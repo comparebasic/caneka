@@ -29,6 +29,8 @@ enum types {
     TYPE_STRINGMATCH,
     TYPE_PARSER,
     TYPE_MULTIPARSER,
+    TYPE_SCURSOR,
+    TYPE_RANGE,
     TYPE_MATCH,
 };
 

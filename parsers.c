@@ -8,7 +8,6 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
     Match **matches = (Match **)prs->matches;
     while(matches[i] != NULL){
         r = SCursor_Find(range, matches[i]);
-        Debug_Print((void *)matches[i], TYPE_MATCH, "After ", COLOR_YELLOW, TRUE);
         if(r == COMPLETE){
             prs->idx = i;
             if(prs->complete != NULL){
@@ -83,12 +82,11 @@ Parser *Parser_Space(Serve *sctx, Req *req){
 static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
     req->path = String_FromRange(req->m, range);
-    printf("PATH COMPLETE CALLED: %s\n", req->path->bytes);
     return SUCCESS;
 }
 
 Parser *Parser_Path(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_CONTAINS, 0), Parser_PathComplete);
+    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_UNTIL, 0), Parser_PathComplete);
 }
 
 status Parse_HttpV(Req *req, Range *range){

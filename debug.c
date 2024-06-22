@@ -19,7 +19,7 @@ static void String_Print(String *s, char *msg, int color, boolean extended){
 }
 
 static void Req_Print(Req *req, char *msg, int color, boolean extended){
-    printf("%s\x1b[1;%dmReq<%s:%s/%s:%s,%s,%s>\x1b[0;1m\n",
+    printf("%s\x1b[1;%dmReq<%s:%s %s:%s,%s,%s>\x1b[0;1m\n",
         msg, color, State_ToString(req->state), Method_ToString(req->method),
         req->path != NULL ? (char *)req->path->bytes : "",
         req->body != NULL ? "body" : "no-body",
@@ -28,14 +28,34 @@ static void Req_Print(Req *req, char *msg, int color, boolean extended){
     );
 }
 
+static void SCursor_Print(SCursor *sc, char *msg, int color, boolean extended){
+    printf("%s\x1b[1;%dmCursor<%s:%ld/seg%ld[%ld]:%ld>\x1b[0;1m", msg, color,
+        State_ToString(sc->state), 
+        sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength
+    );
+}
+
+static void Range_Print(Range *range, char *msg, int color, boolean extended){
+    printf("%s\x1b[1;%dmReq<%s ", msg, color, State_ToString(range->state));
+    Debug_Print((void *)&(range->start), TYPE_SCURSOR, "", color, extended);
+    Debug_Print((void *)&(range->end), TYPE_SCURSOR, " -> ", color, extended);
+    printf("\x1b[1;>\n");
+}
+
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     if(color >= 0){
         printf("\x1b[%dm", color);
     }
-    if(type == TYPE_MATCH){
+    if(t == NULL){
+        printf("NULL");
+    }else if(type == TYPE_MATCH){
         Match_Print((Match *)t, msg, color, extended);
     }else if(type == TYPE_STRING){
         String_Print((String *)t, msg, color, extended);
+    }else if(type == TYPE_SCURSOR){
+        SCursor_Print((SCursor *)t, msg, color, extended);
+    }else if(type == TYPE_RANGE){
+        Range_Print((Range *)t, msg, color, extended);
     }else if(type == TYPE_REQ){
         Req_Print((Req *)t, msg, color, extended);
     }else{

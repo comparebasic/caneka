@@ -184,8 +184,6 @@ String *String_FromRange(MemCtx *m, Range *range){
     String_AddCstr(m, s, p, length);
     remaining -= length;
 
-    printf("range length %ld\n", length);
-
     if(remaining > 0){
         while(seg != NULL){
             if(seg == range->end.seg){

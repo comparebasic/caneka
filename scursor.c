@@ -52,7 +52,6 @@ status SCursor_SetLocals(SCursor *sc){
 }
 
 status SCursor_Find(Range *range, Match *search){
-    Debug_Print((void *)search, TYPE_MATCH, "Finding ", COLOR_YELLOW, TRUE);
     SCursor *start = &(range->start); 
     SCursor *end = &(range->end); 
     if(start->seg == NULL || start->seg->length < 1){
@@ -63,6 +62,13 @@ status SCursor_Find(Range *range, Match *search){
     int i = range->start.position;
     int startPosition = i;
     String *seg = start->seg;
+
+    if(search->anchor == ANCHOR_UNTIL){
+        start->position = i;
+        start->seg = seg;
+        start->state = COMPLETE;
+    }
+
     while(seg != NULL){
         for(
             c = seg->bytes[i];
@@ -71,9 +77,11 @@ status SCursor_Find(Range *range, Match *search){
         ){
             Match_Feed(search, c);
             if(search->state != READY){
-                if(start->state == READY){
+                if(search->anchor != ANCHOR_UNTIL && start->state == READY){
                     start->position = i;
                     start->seg = seg;
+                    start->state = search->state;
+                    SCursor_SetLocals(start);
                 }
                 range->compare++;
                 start->state = PROCESSING;
@@ -82,6 +90,7 @@ status SCursor_Find(Range *range, Match *search){
                     end->seg = seg;
                     range->length = i - start->position;
                     range->state = COMPLETE;
+                    SCursor_SetLocals(end);
                     break;
                 }
             }else{
@@ -98,12 +107,6 @@ status SCursor_Find(Range *range, Match *search){
         end->seg = seg;
         seg = seg->next;
     }
-
-    SCursor_SetLocals(start);
-    SCursor_SetLocals(end);
-
-    end->position = start->position + range->length;
-    SCursor_SetLocals(end);
 
     return range->state;
 }

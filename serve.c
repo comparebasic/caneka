@@ -143,8 +143,6 @@ status Serve_Respond(Serve *sctx, Req *req){
 status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
-        printf("Accepted %d\n", new_fd);
-        fflush(stdout);
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
         Req *req = Req_Make();
 

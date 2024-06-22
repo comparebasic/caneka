@@ -31,7 +31,6 @@ status Serve_Tests(MemCtx *gm){
     
     r |=  Serve_PreRun(sctx, TEST_PORT);
 
-    printf("Connecting\n");
     int sock = testConnect();
     Serve_AcceptRound(sctx);
     r |= Test(sock >= 0, "Expect socket to connect has fd %d", sock);

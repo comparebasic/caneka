@@ -1,6 +1,7 @@
 enum anchor_types {
     ANCHOR_CONTAINS = 0,
     ANCHOR_START = 1,
+    ANCHOR_UNTIL = 2,
 };
 
 typedef struct match {

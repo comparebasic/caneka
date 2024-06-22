@@ -51,7 +51,7 @@ status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]){
         pmk = parsers[++i];
     }
         
-    Debug_Print((void *)req, TYPE_REQ, "Req Parsed ", COLOR_GREEN, TRUE);
+    Debug_Print((void *)req, TYPE_REQ, "Req Parsed ", COLOR_CYAN, TRUE);
 
     req->state = PROCESSING;
     Serve_NextState(sctx, req);
@@ -78,7 +78,6 @@ status Req_Process(Serve *sctx, Req *req){
 }
 
 status Req_Handle(Serve *sctx, Req *req){
-    printf("Req Handle\n");
     if(req->state == INCOMING){
         return Req_Recv(sctx, req);
     }
