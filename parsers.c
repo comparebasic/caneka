@@ -1,24 +1,34 @@
 #include "external.h"
 #include "filestore.h"
 
-static status parse_Multi(Parser *prs, Req *req, Range *range){
+static status parse_Multi(Parser *prs, Range *range, void *source){
+    status r = READY;
     int i = 0;
     int start = range->start.position;
     Match **matches = (Match **)prs->matches;
-    Match *mt = matches[0];
-    while(mt != NULL){
-        if(SCursor_Find(range, mt) == COMPLETE){
-            req->method = mt->intval;
+    while(matches[i] != NULL){
+        r = SCursor_Find(range, matches[i]);
+        Debug_Print((void *)matches[i], TYPE_MATCH, "After ", COLOR_YELLOW, TRUE);
+        if(r == COMPLETE){
+            prs->idx = i;
+            if(prs->complete != NULL){
+                prs->complete(prs, range, source);
+            }
             return SUCCESS;
         }
-        mt++;
+        i++;
     }
     return ERROR;
 }
 
-static status parse_Single(Parser *prs, Req *req, Range *range){
+static status parse_Single(Parser *prs, Range *range, void *source){
+    status r = READY;
     Match *mt = (Match *)prs->matches;
-    if(SCursor_Find(range, mt) == COMPLETE){
+    r = SCursor_Find(range, mt);
+    if(r == COMPLETE){
+        if(prs->complete != NULL){
+            prs->complete(prs, range, source);
+        }
         return SUCCESS;
     }
     return ERROR;
@@ -30,44 +40,55 @@ Parser *Parser_Make(MemCtx *m, cls type){
     return prs;
 }
 
-Parser *Parser_MakeSingle(MemCtx *m, Match *mt){
+Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
     Parser *prs = Parser_Make(m, TYPE_PARSER);
     prs->type = TYPE_PARSER;
     prs->matches = (void *)mt;
     prs->func = parse_Single;
+    prs->complete = complete;
     return prs;
 }
 
-Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr){
-    printf("Parsing multi\n");
-    fflush(stdout);
+Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete){
     Parser *prs = Parser_Make(m, TYPE_MULTIPARSER);
     prs->type = TYPE_MULTIPARSER;
     prs->matches = (void *)mt_arr;
     prs->func = parse_Multi;
+    prs->complete = complete;
     return prs;
 }
 
+static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
+    Req *req = (Req *)_req;
+    Match **matches = (Match **)prs->matches;
+    req->method = matches[prs->idx]->intval;
+    return SUCCESS;
+}
+
 Parser *Parser_Method(Serve *sctx, Req *req){
-    printf("Made method\n");
     int length = Array_Length((void **)sctx->methods);
-    printf("methods length is %d\n", length);
     Match **matches = (Match **)Array_Make(req->m, length); 
     for(int i = 0; i < length; i++){
-        printf("Making match %i\n", i);
-        matches[i] = Match_Make(req->m, String_From(req->m, sctx->methods[i]), ANCHOR_START);
+        String *s = String_From(req->m, sctx->methods[i]);
+        matches[i] = Match_Make(req->m, s, ANCHOR_START, (int)*(sctx->method_vals[i]));
     }
-    printf("after Making match\n");
 
-    return Parser_MakeMulti(req->m, matches);
+    return Parser_MakeMulti(req->m, matches, Parser_MethodComplete);
 }
 
 Parser *Parser_Space(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_START));
+    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_START, 0), NULL);
+}
+
+static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
+    Req *req = (Req *)_req;
+    req->path = String_FromRange(req->m, range);
+    printf("PATH COMPLETE CALLED: %s\n", req->path->bytes);
+    return SUCCESS;
 }
 
 Parser *Parser_Path(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_CONTAINS));
+    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_CONTAINS, 0), Parser_PathComplete);
 }
 
 status Parse_HttpV(Req *req, Range *range){

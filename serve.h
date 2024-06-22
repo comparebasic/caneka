@@ -12,6 +12,7 @@ typedef struct serve_ctx {
     boolean serving;
     ParserMaker *parsers;
     char **methods;
+    byte **method_vals;
 } Serve;
 
 Serve *Serve_Make(MemCtx *m);

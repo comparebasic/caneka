@@ -23,20 +23,20 @@ enum types {
     TYPE_MEMCTX,
     TYPE_MEMSLAB,
     TYPE_REQ,
+    TYPE_STRING,
     TYPE_SERVECTX,
     TYPE_TESTSUITE,
     TYPE_STRINGMATCH,
     TYPE_PARSER,
     TYPE_MULTIPARSER,
+    TYPE_MATCH,
 };
 
-enum methods {
-    METHOD_UNKOWN = 0,
-    METHOD_GET = 1,
-    METHOD_SET,
-    METHOD_UPDATE,
-    METHOD_DELETE,
-};
+extern int METHOD_UNKOWN;
+extern int METHOD_GET;
+extern int METHOD_SET;
+extern int METHOD_UPDATE;
+extern int METHOD_DELETE;
 
 enum status_types {
     READY = 0,
@@ -55,6 +55,7 @@ enum positions {
 };
 
 char *State_ToString(status state);
+char *Class_ToString(cls type);
 
 #define COMPLETE SUCCESS
 #define TEST_OK READY
@@ -70,3 +71,4 @@ char *State_ToString(status state);
 #include "parsers.h"
 #include "serve.h"
 #include "req.h"
+#include "debug.h"

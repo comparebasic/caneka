@@ -12,6 +12,6 @@ typedef struct match {
     int intval;
 } Match;
 
-Match *Match_Make(MemCtx *m, String *s, int anchor);
+Match *Match_Make(MemCtx *m, String *s, int anchor, int intval);
 status Match_Feed(Match *mt, uchar c);
 void Match_Reset(Match *mt);

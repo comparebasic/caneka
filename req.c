@@ -36,7 +36,6 @@ char *Method_ToString(int method){
 }
 
 status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]){
-    printf("Req Parse\n");
     Range find;
     Range_Set(&find, s);
     
@@ -44,15 +43,16 @@ status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]){
     ParserMaker pmk = parsers[i];
     Parser *prs;
     while(pmk != NULL){
-        printf("Parser %d\n", i);
         prs = pmk(sctx, req);
-        if(prs->func(prs, req, &find) != COMPLETE){
+        if(prs->func(prs, &find, (void *)req) != COMPLETE){
             req->state = ERROR;
             return req->state;
         }
         pmk = parsers[++i];
     }
         
+    Debug_Print((void *)req, TYPE_REQ, "Req Parsed ", COLOR_GREEN, TRUE);
+
     req->state = PROCESSING;
     Serve_NextState(sctx, req);
     return req->state;
