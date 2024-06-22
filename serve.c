@@ -143,6 +143,8 @@ status Serve_Respond(Serve *sctx, Req *req){
 status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
+        printf("Accepted %d\n", new_fd);
+        fflush(stdout);
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
         Req *req = Req_Make();
 
@@ -201,7 +203,13 @@ status Serve_ServeRound(Serve *sctx){
     return SUCCESS;
 }
 
-status Serve_Run(Serve *sctx, int port){
+status Serve_Stop(Serve *sctx){
+    close(sctx->socket_fd);
+    close(sctx->epoll_fd);
+    return SUCCESS;
+}
+
+status Serve_PreRun(Serve *sctx, int port){
     int fd = openPortToFd(port);
     sctx->port = port;
     sctx->socket_fd = fd;
@@ -214,16 +222,24 @@ status Serve_Run(Serve *sctx, int port){
 
     sctx->epoll_fd = epoll_fd;
     sctx->serving = TRUE;
-    int cadance = 0;
-    while(sctx->serving){
-        if(cadance-- == 0){
-            Serve_AcceptRound(sctx);
-            cadance = ACCEPT_CADANCE;
-        }
-        Serve_ServeRound(sctx);
-    }
-
     return SUCCESS;
+}
+
+status Serve_Run(Serve *sctx, int port){
+    status r = Serve_PreRun(sctx, port);
+    if(r == SUCCESS){
+        int cadance = 0;
+        while(sctx->serving){
+            if(cadance-- == 0){
+                Serve_AcceptRound(sctx);
+                cadance = ACCEPT_CADANCE;
+            }
+            Serve_ServeRound(sctx);
+        }
+
+        return SUCCESS;
+    }
+    return r;
 }
 
 Serve *Serve_Make(MemCtx *m){

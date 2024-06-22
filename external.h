@@ -7,3 +7,4 @@
 #include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <stdarg.h>
+#include <errno.h>

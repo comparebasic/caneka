@@ -15,5 +15,9 @@ typedef struct serve_ctx {
 } Serve;
 
 Serve *Serve_Make(MemCtx *m);
+status Serve_PreRun(Serve *sctx, int port);
 status Serve_Run(Serve *sctx, int port);
+status Serve_Stop(Serve *sctx);
 status Serve_NextState(Serve *sctx, struct serve_req *req);
+status Serve_AcceptRound(Serve *sctx);
+status Serve_ServeRound(Serve *sctx);

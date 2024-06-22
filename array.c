@@ -2,11 +2,9 @@
 #include "filestore.h"
 
 int Array_Length(void **arr){
-    Unit *u = *((Unit **)arr);
+    Unit **uarr = (Unit **)arr;
     int i = 0;
-    while(u != NULL){
-        i++;
-    };
+    while(uarr[i] != NULL){i++;}
     return i;
 }
 

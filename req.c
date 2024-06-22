@@ -36,6 +36,7 @@ char *Method_ToString(int method){
 }
 
 status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]){
+    printf("Req Parse\n");
     Range find;
     Range_Set(&find, s);
     
@@ -43,6 +44,7 @@ status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]){
     ParserMaker pmk = parsers[i];
     Parser *prs;
     while(pmk != NULL){
+        printf("Parser %d\n", i);
         prs = pmk(sctx, req);
         if(prs->func(prs, req, &find) != COMPLETE){
             req->state = ERROR;
@@ -76,6 +78,7 @@ status Req_Process(Serve *sctx, Req *req){
 }
 
 status Req_Handle(Serve *sctx, Req *req){
+    printf("Req Handle\n");
     if(req->state == INCOMING){
         return Req_Recv(sctx, req);
     }

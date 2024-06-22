@@ -52,6 +52,7 @@ status SCursor_SetLocals(SCursor *sc){
 }
 
 status SCursor_Find(Range *range, Match *search){
+    printf("Finding\n");
     SCursor *start = &(range->start); 
     SCursor *end = &(range->end); 
     if(start->seg == NULL || start->seg->length < 1){

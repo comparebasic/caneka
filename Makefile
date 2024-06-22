@@ -3,7 +3,8 @@ CFLAGS = --target=x86_64-unknown-linux-musl -g -Werror
 INC = -I/usr/local/musl/include/ -I./ 
 
 obj = filestore.o scursor.o req.o serve.o mem.o string.o error.o testsuite.o \
-	tests/string_tests.o log.o tokens.o parsers.o array.o match.o
+	log.o tokens.o parsers.o array.o match.o \
+    tests/string_tests.o tests/serve_tests.o
 
 all: filestore
 

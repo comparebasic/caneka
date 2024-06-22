@@ -8,6 +8,7 @@
 static status test(MemCtx *m){
     status r = TEST_OK;
     r |= String_Tests(m);
+    r |= Serve_Tests(m);
     return r;
 }
 

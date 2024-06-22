@@ -39,6 +39,8 @@ Parser *Parser_MakeSingle(MemCtx *m, Match *mt){
 }
 
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr){
+    printf("Parsing multi\n");
+    fflush(stdout);
     Parser *prs = Parser_Make(m, TYPE_MULTIPARSER);
     prs->type = TYPE_MULTIPARSER;
     prs->matches = (void *)mt_arr;
@@ -47,11 +49,15 @@ Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr){
 }
 
 Parser *Parser_Method(Serve *sctx, Req *req){
+    printf("Made method\n");
     int length = Array_Length((void **)sctx->methods);
+    printf("methods length is %d\n", length);
     Match **matches = (Match **)Array_Make(req->m, length); 
     for(int i = 0; i < length; i++){
+        printf("Making match %i\n", i);
         matches[i] = Match_Make(req->m, String_From(req->m, sctx->methods[i]), ANCHOR_START);
     }
+    printf("after Making match\n");
 
     return Parser_MakeMulti(req->m, matches);
 }
