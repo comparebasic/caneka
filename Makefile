@@ -4,7 +4,8 @@ INC = -I/usr/local/musl/include/ -I./
 
 obj = filestore.o scursor.o req.o serve.o mem.o string.o error.o debug.o \
 	log.o tokens.o parsers.o array.o match.o \
-     testsuite.o tests/string_tests.o tests/serve_tests.o
+    http/range_matches.o http/parsers.o \
+    testsuite.o tests/string_tests.o tests/serve_tests.o
 
 all: filestore
 
@@ -20,6 +21,7 @@ filestore: dirs $(obj)
 dirs:
 	mkdir -p build
 	mkdir -p build/tests
+	mkdir -p build/http
 
 $(obj): %.o:%.c 
 	$(CC) -c $(CFLAGS) $(INC) $< -o build/$@
