@@ -6,11 +6,23 @@ int DEBUG_PATMATCH = 0;
 
 static void PatCharDef_Print(PatCharDef *def, char *msg, int color, boolean extended){
     if((def->flags & PAT_COUNT) != 0){
-        printf("%s%hu=%cx%hu,", msg, (word)def->flags, (char)def->from, def->to);
+        if(def->from == '\r' || def->from == '\n'){
+            printf("%s%hu=%hux%hu,", msg, (word)def->flags, def->from, def->to);
+        }else{
+            printf("%s%hu=%cx%hu,", msg, (word)def->flags, (char)def->from, def->to);
+        }
     }else if(def->from == def->to){
-        printf("%s%hu=%c,", msg, (word)def->flags, (char)def->from);
+        if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
+            printf("%s%hu=%hu,", msg, (word)def->flags, def->from);
+        }else{
+            printf("%s%hu=%c,", msg, (word)def->flags, (char)def->from);
+        }
     }else{
-        printf("%s%hu=%c-%c,", msg, (word)def->flags, (char)def->from, (char)def->to);
+        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n')){
+            printf("%s%hu=%hu-%hu,", msg, (word)def->flags, def->from, def->to);
+        }else{
+            printf("%s%hu=%c-%c,", msg, (word)def->flags, (char)def->from, (char)def->to);
+        }
     }
 }
 

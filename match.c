@@ -1,6 +1,15 @@
 #include "external.h"
 #include "filestore.h"
 
+int Match_PatLength(PatCharDef *def){
+    int length = 0;
+    while(def->flags != 0){
+        length++;
+        def++;
+    }
+    return length;
+}
+
 Match *Match_Make(MemCtx *m, String *s, int anchor, int intval){
     Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
     mt->type = TYPE_STRINGMATCH;
@@ -10,7 +19,7 @@ Match *Match_Make(MemCtx *m, String *s, int anchor, int intval){
     return mt;
 }
 
-Match *Match_MakePat(MemCtx *m, byte *defs, word npats,  int anchor, int intval){
+Match *Match_MakePat(MemCtx *m, byte *defs, word npats, int anchor, int intval){
     Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
     mt->type = TYPE_PATMATCH;
     mt->s = String_MakeFixed(m, defs, npats * sizeof(PatCharDef));
@@ -33,6 +42,7 @@ static status match_FeedPat(Match *mt, byte c){
    i64 length = mt->s->length / sizeof(PatCharDef);
    boolean matched = FALSE;
    word total;
+   int ocurrences = 1;
    if(def->flags == 0){
         mt->state = ERROR;
    }else{
@@ -41,6 +51,8 @@ static status match_FeedPat(Match *mt, byte c){
                 Debug_Print(def, TYPE_PATCHARDEF, "  While: ", DEBUG_PATMATCH, TRUE);
                 printf("\n");
             }
+
+            boolean optional = ((def->flags & PAT_ANY) || ((def->flags & PAT_MANY) != 0 && mt->defPosition > 0));
             if((def->flags & PAT_COUNT) != 0){
                 matched = (c == def->from);
                 total = def->to;
@@ -57,27 +69,38 @@ static status match_FeedPat(Match *mt, byte c){
             }
 
             if(DEBUG_PATMATCH){
-                printf("\x1b[%dm    matched %c? %d\x1b[0m\n", DEBUG_PATMATCH, c, matched);
+                if(c == '\r' || c == '\n' || c == '\t'){
+
+                    printf("\x1b[%dm    matched %hu? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
+                }else{
+                    printf("\x1b[%dm    matched %c? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
+                }
             }
             if(matched){
                 mt->state = PROCESSING;
                 if((def->flags & PAT_TERM) != 0){
                     mt->defPosition++;
-                    if(DEBUG_PATMATCH){
-                        printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
-                    }
                     if(total == mt->defPosition){
                         mt->defPosition = 0;
-                        mt->position++;
+                        mt->position += ocurrences;
+                        if(DEBUG_PATMATCH){
+                            printf("\x1b[%dm    mt->position %d vs length %ld\x1b[0m\n", DEBUG_PATMATCH, mt->position, length);
+                        }
                         if(mt->position == length){
                             mt->state = COMPLETE;
                             mt->defPosition = 0;
                         }
                     }
+                    if(DEBUG_PATMATCH){
+                        printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
+                    }
                     break;
                 }
+            }else if(optional){
+                ocurrences++;
+                def++;
             }else{
-                if((def->flags & PAT_ANY) || ((def->flags & PAT_MANY) && mt->defPosition > 0)){
+                if((def->flags & PAT_ANY) || optional){
                     def++;
                 }else{
                     mt->defPosition = 0;

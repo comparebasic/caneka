@@ -44,12 +44,15 @@ extern int METHOD_DELETE;
 
 enum status_types {
     READY = 0,
-    SUCCESS,
-    ERROR,
-    NOOP,
-    INCOMING,
-    PROCESSING,
-    RESPONDING,
+    ERROR = 1 << 0,
+    NOOP = 1 << 1,
+    CYCLE_MARK = 1 << 2,
+    CYCLE_LOOP = 1 << 3,
+    CYCLE_ESCAPE = 1 << 4,
+    INCOMING = 1 << 5,
+    PROCESSING = 1 << 6,
+    RESPONDING = 1 << 7,
+    SUCCESS = 1 << 8,
 };
 
 enum positions {

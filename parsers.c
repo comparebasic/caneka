@@ -18,11 +18,11 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
             if(prs->complete != NULL){
                 prs->complete(prs, range, source);
             }
-            return SUCCESS;
+            return SUCCESS | prs->flags;
         }
         i++;
     }
-    return ERROR;
+    return ERROR | prs->flags;
 }
 
 static status parse_Single(Parser *prs, Range *range, void *source){
@@ -38,9 +38,9 @@ static status parse_Single(Parser *prs, Range *range, void *source){
         if(prs->complete != NULL){
             prs->complete(prs, range, source);
         }
-        return SUCCESS;
+        return SUCCESS | prs->flags;
     }
-    return ERROR;
+    return ERROR | prs->flags;
 }
 
 Parser *Parser_Make(MemCtx *m, cls type){
@@ -55,6 +55,27 @@ Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
     prs->matches = (void *)mt;
     prs->func = parse_Single;
     prs->complete = complete;
+    return prs;
+}
+
+Parser *Parser_Mark(MemCtx *m, Match *mt, ParseFunc complete){
+    Parser *prs = Parser_Make(m, TYPE_PARSER);
+    prs->type = TYPE_PARSER;
+    prs->flags |= CYCLE_MARK;
+    return prs;
+}
+
+Parser *Parser_Loop(MemCtx *m, Match *mt, ParseFunc complete){
+    Parser *prs = Parser_Make(m, TYPE_PARSER);
+    prs->type = TYPE_PARSER;
+    prs->flags |= CYCLE_LOOP;
+    return prs;
+}
+
+Parser *Parser_Escape(MemCtx *m, Match *mt, ParseFunc complete){
+    Parser *prs = Parser_Make(m, TYPE_PARSER);
+    prs->type = TYPE_PARSER;
+    prs->flags |= CYCLE_ESCAPE;
     return prs;
 }
 

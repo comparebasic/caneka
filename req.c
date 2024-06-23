@@ -41,12 +41,38 @@ status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]){
     
     int i = 0;
     ParserMaker pmk = parsers[i];
+    int mark = -1;
+    boolean escaping = FALSE;
     Parser *prs;
+    status r = READY;
     while(pmk != NULL){
+        printf("Func %d\n", i);
         prs = pmk(sctx, req);
-        if(prs->func(prs, &find, (void *)req) != COMPLETE){
-            req->state = ERROR;
-            return req->state;
+        if(prs->func == NULL){
+            r = COMPLETE | prs->flags;
+            printf("skip\n");
+        }else{
+            r = prs->func(prs, &find, (void *)req);
+            printf("run %s\n", State_ToString(r));
+        }
+
+        if(escaping && (r & CYCLE_LOOP) != 0){
+            escaping = FALSE;
+        }else{
+            if((r & (CYCLE_ESCAPE|COMPLETE)) != 0){
+                escaping = TRUE;
+            }else{
+                if((r & COMPLETE) != 0){
+                    if((r & CYCLE_MARK) != 0){
+                        mark = i+1;
+                    }else if((r & CYCLE_LOOP) != 0 && mark != -1){
+                        i = mark; 
+                    }
+                }else{
+                    req->state = ERROR;
+                    return req->state;
+                }
+            }
         }
         pmk = parsers[++i];
     }

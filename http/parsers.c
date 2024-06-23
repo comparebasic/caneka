@@ -34,22 +34,43 @@ Parser *Parser_Path(Serve *sctx, Req *req){
     return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_UNTIL, 0), Parser_PathComplete);
 }
 
-Parser *Parse_HttpV(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, Match_MakePat(req->m, (byte *)HttpV_RangeDef, 7, ANCHOR_START, 0), NULL);
+Parser *Parser_HttpV(Serve *sctx, Req *req){
+    return Parser_MakeSingle(req->m, 
+        Match_MakePat(req->m, (byte *)HttpV_RangeDef, Match_PatLength(HttpV_RangeDef), ANCHOR_START, 0), NULL);
 }
 
-status Parse_Colon(Req *req, Range *range){
-    return ERROR;
+Parser *Parser_EndNl(Serve *sctx, Req *req){
+    Match *mt = Match_MakePat(req->m, 
+        (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_START, 0);
+    return Parser_MakeSingle(req->m, mt, NULL);
 }
 
-status Parse_LineEnd(Req *req, Range *range){
-    return ERROR;
+static status Parser_HComplete(Parser *prs, Range *range, void *_req){
+    Req *req = (Req *)_req;
+    String *s = String_FromRange(req->m, range);
+    return SUCCESS;
 }
 
-status Parse_DoubleLineEnd(Req *req, Range *range){
-    return ERROR;
+Parser *Parser_HEndNl(Serve *sctx, Req *req){
+    Match *mt = Match_MakePat(req->m, 
+        (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_UNTIL, 0);
+    mt->flags |= CYCLE_LOOP;
+    return Parser_MakeSingle(req->m, mt, Parser_HComplete);
 }
 
-status Parse_Json(Req *req, Range *range){
-    return ERROR;
+Parser *Parser_HEndAllNl(Serve *sctx, Req *req){
+    Match *mt = Match_MakePat(req->m, 
+        (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_START, 0);
+    mt->flags |= CYCLE_ESCAPE;
+    return Parser_MakeSingle(req->m, mt, NULL);
+}
+
+static status Parser_HKeyComplete(Parser *prs, Range *range, void *_req){
+    Req *req = (Req *)_req;
+    req->nextHeader = String_FromRange(req->m, range);
+    return SUCCESS;
+}
+
+Parser *Parser_HColon(Serve *sctx, Req *req){
+    return Parser_MakeSingle(req->m, Match_Make(req->m, String_Make(req->m, (byte *)":"), ANCHOR_UNTIL, 0), Parser_HKeyComplete);
 }

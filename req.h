@@ -5,11 +5,13 @@ typedef struct serve_req {
     MemCtx *m;
     byte method;
     String *path;
-    String *_shelf;
     String *id;
     String *body;
     String *response;
     SCursor *cursor;
+    /* mid parsing */
+    String *_shelf;
+    String *nextHeader;
 } Req;
 
 Req *Req_Make();
