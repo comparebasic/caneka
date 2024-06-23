@@ -1,6 +1,8 @@
 #include "external.h"
 #include "filestore.h"
 
+#include <app.h>
+
 static int openPortToFd(int port){
     int fd = 0;
 	struct sockaddr_in serv_addr;
@@ -243,7 +245,7 @@ status Serve_Run(Serve *sctx, int port){
 Serve *Serve_Make(MemCtx *m){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->m = m;
-    sctx->parsers = (ParserMaker *)Array_MakeFrom(m, 3, Parser_Method, Parser_Space, Parser_Path);
+    sctx->parsers = (ParserMaker *)Array_MakeFrom(m, 4, Parser_Method, Parser_Space, Parser_Path, Parse_HttpV);
     sctx->methods = (char **)Array_MakeFrom(m, 3, "GET", "SET", "UPDATE");
     sctx->method_vals = (byte **)Array_MakeFrom(m, 3, &METHOD_GET, &METHOD_SET, &METHOD_UPDATE);
     return sctx;

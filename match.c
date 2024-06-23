@@ -25,7 +25,11 @@ void Match_Reset(Match *mt){
 }
 
 static status match_FeedPat(Match *mt, byte c){
-   PatCharDef *def = (PatCharDef *)mt->s->bytes+(mt->position * sizeof(PatCharDef));  
+   if(DEBUG_PATMATCH){
+       Debug_Print(mt, TYPE_PATMATCH, "FeedPat: ", DEBUG_PATMATCH, TRUE);
+   }
+
+   PatCharDef *def = ((PatCharDef *)mt->s->bytes)+(mt->position);  
    i64 length = mt->s->length / sizeof(PatCharDef);
    boolean matched = FALSE;
    word total;
@@ -33,11 +37,18 @@ static status match_FeedPat(Match *mt, byte c){
         mt->state = ERROR;
    }else{
         while(1){
+            if(DEBUG_PATMATCH){
+                Debug_Print(def, TYPE_PATCHARDEF, "  While: ", DEBUG_PATMATCH, TRUE);
+                printf("\n");
+            }
             if((def->flags & PAT_COUNT) != 0){
                 matched = (c == def->from);
                 total = def->to;
+                if(DEBUG_PATMATCH){
+                    printf("\x1b[%dm    total %d\x1b[0m\n", DEBUG_PATMATCH, total);
+                }
             }else{
-                matched = (c <= def->from && c >= def->to);
+                matched = (c >= def->from && c <= def->to);
                 total = 1;
             }
 
@@ -45,18 +56,26 @@ static status match_FeedPat(Match *mt, byte c){
                 matched = !matched;
             }
 
+            if(DEBUG_PATMATCH){
+                printf("\x1b[%dm    matched %c? %d\x1b[0m\n", DEBUG_PATMATCH, c, matched);
+            }
             if(matched){
                 mt->state = PROCESSING;
                 if((def->flags & PAT_TERM) != 0){
-                    if(total == ++(mt->defPosition)){
-                        mt->position += mt->defPosition;
+                    mt->defPosition++;
+                    if(DEBUG_PATMATCH){
+                        printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
                     }
-                    if(mt->position == length){
-                        mt->state = COMPLETE;
-                        break;
+                    if(total == mt->defPosition){
+                        mt->defPosition = 0;
+                        mt->position++;
+                        if(mt->position == length){
+                            mt->state = COMPLETE;
+                            mt->defPosition = 0;
+                        }
                     }
+                    break;
                 }
-                def++;
             }else{
                 if((def->flags & PAT_ANY) || ((def->flags & PAT_MANY) && mt->defPosition > 0)){
                     def++;
@@ -70,6 +89,9 @@ static status match_FeedPat(Match *mt, byte c){
         }
     }
 
+    if(DEBUG_PATMATCH){
+        printf("\x1b[%dm  Ret %s\n\n", DEBUG_PATMATCH, State_ToString(mt->state));
+    }
     return mt->state;
 }
 

@@ -1,10 +1,10 @@
 CC = /usr/bin/clang 
 CFLAGS = --target=x86_64-unknown-linux-musl -g -Werror
-INC = -I/usr/local/musl/include/ -I./ 
+INC = -I/usr/local/musl/include/ -I./  -I./http
 
 obj = filestore.o scursor.o req.o serve.o mem.o string.o error.o debug.o \
 	log.o tokens.o parsers.o array.o match.o \
-    http/range_matches.o http/parsers.o \
+    http/parsers.o http/pat_matches.o \
     testsuite.o tests/string_tests.o tests/serve_tests.o
 
 all: filestore

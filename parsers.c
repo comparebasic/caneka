@@ -1,6 +1,8 @@
 #include "external.h"
 #include "filestore.h"
 
+#include <app.h>
+
 static status parse_Multi(Parser *prs, Range *range, void *source){
     status r = READY;
     int i = 0;
@@ -8,6 +10,9 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
     Match **matches = (Match **)prs->matches;
     while(matches[i] != NULL){
         r = SCursor_Find(range, matches[i]);
+        if(DEBUG_MATCH){
+            Debug_Print((void *)matches[i], matches[i]->type, "parse_Multi Match: ", DEBUG_MATCH, TRUE);
+        }
         if(r == COMPLETE){
             prs->idx = i;
             if(prs->complete != NULL){
@@ -23,7 +28,12 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
 static status parse_Single(Parser *prs, Range *range, void *source){
     status r = READY;
     Match *mt = (Match *)prs->matches;
+
+
     r = SCursor_Find(range, mt);
+    if(DEBUG_MATCH){
+        Debug_Print((void *)mt, mt->type, "parse_Single Match: ", DEBUG_MATCH, TRUE);
+    }
     if(r == COMPLETE){
         if(prs->complete != NULL){
             prs->complete(prs, range, source);

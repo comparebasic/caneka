@@ -1,6 +1,9 @@
 #include "external.h"
 #include "filestore.h"
+
+#include "http/app.h"
 #include "tests/tests.h"
+
 
 #define servecmd "serve="
 #define testcmd "test"

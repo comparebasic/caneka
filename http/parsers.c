@@ -1,5 +1,6 @@
 #include "external.h"
 #include "filestore.h"
+#include "app.h"
 
 static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
@@ -33,8 +34,8 @@ Parser *Parser_Path(Serve *sctx, Req *req){
     return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_UNTIL, 0), Parser_PathComplete);
 }
 
-status Parse_HttpV(Req *req, Range *range){
-    return ERROR;
+Parser *Parse_HttpV(Serve *sctx, Req *req){
+    return Parser_MakeSingle(req->m, Match_MakePat(req->m, (byte *)HttpV_RangeDef, 7, ANCHOR_START, 0), NULL);
 }
 
 status Parse_Colon(Req *req, Range *range){

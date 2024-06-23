@@ -1,18 +1,27 @@
 #include "external.h"
 #include "filestore.h"
 
+int DEBUG_MATCH = 0;
+int DEBUG_PATMATCH = 0;
+
+static void PatCharDef_Print(PatCharDef *def, char *msg, int color, boolean extended){
+    if((def->flags & PAT_COUNT) != 0){
+        printf("%s%hu=%cx%hu,", msg, (word)def->flags, (char)def->from, def->to);
+    }else if(def->from == def->to){
+        printf("%s%hu=%c,", msg, (word)def->flags, (char)def->from);
+    }else{
+        printf("%s%hu=%c-%c,", msg, (word)def->flags, (char)def->from, (char)def->to);
+    }
+}
+
+
 static void Match_PrintPat(Match *mt, char *msg, int color, boolean extended){
     if(extended){
-        printf("%sMatch<%s:\x1b[%d;1mstate=%s:pos=%d:val=%d ", msg, Class_ToString(mt->type), color, State_ToString(mt->state), mt->position, mt->intval);
+        printf("%sMatch<%s:state=%s:pos=%d:val=%d \x1b[%d;1m", msg, Class_ToString(mt->type), State_ToString(mt->state), mt->position, mt->intval, color);
         int length = mt->s->length / sizeof(PatCharDef);
-        PatCharDef *def = (PatCharDef *)mt->s;
+        PatCharDef *def = (PatCharDef *)mt->s->bytes;
         for(int i = 0; i < length;i++){
-            if((def->flags & PAT_COUNT) != 0){
-                printf("%u-'%c(%hu)',", def->flags, def->from, def->to);
-            }else{
-                printf("%u-'%c/%c',", def->flags, def->from, def->to);
-            }
-            def++;
+            PatCharDef_Print(def++, "", color, extended);
         }
         printf(">\x1b[0m\n");
     }else{
@@ -26,9 +35,9 @@ static void Match_Print(Match *mt, char *msg, int color, boolean extended){
     }
 
     if(extended){
-        printf("%sMatch<%s:\x1b[%d;1m%s\x1b[0;%dm:state=%s:pos=%d:val=%d>\n", msg, Class_ToString(mt->type), color, mt->s->bytes, color, State_ToString(mt->state), mt->position, mt->intval);
+        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>\n", msg, Class_ToString(mt->type), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
     }else{
-        printf("%sMatch<state=%s:pos=%d>\n", msg, mt->s->bytes, mt->position);
+        printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->state), mt->position);
     }
 }
 
@@ -71,8 +80,12 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     }
     if(t == NULL){
         printf("NULL");
-    }else if(type == TYPE_MATCH){
+    }else if(type == TYPE_MATCH || type == TYPE_STRINGMATCH ){
         Match_Print((Match *)t, msg, color, extended);
+    }else if(type == TYPE_PATCHARDEF){
+        PatCharDef_Print((PatCharDef *)t, msg, color, extended);
+    }else if( type == TYPE_PATMATCH ){
+        Match_PrintPat((Match *)t, msg, color, extended);
     }else if(type == TYPE_STRING){
         String_Print((String *)t, msg, color, extended);
     }else if(type == TYPE_SCURSOR){
