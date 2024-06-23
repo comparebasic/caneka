@@ -1,7 +1,30 @@
 #include "external.h"
 #include "filestore.h"
 
+static void Match_PrintPat(Match *mt, char *msg, int color, boolean extended){
+    if(extended){
+        printf("%sMatch<%s:\x1b[%d;1mstate=%s:pos=%d:val=%d ", msg, Class_ToString(mt->type), color, State_ToString(mt->state), mt->position, mt->intval);
+        int length = mt->s->length / sizeof(PatCharDef);
+        PatCharDef *def = (PatCharDef *)mt->s;
+        for(int i = 0; i < length;i++){
+            if((def->flags & PAT_COUNT) != 0){
+                printf("%u-'%c(%hu)',", def->flags, def->from, def->to);
+            }else{
+                printf("%u-'%c/%c',", def->flags, def->from, def->to);
+            }
+            def++;
+        }
+        printf(">\x1b[0m\n");
+    }else{
+        printf("%sMatch<state=%s:pos=%d>\n", msg, mt->s->bytes, mt->position);
+    }
+}
+
 static void Match_Print(Match *mt, char *msg, int color, boolean extended){
+    if(mt->type == TYPE_PATMATCH){
+        return Match_PrintPat(mt, msg, color, extended);
+    }
+
     if(extended){
         printf("%sMatch<%s:\x1b[%d;1m%s\x1b[0;%dm:state=%s:pos=%d:val=%d>\n", msg, Class_ToString(mt->type), color, mt->s->bytes, color, State_ToString(mt->state), mt->position, mt->intval);
     }else{

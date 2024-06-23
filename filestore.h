@@ -1,10 +1,10 @@
-typedef unsigned char uchar;
-typedef uint16_t cls;
-typedef uchar boolean;
+typedef unsigned char byte;
+typedef uint16_t word;
+typedef word cls;
+typedef byte boolean;
 typedef uint64_t i64;
 typedef int status;
 typedef int type;
-typedef uchar byte;
 struct serve_ctx;
 struct serve_req;
 struct mem_ctx;
@@ -32,6 +32,7 @@ enum types {
     TYPE_SCURSOR,
     TYPE_RANGE,
     TYPE_MATCH,
+    TYPE_PATMATCH,
 };
 
 extern int METHOD_UNKOWN;

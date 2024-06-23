@@ -2,12 +2,12 @@
 #include "filestore.h"
 
 byte HTTPV_RangeDef[] = {
-    RANGE_SINGLE|RANGE_TERM, 'H', 'H',
-    RANGE_COUNT|RANGE_TERM, 'T', 2,
-    RANGE_SINGLE|RANGE_TERM, 'P', 'P',
-    RANGE_SINGLE|RANGE_TERM, '/', '/',
-    RANGE_SINGLE|RANGE_TERM, '1', '1',
-    RANGE_SINGLE|RANGE_TERM, '.', '.',
-    RANGE_SINGLE|RANGE_TERM, '0', '1',
-    0,
+    PAT_SINGLE|PAT_TERM, 'H', 'H',
+    PAT_COUNT|PAT_TERM, 'T', 2,
+    PAT_SINGLE|PAT_TERM, 'P', 'P',
+    PAT_SINGLE|PAT_TERM, '/', '/',
+    PAT_SINGLE|PAT_TERM, '1', '1',
+    PAT_SINGLE|PAT_TERM, '.', '.',
+    PAT_SINGLE|PAT_TERM, '0', '1',
+    0,0,0
 };

@@ -59,7 +59,7 @@ status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]){
 }
 
 status Req_Recv(Serve *sctx, Req *req){
-    uchar buff[SERV_READ_SIZE];
+    byte buff[SERV_READ_SIZE];
     size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     if(l > 0){
         return Req_Parse(sctx, req, String_Make(req->m, buff), sctx->parsers);

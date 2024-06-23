@@ -28,12 +28,14 @@ char *State_ToString(status state){
 }
 
 char *Class_ToString(cls type){
-    if(type == TYPE_MEMCTX){
+     if(type == TYPE_MEMCTX){
         return "TYPE_MEMCTX";
     }else if(type == TYPE_MEMSLAB){
         return "TYPE_MEMSLAB";
     }else if(type == TYPE_REQ){
         return "TYPE_REQ";
+    }else if(type == TYPE_STRING){
+        return "TYPE_STRING";
     }else if(type == TYPE_SERVECTX){
         return "TYPE_SERVECTX";
     }else if(type == TYPE_TESTSUITE){
@@ -44,8 +46,14 @@ char *Class_ToString(cls type){
         return "TYPE_PARSER";
     }else if(type == TYPE_MULTIPARSER){
         return "TYPE_MULTIPARSER";
+    }else if(type == TYPE_SCURSOR){
+        return "TYPE_SCURSOR";
+    }else if(type == TYPE_RANGE){
+        return "TYPE_RANGE";
     }else if(type == TYPE_MATCH){
         return "TYPE_MATCH";
+    }else if(type == TYPE_PATMATCH){
+        return "TYPE_PATMATCH";
     }else{
         return "TYPE_unknown";
     }

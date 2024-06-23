@@ -28,15 +28,22 @@ String *String_FromInt(MemCtx *m, int i){
     return String_From(m, buff+position+1); 
 }
 
-String *String_Make(MemCtx *m, uchar *bytes){
+String *String_Make(MemCtx *m, byte *bytes){
     String *s = string_Init(m); 
     String_AddCstr(m, s, (char *)bytes, strlen((char *)bytes));
 
     return s;
 }
 
+String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
+    String *s = string_Init(m); 
+    String_AddCstr(m, s, (char *)bytes, length);
+
+    return s;
+}
+
 String *String_From(MemCtx *m, char *cstr){
-    return String_Make(m, (uchar *)cstr);
+    return String_Make(m, (byte *)cstr);
 }
 
 status String_Add(MemCtx *m, String *a, String *b) {
@@ -47,11 +54,11 @@ status String_AddCstr(MemCtx *m, String *a, char *chars, int length) {
     size_t l = length;
     size_t remaining = l;
     size_t copy_l = remaining;
-    uchar *bytes = (uchar *)chars;
+    byte *bytes = (byte *)chars;
 
     String *seg = a;
     String *tail = seg;
-    uchar *p = bytes;
+    byte *p = bytes;
 
     while(seg->next != NULL){
         seg = seg->next;
@@ -63,7 +70,7 @@ status String_AddCstr(MemCtx *m, String *a, char *chars, int length) {
     }
 
     if(seg->bytes == NULL){
-        seg->bytes = (uchar *)MemCtx_Alloc(m, copy_l+1);
+        seg->bytes = (byte *)MemCtx_Alloc(m, copy_l+1);
         memcpy(seg->bytes, p, copy_l);
         seg->length = copy_l;
         remaining -= copy_l;
@@ -79,7 +86,7 @@ status String_AddCstr(MemCtx *m, String *a, char *chars, int length) {
     /* if more than a string seg remains, make a new one */
     while(remaining > STRING_CHUNK_SIZE){
         String *next = string_Init(m);
-        next->bytes = (uchar *)MemCtx_Alloc(m, STRING_CHUNK_SIZE+1);
+        next->bytes = (byte *)MemCtx_Alloc(m, STRING_CHUNK_SIZE+1);
         memcpy(next->bytes, p, STRING_CHUNK_SIZE);
         next->length = STRING_CHUNK_SIZE;
         p += STRING_CHUNK_SIZE;
@@ -96,7 +103,7 @@ status String_AddCstr(MemCtx *m, String *a, char *chars, int length) {
     /* if any remains, make a final seg */
     if(remaining > 0){
         String *next = string_Init(m);
-        next->bytes = (uchar *)MemCtx_Alloc(m, remaining+1);
+        next->bytes = (byte *)MemCtx_Alloc(m, remaining+1);
         memcpy(next->bytes, p, remaining);
         next->length = remaining;
 

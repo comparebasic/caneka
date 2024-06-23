@@ -1,13 +1,14 @@
 #define STRING_CHUNK_SIZE 1023
 #define MAX_BASE10 20
 typedef struct string {
-    uchar *bytes;
+    byte *bytes;
     i64 length;
     i64 allocated;
     struct string *next;
 } String;
 
-String *String_Make(MemCtx *m, uchar *bytes);
+String *String_Make(MemCtx *m, byte *bytes);
+String *String_MakeFixed(MemCtx *m, byte *bytes, int length);
 String *String_From(MemCtx *m, char *cstr);
 status String_Add(MemCtx *m, String *a, String *b);
 status String_AddCstr(MemCtx *m, String *a, char *chars, int length);

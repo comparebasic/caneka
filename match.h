@@ -5,55 +5,57 @@ enum anchor_types {
 };
 
 enum range_flags {
-    RANGE_TERM = 1 << 0,
-    RANGE_SINGLE = 1 << 1,
-    RANGE_MANY = 1 << 2,
-    RANGE_ANY = 1 << 3,
-    RANGE_INVERT = 1 << 4,
-    RANGE_COUNT = 1 << 5,
-    RANGE_COUNTTO = 1 << 6,
+    PAT_TERM = 1 << 0,
+    PAT_SINGLE = 1 << 1,
+    PAT_MANY = 1 << 2,
+    PAT_ANY = 1 << 3,
+    PAT_INVERT = 1 << 4,
+    PAT_COUNT = 1 << 5,
+    PAT_COUNTTO = 1 << 6,
 };
 
-#define RANGE_WHITESPACE \
-    RANGE_SINGLE ' ', ' ', \
-    RANGE_SINGLE, '\n', '\n', \
-    RANGE_SINGLE, '\r', '\r', \
-    RANGE_SINGLE|RANGE_TERM, '\t', '\t'
+#define PAT_WHITESPACE \
+    PAT_SINGLE ' ', ' ', \
+    PAT_SINGLE, '\n', '\n', \
+    PAT_SINGLE, '\r', '\r', \
+    PAT_SINGLE|PAT_TERM, '\t', '\t'
 
-#define RANGE_INT \
-    RANGE_SINGLE|RANGE_TERM, '0', '9'
+#define PAT_INT \
+    PAT_SINGLE|PAT_TERM, '0', '9'
 
-#define RANGE_FLOAT \
-    RANGE_SINGLE|RANGE_TERM, '0', '9', \
-    RANGE_ANY|RANGE_TERM, '0', '9', \
-    RANGE_SINGLE|RANGE_TERM, '.', '.', \
-    RANGE_MANY|RANGE_TERM, '0', '9'
+#define PAT_FLOAT \
+    PAT_SINGLE|PAT_TERM, '0', '9', \
+    PAT_ANY|PAT_TERM, '0', '9', \
+    PAT_SINGLE|PAT_TERM, '.', '.', \
+    PAT_MANY|PAT_TERM, '0', '9'
 
-#define RANGE_ALPHA \
-    RANGE_ANY, 'a', 'z' \
-    RANGE_ANY|RANGE_TERM, 'A', 'Z'
+#define PAT_ALPHA \
+    PAT_ANY, 'a', 'z' \
+    PAT_ANY|PAT_TERM, 'A', 'Z'
 
-#define RANGE_UPPER_ALPHA \
-    RANGE_ANY|RANGE_TERM, 'A', 'Z'
+#define PAT_UPPER_ALPHA \
+    PAT_ANY|PAT_TERM, 'A', 'Z'
 
-#define RANGE_LOWER_ALPHA \
-    RANGE_ANY|RANGE_TERM, 'a', 'z'
+#define PAT_LOWER_ALPHA \
+    PAT_ANY|PAT_TERM, 'a', 'z'
 
 typedef struct range_chardef {
     byte flags;
-    byte from;
-    byte to;
-} RCharDef;
+    word from;
+    word to;
+} PatCharDef;
 
 typedef struct match {
     cls type; 
     status state;
     String *s; 
     int position;
+    word defPosition;
     int anchor;
     int intval;
 } Match;
 
 Match *Match_Make(MemCtx *m, String *s, int anchor, int intval);
-status Match_Feed(Match *mt, uchar c);
+Match *Match_MakePat(MemCtx *m, byte *defs, word npats,  int anchor, int intval);
+status Match_Feed(Match *mt, byte c);
 void Match_Reset(Match *mt);
