@@ -89,6 +89,7 @@ static status match_FeedPat(Match *mt, byte c){
                         if(mt->position == length){
                             mt->state = COMPLETE;
                             mt->defPosition = 0;
+                            mt->position = 0;
                         }
                     }
                     if(DEBUG_PATMATCH){
@@ -122,6 +123,7 @@ static status match_FeedString(Match *mt, byte c){
     if(mt->s->bytes[mt->position] == c){
         mt->position++;
         if(mt->position == mt->s->length){
+            mt->position = 0;
             mt->state = COMPLETE;
         }else{
             mt->state = PROCESSING;

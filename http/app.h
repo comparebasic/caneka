@@ -7,5 +7,5 @@ Parser *Parser_Path(struct serve_ctx *sctx,  struct serve_req *req);
 Parser *Parser_HttpV(struct serve_ctx *sctx,  struct serve_req *req);
 Parser *Parser_EndNl(struct serve_ctx *sctx,  struct serve_req *req);
 Parser *Parser_HColon(struct serve_ctx *sctx,  struct serve_req *req);
-Parser *Parser_HEndAllNl(Serve *sctx, Req *req);
-Parser *Parser_HEndNl(Serve *sctx, Req *req);
+Parser *Parser_HEndAllNl(struct serve_ctx *sctx,  struct serve_req *req);
+Parser *Parser_HEndNl(struct serve_ctx *sctx,  struct serve_req *req);

@@ -58,22 +58,22 @@ Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
     return prs;
 }
 
-Parser *Parser_Mark(MemCtx *m, Match *mt, ParseFunc complete){
-    Parser *prs = Parser_Make(m, TYPE_PARSER);
+Parser *Parser_Mark(Serve *sctx, Req *req){
+    Parser *prs = Parser_Make(req->m, TYPE_PARSER);
     prs->type = TYPE_PARSER;
     prs->flags |= CYCLE_MARK;
     return prs;
 }
 
-Parser *Parser_Loop(MemCtx *m, Match *mt, ParseFunc complete){
-    Parser *prs = Parser_Make(m, TYPE_PARSER);
+Parser *Parser_Loop(Serve *sctx, Req *req){
+    Parser *prs = Parser_Make(req->m, TYPE_PARSER);
     prs->type = TYPE_PARSER;
     prs->flags |= CYCLE_LOOP;
     return prs;
 }
 
-Parser *Parser_Escape(MemCtx *m, Match *mt, ParseFunc complete){
-    Parser *prs = Parser_Make(m, TYPE_PARSER);
+Parser *Parser_Escape(Serve *sctx, Req *req){
+    Parser *prs = Parser_Make(req->m, TYPE_PARSER);
     prs->type = TYPE_PARSER;
     prs->flags |= CYCLE_ESCAPE;
     return prs;

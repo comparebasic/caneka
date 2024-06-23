@@ -16,6 +16,6 @@ Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete);
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete);
 
 /* cycle parsers */
-Parser *Parser_Mark(MemCtx *m, Match *mt, ParseFunc complete);
-Parser *Parser_Loop(MemCtx *m, Match *mt, ParseFunc complete);
-Parser *Parser_Escape(MemCtx *m, Match *mt, ParseFunc complete);
+Parser *Parser_Mark(struct serve_ctx *sctx, struct serve_req *req);
+Parser *Parser_Loop(struct serve_ctx *sctx, struct serve_req *req);
+Parser *Parser_Escape(struct serve_ctx *sctx, struct serve_req *req);

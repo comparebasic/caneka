@@ -10,3 +10,4 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
 
 extern int DEBUG_MATCH;
 extern int DEBUG_PATMATCH;
+extern int DEBUG_ALLOC;

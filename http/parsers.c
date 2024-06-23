@@ -48,14 +48,20 @@ Parser *Parser_EndNl(Serve *sctx, Req *req){
 static status Parser_HComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
     String *s = String_FromRange(req->m, range);
+    if(req->nextHeader != NULL){
+        printf("Header: %s -> %s\n", req->nextHeader->bytes, (char *)s->bytes);
+    }else{
+        printf("Header: NULL -> %s\n", (char *)s->bytes);
+    }
     return SUCCESS;
 }
 
 Parser *Parser_HEndNl(Serve *sctx, Req *req){
     Match *mt = Match_MakePat(req->m, 
         (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_UNTIL, 0);
-    mt->flags |= CYCLE_LOOP;
-    return Parser_MakeSingle(req->m, mt, Parser_HComplete);
+    Parser *prs =  Parser_MakeSingle(req->m, mt, Parser_HComplete);
+    prs->flags |= CYCLE_LOOP;
+    return prs;
 }
 
 Parser *Parser_HEndAllNl(Serve *sctx, Req *req){

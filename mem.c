@@ -25,6 +25,9 @@ size_t MemCount(){
 }
 
 void *MemCtx_Alloc(MemCtx *m, size_t s){
+    if(DEBUG_ALLOC){
+        printf("\x1b[%dmAlloc %ld of %p\x1b[0m\n", DEBUG_ALLOC, s, m);
+    }
     if(s > MEM_SLAB_SIZE){
         Fatal("Trying to allocation too much memory at once", TYPE_MEMCTX);
     }
