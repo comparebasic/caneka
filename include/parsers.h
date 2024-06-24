@@ -9,13 +9,13 @@ typedef struct parser {
     ParseFunc complete;
 } Parser;
 
-typedef Parser *(*ParserMaker)(struct serve_ctx *sctx, struct serve_req *req);
+typedef Parser *(*ParserMaker)(StructExp *sexp);
 
 Parser *Parser_Make(MemCtx *m, cls type);
 Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete);
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete);
 
 /* cycle parsers */
-Parser *Parser_Mark(struct serve_ctx *sctx, struct serve_req *req);
-Parser *Parser_Loop(struct serve_ctx *sctx, struct serve_req *req);
-Parser *Parser_Escape(struct serve_ctx *sctx, struct serve_req *req);
+Parser *Parser_Mark(StructExp *sexp);
+Parser *Parser_Loop(StructExp *sexp);
+Parser *Parser_Break(StructExp *sexp);

@@ -58,27 +58,6 @@ Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
     return prs;
 }
 
-Parser *Parser_Mark(Serve *sctx, Req *req){
-    Parser *prs = Parser_Make(req->m, TYPE_PARSER);
-    prs->type = TYPE_PARSER;
-    prs->flags |= CYCLE_MARK;
-    return prs;
-}
-
-Parser *Parser_Loop(Serve *sctx, Req *req){
-    Parser *prs = Parser_Make(req->m, TYPE_PARSER);
-    prs->type = TYPE_PARSER;
-    prs->flags |= CYCLE_LOOP;
-    return prs;
-}
-
-Parser *Parser_Escape(Serve *sctx, Req *req){
-    Parser *prs = Parser_Make(req->m, TYPE_PARSER);
-    prs->type = TYPE_PARSER;
-    prs->flags |= CYCLE_ESCAPE;
-    return prs;
-}
-
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete){
     Parser *prs = Parser_Make(m, TYPE_MULTIPARSER);
     prs->type = TYPE_MULTIPARSER;
@@ -87,3 +66,25 @@ Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete){
     prs->complete = complete;
     return prs;
 }
+
+Parser *Parser_Mark(StructExp *sexp){
+    Parser *prs = Parser_Make(m, TYPE_PARSER);
+    prs->type = TYPE_PARSER;
+    prs->flags |= CYCLE_MARK;
+    return prs;
+}
+
+Parser *Parser_Loop(StructExp *sexp){
+    Parser *prs = Parser_Make(m, TYPE_PARSER);
+    prs->type = TYPE_PARSER;
+    prs->flags |= CYCLE_LOOP;
+    return prs;
+}
+
+Parser *Parser_Break(StructExp *sexp){
+    Parser *prs = Parser_Make(m, TYPE_PARSER);
+    prs->type = TYPE_PARSER;
+    prs->flags |= CYCLE_BREAK;
+    return prs;
+}
+

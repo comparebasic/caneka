@@ -34,6 +34,7 @@ enum types {
     TYPE_STRINGMATCH,
     TYPE_PATMATCH,
     TYPE_PATCHARDEF,
+    TYPE_STRUCTEXP,
 };
 
 extern int METHOD_UNKOWN;
@@ -48,7 +49,7 @@ enum status_types {
     NOOP = 1 << 1,
     CYCLE_MARK = 1 << 2,
     CYCLE_LOOP = 1 << 3,
-    CYCLE_ESCAPE = 1 << 4,
+    CYCLE_BREAK = 1 << 4,
     INCOMING = 1 << 5,
     PROCESSING = 1 << 6,
     RESPONDING = 1 << 7,
@@ -76,6 +77,7 @@ char *Class_ToString(cls type);
 #include "match.h"
 #include "scursor.h"
 #include "parsers.h"
+#include "structexp.h"
 #include "serve.h"
 #include "req.h"
 #include "debug.h"

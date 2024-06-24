@@ -1,20 +1,25 @@
 typedef struct serve_req {
+    MemCtx *m;
     status state;
     int fd;
-    int direction;
-    MemCtx *m;
-    byte method;
-    String *path;
     String *id;
-    String *body;
-    String *response;
-    SCursor *cursor;
-    /* mid parsing */
-    String *_shelf;
-    String *nextHeader;
+    int direction;
+    struct {
+        String *path;
+        byte method;
+        String *body;
+        /* mid parsing */
+        StructExp *sexp;
+        String *_shelf;
+        String *nextHeader;
+    } in;
+    struct {
+        String *response;
+        SCursor *cursor;
+    } out;
 } Req;
 
-Req *Req_Make();
+Req *Req_Make(struct serve_ctx *sctx);
 status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]);
 status Req_SetError(Serve *sctx, Req *req, String *msg);
 status Req_Recv(Serve *sctx, Req *req);

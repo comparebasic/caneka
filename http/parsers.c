@@ -9,19 +9,19 @@ static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_Method(Serve *sctx, Req *req){
+Parser *Parser_Method(StructExp *sexp){
     int length = Array_Length((void **)sctx->methods);
-    Match **matches = (Match **)Array_Make(req->m, length); 
+    Match **matches = (Match **)Array_Make(sexp->m, length); 
     for(int i = 0; i < length; i++){
-        String *s = String_From(req->m, sctx->methods[i]);
-        matches[i] = Match_Make(req->m, s, ANCHOR_START, (int)*(sctx->method_vals[i]));
+        String *s = String_From(sexp->m, sctx->methods[i]);
+        matches[i] = Match_Make(sexp->m, s, ANCHOR_START, (int)*(sctx->method_vals[i]));
     }
 
-    return Parser_MakeMulti(req->m, matches, Parser_MethodComplete);
+    return Parser_MakeMulti(sexp->m, matches, Parser_MethodComplete);
 }
 
-Parser *Parser_Space(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_START, 0), NULL);
+Parser *Parser_Space(StructExp *sexp){
+    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, space_tk, ANCHOR_START, 0), NULL);
 }
 
 static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
@@ -30,19 +30,19 @@ static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_Path(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, Match_Make(req->m, space_tk, ANCHOR_UNTIL, 0), Parser_PathComplete);
+Parser *Parser_Path(StructExp *sexp){
+    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, space_tk, ANCHOR_UNTIL, 0), Parser_PathComplete);
 }
 
-Parser *Parser_HttpV(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, 
-        Match_MakePat(req->m, (byte *)HttpV_RangeDef, Match_PatLength(HttpV_RangeDef), ANCHOR_START, 0), NULL);
+Parser *Parser_HttpV(StructExp *sexp){
+    return Parser_MakeSingle(sexp->m, 
+        Match_MakePat(sexp->m, (byte *)HttpV_RangeDef, Match_PatLength(HttpV_RangeDef), ANCHOR_START, 0), NULL);
 }
 
-Parser *Parser_EndNl(Serve *sctx, Req *req){
-    Match *mt = Match_MakePat(req->m, 
+Parser *Parser_EndNl(StructExp *sexp){
+    Match *mt = Match_MakePat(sexp->m, 
         (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_START, 0);
-    return Parser_MakeSingle(req->m, mt, NULL);
+    return Parser_MakeSingle(sexp->m, mt, NULL);
 }
 
 static status Parser_HComplete(Parser *prs, Range *range, void *_req){
@@ -56,19 +56,19 @@ static status Parser_HComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_HEndNl(Serve *sctx, Req *req){
-    Match *mt = Match_MakePat(req->m, 
+Parser *Parser_HEndNl(StructExp *sexp){
+    Match *mt = Match_MakePat(sexp->m, 
         (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_UNTIL, 0);
-    Parser *prs =  Parser_MakeSingle(req->m, mt, Parser_HComplete);
+    Parser *prs =  Parser_MakeSingle(sexp->m, mt, Parser_HComplete);
     prs->flags |= CYCLE_LOOP;
     return prs;
 }
 
-Parser *Parser_HEndAllNl(Serve *sctx, Req *req){
-    Match *mt = Match_MakePat(req->m, 
+Parser *Parser_HEndAllNl(StructExp *sexp){
+    Match *mt = Match_MakePat(sexp->m, 
         (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_START, 0);
-    mt->flags |= CYCLE_ESCAPE;
-    return Parser_MakeSingle(req->m, mt, NULL);
+    mt->flags |= CYCLE_BREAK;
+    return Parser_MakeSingle(sexp->m, mt, NULL);
 }
 
 static status Parser_HKeyComplete(Parser *prs, Range *range, void *_req){
@@ -77,6 +77,6 @@ static status Parser_HKeyComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_HColon(Serve *sctx, Req *req){
-    return Parser_MakeSingle(req->m, Match_Make(req->m, String_Make(req->m, (byte *)":"), ANCHOR_UNTIL, 0), Parser_HKeyComplete);
+Parser *Parser_HColon(StructExp *sexp){
+    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, String_Make(sexp->m, (byte *)":"), ANCHOR_UNTIL, 0), Parser_HKeyComplete);
 }
