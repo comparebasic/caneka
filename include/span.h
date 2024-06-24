@@ -5,8 +5,6 @@ enum span_flags {
 typedef struct span {
 	Slab *slab;
 	int nvalues;
-    int nslabs;
-    int stride;
     int slotSize;
     cls itemType;
     int itemSize;

@@ -23,6 +23,7 @@ typedef struct typehdr {
 
 #define MAX_BASE10 20
 #define SPAN_DIM_SIZE 32
+#define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
 #define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit))
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
@@ -75,6 +76,7 @@ enum status_types {
     PROCESSING = 1 << 6,
     RESPONDING = 1 << 7,
     SUCCESS = 1 << 8,
+    RAW = 1 << 9,
 };
 
 enum positions {
