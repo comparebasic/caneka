@@ -9,6 +9,7 @@ enum span_ops {
 };
 
 typedef struct span {
+    Type type;
 	Slab *slab;
 	int nvalues;
     int slotSize;
@@ -21,4 +22,10 @@ typedef struct span {
     */
 } Span;
 
+Span* Span_Make(MemCtx* m);
+Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
+status Span_Set(MemCtx *m, Span *p, int idx, Unit *t);
+status Span_Remove(MemCtx *m, Span *p, int idx);
+void *Span_Get(MemCtx *m, Span *p, int idx);
+int Span_Add(MemCtx *m, Span *p, Unit *t);
 #define Span_NextIdx(p) (p->max_idx+1)

@@ -4,7 +4,7 @@ INC = -I/usr/local/musl/include/ -I./include -I./http -I./
 
 coreobj = core/filestore.o core/scursor.o core/req.o core/serve.o core/mem.o core/string.o \
     core/error.o core/debug.o core/log.o core/tokens.o core/parsers.o core/array.o core/match.o \
-    core/structexp.o
+    core/structexp.o core/slab.o core/span.o
 httpobj = http/parsers.o http/pat_matches.o
 testobj = core/testsuite.o tests/core_tests.o tests/string_tests.o tests/serve_tests.o
 

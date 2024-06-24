@@ -1,21 +1,10 @@
-typedef struct span_slabmin {
-    flags_t flags;
-    int local_idx;
-    int increment;
-    int level;
-    int offset;
-	i64 nallocated;
-    Unit items[SLAB_MIN_SIZE];
-} SlabMin;
-
 typedef struct span_slab {
     Type type;
     int local_idx;
     int increment;
     int level;
     int offset;
-	i64 nallocated;
-    Unit items[SLAB_DIM_SIZE];
+    Unit *items[SPAN_DIM_SIZE];
 } Slab;
 
 typedef struct slab_result {
@@ -33,3 +22,5 @@ typedef struct slab_result {
     int level;
     Unit *value;
 } SlabResult;
+
+Slab* Slab_Alloc(MemCtx* m, status flags);
