@@ -1,5 +1,5 @@
-#include "external.h"
-#include "filestore.h"
+#include <external.h>
+#include <filestore.h>
 
 void Fatal(char *msg, type t){
     printf("Fatal Error:");

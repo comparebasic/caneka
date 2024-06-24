@@ -1,5 +1,5 @@
-#include "external.h"
-#include "filestore.h"
+#include <external.h>
+#include <filestore.h>
 
 int Match_PatLength(PatCharDef *def){
     int length = 0;

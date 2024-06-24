@@ -1,5 +1,5 @@
-#include "external.h"
-#include "filestore.h"
+#include <external.h>
+#include <filestore.h>
 
 static char *okBase_cstr = "HTTP/1.1 200 OK\r\nServer: filestore\r\nContent-Length: ";
 static String *packageResponse(MemCtx *m, String *content){

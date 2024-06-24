@@ -1,5 +1,5 @@
-#include "external.h"
-#include "filestore.h"
+#include <external.h>
+#include <filestore.h>
 
 int METHOD_UNKOWN = 0;
 int METHOD_GET = 1;

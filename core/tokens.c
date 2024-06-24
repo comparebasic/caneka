@@ -1,5 +1,5 @@
-#include "external.h"
-#include "filestore.h"
+#include <external.h>
+#include <filestore.h>
 
 String *space_tk;
 String *lineBreak_tk;

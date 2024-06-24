@@ -1,6 +1,6 @@
-#include "external.h"
-#include "filestore.h"
-#include "testsuite.h"
+#include <external.h>
+#include <filestore.h>
+#include <testsuite.h>
 
 static char *sid = "Azjfhuei3";
 static char *req_cstr = "GET /Azjfhuei3 HTTP/1.1\r\nContent-Length: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  

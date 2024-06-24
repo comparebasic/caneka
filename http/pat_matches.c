@@ -1,5 +1,5 @@
-#include "external.h"
-#include "filestore.h"
+#include <external.h>
+#include <filestore.h>
 
 PatCharDef HttpV_RangeDef[] = {
     {PAT_TERM, 'H', 'H'},

@@ -1,5 +1,5 @@
-#include "external.h"
-#include "filestore.h"
+#include <external.h>
+#include <filestore.h>
 
 SCursor* SCursor_Make(MemCtx *m, String *s){
     SCursor *sc = (SCursor *) MemCtx_Alloc(m, sizeof(SCursor));
