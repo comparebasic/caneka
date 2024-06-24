@@ -1,6 +1,3 @@
-#define SPAN_DIM_SIZE 8
-#define SLAB_START_SIZE 2
-
 enum span_flags {
     FLAG_SPAN_AUTOEXPAND = 1 << 16,
 };

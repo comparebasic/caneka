@@ -1,2 +1,2 @@
-void Fatal(char *msg, type t);
+void Fatal(char *msg, cls t);
 void Error(char *msg);

@@ -57,7 +57,7 @@ static void Match_Print(Match *mt, char *msg, int color, boolean extended){
 static void String_Print(String *s, char *msg, int color, boolean extended){
     printf("%s\x1b[1;%dmS<\x1b[0;1m", msg, color);
     do {
-        printf("=\"\x1b[1;%dm%ld:%s\x1b[0;1m\"", color, s->length, s->bytes);
+        printf("=\"\x1b[1;%dm%hu:%s\x1b[0;1m\"", color, s->length, s->bytes);
         s = s->next;
     } while(s != NULL);
     printf("\x1b[1;%dm>\x1b[0m\n", color);

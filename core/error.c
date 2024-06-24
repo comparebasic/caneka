@@ -1,7 +1,7 @@
 #include <external.h>
 #include <filestore.h>
 
-void Fatal(char *msg, type t){
+void Fatal(char *msg, cls t){
     printf("Fatal Error:");
     printf("%s\n", msg);
     exit(13);

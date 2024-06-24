@@ -2,8 +2,16 @@
 #include <filestore.h>
 static const byte *digits = (byte *)"0123456789";
 
-String *String_Init(MemCtx *m){
-    return (String *)MemCtx_Alloc(m, sizeof(String));
+String *String_Init(MemCtx *m, int expected){
+    size_t sz = sizeof(StringMin);
+    cls type = TYPE_STRINGMIN;
+    if(expected < 0 || expected >= STRING_CHUNK_SIZE){
+        size_t sz = sizeof(String);
+        type = TYPE_STRING;
+    }
+    String *s =  (String *)MemCtx_Alloc(m, sz);
+    s->type.of = type;
+    return s;
 }
 
 String *String_FromInt(MemCtx *m, int i){
@@ -29,14 +37,15 @@ String *String_FromInt(MemCtx *m, int i){
 }
 
 String *String_Make(MemCtx *m, byte *bytes){
-    String *s = String_Init(m); 
-    String_AddBytes(m, s, bytes, strlen((char *)bytes));
+    int length = strlen((char *)bytes);
+    String *s = String_Init(m, length); 
+    String_AddBytes(m, s, bytes, length);
 
     return s;
 }
 
 String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
-    String *s = String_Init(m); 
+    String *s = String_Init(m, length); 
     String_AddBytes(m, s, bytes, length);
 
     return s;
@@ -51,6 +60,10 @@ status String_Add(MemCtx *m, String *a, String *b) {
 }
 
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
+    if(a->type.of != TYPE_STRING){
+        return ERROR;
+    }
+
     size_t l = length;
     size_t remaining = l;
     size_t copy_l = remaining;
@@ -69,24 +82,14 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         copy_l = (STRING_CHUNK_SIZE - seg->length);
     }
 
-    if(seg->bytes == NULL){
-        seg->bytes = (byte *)MemCtx_Alloc(m, copy_l+1);
-        memcpy(seg->bytes, p, copy_l);
-        seg->length = copy_l;
-        remaining -= copy_l;
-        p += copy_l;
-    }else if(seg->length < STRING_CHUNK_SIZE){
-        seg->bytes = MemCtx_Realloc(m, STRING_CHUNK_SIZE+1, (void *)seg->bytes, seg->length+1);
-        memcpy(seg->bytes+seg->length, p, copy_l);
-        seg->length += copy_l;
-        remaining -= copy_l;
-        p += copy_l;
-    }
+    memcpy(seg->bytes+seg->length, p, copy_l);
+    seg->length += copy_l;
+    remaining -= copy_l;
+    p += copy_l;
 
     /* if more than a string seg remains, make a new one */
     while(remaining > STRING_CHUNK_SIZE){
-        String *next = String_Init(m);
-        next->bytes = (byte *)MemCtx_Alloc(m, STRING_CHUNK_SIZE+1);
+        String *next = String_Init(m, -1);
         memcpy(next->bytes, p, STRING_CHUNK_SIZE);
         next->length = STRING_CHUNK_SIZE;
         p += STRING_CHUNK_SIZE;
@@ -102,8 +105,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
 
     /* if any remains, make a final seg */
     if(remaining > 0){
-        String *next = String_Init(m);
-        next->bytes = (byte *)MemCtx_Alloc(m, remaining+1);
+        String *next = String_Init(m, -1);
         memcpy(next->bytes, p, remaining);
         next->length = remaining;
 
@@ -182,9 +184,9 @@ String *String_FromRange(MemCtx *m, Range *range){
     if(range->state != COMPLETE){
         return NULL;
     }
-    String *s = String_Init(m);
     String *seg = range->start.seg;
     i64 remaining = range->length;
+    String *s = String_Init(m, remaining);
 
     i64 length = min(remaining, (seg->length - range->start.localPosition));
     byte *p = seg->bytes+range->start.localPosition;

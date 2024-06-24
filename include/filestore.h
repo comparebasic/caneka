@@ -1,11 +1,10 @@
 typedef unsigned char byte;
 typedef uint16_t word;
 typedef word cls;
+typedef word status;
 typedef byte boolean;
 typedef uint64_t i64;
 typedef i64 Unit;
-typedef int status;
-typedef int type;
 
 struct serve_ctx;
 struct serve_req;
@@ -17,6 +16,17 @@ struct span;
 struct span_slab;
 struct structexp;
 
+typedef struct typehdr {
+    cls of;
+    status state;
+} Type;
+
+#define MAX_BASE10 20
+#define SPAN_DIM_SIZE 8
+#define SLAB_START_SIZE 2
+#define SPAN_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit))
+#define STRING_CHUNK_SIZE (SPAN_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(struct string *)))
+
 typedef uint64_t Unit;
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -25,11 +35,13 @@ typedef uint64_t Unit;
 #define TRUE 1
 #define FALSE 0
 
+
 enum types {
     TYPE_MEMCTX,
     TYPE_MEMSLAB,
     TYPE_REQ,
     TYPE_STRING,
+    TYPE_STRINGMIN,
     TYPE_SERVECTX,
     TYPE_TESTSUITE,
     TYPE_PARSER,
@@ -41,6 +53,8 @@ enum types {
     TYPE_PATMATCH,
     TYPE_PATCHARDEF,
     TYPE_STRUCTEXP,
+    TYPE_SPAN,
+    TYPE_SLAB,
 };
 
 extern int METHOD_UNKOWN;

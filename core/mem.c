@@ -3,7 +3,7 @@
 
 static size_t cmem = 0;
 
-static void *trackMalloc(size_t s, type t){
+static void *trackMalloc(size_t s, cls t){
     void *p = malloc(s);
     if(p == NULL){
         Fatal("Allocating", t);

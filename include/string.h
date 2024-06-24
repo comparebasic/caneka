@@ -1,9 +1,13 @@
-#define STRING_CHUNK_SIZE 1023
-#define MAX_BASE10 20
+typedef struct stringmin {
+    Type type;
+    word length;
+    byte bytes[32];
+} StringMin;
+
 typedef struct string {
-    byte *bytes;
-    i64 length;
-    i64 allocated;
+    Type type;
+    word length;
+    byte bytes[STRING_CHUNK_SIZE];
     struct string *next;
 } String;
 
@@ -19,4 +23,4 @@ status String_Equals(String *a, String *b);
 status String_EqualsBytes(String *a, byte *cstr);
 String *String_FromInt(MemCtx *m, int i);
 String *String_FromRange(MemCtx *m, struct strcursor_range *range);
-String *String_Init(MemCtx *m);
+String *String_Init(MemCtx *m, int expected);
