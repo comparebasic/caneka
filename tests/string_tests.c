@@ -24,21 +24,30 @@ char *longCstr = "" \
 
 status String_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
-    String *s = String_From(m, bytes("Hi"));
+    String *s;
+    s = String_From(m, bytes("Hi"));
     status r = TEST_OK;
+    r |= Test(s->type.of == TYPE_STRING_FIXED, 
+        "Expect string to have fixed type %s found %s", 
+            Class_ToString(TYPE_STRING_FIXED), Class_ToString(s->type.of));
     r |= Test(s->length == 2, "Expect string length of %ld found %ld", 2, s->length);
     r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of '%s' found '%s'", "Hi", s->bytes);
 
-    String *ls = String_From(m, bytes(longCstr));
+    s = String_From(m, bytes(longCstr));
     int ls_l = strlen(longCstr);
-    r |= Test(String_Length(ls) == ls_l, "Expect string length of %d found %d", ls_l, String_Length(ls));
-    r |= Test(String_EqualsBytes(ls, bytes(longCstr)) == TRUE, "Expect string match of long string");
+    Debug_Print((String *)s, TYPE_STRING_CHAIN,"Long string variable", COLOR_DARK, FALSE);
+
+    r |= Test(s->type.of == TYPE_STRING_CHAIN, 
+        "Expect string to have chain type %s found %s", 
+            Class_ToString(TYPE_STRING_CHAIN), Class_ToString(s->type.of));
+    r |= Test(String_Length(s) == ls_l, "Expect string length of %d found %d", ls_l, String_Length(s));
+    r |= Test(String_EqualsBytes(s, bytes(longCstr)) == TRUE, "Expect string match of long string");
 
     int value = 35072;
-    String *is = String_FromInt(m, value);
+    s = String_FromInt(m, value);
     String *expected_is = String_From(m, bytes("35072"));
-    r |= Test(String_Length(is) == expected_is->length, "Expect for int value %d  length of %d found %d", value, expected_is->length, String_Length(is));
-    r |= Test(String_Equals(is, expected_is) == TRUE, "Expect string match of int of %d to string", value);
+    r |= Test(String_Length(s) == expected_is->length, "Expect for int value %d  length of %d found %d", value, expected_is->length, String_Length(s));
+    r |= Test(String_Equals(s, expected_is) == TRUE, "Expect string match of int of %d to string", value);
 
     MemCtx_Free(m);
     return r;

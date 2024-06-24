@@ -1,7 +1,7 @@
 typedef struct stringmin {
     Type type;
     word length;
-    byte bytes[32];
+    byte bytes[STRING_FIXED_SIZE+1];
 } StringMin;
 
 typedef struct string {

@@ -34,8 +34,10 @@ char *Class_ToString(cls type){
         return "TYPE_MEMSLAB";
     }else if(type == TYPE_REQ){
         return "TYPE_REQ";
-    }else if(type == TYPE_STRING){
-        return "TYPE_STRING";
+    }else if(type == TYPE_STRING_CHAIN){
+        return "TYPE_STRING_CHAIN";
+    }else if(type == TYPE_STRING_FIXED){
+        return "TYPE_STRING_FIXED";
     }else if(type == TYPE_SERVECTX){
         return "TYPE_SERVECTX";
     }else if(type == TYPE_TESTSUITE){

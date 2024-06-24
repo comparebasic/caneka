@@ -99,7 +99,7 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
         PatCharDef_Print((PatCharDef *)t, msg, color, extended);
     }else if( type == TYPE_PATMATCH ){
         Match_PrintPat((Match *)t, msg, color, extended);
-    }else if(type == TYPE_STRING){
+    }else if(type == TYPE_STRING_CHAIN || type == TYPE_STRING_FIXED){
         String_Print((String *)t, msg, color, extended);
     }else if(type == TYPE_SCURSOR){
         SCursor_Print((SCursor *)t, msg, color, extended);

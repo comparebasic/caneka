@@ -22,10 +22,11 @@ typedef struct typehdr {
 } Type;
 
 #define MAX_BASE10 20
-#define SPAN_DIM_SIZE 8
+#define SPAN_DIM_SIZE 32
 #define SLAB_START_SIZE 2
-#define SPAN_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit))
-#define STRING_CHUNK_SIZE (SPAN_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(struct string *)))
+#define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit))
+#define STRING_CHUNK_SIZE (SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))
+#define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
 typedef uint64_t Unit;
 
@@ -40,8 +41,8 @@ enum types {
     TYPE_MEMCTX,
     TYPE_MEMSLAB,
     TYPE_REQ,
-    TYPE_STRING,
-    TYPE_STRINGMIN,
+    TYPE_STRING_CHAIN,
+    TYPE_STRING_FIXED,
     TYPE_SERVECTX,
     TYPE_TESTSUITE,
     TYPE_PARSER,

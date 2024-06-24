@@ -6,7 +6,7 @@ coreobj = core/filestore.o core/scursor.o core/req.o core/serve.o core/mem.o cor
     core/error.o core/debug.o core/log.o core/tokens.o core/parsers.o core/array.o core/match.o \
     core/structexp.o
 httpobj = http/parsers.o http/pat_matches.o
-testobj = core/testsuite.o tests/string_tests.o tests/serve_tests.o
+testobj = core/testsuite.o tests/core_tests.o tests/string_tests.o tests/serve_tests.o
 
 allobj = $(coreobj) $(httpobj) $(testobj)
 

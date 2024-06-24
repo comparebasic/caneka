@@ -4,12 +4,16 @@ static const byte *digits = (byte *)"0123456789";
 
 String *String_Init(MemCtx *m, int expected){
     size_t sz = sizeof(StringMin);
-    cls type = TYPE_STRINGMIN;
-    if(expected < 0 || expected >= STRING_CHUNK_SIZE){
-        size_t sz = sizeof(String);
-        type = TYPE_STRING;
+    cls type = TYPE_STRING_FIXED;
+    if(expected < 0 || expected >= STRING_FIXED_SIZE){
+        printf("String chain from sz %d\n", expected);
+        sz = sizeof(String);
+        type = TYPE_STRING_CHAIN;
+    }else{
+        printf("String fixed from sz %d\n", expected);
     }
     String *s =  (String *)MemCtx_Alloc(m, sz);
+    printf("Made string of size %lu\n", sz);
     s->type.of = type;
     return s;
 }
@@ -60,9 +64,6 @@ status String_Add(MemCtx *m, String *a, String *b) {
 }
 
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
-    if(a->type.of != TYPE_STRING){
-        return ERROR;
-    }
 
     size_t l = length;
     size_t remaining = l;
@@ -78,8 +79,11 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     }
 
     /* copy the initial chunk */
-    if(copy_l > (STRING_CHUNK_SIZE - seg->length)){
-        copy_l = (STRING_CHUNK_SIZE - seg->length);
+        copy_l = min((STRING_FIXED_SIZE - seg->length), remaining);
+
+    if(copy_l > remaining && a->type.of != TYPE_STRING_CHAIN){
+        printf("Returing ERROR not a flexible string\n");
+        return ERROR;
     }
 
     memcpy(seg->bytes+seg->length, p, copy_l);
