@@ -12,3 +12,4 @@ extern int DEBUG_MATCH;
 extern int DEBUG_PATMATCH;
 extern int DEBUG_ALLOC;
 extern int DEBUG_SCURSOR;
+extern int DEBUG_BOUNDS_CHECK;

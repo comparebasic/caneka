@@ -79,6 +79,8 @@ enum status_types {
     RAW = 1 << 9,
 };
 
+#define HasFlag(x, fl) ((x & (fl)) == fl) 
+
 enum positions {
     POSITION_CONTAINS = 0,
     POSITION_START = 1,

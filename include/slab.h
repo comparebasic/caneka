@@ -21,6 +21,7 @@ typedef struct span_slab {
 typedef struct slab_result {
     Type type;
     struct span *span;
+    byte op;
     Slab *slab;
     Slab *shelfSlab;
     int offset;

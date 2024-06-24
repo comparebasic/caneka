@@ -5,6 +5,7 @@ int DEBUG_SCURSOR = COLOR_DARK;
 int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = 0;
 int DEBUG_ALLOC = 0;
+int DEBUG_BOUNDS_CHECK = 0;
 
 static void PatCharDef_Print(PatCharDef *def, char *msg, int color, boolean extended){
     if((def->flags & PAT_COUNT) != 0){

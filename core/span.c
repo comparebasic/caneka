@@ -95,9 +95,10 @@ Span* Span_Make(MemCtx* m){
     return p;
 }
 
-void SlabResult_Setup(Span *p, SlabResult *sr, int idx){
+void SlabResult_Setup(Span *p, SlabResult *sr, byte op, int idx){
     memset(sr, 0, sizeof(SlabResult));
 
+    sr->op = op;
     sr->span = p;
     sr->dims = p->ndims;
     sr->slab = p->slab;
@@ -157,82 +158,26 @@ lifecycle_t Span_Expand(MemCtx *m, SlabResult *sr){
     return sr->type.state;
 }
 
-lifecycle_t Span_Cull(MemCtx *m, Span *sp, int amount){
-    lifecycle_t r = ERROR;
-    while(amount--){
-        int idx = sp->max_idx;
-        r = Span_Remove(m, sp, idx);
-        if(r == SUCCESS){
-            sp->max_idx--;
-        }else{
-            break;
-        }
-    }
-    return r;
-}
-
-lifecycle_t Span_Remove(MemCtx *m, Span *p, int idx){
-    if(idx > p->max_idx){
-        return MISS;
-    }
-
-    SlabResult sr;
-    SlabResult_Setup(p, &sr, idx);
-    Span_Expand(m, &sr);
-    if(sr.lifecycle == SUCCESS){
-        if(HasFlag(p, FLAG_RAW)){
-            size_t size = p->slotSize*sizeof(Unit *);
-            size_t offset = sr.local_idx*sizeof(Unit *);
-            void *ptr = (void *)((Unit *)sr.slab->items);
-            ptr += offset;
-
-            long end = (long)ptr + (p->slotSize*sizeof(Unit *));
-            long slab_end = (long)sr.slab->items+(sizeof(Unit *)*p->stride);
-            long start = (long)ptr;
-            long slab_start = (long)sr.slab->items;
-            if(end > slab_end){
-                printf("Error: Remove ptr is out of bounds for slot %ld_%ld vs %ld local_idx is %d stride is:%d size is:%d\n", start-slab_start, end-slab_start, slab_end-slab_start, sr.local_idx, sr.slab->stride, p->slotSize);
-                return ERROR;
+static status Span_GetSet(MemCtx *m, SlabResult *sr, Span *p, int idx, Unit *t){
+    Span_Expand(m, sr);
+    Span *p = sr->p;
+    if(HasFlag(sr->type.state, SUCCESS)){
+        if(HasFlag(p->type.state, RAW)){
+            size_t offset = sr->local_idx*p->itemSize;
+            void *ptr += ((void *)sr->slab->items)+offset;
+            if(sr->op == SPAN_OP_REMOVE){
+                memset(ptr, 0, p->itemSize);
+            }else if(sr->op == SPAN_OP_SET){
+                memcpy(ptr, t, p->itemSize);
+            }else if(sr->op == SPAN_OP_GET){
+                sr->value = ptr;
             }
-            memset(ptr, 0, p->itemSize);
         }else{
-            sr.slab->items[sr.local_idx] = NULL;
-        }
-        return SUCCESS;
-    }
-
-    return MISS;
-}
-
-lifecycle_t Span_Set(MemCtx *m, Span *p, int idx, Unit *t){
-    SlabResult sr;
-    SlabResult_Setup(p, &sr, idx);
-
-    if(DEBUG_SPAN_SET){
-        String *db = String_Format(m, "\x1b[%dmSet %d: ", DEBUG_SPAN_SET, idx);
-        String_Print(db);
-        printf("\x1b[0m\n");
-    }
-
-    Span_Expand(m, &sr);
-    if(sr.lifecycle == SUCCESS){
-        if(HasFlag(p, FLAG_RAW)){
-            size_t size = p->slotSize*sizeof(Unit *);
-            size_t offset = sr.local_idx*sizeof(Unit *);
-            void *ptr = (void *)((Unit *)sr.slab->items);
-            ptr += offset;
-
-            long end = (long)ptr + (p->slotSize*sizeof(Unit *));
-            long slab_end = (long)sr.slab->items+(sizeof(Unit *)*p->stride);
-            long start = (long)ptr;
-            long slab_start = (long)sr.slab->items;
-            if(end > slab_end){
-                printf("Error: ptr is out of bounds for slot %ld_%ld vs %ld local_idx is %d stride is:%d size is:%d\n", start-slab_start, end-slab_start, slab_end-slab_start, sr.local_idx, sr.slab->stride, p->slotSize);
-                return ERROR;
+            if(sr->op == SPAN_OP_GET){
+                sr->value = t;
+            }else{
+                sr->slab->items[sr->local_idx] = t;
             }
-            memcpy(ptr, t, p->itemSize);
-        }else{
-            sr.slab->items[sr.local_idx] = t;
         }
         p->nvalues++;
         if(idx > p->max_idx){
@@ -245,8 +190,27 @@ lifecycle_t Span_Set(MemCtx *m, Span *p, int idx, Unit *t){
     return ERROR;
 }
 
-idx_t Span_NextIdx(Span *p){
-    return p->max_idx+1;
+status Span_Set(MemCtx *m, Span *p, int idx, Unit *t){
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
+    return Span_GetSet(MemCtx *m, &sr, int idx, t);
+}
+
+status Span_Remove(MemCtx *m, Span *p, int idx){
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_REMOVE, idx);
+    return Span_GetSet(MemCtx *m, &sr, int idx, NULL);
+}
+
+void *Span_Get(MemCtx *m, Span *p, int idx){
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
+    status r = Span_Set(MemCtx *m, &sr, int idx, NULL);
+    if(HasFlag(r, SUCCESS)){
+        return sr->value;
+    }else{
+        return NULL;
+    }
 }
 
 idx_t Span_Add(MemCtx *m, Span *p, Unit *t){
@@ -256,71 +220,4 @@ idx_t Span_Add(MemCtx *m, Span *p, Unit *t){
     }
 
     return 0;
-}
-
-Unit *Span_Search(MemCtx *m, Span *p, Unit *t){
-    if(p->rslv->cmp.type == 0){
-        return NULL;
-    }
-
-    Comp *cmp = &(p->rslv->cmp);
-    Unit *result = NULL;
-    for(int i = 0; i <= p->max_idx; i++){
-        Unit *item = Span_Get(m, p, i);
-        if(item != NULL){
-            Compare_With(m, item, t, cmp);
-            if(cmp->lifecycle == SUCCESS){
-                result = cmp->dest;
-                break;
-            }
-        }
-    };
-
-    return result;
-}
-
-Unit *Span_Get(MemCtx *m, Span *p, int idx){
-
-    if(idx < 0){
-        idx = p->max_idx + idx+1;
-    }
-
-    if(idx < 0 || idx > p->max_idx){
-        return NULL;
-    }
-
-    SlabResult sr;
-    SlabResult_Setup(p, &sr, idx);
-
-    if(DEBUG_SPAN_GET){
-        printf("\x1b[%dmGet %d:", DEBUG_SPAN_GET, idx);
-        printf("\x1b[0m\n");
-    }
-
-    Span_Expand(m, &sr);
-
-    if(sr.lifecycle == SUCCESS){
-        if(HasFlag(p, FLAG_RAW)){
-            size_t size = p->slotSize*sizeof(Unit *);
-            size_t offset = sr.local_idx*sizeof(Unit *);
-            void *ptr = (void *)((Unit *)sr.slab->items);
-
-            long end = (long)ptr + (p->slotSize*sizeof(Unit *));
-            long slab_end = (long)sr.slab->items+(sizeof(Unit *)*p->stride);
-            long start = (long)ptr;
-            long slab_start = (long)sr.slab->items;
-
-            if(end > slab_end){
-                printf("Error: ptr to get is out of bounds for slot %ld_%ld vs %ld local_idx is %d stride is:%d size is:%d\n", start-slab_start, end-slab_start, slab_end-slab_start, sr.local_idx, sr.slab->stride, p->slotSize);
-                return NULL;
-            }
-
-            return  ptr + offset;
-
-        }
-
-        return sr.slab->items[sr.local_idx];
-    }
-
-    return NULL;
 }
