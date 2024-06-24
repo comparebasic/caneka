@@ -10,6 +10,8 @@ typedef struct serve_req {
         byte method;
         String *body;
         /* mid parsing */
+        int contentLength;
+        String *host;
         StructExp *sexp;
         String *_shelf;
         String *nextHeader;

@@ -37,8 +37,15 @@ status StructExp_Run(StructExp *sexp){
         }
         pmk = sexp->parsers[++i];
     }
+
+    if(pmk == NULL){
+        sexp->state = COMPLETE;
+    }else{
+        sexp->state = PROCESSING;
+    }
+
+    printf("State is %s\n", State_ToString(sexp->state));
         
-    sexp->state = PROCESSING;
     return sexp->state;
 }
 

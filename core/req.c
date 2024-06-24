@@ -44,6 +44,7 @@ status Req_Recv(Serve *sctx, Req *req){
         r = StructExp_Run(req->in.sexp);
         if(r == ERROR){
             req->state = ERROR;
+            Debug_Print((void *)req, TYPE_REQ, "Req Parsed (Error) ", COLOR_RED, TRUE);
         }else if (r == COMPLETE){
             req->state = PROCESSING;
             Debug_Print((void *)req, TYPE_REQ, "Req Parsed ", COLOR_CYAN, TRUE);
