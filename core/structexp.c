@@ -8,7 +8,7 @@ status StructExp_Run(StructExp *sexp){
     boolean escaping = FALSE;
     Parser *prs;
     status r = READY;
-    word escape_fl = (CYCLE_ESCAPE|COMPLETE);
+    word escape_fl = (CYCLE_BREAK|COMPLETE);
     while(pmk != NULL){
         printf("Func %d\n", i);
         prs = pmk(sexp);
@@ -42,14 +42,14 @@ status StructExp_Run(StructExp *sexp){
                 }
             }
         }
-        pmk = parsers[++i];
+        pmk = sexp->parsers[++i];
     }
         
     sexp->state = PROCESSING;
     return sexp->state;
 }
 
-StructExp *StructExp_Make(MemCtx *m, cls type, ParserMake *parsers, String *s, void *source){
+StructExp *StructExp_Make(MemCtx *m, cls type, ParserMaker *parsers, String *s, void *source){
     StructExp *sexp = (StructExp *)MemCtx_Alloc(m, sizeof(StructExp));
     sexp->m = m;
     sexp->type = type;

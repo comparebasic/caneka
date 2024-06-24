@@ -65,11 +65,11 @@ static void String_Print(String *s, char *msg, int color, boolean extended){
 
 static void Req_Print(Req *req, char *msg, int color, boolean extended){
     printf("%s\x1b[1;%dmReq<%s:%s %s:%s,%s,%s>\x1b[0;1m\n",
-        msg, color, State_ToString(req->state), Method_ToString(req->method),
-        req->path != NULL ? (char *)req->path->bytes : "",
-        req->body != NULL ? "body" : "no-body",
-        req->response != NULL ? "response" : "no-response",
-        req->cursor != NULL ? "cursor" : "no-cursor"
+        msg, color, State_ToString(req->state), Method_ToString(req->in.method),
+        req->in.path != NULL ? (char *)req->in.path->bytes : "",
+        req->in.body != NULL ? "body" : "no-body",
+        req->out.response != NULL ? "response" : "no-response",
+        req->out.cursor != NULL ? "cursor" : "no-cursor"
     );
 }
 

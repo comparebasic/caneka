@@ -5,16 +5,17 @@
 static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
     Match **matches = (Match **)prs->matches;
-    req->method = matches[prs->idx]->intval;
+    req->in.method = matches[prs->idx]->intval;
     return SUCCESS;
 }
 
 Parser *Parser_Method(StructExp *sexp){
-    int length = Array_Length((void **)sctx->methods);
+    Req *req = (Req *)sexp->source;
+    int length = Array_Length((void **)req->sctx->methods);
     Match **matches = (Match **)Array_Make(sexp->m, length); 
     for(int i = 0; i < length; i++){
-        String *s = String_From(sexp->m, sctx->methods[i]);
-        matches[i] = Match_Make(sexp->m, s, ANCHOR_START, (int)*(sctx->method_vals[i]));
+        String *s = String_From(sexp->m, bytes(req->sctx->methods[i]));
+        matches[i] = Match_Make(sexp->m, s, ANCHOR_START, (int)*(req->sctx->method_vals[i]));
     }
 
     return Parser_MakeMulti(sexp->m, matches, Parser_MethodComplete);
@@ -26,7 +27,7 @@ Parser *Parser_Space(StructExp *sexp){
 
 static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
-    req->path = String_FromRange(req->m, range);
+    req->in.path = String_FromRange(req->m, range);
     return SUCCESS;
 }
 
@@ -48,8 +49,8 @@ Parser *Parser_EndNl(StructExp *sexp){
 static status Parser_HComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
     String *s = String_FromRange(req->m, range);
-    if(req->nextHeader != NULL){
-        printf("Header: %s -> %s\n", req->nextHeader->bytes, (char *)s->bytes);
+    if(req->in.nextHeader != NULL){
+        printf("Header: %s -> %s\n", req->in.nextHeader->bytes, (char *)s->bytes);
     }else{
         printf("Header: NULL -> %s\n", (char *)s->bytes);
     }
@@ -73,7 +74,7 @@ Parser *Parser_HEndAllNl(StructExp *sexp){
 
 static status Parser_HKeyComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
-    req->nextHeader = String_FromRange(req->m, range);
+    req->in.nextHeader = String_FromRange(req->m, range);
     return SUCCESS;
 }
 

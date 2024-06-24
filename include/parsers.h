@@ -9,8 +9,6 @@ typedef struct parser {
     ParseFunc complete;
 } Parser;
 
-typedef Parser *(*ParserMaker)(StructExp *sexp);
-
 Parser *Parser_Make(MemCtx *m, cls type);
 Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete);
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete);

@@ -13,5 +13,5 @@ typedef struct structexp {
     ParserMaker *parsers;
 } StructExp;
 
-StructExp *StructExp_Make(MemCtx *m, cls type, ParserMake *parsers, String *s, void *source);
+StructExp *StructExp_Make(MemCtx *m, cls type, ParserMaker *parsers, String *s, void *source);
 status StructExp_Run(StructExp *sexp);

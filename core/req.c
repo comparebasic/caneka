@@ -3,10 +3,10 @@
 
 static char *okBase_cstr = "HTTP/1.1 200 OK\r\nServer: filestore\r\nContent-Length: ";
 static String *packageResponse(MemCtx *m, String *content){
-    String *s = String_From(m, okBase_cstr);
+    String *s = String_From(m, bytes(okBase_cstr));
     String *length_s = String_FromInt(m, (int)content->length); 
     String_Add(m, s, length_s);
-    String_AddCstr(m, s, "\r\n\r\n", 4);
+    String_AddBytes(m, s, bytes("\r\n\r\n"), 4);
     String_Add(m, s, content);
 
     return s;
@@ -14,10 +14,10 @@ static String *packageResponse(MemCtx *m, String *content){
 
 static char *errBase_cstr = "HTTP/1.1 500 Error\r\nServer: filestore\r\nContent-Length: ";
 static String *packageError(MemCtx *m, String *content){
-    String *s = String_From(m, errBase_cstr);
+    String *s = String_From(m, bytes(errBase_cstr));
     String *length_s = String_FromInt(m, (int)content->length); 
     String_Add(m, s, length_s);
-    String_AddCstr(m, s, "\r\n\r\n", 4);
+    String_AddBytes(m, s, bytes("\r\n\r\n"), 4);
     String_Add(m, s, content);
 
     return s;
@@ -40,8 +40,8 @@ status Req_Recv(Serve *sctx, Req *req){
     size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     status r = NOOP;
     if(l > 0){
-        String_AddCStr(req->m, req->_shelf, buff, l);
-        r = StructExp_Run(req->sexp);
+        String_AddBytes(req->m, req->in._shelf, buff, l);
+        r = StructExp_Run(req->in.sexp);
         if(r == ERROR){
             req->state = ERROR;
         }else if (r == COMPLETE){
@@ -57,8 +57,8 @@ status Req_Recv(Serve *sctx, Req *req){
 }
 
 status Req_Process(Serve *sctx, Req *req){
-    req->response = packageResponse(req->m, String_From(req->m, "poo"));
-    req->cursor = SCursor_Make(req->m, req->response);
+    req->out.response = packageResponse(req->m, String_From(req->m, bytes("poo")));
+    req->out.cursor = SCursor_Make(req->m, req->out.response);
 
     req->state = RESPONDING;
     Serve_NextState(sctx, req);
@@ -80,9 +80,10 @@ status Req_Handle(Serve *sctx, Req *req){
 Req *Req_Make(Serve *sctx){
     MemCtx *m = MemCtx_Make();
     Req* req = (Req *)MemCtx_Alloc(m, sizeof(Req));
+    req->sctx = sctx;
     req->direction = -1;
-    req->_shelf = String_Init(m); 
-    req->sexp = StructExp_Make(m, TYPE_STRUCTEXP, sctx->parsers, req->_shelf, (void *)req);
+    req->in._shelf = String_Init(m); 
+    req->in.sexp = StructExp_Make(m, TYPE_STRUCTEXP, sctx->parsers, req->in._shelf, (void *)req);
 
     MemCtx_Bind(m, req);
 
@@ -92,7 +93,7 @@ Req *Req_Make(Serve *sctx){
 status Req_SetError(Serve *sctx, Req *req, String *msg){
     req->state = RESPONDING;
     Serve_NextState(sctx, req);
-    req->response = packageError(req->m, msg);
+    req->out.response = packageError(req->m, msg);
     return SUCCESS;
 }
 

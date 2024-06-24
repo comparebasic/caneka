@@ -3,14 +3,20 @@ typedef uint16_t word;
 typedef word cls;
 typedef byte boolean;
 typedef uint64_t i64;
+typedef i64 Unit;
 typedef int status;
 typedef int type;
+
 struct serve_ctx;
 struct serve_req;
 struct mem_ctx;
 struct mem_slab;
 struct strcursor_range;
 struct parser;
+struct span;
+struct span_slab;
+struct structexp;
+
 typedef uint64_t Unit;
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -68,16 +74,19 @@ char *Class_ToString(cls type);
 #define COMPLETE SUCCESS
 #define TEST_OK READY
 
+typedef struct parser *(*ParserMaker)(struct structexp *sexp);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
 #include "array.h"
 #include "string.h"
+#include "slab.h"
+#include "span.h"
 #include "tokens.h"
 #include "match.h"
 #include "scursor.h"
-#include "parsers.h"
 #include "structexp.h"
+#include "parsers.h"
 #include "serve.h"
 #include "req.h"
 #include "debug.h"

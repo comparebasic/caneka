@@ -1,13 +1,13 @@
 #include <external.h>
 #include <filestore.h>
-static const char *digits = "0123456789";
+static const byte *digits = (byte *)"0123456789";
 
-static String *string_Init(MemCtx *m){
+String *String_Init(MemCtx *m){
     return (String *)MemCtx_Alloc(m, sizeof(String));
 }
 
 String *String_FromInt(MemCtx *m, int i){
-    char buff[MAX_BASE10+1];
+    byte buff[MAX_BASE10+1];
     memset(buff, 0, MAX_BASE10+1);
 
     i64 n = 0;
@@ -15,7 +15,7 @@ String *String_FromInt(MemCtx *m, int i){
     int pows = 0;
     int position = MAX_BASE10-1;
     int val;
-    char digit = digits[0];
+    byte digit = digits[0];
     while(i > 0){
         val = i % base;
         digit = digits[val];
@@ -29,28 +29,28 @@ String *String_FromInt(MemCtx *m, int i){
 }
 
 String *String_Make(MemCtx *m, byte *bytes){
-    String *s = string_Init(m); 
-    String_AddCstr(m, s, (char *)bytes, strlen((char *)bytes));
+    String *s = String_Init(m); 
+    String_AddBytes(m, s, bytes, strlen((char *)bytes));
 
     return s;
 }
 
 String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
-    String *s = string_Init(m); 
-    String_AddCstr(m, s, (char *)bytes, length);
+    String *s = String_Init(m); 
+    String_AddBytes(m, s, bytes, length);
 
     return s;
 }
 
-String *String_From(MemCtx *m, char *cstr){
-    return String_Make(m, (byte *)cstr);
+String *String_From(MemCtx *m, byte *bytes){
+    return String_Make(m, bytes);
 }
 
 status String_Add(MemCtx *m, String *a, String *b) {
-    return String_AddCstr(m, a, (char *)b->bytes, b->length);
+    return String_AddBytes(m, a, b->bytes, b->length);
 }
 
-status String_AddCstr(MemCtx *m, String *a, char *chars, int length) {
+status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     size_t l = length;
     size_t remaining = l;
     size_t copy_l = remaining;
@@ -85,7 +85,7 @@ status String_AddCstr(MemCtx *m, String *a, char *chars, int length) {
 
     /* if more than a string seg remains, make a new one */
     while(remaining > STRING_CHUNK_SIZE){
-        String *next = string_Init(m);
+        String *next = String_Init(m);
         next->bytes = (byte *)MemCtx_Alloc(m, STRING_CHUNK_SIZE+1);
         memcpy(next->bytes, p, STRING_CHUNK_SIZE);
         next->length = STRING_CHUNK_SIZE;
@@ -102,7 +102,7 @@ status String_AddCstr(MemCtx *m, String *a, char *chars, int length) {
 
     /* if any remains, make a final seg */
     if(remaining > 0){
-        String *next = string_Init(m);
+        String *next = String_Init(m);
         next->bytes = (byte *)MemCtx_Alloc(m, remaining+1);
         memcpy(next->bytes, p, remaining);
         next->length = remaining;
@@ -130,16 +130,16 @@ i64 String_Length(String *s) {
     return length;
 }
 
-status String_EqualsCStr(String *a, char *cstr){
-    int l = strlen(cstr); 
+status String_EqualsBytes(String *a, byte *cstr){
+    int l = strlen((char *)cstr); 
     int pos = 0;
     if(String_Length(a) != l){
         return FALSE;
     }
     String *tail = a;
-    char *p = cstr;
+    byte *p = cstr;
     while(tail != NULL && (pos+tail->length) <= l){
-        if(strncmp((char *)tail->bytes, p, tail->length) != 0){
+        if(strncmp((char *)tail->bytes, (char *)p, tail->length) != 0){
             return FALSE;
         }
         p += tail->length;
@@ -182,19 +182,19 @@ String *String_FromRange(MemCtx *m, Range *range){
     if(range->state != COMPLETE){
         return NULL;
     }
-    String *s = string_Init(m);
+    String *s = String_Init(m);
     String *seg = range->start.seg;
     i64 remaining = range->length;
 
     i64 length = min(remaining, (seg->length - range->start.localPosition));
-    char *p = (char *)seg->bytes+range->start.localPosition;
-    String_AddCstr(m, s, p, length);
+    byte *p = seg->bytes+range->start.localPosition;
+    String_AddBytes(m, s, p, length);
     remaining -= length;
 
     if(remaining > 0){
         while(seg != NULL){
             if(seg == range->end.seg){
-                String_AddCstr(m, s, (char *)seg->bytes, range->end.localPosition);
+                String_AddBytes(m, s, seg->bytes, range->end.localPosition);
                 break;
             }else{
                 String_Add(m, s, seg);

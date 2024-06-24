@@ -126,16 +126,16 @@ static status Serve_CloseReq(Serve *sctx, Req *req){
 }
 
 status Serve_Respond(Serve *sctx, Req *req){
-    if(req->cursor->state != COMPLETE){
-        SCursor_Prepare(req->cursor, SERV_WRITE_SIZE); 
-        size_t l = write(req->fd, req->cursor->seg->bytes, req->cursor->immidiateLength);
-        status r = SCursor_Incr(req->cursor, l);
+    if(req->out.cursor->state != COMPLETE){
+        SCursor_Prepare(req->out.cursor, SERV_WRITE_SIZE); 
+        size_t l = write(req->fd, req->out.cursor->seg->bytes, req->out.cursor->immidiateLength);
+        status r = SCursor_Incr(req->out.cursor, l);
         if(r == COMPLETE){
             req->state = COMPLETE;
         }
     }
 
-    if(req->cursor->position >= req->response->length){
+    if(req->out.cursor->position >= req->out.response->length){
         req->state = COMPLETE;
     }
 
@@ -146,7 +146,7 @@ status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
-        Req *req = Req_Make();
+        Req *req = Req_Make(sctx);
 
         if(sctx != NULL){
             status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
@@ -184,12 +184,12 @@ status Serve_ServeRound(Serve *sctx){
         }
 
         if(req->state == ERROR){
-            String *msg = String_From(req->m, "Error");
+            String *msg = String_From(req->m, bytes("Error"));
             Req_SetError(sctx, req, msg);
         }
 
         if(req->state == COMPLETE){
-            Log(0, "Served %s %s - mem: %ld", Method_ToString(req->method), req->path != NULL ? (char *)req->path->bytes : "", MemCount());
+            Log(0, "Served %s %s - mem: %ld", Method_ToString(req->in.method), req->in.path != NULL ? (char *)req->in.path->bytes : "", MemCount());
             r = Serve_CloseReq(sctx, req);
         }
 

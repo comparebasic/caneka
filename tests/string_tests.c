@@ -24,19 +24,19 @@ char *longCstr = "" \
 
 status String_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
-    String *s = String_From(m, "Hi");
+    String *s = String_From(m, bytes("Hi"));
     status r = TEST_OK;
     r |= Test(s->length == 2, "Expect string length of %ld found %ld", 2, s->length);
     r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of '%s' found '%s'", "Hi", s->bytes);
 
-    String *ls = String_From(m, longCstr);
+    String *ls = String_From(m, bytes(longCstr));
     int ls_l = strlen(longCstr);
     r |= Test(String_Length(ls) == ls_l, "Expect string length of %d found %d", ls_l, String_Length(ls));
-    r |= Test(String_EqualsCStr(ls, longCstr) == TRUE, "Expect string match of long string");
+    r |= Test(String_EqualsBytes(ls, bytes(longCstr)) == TRUE, "Expect string match of long string");
 
     int value = 35072;
     String *is = String_FromInt(m, value);
-    String *expected_is = String_From(m, "35072");
+    String *expected_is = String_From(m, bytes("35072"));
     r |= Test(String_Length(is) == expected_is->length, "Expect for int value %d  length of %d found %d", value, expected_is->length, String_Length(is));
     r |= Test(String_Equals(is, expected_is) == TRUE, "Expect string match of int of %d to string", value);
 
