@@ -1,6 +1,7 @@
 #include <external.h>
 #include <filestore.h>
 
+int DEBUG_SCURSOR = COLOR_DARK;
 int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = 0;
 int DEBUG_ALLOC = 0;
@@ -57,7 +58,7 @@ static void Match_Print(Match *mt, char *msg, int color, boolean extended){
 static void String_Print(String *s, char *msg, int color, boolean extended){
     printf("%s\x1b[1;%dmS<\x1b[0;1m", msg, color);
     do {
-        printf("=\"\x1b[1;%dm%hu:%s\x1b[0;1m\"", color, s->length, s->bytes);
+        printf("=\"%hu:\x1b[1;%dm%s\x1b[0;1m\"", s->length, color, s->bytes);
         s = s->next;
     } while(s != NULL);
     printf("\x1b[1;%dm>\x1b[0m\n", color);

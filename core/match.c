@@ -120,6 +120,10 @@ static status match_FeedPat(Match *mt, byte c){
 }
 
 static status match_FeedString(Match *mt, byte c){
+    if(DEBUG_MATCH){
+       printf("%c of %s %hu", c, mt->s->bytes, mt->s->length);
+       Debug_Print(mt, TYPE_MATCH, "FeedPat: ", DEBUG_PATMATCH, TRUE);
+    }
     if(mt->s->bytes[mt->position] == c){
         mt->position++;
         if(mt->position == mt->s->length){

@@ -41,6 +41,7 @@ status Req_Recv(Serve *sctx, Req *req){
     status r = NOOP;
     if(l > 0){
         String_AddBytes(req->m, req->in._shelf, buff, l);
+        Debug_Print((void *)req->in._shelf, TYPE_STRING_CHAIN, "_shelf is", COLOR_CYAN, FALSE);
         r = StructExp_Run(req->in.sexp);
         if(r == ERROR){
             req->state = ERROR;
@@ -84,6 +85,7 @@ Req *Req_Make(Serve *sctx){
     req->sctx = sctx;
     req->direction = -1;
     req->in._shelf = String_Init(m, -1); 
+    printf("_shelf type %s\n", Class_ToString(req->in._shelf->type.of));
     req->in.sexp = StructExp_Make(m, TYPE_STRUCTEXP, sctx->parsers, req->in._shelf, (void *)req);
 
     MemCtx_Bind(m, req);

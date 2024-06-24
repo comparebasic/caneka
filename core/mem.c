@@ -73,7 +73,8 @@ void *MemSlab_GetStart(MemSlab *sl){
 }
 
 MemSlab *MemSlab_Make(MemCtx *m){
-    MemSlab *sl = (MemSlab *) trackMalloc(sizeof(MemSlab)+MEM_SLAB_SIZE, TYPE_MEMSLAB);
+    size_t sz = sizeof(MemSlab)+MEM_SLAB_SIZE;
+    MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
     sl->addr = MemSlab_GetStart(sl);
     if(m->start_sl == NULL){
         m->start_sl = sl;
