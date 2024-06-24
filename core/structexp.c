@@ -10,14 +10,11 @@ status StructExp_Run(StructExp *sexp){
     status r = READY;
     word escape_fl = (CYCLE_BREAK|COMPLETE);
     while(pmk != NULL){
-        printf("Func %d\n", i);
         prs = pmk(sexp);
         if(prs->func == NULL){
             r = COMPLETE | prs->flags;
-            printf("skip %d/%d\n", r, prs->flags);
         }else{
             r = prs->func(prs, &(sexp->range), sexp->source);
-            printf("run %d %s\n", r, State_ToString(r));
         }
 
         if(escaping && ((r & CYCLE_LOOP) != 0)){
@@ -28,13 +25,9 @@ status StructExp_Run(StructExp *sexp){
             }else{
                 if((r & COMPLETE) != 0){
                     if((r & CYCLE_MARK) != 0){
-                        printf(" -> SETTING MARK %d\n", i+1);
                         mark = i;
                     }else if(((r & CYCLE_LOOP) != 0) && mark != -1){
-                        printf(" -> BACKT TO LOOP SETTING MARK %d\n", i+1);
                         i = mark; 
-                    }else{
-                        printf("NO LOOP OR MARK%d\n", i+1);
                     }
                 }else{
                     sexp->state = ERROR;
