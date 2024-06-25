@@ -4,7 +4,6 @@ typedef word cls;
 typedef word status;
 typedef byte boolean;
 typedef uint64_t i64;
-typedef i64 Unit;
 
 struct serve_ctx;
 struct serve_req;
@@ -25,11 +24,13 @@ typedef struct typehdr {
 #define SPAN_DIM_SIZE 32
 #define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
-#define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit))
+#define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit *))
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
-typedef uint64_t Unit;
+typedef struct unit {
+    Type type;
+} Unit;
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -39,6 +40,7 @@ typedef uint64_t Unit;
 
 
 enum types {
+    TYPE_UNIT,
     TYPE_MEMCTX,
     TYPE_MEMSLAB,
     TYPE_REQ,

@@ -12,6 +12,7 @@ static status test(MemCtx *m){
     status r = TEST_OK;
     r |= Core_Tests(m);
     r |= String_Tests(m);
+    r |= Span_Tests(m);
     r |= Serve_Tests(m);
     return r;
 }

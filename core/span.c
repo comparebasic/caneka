@@ -3,11 +3,10 @@
 
 #define STRIDE SPAN_DIM_SIZE
 
-static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int dims, int slots_available, status flags){
+static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int dims, int increment, status flags){
     Slab *new_sl = Slab_Alloc(m, flags);
-    new_sl->increment = slots_available; 
-
-    new_sl->local_idx = local_idx;
+    printf("INCREMENT %d\n", increment);
+    new_sl->increment = increment; 
     new_sl->offset = offset;
 
     return new_sl;
@@ -110,7 +109,6 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     sr->slotSize = p->slotSize;
     sr->idx = idx * p->slotSize;
     sr->local_idx = sr->idx;
-    sr->level = p->ndims-1;
     sr->offset = 0;
 
     sr->dimsNeeded = 1;
@@ -126,7 +124,7 @@ static status Span_GetSet(MemCtx *m, SlabResult *sr, int idx, Unit *t){
     Span *p = sr->span;
     if(HasFlag(sr->type.state, SUCCESS)){
         if(HasFlag(p->type.state, RAW)){
-            size_t offset = sr->local_idx*p->itemSize;
+            size_t offset = sr->local_idx*p->slotSize;
             void *ptr = ((void *)sr->slab->items)+offset;
             if(sr->op == SPAN_OP_REMOVE){
                 memset(ptr, 0, p->itemSize);
@@ -137,7 +135,7 @@ static status Span_GetSet(MemCtx *m, SlabResult *sr, int idx, Unit *t){
             }
         }else{
             if(sr->op == SPAN_OP_GET){
-                sr->value = t;
+                sr->value = sr->slab->items[sr->local_idx];
             }else{
                 sr->slab->items[sr->local_idx] = t;
             }
@@ -163,7 +161,7 @@ Span* Span_Make(MemCtx* m){
     p->slotSize = 1;
     p->slab = Slab_Alloc(m, (p->type.state|RAW));
     p->slab->increment = STRIDE;
-    p->slab->level = 1;
+    p->type.of = TYPE_SPAN;
 
     return p;
 }

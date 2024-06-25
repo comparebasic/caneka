@@ -137,7 +137,7 @@ i64 String_Length(String *s) {
     return length;
 }
 
-status String_EqualsBytes(String *a, byte *cstr){
+boolean String_EqualsBytes(String *a, byte *cstr){
     int l = strlen((char *)cstr); 
     int pos = 0;
     if(String_Length(a) != l){
@@ -161,7 +161,7 @@ status String_EqualsBytes(String *a, byte *cstr){
     return FALSE;
 }
 
-status String_Equals(String *a, String *b){
+boolean String_Equals(String *a, String *b){
     if(String_Length(a) != String_Length(b)){
         return FALSE;
     }

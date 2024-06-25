@@ -12,11 +12,11 @@ typedef struct span {
     Type type;
 	Slab *slab;
 	int nvalues;
-    int slotSize;
-    cls itemType;
-    int itemSize;
-	int ndims;
     int max_idx;
+    cls itemType;
+    byte slotSize;
+    byte itemSize;
+	byte ndims;
     /*
     Resolver *rslv;
     */

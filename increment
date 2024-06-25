@@ -1,0 +1,455 @@
+Makefile:CFLAGS = --target=x86_64-unknown-linux-musl -g -Werror
+Makefile:INC = -I/usr/local/musl/include/ -I./include -I./http -I./
+Makefile:	rm -Rf build/*
+Makefile:	$(CC) $(CFLAGS) $(INC) $(LIBS) -o build/filestore main.c $(addprefix build/, $(allobj))
+Makefile:	mkdir -p build
+Makefile:	mkdir -p build/core
+Makefile:	mkdir -p build/tests
+Makefile:	mkdir -p build/http
+Makefile:	$(CC) -c $(CFLAGS) $(INC) $< -o build/$@
+core/debug.c:    if((def->flags & PAT_COUNT) != 0){
+core/debug.c:        if(def->from == '\r' || def->from == '\n'){
+core/debug.c:            printf("%s%hu=%hux%hu,", msg, (word)def->flags, def->from, def->to);
+core/debug.c:            printf("%s%hu=%cx%hu,", msg, (word)def->flags, (char)def->from, def->to);
+core/debug.c:    }else if(def->from == def->to){
+core/debug.c:        if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
+core/debug.c:            printf("%s%hu=%hu,", msg, (word)def->flags, def->from);
+core/debug.c:            printf("%s%hu=%c,", msg, (word)def->flags, (char)def->from);
+core/debug.c:        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n')){
+core/debug.c:            printf("%s%hu=%hu-%hu,", msg, (word)def->flags, def->from, def->to);
+core/debug.c:            printf("%s%hu=%c-%c,", msg, (word)def->flags, (char)def->from, (char)def->to);
+core/debug.c:        printf("%sMatch<%s:state=%s:pos=%d:val=%d \x1b[%d;1m", msg, Class_ToString(mt->type), State_ToString(mt->state), mt->position, mt->intval, color);
+core/debug.c:        int length = mt->s->length / sizeof(PatCharDef);
+core/debug.c:        PatCharDef *def = (PatCharDef *)mt->s->bytes;
+core/debug.c:        printf("%sMatch<state=%s:pos=%d>\n", msg, mt->s->bytes, mt->position);
+core/debug.c:    if(mt->type == TYPE_PATMATCH){
+core/debug.c:        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>\n", msg, Class_ToString(mt->type), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
+core/debug.c:        printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->state), mt->position);
+core/debug.c:        printf("=\"%hu:\x1b[1;%dm%s\x1b[0;1m\"", s->length, color, s->bytes);
+core/debug.c:        s = s->next;
+core/debug.c:        msg, color, State_ToString(req->state), Method_ToString(req->in.method),
+core/debug.c:        req->in.path != NULL ? (char *)req->in.path->bytes : "",
+core/debug.c:        req->in.body != NULL ? "body" : "no-body",
+core/debug.c:        req->out.response != NULL ? "response" : "no-response",
+core/debug.c:        req->out.cursor != NULL ? "cursor" : "no-cursor"
+core/debug.c:        msg, color, State_ToString(slab->type.state), Method_ToString(req->in.method),
+core/debug.c:        req->in.path != NULL ? (char *)req->in.path->bytes : "",
+core/debug.c:        req->in.body != NULL ? "body" : "no-body",
+core/debug.c:        req->out.response != NULL ? "response" : "no-response",
+core/debug.c:        req->out.cursor != NULL ? "cursor" : "no-cursor"
+core/debug.c:        State_ToString(sc->state), 
+core/debug.c:        sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength
+core/debug.c:    printf("%s\x1b[1;%dmReq<%s ", msg, color, State_ToString(range->state));
+core/debug.c:    Debug_Print((void *)&(range->start), TYPE_SCURSOR, "", color, extended);
+core/debug.c:    Debug_Print((void *)&(range->end), TYPE_SCURSOR, " -> ", color, extended);
+core/match.c:    while(def->flags != 0){
+core/match.c:    mt->type = TYPE_STRINGMATCH;
+core/match.c:    mt->s = s;
+core/match.c:    mt->anchor = anchor;
+core/match.c:    mt->intval = intval;
+core/match.c:    mt->type = TYPE_PATMATCH;
+core/match.c:    mt->s = String_MakeFixed(m, defs, npats * sizeof(PatCharDef));
+core/match.c:    mt->anchor = anchor;
+core/match.c:    mt->intval = intval;
+core/match.c:    mt->position = 0;
+core/match.c:    mt->state = READY;
+core/match.c:   PatCharDef *def = ((PatCharDef *)mt->s->bytes)+(mt->position);  
+core/match.c:   i64 length = mt->s->length / sizeof(PatCharDef);
+core/match.c:   if(def->flags == 0){
+core/match.c:        mt->state = ERROR;
+core/match.c:            boolean optional = ((def->flags & PAT_ANY) || ((def->flags & PAT_MANY) != 0 && mt->defPosition > 0));
+core/match.c:            if((def->flags & PAT_COUNT) != 0){
+core/match.c:                matched = (c == def->from);
+core/match.c:                total = def->to;
+core/match.c:                matched = (c >= def->from && c <= def->to);
+core/match.c:            if((def->flags & PAT_INVERT) != 0){
+core/match.c:                mt->state = PROCESSING;
+core/match.c:                if((def->flags & PAT_TERM) != 0){
+core/match.c:                    mt->defPosition++;
+core/match.c:                    if(total == mt->defPosition){
+core/match.c:                        mt->defPosition = 0;
+core/match.c:                        mt->position += ocurrences;
+core/match.c:                            printf("\x1b[%dm    mt->position %d vs length %ld\x1b[0m\n", DEBUG_PATMATCH, mt->position, length);
+core/match.c:                        if(mt->position == length){
+core/match.c:                            mt->state = COMPLETE;
+core/match.c:                            mt->defPosition = 0;
+core/match.c:                            mt->position = 0;
+core/match.c:                        printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
+core/match.c:                if((def->flags & PAT_ANY) || optional){
+core/match.c:                    mt->defPosition = 0;
+core/match.c:                    mt->state = READY;
+core/match.c:                    mt->position = 0;
+core/match.c:        printf("\x1b[%dm  Ret %s\n\n", DEBUG_PATMATCH, State_ToString(mt->state));
+core/match.c:    return mt->state;
+core/match.c:       printf("%c of %s %hu", c, mt->s->bytes, mt->s->length);
+core/match.c:    if(mt->s->bytes[mt->position] == c){
+core/match.c:        mt->position++;
+core/match.c:        if(mt->position == mt->s->length){
+core/match.c:            mt->position = 0;
+core/match.c:            mt->state = COMPLETE;
+core/match.c:            mt->state = PROCESSING;
+core/match.c:    return mt->state;
+core/match.c:    if(mt->type == TYPE_PATMATCH){
+core/mem.c:    cmem -= s;
+core/mem.c:    MemSlab *sl = NULL, *last = m->start_sl;
+core/mem.c:        last = last->next;
+core/mem.c:    MemSlab *current = m->start_sl, *next = NULL;
+core/mem.c:        next = current->next;
+core/mem.c:    sl->addr = MemSlab_GetStart(sl);
+core/mem.c:    if(m->start_sl == NULL){
+core/mem.c:        m->start_sl = sl;
+core/mem.c:        MemSlab *last = m->start_sl;
+core/mem.c:        while(last != NULL && last->next != NULL){
+core/mem.c:            last = last->next;
+core/mem.c:        last->next = sl;
+core/mem.c:    return MEM_SLAB_SIZE - (sl->addr - MemSlab_GetStart(sl));
+core/mem.c:    if((MemSlab_Available(sl) - s) < 0){
+core/mem.c:    void *p = sl->addr; 
+core/mem.c:    sl->addr += s;
+core/parsers.c:    int start = range->start.position;
+core/parsers.c:    Match **matches = (Match **)prs->matches;
+core/parsers.c:            Debug_Print((void *)matches[i], matches[i]->type, "parse_Multi Match: ", DEBUG_MATCH, TRUE);
+core/parsers.c:            prs->idx = i;
+core/parsers.c:            if(prs->complete != NULL){
+core/parsers.c:                prs->complete(prs, range, source);
+core/parsers.c:            return SUCCESS | prs->flags;
+core/parsers.c:    return ERROR | prs->flags;
+core/parsers.c:    Match *mt = (Match *)prs->matches;
+core/parsers.c:        Debug_Print((void *)mt, mt->type, "parse_Single Match: ", DEBUG_MATCH, TRUE);
+core/parsers.c:        if(prs->complete != NULL){
+core/parsers.c:            prs->complete(prs, range, source);
+core/parsers.c:        return SUCCESS | prs->flags;
+core/parsers.c:    return ERROR | prs->flags;
+core/parsers.c:    prs->type = type;
+core/parsers.c:    prs->type = TYPE_PARSER;
+core/parsers.c:    prs->matches = (void *)mt;
+core/parsers.c:    prs->func = parse_Single;
+core/parsers.c:    prs->complete = complete;
+core/parsers.c:    prs->type = TYPE_MULTIPARSER;
+core/parsers.c:    prs->matches = (void *)mt_arr;
+core/parsers.c:    prs->func = parse_Multi;
+core/parsers.c:    prs->complete = complete;
+core/parsers.c:    Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
+core/parsers.c:    prs->type = TYPE_PARSER;
+core/parsers.c:    prs->flags |= CYCLE_MARK;
+core/parsers.c:    Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
+core/parsers.c:    prs->type = TYPE_PARSER;
+core/parsers.c:    prs->flags |= CYCLE_LOOP;
+core/parsers.c:    Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
+core/parsers.c:    prs->type = TYPE_PARSER;
+core/parsers.c:    prs->flags |= CYCLE_BREAK;
+core/req.c:static char *okBase_cstr = "HTTP/1.1 200 OK\r\nServer: filestore\r\nContent-Length: ";
+core/req.c:    String *length_s = String_FromInt(m, (int)content->length); 
+core/req.c:static char *errBase_cstr = "HTTP/1.1 500 Error\r\nServer: filestore\r\nContent-Length: ";
+core/req.c:    String *length_s = String_FromInt(m, (int)content->length); 
+core/req.c:    size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
+core/req.c:        String_AddBytes(req->m, req->in._shelf, buff, l);
+core/req.c:        Debug_Print((void *)req->in._shelf, TYPE_STRING_CHAIN, "_shelf is", COLOR_CYAN, FALSE);
+core/req.c:        r = StructExp_Run(req->in.sexp);
+core/req.c:            req->state = ERROR;
+core/req.c:            req->state = PROCESSING;
+core/req.c:        return req->state;
+core/req.c:    req->out.response = packageResponse(req->m, String_From(req->m, bytes("poo")));
+core/req.c:    req->out.cursor = SCursor_Make(req->m, req->out.response);
+core/req.c:    req->state = RESPONDING;
+core/req.c:    return req->state;
+core/req.c:    if(req->state == INCOMING){
+core/req.c:    if(req->state == PROCESSING){
+core/req.c:    req->sctx = sctx;
+core/req.c:    req->direction = -1;
+core/req.c:    req->in._shelf = String_Init(m, -1); 
+core/req.c:    printf("_shelf type %s\n", Class_ToString(req->in._shelf->type.of));
+core/req.c:    req->in.sexp = StructExp_Make(m, TYPE_STRUCTEXP, sctx->parsers, req->in._shelf, (void *)req);
+core/req.c:    req->state = RESPONDING;
+core/req.c:    req->out.response = packageError(req->m, msg);
+core/scursor.c:    sc->s = s;
+core/scursor.c:    sc->seg = sc->s;
+core/scursor.c:    range->start.s = range->start.seg = range->end.s = range->end.seg = s;
+core/scursor.c:    range->compare = 0;
+core/scursor.c:    if(range->state == COMPLETE){
+core/scursor.c:        range->start.position = range->end.position;
+core/scursor.c:        range->start.seg = range->end.seg;
+core/scursor.c:        if(range->start.localPosition == range->start.seg->length){
+core/scursor.c:            range->start.seg = range->start.seg->next;
+core/scursor.c:        range->start.position++;
+core/scursor.c:        SCursor_SetLocals(&(range->start));
+core/scursor.c:    range->state = READY;
+core/scursor.c:        range->start.state = READY;
+core/scursor.c:        range->start.state = PROCESSING;
+core/scursor.c:    return range->state;
+core/scursor.c:    String *s = sc->s;
+core/scursor.c:    sc->s = s;
+core/scursor.c:    sc->seg = s;
+core/scursor.c:    sc->segIdx = sc->position / STRING_CHUNK_SIZE;
+core/scursor.c:    sc->localPosition = sc->position % STRING_CHUNK_SIZE;
+core/scursor.c:    SCursor *start = &(range->start); 
+core/scursor.c:    SCursor *end = &(range->end); 
+core/scursor.c:    if(start->seg == NULL || start->seg->length < 1){
+core/scursor.c:    Range_Reset(range, search->anchor);
+core/scursor.c:    int i = range->start.position;
+core/scursor.c:    String *seg = start->seg;
+core/scursor.c:    if(search->anchor == ANCHOR_UNTIL){
+core/scursor.c:        start->position = i;
+core/scursor.c:        start->seg = seg;
+core/scursor.c:        start->state = COMPLETE;
+core/scursor.c:            c = seg->bytes[i];
+core/scursor.c:            i < seg->length;
+core/scursor.c:            i++, c = seg->bytes[i]
+core/scursor.c:            if(search->state != READY){
+core/scursor.c:                if(search->anchor != ANCHOR_UNTIL && start->state == READY){
+core/scursor.c:                    start->position = i;
+core/scursor.c:                    start->seg = seg;
+core/scursor.c:                    start->state = search->state;
+core/scursor.c:                range->compare++;
+core/scursor.c:                start->state = PROCESSING;
+core/scursor.c:                if(search->state == COMPLETE){
+core/scursor.c:                    end->position = i;
+core/scursor.c:                    end->seg = seg;
+core/scursor.c:                    range->length = i - start->position;
+core/scursor.c:                    range->state = COMPLETE;
+core/scursor.c:                if(search->anchor == ANCHOR_START){
+core/scursor.c:                    start->state = READY;
+core/scursor.c:                    return start->state;
+core/scursor.c:                    start->state = READY;
+core/scursor.c:                    start->position = startPosition;
+core/scursor.c:        end->seg = seg;
+core/scursor.c:        seg = seg->next;
+core/scursor.c:    return range->state;
+core/scursor.c:    i64 remaining = sc->seg->length - sc->localPosition;
+core/scursor.c:        sc->immidiateLength = remaining;
+core/scursor.c:        sc->immidiateLength = length;
+core/scursor.c:        local = sc->seg->length - sc->localPosition;
+core/scursor.c:            sc->localPosition += remaining;
+core/scursor.c:            sc->position += remaining;
+core/scursor.c:            remaining -= local;
+core/scursor.c:            sc->position += local;
+core/scursor.c:            sc->seg = sc->seg->next;
+core/scursor.c:    if(sc->seg == NULL && sc->position == String_Length(sc->s)){
+core/scursor.c:        sc->state = COMPLETE;
+core/scursor.c:        return sc->state;
+core/serve.c:    if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
+core/serve.c:		return -1;
+core/serve.c:		return -1;
+core/serve.c:		return -1;
+core/serve.c:		return -1;
+core/serve.c:		return -1;
+core/serve.c:    r = epoll_ctl(sctx->epoll_fd, EPOLL_CTL_MOD, req->fd, &event);
+core/serve.c:    int direction = req->direction;
+core/serve.c:    if(req->state == READY){
+core/serve.c:        req->state = INCOMING;
+core/serve.c:    status state = req->state;
+core/serve.c:    if(direction != -1 && direction != req->direction){
+core/serve.c:        req->direction = direction;
+core/serve.c:        Serve_EpollEvUpdate(sctx, req, req->direction);
+core/serve.c:    r = epoll_ctl(sctx->epoll_fd, EPOLL_CTL_ADD, fd, &event);
+core/serve.c:    req->fd = fd;
+core/serve.c:    req->direction = direction;
+core/serve.c:    int r = epoll_ctl(sctx->epoll_fd, EPOLL_CTL_DEL, req->fd, NULL);
+core/serve.c:        close(req->fd);
+core/serve.c:        MemCtx_Free(req->m);
+core/serve.c:    if(req->out.cursor->state != COMPLETE){
+core/serve.c:        SCursor_Prepare(req->out.cursor, SERV_WRITE_SIZE); 
+core/serve.c:        size_t l = write(req->fd, req->out.cursor->seg->bytes, req->out.cursor->immidiateLength);
+core/serve.c:        status r = SCursor_Incr(req->out.cursor, l);
+core/serve.c:            req->state = COMPLETE;
+core/serve.c:    if(req->out.cursor->position >= req->out.response->length){
+core/serve.c:        req->state = COMPLETE;
+core/serve.c:    return req->state;
+core/serve.c:    int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
+core/serve.c:    ev_count = epoll_wait(sctx->epoll_fd, events, SERV_MAX_EVENTS, EPOLL_WAIT);
+core/serve.c:        if(req->state == ERROR){
+core/serve.c:            String *msg = String_From(req->m, bytes("Error"));
+core/serve.c:        if(req->state == COMPLETE){
+core/serve.c:            Log(0, "Served %s %s - mem: %ld", Method_ToString(req->in.method), req->in.path != NULL ? (char *)req->in.path->bytes : "", MemCount());
+core/serve.c:        if(req->state == RESPONDING){
+core/serve.c:    close(sctx->socket_fd);
+core/serve.c:    close(sctx->epoll_fd);
+core/serve.c:    sctx->port = port;
+core/serve.c:    sctx->socket_fd = fd;
+core/serve.c:	if (epoll_fd == -1) {
+core/serve.c:    sctx->epoll_fd = epoll_fd;
+core/serve.c:    sctx->serving = TRUE;
+core/serve.c:        while(sctx->serving){
+core/serve.c:            if(cadance-- == 0){
+core/serve.c:    sctx->m = m;
+core/serve.c:    sctx->parsers = (ParserMaker *)Array_MakeFrom(m, 9, 
+core/serve.c:    sctx->methods = (char **)Array_MakeFrom(m, 3, "GET", "SET", "UPDATE");
+core/serve.c:    sctx->method_vals = (byte **)Array_MakeFrom(m, 3, &METHOD_GET, &METHOD_SET, &METHOD_UPDATE);
+core/slab.c:    sl->type.state = flags;
+core/span.c:    new_sl->increment = slots_available; 
+core/span.c:    new_sl->offset = offset;
+core/span.c:            dims--;
+core/span.c:    int dims = sr->dims = sr->span->ndims = sr->dimsNeeded;
+core/span.c:    boolean expand = sr->slab->increment < needed;
+core/span.c:        Slab *exp_sl = openNewSlab(m, 0, 0, dims, needed, (sr->span->type.state|RAW));
+core/span.c:        exp_sl->type.state |= sr->span->type.state;
+core/span.c:        Slab *shelf_sl = sr->span->slab;
+core/span.c:        sr->span->slab = exp_sl;
+core/span.c:        while(sr->slab->increment < needed){
+core/span.c:            Slab *new_sl = openNewSlab(m, 0, 0, dims, needed, (sr->span->type.state|RAW));
+core/span.c:            exp_sl->items[0] = (Unit *)new_sl;
+core/span.c:        exp_sl->items[0] = (Unit *)shelf_sl;
+core/span.c:    if(sr->dimsNeeded > sr->dims){
+core/span.c:    int dims = sr->dims;
+core/span.c:    int increment = slotsAvailable(dims-1);
+core/span.c:        sr->local_idx = (sr->idx - sr->offset) / increment;
+core/span.c:        sr->shelfSlab = (Slab *)sr->slab->items[sr->local_idx];
+core/span.c:        if(sr->shelfSlab == NULL){
+core/span.c:                sr->local_idx, sr->offset, dims-1, increment, (sr->span->type.state|RAW));
+core/span.c:            sr->slab->items[sr->local_idx] = (Unit *)new_sl;
+core/span.c:            sr->slab = new_sl;
+core/span.c:            if((sr->shelfSlab->type.state & TYPE_SLAB) != 0){
+core/span.c:                sr->type.state = ERROR;
+core/span.c:                return sr->type.state;
+core/span.c:            sr->slab = sr->shelfSlab;
+core/span.c:        sr->offset += increment*sr->local_idx;
+core/span.c:        dims--;
+core/span.c:        increment = slotsAvailable(dims-1);
+core/span.c:    sr->local_idx = (sr->idx - sr->offset);
+core/span.c:    sr->type.state = SUCCESS;
+core/span.c:    return sr->type.state;
+core/span.c:    sr->op = op;
+core/span.c:    sr->span = p;
+core/span.c:    sr->dims = p->ndims;
+core/span.c:    sr->slab = p->slab;
+core/span.c:    sr->slotSize = p->slotSize;
+core/span.c:    sr->idx = idx * p->slotSize;
+core/span.c:    sr->local_idx = sr->idx;
+core/span.c:    sr->level = p->ndims-1;
+core/span.c:    sr->offset = 0;
+core/span.c:    sr->dimsNeeded = 1;
+core/span.c:    while(sr->idx >= slotsAvailable(sr->dimsNeeded)) {
+core/span.c:        sr->dimsNeeded++;
+core/span.c:    Span *p = sr->span;
+core/span.c:    if(HasFlag(sr->type.state, SUCCESS)){
+core/span.c:        if(HasFlag(p->type.state, RAW)){
+core/span.c:            size_t offset = sr->local_idx*p->slotSize;
+core/span.c:            void *ptr = ((void *)sr->slab->items)+offset;
+core/span.c:            if(sr->op == SPAN_OP_REMOVE){
+core/span.c:                memset(ptr, 0, p->itemSize);
+core/span.c:            }else if(sr->op == SPAN_OP_SET){
+core/span.c:                memcpy(ptr, t, p->itemSize);
+core/span.c:            }else if(sr->op == SPAN_OP_GET){
+core/span.c:                sr->value = ptr;
+core/span.c:            if(sr->op == SPAN_OP_GET){
+core/span.c:                sr->value = t;
+core/span.c:                sr->slab->items[sr->local_idx] = t;
+core/span.c:        p->nvalues++;
+core/span.c:        if(idx > p->max_idx){
+core/span.c:            p->max_idx = idx;
+core/span.c:    p->max_idx = -1;
+core/span.c:    p->slotSize = 1;
+core/span.c:    p->slab = Slab_Alloc(m, (p->type.state|RAW));
+core/span.c:    p->slab->increment = STRIDE;
+core/span.c:    p->slab->level = 1;
+core/span.c:    sp->itemSize = itemSize;
+core/span.c:    sp->itemType = type;
+core/span.c:    sp->slotSize = slotSize;
+core/span.c:    sp->slab->type.state |= RAW;
+core/span.c:    sp->type.state |= RAW;
+core/span.c:        return p->max_idx;
+core/string.c:    s->type.of = type;
+core/string.c:    int position = MAX_BASE10-1;
+core/string.c:        i -= val;
+core/string.c:        position--;
+core/string.c:    return String_AddBytes(m, a, b->bytes, b->length);
+core/string.c:    while(seg->next != NULL){
+core/string.c:        seg = seg->next;
+core/string.c:    if(seg->type.of == TYPE_STRING_FIXED){
+core/string.c:        copy_l = min((STRING_FIXED_SIZE - seg->length), remaining);
+core/string.c:        copy_l = min((STRING_CHUNK_SIZE - seg->length), remaining);
+core/string.c:    if(copy_l > remaining && a->type.of != TYPE_STRING_CHAIN){
+core/string.c:    memcpy(seg->bytes+seg->length, p, copy_l);
+core/string.c:    seg->length += copy_l;
+core/string.c:    remaining -= copy_l;
+core/string.c:        String *next = String_Init(m, -1);
+core/string.c:        memcpy(next->bytes, p, STRING_CHUNK_SIZE);
+core/string.c:        next->length = STRING_CHUNK_SIZE;
+core/string.c:            tail->next = next;
+core/string.c:        remaining -= STRING_CHUNK_SIZE;
+core/string.c:        String *next = String_Init(m, -1);
+core/string.c:        memcpy(next->bytes, p, remaining);
+core/string.c:        next->length = remaining;
+core/string.c:            tail->next = next;
+core/string.c:        length += tail->length; 
+core/string.c:        tail = tail->next;
+core/string.c:    while(tail != NULL && (pos+tail->length) <= l){
+core/string.c:        if(strncmp((char *)tail->bytes, (char *)p, tail->length) != 0){
+core/string.c:        p += tail->length;
+core/string.c:        pos += tail->length;
+core/string.c:        tail = tail->next;
+core/string.c:        if(aTail->length != bTail->length){
+core/string.c:        if(strncmp((char *)aTail->bytes, (char *)bTail->bytes, aTail->length) != 0){
+core/string.c:        aTail = aTail->next;
+core/string.c:        bTail = bTail->next;
+core/string.c:    if(range->state != COMPLETE){
+core/string.c:    String *seg = range->start.seg;
+core/string.c:    i64 remaining = range->length;
+core/string.c:    i64 length = min(remaining, (seg->length - range->start.localPosition));
+core/string.c:    byte *p = seg->bytes+range->start.localPosition;
+core/string.c:    remaining -= length;
+core/string.c:            if(seg == range->end.seg){
+core/string.c:                String_AddBytes(m, s, seg->bytes, range->end.localPosition);
+core/string.c:            seg = seg->next;
+core/structexp.c:    ParserMaker pmk = sexp->parsers[i];
+core/structexp.c:    int mark = -1;
+core/structexp.c:        if(prs->func == NULL){
+core/structexp.c:            r = COMPLETE | prs->flags;
+core/structexp.c:            r = prs->func(prs, &(sexp->range), sexp->source);
+core/structexp.c:                    }else if(((r & CYCLE_LOOP) != 0) && mark != -1){
+core/structexp.c:                    sexp->state = ERROR;
+core/structexp.c:                    return sexp->state;
+core/structexp.c:        pmk = sexp->parsers[++i];
+core/structexp.c:        sexp->state = COMPLETE;
+core/structexp.c:        sexp->state = PROCESSING;
+core/structexp.c:    printf("State is %s\n", State_ToString(sexp->state));
+core/structexp.c:    return sexp->state;
+core/structexp.c:    sexp->m = m;
+core/structexp.c:    sexp->type = type;
+core/structexp.c:    sexp->parsers = parsers;
+core/structexp.c:    sexp->source = source;
+core/structexp.c:    Range_Set(&(sexp->range), s);
+http/parsers.c:    Match **matches = (Match **)prs->matches;
+http/parsers.c:    req->in.method = matches[prs->idx]->intval;
+http/parsers.c:    Req *req = (Req *)sexp->source;
+http/parsers.c:    int length = Array_Length((void **)req->sctx->methods);
+http/parsers.c:    Match **matches = (Match **)Array_Make(sexp->m, length); 
+http/parsers.c:        String *s = String_From(sexp->m, bytes(req->sctx->methods[i]));
+http/parsers.c:        matches[i] = Match_Make(sexp->m, s, ANCHOR_START, (int)*(req->sctx->method_vals[i]));
+http/parsers.c:    return Parser_MakeMulti(sexp->m, matches, Parser_MethodComplete);
+http/parsers.c:    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, space_tk, ANCHOR_START, 0), NULL);
+http/parsers.c:    req->in.path = String_FromRange(req->m, range);
+http/parsers.c:    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, space_tk, ANCHOR_UNTIL, 0), Parser_PathComplete);
+http/parsers.c:    return Parser_MakeSingle(sexp->m, 
+http/parsers.c:        Match_MakePat(sexp->m, (byte *)HttpV_RangeDef, Match_PatLength(HttpV_RangeDef), ANCHOR_START, 0), NULL);
+http/parsers.c:    Match *mt = Match_MakePat(sexp->m, 
+http/parsers.c:    return Parser_MakeSingle(sexp->m, mt, NULL);
+http/parsers.c:    String *s = String_FromRange(req->m, range);
+http/parsers.c:    if(req->in.nextHeader != NULL){
+http/parsers.c:        printf("Header: %s -> %s\n", req->in.nextHeader->bytes, (char *)s->bytes);
+http/parsers.c:        printf("Header: NULL -> %s\n", (char *)s->bytes);
+http/parsers.c:    Match *mt = Match_MakePat(sexp->m, 
+http/parsers.c:    Parser *prs =  Parser_MakeSingle(sexp->m, mt, Parser_HComplete);
+http/parsers.c:    prs->flags |= CYCLE_LOOP;
+http/parsers.c:    Match *mt = Match_MakePat(sexp->m, 
+http/parsers.c:    mt->flags |= CYCLE_BREAK;
+http/parsers.c:    return Parser_MakeSingle(sexp->m, mt, NULL);
+http/parsers.c:    req->in.nextHeader = String_FromRange(req->m, range);
+http/parsers.c:    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, String_Make(sexp->m, (byte *)":"), ANCHOR_UNTIL, 0), Parser_HKeyComplete);
+include/filestore.h:#define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
+include/filestore.h:#define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
+include/mem.h:#define MemCtx_Bind(m, inst) do { inst->m = m; m->instance = (void *)inst;} while(0);
+include/span.h:#define Span_NextIdx(p) (p->max_idx+1)
+tests/serve_tests.c:static char *req_cstr = "GET /Azjfhuei3 HTTP/1.1\r\nContent-Length: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
+tests/serve_tests.c:        return -1;
+tests/string_tests.c:   "Detail from an 18th-century engraving showing a girl (left) with a ponytail" \
+tests/string_tests.c:   "In European and Western culture, it was unusual for women (as opposed to girls) to wear their hair in public in a ponytail until the mid-20th century. The expansion in the ponytail hairstyle was in large part due to the arrival of the first Barbie doll by Mattel, which popularized the hairstyle, and movie stars like Sandra Dee who wore it in movies such as Gidget.[2]" \
+tests/string_tests.c:   "In the mid-1980s and through the mid-1990s it was common to see women of all ages from girls, tweens, teens, college and beyond wearing high ponytails or high side ponytails held with a scrunchie." \
+tests/string_tests.c:   "Today, both women and girls commonly wear their hair in ponytails in informal and office settings or when exercising with a scrunchie or tie; they are likely to choose more elaborate styles (such as braids and those involving accessories) for formal occasions. High and low ponytails are both common. Ponytails with a scrunchie are back in style and practicality as they are seen as better on the hair then traditional hair ties. The ponytail is popular with school-aged girls, partly because flowing hair is often associated with youth and because of its simplicity; a young girl is likely to be able to redo her own hair after a sports class, for example. Wearing a scrunchie with your ponytail is popular with school aged girls especially those with school uniforms as it is one piece of stylish item girls can wear as long as they conform to school colors or requirements. A ponytail can also be a fashion statement; sometimes meaning athletic; other times a low ponytail sends signals of a chic personality." \
+tests/string_tests.c:    r |= Test(s->type.of == TYPE_STRING_FIXED, 
+tests/string_tests.c:            Class_ToString(TYPE_STRING_FIXED), Class_ToString(s->type.of));
+tests/string_tests.c:    r |= Test(s->length == 2, "Expect string length of %ld found %ld", 2, s->length);
+tests/string_tests.c:    r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of '%s' found '%s'", "Hi", s->bytes);
+tests/string_tests.c:    r |= Test(s->type.of == TYPE_STRING_CHAIN, 
+tests/string_tests.c:            Class_ToString(TYPE_STRING_CHAIN), Class_ToString(s->type.of));
+tests/string_tests.c:    r |= Test(String_Length(s) == expected_is->length, "Expect for int value %d  length of %d found %d", value, expected_is->length, String_Length(s));
