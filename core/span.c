@@ -3,9 +3,8 @@
 
 #define STRIDE SPAN_DIM_SIZE
 
-static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int dims, int increment, status flags){
+static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment, status flags){
     Slab *new_sl = Slab_Alloc(m, flags);
-    printf("INCREMENT %d\n", increment);
     new_sl->increment = increment; 
     new_sl->offset = offset;
 
@@ -34,26 +33,39 @@ static int slotsAvailable(int dims){
 static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
     int dims = sr->dims = sr->span->ndims = sr->dimsNeeded;
 
-    int slots_available = slotsAvailable(dims);
-
-    int needed = slots_available;
+    int needed = slotsAvailable(dims);
     boolean expand = sr->slab->increment < needed;
     if(expand){
-        Slab *exp_sl = openNewSlab(m, 0, 0, dims, needed, (sr->span->type.state|RAW));
+        printf("Expand to hold %d items\n", needed);
+        Debug_Print((void *)sr->span, TYPE_SPAN, "Expanding from ", COLOR_DARK, TRUE);
+        printf("\nend\n");
 
-        exp_sl->type.state |= sr->span->type.state;
-
-        Slab *shelf_sl = sr->span->slab;
-        sr->span->slab = exp_sl;
-        needed /= STRIDE;
+        Slab *exp_sl = NULL;
+        Slab *shelf_sl = NULL;
         while(sr->slab->increment < needed){
-            Slab *new_sl = openNewSlab(m, 0, 0, dims, needed, (sr->span->type.state|RAW));
-            exp_sl->items[0] = (Unit *)new_sl;
-            exp_sl = new_sl;
+            Slab *new_sl = openNewSlab(m, 0, 0, needed, (sr->span->type.state|RAW));
+
+            Debug_Print((void *)new_sl, TYPE_SLAB, "New Slab ", COLOR_DARK, TRUE);
+            printf("\nend\n");
+
+            if(exp_sl == NULL){
+                shelf_sl = sr->span->slab;
+                sr->span->slab = new_sl;
+                printf("Seeting root to have a %d slots \n", new_sl->increment);
+            }else{
+                exp_sl->items[0] = (Unit *)new_sl;
+                printf("Adding a %d slot slab into a %d slot slab\n", new_sl->increment, exp_sl->increment);
+            }
+
             needed /= STRIDE;
+            exp_sl = new_sl;
         }
         exp_sl->items[0] = (Unit *)shelf_sl;
     }
+    Debug_Print((void *)sr->span, TYPE_SPAN, "After Expand ", COLOR_DARK, TRUE);
+    printf("\nend\n");
+
+    sr->slab = sr->span->slab;
     return SUCCESS;
 }
 
@@ -65,29 +77,30 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
 
     int dims = sr->dims;
     int increment = slotsAvailable(dims-1);
+    Slab *prev_sl = sr->slab;
     while(dims > 1){
         sr->local_idx = (sr->idx - sr->offset) / increment;
+        sr->offset += increment*sr->local_idx;
+        printf("\x1b[%dmdim %d local %d incr%d\n", COLOR_YELLOW, dims, sr->local_idx, prev_sl->increment);
 
         /* find or allocate a space for the new span */
-        sr->shelfSlab = (Slab *)sr->slab->items[sr->local_idx];
+        sr->slab = (Slab *)sr->slab->items[sr->local_idx];
 
         /* make new if not exists */
-        if(sr->shelfSlab == NULL){
+        if(sr->slab == NULL){
             Slab *new_sl = openNewSlab(m, 
-                sr->local_idx, sr->offset, dims-1, increment, (sr->span->type.state|RAW));
-            sr->slab->items[sr->local_idx] = (Unit *)new_sl;
-            sr->slab = new_sl;
-        }else{
-            if((sr->shelfSlab->type.state & TYPE_SLAB) != 0){
-                printf("Error expected to find a mid dimenstion slab");
-                sr->type.state = ERROR;
-                return sr->type.state;
-            }
-            sr->slab = sr->shelfSlab;
+                sr->local_idx, sr->offset, increment, (sr->span->type.state|RAW));
+            prev_sl->items[sr->local_idx] = (Unit *)new_sl;
+            prev_sl = sr->slab = new_sl;
+        }
+
+        if((sr->slab->type.state & TYPE_SLAB) != 0){
+            printf("Error expected to find a mid dimenstion slab");
+            sr->type.state = ERROR;
+            return sr->type.state;
         }
 
         /* prepare for another found of inquiry */
-        sr->offset += increment*sr->local_idx;
         dims--;
         increment = slotsAvailable(dims-1);
     }
@@ -95,6 +108,10 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
     /* conclude by setting the local idx and setting the state */
     sr->local_idx = (sr->idx - sr->offset);
     sr->type.state = SUCCESS;
+    printf("\x1b[%dmdim %d local %d\n", COLOR_YELLOW, dims, sr->local_idx);
+
+    Debug_Print((void *)sr->span, TYPE_SPAN, "After Expand ", COLOR_DARK, TRUE);
+    printf("\nend\n");
 
     return sr->type.state;
 }

@@ -77,7 +77,7 @@ static void Req_Print(Req *req, char *msg, int color, boolean extended){
 
 static void Unit_Print(Unit *t, char *msg, int color, boolean extended){
     if(t == NULL){
-        printf("0");
+        printf("u0");
     }else{
         printf("%p", t);
     }
@@ -85,59 +85,56 @@ static void Unit_Print(Unit *t, char *msg, int color, boolean extended){
 
 static void Slab_Print(Slab *slab, char *msg, int color, boolean extended){
     if(slab->increment != SPAN_DIM_SIZE){
-        printf("\x1b[1;31mL<Error Slab(incr%d)>\x1b[0m", slab->increment);
+        printf("%s\x1b[0;%dmL<incr%d[%d]>\x1b[0m", msg, color, slab->increment, slab->offset);
         return;
     }
-    printf("%s\x1b[1;%dmL<%s icr%d ", msg, color, Class_ToString(slab->type.of), slab->increment);
+    printf("%s\x1b[1;%dmL<icr%d[%d] \x1b[0;%dm", msg, color, slab->increment, slab->offset, color);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
         Unit *t = slab->items[i];
         if(t != NULL){
             if(!first){
-                printf(",");
+                printf(", ");
             }
             if(first){
                 first = FALSE;
             }
-            printf("%d:", i);
+            printf("%d=", i);
             Debug_Print((void *)t, TYPE_UNIT, "", color, extended); 
 
             printf("\x1b[%dm", color);
         }
     }
-    printf("\n>\x1b[0m");
+    printf("\x1b[1;%dm>\x1b[0m", color);
 }
 
 static void showSlab(Slab *sl, int color, boolean extended){
-    if(sl->increment == SPAN_DIM_SIZE){
-        printf("\n        ");
-        Debug_Print((void *)sl, TYPE_SLAB, "", color, extended); 
-        printf("\n");
-    }else{
+    Debug_Print((void *)sl, TYPE_SLAB, "", color, extended); 
+    if(sl->increment > SPAN_DIM_SIZE){
+        printf("\x1b[%dm -> \x1b[0m", color);
+        boolean first = TRUE;
         for(int i = 0; i < SPAN_DIM_SIZE; i++){
             Unit *t = sl->items[i];
-            if(t == NULL){
-                printf("0");
-            }else{
-                if(t->type.of == TYPE_SLAB){
-                    Slab *cur = (Slab *)t;
-                    printf(" Sl(%d[%d])->", cur->increment, cur->offset);
-                }else{
-                    printf(" %p->", t);
+            if(t != NULL){
+                if(!first){
+                    printf("\n                       ");
                 }
+                if(first){
+                    first = FALSE;
+                }
+                printf("\x1b[%dm%d=", color, i);
                 showSlab((Slab *)t, color, extended);
             }
         }
     }
-    printf("\n");
 }
 
 static void Span_Print(Span *p, char *msg, int color, boolean extended){
-    printf("%s\x1b[1;%dmP<%s %udims of %u ", msg, color, 
-        Class_ToString(p->type.of), p->ndims, p->slotSize);
+    printf("%s\n\x1b[1;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
+        p->nvalues, p->ndims, sizeof(Unit *)*p->slotSize);
     printf("\n    ");
     showSlab(p->slab, color, extended);
-    printf(">");
+    printf("\n\x1b[1;%dm>\x1b[0m\n", color);
 }
 
 static void SCursor_Print(SCursor *sc, char *msg, int color, boolean extended){
