@@ -1,11 +1,11 @@
 extern PatCharDef HttpV_RangeDef[];
 extern PatCharDef EndNl_RangeDef[];
 /* specific parsers */
-Parser *Parser_Method(StructExp *sexp);
-Parser *Parser_Space(StructExp *sexp);
-Parser *Parser_Path(StructExp *sexp);
-Parser *Parser_HttpV(StructExp *sexp);
-Parser *Parser_EndNl(StructExp *sexp);
-Parser *Parser_HColon(StructExp *sexp);
-Parser *Parser_HEndAllNl(StructExp *sexp);
-Parser *Parser_HEndNl(StructExp *sexp);
+Parser *Parser_Method(Roebling *sexp);
+Parser *Parser_Space(Roebling *sexp);
+Parser *Parser_Path(Roebling *sexp);
+Parser *Parser_HttpV(Roebling *sexp);
+Parser *Parser_EndNl(Roebling *sexp);
+Parser *Parser_HColon(Roebling *sexp);
+Parser *Parser_HEndAllNl(Roebling *sexp);
+Parser *Parser_HEndNl(Roebling *sexp);

@@ -11,7 +11,7 @@ typedef struct structexp {
     Span *marks;
     Range range;
     ParserMaker *parsers;
-} StructExp;
+} Roebling;
 
-StructExp *StructExp_Make(MemCtx *m, cls type, ParserMaker *parsers, String *s, void *source);
-status StructExp_Run(StructExp *sexp);
+Roebling *Roebling_Make(MemCtx *m, cls type, ParserMaker *parsers, String *s, void *source);
+status Roebling_Run(Roebling *sexp);

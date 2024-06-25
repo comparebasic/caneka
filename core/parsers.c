@@ -67,21 +67,21 @@ Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete){
     return prs;
 }
 
-Parser *Parser_Mark(StructExp *sexp){
+Parser *Parser_Mark(Roebling *sexp){
     Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
     prs->type = TYPE_PARSER;
     prs->flags |= CYCLE_MARK;
     return prs;
 }
 
-Parser *Parser_Loop(StructExp *sexp){
+Parser *Parser_Loop(Roebling *sexp){
     Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
     prs->type = TYPE_PARSER;
     prs->flags |= CYCLE_LOOP;
     return prs;
 }
 
-Parser *Parser_Break(StructExp *sexp){
+Parser *Parser_Break(Roebling *sexp){
     Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
     prs->type = TYPE_PARSER;
     prs->flags |= CYCLE_BREAK;

@@ -1,7 +1,7 @@
 #include <external.h>
 #include <filestore.h>
 
-status StructExp_Run(StructExp *sexp){
+status Roebling_Run(Roebling *sexp){
     int i = 0;
     ParserMaker pmk = sexp->parsers[i];
     int mark = -1;
@@ -49,8 +49,8 @@ status StructExp_Run(StructExp *sexp){
     return sexp->state;
 }
 
-StructExp *StructExp_Make(MemCtx *m, cls type, ParserMaker *parsers, String *s, void *source){
-    StructExp *sexp = (StructExp *)MemCtx_Alloc(m, sizeof(StructExp));
+Roebling *Roebling_Make(MemCtx *m, cls type, ParserMaker *parsers, String *s, void *source){
+    Roebling *sexp = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     sexp->m = m;
     sexp->type = type;
     sexp->parsers = parsers;

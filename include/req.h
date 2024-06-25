@@ -12,7 +12,7 @@ typedef struct serve_req {
         /* mid parsing */
         int contentLength;
         String *host;
-        StructExp *sexp;
+        Roebling *sexp;
         String *_shelf;
         String *nextHeader;
     } in;
