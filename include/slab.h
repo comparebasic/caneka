@@ -2,7 +2,7 @@ typedef struct span_slab {
     Type type;
     int increment;
     int offset;
-    Unit *items[SPAN_DIM_SIZE];
+    Virtual *items[SPAN_DIM_SIZE];
 } Slab;
 
 typedef struct slab_result {

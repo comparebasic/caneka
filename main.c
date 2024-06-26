@@ -29,7 +29,7 @@ static status handle(MemCtx *m, char *arg){
             return ERROR;
         }
 
-        Serve *sctx = Serve_Make(m);
+        Serve *sctx = Serve_Make(m, Http_ProtoDefMake(m, (Serve *)lk->arg));
         return Serve_Run(sctx, port);
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
         status r = test(m);

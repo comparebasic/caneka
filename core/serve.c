@@ -146,7 +146,7 @@ status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
-        Req *req = Req_Make(sctx);
+        Req *req = sctx->proto->req(NULL, (Virtual *)sctx);
 
         if(sctx != NULL){
             status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
@@ -242,14 +242,17 @@ status Serve_Run(Serve *sctx, int port){
     return r;
 }
 
-Serve *Serve_Make(MemCtx *m){
+Serve *Serve_Make(MemCtx *m, ProtoDef *proto){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->m = m;
+    sctx->proto = proto;
+    /*
     sctx->parsers = (ParserMaker *)Array_MakeFrom(m, 9, 
         Parser_Method, Parser_Space, Parser_Path, Parser_HttpV, Parser_EndNl, 
         Parser_Mark,
         Parser_HColon, Parser_Space, Parser_HEndNl);
     sctx->methods = (char **)Array_MakeFrom(m, 3, "GET", "SET", "UPDATE");
     sctx->method_vals = (byte **)Array_MakeFrom(m, 3, &METHOD_GET, &METHOD_SET, &METHOD_UPDATE);
+    */
     return sctx;
 }

@@ -5,24 +5,14 @@ typedef struct serve_req {
     String *id;
     int direction;
     Serve *sctx;
-    struct {
-        String *path;
-        byte method;
-        String *body;
-        /* mid parsing */
-        int contentLength;
-        String *host;
-        Roebling *sexp;
-        String *_shelf;
-        String *nextHeader;
-    } in;
+    Proto *proto;
     struct {
         String *response;
         SCursor *cursor;
     } out;
 } Req;
 
-Req *Req_Make(struct serve_ctx *sctx);
+Req *Req_Make(struct serve_ctx *sctx, Proto *proto);
 status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]);
 status Req_SetError(Serve *sctx, Req *req, String *msg);
 status Req_Recv(Serve *sctx, Req *req);

@@ -11,6 +11,8 @@ typedef struct string {
     struct string *next;
 } String;
 
+#define STRING_EXTEND -1
+
 #define bytes(cstr) ((byte *)cstr)
 
 String *String_Make(MemCtx *m, byte *bytes);

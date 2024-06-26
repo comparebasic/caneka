@@ -1,6 +1,16 @@
 #include <external.h>
 #include <filestore.h>
 
+RlbLookup RlbLookup_Make(MemCtx *m, word offset, RlbLookupPopulate populate, Virtual *arg){
+    RlbLookup *lk = (RlbLookup *)MemCtx_Alloc(m, sizeof(RlbLookup));
+    lk->offset = offset;
+    lk->values = Span_Make(m);
+    lk->arg = arg;
+    populate(m, lk);
+
+    return lk;
+}
+
 status Roebling_Run(Roebling *sexp){
     int i = 0;
     ParserMaker pmk = sexp->parsers[i];

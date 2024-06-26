@@ -3,7 +3,9 @@ typedef uint16_t word;
 typedef word cls;
 typedef word status;
 typedef byte boolean;
+typedef uint32_t dword;
 typedef uint64_t i64;
+typedef i64 util;
 
 struct serve_ctx;
 struct serve_req;
@@ -20,6 +22,17 @@ typedef struct typehdr {
     status state;
 } Type;
 
+typedef struct unit {
+    Type type;
+} Unit;
+
+typedef Virtual {
+    Type type;
+    util ptr;
+}
+
+typedef Virtual *(*Maker)(MemCtx *m, Vitrual *v);
+
 #define MAX_BASE10 20
 #define SPAN_DIM_SIZE 16
 #define SLAM_MIN_SIZE 4
@@ -28,9 +41,6 @@ typedef struct typehdr {
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
-typedef struct unit {
-    Type type;
-} Unit;
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -42,8 +52,11 @@ typedef struct unit {
 enum types {
     TYPE_UNIT,
     TYPE_MEMCTX,
+    TYPE_MAKER,
     TYPE_MEMSLAB,
     TYPE_REQ,
+    TYPE_PROTO,
+    TYPE_PROTODEF,
     TYPE_STRING_CHAIN,
     TYPE_STRING_FIXED,
     TYPE_SERVECTX,
@@ -59,6 +72,7 @@ enum types {
     TYPE_STRUCTEXP,
     TYPE_SPAN,
     TYPE_SLAB,
+    _TYPE_CORE_END,
 };
 
 extern int METHOD_UNKOWN;
@@ -91,6 +105,9 @@ enum positions {
 
 char *State_ToString(status state);
 char *Class_ToString(cls type);
+Virtual *Maker_Make(Memctx*m, void *mk, cls type);
+    ;
+}
 
 #define COMPLETE SUCCESS
 #define TEST_OK READY

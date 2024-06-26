@@ -1,11 +1,13 @@
 #include <external.h>
 #include <filestore.h>
 
-int METHOD_UNKOWN = 0;
-int METHOD_GET = 1;
-int METHOD_SET = 2;
-int METHOD_UPDATE = 3;
-int METHOD_DELETE = 4;
+Virtual *Maker_Make(Memctx*m, void *mk, cls type){
+    Virtual *v = (Vitrual *)MemCtx_Alloct(m, sizeof(Virtual));
+    v->type.of = TYPE_MAKER;
+    v->type.state = type;
+    v->ptr = (util)mk;
+    return v;
+}
 
 char *State_ToString(status state){
     if(state == READY){

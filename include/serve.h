@@ -10,12 +10,10 @@ typedef struct serve_ctx {
     int socket_fd;
     int port;
     boolean serving;
-    ParserMaker *parsers;
-    char **methods;
-    byte **method_vals;
+    ProtoDef *proto;
 } Serve;
 
-Serve *Serve_Make(MemCtx *m);
+Serve *Serve_Make(MemCtx *m, ProtoDef *def);
 status Serve_PreRun(Serve *sctx, int port);
 status Serve_Run(Serve *sctx, int port);
 status Serve_Stop(Serve *sctx);

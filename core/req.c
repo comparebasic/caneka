@@ -79,16 +79,11 @@ status Req_Handle(Serve *sctx, Req *req){
     return NOOP;
 }
 
-Req *Req_Make(Serve *sctx){
-    MemCtx *m = MemCtx_Make();
+Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
     Req* req = (Req *)MemCtx_Alloc(m, sizeof(Req));
     req->sctx = sctx;
-    req->direction = -1;
-    req->in._shelf = String_Init(m, -1); 
-    req->in.sexp = Roebling_Make(m, TYPE_STRUCTEXP, sctx->parsers, req->in._shelf, (void *)req);
-
-    MemCtx_Bind(m, req);
-
+    req->proto = proto;
+    req->direction = direction;
     return req;
 }
 
