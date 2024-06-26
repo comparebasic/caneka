@@ -21,7 +21,7 @@ typedef struct typehdr {
 } Type;
 
 #define MAX_BASE10 20
-#define SPAN_DIM_SIZE 32
+#define SPAN_DIM_SIZE 16
 #define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
 #define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit *))

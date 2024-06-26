@@ -7,6 +7,12 @@ int DEBUG_PATMATCH = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 
+static void indent_Print(int indent){
+    while(indent--){
+        printf("  ");
+    }
+}
+
 static void PatCharDef_Print(PatCharDef *def, char *msg, int color, boolean extended){
     if((def->flags & PAT_COUNT) != 0){
         if(def->from == '\r' || def->from == '\n'){
@@ -113,7 +119,7 @@ static void Slab_Print(Slab *slab, char *msg, int color, boolean extended){
         return slab_Summarize(slab, msg, color, extended);
     }
 
-    printf("%s\x1b[1;%dmL<icr%d[%d] \x1b[0;%dm", msg, color, slab->increment, slab->offset, color);
+    printf("%s\x1b[%dmL<icr%d[%d] \x1b[%dm", msg, color, slab->increment, slab->offset, color);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
         Unit *t = slab->items[i];
@@ -130,35 +136,38 @@ static void Slab_Print(Slab *slab, char *msg, int color, boolean extended){
             printf("\x1b[%dm", color);
         }
     }
-    printf("\x1b[1;%dm>\x1b[0m", color);
+    printf("\x1b[%dm>\x1b[0m", color);
 }
 
-static void showSlab(Slab *sl, int color, boolean extended){
-    Debug_Print((void *)sl, TYPE_SLAB, "", color, extended); 
+static void showSlab(Slab *sl, int color, boolean extended, int indent){
+    Slab_Print(sl, "", color, extended); 
     if(sl->increment > SPAN_DIM_SIZE){
-        printf("\x1b[%dm -> \x1b[0m", color);
+        indent++;
+        printf("\n");
         boolean first = TRUE;
         for(int i = 0; i < SPAN_DIM_SIZE; i++){
             Unit *t = sl->items[i];
             if(t != NULL){
                 if(!first){
-                    printf("\n                       ");
+                    printf("\n");
                 }
                 if(first){
                     first = FALSE;
                 }
+                indent_Print(indent);
                 printf("\x1b[%dm%d=", color, i);
-                showSlab((Slab *)t, color, extended);
+                showSlab((Slab *)t, color, extended, indent);
             }
         }
     }
 }
 
 static void Span_Print(Span *p, char *msg, int color, boolean extended){
-    printf("%s\n\x1b[1;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
+    printf("%s\n\x1b[;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
         p->nvalues, p->dims, sizeof(Unit *)*p->slotSize);
-    printf("\n    ");
-    showSlab(p->slab, color, extended);
+    printf("\n");
+    indent_Print(1);
+    showSlab(p->slab, color, extended, 1);
     printf("\n\x1b[1;%dm>\x1b[0m\n", color);
 }
 
