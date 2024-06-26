@@ -26,12 +26,9 @@ typedef struct unit {
     Type type;
 } Unit;
 
-typedef Virtual {
+typedef struct virt  {
     Type type;
-    util ptr;
-}
-
-typedef Virtual *(*Maker)(MemCtx *m, Vitrual *v);
+} Virtual;
 
 #define MAX_BASE10 20
 #define SPAN_DIM_SIZE 16
@@ -105,9 +102,7 @@ enum positions {
 
 char *State_ToString(status state);
 char *Class_ToString(cls type);
-Virtual *Maker_Make(Memctx*m, void *mk, cls type);
-    ;
-}
+Virtual *Maker_Make(struct mem_ctx *m, void *mk, cls type);
 
 #define COMPLETE SUCCESS
 #define TEST_OK READY
@@ -116,6 +111,7 @@ typedef struct parser *(*ParserMaker)(struct structexp *sexp);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
+#include "maker.h"
 #include "array.h"
 #include "string.h"
 #include "slab.h"
@@ -123,8 +119,11 @@ typedef struct parser *(*ParserMaker)(struct structexp *sexp);
 #include "tokens.h"
 #include "match.h"
 #include "scursor.h"
+#include "lookup.h"
 #include "roebling.h"
 #include "parsers.h"
+#include "apps.h"
+#include "proto.h"
 #include "serve.h"
 #include "req.h"
 #include "debug.h"

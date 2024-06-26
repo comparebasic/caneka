@@ -18,7 +18,7 @@ typedef struct slab_result {
     byte slotSize;
     byte local_idx;
     byte level;
-    Unit *value;
+    Virtual *value;
 } SlabResult;
 
 Slab* Slab_Alloc(MemCtx* m, status flags);

@@ -72,13 +72,8 @@ static void String_Print(String *s, char *msg, int color, boolean extended){
 }
 
 static void Req_Print(Req *req, char *msg, int color, boolean extended){
-    printf("%s\x1b[1;%dmReq<%s:%s %s:%s,%s,%s>\x1b[0;1m\n",
-        msg, color, State_ToString(req->state), Method_ToString(req->in.method),
-        req->in.path != NULL ? (char *)req->in.path->bytes : "",
-        req->in.body != NULL ? "body" : "no-body",
-        req->out.response != NULL ? "response" : "no-response",
-        req->out.cursor != NULL ? "cursor" : "no-cursor"
-    );
+    printf("%s\x1b[1;%dmReq<%s:%s>\x1b[0;1m\n",
+        msg, color, State_ToString(req->state), Proto_ToChars(req->proto));
 }
 
 static void Unit_Print(Unit *t, char *msg, int color, boolean extended){
@@ -93,7 +88,7 @@ static void slab_Summarize(Slab *slab, char *msg, int color, boolean extended){
     printf("%s\x1b[0;%dmL<incr%d[%d] ", msg, color, slab->increment, slab->offset);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
-        Unit *t = slab->items[i];
+        Virtual *t = slab->items[i];
         if(t != NULL){
             if(!first){
                 printf(", ");
@@ -122,7 +117,7 @@ static void Slab_Print(Slab *slab, char *msg, int color, boolean extended){
     printf("%s\x1b[%dmL<icr%d[%d] \x1b[%dm", msg, color, slab->increment, slab->offset, color);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
-        Unit *t = slab->items[i];
+        Virtual *t = slab->items[i];
         if(t != NULL){
             if(!first){
                 printf(", ");
@@ -146,7 +141,7 @@ static void showSlab(Slab *sl, int color, boolean extended, int indent){
         printf("\n");
         boolean first = TRUE;
         for(int i = 0; i < SPAN_DIM_SIZE; i++){
-            Unit *t = sl->items[i];
+            Virtual *t = sl->items[i];
             if(t != NULL){
                 if(!first){
                     printf("\n");

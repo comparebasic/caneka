@@ -1,14 +1,6 @@
-enum http_methods {
-    __TYPE_HTTP_START = _TYPE_HTTP_START,
-    TYPE_METHOD_GET,
-    TYPE_METHOD_SET,
-    TYPE_METHOD_UPDATE, 
-    TYPE_METHOD_DELETE,
-    __TYPE_HTTP_END,
-};
-
-typedef struct proto {
+typedef struct http_proto {
     Type type;
+    char *(*toLog)(Req *req);
     String *path;
     byte method;
     String *body;
@@ -16,12 +8,12 @@ typedef struct proto {
     Virtual *session;
     /* mid parsing */
     i64 contentLength;
-    String *shelf;
-    Roebling *rbl;
     String *nextHeader;
 } HttpProto;
 
-ProtoDef *Http_ProtoDefMake(MemCtx *m, Serve *sctx);
+ProtoDef *HttpProtoDef_Make(MemCtx *m, Serve *sctx);
+Proto *HttpProto_Make(MemCtx *m, Serve *sctx);
+Req *HttpReq_Make(MemCtx *m, Serve *sctx);
 
 extern PatCharDef HttpV_RangeDef[];
 extern PatCharDef EndNl_RangeDef[];

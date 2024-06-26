@@ -146,7 +146,10 @@ status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
-        Req *req = sctx->proto->req(NULL, (Virtual *)sctx);
+        
+        Req *req = sctx->proto->req(sctx->m, sctx);
+        req->in.rbl = Roebling_Make(req->m, 
+            TYPE_PARSER, sctx->proto->parsers, req->in.shelf, (Virtual *)req);
 
         if(sctx != NULL){
             status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
@@ -189,7 +192,7 @@ status Serve_ServeRound(Serve *sctx){
         }
 
         if(req->state == COMPLETE){
-            Log(0, "Served %s %s - mem: %ld", Method_ToString(req->in.method), req->in.path != NULL ? (char *)req->in.path->bytes : "", MemCount());
+            Log(0, "Served %s - mem: %ld", req->proto->toLog(req), MemCount());
             r = Serve_CloseReq(sctx, req);
         }
 

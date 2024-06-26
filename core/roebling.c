@@ -1,30 +1,21 @@
 #include <external.h>
 #include <filestore.h>
 
-RlbLookup RlbLookup_Make(MemCtx *m, word offset, RlbLookupPopulate populate, Virtual *arg){
-    RlbLookup *lk = (RlbLookup *)MemCtx_Alloc(m, sizeof(RlbLookup));
-    lk->offset = offset;
-    lk->values = Span_Make(m);
-    lk->arg = arg;
-    populate(m, lk);
-
-    return lk;
-}
-
-status Roebling_Run(Roebling *sexp){
+status Roebling_Run(Roebling *rbl){
+    /*
     int i = 0;
-    ParserMaker pmk = sexp->parsers[i];
+    ParserMaker pmk = rbl->parsers[i];
     int mark = -1;
     boolean escaping = FALSE;
     Parser *prs;
     status r = READY;
     word escape_fl = (CYCLE_BREAK|COMPLETE);
     while(pmk != NULL){
-        prs = pmk(sexp);
+        prs = pmk(rbl);
         if(prs->func == NULL){
             r = COMPLETE | prs->flags;
         }else{
-            r = prs->func(prs, &(sexp->range), sexp->source);
+            r = prs->func(prs, &(rbl->range), rbl->source);
         }
 
         if(escaping && ((r & CYCLE_LOOP) != 0)){
@@ -40,31 +31,32 @@ status Roebling_Run(Roebling *sexp){
                         i = mark; 
                     }
                 }else{
-                    sexp->state = ERROR;
-                    return sexp->state;
+                    rbl->state = ERROR;
+                    return rbl->state;
                 }
             }
         }
-        pmk = sexp->parsers[++i];
+        pmk = rbl->parsers[++i];
     }
 
     if(pmk == NULL){
-        sexp->state = COMPLETE;
+        rbl->state = COMPLETE;
     }else{
-        sexp->state = PROCESSING;
+        rbl->state = PROCESSING;
     }
 
-    printf("State is %s\n", State_ToString(sexp->state));
+    printf("State is %s\n", State_ToString(rbl->state));
+    */
         
-    return sexp->state;
+    return rbl->state;
 }
 
-Roebling *Roebling_Make(MemCtx *m, cls type, ParserMaker *parsers, String *s, void *source){
-    Roebling *sexp = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
-    sexp->m = m;
-    sexp->type = type;
-    sexp->parsers = parsers;
-    sexp->source = source;
-    Range_Set(&(sexp->range), s);
-    return sexp;
+Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Virtual *source){
+    Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
+    rbl->m = m;
+    rbl->type = type;
+    rbl->parsers = parsers;
+    rbl->source = source;
+    Range_Set(&(rbl->range), s);
+    return rbl;
 }

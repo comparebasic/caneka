@@ -5,11 +5,13 @@
 static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
     Match **matches = (Match **)prs->matches;
-    req->in.method = matches[prs->idx]->intval;
+    HttpProto *proto = (HttpProto *)req->proto;
+    proto->method = matches[prs->idx]->intval;
     return SUCCESS;
 }
 
 Parser *Parser_Method(Roebling *sexp){
+    /*
     Req *req = (Req *)sexp->source;
     int length = Array_Length((void **)req->sctx->methods);
     Match **matches = (Match **)Array_Make(sexp->m, length); 
@@ -19,6 +21,8 @@ Parser *Parser_Method(Roebling *sexp){
     }
 
     return Parser_MakeMulti(sexp->m, matches, Parser_MethodComplete);
+    */
+    return NULL;
 }
 
 Parser *Parser_Space(Roebling *sexp){
@@ -27,7 +31,8 @@ Parser *Parser_Space(Roebling *sexp){
 
 static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
-    req->in.path = String_FromRange(req->m, range);
+    HttpProto *proto = (HttpProto *)req->proto;
+    proto->path = String_FromRange(req->m, range);
     return SUCCESS;
 }
 
@@ -49,8 +54,9 @@ Parser *Parser_EndNl(Roebling *sexp){
 static status Parser_HComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
     String *s = String_FromRange(req->m, range);
-    if(req->in.nextHeader != NULL){
-        printf("Header: %s -> %s\n", req->in.nextHeader->bytes, (char *)s->bytes);
+    HttpProto *proto = (HttpProto *)req->proto;
+    if(proto->nextHeader != NULL){
+        printf("Header: %s -> %s\n", proto->nextHeader->bytes, (char *)s->bytes);
     }else{
         printf("Header: NULL -> %s\n", (char *)s->bytes);
     }
@@ -74,7 +80,8 @@ Parser *Parser_HEndAllNl(Roebling *sexp){
 
 static status Parser_HKeyComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
-    req->in.nextHeader = String_FromRange(req->m, range);
+    HttpProto *proto = (HttpProto *)req->proto;
+    proto->nextHeader = String_FromRange(req->m, range);
     return SUCCESS;
 }
 

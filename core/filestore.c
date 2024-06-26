@@ -1,14 +1,6 @@
 #include <external.h>
 #include <filestore.h>
 
-Virtual *Maker_Make(Memctx*m, void *mk, cls type){
-    Virtual *v = (Vitrual *)MemCtx_Alloct(m, sizeof(Virtual));
-    v->type.of = TYPE_MAKER;
-    v->type.state = type;
-    v->ptr = (util)mk;
-    return v;
-}
-
 char *State_ToString(status state){
     if(state == READY){
         return "READY";

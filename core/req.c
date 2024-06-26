@@ -23,26 +23,16 @@ static String *packageError(MemCtx *m, String *content){
     return s;
 }
 
-char *Method_ToString(int method){
-    if(method == METHOD_GET){
-        return "GET";
-    }else if(method == METHOD_SET){
-        return "SET";
-    }else if(method == METHOD_UPDATE){
-        return "UPDATE";
-    }else{
-        return "UNKONWN_method";
-    }
-}
-
 status Req_Recv(Serve *sctx, Req *req){
     byte buff[SERV_READ_SIZE];
     size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     status r = NOOP;
     if(l > 0){
-        String_AddBytes(req->m, req->in._shelf, buff, l);
-        Debug_Print((void *)req->in._shelf, TYPE_STRING_CHAIN, "_shelf is", COLOR_CYAN, FALSE);
-        r = Roebling_Run(req->in.sexp);
+
+        String_AddBytes(req->m, req->in.shelf, buff, l);
+        Debug_Print((void *)req->in.shelf, TYPE_STRING_CHAIN, "shelf is", COLOR_CYAN, FALSE);
+
+        r = Roebling_Run(req->in.rbl);
         if(r == ERROR){
             req->state = ERROR;
             Debug_Print((void *)req, TYPE_REQ, "Req Parsed (Error) ", COLOR_RED, TRUE);
@@ -91,6 +81,7 @@ status Req_SetError(Serve *sctx, Req *req, String *msg){
     req->state = RESPONDING;
     Serve_NextState(sctx, req);
     req->out.response = packageError(req->m, msg);
+    req->in.shelf = String_Init(req->m, STRING_EXTEND);
     return SUCCESS;
 }
 

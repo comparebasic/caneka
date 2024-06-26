@@ -1,4 +1,5 @@
 typedef struct serve_req {
+    Type type;
     MemCtx *m;
     status state;
     int fd;
@@ -7,12 +8,16 @@ typedef struct serve_req {
     Serve *sctx;
     Proto *proto;
     struct {
+        String *shelf;
+        Roebling *rbl;
+    } in;
+    struct {
         String *response;
         SCursor *cursor;
     } out;
 } Req;
 
-Req *Req_Make(struct serve_ctx *sctx, Proto *proto);
+Req *Req_Make(MemCtx *m, struct serve_ctx *sctx, Proto *proto, int direction);
 status Req_Parse(Serve *sctx, Req *req, String *s, ParserMaker parsers[]);
 status Req_SetError(Serve *sctx, Req *req, String *msg);
 status Req_Recv(Serve *sctx, Req *req);
