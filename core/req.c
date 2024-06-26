@@ -85,7 +85,6 @@ Req *Req_Make(Serve *sctx){
     req->sctx = sctx;
     req->direction = -1;
     req->in._shelf = String_Init(m, -1); 
-    printf("_shelf type %s\n", Class_ToString(req->in._shelf->type.of));
     req->in.sexp = Roebling_Make(m, TYPE_STRUCTEXP, sctx->parsers, req->in._shelf, (void *)req);
 
     MemCtx_Bind(m, req);

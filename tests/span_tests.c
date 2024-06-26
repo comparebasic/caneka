@@ -56,7 +56,6 @@ status Span_Tests(MemCtx *gm){
 
     Debug_Print((void *)p, TYPE_SPAN, "Span after first insert(s) ", COLOR_CYAN, TRUE);
 
-    /*
     s = (String *)Span_Get(m, p, 0);
     r |= Test(s->type.of == s1->type.of, "After expand, Span item 0 has type string %s found %s", 
         Class_ToString(s1->type.of), Class_ToString(s->type.of));
@@ -80,7 +79,25 @@ status Span_Tests(MemCtx *gm){
         Class_ToString(s8->type.of), Class_ToString(s->type.of));
     r |= Test(String_Equals(s8, s), "String 8 equals %s found %s", 
         s8->bytes, s->bytes);
-        */
+
+    s = (String *)Span_Get(m, p, 511);
+    r |= Test(s->type.of == s512->type.of, "Span item 512 has type string %s found %s", 
+        Class_ToString(s512->type.of), Class_ToString(s->type.of));
+    r |= Test(String_Equals(s512, s), "String 8 equals %s found %s", 
+        s512->bytes, s->bytes);
+
+    s = (String *)Span_Get(m, p, 4078);
+    r |= Test(s->type.of == s4079->type.of, "Span item 4079 has type string %s found %s", 
+        Class_ToString(s4079->type.of), Class_ToString(s->type.of));
+    r |= Test(String_Equals(s4079, s), "String 8 equals %s found %s", 
+        s4079->bytes, s->bytes);
+
+    s = (String *)Span_Get(m, p, 512);
+    r |= Test(s->type.of == s513->type.of, "Span item 513 has type string %s found %s", 
+        Class_ToString(s513->type.of), Class_ToString(s->type.of));
+    r |= Test(String_Equals(s513, s), "String 8 equals %s found %s", 
+        s513->bytes, s->bytes);
+
 
 
     MemCtx_Free(m);
