@@ -1,7 +1,7 @@
 #include <external.h>
 #include <filestore.h>
 
-#include <app.h>
+#include <proto/http.h>
 
 static int openPortToFd(int port){
     int fd = 0;

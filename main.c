@@ -1,8 +1,8 @@
 #include <external.h>
 #include <filestore.h>
+#include <tests.h>
 
-#include <http/app.h>
-#include <tests/tests.h>
+#include <proto/http.h>
 
 
 #define servecmd "serve="

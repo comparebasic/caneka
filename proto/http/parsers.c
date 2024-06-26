@@ -1,6 +1,6 @@
 #include <external.h>
 #include <filestore.h>
-#include "app.h"
+#include <proto/http.h>
 
 static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;

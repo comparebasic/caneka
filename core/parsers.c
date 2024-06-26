@@ -1,7 +1,7 @@
 #include <external.h>
 #include <filestore.h>
 
-#include <app.h>
+#include <proto/http.h>
 
 static status parse_Multi(Parser *prs, Range *range, void *source){
     status r = READY;
