@@ -31,7 +31,7 @@ static int slotsAvailable(int dims){
 }
 
 static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
-    int dims = sr->dims = sr->span->ndims = sr->dimsNeeded;
+    int dims = sr->dims = sr->span->dims = sr->dimsNeeded;
 
     int needed = slotsAvailable(dims);
     boolean expand = sr->slab->increment < needed;
@@ -75,14 +75,15 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
         span_GrowToNeeded(m, sr);
     }
 
-    int dims = sr->dims;
+    byte dims = sr->dims = sr->span->dims = max(sr->dims, sr->span->dims);
+    printf("\x1b[%dmDIMS %hu\x1b[0m\n", COLOR_GREEN, dims);
+
     int increment = slotsAvailable(dims-1);
     Slab *prev_sl = sr->slab;
     while(dims > 1){
         sr->local_idx = (sr->idx - sr->offset) / increment;
         sr->offset += increment*sr->local_idx;
         printf("\x1b[%dmdim %d local %d incr%d\n", COLOR_YELLOW, dims, sr->local_idx, prev_sl->increment);
-
         /* find or allocate a space for the new span */
         sr->slab = (Slab *)sr->slab->items[sr->local_idx];
 
@@ -92,6 +93,8 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
                 sr->local_idx, sr->offset, increment, (sr->span->type.state|RAW));
             prev_sl->items[sr->local_idx] = (Unit *)new_sl;
             prev_sl = sr->slab = new_sl;
+        }else{
+            prev_sl = sr->slab;
         }
 
         if((sr->slab->type.state & TYPE_SLAB) != 0){
@@ -121,7 +124,7 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
 
     sr->op = op;
     sr->span = p;
-    sr->dims = p->ndims;
+    sr->dims = p->dims;
     sr->slab = p->slab;
     sr->slotSize = p->slotSize;
     sr->idx = idx * p->slotSize;

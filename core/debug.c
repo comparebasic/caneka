@@ -83,11 +83,36 @@ static void Unit_Print(Unit *t, char *msg, int color, boolean extended){
     }
 }
 
+static void slab_Summarize(Slab *slab, char *msg, int color, boolean extended){
+    printf("%s\x1b[0;%dmL<incr%d[%d] ", msg, color, slab->increment, slab->offset);
+    boolean first = TRUE;
+    for(int i = 0; i < SPAN_DIM_SIZE; i++){
+        Unit *t = slab->items[i];
+        if(t != NULL){
+            if(!first){
+                printf(", ");
+            }
+            if(first){
+                first = FALSE;
+            }
+            printf("%d=", i);
+            if(t->type.of == TYPE_SLAB){
+                Slab *slt = (Slab *)t;
+                printf("%u", slt->offset);
+            }else{
+                printf("%p", t);
+            }
+            printf("\x1b[%dm", color);
+        }
+    }
+    printf("\x1b[1;%dm>\x1b[0m", color);
+}
+
 static void Slab_Print(Slab *slab, char *msg, int color, boolean extended){
     if(slab->increment != SPAN_DIM_SIZE){
-        printf("%s\x1b[0;%dmL<incr%d[%d]>\x1b[0m", msg, color, slab->increment, slab->offset);
-        return;
+        return slab_Summarize(slab, msg, color, extended);
     }
+
     printf("%s\x1b[1;%dmL<icr%d[%d] \x1b[0;%dm", msg, color, slab->increment, slab->offset, color);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
@@ -131,7 +156,7 @@ static void showSlab(Slab *sl, int color, boolean extended){
 
 static void Span_Print(Span *p, char *msg, int color, boolean extended){
     printf("%s\n\x1b[1;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
-        p->nvalues, p->ndims, sizeof(Unit *)*p->slotSize);
+        p->nvalues, p->dims, sizeof(Unit *)*p->slotSize);
     printf("\n    ");
     showSlab(p->slab, color, extended);
     printf("\n\x1b[1;%dm>\x1b[0m\n", color);

@@ -16,7 +16,7 @@ typedef struct span {
     cls itemType;
     byte slotSize;
     byte itemSize;
-	byte ndims;
+	byte dims;
     /*
     Resolver *rslv;
     */
