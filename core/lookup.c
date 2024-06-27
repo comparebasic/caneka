@@ -5,7 +5,6 @@ void *Lookup_Get(Lookup *lk, word type){
     if(type < lk->offset){
         Fatal("Adding lookup value below zero", TYPE_UNIT);
     }
-    printf("Getting %d\n", (int)(type-lk->offset));
     return (void *)Span_Get(lk->values, (int)(type-lk->offset));
 }
 

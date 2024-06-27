@@ -1,12 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
-void Fatal(char *msg, cls t){
+void *Fatal(char *msg, cls t){
     printf("Fatal Error:");
     printf("%s\n", msg);
     exit(13);
+    return NULL;
 }
 
-void Error(char *msg){
+void *Error(char *msg){
     printf("Error: %s\n", msg);
+    return NULL;
 }

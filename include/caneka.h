@@ -5,6 +5,7 @@ typedef word status;
 typedef byte boolean;
 typedef uint32_t dword;
 typedef uint64_t i64;
+typedef i64 hash;
 typedef i64 util;
 
 struct serve_ctx;
@@ -35,6 +36,8 @@ typedef struct virt  {
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
+#define as(x, t) ((x)->type.of == (t) ? x : Fatal("Cast from abstract mismatch", t))
+
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -45,6 +48,7 @@ typedef struct virt  {
 
 enum types {
     _TYPE_START,
+    TYPE_ABSTRACT,
     TYPE_UNIT,
     TYPE_MEMCTX,
     TYPE_MAKER,
