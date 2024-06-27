@@ -3,6 +3,7 @@
 
 void *Chain_Get(Chain *chain, word type){
     Abstract *t = Lookup_Get(chain->funcs, type);
+    printf("Looking up the thing for %hu %p of %d values\n", type, t, chain->funcs->values->nvalues);
     if(t != NULL){
        return (void *)t; 
     }

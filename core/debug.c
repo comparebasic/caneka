@@ -63,7 +63,8 @@ static void Match_Print(Match *mt, char *msg, int color, boolean extended){
     }
 }
 
-static void String_Print(String *s, char *msg, int color, boolean extended){
+static void String_Print(Abstract *a, char *msg, int color, boolean extended){
+    String *s = (String *)a;
     printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
     do {
         printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
@@ -198,7 +199,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
 
 status Debug_Init(MemCtx *m){
     if(DebugPrintChain == NULL){
-        Lookup *funcs = Lookup_Make(m, _TYPE_HTTP_START, populateDebugPrint, NULL);
+        Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);
         DebugPrintChain = Chain_Make(m, funcs);
         return SUCCESS;
     }
@@ -210,22 +211,25 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
         printf("\x1b[%dm", color);
     }
 
+    Abstract *a = NULL;
     if(type == TYPE_UNIT){
         if(t == NULL){
             printf("%s\x1b[%dm0\x1b[0m", msg, color);
             return;
         }else{
-            Abstract *u = (Abstract *)t;
-            type = u->type.of;
+            a = (Abstract *)t;
+            type = a->type.of;
         }
     }
 
     if(t == NULL){
         printf("NULL");
     }else{
+        printf("Getting things %hu\n", type);
         DebugPrintFunc func = (DebugPrintFunc)Chain_Get(DebugPrintChain, type);
         if(func != NULL){
-            return func(t, type, msg, color, extended);
+            printf("Calling func\n");
+            return func(a, type, msg, color, extended);
         }else{
             printf("%s: %s unkown debug", msg, Class_ToString(type));
         }

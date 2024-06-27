@@ -44,6 +44,7 @@ typedef struct virt  {
 
 
 enum types {
+    _TYPE_START,
     TYPE_UNIT,
     TYPE_MEMCTX,
     TYPE_MAKER,

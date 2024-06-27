@@ -2,12 +2,19 @@
 #include <caneka.h>
 
 void *Lookup_Get(Lookup *lk, word type){
-    return (void *)Span_Get(lk->values, type-lk->offset);
+    if(type < lk->offset){
+        Fatal("Adding lookup value below zero", TYPE_UNIT);
+    }
+    printf("Getting %d\n", (int)(type-lk->offset));
+    return (void *)Span_Get(lk->values, (int)(type-lk->offset));
 }
 
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
+    if(type < lk->offset){
+        Fatal("Adding lookup value below zero", TYPE_UNIT);
+    }
     return Span_Set(m,
-        lk->values, TYPE_METHOD_UPDATE-lk->offset,  (Abstract *)value);
+        lk->values, (int)(type-lk->offset), (Abstract *)value);
 }
 
 Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *arg){
