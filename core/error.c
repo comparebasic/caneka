@@ -1,9 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-void *Fatal(char *msg, cls t){
-    printf("Fatal Error:");
-    printf("%s\n", msg);
+void *_Fatal(char *msg, cls t, char *func, char *file, int line){
+    printf("Fatal Error: %s - %s:%s:%d\n" , msg, func, file, line);
     exit(13);
     return NULL;
 }

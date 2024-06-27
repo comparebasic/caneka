@@ -1,5 +1,5 @@
 CC = /usr/bin/clang 
-CFLAGS = --target=x86_64-unknown-linux-musl -g -Werror
+CFLAGS = --target=x86_64-unknown-linux-musl -g -Werror -Wno-incompatible-pointer-types-discards-qualifiers
 INC = -I/usr/local/musl/include/ -I./include 
 
 coreobj = core/caneka.o core/mem.o core/string.o core/error.o core/debug.o \

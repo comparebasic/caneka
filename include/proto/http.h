@@ -1,6 +1,7 @@
 typedef struct http_proto {
     Type type;
     char *(*toLog)(Req *req);
+    /* end proto props */
     String *path;
     byte method;
     String *body;
@@ -13,7 +14,7 @@ typedef struct http_proto {
 
 status HttpProto_Init(MemCtx *m);
 
-ProtoDef *HttpProtoDef_Make(MemCtx *m, Serve *sctx);
+ProtoDef *HttpProtoDef_Make(MemCtx *m);
 Proto *HttpProto_Make(MemCtx *m, Serve *sctx);
 Req *HttpReq_Make(MemCtx *m, Serve *sctx);
 

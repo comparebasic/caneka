@@ -2,6 +2,8 @@
 #include <caneka.h>
 #include <testsuite.h>
 
+#include <proto/http.h>
+
 static char *sid = "Azjfhuei3";
 static char *req_cstr = "GET /Azjfhuei3 HTTP/1.1\r\nContent-Length: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
 
@@ -25,10 +27,10 @@ static int testConnect(){
 
 status Serve_Tests(MemCtx *gm){
     status r = TEST_OK;
-    /*
     MemCtx *m = MemCtx_Make();
+    HttpProto_Init(m);
 
-    Serve *sctx = Serve_Make(m);
+    Serve *sctx = Serve_Make(m, HttpProtoDef_Make(m));
     
     r |=  Serve_PreRun(sctx, TEST_PORT);
 
@@ -41,6 +43,5 @@ status Serve_Tests(MemCtx *gm){
 
     Serve_Stop(sctx);
     MemCtx_Free(m);
-    */
     return r;
 }

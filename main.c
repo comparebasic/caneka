@@ -4,7 +4,6 @@
 
 #include <proto/http.h>
 
-
 #define servecmd "serve="
 #define testcmd "test"
 
@@ -29,7 +28,7 @@ static status handle(MemCtx *m, char *arg){
             return ERROR;
         }
 
-        Serve *sctx = Serve_Make(m, HttpProtoDef_Make(m, sctx));
+        Serve *sctx = Serve_Make(m, HttpProtoDef_Make(m));
         return Serve_Run(sctx, port);
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
         status r = test(m);
