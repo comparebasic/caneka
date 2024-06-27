@@ -16,6 +16,7 @@ struct parser;
 struct span;
 struct span_slab;
 struct structexp;
+struct lookup;
 
 typedef struct typehdr {
     cls of;
@@ -69,6 +70,7 @@ enum types {
     TYPE_STRUCTEXP,
     TYPE_SPAN,
     TYPE_SLAB,
+    TYPE_CHAIN,
     _TYPE_CORE_END,
 };
 
@@ -90,6 +92,7 @@ enum status_types {
     RESPONDING = 1 << 7,
     SUCCESS = 1 << 8,
     RAW = 1 << 9,
+    MISS = 1 << 10,
 };
 
 #define HasFlag(x, fl) ((x & (fl)) == fl) 
@@ -108,6 +111,7 @@ Virtual *Maker_Make(struct mem_ctx *m, void *mk, cls type);
 #define TEST_OK READY
 
 typedef struct parser *(*ParserMaker)(struct structexp *sexp);
+#include "chain.h"
 #include "error.h"
 #include "log.h"
 #include "mem.h"

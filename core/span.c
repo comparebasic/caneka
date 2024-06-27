@@ -61,6 +61,9 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
 static status Span_Expand(MemCtx *m, SlabResult *sr){
     /* resize the span by adding dimensions and slabs as needed */
     if(sr->dimsNeeded > sr->dims){
+        if(sr->op != SPAN_OP_SET){
+            return MISS;
+        }
         span_GrowToNeeded(m, sr);
     }
 
@@ -76,6 +79,9 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
 
         /* make new if not exists */
         if(sr->slab == NULL){
+            if(sr->op != SPAN_OP_SET){
+                return MISS;
+            }
             Slab *new_sl = openNewSlab(m, 
                 sr->local_idx, sr->offset, increment, (sr->span->type.state|RAW));
             prev_sl->items[sr->local_idx] = (Virtual *)new_sl;
@@ -97,8 +103,8 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
 
     /* conclude by setting the local idx and setting the state */
     sr->local_idx = (sr->idx - sr->offset);
-    sr->type.state = SUCCESS;
 
+    sr->type.state = SUCCESS;
     return sr->type.state;
 }
 
@@ -123,7 +129,13 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
 }
 
 static status Span_GetSet(MemCtx *m, SlabResult *sr, int idx, Virtual *t){
-    Span_Expand(m, sr);
+    if(m == NULL && sr->op != SPAN_OP_GET){
+        return ERROR;
+    }
+    status r = Span_Expand(m, sr);
+    if(r != SUCCESS){
+        return r; 
+    }
     Span *p = sr->span;
     if(HasFlag(sr->type.state, SUCCESS)){
         if(HasFlag(p->type.state, RAW)){
@@ -193,16 +205,16 @@ status Span_Set(MemCtx *m, Span *p, int idx, Virtual *t){
     return Span_GetSet(m, &sr, idx, t);
 }
 
-status Span_Remove(MemCtx *m, Span *p, int idx){
+status Span_Remove(Span *p, int idx){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_REMOVE, idx);
-    return Span_GetSet(m, &sr, idx, NULL);
+    return Span_GetSet(NULL, &sr, idx, NULL);
 }
 
-void *Span_Get(MemCtx *m, Span *p, int idx){
+void *Span_Get(Span *p, int idx){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
-    status r = Span_GetSet(m, &sr, idx, NULL);
+    status r = Span_GetSet(NULL, &sr, idx, NULL);
     if(HasFlag(r, SUCCESS)){
         return sr.value;
     }else{

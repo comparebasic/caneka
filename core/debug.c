@@ -1,6 +1,8 @@
 #include <external.h>
 #include <filestore.h>
 
+Chain *DebugPrintChain = NULL;
+
 int DEBUG_SCURSOR = COLOR_DARK;
 int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = 0;
@@ -34,7 +36,6 @@ static void PatCharDef_Print(PatCharDef *def, char *msg, int color, boolean exte
         }
     }
 }
-
 
 static void Match_PrintPat(Match *mt, char *msg, int color, boolean extended){
     if(extended){
@@ -180,6 +181,30 @@ static void Range_Print(Range *range, char *msg, int color, boolean extended){
     printf("\x1b[1;>\n");
 }
 
+static status populateDebugPrint(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_MATCH, (void *)Match_Print);
+    r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
+    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
+    r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)String_Print);
+    r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
+    r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
+    r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
+    r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Slab_Print);
+    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    return r;
+}
+
+status Debug_Init(MemCtx *m){
+    if(DebugPrintChain == NULL){
+        Lookup *funcs = Lookup_Make(m, _TYPE_HTTP_START, populateDebugPrint, NULL);
+        DebugPrintChain = Chain_Make(m, funcs);
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     if(color >= 0){
         printf("\x1b[%dm", color);
@@ -194,28 +219,18 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
             type = u->type.of;
         }
     }
+
     if(t == NULL){
         printf("NULL");
-    }else if(type == TYPE_MATCH || type == TYPE_STRINGMATCH ){
-        Match_Print((Match *)t, msg, color, extended);
-    }else if(type == TYPE_PATCHARDEF){
-        PatCharDef_Print((PatCharDef *)t, msg, color, extended);
-    }else if( type == TYPE_PATMATCH ){
-        Match_PrintPat((Match *)t, msg, color, extended);
-    }else if(type == TYPE_STRING_CHAIN || type == TYPE_STRING_FIXED){
-        String_Print((String *)t, msg, color, extended);
-    }else if(type == TYPE_SCURSOR){
-        SCursor_Print((SCursor *)t, msg, color, extended);
-    }else if(type == TYPE_RANGE){
-        Range_Print((Range *)t, msg, color, extended);
-    }else if(type == TYPE_REQ){
-        Req_Print((Req *)t, msg, color, extended);
-    }else if(type == TYPE_SLAB){
-        Slab_Print((Slab *)t, msg, color, extended);
-    }else if(type == TYPE_SPAN){
-        Span_Print((Span *)t, msg, color, extended);
     }else{
-        printf("%s: %s unkown debug", msg, Class_ToString(type));
+        DebugPrintFunc *func = (DebugPrintFunc *)Chain_Get(DebugPrintChain, type);
+        if(func != NULL){
+            return func(t, type, msg, color, extended);
+        }else{
+            printf("%s: %s unkown debug", msg, Class_ToString(type));
+        }
+    }
+
     }
     if(color >= 0){
         printf("\x1b[0m");

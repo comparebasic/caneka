@@ -2,17 +2,9 @@
 #include <filestore.h>
 #include <proto/http.h>
 
-char *Method_ToString(int method){
-    if(method == TYPE_METHOD_GET){
-        return "GET";
-    }else if(method == TYPE_METHOD_SET){
-        return "SET";
-    }else if(method == TYPE_METHOD_UPDATE){
-        return "UPDATE";
-    }else{
-        return "UNKONWN_method";
-    }
-}
+status HttpProto_Init(MemCtx *m){
+    HttpProtoDebug_Init(m);
+    return SUCCESS;
 
 static char *toLog(Req *req){
     return "Request";

@@ -11,6 +11,8 @@ typedef struct http_proto {
     String *nextHeader;
 } HttpProto;
 
+status HttpProto_Init(MemCtx *m);
+
 ProtoDef *HttpProtoDef_Make(MemCtx *m, Serve *sctx);
 Proto *HttpProto_Make(MemCtx *m, Serve *sctx);
 Req *HttpReq_Make(MemCtx *m, Serve *sctx);

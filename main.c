@@ -44,6 +44,7 @@ static status handle(MemCtx *m, char *arg){
 }
 
 int main(int argc, char **argv){
+    Debug_Init(m);
     MemCtx *m = MemCtx_Make();
     Tokens_Init(m);
 

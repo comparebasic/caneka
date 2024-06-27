@@ -6,6 +6,10 @@
 #define COLOR_CYAN 36
 #define COLOR_DARK 37
 
+typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean extended);
+
+extern Chain *DebugPrintChain;
+status Debug_Init(MemCtx *m);
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
 
 extern int DEBUG_MATCH;

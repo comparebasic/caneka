@@ -147,6 +147,7 @@ status Serve_AcceptRound(Serve *sctx){
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
         
+        /*
         Req *req = sctx->proto->req(sctx->m, sctx);
         req->in.rbl = Roebling_Make(req->m, 
             TYPE_PARSER, sctx->proto->parsers, req->in.shelf, (Virtual *)req);
@@ -161,6 +162,7 @@ status Serve_AcceptRound(Serve *sctx){
 
             return SUCCESS;
         }
+        */
     }
 
     return NOOP;
