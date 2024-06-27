@@ -1,5 +1,5 @@
 #include <external.h>
-#include <filestore.h>
+#include <caneka.h>
 
 void *Lookup_Get(Lookup *lk, word type){
     return (void *)Span_Get(lk->values, type-lk->offset);

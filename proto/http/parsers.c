@@ -1,5 +1,5 @@
 #include <external.h>
-#include <filestore.h>
+#include <caneka.h>
 #include <proto/http.h>
 
 static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){

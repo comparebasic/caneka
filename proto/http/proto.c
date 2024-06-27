@@ -1,5 +1,5 @@
 #include <external.h>
-#include <filestore.h>
+#include <caneka.h>
 #include <proto/http.h>
 
 status HttpProto_Init(MemCtx *m){

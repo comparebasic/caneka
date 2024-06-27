@@ -1,5 +1,5 @@
 #include <external.h>
-#include <filestore.h>
+#include <caneka.h>
 #include <testsuite.h>
 
 static char *sid = "Azjfhuei3";

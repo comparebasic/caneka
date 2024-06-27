@@ -1,5 +1,5 @@
 #include <external.h>
-#include <filestore.h>
+#include <caneka.h>
 #include <testsuite.h>
 
 status Core_Tests(MemCtx *gm){

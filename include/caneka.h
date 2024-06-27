@@ -116,7 +116,6 @@ typedef struct parser *(*ParserMaker)(struct structexp *sexp);
 #include "log.h"
 #include "mem.h"
 #include "maker.h"
-#include "array.h"
 #include "string.h"
 #include "slab.h"
 #include "span.h"

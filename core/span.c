@@ -1,5 +1,5 @@
 #include <external.h>
-#include <filestore.h>
+#include <caneka.h>
 
 #define STRIDE SPAN_DIM_SIZE
 
