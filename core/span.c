@@ -45,13 +45,13 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
                 shelf_sl = sr->span->slab;
                 sr->span->slab = new_sl;
             }else{
-                exp_sl->items[0] = (Virtual *)new_sl;
+                exp_sl->items[0] = (Abstract *)new_sl;
             }
 
             needed /= STRIDE;
             exp_sl = new_sl;
         }
-        exp_sl->items[0] = (Virtual *)shelf_sl;
+        exp_sl->items[0] = (Abstract *)shelf_sl;
     }
 
     sr->slab = sr->span->slab;
@@ -84,7 +84,7 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
             }
             Slab *new_sl = openNewSlab(m, 
                 sr->local_idx, sr->offset, increment, (sr->span->type.state|RAW));
-            prev_sl->items[sr->local_idx] = (Virtual *)new_sl;
+            prev_sl->items[sr->local_idx] = (Abstract *)new_sl;
             prev_sl = sr->slab = new_sl;
         }else{
             prev_sl = sr->slab;
@@ -128,7 +128,7 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     return;
 }
 
-static status Span_GetSet(MemCtx *m, SlabResult *sr, int idx, Virtual *t){
+static status Span_GetSet(MemCtx *m, SlabResult *sr, int idx, Abstract *t){
     if(m == NULL && sr->op != SPAN_OP_GET){
         return ERROR;
     }
@@ -199,7 +199,7 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     return sp;
 }
 
-status Span_Set(MemCtx *m, Span *p, int idx, Virtual *t){
+status Span_Set(MemCtx *m, Span *p, int idx, Abstract *t){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
     return Span_GetSet(m, &sr, idx, t);
@@ -222,7 +222,7 @@ void *Span_Get(Span *p, int idx){
     }
 }
 
-int Span_Add(MemCtx *m, Span *p, Virtual *t){
+int Span_Add(MemCtx *m, Span *p, Abstract *t){
     int idx = Span_NextIdx(p);
     if(Span_Set(m, p, idx, t) == SUCCESS){
         return p->max_idx;

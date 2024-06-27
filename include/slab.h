@@ -2,7 +2,7 @@ typedef struct span_slab {
     Type type;
     int increment;
     int offset;
-    Virtual *items[SPAN_DIM_SIZE];
+    Abstract *items[SPAN_DIM_SIZE];
 } Slab;
 
 typedef struct slab_result {
@@ -18,7 +18,7 @@ typedef struct slab_result {
     byte slotSize;
     byte local_idx;
     byte level;
-    Virtual *value;
+    Abstract *value;
 } SlabResult;
 
 Slab* Slab_Alloc(MemCtx* m, status flags);

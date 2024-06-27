@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 void *Chain_Get(Chain *chain, word type){
-    Virtual *t = Lookup_Get(chain->funcs, type);
+    Abstract *t = Lookup_Get(chain->funcs, type);
     if(t != NULL){
        return (void *)t; 
     }

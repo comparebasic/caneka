@@ -1,1 +1,1 @@
-typedef Virtual *(*Maker)(struct mem_ctx *m, Virtual *v);
+typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *v);

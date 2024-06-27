@@ -23,19 +23,15 @@ typedef struct typehdr {
     status state;
 } Type;
 
-typedef struct unit {
-    Type type;
-} Unit;
-
 typedef struct virt  {
     Type type;
-} Virtual;
+} Abstract;
 
 #define MAX_BASE10 20
 #define SPAN_DIM_SIZE 16
 #define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
-#define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Unit *))
+#define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Abstract *))
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
@@ -105,7 +101,7 @@ enum positions {
 
 char *State_ToString(status state);
 char *Class_ToString(cls type);
-Virtual *Maker_Make(struct mem_ctx *m, void *mk, cls type);
+Abstract *Maker_Make(struct mem_ctx *m, void *mk, cls type);
 
 #define COMPLETE SUCCESS
 #define TEST_OK READY

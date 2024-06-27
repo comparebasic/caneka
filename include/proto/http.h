@@ -5,7 +5,7 @@ typedef struct http_proto {
     byte method;
     String *body;
     String *host;
-    Virtual *session;
+    Abstract *session;
     /* mid parsing */
     i64 contentLength;
     String *nextHeader;

@@ -24,8 +24,8 @@ typedef struct span {
 
 Span* Span_Make(MemCtx* m);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
-status Span_Set(MemCtx *m, Span *p, int idx, Virtual *t);
+status Span_Set(MemCtx *m, Span *p, int idx, Abstract *t);
 status Span_Remove(Span *p, int idx);
 void *Span_Get(Span *p, int idx);
-int Span_Add(MemCtx *m, Span *p, Virtual *t);
+int Span_Add(MemCtx *m, Span *p, Abstract *t);
 #define Span_NextIdx(p) (p->max_idx+1)

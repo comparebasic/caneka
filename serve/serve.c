@@ -150,7 +150,7 @@ status Serve_AcceptRound(Serve *sctx){
         /*
         Req *req = sctx->proto->req(sctx->m, sctx);
         req->in.rbl = Roebling_Make(req->m, 
-            TYPE_PARSER, sctx->proto->parsers, req->in.shelf, (Virtual *)req);
+            TYPE_PARSER, sctx->proto->parsers, req->in.shelf, (Abstract *)req);
 
         if(sctx != NULL){
             status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 

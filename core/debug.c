@@ -77,7 +77,7 @@ static void Req_Print(Req *req, char *msg, int color, boolean extended){
         msg, color, State_ToString(req->state), Proto_ToChars(req->proto));
 }
 
-static void Unit_Print(Unit *t, char *msg, int color, boolean extended){
+static void Abstract_Print(Abstract *t, char *msg, int color, boolean extended){
     if(t == NULL){
         printf("u0");
     }else{
@@ -89,7 +89,7 @@ static void slab_Summarize(Slab *slab, char *msg, int color, boolean extended){
     printf("%s\x1b[0;%dmL<incr%d[%d] ", msg, color, slab->increment, slab->offset);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
-        Virtual *t = slab->items[i];
+        Abstract *t = slab->items[i];
         if(t != NULL){
             if(!first){
                 printf(", ");
@@ -118,7 +118,7 @@ static void Slab_Print(Slab *slab, char *msg, int color, boolean extended){
     printf("%s\x1b[%dmL<icr%d[%d] \x1b[%dm", msg, color, slab->increment, slab->offset, color);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
-        Virtual *t = slab->items[i];
+        Abstract *t = slab->items[i];
         if(t != NULL){
             if(!first){
                 printf(", ");
@@ -142,7 +142,7 @@ static void showSlab(Slab *sl, int color, boolean extended, int indent){
         printf("\n");
         boolean first = TRUE;
         for(int i = 0; i < SPAN_DIM_SIZE; i++){
-            Virtual *t = sl->items[i];
+            Abstract *t = sl->items[i];
             if(t != NULL){
                 if(!first){
                     printf("\n");
@@ -160,7 +160,7 @@ static void showSlab(Slab *sl, int color, boolean extended, int indent){
 
 static void Span_Print(Span *p, char *msg, int color, boolean extended){
     printf("%s\n\x1b[;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
-        p->nvalues, p->dims, sizeof(Unit *)*p->slotSize);
+        p->nvalues, p->dims, sizeof(Abstract *)*p->slotSize);
     printf("\n");
     indent_Print(1);
     showSlab(p->slab, color, extended, 1);
@@ -215,7 +215,7 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
             printf("%s\x1b[%dm0\x1b[0m", msg, color);
             return;
         }else{
-            Unit *u = (Unit *)t;
+            Abstract *u = (Abstract *)t;
             type = u->type.of;
         }
     }

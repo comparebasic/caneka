@@ -5,7 +5,7 @@ char *Proto_ToChars(Proto *proto){
     return "Proto";
 }
 
-ProtoDef *ProtoDef_Make(MemCtx *m, Lookup *handlers, Lookup *methods, Virtual *virt){
+ProtoDef *ProtoDef_Make(MemCtx *m, Lookup *handlers, Lookup *methods, Abstract *virt){
     ProtoDef *def = (ProtoDef *)MemCtx_Alloc(m, sizeof(ProtoDef));
     def->type.of = TYPE_PROTODEF;
     def->handlers = handlers;

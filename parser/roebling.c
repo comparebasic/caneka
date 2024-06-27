@@ -51,7 +51,7 @@ status Roebling_Run(Roebling *rbl){
     return rbl->state;
 }
 
-Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Virtual *source){
+Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source){
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->m = m;
     rbl->type = type;

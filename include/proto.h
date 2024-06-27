@@ -11,8 +11,8 @@ typedef struct protodef {
     MakeReq req;
     Lookup *handlers;
     Lookup *methods;
-    Virtual *virt;
+    Abstract *virt;
 } ProtoDef;
 
-ProtoDef *ProtoDef_Make(MemCtx *m, Lookup *handlers, Lookup *methods, Virtual *virt);
+ProtoDef *ProtoDef_Make(MemCtx *m, Lookup *handlers, Lookup *methods, Abstract *virt);
 char *Proto_ToChars(struct proto *proto);

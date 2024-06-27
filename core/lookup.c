@@ -7,10 +7,10 @@ void *Lookup_Get(Lookup *lk, word type){
 
 status Lookup_Add(Lookup *lk, word type, void *value){
     return Span_Set(m,
-        lk->values, TYPE_METHOD_UPDATE-lk->offset,  (Virtual *)value);
+        lk->values, TYPE_METHOD_UPDATE-lk->offset,  (Abstract *)value);
 }
 
-Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Virtual *arg){
+Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *arg){
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
     lk->offset = offset;
     lk->values = Span_Make(m);

@@ -21,13 +21,13 @@ Proto *HttpProto_Make(MemCtx *m, Serve *sctx){
 static status populateMethods(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Span_Set(m,
-        lk->values, TYPE_METHOD_GET-lk->offset, (Virtual *)String_Make(m, bytes("GET")));
+        lk->values, TYPE_METHOD_GET-lk->offset, (Abstract *)String_Make(m, bytes("GET")));
     r |= Span_Set(m,
-        lk->values, TYPE_METHOD_POST-lk->offset,  (Virtual *)String_Make(m, bytes("POST")));
+        lk->values, TYPE_METHOD_POST-lk->offset,  (Abstract *)String_Make(m, bytes("POST")));
     r |= Span_Set(m,
-        lk->values, TYPE_METHOD_SET-lk->offset,  (Virtual *)String_Make(m, bytes("SET")));
+        lk->values, TYPE_METHOD_SET-lk->offset,  (Abstract *)String_Make(m, bytes("SET")));
     r |= Span_Set(m,
-        lk->values, TYPE_METHOD_UPDATE-lk->offset,  (Virtual *)String_Make(m, bytes("UPDATE")));
+        lk->values, TYPE_METHOD_UPDATE-lk->offset,  (Abstract *)String_Make(m, bytes("UPDATE")));
     return r;
 }
 

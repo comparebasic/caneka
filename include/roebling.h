@@ -14,5 +14,5 @@ typedef struct structexp {
     Lookup *gotos;
 } Roebling;
 
-Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Virtual *source);
+Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source);
 status Roebling_Run(Roebling *sexp);

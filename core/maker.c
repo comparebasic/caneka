@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-Virtual *Maker_Make(MemCtx*m, void *mk, cls type){
-    Virtual *v = (Vitrual *)MemCtx_Alloct(m, sizeof(Virtual));
+Abstract *Maker_Make(MemCtx*m, void *mk, cls type){
+    Abstract *v = (Vitrual *)MemCtx_Alloct(m, sizeof(Abstract));
     v->type.of = TYPE_MAKER;
     v->type.state = type;
     v->ptr = (util)mk;
