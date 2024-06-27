@@ -223,14 +223,12 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     if(t == NULL){
         printf("NULL");
     }else{
-        DebugPrintFunc *func = (DebugPrintFunc *)Chain_Get(DebugPrintChain, type);
+        DebugPrintFunc func = (DebugPrintFunc)Chain_Get(DebugPrintChain, type);
         if(func != NULL){
             return func(t, type, msg, color, extended);
         }else{
             printf("%s: %s unkown debug", msg, Class_ToString(type));
         }
-    }
-
     }
     if(color >= 0){
         printf("\x1b[0m");

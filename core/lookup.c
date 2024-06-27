@@ -5,7 +5,7 @@ void *Lookup_Get(Lookup *lk, word type){
     return (void *)Span_Get(lk->values, type-lk->offset);
 }
 
-status Lookup_Add(Lookup *lk, word type, void *value){
+status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     return Span_Set(m,
         lk->values, TYPE_METHOD_UPDATE-lk->offset,  (Abstract *)value);
 }

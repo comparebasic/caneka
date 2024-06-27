@@ -16,9 +16,9 @@ static char *Method_ToString(int method){
     }
 }
 
-static HttpProto_Print(void *t, cls type, char *msg, int color, boolean extended){
+static void HttpProto_Print(void *t, cls type, char *msg, int color, boolean extended){
     HttpProto *proto = (HttpProto *)t;
-    printf("Http<%s %s>", Method_ToString(t->method), t->path->bytes);
+    printf("Http<%s %s>", Method_ToString(proto->method), proto->path->bytes);
 }
 
 static status populateHttpDebugPrint(MemCtx *m, Lookup *lk){
@@ -30,8 +30,7 @@ static status populateHttpDebugPrint(MemCtx *m, Lookup *lk){
 status HttpProtoDebug_Init(MemCtx *m){
     if(debugChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_HTTP_START, populateHttpDebugPrint, NULL);
-        debugChain = Chain_Make(m, funcs);
-        Chain_Extend(m, DebugPrintChain, debugChain); 
+        Chain_Extend(m, DebugPrintChain, funcs); 
         return SUCCESS;
     }
     return NOOP;

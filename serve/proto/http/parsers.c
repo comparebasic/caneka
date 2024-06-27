@@ -10,7 +10,7 @@ static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_Method(Roebling *sexp){
+Parser *Parser_Method(Roebling *rbl){
     /*
     Req *req = (Req *)sexp->source;
     int length = Array_Length((void **)req->sctx->methods);
@@ -25,8 +25,8 @@ Parser *Parser_Method(Roebling *sexp){
     return NULL;
 }
 
-Parser *Parser_Space(Roebling *sexp){
-    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, space_tk, ANCHOR_START, 0), NULL);
+Parser *Parser_Space(Roebling *rbl){
+    return Parser_MakeSingle(rbl->m, Match_Make(rbl->m, String_From(rbl->m, bytes(" ")), ANCHOR_START, 0), NULL);
 }
 
 static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
@@ -36,19 +36,19 @@ static status Parser_PathComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_Path(Roebling *sexp){
-    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, space_tk, ANCHOR_UNTIL, 0), Parser_PathComplete);
+Parser *Parser_Path(Roebling *rbl){
+    return Parser_MakeSingle(rbl->m, Match_Make(rbl->m, String_From(rbl->m, bytes(" ")), ANCHOR_UNTIL, 0), Parser_PathComplete);
 }
 
-Parser *Parser_HttpV(Roebling *sexp){
-    return Parser_MakeSingle(sexp->m, 
-        Match_MakePat(sexp->m, (byte *)HttpV_RangeDef, Match_PatLength(HttpV_RangeDef), ANCHOR_START, 0), NULL);
+Parser *Parser_HttpV(Roebling *rbl){
+    return Parser_MakeSingle(rbl->m, 
+        Match_MakePat(rbl->m, (byte *)HttpV_RangeDef, Match_PatLength(HttpV_RangeDef), ANCHOR_START, 0), NULL);
 }
 
-Parser *Parser_EndNl(Roebling *sexp){
-    Match *mt = Match_MakePat(sexp->m, 
+Parser *Parser_EndNl(Roebling *rbl){
+    Match *mt = Match_MakePat(rbl->m, 
         (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_START, 0);
-    return Parser_MakeSingle(sexp->m, mt, NULL);
+    return Parser_MakeSingle(rbl->m, mt, NULL);
 }
 
 static status Parser_HComplete(Parser *prs, Range *range, void *_req){
@@ -63,19 +63,19 @@ static status Parser_HComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_HEndNl(Roebling *sexp){
-    Match *mt = Match_MakePat(sexp->m, 
+Parser *Parser_HEndNl(Roebling *rbl){
+    Match *mt = Match_MakePat(rbl->m, 
         (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_UNTIL, 0);
-    Parser *prs =  Parser_MakeSingle(sexp->m, mt, Parser_HComplete);
+    Parser *prs =  Parser_MakeSingle(rbl->m, mt, Parser_HComplete);
     prs->flags |= CYCLE_LOOP;
     return prs;
 }
 
-Parser *Parser_HEndAllNl(Roebling *sexp){
-    Match *mt = Match_MakePat(sexp->m, 
+Parser *Parser_HEndAllNl(Roebling *rbl){
+    Match *mt = Match_MakePat(rbl->m, 
         (byte *)EndNl_RangeDef, Match_PatLength(EndNl_RangeDef), ANCHOR_START, 0);
     mt->flags |= CYCLE_BREAK;
-    return Parser_MakeSingle(sexp->m, mt, NULL);
+    return Parser_MakeSingle(rbl->m, mt, NULL);
 }
 
 static status Parser_HKeyComplete(Parser *prs, Range *range, void *_req){
@@ -85,6 +85,6 @@ static status Parser_HKeyComplete(Parser *prs, Range *range, void *_req){
     return SUCCESS;
 }
 
-Parser *Parser_HColon(Roebling *sexp){
-    return Parser_MakeSingle(sexp->m, Match_Make(sexp->m, String_Make(sexp->m, (byte *)":"), ANCHOR_UNTIL, 0), Parser_HKeyComplete);
+Parser *Parser_HColon(Roebling *rbl){
+    return Parser_MakeSingle(rbl->m, Match_Make(rbl->m, String_Make(rbl->m, (byte *)":"), ANCHOR_UNTIL, 0), Parser_HKeyComplete);
 }

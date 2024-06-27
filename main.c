@@ -44,14 +44,13 @@ static status handle(MemCtx *m, char *arg){
 }
 
 int main(int argc, char **argv){
-    Debug_Init(m);
-    MemCtx *m = MemCtx_Make();
-    Tokens_Init(m);
-
     if(argc == 1){
         printf("%s [test,serve=port]", argv[0]);
         exit(1);
     }
+
+    MemCtx *m = MemCtx_Make();
+    Debug_Init(m);
     
     if(argc > 1){
         for(int i = 1; i < argc; i++){

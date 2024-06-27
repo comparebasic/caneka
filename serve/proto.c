@@ -1,5 +1,5 @@
 #include <external.h>
-#include <filestore.h>
+#include <caneka.h>
 
 char *Proto_ToChars(Proto *proto){
     return "Proto";

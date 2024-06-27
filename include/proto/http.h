@@ -28,3 +28,5 @@ Parser *Parser_EndNl(Roebling *sexp);
 Parser *Parser_HColon(Roebling *sexp);
 Parser *Parser_HEndAllNl(Roebling *sexp);
 Parser *Parser_HEndNl(Roebling *sexp);
+
+status HttpProtoDebug_Init(MemCtx *m);

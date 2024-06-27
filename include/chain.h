@@ -4,6 +4,6 @@ typedef struct chain {
     struct chain *next;
 } Chain;
 
-Chain *Chain_Make(MemCtx *m);
-status Chain_Extend(MemCtx *m, Chain *chain, Lookup *funcs);
+Chain *Chain_Make(struct mem_ctx *m, struct lookup *funcs);
+status Chain_Extend(struct mem_ctx *m, Chain *chain, struct lookup *funcs);
 void *Chain_Get(Chain *chain, word type);

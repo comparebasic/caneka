@@ -5,6 +5,7 @@
 status HttpProto_Init(MemCtx *m){
     HttpProtoDebug_Init(m);
     return SUCCESS;
+}
 
 static char *toLog(Req *req){
     return "Request";
