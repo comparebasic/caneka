@@ -12,8 +12,7 @@ status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
         Fatal("Adding lookup value below zero", TYPE_UNIT);
     }
-    return Span_Set(m,
-        lk->values, (int)(type-lk->offset), (Abstract *)value);
+    return Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value);
 }
 
 Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *arg){

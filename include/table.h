@@ -6,4 +6,5 @@ typedef struct table {
     Span *values;
 } Table;
 
-Abstract *Table_Get(MemCtx *m, Table *tbl, Abstract *a);
+Abstract *Table_Get(Table *tbl, Abstract *a);
+Abstract *StringTable_Get(Table *tbl, Abstract *a);

@@ -128,7 +128,8 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     return;
 }
 
-static status Span_GetSet(MemCtx *m, SlabResult *sr, int idx, Abstract *t){
+static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
+    MemCtx *m = sr->span->m;
     if(m == NULL && sr->op != SPAN_OP_GET){
         return ERROR;
     }
@@ -172,6 +173,7 @@ static Span* Span_Init(MemCtx* m){
 
 Span* Span_Make(MemCtx* m){
     Span *p = Span_Init(m);
+    p->m = m;
     p->max_idx = -1;
     p->slotSize = 1;
     p->slab = Slab_Alloc(m, (p->type.state|RAW));
@@ -199,22 +201,22 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     return sp;
 }
 
-status Span_Set(MemCtx *m, Span *p, int idx, Abstract *t){
+status Span_Set(Span *p, int idx, Abstract *t){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
-    return Span_GetSet(m, &sr, idx, t);
+    return Span_GetSet(&sr, idx, t);
 }
 
 status Span_Remove(Span *p, int idx){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_REMOVE, idx);
-    return Span_GetSet(NULL, &sr, idx, NULL);
+    return Span_GetSet(&sr, idx, NULL);
 }
 
 void *Span_Get(Span *p, int idx){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
-    status r = Span_GetSet(NULL, &sr, idx, NULL);
+    status r = Span_GetSet(&sr, idx, NULL);
     if(HasFlag(r, SUCCESS)){
         return sr.value;
     }else{
@@ -222,9 +224,9 @@ void *Span_Get(Span *p, int idx){
     }
 }
 
-int Span_Add(MemCtx *m, Span *p, Abstract *t){
+int Span_Add(Span *p, Abstract *t){
     int idx = Span_NextIdx(p);
-    if(Span_Set(m, p, idx, t) == SUCCESS){
+    if(Span_Set(p, idx, t) == SUCCESS){
         return p->max_idx;
     }
 

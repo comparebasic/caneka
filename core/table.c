@@ -7,8 +7,12 @@ static int getReQueryKey(i64 hash, int position, byte dim){
     return (int) ((hash >> (position*4)) & TABLE_DIM_LOOKUPS[dim]);
 }
 
-Abstract *Table_Get(MemCtx *m, Table *tbl, Abstract *a){
-    Hashed *h = Hashed_Make(m, a);
+Abstract *Table_Get(Table *tbl, Abstract *a){
+    if(tbl->type.of == TYPE_STRINGTABLE){
+        return StringTable_Get(tbl, a);
+    }
+
+    Hashed *h = Hashed_Make(tbl->values->m, a);
 
     int dims = tbl->values->dims; 
     Abstract *v = NULL;
@@ -31,4 +35,8 @@ Abstract *Table_Get(MemCtx *m, Table *tbl, Abstract *a){
     }
 
     return v;
+}
+
+Abstract *StringTable_Get(Table *tbl, Abstract *a){
+    return NULL;
 }

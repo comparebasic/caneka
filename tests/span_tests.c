@@ -13,13 +13,13 @@ status Span_Tests(MemCtx *gm){
         Class_ToString(TYPE_SPAN), Class_ToString(p->type.of));
 
     String *s1 = String_From(m, bytes("Hello there"));
-    Span_Add(m, p, (Abstract *)s1);
+    Span_Add(p, (Abstract *)s1);
     String *s7 = String_From(m, bytes("Seven"));
-    Span_Set(m, p, 6, (Abstract *)s7);
+    Span_Set(p, 6, (Abstract *)s7);
     String *s3 = String_From(m, bytes("Three"));
-    Span_Set(m, p, 2, (Abstract *)s3);
+    Span_Set(p, 2, (Abstract *)s3);
     String *s8 = String_From(m, bytes("Eight"));
-    Span_Add(m, p, (Abstract *)s8);
+    Span_Add(p, (Abstract *)s8);
 
     s = (String *)Span_Get(p, 0);
     r |= Test(s->type.of == s1->type.of, "Span item 0 has type string %s found %s", 
@@ -46,13 +46,13 @@ status Span_Tests(MemCtx *gm){
         s8->bytes, s->bytes);
 
     String *s4079 = String_From(m, bytes("Four Hundred Seventy Nine"));
-    Span_Set(m, p, 4078, (Abstract *)s4079);
+    Span_Set(p, 4078, (Abstract *)s4079);
 
     String *s512 = String_From(m, bytes("Five Twelve"));
-    Span_Set(m, p, 511, (Abstract *)s512);
+    Span_Set(p, 511, (Abstract *)s512);
 
     String *s513 = String_From(m, bytes("Five Thirteen"));
-    Span_Set(m, p, 512, (Abstract *)s513);
+    Span_Set(p, 512, (Abstract *)s513);
 
     Debug_Print((void *)p, TYPE_SPAN, "Span after first insert(s) ", COLOR_CYAN, TRUE);
 
@@ -97,8 +97,6 @@ status Span_Tests(MemCtx *gm){
         Class_ToString(s513->type.of), Class_ToString(s->type.of));
     r |= Test(String_Equals(s513, s), "String 513 equals %s found %s", 
         s513->bytes, s->bytes);
-
-
 
     MemCtx_Free(m);
     return r;

@@ -73,6 +73,8 @@ enum types {
     TYPE_CHAIN,
     TYPE_HASHED,
     TYPE_HASHED_LINKED,
+    TYPE_TABLE,
+    TYPE_STRINGTABLE,
     _TYPE_CORE_END,
 };
 
