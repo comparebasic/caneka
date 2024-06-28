@@ -3,12 +3,13 @@ CFLAGS = --target=x86_64-unknown-linux-musl -g -Werror -Wno-incompatible-pointer
 INC = -I/usr/local/musl/include/ -I./include 
 
 coreobj = core/caneka.o core/mem.o core/string.o core/error.o core/debug.o \
-	core/log.o core/slab.o core/span.o core/lookup.o core/chain.o core/testsuite.o
+	core/log.o core/slab.o core/span.o core/lookup.o core/chain.o core/testsuite.o \
+    core/hash.o core/table.o
 parserobj = parser/parsers.o parser/match.o parser/roebling.o parser/scursor.o
 serveobj = serve/req.o serve/serve.o serve/proto.o 
 httpobj = serve/proto/http/proto.o serve/proto/http/parsers.o serve/proto/http/pat_matches.o serve/proto/http/debug.o
 testobj = tests/core_tests.o tests/string_tests.o tests/serve_tests.o \
-	tests/span_tests.o
+	tests/span_tests.o tests/hash_tests.o
 
 allobj = $(coreobj) $(testobj) $(parserobj) $(httpobj) $(serveobj)
 

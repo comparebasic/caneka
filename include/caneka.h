@@ -5,7 +5,6 @@ typedef word status;
 typedef byte boolean;
 typedef uint32_t dword;
 typedef uint64_t i64;
-typedef i64 hash;
 typedef i64 util;
 
 struct serve_ctx;
@@ -72,6 +71,7 @@ enum types {
     TYPE_SPAN,
     TYPE_SLAB,
     TYPE_CHAIN,
+    TYPE_HASHED,
     _TYPE_CORE_END,
 };
 
@@ -94,6 +94,7 @@ enum status_types {
     SUCCESS = 1 << 8,
     RAW = 1 << 9,
     MISS = 1 << 10,
+    HASHED = 1 << 11,
 };
 
 #define HasFlag(x, fl) ((x & (fl)) == fl) 
@@ -116,10 +117,12 @@ typedef struct parser *(*ParserMaker)(struct structexp *sexp);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
+#include "hash.h"
 #include "maker.h"
 #include "string.h"
 #include "slab.h"
 #include "span.h"
+#include "table.h"
 #include "tokens.h"
 #include "match.h"
 #include "scursor.h"
@@ -131,3 +134,5 @@ typedef struct parser *(*ParserMaker)(struct structexp *sexp);
 #include "serve.h"
 #include "req.h"
 #include "debug.h"
+
+status Caneka_Init(MemCtx *m);

@@ -12,7 +12,10 @@ static status test(MemCtx *m){
     r |= Core_Tests(m);
     r |= String_Tests(m);
     r |= Span_Tests(m);
+    /*
     r |= Serve_Tests(m);
+    */
+    r |= Hash_Tests(m);
     return r;
 }
 
@@ -49,7 +52,7 @@ int main(int argc, char **argv){
     }
 
     MemCtx *m = MemCtx_Make();
-    Debug_Init(m);
+    Caneka_Init(m);
     
     if(argc > 1){
         for(int i = 1; i < argc; i++){

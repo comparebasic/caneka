@@ -250,3 +250,16 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     }
     fflush(stdout);
 }
+
+void Bits_Print(byte *bt, int length, char *msg, int color){
+    printf("\x1b[%dm%s", color, msg);
+    for(int i = length-1; i >= 0;i--){
+        byte b = bt[i];
+        printf(" %03hu=", b);
+        for(int j = 7; j >= 0;j--){
+            printf("%c", (b & (1 << j)) ? '1' : '0');
+        }
+    }
+    printf("\x1b[0m");
+}
+

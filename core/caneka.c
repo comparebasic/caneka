@@ -1,6 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
+status Caneka_Init(MemCtx *m){
+    status r = READY;
+    r |= Debug_Init(m);
+    r |= Hash_Init(m);
+    return r;
+}
+
 char *State_ToString(status state){
     if(state == READY){
         return "READY";
