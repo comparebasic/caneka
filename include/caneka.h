@@ -72,6 +72,7 @@ enum types {
     TYPE_SLAB,
     TYPE_CHAIN,
     TYPE_HASHED,
+    TYPE_HASHED_LINKED,
     _TYPE_CORE_END,
 };
 
@@ -117,6 +118,7 @@ typedef struct parser *(*ParserMaker)(struct structexp *sexp);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
+#include "compare.h"
 #include "hash.h"
 #include "maker.h"
 #include "string.h"

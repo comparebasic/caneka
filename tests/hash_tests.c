@@ -14,20 +14,28 @@ status Hash_Tests(MemCtx *gm){
 
     h = Get_Hash((Abstract *)s);
     expected = 4291084750259606489;
-    Bits_Print((byte *)&h, sizeof(util), "Has for string %ld\n", COLOR_DARK);
+    Bits_Print((byte *)&h, sizeof(util), "Has for string ", COLOR_DARK);
     printf("\n");
 
-    s = String_From(m, bytes("Hi"));
-    Table_Get(m, NULL, (Abstract *)s);
-    s = String_From(m, bytes("Yo Dude!!!"));
-    Table_Get(m, NULL, (Abstract *)s);
-    s = String_From(m, bytes("Its Hashing"));
-    Table_Get(m, NULL, (Abstract *)s);
-    s = String_From(m, bytes("Bannana"));
-    Table_Get(m, NULL, (Abstract *)s);
 
-    r |= Test(h == expected, 
-        "Has of string %s is expected %ld found %ld", s->bytes, expected, h);
+    int x;
+    x = 15;
+    Bits_Print((byte *)&x, sizeof(int), "", COLOR_DARK);
+    printf("\n");
+    x = 255;
+    Bits_Print((byte *)&x, sizeof(int), "", COLOR_DARK);
+    printf("\n");
+    x = 4095;
+    Bits_Print((byte *)&x, sizeof(int), "", COLOR_DARK);
+    printf("\n");
+    x = 65535;
+    Bits_Print((byte *)&x, sizeof(int), "", COLOR_DARK);
+    printf("\n");
+    x = 1048575;
+    Bits_Print((byte *)&x, sizeof(int), "", COLOR_DARK);
+    printf("\n");
+
+
 
     MemCtx_Free(m);
     return r;

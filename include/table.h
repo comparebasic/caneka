@@ -1,5 +1,5 @@
 #define TABLE_MAX_DIMS 5
-int TABLE_DIM_LOOKUPS[5] = {15, 16*16, 16*16*16, 16*16*16*16, 16*16*16*16*16};
+extern int TABLE_DIM_LOOKUPS[];
 
 typedef struct table {
     Type type;
