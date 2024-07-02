@@ -14,7 +14,7 @@ status Hash_Tests(MemCtx *gm){
 
     h = Get_Hash((Abstract *)s);
     expected = 4291084750259606489;
-    Bits_Print((byte *)&h, sizeof(util), "Has for string ", COLOR_DARK);
+    Bits_Print((byte *)&h, sizeof(util), "Hash for string ", COLOR_DARK);
     printf("\n");
 
 

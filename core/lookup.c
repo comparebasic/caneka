@@ -2,10 +2,10 @@
 #include <caneka.h>
 
 void *Lookup_Get(Lookup *lk, word type){
-    if(type < lk->offset){
-        Fatal("Adding lookup value below zero", TYPE_UNIT);
+    if(type >= lk->offset && type < lk->offset+lk->values->max_idx){
+        return (void *)Span_Get(lk->values, (int)(type-lk->offset));
     }
-    return (void *)Span_Get(lk->values, (int)(type-lk->offset));
+    return NULL;
 }
 
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){

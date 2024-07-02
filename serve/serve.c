@@ -146,7 +146,8 @@ status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
-        Debug_Print(sctx->proto, TYPE_HTTP_PROTO, "Accept with proto", COLOR_DARK, TRUE);
+        Debug_Print(sctx->proto, 0, "Accept with proto", COLOR_DARK, TRUE);
+        printf("\n");
         /*
         Req *req = sctx->proto->req(sctx->m, sctx);
         req->in.rbl = Roebling_Make(req->m, 

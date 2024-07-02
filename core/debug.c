@@ -196,6 +196,11 @@ static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean ext
     printf("\x1b[1;>\n");
 }
 
+static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    ProtoDef *proto = (ProtoDef *)a;
+    printf("\x1b[%dm%sProtoDef<%d>\x1b[0m", color, msg, proto->methods->values->nvalues);
+}
+
 static status populateDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);
@@ -210,6 +215,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Slab_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     return r;
 }
 
