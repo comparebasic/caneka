@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 void *Lookup_Get(Lookup *lk, word type){
-    if(type >= lk->offset && type < lk->offset+lk->values->max_idx){
+    if(type >= lk->offset && type <= lk->offset+lk->values->max_idx){
         return (void *)Span_Get(lk->values, (int)(type-lk->offset));
     }
     return NULL;

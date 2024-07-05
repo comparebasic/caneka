@@ -14,5 +14,5 @@ typedef struct protodef {
     Abstract *virt;
 } ProtoDef;
 
-ProtoDef *ProtoDef_Make(MemCtx *m, Lookup *handlers, Lookup *methods, Abstract *virt);
+ProtoDef *ProtoDef_Make(MemCtx *m, cls type, Lookup *handlers, Lookup *methods, Abstract *virt);
 char *Proto_ToChars(struct proto *proto);

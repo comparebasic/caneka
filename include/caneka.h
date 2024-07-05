@@ -75,6 +75,7 @@ enum types {
     TYPE_HASHED_LINKED,
     TYPE_TABLE,
     TYPE_STRINGTABLE,
+    TYPE_LOOKUP,
     _TYPE_CORE_END,
 };
 

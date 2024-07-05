@@ -25,9 +25,26 @@ static void HttpProto_Print(void *t, cls type, char *msg, int color, boolean ext
     printf("Http<%s %s>", Method_ToString(proto->method), proto->path->bytes);
 }
 
+static void HttpProtoDef_Print(void *t, cls type, char *msg, int color, boolean extended){
+    if(((Abstract *)t)->type.state != TYPE_HTTP_PROTODEF){
+        Fatal("Incorrect type", TYPE_HTTP_PROTODEF);
+        return;
+    }
+    ProtoDef *def = (ProtoDef *)t;
+    printf("\x1b[%dmHttpProtoDef<HTTP", color);
+    if(def->methods != NULL){
+        printf(", method:%d", def->methods->values->nvalues);
+        /*
+        Debug_Print((void *)def->methods->values, def->methods->values->type.of, "", color, extended);
+        */
+    }
+    printf(">\x1b[0m");
+}
+
 static status populateHttpDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
+    r |= Lookup_Add(m, lk, TYPE_HTTP_PROTODEF, (void *)HttpProtoDef_Print);
     return r;
 }
 

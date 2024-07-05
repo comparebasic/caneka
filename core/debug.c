@@ -198,7 +198,11 @@ static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean ext
 
 static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     ProtoDef *proto = (ProtoDef *)a;
-    printf("\x1b[%dm%sProtoDef<%d>\x1b[0m", color, msg, proto->methods->values->nvalues);
+    if(a->type.state != 0){
+        Debug_Print((void *)a, a->type.state, msg, color, extended);
+    }else{
+        printf("\x1b[%dm%sProtoDef<unknown>\x1b[0m", color, msg);
+    }
 }
 
 static status populateDebugPrint(MemCtx *m, Lookup *lk){
