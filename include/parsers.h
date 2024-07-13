@@ -7,7 +7,7 @@ typedef struct parser {
     int idx;
     ParseFunc func;
     ParseFunc complete;
-} Parser;
+} Parser; /*rp*/
 
 Parser *Parser_Make(MemCtx *m, cls type);
 Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete);

@@ -232,3 +232,15 @@ int Span_Add(Span *p, Abstract *t){
 
     return 0;
 }
+
+Span *Span_From(MemCtx *m, int count, ...){
+    Span *p = Span_Make(m);
+    Abstract *v = NULL;
+	va_list arg;
+    va_start(arg, count);
+    for(int i = 0; i < count; i++){
+        v = va_arg(arg, AbstractPtr);
+        Span_Add(p, v);
+    }
+    return p;
+}

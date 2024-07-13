@@ -1,6 +1,7 @@
 enum proto_types {
     _TYPE_PROTO_START = _TYPE_CORE_END,
     TYPE_HTTP_PROTO,
+    TYPE_HTTP_REQ,
     TYPE_HTTP_PROTODEF,
     _TYPE_PROTO_END,
     _TYPE_HTTP_START,

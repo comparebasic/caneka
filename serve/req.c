@@ -74,6 +74,7 @@ Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
     req->sctx = sctx;
     req->proto = proto;
     req->direction = direction;
+
     return req;
 }
 

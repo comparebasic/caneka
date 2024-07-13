@@ -12,7 +12,8 @@ static char *toLog(Req *req){
 
 Proto *HttpProto_Make(MemCtx *m, Serve *sctx){
     HttpProto *p = (HttpProto *)MemCtx_Alloc(m, sizeof(HttpProto));
-    p->type.of = TYPE_HTTP_PROTODEF;
+    p->type.of = TYPE_HTTP_PROTO;
+    p->path = String_Init(m, 0);
     p->toLog = toLog;
 
     return (Proto *)p;
@@ -20,8 +21,9 @@ Proto *HttpProto_Make(MemCtx *m, Serve *sctx){
 
 Req *HttpReq_Make(MemCtx *_m, Serve *sctx){
     MemCtx *m = MemCtx_Make();
-    HttpProto *proto = (HttpProto *)HttpProto_Make(m, sctx);;
+    HttpProto *proto = (HttpProto *)HttpProto_Make(m, sctx);
     Req *req =  Req_Make(m, sctx, (Proto *)proto, -1);
+    req->type.of = TYPE_HTTP_REQ;
     MemCtx_Bind(m, req);
 
     return req;

@@ -27,6 +27,8 @@ typedef struct virt  {
     Type type;
 } Abstract;
 
+typedef struct virt * AbstractPtr;
+
 #define MAX_BASE10 20
 #define SPAN_DIM_SIZE 16
 #define SLAM_MIN_SIZE 4
@@ -35,7 +37,7 @@ typedef struct virt  {
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
-#define as(x, t) ((x)->type.of == (t) ? x : Fatal("Cast from abstract mismatch", t))
+#define as(x, t) (((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", t))
 
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -111,12 +113,11 @@ enum positions {
 
 char *State_ToString(status state);
 char *Class_ToString(cls type);
-Abstract *Maker_Make(struct mem_ctx *m, void *mk, cls type);
 
 #define COMPLETE SUCCESS
 #define TEST_OK READY
 
-typedef struct parser *(*ParserMaker)(struct structexp *sexp);
+typedef struct parser *(*ParserMaker)(struct structexp *sexp); /* pmk */
 #include "chain.h"
 #include "error.h"
 #include "log.h"

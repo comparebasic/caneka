@@ -29,4 +29,5 @@ status Span_Set(Span *p, int idx, Abstract *t);
 status Span_Remove(Span *p, int idx);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
+Span *Span_From(MemCtx *m, int count, ...);
 #define Span_NextIdx(p) (p->max_idx+1)
