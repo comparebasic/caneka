@@ -23,6 +23,7 @@ static void HttpReq_Print(void *t, cls type, char *msg, int color, boolean exten
 
     Debug_Print((void *)req->proto, 0, "", color, extended);
     if(req->in.rbl != NULL){
+        printf(" ");
         Debug_Print((void *)req->in.rbl, 0, "", color, extended);
     }
     printf(">\x1b[0m");

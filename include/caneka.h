@@ -119,13 +119,13 @@ char *Class_ToString(cls type);
 #define TEST_OK READY
 
 typedef struct parser *(*ParserMaker)(struct structexp *sexp); /* pmk */
+typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 #include "chain.h"
 #include "error.h"
 #include "log.h"
 #include "mem.h"
 #include "compare.h"
 #include "hash.h"
-#include "maker.h"
 #include "string.h"
 #include "slab.h"
 #include "span.h"

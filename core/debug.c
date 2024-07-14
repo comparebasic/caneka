@@ -20,11 +20,10 @@ static Abstract *Print(MemCtx *m, Abstract *a){
     return NULL;
 }
 
-static Abstract *Print_Maker(MemCtx *m, Abstract *a){
-    Debug_Print(a, 0, "", 0, TRUE);
+static Abstract *PrintAddr(MemCtx *m, Abstract *a){
+    printf("%p ", a);
     return NULL;
 }
-
 
 static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     PatCharDef *def = (PatCharDef *) as(a, TYPE_PATCHARDEF);
@@ -86,7 +85,7 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     printf("\x1b[%dm%sRbl<", color, msg);
-    Span_Run(NULL, rbl->parsers_pmk, Print, NULL);
+    Span_Run(NULL, rbl->parsers_pmk, PrintAddr, NULL);
     printf(">\x1b[0m");
 }
 
