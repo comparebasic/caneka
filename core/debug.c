@@ -84,7 +84,9 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    printf("\x1b[%dm%sRbl<", color, msg);
+    printf("\x1b[%dm%sRbl<%s:", color, msg, State_ToString(rbl->type.state));
+    Debug_Print((void *)&(rbl->range), 0, "", color, extended);
+    printf("\x1b[%dm:Pmk=", color);
     Span_Run(NULL, rbl->parsers_pmk, PrintAddr, NULL);
     printf(">\x1b[0m");
 }
@@ -200,7 +202,7 @@ static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean exte
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("%s\x1b[1;%dmCursor<%s:%ld/seg%ld[%ld]:%ld>\x1b[0;1m", msg, color,
+    printf("%s\x1b[%dmCursor<%s:%ld/seg%ld[%ld]:%ld>\x1b[0m", msg, color,
         State_ToString(sc->state), 
         sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength
     );
@@ -208,10 +210,10 @@ static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean e
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Range *range = (Range *)a;
-    printf("%s\x1b[1;%dmReq<%s ", msg, color, State_ToString(range->state));
+    printf("%s\x1b[%dmRange<%s [", msg, color, State_ToString(range->state));
     Debug_Print((void *)&(range->start), TYPE_SCURSOR, "", color, extended);
-    Debug_Print((void *)&(range->end), TYPE_SCURSOR, " -> ", color, extended);
-    printf("\x1b[1;>\n");
+    Debug_Print((void *)&(range->end), TYPE_SCURSOR, "...", color, extended);
+    printf("\x1b[%dm]>\x1b[0m", color);
 }
 
 static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

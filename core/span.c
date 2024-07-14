@@ -237,7 +237,7 @@ void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg){
     if(p == NULL){
         return;
     }
-    for(int i = 0; i < p->max_idx; i++){
+    for(int i = 0; i <= p->max_idx; i++){
         Abstract *t = Span_Get(p, i);
         if(t != NULL){
             func(m, t);

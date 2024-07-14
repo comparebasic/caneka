@@ -11,18 +11,16 @@ static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
 }
 
 Parser *Parser_Method(Roebling *rbl){
-    /*
-    Req *req = (Req *)sexp->source;
-    int length = Array_Length((void **)req->sctx->methods);
-    Match **matches = (Match **)Array_Make(sexp->m, length); 
-    for(int i = 0; i < length; i++){
-        String *s = String_From(sexp->m, bytes(req->sctx->methods[i]));
-        matches[i] = Match_Make(sexp->m, s, ANCHOR_START, (int)*(req->sctx->method_vals[i]));
+    Req *req = (Req *)rbl->source;
+    int length = req->sctx->proto->methods->values->max_idx;
+    Match **matches = (Match **)Array_Make(rbl->m, length); 
+    Iter *it = Iter_Make(rbl->m, req->sctx->proto->methods->values);
+    while(Iter_Next(it) == SUCCESS){
+        String *s = (String *)Iter_Get(it);
+        matches[it->idx] = Match_Make(rbl->m, s, ANCHOR_START, it->idx);
     }
 
-    return Parser_MakeMulti(sexp->m, matches, Parser_MethodComplete);
-    */
-    return NULL;
+    return Parser_MakeMulti(rbl->m, matches, Parser_MethodComplete);
 }
 
 Parser *Parser_Space(Roebling *rbl){

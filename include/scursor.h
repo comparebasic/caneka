@@ -8,20 +8,9 @@ typedef struct strcursor {
     i64 immidiateLength;
 } SCursor;
 
-typedef struct strcursor_range {
-    status state;
-    i64 compare;
-    String *search;
-    SCursor start;
-    SCursor end;
-    int length;
-} Range;
-
 SCursor* SCursor_Make(MemCtx *m, String *s);
 status SCursor_Prepare(SCursor *sc, i64 length);
 status SCursor_Incr(SCursor *sc, i64 length);
 status SCursor_Reset(SCursor *sc);
-status SCursor_Find(Range *range, Match *search);
+status SCursor_Find(struct strcursor_range *range, Match *search);
 status SCursor_SetLocals(SCursor *sc);
-status Range_Set(Range *range, String *s);
-status Range_Reset(Range *range, int anchor);

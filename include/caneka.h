@@ -17,6 +17,8 @@ struct span;
 struct span_slab;
 struct structexp;
 struct lookup;
+struct strcursor;
+struct strcursor_range;
 
 typedef struct typehdr {
     cls of;
@@ -79,6 +81,7 @@ enum types {
     TYPE_TABLE,
     TYPE_STRINGTABLE,
     TYPE_LOOKUP,
+    TYPE_ITER,
     _TYPE_CORE_END,
 };
 
@@ -102,6 +105,7 @@ enum status_types {
     RAW = 1 << 9,
     MISS = 1 << 10,
     HASHED = 1 << 11,
+    END = 1 << 12,
 };
 
 #define HasFlag(x, fl) ((x & (fl)) == fl) 
@@ -128,11 +132,14 @@ typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 #include "hash.h"
 #include "string.h"
 #include "slab.h"
+#include "array.h"
 #include "span.h"
+#include "iter.h"
 #include "table.h"
 #include "tokens.h"
 #include "match.h"
 #include "scursor.h"
+#include "range.h"
 #include "lookup.h"
 #include "roebling.h"
 #include "parsers.h"
@@ -141,5 +148,6 @@ typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 #include "serve.h"
 #include "req.h"
 #include "debug.h"
+#include "testsuite.h"
 
 status Caneka_Init(MemCtx *m);

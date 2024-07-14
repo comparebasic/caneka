@@ -7,6 +7,8 @@ typedef struct structexp {
     Type type;
     MemCtx *m;
     status state;
+    int idx;
+    int mark;
     void *source; 
     Span *marks;
     Range range;

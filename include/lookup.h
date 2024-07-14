@@ -2,6 +2,7 @@ typedef struct lookup {
     word offset;
     Span *values;
     Abstract *arg;
+    int latest_idx;
 } Lookup;
 
 typedef status (*LookupPopulate)(MemCtx *m, Lookup *lk);
