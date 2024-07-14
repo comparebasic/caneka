@@ -15,6 +15,17 @@ static void indent_Print(int indent){
     }
 }
 
+static Abstract *Print(MemCtx *m, Abstract *a){
+    Debug_Print(a, 0, "", 0, TRUE);
+    return NULL;
+}
+
+static Abstract *Print_Maker(MemCtx *m, Abstract *a){
+    Debug_Print(a, 0, "", 0, TRUE);
+    return NULL;
+}
+
+
 static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     PatCharDef *def = (PatCharDef *) as(a, TYPE_PATCHARDEF);
     if((def->flags & PAT_COUNT) != 0){
@@ -41,7 +52,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:val=%d \x1b[%d;1m", msg, Class_ToString(mt->type), State_ToString(mt->state), mt->position, mt->intval, color);
+        printf("%sMatch<%s:state=%s:pos=%d:val=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, mt->intval, color);
         int length = mt->s->length / sizeof(PatCharDef);
         PatCharDef *def = (PatCharDef *)mt->s->bytes;
         for(int i = 0; i < length;i++){
@@ -56,11 +67,12 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>\n", msg, Class_ToString(mt->type), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
+        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>\n", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
     }else{
         printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->state), mt->position);
     }
 }
+
 static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)as(a, TYPE_STRING_FIXED);
     printf("%s\x1b[%dmSFixed<\x1b[0;%dm", msg, color, color);
@@ -69,6 +81,13 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
         s = s->next;
     } while(s != NULL);
     printf("\x1b[%dm>\x1b[0m", color);
+}
+
+static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
+    printf("\x1b[%dm%sRbl<", color, msg);
+    Span_Run(NULL, rbl->parsers_pmk, Print, NULL);
+    printf(">\x1b[0m");
 }
 
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -220,6 +239,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Slab_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
+    r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     return r;
 }
 

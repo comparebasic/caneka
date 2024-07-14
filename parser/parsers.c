@@ -11,7 +11,7 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
     while(matches[i] != NULL){
         r = SCursor_Find(range, matches[i]);
         if(DEBUG_MATCH){
-            Debug_Print((void *)matches[i], matches[i]->type, "parse_Multi Match: ", DEBUG_MATCH, TRUE);
+            Debug_Print((void *)matches[i], matches[i]->type.of, "parse_Multi Match: ", DEBUG_MATCH, TRUE);
         }
         if(r == COMPLETE){
             prs->idx = i;
@@ -32,7 +32,7 @@ static status parse_Single(Parser *prs, Range *range, void *source){
 
     r = SCursor_Find(range, mt);
     if(DEBUG_MATCH){
-        Debug_Print((void *)mt, mt->type, "parse_Single Match: ", DEBUG_MATCH, TRUE);
+        Debug_Print((void *)mt, mt->type.of, "parse_Single Match: ", DEBUG_MATCH, TRUE);
     }
     if(r == COMPLETE){
         if(prs->complete != NULL){
@@ -45,13 +45,13 @@ static status parse_Single(Parser *prs, Range *range, void *source){
 
 Parser *Parser_Make(MemCtx *m, cls type){
     Parser *prs = (Parser *) MemCtx_Alloc(m, sizeof(Parser));
-    prs->type = type;
+    prs->type.of = type;
     return prs;
 }
 
 Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
     Parser *prs = Parser_Make(m, TYPE_PARSER);
-    prs->type = TYPE_PARSER;
+    prs->type.of = TYPE_PARSER;
     prs->matches = (void *)mt;
     prs->func = parse_Single;
     prs->complete = complete;
@@ -60,7 +60,7 @@ Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
 
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete){
     Parser *prs = Parser_Make(m, TYPE_MULTIPARSER);
-    prs->type = TYPE_MULTIPARSER;
+    prs->type.of = TYPE_MULTIPARSER;
     prs->matches = (void *)mt_arr;
     prs->func = parse_Multi;
     prs->complete = complete;
@@ -69,21 +69,21 @@ Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete){
 
 Parser *Parser_Mark(Roebling *sexp){
     Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
-    prs->type = TYPE_PARSER;
+    prs->type.of = TYPE_PARSER;
     prs->flags |= CYCLE_MARK;
     return prs;
 }
 
 Parser *Parser_Loop(Roebling *sexp){
     Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
-    prs->type = TYPE_PARSER;
+    prs->type.of = TYPE_PARSER;
     prs->flags |= CYCLE_LOOP;
     return prs;
 }
 
 Parser *Parser_Break(Roebling *sexp){
     Parser *prs = Parser_Make(sexp->m, TYPE_PARSER);
-    prs->type = TYPE_PARSER;
+    prs->type.of = TYPE_PARSER;
     prs->flags |= CYCLE_BREAK;
     return prs;
 }

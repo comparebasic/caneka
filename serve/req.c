@@ -70,10 +70,14 @@ status Req_Handle(Serve *sctx, Req *req){
 }
 
 Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
-    Req* req = (Req *)MemCtx_Alloc(m, sizeof(Req));
+    MemCtx *rm = MemCtx_Make();
+    Req* req = (Req *)MemCtx_Alloc(rm, sizeof(Req));
+    req->m = rm;
     req->sctx = sctx;
     req->proto = proto;
     req->direction = direction;
+    req->in.rbl = Roebling_Make(req->m, TYPE_HTTP_PARSER, 
+        sctx->proto->parsers_pmk, req->in.shelf, (Abstract *)sctx->proto);  
 
     return req;
 }

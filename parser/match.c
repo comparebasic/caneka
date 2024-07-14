@@ -12,7 +12,7 @@ int Match_PatLength(PatCharDef *def){
 
 Match *Match_Make(MemCtx *m, String *s, int anchor, int intval){
     Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
-    mt->type = TYPE_STRINGMATCH;
+    mt->type.of = TYPE_STRINGMATCH;
     mt->s = s;
     mt->anchor = anchor;
     mt->intval = intval;
@@ -21,7 +21,7 @@ Match *Match_Make(MemCtx *m, String *s, int anchor, int intval){
 
 Match *Match_MakePat(MemCtx *m, byte *defs, word npats, int anchor, int intval){
     Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
-    mt->type = TYPE_PATMATCH;
+    mt->type.of = TYPE_PATMATCH;
     mt->s = String_MakeFixed(m, defs, npats * sizeof(PatCharDef));
     mt->anchor = anchor;
     mt->intval = intval;
@@ -139,7 +139,7 @@ static status match_FeedString(Match *mt, byte c){
 }
 
 status Match_Feed(Match *mt, byte c){
-    if(mt->type == TYPE_PATMATCH){
+    if(mt->type.of == TYPE_PATMATCH){
         return match_FeedPat(mt, c);
     }else{
         return match_FeedString(mt, c);

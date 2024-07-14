@@ -1,7 +1,7 @@
 typedef status (*ParseFunc)(struct parser *parser, Range *range, void *source);
 
 typedef struct parser {
-    cls type;
+    Type type;
     word flags;
     void *matches;
     int idx;

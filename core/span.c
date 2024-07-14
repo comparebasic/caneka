@@ -233,6 +233,30 @@ int Span_Add(Span *p, Abstract *t){
     return 0;
 }
 
+void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg){
+    if(p == NULL){
+        return;
+    }
+    for(int i = 0; i < p->max_idx; i++){
+        Abstract *t = Span_Get(p, i);
+        if(t != NULL){
+            func(m, t);
+        }
+    };
+}
+
+void Span_RunMaker(MemCtx *m, Span *p, Maker func, Abstract *arg){
+    if(p == NULL){
+        return;
+    }
+    for(int i = 0; i < p->max_idx; i++){
+        Abstract *t = Span_Get(p, i);
+        if(t != NULL){
+            func(m, t);
+        }
+    };
+}
+
 Span *Span_From(MemCtx *m, int count, ...){
     Span *p = Span_Make(m);
     Abstract *v = NULL;

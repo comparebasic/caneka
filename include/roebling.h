@@ -4,13 +4,13 @@ enum mark_reserved {
 };
 
 typedef struct structexp {
-    cls type;
+    Type type;
     MemCtx *m;
     status state;
     void *source; 
     Span *marks;
     Range range;
-    Span *parsers;
+    Span *parsers_pmk;
     Lookup *gotos;
 } Roebling;
 

@@ -30,4 +30,5 @@ status Span_Remove(Span *p, int idx);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
 Span *Span_From(MemCtx *m, int count, ...);
+void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg);
 #define Span_NextIdx(p) (p->max_idx+1)

@@ -53,9 +53,9 @@ status Roebling_Run(Roebling *rbl){
 
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source){
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
+    rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;
-    rbl->type = type;
-    rbl->parsers = parsers;
+    rbl->parsers_pmk = parsers;
     rbl->source = source;
     Range_Set(&(rbl->range), s);
     return rbl;
