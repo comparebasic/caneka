@@ -2,6 +2,10 @@
 #include <caneka.h>
 
 status Roebling_Run(Roebling *rbl){
+    if(DEBUG_ROEBLING){
+        Debug_Print((void *)rbl, 0, "Roebling_Run for: ", DEBUG_ROEBLING, TRUE);
+        printf("\n");
+    }
     ParserMaker pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
     boolean escaping = FALSE;
     Parser *prs;
@@ -9,9 +13,10 @@ status Roebling_Run(Roebling *rbl){
     word escape_fl = (CYCLE_BREAK|COMPLETE);
     while(pmk != NULL){
         prs = pmk(rbl);
-        printf("%d\n", rbl->idx); 
-        Debug_Print((void *)prs, 0, "Parser in run: ", COLOR_YELLOW, TRUE);
-        printf("\n");
+        if(DEBUG_ROEBLING){
+            Debug_Print((void *)prs, 0, "Parser in run: ", DEBUG_ROEBLING, TRUE);
+            printf("\x1b[0m\n");
+        }
         if(prs->func == NULL){
             r = COMPLETE | prs->flags;
         }else{
@@ -32,6 +37,10 @@ status Roebling_Run(Roebling *rbl){
                     }
                 }else{
                     rbl->state = ERROR;
+                    if(DEBUG_ROEBLING){
+                        Debug_Print((void *)rbl, 0, "Roebling_Run ERROR: ", DEBUG_ROEBLING, TRUE);
+                        printf("\n");
+                    }
                     return rbl->state;
                 }
             }
@@ -46,7 +55,14 @@ status Roebling_Run(Roebling *rbl){
         rbl->state = PROCESSING;
     }
 
-    printf("State is %s\n", State_ToString(rbl->state));
+    if(DEBUG_ROEBLING){
+        Debug_Print((void *)rbl, 0, "Roebling_Run END for: ", DEBUG_ROEBLING, TRUE);
+        printf("\n");
+    }
+    if(DEBUG_ROEBLING){
+        Debug_Print((void *)prs, 0, "Parser END of run: ", DEBUG_ROEBLING, TRUE);
+        printf("\x1b[0m\n");
+    }
         
     return rbl->state;
 }

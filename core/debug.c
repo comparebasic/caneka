@@ -8,6 +8,8 @@ int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
+int DEBUG_ROEBLING = COLOR_GREEN;
+int DEBUG_ROEBLING_CONTENT = COLOR_PURPLE;
 
 static void indent_Print(int indent){
     while(indent--){
@@ -57,28 +59,30 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
         for(int i = 0; i < length;i++){
             PatCharDef_Print((Abstract *)def++, type, "", color, extended);
         }
-        printf(">\x1b[0m\n");
+        printf(">\x1b[0m");
     }else{
-        printf("%sMatch<state=%s:pos=%d>\n", msg, mt->s->bytes, mt->position);
+        printf("%sMatch<state=%s:pos=%d>", msg, mt->s->bytes, mt->position);
     }
 }
 
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>\n", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
+        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
     }else{
         printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->state), mt->position);
     }
 }
 
+static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Match *mt = (Match *)as(a, TYPE_STRINGMATCH);
+    printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
+}
+
 static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)as(a, TYPE_STRING_FIXED);
     printf("%s\x1b[%dmSFixed<\x1b[0;%dm", msg, color, color);
-    do {
-        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
-        s = s->next;
-    } while(s != NULL);
+    printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
@@ -92,7 +96,6 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
 }
 
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    printf("String Print Called %s\n", Class_ToString(type));
     String *s = (String *)as(a, TYPE_STRING_CHAIN);
     printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
     do {
@@ -210,10 +213,30 @@ static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean e
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Range *range = (Range *)a;
-    printf("%s\x1b[%dmRange<%s [", msg, color, State_ToString(range->state));
+    printf("%s\x1b[%dmRange<%s search=", msg, color, State_ToString(range->state));
+    Debug_Print((void *)range->search, 0, "", color, extended);
+    printf("\x1b[%dm[", color);
     Debug_Print((void *)&(range->start), TYPE_SCURSOR, "", color, extended);
     Debug_Print((void *)&(range->end), TYPE_SCURSOR, "...", color, extended);
     printf("\x1b[%dm]>\x1b[0m", color);
+}
+
+static void Parser_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Parser *prs = (Parser *)as(a, TYPE_PARSER);
+    printf("\x1b[%dm%sPrs<%s", color, msg, State_ToString(prs->type.state));
+    Match *mt = (Match *)prs->match.single;
+    Debug_Print((void *)mt, 0, " ", color, extended);
+    printf(">\x1b[0m");
+}
+
+static void MultiParser_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Parser *prs = (Parser *)as(a, TYPE_MULTIPARSER);
+    printf("\x1b[%dm%sPrs<%s", color, msg, State_ToString(prs->type.state));
+    Match *mt = NULL;;
+    int i = 0;
+    while((mt = prs->match.array[i++]) != NULL){
+        Debug_Print((void *)mt, 0, ", ", color, extended);
+    }
 }
 
 static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -241,6 +264,9 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
+    r |= Lookup_Add(m, lk, TYPE_PARSER, (void *)Parser_Print);
+    r |= Lookup_Add(m, lk, TYPE_MULTIPARSER, (void *)MultiParser_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRINGMATCH, (void *)StringMatch_Print);
     return r;
 }
 

@@ -139,6 +139,15 @@ static status match_FeedString(Match *mt, byte c){
 }
 
 status Match_Feed(Match *mt, byte c){
+    if(DEBUG_ROEBLING_CONTENT){
+        if(c == '\r'){
+            printf("\x1b[%dm\\r\x1b[0m", DEBUG_ROEBLING_CONTENT);
+        }else if(c == '\n'){
+            printf("\x1b[%dm\\n\x1b[0m", DEBUG_ROEBLING_CONTENT);
+        }else{
+            printf("\x1b[%dm%c\x1b[0m", DEBUG_ROEBLING_CONTENT, c);
+        }
+    }
     if(mt->type.of == TYPE_PATMATCH){
         return match_FeedPat(mt, c);
     }else{

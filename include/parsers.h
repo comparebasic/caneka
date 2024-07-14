@@ -3,7 +3,10 @@ typedef status (*ParseFunc)(struct parser *parser, Range *range, void *source);
 typedef struct parser {
     Type type;
     word flags;
-    void *matches;
+    union {
+        Match *single;
+        Match **array;
+    } match;
     int idx;
     ParseFunc func;
     ParseFunc complete;

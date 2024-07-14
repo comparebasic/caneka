@@ -4,7 +4,7 @@
 
 static status Parser_MethodComplete(Parser *prs, Range *range, void *_req){
     Req *req = (Req *)_req;
-    Match **matches = (Match **)prs->matches;
+    Match **matches = prs->match.array;
     HttpProto *proto = (HttpProto *)req->proto;
     proto->method = matches[prs->idx]->intval;
     return SUCCESS;

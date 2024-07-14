@@ -48,6 +48,7 @@ status SCursor_Find(Range *range, Match *search){
             i++, c = seg->bytes[i]
         ){
             Match_Feed(search, c);
+            printf("%d\n", i);
             if(search->state != READY){
                 if(search->anchor != ANCHOR_UNTIL && start->state == READY){
                     start->position = i;
@@ -78,6 +79,10 @@ status SCursor_Find(Range *range, Match *search){
         }
         end->seg = seg;
         seg = seg->next;
+    }
+
+    if(DEBUG_ROEBLING){
+        Debug_Print((void *)search, 0, "SCursor_Find of:", DEBUG_ROEBLING, TRUE);
     }
 
     return range->state;

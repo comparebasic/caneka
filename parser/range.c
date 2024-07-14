@@ -4,7 +4,7 @@
 status Range_Set(Range *range, String *s){
     memset(range, 0, sizeof(Range));
     range->type.of = TYPE_RANGE;
-    range->start.s = range->start.seg = range->end.s = range->end.seg = s;
+    range->search = range->start.s =  range->start.seg = range->end.s = range->end.seg = s;
     return SUCCESS;
 }
 

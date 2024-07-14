@@ -9,7 +9,7 @@ typedef struct structexp {
     status state;
     int idx;
     int mark;
-    void *source; 
+    Abstract *source; 
     Span *marks;
     Range range;
     Span *parsers_pmk;

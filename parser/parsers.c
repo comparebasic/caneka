@@ -7,7 +7,7 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
     status r = READY;
     int i = 0;
     int start = range->start.position;
-    Match **matches = (Match **)prs->matches;
+    Match **matches = prs->match.array;
     while(matches[i] != NULL){
         r = SCursor_Find(range, matches[i]);
         if(DEBUG_MATCH){
@@ -27,8 +27,7 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
 
 static status parse_Single(Parser *prs, Range *range, void *source){
     status r = READY;
-    Match *mt = (Match *)prs->matches;
-
+    Match *mt = prs->match.single;
 
     r = SCursor_Find(range, mt);
     if(DEBUG_MATCH){
@@ -52,7 +51,7 @@ Parser *Parser_Make(MemCtx *m, cls type){
 Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
     Parser *prs = Parser_Make(m, TYPE_PARSER);
     prs->type.of = TYPE_PARSER;
-    prs->matches = (void *)mt;
+    prs->match.single = mt;
     prs->func = parse_Single;
     prs->complete = complete;
     return prs;
@@ -61,7 +60,7 @@ Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete){
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete){
     Parser *prs = Parser_Make(m, TYPE_MULTIPARSER);
     prs->type.of = TYPE_MULTIPARSER;
-    prs->matches = (void *)mt_arr;
+    prs->match.array = mt_arr;
     prs->func = parse_Multi;
     prs->complete = complete;
     return prs;
