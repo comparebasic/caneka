@@ -6,7 +6,6 @@ enum mark_reserved {
 typedef struct structexp {
     Type type;
     MemCtx *m;
-    status state;
     int idx;
     int mark;
     Abstract *source; 

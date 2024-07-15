@@ -10,6 +10,7 @@ int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_ROEBLING = COLOR_GREEN;
 int DEBUG_ROEBLING_CONTENT = COLOR_PURPLE;
+int DEBUG_CURSOR = COLOR_CYAN;
 
 static void indent_Print(int indent){
     while(indent--){
@@ -205,9 +206,10 @@ static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean exte
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("%s\x1b[%dmCursor<%s:%ld/seg%ld[%ld]:%ld>\x1b[0m", msg, color,
+    printf("%s\x1b[%dmCursor<%s:%ld/seg%ld[%ld]:%ld %s>\x1b[0m", msg, color,
         State_ToString(sc->state), 
-        sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength
+        sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength,
+        sc->seg != NULL ? (char *)sc->seg->bytes : ""
     );
 }
 

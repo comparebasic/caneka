@@ -87,3 +87,19 @@ Parser *Parser_Break(Roebling *sexp){
     return prs;
 }
 
+Abstract *Parser_GetMatchKey(Parser *prs){
+    Match *mt = NULL;
+    if(prs->type.of == TYPE_MULTIPARSER){
+       mt = prs->match.array[prs->idx]; 
+    }else{
+       mt = prs->match.single; 
+    }
+    if(mt->type.of == TYPE_STRINGMATCH){
+        return (Abstract *)mt->s;
+    }
+    return NULL;
+}
+
+Abstract *Parser_GetContent(Parser *prs, Range *range, void *source){
+    return NULL;
+}

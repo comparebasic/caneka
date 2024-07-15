@@ -7,6 +7,7 @@ typedef struct mem_slab {
 } MemSlab;
 
 typedef struct mem_ctx {
+    Type type;
     MemSlab *start_sl;
     void *instance;
 } MemCtx;

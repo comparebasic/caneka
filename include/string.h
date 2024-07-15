@@ -26,3 +26,4 @@ boolean String_EqualsBytes(String *a, byte *cstr);
 String *String_FromInt(MemCtx *m, int i);
 String *String_FromRange(MemCtx *m, struct strcursor_range *range);
 String *String_Init(MemCtx *m, int expected);
+String *String_Next(String *s);

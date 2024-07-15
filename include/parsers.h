@@ -15,6 +15,8 @@ typedef struct parser {
 Parser *Parser_Make(MemCtx *m, cls type);
 Parser *Parser_MakeSingle(MemCtx *m, Match *mt, ParseFunc complete);
 Parser *Parser_MakeMulti(MemCtx *m, Match **mt_arr, ParseFunc complete);
+Abstract *Parser_GetMatchKey(Parser *prs);
+Abstract *Parser_GetContent(Parser *prs, Range *range, void *source);
 
 /* cycle parsers */
 Parser *Parser_Mark(Roebling *sexp);

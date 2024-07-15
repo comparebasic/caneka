@@ -12,7 +12,11 @@ static status populateMethods(MemCtx *m, Lookup *lk){
 }
 
 static status ParseComplete(Parser *prs, Range *range, void *source){
-    printf("Completed\n");
+    MemCtx *m = (MemCtx *)source;
+    Debug_Print((void *)Parser_GetMatchKey(prs), 0, "Completed Match key: ", COLOR_YELLOW, TRUE);
+    printf("\n");
+    Debug_Print((void *)Range_Copy(m, range), 0, "Completed Range: ", COLOR_YELLOW, TRUE);
+    printf("\n");
     return prs->type.state;
 }
 
@@ -33,19 +37,22 @@ status Roebling_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     String *s = NULL; 
     Lookup *methods = Lookup_Make(m, _TYPE_HTTP_START, populateMethods, NULL);
-    ProtoDef *def = HttpProtoDef_Make(m);
-
 
     s = String_Make(m, bytes("one and a bunch!"));
     Span *parsers_pmk = (Span *)Span_From(m, 1, makeOneTwoThree);
     Roebling *rbl = Roebling_Make(m, TYPE_HTTP_PARSER, 
-        parsers_pmk, s, (Abstract *)def);  
+        parsers_pmk, s, (Abstract *)m);  
 
     Roebling_Run(rbl);
 
-
     Debug_Print((void *)rbl, 0, "Roebling HTTP: ", COLOR_CYAN, TRUE);
     printf("\n");
+
+    s = String_Make(m, bytes("two and a half" ));
+    parsers_pmk = (Span *)Span_From(m, 1, makeOneTwoThree);
+    rbl = Roebling_Make(m, TYPE_HTTP_PARSER, parsers_pmk, s, (Abstract *)m);  
+
+    Roebling_Run(rbl);
 
     /*
     r |= Test(s->type.of == TYPE_STRING_FIXED, 

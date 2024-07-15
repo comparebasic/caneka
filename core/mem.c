@@ -53,7 +53,9 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 }
 
 MemCtx *MemCtx_Make(){
-    return (MemCtx *) trackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
+    MemCtx *m = (MemCtx *) trackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
+    m->type.of = TYPE_MEMCTX;
+    return m;
 }
 
 status MemCtx_Free(MemCtx *m){

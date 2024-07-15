@@ -185,6 +185,13 @@ boolean String_Equals(String *a, String *b){
     return FALSE;
 }
 
+String *String_Next(String *s){
+    if(s->type.of == TYPE_STRING_CHAIN){
+        return s->next;
+    }
+    return NULL;
+}
+
 String *String_FromRange(MemCtx *m, Range *range){
     if(range->state != COMPLETE){
         return NULL;

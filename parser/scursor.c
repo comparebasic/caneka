@@ -45,10 +45,14 @@ status SCursor_Find(Range *range, Match *search){
         for(
             c = seg->bytes[i];
             i < seg->length;
-            i++, c = seg->bytes[i]
+            ++i, c = seg->bytes[i]
         ){
             Match_Feed(search, c);
-            printf("%d\n", i);
+            if(DEBUG_CURSOR){
+                printf("%d - %c ", i, c);
+                Debug_Print((void *)search, 0, "", DEBUG_CURSOR, TRUE);
+                printf("\n");
+            }
             if(search->state != READY){
                 if(search->anchor != ANCHOR_UNTIL && start->state == READY){
                     start->position = i;
@@ -59,10 +63,9 @@ status SCursor_Find(Range *range, Match *search){
                 range->compare++;
                 start->state = PROCESSING;
                 if(search->state == COMPLETE){
-                    end->position = i;
+                    end->position = (i+1);
                     end->seg = seg;
-                    range->length = i - start->position;
-                    range->state = COMPLETE;
+                    range->length = (i+1) - start->position;
                     SCursor_SetLocals(end);
                     break;
                 }
@@ -78,14 +81,15 @@ status SCursor_Find(Range *range, Match *search){
 
         }
         end->seg = seg;
-        seg = seg->next;
+        seg = String_Next(seg);
     }
 
     if(DEBUG_ROEBLING){
         Debug_Print((void *)search, 0, "SCursor_Find of:", DEBUG_ROEBLING, TRUE);
+        printf("\n");
     }
 
-    return range->state;
+    return search->state;
 }
 
 status SCursor_Prepare(SCursor *sc, i64 length){

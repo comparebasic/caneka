@@ -4,8 +4,27 @@
 status Range_Set(Range *range, String *s){
     memset(range, 0, sizeof(Range));
     range->type.of = TYPE_RANGE;
-    range->search = range->start.s =  range->start.seg = range->end.s = range->end.seg = s;
+    range->search = range->start.s = range->start.seg = range->end.s = range->end.seg = s;
     return SUCCESS;
+}
+
+String *Range_Copy(MemCtx *m, Range *range){
+    String *s = String_Init(m, range->length); 
+    String *seg = range->start.seg;
+    int remaining = range->length;
+    while(remaining > 0 && seg != NULL){
+        int localLength = seg->length - range->start.localPosition;
+        if(localLength < remaining){
+           String_AddBytes(m, s, seg->bytes + range->start.localPosition, localLength); 
+           remaining -= localLength;
+           seg = String_Next(seg);
+        }else{
+           String_AddBytes(m, s, seg->bytes + range->start.localPosition, range->length); 
+           remaining -= range->length;
+        }
+    }
+    
+    return s;
 }
 
 status Range_Reset(Range *range, int anchor){
