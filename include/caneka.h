@@ -32,6 +32,7 @@ typedef struct virt  {
 typedef struct virt * AbstractPtr;
 
 #define MAX_BASE10 20
+#define SPAN_MINI_DIM_SIZE 4
 #define SPAN_DIM_SIZE 16
 #define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
@@ -74,6 +75,7 @@ enum types {
     TYPE_PATCHARDEF,
     TYPE_STRUCTEXP,
     TYPE_SPAN,
+    TYPE_MINISPAN,
     TYPE_SLAB,
     TYPE_CHAIN,
     TYPE_HASHED,
@@ -149,5 +151,7 @@ typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 #include "req.h"
 #include "debug.h"
 #include "testsuite.h"
+#include "mess.h"
+#include "streamdef.h"
 
 status Caneka_Init(MemCtx *m);

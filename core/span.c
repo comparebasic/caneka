@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-#define STRIDE SPAN_DIM_SIZE
+#define STRIDE(p) (((p)->type.of == TYPE_MINISPAN) ? SPAN_MINI_DIM_SIZE : SPAN_DIM_SIZE)
 
 static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment, status flags){
     Slab *new_sl = Slab_Alloc(m, flags);
@@ -12,13 +12,13 @@ static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment, st
 }
 
 static int slotsAvailable(int dims){
-    int n = STRIDE;
+    int n = STRIDE(p);
     int _dims = dims;
     int r = n;
     if(dims <= 0){
         r = 1;
     }else if(dims == 1){
-        r = STRIDE;
+        r = STRIDE(p);
     }else{
         while(dims > 1){
             n *= STRIDE;
@@ -179,6 +179,18 @@ Span* Span_Make(MemCtx* m){
     p->slab = Slab_Alloc(m, (p->type.state|RAW));
     p->slab->increment = STRIDE;
     p->type.of = TYPE_SPAN;
+
+    return p;
+}
+
+Span* Span_MakeMini(MemCtx* m){
+    Span *p = Span_Init(m);
+    p->m = m;
+    p->max_idx = -1;
+    p->slotSize = 1;
+    p->slab = Slab_Alloc(m, (p->type.state|RAW));
+    p->slab->increment = STRIDE;
+    p->type.of = TYPE_MINISPAN;
 
     return p;
 }
