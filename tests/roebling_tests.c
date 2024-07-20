@@ -13,10 +13,12 @@ static status populateMethods(MemCtx *m, Lookup *lk){
 
 static status ParseComplete(Parser *prs, Range *range, void *source){
     MemCtx *m = (MemCtx *)source;
-    Debug_Print((void *)Parser_GetMatchKey(prs), 0, "Completed Match key: ", COLOR_YELLOW, TRUE);
-    printf("\n");
-    Debug_Print((void *)Range_Copy(m, range), 0, "Completed Range: ", COLOR_YELLOW, TRUE);
-    printf("\n");
+    /*
+    r |= Test(s->type.of == TYPE_STRING_FIXED, 
+        "Expect string to have fixed type %s found %s", 
+            Class_ToString(TYPE_STRING_FIXED), Class_ToString(s->type.of));
+            */
+
     return prs->type.state;
 }
 
@@ -45,20 +47,11 @@ status Roebling_Tests(MemCtx *gm){
 
     Roebling_Run(rbl);
 
-    Debug_Print((void *)rbl, 0, "Roebling HTTP: ", COLOR_CYAN, TRUE);
-    printf("\n");
-
     s = String_Make(m, bytes("two and a half" ));
     parsers_pmk = (Span *)Span_From(m, 1, makeOneTwoThree);
     rbl = Roebling_Make(m, TYPE_HTTP_PARSER, parsers_pmk, s, (Abstract *)m);  
 
     Roebling_Run(rbl);
-
-    /*
-    r |= Test(s->type.of == TYPE_STRING_FIXED, 
-        "Expect string to have fixed type %s found %s", 
-            Class_ToString(TYPE_STRING_FIXED), Class_ToString(s->type.of));
-            */
 
     return r;
 }

@@ -14,7 +14,6 @@ static status setPath(Parser *prs, Range *range, void *source){
     Req *req = (Req *)as(source, TYPE_HTTP_REQ);
     HttpProto *proto = (HttpProto*)as(req->proto, TYPE_HTTP_PROTO);
     proto->path = Range_Copy(req->m, range);
-    Debug_Print((void *)proto->path, 0, "Setting path: ", COLOR_PURPLE, TRUE);
     return SUCCESS;
 }
 
@@ -48,6 +47,5 @@ static Parser *nlParserMk(Roebling *rlb){
 
 /* public */
 Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
-    printf("ADDR of method %p\n", methodParserMk);
     return Span_From(m, 6, (Abstract *)methodParserMk, (Abstract *)spaceParserMk, (Abstract *)pathParserMk, (Abstract *)spaceParserMk, (Abstract *)httvParserMk, (Abstract *)nlParserMk);
 }

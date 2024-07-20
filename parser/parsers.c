@@ -127,18 +127,9 @@ Parser *Parser_StringSet(MemCtx *m, word flags, ParseFunc complete, ...){
 
 Parser *Parser_StringLookup(MemCtx *m, word flags, ParseFunc complete, Lookup *lk){
     Array arr = Array_Make(m, lk->values->nvalues);
-    Debug_Print((void *)lk->values, 0, "Parser lookup", COLOR_PURPLE, TRUE);
-    printf("\n");
-    printf("nvalues %d\n", lk->values->nvalues);
     for(int i = 0; i < lk->values->nvalues; i++){
-        printf("i%d\n", i);
         String *s = (String *)Span_Get(lk->values, i);
-        Debug_Print((void *)s, 0, "String in lookup:", COLOR_PURPLE, TRUE);
-        printf("\n");
         Match *mt = Match_Make(m, s, flags);
-        /*
-        Debug_Print((void *)mt, 0, "Match in lookup", COLOR_PURPLE, TRUE);
-        */
         arr[i] = (Abstract *)mt;
     }
     

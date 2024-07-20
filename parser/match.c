@@ -36,7 +36,6 @@ static status match_FeedPat(Match *mt, byte c){
        Debug_Print(mt, TYPE_PATMATCH, "FeedPat: ", DEBUG_PATMATCH, TRUE);
    }
 
-   printf("pos %d\n", mt->position);
    PatCharDef *def = ((PatCharDef *)mt->s->bytes)+(mt->position);  
    i64 length = mt->s->length / sizeof(PatCharDef);
    boolean matched = FALSE;
@@ -58,9 +57,6 @@ static status match_FeedPat(Match *mt, byte c){
             if((def->flags & PAT_COUNT) != 0){
                 matched = (c == def->from);
                 total = def->to;
-                if(DEBUG_PATMATCH){
-                    printf("\x1b[%dm    total %d\x1b[0m\n", DEBUG_PATMATCH, total);
-                }
             }else{
                 matched = (c >= def->from && c <= def->to);
                 total = 1;

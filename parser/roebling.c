@@ -6,9 +6,7 @@ status Roebling_Run(Roebling *rbl){
         Debug_Print((void *)rbl, 0, "Roebling_Run for: ", DEBUG_ROEBLING, TRUE);
         printf("\n");
     }
-    printf("RBL IDX %d\n", rbl->idx);
     ParserMaker pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
-    printf("RBL pmk %p\n", pmk);
     boolean escaping = FALSE;
     Parser *prs;
     status r = READY;

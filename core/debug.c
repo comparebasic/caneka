@@ -3,14 +3,14 @@
 
 Chain *DebugPrintChain = NULL;
 
-int DEBUG_SCURSOR = COLOR_DARK;
+int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = COLOR_BLUE;
+int DEBUG_PATMATCH = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
-int DEBUG_ROEBLING = COLOR_GREEN;
-int DEBUG_ROEBLING_CONTENT = COLOR_PURPLE;
-int DEBUG_CURSOR = COLOR_CYAN;
+int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING_CONTENT = 0;
+int DEBUG_CURSOR = 0;
 
 static void indent_Print(int indent){
     while(indent--){
