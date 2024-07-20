@@ -47,12 +47,10 @@ typedef struct match {
     String *s; 
     int position;
     word defPosition;
-    int anchor;
-    int intval;
 } Match;
 
-Match *Match_Make(MemCtx *m, String *s, int anchor, int intval);
-Match *Match_MakePat(MemCtx *m, byte *defs, word npats,  int anchor, int intval);
+Match *Match_Make(MemCtx *m, String *s, word flags);
+Match *Match_MakePat(MemCtx *m, byte *defs, word npats, word flags);
 int Match_PatLength(PatCharDef *def);
 status Match_Feed(Match *mt, byte c);
 void Match_Reset(Match *mt);

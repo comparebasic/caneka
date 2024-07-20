@@ -11,7 +11,7 @@ static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment, st
     return new_sl;
 }
 
-static int slotsAvailable(int dims){
+static int slotsAvailable(Span *p, int dims){
     int n = STRIDE(p);
     int _dims = dims;
     int r = n;
@@ -21,7 +21,7 @@ static int slotsAvailable(int dims){
         r = STRIDE(p);
     }else{
         while(dims > 1){
-            n *= STRIDE;
+            n *= STRIDE(p);
             dims--;
         }
         r = n;
@@ -33,7 +33,7 @@ static int slotsAvailable(int dims){
 static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
     int dims = sr->dims = sr->span->dims = sr->dimsNeeded;
 
-    int needed = slotsAvailable(dims);
+    int needed = slotsAvailable(sr->span, dims);
     boolean expand = sr->slab->increment < needed;
     if(expand){
         Slab *exp_sl = NULL;
@@ -48,7 +48,7 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
                 exp_sl->items[0] = (Abstract *)new_sl;
             }
 
-            needed /= STRIDE;
+            needed /= STRIDE(sr->span);
             exp_sl = new_sl;
         }
         exp_sl->items[0] = (Abstract *)shelf_sl;
@@ -68,7 +68,7 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
     }
 
     byte dims = sr->dims = sr->span->dims = max(sr->dims, sr->span->dims);
-    int increment = slotsAvailable(dims-1);
+    int increment = slotsAvailable(sr->span, dims-1);
     Slab *prev_sl = sr->slab;
     while(dims > 1){
         sr->local_idx = (sr->idx - sr->offset) / increment;
@@ -98,7 +98,7 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
 
         /* prepare for another found of inquiry */
         dims--;
-        increment = slotsAvailable(dims-1);
+        increment = slotsAvailable(sr->span, dims-1);
     }
 
     /* conclude by setting the local idx and setting the state */
@@ -121,7 +121,7 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     sr->offset = 0;
 
     sr->dimsNeeded = 1;
-    while(sr->idx >= slotsAvailable(sr->dimsNeeded)) {
+    while(sr->idx >= slotsAvailable(sr->span, sr->dimsNeeded)) {
         sr->dimsNeeded++;
     };
 
@@ -177,8 +177,8 @@ Span* Span_Make(MemCtx* m){
     p->max_idx = -1;
     p->slotSize = 1;
     p->slab = Slab_Alloc(m, (p->type.state|RAW));
-    p->slab->increment = STRIDE;
     p->type.of = TYPE_SPAN;
+    p->slab->increment = STRIDE(p);
 
     return p;
 }
@@ -189,8 +189,8 @@ Span* Span_MakeMini(MemCtx* m){
     p->max_idx = -1;
     p->slotSize = 1;
     p->slab = Slab_Alloc(m, (p->type.state|RAW));
-    p->slab->increment = STRIDE;
     p->type.of = TYPE_MINISPAN;
+    p->slab->increment = STRIDE(p);
 
     return p;
 }

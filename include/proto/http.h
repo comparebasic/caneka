@@ -10,6 +10,7 @@ typedef struct http_proto {
     /* mid parsing */
     i64 contentLength;
     String *nextHeader;
+    ProtoDef *def;
 } HttpProto;
 
 status HttpProto_Init(MemCtx *m);
@@ -29,5 +30,6 @@ Parser *Parser_EndNl(Roebling *sexp);
 Parser *Parser_HColon(Roebling *sexp);
 Parser *Parser_HEndAllNl(Roebling *sexp);
 Parser *Parser_HEndNl(Roebling *sexp);
+Span *HttpParser_Make(MemCtx *m, ProtoDef *def);
 
 status HttpProtoDebug_Init(MemCtx *m);

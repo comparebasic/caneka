@@ -77,7 +77,7 @@ Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
     req->proto = proto;
     req->direction = direction;
     req->in.rbl = Roebling_Make(req->m, TYPE_HTTP_PARSER, 
-        sctx->proto->parsers_pmk, req->in.shelf, (Abstract *)sctx->proto);  
+        sctx->def->parsers_pmk, req->in.shelf, (Abstract *)req);  
 
     return req;
 }

@@ -23,9 +23,9 @@ static status ParseComplete(Parser *prs, Range *range, void *source){
 static Parser *makeOneTwoThree(Roebling *rbl){
     MemCtx *m = rbl->m;
     Match **onetwothree = (Match **)Array_MakeFrom(m, 3, 
-        Match_Make(m, String_Make(m, bytes("one")), ANCHOR_START, 0),
-        Match_Make(m, String_Make(m, bytes("two")), ANCHOR_START, 0),
-        Match_Make(m, String_Make(m, bytes("three")), ANCHOR_START, 0)
+        Match_Make(m, String_Make(m, bytes("one")), ANCHOR_START),
+        Match_Make(m, String_Make(m, bytes("two")), ANCHOR_START),
+        Match_Make(m, String_Make(m, bytes("three")), ANCHOR_START)
     );
 
     return Parser_MakeMulti(m, onetwothree, ParseComplete);

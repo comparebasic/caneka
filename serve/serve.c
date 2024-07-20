@@ -146,14 +146,14 @@ status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
-        Debug_Print(sctx->proto, 0, "Accept proto: ", COLOR_DARK, TRUE);
+        Debug_Print(sctx->def, 0, "Accept proto: ", COLOR_DARK, TRUE);
         printf("\n");
-        Req *req = (Req *)sctx->proto->req_mk(sctx->m, (Abstract *)sctx);
+        Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
         Debug_Print(req, 0, "Accept req: ", COLOR_DARK, TRUE);
         printf("\n");
         /*
         req->in.rbl = Roebling_Make(req->m, 
-            TYPE_PARSER, sctx->proto->parsers, req->in.shelf, (Abstract *)req);
+            TYPE_PARSER, sctx->def->parsers, req->in.shelf, (Abstract *)req);
 
         if(sctx != NULL){
             status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
@@ -250,10 +250,10 @@ status Serve_Run(Serve *sctx, int port){
     return r;
 }
 
-Serve *Serve_Make(MemCtx *m, ProtoDef *proto){
+Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->m = m;
-    sctx->proto = proto;
+    sctx->def = def;
     /*
     sctx->parsers = (ParserMaker *)Array_MakeFrom(m, 9, 
         Parser_Method, Parser_Space, Parser_Path, Parser_HttpV, Parser_EndNl, 

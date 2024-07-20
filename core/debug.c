@@ -54,7 +54,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:val=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, mt->intval, color);
+        printf("%sMatch<%s:state=%s:pos=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color);
         int length = mt->s->length / sizeof(PatCharDef);
         PatCharDef *def = (PatCharDef *)mt->s->bytes;
         for(int i = 0; i < length;i++){
@@ -69,7 +69,7 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
+        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color);
     }else{
         printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->state), mt->position);
     }
@@ -77,7 +77,7 @@ static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean ext
 
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_STRINGMATCH);
-    printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm':val=%d>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color, mt->intval);
+    printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color);
 }
 
 static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

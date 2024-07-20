@@ -10,7 +10,7 @@ typedef struct serve_ctx {
     int socket_fd;
     int port;
     boolean serving;
-    ProtoDef *proto;
+    ProtoDef *def;
 } Serve;
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def);

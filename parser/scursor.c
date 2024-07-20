@@ -29,13 +29,13 @@ status SCursor_Find(Range *range, Match *search){
     if(start->seg == NULL || start->seg->length < 1){
         return NOOP;
     }
-    Range_Reset(range, search->anchor);
+    Range_Reset(range, search->flags);
     byte c;
     int i = range->start.position;
     int startPosition = i;
     String *seg = start->seg;
 
-    if(search->anchor == ANCHOR_UNTIL){
+    if((search->flags & ANCHOR_UNTIL) != 0){
         start->position = i;
         start->seg = seg;
         start->state = COMPLETE;
@@ -54,7 +54,7 @@ status SCursor_Find(Range *range, Match *search){
                 printf("\n");
             }
             if(search->state != READY){
-                if(search->anchor != ANCHOR_UNTIL && start->state == READY){
+                if((search->flags & ANCHOR_UNTIL) != 0 && start->state == READY){
                     start->position = i;
                     start->seg = seg;
                     start->state = search->state;
@@ -70,7 +70,7 @@ status SCursor_Find(Range *range, Match *search){
                     break;
                 }
             }else{
-                if(search->anchor == ANCHOR_START){
+                if((search->flags & ANCHOR_START) != 0){
                     start->state = READY;
                     return start->state;
                 }else{

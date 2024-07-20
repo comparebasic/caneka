@@ -22,3 +22,8 @@ Abstract *Parser_GetContent(Parser *prs, Range *range, void *source);
 Parser *Parser_Mark(Roebling *sexp);
 Parser *Parser_Loop(Roebling *sexp);
 Parser *Parser_Break(Roebling *sexp);
+
+/* parser constructors */
+Parser *Parser_StringSet(MemCtx *m, word flags, ParseFunc complete, ...);
+Parser *Parser_StringLookup(MemCtx *m, word flags, ParseFunc complete, Lookup *lb);
+Parser *Parser_String(MemCtx *m, word flags, ParseFunc complete, byte *b);

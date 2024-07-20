@@ -10,21 +10,19 @@ int Match_PatLength(PatCharDef *def){
     return length;
 }
 
-Match *Match_Make(MemCtx *m, String *s, int anchor, int intval){
+Match *Match_Make(MemCtx *m, String *s, word flags){
     Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
     mt->type.of = TYPE_STRINGMATCH;
+    mt->flags = flags;
     mt->s = s;
-    mt->anchor = anchor;
-    mt->intval = intval;
     return mt;
 }
 
-Match *Match_MakePat(MemCtx *m, byte *defs, word npats, int anchor, int intval){
+Match *Match_MakePat(MemCtx *m, byte *defs, word npats, word flags){
     Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;
     mt->s = String_MakeFixed(m, defs, npats * sizeof(PatCharDef));
-    mt->anchor = anchor;
-    mt->intval = intval;
+    mt->flags = flags;
     return mt;
 }
 

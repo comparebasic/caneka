@@ -103,3 +103,38 @@ Abstract *Parser_GetMatchKey(Parser *prs){
 Abstract *Parser_GetContent(Parser *prs, Range *range, void *source){
     return NULL;
 }
+
+Parser *Parser_StringSet(MemCtx *m, word flags, ParseFunc complete, ...){
+	va_list args;
+	va_list args_copy;
+    va_start(args, complete);
+    va_copy(args_copy, args);
+
+    int l = 0;
+    String *s = va_arg(args, String*);
+    while(s != NULL){
+        l++; 
+        String *s = va_arg(args, String*);
+    }
+    Array arr = Array_Make(m, l);
+    for(int i = 0; i < l; i++){
+        s = va_arg(args_copy, String*);
+        arr[i] = (Abstract *)Match_Make(m, s, flags);
+    }
+    
+    return Parser_MakeMulti(m, (Match **)arr, complete);
+}
+
+Parser *Parser_StringLookup(MemCtx *m, word flags, ParseFunc complete, Lookup *lb){
+    Array arr = Array_Make(m, lb->values->nvalues);
+    for(int i = 0; i < lb->values->nvalues; i++){
+        String *s = (String *)Span_Get(lb->values, i);
+        arr[i] = (Abstract *)Match_Make(m, s, flags);
+    }
+    
+    return Parser_MakeMulti(m, (Match **)arr, complete);
+}
+
+Parser *Parser_String(MemCtx *m, word flags, ParseFunc complete, byte *b){
+    return Parser_MakeSingle(m, Match_Make(m, String_From(m, b), flags), complete); 
+}

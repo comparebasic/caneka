@@ -8,17 +8,17 @@ int Array_Length(void **arr){
     return i;
 }
 
-void **Array_Make(MemCtx *m, int count){
-    Abstract **slab = (Abstract **)MemCtx_Alloc(m, sizeof(void*)*(count+1));
+Array Array_Make(MemCtx *m, int count){
+    Array slab = (Abstract **)MemCtx_Alloc(m, sizeof(void*)*(count+1));
     slab[count] = NULL;
-    return (void **)slab;
+    return slab;
 }
 
-void *Array_MakeFrom(MemCtx *m, int count, ...){
+Array Array_MakeFrom(MemCtx *m, int count, ...){
 	va_list args;
     va_start(args, count);
     
-    Abstract **slab = (Abstract **)Array_Make(m, count);
+    Array slab = (Abstract **)Array_Make(m, count);
     for(int i = 0; i < count; i++){
         slab[i] = va_arg(args, Abstract*);
     }

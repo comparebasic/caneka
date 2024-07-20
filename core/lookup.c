@@ -14,6 +14,10 @@ void *Lookup_Get(Lookup *lk, word type){
     return result;
 }
 
+word Lookup_AbsFromIdx(Lookup *lk, word idx){
+    return idx+lk->offset;
+}
+
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
         Fatal("Adding lookup value below zero", TYPE_UNIT);

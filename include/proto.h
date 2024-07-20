@@ -10,16 +10,13 @@ typedef struct protodef {
     Maker proto_mk;
     Lookup *handlers;
     Lookup *methods;
-    Abstract *virt;
+    Abstract *source;
 } ProtoDef;
 
 ProtoDef *ProtoDef_Make(MemCtx *m, cls type,
     Maker req_mk,
     Maker proto_mk,
-    Span *parsers_pmk,
-    Lookup *handlers,
-    Lookup *methods,
-    Abstract *virt
+    Abstract *source
 );
 
 char *Proto_ToChars(struct proto *proto);
