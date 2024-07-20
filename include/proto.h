@@ -1,6 +1,7 @@
 typedef struct proto {
     Type type;
     char *(*toLog)(struct serve_req *req);
+    Table *headers;
 } Proto;
 
 typedef struct protodef {

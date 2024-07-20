@@ -280,3 +280,25 @@ Span *Span_From(MemCtx *m, int count, ...){
     }
     return p;
 }
+
+int Span_GetIdx(Span *p, Abstract *a, EqualFunc eq){
+    for(int i = 0; i < p->max_idx; i++){
+        Abstract *t = Span_Get(p, i);
+        if(eq(a, t)){
+            return i;
+        }
+    };
+
+    return -1;
+}
+
+status Span_Merge(Span *dest, Span *additional){
+    for(int i = 0; i < additional->max_idx; i++){
+        Abstract *t = Span_Get(additional, i);
+        if(t != NULL){
+            Span_Add(dest, t);
+        }
+    };
+
+    return SUCCESS;
+}

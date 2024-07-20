@@ -21,9 +21,8 @@ Proto *HttpProto_Make(MemCtx *m, Serve *sctx){
 
 Req *HttpReq_Make(MemCtx *_m, Serve *sctx){
     MemCtx *m = MemCtx_Make();
-    HttpProto *def = (HttpProto *)HttpProto_Make(m, sctx);
-    Req *req =  Req_Make(m, sctx, (Proto *)def, -1);
-    req->type.of = TYPE_HTTP_REQ;
+    HttpProto *proto = (HttpProto *)HttpProto_Make(m, sctx);
+    Req *req =  Req_Make(m, sctx, (Proto *)proto, -1);
     req->in.rbl = Roebling_Make(req->m, TYPE_HTTP_PARSER, 
         sctx->def->parsers_pmk, req->in.shelf, (Abstract *)req);  
     MemCtx_Bind(m, req);

@@ -7,13 +7,12 @@ static int getReQueryKey(i64 hash, int position, byte dim){
     return (int) ((hash >> (position*4)) & TABLE_DIM_LOOKUPS[dim]);
 }
 
-Abstract *Table_Get(Table *tbl, Abstract *a){
-    if(tbl->type.of == TYPE_STRINGTABLE){
-        return StringTable_Get(tbl, a);
-    }
+status Table_SetKey(Table *tbl, Abstract *a){
+    return NOOP;
+}
 
+Hashed *Table_GetHashed(Table *tbl, Abstract *a){
     Hashed *h = Hashed_Make(tbl->values->m, a);
-
     int dims = tbl->values->dims; 
     Abstract *v = NULL;
     boolean found = FALSE;
@@ -23,20 +22,29 @@ Abstract *Table_Get(Table *tbl, Abstract *a){
             int hkey = getReQueryKey(h->id, j, dims);
             Abstract *v = Span_Get(tbl->values, hkey);
             while(v != NULL){
-                if(Compare(a, v)){
-                    found = TRUE;
-                    break;
+                if(rbl->eq(a, v)){
+                    return v;
                 }
-                if(v->type.of != TYPE_HASHED_LINKED){
-                    break;
-                }
+                v = v->next;
             }
         }
     }
-
-    return v;
 }
 
-Abstract *StringTable_Get(Table *tbl, Abstract *a){
-    return NULL;
+Abstract *Table_Get(Table *tbl, Abstract *a){
+    Hashed *h = Table_GetHashed(tbl, a);
+    if(h->type.status == SUCCESS){
+        return h->value;
+    }else{
+        return NULL;
+    }
+}
+
+int Table_GetIdx(Table *tbl, Abstract *a){
+    Hashed *h = Table_GetHashed(tbl, a);
+    if(h->type.status == SUCCESS){
+        return h->idx;
+    }else{
+        return NULL;
+    }
 }

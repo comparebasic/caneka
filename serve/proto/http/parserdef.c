@@ -4,14 +4,14 @@
 
 /* setters */
 static status setMethod(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_HTTP_REQ);
+    Req *req = (Req *)as(source, TYPE_REQ);
     HttpProto *proto = (HttpProto*)as(req->proto, TYPE_HTTP_PROTO);
     proto->method = Lookup_AbsFromIdx(req->sctx->def->methods, prs->idx);
     return SUCCESS;
 }
 
 static status setPath(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_HTTP_REQ);
+    Req *req = (Req *)as(source, TYPE_REQ);
     HttpProto *proto = (HttpProto*)as(req->proto, TYPE_HTTP_PROTO);
     proto->path = Range_Copy(req->m, range);
     return SUCCESS;
@@ -19,7 +19,7 @@ static status setPath(Parser *prs, Range *range, void *source){
 
 /* parser makers */
 static Parser *methodParserMk(Roebling *rlb){
-    Req *req = (Req *) as(rlb->source, TYPE_HTTP_REQ);
+    Req *req = (Req *) as(rlb->source, TYPE_REQ);
     return Parser_StringLookup(req->m, ANCHOR_START, setMethod, req->sctx->def->methods);
 }
 
@@ -41,11 +41,23 @@ static Parser *httvParserMk(Roebling *rlb){
 }
 
 static Parser *nlParserMk(Roebling *rlb){
-    word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n', PAT_INVERT|PAT_TERM, '\t', '\t', PAT_INVERT|PAT_TERM, ' ', ' ', PAT_END};
+    word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n'};
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 4, ANCHOR_START), NULL); 
 }
 
+static Abstract markHeaders;
+markHeaders.type.of = TYPE_RBL_MARK;
+
 /* public */
 Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
-    return Span_From(m, 6, (Abstract *)methodParserMk, (Abstract *)spaceParserMk, (Abstract *)pathParserMk, (Abstract *)spaceParserMk, (Abstract *)httvParserMk, (Abstract *)nlParserMk);
+    Span *p =  Span_From(m, 6, 
+        (Abstract *)methodParserMk,
+        (Abstract *)spaceParserMk,
+        (Abstract *)pathParserMk,
+        (Abstract *)spaceParserMk,
+        (Abstract *)httvParserMk,
+        (Abstract *)nlParserMk);
+
+    Span_Merge(p, HeadersParser_Make(m, def));
+    return p
 }

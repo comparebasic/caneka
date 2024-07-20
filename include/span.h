@@ -14,9 +14,9 @@ typedef struct span {
     byte slotSize;
     byte itemSize;
 	byte dims;
-    /*
-    Resolver *rslv;
-    */
+    int latest_set;
+    int latest_get;
+    EqualFunc eq;
 } Span;
 
 Span* Span_Make(MemCtx* m);
@@ -28,4 +28,6 @@ void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
 Span *Span_From(MemCtx *m, int count, ...);
 void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg);
+status Span_Merge(Span *dest, Span *additional);
+int Span_GetIdx(Span *p, Abstract *a, EqualFunc eq);
 #define Span_NextIdx(p) (p->max_idx+1)

@@ -1,6 +1,23 @@
 #include <external.h>
 #include <caneka.h>
 
+static boolean findMark(Abstract *a, void *b){
+    if(b == NULL){
+        return FALSE;
+    }
+    Single *sgl = (Single *) as(a, TYPE_RBL_MARK); 
+    return sgl->value == *b;
+}
+
+status Roebling_SetJump(Roebling *rbl, Parser *prs, word mark){
+    int jump = Span_GetIdx(rbl->marks, &mark, findMark);
+    if(jump >= 0){
+        prs->jump = jump;
+        return SUCCESS;
+    }
+    return ERROR;
+}
+
 status Roebling_Run(Roebling *rbl){
     if(0 && DEBUG_ROEBLING){
         Debug_Print((void *)rbl, 0, "Roebling_Run for: ", DEBUG_ROEBLING, TRUE);
@@ -14,6 +31,10 @@ status Roebling_Run(Roebling *rbl){
     while(pmk != NULL){
         rbl->type.state = PROCESSING;
         prs = pmk(rbl);
+        if(prs->type.of == TYPE_RBL_MARK){
+            Span_Add(rbl->marks, prs);
+            continue;
+        }
         if(DEBUG_ROEBLING){
             Debug_Print((void *)prs, 0, "Parser in run: ", DEBUG_ROEBLING, TRUE);
             printf("\x1b[0m\n");
@@ -32,7 +53,11 @@ status Roebling_Run(Roebling *rbl){
             rbl->type.state = COMPLETE;
             break;
         }else{
-            rbl->idx++;
+            }else if(prs->jump > 0){
+                rbl->idx = prs->jump;
+            }else{
+                rbl->idx++;
+            }
             pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
             Range_Incr(&(rbl->range));
         }

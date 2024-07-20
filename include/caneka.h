@@ -29,6 +29,11 @@ typedef struct virt  {
     Type type;
 } Abstract;
 
+typedef struct single  {
+    Type type;
+    util value;
+} Single;
+
 typedef struct virt * AbstractPtr;
 
 #define MAX_BASE10 20
@@ -84,6 +89,7 @@ enum types {
     TYPE_STRINGTABLE,
     TYPE_LOOKUP,
     TYPE_ITER,
+    TYPE_RBL_MARK,
     _TYPE_CORE_END,
 };
 
@@ -127,6 +133,7 @@ char *Class_ToString(cls type);
 
 typedef struct parser *(*ParserMaker)(struct structexp *sexp); /* pmk */
 typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
+typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 #include "chain.h"
 #include "error.h"
 #include "log.h"

@@ -1,3 +1,7 @@
+enum parser_cmds {
+    BREAK = -1,
+};
+
 typedef status (*ParseFunc)(struct parser *parser, Range *range, void *source);
 
 typedef struct parser {
@@ -9,6 +13,7 @@ typedef struct parser {
     } match;
     int idx;
     ParseFunc func;
+    int jump;
     ParseFunc complete;
 } Parser; /*rp*/
 

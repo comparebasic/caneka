@@ -12,6 +12,9 @@ enum proto_types {
     TYPE_METHOD_UPDATE, 
     TYPE_METHOD_DELETE,
     _TYPE_HTTP_END,
+    _PATTERNS_START,
+    RBL_HTTP_LINE,
+    RBL_HEADERS,
 };
 
 #define _TYPE_PROTO_END _TYPE_HTTP_END

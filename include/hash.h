@@ -3,16 +3,9 @@ typedef struct hashed {
     int idx;
     util id;
     Abstract *item;
+    Abstract *value;
+    struct hashed *next;
 } Hashed;
-
-typedef struct hashed_linked {
-    Type type;
-    int idx;
-    util id;
-    Abstract *item;
-    struct hashed_linked *next;
-} HashedLinked;
-
 
 extern Chain *HashChain;
 status Hash_Init(MemCtx *m);
