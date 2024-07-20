@@ -88,6 +88,10 @@ static status match_FeedPat(Match *mt, byte c){
                     if(DEBUG_PATMATCH){
                         printf("\x1b[%dm    mt->position %d vs length %ld\x1b[0m\n", DEBUG_PATMATCH, mt->position, length);
                     }
+                    while((def->flags & PAT_TERM) == 0 && (def->flags & PAT_END) == 0){
+                        def++;
+                        mt->position++;
+                    }
                     if(mt->position == length){
                         mt->defPosition = 0;
                         mt->position = 0;

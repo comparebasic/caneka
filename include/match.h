@@ -1,13 +1,17 @@
-enum range_flags {
+enum pat_flags {
     PAT_END = 0,
     PAT_TERM = 1 << 0,
-    PAT_MANY = 1 << 1,
-    PAT_ANY = 1 << 2,
-    PAT_INVERT = 1 << 3,
-    PAT_COUNT = 1 << 4,
-    ANCHOR_UNTIL = 1 << 5,
-    ANCHOR_CONTAINS = 1 << 6,
-    ANCHOR_START = 1 << 7,
+    PAT_SINGLE = 1 << 1,
+    PAT_MANY = 1 << 2,
+    PAT_ANY = 1 << 3,
+    PAT_INVERT = 1 << 4,
+    PAT_COUNT = 1 << 5,
+};
+
+enum match_flags {
+    ANCHOR_UNTIL = 1 << 0,
+    ANCHOR_CONTAINS = 1 << 1,
+    ANCHOR_START = 1 << 2,
 };
 
 #define PAT_WHITESPACE(flags) \

@@ -37,7 +37,7 @@ static Parser *pathParserMk(Roebling *rlb){
 static Parser *httvParserMk(Roebling *rlb){
     word httpv[] = {PAT_TERM, 'H', 'H', PAT_COUNT|PAT_TERM, 'T', 2, PAT_TERM, 'P', 'P',
         PAT_TERM, '/', '/', PAT_TERM, '1', '1', PAT_ANY|PAT_TERM, '.', '.', 
-        PAT_COUNT, '1', 1, PAT_COUNT, '2', 1, PAT_END}; 
+        PAT_SINGLE, '1', '1', PAT_TERM, '2', '2', PAT_END}; 
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(httpv), 8, ANCHOR_START), NULL); 
 }
 
