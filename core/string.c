@@ -61,6 +61,9 @@ status String_Add(MemCtx *m, String *a, String *b) {
 }
 
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
+    if(a == NULL){
+        Fatal("Error string is NULL", TYPE_STRING_CHAIN);
+    }
 
     size_t l = length;
     size_t remaining = l;

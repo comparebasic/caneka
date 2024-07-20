@@ -18,8 +18,8 @@ ProtoDef *HttpProtoDef_Make(MemCtx *m){
         NULL
     ); 
 
-    def->parsers_pmk = (Span *)HttpParser_Make(m, def);
-    def->methods = Lookup_Make(m, _TYPE_HTTP_START, populateMethods, NULL);
+    def->methods = Lookup_Make(m, _TYPE_HTTP_START+1, populateMethods, NULL);
+    def->parsers_pmk = HttpParser_Make(m, def);
 
     return def;
 }

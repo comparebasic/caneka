@@ -89,7 +89,8 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    printf("\x1b[%dm%sRbl<%s:", color, msg, State_ToString(rbl->type.state));
+    printf("\x1b[%dm%sRbl<%s:source=%hu", color, msg, State_ToString(rbl->type.state), rbl->source->type.of);
+    printf(":");
     Debug_Print((void *)&(rbl->range), 0, "", color, extended);
     printf("\x1b[%dm:Pmk=", color);
     Span_Run(NULL, rbl->parsers_pmk, PrintAddr, NULL);
@@ -301,7 +302,7 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     if(func != NULL){
         return func(a, type, msg, color, extended);
     }else{
-        printf("%s: %s unkown debug", msg, Class_ToString(type));
+        printf("%s:%s unkown_debug(%p)", msg, Class_ToString(type), t);
     }
 
     if(color >= 0){

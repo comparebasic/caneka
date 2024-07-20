@@ -4,7 +4,7 @@
 
 /* setters */
 static status setMethod(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
+    Req *req = (Req *)as(source, TYPE_HTTP_REQ);
     HttpProto *proto = (HttpProto*)as(req->proto, TYPE_HTTP_PROTO);
     proto->method = Lookup_AbsFromIdx(req->sctx->def->methods, prs->idx);
     return SUCCESS;
@@ -19,7 +19,7 @@ static status setPath(Parser *prs, Range *range, void *source){
 
 /* parser makers */
 static Parser *methodParserMk(Roebling *rlb){
-    Req *req = (Req *) as(rlb->source, TYPE_REQ);
+    Req *req = (Req *) as(rlb->source, TYPE_HTTP_REQ);
     return Parser_StringLookup(req->m, ANCHOR_START, setMethod, req->sctx->def->methods);
 }
 
@@ -48,5 +48,6 @@ static Parser *nlParserMk(Roebling *rlb){
 
 /* public */
 Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
+    printf("ADDR of method %p\n", methodParserMk);
     return Span_From(m, 5, (Abstract *)methodParserMk, (Abstract *)spaceParserMk, (Abstract *)pathParserMk, (Abstract *)spaceParserMk, (Abstract *)nlParserMk);
 }

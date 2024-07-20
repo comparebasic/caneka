@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 #include <tests.h>
+#include <proto_tests.h>
 
 #include <proto/http.h>
 
@@ -9,14 +10,15 @@
 
 static status test(MemCtx *m){
     status r = TEST_OK;
-        /*
     r |= Core_Tests(m);
     r |= String_Tests(m);
     r |= Span_Tests(m);
-    r |= Serve_Tests(m);
     r |= Hash_Tests(m);
-    */
     r |= Roebling_Tests(m);
+    r |= ProtoHttp_Tests(m);
+    /*
+    r |= Serve_Tests(m);
+    */
     return r;
 }
 

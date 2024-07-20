@@ -72,12 +72,12 @@ status Req_Handle(Serve *sctx, Req *req){
 Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
     MemCtx *rm = MemCtx_Make();
     Req* req = (Req *)MemCtx_Alloc(rm, sizeof(Req));
+    req->type.of = TYPE_REQ;
     req->m = rm;
     req->sctx = sctx;
     req->proto = proto;
     req->direction = direction;
-    req->in.rbl = Roebling_Make(req->m, TYPE_HTTP_PARSER, 
-        sctx->def->parsers_pmk, req->in.shelf, (Abstract *)req);  
+    req->in.shelf = String_Init(req->m, STRING_EXTEND);
 
     return req;
 }
@@ -86,7 +86,6 @@ status Req_SetError(Serve *sctx, Req *req, String *msg){
     req->state = RESPONDING;
     Serve_NextState(sctx, req);
     req->out.response = packageError(req->m, msg);
-    req->in.shelf = String_Init(req->m, STRING_EXTEND);
     return SUCCESS;
 }
 
