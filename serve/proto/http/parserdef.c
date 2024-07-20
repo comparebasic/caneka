@@ -11,9 +11,10 @@ static status setMethod(Parser *prs, Range *range, void *source){
 }
 
 static status setPath(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
+    Req *req = (Req *)as(source, TYPE_HTTP_REQ);
     HttpProto *proto = (HttpProto*)as(req->proto, TYPE_HTTP_PROTO);
     proto->path = Range_Copy(req->m, range);
+    Debug_Print((void *)proto->path, 0, "Setting path: ", COLOR_PURPLE, TRUE);
     return SUCCESS;
 }
 
@@ -24,26 +25,25 @@ static Parser *methodParserMk(Roebling *rlb){
 }
 
 static Parser *spaceParserMk(Roebling *rlb){
-    PatCharDef space[] = {{PAT_ANY|PAT_TERM, ' ', ' '}};
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, (byte *)space, 1, ANCHOR_START), NULL); 
+    word pat[] = {PAT_TERM, ' ', ' ', PAT_END};
+    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(pat), 1, ANCHOR_START), NULL); 
 }
 
 static Parser *pathParserMk(Roebling *rlb){
-    PatCharDef path[] = {{PAT_INVERT, ' ', ' '}, {PAT_ANY|PAT_TERM, '*', '~'}};
-
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, (byte *)path, 2, ANCHOR_START), setPath); 
+    word path[] = {PAT_INVERT|PAT_TERM, ' ', ' ', PAT_MANY|PAT_TERM, '*', '~', PAT_END};
+    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(path), 2, ANCHOR_START), setPath); 
 }
 
 static Parser *httvParserMk(Roebling *rlb){
-    PatCharDef httpv[] = {{PAT_TERM, 'H', 'H'}, {PAT_COUNT|PAT_TERM, 'T', 2}, {PAT_TERM, 'P', 'P'},
-        {PAT_TERM, '/', '/'}, {PAT_TERM, '1', '1'}, {PAT_ANY|PAT_TERM, '.', '.'}, 
-        {PAT_COUNT, '1', 1}, {PAT_COUNT, '2', 1}}; 
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, (byte *)httpv, 8, ANCHOR_START), NULL); 
+    word httpv[] = {PAT_TERM, 'H', 'H', PAT_COUNT|PAT_TERM, 'T', 2, PAT_TERM, 'P', 'P',
+        PAT_TERM, '/', '/', PAT_TERM, '1', '1', PAT_ANY|PAT_TERM, '.', '.', 
+        PAT_COUNT, '1', 1, PAT_COUNT, '2', 1, PAT_END}; 
+    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(httpv), 8, ANCHOR_START), NULL); 
 }
 
 static Parser *nlParserMk(Roebling *rlb){
-    PatCharDef nl[] = {{PAT_TERM, '\r', '\r'}, {PAT_TERM, '\n', '\n'}, {PAT_INVERT, '\t', '\t'}, {PAT_INVERT|PAT_TERM, ' ', ' '}};
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, (byte *)nl, 4, ANCHOR_START), NULL); 
+    word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n', PAT_INVERT|PAT_TERM, '\t', '\t', PAT_INVERT|PAT_TERM, ' ', ' ', PAT_END};
+    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 4, ANCHOR_START), NULL); 
 }
 
 /* public */

@@ -107,7 +107,8 @@ enum status_types {
     RAW = 1 << 9,
     MISS = 1 << 10,
     HASHED = 1 << 11,
-    END = 1 << 12,
+    INVERTED = 1 << 12,
+    END = 1 << 13,
 };
 
 #define HasFlag(x, fl) ((x & (fl)) == fl) 

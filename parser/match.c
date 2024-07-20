@@ -36,6 +36,7 @@ static status match_FeedPat(Match *mt, byte c){
        Debug_Print(mt, TYPE_PATMATCH, "FeedPat: ", DEBUG_PATMATCH, TRUE);
    }
 
+   printf("pos %d\n", mt->position);
    PatCharDef *def = ((PatCharDef *)mt->s->bytes)+(mt->position);  
    i64 length = mt->s->length / sizeof(PatCharDef);
    boolean matched = FALSE;
@@ -45,6 +46,9 @@ static status match_FeedPat(Match *mt, byte c){
         mt->state = ERROR;
    }else{
         while(1){
+            if(def->flags == 0){
+                break;
+            }
             if(DEBUG_PATMATCH){
                 Debug_Print(def, TYPE_PATCHARDEF, "  While: ", DEBUG_PATMATCH, TRUE);
                 printf("\n");
@@ -69,11 +73,12 @@ static status match_FeedPat(Match *mt, byte c){
             if(DEBUG_PATMATCH){
                 if(c == '\r' || c == '\n' || c == '\t'){
 
-                    printf("\x1b[%dm    matched %hu? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
+                    printf("\x1b[%dm    matched \%hu'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
                 }else{
-                    printf("\x1b[%dm    matched %c? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
+                    printf("\x1b[%dm    matched '%c'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
                 }
             }
+
             if(matched){
                 mt->state = PROCESSING;
                 if((def->flags & PAT_TERM) != 0){
@@ -85,21 +90,28 @@ static status match_FeedPat(Match *mt, byte c){
                             printf("\x1b[%dm    mt->position %d vs length %ld\x1b[0m\n", DEBUG_PATMATCH, mt->position, length);
                         }
                         if(mt->position == length){
-                            mt->state = COMPLETE;
                             mt->defPosition = 0;
                             mt->position = 0;
+                            if((def->flags & PAT_MANY) == 0){
+                                mt->state = COMPLETE;
+                            }
                         }
                     }
                     if(DEBUG_PATMATCH){
                         printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
                     }
-                    break;
+                    def++;
                 }
             }else if(optional){
                 ocurrences++;
                 def++;
             }else{
-                if((def->flags & PAT_ANY) || optional){
+                if((def->flags & PAT_INVERT)){
+                    mt->state = INVERTED;
+                    mt->defPosition = 0;
+                    mt->position = 0;
+                    break;
+                }else if((def->flags & PAT_ANY) || optional){
                     def++;
                 }else{
                     mt->defPosition = 0;

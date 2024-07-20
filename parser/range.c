@@ -8,6 +8,11 @@ status Range_Set(Range *range, String *s){
     return SUCCESS;
 }
 
+status Range_Incr(Range *range){
+    range->start = range->end;
+    return SUCCESS;
+}
+
 String *Range_Copy(MemCtx *m, Range *range){
     String *s = String_Init(m, range->length); 
     String *seg = range->start.seg;

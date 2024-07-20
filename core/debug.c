@@ -5,7 +5,7 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = COLOR_DARK;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_BLUE;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_ROEBLING = COLOR_GREEN;
@@ -29,7 +29,7 @@ static Abstract *PrintAddr(MemCtx *m, Abstract *a){
 }
 
 static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    PatCharDef *def = (PatCharDef *) as(a, TYPE_PATCHARDEF);
+    PatCharDef *def = (PatCharDef *)a;
     if((def->flags & PAT_COUNT) != 0){
         if(def->from == '\r' || def->from == '\n'){
             printf("%s%hu=%hux%hu,", msg, (word)def->flags, def->from, def->to);
@@ -38,15 +38,15 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
         }
     }else if(def->from == def->to){
         if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
-            printf("%s%hu=%hu,", msg, (word)def->flags, def->from);
+            printf("%s%hu='%hu',", msg, (word)def->flags, def->from);
         }else{
-            printf("%s%hu=%c,", msg, (word)def->flags, (char)def->from);
+            printf("%s%hu='%c',", msg, (word)def->flags, (char)def->from);
         }
     }else{
         if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n')){
-            printf("%s%hu=%hu-%hu,", msg, (word)def->flags, def->from, def->to);
+            printf("%s%hu='%hu'-'%hu',", msg, (word)def->flags, def->from, def->to);
         }else{
-            printf("%s%hu=%c-%c,", msg, (word)def->flags, (char)def->from, (char)def->to);
+            printf("%s%hu='%c'-'%c',", msg, (word)def->flags, (char)def->from, (char)def->to);
         }
     }
 }

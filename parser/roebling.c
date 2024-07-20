@@ -36,6 +36,7 @@ status Roebling_Run(Roebling *rbl){
         }else{
             rbl->idx++;
             pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+            Range_Incr(&(rbl->range));
         }
     }
 

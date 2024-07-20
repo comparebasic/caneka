@@ -49,7 +49,7 @@ status SCursor_Find(Range *range, Match *search){
         ){
             Match_Feed(search, c);
             if(DEBUG_CURSOR){
-                printf("%d - %c ", i, c);
+                printf("%d - '%c' ", i, c);
                 Debug_Print((void *)search, 0, "", DEBUG_CURSOR, TRUE);
                 printf("\n");
             }
@@ -66,6 +66,13 @@ status SCursor_Find(Range *range, Match *search){
                     end->position = (i+1);
                     end->seg = seg;
                     range->length = (i+1) - start->position;
+                    SCursor_SetLocals(end);
+                    break;
+                }else if(search->state == INVERTED){
+                    search->state = COMPLETE;
+                    end->position = i;
+                    end->seg = seg;
+                    range->length = i - start->position;
                     SCursor_SetLocals(end);
                     break;
                 }

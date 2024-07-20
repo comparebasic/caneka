@@ -1,4 +1,5 @@
 enum range_flags {
+    PAT_END = 0,
     PAT_TERM = 1 << 0,
     PAT_MANY = 1 << 1,
     PAT_ANY = 1 << 2,
@@ -35,7 +36,7 @@ enum range_flags {
     PAT_ANY|PAT_TERM, 'a', 'z'
 
 typedef struct range_chardef {
-    byte flags;
+    word flags;
     word from;
     word to;
 } PatCharDef;

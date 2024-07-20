@@ -23,6 +23,8 @@ char *State_ToString(status state){
         return "PROCESSING";
     }else if(state == RESPONDING){
         return "RESPONDING";
+    }else if(state == INVERTED){
+        return "INVERTED";
     }else{
         return "UNKNOWN_state";
     }
