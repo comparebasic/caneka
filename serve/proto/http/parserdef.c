@@ -30,7 +30,7 @@ static Parser *spaceParserMk(Roebling *rlb){
 }
 
 static Parser *pathParserMk(Roebling *rlb){
-    word path[] = {PAT_INVERT|PAT_TERM, ' ', ' ', PAT_MANY|PAT_TERM, '*', '~', PAT_END};
+    word path[] = {PAT_INVERT, ' ', ' ', PAT_MANY|PAT_TERM, '*', '~', PAT_END};
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(path), 2, ANCHOR_START), setPath); 
 }
 
@@ -49,5 +49,5 @@ static Parser *nlParserMk(Roebling *rlb){
 /* public */
 Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
     printf("ADDR of method %p\n", methodParserMk);
-    return Span_From(m, 5, (Abstract *)methodParserMk, (Abstract *)spaceParserMk, (Abstract *)pathParserMk, (Abstract *)spaceParserMk, (Abstract *)nlParserMk);
+    return Span_From(m, 6, (Abstract *)methodParserMk, (Abstract *)spaceParserMk, (Abstract *)pathParserMk, (Abstract *)spaceParserMk, (Abstract *)httvParserMk, (Abstract *)nlParserMk);
 }

@@ -47,9 +47,11 @@ status SCursor_Find(Range *range, Match *search){
             i < seg->length;
             ++i, c = seg->bytes[i]
         ){
+            if(DEBUG_CURSOR){
+                printf("\x1b[%dmMatch_Feed ->  i:%d - '%c' \x1b[0m\n", DEBUG_CURSOR, i, c);
+            }
             Match_Feed(search, c);
             if(DEBUG_CURSOR){
-                printf("%d - '%c' ", i, c);
                 Debug_Print((void *)search, 0, "", DEBUG_CURSOR, TRUE);
                 printf("\n");
             }

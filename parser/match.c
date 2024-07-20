@@ -81,26 +81,28 @@ static status match_FeedPat(Match *mt, byte c){
 
             if(matched){
                 mt->state = PROCESSING;
-                if((def->flags & PAT_TERM) != 0){
-                    mt->defPosition++;
-                    if(total == mt->defPosition){
-                        mt->defPosition = 0;
-                        mt->position += ocurrences;
-                        if(DEBUG_PATMATCH){
-                            printf("\x1b[%dm    mt->position %d vs length %ld\x1b[0m\n", DEBUG_PATMATCH, mt->position, length);
-                        }
-                        if(mt->position == length){
-                            mt->defPosition = 0;
-                            mt->position = 0;
-                            if((def->flags & PAT_MANY) == 0){
-                                mt->state = COMPLETE;
-                            }
-                        }
-                    }
+                mt->defPosition++;
+                if(total == mt->defPosition){
+                    mt->defPosition = 0;
+                    mt->position += ocurrences;
                     if(DEBUG_PATMATCH){
-                        printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
+                        printf("\x1b[%dm    mt->position %d vs length %ld\x1b[0m\n", DEBUG_PATMATCH, mt->position, length);
                     }
+                    if(mt->position == length){
+                        mt->defPosition = 0;
+                        mt->position = 0;
+                        if((def->flags & PAT_MANY) == 0){
+                            mt->state = COMPLETE;
+                        }
+                    }
+                }
+                if(DEBUG_PATMATCH){
+                    printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
+                }
+                if((def->flags & PAT_TERM) == 0){
                     def++;
+                }else{
+                    break;
                 }
             }else if(optional){
                 ocurrences++;
