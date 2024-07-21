@@ -16,7 +16,6 @@ typedef struct span {
 	byte dims;
     int latest_set;
     int latest_get;
-    EqualFunc eq;
 } Span;
 
 Span* Span_Make(MemCtx* m);

@@ -11,7 +11,7 @@ int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_ROEBLING = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_CURSOR = 0;
-int DEBUG_TABLE = COLOR_PURPLE;
+int DEBUG_TABLE = 0;
 
 static void indent_Print(int indent){
     while(indent--){
@@ -208,8 +208,9 @@ static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean exte
 
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
-    printf("\x1b[%dm%sH<%u:%lu ", color, msg, h->idx, h->id);
+    printf("\x1b[%dm%sH<%u:%lu itm=", color, msg, h->idx, h->id);
     Debug_Print((void *)h->item, 0, "", color, extended);
+    printf("\x1b[%dm v=", color);
     Debug_Print((void *)h->value, 0, "", color, extended);
     printf("\x1b[%dm>\x1b[0m", color);
 }

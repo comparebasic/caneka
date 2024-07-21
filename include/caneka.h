@@ -134,6 +134,7 @@ char *Class_ToString(cls type);
 typedef struct parser *(*ParserMaker)(struct structexp *sexp); /* pmk */
 typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
+boolean Abs_Eq(Abstract *a, void *b);
 #include "chain.h"
 #include "error.h"
 #include "log.h"

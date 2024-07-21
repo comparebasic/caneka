@@ -129,6 +129,9 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
 }
 
 i64 String_Length(String *s) {
+    if(s->type.of == TYPE_STRING_FIXED){
+        return s->length;
+    }
     String *tail = s;
     i64 length = 0;
     int i = 0;
@@ -176,6 +179,12 @@ boolean String_Eq(Abstract *a, void *b){
 }
 
 boolean String_Equals(String *a, String *b){
+    if(a == NULL){
+        Fatal("String a is NULL", TYPE_STRING_CHAIN);
+    }
+    if(b == NULL){
+        Fatal("String b is NULL", TYPE_STRING_CHAIN);
+    }
     if(String_Length(a) != String_Length(b)){
         return FALSE;
     }
@@ -188,8 +197,17 @@ boolean String_Equals(String *a, String *b){
         if(strncmp((char *)aTail->bytes, (char *)bTail->bytes, aTail->length) != 0){
             return FALSE;
         }
-        aTail = aTail->next;
-        bTail = bTail->next;
+        if(aTail->type.of == TYPE_STRING_CHAIN){
+            aTail = aTail->next;
+        }else{
+            aTail = NULL;
+        }
+
+        if(bTail->type.of == TYPE_STRING_CHAIN){
+            bTail = bTail->next;
+        }else{
+            bTail = NULL;
+        }
     }
 
     if(aTail == NULL && bTail == NULL){

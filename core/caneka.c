@@ -73,3 +73,12 @@ char *Class_ToString(cls type){
         return "TYPE_unknown";
     }
 }
+
+boolean Abs_Eq(Abstract *a, void *b){
+    if(a->type.of == TYPE_STRING_CHAIN || a->type.of == TYPE_STRING_FIXED){
+        return String_Eq(a, b);
+    }else{
+        Fatal("Not implemented", TYPE_ABSTRACT);
+        return FALSE;
+    }
+}

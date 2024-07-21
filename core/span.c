@@ -156,9 +156,11 @@ static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
                 sr->slab->items[sr->local_idx] = t;
             }
         }
-        if(sr->op != SPAN_OP_GET && idx > p->max_idx){
+        if(sr->op != SPAN_OP_GET){
             p->nvalues++;
-            p->max_idx = idx;
+            if(idx > p->max_idx){
+                p->max_idx = idx;
+            }
         }
 
         return SUCCESS;

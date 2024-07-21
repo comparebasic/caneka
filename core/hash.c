@@ -92,6 +92,13 @@ util Get_Hash(Abstract *a){
     }
 }
 
+boolean Hashed_Equals(Hashed *a, Hashed *b){
+    if(a->id != b->id){
+        return FALSE;
+    }
+    return Abs_Eq(a->item, (void *)b->item);
+}
+
 Hashed *Hashed_Make(MemCtx *m, Abstract *a){
     if(a->type.of == TYPE_HASHED){
         return (Hashed *)a;
