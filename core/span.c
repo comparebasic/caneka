@@ -176,6 +176,7 @@ Span* Span_Make(MemCtx* m){
     p->m = m;
     p->max_idx = -1;
     p->slotSize = 1;
+    p->dims = 1;
     p->slab = Slab_Alloc(m, (p->type.state|RAW));
     p->type.of = TYPE_SPAN;
     p->slab->increment = STRIDE(p);

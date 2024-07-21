@@ -11,6 +11,7 @@ int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_ROEBLING = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_CURSOR = 0;
+int DEBUG_TABLE = COLOR_PURPLE;
 
 static void indent_Print(int indent){
     while(indent--){
@@ -205,6 +206,15 @@ static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean exte
     printf("\n\x1b[1;%dm>\x1b[0m\n", color);
 }
 
+static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Hashed *h = (Hashed *)as(a, TYPE_HASHED);
+    printf("\x1b[%dm%sH<%u:%lu ", color, msg, h->idx, h->id);
+    Debug_Print((void *)h->item, 0, "", color, extended);
+    Debug_Print((void *)h->value, 0, "", color, extended);
+    printf("\x1b[%dm>\x1b[0m", color);
+}
+
+
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
     printf("%s\x1b[%dmCursor<%s:%ld/seg%ld[%ld]:%ld %s>\x1b[0m", msg, color,
@@ -270,6 +280,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PARSER, (void *)Parser_Print);
     r |= Lookup_Add(m, lk, TYPE_MULTIPARSER, (void *)MultiParser_Print);
     r |= Lookup_Add(m, lk, TYPE_STRINGMATCH, (void *)StringMatch_Print);
+    r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     return r;
 }
 

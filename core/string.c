@@ -164,6 +164,17 @@ boolean String_EqualsBytes(String *a, byte *cstr){
     return FALSE;
 }
 
+boolean String_Eq(Abstract *a, void *b){
+    if(a->type.of != TYPE_STRING_CHAIN && a->type.of != TYPE_STRING_FIXED
+        || ((Abstract *)b)->type.of != TYPE_STRING_CHAIN && ((Abstract *)b)->type.of != TYPE_STRING_FIXED
+    ){
+       Fatal("", TYPE_STRING_CHAIN); 
+    }
+    String *sa = (String *)a;
+    String *sb = (String *)b;
+    return String_Equals(sa, sb);
+}
+
 boolean String_Equals(String *a, String *b){
     if(String_Length(a) != String_Length(b)){
         return FALSE;

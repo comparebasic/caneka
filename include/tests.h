@@ -5,3 +5,4 @@ status Serve_Tests(MemCtx *gm);
 status Span_Tests(MemCtx *gm);
 status Hash_Tests(MemCtx *gm);
 status Roebling_Tests(MemCtx *gm);
+status Table_Tests(MemCtx *gm);

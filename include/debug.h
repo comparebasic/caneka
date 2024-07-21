@@ -21,3 +21,4 @@ extern int DEBUG_BOUNDS_CHECK;
 extern int DEBUG_ROEBLING;
 extern int DEBUG_ROEBLING_CONTENT;
 extern int DEBUG_CURSOR;
+extern int DEBUG_TABLE;

@@ -16,6 +16,7 @@ static status test(MemCtx *m){
     r |= Hash_Tests(m);
     r |= Roebling_Tests(m);
     r |= ProtoHttp_Tests(m);
+    r |= Table_Tests(m);
     /*
     r |= Serve_Tests(m);
     */
