@@ -11,6 +11,7 @@ typedef struct parser {
         Match *single;
         Match **array;
     } match;
+    Match *ko;
     int idx;
     ParseFunc func;
     int jump;

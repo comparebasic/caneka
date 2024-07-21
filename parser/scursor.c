@@ -23,7 +23,7 @@ status SCursor_SetLocals(SCursor *sc){
     return SUCCESS;
 }
 
-status SCursor_Find(Range *range, Match *search){
+status SCursor_Find(Range *range, Match *search, Match *ko){
     SCursor *start = &(range->start); 
     SCursor *end = &(range->end); 
     if(start->seg == NULL || start->seg->length < 1){
@@ -51,6 +51,13 @@ status SCursor_Find(Range *range, Match *search){
                 printf("\x1b[%dmMatch_Feed ->  i:%d - '%c' \x1b[0m\n", DEBUG_CURSOR, i, c);
             }
             Match_Feed(search, c);
+            if(ko != NULL){
+                Match_Feed(ko, c);
+                if(ko->state == COMPLETE){
+                    search->state = COMPLETE;
+                    i -= (ko->position);
+                }
+            }
             if(DEBUG_CURSOR){
                 Debug_Print((void *)search, 0, "", DEBUG_CURSOR, TRUE);
                 printf("\n");
@@ -70,7 +77,7 @@ status SCursor_Find(Range *range, Match *search){
                     range->length = (i+1) - start->position;
                     SCursor_SetLocals(end);
                     break;
-                }else if(search->state == INVERTED){
+                }else if((search->state & INVERTED) != 0){
                     search->state = COMPLETE;
                     end->position = i;
                     end->seg = seg;

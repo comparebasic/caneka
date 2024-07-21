@@ -7,7 +7,7 @@ typedef struct structexp {
     Type type;
     MemCtx *m;
     int idx;
-    int mark;
+    int current;
     Abstract *source; 
     Span *marks;
     Range range;

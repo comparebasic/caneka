@@ -4,13 +4,15 @@
 Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
-int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_MATCH = COLOR_YELLOW;
+int DEBUG_PATMATCH = COLOR_DARK;
+int DEBUG_CURSOR = COLOR_BLUE;
+int DEBUG_PARSER = COLOR_YELLOW;
+int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING_COMPLETE = COLOR_RED;
+int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
-int DEBUG_ROEBLING = 0;
-int DEBUG_ROEBLING_CONTENT = 0;
-int DEBUG_CURSOR = 0;
 int DEBUG_TABLE = 0;
 
 static void indent_Print(int indent){
@@ -33,7 +35,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
     PatCharDef *def = (PatCharDef *)a;
     if((def->flags & PAT_COUNT) != 0){
         if(def->from == '\r' || def->from == '\n'){
-            printf("%s%hu=%hux%hu,", msg, (word)def->flags, def->from, def->to);
+            printf("%s%hu=0x%hux0x%hu,", msg, (word)def->flags, def->from, def->to);
         }else{
             printf("%s%hu=%cx%hu,", msg, (word)def->flags, (char)def->from, def->to);
         }
@@ -45,7 +47,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
         }
     }else{
         if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n')){
-            printf("%s%hu='%hu'-'%hu',", msg, (word)def->flags, def->from, def->to);
+            printf("%s%hu='0x%hu'-'0x%hu',", msg, (word)def->flags, def->from, def->to);
         }else{
             printf("%s%hu='%c'-'%c',", msg, (word)def->flags, (char)def->from, (char)def->to);
         }
@@ -110,8 +112,14 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Req *req = (Req *) as(a, TYPE_REQ);
-    printf("%s\x1b[1;%dmReq<%s:%s>\x1b[0;1m\n",
+    printf("%s\x1b[1;%dmReq<%s:%s ",
         msg, color, State_ToString(req->state), Proto_ToChars(req->proto));
+    Debug_Print((void *)req->proto, 0, "", color, extended);
+    if(req->in.rbl != NULL && extended){
+        printf(" ");
+        Debug_Print((void *)req->in.rbl, 0, "", color, extended);
+    }
+    printf(">\x1b[0m");
 }
 
 static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean extended){
@@ -218,11 +226,9 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("%s\x1b[%dmCursor<%s:%ld/seg%ld[%ld]:%ld %s>\x1b[0m", msg, color,
+    printf("%s\x1b[%dmCursor<%s:%ld/seg%ld[%ld]:%ld>\x1b[0m", msg, color,
         State_ToString(sc->state), 
-        sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength,
-        sc->seg != NULL ? (char *)sc->seg->bytes : ""
-    );
+        sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength);
 }
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -266,6 +272,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);
     r |= Lookup_Add(m, lk, TYPE_MATCH, (void *)Match_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRINGMATCH, (void *)StringMatch_Print);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
@@ -280,7 +287,6 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_PARSER, (void *)Parser_Print);
     r |= Lookup_Add(m, lk, TYPE_MULTIPARSER, (void *)MultiParser_Print);
-    r |= Lookup_Add(m, lk, TYPE_STRINGMATCH, (void *)StringMatch_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     return r;
 }

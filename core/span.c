@@ -300,12 +300,14 @@ int Span_GetIdx(Span *p, void *a, EqualFunc eq){
 }
 
 status Span_Merge(Span *dest, Span *additional){
-    for(int i = 0; i < additional->max_idx; i++){
+    printf("nvalues before %u\n", dest->nvalues);
+    for(int i = 0; i <= additional->max_idx; i++){
         Abstract *t = Span_Get(additional, i);
         if(t != NULL){
             Span_Add(dest, t);
         }
     };
+    printf("nvalues after %u\n", dest->nvalues);
 
     return SUCCESS;
 }

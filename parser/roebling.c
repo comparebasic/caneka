@@ -24,7 +24,10 @@ status Roebling_Run(Roebling *rbl){
         rbl->type.state = PROCESSING;
         prs = pmk(rbl);
         if(prs->type.of == TYPE_RBL_MARK){
+            printf("Its a mark!\n");
             Span_Add(rbl->marks, (Abstract *)prs);
+            rbl->idx++;
+            pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
             continue;
         }
         if(DEBUG_ROEBLING){
@@ -69,7 +72,8 @@ Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract 
     rbl->m = m;
     rbl->parsers_pmk = parsers;
     rbl->source = source;
-    rbl->mark = -1;
+    rbl->marks = Span_Make(m);
+    rbl->current = -1;
     Range_Set(&(rbl->range), s);
     return rbl;
 }

@@ -15,6 +15,7 @@ Proto *HttpProto_Make(MemCtx *m, Serve *sctx){
     p->type.of = TYPE_HTTP_PROTO;
     p->path = String_Init(m, 0);
     p->toLog = toLog;
+    p->headers_tbl = Span_Make(m);
 
     return (Proto *)p;
 }

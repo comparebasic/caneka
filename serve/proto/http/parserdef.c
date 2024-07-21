@@ -42,7 +42,7 @@ static Parser *httvParserMk(Roebling *rlb){
 
 static Parser *nlParserMk(Roebling *rlb){
     word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n'};
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 4, ANCHOR_START), NULL); 
+    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 2, ANCHOR_START), NULL); 
 }
 
 /* public */

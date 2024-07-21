@@ -7,6 +7,7 @@ enum pat_flags {
     PAT_INVERT = 1 << 4,
     PAT_COUNT = 1 << 5,
     PAT_SET_NOOP = 1 << 6,
+    PAT_IGNORE = 1 << 7,
 };
 
 enum match_flags {

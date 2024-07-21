@@ -53,7 +53,7 @@ static status match_FeedPat(Match *mt, byte c){
                 printf("\n");
             }
 
-            boolean optional = ((def->flags & PAT_ANY) || ((def->flags & PAT_MANY) != 0 && mt->defPosition > 0));
+            boolean optional = ((def->flags & PAT_ANY|PAT_MANY) != 0 && mt->defPosition > 0);
             if((def->flags & PAT_COUNT) != 0){
                 matched = (c == def->from);
                 total = def->to;
@@ -90,10 +90,15 @@ static status match_FeedPat(Match *mt, byte c){
                     }
                     if(mt->position == length){
                         mt->defPosition = 0;
-                        mt->position = 0;
                         if((def->flags & PAT_MANY) == 0){
                             mt->state = COMPLETE;
+                            if(DEBUG_ROEBLING_COMPLETE){
+                                Debug_Print((void *)mt, 0, "Match Complete (matched): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                            }
+                        }else{
+                            mt->position = 0;
                         }
+
                     }
                 }
                 if(DEBUG_PATMATCH){
@@ -110,16 +115,27 @@ static status match_FeedPat(Match *mt, byte c){
             }else{
                 if((def->flags & PAT_INVERT)){
                     mt->state = INVERTED;
+                    if((def->flags & PAT_IGNORE) != 0){
+                        mt->state |= PROCESSING;
+                    }
                     mt->defPosition = 0;
-                    mt->position = 0;
+                    mt->position--;
+                    if(DEBUG_ROEBLING_COMPLETE){
+                        Debug_Print((void *)mt, 0, "Match Complete (invert): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                    }
                     break;
-                }else if((def->flags & PAT_ANY) || optional){
+                }else if(optional){
                     def++;
                 }else{
-                    mt->defPosition = 0;
-                    mt->state = READY;
-                    mt->position = 0;
-                    break;
+                    if((def->flags & PAT_TERM) != 0){
+                        mt->defPosition = 0;
+                        mt->state = READY;
+                        mt->position = 0;
+                        break;
+                    }else{
+                        ocurrences++;
+                        def++;
+                    }
                 }
             }
         }
@@ -134,13 +150,16 @@ static status match_FeedPat(Match *mt, byte c){
 static status match_FeedString(Match *mt, byte c){
     if(DEBUG_MATCH){
        printf("%c of %s %hu", c, mt->s->bytes, mt->s->length);
-       Debug_Print(mt, TYPE_MATCH, "FeedPat: ", DEBUG_PATMATCH, TRUE);
+       Debug_Print(mt, 0, "FeedPat: ", DEBUG_PATMATCH, TRUE);
     }
     if(mt->s->bytes[mt->position] == c){
         mt->position++;
         if(mt->position == mt->s->length){
             mt->position = 0;
             mt->state = COMPLETE;
+            if(DEBUG_ROEBLING_COMPLETE){
+                Debug_Print((void *)mt, 0, "Match Complete: ", DEBUG_ROEBLING_COMPLETE, TRUE);
+            }
         }else{
             mt->state = PROCESSING;
         }

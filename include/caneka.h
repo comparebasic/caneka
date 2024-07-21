@@ -45,7 +45,7 @@ typedef struct virt * AbstractPtr;
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
-#define as(x, t) (((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", t))
+#define as(x, t) (((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -57,6 +57,7 @@ typedef struct virt * AbstractPtr;
 
 enum types {
     _TYPE_START,
+    TYPE_UNKNOWN,
     TYPE_ABSTRACT,
     TYPE_UNIT,
     TYPE_MEMCTX,

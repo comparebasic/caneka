@@ -9,9 +9,9 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
     int start = range->start.position;
     Match **matches = prs->match.array;
     while(matches[i] != NULL){
-        r = SCursor_Find(range, matches[i]);
-        if(DEBUG_MATCH){
-            Debug_Print((void *)matches[i], matches[i]->type.of, "parse_Multi Match: ", DEBUG_MATCH, TRUE);
+        r = SCursor_Find(range, matches[i], prs->ko);
+        if(DEBUG_PARSER){
+            Debug_Print((void *)matches[i], matches[i]->type.of, "parse_Multi Match: ", DEBUG_PARSER, TRUE);
         }
         if(r == COMPLETE){
             prs->idx = i;
@@ -28,10 +28,13 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
 static status parse_Single(Parser *prs, Range *range, void *source){
     status r = READY;
     Match *mt = prs->match.single;
+    if(mt->state == MISS){
+        return mt->state;
+    }
 
-    r = SCursor_Find(range, mt);
-    if(DEBUG_MATCH){
-        Debug_Print((void *)mt, mt->type.of, "parse_Single Match: ", DEBUG_MATCH, TRUE);
+    r = SCursor_Find(range, mt, prs->ko);
+    if(DEBUG_PARSER){
+        Debug_Print((void *)mt, mt->type.of, "parse_Single Match: ", DEBUG_PARSER, TRUE);
     }
     if(r == COMPLETE){
         if(prs->complete != NULL){

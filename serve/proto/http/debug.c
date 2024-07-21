@@ -16,22 +16,11 @@ static char *Method_ToString(int method){
     }
 }
 
-static void HttpReq_Print(void *t, cls type, char *msg, int color, boolean extended){
-    Req *req = (Req *) as(t, TYPE_HTTP_REQ);
-    printf("%s\x1b[%dmReq[Http]<%s ",
-        msg, color, State_ToString(req->state));
-
-    Debug_Print((void *)req->proto, 0, "", color, extended);
-    if(req->in.rbl != NULL){
-        printf(" ");
-        Debug_Print((void *)req->in.rbl, 0, "", color, extended);
-    }
-    printf(">\x1b[0m");
-}
-
 static void HttpProto_Print(void *t, cls type, char *msg, int color, boolean extended){
     HttpProto *proto = (HttpProto *) as(t, TYPE_HTTP_PROTO);
-    printf("HttpProto<%s %s>", Method_ToString(proto->method), proto->path->bytes);
+    printf("HttpProto<%s \x1b[1m%s\x1b[0;%dm", Method_ToString(proto->method), proto->path->bytes, color);
+    Debug_Print((void *)proto->headers_tbl, 0, " Headers:", color, extended);
+    printf("\x1b[%dm>\x1b[0m", color);
 }
 
 static void HttpProtoDef_Print(void *t, cls type, char *msg, int color, boolean extended){
@@ -60,7 +49,6 @@ static status populateHttpDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTODEF, (void *)HttpProtoDef_Print);
-    r |= Lookup_Add(m, lk, TYPE_HTTP_REQ, (void *)HttpReq_Print);
     return r;
 }
 
