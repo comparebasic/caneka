@@ -145,15 +145,19 @@ static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
             if(sr->op == SPAN_OP_REMOVE){
                 memset(ptr, 0, p->itemSize);
             }else if(sr->op == SPAN_OP_SET){
+                sr->span->metrics.set = idx;
                 memcpy(ptr, t, p->itemSize);
             }else if(sr->op == SPAN_OP_GET){
                 sr->value = ptr;
+                sr->span->metrics.get = idx;
             }
         }else{
             if(sr->op == SPAN_OP_GET){
                 sr->value = sr->slab->items[sr->local_idx];
+                sr->span->metrics.get = idx;
             }else{
                 sr->slab->items[sr->local_idx] = t;
+                sr->span->metrics.set = idx;
             }
         }
         if(sr->op != SPAN_OP_GET){

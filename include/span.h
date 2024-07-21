@@ -14,8 +14,10 @@ typedef struct span {
     byte slotSize;
     byte itemSize;
 	byte dims;
-    int latest_set;
-    int latest_get;
+    struct {
+        int get;
+        int set;
+    } metrics;
 } Span;
 
 Span* Span_Make(MemCtx* m);

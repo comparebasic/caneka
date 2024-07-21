@@ -5,37 +5,22 @@ int TABLE_DIM_LOOKUPS[7] = {0, 15, 255, 4095, 65535, 1048575, 0};
 int TABLE_REQUERY_MAX[7] = {0, 2, 4, 8, 16, 32, 0};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
-Hashed *Table_GetSetHashed(Span *tbl, Abstract *a, Abstract *value);
+static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
 
 static int getReQueryKey(i64 hash, int position, byte dim){
     return (int) ((hash >> (position*4)) & TABLE_DIM_LOOKUPS[dim]);
 }
 
-status Table_SetKey(Span *tbl, Abstract *a){
-    return NOOP;
-}
-
-status Table_SetValue(Span *tbl, Abstract *a){
-    return NOOP;
-}
-
-status Table_Resize(Span *tbl, word *queries){
-    /*
-    if(DEBUG_TABLE_EXPAND){
-        printf("nvalues:%u vs %u queries:%u vs %u\n",
-           tbl->nvalues,
-           (TABLE_DIM_LOOKUPS[tbl->dims] / 2), 
-           *queries,  TABLE_REQUERY_MAX[tbl->dims]);
-    }
-    */
-    if(tbl->nvalues > ((TABLE_DIM_LOOKUPS[tbl->dims] / 2) + (TABLE_DIM_LOOKUPS[tbl->dims] / 4)) || *queries > TABLE_REQUERY_MAX[tbl->dims]){
+static status Table_Resize(Span *tbl, word *queries){
+    if(tbl->nvalues > ((TABLE_DIM_LOOKUPS[tbl->dims] / 2) + (TABLE_DIM_LOOKUPS[tbl->dims] / 4)) 
+            || *queries > TABLE_REQUERY_MAX[tbl->dims]){
         *queries = 0;
         Span *newTbl = Span_Make(tbl->m);
         Span_Set(newTbl, TABLE_DIM_LOOKUPS[tbl->dims]+1, NULL);
         for(int i = 0; i <= tbl->max_idx; i++){
             Hashed *h = (Hashed *)Span_Get(tbl, i);
             if(h != NULL){
-                Table_GetSetHashed(newTbl, (Abstract *)h, (Abstract *)h->value);
+                Table_GetSetHashed(newTbl, SPAN_OP_SET, (Abstract *)h, (Abstract *)h->value);
             }
         }
         memcpy(tbl, newTbl, sizeof(Span));
@@ -44,8 +29,11 @@ status Table_Resize(Span *tbl, word *queries){
     return NOOP;
 }
 
-Hashed *Table_GetSetHashed(Span *tbl, Abstract *a, Abstract *value){
+static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value){
     Hashed *h = Hashed_Make(tbl->m, a);
+    if(op != SPAN_OP_GET && op != SPAN_OP_SET){
+        return h;
+    }
     Hashed *_h = NULL;
     h->value = value;
     Abstract *v = NULL;
@@ -60,7 +48,7 @@ Hashed *Table_GetSetHashed(Span *tbl, Abstract *a, Abstract *value){
                 printf("\x1b[%dmhkey of j:%d hkey:%u from %lu\x1b[0m\n", DEBUG_TABLE, j, hkey, h->id);
             }
             _h = (Hashed *)Span_Get(tbl, hkey);
-            if(value == NULL){
+            if(op == SPAN_OP_GET){
                 if(_h != NULL){
                     while(_h != NULL){
                         if(Hashed_Equals(h, _h)){
@@ -74,7 +62,7 @@ Hashed *Table_GetSetHashed(Span *tbl, Abstract *a, Abstract *value){
                     found = TRUE;
                     break;
                 }
-            }else{
+            }else if(op == SPAN_OP_SET){
                 if(_h != NULL){
                     while(_h != NULL){
                         if(Hashed_Equals(h, _h)){
@@ -98,19 +86,33 @@ Hashed *Table_GetSetHashed(Span *tbl, Abstract *a, Abstract *value){
     return h;
 }
 
+status Table_SetKey(Span *tbl, Abstract *a){
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, NULL);
+    return SUCCESS;
+}
+
+status Table_SetValue(Span *tbl, Abstract *a){
+    Hashed *h = Span_Get(tbl, tbl->metrics.set);
+    if(h != NULL){
+        h->value = a;
+        return SUCCESS;
+    }
+    return ERROR;
+}
+
 Abstract *Table_Get(Span *tbl, Abstract *a){
-    Hashed *h = Table_GetSetHashed(tbl, a, NULL);
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
     return h->value;
 }
 
 int Table_Set(Span *tbl, Abstract *a, Abstract *value){
-    Hashed *h = Table_GetSetHashed(tbl, a, value);
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
     h->value = value;
     return h->idx;
 }
 
 int Table_GetIdx(Span *tbl, Abstract *a){
-    Hashed *h = Table_GetSetHashed(tbl, a, NULL);
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
     if(h->type.state == SUCCESS){
         return h->idx;
     }else{
