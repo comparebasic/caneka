@@ -45,9 +45,6 @@ static Parser *nlParserMk(Roebling *rlb){
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 4, ANCHOR_START), NULL); 
 }
 
-static Abstract markHeaders;
-markHeaders.type.of = TYPE_RBL_MARK;
-
 /* public */
 Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
     Span *p =  Span_From(m, 6, 
@@ -59,5 +56,5 @@ Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
         (Abstract *)nlParserMk);
 
     Span_Merge(p, HeadersParser_Make(m, def));
-    return p
+    return p;
 }

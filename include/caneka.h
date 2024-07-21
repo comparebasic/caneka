@@ -153,7 +153,6 @@ typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 #include "lookup.h"
 #include "roebling.h"
 #include "parsers.h"
-#include "apps.h"
 #include "proto.h"
 #include "serve.h"
 #include "req.h"
@@ -161,5 +160,7 @@ typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 #include "testsuite.h"
 #include "mess.h"
 #include "streamdef.h"
+#include "mark.h"
+#include "apps.h"
 
 status Caneka_Init(MemCtx *m);

@@ -281,10 +281,10 @@ Span *Span_From(MemCtx *m, int count, ...){
     return p;
 }
 
-int Span_GetIdx(Span *p, Abstract *a, EqualFunc eq){
+int Span_GetIdx(Span *p, void *a, EqualFunc eq){
     for(int i = 0; i < p->max_idx; i++){
         Abstract *t = Span_Get(p, i);
-        if(eq(a, t)){
+        if(eq(t, a)){
             return i;
         }
     };

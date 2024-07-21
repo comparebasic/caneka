@@ -1,7 +1,7 @@
 typedef struct http_proto {
     Type type;
     char *(*toLog)(Req *req);
-    Table *headers;
+    Span *headers_tbl;
     /* end proto props */
     String *path;
     byte method;

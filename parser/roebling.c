@@ -1,16 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static boolean findMark(Abstract *a, void *b){
-    if(b == NULL){
-        return FALSE;
-    }
-    Single *sgl = (Single *) as(a, TYPE_RBL_MARK); 
-    return sgl->value == *b;
-}
-
 status Roebling_SetJump(Roebling *rbl, Parser *prs, word mark){
-    int jump = Span_GetIdx(rbl->marks, &mark, findMark);
+    int jump = Span_GetIdx(rbl->marks, &mark, Mark_Eq);
     if(jump >= 0){
         prs->jump = jump;
         return SUCCESS;
@@ -32,7 +24,7 @@ status Roebling_Run(Roebling *rbl){
         rbl->type.state = PROCESSING;
         prs = pmk(rbl);
         if(prs->type.of == TYPE_RBL_MARK){
-            Span_Add(rbl->marks, prs);
+            Span_Add(rbl->marks, (Abstract *)prs);
             continue;
         }
         if(DEBUG_ROEBLING){
@@ -53,7 +45,7 @@ status Roebling_Run(Roebling *rbl){
             rbl->type.state = COMPLETE;
             break;
         }else{
-            }else if(prs->jump > 0){
+            if(prs->jump > 0){
                 rbl->idx = prs->jump;
             }else{
                 rbl->idx++;

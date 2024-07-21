@@ -18,3 +18,4 @@ enum proto_types {
 };
 
 #define _TYPE_PROTO_END _TYPE_HTTP_END
+#include "headers.h"

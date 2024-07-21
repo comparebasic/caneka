@@ -7,7 +7,7 @@ coreobj = core/caneka.o core/mem.o core/string.o core/error.o core/debug.o \
     core/hash.o core/table.o core/compare.o core/iter.o core/array.o
 parserobj = parser/parsers.o parser/match.o parser/roebling.o parser/scursor.o parser/range.o \
     parser/mark.o
-serveobj = serve/req.o serve/serve.o serve/proto.o 
+serveobj = serve/req.o serve/serve.o serve/proto.o serve/proto/headers/parserdef.o
 httpobj = serve/proto/http/protodef.o serve/proto/http/proto.o serve/proto/http/parserdef.o \
     serve/proto/http/pat_matches.o serve/proto/http/debug.o
 testobj = tests/core_tests.o tests/string_tests.o tests/serve_tests.o \
@@ -31,6 +31,7 @@ dirs:
 	mkdir -p build/core
 	mkdir -p build/parser
 	mkdir -p build/serve/proto/http
+	mkdir -p build/serve/proto/headers
 	mkdir -p build/tests
 	mkdir -p build/proto/http
 
