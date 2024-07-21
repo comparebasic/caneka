@@ -36,7 +36,6 @@ status Table_Tests(MemCtx *gm){
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
     }
 
-    Debug_Print((void *)tbl, 0, "TAble: ", COLOR_BLUE, TRUE);
 
     for(int i = 0; ; i+= 2){
         if(values[i] == NULL){
@@ -51,6 +50,20 @@ status Table_Tests(MemCtx *gm){
             "Expect strings to equal %s from key:%s found %s", (char *)(value->bytes), (char *)(s->bytes),
             found != NULL ? (char *)(found->bytes) : "NULL");
     }
+
+
+    s = String_Make(m, bytes("PreKey"));
+    value = String_Make(m, bytes("After Value"));
+    Table_SetKey(tbl, (Abstract *)s);
+    Table_SetValue(tbl, (Abstract *)value);
+    found = (String *)Table_Get(tbl, (Abstract *)s);
+    r |= Test(found != NULL, 
+        "Expect SetKey and SetValue to effect the same entry: strings to not be NULL from key:'%s'", (char *)(s->bytes));
+    r |= Test(String_Equals(value, found), 
+        "Expect SetKey and SetValue to effect the same entry: strings to equal '%s' from key:'%s' found '%s'", (char *)(value->bytes), (char *)(s->bytes),
+        found != NULL ? (char *)(found->bytes) : "NULL");
+
+
 
     MemCtx_Free(m);
     return r;
