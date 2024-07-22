@@ -37,6 +37,10 @@ String *String_FromInt(MemCtx *m, int i){
     return String_From(m, buff+position+1); 
 }
 
+int String_ToInt(MemCtx *m, String *s){
+    return 0;
+}
+
 String *String_Make(MemCtx *m, byte *bytes){
     int length = strlen((char *)bytes);
     String *s = String_Init(m, length); 

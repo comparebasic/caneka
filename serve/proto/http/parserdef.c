@@ -17,6 +17,13 @@ static status setPath(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
+static status setBody(Parser *prs, Range *range, void *source){
+    Req *req = (Req *)as(source, TYPE_REQ);
+    HttpProto *proto = (HttpProto*)as(req->proto, TYPE_HTTP_PROTO);
+    proto->body = Range_Copy(req->m, range);
+    return SUCCESS;
+}
+
 /* parser makers */
 static Parser *methodParserMk(Roebling *rlb){
     Req *req = (Req *) as(rlb->source, TYPE_REQ);
@@ -45,6 +52,19 @@ static Parser *nlParserMk(Roebling *rlb){
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 2, ANCHOR_START), NULL); 
 }
 
+static Parser *bodyParserMk(Roebling *rlb){
+    Req *req = (Req *) as(rlb->source, TYPE_REQ);
+    HttpProto *proto = (HttpProto*)req->proto;
+
+    if(proto->method == TYPE_METHOD_POST){
+        int length =  Header_GetInt(proto->headers_tbl, String_Make(req->m, bytes("Content-Length")));
+        word body[] = {PAT_WILDCOUNT, 0, length, PAT_END, 0, 0};
+        return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(body), 2, ANCHOR_START), setBody); 
+    }else{
+        return NULL;
+    }
+}
+
 /* public */
 Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
     Span *p =  Span_From(m, 6, 
@@ -54,7 +74,8 @@ Span *HttpParser_Make(MemCtx *m, ProtoDef *def){
         (Abstract *)spaceParserMk,
         (Abstract *)httvParserMk,
         (Abstract *)nlParserMk);
-
     Span_Merge(p, HeadersParser_Make(m, def));
+    Span_Add(p, (Abstract *)bodyParserMk);
+
     return p;
 }

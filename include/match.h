@@ -8,6 +8,7 @@ enum pat_flags {
     PAT_COUNT = 1 << 5,
     PAT_SET_NOOP = 1 << 6,
     PAT_IGNORE = 1 << 7,
+    PAT_WILDCOUNT = 1 << 8,
 };
 
 enum match_flags {

@@ -23,6 +23,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length);
 i64 String_Length(String *s);
 boolean String_EqualsBytes(String *a, byte *cstr);
 String *String_FromInt(MemCtx *m, int i);
+int String_ToInt(MemCtx *m, String *s);
 String *String_FromRange(MemCtx *m, struct strcursor_range *range);
 String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
