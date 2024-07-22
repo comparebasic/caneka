@@ -33,6 +33,13 @@ void Match_Reset(Match *mt){
 
 static status match_FeedPat(Match *mt, byte c){
    if(DEBUG_PATMATCH){
+       if(c == '\r'){
+           printf("\x1b[%dm'\\r' -> ", DEBUG_PATMATCH);
+       }else if(c == '\n'){
+           printf("\x1b[%dm'\\n' -> ", DEBUG_PATMATCH);
+       }else{
+           printf("\x1b[%dm'%c' -> ", DEBUG_PATMATCH, c);
+       }
        Debug_Print(mt, TYPE_PATMATCH, "FeedPat: ", DEBUG_PATMATCH, TRUE);
    }
 
@@ -94,6 +101,7 @@ static status match_FeedPat(Match *mt, byte c){
                             mt->state = COMPLETE;
                             if(DEBUG_ROEBLING_COMPLETE){
                                 Debug_Print((void *)mt, 0, "Match Complete (matched): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                                printf("\n");
                             }
                         }else{
                             mt->position = 0;
@@ -122,6 +130,7 @@ static status match_FeedPat(Match *mt, byte c){
                     mt->position--;
                     if(DEBUG_ROEBLING_COMPLETE){
                         Debug_Print((void *)mt, 0, "Match Complete (invert): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                        printf("\n");
                     }
                     break;
                 }else if(optional){
@@ -159,6 +168,7 @@ static status match_FeedString(Match *mt, byte c){
             mt->state = COMPLETE;
             if(DEBUG_ROEBLING_COMPLETE){
                 Debug_Print((void *)mt, 0, "Match Complete: ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                printf("\n");
             }
         }else{
             mt->state = PROCESSING;

@@ -4,16 +4,17 @@
 Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
-int DEBUG_MATCH = COLOR_YELLOW;
-int DEBUG_PATMATCH = COLOR_DARK;
-int DEBUG_CURSOR = COLOR_BLUE;
-int DEBUG_PARSER = COLOR_YELLOW;
+int DEBUG_MATCH = 0;
+int DEBUG_PATMATCH = 0;
+int DEBUG_CURSOR = 0;
+int DEBUG_PARSER = 0;
 int DEBUG_ROEBLING = 0;
-int DEBUG_ROEBLING_COMPLETE = COLOR_RED;
+int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_TABLE = 0;
+int DEBUG_ROEBLING_CURRENT = 0;
 
 static void indent_Print(int indent){
     while(indent--){
@@ -76,6 +77,11 @@ static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean ext
     }else{
         printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->state), mt->position);
     }
+}
+
+static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Single *v = (Single *)a;
+    printf("\x1b[%dm%sSingle<%s:%s:%ld>\x1b[0m", color, msg, Class_ToString(v->type.of), State_ToString(v->type.state), v->value);
 }
 
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -288,6 +294,8 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PARSER, (void *)Parser_Print);
     r |= Lookup_Add(m, lk, TYPE_MULTIPARSER, (void *)MultiParser_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
+    r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
+    r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
     return r;
 }
 

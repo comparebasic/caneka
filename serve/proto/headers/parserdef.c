@@ -47,21 +47,20 @@ static Parser *hdrBodyParserMk(Roebling *rlb){
     word nl[] = {PAT_SINGLE|PAT_TERM, '\r', '\r', PAT_SINGLE|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
     prs->ko = Match_MakePat(rlb->m, bytes(nl), 2, ANCHOR_START);
 
-    word enumval = RBL_HEADERS;
-    prs->jump = Span_GetIdx(rlb->marks, &enumval, Mark_Eq);
-    return prs;
-}
-
-static Parser *nlDblParserMk(Roebling *rlb){
-    word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n', PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n'};
-    Parser *prs = Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 4, ANCHOR_START), hdrComplete); 
-    prs->jump = BREAK;
     return prs;
 }
 
 static Parser *hdrNlParserMk(Roebling *rlb){
-    word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n', PAT_SET_NOOP, '\t', '\t', PAT_SET_NOOP|PAT_TERM, ' ', ' ', PAT_END};
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 4, ANCHOR_START), NULL); 
+    word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 2, ANCHOR_START), NULL); 
+}
+
+static Parser *nlDblParserMk(Roebling *rlb){
+    word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+    Parser *prs = Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 2, ANCHOR_START), NULL); 
+    word enumval = RBL_HEADERS;
+    prs->jump = Span_GetIdx(rlb->marks, &enumval, Mark_Eq);
+    return prs;
 }
 
 static Parser *headerMarkMk(Roebling *rbl){
@@ -69,7 +68,7 @@ static Parser *headerMarkMk(Roebling *rbl){
 }
 
 Span *HeadersParser_Make(MemCtx *m, ProtoDef *def){
-    Span *p =  Span_From(m, 5, 
+    Span *p =  Span_From(m, 6, 
         (Abstract *)headerMarkMk,
         (Abstract *)keyParserMk,
         (Abstract *)hdrSepParserMk,

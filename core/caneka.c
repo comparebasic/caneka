@@ -69,6 +69,8 @@ char *Class_ToString(cls type){
         return "TYPE_SPAN";
     }else if(type == TYPE_SLAB){
         return "TYPE_SLAB";
+    }else if(type == TYPE_RBL_MARK){
+        return "TYPE_RBL_MARK";
     }else{
         return "TYPE_unknown";
     }

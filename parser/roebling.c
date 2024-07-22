@@ -11,7 +11,7 @@ status Roebling_SetJump(Roebling *rbl, Parser *prs, word mark){
 }
 
 status Roebling_Run(Roebling *rbl){
-    if(0 && DEBUG_ROEBLING){
+    if(DEBUG_ROEBLING){
         Debug_Print((void *)rbl, 0, "Roebling_Run for: ", DEBUG_ROEBLING, TRUE);
         printf("\n");
     }
@@ -23,8 +23,18 @@ status Roebling_Run(Roebling *rbl){
     while(pmk != NULL){
         rbl->type.state = PROCESSING;
         prs = pmk(rbl);
+        if(prs == NULL){
+            rbl->type.state = ERROR; 
+            return rbl->type.state;
+        }else{
+            if(DEBUG_ROEBLING_CURRENT){
+                Debug_Print((void *)prs, 0, "Current Parser: ", DEBUG_ROEBLING_CURRENT, TRUE);
+                printf("\n");
+            }
+        }
         if(prs->type.of == TYPE_RBL_MARK){
-            printf("Its a mark!\n");
+            Single *mrk = (Single *)prs;
+            mrk->type.state = rbl->idx;
             Span_Add(rbl->marks, (Abstract *)prs);
             rbl->idx++;
             pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
@@ -36,6 +46,13 @@ status Roebling_Run(Roebling *rbl){
         }
         r = prs->func(prs, &(rbl->range), rbl->source);
         if((r & COMPLETE) != COMPLETE){
+            if(prs->jump != -1){
+                Single *mrk = (Single *)Span_Get(rbl->marks, prs->jump);
+                rbl->idx = mrk->type.state;
+                pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+                continue;
+            }
+
             rbl->type.state = ERROR;
             if(DEBUG_ROEBLING){
                 Debug_Print((void *)rbl, 0, "Roebling_Run ERROR: ", DEBUG_ROEBLING, TRUE);

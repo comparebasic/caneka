@@ -9,11 +9,9 @@ boolean Mark_Eq(Abstract *a, void *b){
     return sgl->value == *((word *)b);
 }
 
-
 Single *Mark_Make(MemCtx *m, word mark){
     Single *mrk = (Single *)MemCtx_Alloc(m, sizeof(Single));
     mrk->type.of = TYPE_RBL_MARK;
     mrk->value = mark;
-    printf("Made mark\n");
     return mrk;
 }

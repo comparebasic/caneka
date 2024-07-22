@@ -90,6 +90,7 @@ enum types {
     TYPE_STRINGTABLE,
     TYPE_LOOKUP,
     TYPE_ITER,
+    TYPE_SINGLE,
     TYPE_RBL_MARK,
     _TYPE_CORE_END,
 };
@@ -163,6 +164,7 @@ boolean Abs_Eq(Abstract *a, void *b);
 #include "mess.h"
 #include "streamdef.h"
 #include "mark.h"
+#include "header.h"
 #include "apps.h"
 
 status Caneka_Init(MemCtx *m);

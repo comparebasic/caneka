@@ -48,6 +48,7 @@ static status parse_Single(Parser *prs, Range *range, void *source){
 Parser *Parser_Make(MemCtx *m, cls type){
     Parser *prs = (Parser *) MemCtx_Alloc(m, sizeof(Parser));
     prs->type.of = type;
+    prs->jump = -1;
     return prs;
 }
 

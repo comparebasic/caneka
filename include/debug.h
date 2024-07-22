@@ -24,3 +24,4 @@ extern int DEBUG_ROEBLING_COMPLETE;
 extern int DEBUG_ROEBLING_CONTENT;
 extern int DEBUG_CURSOR;
 extern int DEBUG_TABLE;
+extern int DEBUG_ROEBLING_CURRENT;
