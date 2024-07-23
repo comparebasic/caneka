@@ -62,7 +62,12 @@ String *String_From(MemCtx *m, byte *bytes){
 }
 
 status String_Add(MemCtx *m, String *a, String *b) {
-    return String_AddBytes(m, a, b->bytes, b->length);
+    status r = READY;
+    while(b != NULL && r != ERROR){
+        r = String_AddBytes(m, a, b->bytes, b->length);
+        b = String_Next(b);
+    }
+    return r;
 }
 
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
@@ -76,7 +81,6 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     byte *bytes = (byte *)chars;
 
     String *seg = a;
-    String *tail = seg;
     byte *p = bytes;
 
     while(seg->next != NULL){
@@ -108,10 +112,10 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         p += STRING_CHUNK_SIZE;
 
         if(seg == NULL){
-            seg = tail = next;
+            seg = next;
         }else{
-            tail->next = next;
-            tail = next;
+            seg->next = next;
+            seg = next;
         }
         remaining -= STRING_CHUNK_SIZE;
     }
@@ -123,10 +127,10 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         next->length = remaining;
 
         if(seg == NULL){
-            seg = tail = next;
+            seg = next;
         }else{
-            tail->next = next;
-            tail = next;
+            seg->next = next;
+            seg = next;
         }
     }
 

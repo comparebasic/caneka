@@ -16,12 +16,10 @@ status ProtoHttp_Tests(MemCtx *gm){
 
     req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
     proto = (HttpProto *) as(req->proto, TYPE_HTTP_PROTO);
-    String_Add(req->m, req->in.shelf, String_Make(m, bytes("GET /page1.html HTTP/1.2\r\nUser-Agent: Firefox\r\nCookie: sid=xyz1234;Expiration=2024-04-04;Secure=true;\r\n")));
-    /*
-    String_Add(req->m, req->in.shelf, String_Make(m, bytes("Accept: text/html,application/json\r\n\r\n")));
-    */
+    String_Add(req->m, req->in.shelf, String_Make(m, bytes("GET /page1.html HTTP/1.2\r\nUser-Agent: Firefox\r\nCookie: sid=xyz1234;Expiration=2024-04-04;Secure=true;\r\nAccept: text/html,application/json\r\n\r\n")));
 
     Roebling_Run(req->in.rbl);
+
     printf("\n");
     Debug_Print((void *)req, 0, "Req in test", COLOR_DARK, FALSE);
     printf("\n");
