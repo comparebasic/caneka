@@ -9,6 +9,8 @@ static status setKey(Parser *prs, Range *range, void *source){
 
 static status setHdr(Parser *prs, Range *range, void *source){
     Req *req = (Req *) as(source, TYPE_REQ);
+    Debug_Print((void *)range, 0, "Range in setHdr: ", COLOR_PURPLE, TRUE);
+    printf("\n");
     Table_SetValue(req->proto->headers_tbl, (Abstract *)Range_Copy(req->m, range));
     return SUCCESS;
 }

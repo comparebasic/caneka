@@ -3,9 +3,6 @@ typedef struct strcursor {
     status state;
     String *seg;
     i64 position;
-    i64 localPosition;
-    i64 segIdx;
-    i64 immidiateLength;
 } SCursor;
 
 SCursor* SCursor_Make(MemCtx *m, String *s);

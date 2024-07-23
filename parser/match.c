@@ -99,8 +99,8 @@ static status match_FeedPat(Match *mt, byte c){
                         mt->defPosition = 0;
                         if((def->flags & PAT_MANY) == 0){
                             mt->state = COMPLETE;
-                            if(DEBUG_ROEBLING_COMPLETE){
-                                Debug_Print((void *)mt, 0, "Match Complete (matched): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                            if(DEBUG_PATMATCH){
+                                Debug_Print((void *)mt, 0, "Match Complete (matched): ", DEBUG_PATMATCH, TRUE);
                                 printf("\n");
                             }
                         }else{
@@ -128,8 +128,8 @@ static status match_FeedPat(Match *mt, byte c){
                     }
                     mt->defPosition = 0;
                     mt->position--;
-                    if(DEBUG_ROEBLING_COMPLETE){
-                        Debug_Print((void *)mt, 0, "Match Complete (invert): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                    if(DEBUG_PATMATCH){
+                        Debug_Print((void *)mt, 0, "Match Complete (invert): ", DEBUG_PATMATCH, TRUE);
                         printf("\n");
                     }
                     break;

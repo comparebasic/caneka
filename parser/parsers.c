@@ -14,6 +14,10 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
             Debug_Print((void *)matches[i], matches[i]->type.of, "parse_Multi Match: ", DEBUG_PARSER, TRUE);
         }
         if(r == COMPLETE){
+            if(DEBUG_ROEBLING_COMPLETE){
+                Debug_Print((void *)prs, 0, "parse_Multi COMPLETE: ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                printf("\n");
+            }
             prs->idx = i;
             if(prs->complete != NULL){
                 prs->complete(prs, range, source);
@@ -35,8 +39,13 @@ static status parse_Single(Parser *prs, Range *range, void *source){
     r = SCursor_Find(range, mt, prs->ko);
     if(DEBUG_PARSER){
         Debug_Print((void *)mt, mt->type.of, "parse_Single Match: ", DEBUG_PARSER, TRUE);
+        printf("\n");
     }
     if(r == COMPLETE){
+        if(DEBUG_ROEBLING_COMPLETE){
+            Debug_Print((void *)prs, 0, "parse_Multi COMPLETE: ", DEBUG_ROEBLING_COMPLETE, TRUE);
+            printf("\n");
+        }
         if(prs->complete != NULL){
             prs->complete(prs, range, source);
         }

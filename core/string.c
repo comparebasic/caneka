@@ -232,31 +232,3 @@ String *String_Next(String *s){
     }
     return NULL;
 }
-
-String *String_FromRange(MemCtx *m, Range *range){
-    if(range->state != COMPLETE){
-        return NULL;
-    }
-    String *seg = range->start.seg;
-    i64 remaining = range->length;
-    String *s = String_Init(m, remaining);
-
-    i64 length = min(remaining, (seg->length - range->start.localPosition));
-    byte *p = seg->bytes+range->start.localPosition;
-    String_AddBytes(m, s, p, length);
-    remaining -= length;
-
-    if(remaining > 0){
-        while(seg != NULL){
-            if(seg == range->end.seg){
-                String_AddBytes(m, s, seg->bytes, range->end.localPosition);
-                break;
-            }else{
-                String_Add(m, s, seg);
-            }
-            seg = seg->next;
-        }
-    }
-    
-    return s;
-}

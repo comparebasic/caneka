@@ -13,22 +13,51 @@ status Range_Incr(Range *range){
     return SUCCESS;
 }
 
-String *Range_Copy(MemCtx *m, Range *range){
-    String *s = String_Init(m, range->length); 
-    String *seg = range->start.seg;
-    int remaining = range->length;
-    while(remaining > 0 && seg != NULL){
-        int localLength = seg->length - range->start.localPosition;
-        if(localLength < remaining){
-           String_AddBytes(m, s, seg->bytes + range->start.localPosition, localLength); 
-           remaining -= localLength;
-           seg = String_Next(seg);
+int Range_GetLength(Range *range){
+    if(range->length >= 0){
+        return range->length;
+    }else{
+        String *seg = range->start.seg;
+        int length = 0;
+        if(seg == range->end.seg){
+            length =  range->end.position - range->start.position;
         }else{
-           String_AddBytes(m, s, seg->bytes + range->start.localPosition, range->length); 
-           remaining -= range->length;
+            length = seg->length - range->start.position;
+            seg = String_Next(seg);
+            while(seg != NULL && seg != range->end.seg ){
+                length += seg->length;
+                seg = String_Next(seg);
+            }
+            if(seg != NULL){
+                length += range->end.position;
+            }
+        }
+        range->length = length;
+        return range->length;
+    }
+}
+
+String *Range_Copy(MemCtx *m, Range *range){
+    String *seg = range->start.seg;
+    String *s = NULL;
+    int length = 0;
+    if(seg == range->end.seg){
+        length =  range->end.position - range->start.position;
+        s = String_MakeFixed(m, seg->bytes + range->start.position, length); 
+    }else{
+        length = Range_GetLength(range);
+        s = String_Init(m, length);
+        String_AddBytes(m, s, seg->bytes + range->start.position, seg->length - range->start.position); 
+        seg = String_Next(seg);
+        while(seg != NULL && seg != range->end.seg ){
+            String_Add(m, s, seg); 
+            seg = String_Next(seg);
+        }
+        if(seg != NULL){
+            String_AddBytes(m, s, seg->bytes, range->end.position); 
         }
     }
-    
+
     return s;
 }
 
@@ -37,11 +66,10 @@ status Range_Reset(Range *range, int anchor){
     if(range->state == COMPLETE){
         range->start.position = range->end.position;
         range->start.seg = range->end.seg;
-        if(range->start.localPosition == range->start.seg->length){
+        if(range->start.position == range->start.seg->length){
             range->start.seg = range->start.seg->next;
         }
         range->start.position++;
-        SCursor_SetLocals(&(range->start));
     }
 
     range->state = READY;

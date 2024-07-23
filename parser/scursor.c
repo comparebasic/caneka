@@ -17,12 +17,6 @@ status SCursor_Reset(SCursor *sc){
     return SUCCESS;
 }
 
-status SCursor_SetLocals(SCursor *sc){
-    sc->segIdx = sc->position / STRING_CHUNK_SIZE;
-    sc->localPosition = sc->position % STRING_CHUNK_SIZE;
-    return SUCCESS;
-}
-
 status SCursor_Find(Range *range, Match *search, Match *ko){
     SCursor *start = &(range->start); 
     SCursor *end = &(range->end); 
@@ -67,23 +61,21 @@ status SCursor_Find(Range *range, Match *search, Match *ko){
                     start->position = i;
                     start->seg = seg;
                     start->state = search->state;
-                    SCursor_SetLocals(start);
                 }
                 range->compare++;
                 start->state = PROCESSING;
                 if(search->state == COMPLETE){
                     end->position = (i+1);
                     end->seg = seg;
-                    range->length = (i+1) - start->position;
-                    SCursor_SetLocals(end);
-                    break;
+                    Debug_Print((void *)end->seg, 0, "End seg in complete: ", COLOR_RED, TRUE);
+                    range->length = -1;
+                    return search->state;
                 }else if((search->state & INVERTED) != 0){
                     search->state = COMPLETE;
                     end->position = i;
                     end->seg = seg;
-                    range->length = i - start->position;
-                    SCursor_SetLocals(end);
-                    break;
+                    range->length = -1;
+                    return search->state;
                 }
             }else{
                 if((search->flags & ANCHOR_START) != 0){
@@ -96,7 +88,7 @@ status SCursor_Find(Range *range, Match *search, Match *ko){
             }
 
         }
-        end->seg = seg;
+        i = 0;
         seg = String_Next(seg);
     }
 
@@ -108,24 +100,12 @@ status SCursor_Find(Range *range, Match *search, Match *ko){
     return search->state;
 }
 
-status SCursor_Prepare(SCursor *sc, i64 length){
-    i64 remaining = sc->seg->length - sc->localPosition;
-    if(remaining < length){
-        sc->immidiateLength = remaining;
-    }else{
-        sc->immidiateLength = length;
-    }
-
-    return SUCCESS;
-}
-
 status SCursor_Incr(SCursor *sc, i64 length){
     i64 remaining = length;
     i64 local;
     while(remaining > 0){
-        local = sc->seg->length - sc->localPosition;
+        local = sc->seg->length - sc->position;
         if(local > remaining){
-            sc->localPosition += remaining;
             sc->position += remaining;
             remaining = 0;
             continue;

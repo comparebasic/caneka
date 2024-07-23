@@ -8,8 +8,8 @@ int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = 0;
 int DEBUG_CURSOR = COLOR_BLUE;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
-int DEBUG_ROEBLING_COMPLETE = 0;
+int DEBUG_ROEBLING = COLOR_YELLOW;
+int DEBUG_ROEBLING_COMPLETE = COLOR_CYAN;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
@@ -232,9 +232,14 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("%s\x1b[%dmCursor<%s:%ld/seg%ld[%ld]:%ld>\x1b[0m", msg, color,
+    printf("%s\x1b[%dmCursor<%s:%ld ", msg, color,
         State_ToString(sc->state), 
-        sc->position, sc->segIdx, sc->localPosition, sc->immidiateLength);
+        sc->position);
+    if(extended){
+        Debug_Print((void *)sc->seg, 0, "", color, extended);
+    }else{
+        printf("\x1b[%dm>\x1b[0m", color);
+    }
 }
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
