@@ -67,7 +67,6 @@ status SCursor_Find(Range *range, Match *search, Match *ko){
                 if(search->state == COMPLETE){
                     end->position = (i+1);
                     end->seg = seg;
-                    Debug_Print((void *)end->seg, 0, "End seg in complete: ", COLOR_RED, TRUE);
                     range->length = -1;
                     return search->state;
                 }else if((search->state & INVERTED) != 0){
