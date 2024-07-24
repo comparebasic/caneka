@@ -87,6 +87,7 @@ static status match_FeedPat(Match *mt, byte c){
             }
 
             if(matched){
+                printf("matched\n");
                 mt->state = PROCESSING;
                 mt->defPosition++;
                 if(total == mt->defPosition){

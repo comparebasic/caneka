@@ -20,6 +20,7 @@ extern int DEBUG_SCURSOR;
 extern int DEBUG_PARSER;
 extern int DEBUG_BOUNDS_CHECK;
 extern int DEBUG_ROEBLING;
+extern int DEBUG_ROEBLING_MARK;
 extern int DEBUG_ROEBLING_COMPLETE;
 extern int DEBUG_ROEBLING_CONTENT;
 extern int DEBUG_CURSOR;

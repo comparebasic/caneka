@@ -10,45 +10,45 @@ int XML_BODY = 5;
 /* setters */
 
 static status setTag(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
-    String *s =  Range_Copy(req->m, range);
+    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
+    String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setTag: ", COLOR_YELLOW, TRUE);
     return SUCCESS;
 }
 
 static status setAttr(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
-    String *s =  Range_Copy(req->m, range);
+    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
+    String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setAttr: ", COLOR_YELLOW, TRUE);
     return SUCCESS;
 }
 
 static status setAttrValue(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
-    String *s =  Range_Copy(req->m, range);
+    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
+    String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setAttrValue: ", COLOR_YELLOW, TRUE);
     return SUCCESS;
 }
 
 static status setBody(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
-    String *s =  Range_Copy(req->m, range);
+    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
+    String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setBody: ", COLOR_YELLOW, TRUE);
     return SUCCESS;
 }
 
 static status tagNamed(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
+    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     Match *mt = Parser_GetMatch(prs);
     prs->jump = mt->jump;
-    String *s =  Range_Copy(req->m, range);
+    String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
     return SUCCESS;
 }
 
 static status tagOpened(Parser *prs, Range *range, void *source){
-    Req *req = (Req *)as(source, TYPE_REQ);
-    String *s =  Range_Copy(req->m, range);
+    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
+    String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
     return SUCCESS;
 }
@@ -87,7 +87,14 @@ static Match *spaceMt(Roebling *rlb){
     word sep[] = {
         PAT_ANY, ' ', ' ',
         PAT_ANY, '\t', '\t', PAT_ANY|PAT_TERM, '\r', '\r', PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
-    return  Match_MakePat(rlb->m, bytes(sep), 3, ANCHOR_START); 
+    return  Match_MakePat(rlb->m, bytes(sep), 4, ANCHOR_START); 
+}
+
+static Match *nameEndeMt(Roebling *rlb){
+    word sep[] = {
+        PAT_ANY, '/', '/', PAT_ANY, ' ', ' ',
+        PAT_ANY, '\t', '\t', PAT_ANY|PAT_TERM, '\r', '\r', PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+    return  Match_MakePat(rlb->m, bytes(sep), 5, ANCHOR_START); 
 }
 
 static Match *selfCloseeMt(Roebling *rlb){
@@ -105,19 +112,17 @@ static Match *tagOpenedMt(Roebling *rlb){
 }
 
 static Parser *tagParserMk(Roebling *rlb){
-    word tag[] = {PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
-        PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9'};
-    Match *mt = Match_MakePat(rlb->m, bytes(tag), 7, ANCHOR_START);
+    word tag[] = {PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ',PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY|PAT_TERM, '0', '9',
+        PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', PAT_END, 0, 0};
+    Match *mt = Match_MakePat(rlb->m, bytes(tag), 12, ANCHOR_START);
 
     word close[] = {PAT_SINGLE|PAT_TERM, '/', '/', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
         PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', PAT_SINGLE|PAT_TERM, '>', '>', PAT_END, 0, 0};
 
-    Match *close_mt = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START);
+    Match *close_mt = Match_MakePat(rlb->m, bytes(tag), 0, ANCHOR_START);
     close_mt->jump = Roebling_GetMarkIdx(rlb, XML_START); 
     Array mt_arr = Array_MakeFrom(rlb->m, 2, mt, close_mt);
     Parser *prs = Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagNamed); 
-
-    prs->ko = spaceMt(rlb);
     return prs;
 }
 

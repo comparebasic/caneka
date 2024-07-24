@@ -9,25 +9,42 @@ status Caneka_Init(MemCtx *m){
 }
 
 char *State_ToString(status state){
-    if(state == READY){
+    if((state & READY) != 0){
         return "READY";
-    }else if(state == SUCCESS){
-        return "SUCCESS/COMPLETE";
-    }else if(state == ERROR){
+    }else if((state & ERROR) != 0){
         return "ERROR";
-    }else if(state == NOOP){
+    }else if((state & NOOP) != 0){
         return "NOOP";
-    }else if(state == INCOMING){
+    }else if((state & CYCLE_MARK) != 0){
+        return "CYCLE_MARK";
+    }else if((state & CYCLE_LOOP) != 0){
+        return "CYCLE_LOOP";
+    }else if((state & CYCLE_BREAK) != 0){
+        return "CYCLE_BREAK";
+    }else if((state & INCOMING) != 0){
         return "INCOMING";
-    }else if(state == PROCESSING){
+    }else if((state & (PROCESSING|INVERTED)) == (PROCESSING|INVERTED)){
+        return "PROCESSING|INVERTED";
+    }else if((state & PROCESSING) != 0){
         return "PROCESSING";
-    }else if(state == RESPONDING){
+    }else if((state & RESPONDING) != 0){
         return "RESPONDING";
-    }else if(state == INVERTED){
+    }else if((state & SUCCESS) != 0){
+        return "SUCCESS/COMPLETE";
+    }else if((state & RAW) != 0){
+        return "RAW";
+    }else if((state & MISS) != 0){
+        return "MISS";
+    }else if((state & HASHED) != 0){
+        return "HASHED";
+    }else if((state & INVERTED) != 0){
         return "INVERTED";
+    }else if((state & END) != 0){
+        return "END";
     }else{
         return "UNKNOWN_state";
     }
+
 }
 
 char *Class_ToString(cls type){

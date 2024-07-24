@@ -3,13 +3,14 @@
 
 Chain *DebugPrintChain = NULL;
 
-int DEBUG_SCURSOR = 0;
+int DEBUG_SCURSOR = COLOR_DARK;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_PURPLE;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
-int DEBUG_ROEBLING_COMPLETE = 0;
+int DEBUG_ROEBLING = COLOR_CYAN;
+int DEBUG_ROEBLING_MARK = COLOR_YELLOW;
+int DEBUG_ROEBLING_COMPLETE = COLOR_GREEN;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
@@ -36,22 +37,27 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
     PatCharDef *def = (PatCharDef *)a;
     if((def->flags & PAT_COUNT) != 0){
         if(def->from == '\r' || def->from == '\n'){
-            printf("%s%hu=0x%hux0x%hu,", msg, (word)def->flags, def->from, def->to);
+            printf("%s%hu=0x%hux0x%hu", msg, (word)def->flags, def->from, def->to);
         }else{
-            printf("%s%hu=%cx%hu,", msg, (word)def->flags, (char)def->from, def->to);
+            printf("%s%hu=%cx%hu", msg, (word)def->flags, (char)def->from, def->to);
         }
     }else if(def->from == def->to){
         if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
-            printf("%s%hu='%hu',", msg, (word)def->flags, def->from);
+            printf("%s%hu='#%hu'", msg, (word)def->flags, def->from);
         }else{
-            printf("%s%hu='%c',", msg, (word)def->flags, (char)def->from);
+            printf("%s%hu='%c'", msg, (word)def->flags, (char)def->from);
         }
     }else{
         if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n')){
-            printf("%s%hu='0x%hu'-'0x%hu',", msg, (word)def->flags, def->from, def->to);
+            printf("%s%hu='#%hu-#%hu'", msg, (word)def->flags, def->from, def->to);
         }else{
-            printf("%s%hu='%c'-'%c',", msg, (word)def->flags, (char)def->from, (char)def->to);
+            printf("%s%hu='%c-%c'", msg, (word)def->flags, (char)def->from, (char)def->to);
         }
+    }
+    if((def->flags & PAT_TERM) != 0){
+        printf(".");
+    }else{
+        printf(",");
     }
 }
 

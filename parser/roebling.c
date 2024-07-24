@@ -42,6 +42,11 @@ status Roebling_Run(Roebling *rbl){
             Span_Add(rbl->marks, (Abstract *)prs);
             rbl->idx++;
             pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+            if(DEBUG_ROEBLING_MARK){
+                printf("\x1b[%dmJump to %d - ", DEBUG_ROEBLING_MARK, rbl->idx);
+                Debug_Print((void *)pmk, 0, "Mark Jump: ", DEBUG_ROEBLING_MARK, TRUE);
+                printf("\n");
+            }
             continue;
         }
         if(DEBUG_ROEBLING){
@@ -54,6 +59,10 @@ status Roebling_Run(Roebling *rbl){
                 Single *mrk = (Single *)Span_Get(rbl->marks, prs->jump);
                 rbl->idx = mrk->type.state;
                 pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+                if(DEBUG_ROEBLING_MARK){
+                    Debug_Print((void *)pmk, 0, "Mark Jump: ", DEBUG_ROEBLING_MARK, TRUE);
+                    printf("\n");
+                }
                 continue;
             }
 

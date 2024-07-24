@@ -2,11 +2,12 @@ typedef struct mess {
     Type type;
     union {
         Abstract *a;
+        void *ptr;
         util i64;
         int i32;
-        word i;
+        word w;
         byte b;
     } value;
-    Span *children;
+    struct mess *next;
     struct mess *parent;
 } Mess;
