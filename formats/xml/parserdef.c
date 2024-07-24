@@ -12,6 +12,7 @@ static status setTag(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setTag: ", COLOR_YELLOW, TRUE);
+    printf("\n");
     return SUCCESS;
 }
 
@@ -19,6 +20,7 @@ static status setAttr(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setAttr: ", COLOR_YELLOW, TRUE);
+    printf("\n");
     return SUCCESS;
 }
 
@@ -26,6 +28,7 @@ static status setAttrValue(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setAttrValue: ", COLOR_YELLOW, TRUE);
+    printf("\n");
     return SUCCESS;
 }
 
@@ -33,6 +36,7 @@ static status setBody(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setBody: ", COLOR_YELLOW, TRUE);
+    printf("\n");
     return SUCCESS;
 }
 
@@ -42,7 +46,7 @@ static status tagNamed(Parser *prs, Range *range, void *source){
     prs->jump = mt->jump;
     String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "tagNamed: ", COLOR_YELLOW, TRUE);
-
+    printf("\n");
     XmlCtx_Open(ctx, s);
     return SUCCESS;
 }
@@ -52,6 +56,7 @@ static status tagOpened(Parser *prs, Range *range, void *source){
     String *s =  Range_Copy(ctx->m, range);
     Match *mt = Parser_GetMatch(prs);
     Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
+    printf("\n");
     XmlCtx_Close(ctx, s);
     prs->jump = mt->jump;
     return SUCCESS;

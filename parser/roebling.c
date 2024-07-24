@@ -21,6 +21,10 @@ status Roebling_Run(Roebling *rbl){
     status r = READY;
     word escape_fl = (CYCLE_BREAK|COMPLETE);
     while(pmk != NULL){
+        if(DEBUG_ROEBLING_NAME){
+            printf("\x1b[%dmRbl ParserName %s %p\x1b[0m\n", DEBUG_ROEBLING_NAME,
+                rbl_debug_cstr[rbl->idx], pmk);
+        }
         rbl->type.state = PROCESSING;
         prs = pmk(rbl);
         if(prs == NULL){

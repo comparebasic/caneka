@@ -59,6 +59,7 @@ static status match_FeedPat(Match *mt, byte c){
             if(def->flags == 0){
                 break;
             }
+
             if(DEBUG_PATMATCH){
                 Debug_Print(def, TYPE_PATCHARDEF, "  While: ", DEBUG_PATMATCH, TRUE);
                 printf("\n");
@@ -82,7 +83,6 @@ static status match_FeedPat(Match *mt, byte c){
 
             if(DEBUG_PATMATCH){
                 if(c == '\r' || c == '\n' || c == '\t'){
-
                     printf("\x1b[%dm    matched \%hu'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
                 }else{
                     printf("\x1b[%dm    matched '%c'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
@@ -165,7 +165,10 @@ static status match_FeedPat(Match *mt, byte c){
                 }else if(optional){
                     def++;
                 }else{
-                    if((def->flags & PAT_TERM) != 0){
+                    if((def->flags & PAT_TERM) != 0 && ((def->flags & PAT_ANY) != 0 && mt->position > 0)){
+                        mt->state = INVERTED;
+                        break;
+                    }else if((def->flags & PAT_TERM) != 0){
                         mt->defPosition = 0;
                         mt->state = READY;
                         mt->position = 0;

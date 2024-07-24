@@ -21,7 +21,10 @@ status Xml_Tests(MemCtx *gm){
     printf("\n");
 
     ctx = XmlCtx_Make((MemHandle *)m, NULL);
+    /*
     s = String_Make(m, bytes("<main alpha=\"apples\" one=1 horizontal>And here is cool stuff</main>"));
+    */
+    s = String_Make(m, bytes("<main alpha=\"apples\" "));
     rbl = Roebling_Make(m, TYPE_RBL_XML, xmlParsersMk, s, (Abstract *)ctx);  
 
     Roebling_Run(rbl);

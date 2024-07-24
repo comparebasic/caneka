@@ -5,17 +5,35 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_PURPLE;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
 int DEBUG_ROEBLING = 0;
-int DEBUG_ROEBLING_MARK = 0;
-int DEBUG_ROEBLING_COMPLETE = 0;
+int DEBUG_ROEBLING_MARK = COLOR_BLUE;
+int DEBUG_ROEBLING_COMPLETE = COLOR_CYAN;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_TABLE = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
+
+int DEBUG_ROEBLING_NAME = COLOR_GREEN;
+char *rbl_debug_cstr[] = {
+    "MARK_START",
+    "startPRS",
+    "MARK_TAG",
+    "tagPRS",
+    "postTagPRS",
+    "MARK_ATTR",
+    "attrPRS",
+    "eqPRS",
+    "postAttrPRS",
+    "attrValuePRS",
+    "postAttrParse",
+    "MARK_BODY"
+    "bodyPRS",
+    "MARK_END",
+    NULL};
 
 static void indent_Print(int indent){
     while(indent--){
