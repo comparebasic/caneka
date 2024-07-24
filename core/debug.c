@@ -3,14 +3,14 @@
 
 Chain *DebugPrintChain = NULL;
 
-int DEBUG_SCURSOR = COLOR_DARK;
+int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = COLOR_PURPLE;
+int DEBUG_PATMATCH = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = COLOR_CYAN;
-int DEBUG_ROEBLING_MARK = COLOR_YELLOW;
-int DEBUG_ROEBLING_COMPLETE = COLOR_GREEN;
+int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING_MARK = 0;
+int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
@@ -48,7 +48,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
             printf("%s%hu='%c'", msg, (word)def->flags, (char)def->from);
         }
     }else{
-        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n')){
+        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32)){
             printf("%s%hu='#%hu-#%hu'", msg, (word)def->flags, def->from, def->to);
         }else{
             printf("%s%hu='%c-%c'", msg, (word)def->flags, (char)def->from, (char)def->to);
@@ -64,7 +64,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:remaining=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, mt->remaining, color);
+        printf("%sMatch<%s:state=%s:pos=%d:remaining=%d:count=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, mt->remaining, mt->count, color);
         int length = mt->s->length / sizeof(PatCharDef);
         PatCharDef *def = (PatCharDef *)mt->s->bytes;
         for(int i = 0; i < length;i++){

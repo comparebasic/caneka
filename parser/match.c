@@ -65,7 +65,10 @@ static status match_FeedPat(Match *mt, byte c){
             }
 
             boolean optional = ((def->flags & PAT_ANY|PAT_MANY) != 0 && mt->defPosition > 0);
-            if((def->flags & PAT_COUNT) != 0){
+            if((def->flags & PAT_ALL) != 0){
+                matched = TRUE;
+                total = 1;
+            }else if((def->flags & PAT_COUNT) != 0){
                 matched = (c == def->from);
                 total = def->to;
             }else{
@@ -87,7 +90,10 @@ static status match_FeedPat(Match *mt, byte c){
             }
 
             if(matched){
-                printf("matched\n");
+                if(DEBUG_PATMATCH){
+                    Debug_Print((void *)def, TYPE_PATCHARDEF, "matched ", COLOR_RED, TRUE);
+                    printf(" - %d\n", def->flags & PAT_INVERT);
+                }
                 mt->state = PROCESSING;
                 mt->defPosition++;
                 if(total == mt->defPosition){
@@ -96,10 +102,12 @@ static status match_FeedPat(Match *mt, byte c){
                     if(DEBUG_PATMATCH){
                         printf("\x1b[%dm    mt->position %d vs length %d\x1b[0m\n", DEBUG_PATMATCH, mt->position, length);
                     }
-                    while((def->flags & PAT_TERM) == 0 && (def->flags & PAT_END) == 0){
+
+                    while((def->flags & (PAT_TERM|PAT_INVERT)) == 0){
                         def++;
                         mt->position++;
                     }
+
                     if(mt->position == length){
                         mt->defPosition = 0;
                         if((def->flags & PAT_MANY) == 0){
@@ -113,19 +121,31 @@ static status match_FeedPat(Match *mt, byte c){
                         }
 
                     }
-                    mt->count++;
-                    if(mt->remaining >= 0 && mt->count == mt->remaining){
-                        mt->state = COMPLETE;
-                        if(DEBUG_PATMATCH){
-                            Debug_Print((void *)mt, 0, "Match Complete (matched): ", DEBUG_PATMATCH, TRUE);
-                            printf("\n");
+                    if((def->flags & PAT_TERM) != 0){
+                        mt->count++;
+                        if(mt->remaining >= 0 && mt->count == mt->remaining){
+                            mt->state = COMPLETE;
+                            if(DEBUG_PATMATCH){
+                                Debug_Print((void *)mt, 0, "Match Complete (matched): ", DEBUG_PATMATCH, TRUE);
+                                printf("\n");
+                            }
                         }
                     }
                 }
                 if(DEBUG_PATMATCH){
                     printf("\x1b[%dm    total %d vs defPosition %d\x1b[0m\n", DEBUG_PATMATCH, total, mt->defPosition);
                 }
-                break;
+                if((def->flags & PAT_INVERT) != 0){
+                    def++;
+                }else{
+                    if(mt->position > 0){
+                        while(mt->position > 0 && ((def-1)->flags & PAT_TERM) == 0){
+                            def--;
+                            mt->position--;
+                        }
+                    }
+                    break;
+                }
             }else if(optional){
                 ocurrences++;
                 def++;

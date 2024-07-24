@@ -3,7 +3,7 @@
 
 status XmlCtx_Open(XmlCtx *ctx, String *tagName){
     Mess *ms = Mess_Make(ctx->m);
-    ms->value = (Abstract *)tagName;
+    ms->value = Hashed_Make(ctx->m, (Abstract *)tagName);
     if(ctx->current == NULL){
         Mess_Append(ms, ctx->root);
     }else{

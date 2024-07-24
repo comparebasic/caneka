@@ -1,6 +1,6 @@
 typedef struct mess {
     Type type;
-    Abstract *value;
+    Hashed *value;
     Hashed *atts;
     String *body;
     struct mess *next;
