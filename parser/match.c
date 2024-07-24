@@ -16,6 +16,7 @@ Match *Match_Make(MemCtx *m, String *s, word flags){
     mt->flags = flags;
     mt->s = s;
     mt->remaining = -1;
+    mt->jump = -1;
     return mt;
 }
 
@@ -25,6 +26,7 @@ Match *Match_MakePat(MemCtx *m, byte *defs, word npats, word flags){
     mt->s = String_MakeFixed(m, defs, npats * sizeof(PatCharDef));
     mt->flags = flags;
     mt->remaining = -1;
+    mt->jump = -1;
     return mt;
 }
 

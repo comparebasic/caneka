@@ -63,6 +63,7 @@ typedef struct match {
     int position;
     int count;
     int remaining;
+    int jump;
     word defPosition;
 } Match;
 

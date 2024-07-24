@@ -92,6 +92,10 @@ status Roebling_Run(Roebling *rbl){
     return rbl->type.state;
 }
 
+int Roebling_GetMarkIdx(Roebling *rlb, int mark){
+    return Span_GetIdx(rlb->marks, &enumval, Mark_Eq); 
+}
+
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source){
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;

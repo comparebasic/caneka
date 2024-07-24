@@ -8,10 +8,11 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
     int i = 0;
     int start = range->start.position;
     Match **matches = prs->match.array;
-    while(matches[i] != NULL){
-        r = SCursor_Find(range, matches[i], prs->ko);
+    Match *mt;
+    while((mt = matches[i]) != NULL){
+        r = SCursor_Find(range, mt, prs->ko);
         if(DEBUG_PARSER){
-            Debug_Print((void *)matches[i], matches[i]->type.of, "parse_Multi Match: ", DEBUG_PARSER, TRUE);
+            Debug_Print((void *)mt, mt->type.of, "parse_Multi Match: ", DEBUG_PARSER, TRUE);
         }
         if(r == COMPLETE){
             if(DEBUG_ROEBLING_COMPLETE){
@@ -21,6 +22,9 @@ static status parse_Multi(Parser *prs, Range *range, void *source){
             prs->idx = i;
             if(prs->complete != NULL){
                 prs->complete(prs, range, source);
+            }
+            if(mt->jump >= 0){
+                prs->jump = mt->jump;
             }
             return SUCCESS | prs->flags;
         }
@@ -48,6 +52,9 @@ static status parse_Single(Parser *prs, Range *range, void *source){
         }
         if(prs->complete != NULL){
             prs->complete(prs, range, source);
+        }
+        if(mt->jump >= 0){
+            prs->jump = mt->jump;
         }
         return SUCCESS | prs->flags;
     }

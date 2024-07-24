@@ -174,6 +174,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "lookup.h"
 #include "roebling.h"
 #include "parsers.h"
+#include "xml.h"
 #include "proto.h"
 #include "serve.h"
 #include "req.h"

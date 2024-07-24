@@ -17,3 +17,4 @@ typedef struct structexp {
 
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source);
 status Roebling_Run(Roebling *sexp);
+int Roebling_GetMarkIdx(Roebling *rlb, int mark);
