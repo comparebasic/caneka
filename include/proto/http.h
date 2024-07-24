@@ -5,6 +5,7 @@ typedef struct http_proto {
     String *body;
     /* end proto props */
     String *path;
+    String *sid;
     byte method;
     String *host;
     Abstract *session;
