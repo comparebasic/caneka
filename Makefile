@@ -12,11 +12,12 @@ serveobj = serve/req.o serve/serve.o serve/proto.o serve/proto/headers/parserdef
     serve/proto/headers/utils.o
 httpobj = serve/proto/http/protodef.o serve/proto/http/proto.o serve/proto/http/parserdef.o \
     serve/proto/http/pat_matches.o serve/proto/http/debug.o
+xmlobj = formats/xml/parserdef.o
 testobj = tests/core_tests.o tests/string_tests.o tests/serve_tests.o \
 	tests/span_tests.o tests/hash_tests.o tests/roebling_tests.o tests/proto_http_tests.o \
     tests/table_tests.o
 
-allobj = $(coreobj) $(testobj) $(parserobj) $(httpobj) $(serveobj)
+allobj = $(coreobj) $(testobj) $(parserobj) $(httpobj) $(serveobj) $(xmlobj)
 
 all: caneka
 
@@ -37,6 +38,7 @@ dirs:
 	mkdir -p build/serve/proto/headers
 	mkdir -p build/tests
 	mkdir -p build/proto/http
+	mkdir -p build/formats/xml
 
 $(allobj): %.o:%.c 
 	$(CC) -c $(CFLAGS) $(INC) $< -o build/$@

@@ -159,3 +159,13 @@ Parser *Parser_StringLookup(MemCtx *m, word flags, ParseFunc complete, Lookup *l
 Parser *Parser_String(MemCtx *m, word flags, ParseFunc complete, byte *b){
     return Parser_MakeSingle(m, Match_Make(m, String_From(m, b), flags), complete); 
 }
+
+Match *Parser_GetMatch(Parser *prs){
+    if(prs->type.of == TYPE_PARSER){
+        return prs->match.single;
+    }else if(prs->type.of == TYPE_MULTIPARSER){
+        return prs->match.array[prs->idx];
+    }else{
+        return NULL;
+    }
+}

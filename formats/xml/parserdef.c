@@ -7,6 +7,52 @@ int XML_ATTRIBUTE = 3;
 int XML_ATTR_VALUE = 4;
 int XML_BODY = 5;
 
+/* setters */
+
+static status setTag(Parser *prs, Range *range, void *source){
+    Req *req = (Req *)as(source, TYPE_REQ);
+    String *s =  Range_Copy(req->m, range);
+    Debug_Print((void *)s, 0, "setTag: ", COLOR_YELLOW, TRUE);
+    return SUCCESS;
+}
+
+static status setAttr(Parser *prs, Range *range, void *source){
+    Req *req = (Req *)as(source, TYPE_REQ);
+    String *s =  Range_Copy(req->m, range);
+    Debug_Print((void *)s, 0, "setAttr: ", COLOR_YELLOW, TRUE);
+    return SUCCESS;
+}
+
+static status setAttrValue(Parser *prs, Range *range, void *source){
+    Req *req = (Req *)as(source, TYPE_REQ);
+    String *s =  Range_Copy(req->m, range);
+    Debug_Print((void *)s, 0, "setAttrValue: ", COLOR_YELLOW, TRUE);
+    return SUCCESS;
+}
+
+static status setBody(Parser *prs, Range *range, void *source){
+    Req *req = (Req *)as(source, TYPE_REQ);
+    String *s =  Range_Copy(req->m, range);
+    Debug_Print((void *)s, 0, "setBody: ", COLOR_YELLOW, TRUE);
+    return SUCCESS;
+}
+
+static status tagNamed(Parser *prs, Range *range, void *source){
+    Req *req = (Req *)as(source, TYPE_REQ);
+    Match *mt = Parser_GetMatch(prs);
+    prs->jump = mt->jump;
+    String *s =  Range_Copy(req->m, range);
+    Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
+    return SUCCESS;
+}
+
+static status tagOpened(Parser *prs, Range *range, void *source){
+    Req *req = (Req *)as(source, TYPE_REQ);
+    String *s =  Range_Copy(req->m, range);
+    Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
+    return SUCCESS;
+}
+
 /* marks */
 static Parser *xmlStartMarkMk(Roebling *rbl){
     return (Parser *)Mark_Make(rbl->m, XML_START);
@@ -27,7 +73,7 @@ static Parser *xmlBodyMarkMk(Roebling *rbl){
 /* routing parsers */
 static Match *openMt(Roebling *rlb){
     word open[] = {PAT_TERM, '<', '<', PAT_END, 0, 0}; 
-    Match *mt Match_MakePat(rlb->m, bytes(open), 1, ANCHOR_START);
+    Match *mt = Match_MakePat(rlb->m, bytes(open), 1, ANCHOR_START);
     mt->jump = Roebling_GetMarkIdx(rlb, XML_TAG); 
     return mt;
 }
@@ -35,15 +81,6 @@ static Match *openMt(Roebling *rlb){
 static Parser *startParserMk(Roebling *rlb){
     Match *mt = openMt(rlb);
     return Parser_MakeSingle(rlb->m, mt, NULL); 
-}
-
-static Parser *tagParserMk(Roebling *rlb){
-    word tag[] = {PAT_INVERT|PAT_IGNORE, ' ', ' ', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
-        PAT_INVERT|PAT_IGNORE, ' ', ' ', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9'};
-    Match *mt = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START)
-    mt->jump = Roebling_GetMarkIdx(rlb, XML_ATTRIBUTE);
-
-    return Parser_MakeSingle(rlb->m, mt, setKey); 
 }
 
 static Match *spaceMt(Roebling *rlb){
@@ -55,14 +92,14 @@ static Match *spaceMt(Roebling *rlb){
 
 static Match *selfCloseeMt(Roebling *rlb){
     word close[] = { PAT_TERM, '/', '/', PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', PAT_TERM, '>', '>', PAT_END, 0, 0};
-    Match *mt Match_MakePat(rlb->m, bytes(close), 6, ANCHOR_START); 
+    Match *mt = Match_MakePat(rlb->m, bytes(close), 6, ANCHOR_START); 
     mt->jump = Roebling_GetMarkIdx(rlb, XML_START);
     return mt;
 }
 
 static Match *tagOpenedMt(Roebling *rlb){
     word close[] = { PAT_TERM, '>', '>',PAT_END, 0, 0};
-    Match *mt Match_MakePat(rlb->m, bytes(close), 1, ANCHOR_START); 
+    Match *mt = Match_MakePat(rlb->m, bytes(close), 1, ANCHOR_START); 
     mt->jump = Roebling_GetMarkIdx(rlb, XML_BODY);
     return mt;
 }
@@ -71,13 +108,21 @@ static Parser *tagParserMk(Roebling *rlb){
     word tag[] = {PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
         PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9'};
     Match *mt = Match_MakePat(rlb->m, bytes(tag), 7, ANCHOR_START);
-    Parser *prs = Parser_MakeSingle(rlb->m, mt, setTag); 
-    prs->ko = spaceMt(rlb->m);
+
+    word close[] = {PAT_SINGLE|PAT_TERM, '/', '/', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
+        PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', PAT_SINGLE|PAT_TERM, '>', '>', PAT_END, 0, 0};
+
+    Match *close_mt = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START);
+    close_mt->jump = Roebling_GetMarkIdx(rlb, XML_START); 
+    Array mt_arr = Array_MakeFrom(rlb->m, 2, mt, close_mt);
+    Parser *prs = Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagNamed); 
+
+    prs->ko = spaceMt(rlb);
     return prs;
 }
 
 static Parser *spaceParserMk(Roebling *rlb){
-    Match *sp = spaceMt(rlb->m);
+    Match *sp = spaceMt(rlb);
     sp->jump = Roebling_GetMarkIdx(rlb, XML_ATTRIBUTE);
     Parser *prs = Parser_MakeSingle(rlb->m, sp, NULL); 
 }
@@ -96,8 +141,8 @@ static Parser *sepParserMk(Roebling *rlb){
 static Parser *attrParserMk(Roebling *rlb){
     word tag[] = {PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
         PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9'};
-    Match *mt = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START)
-    Parser *prs = Parser_MakeSingle(rlb->m, mt, setTag); 
+    Match *mt = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START);
+    Parser *prs = Parser_MakeSingle(rlb->m, mt, setAttr); 
     prs->ko = spaceMt(rlb->m);
     return prs;
 }
@@ -110,8 +155,8 @@ static Parser *postAttrParserMk(Roebling *rlb){
 static Parser *attrValueParserMk(Roebling *rlb){
     word quoted[] = {PAT_IGNORE|PAT_TERM, '"', '"', PAT_INVERT, '"', '"', PAT_ANY|PAT_TERM, 32, 255, PAT_IGNORE|PAT_TERM, '"', '"', PAT_END, 0,0};
     word unquoted[] = {PAT_INVERT, '"', '"', PAT_INVERT, ' ', ' ', PAT_INVERT, '\t', '\t', PAT_INVERT, '\r', '\r', PAT_INVERT, '\n', '\n', PAT_ANY|PAT_TERM, 32, 255, PAT_END, 0,0};
-    Match *mtq = Match_MakePat(rlb->m, bytes(quoted), 4, ANCHOR_START)
-    Match *mtu = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START)
+    Match *mtq = Match_MakePat(rlb->m, bytes(quoted), 4, ANCHOR_START);
+    Match *mtu = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START);
     mtq->mark = mtu->mark = Roebling_GetMarkIdx(rlb, XML_ATTRIBUTE);
 
     Array mt_arr = Array_MakeFrom(rlb->m, 2, mtq, mtu);
@@ -121,12 +166,12 @@ static Parser *attrValueParserMk(Roebling *rlb){
 static Parser *bodyParserMk(Roebling *rlb){
     word body[] = {PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n' PAT_ANY|PAT_TERM, 32, 255, PAT_END, 0,0};
     
-    Match *mtq = Match_MakePat(rlb->m, bytes(quoted), 4, ANCHOR_START)
-    Match *mtu = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START)
+    Match *mtq = Match_MakePat(rlb->m, bytes(quoted), 4, ANCHOR_START);
+    Match *mtu = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START);
     mtq->mark = mtu->mark = Roebling_GetMarkIdx(rlb, XML_ATTRIBUTE);
 
     Array mt_arr = Array_MakeFrom(rlb->m, 2, mtq, mtu);
-    Parser *prs = Parser_MakeMulti(rlb->m, mt_arr, setAttrValue);
+    Parser *prs = Parser_MakeMulti(rlb->m, mt_arr, setBody);
     prs->ko = openMt(rlb);
 
     return prs;

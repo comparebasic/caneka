@@ -93,7 +93,7 @@ status Roebling_Run(Roebling *rbl){
 }
 
 int Roebling_GetMarkIdx(Roebling *rlb, int mark){
-    return Span_GetIdx(rlb->marks, &enumval, Mark_Eq); 
+    return Span_GetIdx(rlb->marks, &mark, Mark_Eq); 
 }
 
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source){
