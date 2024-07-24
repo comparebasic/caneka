@@ -1,13 +1,12 @@
 typedef struct mess {
     Type type;
-    union {
-        Abstract *a;
-        void *ptr;
-        util i64;
-        int i32;
-        word w;
-        byte b;
-    } value;
+    Abstract *value;
+    Hashed *atts;
+    String *body;
     struct mess *next;
     struct mess *parent;
+    struct mess *firstChild;
 } Mess;
+
+Mess *Mess_Make(MemCtx *m);
+status Mess_Append(Mess *new, Mess *existing);

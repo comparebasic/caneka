@@ -5,7 +5,7 @@ INC = -I/usr/local/musl/include/ -I./include
 coreobj = core/caneka.o core/mem.o core/string.o core/error.o core/debug.o \
 	core/log.o core/slab.o core/span.o core/lookup.o core/chain.o core/testsuite.o \
     core/hash.o core/table.o core/compare.o core/iter.o core/array.o core/int.o \
-    core/maker.o
+    core/maker.o core/mess.o
 parserobj = parser/parsers.o parser/match.o parser/roebling.o parser/scursor.o parser/range.o \
     parser/mark.o
 serveobj = serve/req.o serve/serve.o serve/proto.o serve/proto/headers/parserdef.o \

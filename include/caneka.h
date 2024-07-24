@@ -75,6 +75,7 @@ enum types {
     TYPE_UTIL,
     TYPE_UNIT,
     TYPE_MEMCTX,
+    TYPE_MESS,
     TYPE_MAKER,
     TYPE_MEMSLAB,
     TYPE_REQ,

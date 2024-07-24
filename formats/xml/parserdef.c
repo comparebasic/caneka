@@ -8,7 +8,6 @@ int XML_ATTR_VALUE = 4;
 int XML_BODY = 5;
 
 /* setters */
-
 static status setTag(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
@@ -42,14 +41,19 @@ static status tagNamed(Parser *prs, Range *range, void *source){
     Match *mt = Parser_GetMatch(prs);
     prs->jump = mt->jump;
     String *s =  Range_Copy(ctx->m, range);
-    Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
+    Debug_Print((void *)s, 0, "tagNamed: ", COLOR_YELLOW, TRUE);
+
+    XmlCtx_Open(ctx, s);
     return SUCCESS;
 }
 
 static status tagOpened(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
+    Match *mt = Parser_GetMatch(prs);
     Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
+    XmlCtx_Close(ctx, s);
+    prs->jump = mt->jump;
     return SUCCESS;
 }
 
@@ -67,6 +71,10 @@ static Parser *xmlAttrMarkMk(Roebling *rbl){
 }
 
 static Parser *xmlBodyMarkMk(Roebling *rbl){
+    return (Parser *)Mark_Make(rbl->m, XML_BODY);
+}
+
+static Parser *xmlEndMarkMk(Roebling *rbl){
     return (Parser *)Mark_Make(rbl->m, XML_BODY);
 }
 
@@ -133,11 +141,6 @@ static Parser *spaceParserMk(Roebling *rlb){
     return prs;
 }
 
-static Parser *tagSpaceParserMk(Roebling *rlb){
-    Parser *prs = Parser_MakeSingle(rlb->m, spaceMt(rlb), NULL); 
-    return prs;
-}
-
 static Parser *sepParserMk(Roebling *rlb){
     word sep[] = {
         PAT_ANY, ' ', ' ',
@@ -152,6 +155,11 @@ static Parser *attrParserMk(Roebling *rlb){
     Parser *prs = Parser_MakeSingle(rlb->m, mt, setAttr); 
     prs->ko = spaceMt(rlb);
     return prs;
+}
+
+static Parser *postTagNameParserMk(Roebling *rlb){
+    Array mt_arr = Array_MakeFrom(rlb->m, 2, selfCloseeMt(rlb), spaceMt(rlb));
+    return Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagOpened); 
 }
 
 static Parser *postAttrParserMk(Roebling *rlb){
@@ -194,7 +202,7 @@ Span *XmlParser_Make(MemCtx *m, ProtoDef *def){
             (Abstract *)startParserMk,
         (Abstract *)xmlTagMarkMk, 
             (Abstract *)tagParserMk,
-            (Abstract *)tagSpaceParserMk,
+            (Abstract *)postTagNameParserMk,
         (Abstract *)xmlAttrMarkMk, 
             (Abstract *)attrParserMk,
             (Abstract *)eqParserMk,
@@ -202,6 +210,7 @@ Span *XmlParser_Make(MemCtx *m, ProtoDef *def){
             (Abstract *)attrValueParserMk,
             (Abstract *)postAttrParserMk,
         (Abstract *)xmlBodyMarkMk, 
-            (Abstract *)bodyParserMk);
+            (Abstract *)bodyParserMk,
+        (Abstract *)xmlEndMarkMk);
     return p;
 }

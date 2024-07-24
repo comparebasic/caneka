@@ -76,6 +76,31 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
     }
 }
 
+static void Mess_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Mess *ms = (Mess *)a;
+    printf("\x1b[%dm%sM<%s value=\x1b[0m", color, msg, Class_ToString(ms->type.of));
+    Debug_Print((void *)ms->value, 0, "", color, extended);
+    Mess *child = ms->firstChild;
+    printf("\x1b[%dm [", color);
+    while(child != NULL){
+        Debug_Print((void *)child, 0, "", color, extended);
+        child = child->next;
+    }
+    printf("\x1b[%dm]", color);
+    printf(">\x1b[0m");
+}
+
+static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    XmlCtx *ctx = (XmlCtx *)as(a, TYPE_XMLCTX);
+    if(extended){
+        printf("\x1b[%dm%sXmlCtx<%s nodes=", color, msg, State_ToString(ctx->type.state));
+        Debug_Print((void *)ctx->root, 0, "", color, extended);
+        printf("\x1b[%dm>\x1b[0m", color);
+    }else{
+        printf("\x1b[%dm%sXmlCtx<%s>\x1b[0m", color, msg, State_ToString(ctx->type.state));
+    }
+}
+
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
     if(extended){
@@ -323,6 +348,8 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
+    r |= Lookup_Add(m, lk, TYPE_XMLCTX, (void *)XmlCtx_Print);
+    r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     return r;
 }
 

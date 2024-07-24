@@ -16,6 +16,9 @@ status Xml_Tests(MemCtx *gm){
 
     Roebling_Run(rbl);
 
+    Debug_Print((void *)ctx, 0, "Xml: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+
     s = String_Make(m, bytes("<main alpha=\"apples\" one=1 horizontal>And here is cool stuff</main>"));
 
     return r;

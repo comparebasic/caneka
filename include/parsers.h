@@ -1,5 +1,5 @@
 enum parser_cmds {
-    BREAK = -1,
+    BREAK = -2,
 };
 
 typedef status (*ParseFunc)(struct parser *parser, Range *range, void *source);

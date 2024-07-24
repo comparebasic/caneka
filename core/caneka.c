@@ -88,6 +88,8 @@ char *Class_ToString(cls type){
         return "TYPE_SLAB";
     }else if(type == TYPE_RBL_MARK){
         return "TYPE_RBL_MARK";
+    }else if(type == TYPE_MESS){
+        return "TYPE_MESS";
     }else{
         return "TYPE_unknown";
     }
