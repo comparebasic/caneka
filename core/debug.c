@@ -58,7 +58,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color);
+        printf("%sMatch<%s:state=%s:pos=%d:remaining=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, mt->remaining, color);
         int length = mt->s->length / sizeof(PatCharDef);
         PatCharDef *def = (PatCharDef *)mt->s->bytes;
         for(int i = 0; i < length;i++){

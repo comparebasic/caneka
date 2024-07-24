@@ -20,8 +20,8 @@ status SCursor_Reset(SCursor *sc){
 status SCursor_Find(Range *range, Match *search, Match *ko){
     SCursor *start = &(range->start); 
     SCursor *end = &(range->end); 
-    if(start->seg == NULL || start->seg->length < 1){
-        return NOOP;
+    if(start->seg == NULL || start->seg->length < 1 || range->start.position >= start->seg->length){
+        return Match_FeedEnd(search);
     }
     Range_Reset(range, search->flags);
     byte c;

@@ -34,6 +34,7 @@ status ProtoHttp_Tests(MemCtx *gm){
 
     Roebling_Run(req->in.rbl);
 
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToString(req->in.rbl->type.state));
     String *method_s = Lookup_Get(sctx->def->methods, proto->method);
     r |= Test(proto->method == TYPE_METHOD_GET, "Expect method to be set to get found %d(%s)", proto->method, method_s->bytes);
     r |= Test(String_Equals(proto->path, String_Make(m, bytes("/page1.html"))), "Expect string path to equal have '%s'", proto->path->bytes);
@@ -50,6 +51,7 @@ status ProtoHttp_Tests(MemCtx *gm){
     String_Add(req->m, req->in.shelf, body);
 
     Roebling_Run(req->in.rbl);
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToString(req->in.rbl->type.state));
 
     method_s = Lookup_Get(sctx->def->methods, proto->method);
     r |= Test(proto->method == TYPE_METHOD_POST, "Expect method to be set to get found %d(%s)", proto->method, method_s->bytes);
@@ -59,6 +61,7 @@ status ProtoHttp_Tests(MemCtx *gm){
     Single *sgl = (Single *)contentLengthHdr;
     r |= Test(String_Equals(proto->sid, String_Make(m, bytes("sid=xyz1234;Expiration=2024-04-04;Secure=true;"))), "Expect string cookie to equal have '%s'", proto->sid->bytes);
     r |= Test(sgl->val.value == body->length,  "Expect content length to have value of body length %u found %u", body->length, sgl->val.value);
+    r |= Test(String_Equals(proto->body, body), "Body found expected '%s' have '%s'", body->bytes, proto->body->bytes);
 
     return r;
 }

@@ -24,6 +24,10 @@ status Roebling_Run(Roebling *rbl){
         rbl->type.state = PROCESSING;
         prs = pmk(rbl);
         if(prs == NULL){
+            if(DEBUG_ROEBLING_COMPLETE){
+                Debug_Print((void *)prs, 0, "Finish in Error (prs is NULL): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                printf("\n");
+            }
             rbl->type.state = ERROR; 
             return rbl->type.state;
         }else{
@@ -51,6 +55,11 @@ status Roebling_Run(Roebling *rbl){
                 rbl->idx = mrk->type.state;
                 pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
                 continue;
+            }
+
+            if(DEBUG_ROEBLING_COMPLETE){
+                Debug_Print((void *)prs, 0, "Finish in Error (prs->func not COMPLETE): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                printf("\n");
             }
 
             rbl->type.state = ERROR;

@@ -29,7 +29,7 @@ enum match_flags {
 
 #define patText \
     PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', PAT_INVERT, 0, 31, \
-    PAT_ALL|PAT_TERM, 0, 0, PAT_END, 0, 0
+    PAT_MANY|PAT_ALL|PAT_TERM, 0, 0, PAT_END, 0, 0
 
 #define patTextLength 5
 
@@ -61,6 +61,7 @@ typedef struct match {
     status state;
     String *s; 
     int position;
+    int count;
     int remaining;
     word defPosition;
 } Match;
@@ -70,3 +71,4 @@ Match *Match_MakePat(MemCtx *m, byte *defs, word npats, word flags);
 int Match_PatLength(PatCharDef *def);
 status Match_Feed(Match *mt, byte c);
 void Match_Reset(Match *mt);
+status Match_FeedEnd(Match *mt);

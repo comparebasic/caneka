@@ -21,14 +21,6 @@ static status setHdr(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
-static status setBody(Parser *prs, Range *range, void *source){
-    Req *req = (Req *) as(source, TYPE_REQ);
-    String *body = (String *)Range_Copy(req->m, range);
-    req->proto->body = body;
-    Debug_Print((void *)body, 0, "Body: ", COLOR_YELLOW, TRUE);
-    return SUCCESS;
-}
-
 static status hdrComplete(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
