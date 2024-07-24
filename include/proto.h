@@ -12,6 +12,7 @@ typedef struct protodef {
     Lookup *handlers;
     Lookup *methods;
     Abstract *source;
+    Span *hdrHandlers_tbl_mk;
 } ProtoDef;
 
 ProtoDef *ProtoDef_Make(MemCtx *m, cls type,

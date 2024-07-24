@@ -44,7 +44,10 @@ static status match_FeedPat(Match *mt, byte c){
    }
 
    PatCharDef *def = ((PatCharDef *)mt->s->bytes)+(mt->position);  
-   i64 length = mt->s->length / sizeof(PatCharDef);
+   i64 length = mt->remaining;
+   if(length <= 0){
+       length = mt->s->length / sizeof(PatCharDef);
+   }
    boolean matched = FALSE;
    word total;
    int ocurrences = 1;

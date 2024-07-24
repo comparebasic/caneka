@@ -103,3 +103,14 @@ void *MemSlab_Alloc(MemSlab *sl, size_t s){
 
     return p;
 }
+
+/* utils */
+MemCtx *MemCtx_FromHandle(MemHandle *a){
+    if(a->type.of == TYPE_MEMCTX){
+        return (MemCtx *)a;
+    }else if(Ifc_Match(a->type.of, TYPE_MEMCTX)){
+        return a->m;
+    }
+    return NULL;
+}
+

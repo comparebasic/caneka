@@ -56,13 +56,17 @@ static Parser *bodyParserMk(Roebling *rlb){
     Req *req = (Req *) as(rlb->source, TYPE_REQ);
     HttpProto *proto = (HttpProto*)req->proto;
 
-    if(proto->method == TYPE_METHOD_POST){
-        int length =  Header_GetInt(proto->headers_tbl, String_Make(req->m, bytes("Content-Length")));
-        word body[] = {PAT_WILDCOUNT, 0, length, PAT_END, 0, 0};
-        return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(body), 2, ANCHOR_START), setBody); 
-    }else{
-        return NULL;
+    int length = 0;
+    if(proto->method != TYPE_METHOD_GET){
+        length = Hdr_GetInt(proto->headers_tbl, String_Make(req->m, bytes("Content-Length")));
     }
+
+    word body[] = {patText};
+    Match *mt = Match_MakePat(rlb->m, bytes(body), patTextLength, ANCHOR_START);
+    mt->remaining = length;
+    Parser *prs =  Parser_MakeSingle(rlb->m, mt, setBody); 
+
+    return prs;
 }
 
 /* public */

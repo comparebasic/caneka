@@ -9,6 +9,7 @@ enum pat_flags {
     PAT_SET_NOOP = 1 << 6,
     PAT_IGNORE = 1 << 7,
     PAT_WILDCOUNT = 1 << 8,
+    PAT_ALL = 1 << 9,
 };
 
 enum match_flags {
@@ -25,6 +26,12 @@ enum match_flags {
 
 #define PAT_INT \
     PAT_TERM, '0', '9'
+
+#define patText \
+    PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', PAT_INVERT, 0, 31, \
+    PAT_ALL|PAT_TERM, 0, 0, PAT_END, 0, 0
+
+#define patTextLength 5
 
 #define PAT_FLOAT \
     PAT_TERM, '0', '9', \
@@ -54,6 +61,7 @@ typedef struct match {
     status state;
     String *s; 
     int position;
+    int remaining;
     word defPosition;
 } Match;
 

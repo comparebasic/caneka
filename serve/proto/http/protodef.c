@@ -20,6 +20,7 @@ ProtoDef *HttpProtoDef_Make(MemCtx *m){
 
     def->methods = Lookup_Make(m, _TYPE_HTTP_START+1, populateMethods, NULL);
     def->parsers_pmk = HttpParser_Make(m, def);
+    def->hdrHandlers_tbl_mk = Span_Make(m);
 
     return def;
 }

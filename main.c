@@ -25,6 +25,15 @@ static status test(MemCtx *m){
     return r;
 }
 
+
+static Abstract *hdrCookieProcess(MemCtx *source, Abstract *a){
+    Req *req = (Req *) as(source, TYPE_REQ);
+    MemCtx *m = MemCtx_FromHandle((MemHandle *)req);
+    String *s = (String *)asIfc(a, TYPE_STRING);
+    Debug_Print((void *)s, 0, "Processing Cookie", COLOR_CYAN, TRUE);
+    return (Abstract *)s;
+}
+
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
     if(strncmp(arg, servecmd, strlen(servecmd)) == 0){
@@ -37,7 +46,13 @@ static status handle(MemCtx *m, char *arg){
             return ERROR;
         }
 
-        Serve *sctx = Serve_Make(m, HttpProtoDef_Make(m));
+        ProtoDef *def = HttpProtoDef_Make(m);
+        Table_Set(def->hdrHandlers_tbl_mk, (Abstract *)String_Make(m, bytes("Content-Length")),
+            (Abstract *)Maker_Wrapped(m, Hdr_IntMk)); 
+        Table_Set(def->hdrHandlers_tbl_mk, (Abstract *)String_Make(m, bytes("Cookie")),
+            (Abstract *)Maker_Wrapped(m, hdrCookieProcess)); 
+
+        Serve *sctx = Serve_Make(m, def);
         return Serve_Run(sctx, port);
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
         status r = test(m);

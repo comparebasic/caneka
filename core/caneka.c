@@ -84,3 +84,13 @@ boolean Abs_Eq(Abstract *a, void *b){
         return FALSE;
     }
 }
+
+boolean Ifc_Match(cls inst, cls ifc){
+    if(ifc == TYPE_MEMCTX){
+        return inst == TYPE_SPAN || inst == TYPE_REQ || inst == TYPE_SERVECTX 
+            || inst == TYPE_ROEBLING;
+    }else if(ifc == TYPE_STRING){
+        return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
+    }
+    return FALSE;
+}

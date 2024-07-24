@@ -31,8 +31,17 @@ typedef struct virt  {
 
 typedef struct single  {
     Type type;
-    util value;
+    union {
+        util value;
+        Abstract *a;
+        void *ptr;
+    } val;
 } Single;
+
+typedef struct mem_handle  {
+    Type type;
+    struct mem_ctx *m;
+} MemHandle;
 
 typedef struct virt * AbstractPtr;
 
@@ -47,6 +56,7 @@ typedef struct virt * AbstractPtr;
 
 #define as(x, t) (((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
+#define asIfc(x, ifc) (Ifc_Match(((Abstract *)(x))->type.of, ifc) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -59,6 +69,10 @@ enum types {
     _TYPE_START,
     TYPE_UNKNOWN,
     TYPE_ABSTRACT,
+    TYPE_WRAPPED,
+    TYPE_WRAPPED_FUNC,
+    TYPE_WRAPPED_UTIL,
+    TYPE_UTIL,
     TYPE_UNIT,
     TYPE_MEMCTX,
     TYPE_MAKER,
@@ -66,6 +80,7 @@ enum types {
     TYPE_REQ,
     TYPE_PROTO,
     TYPE_PROTODEF,
+    TYPE_STRING,
     TYPE_STRING_CHAIN,
     TYPE_STRING_FIXED,
     TYPE_SERVECTX,
@@ -134,16 +149,19 @@ char *Class_ToString(cls type);
 #define TEST_OK READY
 
 typedef struct parser *(*ParserMaker)(struct structexp *sexp); /* pmk */
-typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);
+boolean Ifc_Match(cls inst, cls ifc);
+
 #include "chain.h"
 #include "error.h"
 #include "log.h"
 #include "mem.h"
+#include "maker.h"
 #include "compare.h"
 #include "hash.h"
 #include "string.h"
+#include "int.h"
 #include "slab.h"
 #include "array.h"
 #include "span.h"
@@ -164,7 +182,7 @@ boolean Abs_Eq(Abstract *a, void *b);
 #include "mess.h"
 #include "streamdef.h"
 #include "mark.h"
-#include "header.h"
+#include "headers.h"
 #include "apps.h"
 
 status Caneka_Init(MemCtx *m);

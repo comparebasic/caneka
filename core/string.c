@@ -15,6 +15,7 @@ String *String_Init(MemCtx *m, int expected){
     return s;
 }
 
+
 String *String_FromInt(MemCtx *m, int i){
     byte buff[MAX_BASE10+1];
     memset(buff, 0, MAX_BASE10+1);
@@ -35,11 +36,6 @@ String *String_FromInt(MemCtx *m, int i){
     }
 
     return String_From(m, buff+position+1); 
-}
-
-int String_ToInt(String *s){
-    int n = atoi((char *)s->bytes);
-    return n;
 }
 
 String *String_Make(MemCtx *m, byte *bytes){

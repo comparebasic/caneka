@@ -23,3 +23,6 @@ void *MemSlab_GetStart(MemSlab *sl);
 MemSlab *MemSlab_Make(MemCtx *m);
 size_t MemSlab_Available(MemSlab *sl);
 void *MemSlab_Alloc(MemSlab *sl, size_t s);
+
+/* utils */
+MemCtx *MemCtx_FromHandle(MemHandle *a);

@@ -9,7 +9,15 @@ static status setKey(Parser *prs, Range *range, void *source){
 
 static status setHdr(Parser *prs, Range *range, void *source){
     Req *req = (Req *) as(source, TYPE_REQ);
-    Table_SetValue(req->proto->headers_tbl, (Abstract *)Range_Copy(req->m, range));
+    Abstract *value = (Abstract *)Range_Copy(req->m, range);
+
+    String *key = Span_Get(req->proto->headers_tbl, req->proto->headers_tbl->metrics.set);
+    Single *wrp = (Single *)Table_Get(req->sctx->def->hdrHandlers_tbl_mk, (Abstract *)key);
+    if(wrp != NULL){
+        value = ((Maker)wrp->val.ptr)(req->m, (Abstract *)value); 
+    }
+
+    Table_SetValue(req->proto->headers_tbl, value);
     return SUCCESS;
 }
 
