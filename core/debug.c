@@ -116,6 +116,21 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
+static void Wrapped_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    String *s = (String *)as(a, TYPE_STRING_CHAIN);
+    printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
+    do {
+        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
+        s = s->next;
+    } while(s != NULL);
+    printf("\x1b[%dm>\x1b[0m", color);
+}
+
+static void WrappedUtil_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Single *sgl = (Single *)as(a, TYPE_WRAPPED_UTIL);
+    printf("\x1b[%dm%sWi64<\x1b[1;%dm%lu\x1b[0;%dm>\x1b[0m", color,  msg, color, sgl->val.value, color);
+}
+
 static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Req *req = (Req *) as(a, TYPE_REQ);
     printf("%s\x1b[1;%dmReq<%s:%s ",
@@ -301,6 +316,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
     return r;
 }
 

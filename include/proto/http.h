@@ -2,10 +2,10 @@ typedef struct http_proto {
     Type type;
     char *(*toLog)(Req *req);
     Span *headers_tbl;
+    String *body;
     /* end proto props */
     String *path;
     byte method;
-    String *body;
     String *host;
     Abstract *session;
     /* mid parsing */

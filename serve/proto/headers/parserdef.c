@@ -14,7 +14,7 @@ static status setHdr(Parser *prs, Range *range, void *source){
     String *key = Span_Get(req->proto->headers_tbl, req->proto->headers_tbl->metrics.set);
     Single *wrp = (Single *)Table_Get(req->sctx->def->hdrHandlers_tbl_mk, (Abstract *)key);
     if(wrp != NULL){
-        value = ((Maker)wrp->val.ptr)(req->m, (Abstract *)value); 
+        value = ((Maker)wrp->val.ptr)((MemCtx *)req, (Abstract *)value); 
     }
 
     Table_SetValue(req->proto->headers_tbl, value);
@@ -22,10 +22,10 @@ static status setHdr(Parser *prs, Range *range, void *source){
 }
 
 static status setBody(Parser *prs, Range *range, void *source){
-    /*
     Req *req = (Req *) as(source, TYPE_REQ);
-    Table_SetValue(req->proto->headers_tbl, (Abstract *)Range_Copy(req->m, range));
-    */
+    String *body = (String *)Range_Copy(req->m, range);
+    req->proto->body = body;
+    Debug_Print((void *)body, 0, "Body: ", COLOR_YELLOW, TRUE);
     return SUCCESS;
 }
 

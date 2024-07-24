@@ -2,6 +2,14 @@
 #include <caneka.h>
 #include <proto/http.h>
 
+static Abstract *hdrCookieProcess(MemCtx *source, Abstract *a){
+    Req *req = (Req *) as(source, TYPE_REQ);
+    MemCtx *m = MemCtx_FromHandle((MemHandle *)req);
+    String *s = (String *)asIfc(a, TYPE_STRING);
+    Debug_Print((void *)s, 0, "Processing Cookie: ", COLOR_CYAN, TRUE);
+    return (Abstract *)s;
+}
+
 status ProtoHttp_Tests(MemCtx *gm){
     status r = TEST_OK;
     MemCtx *m = MemCtx_Make();
@@ -11,8 +19,13 @@ status ProtoHttp_Tests(MemCtx *gm){
     Req *req = NULL;
     HttpProto *proto = NULL;
 
+    ProtoDef *def = HttpProtoDef_Make(m);
+    Table_Set(def->hdrHandlers_tbl_mk, (Abstract *)String_Make(m, bytes("Content-Length")),
+        (Abstract *)Maker_Wrapped(m, Hdr_IntMk)); 
+    Table_Set(def->hdrHandlers_tbl_mk, (Abstract *)String_Make(m, bytes("Cookie")),
+        (Abstract *)Maker_Wrapped(m, hdrCookieProcess)); 
 
-    Serve *sctx = Serve_Make(m, HttpProtoDef_Make(m));
+    Serve *sctx = Serve_Make(m, def);
 
     req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
     proto = (HttpProto *) as(req->proto, TYPE_HTTP_PROTO);
@@ -40,13 +53,14 @@ status ProtoHttp_Tests(MemCtx *gm){
     String_AddBytes(req->m, req->in.shelf, bytes("\r\n"), 2);
     String_Add(req->m, req->in.shelf, body);
 
-    printf("\n");
-    Debug_Print((void *)req->in.shelf, 0, "Req for post request: ", COLOR_DARK, TRUE);
-    printf("\n");
 
-    /*
     Roebling_Run(req->in.rbl);
-    */
+
+    printf("\n");
+    Debug_Print((void *)req, 0, "Req in test", COLOR_DARK, FALSE);
+    printf("\n");
+    Debug_Print((void *)req->in.shelf, 0, "Req for get request: ", COLOR_DARK, TRUE);
+    printf("\n");
 
     return r;
 }

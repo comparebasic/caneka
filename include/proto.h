@@ -2,6 +2,7 @@ typedef struct proto {
     Type type;
     char *(*toLog)(struct serve_req *req);
     Span *headers_tbl;
+    String *body;
 } Proto;
 
 typedef struct protodef {
