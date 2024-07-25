@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 static status match_FeedPat(Match *mt, byte c){
+    /*
    if(DEBUG_PATMATCH){
        if(c == '\r'){
            printf("\x1b[%dm'\\r' -> ", DEBUG_PATMATCH);
@@ -156,30 +157,32 @@ static status match_FeedPat(Match *mt, byte c){
         printf("\x1b[%dm  Ret %s\n\n", DEBUG_PATMATCH, State_ToString(mt->state));
     }
 
-    return mt->state;
+    */
+    return mt->type.state;
 }
 
 static status match_FeedString(Match *mt, byte c){
     if(DEBUG_MATCH){
-       printf("%c of %s %hu", c, mt->s->bytes, mt->s->length);
+       printf("%c of %s %hu", c, mt->def.s->bytes, mt->def.s->length);
        Debug_Print(mt, 0, "FeedPat: ", DEBUG_PATMATCH, TRUE);
     }
-    if(mt->s->bytes[mt->position] == c){
+    if(mt->def.s->bytes[mt->position] == c){
         mt->position++;
-        if(mt->position == mt->s->length){
+        if(mt->position == mt->def.s->length){
             mt->position = 0;
-            mt->state = COMPLETE;
+            mt->type.state = COMPLETE;
             if(DEBUG_ROEBLING_COMPLETE){
                 Debug_Print((void *)mt, 0, "Match Complete: ", DEBUG_ROEBLING_COMPLETE, TRUE);
                 printf("\n");
             }
         }else{
-            mt->state = PROCESSING;
+            mt->type.state = PROCESSING;
         }
     }else{
-        Match_Reset(mt);
+        mt->position = 0;
+        mt->type.state = READY;
     }
-    return mt->state;
+    return mt->type.state;
 }
 
 status Match_Feed(Match *mt, byte c){
@@ -201,36 +204,32 @@ status Match_Feed(Match *mt, byte c){
 
 status Match_FeedEnd(Match *mt){
     if(mt->remaining == 0){
-        mt->state = SUCCESS;
+        mt->type.state = SUCCESS;
     }
-    return mt->state;
+    return mt->type.state;
 }
 
-Match *Match_Make(MemCtx *m, String *s, word flags){
-    Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
-    mt->type.of = TYPE_STRINGMATCH;
-    mt->flags = flags;
-    mt->s = s;
-    mt->remaining = -1;
-    mt->jump = -1;
-    return mt;
-}
-
-Match *Match_Pattern(MemCtx *m, byte *defs){
-    PatCharDef *d = (PatCharDef *)defs;
-    int l = 0  
-    while(d->flags != PAT_END){
-       l++;
-       d++;
-    }
-    size_t sz = (sizeof(PatCharDef)*l);
-
-    Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match)+sz);
+status Match_SetPattern(Match *mt, PatCharDef def[]){
+    memset(mt, 0, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;
-    mt->def.pat = ((void *)mt)+sizeof(Match);
-    memcpy(mt->def.pat, defs, sz); 
-
+    mt->def.pat = def;
+    while(def->flags != PAT_END){
+       mt->length++;
+       def++;
+    }
     mt->remaining = -1;
     mt->jump = -1;
-    return mt;
+
+    return SUCCESS;
+}
+
+status Match_SetString(Match *mt, String *s){
+    memset(mt, 0, sizeof(Match));
+    mt->type.of = TYPE_STRINGMATCH;
+    mt->def.s = s;
+    mt->length = s->length;
+    mt->remaining = -1;
+    mt->jump = -1;
+
+    return SUCCESS;
 }

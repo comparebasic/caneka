@@ -30,6 +30,7 @@ typedef struct range_chardef {
 
 typedef struct match {
     Type type; 
+    word flags;
     union {
         PatCharDef *pat;
         String *s;
@@ -42,6 +43,7 @@ typedef struct match {
 } Match;
 
 Match *Match_Make(MemCtx *m, String *s, word flags);
-Match *Match_Pattern(MemCtx *m, byte *defs);
+status Match_SetPattern(Match *mt, PatCharDef def[]);
+status Match_SetString(Match *mt, String *s);
 status Match_Feed(Match *mt, byte c);
 status Match_FeedEnd(Match *mt);

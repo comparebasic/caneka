@@ -142,8 +142,10 @@ static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
         if(HasFlag(p->type.state, RAW)){
             size_t offset = sr->local_idx*p->slotSize;
             void *ptr = ((void *)sr->slab->items)+offset;
-            if(sr->op == SPAN_OP_REMOVE){
+            if(sr->op == SPAN_OP_REMOVE || sr->op == SPAN_OP_RESERVE){
+                sr->span->metrics.set = idx;
                 memset(ptr, 0, p->itemSize);
+                sr->value = ptr;
             }else if(sr->op == SPAN_OP_SET){
                 sr->span->metrics.set = idx;
                 memcpy(ptr, t, p->itemSize);
@@ -243,6 +245,10 @@ void *Span_Get(Span *p, int idx){
     }
 }
 
+void *Span_GetSelected(Span *p){
+    return Span_Get(p, p->metrics.selected);
+}
+
 int Span_Add(Span *p, Abstract *t){
     int idx = Span_NextIdx(p);
     if(Span_Set(p, idx, t) == SUCCESS){
@@ -250,6 +256,18 @@ int Span_Add(Span *p, Abstract *t){
     }
 
     return 0;
+}
+
+void *Span_ReserveNext(Span *p){
+    int idx = Span_NextIdx(p);
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_RESERVE, idx);
+    status r = Span_GetSet(&sr, idx, NULL);
+    if(HasFlag(r, SUCCESS)){
+        return sr.value;
+    }else{
+        return NULL;
+    }
 }
 
 void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg){
@@ -295,5 +313,12 @@ status Span_Merge(Span *dest, Span *additional){
             Span_Add(dest, t);
         }
     };
+    return SUCCESS;
+}
+
+status Span_ReInit(Span *p){
+    p->nvalues = 0;
+    p->max_idx = 0;
+    p->metrics.selected = 0;
     return SUCCESS;
 }

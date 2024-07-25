@@ -1,6 +1,24 @@
 #include <external.h>
 #include <caneka.h>
 
+Match *Roebling_GetMatch(Roebling *rbl){
+    return Span_GetSelected(rbl->matches.values);
+}
+
+status Roebling_SetPattern(Roebling *rbl, PatCharDef *def){
+    Match *mt = Span_ReserveNext(rbl->matches.values);
+    return Match_SetPattern(mt, def);
+}
+
+status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
+    for(int i = 0; i < lk->values->nvalues; i++){
+        Match *mt = Span_ReserveNext(rbl->matches.values);
+        String *s = (String *)Span_Get(lk->values, i);
+        Match_SetString(mt, s);
+    }
+    return SUCCESS;
+}
+
 status Roebling_Prepare(Roebling *rbl){
     rbl->idx = 0;
     Abstract *pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
@@ -64,7 +82,7 @@ status Roebling_Run(Roebling *rbl){
             Debug_Print((void *)prs, 0, "Parser in run: ", DEBUG_ROEBLING, TRUE);
             printf("\x1b[0m\n");
         }
-        r = prs->func(prs, &(rbl->range), rbl->source);
+        r = Parser_Run(prs, rbl);
         if((r & COMPLETE) != COMPLETE){
             if(prs->failJump != -1){
                 rbl->idx = prs->failJump;
@@ -135,7 +153,8 @@ Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract 
     rbl->parsers_pmk = parsers;
     rbl->source = source;
     rbl->gotos = Lookup_Make(m, XML_START, NULL, (Abstract *)rbl);
-    rbl->current = -1;
+    rbl->matches.values = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
+    rbl->matches.ko = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
     Range_Set(&(rbl->range), s);
 
     Roebling_Prepare(rbl);

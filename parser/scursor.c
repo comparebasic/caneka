@@ -17,7 +17,7 @@ status SCursor_Reset(SCursor *sc){
     return SUCCESS;
 }
 
-status SCursor_Find(Range *range, Match *search, Match *ko){
+status SCursor_Find(Range *range, Match *search){
     SCursor *start = &(range->start); 
     SCursor *end = &(range->end); 
     if(start->seg == NULL || start->seg->length < 1 || range->start.position >= start->seg->length){
@@ -45,36 +45,29 @@ status SCursor_Find(Range *range, Match *search, Match *ko){
                 printf("\x1b[%dmMatch_Feed ->  i:%d - '%c' \x1b[0m\n", DEBUG_CURSOR, i, c);
             }
             Match_Feed(search, c);
-            if(ko != NULL){
-                Match_Feed(ko, c);
-                if(ko->state == COMPLETE){
-                    search->state = COMPLETE;
-                    i -= (ko->position);
-                }
-            }
             if(DEBUG_CURSOR){
                 Debug_Print((void *)search, 0, "", DEBUG_CURSOR, TRUE);
                 printf("\n");
             }
-            if(search->state != READY){
+            if(search->type.state != READY){
                 if((search->flags & ANCHOR_UNTIL) != 0 && start->state == READY){
                     start->position = i;
                     start->seg = seg;
-                    start->state = search->state;
+                    start->state = search->type.state;
                 }
                 range->compare++;
                 start->state = PROCESSING;
-                if(search->state == COMPLETE){
+                if(search->type.state == COMPLETE){
                     end->position = (i+1);
                     end->seg = seg;
                     range->length = -1;
-                    return search->state;
-                }else if((search->state & INVERTED) != 0){
-                    search->state = COMPLETE;
+                    return search->type.state;
+                }else if((search->type.state & INVERTED) != 0){
+                    search->type.state = COMPLETE;
                     end->position = i;
                     end->seg = seg;
                     range->length = -1;
-                    return search->state;
+                    return search->type.state;
                 }
             }else{
                 if((search->flags & ANCHOR_START) != 0){
@@ -96,7 +89,7 @@ status SCursor_Find(Range *range, Match *search, Match *ko){
         printf("\n");
     }
 
-    return search->state;
+    return search->type.state;
 }
 
 status SCursor_Incr(SCursor *sc, i64 length){

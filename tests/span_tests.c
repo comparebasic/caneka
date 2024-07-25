@@ -101,3 +101,18 @@ status Span_Tests(MemCtx *gm){
     MemCtx_Free(m);
     return r;
 }
+
+status SpanInline_Tests(MemCtx *gm){
+    MemCtx *m = MemCtx_Make();
+    Span *p;
+    status r = READY;
+
+    Single *sgl = NULL;
+    p = Span_MakeInline(m, TYPE_WRAPPED, sizeof(Single));
+    String *s;
+
+    printf("Single is sizeof(%ld)\n", sizeof(Single));
+
+    MemCtx_Free(m);
+    return r;
+}

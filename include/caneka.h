@@ -1,6 +1,5 @@
 typedef unsigned char byte;
-typedef uint16_t word;
-typedef word cls;
+typedef uint16_t word; typedef word cls;
 typedef word status;
 typedef byte boolean;
 typedef uint32_t dword;
@@ -166,8 +165,8 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "scursor.h"
 #include "range.h"
 #include "lookup.h"
-#include "roebling.h"
 #include "parsers.h"
+#include "roebling.h"
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"

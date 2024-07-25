@@ -66,15 +66,19 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:remaining=%d:count=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, mt->remaining, mt->count, color);
+        printf("%sMatch<%s:state=%s:pos=%d:remaining=%d:count=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, mt->remaining, mt->count, color);
+        /*
         int length = mt->s->length / sizeof(PatCharDef);
         PatCharDef *def = (PatCharDef *)mt->s->bytes;
         for(int i = 0; i < length;i++){
             PatCharDef_Print((Abstract *)def++, type, "", color, extended);
         }
+        */
         printf(">\x1b[0m");
     }else{
+        /*
         printf("%sMatch<state=%s:pos=%d>", msg, mt->s->bytes, mt->position);
+        */
     }
 }
 
@@ -112,11 +116,13 @@ static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
+    /*
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color);
+        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, color, mt->s->bytes, color);
     }else{
         printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->state), mt->position);
     }
+    */
 }
 
 static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -126,7 +132,9 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_STRINGMATCH);
+    /*
     printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->state), mt->position, color, mt->s->bytes, color);
+    */
 }
 
 static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -324,8 +332,10 @@ static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean ext
 static void Parser_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Parser *prs = (Parser *)as(a, TYPE_PARSER);
     printf("\x1b[%dm%sPrs<%s", color, msg, State_ToString(prs->type.state));
+    /*
     Match *mt = (Match *)prs->match.single;
     Debug_Print((void *)mt, 0, " ", color, extended);
+    */
     printf(">\x1b[0m");
 }
 
@@ -334,9 +344,11 @@ static void MultiParser_Print(Abstract *a, cls type, char *msg, int color, boole
     printf("\x1b[%dm%sPrs<%s", color, msg, State_ToString(prs->type.state));
     Match *mt = NULL;;
     int i = 0;
+    /*
     while((mt = prs->match.array[i++]) != NULL){
         Debug_Print((void *)mt, 0, ", ", color, extended);
     }
+    */
 }
 
 static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

@@ -26,33 +26,49 @@ static status setBody(Parser *prs, Range *range, void *source){
 
 /* parser makers */
 static Parser *methodParserMk(Roebling *rlb){
+    /*
     Req *req = (Req *) as(rlb->source, TYPE_REQ);
     return Parser_StringLookup(req->m, ANCHOR_START, setMethod, req->sctx->def->methods);
+    */
+    return NULL;
 }
 
 static Parser *spaceParserMk(Roebling *rlb){
+    /*
     word pat[] = {PAT_TERM, ' ', ' ', PAT_END};
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(pat), 1, ANCHOR_START), NULL); 
+    */
+    return NULL;
 }
 
 static Parser *pathParserMk(Roebling *rlb){
+    /*
     word path[] = {PAT_INVERT, ' ', ' ', PAT_MANY|PAT_TERM, '*', '~', PAT_END};
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(path), 2, ANCHOR_START), setPath); 
+    */
+    return NULL;
 }
 
 static Parser *httvParserMk(Roebling *rlb){
+    /*
     word httpv[] = {PAT_TERM, 'H', 'H', PAT_COUNT|PAT_TERM, 'T', 2, PAT_TERM, 'P', 'P',
         PAT_TERM, '/', '/', PAT_TERM, '1', '1', PAT_ANY|PAT_TERM, '.', '.', 
         PAT_SINGLE, '1', '1', PAT_TERM, '2', '2', PAT_END}; 
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(httpv), 8, ANCHOR_START), NULL); 
+    */
+    return NULL;
 }
 
 static Parser *nlParserMk(Roebling *rlb){
+    /*
     word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n'};
     return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 2, ANCHOR_START), NULL); 
+    */
+    return NULL;
 }
 
 static Parser *bodyParserMk(Roebling *rlb){
+    /*
     Req *req = (Req *) as(rlb->source, TYPE_REQ);
     HttpProto *proto = (HttpProto*)req->proto;
 
@@ -67,6 +83,8 @@ static Parser *bodyParserMk(Roebling *rlb){
     Parser *prs =  Parser_MakeSingle(rlb->m, mt, setBody); 
 
     return prs;
+    */
+    return NULL;
 }
 
 /* public */
