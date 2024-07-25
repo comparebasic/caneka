@@ -160,13 +160,16 @@
 }
 */
 
-static status match_FeedPat(Match *mt, byte c){
+static status match_FeedPat(Match *mt, word c){
     boolean matched = FALSE;
     PatCharDef *def = mt->def.pat+mt->position;
     while(def->flags != PAT_END){
-        Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_RED, FALSE);
-        printf(" ");
+        if(DEBUG_MATCH){
+            Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_MATCH, FALSE);
+            printf(" :");
+        }
 
+        /* match the pattern to the char */
         if((def->flags & PAT_ALL) != 0){
             matched = TRUE;
         }else if((def->flags & PAT_COUNT) != 0){
@@ -179,56 +182,63 @@ static status match_FeedPat(Match *mt, byte c){
             matched = !matched;
         }
 
+        /* handle if matched or not */
         if(matched){
             mt->type.state = PROCESSING;
             mt->count++;
 
-            printf("\x1b[%dmY match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
-            Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
-            printf("\n");
-
+            if(DEBUG_MATCH){
+                printf("\x1b[%dmY match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
+                Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+                printf("\n");
+            }
+            
+            /* if it's a many or any match rewind to the first non PAT_TERM def */
             if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
-                while((mt->position-1) > 0 && ((def-1)->flags & PAT_TERM) == 0){
+                while((mt->position-1) > 0 && ((def+(mt->position-1))->flags & PAT_TERM) == 0){
                     mt->position--;
                 }
             }else{
-                while((mt->position+1) < mt->length && ((mt->def.pat+(mt->position))->flags & PAT_TERM) != 0){
+                /* if  we have matched in the middle of the term, fast fowrard to the end of it */
+                while(((mt->def.pat+(mt->position))->flags & PAT_TERM) != 0 && (mt->position+1) < mt->length){
                     mt->position++;
                 }
+                mt->position++;
             }
             break;
         }else{
-            if((def->flags & PAT_OPTIONAL) == 0){
-                boolean ko = TRUE;
-                if(mt->position > 0 && ((def-1)->flags & (PAT_MANY|PAT_ANY)) != 0){
-                    ko = FALSE;
-                }
-                if(ko){
-                    mt->type.state = READY;
+            /* only knockout the status if the character is not optional */
+            if((def->flags & (PAT_OPTIONAL|PAT_ANY|PAT_MANY)) == 0){
+                mt->type.state = READY;
 
+                if(DEBUG_MATCH){
                     printf("\x1b[%dmN match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
                     Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
                     printf("\n");
-
-                    mt->position = 0;
-
-                    break;
                 }
+
+                mt->position = 0;
+
+                break;
             }
-            printf("\x1b[%dmO match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
-            Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
-            printf("\n");
+
+            if(DEBUG_MATCH){
+                printf("\x1b[%dmO match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
+                Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+                printf("\n");
+            }
+
             mt->position++;
         }
 
-        if((mt->type.state & PROCESSING) != 0 && (def->flags & PAT_TERM) != 0){
-            if(mt->position == mt->length){
-                mt->type.state |= SUCCESS;
-            }
-        }
-
-
         def = mt->def.pat+mt->position;
+    }
+
+    /* after the loop has broken, if we are in a PROCESSING state and have reached the end of the pattern, we are COMPLETE */
+    if((mt->type.state & PROCESSING) != 0){
+        if(mt->position == mt->length){
+            mt->type.state |= SUCCESS;
+        }
     }
 
     return mt->type.state;
