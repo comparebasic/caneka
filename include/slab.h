@@ -2,6 +2,7 @@ typedef struct span_slab {
     Type type;
     int increment;
     int offset;
+    byte slotSize;
     Abstract *items[SPAN_DIM_SIZE];
 } Slab;
 
@@ -21,4 +22,5 @@ typedef struct slab_result {
     Abstract *value;
 } SlabResult;
 
-Slab* Slab_Alloc(MemCtx* m, status flags);
+Slab* Slab_Alloc(MemCtx* m, status flags, byte slotSize);
+void *Slab_GetPtr(Slab *sl, int idx);

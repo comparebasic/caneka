@@ -3,8 +3,9 @@
 
 #define STRIDE(p) (((p)->type.of == TYPE_MINISPAN) ? SPAN_MINI_DIM_SIZE : SPAN_DIM_SIZE)
 
-static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment, status flags){
-    Slab *new_sl = Slab_Alloc(m, flags);
+static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment,
+        status flags, byte slotSize ){
+    Slab *new_sl = Slab_Alloc(m, flags, slotSize);
     new_sl->increment = increment; 
     new_sl->offset = offset;
 
@@ -39,7 +40,8 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
         Slab *exp_sl = NULL;
         Slab *shelf_sl = NULL;
         while(sr->slab->increment < needed){
-            Slab *new_sl = openNewSlab(m, 0, 0, needed, (sr->span->type.state|RAW));
+            Slab *new_sl = openNewSlab(m, 0, 0, needed, (sr->span->type.state & RAW),
+                sr->span->slotSize);
 
             if(exp_sl == NULL){
                 shelf_sl = sr->span->slab;
@@ -83,7 +85,8 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
                 return MISS;
             }
             Slab *new_sl = openNewSlab(m, 
-                sr->local_idx, sr->offset, increment, (sr->span->type.state|RAW));
+                sr->local_idx, sr->offset, increment, (sr->span->type.state & RAW),
+                sr->span->slotSize);
             prev_sl->items[sr->local_idx] = (Abstract *)new_sl;
             prev_sl = sr->slab = new_sl;
         }else{
@@ -140,12 +143,11 @@ static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
     Span *p = sr->span;
     if(HasFlag(sr->type.state, SUCCESS)){
         if(HasFlag(p->type.state, RAW)){
-            size_t offset = sr->local_idx*p->slotSize;
-            void *ptr = ((void *)sr->slab->items)+offset;
+            void *ptr = Slab_GetPtr(sr->slab, sr->local_idx);
             if(sr->op == SPAN_OP_REMOVE || sr->op == SPAN_OP_RESERVE){
-                sr->span->metrics.set = idx;
                 memset(ptr, 0, p->itemSize);
                 sr->value = ptr;
+                sr->span->metrics.set = idx;
             }else if(sr->op == SPAN_OP_SET){
                 sr->span->metrics.set = idx;
                 memcpy(ptr, t, p->itemSize);
@@ -185,7 +187,7 @@ Span* Span_Make(MemCtx* m){
     p->max_idx = -1;
     p->slotSize = 1;
     p->dims = 1;
-    p->slab = Slab_Alloc(m, (p->type.state|RAW));
+    p->slab = Slab_Alloc(m, (p->type.state & RAW), p->slotSize);
     p->type.of = TYPE_SPAN;
     p->slab->increment = STRIDE(p);
 
@@ -197,7 +199,7 @@ Span* Span_MakeMini(MemCtx* m){
     p->m = m;
     p->max_idx = -1;
     p->slotSize = 1;
-    p->slab = Slab_Alloc(m, (p->type.state|RAW));
+    p->slab = Slab_Alloc(m, (p->type.state & RAW), p->slotSize);
     p->type.of = TYPE_MINISPAN;
     p->slab->increment = STRIDE(p);
 
@@ -215,7 +217,7 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     Span *sp = Span_Make(m);
     sp->itemSize = itemSize;
     sp->itemType = type;
-    sp->slotSize = slotSize;
+    sp->slotSize = sp->slab->slotSize = slotSize;
     sp->slab->type.state |= RAW;
     sp->type.state |= RAW;
 

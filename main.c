@@ -15,6 +15,7 @@ static status test(MemCtx *m){
     r |= String_Tests(m);
     */
     r |= Span_Tests(m);
+    r |= SpanInline_Tests(m);
     /*
     r |= Hash_Tests(m);
     r |= Roebling_Tests(m);

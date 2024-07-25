@@ -111,7 +111,14 @@ status SpanInline_Tests(MemCtx *gm){
     p = Span_MakeInline(m, TYPE_WRAPPED, sizeof(Single));
     String *s;
 
+
+    sgl = Int_Wrapped(m, 12);
+    Span_Add(p, (Abstract *)sgl);
+    sgl = Int_Wrapped(m, 45);
+    Span_Add(p, (Abstract *)sgl);
+    Span_Set(p, 45, (Abstract *)sgl);
     printf("Single is sizeof(%ld)\n", sizeof(Single));
+    Debug_Print((void *)p, 0, "Span Inline Int: ", COLOR_CYAN, FALSE);
 
     MemCtx_Free(m);
     return r;

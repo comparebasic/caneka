@@ -236,9 +236,14 @@ static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean exte
 
     printf("%s\x1b[%dmL<icr%d[%d] \x1b[%dm", msg, color, slab->increment, slab->offset, color);
     boolean first = TRUE;
-    for(int i = 0; i < SPAN_DIM_SIZE; i++){
-        Abstract *t = slab->items[i];
-        if(t != NULL){
+    for(int i = 0; i < SPAN_DIM_SIZE; i+= slab->slotSize){
+        void *t = NULL;
+        if((slab->type.state & RAW) != 0){
+            t = Slab_GetPtr(slab, i);
+        }else{
+            t = slab->items[i];
+        }
+        if(t != NULL && ((Abstract *)t)->type.of != 0){
             if(!first){
                 printf(", ");
             }
