@@ -83,9 +83,9 @@ static status match_FeedPat(Match *mt, byte c){
 
             if(DEBUG_PATMATCH){
                 if(c == '\r' || c == '\n' || c == '\t'){
-                    printf("\x1b[%dm    matched \%hu'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
+                    printf("\x1b[%dm    matched at %u \%hu'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, mt->position, c, matched, optional);
                 }else{
-                    printf("\x1b[%dm    matched '%c'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, c, matched, optional);
+                    printf("\x1b[%dm    matched at %u '%c'? %d opt %d\x1b[0m\n", DEBUG_PATMATCH, mt->position, c, matched, optional);
                 }
             }
 

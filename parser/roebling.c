@@ -60,16 +60,18 @@ status Roebling_Run(Roebling *rbl){
         }
 
         if(DEBUG_ROEBLING){
+            printf("Roebling idx %d\n", rbl->idx);
             Debug_Print((void *)prs, 0, "Parser in run: ", DEBUG_ROEBLING, TRUE);
             printf("\x1b[0m\n");
         }
         r = prs->func(prs, &(rbl->range), rbl->source);
         if((r & COMPLETE) != COMPLETE){
-            if(prs->jump != -1){
-                rbl->idx = prs->jump;
+            if(prs->failJump != -1){
+                rbl->idx = prs->failJump;
                 pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
                 if(DEBUG_ROEBLING_MARK){
-                    Debug_Print((void *)pmk, 0, "Mark Jump: ", DEBUG_ROEBLING_MARK, TRUE);
+                    printf("Jumping %d\n", rbl->idx);
+                    Debug_Print((void *)pmk, 0, "Mark failJump: ", DEBUG_ROEBLING_MARK, TRUE);
                     printf("\n");
                 }
                 continue;

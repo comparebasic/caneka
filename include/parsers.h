@@ -15,6 +15,7 @@ typedef struct parser {
     int idx;
     ParseFunc func;
     int jump;
+    int failJump;
     ParseFunc complete;
 } Parser; /*rp*/
 

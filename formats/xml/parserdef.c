@@ -151,7 +151,9 @@ static Parser *postTagNameParserMk(Roebling *rlb){
 
 static Parser *postAttrParserMk(Roebling *rlb){
     Array mt_arr = Array_MakeFrom(rlb->m, 2, selfCloseeMt(rlb), tagOpenedMt(rlb));
-    return Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagOpened); 
+    Parser *prs =  Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagOpened); 
+    prs->failJump = Roebling_GetMarkIdx(rlb, XML_ATTR_VALUE);
+    return prs;
 }
 
 static Parser *attrValueParserMk(Roebling *rlb){
@@ -194,6 +196,7 @@ Span *XmlParser_Make(MemCtx *m, ProtoDef *def){
             (Abstract *)Single_Ptr(m, attrParserMk),
             (Abstract *)Single_Ptr(m, eqParserMk),
             (Abstract *)Single_Ptr(m, postAttrParserMk),
+        (Abstract *)Int_Wrapped(m, XML_ATTR_VALUE), 
             (Abstract *)Single_Ptr(m, attrValueParserMk),
             (Abstract *)Single_Ptr(m, postAttrParserMk),
         (Abstract *)Int_Wrapped(m, XML_BODY), 

@@ -50,7 +50,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
             printf("%s%hu='%c'", msg, (word)def->flags, (char)def->from);
         }
     }else{
-        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32)){
+        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32) || (def->to > 128 || def->to > 127)){
             printf("%s%hu='#%hu-#%hu'", msg, (word)def->flags, def->from, def->to);
         }else{
             printf("%s%hu='%c-%c'", msg, (word)def->flags, (char)def->from, (char)def->to);
