@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status match_FeedPat(Match *mt, byte c){
-    /*
+/*
    if(DEBUG_PATMATCH){
        if(c == '\r'){
            printf("\x1b[%dm'\\r' -> ", DEBUG_PATMATCH);
@@ -157,7 +156,81 @@ static status match_FeedPat(Match *mt, byte c){
         printf("\x1b[%dm  Ret %s\n\n", DEBUG_PATMATCH, State_ToString(mt->state));
     }
 
-    */
+    return mt->type.state;
+}
+*/
+
+static status match_FeedPat(Match *mt, byte c){
+    boolean matched = FALSE;
+    PatCharDef *def = mt->def.pat+mt->position;
+    while(def->flags != PAT_END){
+        Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_RED, FALSE);
+        printf(" ");
+
+        if((def->flags & PAT_ALL) != 0){
+            matched = TRUE;
+        }else if((def->flags & PAT_COUNT) != 0){
+            matched = (c == def->from);
+        }else{
+            matched = (c >= def->from && c <= def->to);
+        }
+
+        if((def->flags & PAT_INVERT) != 0){
+            matched = !matched;
+        }
+
+        if(matched){
+            mt->type.state = PROCESSING;
+            mt->count++;
+
+            printf("\x1b[%dmY match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
+            Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+            printf("\n");
+
+            if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
+                while((mt->position-1) > 0 && ((def-1)->flags & PAT_TERM) == 0){
+                    mt->position--;
+                }
+            }else{
+                while((mt->position+1) < mt->length && ((mt->def.pat+(mt->position))->flags & PAT_TERM) != 0){
+                    mt->position++;
+                }
+            }
+            break;
+        }else{
+            if((def->flags & PAT_OPTIONAL) == 0){
+                boolean ko = TRUE;
+                if(mt->position > 0 && ((def-1)->flags & (PAT_MANY|PAT_ANY)) != 0){
+                    ko = FALSE;
+                }
+                if(ko){
+                    mt->type.state = READY;
+
+                    printf("\x1b[%dmN match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
+                    Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+                    printf("\n");
+
+                    mt->position = 0;
+
+                    break;
+                }
+            }
+            printf("\x1b[%dmO match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
+            Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+            printf("\n");
+            mt->position++;
+        }
+
+        if((mt->type.state & PROCESSING) != 0 && (def->flags & PAT_TERM) != 0){
+            if(mt->position == mt->length){
+                mt->type.state |= SUCCESS;
+            }
+        }
+
+
+        def = mt->def.pat+mt->position;
+    }
+
     return mt->type.state;
 }
 

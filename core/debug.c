@@ -35,50 +35,95 @@ static Abstract *PrintAddr(MemCtx *m, Abstract *a){
     return NULL;
 }
 
-static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    PatCharDef *def = (PatCharDef *)a;
+static status patFlagStr(word flags, char str[]){
+    int i = 0;
+    if(flags == PAT_END){
+        str[i++] = 'E';
+    }
+    if((flags & PAT_TERM) != 0){
+        str[i++] = 'X';
+    }
+    if((flags & PAT_OPTIONAL) != 0){
+        str[i++] = 'O';
+    }
+    if((flags & PAT_MANY) != 0){
+        str[i++] = 'M';
+    }
+    if((flags & PAT_ANY) != 0){
+        str[i++] = 'N';
+    }
+    if((flags & PAT_INVERT) != 0){
+        str[i++] = 'I';
+    }
+    if((flags & PAT_COUNT) != 0){
+        str[i++] = 'C';
+    }
+    if((flags & PAT_SET_NOOP) != 0){
+        str[i++] = 'N';
+    }
+    if((flags & PAT_IGNORE) != 0){
+        str[i++] = 'G';
+    }
+    if((flags & PAT_WILDCOUNT) != 0){
+        str[i++] = 'W';
+    }
+    if((flags & PAT_ALL) != 0){
+        str[i++] = 'A';
+    }
+    str[i] = '\0';
+    return SUCCESS;
+}
+
+static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int color, boolean extended){
+    char flag_cstr[12];
+    patFlagStr(def->flags, flag_cstr);
     if((def->flags & PAT_COUNT) != 0){
         if(def->from == '\r' || def->from == '\n'){
-            printf("%s%hu=0x%hux0x%hu", msg, (word)def->flags, def->from, def->to);
+            printf("%s%s=0x%hux0x%hu", msg, flag_cstr, def->from, def->to);
         }else{
-            printf("%s%hu=%cx%hu", msg, (word)def->flags, (char)def->from, def->to);
+            printf("%s%s=%cx%hu", msg, flag_cstr, (char)def->from, def->to);
         }
+    }else if((def->flags & PAT_ALL) != 0 || def->flags == PAT_END){
+        printf("%s%s", msg, flag_cstr);
     }else if(def->from == def->to){
         if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
-            printf("%s%hu='#%hu'", msg, (word)def->flags, def->from);
+            printf("%s%s=#%hu", msg, flag_cstr, def->from);
         }else{
-            printf("%s%hu='%c'", msg, (word)def->flags, (char)def->from);
+            printf("%s%s=%c", msg, flag_cstr, (char)def->from);
         }
     }else{
         if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32) || (def->to > 128 || def->to > 127)){
-            printf("%s%hu='#%hu-#%hu'", msg, (word)def->flags, def->from, def->to);
+            printf("%s%s=#%hu-#%hu", msg, flag_cstr, def->from, def->to);
         }else{
-            printf("%s%hu='%c-%c'", msg, (word)def->flags, (char)def->from, (char)def->to);
+            printf("%s%s=%c-%c", msg, flag_cstr, (char)def->from, (char)def->to);
         }
     }
     if((def->flags & PAT_TERM) != 0){
         printf(".");
+    }
+}
+
+static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    PatCharDef *def = (PatCharDef *)a;
+    char flag_cstr[12];
+    if(extended){
+        while(def->flags != PAT_END){
+            patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
+            def++;
+        }
     }else{
-        printf(",");
+        patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
     }
 }
 
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:remaining=%d:count=%d \x1b[%d;1m", msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, mt->remaining, mt->count, color);
-        /*
-        int length = mt->s->length / sizeof(PatCharDef);
-        PatCharDef *def = (PatCharDef *)mt->s->bytes;
-        for(int i = 0; i < length;i++){
-            PatCharDef_Print((Abstract *)def++, type, "", color, extended);
-        }
-        */
+        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, mt->jump, mt->count, mt->remaining);
+        Debug_Print((void *)mt->def.pat, TYPE_PATCHARDEF, "", color, FALSE);
         printf(">\x1b[0m");
     }else{
-        /*
-        printf("%sMatch<state=%s:pos=%d>", msg, mt->s->bytes, mt->position);
-        */
+        printf("\x1b[%dm%sMatch<state=%s:pos=%d>\x1b[0m", color, msg, State_ToString(mt->type.state), mt->position);
     }
 }
 
