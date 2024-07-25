@@ -1,40 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-int Match_PatLength(PatCharDef *def){
-    int length = 0;
-    while(def->flags != 0){
-        length++;
-        def++;
-    }
-    return length;
-}
-
-Match *Match_Make(MemCtx *m, String *s, word flags){
-    Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
-    mt->type.of = TYPE_STRINGMATCH;
-    mt->flags = flags;
-    mt->s = s;
-    mt->remaining = -1;
-    mt->jump = -1;
-    return mt;
-}
-
-Match *Match_MakePat(MemCtx *m, byte *defs, word npats, word flags){
-    Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
-    mt->type.of = TYPE_PATMATCH;
-    mt->s = String_MakeFixed(m, defs, npats * sizeof(PatCharDef));
-    mt->flags = flags;
-    mt->remaining = -1;
-    mt->jump = -1;
-    return mt;
-}
-
-void Match_Reset(Match *mt){
-    mt->position = 0;
-    mt->state = READY;
-}
-
 static status match_FeedPat(Match *mt, byte c){
    if(DEBUG_PATMATCH){
        if(c == '\r'){
@@ -238,4 +204,33 @@ status Match_FeedEnd(Match *mt){
         mt->state = SUCCESS;
     }
     return mt->state;
+}
+
+Match *Match_Make(MemCtx *m, String *s, word flags){
+    Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match));
+    mt->type.of = TYPE_STRINGMATCH;
+    mt->flags = flags;
+    mt->s = s;
+    mt->remaining = -1;
+    mt->jump = -1;
+    return mt;
+}
+
+Match *Match_Pattern(MemCtx *m, byte *defs){
+    PatCharDef *d = (PatCharDef *)defs;
+    int l = 0  
+    while(d->flags != PAT_END){
+       l++;
+       d++;
+    }
+    size_t sz = (sizeof(PatCharDef)*l);
+
+    Match *mt = (Match *)MemCtx_Alloc(m, sizeof(Match)+sz);
+    mt->type.of = TYPE_PATMATCH;
+    mt->def.pat = ((void *)mt)+sizeof(Match);
+    memcpy(mt->def.pat, defs, sz); 
+
+    mt->remaining = -1;
+    mt->jump = -1;
+    return mt;
 }
