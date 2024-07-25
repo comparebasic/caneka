@@ -1,23 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-status Roebling_SetJump(Roebling *rbl, Parser *prs, word mark){
-    Single *mrk = (Single *)Span_Search(rbl->marks, &mark, Mark_Eq);
-    if(mrk != NULL){
-        prs->jump = mrk->type.state;
-        return SUCCESS;
-    }
-    return ERROR;
-}
-
 status Roebling_Prepare(Roebling *rbl){
     rbl->idx = 0;
     Abstract *pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
     while(pmk != NULL){
-        if(pmk->type.of == TYPE_RBL_MARK){
-            Single *mrk = (Single *)pmk;
-            mrk->type.state = rbl->idx;
-            Span_Add(rbl->marks, (Abstract *)mrk);
+        if(pmk->type.of == TYPE_WRAPPED_UTIL){
+            int mark = ((Single *)pmk)->val.value;
+            Roebling_SetMark(rbl, mark);
         }
         rbl->idx++;
         pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
@@ -76,8 +66,7 @@ status Roebling_Run(Roebling *rbl){
         r = prs->func(prs, &(rbl->range), rbl->source);
         if((r & COMPLETE) != COMPLETE){
             if(prs->jump != -1){
-                Single *mrk = (Single *)Span_Get(rbl->marks, prs->jump);
-                rbl->idx = mrk->type.state;
+                rbl->idx = prs->jump;
                 pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
                 if(DEBUG_ROEBLING_MARK){
                     Debug_Print((void *)pmk, 0, "Mark Jump: ", DEBUG_ROEBLING_MARK, TRUE);
@@ -125,7 +114,16 @@ status Roebling_Run(Roebling *rbl){
 }
 
 int Roebling_GetMarkIdx(Roebling *rlb, int mark){
-    return Span_GetIdx(rlb->marks, &mark, Mark_Eq); 
+    Single *mrk = (Single *)Lookup_Get(rlb->gotos, mark); 
+    if(mrk != NULL){
+        return mrk->val.value;
+    }
+    return -1; 
+}
+
+status Roebling_SetMark(Roebling *rbl, int mark){
+    Single *sgl = Int_Wrapped(rbl->m, rbl->idx);
+    return Lookup_Add(rbl->m, rbl->gotos, mark, (void *)sgl);
 }
 
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source){
@@ -134,12 +132,12 @@ Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract 
     rbl->m = m;
     rbl->parsers_pmk = parsers;
     rbl->source = source;
-    rbl->marks = Span_Make(m);
+    rbl->gotos = Lookup_Make(m, XML_START, NULL, (Abstract *)rbl);
     rbl->current = -1;
     Range_Set(&(rbl->range), s);
 
     Roebling_Prepare(rbl);
-    Debug_Print((void *)rbl->marks, 0, "Marks: ", COLOR_RED, TRUE);
+    Debug_Print((void *)rbl->gotos->values, 0, "Marks: ", COLOR_RED, TRUE);
 
     return rbl;
 }

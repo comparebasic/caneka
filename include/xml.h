@@ -1,9 +1,11 @@
-extern int XML_START;
-extern int XML_TAG;
-extern int XML_ATTRIBUTE;
-extern int XML_ATTR_VALUE;
-extern int XML_BODY;
-extern int XML_END;
+enum xml_marks {
+    XML_START = 1,
+    XML_TAG,
+    XML_ATTRIBUTE,
+    XML_ATTR_VALUE,
+    XML_BODY,
+    XML_END,
+};
 
 typedef struct xml_ctx {
     Type type;

@@ -9,7 +9,6 @@ typedef struct structexp {
     int idx;
     int current;
     Abstract *source; 
-    Span *marks;
     Range range;
     Span *parsers_pmk;
     Lookup *gotos;
@@ -18,4 +17,5 @@ typedef struct structexp {
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source);
 status Roebling_Run(Roebling *sexp);
 int Roebling_GetMarkIdx(Roebling *rlb, int mark);
+status Roebling_SetMark(Roebling *rlb, int mark);
 status Roebling_Prepare(Roebling *rbl);

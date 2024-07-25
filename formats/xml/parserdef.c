@@ -1,13 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-int XML_START = 1;
-int XML_TAG = 2;
-int XML_ATTRIBUTE = 3;
-int XML_ATTR_VALUE = 4;
-int XML_BODY = 5;
-int XML_END = 6;
-
 /* setters */
 static status setTag(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
@@ -192,19 +185,19 @@ static Parser *eqParserMk(Roebling *rlb){
 
 Span *XmlParser_Make(MemCtx *m, ProtoDef *def){
     Span *p =  Span_From(m, 14, 
-        (Abstract *)Mark_Make(m, XML_START), 
+        (Abstract *)Int_Wrapped(m, XML_START), 
             (Abstract *)Single_Ptr(m, startParserMk),
-        (Abstract *)Mark_Make(m, XML_TAG), 
+        (Abstract *)Int_Wrapped(m, XML_TAG), 
             (Abstract *)Single_Ptr(m, tagParserMk),
             (Abstract *)Single_Ptr(m, postTagNameParserMk),
-        (Abstract *)Mark_Make(m, XML_ATTRIBUTE), 
+        (Abstract *)Int_Wrapped(m, XML_ATTRIBUTE), 
             (Abstract *)Single_Ptr(m, attrParserMk),
             (Abstract *)Single_Ptr(m, eqParserMk),
             (Abstract *)Single_Ptr(m, postAttrParserMk),
             (Abstract *)Single_Ptr(m, attrValueParserMk),
             (Abstract *)Single_Ptr(m, postAttrParserMk),
-        (Abstract *)Mark_Make(m, XML_BODY), 
+        (Abstract *)Int_Wrapped(m, XML_BODY), 
             (Abstract *)Single_Ptr(m, bodyParserMk),
-        (Abstract *)Mark_Make(m, XML_END));
+        (Abstract *)Int_Wrapped(m, XML_END));
     return p;
 }

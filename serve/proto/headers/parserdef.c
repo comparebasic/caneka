@@ -58,12 +58,12 @@ static Parser *nlDblParserMk(Roebling *rlb){
     word nl[] = {PAT_TERM, '\r', '\r', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
     Parser *prs = Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 2, ANCHOR_START), NULL); 
     word enumval = RBL_HEADERS;
-    prs->jump = Span_GetIdx(rlb->marks, &enumval, Mark_Eq);
+    prs->jump = Roebling_GetMarkIdx(rlb, RBL_HEADERS);
     return prs;
 }
 
 static Parser *headerMarkMk(Roebling *rbl){
-    return (Parser *)Mark_Make(rbl->m, RBL_HEADERS);
+    return (Parser *)Int_Wrapped(rbl->m, RBL_HEADERS);
 }
 
 Span *HeadersParser_Make(MemCtx *m, ProtoDef *def){

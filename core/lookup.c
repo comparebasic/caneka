@@ -30,7 +30,9 @@ Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *a
     lk->offset = offset;
     lk->values = Span_Make(m);
     lk->arg = arg;
-    populate(m, lk);
+    if(populate != NULL){
+        populate(m, lk);
+    }
 
     return lk;
 }
