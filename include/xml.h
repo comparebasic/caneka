@@ -18,3 +18,4 @@ XmlCtx *XmlCtx_Make(MemHandle *mh, void *source);
 Span *XmlParser_Make(MemCtx *m, ProtoDef *def);
 status XmlCtx_Open(XmlCtx *ctx, String *tagName);
 status XmlCtx_Close(XmlCtx *ctx, String *tagName);
+status XmlCtx_SetAttr(XmlCtx *ctx, String *attName);

@@ -29,15 +29,6 @@ typedef struct virt  {
     Type type;
 } Abstract;
 
-typedef struct single  {
-    Type type;
-    union {
-        util value;
-        Abstract *a;
-        void *ptr;
-    } val;
-} Single;
-
 typedef struct mem_handle  {
     Type type;
     struct mem_ctx *m;
@@ -72,6 +63,7 @@ enum types {
     TYPE_WRAPPED,
     TYPE_WRAPPED_FUNC,
     TYPE_WRAPPED_UTIL,
+    TYPE_WRAPPED_PTR,
     TYPE_UTIL,
     TYPE_UNIT,
     TYPE_MEMCTX,
@@ -158,6 +150,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
+#include "single.h"
 #include "maker.h"
 #include "compare.h"
 #include "hash.h"

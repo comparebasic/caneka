@@ -15,7 +15,7 @@ status Roebling_Run(Roebling *rbl){
         Debug_Print((void *)rbl, 0, "Roebling_Run for: ", DEBUG_ROEBLING, TRUE);
         printf("\n");
     }
-    ParserMaker pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+    Abstract *pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
     boolean escaping = FALSE;
     Parser *prs;
     status r = READY;
@@ -26,20 +26,26 @@ status Roebling_Run(Roebling *rbl){
                 rbl_debug_cstr[rbl->idx], pmk);
         }
         rbl->type.state = PROCESSING;
-        prs = pmk(rbl);
-        if(prs == NULL){
-            if(DEBUG_ROEBLING_COMPLETE){
-                Debug_Print((void *)prs, 0, "Finish in Error (prs is NULL): ", DEBUG_ROEBLING_COMPLETE, TRUE);
-                printf("\n");
-            }
-            rbl->type.state = ERROR; 
-            return rbl->type.state;
-        }else{
-            if(DEBUG_ROEBLING_CURRENT){
-                Debug_Print((void *)prs, 0, "Current Parser: ", DEBUG_ROEBLING_CURRENT, TRUE);
-                printf("\n");
+        
+        if(pmk->type.of == TYPE_WRAPPED_PTR){
+            Single *_sgl = (Single *)pmk;
+            ParserMaker p = (ParserMaker)_sgl->val.ptr;
+            prs = p(rbl);
+            if(prs == NULL){
+                if(DEBUG_ROEBLING_COMPLETE){
+                    Debug_Print((void *)prs, 0, "Finish in Error (prs is NULL): ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                    printf("\n");
+                }
+                rbl->type.state = ERROR; 
+                return rbl->type.state;
+            }else{
+                if(DEBUG_ROEBLING_CURRENT){
+                    Debug_Print((void *)prs, 0, "Current Parser: ", DEBUG_ROEBLING_CURRENT, TRUE);
+                    printf("\n");
+                }
             }
         }
+
         if(prs->type.of == TYPE_RBL_MARK){
             Single *mrk = (Single *)prs;
             mrk->type.state = rbl->idx;
@@ -53,6 +59,7 @@ status Roebling_Run(Roebling *rbl){
             }
             continue;
         }
+
         if(DEBUG_ROEBLING){
             Debug_Print((void *)prs, 0, "Parser in run: ", DEBUG_ROEBLING, TRUE);
             printf("\x1b[0m\n");

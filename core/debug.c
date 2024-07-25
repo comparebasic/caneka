@@ -8,7 +8,7 @@ int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = COLOR_PURPLE;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING = COLOR_CYAN;
 int DEBUG_ROEBLING_MARK = COLOR_BLUE;
 int DEBUG_ROEBLING_COMPLETE = COLOR_CYAN;
 int DEBUG_ROEBLING_CONTENT = 0;
@@ -33,7 +33,8 @@ char *rbl_debug_cstr[] = {
     "MARK_BODY"
     "bodyPRS",
     "MARK_END",
-    NULL};
+    NULL
+};
 
 static void indent_Print(int indent){
     while(indent--){
@@ -98,6 +99,13 @@ static void Mess_Print(Abstract *a, cls type, char *msg, int color, boolean exte
     Mess *ms = (Mess *)a;
     printf("\x1b[%dm%sM<%s value=\x1b[0m", color, msg, Class_ToString(ms->type.of));
     Debug_Print((void *)ms->value, 0, "", color, extended);
+    Hashed *h = ms->atts;
+    printf(" ");
+    while(h != NULL){
+        Debug_Print((void *)h, 0, "", color, extended);
+        h = h->next;
+        printf(", ");
+    }
     Mess *child = ms->firstChild;
     printf("\x1b[%dm [", color);
     while(child != NULL){
@@ -112,7 +120,7 @@ static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     XmlCtx *ctx = (XmlCtx *)as(a, TYPE_XMLCTX);
     if(extended){
         printf("\x1b[%dm%sXmlCtx<%s nodes=", color, msg, State_ToString(ctx->type.state));
-        Debug_Print((void *)ctx->root, 0, "", color, extended);
+        Debug_Print((void *)ctx->root, 0, "", color, FALSE);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
         printf("\x1b[%dm%sXmlCtx<%s>\x1b[0m", color, msg, State_ToString(ctx->type.state));
@@ -140,9 +148,13 @@ static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boole
 
 static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)as(a, TYPE_STRING_FIXED);
-    printf("%s\x1b[%dmSFixed<\x1b[0;%dm", msg, color, color);
-    printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
-    printf("\x1b[%dm>\x1b[0m", color);
+    if(extended){
+        printf("%s\x1b[%dmSFixed<\x1b[0;%dm", msg, color, color);
+        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
+        printf("\x1b[%dm>\x1b[0m", color);
+    }else{
+        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\">", color, msg, color, s->bytes, color);
+    }
 }
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -286,11 +298,21 @@ static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean exte
 
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
-    printf("\x1b[%dm%sH<%u:%lu itm=", color, msg, h->idx, h->id);
-    Debug_Print((void *)h->item, 0, "", color, extended);
-    printf("\x1b[%dm v=", color);
-    Debug_Print((void *)h->value, 0, "", color, extended);
-    printf("\x1b[%dm>\x1b[0m", color);
+    if(extended){
+        printf("\x1b[%dm%sH<%u:%lu itm=", color, msg, h->idx, h->id);
+        Debug_Print((void *)h->item, 0, "", color, extended);
+        printf("\x1b[%dm v=", color);
+        Debug_Print((void *)h->value, 0, "", color, extended);
+        printf("\x1b[%dm>\x1b[0m", color);
+    }else{
+        printf("\x1b[%dm%sH<", color, msg);
+        Debug_Print((void *)h->item, 0, "", color, FALSE);
+        if(h->value != NULL){
+            printf("\x1b[%dm v=", color);
+            Debug_Print((void *)h->value, 0, "", color, FALSE);
+        }
+        printf("\x1b[%dm>\x1b[0m", color);
+    }
 }
 
 

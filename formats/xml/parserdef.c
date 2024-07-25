@@ -19,8 +19,7 @@ static status setTag(Parser *prs, Range *range, void *source){
 static status setAttr(Parser *prs, Range *range, void *source){
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
-    Debug_Print((void *)s, 0, "setAttr: ", COLOR_YELLOW, TRUE);
-    printf("\n");
+    XmlCtx_SetAttr(ctx, s);
     return SUCCESS;
 }
 
@@ -57,30 +56,40 @@ static status tagOpened(Parser *prs, Range *range, void *source){
     Match *mt = Parser_GetMatch(prs);
     Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
     printf("\n");
+    prs->jump = mt->jump;
+    return SUCCESS;
+}
+
+static status tagClose(Parser *prs, Range *range, void *source){
+    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
+    String *s =  Range_Copy(ctx->m, range);
+    Match *mt = Parser_GetMatch(prs);
+    Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
+    printf("\n");
     XmlCtx_Close(ctx, s);
     prs->jump = mt->jump;
     return SUCCESS;
 }
 
 /* marks */
-static Parser *xmlStartMarkMk(Roebling *rbl){
-    return (Parser *)Mark_Make(rbl->m, XML_START);
+static Single *xmlStartMarkMk(Roebling *rbl){
+    return Mark_Make(rbl->m, XML_START);
 }
 
-static Parser *xmlTagMarkMk(Roebling *rbl){
-    return (Parser *)Mark_Make(rbl->m, XML_TAG);
+static Single *xmlTagMarkMk(Roebling *rbl){
+    return Mark_Make(rbl->m, XML_TAG);
 }
 
-static Parser *xmlAttrMarkMk(Roebling *rbl){
-    return (Parser *)Mark_Make(rbl->m, XML_ATTRIBUTE);
+static Single *xmlAttrMarkMk(Roebling *rbl){
+    return Mark_Make(rbl->m, XML_ATTRIBUTE);
 }
 
-static Parser *xmlBodyMarkMk(Roebling *rbl){
-    return (Parser *)Mark_Make(rbl->m, XML_BODY);
+static Single *xmlBodyMarkMk(Roebling *rbl){
+    return Mark_Make(rbl->m, XML_BODY);
 }
 
-static Parser *xmlEndMarkMk(Roebling *rbl){
-    return (Parser *)Mark_Make(rbl->m, XML_BODY);
+static Single *xmlEndMarkMk(Roebling *rbl){
+    return Mark_Make(rbl->m, XML_BODY);
 }
 
 /* routing parsers */
@@ -99,7 +108,7 @@ static Parser *startParserMk(Roebling *rlb){
 static Match *spaceMt(Roebling *rlb){
     word sep[] = {
         PAT_ANY, ' ', ' ',
-        PAT_ANY, '\t', '\t', PAT_ANY|PAT_TERM, '\r', '\r', PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+        PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
     return  Match_MakePat(rlb->m, bytes(sep), 4, ANCHOR_START); 
 }
 
@@ -202,20 +211,20 @@ static Parser *eqParserMk(Roebling *rlb){
 }
 
 Span *XmlParser_Make(MemCtx *m, ProtoDef *def){
-    Span *p =  Span_From(m, 6, 
-        (Abstract *)xmlStartMarkMk, 
-            (Abstract *)startParserMk,
-        (Abstract *)xmlTagMarkMk, 
-            (Abstract *)tagParserMk,
-            (Abstract *)postTagNameParserMk,
-        (Abstract *)xmlAttrMarkMk, 
-            (Abstract *)attrParserMk,
-            (Abstract *)eqParserMk,
-            (Abstract *)postAttrParserMk,
-            (Abstract *)attrValueParserMk,
-            (Abstract *)postAttrParserMk,
-        (Abstract *)xmlBodyMarkMk, 
-            (Abstract *)bodyParserMk,
-        (Abstract *)xmlEndMarkMk);
+    Span *p =  Span_From(m, 14, 
+        (Abstract *)Single_Ptr(m, xmlStartMarkMk), 
+            (Abstract *)Single_Ptr(m, startParserMk),
+        (Abstract *)Single_Ptr(m, xmlTagMarkMk), 
+            (Abstract *)Single_Ptr(m, tagParserMk),
+            (Abstract *)Single_Ptr(m, postTagNameParserMk),
+        (Abstract *)Single_Ptr(m, xmlAttrMarkMk), 
+            (Abstract *)Single_Ptr(m, attrParserMk),
+            (Abstract *)Single_Ptr(m, eqParserMk),
+            (Abstract *)Single_Ptr(m, postAttrParserMk),
+            (Abstract *)Single_Ptr(m, attrValueParserMk),
+            (Abstract *)Single_Ptr(m, postAttrParserMk),
+        (Abstract *)Single_Ptr(m, xmlBodyMarkMk), 
+            (Abstract *)Single_Ptr(m, bodyParserMk),
+        (Abstract *)Single_Ptr(m, xmlEndMarkMk));
     return p;
 }

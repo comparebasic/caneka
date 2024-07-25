@@ -14,6 +14,21 @@ status XmlCtx_Open(XmlCtx *ctx, String *tagName){
     return SUCCESS;
 }
 
+status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
+    printf("Setting Atts\n");
+    Hashed *h = Hashed_Make(ctx->m, (Abstract *)attName);
+    if(ctx->current->atts == NULL){
+        ctx->current->atts = h;
+    }else{
+        Hashed *_h = ctx->current->atts;
+        while(_h->next != NULL){
+            _h = _h->next;
+        }
+        _h->next = h;
+    }
+    return SUCCESS;
+}
+
 status XmlCtx_Close(XmlCtx *ctx, String *tagName){
     ctx->current = ctx->current->parent;
     if(ctx->current == ctx->root){
