@@ -2,12 +2,28 @@
 #include <caneka.h>
 
 status Roebling_SetJump(Roebling *rbl, Parser *prs, word mark){
-    int jump = Span_GetIdx(rbl->marks, &mark, Mark_Eq);
-    if(jump >= 0){
-        prs->jump = jump;
+    Single *mrk = (Single *)Span_Search(rbl->marks, &mark, Mark_Eq);
+    if(mrk != NULL){
+        prs->jump = mrk->type.state;
         return SUCCESS;
     }
     return ERROR;
+}
+
+status Roebling_Prepare(Roebling *rbl){
+    rbl->idx = 0;
+    Abstract *pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+    while(pmk != NULL){
+        if(pmk->type.of == TYPE_RBL_MARK){
+            Single *mrk = (Single *)pmk;
+            mrk->type.state = rbl->idx;
+            Span_Add(rbl->marks, (Abstract *)mrk);
+        }
+        rbl->idx++;
+        pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+    }
+    rbl->idx = 0;
+    return SUCCESS;
 }
 
 status Roebling_Run(Roebling *rbl){
@@ -26,8 +42,12 @@ status Roebling_Run(Roebling *rbl){
                 rbl_debug_cstr[rbl->idx], pmk);
         }
         rbl->type.state = PROCESSING;
-        
-        if(pmk->type.of == TYPE_WRAPPED_PTR){
+
+        if(pmk->type.of == TYPE_RBL_MARK){
+            rbl->idx++;
+            pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+            continue;
+        }else if(pmk->type.of == TYPE_WRAPPED_PTR){
             Single *_sgl = (Single *)pmk;
             ParserMaker p = (ParserMaker)_sgl->val.ptr;
             prs = p(rbl);
@@ -44,20 +64,9 @@ status Roebling_Run(Roebling *rbl){
                     printf("\n");
                 }
             }
-        }
-
-        if(prs->type.of == TYPE_RBL_MARK){
-            Single *mrk = (Single *)prs;
-            mrk->type.state = rbl->idx;
-            Span_Add(rbl->marks, (Abstract *)prs);
-            rbl->idx++;
-            pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
-            if(DEBUG_ROEBLING_MARK){
-                printf("\x1b[%dmJump to %d - ", DEBUG_ROEBLING_MARK, rbl->idx);
-                Debug_Print((void *)pmk, 0, "Mark Jump: ", DEBUG_ROEBLING_MARK, TRUE);
-                printf("\n");
-            }
-            continue;
+        }else{
+            rbl->type.state = ERROR;
+            return rbl->type.state;
         }
 
         if(DEBUG_ROEBLING){
@@ -96,6 +105,9 @@ status Roebling_Run(Roebling *rbl){
         }else{
             if(prs->jump > 0){
                 rbl->idx = prs->jump;
+                printf("\x1b[%dm%d\n", COLOR_RED, prs->jump);
+                Debug_Print((void *)prs, 0, "Jump", COLOR_RED, TRUE);
+                printf("\n");
             }else{
                 rbl->idx++;
             }
@@ -125,5 +137,9 @@ Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract 
     rbl->marks = Span_Make(m);
     rbl->current = -1;
     Range_Set(&(rbl->range), s);
+
+    Roebling_Prepare(rbl);
+    Debug_Print((void *)rbl->marks, 0, "Marks: ", COLOR_RED, TRUE);
+
     return rbl;
 }

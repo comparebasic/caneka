@@ -6,6 +6,7 @@ int XML_TAG = 2;
 int XML_ATTRIBUTE = 3;
 int XML_ATTR_VALUE = 4;
 int XML_BODY = 5;
+int XML_END = 6;
 
 /* setters */
 static status setTag(Parser *prs, Range *range, void *source){
@@ -69,27 +70,6 @@ static status tagClose(Parser *prs, Range *range, void *source){
     XmlCtx_Close(ctx, s);
     prs->jump = mt->jump;
     return SUCCESS;
-}
-
-/* marks */
-static Single *xmlStartMarkMk(Roebling *rbl){
-    return Mark_Make(rbl->m, XML_START);
-}
-
-static Single *xmlTagMarkMk(Roebling *rbl){
-    return Mark_Make(rbl->m, XML_TAG);
-}
-
-static Single *xmlAttrMarkMk(Roebling *rbl){
-    return Mark_Make(rbl->m, XML_ATTRIBUTE);
-}
-
-static Single *xmlBodyMarkMk(Roebling *rbl){
-    return Mark_Make(rbl->m, XML_BODY);
-}
-
-static Single *xmlEndMarkMk(Roebling *rbl){
-    return Mark_Make(rbl->m, XML_BODY);
 }
 
 /* routing parsers */
@@ -212,19 +192,19 @@ static Parser *eqParserMk(Roebling *rlb){
 
 Span *XmlParser_Make(MemCtx *m, ProtoDef *def){
     Span *p =  Span_From(m, 14, 
-        (Abstract *)Single_Ptr(m, xmlStartMarkMk), 
+        (Abstract *)Mark_Make(m, XML_START), 
             (Abstract *)Single_Ptr(m, startParserMk),
-        (Abstract *)Single_Ptr(m, xmlTagMarkMk), 
+        (Abstract *)Mark_Make(m, XML_TAG), 
             (Abstract *)Single_Ptr(m, tagParserMk),
             (Abstract *)Single_Ptr(m, postTagNameParserMk),
-        (Abstract *)Single_Ptr(m, xmlAttrMarkMk), 
+        (Abstract *)Mark_Make(m, XML_ATTRIBUTE), 
             (Abstract *)Single_Ptr(m, attrParserMk),
             (Abstract *)Single_Ptr(m, eqParserMk),
             (Abstract *)Single_Ptr(m, postAttrParserMk),
             (Abstract *)Single_Ptr(m, attrValueParserMk),
             (Abstract *)Single_Ptr(m, postAttrParserMk),
-        (Abstract *)Single_Ptr(m, xmlBodyMarkMk), 
+        (Abstract *)Mark_Make(m, XML_BODY), 
             (Abstract *)Single_Ptr(m, bodyParserMk),
-        (Abstract *)Single_Ptr(m, xmlEndMarkMk));
+        (Abstract *)Mark_Make(m, XML_END));
     return p;
 }

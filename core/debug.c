@@ -138,7 +138,7 @@ static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean ext
 
 static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Single *v = (Single *)a;
-    printf("\x1b[%dm%sSingle<%s:%s:%ld>\x1b[0m", color, msg, Class_ToString(v->type.of), State_ToString(v->type.state), v->val.value);
+    printf("\x1b[%dm%sSingle<%s:%u:%ld>\x1b[0m", color, msg, Class_ToString(v->type.of), v->type.state, v->val.value);
 }
 
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

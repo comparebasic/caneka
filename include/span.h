@@ -31,4 +31,5 @@ Span *Span_From(MemCtx *m, int count, ...);
 void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg);
 status Span_Merge(Span *dest, Span *additional);
 int Span_GetIdx(Span *p, void *a, EqualFunc eq);
+Abstract *Span_Search(Span *p, void *a, EqualFunc eq);
 #define Span_NextIdx(p) (p->max_idx+1)
