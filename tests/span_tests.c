@@ -141,8 +141,6 @@ status SpanInline_Tests(MemCtx *gm){
     sgl = (Single *)Span_Get(p, idx);
     r |= Test(sgl->val.value == expected, "Inline Span idx %u match expected %ld have %ld", idx, expected, sgl->val.value);
 
-
-
     MemCtx_Free(m);
     return r;
 }

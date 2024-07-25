@@ -14,7 +14,7 @@ httpobj = serve/proto/http/protodef.o serve/proto/http/proto.o serve/proto/http/
 xmlobj = formats/xml/xml.o formats/xml/parserdef.o
 testobj = tests/core_tests.o tests/string_tests.o tests/serve_tests.o \
 	tests/span_tests.o tests/hash_tests.o tests/roebling_tests.o tests/proto_http_tests.o \
-    tests/table_tests.o tests/xml_tests.o
+    tests/table_tests.o tests/xml_tests.o tests/match_tests.o
 
 allobj = $(coreobj) $(testobj) $(parserobj) $(httpobj) $(serveobj) $(xmlobj)
 

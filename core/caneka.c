@@ -9,7 +9,7 @@ status Caneka_Init(MemCtx *m){
 }
 
 char *State_ToString(status state){
-    if((state & READY) != 0){
+    if(state ==  READY){
         return "READY";
     }else if((state & ERROR) != 0){
         return "ERROR";
