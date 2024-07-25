@@ -28,12 +28,12 @@ status Roebling_Run(Roebling *rbl){
     word escape_fl = (CYCLE_BREAK|COMPLETE);
     while(pmk != NULL){
         if(DEBUG_ROEBLING_NAME){
-            printf("\x1b[%dmRbl ParserName %s %p\x1b[0m\n", DEBUG_ROEBLING_NAME,
-                rbl_debug_cstr[rbl->idx], pmk);
+            printf("\x1b[%dmRbl ParserName %d %p\x1b[0m\n", DEBUG_ROEBLING_NAME,
+                rbl->idx, pmk);
         }
         rbl->type.state = PROCESSING;
 
-        if(pmk->type.of == TYPE_RBL_MARK){
+        if(pmk->type.of == TYPE_WRAPPED_UTIL){
             rbl->idx++;
             pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
             continue;

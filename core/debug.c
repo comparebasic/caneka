@@ -18,23 +18,6 @@ int DEBUG_TABLE = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
 
 int DEBUG_ROEBLING_NAME = COLOR_GREEN;
-char *rbl_debug_cstr[] = {
-    "MARK_START",
-    "startPRS",
-    "MARK_TAG",
-    "tagPRS",
-    "postTagPRS",
-    "MARK_ATTR",
-    "attrPRS",
-    "eqPRS",
-    "postAttrPRS",
-    "attrValuePRS",
-    "postAttrParse",
-    "MARK_BODY"
-    "bodyPRS",
-    "MARK_END",
-    NULL
-};
 
 static void indent_Print(int indent){
     while(indent--){
