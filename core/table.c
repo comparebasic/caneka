@@ -3,7 +3,7 @@
 
 int TABLE_DIM_LOOKUPS[7] = {0, 15, 255, 4095, 65535, 1048575, 0};
 int TABLE_DIM_BYTESIZES[7] = {0, 1, 1, 2, 2, 4, 0};
-int TABLE_REQUERY_MAX[7] = {0, 2, 4, 8, 16, 32, 0};
+int TABLE_REQUERY_MAX[7] = {0, 4, 4, 8, 16, 32, 0};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
@@ -47,10 +47,11 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
             int hkey = getReQueryKey(h->id, j, tbl->dims);
             if(DEBUG_TABLE){
                 Debug_Print((void *)h->item, 0, "Placing ", DEBUG_TABLE, FALSE);
-                printf("\x1b[%dm dim %hu offset %d key:", DEBUG_TABLE, tbl->dims, j);
+                printf("\x1b[%dm dimsize=%hu key=", DEBUG_TABLE, tbl->dims);
                 Bits_Print((byte *)&hkey, TABLE_DIM_BYTESIZES[tbl->dims], "", DEBUG_TABLE, TRUE);
-                Bits_Print((byte *)&(h->id), sizeof(h->id), " of ", DEBUG_TABLE, FALSE);
-                printf("\x1b[%dm query=%d>\x1b[0m\n", DEBUG_TABLE, queries+1);
+                printf("\x1b[%dm%d half-byte of ", DEBUG_TABLE, j+1);
+                Bits_Print((byte *)&(h->id), sizeof(int), "", DEBUG_TABLE, FALSE);
+                printf("\x1b[%dm query=%d>\x1b[0m\n", DEBUG_TABLE, queries);
             }
             _h = (Hashed *)Span_Get(tbl, hkey);
             if(op == SPAN_OP_GET){

@@ -485,10 +485,13 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
     for(int i = length-1; i >= 0;i--){
         byte b = bt[i];
         if(extended){
-            printf(" %03hu=", b);
+            printf("%03hu=", b);
         }
         for(int j = 7; j >= 0;j--){
             printf("%c", (b & (1 << j)) ? '1' : '0');
+        }
+        if(extended){
+            printf(" ");
         }
     }
     printf("\x1b[0m");
