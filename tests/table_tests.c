@@ -64,6 +64,22 @@ status Table_Tests(MemCtx *gm){
         found != NULL ? (char *)(found->bytes) : "NULL");
 
 
+    tbl = Span_Make(m);
+    s = String_From(m, bytes("Apples"));
+    value = String_From(m, bytes("Mmmm pie in the making"));
+    Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+    s = String_From(m, bytes("Bananas"));
+    value = String_From(m, bytes("Don't slip :)"));
+    Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+    s = String_From(m, bytes("Carrots"));
+    value = String_From(m, bytes("And peas and potatoes and corn."));
+    Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+    s = String_From(m, bytes("Dandilions"));
+    value = String_From(m, bytes("Summer-summer-summer-Time!"));
+    Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+
+    Debug_Print((void *) tbl, 0, "Table: ", COLOR_YELLOW, TRUE);
+
 
     MemCtx_Free(m);
     return r;

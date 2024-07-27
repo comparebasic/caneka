@@ -11,7 +11,7 @@ typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean 
 extern Chain *DebugPrintChain;
 status Debug_Init(MemCtx *m);
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
-void Bits_Print(byte *bt, int length, char *msg, int color);
+void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
 
 extern char *rbl_debug_cstr[];
 
