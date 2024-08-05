@@ -10,6 +10,11 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def){
     return Match_SetPattern(mt, def);
 }
 
+status Roebling_SetKOPattern(Roebling *rbl, PatCharDef *def){
+    Match *mt = Span_ReserveNext(rbl->matches.ko);
+    return Match_SetPattern(mt, def);
+}
+
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
     for(int i = 0; i < lk->values->nvalues; i++){
         Match *mt = Span_ReserveNext(rbl->matches.values);
@@ -35,6 +40,7 @@ status Roebling_Prepare(Roebling *rbl){
 }
 
 status Roebling_Run(Roebling *rbl){
+    /*
     if(DEBUG_ROEBLING){
         Debug_Print((void *)rbl, 0, "Roebling_Run for: ", DEBUG_ROEBLING, TRUE);
         printf("\n");
@@ -129,6 +135,7 @@ status Roebling_Run(Roebling *rbl){
         Debug_Print((void *)rbl, 0, "Roebling_Run END for: ", DEBUG_ROEBLING, TRUE);
         printf("\n");
     }
+    */
         
     return rbl->type.state;
 }
@@ -139,6 +146,12 @@ int Roebling_GetMarkIdx(Roebling *rlb, int mark){
         return mrk->val.value;
     }
     return -1; 
+}
+
+status Roebling_ResetPatterns(Roebling *rbl){
+    Span_ReInit(rbl->matches.values);
+    Span_ReInit(rbl->matches.ko);
+    return READY;
 }
 
 status Roebling_SetMark(Roebling *rbl, int mark){

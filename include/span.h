@@ -31,7 +31,7 @@ status Span_ReInit(Span *p);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
 Span *Span_From(MemCtx *m, int count, ...);
-void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg);
+void Span_Run(MemHandle *m, Span *p, Maker func, Abstract *arg);
 status Span_Merge(Span *dest, Span *additional);
 int Span_GetIdx(Span *p, void *a, EqualFunc eq);
 Abstract *Span_Search(Span *p, void *a, EqualFunc eq);

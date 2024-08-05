@@ -27,3 +27,4 @@ status Roebling_SetMark(Roebling *rlb, int mark);
 status Roebling_Prepare(Roebling *rbl);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def);
+status Roebling_ResetPatterns(Roebling *rbl);

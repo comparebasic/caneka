@@ -25,6 +25,7 @@ static status test(MemCtx *m){
     r |= Span_Tests(m);
     */
     r |= Match_Tests(m);
+    r |= Roebling_Tests(m);
     return r;
 }
 

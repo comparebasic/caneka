@@ -272,7 +272,7 @@ void *Span_ReserveNext(Span *p){
     }
 }
 
-void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg){
+void Span_Run(MemHandle *m, Span *p, Maker func, Abstract *arg){
     if(p == NULL){
         return;
     }
@@ -284,7 +284,7 @@ void Span_Run(MemCtx *m, Span *p, Maker func, Abstract *arg){
     };
 }
 
-void Span_RunMaker(MemCtx *m, Span *p, Maker func, Abstract *arg){
+void Span_RunMaker(MemHandle *m, Span *p, Maker func, Abstract *arg){
     if(p == NULL){
         return;
     }

@@ -28,11 +28,6 @@ typedef struct virt  {
     Type type;
 } Abstract;
 
-typedef struct mem_handle  {
-    Type type;
-    struct mem_ctx *m;
-} MemHandle;
-
 typedef struct virt * AbstractPtr;
 
 #define MAX_BASE10 20
@@ -140,7 +135,7 @@ char *Class_ToString(cls type);
 #define COMPLETE SUCCESS
 #define TEST_OK READY
 
-typedef struct parser *(*ParserMaker)(struct structexp *sexp); /* pmk */
+typedef status (*ParserSetter)(struct structexp *sexp); /* pmk */
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);

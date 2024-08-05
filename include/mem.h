@@ -12,6 +12,12 @@ typedef struct mem_ctx {
     void *instance;
 } MemCtx;
 
+typedef struct mem_handle  {
+    Type type;
+    struct mem_ctx *m;
+} MemHandle;
+
+
 #define MemCtx_Bind(m, inst) do { inst->m = m; m->instance = (void *)inst;} while(0);
 
 size_t MemCount();

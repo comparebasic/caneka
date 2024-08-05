@@ -30,7 +30,7 @@ static Abstract *Print(MemCtx *m, Abstract *a){
     return NULL;
 }
 
-static Abstract *PrintAddr(MemCtx *m, Abstract *a){
+static Abstract *PrintAddr(MemHandle *_mh, Abstract *a){
     printf("%p ", a);
     return NULL;
 }

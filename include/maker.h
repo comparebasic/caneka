@@ -1,2 +1,2 @@
-typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
-Single *Maker_Wrapped(MemCtx *m, Maker mk);
+typedef Abstract *(*Maker)(struct mem_handle *m, Abstract *a); /* mk */
+Single *Maker_Wrapped(MemHandle *m, Maker mk);
