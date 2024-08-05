@@ -18,6 +18,7 @@ static status Table_Resize(Span *tbl, word *queries){
         *queries = 0;
         Span *newTbl = Span_Make(tbl->m);
         Span_Set(newTbl, TABLE_DIM_LOOKUPS[tbl->dims]+1, NULL);
+        printf("Resize to %d dims\n", tbl->dims);
         for(int i = 0; i <= tbl->max_idx; i++){
             Hashed *h = (Hashed *)Span_Get(tbl, i);
             if(h != NULL){

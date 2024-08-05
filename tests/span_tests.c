@@ -98,6 +98,15 @@ status Span_Tests(MemCtx *gm){
     r |= Test(String_Equals(s513, s), "String 513 equals %s found %s", 
         s513->bytes, s->bytes);
 
+    p = Span_Make(m);
+    Span_Set(p, 0, (Abstract *)Int_Wrapped(m, 0));
+    Span_Set(p, 1, (Abstract *)Int_Wrapped(m, 1));
+    Span_Set(p, 2, (Abstract *)Int_Wrapped(m, 2));
+    Span_Set(p, 6, (Abstract *)Int_Wrapped(m, 6));
+    Span_Set(p, 225, (Abstract *)Int_Wrapped(m, 225));
+    Debug_Print((void *)p, 0, "Span: ", COLOR_CYAN, TRUE);
+
+
     MemCtx_Free(m);
     return r;
 }
@@ -121,7 +130,6 @@ status SpanInline_Tests(MemCtx *gm){
 
     printf("Single is sizeof(%ld)\n", sizeof(Single));
     Debug_Print((void *)p, 0, "Span Inline Int: ", COLOR_CYAN, FALSE);
-
 
     int idx;
     util expected;

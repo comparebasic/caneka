@@ -1,24 +1,37 @@
-CC = /usr/bin/clang 
-CFLAGS = --target=x86_64-unknown-linux-musl -g -Werror -Wno-incompatible-pointer-types-discards-qualifiers
-INC = -I/usr/local/musl/include/ -I./include 
+UNAME := $(shell ) 
+NETBSD := NetBSD
+CC = 
+CFLAGS =
+INC =
 
-coreobj = core/caneka.o core/mem.o core/string.o core/error.o core/debug.o \
-	core/log.o core/slab.o core/span.o core/lookup.o core/chain.o core/testsuite.o \
-    core/hash.o core/table.o core/compare.o core/iter.o core/array.o core/int.o \
-    core/maker.o core/mess.o core/single.o
-parserobj = parser/parsers.o parser/match.o parser/roebling.o parser/scursor.o parser/range.o
-serveobj = serve/req.o serve/serve.o serve/proto.o serve/proto/headers/parserdef.o \
-    serve/proto/headers/utils.o
-httpobj = serve/proto/http/protodef.o serve/proto/http/proto.o serve/proto/http/parserdef.o \
-    serve/proto/http/pat_matches.o serve/proto/http/debug.o
-xmlobj = formats/xml/xml.o formats/xml/parserdef.o
-testobj = tests/core_tests.o tests/string_tests.o tests/serve_tests.o \
-	tests/span_tests.o tests/hash_tests.o tests/roebling_tests.o tests/proto_http_tests.o \
-    tests/table_tests.o tests/xml_tests.o tests/match_tests.o
+coreobj = core/caneka.c core/mem.c core/string.c core/error.c core/debug.c \
+	core/log.c core/slab.c core/span.c core/lookup.c core/chain.c core/testsuite.c \
+    core/hash.c core/table.c core/compare.c core/iter.c core/array.c core/int.c \
+    core/maker.c core/mess.c core/single.c
+parserobj = parser/parsers.c parser/match.c parser/roebling.c parser/scursor.c parser/range.c
+serveobj = serve/req.c serve/serve.c serve/proto.c serve/proto/headers/parserdef.c \
+    serve/proto/headers/utils.c
+httpobj = serve/proto/http/protodef.c serve/proto/http/proto.c serve/proto/http/parserdef.c \
+    serve/proto/http/pat_matches.c serve/proto/http/debug.c
+xmlobj = formats/xml/xml.c formats/xml/parserdef.c
+testobj = tests/core_tests.c tests/string_tests.c tests/serve_tests.c \
+	tests/span_tests.c tests/hash_tests.c tests/roebling_tests.c tests/proto_http_tests.c \
+    tests/table_tests.c tests/xml_tests.c tests/match_tests.c
 
 allobj = $(coreobj) $(testobj) $(parserobj) $(httpobj) $(serveobj) $(xmlobj)
 
-all: caneka
+all: setup caneka
+
+setup:
+	ifeq ($(UNAME), $(NETBSD))
+	CC := cc
+	CFLAGS := -g -Werror -Wno-incompatible-pointer-types-discards-qualifiers
+	INC := -I./include 
+	else
+	CC := /usr/bin/clang 
+	CFLAGS := --target=x86_64-unknown-linux-musl -g -Werror -Wno-incompatible-pointer-types-discards-qualifiers
+	INC := -I/usr/local/musl/include/ -I./include 
+	endif
 
 clean:
 	rm -Rf build/*
@@ -39,5 +52,9 @@ dirs:
 	mkdir -p build/proto/http
 	mkdir -p build/formats/xml
 
-$(allobj): %.o:%.c 
-	$(CC) -c $(CFLAGS) $(INC) $< -o build/$@
+$(allobj):
+	@echo "Compiling $(allobj)"
+	@echo $$UNAME
+	for file in $(allobj); do \
+		$(CC) -c $(CFLAGS) $(INC) $$name -o build/$$name; \
+	done

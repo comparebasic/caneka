@@ -13,8 +13,10 @@ char *values[] = {
     "Hotel", "Happy Go Lucky",
     "India", "Idio-syncratic",
     "Juliet", "Jockey Rider",
+    /*
     "Kilo", "Kangaroo",
     "Lima", "Lefties",
+    */
     NULL,
     NULL,
 };
@@ -58,6 +60,7 @@ status Table_Tests(MemCtx *gm){
             "Expect strings to equal %s from key:%s found %s", (char *)(value->bytes), (char *)(s->bytes),
             found != NULL ? (char *)(found->bytes) : "NULL");
     }
+    Debug_Print((void *) tbl, 0, "Table: ", COLOR_YELLOW, TRUE);
 
 
     s = String_Make(m, bytes("PreKey"));

@@ -37,7 +37,7 @@ typedef struct virt * AbstractPtr;
 
 #define MAX_BASE10 20
 #define SPAN_MINI_DIM_SIZE 4
-#define SPAN_DIM_SIZE 16
+#define SPAN_DIM_SIZE 8 
 #define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
 #define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Abstract *))
@@ -153,7 +153,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "maker.h"
 #include "compare.h"
 #include "hash.h"
-#include "string.h"
+#include "string_cnk.h"
 #include "int.h"
 #include "slab.h"
 #include "array.h"
