@@ -5,16 +5,16 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = COLOR_PURPLE;
+int DEBUG_PATMATCH = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = COLOR_CYAN;
-int DEBUG_ROEBLING_MARK = COLOR_BLUE;
-int DEBUG_ROEBLING_COMPLETE = COLOR_CYAN;
+int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING_MARK = 0;
+int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
-int DEBUG_TABLE = COLOR_CYAN;
+int DEBUG_TABLE = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
 
 int DEBUG_ROEBLING_NAME = COLOR_GREEN;
@@ -44,7 +44,7 @@ static status patFlagStr(word flags, char str[]){
         str[i++] = 'X';
     }
     if((flags & PAT_OPTIONAL) != 0){
-        str[i++] = 'O';
+        str[i++] = 'P';
     }
     if((flags & PAT_MANY) != 0){
         str[i++] = 'M';
@@ -119,7 +119,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, mt->jump, mt->count, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:length=%d:pos=%d:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->length, mt->position, mt->jump, mt->count, mt->remaining);
         Debug_Print((void *)mt->def.pat, TYPE_PATCHARDEF, "", color, FALSE);
         printf(">\x1b[0m");
     }else{

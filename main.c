@@ -15,7 +15,6 @@ static status test(MemCtx *m){
     r |= String_Tests(m);
     r |= SpanInline_Tests(m);
     r |= Hash_Tests(m);
-    r |= Match_Tests(m);
     r |= Table_Tests(m);
     */
     /*
@@ -23,8 +22,9 @@ static status test(MemCtx *m){
     r |= Serve_Tests(m);
     r |= ProtoHttp_Tests(m);
     r |= Xml_Tests(m);
-    */
     r |= Span_Tests(m);
+    */
+    r |= Match_Tests(m);
     return r;
 }
 

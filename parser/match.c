@@ -164,8 +164,8 @@ static status match_FeedPat(Match *mt, word c){
     boolean matched = FALSE;
     PatCharDef *def = mt->def.pat+mt->position;
     while(def->flags != PAT_END){
-        if(DEBUG_MATCH){
-            Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_MATCH, FALSE);
+        if(DEBUG_PATMATCH){
+            Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
             printf(" :");
         }
 
@@ -187,9 +187,9 @@ static status match_FeedPat(Match *mt, word c){
             mt->type.state = PROCESSING;
             mt->count++;
 
-            if(DEBUG_MATCH){
-                printf("\x1b[%dmY match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
-                Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+            if(DEBUG_PATMATCH){
+                printf("\x1b[%dmY match %d '%c' - pos(%d) %s ", DEBUG_PATMATCH, matched, c, mt->position, State_ToString(mt->type.state));
+                Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
                 printf("\n");
             }
             
@@ -205,15 +205,16 @@ static status match_FeedPat(Match *mt, word c){
                 }
                 mt->position++;
             }
+
             break;
         }else{
             /* only knockout the status if the character is not optional */
             if((def->flags & (PAT_OPTIONAL|PAT_ANY|PAT_MANY)) == 0){
                 mt->type.state = READY;
 
-                if(DEBUG_MATCH){
-                    printf("\x1b[%dmN match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
-                    Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+                if(DEBUG_PATMATCH){
+                    printf("\x1b[%dmN match %d '%c' - pos(%d) %s ", DEBUG_PATMATCH, matched, c, mt->position, State_ToString(mt->type.state));
+                    Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
                     printf("\n");
                 }
 
@@ -222,9 +223,9 @@ static status match_FeedPat(Match *mt, word c){
                 break;
             }
 
-            if(DEBUG_MATCH){
-                printf("\x1b[%dmO match %d '%c' - pos(%d) %s ", COLOR_YELLOW, matched, c, mt->position, State_ToString(mt->type.state));
-                Debug_Print((void *)def, TYPE_PATCHARDEF, "", COLOR_YELLOW, FALSE);
+            if(DEBUG_PATMATCH){
+                printf("\x1b[%dmO match %d '%c' - pos(%d) %s ", DEBUG_PATMATCH, matched, c, mt->position, State_ToString(mt->type.state));
+                Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
                 printf("\n");
             }
 

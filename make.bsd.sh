@@ -28,6 +28,7 @@ allobj="$testobj $parserobj $httpobj $xmlobj $coreobj"
 
 echo "cleaning"
 clean="rm -Rf build/*"
+$clean
 
 echo "make dirs"
 mkdir -p build
