@@ -40,6 +40,7 @@ static Abstract *hdrCookieProcess(MemCtx *source, Abstract *a){
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
     if(strncmp(arg, servecmd, strlen(servecmd)) == 0){
+        /*
         arg += servecmd_l;
         printf("port is %s\n", arg);
 
@@ -57,6 +58,8 @@ static status handle(MemCtx *m, char *arg){
 
         Serve *sctx = Serve_Make(m, def);
         return Serve_Run(sctx, port);
+        */
+        return MISS;
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
         status r = test(m);
         if(r == TEST_OK){
@@ -71,7 +74,7 @@ static status handle(MemCtx *m, char *arg){
 
 int main(int argc, char **argv){
     if(argc == 1){
-        printf("%s [test,serve=port]", argv[0]);
+        printf("%s [test,serve=port]\n", argv[0]);
         exit(1);
     }
 

@@ -233,6 +233,7 @@ static void WrappedUtil_Print(Abstract *a, cls type, char *msg, int color, boole
 }
 
 static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    /*
     Req *req = (Req *) as(a, TYPE_REQ);
     printf("%s\x1b[1;%dmReq<%s:%s ",
         msg, color, State_ToString(req->state), Proto_ToChars(req->proto));
@@ -242,6 +243,7 @@ static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean exten
         Debug_Print((void *)req->in.rbl, 0, "", color, extended);
     }
     printf(">\x1b[0m");
+    */
 }
 
 static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean extended){
