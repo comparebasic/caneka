@@ -90,6 +90,16 @@ char *Class_ToString(cls type){
         return "TYPE_RBL_MARK";
     }else if(type == TYPE_MESS){
         return "TYPE_MESS";
+    }else if(type == TYPE_WRAPPED){
+        return "TYPE_WRAPPED";
+    }else if(type == TYPE_WRAPPED_FUNC){
+        return "TYPE_WRAPPED_FUNC";
+    }else if(type == TYPE_WRAPPED_UTIL){
+        return "TYPE_WRAPPED_UTIL";
+    }else if(type == TYPE_WRAPPED_DO){
+        return "TYPE_WRAPPED_DO";
+    }else if(type == TYPE_WRAPPED_PTR){
+        return "TYPE_WRAPPED_PTR";
     }else{
         return "TYPE_unknown";
     }
@@ -108,6 +118,8 @@ boolean Ifc_Match(cls inst, cls ifc){
     if(ifc == TYPE_MEMCTX){
         return inst == TYPE_SPAN || inst == TYPE_REQ || inst == TYPE_SERVECTX 
             || inst == TYPE_ROEBLING;
+    }else if(ifc == TYPE_WRAPPED){
+        return inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL || inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR;
     }else if(ifc == TYPE_STRING){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
     }

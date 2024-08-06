@@ -9,7 +9,7 @@ msg() {
 coreobj="core/caneka core/mem core/string core/error \
 	core/log core/slab core/span core/lookup core/chain core/testsuite \
     core/hash core/table core/compare core/iter core/array core/int \
-    core/maker core/mess core/single core/debug"
+    core/maker core/do core/mess core/single core/debug"
 parserobj="parser/parsers parser/match parser/roebling parser/scursor parser/range"
 httpobj="serve/proto/http/protodef serve/proto/http/proto serve/proto/http/parserdef \
     serve/proto/http/pat_matches serve/proto/http/debug"

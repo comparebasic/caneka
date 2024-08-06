@@ -63,7 +63,7 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
 static status Span_Expand(MemCtx *m, SlabResult *sr){
     /* resize the span by adding dimensions and slabs as needed */
     if(sr->dimsNeeded > sr->dims){
-        if(sr->op != SPAN_OP_SET){
+        if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
             return MISS;
         }
         span_GrowToNeeded(m, sr);
@@ -81,7 +81,7 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
 
         /* make new if not exists */
         if(sr->slab == NULL){
-            if(sr->op != SPAN_OP_SET){
+            if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
                 return MISS;
             }
             Slab *new_sl = openNewSlab(m, 
@@ -214,10 +214,16 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
             slotSize += 1;
         }
     }
+
+    byte pwrSlot = SPAN_DIM_SIZE;
+    while((pwrSlot / 2) >= slotSize){
+        pwrSlot /= 2;
+    }
+
     Span *sp = Span_Make(m);
     sp->itemSize = itemSize;
     sp->itemType = type;
-    sp->slotSize = sp->slab->slotSize = slotSize;
+    sp->slotSize = sp->slab->slotSize = pwrSlot;
     sp->slab->type.state |= RAW;
     sp->type.state |= RAW;
 
@@ -320,7 +326,7 @@ status Span_Merge(Span *dest, Span *additional){
 
 status Span_ReInit(Span *p){
     p->nvalues = 0;
-    p->max_idx = 0;
+    p->max_idx = -1;
     p->metrics.selected = 0;
     return SUCCESS;
 }

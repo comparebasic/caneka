@@ -199,11 +199,16 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    printf("\x1b[%dm%sRbl<%s:source=%hu", color, msg, State_ToString(rbl->type.state), rbl->source->type.of);
+    printf("\x1b[%dm%sRbl<%s:source=%hu", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ?rbl->source->type.of: 0);
     printf(":");
     Debug_Print((void *)&(rbl->range), 0, "", color, extended);
-    printf("\x1b[%dm:Pmk=", color);
-    Span_Run(NULL, rbl->parsers_pmk, PrintAddr, NULL);
+    printf("\n    \x1b[%dmmatches=", color);
+    Debug_Print((void *)rbl->matches.values, 0, "", color, extended);
+    printf("\n    \x1b[%dmko=", color);
+    Debug_Print((void *)rbl->matches.ko, 0, "", color, extended);
+    printf("\n    \x1b[%dmDo=", color);
+    Span_Run(NULL, rbl->parsers_do, PrintAddr, NULL);
+    printf("\n");
     printf(">\x1b[0m");
 }
 
@@ -218,13 +223,8 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 }
 
 static void Wrapped_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    String *s = (String *)as(a, TYPE_STRING_CHAIN);
-    printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
-    do {
-        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
-        s = s->next;
-    } while(s != NULL);
-    printf("\x1b[%dm>\x1b[0m", color);
+    String *s = (String *)asIfc(a, TYPE_WRAPPED);
+    printf("\x1b[%dm%sW<%s>\x1b[0m", color, msg, Class_ToString(a->type.of));
 }
 
 static void WrappedUtil_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

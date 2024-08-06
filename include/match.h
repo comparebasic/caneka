@@ -34,11 +34,11 @@ typedef struct match {
         PatCharDef *pat;
         String *s;
     } def;
-    int length;
-    int position;
+    i8 position;
+    i8 length;
+    i8 jump;
+    i16 remaining;
     int count;
-    int remaining;
-    int jump;
 } Match;
 
 Match *Match_Make(MemCtx *m, String *s, word flags);

@@ -16,7 +16,7 @@ typedef struct structexp {
     } matches;
     /* overall */
     Range range;
-    Span *parsers_pmk;
+    Span *parsers_do;
     Lookup *gotos;
 } Roebling;
 

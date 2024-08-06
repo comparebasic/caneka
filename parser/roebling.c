@@ -26,14 +26,14 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
 
 status Roebling_Prepare(Roebling *rbl){
     rbl->idx = 0;
-    Abstract *pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
-    while(pmk != NULL){
-        if(pmk->type.of == TYPE_WRAPPED_UTIL){
-            int mark = ((Single *)pmk)->val.value;
+    Abstract *dof = Span_Get(rbl->parsers_do, rbl->idx);
+    while(dof != NULL){
+        if(dof->type.of == TYPE_WRAPPED_UTIL){
+            int mark = ((Single *)dof)->val.value;
             Roebling_SetMark(rbl, mark);
         }
         rbl->idx++;
-        pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
+        dof = Span_Get(rbl->parsers_do, rbl->idx);
     }
     rbl->idx = 0;
     return SUCCESS;
@@ -163,7 +163,7 @@ Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract 
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;
-    rbl->parsers_pmk = parsers;
+    rbl->parsers_do = parsers;
     rbl->source = source;
     rbl->gotos = Lookup_Make(m, XML_START, NULL, (Abstract *)rbl);
     rbl->matches.values = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  

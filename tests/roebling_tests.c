@@ -9,14 +9,14 @@ enum test_enum {
     THREE,
 };
 
-status SetWord1(MemHandle *m, Abstract *a){
+status SetWord1(Abstract *a){
    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-   Lookup *lk = Lookup_Make(rbl->m, _START, NULL, NULL); 
-   Lookup_Add(rbl->m, lk, TYPE_RANGE, 
+   Lookup *lk = Lookup_Make(rbl->m, ONE, NULL, NULL); 
+   Lookup_Add(rbl->m, lk, ONE, 
         (void *)String_Make(rbl->m, bytes("ONE")));
-   Lookup_Add(rbl->m, lk, TYPE_RANGE, 
+   Lookup_Add(rbl->m, lk, TWO, 
         (void *)String_Make(rbl->m, bytes("TWO")));
-   Lookup_Add(rbl->m, lk, TYPE_RANGE, 
+   Lookup_Add(rbl->m, lk, THREE, 
         (void *)String_Make(rbl->m, bytes("THREE")));
 
    Roebling_ResetPatterns(rbl);
@@ -30,9 +30,17 @@ status Roebling_Tests(MemCtx *gm){
     String *s = NULL; 
 
     Roebling *rbl = NULL;
-    Span *parsers_pmk = Span_Make(m);
-    Span_Add(parsers_pmk, (Abstract *)Maker_Wrapped((MemHandle *)m, (Maker)SetWord1)); 
-    Roebling_Make(m, TYPE_ROEBLING, parsers_pmk, String_Init(m, STRING_EXTEND), NULL); 
+    Span *parsers_do = Span_Make(m);
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped((MemHandle *)m, (DoFunc)SetWord1)); 
+    rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, String_Init(m, STRING_EXTEND), NULL); 
+
+    Single *dof = as(Span_Get(rbl->parsers_do, 0), TYPE_WRAPPED_DO);
+    dof->val.dof((MemHandle *)rbl);
+
+    Debug_Print((void *)rbl, 0, "Roebling: ", COLOR_CYAN, TRUE);
+    printf("\n");
+
+    r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
 
     return r;
 }

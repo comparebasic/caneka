@@ -1,5 +1,8 @@
 typedef unsigned char byte;
-typedef uint16_t word; typedef word cls;
+typedef char i8;
+typedef int16_t i16;
+typedef uint16_t word;
+typedef word cls;
 typedef word status;
 typedef byte boolean;
 typedef uint32_t dword;
@@ -32,7 +35,7 @@ typedef struct virt * AbstractPtr;
 
 #define MAX_BASE10 20
 #define SPAN_MINI_DIM_SIZE 4
-#define SPAN_DIM_SIZE 8 
+#define SPAN_DIM_SIZE 16
 #define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
 #define SLAB_BYTE_SIZE (SPAN_DIM_SIZE*sizeof(Abstract *))
@@ -56,6 +59,7 @@ enum types {
     TYPE_ABSTRACT,
     TYPE_WRAPPED,
     TYPE_WRAPPED_FUNC,
+    TYPE_WRAPPED_DO,
     TYPE_WRAPPED_UTIL,
     TYPE_WRAPPED_PTR,
     TYPE_UTIL,
@@ -135,7 +139,6 @@ char *Class_ToString(cls type);
 #define COMPLETE SUCCESS
 #define TEST_OK READY
 
-typedef status (*ParserSetter)(struct structexp *sexp); /* pmk */
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);
