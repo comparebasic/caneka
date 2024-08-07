@@ -8,12 +8,16 @@ enum test_enum {
     THREE,
 };
 
-status WordFound(Roebling *rbl, Match *mt){
-    Debug_Print((void *)mt, 0, "found mt: ", COLOR_YELLOW, TRUE);
-    printf("\n");
-    String *s = Range_Copy(rbl->m, &(rbl->range));
-    Debug_Print((void *)s, 0, "found s: ", COLOR_YELLOW, TRUE);
-    printf("\n");
+status WordFound(MemHandle *mh){
+    if(DEBUG_ROEBLING){
+        Roebling *rbl = as(mh, TYPE_ROEBLING);
+        Match *mt = Roebling_GetMatch(rbl);
+        Debug_Print((void *)mt, 0, "found mt: ", COLOR_YELLOW, TRUE);
+        printf("\n");
+        String *s = Range_Copy(rbl->m, &(rbl->range));
+        Debug_Print((void *)s, 0, "found s: ", COLOR_YELLOW, TRUE);
+        printf("\n");
+    }
     return SUCCESS;
 }
 
@@ -53,11 +57,19 @@ status Roebling_Tests(MemCtx *gm){
     Debug_Print((void *)rbl, 0, "Roebling: ", COLOR_CYAN, TRUE);
     printf("\n");
 
+    r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
+
     s = String_Make(m, "TWO for the weekend\n");
     Roebling_AddBytes(rbl, s->bytes, s->length);
     Roebling_Run(rbl);
 
-    r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
+    Match *mt = Roebling_GetMatch(rbl);
+    s = Range_Copy(rbl->m, &(rbl->range));
+    int idx = Roebling_GetMatchIdx(rbl);
+
+    r |= Test(String_EqualsBytes(mt->def.s, bytes("TWO")), "Match equals expected");
+    r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected");
+    r |= Test(idx = 1, "Match Idx equals expected");
 
     return r;
 }

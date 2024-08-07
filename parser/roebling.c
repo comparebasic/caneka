@@ -2,7 +2,19 @@
 #include <caneka.h>
 
 Match *Roebling_GetMatch(Roebling *rbl){
-    return Span_GetSelected(rbl->matches.values);
+    if(HasFlag(rbl->type.state, KO)){
+        return Span_GetSelected(rbl->matches.ko);
+    }else{
+        return Span_GetSelected(rbl->matches.values);
+    }
+}
+
+int Roebling_GetMatchIdx(Roebling *rbl){
+    if(HasFlag(rbl->type.state, KO)){
+        return rbl->matches.ko->metrics.selected;
+    }else{
+        return rbl->matches.ko->metrics.selected;
+    }
 }
 
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def){
@@ -79,14 +91,9 @@ status Roebling_Run(Roebling *rbl){
 
     if(HasFlag(rbl->type.state, NEXT)){
         if(rbl->dispatch != NULL){
-            Match *mt = (HasFlag(rbl->type.state, KO) ? 
-                 Span_GetSelected(rbl->matches.ko) :
-                 Span_GetSelected(rbl->matches.values));
-
-            rbl->dispatch(rbl, mt);
+            rbl->dispatch((MemHandle *)rbl);
         }
     }
-
 
     /*
     Abstract *pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
