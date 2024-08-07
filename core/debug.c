@@ -8,7 +8,7 @@ int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING = COLOR_PURPLE;
 int DEBUG_ROEBLING_MARK = 0;
 int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
@@ -385,27 +385,6 @@ static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean ext
     printf("\x1b[%dm]>\x1b[0m", color);
 }
 
-static void Parser_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    Parser *prs = (Parser *)as(a, TYPE_PARSER);
-    printf("\x1b[%dm%sPrs<%s", color, msg, State_ToString(prs->type.state));
-    /*
-    Match *mt = (Match *)prs->match.single;
-    Debug_Print((void *)mt, 0, " ", color, extended);
-    */
-    printf(">\x1b[0m");
-}
-
-static void MultiParser_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    Parser *prs = (Parser *)as(a, TYPE_MULTIPARSER);
-    printf("\x1b[%dm%sPrs<%s", color, msg, State_ToString(prs->type.state));
-    Match *mt = NULL;;
-    int i = 0;
-    /*
-    while((mt = prs->match.array[i++]) != NULL){
-        Debug_Print((void *)mt, 0, ", ", color, extended);
-    }
-    */
-}
 
 static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     ProtoDef *proto = (ProtoDef *)a;
@@ -433,8 +412,6 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
-    r |= Lookup_Add(m, lk, TYPE_PARSER, (void *)Parser_Print);
-    r |= Lookup_Add(m, lk, TYPE_MULTIPARSER, (void *)MultiParser_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);

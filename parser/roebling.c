@@ -40,11 +40,55 @@ status Roebling_Prepare(Roebling *rbl){
 }
 
 status Roebling_Run(Roebling *rbl){
-    /*
     if(DEBUG_ROEBLING){
-        Debug_Print((void *)rbl, 0, "Roebling_Run for: ", DEBUG_ROEBLING, TRUE);
+        printf("\x1b[%dmRbl Run idx:\x1b[1;%dm%d\x1b[0;%dm ", DEBUG_ROEBLING, DEBUG_ROEBLING, rbl->idx, DEBUG_ROEBLING);
+        Debug_Print((void *)rbl, 0, "", DEBUG_ROEBLING, TRUE);
         printf("\n");
     }
+
+    Single *wdof = Span_Get(rbl->parsers_do, rbl->idx);
+    if(wdof == NULL){
+        rbl->type.state = COMPLETE;
+    }else{
+        wdof = as(wdof, TYPE_WRAPPED_DO);
+        wdof->val.dof((MemHandle *)rbl);
+        int i = 0;
+        for(int i = 0; i < rbl->matches.ko->nvalues; i++){
+            Match *mt = Span_Get(rbl->matches.ko, i);
+            if(mt != NULL){
+               SCursor_Find(&(rbl->range), mt); 
+               if(HasFlag(mt->type.state, COMPLETE)){
+                     rbl->matches.ko->metrics.selected = i;
+                     rbl->type.state = NEXT|KO;
+                     break;
+               }
+            }
+        }
+        for(int i = 0; i < rbl->matches.values->nvalues; i++){
+            Match *mt = Span_Get(rbl->matches.values, i);
+            if(mt != NULL){
+               SCursor_Find(&(rbl->range), mt); 
+               if(HasFlag(mt->type.state, COMPLETE)){
+                     rbl->matches.values->metrics.selected = i;
+                     rbl->type.state = NEXT;
+                     break;
+               }
+            }
+        }
+    }
+
+    if(HasFlag(rbl->type.state, NEXT)){
+        if(rbl->dispatch != NULL){
+            Match *mt = (HasFlag(rbl->type.state, KO) ? 
+                 Span_GetSelected(rbl->matches.ko) :
+                 Span_GetSelected(rbl->matches.values));
+
+            rbl->dispatch(rbl, mt);
+        }
+    }
+
+
+    /*
     Abstract *pmk = Span_Get(rbl->parsers_pmk, rbl->idx);
     boolean escaping = FALSE;
     Parser *prs;
@@ -157,6 +201,10 @@ status Roebling_ResetPatterns(Roebling *rbl){
 status Roebling_SetMark(Roebling *rbl, int mark){
     Single *sgl = Int_Wrapped(rbl->m, rbl->idx);
     return Lookup_Add(rbl->m, rbl->gotos, mark, (void *)sgl);
+}
+
+status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
+    return String_AddBytes(rbl->m, rbl->range.search, bytes, length);
 }
 
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source){

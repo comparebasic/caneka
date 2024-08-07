@@ -3,8 +3,6 @@
 #include <tests.h>
 #include <proto_tests.h>
 
-#include <proto/http.h>
-
 #define servecmd "serve="
 #define testcmd "test"
 

@@ -14,13 +14,13 @@ struct serve_req;
 struct mem_ctx;
 struct mem_slab;
 struct strcursor_range;
-struct parser;
 struct span;
 struct span_slab;
 struct structexp;
 struct lookup;
 struct strcursor;
 struct strcursor_range;
+struct roebling;
 
 typedef struct typehdr {
     cls of;
@@ -123,6 +123,8 @@ enum status_types {
     HASHED = 1 << 11,
     INVERTED = 1 << 12,
     END = 1 << 13,
+    NEXT = 1 << 14,
+    KO = 1 << 15,
 };
 
 #define HasFlag(x, fl) ((x & (fl)) == fl) 
@@ -164,7 +166,6 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "range.h"
 #include "lookup.h"
 #include "debug.h"
-#include "parsers.h"
 #include "roebling.h"
 #include "proto.h"
 #include "mess.h"
@@ -172,7 +173,6 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "serve.h"
 #include "req.h"
 #include "testsuite.h"
-#include "streamdef.h"
 #include "mark.h"
 #include "headers.h"
 #include "apps.h"

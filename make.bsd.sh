@@ -10,16 +10,16 @@ coreobj="core/caneka core/mem core/string core/error \
 	core/log core/slab core/span core/lookup core/chain core/testsuite \
     core/hash core/table core/compare core/iter core/array core/int \
     core/maker core/do core/mess core/single core/debug"
-parserobj="parser/parsers parser/match parser/roebling parser/scursor parser/range"
-httpobj="serve/proto/http/protodef serve/proto/http/proto serve/proto/http/parserdef \
-    serve/proto/http/pat_matches serve/proto/http/debug"
+parserobj="parser/match parser/roebling parser/scursor parser/range"
+#httpobj="serve/proto/http/protodef serve/proto/http/proto serve/proto/http/parserdef \
+#    serve/proto/http/pat_matches serve/proto/http/debug"
 
 xmlobj="formats/xml/xml formats/xml/parserdef"
 
 testobj="tests/core_tests tests/string_tests tests/table_tests tests/xml_tests \
     tests/match_tests tests/span_tests tests/hash_tests tests/roebling_tests"
 
-allobj="$testobj $parserobj $httpobj $xmlobj $coreobj"
+allobj="$testobj $parserobj $coreobj"
 
 #serveobj="serve/req serve/serve serve/proto serve/proto/headers/parserdef \
 #    serve/proto/headers/utils"

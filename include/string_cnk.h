@@ -1,12 +1,12 @@
 typedef struct stringmin {
     Type type;
-    word length;
+    int length;
     byte bytes[STRING_FIXED_SIZE+1];
 } StringMin;
 
 typedef struct string {
     Type type;
-    word length;
+    int length;
     byte bytes[STRING_CHUNK_SIZE];
     struct string *next;
 } String;

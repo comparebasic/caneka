@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <proto/http.h>
 
 enum test_enum {
     _START = 1000,
@@ -8,6 +7,15 @@ enum test_enum {
     TWO,
     THREE,
 };
+
+status WordFound(Roebling *rbl, Match *mt){
+    Debug_Print((void *)mt, 0, "found mt: ", COLOR_YELLOW, TRUE);
+    printf("\n");
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    Debug_Print((void *)s, 0, "found s: ", COLOR_YELLOW, TRUE);
+    printf("\n");
+    return SUCCESS;
+}
 
 status SetWord1(Abstract *a){
    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
@@ -20,7 +28,12 @@ status SetWord1(Abstract *a){
         (void *)String_Make(rbl->m, bytes("THREE")));
 
    Roebling_ResetPatterns(rbl);
+   rbl->dispatch = WordFound;
    return Roebling_SetLookup(rbl, lk); 
+}
+
+status SetWord2(Abstract *a){
+   return NOOP; 
 }
 
 status Roebling_Tests(MemCtx *gm){
@@ -39,6 +52,10 @@ status Roebling_Tests(MemCtx *gm){
 
     Debug_Print((void *)rbl, 0, "Roebling: ", COLOR_CYAN, TRUE);
     printf("\n");
+
+    s = String_Make(m, "TWO for the weekend\n");
+    Roebling_AddBytes(rbl, s->bytes, s->length);
+    Roebling_Run(rbl);
 
     r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
 

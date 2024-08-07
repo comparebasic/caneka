@@ -3,13 +3,14 @@ enum mark_reserved {
     _FIRST_MARK,
 };
 
-typedef struct structexp {
+typedef status (*RblFunc)(struct roebling *rbl, Match *mt);
+
+typedef struct roebling {
     Type type;
     MemCtx *m;
     int idx;
     Abstract *source; 
     /* current */
-    struct parser parser;
     struct {
         Span *values;
         Span *ko;
@@ -18,6 +19,7 @@ typedef struct structexp {
     Range range;
     Span *parsers_do;
     Lookup *gotos;
+    RblFunc dispatch;
 } Roebling;
 
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source);
@@ -28,3 +30,4 @@ status Roebling_Prepare(Roebling *rbl);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def);
 status Roebling_ResetPatterns(Roebling *rbl);
+status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
