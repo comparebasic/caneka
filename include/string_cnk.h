@@ -28,3 +28,5 @@ String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
 boolean String_Equals(String *a, String *b);
 boolean String_Eq(Abstract *a, void *b);
+status String_AddInt(MemCtx *m, String *s, int i);
+String *String_ToEscaped(MemCtx *m, String *s);

@@ -19,6 +19,8 @@ int DEBUG_ROEBLING_CURRENT = 0;
 
 int DEBUG_ROEBLING_NAME = COLOR_GREEN;
 
+static MemCtx *DebugM = NULL;
+
 static void indent_Print(int indent){
     while(indent--){
         printf("  ");
@@ -188,18 +190,19 @@ static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boole
 
 static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)as(a, TYPE_STRING_FIXED);
+    String *esc = String_ToEscaped(DebugM, s);
     if(extended){
         printf("%s\x1b[%dmSFixed<\x1b[0;%dm", msg, color, color);
-        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
+        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"", color, msg, color, s->bytes, color);
+        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"", color, msg, color, esc->bytes, color);
     }
 }
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    printf("\x1b[%dm%sRbl<%s:source=%hu", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ?rbl->source->type.of: 0);
+    printf("\x1b[%dm%sRbl<%s:source=%hu", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
     Debug_Print((void *)&(rbl->range), 0, "", color, extended);
     printf("\n    \x1b[%dmmatches=", color);
@@ -216,7 +219,8 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     String *s = (String *)as(a, TYPE_STRING_CHAIN);
     printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
     do {
-        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, s->bytes, color);
+        String *esc = String_ToEscaped(DebugM, s);
+        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
         s = s->next;
     } while(s != NULL);
     printf("\x1b[%dm>\x1b[0m", color);
@@ -276,7 +280,7 @@ static void slab_Summarize(Slab *slab, char *msg, int color, boolean extended){
             printf("\x1b[%dm", color);
         }
     }
-    printf("\x1b[1;%dm>\x1b[0m", color);
+    printf("\x1b[0;%dm>\x1b[0m", color);
 }
 
 static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -340,7 +344,7 @@ static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean exte
     printf("\n");
     indent_Print(1);
     showSlab(p->slab, color, extended, 1);
-    printf("\n\x1b[1;%dm>\x1b[0m\n", color);
+    printf("\n\x1b[0;%dm>\x1b[0m\n", color);
 }
 
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -422,6 +426,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
 }
 
 status Debug_Init(MemCtx *m){
+    DebugM = m;
     if(DebugPrintChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);
         DebugPrintChain = Chain_Make(m, funcs);

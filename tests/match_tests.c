@@ -54,8 +54,9 @@ status Match_Tests(MemCtx *gm){
         Match_Feed(&mt, s->bytes[i]);
     }
 
+    String *s2 = String_ToEscaped(m, s);
     r |= Test(HasFlag(ko.type.state, COMPLETE), "Matching string has successful for line '%s' state found %s",
-        s->bytes, State_ToString(ko.type.state)); 
+        s2->bytes, State_ToString(ko.type.state)); 
 
     r |= Test(mt.count == s->length-1, "Matched length of string, less termMatching, expected %d have %d",
         s->length-1, mt.count);

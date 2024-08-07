@@ -54,8 +54,6 @@ status Roebling_Tests(MemCtx *gm){
     Single *dof = as(Span_Get(rbl->parsers_do, 0), TYPE_WRAPPED_DO);
     dof->val.dof((MemHandle *)rbl);
 
-    Debug_Print((void *)rbl, 0, "Roebling: ", COLOR_CYAN, TRUE);
-    printf("\n");
 
     r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
 
@@ -70,6 +68,9 @@ status Roebling_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(mt->def.s, bytes("TWO")), "Match equals expected");
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected");
     r |= Test(idx = 1, "Match Idx equals expected");
+
+    Debug_Print((void *)rbl, 0, "Roebling: ", COLOR_CYAN, TRUE);
+    printf("\n");
 
     return r;
 }

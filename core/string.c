@@ -3,21 +3,7 @@
 
 static const byte *digits = (byte *)"0123456789";
 
-String *String_Init(MemCtx *m, int expected){
-    size_t sz = sizeof(StringMin);
-    cls type = TYPE_STRING_FIXED;
-    if(expected < 0 || expected >= STRING_FIXED_SIZE){
-        sz = sizeof(String);
-        type = TYPE_STRING_CHAIN;
-    }
-    String *s =  (String *)MemCtx_Alloc(m, sz);
-    s->type.of = type;
-    return s;
-}
-
-
-String *String_FromInt(MemCtx *m, int i){
-    byte buff[MAX_BASE10+1];
+static int _String_FromInt(MemCtx *m, int i, byte buff[]){
     memset(buff, 0, MAX_BASE10+1);
 
     i64 n = 0;
@@ -34,15 +20,88 @@ String *String_FromInt(MemCtx *m, int i){
         i /= 10;
         position--;
     }
+    return position;
+}
 
+
+String *String_Init(MemCtx *m, int expected){
+    size_t sz = sizeof(StringMin);
+    cls type = TYPE_STRING_FIXED;
+    if(expected < 0 || expected >= STRING_FIXED_SIZE){
+        sz = sizeof(String);
+        type = TYPE_STRING_CHAIN;
+    }
+    String *s = (String *)MemCtx_Alloc(m, sz);
+    s->type.of = type;
+    return s;
+}
+
+String *String_ToEscaped(MemCtx *m, String *s){
+    int length = 0;
+    byte i8;
+    for(int i = 0; i < s->length; i++){
+        i8 = s->bytes[i];
+        if(i8 > 31 && i8 < 127){
+            length++;
+        }else{
+            if(
+                i8 == '\r' ||
+                i8 == '\t' ||
+                i8 == '\n' ||
+                i8 == '\\' ||
+                i8 < 10
+            ){
+                length += 2;
+            }else if (i8 < 100){
+                length += 3;
+            }else{
+                length += 4;
+            }
+        }
+    }
+    String *s2 = String_Init(m, length);
+    int position;
+    for(int i = 0; i < s->length; i++){
+        i8 = s->bytes[i];
+        byte buff[MAX_BASE10+1];
+        if(i8 > 31 && i8 < 127){
+            String_AddBytes(m, s2, &i8, 1);
+            continue;
+        }else{
+            String_AddBytes(m, s2, bytes("\\"), 1);
+            if(i8 == '\r'){
+                String_AddBytes(m, s2, bytes("r"), 1);
+            }else if(i8 == '\n'){
+                String_AddBytes(m, s2, bytes("n"), 1);
+            }else if(i8 == '\\'){
+                String_AddBytes(m, s2, bytes("\\"), 1);
+            }else if(i8 == '\t'){
+                String_AddBytes(m, s2, bytes("t"), 1);
+            }else{
+                String_AddInt(m, s2, i8);
+            }
+        }
+    }
+
+    return s2;
+}
+
+String *String_FromInt(MemCtx *m, int i){
+    byte buff[MAX_BASE10+1];
+    int position = _String_FromInt(m, i, buff);
     return String_From(m, buff+position+1); 
+}
+
+status String_AddInt(MemCtx *m, String *s, int i){
+    byte buff[MAX_BASE10+1];
+    int position = _String_FromInt(m, i, buff);
+    return String_AddBytes(m, s, buff+position+1, MAX_BASE10-position-1);
 }
 
 String *String_Make(MemCtx *m, byte *bytes){
     int length = strlen((char *)bytes);
     String *s = String_Init(m, length); 
     String_AddBytes(m, s, bytes, length);
-
     return s;
 }
 
