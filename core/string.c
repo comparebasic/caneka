@@ -38,21 +38,21 @@ String *String_Init(MemCtx *m, int expected){
 
 String *String_ToEscaped(MemCtx *m, String *s){
     int length = 0;
-    byte i8;
+    byte b;
     for(int i = 0; i < s->length; i++){
-        i8 = s->bytes[i];
-        if(i8 > 31 && i8 < 127){
+        b = s->bytes[i];
+        if(b > 31 && b < 127){
             length++;
         }else{
             if(
-                i8 == '\r' ||
-                i8 == '\t' ||
-                i8 == '\n' ||
-                i8 == '\\' ||
-                i8 < 10
+                b == '\r' ||
+                b == '\t' ||
+                b == '\n' ||
+                b == '\\' ||
+                b < 10
             ){
                 length += 2;
-            }else if (i8 < 100){
+            }else if (b < 100){
                 length += 3;
             }else{
                 length += 4;
@@ -62,23 +62,23 @@ String *String_ToEscaped(MemCtx *m, String *s){
     String *s2 = String_Init(m, length);
     int position;
     for(int i = 0; i < s->length; i++){
-        i8 = s->bytes[i];
+        b = s->bytes[i];
         byte buff[MAX_BASE10+1];
-        if(i8 > 31 && i8 < 127){
-            String_AddBytes(m, s2, &i8, 1);
+        if(b > 31 && b < 127){
+            String_AddBytes(m, s2, &b, 1);
             continue;
         }else{
             String_AddBytes(m, s2, bytes("\\"), 1);
-            if(i8 == '\r'){
+            if(b == '\r'){
                 String_AddBytes(m, s2, bytes("r"), 1);
-            }else if(i8 == '\n'){
+            }else if(b == '\n'){
                 String_AddBytes(m, s2, bytes("n"), 1);
-            }else if(i8 == '\\'){
+            }else if(b == '\\'){
                 String_AddBytes(m, s2, bytes("\\"), 1);
-            }else if(i8 == '\t'){
+            }else if(b == '\t'){
                 String_AddBytes(m, s2, bytes("t"), 1);
             }else{
-                String_AddInt(m, s2, i8);
+                String_AddInt(m, s2, b);
             }
         }
     }

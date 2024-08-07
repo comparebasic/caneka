@@ -60,6 +60,9 @@ static status Roebling_RunMatches(Roebling *rbl){
            SCursor_Find(&(rbl->range), mt); 
            if(HasFlag(mt->type.state, COMPLETE)){
                  ko->metrics.selected = i;
+                 if(mt->jump > -1){
+                    rbl->jump = mt->jump;
+                 }
                  rbl->type.state = NEXT|KO;
                  break;
            }
@@ -72,6 +75,9 @@ static status Roebling_RunMatches(Roebling *rbl){
            SCursor_Find(&(rbl->range), mt); 
            if(HasFlag(mt->type.state, COMPLETE)){
                  posative->metrics.selected = i;
+                 if(mt->jump > -1){
+                    rbl->jump = mt->jump;
+                 }
                  rbl->type.state = NEXT;
                  break;
            }
@@ -100,6 +106,14 @@ status Roebling_Run(Roebling *rbl){
         if(rbl->dispatch != NULL){
             rbl->dispatch((MemHandle *)rbl);
         }
+        if(rbl->jump > -1){
+            rbl->idx = rbl->jump;
+            rbl->jump = -1;
+        }
+        if(rbl->jumpMiss > -1){
+            rbl->idx = rbl->jumpMiss;
+            rbl->jumpMiss = -1;
+        }
     }
         
     return rbl->type.state;
@@ -116,6 +130,8 @@ int Roebling_GetMarkIdx(Roebling *rlb, int mark){
 status Roebling_ResetPatterns(Roebling *rbl){
     Span_ReInit(rbl->matches.values);
     Span_ReInit(rbl->matches.ko);
+    rbl->jump = -1;
+    rbl->jumpMiss = -1;
     return READY;
 }
 

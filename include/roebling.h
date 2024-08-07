@@ -17,7 +17,10 @@ typedef struct roebling {
     Range range;
     Span *parsers_do;
     Lookup *gotos;
+    /* step specific */
     DoFunc dispatch;
+    i8 jump;
+    i8 jumpMiss;
 } Roebling;
 
 Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source);
