@@ -41,6 +41,12 @@ char *State_ToString(status state){
         return "INVERTED";
     }else if((state & END) != 0){
         return "END";
+    }else if(HasFlag(state, NEXT|KO)){
+        return "NEXT+KO";
+    }else if((state & NEXT) != 0){
+        return "NEXT";
+    }else if((state & KO) != 0){
+        return "KO";
     }else{
         return "UNKNOWN_state";
     }

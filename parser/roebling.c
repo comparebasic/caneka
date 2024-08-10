@@ -93,6 +93,11 @@ status Roebling_Run(Roebling *rbl){
         printf("\n");
     }
 
+    if(HasFlag(rbl->type.state, NEXT)){
+        rbl->idx++;
+        rbl->type.state &= ~NEXT; 
+    }
+
     Single *wdof = Span_Get(rbl->parsers_do, rbl->idx);
     if(wdof == NULL){
         rbl->type.state = COMPLETE;
@@ -108,10 +113,12 @@ status Roebling_Run(Roebling *rbl){
         }
         if(rbl->jump > -1){
             rbl->idx = rbl->jump;
+            rbl->type.state &= ~NEXT; 
             rbl->jump = -1;
         }
         if(rbl->jumpMiss > -1){
             rbl->idx = rbl->jumpMiss;
+            rbl->type.state &= ~NEXT; 
             rbl->jumpMiss = -1;
         }
     }

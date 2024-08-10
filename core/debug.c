@@ -204,14 +204,32 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
-    Debug_Print((void *)&(rbl->range), 0, "", color, extended);
-    printf("\n    \x1b[%dmmatches=", color);
-    Debug_Print((void *)rbl->matches.values, 0, "", color, extended);
-    printf("\n    \x1b[%dmko=", color);
-    Debug_Print((void *)rbl->matches.ko, 0, "", color, extended);
-    printf("\n    \x1b[%dmDo=", color);
-    Span_Run(NULL, rbl->parsers_do, PrintAddr, NULL);
-    printf("\n");
+    if(extended){
+        printf(" idx:%d ", rbl->idx);
+        Debug_Print((void *)&(rbl->range), 0, "", color, extended);
+        printf("\n  \x1b[%dmmatches=\n", color);
+        Match *mt = NULL;
+        for(int i = 0; i < rbl->matches.values->nvalues; i++){
+            mt = Span_Get(rbl->matches.values, i);
+            Debug_Print((void *)mt, 0, "    ", color, extended);
+            if(i < rbl->matches.values->nvalues-1){
+                printf(",\n");
+            }
+        }
+        printf("\n  \x1b[%dmko=\n", color);
+        for(int i = 0; i < rbl->matches.ko->nvalues; i++){
+            mt = Span_Get(rbl->matches.ko, i);
+            Debug_Print((void *)mt, 0, "    ", color, extended);
+            if(i < rbl->matches.ko->nvalues-1){
+                printf(",\n");
+            }
+        }
+        printf("\n  \x1b[%dmDoF=\n", color);
+        Span_Run(NULL, rbl->parsers_do, PrintAddr, NULL);
+        printf("\n");
+    }else{
+        printf(" idx:%d", rbl->idx);
+    }
     printf(">\x1b[0m");
 }
 

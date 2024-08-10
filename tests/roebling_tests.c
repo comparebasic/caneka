@@ -21,6 +21,17 @@ status WordFound(MemHandle *mh){
     return SUCCESS;
 }
 
+status RestFound(MemHandle *mh){
+    if(DEBUG_ROEBLING){
+        Roebling *rbl = as(mh, TYPE_ROEBLING);
+        printf("\n");
+        String *s = Range_Copy(rbl->m, &(rbl->range));
+        Debug_Print((void *)s, 0, "found rest: ", COLOR_YELLOW, TRUE);
+        printf("\n");
+    }
+    return SUCCESS;
+}
+
 status SetWord1(Abstract *a){
    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
    Lookup *lk = Lookup_Make(rbl->m, ONE, NULL, NULL); 
@@ -37,7 +48,17 @@ status SetWord1(Abstract *a){
 }
 
 status SetWord2(Abstract *a){
-   return NOOP; 
+    status r = READY;
+
+    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
+    Roebling_ResetPatterns(rbl);
+
+    word text[] = {TEXT_DEF};
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)text);
+    word nl[] = {PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+    r |= Roebling_SetKOPattern(rbl, (PatCharDef *)nl);
+    rbl->dispatch = RestFound;
+    return r; 
 }
 
 status Roebling_Tests(MemCtx *gm){
@@ -49,6 +70,7 @@ status Roebling_Tests(MemCtx *gm){
     Roebling *rbl = NULL;
     Span *parsers_do = Span_Make(m);
     Span_Add(parsers_do, (Abstract *)Do_Wrapped((MemHandle *)m, (DoFunc)SetWord1)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped((MemHandle *)m, (DoFunc)SetWord2)); 
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, String_Init(m, STRING_EXTEND), NULL); 
 
     Single *dof = as(Span_Get(rbl->parsers_do, 0), TYPE_WRAPPED_DO);
@@ -60,6 +82,8 @@ status Roebling_Tests(MemCtx *gm){
     s = String_Make(m, bytes("TWO for the weekend\n"));
     Roebling_AddBytes(rbl, s->bytes, s->length);
     Roebling_Run(rbl);
+    Debug_Print((void *)rbl, 0, "Roebling: ", COLOR_CYAN, FALSE);
+    printf("\n");
 
     Match *mt = Roebling_GetMatch(rbl);
     s = Range_Copy(rbl->m, &(rbl->range));
@@ -68,7 +92,9 @@ status Roebling_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(mt->def.s, bytes("TWO")), "Match equals expected");
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected");
     r |= Test(idx = 1, "Match Idx equals expected");
+    r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
 
+    Roebling_Run(rbl);
     Debug_Print((void *)rbl, 0, "Roebling: ", COLOR_CYAN, TRUE);
     printf("\n");
 

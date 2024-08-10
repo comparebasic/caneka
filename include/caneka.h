@@ -127,7 +127,7 @@ enum status_types {
     KO = 1 << 15,
 };
 
-#define HasFlag(x, fl) ((x & (fl)) == fl) 
+#define HasFlag(x, fl) ((x & (fl)) == (fl)) 
 
 enum positions {
     POSITION_CONTAINS = 0,
