@@ -193,7 +193,7 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
     String *esc = String_ToEscaped(DebugM, s);
     if(extended){
         printf("%s\x1b[%dmSFixed<\x1b[0;%dm", msg, color, color);
-        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
+        printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
         printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"", color, msg, color, esc->bytes, color);
@@ -202,7 +202,7 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    printf("\x1b[%dm%sRbl<%s:source=%hu", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
+    printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
     Debug_Print((void *)&(rbl->range), 0, "", color, extended);
     printf("\n    \x1b[%dmmatches=", color);
@@ -220,7 +220,7 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
     do {
         String *esc = String_ToEscaped(DebugM, s);
-        printf("s/%hu=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
+        printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
         s = s->next;
     } while(s != NULL);
     printf("\x1b[%dm>\x1b[0m", color);

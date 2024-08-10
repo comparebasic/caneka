@@ -57,7 +57,7 @@ status Roebling_Tests(MemCtx *gm){
 
     r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
 
-    s = String_Make(m, "TWO for the weekend\n");
+    s = String_Make(m, bytes("TWO for the weekend\n"));
     Roebling_AddBytes(rbl, s->bytes, s->length);
     Roebling_Run(rbl);
 

@@ -1,4 +1,4 @@
-CC=cc
+CC=clang
 CFLAGS="-g -Werror -Wno-incompatible-pointer-types-discards-qualifiers"
 INC="-I./include"
 
