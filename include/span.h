@@ -24,7 +24,6 @@ typedef struct span {
 } Span;
 
 Span* Span_Make(MemCtx* m);
-Span* Span_MakeMini(MemCtx* m);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
 status Span_Set(Span *p, int idx, Abstract *t);
 status Span_Remove(Span *p, int idx);

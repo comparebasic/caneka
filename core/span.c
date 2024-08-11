@@ -1,28 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
-#define STRIDE(p) ((((p)->type.of == TYPE_MINISPAN) ? SPAN_MINI_DIM_SIZE : SPAN_DIM_SIZE) / p->idxSlotSize)
-
-static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment,
-        status flags, byte slotSize ){
-    Slab *new_sl = Slab_Alloc(m, flags, slotSize);
-    new_sl->increment = increment; 
-    new_sl->offset = offset;
-
-    return new_sl;
-}
+#define STRIDE SPAN_DIM_SIZE
 
 static int slotsAvailable(Span *p, int dims){
-    int n = STRIDE(p);
+    int n = STRIDE;
     int _dims = dims;
     int r = n;
     if(dims <= 0){
         r = 1;
     }else if(dims == 1){
-        r = STRIDE(p);
+        r = STRIDE;
     }else{
         while(dims > 1){
-            n *= STRIDE(p);
+            n *= STRIDE;
             dims--;
         }
         r = n;
@@ -32,28 +23,29 @@ static int slotsAvailable(Span *p, int dims){
 }
 
 static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
-    int dims = sr->dims = sr->span->dims = sr->dimsNeeded;
+    boolean expand = sr->span->dims < sr->dimsNeeded;
+    int dims = sr->span->dims;
 
     int needed = slotsAvailable(sr->span, dims);
-    boolean expand = sr->slab->increment < needed;
     if(expand){
         Slab *exp_sl = NULL;
         Slab *shelf_sl = NULL;
-        while(sr->slab->increment < needed){
-            Slab *new_sl = openNewSlab(m, 0, 0, needed, (sr->span->type.state & RAW),
-                sr->span->slotSize);
+        int stride = STRIDE;
+        while(dims < sr->dimsNeeded){
+            Slab *new_sl = Slab_Alloc(m);
 
             if(exp_sl == NULL){
                 shelf_sl = sr->span->slab;
                 sr->span->slab = new_sl;
             }else{
-                exp_sl->items[0] = (Abstract *)new_sl;
+                exp_sl[0] = (Abstract *)new_sl;
             }
 
-            needed /= STRIDE(sr->span);
+            needed /= stride;
             exp_sl = new_sl;
+            dims++;
         }
-        exp_sl->items[0] = (Abstract *)shelf_sl;
+        exp_sl[0] = (Abstract *)shelf_sl;
     }
 
     sr->slab = sr->span->slab;
@@ -72,14 +64,18 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
     byte idxSlotSize = sr->span->idxSlotSize;
 
     byte dims = sr->dims = sr->span->dims = max(sr->dims, sr->span->dims);
-    int increment = slotsAvailable(sr->span, dims-1) / idxSlotSize;
     Slab *prev_sl = sr->slab;
     while(dims > 1){
-        sr->local_idx = ((sr->idx - sr->offset) / increment) * idxSlotSize;
+        int increment = slotsAvailable(sr->span, dims-1);
+        sr->local_idx = ((sr->idx - sr->offset) / increment);
+        if(dims > 1){
+            increment /= sr->span->idxSlotSize;
+            sr->local_idx *= sr->span->idxSlotSize;
+        }
         sr->offset += increment*sr->local_idx;
 
         /* find or allocate a space for the new span */
-        sr->slab = (Slab *)sr->slab->items[sr->local_idx];
+        sr->slab = (Slab *)sr->slab[sr->local_idx];
 
         /* make new if not exists */
         if(sr->slab == NULL){
@@ -89,21 +85,13 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
             Slab *new_sl = openNewSlab(m, 
                 sr->local_idx, sr->offset, increment, (sr->span->type.state & RAW),
                 sr->span->slotSize);
-            prev_sl->items[sr->local_idx] = (Abstract *)new_sl;
+            prev_sl[sr->local_idx] = (Abstract *)new_sl;
             prev_sl = sr->slab = new_sl;
         }else{
             prev_sl = sr->slab;
         }
 
-        if((sr->slab->type.state & TYPE_SLAB) != 0){
-            printf("Error expected to find a mid dimenstion slab");
-            sr->type.state = ERROR;
-            return sr->type.state;
-        }
-
-        /* prepare for another found of inquiry */
         dims--;
-        increment = slotsAvailable(sr->span, dims-1);
     }
 
     /* conclude by setting the local idx and setting the state */
@@ -135,10 +123,10 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
 
 static Slab_UpdateFlags(SlabResult *sr){
     if(HasFlag(sr->span->type.state, TRACKED)){
-        Slab *sl = (Slab *)sr->slab;
+        SlabSlot *slt = (SlabSlot *)sr->slab;
         sl->meta.pos = sr->local_idx+1;
         sl->meta.flags |= SLAB_ACTIVE;
-        if(sl->meta.pos >= STRIDE(sr->span)){
+        if(sl->meta.pos >= STRIDE){
             sl->meta.flags |= SLAB_FULL;
             sl->meta.pos = -1;
         }
@@ -172,10 +160,10 @@ static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
             }
         }else{
             if(sr->op == SPAN_OP_GET){
-                sr->value = sr->slab->items[sr->local_idx];
+                sr->value = sr->slab[sr->local_idx];
                 sr->span->metrics.get = idx;
             }else{
-                sr->slab->items[sr->local_idx] = t;
+                sr->slab[sr->local_idx] = t;
                 sr->span->metrics.set = idx;
                 Slab_UpdateFlags(sr);
             }
@@ -205,19 +193,6 @@ Span* Span_Make(MemCtx* m){
     p->dims = 1;
     p->slab = Slab_Alloc(m, (p->type.state & RAW), p->slotSize);
     p->type.of = TYPE_SPAN;
-    p->slab->increment = STRIDE(p);
-
-    return p;
-}
-
-Span* Span_MakeMini(MemCtx* m){
-    Span *p = Span_Init(m);
-    p->m = m;
-    p->max_idx = -1;
-    p->slotSize = 1;
-    p->slab = Slab_Alloc(m, (p->type.state & RAW), p->slotSize);
-    p->type.of = TYPE_MINISPAN;
-    p->slab->increment = STRIDE(p);
 
     return p;
 }
@@ -246,8 +221,7 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
 
     sp->itemSize = itemSize;
     sp->itemType = type;
-    sp->slotSize = sp->slab->slotSize = pwrSlot;
-    sp->slab->type.state |= RAW;
+    sp->slotSize = pwrSlot;
     sp->type.state |= RAW;
     if(type == 0){
         sp->type.of = TYPE_SPAN;

@@ -15,12 +15,6 @@ char *State_ToString(status state){
         return "ERROR";
     }else if((state & NOOP) != 0){
         return "NOOP";
-    }else if((state & CYCLE_MARK) != 0){
-        return "CYCLE_MARK";
-    }else if((state & CYCLE_LOOP) != 0){
-        return "CYCLE_LOOP";
-    }else if((state & CYCLE_BREAK) != 0){
-        return "CYCLE_BREAK";
     }else if((state & INCOMING) != 0){
         return "INCOMING";
     }else if((state & (PROCESSING|INVERTED)) == (PROCESSING|INVERTED)){

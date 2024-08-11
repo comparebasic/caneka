@@ -34,7 +34,6 @@ typedef struct virt  {
 typedef struct virt * AbstractPtr;
 
 #define MAX_BASE10 20
-#define SPAN_MINI_DIM_SIZE 4
 #define SPAN_DIM_SIZE 16
 #define SLAM_MIN_SIZE 4
 #define SLAB_START_SIZE 2
@@ -87,8 +86,9 @@ enum types {
     TYPE_PATCHARDEF,
     TYPE_STRUCTEXP,
     TYPE_SPAN,
+    TYPE_SPAN_PTR,
+    TYPE_SPAN_INLINE,
     TYPE_QUEUE,
-    TYPE_MINISPAN,
     TYPE_SLAB,
     TYPE_CHAIN,
     TYPE_HASHED,
