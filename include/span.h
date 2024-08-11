@@ -13,6 +13,7 @@ typedef struct span {
     int max_idx;
     cls itemType;
     byte slotSize;
+    byte idxSlotSize;
     byte itemSize;
 	byte dims;
     struct {

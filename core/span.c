@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-#define STRIDE(p) (((p)->type.of == TYPE_MINISPAN) ? SPAN_MINI_DIM_SIZE : SPAN_DIM_SIZE)
+#define STRIDE(p) ((((p)->type.of == TYPE_MINISPAN) ? SPAN_MINI_DIM_SIZE : SPAN_DIM_SIZE) / p->idxSlotSize)
 
 static Slab *openNewSlab(MemCtx *m, int local_idx, int offset, int increment,
         status flags, byte slotSize ){
@@ -69,11 +69,13 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
         span_GrowToNeeded(m, sr);
     }
 
+    byte idxSlotSize = sr->span->idxSlotSize;
+
     byte dims = sr->dims = sr->span->dims = max(sr->dims, sr->span->dims);
-    int increment = slotsAvailable(sr->span, dims-1);
+    int increment = slotsAvailable(sr->span, dims-1) / idxSlotSize;
     Slab *prev_sl = sr->slab;
     while(dims > 1){
-        sr->local_idx = (sr->idx - sr->offset) / increment;
+        sr->local_idx = ((sr->idx - sr->offset) / increment) * idxSlotSize;
         sr->offset += increment*sr->local_idx;
 
         /* find or allocate a space for the new span */
@@ -131,6 +133,18 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     return;
 }
 
+static Slab_UpdateFlags(SlabResult *sr){
+    if(HasFlag(sr->span->type.state, TRACKED)){
+        Slab *sl = (Slab *)sr->slab;
+        sl->meta.pos = sr->local_idx+1;
+        sl->meta.flags |= SLAB_ACTIVE;
+        if(sl->meta.pos >= STRIDE(sr->span)){
+            sl->meta.flags |= SLAB_FULL;
+            sl->meta.pos = -1;
+        }
+    }
+}
+
 static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
     MemCtx *m = sr->span->m;
     if(m == NULL && sr->op != SPAN_OP_GET){
@@ -151,6 +165,7 @@ static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
             }else if(sr->op == SPAN_OP_SET){
                 sr->span->metrics.set = idx;
                 memcpy(ptr, t, p->itemSize);
+                Slab_UpdateFlags(sr);
             }else if(sr->op == SPAN_OP_GET){
                 sr->value = ptr;
                 sr->span->metrics.get = idx;
@@ -162,6 +177,7 @@ static status Span_GetSet(SlabResult *sr, int idx, Abstract *t){
             }else{
                 sr->slab->items[sr->local_idx] = t;
                 sr->span->metrics.set = idx;
+                Slab_UpdateFlags(sr);
             }
         }
         if(sr->op != SPAN_OP_GET){
@@ -207,6 +223,9 @@ Span* Span_MakeMini(MemCtx* m){
 }
 
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
+    Span *sp = Span_Make(m);
+    sp->idxSlotSize = 1;
+
     int slotSize = 1;
     if(itemSize > sizeof(void *)){
         slotSize = itemSize / sizeof(void *);
@@ -214,18 +233,27 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
             slotSize += 1;
         }
     }
+    if(Ifc_Match(cls, TYPE_QUEUE)){
+        slotSize += 1;
+        sp->type.state |= TRACKED;
+        sp->idxSlotSize += 1;
+    }
 
     byte pwrSlot = SPAN_DIM_SIZE;
     while((pwrSlot / 2) >= slotSize){
         pwrSlot /= 2;
     }
 
-    Span *sp = Span_Make(m);
     sp->itemSize = itemSize;
     sp->itemType = type;
     sp->slotSize = sp->slab->slotSize = pwrSlot;
     sp->slab->type.state |= RAW;
     sp->type.state |= RAW;
+    if(type == 0){
+        sp->type.of = TYPE_SPAN;
+    }else{
+        sp->type.of = cls;
+    }
 
     return sp;
 }
