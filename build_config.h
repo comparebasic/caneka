@@ -1,9 +1,19 @@
 #define CC "clang"
-#define CFLAGS "-g -Werror -Wno-incompatible-pointer-types-discards-qualifiers"
-#define INC "-I./include"
+#define CFLAGS cflags
+#define INC inc 
 #define BINARY "caneka"
 #define MAIN "main.c"
 #define ALL allobj
+
+static char *cflags[] = {
+    "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+    NULL
+};
+
+static char *inc[] = {
+    "-I./include",
+    NULL
+};
 
 static BuildSubdir coreobj = { "core", {
     "caneka.c", "mem.c", "string.c", "error.c",
