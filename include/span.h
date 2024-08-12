@@ -1,3 +1,9 @@
+#define SPAN_DEFAULT_STRIDE 16
+#define SPAN_DEFAULT_STRIDE 16
+#define SPAN_DEFAULT_SLOT_SIZE 1
+#define SPAN_DEFAULT_ITEM_SIZE 1
+#define SPAN_DEFAULT_IDX_EXTRA_SLOTS 0
+
 enum span_ops {
     SPAN_OP_GET = 1,
     SPAN_OP_SET = 2,
@@ -5,17 +11,29 @@ enum span_ops {
     SPAN_OP_RESERVE = 4,
 };
 
+typedef void *(*SpanAddrFunc)(SlabResult *sr);   
+
+typedef span_def {
+    int stride;
+    int idxStride;
+    int slotSize;
+    int itemSize;
+    int idxExtraSlots;
+    SpanAddrFunc valueSlab_Make;
+    SpanAddrFunc idxSlab_Make;
+    SpanAddrFunc nextByIdx;
+    SpanAddrFunc nextBySlot;
+    SpanAddrFunc reserve;
+} SpanDef;
+
 typedef struct span {
     Type type;
     MemCtx *m;
-	Slab *slab;
+    SpanDef *def;
+	Slab *root;
 	int nvalues;
     int max_idx;
-    cls itemType;
-    byte slotSize;
-    byte idxSlotSize;
-    byte itemSize;
-	byte dims;
+    SlabProps props;
     struct {
         int get;
         int set;

@@ -22,7 +22,7 @@ typedef struct slab_meta {
     } vals;
 } SlabMeta;
 
-typedef Abstract *Slab[];
+typedef Abstract Slab[];
 
 typedef struct span_slab {
     Slab *items;
@@ -32,19 +32,19 @@ typedef struct span_slab {
 
 typedef struct slab_result {
     Type type;
+    MemCtx *m;
     struct span *span;
-    byte op;
     Slab *slab;
     Slab *shelfSlab;
     int offset;
     int idx;
-    byte dims;
-    byte dimsNeeded;
-    byte slotSize;
-    byte local_idx;
-    byte level;
     Abstract *value;
     Slab *stack[8];
+    byte op;
+    byte dims;
+    byte dimsNeeded;
+    byte local_idx;
+    byte level;
 } SlabResult;
 
 Slab* Slab_Alloc(MemCtx* m);
