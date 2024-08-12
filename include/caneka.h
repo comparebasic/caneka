@@ -35,6 +35,9 @@ typedef struct virt * AbstractPtr;
 
 #define MAX_BASE10 20
 #define SLAB_START_SIZE 2
+
+
+#define SLAB_BYTE_SIZE (16 * sizeof(void *))
 #define STRING_CHUNK_SIZE ((SLAB_BYTE_SIZE - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 

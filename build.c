@@ -107,7 +107,7 @@ static int FolderMake(char *dirname){
         closedir(dir);
     }else if(ENOENT == errno){
         printf("\x1b[%dmMaking Directory %s\x1b[0m\n", MSG_COLOR, dir_cstr.content);
-        mkdir(dir_cstr.content, 0577);
+        mkdir(dir_cstr.content, 0777);
     }
     return TRUE;
 }
@@ -149,11 +149,15 @@ static int BuildObj(char *objName, StrArr *cmd_arr){
         printf("\x1b[%dmBuilding obj %s\x1b[0m\n", MSG_COLOR, objName);
     }
     if(VERBOSE > 1){
-        char *arg = cmd_arr->arr[0];
+        char **cmd = cmd_arr->arr;
+        printf("\x1b[%dmBuilding obj %s\x1b[0m\n", MSG_COLOR, cmd[0]);
+
+        char **arg = &(cmd_arr->arr[1]);
         int i = 0;
-        while (arg != NULL){
-            printf("%s ", arg);
-            arg = cmd_arr->arr[++i];
+        printf("%s ", cmd[0]);
+        while (*arg != NULL){
+            printf("%s ", *arg);
+            arg++;
         }
         printf("\n");
     }
@@ -165,7 +169,10 @@ static int BuildObj(char *objName, StrArr *cmd_arr){
         Fatal(1, "Fork building obj %s", objName); 
     }else if(!child){
         char **cmd = cmd_arr->arr;
-        execv(cmd[0], &(cmd[1]));
+        printf("running: %s ", cmd[0]);
+        execvp(cmd[0], cmd);
+        printf("Execv failed\n");
+        exit(1);
     }
 
     do {
@@ -208,6 +215,7 @@ static int BuildSource(char *fname, char *subdir){
         Arr_AddArr(&arr, cflags);
         Arr_AddArr(&arr, CFLAGS);
         Arr_AddArr(&arr, INC);
+        Arr_Add(&arr, "-c");
         Arr_Add(&arr, "-o");
         Arr_Add(&arr, build_cstr.content);
         Arr_Add(&arr, source_cstr.content);

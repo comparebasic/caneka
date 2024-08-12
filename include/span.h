@@ -13,7 +13,7 @@ enum span_ops {
 
 typedef void *(*SpanAddrFunc)(SlabResult *sr);   
 
-typedef span_def {
+typedef struct span_def {
     int stride;
     int idxStride;
     int slotSize;

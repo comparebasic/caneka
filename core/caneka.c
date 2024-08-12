@@ -33,10 +33,10 @@ char *State_ToString(status state){
         return "HASHED";
     }else if((state & INVERTED) != 0){
         return "INVERTED";
-    }else if((state & END) != 0){
-        return "END";
     }else if(HasFlag(state, NEXT|KO)){
         return "NEXT+KO";
+    }else if((state & END) != 0){
+        return "END";
     }else if((state & NEXT) != 0){
         return "NEXT";
     }else if((state & KO) != 0){
