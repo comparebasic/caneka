@@ -5,7 +5,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -142,37 +144,46 @@ static int NeedsBuild(Cstr *source_cstr, Cstr *build_cstr){
     }
 }
 
-static int BuildObj(char *objName, StrArr *cmd){
+static int BuildObj(char *objName, StrArr *cmd_arr){
     if(VERBOSE){
-        printf("\x1b[%dmBuilding binary %s\x1b[0m\n", MSG_COLOR, binaryName);
+        printf("\x1b[%dmBuilding obj %s\x1b[0m\n", MSG_COLOR, objName);
+    }
+    if(VERBOSE > 1){
+        char *arg = cmd_arr->arr[0];
+        int i = 0;
+        while (arg != NULL){
+            printf("%s ", arg);
+            arg = cmd_arr->arr[++i];
+        }
+        printf("\n");
     }
     pid_t child, p;
     int r;
 
     child = fork();
     if(child == (pid_t)-1){
-        Fatal("Fork building obj %s", objName); 
+        Fatal(1, "Fork building obj %s", objName); 
     }else if(!child){
-        char *cmd = cmd->arr;
-        execv(*cmd, ++cmd);
+        char **cmd = cmd_arr->arr;
+        execv(cmd[0], &(cmd[1]));
     }
 
     do {
         r = 0;
-        p = waitpid(child, &r);
+        p = waitpid(child, &r, 0);
         if(p == (pid_t)-1 && errno != EINTR){
-            Fatal("Build command failed for obj %s", objName); 
+            Fatal(1, "Build command failed for obj %s", objName); 
             break;
         }
     } while(p != child);
 
     if(!WIFEXITED(r)){
-        Fatal("Build command failed for obj %s process did not exit propery", objName); 
+        Fatal(1, "Build command failed for obj %s process did not exit propery", objName); 
     }
 
     int code = WEXITSTATUS(r);    
     if(code != 0){
-        Fatal("Build command failed for obj %s return code %d", objName, code); 
+        Fatal(1, "Build command failed for obj %s return code %d", objName, code); 
     }
 
     return TRUE;
@@ -204,17 +215,8 @@ static int BuildSource(char *fname, char *subdir){
         if(VERBOSE){
             printf("\x1b[%dmBuilding file %s -> %s\x1b[0m\n", MSG_COLOR, source_cstr.content, build_cstr.content);
         }
-        char *arg = arr.arr[0];
-        int i = 0;
-        if(VERBOSE > 1){
-            while (arg != NULL){
-                printf("%s ", arg);
-                arg = arr.arr[++i];
-            }
-            printf("\n");
-        }
 
-        return TRUE;
+        return BuildObj(source_cstr.content, &arr);
     }
     return FALSE;
 }
@@ -236,6 +238,8 @@ int main(){
         }
         set++;
     }
+    /*
     BuildBinary(BINARY, ALL);
+    */
     printf("\x1b[%dmDone building\x1b[0m\n", DONE_COLOR);
 }
