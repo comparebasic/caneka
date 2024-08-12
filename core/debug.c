@@ -201,6 +201,7 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
 }
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    /*
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
@@ -231,6 +232,7 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
         printf(" idx:%d", rbl->idx);
     }
     printf(">\x1b[0m");
+    */
 }
 
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -277,6 +279,7 @@ static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean 
 }
 
 static void slab_Summarize(Slab *slab, char *msg, int color, boolean extended){
+    /*
     printf("%s\x1b[0;%dmL<incr%d[%d] ", msg, color, slab->increment, slab->offset);
     boolean first = TRUE;
     for(int i = 0; i < SPAN_DIM_SIZE; i++){
@@ -299,9 +302,11 @@ static void slab_Summarize(Slab *slab, char *msg, int color, boolean extended){
         }
     }
     printf("\x1b[0;%dm>\x1b[0m", color);
+    */
 }
 
 static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    /*
     Slab *slab = (Slab *)a;
     if(slab->increment != SPAN_DIM_SIZE){
         return slab_Summarize(slab, msg, color, extended);
@@ -330,9 +335,11 @@ static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean exte
         }
     }
     printf("\x1b[%dm>\x1b[0m", color);
+    */
 }
 
 static void showSlab(Slab *sl, int color, boolean extended, int indent){
+    /*
     Slab_Print((Abstract *)sl, TYPE_SLAB, "", color, extended); 
     if(sl->increment > SPAN_DIM_SIZE){
         indent++;
@@ -353,9 +360,11 @@ static void showSlab(Slab *sl, int color, boolean extended, int indent){
             }
         }
     }
+    */
 }
 
 static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+/*
     Span *p = (Span *)as(a, TYPE_SPAN);
     printf("%s\n\x1b[;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
         p->nvalues, p->dims, sizeof(Abstract *)*p->slotSize);
@@ -363,6 +372,7 @@ static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean exte
     indent_Print(1);
     showSlab(p->slab, color, extended, 1);
     printf("\n\x1b[0;%dm>\x1b[0m\n", color);
+    */
 }
 
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -444,12 +454,14 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
 }
 
 status Debug_Init(MemCtx *m){
+    /*
     DebugM = m;
     if(DebugPrintChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);
         DebugPrintChain = Chain_Make(m, funcs);
         return SUCCESS;
     }
+    */
     return NOOP;
 }
 

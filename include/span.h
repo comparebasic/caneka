@@ -41,7 +41,7 @@ typedef struct span {
     } metrics;
 } Span;
 
-Span* Span_Make(MemCtx* m);
+Span* Span_Make(MemCtx* m, cls type);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
 status Span_Set(Span *p, int idx, Abstract *t);
 status Span_Remove(Span *p, int idx);
@@ -56,3 +56,16 @@ Abstract *Span_Search(Span *p, void *a, EqualFunc eq);
 void *Span_GetSelected(Span *p);
 void *Span_ReserveNext(Span *p);
 #define Span_NextIdx(p) (p->max_idx+1)
+
+/* span type makers */
+SpanDef *Span4x16_MakeDef();
+SpanDef *Span16_MakeDef();
+SpanDef *Span16x32m_MakeDef();
+SpanDef *Span4kx32m_MakeDef();
+SpanDef *SpanString_MakeDef();
+
+void *Span_valueSlab_Make(SlabResult *sr);
+void *Span_idxSlab_Make(SlabResult *sr);
+void *Span_nextByIdx(SlabResult *sr);
+void *Span_nextBySlot(SlabResult *sr);
+void *Span_reserve(SlabResult *sr);

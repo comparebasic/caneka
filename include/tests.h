@@ -9,3 +9,4 @@ status Roebling_Tests(MemCtx *gm);
 status Table_Tests(MemCtx *gm);
 status Xml_Tests(MemCtx *gm);
 status Match_Tests(MemCtx *gm);
+status SpanSetup_Tests(MemCtx *gm);

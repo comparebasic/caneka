@@ -9,22 +9,26 @@
 #include <stdarg.h>
 #include <unistd.h>
 
-#define TRUE 1
-#define FALSE 0
-
-#define MSG_COLOR 33
-#define ERR_COLOR 31
-#define DONE_COLOR 32
-#define STRMAX 1024
-#define ARRMAX 64
 
 typedef struct build_subdir {
     char *name;
     char *sources[];
 } BuildSubdir;
 
+/* include configuration */
 #include "build_config.h"
 
+/* remaining header setup */
+
+#define TRUE 1
+#define FALSE 0
+
+#define MSG_COLOR 33
+#define DEBUG_COLOR 35
+#define ERR_COLOR 31
+#define DONE_COLOR 32
+#define STRMAX 1024
+#define ARRMAX 64
 #ifndef VERBOSE 
     #define VERBOSE 0
 #endif
@@ -38,6 +42,8 @@ typedef struct str_arr {
     char *arr[ARRMAX];
     int nvalues;
 } StrArr;
+
+static Cstr lib_cstr;
 
 /* util functions */
 static void Fatal(int code, char *msg, ...){
@@ -54,6 +60,18 @@ static void Fatal(int code, char *msg, ...){
     printf("\n");
 
     exit(code);
+}
+
+static void Debug(char *msg, ...){
+	va_list args;
+    va_start(args, msg);
+    if(ERR_COLOR){
+        printf("\x1b[%dm", DEBUG_COLOR);
+    }
+    vprintf(msg, args);
+    if(DEBUG_COLOR){
+        printf("\x1b[0m");
+    }
 }
 
 int Cstr_Add(Cstr *s, char *str){
@@ -148,59 +166,59 @@ static int NeedsBuild(Cstr *source_cstr, Cstr *build_cstr){
     }
 }
 
-static int BuildObj(char *objName, StrArr *cmd_arr){
-    if(VERBOSE){
-        printf("\x1b[%dmBuilding obj %s\x1b[0m\n", MSG_COLOR, objName);
-    }
+static int subProcess(StrArr *cmd_arr, char *msg){
+    pid_t child, p;
+    int r;
+
     if(VERBOSE > 1){
         char **cmd = cmd_arr->arr;
-        printf("\x1b[%dmBuilding obj %s\x1b[0m\n", MSG_COLOR, cmd[0]);
-
-        char **arg = &(cmd_arr->arr[1]);
-        int i = 0;
-        printf("%s ", cmd[0]);
+        char **arg = &(cmd[1]);
+        Debug("%s ", cmd[0]);
         while (*arg != NULL){
-            printf("%s ", *arg);
+            Debug("%s ", *arg);
             arg++;
         }
         printf("\n");
     }
-    pid_t child, p;
-    int r;
 
     child = fork();
     if(child == (pid_t)-1){
-        Fatal(1, "Fork building obj %s", objName); 
+        Fatal(1, "Fork for %s", msg); 
     }else if(!child){
         char **cmd = cmd_arr->arr;
-        printf("running: %s ", cmd[0]);
         execvp(cmd[0], cmd);
-        printf("Execv failed\n");
-        exit(1);
+        Fatal(1, "Execv failed\n");
+        return FALSE;
     }
 
     do {
         r = 0;
         p = waitpid(child, &r, 0);
         if(p == (pid_t)-1 && errno != EINTR){
-            Fatal(1, "Build command failed for obj %s", objName); 
+            Fatal(1, "subProcess failed for  %s", msg); 
             break;
         }
     } while(p != child);
 
-    if(!WIFEXITED(r)){
-        Fatal(1, "Build command failed for obj %s process did not exit propery", objName); 
+    if(p != child || !WIFEXITED(r)){
+        Fatal(1, "subProcess failed for %s process did not exit propery", msg); 
+        return FALSE;
     }
 
     int code = WEXITSTATUS(r);    
     if(code != 0){
-        Fatal(1, "Build command failed for obj %s return code %d", objName, code); 
+        Fatal(1, "subProcess failed for obj %s return code %d", msg, code); 
+        return FALSE;
     }
 
     return TRUE;
 }
 
-static int BuildSource(char *fname, char *subdir){
+static int BuildObj(char *objName, StrArr *cmd_arr){
+    return subProcess(cmd_arr, objName);
+}
+
+static int BuildSource(char *binary, char *fname, char *subdir){
     StrArr arr;
 
     Cstr build_cstr;
@@ -228,31 +246,57 @@ static int BuildSource(char *fname, char *subdir){
             printf("\x1b[%dmBuilding file %s -> %s\x1b[0m\n", MSG_COLOR, source_cstr.content, build_cstr.content);
         }
 
-        return BuildObj(source_cstr.content, &arr);
+        if(BuildObj(source_cstr.content, &arr)){
+            Arr_Init(&arr, AR);
+            Arr_Add(&arr, "-rc");
+            Arr_Add(&arr, lib_cstr.content);
+            Arr_Add(&arr, build_cstr.content);
+
+            return subProcess(&arr, build_cstr.content);
+        }
     }
     return FALSE;
 }
 
 static int BuildBinary(char *binaryName){
     printf("\x1b[%dmBuilding binary %s\x1b[0m\n", MSG_COLOR, binaryName);
-    return TRUE;
+    StrArr arr;
+
+    Cstr binary_cstr;
+    Cstr_Init(&binary_cstr, "build/");
+    Cstr_Add(&binary_cstr, binaryName);
+
+    Arr_Init(&arr, CC);
+    Arr_AddArr(&arr, cflags);
+    Arr_AddArr(&arr, CFLAGS);
+    Arr_AddArr(&arr, INC);
+    Arr_Add(&arr, "-o");
+    Arr_Add(&arr, binary_cstr.content);
+    Arr_Add(&arr, MAIN);
+    Arr_Add(&arr, lib_cstr.content);
+
+    return subProcess(&arr, binary_cstr.content);
 }
+
 
 /* main */
 int main(){
+    Cstr_Init(&lib_cstr, "build/lib");
+    Cstr_Add(&lib_cstr, BINARY);
+    Cstr_Add(&lib_cstr, ".a");
+
     BuildSubdir **set = ALL;
     while(*set != NULL){
         BuildSubdir *dir = *set;
         FolderMake(dir->name);
         char **fname = dir->sources;
         while(*fname != NULL){
-            BuildSource(*fname, dir->name);
+            BuildSource(BINARY, *fname, dir->name);
             fname++;
         }
         set++;
     }
-    /*
-    BuildBinary(BINARY, ALL);
-    */
-    printf("\x1b[%dmDone building\x1b[0m\n", DONE_COLOR);
+    if(BuildBinary(BINARY)){
+        printf("\x1b[%dmDone building\x1b[0m\n", DONE_COLOR);
+    }
 }

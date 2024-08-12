@@ -1,20 +1,20 @@
 static SpanDef def;
 static boolean _init = FALSE;
 
-#ifndef stride
-    static int stride = SPAN_DEFAULT_STRIDE;
+#ifndef valueSlab_Make
+    static void *(*valueSlab_Make)(SlabResult *sr) = Span_valueSlab_Make;
 #endif
-#ifndef idxStride
-    static int idxStride = SPAN_DEFAULT_STRIDE;
+#ifndef idxSlab_Make
+    static void *(*idxSlab_Make)(SlabResult *sr) = Span_idxSlab_Make;
 #endif
-#ifndef slotsSize
-    static int slotSize = SPAN_DEFAULT_SLOT_SIZE;
+#ifndef nextByIdx
+    static void *(*nextByIdx)(SlabResult *sr) = Span_nextByIdx;
 #endif
-#ifndef itemSize
-    static int itemSize = SPAN_DEFAULT_ITEM_SIZE;
+#ifndef nextBySlot
+    static void *(*nextBySlot)(SlabResult *sr) = Span_nextBySlot;
 #endif
-#ifndef idxExtraSlots 
-    static int idxExtraSlots = SPAN_DEFAULT_IDX_EXTRA_SLOTS;
+#ifndef reserve
+    static void *(*reserve)(SlabResult *sr) = Span_reserve;
 #endif
 
 static SpanDef *spanDef_Make(){

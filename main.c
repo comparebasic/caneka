@@ -21,20 +21,13 @@ static status test(MemCtx *m){
     r |= ProtoHttp_Tests(m);
     r |= Xml_Tests(m);
     r |= Span_Tests(m);
-    */
     r |= Match_Tests(m);
     r |= Roebling_Tests(m);
+    */
+    r |= SpanSetup_Tests(m);
     return r;
 }
 
-
-static Abstract *hdrCookieProcess(MemCtx *source, Abstract *a){
-    Req *req = (Req *) as(source, TYPE_REQ);
-    MemCtx *m = MemCtx_FromHandle((MemHandle *)req);
-    String *s = (String *)asIfc(a, TYPE_STRING);
-    Debug_Print((void *)s, 0, "Processing Cookie", COLOR_CYAN, TRUE);
-    return (Abstract *)s;
-}
 
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
@@ -78,7 +71,9 @@ int main(int argc, char **argv){
     }
 
     MemCtx *m = MemCtx_Make();
+    /*
     Caneka_Init(m);
+    */
     
     if(argc > 1){
         for(int i = 1; i < argc; i++){
