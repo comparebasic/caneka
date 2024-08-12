@@ -17,6 +17,10 @@ typedef struct build_subdir {
 
 #include "build_config.h"
 
+#ifndef VERBOSE 
+    #define VERBOSE 0
+#endif
+
 #define MSG_COLOR 33
 #define ERR_COLOR 31
 #define DONE_COLOR 32
@@ -138,6 +142,42 @@ static int NeedsBuild(Cstr *source_cstr, Cstr *build_cstr){
     }
 }
 
+static int BuildObj(char *objName, StrArr *cmd){
+    if(VERBOSE){
+        printf("\x1b[%dmBuilding binary %s\x1b[0m\n", MSG_COLOR, binaryName);
+    }
+    pid_t child, p;
+    int r;
+
+    child = fork();
+    if(child == (pid_t)-1){
+        Fatal("Fork building obj %s", objName); 
+    }else if(!child){
+        char *cmd = cmd->arr;
+        execv(*cmd, ++cmd);
+    }
+
+    do {
+        r = 0;
+        p = waitpid(child, &r);
+        if(p == (pid_t)-1 && errno != EINTR){
+            Fatal("Build command failed for obj %s", objName); 
+            break;
+        }
+    } while(p != child);
+
+    if(!WIFEXITED(r)){
+        Fatal("Build command failed for obj %s process did not exit propery", objName); 
+    }
+
+    int code = WEXITSTATUS(r);    
+    if(code != 0){
+        Fatal("Build command failed for obj %s return code %d", objName, code); 
+    }
+
+    return TRUE;
+}
+
 static int BuildSource(char *fname, char *subdir){
     StrArr arr;
 
@@ -161,21 +201,25 @@ static int BuildSource(char *fname, char *subdir){
         Arr_Add(&arr, build_cstr.content);
         Arr_Add(&arr, source_cstr.content);
 
-        printf("\x1b[%dmBuilding file %s -> %s\x1b[0m\n", MSG_COLOR, source_cstr.content, build_cstr.content);
+        if(VERBOSE){
+            printf("\x1b[%dmBuilding file %s -> %s\x1b[0m\n", MSG_COLOR, source_cstr.content, build_cstr.content);
+        }
         char *arg = arr.arr[0];
         int i = 0;
-        while (arg != NULL){
-            printf("%s ", arg);
-            arg = arr.arr[++i];
+        if(VERBOSE > 1){
+            while (arg != NULL){
+                printf("%s ", arg);
+                arg = arr.arr[++i];
+            }
+            printf("\n");
         }
-        printf("\n");
 
         return TRUE;
     }
     return FALSE;
 }
 
-static int BuildBinary(char *binaryName, BuildSubdir *obj[]){
+static int BuildBinary(char *binaryName){
     printf("\x1b[%dmBuilding binary %s\x1b[0m\n", MSG_COLOR, binaryName);
     return TRUE;
 }

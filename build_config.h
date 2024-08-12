@@ -4,6 +4,7 @@
 #define BINARY "caneka"
 #define MAIN "main.c"
 #define ALL allobj
+#define VERBOSE 2
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
