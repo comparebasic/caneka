@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static int stride = STRING_CHUNK_SIZE;
+static int stride = STRING_CHUNK_SIZE / sizeof(void *);
 static int idxStride = 16;
 static int idxExtraSlots = 0;
 static int slotSize = SPAN_DEFAULT_SLOT_SIZE;
