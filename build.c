@@ -12,6 +12,12 @@
 #define TRUE 1
 #define FALSE 0
 
+#define MSG_COLOR 33
+#define ERR_COLOR 31
+#define DONE_COLOR 32
+#define STRMAX 1024
+#define ARRMAX 64
+
 typedef struct build_subdir {
     char *name;
     char *sources[];
@@ -23,12 +29,6 @@ typedef struct build_subdir {
     #define VERBOSE 0
 #endif
 
-#define MSG_COLOR 33
-#define ERR_COLOR 31
-#define DONE_COLOR 32
-#define STRMAX 1024
-#define ARRMAX 64
-
 typedef struct cstr {
     char content[STRMAX];
     int length;
@@ -39,6 +39,7 @@ typedef struct str_arr {
     int nvalues;
 } StrArr;
 
+/* util functions */
 static void Fatal(int code, char *msg, ...){
 	va_list args;
     va_start(args, msg);
@@ -83,6 +84,9 @@ int Arr_Init(StrArr *arr, char *str){
 }
 
 int Arr_Add(StrArr *arr, char *str){
+    if(arr->nvalues+1 >= ARRMAX-1){
+        Fatal(1, "Array max exceeded");
+    }
     arr->arr[arr->nvalues] = str;
     arr->nvalues++;
     return TRUE;
@@ -90,13 +94,13 @@ int Arr_Add(StrArr *arr, char *str){
 
 int Arr_AddArr(StrArr *arr, char *str[]){
     while(*str != NULL){
-        arr->arr[arr->nvalues] = *str;
-        arr->nvalues++;
+        Arr_Add(arr, *str);
         str++;
     }
     return TRUE;
 }
 
+/* build functions */
 static int FolderMake(char *dirname){
     Cstr dir_cstr;
     Cstr_Init(&dir_cstr, "build/");
@@ -234,6 +238,7 @@ static int BuildBinary(char *binaryName){
     return TRUE;
 }
 
+/* main */
 int main(){
     BuildSubdir **set = ALL;
     while(*set != NULL){
