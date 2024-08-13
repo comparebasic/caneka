@@ -105,6 +105,7 @@ static void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     memset(sr, 0, sizeof(SlabResult));
 
     sr->op = op;
+    sr->m = p->m;
     sr->span = p;
     sr->dims = p->dims;
     sr->slab = p->slab;

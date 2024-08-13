@@ -22,7 +22,7 @@ typedef struct slab_meta {
     } vals;
 } SlabMeta;
 
-typedef Abstract Slab[];
+typedef Abstract *Slab;
 
 typedef struct span_slab {
     Slab *items;

@@ -17,19 +17,23 @@ static SpanDef *SpanDef_FromCls(word cls){
 }
 
 void *Span_valueSlab_Make(SlabResult *sr){
-    return NULL;
+    SpanDef *def = sr->span->def;
+    return MemCtx_Alloc(sr->m, sizeof(Abstract *)*def->stride*def->slotSize);
 }
 
 void *Span_idxSlab_Make(SlabResult *sr){
-    return NULL;
+    SpanDef *def = sr->span->def;
+    return MemCtx_Alloc(sr->m, sizeof(Abstract *)*(1+def->idxExtraSlots)*def->idxStride);
 }
 
 void *Span_nextByIdx(SlabResult *sr){
-    return NULL;
+    SpanDef *def = sr->span->def;
+    return (void *)(sr->slab[sr->local_idx*(def->slotSize)]);
 }
 
 void *Span_nextBySlot(SlabResult *sr){
-    return NULL;
+    SpanDef *def = sr->span->def;
+    return (void *)(sr->slab[sr->local_idx*(1+def->idxExtraSlots)]);
 }
 
 void *Span_reserve(SlabResult *sr){
