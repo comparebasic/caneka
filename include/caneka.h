@@ -37,7 +37,7 @@ typedef struct virt * AbstractPtr;
 #define SLAB_START_SIZE 2
 
 #define STRING_SEG_FOOTPRINT 256
-#define STRING_CHUNK_SIZE ((STRING_SEG_FOOTPRINT - (sizeof(struct typehdr)+sizeof(word)+sizeof(struct string *)))-1)
+#define STRING_CHUNK_SIZE ((STRING_SEG_FOOTPRINT - (sizeof(struct typehdr)+sizeof(int)+sizeof(struct string *))))
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(word)))-1
 
 #define as(x, t) (((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))

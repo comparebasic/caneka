@@ -4,6 +4,8 @@
 #define SPAN_DEFAULT_ITEM_SIZE 1
 #define SPAN_DEFAULT_IDX_EXTRA_SLOTS 0
 
+struct span_def;
+
 enum span_ops {
     SPAN_OP_GET = 1,
     SPAN_OP_SET = 2,
@@ -11,7 +13,8 @@ enum span_ops {
     SPAN_OP_RESERVE = 4,
 };
 
-typedef void *(*SpanAddrFunc)(SlabResult *sr);   
+typedef void *(*SpanDefFunc)(MemCtx *m, struct span_def *def);
+typedef void *(*SpanAddrFunc)(SlabResult *sr);
 
 typedef struct span_def {
     int stride;
@@ -19,8 +22,8 @@ typedef struct span_def {
     int slotSize;
     int itemSize;
     int idxExtraSlots;
-    SpanAddrFunc valueSlab_Make;
-    SpanAddrFunc idxSlab_Make;
+    SpanDefFunc valueSlab_Make;
+    SpanDefFunc idxSlab_Make;
     SpanAddrFunc nextByIdx;
     SpanAddrFunc nextBySlot;
     SpanAddrFunc reserve;
@@ -65,8 +68,8 @@ SpanDef *Span16x32m_MakeDef();
 SpanDef *Span4kx32m_MakeDef();
 SpanDef *SpanString_MakeDef();
 
-void *Span_valueSlab_Make(SlabResult *sr);
-void *Span_idxSlab_Make(SlabResult *sr);
+void *Span_valueSlab_Make(MemCtx *m, SpanDef *def);
+void *Span_idxSlab_Make(MemCtx *m, SpanDef *def);
 void *Span_nextByIdx(SlabResult *sr);
 void *Span_nextBySlot(SlabResult *sr);
 void *Span_reserve(SlabResult *sr);

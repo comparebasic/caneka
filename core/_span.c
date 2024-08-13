@@ -38,15 +38,13 @@ static SpanDef *SpanDef_FromCls(word cls){
     return NULL;
 }
 
-void *Span_valueSlab_Make(SlabResult *sr){
-    SpanDef *def = sr->span->def;
+void *Span_valueSlab_Make(MemCtx *m, SpanDef *def){
     i64 sz = sizeof(Abstract *)*def->stride*def->slotSize;
-    return MemCtx_Alloc(sr->m, sz);
+    return MemCtx_Alloc(m, sz);
 }
 
-void *Span_idxSlab_Make(SlabResult *sr){
-    SpanDef *def = sr->span->def;
-    return MemCtx_Alloc(sr->m, sizeof(Abstract *)*(1+def->idxExtraSlots)*def->idxStride);
+void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
+    return MemCtx_Alloc(m, sizeof(Abstract *)*(1+def->idxExtraSlots)*def->idxStride);
 }
 
 void *Span_nextByIdx(SlabResult *sr){
