@@ -9,7 +9,6 @@
 #include <stdarg.h>
 #include <unistd.h>
 
-
 typedef struct build_subdir {
     char *name;
     char *sources[];
@@ -32,6 +31,9 @@ typedef struct build_subdir {
 #ifndef VERBOSE 
     #define VERBOSE 0
 #endif
+
+static int REBUILD_ALL = FALSE;
+static int REBUILD_BINARY = FALSE;
 
 typedef struct cstr {
     char content[STRMAX];
@@ -233,6 +235,7 @@ static int BuildSource(char *binary, char *fname, char *subdir){
     Cstr_Add(&source_cstr, fname);
 
     if(NeedsBuild(&source_cstr, &build_cstr)){
+        REBUILD_BINARY = TRUE;
         Arr_Init(&arr, CC);
         Arr_AddArr(&arr, cflags);
         Arr_AddArr(&arr, CFLAGS);
@@ -296,7 +299,8 @@ int main(){
         }
         set++;
     }
-    if(BuildBinary(BINARY)){
-        printf("\x1b[%dmDone building\x1b[0m\n", DONE_COLOR);
+    if(REBUILD_BINARY){
+        BuildBinary(BINARY);
     }
+    printf("\x1b[%dmDone building\x1b[0m\n", DONE_COLOR);
 }
