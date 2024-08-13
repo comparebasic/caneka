@@ -13,6 +13,8 @@ status SpanSetup_Tests(MemCtx *gm){
     Span *p;
     i64 used = 0;
     i64 delta = 0;
+    int idx = 0;
+    int dims = 0;
     p = Span_Make(m, TYPE_SPAN);
     r |= Test(p->def->stride == 16, "Span stride is 16 %d", p->def->stride);
     r |= Test(p->def->idxStride == 16, "Span idxStride is 16 %d", p->def->idxStride);
@@ -22,6 +24,13 @@ status SpanSetup_Tests(MemCtx *gm){
     p->def->valueSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used;
     r |= Test(delta == 128, "Span slab has allocated 128 bytes, have %ld", delta);
+    idx = 100;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
+
+    idx = 2000;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
 
     p = Span_Make(m, TYPE_QUEUE_SPAN);
     r |= Test(p->def->stride == 16, "Queue stride is 16 %d", p->def->stride);
@@ -31,6 +40,12 @@ status SpanSetup_Tests(MemCtx *gm){
     p->def->valueSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used; 
     r |= Test(delta == 128, "Queue slab has allocated 128 bytes, have %ld", delta);
+    idx = 100;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
+    idx = 2000;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
 
     p = Span_Make(m, TYPE_MINI_SPAN);
     r |= Test(p->def->stride == 4, "Mini stride is 4 %d", p->def->stride);
@@ -40,6 +55,12 @@ status SpanSetup_Tests(MemCtx *gm){
     p->def->valueSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used;
     r |= Test(delta == 32, "Mini slab has allocated 32 bytes, have %ld", delta);
+    idx = 100;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
+    idx = 2000;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
 
     p = Span_Make(m, TYPE_STRING_SPAN);
     r |= Test(p->def->stride == 30, "StringSpan stride is 30 %d", p->def->stride);
@@ -49,6 +70,12 @@ status SpanSetup_Tests(MemCtx *gm){
     p->def->valueSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used; 
     r |= Test(delta == 256, "String span has allocated 256 bytes, have %ld", delta);
+    idx = 100;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
+    idx = 2000;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
 
     p = Span_Make(m, TYPE_SLAB_SPAN);
     r |= Test(p->def->stride == 512, "SlabSpan stride is 512 %d", p->def->stride);
@@ -58,6 +85,12 @@ status SpanSetup_Tests(MemCtx *gm){
     p->def->valueSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used;
     r |= Test(delta == 4096, "SlabSpan span has allocated 4096 bytes, have %ld", delta);
+    idx = 100;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
+    idx = 2000;
+    dims = SpanDef_GetDimNeeded(p->def, idx);
+    printf("Idx dims for %d %d(dims)\n", idx, dims); 
 
     return r;
 }

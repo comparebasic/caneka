@@ -75,3 +75,5 @@ void *Span_nextBySlot(SlabResult *sr);
 void *Span_reserve(SlabResult *sr);
 
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);
+/* SpanDef */
+byte SpanDef_GetDimNeeded(SpanDef *def, int idx);

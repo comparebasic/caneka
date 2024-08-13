@@ -1,6 +1,46 @@
 #include <external.h>
 #include <caneka.h>
 
+static int availableByDim(int dims, int stride){
+    int _dims = dims;
+    int n = stride;
+    int r = n;
+    if(dims <= 0){
+        r = 1;
+    }else if(dims == 1){
+        printf("Dims %d has %d idxSlots\n", _dims, r);
+        return stride;
+    }else{
+        while(dims > 1){
+            n *= stride;
+            dims--;
+        }
+        r = n;
+    }
+
+    printf("Dims %d has %d idxSlots\n", _dims, r);
+    return r;
+}
+
+byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
+    if(idx < def->stride){
+        return 0;
+    }
+
+    int nslabs = idx / def->stride;
+    if(idx % nslabs > 0){
+        nslabs++;
+    }
+    printf("Get %d slabs\n", nslabs);
+
+    int dims = 1;
+    while(availableByDim(dims, def->idxStride) < nslabs){
+        dims++;
+    }
+
+    return dims;
+}
+
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     memset(sr, 0, sizeof(SlabResult));
 
