@@ -4,6 +4,17 @@
 #define SPAN_DEFAULT_ITEM_SIZE 1
 #define SPAN_DEFAULT_IDX_EXTRA_SLOTS 0
 
+enum span_flags {
+    SLAB_ACTIVE = 1 << 0,
+    SLAB_FULL = 1 << 1,
+    SLAB_ALPHA = 1 << 2,
+    SLAB_BRAVO = 1 << 3,
+    SLAB_DELTA = 1 << 4,
+    SLAB_ECHO = 1 << 5,
+    SLAB_FOXTROT = 1 << 6,
+    SLAB_GOLF = 1 << 7,
+};
+
 struct span_def;
 
 enum span_ops {
@@ -37,7 +48,6 @@ typedef struct span {
     byte dims;
 	int nvalues;
     int max_idx;
-    SlabProps props;
     struct {
         int get;
         int set;
