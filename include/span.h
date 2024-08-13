@@ -31,6 +31,7 @@ typedef struct span {
     MemCtx *m;
     SpanDef *def;
 	Slab *root;
+    byte dims;
 	int nvalues;
     int max_idx;
     SlabProps props;
@@ -69,3 +70,5 @@ void *Span_idxSlab_Make(SlabResult *sr);
 void *Span_nextByIdx(SlabResult *sr);
 void *Span_nextBySlot(SlabResult *sr);
 void *Span_reserve(SlabResult *sr);
+
+void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);

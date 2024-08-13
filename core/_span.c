@@ -1,6 +1,28 @@
 #include <external.h>
 #include <caneka.h>
 
+void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
+    memset(sr, 0, sizeof(SlabResult));
+
+    sr->op = op;
+    sr->m = p->m;
+    sr->span = p;
+    sr->dims = p->dims;
+    sr->slab = p->root;
+    sr->idx = idx;
+    sr->local_idx = sr->idx;
+    sr->offset = 0;
+
+    sr->dimsNeeded = 1;
+    /*
+    while(sr->idx >= slotsAvailable(sr->span, sr->dimsNeeded)) {
+        sr->dimsNeeded++;
+    };
+    */
+
+    return;
+}
+
 static SpanDef *SpanDef_FromCls(word cls){
     if(cls == TYPE_SPAN){
         return Span16_MakeDef();
@@ -18,7 +40,8 @@ static SpanDef *SpanDef_FromCls(word cls){
 
 void *Span_valueSlab_Make(SlabResult *sr){
     SpanDef *def = sr->span->def;
-    return MemCtx_Alloc(sr->m, sizeof(Abstract *)*def->stride*def->slotSize);
+    i64 sz = sizeof(Abstract *)*def->stride*def->slotSize;
+    return MemCtx_Alloc(sr->m, sz);
 }
 
 void *Span_idxSlab_Make(SlabResult *sr){
@@ -42,6 +65,7 @@ void *Span_reserve(SlabResult *sr){
 
 Span *Span_Make(MemCtx *m, cls type){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
+    p->m = m;
     p->def = SpanDef_FromCls(type);
     return p;
 }

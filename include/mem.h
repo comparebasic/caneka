@@ -17,7 +17,6 @@ typedef struct mem_handle  {
     struct mem_ctx *m;
 } MemHandle;
 
-
 #define MemCtx_Bind(m, inst) do { inst->m = m; m->instance = (void *)inst;} while(0);
 
 size_t MemCount();
@@ -29,6 +28,7 @@ void *MemSlab_GetStart(MemSlab *sl);
 MemSlab *MemSlab_Make(MemCtx *m);
 size_t MemSlab_Available(MemSlab *sl);
 void *MemSlab_Alloc(MemSlab *sl, size_t s);
+i64 MemCtx_Used(MemCtx *m);
 
 /* utils */
 MemCtx *MemCtx_FromHandle(MemHandle *a);

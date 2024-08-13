@@ -46,6 +46,17 @@ void *MemCtx_Alloc(MemCtx *m, size_t s){
     return MemSlab_Alloc(sl, s); 
 }
 
+i64 MemCtx_Used(MemCtx *m){
+    i64 n = 0;
+    MemSlab *sl = m->start_sl;
+    while(sl != NULL){
+        n += (sl->addr - MemSlab_GetStart(sl));
+        sl = sl->next;
+    }
+
+    return n;
+}
+
 void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
     void *p = MemCtx_Alloc(m, s);
     memcpy(p, orig, origsize);
