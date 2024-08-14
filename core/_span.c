@@ -74,13 +74,13 @@ status Span_Move(Span *p, int fromIdx, int toIdx){
 /* internals */
 static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
     boolean expand = sr->span->dims < sr->dimsNeeded;
-    int dims = sr->span->dims;
     SpanDef *def = sr->span->def;
+    Span *p = sr->span;
 
     if(expand){
         Slab *exp_sl = NULL;
         Slab *shelf_sl = NULL;
-        while(dims < sr->dimsNeeded){
+        while(p->dims < sr->dimsNeeded){
             Slab *new_sl = Span_idxSlab_Make(m, def);
 
             if(exp_sl == NULL){
@@ -91,13 +91,55 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
             }
 
             exp_sl = new_sl;
-            dims++;
+            p->dims++;
         }
         exp_sl[0] = (Abstract *)shelf_sl;
     }
 
     sr->slab = sr->span->root;
     return SUCCESS;
+}
+
+static status Span_Expand(MemCtx *m, SlabResult *sr){
+    /* resize the span by adding dimensions and slabs as needed */
+    if(sr->dimsNeeded > sr->dims){
+        if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
+            return MISS;
+        }
+        span_GrowToNeeded(m, sr);
+    }
+    Span *p = sr->span;
+
+    byte dims = p->dims;
+    Slab *prev_sl = sr->slab;
+    while(dims > 1){
+        int increment = availableByDim(dims-1, p->def->idxStride);
+        sr->local_idx = ((sr->idx - sr->offset) / increment);
+        sr->offset += increment*sr->local_idx;
+
+        /* find or allocate a space for the new span */
+        sr->slab = (Slab *)Span_nextBySlot(sr->slab, p->def, sr->local_idx);
+
+        /* make new if not exists */
+        if(sr->slab == NULL){
+            if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
+                return MISS;
+            }
+            Slab *new_sl = Span_idxSlab_Make(m, p->def); 
+            prev_sl[sr->local_idx] = (Abstract *)new_sl;
+            prev_sl = sr->slab = new_sl;
+        }else{
+            prev_sl = sr->slab;
+        }
+
+        dims--;
+    }
+
+    /* conclude by setting the local idx and setting the state */
+    sr->local_idx = (sr->idx - sr->offset);
+
+    sr->type.state = SUCCESS;
+    return sr->type.state;
 }
 
 byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
@@ -147,7 +189,7 @@ void *Span_nextByIdx(SlabResult *sr){
     return (void *)(sr->slab[sr->local_idx*(def->slotSize)]);
 }
 
-void *Span_nextBySlot(SlabResult *sr){
+void *Span_nextBySlot(SlabResult *sr, int local_idx){
     SpanDef *def = sr->span->def;
     return (void *)(sr->slab[sr->local_idx*(1+def->idxExtraSlots)]);
 }
