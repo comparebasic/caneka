@@ -8,7 +8,6 @@ static int availableByDim(int dims, int stride){
     if(dims <= 0){
         r = 1;
     }else if(dims == 1){
-        printf("Dims %d has %d idxSlots\n", _dims, r);
         return stride;
     }else{
         while(dims > 1){
@@ -18,7 +17,6 @@ static int availableByDim(int dims, int stride){
         r = n;
     }
 
-    printf("Dims %d has %d idxSlots\n", _dims, r);
     return r;
 }
 
@@ -31,8 +29,6 @@ byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
     if(idx % nslabs > 0){
         nslabs++;
     }
-    printf("Get %d slabs\n", nslabs);
-
     int dims = 1;
     while(availableByDim(dims, def->idxStride) < nslabs){
         dims++;
@@ -84,7 +80,8 @@ void *Span_valueSlab_Make(MemCtx *m, SpanDef *def){
 }
 
 void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
-    return MemCtx_Alloc(m, sizeof(Abstract *)*(1+def->idxExtraSlots)*def->idxStride);
+    i64 sz = sizeof(Abstract *)*(1+def->idxExtraSlots)*def->idxStride;
+    return MemCtx_Alloc(m, sz);
 }
 
 void *Span_nextByIdx(SlabResult *sr){
