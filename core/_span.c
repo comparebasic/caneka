@@ -20,6 +20,59 @@ static int availableByDim(int dims, int stride){
     return r;
 }
 
+/* API */
+
+void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
+    memset(sr, 0, sizeof(SlabResult));
+
+    sr->op = op;
+    sr->m = p->m;
+    sr->span = p;
+    sr->dims = p->dims;
+    sr->slab = p->root;
+    sr->idx = idx;
+    sr->dimsNeeded = SpanDef_GetDimNeeded(p->def, idx);
+
+    return;
+}
+
+status Span_GetSet(SlabResult *sr, Abstract *t){
+    MemCtx *m = sr->span->m;
+    if(m == NULL && sr->op != SPAN_OP_GET){
+        return ERROR;
+    }
+    return NOOP;
+}
+
+status Span_Set(Span *p, int idx, Abstract *t){
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
+    return Span_GetSet(&sr, t);
+}
+
+void *Span_Get(Span *p, int idx){
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
+    status r = Span_GetSet(&sr, NULL);
+    if(HasFlag(r, SUCCESS)){
+        return sr.value;
+    }else{
+        return NULL;
+    }
+}
+
+status Span_Remove(Span *p, int idx){
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_REMOVE, idx);
+    return Span_GetSet(&sr, NULL);
+}
+
+status Span_Move(Span *p, int fromIdx, int toIdx){
+    return NOOP;
+}
+
+/* internals */
+
 byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
     if(idx < def->stride){
         return 0;
@@ -35,28 +88,6 @@ byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
     }
 
     return dims;
-}
-
-void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
-    memset(sr, 0, sizeof(SlabResult));
-
-    sr->op = op;
-    sr->m = p->m;
-    sr->span = p;
-    sr->dims = p->dims;
-    sr->slab = p->root;
-    sr->idx = idx;
-    sr->local_idx = sr->idx;
-    sr->offset = 0;
-
-    sr->dimsNeeded = 1;
-    /*
-    while(sr->idx >= slotsAvailable(sr->span, sr->dimsNeeded)) {
-        sr->dimsNeeded++;
-    };
-    */
-
-    return;
 }
 
 static SpanDef *SpanDef_FromCls(word cls){
@@ -102,5 +133,6 @@ Span *Span_Make(MemCtx *m, cls type){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->m = m;
     p->def = SpanDef_FromCls(type);
+    p->root = p->def->valueSlab_Make(m, p->def);
     return p;
 }

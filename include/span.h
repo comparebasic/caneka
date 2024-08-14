@@ -33,6 +33,7 @@ typedef struct span_def {
     int slotSize;
     int itemSize;
     int idxExtraSlots;
+    int valueHdr;
     SpanDefFunc valueSlab_Make;
     SpanDefFunc idxSlab_Make;
     SpanAddrFunc nextByIdx;
@@ -84,6 +85,7 @@ void *Span_nextByIdx(SlabResult *sr);
 void *Span_nextBySlot(SlabResult *sr);
 void *Span_reserve(SlabResult *sr);
 
+status Span_GetSet(SlabResult *sr, Abstract *t);
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);
 /* SpanDef */
 byte SpanDef_GetDimNeeded(SpanDef *def, int idx);
