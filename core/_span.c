@@ -72,6 +72,33 @@ status Span_Move(Span *p, int fromIdx, int toIdx){
 }
 
 /* internals */
+static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
+    boolean expand = sr->span->dims < sr->dimsNeeded;
+    int dims = sr->span->dims;
+    SpanDef *def = sr->span->def;
+
+    if(expand){
+        Slab *exp_sl = NULL;
+        Slab *shelf_sl = NULL;
+        while(dims < sr->dimsNeeded){
+            Slab *new_sl = Span_idxSlab_Make(m, def);
+
+            if(exp_sl == NULL){
+                shelf_sl = sr->span->root;
+                sr->span->root = new_sl;
+            }else{
+                exp_sl[0] = (Abstract *)new_sl;
+            }
+
+            exp_sl = new_sl;
+            dims++;
+        }
+        exp_sl[0] = (Abstract *)shelf_sl;
+    }
+
+    sr->slab = sr->span->root;
+    return SUCCESS;
+}
 
 byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
     if(idx < def->stride){
