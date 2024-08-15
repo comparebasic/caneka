@@ -33,15 +33,15 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
         name, dimFor100, idx, sr.dimsNeeded);
 
     w = Int_Wrapped(m, idx);
-    Span_GetSet(&sr, (Abstract *)w);
+    Span_Set(p, idx, (Abstract *)w);
 
     idx = 2000;
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
     r |= Test(sr.dimsNeeded == dimFor2000, "%s only needs %d dim to index into %d, have %hu",
         name, dimFor2000, idx, sr.dimsNeeded);
+    Span_Set(p, idx, (Abstract *)w);
 
     w = Int_Wrapped(m, idx);
-    Span_GetSet(&sr, (Abstract *)w);
 
     return r;
 }

@@ -1,5 +1,7 @@
 #include <external.h>
 #include <caneka.h>
+static status Span_Extend(SlabResult *sr);
+static status span_GrowToNeeded(SlabResult *sr);
 
 static int availableByDim(int dims, int stride){
     int _dims = dims;
@@ -36,24 +38,43 @@ void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     return;
 }
 
-status Span_GetSet(SlabResult *sr, Abstract *t){
+status Span_Query(SlabResult *sr){
+    printf("Query %d\n", sr->idx);
     MemCtx *m = sr->span->m;
-    if(m == NULL && sr->op != SPAN_OP_GET){
-        return ERROR;
+    if(sr->dimsNeeded > sr->dims){
+        if(sr->op == SPAN_OP_GET){
+            return MISS;
+        }
+        if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
+            return MISS;
+        }
+        span_GrowToNeeded(sr);
+        printf("Grew to %d\n", sr->span->dims);
     }
-    return NOOP;
+    return Span_Extend(sr);
 }
 
 status Span_Set(Span *p, int idx, Abstract *t){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
-    return Span_GetSet(&sr, t);
+    status r = Span_Query(&sr);
+    if(HasFlag(r, SUCCESS)){
+        void **ptr = NULL;
+        Span_addrByIdx(&sr, ptr);
+        if(HasFlag(p->def->flags, RAW)){
+            memcpy(*ptr, t, p->def->itemSize);
+        }else{
+            *ptr = (void *)t;
+        }
+        return SUCCESS;
+    }
+    return r;
 }
 
 void *Span_Get(Span *p, int idx){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
-    status r = Span_GetSet(&sr, NULL);
+    status r = Span_Query(&sr);
     if(HasFlag(r, SUCCESS)){
         return sr.value;
     }else{
@@ -64,7 +85,7 @@ void *Span_Get(Span *p, int idx){
 status Span_Remove(Span *p, int idx){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_REMOVE, idx);
-    return Span_GetSet(&sr, NULL);
+    return Span_Query(&sr);
 }
 
 status Span_Move(Span *p, int fromIdx, int toIdx){
@@ -72,7 +93,7 @@ status Span_Move(Span *p, int fromIdx, int toIdx){
 }
 
 /* internals */
-static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
+static status span_GrowToNeeded(SlabResult *sr){
     boolean expand = sr->span->dims < sr->dimsNeeded;
     SpanDef *def = sr->span->def;
     Span *p = sr->span;
@@ -81,7 +102,7 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
         Slab *exp_sl = NULL;
         Slab *shelf_sl = NULL;
         while(p->dims < sr->dimsNeeded){
-            Slab *new_sl = Span_idxSlab_Make(m, def);
+            Slab *new_sl = Span_idxSlab_Make(p->m, def);
 
             if(exp_sl == NULL){
                 shelf_sl = sr->span->root;
@@ -100,14 +121,8 @@ static status span_GrowToNeeded(MemCtx *m, SlabResult *sr){
     return SUCCESS;
 }
 
-static status Span_Expand(MemCtx *m, SlabResult *sr){
+static status Span_Extend(SlabResult *sr){
     /* resize the span by adding dimensions and slabs as needed */
-    if(sr->dimsNeeded > sr->dims){
-        if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
-            return MISS;
-        }
-        span_GrowToNeeded(m, sr);
-    }
     Span *p = sr->span;
 
     byte dims = p->dims;
@@ -125,7 +140,7 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
             if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
                 return MISS;
             }
-            Slab *new_sl = Span_idxSlab_Make(m, p->def); 
+            Slab *new_sl = Span_idxSlab_Make(p->m, p->def); 
             prev_sl[sr->local_idx] = (Abstract *)new_sl;
             prev_sl = sr->slab = new_sl;
         }else{
@@ -184,9 +199,10 @@ void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
     return MemCtx_Alloc(m, sz);
 }
 
-void *Span_nextByIdx(SlabResult *sr){
+status Span_addrByIdx(SlabResult *sr, void **addr){
     SpanDef *def = sr->span->def;
-    return (void *)(sr->slab[sr->local_idx*(def->slotSize)]);
+    *addr = (void *)(sr->slab[sr->local_idx*(def->slotSize)]);
+    return SUCCESS;
 }
 
 void *Span_nextSlot(SlabResult *sr){
