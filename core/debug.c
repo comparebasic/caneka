@@ -278,103 +278,6 @@ static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean 
     }
 }
 
-static void slab_Summarize(Slab *slab, char *msg, int color, boolean extended){
-    /*
-    printf("%s\x1b[0;%dmL<incr%d[%d] ", msg, color, slab->increment, slab->offset);
-    boolean first = TRUE;
-    for(int i = 0; i < SPAN_DIM_SIZE; i++){
-        Abstract *t = slab->items[i];
-        if(t != NULL){
-            if(!first){
-                printf(", ");
-            }
-            if(first){
-                first = FALSE;
-            }
-            printf("%d=", i);
-            if(t->type.of == TYPE_SLAB){
-                Slab *slt = (Slab *)t;
-                printf("%u", slt->offset);
-            }else{
-                printf("%p", t);
-            }
-            printf("\x1b[%dm", color);
-        }
-    }
-    printf("\x1b[0;%dm>\x1b[0m", color);
-    */
-}
-
-static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    /*
-    Slab *slab = (Slab *)a;
-    if(slab->increment != SPAN_DIM_SIZE){
-        return slab_Summarize(slab, msg, color, extended);
-    }
-
-    printf("%s\x1b[%dmL<icr%d[%d] \x1b[%dm", msg, color, slab->increment, slab->offset, color);
-    boolean first = TRUE;
-    for(int i = 0; i < SPAN_DIM_SIZE; i+= slab->slotSize){
-        void *t = NULL;
-        if((slab->type.state & RAW) != 0){
-            t = Slab_GetPtr(slab, i);
-        }else{
-            t = slab->items[i];
-        }
-        if(t != NULL && ((Abstract *)t)->type.of != 0){
-            if(!first){
-                printf(", ");
-            }
-            if(first){
-                first = FALSE;
-            }
-            printf("%d=", i);
-            Debug_Print((void *)t, 0, "", color, extended); 
-
-            printf("\x1b[%dm", color);
-        }
-    }
-    printf("\x1b[%dm>\x1b[0m", color);
-    */
-}
-
-static void showSlab(Slab *sl, int color, boolean extended, int indent){
-    /*
-    Slab_Print((Abstract *)sl, TYPE_SLAB, "", color, extended); 
-    if(sl->increment > SPAN_DIM_SIZE){
-        indent++;
-        printf("\n");
-        boolean first = TRUE;
-        for(int i = 0; i < SPAN_DIM_SIZE; i++){
-            Abstract *t = sl->items[i];
-            if(t != NULL){
-                if(!first){
-                    printf("\n");
-                }
-                if(first){
-                    first = FALSE;
-                }
-                indent_Print(indent);
-                printf("\x1b[%dm%d=", color, i);
-                showSlab((Slab *)t, color, extended, indent);
-            }
-        }
-    }
-    */
-}
-
-static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-/*
-    Span *p = (Span *)as(a, TYPE_SPAN);
-    printf("%s\n\x1b[;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
-        p->nvalues, p->dims, sizeof(Abstract *)*p->slotSize);
-    printf("\n");
-    indent_Print(1);
-    showSlab(p->slab, color, extended, 1);
-    printf("\n\x1b[0;%dm>\x1b[0m\n", color);
-    */
-}
-
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(extended){
@@ -440,8 +343,10 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
+    /*
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Slab_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    */
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
