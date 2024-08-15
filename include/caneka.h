@@ -21,6 +21,7 @@ struct lookup;
 struct strcursor;
 struct strcursor_range;
 struct roebling;
+struct span_def;
 
 typedef struct typehdr {
     cls of;

@@ -7,10 +7,8 @@ typedef struct slab_meta {
     int offset;
 } SlabMeta;
 
-typedef Abstract *Slab;
-
 typedef struct span_slab {
-    Slab *items;
+    void *items;
     SlabMeta meta;
 } SlabSlot;
 
@@ -18,12 +16,12 @@ typedef struct slab_result {
     Type type;
     MemCtx *m;
     struct span *span;
-    Slab *slab;
-    Slab *shelfSlab;
+    void *slab;
+    void *shelfSlab;
     int offset;
     int idx;
     Abstract *value;
-    Slab *stack[8];
+    void *stack[8];
     byte op;
     byte dims;
     byte dimsNeeded;
@@ -31,5 +29,4 @@ typedef struct slab_result {
     byte level;
 } SlabResult;
 
-Slab* Slab_Alloc(MemCtx* m);
-void *Slab_GetPtr(Slab *sl, int idx);
+status Slab_setSlot(void *sl, struct span_def *def, int idx, void *value, size_t sz);

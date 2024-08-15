@@ -41,7 +41,7 @@ typedef struct span {
     Type type;
     MemCtx *m;
     SpanDef *def;
-	Slab *root;
+	void *root;
     byte dims;
 	int nvalues;
     int max_idx;

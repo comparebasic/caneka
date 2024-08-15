@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+
 static status Span_Extend(SlabResult *sr);
 static status span_GrowToNeeded(SlabResult *sr);
 
@@ -99,22 +100,22 @@ static status span_GrowToNeeded(SlabResult *sr){
     Span *p = sr->span;
 
     if(expand){
-        Slab *exp_sl = NULL;
-        Slab *shelf_sl = NULL;
+        void *exp_sl = NULL;
+        void *shelf_sl = NULL;
         while(p->dims < sr->dimsNeeded){
-            Slab *new_sl = Span_idxSlab_Make(p->m, def);
+            void *new_sl = Span_idxSlab_Make(p->m, def);
 
             if(exp_sl == NULL){
                 shelf_sl = sr->span->root;
                 sr->span->root = new_sl;
             }else{
-                exp_sl[0] = (Abstract *)new_sl;
+                Slab_setSlot(exp_sl, p->def, 0, new_sl, sizeof(void *));
             }
 
             exp_sl = new_sl;
             p->dims++;
         }
-        exp_sl[0] = (Abstract *)shelf_sl;
+        Slab_setSlot(exp_sl, p->def, 0, shelf_sl, sizeof(void *));
     }
 
     sr->slab = sr->span->root;
@@ -126,7 +127,7 @@ static status Span_Extend(SlabResult *sr){
     Span *p = sr->span;
 
     byte dims = p->dims;
-    Slab *prev_sl = sr->slab;
+    void *prev_sl = sr->slab;
     printf("Extend called\n");
     while(dims > 0){
         int increment = availableByDim(dims, p->def->idxStride);
@@ -135,15 +136,15 @@ static status Span_Extend(SlabResult *sr){
         printf("local_idx %d/%d\n", sr->local_idx, increment);
 
         /* find or allocate a space for the new span */
-        sr->slab = (Slab *)Span_nextSlot(sr);
+        sr->slab = (void *)Span_nextSlot(sr);
 
         /* make new if not exists */
         if(sr->slab == NULL){
             if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
                 return MISS;
             }
-            Slab *new_sl = Span_idxSlab_Make(p->m, p->def); 
-            prev_sl[sr->local_idx] = (Abstract *)new_sl;
+            void *new_sl = Span_idxSlab_Make(p->m, p->def); 
+            Slab_setSlot(prev_sl, p->def, sr->local_idx, new_sl, sizeof(void *));
             prev_sl = sr->slab = new_sl;
         }else{
             prev_sl = sr->slab;
