@@ -18,11 +18,11 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
     r |= Test(p->def->stride == stride, "%s stride is 16, have %d", name, p->def->stride);
     r |= Test(p->def->idxStride == idxStride, "%s idxStride is 16, have %d", name, p->def->idxStride);
     used = MemCtx_Used(m);
-    p->def->valueSlab_Make(m, p->def);
+    Span_valueSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used;
     r |= Test(delta == slabSz, "%s slab has allocated %d bytes, have %ld", name, slabSz, delta);
     used += delta;
-    p->def->idxSlab_Make(m, p->def);
+    Span_idxSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used;
     r |= Test(delta == idxSlabSz, "%s idxSlab has allocated %d bytes, have %ld", name, idxSlabSz, delta);
 
@@ -71,7 +71,7 @@ status SpanSetup_Tests(MemCtx *gm){
 
     /* string span */
     p = Span_Make(m, TYPE_STRING_SPAN);
-    testSpan(p, "StringSpan", 1, 2, STRING_CHUNK_SIZE / sizeof(void *), 16, 256, 128);
+    testSpan(p, "StringSpan", 1, 2, STRING_CHUNK_SIZE / sizeof(void *), 16, 240, 128);
 
     /* slab span */
     p = Span_Make(m, TYPE_SLAB_SPAN);
