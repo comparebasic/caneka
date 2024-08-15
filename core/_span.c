@@ -127,10 +127,12 @@ static status Span_Extend(SlabResult *sr){
 
     byte dims = p->dims;
     Slab *prev_sl = sr->slab;
-    while(dims > 1){
-        int increment = availableByDim(dims-1, p->def->idxStride);
+    printf("Extend called\n");
+    while(dims > 0){
+        int increment = availableByDim(dims, p->def->idxStride);
         sr->local_idx = ((sr->idx - sr->offset) / increment);
         sr->offset += increment*sr->local_idx;
+        printf("local_idx %d/%d\n", sr->local_idx, increment);
 
         /* find or allocate a space for the new span */
         sr->slab = (Slab *)Span_nextSlot(sr);
@@ -201,13 +203,20 @@ void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
 
 status Span_addrByIdx(SlabResult *sr, void **addr){
     SpanDef *def = sr->span->def;
-    *addr = (void *)(sr->slab[sr->local_idx*(def->slotSize)]);
+    int pos = sr->local_idx*(def->slotSize);
+    printf("Getting addr %d in span %p\n", pos, sr->slab);
+    /*
+    *addr = (void *)(((void *)sr->slab)+pos);
+    */
     return SUCCESS;
 }
 
 void *Span_nextSlot(SlabResult *sr){
     SpanDef *def = sr->span->def;
-    return (void *)(sr->slab[sr->local_idx*(1+def->idxExtraSlots)]);
+    void *sl = (void *)sr->slab;
+    int pos = sr->local_idx*(1+def->idxExtraSlots)*sizeof(void *);
+    printf("Getting local_idx:%d slot addr %d/%ld in span %p\n", sr->local_idx, pos, pos / sizeof(void *), sl);
+    return (sl)+pos;
 }
 
 void *Span_reserve(SlabResult *sr){
