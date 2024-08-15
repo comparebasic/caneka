@@ -118,7 +118,7 @@ static status Span_Expand(MemCtx *m, SlabResult *sr){
         sr->offset += increment*sr->local_idx;
 
         /* find or allocate a space for the new span */
-        sr->slab = (Slab *)Span_nextBySlot(sr->slab, p->def, sr->local_idx);
+        sr->slab = (Slab *)Span_nextSlot(sr->slab, sr->local_idx);
 
         /* make new if not exists */
         if(sr->slab == NULL){
@@ -189,9 +189,9 @@ void *Span_nextByIdx(SlabResult *sr){
     return (void *)(sr->slab[sr->local_idx*(def->slotSize)]);
 }
 
-void *Span_nextBySlot(SlabResult *sr, int local_idx){
+void *Span_nextSlot(SlabResult *sr){
     SpanDef *def = sr->span->def;
-    return (void *)(sr->slab[sr->local_idx*(1+def->idxExtraSlots)]);
+    return (void *)(sr->slab[rs->local_idx*(1+def->idxExtraSlots)]);
 }
 
 void *Span_reserve(SlabResult *sr){
