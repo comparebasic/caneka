@@ -43,6 +43,11 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
 
     w = Int_Wrapped(m, idx);
 
+    if(DEBUG_SPAN){
+        Span_Print((Abstract *)p, p->type.of, "Tested Span ", DEBUG_SPAN, TRUE);
+        printf("\n");
+    }
+
     return r;
 }
 

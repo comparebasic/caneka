@@ -24,6 +24,31 @@ static int availableByDim(int dims, int stride){
 }
 /* DEBUG */
 
+static void showSlab(void *sl, int color, boolean extended, int indent){
+    /*
+    Slab_Print((Abstract *)sl, TYPE_SLAB, "", color, extended); 
+    if(sl->increment > SPAN_DIM_SIZE){
+        indent++;
+        printf("\n");
+        boolean first = TRUE;
+        for(int i = 0; i < SPAN_DIM_SIZE; i++){
+            Abstract *t = sl->items[i];
+            if(t != NULL){
+                if(!first){
+                    printf("\n");
+                }
+                if(first){
+                    first = FALSE;
+                }
+                indent_Print(indent);
+                printf("\x1b[%dm%d=", color, i);
+                showSlab((void *)t, color, extended, indent);
+            }
+        }
+    }
+    */
+}
+
 static void slab_Summarize(void *slab, char *msg, int color, boolean extended){
     /*
     printf("%s\x1b[0;%dmL<incr%d[%d] ", msg, color, slab->increment, slab->offset);
@@ -51,17 +76,6 @@ static void slab_Summarize(void *slab, char *msg, int color, boolean extended){
     */
 }
 
-static void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-/*
-    Span *p = (Span *)as(a, TYPE_SPAN);
-    printf("%s\n\x1b[;%dmP<%u items in %u dims of %lu bytes each", msg, color, 
-        p->nvalues, p->dims, sizeof(Abstract *)*p->slotSize);
-    printf("\n");
-    indent_Print(1);
-    showSlab(p->slab, color, extended, 1);
-    printf("\n\x1b[0;%dm>\x1b[0m\n", color);
-    */
-}
 
 static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     /*
@@ -96,32 +110,25 @@ static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean exte
     */
 }
 
-
-static void showSlab(void *sl, int color, boolean extended, int indent){
-    /*
-    Slab_Print((Abstract *)sl, TYPE_SLAB, "", color, extended); 
-    if(sl->increment > SPAN_DIM_SIZE){
-        indent++;
-        printf("\n");
-        boolean first = TRUE;
-        for(int i = 0; i < SPAN_DIM_SIZE; i++){
-            Abstract *t = sl->items[i];
-            if(t != NULL){
-                if(!first){
-                    printf("\n");
-                }
-                if(first){
-                    first = FALSE;
-                }
-                indent_Print(indent);
-                printf("\x1b[%dm%d=", color, i);
-                showSlab((void *)t, color, extended, indent);
-            }
-        }
-    }
-    */
+static void SpanDef_Print(SpanDef *def){
+    printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d itemSize:%d, valueHdr:%d]", 
+         def->idxStride, def->stride, def->idxSize, def->slotSize, def->itemSize, def->valueHdr);
 }
 
+void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Span *p = (Span *)asIfc(a, TYPE_SPAN);
+    printf("\x1b[0;%dm%sP<%u items in %u dims ", color, msg,
+        p->nvalues, p->dims);
+    if(extended){
+        SpanDef_Print(p->def);
+    }
+    printf(">\x1b[0m");
+    /*
+    indent_Print(1);
+    showSlab(p->slab, color, extended, 1);
+    printf("\n\x1b[0;%dm>\x1b[0m\n", color);
+    */
+}
 
 /* API */
 
@@ -300,7 +307,7 @@ void *Span_valueSlab_Make(MemCtx *m, SpanDef *def){
 }
 
 void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
-    i64 sz = sizeof(Abstract *)*(1+def->idxExtraSlots)*def->idxStride;
+    i64 sz = sizeof(Abstract *)*(def->idxSize)*def->idxStride;
     return MemCtx_Alloc(m, sz);
 }
 
@@ -317,7 +324,7 @@ status Span_addrByIdx(SlabResult *sr, void **addr){
 void *Span_nextSlot(SlabResult *sr){
     SpanDef *def = sr->span->def;
     void *sl = (void *)sr->slab;
-    int pos = sr->local_idx*(1+def->idxExtraSlots)*sizeof(void *);
+    int pos = sr->local_idx*(def->idxSize)*sizeof(void *);
     void **ptr = (void *)(sl)+pos;
     printf("Getting local_idx:%d slot addr %d/%ld in span %p ptr:%p\n", sr->local_idx, pos, pos / sizeof(void *), sl, *ptr);
     return *ptr;
@@ -331,6 +338,7 @@ Span *Span_Make(MemCtx *m, cls type){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->m = m;
     p->def = SpanDef_FromCls(type);
+    p->type.of = p->def->typeOf;
     p->root = Span_valueSlab_Make(m, p->def);
     return p;
 }

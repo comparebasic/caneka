@@ -29,3 +29,4 @@ extern int DEBUG_CURSOR;
 extern int DEBUG_TABLE;
 extern int DEBUG_ROEBLING_CURRENT;
 extern int DEBUG_ROEBLING_NAME;
+extern int DEBUG_SPAN;

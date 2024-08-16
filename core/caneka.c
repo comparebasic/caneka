@@ -124,6 +124,10 @@ boolean Ifc_Match(cls inst, cls ifc){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
     }else if(ifc == TYPE_STRING){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
+    }else if(ifc == TYPE_SPAN){ 
+        printf("its a span! %d\n", inst);
+        return (inst == TYPE_SPAN || inst == TYPE_QUEUE_SPAN || 
+            inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN);
     }
     return FALSE;
 }

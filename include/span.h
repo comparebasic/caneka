@@ -1,8 +1,10 @@
 #define SPAN_DEFAULT_STRIDE 16
 #define SPAN_DEFAULT_STRIDE 16
 #define SPAN_DEFAULT_SLOT_SIZE 1
+#define SPAN_DEFAULT_IDX_SIZE 1
 #define SPAN_DEFAULT_ITEM_SIZE 1
 #define SPAN_DEFAULT_IDX_EXTRA_SLOTS 0
+#define SPAN_DEFAULT_HDR 0
 
 enum span_flags {
     SLAB_ACTIVE = 1 << 0,
@@ -29,11 +31,12 @@ typedef void *(*SpanAddrFunc)(SlabResult *sr);
 
 typedef struct span_def {
     word flags;
+    word typeOf;
     int stride;
     int idxStride;
     int slotSize;
+    int idxSize;
     int itemSize;
-    int idxExtraSlots;
     int valueHdr;
 } SpanDef;
 
@@ -85,3 +88,6 @@ status Span_GetSet(SlabResult *sr, Abstract *t);
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);
 /* SpanDef */
 byte SpanDef_GetDimNeeded(SpanDef *def, int idx);
+
+/* debug */
+void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
