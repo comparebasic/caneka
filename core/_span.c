@@ -22,59 +22,8 @@ static int availableByDim(int dims, int stride, int idxStride){
 
     return r;
 }
+
 /* DEBUG */
-
-static void showSlab(void *sl, int color, boolean extended, int indent){
-    /*
-    Slab_Print((Abstract *)sl, TYPE_SLAB, "", color, extended); 
-    if(sl->increment > SPAN_DIM_SIZE){
-        indent++;
-        printf("\n");
-        boolean first = TRUE;
-        for(int i = 0; i < SPAN_DIM_SIZE; i++){
-            Abstract *t = sl->items[i];
-            if(t != NULL){
-                if(!first){
-                    printf("\n");
-                }
-                if(first){
-                    first = FALSE;
-                }
-                indent_Print(indent);
-                printf("\x1b[%dm%d=", color, i);
-                showSlab((void *)t, color, extended, indent);
-            }
-        }
-    }
-    */
-}
-
-static void slab_Summarize(void *slab, char *msg, int color, boolean extended){
-    /*
-    printf("%s\x1b[0;%dmL<incr%d[%d] ", msg, color, slab->increment, slab->offset);
-    boolean first = TRUE;
-    for(int i = 0; i < SPAN_DIM_SIZE; i++){
-        Abstract *t = slab->items[i];
-        if(t != NULL){
-            if(!first){
-                printf(", ");
-            }
-            if(first){
-                first = FALSE;
-            }
-            printf("%d=", i);
-            if(t->type.of == TYPE_SLAB){
-                void *slt = (void *)t;
-                printf("%u", slt->offset);
-            }else{
-                printf("%p", t);
-            }
-            printf("\x1b[%dm", color);
-        }
-    }
-    printf("\x1b[0;%dm>\x1b[0m", color);
-    */
-}
 
 static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
     if(dim == 0){
@@ -98,10 +47,6 @@ static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte ind
                     printf("0x%lx", *a);
                 }
                 printf(" ");
-            }else{
-                /*
-                printf("%d=0#%p ", i, ptr);
-                */
             }
             ptr += sizeof(void *)*def->slotSize;
         }
@@ -124,10 +69,6 @@ static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte ind
                 if(i < def->idxStride - 1){
                     printf(" ");
                 }
-            }else{
-                /*
-                printf("%d=0#%p ", i, ptr);
-                */
             }
             ptr += sizeof(void *)*def->idxSize;
         }
@@ -148,6 +89,9 @@ static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte ind
         }
         indent_Print(indent);
         printf("]");
+        if(any){
+            printf("\n");
+        }
     }
 }
 
@@ -166,11 +110,6 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
         Slab_Print(p->root, p->def, p->dims, 0, 1, TRUE, p->dims, 0);
     }
     printf(">\x1b[0m");
-    /*
-    indent_Print(1);
-    showSlab(p->slab, color, extended, 1);
-    printf("\n\x1b[0;%dm>\x1b[0m\n", color);
-    */
 }
 
 /* API */
@@ -209,7 +148,6 @@ status Span_Set(Span *p, int idx, Abstract *t){
     status r = Span_Query(&sr);
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
-        printf("Setting 0x%lx to %d\n", ((util )ptr), idx);
         if(HasFlag(p->def->flags, RAW)){
             memcpy(ptr, t, p->def->itemSize);
         }else{
@@ -225,6 +163,13 @@ void *Span_Get(Span *p, int idx){
     SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
     status r = Span_Query(&sr);
     if(HasFlag(r, SUCCESS)){
+        void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
+        if(HasFlag(p->def->flags, RAW)){
+            sr.value = ptr;
+        }else if(*((Abstract **)ptr) != NULL){
+            void **dptr = (void **)ptr;
+            sr.value = *dptr;
+        }
         return sr.value;
     }else{
         return NULL;
@@ -257,14 +202,12 @@ static status span_GrowToNeeded(SlabResult *sr){
                 shelf_sl = sr->span->root;
                 sr->span->root = new_sl;
             }else{
-                printf("Set Grow I in dim %d\n", p->dims);
                 Slab_setSlot(exp_sl, p->def, 0, &new_sl, sizeof(void *));
             }
 
             exp_sl = new_sl;
             p->dims++;
         }
-        printf("Set Grow II in dim %d\n", p->dims);
         Slab_setSlot(exp_sl, p->def, 0, &shelf_sl, sizeof(void *));
     }
 
@@ -285,7 +228,6 @@ static status Span_Extend(SlabResult *sr){
         if(sr->local_idx >= p->def->idxStride){
             printf("\x1b[31mError: local_idx greater than idxStride:%d dim:%d offset:%d\x1b[0m\n", sr->local_idx, dims, sr->offset);
         }
-        printf(" local_idx:%d increment:%d (idx:%d)\n", sr->local_idx, increment, sr->idx);
 
         /* find or allocate a space for the new span */
         sr->slab = (void *)Slab_nextSlot(sr, p->def, sr->local_idx);
@@ -301,7 +243,6 @@ static status Span_Extend(SlabResult *sr){
             }else{
                 new_sl = Span_valueSlab_Make(p->m, p->def); 
             }
-            printf("Set in Expand in dim %d\n", dims);
             Slab_setSlot(prev_sl, p->def, sr->local_idx, &new_sl, sizeof(void *));
             prev_sl = sr->slab = new_sl;
         }else{
@@ -313,7 +254,6 @@ static status Span_Extend(SlabResult *sr){
 
     /* conclude by setting the local idx and setting the state */
     sr->local_idx = (sr->idx - sr->offset);
-    printf("\x1b[34m    local_idx:%d offset:%d idx:%d\x1b[0m\n", sr->local_idx, sr->offset, sr->idx);
 
     if(sr->local_idx >= p->def->stride){
         printf("\x1b[31mError: local_idx:%d greater than stride:%d dim:%d offset:%d\x1b[0m\n", sr->local_idx, p->def->stride, dims, sr->offset);
