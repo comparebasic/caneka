@@ -153,6 +153,10 @@ status Span_Set(Span *p, int idx, Abstract *t){
         }else{
             memcpy(ptr, &t, sizeof(void *));
         }
+        p->nvalues++;
+        if(idx > p->max_idx){
+            p->max_idx = idx;
+        }
         return SUCCESS;
     }
     return r;
@@ -170,6 +174,27 @@ void *Span_Get(Span *p, int idx){
             void **dptr = (void **)ptr;
             sr.value = *dptr;
         }
+        return sr.value;
+    }else{
+        return NULL;
+    }
+}
+
+int Span_Add(Span *p, Abstract *t){
+    int idx = Span_NextIdx(p);
+    if(Span_Set(p, idx, t) == SUCCESS){
+        return p->max_idx;
+    }
+
+    return 0;
+}
+
+void *Span_ReserveNext(Span *p){
+    int idx = Span_NextIdx(p);
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_RESERVE, idx);
+    status r = Span_Query(&sr);
+    if(HasFlag(r, SUCCESS)){
         return sr.value;
     }else{
         return NULL;
@@ -309,11 +334,53 @@ void *Span_reserve(SlabResult *sr){
     return NULL;
 }
 
+Span *Span_From(MemCtx *m, int count, ...){
+    Span *p = Span_Make(m, TYPE_SPAN);
+    Abstract *v = NULL;
+	va_list arg;
+    va_start(arg, count);
+    for(int i = 0; i < count; i++){
+        v = va_arg(arg, AbstractPtr);
+        Span_Add(p, v);
+    }
+    return p;
+}
+
+SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def){
+   SpanDef *def = MemCtx_Alloc(m, sizeof(SpanDef));
+   memcpy(def, _def, sizeof(SpanDef));
+   return def;
+}
+
 Span *Span_Make(MemCtx *m, cls type){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->m = m;
     p->def = SpanDef_FromCls(type);
     p->type.of = p->def->typeOf;
+    p->root = Span_valueSlab_Make(m, p->def);
+    return p;
+}
+
+Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
+    Span *p = MemCtx_Alloc(m, sizeof(Span));
+    p->m = m;
+    p->def = SpanDef_Clone(m, SpanDef_FromCls(type));
+    p->type.of = p->def->typeOf;
+
+    p->def->itemSize = itemSize;
+    int slotSize = 1;
+    if(itemSize > sizeof(void *)){
+        slotSize = itemSize / sizeof(void *);
+        if(itemSize % sizeof(void *) > 1){
+            slotSize += 1;
+        }
+    }
+    int pwrSlot = p->def->stride;
+    while((pwrSlot / 2) >= slotSize){
+        pwrSlot /= 2;
+    }
+
+    p->def->slotSize = pwrSlot;
     p->root = Span_valueSlab_Make(m, p->def);
     return p;
 }

@@ -239,12 +239,6 @@ status Span_Set(Span *p, int idx, Abstract *t){
     return Span_GetSet(&sr, idx, t);
 }
 
-status Span_Remove(Span *p, int idx){
-    SlabResult sr;
-    SlabResult_Setup(&sr, p, SPAN_OP_REMOVE, idx);
-    return Span_GetSet(&sr, idx, NULL);
-}
-
 void *Span_Get(Span *p, int idx){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
@@ -269,17 +263,6 @@ int Span_Add(Span *p, Abstract *t){
     return 0;
 }
 
-void *Span_ReserveNext(Span *p){
-    int idx = Span_NextIdx(p);
-    SlabResult sr;
-    SlabResult_Setup(&sr, p, SPAN_OP_RESERVE, idx);
-    status r = Span_GetSet(&sr, idx, NULL);
-    if(HasFlag(r, SUCCESS)){
-        return sr.value;
-    }else{
-        return NULL;
-    }
-}
 
 void Span_Run(MemHandle *m, Span *p, Maker func, Abstract *arg){
     if(p == NULL){
@@ -305,17 +288,6 @@ void Span_RunMaker(MemHandle *m, Span *p, Maker func, Abstract *arg){
     };
 }
 
-Span *Span_From(MemCtx *m, int count, ...){
-    Span *p = Span_Make(m);
-    Abstract *v = NULL;
-	va_list arg;
-    va_start(arg, count);
-    for(int i = 0; i < count; i++){
-        v = va_arg(arg, AbstractPtr);
-        Span_Add(p, v);
-    }
-    return p;
-}
 
 status Span_Merge(Span *dest, Span *additional){
     for(int i = 0; i <= additional->max_idx; i++){
