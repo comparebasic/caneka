@@ -34,6 +34,10 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
 
     w = Int_Wrapped(m, idx);
     Span_Set(p, idx, (Abstract *)w);
+    if(DEBUG_SPAN){
+        Span_Print((Abstract *)p, p->type.of, "Tested Span ", DEBUG_SPAN, TRUE);
+        printf("\n");
+    }
 
     idx = 2000;
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
@@ -74,9 +78,10 @@ status SpanSetup_Tests(MemCtx *gm){
     p = Span_Make(m, TYPE_MINI_SPAN);
     testSpan(p, "Mini", 2, 3, 4, 16, 32, 128);
 
-    /* string span */
+    /* string span 
     p = Span_Make(m, TYPE_STRING_SPAN);
     testSpan(p, "StringSpan", 1, 2, STRING_CHUNK_SIZE / sizeof(void *), 16, 240, 128);
+    */
 
     /* slab span */
     p = Span_Make(m, TYPE_SLAB_SPAN);

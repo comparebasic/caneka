@@ -3,7 +3,6 @@ static boolean _init = FALSE;
 
 static SpanDef *spanDef_Make(){
     if(!_init){
-        printf("type is %d\n", type);
         def.typeOf = type;
         def.stride = stride;
         def.idxStride = idxStride;
