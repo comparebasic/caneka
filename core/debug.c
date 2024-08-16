@@ -338,10 +338,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
-    /*
-    r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Slab_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
-    */
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
@@ -354,14 +351,12 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
 }
 
 status Debug_Init(MemCtx *m){
-    /*
     DebugM = m;
     if(DebugPrintChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);
         DebugPrintChain = Chain_Make(m, funcs);
         return SUCCESS;
     }
-    */
     return NOOP;
 }
 

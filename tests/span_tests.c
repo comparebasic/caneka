@@ -8,7 +8,7 @@ status Span_Tests(MemCtx *gm){
     status r = READY;
     String *s;
 
-    p = Span_Make(m);
+    p = Span_Make(m, TYPE_SPAN);
     r |= Test(p->type.of == TYPE_SPAN, "Span has type span %s found %s", 
         Class_ToString(TYPE_SPAN), Class_ToString(p->type.of));
 
@@ -98,7 +98,7 @@ status Span_Tests(MemCtx *gm){
     r |= Test(String_Equals(s513, s), "String 513 equals %s found %s", 
         s513->bytes, s->bytes);
 
-    p = Span_Make(m);
+    p = Span_Make(m, TYPE_SPAN);
     Span_Set(p, 0, (Abstract *)Int_Wrapped(m, 0));
     Span_Set(p, 1, (Abstract *)Int_Wrapped(m, 1));
     Span_Set(p, 2, (Abstract *)Int_Wrapped(m, 2));

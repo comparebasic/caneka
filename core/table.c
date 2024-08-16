@@ -16,7 +16,7 @@ static status Table_Resize(Span *tbl, word *queries){
     if(tbl->nvalues > ((TABLE_DIM_LOOKUPS[tbl->dims] / 2) + (TABLE_DIM_LOOKUPS[tbl->dims] / 4)) 
             || *queries > TABLE_REQUERY_MAX[tbl->dims]){
         *queries = 0;
-        Span *newTbl = Span_Make(tbl->m);
+        Span *newTbl = Span_Make(tbl->m, TYPE_SPAN);
         Span_Set(newTbl, TABLE_DIM_LOOKUPS[tbl->dims]+1, NULL);
         printf("Resize to %d dims\n", tbl->dims);
         for(int i = 0; i <= tbl->max_idx; i++){

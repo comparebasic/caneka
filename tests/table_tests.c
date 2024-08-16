@@ -31,7 +31,7 @@ char *values2[] = {
 
 status Table_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
-    Span *tbl = Span_Make(m);
+    Span *tbl = Span_Make(m, TYPE_SPAN);
     status r = READY;
     String *s;
     String *value;
@@ -75,7 +75,7 @@ status Table_Tests(MemCtx *gm){
         found != NULL ? (char *)(found->bytes) : "NULL");
 
 
-    tbl = Span_Make(m);
+    tbl = Span_Make(m, TYPE_SPAN);
     for(int i = 0; ; i+= 2){
         if(values2[i] == NULL){
             break;

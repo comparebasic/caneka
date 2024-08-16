@@ -8,23 +8,22 @@
 
 static status test(MemCtx *m){
     status r = TEST_OK;
-    /*
     r |= Core_Tests(m);
+    /*
     r |= String_Tests(m);
+    */
     r |= SpanInline_Tests(m);
     r |= Hash_Tests(m);
     r |= Table_Tests(m);
-    */
+    r |= SpanSetup_Tests(m);
+    r |= Span_Tests(m);
+    r |= Match_Tests(m);
     /*
     r |= Roebling_Tests(m);
     r |= Serve_Tests(m);
     r |= ProtoHttp_Tests(m);
     r |= Xml_Tests(m);
-    r |= Span_Tests(m);
-    r |= Match_Tests(m);
-    r |= Roebling_Tests(m);
     */
-    r |= SpanSetup_Tests(m);
     return r;
 }
 
@@ -71,9 +70,7 @@ int main(int argc, char **argv){
     }
 
     MemCtx *m = MemCtx_Make();
-    /*
     Caneka_Init(m);
-    */
     
     if(argc > 1){
         for(int i = 1; i < argc; i++){
