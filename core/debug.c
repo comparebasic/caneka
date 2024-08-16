@@ -22,12 +22,6 @@ int DEBUG_ROEBLING_NAME = COLOR_GREEN;
 
 static MemCtx *DebugM = NULL;
 
-static void indent_Print(int indent){
-    while(indent--){
-        printf("  ");
-    }
-}
-
 static Abstract *Print(MemCtx *m, Abstract *a){
     Debug_Print(a, 0, "", 0, TRUE);
     return NULL;
@@ -369,6 +363,12 @@ status Debug_Init(MemCtx *m){
     }
     */
     return NOOP;
+}
+
+void indent_Print(int indent){
+    while(indent--){
+        printf("  ");
+    }
 }
 
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){

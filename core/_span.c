@@ -76,8 +76,60 @@ static void slab_Summarize(void *slab, char *msg, int color, boolean extended){
     */
 }
 
+static void Slab_Print(void *sl, SpanDef *def, byte dim, byte indent){
+    if(dim == 0){
+        indent_Print(indent);
+        printf("Value Dim %d [ ", dim);
+        void *ptr = sl;
+        boolean any = FALSE;
+        for(int i = 0; i < def->stride; i++){
+            util *a = (util *)ptr;
+            if(*a != 0){
+                Abstract *t = (Abstract *)*a;
+                printf("Ptr(%d)=", i);
+                if(t->type.of == TYPE_WRAPPED_UTIL){
+                    Single *wi = (Single *)t;
+                    printf("Wi<%ld>", wi->val.value);
+                }else{
+                    printf("0x%lx", *a);
+                }
+                if(i < def->idxStride - 1){
+                    printf(" ");
+                }
+            }
+            ptr += sizeof(void *)*def->slotSize;
+        }
+        printf("]\n");
+    }else{
+        indent_Print(indent);
+        printf("Idx Dim %d [ ", dim);
+        boolean any = FALSE;
+        void *ptr = sl;
+        for(int i = 0; i < def->idxStride; i++){
+            util *a = (util *)ptr;
+            if(*a != 0){
+                printf("Ptr(%d)=0x%lx", i, *a);
+                if(i < def->idxStride - 1){
+                    printf(" ");
+                }
+            }
+            ptr += sizeof(void *)*def->idxSize;
+        }
+        ptr = sl;
+        for(int i = 0; i < def->idxStride; i++){
+            util *a = (util *)ptr;
+            if(*a != 0){
+                if(i < def->idxStride - 1){
+                    printf("\n");
+                }
+                Slab_Print((void *)*a, def, dim-1, indent+1);
+            }
+            ptr += sizeof(void *)*def->idxSize;
+        }
+        indent_Print(indent);
+        printf("]\n");
+    }
 
-static void Slab_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     /*
     void *slab = (void *)a;
     if(slab->increment != SPAN_DIM_SIZE){
@@ -121,6 +173,8 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
         p->nvalues, p->dims);
     if(extended){
         SpanDef_Print(p->def);
+        printf("\n");
+        Slab_Print(p->root, p->def, p->dims, 1);
     }
     printf(">\x1b[0m");
     /*
@@ -166,18 +220,15 @@ status Span_Set(Span *p, int idx, Abstract *t){
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
     status r = Span_Query(&sr);
-    /*
     if(HasFlag(r, SUCCESS)){
-        void **ptr = NULL;
-        Span_addrByIdx(&sr, ptr);
+        void *ptr = Span_addrByIdx(&sr);
         if(HasFlag(p->def->flags, RAW)){
-            memcpy(*ptr, t, p->def->itemSize);
+            memcpy(ptr, t, p->def->itemSize);
         }else{
-            *ptr = (void *)t;
+            memcpy(ptr, &t, sizeof(void *));
         }
         return SUCCESS;
     }
-    */
     return r;
 }
 
@@ -311,14 +362,10 @@ void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
     return MemCtx_Alloc(m, sz);
 }
 
-status Span_addrByIdx(SlabResult *sr, void **addr){
+void *Span_addrByIdx(SlabResult *sr){
     SpanDef *def = sr->span->def;
-    int pos = sr->local_idx*(def->slotSize);
-    printf("Getting addr %d in span %p\n", pos, sr->slab);
-    /*
-    *addr = (void *)(((void *)sr->slab)+pos);
-    */
-    return SUCCESS;
+    int pos = sr->local_idx*(def->slotSize)*sizeof(void *);
+    return (void *)(((void *)sr->slab)+pos);
 }
 
 void *Span_nextSlot(SlabResult *sr){

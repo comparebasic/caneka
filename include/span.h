@@ -80,7 +80,7 @@ SpanDef *SpanString_MakeDef();
 
 void *Span_valueSlab_Make(MemCtx *m, SpanDef *def);
 void *Span_idxSlab_Make(MemCtx *m, SpanDef *def);
-status Span_addrByIdx(SlabResult *sr, void **addr);
+void *Span_addrByIdx(SlabResult *sr);
 void *Span_nextSlot(SlabResult *sr);
 void *Span_reserve(SlabResult *sr);
 
