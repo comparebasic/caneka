@@ -15,8 +15,8 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
     SlabResult sr;
     Single *w;
 
-    r |= Test(p->def->stride == stride, "%s stride is 16, have %d", name, p->def->stride);
-    r |= Test(p->def->idxStride == idxStride, "%s idxStride is 16, have %d", name, p->def->idxStride);
+    r |= Test(p->def->stride == stride, "%s stride is %d, have %d", name, stride, p->def->stride);
+    r |= Test(p->def->idxStride == idxStride, "%s idxStride is %d, have %d", name, idxStride, p->def->idxStride);
     used = MemCtx_Used(m);
     Span_valueSlab_Make(m, p->def);
     delta = MemCtx_Used(m) - used;
@@ -27,7 +27,6 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
     r |= Test(delta == idxSlabSz, "%s idxSlab has allocated %d bytes, have %ld", name, idxSlabSz, delta);
 
     idx = 100;
-
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
     r |= Test(sr.dimsNeeded == dimFor100, "%s needs %d dims to index into %d, have %hu",
         name, dimFor100, idx, sr.dimsNeeded);
@@ -43,9 +42,9 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
     r |= Test(sr.dimsNeeded == dimFor2000, "%s only needs %d dim to index into %d, have %hu",
         name, dimFor2000, idx, sr.dimsNeeded);
+    w = Int_Wrapped(m, idx);
     Span_Set(p, idx, (Abstract *)w);
 
-    w = Int_Wrapped(m, idx);
 
     if(DEBUG_SPAN){
         Span_Print((Abstract *)p, p->type.of, "Tested Span ", DEBUG_SPAN, TRUE);

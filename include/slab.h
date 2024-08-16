@@ -20,13 +20,15 @@ typedef struct slab_result {
     void *shelfSlab;
     int offset;
     int idx;
+    int local_idx;
     Abstract *value;
     void *stack[8];
     byte op;
     byte dims;
     byte dimsNeeded;
-    byte local_idx;
     byte level;
 } SlabResult;
 
 status Slab_setSlot(void *sl, struct span_def *def, int idx, void *value, size_t sz);
+void *Slab_nextSlot(SlabResult *sr, struct span_def *def, int local_idx);
+void *Slab_valueAddr(SlabResult *sr, struct span_def *def, int local_idx);
