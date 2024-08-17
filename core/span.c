@@ -35,7 +35,7 @@ static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte ind
         printf("Values[ ");
         void *ptr = sl;
         boolean any = FALSE;
-        for(int i = 0; i < def->stride; i++){
+        for(int i = 0; i < def->stride; i+=def->slotSize){
             util *a = (util *)ptr;
             if(*a != 0){
                 Abstract *t = (Abstract *)*a;
@@ -148,6 +148,7 @@ status Span_Set(Span *p, int idx, Abstract *t){
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
         if(HasFlag(p->def->flags, RAW)){
+            printf("Setting %p\n", ptr);
             memcpy(ptr, t, p->def->itemSize);
         }else{
             memcpy(ptr, &t, sizeof(void *));
@@ -168,11 +169,13 @@ void *Span_Get(Span *p, int idx){
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
         if(HasFlag(p->def->flags, RAW)){
+            printf("Getting %p\n", ptr);
             sr.value = ptr;
         }else if(*((Abstract **)ptr) != NULL){
             void **dptr = (void **)ptr;
             sr.value = *dptr;
         }
+        Debug_Print((void *)sr.value, 0, "found", COLOR_RED, TRUE);
         return sr.value;
     }else{
         return NULL;
@@ -315,12 +318,14 @@ static SpanDef *SpanDef_FromCls(word cls){
         return Span4kx32m_MakeDef();
     }else if(cls == TYPE_STRING_SPAN){
         return SpanString_MakeDef();
+    }else{
+        return Span16_MakeDef();
     }
-    return NULL;
 }
 
 void *Span_valueSlab_Make(MemCtx *m, SpanDef *def){
     i64 sz = sizeof(Abstract *)*def->stride*def->slotSize;
+    printf("SpanSize %d sz:%ld slotSize:%d\n", def->slotSize, sz, def->slotSize);
     return MemCtx_Alloc(m, sz);
 }
 
@@ -346,9 +351,9 @@ Span *Span_From(MemCtx *m, int count, ...){
 }
 
 SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def){
-   SpanDef *def = (SpanDef *)MemCtx_Alloc(m, sizeof(SpanDef));
-   memcpy(def, _def, sizeof(SpanDef));
-   return def;
+    SpanDef *def = (SpanDef *)MemCtx_Alloc(m, sizeof(SpanDef));
+    memcpy(def, _def, sizeof(SpanDef));
+    return def;
 }
 
 Span *Span_Make(MemCtx *m, cls type){
@@ -380,6 +385,8 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     }
 
     p->def->slotSize = pwrSlot;
+    p->type.state |= RAW;
+    p->def->flags |= RAW;
     p->root = Span_valueSlab_Make(m, p->def);
     return p;
 }

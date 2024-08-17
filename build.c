@@ -269,13 +269,20 @@ static int BuildBinary(char *binaryName){
     Cstr_Init(&binary_cstr, "build/");
     Cstr_Add(&binary_cstr, binaryName);
 
+    Cstr source_cstr;
+    Cstr_Init(&source_cstr, MAIN);
+
+    if(!REBUILD_BINARY && !NeedsBuild(&source_cstr, &binary_cstr)){
+        return FALSE;
+    }
+
     Arr_Init(&arr, CC);
     Arr_AddArr(&arr, cflags);
     Arr_AddArr(&arr, CFLAGS);
     Arr_AddArr(&arr, INC);
     Arr_Add(&arr, "-o");
     Arr_Add(&arr, binary_cstr.content);
-    Arr_Add(&arr, MAIN);
+    Arr_Add(&arr, source_cstr.content);
     Arr_Add(&arr, lib_cstr.content);
 
     return subProcess(&arr, binary_cstr.content);
@@ -299,8 +306,6 @@ int main(){
         }
         set++;
     }
-    if(REBUILD_BINARY){
-        BuildBinary(BINARY);
-    }
+    BuildBinary(BINARY);
     printf("\x1b[%dmDone building\x1b[0m\n", DONE_COLOR);
 }

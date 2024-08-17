@@ -35,7 +35,6 @@ status String_Tests(MemCtx *gm){
 
     s = String_From(m, bytes(longCstr));
     int ls_l = strlen(longCstr);
-    Debug_Print((String *)s, TYPE_STRING_CHAIN,"Long string variable", COLOR_DARK, FALSE);
 
     r |= Test(s->type.of == TYPE_STRING_CHAIN, 
         "Expect string to have chain type %s found %s", 

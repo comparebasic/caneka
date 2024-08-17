@@ -117,10 +117,11 @@ status SpanInline_Tests(MemCtx *gm){
     status r = READY;
 
     Single *sgl = NULL;
-    p = Span_MakeInline(m, TYPE_WRAPPED, sizeof(Single));
+    p = Span_MakeInline(m, TYPE_SPAN, sizeof(Single));
     String *s;
 
 
+    printf("Start >>>>>>>>>>>\n");
     sgl = Int_Wrapped(m, 12);
     Span_Add(p, (Abstract *)sgl);
     sgl = Int_Wrapped(m, 45);
@@ -129,7 +130,7 @@ status SpanInline_Tests(MemCtx *gm){
     Span_Set(p, 45, (Abstract *)sgl);
 
     printf("Single is sizeof(%ld)\n", sizeof(Single));
-    Debug_Print((void *)p, 0, "Span Inline Int: ", COLOR_CYAN, FALSE);
+    Debug_Print((void *)p, 0, "Span Inline Int: ", COLOR_CYAN, TRUE);
 
     int idx;
     util expected;
@@ -137,6 +138,8 @@ status SpanInline_Tests(MemCtx *gm){
     idx = 0;
     expected = 12;
     sgl = (Single *)Span_Get(p, idx);
+    printf("\n<<<<<<< END\n");
+    printf("%p\n", sgl);
     r |= Test(sgl->val.value == expected, "Inline Span idx %u match expected %ld have %ld", idx, expected, sgl->val.value);
 
     idx = 1;

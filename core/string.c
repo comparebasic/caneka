@@ -101,6 +101,7 @@ status String_AddInt(MemCtx *m, String *s, int i){
 String *String_Make(MemCtx *m, byte *bytes){
     int length = strlen((char *)bytes);
     String *s = String_Init(m, length); 
+    printf("String Init Lenght %d vs %d\n", length, s->length);
     String_AddBytes(m, s, bytes, length);
     return s;
 }
@@ -113,6 +114,8 @@ String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
 }
 
 String *String_From(MemCtx *m, byte *bytes){
+    printf("Bytes for string %s\n", bytes);
+    fflush(stdout);
     return String_Make(m, bytes);
 }
 
@@ -138,8 +141,16 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     String *seg = a;
     byte *p = bytes;
 
-    while(seg->next != NULL){
-        seg = seg->next;
+    if(a->type.of == TYPE_STRING_CHAIN){
+        while(seg->next != NULL){
+            seg = seg->next;
+        }
+    }else if(a->type.of == TYPE_STRING_FIXED){
+        if(length > STRING_FIXED_SIZE){
+            Fatal("length exceeds fixed size\n", a->type.of);
+        }
+    }else{
+        Fatal("unknown type\n", a->type.of);
     }
 
     /* copy the initial chunk */

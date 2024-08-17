@@ -9,9 +9,7 @@
 static status test(MemCtx *m){
     status r = TEST_OK;
     r |= Core_Tests(m);
-    /*
     r |= String_Tests(m);
-    */
     r |= SpanInline_Tests(m);
     r |= Hash_Tests(m);
     r |= Table_Tests(m);
