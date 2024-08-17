@@ -1,23 +1,31 @@
 #include <external.h>
 #include <caneka.h>
 
-int TABLE_DIM_LOOKUPS[7] = {0, 15, 255, 4095, 65535, 1048575, 0};
 int TABLE_DIM_BYTESIZES[7] = {0, 1, 1, 2, 2, 4, 0};
 int TABLE_REQUERY_MAX[7] = {0, 4, 4, 8, 16, 32, 0};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
 
-static int getReQueryKey(i64 hash, int position, byte dim){
-    return (int) ((hash >> (position*4)) & TABLE_DIM_LOOKUPS[dim]);
+static Span *Table_SetupTable(Span *p){
+    p->def = SpanDef_Clone(p->m, p->def);
+    for(int i = 0; i < 8; i++){
+        p->def->dim_lookups[i] = Span_availableByDim(i, p->def->stride, p->def->idxStride);
+    }
+    return p;
+}
+
+static int getReQueryKey(SpanDef *def, i64 hash, int position, byte dim){
+    return (int) ((hash >> (position*4)) & def->dim_lookups[dim]);
 }
 
 static status Table_Resize(Span *tbl, word *queries){
-    if(tbl->nvalues > ((TABLE_DIM_LOOKUPS[tbl->dims] / 2) + (TABLE_DIM_LOOKUPS[tbl->dims] / 4)) 
+    SpanDef *def = tbl->def;
+    if(tbl->nvalues > ((def->dim_lookups[tbl->dims] / 2) + (def->dim_lookups[tbl->dims] / 4)) 
             || *queries > TABLE_REQUERY_MAX[tbl->dims]){
         *queries = 0;
         Span *newTbl = Span_Make(tbl->m, TYPE_SPAN);
-        Span_Set(newTbl, TABLE_DIM_LOOKUPS[tbl->dims]+1, NULL);
+        Span_Set(newTbl, def->dim_lookups[tbl->dims]+1, NULL);
         printf("Resize to %d dims\n", tbl->dims);
         for(int i = 0; i <= tbl->max_idx; i++){
             Hashed *h = (Hashed *)Span_Get(tbl, i);
@@ -45,7 +53,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
         for(int j = 0; !found && j < TABLE_REQUERY_MAX[tbl->dims]; j++){
             queries++;
             Table_Resize(tbl, &queries);
-            int hkey = getReQueryKey(h->id, j, tbl->dims);
+            int hkey = getReQueryKey(tbl->def, h->id, j, tbl->dims);
             if(DEBUG_TABLE){
                 Debug_Print((void *)h->item, 0, "Placing ", DEBUG_TABLE, FALSE);
                 printf("\x1b[%dm dimsize=%hu key=", DEBUG_TABLE, tbl->dims);
@@ -125,4 +133,10 @@ int Table_GetIdx(Span *tbl, Abstract *a){
     }else{
         return -1;
     }
+}
+
+Span *Table_Make(MemCtx *m){
+    Span *p = Span_Make(m, TYPE_SPAN);
+    p->type.of = TYPE_TABLE;
+    return Table_SetupTable(p);
 }

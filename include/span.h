@@ -38,6 +38,7 @@ typedef struct span_def {
     int idxSize;
     int itemSize;
     int valueHdr;
+    int dim_lookups[8];
 } SpanDef;
 
 typedef struct span {
@@ -85,6 +86,7 @@ void *Span_reserve(SlabResult *sr);
 status Span_GetSet(SlabResult *sr, Abstract *t);
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);
 /* SpanDef */
+SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def);
 byte SpanDef_GetDimNeeded(SpanDef *def, int idx);
 
 /* debug */
