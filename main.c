@@ -6,22 +6,27 @@
 #define servecmd "serve="
 #define testcmd "test"
 
+static void *tests[] = {
+    "Core", Core_Tests,
+    "String", String_Tests,
+    "SpanSetup", SpanSetup_Tests,
+    "Span", Span_Tests,
+    "SpanInline", SpanInline_Tests,
+    "Hash", Hash_Tests,
+    "Table", Table_Tests,
+    "Match", Match_Tests,
+    NULL, NULL
+    /*
+    Roebling_Tests,
+    Serve_Tests,
+    ProtoHttp_Tests,
+    Xml_Tests,
+    */
+};
+
 static status test(MemCtx *m){
     status r = TEST_OK;
-    r |= Core_Tests(m);
-    r |= String_Tests(m);
-    r |= SpanInline_Tests(m);
-    r |= Hash_Tests(m);
-    r |= Table_Tests(m);
-    r |= SpanSetup_Tests(m);
-    r |= Span_Tests(m);
-    r |= Match_Tests(m);
-    /*
-    r |= Roebling_Tests(m);
-    r |= Serve_Tests(m);
-    r |= ProtoHttp_Tests(m);
-    r |= Xml_Tests(m);
-    */
+    Test_Runner(m, "Caneka", tests);
     return r;
 }
 

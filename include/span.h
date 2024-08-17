@@ -89,3 +89,4 @@ byte SpanDef_GetDimNeeded(SpanDef *def, int idx);
 
 /* debug */
 void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
+int Span_availableByDim(int dims, int stride, int idxStride);

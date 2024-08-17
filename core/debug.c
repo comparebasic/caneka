@@ -27,6 +27,101 @@ static Abstract *Print(MemCtx *m, Abstract *a){
     return NULL;
 }
 
+static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
+    if(dim == 0){
+        indent_Print(indent);
+        printf("%d(%d)= ", parentIdx,offset);
+        if(extended){
+            printf("#%p->", sl);
+        }
+        printf("Values[ ");
+        void *ptr = sl;
+        boolean any = FALSE;
+        for(int i = 0; i < def->stride; i+=def->slotSize){
+            util *a = (util *)ptr;
+            if(HasFlag(def->flags, RAW)){
+                if(*a != 0){
+                    printf("I:%p ", a);
+                }
+            }else{
+                if(*a != 0){
+                    Abstract *t = (Abstract *)*a;
+                    printf("%d=", i);
+                    /*
+                    if(t->type.of == TYPE_WRAPPED_UTIL){
+                        Single *wi = (Single *)t;
+                        printf("Wi<%ld>", wi->val.value);
+                    }else{
+                    */
+                        printf("0x%lx", *a);
+                    /*}*/
+                    printf(" ");
+                }
+            }
+            ptr += sizeof(void *)*def->slotSize;
+        }
+        printf("]");
+    }else{
+        indent_Print(indent);
+        printf("%d=", parentIdx);
+        if(extended){
+            printf("#%p->", sl);
+        }
+        printf("Idx(%d/%d)[ ",  dim, Span_availableByDim(dim, def->stride, def->idxStride));
+        boolean any = FALSE;
+        void *ptr = sl;
+        for(int i = 0; i < def->idxStride; i++){
+            util *a = (util *)ptr;
+            if(*a != 0){
+                int increment = Span_availableByDim(dim, def->stride, def->idxStride);
+                util pos = offset+increment*i;
+                printf("%d=%ld..%ld", i, pos, pos+(increment-1));
+                if(i < def->idxStride - 1){
+                    printf(" ");
+                }
+            }
+            ptr += sizeof(void *)*def->idxSize;
+        }
+        ptr = sl;
+        any = FALSE;
+        for(int i = 0; i < def->idxStride; i++){
+            util *a = (util *)ptr;
+            if(*a != 0){
+                printf("\n");
+                offset += Span_availableByDim(dim, def->stride, def->idxStride)*i;
+                Slab_Print((void *)*a, def, dim-1, i, indent+1, extended, totalDims, offset);
+                any = TRUE;
+            }
+            ptr += sizeof(void *)*def->idxSize;
+        }
+        if(any){
+            printf("\n");
+        }
+        indent_Print(indent);
+        printf("]");
+        if(any){
+            printf("\n");
+        }
+    }
+}
+
+static void SpanDef_Print(SpanDef *def){
+    printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d itemSize:%d, valueHdr:%d]", 
+         def->idxStride, def->stride, def->idxSize, def->slotSize, def->itemSize, def->valueHdr);
+}
+
+void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Span *p = (Span *)asIfc(a, TYPE_SPAN);
+    printf("\x1b[0;%dm%sP<%u items in %u dims ", color, msg,
+        p->nvalues, p->dims);
+    if(extended){
+        SpanDef_Print(p->def);
+        printf("\n");
+        Slab_Print(p->root, p->def, p->dims, 0, 1, TRUE, p->dims, 0);
+    }
+    printf(">\x1b[0m");
+}
+
 static Abstract *PrintAddr(MemHandle *_mh, Abstract *a){
     printf("%p ", a);
     return NULL;

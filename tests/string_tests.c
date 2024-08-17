@@ -26,7 +26,7 @@ status String_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     String *s;
     s = String_From(m, bytes("Hi"));
-    status r = TEST_OK;
+    status r = SUCCESS;
     r |= Test(s->type.of == TYPE_STRING_FIXED, 
         "Expect string to have fixed type %s found %s", 
             Class_ToString(TYPE_STRING_FIXED), Class_ToString(s->type.of));

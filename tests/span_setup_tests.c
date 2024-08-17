@@ -8,7 +8,7 @@ static void _Debug(Span *p, char *msg){
 
 static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int stride, int idxStride, int slabSz, int idxSlabSz){
     MemCtx *m = p->m;
-    status r = READY;
+    status r = SUCCESS;
     i64 used = 0;
     i64 delta = 0;
     int idx = 0;
@@ -55,7 +55,7 @@ static status testSpan(Span *p, char *name, int dimFor100, int dimFor2000, int s
 }
 
 status SpanSetup_Tests(MemCtx *gm){
-    status r = READY;
+    status r = SUCCESS;
     MemCtx *m = MemCtx_Make();
 
     Span *p;
@@ -67,15 +67,15 @@ status SpanSetup_Tests(MemCtx *gm){
 
     /* span */
     p = Span_Make(m, TYPE_SPAN);
-    testSpan(p, "Span", 1, 2, 16, 16, 128, 128);
+    r |= testSpan(p, "Span", 1, 2, 16, 16, 128, 128);
 
     /* queue */
     p = Span_Make(m, TYPE_QUEUE_SPAN);
-    testSpan(p, "Queue", 1, 2, 16, 32, 128, 512);
+    r |= testSpan(p, "Queue", 1, 2, 16, 32, 128, 512);
 
     /* mini */
     p = Span_Make(m, TYPE_MINI_SPAN);
-    testSpan(p, "Mini", 2, 3, 4, 16, 32, 128);
+    r |= testSpan(p, "Mini", 2, 3, 4, 16, 32, 128);
 
     /* string span 
     p = Span_Make(m, TYPE_STRING_SPAN);
@@ -84,7 +84,7 @@ status SpanSetup_Tests(MemCtx *gm){
 
     /* slab span */
     p = Span_Make(m, TYPE_SLAB_SPAN);
-    testSpan(p, "SlabSpan", 0, 1, 512, 32, 4096, 512);
+    r |= testSpan(p, "SlabSpan", 0, 1, 512, 32, 4096, 512);
 
     return r;
 }

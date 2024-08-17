@@ -4,5 +4,5 @@
 
 status Core_Tests(MemCtx *gm){
     status r = READY;
-    return r;
+    return SUCCESS;
 }

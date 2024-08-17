@@ -5,7 +5,7 @@
 status Hash_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     String *s;
-    status r = TEST_OK;
+    status r = SUCCESS;
 
     s = String_From(m, bytes("Hi"));
 

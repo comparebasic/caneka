@@ -54,8 +54,6 @@ status Span_Tests(MemCtx *gm){
     String *s513 = String_From(m, bytes("Five Thirteen"));
     Span_Set(p, 512, (Abstract *)s513);
 
-    Debug_Print((void *)p, TYPE_SPAN, "Span after first insert(s) ", COLOR_CYAN, TRUE);
-
     s = (String *)Span_Get(p, 0);
     r |= Test(s->type.of == s1->type.of, "After expand, Span item 0 has type string %s found %s", 
         Class_ToString(s1->type.of), Class_ToString(s->type.of));
@@ -104,8 +102,6 @@ status Span_Tests(MemCtx *gm){
     Span_Set(p, 2, (Abstract *)Int_Wrapped(m, 2));
     Span_Set(p, 6, (Abstract *)Int_Wrapped(m, 6));
     Span_Set(p, 225, (Abstract *)Int_Wrapped(m, 225));
-    Debug_Print((void *)p, 0, "Span: ", COLOR_CYAN, TRUE);
-
 
     MemCtx_Free(m);
     return r;
@@ -121,7 +117,6 @@ status SpanInline_Tests(MemCtx *gm){
     String *s;
 
 
-    printf("Start >>>>>>>>>>>\n");
     sgl = Int_Wrapped(m, 12);
     Span_Add(p, (Abstract *)sgl);
     sgl = Int_Wrapped(m, 45);
@@ -129,17 +124,12 @@ status SpanInline_Tests(MemCtx *gm){
     sgl = Int_Wrapped(m, 72);
     Span_Set(p, 45, (Abstract *)sgl);
 
-    printf("Single is sizeof(%ld)\n", sizeof(Single));
-    Debug_Print((void *)p, 0, "Span Inline Int: ", COLOR_CYAN, TRUE);
-
     int idx;
     util expected;
 
     idx = 0;
     expected = 12;
     sgl = (Single *)Span_Get(p, idx);
-    printf("\n<<<<<<< END\n");
-    printf("%p\n", sgl);
     r |= Test(sgl->val.value == expected, "Inline Span idx %u match expected %ld have %ld", idx, expected, sgl->val.value);
 
     idx = 1;

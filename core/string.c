@@ -101,7 +101,6 @@ status String_AddInt(MemCtx *m, String *s, int i){
 String *String_Make(MemCtx *m, byte *bytes){
     int length = strlen((char *)bytes);
     String *s = String_Init(m, length); 
-    printf("String Init Lenght %d vs %d\n", length, s->length);
     String_AddBytes(m, s, bytes, length);
     return s;
 }
@@ -114,8 +113,6 @@ String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
 }
 
 String *String_From(MemCtx *m, byte *bytes){
-    printf("Bytes for string %s\n", bytes);
-    fflush(stdout);
     return String_Make(m, bytes);
 }
 

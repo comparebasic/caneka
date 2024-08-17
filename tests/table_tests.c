@@ -32,7 +32,7 @@ char *values2[] = {
 status Table_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     Span *tbl = Span_Make(m, TYPE_SPAN);
-    status r = READY;
+    status r = SUCCESS;
     String *s;
     String *value;
     String *found;
