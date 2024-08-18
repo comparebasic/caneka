@@ -218,21 +218,6 @@ byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
     return dims;
 }
 
-static SpanDef *SpanDef_FromCls(word cls){
-    if(cls == TYPE_SPAN){
-        return Span16_MakeDef();
-    }else if(cls == TYPE_MINI_SPAN){
-        return Span4x16_MakeDef();
-    }else if(cls == TYPE_QUEUE_SPAN){
-        return Span16x32m_MakeDef();
-    }else if(cls == TYPE_SLAB_SPAN){
-        return Span4kx32m_MakeDef();
-    }else if(cls == TYPE_STRING_SPAN){
-        return SpanString_MakeDef();
-    }else{
-        return Span16_MakeDef();
-    }
-}
 
 void *Span_valueSlab_Make(MemCtx *m, SpanDef *def){
     i64 sz = sizeof(Abstract *)*def->stride*def->slotSize;
@@ -258,12 +243,6 @@ Span *Span_From(MemCtx *m, int count, ...){
         Span_Add(p, v);
     }
     return p;
-}
-
-SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def){
-    SpanDef *def = (SpanDef *)MemCtx_Alloc(m, sizeof(SpanDef));
-    memcpy(def, _def, sizeof(SpanDef));
-    return def;
 }
 
 Span *Span_Make(MemCtx *m, cls type){

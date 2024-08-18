@@ -68,7 +68,7 @@ status Roebling_Tests(MemCtx *gm){
     String *s = NULL; 
 
     Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m);
+    Span *parsers_do = Span_Make(m, TYPE_SPAN);
     Span_Add(parsers_do, (Abstract *)Do_Wrapped((MemHandle *)m, (DoFunc)SetWord1)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped((MemHandle *)m, (DoFunc)SetWord2)); 
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, String_Init(m, STRING_EXTEND), NULL); 

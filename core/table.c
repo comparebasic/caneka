@@ -7,14 +7,6 @@ int TABLE_REQUERY_MAX[7] = {0, 4, 4, 8, 16, 32, 0};
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
 
-static Span *Table_SetupTable(Span *p){
-    p->def = SpanDef_Clone(p->m, p->def);
-    for(int i = 0; i < 8; i++){
-        p->def->dim_lookups[i] = Span_availableByDim(i, p->def->stride, p->def->idxStride);
-    }
-    return p;
-}
-
 static int getReQueryKey(SpanDef *def, i64 hash, int position, byte dim){
     return (int) ((hash >> (position*4)) & def->dim_lookups[dim]);
 }
@@ -133,10 +125,4 @@ int Table_GetIdx(Span *tbl, Abstract *a){
     }else{
         return -1;
     }
-}
-
-Span *Table_Make(MemCtx *m){
-    Span *p = Span_Make(m, TYPE_SPAN);
-    p->type.of = TYPE_TABLE;
-    return Table_SetupTable(p);
 }

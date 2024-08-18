@@ -161,6 +161,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "int.h"
 #include "slab.h"
 #include "array.h"
+#include "spandef.h"
 #include "span.h"
 #include "iter.h"
 #include "table.h"
