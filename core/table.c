@@ -11,24 +11,37 @@ static int getReQueryKey(SpanDef *def, i64 hash, int position, byte dim){
     return (int) ((hash >> (position*4)) & def->dim_lookups[dim]);
 }
 
-static status Table_Resize(Span *tbl, word *queries){
+static boolean shouldResize(Span *tbl, word *queries){
     SpanDef *def = tbl->def;
+    if(def->dim_lookups[tbl->dims] == 0){
+        Fatal("Dim lookup value not set for SpanDef\n", tbl->type.of);
+        return FALSE;
+    }
     if(tbl->nvalues > ((def->dim_lookups[tbl->dims] / 2) + (def->dim_lookups[tbl->dims] / 4)) 
             || *queries > TABLE_REQUERY_MAX[tbl->dims]){
+            *queries = 0;
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static status Table_Resize(Span *tbl, word *queries){
+    SpanDef *def = tbl->def;
+    if(shouldResize(tbl, queries)){
         *queries = 0;
-        Span *newTbl = Span_Make(tbl->m, TYPE_SPAN);
+        Span *newTbl = Span_Make(tbl->m, TYPE_TABLE);
 
         SlabResult sr;
         SlabResult_Setup(&sr, newTbl, SPAN_OP_RESIZE, 0);
         sr.dimsNeeded = tbl->dims+1;
         Span_GrowToNeeded(&sr);
-        Debug_Print((void *)newTbl, 0, "New Table", COLOR_PURPLE, TRUE);
 
-        printf("Resize to %d dims\n", tbl->dims);
         for(int i = 0; i <= tbl->max_idx; i++){
             Hashed *h = (Hashed *)Span_Get(tbl, i);
             if(h != NULL){
-                Table_GetSetHashed(newTbl, SPAN_OP_SET, (Abstract *)h, (Abstract *)h->value);
+                if(h != NULL){
+                    Table_GetSetHashed(newTbl, SPAN_OP_SET, (Abstract *)h, (Abstract *)h->value);
+                }
             }
         }
         memcpy(tbl, newTbl, sizeof(Span));

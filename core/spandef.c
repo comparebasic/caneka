@@ -27,8 +27,14 @@ status SpanDef_Init(){
     tableDef.slotSize = sizeof(Hashed)/sizeof(void*);
     tableDef.itemSize = sizeof(Hashed);
     tableDef.flags = RAW;
-    i64 dim_lookup[] = {15, 255, 4095, 0, 0, 0, 0, 0};
-    memcpy(&(tableDef.dim_lookups), &dim_lookup, sizeof(tableDef.dim_lookups)); 
+    tableDef.dim_lookups[0] = 15;
+    tableDef.dim_lookups[1] = 255;
+    tableDef.dim_lookups[2] = 4095;
+    tableDef.dim_lookups[3] = 0;
+    tableDef.dim_lookups[4] = 0;
+    tableDef.dim_lookups[5] = 0;
+    tableDef.dim_lookups[6] = 0;
+    tableDef.dim_lookups[7] = 0;
 
     /* span16x32m */
     memset(&span16x32mDef, 0, sizeof(SpanDef));
@@ -69,7 +75,6 @@ status SpanDef_Init(){
     spanStringDef.idxSize = SPAN_DEFAULT_IDX_SIZE;
     spanStringDef.valueHdr = sizeof(Type)+sizeof(int);
 
-    printf("Spans inited span16.stride:%d\n", span16Def.stride);
     return SUCCESS;
 }
 

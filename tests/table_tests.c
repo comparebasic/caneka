@@ -21,6 +21,30 @@ char *values[] = {
     NULL,
 };
 
+char *valuesResize[] = {
+    "Alpha", "Apples",
+    "Bravo", "Bandits",
+    "Charlie", "Carrots",
+    "Delta", "DeadMan",
+    "Echo", "Elevator",
+    "Foxtrot", "Five Minutes",
+    "Golf", "Gophers Are Cool",
+    "Hotel", "Happy Go Lucky",
+    "India", "Idio-syncratic",
+    "Juliet", "Jockey Rider",
+    "Kilo", "Kangaroo",
+    "Lima", "Lefties",
+    "Mike", "Mangoes",
+    "November", "Neighbourhood Villan",
+    "Oscar", "Oasis of Gems",
+    "Pappa", "Pinapple Ham",
+    "Quebec", "Quarterly Report",
+    "Romeo", "Rooty Tooty",
+    "Sierra", "Stainless Steel",
+    NULL,
+    NULL,
+};
+
 char *values2[] = {
     "Apples", "Mmmm pie in the making",
     "Bananas", "Don't slip",
@@ -45,7 +69,7 @@ status Table_Tests(MemCtx *gm){
         value = String_Make(m, bytes(values[i+1]));
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
         if(DEBUG_TABLE){
-            Debug_Print((void *)s, 0, "Setting: ", COLOR_YELLOW, TRUE);
+            Debug_Print((void *)s, 0, "Setting: ", DEBUG_TABLE, TRUE);
             printf("\n");
             Debug_Print((void *)tbl, 0, "In Table: ", DEBUG_TABLE, TRUE);
             printf("\n");
@@ -67,7 +91,60 @@ status Table_Tests(MemCtx *gm){
             found != NULL ? (char *)(found->bytes) : "NULL");
     }
 
-    /*
+    MemCtx_Free(m);
+    return r;
+}
+
+status TableResize_Tests(MemCtx *gm){
+    MemCtx *m = MemCtx_Make();
+    Span *tbl = Span_Make(m, TYPE_TABLE);
+    status r = SUCCESS;
+    String *s;
+    String *value;
+    String *found;
+
+    for(int i = 0; ; i+= 2){
+        if(valuesResize[i] == NULL){
+            break;
+        }
+        s = String_Make(m, bytes(valuesResize[i]));
+        value = String_Make(m, bytes(valuesResize[i+1]));
+        Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+        if(DEBUG_TABLE){
+            Debug_Print((void *)s, 0, "Setting: ", DEBUG_TABLE, TRUE);
+            printf("\n");
+            Debug_Print((void *)tbl, 0, "In Table: ", DEBUG_TABLE, TRUE);
+            printf("\n");
+        }
+    }
+
+
+    for(int i = 0; ; i+= 2){
+        if(valuesResize[i] == NULL){
+            break;
+        }
+        s = String_Make(m, bytes(valuesResize[i]));
+        value = String_Make(m, bytes(valuesResize[i+1]));
+        found = (String *)Table_Get(tbl, (Abstract *)s);
+        r |= Test(found != NULL, 
+            "Expect strings to not be NULL from key:%s", (char *)(s->bytes));
+        r |= Test(String_Equals(value, found), 
+            "Expect strings to equal %s from key:%s found %s", (char *)(value->bytes), (char *)(s->bytes),
+            found != NULL ? (char *)(found->bytes) : "NULL");
+    }
+
+    MemCtx_Free(m);
+    return r;
+}
+
+status TablePreKey_Tests(MemCtx *gm){
+    MemCtx *m = MemCtx_Make();
+    Span *tbl = Span_Make(m, TYPE_TABLE);
+    status r = SUCCESS;
+    String *s;
+    String *value;
+    String *found;
+
     s = String_Make(m, bytes("PreKey"));
     value = String_Make(m, bytes("After Value"));
     Table_SetKey(tbl, (Abstract *)s);
@@ -89,9 +166,6 @@ status Table_Tests(MemCtx *gm){
         value = String_Make(m, bytes(values2[i+1]));
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
     }
-
-    Debug_Print((void *) tbl, 0, "Table: ", COLOR_YELLOW, TRUE);
-    */
 
     MemCtx_Free(m);
     return r;

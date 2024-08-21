@@ -82,7 +82,11 @@ void *Span_Get(Span *p, int idx){
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
         if(HasFlag(p->def->flags, RAW)){
-            sr.value = ptr;
+            if((*(util *)ptr) != 0){
+                sr.value = ptr;
+            }else{
+                sr.value = NULL;
+            }
         }else if(*((Abstract **)ptr) != NULL){
             void **dptr = (void **)ptr;
             sr.value = *dptr;

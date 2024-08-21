@@ -14,6 +14,8 @@ static void *tests[] = {
     "SpanInline", SpanInline_Tests,
     "Hash", Hash_Tests,
     "Table", Table_Tests,
+    "TableResize", TableResize_Tests,
+    "TablePreKey", TablePreKey_Tests,
     "Match", Match_Tests,
     NULL, NULL
     /*
