@@ -9,6 +9,13 @@
 #include <stdarg.h>
 #include <unistd.h>
 
+#define RM "rm"
+
+typedef int (*Anon)();
+int Build();
+int Clean();
+int BuildLib();
+
 typedef struct build_subdir {
     char *name;
     char *sources[];
@@ -288,9 +295,7 @@ static int BuildBinary(char *binaryName){
     return subProcess(&arr, binary_cstr.content);
 }
 
-
-/* main */
-int main(){
+int BuildLib(){
     Cstr_Init(&lib_cstr, "build/lib");
     Cstr_Add(&lib_cstr, BINARY);
     Cstr_Add(&lib_cstr, ".a");
@@ -306,6 +311,85 @@ int main(){
         }
         set++;
     }
-    BuildBinary(BINARY);
-    printf("\x1b[%dmDone building\x1b[0m\n", DONE_COLOR);
+    return TRUE;
+}
+
+int Build(){
+    if(BuildLib()){
+
+        return BuildBinary(BINARY);
+    }
+    return FALSE;
+}
+
+int Clean(){
+    BuildSubdir **set = ALL;
+    char *name = "cleaning source objects"; 
+    Cstr path;
+    StrArr rm;
+    while(*set != NULL){
+        Cstr_Init(&path, "build/");
+        Cstr_Add(&path, (*set)->name);
+
+        Arr_Init(&rm, RM);
+        Arr_Add(&rm, "-rfv");
+        Arr_Add(&rm, path.content);
+        set++;
+        if(!subProcess(&rm, name)){
+            return FALSE;
+        }
+    }
+
+    Arr_Init(&rm, RM);
+    Arr_Add(&rm, "-rfv");
+    Cstr_Init(&path, "build/");
+    Cstr_Add(&path, BINARY);
+    Arr_Add(&rm, path.content);
+    if(!subProcess(&rm, name)){
+        return FALSE;
+    }
+
+    Arr_Init(&rm, RM);
+    Arr_Add(&rm, "-rfv");
+    Cstr_Init(&path, "build/");
+    Cstr_Add(&path, "lib");
+    Cstr_Add(&path, BINARY);
+    Cstr_Add(&path, ".a");
+    Arr_Add(&rm, path.content);
+    if(!subProcess(&rm, name)){
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+void **cmdSet[] = {
+    (void *)"clean", (void *)Clean,
+    (void *)"static", (void *)BuildLib,
+    (void *)"build", (void *)Build,
+    NULL, NULL
+};
+
+/* main */
+int main(int argc, char *argv[]){
+    if(argc > 1){
+        int i = 0;
+        for(int ai = 1; ai < argc; ai++){
+            char *arg = argv[ai];
+            for(; cmdSet[i] != NULL; i+=2){
+                char *cmd = (char *)cmdSet[i];
+                printf("cmd %s vs arg %s\n", cmd, arg);
+                Anon func = (Anon)cmdSet[i+1];
+                if(!strcmp(arg, cmd)){
+                    printf("Running %s\n", cmd);
+                    if(!func()){
+                        break;
+                    }
+                }
+            }
+        }
+    }else{
+        Build();
+    }
+    printf("\x1b[%dmAll Done\x1b[0m\n", DONE_COLOR);
 }
