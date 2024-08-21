@@ -43,7 +43,13 @@ status Table_Tests(MemCtx *gm){
         }
         s = String_Make(m, bytes(values[i]));
         value = String_Make(m, bytes(values[i+1]));
-        Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+        if(DEBUG_TABLE){
+            Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+            Debug_Print((void *)s, 0, "Setting: ", COLOR_YELLOW, TRUE);
+            printf("\n");
+            Debug_Print((void *)tbl, 0, "In Table: ", DEBUG_TABLE, TRUE);
+            printf("\n");
+        }
     }
 
 

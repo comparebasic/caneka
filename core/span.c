@@ -62,8 +62,10 @@ status Span_Set(Span *p, int idx, Abstract *t){
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
         if(HasFlag(p->def->flags, RAW)){
+            printf("Setting Inline %d\n", idx);
             memcpy(ptr, t, (size_t)p->def->itemSize);
         }else{
+            printf("Setting Normal %d\n", p->def->itemSize);
             memcpy(ptr, &t, sizeof(void *));
         }
         p->nvalues++;
@@ -276,7 +278,6 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     }
 
     p->def->slotSize = pwrSlot;
-    p->type.state |= RAW;
     p->def->flags |= RAW;
     p->root = Span_valueSlab_Make(m, p->def);
     return p;

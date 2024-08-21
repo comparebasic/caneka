@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-int TABLE_DIM_BYTESIZES[7] = {0, 1, 1, 2, 2, 4, 0};
-int TABLE_REQUERY_MAX[7] = {0, 4, 4, 8, 16, 32, 0};
+int TABLE_DIM_BYTESIZES[7] = {1, 1, 2, 2, 4, 0, 0};
+int TABLE_REQUERY_MAX[7] = {4, 4,  8, 16, 32, 0, 0};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
@@ -41,14 +41,15 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
     Abstract *v = NULL;
     boolean found = FALSE;
     word queries = 0;
-    for(int i = 0; !found && i < tbl->dims && i < TABLE_MAX_DIMS; i++){
+    for(int i = 0; !found && i <= tbl->dims && i < TABLE_MAX_DIMS; i++){
+        printf("Table Q i;%d\n", i);
         for(int j = 0; !found && j < TABLE_REQUERY_MAX[tbl->dims]; j++){
             queries++;
             Table_Resize(tbl, &queries);
             int hkey = getReQueryKey(tbl->def, h->id, j, tbl->dims);
             if(DEBUG_TABLE){
                 Debug_Print((void *)h->item, 0, "Placing ", DEBUG_TABLE, FALSE);
-                printf("\x1b[%dm dimsize=%hu key=", DEBUG_TABLE, tbl->dims);
+                printf("\x1b[%dm dimsize=%hu key/%lu=", DEBUG_TABLE, tbl->dims, tbl->def->dim_lookups[tbl->dims]);
                 Bits_Print((byte *)&hkey, TABLE_DIM_BYTESIZES[tbl->dims], "", DEBUG_TABLE, TRUE);
                 printf("\x1b[%dm%d half-byte of ", DEBUG_TABLE, j+1);
                 Bits_Print((byte *)&(h->id), sizeof(int), "", DEBUG_TABLE, FALSE);
@@ -56,7 +57,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
             }
             _h = (Hashed *)Span_Get(tbl, hkey);
             if(op == SPAN_OP_GET){
-                if(_h != NULL){
+                if(_h != NULL && *((util *)_h) != 0){
                     while(_h != NULL){
                         if(Hashed_Equals(h, _h)){
                             h = _h;
@@ -70,8 +71,10 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                     break;
                 }
             }else if(op == SPAN_OP_SET){
-                if(_h != NULL){
+                printf("SET\n");
+                if(_h != NULL && *((util *)_h) != 0){
                     while(_h != NULL){
+                        printf("Comparing...\n");
                         if(Hashed_Equals(h, _h)){
                             h = _h;
                             h->idx = hkey;
@@ -82,6 +85,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                         _h = _h->next;
                     }
                 }else{
+                    printf("Setting...\n");
                     h->idx = hkey;
                     Span_Set(tbl, hkey, (Abstract *)h);
                     found = TRUE;

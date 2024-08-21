@@ -7,7 +7,7 @@ typedef struct span_def {
     int idxSize;
     int itemSize;
     int valueHdr;
-    int dim_lookups[8];
+    i64 dim_lookups[8];
 } SpanDef;
 
 SpanDef *SpanDef_FromCls(word cls);

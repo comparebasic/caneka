@@ -14,7 +14,7 @@ int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
-int DEBUG_TABLE = 0;
+int DEBUG_TABLE = COLOR_CYAN;
 int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_SPAN = 0;
 
@@ -27,7 +27,7 @@ static Abstract *Print(MemCtx *m, Abstract *a){
     return NULL;
 }
 
-static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
+static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
     if(dim == 0){
         indent_Print(indent);
         printf("%d(%d)= ", parentIdx,offset);
@@ -37,26 +37,20 @@ static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte ind
         printf("Values[ ");
         void *ptr = sl;
         boolean any = FALSE;
-        for(int i = 0; i < def->stride; i+=def->slotSize){
+        for(int i = 0; i < def->stride; i++){
             util *a = (util *)ptr;
-            if(HasFlag(def->flags, RAW)){
-                if(*a != 0){
-                    printf("I:%p ", a);
+            if(*a != 0){
+                Abstract *t = (Abstract *)ptr;
+                if(!HasFlag(def->flags, RAW)){
+                    t = *((Abstract **)t);
                 }
-            }else{
-                if(*a != 0){
-                    Abstract *t = (Abstract *)*a;
-                    printf("%d=", i);
-                    /*
-                    if(t->type.of == TYPE_WRAPPED_UTIL){
-                        Single *wi = (Single *)t;
-                        printf("Wi<%ld>", wi->val.value);
-                    }else{
-                    */
-                        printf("0x%lx", *a);
-                    /*}*/
-                    printf(" ");
+                printf("%d=", i);
+                if(t->type.of != 0){
+                    Debug_Print((void *)t, 0, "", color, TRUE);
+                }else{
+                    printf("0x%lx", *a);
                 }
+                printf(" ");
             }
             ptr += sizeof(void *)*def->slotSize;
         }
@@ -89,7 +83,7 @@ static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte ind
             if(*a != 0){
                 printf("\n");
                 offset += Span_availableByDim(dim, def->stride, def->idxStride)*i;
-                Slab_Print((void *)*a, def, dim-1, i, indent+1, extended, totalDims, offset);
+                Slab_Print((void *)*a, def, color, dim-1, i, indent+1, extended, totalDims, offset);
                 any = TRUE;
             }
             ptr += sizeof(void *)*def->idxSize;
@@ -106,8 +100,19 @@ static void Slab_Print(void *sl, SpanDef *def, byte dim, int parentIdx, byte ind
 }
 
 static void SpanDef_Print(SpanDef *def){
-    printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d itemSize:%d, valueHdr:%d]", 
-         def->idxStride, def->stride, def->idxSize, def->slotSize, def->itemSize, def->valueHdr);
+    char *flags = "";
+    if(HasFlag(def->flags, RAW)){
+        flags = "(inline)";
+    }
+    printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d%s itemSize:%d, valueHdr:%d", 
+         def->idxStride, def->stride, def->idxSize, def->slotSize, flags, def->itemSize, def->valueHdr);
+    if(def->dim_lookups[0] != 0){
+        printf(" lookups: ");
+        for(int i = 0; i < 8; i ++){
+            printf("%lu ", def->dim_lookups[i]);
+        }
+    }
+    printf("]");
 }
 
 void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -117,7 +122,7 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     if(extended){
         SpanDef_Print(p->def);
         printf("\n");
-        Slab_Print(p->root, p->def, p->dims, 0, 1, TRUE, p->dims, 0);
+        Slab_Print(p->root, p->def, color, p->dims, 0, 1, TRUE, p->dims, 0);
     }
     printf(">\x1b[0m");
 }
@@ -434,6 +439,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);

@@ -85,6 +85,8 @@ char *Class_ToString(cls type){
         return "TYPE_STRUCTEXP";
     }else if(type == TYPE_SPAN){
         return "TYPE_SPAN";
+    }else if(type == TYPE_TABLE){
+        return "TYPE_TABLE";
     }else if(type == TYPE_SLAB){
         return "TYPE_SLAB";
     }else if(type == TYPE_RBL_MARK){
@@ -127,7 +129,8 @@ boolean Ifc_Match(cls inst, cls ifc){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
     }else if(ifc == TYPE_SPAN){ 
         return (inst == TYPE_SPAN || inst == TYPE_QUEUE_SPAN || 
-            inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN);
+            inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN ||
+            inst == TYPE_TABLE);
     }
     return FALSE;
 }

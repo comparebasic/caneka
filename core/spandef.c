@@ -24,9 +24,10 @@ status SpanDef_Init(){
     tableDef.stride = SPAN_DEFAULT_STRIDE;
     tableDef.idxSize = SPAN_DEFAULT_IDX_SIZE;
     tableDef.idxStride = SPAN_DEFAULT_STRIDE;
-    tableDef.slotSize = SPAN_DEFAULT_SLOT_SIZE;
-    tableDef.itemSize = SPAN_DEFAULT_ITEM_SIZE;
-    int dim_lookup[] = {16, 256, 4096, 0, 0, 0, 0, 0};
+    tableDef.slotSize = sizeof(Hashed)/sizeof(void*);
+    tableDef.itemSize = sizeof(Hashed);
+    tableDef.flags = RAW;
+    i64 dim_lookup[] = {15, 255, 4095, 0, 0, 0, 0, 0};
     memcpy(&(tableDef.dim_lookups), &dim_lookup, sizeof(tableDef.dim_lookups)); 
 
     /* span16x32m */
