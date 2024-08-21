@@ -2,7 +2,6 @@
 #include <caneka.h>
 
 static status Span_Extend(SlabResult *sr);
-static status span_GrowToNeeded(SlabResult *sr);
 
 int Span_availableByDim(int dims, int stride, int idxStride){
     int _dims = dims;
@@ -36,7 +35,7 @@ void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx){
     sr->dims = p->dims;
     sr->slab = p->root;
     sr->idx = idx;
-    sr->dimsNeeded = SpanDef_GetDimNeeded(p->def, (idx+1));
+    sr->dimsNeeded = SpanDef_GetDimNeeded(p->def, (idx));
 
     return;
 }
@@ -50,7 +49,7 @@ status Span_Query(SlabResult *sr){
         if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
             return MISS;
         }
-        span_GrowToNeeded(sr);
+        Span_GrowToNeeded(sr);
     }
     return Span_Extend(sr);
 }
@@ -62,13 +61,12 @@ status Span_Set(Span *p, int idx, Abstract *t){
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
         if(HasFlag(p->def->flags, RAW)){
-            printf("Setting Inline %d\n", idx);
             memcpy(ptr, t, (size_t)p->def->itemSize);
         }else{
-            printf("Setting Normal %d\n", p->def->itemSize);
             memcpy(ptr, &t, sizeof(void *));
         }
         p->nvalues++;
+        p->metrics.set = sr.local_idx;
         if(idx > p->max_idx){
             p->max_idx = idx;
         }
@@ -89,6 +87,7 @@ void *Span_Get(Span *p, int idx){
             void **dptr = (void **)ptr;
             sr.value = *dptr;
         }
+        p->metrics.get = sr.local_idx;
         return sr.value;
     }else{
         return NULL;
@@ -127,7 +126,7 @@ status Span_Move(Span *p, int fromIdx, int toIdx){
 }
 
 /* internals */
-static status span_GrowToNeeded(SlabResult *sr){
+status Span_GrowToNeeded(SlabResult *sr){
     boolean expand = sr->span->dims < sr->dimsNeeded;
     SpanDef *def = sr->span->def;
     Span *p = sr->span;

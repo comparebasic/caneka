@@ -22,6 +22,7 @@ enum span_ops {
     SPAN_OP_SET = 2,
     SPAN_OP_REMOVE = 3,
     SPAN_OP_RESERVE = 4,
+    SPAN_OP_RESIZE = 5,
 };
 
 typedef void *(*SpanDefFunc)(MemCtx *m, struct span_def *def);
@@ -71,6 +72,7 @@ void *Span_reserve(SlabResult *sr);
 
 status Span_GetSet(SlabResult *sr, Abstract *t);
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);
+status Span_GrowToNeeded(SlabResult *sr);
 /* SpanDef */
 SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def);
 byte SpanDef_GetDimNeeded(SpanDef *def, int idx);

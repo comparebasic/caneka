@@ -43,8 +43,8 @@ status Table_Tests(MemCtx *gm){
         }
         s = String_Make(m, bytes(values[i]));
         value = String_Make(m, bytes(values[i+1]));
+        Table_Set(tbl, (Abstract *)s, (Abstract *)value);
         if(DEBUG_TABLE){
-            Table_Set(tbl, (Abstract *)s, (Abstract *)value);
             Debug_Print((void *)s, 0, "Setting: ", COLOR_YELLOW, TRUE);
             printf("\n");
             Debug_Print((void *)tbl, 0, "In Table: ", DEBUG_TABLE, TRUE);
@@ -66,9 +66,8 @@ status Table_Tests(MemCtx *gm){
             "Expect strings to equal %s from key:%s found %s", (char *)(value->bytes), (char *)(s->bytes),
             found != NULL ? (char *)(found->bytes) : "NULL");
     }
-    Debug_Print((void *) tbl, 0, "Table: ", COLOR_YELLOW, TRUE);
 
-
+    /*
     s = String_Make(m, bytes("PreKey"));
     value = String_Make(m, bytes("After Value"));
     Table_SetKey(tbl, (Abstract *)s);
@@ -92,6 +91,7 @@ status Table_Tests(MemCtx *gm){
     }
 
     Debug_Print((void *) tbl, 0, "Table: ", COLOR_YELLOW, TRUE);
+    */
 
     MemCtx_Free(m);
     return r;

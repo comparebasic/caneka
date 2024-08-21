@@ -17,7 +17,13 @@ static status Table_Resize(Span *tbl, word *queries){
             || *queries > TABLE_REQUERY_MAX[tbl->dims]){
         *queries = 0;
         Span *newTbl = Span_Make(tbl->m, TYPE_SPAN);
-        Span_Set(newTbl, def->dim_lookups[tbl->dims]+1, NULL);
+
+        SlabResult sr;
+        SlabResult_Setup(&sr, newTbl, SPAN_OP_RESIZE, 0);
+        sr.dimsNeeded = tbl->dims+1;
+        Span_GrowToNeeded(&sr);
+        Debug_Print((void *)newTbl, 0, "New Table", COLOR_PURPLE, TRUE);
+
         printf("Resize to %d dims\n", tbl->dims);
         for(int i = 0; i <= tbl->max_idx; i++){
             Hashed *h = (Hashed *)Span_Get(tbl, i);
@@ -42,7 +48,6 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
     boolean found = FALSE;
     word queries = 0;
     for(int i = 0; !found && i <= tbl->dims && i < TABLE_MAX_DIMS; i++){
-        printf("Table Q i;%d\n", i);
         for(int j = 0; !found && j < TABLE_REQUERY_MAX[tbl->dims]; j++){
             queries++;
             Table_Resize(tbl, &queries);
@@ -71,10 +76,8 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                     break;
                 }
             }else if(op == SPAN_OP_SET){
-                printf("SET\n");
                 if(_h != NULL && *((util *)_h) != 0){
                     while(_h != NULL){
-                        printf("Comparing...\n");
                         if(Hashed_Equals(h, _h)){
                             h = _h;
                             h->idx = hkey;
@@ -85,7 +88,6 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                         _h = _h->next;
                     }
                 }else{
-                    printf("Setting...\n");
                     h->idx = hkey;
                     Span_Set(tbl, hkey, (Abstract *)h);
                     found = TRUE;
