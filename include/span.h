@@ -45,9 +45,9 @@ typedef struct span {
 
 Span* Span_Make(MemCtx* m, cls type);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
-status Span_Set(Span *p, int idx, Abstract *t);
 status Span_Remove(Span *p, int idx);
 status Span_ReInit(Span *p);
+void *Span_Set(Span *p, int idx, Abstract *t);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
 Span *Span_From(MemCtx *m, int count, ...);
@@ -70,7 +70,6 @@ void *Span_valueSlab_Make(MemCtx *m, SpanDef *def);
 void *Span_idxSlab_Make(MemCtx *m, SpanDef *def);
 void *Span_reserve(SlabResult *sr);
 
-status Span_GetSet(SlabResult *sr, Abstract *t);
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);
 status Span_GrowToNeeded(SlabResult *sr);
 /* SpanDef */

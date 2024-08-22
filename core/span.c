@@ -54,28 +54,38 @@ status Span_Query(SlabResult *sr){
     return Span_Extend(sr);
 }
 
-status Span_Set(Span *p, int idx, Abstract *t){
+void *Span_Set(Span *p, int idx, Abstract *t){
+    if(idx < 0){
+        return NULL;
+    }
     SlabResult sr;
-    SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
+    byte op = t != NULL ? SPAN_OP_SET : SPAN_OP_RESERVE;
+    SlabResult_Setup(&sr, p, op, idx);
     status r = Span_Query(&sr);
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
-        if(HasFlag(p->def->flags, RAW)){
-            memcpy(ptr, t, (size_t)p->def->itemSize);
-        }else{
-            memcpy(ptr, &t, sizeof(void *));
+        if(op == SPAN_OP_SET){
+            if(HasFlag(p->def->flags, RAW)){
+                memcpy(ptr, t, (size_t)p->def->itemSize);
+            }else{
+                memcpy(ptr, &t, sizeof(void *));
+            }
+            p->nvalues++;
         }
-        p->nvalues++;
         p->metrics.set = sr.local_idx;
         if(idx > p->max_idx){
             p->max_idx = idx;
         }
-        return SUCCESS;
+        sr.value = ptr;
+        return sr.value;
     }
-    return r;
+    return NULL;
 }
 
 void *Span_Get(Span *p, int idx){
+    if(idx < 0){
+        return NULL;
+    }
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_GET, idx);
     status r = Span_Query(&sr);
@@ -98,9 +108,13 @@ void *Span_Get(Span *p, int idx){
     }
 }
 
+void *Span_GetSelected(Span *p){
+    return Span_Get(p, p->metrics.selected);
+}
+
 int Span_Add(Span *p, Abstract *t){
     int idx = Span_NextIdx(p);
-    if(Span_Set(p, idx, t) == SUCCESS){
+    if(Span_Set(p, idx, t) != NULL){
         return p->max_idx;
     }
 
@@ -108,15 +122,7 @@ int Span_Add(Span *p, Abstract *t){
 }
 
 void *Span_ReserveNext(Span *p){
-    int idx = Span_NextIdx(p);
-    SlabResult sr;
-    SlabResult_Setup(&sr, p, SPAN_OP_RESERVE, idx);
-    status r = Span_Query(&sr);
-    if(HasFlag(r, SUCCESS)){
-        return sr.value;
-    }else{
-        return NULL;
-    }
+    return Span_Set(p, Span_NextIdx(p), NULL);
 }
 
 status Span_Remove(Span *p, int idx){
@@ -248,6 +254,12 @@ Span *Span_From(MemCtx *m, int count, ...){
         Span_Add(p, v);
     }
     return p;
+}
+
+status Span_ReInit(Span *p){
+    p->nvalues = 0;
+    p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
+    return SUCCESS;
 }
 
 Span *Span_Make(MemCtx *m, cls type){
