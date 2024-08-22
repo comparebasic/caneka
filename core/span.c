@@ -55,23 +55,24 @@ status Span_Query(SlabResult *sr){
 }
 
 void *Span_Set(Span *p, int idx, Abstract *t){
-    if(idx < 0){
+    if(idx < 0 || t == NULL){
         return NULL;
     }
     SlabResult sr;
-    byte op = t != NULL ? SPAN_OP_SET : SPAN_OP_RESERVE;
-    SlabResult_Setup(&sr, p, op, idx);
+    SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
     status r = Span_Query(&sr);
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
-        if(op == SPAN_OP_SET){
-            if(HasFlag(p->def->flags, RAW)){
-                memcpy(ptr, t, (size_t)p->def->itemSize);
-            }else{
-                memcpy(ptr, &t, sizeof(void *));
+        if(HasFlag(p->def->flags, RAW)){
+            size_t sz = (size_t)p->def->itemSize;
+            if(t->type.of == TYPE_RESERVE){
+                sz = sizeof(Reserve);
             }
-            p->nvalues++;
+            memcpy(ptr, t, sz);
+        }else{
+            memcpy(ptr, &t, sizeof(void *));
         }
+        p->nvalues++;
         p->metrics.set = sr.local_idx;
         if(idx > p->max_idx){
             p->max_idx = idx;
@@ -122,7 +123,10 @@ int Span_Add(Span *p, Abstract *t){
 }
 
 void *Span_ReserveNext(Span *p){
-    return Span_Set(p, Span_NextIdx(p), NULL);
+    Reserve rsv;
+    memset(&rsv, 0, sizeof(Reserve));
+    rsv.type.of = TYPE_RESERVE;
+    return Span_Set(p, Span_NextIdx(p), (Abstract *)&rsv);
 }
 
 status Span_Remove(Span *p, int idx){
@@ -133,6 +137,38 @@ status Span_Remove(Span *p, int idx){
 
 status Span_Move(Span *p, int fromIdx, int toIdx){
     return NOOP;
+}
+
+/* utils */
+Span *Span_From(MemCtx *m, int count, ...){
+    Span *p = Span_Make(m, TYPE_SPAN);
+    Abstract *v = NULL;
+	va_list arg;
+    va_start(arg, count);
+    for(int i = 0; i < count; i++){
+        v = va_arg(arg, AbstractPtr);
+        Span_Add(p, v);
+    }
+    return p;
+}
+
+status Span_Run(MemHandle *mh, Span *p, DoFunc func){
+    status r = READY;
+    MHAbstract ma;
+    MemCtx *m = NULL;
+    if(mh != NULL){
+        mh = asIfc(mh, TYPE_MEMHANDLE);
+        m = mh->m;
+    }
+    MHAbstract_Init(&ma, m, NULL);
+    for(int i = 0; i < p->nvalues; i++){
+        Abstract *a = (Abstract *)Span_Get(p, i);
+        if(a != NULL && (*(util *)a) != 0){
+            ma.a = a;
+            r |= func((MemHandle *)&ma);
+        }
+    }
+    return r;
 }
 
 /* internals */
@@ -242,18 +278,6 @@ void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
 
 void *Span_reserve(SlabResult *sr){
     return NULL;
-}
-
-Span *Span_From(MemCtx *m, int count, ...){
-    Span *p = Span_Make(m, TYPE_SPAN);
-    Abstract *v = NULL;
-	va_list arg;
-    va_start(arg, count);
-    for(int i = 0; i < count; i++){
-        v = va_arg(arg, AbstractPtr);
-        Span_Add(p, v);
-    }
-    return p;
 }
 
 status Span_ReInit(Span *p){

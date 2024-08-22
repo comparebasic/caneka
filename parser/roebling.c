@@ -163,7 +163,6 @@ Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract 
     Range_Set(&(rbl->range), s);
 
     Roebling_Prepare(rbl);
-    Debug_Print((void *)rbl->gotos->values, 0, "Marks: ", COLOR_RED, TRUE);
 
     return rbl;
 }

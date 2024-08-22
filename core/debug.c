@@ -127,9 +127,10 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     printf(">\x1b[0m");
 }
 
-static Abstract *PrintAddr(MemHandle *_mh, Abstract *a){
-    printf("%p ", a);
-    return NULL;
+status PrintAddr(MemHandle *mh){
+    MHAbstract *ma = (MHAbstract *)as(mh, TYPE_MHABSTRACT);
+    printf("%p ", ma->a);
+    return SUCCESS;
 }
 
 static status patFlagStr(word flags, char str[]){
@@ -296,7 +297,6 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
 }
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    /*
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
@@ -320,14 +320,13 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
                 printf(",\n");
             }
         }
-        printf("\n  \x1b[%dmDoF=\n", color);
-        Span_Run(NULL, rbl->parsers_do, PrintAddr, NULL);
+        printf("\n  \x1b[%dmParsers(DoF)=\n    ", color);
+        Span_Run(NULL, rbl->parsers_do, PrintAddr);
         printf("\n");
     }else{
         printf(" idx:%d", rbl->idx);
     }
     printf(">\x1b[0m");
-    */
 }
 
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

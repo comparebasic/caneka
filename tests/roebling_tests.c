@@ -76,7 +76,6 @@ status Roebling_Tests(MemCtx *gm){
     Single *dof = as(Span_Get(rbl->parsers_do, 0), TYPE_WRAPPED_DO);
     dof->val.dof((MemHandle *)rbl);
 
-
     r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
 
     s = String_Make(m, bytes("TWO for the weekend\n"));

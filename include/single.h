@@ -1,4 +1,3 @@
-typedef status (*DoFunc)(MemHandle *mh);
 typedef struct single  {
     Type type;
     union {

@@ -22,7 +22,7 @@ static BuildSubdir coreobj = { "core", {
 	"log.c", "spandef.c", "span.c", "slab.c", "lookup.c", "chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 
-    "mess.c", "single.c", "debug.c",
+    "mess.c", "single.c", "debug.c", "abstract.c",
     NULL
 }};
 

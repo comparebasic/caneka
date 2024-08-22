@@ -1,13 +1,15 @@
-typedef unsigned char byte;
 typedef char i8;
+typedef unsigned char byte;
 typedef int16_t i16;
 typedef uint16_t word;
+typedef int32_t i32;
+typedef uint32_t quad;
+typedef int64_t i64;
+typedef uint64_t util;
+
 typedef word cls;
 typedef word status;
 typedef byte boolean;
-typedef uint32_t dword;
-typedef uint64_t i64;
-typedef i64 util;
 
 struct serve_ctx;
 struct serve_req;
@@ -22,6 +24,7 @@ struct strcursor;
 struct strcursor_range;
 struct roebling;
 struct span_def;
+struct mem_handle;
 
 typedef struct typehdr {
     cls of;
@@ -32,7 +35,15 @@ typedef struct virt  {
     Type type;
 } Abstract;
 
+typedef struct reserve  {
+    Type type;
+    i32 nunits;
+} Reserve;
+
+extern Abstract Reserved;
+
 typedef struct virt * AbstractPtr;
+typedef status (*DoFunc)(struct mem_handle *mh);
 
 #define MAX_BASE10 20
 #define SLAB_START_SIZE 2
@@ -56,6 +67,7 @@ enum types {
     _TYPE_START,
     TYPE_UNKNOWN,
     TYPE_ABSTRACT,
+    TYPE_RESERVE,
     TYPE_WRAPPED,
     TYPE_WRAPPED_FUNC,
     TYPE_WRAPPED_DO,
@@ -64,6 +76,8 @@ enum types {
     TYPE_UTIL,
     TYPE_UNIT,
     TYPE_MEMCTX,
+    TYPE_MEMHANDLE,
+    TYPE_MHABSTRACT,
     TYPE_MESS,
     TYPE_MAKER,
     TYPE_MEMSLAB,
@@ -149,6 +163,7 @@ typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);
 
+#include "abstract.h"
 #include "chain.h"
 #include "error.h"
 #include "log.h"
