@@ -127,7 +127,7 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     printf(">\x1b[0m");
 }
 
-status PrintAddr(MemHandle *mh){
+status PrintMatchAddr(MemHandle *mh){
     MHAbstract *ma = (MHAbstract *)as(mh, TYPE_MHABSTRACT);
     printf("%p ", ma->a);
     return SUCCESS;
@@ -321,12 +321,13 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
             }
         }
         printf("\n  \x1b[%dmParsers(DoF)=\n    ", color);
-        Span_Run(NULL, rbl->parsers_do, PrintAddr);
+        Span_Run(NULL, rbl->parsers_do, PrintMatchAddr);
         printf("\n");
     }else{
-        printf(" idx:%d", rbl->idx);
+        printf(" idx:%d ", rbl->idx);
+        Debug_Print((void *)&(rbl->range), 0, "", color, extended);
     }
-    printf(">\x1b[0m");
+    printf("\x1b[%dm>\x1b[0m", color);
 }
 
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -391,7 +392,6 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     }
 }
 
-
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
     printf("%s\x1b[%dmCursor<%s:%ld ", msg, color,
@@ -407,11 +407,16 @@ static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean e
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Range *range = (Range *)a;
     printf("%s\x1b[%dmRange<%s search=", msg, color, State_ToString(range->state));
-    Debug_Print((void *)range->search, 0, "", color, extended);
-    printf("\x1b[%dm[", color);
-    Debug_Print((void *)&(range->start), TYPE_SCURSOR, "", color, extended);
-    Debug_Print((void *)&(range->end), TYPE_SCURSOR, "...", color, extended);
-    printf("\x1b[%dm]>\x1b[0m", color);
+    Debug_Print((void *)range->search, 0, "", color, FALSE);
+    String *s = Range_Copy(DebugM, range);
+    Debug_Print((void *)s, 0, " current=", color, FALSE);
+    if(extended){
+        printf("\x1b[%dm[", color);
+        Debug_Print((void *)&(range->start), TYPE_SCURSOR, "", color, extended);
+        Debug_Print((void *)&(range->end), TYPE_SCURSOR, "...", color, extended);
+        printf("\x1b[%dm]", color);
+    }
+    printf("\x1b[%dm>\x1b[0m", color);
 }
 
 

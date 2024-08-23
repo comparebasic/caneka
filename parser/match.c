@@ -88,8 +88,9 @@ static status match_FeedPat(Match *mt, word c){
 
 static status match_FeedString(Match *mt, byte c){
     if(DEBUG_MATCH){
-       printf("%c of %s %u", c, mt->def.s->bytes, mt->def.s->length);
+       printf("\x1b[%dm%c of %s %u", DEBUG_PATMATCH, c, mt->def.s->bytes, mt->def.s->length);
        Debug_Print(mt, 0, "FeedPat: ", DEBUG_PATMATCH, TRUE);
+       printf("\n");
     }
     if(mt->def.s->bytes[mt->position] == c){
         mt->position++;
@@ -105,7 +106,7 @@ static status match_FeedString(Match *mt, byte c){
         }
     }else{
         mt->position = 0;
-        mt->type.state = READY;
+        mt->type.state = MISS;
     }
     return mt->type.state;
 }

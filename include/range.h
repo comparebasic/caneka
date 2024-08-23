@@ -13,3 +13,4 @@ status Range_Reset(Range *range, int anchor);
 String *Range_Copy(MemCtx *m, Range *range);
 status Range_Incr(Range *range);
 int Range_GetLength(Range *range);
+byte Range_GetNextByte(Range *range);

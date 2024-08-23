@@ -5,11 +5,31 @@ status Range_Set(Range *range, String *s){
     memset(range, 0, sizeof(Range));
     range->type.of = TYPE_RANGE;
     range->search = range->start.s = range->start.seg = range->end.s = range->end.seg = s;
+    range->end.position = -1;
     return SUCCESS;
 }
 
+byte Range_GetNextByte(Range *range){
+    SCursor *end = &(range->end); 
+    String *seg = end->seg;
+
+    boolean found = FALSE;
+    while(!found){
+        if(range->end.position+1 < seg->length){
+            range->end.position++;
+            found = TRUE;
+        }else{
+            range->end.position = -1;
+            range->end.seg = String_Next(seg);
+        }
+    }
+
+    printf("Pos %ld\n", range->end.position);
+    return range->end.seg->bytes[range->end.position];
+}
+
 status Range_Incr(Range *range){
-    range->start = range->end;
+    memcpy(&(range->start), &(range->end), sizeof(SCursor));
     return SUCCESS;
 }
 
@@ -42,7 +62,7 @@ String *Range_Copy(MemCtx *m, Range *range){
     String *s = NULL;
     int length = 0;
     if(seg == range->end.seg){
-        length =  range->end.position - range->start.position;
+        length =  (range->end.position - range->start.position)+1;
         s = String_MakeFixed(m, seg->bytes + range->start.position, length); 
     }else{
         length = Range_GetLength(range);

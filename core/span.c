@@ -162,6 +162,7 @@ status Span_Run(MemHandle *mh, Span *p, DoFunc func){
     }
     MHAbstract_Init(&ma, m, NULL);
     for(int i = 0; i < p->nvalues; i++){
+        printf("%d:", i);
         Abstract *a = (Abstract *)Span_Get(p, i);
         if(a != NULL && (*(util *)a) != 0){
             ma.a = a;
