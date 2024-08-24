@@ -94,6 +94,7 @@ static status match_FeedString(Match *mt, byte c){
     }
     if(mt->def.s->bytes[mt->position] == c){
         mt->position++;
+        mt->count++;
         if(mt->position == mt->def.s->length){
             mt->position = 0;
             mt->type.state = COMPLETE;
@@ -135,7 +136,7 @@ status Match_FeedEnd(Match *mt){
     return mt->type.state;
 }
 
-status Match_SetPattern(Match *mt, PatCharDef def[]){
+status Match_SetPattern(Match *mt, PatCharDef *def){
     memset(mt, 0, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;
     mt->def.pat = def;

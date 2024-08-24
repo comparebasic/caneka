@@ -9,12 +9,20 @@ status Range_Set(Range *range, String *s){
     return SUCCESS;
 }
 
-byte Range_GetNextByte(Range *range){
+byte Range_GetByte(Range *range){
+    if(range->end.seg != NULL){
+        return range->end.seg->bytes[range->end.position];
+    }else{
+        return '\0';
+    }
+}
+
+status Range_Incr(Range *range){
     SCursor *end = &(range->end); 
     String *seg = end->seg;
 
     boolean found = FALSE;
-    while(!found){
+    while(!found && range->end.seg != NULL){
         if(range->end.position+1 < seg->length){
             range->end.position++;
             found = TRUE;
@@ -23,49 +31,52 @@ byte Range_GetNextByte(Range *range){
             range->end.seg = String_Next(seg);
         }
     }
-
-    printf("Pos %ld\n", range->end.position);
-    return range->end.seg->bytes[range->end.position];
+    if(range->end.seg == NULL){
+        range->type.state |= END;
+        return END;
+    }else{
+        range->type.state &= ~END;
+        return SUCCESS;
+    }
 }
 
-status Range_Incr(Range *range){
+status Range_Next(Range *range){
     memcpy(&(range->start), &(range->end), sizeof(SCursor));
+    range->tail = 0;
     return SUCCESS;
 }
 
 int Range_GetLength(Range *range){
-    if(range->length >= 0){
-        return range->length;
-    }else{
-        String *seg = range->start.seg;
-        int length = 0;
-        if(seg == range->end.seg){
-            length =  range->end.position - range->start.position;
-        }else{
-            length = seg->length - range->start.position;
-            seg = String_Next(seg);
-            while(seg != NULL && seg != range->end.seg ){
-                length += seg->length;
-                seg = String_Next(seg);
-            }
-            if(seg != NULL){
-                length += range->end.position;
-            }
-        }
-        range->length = length;
-        return range->length;
+    if(range->end.position == -1){
+        return 0;
     }
+    String *seg = range->start.seg;
+    int length = 0;
+    if(seg == range->end.seg){
+        length = (range->end.position - range->tail) - range->start.position;
+    }else{
+        length = seg->length - range->start.position;
+        seg = String_Next(seg);
+        while(seg != NULL && seg != range->end.seg ){
+            length += seg->length;
+            seg = String_Next(seg);
+        }
+        if(seg != NULL){
+            length += range->end.position;
+        }
+    }
+
+    length -= range->tail;
+    return length;
 }
 
 String *Range_Copy(MemCtx *m, Range *range){
     String *seg = range->start.seg;
     String *s = NULL;
-    int length = 0;
+    int length = Range_GetLength(range);
     if(seg == range->end.seg){
-        length =  (range->end.position - range->start.position)+1;
         s = String_MakeFixed(m, seg->bytes + range->start.position, length); 
     }else{
-        length = Range_GetLength(range);
         s = String_Init(m, length);
         String_AddBytes(m, s, seg->bytes + range->start.position, seg->length - range->start.position); 
         seg = String_Next(seg);

@@ -18,9 +18,7 @@ static void *tests[] = {
     "TablePreKey", TablePreKey_Tests,
     "Match", Match_Tests,
     "Roebling", Roebling_Tests,
-    /*
     "RoeblingRun", RoeblingRun_Tests,
-    */
     NULL, NULL
     /*
     Serve_Tests,

@@ -56,21 +56,24 @@ static status Roebling_RunMatches(Roebling *rbl){
     Span *ko = rbl->matches.ko;
     byte c = 0;
     while(!HasFlag(rbl->type.state, BREAK)){
-        c = Range_GetNextByte(&(rbl->range));
+        c = Range_GetByte(&(rbl->range));
         for(int i = 0; i < ko->nvalues; i++){
             Match *mt = Span_Get(ko, i);
             if(mt != NULL){
                 Match_Feed(mt, c);
                 if(HasFlag(mt->type.state, COMPLETE)){
+                     rbl->range.tail = mt->count-1;
                      ko->metrics.selected = i;
                      if(mt->jump > -1){
                         rbl->jump = mt->jump;
                      }
                      rbl->type.state = (NEXT|KO|BREAK);
-                     printf("\x1b[%dmKO\x1b[0m\n", COLOR_YELLOW);
                      break;
                 }
             }
+        }
+        if(HasFlag(rbl->type.state, KO)){
+            break;
         }
         Span *posative = rbl->matches.values;
         for(int i = 0; i < posative->nvalues; i++){
@@ -87,23 +90,20 @@ static status Roebling_RunMatches(Roebling *rbl){
                }
             }
         }
+        Range_Incr(&(rbl->range));
     }
-    printf("MATCH RESULT %d\n", rbl->type.state);
     rbl->type.state &= ~BREAK;
     return rbl->type.state;
 }
 
 status Roebling_Run(Roebling *rbl){
-    printf("RblRun %d, flags:%d\n", rbl->idx, rbl->type.state);
 
     if(HasFlag(rbl->type.state, NEXT)){
-        printf("INCR\n");
         rbl->idx++;
         rbl->type.state &= ~NEXT; 
-        Range_Incr(&(rbl->range));
+        Range_Next(&(rbl->range));
     }
 
-    printf("Getting %d, flags:%d\n", rbl->idx, rbl->type.state);
     Single *wdof = Span_Get(rbl->parsers_do, rbl->idx);
     if(wdof == NULL){
         rbl->type.state = COMPLETE;
@@ -113,12 +113,12 @@ status Roebling_Run(Roebling *rbl){
     }else{
         wdof = as(wdof, TYPE_WRAPPED_DO);
         wdof->val.dof((MemHandle *)rbl);
-        Roebling_RunMatches(rbl);
         if(DEBUG_ROEBLING){
             printf("\x1b[%dmRbl Run idx:\x1b[1;%dm%d\x1b[0;%dm ", DEBUG_ROEBLING, DEBUG_ROEBLING, rbl->idx, DEBUG_ROEBLING);
             Debug_Print((void *)rbl, 0, "", DEBUG_ROEBLING, TRUE);
             printf("\n");
         }
+        Roebling_RunMatches(rbl);
     }
 
     if(HasFlag(rbl->type.state, NEXT)){

@@ -12,10 +12,10 @@ int DEBUG_ROEBLING = 0;
 int DEBUG_ROEBLING_MARK = 0;
 int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
+int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_TABLE = 0;
-int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_SPAN = 0;
 
 int DEBUG_ROEBLING_NAME = COLOR_GREEN;
@@ -157,7 +157,7 @@ static status patFlagStr(word flags, char str[]){
         str[i++] = 'C';
     }
     if((flags & PAT_SET_NOOP) != 0){
-        str[i++] = 'N';
+        str[i++] = 'U';
     }
     if((flags & PAT_IGNORE) != 0){
         str[i++] = 'G';
@@ -203,14 +203,19 @@ static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int col
 
 static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     PatCharDef *def = (PatCharDef *)a;
-    char flag_cstr[12];
     if(extended){
+        boolean first = TRUE;
         while(def->flags != PAT_END){
+            if(first){
+                first = FALSE;
+            }else{
+                printf(",");
+            }
             patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
             def++;
         }
     }else{
-        patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
+        patCharDef_PrintSingle(def, TYPE_PATCHARDEF, msg, color, extended);
     }
 }
 
@@ -218,7 +223,7 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
         printf("\x1b[%dm%sMatch<%s:state=%s:length=%d:pos=%d:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->length, mt->position, mt->jump, mt->count, mt->remaining);
-        Debug_Print((void *)mt->def.pat, TYPE_PATCHARDEF, "", color, FALSE);
+        Debug_Print((void *)mt->def.pat, TYPE_PATCHARDEF, "", color, TRUE);
         printf(">\x1b[0m");
     }else{
         printf("\x1b[%dm%sMatch<state=%s:pos=%d>\x1b[0m", color, msg, State_ToString(mt->type.state), mt->position);
