@@ -17,6 +17,29 @@ byte Range_GetByte(Range *range){
     }
 }
 
+status Range_IncrLead(Range *range){
+    SCursor *start = &(range->start); 
+    String *seg = start->seg;
+
+    boolean found = FALSE;
+    while(!found && range->start.seg != NULL){
+        if(range->start.position+1 < seg->length){
+            range->start.position++;
+            found = TRUE;
+        }else{
+            range->start.position = -1;
+            range->start.seg = String_Next(seg);
+        }
+    }
+    if(range->start.seg == NULL){
+        range->type.state |= END;
+        return END;
+    }else{
+        range->type.state &= ~END;
+        return SUCCESS;
+    }
+}
+
 status Range_Incr(Range *range){
     SCursor *end = &(range->end); 
     String *seg = end->seg;

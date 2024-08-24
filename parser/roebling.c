@@ -86,6 +86,10 @@ static status Roebling_RunMatches(Roebling *rbl){
                         rbl->jump = mt->jump;
                      }
                      rbl->type.state = (NEXT|BREAK);
+                     int lead = mt->lead;
+                     while(lead-- > 0){
+                        Range_IncrLead(&(rbl->range));
+                     }
                      break;
                }
             }

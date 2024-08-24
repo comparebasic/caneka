@@ -25,8 +25,13 @@ static status match_FeedPat(Match *mt, word c){
 
         /* handle if matched or not */
         if(matched){
-            mt->type.state = PROCESSING;
-            mt->count++;
+            mt->type.state |= PROCESSING;
+
+            if(HasFlag(def->flags, PAT_IGNORE)){
+                mt->lead++;
+            }else{
+                mt->count++;
+            }
 
             if(DEBUG_PATMATCH){
                 printf("\x1b[%dmY match %d '%c' - pos(%d) %s ", DEBUG_PATMATCH, matched, c, mt->position, State_ToString(mt->type.state));

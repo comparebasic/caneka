@@ -42,6 +42,7 @@ typedef struct match {
     i8 jump;
     i16 remaining;
     int count;
+    int lead;
 } Match;
 
 Match *Match_Make(MemCtx *m, String *s, word flags);
