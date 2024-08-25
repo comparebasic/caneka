@@ -136,7 +136,6 @@ status Roebling_Run(Roebling *rbl){
         Match *mt = Roebling_GetValueMatch(rbl);
         if(mt != NULL){
             int lead = mt->lead;
-            printf("Lead %d\n", lead);
             while(lead--){
                 Range_IncrLead(&(rbl->range));
             }
