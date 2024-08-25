@@ -5,8 +5,6 @@ typedef struct strcursor_range {
     String *search;
     struct strcursor start;
     struct strcursor end;
-    int head;
-    int tail;
 } Range;
 
 status Range_Set(Range *range, String *s);

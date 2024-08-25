@@ -65,7 +65,6 @@ status Range_Incr(Range *range){
 
 status Range_Next(Range *range){
     memcpy(&(range->start), &(range->end), sizeof(SCursor));
-    range->tail = 0;
     return SUCCESS;
 }
 
@@ -76,7 +75,7 @@ int Range_GetLength(Range *range){
     String *seg = range->start.seg;
     int length = 0;
     if(seg == range->end.seg){
-        length = (range->end.position - range->tail) - range->start.position;
+        length = range->end.position - range->start.position;
     }else{
         length = seg->length - range->start.position;
         seg = String_Next(seg);
@@ -89,7 +88,6 @@ int Range_GetLength(Range *range){
         }
     }
 
-    length -= range->tail;
     return length;
 }
 

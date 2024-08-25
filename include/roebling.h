@@ -35,4 +35,5 @@ status Roebling_ResetPatterns(Roebling *rbl);
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
 int Roebling_GetMatchIdx(Roebling *rbl);
 Match *Roebling_GetMatch(Roebling *rbl);
+Match *Roebling_GetValueMatch(Roebling *rbl);
 status SCursor_Finish(Roebling *rbl, Match *mt);

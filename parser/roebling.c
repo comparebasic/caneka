@@ -9,6 +9,14 @@ Match *Roebling_GetMatch(Roebling *rbl){
     }
 }
 
+Match *Roebling_GetValueMatch(Roebling *rbl){
+    if(rbl->matches.values->nvalues == 1){
+        return Span_Get(rbl->matches.values, 0);
+    }else{
+        return Span_GetSelected(rbl->matches.values);
+    }
+}
+
 int Roebling_GetMatchIdx(Roebling *rbl){
     if(HasFlag(rbl->type.state, KO)){
         return rbl->matches.ko->metrics.selected;
@@ -62,7 +70,6 @@ static status Roebling_RunMatches(Roebling *rbl){
             if(mt != NULL){
                 Match_Feed(mt, c);
                 if(HasFlag(mt->type.state, COMPLETE)){
-                     rbl->range.tail = mt->count-1;
                      ko->metrics.selected = i;
                      if(mt->jump > -1){
                         rbl->jump = mt->jump;
@@ -126,6 +133,14 @@ status Roebling_Run(Roebling *rbl){
     }
 
     if(HasFlag(rbl->type.state, NEXT)){
+        Match *mt = Roebling_GetValueMatch(rbl);
+        if(mt != NULL){
+            int lead = mt->lead;
+            printf("Lead %d\n", lead);
+            while(lead--){
+                Range_IncrLead(&(rbl->range));
+            }
+        }
         if(rbl->dispatch != NULL){
             rbl->dispatch((MemHandle *)rbl);
         }

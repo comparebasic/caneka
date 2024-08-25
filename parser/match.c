@@ -28,6 +28,7 @@ static status match_FeedPat(Match *mt, word c){
             mt->type.state |= PROCESSING;
 
             if(HasFlag(def->flags, PAT_IGNORE)){
+                printf(" --- IGNORING ---\n");
                 mt->lead++;
             }else{
                 mt->count++;

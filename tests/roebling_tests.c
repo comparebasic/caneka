@@ -47,7 +47,7 @@ status SetWord1(Abstract *a){
     return Roebling_SetLookup(rbl, lk); 
 }
 
-static word text[] = {TEXT_DEF};
+static word text[] = {PAT_IGNORE|PAT_ANY, ' ', ' ',TEXT_DEF};
 static word nl[] = {NL_DEF};
 
 status SetWord2(Abstract *a){
@@ -109,7 +109,7 @@ status RoeblingRun_Tests(MemCtx *gm){
 
     Roebling_Run(rbl);
     s = Range_Copy(rbl->m, &(rbl->range));
-    r |= Test(String_EqualsBytes(s, bytes(" for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
+    r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
     r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
 
     Roebling_Run(rbl);
