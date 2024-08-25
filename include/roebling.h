@@ -16,18 +16,18 @@ typedef struct roebling {
     /* overall */
     Range range;
     Span *parsers_do;
-    Lookup *gotos;
+    Lookup *marks;
     /* step specific */
     DoFunc dispatch;
     i8 jump;
     i8 jumpMiss;
 } Roebling;
 
-Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source);
+Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, int startMark, String *s, Abstract *source);
 status Roebling_Run(Roebling *sexp);
 int Roebling_GetMarkIdx(Roebling *rlb, int mark);
-status Roebling_SetMark(Roebling *rlb, int mark);
-status Roebling_Prepare(Roebling *rbl);
+status Roebling_SetMark(Roebling *rlb, int mark, int idx);
+status Roebling_Prepare(Roebling *rbl, Span *parsers);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def);
 status Roebling_SetKOPattern(Roebling *rbl, PatCharDef *def);

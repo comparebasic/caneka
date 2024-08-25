@@ -116,7 +116,7 @@ void *Span_GetSelected(Span *p){
 int Span_Add(Span *p, Abstract *t){
     int idx = Span_NextIdx(p);
     if(Span_Set(p, idx, t) != NULL){
-        return p->max_idx;
+        return idx;
     }
 
     return 0;

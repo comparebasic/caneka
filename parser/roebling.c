@@ -44,18 +44,32 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
     return SUCCESS;
 }
 
-status Roebling_Prepare(Roebling *rbl){
-    rbl->idx = 0;
-    Abstract *dof = Span_Get(rbl->parsers_do, rbl->idx);
-    while(dof != NULL){
-        if(dof->type.of == TYPE_WRAPPED_UTIL){
-            int mark = ((Single *)dof)->val.value;
-            Roebling_SetMark(rbl, mark);
-        }
-        rbl->idx++;
-        dof = Span_Get(rbl->parsers_do, rbl->idx);
+int Roebling_GetMarkIdx(Roebling *rlb, int mark){
+    Single *mrk = (Single *)Lookup_Get(rlb->marks, mark); 
+    if(mrk != NULL){
+        return mrk->val.value;
     }
-    rbl->idx = 0;
+    return -1; 
+}
+
+status Roebling_SetMark(Roebling *rbl, int mark, int idx){
+    return Lookup_Add(rbl->m, rbl->marks, mark, (void *)&idx);
+}
+
+status Roebling_Prepare(Roebling *rbl, Span *parsers){
+    int idx = 0;
+    int rblIdx = 0;
+    Abstract *t = NULL;
+    while(idx < parsers->nvalues){
+        t = Span_Get(parsers, idx);
+        if(t->type.of == TYPE_WRAPPED_UTIL){
+            int mark = ((Single *)t)->val.value;
+            Roebling_SetMark(rbl, mark, rblIdx);
+        }else if(t->type.of == TYPE_WRAPPED_DO){
+            rblIdx = Span_Add(rbl->parsers_do, t) + 1;
+        }
+        idx++;
+    }
     return SUCCESS;
 }
 
@@ -158,14 +172,6 @@ status Roebling_Run(Roebling *rbl){
     return rbl->type.state;
 }
 
-int Roebling_GetMarkIdx(Roebling *rlb, int mark){
-    Single *mrk = (Single *)Lookup_Get(rlb->gotos, mark); 
-    if(mrk != NULL){
-        return mrk->val.value;
-    }
-    return -1; 
-}
-
 status Roebling_ResetPatterns(Roebling *rbl){
     Span_ReInit(rbl->matches.values);
     Span_ReInit(rbl->matches.ko);
@@ -174,27 +180,21 @@ status Roebling_ResetPatterns(Roebling *rbl){
     return READY;
 }
 
-status Roebling_SetMark(Roebling *rbl, int mark){
-    Single *sgl = Int_Wrapped(rbl->m, rbl->idx);
-    return Lookup_Add(rbl->m, rbl->gotos, mark, (void *)sgl);
-}
-
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
     return String_AddBytes(rbl->m, rbl->range.search, bytes, length);
 }
 
-Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, String *s, Abstract *source){
+Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, int startMark, String *s, Abstract *source){
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;
-    rbl->parsers_do = parsers;
     rbl->source = source;
-    rbl->gotos = Lookup_Make(m, XML_START, NULL, (Abstract *)rbl);
     rbl->matches.values = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
     rbl->matches.ko = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
+    rbl->parsers_do = Span_Make(m, TYPE_SPAN);
+    rbl->marks = LookupInt_Make(m, startMark, (Abstract *)rbl); 
+    Roebling_Prepare(rbl, parsers);
     Range_Set(&(rbl->range), s);
-
-    Roebling_Prepare(rbl);
 
     return rbl;
 }

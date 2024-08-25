@@ -28,6 +28,15 @@ status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     return ERROR;
 }
 
+Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
+    Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
+    lk->offset = offset;
+    lk->values = Span_MakeInline(m, TYPE_SPAN, sizeof(int));
+    lk->arg = arg;
+
+    return lk;
+}
+
 Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *arg){
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
     lk->offset = offset;
