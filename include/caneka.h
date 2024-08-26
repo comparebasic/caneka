@@ -128,14 +128,14 @@ extern int METHOD_DELETE;
 enum status_types {
     READY = 0,
     ERROR = 1 << 0,
-    NOOP = 1 << 1,
-    LOOP = 1 << 2,
-    BREAK = 1 << 3,
-    TRACKED = 1 << 4,
-    INCOMING = 1 << 5,
-    PROCESSING = 1 << 6,
-    RESPONDING = 1 << 7,
-    SUCCESS = 1 << 8,
+    OPTIONAL = 1 << 1,
+    NOOP = 1 << 2,
+    LOOP = 1 << 3,
+    BREAK = 1 << 4,
+    TRACKED = 1 << 5,
+    INCOMING = 1 << 6,
+    PROCESSING = 1 << 7,
+    RESPONDING = 1 << 8,
     RAW = 1 << 9,
     MISS = 1 << 10,
     HASHED = 1 << 11,
@@ -143,6 +143,7 @@ enum status_types {
     END = 1 << 13,
     NEXT = 1 << 14,
     KO = 1 << 15,
+    SUCCESS = 1 << 15,
 };
 
 #define HasFlag(x, fl) ((x & (fl)) == (fl)) 

@@ -1,11 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
-enum test_enum {
-    _START = 1000,
+
+enum rbl_test_enum {
+    _start = 333,
     ONE,
     TWO,
     THREE,
+};
+
+enum rbl_test_marks {
+    RBL_TEST_START = 1000,
+    RBL_TEST_END,
 };
 
 status WordFound(MemHandle *mh){
@@ -47,12 +53,11 @@ status SetWord1(Abstract *a){
     return Roebling_SetLookup(rbl, lk); 
 }
 
-status SetBravo(Abstract *a){
-    return NOOP; 
-}
 
 static word text[] = {PAT_IGNORE|PAT_ANY, ' ', ' ',TEXT_DEF};
 static word nl[] = {NL_DEF};
+static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_IGNORE|PAT_TERM, 'A', 'Z', PAT_END, 0, 0};
+static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
 
 status SetWord2(Abstract *a){
     status r = READY;
@@ -63,6 +68,30 @@ status SetWord2(Abstract *a){
     r |= Roebling_SetPattern(rbl, (PatCharDef *)text);
     r |= Roebling_SetKOPattern(rbl, (PatCharDef *)nl);
     rbl->dispatch = RestFound;
+    return r; 
+}
+
+status SetNextOrEnd(Abstract *a){
+    status r = READY;
+
+    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)nl_upper);
+    /*
+    mt->jump = Roebling_GetMarkIdx(rbl, RBL_TEST_START);
+    */
+    mt->jump = 0;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)dbl_nl);
+    /*
+    mt->jump = Roebling_GetMarkIdx(rbl, RBL_TEST_END);
+    */
+    mt->jump = 3;
+
     return r; 
 }
 
@@ -86,12 +115,6 @@ status Roebling_Tests(MemCtx *gm){
     MemCtx_Free(m);
     return r;
 }
-
-enum rbl_test_marks {
-    RBL_TEST_START = 0,
-    RBL_TEST_BRAVO,
-    RBL_TEST_END,
-};
 
 status RoeblingRun_Tests(MemCtx *gm){
     status r = TEST_OK;
@@ -140,32 +163,40 @@ status RoeblingMark_Tests(MemCtx *gm){
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_START)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord1)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord2)); 
-    Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_BRAVO)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetBravo)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetNextOrEnd)); 
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_END)); 
+
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, RBL_TEST_START, String_Init(m, STRING_EXTEND), NULL); 
 
     String *s = NULL; 
-    s = String_Make(m, bytes("TWO for the weekend\n"));
+    s = String_Make(m, bytes("TWO for the weekend\nONE for good measure\n\n"));
     Roebling_AddBytes(rbl, s->bytes, s->length);
-    Roebling_Run(rbl);
 
-    Match *mt = Roebling_GetMatch(rbl);
-    s = Range_Copy(rbl->m, &(rbl->range));
-    int idx = Roebling_GetMatchIdx(rbl);
+    Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
-    r |= Test(String_EqualsBytes(mt->def.s, bytes("TWO")), "Match equals expected");
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
-    r |= Test(idx = 1, "Match Idx equals expected");
     r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
 
     Roebling_Run(rbl);
-    s = Range_Copy(rbl->m, &(rbl->range));
+    s = Range_Copy(m, &(rbl->range));
     r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
     r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
 
     Roebling_Run(rbl);
-    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS");
+    Roebling_Run(rbl);
+    s = Range_Copy(m, &(rbl->range));
+    r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals expected, have %s", s->bytes);
+    r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
+
+    Roebling_Run(rbl);
+    s = Range_Copy(m, &(rbl->range));
+    r |= Test(String_EqualsBytes(s, bytes("for good measure")), "Roebling has captured the rest of the line: '%s'", s->bytes);
+    r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
+
+    Roebling_Run(rbl);
+    r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state SUCCESS");
+    s = Range_Copy(m, &(rbl->range));
+    r |= Test(String_EqualsBytes(s, bytes("\n\n")), "Roebling has captured the ending double newline");
 
     MemCtx_Free(m);
     return r;

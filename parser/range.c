@@ -68,6 +68,11 @@ status Range_Next(Range *range){
     return SUCCESS;
 }
 
+status Range_Back(Range *range){
+    memcpy(&(range->end), &(range->start), sizeof(SCursor));
+    return SUCCESS;
+}
+
 int Range_GetLength(Range *range){
     if(range->end.position == -1){
         return 0;

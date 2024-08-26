@@ -5,10 +5,10 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_CYAN;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING = COLOR_YELLOW;
 int DEBUG_ROEBLING_MARK = 0;
 int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
@@ -129,7 +129,11 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
 
 status PrintMatchAddr(MemHandle *mh){
     MHAbstract *ma = (MHAbstract *)as(mh, TYPE_MHABSTRACT);
-    printf("%p ", ma->a);
+    if(ma->a == NULL){
+        printf("NULL ");
+    }else{
+        printf("0x%lx ", (util)(ma->a));
+    }
     return SUCCESS;
 }
 

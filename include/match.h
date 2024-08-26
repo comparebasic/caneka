@@ -24,6 +24,8 @@ enum match_flags {
 #define TEXT_DEF patText, PAT_END, 0, 0
 #define NL_DEF PAT_TERM, '\n', '\n', PAT_END, 0, 0
 
+#define UPPER_DEF PAT_TERM, 'A', 'Z' 
+
 typedef struct range_chardef {
     word flags;
     word from;

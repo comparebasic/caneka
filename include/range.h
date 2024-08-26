@@ -13,5 +13,6 @@ String *Range_Copy(MemCtx *m, Range *range);
 status Range_Incr(Range *range);
 status Range_IncrLead(Range *range);
 status Range_Next(Range *range);
+status Range_Back(Range *range);
 int Range_GetLength(Range *range);
 byte Range_GetByte(Range *range);

@@ -7,6 +7,7 @@ status SpanInline_Tests(MemCtx *gm);
 status Hash_Tests(MemCtx *gm);
 status Roebling_Tests(MemCtx *gm);
 status RoeblingRun_Tests(MemCtx *gm);
+status RoeblingMark_Tests(MemCtx *gm);
 status Table_Tests(MemCtx *gm);
 status Xml_Tests(MemCtx *gm);
 status Match_Tests(MemCtx *gm);

@@ -19,6 +19,7 @@ static void *tests[] = {
     "Match", Match_Tests,
     "Roebling", Roebling_Tests,
     "RoeblingRun", RoeblingRun_Tests,
+    "RoeblingMark", RoeblingMark_Tests,
     NULL, NULL
     /*
     Serve_Tests,
