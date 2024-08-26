@@ -130,6 +130,20 @@ status Roebling_Run(Roebling *rbl){
     if(HasFlag(rbl->type.state, NEXT)){
         rbl->idx++;
         Range_Sync(&(rbl->range), &(rbl->range.end));
+        if(rbl->jump > -1){
+            rbl->idx = rbl->jump;
+            rbl->jump = -1;
+            Range_Sync(&(rbl->range), &(rbl->range.end));
+            if(DEBUG_ROEBLING_MARK){
+                printf("\x1b[%dmJumping to %d\n", DEBUG_ROEBLING_MARK, rbl->idx);
+            }
+        }
+        if(rbl->jumpMiss > -1){
+            rbl->idx = rbl->jumpMiss;
+            rbl->jumpMiss = -1;
+            rbl->type.state &= ~NEXT;
+            Range_Sync(&(rbl->range), &(rbl->range.end));
+        }
     }
     rbl->type.state &= ~(NEXT|NOOP); 
 
@@ -167,21 +181,6 @@ status Roebling_Run(Roebling *rbl){
         }
         if(rbl->dispatch != NULL){
             rbl->dispatch((MemHandle *)rbl);
-        }
-        if(rbl->jump > -1){
-            rbl->idx = rbl->jump;
-            rbl->jump = -1;
-            rbl->type.state &= ~NEXT;
-            Range_Sync(&(rbl->range), &(rbl->range.end));
-            if(DEBUG_ROEBLING_MARK){
-                printf("\x1b[%dmJumping to %d\n", DEBUG_ROEBLING_MARK, rbl->idx);
-            }
-        }
-        if(rbl->jumpMiss > -1){
-            rbl->idx = rbl->jumpMiss;
-            rbl->jumpMiss = -1;
-            rbl->type.state &= ~NEXT;
-            Range_Sync(&(rbl->range), &(rbl->range.end));
         }
     }
         

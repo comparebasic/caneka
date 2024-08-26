@@ -229,7 +229,7 @@ boolean String_EqualsBytes(String *a, byte *cstr){
         }
         p += tail->length;
         pos += tail->length;
-        tail = tail->next;
+        tail = String_Next(tail);
     }
 
     if(tail == NULL && pos == l){

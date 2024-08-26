@@ -169,7 +169,7 @@ status RoeblingMark_Tests(MemCtx *gm){
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, RBL_TEST_START, String_Init(m, STRING_EXTEND), NULL); 
 
     String *s = NULL; 
-    s = String_Make(m, bytes("TWO for the weekend\nONE for good measure\n\n"));
+    s = String_Make(m, bytes("TWO for the weekend\nONE for good measure\nTHREE for all!\n\n"));
     Roebling_AddBytes(rbl, s->bytes, s->length);
 
     Roebling_Run(rbl);
@@ -195,11 +195,21 @@ status RoeblingMark_Tests(MemCtx *gm){
 
     Roebling_Run(rbl);
     Roebling_Run(rbl);
-    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS");
     s = Range_Copy(m, &(rbl->range));
-    Debug_Print((void *)s, 0, "END", COLOR_RED, TRUE);
-    Debug_Print((void *)&(rbl->range), 0, "END: ", COLOR_RED, TRUE);
+    r |= Test(String_EqualsBytes(s, bytes("THREE")), "Content equals expected, have %s", s->bytes);
+    r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
+
+    Roebling_Run(rbl);
+    s = Range_Copy(m, &(rbl->range));
+    r |= Test(String_EqualsBytes(s, bytes("for all!")), "Roebling has captured the rest of the line: '%s'", s->bytes);
+    r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
+
+    Roebling_Run(rbl);
+    s = Range_Copy(m, &(rbl->range));
     r |= Test(String_EqualsBytes(s, bytes("\n\n")), "Roebling has captured the ending double newline");
+
+    Roebling_Run(rbl);
+    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS");
 
     MemCtx_Free(m);
     return r;
