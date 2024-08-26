@@ -28,11 +28,13 @@ static status match_FeedPat(Match *mt, word c){
             mt->type.state |= PROCESSING;
 
             if(HasFlag(def->flags, PAT_IGNORE)){
-                mt->type.state |= OPTIONAL;
                 if(mt->count == 0){
                     mt->lead++;
+                }else{
+                    mt->type.state |= OPTIONAL;
                 }
             }else if(!HasFlag(def->flags, PAT_IGNORE)){
+                mt->type.state &= ~OPTIONAL;
                 mt->count++;
             }
 

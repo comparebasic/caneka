@@ -32,7 +32,7 @@ status RestFound(MemHandle *mh){
         Roebling *rbl = as(mh, TYPE_ROEBLING);
         printf("\n");
         String *s = Range_Copy(rbl->m, &(rbl->range));
-        Debug_Print((void *)s, 0, "found rest: ", COLOR_YELLOW, TRUE);
+        Debug_Print((void *)s, 0, "found rest: ", COLOR_BLUE, TRUE);
         printf("\n");
     }
     return SUCCESS;
