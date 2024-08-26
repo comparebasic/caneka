@@ -4,72 +4,29 @@
 status Range_Set(Range *range, String *s){
     memset(range, 0, sizeof(Range));
     range->type.of = TYPE_RANGE;
-    range->search = range->start.s = range->start.seg = range->end.s = range->end.seg = s;
-    range->end.position = -1;
+    range->search = range->start.s = range->start.seg = s;
+    Range_Sync(range, &(range->start));
     return SUCCESS;
 }
 
 byte Range_GetByte(Range *range){
-    if(range->end.seg != NULL){
-        return range->end.seg->bytes[range->end.position];
+    if(range->potential.seg != NULL){
+        return range->potential.seg->bytes[range->potential.position];
     }else{
         return '\0';
     }
 }
 
-status Range_IncrLead(Range *range){
-    SCursor *start = &(range->start); 
-    String *seg = start->seg;
-
-    boolean found = FALSE;
-    while(!found && range->start.seg != NULL){
-        if(range->start.position+1 < seg->length){
-            range->start.position++;
-            found = TRUE;
-        }else{
-            range->start.position = -1;
-            range->start.seg = String_Next(seg);
-        }
+status Range_Sync(Range *range, SCursor *cursor){
+    if(&(range->start) != cursor){
+        memcpy(&(range->start), cursor, sizeof(SCursor));
     }
-    if(range->start.seg == NULL){
-        range->type.state |= END;
-        return END;
-    }else{
-        range->type.state &= ~END;
-        return SUCCESS;
+    if(&(range->end) != cursor){
+        memcpy(&(range->end), cursor, sizeof(SCursor));
     }
-}
-
-status Range_Incr(Range *range){
-    SCursor *end = &(range->end); 
-    String *seg = end->seg;
-
-    boolean found = FALSE;
-    while(!found && range->end.seg != NULL){
-        if(range->end.position+1 < seg->length){
-            range->end.position++;
-            found = TRUE;
-        }else{
-            range->end.position = -1;
-            range->end.seg = String_Next(seg);
-        }
+    if(&(range->potential) != cursor){
+        memcpy(&(range->potential), cursor, sizeof(SCursor));
     }
-    if(range->end.seg == NULL){
-        range->type.state |= END;
-        return END;
-    }else{
-        range->type.state &= ~END;
-        return SUCCESS;
-    }
-}
-
-status Range_Next(Range *range){
-    memcpy(&(range->start), &(range->end), sizeof(SCursor));
-    return SUCCESS;
-}
-
-status Range_Back(Range *range){
-    memcpy(&(range->end), &(range->start), sizeof(SCursor));
     return SUCCESS;
 }
 
@@ -117,25 +74,3 @@ String *Range_Copy(MemCtx *m, Range *range){
 
     return s;
 }
-
-status Range_Reset(Range *range, int anchor){
-    range->compare = 0;
-    if(range->state == COMPLETE){
-        range->start.position = range->end.position;
-        range->start.seg = range->end.seg;
-        if(range->start.position == range->start.seg->length){
-            range->start.seg = range->start.seg->next;
-        }
-        range->start.position++;
-    }
-
-    range->state = READY;
-    if(anchor == ANCHOR_START){
-        range->start.state = READY;
-    }else{
-        range->start.state = PROCESSING;
-    }
-
-    return range->state;
-}
-

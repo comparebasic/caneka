@@ -1,6 +1,6 @@
 typedef struct strcursor {
+    Type type;
     String *s;
-    status state;
     String *seg;
     i64 position;
 } SCursor;

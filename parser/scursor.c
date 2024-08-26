@@ -33,10 +33,9 @@ status SCursor_Incr(SCursor *sc, i64 length){
         }
     }
 
-    if(sc->seg == NULL && sc->position == String_Length(sc->s)){
-        sc->state = COMPLETE;
-        return sc->state;
+    if(sc->seg == NULL){
+        sc->type.state = END;
     }
 
-    return SUCCESS;
+    return sc->type.state;
 }

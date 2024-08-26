@@ -341,13 +341,23 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
 
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)as(a, TYPE_STRING_CHAIN);
-    printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
-    do {
-        String *esc = String_ToEscaped(DebugM, s);
-        printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
-        s = s->next;
-    } while(s != NULL);
-    printf("\x1b[%dm>\x1b[0m", color);
+    if(extended){
+        printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
+        do {
+            String *esc = String_ToEscaped(DebugM, s);
+            printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
+            s = s->next;
+        } while(s != NULL);
+        printf("\x1b[%dm>\x1b[0m", color);
+    }else{
+        printf("\x1b[1;%dm\"", color);
+        do {
+            String *esc = String_ToEscaped(DebugM, s);
+            printf("%s",esc->bytes);
+            s = s->next;
+        } while(s != NULL);
+        printf("\"\x1b[0m");
+    }
 }
 
 static void Wrapped_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -403,27 +413,21 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("%s\x1b[%dmCursor<%s:%ld ", msg, color,
-        State_ToString(sc->state), 
-        sc->position);
-    if(extended){
-        Debug_Print((void *)sc->seg, 0, "", color, extended);
-    }else{
-        printf("\x1b[%dm>\x1b[0m", color);
-    }
+    printf("\x1b[%dm%sC<%s:%s[%ld]>", color, msg, State_ToString(sc->type.state), sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "", sc->position);
 }
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Range *range = (Range *)a;
-    printf("%s\x1b[%dmRange<%s search=", msg, color, State_ToString(range->state));
-    Debug_Print((void *)range->search, 0, "", color, FALSE);
+    printf("%s\x1b[%dmR<s=", msg, color);
+    Debug_Print((void *)range->search, 0, "", color, extended);
     String *s = Range_Copy(DebugM, range);
-    Debug_Print((void *)s, 0, " current=", color, FALSE);
+    Debug_Print((void *)s, 0, " current=", color, extended);
     if(extended){
-        printf("\x1b[%dm[", color);
-        Debug_Print((void *)&(range->start), TYPE_SCURSOR, "", color, extended);
-        Debug_Print((void *)&(range->end), TYPE_SCURSOR, "...", color, extended);
-        printf("\x1b[%dm]", color);
+        printf("\n  \x1b[%dmCursors=\n    ", color);
+        Debug_Print((void *)&(range->start), TYPE_SCURSOR, "S=", color, extended);
+        Debug_Print((void *)&(range->potential), TYPE_SCURSOR, "P=", color, extended);
+        Debug_Print((void *)&(range->end), TYPE_SCURSOR, "E=", color, extended);
+        printf("\x1b[%dm", color);
     }
     printf("\x1b[%dm>\x1b[0m", color);
 }
