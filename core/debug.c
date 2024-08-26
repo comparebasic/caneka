@@ -4,13 +4,13 @@
 Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
-int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_MATCH = COLOR_BLUE;
+int DEBUG_PATMATCH = COLOR_BLUE;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
-int DEBUG_ROEBLING_MARK = 0;
-int DEBUG_ROEBLING_COMPLETE = 0;
+int DEBUG_ROEBLING = COLOR_CYAN;
+int DEBUG_ROEBLING_MARK = COLOR_YELLOW;
+int DEBUG_ROEBLING_COMPLETE = COLOR_PURPLE;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_ALLOC = 0;
@@ -271,7 +271,12 @@ static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean ext
     if(extended){
         printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, color, mt->def.s->bytes, color);
     }else{
-        printf("%sMatch<state=%s:pos=%d>\n", msg, State_ToString(mt->type.state), mt->position);
+        char *jump = "";
+        printf("%sMatch<state=%s:pos=%d", msg, State_ToString(mt->type.state), mt->position);
+        if(mt->jump >= 0){
+            printf(":jmp=%d\n", mt->jump);
+        }
+        printf(">\n");
     }
 }
 
@@ -283,7 +288,7 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_STRINGMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, mt->jump, mt->count, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jmp=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, mt->jump, mt->count, mt->remaining);
         Debug_Print((void *)mt->def.s, 0, "", color, FALSE);
         printf(">\x1b[0m");
     }else{

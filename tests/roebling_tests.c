@@ -194,8 +194,11 @@ status RoeblingMark_Tests(MemCtx *gm){
     r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
 
     Roebling_Run(rbl);
-    r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state SUCCESS");
+    Roebling_Run(rbl);
+    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS");
     s = Range_Copy(m, &(rbl->range));
+    Debug_Print((void *)s, 0, "END", COLOR_RED, TRUE);
+    Debug_Print((void *)&(rbl->range), 0, "END: ", COLOR_RED, TRUE);
     r |= Test(String_EqualsBytes(s, bytes("\n\n")), "Roebling has captured the ending double newline");
 
     MemCtx_Free(m);

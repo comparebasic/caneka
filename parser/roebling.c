@@ -125,7 +125,7 @@ static status Roebling_RunMatches(Roebling *rbl){
 
 status Roebling_Run(Roebling *rbl){
     if(DEBUG_ROEBLING_MARK){
-        printf("\x1b[%dRblIdx:%d\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx);
+        printf("\x1b[%dmRblIdx:%d\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx);
     }
     if(HasFlag(rbl->type.state, NEXT)){
         rbl->idx++;
@@ -173,6 +173,9 @@ status Roebling_Run(Roebling *rbl){
             rbl->jump = -1;
             rbl->type.state &= ~NEXT;
             Range_Sync(&(rbl->range), &(rbl->range.end));
+            if(DEBUG_ROEBLING_MARK){
+                printf("\x1b[%dmJumping to %d\n", DEBUG_ROEBLING_MARK, rbl->idx);
+            }
         }
         if(rbl->jumpMiss > -1){
             rbl->idx = rbl->jumpMiss;
