@@ -5,17 +5,16 @@ static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_TERM, 'A', 'Z', PAT_END, 0, 
 
 static word open[] = {PAT_TERM, '<', '<', PAT_END, 0, 0}; 
 
-static word tag[] = {PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ',\
-    PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY|PAT_TERM, '0', '9',
-    PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ', PAT_MANY, 'a', 'z', \
-    PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', \
+static word tag[] = {PAT_INVERT|PAT_MANY, '/', '/', PAT_INVERT|PAT_MANY, ' ', ' ',\
+    PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_',\
+    PAT_MANY, ':', ':', PAT_MANY|PAT_TERM, '0', '9',
     PAT_END, 0, 0
 };
 
 static word attrTag[] = {PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', \
     PAT_MANY|PAT_TERM, 'A', 'Z', PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', \
     PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', \
-    PAT_MANY|PAT_TERM, '0', '9'
+    PAT_MANY|PAT_TERM, '0', '9', PAT_END, 0, 0
 };
 
 static word closeDef[] = {PAT_TERM, '/', '/', PAT_MANY, 'a', 'z', \
@@ -55,7 +54,6 @@ static status setTag(Roebling *rbl){
     printf("setTag\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
-    String *s =  Range_Copy(ctx->m, range);
     Debug_Print((void *)s, 0, "setTag: ", COLOR_YELLOW, TRUE);
     printf("\n");
     */
@@ -95,7 +93,8 @@ static status setBody(Roebling *rbl){
 }
 
 static status tagNamed(Roebling *rbl){
-    printf("tagNamed\n");
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    printf("tagNamed '%s'\n", s->bytes);
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     Match *mt = Parser_GetMatch(prs);
@@ -141,22 +140,22 @@ static status startParserMk(Roebling *rbl){
     Match *mt = NULL;
 
     mt = Span_ReserveNext(rbl->matches.values);
-    Match_SetPattern(mt, (PatCharDef *)nl_upper);
+    Match_SetPattern(mt, (PatCharDef *)open);
     mt->jump = Roebling_GetMarkIdx(rbl, XML_TAG); 
 
     return SUCCESS;
 }
 
 static status tagParserMk(Roebling *rbl){
-
     Roebling_ResetPatterns(rbl);
 
     Match *open_mt = Span_ReserveNext(rbl->matches.values);
     Match_SetPattern(open_mt, (PatCharDef *)tag);
 
     Match *close_mt = Span_ReserveNext(rbl->matches.values);
-    Match_SetPattern(open_mt, (PatCharDef *)closeDef);
+    Match_SetPattern(close_mt, (PatCharDef *)closeDef);
     close_mt->jump = Roebling_GetMarkIdx(rbl, XML_START); 
+
     rbl->dispatch = tagNamed;
 
     return SUCCESS;

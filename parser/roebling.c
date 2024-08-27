@@ -1,6 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
+String *Roebling_GetMarkDebug(Roebling *rbl, int idx){
+    for(int i = 0; i <= rbl->marks->values->max_idx; i++){
+        int *n = Span_Get(rbl->marks->values, i);
+        if(n != NULL && *n == idx){
+            return (String *)Span_Get(rbl->markLabels->values, i);
+        }
+    }
+    return NULL;
+}
+
 Match *Roebling_GetMatch(Roebling *rbl){
     if(HasFlag(rbl->type.state, KO)){
         return Span_GetSelected(rbl->matches.ko);
@@ -45,15 +55,16 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
 }
 
 int Roebling_GetMarkIdx(Roebling *rlb, int mark){
-    Single *mrk = (Single *)Lookup_Get(rlb->marks, mark); 
-    if(mrk != NULL){
-        return mrk->val.value;
+    int *mrk = (int *)Lookup_Get(rlb->marks, mark); 
+    if(mrk != 0){
+        return *mrk;
     }
     return -1; 
 }
 
-status Roebling_SetMark(Roebling *rbl, int mark, int idx){
-    return Lookup_Add(rbl->m, rbl->marks, mark, (void *)&idx);
+status Roebling_SetMark(Roebling *rbl, int mark, int _idx){
+    i64 idx = (i64)_idx;
+    return Lookup_Add(rbl->m, rbl->marks, mark, (void *)&_idx);
 }
 
 status Roebling_Prepare(Roebling *rbl, Span *parsers){
@@ -138,6 +149,7 @@ status Roebling_Run(Roebling *rbl){
                 printf("\x1b[%dmJumping to %d\n", DEBUG_ROEBLING_MARK, rbl->idx);
             }
         }
+    }else{
         if(rbl->jumpMiss > -1){
             rbl->idx = rbl->jumpMiss;
             rbl->jumpMiss = -1;
@@ -180,7 +192,7 @@ status Roebling_Run(Roebling *rbl){
             }
         }
         if(rbl->dispatch != NULL){
-            rbl->dispatch((MemHandle *)rbl);
+            rbl->dispatch(rbl);
         }
     }
         
@@ -200,7 +212,13 @@ status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
     return String_AddBytes(rbl->m, rbl->range.search, bytes, length);
 }
 
-Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, int startMark, String *s, Abstract *source){
+Roebling *Roebling_Make(MemCtx *m,
+        cls type,
+        Span *parsers,
+        Lookup *markLabels,
+        String *s,
+        Abstract *source
+    ){
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;
@@ -208,7 +226,12 @@ Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, int startMark, Strin
     rbl->matches.values = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
     rbl->matches.ko = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
     rbl->parsers_do = Span_Make(m, TYPE_SPAN);
-    rbl->marks = LookupInt_Make(m, startMark, (Abstract *)rbl); 
+    int markStart = 0;
+    if(markLabels != NULL){
+        markStart = markLabels->offset;
+    }
+    rbl->marks = LookupInt_Make(m, markStart, (Abstract *)rbl); 
+    rbl->markLabels = markLabels;
     Roebling_Prepare(rbl, parsers);
     Range_Set(&(rbl->range), s);
 

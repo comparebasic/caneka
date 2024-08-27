@@ -63,9 +63,9 @@ void *Span_Set(Span *p, int idx, Abstract *t){
     status r = Span_Query(&sr);
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
-        if(HasFlag(p->def->flags, RAW)){
+        if(HasFlag(p->def->flags, INLINE)){
             size_t sz = (size_t)p->def->itemSize;
-            if(t->type.of == TYPE_RESERVE){
+            if(!HasFlag(p->def->flags, RAW) && t->type.of == TYPE_RESERVE){
                 sz = sizeof(Reserve);
             }
             memcpy(ptr, t, sz);
@@ -92,11 +92,11 @@ void *Span_Get(Span *p, int idx){
     status r = Span_Query(&sr);
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
-        if(HasFlag(p->def->flags, RAW)){
-            if((*(util *)ptr) != 0){
-                sr.value = ptr;
-            }else{
+        if(HasFlag(p->def->flags, INLINE)){
+            if(!HasFlag(p->def->flags, RAW) && (*(util *)ptr) == 0){
                 sr.value = NULL;
+            }else{
+                sr.value = ptr;
             }
         }else if(*((Abstract **)ptr) != NULL){
             void **dptr = (void **)ptr;
@@ -162,7 +162,6 @@ status Span_Run(MemHandle *mh, Span *p, DoFunc func){
     }
     MHAbstract_Init(&ma, m, NULL);
     for(int i = 0; i < p->nvalues; i++){
-        printf("%d:", i);
         Abstract *a = (Abstract *)Span_Get(p, i);
         if(a != NULL && (*(util *)a) != 0){
             ma.a = a;
@@ -318,7 +317,7 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     }
 
     p->def->slotSize = pwrSlot;
-    p->def->flags |= RAW;
+    p->def->flags |= INLINE;
     p->root = Span_valueSlab_Make(m, p->def);
     return p;
 }

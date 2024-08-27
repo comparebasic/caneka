@@ -18,6 +18,16 @@ word Lookup_AbsFromIdx(Lookup *lk, word idx){
     return idx+lk->offset;
 }
 
+Lookup *Lookup_FromConfig(MemCtx *m, LookupConfig *config, Abstract *arg){
+    LookupConfig *cnf = config;
+    Lookup *lk = Lookup_Make(m, cnf->key, NULL, arg);
+    while(cnf->key != 0){
+        Lookup_Add(m, lk, cnf->key, cnf->a); 
+        cnf++;
+    };
+    return lk;
+}
+
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
         Fatal("Adding lookup value below zero", TYPE_UNIT);
@@ -32,6 +42,8 @@ Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
     lk->offset = offset;
     lk->values = Span_MakeInline(m, TYPE_SPAN, sizeof(int));
+    lk->values->type.state |= RAW;
+    lk->values->def->flags |= RAW;
     lk->arg = arg;
 
     return lk;

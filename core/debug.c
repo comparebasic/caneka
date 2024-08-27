@@ -40,15 +40,24 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
         for(int i = 0; i < def->stride; i++){
             util *a = (util *)ptr;
             if(*a != 0){
+                printf("%d=", i);
                 Abstract *t = (Abstract *)ptr;
-                if(!HasFlag(def->flags, RAW)){
+                if(HasFlag(def->flags, INLINE)){
                     t = *((Abstract **)t);
                 }
-                printf("%d=", i);
-                if(t->type.of != 0){
-                    Debug_Print((void *)t, 0, "", color, TRUE);
+                if(!HasFlag(def->flags, RAW)){
+                    i64 n = (util)t;
+                    if(def->itemSize == sizeof(int)){
+                        printf("%u", (int)n);
+                    }else{
+                        printf("%lu", n);
+                    }
                 }else{
-                    printf("0x%lx", *a);
+                    if(t->type.of != 0){
+                        Debug_Print((void *)t, 0, "", color, TRUE);
+                    }else{
+                        printf("0x%lx", *a);
+                    }
                 }
                 printf(" ");
             }
@@ -101,7 +110,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
 
 static void SpanDef_Print(SpanDef *def){
     char *flags = "";
-    if(HasFlag(def->flags, RAW)){
+    if(HasFlag(def->flags, INLINE)){
         flags = "(inline)";
     }
     printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d%s itemSize:%d, valueHdr:%d", 
@@ -315,8 +324,20 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
     printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
     if(extended){
-        printf(" idx:%d ", rbl->idx);
+        printf(" idx:%d jump:%d ", rbl->idx, rbl->jump);
         Debug_Print((void *)&(rbl->range), 0, "", color, extended);
+        if(rbl->marks->values->nvalues > 0){
+            printf("\n  \x1b[%dmmarks=\n    ", color);
+            for(int i = 0; i <= rbl->marks->values->max_idx; i++){
+                Debug_Print((void *)Span_Get(rbl->markLabels->values, i), 0, "", color, FALSE);
+                printf("=");
+                int *n = Span_Get(rbl->marks->values, i);
+                if(n != NULL){
+                    printf("%u", *n);
+                }
+                printf(" ");
+            }
+        }
         printf("\n  \x1b[%dmmatches=\n", color);
         Match *mt = NULL;
         for(int i = 0; i < rbl->matches.values->nvalues; i++){

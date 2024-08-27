@@ -130,7 +130,7 @@ enum status_types {
     ERROR = 1 << 0,
     OPTIONAL = 1 << 1,
     NOOP = 1 << 2,
-    LOOP = 1 << 3,
+    INLINE = 1 << 3,
     BREAK = 1 << 4,
     TRACKED = 1 << 5,
     INCOMING = 1 << 6,
@@ -146,6 +146,7 @@ enum status_types {
     SUCCESS = 1 << 15,
 };
 
+
 #define HasFlag(x, fl) ((x & (fl)) == (fl)) 
 
 enum positions {
@@ -159,6 +160,7 @@ char *Class_ToString(cls type);
 
 #define COMPLETE SUCCESS
 #define TEST_OK READY
+#define ELASTIC INLINE
 
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);

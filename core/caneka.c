@@ -28,6 +28,8 @@ char *State_ToString(status state){
         return "SUCCESS/COMPLETE";
     }else if((state & RAW) != 0){
         return "RAW";
+    }else if((state & INLINE) != 0){
+        return "INLINE";
     }else if((state & MISS) != 0){
         return "MISS";
     }else if((state & HASHED) != 0){

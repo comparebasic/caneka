@@ -23,9 +23,17 @@ typedef struct roebling {
     RblFunc dispatch;
     i8 jump;
     i8 jumpMiss;
+    /* debug */
+    Lookup *markLabels;
 } Roebling;
 
-Roebling *Roebling_Make(MemCtx *m, cls type, Span *parsers, int startMark, String *s, Abstract *source);
+Roebling *Roebling_Make(MemCtx *m,
+    cls type,
+    Span *parsers,
+    Lookup *markLabels,
+    String *s,
+    Abstract *source
+);
 status Roebling_Run(Roebling *sexp);
 int Roebling_GetMarkIdx(Roebling *rlb, int mark);
 status Roebling_SetMark(Roebling *rlb, int mark, int idx);
@@ -39,3 +47,5 @@ int Roebling_GetMatchIdx(Roebling *rbl);
 Match *Roebling_GetMatch(Roebling *rbl);
 Match *Roebling_GetValueMatch(Roebling *rbl);
 status SCursor_Finish(Roebling *rbl, Match *mt);
+/* debug */
+String *Roebling_GetMarkDebug(Roebling *rbl, int idx);

@@ -30,6 +30,7 @@ status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
 }
 
 status XmlCtx_Close(XmlCtx *ctx, String *tagName){
+    printf("Setting Tag(Close)\n");
     ctx->current = ctx->current->parent;
     if(ctx->current == ctx->root){
         ctx->type.state = SUCCESS;

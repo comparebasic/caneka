@@ -23,6 +23,10 @@ static status match_FeedPat(Match *mt, word c){
             matched = !matched;
         }
 
+        if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
+            mt->type.state |= ELASTIC;
+        }
+
         /* handle if matched or not */
         if(matched){
             mt->type.state |= PROCESSING;
@@ -69,8 +73,14 @@ static status match_FeedPat(Match *mt, word c){
             break;
         }else{
             /* only knockout the status if the character is not optional */
-            if((def->flags & (PAT_OPTIONAL|PAT_ANY|PAT_MANY)) == 0){
-                mt->type.state = READY;
+            if(HasFlag(def->flags, (PAT_MANY|PAT_INVERT))){
+                if(mt->count > 0){
+                    mt->type.state |= (COMPLETE|OPTIONAL);
+                    break;
+                }
+            }
+            if((def->flags & (PAT_OPTIONAL|PAT_ANY)) == 0){
+                mt->type.state &= ~(PROCESSING|COMPLETE);
 
                 if(DEBUG_PATMATCH){
                     if(c == '\n'){
@@ -116,7 +126,7 @@ static status match_FeedPat(Match *mt, word c){
 
     /* after the loop has broken, if we are in a PROCESSING state and have reached the end of the pattern, we are COMPLETE */
     if(HasFlag(mt->type.state, PROCESSING)){
-        if(mt->position == mt->length){
+        if(mt->position == mt->length && !HasFlag(mt->type.state, ELASTIC)){
             mt->type.state |= SUCCESS;
         }
     }

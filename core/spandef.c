@@ -26,7 +26,7 @@ status SpanDef_Init(){
     tableDef.idxStride = SPAN_DEFAULT_STRIDE;
     tableDef.slotSize = sizeof(Hashed)/sizeof(void*);
     tableDef.itemSize = sizeof(Hashed);
-    tableDef.flags = RAW;
+    tableDef.flags = INLINE;
     tableDef.dim_lookups[0] = 15;
     tableDef.dim_lookups[1] = 255;
     tableDef.dim_lookups[2] = 4095;
