@@ -418,7 +418,7 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("\x1b[%dm%sC<%s:%s[%ld]>", color, msg, State_ToString(sc->type.state), sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "", sc->position);
+    printf("\x1b[%dm%sC<%s:\x1b[1;%dm%s\x1b[0;%dm[%ld]>", color, msg, State_ToString(sc->type.state), color, sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "", color, sc->position);
 }
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

@@ -1,3 +1,5 @@
+typedef status (*RblFunc)(struct roebling *rbl);
+
 enum mark_reserved {
     LOOP_MARK = 0,
     _FIRST_MARK,
@@ -18,7 +20,7 @@ typedef struct roebling {
     Span *parsers_do;
     Lookup *marks;
     /* step specific */
-    DoFunc dispatch;
+    RblFunc dispatch;
     i8 jump;
     i8 jumpMiss;
 } Roebling;

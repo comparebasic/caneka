@@ -136,6 +136,7 @@ static int FolderMake(char *dirname){
     DIR* dir = opendir(dir_cstr.content);
     if(dir){
         closedir(dir);
+        printf("Folder exists\n");
     }else if(ENOENT == errno){
         printf("\x1b[%dmMaking Directory %s\x1b[0m\n", MSG_COLOR, dir_cstr.content);
         mkdir(dir_cstr.content, 0777);
@@ -316,7 +317,6 @@ int BuildLib(){
 
 int Build(){
     if(BuildLib()){
-
         return BuildBinary(BINARY);
     }
     return FALSE;

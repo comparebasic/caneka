@@ -59,10 +59,9 @@ static word nl[] = {NL_DEF};
 static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_IGNORE|PAT_TERM, 'A', 'Z', PAT_END, 0, 0};
 static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
 
-status SetWord2(Abstract *a){
+status SetWord2(Roebling *rbl){
     status r = READY;
 
-    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl, (PatCharDef *)text);
@@ -71,10 +70,9 @@ status SetWord2(Abstract *a){
     return r; 
 }
 
-status SetNextOrEnd(Abstract *a){
+status SetNextOrEnd(Roebling *rbl){
     status r = READY;
 
-    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 

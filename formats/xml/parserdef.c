@@ -1,8 +1,58 @@
 #include <external.h>
 #include <caneka.h>
 
+static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_TERM, 'A', 'Z', PAT_END, 0, 0}; 
+
+static word open[] = {PAT_TERM, '<', '<', PAT_END, 0, 0}; 
+
+static word tag[] = {PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ',\
+    PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY|PAT_TERM, '0', '9',
+    PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ', PAT_MANY, 'a', 'z', \
+    PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', \
+    PAT_END, 0, 0
+};
+
+static word attrTag[] = {PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', \
+    PAT_MANY|PAT_TERM, 'A', 'Z', PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', \
+    PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', \
+    PAT_MANY|PAT_TERM, '0', '9'
+};
+
+static word closeDef[] = {PAT_TERM, '/', '/', PAT_MANY, 'a', 'z', \
+    PAT_MANY|PAT_TERM, 'A', 'Z', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', \
+    PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', \
+    PAT_TERM, '>', '>', PAT_END, 0, 0
+};
+
+static word sep[] = { PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', \
+    PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+
+static word gt[] = { PAT_TERM, '>', '>',PAT_END, 0, 0};
+
+static  word selfClose[] = { PAT_TERM, '/', '/', PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', \
+    PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', PAT_TERM, '>', '>', PAT_END, 0, 0
+};
+
+static word quoted[] = {PAT_IGNORE|PAT_TERM, '"', '"', PAT_INVERT, '"', '"', \
+    PAT_ANY|PAT_TERM, 32, 255, PAT_IGNORE|PAT_TERM, '"', '"', PAT_END, 0,0
+};
+
+static word unquoted[] = {PAT_INVERT, '"', '"', PAT_INVERT, ' ', ' ', \
+    PAT_INVERT, '\t', '\t', PAT_INVERT, '\r', '\r', PAT_INVERT, '\n', '\n', \
+    PAT_ANY|PAT_TERM, 32, 255, PAT_END, 0,0
+};
+
+static word body[] = {PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', \
+    PAT_ANY|PAT_TERM, 32, 255, PAT_END, 0,0
+};
+
+static word sepEq[] = { PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', PAT_TERM, '=', '=', \
+    PAT_END, 0, 0
+};
+
 /* setters */
-static status setTag(Parser *prs, Range *range, void *source){
+static status setTag(Roebling *rbl){
+    printf("setTag\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
@@ -12,7 +62,8 @@ static status setTag(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
-static status setAttr(Parser *prs, Range *range, void *source){
+static status setAttr(Roebling *rbl){
+    printf("setAttr\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
@@ -21,7 +72,8 @@ static status setAttr(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
-static status setAttrValue(Parser *prs, Range *range, void *source){
+static status setAttrValue(Roebling *rbl){
+    printf("setAttrValue\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
@@ -31,7 +83,8 @@ static status setAttrValue(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
-static status setBody(Parser *prs, Range *range, void *source){
+static status setBody(Roebling *rbl){
+    printf("setBody\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
@@ -41,7 +94,8 @@ static status setBody(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
-static status tagNamed(Parser *prs, Range *range, void *source){
+static status tagNamed(Roebling *rbl){
+    printf("tagNamed\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     Match *mt = Parser_GetMatch(prs);
@@ -54,7 +108,8 @@ static status tagNamed(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
-static status tagOpened(Parser *prs, Range *range, void *source){
+static status tagOpened(Roebling *rbl){
+    printf("tagOpened\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
@@ -66,7 +121,8 @@ static status tagOpened(Parser *prs, Range *range, void *source){
     return SUCCESS;
 }
 
-static status tagClose(Parser *prs, Range *range, void *source){
+static status tagClose(Roebling *rbl){
+    printf("tagClose\n");
     /*
     XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
     String *s =  Range_Copy(ctx->m, range);
@@ -80,186 +136,148 @@ static status tagClose(Parser *prs, Range *range, void *source){
 }
 
 /* routing parsers */
-static Match *openMt(Roebling *rlb){
-    /*
-    word open[] = {PAT_TERM, '<', '<', PAT_END, 0, 0}; 
-    Match *mt = Match_MakePat(rlb->m, bytes(open), 1, ANCHOR_START);
-    mt->jump = Roebling_GetMarkIdx(rlb, XML_TAG); 
-    return mt;
-    */
-    return NULL;
+static status startParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)nl_upper);
+    mt->jump = Roebling_GetMarkIdx(rbl, XML_TAG); 
+
+    return SUCCESS;
 }
 
-static Parser *startParserMk(Roebling *rlb){
-    /*
-    Match *mt = openMt(rlb);
-    return Parser_MakeSingle(rlb->m, mt, NULL); 
-    */
-    return NULL;
+static status tagParserMk(Roebling *rbl){
+
+    Roebling_ResetPatterns(rbl);
+
+    Match *open_mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(open_mt, (PatCharDef *)tag);
+
+    Match *close_mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(open_mt, (PatCharDef *)closeDef);
+    close_mt->jump = Roebling_GetMarkIdx(rbl, XML_START); 
+    rbl->dispatch = tagNamed;
+
+    return SUCCESS;
 }
 
-static Match *spaceMt(Roebling *rlb){
-    /*
-    word sep[] = {
-        PAT_ANY, ' ', ' ',
-        PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
-    return  Match_MakePat(rlb->m, bytes(sep), 4, ANCHOR_START); 
-    */
-    return NULL;
+static status spaceParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)sep);
+    mt->jump = Roebling_GetMarkIdx(rbl, XML_ATTRIBUTE);
+
+    return SUCCESS;
 }
 
-static Match *nameEndeMt(Roebling *rlb){
-    /*
-    word sep[] = {
-        PAT_ANY, '/', '/', PAT_ANY, ' ', ' ',
-        PAT_ANY, '\t', '\t', PAT_ANY|PAT_TERM, '\r', '\r', PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
-    return  Match_MakePat(rlb->m, bytes(sep), 5, ANCHOR_START); 
-    */
-    return NULL;
+static status sepParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)sep);
+
+    return SUCCESS;
 }
 
-static Match *selfCloseeMt(Roebling *rlb){
-    /*
-    word close[] = { PAT_TERM, '/', '/', PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', PAT_TERM, '>', '>', PAT_END, 0, 0};
-    Match *mt = Match_MakePat(rlb->m, bytes(close), 6, ANCHOR_START); 
-    mt->jump = Roebling_GetMarkIdx(rlb, XML_START);
-    return mt;
-    */
-    return NULL;
+static status attrParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)attrTag);
+    rbl->dispatch = setAttr;
+
+    return SUCCESS;
 }
 
-static Match *tagOpenedMt(Roebling *rlb){
-    /*
-    word close[] = { PAT_TERM, '>', '>',PAT_END, 0, 0};
-    Match *mt = Match_MakePat(rlb->m, bytes(close), 1, ANCHOR_START); 
-    mt->jump = Roebling_GetMarkIdx(rlb, XML_BODY);
-    return mt;
-    */
-    return NULL;
-}
+static status postTagNameParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
 
-static Parser *tagParserMk(Roebling *rlb){
-    /*
-    word tag[] = {PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ',PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY|PAT_TERM, '0', '9',
-        PAT_INVERT|PAT_IGNORE, '/', '/', PAT_INVERT|PAT_IGNORE, ' ', ' ', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', PAT_END, 0, 0};
-    Match *mt = Match_MakePat(rlb->m, bytes(tag), 12, ANCHOR_START);
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)sep);
 
-    word close[] = {PAT_SINGLE|PAT_TERM, '/', '/', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
-        PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', PAT_SINGLE|PAT_TERM, '>', '>', PAT_END, 0, 0};
-
-    Match *close_mt = Match_MakePat(rlb->m, bytes(tag), 0, ANCHOR_START);
-    close_mt->jump = Roebling_GetMarkIdx(rlb, XML_START); 
-    Array mt_arr = Array_MakeFrom(rlb->m, 2, mt, close_mt);
-    Parser *prs = Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagNamed); 
-    return prs;
-    */
-    return NULL;
-}
-
-static Parser *spaceParserMk(Roebling *rlb){
-    /*
-    Match *sp = spaceMt(rlb);
-    sp->jump = Roebling_GetMarkIdx(rlb, XML_ATTRIBUTE);
-    Parser *prs = Parser_MakeSingle(rlb->m, sp, NULL); 
-    return prs;
-    */
-    return NULL;
-}
-
-static Parser *sepParserMk(Roebling *rlb){
-    /*
-    word sep[] = {
-        PAT_ANY, ' ', ' ',
-        PAT_ANY, '\t', '\t', PAT_ANY|PAT_TERM, '\r', '\r', PAT_END, 0, 0};
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(sep), 3, ANCHOR_START), NULL); 
-    */
-    return NULL;
-}
-
-static Parser *attrParserMk(Roebling *rlb){
-    /*
-    word tag[] = {PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
-        PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9'};
-    Match *mt = Match_MakePat(rlb->m, bytes(tag), 9, ANCHOR_START);
-    Parser *prs = Parser_MakeSingle(rlb->m, mt, setAttr); 
-    prs->ko = spaceMt(rlb);
-    return prs;
-    */
-    return NULL;
-}
-
-static Parser *postTagNameParserMk(Roebling *rlb){
-    /*
-    Array mt_arr = Array_MakeFrom(rlb->m, 2, selfCloseeMt(rlb), spaceMt(rlb));
-    return Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagOpened); 
-    */
-    return NULL;
-}
-
-static Parser *postAttrParserMk(Roebling *rlb){
-    /*
-    Array mt_arr = Array_MakeFrom(rlb->m, 2, selfCloseeMt(rlb), tagOpenedMt(rlb));
-    Parser *prs =  Parser_MakeMulti(rlb->m, (Match **)mt_arr, tagOpened); 
-    prs->failJump = Roebling_GetMarkIdx(rlb, XML_ATTR_VALUE);
-    return prs;
-    */
-    return NULL;
-}
-
-static Parser *attrValueParserMk(Roebling *rlb){
-    /*
-    word quoted[] = {PAT_IGNORE|PAT_TERM, '"', '"', PAT_INVERT, '"', '"', PAT_ANY|PAT_TERM, 32, 255, PAT_IGNORE|PAT_TERM, '"', '"', PAT_END, 0,0};
-    word unquoted[] = {PAT_INVERT, '"', '"', PAT_INVERT, ' ', ' ', PAT_INVERT, '\t', '\t', PAT_INVERT, '\r', '\r', PAT_INVERT, '\n', '\n', PAT_ANY|PAT_TERM, 32, 255, PAT_END, 0,0};
-    Match *mtq = Match_MakePat(rlb->m, bytes(quoted), 4, ANCHOR_START);
-    Match *mtu = Match_MakePat(rlb->m, bytes(unquoted), 9, ANCHOR_START);
-    mtq->jump = mtu->jump = Roebling_GetMarkIdx(rlb, XML_ATTRIBUTE);
-
-    Array mt_arr = Array_MakeFrom(rlb->m, 2, mtq, mtu);
-    Parser *prs = Parser_MakeMulti(rlb->m, (Match **)mt_arr, setAttrValue);
-    return prs;
-    */
-    return NULL;
-}
-
-static Parser *bodyParserMk(Roebling *rlb){
-    /*
-    word body[] = {PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', PAT_ANY|PAT_TERM, 32, 255, PAT_END, 0,0};
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)selfClose);
     
-    Match *mt = Match_MakePat(rlb->m, bytes(body), 4, ANCHOR_START);
-    mt->jump = Roebling_GetMarkIdx(rlb, XML_ATTRIBUTE);
-
-    Parser *prs = Parser_MakeSingle(rlb->m, mt, setBody);
-    prs->ko = openMt(rlb);
-
-    return prs;
-    */
-    return NULL;
+    rbl->dispatch = tagOpened;
+    return SUCCESS;
 }
 
-static Parser *eqParserMk(Roebling *rlb){
-    /*
-    word sep[] = { PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', PAT_TERM, '=', '=', PAT_END, 0, 0};
-    return Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(sep), 3, ANCHOR_START), NULL); 
-    */
-    return NULL;
+static status postAttrParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)selfClose);
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)gt);
+
+    rbl->dispatch = tagOpened;
+
+    return SUCCESS;
 }
 
-Span *XmlParser_Make(MemCtx *m, ProtoDef *def){
+static status attrValueParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)quoted);
+    mt->jump = Roebling_GetMarkIdx(rbl, XML_ATTRIBUTE);
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)unquoted);
+
+    rbl->dispatch = setAttrValue;
+
+    return SUCCESS;
+}
+
+static status bodyParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)body);
+
+    rbl->dispatch = setBody;
+
+    return SUCCESS;
+}
+
+static status eqParserMk(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
+
+    mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(mt, (PatCharDef *)sepEq);
+
+    return SUCCESS;
+}
+
+Span *XmlParser_Make(MemCtx *m){
+    MemHandle *mh = (MemHandle *)m;
     Span *p =  Span_From(m, 14, 
         (Abstract *)Int_Wrapped(m, XML_START), 
-            (Abstract *)Single_Ptr(m, startParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)startParserMk),
         (Abstract *)Int_Wrapped(m, XML_TAG), 
-            (Abstract *)Single_Ptr(m, tagParserMk),
-            (Abstract *)Single_Ptr(m, postTagNameParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)tagParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)postTagNameParserMk),
         (Abstract *)Int_Wrapped(m, XML_ATTRIBUTE), 
-            (Abstract *)Single_Ptr(m, attrParserMk),
-            (Abstract *)Single_Ptr(m, eqParserMk),
-            (Abstract *)Single_Ptr(m, postAttrParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)attrParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)eqParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)postAttrParserMk),
         (Abstract *)Int_Wrapped(m, XML_ATTR_VALUE), 
-            (Abstract *)Single_Ptr(m, attrValueParserMk),
-            (Abstract *)Single_Ptr(m, postAttrParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)attrValueParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)postAttrParserMk),
         (Abstract *)Int_Wrapped(m, XML_BODY), 
-            (Abstract *)Single_Ptr(m, bodyParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)bodyParserMk),
         (Abstract *)Int_Wrapped(m, XML_END));
     return p;
 }

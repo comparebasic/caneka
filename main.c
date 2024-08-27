@@ -20,11 +20,11 @@ static void *tests[] = {
     "Roebling", Roebling_Tests,
     "RoeblingRun", RoeblingRun_Tests,
     "RoeblingMark", RoeblingMark_Tests,
+    "XML", Xml_Tests,
     NULL, NULL
     /*
     Serve_Tests,
     ProtoHttp_Tests,
-    Xml_Tests,
     */
 };
 

@@ -155,7 +155,7 @@ status Roebling_Run(Roebling *rbl){
         }
     }else{
         wdof = as(wdof, TYPE_WRAPPED_DO);
-        wdof->val.dof((MemHandle *)rbl);
+        ((RblFunc)(wdof->val.dof))(rbl);
         if(DEBUG_ROEBLING){
             printf("\x1b[%dmRbl Run 0x%lx idx:\x1b[1;%dm%d\x1b[0;%dm ", DEBUG_ROEBLING, (util)wdof, DEBUG_ROEBLING, rbl->idx, DEBUG_ROEBLING);
             Debug_Print((void *)rbl, 0, "", DEBUG_ROEBLING, TRUE);

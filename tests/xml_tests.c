@@ -9,28 +9,24 @@ status Xml_Tests(MemCtx *gm){
     Roebling *rbl = NULL;
     XmlCtx *ctx = NULL;
 
-    Span *xmlParsersMk = XmlParser_Make(m, NULL);
+    Span *xmlParsersMk = XmlParser_Make(m);
 
     ctx = XmlCtx_Make((MemHandle *)m, NULL);
+
+    Span *parsers_do = XmlParser_Make(m);
+    rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, 0, String_Init(m, STRING_EXTEND), (Abstract *)ctx); 
     s = String_Make(m, bytes("<main/>"));
-    rbl = Roebling_Make(m, TYPE_RBL_XML, xmlParsersMk, s, (Abstract *)ctx);  
+    Roebling_AddBytes(rbl, s->bytes, s->length);
 
-    Roebling_Run(rbl);
-
-    Debug_Print((void *)ctx, 0, "Xml: ", COLOR_PURPLE, TRUE);
+    Debug_Print((void *)rbl, 0, "XmlRbl: ", COLOR_CYAN, TRUE);
     printf("\n");
 
-    ctx = XmlCtx_Make((MemHandle *)m, NULL);
     /*
-    s = String_Make(m, bytes("<main alpha=\"apples\" one=1 horizontal>And here is cool stuff</main>"));
-    */
-    s = String_Make(m, bytes("<main alpha=\"apples\" "));
-    rbl = Roebling_Make(m, TYPE_RBL_XML, xmlParsersMk, s, (Abstract *)ctx);  
-
     Roebling_Run(rbl);
+    */
 
-    Debug_Print((void *)ctx, 0, "Xml: ", COLOR_PURPLE, TRUE);
-    printf("\n");
+    r |= SUCCESS;
 
+    MemCtx_Free(m);
     return r;
 }
