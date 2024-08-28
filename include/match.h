@@ -10,6 +10,7 @@ enum pat_flags {
     PAT_IGNORE = 1 << 7, /* G */
     PAT_WILDCOUNT = 1 << 8, /* W */
     PAT_ALL = 1 << 9, /* A */
+    PAT_NORMAL = 1 << 10, /* */
 };
 
 enum match_flags {
@@ -23,6 +24,10 @@ enum match_flags {
 
 #define TEXT_DEF patText, PAT_END, 0, 0
 #define NL_DEF PAT_TERM, '\n', '\n', PAT_END, 0, 0
+#define WS_REQUIRED PAT_MANY, ' ',' ', PAT_MANY, '\t','\t', \
+    PAT_MANY, '\r','\r', PAT_MANY|PAT_TERM, '\n','\n'
+#define WS_OPTIONAL PAT_OPTIONAL|PAT_ANY, ' ',' ', PAT_OPTIONAL|PAT_ANY, '\t','\t', \
+    PAT_OPTIONAL|PAT_ANY, '\r','\r', PAT_OPTIONAL|PAT_ANY|PAT_TERM, '\n','\n'
 
 #define UPPER_DEF PAT_TERM, 'A', 'Z' 
 
@@ -45,6 +50,7 @@ typedef struct match {
     i16 remaining;
     int count;
     int lead;
+    status (*dispatch)(struct roebling *rbl);
 } Match;
 
 Match *Match_Make(MemCtx *m, String *s, word flags);

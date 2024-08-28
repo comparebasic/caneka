@@ -89,6 +89,9 @@ static status Roebling_RunMatches(Roebling *rbl){
     Span *ko = rbl->matches.ko;
     byte c = 0;
     rbl->type.state &= ~(NEXT|KO|BREAK|COMPLETE);
+    if(rbl->matches.values->nvalues == 0 && rbl->matches.ko->nvalues == 0){
+        rbl->type.state |= (BREAK|NEXT);
+    }
     while(!HasFlag(rbl->type.state, BREAK) && !HasFlag(rbl->range.potential.type.state, END)){
         c = Range_GetByte(&(rbl->range));
         Match *mt = NULL;
@@ -193,6 +196,9 @@ status Roebling_Run(Roebling *rbl){
         }
         if(rbl->dispatch != NULL){
             rbl->dispatch(rbl);
+        }
+        if(mt->dispatch){
+            mt->dispatch(rbl);
         }
     }
         

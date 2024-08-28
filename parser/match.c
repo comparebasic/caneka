@@ -25,6 +25,8 @@ static status match_FeedPat(Match *mt, word c){
 
         if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
             mt->type.state |= ELASTIC;
+        }else if(def->flags & PAT_TERM){
+            mt->type.state &= ~ELASTIC;
         }
 
         /* handle if matched or not */
@@ -126,8 +128,10 @@ static status match_FeedPat(Match *mt, word c){
 
     /* after the loop has broken, if we are in a PROCESSING state and have reached the end of the pattern, we are COMPLETE */
     if(HasFlag(mt->type.state, PROCESSING)){
-        if(mt->position == mt->length && !HasFlag(mt->type.state, ELASTIC)){
-            mt->type.state |= SUCCESS;
+        if(mt->position == mt->length){
+            if(!HasFlag(mt->type.state, ELASTIC)){
+                mt->type.state |= SUCCESS;
+            }
         }
     }
 

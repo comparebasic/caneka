@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+static word attStart[] = {
+    WS_REQUIRED,
+    PAT_IGNORE, 'a','z', PAT_IGNORE, 'A','Z',PAT_IGNORE|PAT_TERM, '_','_',
+    PAT_END, 0, 0
+};
+
+static word selfClose[] = {
+    WS_OPTIONAL,
+    PAT_IGNORE|PAT_TERM, '/', '/', PAT_IGNORE|PAT_TERM, '>', '>',
+    PAT_END, 0, 0
+};
+
 static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_TERM, 'A', 'Z', PAT_END, 0, 0}; 
 
 static word open[] = {PAT_TERM, '<', '<', PAT_END, 0, 0}; 
@@ -17,20 +29,18 @@ static word attrTag[] = {PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', \
     PAT_MANY|PAT_TERM, '0', '9', PAT_END, 0, 0
 };
 
-static word closeDef[] = {PAT_TERM, '/', '/', PAT_MANY, 'a', 'z', \
-    PAT_MANY|PAT_TERM, 'A', 'Z', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', \
-    PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', \
-    PAT_TERM, '>', '>', PAT_END, 0, 0
+static word closeDef[] = {
+    PAT_TERM|PAT_IGNORE, '/','/', PAT_MANY, 'a', 'z', PAT_ANY|PAT_TERM, 'A', 'Z',
+    PAT_ANY, 'a', 'z', PAT_ANY, 'A', 'Z', \
+    PAT_ANY, '-', '-', PAT_ANY, '_', '_', PAT_ANY, ':', ':', PAT_ANY|PAT_TERM, '0', '9', \
+    PAT_IGNORE|PAT_TERM, '>', '>',
+    PAT_END, 0, 0
 };
 
 static word sep[] = { PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r', \
     PAT_ANY|PAT_TERM, '\n', '\n', PAT_END, 0, 0};
 
 static word gt[] = { PAT_TERM, '>', '>',PAT_END, 0, 0};
-
-static  word selfClose[] = { PAT_TERM, '/', '/', PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', \
-    PAT_ANY, '\r', '\r', PAT_ANY, '\n', '\n', PAT_TERM, '>', '>', PAT_END, 0, 0
-};
 
 static word quoted[] = {PAT_IGNORE|PAT_TERM, '"', '"', PAT_INVERT, '"', '"', \
     PAT_ANY|PAT_TERM, 32, 255, PAT_IGNORE|PAT_TERM, '"', '"', PAT_END, 0,0
@@ -94,17 +104,8 @@ static status setBody(Roebling *rbl){
 
 static status tagNamed(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
-    printf("tagNamed '%s'\n", s->bytes);
-    /*
-    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
-    Match *mt = Parser_GetMatch(prs);
-    prs->jump = mt->jump;
-    String *s =  Range_Copy(ctx->m, range);
-    Debug_Print((void *)s, 0, "tagNamed: ", COLOR_YELLOW, TRUE);
-    printf("\n");
-    XmlCtx_Open(ctx, s);
-    */
-    return SUCCESS;
+    XmlCtx *ctx = (XmlCtx *)as(rbl->source, TYPE_XMLCTX);
+    return XmlCtx_Open(ctx, s);
 }
 
 static status tagOpened(Roebling *rbl){
@@ -121,17 +122,9 @@ static status tagOpened(Roebling *rbl){
 }
 
 static status tagClose(Roebling *rbl){
-    printf("tagClose\n");
-    /*
-    XmlCtx *ctx = (XmlCtx *)as(source, TYPE_XMLCTX);
-    String *s =  Range_Copy(ctx->m, range);
-    Match *mt = Parser_GetMatch(prs);
-    Debug_Print((void *)s, 0, "tagOpened: ", COLOR_YELLOW, TRUE);
-    printf("\n");
-    XmlCtx_Close(ctx, s);
-    prs->jump = mt->jump;
-    */
-    return SUCCESS;
+    XmlCtx *ctx = (XmlCtx *)as(rbl->source, TYPE_XMLCTX);
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    return XmlCtx_Close(ctx, s);
 }
 
 /* routing parsers */
@@ -157,6 +150,20 @@ static status tagParserMk(Roebling *rbl){
     close_mt->jump = Roebling_GetMarkIdx(rbl, XML_START); 
 
     rbl->dispatch = tagNamed;
+
+    return SUCCESS;
+}
+
+static status attRoute(Roebling *rbl){
+    Roebling_ResetPatterns(rbl);
+
+    Match *toAtt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(toAtt, (PatCharDef *)tag);
+    toAtt->jump = Roebling_GetMarkIdx(rbl, XML_ATTRIBUTE);
+
+    Match *self_mt = Span_ReserveNext(rbl->matches.values);
+    Match_SetPattern(self_mt, (PatCharDef *)selfClose);
+    self_mt->dispatch = tagClose;
 
     return SUCCESS;
 }
@@ -267,7 +274,8 @@ Span *XmlParser_Make(MemCtx *m){
             (Abstract *)Do_Wrapped(mh, (DoFunc)startParserMk),
         (Abstract *)Int_Wrapped(m, XML_TAG), 
             (Abstract *)Do_Wrapped(mh, (DoFunc)tagParserMk),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)postTagNameParserMk),
+        (Abstract *)Int_Wrapped(m, XML_ATTROUTE), 
+            (Abstract *)Do_Wrapped(mh, (DoFunc)attRoute),
         (Abstract *)Int_Wrapped(m, XML_ATTRIBUTE), 
             (Abstract *)Do_Wrapped(mh, (DoFunc)attrParserMk),
             (Abstract *)Do_Wrapped(mh, (DoFunc)eqParserMk),
