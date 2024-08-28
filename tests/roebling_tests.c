@@ -1,7 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-
 enum rbl_test_enum {
     _start = 333,
     ONE,

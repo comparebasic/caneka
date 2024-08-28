@@ -2,6 +2,9 @@
 #include <caneka.h>
 
 String *Roebling_GetMarkDebug(Roebling *rbl, int idx){
+    if(idx < 0){
+        return NULL;
+    }
     for(int i = 0; i <= rbl->marks->values->max_idx; i++){
         int *n = Span_Get(rbl->marks->values, i);
         if(n != NULL && *n == idx){

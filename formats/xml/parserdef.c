@@ -163,6 +163,7 @@ static status attRoute(Roebling *rbl){
 
     Match *self_mt = Span_ReserveNext(rbl->matches.values);
     Match_SetPattern(self_mt, (PatCharDef *)selfClose);
+    self_mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
     self_mt->dispatch = tagClose;
 
     return SUCCESS;

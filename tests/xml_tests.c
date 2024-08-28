@@ -42,6 +42,8 @@ status Xml_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(s, bytes("main")), "Xml firstChild node is expected, have '%s'", s->bytes);
     Roebling_Run(rbl);
     r |= Test(ctx->type.state == COMPLETE, "Xml state is complete, have %s", State_ToString(ctx->type.state));
+    s = Roebling_GetMarkDebug(rbl, rbl->jump);
+    r |= Test(rbl->jump == Roebling_GetMarkIdx(rbl, XML_START), "Jump next to expected mark %s", s != NULL ? (char *)s->bytes: "NULL");
 
     MemCtx_Free(m);
     return r;
