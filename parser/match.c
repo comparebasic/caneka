@@ -4,9 +4,13 @@
 static status match_FeedPat(Match *mt, word c){
     boolean matched = FALSE;
     PatCharDef *def = mt->def.pat+mt->position;
+    if(DEBUG_PATMATCH){
+        Debug_Print(def, TYPE_PATCHARDEF, ">", DEBUG_PATMATCH, TRUE);
+        printf("\n");
+    }
     while(def->flags != PAT_END){
         if(DEBUG_PATMATCH){
-            Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
+            Debug_Print((void *)def, TYPE_PATCHARDEF, "  ", DEBUG_PATMATCH, FALSE);
             printf(" :");
         }
 
@@ -46,13 +50,13 @@ static status match_FeedPat(Match *mt, word c){
 
             if(DEBUG_PATMATCH){
                 if(c == '\n'){
-                    printf("\x1b[%dmY match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                    printf("\x1b[%dm  Y match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                         DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                 }else if(c == '\r'){
-                    printf("\x1b[%dmY match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                    printf("\x1b[%dm  Y match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                         DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                 }else{
-                    printf("\x1b[%dmY match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                    printf("\x1b[%dm  Y match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                         c, DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                 }
                 Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
@@ -76,6 +80,20 @@ static status match_FeedPat(Match *mt, word c){
         }else{
             /* only knockout the status if the character is not optional */
             if(HasFlag(def->flags, (PAT_MANY|PAT_INVERT))){
+                if(DEBUG_PATMATCH){
+                    if(c == '\n'){
+                        printf("\x1b[%dm  I match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                            DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
+                    }else if(c == '\r'){
+                        printf("\x1b[%dm  I match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                            DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
+                    }else{
+                        printf("\x1b[%dm  I match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                            c, DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
+                    }
+                    Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
+                    printf("\n");
+                }
                 if(mt->count > 0){
                     mt->type.state |= (COMPLETE|OPTIONAL);
                     break;
@@ -86,13 +104,13 @@ static status match_FeedPat(Match *mt, word c){
 
                 if(DEBUG_PATMATCH){
                     if(c == '\n'){
-                        printf("\x1b[%dmN match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                        printf("\x1b[%dm  N match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                             DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                     }else if(c == '\r'){
-                        printf("\x1b[%dmN match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                        printf("\x1b[%dm  N match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                             DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                     }else{
-                        printf("\x1b[%dmN match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                        printf("\x1b[%dm  N match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                             c, DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                     }
                     Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
@@ -107,13 +125,13 @@ static status match_FeedPat(Match *mt, word c){
 
             if(DEBUG_PATMATCH){
                 if(c == '\n'){
-                    printf("\x1b[%dmO match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                    printf("\x1b[%dm  O match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                         DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                 }else if(c == '\r'){
-                    printf("\x1b[%dmO match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                    printf("\x1b[%dm  O match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                         DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                 }else{
-                    printf("\x1b[%dmO match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
+                    printf("\x1b[%dm  O match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, matched,
                         c, DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
                 }
                 Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
@@ -135,6 +153,9 @@ static status match_FeedPat(Match *mt, word c){
         }
     }
 
+    if(DEBUG_PATMATCH){
+        printf("\x1b[%dm <%s\x1b[0m\n", DEBUG_PATMATCH, State_ToString(mt->type.state));
+    }
     return mt->type.state;
 }
 

@@ -5,12 +5,12 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_DARK;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
-int DEBUG_ROEBLING_MARK = 0;
-int DEBUG_ROEBLING_COMPLETE = 0;
+int DEBUG_ROEBLING = COLOR_CYAN;
+int DEBUG_ROEBLING_MARK = COLOR_YELLOW;
+int DEBUG_ROEBLING_COMPLETE = COLOR_YELLOW;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_ALLOC = 0;
@@ -216,6 +216,7 @@ static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int col
 
 static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     PatCharDef *def = (PatCharDef *)a;
+    printf("\x1b[%dm%s", color, msg);
     if(extended){
         boolean first = TRUE;
         while(def->flags != PAT_END){
@@ -230,6 +231,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
     }else{
         patCharDef_PrintSingle(def, TYPE_PATCHARDEF, msg, color, extended);
     }
+    printf("\x1b[0m");
 }
 
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -444,8 +446,12 @@ static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean e
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Range *range = (Range *)a;
-    printf("%s\x1b[%dmR<s=", msg, color);
-    Debug_Print((void *)range->search, 0, "", color, extended);
+    printf("%s\x1b[%dmR<", msg, color);
+    if(extended){
+        printf("s=");
+        Debug_Print((void *)range->search, 0, "", color, extended);
+        printf(" ");
+    }
     String *s = Range_Copy(DebugM, range);
     Debug_Print((void *)s, 0, " current=", color, extended);
     if(extended){

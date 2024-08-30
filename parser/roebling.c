@@ -152,7 +152,8 @@ status Roebling_Run(Roebling *rbl){
             rbl->jump = -1;
             Range_Sync(&(rbl->range), &(rbl->range.end));
             if(DEBUG_ROEBLING_MARK){
-                printf("\x1b[%dmJumping to %d\n", DEBUG_ROEBLING_MARK, rbl->idx);
+                String *mark_s = Roebling_GetMarkDebug(rbl, rbl->idx);
+                printf("\x1b[%dmJumping to %s(%d)\n", DEBUG_ROEBLING_MARK, mark_s != NULL ? (char *)mark_s->bytes : "", rbl->idx);
             }
         }
     }else{
@@ -187,7 +188,7 @@ status Roebling_Run(Roebling *rbl){
         if(DEBUG_ROEBLING_COMPLETE){
             Debug_Print((void *)mt, 0, "Match Found: ", DEBUG_ROEBLING_COMPLETE, TRUE);
             printf("\n");
-            Debug_Print((void *)&(rbl->range), 0, "Range: ", DEBUG_ROEBLING_COMPLETE, TRUE);
+            Debug_Print((void *)&(rbl->range), 0, "Range: ", DEBUG_ROEBLING_COMPLETE, FALSE);
             printf("\n");
         }
         if(mt != NULL){

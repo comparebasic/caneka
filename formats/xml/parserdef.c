@@ -1,12 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static word attStart[] = {
-    WS_REQUIRED,
-    PAT_IGNORE, 'a','z', PAT_IGNORE, 'A','Z',PAT_IGNORE|PAT_TERM, '_','_',
-    PAT_END, 0, 0
-};
-
 static word selfClose[] = {
     WS_OPTIONAL,
     PAT_IGNORE|PAT_TERM, '/', '/', PAT_IGNORE|PAT_TERM, '>', '>',
@@ -23,10 +17,9 @@ static word tag[] = {PAT_INVERT|PAT_MANY, '/', '/', PAT_INVERT|PAT_MANY, ' ', ' 
     PAT_END, 0, 0
 };
 
-static word attrTag[] = {PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', \
-    PAT_MANY|PAT_TERM, 'A', 'Z', PAT_IGNORE|PAT_INVERT, '=', '=', PAT_MANY, 'a', 'z', \
-    PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', \
-    PAT_MANY|PAT_TERM, '0', '9', PAT_END, 0, 0
+static word attrName[] = {PAT_INVERT|PAT_MANY, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
+    PAT_INVERT|PAT_MANY, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9',
+    PAT_END, 0, 0
 };
 
 static word closeDef[] = {
@@ -154,11 +147,11 @@ static status tagParserMk(Roebling *rbl){
     return SUCCESS;
 }
 
-static status attRoute(Roebling *rbl){
+static status attOrClose(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     Match *toAtt = Span_ReserveNext(rbl->matches.values);
-    Match_SetPattern(toAtt, (PatCharDef *)tag);
+    Match_SetPattern(toAtt, (PatCharDef *)attrName);
     toAtt->jump = Roebling_GetMarkIdx(rbl, XML_ATTRIBUTE);
 
     Match *self_mt = Span_ReserveNext(rbl->matches.values);
@@ -186,17 +179,6 @@ static status sepParserMk(Roebling *rbl){
 
     mt = Span_ReserveNext(rbl->matches.values);
     Match_SetPattern(mt, (PatCharDef *)sep);
-
-    return SUCCESS;
-}
-
-static status attrParserMk(Roebling *rbl){
-    Roebling_ResetPatterns(rbl);
-    Match *mt = NULL;
-
-    mt = Span_ReserveNext(rbl->matches.values);
-    Match_SetPattern(mt, (PatCharDef *)attrTag);
-    rbl->dispatch = setAttr;
 
     return SUCCESS;
 }
@@ -276,10 +258,7 @@ Span *XmlParser_Make(MemCtx *m){
         (Abstract *)Int_Wrapped(m, XML_TAG), 
             (Abstract *)Do_Wrapped(mh, (DoFunc)tagParserMk),
         (Abstract *)Int_Wrapped(m, XML_ATTROUTE), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)attRoute),
-
-        (Abstract *)Int_Wrapped(m, XML_ATTRIBUTE), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)attrParserMk),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)attOrClose),
             (Abstract *)Do_Wrapped(mh, (DoFunc)eqParserMk),
             (Abstract *)Do_Wrapped(mh, (DoFunc)postAttrParserMk),
         (Abstract *)Int_Wrapped(m, XML_ATTR_VALUE), 

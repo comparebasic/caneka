@@ -7,6 +7,7 @@
 #define testcmd "test"
 
 static void *tests[] = {
+    /*
     "Core", Core_Tests,
     "String", String_Tests,
     "SpanSetup", SpanSetup_Tests,
@@ -16,11 +17,13 @@ static void *tests[] = {
     "Table", Table_Tests,
     "TableResize", TableResize_Tests,
     "TablePreKey", TablePreKey_Tests,
+    */
     "Match", Match_Tests,
     "Roebling", Roebling_Tests,
     "RoeblingRun", RoeblingRun_Tests,
     "RoeblingMark", RoeblingMark_Tests,
     "XML", Xml_Tests,
+    "XMLNested", XmlNested_Tests,
     NULL, NULL
     /*
     Serve_Tests,

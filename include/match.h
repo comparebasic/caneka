@@ -29,6 +29,9 @@ enum match_flags {
 #define WS_OPTIONAL PAT_OPTIONAL|PAT_ANY, ' ',' ', PAT_OPTIONAL|PAT_ANY, '\t','\t', \
     PAT_OPTIONAL|PAT_ANY, '\r','\r', PAT_OPTIONAL|PAT_ANY|PAT_TERM, '\n','\n'
 
+#define WS_INVERT_MANY PAT_INVERT|PAT_MANY, ' ',' ', PAT_INVERT|PAT_MANY, '\t','\t', \
+    PAT_INVERT|PAT_MANY,'\r','\r', PAT_INVERT|PAT_MANY, '\n','\n'
+
 #define UPPER_DEF PAT_TERM, 'A', 'Z' 
 
 typedef struct range_chardef {
