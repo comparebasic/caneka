@@ -132,7 +132,7 @@ static status Roebling_RunMatches(Roebling *rbl){
             }
         }
         SCursor_Incr(&(rbl->range.potential), 1);
-        if(mt != NULL && !HasFlag(mt->type.state, OPTIONAL)){
+        if(mt != NULL && (mt->type.state & OPTIONAL) == 0){
             SCursor_Incr(&(rbl->range.end), 1);
         }
     }

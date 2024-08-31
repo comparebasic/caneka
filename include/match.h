@@ -11,6 +11,7 @@ enum pat_flags {
     PAT_WILDCOUNT = 1 << 8, /* W */
     PAT_ALL = 1 << 9, /* A */
     PAT_NORMAL = 1 << 10, /* */
+    PAT_OR = 1 << 11, /* */
 };
 
 enum match_flags {

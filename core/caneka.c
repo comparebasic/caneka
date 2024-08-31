@@ -9,45 +9,62 @@ status Caneka_Init(MemCtx *m){
     return r;
 }
 
-char *State_ToString(status state){
-    if(state ==  READY){
-        return "READY";
-    }else if((state & ERROR) != 0){
-        return "ERROR";
-    }else if((state & NOOP) != 0){
-        return "NOOP";
-    }else if((state & INCOMING) != 0){
-        return "INCOMING";
-    }else if((state & (PROCESSING|INVERTED)) == (PROCESSING|INVERTED)){
-        return "PROCESSING|INVERTED";
-    }else if((state & PROCESSING) != 0){
-        return "PROCESSING";
-    }else if((state & RESPONDING) != 0){
-        return "RESPONDING";
-    }else if((state & SUCCESS) != 0){
-        return "SUCCESS/COMPLETE";
-    }else if((state & RAW) != 0){
-        return "RAW";
-    }else if((state & INLINE) != 0){
-        return "INLINE";
-    }else if((state & MISS) != 0){
-        return "MISS";
-    }else if((state & HASHED) != 0){
-        return "HASHED";
-    }else if((state & INVERTED) != 0){
-        return "INVERTED";
-    }else if(HasFlag(state, NEXT|KO)){
-        return "NEXT+KO";
-    }else if((state & END) != 0){
-        return "END";
-    }else if((state & NEXT) != 0){
-        return "NEXT";
-    }else if((state & KO) != 0){
-        return "KO";
-    }else{
-        return "UNKNOWN_state";
-    }
+static word states[] = {
+    ERROR,
+    OPTIONAL,
+    NOOP,
+    INLINE,
+    BREAK,
+    TRACKED,
+    INCOMING,
+    PROCESSING,
+    RESPONDING,
+    RAW,
+    MISS,
+    HASHED,
+    INVERTED,
+    END,
+    NEXT,
+    KO,
+    SUCCESS,
+};
 
+static char *stateNames[] = {
+    "ERROR,",
+    "OPTIONAL,",
+    "NOOP,",
+    "INLINE,",
+    "BREAK,",
+    "TRACKED,",
+    "INCOMING,",
+    "PROCESSING,",
+    "RESPONDING,",
+    "RAW,",
+    "MISS,",
+    "HASHED,",
+    "INVERTED,",
+    "END,",
+    "NEXT,",
+    "KO,",
+    "SUCCESS,",
+    NULL,
+};
+
+static char _buff[1024];
+char *State_ToString(status state){
+    int pos = 0;
+    memset(_buff, 0, 1024);
+    int i = 0;
+    char *name = NULL;
+    while((name = stateNames[i]) != NULL){
+        if((state & states[i]) != 0){
+            int l = strlen(stateNames[i]);
+            memcpy(_buff+pos, stateNames[i], l);
+            pos += l;
+        }
+        i++;
+    }
+    return _buff;
 }
 
 char *Class_ToString(cls type){

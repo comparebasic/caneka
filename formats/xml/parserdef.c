@@ -7,15 +7,15 @@ static word selfClose[] = {
     PAT_END, 0, 0
 };
 
+static word tag[] = { PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_',\
+    PAT_MANY, ':', ':', PAT_MANY|PAT_TERM, '0', '9',
+    PAT_END, 0, 0
+};
+
 static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_TERM, 'A', 'Z', PAT_END, 0, 0}; 
 
 static word open[] = {PAT_TERM, '<', '<', PAT_END, 0, 0}; 
 
-static word tag[] = {PAT_INVERT|PAT_MANY, '/', '/', PAT_INVERT|PAT_MANY, ' ', ' ',\
-    PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_',\
-    PAT_MANY, ':', ':', PAT_MANY|PAT_TERM, '0', '9',
-    PAT_END, 0, 0
-};
 
 static word attrName[] = {PAT_INVERT|PAT_MANY, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY|PAT_TERM, 'A', 'Z',
     PAT_INVERT|PAT_MANY, '=', '=', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9',
@@ -137,10 +137,6 @@ static status tagParserMk(Roebling *rbl){
 
     Match *open_mt = Span_ReserveNext(rbl->matches.values);
     Match_SetPattern(open_mt, (PatCharDef *)tag);
-
-    Match *close_mt = Span_ReserveNext(rbl->matches.values);
-    Match_SetPattern(close_mt, (PatCharDef *)closeDef);
-    close_mt->jump = Roebling_GetMarkIdx(rbl, XML_START); 
 
     rbl->dispatch = tagNamed;
 

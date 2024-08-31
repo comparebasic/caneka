@@ -3,17 +3,70 @@
 
 static void debug(char type, word c, PatCharDef *def, Match *mt, boolean matched){
     if(c == '\n'){
-        printf("\x1b[%dm  %c match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, type, matched,
-            DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
+        printf("\x1b[%dm  %c match %d \x1b[0;1m'\\n'\x1b[0;%dm - pos(%d) count(%d) %s ", DEBUG_PATMATCH, type, matched,
+            DEBUG_PATMATCH, mt->position, mt->count, State_ToString(mt->type.state));
     }else if(c == '\r'){
-        printf("\x1b[%dm  %c match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, type, matched,
-            DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
+        printf("\x1b[%dm  %c match %d \x1b[0;1m'\\r'\x1b[0;%dm - pos(%d) count(%d) %s ", DEBUG_PATMATCH, type, matched,
+            DEBUG_PATMATCH, mt->position, mt->count, State_ToString(mt->type.state));
     }else{
-        printf("\x1b[%dm  %c match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) %s ", DEBUG_PATMATCH, type,  matched,
-            c, DEBUG_PATMATCH, mt->position, State_ToString(mt->type.state));
+        printf("\x1b[%dm  %c match %d \x1b[0;1m'%c'\x1b[0;%dm - pos(%d) count(%d) %s ", DEBUG_PATMATCH, type,  matched,
+            c, DEBUG_PATMATCH, mt->position, mt->count, State_ToString(mt->type.state));
     }
     Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
     printf("\n");
+}
+
+static boolean charMatched(word c, PatCharDef *def){
+    boolean matched = FALSE;
+    if((def->flags & PAT_ALL) != 0){
+        matched =  TRUE;
+    }else if((def->flags & PAT_COUNT) != 0){
+        matched = (c == def->from);
+    }else{
+        matched = (c >= def->from && c <= def->to);
+    }
+
+    if((def->flags & PAT_INVERT) != 0){
+        matched = !matched;
+    }
+    return matched;
+}
+
+static void incrCount(Match *mt, PatCharDef *def){
+    if(HasFlag(def->flags, PAT_IGNORE)){
+        if(mt->count == 0){
+            mt->lead++;
+        }else{
+            mt->type.state |= OPTIONAL;
+        }
+    }else if(!HasFlag(def->flags, PAT_IGNORE)){
+        mt->type.state &= ~OPTIONAL;
+        mt->count++;
+    }
+}
+
+static boolean reposition(Match *mt, PatCharDef *def){
+    if(HasFlag(def->flags, PAT_OR)){
+        mt->position++;
+        return FALSE;
+    }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
+        /* if it's a many or any match rewind to the first non PAT_TERM def */
+        while((mt->position-1) > 0 && ((def+(mt->position-1))->flags & PAT_TERM) == 0){
+            mt->position--;
+        }
+    }else{
+        /* if  we have matched in the middle of the term, fast fowrard to the end of it */
+        while(((mt->def.pat+(mt->position))->flags & PAT_TERM) == 0 && (mt->position+1) < mt->length){
+            mt->position++;
+        }
+        mt->position++;
+    }
+    return TRUE;
+}
+
+static void reset(Match *mt){
+    mt->type.state &= ~(PROCESSING|COMPLETE);
+    mt->position = 0;
 }
 
 static status match_FeedPat(Match *mt, word c){
@@ -25,21 +78,7 @@ static status match_FeedPat(Match *mt, word c){
     }
     while(def->flags != PAT_END){
         if(DEBUG_PATMATCH){
-            Debug_Print((void *)def, TYPE_PATCHARDEF, "  ", DEBUG_PATMATCH, FALSE);
-            printf(" :");
-        }
-
-        /* match the pattern to the char */
-        if((def->flags & PAT_ALL) != 0){
-            matched = TRUE;
-        }else if((def->flags & PAT_COUNT) != 0){
-            matched = (c == def->from);
-        }else{
-            matched = (c >= def->from && c <= def->to);
-        }
-
-        if((def->flags & PAT_INVERT) != 0){
-            matched = !matched;
+            debug('_', c, def, mt, matched);
         }
 
         if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
@@ -48,70 +87,32 @@ static status match_FeedPat(Match *mt, word c){
             mt->type.state &= ~ELASTIC;
         }
 
-        /* handle if matched or not */
-        if(matched){
+        if(charMatched(c, def)){
             mt->type.state |= PROCESSING;
-
-            if(HasFlag(def->flags, PAT_IGNORE)){
-                if(mt->count == 0){
-                    mt->lead++;
-                }else{
-                    mt->type.state |= OPTIONAL;
-                }
-            }else if(!HasFlag(def->flags, PAT_IGNORE)){
-                mt->type.state &= ~OPTIONAL;
-                mt->count++;
-            }
-
-            if(DEBUG_PATMATCH){
-                debug('Y', c, def, mt, matched);
-            }
-            
-            /* if it's a many or any match rewind to the first non PAT_TERM def */
-            if(!HasFlag(def->flags, PAT_INVERT)){
-                mt->position++;
+            incrCount(mt, def);
+            if(reposition(mt, def)){
                 break;
             }
-            if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
-                while((mt->position-1) > 0 && ((def+(mt->position-1))->flags & PAT_TERM) == 0){
-                    mt->position--;
-                }
-            }else{
-                /* if  we have matched in the middle of the term, fast fowrard to the end of it */
-                while(((mt->def.pat+(mt->position))->flags & PAT_TERM) == 0 && (mt->position+1) < mt->length){
-                    mt->position++;
-                }
-                mt->position++;
-            }
-
-            break;
         }else{
-            /* only knockout the status if the character is not optional */
+            if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, PROCESSING)){
+                reset(mt);
+                break;
+            }
             if(HasFlag(def->flags, (PAT_MANY|PAT_INVERT))){
-                if(DEBUG_PATMATCH){
-                    debug('I', c, def, mt, matched);
-                }
                 if(mt->count > 0){
-                    mt->type.state |= (COMPLETE|OPTIONAL);
+                    mt->type.state = (COMPLETE|OPTIONAL);
+                    break;
+                }
+            }
+            if(HasFlag(def->flags, PAT_MANY)){
+                if(mt->count > 0){
+                    mt->type.state = (COMPLETE|OPTIONAL);
                     break;
                 }
             }
             if((def->flags & (PAT_OPTIONAL|PAT_ANY)) == 0){
-                mt->type.state &= ~(PROCESSING|COMPLETE);
-
-                if(DEBUG_PATMATCH){
-                    debug('N', c, def, mt, matched);
-                }
-
-                mt->position = 0;
-
                 break;
             }
-
-            if(DEBUG_PATMATCH){
-                debug('O', c, def, mt, matched);
-            }
-
             mt->position++;
         }
 
