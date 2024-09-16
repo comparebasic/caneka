@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #define RM "rm"
+#define MKDIR "mkdir"
 
 typedef int (*Anon)();
 int Build();
@@ -128,22 +129,6 @@ int Arr_AddArr(StrArr *arr, char *str[]){
 }
 
 /* build functions */
-static int FolderMake(char *dirname){
-    Cstr dir_cstr;
-    Cstr_Init(&dir_cstr, "build/");
-    Cstr_Add(&dir_cstr, dirname);
-
-    DIR* dir = opendir(dir_cstr.content);
-    if(dir){
-        closedir(dir);
-        printf("Folder exists\n");
-    }else if(ENOENT == errno){
-        printf("\x1b[%dmMaking Directory %s\x1b[0m\n", MSG_COLOR, dir_cstr.content);
-        mkdir(dir_cstr.content, 0777);
-    }
-    return TRUE;
-}
-
 static int Cstr_AddBuildName(Cstr *cstr, char *fname){
     Cstr_Add(cstr, fname);
     if(cstr->content[cstr->length-2] == '.' && cstr->content[cstr->length-1] == 'c'){
@@ -223,6 +208,30 @@ static int subProcess(StrArr *cmd_arr, char *msg){
 
     return TRUE;
 }
+
+static int FolderMake(char *dirname){
+    Cstr dir_cstr;
+    Cstr_Init(&dir_cstr, "build/");
+    Cstr_Add(&dir_cstr, dirname);
+
+    DIR* dir = opendir(dir_cstr.content);
+    if(dir){
+        closedir(dir);
+        printf("Folder exists\n");
+    }else if(ENOENT == errno){
+        printf("\x1b[%dmMaking Directory %s\x1b[0m\n", MSG_COLOR, dir_cstr.content);
+
+        StrArr mkdir;
+        Arr_Init(&mkdir, MKDIR);
+        Arr_Add(&mkdir, "-p");
+        Arr_Add(&mkdir, dir_cstr.content);
+        if(!subProcess(&mkdir, "Folder Make")){
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 
 static int BuildObj(char *objName, StrArr *cmd_arr){
     return subProcess(cmd_arr, objName);
