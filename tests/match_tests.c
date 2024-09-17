@@ -26,24 +26,13 @@ status Match_Tests(MemCtx *gm){
     }
     r |= Test(mt.type.state == COMPLETE, "Matching string has successful state found %s", State_ToString(mt.type.state)); 
 
-    word line[] = { PAT_OPTIONAL|PAT_KO, '\n', '\n', patText, PAT_END, 0, 0};  
 
-    Match_SetPattern(&mt, (PatCharDef *)line);
-
-    s = String_Make(m, bytes("incomplete"));
-    Match_SetPattern(&mt, (PatCharDef *)line);
-    for(int i = 0; i < s->length; i++){
-        Match_Feed(&mt, s->bytes[i]);
-    }
-
-    s = String_Make(m, bytes("\x02 Bad Malicious\n"));
-    Match_SetPattern(&mt, (PatCharDef *)line);
-    for(int i = 0; i < s->length; i++){
-        Match_Feed(&mt, s->bytes[i]);
-    }
+    /* test pat match */
+    word line[] = { PAT_KO, '\n', '\n', patText, PAT_END, 0, 0};  
 
     s = String_Make(m, bytes("A good line :)\n"));
     Match_SetPattern(&mt, (PatCharDef *)line);
+    Debug_Print(mt.def.pat, TYPE_PATCHARDEF, "line: ", COLOR_YELLOW, TRUE);
     for(int i = 0; i < s->length; i++){
         Match_Feed(&mt, s->bytes[i]);
         if(!HasFlag(mt.type.state, PROCESSING)){
@@ -51,7 +40,6 @@ status Match_Tests(MemCtx *gm){
         }
     }
 
-    String *s2 = String_ToEscaped(m, s);
     r |= Test(mt.count == s->length-1, "Matched length of string, less termMatching, expected %d have %d",
         s->length-1, mt.count);
 
@@ -72,8 +60,8 @@ status MatchElastic_Tests(MemCtx *gm){
     int i = 0;
     Match_Feed(&mt, s->bytes[i]);
     i++;
-    r |= Test(HasFlag(mt.type.state, PROCESSING), "Has PROCESSING status");
-    r |= Test(HasFlag(mt.position, 1), "On second pos");
+    r |= Test(HasFlag(mt.type.state, PROCESSING), "Has PROCESSING status %s", State_ToString(mt.type.state));
+    r |= Test(HasFlag(mt.position, 1), "On second pos, position is %d", mt.position);
 
     int count = 0;
     while(1){
@@ -87,11 +75,25 @@ status MatchElastic_Tests(MemCtx *gm){
     }
     r |= Test(i ==  4, "Stopped on the fourth character");
     r |= Test(count == 3, "Found three chars");
+    r |= Test(HasFlag(mt.type.state, SUCCESS), "Found SUCCESS have %s", State_ToString(mt.type.state));
     PatCharDef *def = Match_GetDef(&mt);
     r |= Test((def->flags == PAT_END), "At end");
+
+    word att[] = { PAT_IGNORE|PAT_TERM, ' ', ' ', PAT_KO, '=', '=', PAT_MANY|PAT_TERM, 'a', 'z', PAT_END, 0, 0};
+    Match_SetPattern(&mt, (PatCharDef *)att);
+    count = 0;
+    while(1){
+        Match_Feed(&mt, s->bytes[i]);
+        if(HasFlag(mt.type.state, PROCESSING)){
+            count++;
+            i++;
+        }else{
+            break;
+        }
+    }
+    r |= Test(mt.count == 4, "Found four chars, count is %d", mt.count);
+    
 
     MemCtx_Free(m);
     return r;
 }
-
-

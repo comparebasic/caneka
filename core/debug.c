@@ -5,7 +5,7 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_CYAN;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
 int DEBUG_ROEBLING = 0;
@@ -180,6 +180,9 @@ static status patFlagStr(word flags, char str[]){
     }
     if((flags & PAT_ALL) != 0){
         str[i++] = 'A';
+    }
+    if((flags & PAT_KO) != 0){
+        str[i++] = 'K';
     }
     str[i] = '\0';
     return SUCCESS;

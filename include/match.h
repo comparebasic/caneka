@@ -44,7 +44,6 @@ typedef struct range_chardef {
 
 typedef struct match {
     Type type; 
-    word flags;
     union {
         PatCharDef *pat;
         String *s;
