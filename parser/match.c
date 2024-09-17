@@ -64,14 +64,9 @@ static boolean reposition(Match *mt, PatCharDef *def){
     return TRUE;
 }
 
-static void reset(Match *mt){
-    mt->type.state &= ~(PROCESSING|COMPLETE);
-    mt->position = 0;
-}
-
 static status match_FeedPat(Match *mt, word c){
     boolean matched = FALSE;
-    PatCharDef *def = mt->def.pat+mt->position;
+    PatCharDef *def = Match_GetDef(mt);
     if(DEBUG_PATMATCH){
         Debug_Print(def, TYPE_PATCHARDEF, ">", DEBUG_PATMATCH, TRUE);
         printf("\n");
@@ -88,35 +83,44 @@ static status match_FeedPat(Match *mt, word c){
         }
 
         if(charMatched(c, def)){
+            if(HasFlag(def->flags, PAT_KO)){
+                mt->type.state |= PAT_KO;
+                if(HasFlag(def->flags, PAT_TERM)){
+                    break;
+                }else{
+                    goto next;
+                }
+            }
             mt->type.state |= PROCESSING;
             incrCount(mt, def);
             if(reposition(mt, def)){
+                def = Match_GetDef(mt);
                 break;
             }
         }else{
-            if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, PROCESSING)){
-                reset(mt);
-                break;
-            }
+            mt->type.state &= ~(PROCESSING|COMPLETE);
             if(HasFlag(def->flags, (PAT_MANY|PAT_INVERT))){
                 if(mt->count > 0){
                     mt->type.state = (COMPLETE|OPTIONAL);
-                    break;
+                    goto next;
                 }
             }
             if(HasFlag(def->flags, PAT_MANY)){
                 if(mt->count > 0){
                     mt->type.state = (COMPLETE|OPTIONAL);
-                    break;
+                    goto next;
                 }
             }
-            if((def->flags & (PAT_OPTIONAL|PAT_ANY)) == 0){
-                break;
+            if((def->flags & (PAT_OPTIONAL|PAT_ANY)) != 0){
+                goto next;
             }
-            mt->position++;
         }
-
-        def = mt->def.pat+mt->position;
+next:
+        mt->position++;
+        def = Match_GetDef(mt);
+    }
+    if(DEBUG_PATMATCH){
+        debug('E', c, def, mt, matched);
     }
 
     /* after the loop has broken, if we are in a PROCESSING state and have reached the end of the pattern, we are COMPLETE */
@@ -129,7 +133,7 @@ static status match_FeedPat(Match *mt, word c){
     }
 
     if(DEBUG_PATMATCH){
-        printf("\x1b[%dm <%s\x1b[0m\n", DEBUG_PATMATCH, State_ToString(mt->type.state));
+        printf("\x1b[%dm <%s>\x1b[0m\n", DEBUG_PATMATCH, State_ToString(mt->type.state));
     }
     return mt->type.state;
 }
@@ -159,6 +163,11 @@ static status match_FeedString(Match *mt, byte c){
     }
     return mt->type.state;
 }
+
+PatCharDef *Match_GetDef(Match *mt){
+    return mt->def.pat+mt->position;
+}
+
 
 status Match_Feed(Match *mt, byte c){
     if(DEBUG_ROEBLING_CONTENT){

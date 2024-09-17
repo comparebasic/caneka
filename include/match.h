@@ -12,6 +12,7 @@ enum pat_flags {
     PAT_ALL = 1 << 9, /* A */
     PAT_NORMAL = 1 << 10, /* */
     PAT_OR = 1 << 11, /* */
+    PAT_KO = 1 << 12, /* */
 };
 
 enum match_flags {
@@ -62,3 +63,4 @@ status Match_SetPattern(Match *mt, PatCharDef *def);
 status Match_SetString(Match *mt, String *s);
 status Match_Feed(Match *mt, byte c);
 status Match_FeedEnd(Match *mt);
+PatCharDef *Match_GetDef(Match *mt);

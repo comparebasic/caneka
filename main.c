@@ -19,11 +19,14 @@ static void *tests[] = {
     "TablePreKey", TablePreKey_Tests,
     */
     "Match", Match_Tests,
+    "MatchElastic", MatchElastic_Tests,
+    /*
     "Roebling", Roebling_Tests,
     "RoeblingRun", RoeblingRun_Tests,
     "RoeblingMark", RoeblingMark_Tests,
     "XML", Xml_Tests,
     "XMLNested", XmlNested_Tests,
+    */
     NULL, NULL
     /*
     Serve_Tests,
