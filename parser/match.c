@@ -56,10 +56,7 @@ static void incrCount(Match *mt, PatCharDef *def){
 
 static boolean reposition(Match *mt, PatCharDef *def){
     PatCharDef *p = Match_GetDef(mt);
-    if(HasFlag(def->flags, PAT_OR)){
-        mt->position++;
-        return FALSE;
-    }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
+    if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
         /* if it's a many or any match rewind to the first non PAT_TERM def */
         while(mt->position > 0){
             p--;

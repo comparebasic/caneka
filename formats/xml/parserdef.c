@@ -125,7 +125,7 @@ static status startParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)open);
     mt->jump = Roebling_GetMarkIdx(rbl, XML_TAG); 
 
@@ -135,7 +135,7 @@ static status startParserMk(Roebling *rbl){
 static status tagParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
-    Match *open_mt = Span_ReserveNext(rbl->matches.values);
+    Match *open_mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(open_mt, (PatCharDef *)tag);
 
     rbl->dispatch = tagNamed;
@@ -146,11 +146,11 @@ static status tagParserMk(Roebling *rbl){
 static status attOrClose(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
-    Match *toAtt = Span_ReserveNext(rbl->matches.values);
+    Match *toAtt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(toAtt, (PatCharDef *)attrName);
     toAtt->jump = Roebling_GetMarkIdx(rbl, XML_ATTRIBUTE);
 
-    Match *self_mt = Span_ReserveNext(rbl->matches.values);
+    Match *self_mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(self_mt, (PatCharDef *)selfClose);
     self_mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
     self_mt->dispatch = tagClose;
@@ -162,7 +162,7 @@ static status spaceParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)sep);
     mt->jump = Roebling_GetMarkIdx(rbl, XML_ATTRIBUTE);
 
@@ -173,7 +173,7 @@ static status sepParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)sep);
 
     return SUCCESS;
@@ -183,10 +183,10 @@ static status postTagNameParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)sep);
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)selfClose);
     
     rbl->dispatch = tagOpened;
@@ -197,10 +197,10 @@ static status postAttrParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)selfClose);
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)gt);
 
     rbl->dispatch = tagOpened;
@@ -212,11 +212,11 @@ static status attrValueParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)quoted);
     mt->jump = Roebling_GetMarkIdx(rbl, XML_ATTRIBUTE);
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)unquoted);
 
     rbl->dispatch = setAttrValue;
@@ -228,7 +228,7 @@ static status bodyParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)body);
 
     rbl->dispatch = setBody;
@@ -240,7 +240,7 @@ static status eqParserMk(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)sepEq);
 
     return SUCCESS;

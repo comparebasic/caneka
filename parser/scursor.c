@@ -24,21 +24,23 @@ status SCursor_Incr(SCursor *sc, i64 length){
 
     i64 remaining = length;
     i64 local;
-    while(remaining > 0 && sc->seg != NULL){
+    while(remaining > 0 && sc->seg != NULL && !HasFlag(sc->type.state, END)){
         local = sc->seg->length - sc->position;
         if(local > remaining){
             sc->position += remaining;
             remaining = 0;
             break;
         }else{
+            if(sc->seg->next == NULL){
+                sc->type.state = END;
+                local--;
+            }else{
+                sc->seg = sc->seg->next;
+            }
+
             remaining -= local;
             sc->position += local;
-            sc->seg = sc->seg->next;
         }
-    }
-
-    if(sc->seg == NULL){
-        sc->type.state = END;
     }
 
     if(remaining > 0){

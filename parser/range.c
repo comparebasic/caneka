@@ -41,13 +41,17 @@ int Range_GetLength(Range *range){
     }else{
         length = seg->length - range->start.position;
         seg = String_Next(seg);
-        while(seg != NULL && seg != range->end.seg ){
+        while(seg != NULL && seg != range->end.seg){
             length += seg->length;
             seg = String_Next(seg);
         }
         if(seg != NULL){
             length += range->end.position;
         }
+    }
+
+    if(HasFlag(range->end.type.state, END)){
+        length++;
     }
 
     return length;
@@ -63,7 +67,7 @@ String *Range_Copy(MemCtx *m, Range *range){
         s = String_Init(m, length);
         String_AddBytes(m, s, seg->bytes + range->start.position, seg->length - range->start.position); 
         seg = String_Next(seg);
-        while(seg != NULL && seg != range->end.seg ){
+        while(seg != NULL && seg != range->end.seg){
             String_Add(m, s, seg); 
             seg = String_Next(seg);
         }

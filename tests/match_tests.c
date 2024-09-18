@@ -32,7 +32,6 @@ status Match_Tests(MemCtx *gm){
 
     s = String_Make(m, bytes("A good line :)\n"));
     Match_SetPattern(&mt, (PatCharDef *)line);
-    Debug_Print(mt.def.pat, TYPE_PATCHARDEF, "line: ", COLOR_YELLOW, TRUE);
     for(int i = 0; i < s->length; i++){
         Match_Feed(&mt, s->bytes[i]);
         if(!HasFlag(mt.type.state, PROCESSING)){

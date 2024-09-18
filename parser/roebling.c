@@ -15,42 +15,29 @@ String *Roebling_GetMarkDebug(Roebling *rbl, int idx){
 }
 
 Match *Roebling_GetMatch(Roebling *rbl){
-    if(HasFlag(rbl->type.state, KO)){
-        return Span_GetSelected(rbl->matches.ko);
-    }else{
-        return Span_GetSelected(rbl->matches.values);
-    }
+    return Span_GetSelected(rbl->matches);
 }
 
 Match *Roebling_GetValueMatch(Roebling *rbl){
-    if(rbl->matches.values->nvalues == 1){
-        return Span_Get(rbl->matches.values, 0);
+    if(rbl->matches->nvalues == 1){
+        return Span_Get(rbl->matches, 0);
     }else{
-        return Span_GetSelected(rbl->matches.values);
+        return Span_GetSelected(rbl->matches);
     }
 }
 
 int Roebling_GetMatchIdx(Roebling *rbl){
-    if(HasFlag(rbl->type.state, KO)){
-        return rbl->matches.ko->metrics.selected;
-    }else{
-        return rbl->matches.ko->metrics.selected;
-    }
+    return rbl->matches->metrics.selected;
 }
 
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def){
-    Match *mt = Span_ReserveNext(rbl->matches.values);
-    return Match_SetPattern(mt, def);
-}
-
-status Roebling_SetKOPattern(Roebling *rbl, PatCharDef *def){
-    Match *mt = Span_ReserveNext(rbl->matches.ko);
+    Match *mt = Span_ReserveNext(rbl->matches);
     return Match_SetPattern(mt, def);
 }
 
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
     for(int i = 0; i < lk->values->nvalues; i++){
-        Match *mt = Span_ReserveNext(rbl->matches.values);
+        Match *mt = Span_ReserveNext(rbl->matches);
         String *s = (String *)Span_Get(lk->values, i);
         Match_SetString(mt, s);
     }
@@ -89,52 +76,31 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
 
 static status Roebling_RunMatches(Roebling *rbl){
     int i = 0;
-    Span *ko = rbl->matches.ko;
     byte c = 0;
     rbl->type.state &= ~(NEXT|KO|BREAK|COMPLETE);
-    if(rbl->matches.values->nvalues == 0 && rbl->matches.ko->nvalues == 0){
+    if(rbl->matches->nvalues == 0){
         rbl->type.state |= (BREAK|NEXT);
     }
     while(!HasFlag(rbl->type.state, BREAK) && !HasFlag(rbl->range.potential.type.state, END)){
         c = Range_GetByte(&(rbl->range));
         Match *mt = NULL;
-        for(int i = 0; i < ko->nvalues; i++){
-            mt = Span_Get(ko, i);
-            if(mt != NULL){
-                Match_Feed(mt, c);
-                if(HasFlag(mt->type.state, COMPLETE)){
-                     ko->metrics.selected = i;
-                     if(mt->jump > -1){
-                        rbl->jump = mt->jump;
-                     }
-                     rbl->type.state = (NEXT|KO|BREAK);
-                     break;
-                }
-            }
-        }
-        if(HasFlag(rbl->type.state, KO)){
-            break;
-        }
-        Span *posative = rbl->matches.values;
-        for(int i = 0; i < posative->nvalues; i++){
-            mt = Span_Get(posative, i);
+        for(int i = 0; i < rbl->matches->nvalues; i++){
+            mt = Span_Get(rbl->matches, i);
             if(mt != NULL){
                Match_Feed(mt, c);
                if(HasFlag(mt->type.state, COMPLETE)){
-                     posative->metrics.selected = i;
+                     rbl->matches->metrics.selected = i;
                      if(mt->jump > -1){
                         rbl->jump = mt->jump;
                      }
                      rbl->type.state = (NEXT|BREAK);
                      SCursor_Incr(&(rbl->range.start), mt->lead);
+                     SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
                      break;
                }
             }
         }
         SCursor_Incr(&(rbl->range.potential), 1);
-        if(mt != NULL && (mt->type.state & OPTIONAL) == 0){
-            SCursor_Incr(&(rbl->range.end), 1);
-        }
     }
     rbl->type.state &= ~BREAK;
     return rbl->type.state;
@@ -150,7 +116,6 @@ status Roebling_Run(Roebling *rbl){
         if(rbl->jump > -1){
             rbl->idx = rbl->jump;
             rbl->jump = -1;
-            Range_Sync(&(rbl->range), &(rbl->range.end));
             if(DEBUG_ROEBLING_MARK){
                 String *mark_s = Roebling_GetMarkDebug(rbl, rbl->idx);
                 printf("\x1b[%dmJumping to %s(%d)\n", DEBUG_ROEBLING_MARK, mark_s != NULL ? (char *)mark_s->bytes : "", rbl->idx);
@@ -192,7 +157,6 @@ status Roebling_Run(Roebling *rbl){
             printf("\n");
         }
         if(mt != NULL){
-            SCursor_Incr(&(rbl->range.start), mt->lead);
             rbl->type.state |= (mt->type.state & NOOP);
             if(HasFlag(mt->type.state, SUCCESS) && mt->jump > -1){
                 rbl->jump = mt->jump; 
@@ -210,8 +174,7 @@ status Roebling_Run(Roebling *rbl){
 }
 
 status Roebling_ResetPatterns(Roebling *rbl){
-    Span_ReInit(rbl->matches.values);
-    Span_ReInit(rbl->matches.ko);
+    Span_ReInit(rbl->matches);
     rbl->jump = -1;
     rbl->jumpMiss = -1;
     rbl->dispatch = NULL;
@@ -233,8 +196,7 @@ Roebling *Roebling_Make(MemCtx *m,
     rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;
     rbl->source = source;
-    rbl->matches.values = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
-    rbl->matches.ko = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
+    rbl->matches = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
     rbl->parsers_do = Span_Make(m, TYPE_SPAN);
     int markStart = 0;
     if(markLabels != NULL){

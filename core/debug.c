@@ -5,7 +5,7 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = COLOR_CYAN;
+int DEBUG_PATMATCH = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
 int DEBUG_ROEBLING = 0;
@@ -175,12 +175,6 @@ static status patFlagStr(word flags, char str[]){
     if((flags & PAT_IGNORE) != 0){
         str[i++] = 'G';
     }
-    if((flags & PAT_WILDCOUNT) != 0){
-        str[i++] = 'W';
-    }
-    if((flags & PAT_ALL) != 0){
-        str[i++] = 'A';
-    }
     if((flags & PAT_KO) != 0){
         str[i++] = 'K';
     }
@@ -345,18 +339,10 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
         }
         printf("\n  \x1b[%dmmatches=\n", color);
         Match *mt = NULL;
-        for(int i = 0; i < rbl->matches.values->nvalues; i++){
-            mt = Span_Get(rbl->matches.values, i);
+        for(int i = 0; i < rbl->matches->nvalues; i++){
+            mt = Span_Get(rbl->matches, i);
             Debug_Print((void *)mt, 0, "    ", color, extended);
-            if(i < rbl->matches.values->nvalues-1){
-                printf(",\n");
-            }
-        }
-        printf("\n  \x1b[%dmko=\n", color);
-        for(int i = 0; i < rbl->matches.ko->nvalues; i++){
-            mt = Span_Get(rbl->matches.ko, i);
-            Debug_Print((void *)mt, 0, "    ", color, extended);
-            if(i < rbl->matches.ko->nvalues-1){
+            if(i < rbl->matches->nvalues-1){
                 printf(",\n");
             }
         }
@@ -444,7 +430,7 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("\x1b[%dm%sC<%s:\x1b[1;%dm%s\x1b[0;%dm[%ld]>", color, msg, State_ToString(sc->type.state), color, sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "", color, sc->position);
+    printf("\x1b[%dm%sC<%s:\x1b[1;%dm%s\x1b[0;%dm[%ld]>", color, msg, State_ToString(sc->type.state), color, sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "NULL", color, sc->position);
 }
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

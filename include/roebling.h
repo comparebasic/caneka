@@ -11,10 +11,7 @@ typedef struct roebling {
     int idx;
     Abstract *source; 
     /* current */
-    struct {
-        Span *values;
-        Span *ko;
-    } matches;
+    Span * matches;
     /* overall */
     Range range;
     Span *parsers_do;
@@ -40,7 +37,6 @@ status Roebling_SetMark(Roebling *rlb, int mark, int idx);
 status Roebling_Prepare(Roebling *rbl, Span *parsers);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def);
-status Roebling_SetKOPattern(Roebling *rbl, PatCharDef *def);
 status Roebling_ResetPatterns(Roebling *rbl);
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
 int Roebling_GetMatchIdx(Roebling *rbl);

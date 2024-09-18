@@ -51,7 +51,7 @@ status SetWord1(Abstract *a){
 }
 
 
-static word text[] = {PAT_IGNORE|PAT_ANY, ' ', ' ',TEXT_DEF};
+static word text[] = {PAT_IGNORE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', TEXT_DEF};
 static word nl[] = {NL_DEF};
 static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_IGNORE|PAT_TERM, 'A', 'Z', PAT_END, 0, 0};
 static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
@@ -62,7 +62,6 @@ status SetWord2(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl, (PatCharDef *)text);
-    r |= Roebling_SetKOPattern(rbl, (PatCharDef *)nl);
     rbl->dispatch = RestFound;
     return r; 
 }
@@ -73,14 +72,14 @@ status SetNextOrEnd(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)nl_upper);
     /*
     mt->jump = Roebling_GetMarkIdx(rbl, RBL_TEST_START);
     */
     mt->jump = 0;
 
-    mt = Span_ReserveNext(rbl->matches.values);
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)dbl_nl);
     /*
     mt->jump = Roebling_GetMarkIdx(rbl, RBL_TEST_END);
@@ -105,7 +104,7 @@ status Roebling_Tests(MemCtx *gm){
     Single *dof = as(Span_Get(rbl->parsers_do, 0), TYPE_WRAPPED_DO);
     dof->val.dof((MemHandle *)rbl);
 
-    r |= Test(rbl->matches.values->nvalues == 3, "Roebling has three match values loaded up");
+    r |= Test(rbl->matches->nvalues == 3, "Roebling has three match values loaded up");
 
     MemCtx_Free(m);
     return r;
@@ -138,7 +137,7 @@ status RoeblingRun_Tests(MemCtx *gm){
 
     Roebling_Run(rbl);
     s = Range_Copy(rbl->m, &(rbl->range));
-    r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
+    r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line, expected 'for the weekend', have '%s'", s->bytes);
     r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
 
     Roebling_Run(rbl);
