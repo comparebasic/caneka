@@ -22,9 +22,6 @@ static void match_Reset(Match *mt){
     mt->lead = 0;
 }
 
-
-
-
 static boolean charMatched(word c, PatCharDef *def){
     boolean matched = FALSE;
     if((def->flags & PAT_ALL) != 0){
@@ -39,14 +36,6 @@ static boolean charMatched(word c, PatCharDef *def){
         matched = !matched;
     }
     return matched;
-}
-
-static void incrCount(Match *mt, PatCharDef *def){
-    if(HasFlag(def->flags, PAT_IGNORE) && mt->count == 0){
-        mt->lead++;
-    }else{
-        mt->count++;
-    }
 }
 
 static void match_NextTerm(Match *mt){
@@ -182,9 +171,6 @@ static status match_FeedString(Match *mt, byte c){
         mt->type.state = MISS;
     }
     return mt->type.state;
-}
-
-PatCharDef *Match_GetDef(Match *mt){
 }
 
 status Match_Feed(Match *mt, byte c){
