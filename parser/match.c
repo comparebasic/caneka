@@ -42,102 +42,108 @@ static boolean charMatched(word c, PatCharDef *def){
 }
 
 static void incrCount(Match *mt, PatCharDef *def){
-    if(HasFlag(def->flags, PAT_IGNORE)){
-        if(mt->count == 0){
-            mt->lead++;
-        }else{
-            mt->type.state |= OPTIONAL;
-        }
-    }else if(!HasFlag(def->flags, PAT_IGNORE)){
-        mt->type.state &= ~OPTIONAL;
+    if(HasFlag(def->flags, PAT_IGNORE) && mt->count == 0){
+        mt->lead++;
+    }else{
         mt->count++;
     }
 }
 
-static boolean reposition(Match *mt, PatCharDef *def){
-    PatCharDef *p = Match_GetDef(mt);
-    if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
-        /* if it's a many or any match rewind to the first non PAT_TERM def */
-        while(mt->position > 0){
-            p--;
-            if(HasFlag(p->flags, PAT_TERM)){
-                break;
-            }else{
-                mt->position--;
-            }
-        }
-    }else{
-        /* if  we have matched in the middle of the term, fast fowrard to the end of it */
-        while(mt->position <= (mt->length+1) && p->flags != PAT_END){
+static void match_NextTerm(Match *mt){
+    mt->type.state &= ~TERM_MATCH;
+    PatCharDef *def = mt->def.pat+mt->position;
+    if(def->flags != PAT_END){
+        while(!HasFlag(def->flags, PAT_TERM) && def->flags != PAT_END){
+            def++;
             mt->position++;
-            if(HasFlag(p->flags, PAT_TERM)){
-                break;
-            }
-            p++;
         }
     }
-    return TRUE;
+    if(HasFlag(def->flags, PAT_TERM)){
+        def++;
+        mt->position++;
+    }
+}
+
+static void match_StartOfTerm(Match *mt){
+    PatCharDef *def = mt->def.pat+mt->position;
+    if(mt->position > 0){
+        PatCharDef *prev = def;
+        prev--;
+        while(mt->position > 0 && !HasFlag(prev->flags, PAT_TERM)){
+            prev--;
+            mt->position--;
+            def--;
+        }
+    }
 }
 
 static status match_FeedPat(Match *mt, word c){
     boolean matched = FALSE;
-    PatCharDef *def = Match_GetDef(mt);
+    PatCharDef *def = NULL;
     if(DEBUG_PATMATCH){
         Debug_Print(mt->def.pat, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
         printf("\n");
     }
-    while(def->flags != PAT_END){
+    while(1){
+        def = mt->def.pat+mt->position;
+        if(def->flags != PAT_END){
+            break;
+        }
         if(DEBUG_PATMATCH){
             debug('_', c, def, mt, charMatched(c, def));
         }
 
-        if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
-            mt->type.state |= ELASTIC;
-        }else if(def->flags & PAT_TERM){
-            mt->type.state &= ~ELASTIC;
-        }
-
-        if(charMatched(c, def)){
+        matched = charMatched(c, def);
+        if(matched){
             if(HasFlag(def->flags, PAT_KO)){
                 mt->type.state &= ~(PROCESSING|COMPLETE);
                 mt->type.state |= PAT_KO;
-                reposition(mt, def);
-                def = Match_GetDef(mt);
+                match_NextTerm(mt);
                 break;
-            }
-            mt->type.state |= PROCESSING;
-            incrCount(mt, def);
-            if(reposition(mt, def)){
-                def = Match_GetDef(mt);
-                break;
-            }
-        }else{
-            mt->type.state &= ~(PROCESSING|COMPLETE);
-            if(HasFlag(def->flags, (PAT_MANY|PAT_INVERT))){
-                if(mt->count > 0){
-                    mt->type.state = (COMPLETE|OPTIONAL);
-                    goto next;
-                }
             }
             if(HasFlag(def->flags, PAT_MANY)){
-                if(mt->count > 0){
-                    mt->type.state = (COMPLETE|OPTIONAL);
-                    goto next;
-                }
+                mt->type.state |= TERM_MATCH;
+            }else{
+                mt->type.state &= ~TERM_MATCH;
             }
-            if((def->flags & (PAT_OPTIONAL|PAT_ANY)) != 0){
-                goto next;
+            mt->type.state |= PROCESSING;
+
+            if(HasFlag(def->flags, PAT_IGNORE) && mt->count == 0){
+                mt->lead++;
+            }else{
+                mt->count++;
+            }
+
+            if((def->flags & (PAT_ANY|PAT_MANY)) != 0){
+                match_StartOfTerm(mt);
+            }else{
+                match_NextTerm(mt);
+            }
+            break;
+        }else{
+            if(HasFlag(def->flags, (PAT_MANY)) != 0){
+                match_NextTerm(mt);
+                continue;
+            }else if(HasFlag(def->flags, (PAT_ANY)) != 0){
+                match_NextTerm(mt);
+                continue;
+            }else{
+                mt->type.state &= ~(PROCESSING|COMPLETE);
+                mt->position = 0;
+                break;
             }
         }
-next:
+        if(HasFlag(def->type.state, PAT_TERM)){
+            mt->type.state &= ~TERM_MATCH;
+        }
         mt->position++;
-        def = Match_GetDef(mt);
     }
+
+    def = mt->def.pat+mt->position;
 
     if(DEBUG_PATMATCH){
         debug('E', c, def, mt, charMatched(c, def));
     }
-
 
     if(def->flags == PAT_END && mt->count > 0){
         mt->type.state |= SUCCESS;
@@ -179,7 +185,6 @@ static status match_FeedString(Match *mt, byte c){
 }
 
 PatCharDef *Match_GetDef(Match *mt){
-    return mt->def.pat+mt->position;
 }
 
 status Match_Feed(Match *mt, byte c){
