@@ -1,3 +1,5 @@
+#define PAT_CHAR_MAX_LENGTH 64
+
 enum pat_flags {
     PAT_END = 0, /* E */
     PAT_TERM = 1 << 0, /* X */
@@ -39,16 +41,26 @@ typedef struct range_chardef {
     word to;
 } PatCharDef;
 
+typedef struct _pat_match {
+    PatCharDef *startDef;
+    PatCharDef *endDef;
+    PatCharDef *curDef;
+    PatCharDef *startTermDef;
+} _patMatch;
+
+typedef struct _string_match {
+    String *s;
+    int position;
+}_stringMatch;
+
 typedef struct match {
     Type type; 
     union {
-        PatCharDef *pat;
-        String *s;
+        _patMatch pat;
+        _stringMatch str;
     } def;
-    i8 position;
-    i8 length;
     i8 jump;
-    i16 remaining;
+    int remaining;
     int count;
     int lead;
     status (*dispatch)(struct roebling *rbl);

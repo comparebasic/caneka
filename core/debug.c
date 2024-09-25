@@ -234,11 +234,11 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:length=%d:pos=%d:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->length, mt->position, mt->jump, mt->count, mt->remaining);
-        Debug_Print((void *)mt->def.pat, TYPE_PATCHARDEF, "", color, TRUE);
+        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->jump, mt->count, mt->remaining);
+        Debug_Print((void *)mt->def.pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
         printf(">\x1b[0m");
     }else{
-        printf("\x1b[%dm%sMatch<state=%s:pos=%d>\x1b[0m", color, msg, State_ToString(mt->type.state), mt->position);
+        printf("\x1b[%dm%sMatch<state=%s>\x1b[0m", color, msg, State_ToString(mt->type.state));
     }
 }
 
@@ -277,10 +277,10 @@ static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s:pos=%d:'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, color, mt->def.s->bytes, color);
+        printf("%sMatch<%s:state=%s'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), color, mt->def.str.s->bytes, color);
     }else{
         char *jump = "";
-        printf("%sMatch<state=%s:pos=%d", msg, State_ToString(mt->type.state), mt->position);
+        printf("%sMatch<state=%s", msg, State_ToString(mt->type.state));
         if(mt->jump >= 0){
             printf(":jmp=%d\n", mt->jump);
         }
@@ -296,12 +296,12 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_STRINGMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jmp=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->position, mt->jump, mt->count, mt->remaining);
-        Debug_Print((void *)mt->def.s, 0, "", color, FALSE);
+        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jmp=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->def.str.position, mt->jump, mt->count, mt->remaining);
+        Debug_Print((void *)mt->def.str.s, 0, "", color, FALSE);
         printf(">\x1b[0m");
     }else{
-        printf("\x1b[%dm%sMatch<state=%s:pos=%d ", color, msg, State_ToString(mt->type.state), mt->position);
-        Debug_Print((void *)mt->def.s, 0, "", color, FALSE);
+        printf("\x1b[%dm%sMatch<state=%s:pos=%d ", color, msg, State_ToString(mt->type.state), mt->def.str.position);
+        Debug_Print((void *)mt->def.str.s, 0, "", color, FALSE);
         printf(">\x1b[0m");
     }
 }

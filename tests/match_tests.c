@@ -60,7 +60,7 @@ status MatchElastic_Tests(MemCtx *gm){
     Match_Feed(&mt, s->bytes[i]);
     i++;
     r |= Test(HasFlag(mt.type.state, PROCESSING), "Has PROCESSING status %s", State_ToString(mt.type.state));
-    r |= Test(HasFlag(mt.position, 1), "On second pos, position is %d", mt.position);
+    r |= Test(mt.def.pat.curDef == (mt.def.pat.startDef+1) , "On second pos, position is %d", (util)(mt.def.pat.curDef - mt.def.pat.startDef) / sizeof(PatCharDef));
 
     int count = 0;
     while(1){
@@ -75,7 +75,7 @@ status MatchElastic_Tests(MemCtx *gm){
     r |= Test(i ==  4, "Stopped on the fourth character");
     r |= Test(count == 3, "Found three chars");
     r |= Test(HasFlag(mt.type.state, SUCCESS), "Found SUCCESS have %s", State_ToString(mt.type.state));
-    PatCharDef *def = Match_GetDef(&mt);
+    PatCharDef *def = mt.def.pat.curDef;
     r |= Test((def->flags == PAT_END), "At end");
 
     word att[] = { PAT_IGNORE|PAT_TERM, ' ', ' ', PAT_KO, '=', '=', PAT_MANY|PAT_TERM, 'a', 'z', PAT_END, 0, 0};

@@ -130,7 +130,7 @@ status RoeblingRun_Tests(MemCtx *gm){
     s = Range_Copy(rbl->m, &(rbl->range));
     int idx = Roebling_GetMatchIdx(rbl);
     s = Range_Copy(m, &(rbl->range));
-    r |= Test(String_EqualsBytes(mt->def.s, bytes("TWO")), "Match equals expected");
+    r |= Test(String_EqualsBytes(mt->def.str.s, bytes("TWO")), "Match equals expected");
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
     r |= Test(idx = 1, "Match Idx equals expected");
     r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
