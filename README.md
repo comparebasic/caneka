@@ -18,28 +18,18 @@ Further configuration can be specified at the top of [build_config.h](./build_co
 
 Here is a list of the cornerstone source code files of the system, each has a comment at the top about it's purpose and related source code files:
 
-- [include/caneka.h](./include/caneka.h) - main include
-
-This defines the types and structs for the runtime-polymorphic type system, and
+- [include/caneka.h](./include/caneka.h) - Main include. This defines the types and structs for the runtime-polymorphic type system, and
 all of Caneka.
 
-- [include/mem.h](./include/mem.h) - Memory Context 
+- [include/mem.h](./include/mem.h) - Memory Context. This is the manually-run garbage collector.
 
-This is the manually-run garbage collector.
+- [include/span.h](./include/span.h) - Data Strucutre for slab allocation of segmented arrays. This is the main work-horse data structure for storing and retrieving data, Table is biult on top of this.
 
-- [include/span.h](./include/span.h) - Data Strucutre for slab allocation of segmented arrays.
+- [include/string_cnk.h](./include/string_cnk.h) - Data Strucutre for slab allocation of segmented arrays. This is the main work-horse data structure for storing and retrieving data, Table is biult on top of this.
 
-This is the main work-horse data structure for storing and retrieving data, Table is biult on top of this.
+- [include/debug.h](./include/debug.h) - Configuration file for showing debugging information, the debug flags are located in core/debug.c.
 
-- [include/string_cnk.h](./include/string_cnk.h) - Data Strucutre for slab allocation of segmented arrays.
-
-This is the main work-horse data structure for storing and retrieving data, Table is biult on top of this.
-
-- [include/debug.h](./include/debug.h) - Configuration file for showing debugging information, the debug flags are located in core/debug.c
-
-- [main.c](./main.c) - Example and test runner
-
-This file is mostly an example Caneka application, and it runs the tests
+- [main.c](./main.c) - Example and test runner. This file is mostly an example Caneka application, and it runs the tests
 
 ## Licence
 

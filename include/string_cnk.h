@@ -2,6 +2,7 @@
 String
 string library
 
+related: core/string.h
 */
 
 typedef struct stringmin {
