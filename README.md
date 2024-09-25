@@ -19,3 +19,5 @@ Further configuration can be specified at the top of [build_config.h](./build_co
 MIT: [licence file](./LICENCE)
 
 Copyright 2023-2024 COMPARE BASIC INCORPORATED
+
+Caneka is a brand of Compare Basic, read more at [comparebasic.com](https://comparebasic.com)
