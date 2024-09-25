@@ -1,5 +1,6 @@
 /*
 Main
+Example and test runner
 
 This file is mostly an example Caneka application, and it runs the tests
 */

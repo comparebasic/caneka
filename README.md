@@ -37,6 +37,10 @@ This is the main work-horse data structure for storing and retrieving data, Tabl
 
 - [include/debug.h](./include/debug.h) - Configuration file for showing debugging information, the debug flags are located in core/debug.c
 
+- [main.c](./main.c) - Example and test runner
+
+This file is mostly an example Caneka application, and it runs the tests
+
 ## Licence
 
 MIT: [licence file](./LICENCE)
