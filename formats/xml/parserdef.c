@@ -3,7 +3,7 @@
 
 static word selfClose[] = {
     WS_OPTIONAL,
-    PAT_IGNORE|PAT_TERM, '/', '/', PAT_IGNORE|PAT_TERM, '>', '>',
+    PAT_NO_CAPTURE|PAT_TERM, '/', '/', PAT_NO_CAPTURE|PAT_TERM, '>', '>',
     PAT_END, 0, 0
 };
 
@@ -23,10 +23,10 @@ static word attrName[] = {PAT_INVERT|PAT_MANY, '=', '=', PAT_MANY, 'a', 'z', PAT
 };
 
 static word closeDef[] = {
-    PAT_TERM|PAT_IGNORE, '/','/', PAT_MANY, 'a', 'z', PAT_ANY|PAT_TERM, 'A', 'Z',
+    PAT_TERM|PAT_NO_CAPTURE, '/','/', PAT_MANY, 'a', 'z', PAT_ANY|PAT_TERM, 'A', 'Z',
     PAT_ANY, 'a', 'z', PAT_ANY, 'A', 'Z', \
     PAT_ANY, '-', '-', PAT_ANY, '_', '_', PAT_ANY, ':', ':', PAT_ANY|PAT_TERM, '0', '9', \
-    PAT_IGNORE|PAT_TERM, '>', '>',
+    PAT_NO_CAPTURE|PAT_TERM, '>', '>',
     PAT_END, 0, 0
 };
 
@@ -35,8 +35,8 @@ static word sep[] = { PAT_ANY, ' ', ' ', PAT_ANY, '\t', '\t', PAT_ANY, '\r', '\r
 
 static word gt[] = { PAT_TERM, '>', '>',PAT_END, 0, 0};
 
-static word quoted[] = {PAT_IGNORE|PAT_TERM, '"', '"', PAT_INVERT, '"', '"', \
-    PAT_ANY|PAT_TERM, 32, 255, PAT_IGNORE|PAT_TERM, '"', '"', PAT_END, 0,0
+static word quoted[] = {PAT_NO_CAPTURE|PAT_TERM, '"', '"', PAT_INVERT, '"', '"', \
+    PAT_ANY|PAT_TERM, 32, 255, PAT_NO_CAPTURE|PAT_TERM, '"', '"', PAT_END, 0,0
 };
 
 static word unquoted[] = {PAT_INVERT, '"', '"', PAT_INVERT, ' ', ' ', \

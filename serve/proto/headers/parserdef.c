@@ -28,7 +28,7 @@ static status hdrComplete(Parser *prs, Range *range, void *source){
 static Parser *keyParserMk(Roebling *rlb){
     /*
     word nl[] = {
-        PAT_INVERT|PAT_IGNORE, ':', ':', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', PAT_END, 0, 0};
+        PAT_INVERT|PAT_NO_CAPTURE, ':', ':', PAT_MANY, 'a', 'z', PAT_MANY, 'A', 'Z', PAT_MANY, '-', '-', PAT_MANY, '_', '_', PAT_MANY|PAT_TERM, '0', '9', PAT_END, 0, 0};
     Parser *prs = Parser_MakeSingle(rlb->m, Match_MakePat(rlb->m, bytes(nl), 6, ANCHOR_START), setKey); 
     prs->jump = BREAK;
     return prs;

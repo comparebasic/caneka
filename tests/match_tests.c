@@ -53,7 +53,7 @@ status MatchElastic_Tests(MemCtx *gm){
 
     String *s = String_Make(m, bytes("<tag atts=\"poo\">hi</tab>"));
 
-    word pat[] = { PAT_IGNORE|PAT_TERM, '<', '<', PAT_MANY, 'a', 'z', PAT_END, 0, 0};
+    word pat[] = { PAT_NO_CAPTURE|PAT_TERM, '<', '<', PAT_MANY, 'a', 'z', PAT_END, 0, 0};
     Match mt;
     Match_SetPattern(&mt, (PatCharDef *)pat);
     int i = 0;
@@ -72,13 +72,14 @@ status MatchElastic_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(i ==  4, "Stopped on the fourth character");
-    r |= Test(count == 3, "Found three chars");
-    r |= Test(HasFlag(mt.type.state, SUCCESS), "Found SUCCESS have %s", State_ToString(mt.type.state));
-    PatCharDef *def = mt.def.pat.curDef;
-    r |= Test((def->flags == PAT_END), "At end");
 
-    word att[] = { PAT_IGNORE|PAT_TERM, ' ', ' ', PAT_KO, '=', '=', PAT_MANY|PAT_TERM, 'a', 'z', PAT_END, 0, 0};
+    r |= Test(i ==  4, "Tag -Stopped on the fourth character");
+    r |= Test(count == 3, "Tag -Found three chars");
+    r |= Test(HasFlag(mt.type.state, SUCCESS), "Tag- Found SUCCESS have %s", State_ToString(mt.type.state));
+    PatCharDef *def = mt.def.pat.curDef;
+    r |= Test((def->flags == PAT_END), "Tag -At end");
+
+    word att[] = { PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', PAT_KO, '=', '=', PAT_MANY|PAT_TERM, 'a', 'z', PAT_END, 0, 0};
     Match_SetPattern(&mt, (PatCharDef *)att);
     count = 0;
     while(1){
@@ -90,7 +91,7 @@ status MatchElastic_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(mt.count == 4, "Found four chars, count is %d", mt.count);
+    r |= Test(mt.count == 4, "Att - Found four chars, count is %d", mt.count);
     
 
     MemCtx_Free(m);

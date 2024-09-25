@@ -51,9 +51,9 @@ status SetWord1(Abstract *a){
 }
 
 
-static word text[] = {PAT_IGNORE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', TEXT_DEF};
+static word text[] = {PAT_NO_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', TEXT_DEF};
 static word nl[] = {NL_DEF};
-static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_IGNORE|PAT_TERM, 'A', 'Z', PAT_END, 0, 0};
+static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_NO_CAPTURE|PAT_TERM, 'A', 'Z', PAT_END, 0, 0};
 static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
 
 status SetWord2(Roebling *rbl){

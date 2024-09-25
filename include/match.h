@@ -9,7 +9,7 @@ enum pat_flags {
     PAT_INVERT = 1 << 4, /* I */
     PAT_COUNT = 1 << 5, /* C */
     PAT_SET_NOOP = 1 << 6, /* U */
-    PAT_IGNORE = 1 << 7, /* G */
+    PAT_NO_CAPTURE = 1 << 7, /* G */
     PAT_ALL = 1 << 8, /* A */
     PAT_KO = 1 << 9, /* K */
 };

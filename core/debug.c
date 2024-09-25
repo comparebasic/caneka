@@ -172,7 +172,7 @@ static status patFlagStr(word flags, char str[]){
     if((flags & PAT_SET_NOOP) != 0){
         str[i++] = 'U';
     }
-    if((flags & PAT_IGNORE) != 0){
+    if((flags & PAT_NO_CAPTURE) != 0){
         str[i++] = 'G';
     }
     if((flags & PAT_KO) != 0){

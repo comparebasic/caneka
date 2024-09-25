@@ -56,13 +56,17 @@ char *State_ToString(status state){
     memset(_buff, 0, 1024);
     int i = 0;
     char *name = NULL;
-    while((name = stateNames[i]) != NULL){
-        if((state & states[i]) != 0){
-            int l = strlen(stateNames[i]);
-            memcpy(_buff+pos, stateNames[i], l);
-            pos += l;
+    if(state == 0){
+        memcpy(_buff, "ZERO", strlen("ZERO"));
+    }else{
+        while((name = stateNames[i]) != NULL){
+            if((state & states[i]) != 0){
+                int l = strlen(stateNames[i]);
+                memcpy(_buff+pos, stateNames[i], l);
+                pos += l;
+            }
+            i++;
         }
-        i++;
     }
     return _buff;
 }

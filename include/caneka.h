@@ -161,7 +161,6 @@ char *Class_ToString(cls type);
 #define COMPLETE SUCCESS
 #define TEST_OK READY
 #define ELASTIC INLINE
-#define TERM_MATCH TRACKED
 
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);
