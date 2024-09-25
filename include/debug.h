@@ -1,3 +1,9 @@
+/* 
+Debug
+Configuration file for showing debugging information, the debug flags are located in core/debug.c
+
+related: core/debug.c
+*/
 #define COLOR_RED 31
 #define COLOR_GREEN 32
 #define COLOR_YELLOW 33

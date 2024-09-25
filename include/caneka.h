@@ -1,3 +1,12 @@
+/*
+Caneka 
+main include
+
+This defines the types and structs for the runtime-polymorphic type system, and
+all of Caneka.
+
+related: core/caneka.c
+*/
 typedef char i8;
 typedef unsigned char byte;
 typedef int16_t i16;

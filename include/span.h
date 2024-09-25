@@ -1,3 +1,12 @@
+/*
+Span
+Data Strucutre for slab allocation of segmented arrays.
+
+This is the main work-horse data structure for storing and retrieving data, Table is biult on top of this.
+
+related: core/span.c
+related: include/slab.h
+*/
 #define SPAN_DEFAULT_STRIDE 16
 #define SPAN_DEFAULT_STRIDE 16
 #define SPAN_DEFAULT_SLOT_SIZE 1

@@ -1,3 +1,8 @@
+/*
+Main
+
+This file is mostly an example Caneka application, and it runs the tests
+*/
 #include <external.h>
 #include <caneka.h>
 #include <tests.h>

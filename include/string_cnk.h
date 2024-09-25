@@ -1,3 +1,9 @@
+/* 
+String
+string library
+
+*/
+
 typedef struct stringmin {
     Type type;
     int length;

@@ -1,3 +1,10 @@
+/*
+Slab
+The slab element used by Span, the slab is almost entirely internal.
+
+related: core/slab.c
+related: include/span.h
+*/
 typedef struct slab_meta {
     struct {
         word max;
