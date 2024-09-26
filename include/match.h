@@ -12,6 +12,7 @@ enum pat_flags {
     PAT_NO_CAPTURE = 1 << 7, /* G */
     PAT_ALL = 1 << 8, /* A */
     PAT_KO = 1 << 9, /* K */
+    PAT_SINGLE = 1 << 10, /* S */
 };
 
 enum match_flags {

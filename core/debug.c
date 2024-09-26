@@ -175,6 +175,9 @@ static status patFlagStr(word flags, char str[]){
     if((flags & PAT_NO_CAPTURE) != 0){
         str[i++] = 'G';
     }
+    if((flags & PAT_SINGLE) != 0){
+        str[i++] = 'S';
+    }
     if((flags & PAT_KO) != 0){
         str[i++] = 'K';
     }

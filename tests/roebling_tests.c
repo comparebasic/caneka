@@ -73,17 +73,11 @@ status SetNextOrEnd(Roebling *rbl){
 
     mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)nl_upper);
-    /*
     mt->jump = Roebling_GetMarkIdx(rbl, RBL_TEST_START);
-    */
-    mt->jump = 0;
 
     mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)dbl_nl);
-    /*
     mt->jump = Roebling_GetMarkIdx(rbl, RBL_TEST_END);
-    */
-    mt->jump = 3;
 
     return r; 
 }
