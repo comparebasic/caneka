@@ -3,14 +3,14 @@
 
 static void debug(char type, word c, PatCharDef *def, Match *mt, boolean matched){
     if(c == '\n'){
-        printf("\x1b[%dm  %c \x1b[0;1m'\\n'\x1b[0;%dm=%s - [count:%d lead:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, State_ToString(mt->type.state));
+        printf("\x1b[%dm  %c \x1b[0;1m'\\n'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
+            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
     }else if(c == '\r'){
-        printf("\x1b[%dm  %c \x1b[0;1m'\\r'\x1b[0;%dm=%s - [count:%d lead:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, State_ToString(mt->type.state));
+        printf("\x1b[%dm  %c \x1b[0;1m'\\r'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
+            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
     }else{
-        printf("\x1b[%dm  %c \x1b[0;1m'%c'\x1b[0;%dm=%s - [count:%d lead:%d] %s ", DEBUG_PATMATCH, type,
-            c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, State_ToString(mt->type.state));
+        printf("\x1b[%dm  %c \x1b[0;1m'%c'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
+            c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
     }
     Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
     printf("\n");
@@ -88,6 +88,9 @@ static status match_FeedPat(Match *mt, word c){
         if(matched){
             if(HasFlag(def->flags, PAT_KO)){
                 mt->type.state &= ~PROCESSING;
+                if(!HasFlag(def->flags, PAT_NO_CAPTURE)){
+                    mt->tail++;
+                }
                 mt->type.state |= PAT_KO;
                 match_NextTerm(mt);
                 break;
@@ -107,11 +110,11 @@ static status match_FeedPat(Match *mt, word c){
             }
             break;
         }else{
-            if((def->flags & (PAT_MANY|PAT_MANY)) != 0){
-                match_NextTerm(mt);
-                continue;
-            }else if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
+            if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
                 mt->def.pat.curDef++;
+                continue;
+            }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
+                match_NextTerm(mt);
                 continue;
             }else{
                 mt->type.state &= ~PROCESSING;
@@ -140,8 +143,8 @@ static status match_FeedPat(Match *mt, word c){
 
 static status match_FeedString(Match *mt, byte c){
     if(DEBUG_MATCH){
-       printf("\x1b[%dm%c of %s %u", DEBUG_PATMATCH, c, mt->def.str.s->bytes, mt->def.str.s->length);
-       Debug_Print(mt, 0, "FeedPat: ", DEBUG_PATMATCH, TRUE);
+       printf("\x1b[%dm%c of %s %u", DEBUG_MATCH, c, mt->def.str.s->bytes, mt->def.str.s->length);
+       Debug_Print(mt, 0, " FeedPat: ", DEBUG_MATCH, TRUE);
        printf("\n");
     }
     if(mt->def.str.s->bytes[mt->def.str.position] == c){

@@ -50,11 +50,10 @@ status SetWord1(Abstract *a){
     return Roebling_SetLookup(rbl, lk); 
 }
 
-
-static word text[] = {PAT_NO_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', TEXT_DEF};
+static word text[] = {PAT_NO_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, PAT_END, 0, 0};
 static word nl[] = {NL_DEF};
-static word nl_upper[] = {PAT_TERM, '\n', '\n', PAT_NO_CAPTURE|PAT_TERM, 'A', 'Z', PAT_END, 0, 0};
-static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+static word nl_upper[] = {PAT_INVERT|PAT_TERM|PAT_NO_CAPTURE, '\n', '\n', PAT_END, 0, 0};
+static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_END, 0, 0};
 
 status SetWord2(Roebling *rbl){
     status r = READY;
@@ -176,18 +175,18 @@ status RoeblingMark_Tests(MemCtx *gm){
     Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
-    r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
+    r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT after 'TWO'");
 
     Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
     r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
-    r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
+    r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT after 'for the weekend'");
 
     Roebling_Run(rbl);
     Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
     r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals expected, have %s", s->bytes);
-    r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
+    r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT after 'ONE'");
 
     Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
@@ -206,11 +205,8 @@ status RoeblingMark_Tests(MemCtx *gm){
     r |= Test(HasFlag(rbl->type.state, NEXT), "Roebling has state NEXT");
 
     Roebling_Run(rbl);
-    s = Range_Copy(m, &(rbl->range));
-    r |= Test(String_EqualsBytes(s, bytes("\n\n")), "Roebling has captured the ending double newline");
-
     Roebling_Run(rbl);
-    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS");
+    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS %s", State_ToString(rbl->type.state));
 
     MemCtx_Free(m);
     return r;

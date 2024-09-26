@@ -33,7 +33,6 @@ status SCursor_Incr(SCursor *sc, i64 length){
         }else{
             if(sc->seg->next == NULL){
                 sc->type.state = END;
-                local--;
             }else{
                 sc->seg = sc->seg->next;
             }

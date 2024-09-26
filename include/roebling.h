@@ -20,6 +20,7 @@ typedef struct roebling {
     RblFunc dispatch;
     i8 jump;
     i8 jumpMiss;
+    int tail;
     /* debug */
     Lookup *markLabels;
 } Roebling;

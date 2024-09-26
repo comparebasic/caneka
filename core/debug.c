@@ -197,7 +197,7 @@ static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int col
         if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
             printf("%s%s=#%hu", msg, flag_cstr, def->from);
         }else{
-            printf("%s%s=%c", msg, flag_cstr, (char)def->from);
+            printf("%s%s=%c/%hu", msg, flag_cstr, (char)def->from, (i8)def->from);
         }
     }else{
         if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32) || (def->to > 128 || def->to > 127)){
@@ -430,7 +430,7 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("\x1b[%dm%sC<%s:\x1b[1;%dm%s\x1b[0;%dm[%ld]>", color, msg, State_ToString(sc->type.state), color, sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "NULL", color, sc->position);
+    printf("\x1b[%dm%sC<%s:\x1b[1;%dm%s\x1b[0;%dm[%c@%ld]>", color, msg, State_ToString(sc->type.state), color, sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "NULL", color, sc->seg != NULL ? sc->seg->bytes[sc->position] : '?',  sc->position);
 }
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

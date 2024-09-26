@@ -95,7 +95,10 @@ static status Roebling_RunMatches(Roebling *rbl){
                      }
                      rbl->type.state = (NEXT|BREAK);
                      SCursor_Incr(&(rbl->range.start), mt->lead);
-                     SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
+                     if(mt->count){
+                         SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
+                     }
+                     rbl->tail = mt->tail;
                      break;
                }
             }
@@ -112,6 +115,8 @@ status Roebling_Run(Roebling *rbl){
     }
     if(HasFlag(rbl->type.state, NEXT)){
         rbl->idx++;
+        SCursor_Incr(&(rbl->range.end), rbl->tail);
+        rbl->tail = 0;
         Range_Sync(&(rbl->range), &(rbl->range.end));
         if(rbl->jump > -1){
             rbl->idx = rbl->jump;
