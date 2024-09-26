@@ -1,10 +1,7 @@
 enum xml_marks {
     XML_START = 1,
-    XML_TAG,
     XML_ATTROUTE,
-    XML_ATTRIBUTE,
     XML_ATTR_VALUE,
-    XML_BODY,
     XML_END,
 };
 

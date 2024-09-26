@@ -59,29 +59,33 @@ word attUnQuotedDef[] = {
     PAT_END, 0, 0
 };
 
-
 static status setOpen(Roebling *rbl){
-    printf("Open\n"); 
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    Debug_Print(s, 0, "Open: ", COLOR_CYAN, TRUE);
     return SUCCESS;
 }
 
 static status setClose(Roebling *rbl){
-    printf("Close\n"); 
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    Debug_Print(s, 0, "Close: ", COLOR_CYAN, TRUE);
     return SUCCESS;
 }
 
 static status setBody(Roebling *rbl){
-    printf("Body\n"); 
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    Debug_Print(s, 0, "Body: ", COLOR_CYAN, TRUE);
     return SUCCESS;
 }
 
 static status setAtt(Roebling *rbl){
-    printf("Body\n"); 
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    Debug_Print(s, 0, "Att: ", COLOR_CYAN, TRUE);
     return SUCCESS;
 }
 
 static status setAttValue(Roebling *rbl){
-    printf("Body\n"); 
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    Debug_Print(s, 0, "AttValue: ", COLOR_CYAN, TRUE);
     return SUCCESS;
 }
 
@@ -153,7 +157,7 @@ static status postAttName(Roebling *rbl){
 
 Span *XmlParser_Make(MemCtx *m){
     MemHandle *mh = (MemHandle *)m;
-    Span *p =  Span_From(m, 14, 
+    Span *p =  Span_From(m, 7, 
         (Abstract *)Int_Wrapped(m, XML_START), 
             (Abstract *)Do_Wrapped(mh, (DoFunc)start),
         (Abstract *)Int_Wrapped(m, XML_ATTROUTE), 
