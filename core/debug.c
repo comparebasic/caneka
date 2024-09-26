@@ -17,6 +17,7 @@ int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
+int DEBUG_XML = 0;
 
 int DEBUG_ROEBLING_NAME = COLOR_GREEN;
 
@@ -238,6 +239,9 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
         printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->jump, mt->count, mt->remaining);
+        printf("\x1b[1;%dm", color);
+        Debug_Print((void *)mt->def.pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
+        printf("\x1b[0;%dm ", color);
         Debug_Print((void *)mt->def.pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
         printf(">\x1b[0m");
     }else{

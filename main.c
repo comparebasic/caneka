@@ -27,8 +27,8 @@ static void *tests[] = {
     "Roebling", Roebling_Tests,
     "RoeblingRun", RoeblingRun_Tests,
     "RoeblingMark", RoeblingMark_Tests,
-    /*
     "XML", Xml_Tests,
+    /*
     "XMLNested", XmlNested_Tests,
     */
     NULL, NULL

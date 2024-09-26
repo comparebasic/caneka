@@ -72,6 +72,13 @@ static void match_StartOfTerm(Match *mt){
 }
 
 static status match_FeedPat(Match *mt, word c){
+    if(HasFlag(mt->type.state, MISS)){
+        if(DEBUG_PATMATCH){
+            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
+            printf(" - MISS\n");
+        }
+        return mt->type.state;
+    }
     boolean matched = FALSE;
     PatCharDef *def;
     if(DEBUG_PATMATCH){
@@ -87,11 +94,16 @@ static status match_FeedPat(Match *mt, word c){
         }
         if(matched){
             if(HasFlag(def->flags, PAT_KO)){
+                if(HasFlag(def->flags, PAT_SET_NOOP)){
+                    mt->type.state |= MISS;
+                    mt->def.pat.curDef = mt->def.pat.startDef;
+                    return mt->type.state;
+                }
                 mt->type.state &= ~PROCESSING;
                 if(!HasFlag(def->flags, PAT_NO_CAPTURE)){
                     mt->tail++;
                 }
-                mt->type.state |= PAT_KO;
+                mt->type.state |= KO;
                 match_NextTerm(mt);
                 break;
             }
@@ -114,7 +126,7 @@ static status match_FeedPat(Match *mt, word c){
                 mt->def.pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
-                match_NextTerm(mt);
+                mt->def.pat.curDef++;
                 continue;
             }else{
                 mt->type.state &= ~PROCESSING;
@@ -128,6 +140,9 @@ static status match_FeedPat(Match *mt, word c){
         debug('E', c, def, mt, charMatched(c, mt->def.pat.curDef));
     }
 
+    /*
+    if(mt->def.pat.curDef == mt->def.pat.endDef && mt->count > 0){
+    */
     if(mt->def.pat.curDef == mt->def.pat.endDef){
         mt->type.state = (mt->type.state | COMPLETE) & ~PROCESSING;
     }

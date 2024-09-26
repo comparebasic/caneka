@@ -30,12 +30,12 @@ status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
 }
 
 status XmlCtx_Close(XmlCtx *ctx, String *tagName){
-    ctx->current = ctx->current->parent;
-    if(ctx->current == ctx->root){
+    if(ctx->current == ctx->root->firstChild){
         ctx->type.state = SUCCESS;
     }else{
         ctx->type.state = PROCESSING;
     }
+    ctx->current = ctx->current->parent;
     return ctx->type.state;
 }
 

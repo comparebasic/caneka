@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-#define TAG_ATTR_PAT PAT_SINGLE,':',':',PAT_SINGLE,'-','-',PAT_SINGLE,'_','_',PAT_SINGLE,'a','z',PAT_SINGLE|PAT_TERM,'A','Z',\
+#define TAG_ATTR_PAT PAT_MANY,':',':',PAT_MANY,'-','-',PAT_MANY,'_','_',PAT_MANY,'a','z',PAT_MANY|PAT_TERM,'A','Z',\
     PAT_MANY,':',':',PAT_MANY,'-','-',PAT_MANY,'_','_',PAT_MANY,'a','z',PAT_MANY,'0','9',PAT_MANY|PAT_TERM,'A','Z'
 
 word tagDef[] = {
@@ -19,16 +19,16 @@ word closeTagDef[] = {
 };
 
 word bodyDef[] = {
-    PAT_KO, '<', '<', patText,
+    PAT_KO|PAT_SET_NOOP, '<', '<', patText,
     PAT_END, 0, 0
 };
 
 word attDef[] = {
     PAT_NO_CAPTURE|PAT_MANY, '\t', '\t', PAT_NO_CAPTURE|PAT_MANY, '\r', '\r', 
     PAT_NO_CAPTURE|PAT_MANY, '\n', '\n', PAT_NO_CAPTURE|PAT_MANY|PAT_TERM, ' ', ' ',
-    PAT_KO, '=', '=',
-    PAT_KO, '/', '/',
-    PAT_KO, '>', '>',
+    PAT_KO|PAT_SET_NOOP, '=', '=',
+    PAT_KO|PAT_SET_NOOP, '/', '/',
+    PAT_KO|PAT_SET_NOOP, '>', '>',
     TAG_ATTR_PAT,
     TAG_ATTR_PAT,
     PAT_END, 0, 0
@@ -61,31 +61,45 @@ word attUnQuotedDef[] = {
 
 static status setOpen(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
-    Debug_Print(s, 0, "Open: ", COLOR_CYAN, TRUE);
+    if(DEBUG_XML){
+        Debug_Print(s, 0, "Open: ", DEBUG_XML, TRUE);
+    }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    XmlCtx_Open(ctx, s);
     return SUCCESS;
 }
 
 static status setClose(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
-    Debug_Print(s, 0, "Close: ", COLOR_CYAN, TRUE);
+    if(DEBUG_XML){
+        Debug_Print(s, 0, "Close: ", DEBUG_XML, TRUE);
+    }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    XmlCtx_Close(ctx, s);
     return SUCCESS;
 }
 
 static status setBody(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
-    Debug_Print(s, 0, "Body: ", COLOR_CYAN, TRUE);
+    if(DEBUG_XML){
+        Debug_Print(s, 0, "Body: ", DEBUG_XML, TRUE);
+    }
     return SUCCESS;
 }
 
 static status setAtt(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
-    Debug_Print(s, 0, "Att: ", COLOR_CYAN, TRUE);
+    if(DEBUG_XML){
+        Debug_Print(s, 0, "Att: ", DEBUG_XML, TRUE);
+    }
     return SUCCESS;
 }
 
 static status setAttValue(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
-    Debug_Print(s, 0, "AttValue: ", COLOR_CYAN, TRUE);
+    if(DEBUG_XML){
+        Debug_Print(s, 0, "AttValue: ", DEBUG_XML, TRUE);
+    }
     return SUCCESS;
 }
 
@@ -122,14 +136,14 @@ static status attRoute(Roebling *rbl){
     Match_SetPattern(mt, (PatCharDef *)attDef);
     mt->dispatch = setAtt;
 
-    mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
-    mt = Span_ReserveNext(rbl->matches);
-    Match_SetPattern(mt, (PatCharDef *)tagEndDef);
-    mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
-
     mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)selfCloseDef);
     mt->dispatch = setClose;
+    mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
+
+    mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
+    mt = Span_ReserveNext(rbl->matches);
+    Match_SetPattern(mt, (PatCharDef *)tagEndDef);
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
 
     r |= SUCCESS;

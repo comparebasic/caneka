@@ -86,6 +86,10 @@ static status Roebling_RunMatches(Roebling *rbl){
         Match *mt = NULL;
         for(int i = 0; i < rbl->matches->nvalues; i++){
             mt = Span_Get(rbl->matches, i);
+            if(DEBUG_ROEBLING){
+                printf("\x1b[%dm%d ", DEBUG_ROEBLING, i);
+                Debug_Print(mt, 0, "Roebling Running Match: ", DEBUG_ROEBLING, TRUE);
+            }
             if(mt != NULL){
                Match_Feed(mt, c);
                if(HasFlag(mt->type.state, COMPLETE)){
