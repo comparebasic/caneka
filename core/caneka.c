@@ -35,7 +35,7 @@ static char *stateNames[] = {
     "NOOP,",
     "INLINE/ELASTIC,",
     "BREAK,",
-    "TRACKED,",
+    "TRACKED/TERM_FOUND,",
     "INCOMING,",
     "PROCESSING,",
     "RESPONDING,",

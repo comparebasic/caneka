@@ -5,12 +5,13 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_DARK;
+int DEBUG_MATCH_COMPLETE = COLOR_YELLOW;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
 int DEBUG_ROEBLING = 0;
 int DEBUG_ROEBLING_MARK = 0;
-int DEBUG_ROEBLING_COMPLETE = 0;
+int DEBUG_ROEBLING_COMPLETE = COLOR_CYAN;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_ALLOC = 0;
@@ -18,8 +19,7 @@ int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
 int DEBUG_XML = 0;
-
-int DEBUG_ROEBLING_NAME = COLOR_GREEN;
+int DEBUG_ROEBLING_NAME = 0;
 
 static MemCtx *DebugM = NULL;
 
@@ -158,6 +158,9 @@ static status patFlagStr(word flags, char str[]){
     if((flags & PAT_OPTIONAL) != 0){
         str[i++] = 'P';
     }
+    if((flags & PAT_CONSUME) != 0){
+        str[i++] = 'O';
+    }
     if((flags & PAT_MANY) != 0){
         str[i++] = 'M';
     }
@@ -239,11 +242,11 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
         printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->jump, mt->count, mt->remaining);
-        printf("\x1b[1;%dm", color);
+        printf("\x1b[1;%dm[", color);
         Debug_Print((void *)mt->def.pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
-        printf("\x1b[0;%dm ", color);
+        printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);
         Debug_Print((void *)mt->def.pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
-        printf(">\x1b[0m");
+        printf("\x1b[%dm>\x1b[0m", color);
     }else{
         printf("\x1b[%dm%sMatch<state=%s>\x1b[0m", color, msg, State_ToString(mt->type.state));
     }
@@ -291,7 +294,7 @@ static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean ext
         if(mt->jump >= 0){
             printf(":jmp=%d\n", mt->jump);
         }
-        printf(">\n");
+        printf("\x1b[%dm>\x1b[0m\n", color);
     }
 }
 
@@ -557,4 +560,21 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
     }
     printf("\x1b[0m");
 }
+
+
+void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched){
+    if(c == '\n'){
+        printf("\x1b[%dm  %c \x1b[0;1m'\\n'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
+            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
+    }else if(c == '\r'){
+        printf("\x1b[%dm  %c \x1b[0;1m'\\r'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
+            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
+    }else{
+        printf("\x1b[%dm  %c \x1b[0;1m'%c'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
+            c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
+    }
+    Debug_Print((void *)mt->def.pat.startDef, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
+    printf("\n");
+}
+
 

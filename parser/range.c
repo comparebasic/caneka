@@ -50,8 +50,8 @@ int Range_GetLength(Range *range){
         }
     }
 
-    if(HasFlag(range->end.type.state, END)){
-        length++;
+    if(length < 0){
+        length = 0;
     }
 
     return length;

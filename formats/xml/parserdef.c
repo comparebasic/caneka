@@ -26,10 +26,9 @@ word bodyDef[] = {
 word attDef[] = {
     PAT_NO_CAPTURE|PAT_MANY, '\t', '\t', PAT_NO_CAPTURE|PAT_MANY, '\r', '\r', 
     PAT_NO_CAPTURE|PAT_MANY, '\n', '\n', PAT_NO_CAPTURE|PAT_MANY|PAT_TERM, ' ', ' ',
-    PAT_KO|PAT_SET_NOOP, '=', '=',
-    PAT_KO|PAT_SET_NOOP, '/', '/',
-    PAT_KO|PAT_SET_NOOP, '>', '>',
-    TAG_ATTR_PAT,
+    PAT_KO|PAT_NO_CAPTURE, '=', '=',
+    PAT_KO|PAT_NO_CAPTURE, '/', '/',
+    PAT_KO|PAT_NO_CAPTURE, '>', '>',
     TAG_ATTR_PAT,
     PAT_END, 0, 0
 };
@@ -48,8 +47,7 @@ word selfCloseDef[] = {
 word attQuotedDef[] = {
     PAT_NO_CAPTURE|PAT_TERM, '=', '=',
     PAT_NO_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_NO_CAPTURE, '"', '"', patText,
-    PAT_NO_CAPTURE|PAT_TERM, '"', '"',
+    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', patText,
     PAT_END, 0, 0
 };
 
@@ -91,7 +89,10 @@ static status setAtt(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
     if(DEBUG_XML){
         Debug_Print(s, 0, "Att: ", DEBUG_XML, TRUE);
+        printf("\n");
     }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    XmlCtx_SetAttr(ctx, s);
     return SUCCESS;
 }
 
@@ -100,6 +101,8 @@ static status setAttValue(Roebling *rbl){
     if(DEBUG_XML){
         Debug_Print(s, 0, "AttValue: ", DEBUG_XML, TRUE);
     }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    XmlCtx_SetAttrValue(ctx, (Abstract *)s);
     return SUCCESS;
 }
 
@@ -115,7 +118,6 @@ static status start(Roebling *rbl){
 
     mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)closeTagDef);
-    mt->dispatch = setClose;  
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
 
     mt = Span_ReserveNext(rbl->matches);

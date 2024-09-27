@@ -11,6 +11,7 @@ typedef struct xml_ctx {
     int count;
     Mess *root;
     Mess *current;
+    Mess *parent;
     void *source;
 } XmlCtx;
 
@@ -19,3 +20,5 @@ Span *XmlParser_Make(MemCtx *m);
 status XmlCtx_Open(XmlCtx *ctx, String *tagName);
 status XmlCtx_Close(XmlCtx *ctx, String *tagName);
 status XmlCtx_SetAttr(XmlCtx *ctx, String *attName);
+status XmlCtx_SetAttrValue(XmlCtx *ctx, Abstract *value);
+status XmlCtx_TagClosed(XmlCtx *ctx);

@@ -4,18 +4,16 @@
 status XmlCtx_Open(XmlCtx *ctx, String *tagName){
     Mess *ms = Mess_Make(ctx->m);
     ms->value = Hashed_Make(ctx->m, (Abstract *)tagName);
-    if(ctx->current == NULL){
-        Mess_Append(ms, ctx->root);
-    }else{
-        Mess_Append(ms, ctx->current->parent);
+    if(ctx->parent == NULL){
+        ctx->parent = ctx->root;
     }
+    Mess_Append(ms, ctx->parent);
     ctx->count++;
     ctx->current = ms;
     return SUCCESS;
 }
 
 status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
-    printf("Setting Atts\n");
     Hashed *h = Hashed_Make(ctx->m, (Abstract *)attName);
     if(ctx->current->atts == NULL){
         ctx->current->atts = h;
@@ -29,13 +27,28 @@ status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
     return SUCCESS;
 }
 
+status XmlCtx_SetAttrValue(XmlCtx *ctx, Abstract *value){
+    Hashed *h = ctx->current->atts;
+    while(h->next != NULL){
+        h = h->next;
+    }
+    h->value = value;
+    return SUCCESS;
+}
+
+status XmlCtx_TagClosed(XmlCtx *ctx){
+    ctx->parent = ctx->current;
+    ctx->current = NULL;
+    return ctx->type.state;
+}
+
 status XmlCtx_Close(XmlCtx *ctx, String *tagName){
     if(ctx->current == ctx->root->firstChild){
         ctx->type.state = SUCCESS;
     }else{
         ctx->type.state = PROCESSING;
     }
-    ctx->current = ctx->current->parent;
+    ctx->current = ctx->parent;
     return ctx->type.state;
 }
 

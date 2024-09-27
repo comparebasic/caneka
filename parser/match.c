@@ -1,21 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static void debug(char type, word c, PatCharDef *def, Match *mt, boolean matched){
-    if(c == '\n'){
-        printf("\x1b[%dm  %c \x1b[0;1m'\\n'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
-    }else if(c == '\r'){
-        printf("\x1b[%dm  %c \x1b[0;1m'\\r'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
-    }else{
-        printf("\x1b[%dm  %c \x1b[0;1m'%c'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
-    }
-    Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
-    printf("\n");
-}
-
 static void match_Reset(Match *mt){
     if(mt->type.of == TYPE_PATMATCH){
         mt->def.pat.curDef = mt->def.pat.startTermDef = mt->def.pat.startDef;
@@ -90,35 +75,44 @@ static status match_FeedPat(Match *mt, word c){
         matched = charMatched(c, def);
 
         if(DEBUG_PATMATCH){
-            debug('_', c, def, mt, matched);
+            Match_midDebug('_', c, def, mt, matched);
         }
         if(matched){
             if(HasFlag(def->flags, PAT_KO)){
-                if(HasFlag(def->flags, PAT_SET_NOOP)){
+                if(!HasFlag(def->flags, PAT_NO_CAPTURE) || HasFlag(def->flags, PAT_CONSUME)){
+                    mt->tail++;
+                }
+                if(HasFlag(def->flags, PAT_SET_NOOP) || mt->count == 0){
                     mt->type.state |= MISS;
                     mt->def.pat.curDef = mt->def.pat.startDef;
                     return mt->type.state;
                 }
                 mt->type.state &= ~PROCESSING;
-                if(!HasFlag(def->flags, PAT_NO_CAPTURE)){
-                    mt->tail++;
-                }
                 mt->type.state |= KO;
                 match_NextTerm(mt);
                 break;
             }
             mt->type.state |= PROCESSING;
 
-            if(HasFlag(def->flags, PAT_NO_CAPTURE) && mt->count == 0){
-                mt->lead++;
+            if(HasFlag(def->flags, PAT_NO_CAPTURE)){
+                printf("___________ NO CAPTURE\n");
+                if(mt->count == 0){
+                    mt->lead++;
+                }else if((def+1) == mt->def.pat.endDef){
+                    mt->tail++;
+                }else{
+                    mt->count++;
+                }
             }else{
                 mt->count++;
             }
 
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0){
                 match_StartOfTerm(mt);
+                mt->type.state |= TERM_FOUND;
             }else{
                 match_NextTerm(mt);
+                mt->type.state &= ~TERM_FOUND;
             }
             break;
         }else{
@@ -126,8 +120,14 @@ static status match_FeedPat(Match *mt, word c){
                 mt->def.pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
-                mt->def.pat.curDef++;
-                continue;
+                if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, TERM_FOUND)){
+                    mt->type.state &= ~PROCESSING;
+                    match_Reset(mt);
+                    break;
+                }else{
+                    mt->def.pat.curDef++;
+                    continue;
+                }
             }else{
                 mt->type.state &= ~PROCESSING;
                 match_Reset(mt);
@@ -137,18 +137,19 @@ static status match_FeedPat(Match *mt, word c){
     }
 
     if(DEBUG_PATMATCH){
-        debug('E', c, def, mt, charMatched(c, mt->def.pat.curDef));
+        Match_midDebug('E', c, def, mt, charMatched(c, mt->def.pat.curDef));
     }
 
-    /*
-    if(mt->def.pat.curDef == mt->def.pat.endDef && mt->count > 0){
-    */
     if(mt->def.pat.curDef == mt->def.pat.endDef){
         mt->type.state = (mt->type.state | COMPLETE) & ~PROCESSING;
+        if(DEBUG_MATCH_COMPLETE){
+            Debug_Print(mt, 0, "Match Completed:%s", DEBUG_MATCH_COMPLETE, TRUE);
+            printf("\n");
+        }
     }
 
     if(DEBUG_PATMATCH){
-        printf("\x1b[%dm round: <%s> on \x1b[0m", DEBUG_PATMATCH, State_ToString(mt->type.state));
+        printf("\x1b[%dmround: <%s> on \x1b[0m", DEBUG_PATMATCH, State_ToString(mt->type.state));
         Debug_Print(def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
         printf("\n");
     }

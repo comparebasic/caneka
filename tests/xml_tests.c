@@ -63,11 +63,25 @@ status XmlNested_Tests(MemCtx *gm){
     Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
     printf("\n");
 
-    /*
     Roebling_Run(rbl);
     Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
     printf("\n");
+
+    Mess *node = ctx->root->firstChild;
+    Hashed *h = node->atts;
+    r |= Test(String_EqualsBytes((String *)h->item, bytes("type")), "Attribute has name 'type', have '%s'", ((String *)h->item)->bytes);
+    r |= Test(String_EqualsBytes((String *)h->value, bytes("root")), "Attribute Value to be 'root', have '%s'", ((String *)h->value)->bytes);
+
+    Roebling_Run(rbl);
+    r |= Test(rbl->jump == Roebling_GetMarkIdx(rbl, XML_START), "Jump set to XML_START");
+    Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
+    printf("\n");
+    
+    Roebling_Run(rbl);
+    /*
+    Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
     */
+    printf("\n");
 
     r |= SUCCESS;
 

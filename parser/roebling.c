@@ -103,6 +103,15 @@ static status Roebling_RunMatches(Roebling *rbl){
                          SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
                      }
                      rbl->tail = mt->tail;
+                     if(DEBUG_ROEBLING_COMPLETE){
+                         printf("\x1b[%dm#%d ", DEBUG_ROEBLING_COMPLETE, i);
+                         Debug_Print((void *)mt, 0, "Match Found: ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                         String *s = Range_Copy(rbl->m, &(rbl->range));
+                         printf(" \x1b[1;%dm(", DEBUG_ROEBLING_COMPLETE);
+                         Debug_Print((void *)s, 0, "", DEBUG_ROEBLING_COMPLETE, TRUE);
+                         printf("\x1b[1;%dm)\n\x1b[0m", DEBUG_ROEBLING_COMPLETE);
+                         printf("\n");
+                     }
                      break;
                }
             }
@@ -159,12 +168,6 @@ status Roebling_Run(Roebling *rbl){
 
     if(HasFlag(rbl->type.state, NEXT)){
         Match *mt = Roebling_GetValueMatch(rbl);
-        if(DEBUG_ROEBLING_COMPLETE){
-            Debug_Print((void *)mt, 0, "Match Found: ", DEBUG_ROEBLING_COMPLETE, TRUE);
-            printf("\n");
-            Debug_Print((void *)&(rbl->range), 0, "Range: ", DEBUG_ROEBLING_COMPLETE, FALSE);
-            printf("\n");
-        }
         if(mt != NULL){
             rbl->type.state |= (mt->type.state & NOOP);
             if(HasFlag(mt->type.state, SUCCESS) && mt->jump > -1){

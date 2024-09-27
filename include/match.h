@@ -13,6 +13,7 @@ enum pat_flags {
     PAT_ALL = 1 << 8, /* A */
     PAT_KO = 1 << 9, /* K */
     PAT_SINGLE = 1 << 10, /* S */
+    PAT_CONSUME  = 1 << 11, /* O */
 };
 
 enum match_flags {
