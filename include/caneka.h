@@ -35,6 +35,8 @@ struct roebling;
 struct span_def;
 struct mem_handle;
 
+extern word GLOBAL_flags;
+
 typedef struct typehdr {
     cls of;
     status state;
@@ -171,6 +173,7 @@ char *Class_ToString(cls type);
 #define TEST_OK READY
 #define ELASTIC INLINE
 #define TERM_FOUND TRACKED
+#define NO_COLOR RAW
 
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);

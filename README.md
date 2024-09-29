@@ -31,6 +31,12 @@ all of Caneka.
 
 - [main.c](./main.c) - Example and test runner. This file is mostly an example Caneka application, and it runs the tests
 
+## Tests
+
+Tests can be found in the `tests` folder and are runnable from the `caneka` binary with the argument `test`.
+
+Output is also regularly commited to [dist/test_run.txt](./dist/test_run.txt)
+
 ## Licence
 
 MIT: [licence file](./LICENCE)

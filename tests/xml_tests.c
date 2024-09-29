@@ -53,19 +53,9 @@ status XmlNested_Tests(MemCtx *gm){
 
     s = String_Make(m, bytes("<main type=\"root\">\n  <alpha>\n    <t model=\"foo\" baseline=\"fancy-pants\">Gotta Get It!</t>\n  </alpha>\n  <alpha>\n    <t model=\"geese\" baseline=\"fancy-pants\">Have It!</t>\n  </alpha>\n</main>"));
     Roebling_AddBytes(rbl, s->bytes, s->length);
-    printf("\x1b[%dmParsing:\n%s\x1b[0m\n", COLOR_BLUE, s->bytes);
-
     Roebling_Run(rbl);
-    Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     Roebling_Run(rbl);
-    Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     Roebling_Run(rbl);
-    Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     Mess *node = ctx->root->firstChild;
     Hashed *h = node->atts;
@@ -74,16 +64,13 @@ status XmlNested_Tests(MemCtx *gm){
 
     Roebling_Run(rbl);
     r |= Test(rbl->jump == Roebling_GetMarkIdx(rbl, XML_START), "Jump set to XML_START");
-    Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
-    printf("\n");
     
     Roebling_Run(rbl);
     r |= Test(String_EqualsBytes(node->firstChild->body, bytes("\n  ")), "Whitespace before tag added as body, have '%s'", String_ToEscaped(m, node->firstChild->body)->bytes);
+    /*
     Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
     printf("\n");
-    printf("\n");
-
-    r |= SUCCESS;
+    */
 
     MemCtx_Free(m);
     return r;

@@ -36,12 +36,15 @@ static void *tests[] = {
     */
 };
 
-static status test(MemCtx *m){
+static status test(MemCtx *m, char *arg){
     status r = TEST_OK;
+    word flags = 0;
+    if(strncmp(arg, "test=no-color", strlen("test=no-color")) == 0){
+        GLOBAL_flags |= NO_COLOR;
+    }
     Test_Runner(m, "Caneka", tests);
     return r;
 }
-
 
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
@@ -67,7 +70,7 @@ static status handle(MemCtx *m, char *arg){
         */
         return MISS;
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
-        status r = test(m);
+        status r = test(m, arg);
         if(r == TEST_OK){
             return SUCCESS;
         }else{

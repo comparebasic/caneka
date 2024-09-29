@@ -60,7 +60,6 @@ static status match_FeedPat(Match *mt, word c){
     if(HasFlag(mt->type.state, MISS)){
         if(DEBUG_PATMATCH){
             Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
-            printf(" - MISS\n");
         }
         return mt->type.state;
     }
@@ -116,7 +115,6 @@ static status match_FeedPat(Match *mt, word c){
             break;
         }else{
             if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
-                printf("KO def++\n");
                 mt->def.pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){

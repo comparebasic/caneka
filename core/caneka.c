@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+word GLOBAL_flags = 0;
+
 status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= SpanDef_Init();
