@@ -32,7 +32,7 @@ static word states[] = {
 static char *stateNames[] = {
     "ERROR,",
     "OPTIONAL,",
-    "NOOP,",
+    "NOOP/WHITESPACE,",
     "INLINE/ELASTIC,",
     "BREAK,",
     "TRACKED/TERM_FOUND,",

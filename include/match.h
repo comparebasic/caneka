@@ -25,6 +25,9 @@ enum match_flags {
 #define patText \
     PAT_OPTIONAL|PAT_MANY, '\t', '\t', PAT_OPTIONAL|PAT_MANY, '\r', '\r', PAT_OPTIONAL|PAT_MANY, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31
 
+#define patWhiteSpace \
+    PAT_MANY, '\t', '\t', PAT_MANY, '\r', '\r', PAT_MANY, '\n', '\n', PAT_MANY|PAT_TERM, ' ', ' ' 
+
 #define TEXT_DEF patText, PAT_END, 0, 0
 #define NL_DEF PAT_TERM, '\n', '\n', PAT_END, 0, 0
 #define WS_REQUIRED PAT_MANY, ' ',' ', PAT_MANY, '\t','\t', \

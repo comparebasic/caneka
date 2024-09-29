@@ -19,7 +19,12 @@ word closeTagDef[] = {
 };
 
 word bodyDef[] = {
-    PAT_KO|PAT_SET_NOOP, '<', '<', patText,
+    PAT_KO|PAT_NO_CAPTURE, '<', '<', patText,
+    PAT_END, 0, 0
+};
+
+word bodyWsDef[] = {
+    PAT_KO|PAT_NO_CAPTURE, '<', '<', patWhiteSpace, 
     PAT_END, 0, 0
 };
 
@@ -67,6 +72,16 @@ static status setOpen(Roebling *rbl){
     return SUCCESS;
 }
 
+static status setTagClosed(Roebling *rbl){
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    if(DEBUG_XML){
+        Debug_Print(s, 0, "TagClosed: ", DEBUG_XML, TRUE);
+    }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    XmlCtx_TagClosed(ctx);
+    return SUCCESS;
+}
+
 static status setClose(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
     if(DEBUG_XML){
@@ -77,11 +92,26 @@ static status setClose(Roebling *rbl){
     return SUCCESS;
 }
 
+static status setWhiteSpaceBody(Roebling *rbl){
+    String *s = Range_Copy(rbl->m, &(rbl->range));
+    if(DEBUG_XML){
+        Debug_Print(s, 0, "WSBody: ", DEBUG_XML, TRUE);
+        printf("\n");
+    }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    s->type.state |= WHITESPACE;
+    XmlCtx_BodyAppend(ctx, s);
+    return SUCCESS;
+}
+
 static status setBody(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
     if(DEBUG_XML){
         Debug_Print(s, 0, "Body: ", DEBUG_XML, TRUE);
+        printf("\n");
     }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    XmlCtx_BodyAppend(ctx, s);
     return SUCCESS;
 }
 
@@ -121,6 +151,11 @@ static status start(Roebling *rbl){
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
 
     mt = Span_ReserveNext(rbl->matches);
+    Match_SetPattern(mt, (PatCharDef *)bodyWsDef);
+    mt->dispatch = setWhiteSpaceBody;  
+    mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
+
+    mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)bodyDef);
     mt->dispatch = setBody;  
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
@@ -146,6 +181,7 @@ static status attRoute(Roebling *rbl){
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
     mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)tagEndDef);
+    mt->dispatch = setTagClosed;
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
 
     r |= SUCCESS;

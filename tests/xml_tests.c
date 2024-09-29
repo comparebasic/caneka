@@ -78,9 +78,9 @@ status XmlNested_Tests(MemCtx *gm){
     printf("\n");
     
     Roebling_Run(rbl);
-    /*
+    r |= Test(String_EqualsBytes(node->firstChild->body, bytes("\n  ")), "Whitespace before tag added as body, have '%s'", String_ToEscaped(m, node->firstChild->body)->bytes);
     Debug_Print((void *)ctx, 0, "Xml", COLOR_PURPLE, TRUE);
-    */
+    printf("\n");
     printf("\n");
 
     r |= SUCCESS;

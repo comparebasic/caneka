@@ -5,6 +5,8 @@ string library
 related: core/string.h
 */
 
+#define WHITESPACE NOOP
+
 typedef struct stringmin {
     Type type;
     int length;
@@ -25,7 +27,7 @@ typedef struct string {
 String *String_Make(MemCtx *m, byte *bytes);
 String *String_MakeFixed(MemCtx *m, byte *bytes, int length);
 String *String_From(MemCtx *m, byte *bytes);
-status String_Add(MemCtx *m, String *a, String *b);
+status String_Add(MemCtx *m, String *dest, String *toAdd);
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length);
 i64 String_Length(String *s);
 boolean String_EqualsBytes(String *a, byte *cstr);

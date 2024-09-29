@@ -22,3 +22,4 @@ status XmlCtx_Close(XmlCtx *ctx, String *tagName);
 status XmlCtx_SetAttr(XmlCtx *ctx, String *attName);
 status XmlCtx_SetAttrValue(XmlCtx *ctx, Abstract *value);
 status XmlCtx_TagClosed(XmlCtx *ctx);
+status XmlCtx_BodyAppend(XmlCtx *ctx, String *body);

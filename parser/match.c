@@ -95,7 +95,6 @@ static status match_FeedPat(Match *mt, word c){
             mt->type.state |= PROCESSING;
 
             if(HasFlag(def->flags, PAT_NO_CAPTURE)){
-                printf("___________ NO CAPTURE\n");
                 if(mt->count == 0){
                     mt->lead++;
                 }else if((def+1) == mt->def.pat.endDef){
@@ -117,6 +116,7 @@ static status match_FeedPat(Match *mt, word c){
             break;
         }else{
             if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
+                printf("KO def++\n");
                 mt->def.pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){

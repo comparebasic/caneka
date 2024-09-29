@@ -9,7 +9,7 @@ int DEBUG_PATMATCH = COLOR_DARK;
 int DEBUG_MATCH_COMPLETE = COLOR_YELLOW;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
-int DEBUG_ROEBLING = 0;
+int DEBUG_ROEBLING = COLOR_BLUE;
 int DEBUG_ROEBLING_MARK = 0;
 int DEBUG_ROEBLING_COMPLETE = COLOR_CYAN;
 int DEBUG_ROEBLING_CONTENT = 0;
@@ -18,7 +18,7 @@ int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
-int DEBUG_XML = 0;
+int DEBUG_XML = COLOR_CYAN;
 int DEBUG_ROEBLING_NAME = 0;
 
 static MemCtx *DebugM = NULL;
@@ -252,25 +252,49 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
     }
 }
 
-static void Mess_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    Mess *ms = (Mess *)a;
+
+static void mess_PrintRecurse(Mess *ms, char *msg, int color, boolean extended, int indent){
+    indent_Print(indent);
     printf("\x1b[%dm%sM<%s value=\x1b[0m", color, msg, Class_ToString(ms->type.of));
     Debug_Print((void *)ms->value, 0, "", color, extended);
     Hashed *h = ms->atts;
     printf(" ");
+    if(h != NULL){
+        printf("\x1b[%dmatts=[", color);
+    }
     while(h != NULL){
         Debug_Print((void *)h, 0, "", color, extended);
         h = h->next;
-        printf(", ");
+        if(h != NULL){
+            printf("\x1b[%dm, ", color);
+        }
+    }
+    if(ms->atts != NULL){
+        printf("\x1b[%dm]", color);
+    }
+    if(ms->body != NULL){
+        Debug_Print(ms->body, 0, "body=", color, TRUE);
     }
     Mess *child = ms->firstChild;
-    printf("\x1b[%dm [", color);
+    if(child != NULL){
+        printf("\x1b[%dm [", color);
+        printf("\n");
+    }
     while(child != NULL){
-        Debug_Print((void *)child, 0, "", color, extended);
+        mess_PrintRecurse(child, msg, color, extended, indent+1);
         child = child->next;
     }
-    printf("\x1b[%dm]", color);
-    printf(">\x1b[0m");
+    if(ms->firstChild != NULL){
+        indent_Print(indent);
+        printf("\x1b[%dm]", color);
+        printf(">\x1b[0m");
+    }
+    printf("\n");
+}
+
+static void Mess_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Mess *ms = (Mess *)a;
+    mess_PrintRecurse(ms, msg, color, extended, 0);
 }
 
 static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -320,7 +344,11 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
     String *s = (String *)as(a, TYPE_STRING_FIXED);
     String *esc = String_ToEscaped(DebugM, s);
     if(extended){
-        printf("%s\x1b[%dmSFixed<\x1b[0;%dm", msg, color, color);
+        char *state = "";
+        if(s->type.state != 0){
+            state = State_ToString(s->type.state);
+        }
+        printf("%s\x1b[%dmSFixed<%s\x1b[0;%dm", msg, color,state, color);
         printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
@@ -369,7 +397,11 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)as(a, TYPE_STRING_CHAIN);
     if(extended){
-        printf("%s\x1b[%dmS<\x1b[0;%dm", msg, color, color);
+        char *state = "";
+        if(s->type.state != 0){
+            state = State_ToString(s->type.state);
+        }
+        printf("%s\x1b[%dmS<%s\x1b[0;%dm", msg, color, state, color);
         do {
             String *esc = String_ToEscaped(DebugM, s);
             printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
@@ -573,7 +605,7 @@ void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean match
         printf("\x1b[%dm  %c \x1b[0;1m'%c'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
             c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
     }
-    Debug_Print((void *)mt->def.pat.startDef, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
+    Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
     printf("\n");
 }
 

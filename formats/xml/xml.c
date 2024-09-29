@@ -27,6 +27,13 @@ status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
     return SUCCESS;
 }
 
+status XmlCtx_BodyAppend(XmlCtx *ctx, String *body){
+    Mess *ms = Mess_Make(ctx->m);
+    ms->body = body;
+    Mess_Append(ms, ctx->parent);
+    return SUCCESS;
+}
+
 status XmlCtx_SetAttrValue(XmlCtx *ctx, Abstract *value){
     Hashed *h = ctx->current->atts;
     while(h->next != NULL){
@@ -57,6 +64,7 @@ XmlCtx *XmlCtx_Make(MemHandle *mh, void *source){
     XmlCtx *ctx = (XmlCtx*)MemCtx_Alloc(m, sizeof(XmlCtx));
     ctx->m = m;
     ctx->root = Mess_Make(ctx->m);
+    ctx->parent = ctx->root;
     ctx->type.of = TYPE_XMLCTX;
     return ctx;
 }
