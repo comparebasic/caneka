@@ -281,8 +281,11 @@ static void mess_PrintRecurse(Mess *ms, char *msg, int color, boolean extended, 
         printf("\n");
     }
     while(child != NULL){
-        mess_PrintRecurse(child, msg, color, extended, indent+1);
+        mess_PrintRecurse(child, "", color, extended, indent+1);
         child = child->next;
+    }
+    if(ms->next != NULL){
+        printf("\x1b[%dmnext=%p", color, ms->next);
     }
     if(ms->firstChild != NULL){
         indent_Print(indent);
@@ -458,6 +461,9 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
         Debug_Print((void *)h->item, 0, "", color, extended);
         printf("\x1b[%dm v=", color);
         Debug_Print((void *)h->value, 0, "", color, extended);
+        if(h->next != NULL){
+            printf("\x1b[%dm next=%p", color, h);
+        }
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
         printf("\x1b[%dm%sH<", color, msg);

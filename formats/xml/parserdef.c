@@ -82,13 +82,23 @@ static status setTagClosed(Roebling *rbl){
     return SUCCESS;
 }
 
-static status setClose(Roebling *rbl){
+static status setCloseTag(Roebling *rbl){
     String *s = Range_Copy(rbl->m, &(rbl->range));
     if(DEBUG_XML){
         Debug_Print(s, 0, "Close: ", DEBUG_XML, TRUE);
     }
     XmlCtx *ctx = (XmlCtx *)rbl->source;
     XmlCtx_Close(ctx, s);
+    return SUCCESS;
+}
+
+static status setSelfClose(Roebling *rbl){
+    if(DEBUG_XML){
+        String *s = Range_Copy(rbl->m, &(rbl->range));
+        Debug_Print(s, 0, "SelfClose: ", DEBUG_XML, TRUE);
+    }
+    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    XmlCtx_Close(ctx, NULL);
     return SUCCESS;
 }
 
@@ -148,6 +158,7 @@ static status start(Roebling *rbl){
 
     mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)closeTagDef);
+    mt->dispatch = setCloseTag;
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
 
     mt = Span_ReserveNext(rbl->matches);
@@ -175,7 +186,7 @@ static status attRoute(Roebling *rbl){
 
     mt = Span_ReserveNext(rbl->matches);
     Match_SetPattern(mt, (PatCharDef *)selfCloseDef);
-    mt->dispatch = setClose;
+    mt->dispatch = setSelfClose;
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);
 
     mt->jump = Roebling_GetMarkIdx(rbl, XML_START);

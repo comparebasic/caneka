@@ -7,7 +7,7 @@ status XmlCtx_Open(XmlCtx *ctx, String *tagName){
     if(ctx->parent == NULL){
         ctx->parent = ctx->root;
     }
-    Mess_Append(ms, ctx->parent);
+    Mess_Append(ctx->parent, ms);
     ctx->count++;
     ctx->current = ms;
     return SUCCESS;
@@ -30,7 +30,7 @@ status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
 status XmlCtx_BodyAppend(XmlCtx *ctx, String *body){
     Mess *ms = Mess_Make(ctx->m);
     ms->body = body;
-    Mess_Append(ms, ctx->parent);
+    Mess_Append(ctx->parent, ms);
     return SUCCESS;
 }
 
@@ -45,17 +45,17 @@ status XmlCtx_SetAttrValue(XmlCtx *ctx, Abstract *value){
 
 status XmlCtx_TagClosed(XmlCtx *ctx){
     ctx->parent = ctx->current;
-    ctx->current = NULL;
     return ctx->type.state;
 }
 
 status XmlCtx_Close(XmlCtx *ctx, String *tagName){
-    if(ctx->current == ctx->root->firstChild){
+    if(ctx->current == ctx->root->firstChild || ctx->parent == ctx->root->firstChild){
         ctx->type.state = SUCCESS;
     }else{
         ctx->type.state = PROCESSING;
     }
     ctx->current = ctx->parent;
+    ctx->parent = ctx->current->parent;
     return ctx->type.state;
 }
 

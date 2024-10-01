@@ -1,34 +1,37 @@
 #include <external.h>
 #include <caneka.h>
 
-Mess *Mess_Make(MemCtx *m){
-    Mess *ms = (Mess *)MemCtx_Alloc(m, sizeof(Mess));
-    ms->type.of = TYPE_MESS;
-    return ms;
-}
-
-status Mess_Extend(Mess *new, Mess *existing){
+static status mess_Extend(Mess *existing, Mess *new){
     if(existing != NULL){
         while(existing->next != NULL){
             existing = existing->next;
         }
-        existing->next = existing;
+        existing->next = new;
         return SUCCESS;
     }
 
     return ERROR;
 }
 
-status Mess_Append(Mess *new, Mess *existing){
-    if(existing != NULL){
-        new->parent = existing;
+
+Mess *Mess_Make(MemCtx *m){
+    Mess *ms = (Mess *)MemCtx_Alloc(m, sizeof(Mess));
+    ms->type.of = TYPE_MESS;
+    return ms;
+}
+
+status Mess_Append(Mess *existing, Mess *ms){
+    if(existing != NULL && ms != existing){
         if(existing->firstChild == NULL){
-            existing->firstChild = new;
+            existing->firstChild = ms;
         }else{
-            Mess_Extend(new, existing->firstChild);
+            mess_Extend(existing->firstChild, ms);
         }
+        ms->parent = existing;
         return SUCCESS;
     }
+
+    printf("OOps they are identical\n");
 
     return ERROR;
 }

@@ -174,6 +174,7 @@ char *Class_ToString(cls type);
 #define ELASTIC INLINE
 #define TERM_FOUND TRACKED
 #define NO_COLOR RAW
+#define SEARCH OPTIONAL
 
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);

@@ -9,4 +9,4 @@ typedef struct mess {
 } Mess;
 
 Mess *Mess_Make(MemCtx *m);
-status Mess_Append(Mess *new, Mess *existing);
+status Mess_Append(Mess *existing, Mess *ms);
