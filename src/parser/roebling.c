@@ -30,8 +30,13 @@ int Roebling_GetMatchIdx(Roebling *rbl){
     return rbl->matches->metrics.selected;
 }
 
-status Roebling_SetPattern(Roebling *rbl, PatCharDef *def){
+status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump){
     Match *mt = Span_ReserveNext(rbl->matches);
+    mt->captureKey = captureKey;
+    if(jump != -1){
+        mt->jump = Roebling_GetMarkIdx(rbl, jump);
+        printf("Setting Jump %d -> %d\n", jump, mt->jump);
+    }
     return Match_SetPattern(mt, def);
 }
 
@@ -44,16 +49,18 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
     return SUCCESS;
 }
 
-int Roebling_GetMarkIdx(Roebling *rlb, int mark){
-    int *mrk = (int *)Lookup_Get(rlb->marks, mark); 
-    if(mrk != 0){
+int Roebling_GetMarkIdx(Roebling *rbl, int mark){
+    int *mrk = (int *)Lookup_Get(rbl->marks, mark); 
+    if(mrk != NULL){
         return *mrk;
     }
+    Debug_Print((void *)rbl->marks, 0, "Mark not found: ", COLOR_PURPLE, TRUE);
+    printf("\n");
     return -1; 
 }
 
 status Roebling_SetMark(Roebling *rbl, int mark, int _idx){
-    i64 idx = (i64)_idx;
+    printf("Setting Mark %d-> %d\n", mark, _idx);
     return Lookup_Add(rbl->m, rbl->marks, mark, (void *)&_idx);
 }
 
@@ -174,12 +181,8 @@ status Roebling_Run(Roebling *rbl){
                 rbl->jump = mt->jump; 
             }
         }
-        if(rbl->dispatch != NULL){
-            rbl->dispatch(rbl);
-        }
-        if(mt->dispatch){
-            mt->dispatch(rbl);
-        }
+        String *s = Range_Copy(rbl->m, &(rbl->range));
+        rbl->capture(mt->captureKey, s, rbl->source);
     }
         
     return rbl->type.state;
@@ -189,7 +192,6 @@ status Roebling_ResetPatterns(Roebling *rbl){
     Span_ReInit(rbl->matches);
     rbl->jump = -1;
     rbl->jumpMiss = -1;
-    rbl->dispatch = NULL;
     return READY;
 }
 
@@ -202,12 +204,14 @@ Roebling *Roebling_Make(MemCtx *m,
         Span *parsers,
         Lookup *markLabels,
         String *s,
+        RblCaptureFunc capture,
         Abstract *source
     ){
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;
     rbl->source = source;
+    rbl->capture = capture;
     rbl->matches = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
     rbl->parsers_do = Span_Make(m, TYPE_SPAN);
     int markStart = 0;

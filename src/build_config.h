@@ -31,7 +31,7 @@ static BuildSubdir parserobj = {"parser", {
 }};
 
 static BuildSubdir xmlobj = {"formats/xml", {
-    "xml.c", "parserdef.c", NULL
+    "xml.c", "xml_parser.c", NULL
 }};
 
 static BuildSubdir testobj = { "tests", {

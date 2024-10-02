@@ -1,4 +1,5 @@
 typedef status (*RblFunc)(struct roebling *rbl);
+typedef status (*RblCaptureFunc)(word captureKey, String *s, Abstract *source);
 
 enum mark_reserved {
     LOOP_MARK = 0,
@@ -17,7 +18,7 @@ typedef struct roebling {
     Span *parsers_do;
     Lookup *marks;
     /* step specific */
-    RblFunc dispatch;
+    RblCaptureFunc capture;
     i8 jump;
     i8 jumpMiss;
     int tail;
@@ -30,6 +31,7 @@ Roebling *Roebling_Make(MemCtx *m,
     Span *parsers,
     Lookup *markLabels,
     String *s,
+    RblCaptureFunc capture,
     Abstract *source
 );
 status Roebling_Run(Roebling *sexp);
@@ -37,7 +39,7 @@ int Roebling_GetMarkIdx(Roebling *rlb, int mark);
 status Roebling_SetMark(Roebling *rlb, int mark, int idx);
 status Roebling_Prepare(Roebling *rbl, Span *parsers);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk);
-status Roebling_SetPattern(Roebling *rbl, PatCharDef *def);
+status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
 status Roebling_ResetPatterns(Roebling *rbl);
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
 int Roebling_GetMatchIdx(Roebling *rbl);

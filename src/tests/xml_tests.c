@@ -1,29 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-static Roebling *rblMake(MemCtx *m){
-    XmlCtx *ctx = XmlCtx_Make((MemHandle *)m, NULL);
-    Span *parsers_do = XmlParser_Make(m);
-
-    LookupConfig config[] = {
-        {XML_START, (Abstract *)String_Make(m, bytes("XML_START"))},
-        {XML_ATTROUTE, (Abstract *)String_Make(m, bytes("XML_ATTROUTE"))},
-        {XML_ATTR_VALUE, (Abstract *)String_Make(m, bytes("XML_ATTR_VALUE"))},
-        {XML_END, (Abstract *)String_Make(m, bytes("XML_END"))},
-        {0, NULL},
-    };
-
-    Lookup *desc = Lookup_FromConfig(m, config, NULL);
-    return Roebling_Make(m, TYPE_ROEBLING, parsers_do, desc, String_Init(m, STRING_EXTEND), (Abstract *)ctx); 
-}
-
 status Xml_Tests(MemCtx *gm){
     status r = TEST_OK;
     MemCtx *m = MemCtx_Make();
 
     String *s = NULL;
-    Roebling *rbl = rblMake(m);
-    XmlCtx *ctx = (XmlCtx *)rbl->source;
+
+    XmlParser *xml = XmlParser_Make(m);
+    Roebling *rbl = xml->rbl;
+    XmlCtx *ctx = xml->ctx;
 
     s = String_Make(m, bytes("<main/>"));
     Roebling_AddBytes(rbl, s->bytes, s->length);
@@ -47,11 +33,11 @@ status XmlNested_Tests(MemCtx *gm){
     status r = TEST_OK;
     MemCtx *m = MemCtx_Make();
 
-    String *s = NULL;
-    Roebling *rbl = rblMake(m);
-    XmlCtx *ctx = (XmlCtx *)rbl->source;
+    String *s = String_Make(m, bytes("<main type=\"root\">\n  <alpha>\n    <t model=\"foo\" baseline=\"fancy-pants\">Gotta Get It!</t>\n  </alpha>\n  <alpha>\n    <t model=\"geese\" baseline=\"fancy-pants\">Have It!</t>\n  </alpha>\n</main>"));
+    XmlParser *xml = XmlParser_Make(m);
+    Roebling *rbl = xml->rbl;
+    XmlCtx *ctx = xml->ctx;
 
-    s = String_Make(m, bytes("<main type=\"root\">\n  <alpha>\n    <t model=\"foo\" baseline=\"fancy-pants\">Gotta Get It!</t>\n  </alpha>\n  <alpha>\n    <t model=\"geese\" baseline=\"fancy-pants\">Have It!</t>\n  </alpha>\n</main>"));
     Roebling_AddBytes(rbl, s->bytes, s->length);
     Roebling_Run(rbl);
     Roebling_Run(rbl);
@@ -97,5 +83,17 @@ status XmlNested_Tests(MemCtx *gm){
     r |= Test(HasFlag(ctx->type.state, SUCCESS), "XML has state success", State_ToString(ctx->type.state));
 
     MemCtx_Free(m);
+    return r;
+}
+
+status XmlParser_Tests(MemCtx *gm){
+    status r = TEST_OK;
+    MemCtx *m = MemCtx_Make();
+    XmlParser *xml = XmlParser_Make(m); 
+
+    String *s = String_Make(m, bytes("<main><sub>The World is Upside Down!</sub></main>"));
+    XmlParser_Parse(xml, s);
+    Debug_Print((void *)xml->ctx, 0, "XmlParser test Ctx: ", COLOR_PURPLE, TRUE);
+
     return r;
 }

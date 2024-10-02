@@ -8,9 +8,13 @@ void *Lookup_Get(Lookup *lk, word type){
         if(result != NULL){
             lk->latest_idx = type-lk->offset;
         }else{
+            printf("resul tis null for %d\n", type-lk->offset);
             lk->latest_idx = -1;
         }
+    }else{
+        printf("nope!\n");
     }
+    printf("Lookup Result %p", result);
     return result;
 }
 
@@ -40,6 +44,7 @@ status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
 
 Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
+    lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
     lk->values = Span_MakeInline(m, TYPE_SPAN, sizeof(int));
     lk->values->type.state |= RAW;
@@ -51,6 +56,7 @@ Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
 
 Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *arg){
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
+    lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
     lk->values = Span_Make(m, TYPE_SPAN);
     lk->arg = arg;

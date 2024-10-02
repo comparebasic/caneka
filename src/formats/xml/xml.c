@@ -59,7 +59,7 @@ status XmlCtx_Close(XmlCtx *ctx, String *tagName){
     return ctx->type.state;
 }
 
-XmlCtx *XmlCtx_Make(MemHandle *mh, void *source){
+XmlCtx *XmlCtx_Make(MemHandle *mh){
     MemCtx *m = MemCtx_FromHandle(mh);
     XmlCtx *ctx = (XmlCtx*)MemCtx_Alloc(m, sizeof(XmlCtx));
     ctx->m = m;

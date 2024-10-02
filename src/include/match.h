@@ -64,12 +64,12 @@ typedef struct match {
         _patMatch pat;
         _stringMatch str;
     } def;
-    i8 jump;
+    int jump;
     int remaining;
     int count;
     int lead;
     int tail;
-    status (*dispatch)(struct roebling *rbl);
+    word captureKey;
 } Match;
 
 Match *Match_Make(MemCtx *m, String *s, word flags);

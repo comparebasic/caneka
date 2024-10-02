@@ -137,6 +137,13 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     printf(">\x1b[0m");
 }
 
+void Lookup_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
+    printf("\x1b[%dm%sLk<offset:%d latest_idx:\%d", color, msg, lk->offset, lk->latest_idx);
+    Debug_Print((void *)lk->values, 0, "", color, TRUE);
+    printf("\x1b[%dm>\x1b[0m", color);
+}
+
 status PrintMatchAddr(MemHandle *mh){
     MHAbstract *ma = (MHAbstract *)as(mh, TYPE_MHABSTRACT);
     if(ma->a == NULL){
@@ -534,6 +541,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
     r |= Lookup_Add(m, lk, TYPE_XMLCTX, (void *)XmlCtx_Print);
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
+    r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
     return r;
 }
 

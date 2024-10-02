@@ -16,3 +16,4 @@ status SpanSetup_Tests(MemCtx *gm);
 status TableResize_Tests(MemCtx *gm);
 status TablePreKey_Tests(MemCtx *gm);
 status MatchElastic_Tests(MemCtx *gm);
+status XmlParser_Tests(MemCtx *gm);

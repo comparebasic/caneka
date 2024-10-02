@@ -1,4 +1,5 @@
 typedef struct lookup {
+    Type type;
     word offset;
     Span *values;
     Abstract *arg;

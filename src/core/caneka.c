@@ -116,6 +116,8 @@ char *Class_ToString(cls type){
         return "TYPE_SLAB";
     }else if(type == TYPE_RBL_MARK){
         return "TYPE_RBL_MARK";
+    }else if(type == TYPE_LOOKUP){
+        return "TYPE_LOOKUP";
     }else if(type == TYPE_MESS){
         return "TYPE_MESS";
     }else if(type == TYPE_WRAPPED){
