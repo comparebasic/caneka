@@ -26,7 +26,7 @@ Test_Runner(Cstr suiteName, Void[] tests) {
     TestFunc func
     int pass
     int fail
-    ((name, func) in tests) {
+    (name, func) in tests {
         out("[Testing \{name}]\n")
         func() & ERROR ~ SUCCESS {
             fail++
