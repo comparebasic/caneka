@@ -93,7 +93,9 @@ status XmlParser_Tests(MemCtx *gm){
 
     String *s = String_Make(m, bytes("<main><sub>The World is Upside Down!</sub></main>"));
     XmlParser_Parse(xml, s);
-    Debug_Print((void *)xml->ctx, 0, "XmlParser test Ctx: ", COLOR_PURPLE, TRUE);
+    Mess *node = xml->ctx->root->firstChild->firstChild->firstChild;
+    r |= Test(HasFlag(xml->ctx->type.state, SUCCESS), "XML has state success", State_ToString(xml->ctx->type.state));
+    r |= Test(String_EqualsBytes((String *)node->body, bytes("The World is Upside Down!")), "XML node has expected body, have '%s'", ((String *)node->body)->bytes);
 
     return r;
 }

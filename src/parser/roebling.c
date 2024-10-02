@@ -32,12 +32,13 @@ int Roebling_GetMatchIdx(Roebling *rbl){
 
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump){
     Match *mt = Span_ReserveNext(rbl->matches);
+    status r = READY;
+    r |= Match_SetPattern(mt, def);
     mt->captureKey = captureKey;
     if(jump != -1){
         mt->jump = Roebling_GetMarkIdx(rbl, jump);
-        printf("Setting Jump %d -> %d\n", jump, mt->jump);
     }
-    return Match_SetPattern(mt, def);
+    return r;
 }
 
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk){
@@ -54,13 +55,10 @@ int Roebling_GetMarkIdx(Roebling *rbl, int mark){
     if(mrk != NULL){
         return *mrk;
     }
-    Debug_Print((void *)rbl->marks, 0, "Mark not found: ", COLOR_PURPLE, TRUE);
-    printf("\n");
     return -1; 
 }
 
 status Roebling_SetMark(Roebling *rbl, int mark, int _idx){
-    printf("Setting Mark %d-> %d\n", mark, _idx);
     return Lookup_Add(rbl->m, rbl->marks, mark, (void *)&_idx);
 }
 

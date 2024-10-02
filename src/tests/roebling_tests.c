@@ -141,7 +141,7 @@ status RoeblingMark_Tests(MemCtx *gm){
 
     Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
-    r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
+    r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals TWO, have %s", s->bytes);
     r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT after 'TWO'");
 
     Roebling_Run(rbl);
@@ -152,7 +152,7 @@ status RoeblingMark_Tests(MemCtx *gm){
     Roebling_Run(rbl);
     Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
-    r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals expected, have %s", s->bytes);
+    r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals ONE, have %s", s->bytes);
     r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT after 'ONE'");
 
     Roebling_Run(rbl);
@@ -163,7 +163,7 @@ status RoeblingMark_Tests(MemCtx *gm){
     Roebling_Run(rbl);
     Roebling_Run(rbl);
     s = Range_Copy(m, &(rbl->range));
-    r |= Test(String_EqualsBytes(s, bytes("THREE")), "Content equals expected, have %s", s->bytes);
+    r |= Test(String_EqualsBytes(s, bytes("THREE")), "Content equals THREE, have %s", s->bytes);
     r |= Test(rbl->type.state == NEXT, "Roebling has state NEXT");
 
     Roebling_Run(rbl);

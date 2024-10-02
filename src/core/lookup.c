@@ -8,13 +8,9 @@ void *Lookup_Get(Lookup *lk, word type){
         if(result != NULL){
             lk->latest_idx = type-lk->offset;
         }else{
-            printf("resul tis null for %d\n", type-lk->offset);
             lk->latest_idx = -1;
         }
-    }else{
-        printf("nope!\n");
     }
-    printf("Lookup Result %p", result);
     return result;
 }
 
