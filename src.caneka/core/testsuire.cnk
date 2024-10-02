@@ -1,21 +1,21 @@
-status, out, global, ansi
+@status, @out, @global, @ansi[red, green, none, bold]
 
 NO_COLOR = RAW
 
 Test(int condition, Cstr msg, ...args) {
     status r
     condition {
-        global.flags ~ NO_COLOR { out("\{ansi.green}") }
+        global.flags ~ NO_COLOR { out("\{green}") }
         out("PASS: ")
         out(msg, args)
-        global.flags ~ NO_COLOR { out("\{ansi.none}") }
+        global.flags ~ NO_COLOR { out("\{none}") }
         out("\n")
         status(SUCCESS)
     } else {
-        global.flags ~ NO_COLOR { out("\{ansi.red}") }
+        global.flags ~ NO_COLOR { out("\{red}") }
         out("FAIL: ")
         out(msg, args)
-        global.flags ~ NO_COLOR { out("\{ansi.none}") }
+        global.flags ~ NO_COLOR { out("\{none}") }
         out("\n")
         status(ERROR)
     }
@@ -39,10 +39,10 @@ Test_Runner(Cstr suiteName, Void[] tests) {
         out("Suite \{suiteName} pass:\{pass} fail:\{fail}\n")
     } else {
         fail {
-            out("\{ansi.red}Suite \{suiteName} pass:\{pass} \{ansi.(bold&red)fail:\{fail}\n")
+            out("\{red}Suite \{suiteName} pass:\{pass} \{(bold+red)fail:\{fail}\n")
         } else {
-            out("\{ansi.green}Suite \{suiteName} \{ansi.(bold&green)}pass:%d\{ansi.(none&green)} "
-                "fail:\{fail}\{ansi.none}\n")
+            out("\{green}Suite \{suiteName} \{bold+green}pass:%d\{none+green} "
+                "fail:\{fail}\{none}\n")
         }
     }
     status(fail ? SUCCESS : MISS)
