@@ -13,7 +13,7 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./include",
+    "-I./src/include",
     NULL
 };
 

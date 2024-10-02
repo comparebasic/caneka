@@ -39,7 +39,8 @@ status Test_Runner(MemCtx *m, char *suiteName, void *tests[]){
     int fail = 0;
     while(name != NULL){
         printf("[Testing %s]\n", name);
-        if(func(m) != SUCCESS){
+        status r = func(m);
+        if(HasFlag(r, ERROR) || !HasFlag(r, SUCCESS)){
             fail++;
             break;
         }

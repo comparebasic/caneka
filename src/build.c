@@ -247,7 +247,8 @@ static int BuildSource(char *binary, char *fname, char *subdir){
     Cstr_AddBuildName(&build_cstr, fname);
 
     Cstr source_cstr;
-    Cstr_Init(&source_cstr, subdir);
+    Cstr_Init(&source_cstr, "src/");
+    Cstr_Add(&source_cstr, subdir);
     Cstr_Add(&source_cstr, "/");
     Cstr_Add(&source_cstr, fname);
 
@@ -287,7 +288,8 @@ static int BuildBinary(char *binaryName){
     Cstr_Add(&binary_cstr, binaryName);
 
     Cstr source_cstr;
-    Cstr_Init(&source_cstr, MAIN);
+    Cstr_Init(&source_cstr, "src/");
+    Cstr_Add(&source_cstr, MAIN);
 
     if(!REBUILD_BINARY && !NeedsBuild(&source_cstr, &binary_cstr)){
         return FALSE;

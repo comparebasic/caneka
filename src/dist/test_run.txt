@@ -1,5 +1,5 @@
-Caneka Tests run 1727846468 (Wed Oct  2 00:21:08 CDT 2024)
-commit a5ee5cbcc981082f3dea8d81348240779b451107
+Caneka Tests run 1727573705 (Sat Sep 28 20:35:05 CDT 2024)
+commit 7022cba924f8bfa0ba8e9300c5ddbccb6901b90f
 [Testing Core]
 [Testing String]
 PASS: Expect string to have fixed type TYPE_STRING_FIXED found TYPE_STRING_FIXED
@@ -179,12 +179,4 @@ PASS: Attribute has name 'type', have 'type'
 PASS: Attribute Value to be 'root', have 'root'
 PASS: Jump set to XML_START
 PASS: Whitespace before tag added as body, have '\n  '
-PASS: Expected att item: 'model', have 'model'
-PASS: Expected att value: 'fancy-pants', have 'foo'
-PASS: Expected att item: 'model', have 'baseline'
-PASS: Expected att value: 'fancy-pants', have 'fancy-pants'
-PASS: Expected body value: 'Gotta Get It!', have 'Gotta Get It!'
-PASS: NodeName is 'alpha', have 'alpha'
-PASS: Second NodeName is 'alpha', have 'alpha'
-PASS: XML has state success
 Suite Caneka pass:16 fail:0
