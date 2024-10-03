@@ -1,5 +1,3 @@
-#include <formats/http.h>
-
 typedef struct http_proto {
     Type type;
     char *(*toLog)(Req *req);

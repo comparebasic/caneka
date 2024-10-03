@@ -12,6 +12,8 @@ related: core/debug.c
 #define COLOR_CYAN 36
 #define COLOR_DARK 37
 
+extern MemCtx *DebugM;
+
 typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean extended);
 
 extern Chain *DebugPrintChain;
@@ -41,3 +43,4 @@ extern int DEBUG_ROEBLING_NAME;
 extern int DEBUG_SPAN;
 extern int DEBUG_XML;
 extern int DEBUG_HTTP;
+extern int DEBUG_SERVE;

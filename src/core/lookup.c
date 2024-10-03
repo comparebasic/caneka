@@ -30,6 +30,7 @@ Lookup *Lookup_FromConfig(MemCtx *m, LookupConfig *config, Abstract *arg){
 
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
+        printf("type:%d offset:%d\n", type, lk->offset);
         Fatal("Adding lookup value below zero", TYPE_UNIT);
     }
     if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) != NULL){

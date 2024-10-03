@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <formats/http.h>
 
 word pathDef[] = {
     PAT_TERM|PAT_NO_CAPTURE,' ',' ', 
@@ -118,8 +117,8 @@ Roebling *HttpParser_Make(MemCtx *m, String *s, Abstract *source){
         (Abstract *)Int_Wrapped(m, HTTP_MARK_END));
 
     LookupConfig config[] = {
-        {HTTP_HEADER, (Abstract *)String_Make(m, bytes("HTTP_HEADER"))},
-        {HTTP_END, (Abstract *)String_Make(m, bytes("HTTP_END"))},
+        {HTTP_MARK_HEADER, (Abstract *)String_Make(m, bytes("HTTP_HEADER"))},
+        {HTTP_MARK_END, (Abstract *)String_Make(m, bytes("HTTP_END"))},
         {0, NULL},
     };
 

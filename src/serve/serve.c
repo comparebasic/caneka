@@ -1,8 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-#include <proto/http.h>
-
 static int openPortToFd(int port){
     int fd = 0;
 	struct sockaddr_in serv_addr;
@@ -148,11 +146,16 @@ status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
-        Debug_Print(sctx->def, 0, "Accept proto: ", COLOR_DARK, TRUE);
-        printf("\n");
+
+        if(DEBUG_SERVE){
+            Debug_Print(sctx->def, 0, "Accept proto: ", DEBUG_SERVE, TRUE);
+            printf("\n");
+        }
         Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
-        Debug_Print(req, 0, "Accept req: ", COLOR_DARK, TRUE);
-        printf("\n");
+        if(DEBUG_SERVE){
+            Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
+            printf("\n");
+        }
         /*
         req->in.rbl = Roebling_Make(req->m, 
             TYPE_PARSER, sctx->def->parsers, req->in.shelf, (Abstract *)req);

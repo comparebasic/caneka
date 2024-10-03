@@ -73,7 +73,6 @@ typedef status (*DoFunc)(struct mem_handle *mh);
 #define TRUE 1
 #define FALSE 0
 
-
 enum types {
     _TYPE_START,
     TYPE_UNKNOWN,
@@ -92,9 +91,6 @@ enum types {
     TYPE_MESS,
     TYPE_MAKER,
     TYPE_MEMSLAB,
-    TYPE_REQ,
-    TYPE_PROTO,
-    TYPE_PROTODEF,
     TYPE_STRING,
     TYPE_STRING_CHAIN,
     TYPE_STRING_FIXED,
@@ -211,7 +207,6 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "req.h"
 #include "testsuite.h"
 #include "mark.h"
-#include "headers.h"
 #include "apps.h"
 
 status Caneka_Init(MemCtx *m);

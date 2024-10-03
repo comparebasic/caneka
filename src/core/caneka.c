@@ -8,6 +8,7 @@ status Caneka_Init(MemCtx *m){
     r |= SpanDef_Init();
     r |= Debug_Init(m);
     r |= Hash_Init(m);
+    r |= AppsDebug_Init(m);
     return r;
 }
 

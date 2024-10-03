@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <proto/http.h>
 
 static char *toLog(Req *req){
     return "HttpProto<>";

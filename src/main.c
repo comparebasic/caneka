@@ -8,7 +8,6 @@ This file is mostly an example Caneka application, and it runs the tests
 #include <caneka.h>
 #include <tests.h>
 #include <proto_tests.h>
-#include <proto/http.h>
 
 #define servecmd "serve"
 #define testcmd "test"

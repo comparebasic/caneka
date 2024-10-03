@@ -46,4 +46,9 @@ static BuildSubdir serveobj = { "serve", {
     NULL
 }};
 
-BuildSubdir *allobj[] = {&coreobj, &testobj, &parserobj, &xmlobj, &serveobj, NULL};
+static BuildSubdir appsobj = { "apps", {
+    "appsdebug.c",
+    NULL
+}};
+
+BuildSubdir *allobj[] = {&coreobj, &testobj, &parserobj, &xmlobj, &serveobj, &appsobj, NULL};

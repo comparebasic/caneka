@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <proto/http.h>
 
 static Abstract *hdrCookieProcess(MemCtx *source, Abstract *a){
     Req *req = (Req *) as(source, TYPE_REQ);

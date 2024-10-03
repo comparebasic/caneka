@@ -21,8 +21,9 @@ int DEBUG_SPAN = 0;
 int DEBUG_XML = 0;
 int DEBUG_ROEBLING_NAME = 0;
 int DEBUG_HTTP = 0;
+int DEBUG_SERVE = COLOR_DARK;
 
-static MemCtx *DebugM = NULL;
+MemCtx *DebugM = NULL;
 
 static Abstract *Print(MemCtx *m, Abstract *a){
     Debug_Print(a, 0, "", 0, TRUE);
@@ -308,17 +309,6 @@ static void Mess_Print(Abstract *a, cls type, char *msg, int color, boolean exte
     mess_PrintRecurse(ms, msg, color, extended, 0);
 }
 
-static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    XmlCtx *ctx = (XmlCtx *)as(a, TYPE_XMLCTX);
-    if(extended){
-        printf("\x1b[%dm%sXmlCtx<%s nodes=", color, msg, State_ToString(ctx->type.state));
-        Debug_Print((void *)ctx->root, 0, "", color, FALSE);
-        printf("\x1b[%dm>\x1b[0m", color);
-    }else{
-        printf("\x1b[%dm%sXmlCtx<%s>\x1b[0m", color, msg, State_ToString(ctx->type.state));
-    }
-}
-
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
     if(extended){
@@ -440,20 +430,6 @@ static void WrappedUtil_Print(Abstract *a, cls type, char *msg, int color, boole
     printf("\x1b[%dm%sWi64<\x1b[1;%dm%lu\x1b[0;%dm>\x1b[0m", color,  msg, color, sgl->val.value, color);
 }
 
-static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    /*
-    Req *req = (Req *) as(a, TYPE_REQ);
-    printf("%s\x1b[1;%dmReq<%s:%s ",
-        msg, color, State_ToString(req->state), Proto_ToChars(req->proto));
-    Debug_Print((void *)req->proto, 0, "", color, extended);
-    if(req->in.rbl != NULL && extended){
-        printf(" ");
-        Debug_Print((void *)req->in.rbl, 0, "", color, extended);
-    }
-    printf(">\x1b[0m");
-    */
-}
-
 static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean extended){
     if(t == NULL){
         printf("u0");
@@ -510,15 +486,6 @@ static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean ext
 }
 
 
-static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    ProtoDef *proto = (ProtoDef *)a;
-    if(a->type.state != 0){
-        Debug_Print((void *)a, a->type.state, msg, color, extended);
-    }else{
-        printf("\x1b[%dm%sProtoDef<unknown>\x1b[0m", color, msg);
-    }
-}
-
 static status populateDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);
@@ -531,16 +498,13 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)StringFixed_Print);
     r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
-    r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
-    r |= Lookup_Add(m, lk, TYPE_XMLCTX, (void *)XmlCtx_Print);
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
     return r;

@@ -1,25 +1,21 @@
+#include <formats/http.h>
+#include <proto/http.h>
+
 enum proto_types {
     _TYPE_APPS_START = _TYPE_CORE_END,
-    TYPE_RBL_XML,
+    TYPE_REQ,
+    TYPE_PROTO,
+    TYPE_PROTODEF,
     TYPE_XMLCTX,
-    TYPE_XMLNODE,
-    TYPE_XMLATTNODE,
-    _TYPE_PROTO_START,
     TYPE_HTTP_PROTO,
-    TYPE_HTTP_PARSER,
     TYPE_HTTP_PROTODEF,
-    _TYPE_PROTO_END,
-    _TYPE_HTTP_START,
+    _TYPE_HTTP_METHODS_START,
     TYPE_METHOD_GET,
     TYPE_METHOD_POST,
     TYPE_METHOD_SET,
     TYPE_METHOD_UPDATE, 
     TYPE_METHOD_DELETE,
-    _TYPE_HTTP_END,
-    _PATTERNS_START,
-    RBL_HTTP_LINE,
-    RBL_HEADERS,
+    _TYPE_APPS_END,
 };
 
-#define _TYPE_PROTO_END _TYPE_HTTP_END
-#include "headers.h"
+status AppsDebug_Init(MemCtx *m);
