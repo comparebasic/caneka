@@ -32,7 +32,7 @@ status SetWord1(Abstract *a){
          (void *)String_Make(rbl->m, bytes("THREE")));
  
     Roebling_ResetPatterns(rbl);
-    return Roebling_SetLookup(rbl, lk); 
+    return Roebling_SetLookup(rbl, lk, 0, -1); 
 }
 
 static word text[] = {PAT_NO_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, PAT_END, 0, 0};

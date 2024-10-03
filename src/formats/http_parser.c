@@ -25,23 +25,23 @@ word protoDef[] = {
 };
 
 word headerDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, ':', ':'
+    PAT_KO|PAT_NO_CAPTURE, ':', ':',
     patText,
     PAT_END, 0, 0
 };
 
 word headerValueDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE|PAT_TERM|, ' ', ' ', 
+    PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
     PAT_KO, '\r', '\r', PAT_INVERT|PAT_TERM, 0, 31, 
-    PAT_TERM|PAT_NO_CAPTURE, '\r', '\r'
-    PAT_TERM|PAT_NO_CAPTURE, '\n', '\n'
+    PAT_TERM|PAT_NO_CAPTURE, '\r', '\r',
+    PAT_TERM|PAT_NO_CAPTURE, '\n', '\n',
     PAT_CMD|PAT_INVERT, PAT_GO_ON_FAIL, 1, PAT_INVERT|PAT_LEAVE, ' ', ' ', PAT_INVERT|PAT_LEAVE|PAT_TERM, '\t', '\t',
     PAT_END, 0, 0
 };
 
 word endDef[] = {
-    PAT_TERM, '\r', '\r'
-    PAT_TERM, '\n', '\n'
+    PAT_TERM, '\r', '\r',
+    PAT_TERM, '\n', '\n',
     PAT_END, 0, 0
 };
 
@@ -78,7 +78,7 @@ static status httpProto(Roebling *rbl){
     return r;
 }
 
-static status header(Abstract *a){
+static status header(Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -88,7 +88,7 @@ static status header(Abstract *a){
     return r;
 }
 
-static status headerValue(Abstract *a){
+static status headerValue(Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -107,6 +107,7 @@ static status httpParser_Capture(word captureKey, String *s, Abstract *source){
 }
 
 Roebling *HttpParser_Make(MemCtx *m, String *s, Abstract *source){
+    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do =  Span_From(m, 7, 
             (Abstract *)Do_Wrapped(mh, (DoFunc)method),
             (Abstract *)Do_Wrapped(mh, (DoFunc)path),

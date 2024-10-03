@@ -126,20 +126,20 @@ static status Serve_CloseReq(Serve *sctx, Req *req){
 }
 
 status Serve_Respond(Serve *sctx, Req *req){
+    /*
     if(req->out.cursor->state != COMPLETE){
-        /*
         SCursor_Prepare(req->out.cursor, SERV_WRITE_SIZE); 
         size_t l = write(req->fd, req->out.cursor->seg->bytes, req->out.cursor->position);
         status r = SCursor_Incr(req->out.cursor, l);
         if(r == COMPLETE){
             req->state = COMPLETE;
         }
-        */
     }
 
     if(req->out.cursor->position >= req->out.response->length){
         req->state = COMPLETE;
     }
+    */
 
     return req->state;
 }
@@ -150,7 +150,7 @@ status Serve_AcceptRound(Serve *sctx){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
         Debug_Print(sctx->def, 0, "Accept proto: ", COLOR_DARK, TRUE);
         printf("\n");
-        Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
+        Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
         Debug_Print(req, 0, "Accept req: ", COLOR_DARK, TRUE);
         printf("\n");
         /*

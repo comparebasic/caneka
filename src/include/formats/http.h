@@ -18,6 +18,7 @@ enum http_captures {
     HTTP_PROTO,
     HTTP_HEADER,
     HTTP_HEADER_VALUE,
+    HTTP_END,
     _HTTP_MAX = 1 << 15
 };
 

@@ -8,8 +8,9 @@ This file is mostly an example Caneka application, and it runs the tests
 #include <caneka.h>
 #include <tests.h>
 #include <proto_tests.h>
+#include <proto/http.h>
 
-#define servecmd "serve="
+#define servecmd "serve"
 #define testcmd "test"
 
 static void *tests[] = {
@@ -47,16 +48,20 @@ static status test(MemCtx *m, char *arg){
     return r;
 }
 
-status serve(MemCtx *m, char arg){
-    if(strncmp(arg, "test=port:", strlen("test=port:")) == 0){
-        printf("Serving on port: %s\n", arg);
+status serve(MemCtx *m, char *arg){
+    printf("ARg '%s;\n", arg);
+    int l = strlen("serve=port:");
+    int port = 0;
+    if(strncmp(arg, "serve=port:", l) == 0){
+        port = atoi(arg+l);
+        printf("Serving on port: %d\n", port);
     }else{
-        printf("No port specified: %s\n", arg);
+        printf("No port specified: '%s'\n", arg);
         exit(1);
     }
     ProtoDef *def = HttpProtoDef_Make(m, NULL);
     Serve *sctx = Serve_Make(m, def);
-    def->source = sctx;
+    def->source = (Abstract *)sctx;
 
     return Serve_Run(sctx, port);
 }

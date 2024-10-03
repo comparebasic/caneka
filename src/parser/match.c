@@ -97,7 +97,7 @@ static status match_FeedPat(Match *mt, word c){
                     return mt->type.state;
                 }
                 mt->type.state &= ~PROCESSING;
-                mt->type.state |= KO;
+                mt->type.state |= SUCCESS;
                 match_NextTerm(mt);
                 break;
             }

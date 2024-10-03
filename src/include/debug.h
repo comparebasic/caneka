@@ -40,3 +40,4 @@ extern int DEBUG_ROEBLING_CURRENT;
 extern int DEBUG_ROEBLING_NAME;
 extern int DEBUG_SPAN;
 extern int DEBUG_XML;
+extern int DEBUG_HTTP;

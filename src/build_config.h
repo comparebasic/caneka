@@ -30,8 +30,8 @@ static BuildSubdir parserobj = {"parser", {
     "match.c", "roebling.c", "scursor.c", "range.c", NULL
 }};
 
-static BuildSubdir xmlobj = {"formats/xml", {
-    "xml.c", "xml_parser.c", NULL
+static BuildSubdir xmlobj = {"formats", {
+    "xml.c", "xml_parser.c", "http_parser.c", NULL
 }};
 
 static BuildSubdir testobj = { "tests", {
@@ -41,4 +41,9 @@ static BuildSubdir testobj = { "tests", {
     NULL
 }};
 
-BuildSubdir *allobj[] = {&coreobj, &testobj, &parserobj, &xmlobj, NULL};
+static BuildSubdir serveobj = { "serve", {
+    "serve.c", "proto.c", "req.c", "http_proto.c",
+    NULL
+}};
+
+BuildSubdir *allobj[] = {&coreobj, &testobj, &parserobj, &xmlobj, &serveobj, NULL};

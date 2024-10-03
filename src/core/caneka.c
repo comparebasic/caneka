@@ -27,7 +27,6 @@ static word states[] = {
     INVERTED,
     END,
     NEXT,
-    KO,
     SUCCESS,
 };
 
@@ -47,7 +46,6 @@ static char *stateNames[] = {
     "INVERTED,",
     "END,",
     "NEXT,",
-    "KO,",
     "SUCCESS,",
     NULL,
 };

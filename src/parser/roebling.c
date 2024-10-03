@@ -86,7 +86,7 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
 static status Roebling_RunMatches(Roebling *rbl){
     int i = 0;
     byte c = 0;
-    rbl->type.state &= ~(NEXT|KO|BREAK|COMPLETE);
+    rbl->type.state &= ~(NEXT|BREAK|COMPLETE);
     if(rbl->matches->nvalues == 0){
         rbl->type.state |= (BREAK|NEXT);
     }

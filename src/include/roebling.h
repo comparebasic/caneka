@@ -38,7 +38,7 @@ status Roebling_Run(Roebling *sexp);
 int Roebling_GetMarkIdx(Roebling *rlb, int mark);
 status Roebling_SetMark(Roebling *rlb, int mark, int idx);
 status Roebling_Prepare(Roebling *rbl, Span *parsers);
-status Roebling_SetLookup(Roebling *rbl, Lookup *lk);
+status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
 status Roebling_ResetPatterns(Roebling *rbl);
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);

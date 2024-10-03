@@ -20,6 +20,7 @@ int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
 int DEBUG_XML = 0;
 int DEBUG_ROEBLING_NAME = 0;
+int DEBUG_HTTP = 0;
 
 static MemCtx *DebugM = NULL;
 
