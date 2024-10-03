@@ -129,7 +129,6 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     if(a == NULL){
         Fatal("Error string is NULL", TYPE_STRING_CHAIN);
     }
-
     size_t l = length;
     size_t remaining = l;
     size_t copy_l = remaining;
@@ -157,7 +156,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         copy_l = min((STRING_CHUNK_SIZE - seg->length), remaining);
     }
 
-    if(copy_l > remaining && a->type.of != TYPE_STRING_CHAIN){
+    if(copy_l < remaining && a->type.of != TYPE_STRING_CHAIN){
         printf("Returing ERROR not a flexible string\n");
         return ERROR;
     }
@@ -165,6 +164,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     memcpy(seg->bytes+seg->length, p, copy_l);
     seg->length += copy_l;
     remaining -= copy_l;
+    byte *_b = p;
     p += copy_l;
 
     /* if more than a string seg remains, make a new one */
@@ -193,7 +193,6 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
             seg = next;
         }else{
             seg->next = next;
-            seg = next;
         }
     }
 

@@ -23,16 +23,15 @@ word protoDef[] = {
 };
 
 word headerDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, ':', ':',
+    PAT_KO, ':', ':',
     patText,
     PAT_END, 0, 0
 };
 
 word headerValueDef[] = {
     PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
-    PAT_KO, '\r', '\r', PAT_INVERT|PAT_TERM, 0, 31, 
-    PAT_TERM|PAT_NO_CAPTURE, '\r', '\r',
-    PAT_TERM|PAT_NO_CAPTURE, '\n', '\n',
+    PAT_KO, '\r', '\r', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, 
+    PAT_TERM|PAT_NO_CAPTURE|PAT_CONSUME, '\n', '\n',
     PAT_CMD|PAT_INVERT, PAT_GO_ON_FAIL, 1, PAT_INVERT|PAT_LEAVE, ' ', ' ', PAT_INVERT|PAT_LEAVE|PAT_TERM, '\t', '\t',
     PAT_END, 0, 0
 };

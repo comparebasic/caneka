@@ -125,6 +125,9 @@ static status Roebling_RunMatches(Roebling *rbl){
                }
             }
         }
+        if(HasFlag(mt->type.state, INVERTED)){
+            break;
+        }
         SCursor_Incr(&(rbl->range.potential), 1);
     }
     rbl->type.state &= ~BREAK;

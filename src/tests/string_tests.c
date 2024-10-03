@@ -26,7 +26,7 @@ status String_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     String *s;
     s = String_From(m, bytes("Hi"));
-    status r = SUCCESS;
+    status r = READY;
     r |= Test(s->type.of == TYPE_STRING_FIXED, 
         "Expect string to have fixed type %s found %s", 
             Class_ToString(TYPE_STRING_FIXED), Class_ToString(s->type.of));
@@ -47,6 +47,21 @@ status String_Tests(MemCtx *gm){
     String *expected_is = String_From(m, bytes("35072"));
     r |= Test(String_Length(s) == expected_is->length, "Expect for int value %d  length of %d found %d", value, expected_is->length, String_Length(s));
     r |= Test(String_Equals(s, expected_is) == TRUE, "Expect string match of int of %d to string", value);
+
+
+    char *cstr = "GET /path.html HTTP/1.1\r\n"
+    "Host: localhost\r\n"
+    "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0\r\n"
+    "Connection: keep-alive\r\n"
+    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8\r\n"
+    "\r\n";
+
+    s = String_Make(m, bytes(cstr));
+    Debug_Print((void *)s, 0, "String: ", COLOR_PURPLE, TRUE);
+    printf("%s\n", cstr);
+
+    r |= Test(String_Length(s) == strlen(cstr), "Expect length %d, have %d", strlen(cstr), String_Length(s));
+    r |= Test(String_EqualsBytes(s, bytes(cstr)), "Expect string match of '%s' to be TRUE", cstr);
 
     MemCtx_Free(m);
     return r;

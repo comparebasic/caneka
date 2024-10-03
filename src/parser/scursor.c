@@ -35,10 +35,10 @@ status SCursor_Incr(SCursor *sc, i64 length){
                 sc->type.state = END;
             }else{
                 sc->seg = sc->seg->next;
+                sc->position = 0;
             }
 
             remaining -= local;
-            sc->position += local;
         }
     }
 

@@ -97,13 +97,14 @@ static status match_FeedPat(Match *mt, word c){
                     return mt->type.state;
                 }
                 mt->type.state &= ~PROCESSING;
-                mt->type.state |= SUCCESS;
                 match_NextTerm(mt);
                 break;
             }
             mt->type.state |= PROCESSING;
 
-            if(HasFlag(def->flags, PAT_NO_CAPTURE)){
+            if(HasFlag(def->flags, PAT_LEAVE)){
+                mt->type.state |= INVERTED;
+            }else if(HasFlag(def->flags, PAT_NO_CAPTURE)){
                 if(mt->count == 0){
                     mt->lead++;
                 }else {
