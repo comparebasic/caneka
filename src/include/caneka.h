@@ -153,7 +153,6 @@ enum status_types {
     INVERTED = 1 << 12,
     END = 1 << 13,
     NEXT = 1 << 14,
-    KO = 1 << 15,
     SUCCESS = 1 << 15,
 };
 
@@ -175,6 +174,7 @@ char *Class_ToString(cls type);
 #define TERM_FOUND TRACKED
 #define NO_COLOR RAW
 #define SEARCH OPTIONAL
+#define MATCH_GOTO NEXT 
 
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);

@@ -14,6 +14,9 @@ enum pat_flags {
     PAT_KO = 1 << 9, /* K */
     PAT_SINGLE = 1 << 10, /* S */
     PAT_CONSUME  = 1 << 11, /* O */
+    PAT_LEAVE  = 1 << 12, /* L */
+    PAT_CMD = 1 << 13, /* D */
+    PAT_GO_ON_FAIL = 1 << 14, /* T */
 };
 
 enum match_flags {
@@ -69,6 +72,7 @@ typedef struct match {
     int count;
     int lead;
     int tail;
+    word counter;
     word captureKey;
 } Match;
 

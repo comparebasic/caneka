@@ -47,29 +47,24 @@ static status test(MemCtx *m, char *arg){
     return r;
 }
 
+status serve(MemCtx *m, char arg){
+    if(strncmp(arg, "test=port:", strlen("test=port:")) == 0){
+        printf("Serving on port: %s\n", arg);
+    }else{
+        printf("No port specified: %s\n", arg);
+        exit(1);
+    }
+    ProtoDef *def = HttpProtoDef_Make(m, NULL);
+    Serve *sctx = Serve_Make(m, def);
+    def->source = sctx;
+
+    return Serve_Run(sctx, port);
+}
+
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
     if(strncmp(arg, servecmd, strlen(servecmd)) == 0){
-        /*
-        arg += servecmd_l;
-        printf("port is %s\n", arg);
-
-        int port = atoi(arg);
-        if(port == 0){
-            Error("unable to find port for serve cmd");
-            return ERROR;
-        }
-
-        ProtoDef *def = HttpProtoDef_Make(m);
-        Table_Set(def->hdrHandlers_tbl_mk, (Abstract *)String_Make(m, bytes("Content-Length")),
-            (Abstract *)Maker_Wrapped(m, Hdr_IntMk)); 
-        Table_Set(def->hdrHandlers_tbl_mk, (Abstract *)String_Make(m, bytes("Cookie")),
-            (Abstract *)Maker_Wrapped(m, hdrCookieProcess)); 
-
-        Serve *sctx = Serve_Make(m, def);
-        return Serve_Run(sctx, port);
-        */
-        return MISS;
+        return serve(m, arg);
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
         status r = test(m, arg);
         if(r == TEST_OK){

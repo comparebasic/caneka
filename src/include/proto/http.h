@@ -17,8 +17,8 @@ typedef struct http_proto {
 
 status HttpProto_Init(MemCtx *m);
 
-ProtoDef *HttpProtoDef_Make(MemCtx *m);
-Proto *HttpProto_Make(MemCtx *m, Serve *sctx);
+ProtoDef *HttpProtoDef_Make(MemCtx *m, Abstract *source);
+Proto *HttpProto_Make(MemCtx *m);
 Req *HttpReq_Make(MemCtx *m, Serve *sctx);
 
 extern PatCharDef HttpV_RangeDef[];

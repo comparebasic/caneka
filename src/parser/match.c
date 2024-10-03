@@ -72,6 +72,15 @@ static status match_FeedPat(Match *mt, word c){
     }
     while(mt->def.pat.curDef < mt->def.pat.endDef){
         def = mt->def.pat.curDef;
+        if(HasFlag(def->flags, PAT_CMD)){
+            mt->counter = def->to;
+            if(HasFlag(def->from, PAT_GO_ON_FAIL)){
+                mt->type.state |= MATCH_GOTO;
+            }
+            mt->def.pat.curDef++;
+            continue;
+        }
+
         matched = charMatched(c, def);
 
         if(DEBUG_PATMATCH){

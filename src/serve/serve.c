@@ -256,13 +256,5 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->m = m;
     sctx->def = def;
-    /*
-    sctx->parsers = (ParserMaker *)Array_MakeFrom(m, 9, 
-        Parser_Method, Parser_Space, Parser_Path, Parser_HttpV, Parser_EndNl, 
-        Parser_Mark,
-        Parser_HColon, Parser_Space, Parser_HEndNl);
-    sctx->methods = (char **)Array_MakeFrom(m, 3, "GET", "SET", "UPDATE");
-    sctx->method_vals = (byte **)Array_MakeFrom(m, 3, &METHOD_GET, &METHOD_SET, &METHOD_UPDATE);
-    */
     return sctx;
 }
