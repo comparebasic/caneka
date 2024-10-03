@@ -1,5 +1,5 @@
-Caneka Tests run 1727984518 (Thu Oct  3 14:41:58 CDT 2024)
-commit 54654f5cfd5e163a625c4e943deccd326a3225b7
+Caneka Tests run 1727985487 (Thu Oct  3 14:58:07 CDT 2024)
+commit eea40bb2a9900de3b96de51b60fd19d9bf3bfc12
 [Testing Core]
 [Testing String]
 PASS: Expect string to have fixed type TYPE_STRING_FIXED found TYPE_STRING_FIXED
@@ -206,27 +206,29 @@ PASS: XML has state success
 PASS: XML has state success
 PASS: XML node has expected body, have 'The World is Upside Down!'
 [Testing Http]
-PASS: captureKey is as expected, have 0
+PASS: captureKey is as expected HTTP_METHOD, have 0/HTTP_METHOD
 PASS: Expected content 'GET', have 'GET'
-PASS: captureKey is as expected, have 1
+PASS: captureKey is as expected HTTP_PATH, have 1/HTTP_PATH
 PASS: Expected content '/path.html', have '/path.html'
-PASS: captureKey is as expected, have 2
+PASS: captureKey is as expected HTTP_PROTO, have 2/HTTP_PROTO
 PASS: Expected content 'HTTP/1.1', have 'HTTP/1.1'
-PASS: captureKey is as expected, have 3
+PASS: captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER
 PASS: Expected content 'Host', have 'Host'
-PASS: captureKey is as expected, have 4
+PASS: captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE
 PASS: Expected content 'localhost', have 'localhost'
-PASS: captureKey is as expected, have 3
+PASS: captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER
 PASS: Expected content 'User-Agent', have 'User-Agent'
-PASS: captureKey is as expected, have 4
+PASS: captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE
 PASS: Expected content 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0', have 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
-PASS: captureKey is as expected, have 3
+PASS: captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER
 PASS: Expected content 'Connection', have 'Connection'
-PASS: captureKey is as expected, have 4
+PASS: captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE
 PASS: Expected content 'keep-alive', have 'keep-alive'
-PASS: captureKey is as expected, have 3
+PASS: captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER
 PASS: Expected content 'Accept', have 'Accept'
-PASS: captureKey is as expected, have 4
+PASS: captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE
 PASS: Expected content 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8', have 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8'
-PASS: Reached end of test captures, have 11
+PASS: captureKey is as expected HTTP_END, have 5/HTTP_END
+PASS: Reached end of test captures, have 12
+PASS: Roebling HttpParser has state SUCCESS, have 'SUCCESS,'
 Suite Caneka pass:18 fail:0
