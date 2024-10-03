@@ -30,6 +30,7 @@ static void *tests[] = {
     "XML", Xml_Tests,
     "XMLNested", XmlNested_Tests,
     "XMLParser", XmlParser_Tests,
+    "Http", Http_Tests,
     NULL, NULL
     /*
     Serve_Tests,

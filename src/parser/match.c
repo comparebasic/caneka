@@ -106,10 +106,8 @@ static status match_FeedPat(Match *mt, word c){
             if(HasFlag(def->flags, PAT_NO_CAPTURE)){
                 if(mt->count == 0){
                     mt->lead++;
-                }else if((def+1) == mt->def.pat.endDef){
+                }else {
                     mt->tail++;
-                }else{
-                    mt->count++;
                 }
             }else{
                 mt->count++;

@@ -9,13 +9,12 @@ word pathDef[] = {
 };
 
 word protoDef[] = {
-    PAT_TERM|PAT_NO_CAPTURE,' ',' ', 
     PAT_TERM,'H','H', 
     PAT_TERM,'T','T', 
     PAT_TERM,'T','T', 
     PAT_TERM,'P','P', 
+    PAT_TERM,'/','/', 
     PAT_TERM,'1','1', 
-    PAT_TERM,'.','.', 
     PAT_TERM,'.','.', 
     PAT_TERM,'1', '2',
     PAT_TERM|PAT_NO_CAPTURE, '\r', '\r',
@@ -124,10 +123,14 @@ Roebling *HttpParser_Make(MemCtx *m, String *s, Abstract *source){
 
     Lookup *desc = Lookup_FromConfig(m, config, NULL);
 
+    if(s == NULL){
+        s = String_Init(m, STRING_EXTEND);
+    }
+
     return Roebling_Make(m, TYPE_ROEBLING,
         parsers_do,
         desc,
-        String_Init(m, STRING_EXTEND),
+        s,
         httpParser_Capture,
         source 
     ); 

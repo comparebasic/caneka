@@ -5,7 +5,7 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_DARK;
 int DEBUG_MATCH_COMPLETE = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
@@ -20,7 +20,7 @@ int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
 int DEBUG_XML = 0;
 int DEBUG_ROEBLING_NAME = 0;
-int DEBUG_HTTP = 0;
+int DEBUG_HTTP = COLOR_BLUE;
 int DEBUG_SERVE = COLOR_DARK;
 
 MemCtx *DebugM = NULL;
