@@ -1,5 +1,5 @@
-Caneka Tests run 1727846468 (Wed Oct  2 00:21:08 CDT 2024)
-commit a5ee5cbcc981082f3dea8d81348240779b451107
+Caneka Tests run 1727984518 (Thu Oct  3 14:41:58 CDT 2024)
+commit 54654f5cfd5e163a625c4e943deccd326a3225b7
 [Testing Core]
 [Testing String]
 PASS: Expect string to have fixed type TYPE_STRING_FIXED found TYPE_STRING_FIXED
@@ -10,6 +10,21 @@ PASS: Expect string length of 3396 found 3396
 PASS: Expect string match of long string
 PASS: Expect for int value 35072  length of 5 found 5
 PASS: Expect string match of int of 35072 to string
+[35mString: [35mS<[0;35ms/239="[1;35mGET /path.html HTTP/1.1\r\nHost: localhost\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0\r\nConnection: keep-alive\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/we[0;35m"s/32="[1;35m/png,image/svg+xml,*/*;q=0.8\r\n\r\n[0;35m"[35m>[0mGET /path.html HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8
+
+
+PASS: Expect length 271, have 271
+PASS: Expect string match of 'GET /path.html HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8
+
+' to be TRUE
 [Testing SpanSetup]
 PASS: Span stride is 16, have 16
 PASS: Span idxStride is 16, have 16
@@ -136,14 +151,14 @@ PASS: Expect SetKey and SetValue to effect the same entry: strings to not be NUL
 PASS: Expect SetKey and SetValue to effect the same entry: strings to equal 'After Value' from key:'PreKey' found 'After Value'
 [Testing Match]
 PASS: Non match has unsuccessful state found MISS,
-PASS: Matching string has successful state found KO,SUCCESS,
+PASS: Matching string has successful state found SUCCESS,
 PASS: Matched length of string, less termMatching, expected 14 have 14
 [Testing MatchElastic]
 PASS: Has PROCESSING status PROCESSING,
 PASS: On second pos, position is 0
 PASS: Tag -Stopped on the fourth character
 PASS: Tag -Found three chars
-PASS: Tag- Found SUCCESS have TRACKED/TERM_FOUND,KO,SUCCESS,
+PASS: Tag- Found SUCCESS have TRACKED/TERM_FOUND,SUCCESS,
 PASS: Tag -At end
 PASS: Att - Found four chars, count is 4
 [Testing Roebling]
@@ -157,23 +172,23 @@ PASS: Roebling has captured the rest of the line, expected 'for the weekend', ha
 PASS: Roebling has state NEXT
 PASS: Roebling has state SUCCESS
 [Testing RoeblingMark]
-PASS: Content equals expected, have TWO
+PASS: Content equals TWO, have TWO
 PASS: Roebling has state NEXT after 'TWO'
 PASS: Roebling has captured the rest of the line: 'for the weekend'
 PASS: Roebling has state NEXT after 'for the weekend'
-PASS: Content equals expected, have ONE
+PASS: Content equals ONE, have ONE
 PASS: Roebling has state NEXT after 'ONE'
 PASS: Roebling has captured the rest of the line: 'for good measure'
 PASS: Roebling has state NEXT
-PASS: Content equals expected, have THREE
+PASS: Content equals THREE, have THREE
 PASS: Roebling has state NEXT
 PASS: Roebling has captured the rest of the line: 'for all!'
 PASS: Roebling has state NEXT
-PASS: Roebling has state SUCCESS KO,SUCCESS,
+PASS: Roebling has state SUCCESS SUCCESS,
 [Testing XML]
 PASS: Root node equals 'main' have 'main'
 PASS: Jump next to expected mark XML_ATTROUTE
-PASS: XmlCtx has state SUCCSS, have KO,SUCCESS,
+PASS: XmlCtx has state SUCCSS, have SUCCESS,
 [Testing XMLNested]
 PASS: Attribute has name 'type', have 'type'
 PASS: Attribute Value to be 'root', have 'root'
@@ -187,4 +202,31 @@ PASS: Expected body value: 'Gotta Get It!', have 'Gotta Get It!'
 PASS: NodeName is 'alpha', have 'alpha'
 PASS: Second NodeName is 'alpha', have 'alpha'
 PASS: XML has state success
-Suite Caneka pass:16 fail:0
+[Testing XMLParser]
+PASS: XML has state success
+PASS: XML node has expected body, have 'The World is Upside Down!'
+[Testing Http]
+PASS: captureKey is as expected, have 0
+PASS: Expected content 'GET', have 'GET'
+PASS: captureKey is as expected, have 1
+PASS: Expected content '/path.html', have '/path.html'
+PASS: captureKey is as expected, have 2
+PASS: Expected content 'HTTP/1.1', have 'HTTP/1.1'
+PASS: captureKey is as expected, have 3
+PASS: Expected content 'Host', have 'Host'
+PASS: captureKey is as expected, have 4
+PASS: Expected content 'localhost', have 'localhost'
+PASS: captureKey is as expected, have 3
+PASS: Expected content 'User-Agent', have 'User-Agent'
+PASS: captureKey is as expected, have 4
+PASS: Expected content 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0', have 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
+PASS: captureKey is as expected, have 3
+PASS: Expected content 'Connection', have 'Connection'
+PASS: captureKey is as expected, have 4
+PASS: Expected content 'keep-alive', have 'keep-alive'
+PASS: captureKey is as expected, have 3
+PASS: Expected content 'Accept', have 'Accept'
+PASS: captureKey is as expected, have 4
+PASS: Expected content 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8', have 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8'
+PASS: Reached end of test captures, have 11
+Suite Caneka pass:18 fail:0
