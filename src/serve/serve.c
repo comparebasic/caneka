@@ -58,30 +58,28 @@ static status Serve_EpollEvUpdate(Serve *sctx, Req *req, int direction){
 
 status Serve_NextState(Serve *sctx, Req *req){
     int direction = req->direction;
-    if(req->state == READY){
-        req->state = INCOMING;
+    Handler h = req->proto->handlers + req->handlerIdx;
+
+    if(h != NULL){
+        h(sctx, req);
     }
-    status state = req->state;
-    if(state == INCOMING){
-        direction = EPOLLIN;
-    }else if(state == PROCESSING){
-        direction = EPOLLIN|EPOLLOUT;
-    }else if(state == RESPONDING){
-        direction = EPOLLOUT;
-    }else if(state == ERROR){
-        direction = EPOLLOUT;
-    }else{
-        Error("Direction Not Found");
-        return ERROR;
+
+    if(HasFlag(req->type.state, NEXT)){
+        req->type.state &= ~NEXT;
+        h++;
+        req->handlerIdx++;
+    }
+
+    if(h == NULL){
+        req->type.state |= SUCCESS;
     }
 
     if(direction != -1 && direction != req->direction){
         req->direction = direction;
         Serve_EpollEvUpdate(sctx, req, req->direction);
-        return SUCCESS;
     }
 
-    return NOOP;
+    return req->type.state;
 }
 
 static status Serve_EpollEvAdd(Serve *sctx, Req *req, int fd, int direction){
@@ -139,7 +137,7 @@ status Serve_Respond(Serve *sctx, Req *req){
     }
     */
 
-    return req->state;
+    return req->type.state;
 }
 
 status Serve_AcceptRound(Serve *sctx){
@@ -156,21 +154,8 @@ status Serve_AcceptRound(Serve *sctx){
             Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
             printf("\n");
         }
-        /*
-        req->in.rbl = Roebling_Make(req->m, 
-            TYPE_PARSER, sctx->def->parsers, req->in.shelf, (Abstract *)req);
-
-        if(sctx != NULL){
-            status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
-            Serve_NextState(sctx, req);
-            if(r != SUCCESS){
-                Error("Serve_Accept");
-                return ERROR;
-            }
-
-            return SUCCESS;
-        }
-        */
+        status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
+        return Serve_NextState(sctx, req);
     }
 
     return NOOP;
@@ -183,6 +168,7 @@ status Serve_ServeRound(Serve *sctx){
 	struct epoll_event event;
     struct epoll_event events[SERV_MAX_EVENTS];
 	char buff[SERV_READ_SIZE + 1];
+    /*
 
     ev_count = epoll_wait(sctx->epoll_fd, events, SERV_MAX_EVENTS, EPOLL_WAIT);
     if(ev_count == 0){
@@ -212,6 +198,7 @@ status Serve_ServeRound(Serve *sctx){
             Req_Handle(sctx, req);
         }
     }
+    */
 
     return SUCCESS;
 }

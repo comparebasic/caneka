@@ -1,7 +1,7 @@
 typedef struct serve_req {
     Type type;
     MemCtx *m;
-    status state;
+    word handlerIdx;
     int fd;
     String *id;
     int direction;

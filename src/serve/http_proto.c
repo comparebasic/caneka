@@ -35,10 +35,9 @@ Req *HttpReq_Make(MemCtx *_m, Serve *sctx){
     return req;
 }
 
-ProtoDef *HttpProtoDef_Make(MemCtx *m, Lookup *handlers){
+ProtoDef *HttpProtoDef_Make(MemCtx *m){
     return ProtoDef_Make(m, TYPE_HTTP_PROTODEF,
         (Maker)HttpReq_Make,
-        (Maker)HttpProto_Make,
-        handlers
+        (Maker)HttpProto_Make
     ); 
 }

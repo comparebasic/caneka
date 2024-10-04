@@ -34,15 +34,15 @@ status Req_Recv(Serve *sctx, Req *req){
 
         r = Roebling_Run(req->in.rbl);
         if(r == ERROR){
-            req->state = ERROR;
+            req->type.state = ERROR;
             Debug_Print((void *)req, TYPE_REQ, "Req Parsed (Error) ", COLOR_RED, TRUE);
         }else if (r == COMPLETE){
-            req->state = PROCESSING;
+            req->type.state = PROCESSING;
             Debug_Print((void *)req, TYPE_REQ, "Req Parsed ", COLOR_CYAN, TRUE);
         }
 
-        Serve_NextState(sctx, req);
-        return req->state;
+        req->type.state |= NEXT;
+        return req->type.state;
     }
 
     return NOOP;
@@ -52,17 +52,17 @@ status Req_Process(Serve *sctx, Req *req){
     req->out.response = packageResponse(req->m, String_From(req->m, bytes("poo")));
     req->out.cursor = SCursor_Make(req->m, req->out.response);
 
-    req->state = RESPONDING;
+    req->type.state = RESPONDING;
     Serve_NextState(sctx, req);
-    return req->state;
+    return req->type.state;
 }
 
 status Req_Handle(Serve *sctx, Req *req){
-    if(req->state == INCOMING){
+    if(req->type.state == INCOMING){
         return Req_Recv(sctx, req);
     }
 
-    if(req->state == PROCESSING){
+    if(req->type.state == PROCESSING){
         return Req_Process(sctx, req);
     }
 
@@ -83,7 +83,7 @@ Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
 }
 
 status Req_SetError(Serve *sctx, Req *req, String *msg){
-    req->state = RESPONDING;
+    req->type.state = RESPONDING;
     Serve_NextState(sctx, req);
     req->out.response = packageError(req->m, msg);
     return SUCCESS;

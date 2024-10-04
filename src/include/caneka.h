@@ -201,6 +201,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "lookup.h"
 #include "debug.h"
 #include "roebling.h"
+#include "handler.h"
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"

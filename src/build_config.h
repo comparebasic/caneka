@@ -47,7 +47,7 @@ static BuildSubdir serveobj = { "serve", {
 }};
 
 static BuildSubdir appsobj = { "apps", {
-    "appsdebug.c",
+    "appsdebug.c", "example.c",
     NULL
 }};
 
