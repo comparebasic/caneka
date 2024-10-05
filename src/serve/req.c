@@ -48,27 +48,6 @@ status Req_Recv(Serve *sctx, Req *req){
     return NOOP;
 }
 
-status Req_Process(Serve *sctx, Req *req){
-    req->out.response = packageResponse(req->m, String_From(req->m, bytes("poo")));
-    req->out.cursor = SCursor_Make(req->m, req->out.response);
-
-    req->type.state = RESPONDING;
-    Serve_NextState(sctx, req);
-    return req->type.state;
-}
-
-status Req_Handle(Serve *sctx, Req *req){
-    if(req->type.state == INCOMING){
-        return Req_Recv(sctx, req);
-    }
-
-    if(req->type.state == PROCESSING){
-        return Req_Process(sctx, req);
-    }
-
-    return NOOP;
-}
-
 Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
     MemCtx *rm = MemCtx_Make();
     Req* req = (Req *)MemCtx_Alloc(rm, sizeof(Req));
@@ -81,11 +60,3 @@ Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
 
     return req;
 }
-
-status Req_SetError(Serve *sctx, Req *req, String *msg){
-    req->type.state = RESPONDING;
-    Serve_NextState(sctx, req);
-    req->out.response = packageError(req->m, msg);
-    return SUCCESS;
-}
-

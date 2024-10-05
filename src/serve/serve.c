@@ -56,32 +56,6 @@ static status Serve_EpollEvUpdate(Serve *sctx, Req *req, int direction){
     return SUCCESS;
 }
 
-status Serve_NextState(Serve *sctx, Req *req){
-    int direction = req->direction;
-    Handler h = req->proto->handlers + req->handlerIdx;
-
-    if(h != NULL){
-        h(sctx, req);
-    }
-
-    if(HasFlag(req->type.state, NEXT)){
-        req->type.state &= ~NEXT;
-        h++;
-        req->handlerIdx++;
-    }
-
-    if(h == NULL){
-        req->type.state |= SUCCESS;
-    }
-
-    if(direction != -1 && direction != req->direction){
-        req->direction = direction;
-        Serve_EpollEvUpdate(sctx, req, req->direction);
-    }
-
-    return req->type.state;
-}
-
 static status Serve_EpollEvAdd(Serve *sctx, Req *req, int fd, int direction){
     int r;
     struct epoll_event event;
@@ -150,15 +124,48 @@ status Serve_AcceptRound(Serve *sctx){
             printf("\n");
         }
         Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
+        req->handlers = sctx->def->getHandlers(sctx, req);
         if(DEBUG_SERVE){
             Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
             printf("\n");
         }
         status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
-        return Serve_NextState(sctx, req);
+        return req->type.state;
     }
 
     return NOOP;
+}
+
+status ServeReq_Handle(Serve *sctx, Req *req){
+    if(DEBUG_REQ){
+        Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
+        printf("\n");
+    }
+    Handler *h = req->handlers + req->handlerIdx;
+
+    if(h != NULL && HasFlag(req->type.state, NEXT)){
+        req->type.state &= ~NEXT;
+        req->handlerIdx++;
+    }
+
+    h = req->handlers + req->handlerIdx;
+
+    int direction = req->direction;
+    if(*h == NULL){
+        if(DEBUG_REQ){
+            Debug_Print((void *)req, 0, "ServeReq_Handle(END): ", DEBUG_REQ, FALSE);
+            printf("\n");
+        }
+        req->type.state |= END;
+    }else{
+        (*h)(sctx, req);
+    }
+
+    if(req->direction != -1 && direction != req->direction){
+        Serve_EpollEvUpdate(sctx, req, req->direction);
+    }
+
+    return req->type.state;
 }
 
 status Serve_ServeRound(Serve *sctx){
@@ -168,7 +175,6 @@ status Serve_ServeRound(Serve *sctx){
 	struct epoll_event event;
     struct epoll_event events[SERV_MAX_EVENTS];
 	char buff[SERV_READ_SIZE + 1];
-    /*
 
     ev_count = epoll_wait(sctx->epoll_fd, events, SERV_MAX_EVENTS, EPOLL_WAIT);
     if(ev_count == 0){
@@ -182,23 +188,14 @@ status Serve_ServeRound(Serve *sctx){
             continue;
         }
 
-        if(req->state == ERROR){
-            String *msg = String_From(req->m, bytes("Error"));
-            Req_SetError(sctx, req, msg);
-        }
-
-        if(req->state == COMPLETE){
-            Log(0, "Served %s - mem: %ld", req->proto->toLog(req), MemCount());
+        if((req->type.state & (END|ERROR)) != 0){
+            int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
+            Log(logStatus, "Served %s - mem: %ld", req->proto->toLog(req), MemCount());
             r = Serve_CloseReq(sctx, req);
-        }
-
-        if(req->state == RESPONDING){
-            Serve_Respond(sctx, req);
         }else{
-            Req_Handle(sctx, req);
+            ServeReq_Handle(sctx, req);
         }
     }
-    */
 
     return SUCCESS;
 }

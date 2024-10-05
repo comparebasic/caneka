@@ -1,1 +1,1 @@
-Handler Example_getHandlers(Serve *sctx, Req *req);
+Handler *Example_getHandlers(Serve *sctx, Req *req);

@@ -3,7 +3,6 @@ typedef struct proto {
     char *(*toLog)(struct serve_req *req);
     Span *headers_tbl;
     String *body;
-    Handler handlers; /* array */
 } Proto;
 
 typedef struct protodef {
@@ -11,7 +10,7 @@ typedef struct protodef {
     cls reqType;
     Maker req_mk;
     Maker proto_mk;
-    Handler (*getHandlers)(struct serve_ctx *sctx, struct serve_req *req);
+    Handler *(*getHandlers)(struct serve_ctx *sctx, struct serve_req *req);
     Abstract *source;
 } ProtoDef;
 

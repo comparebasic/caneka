@@ -44,3 +44,5 @@ extern int DEBUG_SPAN;
 extern int DEBUG_XML;
 extern int DEBUG_HTTP;
 extern int DEBUG_SERVE;
+extern int DEBUG_REQ;
+extern int DEBUG_EXAMPLE_HANDLERS;
