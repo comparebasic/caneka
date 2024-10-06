@@ -22,6 +22,7 @@ typedef byte boolean;
 
 struct serve_ctx;
 struct serve_req;
+struct handler;
 struct mem_ctx;
 struct mem_slab;
 struct strcursor_range;

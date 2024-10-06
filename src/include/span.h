@@ -15,6 +15,9 @@ related: include/slab.h
 #define SPAN_DEFAULT_IDX_EXTRA_SLOTS 0
 #define SPAN_DEFAULT_HDR 0
 
+#define SPAN_VALUE_SIZE(def) (sizeof(Abstract *)*def->stride*def->slotSize)
+#define SPAN_IDX_SIZE(def) (sizeof(Abstract *)*(def->idxSize)*def->idxStride)
+
 enum span_flags {
     SLAB_ACTIVE = 1 << 0,
     SLAB_FULL = 1 << 1,
@@ -56,6 +59,7 @@ Span* Span_Make(MemCtx* m, cls type);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
 status Span_Remove(Span *p, int idx);
 status Span_ReInit(Span *p);
+Span *Span_Clone(MemCtx *m, Span *p);
 void *Span_Set(Span *p, int idx, Abstract *t);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);

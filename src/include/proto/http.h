@@ -2,7 +2,6 @@ typedef struct http_proto {
     Type type;
     char *(*toLog)(Req *req);
     Span *headers_tbl;
-    Handler handlers; /* array */
     /* end proto props */
     String *path;
     String *sid;

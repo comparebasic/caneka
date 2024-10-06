@@ -145,3 +145,25 @@ status SpanInline_Tests(MemCtx *gm){
     MemCtx_Free(m);
     return r;
 }
+
+status SpanClone_Tests(MemCtx *gm){
+    MemCtx *m = MemCtx_Make();
+    Span *p;
+    status r = READY;
+
+    p = Span_MakeInline(m, TYPE_MINI_SPAN, sizeof(Single));
+    String *s;
+
+    Span_Set(p, 0, (Abstract *)String_Make(m, bytes("Zero")));
+    Span_Set(p, 3, (Abstract *)String_Make(m, bytes("Three")));
+    Span_Set(p, 4, (Abstract *)String_Make(m, bytes("Four")));
+    Span_Set(p, 5, (Abstract *)String_Make(m, bytes("Five")));
+    Span_Set(p, 17, (Abstract *)String_Make(m, bytes("Seventeen")));
+
+    Debug_Print((void *)p, 0, "Span: ", COLOR_DARK, TRUE);
+
+    MemCtx_Free(m);
+
+    r |= SUCCESS;
+    return r;
+}

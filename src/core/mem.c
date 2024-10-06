@@ -58,6 +58,10 @@ i64 MemCtx_Used(MemCtx *m){
 }
 
 void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
+    if(s > origsize){
+        Fatal("Asking to copy more than newly allocated", TYPE_MEMCTX);
+        return NULL;
+    }
     void *p = MemCtx_Alloc(m, s);
     memcpy(p, orig, origsize);
     return p; 

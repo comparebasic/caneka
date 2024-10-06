@@ -13,7 +13,7 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./src/include",
+    "-I./src/include/", "-I./src/apps/include/",
     NULL
 };
 
@@ -42,7 +42,7 @@ static BuildSubdir testobj = { "tests", {
 }};
 
 static BuildSubdir serveobj = { "serve", {
-    "serve.c", "proto.c", "req.c", "http_proto.c",
+    "serve.c", "proto.c", "req.c", "http_proto.c", "handler.c",
     NULL
 }};
 

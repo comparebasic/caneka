@@ -10,7 +10,7 @@ typedef struct protodef {
     cls reqType;
     Maker req_mk;
     Maker proto_mk;
-    Handler *(*getHandlers)(struct serve_ctx *sctx, struct serve_req *req);
+    Handler *(*getHandler)(struct serve_ctx *sctx, struct serve_req *req);
     Abstract *source;
 } ProtoDef;
 

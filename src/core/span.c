@@ -265,14 +265,13 @@ byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
     return dims;
 }
 
-
 void *Span_valueSlab_Make(MemCtx *m, SpanDef *def){
-    i64 sz = sizeof(Abstract *)*def->stride*def->slotSize;
+    i64 sz = SPAN_VALUE_SIZE(def);
     return MemCtx_Alloc(m, sz);
 }
 
 void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
-    i64 sz = sizeof(Abstract *)*(def->idxSize)*def->idxStride;
+    i64 sz = SPAN_IDX_SIZE(def);
     return MemCtx_Alloc(m, sz);
 }
 
@@ -284,6 +283,31 @@ status Span_ReInit(Span *p){
     p->nvalues = 0;
     p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
     return SUCCESS;
+}
+
+static void *span_CloneSlabs(MemCtx *m, void *p_sl, Span *p, int dim){
+    SpanDef *def = p->def;
+    if(dim == 0){
+       return MemCtx_Realloc(m, SPAN_VALUE_SIZE(p->def), p_sl, SPAN_VALUE_SIZE(p->def)); 
+    }else{
+        void **new_sl = MemCtx_Alloc(m, SPAN_IDX_SIZE(def));
+        for(int local_idx = 0; local_idx < def->idxStride; local_idx++){
+            int pos = local_idx*(def->slotSize)*sizeof(void *);
+            void *ptr = p_sl+local_idx;
+            util *a = (util *)ptr;
+            if(*a != 0){
+                void *copied_sl = span_CloneSlabs(m, *((void **)ptr), p, dim-1);
+                new_sl[pos] = copied_sl;
+            }
+        }
+        return new_sl;
+    }
+}
+
+Span *Span_Clone(MemCtx *m, Span *p){
+    Span *copy;
+    copy->root = span_CloneSlabs(m, p->root, p, p->dims);
+    return copy;
 }
 
 Span *Span_Make(MemCtx *m, cls type){

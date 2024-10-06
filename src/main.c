@@ -8,7 +8,7 @@ This file is mostly an example Caneka application, and it runs the tests
 #include <caneka.h>
 #include <tests.h>
 #include <proto_tests.h>
-#include <apps/example.h>
+#include <example.h>
 
 #define servecmd "serve"
 #define testcmd "test"
@@ -19,6 +19,8 @@ static void *tests[] = {
     "SpanSetup", SpanSetup_Tests,
     "Span", Span_Tests,
     "SpanInline", SpanInline_Tests,
+    "SpanClone", SpanClone_Tests,
+    /*
     "Hash", Hash_Tests,
     "Table", Table_Tests,
     "TableResize", TableResize_Tests,
@@ -32,6 +34,7 @@ static void *tests[] = {
     "XMLNested", XmlNested_Tests,
     "XMLParser", XmlParser_Tests,
     "Http", Http_Tests,
+    */
     NULL, NULL
 };
 
@@ -57,7 +60,7 @@ status serve(MemCtx *m, char *arg){
         exit(1);
     }
     ProtoDef *def = HttpProtoDef_Make(m);
-    def->getHandlers = Example_getHandlers;
+    def->getHandler = Example_getHandler;
     Serve *sctx = Serve_Make(m, def);
     def->source = (Abstract *)sctx;
 

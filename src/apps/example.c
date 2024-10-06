@@ -1,39 +1,51 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Setup(Serve *sctx, Req *req){
+static status Setup(Handler *h, Req *req, Serve *sctx){
     if(DEBUG_EXAMPLE_HANDLERS){
         Debug_Print((void *)req, 0, "Setup: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
         printf("\n");
     }
     req->direction = EPOLLIN;
-    req->type.state |= NEXT;
-    return SUCCESS;
+    h->type.state |= SUCCESS;
+    return h->type.state;
 }
 
-static status Recieve(Serve *sctx, Req *req){
+static status Recieve(Handler *h, Req *req, Serve *sctx){
     if(DEBUG_EXAMPLE_HANDLERS){
         Debug_Print((void *)req, 0, "Recieving: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
         printf("\n");
     }
-    req->type.state |= NEXT;
     req->direction = EPOLLOUT;
-    return SUCCESS;
+    h->type.state |= SUCCESS;
+    return h->type.state;
 }
 
-static status Respond(Serve *sctx, Req *req){
+static status Respond(Handler *h, Req *req, Serve *sctx){
     if(DEBUG_EXAMPLE_HANDLERS){
         Debug_Print((void *)req, 0, "Responding: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
         printf("\n");
     }
-    req->type.state |= NEXT;
-    return SUCCESS;
+    h->type.state |= SUCCESS;
+    return h->type.state;
 }
 
-static Handler handlers[] = {
-   Setup, Recieve, Respond, NULL 
-};
+static status Complete(Handler *h, Req *req, Serve *sctx){
+    if(DEBUG_EXAMPLE_HANDLERS){
+        Debug_Print((void *)req, 0, "Complete: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
+        printf("\n");
+    }
+    h->type.state |= SUCCESS;
+    return h->type.state;
+}
 
-Handler *Example_getHandlers(Serve *sctx, Req *req){
-    return handlers;
+Handler *Example_getHandler(Serve *sctx, Req *req){
+    MemCtx *m = req->m;
+    Handler *startHandler = Handler_Make(m, Complete, NULL);
+    startHandler->prior = Span_Make(m, TYPE_SPAN); 
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Setup, NULL));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Recieve, NULL));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Respond, NULL));
+
+    return startHandler;
 }

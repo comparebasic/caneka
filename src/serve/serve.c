@@ -124,7 +124,7 @@ status Serve_AcceptRound(Serve *sctx){
             printf("\n");
         }
         Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
-        req->handlers = sctx->def->getHandlers(sctx, req);
+        req->handler = sctx->def->getHandler(sctx, req);
         if(DEBUG_SERVE){
             Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
             printf("\n");
@@ -141,24 +141,18 @@ status ServeReq_Handle(Serve *sctx, Req *req){
         Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
         printf("\n");
     }
-    Handler *h = req->handlers + req->handlerIdx;
 
-    if(h != NULL && HasFlag(req->type.state, NEXT)){
-        req->type.state &= ~NEXT;
-        req->handlerIdx++;
-    }
-
-    h = req->handlers + req->handlerIdx;
-
+    Handler *h = Handler_Get(req->handler);
     int direction = req->direction;
-    if(*h == NULL){
+    status hstate = h->type.state & (SUCCESS|ERROR);
+    if(hstate != 0){
         if(DEBUG_REQ){
             Debug_Print((void *)req, 0, "ServeReq_Handle(END): ", DEBUG_REQ, FALSE);
             printf("\n");
         }
-        req->type.state |= END;
+        req->type.state |= hstate|END;
     }else{
-        (*h)(sctx, req);
+        h->func(h, req, sctx);
     }
 
     if(req->direction != -1 && direction != req->direction){

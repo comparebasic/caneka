@@ -18,3 +18,4 @@ status TablePreKey_Tests(MemCtx *gm);
 status MatchElastic_Tests(MemCtx *gm);
 status XmlParser_Tests(MemCtx *gm);
 status Http_Tests(MemCtx *gm);
+status SpanClone_Tests(MemCtx *gm);
