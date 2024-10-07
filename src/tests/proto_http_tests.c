@@ -31,7 +31,7 @@ status ProtoHttp_Tests(MemCtx *gm){
     proto = (HttpProto *) as(req->proto, TYPE_HTTP_PROTO);
     String_Add(req->m, req->in.shelf, String_Make(m, bytes("GET /page1.html HTTP/1.2\r\nUser-Agent: Firefox\r\nCookie: sid=xyz1234;Expiration=2024-04-04;Secure=true;\r\nAccept: text/html,application/json\r\n\r\n")));
 
-    Roebling_Run(req->in.rbl);
+    Roebling_RunCycle(req->in.rbl);
 
     r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToString(req->in.rbl->type.state));
     String *method_s = Lookup_Get(sctx->def->methods, proto->method);
@@ -49,7 +49,7 @@ status ProtoHttp_Tests(MemCtx *gm){
     String_AddBytes(req->m, req->in.shelf, bytes("\r\n"), 2);
     String_Add(req->m, req->in.shelf, body);
 
-    Roebling_Run(req->in.rbl);
+    Roebling_RunCycle(req->in.rbl);
     r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToString(req->in.rbl->type.state));
 
     method_s = Lookup_Get(sctx->def->methods, proto->method);

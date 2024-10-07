@@ -1,9 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 #include <testsuite.h>
+#include <example.h>
 
 static char *sid = "Azjfhuei3";
-static char *req_cstr = "GET /Azjfhuei3 HTTP/1.1\r\nContent-Length: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
+static char *reqStart_cstr = "GET /Azjfhuei3 HTTP/1.1\r\nContent-Leng";  
+static char *reqEnd_cstr = "th: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
 
 static int testConnect(){
 	struct sockaddr_in server;
@@ -26,20 +28,59 @@ static int testConnect(){
 status Serve_Tests(MemCtx *gm){
     status r = TEST_OK;
     MemCtx *m = MemCtx_Make();
-    HttpProto_Init(m);
 
-    Serve *sctx = Serve_Make(m, HttpProtoDef_Make(m));
+    ProtoDef *def = HttpProtoDef_Make(m);
+    def->getHandler = Example_getHandler;
+    Serve *sctx = Serve_Make(m, def);
     
     r |=  Serve_PreRun(sctx, TEST_PORT);
 
     int sock = testConnect();
     Serve_AcceptRound(sctx);
     r |= Test(sock >= 0, "Expect socket to connect has fd %d", sock);
-    send(sock, req_cstr, strlen(req_cstr), 0);
+    send(sock, reqStart_cstr, strlen(reqStart_cstr), 0);
     Serve_ServeRound(sctx);
     close(sock);
 
     Serve_Stop(sctx);
+    MemCtx_Free(m);
+    return r;
+}
+
+status ServeHandle_Tests(MemCtx *gm){
+    status r = TEST_OK;
+    MemCtx *m = MemCtx_Make();
+
+    Handler *h = NULL;
+    Req *req = NULL;;
+    ProtoDef *def = HttpProtoDef_Make(m);
+    def->getHandler = Example_getHandler;
+    Serve *sctx = Serve_Make(m, def);
+    
+    r |=  Serve_PreRun(sctx, TEST_PORT);
+
+    int sock = testConnect();
+    send(sock, reqStart_cstr, strlen(reqStart_cstr), 0);
+    Serve_AcceptRound(sctx);
+
+    Serve_ServeRound(sctx);
+    req = sctx->active;
+    r |= Test(req != NULL, "active Req is not null");
+    
+    h = Handler_Current(req->handler);
+    r |= Test(h->func == Example_Setup, "Req has the first handler set");
+
+    Serve_ServeRound(sctx);
+    h = Handler_Current(req->handler);
+    r |= Test(h->func == Example_Recieve, "Req has the second handler set");
+    r |= Test(!HasFlag(req->in.rbl->type.state, SUCCESS), "Req Roebling does not have state SUCCESS yet, have %s", State_ToString(req->in.rbl->type.state));
+
+    send(sock, reqEnd_cstr, strlen(reqEnd_cstr), 0);
+    Serve_ServeRound(sctx);
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
+
+    Serve_Stop(sctx);
+
     MemCtx_Free(m);
     return r;
 }

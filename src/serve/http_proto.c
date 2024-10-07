@@ -9,6 +9,7 @@ static status reqHttpParser_Capture(word captureKey, String *s, Abstract *source
     if(DEBUG_HTTP){
         printf("%d\n", captureKey);
         Debug_Print(s, 0, "HttpCaptured: ", DEBUG_HTTP, TRUE);
+        printf("\n");
     }
 
     status r = SUCCESS;

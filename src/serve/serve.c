@@ -1,6 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
+static void delay(){
+    struct timespec ts = {
+        ROUND_DELAY_SEC,
+        ROUND_DELAY_TVSEC,
+    };
+    struct timespec remaining;
+    nanosleep(&ts, &remaining);
+}
+
+
 static int openPortToFd(int port){
     int fd = 0;
 	struct sockaddr_in serv_addr;
@@ -137,6 +147,7 @@ status Serve_AcceptRound(Serve *sctx){
 }
 
 status ServeReq_Handle(Serve *sctx, Req *req){
+    sctx->active = req;
     if(DEBUG_REQ){
         Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
         printf("\n");
@@ -226,6 +237,7 @@ status Serve_Run(Serve *sctx, int port){
                 cadance = ACCEPT_CADANCE;
             }
             Serve_ServeRound(sctx);
+            delay();
         }
 
         return SUCCESS;

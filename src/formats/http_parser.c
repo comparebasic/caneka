@@ -97,6 +97,7 @@ static status httpParser_Capture(word captureKey, String *s, Abstract *source){
     if(DEBUG_HTTP){
         printf("%d\n", captureKey);
         Debug_Print(s, 0, "Captured: ", DEBUG_XML, TRUE);
+        printf("\n");
     }
 
     status r = SUCCESS;

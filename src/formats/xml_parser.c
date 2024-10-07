@@ -156,7 +156,7 @@ status XmlParser_Parse(XmlParser *xml, String *s){
     }
     while(!HasFlag(xml->rbl->type.state, BREAK)
             && !HasFlag(xml->ctx->type.state, SUCCESS)){
-        Roebling_Run(xml->rbl);
+        Roebling_RunCycle(xml->rbl);
     };
 
     xml->type.state |= 

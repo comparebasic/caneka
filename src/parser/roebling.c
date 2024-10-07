@@ -1,6 +1,64 @@
 #include <external.h>
 #include <caneka.h>
 
+static status Roebling_RunMatches(Roebling *rbl){
+    int i = 0;
+    byte c = 0;
+    rbl->type.state &= ~(NEXT|BREAK|COMPLETE);
+    if(rbl->matches->nvalues == 0){
+        rbl->type.state |= NEXT;
+    }
+    while((rbl->type.state & (NEXT|BREAK)) == 0){
+        if(HasFlag(rbl->range.potential.type.state, END)){
+            printf("end");
+            rbl->type.state |= BREAK;
+            continue;
+        }
+        c = Range_GetByte(&(rbl->range));
+        printf("%c - ", c);
+        Debug_Print((void *)&(rbl->range), 0, "C", COLOR_DARK, TRUE);
+        printf("\n");
+        Match *mt = NULL;
+        for(int i = 0; i < rbl->matches->nvalues; i++){
+            mt = Span_Get(rbl->matches, i);
+            if(DEBUG_ROEBLING){
+                printf("\x1b[%dm%d ", DEBUG_ROEBLING, i);
+                Debug_Print(mt, 0, "Roebling Running Match: ", DEBUG_ROEBLING, TRUE);
+            }
+            if(mt != NULL){
+               Match_Feed(mt, c);
+               if(HasFlag(mt->type.state, COMPLETE)){
+                     rbl->matches->metrics.selected = i;
+                     if(mt->jump > -1){
+                        rbl->jump = mt->jump;
+                     }
+                     rbl->type.state = NEXT;
+                     SCursor_Incr(&(rbl->range.start), mt->lead);
+                     if(mt->count){
+                         SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
+                     }
+                     rbl->tail = mt->tail;
+                     if(DEBUG_ROEBLING_COMPLETE){
+                         printf("\x1b[%dm#%d ", DEBUG_ROEBLING_COMPLETE, i);
+                         Debug_Print((void *)mt, 0, "Match Found: ", DEBUG_ROEBLING_COMPLETE, TRUE);
+                         String *s = Range_Copy(rbl->m, &(rbl->range));
+                         printf(" \x1b[1;%dm(", DEBUG_ROEBLING_COMPLETE);
+                         Debug_Print((void *)s, 0, "", DEBUG_ROEBLING_COMPLETE, TRUE);
+                         printf("\x1b[1;%dm)\n\x1b[0m", DEBUG_ROEBLING_COMPLETE);
+                         printf("\n");
+                     }
+                     break;
+               }
+            }
+        }
+        if(HasFlag(mt->type.state, INVERTED)){
+            break;
+        }
+        SCursor_Incr(&(rbl->range.potential), 1);
+    }
+    return rbl->type.state;
+}
+
 String *Roebling_GetMarkDebug(Roebling *rbl, int idx){
     if(idx < 0){
         return NULL;
@@ -83,61 +141,23 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
     return SUCCESS;
 }
 
-static status Roebling_RunMatches(Roebling *rbl){
-    int i = 0;
-    byte c = 0;
-    rbl->type.state &= ~(NEXT|BREAK|COMPLETE);
-    if(rbl->matches->nvalues == 0){
-        rbl->type.state |= (BREAK|NEXT);
+status Roebling_Run(Roebling *rbl){
+    status r = READY;
+    printf("start CycleBreak at %s\n", State_ToString(rbl->type.state));
+    while((r & (SUCCESS|ERROR|BREAK)) == 0){
+        r = Roebling_RunCycle(rbl);
     }
-    while(!HasFlag(rbl->type.state, BREAK) && !HasFlag(rbl->range.potential.type.state, END)){
-        c = Range_GetByte(&(rbl->range));
-        Match *mt = NULL;
-        for(int i = 0; i < rbl->matches->nvalues; i++){
-            mt = Span_Get(rbl->matches, i);
-            if(DEBUG_ROEBLING){
-                printf("\x1b[%dm%d ", DEBUG_ROEBLING, i);
-                Debug_Print(mt, 0, "Roebling Running Match: ", DEBUG_ROEBLING, TRUE);
-            }
-            if(mt != NULL){
-               Match_Feed(mt, c);
-               if(HasFlag(mt->type.state, COMPLETE)){
-                     rbl->matches->metrics.selected = i;
-                     if(mt->jump > -1){
-                        rbl->jump = mt->jump;
-                     }
-                     rbl->type.state = (NEXT|BREAK);
-                     SCursor_Incr(&(rbl->range.start), mt->lead);
-                     if(mt->count){
-                         SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
-                     }
-                     rbl->tail = mt->tail;
-                     if(DEBUG_ROEBLING_COMPLETE){
-                         printf("\x1b[%dm#%d ", DEBUG_ROEBLING_COMPLETE, i);
-                         Debug_Print((void *)mt, 0, "Match Found: ", DEBUG_ROEBLING_COMPLETE, TRUE);
-                         String *s = Range_Copy(rbl->m, &(rbl->range));
-                         printf(" \x1b[1;%dm(", DEBUG_ROEBLING_COMPLETE);
-                         Debug_Print((void *)s, 0, "", DEBUG_ROEBLING_COMPLETE, TRUE);
-                         printf("\x1b[1;%dm)\n\x1b[0m", DEBUG_ROEBLING_COMPLETE);
-                         printf("\n");
-                     }
-                     break;
-               }
-            }
-        }
-        if(HasFlag(mt->type.state, INVERTED)){
-            break;
-        }
-        SCursor_Incr(&(rbl->range.potential), 1);
-    }
+    printf("CycleBreak at %s\n", State_ToString(rbl->type.state));
     rbl->type.state &= ~BREAK;
     return rbl->type.state;
 }
 
-status Roebling_Run(Roebling *rbl){
+
+status Roebling_RunCycle(Roebling *rbl){
     if(DEBUG_ROEBLING_MARK){
         printf("\x1b[%dmRblIdx:%d\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx);
     }
+    rbl->type.state &= ~BREAK;
     if(HasFlag(rbl->type.state, NEXT)){
         rbl->idx++;
         SCursor_Incr(&(rbl->range.end), rbl->tail);

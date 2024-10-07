@@ -312,6 +312,7 @@ Span *Span_Clone(MemCtx *m, Span *p){
 
 Span *Span_Make(MemCtx *m, cls type){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
+    p->type.of = TYPE_SPAN;
     p->m = m;
     p->def = SpanDef_FromCls(type);
     p->type.of = p->def->typeOf;
@@ -322,6 +323,7 @@ Span *Span_Make(MemCtx *m, cls type){
 
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
+    p->type.of = TYPE_SPAN;
     p->m = m;
     p->def = SpanDef_Clone(m, SpanDef_FromCls(type));
     p->type.of = p->def->typeOf;

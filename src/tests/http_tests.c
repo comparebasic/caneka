@@ -86,7 +86,7 @@ status Http_Tests(MemCtx *gm){
 
     setTestCapture(expected1);
     for(int i = 0; i < 13; i++){
-        Roebling_Run(rbl);
+        Roebling_RunCycle(rbl);
         /*
         Debug_Print((void *)rbl, 0, "Rbl: ", COLOR_PURPLE, TRUE);
         */

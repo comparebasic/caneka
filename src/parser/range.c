@@ -38,6 +38,7 @@ int Range_GetLength(Range *range){
     int length = 0;
     if(seg == range->end.seg){
         length = range->end.position - range->start.position;
+        printf("Getting length: %d\n", length);
     }else{
         length = seg->length - range->start.position;
         seg = String_Next(seg);
@@ -61,6 +62,7 @@ String *Range_Copy(MemCtx *m, Range *range){
     String *seg = range->start.seg;
     String *s = NULL;
     int length = Range_GetLength(range);
+    printf("length: %d\n", length);
     if(seg == range->end.seg){
         s = String_MakeFixed(m, seg->bytes + range->start.position, length); 
     }else{

@@ -18,7 +18,6 @@ static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean exten
     printf(">\x1b[0m");
 }
 
-
 static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     XmlCtx *ctx = (XmlCtx *)as(a, TYPE_XMLCTX);
     if(extended){
@@ -30,15 +29,16 @@ static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     }
 }
 
-static void HttpProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    printf("\x1b[%dmHttpProtoDef<>\x1b[0m", color);
-}
-
 static void HttpProto_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     HttpProto *proto = (HttpProto *)as(a, TYPE_HTTP_PROTO);
     printf("\x1b[%dmHttpProto< %s", color, proto->path != NULL ? (char *)String_ToEscaped(DebugM, proto->path)->bytes : "");
     Debug_Print(proto->body, 0, "body=", color, TRUE);
     printf("\x1b[%dm>\x1b[0m", color);
+}
+
+static void HttpProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    ProtoDef *proto = (ProtoDef *)a;
+    printf("\x1b[%dm%sHTTP<>\x1b[0m", color, "");
 }
 
 static status populateDebugPrint(MemCtx *m, Lookup *lk){

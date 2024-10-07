@@ -28,21 +28,15 @@ status Req_Recv(Serve *sctx, Req *req){
     size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     status r = NOOP;
     if(l > 0){
-
+        printf("buff: %s\n", buff);
+        Debug_Print((void *)req->in.rbl, 0, "Rbl before is", COLOR_CYAN, TRUE);
         String_AddBytes(req->m, req->in.shelf, buff, l);
-        Debug_Print((void *)req->in.shelf, TYPE_STRING_CHAIN, "shelf is", COLOR_CYAN, FALSE);
+        req->in.rbl->range.potential.type.state &= ~END;
+        printf("\n");
+        Debug_Print((void *)req->in.rbl, 0, "Rbl endis", COLOR_CYAN, TRUE);
+        printf("\n");
 
-        r = Roebling_Run(req->in.rbl);
-        if(r == ERROR){
-            req->type.state = ERROR;
-            Debug_Print((void *)req, TYPE_REQ, "Req Parsed (Error) ", COLOR_RED, TRUE);
-        }else if (r == COMPLETE){
-            req->type.state = PROCESSING;
-            Debug_Print((void *)req, TYPE_REQ, "Req Parsed ", COLOR_CYAN, TRUE);
-        }
-
-        req->type.state |= NEXT;
-        return req->type.state;
+        return Roebling_Run(req->in.rbl);
     }
 
     return NOOP;

@@ -35,6 +35,7 @@ Roebling *Roebling_Make(MemCtx *m,
     Abstract *source
 );
 status Roebling_Run(Roebling *sexp);
+status Roebling_RunCycle(Roebling *sexp);
 int Roebling_GetMarkIdx(Roebling *rlb, int mark);
 status Roebling_SetMark(Roebling *rlb, int mark, int idx);
 status Roebling_Prepare(Roebling *rbl, Span *parsers);

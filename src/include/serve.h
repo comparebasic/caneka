@@ -3,6 +3,8 @@
 #define SERV_READ_SIZE 512
 #define SERV_WRITE_SIZE 512
 #define EPOLL_WAIT 10
+#define ROUND_DELAY_SEC 1
+#define ROUND_DELAY_TVSEC 0
 
 typedef struct serve_ctx {
     MemCtx *m;
@@ -11,6 +13,7 @@ typedef struct serve_ctx {
     int port;
     boolean serving;
     ProtoDef *def;
+    struct serve_req *active;
 } Serve;
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def);
