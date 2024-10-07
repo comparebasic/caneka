@@ -3,6 +3,7 @@ status Core_Tests(MemCtx *gm);
 status String_Tests(MemCtx *gm);
 status Serve_Tests(MemCtx *gm);
 status ServeHandle_Tests(MemCtx *gm);
+status ServeChunked_Tests(MemCtx *gm);
 status Span_Tests(MemCtx *gm);
 status SpanInline_Tests(MemCtx *gm);
 status Hash_Tests(MemCtx *gm);

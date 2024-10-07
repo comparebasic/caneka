@@ -28,13 +28,8 @@ status Req_Recv(Serve *sctx, Req *req){
     size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     status r = NOOP;
     if(l > 0){
-        printf("buff: %s\n", buff);
-        Debug_Print((void *)req->in.rbl, 0, "Rbl before is", COLOR_CYAN, TRUE);
         String_AddBytes(req->m, req->in.shelf, buff, l);
         req->in.rbl->range.potential.type.state &= ~END;
-        printf("\n");
-        Debug_Print((void *)req->in.rbl, 0, "Rbl endis", COLOR_CYAN, TRUE);
-        printf("\n");
 
         return Roebling_Run(req->in.rbl);
     }

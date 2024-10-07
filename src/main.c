@@ -32,8 +32,9 @@ static void *tests[] = {
     "XMLNested", XmlNested_Tests,
     "XMLParser", XmlParser_Tests,
     "Http", Http_Tests,
-    "ServeTests", Serve_Tests,
-    "ServeHandleTests", ServeHandle_Tests,
+    "Serve", Serve_Tests,
+    "ServeHandle", ServeHandle_Tests,
+    "ServeChunked", ServeChunked_Tests,
     NULL, NULL
 };
 

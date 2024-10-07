@@ -10,14 +10,10 @@ static status Roebling_RunMatches(Roebling *rbl){
     }
     while((rbl->type.state & (NEXT|BREAK)) == 0){
         if(HasFlag(rbl->range.potential.type.state, END)){
-            printf("end");
             rbl->type.state |= BREAK;
             continue;
         }
         c = Range_GetByte(&(rbl->range));
-        printf("%c - ", c);
-        Debug_Print((void *)&(rbl->range), 0, "C", COLOR_DARK, TRUE);
-        printf("\n");
         Match *mt = NULL;
         for(int i = 0; i < rbl->matches->nvalues; i++){
             mt = Span_Get(rbl->matches, i);
@@ -143,11 +139,9 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
 
 status Roebling_Run(Roebling *rbl){
     status r = READY;
-    printf("start CycleBreak at %s\n", State_ToString(rbl->type.state));
     while((r & (SUCCESS|ERROR|BREAK)) == 0){
         r = Roebling_RunCycle(rbl);
     }
-    printf("CycleBreak at %s\n", State_ToString(rbl->type.state));
     rbl->type.state &= ~BREAK;
     return rbl->type.state;
 }

@@ -61,6 +61,43 @@ status ServeHandle_Tests(MemCtx *gm){
 
     int sock = testConnect();
     send(sock, reqStart_cstr, strlen(reqStart_cstr), 0);
+    send(sock, reqEnd_cstr, strlen(reqEnd_cstr), 0);
+    Serve_AcceptRound(sctx);
+
+    Serve_ServeRound(sctx);
+    req = sctx->active;
+    r |= Test(req != NULL, "active Req is not null");
+    
+    h = Handler_Current(req->handler);
+    r |= Test(h->func == Example_Setup, "Req has the first handler set");
+
+    Serve_ServeRound(sctx);
+    h = Handler_Current(req->handler);
+    r |= Test(h->func == Example_Recieve, "Req has the second handler set");
+
+    Serve_ServeRound(sctx);
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
+
+    Serve_Stop(sctx);
+
+    MemCtx_Free(m);
+    return r;
+}
+
+status ServeChunked_Tests(MemCtx *gm){
+    status r = TEST_OK;
+    MemCtx *m = MemCtx_Make();
+
+    Handler *h = NULL;
+    Req *req = NULL;;
+    ProtoDef *def = HttpProtoDef_Make(m);
+    def->getHandler = Example_getHandler;
+    Serve *sctx = Serve_Make(m, def);
+    
+    r |=  Serve_PreRun(sctx, TEST_PORT);
+
+    int sock = testConnect();
+    send(sock, reqStart_cstr, strlen(reqStart_cstr), 0);
     Serve_AcceptRound(sctx);
 
     Serve_ServeRound(sctx);
