@@ -17,7 +17,14 @@ status Example_Recieve(Handler *h, Req *req, Serve *sctx){
         printf("\n");
     }
 
-    h->type.state |= (Req_Recv(sctx, req) & (SUCCESS|ERROR));
+    status r = Req_Recv(sctx, req);
+    if((r & SUCCESS) != 0){
+        req->direction = EPOLLOUT;
+    }
+    h->type.state |= (r & (SUCCESS|ERROR));
+    if(DEBUG_EXAMPLE_HANDLERS){
+        printf("\x1b[%dmRecieved %s\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS, State_ToString(h->type.state));
+    }
     return h->type.state;
 }
 
@@ -26,7 +33,7 @@ status Example_Respond(Handler *h, Req *req, Serve *sctx){
         Debug_Print((void *)req, 0, "Responding: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
         printf("\n");
     }
-    h->type.state |= SUCCESS;
+    h->type.state |= (Req_Respond(sctx, req) & (SUCCESS|ERROR));
     return h->type.state;
 }
 

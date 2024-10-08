@@ -3,8 +3,8 @@
 #define SERV_READ_SIZE 512
 #define SERV_WRITE_SIZE 512
 #define EPOLL_WAIT 10
-#define ROUND_DELAY_SEC 1
-#define ROUND_DELAY_TVSEC 0
+#define ROUND_DELAY_SEC 0 
+#define ROUND_DELAY_TVSEC 100
 
 typedef struct serve_ctx {
     MemCtx *m;

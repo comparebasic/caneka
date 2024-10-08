@@ -23,13 +23,18 @@ static String *packageError(MemCtx *m, String *content){
     return s;
 }
 
+status Req_Respond(Serve *sctx, Req *req){
+    char *fakeOk = "HTTP/1.2 200 OK\r\nContent-Length: 2\r\nContent-Type: text/plain\r\n\r\nok";
+    size_t l = write(req->fd, fakeOk, strlen(fakeOk));
+    return SUCCESS;
+}
+
 status Req_Recv(Serve *sctx, Req *req){
     byte buff[SERV_READ_SIZE];
     size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     status r = NOOP;
     if(l > 0){
         Roebling_AddBytes(req->in.rbl, buff, l);
-
         return Roebling_Run(req->in.rbl);
     }
 

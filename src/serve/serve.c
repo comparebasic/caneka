@@ -10,7 +10,6 @@ static void delay(){
     nanosleep(&ts, &remaining);
 }
 
-
 static int openPortToFd(int port){
     int fd = 0;
 	struct sockaddr_in serv_addr;
