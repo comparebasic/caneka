@@ -19,14 +19,9 @@ related: include/slab.h
 #define SPAN_IDX_SIZE(def) (sizeof(Abstract *)*(def->idxSize)*def->idxStride)
 
 enum span_flags {
-    SLAB_ACTIVE = 1 << 0,
+    SLAB_ACTIVE = 1,
     SLAB_FULL = 1 << 1,
-    SLAB_ALPHA = 1 << 2,
-    SLAB_BRAVO = 1 << 3,
-    SLAB_DELTA = 1 << 4,
-    SLAB_ECHO = 1 << 5,
-    SLAB_FOXTROT = 1 << 6,
-    SLAB_GOLF = 1 << 7,
+    _SLAB_MAX = 1 << 15,
 };
 
 enum span_ops {

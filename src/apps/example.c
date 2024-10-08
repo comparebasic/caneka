@@ -6,7 +6,7 @@ status Example_Setup(Handler *h, Req *req, Serve *sctx){
         Debug_Print((void *)req, 0, "Setup: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
         printf("\n");
     }
-    req->direction = EPOLLIN;
+    req->direction = SOCK_IN;
     h->type.state |= SUCCESS;
     return h->type.state;
 }
@@ -19,7 +19,7 @@ status Example_Recieve(Handler *h, Req *req, Serve *sctx){
 
     status r = Req_Recv(sctx, req);
     if((r & SUCCESS) != 0){
-        req->direction = EPOLLOUT;
+        req->direction = SOCK_OUT;
     }
     h->type.state |= (r & (SUCCESS|ERROR));
     if(DEBUG_EXAMPLE_HANDLERS){

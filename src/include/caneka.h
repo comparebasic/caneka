@@ -211,5 +211,8 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "testsuite.h"
 #include "mark.h"
 #include "apps.h"
+#ifdef LINUX
+    #include "linux.h"
+#endif
 
 status Caneka_Init(MemCtx *m);

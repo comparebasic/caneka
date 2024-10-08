@@ -6,9 +6,22 @@
 #define ROUND_DELAY_SEC 0 
 #define ROUND_DELAY_TVSEC 100
 
+#ifdef LINUX
+    #define SOCK_OUT EPOLLOUT
+    #define SOCK_IN EPOLLIN
+#else
+    #define SOCK_IN 1
+    #define SOCK_OUT 2
+#endif
+
 typedef struct serve_ctx {
+    Type type;
     MemCtx *m;
+#ifdef LINUX
     int epoll_fd;
+#else
+    Span *queue;
+#endif
     int socket_fd;
     int port;
     boolean serving;

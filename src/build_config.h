@@ -9,6 +9,7 @@
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+    "-DFREEBSD",
     NULL
 };
 
@@ -42,7 +43,7 @@ static BuildSubdir testobj = { "tests", {
 }};
 
 static BuildSubdir serveobj = { "serve", {
-    "serve.c", "proto.c", "req.c", "http_proto.c", "handler.c",
+    "serve.c", "proto.c", "req.c", "http_proto.c", "handler.c", "linux.c",
     NULL
 }};
 

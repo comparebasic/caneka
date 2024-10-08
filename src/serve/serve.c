@@ -49,53 +49,12 @@ static int openPortToFd(int port){
     return fd;
 }
 
-static status Serve_EpollEvUpdate(Serve *sctx, Req *req, int direction){
-    int r;
-    struct epoll_event event;
-
-    event.events = direction;
-    event.data.ptr = (void *)req;
-
-    r = epoll_ctl(sctx->epoll_fd, EPOLL_CTL_MOD, req->fd, &event);
-    if(r != 0){
-        Error("Failed to modify file descriptor\n");
-        return ERROR;
-    }
-
-    return SUCCESS;
-}
-
-static status Serve_EpollEvAdd(Serve *sctx, Req *req, int fd, int direction){
-    int r;
-    struct epoll_event event;
-
-    event.events = direction;
-    event.data.ptr = (void *)req;
-
-    r = epoll_ctl(sctx->epoll_fd, EPOLL_CTL_ADD, fd, &event);
-    if(r != 0){
-        Error("Failed to add file descriptor to epoll");
-        return ERROR;
-    }
-
-    req->fd = fd;
-    req->direction = direction;
-
-    return SUCCESS;
-}
-
-static status Serve_EpollEvRemove(Serve *sctx, Req* req){
-    int r = epoll_ctl(sctx->epoll_fd, EPOLL_CTL_DEL, req->fd, NULL);
-    if(r != 0){
-        Error("Failed to remove file descriptor to epoll");
-        return ERROR;
-    }
-
-    return SUCCESS;
-}
-
 static status Serve_CloseReq(Serve *sctx, Req *req){
+#ifdef LINUX
     status r = Serve_EpollEvRemove(sctx, req);
+#else
+    status r = SUCCESS;
+#endif
     if(r == SUCCESS){
         close(req->fd);
         MemCtx_Free(req->m);
@@ -123,6 +82,14 @@ status Serve_Respond(Serve *sctx, Req *req){
     return req->type.state;
 }
 
+status Serve_EnQueue(Serve *sctx, Req *req, int fd, int flags){
+#ifdef LINUX
+    return Serve_EpollEvAdd(sctx, req, fd, flags);
+#else
+    return SUCCESS;
+#endif
+}
+
 status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
@@ -138,7 +105,7 @@ status Serve_AcceptRound(Serve *sctx){
             Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
             printf("\n");
         }
-        status r = Serve_EpollEvAdd(sctx, req, new_fd, EPOLLIN); 
+        status r = Serve_EnQueue(sctx, req, new_fd, 0); 
         return req->type.state;
     }
 
@@ -153,7 +120,9 @@ status ServeReq_Handle(Serve *sctx, Req *req){
     }
 
     Handler *h = Handler_Get(req->handler);
+#if LINUX
     int direction = req->direction;
+#endif
     status hstate = h->type.state & (SUCCESS|ERROR);
     if(hstate != 0){
         if(DEBUG_REQ){
@@ -165,48 +134,28 @@ status ServeReq_Handle(Serve *sctx, Req *req){
         h->func(h, req, sctx);
     }
 
+#if LINUX
     if(req->direction != -1 && direction != req->direction){
         Serve_EpollEvUpdate(sctx, req, req->direction);
     }
+#endif
 
     return req->type.state;
 }
 
 status Serve_ServeRound(Serve *sctx){
-    status r = ERROR;
-    int ev_count;
-	struct epoll_event *curev;
-	struct epoll_event event;
-    struct epoll_event events[SERV_MAX_EVENTS];
-	char buff[SERV_READ_SIZE + 1];
-
-    ev_count = epoll_wait(sctx->epoll_fd, events, SERV_MAX_EVENTS, EPOLL_WAIT);
-    if(ev_count == 0){
-        return NOOP;
-    }
-
-    for(int i = 0; i < ev_count; i++){
-        Req *req = (Req *)events[i].data.ptr;
-        if(req == NULL){
-            Error("bad req from epoll");
-            continue;
-        }
-
-        if((req->type.state & (END|ERROR)) != 0){
-            int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
-            Log(logStatus, "Served %s - mem: %ld", req->proto->toLog(req), MemCount());
-            r = Serve_CloseReq(sctx, req);
-        }else{
-            ServeReq_Handle(sctx, req);
-        }
-    }
-
+#ifdef LINUX
+    return Serve_Epoll(sctx);
+#else
     return SUCCESS;
+#endif
 }
 
 status Serve_Stop(Serve *sctx){
     close(sctx->socket_fd);
+#ifdef LINUX
     close(sctx->epoll_fd);
+#endif
     return SUCCESS;
 }
 
@@ -215,13 +164,15 @@ status Serve_PreRun(Serve *sctx, int port){
     sctx->port = port;
     sctx->socket_fd = fd;
 
+#ifdef LINUX
 	int epoll_fd =  epoll_create1(0);
 	if (epoll_fd == -1) {
 		Fatal("Failed to create epoll file descriptor\n", TYPE_SERVECTX);
 		return ERROR;
 	}
-
     sctx->epoll_fd = epoll_fd;
+#endif
+
     sctx->serving = TRUE;
     return SUCCESS;
 }
