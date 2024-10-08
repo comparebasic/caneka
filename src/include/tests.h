@@ -21,3 +21,4 @@ status MatchElastic_Tests(MemCtx *gm);
 status XmlParser_Tests(MemCtx *gm);
 status Http_Tests(MemCtx *gm);
 status SpanClone_Tests(MemCtx *gm);
+status RoeblingStartStop_Tests(MemCtx *gm);

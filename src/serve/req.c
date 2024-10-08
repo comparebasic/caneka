@@ -28,8 +28,7 @@ status Req_Recv(Serve *sctx, Req *req){
     size_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     status r = NOOP;
     if(l > 0){
-        String_AddBytes(req->m, req->in.shelf, buff, l);
-        req->in.rbl->range.potential.type.state &= ~END;
+        Roebling_AddBytes(req->in.rbl, buff, l);
 
         return Roebling_Run(req->in.rbl);
     }

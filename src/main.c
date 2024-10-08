@@ -28,6 +28,7 @@ static void *tests[] = {
     "Roebling", Roebling_Tests,
     "RoeblingRun", RoeblingRun_Tests,
     "RoeblingMark", RoeblingMark_Tests,
+    "RoeblingStartSop", RoeblingStartStop_Tests,
     "XML", Xml_Tests,
     "XMLNested", XmlNested_Tests,
     "XMLParser", XmlParser_Tests,

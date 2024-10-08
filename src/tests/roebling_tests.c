@@ -178,3 +178,33 @@ status RoeblingMark_Tests(MemCtx *gm){
     MemCtx_Free(m);
     return r;
 }
+
+status RoeblingStartStop_Tests(MemCtx *gm){
+    status r = TEST_OK;
+    MemCtx *m = MemCtx_Make();
+
+    Roebling *rbl = NULL;
+    MemHandle *mh = (MemHandle *)m;
+    Span *parsers_do = Span_Make(m, TYPE_SPAN);
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord2)); 
+
+    String *s = String_Init(m, STRING_EXTEND);
+    rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, s, Found, NULL); 
+
+    char *cstr = "Hi how are you ";
+    Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
+    Roebling_Run(rbl);
+
+    cstr = "today?\n";
+    Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
+    Roebling_Run(rbl);
+
+    s = Range_Copy(m, &(rbl->range));
+    /*
+    Test(String_EqualsBytes(s, bytes("Hi how are you today?")), "String equals 'Hi how are you today?', have '%s'", (char *)s->bytes);
+    */
+    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS, have '%s'", State_ToString(rbl->type.state));
+
+    MemCtx_Free(m);
+    return r;
+}

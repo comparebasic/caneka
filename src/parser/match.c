@@ -59,7 +59,7 @@ static void match_StartOfTerm(Match *mt){
 static status match_FeedPat(Match *mt, word c){
     if(HasFlag(mt->type.state, MISS)){
         if(DEBUG_PATMATCH){
-            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "\nMISS - match_FeedPat: of ", DEBUG_PATMATCH, TRUE);
+            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "MISS - match_FeedPat: of ", DEBUG_PATMATCH, TRUE);
             printf("\n");
         }
         return mt->type.state;
@@ -126,9 +126,17 @@ static status match_FeedPat(Match *mt, word c){
             if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
                 mt->def.pat.curDef++;
                 continue;
-            }else if((def->flags & (PAT_MANY|PAT_ANY)) != 0){
+            }else if((def->flags & (PAT_MANY)) != 0){
                 if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, TERM_FOUND)){
                     goto miss;
+                    break;
+                }else{
+                    mt->def.pat.curDef++;
+                    continue;
+                }
+            }else if((def->flags & (PAT_ANY)) != 0){
+                if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, TERM_FOUND)){
+                    match_NextTerm(mt);
                     break;
                 }else{
                     mt->def.pat.curDef++;

@@ -24,6 +24,7 @@ static status Roebling_RunMatches(Roebling *rbl){
             if(mt != NULL){
                Match_Feed(mt, c);
                if(HasFlag(mt->type.state, COMPLETE)){
+                     rbl->type.state &= ~PROCESSING;
                      rbl->matches->metrics.selected = i;
                      if(mt->jump > -1){
                         rbl->jump = mt->jump;
@@ -182,12 +183,15 @@ status Roebling_RunCycle(Roebling *rbl){
             printf("\x1b[%dmRbl DONE wof == NULL\x1b[0m\n", DEBUG_ROEBLING);
         }
     }else{
-        wdof = as(wdof, TYPE_WRAPPED_DO);
-        ((RblFunc)(wdof->val.dof))(rbl);
-        if(DEBUG_ROEBLING){
-            printf("\x1b[%dmRbl Run 0x%lx idx:\x1b[1;%dm%d\x1b[0;%dm ", DEBUG_ROEBLING, (util)wdof, DEBUG_ROEBLING, rbl->idx, DEBUG_ROEBLING);
-            Debug_Print((void *)rbl, 0, "", DEBUG_ROEBLING, TRUE);
-            printf("\n");
+        if((rbl->type.state & PROCESSING) == 0){
+            rbl->type.state |= PROCESSING;
+            wdof = as(wdof, TYPE_WRAPPED_DO);
+            ((RblFunc)(wdof->val.dof))(rbl);
+            if(DEBUG_ROEBLING){
+                printf("\x1b[%dmRbl Run 0x%lx idx:\x1b[1;%dm%d\x1b[0;%dm ", DEBUG_ROEBLING, (util)wdof, DEBUG_ROEBLING, rbl->idx, DEBUG_ROEBLING);
+                Debug_Print((void *)rbl, 0, "", DEBUG_ROEBLING, TRUE);
+                printf("\n");
+            }
         }
         Roebling_RunMatches(rbl);
     }
@@ -215,7 +219,20 @@ status Roebling_ResetPatterns(Roebling *rbl){
 }
 
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
-    return String_AddBytes(rbl->m, rbl->range.search, bytes, length);
+    status r = String_AddBytes(rbl->m, rbl->range.search, bytes, length);
+    if((rbl->range.potential.type.state & END) != 0){
+        rbl->range.potential.type.state &= ~END;
+        SCursor_Incr(&(rbl->range.potential), 1);
+    }
+    if((rbl->range.end.type.state & END) != 0){
+        SCursor_Incr(&(rbl->range.end), 1);
+        rbl->range.end.type.state &= ~END;
+    }
+    if((rbl->range.start.type.state & END) != 0){
+        SCursor_Incr(&(rbl->range.start), 1);
+        rbl->range.start.type.state &= ~END;
+    }
+    return r;
 }
 
 Roebling *Roebling_Make(MemCtx *m,
