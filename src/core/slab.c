@@ -9,14 +9,14 @@ status Slab_setSlot(void *sl, SpanDef *def, int idx, void *value, size_t sz){
     memcpy(sl+pos, value, sz);
     return SUCCESS;
 }
-
-void *Slab_nextSlot(SlabResult *sr, SpanDef *def, int local_idx){
+void **Slab_nextSlotPtr(SlabResult *sr, SpanDef *def, int local_idx){
     void *sl = (void *)sr->slab;
     int pos = local_idx*(def->idxSize)*sizeof(void *);
-    /*
-    printf("Getting Idx(%d/%d) of %p at 0x%lx\n", local_idx, pos, sl, (util)(sl+pos));
-    */
-    void **ptr = sl+pos;
+    return sl+pos;
+}
+
+void *Slab_nextSlot(SlabResult *sr, SpanDef *def, int local_idx){
+    void **ptr = Slab_nextSlotPtr(sr, def, local_idx); 
     return *ptr;
 }
 

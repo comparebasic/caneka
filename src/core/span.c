@@ -3,6 +3,24 @@
 
 static status Span_Extend(SlabResult *sr);
 
+static void *slab_dims_stack[MAX_DIMS+1];
+
+static void reset_stack(){
+    memset(slab_dims_stack, 0, sizeof(void *)*MAX_DIMS+1);
+}
+
+void **Span_GetStack(){
+    return slab_dims_stack;
+}
+
+static void set_stack(void *ptr, byte dim){
+    if(dim > MAX_DIMS){
+        Fatal("Greater dim than available stack", TYPE_SPAN);
+    }else{
+        slab_dims_stack[dim] = ptr;
+    }
+}
+
 int Span_availableByDim(int dims, int stride, int idxStride){
     int _dims = dims;
     int n = stride;
@@ -51,6 +69,7 @@ status Span_Query(SlabResult *sr){
         }
         Span_GrowToNeeded(sr);
     }
+    reset_stack();
     return Span_Extend(sr);
 }
 
@@ -215,6 +234,7 @@ static status Span_Extend(SlabResult *sr){
         }
 
         /* find or allocate a space for the new span */
+        set_stack(Slab_nextSlotPtr(sr, p->def, sr->local_idx), sr->span->dims - dims);
         sr->slab = (void *)Slab_nextSlot(sr, p->def, sr->local_idx);
 
         /* make new if not exists */
@@ -312,7 +332,6 @@ Span *Span_Clone(MemCtx *m, Span *p){
 
 Span *Span_Make(MemCtx *m, cls type){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
-    p->type.of = TYPE_SPAN;
     p->m = m;
     p->def = SpanDef_FromCls(type);
     p->type.of = p->def->typeOf;
@@ -323,7 +342,6 @@ Span *Span_Make(MemCtx *m, cls type){
 
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
-    p->type.of = TYPE_SPAN;
     p->m = m;
     p->def = SpanDef_Clone(m, SpanDef_FromCls(type));
     p->type.of = p->def->typeOf;

@@ -32,10 +32,26 @@ static Abstract *Print(MemCtx *m, Abstract *a){
     return NULL;
 }
 
+char *QueueFlags_ToChars(word flags){
+    String *s = String_Init(DebugM, 64);
+    if((flags & SLAB_ACTIVE) != 0){
+        String_AddBytes(DebugM, s, bytes("A"), 1);
+    }
+    if((flags & SLAB_FULL) != 0){
+        String_AddBytes(DebugM, s, bytes("F"), 1);
+    }
+
+    if(s->length == 0){
+        return "ZERO";
+    }
+
+    return (char *)s->bytes;
+}
+
 static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
+    indent_Print(indent);
+    printf("%d(%d)= ", parentIdx,offset);
     if(dim == 0){
-        indent_Print(indent);
-        printf("%d(%d)= ", parentIdx,offset);
         if(extended){
             printf("#%p->", sl);
         }
@@ -55,7 +71,13 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     if(def->itemSize == sizeof(int)){
                         printf("%u", (int)n);
                     }else{
-                        printf("%lu", n);
+                        if(def->typeOf == TYPE_QUEUE_SPAN){
+                            void **itm = (void **)t;
+                            Debug_Print(*itm, 0, "", color, TRUE);
+                            printf("\x1b[%dm", color);
+                        }else{
+                            printf("0x%lx", n);
+                        }
                     }
                 }else{
                     if(t->type.of != 0){
@@ -70,8 +92,6 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
         }
         printf("]");
     }else{
-        indent_Print(indent);
-        printf("%d=", parentIdx);
         if(extended){
             printf("#%p->", sl);
         }
@@ -83,7 +103,12 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
             if(*a != 0){
                 int increment = Span_availableByDim(dim, def->stride, def->idxStride);
                 util pos = offset+increment*i;
-                printf("%d=%ld..%ld", i, pos, pos+(increment-1));
+                if(def->typeOf == TYPE_QUEUE_SPAN){
+                    QueueIdx *qidx = (QueueIdx *)a;
+                    printf("%d=%ld..%ld!%s/%d", i, pos, pos+(increment-1), QueueFlags_ToChars(qidx->flags), qidx->delayTicks);
+                }else{
+                    printf("%d=%ld..%ld", i, pos, pos+(increment-1));
+                }
                 if(i < def->idxStride - 1){
                     printf(" ");
                 }
@@ -97,6 +122,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
             if(*a != 0){
                 printf("\n");
                 offset += Span_availableByDim(dim, def->stride, def->idxStride)*i;
+
                 Slab_Print((void *)*a, def, color, dim-1, i, indent+1, extended, totalDims, offset);
                 any = TRUE;
             }
@@ -504,6 +530,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_QUEUE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);

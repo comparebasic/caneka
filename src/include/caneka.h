@@ -112,6 +112,7 @@ enum types {
     TYPE_SPAN,
     TYPE_MINI_SPAN,
     TYPE_QUEUE_SPAN,
+    TYPE_QUEUE_IDX,
     TYPE_SLAB_SPAN,
     TYPE_STRING_SPAN,
     TYPE_TABLE,
@@ -206,6 +207,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"
+#include "queue.h"
 #include "serve.h"
 #include "req.h"
 #include "testsuite.h"

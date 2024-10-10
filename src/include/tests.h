@@ -1,6 +1,7 @@
 #define TEST_PORT 1200
 status Core_Tests(MemCtx *gm);
 status String_Tests(MemCtx *gm);
+status Queue_Tests(MemCtx *gm);
 status Serve_Tests(MemCtx *gm);
 status ServeHandle_Tests(MemCtx *gm);
 status ServeChunked_Tests(MemCtx *gm);

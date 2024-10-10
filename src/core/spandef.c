@@ -41,7 +41,7 @@ status SpanDef_Init(){
     span16x32mDef.typeOf = TYPE_QUEUE_SPAN;
     span16x32mDef.stride = 16;
     span16x32mDef.idxStride = 32;
-    span16x32mDef.idxSize = 2;
+    span16x32mDef.idxSize = sizeof(QueueIdx) / SPAN_SLOT_BYTES;
     span16x32mDef.slotSize = SPAN_DEFAULT_SLOT_SIZE;
     span16x32mDef.itemSize = SPAN_DEFAULT_ITEM_SIZE;
 

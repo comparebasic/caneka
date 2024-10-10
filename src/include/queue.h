@@ -7,3 +7,6 @@ typedef struct queue_idx {
      * contained within this slab */
     quad delayTicks; 
 } QueueIdx;
+
+status Queue_SetFlags(word set, word unset, quad delayTicks);
+char *QueueFlags_ToChars(word flags);
