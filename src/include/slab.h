@@ -29,7 +29,7 @@ typedef struct slab_result {
     int idx;
     int local_idx;
     Abstract *value;
-    void *stack[8];
+    void *stack[MAX_DIMS+1];
     byte op;
     byte dims;
     byte dimsNeeded;
@@ -40,3 +40,4 @@ status Slab_setSlot(void *sl, struct span_def *def, int idx, void *value, size_t
 void *Slab_nextSlot(SlabResult *sr, struct span_def *def, int local_idx);
 void **Slab_nextSlotPtr(SlabResult *sr, struct span_def *def, int local_idx);
 void *Slab_valueAddr(SlabResult *sr, struct span_def *def, int local_idx);
+void SlabResult_SetStack(SlabResult *sr, void *ptr, byte dim);

@@ -60,6 +60,8 @@ typedef status (*DoFunc)(struct mem_handle *mh);
 #define MAX_BASE10 20
 #define SLAB_START_SIZE 2
 
+#define MAX_DIMS 16
+
 #define STRING_SEG_FOOTPRINT 256
 #define STRING_EXTRAS (sizeof(Type)+sizeof(int)+sizeof(struct string *))
 #define STRING_CHUNK_SIZE (STRING_SEG_FOOTPRINT - STRING_EXTRAS)-1

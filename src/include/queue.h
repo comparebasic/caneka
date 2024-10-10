@@ -8,5 +8,5 @@ typedef struct queue_idx {
     quad delayTicks; 
 } QueueIdx;
 
-status Queue_SetFlags(word set, word unset, quad delayTicks);
+void *Queue_Set(Span *p, int idx, void *value, quad delayTicks);
 char *QueueFlags_ToChars(word flags);

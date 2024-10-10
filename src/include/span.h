@@ -7,7 +7,7 @@ This is the main work-horse data structure for storing and retrieving data, Tabl
 related: core/span.c
 related: include/slab.h
 */
-#define SPAN_SLOT_BYTES 8
+#define SPAN_SLOT_BYTES sizeof(void *)
 #define SPAN_DEFAULT_STRIDE 16
 #define SPAN_DEFAULT_STRIDE 16
 #define SPAN_DEFAULT_SLOT_SIZE 1
@@ -15,7 +15,6 @@ related: include/slab.h
 #define SPAN_DEFAULT_ITEM_SIZE 1
 #define SPAN_DEFAULT_IDX_EXTRA_SLOTS 0
 #define SPAN_DEFAULT_HDR 0
-#define MAX_DIMS 16
 
 #define SPAN_VALUE_SIZE(def) (sizeof(Abstract *)*def->stride*def->slotSize)
 #define SPAN_IDX_SIZE(def) (sizeof(Abstract *)*(def->idxSize)*def->idxStride)
@@ -41,7 +40,12 @@ typedef struct span {
     Type type;
     MemCtx *m;
     SpanDef *def;
+    /* Queue Idx */
 	void *root;
+    word flags;
+    word _;
+    int  delayTicks;
+    /* end QueuIdx */
     byte dims;
 	int nvalues;
     int max_idx;
@@ -82,6 +86,7 @@ void *Span_reserve(SlabResult *sr);
 
 void SlabResult_Setup(SlabResult *sr, Span *p, byte op, int idx);
 status Span_GrowToNeeded(SlabResult *sr);
+void *_span_Set(SlabResult *sr, int idx, Abstract *t);
 
 void **Span_GetStack();
 /* SpanDef */

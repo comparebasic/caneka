@@ -160,6 +160,9 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     printf("\x1b[0;%dm%sP<%u items in %u dims ", color, msg,
         p->nvalues, p->dims);
     if(extended){
+        if(p->def->typeOf == TYPE_QUEUE_SPAN){
+            printf("%s ", QueueFlags_ToChars(p->flags));
+        }
         SpanDef_Print(p->def);
         printf("\n");
         Slab_Print(p->root, p->def, color, p->dims, 0, 1, TRUE, p->dims, 0);

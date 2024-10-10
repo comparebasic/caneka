@@ -3,24 +3,6 @@
 
 static status Span_Extend(SlabResult *sr);
 
-static void *slab_dims_stack[MAX_DIMS+1];
-
-static void reset_stack(){
-    memset(slab_dims_stack, 0, sizeof(void *)*MAX_DIMS+1);
-}
-
-void **Span_GetStack(){
-    return slab_dims_stack;
-}
-
-static void set_stack(void *ptr, byte dim){
-    if(dim > MAX_DIMS){
-        Fatal("Greater dim than available stack", TYPE_SPAN);
-    }else{
-        slab_dims_stack[dim] = ptr;
-    }
-}
-
 int Span_availableByDim(int dims, int stride, int idxStride){
     int _dims = dims;
     int n = stride;
@@ -69,19 +51,13 @@ status Span_Query(SlabResult *sr){
         }
         Span_GrowToNeeded(sr);
     }
-    reset_stack();
     return Span_Extend(sr);
 }
-
-void *Span_Set(Span *p, int idx, Abstract *t){
-    if(idx < 0 || t == NULL){
-        return NULL;
-    }
-    SlabResult sr;
-    SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
-    status r = Span_Query(&sr);
+void *_span_Set(SlabResult *sr, int idx, Abstract *t){
+    status r = READY;
+    Span *p = sr->span;
     if(HasFlag(r, SUCCESS)){
-        void *ptr = Slab_valueAddr(&sr, p->def, sr.local_idx);
+        void *ptr = Slab_valueAddr(sr, p->def, sr->local_idx);
         if(HasFlag(p->def->flags, INLINE)){
             size_t sz = (size_t)p->def->itemSize;
             if(!HasFlag(p->def->flags, RAW) && t->type.of == TYPE_RESERVE){
@@ -92,14 +68,25 @@ void *Span_Set(Span *p, int idx, Abstract *t){
             memcpy(ptr, &t, sizeof(void *));
         }
         p->nvalues++;
-        p->metrics.set = sr.local_idx;
+        p->metrics.set = sr->local_idx;
         if(idx > p->max_idx){
             p->max_idx = idx;
         }
-        sr.value = ptr;
-        return sr.value;
+        sr->value = ptr;
+        return sr->value;
     }
     return NULL;
+
+}
+
+void *Span_Set(Span *p, int idx, Abstract *t){
+    if(idx < 0 || t == NULL){
+        return NULL;
+    }
+    SlabResult sr;
+    SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
+    status r = Span_Query(&sr);
+    return _span_Set(&sr, idx, t);
 }
 
 void *Span_Get(Span *p, int idx){
@@ -225,6 +212,7 @@ static status Span_Extend(SlabResult *sr){
 
     byte dims = p->dims;
     void *prev_sl = sr->slab;
+    SlabResult_SetStack(sr, sr->slab, 0);
     while(dims > 0){
         int increment = Span_availableByDim(dims, p->def->stride, p->def->idxStride);
         sr->local_idx = ((sr->idx - sr->offset) / increment);
@@ -234,7 +222,7 @@ static status Span_Extend(SlabResult *sr){
         }
 
         /* find or allocate a space for the new span */
-        set_stack(Slab_nextSlotPtr(sr, p->def, sr->local_idx), sr->span->dims - dims);
+        SlabResult_SetStack(sr, Slab_nextSlotPtr(sr, p->def, sr->local_idx), sr->span->dims - dims+1);
         sr->slab = (void *)Slab_nextSlot(sr, p->def, sr->local_idx);
 
         /* make new if not exists */

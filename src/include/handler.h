@@ -3,6 +3,7 @@ typedef status (*HandleFunc)(struct handler *h, struct serve_req *req, struct se
 typedef struct handler {
     Type type;
     HandleFunc func;
+    int direction;
     Abstract *data;
     Span *prior;
 } Handler;
