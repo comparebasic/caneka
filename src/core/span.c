@@ -54,8 +54,8 @@ status Span_Query(SlabResult *sr){
     return Span_Extend(sr);
 }
 void *_span_Set(SlabResult *sr, int idx, Abstract *t){
-    status r = READY;
     Span *p = sr->span;
+    status r = Span_Query(sr);
     if(HasFlag(r, SUCCESS)){
         void *ptr = Slab_valueAddr(sr, p->def, sr->local_idx);
         if(HasFlag(p->def->flags, INLINE)){
@@ -85,7 +85,6 @@ void *Span_Set(Span *p, int idx, Abstract *t){
     }
     SlabResult sr;
     SlabResult_Setup(&sr, p, SPAN_OP_SET, idx);
-    status r = Span_Query(&sr);
     return _span_Set(&sr, idx, t);
 }
 
