@@ -43,8 +43,8 @@ typedef struct span {
     /* Queue Idx */
 	void *root;
     word flags;
-    word _;
-    int  delayTicks;
+    word nextAvailable;
+    quad  delayTicks;
     /* end QueuIdx */
     byte dims;
 	int nvalues;

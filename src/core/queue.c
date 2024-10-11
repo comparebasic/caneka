@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status Queue_SetFlags(void **stack, word set, word unset, quad delayTicks){
-    void **sl = Span_GetStack();
+    void **sl = stack;
     int dim = 0;
     while(*sl != NULL){
         printf("set_flags %hu\n", dim++);
@@ -18,6 +18,7 @@ status Queue_SetFlags(void **stack, word set, word unset, quad delayTicks){
 }
 
 void *Queue_Set(Span *p, int idx, void *value, quad delayTicks){
+    printf("Queue Set\n");
     if(idx < 0 || value == NULL){
         return NULL;
     }

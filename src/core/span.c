@@ -212,7 +212,9 @@ static status Span_Extend(SlabResult *sr){
 
     byte dims = p->dims;
     void *prev_sl = sr->slab;
+    /*
     SlabResult_SetStack(sr, sr->slab, 0);
+    */
     while(dims > 0){
         int increment = Span_availableByDim(dims, p->def->stride, p->def->idxStride);
         sr->local_idx = ((sr->idx - sr->offset) / increment);
@@ -222,7 +224,9 @@ static status Span_Extend(SlabResult *sr){
         }
 
         /* find or allocate a space for the new span */
+        /*
         SlabResult_SetStack(sr, Slab_nextSlotPtr(sr, p->def, sr->local_idx), sr->span->dims - dims+1);
+        */
         sr->slab = (void *)Slab_nextSlot(sr, p->def, sr->local_idx);
 
         /* make new if not exists */
