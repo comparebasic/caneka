@@ -1,3 +1,5 @@
+typedef int (*GetDelayFunc)(status r);
+
 typedef struct queue_idx {
     void *item; /* slab or value */
     word flags; /* active, full, etc. */
@@ -7,6 +9,13 @@ typedef struct queue_idx {
      * contained within this slab */
     quad delayTicks; 
 } QueueIdx;
+
+typedef queue {
+    Span span;
+    /* */
+    SlabResult sr;
+    GetDelayFunc getDelay;
+} Queue;
 
 void *Queue_Set(Span *p, int idx, void *value, quad delayTicks);
 char *QueueFlags_ToChars(word flags);
