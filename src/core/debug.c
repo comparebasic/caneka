@@ -63,27 +63,26 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
             if(*a != 0){
                 printf("%d=", i);
                 Abstract *t = (Abstract *)ptr;
-                if(HasFlag(def->flags, INLINE)){
-                    t = *((Abstract **)t);
-                }
-                if(!HasFlag(def->flags, RAW)){
-                    i64 n = (util)t;
-                    if(def->itemSize == sizeof(int)){
-                        printf("%u", (int)n);
-                    }else{
-                        if(def->typeOf == TYPE_QUEUE_SPAN){
-                            void **itm = (void **)t;
-                            Debug_Print(*itm, 0, "", color, TRUE);
-                            printf("\x1b[%dm", color);
-                        }else{
-                            printf("0x%lx", n);
-                        }
-                    }
+                if(def->typeOf == TYPE_QUEUE_SPAN){
+                    QueueIdx *qidx = (QueueIdx *)t;
+                    Debug_Print((void *)qidx->item, 0, "", color, TRUE);
+                    printf("\x1b[%dm", color);
                 }else{
-                    if(t->type.of != 0){
-                        Debug_Print((void *)t, 0, "", color, TRUE);
+                    if(HasFlag(def->flags, INLINE)){
+                        t = *((Abstract **)t);
+                    }
+                    if(!HasFlag(def->flags, RAW)){
+                        i64 n = (util)t;
+                        if(def->itemSize == sizeof(int)){
+                            printf("%u", (int)n);
+                        }else{
+                        }
                     }else{
-                        printf("0x%lx", *a);
+                        if(t->type.of != 0){
+                            Debug_Print((void *)t, 0, "", color, TRUE);
+                        }else{
+                            printf("0x%lx", *a);
+                        }
                     }
                 }
                 printf(" ");

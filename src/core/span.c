@@ -53,6 +53,7 @@ status Span_Query(SlabResult *sr){
     }
     return Span_Extend(sr);
 }
+
 void *_span_Set(SlabResult *sr, int idx, Abstract *t){
     Span *p = sr->span;
     status r = Span_Query(sr);
@@ -60,14 +61,23 @@ void *_span_Set(SlabResult *sr, int idx, Abstract *t){
         void *ptr = Slab_valueAddr(sr, p->def, sr->local_idx);
         if(HasFlag(p->def->flags, INLINE)){
             size_t sz = (size_t)p->def->itemSize;
-            if(!HasFlag(p->def->flags, RAW) && t->type.of == TYPE_RESERVE){
+            if(!HasFlag(p->def->flags, RAW) && t != NULL && t->type.of == TYPE_RESERVE){
                 sz = sizeof(Reserve);
             }
-            memcpy(ptr, t, sz);
+            if(t == NULL){
+                printf("removing %d sz:%ld\n", idx, sz);
+                memset(ptr, 0, sz);
+            }else{
+                memcpy(ptr, t, sz);
+            }
         }else{
             memcpy(ptr, &t, sizeof(void *));
         }
-        p->nvalues++;
+        if(t == NULL){
+            p->nvalues--;
+        }else{
+            p->nvalues++;
+        }
         p->metrics.set = sr->local_idx;
         if(idx > p->max_idx){
             p->max_idx = idx;
@@ -224,9 +234,9 @@ static status Span_Extend(SlabResult *sr){
 
         /* find or allocate a space for the new span */
         /*
-        SlabResult_SetStack(sr, Slab_nextSlotPtr(sr, p->def, sr->local_idx), sr->span->dims - dims+1);
+        SlabResult_SetStack(sr, Slab_nextSlotPtr(sr->slab, p->def, sr->local_idx), sr->span->dims - dims+1);
         */
-        sr->slab = (void *)Slab_nextSlot(sr, p->def, sr->local_idx);
+        sr->slab = (void *)Slab_nextSlot(sr->slab, p->def, sr->local_idx);
 
         /* make new if not exists */
         if(sr->slab == NULL){

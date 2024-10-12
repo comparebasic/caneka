@@ -43,7 +43,7 @@ typedef struct span {
     /* Queue Idx */
 	void *root;
     word flags;
-    word nextAvailable;
+    word count;
     quad  delayTicks;
     /* end QueuIdx */
     byte dims;
@@ -60,6 +60,7 @@ Span* Span_Make(MemCtx* m, cls type);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
 status Span_Remove(Span *p, int idx);
 status Span_ReInit(Span *p);
+status Span_Query(SlabResult *sr);
 Span *Span_Clone(MemCtx *m, Span *p);
 void *Span_Set(Span *p, int idx, Abstract *t);
 void *Span_Get(Span *p, int idx);

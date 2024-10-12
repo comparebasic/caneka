@@ -42,8 +42,9 @@ status SpanDef_Init(){
     span16x32mDef.stride = 16;
     span16x32mDef.idxStride = 32;
     span16x32mDef.idxSize = sizeof(QueueIdx) / SPAN_SLOT_BYTES;
-    span16x32mDef.slotSize = SPAN_DEFAULT_SLOT_SIZE;
-    span16x32mDef.itemSize = SPAN_DEFAULT_ITEM_SIZE;
+    span16x32mDef.slotSize = span16x32mDef.idxSize;
+    span16x32mDef.itemSize = sizeof(QueueIdx);
+    span16x32mDef.flags = INLINE;
 
     /*span4kx32m */
     memset(&span4kx32mDef, 0, sizeof(SpanDef));
