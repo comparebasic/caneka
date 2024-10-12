@@ -64,14 +64,17 @@ void *_span_Set(SlabResult *sr, int idx, Abstract *t){
             if(!HasFlag(p->def->flags, RAW) && t != NULL && t->type.of == TYPE_RESERVE){
                 sz = sizeof(Reserve);
             }
-            if(t == NULL){
-                printf("removing %d sz:%ld\n", idx, sz);
+            if(sr->op == SPAN_OP_REMOVE){
                 memset(ptr, 0, sz);
             }else{
                 memcpy(ptr, t, sz);
             }
         }else{
-            memcpy(ptr, &t, sizeof(void *));
+            if(sr->op == SPAN_OP_REMOVE){
+                memset(ptr, 0, sizeof(void *));
+            }else{
+                memcpy(ptr, &t, sizeof(void *));
+            }
         }
         if(t == NULL){
             p->nvalues--;

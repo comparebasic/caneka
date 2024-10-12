@@ -15,8 +15,6 @@ status Slab_setSlot(void *sl, SpanDef *def, int idx, void *value, size_t sz){
     memcpy(sl+pos, value, sz);
     if(def->idxSize > 1){
         QueueIdx *qidx = sl+pos+SPAN_SLOT_BYTES;
-        printf("copying extras %s\n", QueueFlags_ToChars( qidx->flags));
-        fflush(stdout);
         memcpy(sl+SPAN_SLOT_BYTES, sl+pos+SPAN_SLOT_BYTES, (def->idxSize-1)*SPAN_SLOT_BYTES);
     }
     return SUCCESS;

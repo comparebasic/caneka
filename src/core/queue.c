@@ -23,7 +23,8 @@ status Queue_Update(Queue *q, int idx, byte dims, quad delayTicks){
     return Queue_SetDelay(q->sr.stack, delayTicks);
 }
 
-static int queue_findSlab(Queue *q, void *sl, byte dim){
+static status Queue_FindNext(Queue *q, void *sl, byte dim){
+    status r = READY;
     QueueIdx *qidx = (QueueIdx *)sl;
     for(int i = 0; i < q->span.def->idxStride; i++){
         if((qidx->flags & SLAB_FULL) != 0){
@@ -32,30 +33,21 @@ static int queue_findSlab(Queue *q, void *sl, byte dim){
             if(dim == 0){
                 if(qidx->item == NULL){
                     q->sr.offset += i;
-                    return q->sr.offset;
+                    return SUCCESS;
                 }
             }else{
                 int increment = Span_availableByDim(dim, q->span.def->stride, q->span.def->idxStride);
+                r = Queue_FindNext(q, qidx->item, dim-1);
+                if((r & SUCCESS) != 0){
+                    return r;
+                }
                 q->sr.offset += increment*i;
-                return queue_findSlab(q, qidx->item, dim-1);
             }
         }
         qidx++;
     }
 
-    return q->span.max_idx+1;
-}
-
-int Queue_FindNext(Queue *q){
-    /* climb through each dim and set the nextAvailable or active/full flags
-    then return the open index
-    */
-    SlabResult *sr = &(q->sr);
-
-    int idx = queue_findSlab(q, q->span.root, q->span.dims);
-    SlabResult_Setup(&(q->sr), (Span *)q, SPAN_OP_SET, idx);
-
-    return idx;
+    return MISS;
 }
 
 void *Queue_Add(Queue *q, Abstract *value){
@@ -63,22 +55,23 @@ void *Queue_Add(Queue *q, Abstract *value){
         return NULL;
     }
 
-    int idx = Queue_FindNext(q);
-    if(idx == -1){
-        return NULL;
-    }
     SlabResult *sr = &(q->sr);
+    status r = Queue_FindNext(q, q->span.root, q->span.dims);
+    sr->idx = sr->offset;
+    if(r == MISS){
+        sr->idx = q->span.max_idx+1;
+    }
     QueueIdx qidx;
     qidx.item = value;
-    void *ptr = _span_Set(sr, idx, (Abstract *)&qidx);
+    SlabResult_Setup(&(q->sr), (Span *)q, SPAN_OP_SET, sr->idx);
+    void *ptr = _span_Set(sr, sr->idx, (Abstract *)&qidx);
 
     return ptr;
 }
 
 void *Queue_Remove(Queue *q, int idx){
     SlabResult *sr = &(q->sr);
-    SlabResult_Setup(sr, (Span *)q, SPAN_OP_SET, idx);
-    status r = Span_Query(sr);
+    SlabResult_Setup(sr, (Span *)q, SPAN_OP_REMOVE, idx);
     void *ptr = _span_Set(sr, idx, NULL);
     return ptr;
 }

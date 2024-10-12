@@ -47,10 +47,12 @@ status Queue_Tests(MemCtx *gm){
     Queue_Add(q, (Abstract *)one);
     Queue_Add(q, (Abstract *)two);
     Queue_Remove(q, 1);
+
     Queue_Add(q, (Abstract *)six);
 
-    Debug_Print((void *)q, 0, "Queue: ", COLOR_PURPLE, TRUE);
-    printf("\n");
+    QueueIdx *qidx = NULL;
+    qidx = Span_Get((Span *)q, 1);
+    r |= Test(qidx->item == six, "six has replaed idx 1");
 
     Queue_Add(q, (Abstract *)thirtySeven);
     Queue_Add(q, (Abstract *)sevenHundred);
@@ -71,16 +73,11 @@ status Queue_Tests(MemCtx *gm){
     Queue_Add(q, (Abstract *)beach);
     Queue_Add(q, (Abstract *)ocean);
 
-    Debug_Print((void *)q, 0, "Queue: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     Queue_Remove(q, 17);
     Queue_Add(q, (Abstract *)midwest);
 
-    Debug_Print((void *)q, 0, "Queue: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
-
+    qidx = Span_Get((Span *)q, 17);
+    r |= Test(qidx->item == midwest, "midwest has replaed idx 17");
 
     return r;
 }
