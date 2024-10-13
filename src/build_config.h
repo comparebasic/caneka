@@ -20,7 +20,7 @@ static char *inc[] = {
 
 static BuildSubdir coreobj = { "core", {
     "caneka.c", "mem.c", "string.c", "error.c",
-	"log.c", "spandef.c", "span.c", "slab.c", "lookup.c", "chain.c",
+	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 
     "mess.c", "single.c", "debug.c", "abstract.c",

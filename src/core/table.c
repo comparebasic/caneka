@@ -31,8 +31,8 @@ static status Table_Resize(Span *tbl, word *queries){
         *queries = 0;
         Span *newTbl = Span_Make(tbl->m, TYPE_TABLE);
 
-        SlabResult sr;
-        SlabResult_Setup(&sr, newTbl, SPAN_OP_RESIZE, 0);
+        SpanQuery sr;
+        SpanQuery_Setup(&sr, newTbl, SPAN_OP_RESIZE, 0);
         sr.dimsNeeded = tbl->dims+1;
         Span_GrowToNeeded(&sr);
 

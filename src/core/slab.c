@@ -1,15 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-void SlabResult_SetStack(SlabResult *sr, void *ptr, byte dim){
-    if(dim > MAX_DIMS){
-        Fatal("Greater dim than available stack", TYPE_SPAN);
-    }else{
-        sr->stack[dim] = ptr;
-    }
-}
-
-
 status Slab_setSlot(void *sl, SpanDef *def, int idx, void *value, size_t sz){
     int pos = idx*def->idxSize*sizeof(void *);
     memcpy(sl+pos, value, sz);
@@ -29,8 +20,7 @@ void *Slab_nextSlot(void *sl, SpanDef *def, int local_idx){
     return *ptr;
 }
 
-void *Slab_valueAddr(SlabResult *sr, SpanDef *def, int local_idx){
-    void *sl = (void *)sr->slab;
+void *Slab_valueAddr(void *sl, SpanDef *def, int local_idx){
     int pos = local_idx*(def->slotSize)*sizeof(void *);
     /*
     printf("Getting Value(%d/%d) from slab:%p at 0x%lx\n", local_idx, pos, sl, (util)(sl+pos));

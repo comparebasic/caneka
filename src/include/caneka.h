@@ -27,6 +27,7 @@ struct mem_ctx;
 struct mem_slab;
 struct strcursor_range;
 struct span;
+struct span_query;
 struct span_slab;
 struct structexp;
 struct lookup;
@@ -196,6 +197,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "array.h"
 #include "spandef.h"
 #include "span.h"
+#include "spanquery.h"
 #include "iter.h"
 #include "table.h"
 #include "tokens.h"

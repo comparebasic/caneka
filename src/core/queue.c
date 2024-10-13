@@ -1,29 +1,32 @@
 #include <external.h>
 #include <caneka.h>
 
-status Queue_SetDelay(void **stack, quad delayTicks){
-    void **sl = stack;
+status Queue_SetDelay(void *sl, quad delayTicks){
     int dim = 0;
-    while(*sl != NULL){
-        QueueIdx *qidx = *sl;
+    QueueIdx *qidx = (QueueIdx *)sl;
+    while(qidx != NULL){
         if(qidx->delayTicks == 0 || delayTicks < qidx->delayTicks){
             qidx->delayTicks = delayTicks;
         }
-        sl++;
+        qidx++;
     }
     return SUCCESS;
 }
 
-status Queue_Update(Queue *q, int idx, byte dims, quad delayTicks){
-    if(q->sr.idx != idx && q->sr.dims != dims){
+status Queue_Update(Queue *q, int idx, byte dim, quad delayTicks){
+    if(q->sr.idx != idx && q->sr.dims != dim){
         /* requery */
-        SlabResult_Setup(&(q->sr), (Span *)q, SPAN_OP_SET, idx);
+        SpanQuery_Setup(&(q->sr), (Span *)q, SPAN_OP_SET, idx);
         Span_Query(&(q->sr));
     }
-    return Queue_SetDelay(q->sr.stack, delayTicks);
+
+    SpanState *st = SpanQuery_StateByDim(&(q->sr), dim);
+
+    return Queue_SetDelay((QueueIdx *)st->slab, delayTicks);
 }
 
 static status Queue_FindNext(Queue *q, void *sl, byte dim){
+    /*
     status r = READY;
     QueueIdx *qidx = (QueueIdx *)sl;
     for(int i = 0; i < q->span.def->idxStride; i++){
@@ -46,6 +49,7 @@ static status Queue_FindNext(Queue *q, void *sl, byte dim){
         }
         qidx++;
     }
+    */
 
     return MISS;
 }
@@ -55,23 +59,24 @@ void *Queue_Add(Queue *q, Abstract *value){
         return NULL;
     }
 
-    SlabResult *sr = &(q->sr);
+    SpanQuery *sr = &(q->sr);
     status r = Queue_FindNext(q, q->span.root, q->span.dims);
-    sr->idx = sr->offset;
+    SpanState *st = SpanQuery_StateByDim(sr, 0);
+    sr->idx = st->offset;
     if(r == MISS){
         sr->idx = q->span.max_idx+1;
     }
     QueueIdx qidx;
     qidx.item = value;
-    SlabResult_Setup(&(q->sr), (Span *)q, SPAN_OP_SET, sr->idx);
+    SpanQuery_Setup(&(q->sr), (Span *)q, SPAN_OP_SET, sr->idx);
     void *ptr = _span_Set(sr, sr->idx, (Abstract *)&qidx);
 
     return ptr;
 }
 
 void *Queue_Remove(Queue *q, int idx){
-    SlabResult *sr = &(q->sr);
-    SlabResult_Setup(sr, (Span *)q, SPAN_OP_REMOVE, idx);
+    SpanQuery *sr = &(q->sr);
+    SpanQuery_Setup(sr, (Span *)q, SPAN_OP_REMOVE, idx);
     void *ptr = _span_Set(sr, idx, NULL);
     return ptr;
 }
