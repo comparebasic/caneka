@@ -9,7 +9,7 @@ SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim){
 }
 
 SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset){
-    printf(">>>Set Stack dim:%d\n", dim);
+    printf(">>>Set Stack dim:%d %d\n", dim, sq->idx);
     SpanDef *def = sq->span->def;
     Span *p = sq->span;
 
@@ -17,15 +17,18 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset){
     int localIdx = 0;
     SpanState *st = SpanQuery_StateByDim(sq, dim);
     int increment = Span_availableByDim(dim, def->stride, def->idxStride);
+    printf("dim %d increment %d\n", dim, increment);
 
     if(dim == p->dims){
         SpanState *st = SpanQuery_StateByDim(sq, p->dims);
         sl = p->root;
-        st->offset = sq->idx / increment;
         localIdx = sq->idx / increment;
+        st->offset = localIdx * increment;
+        printf("   localIdx %d offset %d\n", localIdx, st->offset);
     }else{
         SpanState *prev = SpanQuery_StateByDim(sq, dim+1);
         localIdx = ((sq->idx - prev->offset) / increment);
+        printf("   localIdx %d\n", localIdx);
         if(localIdx >= sq->span->def->idxStride){
             printf("LocalIdx %d offset %d dim: %d\n", localIdx, prev->offset, dim);
             Fatal("local_idx greater than idxStride", sq->span->type.of);
