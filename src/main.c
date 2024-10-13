@@ -94,7 +94,13 @@ int main(int argc, char **argv){
     }
 
     MemCtx *m = MemCtx_Make();
+    SpanDef_Init();
+    Span *p = Span_Make(m, TYPE_SPAN);
+    String *s = String_Make(m, bytes("Hi"));
+    Span_Set(p, 0, (Abstract *)s);
+
     Caneka_Init(m);
+    /*
     
     if(argc > 1){
         for(int i = 1; i < argc; i++){
@@ -103,6 +109,7 @@ int main(int argc, char **argv){
             }
         }
     }
+    */
 
     return 0;
 }

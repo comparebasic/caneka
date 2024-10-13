@@ -26,6 +26,7 @@ int Span_availableByDim(int dims, int stride, int idxStride){
 
 /* API */
 void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
+    printf("_Span_Set\n");
     Span *p = sr->span;
     status r = Span_Query(sr);
     if(HasFlag(r, SUCCESS)){
@@ -67,6 +68,7 @@ void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
 }
 
 void *Span_Set(Span *p, int idx, Abstract *t){
+    printf("Span Set\n");
     if(idx < 0 || t == NULL){
         return NULL;
     }
@@ -197,10 +199,8 @@ status Span_Extend(SpanQuery *sq){
     Span *p = sq->span;
 
     byte dims = p->dims;
-    SpanState *st =  SpanQuery_StateByDim(sq, p->dims);
+    SpanState *st = SpanQuery_SetStack(sq, dims, 0, 0);
     while(dims > 0){
-        /* find or allocate a space for the new span */
-        st = SpanQuery_SetStack(sq, dims, 0, 0);
 
         /* make new if not exists */
         if(st->slab == NULL){
@@ -219,6 +219,8 @@ status Span_Extend(SpanQuery *sq){
         }
 
         dims--;
+        /* find or allocate a space for the new span */
+        st = SpanQuery_SetStack(sq, dims, 0, 0);
     }
 
     if(st == NULL){
