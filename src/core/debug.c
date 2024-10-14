@@ -18,6 +18,7 @@ int DEBUG_ALLOC = 0;
 int DEBUG_BOUNDS_CHECK = 0;
 int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
+int DEBUG_SPAN_GET_SET = 0;
 int DEBUG_XML = 0;
 int DEBUG_ROEBLING_NAME = 0;
 int DEBUG_HTTP = 0;
@@ -49,7 +50,7 @@ char *QueueFlags_ToChars(word flags){
 }
 
 void SpanState_Print(SpanState *st, SpanDef *def, int color){
-    printf("\x1b[%dmST<%p localIdx:%hu offset:%hu>\x1b[0m", color, st->slab, st->localIdx, st->offset);
+    printf("\x1b[%dmST<%p localIdx:%hu offset:%hu dim:%d>\x1b[0m", color, st->slab, st->localIdx, st->offset, st->dim);
 }
 
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -157,7 +158,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
     }
 }
 
-static void SpanDef_Print(SpanDef *def){
+void SpanDef_Print(SpanDef *def){
     char *flags = "";
     if(HasFlag(def->flags, INLINE)){
         flags = "(inline)";
@@ -552,6 +553,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_MINI_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);

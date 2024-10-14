@@ -100,7 +100,6 @@ int main(int argc, char **argv){
     Span_Set(p, 0, (Abstract *)s);
 
     Caneka_Init(m);
-    /*
     
     if(argc > 1){
         for(int i = 1; i < argc; i++){
@@ -109,7 +108,6 @@ int main(int argc, char **argv){
             }
         }
     }
-    */
 
     return 0;
 }

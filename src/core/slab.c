@@ -10,20 +10,20 @@ status Slab_setSlot(void *sl, SpanDef *def, int idx, void *value, size_t sz){
     }
     return SUCCESS;
 }
-void **Slab_nextSlotPtr(void *sl, SpanDef *def, int local_idx){
-    int pos = local_idx*(def->idxSize)*sizeof(void *);
+void **Slab_nextSlotPtr(void *sl, SpanDef *def, int localIdx){
+    int pos = localIdx*(def->idxSize)*sizeof(void *);
     return sl+pos;
 }
 
-void *Slab_nextSlot(void *sl, SpanDef *def, int local_idx){
-    void **ptr = Slab_nextSlotPtr(sl, def, local_idx); 
+void *Slab_nextSlot(void *sl, SpanDef *def, int localIdx){
+    void **ptr = Slab_nextSlotPtr(sl, def, localIdx); 
     return *ptr;
 }
 
-void *Slab_valueAddr(void *sl, SpanDef *def, int local_idx){
-    int pos = local_idx*(def->slotSize)*sizeof(void *);
+void *Slab_valueAddr(void *sl, SpanDef *def, int localIdx){
+    int pos = localIdx*(def->slotSize)*sizeof(void *);
     /*
-    printf("Getting Value(%d/%d) from slab:%p at 0x%lx\n", local_idx, pos, sl, (util)(sl+pos));
+    printf("Getting Value(%d/%d) from slab:%p at 0x%lx\n", localIdx, pos, sl, (util)(sl+pos));
     */
     return sl+pos;
 }

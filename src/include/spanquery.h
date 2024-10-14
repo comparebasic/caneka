@@ -3,6 +3,7 @@ typedef struct span_state {
     word flags; /* active, full, etc. */
     word localIdx; 
     word offset;
+    byte dim;
 } SpanState;
 
 typedef struct span_query {

@@ -41,6 +41,7 @@ extern int DEBUG_TABLE;
 extern int DEBUG_ROEBLING_CURRENT;
 extern int DEBUG_ROEBLING_NAME;
 extern int DEBUG_SPAN;
+extern int DEBUG_SPAN_GET_SET;
 extern int DEBUG_XML;
 extern int DEBUG_HTTP;
 extern int DEBUG_SERVE;
@@ -50,3 +51,4 @@ extern int DEBUG_EXAMPLE_HANDLERS;
 
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanState_Print(SpanState *st, SpanDef *def, int color);
+void SpanDef_Print(SpanDef *def);

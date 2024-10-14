@@ -29,8 +29,16 @@ void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
 
     Span *p = sr->span;
     status r = Span_Query(sr);
-    SpanQuery_Print((Abstract *)sr, TYPE_SPAN_QUERY, "_span_Set: ", COLOR_PURPLE, TRUE);
-    printf("\n");
+
+    if(DEBUG_SPAN_GET_SET){
+        printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
+        SpanDef_Print(sr->span->def);
+        printf("\n");
+        SpanQuery_Print((Abstract *)sr, TYPE_SPAN_QUERY, "_span_Set: ", DEBUG_SPAN_GET_SET, TRUE);
+        printf("\n");
+        printf("\n\x1b[0m");
+    }
+
     if(HasFlag(r, SUCCESS)){
         SpanState *st = sr->stack;
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
@@ -70,7 +78,6 @@ void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
 }
 
 void *Span_Set(Span *p, int idx, Abstract *t){
-    printf("Span Set\n");
     if(idx < 0 || t == NULL){
         return NULL;
     }
@@ -86,6 +93,16 @@ void *Span_Get(Span *p, int idx){
     SpanQuery sr;
     SpanQuery_Setup(&sr, p, SPAN_OP_GET, idx);
     status r = Span_Query(&sr);
+
+    if(DEBUG_SPAN_GET_SET){
+        printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
+        SpanDef_Print(sr.span->def);
+        printf("\n");
+        SpanQuery_Print((Abstract *)&sr, TYPE_SPAN_QUERY, "Span_Get: ", DEBUG_SPAN_GET_SET, TRUE);
+        printf("\n");
+        printf("\n\x1b[0m");
+    }
+
     if(HasFlag(r, SUCCESS)){
         SpanState *st = sr.stack;
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
@@ -203,10 +220,10 @@ status Span_Extend(SpanQuery *sq){
     Span *p = sq->span;
 
     byte dims = p->dims;
-    SpanState *st = SpanQuery_SetStack(sq, dims, 0, 0);
-    while(dims > 0){
-
+    SpanState *st = NULL;
+    while(TRUE){
         /* make new if not exists */
+        st = SpanQuery_SetStack(sq, dims, 0, 0);
         if(st->slab == NULL){
             if(sq->op != SPAN_OP_SET && sq->op != SPAN_OP_RESERVE){
                 return MISS;
@@ -217,22 +234,22 @@ status Span_Extend(SpanQuery *sq){
             }else{
                 new_sl = Span_valueSlab_Make(p->m, p->def); 
             }
-            void *prev_sl = SpanQuery_StateByDim(sq, dims+1)->slab;
-            Slab_setSlot(prev_sl, p->def, st->localIdx, &new_sl, sizeof(void *));
+            SpanState *prev = SpanQuery_StateByDim(sq, dims+1);
+            Slab_setSlot(prev->slab, p->def, prev->localIdx, &new_sl, sizeof(void *));
             st->slab = new_sl;
         }
 
-        dims--;
         /* find or allocate a space for the new span */
-        st = SpanQuery_SetStack(sq, dims, 0, 0);
+        if(dims == 0){
+            break;
+        }
+
+        dims--;
     }
 
     if(st == NULL){
         Fatal("Slab not found, SpanState is null\n", TYPE_SPAN);
     }
-
-    /* conclude by setting the local idx and setting the state */
-    st->localIdx = (sq->idx - st->offset);
 
     if(st->localIdx >= p->def->stride){
         Fatal("localIdx greater than stride", p->type.of);
