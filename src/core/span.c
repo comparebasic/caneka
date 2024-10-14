@@ -26,9 +26,11 @@ int Span_availableByDim(int dims, int stride, int idxStride){
 
 /* API */
 void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
-    printf("_Span_Set\n");
+
     Span *p = sr->span;
     status r = Span_Query(sr);
+    SpanQuery_Print((Abstract *)sr, TYPE_SPAN_QUERY, "_span_Set: ", COLOR_PURPLE, TRUE);
+    printf("\n");
     if(HasFlag(r, SUCCESS)){
         SpanState *st = sr->stack;
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
@@ -190,6 +192,8 @@ status Span_GrowToNeeded(SpanQuery *sr){
         }
         Slab_setSlot(exp_sl, p->def, 0, &shelf_sl, sizeof(void *));
     }
+
+    sr->dims = p->dims;
 
     return SUCCESS;
 }

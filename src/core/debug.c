@@ -48,6 +48,25 @@ char *QueueFlags_ToChars(word flags){
     return (char *)s->bytes;
 }
 
+void SpanState_Print(SpanState *st, SpanDef *def, int color){
+    printf("\x1b[%dmST<%p localIdx:%hu offset:%hu>\x1b[0m", color, st->slab, st->localIdx, st->offset);
+}
+
+void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    SpanQuery *sq = as(a, TYPE_SPAN_QUERY);
+    printf("\x1b[%dm%sSQ<%s idx:%d op:%d dims:%hu/%hu", color, msg, State_ToString(sq->type.state), sq->idx, sq->op, sq->dims, sq->dimsNeeded);
+    SpanState *st = sq->stack;
+    for(int i = 0; i <= sq->span->dims; i++){
+        printf("\n");
+        indent_Print(1);
+        printf("\x1b[%dm%d: ", color, i);
+        SpanState_Print(st, sq->span->def, color);
+        st++;
+    }
+    printf("\n");
+    printf("\x1b[%dm>\x1b[0m", color);
+}
+
 static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
     indent_Print(indent);
     printf("%d(%d)= ", parentIdx,offset);
