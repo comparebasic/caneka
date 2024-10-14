@@ -8,6 +8,10 @@ SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim){
     return sq->stack+dim;
 }
 
+status SpanQuery_Refresh(SpanQuery *sq){
+    return SUCCESS;
+}
+
 SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset){
     SpanDef *def = sq->span->def;
     Span *p = sq->span;

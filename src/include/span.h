@@ -87,7 +87,8 @@ void *Span_reserve(struct span_query *sr);
 
 void SpanQuery_Setup(struct span_query *sr, Span *p, byte op, int idx);
 status Span_GrowToNeeded(struct span_query *sr);
-void *_span_Set(struct span_query *sr, int idx, Abstract *t);
+void *Span_SetFromQ(struct span_query *sr, Abstract *t);
+void *Span_GetFromQ(struct span_query *sq);
 
 status Span_Extend(struct span_query *sr);
 status Span_GrowToNeeded(struct span_query *sr);

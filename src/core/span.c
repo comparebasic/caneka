@@ -1,7 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-
 int Span_availableByDim(int dims, int stride, int idxStride){
     int _dims = dims;
     int n = stride;
@@ -25,7 +24,7 @@ int Span_availableByDim(int dims, int stride, int idxStride){
 
 
 /* API */
-void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
+void *Span_SetFromQ(SpanQuery *sr, Abstract *t){
 
     Span *p = sr->span;
     status r = Span_Query(sr);
@@ -34,7 +33,7 @@ void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
         printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
         SpanDef_Print(sr->span->def);
         printf("\n");
-        SpanQuery_Print((Abstract *)sr, TYPE_SPAN_QUERY, "_span_Set: ", DEBUG_SPAN_GET_SET, TRUE);
+        SpanQuery_Print((Abstract *)sr, TYPE_SPAN_QUERY, "Span_SetFromQ: ", DEBUG_SPAN_GET_SET, TRUE);
         printf("\n");
         printf("\n\x1b[0m");
     }
@@ -59,16 +58,21 @@ void *_span_Set(SpanQuery *sr, int idx, Abstract *t){
                 memcpy(ptr, &t, sizeof(void *));
             }
         }
+        if(sr->op == SPAN_OP_REMOVE){
+            memcpy(sr->nextAvailable, sr->stack, sizeof(sr->stack));
+        }else{
+            memset(sr->nextAvailable, 0, sizeof(sr->stack));
+        }
         if(t == NULL){
             p->nvalues--;
         }else{
             p->nvalues++;
         }
         if(sr->op != SPAN_OP_REMOVE){
-            p->metrics.set = idx;
+            p->metrics.set = sr->idx;
         }
-        if(idx > p->max_idx){
-            p->max_idx = idx;
+        if(sr->idx > p->max_idx){
+            p->max_idx = sr->idx;
         }
         sr->value = ptr;
         return sr->value;
@@ -83,44 +87,50 @@ void *Span_Set(Span *p, int idx, Abstract *t){
     }
     SpanQuery sr;
     SpanQuery_Setup(&sr, p, SPAN_OP_SET, idx);
-    return _span_Set(&sr, idx, t);
+    return Span_SetFromQ(&sr, t);
+}
+
+void *Span_GetFromQ(SpanQuery *sq){
+    status r = Span_Query(sq);
+    Span *p = sq->span;
+    SpanDef *def = p->def;
+
+    if(DEBUG_SPAN_GET_SET){
+        printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
+        SpanDef_Print(sq->span->def);
+        printf("\n");
+        SpanQuery_Print((Abstract *)sq, TYPE_SPAN_QUERY, "Span_Get: ", DEBUG_SPAN_GET_SET, TRUE);
+        printf("\n");
+        printf("\n\x1b[0m");
+    }
+
+    if(HasFlag(r, SUCCESS)){
+        SpanState *st = sq->stack;
+        void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
+        if(HasFlag(def->flags, INLINE)){
+            if(!HasFlag(def->flags, RAW) && (*(util *)ptr) == 0){
+                sq->value = NULL;
+            }else{
+                sq->value = ptr;
+            }
+        }else if(*((Abstract **)ptr) != NULL){
+            void **dptr = (void **)ptr;
+            sq->value = *dptr;
+        }
+        p->metrics.get = sq->idx;
+        return sq->value;
+    }else{
+        return NULL;
+    }
 }
 
 void *Span_Get(Span *p, int idx){
     if(idx < 0){
         return NULL;
     }
-    SpanQuery sr;
-    SpanQuery_Setup(&sr, p, SPAN_OP_GET, idx);
-    status r = Span_Query(&sr);
-
-    if(DEBUG_SPAN_GET_SET){
-        printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
-        SpanDef_Print(sr.span->def);
-        printf("\n");
-        SpanQuery_Print((Abstract *)&sr, TYPE_SPAN_QUERY, "Span_Get: ", DEBUG_SPAN_GET_SET, TRUE);
-        printf("\n");
-        printf("\n\x1b[0m");
-    }
-
-    if(HasFlag(r, SUCCESS)){
-        SpanState *st = sr.stack;
-        void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
-        if(HasFlag(p->def->flags, INLINE)){
-            if(!HasFlag(p->def->flags, RAW) && (*(util *)ptr) == 0){
-                sr.value = NULL;
-            }else{
-                sr.value = ptr;
-            }
-        }else if(*((Abstract **)ptr) != NULL){
-            void **dptr = (void **)ptr;
-            sr.value = *dptr;
-        }
-        p->metrics.get = idx;
-        return sr.value;
-    }else{
-        return NULL;
-    }
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, p, SPAN_OP_GET, idx);
+    return Span_GetFromQ(&sq);
 }
 
 void *Span_GetSelected(Span *p){
