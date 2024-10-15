@@ -13,7 +13,7 @@ typedef struct queue_idx {
 typedef struct queue {
     Span span;
     /* */
-    SpanQuery sr;
+    SpanQuery sq;
     GetDelayFunc getDelay;
 } Queue;
 
@@ -22,3 +22,4 @@ char *QueueFlags_ToChars(word flags);
 void *Queue_Add(Queue *q, Abstract *value);
 void *Queue_Make(MemCtx *m, GetDelayFunc getDelay);
 void *Queue_Remove(Queue *q, int idx);
+void *Queue_Next(Queue *q);

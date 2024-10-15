@@ -35,7 +35,7 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset){
             localMax = sq->span->def->idxStride;
         }
         if(localIdx >= localMax){
-            printf("LocalIdx %d offset %d dim: %d\n", localIdx, prev->offset, dim);
+            printf("LocalIdx:%d prevLocalIdx:%d offset:%d dim:%d\n", localIdx, prev->localIdx, prev->offset, dim);
             Fatal("local_idx greater than stride max", sq->span->type.of);
         }
         st->offset = prev->offset + increment*localIdx;
@@ -47,6 +47,7 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset){
     st->flags |= set;
     st->flags &= ~unset;
     st->dim = dim;
+    st->increment = increment;
 
     return st;
 }

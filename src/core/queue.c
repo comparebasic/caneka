@@ -14,13 +14,13 @@ status Queue_SetDelay(void *sl, quad delayTicks){
 }
 
 status Queue_Update(Queue *q, int idx, byte dim, quad delayTicks){
-    if(q->sr.idx != idx && q->sr.dims != dim){
+    if(q->sq.idx != idx && q->sq.dims != dim){
         /* requery */
-        SpanQuery_Setup(&(q->sr), (Span *)q, SPAN_OP_SET, idx);
-        Span_Query(&(q->sr));
+        SpanQuery_Setup(&(q->sq), (Span *)q, SPAN_OP_SET, idx);
+        Span_Query(&(q->sq));
     }
 
-    SpanState *st = SpanQuery_StateByDim(&(q->sr), dim);
+    SpanState *st = SpanQuery_StateByDim(&(q->sq), dim);
 
     return Queue_SetDelay((QueueIdx *)st->slab, delayTicks);
 }
@@ -30,67 +30,89 @@ void *Queue_Add(Queue *q, Abstract *value){
         return NULL;
     }
 
-    SpanQuery *sr = &(q->sr);
+    SpanQuery *sq = &(q->sq);
     QueueIdx qidx;
     qidx.item = value;
-    SpanState *st = sr->nextAvailable;
+    SpanState *st = sq->nextAvailable;
 
     if(st->slab == NULL){
         int nextIdx = q->span.max_idx+1;
         return Span_Set((Span *)q, nextIdx, (Abstract *)&qidx); 
     }else{
-        SpanQuery_Setup(sr, (Span *)q, SPAN_OP_SET, sr->idx);
-        return Span_SetFromQ(sr, (Abstract *)&qidx);
+        SpanQuery_Setup(sq, (Span *)q, SPAN_OP_SET, sq->idx);
+        return Span_SetFromQ(sq, (Abstract *)&qidx);
     }
 }
 
 void *Queue_Remove(Queue *q, int idx){
-    SpanQuery *sr = &(q->sr);
-    SpanQuery_Setup(sr, (Span *)q, SPAN_OP_REMOVE, idx);
-    void *ptr = Span_SetFromQ(sr, NULL);
+    SpanQuery *sq = &(q->sq);
+    SpanQuery_Setup(sq, (Span *)q, SPAN_OP_REMOVE, idx);
+    void *ptr = Span_SetFromQ(sq, NULL);
     return ptr;
 }
 
 void *Queue_Next(Queue *q){
-    if(q->sr.dims != q->span.dims){
-        SpanQuery_Refresh(&(q->sr));
+    if(q->sq.dims != q->span.dims){
+        SpanQuery_Refresh(&(q->sq));
     }
-    SpanState *st = q->sr.stack;
+    SpanState *st = q->sq.stack;
     if((q->span.type.state & PROCESSING) == 0){
         q->span.type.state |= PROCESSING;
-        SpanQuery_Setup(&(q->sr), (Span *)q, SPAN_OP_GET, 0);
-        return Span_GetFromQ(&(q->sr));
+        SpanQuery_Setup(&(q->sq), (Span *)q, SPAN_OP_GET, 0);
+        status r = Span_Query(&(q->sq));
+        if((r & SUCCESS) == 0){
+            q->span.type.state |= ERROR;
+            return NULL;
+        }
+        return Span_GetFromQ(&(q->sq));
     }else{
         byte dim = 0;
         byte found = FALSE; 
-        while(!found && q->sr.idx <= q->span.max_idx){
+        while(!found && q->sq.idx <= q->span.max_idx){
             int maxIdx = q->span.def->stride;
             if(st->dim != 0){
                 maxIdx = q->span.def->idxStride;
             }
             if(st->localIdx+1 < maxIdx){
                 st->localIdx++;
-                q->sr.idx += st->increment;
+                q->sq.idx++;
+                if(DEBUG_QUEUE){
+                    printf("\x1b[%dmincr dim:%d\n", DEBUG_QUEUE, dim);
+                    Debug_Print((void *)(&q->sq), 0, "Underneith: ", DEBUG_QUEUE, TRUE);
+                    printf("\n");
+                }
                 if(dim != 0){
-                    while(st->localIdx < maxIdx){
+                    while(!found){
+                        SpanQuery_SetStack(&(q->sq), dim, 0, 0);
                         if(Slab_nextSlotPtr(st->slab, q->span.def, st->localIdx) != NULL){
                             found = TRUE;
+                            while(dim >= 1){
+                                dim--;
+                                SpanQuery_SetStack(&(q->sq), dim, 0, 0);
+                            }
+                            break;
                         }
-                        st->localIdx++;
+                        q->sq.idx += st->increment;
                     }
                 }
+                break;
             }
-
             st->localIdx = 0;
             st++;
             dim++;
+
         }
 
-        if(q->sr.idx > q->span.max_idx){
+        if(DEBUG_QUEUE){
+            Debug_Print(&(q->sq), 0, "Queue Next SQ: ", DEBUG_QUEUE, TRUE);
+            printf("\n");
+        }
+
+        if(q->sq.idx > q->span.max_idx){
             q->span.type.state &= END & ~PROCESSING;
             return NULL;
         }else{
-            return Span_GetFromQ(&(q->sr));
+            return Span_GetFromQ(&(q->sq));
         }
     }
 }

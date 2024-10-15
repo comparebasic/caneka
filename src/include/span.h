@@ -34,7 +34,7 @@ enum span_ops {
 };
 
 typedef void *(*SpanDefFunc)(MemCtx *m, struct span_def *def);
-typedef void *(*SpanAddrFunc)(struct span_query *sr);
+typedef void *(*SpanAddrFunc)(struct span_query *sq);
 
 typedef struct span {
     Type type;
@@ -60,7 +60,7 @@ Span* Span_Make(MemCtx* m, cls type);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
 status Span_Remove(Span *p, int idx);
 status Span_ReInit(Span *p);
-status Span_Query(struct span_query *sr);
+status Span_Query(struct span_query *sq);
 Span *Span_Clone(MemCtx *m, Span *p);
 void *Span_Set(Span *p, int idx, Abstract *t);
 void *Span_Get(Span *p, int idx);
@@ -83,15 +83,15 @@ SpanDef *SpanString_MakeDef();
 
 void *Span_valueSlab_Make(MemCtx *m, SpanDef *def);
 void *Span_idxSlab_Make(MemCtx *m, SpanDef *def);
-void *Span_reserve(struct span_query *sr);
+void *Span_reserve(struct span_query *sq);
 
-void SpanQuery_Setup(struct span_query *sr, Span *p, byte op, int idx);
-status Span_GrowToNeeded(struct span_query *sr);
-void *Span_SetFromQ(struct span_query *sr, Abstract *t);
+void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, int idx);
+status Span_GrowToNeeded(struct span_query *sq);
+void *Span_SetFromQ(struct span_query *sq, Abstract *t);
 void *Span_GetFromQ(struct span_query *sq);
 
-status Span_Extend(struct span_query *sr);
-status Span_GrowToNeeded(struct span_query *sr);
+status Span_Extend(struct span_query *sq);
+status Span_GrowToNeeded(struct span_query *sq);
 
 /* SpanDef */
 SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def);

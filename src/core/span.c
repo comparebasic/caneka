@@ -24,58 +24,58 @@ int Span_availableByDim(int dims, int stride, int idxStride){
 
 
 /* API */
-void *Span_SetFromQ(SpanQuery *sr, Abstract *t){
+void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
 
-    Span *p = sr->span;
-    status r = Span_Query(sr);
+    Span *p = sq->span;
+    status r = Span_Query(sq);
 
     if(DEBUG_SPAN_GET_SET){
         printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
-        SpanDef_Print(sr->span->def);
+        SpanDef_Print(sq->span->def);
         printf("\n");
-        SpanQuery_Print((Abstract *)sr, TYPE_SPAN_QUERY, "Span_SetFromQ: ", DEBUG_SPAN_GET_SET, TRUE);
+        SpanQuery_Print((Abstract *)sq, TYPE_SPAN_QUERY, "Span_SetFromQ: ", DEBUG_SPAN_GET_SET, TRUE);
         printf("\n");
         printf("\n\x1b[0m");
     }
 
     if(HasFlag(r, SUCCESS)){
-        SpanState *st = sr->stack;
+        SpanState *st = sq->stack;
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
         if(HasFlag(p->def->flags, INLINE)){
             size_t sz = (size_t)p->def->itemSize;
             if(!HasFlag(p->def->flags, RAW) && t != NULL && t->type.of == TYPE_RESERVE){
                 sz = sizeof(Reserve);
             }
-            if(sr->op == SPAN_OP_REMOVE){
+            if(sq->op == SPAN_OP_REMOVE){
                 memset(ptr, 0, sz);
             }else{
                 memcpy(ptr, t, sz);
             }
         }else{
-            if(sr->op == SPAN_OP_REMOVE){
+            if(sq->op == SPAN_OP_REMOVE){
                 memset(ptr, 0, sizeof(void *));
             }else{
                 memcpy(ptr, &t, sizeof(void *));
             }
         }
-        if(sr->op == SPAN_OP_REMOVE){
-            memcpy(sr->nextAvailable, sr->stack, sizeof(sr->stack));
+        if(sq->op == SPAN_OP_REMOVE){
+            memcpy(sq->nextAvailable, sq->stack, sizeof(sq->stack));
         }else{
-            memset(sr->nextAvailable, 0, sizeof(sr->stack));
+            memset(sq->nextAvailable, 0, sizeof(sq->stack));
         }
         if(t == NULL){
             p->nvalues--;
         }else{
             p->nvalues++;
         }
-        if(sr->op != SPAN_OP_REMOVE){
-            p->metrics.set = sr->idx;
+        if(sq->op != SPAN_OP_REMOVE){
+            p->metrics.set = sq->idx;
         }
-        if(sr->idx > p->max_idx){
-            p->max_idx = sr->idx;
+        if(sq->idx > p->max_idx){
+            p->max_idx = sq->idx;
         }
-        sr->value = ptr;
-        return sr->value;
+        sq->value = ptr;
+        return sq->value;
     }
     return NULL;
 
@@ -85,13 +85,12 @@ void *Span_Set(Span *p, int idx, Abstract *t){
     if(idx < 0 || t == NULL){
         return NULL;
     }
-    SpanQuery sr;
-    SpanQuery_Setup(&sr, p, SPAN_OP_SET, idx);
-    return Span_SetFromQ(&sr, t);
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, p, SPAN_OP_SET, idx);
+    return Span_SetFromQ(&sq, t);
 }
 
 void *Span_GetFromQ(SpanQuery *sq){
-    status r = Span_Query(sq);
     Span *p = sq->span;
     SpanDef *def = p->def;
 
@@ -104,24 +103,20 @@ void *Span_GetFromQ(SpanQuery *sq){
         printf("\n\x1b[0m");
     }
 
-    if(HasFlag(r, SUCCESS)){
-        SpanState *st = sq->stack;
-        void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
-        if(HasFlag(def->flags, INLINE)){
-            if(!HasFlag(def->flags, RAW) && (*(util *)ptr) == 0){
-                sq->value = NULL;
-            }else{
-                sq->value = ptr;
-            }
-        }else if(*((Abstract **)ptr) != NULL){
-            void **dptr = (void **)ptr;
-            sq->value = *dptr;
+    SpanState *st = sq->stack;
+    void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
+    if(HasFlag(def->flags, INLINE)){
+        if(!HasFlag(def->flags, RAW) && (*(util *)ptr) == 0){
+            sq->value = NULL;
+        }else{
+            sq->value = ptr;
         }
-        p->metrics.get = sq->idx;
-        return sq->value;
-    }else{
-        return NULL;
+    }else if(*((Abstract **)ptr) != NULL){
+        void **dptr = (void **)ptr;
+        sq->value = *dptr;
     }
+    p->metrics.get = sq->idx;
+    return sq->value;
 }
 
 void *Span_Get(Span *p, int idx){
@@ -130,6 +125,11 @@ void *Span_Get(Span *p, int idx){
     }
     SpanQuery sq;
     SpanQuery_Setup(&sq, p, SPAN_OP_GET, idx);
+    status r = Span_Query(&sq);
+    if((r & SUCCESS) == 0){
+        p->type.state |= ERROR;
+        return NULL;
+    }
     return Span_GetFromQ(&sq);
 }
 
@@ -154,9 +154,9 @@ void *Span_ReserveNext(Span *p){
 }
 
 status Span_Remove(Span *p, int idx){
-    SpanQuery sr;
-    SpanQuery_Setup(&sr, p, SPAN_OP_REMOVE, idx);
-    return Span_Query(&sr);
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
+    return Span_Query(&sq);
 }
 
 status Span_Move(Span *p, int fromIdx, int toIdx){
@@ -196,20 +196,20 @@ status Span_Run(MemHandle *mh, Span *p, DoFunc func){
 }
 
 /* internals */
-status Span_GrowToNeeded(SpanQuery *sr){
-    boolean expand = sr->span->dims < sr->dimsNeeded;
-    SpanDef *def = sr->span->def;
-    Span *p = sr->span;
+status Span_GrowToNeeded(SpanQuery *sq){
+    boolean expand = sq->span->dims < sq->dimsNeeded;
+    SpanDef *def = sq->span->def;
+    Span *p = sq->span;
 
     if(expand){
         void *exp_sl = NULL;
         void *shelf_sl = NULL;
-        while(p->dims < sr->dimsNeeded){
+        while(p->dims < sq->dimsNeeded){
             void *new_sl = Span_idxSlab_Make(p->m, def);
 
             if(exp_sl == NULL){
-                shelf_sl = sr->span->root;
-                sr->span->root = new_sl;
+                shelf_sl = sq->span->root;
+                sq->span->root = new_sl;
             }else{
                 Slab_setSlot(exp_sl, p->def, 0, &new_sl, sizeof(void *));
             }
@@ -220,7 +220,7 @@ status Span_GrowToNeeded(SpanQuery *sr){
         Slab_setSlot(exp_sl, p->def, 0, &shelf_sl, sizeof(void *));
     }
 
-    sr->dims = p->dims;
+    sq->dims = p->dims;
 
     return SUCCESS;
 }
@@ -296,7 +296,7 @@ void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
     return MemCtx_Alloc(m, sz);
 }
 
-void *Span_reserve(SpanQuery *sr){
+void *Span_reserve(SpanQuery *sq){
     return NULL;
 }
 

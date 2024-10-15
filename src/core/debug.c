@@ -25,6 +25,7 @@ int DEBUG_HTTP = 0;
 int DEBUG_SERVE = 0;
 int DEBUG_REQ = 0;
 int DEBUG_EXAMPLE_HANDLERS = 0;
+int DEBUG_QUEUE = 0;
 
 MemCtx *DebugM = NULL;
 
@@ -49,8 +50,14 @@ char *QueueFlags_ToChars(word flags){
     return (char *)s->bytes;
 }
 
-void SpanState_Print(SpanState *st, SpanDef *def, int color){
-    printf("\x1b[%dmST<%p localIdx:%hu offset:%hu dim:%d>\x1b[0m", color, st->slab, st->localIdx, st->offset, st->dim);
+void spanState_Print(SpanState *st, int color){
+    printf("\x1b[%dmST<%p localIdx:%hu increment:%d offset:%hu dim:%d>\x1b[0m", color, st->slab, st->localIdx, st->increment, st->offset, st->dim);
+}
+
+void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    SpanState *st = (SpanState *)a;
+    printf("\x1b[%dm%s", color, msg);
+    spanState_Print(st, color);
 }
 
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -61,7 +68,7 @@ void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extend
         printf("\n");
         indent_Print(1);
         printf("\x1b[%dm%d: ", color, i);
-        SpanState_Print(st, sq->span->def, color);
+        spanState_Print(st, color);
         st++;
     }
     printf("\n");
@@ -562,6 +569,8 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
+    r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
+    r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
     return r;
 }
 

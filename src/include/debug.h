@@ -47,8 +47,9 @@ extern int DEBUG_HTTP;
 extern int DEBUG_SERVE;
 extern int DEBUG_REQ;
 extern int DEBUG_EXAMPLE_HANDLERS;
+extern int DEBUG_QUEUE;
 
 
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
-void SpanState_Print(SpanState *st, SpanDef *def, int color);
+void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanDef_Print(SpanDef *def);

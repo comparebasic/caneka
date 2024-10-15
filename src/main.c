@@ -34,6 +34,8 @@ static void *tests[] = {
     "XMLParser", XmlParser_Tests,
     "Http", Http_Tests,
     "Queue", Queue_Tests,
+    "QueueNext", QueueNext_Tests,
+    "QueueMixed", QueueMixed_Tests,
     /*
     "Serve", Serve_Tests,
     "ServeHandle", ServeHandle_Tests,

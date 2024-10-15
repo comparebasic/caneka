@@ -4,7 +4,6 @@
 
 status Core_Tests(MemCtx *gm);
 status String_Tests(MemCtx *gm);
-status Queue_Tests(MemCtx *gm);
 status Serve_Tests(MemCtx *gm);
 status ServeHandle_Tests(MemCtx *gm);
 status ServeChunked_Tests(MemCtx *gm);
@@ -26,5 +25,8 @@ status XmlParser_Tests(MemCtx *gm);
 status Http_Tests(MemCtx *gm);
 status SpanClone_Tests(MemCtx *gm);
 status RoeblingStartStop_Tests(MemCtx *gm);
+status Queue_Tests(MemCtx *gm);
+status QueueNext_Tests(MemCtx *gm);
+status QueueMixed_Tests(MemCtx *gm);
 
 status Tests_Init(MemCtx *m);

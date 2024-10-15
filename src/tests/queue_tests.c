@@ -14,7 +14,7 @@ static quad exampleDelayTicks(status r){
 }
 
 status Queue_Tests(MemCtx *gm){
-    status r = SUCCESS;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     Queue *q = Queue_Make(m, exampleDelayTicks);
@@ -79,5 +79,59 @@ status Queue_Tests(MemCtx *gm){
     qidx = Span_Get((Span *)q, 17);
     r |= Test(qidx->item == midwest, "midwest has replaed idx 17");
 
+    MemCtx_Free(m);
+
+    r |= SUCCESS;
+    return r;
+}
+
+status QueueNext_Tests(MemCtx *gm){
+    status r = READY;
+    MemCtx *m = MemCtx_Make();
+
+    Queue *q = Queue_Make(m, exampleDelayTicks);
+    String *s = NULL;
+    int max = 67;
+    int count = 0;
+    for (int i = 0; i < max; i++){
+        s = all109_s[i];
+        Queue_Add(q, (Abstract *)s);
+        count++;
+    }
+    r |= Test(q->span.nvalues == max, "Expect queue to have 67 values, have %d\n", q->span.nvalues);
+    
+    QueueIdx *qidx = NULL;
+
+    qidx = Queue_Next(q);
+    s = (String *)qidx->item;
+    r |= Test(s == zero_s, "Expect first item to be zero_s, have %s\n", (char *)s->bytes);
+
+    qidx = Queue_Next(q);
+    s = (String *)qidx->item;
+    r |= Test(s == one_s, "Expect second item to be one_s, have %s\n", (char *)s->bytes);
+
+    for(int i = 2; i < max; i++){
+        qidx = Queue_Next(q);
+        s = (String *)qidx->item;
+        r |= Test(s == all109_s[i], "Expect item %d to be from all109_s(%s), have %s", i, (char *)all109_s[i]->bytes, (char *)s->bytes);
+        if((r & ERROR) != 0){
+            break;
+        }
+    }
+
+    MemCtx_Free(m);
+
+    return r;
+}
+
+status QueueMixed_Tests(MemCtx *gm){
+    status r = READY;
+    MemCtx *m = MemCtx_Make();
+
+    Queue *q = Queue_Make(m, exampleDelayTicks);
+
+    MemCtx_Free(m);
+
+    r |= SUCCESS;
     return r;
 }
