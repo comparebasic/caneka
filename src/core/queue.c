@@ -67,8 +67,8 @@ void *Queue_Next(Queue *q){
         return Span_GetFromQ(&(q->sq));
     }else{
         byte dim = 0;
-        byte found = FALSE; 
-        while(!found && q->sq.idx <= q->span.max_idx){
+outer:
+        while(q->sq.idx <= q->span.max_idx){
             int maxIdx = q->span.def->stride;
             if(st->dim != 0){
                 maxIdx = q->span.def->idxStride;
@@ -81,35 +81,45 @@ void *Queue_Next(Queue *q){
                     Debug_Print((void *)(&q->sq), 0, "Underneith: ", DEBUG_QUEUE, TRUE);
                     printf("\n");
                 }
-                if(dim != 0){
-                    while(!found){
+                if(dim == 0){
+                    if(*((util *)Slab_valueAddr(st->slab, q->span.def, st->localIdx)) != 0){
+                        goto final;
+                    }
+                    goto outer;
+                }else{
+                    while(TRUE){
                         SpanQuery_SetStack(&(q->sq), dim, 0, 0);
                         if(Slab_nextSlotPtr(st->slab, q->span.def, st->localIdx) != NULL){
-                            found = TRUE;
                             while(dim >= 1){
                                 dim--;
                                 SpanQuery_SetStack(&(q->sq), dim, 0, 0);
                             }
-                            break;
+                            dim = 0;
+                            st = SpanQuery_StateByDim(&(q->sq), dim);
+                            if(*((util *)Slab_valueAddr(st->slab, q->span.def, st->localIdx)) != 0){
+                                goto final;
+                            }
+                            goto outer;
                         }
                         q->sq.idx += st->increment;
                     }
                 }
-                break;
+                goto final;
             }
             st->localIdx = 0;
             st++;
             dim++;
 
         }
-
+final:
         if(DEBUG_QUEUE){
             Debug_Print(&(q->sq), 0, "Queue Next SQ: ", DEBUG_QUEUE, TRUE);
             printf("\n");
         }
 
         if(q->sq.idx > q->span.max_idx){
-            q->span.type.state &= END & ~PROCESSING;
+            q->span.type.state |= END;
+            q->span.type.state &= ~PROCESSING;
             return NULL;
         }else{
             return Span_GetFromQ(&(q->sq));

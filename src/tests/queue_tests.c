@@ -81,7 +81,6 @@ status Queue_Tests(MemCtx *gm){
 
     MemCtx_Free(m);
 
-    r |= SUCCESS;
     return r;
 }
 
@@ -110,14 +109,17 @@ status QueueNext_Tests(MemCtx *gm){
     s = (String *)qidx->item;
     r |= Test(s == one_s, "Expect second item to be one_s, have %s\n", (char *)s->bytes);
 
-    for(int i = 2; i < max; i++){
+    int i = 2;
+    while(TRUE){
         qidx = Queue_Next(q);
-        s = (String *)qidx->item;
-        r |= Test(s == all109_s[i], "Expect item %d to be from all109_s(%s), have %s", i, (char *)all109_s[i]->bytes, (char *)s->bytes);
-        if((r & ERROR) != 0){
+        if((q->span.type.state & END) != 0 || (r & ERROR) != 0){
             break;
         }
+        s = (String *)qidx->item;
+        r |= Test(s == all109_s[i], "Expect item %d to be from all109_s(%s), have %s", i, (char *)all109_s[i]->bytes, (char *)s->bytes);
+        i++;
     }
+    r |= Test(i == 67, "Expect i to have reached the max, have %d", i);
 
     MemCtx_Free(m);
 
@@ -129,9 +131,43 @@ status QueueMixed_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
 
     Queue *q = Queue_Make(m, exampleDelayTicks);
+    String *s = NULL;
+    int max = 8;
+    int gap = 21;
+    int max2 = max + gap + 7;
+    int total = max2 - (gap - max);
+    int i = 0;
+
+    int indexes[] = {0,1,2,3,4,5,6,7,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35};
+
+    for (; i < max2; i++){
+        s = all109_s[i];
+        Queue_Add(q, (Abstract *)s);
+    }
+    r |= Test(q->span.nvalues == max2, "Expect queue to have 8 values, have %d", q->span.nvalues);
+
+    i = max;
+    for (; i < gap; i++){
+        Queue_Remove(q, i);
+    }
+    r |= Test(q->span.nvalues == total, "Expect queue to have 23 values, have %d", q->span.nvalues);
+    
+    QueueIdx *qidx = NULL;
+
+    i = 0;
+    while(TRUE){
+        qidx = Queue_Next(q);
+        if((q->span.type.state & END) != 0 || (r & ERROR) != 0){
+            break;
+        }
+        s = (String *)qidx->item;
+        String *expected_s = all109_s[indexes[i]];
+        r |= Test(s == expected_s, "Expect item %d to be from all109_s(%s), have %s", indexes[i], (char *)expected_s->bytes, (char *)s->bytes);
+        i++;
+    }
+    r |= Test(i == total, "Expect i to have reached the max, have %d", i);
 
     MemCtx_Free(m);
 
-    r |= SUCCESS;
     return r;
 }
