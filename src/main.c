@@ -48,6 +48,7 @@ static status test(MemCtx *m, char *arg){
     if(strncmp(arg, "test=no-color", strlen("test=no-color")) == 0){
         GLOBAL_flags |= NO_COLOR;
     }
+    Tests_Init(m);
     Test_Runner(m, "Caneka", tests);
     return r;
 }
