@@ -10,6 +10,7 @@ related: core/mem.c
 
 typedef struct mem_slab {
     byte bytes[MEM_SLAB_SIZE];
+    word idx;
     void *addr;
     struct mem_slab *next;
 } MemSlab;
@@ -17,6 +18,7 @@ typedef struct mem_slab {
 typedef struct mem_ctx {
     Type type;
     MemSlab *start_sl;
+    int count;
     void *instance;
 } MemCtx;
 
@@ -37,6 +39,8 @@ MemSlab *MemSlab_Make(MemCtx *m);
 size_t MemSlab_Available(MemSlab *sl);
 void *MemSlab_Alloc(MemSlab *sl, size_t s);
 i64 MemCtx_Used(MemCtx *m);
+
+void *MemCtx_GetSlab(MemCtx *m, void *addr);
 
 /* utils */
 MemCtx *MemCtx_FromHandle(MemHandle *a);

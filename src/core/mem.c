@@ -93,6 +93,7 @@ MemSlab *MemSlab_Make(MemCtx *m){
     size_t sz = sizeof(MemSlab)+MEM_SLAB_SIZE;
     MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
     sl->addr = MemSlab_GetStart(sl);
+    sl->idx = ++(m->count);
     if(m->start_sl == NULL){
         m->start_sl = sl;
     }else{
@@ -120,6 +121,17 @@ void *MemSlab_Alloc(MemSlab *sl, size_t s){
 }
 
 /* utils */
+void *MemCtx_GetSlab(MemCtx *m, void *addr){
+    MemSlab *sl = m->start_sl;
+    while(sl != NULL){
+        if(sl->addr <= addr && addr < last->addr + MEM_SLAB_SIZE){
+            return sl;
+        }
+        sl = sl->next;
+    }
+    return NULL;
+}
+
 MemCtx *MemCtx_FromHandle(MemHandle *a){
     if(a->type.of == TYPE_MEMCTX){
         return (MemCtx *)a;

@@ -18,6 +18,10 @@ static util Hash_Abstract(Abstract *a){
     return 0;
 }
 
+static util Hash_MemPair(MemPair *mp){
+    return Hash_Bytes(mp, sizeof(MemPair));
+}
+
 static util Hash_Match(Abstract *a){
     return 0;
 }
@@ -74,6 +78,7 @@ static status populateHash(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
+    r |= Lookup_Add(m, lk, TYPE_MEMPAIR, (void *)Hash_MemPair);
     return r;
 }
 
