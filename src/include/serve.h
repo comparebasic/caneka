@@ -17,11 +17,7 @@
 typedef struct serve_ctx {
     Type type;
     MemCtx *m;
-#ifdef LINUX
-    int epoll_fd;
-#else
-    Span *queue;
-#endif
+    Queue *queue;
     int socket_fd;
     int port;
     boolean serving;
@@ -36,3 +32,4 @@ status Serve_Stop(Serve *sctx);
 status Serve_NextState(Serve *sctx, struct serve_req *req);
 status Serve_AcceptRound(Serve *sctx);
 status Serve_ServeRound(Serve *sctx);
+status Serve_CloseReq(Serve *sctx, struct serve_req *req, int idx);

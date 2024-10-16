@@ -19,7 +19,14 @@ Handler *Handler_Current(Handler *h){
 Handler *Handler_Get(Handler *h){
     /* if the root handler is finished, the request is complete */
     if((h->type.state & (SUCCESS|ERROR)) != 0){
+        if(DEBUG_EXAMPLE_HANDLERS){
+            printf("\x1b[%dm   returning same handler\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS);
+        }
         return h;
+    }
+
+    if(DEBUG_EXAMPLE_HANDLERS){
+        printf("\x1b[%dm   returning new handler\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS);
     }
 
     Handler *cursor = h;

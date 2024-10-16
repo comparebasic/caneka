@@ -36,11 +36,9 @@ static void *tests[] = {
     "Queue", Queue_Tests,
     "QueueNext", QueueNext_Tests,
     "QueueMixed", QueueMixed_Tests,
-    /*
     "Serve", Serve_Tests,
     "ServeHandle", ServeHandle_Tests,
     "ServeChunked", ServeChunked_Tests,
-    */
     NULL, NULL
 };
 

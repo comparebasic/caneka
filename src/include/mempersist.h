@@ -1,8 +1,8 @@
 typedef struct mem_persist {
     Type type;
     MemCtx *m;
-    Span *map;
-    String *path;
+    struct span *map;
+    struct string *path;
 } MemPersist;
 
 typedef struct mem_pair {

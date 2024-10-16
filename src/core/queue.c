@@ -25,7 +25,7 @@ status Queue_Update(Queue *q, int idx, byte dim, quad delayTicks){
     return Queue_SetDelay((QueueIdx *)st->slab, delayTicks);
 }
 
-void *Queue_Add(Queue *q, Abstract *value){
+QueueIdx *Queue_Add(Queue *q, Abstract *value){
     if(value == NULL){
         return NULL;
     }
@@ -37,21 +37,21 @@ void *Queue_Add(Queue *q, Abstract *value){
 
     if(st->slab == NULL){
         int nextIdx = q->span.max_idx+1;
-        return Span_Set((Span *)q, nextIdx, (Abstract *)&qidx); 
+        return (QueueIdx *)Span_Set((Span *)q, nextIdx, (Abstract *)&qidx); 
     }else{
         SpanQuery_Setup(sq, (Span *)q, SPAN_OP_SET, sq->idx);
-        return Span_SetFromQ(sq, (Abstract *)&qidx);
+        return (QueueIdx *)Span_SetFromQ(sq, (Abstract *)&qidx);
     }
 }
 
-void *Queue_Remove(Queue *q, int idx){
+status Queue_Remove(Queue *q, int idx){
     SpanQuery *sq = &(q->sq);
     SpanQuery_Setup(sq, (Span *)q, SPAN_OP_REMOVE, idx);
-    void *ptr = Span_SetFromQ(sq, NULL);
-    return ptr;
+    Span_SetFromQ(sq, NULL);
+    return SUCCESS;
 }
 
-void *Queue_Next(Queue *q){
+QueueIdx *Queue_Next(Queue *q){
     if(q->sq.dims != q->span.dims){
         SpanQuery_Refresh(&(q->sq));
     }
@@ -127,7 +127,7 @@ final:
     }
 }
 
-void *Queue_Make(MemCtx *m, GetDelayFunc getDelay){
+Queue *Queue_Make(MemCtx *m, GetDelayFunc getDelay){
     Queue *q = MemCtx_Alloc(m, sizeof(Queue));
     /* copied from span.c */
     q->span.m = m;

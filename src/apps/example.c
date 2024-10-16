@@ -43,6 +43,7 @@ status Example_Complete(Handler *h, Req *req, Serve *sctx){
         printf("\n");
     }
     h->type.state |= SUCCESS;
+    req->type.state |= END;
     return h->type.state;
 }
 
@@ -53,6 +54,7 @@ Handler *Example_getHandler(Serve *sctx, Req *req){
     Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Setup, NULL));
     Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Recieve, NULL));
     Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Respond, NULL));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Complete, NULL));
 
     return startHandler;
 }

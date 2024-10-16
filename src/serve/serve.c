@@ -49,45 +49,11 @@ static int openPortToFd(int port){
     return fd;
 }
 
-static status Serve_CloseReq(Serve *sctx, Req *req){
-#ifdef LINUX
-    status r = Serve_EpollEvRemove(sctx, req);
-#else
-    status r = SUCCESS;
-#endif
-    if(r == SUCCESS){
-        close(req->fd);
-        MemCtx_Free(req->m);
-        return SUCCESS;
-    }
-    return r;
-}
-
-status Serve_Respond(Serve *sctx, Req *req){
-    /*
-    if(req->out.cursor->state != COMPLETE){
-        SCursor_Prepare(req->out.cursor, SERV_WRITE_SIZE); 
-        size_t l = write(req->fd, req->out.cursor->seg->bytes, req->out.cursor->position);
-        status r = SCursor_Incr(req->out.cursor, l);
-        if(r == COMPLETE){
-            req->state = COMPLETE;
-        }
-    }
-
-    if(req->out.cursor->position >= req->out.response->length){
-        req->state = COMPLETE;
-    }
-    */
-
-    return req->type.state;
-}
-
-status Serve_EnQueue(Serve *sctx, Req *req, int fd, int flags){
-#ifdef LINUX
-    return Serve_EpollEvAdd(sctx, req, fd, flags);
-#else
+status Serve_CloseReq(Serve *sctx, Req *req, int idx){
+    Queue_Remove(sctx->queue, idx);
+    close(req->fd);
+    MemCtx_Free(req->m);
     return SUCCESS;
-#endif
 }
 
 status Serve_AcceptRound(Serve *sctx){
@@ -100,62 +66,75 @@ status Serve_AcceptRound(Serve *sctx){
             printf("\n");
         }
         Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
+        req->fd = new_fd;
         req->handler = sctx->def->getHandler(sctx, req);
         if(DEBUG_SERVE){
             Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
             printf("\n");
         }
-        status r = Serve_EnQueue(sctx, req, new_fd, 0); 
+        Queue_Add(sctx->queue, (Abstract *)req); 
         return req->type.state;
     }
 
     return NOOP;
 }
 
-status ServeReq_Handle(Serve *sctx, Req *req){
-    sctx->active = req;
-    if(DEBUG_REQ){
-        Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
-        printf("\n");
-    }
-
-    Handler *h = Handler_Get(req->handler);
-#if LINUX
-    int direction = req->direction;
-#endif
-    status hstate = h->type.state & (SUCCESS|ERROR);
-    if(hstate != 0){
-        if(DEBUG_REQ){
-            Debug_Print((void *)req, 0, "ServeReq_Handle(END): ", DEBUG_REQ, FALSE);
-            printf("\n");
-        }
-        req->type.state |= hstate|END;
-    }else{
-        h->func(h, req, sctx);
-    }
-
-#if LINUX
-    if(req->direction != -1 && direction != req->direction){
-        Serve_EpollEvUpdate(sctx, req, req->direction);
-    }
-#endif
-
-    return req->type.state;
-}
-
 status Serve_ServeRound(Serve *sctx){
-#ifdef LINUX
-    return Serve_Epoll(sctx);
-#else
-    return SUCCESS;
-#endif
+    status r = READY;
+    Queue *q = sctx->queue;
+
+    if(sctx->queue->span.nvalues == 0){
+        return NOOP;
+    }
+
+    while(TRUE){
+        QueueIdx *qidx = Queue_Next(sctx->queue);
+        if((q->span.type.state & END) != 0 || (r & ERROR) != 0){
+            q->span.type.state &= ~END;
+            break;
+        }
+
+        if(qidx == NULL || qidx->item == NULL){
+            Error("bad req from queue");
+            continue;
+        }
+
+        Req *req = (Req *)qidx->item;
+        sctx->active = req;
+
+        if((req->type.state & (END|ERROR)) != 0){
+            int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
+            Log(logStatus, "Served %s - mem: %ld", req->proto->toLog(req), MemCount());
+            r |= Serve_CloseReq(sctx, req, q->sq.idx);
+        }else{
+            if(DEBUG_REQ){
+                Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
+                printf("\n");
+            }
+
+            Handler *h = Handler_Get(req->handler);
+            status hstate = h->type.state & (SUCCESS|ERROR);
+            if(hstate != 0){
+                if(DEBUG_REQ){
+                    Debug_Print((void *)req, 0, "ServeReq_Handle(END): ", DEBUG_REQ, FALSE);
+                    printf("\n");
+                }
+                req->type.state |= hstate|END;
+            }else{
+                if(DEBUG_REQ){
+                    printf("\x1b[%dm   calling handler %s\x1b[0m\n", DEBUG_REQ, State_ToString(h->type.state));
+                }
+                h->func(h, req, sctx);
+            }
+            r |= req->type.state;
+        }
+    }
+
+    return r;
 }
 
 status Serve_Stop(Serve *sctx){
     close(sctx->socket_fd);
-#ifdef LINUX
-    close(sctx->epoll_fd);
-#endif
     return SUCCESS;
 }
 
@@ -163,15 +142,6 @@ status Serve_PreRun(Serve *sctx, int port){
     int fd = openPortToFd(port);
     sctx->port = port;
     sctx->socket_fd = fd;
-
-#ifdef LINUX
-	int epoll_fd =  epoll_create1(0);
-	if (epoll_fd == -1) {
-		Fatal("Failed to create epoll file descriptor\n", TYPE_SERVECTX);
-		return ERROR;
-	}
-    sctx->epoll_fd = epoll_fd;
-#endif
 
     sctx->serving = TRUE;
     return SUCCESS;
@@ -199,5 +169,6 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->m = m;
     sctx->def = def;
+    sctx->queue = Queue_Make(sctx->m, def->getDelay);
     return sctx;
 }

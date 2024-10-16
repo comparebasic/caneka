@@ -19,7 +19,7 @@ static util Hash_Abstract(Abstract *a){
 }
 
 static util Hash_MemPair(MemPair *mp){
-    return Hash_Bytes(mp, sizeof(MemPair));
+    return Hash_Bytes((byte *)mp, sizeof(MemPair));
 }
 
 static util Hash_Match(Abstract *a){
