@@ -1,6 +1,22 @@
 #include <external.h>
 #include <caneka.h>
 
+char *HttpProto_MethodToChars(int methodIdx){
+    if(methodIdx == HTTP_METHOD_GET){
+        return "GET";
+    }else if(methodIdx == HTTP_METHOD_GET){
+        return "POST";
+    }else if(methodIdx == HTTP_METHOD_GET){
+        return "UPDATE";
+    }else if(methodIdx == HTTP_METHOD_GET){
+        return "SET";
+    }else if(methodIdx == HTTP_METHOD_GET){
+        return "DELETE";
+    }
+    return "UNKNOWN_method";
+}
+
+
 word pathDef[] = {
     PAT_TERM|PAT_NO_CAPTURE,' ',' ', 
     PAT_KO,' ',' ', 
@@ -43,20 +59,9 @@ word endDef[] = {
 };
 
 static status method(Roebling *rbl){
-    Lookup *lk = Lookup_Make(rbl->m, HTTP_METHOD_GET, NULL, NULL); 
-    Lookup_Add(rbl->m, lk, HTTP_METHOD_GET, 
-         (void *)String_Make(rbl->m, bytes("GET")));
-    Lookup_Add(rbl->m, lk, HTTP_METHOD_POST, 
-         (void *)String_Make(rbl->m, bytes("POST")));
-    Lookup_Add(rbl->m, lk, HTTP_METHOD_UPDATE, 
-         (void *)String_Make(rbl->m, bytes("UPDATE")));
-    Lookup_Add(rbl->m, lk, HTTP_METHOD_SET, 
-         (void *)String_Make(rbl->m, bytes("SET")));
-    Lookup_Add(rbl->m, lk, HTTP_METHOD_DELETE, 
-         (void *)String_Make(rbl->m, bytes("DELETE")));
- 
+    HttpProto *proto = (HttpProto *)rbl->source;
     Roebling_ResetPatterns(rbl);
-    return Roebling_SetLookup(rbl, lk, HTTP_METHOD, -1); 
+    return Roebling_SetLookup(rbl, proto->methods, HTTP_METHOD, -1); 
 }
 
 static status path(Roebling *rbl){
@@ -93,10 +98,11 @@ static status headerValue(Roebling *rbl){
     return r;
 }
 
-static status httpParser_Capture(word captureKey, String *s, Abstract *source){
+static status httpParser_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
+
     if(DEBUG_HTTP){
         printf("%d\n", captureKey);
-        Debug_Print(s, 0, "Captured: ", DEBUG_XML, TRUE);
+        Debug_Print(s, 0, "Captured: ", DEBUG_HTTP, TRUE);
         printf("\n");
     }
 

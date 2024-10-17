@@ -13,7 +13,7 @@ enum rbl_test_marks {
     RBL_TEST_END,
 };
 
-static status Found(word captureKey, String *s, Abstract *source){
+static status Found(word captureKey, int matchIdx, String *s, Abstract *source){
     if(DEBUG_ROEBLING){
         Debug_Print((void *)s, 0, "found s: ", COLOR_YELLOW, TRUE);
         printf("\n");

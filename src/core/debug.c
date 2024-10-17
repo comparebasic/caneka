@@ -103,6 +103,9 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                         if(def->itemSize == sizeof(int)){
                             printf("%u", (int)n);
                         }else{
+                            if(def->typeOf == TYPE_TABLE){
+                               Debug_Print((void *)a, TYPE_HASHED, "", color, FALSE); 
+                           }
                         }
                     }else{
                         if(t->type.of != 0){

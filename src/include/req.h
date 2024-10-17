@@ -23,3 +23,4 @@ status Req_Recv(Serve *sctx, Req *req);
 status Req_Respond(Serve *sctx, Req *req);
 status Req_Handle(Serve *sctx, Req *req);
 status Req_Process(Serve *sctx, Req *req);
+status Req_SetResponse(Req *req, int code, Span *headers, String *body);

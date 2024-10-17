@@ -28,6 +28,20 @@ status Example_Recieve(Handler *h, Req *req, Serve *sctx){
     return h->type.state;
 }
 
+status Example_Process(Handler *h, Req *req, Serve *sctx){
+    if(DEBUG_EXAMPLE_HANDLERS){
+        Debug_Print((void *)req, 0, "Processing: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
+        printf("\n");
+    }
+    String *response = String_Init(req->m, STRING_EXTEND);
+    String_AddBytes(req->m, response, bytes("Hi, you requested: "), strlen("Hi, you requested: "));
+    String_Add(req->m, response, ((HttpProto *)req->proto)->path);
+
+    h->type.state |= Req_SetResponse(req, 200, NULL, response);
+    
+    return h->type.state;
+}
+
 status Example_Respond(Handler *h, Req *req, Serve *sctx){
     if(DEBUG_EXAMPLE_HANDLERS){
         Debug_Print((void *)req, 0, "Responding: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
@@ -43,7 +57,7 @@ status Example_Complete(Handler *h, Req *req, Serve *sctx){
         printf("\n");
     }
     h->type.state |= SUCCESS;
-    req->type.state |= END;
+    req->type.state |= END|SUCCESS;
     return h->type.state;
 }
 
@@ -53,6 +67,7 @@ Handler *Example_getHandler(Serve *sctx, Req *req){
     startHandler->prior = Span_Make(m, TYPE_SPAN); 
     Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Setup, NULL));
     Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Recieve, NULL));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Process, NULL));
     Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Respond, NULL));
     Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Complete, NULL));
 

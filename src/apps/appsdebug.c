@@ -31,8 +31,9 @@ static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void HttpProto_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     HttpProto *proto = (HttpProto *)as(a, TYPE_HTTP_PROTO);
-    printf("\x1b[%dmHttpProto< %s", color, proto->path != NULL ? (char *)String_ToEscaped(DebugM, proto->path)->bytes : "");
+    printf("\x1b[%dmHttpProto<%s path='%s' ", color, HttpProto_MethodToChars(proto->method), proto->path != NULL ? (char *)String_ToEscaped(DebugM, proto->path)->bytes : "");
     Debug_Print(proto->body, 0, "body=", color, TRUE);
+    Debug_Print(proto->headers_tbl, 0, " headers=", color, TRUE);
     printf("\x1b[%dm>\x1b[0m", color);
 }
 

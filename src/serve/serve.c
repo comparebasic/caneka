@@ -104,7 +104,7 @@ status Serve_ServeRound(Serve *sctx){
 
         if((req->type.state & (END|ERROR)) != 0){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
-            Log(logStatus, "Served %s - mem: %ld", req->proto->toLog(req), MemCount());
+            Log(logStatus, "Served %s - mem: %ld/%ld", req->proto->toLog(req), MemCtx_Used(req->m), MemCount());
             r |= Serve_CloseReq(sctx, req, q->sq.idx);
         }else{
             if(DEBUG_REQ){

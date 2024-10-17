@@ -1,5 +1,5 @@
 typedef status (*RblFunc)(struct roebling *rbl);
-typedef status (*RblCaptureFunc)(word captureKey, String *s, Abstract *source);
+typedef status (*RblCaptureFunc)(word captureKey, int matchIdx, String *s, Abstract *source);
 
 enum mark_reserved {
     LOOP_MARK = 0,

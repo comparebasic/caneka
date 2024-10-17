@@ -24,8 +24,11 @@ static String *packageError(MemCtx *m, String *content){
 }
 
 status Req_Respond(Serve *sctx, Req *req){
-    char *fakeOk = "HTTP/1.2 200 OK\r\nContent-Length: 2\r\nContent-Type: text/plain\r\n\r\nok";
-    size_t l = write(req->fd, fakeOk, strlen(fakeOk));
+    if(req->out.response == NULL){
+        return ERROR;
+    }else{
+        size_t l = write(req->fd, req->out.response->bytes, req->out.response->length);
+    }
     return SUCCESS;
 }
 

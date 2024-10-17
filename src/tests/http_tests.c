@@ -32,7 +32,7 @@ void setTestCapture(TestCapture *capture){
     position = 0;
 }
 
-static status testHttpParser_Capture(word captureKey, String *s, Abstract *source){
+static status testHttpParser_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     if(DEBUG_HTTP){
         printf("%d\n", captureKey);
         Debug_Print(s, 0, "TestCaptured: ", DEBUG_HTTP, TRUE);
@@ -81,7 +81,9 @@ status Http_Tests(MemCtx *gm){
         "\r\n"
     ));
 
-    Roebling *rbl = HttpParser_Make(m, s, NULL);
+    ProtoDef *def = (ProtoDef *)HttpProtoDef_Make(m);
+    Proto *proto = HttpProto_Make(m, def);
+    Roebling *rbl = HttpParser_Make(m, s, (Abstract *)proto);
     rbl->capture = testHttpParser_Capture;
 
     setTestCapture(expected1);

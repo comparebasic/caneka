@@ -98,7 +98,7 @@ static status postAttName(Roebling *rbl){
     return r; 
 }
 
-static status xmlParser_Capture(word captureKey, String *s, Abstract *source){
+static status xmlParser_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     status r = READY;
     XmlCtx *ctx = (XmlCtx *)source;
     if(captureKey == XML_CAPTURE_OPEN){

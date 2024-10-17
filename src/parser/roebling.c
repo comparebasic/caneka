@@ -205,7 +205,8 @@ status Roebling_RunCycle(Roebling *rbl){
             }
         }
         String *s = Range_Copy(rbl->m, &(rbl->range));
-        rbl->capture(mt->captureKey, s, rbl->source);
+        int matchIdx = Roebling_GetMatchIdx(rbl);
+        rbl->capture(mt->captureKey, matchIdx, s, rbl->source);
     }
         
     return rbl->type.state;

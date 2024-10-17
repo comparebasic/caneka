@@ -14,6 +14,13 @@ void *Lookup_Get(Lookup *lk, word type){
     return result;
 }
 
+int Lookup_GetKey(Lookup *lk, int idx){
+    if(idx <= lk->values->max_idx){
+        return lk->offset+idx;
+    }
+    return -1;
+}
+
 word Lookup_AbsFromIdx(Lookup *lk, word idx){
     return idx+lk->offset;
 }

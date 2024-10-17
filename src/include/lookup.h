@@ -19,3 +19,4 @@ void *Lookup_Get(Lookup *lk, word type);
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value);
 word Lookup_AbsFromIdx(Lookup *lk, word idx);
 Lookup *Lookup_FromConfig(MemCtx *m, LookupConfig *config, Abstract *arg);
+int Lookup_GetKey(Lookup *lk, int idx);
