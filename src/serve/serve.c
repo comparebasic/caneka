@@ -169,6 +169,9 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->m = m;
     sctx->def = def;
-    sctx->queue = Queue_Make(sctx->m, def->getDelay);
+    Span *q = Span_Make(m, TYPE_QUEUE_SPAN);
+    sctx->getDelay = def->getDelay;
+    SpanQuery_Setup(&(sctx->queue), q, SPAN_OP_SET, 0);
+    SpanQuery_Setup(&(sctx->available), q, SPAN_OP_SET, 0);
     return sctx;
 }

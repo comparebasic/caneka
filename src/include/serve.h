@@ -17,7 +17,9 @@
 typedef struct serve_ctx {
     Type type;
     MemCtx *m;
-    Queue *queue;
+    SpanQuery queue;
+    SpanQuery available;
+    GetDelayFunc getDelay;
     int socket_fd;
     int port;
     boolean serving;
