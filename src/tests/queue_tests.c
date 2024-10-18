@@ -17,7 +17,9 @@ status Queue_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
-    Queue *q = Queue_Make(m, exampleDelayTicks);
+    Span *p = Span_Make(m, TYPE_QUEUE_SPAN);
+    SpanQuery q;
+    SpanQuery_Setup(&q, p, SPAN_OP_SET, 0);
     String *zero = String_Make(m, bytes("zero"));
     String *one = String_Make(m, bytes("one"));
     String *two = String_Make(m, bytes("two"));
@@ -43,40 +45,40 @@ status Queue_Tests(MemCtx *gm){
     
     String *midwest = String_Make(m, bytes("midwest"));
 
-    Queue_Add(q, (Abstract *)zero);
-    Queue_Add(q, (Abstract *)one);
-    Queue_Add(q, (Abstract *)two);
-    Queue_Remove(q, 1);
+    Queue_Add(&q, (Abstract *)zero);
+    Queue_Add(&q, (Abstract *)one);
+    Queue_Add(&q, (Abstract *)two);
+    Queue_Remove(&q, 1);
 
-    Queue_Add(q, (Abstract *)six);
+    Queue_Add(&q, (Abstract *)six);
 
     QueueIdx *qidx = NULL;
-    qidx = Span_Get((Span *)q, 1);
+    qidx = Span_Get(q.span, 1);
     r |= Test(qidx->item == six, "six has replaed idx 1");
 
-    Queue_Add(q, (Abstract *)thirtySeven);
-    Queue_Add(q, (Abstract *)sevenHundred);
-    Queue_Add(q, (Abstract *)dog);
-    Queue_Add(q, (Abstract *)cat);
-    Queue_Add(q, (Abstract *)bear);
-    Queue_Add(q, (Abstract *)panda);
-    Queue_Add(q, (Abstract *)donkey);
-    Queue_Add(q, (Abstract *)poodle);
-    Queue_Add(q, (Abstract *)carrot);
-    Queue_Add(q, (Abstract *)pinnaple);
-    Queue_Add(q, (Abstract *)kangaroo);
-    Queue_Add(q, (Abstract *)iowa);
-    Queue_Add(q, (Abstract *)indiana);
-    Queue_Add(q, (Abstract *)idaho);
-    Queue_Add(q, (Abstract *)idaOhiOwa);
-    Queue_Add(q, (Abstract *)newYork);
-    Queue_Add(q, (Abstract *)beach);
-    Queue_Add(q, (Abstract *)ocean);
+    Queue_Add(&q, (Abstract *)thirtySeven);
+    Queue_Add(&q, (Abstract *)sevenHundred);
+    Queue_Add(&q, (Abstract *)dog);
+    Queue_Add(&q, (Abstract *)cat);
+    Queue_Add(&q, (Abstract *)bear);
+    Queue_Add(&q, (Abstract *)panda);
+    Queue_Add(&q, (Abstract *)donkey);
+    Queue_Add(&q, (Abstract *)poodle);
+    Queue_Add(&q, (Abstract *)carrot);
+    Queue_Add(&q, (Abstract *)pinnaple);
+    Queue_Add(&q, (Abstract *)kangaroo);
+    Queue_Add(&q, (Abstract *)iowa);
+    Queue_Add(&q, (Abstract *)indiana);
+    Queue_Add(&q, (Abstract *)idaho);
+    Queue_Add(&q, (Abstract *)idaOhiOwa);
+    Queue_Add(&q, (Abstract *)newYork);
+    Queue_Add(&q, (Abstract *)beach);
+    Queue_Add(&q, (Abstract *)ocean);
 
-    Queue_Remove(q, 17);
-    Queue_Add(q, (Abstract *)midwest);
+    Queue_Remove(&q, 17);
+    Queue_Add(&q, (Abstract *)midwest);
 
-    qidx = Span_Get((Span *)q, 17);
+    qidx = Span_Get(q.span, 17);
     r |= Test(qidx->item == midwest, "midwest has replaed idx 17");
 
     MemCtx_Free(m);
@@ -88,31 +90,36 @@ status QueueNext_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
-    Queue *q = Queue_Make(m, exampleDelayTicks);
+    Span *p = Span_Make(m, TYPE_QUEUE_SPAN);
+    SpanQuery q;
+    SpanQuery_Setup(&q, p, SPAN_OP_SET, 0);
+    SpanQuery avail;
+    SpanQuery_Setup(&avail, p, SPAN_OP_SET, 0);
     String *s = NULL;
     int max = 67;
     int count = 0;
     for (int i = 0; i < max; i++){
         s = all109_s[i];
-        Queue_Add(q, (Abstract *)s);
+        Queue_Add(&avail, (Abstract *)s);
         count++;
     }
-    r |= Test(q->span.nvalues == max, "Expect queue to have 67 values, have %d\n", q->span.nvalues);
+    r |= Test(q.span->nvalues == max, "Expect queue to have 67 values, have %d\n", q.span->nvalues);
     
     QueueIdx *qidx = NULL;
 
-    qidx = Queue_Next(q);
+
+    qidx = Queue_Next(&q);
     s = (String *)qidx->item;
     r |= Test(s == zero_s, "Expect first item to be zero_s, have %s\n", (char *)s->bytes);
 
-    qidx = Queue_Next(q);
+    qidx = Queue_Next(&q);
     s = (String *)qidx->item;
     r |= Test(s == one_s, "Expect second item to be one_s, have %s\n", (char *)s->bytes);
 
     int i = 2;
     while(TRUE){
-        qidx = Queue_Next(q);
-        if((q->span.type.state & END) != 0 || (r & ERROR) != 0){
+        qidx = Queue_Next(&q);
+        if((q.type.state & END) != 0 || (r & ERROR) != 0){
             break;
         }
         s = (String *)qidx->item;
@@ -130,7 +137,11 @@ status QueueMixed_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
-    Queue *q = Queue_Make(m, exampleDelayTicks);
+    Span *p = Span_Make(m, TYPE_QUEUE_SPAN);
+    SpanQuery q;
+    SpanQuery_Setup(&q, p, SPAN_OP_SET, 0);
+    SpanQuery avail;
+    SpanQuery_Setup(&avail, p, SPAN_OP_SET, 0);
     String *s = NULL;
     int max = 8;
     int gap = 21;
@@ -142,22 +153,22 @@ status QueueMixed_Tests(MemCtx *gm){
 
     for (; i < max2; i++){
         s = all109_s[i];
-        Queue_Add(q, (Abstract *)s);
+        Queue_Add(&avail, (Abstract *)s);
     }
-    r |= Test(q->span.nvalues == max2, "Expect queue to have 8 values, have %d", q->span.nvalues);
+    r |= Test(q.span->nvalues == max2, "Expect queue to have 8 values, have %d", q.span->nvalues);
 
     i = max;
     for (; i < gap; i++){
-        Queue_Remove(q, i);
+        Queue_Remove(&avail, i);
     }
-    r |= Test(q->span.nvalues == total, "Expect queue to have 23 values, have %d", q->span.nvalues);
+    r |= Test(q.span->nvalues == total, "Expect queue to have 23 values, have %d", q.span->nvalues);
     
     QueueIdx *qidx = NULL;
 
     i = 0;
     while(TRUE){
-        qidx = Queue_Next(q);
-        if((q->span.type.state & END) != 0 || (r & ERROR) != 0){
+        qidx = Queue_Next(&q);
+        if((q.type.state & END) != 0 || (r & ERROR) != 0){
             break;
         }
         s = (String *)qidx->item;

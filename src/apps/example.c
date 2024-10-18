@@ -47,7 +47,7 @@ status Example_Respond(Handler *h, Req *req, Serve *sctx){
         Debug_Print((void *)req, 0, "Responding: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
         printf("\n");
     }
-    h->type.state |= (Req_Respond(sctx, req) & (SUCCESS|ERROR));
+    h->type.state |= Req_Respond(sctx, req) & (SUCCESS|ERROR);
     return h->type.state;
 }
 

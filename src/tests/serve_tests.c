@@ -76,6 +76,8 @@ status ServeHandle_Tests(MemCtx *gm){
     r |= Test(h->func == Example_Recieve, "Req has the second handler set");
 
     Serve_ServeRound(sctx);
+    Serve_ServeRound(sctx);
+    Serve_ServeRound(sctx);
     r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
 
     Serve_Stop(sctx);
@@ -113,6 +115,7 @@ status ServeChunked_Tests(MemCtx *gm){
     r |= Test(!HasFlag(req->in.rbl->type.state, SUCCESS), "Req Roebling does not have state SUCCESS yet, have %s", State_ToString(req->in.rbl->type.state));
 
     send(sock, reqEnd_cstr, strlen(reqEnd_cstr), 0);
+    Serve_ServeRound(sctx);
     Serve_ServeRound(sctx);
     r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
 

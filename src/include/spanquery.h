@@ -1,3 +1,11 @@
+enum span_ops {
+    SPAN_OP_GET = 1,
+    SPAN_OP_SET = 2,
+    SPAN_OP_REMOVE = 3,
+    SPAN_OP_RESERVE = 4,
+    SPAN_OP_RESIZE = 5,
+};
+
 typedef struct span_state {
     void *slab;
     word flags; /* active, full, etc. */
@@ -24,3 +32,4 @@ typedef struct span_query {
 SpanState * SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset);
 SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim);
 status SpanQuery_Refresh(SpanQuery *sq);
+void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, int idx);

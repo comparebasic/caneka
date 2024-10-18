@@ -50,7 +50,7 @@ static int openPortToFd(int port){
 }
 
 status Serve_CloseReq(Serve *sctx, Req *req, int idx){
-    Queue_Remove(sctx->queue, idx);
+    Queue_Remove(&(sctx->queue), idx);
     close(req->fd);
     MemCtx_Free(req->m);
     return SUCCESS;
@@ -60,19 +60,22 @@ status Serve_AcceptRound(Serve *sctx){
     int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
     if(new_fd > 0){
         fcntl(new_fd, F_SETFL, O_NONBLOCK);
-
-        if(DEBUG_SERVE){
-            Debug_Print(sctx->def, 0, "Accept proto: ", DEBUG_SERVE, TRUE);
-            printf("\n");
-        }
         Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
         req->fd = new_fd;
         req->handler = sctx->def->getHandler(sctx, req);
         if(DEBUG_SERVE){
+            Debug_Print(sctx->def, 0, "Accept proto: ", DEBUG_SERVE, TRUE);
+            printf("\n");
+        }
+        if(DEBUG_SERVE){
             Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
             printf("\n");
         }
-        Queue_Add(sctx->queue, (Abstract *)req); 
+        if(DEBUG_SERVE_ACCEPT){
+            Debug_Print(sctx, 0, "Accept Serve: ", DEBUG_SERVE_ACCEPT, TRUE);
+            printf("\n");
+        }
+        Queue_Add(&(sctx->queue), (Abstract *)req); 
         return req->type.state;
     }
 
@@ -81,16 +84,20 @@ status Serve_AcceptRound(Serve *sctx){
 
 status Serve_ServeRound(Serve *sctx){
     status r = READY;
-    Queue *q = sctx->queue;
+    SpanQuery *q = &(sctx->queue);
 
-    if(sctx->queue->span.nvalues == 0){
+    if(q->span->nvalues == 0){
         return NOOP;
     }
 
     while(TRUE){
-        QueueIdx *qidx = Queue_Next(sctx->queue);
-        if((q->span.type.state & END) != 0 || (r & ERROR) != 0){
-            q->span.type.state &= ~END;
+        QueueIdx *qidx = Queue_Next(q);
+        if(DEBUG_SERVE_ROUNDS){
+            Debug_Print(sctx, 0, "Round Serve: ", DEBUG_SERVE_ROUNDS, TRUE);
+            printf("\n");
+        }
+        if((q->type.state & END) != 0 || (r & ERROR) != 0){
+            q->type.state &= ~END;
             break;
         }
 
@@ -105,7 +112,7 @@ status Serve_ServeRound(Serve *sctx){
         if((req->type.state & (END|ERROR)) != 0){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
             Log(logStatus, "Served %s - mem: %ld/%ld", req->proto->toLog(req), MemCtx_Used(req->m), MemCount());
-            r |= Serve_CloseReq(sctx, req, q->sq.idx);
+            r |= Serve_CloseReq(sctx, req, q->idx);
         }else{
             if(DEBUG_REQ){
                 Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
@@ -167,6 +174,7 @@ status Serve_Run(Serve *sctx, int port){
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
+    sctx->type.of = TYPE_SERVECTX;
     sctx->m = m;
     sctx->def = def;
     Span *q = Span_Make(m, TYPE_QUEUE_SPAN);

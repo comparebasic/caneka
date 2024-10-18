@@ -14,10 +14,10 @@ status Queue_SetDelay(void *sl, quad delayTicks){
 }
 
 status Queue_Update(SpanQuery *q, int idx, byte dim, quad delayTicks){
-    if(q.idx != idx && q->dims != dim){
+    if(q->idx != idx && q->dims != dim){
         /* requery */
-        SpanQuery_Setup(&(q), (Span *)q, SPAN_OP_SET, idx);
-        Span_Query(&(q));
+        SpanQuery_Setup(q, q->span, SPAN_OP_SET, idx);
+        Span_Query(q);
     }
 
     SpanState *st = SpanQuery_StateByDim(q, dim);
@@ -35,31 +35,31 @@ QueueIdx *Queue_Add(SpanQuery *q, Abstract *value){
     SpanState *st = q->nextAvailable;
 
     if(st->slab == NULL){
-        int nextIdx = q->span.max_idx+1;
-        return (QueueIdx *)Span_Set((Span *)q, nextIdx, (Abstract *)&qidx); 
+        int nextIdx = q->span->max_idx+1;
+        return (QueueIdx *)Span_Set(q->span, nextIdx, (Abstract *)&qidx); 
     }else{
-        SpanQuery_Setup(q, (Span *)q, SPAN_OP_SET, q->idx);
+        SpanQuery_Setup(q, q->span, SPAN_OP_SET, q->idx);
         return (QueueIdx *)Span_SetFromQ(q, (Abstract *)&qidx);
     }
 }
 
 status Queue_Remove(SpanQuery *q, int idx){
-    SpanQuery_Setup(q, (Span *)q, SPAN_OP_REMOVE, idx);
+    SpanQuery_Setup(q, q->span, SPAN_OP_REMOVE, idx);
     Span_SetFromQ(q, NULL);
     return SUCCESS;
 }
 
 QueueIdx *Queue_Next(SpanQuery *q){
-    if(q->dims != q->dims){
+    if(q->dims != q->span->dims){
         SpanQuery_Refresh(q);
     }
     SpanState *st = q->stack;
-    if((q->span.type.state & PROCESSING) == 0){
-        q->span.type.state |= PROCESSING;
+    if((q->type.state & PROCESSING) == 0){
         SpanQuery_Setup(q, q->span, SPAN_OP_GET, 0);
+        q->type.state |= PROCESSING;
         status r = Span_Query(q);
         if((r & SUCCESS) == 0){
-            q->span.type.state |= ERROR;
+            q->type.state |= ERROR;
             return NULL;
         }
         return Span_GetFromQ(q);
@@ -80,21 +80,21 @@ outer:
                     printf("\n");
                 }
                 if(dim == 0){
-                    if(*((util *)Slab_valueAddr(st->slab, q->span.def, st->localIdx)) != 0){
+                    if(*((util *)Slab_valueAddr(st->slab, q->span->def, st->localIdx)) != 0){
                         goto final;
                     }
                     goto outer;
                 }else{
                     while(TRUE){
                         SpanQuery_SetStack(q, dim, 0, 0);
-                        if(Slab_nextSlotPtr(st->slab, q->span.def, st->localIdx) != NULL){
+                        if(Slab_nextSlotPtr(st->slab, q->span->def, st->localIdx) != NULL){
                             while(dim >= 1){
                                 dim--;
                                 SpanQuery_SetStack(q, dim, 0, 0);
                             }
                             dim = 0;
                             st = SpanQuery_StateByDim(q, dim);
-                            if(*((util *)Slab_valueAddr(st->slab, q->span.def, st->localIdx)) != 0){
+                            if(*((util *)Slab_valueAddr(st->slab, q->span->def, st->localIdx)) != 0){
                                 goto final;
                             }
                             goto outer;
@@ -116,8 +116,8 @@ final:
         }
 
         if(q->idx > q->span->max_idx){
-            q->span.type.state |= END;
-            q->span.type.state &= ~PROCESSING;
+            q->type.state |= END;
+            q->type.state &= ~PROCESSING;
             return NULL;
         }else{
             return Span_GetFromQ(q);

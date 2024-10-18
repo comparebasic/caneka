@@ -25,14 +25,6 @@ enum span_flags {
     _SLAB_MAX = 1 << 15,
 };
 
-enum span_ops {
-    SPAN_OP_GET = 1,
-    SPAN_OP_SET = 2,
-    SPAN_OP_REMOVE = 3,
-    SPAN_OP_RESERVE = 4,
-    SPAN_OP_RESIZE = 5,
-};
-
 typedef void *(*SpanDefFunc)(MemCtx *m, struct span_def *def);
 typedef void *(*SpanAddrFunc)(struct span_query *sq);
 
@@ -85,7 +77,6 @@ void *Span_valueSlab_Make(MemCtx *m, SpanDef *def);
 void *Span_idxSlab_Make(MemCtx *m, SpanDef *def);
 void *Span_reserve(struct span_query *sq);
 
-void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, int idx);
 status Span_GrowToNeeded(struct span_query *sq);
 void *Span_SetFromQ(struct span_query *sq, Abstract *t);
 void *Span_GetFromQ(struct span_query *sq);

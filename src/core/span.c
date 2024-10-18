@@ -265,7 +265,7 @@ status Span_Extend(SpanQuery *sq){
         Fatal("localIdx greater than stride", p->type.of);
     }
 
-    sq->type.state = SUCCESS;
+    sq->type.state |= SUCCESS;
     return sq->type.state;
 }
 

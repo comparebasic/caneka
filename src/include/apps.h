@@ -3,6 +3,7 @@
 
 enum proto_types {
     _TYPE_APPS_START = _TYPE_CORE_END,
+    TYPE_SERVECTX,
     TYPE_REQ,
     TYPE_PROTO,
     TYPE_PROTODEF,

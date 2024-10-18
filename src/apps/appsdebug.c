@@ -18,6 +18,14 @@ static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean exten
     printf(">\x1b[0m");
 }
 
+static void Serve_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Serve *sctx = (Serve *) as(a, TYPE_SERVECTX);
+    printf("\x1b[%dm%sServe<%s", color, msg, State_ToString(sctx->type.state));
+    Debug_Print((void *)&(sctx->queue), 0, " next=", color, extended);
+    Debug_Print((void *)&(sctx->available), 0, " available", color, extended);
+    printf(">\x1b[0m");
+}
+
 static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     XmlCtx *ctx = (XmlCtx *)as(a, TYPE_XMLCTX);
     if(extended){
@@ -50,6 +58,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
+    r |= Lookup_Add(m, lk, TYPE_SERVECTX, (void *)Serve_Print);
     return r;
 }
 
