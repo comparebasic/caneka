@@ -34,7 +34,7 @@ status Req_Respond(Serve *sctx, Req *req){
 
 status Req_Recv(Serve *sctx, Req *req){
     byte buff[SERV_READ_SIZE];
-    ssize_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
+    ssize_t l = read(req->fd, buff, SERV_READ_SIZE);
     status r = NOOP;
     if(l > 0){
         Roebling_AddBytes(req->in.rbl, buff, l);
