@@ -21,7 +21,6 @@ typedef struct span_query {
     struct span *span;
     /* end SpanState */
     SpanState stack[MAX_DIMS+1];
-    SpanState nextAvailable[MAX_DIMS+1];
     int idx;
     Abstract *value;
     byte op;

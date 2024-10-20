@@ -17,9 +17,9 @@ status Queue_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
-    Span *p = Span_Make(m, TYPE_QUEUE_SPAN);
-    SpanQuery q;
-    SpanQuery_Setup(&q, p, SPAN_OP_SET, 0);
+    Queue q;
+    Queue_Init(m, &q, exampleDelayTicks);
+
     String *zero = String_Make(m, bytes("zero"));
     String *one = String_Make(m, bytes("one"));
     String *two = String_Make(m, bytes("two"));
@@ -51,6 +51,8 @@ status Queue_Tests(MemCtx *gm){
     Queue_Remove(&q, 1);
 
     Queue_Add(&q, (Abstract *)six);
+    Debug_Print((void *)&q, 0, "Queue: ", COLOR_PURPLE, FALSE);
+    fflush(stdout);
 
     QueueIdx *qidx = NULL;
     qidx = Span_Get(q.span, 1);
@@ -90,17 +92,15 @@ status QueueNext_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
-    Span *p = Span_Make(m, TYPE_QUEUE_SPAN);
-    SpanQuery q;
-    SpanQuery_Setup(&q, p, SPAN_OP_SET, 0);
-    SpanQuery avail;
-    SpanQuery_Setup(&avail, p, SPAN_OP_SET, 0);
+    Queue q;
+    Queue_Init(m, &q, exampleDelayTicks);
+
     String *s = NULL;
     int max = 67;
     int count = 0;
     for (int i = 0; i < max; i++){
         s = all109_s[i];
-        Queue_Add(&avail, (Abstract *)s);
+        Queue_Add(&q, (Abstract *)s);
         count++;
     }
     r |= Test(q.span->nvalues == max, "Expect queue to have 67 values, have %d\n", q.span->nvalues);
@@ -137,11 +137,9 @@ status QueueMixed_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
-    Span *p = Span_Make(m, TYPE_QUEUE_SPAN);
-    SpanQuery q;
-    SpanQuery_Setup(&q, p, SPAN_OP_SET, 0);
-    SpanQuery avail;
-    SpanQuery_Setup(&avail, p, SPAN_OP_SET, 0);
+    Queue q;
+    Queue_Init(m, &q, exampleDelayTicks);
+
     String *s = NULL;
     int max = 8;
     int gap = 21;
@@ -153,13 +151,13 @@ status QueueMixed_Tests(MemCtx *gm){
 
     for (; i < max2; i++){
         s = all109_s[i];
-        Queue_Add(&avail, (Abstract *)s);
+        Queue_Add(&q, (Abstract *)s);
     }
     r |= Test(q.span->nvalues == max2, "Expect queue to have 8 values, have %d", q.span->nvalues);
 
     i = max;
     for (; i < gap; i++){
-        Queue_Remove(&avail, i);
+        Queue_Remove(&q, i);
     }
     r |= Test(q.span->nvalues == total, "Expect queue to have 23 values, have %d", q.span->nvalues);
     

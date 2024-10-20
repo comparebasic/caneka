@@ -84,7 +84,7 @@ status Serve_AcceptRound(Serve *sctx){
 
 status Serve_ServeRound(Serve *sctx){
     status r = READY;
-    SpanQuery *q = &(sctx->queue);
+    Queue *q = &sctx->queue;
 
     if(q->span->nvalues == 0){
         return NOOP;
@@ -112,7 +112,7 @@ status Serve_ServeRound(Serve *sctx){
         if((req->type.state & (END|ERROR)) != 0){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
             Log(logStatus, "Served %s - mem: %ld/%ld", req->proto->toLog(req), MemCtx_Used(req->m), MemCount());
-            r |= Serve_CloseReq(sctx, req, q->idx);
+            r |= Serve_CloseReq(sctx, req, q->current.idx);
         }else{
             if(DEBUG_REQ){
                 Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
@@ -177,9 +177,6 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     sctx->type.of = TYPE_SERVECTX;
     sctx->m = m;
     sctx->def = def;
-    Span *q = Span_Make(m, TYPE_QUEUE_SPAN);
-    sctx->getDelay = def->getDelay;
-    SpanQuery_Setup(&(sctx->queue), q, SPAN_OP_SET, 0);
-    SpanQuery_Setup(&(sctx->available), q, SPAN_OP_SET, 0);
+    Queue_Init(m, &sctx->queue, def->getDelay);
     return sctx;
 }

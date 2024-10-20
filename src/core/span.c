@@ -59,11 +59,6 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             }
         }
         if(sq->op == SPAN_OP_REMOVE){
-            memcpy(sq->nextAvailable, sq->stack, sizeof(sq->stack));
-        }else{
-            memset(sq->nextAvailable, 0, sizeof(sq->stack));
-        }
-        if(t == NULL){
             p->nvalues--;
         }else{
             p->nvalues++;

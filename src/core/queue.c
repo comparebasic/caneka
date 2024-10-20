@@ -1,79 +1,90 @@
 #include <external.h>
 #include <caneka.h>
 
-status Queue_SetDelay(void *sl, quad delayTicks){
-    int dim = 0;
-    QueueIdx *qidx = (QueueIdx *)sl;
-    while(qidx != NULL){
-        if(qidx->delayTicks == 0 || delayTicks < qidx->delayTicks){
-            qidx->delayTicks = delayTicks;
-        }
-        qidx++;
-    }
+status Queue_SetDelay(SpanQuery *sq, quad delayTicks){
     return SUCCESS;
 }
 
-status Queue_Update(SpanQuery *q, int idx, byte dim, quad delayTicks){
-    if(q->idx != idx && q->dims != dim){
-        /* requery */
-        SpanQuery_Setup(q, q->span, SPAN_OP_SET, idx);
-        Span_Query(q);
+status Queue_Update(Queue *q, int idx, byte dim, quad delayTicks){
+    if(q->current.idx != idx || q->span->dims != dim){
+        SpanQuery_Setup(&q->current, q->span, SPAN_OP_SET, idx);
+        Span_Query(&q->current);
     }
 
-    SpanState *st = SpanQuery_StateByDim(q, dim);
-
-    return Queue_SetDelay((QueueIdx *)st->slab, delayTicks);
+    return Queue_SetDelay(&q->current, delayTicks);
 }
 
-QueueIdx *Queue_Add(SpanQuery *q, Abstract *value){
+QueueIdx *Queue_Add(Queue *q, Abstract *value){
     if(value == NULL){
         return NULL;
     }
 
     QueueIdx qidx;
     qidx.item = value;
-    SpanState *st = q->nextAvailable;
+    SpanState *st = (SpanState *)&q->available.stack;
 
     if(st->slab == NULL){
         int nextIdx = q->span->max_idx+1;
+        if(DEBUG_QUEUE){
+            printf("\x1b[%dmAdding to %d\x1b[%dm\n", DEBUG_QUEUE, nextIdx, DEBUG_QUEUE);
+        }
         return (QueueIdx *)Span_Set(q->span, nextIdx, (Abstract *)&qidx); 
     }else{
-        SpanQuery_Setup(q, q->span, SPAN_OP_SET, q->idx);
-        return (QueueIdx *)Span_SetFromQ(q, (Abstract *)&qidx);
+        q->available.op = SPAN_OP_SET;
+        if(DEBUG_QUEUE){
+            printf("\x1b[%dmAdding to open slot %d\x1b[%dm\n", DEBUG_QUEUE, q->current.idx, DEBUG_QUEUE);
+        }
+        QueueIdx *ptr = (QueueIdx *)Span_SetFromQ(&q->available, (Abstract *)&qidx);
+        memset(&q->available, 0, sizeof(SpanQuery));
+        return ptr;
     }
 }
 
-status Queue_Remove(SpanQuery *q, int idx){
-    SpanQuery_Setup(q, q->span, SPAN_OP_REMOVE, idx);
-    Span_SetFromQ(q, NULL);
+status Queue_Remove(Queue *q, int idx){
+    if(DEBUG_QUEUE){
+        printf("Removing idx %d\n", idx);
+        Debug_Print((void *)q, 0, "Queue: %s\n", DEBUG_QUEUE, TRUE);
+        printf("\n");
+    }
+    SpanQuery_Setup(&q->available, q->span, SPAN_OP_REMOVE, idx);
+    Span_SetFromQ(&q->available, NULL);
+    if(DEBUG_QUEUE){
+        printf("Removed idx %d\n", idx);
+        Debug_Print((void *)&q->available, 0, "Freshly removed: ", COLOR_PURPLE, TRUE);
+        printf("\n");
+    }
     return SUCCESS;
 }
 
-QueueIdx *Queue_Next(SpanQuery *q){
-    if(q->dims != q->span->dims){
-        SpanQuery_Refresh(q);
+QueueIdx *Queue_Next(Queue *q){
+    if(DEBUG_QUEUE){
+        Debug_Print((void *)q, 0, "Queue_Next called:", DEBUG_QUEUE, FALSE);
     }
-    SpanState *st = q->stack;
+    if(q->current.dims != q->span->dims){
+        SpanQuery_Setup(&q->current, q->span, SPAN_OP_REMOVE, q->current.idx);
+    }
+
+    SpanState *st = (SpanState *)&q->current.stack;
     if((q->type.state & PROCESSING) == 0){
-        SpanQuery_Setup(q, q->span, SPAN_OP_GET, 0);
+        SpanQuery_Setup(&q->current, q->span, SPAN_OP_GET, 0);
         q->type.state |= PROCESSING;
-        status r = Span_Query(q);
+        status r = Span_Query(&q->current);
         if((r & SUCCESS) == 0){
             q->type.state |= ERROR;
             return NULL;
         }
-        return Span_GetFromQ(q);
+        return Span_GetFromQ(&q->current);
     }else{
         byte dim = 0;
 outer:
-        while(q->idx <= q->span->max_idx){
+        while(q->current.idx <= q->span->max_idx){
             int maxIdx = q->span->def->stride;
             if(st->dim != 0){
                 maxIdx = q->span->def->idxStride;
             }
             if(st->localIdx+1 < maxIdx){
                 st->localIdx++;
-                q->idx++;
+                q->current.idx++;
                 if(DEBUG_QUEUE){
                     printf("\x1b[%dmincr dim:%d\n", DEBUG_QUEUE, dim);
                     Debug_Print((void *)q, 0, "Underneith: ", DEBUG_QUEUE, TRUE);
@@ -86,20 +97,20 @@ outer:
                     goto outer;
                 }else{
                     while(TRUE){
-                        SpanQuery_SetStack(q, dim, 0, 0);
+                        SpanQuery_SetStack(&q->current, dim, 0, 0);
                         if(Slab_nextSlotPtr(st->slab, q->span->def, st->localIdx) != NULL){
                             while(dim >= 1){
                                 dim--;
-                                SpanQuery_SetStack(q, dim, 0, 0);
+                                SpanQuery_SetStack(&q->current, dim, 0, 0);
                             }
                             dim = 0;
-                            st = SpanQuery_StateByDim(q, dim);
+                            st = SpanQuery_StateByDim(&q->current, dim);
                             if(*((util *)Slab_valueAddr(st->slab, q->span->def, st->localIdx)) != 0){
                                 goto final;
                             }
                             goto outer;
                         }
-                        q->idx += st->increment;
+                        q->current.idx += st->increment;
                     }
                 }
                 goto final;
@@ -115,12 +126,25 @@ final:
             printf("\n");
         }
 
-        if(q->idx > q->span->max_idx){
+        if(q->current.idx > q->span->max_idx){
+            if(DEBUG_QUEUE){
+                Debug_Print((void *)q, 0, "END: ", DEBUG_QUEUE, TRUE);
+            }
             q->type.state |= END;
             q->type.state &= ~PROCESSING;
             return NULL;
         }else{
-            return Span_GetFromQ(q);
+            return Span_GetFromQ(&q->current);
         }
     }
+}
+
+status Queue_Init(MemCtx *m, Queue *q, GetDelayFunc getDelay){
+    memset(q, 0, sizeof(Queue));
+    q->type.of = TYPE_QUEUE;
+    q->span = Span_Make(m, TYPE_QUEUE_SPAN);;
+    SpanQuery_Setup(&q->current, q->span, SPAN_OP_SET, 0); 
+    memset(&q->available, 0, sizeof(SpanQuery)); 
+    q->getDelay = getDelay;
+    return SUCCESS;
 }

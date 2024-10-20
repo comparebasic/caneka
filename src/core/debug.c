@@ -56,6 +56,22 @@ void spanState_Print(SpanState *st, int color){
     printf("\x1b[%dmST<%p localIdx:%hu increment:%d offset:%hu dim:%d>\x1b[0m", color, st->slab, st->localIdx, st->increment, st->offset, st->dim);
 }
 
+void Queue_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Queue *q = as(a, TYPE_QUEUE);
+    printf("\x1b[%dm%sQ<%s\x1b[0m", color, msg, State_ToString(q->type.state));
+    if(extended){
+        Debug_Print((void *)q->span, 0, "", color, TRUE);
+        printf("\n");
+        Debug_Print((void *)&q->current, 0, "current=", color, FALSE);
+        printf("\n");
+        Debug_Print((void *)&q->available, 0, "available=", color, FALSE);
+        printf("\n");
+        printf("\x1b[%dm>\x1b[0m", color);
+    }else{
+        printf("\x1b[%dm values:%d current:%d available:%d>\x1b[0m", color, q->span->nvalues, q->current.idx, q->available.idx);
+    }
+}
+
 void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SpanState *st = (SpanState *)a;
     printf("\x1b[%dm%s", color, msg);
@@ -576,6 +592,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
+    r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
     return r;
 }
 

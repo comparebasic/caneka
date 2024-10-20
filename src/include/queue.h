@@ -10,9 +10,20 @@ typedef struct queue_idx {
     quad delayTicks; 
 } QueueIdx;
 
+typedef struct queue {
+    Type type;
+    Span *span;
+    SpanQuery current;
+    SpanQuery available;
+    GetDelayFunc getDelay;
+} Queue;
+
+status Queue_Init(MemCtx *m, Queue *q, GetDelayFunc getDelay);
+
 char *QueueFlags_ToChars(word flags);
 Span *Queue_Make(MemCtx *m, GetDelayFunc getDelay);
-QueueIdx *Queue_Set(SpanQuery *q, int idx, void *value, quad delayTicks);
-QueueIdx *Queue_Add(SpanQuery *q, Abstract *value);
-QueueIdx *Queue_Next(SpanQuery *q);
-status Queue_Remove(SpanQuery *q, int idx);
+QueueIdx *Queue_Set(Queue *q, int idx, void *value, quad delayTicks);
+QueueIdx *Queue_Add(Queue *q, Abstract *value);
+QueueIdx *Queue_Next(Queue *q);
+status Queue_SetDelay(SpanQuery *sq, quad delayTicks);
+status Queue_Remove(Queue *q, int idx);
