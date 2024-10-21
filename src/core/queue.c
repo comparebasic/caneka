@@ -77,13 +77,14 @@ QueueIdx *Queue_Next(Queue *q){
     }else{
         byte dim = 0;
 outer:
-        while(q->current.idx <= q->span->max_idx){
+        while(dim <= q->span->dims){
             int maxIdx = q->span->def->stride;
             if(st->dim != 0){
                 maxIdx = q->span->def->idxStride;
             }
             if(st->localIdx+1 < maxIdx){
                 st->localIdx++;
+                printf("localIdx:%d vs maxIdx:%d\n", st->localIdx, maxIdx);
                 q->current.idx++;
                 if(DEBUG_QUEUE){
                     printf("\x1b[%dmincr dim:%d\n", DEBUG_QUEUE, dim);
@@ -97,19 +98,21 @@ outer:
                     goto outer;
                 }else{
                     while(TRUE){
-                        SpanQuery_SetStack(&q->current, dim, 0, 0);
                         if(Slab_nextSlotPtr(st->slab, q->span->def, st->localIdx) != NULL){
                             while(dim >= 1){
                                 dim--;
                                 SpanQuery_SetStack(&q->current, dim, 0, 0);
                             }
                             dim = 0;
-                            st = SpanQuery_StateByDim(&q->current, dim);
-                            if(*((util *)Slab_valueAddr(st->slab, q->span->def, st->localIdx)) != 0){
+                            Debug_Print((void *)st, TYPE_SPAN_STATE, "Span State at verify: ", COLOR_PURPLE, TRUE);
+                            printf("\n");
+                            fflush(stdout);
+                            if((st->slab != NULL) && *((util *)Slab_valueAddr(st->slab, q->span->def, st->localIdx)) != 0){
                                 goto final;
                             }
                             goto outer;
                         }
+                        printf("skip at %d dim:%d\n", q->current.idx, dim);
                         q->current.idx += st->increment;
                     }
                 }
@@ -118,7 +121,10 @@ outer:
             st->localIdx = 0;
             st++;
             dim++;
-
+            printf("up dim:%d\n", dim);
+            Debug_Print((void *)st, TYPE_SPAN_STATE, "up: ", COLOR_PURPLE, TRUE);
+            Debug_Print((void *)q, 0, "q: ", COLOR_PURPLE, TRUE);
+            printf("\n");
         }
 final:
         if(DEBUG_QUEUE){
@@ -126,7 +132,7 @@ final:
             printf("\n");
         }
 
-        if(q->current.idx > q->span->max_idx){
+        if(dim > q->span->dims){
             if(DEBUG_QUEUE){
                 Debug_Print((void *)q, 0, "END: ", DEBUG_QUEUE, TRUE);
             }
