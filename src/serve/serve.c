@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static void delay(){
+void Delay(){
     struct timespec ts = {
         ROUND_DELAY_SEC,
         ROUND_DELAY_TVSEC,
@@ -164,7 +164,7 @@ status Serve_Run(Serve *sctx, int port){
                 cadance = ACCEPT_CADANCE;
             }
             Serve_ServeRound(sctx);
-            delay();
+            Delay();
         }
 
         return SUCCESS;

@@ -1,7 +1,5 @@
 #include <mock_109strings.h>
 
-#define TEST_PORT 1200
-
 status Core_Tests(MemCtx *gm);
 status String_Tests(MemCtx *gm);
 status Serve_Tests(MemCtx *gm);
@@ -29,4 +27,3 @@ status Queue_Tests(MemCtx *gm);
 status QueueNext_Tests(MemCtx *gm);
 status QueueMixed_Tests(MemCtx *gm);
 
-status Tests_Init(MemCtx *m);

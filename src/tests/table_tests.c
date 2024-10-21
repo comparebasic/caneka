@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <testsuite.h>
 
 char *values[] = {
     "Alpha", "Apples",

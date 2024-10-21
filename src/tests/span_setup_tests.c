@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <testsuite.h>
 
 static void _Debug(Span *p, char *msg){
     printf("%sP<%dx(idx:%d)>\n", msg, p->def->stride, p->def->idxStride);

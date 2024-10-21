@@ -1,28 +1,12 @@
 #include <external.h>
 #include <caneka.h>
-#include <testsuite.h>
 #include <example.h>
 
 static char *sid = "Azjfhuei3";
 static char *req_cstr = "GET /Azjfhuei3 HTTP/1.1\r\nContent-Length: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
 
-static int testConnect(){
-	struct sockaddr_in server;
-	int incoming_sc = socket(AF_INET , SOCK_STREAM, 0);
-	server.sin_addr.s_addr = inet_addr("0.0.0.0");
-	server.sin_family = AF_INET;
-	server.sin_port = htons( TEST_PORT );
-
-    int r = connect(incoming_sc , (struct sockaddr *)&server , sizeof(server));
-    if(r == 0){
-        fcntl(incoming_sc, F_SETFL, O_NONBLOCK);
-        return incoming_sc;
-    }else{
-        printf("Error connecting to test socket %s\n", strerror(errno));
-        close(incoming_sc);
-        return -1;
-    }
-}
+static char *req1_cstr = "GET /Azjfhuei3 HTTP/1.1\r\nContent-Leng";  
+static char *req2_cstr = "th: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
 
 status Serve_Tests(MemCtx *gm){
     status r = TEST_OK;
@@ -34,12 +18,27 @@ status Serve_Tests(MemCtx *gm){
     
     r |=  Serve_PreRun(sctx, TEST_PORT);
 
-    int sock = testConnect();
+    ReqTestSpec specs[] = {
+        {0, NULL, 0,  1, 0},
+        {TEST_SEND, req_cstr, strlen(req_cstr), 1, 0},
+        {TEST_SERVE_END, NULL, 0, 0,  0}
+    };
+    int child = ServeTests_ForkRequest(m, "Connect test", specs);
+    Delay();
+    Delay();
+    Delay();
+    Delay();
+    Delay();
+    Delay();
     Serve_AcceptRound(sctx);
-    r |= Test(sock >= 0, "Expect socket to connect has fd %d", sock);
-    send(sock, req_cstr, strlen(req_cstr), 0);
+    Delay();
+    Delay();
     Serve_ServeRound(sctx);
-    close(sock);
+
+    int st = 0;
+    pid_t pid = waitpid(child, &st, 0);
+    int code = WEXITSTATUS(st);
+    r |= Test(code == 0, "Proc %d existed with status %d", pid, code);
 
     Serve_Stop(sctx);
     MemCtx_Free(m);
@@ -58,9 +57,13 @@ status ServeHandle_Tests(MemCtx *gm){
     
     r |=  Serve_PreRun(sctx, TEST_PORT);
 
-    int sock = testConnect();
-    int code = 0;
-    send(sock, req_cstr, strlen(req_cstr), 0);
+    ReqTestSpec specs[] = {
+        {TEST_SEND, req_cstr, strlen(req_cstr), 1, 0},
+        {TEST_SERVE_END, NULL, 0, 0,  0}
+    };
+    int child = ServeTests_ForkRequest(m, "Handler test", specs);
+    Delay();
+    Delay();
     Serve_AcceptRound(sctx);
 
     Serve_ServeRound(sctx);
@@ -79,6 +82,11 @@ status ServeHandle_Tests(MemCtx *gm){
     Serve_ServeRound(sctx);
     r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
 
+    int st = 0;
+    pid_t pid = waitpid(child, &st, 0);
+    int code = WEXITSTATUS(st);
+    r |= Test(code == 0, "Proc %d existed with status %d", pid, code);
+
     Serve_Stop(sctx);
 
     MemCtx_Free(m);
@@ -87,7 +95,6 @@ status ServeHandle_Tests(MemCtx *gm){
 
 status ServeChunked_Tests(MemCtx *gm){
     status r = TEST_OK;
-    /*
     MemCtx *m = MemCtx_Make();
 
     Handler *h = NULL;
@@ -98,8 +105,15 @@ status ServeChunked_Tests(MemCtx *gm){
     
     r |=  Serve_PreRun(sctx, TEST_PORT);
 
-    int sock = testConnect();
-    send(sock, reqStart_cstr, strlen(reqStart_cstr), 0);
+    ReqTestSpec specs[] = {
+        {TEST_SEND, req1_cstr, strlen(req1_cstr), 0, 0},
+        {TEST_DELAY_ONLY, NULL, 0, 5, 0},
+        {TEST_SEND, req2_cstr, strlen(req2_cstr), 0, 0},
+        {TEST_SERVE_END, NULL, 0, 0,  0}
+    };
+    int child = ServeTests_ForkRequest(m, "Chunked test", specs);
+    Delay();
+    Delay();
     Serve_AcceptRound(sctx);
 
     Serve_ServeRound(sctx);
@@ -109,19 +123,29 @@ status ServeChunked_Tests(MemCtx *gm){
     h = Handler_Current(req->handler);
     r |= Test(h->func == Example_Setup, "Req has the first handler set");
 
+    Delay();
     Serve_ServeRound(sctx);
     h = Handler_Current(req->handler);
     r |= Test(h->func == Example_Recieve, "Req has the second handler set");
     r |= Test(!HasFlag(req->in.rbl->type.state, SUCCESS), "Req Roebling does not have state SUCCESS yet, have %s", State_ToString(req->in.rbl->type.state));
 
-    send(sock, reqEnd_cstr, strlen(reqEnd_cstr), 0);
+    Delay();
+    Delay();
+    Delay();
+    Delay();
+    Delay();
+    Delay();
     Serve_ServeRound(sctx);
     Serve_ServeRound(sctx);
     r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
 
+    int st = 0;
+    pid_t pid = waitpid(child, &st, 0);
+    int code = WEXITSTATUS(st);
+    r |= Test(code == 0, "Proc %d existed with status %d", pid, code);
+
     Serve_Stop(sctx);
 
     MemCtx_Free(m);
-    */
     return r;
 }

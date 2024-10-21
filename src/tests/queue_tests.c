@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <testsuite.h>
 
 static quad exampleDelayTicks(status r){
     if(r == SUCCESS){

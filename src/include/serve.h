@@ -33,3 +33,4 @@ status Serve_NextState(Serve *sctx, struct serve_req *req);
 status Serve_AcceptRound(Serve *sctx);
 status Serve_ServeRound(Serve *sctx);
 status Serve_CloseReq(Serve *sctx, struct serve_req *req, int idx);
+void Delay();

@@ -48,6 +48,7 @@ extern int DEBUG_SERVE;
 extern int DEBUG_SERVE_ACCEPT;
 extern int DEBUG_SERVE_ROUNDS;
 extern int DEBUG_REQ;
+extern int DEBUG_REQ_RECV;
 extern int DEBUG_EXAMPLE_HANDLERS;
 extern int DEBUG_QUEUE;
 

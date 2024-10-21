@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <testsuite.h>
 
 char *longCstr = "" \
    "A ponytail is a hairstyle in which some, most, or all of the hair on the head is pulled away from the face, gathered and secured at the back of the head with a hair tie, clip, or other similar accessory and allowed to hang freely from that point. It gets its name from its resemblance to the tail of a pony." \
