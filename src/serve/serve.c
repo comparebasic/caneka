@@ -52,34 +52,53 @@ static int openPortToFd(int port){
 status Serve_CloseReq(Serve *sctx, Req *req, int idx){
     Queue_Remove(&(sctx->queue), idx);
     close(req->fd);
+    sctx->metrics.open--;
+    if((req->type.state & ERROR) != 0){
+        sctx->metrics.error++;
+    }else{
+        sctx->metrics.served++;
+    }
     MemCtx_Free(req->m);
     return SUCCESS;
 }
 
 status Serve_AcceptRound(Serve *sctx){
-    int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
-    if(new_fd > 0){
-        fcntl(new_fd, F_SETFL, O_NONBLOCK);
-        Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
-        req->fd = new_fd;
-        req->handler = sctx->def->getHandler(sctx, req);
-        if(DEBUG_SERVE){
-            Debug_Print(sctx->def, 0, "Accept proto: ", DEBUG_SERVE, TRUE);
-            printf("\n");
+    status r = READY;
+    int count = ACCEPT_AT_ONEC_MAX;
+    while(count-- > 0){
+        int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
+        if(new_fd > 0){
+            if(DEBUG_SERVE_ACCEPT){
+                printf("\x1b[%dmAccepted request\n\x1b[0m", DEBUG_SERVE_ACCEPT);
+            }
+            
+            sctx->metrics.open++;
+            fcntl(new_fd, F_SETFL, O_NONBLOCK);
+            Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
+            req->fd = new_fd;
+            req->handler = sctx->def->getHandler(sctx, req);
+            if(DEBUG_SERVE){
+                Debug_Print(sctx->def, 0, "Accept proto: ", DEBUG_SERVE, TRUE);
+                printf("\n");
+            }
+            if(DEBUG_SERVE){
+                Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
+                printf("\n");
+            }
+            /*
+            if(DEBUG_SERVE_ACCEPT){
+                Debug_Print(sctx, 0, "Accept Serve: ", DEBUG_SERVE_ACCEPT, TRUE);
+                printf("\n");
+            }
+            */
+            Queue_Add(&(sctx->queue), (Abstract *)req); 
+            r |= req->type.state;
+        }else{
+            break;
         }
-        if(DEBUG_SERVE){
-            Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
-            printf("\n");
-        }
-        if(DEBUG_SERVE_ACCEPT){
-            Debug_Print(sctx, 0, "Accept Serve: ", DEBUG_SERVE_ACCEPT, TRUE);
-            printf("\n");
-        }
-        Queue_Add(&(sctx->queue), (Abstract *)req); 
-        return req->type.state;
     }
 
-    return NOOP;
+    return r;
 }
 
 status Serve_ServeRound(Serve *sctx){

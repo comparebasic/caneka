@@ -34,6 +34,7 @@ status Req_Respond(Serve *sctx, Req *req){
 
 status Req_Recv(Serve *sctx, Req *req){
     byte buff[SERV_READ_SIZE];
+    buff[0] = '\0';
     ssize_t l = recv(req->fd, buff, SERV_READ_SIZE, 0);
     if(DEBUG_REQ_RECV){
         printf("\x1b[%dmRecv: %ld \x1b[1;%dm'%s'\x1b[0m\n", DEBUG_REQ_RECV, l, DEBUG_REQ_RECV, buff);

@@ -5,6 +5,7 @@
 #define EPOLL_WAIT 10
 #define ROUND_DELAY_SEC 0 
 #define ROUND_DELAY_TVSEC 5000000
+#define ACCEPT_AT_ONEC_MAX 8 
 
 #ifdef LINUX
     #define SOCK_OUT EPOLLOUT
@@ -23,6 +24,14 @@ typedef struct serve_ctx {
     boolean serving;
     ProtoDef *def;
     struct serve_req *active;
+    struct {
+        int open;
+        int served;
+        int error;
+        int collected;
+        struct timespec started;
+        int tickNanos;
+    } metrics;
 } Serve;
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def);

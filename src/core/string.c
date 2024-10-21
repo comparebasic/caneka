@@ -12,7 +12,9 @@ static int _String_FromInt(MemCtx *m, int i, byte buff[]){
     int position = MAX_BASE10-1;
     int val;
     byte digit = digits[0];
+    boolean found = FALSE;
     while(i > 0){
+        found = TRUE;
         val = i % base;
         digit = digits[val];
         buff[position] = digit;
@@ -20,6 +22,12 @@ static int _String_FromInt(MemCtx *m, int i, byte buff[]){
         i /= 10;
         position--;
     }
+
+    if(!found){
+        buff[position] = digits[0];
+        position--;
+    }
+
     return position;
 }
 

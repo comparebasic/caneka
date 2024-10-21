@@ -2,9 +2,6 @@
 
 status Core_Tests(MemCtx *gm);
 status String_Tests(MemCtx *gm);
-status Serve_Tests(MemCtx *gm);
-status ServeHandle_Tests(MemCtx *gm);
-status ServeChunked_Tests(MemCtx *gm);
 status Span_Tests(MemCtx *gm);
 status SpanInline_Tests(MemCtx *gm);
 status Hash_Tests(MemCtx *gm);
@@ -26,4 +23,7 @@ status RoeblingStartStop_Tests(MemCtx *gm);
 status Queue_Tests(MemCtx *gm);
 status QueueNext_Tests(MemCtx *gm);
 status QueueMixed_Tests(MemCtx *gm);
-
+status Serve_Tests(MemCtx *gm);
+status ServeHandle_Tests(MemCtx *gm);
+status ServeChunked_Tests(MemCtx *gm);
+status ServeMultiple_Tests(MemCtx *gm);
