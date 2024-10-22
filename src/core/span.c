@@ -20,6 +20,11 @@ int Span_availableByDim(int dims, int stride, int idxStride){
     return r;
 }
 
+int Span_Capacity(Span *p){
+    int increment = Span_availableByDim(p->dims, p->def->stride, p->def->idxStride);
+    return increment * p->def->idxStride;
+}
+
 /* DEBUG */
 
 
@@ -242,6 +247,8 @@ status Span_Extend(SpanQuery *sq){
             SpanState *prev = SpanQuery_StateByDim(sq, dims+1);
             Slab_setSlot(prev->slab, p->def, prev->localIdx, &new_sl, sizeof(void *));
             st->slab = new_sl;
+        }else{
+            sq->queryDim = dims;
         }
 
         /* find or allocate a space for the new span */

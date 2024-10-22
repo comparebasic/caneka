@@ -144,10 +144,10 @@ status ServeChunked_Tests(MemCtx *gm){
     return r;
 }
 
-#define MULTIPLE_COUNT 15
+#define MULTIPLE_COUNT 18
 int atOncePids[MULTIPLE_COUNT] = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,/*0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0/*,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,*/
 };
 
@@ -175,6 +175,7 @@ status ServeMultiple_Tests(MemCtx *gm){
         String_AddBytes(m, s, bytes("Multiple requests "), strlen("Multiple requests "));
         String_Add(m, s, String_FromInt(m, i));
         atOncePids[i] = ServeTests_ForkRequest(m, (char *)s->bytes, specs);
+        printf("forking %d\n",i);
     }
 
     for(int i = 0; i < MULTIPLE_COUNT / 3; i++){

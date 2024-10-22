@@ -75,73 +75,37 @@ QueueIdx *Queue_Next(Queue *q){
         }
         return Span_GetFromQ(&q->current);
     }else{
-        byte dim = 0;
-outer:
-        while(dim <= q->span->dims){
-            int maxIdx = q->span->def->stride;
-            if(st->dim != 0){
-                maxIdx = q->span->def->idxStride;
+        /* Use the Span_GetFromQ function to find the next value, jumping by increment amounts if it finds missing slabs */
+        int maxIdx = Span_Capacity(q->span);
+        while(TRUE){
+            q->current.idx += Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+            if(q->current.idx >= maxIdx){
+                goto end;
             }
-            if(st->localIdx+1 < maxIdx){
-                st->localIdx++;
-                printf("localIdx:%d vs maxIdx:%d\n", st->localIdx, maxIdx);
-                q->current.idx++;
-                if(DEBUG_QUEUE){
-                    printf("\x1b[%dmincr dim:%d\n", DEBUG_QUEUE, dim);
-                    Debug_Print((void *)q, 0, "Underneith: ", DEBUG_QUEUE, TRUE);
-                    printf("\n");
+            while(TRUE){
+                SpanQuery_Setup(&q->current, q->span, SPAN_OP_GET, q->current.idx);
+                if((Span_Query(&q->current) & MISS) == 0){
+                    break;
                 }
-                if(dim == 0){
-                    if(*((util *)Slab_valueAddr(st->slab, q->span->def, st->localIdx)) != 0){
-                        goto final;
-                    }
-                    goto outer;
-                }else{
-                    while(TRUE){
-                        if(Slab_nextSlotPtr(st->slab, q->span->def, st->localIdx) != NULL){
-                            while(dim >= 1){
-                                dim--;
-                                SpanQuery_SetStack(&q->current, dim, 0, 0);
-                            }
-                            dim = 0;
-                            Debug_Print((void *)st, TYPE_SPAN_STATE, "Span State at verify: ", COLOR_PURPLE, TRUE);
-                            printf("\n");
-                            fflush(stdout);
-                            if((st->slab != NULL) && *((util *)Slab_valueAddr(st->slab, q->span->def, st->localIdx)) != 0){
-                                goto final;
-                            }
-                            goto outer;
-                        }
-                        printf("skip at %d dim:%d\n", q->current.idx, dim);
-                        q->current.idx += st->increment;
-                    }
+                /* capture an available slot if we just found one in dim 0*/
+                if(q->current.queryDim == 0 && q->available.stack[0].slab == NULL){
+                    SpanQuery_Setup(&q->available, q->span, SPAN_OP_GET, q->current.idx);
+                    Span_Query(&q->available);
                 }
-                goto final;
+                q->current.idx += Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+                if(q->current.idx >= maxIdx){
+                    goto end;
+                }
             }
-            st->localIdx = 0;
-            st++;
-            dim++;
-            printf("up dim:%d\n", dim);
-            Debug_Print((void *)st, TYPE_SPAN_STATE, "up: ", COLOR_PURPLE, TRUE);
-            Debug_Print((void *)q, 0, "q: ", COLOR_PURPLE, TRUE);
-            printf("\n");
-        }
-final:
-        if(DEBUG_QUEUE){
-            Debug_Print(q, 0, "Queue Next SQ: ", DEBUG_QUEUE, TRUE);
-            printf("\n");
-        }
-
-        if(dim > q->span->dims){
-            if(DEBUG_QUEUE){
-                Debug_Print((void *)q, 0, "END: ", DEBUG_QUEUE, TRUE);
+            QueueIdx *qidx = (QueueIdx *)Span_GetFromQ(&q->current);
+            if(qidx != NULL && qidx->item != NULL){
+               return qidx; 
             }
-            q->type.state |= END;
-            q->type.state &= ~PROCESSING;
-            return NULL;
-        }else{
-            return Span_GetFromQ(&q->current);
         }
+end:
+        q->type.state |= END;
+        q->type.state &= ~PROCESSING;
+        return NULL;
     }
 }
 

@@ -25,6 +25,7 @@ typedef struct span_query {
     Abstract *value;
     byte op;
     byte dims;
+    byte queryDim;
     byte dimsNeeded;
 } SpanQuery; /* sr */
 
