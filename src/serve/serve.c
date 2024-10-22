@@ -62,19 +62,23 @@ status Serve_CloseReq(Serve *sctx, Req *req, int idx){
     return SUCCESS;
 }
 
-status Serve_AcceptRound(Serve *sctx){
-    printf("Accept called\n");
+status Serve_AcceptPoll(Serve *sctx, int delay){
     status r = READY;
-    int count = ACCEPT_AT_ONEC_MAX;
     int new_fd = 0;
-    while(count-- > 0){
+    struct pollfd pfd = {
+        sctx->socket_fd,
+        POLLIN,
+        POLLHUP
+    };
+    int available = min(poll(&pfd, 1, delay), ACCEPT_AT_ONEC_MAX);
+    if(available == -1){
+        LogError("Error connecting to test socket %s\n", strerror(errno));
+    }
+    int accepted = 0;
+    while(available-- > 0){
         new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
-            printf("fd found %d\n", new_fd);
-            if(DEBUG_SERVE_ACCEPT){
-                printf("\x1b[%dmAccepted request\n\x1b[0m", DEBUG_SERVE_ACCEPT);
-            }
-            
+            accepted++;
             sctx->metrics.open++;
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
             Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
@@ -91,12 +95,13 @@ status Serve_AcceptRound(Serve *sctx){
             Queue_Add(&(sctx->queue), (Abstract *)req); 
             r |= req->type.state;
         }else{
-            printf("-1 new_fd\n");
             break;
         }
     }
+
     if(DEBUG_SERVE_ACCEPT){
-        Debug_Print(sctx, 0, "Accept Serve: ", DEBUG_SERVE_ACCEPT, FALSE);
+        printf("\x1b[%dmAccepted %d new connections:", DEBUG_SERVE_ACCEPT, accepted);
+        Debug_Print(sctx, 0, "", DEBUG_SERVE_ACCEPT, FALSE);
         printf("\n");
     }
 
@@ -162,7 +167,6 @@ status Serve_ServeRound(Serve *sctx){
 }
 
 status Serve_Stop(Serve *sctx){
-    printf("closing...\n");
     close(sctx->socket_fd);
     return SUCCESS;
 }
@@ -181,12 +185,11 @@ status Serve_Run(Serve *sctx, int port){
     if(r == SUCCESS){
         int cadance = 0;
         while(sctx->serving){
-            if(cadance-- == 0){
-                Serve_AcceptRound(sctx);
-                cadance = ACCEPT_CADANCE;
-            }
+            int delay = (sctx->queue.count == 0 ? 
+                ACCEPT_LONGDELAY_MILLIS : 
+                ACCEPT_DELAY_MILLIS);
+            Serve_AcceptPoll(sctx, delay);
             Serve_ServeRound(sctx);
-            Delay();
         }
 
         return SUCCESS;

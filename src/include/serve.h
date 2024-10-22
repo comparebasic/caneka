@@ -6,6 +6,8 @@
 #define ROUND_DELAY_SEC 0 
 #define ROUND_DELAY_TVSEC 5000000
 #define ACCEPT_AT_ONEC_MAX 8 
+#define ACCEPT_DELAY_MILLIS 50
+#define ACCEPT_LONGDELAY_MILLIS 5000
 
 #ifdef LINUX
     #define SOCK_OUT EPOLLOUT
@@ -39,7 +41,7 @@ status Serve_PreRun(Serve *sctx, int port);
 status Serve_Run(Serve *sctx, int port);
 status Serve_Stop(Serve *sctx);
 status Serve_NextState(Serve *sctx, struct serve_req *req);
-status Serve_AcceptRound(Serve *sctx);
+status Serve_AcceptPoll(Serve *sctx, int delay);
 status Serve_ServeRound(Serve *sctx);
 status Serve_CloseReq(Serve *sctx, struct serve_req *req, int idx);
 void Delay();

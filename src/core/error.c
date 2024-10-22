@@ -12,6 +12,19 @@ void *Error(char *msg){
     return NULL;
 }
 
+void LogError(char *msg, ...){
+	va_list args;
+    va_start(args, msg);
+    if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+        printf("\x1b[31m");
+    }
+    vprintf(msg, args);
+    if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+        printf("\x1b[0m");
+    }
+    printf("\n");
+}
+
 void ExitError(int code, char *msg, ...){
 	va_list args;
     va_start(args, msg);

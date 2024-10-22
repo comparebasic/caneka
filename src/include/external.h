@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <poll.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <stdarg.h>

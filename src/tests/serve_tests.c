@@ -24,13 +24,7 @@ status Serve_Tests(MemCtx *gm){
         {TEST_SERVE_END, NULL, 0, 0,  0}
     };
     int child = ServeTests_ForkRequest(m, "Connect test", specs);
-    Delay();
-    Delay();
-    Delay();
-    Delay();
-    Delay();
-    Delay();
-    Serve_AcceptRound(sctx);
+    Serve_AcceptPoll(sctx, ACCEPT_LONGDELAY_MILLIS);
     Delay();
     Delay();
     Serve_ServeRound(sctx);
@@ -59,10 +53,9 @@ status ServeHandle_Tests(MemCtx *gm){
         {TEST_SERVE_END, NULL, 0, 0,  0}
     };
     int child = ServeTests_ForkRequest(m, "Handler test", specs);
+    Serve_AcceptPoll(sctx, ACCEPT_LONGDELAY_MILLIS);
     Delay();
     Delay();
-    Serve_AcceptRound(sctx);
-
     Serve_ServeRound(sctx);
     req = sctx->active;
     r |= Test(req != NULL, "active Req is not null");
@@ -109,9 +102,7 @@ status ServeChunked_Tests(MemCtx *gm){
         {TEST_SERVE_END, NULL, 0, 0,  0}
     };
     int child = ServeTests_ForkRequest(m, "Chunked test", specs);
-    Delay();
-    Delay();
-    Serve_AcceptRound(sctx);
+    Serve_AcceptPoll(sctx, ACCEPT_LONGDELAY_MILLIS);
 
     Serve_ServeRound(sctx);
     req = sctx->active;
@@ -177,12 +168,15 @@ status ServeMultiple_Tests(MemCtx *gm){
         atOncePids[i] = ServeTests_ForkRequest(m, (char *)s->bytes, specs);
     }
 
-    for(int i = 0; i < MULTIPLE_COUNT / 3; i++){
-        Delay();
-        Delay();
-        Delay();
-        Delay();
-        Serve_AcceptRound(sctx);
+    int circuit = MULTIPLE_COUNT+5;
+    int i = 0;
+    while(sctx->metrics.open < MULTIPLE_COUNT){
+        if(i > circuit){
+            r |= Test(FALSE, "Too many accept tries");
+            break;
+        }
+        Serve_AcceptPoll(sctx, ACCEPT_DELAY_MILLIS);
+        i++;
     }
 
     r |= Test(sctx->metrics.open == MULTIPLE_COUNT, "Multiple count of %d currently open, have %d", MULTIPLE_COUNT, sctx->metrics.open);
