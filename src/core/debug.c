@@ -30,7 +30,7 @@ int DEBUG_REQ_RECV = 0;
 int DEBUG_EXAMPLE_HANDLERS = 0;
 int DEBUG_QUEUE = 0;
 
-boolean SHOW_SERVE_TESTS = TRUE;
+boolean SHOW_SERVE_TESTS = FALSE;
 
 MemCtx *DebugM = NULL;
 

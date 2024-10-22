@@ -63,12 +63,14 @@ status Serve_CloseReq(Serve *sctx, Req *req, int idx){
 }
 
 status Serve_AcceptRound(Serve *sctx){
+    printf("Accept called\n");
     status r = READY;
     int count = ACCEPT_AT_ONEC_MAX;
     int new_fd = 0;
-    while(count-- > 0 || new_fd > 0){
+    while(count-- > 0){
         new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
+            printf("fd found %d\n", new_fd);
             if(DEBUG_SERVE_ACCEPT){
                 printf("\x1b[%dmAccepted request\n\x1b[0m", DEBUG_SERVE_ACCEPT);
             }
@@ -86,18 +88,16 @@ status Serve_AcceptRound(Serve *sctx){
                 Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
                 printf("\n");
             }
-            /*
-            if(DEBUG_SERVE_ACCEPT){
-                Debug_Print(sctx, 0, "Accept Serve: ", DEBUG_SERVE_ACCEPT, TRUE);
-                printf("\n");
-            }
-            */
             Queue_Add(&(sctx->queue), (Abstract *)req); 
             r |= req->type.state;
         }else{
-            printf("nothing...\n");
+            printf("-1 new_fd\n");
             break;
         }
+    }
+    if(DEBUG_SERVE_ACCEPT){
+        Debug_Print(sctx, 0, "Accept Serve: ", DEBUG_SERVE_ACCEPT, FALSE);
+        printf("\n");
     }
 
     return r;
@@ -107,7 +107,7 @@ status Serve_ServeRound(Serve *sctx){
     status r = READY;
     Queue *q = &sctx->queue;
 
-    if(q->span->nvalues == 0){
+    if(q->count == 0){
         return NOOP;
     }
 
@@ -162,6 +162,7 @@ status Serve_ServeRound(Serve *sctx){
 }
 
 status Serve_Stop(Serve *sctx){
+    printf("closing...\n");
     close(sctx->socket_fd);
     return SUCCESS;
 }

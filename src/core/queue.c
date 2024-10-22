@@ -28,14 +28,21 @@ QueueIdx *Queue_Add(Queue *q, Abstract *value){
         if(DEBUG_QUEUE){
             printf("\x1b[%dmAdding to %d\x1b[%dm\n", DEBUG_QUEUE, nextIdx, DEBUG_QUEUE);
         }
-        return (QueueIdx *)Span_Set(q->span, nextIdx, (Abstract *)&qidx); 
+        QueueIdx *ptr = (QueueIdx *)Span_Set(q->span, nextIdx, (Abstract *)&qidx); 
+        if(ptr != NULL){
+            q->count++;
+        }
+        return ptr;
     }else{
         q->available.op = SPAN_OP_SET;
         if(DEBUG_QUEUE){
             printf("\x1b[%dmAdding to open slot %d\x1b[%dm\n", DEBUG_QUEUE, q->current.idx, DEBUG_QUEUE);
         }
         QueueIdx *ptr = (QueueIdx *)Span_SetFromQ(&q->available, (Abstract *)&qidx);
-        memset(&q->available, 0, sizeof(SpanQuery));
+        if(ptr != NULL){
+            memset(&q->available, 0, sizeof(SpanQuery));
+            q->count++;
+        }
         return ptr;
     }
 }
@@ -53,6 +60,7 @@ status Queue_Remove(Queue *q, int idx){
         Debug_Print((void *)&q->available, 0, "Freshly removed: ", COLOR_PURPLE, TRUE);
         printf("\n");
     }
+    q->count--;
     return SUCCESS;
 }
 

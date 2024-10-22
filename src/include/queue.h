@@ -13,6 +13,7 @@ typedef struct queue_idx {
 typedef struct queue {
     Type type;
     Span *span;
+    int count;
     SpanQuery current;
     SpanQuery available;
     GetDelayFunc getDelay;

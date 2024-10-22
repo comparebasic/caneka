@@ -21,7 +21,11 @@ static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean exten
 static void Serve_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Serve *sctx = (Serve *) as(a, TYPE_SERVECTX);
     printf("\x1b[%dm%sServe<%s", color, msg, State_ToString(sctx->type.state));
-    Debug_Print((void *)&sctx->queue, 0, " next=", color, extended);
+    if(extended){
+        Debug_Print((void *)&sctx->queue, 0, " next=", color, extended);
+    }else{
+        printf(" count:%d", sctx->queue.count);
+    }
     printf(">\x1b[0m");
 }
 

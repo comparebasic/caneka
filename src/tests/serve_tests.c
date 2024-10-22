@@ -175,7 +175,6 @@ status ServeMultiple_Tests(MemCtx *gm){
         String_AddBytes(m, s, bytes("Multiple requests "), strlen("Multiple requests "));
         String_Add(m, s, String_FromInt(m, i));
         atOncePids[i] = ServeTests_ForkRequest(m, (char *)s->bytes, specs);
-        printf("forking %d\n",i);
     }
 
     for(int i = 0; i < MULTIPLE_COUNT / 3; i++){
@@ -183,7 +182,6 @@ status ServeMultiple_Tests(MemCtx *gm){
         Delay();
         Delay();
         Delay();
-        printf("calling accept\n");
         Serve_AcceptRound(sctx);
     }
 
