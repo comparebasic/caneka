@@ -183,6 +183,7 @@ status ServeMultiple_Tests(MemCtx *gm){
         Delay();
         Delay();
         Delay();
+        printf("calling accept\n");
         Serve_AcceptRound(sctx);
     }
 
@@ -197,7 +198,7 @@ status ServeMultiple_Tests(MemCtx *gm){
     }
 
     r |= Test(sctx->metrics.open == 0, "All processes closed, count of 0 currently open, have %d", sctx->metrics.open);
-    r |= Test(sctx->metrics.served == MULTIPLE_COUNT, "Served all count of %d requests, have %d", sctx->metrics.served);
+    r |= Test(sctx->metrics.served == MULTIPLE_COUNT, "Served all count of %d requests, have %d", MULTIPLE_COUNT, sctx->metrics.served);
 
     for(int i = 0; i < MULTIPLE_COUNT; i++){
         r |= TestChild(atOncePids[i]);
