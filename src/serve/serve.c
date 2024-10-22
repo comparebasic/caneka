@@ -65,8 +65,9 @@ status Serve_CloseReq(Serve *sctx, Req *req, int idx){
 status Serve_AcceptRound(Serve *sctx){
     status r = READY;
     int count = ACCEPT_AT_ONEC_MAX;
-    while(count-- > 0){
-        int new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
+    int new_fd = 0;
+    while(count-- > 0 || new_fd > 0){
+        new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
             if(DEBUG_SERVE_ACCEPT){
                 printf("\x1b[%dmAccepted request\n\x1b[0m", DEBUG_SERVE_ACCEPT);
