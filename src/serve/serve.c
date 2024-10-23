@@ -163,6 +163,7 @@ status Serve_ServeRound(Serve *sctx){
         }
     }
 
+    Delay();
     return r;
 }
 
@@ -187,7 +188,7 @@ status Serve_Run(Serve *sctx, int port){
         while(sctx->serving){
             int delay = (sctx->queue.count == 0 ? 
                 ACCEPT_LONGDELAY_MILLIS : 
-                ACCEPT_DELAY_MILLIS);
+                0);
             Serve_AcceptPoll(sctx, delay);
             Serve_ServeRound(sctx);
         }
