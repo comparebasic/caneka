@@ -64,7 +64,7 @@ status Queue_Remove(Queue *q, int idx){
     return SUCCESS;
 }
 
-QueueIdx *Queue_Next(Queue *q){
+QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
     if(DEBUG_QUEUE){
         Debug_Print((void *)q, 0, "Queue_Next called:", DEBUG_QUEUE, FALSE);
     }
@@ -80,6 +80,10 @@ QueueIdx *Queue_Next(Queue *q){
         if((r & SUCCESS) == 0){
             q->type.state |= ERROR;
             return NULL;
+        }
+        if(skip(q->source, 0) > 0){
+            q->current.idx += Span_availableByDim(1, q->span->def->stride, q->span->def->idxStride);
+            return Queue_Next(q, skip); 
         }
         return Span_GetFromQ(&q->current);
     }else{
@@ -100,7 +104,9 @@ QueueIdx *Queue_Next(Queue *q){
                     SpanQuery_Setup(&q->available, q->span, SPAN_OP_GET, q->current.idx);
                     Span_Query(&q->available);
                 }
-                q->current.idx += Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+                while(q->current.idx >= maxIdx && skip(q->source, q->current.idx) <= 0 ){
+                    q->current.idx += Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+                }
                 if(q->current.idx >= maxIdx){
                     goto end;
                 }

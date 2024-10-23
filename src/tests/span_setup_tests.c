@@ -70,7 +70,7 @@ status SpanSetup_Tests(MemCtx *gm){
 
     /* queue */
     p = Span_Make(m, TYPE_QUEUE_SPAN);
-    r |= testSpan(p, "Queue", 1, 2, 16, 32, 256, 512);
+    r |= testSpan(p, "Queue", 1, 2, 16, 16, 256, 256);
 
     /* mini */
     p = Span_Make(m, TYPE_MINI_SPAN);

@@ -2,6 +2,7 @@ typedef struct serve_req {
     Type type;
     MemCtx *m;
     Handler *handler;
+    int queueIdx;
     int fd;
     String *id;
     int direction;

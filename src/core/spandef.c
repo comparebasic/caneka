@@ -7,6 +7,7 @@ static SpanDef span16x32mDef;
 static SpanDef span4kx32mDef;
 static SpanDef span4x16Def;
 static SpanDef spanStringDef;
+static SpanDef spanPollMapDef;
 
 status SpanDef_Init(){
     /* span16 */
@@ -36,11 +37,21 @@ status SpanDef_Init(){
     tableDef.dim_lookups[6] = 0;
     tableDef.dim_lookups[7] = 0;
 
+    /* pollMap */
+    memset(&spanPollMapDef, 0, sizeof(SpanDef));
+    tableDef.typeOf = TYPE_POLL_MAP_SPAN;
+    tableDef.stride = 16;
+    tableDef.idxSize = SPAN_DEFAULT_IDX_SIZE;
+    tableDef.idxStride = SPAN_DEFAULT_STRIDE;
+    tableDef.slotSize = sizeof(struct pollfd)/sizeof(void*);
+    tableDef.itemSize = sizeof(struct pollfd);
+    tableDef.flags = INLINE;
+
     /* span16x32m */
     memset(&span16x32mDef, 0, sizeof(SpanDef));
     span16x32mDef.typeOf = TYPE_QUEUE_SPAN;
     span16x32mDef.stride = 16;
-    span16x32mDef.idxStride = 32;
+    span16x32mDef.idxStride = 16;
     span16x32mDef.idxSize = sizeof(QueueIdx) / SPAN_SLOT_BYTES;
     span16x32mDef.slotSize = span16x32mDef.idxSize;
     span16x32mDef.itemSize = sizeof(QueueIdx);
@@ -98,6 +109,8 @@ SpanDef *SpanDef_FromCls(word cls){
         return &span4kx32mDef;
     }else if(cls == TYPE_STRING_SPAN){
         return &spanStringDef;
+    }else if(cls == TYPE_POLL_MAP_SPAN){
+        return &spanPollMapDef;
     }else{
         /* default to 16 x 16 */
         return &span16Def;

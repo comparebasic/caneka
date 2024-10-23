@@ -62,6 +62,16 @@ status Serve_CloseReq(Serve *sctx, Req *req, int idx){
     return SUCCESS;
 }
 
+status Serve_SetPollFds(Serve *sctx, Req *req){
+    struct pollfd pfd = {
+        sctx->socket_fd,
+        req->handler->direction,
+        POLLHUP
+    };
+    Span_Set(sctx->pollMap, req->queueIdx, &pfd);
+    return SUCCESS;
+}
+
 status Serve_AcceptPoll(Serve *sctx, int delay){
     status r = READY;
     int new_fd = 0;
@@ -93,6 +103,8 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
                 printf("\n");
             }
             Queue_Add(&(sctx->queue), (Abstract *)req); 
+            req->queueIdx = sctx->queue.current.idx;
+            Serve_SetPollFds(sctx, req);
             r |= req->type.state;
         }else{
             break;
@@ -108,6 +120,17 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
     return r;
 }
 
+static int pollSkipSlab(Abstract *source, int idx){
+    Serve *sctx = as(source, TYPE_SERVECTX);
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, sq.span, SPAN_OP_GET, idx);
+    Span_Query(&sq);
+    if(sq->slab != NULL){
+        return poll(sq->slab, sctx->pollMap->def->stride, 0);
+    }
+    return 0;
+}
+
 status Serve_ServeRound(Serve *sctx){
     status r = READY;
     Queue *q = &sctx->queue;
@@ -117,7 +140,10 @@ status Serve_ServeRound(Serve *sctx){
     }
 
     while(TRUE){
-        QueueIdx *qidx = Queue_Next(q);
+        /*
+        user poll on a slab of pollfds here to determine if the whole block should be skipped
+        */
+        QueueIdx *qidx = Queue_Next(q, pollSkipSlab);
         if(DEBUG_SERVE_ROUNDS){
             Debug_Print(sctx, 0, "Round Serve: ", DEBUG_SERVE_ROUNDS, TRUE);
             printf("\n");
@@ -203,6 +229,7 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     sctx->type.of = TYPE_SERVECTX;
     sctx->m = m;
     sctx->def = def;
+    sctx->pollMap = Span_Make(m, TYPE_POLL_MAP_SPAN);
     Queue_Init(m, &sctx->queue, def->getDelay);
     return sctx;
 }

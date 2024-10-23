@@ -13,14 +13,15 @@
     #define SOCK_OUT EPOLLOUT
     #define SOCK_IN EPOLLIN
 #else
-    #define SOCK_IN 1
-    #define SOCK_OUT 2
+    #define SOCK_IN POLLIN
+    #define SOCK_OUT POLLOUT
 #endif
 
 typedef struct serve_ctx {
     Type type;
     MemCtx *m;
     Queue queue;
+    Span *pollMap;
     int socket_fd;
     int port;
     boolean serving;
