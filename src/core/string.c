@@ -31,7 +31,6 @@ static int _String_FromInt(MemCtx *m, int i, byte buff[]){
     return position;
 }
 
-
 String *String_Init(MemCtx *m, int expected){
     size_t sz = sizeof(StringMin);
     cls type = TYPE_STRING_FIXED;

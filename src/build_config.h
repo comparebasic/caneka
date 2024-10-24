@@ -9,7 +9,7 @@
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-    "-DFREEBSD",
+    "-DFREEBSD -DMEM_KEYED",
     NULL
 };
 
@@ -24,7 +24,7 @@ static BuildSubdir coreobj = { "core", {
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 
     "mess.c", "single.c", "debug.c", "abstract.c", "time.c",
-    "queue.c",
+    "queue.c", "memkeyed.c",
     NULL
 }};
 

@@ -43,7 +43,13 @@ void *MemCtx_Alloc(MemCtx *m, size_t s){
         sl = MemSlab_Make(m);
     }
 
-    return MemSlab_Alloc(sl, s); 
+    void *ptr = MemSlab_Alloc(sl, s); 
+#ifdef MEM_KEYED
+    if((m->type.state & TRACKED) != 0){
+        Table_SetValue((Span *)m->instance, ptr);
+    }
+#endif
+    return ptr;
 }
 
 i64 MemCtx_Used(MemCtx *m){

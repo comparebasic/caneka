@@ -44,3 +44,10 @@ void *MemCtx_GetSlab(MemCtx *m, void *addr);
 
 /* utils */
 MemCtx *MemCtx_FromHandle(MemHandle *a);
+
+#ifdef MEM_KEYED
+/* mem-keyed */
+MemCtx *MemKeyed_Make(MemCtx *m){
+status MemKeyed_SetKey(MemCtx *m, Abstract *key);
+status MemKeyed_Alloc(MemCtx *m, Abstract *key);
+#endif
