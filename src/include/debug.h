@@ -46,6 +46,7 @@ extern int DEBUG_XML;
 extern int DEBUG_HTTP;
 extern int DEBUG_SERVE;
 extern int DEBUG_SERVE_ACCEPT;
+extern int DEBUG_SERVE_POLLING;
 extern int DEBUG_SERVE_ROUNDS;
 extern int DEBUG_REQ;
 extern int DEBUG_REQ_RECV;

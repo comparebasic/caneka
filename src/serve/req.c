@@ -48,14 +48,13 @@ status Req_Recv(Serve *sctx, Req *req){
     return NOOP;
 }
 
-Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto, int direction){
+Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto){
     MemCtx *rm = MemCtx_Make();
     Req* req = (Req *)MemCtx_Alloc(rm, sizeof(Req));
     req->type.of = TYPE_REQ;
     req->m = rm;
     req->sctx = sctx;
     req->proto = proto;
-    req->direction = direction;
     req->in.shelf = String_Init(req->m, STRING_EXTEND);
 
     return req;

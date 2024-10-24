@@ -6,7 +6,6 @@ status Example_Setup(Handler *h, Req *req, Serve *sctx){
         Debug_Print((void *)req, 0, "Setup: ", DEBUG_EXAMPLE_HANDLERS, FALSE);
         printf("\n");
     }
-    req->direction = SOCK_IN;
     h->type.state |= SUCCESS;
     return h->type.state;
 }
@@ -18,9 +17,6 @@ status Example_Recieve(Handler *h, Req *req, Serve *sctx){
     }
 
     status r = Req_Recv(sctx, req);
-    if((r & SUCCESS) != 0){
-        req->direction = SOCK_OUT;
-    }
     h->type.state |= (r & (SUCCESS|ERROR));
     if(DEBUG_EXAMPLE_HANDLERS){
         printf("\x1b[%dmRecieved %s\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS, State_ToString(h->type.state));
@@ -63,13 +59,13 @@ status Example_Complete(Handler *h, Req *req, Serve *sctx){
 
 Handler *Example_getHandler(Serve *sctx, Req *req){
     MemCtx *m = req->m;
-    Handler *startHandler = Handler_Make(m, Example_Complete, NULL);
+    Handler *startHandler = Handler_Make(m, Example_Complete, NULL, SOCK_OUT|SOCK_IN);
     startHandler->prior = Span_Make(m, TYPE_SPAN); 
-    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Setup, NULL));
-    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Recieve, NULL));
-    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Process, NULL));
-    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Respond, NULL));
-    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Complete, NULL));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Setup, NULL, SOCK_IN));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Recieve, NULL, SOCK_IN));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Process, NULL, SOCK_OUT));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Respond, NULL, SOCK_OUT));
+    Span_Add(startHandler->prior, (Abstract *)Handler_Make(m, Example_Complete, NULL, SOCK_OUT));
 
     return startHandler;
 }

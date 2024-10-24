@@ -10,4 +10,4 @@ typedef struct handler {
 
 Handler *Handler_Get(Handler *h);
 Handler *Handler_Current(Handler *h);
-Handler *Handler_Make(MemCtx *m, HandleFunc func, Abstract *data);
+Handler *Handler_Make(MemCtx *m, HandleFunc func, Abstract *data, int direction);

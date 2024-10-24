@@ -64,7 +64,7 @@ status Serve_CloseReq(Serve *sctx, Req *req, int idx){
 
 status Serve_SetPollFds(Serve *sctx, Req *req){
     struct pollfd pfd = {
-        sctx->socket_fd,
+        req->fd,
         req->handler->direction,
         POLLHUP
     };
@@ -102,8 +102,7 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
                 Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
                 printf("\n");
             }
-            Queue_Add(&(sctx->queue), (Abstract *)req); 
-            req->queueIdx = sctx->queue.current.idx;
+            req->queueIdx = Queue_Add(&(sctx->queue), (Abstract *)req); 
             Serve_SetPollFds(sctx, req);
             r |= req->type.state;
         }else{
@@ -126,7 +125,12 @@ static int pollSkipSlab(Abstract *source, int idx){
     SpanQuery_Setup(&sq, sctx->pollMap, SPAN_OP_GET, idx);
     Span_Query(&sq);
     if(sq.stack[0].slab != NULL){
-        return poll(sq.stack[0].slab, sctx->pollMap->def->stride, 0);
+        int ready = poll(sq.stack[0].slab, sctx->pollMap->def->stride, 1);
+        if(DEBUG_SERVE_POLLING){
+            struct pollfd *pfd = sq.stack[0].slab;
+            printf("\x1b[%dmPoll Found %d, first fd:%d events:%d\x1b[0m\n", DEBUG_SERVE_POLLING, ready, pfd->fd, pfd->events);
+        }
+        return ready;
     }
     return 0;
 }

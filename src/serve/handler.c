@@ -56,9 +56,10 @@ Handler *Handler_Get(Handler *h){
     return cursor;
 }
 
-Handler *Handler_Make(MemCtx *m, HandleFunc func, Abstract *data){
+Handler *Handler_Make(MemCtx *m, HandleFunc func, Abstract *data, int direction){
     Handler *h = MemCtx_Alloc(m, sizeof(Handler));
     h->func = func;
     h->data = data;
+    h->direction = direction;
     return h;
 }

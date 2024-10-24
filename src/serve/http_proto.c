@@ -82,7 +82,7 @@ Proto *HttpProto_Make(MemCtx *m, ProtoDef *def){
 Req *HttpReq_Make(MemCtx *_m, Serve *sctx){
     MemCtx *m = MemCtx_Make();
     HttpProto *proto = (HttpProto *)HttpProto_Make(m, (ProtoDef *)sctx->def);
-    Req *req =  Req_Make(m, sctx, (Proto *)proto, -1);
+    Req *req =  Req_Make(m, sctx, (Proto *)proto);
     req->in.rbl = HttpParser_Make(m, req->in.shelf, (Abstract *)proto);
     req->in.rbl->capture = reqHttpParser_Capture; 
     MemCtx_Bind(m, req);

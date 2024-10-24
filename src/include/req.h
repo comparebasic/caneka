@@ -5,7 +5,6 @@ typedef struct serve_req {
     int queueIdx;
     int fd;
     String *id;
-    int direction;
     Serve *sctx;
     Proto *proto;
     struct {
@@ -18,7 +17,7 @@ typedef struct serve_req {
     } out;
 } Req;
 
-Req *Req_Make(MemCtx *m, struct serve_ctx *sctx, Proto *proto, int direction);
+Req *Req_Make(MemCtx *m, struct serve_ctx *sctx, Proto *proto);
 status Req_SetError(Serve *sctx, Req *req, String *msg);
 status Req_Recv(Serve *sctx, Req *req);
 status Req_Respond(Serve *sctx, Req *req);

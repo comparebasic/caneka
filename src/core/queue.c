@@ -14,9 +14,9 @@ status Queue_Update(Queue *q, int idx, byte dim, quad delayTicks){
     return Queue_SetDelay(&q->current, delayTicks);
 }
 
-QueueIdx *Queue_Add(Queue *q, Abstract *value){
+int Queue_Add(Queue *q, Abstract *value){
     if(value == NULL){
-        return NULL;
+        return -1;
     }
 
     QueueIdx qidx;
@@ -32,18 +32,19 @@ QueueIdx *Queue_Add(Queue *q, Abstract *value){
         if(ptr != NULL){
             q->count++;
         }
-        return ptr;
+        return nextIdx;
     }else{
         q->available.op = SPAN_OP_SET;
         if(DEBUG_QUEUE){
             printf("\x1b[%dmAdding to open slot %d\x1b[%dm\n", DEBUG_QUEUE, q->current.idx, DEBUG_QUEUE);
         }
         QueueIdx *ptr = (QueueIdx *)Span_SetFromQ(&q->available, (Abstract *)&qidx);
+        int idx = q->available.idx;
         if(ptr != NULL){
             memset(&q->available, 0, sizeof(SpanQuery));
             q->count++;
         }
-        return ptr;
+        return idx;
     }
 }
 
@@ -81,7 +82,7 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
             q->type.state |= ERROR;
             return NULL;
         }
-        if(skip != NULL && skip(q->source, 0) > 0){
+        if(skip != NULL && skip(q->source, 0) == 0){
             q->current.idx += Span_availableByDim(1, q->span->def->stride, q->span->def->idxStride);
             return Queue_Next(q, skip); 
         }
@@ -90,7 +91,11 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
         /* Use the Span_GetFromQ function to find the next value, jumping by increment amounts if it finds missing slabs */
         int maxIdx = Span_Capacity(q->span);
         while(TRUE){
-            q->current.idx += Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+            int increment = Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+            q->current.idx += increment;
+            while(skip != NULL && q->current.idx+increment < maxIdx && skip(q->source, q->current.idx) <= 0){
+                q->current.idx += increment;
+            }
             if(q->current.idx >= maxIdx){
                 goto end;
             }
@@ -104,13 +109,11 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
                     SpanQuery_Setup(&q->available, q->span, SPAN_OP_GET, q->current.idx);
                     Span_Query(&q->available);
                 }
-                int increment = Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+                increment = Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
                 q->current.idx += increment;
-                /*
                 while(skip != NULL && q->current.idx+increment < maxIdx && skip(q->source, q->current.idx) <= 0){
                     q->current.idx += increment;
                 }
-                */
                 if(q->current.idx >= maxIdx){
                     goto end;
                 }
