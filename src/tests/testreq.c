@@ -1,6 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
+static char *req1_cstr = "GET /home HTTP/1.1\r\nContent-Leng";  
+static char *req2_cstr = "th: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
+
 static int connectToServer(){
 	struct sockaddr_in server;
 	int incoming_sc = socket(AF_INET , SOCK_STREAM, 0);
@@ -19,18 +22,14 @@ static int connectToServer(){
     }
 }
 
-status TestChild(int child){
-    int st = 0;
-    pid_t pid = waitpid(child, &st, 0);
-    int code = WEXITSTATUS(st);
-    boolean pass = code == 0;
-    if(SHOW_SERVE_TESTS){
-       Test(code == 0, "Proc %d existed with status %d", pid, code);
-    }
-    return pass ? SUCCESS : ERROR;
-}
-
-int ServeTests_ForkRequest(MemCtx *m, char *msg, ReqTestSpec specs[]){
+int main(int argc, char *argv[]){
+    char *msg = argv[1];
+    ReqTestSpec specs[] = {
+        {TEST_SEND, req1_cstr, strlen(req1_cstr), 0, 0},
+        {TEST_DELAY_ONLY, NULL, 0, 16, 0},
+        {TEST_SEND, req2_cstr, strlen(req2_cstr), 0, 0},
+        {TEST_SERVE_END, NULL, 0, 0,  0}
+    };
     int child = fork();
     if(child == (pid_t)-1){
         ExitError(1, "Exit: %s - Fork", msg); 
@@ -84,17 +83,4 @@ int ServeTests_ForkRequest(MemCtx *m, char *msg, ReqTestSpec specs[]){
     }
 
     return child;
-}
-
-status ServeTests_SpawnRequest(MemCtx *m, char *msg){
-    const char *args[2] = {msg, NULL};
-    int child = fork();
-    if(child == (pid_t)-1){
-        ExitError(1, "Fork for %s", args);
-    }else if(!child){
-        execvp("./build/testreq", args);
-        ExitError(1, "Execv failed\n");
-        return ERROR;
-    }
-    return SUCCESS;
 }

@@ -106,6 +106,7 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
             Serve_SetPollFds(sctx, req);
             r |= req->type.state;
         }else{
+            printf("none");
             break;
         }
     }

@@ -135,11 +135,12 @@ status ServeChunked_Tests(MemCtx *gm){
     return r;
 }
 
-#define MULTIPLE_COUNT 18
+#define MULTIPLE_COUNT 22
 int atOncePids[MULTIPLE_COUNT] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0/*,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,*/
+    0,0,0,0,0,0,/*0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,
+    */
 };
 
 status ServeMultiple_Tests(MemCtx *gm){
@@ -154,21 +155,14 @@ status ServeMultiple_Tests(MemCtx *gm){
     
     r |=  Serve_PreRun(sctx, TEST_PORT);
 
-    ReqTestSpec specs[] = {
-        {TEST_SEND, req1_cstr, strlen(req1_cstr), 0, 0},
-        {TEST_DELAY_ONLY, NULL, 0, 16, 0},
-        {TEST_SEND, req2_cstr, strlen(req2_cstr), 0, 0},
-        {TEST_SERVE_END, NULL, 0, 0,  0}
-    };
-
     for(int i = 0; i < MULTIPLE_COUNT; i++){
         String *s = String_Init(m, STRING_EXTEND);
         String_AddBytes(m, s, bytes("Multiple requests "), strlen("Multiple requests "));
         String_Add(m, s, String_FromInt(m, i));
-        atOncePids[i] = ServeTests_ForkRequest(m, (char *)s->bytes, specs);
+        atOncePids[i] = ServeTests_SpawnRequest(m, (char *)s->bytes);
     }
 
-    int circuit = MULTIPLE_COUNT+5;
+    int circuit = MULTIPLE_COUNT*2;
     int i = 0;
     while(sctx->metrics.open < MULTIPLE_COUNT){
         if(i > circuit){

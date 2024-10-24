@@ -23,5 +23,6 @@ typedef struct req_test_spec {
 /* utils */
 int ServeTests_ForkRequest(MemCtx *m, char *msg, ReqTestSpec[]);
 status TestChild(int child);
+status ServeTests_SpawnRequest(MemCtx *m, char *msg);
 
 #include <tests.h>

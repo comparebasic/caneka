@@ -279,7 +279,7 @@ static int BuildSource(char *binary, char *fname, char *subdir){
     return FALSE;
 }
 
-static int BuildBinary(char *binaryName){
+static int BuildBinary(char *binaryName, char *sourceName){
     printf("\x1b[%dmBuilding binary %s\x1b[0m\n", MSG_COLOR, binaryName);
     StrArr arr;
 
@@ -289,7 +289,7 @@ static int BuildBinary(char *binaryName){
 
     Cstr source_cstr;
     Cstr_Init(&source_cstr, "src/");
-    Cstr_Add(&source_cstr, MAIN);
+    Cstr_Add(&source_cstr, sourceName);
 
     if(!REBUILD_BINARY && !NeedsBuild(&source_cstr, &binary_cstr)){
         return FALSE;
@@ -328,7 +328,8 @@ int BuildLib(){
 
 int Build(){
     if(BuildLib()){
-        return BuildBinary(BINARY);
+        BuildBinary("testreq", "tests/testreq.c");
+        return BuildBinary(BINARY, MAIN);
     }
     return FALSE;
 }
