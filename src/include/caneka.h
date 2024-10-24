@@ -68,7 +68,7 @@ typedef status (*DoFunc)(struct mem_handle *mh);
 #define STRING_CHUNK_SIZE (STRING_SEG_FOOTPRINT - STRING_EXTRAS)-1
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(int)))-1
 
-#define as(x, t) (((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
+#define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
 #define asIfc(x, ifc) (Ifc_Match(((Abstract *)(x))->type.of, ifc) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 

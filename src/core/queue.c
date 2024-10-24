@@ -81,7 +81,7 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
             q->type.state |= ERROR;
             return NULL;
         }
-        if(skip(q->source, 0) > 0){
+        if(skip != NULL && skip(q->source, 0) > 0){
             q->current.idx += Span_availableByDim(1, q->span->def->stride, q->span->def->idxStride);
             return Queue_Next(q, skip); 
         }
@@ -104,9 +104,13 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
                     SpanQuery_Setup(&q->available, q->span, SPAN_OP_GET, q->current.idx);
                     Span_Query(&q->available);
                 }
-                while(q->current.idx >= maxIdx && skip(q->source, q->current.idx) <= 0 ){
-                    q->current.idx += Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+                int increment = Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
+                q->current.idx += increment;
+                /*
+                while(skip != NULL && q->current.idx+increment < maxIdx && skip(q->source, q->current.idx) <= 0){
+                    q->current.idx += increment;
                 }
+                */
                 if(q->current.idx >= maxIdx){
                     goto end;
                 }

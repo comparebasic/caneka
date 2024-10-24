@@ -39,13 +39,13 @@ status SpanDef_Init(){
 
     /* pollMap */
     memset(&spanPollMapDef, 0, sizeof(SpanDef));
-    tableDef.typeOf = TYPE_POLL_MAP_SPAN;
-    tableDef.stride = 16;
-    tableDef.idxSize = SPAN_DEFAULT_IDX_SIZE;
-    tableDef.idxStride = SPAN_DEFAULT_STRIDE;
-    tableDef.slotSize = sizeof(struct pollfd)/sizeof(void*);
-    tableDef.itemSize = sizeof(struct pollfd);
-    tableDef.flags = INLINE;
+    spanPollMapDef.typeOf = TYPE_POLL_MAP_SPAN;
+    spanPollMapDef.stride = 16;
+    spanPollMapDef.idxSize = SPAN_DEFAULT_IDX_SIZE;
+    spanPollMapDef.idxStride = SPAN_DEFAULT_STRIDE;
+    spanPollMapDef.slotSize = sizeof(struct pollfd)/sizeof(void*);
+    spanPollMapDef.itemSize = sizeof(struct pollfd);
+    spanPollMapDef.flags = INLINE;
 
     /* span16x32m */
     memset(&span16x32mDef, 0, sizeof(SpanDef));

@@ -107,17 +107,17 @@ status QueueNext_Tests(MemCtx *gm){
     QueueIdx *qidx = NULL;
 
 
-    qidx = Queue_Next(&q);
+    qidx = Queue_Next(&q, NULL);
     s = (String *)qidx->item;
     r |= Test(s == zero_s, "Expect first item to be zero_s, have %s\n", (char *)s->bytes);
 
-    qidx = Queue_Next(&q);
+    qidx = Queue_Next(&q, NULL);
     s = (String *)qidx->item;
     r |= Test(s == one_s, "Expect second item to be one_s, have %s\n", (char *)s->bytes);
 
     int i = 2;
     while(TRUE){
-        qidx = Queue_Next(&q);
+        qidx = Queue_Next(&q, NULL);
         if((q.type.state & END) != 0 || (r & ERROR) != 0){
             break;
         }
@@ -164,7 +164,7 @@ status QueueMixed_Tests(MemCtx *gm){
 
     i = 0;
     while(TRUE){
-        qidx = Queue_Next(&q);
+        qidx = Queue_Next(&q, NULL);
         if((q.type.state & END) != 0 || (r & ERROR) != 0){
             break;
         }

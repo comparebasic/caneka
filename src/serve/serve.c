@@ -68,7 +68,7 @@ status Serve_SetPollFds(Serve *sctx, Req *req){
         req->handler->direction,
         POLLHUP
     };
-    Span_Set(sctx->pollMap, req->queueIdx, &pfd);
+    Span_Set(sctx->pollMap, req->queueIdx, (void *)&pfd);
     return SUCCESS;
 }
 
@@ -123,10 +123,10 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
 static int pollSkipSlab(Abstract *source, int idx){
     Serve *sctx = as(source, TYPE_SERVECTX);
     SpanQuery sq;
-    SpanQuery_Setup(&sq, sq.span, SPAN_OP_GET, idx);
+    SpanQuery_Setup(&sq, sctx->pollMap, SPAN_OP_GET, idx);
     Span_Query(&sq);
-    if(sq->slab != NULL){
-        return poll(sq->slab, sctx->pollMap->def->stride, 0);
+    if(sq.stack[0].slab != NULL){
+        return poll(sq.stack[0].slab, sctx->pollMap->def->stride, 0);
     }
     return 0;
 }
@@ -231,5 +231,6 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     sctx->def = def;
     sctx->pollMap = Span_Make(m, TYPE_POLL_MAP_SPAN);
     Queue_Init(m, &sctx->queue, def->getDelay);
+    sctx->queue.source = (Abstract *)sctx;
     return sctx;
 }
