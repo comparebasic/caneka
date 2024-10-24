@@ -14,6 +14,7 @@ typedef uint16_t word;
 typedef int32_t i32;
 typedef uint32_t quad;
 typedef int64_t i64;
+typedef i64 time64_t;
 typedef uint64_t util;
 
 typedef word cls;
@@ -188,6 +189,7 @@ boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);
 
 #include "abstract.h"
+#include "time.h"
 #include "chain.h"
 #include "error.h"
 #include "log.h"
