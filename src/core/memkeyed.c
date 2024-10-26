@@ -1,11 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-MemCtx *MemKeyed_Make(MemCtx *m){
+MemCtx *MemKeyed_Make(MemCtx *m, Span *tbl){
     MemCtx *md = MemCtx_Make();
-    md->instance = Span_Make(m, TYPE_TABLE);
+    md->instance = tbl;
     md->type.state |= TRACKED;
-    return m;
+    return md;
 }
 
 status MemKeyed_SetKey(MemCtx *m, Abstract *key){
@@ -14,4 +14,3 @@ status MemKeyed_SetKey(MemCtx *m, Abstract *key){
 status MemKeyed_Alloc(MemCtx *m, Abstract *key){
     return Table_SetValue((Span *)m->instance, key);
 }
-
