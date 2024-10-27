@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-Session_Start(IoCtx *ctx, String *sid){
-
+status Session_Start(IoCtx *ctx, String *sid){
+    return SUCCESS;
 }

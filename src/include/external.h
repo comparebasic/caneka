@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <poll.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -12,6 +13,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
+#include <dirent.h>
 
 #ifdef FREEBSD
     #include <netinet/in.h>

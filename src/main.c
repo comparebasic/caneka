@@ -40,6 +40,7 @@ static void *tests[] = {
     "ServeHandle", ServeHandle_Tests,
     "ServeChunked", ServeChunked_Tests,
     "ServeMultiple", ServeMultiple_Tests,
+    "IoCtx", IoCtx_Tests,
     NULL, NULL
 };
 
