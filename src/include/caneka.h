@@ -128,7 +128,7 @@ enum types {
     TYPE_QUEUE,
     TYPE_SPAN_QUERY,
     TYPE_SLAB,
-    TYPE_CHAIN,
+    TYPE_TABLE_CHAIN,
     TYPE_HASHED,
     TYPE_HASHED_LINKED,
     TYPE_MEMPAIR,
@@ -137,6 +137,8 @@ enum types {
     TYPE_ITER,
     TYPE_SINGLE,
     TYPE_RBL_MARK,
+    TYPE_OSET,
+    TYPE_OSET_DEF,
     _TYPE_CORE_END,
 };
 
@@ -210,6 +212,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "spanquery.h"
 #include "iter.h"
 #include "table.h"
+#include "table_chain.h"
 #include "tokens.h"
 #include "match.h"
 #include "scursor.h"

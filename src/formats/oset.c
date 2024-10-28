@@ -10,78 +10,68 @@ oset
         string = hey -> address = (base64) XafjkacC
 */
 
+static Oset *_oset = NULL;
 
-
-Chain *OsetChain = NULL;
-
-static status populateOset(MemCtx *m, Lookup *lk){
-    status r = READY;
-    /*
-    r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);
-    r |= Lookup_Add(m, lk, TYPE_MATCH, (void *)Match_Print);
-    r |= Lookup_Add(m, lk, TYPE_STRINGMATCH, (void *)StringMatch_Print);
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
-    r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
-    r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_Print);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)StringFixed_Print);
-    r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
-    r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_QUEUE_SPAN, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_MINI_SPAN, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
-    r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
-    r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
-    r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
-    r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
-    r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
-    r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
-    */
-    return r;
+OsetDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, Maker from, ToOset to){
+    OsetDef *def = (OsetDef *)MemCtx_Alloc(m, TYPE_OSET_DEF);
+    def->type.of = TYPE_OSET_DEF;
+    def->typeOf = typeOf;
+    def->name = name;
+    def->from = from;
+    def->to = to;
+    return def;
 }
 
-
 status Oset_Init(MemCtx *m){
-    if(OsetChain == NULL){
-        Lookup *funcs = Lookup_Make(m, _TYPE_START, populateOset, NULL);
-        OsetChain = Chain_Make(m, funcs);
+    if(_oset == NULL){
+        Span *osetDefs = Span_Make(m, TYPE_SPAN);
+        Span_Add(osetDefs, (Abstract *)OsetDef_Make(m, TYPE_STRING, String_Make(m, bytes("s"), String_FromOset, String_ToOset)));
+        Span_Add(osetDefs, (Abstract *)OsetDef_Make(m, TYPE_TABLE, String_Make(m, bytes("s"), String_FromOset, String_ToOset)));
+        Span_Add(osetDefs, (Abstract *)OsetDef_Make(m, TYPE_SPAN, String_Make(m, bytes("s"), String_FromOset, String_ToOset)));
+        _oset = Oset_Make(osetDefs);
         return SUCCESS;
     }
     return NOOP;
 }
 
-String *Oset_To(MemCtx *m, Abstract *a){
-    Maker func = (Maker)Chain_Get(OsetChain, a->type.of);
-    if(func != NULL){
-        return func(m, a);
+status Oset_Add(MemCtx *m, Oset *o, Lookup *osetDefs){
+    Iter *it = Iter_Make(m, osetDefs->values);
+    Abstract *first = Span_Get(osetDefs->values, 0);
+    Lookup *byType = Lookup_Make(m, first->type.of);
+    Table *byName = Span_Make(m, TYPE_TABLE);
+    while((Iter_Next(it) & END) == 0){
+        OsetDef *def = (OsetDef *)Iter_Get(it);
+        Table_Set(byName, def->name, (Abstract *)def);
+        Lookup_Add(m, byType, def->typeOf, (Abstract *)def);
+    }
+    Chain_Extend(m, o->byType, byType);
+    TableChain_Extend(m, o->byName, byName);
+    return SUCCESS;
+}
+
+Oset *Oset_Make(MemCtx *m, Lookup *osetDefs){
+    Oset *o = (Oset *)MemCtx_Alloc(m, sizeof(Oset));
+    o->type.of = TYPE_OSET;
+        Oset_Add(MemCtx *m, o, osetDefs);
+    return o;
+}
+
+String *Oset_To(MemCtx *m, cls type, Abstract *a){
+    if(_oset == NULL){
+        Fatal("Oset not intialized", TYPE_OSET);
+    }
+    if(type == 0){
+        type = a->type.of;
+    }
+    Abstract *found = Chain_Get(_oset->byType, type);
+    OsetDef *def = as(found, TYPE_OSET_DEF);
+    if(def != NULL){
+        return def->to(m, a);
     }else{
         Fatal("Uknown type for parsing Oset", TYPE_ABSTRACT);
     }
 }
 
-Roebling *OsetParser_Make(MemCtx *m, String *Source){
-    MemHandle *mh = (MemHandle *)m;
-
-    Span *parsers_do =  Span_From(m, 1, 
-        (Abstract *)Int_Wrapped(m, OSET_START));
-
-    LookupConfig config[] = {
-        {OSET_START, (Abstract *)String_Make(m, bytes("OSET_START"))},
-        {OSET_KEY, (Abstract *)String_Make(m, bytes("OSET_KEY"))},
-        {OSET_LENGTH, (Abstract *)String_Make(m, bytes("OSET_LENGTH"))},
-        {OSET_OPTS, (Abstract *)String_Make(m, bytes("OSET_OPTS"))},
-        {OSET_VALUE, (Abstract *)String_Make(m, bytes("OSET_VALUE"))},
-        {0, NULL},
-    };
-
-    Lookup *desc = Lookup_FromConfig(m, config, NULL);
-
-    return Roebling_Make(m, TYPE_ROEBLING, parsers_do, desc, String_Init(m, STRING_EXTEND), Oset_Capture, (Abstract *)xml->ctx); 
-
-    return xml;
+Abstract *Abs_FromOset(MemCtx *m, String *s){
+    return NULL;
 }
