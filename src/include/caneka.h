@@ -126,6 +126,7 @@ enum types {
     _TYPE_SPAN_END,
     TYPE_SPAN_STATE,
     TYPE_QUEUE,
+    TYPE_CHAIN,
     TYPE_SPAN_QUERY,
     TYPE_SLAB,
     TYPE_TABLE_CHAIN,

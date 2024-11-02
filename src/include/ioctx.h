@@ -1,4 +1,4 @@
-#define PERMS 577
+#define PERMS 0755 
 #define PATH_BUFFLEN 1024
 typedef struct access {
     Type type;
@@ -20,5 +20,5 @@ typedef struct ioctx {
 
 String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path);
 IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior);
-IoCtx *IoCtx_MakeRoot(MemCtx *m, String *root, Access *access);
 status IoCtx_Persist(MemCtx *m, IoCtx *ctx);
+status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access);

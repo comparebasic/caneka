@@ -2,11 +2,18 @@
 #include <caneka.h>
 
 static String *pathRecurse(MemCtx *m, String *s, IoCtx *ctx, IoCtx *prior){
-    if(prior->prior != NULL){
+    if(prior != NULL && prior->prior != NULL){
         String_Add(m, s, pathRecurse(m, s, prior, prior->prior));
     }else{
-        String_Add(m, s, prior->root);
-        String_AddBytes(m, s, bytes("/"), 1);
+        if(prior != NULL){
+            if(s->length > 0){
+                String_AddBytes(m, s, bytes("/"), 1);
+            }
+            String_Add(m, s, prior->root);
+        }
+        if(s->length > 0){
+            String_AddBytes(m, s, bytes("/"), 1);
+        }
         String_Add(m, s, ctx->root);
     }
     return s;
@@ -25,7 +32,9 @@ String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path){
     String *abs = IoCtx_GetAbs(m, ctx); 
     String_Add(m, s, abs);
     if(path != NULL){
-        String_AddBytes(m, s, bytes("/"), 1);
+        if(s->length > 0){
+            String_AddBytes(m, s, bytes("/"), 1);
+        }
         String_Add(m, s, path);
     }
 
@@ -47,6 +56,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
             return ERROR;
         }
     }
+
     while(Iter_Next(ctx->it) != END){
         File *file = (File *)Iter_Get(ctx->it);
         r |= File_Persist(file);
@@ -57,23 +67,13 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
     return r;
 }
 
-IoCtx *IoCtx_MakeRoot(MemCtx *m, String *root, Access *access){
-    char buff[PATH_BUFFLEN];
-    char *path = getcwd(buff, PATH_BUFFLEN);
-    if(path != NULL){
-        int l = strlen(path);
-        int total = l+root->length+1;
-        if(total > PATH_BUFFLEN){
-            Fatal("MakeRoot path too long", TYPE_IOCTX);
-        }
-        buff[l] = '/';
-        memcpy(buff+l+1, root->bytes, root->length);
-        buff[total] = '\0';
-        return IoCtx_Make(m, String_Make(m, bytes(buff)), access, NULL);
-    }else{
-        Fatal("Unable to get Current Working Directory", TYPE_IOCTX);
-        return NULL;
+status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
+    String *abs = IoCtx_GetAbs(m, ctx); 
+    char *abs_cstr = String_ToChars(m, abs);
+    if(rmdir(abs_cstr) == 0){
+        return SUCCESS;
     }
+    return ERROR;
 }
 
 IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
