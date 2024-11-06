@@ -28,6 +28,20 @@ status IoCtx_Tests(MemCtx *gm){
     char *onePath_cstr = String_ToChars(m, onePath);
     DIR* dir = opendir(onePath_cstr);
     r |= Test(dir != NULL, "dir exists %s", onePath_cstr);
+
+    String *fname = String_Make(m, bytes("file.one"));
+    File *file = File_Make(m, fname, NULL, one);
+    char *cstr = "Test content here is a thing\n";
+    file->data = String_Make(m, bytes(cstr));
+    file->type.state |= (FILE_UPDATED|FILE_TRACKED);
+    File_Persist(m, file);
+
+    FILE *f = fopen((char *)file->abs->bytes, "r");
+    memset(buff, 0, sizeof(buff));
+    l = fread(buff, 1, sizeof(buff), f);
+    r |= Test(l == file->data->length, "file length match, have %ld", l);
+    r |= Test(String_EqualsBytes(file->data, bytes(buff)), "String content matches, have: '%s'", buff);
+
     IoCtx_Destroy(m, one, NULL);
     dir = opendir(onePath_cstr);
     r |= Test(dir == NULL, "dir destroyed %s", onePath_cstr);

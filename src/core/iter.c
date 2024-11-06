@@ -17,9 +17,15 @@ Abstract *Iter_Get(Iter *it){
     return Span_Get(it->values, it->idx);
 }
 
-Iter *Iter_Make(MemCtx *m, Span *values){
-    Iter *it = (Iter *)MemCtx_Alloc(m, sizeof(Iter));
+Iter *Iter_Init(Iter *it, Span *values){
     it->type.of = TYPE_ITER;
     it->values = values;
+    it->idx = -1;
+    return it;
+}
+
+Iter *Iter_Make(MemCtx *m, Span *values){
+    Iter *it = (Iter *)MemCtx_Alloc(m, sizeof(Iter));
+    Iter_Init(it, values);
     return it;
 }

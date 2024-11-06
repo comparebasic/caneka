@@ -59,7 +59,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 
     while(Iter_Next(ctx->it) != END){
         File *file = (File *)Iter_Get(ctx->it);
-        r |= File_Persist(file);
+        r |= File_Persist(m, file);
     }
 
     r |= MemKeyed_Persist(m, ctx);
@@ -70,6 +70,15 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     String *abs = IoCtx_GetAbs(m, ctx); 
     char *abs_cstr = String_ToChars(m, abs);
+    /* TODO: remove files ... */
+    Iter it;
+    Iter_Init(&it, ctx->files);
+    while(Iter_Next(&it) != END){
+        File *file = (File *)Iter_Get(&it);
+        File_Delete(file);
+    }
+
+    /* remove dir */
     if(rmdir(abs_cstr) == 0){
         return SUCCESS;
     }

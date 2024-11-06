@@ -59,7 +59,7 @@ extern Abstract Reserved;
 typedef struct virt * AbstractPtr;
 typedef status (*DoFunc)(struct mem_handle *mh);
 
-#define MAX_BASE10 20
+#define MAX_BASE10 22
 #define SLAB_START_SIZE 2
 
 #define MAX_DIMS 16
@@ -134,6 +134,7 @@ enum types {
     TYPE_HASHED_LINKED,
     TYPE_MEMPAIR,
     TYPE_STRINGTABLE,
+    TYPE_FILE,
     TYPE_LOOKUP,
     TYPE_ITER,
     TYPE_SINGLE,
@@ -152,21 +153,22 @@ extern int METHOD_DELETE;
 enum status_types {
     READY = 0,
     ERROR = 1 << 0,
-    OPTIONAL = 1 << 1,
+    SUCCESS = 1 << 1,
     NOOP = 1 << 2,
-    INLINE = 1 << 3,
-    BREAK = 1 << 4,
-    TRACKED = 1 << 5,
-    INCOMING = 1 << 6,
-    PROCESSING = 1 << 7,
-    RESPONDING = 1 << 8,
-    RAW = 1 << 9,
-    MISS = 1 << 10,
-    HASHED = 1 << 11,
-    INVERTED = 1 << 12,
-    END = 1 << 13,
-    NEXT = 1 << 14,
-    SUCCESS = 1 << 15,
+    RAW = 1 << 3,
+    HASHED = 1 << 4,
+    MISS = 1 << 5,
+    END = 1 << 6,
+    NEXT = 1 << 7,
+    /* class speciric */
+    INVERTED = 1 << 8,
+    OPTIONAL = 1 << 9,
+    INLINE = 1 << 10,
+    BREAK = 1 << 11,
+    TRACKED = 1 << 12,
+    INCOMING = 1 << 13,
+    PROCESSING = 1 << 14,
+    RESPONDING = 1 << 15,
 };
 
 
@@ -194,7 +196,7 @@ boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);
 
 #include "abstract.h"
-#include "time.h"
+#include "time_cnk.h"
 #include "chain.h"
 #include "error.h"
 #include "log.h"

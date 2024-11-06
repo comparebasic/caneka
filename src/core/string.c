@@ -3,14 +3,13 @@
 
 static const byte *digits = (byte *)"0123456789";
 
-static int _String_FromInt(MemCtx *m, int i, byte buff[]){
+static int _String_FromI64(MemCtx *m, i64 i, byte buff[]){
     memset(buff, 0, MAX_BASE10+1);
 
-    i64 n = 0;
-    i64 base = 10;
+    int base = 10;
     int pows = 0;
     int position = MAX_BASE10-1;
-    int val;
+    i64 val;
     byte digit = digits[0];
     boolean found = FALSE;
     while(i > 0){
@@ -95,13 +94,19 @@ String *String_ToEscaped(MemCtx *m, String *s){
 
 String *String_FromInt(MemCtx *m, int i){
     byte buff[MAX_BASE10+1];
-    int position = _String_FromInt(m, i, buff);
+    int position = _String_FromI64(m, (i64)i, buff);
+    return String_From(m, buff+position+1); 
+}
+
+String *String_FromI64(MemCtx *m, i64 i){
+    byte buff[MAX_BASE10+1];
+    int position = _String_FromI64(m, i, buff);
     return String_From(m, buff+position+1); 
 }
 
 status String_AddInt(MemCtx *m, String *s, int i){
     byte buff[MAX_BASE10+1];
-    int position = _String_FromInt(m, i, buff);
+    int position = _String_FromI64(m, (i64)i, buff);
     return String_AddBytes(m, s, buff+position+1, MAX_BASE10-position-1);
 }
 
