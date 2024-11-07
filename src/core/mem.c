@@ -44,11 +44,13 @@ void *MemCtx_Alloc(MemCtx *m, size_t s){
     }
 
     void *ptr = MemSlab_Alloc(sl, s); 
-#ifdef MEM_KEYED
-    if((m->type.state & TRACKED) != 0){
-        Table_SetValue((Span *)m->instance, ptr);
+    if((m->type.state & TRACKED) != 0 && m->instance != NULL && m->instance->type.of == TYPE_TABLE){
+        Hashed *h = Table_SetValue((Span *)m->instance, ptr);
+        if(h != NULL){
+            h->locationIdx = sl->idx;
+            h->offset = ptr - (void *)sl->bytes;
+        }
     }
-#endif
     return ptr;
 }
 
@@ -99,7 +101,6 @@ MemSlab *MemSlab_Make(MemCtx *m){
     size_t sz = sizeof(MemSlab)+MEM_SLAB_SIZE;
     MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
     sl->addr = MemSlab_GetStart(sl);
-    sl->idx = ++(m->count);
     if(m->start_sl == NULL){
         m->start_sl = sl;
     }else{
@@ -108,6 +109,12 @@ MemSlab *MemSlab_Make(MemCtx *m){
             last = last->next;
         }
         last->next = sl;
+    }
+    if(m->index != NULL && m->index->type.of == TYPE_MEM_SPAN){
+        Span_Add((Span *)m->index, (Abstract *)sl);
+        sl->idx = m->index->metrics.set;
+    }else{
+        sl->idx = m->count++;
     }
     return sl;
 }

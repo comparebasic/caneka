@@ -19,7 +19,8 @@ typedef struct mem_ctx {
     Type type;
     MemSlab *start_sl;
     int count;
-    void *instance;
+    Abstract *instance;
+    struct span *index;
 } MemCtx;
 
 typedef struct mem_handle  {
@@ -45,9 +46,7 @@ void *MemCtx_GetSlab(MemCtx *m, void *addr);
 /* utils */
 MemCtx *MemCtx_FromHandle(MemHandle *a);
 
-#ifdef MEM_KEYED
 /* mem-keyed */
-MemCtx *MemKeyed_Make(MemCtx *m){
+MemCtx *MemKeyed_Make(MemCtx *m);
 status MemKeyed_SetKey(MemCtx *m, Abstract *key);
 status MemKeyed_Alloc(MemCtx *m, Abstract *key);
-#endif

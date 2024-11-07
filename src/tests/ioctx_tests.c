@@ -36,11 +36,35 @@ status IoCtx_Tests(MemCtx *gm){
     file->type.state |= (FILE_UPDATED|FILE_TRACKED);
     File_Persist(m, file);
 
+    Debug_Print((void *)one->files, 0, "Files: ",COLOR_PURPLE, TRUE);
+    printf("\n");
+
     FILE *f = fopen((char *)file->abs->bytes, "r");
     memset(buff, 0, sizeof(buff));
     l = fread(buff, 1, sizeof(buff), f);
     r |= Test(l == file->data->length, "file length match, have %ld", l);
     r |= Test(String_EqualsBytes(file->data, bytes(buff)), "String content matches, have: '%s'", buff);
+
+    MemKeyed_SetKey(one->m, (Abstract *)String_Make(one->m, bytes("A")));
+    String_Make(one->m, bytes("Apples"));
+
+    MemKeyed_SetKey(one->m, (Abstract *)String_Make(one->m, bytes("B")));
+    String_Make(one->m, bytes("Bananas"));
+
+    Debug_Print((void *)one->m->instance, 0, "Mem Instance: ",COLOR_PURPLE, TRUE);
+    printf("\n");
+    Debug_Print((void *)one->m->index, 0, "Mem Span: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+    while(Iter_Next(one->it) != END){
+        Hashed *h = (Hashed *)Iter_Get(one->it);
+        if(h != NULL){
+            printf("found\n");
+            Debug_Print((void *)h, 0, "", COLOR_PURPLE, TRUE);
+            printf("\n");
+        }else{
+            printf("skip\n");
+        }
+    }
 
     IoCtx_Destroy(m, one, NULL);
     dir = opendir(onePath_cstr);

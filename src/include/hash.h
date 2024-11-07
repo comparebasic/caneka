@@ -5,6 +5,9 @@ typedef struct hashed {
     Abstract *value;
     int idx;
     struct hashed *next;
+    /* memkeyed values */
+    int locationIdx;
+    int offset;
 } Hashed;
 
 extern Chain *HashChain;

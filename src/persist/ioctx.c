@@ -68,20 +68,28 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 }
 
 status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
+    printf("destroying\n");
     String *abs = IoCtx_GetAbs(m, ctx); 
     char *abs_cstr = String_ToChars(m, abs);
     /* TODO: remove files ... */
+    printf("destroying II\n");
     Iter it;
     Iter_Init(&it, ctx->files);
+    printf("destroying II.1\n");
     while(Iter_Next(&it) != END){
+        printf("destroying II.1.1\n");
         File *file = (File *)Iter_Get(&it);
+        printf("destroying II.1.2\n");
         File_Delete(file);
+        printf("destroying II.1.3\n");
     }
 
     /* remove dir */
     if(rmdir(abs_cstr) == 0){
         return SUCCESS;
     }
+
+    printf("destroying III\n");
     return ERROR;
 }
 
@@ -95,10 +103,9 @@ IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
     ctx->access = access;
     ctx->prior = prior;
 
-    ctx->tbl = Span_Make(m, TYPE_TABLE);
     ctx->files = Span_Make(m, TYPE_SPAN);
-    ctx->m = MemKeyed_Make(m, ctx->files);
-    ctx->it = Iter_Make(m, ctx->tbl);
+    ctx->m = MemKeyed_Make(m);
+    ctx->it = Iter_Make(m, (Span *)ctx->m->instance);
 
     return ctx;
 }

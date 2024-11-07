@@ -2,6 +2,10 @@
 #include <caneka.h>
 
 status Iter_Next(Iter *it){
+    if(it->type.state == END){
+        it->idx = -1;
+        it->type.state &= ~END;
+    }
     if((it->idx+1) > it->values->max_idx){
         it->type.state = END;
     }else{

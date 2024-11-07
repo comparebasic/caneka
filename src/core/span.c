@@ -323,7 +323,7 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     p->m = m;
     p->def = SpanDef_Clone(m, SpanDef_FromCls(type));
     p->type.of = p->def->typeOf;
-    p->max_idx = -1;
+    p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
 
     p->def->itemSize = itemSize;
     int slotSize = 1;

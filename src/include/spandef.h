@@ -7,6 +7,7 @@ typedef struct span_def {
     int idxSize;
     int itemSize;
     int valueHdr;
+    Maker valueSlab_Make;
     i64 dim_lookups[8];
 } SpanDef;
 

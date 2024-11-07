@@ -14,7 +14,6 @@ typedef struct ioctx {
     String *abs;
     Access *access;
     struct ioctx *prior;
-    Span *tbl;
     Span *files;
     Iter *it;
 } IoCtx;

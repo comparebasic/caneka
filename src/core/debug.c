@@ -533,6 +533,9 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
         if(h->next != NULL){
             printf("\x1b[%dm next=%p", color, h);
         }
+        if(h->offset){
+            printf("\x1b[%dm %d/%d", color, h->locationIdx, h->offset);
+        }
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
         printf("\x1b[%dm%sH<", color, msg);

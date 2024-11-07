@@ -4,6 +4,7 @@
 static SpanDef span16Def;
 static SpanDef tableDef;
 static SpanDef span16x32mDef;
+static SpanDef spanMemSlabDef;
 static SpanDef span4kx32mDef;
 static SpanDef span4x16Def;
 static SpanDef spanStringDef;
@@ -56,6 +57,16 @@ status SpanDef_Init(){
     span16x32mDef.slotSize = span16x32mDef.idxSize;
     span16x32mDef.itemSize = sizeof(QueueIdx);
     span16x32mDef.flags = INLINE;
+
+    /* span16x32m */
+    memset(&spanMemSlabDef, 0, sizeof(SpanDef));
+    spanMemSlabDef.typeOf = TYPE_MEM_SPAN;
+    spanMemSlabDef.stride = 16;
+    spanMemSlabDef.idxStride = 16;
+    spanMemSlabDef.idxSize = sizeof(QueueIdx) / SPAN_SLOT_BYTES;
+    /* value span will not be allocated, will be mem slab instead */
+    spanMemSlabDef.slotSize = SPAN_DEFAULT_SLOT_SIZE;
+    spanMemSlabDef.itemSize = SPAN_DEFAULT_ITEM_SIZE;
 
     /*span4kx32m */
     memset(&span4kx32mDef, 0, sizeof(SpanDef));

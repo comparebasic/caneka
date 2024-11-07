@@ -1,4 +1,4 @@
-MemCtx *MemKeyed_Make(MemCtx *m, Span *tbl);
+MemCtx *MemKeyed_Make(MemCtx *m);
 status MemKeyed_SetKey(MemCtx *m, Abstract *key);
 status MemKeyed_Alloc(MemCtx *m, Abstract *key);
 status MemKeyed_Persist(MemCtx *m, IoCtx *ctx);

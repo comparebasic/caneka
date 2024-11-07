@@ -59,6 +59,7 @@ extern Abstract Reserved;
 typedef struct virt * AbstractPtr;
 typedef status (*DoFunc)(struct mem_handle *mh);
 
+#define ZERO 0
 #define MAX_BASE10 22
 #define SLAB_START_SIZE 2
 
@@ -117,6 +118,7 @@ enum types {
     _TYPE_SPAN_START,
     TYPE_SPAN,
     TYPE_MINI_SPAN,
+    TYPE_MEM_SPAN,
     TYPE_QUEUE_SPAN,
     TYPE_QUEUE_IDX,
     TYPE_SLAB_SPAN,
@@ -125,6 +127,7 @@ enum types {
     TYPE_POLL_MAP_SPAN,
     _TYPE_SPAN_END,
     TYPE_SPAN_STATE,
+    TYPE_SPAN_DEF,
     TYPE_QUEUE,
     TYPE_CHAIN,
     TYPE_SPAN_QUERY,

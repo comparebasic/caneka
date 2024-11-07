@@ -117,13 +117,14 @@ status Table_SetKey(Span *tbl, Abstract *a){
     return SUCCESS;
 }
 
-status Table_SetValue(Span *tbl, Abstract *a){
+Hashed *Table_SetValue(Span *tbl, Abstract *a){
     Hashed *h = Span_Get(tbl, tbl->metrics.set);
     if(h != NULL){
         h->value = a;
-        return SUCCESS;
+        tbl->metrics.set = -1;
+        return h;
     }
-    return ERROR;
+    return NULL;
 }
 
 Abstract *Table_Get(Span *tbl, Abstract *a){
