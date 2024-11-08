@@ -8,6 +8,12 @@ related: core/mem.c
 */
 #define MEM_SLAB_SIZE 4096
 
+typedef struct coords {
+    void *ptr;
+    int slabIdx;
+    int offset;
+} Coords;
+
 typedef struct mem_slab {
     byte bytes[MEM_SLAB_SIZE];
     word idx;
@@ -19,16 +25,14 @@ typedef struct mem_ctx {
     Type type;
     MemSlab *start_sl;
     int count;
-    Abstract *instance;
     struct span *index;
+    Coords latest;
 } MemCtx;
 
 typedef struct mem_handle  {
     Type type;
     struct mem_ctx *m;
 } MemHandle;
-
-#define MemCtx_Bind(m, inst) do { inst->m = m; m->instance = (void *)inst;} while(0);
 
 size_t MemCount();
 void *MemCtx_Alloc(MemCtx *m, size_t s);

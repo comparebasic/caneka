@@ -523,6 +523,13 @@ static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean 
     }
 }
 
+static void Iter_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Iter *it = (Iter *)as(a, TYPE_ITER);
+    printf("\x1b[%dm%sI<%s:%d of %d>\x1b[0m", color, msg,
+        State_ToString(it->type.state), it->idx, it->values->nvalues);
+}
+
+
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(extended){
@@ -533,9 +540,7 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
         if(h->next != NULL){
             printf("\x1b[%dm next=%p", color, h);
         }
-        if(h->offset){
-            printf("\x1b[%dm %d/%d", color, h->locationIdx, h->offset);
-        }
+        printf("\x1b[%dm %d/%d", color, h->locationIdx, h->offset);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
         printf("\x1b[%dm%sH<", color, msg);
@@ -600,6 +605,8 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
+    r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
+    
     return r;
 }
 

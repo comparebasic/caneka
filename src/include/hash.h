@@ -1,9 +1,9 @@
 typedef struct hashed {
     Type type;
+    int idx;
     util id;
     Abstract *item;
     Abstract *value;
-    int idx;
     struct hashed *next;
     /* memkeyed values */
     int locationIdx;

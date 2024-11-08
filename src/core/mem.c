@@ -44,13 +44,9 @@ void *MemCtx_Alloc(MemCtx *m, size_t s){
     }
 
     void *ptr = MemSlab_Alloc(sl, s); 
-    if((m->type.state & TRACKED) != 0 && m->instance != NULL && m->instance->type.of == TYPE_TABLE){
-        Hashed *h = Table_SetValue((Span *)m->instance, ptr);
-        if(h != NULL){
-            h->locationIdx = sl->idx;
-            h->offset = ptr - (void *)sl->bytes;
-        }
-    }
+    m->latest.ptr = ptr;
+    m->latest.slabIdx = sl->idx;
+    m->latest.offset = ptr - (void *)sl->bytes;
     return ptr;
 }
 
@@ -85,7 +81,7 @@ status MemCtx_Free(MemCtx *m){
     MemSlab *current = m->start_sl, *next = NULL;
     while(current != NULL){
         next = current->next;
-        trackFree(current, sizeof(MemSlab)+MEM_SLAB_SIZE);
+        trackFree(current, sizeof(MemSlab));
         current = next;
     }
     trackFree(m, sizeof(MemCtx));
@@ -94,11 +90,11 @@ status MemCtx_Free(MemCtx *m){
 }
 
 void *MemSlab_GetStart(MemSlab *sl){
-    return ((void *)sl)+sizeof(MemSlab);
+    return ((void *)sl->bytes);
 }
 
 MemSlab *MemSlab_Make(MemCtx *m){
-    size_t sz = sizeof(MemSlab)+MEM_SLAB_SIZE;
+    size_t sz = sizeof(MemSlab);
     MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
     sl->addr = MemSlab_GetStart(sl);
     if(m->start_sl == NULL){

@@ -3,15 +3,13 @@
 
 status Iter_Next(Iter *it){
     if(it->type.state == END){
-        it->idx = -1;
+        it->idx = 0;
         it->type.state &= ~END;
     }
     if((it->idx+1) > it->values->max_idx){
         it->type.state = END;
     }else{
-        if(it->type.state != READY){
-            it->idx++;
-        }
+        it->idx++;
         it->type.state = SUCCESS;
     }
     return it->type.state;
@@ -22,6 +20,7 @@ Abstract *Iter_Get(Iter *it){
 }
 
 Iter *Iter_Init(Iter *it, Span *values){
+    memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_ITER;
     it->values = values;
     it->idx = -1;

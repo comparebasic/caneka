@@ -85,7 +85,6 @@ Req *HttpReq_Make(MemCtx *_m, Serve *sctx){
     Req *req =  Req_Make(m, sctx, (Proto *)proto);
     req->in.rbl = HttpParser_Make(m, req->in.shelf, (Abstract *)proto);
     req->in.rbl->capture = reqHttpParser_Capture; 
-    MemCtx_Bind(m, req);
 
     return req;
 }

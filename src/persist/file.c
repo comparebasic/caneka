@@ -47,11 +47,9 @@ status File_Persist(MemCtx *m, File *file){
 }
 
 status File_Delete(File *file){
-    printf("deleting file %p\n", file);
     char buff[PATH_BUFFLEN];
     file->type.state &= ~FILE_UPDATED;
     file->data = NULL;
-    printf("deleting file II\n");
     if(unlink((char *)file->abs->bytes) == 0){
         if((file->type.state & FILE_TRACKED) != 0){
             int suffixL = strlen(".notes");

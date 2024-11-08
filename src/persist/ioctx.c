@@ -68,20 +68,14 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 }
 
 status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
-    printf("destroying\n");
     String *abs = IoCtx_GetAbs(m, ctx); 
     char *abs_cstr = String_ToChars(m, abs);
     /* TODO: remove files ... */
-    printf("destroying II\n");
     Iter it;
     Iter_Init(&it, ctx->files);
-    printf("destroying II.1\n");
     while(Iter_Next(&it) != END){
-        printf("destroying II.1.1\n");
         File *file = (File *)Iter_Get(&it);
-        printf("destroying II.1.2\n");
         File_Delete(file);
-        printf("destroying II.1.3\n");
     }
 
     /* remove dir */
@@ -89,7 +83,6 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
         return SUCCESS;
     }
 
-    printf("destroying III\n");
     return ERROR;
 }
 
@@ -98,14 +91,16 @@ IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
         Fatal("Error getAbsPath: missing base_s on ioctc\n", TYPE_IOCTX);
     }
 	IoCtx* ctx = (IoCtx*)MemCtx_Alloc(m, sizeof(IoCtx));
+    ctx->m = m;
 	ctx->type.of = TYPE_IOCTX;
     ctx->root = root;
     ctx->access = access;
     ctx->prior = prior;
 
     ctx->files = Span_Make(m, TYPE_SPAN);
-    ctx->m = MemKeyed_Make(m);
-    ctx->it = Iter_Make(m, (Span *)ctx->m->instance);
+    ctx->tbl = Span_Make(m, TYPE_TABLE);
+    ctx->mstore = MemKeyed_Make(m);
+    ctx->it = Iter_Make(m, (Span *)ctx->tbl);
 
     return ctx;
 }

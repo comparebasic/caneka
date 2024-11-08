@@ -45,24 +45,26 @@ status IoCtx_Tests(MemCtx *gm){
     r |= Test(l == file->data->length, "file length match, have %ld", l);
     r |= Test(String_EqualsBytes(file->data, bytes(buff)), "String content matches, have: '%s'", buff);
 
-    MemKeyed_SetKey(one->m, (Abstract *)String_Make(one->m, bytes("A")));
-    String_Make(one->m, bytes("Apples"));
+    MemKeyed_Set(one->mstore, one->tbl,
+        (Abstract *)String_Make(one->m, bytes("A")),
+        (Abstract *)String_Make(one->mstore, bytes("Apples"))
+    );
 
-    MemKeyed_SetKey(one->m, (Abstract *)String_Make(one->m, bytes("B")));
-    String_Make(one->m, bytes("Bananas"));
+    MemKeyed_Set(one->mstore, one->tbl,
+        (Abstract *)String_Make(one->m, bytes("B")),
+        (Abstract *)String_Make(one->mstore, bytes("Bannanas"))
+    );
 
-    Debug_Print((void *)one->m->instance, 0, "Mem Instance: ",COLOR_PURPLE, TRUE);
+    Debug_Print((void *)one->tbl, 0, "Mem Instance: ",COLOR_PURPLE, TRUE);
     printf("\n");
-    Debug_Print((void *)one->m->index, 0, "Mem Span: ", COLOR_PURPLE, TRUE);
+    Debug_Print((void *)one->mstore->index, 0, "Mem Span: ", COLOR_PURPLE, TRUE);
     printf("\n");
+
     while(Iter_Next(one->it) != END){
         Hashed *h = (Hashed *)Iter_Get(one->it);
         if(h != NULL){
-            printf("found\n");
             Debug_Print((void *)h, 0, "", COLOR_PURPLE, TRUE);
             printf("\n");
-        }else{
-            printf("skip\n");
         }
     }
 
