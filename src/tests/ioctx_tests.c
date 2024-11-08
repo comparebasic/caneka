@@ -62,6 +62,8 @@ status IoCtx_Tests(MemCtx *gm){
     Debug_Print((void *)one->mstore->m->index, 0, "Mem Span: ", COLOR_PURPLE, TRUE);
     printf("\n");
 
+    MemKeyed *mk = MemKeyed_FromIndex(m, IoCtx_GetMstorePath(m, one), one);
+
     /*
     IoCtx_Destroy(m, one, NULL);
     dir = opendir(onePath_cstr);

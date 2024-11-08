@@ -49,6 +49,32 @@ status File_Persist(MemCtx *m, File *file){
     return NOOP;
 }
 
+status File_Load(MemCtx *m, File *file, Access *access, IoCtx *ctx){
+    FILE *f = fopen((char *)file->abs->bytes, "r");
+    if(f == NULL){
+        return NOOP;
+    }
+
+    file->data = String_Init(m, STRING_EXTEND);
+    char buff[FILE_READ_LENGTH+1];
+    size_t l = fread(buff, 1, FILE_READ_LENGTH, f);
+    while(l > 0){
+        String_AddBytes(m, file->data, bytes(buff), l);
+        if(l < FILE_READ_LENGTH){
+            break;
+        }
+        l = fread(buff, 1, FILE_READ_LENGTH, f);
+    }
+
+    if(feof(f)){
+        return SUCCESS;
+    }else if(ferror(f)){
+        return ERROR;
+    }
+
+    return ERROR;
+}
+
 status File_Delete(File *file){
     char buff[PATH_BUFFLEN];
     file->type.state &= ~FILE_UPDATED;

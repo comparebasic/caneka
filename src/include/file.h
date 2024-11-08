@@ -1,3 +1,5 @@
+#define FILE_READ_LENGTH 1023
+
 typedef struct file {
     Type type;
     String *path;
@@ -16,3 +18,4 @@ status File_Persist(MemCtx *m, File *file);
 status File_SetAbs(MemCtx *m, File *file, IoCtx *ctx);
 File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx);
 status File_Delete(File *file);
+status File_Load(MemCtx *m, File *file, Access *access, IoCtx *ctx);

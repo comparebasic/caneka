@@ -23,6 +23,17 @@ status MemKeyed_Set(MemCtx *m, MemKeyed *mk, Abstract *key, Abstract *value){
     return SUCCESS;
 }
 
+MemKeyed *MemKeyed_FromIndex(MemCtx *m, String *index, IoCtx *ctx){
+    printf("index is: \x1b[%dm%s\n", COLOR_YELLOW, index->bytes);
+
+    File *file = File_Make(m, index, NULL, NULL);
+    File_Load(m, file, NULL, ctx);
+
+    printf("index content: \x1b[%dm'%s'\x1b[0m\n", COLOR_YELLOW, file->data->bytes);
+
+    return NULL;
+}
+
 status MemKeyed_Persist(MemCtx *m, MemKeyed *mstore, IoCtx *ctx){
     Iter it;
     Iter_Init(&it, mstore->tbl);

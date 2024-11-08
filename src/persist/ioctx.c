@@ -45,7 +45,7 @@ String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path){
 	return s;
 }
 
-status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
+status IoCtx_LoadOrReserve(MemCtx *m, IoCtx *ctx){
     status r = READY;
     String *s = String_Init(m, STRING_EXTEND);
     String *path = pathRecurse(m, s, ctx, ctx->prior);
@@ -60,6 +60,32 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
             return ERROR;
         }
     }
+
+    return SUCCESS;
+}
+
+status IoCtx_Load(MemCtx *m, IoCtx *ctx){
+    status r = READY;
+    String *s = String_Init(m, STRING_EXTEND);
+    String *path = pathRecurse(m, s, ctx, ctx->prior);
+
+    char *path_cstr = String_ToChars(m, path);
+    DIR* dir = opendir(path_cstr);
+    if(dir == NULL && ENOENT == errno){
+        return MISS;
+    }
+
+    /* load mstore */
+    /* load file list */
+
+    closedir(dir);
+    return SUCCESS;
+}
+
+status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
+    status r = READY;
+
+    r |= IoCtx_LoadOrReserve(m, ctx);
 
     Iter it;
     Iter_Init(&it, ctx->files);
