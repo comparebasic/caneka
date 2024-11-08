@@ -10,10 +10,19 @@ related: core/mem.c
 
 #define MemH(x) MemCtx_FromHandle((MemHandle *)(x))
 
-typedef struct coords {
-    void *ptr;
+typedef struct local_ptr {
     int slabIdx;
     int offset;
+} LocalPtr;
+
+typedef struct coords {
+    Type type;
+    void *ptr;
+    /* localptr */
+    int slabIdx;
+    int offset;
+    /* end localptr */
+    struct coords *next;
 } Coords;
 
 typedef struct mem_slab {

@@ -21,6 +21,9 @@ status File_Persist(MemCtx *m, File *file){
                 s = String_Next(s);
             }
             file->type.state &= ~FILE_UPDATED;
+            if(DEBUG_FILE){
+                printf("\x1b[%dmSaved file: %s\n", DEBUG_FILE, file->path->bytes);
+            }
             fclose(f);
             if((file->type.state & FILE_TRACKED) != 0){
                 int suffixL = strlen(".notes");
@@ -73,6 +76,8 @@ File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx){
     if(ctx != NULL){
         file->abs = IoCtx_GetPath(m, ctx, file->path);
         Span_Add(ctx->files, (Abstract *)file);
+    }else{
+        file->abs = file->path;
     }
     
     return file;

@@ -74,6 +74,7 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 MemCtx *MemCtx_Make(){
     MemCtx *m = (MemCtx *) trackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
     m->type.of = TYPE_MEMCTX;
+    m->latest.type.of = TYPE_COORDS;
     return m;
 }
 
@@ -106,7 +107,7 @@ MemSlab *MemSlab_Make(MemCtx *m){
         }
         last->next = sl;
     }
-    if(m->index != NULL && m->index->type.of == TYPE_MEM_SPAN){
+    if(m->index != NULL){
         Span_Add((Span *)m->index, (Abstract *)sl);
         sl->idx = m->index->metrics.set;
     }else{
