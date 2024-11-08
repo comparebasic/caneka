@@ -6,6 +6,7 @@ word GLOBAL_flags = 0;
 status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= SpanDef_Init();
+    r |= Oset_Init(m);
     r |= Debug_Init(m);
     r |= Hash_Init(m);
     r |= AppsDebug_Init(m);

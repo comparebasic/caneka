@@ -22,6 +22,11 @@ OsetDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, Maker from, ToOset to
     return def;
 }
 
+status OsetDef_Reset(Oset *o){
+    o->remaining = 0;
+    o->currentType = ZERO;
+}
+
 status Oset_Init(MemCtx *m){
     if(_oset == NULL){
         Span *osetDefs = Span_Make(m, TYPE_SPAN);
@@ -52,7 +57,8 @@ status Oset_Add(MemCtx *m, Oset *o, Lookup *osetDefs){
 Oset *Oset_Make(MemCtx *m, Lookup *osetDefs){
     Oset *o = (Oset *)MemCtx_Alloc(m, sizeof(Oset));
     o->type.of = TYPE_OSET;
-        Oset_Add(MemCtx *m, o, osetDefs);
+    o->rbl = OsetParser_Make(m, NULL, o);
+    Oset_Add(MemCtx *m, o, osetDefs);
     return o;
 }
 
@@ -73,5 +79,16 @@ String *Oset_To(MemCtx *m, cls type, Abstract *a){
 }
 
 Abstract *Abs_FromOset(MemCtx *m, String *s){
+    Roebling_Reset(m, _oset->rbl, s);
+    _oset->type.state = ZERO;
+    while(!HasFlag(xml->rbl->type.state, BREAK)
+            && !HasFlag(_oset->type.state, SUCCESS)){
+        Roebling_RunCycle(xml->rbl);
+    };
+
+    if((_oset->rbl->type.state & SUCCESS) != 0){
+        printf("yay parset oset\n");
+    }
+
     return NULL;
 }

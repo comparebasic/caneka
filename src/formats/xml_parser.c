@@ -159,9 +159,9 @@ status XmlParser_Parse(XmlParser *xml, String *s){
         Roebling_RunCycle(xml->rbl);
     };
 
-    xml->type.state |= 
-        (xml->rbl->type.state & (BREAK|ERROR)) 
-        | (xml->ctx->type.state & (ERROR|SUCCESS));
+    xml->type.state = 
+        (xml->rbl->type.state & (BREAK|ERROR)) | 
+            (xml->ctx->type.state & (ERROR|SUCCESS));
 
     return xml->type.state;
 }

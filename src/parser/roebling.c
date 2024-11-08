@@ -236,6 +236,13 @@ status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
     return r;
 }
 
+status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){
+    if(s != NULL){
+        Range_Set(&rbl->range, s);
+    }
+    return SUCCESS;
+}
+
 Roebling *Roebling_Make(MemCtx *m,
         cls type,
         Span *parsers,
@@ -258,7 +265,7 @@ Roebling *Roebling_Make(MemCtx *m,
     rbl->marks = LookupInt_Make(m, markStart, (Abstract *)rbl); 
     rbl->markLabels = markLabels;
     Roebling_Prepare(rbl, parsers);
-    Range_Set(&(rbl->range), s);
+    Roebling_Reset(m, rbl, s);
 
     return rbl;
 }

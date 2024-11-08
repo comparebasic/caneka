@@ -6,7 +6,7 @@ enum oset_states {
     OSET_VALUE = 0
 };
 
-typedef oset {
+typedef struct oset {
     Type type;
     String *content;
     Chain *defs;
@@ -18,9 +18,9 @@ typedef oset {
     TableChain *byName;
 } Oset;
 
-typedef status (*ToOset)(MemCtx *m, OsetCtx *oset, Abstract *a);
+typedef status (*ToOset)(MemCtx *m, Oset *oset, Abstract *a);
 
-typedef oset_def {
+typedef struct oset_def {
     Type type;
     cls typeOf;
     word _;
@@ -29,6 +29,7 @@ typedef oset_def {
     ToOset toOset;
 } OsetDef;
 
+status Oset_Init(MemCtx *m);
 Oset *Oset_Make(MemCtx *m, Lookup *osetDefs);
 status Oset_Add(MemCtx *m, Oset *o, Lookup *osetDefs);
 

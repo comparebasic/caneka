@@ -234,6 +234,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"
+#include "oset.h"
 #include "ioctx.h"
 #include "memkeyed.h"
 #include "file.h"

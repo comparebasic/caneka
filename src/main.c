@@ -42,7 +42,10 @@ static void *tests[] = {
     "ServeChunked", ServeChunked_Tests,
     "ServeMultiple", ServeMultiple_Tests,
     */
+    "Oset", Oset_Tests,
+    /*
     "IoCtx", IoCtx_Tests,
+    */
     NULL, NULL
 };
 
@@ -99,11 +102,6 @@ int main(int argc, char **argv){
     }
 
     MemCtx *m = MemCtx_Make();
-    SpanDef_Init();
-    Span *p = Span_Make(m, TYPE_SPAN);
-    String *s = String_Make(m, bytes("Hi"));
-    Span_Set(p, 0, (Abstract *)s);
-
     Caneka_Init(m);
     
     if(argc > 1){

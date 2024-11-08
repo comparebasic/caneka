@@ -14,11 +14,12 @@ typedef struct roebling {
     /* current */
     Span * matches;
     /* overall */
-    Range range;
     Span *parsers_do;
     Lookup *marks;
-    /* step specific */
     RblCaptureFunc capture;
+    /* run specific */
+    Range range;
+    /* step specific */
     i8 jump;
     i8 jumpMiss;
     int tail;
@@ -42,6 +43,7 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
 status Roebling_ResetPatterns(Roebling *rbl);
+status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s);
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
 int Roebling_GetMatchIdx(Roebling *rbl);
 Match *Roebling_GetMatch(Roebling *rbl);
