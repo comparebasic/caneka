@@ -27,6 +27,10 @@ String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
     return ctx->abs;
 }
 
+String *IoCtx_GetMstorePath(MemCtx *m, IoCtx *ctx){
+    return IoCtx_GetPath(m, ctx, String_Make(m, bytes("mstore.index")));
+}
+
 String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path){
     String *s = String_Init(m, STRING_EXTEND);
     String *abs = IoCtx_GetAbs(m, ctx); 
@@ -57,12 +61,14 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
         }
     }
 
-    while(Iter_Next(ctx->it) != END){
-        File *file = (File *)Iter_Get(ctx->it);
+    Iter it;
+    Iter_Init(&it, ctx->files);
+    while(Iter_Next(&it) != END){
+        File *file = (File *)Iter_Get(&it);
         r |= File_Persist(m, file);
     }
 
-    r |= MemKeyed_Persist(m, ctx);
+    r |= MemKeyed_Persist(m, ctx->mstore, ctx);
 
     return r;
 }
@@ -98,9 +104,7 @@ IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
     ctx->prior = prior;
 
     ctx->files = Span_Make(m, TYPE_SPAN);
-    ctx->tbl = Span_Make(m, TYPE_TABLE);
     ctx->mstore = MemKeyed_Make(m);
-    ctx->it = Iter_Make(m, (Span *)ctx->tbl);
 
     return ctx;
 }

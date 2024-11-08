@@ -37,6 +37,7 @@ struct strcursor_range;
 struct roebling;
 struct span_def;
 struct mem_handle;
+struct mem_keyed;
 
 extern word GLOBAL_flags;
 
@@ -126,6 +127,7 @@ enum types {
     TYPE_TABLE,
     TYPE_POLL_MAP_SPAN,
     _TYPE_SPAN_END,
+    TYPE_MEM_KEYED,
     TYPE_SPAN_STATE,
     TYPE_SPAN_DEF,
     TYPE_QUEUE,

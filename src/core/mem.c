@@ -144,7 +144,7 @@ void *MemCtx_GetSlab(MemCtx *m, void *addr){
 MemCtx *MemCtx_FromHandle(MemHandle *a){
     if(a->type.of == TYPE_MEMCTX){
         return (MemCtx *)a;
-    }else if(Ifc_Match(a->type.of, TYPE_MEMCTX)){
+    }else if(Ifc_Match(a->type.of, TYPE_MEMHANDLE)){
         return a->m;
     }
     return NULL;

@@ -70,8 +70,10 @@ File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx){
     file->type.of = TYPE_FILE;
     file->access = access;
     file->path = path;
-    file->abs = IoCtx_GetPath(m, ctx, file->path);
-    Span_Add(ctx->files, (Abstract *)file);
+    if(ctx != NULL){
+        file->abs = IoCtx_GetPath(m, ctx, file->path);
+        Span_Add(ctx->files, (Abstract *)file);
+    }
     
     return file;
 }

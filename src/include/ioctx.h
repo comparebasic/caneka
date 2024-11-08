@@ -14,13 +14,12 @@ typedef struct ioctx {
     String *abs;
     Access *access;
     struct ioctx *prior;
-    Span *tbl;
-    MemCtx *mstore;
+    struct mem_keyed *mstore;
     Span *files;
-    Iter *it;
 } IoCtx;
 
 String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path);
 IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior);
 status IoCtx_Persist(MemCtx *m, IoCtx *ctx);
 status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access);
+String *IoCtx_GetMstorePath(MemCtx *m, IoCtx *ctx);

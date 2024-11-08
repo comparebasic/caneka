@@ -8,6 +8,8 @@ related: core/mem.c
 */
 #define MEM_SLAB_SIZE 4096
 
+#define MemH(x) MemCtx_FromHandle((MemHandle *)(x))
+
 typedef struct coords {
     void *ptr;
     int slabIdx;
@@ -49,8 +51,3 @@ void *MemCtx_GetSlab(MemCtx *m, void *addr);
 
 /* utils */
 MemCtx *MemCtx_FromHandle(MemHandle *a);
-
-/* mem-keyed */
-MemCtx *MemKeyed_Make(MemCtx *m);
-status MemKeyed_SetKey(MemCtx *m, Abstract *key);
-status MemKeyed_Alloc(MemCtx *m, Abstract *key);
