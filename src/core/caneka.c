@@ -162,5 +162,6 @@ boolean Ifc_Match(cls inst, cls ifc){
             inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN ||
             inst == TYPE_TABLE);
     }
-    return FALSE;
+
+    return inst == ifc;
 }

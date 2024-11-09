@@ -38,6 +38,8 @@ struct roebling;
 struct span_def;
 struct mem_handle;
 struct mem_keyed;
+struct oset;
+struct oset_def;
 
 extern word GLOBAL_flags;
 
@@ -90,6 +92,7 @@ enum types {
     TYPE_WRAPPED_FUNC,
     TYPE_WRAPPED_DO,
     TYPE_WRAPPED_UTIL,
+    TYPE_WRAPPED_I64,
     TYPE_WRAPPED_PTR,
     TYPE_UTIL,
     TYPE_UNIT,
@@ -165,13 +168,13 @@ enum status_types {
     HASHED = 1 << 4,
     MISS = 1 << 5,
     END = 1 << 6,
-    NEXT = 1 << 7,
+    TRACKED = 1 << 7,
     /* class speciric */
     INVERTED = 1 << 8,
     OPTIONAL = 1 << 9,
     INLINE = 1 << 10,
     BREAK = 1 << 11,
-    TRACKED = 1 << 12,
+    NEXT = 1 << 12,
     INCOMING = 1 << 13,
     PROCESSING = 1 << 14,
     RESPONDING = 1 << 15,
