@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-void *MemLocal_GetPtr(LocalPtr *lptr){
+void *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr, boolean convert){
     return NULL;
 }
 

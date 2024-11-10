@@ -308,9 +308,10 @@ boolean String_Equals(String *a, String *b){
     return FALSE;
 }
 
-String *String_Next(String *s){
+String *String_Next(MemCtx *m, String *s){
     if(s->type.of == TYPE_STRING_CHAIN){
-        return s->next;
+        boolean convert = (s->type.state & LOCAL_PTR) != 0;
+        return MemLocal_GetPtr(MemCtx *m, (LocalPtr *)s->next, convert);
     }
     return NULL;
 }
