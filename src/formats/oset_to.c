@@ -1,9 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-String *String_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
-    String *s = (String *s)asIfc(v, TYPE_STRING);
-    String *os = String_Make(m, STRING_EXTEND);
+Abstract *String_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+    String *s = (String *)asIfc(a, TYPE_STRING);
+    String *os = String_Init(m, STRING_EXTEND);
     if(key != NULL){
         String_Add(m, os, key);
         String_AddBytes(m, os, bytes(":"), 1);
@@ -11,80 +11,80 @@ String *String_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
     String_Add(m, os, odef->name);
     String_AddBytes(m, os, bytes("/"), 1);
     String_Add(m, os, String_FromInt(m, s->length));
-    char eq = '=';
-    char end = ';';
+    char *eq = "=";
+    char *end = ";";
     if((o->type.state & LINE_SEPERATED) != 0){
-        eq = ' ';
-        end = '\n';
+        eq = " ";
+        end = "\n";
     }
     String_AddBytes(m, os, bytes(eq), 1);
     String_Add(m, os, s);
     String_AddBytes(m, os, bytes(end), 1);
 
-    return os;
+    return (Abstract *)os;
 }
 
-String *I64_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
-    Single *sg = (Single *s)as(v, TYPE_WRAPPED_I64);
-    String *os = String_Make(m, STRING_EXTEND);
+Abstract *I64_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
+    String *os = String_Init(m, STRING_EXTEND);
     if(key != NULL){
         String_Add(m, os, key);
         String_AddBytes(m, os, bytes(":"), 1);
     }
     String_Add(m, os, odef->name);
     String_AddBytes(m, os, bytes("/"), 1);
-    String *s = String_FromI64(m, (i64)(*v));
+    String *s = String_FromI64(m, *((i64*)a));
     String_Add(m, os, String_FromInt(m, s->length));
-    char eq = '=';
-    char end = ';';
+    char *eq = "=";
+    char *end = ";";
     if((o->type.state & LINE_SEPERATED) != 0){
-        eq = ' ';
-        end = '\n';
+        eq = " ";
+        end = "\n";
     }
     String_AddBytes(m, os, bytes(eq), 1);
-    String_Add(m, os, String_FromInt(m, s);
+    String_Add(m, os, String_FromInt(m, s->length));
     String_AddBytes(m, os, bytes(end), 1);
 
-   return os;
+   return (Abstract *)os;
 }
 
-String *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
     Span *p = asIfc(a, TYPE_SPAN);
 
-    String *os = String_Make(m, STRING_EXTEND);
+    String *os = String_Init(m, STRING_EXTEND);
     if(key != NULL){
         String_Add(m, os, key);
         String_AddBytes(m, os, bytes(":"), 1);
     }
     String_Add(m, os, odef->name);
     String_AddBytes(m, os, bytes("/"), 1);
-    String *s = String_FromI64(m, (i64)(*v));
+    String *s = String_FromI64(m, *((i64 *)a));
     String_Add(m, os, String_FromInt(m, p->nvalues));
-    char eq = '=';
-    char end = ';';
+    char *eq = "=";
+    char *end = ";";
     if((o->type.state & LINE_SEPERATED) != 0){
-        eq = ' ';
-        end = '\n';
+        eq = " ";
+        end = "\n";
     }
     String_AddBytes(m, os, bytes(eq), 1);
 
     Iter it;
-    Iter_Init(m, a);
-    String *key = NULL;
-    while((Iter_Next(it) & END) == 0){
-        Abstract *item = Iter_Get(it);
+    Iter_Init(&it, p);
+    String *itemKey = NULL;
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *item = Iter_Get(&it);
         if(item != NULL){
             if(item->type.of == TYPE_HASHED){
                 Hashed *h = (Hashed *)item;
-                key = h->item;
+                itemKey = (String *)h->item;
                 item = h->value;
             }else{
-                key = NULL;
+                itemKey = NULL;
             }
-            String_Add(m, os, Oset_To(m, key, item));
+            String_Add(m, os, Oset_To(m, itemKey, item));
         }
     }
     String_AddBytes(m, os, bytes(end), 1);
 
-    return os;
+    return (Abstract *)os;
 }

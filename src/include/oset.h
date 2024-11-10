@@ -1,9 +1,15 @@
 enum oset_states {
     OSET_START = 0,
-    OSET_KEY = 0,
-    OSET_LENGTH = 0,
-    OSET_OPTS = 0,
-    OSET_VALUE = 0
+    OSET_KEY,
+    OSET_TOKEN,
+    OSET_LENGTH,
+    OSET_OPTS,
+    OSET_VALUE,
+};
+
+enum oset_marks {
+    OSET_MARK_START = 1,
+    OSET_MARK_LENGTH,
 };
 
 enum oset_flags {
@@ -13,11 +19,12 @@ enum oset_flags {
 typedef struct oset {
     Type type;
     MemCtx *m;
+    /* current item */
     String *content;
-    Chain *defs;
-    /* internal */
+    String *key;
+    struct oset_def *odef;
     int remaining;
-    cls currentType;
+    /* internal */
     Roebling *rbl;
     Chain *byType;
     TableChain *byName;
@@ -45,3 +52,4 @@ Abstract *Abs_FromOset(MemCtx *m, String *s);
 Roebling *OsetParser_Make(MemCtx *m, String *s, Abstract *source);
 
 #include "formats/oset_to.h"
+#include "formats/oset_from.h"

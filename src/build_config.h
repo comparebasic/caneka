@@ -19,8 +19,8 @@ static char *inc[] = {
 };
 
 static BuildSubdir coreobj = { "core", {
-    "caneka.c", "mem.c", "string.c", "error.c",
-	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c",
+    "caneka.c", "mem.c", "memlocal.c", "string.c", "error.c",
+	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c", "table_chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 
     "mess.c", "single.c", "debug.c", "abstract.c", "time.c",
@@ -38,7 +38,7 @@ static BuildSubdir parserobj = {"parser", {
 }};
 
 static BuildSubdir formatsobj = {"formats", {
-    "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c",
+    "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c","oset_from.c",
     NULL
 }};
 

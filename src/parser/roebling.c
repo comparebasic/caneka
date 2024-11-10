@@ -240,6 +240,8 @@ status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){
     if(s != NULL){
         Range_Set(&rbl->range, s);
     }
+    rbl->type.state &= ~(SUCCESS|ERROR|BREAK);
+    rbl->idx = 0;
     return SUCCESS;
 }
 

@@ -6,16 +6,16 @@ word GLOBAL_flags = 0;
 status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= SpanDef_Init();
-    r |= Oset_Init(m);
     r |= Debug_Init(m);
     r |= Hash_Init(m);
+    r |= Oset_Init(m);
     r |= AppsDebug_Init(m);
     return r;
 }
 
 static word states[] = {
     ERROR,
-    OPTIONAL,
+    LOCAL_PTR,
     NOOP,
     INLINE,
     BREAK,
@@ -34,7 +34,7 @@ static word states[] = {
 
 static char *stateNames[] = {
     "ERROR,",
-    "OPTIONAL,",
+    "LOCAL_PTR,",
     "NOOP/WHITESPACE,",
     "INLINE/ELASTIC,",
     "BREAK,",

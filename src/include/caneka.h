@@ -170,8 +170,8 @@ enum status_types {
     END = 1 << 6,
     TRACKED = 1 << 7,
     /* class speciric */
-    INVERTED = 1 << 8,
-    OPTIONAL = 1 << 9,
+    LOCAL_PTR = 1 << 8,
+    INVERTED = 1 << 9,
     INLINE = 1 << 10,
     BREAK = 1 << 11,
     NEXT = 1 << 12,
@@ -210,6 +210,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
+#include "memlocal.h"
 #include "single.h"
 #include "maker.h"
 #include "compare.h"

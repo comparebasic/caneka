@@ -6,6 +6,11 @@ int Int_FromString(String *s){
     return n;
 }
 
+i64 I64_FromString(String *s){
+    i64 n = strtol((char *)s->bytes, NULL, 10);
+    return n;
+}
+
 Single *Int_Wrapped(MemCtx *m, int n){
     m = MemCtx_FromHandle((MemHandle *)m);
     Single *sgl = (Single *)MemCtx_Alloc(m, sizeof(Single));

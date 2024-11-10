@@ -15,8 +15,6 @@ static boolean charMatched(word c, PatCharDef *def){
     boolean matched = FALSE;
     if((def->flags & PAT_ALL) != 0){
         matched =  TRUE;
-    }else if((def->flags & PAT_COUNT) != 0){
-        matched = (c == def->from);
     }else{
         matched = (c >= def->from && c <= def->to);
     }
@@ -114,13 +112,16 @@ static status match_FeedPat(Match *mt, word c){
                 mt->count++;
             }
 
-            if((def->flags & (PAT_ANY|PAT_MANY)) != 0){
+
+            if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
+                    ((def->flags & PAT_COUNT) != 0 && (--mt->remaining) > 0)){
                 match_StartOfTerm(mt);
                 mt->type.state |= TERM_FOUND;
             }else{
                 match_NextTerm(mt);
                 mt->type.state &= ~TERM_FOUND;
             }
+
             break;
         }else{
             if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){

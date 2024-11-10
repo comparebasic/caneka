@@ -20,9 +20,11 @@ enum pat_flags {
 };
 
 enum match_flags {
-    ANCHOR_UNTIL = 1 << 0,
-    ANCHOR_CONTAINS = 1 << 1,
-    ANCHOR_START = 1 << 2,
+    /* */
+    ANCHOR_UNTIL = 1 << 11,
+    ANCHOR_CONTAINS = 1 << 12,
+    ANCHOR_START = 1 << 13,
+    SEARCH = 1 << 14, 
 };
 
 #define patText \

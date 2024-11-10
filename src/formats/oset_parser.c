@@ -3,16 +3,17 @@
 
 /* token patCharDefs */
 static word labelDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, ':',':', patText,
+    PAT_KO|PAT_CONSUME, ':',':', patText,
     PAT_END, 0, 0
 };
+
 static word tokenNameDef[] = {
     PAT_KO, '/','/', patText,
     PAT_END, 0, 0
 };
 
 static word lengthDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM, '/','/',PAT_MANY|PAT_TERM,'0', '9',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_MANY|PAT_TERM,'0', '9',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
     PAT_END, 0, 0
 };
 
@@ -28,23 +29,26 @@ static word sepDef[] = {
 
 /* match setups */
 static status start(Roebling *rbl){
+    status r = READY;
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)labelNameDef, OSET_TYPE, OSET_MARK_LENGTH);
+        (PatCharDef*)labelDef, OSET_KEY, -1);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)tokenNameDef, OSET_TYPE, -1);
+        (PatCharDef*)tokenNameDef, OSET_TOKEN, OSET_MARK_LENGTH);
     return r;
 }
 
 static status token(Roebling *rbl){
+    status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)tokenNameDef, OSET_TYPE, -1);
+        (PatCharDef*)tokenNameDef, OSET_TOKEN, -1);
     return r;
 }
 
 static status defineLength(Roebling *rbl){
+    status r = READY;
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
@@ -53,44 +57,50 @@ static status defineLength(Roebling *rbl){
 }
 
 static status value(Roebling *rbl){
+    status r = READY;
     Roebling_ResetPatterns(rbl);
 
     Match *mt = Span_ReserveNext(rbl->matches);
     Oset *oset = (Oset *)as(rbl->source, TYPE_OSET);
 
-    status r = READY;
-    r |= Match_SetPattern(mt, valueDef);
+    r |= Match_SetPattern(mt, (PatCharDef *)valueDef);
     mt->captureKey = OSET_VALUE;
     mt->remaining = oset->remaining;
 
     return r;
 }
 
-static status OsetParser_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
+static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     Oset *oset = (Oset *)as(source, TYPE_OSET);
-
-    oset->remaining = 0;
     if(captureKey == OSET_LENGTH){
-       oset->remaining = Int_FromString(s); 
+        oset->remaining = Int_FromString(s);
+    }else if(captureKey == OSET_KEY){
+        oset->key = s;
+    }else if(captureKey == OSET_TOKEN){
+        OsetDef *odef = TableChain_Get(oset->byName, s);
+        if(odef == NULL){
+            Fatal("Error: type not found\n", TYPE_OSET);
+        }
+        oset->odef = odef;
+    }else if(captureKey == OSET_VALUE){
+        oset->content = s;
     }
-
-    status r = SUCCESS;
-    return r;
+    return SUCCESS;
 }
-
 
 Roebling *OsetParser_Make(MemCtx *m, String *s, Abstract *source){
     MemHandle *mh = (MemHandle *)m;
-    Span *parsers_do =  Span_From(m, 4, 
+    Span *parsers_do =  Span_From(m, 6, 
         (Abstract *)Int_Wrapped(m, OSET_MARK_START), 
             (Abstract *)Do_Wrapped(mh, (DoFunc)start),
             (Abstract *)Do_Wrapped(mh, (DoFunc)token),
         (Abstract *)Int_Wrapped(m, OSET_MARK_LENGTH), 
             (Abstract *)Do_Wrapped(mh, (DoFunc)defineLength),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)valueDef));
+            (Abstract *)Do_Wrapped(mh, (DoFunc)value));
 
     LookupConfig config[] = {
-        {OSET_START, (Abstract *)String_Make(m, bytes("OSET_START"))},
+        {OSET_MARK_START, (Abstract *)String_Make(m, bytes("OSET_START"))},
+        {OSET_MARK_LENGTH, (Abstract *)String_Make(m, bytes("OSET_LENGTH"))},
         {0, NULL},
     };
 

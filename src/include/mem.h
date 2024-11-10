@@ -10,11 +10,6 @@ related: core/mem.c
 
 #define MemH(x) MemCtx_FromHandle((MemHandle *)(x))
 
-typedef struct local_ptr {
-    int slabIdx;
-    int offset;
-} LocalPtr;
-
 typedef struct coords {
     Type type;
     void *ptr;

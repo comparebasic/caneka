@@ -1,8 +1,8 @@
 typedef struct table_chain {
     Type type;
     Span *tbl;
-    struct chain *next;
+    struct table_chain *next;
 } TableChain;
-void *TableChain_Get(Chain *chain, String *s);
+void *TableChain_Get(TableChain *chain, String *s);
 status TableChain_Extend(struct mem_ctx *m, TableChain *chain, struct span *tbl);
-Chain *TableChain_Make(struct mem_ctx *m, struct span *tbl);
+TableChain *TableChain_Make(struct mem_ctx *m, struct span *tbl);
