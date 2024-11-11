@@ -14,11 +14,4 @@
 #include <fcntl.h>
 #include <time.h>
 #include <dirent.h>
-
-#ifdef FREEBSD
-    #include <netinet/in.h>
-#endif
-
-#ifdef LINUX
-    #include <sys/epoll.h>
-#endif
+#include <netinet/in.h>
