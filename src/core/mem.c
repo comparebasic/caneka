@@ -47,6 +47,7 @@ void *MemCtx_Alloc(MemCtx *m, size_t s){
     m->latest.ptr = ptr;
     m->latest.slabIdx = sl->idx;
     m->latest.offset = ptr - (void *)sl->bytes;
+
     return ptr;
 }
 
@@ -74,7 +75,6 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 MemCtx *MemCtx_Make(){
     MemCtx *m = (MemCtx *) trackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
     m->type.of = TYPE_MEMCTX;
-    m->latest.type.of = TYPE_COORDS;
     return m;
 }
 

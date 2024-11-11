@@ -19,7 +19,7 @@ static char *inc[] = {
 };
 
 static BuildSubdir coreobj = { "core", {
-    "caneka.c", "mem.c", "memlocal.c", "string.c", "error.c",
+    "caneka.c", "mem.c",  "string.c", "error.c",
 	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c", "table_chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 
@@ -29,7 +29,7 @@ static BuildSubdir coreobj = { "core", {
 }};
 
 static BuildSubdir persistobj = { "persist", {
-    "ioctx.c", "file.c", "session.c","memkeyed.c",
+    "ioctx.c", "file.c", "session.c","memlocal.c",
     NULL
 }};
 

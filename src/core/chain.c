@@ -13,6 +13,19 @@ void *Chain_Get(Chain *chain, word type){
     }
 }
 
+void *Chain_GetIfc(Chain *chain, word type){
+    type = Ifc_Get(type);
+    Abstract *t = Lookup_Get(chain->funcs, type);
+    if(t != NULL){
+       return (void *)t; 
+    }
+    if(chain->next != NULL){
+        return Chain_Get(chain->next, type);
+    }else{
+        return NULL;
+    }
+}
+
 status Chain_Extend(MemCtx *m, Chain *chain, Lookup *funcs){
     Chain *last = chain;
     while(last->next != NULL){

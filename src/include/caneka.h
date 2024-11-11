@@ -21,6 +21,7 @@ typedef word cls;
 typedef word status;
 typedef byte boolean;
 
+struct string;
 struct serve_ctx;
 struct serve_req;
 struct handler;
@@ -40,6 +41,7 @@ struct mem_handle;
 struct mem_keyed;
 struct oset;
 struct oset_def;
+struct ioctx;
 
 extern word GLOBAL_flags;
 
@@ -202,6 +204,7 @@ char *Class_ToString(cls type);
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);
+cls Ifc_Get(cls inst);
 
 #include "abstract.h"
 #include "time_cnk.h"
@@ -209,7 +212,6 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
-#include "memlocal.h"
 #include "single.h"
 #include "maker.h"
 #include "compare.h"
@@ -239,7 +241,7 @@ boolean Ifc_Match(cls inst, cls ifc);
 #include "xml.h"
 #include "oset.h"
 #include "ioctx.h"
-#include "memkeyed.h"
+#include "memlocal.h"
 #include "file.h"
 #include "session.h"
 #include "serve.h"

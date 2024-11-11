@@ -94,7 +94,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
         r |= File_Persist(m, file);
     }
 
-    r |= MemKeyed_Persist(m, ctx->mstore, ctx);
+    r |= MemLocal_Persist(m, ctx->mstore, ctx);
 
     return r;
 }
@@ -130,7 +130,7 @@ IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
     ctx->prior = prior;
 
     ctx->files = Span_Make(m, TYPE_SPAN);
-    ctx->mstore = MemKeyed_Make(m);
+    ctx->mstore = MemLocal_Make();
 
     return ctx;
 }

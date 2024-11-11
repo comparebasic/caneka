@@ -8,6 +8,7 @@ status Caneka_Init(MemCtx *m){
     r |= SpanDef_Init();
     r |= Debug_Init(m);
     r |= Hash_Init(m);
+    r |= MemLocal_Init(m);
     r |= Oset_Init(m);
     r |= AppsDebug_Init(m);
     return r;
@@ -142,6 +143,18 @@ boolean Abs_Eq(Abstract *a, void *b){
         Fatal("Not implemented", TYPE_ABSTRACT);
         return FALSE;
     }
+}
+
+
+cls Ifc_Get(cls inst){
+    if(inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED){
+        return TYPE_STRING;
+    }else if(inst == TYPE_SPAN || inst == TYPE_QUEUE_SPAN || 
+            inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN){
+        return TYPE_SPAN;
+    }
+
+    return inst;
 }
 
 boolean Ifc_Match(cls inst, cls ifc){

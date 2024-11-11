@@ -10,16 +10,6 @@ related: core/mem.c
 
 #define MemH(x) MemCtx_FromHandle((MemHandle *)(x))
 
-typedef struct coords {
-    Type type;
-    void *ptr;
-    /* localptr */
-    int slabIdx;
-    int offset;
-    /* end localptr */
-    struct coords *next;
-} Coords;
-
 typedef struct mem_slab {
     byte bytes[MEM_SLAB_SIZE];
     word idx;
@@ -32,7 +22,11 @@ typedef struct mem_ctx {
     MemSlab *start_sl;
     int count;
     struct span *index;
-    Coords latest;
+    struct {
+        void *ptr;
+        int slabIdx;
+        int offset;
+    } latest;
 } MemCtx;
 
 typedef struct mem_handle  {

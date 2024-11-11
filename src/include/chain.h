@@ -8,4 +8,5 @@ typedef struct chain {
 Chain *Chain_Make(struct mem_ctx *m, struct lookup *funcs);
 status Chain_Extend(struct mem_ctx *m, Chain *chain, struct lookup *funcs);
 void *Chain_Get(Chain *chain, word type);
+void *Chain_GetIfc(Chain *chain, word type);
 

@@ -45,30 +45,9 @@ status IoCtx_Tests(MemCtx *gm){
     r |= Test(l == file->data->length, "file length match, have %ld", l);
     r |= Test(String_EqualsBytes(file->data, bytes(buff)), "String content matches, have: '%s'", buff);
 
-    MemKeyed_Set(one->m, one->mstore,
-        (Abstract *)String_Make(one->m, bytes("A")),
-        (Abstract *)String_Make(MemH(one->mstore), bytes("Apples"))
-    );
-
-    MemKeyed_Set(one->m, one->mstore,
-        (Abstract *)String_Make(one->m, bytes("B")),
-        (Abstract *)String_Make(MemH(one->mstore), bytes("Bannanas"))
-    );
-
-    MemKeyed_Persist(m, one->mstore, one);
-
-    Debug_Print((void *)one->mstore->tbl, 0, "Mem Instance: ",COLOR_PURPLE, TRUE);
-    printf("\n");
-    Debug_Print((void *)one->mstore->m->index, 0, "Mem Span: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
-    MemKeyed *mk = MemKeyed_FromIndex(m, IoCtx_GetMstorePath(m, one), one);
-
-    /*
     IoCtx_Destroy(m, one, NULL);
     dir = opendir(onePath_cstr);
     r |= Test(dir == NULL, "dir destroyed %s", onePath_cstr);
-    */
 
     MemCtx_Free(m);
     return r;
