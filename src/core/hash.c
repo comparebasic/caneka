@@ -133,7 +133,6 @@ Hashed *Hashed_Make(MemCtx *m, Abstract *a){
         v->type.state |= LOCAL_PTR;
         LocalPtr lp;
         if((MemLocal_GetLocal(m, a, &lp) & SUCCESS) != 0){
-            printf("Setting local ptr %d/%d\n", lp.slabIdx, lp.offset);
             void **lptr = (void **)&lp;
             v->item = (Abstract *)*lptr;
         }else{

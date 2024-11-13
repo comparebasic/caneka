@@ -36,16 +36,12 @@ static void *tests[] = {
     "Queue", Queue_Tests,
     "QueueNext", QueueNext_Tests,
     "QueueMixed", QueueMixed_Tests,
-    /*
     "Serve", Serve_Tests,
     "ServeHandle", ServeHandle_Tests,
     "ServeChunked", ServeChunked_Tests,
     "ServeMultiple", ServeMultiple_Tests,
-    */
     "Oset", Oset_Tests,
-    /*
     "IoCtx", IoCtx_Tests,
-    */
     "MemLocal", MemLocal_Tests,
     NULL, NULL
 };

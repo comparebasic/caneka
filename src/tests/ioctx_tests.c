@@ -36,9 +36,6 @@ status IoCtx_Tests(MemCtx *gm){
     file->type.state |= (FILE_UPDATED|FILE_TRACKED);
     File_Persist(m, file);
 
-    Debug_Print((void *)one->files, 0, "Files: ",COLOR_PURPLE, TRUE);
-    printf("\n");
-
     FILE *f = fopen((char *)file->abs->bytes, "r");
     memset(buff, 0, sizeof(buff));
     l = fread(buff, 1, sizeof(buff), f);

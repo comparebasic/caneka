@@ -5,6 +5,18 @@ int TABLE_DIM_BYTESIZES[7] = {1, 1, 2, 2, 4, 0, 0};
 int TABLE_REQUERY_MAX[7] = {4, 4,  8, 16, 32, 0, 0};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
+static void setValuePtr(Span *tbl, Hashed *h, Abstract *value){
+    LocalPtr lp;
+    if((tbl->m->type.state & value->type.state & LOCAL_PTR) != 0 &&
+            (MemLocal_GetLocal(tbl->m, value, &lp) & SUCCESS) != 0){
+
+        void **lptr = (void **)&lp;
+        h->value = (Abstract *)*lptr;
+    }else{
+        h->value = value;
+    }
+}
+
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
 
 static int getReQueryKey(SpanDef *def, i64 hash, int position, byte dim){
@@ -56,8 +68,8 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
         return h;
     }
     Hashed *_h = NULL;
-    if(h->value == NULL){
-        h->value = value;
+    if(op != SPAN_OP_GET && value != NULL){
+        setValuePtr(tbl, h, value);
     }
     Abstract *v = NULL;
     boolean found = FALSE;
@@ -131,17 +143,7 @@ Hashed *Table_SetValue(Span *tbl, Abstract *a){
 
 Abstract *Table_Get(Span *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
-    Debug_Print((void *)h, 0, "Table_Get H:", COLOR_CYAN, TRUE);
-    printf("\n");
     if((tbl->m->type.state & LOCAL_PTR) != 0){
-        LocalPtr *lptr = (LocalPtr *)&h->value;
-        printf("resolving ptr in Table_Get %d/%d -  %ld\n",lptr->slabIdx, lptr->offset, (util)tbl->m);
-        Bits_Print((byte *)&lptr->slabIdx, sizeof(int), "h->value.slabIdx: ", COLOR_YELLOW, TRUE);
-        printf("\n");
-        Bits_Print((byte *)&lptr->offset, sizeof(int), "h->value.offset: ", COLOR_YELLOW, TRUE);
-        printf("\n");
-        Bits_Print((byte *)&h->item, sizeof(void *), "h->item: ", COLOR_DARK, TRUE);
-        printf("\n");
         return MemLocal_GetPtr(tbl->m, (LocalPtr *)&h->value);
     }else{
         return h->value;
@@ -150,31 +152,6 @@ Abstract *Table_Get(Span *tbl, Abstract *a){
 
 int Table_Set(Span *tbl, Abstract *a, Abstract *value){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
-    Debug_Print((void *)h, 0, "Table_Set H:", COLOR_CYAN, TRUE);
-    printf("\n");
-
-    LocalPtr lp;
-    if((tbl->m->type.state & value->type.state & LOCAL_PTR) != 0 &&
-            (MemLocal_GetLocal(tbl->m, value, &lp) & SUCCESS) != 0){
-
-        Bits_Print((byte *)&lp.slabIdx, sizeof(int), "h->value.slabIdx: ", COLOR_YELLOW, TRUE);
-        printf("\n");
-        Bits_Print((byte *)&lp.offset, sizeof(int), "h->value.offset: ", COLOR_YELLOW, TRUE);
-        printf("\n");
-        printf("Setting local ptr on Set %d/%d - %ld\n", lp.slabIdx, lp.offset, (util)tbl->m);
-
-        void **lptr = (void **)&lp;
-        h->value = (Abstract *)*lptr;
-
-        Bits_Print((byte *)&h->value, sizeof(void *), "h->value: ", COLOR_DARK, TRUE);
-        printf("\n");
-        Bits_Print((byte *)&h->item, sizeof(void *), "h->item: ", COLOR_DARK, TRUE);
-        printf("\n");
-    }else{
-        printf("setting value directly\n");
-        h->value = value;
-    }
-
     return h->idx;
 }
 

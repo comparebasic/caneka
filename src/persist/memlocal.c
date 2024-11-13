@@ -79,7 +79,6 @@ MemLocal *MemLocal_Load(MemCtx *m, String *index, IoCtx *ctx){
             MemSlab *sl = MemSlab_Make(NULL);
             String_ToSlab(file.data, (void *)sl,  sizeof(MemSlab)); 
             MemSlab_Attach(ml->m, sl);
-            printf("Attached sl %d from %s\n", sl->idx, file.abs->bytes);
         }else{
             break;
         }
@@ -91,7 +90,6 @@ MemLocal *MemLocal_Load(MemCtx *m, String *index, IoCtx *ctx){
 
     MemLocal_Awake(ml);
     if((ml->type.state & ERROR) == 0){
-        printf("No Error\n");
         return ml;
     }
 
@@ -100,8 +98,6 @@ MemLocal *MemLocal_Load(MemCtx *m, String *index, IoCtx *ctx){
 
 status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
     Iter it;
-    Debug_Print((void *)mstore->m->index, 0, "Index of slabs:", COLOR_CYAN, TRUE);
-    printf("\n");
     Iter_Init(&it, mstore->m->index);
     String *s = IoCtx_GetMstorePath(m, ctx);
     File f;
@@ -135,7 +131,6 @@ status MemLocal_Awake(MemLocal *ml){
     ml->tbl = (Span *)MemLocal_GetPtr(ml->m, &lp);
     if(ml->tbl != NULL && ml->tbl->type.of == TYPE_TABLE){
         ml->tbl->m = ml->m;
-        printf("Awakened\n");
         return SUCCESS;
     }else{
         ml->type.state |= ERROR;
