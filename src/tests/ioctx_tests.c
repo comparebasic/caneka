@@ -17,7 +17,7 @@ status IoCtx_Tests(MemCtx *gm){
     memcpy(buff+l+1, "tmp", subL);
     buff[total] = '\0';
 
-    IoCtx *root = IoCtx_Make(m, String_Make(m, bytes(buff)), NULL, NULL);
+    IoCtx *root = IoCtxTests_GetRootCtx(m);
 
     IoCtx_Persist(m, root);
 

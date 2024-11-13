@@ -98,3 +98,20 @@ status ServeTests_SpawnRequest(MemCtx *m, char *msg){
     }
     return SUCCESS;
 }
+
+IoCtx *IoCtxTests_GetRootCtx(MemCtx *m){
+
+    char buff[PATH_BUFFLEN];
+    char *path = getcwd(buff, PATH_BUFFLEN);
+    int l = strlen(path);
+    int subL = strlen("tmp");
+    int total = l+subL+1;
+    if(total > PATH_BUFFLEN){
+        Fatal("MakeRoot path too long", TYPE_IOCTX);
+    }
+    buff[l] = '/';
+    memcpy(buff+l+1, "tmp", subL);
+    buff[total] = '\0';
+
+    return IoCtx_Make(m, String_Make(m, bytes(buff)), NULL, NULL);
+}

@@ -42,3 +42,4 @@ boolean String_Eq(Abstract *a, void *b);
 status String_AddInt(MemCtx *m, String *s, int i);
 String *String_ToEscaped(MemCtx *m, String *s);
 char *String_ToChars(MemCtx *m, String *s);
+status String_ToSlab(String *a, void *sl, size_t sz);

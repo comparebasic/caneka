@@ -42,6 +42,7 @@ MemCtx *MemCtx_Make();
 status MemCtx_Free(MemCtx *m);
 void *MemSlab_GetStart(MemSlab *sl);
 MemSlab *MemSlab_Make(MemCtx *m);
+MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl);
 size_t MemSlab_Available(MemSlab *sl);
 void *MemSlab_Alloc(MemSlab *sl, size_t s);
 i64 MemCtx_Used(MemCtx *m);

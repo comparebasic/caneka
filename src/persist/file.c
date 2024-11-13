@@ -49,10 +49,13 @@ status File_Persist(MemCtx *m, File *file){
     return NOOP;
 }
 
-status File_Load(MemCtx *m, File *file, Access *access, IoCtx *ctx){
+status File_Load(MemCtx *m, File *file, Access *access){
     FILE *f = fopen((char *)file->abs->bytes, "r");
     if(f == NULL){
-        return NOOP;
+        file->type.state |= NOOP;
+        return file->type.state;
+    }else{
+        file->type.state &= ~NOOP;
     }
 
     file->data = String_Init(m, STRING_EXTEND);

@@ -61,22 +61,38 @@ Abstract *MemLocal_Trans(MemCtx *m, Abstract *a){
     return a;
 }
 
-MemLocal *MemLocal_FromIndex(MemCtx *m, String *index, IoCtx *ctx){
+MemLocal *MemLocal_Load(MemCtx *m, String *index, IoCtx *ctx){
+    MemLocal *ml = MemLocal_MakeBare(m);
+
     int idx = 0;
-    File *file = NULL;
-    String *path = String_Init(m, STRING_EXTEND);
+    File file;
+    String *path = IoCtx_GetPath(m, ctx, index);
     String_AddBytes(m, path, bytes("."), 1);
     i64 l = path->length;
+    int max = 10;
     while(1){
         path->length = l;
         String_Add(m, path, String_FromInt(m, idx)); 
-        file = File_Make(m, path, ctx->access, NULL);
-        if((file->type.state & NOOP) == 0){
-            printf("Found memslab %d\n", idx);
+        File_Init(&file, path, ctx->access, NULL);
+        File_Load(m, &file, ctx->access);
+        if((file.type.state & NOOP) == 0){
+            MemSlab *sl = MemSlab_Make(NULL);
+            String_ToSlab(file.data, (void *)sl,  sizeof(MemSlab)); 
+            MemSlab_Attach(ml->m, sl);
+            printf("Attached sl %d from %s\n", sl->idx, file.abs->bytes);
         }else{
             break;
         }
         idx++;
+        if(idx > max){
+            break;
+        }
+    }
+
+    MemLocal_Awake(ml);
+    if((ml->type.state & ERROR) == 0){
+        printf("No Error\n");
+        return ml;
     }
 
     return NULL;
@@ -111,7 +127,24 @@ status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
     return SUCCESS;
 }
 
-MemLocal *MemLocal_Make(MemCtx *_m){
+
+status MemLocal_Awake(MemLocal *ml){
+    LocalPtr lp;
+    lp.slabIdx = 0;
+    lp.offset = 0;
+    ml->tbl = (Span *)MemLocal_GetPtr(ml->m, &lp);
+    if(ml->tbl != NULL && ml->tbl->type.of == TYPE_TABLE){
+        ml->tbl->m = ml->m;
+        printf("Awakened\n");
+        return SUCCESS;
+    }else{
+        ml->type.state |= ERROR;
+        ml->type.state &= ~SUCCESS;
+        return ml->type.state;
+    }
+}
+
+MemLocal *MemLocal_MakeBare(MemCtx *_m){
     MemCtx *m = (MemCtx *)MemCtx_Make();
     m->type.state |= LOCAL_PTR;
     m->index = Span_Make(_m, TYPE_MEM_SPAN);
@@ -119,7 +152,12 @@ MemLocal *MemLocal_Make(MemCtx *_m){
     MemLocal *ml = (MemLocal*)MemCtx_Alloc(_m, sizeof(MemLocal));
     ml->type.of = TYPE_MEMLOCAL;
     ml->m = m;
-    ml->tbl = Span_Make(m, TYPE_TABLE);
+    return ml;
+}
+
+MemLocal *MemLocal_Make(MemCtx *_m){
+    MemLocal *ml = MemLocal_MakeBare(_m);
+    ml->tbl = Span_Make(ml->m, TYPE_TABLE);
 
     return ml;
 }

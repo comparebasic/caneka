@@ -147,6 +147,35 @@ status String_Add(MemCtx *m, String *a, String *b) {
     return r;
 }
 
+status String_ToSlab(String *a, void *sl, size_t sz) {
+    if(String_Length(a) > sz){
+        return ERROR;
+    }
+    if(a == NULL){
+        Fatal("Error string is NULL", TYPE_STRING_CHAIN);
+    }
+    size_t remaining = sz;
+
+    String *seg = a;
+    void *p = sl;
+
+    while(seg != NULL && remaining > 0){
+        memcpy(p, seg->bytes, seg->length);
+        remaining -= seg->length;
+        p += seg->length;
+        seg = String_Next(seg);
+    }
+
+    if(remaining > 0){
+        memset(p, 0, remaining);
+    }
+
+    if(seg != NULL){
+        return ERROR;
+    }
+
+    return SUCCESS;
+}
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     if(a == NULL){
         Fatal("Error string is NULL", TYPE_STRING_CHAIN);

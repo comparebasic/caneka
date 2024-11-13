@@ -24,5 +24,6 @@ typedef struct req_test_spec {
 int ServeTests_ForkRequest(MemCtx *m, char *msg, ReqTestSpec[]);
 status TestChild(int child);
 status ServeTests_SpawnRequest(MemCtx *m, char *msg);
+IoCtx *IoCtxTests_GetRootCtx(MemCtx *m);
 
 #include <tests.h>

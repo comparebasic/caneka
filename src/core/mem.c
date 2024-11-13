@@ -95,10 +95,7 @@ void *MemSlab_GetStart(MemSlab *sl){
     return ((void *)sl->bytes);
 }
 
-MemSlab *MemSlab_Make(MemCtx *m){
-    size_t sz = sizeof(MemSlab);
-    MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
-    sl->addr = MemSlab_GetStart(sl);
+MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
     if(m->start_sl == NULL){
         m->start_sl = sl;
     }else{
@@ -115,6 +112,18 @@ MemSlab *MemSlab_Make(MemCtx *m){
         sl->idx = m->count++;
     }
     return sl;
+
+}
+
+MemSlab *MemSlab_Make(MemCtx *m){
+    size_t sz = sizeof(MemSlab);
+    MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
+    sl->addr = MemSlab_GetStart(sl);
+    if(m != NULL){
+        return MemSlab_Attach(m, sl);
+    }else{
+        return sl;
+    }
 }
 
 size_t MemSlab_Available(MemSlab *sl){
