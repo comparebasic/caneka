@@ -135,7 +135,9 @@ void *MemSlab_Alloc(MemSlab *sl, size_t s){
 void *MemCtx_GetSlab(MemCtx *m, void *addr){
     MemSlab *sl = m->start_sl;
     while(sl != NULL){
-        if(sl->addr <= addr && addr < sl->addr + MEM_SLAB_SIZE){
+        void *start = MemSlab_GetStart(sl);
+        void *end = start + MEM_SLAB_SIZE;
+        if(MemSlab_GetStart(sl) <= addr && addr < end){
             return sl;
         }
         sl = sl->next;

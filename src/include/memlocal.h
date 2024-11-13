@@ -9,9 +9,9 @@ typedef struct local_ptr {
     int offset;
 } LocalPtr;
 
-MemLocal *MemLocal_Make();
+MemLocal *MemLocal_Make(MemCtx *m);
 Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr);
-LocalPtr *MemLocal_GetLocal(MemCtx *m, void *addr);
+status MemLocal_GetLocal(MemCtx *m, void *addr, LocalPtr *lptr);
 MemLocal *MemLocal_FromIndex(MemCtx *m, struct string *index, struct ioctx *ctx);
 status MemLocal_Persist(MemCtx *m, MemLocal *mstore, struct ioctx *ioctx);
 Abstract *MemLocal_Alloc(MemLocal *ml, cls inst, size_t sz, String *key);

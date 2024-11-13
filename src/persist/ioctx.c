@@ -130,7 +130,7 @@ IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
     ctx->prior = prior;
 
     ctx->files = Span_Make(m, TYPE_SPAN);
-    ctx->mstore = MemLocal_Make();
+    ctx->mstore = MemLocal_Make(m);
 
     return ctx;
 }

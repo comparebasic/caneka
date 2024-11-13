@@ -1,12 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
-LocalPtr *MemLocal_GetLocal(MemCtx *m, void *addr){
+status MemLocal_GetLocal(MemCtx *m, void *addr, LocalPtr *lptr){
+    memset(lptr, 0, sizeof(LocalPtr));
     MemSlab *sl = MemCtx_GetSlab(m, addr);
     if(sl != NULL){
-        return (LocalPtr *)((void *)addr - (void *)MemSlab_GetStart(sl));
+        lptr->slabIdx = sl->idx;
+        lptr->offset = ((void *)addr - (void *)MemSlab_GetStart(sl));
+        return SUCCESS;
+    }else{
+        Fatal("Slab not found, addr outside this memory context\n", TYPE_MEMLOCAL);
     }
-    return NULL;
+    return MISS;
 }
 
 static boolean canBeLocal(cls inst){
@@ -20,18 +25,16 @@ Abstract *MemLocal_Set(MemLocal *ml, String *key, Abstract *a){
         return NULL;
     }
 
-    Debug_Print((void *)key, 0,  "Making hash key: \n", COLOR_RED, TRUE);
-    printf("\n");
     Hashed *h = Hashed_Make(ml->m, (Abstract *)key);
     h->type.state |= LOCAL_PTR;
-    Debug_Print((void *)h, 0,  "Inserting Hashed: \n", COLOR_RED, TRUE);
-    Table_Set(ml->tbl, (Abstract *)h, (Abstract *)MemLocal_GetLocal(ml->m, a));
+    Table_Set(ml->tbl, (Abstract *)h, a);
 
     return a;
 }
 
 Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
     if(lptr == NULL){
+        printf("returning NULL I\n");
         return NULL;
     }
     Iter it;
@@ -43,6 +46,8 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
     Abstract *a = NULL;
     if(sl != NULL){
        a = MemSlab_GetStart(sl)+lptr->offset; 
+    }else{
+       Fatal("MemLocal Slab not found", TYPE_MEMLOCAL);
     }
 
     return a;
@@ -50,14 +55,13 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
 
 Abstract *MemLocal_Trans(MemCtx *m, Abstract *a){
     if((m->type.state & LOCAL_PTR) != 0){
-        return MemLocal_GetPtr(m, (LocalPtr *)a);
+        return MemLocal_GetPtr(m, (LocalPtr *)&a);
     }
 
     return a;
 }
 
 MemLocal *MemLocal_FromIndex(MemCtx *m, String *index, IoCtx *ctx){
-    printf("index is: \x1b[%dm%s\n", COLOR_YELLOW, index->bytes);
     int idx = 0;
     File *file = NULL;
     String *path = String_Init(m, STRING_EXTEND);
@@ -107,12 +111,13 @@ status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
     return SUCCESS;
 }
 
-MemLocal *MemLocal_Make(){
+MemLocal *MemLocal_Make(MemCtx *_m){
     MemCtx *m = (MemCtx *)MemCtx_Make();
     m->type.state |= LOCAL_PTR;
-    m->index = Span_Make(m, TYPE_MEM_SPAN);
+    m->index = Span_Make(_m, TYPE_MEM_SPAN);
 
-    MemLocal *ml = (MemLocal*)MemCtx_Alloc(m, sizeof(MemLocal));
+    MemLocal *ml = (MemLocal*)MemCtx_Alloc(_m, sizeof(MemLocal));
+    ml->type.of = TYPE_MEMLOCAL;
     ml->m = m;
     ml->tbl = Span_Make(m, TYPE_TABLE);
 

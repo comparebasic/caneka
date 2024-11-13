@@ -51,7 +51,6 @@ static status Table_Resize(Span *tbl, word *queries){
 }
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value){
-    printf("making... %s\n", Class_ToString(a->type.of));
     Hashed *h = Hashed_Make(tbl->m, a);
     if(op != SPAN_OP_GET && op != SPAN_OP_SET){
         return h;
@@ -78,7 +77,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
             if(op == SPAN_OP_GET){
                 if(_h != NULL && *((util *)_h) != 0){
                     while(_h != NULL){
-                        if(Hashed_LocalEquals(tbl->m, h, _h)){
+                        if(Hashed_ExternalEquals(tbl->m, h, _h)){
                             h = _h;
                             found = TRUE;
                             break;
@@ -136,6 +135,9 @@ Abstract *Table_Get(Span *tbl, Abstract *a){
 int Table_Set(Span *tbl, Abstract *a, Abstract *value){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
     h->value = value;
+    if((tbl->m->type.state & LOCAL_PTR) != 0){
+        LocalPtr *lptr = (LocalPtr *)&h->item;
+    }
     return h->idx;
 }
 

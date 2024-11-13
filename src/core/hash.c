@@ -103,8 +103,17 @@ boolean Hashed_LocalEquals(MemCtx *m, Hashed *a, Hashed *b){
     if(a->id != b->id){
         return FALSE;
     }
+    printf("LocalEquals %d\n", (m->type.state & LOCAL_PTR) != 0);
     return Abs_Eq(MemLocal_Trans(m, a->item), (void *)MemLocal_Trans(m, b->item));
 }
+
+boolean Hashed_ExternalEquals(MemCtx *m, Hashed *a, Hashed *b){
+    if(a->id != b->id){
+        return FALSE;
+    }
+    return Abs_Eq(a->item, (void *)MemLocal_Trans(m, b->item));
+}
+
 
 boolean Hashed_Equals(Hashed *a, Hashed *b){
     if(a->id != b->id){
@@ -120,9 +129,15 @@ Hashed *Hashed_Make(MemCtx *m, Abstract *a){
     Hashed *v = (Hashed *)MemCtx_Alloc(m, sizeof(Hashed));
     v->type.of = TYPE_HASHED;
     v->id = Get_Hash(a);
-    if((m->type.state & LOCAL_PTR) != 0){
+    if((m->type.state & a->type.state & LOCAL_PTR) != 0){
         v->type.state |= LOCAL_PTR;
-        v->item = (Abstract *)MemLocal_GetLocal(m, a); 
+        LocalPtr lp;
+        if((MemLocal_GetLocal(m, a, &lp) & SUCCESS) != 0){
+            void **lptr = (void **)&lp;
+            v->item = (Abstract *)*lptr;
+        }else{
+            Fatal("Error Getting Local Addr", TYPE_MEMCTX);
+        }
     }else{
         v->item = a;
     }

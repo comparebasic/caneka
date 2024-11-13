@@ -15,3 +15,4 @@ util Get_Hash(Abstract *a);
 Hashed *Hashed_Make(MemCtx *m, Abstract *a);
 boolean Hashed_Equals(Hashed *a, Hashed *b);
 boolean Hashed_LocalEquals(MemCtx *m, Hashed *a, Hashed *b);
+boolean Hashed_ExternalEquals(MemCtx *m, Hashed *a, Hashed *b);

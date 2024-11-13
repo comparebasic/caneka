@@ -60,12 +60,15 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             if(sq->op == SPAN_OP_REMOVE){
                 memset(ptr, 0, sizeof(void *));
             }else{
-                void *tptr = &t;
                 if((p->m->type.state & LOCAL_PTR) != 0){
                     printf("making local in set\n");
-                    tptr = MemLocal_GetLocal(p->m, tptr);
+                    LocalPtr lp;
+                    if((MemLocal_GetLocal(p->m, &t, (LocalPtr *)&lp) & SUCCESS) != 0){
+                        memcpy(ptr, &lp, sizeof(void *));
+                    }
+                }else{
+                    memcpy(ptr, &t, sizeof(void *));
                 }
-                memcpy(ptr, tptr, sizeof(void *));
             }
         }
         if(sq->op == SPAN_OP_REMOVE){
@@ -118,12 +121,16 @@ void *Span_GetFromQ(SpanQuery *sq){
         }
     }else if(*((Abstract **)ptr) != NULL){
         void **dptr = (void **)ptr;
-        ptr = *dptr;
         if((p->m->type.state & LOCAL_PTR) != 0){
             printf("making local\n");
-            ptr = (void *)MemLocal_GetLocal(p->m, ptr);
+            LocalPtr lp;
+            if((MemLocal_GetLocal(p->m, *dptr, (LocalPtr *)&lp) & SUCCESS) != 0){
+                memcpy(ptr, &lp, sizeof(void *));
+            }
+
+        }else{
+            sq->value = *dptr;
         }
-        sq->value = ptr;
     }
     p->metrics.get = sq->idx;
     return sq->value;
