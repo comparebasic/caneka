@@ -46,6 +46,7 @@ static void *tests[] = {
     /*
     "IoCtx", IoCtx_Tests,
     */
+    "MemLocal", MemLocal_Tests,
     NULL, NULL
 };
 

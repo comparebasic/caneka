@@ -24,6 +24,7 @@ typedef struct mem_ctx {
     struct span *index;
     struct {
         void *ptr;
+        size_t sz;
         int slabIdx;
         int offset;
     } latest;

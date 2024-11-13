@@ -92,9 +92,18 @@ util Get_Hash(Abstract *a){
     if(func != NULL){
         return func(a);
     }else{
+        Debug_Print((void *)a, 0, "Error Debug: ", COLOR_RED, TRUE);
+        printf("\n");
         Fatal("Hash func for type not found", a->type.of);
         return 0;
     }
+}
+
+boolean Hashed_LocalEquals(MemCtx *m, Hashed *a, Hashed *b){
+    if(a->id != b->id){
+        return FALSE;
+    }
+    return Abs_Eq(MemLocal_Trans(m, a->item), (void *)MemLocal_Trans(m, b->item));
 }
 
 boolean Hashed_Equals(Hashed *a, Hashed *b){
@@ -110,8 +119,13 @@ Hashed *Hashed_Make(MemCtx *m, Abstract *a){
     }
     Hashed *v = (Hashed *)MemCtx_Alloc(m, sizeof(Hashed));
     v->type.of = TYPE_HASHED;
-    v->item = a;
     v->id = Get_Hash(a);
+    if((m->type.state & LOCAL_PTR) != 0){
+        v->type.state |= LOCAL_PTR;
+        v->item = (Abstract *)MemLocal_GetLocal(m, a); 
+    }else{
+        v->item = a;
+    }
     return v;
 }
 

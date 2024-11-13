@@ -14,7 +14,7 @@ typedef struct ioctx {
     String *abs;
     Access *access;
     struct ioctx *prior;
-    MemCtx *mstore;
+    struct mem_local *mstore;
     Span *files;
 } IoCtx;
 

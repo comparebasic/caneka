@@ -94,17 +94,22 @@ status File_Delete(File *file){
     return ERROR;
 }
 
-File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx){
-    File *file = MemCtx_Alloc(m, sizeof(File));
+File *File_Init(File *file, String *path, Access *access, IoCtx *ctx){
+    memset(file, 0, sizeof(File));
     file->type.of = TYPE_FILE;
     file->access = access;
     file->path = path;
     if(ctx != NULL){
-        file->abs = IoCtx_GetPath(m, ctx, file->path);
+        file->abs = IoCtx_GetPath(ctx->m, ctx, file->path);
         Span_Add(ctx->files, (Abstract *)file);
     }else{
         file->abs = file->path;
     }
     
     return file;
+}
+
+File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx){
+    File *file = MemCtx_Alloc(m, sizeof(File));
+    return File_Init(file, path, access, ctx);
 }

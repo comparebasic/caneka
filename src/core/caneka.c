@@ -8,7 +8,6 @@ status Caneka_Init(MemCtx *m){
     r |= SpanDef_Init();
     r |= Debug_Init(m);
     r |= Hash_Init(m);
-    r |= MemLocal_Init(m);
     r |= Oset_Init(m);
     r |= AppsDebug_Init(m);
     return r;
@@ -137,6 +136,9 @@ char *Class_ToString(cls type){
 }
 
 boolean Abs_Eq(Abstract *a, void *b){
+    if(a == NULL || b == NULL){
+        return FALSE;
+    }
     if(a->type.of == TYPE_STRING_CHAIN || a->type.of == TYPE_STRING_FIXED){
         return String_Eq(a, b);
     }else{

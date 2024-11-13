@@ -17,5 +17,6 @@ enum file_status {
 status File_Persist(MemCtx *m, File *file);
 status File_SetAbs(MemCtx *m, File *file, IoCtx *ctx);
 File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx);
+File *File_Init(File *file, String *path, Access *access, IoCtx *ctx);
 status File_Delete(File *file);
 status File_Load(MemCtx *m, File *file, Access *access, IoCtx *ctx);

@@ -29,3 +29,4 @@ status ServeChunked_Tests(MemCtx *gm);
 status ServeMultiple_Tests(MemCtx *gm);
 status IoCtx_Tests(MemCtx *gm);
 status Oset_Tests(MemCtx *gm);
+status MemLocal_Tests(MemCtx *gm);

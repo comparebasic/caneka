@@ -39,6 +39,8 @@ String *String_Init(MemCtx *m, int expected){
     }
     String *s = (String *)MemCtx_Alloc(m, sz);
     s->type.of = type;
+    s->type.state |= (m->type.state & LOCAL_PTR);
+
     return s;
 }
 
@@ -310,6 +312,9 @@ boolean String_Equals(String *a, String *b){
 
 String *String_Next(String *s){
     if(s->type.of == TYPE_STRING_CHAIN){
+        if((s->type.state & LOCAL_PTR) != 0 && s->m != NULL){
+            return (String *)MemLocal_GetPtr(s->m, (LocalPtr *)s->next);
+        }
         return s->next;
     }
     return NULL;

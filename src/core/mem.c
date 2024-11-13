@@ -24,16 +24,16 @@ size_t MemCount(){
     return cmem;
 }
 
-void *MemCtx_Alloc(MemCtx *m, size_t s){
+void *MemCtx_Alloc(MemCtx *m, size_t sz){
     if(DEBUG_ALLOC){
-        printf("\x1b[%dmAlloc %ld of %p\x1b[0m\n", DEBUG_ALLOC, s, m);
+        printf("\x1b[%dmAlloc %ld of %p\x1b[0m\n", DEBUG_ALLOC, sz, m);
     }
-    if(s > MEM_SLAB_SIZE){
+    if(sz > MEM_SLAB_SIZE){
         Fatal("Trying to allocation too much memory at once", TYPE_MEMCTX);
     }
     MemSlab *sl = NULL, *last = m->start_sl;
     while(last != NULL){
-        if(MemSlab_Available(last) >= s){
+        if(MemSlab_Available(last) >= sz){
             sl = last;
             break;
         }
@@ -43,8 +43,9 @@ void *MemCtx_Alloc(MemCtx *m, size_t s){
         sl = MemSlab_Make(m);
     }
 
-    void *ptr = MemSlab_Alloc(sl, s); 
+    void *ptr = MemSlab_Alloc(sl, sz);
     m->latest.ptr = ptr;
+    m->latest.sz = sz;
     m->latest.slabIdx = sl->idx;
     m->latest.offset = ptr - (void *)sl->bytes;
 

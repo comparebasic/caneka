@@ -42,6 +42,7 @@ struct mem_keyed;
 struct oset;
 struct oset_def;
 struct ioctx;
+struct mem_local;
 
 extern word GLOBAL_flags;
 
@@ -71,7 +72,7 @@ typedef status (*DoFunc)(struct mem_handle *mh);
 #define MAX_DIMS 16
 
 #define STRING_SEG_FOOTPRINT 256
-#define STRING_EXTRAS (sizeof(Type)+sizeof(int)+sizeof(struct string *))
+#define STRING_EXTRAS (sizeof(Type)+sizeof(int)+sizeof(struct string *)+sizeof(MemCtx *))
 #define STRING_CHUNK_SIZE (STRING_SEG_FOOTPRINT - STRING_EXTRAS)-1
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(int)))-1
 
