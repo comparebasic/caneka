@@ -1,9 +1,19 @@
 typedef status (*TestFunc)(MemCtx *m);
 status Test(int condition, char *msg, ...);
-status Test_Runner(MemCtx *m, char *name, void *tests[]);
+status Test_Runner(MemCtx *m, char *suiteName, struct test_set *tests);
 status Tests_Init(MemCtx *m);
 
 #define TEST_PORT 1200
+
+enum test_status {
+    NOT_STARTED = 1 << 9,
+    PREVIOUSLY_WORKING = 1 << 10,
+    PARTIAL_FEATURE = 1 << 11,
+    FEATURE_COMPLETE = 1 << 12,
+    PRE_PRODUCTION = 1 << 13,
+    PRODUCTION = 1 << 14,
+    PERMANCE_TESTED = 1 << 15,
+};
 
 typedef struct req_test_spec {
     int direction;
@@ -11,7 +21,15 @@ typedef struct req_test_spec {
     int length;
     int delay;
     int pos;
+    /* meta */
 } ReqTestSpec;
+
+typedef struct test_set {
+    char *name;
+    TestFunc func; 
+    char *description;
+    word status;
+} TestSet;
 
 #define TEST_BUFF_SIZE 1023
 

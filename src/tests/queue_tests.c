@@ -50,8 +50,6 @@ status Queue_Tests(MemCtx *gm){
     Queue_Remove(&q, 1);
 
     Queue_Add(&q, (Abstract *)six);
-    Debug_Print((void *)&q, 0, "Queue: ", COLOR_PURPLE, FALSE);
-    fflush(stdout);
 
     QueueIdx *qidx = NULL;
     qidx = Span_Get(q.span, 1);

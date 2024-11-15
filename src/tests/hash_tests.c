@@ -13,11 +13,10 @@ status Hash_Tests(MemCtx *gm){
 
     h = Get_Hash((Abstract *)s);
     expected = 4291084750259606489;
-    Bits_Print((byte *)&h, sizeof(util), "Hash for string ", COLOR_DARK, TRUE);
-    printf("\n");
     r = Test(h == expected, "Expected hash to equal %ld, found: %ld", expected, h);
 
     int x;
+    /*
     x = 15;
     printf("%d ", x);
     Bits_Print((byte *)&x, sizeof(int), "", COLOR_DARK, TRUE);
@@ -38,6 +37,7 @@ status Hash_Tests(MemCtx *gm){
     printf("%d ", x);
     Bits_Print((byte *)&x, sizeof(int), "", COLOR_DARK, TRUE);
     printf("\n");
+    */
 
     MemCtx_Free(m);
     return r;

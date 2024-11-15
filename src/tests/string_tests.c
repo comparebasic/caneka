@@ -56,8 +56,6 @@ status String_Tests(MemCtx *gm){
     "\r\n";
 
     s = String_Make(m, bytes(cstr));
-    Debug_Print((void *)s, 0, "String: ", COLOR_PURPLE, TRUE);
-    printf("%s\n", cstr);
 
     r |= Test(String_Length(s) == strlen(cstr), "Expect length %d, have %d", strlen(cstr), String_Length(s));
     r |= Test(String_EqualsBytes(s, bytes(cstr)), "Expect string match of '%s' to be TRUE", cstr);

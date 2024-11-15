@@ -12,48 +12,17 @@ This file is mostly an example Caneka application, and it runs the tests
 #define servecmd "serve"
 #define testcmd "test"
 
-static void *tests[] = {
-    "Core", Core_Tests,
-    "String", String_Tests,
-    "SpanSetup", SpanSetup_Tests,
-    "Span", Span_Tests,
-    "SpanInline", SpanInline_Tests,
-    "SpanClone", SpanClone_Tests,
-    "Hash", Hash_Tests,
-    "Table", Table_Tests,
-    "TableResize", TableResize_Tests,
-    "TablePreKey", TablePreKey_Tests,
-    "Match", Match_Tests,
-    "MatchElastic", MatchElastic_Tests,
-    "Roebling", Roebling_Tests,
-    "RoeblingRun", RoeblingRun_Tests,
-    "RoeblingMark", RoeblingMark_Tests,
-    "RoeblingStartSop", RoeblingStartStop_Tests,
-    "XML", Xml_Tests,
-    "XMLNested", XmlNested_Tests,
-    "XMLParser", XmlParser_Tests,
-    "Http", Http_Tests,
-    "Queue", Queue_Tests,
-    "QueueNext", QueueNext_Tests,
-    "QueueMixed", QueueMixed_Tests,
-    "Serve", Serve_Tests,
-    "ServeHandle", ServeHandle_Tests,
-    "ServeChunked", ServeChunked_Tests,
-    "ServeMultiple", ServeMultiple_Tests,
-    "Oset", Oset_Tests,
-    "IoCtx", IoCtx_Tests,
-    "MemLocal", MemLocal_Tests,
-    NULL, NULL
-};
-
 static status test(MemCtx *m, char *arg){
     status r = TEST_OK;
     word flags = 0;
     if(strncmp(arg, "test=no-color", strlen("test=no-color")) == 0){
         GLOBAL_flags |= NO_COLOR;
     }
+    if(strncmp(arg, "test=html", strlen("test=html")) == 0){
+        GLOBAL_flags |= HTML_OUTPUT;
+    }
     Tests_Init(m);
-    Test_Runner(m, "Caneka", tests);
+    Test_Runner(m, "Caneka", Tests);
     return r;
 }
 

@@ -43,8 +43,6 @@ static status populateOset(MemCtx *m, Lookup *lk){
 status Oset_Init(MemCtx *m){
     if(_oset == NULL){
         Lookup *osetDefs = Lookup_Make(m, _TYPE_START, populateOset, NULL);
-        Debug_Print((void *)osetDefs, 0, "OsetDefs: ", COLOR_CYAN, TRUE);
-        printf("\n");
         _oset = Oset_Make(m, osetDefs);
         return SUCCESS;
     }

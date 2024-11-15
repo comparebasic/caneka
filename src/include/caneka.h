@@ -43,8 +43,13 @@ struct oset;
 struct oset_def;
 struct ioctx;
 struct mem_local;
+struct test_set;
 
 extern word GLOBAL_flags;
+enum global_flags {
+    NO_COLOR = 1 << 10,
+    HTML_OUTPUT = 1 << 11,
+};
 
 typedef struct typehdr {
     cls of;

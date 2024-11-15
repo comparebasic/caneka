@@ -159,9 +159,6 @@ status SpanClone_Tests(MemCtx *gm){
     Span_Set(p, 5, (Abstract *)String_Make(m, bytes("Five")));
     Span_Set(p, 17, (Abstract *)String_Make(m, bytes("Seventeen")));
 
-    Debug_Print((void *)p, 0, "Span: ", COLOR_DARK, TRUE);
-    printf("\n");
-
     MemCtx_Free(m);
 
     r |= SUCCESS;

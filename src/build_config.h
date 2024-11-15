@@ -46,7 +46,7 @@ static BuildSubdir testobj = { "tests", {
     "match_tests.c", "span_tests.c", "hash_tests.c", "roebling_tests.c",
     "xml_tests.c", "http_tests.c", "serve_tests.c", "queue_tests.c",
     "mock_109strings.c", "ioctx_tests.c", "oset_tests.c",
-    "memlocal_tests.c",
+    "memlocal_tests.c", "blank_test.c",
     NULL
 }};
 

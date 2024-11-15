@@ -1,5 +1,9 @@
 #include <mock_109strings.h>
 
+extern TestSet *Tests;
+
+status Blank_Tests(MemCtx *gm);
+
 status Core_Tests(MemCtx *gm);
 status String_Tests(MemCtx *gm);
 status Span_Tests(MemCtx *gm);
