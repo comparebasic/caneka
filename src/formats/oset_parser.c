@@ -17,6 +17,16 @@ static word lengthDef[] = {
     PAT_END, 0, 0
 };
 
+static word lengthArrayDef[] = {
+    PAT_TERM,'[', '[',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_END, 0, 0
+};
+
+static word lengthTableDef[] = {
+    PAT_TERM,'{', '{',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_END, 0, 0
+};
+
 static word valueDef[] = {
     PAT_COUNT|PAT_TERM, 0, 255,
     PAT_END, 0, 0
@@ -24,6 +34,16 @@ static word valueDef[] = {
 
 static word sepDef[] = {
     PAT_TERM, ';',';',
+    PAT_END, 0, 0
+};
+
+static word sepEndArrayDef[] = {
+    PAT_TERM, ']',']',
+    PAT_END, 0, 0
+};
+
+static word sepEndTableDef[] = {
+    PAT_TERM, '}','}',
     PAT_END, 0, 0
 };
 
@@ -53,6 +73,10 @@ static status defineLength(Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)lengthDef, OSET_LENGTH, -1);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lengthArrayDef, OSET_LENGTH_ARRAY, -1);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lengthTableDef, OSET_LENGTH_TABLE, -1);
     return r;
 }
 
@@ -65,25 +89,89 @@ static status value(Roebling *rbl){
 
     r |= Match_SetPattern(mt, (PatCharDef *)valueDef);
     mt->captureKey = OSET_VALUE;
-    mt->remaining = oset->remaining;
+    mt->remaining = oset->item->remaining;
 
     return r;
 }
 
+static status sep(Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)sepDef, OSET_SEP, -1);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)sepEndArrayDef, OSET_CLOSE_ARRAY, -1);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)sepEndTableDef, OSET_CLOSE_TABLE, -1);
+
+    return r;
+}
+
+
 static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     Oset *oset = (Oset *)as(source, TYPE_OSET);
+    if(oset->item == NULL){
+        oset->item = OsetItem_Make(oset->m, oset);
+    }
     if(captureKey == OSET_LENGTH){
-        oset->remaining = Int_FromString(s);
+        oset->item->remaining = Int_FromString(s);
+    }else if(captureKey == OSET_LENGTH_ARRAY){
+        oset->item->type.state &= ~ITEM_TYPE_TABLE;
+        oset->item->type.state |= ITEM_TYPE_ARRAY;
+        
+        OsetItem *item = OsetItem_Make(oset->m, oset);
+        item->parent = oset->item;
+        oset->item = item;
+    }else if(captureKey == OSET_LENGTH_TABLE){
+        oset->item->type.state &= ~ITEM_TYPE_ARRAY;
+        oset->item->type.state |= ITEM_TYPE_TABLE;
+
+        OsetItem *item = OsetItem_Make(oset->m, oset);
+        item->parent = oset->item;
+        oset->item = item;
+    }else if(captureKey == OSET_SEP){
+        oset->item->type.state &= ~(ITEM_TYPE_TABLE|ITEM_TYPE_ARRAY);
+        if(oset->item->parent != NULL && 
+            (oset->item->parent->type.state & ITEM_TYPE_ARRAY) != 0){
+            int idx = -1;
+            if(oset->item->key != NULL){
+                idx = Int_FromString(oset->item->key);
+            }
+            if(idx >= 0){
+               Span_Set((Span *)oset->item->parent->value, idx, oset->item->value); 
+            }else{
+               Span_Add((Span *)oset->item->parent->value, oset->item->value); 
+            }
+        }else if(oset->item->parent != NULL && 
+            (oset->item->parent->type.state & ITEM_TYPE_TABLE) != 0){
+            int idx = -1;
+            if(oset->item->key == NULL){
+                Fatal("Expected oset key for table sub-item", TYPE_OSET);
+                return ERROR;
+            }
+            Table_Set((Span *)oset->item->parent->value, (Abstract *)oset->item->key, oset->item->value); 
+        }
+    }else if(captureKey == OSET_CLOSE_ARRAY){
+        oset->item = oset->item->parent;
+    }else if(captureKey == OSET_CLOSE_TABLE){
+        oset->item = oset->item->parent;
     }else if(captureKey == OSET_KEY){
-        oset->key = s;
+        oset->item->key = s;
     }else if(captureKey == OSET_TOKEN){
         OsetDef *odef = TableChain_Get(oset->byName, s);
         if(odef == NULL){
             Fatal("Error: type not found\n", TYPE_OSET);
         }
-        oset->odef = odef;
+        oset->item->odef = odef;
     }else if(captureKey == OSET_VALUE){
-        oset->content = s;
+        if(oset->item == NULL){
+            Fatal("Oset item expected to be non-null", TYPE_OSET);
+            return ERROR;
+        }
+        oset->item->content = s;
+        oset->item->value = Abs_FromOset(oset->m, s);
+
     }
     return SUCCESS;
 }
@@ -96,7 +184,8 @@ Roebling *OsetParser_Make(MemCtx *m, String *s, Abstract *source){
             (Abstract *)Do_Wrapped(mh, (DoFunc)token),
         (Abstract *)Int_Wrapped(m, OSET_MARK_LENGTH), 
             (Abstract *)Do_Wrapped(mh, (DoFunc)defineLength),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)value));
+            (Abstract *)Do_Wrapped(mh, (DoFunc)value),
+            (Abstract *)Do_Wrapped(mh, (DoFunc)sep));
 
     LookupConfig config[] = {
         {OSET_MARK_START, (Abstract *)String_Make(m, bytes("OSET_START"))},

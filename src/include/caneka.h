@@ -158,6 +158,7 @@ enum types {
     TYPE_SINGLE,
     TYPE_RBL_MARK,
     TYPE_OSET,
+    TYPE_OSET_ITEM,
     TYPE_OSET_DEF,
     _TYPE_CORE_END,
 };
@@ -246,6 +247,8 @@ cls Ifc_Get(cls inst);
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"
+
+#include "oset_item.h"
 #include "oset.h"
 #include "ioctx.h"
 #include "memlocal.h"

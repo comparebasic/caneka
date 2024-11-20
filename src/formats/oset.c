@@ -23,10 +23,7 @@ OsetDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, OsetTrans from, OsetT
 }
 
 status Oset_Reset(Oset *o){
-    o->content = NULL;
-    o->key = NULL;
-    o->odef = NULL;
-    o->remaining = 0;
+    o->item = NULL;
     o->type.state &= ~(SUCCESS|ERROR);
     return SUCCESS;
 }
@@ -108,11 +105,7 @@ Abstract *Abs_FromOset(MemCtx *m, String *s){
     };
 
     if((_oset->rbl->type.state & SUCCESS) != 0){
-        OsetDef *odef = _oset->odef;
-        if(odef == NULL){
-            Fatal("OsetDef not found", TYPE_OSET);
-        }
-        return odef->fromOset(m, odef, _oset, _oset->key, (Abstract *)_oset->content);
+        return Abs_FromOsetItem(m, _oset, _oset->item);
     }
 
     return NULL;

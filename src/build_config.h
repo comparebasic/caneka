@@ -37,7 +37,7 @@ static BuildSubdir parserobj = {"parser", {
 }};
 
 static BuildSubdir formatsobj = {"formats", {
-    "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c","oset_from.c",
+    "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c","oset_from.c", "oset_item.c",
     NULL
 }};
 
