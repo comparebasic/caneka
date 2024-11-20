@@ -4,13 +4,17 @@
 status Iter_Next(Iter *it){
     if(it->type.state == END){
         it->idx = 0;
-        it->type.state &= ~END;
+        it->type.state &= ~(END|FLAG_ITER_LAST);
     }
     if((it->idx+1) > it->values->max_idx){
         it->type.state = END;
     }else{
         it->idx++;
         it->type.state = SUCCESS;
+        if(it->idx == it->values->max_idx){
+            it->type.state |= FLAG_ITER_LAST;
+        }
+
     }
     return it->type.state;
 }

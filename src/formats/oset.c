@@ -83,11 +83,12 @@ String *Oset_To(MemCtx *m, String *key, Abstract *a){
     if(_oset == NULL){
         Fatal("Oset not intialized", TYPE_OSET);
     }
-    Abstract *found = Chain_Get(_oset->byType, a->type.of);
-    OsetDef *def = as(found, TYPE_OSET_DEF);
-    if(def != NULL){
-        return as(def->toOset(m, def, _oset, key, a), TYPE_STRING);
+    Abstract *found = Chain_Get(_oset->byType, Ifc_Get(a->type.of));
+    if(found != NULL){
+        OsetDef *def = as(found, TYPE_OSET_DEF);
+        return asIfc(def->toOset(m, def, _oset, key, a), TYPE_STRING);
     }else{
+        Debug_Print((void *)a, 0, "Uknown oset type for:" , COLOR_RED, TRUE);
         Fatal("Uknown type for parsing Oset", TYPE_ABSTRACT);
     }
     return NULL;

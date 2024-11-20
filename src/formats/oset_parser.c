@@ -17,13 +17,13 @@ static word lengthDef[] = {
     PAT_END, 0, 0
 };
 
-static word lengthArrayDef[] = {
-    PAT_TERM,'[', '[',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+static word startArrayDef[] = {
+    PAT_NO_CAPTURE|PAT_TERM,'[', '[',
     PAT_END, 0, 0
 };
 
-static word lengthTableDef[] = {
-    PAT_TERM,'{', '{',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+static word startTableDef[] = {
+    PAT_NO_CAPTURE|PAT_TERM,'{', '{',
     PAT_END, 0, 0
 };
 
@@ -37,12 +37,12 @@ static word sepDef[] = {
     PAT_END, 0, 0
 };
 
-static word sepEndArrayDef[] = {
+static word endArrayDef[] = {
     PAT_TERM, ']',']',
     PAT_END, 0, 0
 };
 
-static word sepEndTableDef[] = {
+static word endTableDef[] = {
     PAT_TERM, '}','}',
     PAT_END, 0, 0
 };
@@ -51,6 +51,11 @@ static word sepEndTableDef[] = {
 static status start(Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)startArrayDef, OSET_LENGTH_ARRAY, OSET_MARK_START);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)startTableDef, OSET_LENGTH_TABLE, OSET_MARK_START);
 
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)labelDef, OSET_KEY, -1);
@@ -73,16 +78,17 @@ static status defineLength(Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)lengthDef, OSET_LENGTH, -1);
-    r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)lengthArrayDef, OSET_LENGTH_ARRAY, -1);
-    r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)lengthTableDef, OSET_LENGTH_TABLE, -1);
     return r;
 }
 
 static status value(Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)endArrayDef, OSET_CLOSE_ARRAY, OSET_MARK_START);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)endTableDef, OSET_CLOSE_TABLE, OSET_MARK_START);
 
     Match *mt = Span_ReserveNext(rbl->matches);
     Oset *oset = (Oset *)as(rbl->source, TYPE_OSET);
@@ -100,11 +106,6 @@ static status sep(Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)sepDef, OSET_SEP, -1);
-    r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)sepEndArrayDef, OSET_CLOSE_ARRAY, -1);
-    r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)sepEndTableDef, OSET_CLOSE_TABLE, -1);
-
     return r;
 }
 
@@ -170,7 +171,9 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             return ERROR;
         }
         oset->item->content = s;
-        oset->item->value = Abs_FromOset(oset->m, s);
+        if(oset->item->value == NULL){
+            oset->item->value = Abs_FromOsetItem(oset->m, oset, oset->item);
+        }
 
     }
     return SUCCESS;

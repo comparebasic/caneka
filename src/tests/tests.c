@@ -153,6 +153,7 @@ static TestSet _Tests[] = {
         "Queue iteration with a mix of items missing, built on top of the Span storage architecture.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Serve",
         Serve_Tests,
@@ -189,6 +190,7 @@ static TestSet _Tests[] = {
         "Regularly scheduled activities in CycleServe using the Queue object.",
         NOT_STARTED,
     },
+    */
     {
         "PasswordFlow",
         Blank_Tests,

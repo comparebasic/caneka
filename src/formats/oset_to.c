@@ -58,15 +58,13 @@ Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
     }
     String_Add(m, os, odef->name);
     String_AddBytes(m, os, bytes("/"), 1);
-    String *s = String_FromI64(m, *((i64 *)a));
     String_Add(m, os, String_FromInt(m, p->nvalues));
-    char *eq = "=";
-    char *end = ";";
-    if((o->type.state & LINE_SEPERATED) != 0){
-        eq = " ";
-        end = "\n";
+    String_AddBytes(m, os, bytes("="), 1);
+    if(p->def->typeOf == TYPE_TABLE){
+        String_AddBytes(m, os, bytes("{"), 1);
+    }else{
+        String_AddBytes(m, os, bytes("["), 1);
     }
-    String_AddBytes(m, os, bytes(eq), 1);
 
     Iter it;
     Iter_Init(&it, p);
@@ -84,7 +82,12 @@ Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
             String_Add(m, os, Oset_To(m, itemKey, item));
         }
     }
-    String_AddBytes(m, os, bytes(end), 1);
+
+    if(p->def->typeOf == TYPE_TABLE){
+        String_AddBytes(m, os, bytes("}"), 1);
+    }else{
+        String_AddBytes(m, os, bytes("]"), 1);
+    }
 
     return (Abstract *)os;
 }
