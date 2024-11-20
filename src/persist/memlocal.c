@@ -61,13 +61,14 @@ Abstract *MemLocal_Trans(MemCtx *m, Abstract *a){
     return a;
 }
 
-MemLocal *MemLocal_Load(MemCtx *m, String *index, IoCtx *ctx){
+MemLocal *MemLocal_Load(MemCtx *m, IoCtx *ctx){
     MemLocal *ml = MemLocal_MakeBare(m);
 
     int idx = 0;
     File file;
-    String *path = IoCtx_GetPath(m, ctx, index);
-    String_AddBytes(m, path, bytes("."), 1);
+    String *path = IoCtx_GetMStorePath(m, ctx);
+
+    String_AddBytes(m, path, bytes("/memslab."), strlen("/memslab."));
     i64 l = path->length;
     int max = 10;
     while(1){
@@ -96,21 +97,76 @@ MemLocal *MemLocal_Load(MemCtx *m, String *index, IoCtx *ctx){
     return NULL;
 }
 
+status MemLocal_Destroy(MemCtx *m, IoCtx *ctx){
+    int idx = 0;
+    File file;
+
+    String *fname = IoCtx_GetMStorePath(m, ctx);
+    i64 dirL = fname->length;
+    String_AddBytes(m, fname, bytes("/memslab."), strlen("/memslab."));
+    i64 l = fname->length;
+
+    int max = 10;
+    status r = READY;
+    while(1){
+        fname->length = l;
+        String_Add(m, fname, String_FromInt(m, idx)); 
+        File_Init(&file, fname, ctx->access, NULL);
+        File_Delete(&file);
+        if((file.type.state & NOOP) != 0){
+            break;
+        }
+        r |= SUCCESS;
+        idx++;
+        if(idx > max){
+            break;
+        }
+    }
+
+    if((r & SUCCESS) == 0){
+        r |= NOOP;
+    }
+
+    fname->length = dirL;
+    char *dir_cstr = String_ToChars(m, fname);
+    if(rmdir(dir_cstr) == 0){
+        return r;
+    }else{
+        return ERROR;
+    }
+
+    return r;
+}
+
 status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
     Iter it;
     Iter_Init(&it, mstore->m->index);
-    String *s = IoCtx_GetMstorePath(m, ctx);
+
+    String *fname = IoCtx_GetMStorePath(m, ctx);
+    char *path_cstr = String_ToChars(m, fname);
+    DIR* dir = opendir(path_cstr);
+    if(dir){
+        closedir(dir);
+    }else if(ENOENT == errno){
+        if(mkdir(path_cstr, PERMS) != 0){
+            Fatal("Unable to make dir", TYPE_IOCTX);
+            return ERROR;
+        }
+    }
+
+    String_AddBytes(m, fname, bytes("/memslab."), strlen("/memslab."));
+    i64 l = fname->length;
+
     File f;
+    int idx = 0;
     while(Iter_Next(&it) != END){
         MemSlab *sl = (MemSlab *)Iter_Get(&it);
-        File_Init(&f, s, ctx->access, NULL);
+        File_Init(&f, fname, ctx->access, NULL);
         if(sl != NULL){
-            String *fname = String_Init(m, STRING_EXTEND);
-            String_AddBytes(m, fname, bytes("memslab."), strlen("memslab."));
+            fname->length = l;
             String_Add(m, fname, String_FromInt(m, sl->idx));
 
-            s = IoCtx_GetPath(m, ctx, fname);
-            File_Init(&f, s, ctx->access, NULL);
+            File_Init(&f, fname, ctx->access, NULL);
             f.data = String_Init(m, sizeof(MemSlab));
 
             String_AddBytes(m, f.data, (byte *)sl, sizeof(MemSlab));
@@ -119,8 +175,8 @@ status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
             File_Persist(m, &f);
         }
     }
-    
-    return SUCCESS;
+
+    return ERROR;
 }
 
 

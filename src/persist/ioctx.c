@@ -27,8 +27,12 @@ String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
     return ctx->abs;
 }
 
-String *IoCtx_GetMstorePath(MemCtx *m, IoCtx *ctx){
-    return IoCtx_GetPath(m, ctx, String_Make(m, bytes("mstore.index")));
+String *IoCtx_GetMStorePath(MemCtx *m, IoCtx *ctx){
+    return IoCtx_GetPath(m, ctx, IoCtx_GetMStoreName(m, ctx));
+}
+
+String *IoCtx_GetMStoreName(MemCtx *m, IoCtx *ctx){
+    return String_Make(m, bytes("mstore"));
 }
 
 String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path){
@@ -109,6 +113,8 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
         File *file = (File *)Iter_Get(&it);
         File_Delete(file);
     }
+
+    MemLocal_Destroy(m, ctx);
 
     /* remove dir */
     if(rmdir(abs_cstr) == 0){

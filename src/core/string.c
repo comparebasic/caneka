@@ -114,10 +114,14 @@ status String_AddInt(MemCtx *m, String *s, int i){
 
 char *String_ToChars(MemCtx *m, String *s){
     if(s->next != NULL){
-        printf("Error: not yet ready to make a flat byte string\n");
+        Fatal("Error: not yet ready to make a flat byte string\n", TYPE_STRING);
         return NULL;
     }
-    return (char *)s->bytes;
+
+    char *cstr = MemCtx_Alloc(m, s->length+1);
+    memcpy(cstr, s->bytes, s->length);
+    cstr[s->length] = '\0';
+    return cstr;
 }
 
 String *String_Make(MemCtx *m, byte *bytes){

@@ -94,7 +94,13 @@ status File_Delete(File *file){
         }
         return SUCCESS;
     }
-    return ERROR;
+    struct stat st;
+    if(stat((char *)file->abs->bytes, &st) == -1){
+        file->type.state |= NOOP;
+        return file->type.state;
+    }
+    file->type.state |= ERROR;
+    return file->type.state;
 }
 
 File *File_Init(File *file, String *path, Access *access, IoCtx *ctx){
