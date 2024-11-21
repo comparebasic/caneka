@@ -105,7 +105,7 @@ Abstract *Abs_FromOset(MemCtx *m, String *s){
         r = Roebling_RunCycle(_oset->rbl);
     };
 
-    if((_oset->rbl->type.state & SUCCESS) != 0){
+    if((r & ERROR) == 0){
         return Abs_FromOsetItem(m, _oset, _oset->item);
     }
 

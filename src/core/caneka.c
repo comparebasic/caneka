@@ -82,6 +82,8 @@ char *Class_ToString(cls type){
         return "TYPE_MEMSLAB";
     }else if(type == TYPE_REQ){
         return "TYPE_REQ";
+    }else if(type == TYPE_STRING){
+        return "TYPE_STRING";
     }else if(type == TYPE_STRING_CHAIN){
         return "TYPE_STRING_CHAIN";
     }else if(type == TYPE_STRING_FIXED){
@@ -126,6 +128,8 @@ char *Class_ToString(cls type){
         return "TYPE_WRAPPED_FUNC";
     }else if(type == TYPE_WRAPPED_UTIL){
         return "TYPE_WRAPPED_UTIL";
+    }else if(type == TYPE_WRAPPED_I64){
+        return "TYPE_WRAPPED_I64";
     }else if(type == TYPE_WRAPPED_DO){
         return "TYPE_WRAPPED_DO";
     }else if(type == TYPE_WRAPPED_PTR){

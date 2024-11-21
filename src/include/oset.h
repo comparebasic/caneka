@@ -3,11 +3,13 @@ enum oset_states {
     OSET_KEY,
     OSET_TOKEN,
     OSET_LENGTH,
+    OSET_LENGTH_LIST,
     OSET_LENGTH_TABLE,
     OSET_LENGTH_ARRAY,
     OSET_OPTS,
     OSET_VALUE,
     OSET_SEP,
+    OSET_CLOSE_LIST,
     OSET_CLOSE_ARRAY,
     OSET_CLOSE_TABLE,
 };
@@ -19,8 +21,8 @@ enum oset_marks {
 
 enum oset_flags {
     LINE_SEPERATED = 1 << 10,
-    ITEM_TYPE_ARRAY = 1 << 12,
-    ITEM_TYPE_TABLE = 1 << 13,
+    PARENT_TYPE_ARRAY = 1 << 12,
+    PARENT_TYPE_TABLE = 1 << 13,
 };
 
 typedef struct oset {

@@ -62,8 +62,10 @@ Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
     String_AddBytes(m, os, bytes("="), 1);
     if(p->def->typeOf == TYPE_TABLE){
         String_AddBytes(m, os, bytes("{"), 1);
-    }else{
+    }else if((p->type.state & FLAG_SPAN_HAS_GAPS) != 0){
         String_AddBytes(m, os, bytes("["), 1);
+    }else{
+        String_AddBytes(m, os, bytes("("), 1);
     }
 
     Iter it;
@@ -76,7 +78,9 @@ Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
                 Hashed *h = (Hashed *)item;
                 itemKey = (String *)h->item;
                 item = h->value;
-            }else{
+            }else if((p->type.state & FLAG_SPAN_HAS_GAPS) != 0){
+                itemKey = String_FromInt(m, it.idx);
+            }else {
                 itemKey = NULL;
             }
             String_Add(m, os, Oset_To(m, itemKey, item));
@@ -85,9 +89,12 @@ Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
 
     if(p->def->typeOf == TYPE_TABLE){
         String_AddBytes(m, os, bytes("}"), 1);
-    }else{
+    }else if((p->type.state & FLAG_SPAN_HAS_GAPS) != 0){
         String_AddBytes(m, os, bytes("]"), 1);
+    }else{
+        String_AddBytes(m, os, bytes(")"), 1);
     }
+
 
     return (Abstract *)os;
 }

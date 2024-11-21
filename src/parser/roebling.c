@@ -147,7 +147,6 @@ status Roebling_Run(Roebling *rbl){
     return rbl->type.state;
 }
 
-
 status Roebling_RunCycle(Roebling *rbl){
     if(DEBUG_ROEBLING_MARK){
         printf("\x1b[%dmRblIdx:%d\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx);

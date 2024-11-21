@@ -61,6 +61,9 @@ String *Range_Copy(MemCtx *m, Range *range){
     String *seg = range->start.seg;
     String *s = NULL;
     int length = Range_GetLength(range);
+    if((range->end.type.state & END) != 0){
+        length++;
+    }
     if(seg == range->end.seg){
         s = String_MakeFixed(m, seg->bytes + range->start.position, length); 
     }else{

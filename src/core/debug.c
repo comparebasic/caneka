@@ -516,6 +516,11 @@ static void WrappedUtil_Print(Abstract *a, cls type, char *msg, int color, boole
     printf("\x1b[%dm%sWi64<\x1b[1;%dm%lu\x1b[0;%dm>\x1b[0m", color,  msg, color, sgl->val.value, color);
 }
 
+static void WrappedI64_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Single *sgl = (Single *)as(a, TYPE_WRAPPED_I64);
+    printf("\x1b[%dm%sWi64<\x1b[1;%dm%lu\x1b[0;%dm>\x1b[0m", color,  msg, color, sgl->val.value, color);
+}
+
 static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean extended){
     if(t == NULL){
         printf("u0");
@@ -604,6 +609,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)WrappedI64_Print);
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);

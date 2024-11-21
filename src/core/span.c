@@ -45,6 +45,9 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
 
     if(HasFlag(r, SUCCESS)){
         SpanState *st = sq->stack;
+        if(sq->idx > p->max_idx+1){
+            p->type.state |= FLAG_SPAN_HAS_GAPS;
+        }
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
         if(HasFlag(p->def->flags, INLINE)){
             size_t sz = (size_t)p->def->itemSize;
