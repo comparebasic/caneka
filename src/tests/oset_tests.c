@@ -35,6 +35,53 @@ status Oset_Tests(MemCtx *gm){
     r |= Test((os->length == 5), "Span from oset string 2 length is equal, have '%d'", os->length);
     r |= Test(String_EqualsBytes(os, bytes("there")), "Span from oset string 2 equal, have '%s'", os->bytes);
 
+
+    s = String_Make(m, bytes("span/2=[0:s/2=hi;231:s/5=there;]"));
+    a = Abs_FromOset(m, s);
+    p = (Span *)a;
+
+    r |= Test((p->type.of == TYPE_SPAN), "Span from oset has correct type have '%s'", Class_ToString(p->type.of));
+    r |= Test((p->nvalues == 2), "Span from oset has correct number of values have '%d'", p->nvalues);
+
+    os = (String *)Span_Get(p, 0);
+    r |= Test((os->length == 2), "Span with gaps from oset string 1 length is equal, have '%d'", os->length);
+    r |= Test(String_EqualsBytes(os, bytes("hi")), "Span with gaps from oset string 1 equal, have '%s'", os->bytes);
+
+    os = (String *)Span_Get(p, 231);
+    r |= Test((os->length == 5), "Span with gaps from oset string 231 length is equal, have '%d'", os->length);
+    r |= Test(String_EqualsBytes(os, bytes("there")), "Span from oset string 231 equal, have '%s'", os->bytes);
+
+    s = String_Make(m, bytes("tbl/2={A:s/6=Apples;B:s/3=Bee;C:s/6=Carrot;}"));
+    a = Abs_FromOset(m, s);
+    p = (Span *)a;
+
+    r |= Test((p->type.of == TYPE_TABLE), "Table from oset has correct type have '%s'", Class_ToString(p->type.of));
+    r |= Test((p->def->typeOf == TYPE_TABLE), "Tale from oset has correct def->typeOf have '%s'", Class_ToString(p->def->typeOf));
+    r |= Test((p->nvalues == 3), "Table from oset has correct number of values have '%d'", p->nvalues);
+
+    os = (String *)Table_Get(p, (Abstract *)String_Make(m, bytes("A")));
+    r |= Test(String_EqualsBytes(os, bytes("Apples")), "Table from oset with key A equal, have '%s'", os->bytes);
+    os = (String *)Table_Get(p, (Abstract *)String_Make(m, bytes("B")));
+    r |= Test(String_EqualsBytes(os, bytes("Bee")), "Table from oset with key B equal, have '%s'", os->bytes);
+    os = (String *)Table_Get(p, (Abstract *)String_Make(m, bytes("C")));
+    r |= Test(String_EqualsBytes(os, bytes("Carrot")), "Table from oset with key C equal, have '%s'", os->bytes);
+
+
+    s = String_Make(m, bytes("tbl/2={A:s/6=Apples;B:s/3=Bee;C:span/2=(s/6=Carrot;s/3=Car;)}"));
+    a = Abs_FromOset(m, s);
+    p = (Span *)a;
+
+    os = (String *)Table_Get(p, (Abstract *)String_Make(m, bytes("A")));
+    r |= Test(String_EqualsBytes(os, bytes("Apples")), "Table from oset with key A equal, have '%s'", os->bytes);
+    os = (String *)Table_Get(p, (Abstract *)String_Make(m, bytes("B")));
+    r |= Test(String_EqualsBytes(os, bytes("Bee")), "Table from oset with key B equal, have '%s'", os->bytes);
+    Span *p2 = (Span *)Table_Get(p, (Abstract *)String_Make(m, bytes("C")));
+    os = (String *)Span_Get(p2, 0);
+    r |= Test(String_EqualsBytes(os, bytes("Carrot")), "Table from oset with key C 1 equal, have '%s'", os->bytes);
+    os = (String *)Span_Get(p2, 1);
+    r |= Test(String_EqualsBytes(os, bytes("Car")), "Table from oset with key C 2 equal, have '%s'", os->bytes);
+
+
     p = Span_Make(m, TYPE_SPAN);
     Span_Add(p, (Abstract *)String_Make(m, bytes("poo-head")));
     Span_Add(p, (Abstract *)String_Make(m, bytes("fancy-pants")));

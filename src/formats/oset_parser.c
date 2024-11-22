@@ -122,7 +122,64 @@ static status sep(Roebling *rbl){
     return r;
 }
 
+static char *captureKey_ToChars(word captureKey){
+    if (captureKey == OSET_START){
+        return "OSET_START";
+    }else if (captureKey == OSET_KEY){
+        return "OSET_KEY";
+    }else if (captureKey == OSET_TOKEN){
+        return "OSET_TOKEN";
+    }else if (captureKey == OSET_LENGTH){
+        return "OSET_LENGTH";
+    }else if (captureKey == OSET_LENGTH_LIST){
+        return "OSET_LENGTH_LIST";
+    }else if (captureKey == OSET_LENGTH_TABLE){
+        return "OSET_LENGTH_TABLE";
+    }else if (captureKey == OSET_LENGTH_ARRAY){
+        return "OSET_LENGTH_ARRAY";
+    }else if (captureKey == OSET_OPTS){
+        return "OSET_OPTS";
+    }else if (captureKey == OSET_VALUE){
+        return "OSET_VALUE";
+    }else if (captureKey == OSET_SEP){
+        return "OSET_SEP";
+    }else if (captureKey == OSET_CLOSE_LIST){
+        return "OSET_CLOSE_LIST";
+    }else if (captureKey == OSET_CLOSE_ARRAY){
+        return "OSET_CLOSE_ARRAY";
+    }else if (captureKey == OSET_CLOSE_TABLE){
+        return "OSET_CLOSE_TABLE";
+    }else{
+        return "unknown";
+    }
+}
+
+static status addToParent(Oset *oset){
+    if((oset->item->type.state & PARENT_TYPE_ARRAY) != 0){
+        int idx = -1;
+        if(oset->item->key != NULL){
+            idx = Int_FromString(oset->item->key);
+        }
+        if(idx >= 0){
+            Span_Set((Span *)oset->item->parent->value, idx, oset->item->value); 
+        }else{
+            Span_Add((Span *)oset->item->parent->value, oset->item->value); 
+        }
+    }else if((oset->item->type.state & PARENT_TYPE_TABLE) != 0){
+        if(oset->item->key == NULL){
+            Fatal("Expected oset key for table sub-item", TYPE_OSET);
+            return ERROR;
+        }
+        Table_Set((Span *)oset->item->parent->value, (Abstract *)oset->item->key, oset->item->value); 
+    }
+
+    return SUCCESS;
+}
+
 static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
+    if(DEBUG_OSET){
+        printf("\x1b[%dmOset_Capture(%s %s)\x1b[0m\n", DEBUG_OSET, captureKey_ToChars(captureKey), s->bytes);
+    }
     Oset *oset = (Oset *)as(source, TYPE_OSET);
     if(oset->item == NULL){
         oset->item = OsetItem_Make(oset->m, oset);
@@ -142,10 +199,10 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
-        oset->type.state |= PARENT_TYPE_ARRAY;
 
         OsetItem *item = OsetItem_Make(oset->m, oset);
         item->parent = oset->item;
+        item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_LIST){
         if(oset->item->odef->typeOf != TYPE_SPAN){
@@ -170,8 +227,10 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
 
     }else if(captureKey == OSET_CLOSE_ARRAY || captureKey == OSET_CLOSE_LIST || captureKey == OSET_CLOSE_TABLE){
         oset->item = oset->item->parent;
+        addToParent(oset);
     }else if(captureKey == OSET_CLOSE_TABLE){
         oset->item = oset->item->parent;
+        addToParent(oset);
     }else if(captureKey == OSET_VALUE){
         if(oset->item == NULL){
             Fatal("Oset item expected to be non-null", TYPE_OSET);
@@ -180,23 +239,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         oset->item->content = s;
         oset->item->value = Abs_FromOsetItem(oset->m, oset, oset->item);
     }else if(captureKey == OSET_SEP){
-        if((oset->item->type.state & PARENT_TYPE_ARRAY) != 0){
-            int idx = -1;
-            if(oset->item->key != NULL){
-                idx = Int_FromString(oset->item->key);
-            }
-            if(idx >= 0){
-                Span_Set((Span *)oset->item->parent->value, idx, oset->item->value); 
-            }else{
-                Span_Add((Span *)oset->item->parent->value, oset->item->value); 
-            }
-        }else if((oset->item->type.state & PARENT_TYPE_TABLE) != 0){
-            if(oset->item->key == NULL){
-                Fatal("Expected oset key for table sub-item", TYPE_OSET);
-                return ERROR;
-            }
-            Table_Set((Span *)oset->item->parent->value, (Abstract *)oset->item->key, oset->item->value); 
-        }
+        addToParent(oset);
     }
     return SUCCESS;
 }

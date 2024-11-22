@@ -12,11 +12,11 @@ Abstract *I64_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract 
 }
 
 Abstract *Iter_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
-    return a;
+    return (Abstract *)o->item->value;
 }
 
 Abstract *Table_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
-    return a;
+    return (Abstract *)o->item->value;
 }
 
 Abstract *Span_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){

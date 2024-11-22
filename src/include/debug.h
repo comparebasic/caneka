@@ -53,6 +53,7 @@ extern int DEBUG_REQ_RECV;
 extern int DEBUG_EXAMPLE_HANDLERS;
 extern int DEBUG_QUEUE;
 extern int DEBUG_FILE;
+extern int DEBUG_OSET;
 
 extern boolean SHOW_SERVE_TESTS;
 
