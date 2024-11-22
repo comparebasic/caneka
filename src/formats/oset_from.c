@@ -22,3 +22,13 @@ Abstract *Table_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstrac
 Abstract *Span_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
     return (Abstract *)o->item->value;
 }
+
+Abstract *FilePath_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+    String *s = (String *)asIfc(a, TYPE_STRING);
+
+    File *file = MemCtx_Alloc(m, sizeof(File));
+    file->path = s;
+    file->type.state = s->type.state;
+
+    return (Abstract *)file;
+}

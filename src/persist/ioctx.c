@@ -27,6 +27,10 @@ String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
     return ctx->abs;
 }
 
+String *IoCtx_GetIndexPath(MemCtx *m, IoCtx *ctx){
+    return IoCtx_GetPath(m, ctx, String_Make(m, bytes("index")));
+}
+
 String *IoCtx_GetMStorePath(MemCtx *m, IoCtx *ctx){
     return IoCtx_GetPath(m, ctx, IoCtx_GetMStoreName(m, ctx));
 }
@@ -93,12 +97,18 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 
     Iter it;
     Iter_Init(&it, ctx->files);
+    
     while(Iter_Next(&it) != END){
         File *file = (File *)Iter_Get(&it);
         r |= File_Persist(m, file);
     }
 
     r |= MemLocal_Persist(m, ctx->mstore, ctx);
+    String *os = Oset_To(m, String_Make(m, bytes("index")), (Abstract *)ctx->files);
+    File *index = File_Make(m, IoCtx_GetIndexPath(m, ctx), NULL, NULL); 
+    index->data = os;
+    index->type.state |= FILE_UPDATED;
+    File_Persist(m, index);
 
     return r;
 }

@@ -115,8 +115,16 @@ status Oset_Tests(MemCtx *gm){
     os = Oset_To(m, NULL, (Abstract *)p);
     r |= Test(String_EqualsBytes(os, bytes("span/3=[0:s/4=fist;1:s/6=second;12:s/10=thirteenth;]")), "Span with gaps to have index keys is equal, have '%s'", os->bytes);
 
+    File *file = File_Make(m, String_Make(m, bytes("file-name.txt")), NULL, NULL);
+
+    file->type.state |= FILE_TRACKED;
+    os = Oset_To(m, NULL, (Abstract *)file);
+
+    s = String_Make(m, bytes("file|4096/9=fname.txt;"));
+    File *f2 = (File *)Abs_FromOset(m, s);
+    r |= Test(String_EqualsBytes(f2->path, bytes("fname.txt")), "File from oset matches, have '%s'", f2->path->bytes);
+    r |= Test((f2->type.state == 4096), "File from oset matches, have '%d'", f2->type.state);
 
     MemCtx_Free(m);
-
     return r;
 }

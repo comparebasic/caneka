@@ -2,6 +2,7 @@ enum oset_states {
     OSET_START = 0,
     OSET_KEY,
     OSET_TOKEN,
+    OSET_FLAG,
     OSET_LENGTH,
     OSET_LENGTH_LIST,
     OSET_LENGTH_TABLE,

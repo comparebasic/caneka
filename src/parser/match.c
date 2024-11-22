@@ -112,7 +112,6 @@ static status match_FeedPat(Match *mt, word c){
                 mt->count++;
             }
 
-
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
                     ((def->flags & PAT_COUNT) != 0 && (--mt->remaining) > 0)){
                 match_StartOfTerm(mt);

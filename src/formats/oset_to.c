@@ -95,6 +95,27 @@ Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
         String_AddBytes(m, os, bytes(")"), 1);
     }
 
+    return (Abstract *)os;
+}
+
+Abstract *FilePath_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+    File *file = asIfc(a, TYPE_FILE);
+
+    String *os = String_Init(m, STRING_EXTEND);
+    if(key != NULL){
+        String_Add(m, os, key);
+        String_AddBytes(m, os, bytes(":"), 1);
+    }
+
+    String_Add(m, os, odef->name);
+    String_AddBytes(m, os, bytes("|"), 1);
+    String_Add(m, os, String_FromInt(m, (int)file->type.state));
+    String_AddBytes(m, os, bytes("/"), 1);
+
+    String_Add(m, os, String_FromInt(m, file->path->length));
+    String_AddBytes(m, os, bytes("="), 1);
+    String_Add(m, os, file->path);
+    String_AddBytes(m, os, bytes(";"), 1);
 
     return (Abstract *)os;
 }

@@ -8,12 +8,17 @@ static word labelDef[] = {
 };
 
 static word tokenNameDef[] = {
-    PAT_KO, '/','/', patText,
+    PAT_NO_CAPTURE|PAT_KO,'/','/',PAT_NO_CAPTURE|PAT_KO,'|','|',patText,
+    PAT_END, 0, 0
+};
+
+static word flagsDef[] = {
+    PAT_NO_CAPTURE|PAT_TERM,'|','|',PAT_NO_CAPTURE|PAT_KO,'/','/',PAT_MANY|PAT_TERM,'0', '9',
     PAT_END, 0, 0
 };
 
 static word lengthDef[] = {
-    PAT_MANY|PAT_TERM,'0', '9',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_NO_CAPTURE|PAT_TERM,'/','/',PAT_MANY|PAT_TERM,'0', '9',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
     PAT_END, 0, 0
 };
 
@@ -88,6 +93,9 @@ static status defineLength(Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)flagsDef, OSET_FLAG, OSET_MARK_LENGTH);
+
+    r |= Roebling_SetPattern(rbl,
         (PatCharDef*)lengthDef, OSET_LENGTH, -1);
     return r;
 }
@@ -127,6 +135,8 @@ static char *captureKey_ToChars(word captureKey){
         return "OSET_START";
     }else if (captureKey == OSET_KEY){
         return "OSET_KEY";
+    }else if (captureKey == OSET_FLAG){
+        return "OSET_FLAG";
     }else if (captureKey == OSET_TOKEN){
         return "OSET_TOKEN";
     }else if (captureKey == OSET_LENGTH){
@@ -192,6 +202,8 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             Fatal("Error: type not found\n", TYPE_OSET);
         }
         oset->item->odef = odef;
+    }else if(captureKey == OSET_FLAG){
+        oset->item->flags = (word)Int_FromString(s);
     }else if(captureKey == OSET_LENGTH){
         oset->item->remaining = Int_FromString(s);
     }else if(captureKey == OSET_LENGTH_ARRAY){
@@ -236,6 +248,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             Fatal("Oset item expected to be non-null", TYPE_OSET);
             return ERROR;
         }
+        s->type.state |= oset->item->flags;
         oset->item->content = s;
         oset->item->value = Abs_FromOsetItem(oset->m, oset, oset->item);
     }else if(captureKey == OSET_SEP){

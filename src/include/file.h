@@ -20,3 +20,4 @@ File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx);
 File *File_Init(File *file, String *path, Access *access, IoCtx *ctx);
 status File_Delete(File *file);
 status File_Load(MemCtx *m, File *file, Access *access);
+status File_AbsFromCtx(MemCtx *m, File *file, Access *access, IoCtx *ctx);

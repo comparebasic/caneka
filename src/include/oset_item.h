@@ -3,6 +3,7 @@ typedef struct oset_item {
     String *content;
     String *key;
     Abstract *value;
+    word flags;
     struct oset_def *odef;
     int remaining;
     struct oset_item *parent;

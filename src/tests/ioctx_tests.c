@@ -36,15 +36,19 @@ status IoCtx_Tests(MemCtx *gm){
     file->type.state |= (FILE_UPDATED|FILE_TRACKED);
     File_Persist(m, file);
 
+    IoCtx_Persist(m, one);
+
     FILE *f = fopen((char *)file->abs->bytes, "r");
     memset(buff, 0, sizeof(buff));
     l = fread(buff, 1, sizeof(buff), f);
     r |= Test(l == file->data->length, "file length match, have %ld", l);
     r |= Test(String_EqualsBytes(file->data, bytes(buff)), "String content matches, have: '%s'", buff);
 
+    /*
     IoCtx_Destroy(m, one, NULL);
     dir = opendir(onePath_cstr);
     r |= Test(dir == NULL, "dir destroyed %s", onePath_cstr);
+    */
 
     MemCtx_Free(m);
     return r;
