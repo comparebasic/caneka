@@ -27,6 +27,7 @@ Abstract *FilePath_FromOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abst
     String *s = (String *)asIfc(a, TYPE_STRING);
 
     File *file = MemCtx_Alloc(m, sizeof(File));
+    file->type.of = TYPE_FILE;
     file->path = s;
     file->type.state = s->type.state;
 

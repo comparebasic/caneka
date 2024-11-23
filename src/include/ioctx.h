@@ -25,3 +25,5 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access);
 String *IoCtx_GetMStorePath(MemCtx *m, IoCtx *ctx);
 String *IoCtx_GetMStoreName(MemCtx *m, IoCtx *ctx);
 status IoCtx_Load(MemCtx *m, IoCtx *ctx);
+status IoCtx_Open(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior);
+String *IoCtx_GetIndexPath(MemCtx *m, IoCtx *ctx);

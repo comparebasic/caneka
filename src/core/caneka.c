@@ -80,6 +80,8 @@ char *Class_ToString(cls type){
         return "TYPE_MEMCTX";
     }else if(type == TYPE_MEMSLAB){
         return "TYPE_MEMSLAB";
+    }else if(type == TYPE_FILE){
+        return "TYPE_FILE";
     }else if(type == TYPE_REQ){
         return "TYPE_REQ";
     }else if(type == TYPE_STRING){

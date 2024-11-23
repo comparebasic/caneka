@@ -70,6 +70,7 @@ status File_Load(MemCtx *m, File *file, Access *access){
     }
 
     if(feof(f)){
+        file->type.state |= FILE_LOADED;
         return SUCCESS;
     }else if(ferror(f)){
         return ERROR;

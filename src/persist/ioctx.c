@@ -1,6 +1,20 @@
 #include <external.h>
 #include <caneka.h>
 
+static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
+    File index;
+    File_Init(&index, IoCtx_GetIndexPath(m, ctx), ctx->access, NULL);
+    File_Load(m, &index, ctx->access);
+    if((index.type.state & FILE_LOADED) != 0){
+        ctx->files = (Span *)Abs_FromOset(m, index.data);
+        if(ctx->files != NULL && ctx->files->type.of == TYPE_TABLE){
+            return SUCCESS;
+        }
+    }
+
+    return ERROR;
+}
+
 static String *pathRecurse(MemCtx *m, String *s, IoCtx *ctx, IoCtx *prior){
     if(prior != NULL && prior->prior != NULL){
         String_Add(m, s, pathRecurse(m, s, prior, prior->prior));
@@ -18,6 +32,7 @@ static String *pathRecurse(MemCtx *m, String *s, IoCtx *ctx, IoCtx *prior){
     }
     return s;
 }
+
 
 String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
     if(ctx->abs == NULL){
@@ -82,11 +97,11 @@ status IoCtx_Load(MemCtx *m, IoCtx *ctx){
     if(dir == NULL && ENOENT == errno){
         return MISS;
     }
-
-    /* load mstore */
-    /* load file list */
-
     closedir(dir);
+
+    ctx->mstore = MemLocal_Load(m, ctx);
+    ioCtx_LoadFileList(m, ctx);
+
     return SUCCESS;
 }
 
@@ -134,11 +149,9 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     return ERROR;
 }
 
-IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
-    if(root == NULL){
-        Fatal("Error getAbsPath: missing base_s on ioctc\n", TYPE_IOCTX);
-    }
-	IoCtx* ctx = (IoCtx*)MemCtx_Alloc(m, sizeof(IoCtx));
+status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
+    memset(ctx, 0, sizeof(IoCtx));
+
     ctx->m = m;
 	ctx->type.of = TYPE_IOCTX;
     ctx->root = root;
@@ -148,5 +161,21 @@ IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
     ctx->files = Span_Make(m, TYPE_SPAN);
     ctx->mstore = MemLocal_Make(m);
 
+    return SUCCESS;
+}
+
+IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
+    if(root == NULL){
+        Fatal("Error getAbsPath: missing base_s on ioctx\n", TYPE_IOCTX);
+    }
+	IoCtx* ctx = (IoCtx*)MemCtx_Alloc(m, sizeof(IoCtx));
+    IoCtx_Init(m, ctx, root, access, prior);
+
     return ctx;
 }
+
+status IoCtx_Open(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
+    IoCtx_Init(m, ctx, root, access, prior);
+    return IoCtx_Load(m, ctx);
+}
+
