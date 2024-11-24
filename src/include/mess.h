@@ -3,9 +3,9 @@ typedef struct mess {
     Hashed *value;
     Hashed *atts;
     String *body;
-    struct mess *next;
     struct mess *parent;
     struct mess *firstChild;
+    struct mess *next;
 } Mess;
 
 Mess *Mess_Make(MemCtx *m);

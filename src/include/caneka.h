@@ -69,6 +69,7 @@ extern Abstract Reserved;
 
 typedef struct virt * AbstractPtr;
 typedef status (*DoFunc)(struct mem_handle *mh);
+typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source);
 
 #define ZERO 0
 #define MAX_BASE10 22
@@ -160,6 +161,7 @@ enum types {
     TYPE_OSET,
     TYPE_OSET_ITEM,
     TYPE_OSET_DEF,
+    TYPE_CASH,
     _TYPE_CORE_END,
 };
 
@@ -247,7 +249,6 @@ cls Ifc_Get(cls inst);
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"
-
 #include "oset_item.h"
 #include "oset.h"
 #include "ioctx.h"
@@ -262,5 +263,8 @@ cls Ifc_Get(cls inst);
 #ifdef LINUX
     #include "linux.h"
 #endif
+
+#include "formats/cash.h"
+#include "lang/xmlt.h"
 
 status Caneka_Init(MemCtx *m);
