@@ -1,77 +1,78 @@
-#include <basictypes_external.h> 
-#include <caneka/caneka.h> 
+#include <external.h> 
+#include <caneka.h> 
 
-static lifecycle_t nest(MemCtx *m, NestedD *nd, Typed *t, lifecycle_t nestState, cbool_t stack){
-    if(t->type != TYPE_SPAN){
-        nd->nestState = 0;
+static status nest(MemCtx *m, NestedD *nd, Span *t, status op){
+    if(t == NULL || !Ifc_Match(t->type.of, TYPE_SPAN)){
         return ERROR;
     }
 
-    if(nestState == NESTED_FOR){
-        Iter *it = Iter_Make(m, t);
-        nd->current_it = it;
-        NestedD_Next(m, nd);
-        if(stack){
-            Span_Add(m, nd->stack_sp, Typed_Make(m, nestState));
-            Span_Add(m, nd->stack_sp, (Typed *)it);
-        }
-    }else if(nestState == NESTED_WITH && Table_IsTable(t) == SUCCESS){
-        if(stack){
-            Span_Add(m, nd->stack_sp, Typed_Make(m, nestState));
-            Span_Add(m, nd->stack_sp, (Typed *)t);
-        }
-        nd->current_tbl = (Span *)t;
+    if(op == NESTED_FOR){
+        Iter_Init(&nd->it, t);
+    }else if((op & NESTED_WITH) != 0 && t->type.of == TYPE_TABLE){
+        nd->current_tbl = t;
     }else{
-        nd->nestState = 0;
-        return ERROR;
+        nd->type.state |= ERROR;
+        return nd->type.state;
     }
 
-    nd->nestState = nestState;
+    if((op & NESTED_OUTDENT) == 0){
+        NestedState ns;
+        ns.t = t;
+        ns.idx = 0;
+        ns.flags = ZERO;
+        ns.prev = Span_Get(nd->stack, nd->stack->max_idx);
+        Span_Add(nd->stack, (Abstract *)&ns);
+    }
+
+    nd->type.state = (op & ~NESTED_OUTDENT);
 
     return SUCCESS;
 }
 
-lifecycle_t NestedD_With(MemCtx *m, NestedD *nd, Typed *key){
-    Typed *t =  Table_Get(m, nd->current_tbl, key);
-    if(t != NULL && Table_IsTable(t)){
-        nest(m, nd, t, NESTED_WITH, true);
+status NestedD_With(MemCtx *m, NestedD *nd, Abstract *key){
+    Abstract *t =  Table_Get(nd->current_tbl, key);
+    if(t != NULL && t->type.of == TYPE_TABLE){
+        nest(m, nd, (Span *)t, NESTED_WITH);
         return SUCCESS;
     }
     return MISS;
 }
 
-lifecycle_t NestedD_For(MemCtx *m, NestedD *nd, Typed *key){
-    Typed *t =  Table_Get(m, nd->current_tbl, key);
-    if(t != NULL && t->type == TYPE_SPAN){
-        nest(m, nd, t, NESTED_FOR, true);
+status NestedD_For(MemCtx *m, NestedD *nd, Abstract *key){
+    Abstract *t =  Table_Get(nd->current_tbl, key);
+    if(t != NULL && Ifc_Match(t->type.of, TYPE_SPAN)){
+        nest(m, nd, (Span *)t, NESTED_FOR);
         return SUCCESS;
     }
     return MISS;
 }
 
-lifecycle_t NestedD_Outdent(MemCtx *m, NestedD *nd){
-    Span_Cull(m, nd->stack_sp, 2);
-    Typed *stateT = Span_Get(m, nd->stack_sp, -2); 
-    Span *data_tbl = (Span *)Span_Get(m, nd->stack_sp, -1); 
-    if(stateT == NULL || data_tbl == NULL){
+status NestedD_Outdent(MemCtx *m, NestedD *nd){
+    Span_Cull(nd->stack, 1);
+    
+    NestedState *ns = Span_Get(nd->stack, nd->stack->max_idx);
+    if(ns == NULL || ns->t == NULL){
         return ERROR;
     }
-    return nest(m, nd, (Typed *)data_tbl, stateT->lifecycle, false);
+
+    return nest(m, nd, ns->t, (ns->flags|NESTED_OUTDENT));
 }
 
-Typed *NestedD_Get(MemCtx *m, NestedD *nd, Typed *key){
+Abstract *NestedD_Get(NestedD *nd, Abstract *key){
     if(nd->current_tbl == NULL){
         return NULL;
     }
-    return Table_Get(m, nd->current_tbl, key);
+    return Table_Get(nd->current_tbl, key);
 }
 
-lifecycle_t NestedD_Next(MemCtx *m, NestedD *nd){
-    if(nd->current_it == NULL || IsDone(nd->current_it)){
+status NestedD_Next(NestedD *nd){
+    if(nd->it.values == NULL || (nd->it.type.state & END) != 0){
         return MISS;
     }
-    Typed *next = Iter_Next(nd->current_it);
-    if(Table_IsTable(next)){
+    Iter_Next(&nd->it);
+
+    Abstract *next = Iter_Get(&nd->it);
+    if(next->type.of == TYPE_TABLE){
         nd->current_tbl = (Span *)next;
         return SUCCESS;
     }else{
@@ -80,19 +81,16 @@ lifecycle_t NestedD_Next(MemCtx *m, NestedD *nd){
     }
 }
 
-NestedD *NestedD_New(MemCtx *m){
-    NestedD *nd = Alloc(m, sizeof(NestedD));
-    nd->type = TYPE_NESTED_DATA;
-    nd->stack_sp = Span_Make(m, SPAN_DIM_SIZE);
+NestedD *NestedD_Make(MemCtx *m, Span *tbl){
+    NestedD *nd = MemCtx_Alloc(m, sizeof(NestedD));
+    nd->type.of = TYPE_NESTEDD;
 
-    return nd;
-}
+    nd->stack = Span_Make(m, TYPE_NESTED_SPAN);
 
-NestedD *NestedD_Make(MemCtx *m, Span *data_tbl){
-    NestedD *nd = NestedD_New(m);
-    nd->root_tbl = data_tbl;
-    nd->current_tbl = data_tbl;
-    nest(m, nd, (Typed *)data_tbl, NESTED_WITH, true);
+    if(tbl != NULL){
+        nd->current_tbl = tbl;
+        nest(m, nd, tbl, NESTED_WITH);
+    }
 
     return nd;
 }

@@ -11,8 +11,8 @@ typedef struct xmlt_ctx {
     Type type;
     MemCtx *m;
     Cash *cash;
-    Span *tbl;
-    XmlParser *xml;
+    XmlParser *parser;
+    NestedD *nd;
     Abstract *source;
 } XmlTCtx;
 

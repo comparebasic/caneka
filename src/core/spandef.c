@@ -9,6 +9,7 @@ static SpanDef span4kx32mDef;
 static SpanDef span4x16Def;
 static SpanDef spanStringDef;
 static SpanDef spanPollMapDef;
+static SpanDef nestedStackDef;
 
 status SpanDef_Init(){
     /* span16 */
@@ -78,6 +79,18 @@ status SpanDef_Init(){
     span4kx32mDef.itemSize = SPAN_DEFAULT_ITEM_SIZE;
     span4kx32mDef.valueHdr = SPAN_DEFAULT_HDR;
 
+    /* nestedStackDef */
+    memset(&nestedStackDef, 0, sizeof(SpanDef));
+    nestedStackDef.typeOf = TYPE_NESTED_SPAN;
+    nestedStackDef.stride = 4;
+    nestedStackDef.idxStride = 16;
+    nestedStackDef.idxSize = SPAN_DEFAULT_IDX_SIZE;
+    nestedStackDef.slotSize = sizeof(NestedState)/sizeof(void *);
+    nestedStackDef.itemSize = sizeof(NestedState);
+    nestedStackDef.valueHdr = SPAN_DEFAULT_HDR;
+    nestedStackDef.flags = INLINE;
+
+
     /* span4x16 */
     memset(&span4x16Def, 0, sizeof(SpanDef));
     span4x16Def.typeOf = TYPE_MINI_SPAN;
@@ -122,6 +135,8 @@ SpanDef *SpanDef_FromCls(word cls){
         return &spanStringDef;
     }else if(cls == TYPE_POLL_MAP_SPAN){
         return &spanPollMapDef;
+    }else if(cls == TYPE_NESTED_SPAN){
+        return &nestedStackDef;
     }else{
         /* default to 16 x 16 */
         return &span16Def;

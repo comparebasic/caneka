@@ -51,6 +51,7 @@ typedef struct span {
 Span* Span_Make(MemCtx* m, cls type);
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
 status Span_Remove(Span *p, int idx);
+status Span_Cull(Span *p, int count);
 status Span_ReInit(Span *p);
 status Span_Query(struct span_query *sq);
 Span *Span_Clone(MemCtx *m, Span *p);

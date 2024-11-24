@@ -137,6 +137,7 @@ enum types {
     TYPE_QUEUE_IDX,
     TYPE_SLAB_SPAN,
     TYPE_STRING_SPAN,
+    TYPE_NESTED_SPAN,
     TYPE_TABLE,
     TYPE_POLL_MAP_SPAN,
     _TYPE_SPAN_END,
@@ -162,6 +163,8 @@ enum types {
     TYPE_OSET_ITEM,
     TYPE_OSET_DEF,
     TYPE_CASH,
+    TYPE_XMLT,
+    TYPE_NESTEDD,
     _TYPE_CORE_END,
 };
 
@@ -235,6 +238,7 @@ cls Ifc_Get(cls inst);
 #include "span.h"
 #include "spanquery.h"
 #include "iter.h"
+#include "get.h"
 #include "table.h"
 #include "table_chain.h"
 #include "tokens.h"
@@ -264,7 +268,10 @@ cls Ifc_Get(cls inst);
     #include "linux.h"
 #endif
 
+
+
 #include "formats/cash.h"
+#include "lang/nestedd.h"
 #include "lang/xmlt.h"
 
 status Caneka_Init(MemCtx *m);

@@ -179,6 +179,20 @@ status Span_Remove(Span *p, int idx){
     return Span_Query(&sq);
 }
 
+status Span_Cull(Span *p, int count){
+    SpanQuery sq;
+    while(count-- > 0){
+        int idx = p->max_idx;
+        if(idx >= 0){
+            SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
+            return Span_Query(&sq);
+        }
+    }
+
+    return NOOP;
+}
+
+
 status Span_Move(Span *p, int fromIdx, int toIdx){
     return NOOP;
 }

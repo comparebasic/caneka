@@ -3,7 +3,6 @@
 
 status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
     MemCtx *m = xmlt->m;
-    Span * tbl = xmlt->tbl;
     Hashed *att = e->atts;
     while(att != NULL){
         String_Add(m, s, (String *)att->item); 
@@ -26,7 +25,6 @@ status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
 
 status XmlT_Out(XmlTCtx *xmlt, Mess *e, OutFunc func){
     MemCtx *m = xmlt->m;
-    Span * tbl = xmlt->tbl;
     Abstract *source = xmlt->source;
 
     String *s = String_Init(m, STRING_EXTEND);
@@ -86,4 +84,15 @@ status XmlT_GetPropFlags(Mess *e, String *prop, Abstract *value){
     }
 
     return ZERO;
+}
+
+XmlTCtx *XmlTCtx_Make(MemCtx *m){
+    XmlTCtx *xmlt = (XmlTCtx *)MemCtx_Alloc(m, sizeof(XmlTCtx));
+    xmlt->type.of = TYPE_XMLT;
+
+    xmlt->parser = XmlParser_Make(m);
+    xmlt->nd = NestedD_Make(m, NULL);
+    xmlt->cash = Cash_Make(m, (Getter)NestedD_Get, (Abstract *)xmlt->nd);
+
+    return xmlt;
 }

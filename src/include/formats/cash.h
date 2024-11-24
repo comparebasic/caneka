@@ -10,10 +10,11 @@ enum cash_marks {
 typedef struct cash {
     Type type;
     MemCtx *m;
-    Span *tbl;
     String *s;
     Roebling *rbl;
+    Getter get;
+    Abstract *source;
 } Cash;
 
-Cash *Cash_Make(MemCtx *m);
+Cash *Cash_Make(MemCtx *m, Getter get, Abstract *source);
 String *Cash_Replace(MemCtx *m, Cash *cash, String *s);

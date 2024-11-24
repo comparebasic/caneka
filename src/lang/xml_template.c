@@ -1,7 +1,8 @@
 #include <basictypes_external.h> 
 #include <caneka/caneka.h> 
 
-lifecycle_t XmlElem_Template(MemCtx *m, XmlElem *e, NestedD *nd,  OutFunc func, Typed *dest){
+status XmlElem_Template(XmlTCtx *xmlt, XmlElem *e, NestedD *nd, OutFunc func){
+    MemCtx *m = 
     lifecycle_t r = ERROR;
     lifecycle_t prevCycle = m->destCycle;
     if(m->destCycle == 0){

@@ -34,3 +34,6 @@ status ServeMultiple_Tests(MemCtx *gm);
 status IoCtx_Tests(MemCtx *gm);
 status Oset_Tests(MemCtx *gm);
 status MemLocal_Tests(MemCtx *gm);
+status NestedDFlat_Tests(MemCtx *gm);
+status NestedDWith_Tests(MemCtx *gm);
+status NestedDFor_Tests(MemCtx *gm);

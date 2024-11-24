@@ -36,7 +36,7 @@ static status Cash_Capture(word captureKey, int matchIdx, String *s, Abstract *s
     if(captureKey == CASH_BETWEEN){
         String_Add(cash->m, cash->s, s);
     }else if(captureKey == CASH_VALUE){
-        String *value = (String *)Table_Get(cash->tbl, (Abstract *)s);
+        String *value = (String *)cash->get(cash->source, (Abstract *)s);
         if(value != NULL){
             String_Add(cash->m, cash->s, value);
             cash->type.state |= SUCCESS;
@@ -57,7 +57,7 @@ String *Cash_Replace(MemCtx *m, Cash *cash, String *s){
     return cash->s;
 }
 
-Cash *Cash_Make(MemCtx *m){
+Cash *Cash_Make(MemCtx *m, Getter get, Abstract *source){
     Cash *cash = MemCtx_Alloc(m, sizeof(Cash));
     cash->type.of = TYPE_CASH;
     cash->m = m;
@@ -84,6 +84,8 @@ Cash *Cash_Make(MemCtx *m){
         Cash_Capture,
         (Abstract *)cash
     ); 
+    cash->get = get;
+    cash->source = source;
 
     return cash;
 }

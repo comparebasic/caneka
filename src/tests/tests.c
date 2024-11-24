@@ -201,7 +201,7 @@ static TestSet _Tests[] = {
         "Oset",
         Oset_Tests,
         "Oset serialization format tests (similar features to XML, JSON, or YAML).",
-        PARTIAL_FEATURE,
+        FEATURE_COMPLETE,
     },
     {
         "Crypto",
@@ -213,12 +213,30 @@ static TestSet _Tests[] = {
         "IoCtx",
         IoCtx_Tests,
         "File and storage persistance context tests.",
-        PARTIAL_FEATURE,
+        FEATURE_COMPLETE,
     },
     {
         "MemLocal",
         MemLocal_Tests,
         "Persisting a combination of Table, Span, and MemCtx to disk and back for use in IO Contextx.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "NestedD Flat",
+        NestedDFlat_Tests,
+        "NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), Flat scenario.",
+        PARTIAL_FEATURE,
+    },
+    {
+        "NestedD With",
+        NestedDWith_Tests,
+        "NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), With scenario.",
+        PARTIAL_FEATURE,
+    },
+    {
+        "NestedD For",
+        NestedDFor_Tests,
+        "NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), For scenario.",
         PARTIAL_FEATURE,
     },
     {
