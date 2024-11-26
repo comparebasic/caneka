@@ -185,8 +185,9 @@ status Span_Cull(Span *p, int count){
         int idx = p->max_idx;
         if(idx >= 0){
             SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
-            return Span_Query(&sq);
+            Span_Query(&sq);
         }
+        p->max_idx--;
     }
 
     return NOOP;

@@ -24,3 +24,7 @@ typedef struct nestedd {
 NestedD *NestedD_Make(MemCtx *m, Span *data_tbl);
 Abstract *NestedD_Get(NestedD *nd, Abstract *key);
 status NestedD_Next(NestedD *nd);
+status NestedD_Outdent(MemCtx *m, NestedD *nd);
+status NestedD_For(MemCtx *m, NestedD *nd, Abstract *key);
+status NestedD_With(MemCtx *m, NestedD *nd, Abstract *key);
+char *NestedD_opToChars(status op);

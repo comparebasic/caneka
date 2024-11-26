@@ -159,7 +159,7 @@ status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
 
     File f;
     int idx = 0;
-    while(Iter_Next(&it) != END){
+    while((Iter_Next(&it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&it);
         File_Init(&f, fname, ctx->access, NULL);
         if(sl != NULL){

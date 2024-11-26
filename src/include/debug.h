@@ -54,6 +54,7 @@ extern int DEBUG_EXAMPLE_HANDLERS;
 extern int DEBUG_QUEUE;
 extern int DEBUG_FILE;
 extern int DEBUG_OSET;
+extern int DEBUG_NESTED;
 
 extern boolean SHOW_SERVE_TESTS;
 

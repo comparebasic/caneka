@@ -6,9 +6,11 @@ typedef struct iter {
 
 enum iter_flags {
     FLAG_ITER_LAST = 1 << 10,
+    FLAG_ITER_REVERSE = 1 << 11,
 };
 
 status Iter_Next(Iter *it);
 Abstract *Iter_Get(Iter *it);
 Iter *Iter_Init(Iter *it, Span *values);
+Iter *Iter_InitReverse(Iter *it, Span *values);
 Iter *Iter_Make(MemCtx *m, Span *values);

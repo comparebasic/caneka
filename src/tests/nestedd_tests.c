@@ -22,34 +22,6 @@ status NestedDFlat_Tests(MemCtx *gm){
     sg = (Single *)NestedD_Get(nd, (Abstract *)String_Make(m, bytes("no")));
     r |= Test(sg->val.value == FALSE, "Test if nested second value is expected, have %ld", sg->val.value);
 
-    /*
-    r = TestCase_Eval((Typed_Truthy(value) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 2,  "Truthy of 'yes' is ", LifeCycle_FlagToCStr(value->lifecycle)));
-    if(r != SUCCESS){
-        return;
-    }
-
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "no"));
-    r = TestCase_Eval((Typed_Truthy(value) != SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 2,  "Truthy of 'no' is ", LifeCycle_FlagToCStr(value->lifecycle)));
-    if(r != SUCCESS){
-        return;
-    }
-
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "not-a-thing"));
-    r = TestCase_Eval((Typed_Truthy(value) != SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 2,  "Truthy of 'not-a-thing' is ", LifeCycle_ToCStr(value)));
-    if(r != SUCCESS){
-        return;
-    }
-    */
-
     MemCtx_Free(m);
     return r;
 }
@@ -59,74 +31,45 @@ status NestedDWith_Tests(MemCtx *gm){
     String *s;
     status r = SUCCESS;
 
-    /*
-
     Span *tbl = NULL;
     NestedD *nd = NULL;
-    Typed *value = NULL;
-    lifecycle_t r = ERROR;
+    Abstract *value = NULL;
+    Single *sg = NULL;
 
+    Span *session = Span_Make(m, TYPE_TABLE);
+    Table_Set(session, (Abstract *)String_Make(m, bytes("scid")), (Abstract *)String_Make(m, bytes("a87c782a")));
+    Table_Set(session, (Abstract *)String_Make(m, bytes("domain")), (Abstract *)String_Make(m, bytes("customer")));
     struct timespec ts = {1709645616, 277122774};
-    Typed *session[] = {
-        (Typed *)Nstr(m, "scid"), (Typed *)Nstr(m, "a87c782a"),
-        (Typed *)Nstr(m, "domain"), (Typed *)Nstr(m, "customer"),
-        (Typed *)Nstr(m, "expires"), (Typed *)Time_NewTimeStamp(m, &ts),
-        NULL,
-    };
+    Table_Set(session, (Abstract *)String_Make(m, bytes("expires")), (Abstract *)I64_Wrapped(m, Time64_FromSpec(&ts)));
 
-    Typed *items[] = {
-        (Typed *)Nstr(m, "name"), (Typed *)Nstr(m, "SuppaSuppa"),
-        (Typed *)Nstr(m, "title"), (Typed *)Nstr(m, "Master Of It All"),
-        (Typed *)Nstr(m, "session"), (Typed *)Table_FromLiteral(m, session),
-        NULL,
-    };
+    tbl = Span_Make(m, TYPE_TABLE);
+    Table_Set(tbl, (Abstract *)String_Make(m, bytes("name")), (Abstract *)String_Make(m, bytes("SuppaSuppa")));
+    Table_Set(tbl, (Abstract *)String_Make(m, bytes("title")), (Abstract *)String_Make(m, bytes("Master Of It All")));
+    Table_Set(tbl, (Abstract *)String_Make(m, bytes("session")), (Abstract *)session);
 
-    tbl = Table_FromLiteral(m, items);
     nd = NestedD_Make(m, tbl);
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "name"));
-    r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, String_Static("SuppaSuppa")) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 3,  "Name on main level is as expected, found ", "%S", Typed_ToString(m, value)));
-    if(r != SUCCESS){
-        return;
-    }
+    value = NestedD_Get(nd, (Abstract *)String_Make(m, bytes("name")));
+    r = Test(String_EqualsBytes((String *)value, bytes("SuppaSuppa")),
+        "Name on main level is as expected, found '%s'", ((String *)value)->bytes);
 
-    NestedD_With(m, nd, (Typed *)Nstr(m, "session"));
+    NestedD_With(m, nd, (Abstract *)String_Make(m, bytes("session")));
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "scid"));
-    r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, String_Static("a87c782a")) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 3,  "With session scid is as expected, found ", "%S", Typed_ToString(m, value)));
-    if(r != SUCCESS){
-        return;
-    }
+    value = NestedD_Get(nd, (Abstract *)String_Make(m, bytes("scid")));
+    r |= Test(String_EqualsBytes((String *)value, bytes("a87c782a")), 
+        "With session scid is as expected, found '%s'", ((String *)value)->bytes);
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "expires"));
-    Time *expected_tm = Time_NewTimeStamp(m, &ts);
-    r = TestCase_Eval((value != NULL && value->type == TYPE_TIME && Typed_Equals(value, (Typed *)expected_tm) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 6,  "With session time is as expected, found ", "%S", Typed_ToString(m, value), " expected ", "%S", Typed_ToString(m, (Typed *)expected_tm)));
-    if(r != SUCCESS){
-        return;
-    }
+    sg = (Single *)NestedD_Get(nd, (Abstract *)String_Make(m, bytes("expires")));
+    i64 expected_tm = Time64_FromSpec(&ts);
+    r |= Test(sg->val.value == expected_tm,
+        "With session time is as expected, found '%s'", String_FromI64(m, (sg->val.value))->bytes);
 
     NestedD_Outdent(m, nd);
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "title"));
-    String *expected_s = Nstr(m, "Master Of It All");
-    r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 7,  "Title after outdent on main found '", "%S", Typed_ToString(m, value), "' expected '", "%S", expected_s, "'"));
-    if(r != SUCCESS){
-        return;
-    }
 
-    return;
-    */
+    value = NestedD_Get(nd, (Abstract *)String_Make(m, bytes("title")));
+
+    String *expected_s = String_Make(m, bytes("Master Of It All"));
+    r |= Test(String_EqualsBytes((String *)value, bytes("Master Of It All")), "Title after outdent on main found '%s'", ((String *)value)->bytes);
 
     MemCtx_Free(m);
     return r;

@@ -32,6 +32,7 @@ int DEBUG_EXAMPLE_HANDLERS = 0;
 int DEBUG_QUEUE = 0;
 int DEBUG_FILE = 0;
 int DEBUG_OSET = 0;
+int DEBUG_NESTED = 0;
 
 boolean SHOW_SERVE_TESTS = FALSE;
 
@@ -61,6 +62,25 @@ char *QueueFlags_ToChars(word flags){
 void spanState_Print(SpanState *st, int color){
     printf("\x1b[%dmST<%p localIdx:%hu increment:%d offset:%hu dim:%d>\x1b[0m", color, st->slab, st->localIdx, st->increment, st->offset, st->dim);
 }
+
+void NestedD_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    NestedD *nd = (NestedD *)as(a, TYPE_NESTEDD);
+    printf("\x1b[%dmND<%s: ", color, State_ToString(nd->type.state));
+    Debug_Print((void *)nd->current_tbl, 0, "", color, extended);
+    Iter it;
+    Iter_InitReverse(&it, nd->stack);
+    printf("\x1b[%dm stack/%d=(", color, nd->stack->nvalues);
+    while((Iter_Next(&it) & END) == 0){
+        NestedState *ns = (NestedState *)Iter_Get(&it);
+        printf("\x1b[%dm%s -> ", color, NestedD_opToChars(ns->flags));
+        Debug_Print((void *) ns->t, 0, "", color, FALSE);
+        if((it.type.state & FLAG_ITER_LAST) == 0){
+            printf("\x1b[%dm,", color);
+        }
+    }
+    printf("\x1b[%dm)>\x1b[0m", color);
+}
+
 
 void Queue_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Queue *q = as(a, TYPE_QUEUE);
@@ -617,6 +637,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
+    r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
     
     return r;
 }

@@ -113,7 +113,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
     Iter it;
     Iter_Init(&it, ctx->files);
     
-    while(Iter_Next(&it) != END){
+    while((Iter_Next(&it) & END) == 0){
         File *file = (File *)Iter_Get(&it);
         r |= File_Persist(m, file);
     }
@@ -134,7 +134,7 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     /* TODO: remove files ... */
     Iter it;
     Iter_Init(&it, ctx->files);
-    while(Iter_Next(&it) != END){
+    while((Iter_Next(&it) & END) == 0){
         File *file = (File *)Iter_Get(&it);
         File_Delete(file);
     }
