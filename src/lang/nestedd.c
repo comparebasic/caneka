@@ -13,14 +13,17 @@ char *NestedD_opToChars(status op){
    } 
 }
 
-static status nest(MemCtx *m, NestedD *nd, Span *t, status op){
+static status nest(NestedD *nd, Span *t, status op){
+    MemCtx *m = nd->m;
     if(t == NULL || !Ifc_Match(t->type.of, TYPE_SPAN)){
         return ERROR;
     }
 
-    if(op == NESTED_FOR){
+    if((op & NESTED_FOR) != 0){
         Iter_Init(&nd->it, t);
+        nd->current_tbl = NULL;
     }else if((op & NESTED_WITH) != 0 && t->type.of == TYPE_TABLE){
+        memset(&nd->it, 0, sizeof(Iter));
         nd->current_tbl = t;
     }else if((op & NESTED_OUTDENT) == 0){
         nd->type.state |= ERROR;
@@ -33,6 +36,9 @@ static status nest(MemCtx *m, NestedD *nd, Span *t, status op){
         ns.idx = 0;
         ns.flags = op;
         ns.prev = Span_Get(nd->stack, nd->stack->max_idx);
+        if(ns.prev != NULL){
+            ns.prev->idx = nd->it.idx;
+        }
         Span_Add(nd->stack, (Abstract *)&ns);
     }
 
@@ -51,22 +57,22 @@ static status nest(MemCtx *m, NestedD *nd, Span *t, status op){
 status NestedD_With(MemCtx *m, NestedD *nd, Abstract *key){
     Abstract *t =  Table_Get(nd->current_tbl, key);
     if(t != NULL && t->type.of == TYPE_TABLE){
-        nest(m, nd, (Span *)t, NESTED_WITH);
+        nest(nd, (Span *)t, NESTED_WITH);
         return SUCCESS;
     }
     return MISS;
 }
 
-status NestedD_For(MemCtx *m, NestedD *nd, Abstract *key){
+status NestedD_For(NestedD *nd, Abstract *key){
     Abstract *t =  Table_Get(nd->current_tbl, key);
     if(t != NULL && Ifc_Match(t->type.of, TYPE_SPAN)){
-        nest(m, nd, (Span *)t, NESTED_FOR);
+        nest(nd, (Span *)t, NESTED_FOR);
         return SUCCESS;
     }
     return MISS;
 }
 
-status NestedD_Outdent(MemCtx *m, NestedD *nd){
+status NestedD_Outdent(NestedD *nd){
     Span_Cull(nd->stack, 1);
 
     NestedState *ns = Span_Get(nd->stack, nd->stack->max_idx);
@@ -74,7 +80,11 @@ status NestedD_Outdent(MemCtx *m, NestedD *nd){
         return ERROR;
     }
 
-    return nest(m, nd, ns->t, (ns->flags|NESTED_OUTDENT));
+    status r = nest(nd, ns->t, (ns->flags|NESTED_OUTDENT));
+    if((nd->type.state & NESTED_FOR) != 0){
+        nd->it.idx = ns->idx;
+    }
+    return r;
 }
 
 Abstract *NestedD_Get(NestedD *nd, Abstract *key){
@@ -86,29 +96,32 @@ Abstract *NestedD_Get(NestedD *nd, Abstract *key){
 
 status NestedD_Next(NestedD *nd){
     if(nd->it.values == NULL || (nd->it.type.state & END) != 0){
-        return MISS;
+        return END;
     }
-    Iter_Next(&nd->it);
 
-    Abstract *next = Iter_Get(&nd->it);
-    if(next->type.of == TYPE_TABLE){
-        nd->current_tbl = (Span *)next;
-        return SUCCESS;
-    }else{
-        nd->current_tbl = NULL;
-        return MISS;
+    Iter_Next(&nd->it);
+    if((nd->type.state & NESTED_FOR) != 0){
+        Abstract *next = Iter_Get(&nd->it);
+        if(next->type.of == TYPE_TABLE){
+            nd->current_tbl = (Span *)next;
+            return SUCCESS;
+        }else{
+            nd->current_tbl = NULL;
+            return END;
+        }
     }
+    return NOOP;
 }
 
 NestedD *NestedD_Make(MemCtx *m, Span *tbl){
     NestedD *nd = MemCtx_Alloc(m, sizeof(NestedD));
     nd->type.of = TYPE_NESTEDD;
-
+    nd->m = m;
     nd->stack = Span_Make(m, TYPE_NESTED_SPAN);
 
     if(tbl != NULL){
         nd->current_tbl = tbl;
-        nest(m, nd, tbl, NESTED_WITH);
+        nest(nd, tbl, NESTED_WITH);
     }
 
     return nd;

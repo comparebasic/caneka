@@ -14,6 +14,7 @@ typedef struct nested_state {
 
 typedef struct nestedd {
     Type type;
+    MemCtx *m;
     Span *root;
     NestedState *current;
     Span *stack;
@@ -24,7 +25,7 @@ typedef struct nestedd {
 NestedD *NestedD_Make(MemCtx *m, Span *data_tbl);
 Abstract *NestedD_Get(NestedD *nd, Abstract *key);
 status NestedD_Next(NestedD *nd);
-status NestedD_Outdent(MemCtx *m, NestedD *nd);
-status NestedD_For(MemCtx *m, NestedD *nd, Abstract *key);
+status NestedD_Outdent(NestedD *nd);
+status NestedD_For(NestedD *nd, Abstract *key);
 status NestedD_With(MemCtx *m, NestedD *nd, Abstract *key);
 char *NestedD_opToChars(status op);

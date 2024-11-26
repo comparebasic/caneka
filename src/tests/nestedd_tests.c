@@ -64,7 +64,7 @@ status NestedDWith_Tests(MemCtx *gm){
     r |= Test(sg->val.value == expected_tm,
         "With session time is as expected, found '%s'", String_FromI64(m, (sg->val.value))->bytes);
 
-    NestedD_Outdent(m, nd);
+    NestedD_Outdent(nd);
 
     value = NestedD_Get(nd, (Abstract *)String_Make(m, bytes("title")));
 
@@ -80,93 +80,66 @@ status NestedDFor_Tests(MemCtx *gm){
     String *s;
     status r = SUCCESS;
 
-    /*
     Span *tbl = NULL;
     NestedD *nd = NULL;
-    Typed *value = NULL;
-    String *expected_s = NULL;
-    Typed *expected = NULL;
-    lifecycle_t r = ERROR;
+    Abstract *value = NULL;
+    Single *sg = NULL;
 
-    Typed *hobby1[] = {
-        (Typed *)Nstr(m, "name"), (Typed *)Nstr(m, "Heavy Metal"),
-        (Typed *)Nstr(m, "category"), (Typed *)Nstr(m, "music"),
-        (Typed *)Nstr(m, "status"), (Typed *)Typed_Make(m, CYCLE_STATE_ALPHA),
-        NULL,
-    };
+    Span *hobby1 = Span_Make(m, TYPE_TABLE);
+    Table_Set(hobby1, (Abstract *)String_Make(m, bytes("name")),
+        (Abstract *)String_Make(m, bytes("Heavy Metal")));
+    Table_Set(hobby1, (Abstract *)String_Make(m, bytes("category")),
+        (Abstract *)String_Make(m, bytes("music")));
+    Table_Set(hobby1, (Abstract *)String_Make(m, bytes("status")),
+        (Abstract *)Int_Wrapped(m, 2));
 
-    Typed *hobby2[] = {
-        (Typed *)Nstr(m, "name"), (Typed *)Nstr(m, "Knitting"),
-        (Typed *)Nstr(m, "category"), (Typed *)Nstr(m, "sewing"),
-        (Typed *)Nstr(m, "status"), (Typed *)Typed_Make(m, CYCLE_STATE_DELTA),
-        NULL,
-    };
+    Span *hobby2 = Span_Make(m, TYPE_TABLE);
+    Table_Set(hobby2, (Abstract *)String_Make(m, bytes("name")),
+        (Abstract *)String_Make(m, bytes("Knitting")));
+    Table_Set(hobby2, (Abstract *)String_Make(m, bytes("category")),
+        (Abstract *)String_Make(m, bytes("sewing")));
+    Table_Set(hobby2, (Abstract *)String_Make(m, bytes("status")),
+        (Abstract *)Int_Wrapped(m, 7));
 
-    Typed *hobby3[] = {
-        (Typed *)Nstr(m, "name"), (Typed *)Nstr(m, "Ramen"),
-        (Typed *)Nstr(m, "category"), (Typed *)Nstr(m, "cooking"),
-        (Typed *)Nstr(m, "status"), (Typed *)Typed_Make(m, CYCLE_STATE_ECHO),
-        NULL,
-    };
+    Span *hobby3 = Span_Make(m, TYPE_TABLE);
+    Table_Set(hobby3, (Abstract *)String_Make(m, bytes("name")),
+        (Abstract *)String_Make(m, bytes("Ramen")));
+    Table_Set(hobby3, (Abstract *)String_Make(m, bytes("category")),
+        (Abstract *)String_Make(m, bytes("cooking")));
+    Table_Set(hobby3, (Abstract *)String_Make(m, bytes("status")),
+        (Abstract *)Int_Wrapped(m, 99));
 
-    Span *hobbies_sp = Span_Make(m, SPAN_DIM_SIZE);
-    Span_Add(m, hobbies_sp, (Typed *)Table_FromLiteral(m, hobby1));
-    Span_Add(m, hobbies_sp, (Typed *)Table_FromLiteral(m, hobby2));
-    Span_Add(m, hobbies_sp, (Typed *)Table_FromLiteral(m, hobby3));
+    Span *hobbies_sp = Span_Make(m, TYPE_SPAN);
+    Span_Add(hobbies_sp, (Abstract *)hobby1);
+    Span_Add(hobbies_sp, (Abstract *)hobby2);
+    Span_Add(hobbies_sp, (Abstract *)hobby3);
 
-    Typed *items[] = {
-        (Typed *)Nstr(m, "name"), (Typed *)Nstr(m, "SuppaSuppa"),
-        (Typed *)Nstr(m, "title"), (Typed *)Nstr(m, "Master Of It All"),
-        (Typed *)Nstr(m, "hobbies"), (Typed *)hobbies_sp,
-        NULL,
-    };
+    tbl = Span_Make(m, TYPE_TABLE);
+    Table_Set(tbl, (Abstract *)String_Make(m, bytes("name")), (Abstract *)String_Make(m, bytes("SuppaSuppa")));
+    Table_Set(tbl, (Abstract *)String_Make(m, bytes("title")), (Abstract *)String_Make(m, bytes("Master Of It All")));
+    Table_Set(tbl, (Abstract *)String_Make(m, bytes("hobbies")), (Abstract *)hobbies_sp);
 
-    tbl = Table_FromLiteral(m, items);
     nd = NestedD_Make(m, tbl);
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "name"));
-    r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, String_Static("SuppaSuppa")) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 3,  "Name on main level is as expected, found ", "%S", Typed_ToString(m, value)));
-    if(r != SUCCESS){
-        return;
-    }
+    value = NestedD_Get(nd, (Abstract *)String_Make(m, bytes("name")));
+    r |= Test(String_EqualsBytes((String *)value, bytes("SuppaSuppa")), "Name on main level is as expected, found %s", ((String *)value)->bytes);
 
-    NestedD_For(m, nd, (Typed *)Nstr(m, "hobbies"));
+    NestedD_For(nd, (Abstract *)String_Make(m, bytes("hobbies")));
 
-    / * first round * /
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "name"));
-    expected_s = Nstr(m, "Heavy Metal");
-    r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 7,  "Nested FOR 'name' is as expected, found '", "%S", Typed_ToString(m, value), "' expected '", "%S", expected_s, "'"));
-    if(r != SUCCESS){
-        return;
-    }
+    NestedD_Next(nd);
+    value = NestedD_Get(nd, (Abstract *)String_Make(m, bytes("name")));
+    r |= Test(String_EqualsBytes((String *)value, bytes("Heavy Metal")),
+        "Nested FOR 'name' is as expected, found '%s'", ((String *)value)->bytes);
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "category"));
-    expected_s = Nstr(m, "music");
-    r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 7,  "Nested FOR 'category' is as expected, found '", "%S", value, "' expected '", "%S", expected_s, "'"));
-    if(r != SUCCESS){
-        return;
-    }
+    value = NestedD_Get(nd, (Abstract *)String_Make(m, bytes("category")));
+    r |= Test(String_EqualsBytes((String *)value, bytes("music")), 
+        "Nested FOR 'category' is as expected, found '%s'", ((String *)value)->bytes);
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "status"));
-    expected = Typed_Make(m, CYCLE_STATE_ALPHA);
-    r = TestCase_Eval((value != NULL && value->type == TYPE_TYPED && Typed_Equals(value, expected) == SUCCESS),
-        tc,
-        suite, 
-        (Typed *)String_FormatN(suite->m, 7, "Nested FOR 'status' is as expected, found '", "%S", value, "' expected '", "%S", expected, "'"));
-    if(r != SUCCESS){
-        return;
-    }
+    sg = (Single *)NestedD_Get(nd, (Abstract *)String_Make(m, bytes("status")));
+    r |= Test(sg->val.value == 2, "Nested FOR 'status' is as expected, found '%ld'", sg->val.value);
 
-    / * second round * /
+    NestedD_Next(nd);
+    /*
     r = NestedD_Next(m, nd);
     r = TestCase_Eval((r == SUCCESS),
         tc,
@@ -175,7 +148,7 @@ status NestedDFor_Tests(MemCtx *gm){
     if(r != SUCCESS){
         return;
     }
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "name"));
+    value = NestedD_Get(m, nd, (Abstract *)String_Make(m, bytes("name")));
     expected_s = Nstr(m, "Knitting");
     r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
         tc,
@@ -185,7 +158,7 @@ status NestedDFor_Tests(MemCtx *gm){
         return;
     }
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "category"));
+    value = NestedD_Get(m, nd, (Abstract *)String_Make(m, bytes("category")));
     expected_s = Nstr(m, "sewing");
     r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
         tc,
@@ -195,7 +168,7 @@ status NestedDFor_Tests(MemCtx *gm){
         return;
     }
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "status"));
+    value = NestedD_Get(m, nd, (Abstract *)String_Make(m, bytes("status")));
     expected = Typed_Make(m, CYCLE_STATE_DELTA);
     r = TestCase_Eval((value != NULL && value->type == TYPE_TYPED && Typed_Equals(value, expected) == SUCCESS),
         tc,
@@ -215,7 +188,7 @@ status NestedDFor_Tests(MemCtx *gm){
         return;
     }
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "name"));
+    value = NestedD_Get(m, nd, (Abstract *)String_Make(m, bytes("name")));
     expected_s = Nstr(m, "Ramen");
     r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
         tc,
@@ -225,7 +198,7 @@ status NestedDFor_Tests(MemCtx *gm){
         return;
     }
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "category"));
+    value = NestedD_Get(m, nd, (Abstract *)String_Make(m, bytes("category")));
     expected_s = Nstr(m, "cooking");
     r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
         tc,
@@ -235,7 +208,7 @@ status NestedDFor_Tests(MemCtx *gm){
         return;
     }
 
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "status"));
+    value = NestedD_Get(m, nd, (Abstract *)String_Make(m, bytes("status")));
     expected = Typed_Make(m, CYCLE_STATE_ECHO);
     r = TestCase_Eval((value != NULL && value->type == TYPE_TYPED && Typed_Equals(value, (Typed *)expected) == SUCCESS),
         tc,
@@ -257,7 +230,7 @@ status NestedDFor_Tests(MemCtx *gm){
 
     / * check outdent values are present * /
     NestedD_Outdent(m, nd);
-    value = NestedD_Get(m, nd, (Typed *)Nstr(m, "title"));
+    value = NestedD_Get(m, nd, (Abstract *)String_Make(m, bytes("title")));
     expected_s = Nstr(m, "Master Of It All");
     r = TestCase_Eval((value != NULL && value->type == TYPE_STRING && String_Equals((String *)value, expected_s) == SUCCESS),
         tc,
