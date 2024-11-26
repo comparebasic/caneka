@@ -1,6 +1,6 @@
-<div class="test-run"><h2>Caneka Tests run 1732619466 (Tue Nov 26 05:11:06 CST 2024)</h2>
+<div class="test-run"><h2>Caneka Tests run 1732619872 (Tue Nov 26 05:17:52 CST 2024)</h2>
 <p>
-commit 379fcd48b2657c45927c6fb94684eadfa9b94acd
+commit 9d6e25fb164bb3022fa841b5a35b1972d96f974d
 </p>
 <div class="suite">
     <span class="label">Suite Caneka</span>
@@ -453,6 +453,1452 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
     </ol>
 </div>
 <div class="set">
+    <span class="set-label">Serve</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Basic CycleServe network server initialization tests.</p>
+    <ol class="tests">
+<div class="suite">
+    <span class="label">Suite Caneka</span>
+<div class="set">
+    <span class="set-label">String</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the basic string object and convienience features</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect string to have fixed type TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">Expect string length of 2 found 2</li>
+        <li class="test result result-pass">Expect string match of 'Hi' found 'Hi'</li>
+        <li class="test result result-pass">Expect string to have chain type TYPE_STRING_CHAIN found TYPE_STRING_CHAIN</li>
+        <li class="test result result-pass">Expect string length of 3396 found 3396</li>
+        <li class="test result result-pass">Expect string match of long string</li>
+        <li class="test result result-pass">Expect for int value 35072  length of 5 found 5</li>
+        <li class="test result result-pass">Expect string match of int of 35072 to string</li>
+        <li class="test result result-pass">Expect length 271, have 271</li>
+        <li class="test result result-pass">Expect string match of 'GET /path.html HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8
+
+' to be TRUE</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Span</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Span is the basic data structure for sequential or logorithmic storage access.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Span has type span TYPE_SPAN found TYPE_SPAN</li>
+        <li class="test result result-pass">Span item 0 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 1 equals Hello there found Hello there</li>
+        <li class="test result result-pass">Span item 2 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 3 equals Three found Three</li>
+        <li class="test result result-pass">Span item 6 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 7 equals Seven found Seven</li>
+        <li class="test result result-pass">Span item 7 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 8 equals Eight found Eight</li>
+        <li class="test result result-pass">After expand, Span item 0 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 1 equals Hello there found Hello there</li>
+        <li class="test result result-pass">After expand,Span item 2 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 3 equals Three found Three</li>
+        <li class="test result result-pass">After expand,Span item 6 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 7 equals Seven found Seven</li>
+        <li class="test result result-pass">After expand, Span item 7 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 8 equals Eight found Eight</li>
+        <li class="test result result-pass">Span item 512 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 512 equals Five Twelve found Five Twelve</li>
+        <li class="test result result-pass">Span item 4079 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 4079 equals Four Hundred Seventy Nine found Four Hundred Seventy Nine</li>
+        <li class="test result result-pass">Span item 513 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 513 equals Five Thirteen found Five Thirteen</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">SpanSetup</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>This tests the setup for a variety of Span configurations.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Span stride is 16, have 16</li>
+        <li class="test result result-pass">Span idxStride is 16, have 16</li>
+        <li class="test result result-pass">Span slab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Span idxSlab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Span needs 1 dims to index into 100, have 1</li>
+        <li class="test result result-pass">Span only needs 2 dim to index into 2000, have 2</li>
+        <li class="test result result-pass">Queue stride is 16, have 16</li>
+        <li class="test result result-pass">Queue idxStride is 16, have 16</li>
+        <li class="test result result-pass">Queue slab has allocated 256 bytes, have 256</li>
+        <li class="test result result-pass">Queue idxSlab has allocated 256 bytes, have 256</li>
+        <li class="test result result-pass">Queue needs 1 dims to index into 100, have 1</li>
+        <li class="test result result-pass">Queue only needs 2 dim to index into 2000, have 2</li>
+        <li class="test result result-pass">Mini stride is 4, have 4</li>
+        <li class="test result result-pass">Mini idxStride is 16, have 16</li>
+        <li class="test result result-pass">Mini slab has allocated 32 bytes, have 32</li>
+        <li class="test result result-pass">Mini idxSlab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Mini needs 2 dims to index into 100, have 2</li>
+        <li class="test result result-pass">Mini only needs 3 dim to index into 2000, have 3</li>
+        <li class="test result result-pass">SlabSpan stride is 512, have 512</li>
+        <li class="test result result-pass">SlabSpan idxStride is 32, have 32</li>
+        <li class="test result result-pass">SlabSpan slab has allocated 4096 bytes, have 4096</li>
+        <li class="test result result-pass">SlabSpan idxSlab has allocated 512 bytes, have 512</li>
+        <li class="test result result-pass">SlabSpan needs 0 dims to index into 100, have 0</li>
+        <li class="test result result-pass">SlabSpan only needs 1 dim to index into 2000, have 1</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">SpanInline</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Inline spans hold data directly in thier memory space, instead of storing pointers to data held elsewhere.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Inline Span idx 0 match expected 12 have 12</li>
+        <li class="test result result-pass">Inline Span idx 1 match expected 45 have 45</li>
+        <li class="test result result-pass">Inline Span idx 45 match expected 72 have 72</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Hash</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expected hash to equal 4291084750259606489, found: 4291084750259606489</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Table</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Auto-scaling hash-table built on top of the Span object and Hash object.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect strings to not be NULL from key:Alpha</li>
+        <li class="test result result-pass">Expect strings to equal Apples from key:Alpha found Apples</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Bravo</li>
+        <li class="test result result-pass">Expect strings to equal Bandits from key:Bravo found Bandits</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Charlie</li>
+        <li class="test result result-pass">Expect strings to equal Carrots from key:Charlie found Carrots</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Delta</li>
+        <li class="test result result-pass">Expect strings to equal DeadMan from key:Delta found DeadMan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Echo</li>
+        <li class="test result result-pass">Expect strings to equal Elevator from key:Echo found Elevator</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Foxtrot</li>
+        <li class="test result result-pass">Expect strings to equal Five Minutes from key:Foxtrot found Five Minutes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Golf</li>
+        <li class="test result result-pass">Expect strings to equal Gophers Are Cool from key:Golf found Gophers Are Cool</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Hotel</li>
+        <li class="test result result-pass">Expect strings to equal Happy Go Lucky from key:Hotel found Happy Go Lucky</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:India</li>
+        <li class="test result result-pass">Expect strings to equal Idio-syncratic from key:India found Idio-syncratic</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Juliet</li>
+        <li class="test result result-pass">Expect strings to equal Jockey Rider from key:Juliet found Jockey Rider</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">TableResize</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Resize features of the auto-scaling hash-table.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect strings to not be NULL from key:Alpha</li>
+        <li class="test result result-pass">Expect strings to equal Apples from key:Alpha found Apples</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Bravo</li>
+        <li class="test result result-pass">Expect strings to equal Bandits from key:Bravo found Bandits</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Charlie</li>
+        <li class="test result result-pass">Expect strings to equal Carrots from key:Charlie found Carrots</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Delta</li>
+        <li class="test result result-pass">Expect strings to equal DeadMan from key:Delta found DeadMan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Echo</li>
+        <li class="test result result-pass">Expect strings to equal Elevator from key:Echo found Elevator</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Foxtrot</li>
+        <li class="test result result-pass">Expect strings to equal Five Minutes from key:Foxtrot found Five Minutes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Golf</li>
+        <li class="test result result-pass">Expect strings to equal Gophers Are Cool from key:Golf found Gophers Are Cool</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Hotel</li>
+        <li class="test result result-pass">Expect strings to equal Happy Go Lucky from key:Hotel found Happy Go Lucky</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:India</li>
+        <li class="test result result-pass">Expect strings to equal Idio-syncratic from key:India found Idio-syncratic</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Juliet</li>
+        <li class="test result result-pass">Expect strings to equal Jockey Rider from key:Juliet found Jockey Rider</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Kilo</li>
+        <li class="test result result-pass">Expect strings to equal Kangaroo from key:Kilo found Kangaroo</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Lima</li>
+        <li class="test result result-pass">Expect strings to equal Lefties from key:Lima found Lefties</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Mike</li>
+        <li class="test result result-pass">Expect strings to equal Mangoes from key:Mike found Mangoes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:November</li>
+        <li class="test result result-pass">Expect strings to equal Neighbourhood Villan from key:November found Neighbourhood Villan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Oscar</li>
+        <li class="test result result-pass">Expect strings to equal Oasis of Gems from key:Oscar found Oasis of Gems</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Pappa</li>
+        <li class="test result result-pass">Expect strings to equal Pinapple Ham from key:Pappa found Pinapple Ham</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Quebec</li>
+        <li class="test result result-pass">Expect strings to equal Quarterly Report from key:Quebec found Quarterly Report</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Romeo</li>
+        <li class="test result result-pass">Expect strings to equal Rooty Tooty from key:Romeo found Rooty Tooty</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Sierra</li>
+        <li class="test result result-pass">Expect strings to equal Stainless Steel from key:Sierra found Stainless Steel</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">TablePreKey</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Testing the ability to add a key and value to a hash table and disperate, yet sequential, times.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect SetKey and SetValue to effect the same entry: strings to not be NULL from key:'PreKey'</li>
+        <li class="test result result-pass">Expect SetKey and SetValue to effect the same entry: strings to equal 'After Value' from key:'PreKey' found 'After Value'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Match</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Character pattern matching system for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Non match has unsuccessful state found MISS,</li>
+        <li class="test result result-pass">Matching string has successful state found SUCCESS,</li>
+        <li class="test result result-pass">Matched length of string, less termMatching, expected 14 have 14</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">MatchElastic</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Elastic, (length undetermined) match testing for character patterns of the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Has PROCESSING status PROCESSING,</li>
+        <li class="test result result-pass">On second pos, position is 0</li>
+        <li class="test result result-pass">Tag -Stopped on the fourth character</li>
+        <li class="test result result-pass">Tag -Found three chars</li>
+        <li class="test result result-pass">Tag- Found SUCCESS have TRACKED/TERM_FOUND,SUCCESS,</li>
+        <li class="test result result-pass">Tag -At end</li>
+        <li class="test result result-pass">Att - Found four chars, count is 4</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Roebling</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the Roebling character pattern matching parser, with programmable hooks and capture ranges.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Roebling has three match values loaded up</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingRun</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Run state variables for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Match equals expected</li>
+        <li class="test result result-pass">Content equals expected, have TWO</li>
+        <li class="test result result-pass">Match Idx equals expected</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line, expected 'for the weekend', have 'for the weekend'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has state SUCCESS</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingMark</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Mark and jump behavior tests for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Content equals TWO, have TWO</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'TWO'</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for the weekend'</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'for the weekend'</li>
+        <li class="test result result-pass">Content equals ONE, have ONE</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'ONE'</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for good measure'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Content equals THREE, have THREE</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for all!'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has state SUCCESS SUCCESS,</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingStartSop</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Pausable behavior for the Roebling parser, to be able to handle partial input, and resume when more input is added.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Roebling has state SUCCESS, have 'SUCCESS,'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XML</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Basic XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">Root node equals 'main' have 'main'</li>
+        <li class="test result result-pass">Jump next to expected mark XML_ATTROUTE</li>
+        <li class="test result result-pass">XmlCtx has state SUCCSS, have SUCCESS,</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLNested</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Nested XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">Attribute has name 'type', have 'type'</li>
+        <li class="test result result-pass">Attribute Value to be 'root', have 'root'</li>
+        <li class="test result result-pass">Jump set to XML_START</li>
+        <li class="test result result-pass">Whitespace before tag added as body, have '\n  '</li>
+        <li class="test result result-pass">Expected att item: 'model', have 'model'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'foo'</li>
+        <li class="test result result-pass">Expected att item: 'model', have 'baseline'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'fancy-pants'</li>
+        <li class="test result result-pass">Expected body value: 'Gotta Get It!', have 'Gotta Get It!'</li>
+        <li class="test result result-pass">NodeName is 'alpha', have 'alpha'</li>
+        <li class="test result result-pass">Second NodeName is 'alpha', have 'alpha'</li>
+        <li class="test result result-pass">XML has state success</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLParser</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Fully featured XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">XML has state success</li>
+        <li class="test result result-pass">XML node has expected body, have 'The World is Upside Down!'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Http</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>HTTP protocol parsing using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">captureKey is as expected HTTP_METHOD, have 0/HTTP_METHOD</li>
+        <li class="test result result-pass">Expected content 'GET', have 'GET'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_PATH, have 1/HTTP_PATH</li>
+        <li class="test result result-pass">Expected content '/path.html', have '/path.html'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_PROTO, have 2/HTTP_PROTO</li>
+        <li class="test result result-pass">Expected content 'HTTP/1.1', have 'HTTP/1.1'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Host', have 'Host'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'localhost', have 'localhost'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'User-Agent', have 'User-Agent'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0', have 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Connection', have 'Connection'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'keep-alive', have 'keep-alive'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Accept', have 'Accept'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8', have 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_END, have 5/HTTP_END</li>
+        <li class="test result result-pass">Reached end of test captures, have 12</li>
+        <li class="test result result-pass">Roebling HttpParser has state SUCCESS, have 'SUCCESS,'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Queue</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">six has replaed idx 1</li>
+        <li class="test result result-pass">midwest has replaed idx 17</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">QueueNext</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue iteration behaviour, built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect queue to have 67 values, have 67
+</li>
+        <li class="test result result-pass">Expect first item to be zero_s, have zero
+</li>
+        <li class="test result result-pass">Expect second item to be one_s, have one
+</li>
+        <li class="test result result-pass">Expect item 2 to be from all109_s(two), have two</li>
+        <li class="test result result-pass">Expect item 3 to be from all109_s(three), have three</li>
+        <li class="test result result-pass">Expect item 4 to be from all109_s(four), have four</li>
+        <li class="test result result-pass">Expect item 5 to be from all109_s(five), have five</li>
+        <li class="test result result-pass">Expect item 6 to be from all109_s(six), have six</li>
+        <li class="test result result-pass">Expect item 7 to be from all109_s(seven), have seven</li>
+        <li class="test result result-pass">Expect item 8 to be from all109_s(eight), have eight</li>
+        <li class="test result result-pass">Expect item 9 to be from all109_s(nine), have nine</li>
+        <li class="test result result-pass">Expect item 10 to be from all109_s(ten), have ten</li>
+        <li class="test result result-pass">Expect item 11 to be from all109_s(eleven), have eleven</li>
+        <li class="test result result-pass">Expect item 12 to be from all109_s(twelve), have twelve</li>
+        <li class="test result result-pass">Expect item 13 to be from all109_s(thirteen), have thirteen</li>
+        <li class="test result result-pass">Expect item 14 to be from all109_s(fourteen), have fourteen</li>
+        <li class="test result result-pass">Expect item 15 to be from all109_s(fifteen), have fifteen</li>
+        <li class="test result result-pass">Expect item 16 to be from all109_s(sixteen), have sixteen</li>
+        <li class="test result result-pass">Expect item 17 to be from all109_s(seventeen), have seventeen</li>
+        <li class="test result result-pass">Expect item 18 to be from all109_s(eighteen), have eighteen</li>
+        <li class="test result result-pass">Expect item 19 to be from all109_s(nineteen), have nineteen</li>
+        <li class="test result result-pass">Expect item 20 to be from all109_s(twenty), have twenty</li>
+        <li class="test result result-pass">Expect item 21 to be from all109_s(twentyOne), have twentyOne</li>
+        <li class="test result result-pass">Expect item 22 to be from all109_s(twentyTwo), have twentyTwo</li>
+        <li class="test result result-pass">Expect item 23 to be from all109_s(twentyThree), have twentyThree</li>
+        <li class="test result result-pass">Expect item 24 to be from all109_s(twentyFour), have twentyFour</li>
+        <li class="test result result-pass">Expect item 25 to be from all109_s(twentyFive), have twentyFive</li>
+        <li class="test result result-pass">Expect item 26 to be from all109_s(twentySix), have twentySix</li>
+        <li class="test result result-pass">Expect item 27 to be from all109_s(twentySeven), have twentySeven</li>
+        <li class="test result result-pass">Expect item 28 to be from all109_s(twentyEight), have twentyEight</li>
+        <li class="test result result-pass">Expect item 29 to be from all109_s(twentyNine), have twentyNine</li>
+        <li class="test result result-pass">Expect item 30 to be from all109_s(thirty), have thirty</li>
+        <li class="test result result-pass">Expect item 31 to be from all109_s(thirtyOne), have thirtyOne</li>
+        <li class="test result result-pass">Expect item 32 to be from all109_s(thirtyTwo), have thirtyTwo</li>
+        <li class="test result result-pass">Expect item 33 to be from all109_s(thirtyThree), have thirtyThree</li>
+        <li class="test result result-pass">Expect item 34 to be from all109_s(thirtyFour), have thirtyFour</li>
+        <li class="test result result-pass">Expect item 35 to be from all109_s(thirtyFive), have thirtyFive</li>
+        <li class="test result result-pass">Expect item 36 to be from all109_s(thirtySix), have thirtySix</li>
+        <li class="test result result-pass">Expect item 37 to be from all109_s(thirtySeven), have thirtySeven</li>
+        <li class="test result result-pass">Expect item 38 to be from all109_s(thirtyEight), have thirtyEight</li>
+        <li class="test result result-pass">Expect item 39 to be from all109_s(thirtyNine), have thirtyNine</li>
+        <li class="test result result-pass">Expect item 40 to be from all109_s(fourty), have fourty</li>
+        <li class="test result result-pass">Expect item 41 to be from all109_s(fourtyOne), have fourtyOne</li>
+        <li class="test result result-pass">Expect item 42 to be from all109_s(fourtyTwo), have fourtyTwo</li>
+        <li class="test result result-pass">Expect item 43 to be from all109_s(fourtyThree), have fourtyThree</li>
+        <li class="test result result-pass">Expect item 44 to be from all109_s(fourtyFour), have fourtyFour</li>
+        <li class="test result result-pass">Expect item 45 to be from all109_s(fourtyFive), have fourtyFive</li>
+        <li class="test result result-pass">Expect item 46 to be from all109_s(fourtySix), have fourtySix</li>
+        <li class="test result result-pass">Expect item 47 to be from all109_s(fourtySeven), have fourtySeven</li>
+        <li class="test result result-pass">Expect item 48 to be from all109_s(fourtyEight), have fourtyEight</li>
+        <li class="test result result-pass">Expect item 49 to be from all109_s(fourtyNine), have fourtyNine</li>
+        <li class="test result result-pass">Expect item 50 to be from all109_s(fifty), have fifty</li>
+        <li class="test result result-pass">Expect item 51 to be from all109_s(fiftyOne), have fiftyOne</li>
+        <li class="test result result-pass">Expect item 52 to be from all109_s(fiftyTwo), have fiftyTwo</li>
+        <li class="test result result-pass">Expect item 53 to be from all109_s(fiftyThree), have fiftyThree</li>
+        <li class="test result result-pass">Expect item 54 to be from all109_s(fiftyFour), have fiftyFour</li>
+        <li class="test result result-pass">Expect item 55 to be from all109_s(fiftyFive), have fiftyFive</li>
+        <li class="test result result-pass">Expect item 56 to be from all109_s(fiftySix), have fiftySix</li>
+        <li class="test result result-pass">Expect item 57 to be from all109_s(fiftySeven), have fiftySeven</li>
+        <li class="test result result-pass">Expect item 58 to be from all109_s(fiftyEight), have fiftyEight</li>
+        <li class="test result result-pass">Expect item 59 to be from all109_s(fiftyNine), have fiftyNine</li>
+        <li class="test result result-pass">Expect item 60 to be from all109_s(sixty), have sixty</li>
+        <li class="test result result-pass">Expect item 61 to be from all109_s(sixtyOne), have sixtyOne</li>
+        <li class="test result result-pass">Expect item 62 to be from all109_s(sixtyTwo), have sixtyTwo</li>
+        <li class="test result result-pass">Expect item 63 to be from all109_s(sixtyThree), have sixtyThree</li>
+        <li class="test result result-pass">Expect item 64 to be from all109_s(sixtyFour), have sixtyFour</li>
+        <li class="test result result-pass">Expect item 65 to be from all109_s(sixtyFive), have sixtyFive</li>
+        <li class="test result result-pass">Expect item 66 to be from all109_s(sixtySix), have sixtySix</li>
+        <li class="test result result-pass">Expect i to have reached the max, have 67</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">QueueMixed</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue iteration with a mix of items missing, built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect queue to have 8 values, have 36</li>
+        <li class="test result result-pass">Expect queue to have 23 values, have 23</li>
+        <li class="test result result-pass">Expect item 0 to be from all109_s(zero), have zero</li>
+        <li class="test result result-pass">Expect item 1 to be from all109_s(one), have one</li>
+        <li class="test result result-pass">Expect item 2 to be from all109_s(two), have two</li>
+        <li class="test result result-pass">Expect item 3 to be from all109_s(three), have three</li>
+        <li class="test result result-pass">Expect item 4 to be from all109_s(four), have four</li>
+        <li class="test result result-pass">Expect item 5 to be from all109_s(five), have five</li>
+        <li class="test result result-pass">Expect item 6 to be from all109_s(six), have six</li>
+        <li class="test result result-pass">Expect item 7 to be from all109_s(seven), have seven</li>
+        <li class="test result result-pass">Expect item 21 to be from all109_s(twentyOne), have twentyOne</li>
+        <li class="test result result-pass">Expect item 22 to be from all109_s(twentyTwo), have twentyTwo</li>
+        <li class="test result result-pass">Expect item 23 to be from all109_s(twentyThree), have twentyThree</li>
+        <li class="test result result-pass">Expect item 24 to be from all109_s(twentyFour), have twentyFour</li>
+        <li class="test result result-pass">Expect item 25 to be from all109_s(twentyFive), have twentyFive</li>
+        <li class="test result result-pass">Expect item 26 to be from all109_s(twentySix), have twentySix</li>
+        <li class="test result result-pass">Expect item 27 to be from all109_s(twentySeven), have twentySeven</li>
+        <li class="test result result-pass">Expect item 28 to be from all109_s(twentyEight), have twentyEight</li>
+        <li class="test result result-pass">Expect item 29 to be from all109_s(twentyNine), have twentyNine</li>
+        <li class="test result result-pass">Expect item 30 to be from all109_s(thirty), have thirty</li>
+        <li class="test result result-pass">Expect item 31 to be from all109_s(thirtyOne), have thirtyOne</li>
+        <li class="test result result-pass">Expect item 32 to be from all109_s(thirtyTwo), have thirtyTwo</li>
+        <li class="test result result-pass">Expect item 33 to be from all109_s(thirtyThree), have thirtyThree</li>
+        <li class="test result result-pass">Expect item 34 to be from all109_s(thirtyFour), have thirtyFour</li>
+        <li class="test result result-pass">Expect item 35 to be from all109_s(thirtyFive), have thirtyFive</li>
+        <li class="test result result-pass">Expect i to have reached the max, have 23</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Serve</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Basic CycleServe network server initialization tests.</p>
+    <ol class="tests">
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeHandle</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>CycleServe network server request handling tests.</p>
+    <ol class="tests">
+<div class="suite">
+    <span class="label">Suite Caneka</span>
+<div class="set">
+    <span class="set-label">String</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the basic string object and convienience features</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect string to have fixed type TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">Expect string length of 2 found 2</li>
+        <li class="test result result-pass">Expect string match of 'Hi' found 'Hi'</li>
+        <li class="test result result-pass">Expect string to have chain type TYPE_STRING_CHAIN found TYPE_STRING_CHAIN</li>
+        <li class="test result result-pass">Expect string length of 3396 found 3396</li>
+        <li class="test result result-pass">Expect string match of long string</li>
+        <li class="test result result-pass">Expect for int value 35072  length of 5 found 5</li>
+        <li class="test result result-pass">Expect string match of int of 35072 to string</li>
+        <li class="test result result-pass">Expect length 271, have 271</li>
+        <li class="test result result-pass">Expect string match of 'GET /path.html HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8
+
+' to be TRUE</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Span</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Span is the basic data structure for sequential or logorithmic storage access.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Span has type span TYPE_SPAN found TYPE_SPAN</li>
+        <li class="test result result-pass">Span item 0 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 1 equals Hello there found Hello there</li>
+        <li class="test result result-pass">Span item 2 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 3 equals Three found Three</li>
+        <li class="test result result-pass">Span item 6 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 7 equals Seven found Seven</li>
+        <li class="test result result-pass">Span item 7 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 8 equals Eight found Eight</li>
+        <li class="test result result-pass">After expand, Span item 0 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 1 equals Hello there found Hello there</li>
+        <li class="test result result-pass">After expand,Span item 2 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 3 equals Three found Three</li>
+        <li class="test result result-pass">After expand,Span item 6 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 7 equals Seven found Seven</li>
+        <li class="test result result-pass">After expand, Span item 7 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 8 equals Eight found Eight</li>
+        <li class="test result result-pass">Span item 512 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 512 equals Five Twelve found Five Twelve</li>
+        <li class="test result result-pass">Span item 4079 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 4079 equals Four Hundred Seventy Nine found Four Hundred Seventy Nine</li>
+        <li class="test result result-pass">Span item 513 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 513 equals Five Thirteen found Five Thirteen</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">SpanSetup</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>This tests the setup for a variety of Span configurations.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Span stride is 16, have 16</li>
+        <li class="test result result-pass">Span idxStride is 16, have 16</li>
+        <li class="test result result-pass">Span slab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Span idxSlab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Span needs 1 dims to index into 100, have 1</li>
+        <li class="test result result-pass">Span only needs 2 dim to index into 2000, have 2</li>
+        <li class="test result result-pass">Queue stride is 16, have 16</li>
+        <li class="test result result-pass">Queue idxStride is 16, have 16</li>
+        <li class="test result result-pass">Queue slab has allocated 256 bytes, have 256</li>
+        <li class="test result result-pass">Queue idxSlab has allocated 256 bytes, have 256</li>
+        <li class="test result result-pass">Queue needs 1 dims to index into 100, have 1</li>
+        <li class="test result result-pass">Queue only needs 2 dim to index into 2000, have 2</li>
+        <li class="test result result-pass">Mini stride is 4, have 4</li>
+        <li class="test result result-pass">Mini idxStride is 16, have 16</li>
+        <li class="test result result-pass">Mini slab has allocated 32 bytes, have 32</li>
+        <li class="test result result-pass">Mini idxSlab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Mini needs 2 dims to index into 100, have 2</li>
+        <li class="test result result-pass">Mini only needs 3 dim to index into 2000, have 3</li>
+        <li class="test result result-pass">SlabSpan stride is 512, have 512</li>
+        <li class="test result result-pass">SlabSpan idxStride is 32, have 32</li>
+        <li class="test result result-pass">SlabSpan slab has allocated 4096 bytes, have 4096</li>
+        <li class="test result result-pass">SlabSpan idxSlab has allocated 512 bytes, have 512</li>
+        <li class="test result result-pass">SlabSpan needs 0 dims to index into 100, have 0</li>
+        <li class="test result result-pass">SlabSpan only needs 1 dim to index into 2000, have 1</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">SpanInline</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Inline spans hold data directly in thier memory space, instead of storing pointers to data held elsewhere.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Inline Span idx 0 match expected 12 have 12</li>
+        <li class="test result result-pass">Inline Span idx 1 match expected 45 have 45</li>
+        <li class="test result result-pass">Inline Span idx 45 match expected 72 have 72</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Hash</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expected hash to equal 4291084750259606489, found: 4291084750259606489</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Table</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Auto-scaling hash-table built on top of the Span object and Hash object.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect strings to not be NULL from key:Alpha</li>
+        <li class="test result result-pass">Expect strings to equal Apples from key:Alpha found Apples</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Bravo</li>
+        <li class="test result result-pass">Expect strings to equal Bandits from key:Bravo found Bandits</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Charlie</li>
+        <li class="test result result-pass">Expect strings to equal Carrots from key:Charlie found Carrots</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Delta</li>
+        <li class="test result result-pass">Expect strings to equal DeadMan from key:Delta found DeadMan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Echo</li>
+        <li class="test result result-pass">Expect strings to equal Elevator from key:Echo found Elevator</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Foxtrot</li>
+        <li class="test result result-pass">Expect strings to equal Five Minutes from key:Foxtrot found Five Minutes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Golf</li>
+        <li class="test result result-pass">Expect strings to equal Gophers Are Cool from key:Golf found Gophers Are Cool</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Hotel</li>
+        <li class="test result result-pass">Expect strings to equal Happy Go Lucky from key:Hotel found Happy Go Lucky</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:India</li>
+        <li class="test result result-pass">Expect strings to equal Idio-syncratic from key:India found Idio-syncratic</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Juliet</li>
+        <li class="test result result-pass">Expect strings to equal Jockey Rider from key:Juliet found Jockey Rider</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">TableResize</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Resize features of the auto-scaling hash-table.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect strings to not be NULL from key:Alpha</li>
+        <li class="test result result-pass">Expect strings to equal Apples from key:Alpha found Apples</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Bravo</li>
+        <li class="test result result-pass">Expect strings to equal Bandits from key:Bravo found Bandits</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Charlie</li>
+        <li class="test result result-pass">Expect strings to equal Carrots from key:Charlie found Carrots</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Delta</li>
+        <li class="test result result-pass">Expect strings to equal DeadMan from key:Delta found DeadMan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Echo</li>
+        <li class="test result result-pass">Expect strings to equal Elevator from key:Echo found Elevator</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Foxtrot</li>
+        <li class="test result result-pass">Expect strings to equal Five Minutes from key:Foxtrot found Five Minutes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Golf</li>
+        <li class="test result result-pass">Expect strings to equal Gophers Are Cool from key:Golf found Gophers Are Cool</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Hotel</li>
+        <li class="test result result-pass">Expect strings to equal Happy Go Lucky from key:Hotel found Happy Go Lucky</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:India</li>
+        <li class="test result result-pass">Expect strings to equal Idio-syncratic from key:India found Idio-syncratic</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Juliet</li>
+        <li class="test result result-pass">Expect strings to equal Jockey Rider from key:Juliet found Jockey Rider</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Kilo</li>
+        <li class="test result result-pass">Expect strings to equal Kangaroo from key:Kilo found Kangaroo</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Lima</li>
+        <li class="test result result-pass">Expect strings to equal Lefties from key:Lima found Lefties</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Mike</li>
+        <li class="test result result-pass">Expect strings to equal Mangoes from key:Mike found Mangoes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:November</li>
+        <li class="test result result-pass">Expect strings to equal Neighbourhood Villan from key:November found Neighbourhood Villan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Oscar</li>
+        <li class="test result result-pass">Expect strings to equal Oasis of Gems from key:Oscar found Oasis of Gems</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Pappa</li>
+        <li class="test result result-pass">Expect strings to equal Pinapple Ham from key:Pappa found Pinapple Ham</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Quebec</li>
+        <li class="test result result-pass">Expect strings to equal Quarterly Report from key:Quebec found Quarterly Report</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Romeo</li>
+        <li class="test result result-pass">Expect strings to equal Rooty Tooty from key:Romeo found Rooty Tooty</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Sierra</li>
+        <li class="test result result-pass">Expect strings to equal Stainless Steel from key:Sierra found Stainless Steel</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">TablePreKey</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Testing the ability to add a key and value to a hash table and disperate, yet sequential, times.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect SetKey and SetValue to effect the same entry: strings to not be NULL from key:'PreKey'</li>
+        <li class="test result result-pass">Expect SetKey and SetValue to effect the same entry: strings to equal 'After Value' from key:'PreKey' found 'After Value'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Match</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Character pattern matching system for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Non match has unsuccessful state found MISS,</li>
+        <li class="test result result-pass">Matching string has successful state found SUCCESS,</li>
+        <li class="test result result-pass">Matched length of string, less termMatching, expected 14 have 14</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">MatchElastic</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Elastic, (length undetermined) match testing for character patterns of the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Has PROCESSING status PROCESSING,</li>
+        <li class="test result result-pass">On second pos, position is 0</li>
+        <li class="test result result-pass">Tag -Stopped on the fourth character</li>
+        <li class="test result result-pass">Tag -Found three chars</li>
+        <li class="test result result-pass">Tag- Found SUCCESS have TRACKED/TERM_FOUND,SUCCESS,</li>
+        <li class="test result result-pass">Tag -At end</li>
+        <li class="test result result-pass">Att - Found four chars, count is 4</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Roebling</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the Roebling character pattern matching parser, with programmable hooks and capture ranges.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Roebling has three match values loaded up</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingRun</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Run state variables for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Match equals expected</li>
+        <li class="test result result-pass">Content equals expected, have TWO</li>
+        <li class="test result result-pass">Match Idx equals expected</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line, expected 'for the weekend', have 'for the weekend'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has state SUCCESS</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingMark</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Mark and jump behavior tests for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Content equals TWO, have TWO</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'TWO'</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for the weekend'</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'for the weekend'</li>
+        <li class="test result result-pass">Content equals ONE, have ONE</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'ONE'</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for good measure'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Content equals THREE, have THREE</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for all!'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has state SUCCESS SUCCESS,</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingStartSop</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Pausable behavior for the Roebling parser, to be able to handle partial input, and resume when more input is added.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Roebling has state SUCCESS, have 'SUCCESS,'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XML</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Basic XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">Root node equals 'main' have 'main'</li>
+        <li class="test result result-pass">Jump next to expected mark XML_ATTROUTE</li>
+        <li class="test result result-pass">XmlCtx has state SUCCSS, have SUCCESS,</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLNested</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Nested XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">Attribute has name 'type', have 'type'</li>
+        <li class="test result result-pass">Attribute Value to be 'root', have 'root'</li>
+        <li class="test result result-pass">Jump set to XML_START</li>
+        <li class="test result result-pass">Whitespace before tag added as body, have '\n  '</li>
+        <li class="test result result-pass">Expected att item: 'model', have 'model'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'foo'</li>
+        <li class="test result result-pass">Expected att item: 'model', have 'baseline'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'fancy-pants'</li>
+        <li class="test result result-pass">Expected body value: 'Gotta Get It!', have 'Gotta Get It!'</li>
+        <li class="test result result-pass">NodeName is 'alpha', have 'alpha'</li>
+        <li class="test result result-pass">Second NodeName is 'alpha', have 'alpha'</li>
+        <li class="test result result-pass">XML has state success</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLParser</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Fully featured XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">XML has state success</li>
+        <li class="test result result-pass">XML node has expected body, have 'The World is Upside Down!'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Http</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>HTTP protocol parsing using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">captureKey is as expected HTTP_METHOD, have 0/HTTP_METHOD</li>
+        <li class="test result result-pass">Expected content 'GET', have 'GET'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_PATH, have 1/HTTP_PATH</li>
+        <li class="test result result-pass">Expected content '/path.html', have '/path.html'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_PROTO, have 2/HTTP_PROTO</li>
+        <li class="test result result-pass">Expected content 'HTTP/1.1', have 'HTTP/1.1'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Host', have 'Host'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'localhost', have 'localhost'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'User-Agent', have 'User-Agent'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0', have 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Connection', have 'Connection'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'keep-alive', have 'keep-alive'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Accept', have 'Accept'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8', have 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_END, have 5/HTTP_END</li>
+        <li class="test result result-pass">Reached end of test captures, have 12</li>
+        <li class="test result result-pass">Roebling HttpParser has state SUCCESS, have 'SUCCESS,'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Queue</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">six has replaed idx 1</li>
+        <li class="test result result-pass">midwest has replaed idx 17</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">QueueNext</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue iteration behaviour, built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect queue to have 67 values, have 67
+</li>
+        <li class="test result result-pass">Expect first item to be zero_s, have zero
+</li>
+        <li class="test result result-pass">Expect second item to be one_s, have one
+</li>
+        <li class="test result result-pass">Expect item 2 to be from all109_s(two), have two</li>
+        <li class="test result result-pass">Expect item 3 to be from all109_s(three), have three</li>
+        <li class="test result result-pass">Expect item 4 to be from all109_s(four), have four</li>
+        <li class="test result result-pass">Expect item 5 to be from all109_s(five), have five</li>
+        <li class="test result result-pass">Expect item 6 to be from all109_s(six), have six</li>
+        <li class="test result result-pass">Expect item 7 to be from all109_s(seven), have seven</li>
+        <li class="test result result-pass">Expect item 8 to be from all109_s(eight), have eight</li>
+        <li class="test result result-pass">Expect item 9 to be from all109_s(nine), have nine</li>
+        <li class="test result result-pass">Expect item 10 to be from all109_s(ten), have ten</li>
+        <li class="test result result-pass">Expect item 11 to be from all109_s(eleven), have eleven</li>
+        <li class="test result result-pass">Expect item 12 to be from all109_s(twelve), have twelve</li>
+        <li class="test result result-pass">Expect item 13 to be from all109_s(thirteen), have thirteen</li>
+        <li class="test result result-pass">Expect item 14 to be from all109_s(fourteen), have fourteen</li>
+        <li class="test result result-pass">Expect item 15 to be from all109_s(fifteen), have fifteen</li>
+        <li class="test result result-pass">Expect item 16 to be from all109_s(sixteen), have sixteen</li>
+        <li class="test result result-pass">Expect item 17 to be from all109_s(seventeen), have seventeen</li>
+        <li class="test result result-pass">Expect item 18 to be from all109_s(eighteen), have eighteen</li>
+        <li class="test result result-pass">Expect item 19 to be from all109_s(nineteen), have nineteen</li>
+        <li class="test result result-pass">Expect item 20 to be from all109_s(twenty), have twenty</li>
+        <li class="test result result-pass">Expect item 21 to be from all109_s(twentyOne), have twentyOne</li>
+        <li class="test result result-pass">Expect item 22 to be from all109_s(twentyTwo), have twentyTwo</li>
+        <li class="test result result-pass">Expect item 23 to be from all109_s(twentyThree), have twentyThree</li>
+        <li class="test result result-pass">Expect item 24 to be from all109_s(twentyFour), have twentyFour</li>
+        <li class="test result result-pass">Expect item 25 to be from all109_s(twentyFive), have twentyFive</li>
+        <li class="test result result-pass">Expect item 26 to be from all109_s(twentySix), have twentySix</li>
+        <li class="test result result-pass">Expect item 27 to be from all109_s(twentySeven), have twentySeven</li>
+        <li class="test result result-pass">Expect item 28 to be from all109_s(twentyEight), have twentyEight</li>
+        <li class="test result result-pass">Expect item 29 to be from all109_s(twentyNine), have twentyNine</li>
+        <li class="test result result-pass">Expect item 30 to be from all109_s(thirty), have thirty</li>
+        <li class="test result result-pass">Expect item 31 to be from all109_s(thirtyOne), have thirtyOne</li>
+        <li class="test result result-pass">Expect item 32 to be from all109_s(thirtyTwo), have thirtyTwo</li>
+        <li class="test result result-pass">Expect item 33 to be from all109_s(thirtyThree), have thirtyThree</li>
+        <li class="test result result-pass">Expect item 34 to be from all109_s(thirtyFour), have thirtyFour</li>
+        <li class="test result result-pass">Expect item 35 to be from all109_s(thirtyFive), have thirtyFive</li>
+        <li class="test result result-pass">Expect item 36 to be from all109_s(thirtySix), have thirtySix</li>
+        <li class="test result result-pass">Expect item 37 to be from all109_s(thirtySeven), have thirtySeven</li>
+        <li class="test result result-pass">Expect item 38 to be from all109_s(thirtyEight), have thirtyEight</li>
+        <li class="test result result-pass">Expect item 39 to be from all109_s(thirtyNine), have thirtyNine</li>
+        <li class="test result result-pass">Expect item 40 to be from all109_s(fourty), have fourty</li>
+        <li class="test result result-pass">Expect item 41 to be from all109_s(fourtyOne), have fourtyOne</li>
+        <li class="test result result-pass">Expect item 42 to be from all109_s(fourtyTwo), have fourtyTwo</li>
+        <li class="test result result-pass">Expect item 43 to be from all109_s(fourtyThree), have fourtyThree</li>
+        <li class="test result result-pass">Expect item 44 to be from all109_s(fourtyFour), have fourtyFour</li>
+        <li class="test result result-pass">Expect item 45 to be from all109_s(fourtyFive), have fourtyFive</li>
+        <li class="test result result-pass">Expect item 46 to be from all109_s(fourtySix), have fourtySix</li>
+        <li class="test result result-pass">Expect item 47 to be from all109_s(fourtySeven), have fourtySeven</li>
+        <li class="test result result-pass">Expect item 48 to be from all109_s(fourtyEight), have fourtyEight</li>
+        <li class="test result result-pass">Expect item 49 to be from all109_s(fourtyNine), have fourtyNine</li>
+        <li class="test result result-pass">Expect item 50 to be from all109_s(fifty), have fifty</li>
+        <li class="test result result-pass">Expect item 51 to be from all109_s(fiftyOne), have fiftyOne</li>
+        <li class="test result result-pass">Expect item 52 to be from all109_s(fiftyTwo), have fiftyTwo</li>
+        <li class="test result result-pass">Expect item 53 to be from all109_s(fiftyThree), have fiftyThree</li>
+        <li class="test result result-pass">Expect item 54 to be from all109_s(fiftyFour), have fiftyFour</li>
+        <li class="test result result-pass">Expect item 55 to be from all109_s(fiftyFive), have fiftyFive</li>
+        <li class="test result result-pass">Expect item 56 to be from all109_s(fiftySix), have fiftySix</li>
+        <li class="test result result-pass">Expect item 57 to be from all109_s(fiftySeven), have fiftySeven</li>
+        <li class="test result result-pass">Expect item 58 to be from all109_s(fiftyEight), have fiftyEight</li>
+        <li class="test result result-pass">Expect item 59 to be from all109_s(fiftyNine), have fiftyNine</li>
+        <li class="test result result-pass">Expect item 60 to be from all109_s(sixty), have sixty</li>
+        <li class="test result result-pass">Expect item 61 to be from all109_s(sixtyOne), have sixtyOne</li>
+        <li class="test result result-pass">Expect item 62 to be from all109_s(sixtyTwo), have sixtyTwo</li>
+        <li class="test result result-pass">Expect item 63 to be from all109_s(sixtyThree), have sixtyThree</li>
+        <li class="test result result-pass">Expect item 64 to be from all109_s(sixtyFour), have sixtyFour</li>
+        <li class="test result result-pass">Expect item 65 to be from all109_s(sixtyFive), have sixtyFive</li>
+        <li class="test result result-pass">Expect item 66 to be from all109_s(sixtySix), have sixtySix</li>
+        <li class="test result result-pass">Expect i to have reached the max, have 67</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">QueueMixed</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue iteration with a mix of items missing, built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect queue to have 8 values, have 36</li>
+        <li class="test result result-pass">Expect queue to have 23 values, have 23</li>
+        <li class="test result result-pass">Expect item 0 to be from all109_s(zero), have zero</li>
+        <li class="test result result-pass">Expect item 1 to be from all109_s(one), have one</li>
+        <li class="test result result-pass">Expect item 2 to be from all109_s(two), have two</li>
+        <li class="test result result-pass">Expect item 3 to be from all109_s(three), have three</li>
+        <li class="test result result-pass">Expect item 4 to be from all109_s(four), have four</li>
+        <li class="test result result-pass">Expect item 5 to be from all109_s(five), have five</li>
+        <li class="test result result-pass">Expect item 6 to be from all109_s(six), have six</li>
+        <li class="test result result-pass">Expect item 7 to be from all109_s(seven), have seven</li>
+        <li class="test result result-pass">Expect item 21 to be from all109_s(twentyOne), have twentyOne</li>
+        <li class="test result result-pass">Expect item 22 to be from all109_s(twentyTwo), have twentyTwo</li>
+        <li class="test result result-pass">Expect item 23 to be from all109_s(twentyThree), have twentyThree</li>
+        <li class="test result result-pass">Expect item 24 to be from all109_s(twentyFour), have twentyFour</li>
+        <li class="test result result-pass">Expect item 25 to be from all109_s(twentyFive), have twentyFive</li>
+        <li class="test result result-pass">Expect item 26 to be from all109_s(twentySix), have twentySix</li>
+        <li class="test result result-pass">Expect item 27 to be from all109_s(twentySeven), have twentySeven</li>
+        <li class="test result result-pass">Expect item 28 to be from all109_s(twentyEight), have twentyEight</li>
+        <li class="test result result-pass">Expect item 29 to be from all109_s(twentyNine), have twentyNine</li>
+        <li class="test result result-pass">Expect item 30 to be from all109_s(thirty), have thirty</li>
+        <li class="test result result-pass">Expect item 31 to be from all109_s(thirtyOne), have thirtyOne</li>
+        <li class="test result result-pass">Expect item 32 to be from all109_s(thirtyTwo), have thirtyTwo</li>
+        <li class="test result result-pass">Expect item 33 to be from all109_s(thirtyThree), have thirtyThree</li>
+        <li class="test result result-pass">Expect item 34 to be from all109_s(thirtyFour), have thirtyFour</li>
+        <li class="test result result-pass">Expect item 35 to be from all109_s(thirtyFive), have thirtyFive</li>
+        <li class="test result result-pass">Expect i to have reached the max, have 23</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Serve</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Basic CycleServe network server initialization tests.</p>
+    <ol class="tests">
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeHandle</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>CycleServe network server request handling tests.</p>
+    <ol class="tests">
+        <li class="test result result-pass">active Req is not null</li>
+        <li class="test result result-pass">Req has the first handler set</li>
+        <li class="test result result-pass">Req has the second handler set</li>
+        <li class="test result result-pass">Req Roebling has status of SUCCESS, have SUCCESS,</li>
+        <li class="test result result-pass">Proc 2394 existed with status 0</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeChunked</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Chunked request (partial HTTP request sent in different requests) for CycleServe network server tests.</p>
+    <ol class="tests">
+<div class="suite">
+    <span class="label">Suite Caneka</span>
+<div class="set">
+    <span class="set-label">String</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the basic string object and convienience features</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect string to have fixed type TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">Expect string length of 2 found 2</li>
+        <li class="test result result-pass">Expect string match of 'Hi' found 'Hi'</li>
+        <li class="test result result-pass">Expect string to have chain type TYPE_STRING_CHAIN found TYPE_STRING_CHAIN</li>
+        <li class="test result result-pass">Expect string length of 3396 found 3396</li>
+        <li class="test result result-pass">Expect string match of long string</li>
+        <li class="test result result-pass">Expect for int value 35072  length of 5 found 5</li>
+        <li class="test result result-pass">Expect string match of int of 35072 to string</li>
+        <li class="test result result-pass">Expect length 271, have 271</li>
+        <li class="test result result-pass">Expect string match of 'GET /path.html HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8
+
+' to be TRUE</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Span</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Span is the basic data structure for sequential or logorithmic storage access.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Span has type span TYPE_SPAN found TYPE_SPAN</li>
+        <li class="test result result-pass">Span item 0 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 1 equals Hello there found Hello there</li>
+        <li class="test result result-pass">Span item 2 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 3 equals Three found Three</li>
+        <li class="test result result-pass">Span item 6 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 7 equals Seven found Seven</li>
+        <li class="test result result-pass">Span item 7 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 8 equals Eight found Eight</li>
+        <li class="test result result-pass">After expand, Span item 0 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 1 equals Hello there found Hello there</li>
+        <li class="test result result-pass">After expand,Span item 2 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 3 equals Three found Three</li>
+        <li class="test result result-pass">After expand,Span item 6 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 7 equals Seven found Seven</li>
+        <li class="test result result-pass">After expand, Span item 7 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 8 equals Eight found Eight</li>
+        <li class="test result result-pass">Span item 512 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 512 equals Five Twelve found Five Twelve</li>
+        <li class="test result result-pass">Span item 4079 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 4079 equals Four Hundred Seventy Nine found Four Hundred Seventy Nine</li>
+        <li class="test result result-pass">Span item 513 has type string TYPE_STRING_FIXED found TYPE_STRING_FIXED</li>
+        <li class="test result result-pass">String 513 equals Five Thirteen found Five Thirteen</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">SpanSetup</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>This tests the setup for a variety of Span configurations.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Span stride is 16, have 16</li>
+        <li class="test result result-pass">Span idxStride is 16, have 16</li>
+        <li class="test result result-pass">Span slab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Span idxSlab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Span needs 1 dims to index into 100, have 1</li>
+        <li class="test result result-pass">Span only needs 2 dim to index into 2000, have 2</li>
+        <li class="test result result-pass">Queue stride is 16, have 16</li>
+        <li class="test result result-pass">Queue idxStride is 16, have 16</li>
+        <li class="test result result-pass">Queue slab has allocated 256 bytes, have 256</li>
+        <li class="test result result-pass">Queue idxSlab has allocated 256 bytes, have 256</li>
+        <li class="test result result-pass">Queue needs 1 dims to index into 100, have 1</li>
+        <li class="test result result-pass">Queue only needs 2 dim to index into 2000, have 2</li>
+        <li class="test result result-pass">Mini stride is 4, have 4</li>
+        <li class="test result result-pass">Mini idxStride is 16, have 16</li>
+        <li class="test result result-pass">Mini slab has allocated 32 bytes, have 32</li>
+        <li class="test result result-pass">Mini idxSlab has allocated 128 bytes, have 128</li>
+        <li class="test result result-pass">Mini needs 2 dims to index into 100, have 2</li>
+        <li class="test result result-pass">Mini only needs 3 dim to index into 2000, have 3</li>
+        <li class="test result result-pass">SlabSpan stride is 512, have 512</li>
+        <li class="test result result-pass">SlabSpan idxStride is 32, have 32</li>
+        <li class="test result result-pass">SlabSpan slab has allocated 4096 bytes, have 4096</li>
+        <li class="test result result-pass">SlabSpan idxSlab has allocated 512 bytes, have 512</li>
+        <li class="test result result-pass">SlabSpan needs 0 dims to index into 100, have 0</li>
+        <li class="test result result-pass">SlabSpan only needs 1 dim to index into 2000, have 1</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">SpanInline</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Inline spans hold data directly in thier memory space, instead of storing pointers to data held elsewhere.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Inline Span idx 0 match expected 12 have 12</li>
+        <li class="test result result-pass">Inline Span idx 1 match expected 45 have 45</li>
+        <li class="test result result-pass">Inline Span idx 45 match expected 72 have 72</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Hash</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expected hash to equal 4291084750259606489, found: 4291084750259606489</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Table</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Auto-scaling hash-table built on top of the Span object and Hash object.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect strings to not be NULL from key:Alpha</li>
+        <li class="test result result-pass">Expect strings to equal Apples from key:Alpha found Apples</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Bravo</li>
+        <li class="test result result-pass">Expect strings to equal Bandits from key:Bravo found Bandits</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Charlie</li>
+        <li class="test result result-pass">Expect strings to equal Carrots from key:Charlie found Carrots</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Delta</li>
+        <li class="test result result-pass">Expect strings to equal DeadMan from key:Delta found DeadMan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Echo</li>
+        <li class="test result result-pass">Expect strings to equal Elevator from key:Echo found Elevator</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Foxtrot</li>
+        <li class="test result result-pass">Expect strings to equal Five Minutes from key:Foxtrot found Five Minutes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Golf</li>
+        <li class="test result result-pass">Expect strings to equal Gophers Are Cool from key:Golf found Gophers Are Cool</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Hotel</li>
+        <li class="test result result-pass">Expect strings to equal Happy Go Lucky from key:Hotel found Happy Go Lucky</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:India</li>
+        <li class="test result result-pass">Expect strings to equal Idio-syncratic from key:India found Idio-syncratic</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Juliet</li>
+        <li class="test result result-pass">Expect strings to equal Jockey Rider from key:Juliet found Jockey Rider</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">TableResize</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Resize features of the auto-scaling hash-table.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect strings to not be NULL from key:Alpha</li>
+        <li class="test result result-pass">Expect strings to equal Apples from key:Alpha found Apples</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Bravo</li>
+        <li class="test result result-pass">Expect strings to equal Bandits from key:Bravo found Bandits</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Charlie</li>
+        <li class="test result result-pass">Expect strings to equal Carrots from key:Charlie found Carrots</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Delta</li>
+        <li class="test result result-pass">Expect strings to equal DeadMan from key:Delta found DeadMan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Echo</li>
+        <li class="test result result-pass">Expect strings to equal Elevator from key:Echo found Elevator</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Foxtrot</li>
+        <li class="test result result-pass">Expect strings to equal Five Minutes from key:Foxtrot found Five Minutes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Golf</li>
+        <li class="test result result-pass">Expect strings to equal Gophers Are Cool from key:Golf found Gophers Are Cool</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Hotel</li>
+        <li class="test result result-pass">Expect strings to equal Happy Go Lucky from key:Hotel found Happy Go Lucky</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:India</li>
+        <li class="test result result-pass">Expect strings to equal Idio-syncratic from key:India found Idio-syncratic</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Juliet</li>
+        <li class="test result result-pass">Expect strings to equal Jockey Rider from key:Juliet found Jockey Rider</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Kilo</li>
+        <li class="test result result-pass">Expect strings to equal Kangaroo from key:Kilo found Kangaroo</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Lima</li>
+        <li class="test result result-pass">Expect strings to equal Lefties from key:Lima found Lefties</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Mike</li>
+        <li class="test result result-pass">Expect strings to equal Mangoes from key:Mike found Mangoes</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:November</li>
+        <li class="test result result-pass">Expect strings to equal Neighbourhood Villan from key:November found Neighbourhood Villan</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Oscar</li>
+        <li class="test result result-pass">Expect strings to equal Oasis of Gems from key:Oscar found Oasis of Gems</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Pappa</li>
+        <li class="test result result-pass">Expect strings to equal Pinapple Ham from key:Pappa found Pinapple Ham</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Quebec</li>
+        <li class="test result result-pass">Expect strings to equal Quarterly Report from key:Quebec found Quarterly Report</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Romeo</li>
+        <li class="test result result-pass">Expect strings to equal Rooty Tooty from key:Romeo found Rooty Tooty</li>
+        <li class="test result result-pass">Expect strings to not be NULL from key:Sierra</li>
+        <li class="test result result-pass">Expect strings to equal Stainless Steel from key:Sierra found Stainless Steel</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">TablePreKey</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Testing the ability to add a key and value to a hash table and disperate, yet sequential, times.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect SetKey and SetValue to effect the same entry: strings to not be NULL from key:'PreKey'</li>
+        <li class="test result result-pass">Expect SetKey and SetValue to effect the same entry: strings to equal 'After Value' from key:'PreKey' found 'After Value'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Match</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Character pattern matching system for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Non match has unsuccessful state found MISS,</li>
+        <li class="test result result-pass">Matching string has successful state found SUCCESS,</li>
+        <li class="test result result-pass">Matched length of string, less termMatching, expected 14 have 14</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">MatchElastic</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Elastic, (length undetermined) match testing for character patterns of the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Has PROCESSING status PROCESSING,</li>
+        <li class="test result result-pass">On second pos, position is 0</li>
+        <li class="test result result-pass">Tag -Stopped on the fourth character</li>
+        <li class="test result result-pass">Tag -Found three chars</li>
+        <li class="test result result-pass">Tag- Found SUCCESS have TRACKED/TERM_FOUND,SUCCESS,</li>
+        <li class="test result result-pass">Tag -At end</li>
+        <li class="test result result-pass">Att - Found four chars, count is 4</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Roebling</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Tests for the Roebling character pattern matching parser, with programmable hooks and capture ranges.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Roebling has three match values loaded up</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingRun</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Run state variables for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Match equals expected</li>
+        <li class="test result result-pass">Content equals expected, have TWO</li>
+        <li class="test result result-pass">Match Idx equals expected</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line, expected 'for the weekend', have 'for the weekend'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has state SUCCESS</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingMark</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Mark and jump behavior tests for the Roebling parser.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Content equals TWO, have TWO</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'TWO'</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for the weekend'</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'for the weekend'</li>
+        <li class="test result result-pass">Content equals ONE, have ONE</li>
+        <li class="test result result-pass">Roebling has state NEXT after 'ONE'</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for good measure'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Content equals THREE, have THREE</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has captured the rest of the line: 'for all!'</li>
+        <li class="test result result-pass">Roebling has state NEXT</li>
+        <li class="test result result-pass">Roebling has state SUCCESS SUCCESS,</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">RoeblingStartSop</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Pausable behavior for the Roebling parser, to be able to handle partial input, and resume when more input is added.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Roebling has state SUCCESS, have 'SUCCESS,'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XML</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Basic XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">Root node equals 'main' have 'main'</li>
+        <li class="test result result-pass">Jump next to expected mark XML_ATTROUTE</li>
+        <li class="test result result-pass">XmlCtx has state SUCCSS, have SUCCESS,</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLNested</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Nested XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">Attribute has name 'type', have 'type'</li>
+        <li class="test result result-pass">Attribute Value to be 'root', have 'root'</li>
+        <li class="test result result-pass">Jump set to XML_START</li>
+        <li class="test result result-pass">Whitespace before tag added as body, have '\n  '</li>
+        <li class="test result result-pass">Expected att item: 'model', have 'model'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'foo'</li>
+        <li class="test result result-pass">Expected att item: 'model', have 'baseline'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'fancy-pants'</li>
+        <li class="test result result-pass">Expected body value: 'Gotta Get It!', have 'Gotta Get It!'</li>
+        <li class="test result result-pass">NodeName is 'alpha', have 'alpha'</li>
+        <li class="test result result-pass">Second NodeName is 'alpha', have 'alpha'</li>
+        <li class="test result result-pass">XML has state success</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLParser</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Fully featured XML parsing implemented using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">XML has state success</li>
+        <li class="test result result-pass">XML node has expected body, have 'The World is Upside Down!'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Http</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>HTTP protocol parsing using the Roebling Parser</p>
+    <ol class="tests">
+        <li class="test result result-pass">captureKey is as expected HTTP_METHOD, have 0/HTTP_METHOD</li>
+        <li class="test result result-pass">Expected content 'GET', have 'GET'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_PATH, have 1/HTTP_PATH</li>
+        <li class="test result result-pass">Expected content '/path.html', have '/path.html'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_PROTO, have 2/HTTP_PROTO</li>
+        <li class="test result result-pass">Expected content 'HTTP/1.1', have 'HTTP/1.1'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Host', have 'Host'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'localhost', have 'localhost'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'User-Agent', have 'User-Agent'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0', have 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Connection', have 'Connection'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'keep-alive', have 'keep-alive'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER, have 3/HTTP_HEADER</li>
+        <li class="test result result-pass">Expected content 'Accept', have 'Accept'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_HEADER_VALUE, have 4/HTTP_HEADER_VALUE</li>
+        <li class="test result result-pass">Expected content 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8', have 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8'</li>
+        <li class="test result result-pass">captureKey is as expected HTTP_END, have 5/HTTP_END</li>
+        <li class="test result result-pass">Reached end of test captures, have 12</li>
+        <li class="test result result-pass">Roebling HttpParser has state SUCCESS, have 'SUCCESS,'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Queue</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">six has replaed idx 1</li>
+        <li class="test result result-pass">midwest has replaed idx 17</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">QueueNext</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue iteration behaviour, built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect queue to have 67 values, have 67
+</li>
+        <li class="test result result-pass">Expect first item to be zero_s, have zero
+</li>
+        <li class="test result result-pass">Expect second item to be one_s, have one
+</li>
+        <li class="test result result-pass">Expect item 2 to be from all109_s(two), have two</li>
+        <li class="test result result-pass">Expect item 3 to be from all109_s(three), have three</li>
+        <li class="test result result-pass">Expect item 4 to be from all109_s(four), have four</li>
+        <li class="test result result-pass">Expect item 5 to be from all109_s(five), have five</li>
+        <li class="test result result-pass">Expect item 6 to be from all109_s(six), have six</li>
+        <li class="test result result-pass">Expect item 7 to be from all109_s(seven), have seven</li>
+        <li class="test result result-pass">Expect item 8 to be from all109_s(eight), have eight</li>
+        <li class="test result result-pass">Expect item 9 to be from all109_s(nine), have nine</li>
+        <li class="test result result-pass">Expect item 10 to be from all109_s(ten), have ten</li>
+        <li class="test result result-pass">Expect item 11 to be from all109_s(eleven), have eleven</li>
+        <li class="test result result-pass">Expect item 12 to be from all109_s(twelve), have twelve</li>
+        <li class="test result result-pass">Expect item 13 to be from all109_s(thirteen), have thirteen</li>
+        <li class="test result result-pass">Expect item 14 to be from all109_s(fourteen), have fourteen</li>
+        <li class="test result result-pass">Expect item 15 to be from all109_s(fifteen), have fifteen</li>
+        <li class="test result result-pass">Expect item 16 to be from all109_s(sixteen), have sixteen</li>
+        <li class="test result result-pass">Expect item 17 to be from all109_s(seventeen), have seventeen</li>
+        <li class="test result result-pass">Expect item 18 to be from all109_s(eighteen), have eighteen</li>
+        <li class="test result result-pass">Expect item 19 to be from all109_s(nineteen), have nineteen</li>
+        <li class="test result result-pass">Expect item 20 to be from all109_s(twenty), have twenty</li>
+        <li class="test result result-pass">Expect item 21 to be from all109_s(twentyOne), have twentyOne</li>
+        <li class="test result result-pass">Expect item 22 to be from all109_s(twentyTwo), have twentyTwo</li>
+        <li class="test result result-pass">Expect item 23 to be from all109_s(twentyThree), have twentyThree</li>
+        <li class="test result result-pass">Expect item 24 to be from all109_s(twentyFour), have twentyFour</li>
+        <li class="test result result-pass">Expect item 25 to be from all109_s(twentyFive), have twentyFive</li>
+        <li class="test result result-pass">Expect item 26 to be from all109_s(twentySix), have twentySix</li>
+        <li class="test result result-pass">Expect item 27 to be from all109_s(twentySeven), have twentySeven</li>
+        <li class="test result result-pass">Expect item 28 to be from all109_s(twentyEight), have twentyEight</li>
+        <li class="test result result-pass">Expect item 29 to be from all109_s(twentyNine), have twentyNine</li>
+        <li class="test result result-pass">Expect item 30 to be from all109_s(thirty), have thirty</li>
+        <li class="test result result-pass">Expect item 31 to be from all109_s(thirtyOne), have thirtyOne</li>
+        <li class="test result result-pass">Expect item 32 to be from all109_s(thirtyTwo), have thirtyTwo</li>
+        <li class="test result result-pass">Expect item 33 to be from all109_s(thirtyThree), have thirtyThree</li>
+        <li class="test result result-pass">Expect item 34 to be from all109_s(thirtyFour), have thirtyFour</li>
+        <li class="test result result-pass">Expect item 35 to be from all109_s(thirtyFive), have thirtyFive</li>
+        <li class="test result result-pass">Expect item 36 to be from all109_s(thirtySix), have thirtySix</li>
+        <li class="test result result-pass">Expect item 37 to be from all109_s(thirtySeven), have thirtySeven</li>
+        <li class="test result result-pass">Expect item 38 to be from all109_s(thirtyEight), have thirtyEight</li>
+        <li class="test result result-pass">Expect item 39 to be from all109_s(thirtyNine), have thirtyNine</li>
+        <li class="test result result-pass">Expect item 40 to be from all109_s(fourty), have fourty</li>
+        <li class="test result result-pass">Expect item 41 to be from all109_s(fourtyOne), have fourtyOne</li>
+        <li class="test result result-pass">Expect item 42 to be from all109_s(fourtyTwo), have fourtyTwo</li>
+        <li class="test result result-pass">Expect item 43 to be from all109_s(fourtyThree), have fourtyThree</li>
+        <li class="test result result-pass">Expect item 44 to be from all109_s(fourtyFour), have fourtyFour</li>
+        <li class="test result result-pass">Expect item 45 to be from all109_s(fourtyFive), have fourtyFive</li>
+        <li class="test result result-pass">Expect item 46 to be from all109_s(fourtySix), have fourtySix</li>
+        <li class="test result result-pass">Expect item 47 to be from all109_s(fourtySeven), have fourtySeven</li>
+        <li class="test result result-pass">Expect item 48 to be from all109_s(fourtyEight), have fourtyEight</li>
+        <li class="test result result-pass">Expect item 49 to be from all109_s(fourtyNine), have fourtyNine</li>
+        <li class="test result result-pass">Expect item 50 to be from all109_s(fifty), have fifty</li>
+        <li class="test result result-pass">Expect item 51 to be from all109_s(fiftyOne), have fiftyOne</li>
+        <li class="test result result-pass">Expect item 52 to be from all109_s(fiftyTwo), have fiftyTwo</li>
+        <li class="test result result-pass">Expect item 53 to be from all109_s(fiftyThree), have fiftyThree</li>
+        <li class="test result result-pass">Expect item 54 to be from all109_s(fiftyFour), have fiftyFour</li>
+        <li class="test result result-pass">Expect item 55 to be from all109_s(fiftyFive), have fiftyFive</li>
+        <li class="test result result-pass">Expect item 56 to be from all109_s(fiftySix), have fiftySix</li>
+        <li class="test result result-pass">Expect item 57 to be from all109_s(fiftySeven), have fiftySeven</li>
+        <li class="test result result-pass">Expect item 58 to be from all109_s(fiftyEight), have fiftyEight</li>
+        <li class="test result result-pass">Expect item 59 to be from all109_s(fiftyNine), have fiftyNine</li>
+        <li class="test result result-pass">Expect item 60 to be from all109_s(sixty), have sixty</li>
+        <li class="test result result-pass">Expect item 61 to be from all109_s(sixtyOne), have sixtyOne</li>
+        <li class="test result result-pass">Expect item 62 to be from all109_s(sixtyTwo), have sixtyTwo</li>
+        <li class="test result result-pass">Expect item 63 to be from all109_s(sixtyThree), have sixtyThree</li>
+        <li class="test result result-pass">Expect item 64 to be from all109_s(sixtyFour), have sixtyFour</li>
+        <li class="test result result-pass">Expect item 65 to be from all109_s(sixtyFive), have sixtyFive</li>
+        <li class="test result result-pass">Expect item 66 to be from all109_s(sixtySix), have sixtySix</li>
+        <li class="test result result-pass">Expect i to have reached the max, have 67</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">QueueMixed</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Queue iteration with a mix of items missing, built on top of the Span storage architecture.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Expect queue to have 8 values, have 36</li>
+        <li class="test result result-pass">Expect queue to have 23 values, have 23</li>
+        <li class="test result result-pass">Expect item 0 to be from all109_s(zero), have zero</li>
+        <li class="test result result-pass">Expect item 1 to be from all109_s(one), have one</li>
+        <li class="test result result-pass">Expect item 2 to be from all109_s(two), have two</li>
+        <li class="test result result-pass">Expect item 3 to be from all109_s(three), have three</li>
+        <li class="test result result-pass">Expect item 4 to be from all109_s(four), have four</li>
+        <li class="test result result-pass">Expect item 5 to be from all109_s(five), have five</li>
+        <li class="test result result-pass">Expect item 6 to be from all109_s(six), have six</li>
+        <li class="test result result-pass">Expect item 7 to be from all109_s(seven), have seven</li>
+        <li class="test result result-pass">Expect item 21 to be from all109_s(twentyOne), have twentyOne</li>
+        <li class="test result result-pass">Expect item 22 to be from all109_s(twentyTwo), have twentyTwo</li>
+        <li class="test result result-pass">Expect item 23 to be from all109_s(twentyThree), have twentyThree</li>
+        <li class="test result result-pass">Expect item 24 to be from all109_s(twentyFour), have twentyFour</li>
+        <li class="test result result-pass">Expect item 25 to be from all109_s(twentyFive), have twentyFive</li>
+        <li class="test result result-pass">Expect item 26 to be from all109_s(twentySix), have twentySix</li>
+        <li class="test result result-pass">Expect item 27 to be from all109_s(twentySeven), have twentySeven</li>
+        <li class="test result result-pass">Expect item 28 to be from all109_s(twentyEight), have twentyEight</li>
+        <li class="test result result-pass">Expect item 29 to be from all109_s(twentyNine), have twentyNine</li>
+        <li class="test result result-pass">Expect item 30 to be from all109_s(thirty), have thirty</li>
+        <li class="test result result-pass">Expect item 31 to be from all109_s(thirtyOne), have thirtyOne</li>
+        <li class="test result result-pass">Expect item 32 to be from all109_s(thirtyTwo), have thirtyTwo</li>
+        <li class="test result result-pass">Expect item 33 to be from all109_s(thirtyThree), have thirtyThree</li>
+        <li class="test result result-pass">Expect item 34 to be from all109_s(thirtyFour), have thirtyFour</li>
+        <li class="test result result-pass">Expect item 35 to be from all109_s(thirtyFive), have thirtyFive</li>
+        <li class="test result result-pass">Expect i to have reached the max, have 23</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">Serve</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Basic CycleServe network server initialization tests.</p>
+    <ol class="tests">
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeHandle</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>CycleServe network server request handling tests.</p>
+    <ol class="tests">
+        <li class="test result result-pass">active Req is not null</li>
+        <li class="test result result-pass">Req has the first handler set</li>
+        <li class="test result result-pass">Req has the second handler set</li>
+        <li class="test result result-pass">Req Roebling has status of SUCCESS, have SUCCESS,</li>
+        <li class="test result result-pass">Proc 2394 existed with status 0</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeChunked</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Chunked request (partial HTTP request sent in different requests) for CycleServe network server tests.</p>
+    <ol class="tests">
+        <li class="test result result-pass">active Req is not null</li>
+        <li class="test result result-pass">Req has the first handler set</li>
+        <li class="test result result-pass">Req has the second handler set</li>
+        <li class="test result result-pass">Req Roebling does not have state SUCCESS yet, have PROCESSING,</li>
+        <li class="test result result-pass">Req Roebling has status of SUCCESS, have SUCCESS,</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeMultiple</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Concurrent request testing for CycleServe network server.</p>
+    <ol class="tests">
+        <li class="test result result-pass">Multiple count of 22 currently open, have 22</li>
+        <li class="test result result-pass">All processes closed, count of 0 currently open, have 0</li>
+        <li class="test result result-pass">Served all count of 22 requests, have 22</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeCookieSession</span>
+    <span class="status" data-status="1024">previously working</span>
+    <p>Tests to use Roebling to open a session based on an HTTP Cookie Header using IoCtx and Crypto.</p>
+    <ol class="tests">
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">ServeScheduled</span>
+    <span class="status" data-status="512">not started</span>
+    <p>Regularly scheduled activities in CycleServe using the Queue object.</p>
+    <ol class="tests">
+    </ol>
+</div>
+<div class="set">
     <span class="set-label">Oset</span>
     <span class="status" data-status="4096">feature complete</span>
     <p>Oset serialization format tests (similar features to XML, JSON, or YAML).</p>
@@ -592,6 +2038,6 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
     </ol>
 </div>
 
-    <span class="result">Suite Caneka pass:32 fail:0</span>
+    <span class="result">Suite Caneka pass:38 fail:0</span>
 </div>
 </div>
