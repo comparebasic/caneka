@@ -95,11 +95,9 @@ Abstract *NestedD_Get(NestedD *nd, Abstract *key){
 }
 
 status NestedD_Next(NestedD *nd){
-    if(nd->it.values == NULL || (nd->it.type.state & END) != 0){
+    if(nd->it.values == NULL || (Iter_Next(&nd->it) & END) != 0){
         return END;
     }
-
-    Iter_Next(&nd->it);
     if((nd->type.state & NESTED_FOR) != 0){
         Abstract *next = Iter_Get(&nd->it);
         if(next->type.of == TYPE_TABLE){

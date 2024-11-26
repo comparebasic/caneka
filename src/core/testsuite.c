@@ -68,7 +68,7 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     while(set->func != NULL){
         if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
             printf("<div class=\"set\">\n    <span class=\"set-label\">%s</span>\n", set->name);
-            printf("    <span class=\"status\" data:status=\"%d\">%s</span>\n    <p>%s</p>\n    <ol class=\"tests\">\n",
+            printf("    <span class=\"status\" data-status=\"%d\">%s</span>\n    <p>%s</p>\n    <ol class=\"tests\">\n",
                 set->status, statusCstr(set->status), set->description);
         }else{
             printf("[Testing %s]\n", set->name);

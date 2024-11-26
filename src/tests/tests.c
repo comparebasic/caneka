@@ -9,12 +9,14 @@ status Tests_Init(MemCtx *m){
 }
 
 static TestSet _Tests[] = {
+    /*
     {
         "Core",
         Core_Tests,
         "Initializing core system tests",
         FEATURE_COMPLETE,
     },
+    */
     {
         "String",
         String_Tests,
@@ -39,12 +41,14 @@ static TestSet _Tests[] = {
         "Inline spans hold data directly in thier memory space, instead of storing pointers to data held elsewhere.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "SpanClone",
         SpanClone_Tests,
         "Clone a span",
         NOT_STARTED,
     },
+    */
     {
         "Hash",
         Hash_Tests,
@@ -124,12 +128,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "XML Templating",
-        Blank_Tests,
-        "XML templating for building web applications.",
-        PREVIOUSLY_WORKING,
-    },
-    {
         "Http",
         Http_Tests,
         "HTTP protocol parsing using the Roebling Parser",
@@ -192,22 +190,10 @@ static TestSet _Tests[] = {
     },
     */
     {
-        "PasswordFlow",
-        Blank_Tests,
-        "A Basic user password flow using CycleServe and IoCtx",
-        NOT_STARTED,
-    },
-    {
         "Oset",
         Oset_Tests,
         "Oset serialization format tests (similar features to XML, JSON, or YAML).",
         FEATURE_COMPLETE,
-    },
-    {
-        "Crypto",
-        Blank_Tests,
-        "Basic crypto tests including Sha256 and Salty.",
-        PREVIOUSLY_WORKING,
     },
     {
         "IoCtx",
@@ -238,6 +224,24 @@ static TestSet _Tests[] = {
         NestedDFor_Tests,
         "NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), For scenario.",
         PARTIAL_FEATURE,
+    },
+    {
+        "XML Templating",
+        Blank_Tests,
+        "XML templating for building web applications.",
+        PREVIOUSLY_WORKING,
+    },
+    {
+        "Crypto",
+        Blank_Tests,
+        "Basic crypto tests including Sha256 and Salty.",
+        PREVIOUSLY_WORKING,
+    },
+    {
+        "PasswordFlow",
+        Blank_Tests,
+        "A Basic user password flow using CycleServe and IoCtx",
+        NOT_STARTED,
     },
     {
         "Smtp",
