@@ -1,7 +1,7 @@
 typedef struct mess {
     Type type;
-    Hashed *value;
-    Hashed *atts;
+    String *name;
+    Span *atts;
     String *body;
     struct mess *parent;
     struct mess *firstChild;

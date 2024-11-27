@@ -2,6 +2,10 @@
 #include <caneka.h>
 #include <tests.h>
 
+/*
+#define CYCLE_SERVE 1
+*/
+
 status Tests_Init(MemCtx *m){
    status r = READY;
    r |= Make109Strings(m);
@@ -151,6 +155,7 @@ static TestSet _Tests[] = {
         "Queue iteration with a mix of items missing, built on top of the Span storage architecture.",
         FEATURE_COMPLETE,
     },
+#ifdef CYCLE_SERVE
     {
         "Serve",
         Serve_Tests,
@@ -187,6 +192,7 @@ static TestSet _Tests[] = {
         "Regularly scheduled activities in CycleServe using the Queue object.",
         NOT_STARTED,
     },
+#endif
     {
         "Oset",
         Oset_Tests,

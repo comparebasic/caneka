@@ -275,3 +275,4 @@ cls Ifc_Get(cls inst);
 #include "lang/xmlt.h"
 
 status Caneka_Init(MemCtx *m);
+boolean Caneka_Truthy(Abstract *a);

@@ -3,7 +3,7 @@
 
 status XmlCtx_Open(XmlCtx *ctx, String *tagName){
     Mess *ms = Mess_Make(ctx->m);
-    ms->value = Hashed_Make(ctx->m, (Abstract *)tagName);
+    ms->name = tagName;
     if(ctx->parent == NULL){
         ctx->parent = ctx->root;
     }
@@ -14,17 +14,11 @@ status XmlCtx_Open(XmlCtx *ctx, String *tagName){
 }
 
 status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
-    Hashed *h = Hashed_Make(ctx->m, (Abstract *)attName);
     if(ctx->current->atts == NULL){
-        ctx->current->atts = h;
-    }else{
-        Hashed *_h = ctx->current->atts;
-        while(_h->next != NULL){
-            _h = _h->next;
-        }
-        _h->next = h;
+        ctx->current->atts = Span_Make(ctx->m, TYPE_TABLE);
     }
-    return SUCCESS;
+
+    return Table_SetKey(ctx->current->atts, (Abstract *)attName);
 }
 
 status XmlCtx_BodyAppend(XmlCtx *ctx, String *body){
@@ -35,12 +29,13 @@ status XmlCtx_BodyAppend(XmlCtx *ctx, String *body){
 }
 
 status XmlCtx_SetAttrValue(XmlCtx *ctx, Abstract *value){
-    Hashed *h = ctx->current->atts;
-    while(h->next != NULL){
-        h = h->next;
+    if(ctx->current->atts == NULL){
+        ctx->current->atts = Span_Make(ctx->m, TYPE_TABLE);
     }
-    h->value = value;
-    return SUCCESS;
+    if(Table_SetValue(ctx->current->atts, (Abstract *)value) != NULL){
+        return SUCCESS;
+    }
+    return ERROR;
 }
 
 status XmlCtx_TagClosed(XmlCtx *ctx){

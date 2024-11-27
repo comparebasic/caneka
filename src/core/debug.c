@@ -20,6 +20,7 @@ int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
 int DEBUG_SPAN_GET_SET = 0;
 int DEBUG_XML = 0;
+int DEBUG_XML_TEMPLATE = COLOR_YELLOW;
 int DEBUG_ROEBLING_NAME = 0;
 int DEBUG_HTTP = 0;
 int DEBUG_SERVE = 0;
@@ -372,19 +373,20 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
 static void mess_PrintRecurse(Mess *ms, char *msg, int color, boolean extended, int indent){
     indent_Print(indent);
     printf("\x1b[%dm%sM<%s value=\x1b[0m", color, msg, Class_ToString(ms->type.of));
-    Debug_Print((void *)ms->value, 0, "", color, extended);
-    Hashed *h = ms->atts;
+    Debug_Print((void *)ms->name, 0, "", color, extended);
     printf(" ");
-    if(h != NULL){
+    if(ms->atts != NULL){
         printf("\x1b[%dmatts=[", color);
     }
-    while(h != NULL){
-        Debug_Print((void *)h, 0, "", color, extended);
-        h = h->next;
+    Iter it;
+    Iter_Init(&it, ms->atts);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL){
-            printf("\x1b[%dm, ", color);
+            Debug_Print((void *)h, 0, "", color, extended);
         }
     }
+    printf("\x1b[%dm, ", color);
     if(ms->atts != NULL){
         printf("\x1b[%dm]", color);
     }

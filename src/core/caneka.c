@@ -153,6 +153,17 @@ boolean Abs_Eq(Abstract *a, void *b){
     }
 }
 
+boolean Caneka_Truthy(Abstract *a){
+    if(a == NULL){
+        return FALSE;
+    }else if(Ifc_Match(a->type.of, TYPE_WRAPPED_I64)){
+        return ((Single *)a)->val.value != 0;
+    }else if(Ifc_Match(a->type.of, TYPE_STRING)){
+        return ((String *)a)->length > 1;
+    }else{
+        return FALSE;
+    }
+}
 
 cls Ifc_Get(cls inst){
     if(inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED){

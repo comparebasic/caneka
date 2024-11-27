@@ -3,19 +3,18 @@
 
 status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
     MemCtx *m = xmlt->m;
-    Hashed *att = e->atts;
-    while(att != NULL){
-        String_Add(m, s, (String *)att->item); 
-        if(att->value != NULL){
-            String *value = asIfc(att->value, TYPE_STRING);
+    Iter it;
+    Iter_Init(&it, e->atts);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        String_Add(m, s, (String *)h->item); 
+        if(h->value != NULL){
+            String *value = asIfc(h->value, TYPE_STRING);
             value = Cash_Replace(xmlt->m, xmlt->cash, (String *)value);
             String_AddBytes(m, s, bytes("="), 1);
             String_Add(m, s, (String *)value);
-
         }
-
-        att = att->next;
-        if(att != NULL){
+        if((it.type.state & FLAG_ITER_LAST) == 0){
             String_AddBytes(m, s, bytes(" "), 1);
         }
     }
@@ -29,7 +28,7 @@ status XmlT_Out(XmlTCtx *xmlt, Mess *e, OutFunc func){
 
     String *s = String_Init(m, STRING_EXTEND);
     String_AddBytes(m, s, bytes("<"), 1);
-    String_Add(m, s, (String *)e->value->item);
+    String_Add(m, s, (String *)e->name);
 
 
     if(e->atts != NULL){
@@ -63,7 +62,7 @@ status XmlT_Out(XmlTCtx *xmlt, Mess *e, OutFunc func){
 
     if(!selfContained){
         func(m, String_Make(m, bytes("</")), source);
-        func(m, (String *)e->value->item, source);
+        func(m, (String *)e->name, source);
         func(m, String_Make(m, bytes(">")), source);
     }
 

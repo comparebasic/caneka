@@ -5,6 +5,7 @@ enum xmlt_flags {
     FLAG_XML_WITH = 1 << 11,
     FLAG_XML_IF = 1 << 12,
     FLAG_XML_IF_NOT = 1 << 13,
+    FLAG_XML_SATISFIED = 1 << 14,
 };
 
 typedef struct xmlt_ctx {

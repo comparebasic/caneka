@@ -42,7 +42,7 @@ static BuildSubdir formatsobj = {"formats", {
 }};
 
 static BuildSubdir langobj = {"lang", {
-    "xml_elem.c", "nestedd.c", 
+    "xml_elem.c", "xml_template.c", "nestedd.c", 
     NULL
 }};
 

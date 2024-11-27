@@ -15,8 +15,7 @@ status Xml_Tests(MemCtx *gm){
     Roebling_AddBytes(rbl, s->bytes, s->length);
 
     Roebling_RunCycle(rbl);
-    Hashed *h = (Hashed *)ctx->root->firstChild->value;
-    s = (String *)h->item;
+    s = ctx->root->firstChild->name;
     r |= Test(String_EqualsBytes(s, bytes("main")), "Root node equals 'main' have '%s'", s != NULL ? (char *)s->bytes : "NULL");
 
     s = Roebling_GetMarkDebug(rbl, rbl->jump);
@@ -45,7 +44,8 @@ status XmlNested_Tests(MemCtx *gm){
 
     Mess *node = ctx->root->firstChild;
     Mess *bodyNode = NULL;
-    Hashed *h = node->atts;
+    Hashed *h = Span_Get(node->atts, node->atts->metrics.get);
+
     r |= Test(String_EqualsBytes((String *)h->item, bytes("type")), "Attribute has name 'type', have '%s'", ((String *)h->item)->bytes);
     r |= Test(String_EqualsBytes((String *)h->value, bytes("root")), "Attribute Value to be 'root', have '%s'", ((String *)h->value)->bytes);
 
@@ -60,12 +60,13 @@ status XmlNested_Tests(MemCtx *gm){
     }
 
     node = ctx->root->firstChild->firstChild->next->firstChild->next;
-    Hashed *att = node->atts;
-    r |= Test(String_EqualsBytes((String *)att->item, bytes("model")), "Expected att item: 'model', have '%s'", String_ToEscaped(m, (String *)att->item)->bytes);
-    r |= Test(String_EqualsBytes((String *)att->value, bytes("foo")), "Expected att value: 'fancy-pants', have '%s'", String_ToEscaped(m, (String *)att->value)->bytes);
-    att = att->next;
-    r |= Test(String_EqualsBytes((String *)att->item, bytes("baseline")), "Expected att item: 'model', have '%s'", String_ToEscaped(m, (String *)att->item)->bytes);
-    r |= Test(String_EqualsBytes((String *)att->value, bytes("fancy-pants")), "Expected att value: 'fancy-pants', have '%s'", String_ToEscaped(m, (String *)att->value)->bytes);
+
+    String *result = (String *)Table_Get(node->atts, (Abstract *)String_Make(m, bytes("model")));
+    r |= Test(String_EqualsBytes((String *)result, bytes("foo")), "Expected att value: 'fancy-pants', have '%s'", String_ToEscaped(m, result)->bytes);
+
+    result = (String *)Table_Get(node->atts, (Abstract *)String_Make(m, bytes("baseline")));
+    r |= Test(String_EqualsBytes((String *)result, bytes("fancy-pants")), "Expected att value: 'fancy-pants', have '%s'", String_ToEscaped(m, result));
+
     bodyNode = node->firstChild;
     r |= Test(String_EqualsBytes((String *)bodyNode->body, bytes("Gotta Get It!")), "Expected body value: 'Gotta Get It!', have '%s'", String_ToEscaped(m, (String *)bodyNode->body)->bytes);
     for(int i = 0; i < 6; i++){
@@ -73,9 +74,9 @@ status XmlNested_Tests(MemCtx *gm){
     }
 
     node = ctx->root->firstChild->firstChild->next;
-    r |= Test(String_EqualsBytes((String *)node->value->item, bytes("alpha")), "NodeName is 'alpha', have '%s'", String_ToEscaped(m, (String *)node->value->item)->bytes);
+    r |= Test(String_EqualsBytes((String *)node->name, bytes("alpha")), "NodeName is 'alpha', have '%s'", String_ToEscaped(m, (String *)node->name)->bytes);
     node = node->next->next;
-    r |= Test(String_EqualsBytes((String *)node->value->item, bytes("alpha")), "Second NodeName is 'alpha', have '%s'", String_ToEscaped(m, (String *)node->value->item)->bytes);
+    r |= Test(String_EqualsBytes((String *)node->name, bytes("alpha")), "Second NodeName is 'alpha', have '%s'", String_ToEscaped(m, (String *)node->name)->bytes);
 
     while(!HasFlag(ctx->type.state, SUCCESS)){
         Roebling_RunCycle(rbl);
