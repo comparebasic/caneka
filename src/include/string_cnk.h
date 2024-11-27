@@ -7,6 +7,12 @@ related: core/string.h
 
 #define WHITESPACE NOOP
 
+enum string_flags {
+    FLAG_STRING_IS_NUM = 1 << 9,
+    FLAG_STRING_IS_BOOL = 1 << 10,
+    FLAG_STRING_IS_CASH = 1 << 11,
+};
+
 typedef struct stringmin {
     Type type;
     int length;
