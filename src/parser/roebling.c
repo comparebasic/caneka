@@ -22,6 +22,9 @@ static status Roebling_RunMatches(Roebling *rbl){
                 Debug_Print(mt, 0, "Roebling Running Match: ", DEBUG_ROEBLING, TRUE);
             }
             if(mt != NULL){
+               if(DEBUG_PATMATCH){
+                    printf("\x1b[%dmmatch: %d - ", DEBUG_PATMATCH, i);
+               }
                Match_Feed(mt, c);
                if(HasFlag(mt->type.state, COMPLETE)){
                      rbl->type.state &= ~PROCESSING;

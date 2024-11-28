@@ -2,6 +2,10 @@
 #include <caneka.h>
 
 status Iter_Next(Iter *it){
+    if(it->values == NULL){
+        it->type.state |= END;
+        return it->type.state;
+    }
     if((it->type.state & END) != 0){
         if((it->type.state & FLAG_ITER_REVERSE) != 0){
             it->idx = it->values->nvalues;

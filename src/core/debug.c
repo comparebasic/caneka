@@ -20,7 +20,7 @@ int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
 int DEBUG_SPAN_GET_SET = 0;
 int DEBUG_XML = 0;
-int DEBUG_XML_TEMPLATE = COLOR_YELLOW;
+int DEBUG_XML_TEMPLATE = 0;
 int DEBUG_ROEBLING_NAME = 0;
 int DEBUG_HTTP = 0;
 int DEBUG_SERVE = 0;
@@ -390,9 +390,7 @@ static void mess_PrintRecurse(Mess *ms, char *msg, int color, boolean extended, 
     if(ms->atts != NULL){
         printf("\x1b[%dm]", color);
     }
-    if(ms->body != NULL){
-        Debug_Print(ms->body, 0, "body=", color, TRUE);
-    }
+    Debug_Print(ms->body, 0, "body=", color, TRUE);
     Mess *child = ms->firstChild;
     if(child != NULL){
         printf("\x1b[%dm [", color);

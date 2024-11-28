@@ -100,3 +100,31 @@ status XmlParser_Tests(MemCtx *gm){
 
     return r;
 }
+
+status XmlStringType_Tests(MemCtx *gm){
+    status r = TEST_OK;
+    MemCtx *m = MemCtx_Make();
+    XmlParser *xml = XmlParser_Make(m); 
+    String *s = NULL;
+
+    s = String_Make(m, bytes("<main type=\"root\" cat=\"${fancy}\" count=\"19\" max=3>Not a cash<s>${body}</s></main>"));
+    XmlParser_Parse(xml, s);
+    Mess *node = xml->ctx->root->firstChild;
+
+    s = (String *)Table_Get(node->atts, (Abstract *)String_Make(m, bytes("type")));
+    r |= Test(s->type.state == ZERO, "String root is normal, no flags for '%s', have %d", s->bytes, s->type.state);
+    s = (String *)Table_Get(node->atts, (Abstract *)String_Make(m, bytes("cat")));
+    r |= Test((s->type.state & FLAG_STRING_IS_CASH) != 0, "String is idendified as FLAG_STRING_IS_CASH for '%s', have %d", s->bytes, s->type.state);
+    s = (String *)Table_Get(node->atts, (Abstract *)String_Make(m, bytes("count")));
+    r |= Test((s->type.state & FLAG_STRING_IS_NUM) != 0, "String is idendified as FLAG_STRING_IS_NUM for '%s', have %d", s->bytes, s->type.state);
+    s = (String *)Table_Get(node->atts, (Abstract *)String_Make(m, bytes("max")));
+    r |= Test((s->type.state & FLAG_STRING_IS_NUM) != 0, "String is idendified as FLAG_STRING_IS_NUM for '%s', have %d", s->bytes, s->type.state);
+
+    s = node->firstChild->body;
+    r |= Test(s->type.state == ZERO, "String body is normal, no flags for '%s', have %d", s->bytes, s->type.state);
+
+    s = node->firstChild->next->firstChild->body;
+    r |= Test((s->type.state & FLAG_STRING_IS_CASH) != 0, "Sub-element body is idendified as FLAG_STRING_IS_CASH for '%s', have %d", s->bytes, s->type.state);
+
+    return r;
+}

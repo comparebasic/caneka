@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-#define TAG_ATTR_PAT PAT_MANY,':',':',PAT_MANY,'-','-',PAT_MANY,'_','_',PAT_MANY,'a','z',PAT_MANY|PAT_TERM,'A','Z',\
-    PAT_MANY,':',':',PAT_MANY,'-','-',PAT_MANY,'_','_',PAT_MANY,'a','z',PAT_MANY,'0','9',PAT_MANY|PAT_TERM,'A','Z'
+#define TAG_ATTR_PAT PAT_MANY,':',':',PAT_MANY,'-','-',PAT_MANY,'_','_',PAT_MANY,'a','z',PAT_MANY,'0','9',PAT_MANY|PAT_TERM,'A','Z'
 
 static word tagDef[] = {
     PAT_TERM|PAT_NO_CAPTURE, '<', '<',
@@ -19,12 +18,12 @@ static word closeTagDef[] = {
 };
 
 static word bodyDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, '<', '<', patText,
+    PAT_KO|PAT_NO_CAPTURE, '<', '<', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
     PAT_END, 0, 0
 };
 
 static word bodyCashDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, '<', '<', PAT_MANY, '$', '$', patText,
+    PAT_KO|PAT_NO_CAPTURE, '<', '<',  patText,
     PAT_END, 0, 0
 };
 
@@ -58,21 +57,27 @@ static word selfCloseDef[] = {
 static word attQuotedDef[] = {
     PAT_NO_CAPTURE|PAT_TERM, '=', '=',
     PAT_NO_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', patText,
+    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
     PAT_END, 0, 0
 };
 
 static word attQuotedNumDef[] = {
     PAT_NO_CAPTURE|PAT_TERM, '=', '=',
     PAT_NO_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', PAT_MANY, '0', '9',
+    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', PAT_MANY|PAT_TERM, '0', '9',
     PAT_END, 0, 0
 };
 
 static word attQuotedCashDef[] = {
     PAT_NO_CAPTURE|PAT_TERM, '=', '=',
     PAT_NO_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', PAT_MANY, '$', '$', patText,
+    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"',  patText,
+    PAT_END, 0, 0
+};
+
+static word attUnQuotedNumDef[] = {
+    PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_MANY|PAT_TERM, '0', '9',
     PAT_END, 0, 0
 };
 
@@ -89,13 +94,13 @@ static status start(Roebling *rbl){
         (PatCharDef*)tagDef, XML_CAPTURE_OPEN, XML_ATTROUTE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)closeTagDef, XML_CAPTURE_CLOSE_TAG, XML_START);
+
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)bodyWsDef, XML_CAPTURE_TAG_WHITESPACE_BODY, XML_START);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)bodyCashDef, XML_CAPTURE_BODY_CASH, XML_START);
-
-    r |= Roebling_SetPattern(rbl,
         (PatCharDef*)bodyDef, XML_CAPTURE_BODY, XML_START);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)bodyCashDef, XML_CAPTURE_BODY_CASH, XML_START);
     return r; 
 }
 
@@ -114,8 +119,17 @@ static status attRoute(Roebling *rbl){
 static status postAttName(Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
+    /* quoted */
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)attQuotedNumDef, XML_CAPTURE_ATTR_VALUE_NUM, XML_ATTROUTE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)attQuotedDef, XML_CAPTURE_ATTR_VALUE, XML_ATTROUTE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)attQuotedCashDef, XML_CAPTURE_ATTR_VALUE_CASH, XML_ATTROUTE);
+
+    /* unquoted */
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)attUnQuotedNumDef, XML_CAPTURE_ATTR_VALUE_NUM, XML_ATTROUTE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)attUnQuotedDef, XML_CAPTURE_ATTR_VALUE, XML_ATTROUTE);
     return r; 
@@ -149,12 +163,15 @@ static status xmlParser_Capture(word captureKey, int matchIdx, String *s, Abstra
             Debug_Print(s, 0, "WSBody: ", DEBUG_XML, TRUE);
             printf("\n");
         }
-        s->type.state |= WHITESPACE;
+        s->type.state |= FLAG_STRING_WHITESPACE;
         r = XmlCtx_BodyAppend(ctx, s);
-    }else if(captureKey == XML_CAPTURE_BODY){
+    }else if(captureKey == XML_CAPTURE_BODY || captureKey == XML_CAPTURE_BODY_CASH){
         if(DEBUG_XML){
             Debug_Print(s, 0, "Body: ", DEBUG_XML, TRUE);
             printf("\n");
+        }
+        if(captureKey == XML_CAPTURE_BODY_CASH){
+            s->type.state |= FLAG_STRING_IS_CASH;
         }
         r = XmlCtx_BodyAppend(ctx, s);
     }else if(captureKey == XML_CAPTURE_ATTRIBUTE){
@@ -163,9 +180,15 @@ static status xmlParser_Capture(word captureKey, int matchIdx, String *s, Abstra
             printf("\n");
         }
         r = XmlCtx_SetAttr(ctx, s);
-    }else if(captureKey == XML_CAPTURE_ATTR_VALUE){
+    }else if(captureKey > _XML_CAPTURE_VALUE_START && 
+            captureKey < _XML_CAPTURE_VALUE_END){
         if(DEBUG_XML){
             Debug_Print(s, 0, "AttValue: ", DEBUG_XML, TRUE);
+        }
+        if(captureKey == XML_CAPTURE_ATTR_VALUE_NUM){
+           s->type.state |= FLAG_STRING_IS_NUM; 
+        }else if(captureKey == XML_CAPTURE_ATTR_VALUE_CASH){
+           s->type.state |= FLAG_STRING_IS_CASH; 
         }
         r = XmlCtx_SetAttrValue(ctx, (Abstract *)s);
     }

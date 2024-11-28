@@ -37,3 +37,4 @@ status MemLocal_Tests(MemCtx *gm);
 status NestedDFlat_Tests(MemCtx *gm);
 status NestedDWith_Tests(MemCtx *gm);
 status NestedDFor_Tests(MemCtx *gm);
+status XmlStringType_Tests(MemCtx *gm);

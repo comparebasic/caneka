@@ -86,6 +86,10 @@ static status match_FeedPat(Match *mt, word c){
         }
         if(matched){
             if(HasFlag(def->flags, PAT_KO)){
+                if(HasFlag(def->flags, PAT_LEAVE)){
+                    goto miss;
+                    break;
+                }
                 if(!HasFlag(def->flags, PAT_NO_CAPTURE) || HasFlag(def->flags, PAT_CONSUME)){
                     mt->tail++;
                 }

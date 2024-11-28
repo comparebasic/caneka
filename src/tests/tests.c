@@ -132,6 +132,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "XMLStringType",
+        XmlStringType_Tests,
+        "Identify string types during parsing (NUM/CASH)",
+        FEATURE_COMPLETE,
+    },
+    {
         "Http",
         Http_Tests,
         "HTTP protocol parsing using the Roebling Parser",
