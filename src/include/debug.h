@@ -44,6 +44,7 @@ extern int DEBUG_SPAN;
 extern int DEBUG_SPAN_GET_SET;
 extern int DEBUG_XML;
 extern int DEBUG_XML_TEMPLATE;
+extern int DEBUG_XML_TEMPLATE_OUT;
 extern int DEBUG_HTTP;
 extern int DEBUG_SERVE;
 extern int DEBUG_SERVE_ACCEPT;
@@ -56,6 +57,7 @@ extern int DEBUG_QUEUE;
 extern int DEBUG_FILE;
 extern int DEBUG_OSET;
 extern int DEBUG_NESTED;
+extern int DEBUG_CASH;
 
 extern boolean SHOW_SERVE_TESTS;
 

@@ -6,8 +6,13 @@ static word betweenDef[] = {
     PAT_END, 0, 0
 };
 
+static word startDef[] = {
+    PAT_TERM, '$', '$',
+    PAT_END, 0, 0
+};
+
 static word valueDef[] = {
-    PAT_TERM, '{', '{', PAT_KO, '}', '}', patText,
+    PAT_TERM|PAT_NO_CAPTURE, '{', '{', PAT_KO, '}', '}', patText,
     PAT_END, 0, 0
 };
 
@@ -17,6 +22,8 @@ static status between(Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)betweenDef, CASH_BETWEEN, -1);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)startDef, CASH_NOOP, -1);
 
     return r;
 }
@@ -33,10 +40,22 @@ static status value(Roebling *rbl){
 
 static status Cash_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     Cash *cash = as(source, TYPE_CASH);
+    if(DEBUG_CASH){
+        printf("\x1b[%dmCash_Capture key:%d: ", DEBUG_CASH, captureKey);
+        Debug_Print((void *)s, 0, "", DEBUG_CASH, TRUE);
+        printf("\n");
+    }
     if(captureKey == CASH_BETWEEN){
         String_Add(cash->m, cash->s, s);
     }else if(captureKey == CASH_VALUE){
-        String *value = (String *)cash->get(cash->source, (Abstract *)s);
+        String *value = NULL;
+        Abstract *a = (Abstract *)cash->get(cash->source, (Abstract *)s);
+        if(a != NULL && !Ifc_Match(a->type.of, TYPE_STRING) && cash->presenters != NULL){
+            Presenter *func =  Lookup_Get(cash->presenters, a->type.of);
+            if(func != NULL){
+                value = func(cash->m, a);
+            }
+        }
         if(value != NULL){
             String_Add(cash->m, cash->s, value);
             cash->type.state |= SUCCESS;
@@ -52,7 +71,13 @@ static status Cash_Capture(word captureKey, int matchIdx, String *s, Abstract *s
 String *Cash_Replace(MemCtx *m, Cash *cash, String *s){
     cash->s = String_Init(m, STRING_EXTEND);
     Roebling_Reset(m, cash->rbl, s);
+
     Roebling_Run(cash->rbl);
+    if(DEBUG_CASH){
+        Debug_Print((void *)s, 0, "Cash: ", DEBUG_CASH, TRUE);
+        Debug_Print((void *)cash->s, 0, " -> ", DEBUG_CASH, TRUE);
+        printf("\n");
+    }
 
     return cash->s;
 }

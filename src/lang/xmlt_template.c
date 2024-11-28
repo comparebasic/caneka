@@ -2,18 +2,27 @@
 #include <caneka.h> 
 
 static void setFlags(Mess *e){
+    String *value = NULL;
     if(e->atts != NULL){
-        if(Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("if"))) != NULL){
+        if((value = (String *)Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("if")))) != NULL){
             e->type.state |= FLAG_XML_IF;
+            value->type.state |= FLAG_XML_HIDDEN;
         }
-        if(Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("if-not"))) != NULL){
+        if((value = (String *)Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("if-not")))) != NULL){
             e->type.state |= FLAG_XML_IF_NOT;
+            value->type.state |= FLAG_XML_HIDDEN;
         }
-        if(Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("include"))) != NULL){
+        if((value = (String *)Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("include")))) != NULL){
             e->type.state |= FLAG_XML_INCLUDE;
+            value->type.state |= FLAG_XML_HIDDEN;
         }
-        if(Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("for"))) != NULL){
+        if((value = (String *)Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("for")))) != NULL){
             e->type.state |= FLAG_XML_FOR;
+            value->type.state |= FLAG_XML_HIDDEN;
+        }
+        if((value = (String *)Table_Get(e->atts, (Abstract *)String_Make(e->atts->m, bytes("with")))) != NULL){
+            e->type.state |= FLAG_XML_WITH;
+            value->type.state |= FLAG_XML_HIDDEN;
         }
     }
     e->type.state |= TRACKED;
@@ -90,18 +99,21 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     }
 
     String *build = String_Init(m, STRING_EXTEND);
-    String_AddBytes(m, build, bytes("<"), 1);
-    String_Add(m, build, e->name);
-    XmlT_AddAttsStr(xmlt, e, build);
 
     boolean hasBody = e->body != NULL;
     boolean hasChildren = e->firstChild != NULL;
     boolean selfContained = !hasBody && !hasChildren;
 
-    if(selfContained){
-        String_AddBytes(m, build, bytes("/>"), 2); 
-    }else{
-        String_AddBytes(m, build, bytes(">"), 1); 
+    if(e->name != NULL){
+        String_AddBytes(m, build, bytes("<"), 1);
+        String_Add(m, build, e->name);
+        XmlT_AddAttsStr(xmlt, e, build);
+
+        if(selfContained){
+            String_AddBytes(m, build, bytes("/>"), 2); 
+        }else{
+            String_AddBytes(m, build, bytes(">"), 1); 
+        }
     }
 
     func(m, build, (Abstract *)xmlt);
@@ -114,19 +126,22 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
         func(m, body, (Abstract *)xmlt); 
     }
 
-    if(hasChildren){
-        Mess *child = e->firstChild;
-        while(child != NULL){
-            XmlT_Template(xmlt, child, nd, func);
-            child = child->next;
+    if(e->name != NULL){
+        if(hasChildren){
+            Mess *child = e->firstChild;
+            while(child != NULL){
+                XmlT_Template(xmlt, child, nd, func);
+                child = child->next;
+            }
         }
-    }
 
-    if(!selfContained){
-        String *closeTag = String_Init(m, STRING_EXTEND);
-        String_AddBytes(m, closeTag, bytes("</"), 2);
-        String_Add(m, closeTag, e->name);
-        func(m, closeTag, (Abstract *)xmlt); 
+        if(!selfContained){
+            String *closeTag = String_Init(m, STRING_EXTEND);
+            String_AddBytes(m, closeTag, bytes("</"), 2);
+            String_Add(m, closeTag, e->name);
+            String_AddBytes(m, closeTag, bytes(">"), 1);
+            func(m, closeTag, (Abstract *)xmlt); 
+        }
     }
 
     if(outdent){

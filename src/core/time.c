@@ -23,3 +23,11 @@ time64_t Time64_FromMillis(i64 millis){
 i64 Time64_ToMillis(time64_t tm){
     return tm / 1000000;
 }
+
+Single *Time64_Wrapped(MemCtx *m, time64_t n){
+    m = MemCtx_FromHandle((MemHandle *)m);
+    Single *sgl = (Single *)MemCtx_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_TIME64;
+    sgl->val.value = (util)n;
+    return sgl;
+}

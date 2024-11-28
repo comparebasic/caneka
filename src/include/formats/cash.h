@@ -1,6 +1,7 @@
 enum cash_captures {
     CASH_BETWEEN = 1,
     CASH_VALUE,
+    CASH_NOOP,
 };
 
 enum cash_marks {
@@ -13,6 +14,7 @@ typedef struct cash {
     String *s;
     Roebling *rbl;
     Getter get;
+    Lookup *presenters;
     Abstract *source;
 } Cash;
 

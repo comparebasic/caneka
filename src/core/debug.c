@@ -20,7 +20,8 @@ int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
 int DEBUG_SPAN_GET_SET = 0;
 int DEBUG_XML = 0;
-int DEBUG_XML_TEMPLATE = COLOR_YELLOW;
+int DEBUG_XML_TEMPLATE = 0;
+int DEBUG_XML_TEMPLATE_OUT = 0;
 int DEBUG_ROEBLING_NAME = 0;
 int DEBUG_HTTP = 0;
 int DEBUG_SERVE = 0;
@@ -34,6 +35,7 @@ int DEBUG_QUEUE = 0;
 int DEBUG_FILE = 0;
 int DEBUG_OSET = 0;
 int DEBUG_NESTED = 0;
+int DEBUG_CASH = 0;
 
 boolean SHOW_SERVE_TESTS = FALSE;
 
@@ -542,6 +544,12 @@ static void WrappedI64_Print(Abstract *a, cls type, char *msg, int color, boolea
     printf("\x1b[%dm%sWi64<\x1b[1;%dm%lu\x1b[0;%dm>\x1b[0m", color,  msg, color, sgl->val.value, color);
 }
 
+static void WrappedTime64_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Single *sgl = (Single *)as(a, TYPE_WRAPPED_TIME64);
+    String *s = Time64_Present(DebugM, a);
+    printf("\x1b[%dm%sT64<\x1b[1;%dm%s\x1b[0;%dm>\x1b[0m", color, msg, color, s->bytes, color);
+}
+
 static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean extended){
     if(t == NULL){
         printf("u0");
@@ -631,6 +639,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)WrappedI64_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);

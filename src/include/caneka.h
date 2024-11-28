@@ -99,6 +99,8 @@ enum types {
     TYPE_WRAPPED_DO,
     TYPE_WRAPPED_UTIL,
     TYPE_WRAPPED_I64,
+    TYPE_WRAPPED_TIME64,
+    TYPE_WRAPPED_BOOL,
     TYPE_WRAPPED_PTR,
     TYPE_UTIL,
     TYPE_UNIT,
@@ -261,6 +263,7 @@ cls Ifc_Get(cls inst);
 #include "req.h"
 #include "testsuite.h"
 #include "mark.h"
+#include "human_present.h"
 #include "apps.h"
 #ifdef LINUX
     #include "linux.h"

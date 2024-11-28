@@ -100,6 +100,12 @@ String *String_FromInt(MemCtx *m, int i){
     return String_From(m, buff+position+1); 
 }
 
+status String_AddI64(MemCtx *m, String *s, i64 n){
+    byte buff[MAX_BASE10+1];
+    int position = _String_FromI64(m, n, buff);
+    return String_AddBytes(m, s, buff+position+1, MAX_BASE10-position-1);
+}
+
 String *String_FromI64(MemCtx *m, i64 i){
     byte buff[MAX_BASE10+1];
     int position = _String_FromI64(m, i, buff);
