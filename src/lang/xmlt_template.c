@@ -19,19 +19,20 @@ static void setFlags(Mess *e){
     e->type.state |= TRACKED;
 }
 
-status XmlTCtx_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
+status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     MemCtx *m = xmlt->m;
     status r = ERROR;
 
-    if(DEBUG_XML_TEMPLATE){
-        Debug_Print((void *)e, 0, "Start of Elem: ", DEBUG_XML_TEMPLATE, FALSE);
-        printf("\x1b[%dmflags: %d\n", DEBUG_XML_TEMPLATE, e->type.state);
-    }
 
     Span *tbl = nd->current_tbl;
     boolean outdent = FALSE;
     if((e->type.state & TRACKED) == 0){
         setFlags(e); 
+    }
+
+    if(DEBUG_XML_TEMPLATE){
+        Debug_Print((void *)e, 0, "Start of Elem: ", DEBUG_XML_TEMPLATE, FALSE);
+        printf("\x1b[%dmflags: %d\n", DEBUG_XML_TEMPLATE, e->type.state);
     }
 
     if((e->type.state & FLAG_XML_IF) != 0 && (e->type.state & FLAG_XML_SATISFIED) == 0){
@@ -74,7 +75,7 @@ status XmlTCtx_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
         e->type.state |= FLAG_XML_IN_PROGRESS;
         e->type.state |= FLAG_XML_SATISFIED;
         while((NestedD_Next(nd) & END) == 0){
-            XmlTCtx_Template(xmlt, e, nd, func);
+            XmlT_Template(xmlt, e, nd, func);
         }
         e->type.state &= ~(FLAG_XML_IN_PROGRESS|FLAG_XML_SATISFIED);
         NestedD_Outdent(nd);
@@ -82,6 +83,7 @@ status XmlTCtx_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     }
 
     if(DEBUG_XML_TEMPLATE){
+        printf("\n");
         Debug_Print((void *)e, 0, "(Below) Elem: ", DEBUG_XML_TEMPLATE, TRUE);
         Debug_Print((void *)tbl, 0, " USING DATA: ", DEBUG_XML_TEMPLATE, TRUE);
         printf("\n");
@@ -115,7 +117,7 @@ status XmlTCtx_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     if(hasChildren){
         Mess *child = e->firstChild;
         while(child != NULL){
-            XmlTCtx_Template(xmlt, child, nd, func);
+            XmlT_Template(xmlt, child, nd, func);
             child = child->next;
         }
     }

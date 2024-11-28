@@ -227,19 +227,19 @@ static TestSet _Tests[] = {
         "NestedD With",
         NestedDWith_Tests,
         "NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), With scenario.",
-        PARTIAL_FEATURE,
+        FEATURE_COMPLETE,
     },
     {
         "NestedD For",
         NestedDFor_Tests,
         "NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), For scenario.",
-        PARTIAL_FEATURE,
+        FEATURE_COMPLETE,
     },
     {
         "XML Templating",
-        Blank_Tests,
+        XmlTTemplate_Tests,
         "XML templating for building web applications.",
-        PREVIOUSLY_WORKING,
+        PARTIAL_FEATURE,
     },
     {
         "Crypto",

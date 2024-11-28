@@ -38,3 +38,4 @@ status NestedDFlat_Tests(MemCtx *gm);
 status NestedDWith_Tests(MemCtx *gm);
 status NestedDFor_Tests(MemCtx *gm);
 status XmlStringType_Tests(MemCtx *gm);
+status XmlTTemplate_Tests(MemCtx *gm);

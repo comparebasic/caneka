@@ -23,7 +23,7 @@ static BuildSubdir coreobj = { "core", {
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 
     "mess.c", "single.c", "debug.c", "abstract.c", "time.c",
-    "queue.c",
+    "queue.c", "boolean.c",
     NULL
 }};
 
@@ -42,7 +42,7 @@ static BuildSubdir formatsobj = {"formats", {
 }};
 
 static BuildSubdir langobj = {"lang", {
-    "xml_elem.c", "xml_template.c", "nestedd.c", 
+    "xmlt.c", "xmlt_template.c", "nestedd.c", 
     NULL
 }};
 
@@ -51,7 +51,7 @@ static BuildSubdir testobj = { "tests", {
     "match_tests.c", "span_tests.c", "hash_tests.c", "roebling_tests.c",
     "xml_tests.c", "http_tests.c", "serve_tests.c", "queue_tests.c",
     "mock_109strings.c", "ioctx_tests.c", "oset_tests.c",
-    "memlocal_tests.c", "blank_test.c", "nestedd_tests.c",
+    "memlocal_tests.c", "blank_test.c", "nestedd_tests.c", "xmlt_template_tests.c",
     NULL
 }};
 

@@ -45,6 +45,7 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int 
 status Roebling_ResetPatterns(Roebling *rbl);
 status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s);
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
+status Roebling_Add(Roebling *rbl, String *s);
 int Roebling_GetMatchIdx(Roebling *rbl);
 Match *Roebling_GetMatch(Roebling *rbl);
 Match *Roebling_GetValueMatch(Roebling *rbl);

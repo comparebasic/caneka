@@ -221,8 +221,7 @@ status Roebling_ResetPatterns(Roebling *rbl){
     return READY;
 }
 
-status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
-    status r = String_AddBytes(rbl->m, rbl->range.search, bytes, length);
+status roebling_AddReset(Roebling *rbl){
     if((rbl->range.potential.type.state & END) != 0){
         rbl->range.potential.type.state &= ~END;
         SCursor_Incr(&(rbl->range.potential), 1);
@@ -235,7 +234,17 @@ status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
         SCursor_Incr(&(rbl->range.start), 1);
         rbl->range.start.type.state &= ~END;
     }
-    return r;
+    return SUCCESS;
+}
+
+status Roebling_Add(Roebling *rbl, String *s){
+    String_Add(rbl->m, rbl->range.search, s);
+    return roebling_AddReset(rbl);
+}
+
+status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
+    status r = String_AddBytes(rbl->m, rbl->range.search, bytes, length);
+    return roebling_AddReset(rbl);
 }
 
 status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){

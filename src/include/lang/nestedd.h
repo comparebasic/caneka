@@ -15,14 +15,13 @@ typedef struct nested_state {
 typedef struct nestedd {
     Type type;
     MemCtx *m;
-    Span *root;
-    NestedState *current;
     Span *stack;
     Span *current_tbl;
     Iter it;
 } NestedD;
 
 NestedD *NestedD_Make(MemCtx *m, Span *data_tbl);
+status NestedD_Init(MemCtx *m, NestedD *nd, Span *tbl);
 Abstract *NestedD_Get(NestedD *nd, Abstract *key);
 status NestedD_Next(NestedD *nd);
 status NestedD_Outdent(NestedD *nd);

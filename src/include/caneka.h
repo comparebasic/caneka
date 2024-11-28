@@ -89,9 +89,6 @@ typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source)
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-#define TRUE 1
-#define FALSE 0
-
 enum types {
     _TYPE_START,
     TYPE_UNKNOWN,
@@ -226,6 +223,7 @@ cls Ifc_Get(cls inst);
 #include "log.h"
 #include "mem.h"
 #include "single.h"
+#include "boolean.h"
 #include "maker.h"
 #include "compare.h"
 #include "mempair.h"

@@ -111,16 +111,23 @@ status NestedD_Next(NestedD *nd){
     return NOOP;
 }
 
+status NestedD_Init(MemCtx *m, NestedD *nd, Span *tbl){
+    nd->type.state = ZERO;
+    nd->stack = Span_Make(m, TYPE_NESTED_SPAN);
+    if(tbl != NULL){
+        nd->current_tbl = tbl;
+        nest(nd, tbl, NESTED_WITH);
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 NestedD *NestedD_Make(MemCtx *m, Span *tbl){
     NestedD *nd = MemCtx_Alloc(m, sizeof(NestedD));
     nd->type.of = TYPE_NESTEDD;
     nd->m = m;
-    nd->stack = Span_Make(m, TYPE_NESTED_SPAN);
 
-    if(tbl != NULL){
-        nd->current_tbl = tbl;
-        nest(nd, tbl, NESTED_WITH);
-    }
+    NestedD_Init(m, nd, tbl);
 
     return nd;
 }
