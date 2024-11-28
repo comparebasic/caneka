@@ -17,6 +17,9 @@ status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
                 }
                 if((value->type.state & FLAG_STRING_IS_CASH) != 0){
                     value = Cash_Replace(xmlt->m, xmlt->cash, value);
+                    if((xmlt->cash->type.state & MISS) != 0){
+                        continue;
+                    }
                 }
             }
             String_AddBytes(m, s, bytes(" "), 1);

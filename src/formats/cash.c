@@ -59,6 +59,7 @@ static status Cash_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         if(value != NULL){
             String_Add(cash->m, cash->s, value);
             cash->type.state |= SUCCESS;
+            cash->type.state &= ~MISS;
         }else{
             cash->type.state &= ~SUCCESS;
             cash->type.state |= MISS;
