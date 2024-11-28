@@ -41,19 +41,18 @@ status XmlTCtx_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
             return NOOP;
         }
     }
-    /*
 
-    if(HasFlag(e, FLAG_XML_IF_NOT) && !HasFlag(e, FLAG_XML_IF_SATISFIED)){
-        Abstract *ifNot_t = Table_Get(m, e->props_tbl, (Abstract *)String_Static("if-not"));
-        Abstract *ifValue_t = Table_Get(m, tbl, ifNot_t);
-        if(ifValue_t != NULL && Abstract_Truthy(ifValue_t) == SUCCESS){
+    if((e->type.state & FLAG_XML_IF_NOT) != 0 && (e->type.state & FLAG_XML_SATISFIED) == 0){
+        Abstract *ifNot_t = Table_Get(e->atts, (Abstract *)String_Make(m, bytes("if-not")));
+        Abstract *ifValue_t = Table_Get(tbl, ifNot_t);
+        if(ifValue_t != NULL && Caneka_Truthy(ifValue_t)){
             return NOOP;
         }
     }
 
-    if(HasFlag(e, FLAG_XML_WITH)){
-        outdent = true;
-        Abstract *with_s = Table_Get(m, e->props_tbl, (Abstract *)String_Static("with"));
+    if((e->type.state & FLAG_XML_WITH) != 0){
+        outdent = TRUE;
+        Abstract *with_s = Table_Get(e->atts, (Abstract *)String_Make(m, bytes("with")));
         if(with_s != NULL){
             r = NestedD_With(m, nd, with_s);
             if(r != SUCCESS){
@@ -61,76 +60,76 @@ status XmlTCtx_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
             }
             tbl = nd->current_tbl;
         }
-    }else if(!HasFlag(e, FLAG_XML_FOR_IN_PROGRESS) && HasFlag(e, FLAG_XML_FOR)){
-        outdent = true;
-        Abstract *for_s = Table_Get(m, e->props_tbl, (Abstract *)String_Static("for"));
-        r = NestedD_For(m, nd, for_s);
+    }else if((e->type.state & FLAG_XML_IN_PROGRESS) != 0 && 
+            (e->type.state & FLAG_XML_FOR) != 0){
+        outdent = TRUE;
+        Abstract *for_s = Table_Get(e->atts, (Abstract *)String_Make(m, bytes("for")));
+        r = NestedD_For(nd, for_s);
         if(r != SUCCESS){
             printf("For nest did not succeed\n");
             return NOOP;
         }
 
         tbl = nd->current_tbl;
-        SetFlag(e, FLAG_XML_FOR_IN_PROGRESS);
-        SetFlag(e, FLAG_XML_IF_SATISFIED);
-        while(NestedD_Next(m, nd) == SUCCESS){
-            XmlElem_Template(m, e, nd, func, dest);
+        e->type.state |= FLAG_XML_IN_PROGRESS;
+        e->type.state |= FLAG_XML_SATISFIED;
+        while((NestedD_Next(nd) & END) == 0){
+            XmlTCtx_Template(xmlt, e, nd, func);
         }
-        UnsetFlag(e, FLAG_XML_FOR_IN_PROGRESS);
-        UnsetFlag(e, FLAG_XML_IF_SATISFIED);
-        NestedD_Outdent(m, nd);
+        e->type.state &= ~(FLAG_XML_IN_PROGRESS|FLAG_XML_SATISFIED);
+        NestedD_Outdent(nd);
         return SUCCESS;
     }
 
     if(DEBUG_XML_TEMPLATE){
-        String_PrintColor(String_FormatN(m, 7, "(Below) Elem: ", "%S", Abstract_ToString(m, (Abstract *)e), " USING DATA: ", "%S", Abstract_ToString(m, (Abstract *)tbl), "\n"), ansi_yellow);
-
+        Debug_Print((void *)e, 0, "(Below) Elem: ", DEBUG_XML_TEMPLATE, TRUE);
+        Debug_Print((void *)tbl, 0, " USING DATA: ", DEBUG_XML_TEMPLATE, TRUE);
+        printf("\n");
     }
 
-    String *build =  String_FormatN(m, 3, "<", "%S", String_Clone(m, e->tag_s)); 
+    String *build = String_Init(m, STRING_EXTEND);
+    String_AddBytes(m, build, bytes("<"), 1);
+    String_Add(m, build, e->name);
+    XmlT_AddAttsStr(xmlt, e, build);
 
-    String *atts_s = XmlElem_MakeAttsStr(m, e, tbl);
-    if(Abstract_Truthy((Abstract *)atts_s) == SUCCESS){
-        String_Extend(build, Nstr(m, " "));
-        String_Extend(build, atts_s); 
-    }
-
-    boolean hasBody = Abstract_Truthy((Abstract *)e->body_s) == SUCCESS;
-    boolean hasChildren = Abstract_Truthy((Abstract *)e->children_sp) == SUCCESS;
+    boolean hasBody = e->body != NULL;
+    boolean hasChildren = e->firstChild != NULL;
     boolean selfContained = !hasBody && !hasChildren;
 
     if(selfContained){
-        String_Extend(build, Nstr(m, "/>")); 
+        String_AddBytes(m, build, bytes("/>"), 2); 
     }else{
-        String_Extend(build, Nstr(m, ">")); 
+        String_AddBytes(m, build, bytes(">"), 1); 
     }
 
-    SetFlag(build, STRING_REALIGN);
-    func(m, dest, String_Clone(m, build));
+    func(m, build, (Abstract *)xmlt);
 
     if(hasBody){
-        SetFlag(e->body_s, STRING_REPLAY);
-        String *body_s = Cash_Replace(m, e->body_s, tbl);
-        func(m, dest, body_s); 
+        String *body = e->body;
+        if((body->type.state & FLAG_STRING_IS_CASH) != 0){
+            body = Cash_Replace(xmlt->m, xmlt->cash, body);
+        }
+        func(m, body, (Abstract *)xmlt); 
     }
 
     if(hasChildren){
-        Iter *it = Iter_Make(m, (Abstract *)e->children_sp);
-        XmlElem *e2 = NULL;
-        while(!IsDone(it)){
-            e2 = (XmlElem *)Iter_Next(it);
-            XmlElem_Template(m, e2, nd, func, dest);
+        Mess *child = e->firstChild;
+        while(child != NULL){
+            XmlTCtx_Template(xmlt, child, nd, func);
+            child = child->next;
         }
     }
 
     if(!selfContained){
-        func(m, dest, String_FormatN(m, 4, "</", "%S", String_Clone(m, e->tag_s), ">")); 
+        String *closeTag = String_Init(m, STRING_EXTEND);
+        String_AddBytes(m, closeTag, bytes("</"), 2);
+        String_Add(m, closeTag, e->name);
+        func(m, closeTag, (Abstract *)xmlt); 
     }
 
     if(outdent){
-        NestedD_Outdent(m, nd);
+        NestedD_Outdent(nd);
     }
-    */
 
     return SUCCESS;
 }
