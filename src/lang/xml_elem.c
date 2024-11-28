@@ -10,7 +10,9 @@ status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
         String_Add(m, s, (String *)h->item); 
         if(h->value != NULL){
             String *value = asIfc(h->value, TYPE_STRING);
-            value = Cash_Replace(xmlt->m, xmlt->cash, (String *)value);
+            if((value->type.state & FLAG_STRING_IS_CASH) != 0){
+                value = Cash_Replace(xmlt->m, xmlt->cash, (String *)value);
+            }
             String_AddBytes(m, s, bytes("="), 1);
             String_Add(m, s, (String *)value);
         }
@@ -49,7 +51,11 @@ status XmlT_Out(XmlTCtx *xmlt, Mess *e, OutFunc func){
     func(m, s, source);
 
     if(hasBody){
-        func(m, e->body, source); 
+        String *body = e->body;
+        if((body->type.state & FLAG_STRING_IS_CASH) != 0){
+            body = Cash_Replace(xmlt->m, xmlt->cash, body);
+        }
+        func(m, body, source); 
     }
 
     if(e->firstChild){
