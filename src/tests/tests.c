@@ -2,9 +2,7 @@
 #include <caneka.h>
 #include <tests.h>
 
-/*
 #define CYCLE_SERVE 1
-*/
 
 status Tests_Init(MemCtx *m){
    status r = READY;
@@ -221,7 +219,7 @@ static TestSet _Tests[] = {
         "NestedD Flat",
         NestedDFlat_Tests,
         "NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), Flat scenario.",
-        PARTIAL_FEATURE,
+        FEATURE_COMPLETE,
     },
     {
         "NestedD With",
@@ -239,7 +237,7 @@ static TestSet _Tests[] = {
         "XML Templating",
         XmlTTemplate_Tests,
         "XML templating for building web applications.",
-        PARTIAL_FEATURE,
+        FEATURE_COMPLETE,
     },
     {
         "Crypto",
@@ -257,7 +255,7 @@ static TestSet _Tests[] = {
         "Smtp",
         Blank_Tests,
         "SMTP (email) format parsing with the Roebling parser.",
-        NOT_STARTED,
+        PREVIOUSLY_WORKING,
     },
     {
         "SmtpSend",

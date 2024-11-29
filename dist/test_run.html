@@ -1,6 +1,6 @@
-<div class="test-run"><h2>Caneka Tests run 1732619872 (Tue Nov 26 05:17:52 CST 2024)</h2>
+<div class="test-run"><h2>Caneka Tests run 1732878717 (Fri Nov 29 05:11:57 CST 2024)</h2>
 <p>
-commit 9d6e25fb164bb3022fa841b5a35b1972d96f974d
+commit 72bd6a715f75e6f35d01580a1ecc05bf2589a4d8
 </p>
 <div class="suite">
     <span class="label">Suite Caneka</span>
@@ -280,10 +280,8 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
         <li class="test result result-pass">Attribute Value to be 'root', have 'root'</li>
         <li class="test result result-pass">Jump set to XML_START</li>
         <li class="test result result-pass">Whitespace before tag added as body, have '\n  '</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'model'</li>
         <li class="test result result-pass">Expected att value: 'fancy-pants', have 'foo'</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'baseline'</li>
-        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'fancy-pants'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have ''</li>
         <li class="test result result-pass">Expected body value: 'Gotta Get It!', have 'Gotta Get It!'</li>
         <li class="test result result-pass">NodeName is 'alpha', have 'alpha'</li>
         <li class="test result result-pass">Second NodeName is 'alpha', have 'alpha'</li>
@@ -297,6 +295,19 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
     <ol class="tests">
         <li class="test result result-pass">XML has state success</li>
         <li class="test result result-pass">XML node has expected body, have 'The World is Upside Down!'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLStringType</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Identify string types during parsing (NUM/CASH)</p>
+    <ol class="tests">
+        <li class="test result result-pass">String root is normal, no flags for 'root', have 0</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_CASH for '${fancy}', have 2048</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '19', have 512</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '3', have 512</li>
+        <li class="test result result-pass">String body is normal, no flags for 'Not a cash', have 0</li>
+        <li class="test result result-pass">Sub-element body is idendified as FLAG_STRING_IS_CASH for '${body}', have 2048</li>
     </ol>
 </div>
 <div class="set">
@@ -735,10 +746,8 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
         <li class="test result result-pass">Attribute Value to be 'root', have 'root'</li>
         <li class="test result result-pass">Jump set to XML_START</li>
         <li class="test result result-pass">Whitespace before tag added as body, have '\n  '</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'model'</li>
         <li class="test result result-pass">Expected att value: 'fancy-pants', have 'foo'</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'baseline'</li>
-        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'fancy-pants'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have ''</li>
         <li class="test result result-pass">Expected body value: 'Gotta Get It!', have 'Gotta Get It!'</li>
         <li class="test result result-pass">NodeName is 'alpha', have 'alpha'</li>
         <li class="test result result-pass">Second NodeName is 'alpha', have 'alpha'</li>
@@ -752,6 +761,19 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
     <ol class="tests">
         <li class="test result result-pass">XML has state success</li>
         <li class="test result result-pass">XML node has expected body, have 'The World is Upside Down!'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLStringType</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Identify string types during parsing (NUM/CASH)</p>
+    <ol class="tests">
+        <li class="test result result-pass">String root is normal, no flags for 'root', have 0</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_CASH for '${fancy}', have 2048</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '19', have 512</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '3', have 512</li>
+        <li class="test result result-pass">String body is normal, no flags for 'Not a cash', have 0</li>
+        <li class="test result result-pass">Sub-element body is idendified as FLAG_STRING_IS_CASH for '${body}', have 2048</li>
     </ol>
 </div>
 <div class="set">
@@ -1197,10 +1219,8 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
         <li class="test result result-pass">Attribute Value to be 'root', have 'root'</li>
         <li class="test result result-pass">Jump set to XML_START</li>
         <li class="test result result-pass">Whitespace before tag added as body, have '\n  '</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'model'</li>
         <li class="test result result-pass">Expected att value: 'fancy-pants', have 'foo'</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'baseline'</li>
-        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'fancy-pants'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have ''</li>
         <li class="test result result-pass">Expected body value: 'Gotta Get It!', have 'Gotta Get It!'</li>
         <li class="test result result-pass">NodeName is 'alpha', have 'alpha'</li>
         <li class="test result result-pass">Second NodeName is 'alpha', have 'alpha'</li>
@@ -1214,6 +1234,19 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
     <ol class="tests">
         <li class="test result result-pass">XML has state success</li>
         <li class="test result result-pass">XML node has expected body, have 'The World is Upside Down!'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLStringType</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Identify string types during parsing (NUM/CASH)</p>
+    <ol class="tests">
+        <li class="test result result-pass">String root is normal, no flags for 'root', have 0</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_CASH for '${fancy}', have 2048</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '19', have 512</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '3', have 512</li>
+        <li class="test result result-pass">String body is normal, no flags for 'Not a cash', have 0</li>
+        <li class="test result result-pass">Sub-element body is idendified as FLAG_STRING_IS_CASH for '${body}', have 2048</li>
     </ol>
 </div>
 <div class="set">
@@ -1385,7 +1418,7 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
         <li class="test result result-pass">Req has the first handler set</li>
         <li class="test result result-pass">Req has the second handler set</li>
         <li class="test result result-pass">Req Roebling has status of SUCCESS, have SUCCESS,</li>
-        <li class="test result result-pass">Proc 2394 existed with status 0</li>
+        <li class="test result result-pass">Proc 2302 existed with status 0</li>
     </ol>
 </div>
 <div class="set">
@@ -1671,10 +1704,8 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
         <li class="test result result-pass">Attribute Value to be 'root', have 'root'</li>
         <li class="test result result-pass">Jump set to XML_START</li>
         <li class="test result result-pass">Whitespace before tag added as body, have '\n  '</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'model'</li>
         <li class="test result result-pass">Expected att value: 'fancy-pants', have 'foo'</li>
-        <li class="test result result-pass">Expected att item: 'model', have 'baseline'</li>
-        <li class="test result result-pass">Expected att value: 'fancy-pants', have 'fancy-pants'</li>
+        <li class="test result result-pass">Expected att value: 'fancy-pants', have ''</li>
         <li class="test result result-pass">Expected body value: 'Gotta Get It!', have 'Gotta Get It!'</li>
         <li class="test result result-pass">NodeName is 'alpha', have 'alpha'</li>
         <li class="test result result-pass">Second NodeName is 'alpha', have 'alpha'</li>
@@ -1688,6 +1719,19 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
     <ol class="tests">
         <li class="test result result-pass">XML has state success</li>
         <li class="test result result-pass">XML node has expected body, have 'The World is Upside Down!'</li>
+    </ol>
+</div>
+<div class="set">
+    <span class="set-label">XMLStringType</span>
+    <span class="status" data-status="4096">feature complete</span>
+    <p>Identify string types during parsing (NUM/CASH)</p>
+    <ol class="tests">
+        <li class="test result result-pass">String root is normal, no flags for 'root', have 0</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_CASH for '${fancy}', have 2048</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '19', have 512</li>
+        <li class="test result result-pass">String is idendified as FLAG_STRING_IS_NUM for '3', have 512</li>
+        <li class="test result result-pass">String body is normal, no flags for 'Not a cash', have 0</li>
+        <li class="test result result-pass">Sub-element body is idendified as FLAG_STRING_IS_CASH for '${body}', have 2048</li>
     </ol>
 </div>
 <div class="set">
@@ -1859,7 +1903,7 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
         <li class="test result result-pass">Req has the first handler set</li>
         <li class="test result result-pass">Req has the second handler set</li>
         <li class="test result result-pass">Req Roebling has status of SUCCESS, have SUCCESS,</li>
-        <li class="test result result-pass">Proc 2394 existed with status 0</li>
+        <li class="test result result-pass">Proc 2302 existed with status 0</li>
     </ol>
 </div>
 <div class="set">
@@ -1963,7 +2007,7 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
 </div>
 <div class="set">
     <span class="set-label">NestedD Flat</span>
-    <span class="status" data-status="2048">partial feature</span>
+    <span class="status" data-status="4096">feature complete</span>
     <p>NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), Flat scenario.</p>
     <ol class="tests">
         <li class="test result result-pass">Test if nested value is expected, have 1</li>
@@ -1972,7 +2016,7 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
 </div>
 <div class="set">
     <span class="set-label">NestedD With</span>
-    <span class="status" data-status="2048">partial feature</span>
+    <span class="status" data-status="4096">feature complete</span>
     <p>NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), With scenario.</p>
     <ol class="tests">
         <li class="test result result-pass">Name on main level is as expected, found 'SuppaSuppa'</li>
@@ -1983,7 +2027,7 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
 </div>
 <div class="set">
     <span class="set-label">NestedD For</span>
-    <span class="status" data-status="2048">partial feature</span>
+    <span class="status" data-status="4096">feature complete</span>
     <p>NestedD is a stack based data store for lexical reslution of dataused for template langages templating (such as HTML), For scenario.</p>
     <ol class="tests">
         <li class="test result result-pass">Name on main level is as expected, found SuppaSuppa</li>
@@ -2004,9 +2048,10 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
 </div>
 <div class="set">
     <span class="set-label">XML Templating</span>
-    <span class="status" data-status="1024">previously working</span>
+    <span class="status" data-status="4096">feature complete</span>
     <p>XML templating for building web applications.</p>
     <ol class="tests">
+        <li class="test result result-pass">XmlT created expected output from: <root><h1>Session expires: 2024-03-05T13:33:36.277122774+00</h1><e color="blue"><p>Blue Sky</p><span>Look Up</span></e><e color="green"><p>Grass</p><span>Walk barefoot</span></e><e color="yellow"><p>Sun</p></e><e color="red"><p>Blooooooooooood</p></e></root></li>
     </ol>
 </div>
 <div class="set">
@@ -2025,7 +2070,7 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
 </div>
 <div class="set">
     <span class="set-label">Smtp</span>
-    <span class="status" data-status="512">not started</span>
+    <span class="status" data-status="1024">previously working</span>
     <p>SMTP (email) format parsing with the Roebling parser.</p>
     <ol class="tests">
     </ol>
@@ -2038,6 +2083,6 @@ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/w
     </ol>
 </div>
 
-    <span class="result">Suite Caneka pass:38 fail:0</span>
+    <span class="result">Suite Caneka pass:39 fail:0</span>
 </div>
 </div>
