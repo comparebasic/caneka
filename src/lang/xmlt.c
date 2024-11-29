@@ -25,8 +25,9 @@ status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
             String_AddBytes(m, s, bytes(" "), 1);
             String_Add(m, s, (String *)h->item); 
             if(value != NULL){
-                String_AddBytes(m, s, bytes("="), 1);
+                String_AddBytes(m, s, bytes("=\""), 2);
                 String_Add(m, s, value);
+                String_AddBytes(m, s, bytes("\""), 1);
             }
         }
     }

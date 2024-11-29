@@ -50,10 +50,18 @@ static status Cash_Capture(word captureKey, int matchIdx, String *s, Abstract *s
     }else if(captureKey == CASH_VALUE){
         String *value = NULL;
         Abstract *a = (Abstract *)cash->get(cash->source, (Abstract *)s);
-        if(a != NULL && !Ifc_Match(a->type.of, TYPE_STRING) && cash->presenters != NULL){
-            Presenter *func =  Lookup_Get(cash->presenters, a->type.of);
-            if(func != NULL){
-                value = func(cash->m, a);
+        if(DEBUG_CASH){
+            Debug_Print((void *)a, 0, "Cash found: ", DEBUG_CASH, TRUE);
+            printf("\n");
+        }
+        if(a != NULL){
+            if(Ifc_Match(a->type.of, TYPE_STRING)){
+                value = (String *)a;
+            }else if(cash->presenters != NULL){
+                Presenter *func =  Lookup_Get(cash->presenters, a->type.of);
+                if(func != NULL){
+                    value = func(cash->m, a);
+                }
             }
         }
         if(value != NULL){

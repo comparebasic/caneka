@@ -54,7 +54,7 @@ status XmlTTemplate_Tests(MemCtx *gm){
     tbl = Span_Make(m, TYPE_TABLE);
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("item-color")), (Abstract *)String_Make(m, bytes("yellow")));
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("msg")), (Abstract *)String_Make(m, bytes("Sun")));
-    Table_Set(tbl, (Abstract *)String_Make(m, bytes("no-details")), (Abstract *)Bool_Wrapped(m, FALSE));
+    Table_Set(tbl, (Abstract *)String_Make(m, bytes("no-details")), (Abstract *)Bool_Wrapped(m, TRUE));
     Span_Add(items, (Abstract *)tbl);
 
     tbl = Span_Make(m, TYPE_TABLE);
@@ -70,18 +70,15 @@ status XmlTTemplate_Tests(MemCtx *gm){
 
     xml_s = String_Make(m, bytes("<root><h1 with=\"session\">Session expires: ${expires}</h1><e for=\"items\" if=\"show-items\" color=\"${item-color}\"><p>${msg}</p><span if-not=\"no-details\" if=\"details\">${details}</span></e></root>"));
 
+
     XmlT_Parse(xmlt, xml_s, tbl);
 
     s = ctx->root->firstChild->name;
 
-    expected_s = String_Make(m, bytes("<root><h1>Session expires: 2024-03-05T07:33:36.277122774+00</h1><e color=\"green\"><p>Grass</p><span>Walk barefoot</span></e><e color=\"yellow\"><p>Sun</p></e><e color=\"red\"><p>Blooooooooooood</p></e></root>"));
+    char *xml_cstr = "<root><h1>Session expires: 2024-03-05T13:33:36.277122774+00</h1><e color=\"blue\"><p>Blue Sky</p><span>Look Up</span></e><e color=\"green\"><p>Grass</p><span>Walk barefoot</span></e><e color=\"yellow\"><p>Sun</p></e><e color=\"red\"><p>Blooooooooooood</p></e></root>";
+    expected_s = String_Make(m, bytes(xml_cstr));
 
-    r |= Test(String_Equals(xmlt->result, expected_s), "XmlT created expected output");
-    
-    Debug_Print((void *)xmlt->result, 0, "XmlT Result: ", COLOR_CYAN, TRUE);
-    printf("\n");
-    Debug_Print((void *)expected_s, 0, "Expected: ", COLOR_BLUE, TRUE);
-    printf("\n");
+    r |= Test(String_Equals(xmlt->result, expected_s), "XmlT created expected output from: %s", xml_cstr);
 
     MemCtx_Free(m);
     return r;

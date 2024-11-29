@@ -28,6 +28,21 @@ static void setFlags(Mess *e){
     e->type.state |= TRACKED;
 }
 
+static boolean earlyOutAtts(Mess *e, String *key, NestedD *nd){
+    Abstract *if_t = Table_Get(e->atts, (Abstract *)key);
+    Abstract *ifValue_t = NestedD_Get(nd, if_t);
+    if(DEBUG_XML_TEMPLATE){
+        Debug_Print((void *)key, 0, "Falsey?-", DEBUG_XML_TEMPLATE, FALSE);
+        Debug_Print((void *)if_t, 0, ": ", DEBUG_XML_TEMPLATE, FALSE);
+        Debug_Print((void *)ifValue_t, 0, " -> ", DEBUG_XML_TEMPLATE, FALSE);
+        printf("\n");
+    }
+    if(ifValue_t == NULL || !Caneka_Truthy(ifValue_t)){
+        return TRUE;
+    }
+    return FALSE;
+}
+
 status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     MemCtx *m = xmlt->m;
     status r = ERROR;
@@ -40,22 +55,21 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     }
 
     if(DEBUG_XML_TEMPLATE){
-        Debug_Print((void *)e, 0, "Start of Elem: ", DEBUG_XML_TEMPLATE, FALSE);
+        Debug_Print((void *)e->name, 0, "Start of Elem: ", DEBUG_XML_TEMPLATE, FALSE);
+        Debug_Print((void *)e->atts, 0, ": ", DEBUG_XML_TEMPLATE, TRUE);
+        printf("\n");
+        Debug_Print((void *)nd->current_tbl, 0, "tbl: ", DEBUG_XML_TEMPLATE, TRUE);
         printf("\x1b[%dmflags: %d\n", DEBUG_XML_TEMPLATE, e->type.state);
     }
 
-    if((e->type.state & FLAG_XML_IF) != 0 && (e->type.state & FLAG_XML_SATISFIED) == 0){
-        Abstract *if_t = Table_Get(e->atts, (Abstract *)String_Make(m, bytes("if")));
-        Abstract *ifValue_t = NestedD_Get(nd, if_t);
-        if(ifValue_t == NULL || !Caneka_Truthy(ifValue_t)){
+    if((e->type.state & FLAG_XML_IF) != 0 && (e->type.state & FLAG_XML_IN_PROGRESS) == 0){
+        if(earlyOutAtts(e, String_Make(m, bytes("if")), nd)){
             return NOOP;
         }
     }
 
-    if((e->type.state & FLAG_XML_IF_NOT) != 0 && (e->type.state & FLAG_XML_SATISFIED) == 0){
-        Abstract *ifNot_t = Table_Get(e->atts, (Abstract *)String_Make(m, bytes("if-not")));
-        Abstract *ifValue_t = Table_Get(tbl, ifNot_t);
-        if(ifValue_t != NULL && Caneka_Truthy(ifValue_t)){
+    if((e->type.state & FLAG_XML_IF_NOT) != 0 && (e->type.state & FLAG_XML_IN_PROGRESS) == 0){
+        if(!earlyOutAtts(e, String_Make(m, bytes("if-not")), nd)){
             return NOOP;
         }
     }
@@ -63,6 +77,10 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     if((e->type.state & FLAG_XML_WITH) != 0){
         outdent = TRUE;
         Abstract *with_s = Table_Get(e->atts, (Abstract *)String_Make(m, bytes("with")));
+        if(DEBUG_XML_TEMPLATE_NESTING){
+            Debug_Print((void *)with_s, 0, "With: ", DEBUG_XML_TEMPLATE_NESTING, TRUE);
+            printf("\n");
+        }
         if(with_s != NULL){
             r = NestedD_With(m, nd, with_s);
             if(r != SUCCESS){
@@ -70,10 +88,26 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
             }
             tbl = nd->current_tbl;
         }
-    }else if((e->type.state & FLAG_XML_IN_PROGRESS) != 0 && 
-            (e->type.state & FLAG_XML_FOR) != 0){
+    }else if((e->type.state & FLAG_XML_FOR) != 0 && (e->type.state & FLAG_XML_IN_PROGRESS) == 0){
+
+        if((e->type.state & FLAG_XML_IF)){
+            if(earlyOutAtts(e, String_Make(m, bytes("if")), nd)){
+                return NOOP;
+            }
+        }
+
+        if((e->type.state & FLAG_XML_IF_NOT)){
+            if(earlyOutAtts(e, String_Make(m, bytes("if-not")), nd)){
+                return NOOP;
+            }
+        }
+
         outdent = TRUE;
         Abstract *for_s = Table_Get(e->atts, (Abstract *)String_Make(m, bytes("for")));
+        if(DEBUG_XML_TEMPLATE_NESTING){
+            Debug_Print((void *)for_s, 0, "For: ", DEBUG_XML_TEMPLATE_NESTING, TRUE);
+            printf("\n");
+        }
         r = NestedD_For(nd, for_s);
         if(r != SUCCESS){
             printf("For nest did not succeed\n");
@@ -82,16 +116,15 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
 
         tbl = nd->current_tbl;
         e->type.state |= FLAG_XML_IN_PROGRESS;
-        e->type.state |= FLAG_XML_SATISFIED;
         while((NestedD_Next(nd) & END) == 0){
             XmlT_Template(xmlt, e, nd, func);
         }
-        e->type.state &= ~(FLAG_XML_IN_PROGRESS|FLAG_XML_SATISFIED);
+        e->type.state &= ~(FLAG_XML_IN_PROGRESS);
         NestedD_Outdent(nd);
         return SUCCESS;
     }
 
-    if(DEBUG_XML_TEMPLATE){
+    if(0 && DEBUG_XML_TEMPLATE){
         printf("\n");
         Debug_Print((void *)e, 0, "(Below) Elem: ", DEBUG_XML_TEMPLATE, TRUE);
         Debug_Print((void *)tbl, 0, " USING DATA: ", DEBUG_XML_TEMPLATE, TRUE);
@@ -103,6 +136,10 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     boolean hasBody = e->body != NULL;
     boolean hasChildren = e->firstChild != NULL;
     boolean selfContained = !hasBody && !hasChildren;
+
+    if(DEBUG_XML_TEMPLATE){
+        printf("\x1b[%dmHasBody:%d,HasChildren:%d,selfContained:%d\x1b[0m\n", DEBUG_XML_TEMPLATE, hasBody, hasChildren, selfContained);
+    }
 
     if(e->name != NULL){
         String_AddBytes(m, build, bytes("<"), 1);
@@ -145,6 +182,9 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     }
 
     if(outdent){
+        if(DEBUG_XML_TEMPLATE){
+            printf("\x1b[%dmOutdent\x1b[0m\n", DEBUG_XML_TEMPLATE);
+        }
         NestedD_Outdent(nd);
     }
 

@@ -45,6 +45,7 @@ extern int DEBUG_SPAN_GET_SET;
 extern int DEBUG_XML;
 extern int DEBUG_XML_TEMPLATE;
 extern int DEBUG_XML_TEMPLATE_OUT;
+extern int DEBUG_XML_TEMPLATE_NESTING;
 extern int DEBUG_HTTP;
 extern int DEBUG_SERVE;
 extern int DEBUG_SERVE_ACCEPT;
