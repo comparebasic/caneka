@@ -255,7 +255,6 @@ static int BuildSource(char *binary, char *fname, char *subdir){
     if(NeedsBuild(&source_cstr, &build_cstr)){
         REBUILD_BINARY = TRUE;
         Arr_Init(&arr, CC);
-        Arr_AddArr(&arr, cflags);
         Arr_AddArr(&arr, CFLAGS);
         Arr_AddArr(&arr, INC);
         Arr_Add(&arr, "-c");
@@ -296,7 +295,6 @@ static int BuildBinary(char *binaryName, char *sourceName){
     }
 
     Arr_Init(&arr, CC);
-    Arr_AddArr(&arr, cflags);
     Arr_AddArr(&arr, CFLAGS);
     Arr_AddArr(&arr, INC);
     Arr_Add(&arr, "-o");
