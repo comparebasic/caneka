@@ -32,3 +32,41 @@ String *Bool_Present(MemCtx *m, Abstract *s){
     Single *sg = (Single *)as(s, TYPE_WRAPPED_BOOL);
     return NULL;
 }
+
+String *String_Present(MemCtx *m, Abstract *a){
+    String *s = (String *)asIfc(a, TYPE_STRING);
+    String *ret = Buff(m);
+    boolean in = FALSE;
+    if((s->type.state & FLAG_STRING_TEXT) == 0){
+        while(s != NULL){
+            for(int i = 0; i < s->length; i++){
+                byte *b = s->bytes+i;
+                if(IS_VISIBLE(*b)){
+                    if(in){
+                        String_AddBytes(m, ret, bytes("}"), 1);
+                        in = FALSE;
+                    }
+                    String_AddBytes(m, ret, b, 1);
+                }else{
+                    if(!in){
+                        String_AddBytes(m, ret, bytes("\\{"), 2);
+                        in = TRUE;
+                    }else{
+                        String_AddBytes(m, ret, bytes(","), 1);
+                    }
+                    int n = *b;
+                    String_AddInt(m, ret, n);
+                }
+            }
+
+            s = String_Next(s);
+        }
+        if(in){
+            String_AddBytes(m, ret, bytes("}"), 1);
+            in = FALSE;
+        }
+    }else{
+        ret = s;
+    }
+    return ret;
+}

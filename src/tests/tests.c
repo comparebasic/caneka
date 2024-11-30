@@ -240,6 +240,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "TextFilter",
+        TextFilter_Tests,
+        "Filter any non-visible character below 32 (dec)",
+        FEATURE_COMPLETE,
+    },
+    {
         "Crypto",
         Blank_Tests,
         "Basic crypto tests including Sha256 and Salty.",

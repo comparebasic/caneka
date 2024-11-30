@@ -190,6 +190,13 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     if(a == NULL){
         Fatal("Error string is NULL", TYPE_STRING_CHAIN);
     }
+
+    if((a->type.state & FLAG_STRING_TEXT) != 0){
+        if(!TextCharFilter(chars, length)){
+            return ERROR;
+        }
+    }
+
     size_t l = length;
     size_t remaining = l;
     size_t copy_l = remaining;

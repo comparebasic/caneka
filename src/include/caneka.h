@@ -231,6 +231,7 @@ cls Ifc_Get(cls inst);
 #include "mempair.h"
 #include "hash.h"
 #include "string_cnk.h"
+#include "crypto.h"
 #include "int.h"
 #include "slab.h"
 #include "array.h"

@@ -10,7 +10,7 @@ enum string_flags {
     FLAG_STRING_IS_BOOL = 1 << 10,
     FLAG_STRING_IS_CASH = 1 << 11,
     FLAG_STRING_WHITESPACE = 1 << 12,
-    FLAG_STRING_NON_CONTENT = 1 << 13,
+    FLAG_STRING_TEXT = 1 << 13,
 };
 
 typedef struct stringmin {
