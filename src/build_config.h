@@ -9,6 +9,7 @@
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+    "-DOPENSSL",
     NULL
 };
 

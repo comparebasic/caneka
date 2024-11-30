@@ -16,3 +16,19 @@ status Sha256_Tests(MemCtx *gm){
     MemCtx_Free(m);
     return r;
 }
+
+status Ecdsa_Tests(MemCtx *gm){
+    status r = READY;
+    MemCtx *m = MemCtx_Make();
+
+    String *priv;
+    String *pub;
+    status EcKeyPair_Make(MemCtx *m, String *priv, String *pub);
+
+    printf("\n");
+
+    MemCtx_Free(m);
+
+    r |= SUCCESS;
+    return r;
+}

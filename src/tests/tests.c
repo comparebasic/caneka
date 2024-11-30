@@ -252,6 +252,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Crypto - Ecdsa",
+        Ecdsa_Tests,
+        "Ecsda sugnatures for strings.",
+        NOT_STARTED,
+    },
+    {
         "Crypto",
         Blank_Tests,
         "Basic crypto tests including Sha256 and Salty.",

@@ -15,3 +15,11 @@
 #include <time.h>
 #include <dirent.h>
 #include <netinet/in.h>
+
+/* openssl */
+#ifdef OPENSSL
+    #include <openssl/ec.h>
+    #include <openssl/ecdsa.h>
+    #include <openssl/obj_mac.h>
+#endif
+

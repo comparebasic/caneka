@@ -17,3 +17,15 @@ String *String_Sha256(MemCtx *m, String *s){
     String_AddBytes(m, ret, buff, SHA256_DIGEST_SIZE);
     return ret;
 }
+
+status EcKeyPair_Make(MemCtx *m, String *priv, String *pub){
+    return NOOP;
+}
+
+String *Sign_Ecdsa(MemCtx *m, String *s, String *priv){
+    return NULL;
+}
+
+boolean Verify_Ecdsa(MemCtx *m, String *s, String *priv){
+    return FALSE;
+}
