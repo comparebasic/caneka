@@ -1,5 +1,22 @@
 #define IS_VISIBLE(x) ((x) >= 32 || (x) == '\n' || (x) == '\r' || (x) == '\t')
 
+#define SHA256_BLOCK_SIZE 64
+#define SHA256_DIGEST_SIZE 32
+
+typedef struct sha256_state {
+    Type type;
+	uint64_t length;
+	uint32_t state[8], curlen;
+	uint8_t buf[SHA256_BLOCK_SIZE];
+} Sha256;
+
+void Sha256_init(struct sha256_state *md);
+int Sha256_process(struct sha256_state *md, const unsigned char *in,
+				   unsigned long inlen);
+int Sha256_done(struct sha256_state *md, unsigned char *out);
+
 struct string *Cont(MemCtx *m, byte *byte);
 struct string *Buff(MemCtx *m);
 boolean TextCharFilter(byte *b, i64 length);
+
+String *String_Sha256(MemCtx *m, String *s);

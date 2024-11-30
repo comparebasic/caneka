@@ -246,6 +246,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Crypto - Sha256",
+        Sha256_Tests,
+        "Generating Sha256 summaries of strings.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Crypto",
         Blank_Tests,
         "Basic crypto tests including Sha256 and Salty.",

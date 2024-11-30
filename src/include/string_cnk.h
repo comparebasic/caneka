@@ -46,7 +46,10 @@ String *String_Next(String *s);
 boolean String_Equals(String *a, String *b);
 boolean String_Eq(Abstract *a, void *b);
 status String_AddInt(MemCtx *m, String *s, int i);
+status String_AddI64(MemCtx *m, String *s, i64 i);
+
+/* conversions */
+String *String_ToHex(MemCtx *m, String *s);
 String *String_ToEscaped(MemCtx *m, String *s);
 char *String_ToChars(MemCtx *m, String *s);
 status String_ToSlab(String *a, void *sl, size_t sz);
-status String_AddI64(MemCtx *m, String *s, i64 i);

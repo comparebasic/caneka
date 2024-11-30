@@ -1,5 +1,5 @@
-#include <basictypes_external.h> 
-#include <caneka/caneka.h> 
+#include <external.h>
+#include <caneka.h>
 
 #define LOAD32B(addr) \
 		((uint32_t)((addr)[0] << 24) | ((addr)[1] << 16) | \

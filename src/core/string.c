@@ -1,6 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
+char *b64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+char *hex_chars = "0123456789abcdef";
+
 static const byte *digits = (byte *)"0123456789";
 
 static int _String_FromI64(MemCtx *m, i64 i, byte buff[]){
@@ -146,6 +149,24 @@ String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
 
 String *String_From(MemCtx *m, byte *bytes){
     return String_Make(m, bytes);
+}
+
+String *String_ToHex(MemCtx *m, String *s){
+    String *ret = String_Init(m, s->length*2);
+    while(s != NULL){
+        byte *b = s->bytes;
+        byte *end = b+s->length;
+        while(b < end){
+            byte c = *b;
+            byte b2[2];
+            b2[0] = hex_chars[((c & 240) >> 4)];
+            b2[1] = hex_chars[(c & 15)];
+            String_AddBytes(m, ret, b2, 2);
+            b++;
+        }
+        s = String_Next(s);
+    };
+    return ret;
 }
 
 status String_Add(MemCtx *m, String *a, String *b) {

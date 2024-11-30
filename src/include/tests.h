@@ -1,4 +1,5 @@
 #include <mock_109strings.h>
+extern char *longCstr;
 
 extern TestSet *Tests;
 
@@ -40,3 +41,4 @@ status NestedDFor_Tests(MemCtx *gm);
 status XmlStringType_Tests(MemCtx *gm);
 status XmlTTemplate_Tests(MemCtx *gm);
 status TextFilter_Tests(MemCtx *gm);
+status Sha256_Tests(MemCtx *gm);
