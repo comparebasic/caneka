@@ -43,3 +43,4 @@ status XmlTTemplate_Tests(MemCtx *gm);
 status TextFilter_Tests(MemCtx *gm);
 status Sha256_Tests(MemCtx *gm);
 status Ecdsa_Tests(MemCtx *gm);
+status Salty_Tests(MemCtx *gm);

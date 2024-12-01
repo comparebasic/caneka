@@ -33,6 +33,12 @@ static int _String_FromI64(MemCtx *m, i64 i, byte buff[]){
     return position;
 }
 
+String *String_Clone(MemCtx *m, String *s){
+    String *s2 = String_Init(m, s->length);
+    String_Add(m, s2, s);
+    return s2;
+}
+
 String *String_Init(MemCtx *m, int expected){
     size_t sz = sizeof(StringMin);
     cls type = TYPE_STRING_FIXED;

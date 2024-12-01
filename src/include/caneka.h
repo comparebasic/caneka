@@ -164,6 +164,7 @@ enum types {
     TYPE_CASH,
     TYPE_XMLT,
     TYPE_NESTEDD,
+    TYPE_ENC_PAIR,
     _TYPE_CORE_END,
 };
 

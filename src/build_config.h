@@ -9,7 +9,6 @@
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-    "-DOPENSSL",
     NULL
 };
 
@@ -52,12 +51,17 @@ static BuildSubdir testobj = { "tests", {
     "match_tests.c", "span_tests.c", "hash_tests.c", "roebling_tests.c",
     "xml_tests.c", "http_tests.c", "serve_tests.c", "queue_tests.c",
     "mock_109strings.c", "ioctx_tests.c", "oset_tests.c",
-    "memlocal_tests.c", "blank_test.c", "nestedd_tests.c", "xmlt_template_tests.c", "textfilter_tests.c", "crypto_tests.c",
+    "memlocal_tests.c", "blank_test.c", "nestedd_tests.c", "xmlt_template_tests.c", "textfilter_tests.c", "crypto_tests.c", "salty_tests.c",
     NULL
 }};
 
 static BuildSubdir cryptoobj = { "crypto", {
-    "sane.c", "sha256.c", "crypto_api.c",
+    "sane.c", "sha256.c", "crypto_api.c", "enc_pair.c",
+    NULL
+}};
+
+static BuildSubdir secureobj = { "secure", {
+    "phrase.c",
     NULL
 }};
 
@@ -71,4 +75,12 @@ static BuildSubdir appsobj = { "apps", {
     NULL
 }};
 
-BuildSubdir *allobj[] = {&coreobj, &testobj, &parserobj, &formatsobj, &persistobj, &cryptoobj, &serveobj, &appsobj, &langobj, NULL};
+BuildSubdir *allobj[] = {
+    &coreobj, &testobj, &parserobj, &formatsobj, &persistobj,
+#ifdef CRYPTO
+    &cryptoobj,
+    &secureobj,
+#endif
+    &serveobj, &appsobj, &langobj,
+    NULL
+};

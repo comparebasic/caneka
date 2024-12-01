@@ -11,14 +11,12 @@ status Tests_Init(MemCtx *m){
 }
 
 static TestSet _Tests[] = {
-    /*
     {
         "Core",
         Core_Tests,
         "Initializing core system tests",
         FEATURE_COMPLETE,
     },
-    */
     {
         "String",
         String_Tests,
@@ -251,11 +249,19 @@ static TestSet _Tests[] = {
         "Generating Sha256 summaries of strings.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Crypto - Ecdsa",
         Ecdsa_Tests,
         "Ecsda sugnatures for strings.",
         NOT_STARTED,
+    },
+    */
+    {
+        "Crypto - Salty",
+        Salty_Tests,
+        "Bi-directional encryption with a variable sized key",
+        PARTIAL_FEATURE,
     },
     {
         "Crypto",

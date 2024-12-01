@@ -12,6 +12,8 @@
 #define RM "rm"
 #define MKDIR "mkdir"
 
+#define CRYPTO 1
+
 typedef int (*Anon)();
 int Build();
 int Clean();
