@@ -28,7 +28,7 @@ static BuildSubdir coreobj = { "core", {
 }};
 
 static BuildSubdir persistobj = { "persist", {
-    "ioctx.c", "file.c", "session.c","memlocal.c",
+    "ioctx.c", "file.c", "session.c","memlocal.c", "access.c",
     NULL
 }};
 
@@ -56,7 +56,7 @@ static BuildSubdir testobj = { "tests", {
 }};
 
 static BuildSubdir cryptoobj = { "crypto", {
-    "sane.c", "sha256.c", "crypto_api.c", "enc_pair.c",
+    "sane.c", "sha256.c", "crypto_api.c", "enc_pair.c", "salty.c",
     NULL
 }};
 

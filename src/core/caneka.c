@@ -18,6 +18,7 @@ status Caneka_Init(MemCtx *m){
     r |= Debug_Init(m);
     r |= Hash_Init(m);
     r |= Oset_Init(m);
+    r |= Enc_Init(m);
     r |= AppsDebug_Init(m);
     return r;
 }

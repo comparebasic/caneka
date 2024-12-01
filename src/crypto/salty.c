@@ -23,42 +23,44 @@ static void Tea_decipher(unsigned int rounds, uint32_t v[2], uint32_t const key[
     v[0]=v0; v[1]=v1;
 }
 
-static String *Salty_process(MemCtx *m, String *key, String *s, Salty_Proc proc){
+static status Salty_process(MemCtx *m, String *key, String *s, Salty_Proc proc){
+    if(key->length % SALTY_KEY_SEGSIZE != 0){
+        printf("Error: key string not on bounds, is it aligned?\n");
+        return ERROR;
+    }
+
     while(s != NULL){
         void *ptr = (void *)s->bytes;
-        util_t offset = 0;
 
-        int rounds = s->nbytes / SALTY_VALUE_SIZE;
+        int rounds = s->length / SALTY_VALUE_SIZE;
         if(s->length % SALTY_VALUE_SIZE > 0){
             rounds++;
         }
         for(int i = 0; i < rounds; i++){
-            if(key->length % SALTY_KEY_SEGSIZE != 0){
-                printf("Error: key string not on bounds, is it aligned?\n");
-                return NULL;
-            }
-
             int keyRounds = key->length / SALTY_KEY_SEGSIZE;
             void *kPtr = (void *)key->bytes;
+            if(proc == Tea_decipher){
+                kPtr += (key->length-SALTY_KEY_SEGSIZE);
+            }
             for(int j = 0; j < keyRounds; j++){
                 proc(SALTY_TEA_ROUNDS, (uint32_t *)ptr, (uint32_t *)kPtr); 
-                kPtr += SALTY_KEY_SEGSIZE;
+                if(proc == Tea_decipher){
+                    kPtr -= SALTY_KEY_SEGSIZE;
+                }else{
+                    kPtr += SALTY_KEY_SEGSIZE;
+                }
             }
+            ptr += SALTY_VALUE_SIZE;
         }
 
-        ptr += SALTY_VALUE_SIZE;
-        offset += SALTY_VALUE_SIZE;
-
-        if(offset == tail_s->nbytes){
-            tail_s = tail_s->next_s;
-        }
+        s = String_Next(s);
     }
 
-    return s2;
+    return SUCCESS;
 }
 
 String *Salty_MakeKey(MemCtx *m, String *s){
-    util_t length = SALTY_KEY_MINSIZE;
+    i64 length = SALTY_KEY_MINSIZE;
     if(s->length < length || (s->length % SALTY_KEY_SEGSIZE) != 0){
         length = ((s->length / SALTY_KEY_SEGSIZE)+1) * SALTY_KEY_SEGSIZE;
     }
@@ -72,11 +74,10 @@ String *Salty_MakeKey(MemCtx *m, String *s){
     return key;
 }
 
-
-String *Salty_Enc(MemCtx *m, String *key, String *s){
+status Salty_Enc(MemCtx *m, String *key, String *s){
     return Salty_process(m, key, s, Tea_encipher);
 }
 
-String *Salty_Dec(MemCtx *m, String *key, String *s){
+status Salty_Dec(MemCtx *m, String *key, String *s){
     return Salty_process(m, key, s, Tea_decipher);
 }

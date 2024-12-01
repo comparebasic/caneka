@@ -41,6 +41,7 @@ struct mem_handle;
 struct mem_keyed;
 struct oset;
 struct oset_def;
+struct access;
 struct ioctx;
 struct mem_local;
 struct test_set;
@@ -233,6 +234,8 @@ cls Ifc_Get(cls inst);
 #include "hash.h"
 #include "string_cnk.h"
 #include "crypto.h"
+#include "salty.h"
+#include "enc_pair.h"
 #include "int.h"
 #include "slab.h"
 #include "array.h"
@@ -257,6 +260,7 @@ cls Ifc_Get(cls inst);
 #include "xml.h"
 #include "oset_item.h"
 #include "oset.h"
+#include "access.h"
 #include "ioctx.h"
 #include "memlocal.h"
 #include "file.h"

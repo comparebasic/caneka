@@ -2,10 +2,6 @@
 
 #define SHA256_BLOCK_SIZE 64
 #define SHA256_DIGEST_SIZE 32
-#define SALTY_TEA_ROUNDS 4
-#define SALTY_VALUE_SIZE (sizeof(uint32_t) * 2)
-#define SALTY_KEY_SEGSIZE  (sizeof(uint32_t) * 4)
-#define SALTY_KEY_MINSIZE SALTY_KEY_SEGSIZE / 2
 
 typedef struct sha256_state {
     Type type;
@@ -14,14 +10,6 @@ typedef struct sha256_state {
 	uint8_t buf[SHA256_BLOCK_SIZE];
 } Sha256;
 
-typedef struct enc_pair {
-    Type type;
-    String *keyId;
-    String *enc;
-    String *dec;
-} EncPair;
-
-typedef String *(*Salty_Proc)(unsigned int rounds, uint32_t v[2], uint32_t const key[4]);
 
 void Sha256_init(struct sha256_state *md);
 int Sha256_process(struct sha256_state *md, const unsigned char *in,
@@ -36,12 +24,3 @@ String *String_Sha256(MemCtx *m, String *s);
 status EcKeyPair_Make(MemCtx *m, String *priv, String *pub);
 String *Sign_Ecdsa(MemCtx *m, String *s, String *priv);
 boolean Verify_Ecdsa(MemCtx *m, String *s, String *priv);
-String *CB_Phrase(MemCtx *m);
-
-static String *Salty_process(MemCtx *m, String *key, String *s, Salty_Proc proc);
-String *Salty_MakeKey(MemCtx *m, String *s);
-String *Salty_Enc(MemCtx *m, String *key, String *s);
-String *Salty_Dec(MemCtx *m, String *key, String *s);
-
-/* enc pair */
-EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access *access);

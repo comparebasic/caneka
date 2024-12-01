@@ -1,11 +1,6 @@
 #define PERMS 0755 
 #define PATH_BUFFLEN 1024
 #define PATH_SUFFIX_MAX 128
-typedef struct access {
-    Type type;
-    String *owner;
-    Span *groups;
-} Access;
 
 typedef struct ioctx {
     Type type;

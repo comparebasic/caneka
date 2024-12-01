@@ -617,6 +617,23 @@ static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean ext
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
+static void EncPair_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    EncPair *pair = (EncPair *)as(a, TYPE_ENC_PAIR);
+    printf("\x1b[%dm%sEnc<%s %s:",
+        color, msg, State_ToString(pair->type.state), pair->keyId->bytes);
+    String *enc = String_Present(DebugM, (Abstract *)pair->enc);
+    while(enc != NULL){
+        printf("%s", enc->bytes);
+        enc = String_Next(enc);
+    }
+    printf("->");
+    String *dec = String_Present(DebugM, (Abstract *)pair->dec);
+    while(dec != NULL){
+        printf("%s", dec->bytes);
+        dec = String_Next(dec);
+    }
+    printf(">\x1b[0m");
+}
 
 static status populateDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
@@ -648,6 +665,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
+    r |= Lookup_Add(m, lk, TYPE_ENC_PAIR, (void *)EncPair_Print);
     
     return r;
 }
