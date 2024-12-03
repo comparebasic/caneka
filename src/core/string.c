@@ -46,6 +46,15 @@ String *String_Init(MemCtx *m, int expected){
         sz = sizeof(String);
         type = TYPE_STRING_CHAIN;
     }
+    /*
+    if(expected < 0 || expected > STRING_FULL_SIZE){
+        sz = sizeof(String);
+        type = TYPE_STRING_CHAIN;
+    }else if(expected > STRING_FIXED_SIZE){
+        sz = sizeof(StringFull);
+        type = TYPE_STRING_FULL;
+    }
+    */
     String *s = (String *)MemCtx_Alloc(m, sz);
     s->type.of = type;
     s->type.state |= (m->type.state & LOCAL_PTR);
@@ -237,17 +246,19 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
             seg = seg->next;
         }
     }else if(a->type.of == TYPE_STRING_FIXED){
-        if(length > STRING_FIXED_SIZE){
+        if(a->length+length > STRING_FIXED_SIZE){
             Fatal("length exceeds fixed size\n", a->type.of);
+        }
+    }else if(a->type.of == TYPE_STRING_FULL){
+        if(a->length+length > STRING_FULL_SIZE){
+            Fatal("length exceeds full size\n", a->type.of);
         }
     }else{
         Fatal("unknown type\n", a->type.of);
     }
 
     /* copy the initial chunk */
-    if(seg->type.of == TYPE_STRING_FIXED){
-        copy_l = min((STRING_FIXED_SIZE - seg->length), remaining);
-    }else{
+    if(seg->type.of == TYPE_STRING_CHAIN){
         copy_l = min((STRING_CHUNK_SIZE - seg->length), remaining);
     }
 

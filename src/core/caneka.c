@@ -176,7 +176,7 @@ boolean Caneka_Truthy(Abstract *a){
 }
 
 cls Ifc_Get(cls inst){
-    if(inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED){
+    if(inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL){
         return TYPE_STRING;
     }else if(inst == TYPE_SPAN || inst == TYPE_QUEUE_SPAN || 
             inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN){
@@ -193,7 +193,7 @@ boolean Ifc_Match(cls inst, cls ifc){
     }else if(ifc == TYPE_WRAPPED){
         return inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL || inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR;
     }else if(ifc == TYPE_STRING){
-        return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
+        return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL;
     }else if(ifc == TYPE_STRING){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
     }else if(ifc == TYPE_MEMHANDLE){

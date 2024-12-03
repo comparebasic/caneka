@@ -82,6 +82,7 @@ typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source)
 #define STRING_EXTRAS (sizeof(Type)+sizeof(int)+sizeof(struct string *)+sizeof(MemCtx *))
 #define STRING_CHUNK_SIZE (STRING_SEG_FOOTPRINT - STRING_EXTRAS)-1
 #define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(int)))-1
+#define STRING_FULL_SIZE 127
 
 #define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
@@ -115,6 +116,7 @@ enum types {
     TYPE_STRING,
     TYPE_STRING_CHAIN,
     TYPE_STRING_FIXED,
+    TYPE_STRING_FULL,
     TYPE_STRING_SLAB,
     TYPE_TESTSUITE,
     TYPE_PARSER,

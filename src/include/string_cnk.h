@@ -19,6 +19,12 @@ typedef struct stringmin {
     byte bytes[STRING_FIXED_SIZE+1];
 } StringMin;
 
+typedef struct stringful {
+    Type type;
+    int length;
+    byte bytes[STRING_FULL_SIZE+1];
+} StringFull;
+
 typedef struct string {
     Type type;
     int length;
@@ -32,6 +38,7 @@ typedef struct string {
 #define bytes(cstr) ((byte *)cstr)
 
 String *String_Make(MemCtx *m, byte *bytes);
+String *String_MakeFull(MemCtx *m, byte *bytes);
 String *String_MakeFixed(MemCtx *m, byte *bytes, int length);
 String *String_From(MemCtx *m, byte *bytes);
 status String_Add(MemCtx *m, String *dest, String *toAdd);
