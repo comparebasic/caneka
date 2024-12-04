@@ -1,10 +1,13 @@
 #include "include/builder.h"
 
+#define TEST_REQ 1
+
 /* configuration */
 #define CC "clang"
 #define AR "ar"
 #define CFLAGS cflags
 #define INC inc 
+#define LIBS libs
 #define BINARY "caneka"
 #define MAIN "main.c"
 #define ALL allobj
@@ -17,6 +20,10 @@ static char *cflags[] = {
 
 static char *inc[] = {
     "-I./src/include/", "-I./src/apps/include/",
+    NULL
+};
+
+static char *libs[] = {
     NULL
 };
 

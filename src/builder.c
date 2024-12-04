@@ -271,6 +271,7 @@ static int BuildBinary(char *binaryName, char *sourceName){
     Arr_Add(&arr, binary_cstr.content);
     Arr_Add(&arr, source_cstr.content);
     Arr_Add(&arr, lib_cstr.content);
+    Arr_AddArr(&arr, LIBS);
 
     return subProcess(&arr, binary_cstr.content);
 }
@@ -296,7 +297,9 @@ int BuildLib(){
 
 int Build(){
     if(BuildLib()){
+#ifdef TEST_REQ
         BuildBinary("testreq", "tests/testreq.c");
+#endif
         return BuildBinary(BINARY, MAIN);
     }
     return FALSE;

@@ -11,7 +11,7 @@ int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
 int DEBUG_ROEBLING = 0;
 int DEBUG_ROEBLING_MARK = 0;
-int DEBUG_ROEBLING_COMPLETE = 0;
+int DEBUG_ROEBLING_COMPLETE = COLOR_BLUE;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_ALLOC = 0;
@@ -689,6 +689,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
 }
 
 status Debug_Init(MemCtx *m){
+    printf("Debug ? %d\n", DEBUG_ROEBLING_COMPLETE);
     DebugM = m;
     if(DebugPrintChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);
