@@ -100,6 +100,8 @@ char *Class_ToString(cls type){
         return "TYPE_STRING_CHAIN";
     }else if(type == TYPE_STRING_FIXED){
         return "TYPE_STRING_FIXED";
+    }else if(type == TYPE_STRING_FULL){
+        return "TYPE_STRING_FULL";
     }else if(type == TYPE_SERVECTX){
         return "TYPE_SERVECTX";
     }else if(type == TYPE_TESTSUITE){

@@ -31,10 +31,11 @@ status SCursor_Incr(SCursor *sc, i64 length){
             remaining = 0;
             break;
         }else{
-            if(sc->seg->next == NULL){
+            String *next = String_Next(sc->seg);
+            if(next == NULL){
                 sc->type.state = END;
             }else{
-                sc->seg = sc->seg->next;
+                sc->seg = next;
                 sc->position = 0;
             }
 

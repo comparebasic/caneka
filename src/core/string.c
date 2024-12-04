@@ -42,11 +42,6 @@ String *String_Clone(MemCtx *m, String *s){
 String *String_Init(MemCtx *m, int expected){
     size_t sz = sizeof(StringMin);
     cls type = TYPE_STRING_FIXED;
-    if(expected < 0 || expected >= STRING_FIXED_SIZE){
-        sz = sizeof(String);
-        type = TYPE_STRING_CHAIN;
-    }
-    /*
     if(expected < 0 || expected > STRING_FULL_SIZE){
         sz = sizeof(String);
         type = TYPE_STRING_CHAIN;
@@ -54,7 +49,6 @@ String *String_Init(MemCtx *m, int expected){
         sz = sizeof(StringFull);
         type = TYPE_STRING_FULL;
     }
-    */
     String *s = (String *)MemCtx_Alloc(m, sz);
     s->type.of = type;
     s->type.state |= (m->type.state & LOCAL_PTR);
@@ -306,15 +300,12 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
 }
 
 i64 String_Length(String *s) {
-    if(s->type.of == TYPE_STRING_FIXED){
-        return s->length;
-    }
     String *tail = s;
     i64 length = 0;
     int i = 0;
     while(tail != NULL){
         length += tail->length; 
-        tail = tail->next;
+        tail = String_Next(tail);
         i++;
     }
     return length;

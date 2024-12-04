@@ -467,6 +467,23 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
     }
 }
 
+static void StringFull_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    String *s = (String *)as(a, TYPE_STRING_FULL);
+    String *esc = String_ToEscaped(DebugM, s);
+    if(extended){
+        char *state = "";
+        if(s->type.state != 0){
+            state = State_ToString(s->type.state);
+        }
+        printf("%s\x1b[%dmSFull<%s\x1b[0;%dm", msg, color,state, color);
+        printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
+        printf("\x1b[%dm>\x1b[0m", color);
+    }else{
+        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"", color, msg, color, esc->bytes, color);
+    }
+}
+
+
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
@@ -645,6 +662,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_Print);
     r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)StringFixed_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)StringFull_Print);
     r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
