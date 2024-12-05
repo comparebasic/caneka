@@ -72,9 +72,8 @@ status Oset_Add(MemCtx *m, FmtCtx *o, Lookup *osetDefs){
 }
 
 FmtCtx *Oset_Make(MemCtx *m, Lookup *osetDefs){
-    FmtCtx *o = (FmtCtx *)MemCtx_Alloc(m, sizeof(FmtCtx));
+    FmtCtx *o = FmtCtx_Make(m);
     o->type.of = TYPE_OSET;
-    o->m = m;
     o->rbl = OsetParser_Make(m, NULL, (Abstract *)o);
     Oset_Add(m, o, osetDefs);
     return o;

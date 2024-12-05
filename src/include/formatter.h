@@ -39,4 +39,4 @@ typedef struct formatter {
 } FmtCtx;
 
 FmtItem *FmtItem_Make(MemCtx *m, FmtCtx *fctx);
-
+FmtCtx *FmtCtx_Make(MemCtx *m);
