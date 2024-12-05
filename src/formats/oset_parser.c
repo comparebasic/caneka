@@ -207,7 +207,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
     }else if(captureKey == OSET_LENGTH){
         oset->item->remaining = Int_FromString(s);
     }else if(captureKey == OSET_LENGTH_ARRAY){
-        if(oset->item->def->typeOf != TYPE_SPAN){
+        if(oset->item->def->id != TYPE_SPAN){
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
@@ -217,7 +217,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_LIST){
-        if(oset->item->def->typeOf != TYPE_SPAN){
+        if(oset->item->def->id != TYPE_SPAN){
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
@@ -227,7 +227,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_TABLE){
-        if(oset->item->def->typeOf != TYPE_TABLE){
+        if(oset->item->def->id != TYPE_TABLE){
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_TABLE);

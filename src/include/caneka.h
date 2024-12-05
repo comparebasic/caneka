@@ -173,6 +173,7 @@ enum types {
     TYPE_XMLT,
     TYPE_NESTEDD,
     TYPE_ENC_PAIR,
+    TYPE_FMT_HTML,
     _TYPE_CORE_END,
 };
 
@@ -265,7 +266,7 @@ cls Ifc_Get(cls inst);
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"
-#include "formatter.h"
+#include "fmt_ctx.h"
 #include "oset_item.h"
 #include "oset.h"
 #include "access.h"
@@ -288,6 +289,7 @@ cls Ifc_Get(cls inst);
 #include "formats/cash.h"
 #include "lang/nestedd.h"
 #include "lang/xmlt.h"
+#include "lang/fmt_html.h"
 
 status Caneka_Init(MemCtx *m);
 boolean Caneka_Truthy(Abstract *a);

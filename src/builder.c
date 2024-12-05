@@ -276,8 +276,8 @@ static int BuildBinary(char *binaryName, char *sourceName){
 }
 
 int BuildLib(){
-    Cstr_Init(&lib_cstr, "build/lib");
-    Cstr_Add(&lib_cstr, BINARY);
+    Cstr_Init(&lib_cstr, "build/");
+    Cstr_Add(&lib_cstr, LIBTARGET);
     Cstr_Add(&lib_cstr, ".a");
 
     BuildSubdir **set = ALL;
@@ -286,7 +286,7 @@ int BuildLib(){
         FolderMake(dir->name);
         char **fname = dir->sources;
         while(*fname != NULL){
-            BuildSource(BINARY, *fname, dir->name);
+            BuildSource(LIBTARGET, *fname, dir->name);
             fname++;
         }
         set++;
@@ -296,10 +296,16 @@ int BuildLib(){
 
 int Build(){
     if(BuildLib()){
-#ifdef TEST_REQ
-        BuildBinary("testreq", "tests/testreq.c");
-#endif
-        return BuildBinary(BINARY, MAIN);
+        Target *target = TARGETS;
+        int r = FALSE;
+        while(target->bin != NULL){
+            r = BuildBinary(target->bin, target->src);
+            if(!r){
+                return r;
+            }
+            target++;
+        }
+        return r;
     }
     return FALSE;
 }
@@ -322,20 +328,24 @@ int Clean(){
         }
     }
 
-    Arr_Init(&rm, RM);
-    Arr_Add(&rm, "-rfv");
-    Cstr_Init(&path, "build/");
-    Cstr_Add(&path, BINARY);
-    Arr_Add(&rm, path.content);
-    if(!subProcess(&rm, name)){
-        return FALSE;
+
+    Target *target = TARGETS;
+    while(target->bin != NULL){
+        Arr_Init(&rm, RM);
+        Arr_Add(&rm, "-rfv");
+        Cstr_Init(&path, "build/");
+        Cstr_Add(&path, target->bin);
+        Arr_Add(&rm, path.content);
+        if(!subProcess(&rm, name)){
+            return FALSE;
+        }
+        target++;
     }
 
     Arr_Init(&rm, RM);
     Arr_Add(&rm, "-rfv");
     Cstr_Init(&path, "build/");
-    Cstr_Add(&path, "lib");
-    Cstr_Add(&path, BINARY);
+    Cstr_Add(&path, LIBTARGET);
     Cstr_Add(&path, ".a");
     Arr_Add(&rm, path.content);
     if(!subProcess(&rm, name)){

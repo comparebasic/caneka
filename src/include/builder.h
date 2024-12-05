@@ -27,6 +27,12 @@ int Build();
 int Clean();
 int BuildLib();
 
+typedef struct target {
+    char *bin;
+    char *src;
+} Target;
+
+
 typedef struct build_subdir {
     char *name;
     char *sources[];

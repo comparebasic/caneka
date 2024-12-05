@@ -15,7 +15,7 @@ static FmtCtx *_oset = NULL;
 FmtDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, FmtTrans from, FmtTrans to){
     FmtDef *def = (FmtDef *)MemCtx_Alloc(m, TYPE_OSET_DEF);
     def->type.of = TYPE_OSET_DEF;
-    def->typeOf = typeOf;
+    def->id = typeOf;
     def->name = name;
     def->from = from;
     def->to = to;
@@ -55,7 +55,7 @@ status Oset_Add(MemCtx *m, FmtCtx *o, Lookup *osetDefs){
         FmtDef *def = (FmtDef *)Iter_Get(it);
         if(def != NULL){
             Table_Set(byName, (Abstract *)def->name, (Abstract *)def);
-            Lookup_Add(m, byId, def->typeOf, (Abstract *)def);
+            Lookup_Add(m, byId, def->id, (Abstract *)def);
         }
     }
     if(o->byId == NULL){

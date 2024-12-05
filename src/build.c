@@ -8,10 +8,15 @@
 #define CFLAGS cflags
 #define INC inc 
 #define LIBS libs
-#define BINARY "caneka"
+#define TARGETS targets 
+#define LIBTARGET "libcaneka"
 #define MAIN "main.c"
 #define ALL allobj
 #define VERBOSE 2
+
+static Target targets[] = {
+    {"testreq", "tests/testreq.c"}, {"caneka", "main.c"}, {"formatter", "formatter.c"}, {NULL, NULL},
+};
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
@@ -53,7 +58,7 @@ static BuildSubdir formatsobj = {"formats", {
 
 static BuildSubdir langobj = {"lang", {
     "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
-    "fmt_ctx.c","fmt_item.c",
+    "fmt_ctx.c", "fmt_item.c", "fmt_html.c",
     NULL
 }};
 
