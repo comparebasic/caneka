@@ -46,6 +46,9 @@ struct ioctx;
 struct mem_local;
 struct test_set;
 
+struct format_def;
+struct formatter;
+
 extern word GLOBAL_flags;
 enum global_flags {
     NO_COLOR = 1 << 10,
@@ -163,6 +166,8 @@ enum types {
     TYPE_RBL_MARK,
     TYPE_OSET,
     TYPE_OSET_ITEM,
+    TYPE_FMT_ITEM,
+    TYPE_FMT_CTX,
     TYPE_OSET_DEF,
     TYPE_CASH,
     TYPE_XMLT,
@@ -260,6 +265,7 @@ cls Ifc_Get(cls inst);
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"
+#include "formatter.h"
 #include "oset_item.h"
 #include "oset.h"
 #include "access.h"

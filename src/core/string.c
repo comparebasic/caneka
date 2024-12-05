@@ -385,6 +385,20 @@ boolean String_Equals(String *a, String *b){
     return FALSE;
 }
 
+status String_Reset(String *s){
+    status r = NOOP;
+    while(s != NULL){
+        if(s->length > 0){
+            memset(s->bytes, 0, s->length);
+            r |= SUCCESS;
+        }
+        s->length = 0;
+        s = String_Next(s);
+    }
+    return r;
+}
+
+
 String *String_Next(String *s){
     if(s->type.of == TYPE_STRING_CHAIN){
         if((s->type.state & LOCAL_PTR) != 0 && s->m != NULL){

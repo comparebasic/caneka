@@ -187,7 +187,6 @@ static int FolderMake(char *dirname){
     DIR* dir = opendir(dir_cstr.content);
     if(dir){
         closedir(dir);
-        printf("Folder exists\n");
     }else if(ENOENT == errno){
         printf("\x1b[%dmMaking Directory %s\x1b[0m\n", MSG_COLOR, dir_cstr.content);
 

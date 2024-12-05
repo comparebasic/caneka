@@ -11,7 +11,7 @@
 #define BINARY "caneka"
 #define MAIN "main.c"
 #define ALL allobj
-#define VERBOSE 0
+#define VERBOSE 2
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
@@ -53,6 +53,7 @@ static BuildSubdir formatsobj = {"formats", {
 
 static BuildSubdir langobj = {"lang", {
     "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
+    "fmt_item.c",
     NULL
 }};
 

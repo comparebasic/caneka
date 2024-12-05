@@ -10,19 +10,19 @@ oset
         string = hey -> address = (base64) XafjkacC
 */
 
-static Oset *_oset = NULL;
+static FmtCtx *_oset = NULL;
 
-OsetDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, OsetTrans from, OsetTrans to){
-    OsetDef *def = (OsetDef *)MemCtx_Alloc(m, TYPE_OSET_DEF);
+FmtDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, FmtTrans from, FmtTrans to){
+    FmtDef *def = (FmtDef *)MemCtx_Alloc(m, TYPE_OSET_DEF);
     def->type.of = TYPE_OSET_DEF;
     def->typeOf = typeOf;
     def->name = name;
-    def->fromOset = from;
-    def->toOset = to;
+    def->from = from;
+    def->to = to;
     return def;
 }
 
-status Oset_Reset(Oset *o){
+status Oset_Reset(FmtCtx *o){
     o->item = NULL;
     o->type.state &= ~(SUCCESS|ERROR);
     return SUCCESS;
@@ -47,21 +47,21 @@ status Oset_Init(MemCtx *m){
     return NOOP;
 }
 
-status Oset_Add(MemCtx *m, Oset *o, Lookup *osetDefs){
+status Oset_Add(MemCtx *m, FmtCtx *o, Lookup *osetDefs){
     Iter *it = Iter_Make(m, osetDefs->values);
-    Lookup *byType = Lookup_Make(m, osetDefs->offset, NULL, NULL);
+    Lookup *byId = Lookup_Make(m, osetDefs->offset, NULL, NULL);
     Span *byName = Span_Make(m, TYPE_TABLE);
     while((Iter_Next(it) & END) == 0){
-        OsetDef *def = (OsetDef *)Iter_Get(it);
+        FmtDef *def = (FmtDef *)Iter_Get(it);
         if(def != NULL){
             Table_Set(byName, (Abstract *)def->name, (Abstract *)def);
-            Lookup_Add(m, byType, def->typeOf, (Abstract *)def);
+            Lookup_Add(m, byId, def->typeOf, (Abstract *)def);
         }
     }
-    if(o->byType == NULL){
-        o->byType = Chain_Make(m, byType);
+    if(o->byId == NULL){
+        o->byId = Chain_Make(m, byId);
     }else{
-        Chain_Extend(m, o->byType, byType);
+        Chain_Extend(m, o->byId, byId);
     }
     if(o->byName == NULL){
         o->byName = TableChain_Make(m, byName);
@@ -71,8 +71,8 @@ status Oset_Add(MemCtx *m, Oset *o, Lookup *osetDefs){
     return SUCCESS;
 }
 
-Oset *Oset_Make(MemCtx *m, Lookup *osetDefs){
-    Oset *o = (Oset *)MemCtx_Alloc(m, sizeof(Oset));
+FmtCtx *Oset_Make(MemCtx *m, Lookup *osetDefs){
+    FmtCtx *o = (FmtCtx *)MemCtx_Alloc(m, sizeof(FmtCtx));
     o->type.of = TYPE_OSET;
     o->m = m;
     o->rbl = OsetParser_Make(m, NULL, (Abstract *)o);
@@ -84,10 +84,10 @@ String *Oset_To(MemCtx *m, String *key, Abstract *a){
     if(_oset == NULL){
         Fatal("Oset not intialized", TYPE_OSET);
     }
-    Abstract *found = Chain_Get(_oset->byType, Ifc_Get(a->type.of));
+    Abstract *found = Chain_Get(_oset->byId, Ifc_Get(a->type.of));
     if(found != NULL){
-        OsetDef *def = as(found, TYPE_OSET_DEF);
-        return asIfc(def->toOset(m, def, _oset, key, a), TYPE_STRING);
+        FmtDef *def = as(found, TYPE_OSET_DEF);
+        return asIfc(def->to(m, def, _oset, key, a), TYPE_STRING);
     }else{
         Debug_Print((void *)a, 0, "Uknown oset type for:" , COLOR_RED, TRUE);
         Fatal("Uknown type for parsing Oset", TYPE_ABSTRACT);
@@ -107,7 +107,7 @@ Abstract *Abs_FromOset(MemCtx *m, String *s){
     };
 
     if((r & ERROR) == 0){
-        return Abs_FromOsetItem(m, _oset, _oset->item);
+        return Abs_FromOsetItem(m, _oset, _oset->item->def, _oset->item);
     }
 
     return NULL;

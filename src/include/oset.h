@@ -26,33 +26,11 @@ enum oset_flags {
     PARENT_TYPE_TABLE = 1 << 13,
 };
 
-typedef struct oset {
-    Type type;
-    MemCtx *m;
-    /* current item */
-    OsetItem *item;
-    /* internal */
-    Roebling *rbl;
-    Chain *byType;
-    TableChain *byName;
-} Oset;
-
-typedef Abstract *(*OsetTrans)(MemCtx *m, struct oset_def *odef, struct oset *oset, String *key, Abstract *a);
-
-typedef struct oset_def {
-    Type type;
-    cls typeOf;
-    word _;
-    String *name;
-    OsetTrans fromOset;
-    OsetTrans toOset;
-} OsetDef;
-
 status Oset_Init(MemCtx *m);
-Oset *Oset_Make(MemCtx *m, Lookup *osetDefs);
-status Oset_Add(MemCtx *m, Oset *o, Lookup *osetDefs);
+FmtCtx *Oset_Make(MemCtx *m, Lookup *osetDefs);
+status Oset_Add(MemCtx *m, FmtCtx *o, Lookup *osetDefs);
 
-OsetDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, OsetTrans from, OsetTrans to);
+FmtDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, FmtTrans from, FmtTrans to);
 
 String *Oset_To(MemCtx *m, String *key, Abstract *a);
 Abstract *Abs_FromOset(MemCtx *m, String *s);

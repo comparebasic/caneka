@@ -112,7 +112,7 @@ static status value(Roebling *rbl){
         (PatCharDef*)startTableDef, OSET_LENGTH_TABLE, OSET_MARK_START);
 
     Match *mt = Span_ReserveNext(rbl->matches);
-    Oset *oset = (Oset *)as(rbl->source, TYPE_OSET);
+    FmtCtx *oset = (FmtCtx *)as(rbl->source, TYPE_OSET);
 
     r |= Match_SetPattern(mt, (PatCharDef *)valueDef);
     mt->captureKey = OSET_VALUE;
@@ -164,7 +164,7 @@ static char *captureKey_ToChars(word captureKey){
     }
 }
 
-static status addToParent(Oset *oset){
+static status addToParent(FmtCtx *oset){
     if((oset->item->type.state & PARENT_TYPE_ARRAY) != 0){
         int idx = -1;
         if(oset->item->key != NULL){
@@ -190,49 +190,49 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
     if(DEBUG_OSET){
         printf("\x1b[%dmOset_Capture(%s %s)\x1b[0m\n", DEBUG_OSET, captureKey_ToChars(captureKey), s->bytes);
     }
-    Oset *oset = (Oset *)as(source, TYPE_OSET);
+    FmtCtx *oset = (FmtCtx *)as(source, TYPE_OSET);
     if(oset->item == NULL){
-        oset->item = OsetItem_Make(oset->m, oset);
+        oset->item = FmtItem_Make(oset->m, oset);
     }
     if(captureKey == OSET_KEY){
         oset->item->key = s;
     }else if(captureKey == OSET_TOKEN){
-        OsetDef *odef = TableChain_Get(oset->byName, s);
-        if(odef == NULL){
+        FmtDef *def = TableChain_Get(oset->byName, s);
+        if(def == NULL){
             Fatal("Error: type not found\n", TYPE_OSET);
         }
-        oset->item->odef = odef;
+        oset->item->def = def;
     }else if(captureKey == OSET_FLAG){
         oset->item->flags = (word)Int_FromString(s);
     }else if(captureKey == OSET_LENGTH){
         oset->item->remaining = Int_FromString(s);
     }else if(captureKey == OSET_LENGTH_ARRAY){
-        if(oset->item->odef->typeOf != TYPE_SPAN){
+        if(oset->item->def->typeOf != TYPE_SPAN){
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
 
-        OsetItem *item = OsetItem_Make(oset->m, oset);
+        FmtItem *item = FmtItem_Make(oset->m, oset);
         item->parent = oset->item;
         item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_LIST){
-        if(oset->item->odef->typeOf != TYPE_SPAN){
+        if(oset->item->def->typeOf != TYPE_SPAN){
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
         
-        OsetItem *item = OsetItem_Make(oset->m, oset);
+        FmtItem *item = FmtItem_Make(oset->m, oset);
         item->parent = oset->item;
         item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_TABLE){
-        if(oset->item->odef->typeOf != TYPE_TABLE){
+        if(oset->item->def->typeOf != TYPE_TABLE){
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_TABLE);
         
-        OsetItem *item = OsetItem_Make(oset->m, oset);
+        FmtItem *item = FmtItem_Make(oset->m, oset);
         item->type.state |= PARENT_TYPE_TABLE;
         item->parent = oset->item;
         oset->item = item;
@@ -250,7 +250,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         }
         s->type.state |= oset->item->flags;
         oset->item->content = s;
-        oset->item->value = Abs_FromOsetItem(oset->m, oset, oset->item);
+        oset->item->value = Abs_FromOsetItem(oset->m, oset, oset->item->def, oset->item);
     }else if(captureKey == OSET_SEP){
         addToParent(oset);
     }

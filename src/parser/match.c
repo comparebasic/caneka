@@ -57,7 +57,8 @@ static void match_StartOfTerm(Match *mt){
 static status match_FeedPat(Match *mt, word c){
     if(HasFlag(mt->type.state, MISS)){
         if(DEBUG_PATMATCH){
-            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "MISS - match_FeedPat: of ", DEBUG_PATMATCH, TRUE);
+            printf("\x1b[%dm'%c' - \x1b[0m", COLOR_RED, c);
+            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "MISS - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
             printf("\n");
         }
         return mt->type.state;

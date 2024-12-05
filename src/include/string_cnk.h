@@ -54,6 +54,7 @@ boolean String_Equals(String *a, String *b);
 boolean String_Eq(Abstract *a, void *b);
 status String_AddInt(MemCtx *m, String *s, int i);
 status String_AddI64(MemCtx *m, String *s, i64 i);
+status String_Reset(String *s);
 
 /* conversions */
 String *String_ToHex(MemCtx *m, String *s);

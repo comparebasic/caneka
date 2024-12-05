@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Abstract *String_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+Abstract *String_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
     String *s = (String *)asIfc(a, TYPE_STRING);
     String *os = String_Init(m, STRING_EXTEND);
     if(key != NULL){
@@ -24,7 +24,7 @@ Abstract *String_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract
     return (Abstract *)os;
 }
 
-Abstract *I64_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+Abstract *I64_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
     String *os = String_Init(m, STRING_EXTEND);
     if(key != NULL){
@@ -48,7 +48,7 @@ Abstract *I64_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a
    return (Abstract *)os;
 }
 
-Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+Abstract *Iter_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
     Span *p = asIfc(a, TYPE_SPAN);
 
     String *os = String_Init(m, STRING_EXTEND);
@@ -98,7 +98,7 @@ Abstract *Iter_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *
     return (Abstract *)os;
 }
 
-Abstract *FilePath_ToOset(MemCtx *m, OsetDef *odef, Oset *o, String *key, Abstract *a){
+Abstract *FilePath_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
     File *file = asIfc(a, TYPE_FILE);
 
     String *os = String_Init(m, STRING_EXTEND);
