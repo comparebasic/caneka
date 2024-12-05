@@ -166,6 +166,7 @@ enum types {
     TYPE_RBL_MARK,
     TYPE_OSET_ITEM,
     TYPE_FMT_ITEM,
+    TYPE_FMT_DEF,
     TYPE_OSET,
     TYPE_FMT_CTX,
     TYPE_OSET_DEF,
@@ -266,6 +267,7 @@ cls Ifc_Get(cls inst);
 #include "proto.h"
 #include "mess.h"
 #include "xml.h"
+#include "fmt_def.h"
 #include "fmt_ctx.h"
 #include "oset_item.h"
 #include "oset.h"
@@ -283,8 +285,6 @@ cls Ifc_Get(cls inst);
 #ifdef LINUX
     #include "linux.h"
 #endif
-
-
 
 #include "formats/cash.h"
 #include "lang/nestedd.h"

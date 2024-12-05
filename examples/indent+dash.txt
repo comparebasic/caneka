@@ -14,7 +14,7 @@ with a second line
 
 Description below.
 
-.tbl:columnA,columnB
++:columnA,columnB
 one,two,three
 apples,bananas,carrots
 fancy,not so,bad

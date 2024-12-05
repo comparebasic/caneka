@@ -28,7 +28,6 @@ enum oset_flags {
 
 status Oset_Init(MemCtx *m);
 FmtCtx *Oset_Make(MemCtx *m, Lookup *osetDefs);
-status Oset_Add(MemCtx *m, FmtCtx *o, Lookup *osetDefs);
 
 FmtDef *OsetDef_Make(MemCtx *m, cls typeOf, String *name, FmtTrans from, FmtTrans to);
 

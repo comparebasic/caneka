@@ -8,6 +8,7 @@ enum formatter_marks {
 enum formatter_captures {
     FORMATTER_INDENT,
     FORMATTER_ITEM,
+    FORMATTER_TABLE,
     FORMATTER_LINE,
     FORMATTER_METHOD,
     _FORMATTER_OUT,

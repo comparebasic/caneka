@@ -1,11 +1,36 @@
 #include <external.h>
 #include <caneka.h>
 
+struct pat_config {
+    word flags;
+    char *name; 
+    int parent;
+};
+
+static struct pat_config pats[] = {
+    {0, "p"},
+    {0, "h1"},
+    {0, "h2"},
+    {0, "h3"},
+    {0, "h4"},
+    {0, "ul"},
+    {FMT_FL_TO_PARENT, "li"},
+    {FMT_FL_TO_NEXT_ID, "table"},
+    {FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_PARENT, "thead", -1},
+    {FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_PARENT, "tr", -1},
+    {FMT_FL_TO_PARENT, "th"},
+    {FMT_FL_TO_PARENT_ON_PARENT, "tr", -4},
+    {FMT_FL_TO_PARENT, "td", -1},
+    {0, NULL, 0},
+};
+
 static char *captureToChars(int captureKey){
    if(captureKey == FORMATTER_INDENT){
         return "FORMATTER_INDENT";
    }else if(captureKey == FORMATTER_ITEM){
         return "FORMATTER_ITEM";
+   }else if(captureKey == FORMATTER_TABLE){
+        return "FORMATTER_TABLE";
    }else if(captureKey == FORMATTER_LINE){
         return "FORMATTER_LINE";
    }else if(captureKey == FORMATTER_LAST_VALUE){
@@ -41,6 +66,12 @@ static word dashDef[] = {
     PAT_END, 0, 0
 };
 
+static word plusDef[] = {
+    PAT_ANY, ' ', ' ', PAT_TERM, '+', '+',
+    PAT_END, 0, 0
+};
+
+
 static word cmdDef[] = {
     PAT_TERM|PAT_NO_CAPTURE, '.', '.', PAT_KO, ':', ':', patText,
     PAT_END, 0, 0
@@ -66,6 +97,8 @@ static status start(Roebling *rbl){
         (PatCharDef*)indentDef, FORMATTER_INDENT, FORMATTER_MARK_LINE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)dashDef, FORMATTER_ITEM, FORMATTER_MARK_LINE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)plusDef, FORMATTER_TABLE, FORMATTER_MARK_LINE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)cmdDef, FORMATTER_METHOD, FORMATTER_MARK_VALUES);
     r |= Roebling_SetPattern(rbl,
@@ -104,41 +137,9 @@ static void reset(FmtCtx *ctx){
 }
 
 static void out(FmtCtx *ctx, int captureKey){
-    if(captureKey == FORMATTER_NEXT){
-        if(ctx->id == FMT_TBL){
-            printf("</table>");
-            return;
-        }
-    }
-
-    if(ctx->id != 0){
-        if(ctx->id == FMT_UL){
-            if(ctx->offset == 0){
-                printf("<ul>");
-            }else{
-                printf("<li>");
-            }
-        }else if(ctx->id == FMT_TBL){
-            if(ctx->offset == 0){
-                printf("<table><thead><tr>");
-            }else if(ctx->offset == 1){
-                printf("<th>");
-            }else{
-                printf("<td>");
-            }
-        }
-    }else{
-        if(ctx->offset == 1){
-            printf("<h1>");
-        }else if(ctx->offset == 2){
-            printf("<h2>");
-        }else if(ctx->offset == 3){
-            printf("<h3>");
-        }else if(ctx->offset == 3){
-            printf("<h4>");
-        }else{
-            printf("<p>");
-        }
+    FmtDef *def = Chain_Get(ctx->byId, ctx->id);
+    if(def != NULL){
+        printf("<%s>", def->name->bytes);
     }
 
     String *s = ctx->item->content;
@@ -147,48 +148,16 @@ static void out(FmtCtx *ctx, int captureKey){
         s = String_Next(s);
     }
 
+    if(def != NULL){
+        printf("</%s>", def->name->bytes);
+    }
+
     if(captureKey == FORMATTER_LAST_VALUE){
-        if(ctx->id == FMT_TBL){
-            if(ctx->offset == 1){
-                printf("</tr></thead>\n");
-            }else{
-                printf("</td></tr>\n");
-            }
+        if(def->type.state & FMT_FL_TO_NEXT_ID){
+            ctx->id++;
         }
     }else if(captureKey == FORMATTER_NEXT){
-        if(ctx->id == FMT_TBL){
-            printf("</table>\n");
-        }else if(ctx->id == FMT_UL){
-            printf("</ul>\n");
-        }
-    }else{
-        if(ctx->id != 0){
-            if(ctx->id == FMT_UL){
-                if(ctx->offset == 0){
-                    printf("</ul>");
-                }else{
-                    printf("</li>");
-                }
-            }else if(ctx->id == FMT_TBL){
-                if(ctx->offset == 1){
-                    printf("</th>");
-                }else{
-                    printf("</td>");
-                }
-            }
-        }else{
-            if(ctx->offset == 1){
-                printf("</h1>\n");
-            }else if(ctx->offset == 2){
-                printf("</h2>\n");
-            }else if(ctx->offset == 3){
-                printf("</h3>\n");
-            }else if(ctx->offset == 3){
-                printf("</h4>\n");
-            }else{
-                printf("</p>\n");
-            }
-        }
+        ctx->id = 0;
     }
 
     reset(ctx);
@@ -206,39 +175,29 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     FmtCtx *ctx = as(source, TYPE_FMT_HTML);
     printf("\x1b[%dmcaptured %s/'%s'\x1b[0m\n", COLOR_YELLOW, captureToChars(captureKey), s->bytes);
     if(captureKey == FORMATTER_INDENT){
-        ctx->offset = s->length;
+        ctx->id = s->length;
     }else if(captureKey == FORMATTER_LINE){
         String_Add(ctx->m, ctx->item->content, s);
+    }else if(captureKey == FORMATTER_TABLE){
+        FmtDef *def = TableChain_Get(ctx->byName, String_Make(ctx->m, bytes("table"))); 
+        if(def != 0){
+            ctx->id = def->id;
+        }
+    }else if(captureKey == FORMATTER_ITEM){
+        FmtDef *def = TableChain_Get(ctx->byName, String_Make(ctx->m, bytes("ul"))); 
+        if(def != 0){
+            ctx->id = def->id;
+        }
     }else if(captureKey == FORMATTER_METHOD){
-        if(String_EqualsBytes(s, bytes("tbl"))){
-            printf("setting table\n");
-            ctx->id = FMT_TBL;
+        FmtDef *def = TableChain_Get(ctx->byName, s); 
+        if(def != 0){
+            ctx->id = def->id;
         }
     }else if(captureKey > _FORMATTER_OUT && captureKey < _FORMATTER_OUT_END){
-        if(captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
-            if(ctx->id == FMT_TBL){
-                out(ctx, captureKey);
-                if(ctx->offset == 0){
-                    ctx->offset++;
-                }
-            }else if(ctx->id == FMT_UL){
-                out(ctx, captureKey);
-                if(ctx->offset == 0){
-                    ctx->offset++;
-                }
-            }
-
+        if(captureKey == FORMATTER_LINE || captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
             String_Add(ctx->m, ctx->item->content, s);
-            out(ctx, captureKey);
-
-            if(captureKey == FORMATTER_LAST_VALUE){
-                if(ctx->offset == 1){
-                    ctx->offset++;
-                }
-            }
-        }else{
-            out(ctx, captureKey);
         }
+        out(ctx, captureKey);
         if(captureKey == FORMATTER_NEXT){
             ctx->id = ZERO;
         }
@@ -246,11 +205,25 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
-
+static void addPatterns(FmtCtx *fmt){
+    struct pat_config *cnf = pats;
+    Lookup *lk = Lookup_Make(fmt->m, 0, NULL, (Abstract *)fmt);
+    while(cnf->name != NULL){
+        FmtDef *def = FmtDef_Make(fmt->m);
+        def->name = String_Make(fmt->m, bytes(cnf->name));
+        def->id = lk->values->max_idx+1;
+        Lookup_Add(fmt->m, lk, def->id, def);
+        cnf++;
+    }
+    Fmt_Add(fmt->m, fmt, lk);
+}
 
 FmtCtx *FmtHtml_Make(MemCtx *m){
     FmtCtx *ctx = FmtCtx_Make(m);
     ctx->type.of = TYPE_FMT_HTML;
+    ctx->type.state |= FMT_FL_AUTO_ID;
+
+    addPatterns(ctx);
 
     MemHandle *mh = (MemHandle *)m;
     Span *parsers_do =  Span_From(m, 7,

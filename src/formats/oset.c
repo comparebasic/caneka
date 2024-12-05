@@ -47,35 +47,11 @@ status Oset_Init(MemCtx *m){
     return NOOP;
 }
 
-status Oset_Add(MemCtx *m, FmtCtx *o, Lookup *osetDefs){
-    Iter *it = Iter_Make(m, osetDefs->values);
-    Lookup *byId = Lookup_Make(m, osetDefs->offset, NULL, NULL);
-    Span *byName = Span_Make(m, TYPE_TABLE);
-    while((Iter_Next(it) & END) == 0){
-        FmtDef *def = (FmtDef *)Iter_Get(it);
-        if(def != NULL){
-            Table_Set(byName, (Abstract *)def->name, (Abstract *)def);
-            Lookup_Add(m, byId, def->id, (Abstract *)def);
-        }
-    }
-    if(o->byId == NULL){
-        o->byId = Chain_Make(m, byId);
-    }else{
-        Chain_Extend(m, o->byId, byId);
-    }
-    if(o->byName == NULL){
-        o->byName = TableChain_Make(m, byName);
-    }else{
-        TableChain_Extend(m, o->byName,  byName);
-    }
-    return SUCCESS;
-}
-
 FmtCtx *Oset_Make(MemCtx *m, Lookup *osetDefs){
     FmtCtx *o = FmtCtx_Make(m);
     o->type.of = TYPE_OSET;
     o->rbl = OsetParser_Make(m, NULL, (Abstract *)o);
-    Oset_Add(m, o, osetDefs);
+    Fmt_Add(m, o, osetDefs);
     return o;
 }
 

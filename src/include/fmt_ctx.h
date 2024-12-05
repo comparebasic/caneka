@@ -4,18 +4,6 @@ enum formatter_flags {
     FMT_FL_TO_NEXT_ID = 1 << 10,
     FMT_FL_AUTO_ID = 1 << 11,
 };
-
-typedef Abstract *(*FmtTrans)(MemCtx *m, struct format_def *def, struct formatter *fmt, String *key, Abstract *a);
-
-typedef struct format_def {
-    Type type;
-    cls id;
-    word _;
-    String *name;
-    FmtTrans from;
-    FmtTrans to;
-} FmtDef;
-
 typedef struct fmt_item {
     Type type;
     word flags;
@@ -33,7 +21,7 @@ typedef struct formatter {
     MemCtx *m;
     /* current item */
     FmtItem *item;
-    cls id;
+    int id;
     word offset;
     /* internal */
     Roebling *rbl;
@@ -43,3 +31,4 @@ typedef struct formatter {
 
 FmtItem *FmtItem_Make(MemCtx *m, FmtCtx *fctx);
 FmtCtx *FmtCtx_Make(MemCtx *m);
+status Fmt_Add(MemCtx *m, FmtCtx *fmt, Lookup *fmtDefs);
