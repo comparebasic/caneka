@@ -5,8 +5,10 @@ typedef struct format_def {
     int id;
     word _;
     String *name;
+    String *alias;
     FmtTrans from;
     FmtTrans to;
+    struct format_def *parent;
 } FmtDef;
 
 FmtDef *FmtDef_Make(MemCtx *m);

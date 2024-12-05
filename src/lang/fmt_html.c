@@ -3,34 +3,33 @@
 
 struct pat_config {
     word flags;
+    char *alias;
     char *name; 
     int parent;
 };
 
 static struct pat_config pats[] = {
-    {0, "p"},
-    {0, "h1"},
-    {0, "h2"},
-    {0, "h3"},
-    {0, "h4"},
-    {0, "ul"},
-    {FMT_FL_TO_PARENT, "li"},
-    {FMT_FL_TO_NEXT_ID, "table"},
-    {FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_PARENT, "thead", -1},
-    {FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_PARENT, "tr", -1},
-    {FMT_FL_TO_PARENT, "th"},
-    {FMT_FL_TO_PARENT_ON_PARENT, "tr", -4},
-    {FMT_FL_TO_PARENT, "td", -1},
-    {0, NULL, 0},
+    {0, NULL, "p", 0},
+    {0, NULL, "h1", 0},
+    {0, NULL, "h2", 0},
+    {0, NULL, "h3", 0},
+    {0, NULL, "h4", 0},
+    {FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, "-", "ul", 0},
+    {FMT_FL_TO_PARENT|FMT_FL_SPACE_FOR_WS, NULL, "li", -1},
+    {FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, "+", "table", 0},
+    {FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "thead", -1},
+    {FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_LAST|FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, NULL, "tr", -1},
+    {FMT_FL_TO_PARENT_ON_LAST|FMT_FL_TO_NEXT_ON_LAST , NULL, "th", -1},
+    {FMT_FL_TO_PARENT|FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "tr", -4},
+    {FMT_FL_TO_PARENT_ON_LAST, NULL, "td", -1},
+    {0, NULL, NULL, 0},
 };
 
 static char *captureToChars(int captureKey){
    if(captureKey == FORMATTER_INDENT){
         return "FORMATTER_INDENT";
-   }else if(captureKey == FORMATTER_ITEM){
-        return "FORMATTER_ITEM";
-   }else if(captureKey == FORMATTER_TABLE){
-        return "FORMATTER_TABLE";
+   }else if(captureKey == FORMATTER_ALIAS){
+        return "FORMATTER_ALIAS";
    }else if(captureKey == FORMATTER_LINE){
         return "FORMATTER_LINE";
    }else if(captureKey == FORMATTER_LAST_VALUE){
@@ -62,7 +61,7 @@ static word nlDef[] = {
 };
 
 static word dashDef[] = {
-    PAT_ANY, ' ', ' ', PAT_TERM, '-', '-',
+    PAT_ANY|PAT_NO_CAPTURE, ' ', ' ', PAT_TERM, '-', '-',PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,' ' ,' ',
     PAT_END, 0, 0
 };
 
@@ -96,9 +95,9 @@ static status start(Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)indentDef, FORMATTER_INDENT, FORMATTER_MARK_LINE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)dashDef, FORMATTER_ITEM, FORMATTER_MARK_LINE);
+        (PatCharDef*)dashDef, FORMATTER_ALIAS, FORMATTER_MARK_LINE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)plusDef, FORMATTER_TABLE, FORMATTER_MARK_LINE);
+        (PatCharDef*)plusDef, FORMATTER_ALIAS, FORMATTER_MARK_VALUES);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)cmdDef, FORMATTER_METHOD, FORMATTER_MARK_VALUES);
     r |= Roebling_SetPattern(rbl,
@@ -133,13 +132,31 @@ static status value(Roebling *rbl){
 
 static void reset(FmtCtx *ctx){
     String_Reset(ctx->item->content);
-    ctx->offset = 0;
+}
+
+static void outClose(FmtCtx *ctx, word fl){
+    FmtDef *curDef = ctx->def;
+    while(curDef != NULL && curDef->parent != NULL &&  
+           (curDef->type.state & fl) != 0){
+       if(curDef->parent->type.state & FMT_FL_CLOSE_AFTER_CHILD){
+            printf("</%s>", curDef->parent->name->bytes);
+       }
+       curDef = curDef->parent;
+    }
 }
 
 static void out(FmtCtx *ctx, int captureKey){
-    FmtDef *def = Chain_Get(ctx->byId, ctx->id);
-    if(def != NULL){
-        printf("<%s>", def->name->bytes);
+    FmtDef *def = ctx->def;
+    if(def == NULL){
+        def = Chain_Get(ctx->byId, 0);
+    }
+
+    printf("<%s>", def->name->bytes);
+
+    if((def->type.state & FMT_FL_TO_NEXT_ID) != 0){
+        ctx->def = Chain_Get(ctx->byId, def->id+1); 
+        out(ctx, captureKey);
+        return;
     }
 
     String *s = ctx->item->content;
@@ -148,19 +165,22 @@ static void out(FmtCtx *ctx, int captureKey){
         s = String_Next(s);
     }
 
-    if(def != NULL){
+    if((def->type.state & FMT_FL_CLOSE_AFTER_CHILD) == 0){
         printf("</%s>", def->name->bytes);
     }
 
     if(captureKey == FORMATTER_LAST_VALUE){
-        if(def->type.state & FMT_FL_TO_NEXT_ID){
-            ctx->id++;
+        outClose(ctx, FMT_FL_TO_PARENT_ON_LAST);
+        if(def->type.state & FMT_FL_TO_NEXT_ON_LAST){
+            ctx->def = Chain_Get(ctx->byId, ctx->def->id+1);
+        }else{
+            ctx->def = Chain_Get(ctx->byId, ctx->def->id-1);
         }
     }else if(captureKey == FORMATTER_NEXT){
-        ctx->id = 0;
+        outClose(ctx, (FMT_FL_TO_PARENT|FMT_FL_TO_PARENT_ON_LAST));
+        ctx->def = NULL;
+        reset(ctx);
     }
-
-    reset(ctx);
 }
 
 static cls Fmt_MethodLookup(FmtCtx *ctx, String *s){
@@ -173,34 +193,49 @@ static status Fmt_SetMethod(FmtCtx *ctx, cls id){
 
 static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     FmtCtx *ctx = as(source, TYPE_FMT_HTML);
+    /*
     printf("\x1b[%dmcaptured %s/'%s'\x1b[0m\n", COLOR_YELLOW, captureToChars(captureKey), s->bytes);
+    */
     if(captureKey == FORMATTER_INDENT){
-        ctx->id = s->length;
-    }else if(captureKey == FORMATTER_LINE){
-        String_Add(ctx->m, ctx->item->content, s);
-    }else if(captureKey == FORMATTER_TABLE){
-        FmtDef *def = TableChain_Get(ctx->byName, String_Make(ctx->m, bytes("table"))); 
-        if(def != 0){
-            ctx->id = def->id;
+        ctx->def = Chain_Get(ctx->byId, s->length);
+    }else if(captureKey == FORMATTER_ALIAS || captureKey == FORMATTER_METHOD){
+        if(ctx->item->content->length > 0){
+            out(ctx, captureKey);
+            reset(ctx);
         }
-    }else if(captureKey == FORMATTER_ITEM){
-        FmtDef *def = TableChain_Get(ctx->byName, String_Make(ctx->m, bytes("ul"))); 
-        if(def != 0){
-            ctx->id = def->id;
+        FmtDef *def = NULL;
+        if(captureKey == FORMATTER_ALIAS){
+            def = TableChain_Get(ctx->byAlias, s); 
+        }else{
+            def = TableChain_Get(ctx->byName, s); 
         }
-    }else if(captureKey == FORMATTER_METHOD){
-        FmtDef *def = TableChain_Get(ctx->byName, s); 
-        if(def != 0){
-            ctx->id = def->id;
+        if(def != NULL){
+            if(ctx->def == NULL || ctx->def->parent != def){
+                ctx->def = def;
+            }
         }
     }else if(captureKey > _FORMATTER_OUT && captureKey < _FORMATTER_OUT_END){
         if(captureKey == FORMATTER_LINE || captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
+            if(ctx->def != NULL && (ctx->def->type.state & FMT_FL_SPACE_FOR_WS) != 0 && ctx->item->content->length > 0){
+                String_AddBytes(ctx->m, ctx->item->content, bytes(" "), 1);
+
+            }
             String_Add(ctx->m, ctx->item->content, s);
         }
-        out(ctx, captureKey);
-        if(captureKey == FORMATTER_NEXT){
-            ctx->id = ZERO;
+        if(captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
+            out(ctx, captureKey);
+            reset(ctx);
         }
+        if(captureKey == FORMATTER_NEXT){
+            out(ctx, captureKey);
+            reset(ctx);
+            ctx->def = NULL;
+        }
+
+        if(captureKey == FORMATTER_NEXT || captureKey == FORMATTER_LAST_VALUE){
+            printf("\r\n");
+        }
+
     }
     return SUCCESS;
 }
@@ -211,7 +246,14 @@ static void addPatterns(FmtCtx *fmt){
     while(cnf->name != NULL){
         FmtDef *def = FmtDef_Make(fmt->m);
         def->name = String_Make(fmt->m, bytes(cnf->name));
+        if(cnf->alias != NULL){
+            def->alias = String_Make(fmt->m, bytes(cnf->alias));
+        }
         def->id = lk->values->max_idx+1;
+        def->type.state = cnf->flags;
+        if(cnf->parent != 0){
+            def->parent = Lookup_Get(lk, def->id+cnf->parent);
+        }
         Lookup_Add(fmt->m, lk, def->id, def);
         cnf++;
     }

@@ -14,7 +14,7 @@ with a second line
 
 Description below.
 
-+:columnA,columnB
++columnA,columnB,columnC
 one,two,three
 apples,bananas,carrots
 fancy,not so,bad
