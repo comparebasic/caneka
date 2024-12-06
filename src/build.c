@@ -43,7 +43,7 @@ static BuildSubdir coreobj = { "core", {
 }};
 
 static BuildSubdir persistobj = { "persist", {
-    "ioctx.c", "file.c", "session.c","memlocal.c", "access.c",
+    "ioctx.c", "file.c", "session.c","memlocal.c", "access.c", "user.c",
     NULL
 }};
 
@@ -63,11 +63,13 @@ static BuildSubdir langobj = {"lang", {
 }};
 
 static BuildSubdir testobj = { "tests", {
-    "utils.c", "tests.c", "span_setup_tests.c","core_tests.c", "string_tests.c", "table_tests.c",
-    "match_tests.c", "span_tests.c", "hash_tests.c", "roebling_tests.c",
-    "xml_tests.c", "http_tests.c", "serve_tests.c", "queue_tests.c",
-    "mock_109strings.c", "ioctx_tests.c", "oset_tests.c",
-    "memlocal_tests.c", "blank_test.c", "nestedd_tests.c", "xmlt_template_tests.c", "textfilter_tests.c", "crypto_tests.c", "salty_tests.c",
+    "utils.c","tests.c","span_setup_tests.c","core_tests.c",
+    "string_tests.c","table_tests.c","match_tests.c","span_tests.c",
+    "hash_tests.c","roebling_tests.c","xml_tests.c", "http_tests.c",
+    "serve_tests.c", "queue_tests.c","mock_109strings.c","ioctx_tests.c",
+    "oset_tests.c","memlocal_tests.c","blank_test.c","nestedd_tests.c",
+    "xmlt_template_tests.c","textfilter_tests.c","crypto_tests.c",
+    "salty_tests.c","user_tests.c",
     NULL
 }};
 

@@ -281,6 +281,7 @@ cls Ifc_Get(cls inst);
 #include "testsuite.h"
 #include "mark.h"
 #include "human_present.h"
+#include "user.h"
 #include "apps.h"
 #ifdef LINUX
     #include "linux.h"

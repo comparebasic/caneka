@@ -689,7 +689,6 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
 }
 
 status Debug_Init(MemCtx *m){
-    printf("Debug ? %d\n", DEBUG_ROEBLING_COMPLETE);
     DebugM = m;
     if(DebugPrintChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);

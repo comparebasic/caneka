@@ -24,3 +24,4 @@ String *String_Sha256(MemCtx *m, String *s);
 status EcKeyPair_Make(MemCtx *m, String *priv, String *pub);
 String *Sign_Ecdsa(MemCtx *m, String *s, String *priv);
 boolean Verify_Ecdsa(MemCtx *m, String *s, String *priv);
+String *Crypto_RandomString(MemCtx *m, int length);

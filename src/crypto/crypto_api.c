@@ -29,3 +29,10 @@ String *Sign_Ecdsa(MemCtx *m, String *s, String *priv){
 boolean Verify_Ecdsa(MemCtx *m, String *s, String *priv){
     return FALSE;
 }
+
+String *Crypto_RandomString(MemCtx *m, int length){
+   File file;
+   File_Init(&file, String_Make(m, bytes("/dev/random")), NULL, NULL);
+   File_Read(m, &file, NULL, 0, length);
+   return file.data;
+}

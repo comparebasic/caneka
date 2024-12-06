@@ -9,13 +9,13 @@ struct pat_config {
 };
 
 static struct pat_config pats[] = {
-    {0, NULL, "p", 0},
-    {0, NULL, "h1", 0},
-    {0, NULL, "h2", 0},
-    {0, NULL, "h3", 0},
-    {0, NULL, "h4", 0},
-    {FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, "-", "ul", 0},
-    {FMT_FL_TO_PARENT|FMT_FL_SPACE_FOR_WS, NULL, "li", -1},
+    {FMT_FL_SPACE_FOR_WS, NULL, "p", 0},
+    {FMT_FL_SPACE_FOR_WS, NULL, "h1", 0},
+    {FMT_FL_SPACE_FOR_WS, NULL, "h2", 0},
+    {FMT_FL_SPACE_FOR_WS, NULL, "h3", 0},
+    {FMT_FL_SPACE_FOR_WS, NULL, "h4", 0},
+    {FMT_FL_SPACE_FOR_WS|FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, "-", "ul", 0},
+    {FMT_FL_SPACE_FOR_WS|FMT_FL_TO_PARENT|FMT_FL_SPACE_FOR_WS, NULL, "li", -1},
     {FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, "+", "table", 0},
     {FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "thead", -1},
     {FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_LAST|FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, NULL, "tr", -1},
@@ -147,10 +147,6 @@ static void outClose(FmtCtx *ctx, word fl){
 
 static void out(FmtCtx *ctx, int captureKey){
     FmtDef *def = ctx->def;
-    if(def == NULL){
-        def = Chain_Get(ctx->byId, 0);
-    }
-
     printf("<%s>", def->name->bytes);
 
     if((def->type.state & FMT_FL_TO_NEXT_ID) != 0){
@@ -196,10 +192,14 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     /*
     printf("\x1b[%dmcaptured %s/'%s'\x1b[0m\n", COLOR_YELLOW, captureToChars(captureKey), s->bytes);
     */
+    if(ctx->def == NULL){
+        ctx->def = Chain_Get(ctx->byId, 0);
+    }
+
     if(captureKey == FORMATTER_INDENT){
         ctx->def = Chain_Get(ctx->byId, s->length);
     }else if(captureKey == FORMATTER_ALIAS || captureKey == FORMATTER_METHOD){
-        if(ctx->item->content->length > 0){
+        if(String_Length(ctx->item->content) > 0){
             out(ctx, captureKey);
             reset(ctx);
         }
@@ -216,9 +216,8 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         }
     }else if(captureKey > _FORMATTER_OUT && captureKey < _FORMATTER_OUT_END){
         if(captureKey == FORMATTER_LINE || captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
-            if(ctx->def != NULL && (ctx->def->type.state & FMT_FL_SPACE_FOR_WS) != 0 && ctx->item->content->length > 0){
+            if(ctx->def != NULL && (ctx->def->type.state & FMT_FL_SPACE_FOR_WS) != 0 && String_Length(ctx->item->content) > 0){
                 String_AddBytes(ctx->m, ctx->item->content, bytes(" "), 1);
-
             }
             String_Add(ctx->m, ctx->item->content, s);
         }
@@ -233,7 +232,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         }
 
         if(captureKey == FORMATTER_NEXT || captureKey == FORMATTER_LAST_VALUE){
-            printf("\r\n");
+            printf("\n");
         }
 
     }

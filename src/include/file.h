@@ -21,3 +21,4 @@ File *File_Init(File *file, String *path, Access *access, IoCtx *ctx);
 status File_Delete(File *file);
 status File_Load(MemCtx *m, File *file, Access *access);
 status File_AbsFromCtx(MemCtx *m, File *file, Access *access, IoCtx *ctx);
+status File_Read(MemCtx *m, File *file, Access *access, int pos, int length);

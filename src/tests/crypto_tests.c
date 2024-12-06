@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Sha256_Tests(MemCtx *gm){
+status CryptoStrings_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
     String *s;
@@ -13,22 +13,10 @@ status Sha256_Tests(MemCtx *gm){
     hex = String_ToHex(m, sum);
     r |= Test(String_EqualsBytes(hex, bytes("68760b4a88c113b8ce4aed641911caf8ef01d5969754a20271e601698997881b")), "Sha256 matches, have '%s'",hex->bytes);
 
-    MemCtx_Free(m);
-    return r;
-}
-
-status Ecdsa_Tests(MemCtx *gm){
-    status r = READY;
-    MemCtx *m = MemCtx_Make();
-
-    String *priv;
-    String *pub;
-    status EcKeyPair_Make(MemCtx *m, String *priv, String *pub);
-
-    printf("\n");
+    int length = 512;
+    s = Crypto_RandomString(m, 512);
+    r |= Test(String_Length(s) == 512, "Random string length is expected");
 
     MemCtx_Free(m);
-
-    r |= SUCCESS;
     return r;
 }

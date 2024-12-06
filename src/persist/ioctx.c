@@ -12,7 +12,7 @@ static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
         }
     }
 
-    return ERROR;
+    return NOOP;
 }
 
 static String *pathRecurse(MemCtx *m, String *s, IoCtx *ctx, IoCtx *prior){

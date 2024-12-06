@@ -246,9 +246,9 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Crypto - Sha256",
-        Sha256_Tests,
-        "Generating Sha256 summaries of strings.",
+        "Crypto - Strings",
+        CryptoStrings_Tests,
+        "Generating Sha256 summaries of strings. And random data strings.",
         FEATURE_COMPLETE,
     },
     /*
@@ -266,14 +266,8 @@ static TestSet _Tests[] = {
         PARTIAL_FEATURE,
     },
     {
-        "Crypto",
-        Blank_Tests,
-        "Basic crypto tests including Sha256 and Salty.",
-        PREVIOUSLY_WORKING,
-    },
-    {
-        "PasswordFlow",
-        Blank_Tests,
+        "UserTests - PasswordFlow",
+        User_Tests,
         "A Basic user password flow using CycleServe and IoCtx",
         NOT_STARTED,
     },
