@@ -68,6 +68,7 @@ status StringB64_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
     String *s;
+    String *s2;
     String *b64;
     s = String_From(m, bytes("Some content to be b64 encoded."));
     b64 = String_ToB64(m, s);
@@ -76,6 +77,10 @@ status StringB64_Tests(MemCtx *gm){
     printf("\n");
 
     r |= Test(String_EqualsBytes(b64, bytes("U29tZSBjb250ZW50IHRvIGJlIGI2NCBlbmNvZGVkLg==")), "String has been encoded in base64, have '%s'", b64->bytes);
+
+    s2 = String_FromB64(m, b64);
+    r |= Test(String_Equals(s2, s), "String has been decoded from base64 to match original, expecting '%s', have '%s'", s->bytes, s2->bytes);
+
 
     MemCtx_Free(m);
     return r;

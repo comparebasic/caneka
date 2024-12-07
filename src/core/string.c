@@ -170,7 +170,6 @@ String *String_ToB64(MemCtx *m, String *s){
         int remaining = s->length;
         int offset = 0;
         while(remaining > 0){
-            printf("remaining %d\n", remaining);
             if(remaining < 3){
                 padding = 3 - remaining;
                 memset(&bctx.byte3, 0, 3);
@@ -194,11 +193,8 @@ String *String_ToB64(MemCtx *m, String *s){
             bctx.out[3] = (bctx.byte3[2] & 63); 
 
             for(int j = 0; j < 4-padding; j++){
-                printf("%c", b64_chars[bctx.out[j]]);
                 String_AddBytes(m, bs, &(b64_chars[bctx.out[j]]), 1);
             }
-
-            printf("\n");
         }
 
         for(int i = 0; i < padding; i++){
@@ -230,22 +226,68 @@ String *String_ToHex(MemCtx *m, String *s){
     return ret;
 }
 
-String *String_FromB64(MemCtx *m, String *s){
-    String *ret = String_Init(m, s->length*2);
-    while(s != NULL){
-        byte *b = s->bytes;
-        byte *end = b+s->length;
-        while(b < end){
-            byte c = *b;
-            byte b2[2];
-            b2[0] = hex_chars[((c & 240) >> 4)];
-            b2[1] = hex_chars[(c & 15)];
-            String_AddBytes(m, ret, b2, 2);
-            b++;
+static byte b64CharValue(byte b){
+
+    if(b >= 'A' && b <= 'Z'){
+        return b - 'A';
+    }else if(b >= 'a' && b <= 'z'){
+        return b - 'a' + 26;
+    }else if(b >= '0' && b <= '9'){
+        return b - '0' + 52;
+    }else if (b == '+'){
+        return 62;
+    }else if (b == '/'){
+        return 63;
+    }else if(b == '='){
+        return 0;
+    }else{
+        Fatal("Character out of range for Base64", TYPE_STRING);
+        return 0;
+    }
+}
+
+String *String_FromB64(MemCtx *m, String *bs){
+    B64Ctx bctx;
+    memset(&bctx, 0, sizeof(B64Ctx));
+    String *s = String_Init(m, (bs->length / 4) * 3);
+
+    int padding = 0;
+    while(bs != NULL){
+        int remaining = bs->length;
+        int offset = 0;
+        while(remaining > 0){
+            if(remaining < 4){
+                return NULL;
+            }else if(remaining == 4){
+                for(int i = 0; i < 4; i++){
+                   if(*(bs->bytes+offset+i) ==  '='){
+                        padding++;
+                   }
+                }
+                remaining = 0;
+            }else{
+                memcpy(&bctx.out, bs->bytes+offset, 4);
+                offset += 4;
+                remaining -= 4;
+            }
+
+            memset(&bctx.byte3, 0, 3);
+            byte b0 = b64CharValue(bctx.out[0]);
+            byte b1 = b64CharValue(bctx.out[1]);
+            byte b2 = b64CharValue(bctx.out[2]);
+            byte b3 = b64CharValue(bctx.out[3]);
+
+            bctx.byte3[0] = (b0 << 2) | (b1 >> 4);
+            bctx.byte3[1] = '0';
+            bctx.byte3[2] = '0';
+
+            String_AddBytes(m, s, bctx.byte3, 3-padding);
         }
-        s = String_Next(s);
-    };
-    return ret;
+
+        bs = String_Next(bs);
+    }
+
+    return s;
 }
 
 status String_Add(MemCtx *m, String *a, String *b) {
