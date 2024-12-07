@@ -10,7 +10,7 @@ Abstract *String_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstrac
     }
     String_Add(m, os, odef->name);
     String_AddBytes(m, os, bytes("/"), 1);
-    String_Add(m, os, String_FromInt(m, s->length));
+    String_Add(m, os, String_FromInt(m, String_Length(s)));
     char *eq = "=";
     char *end = ";";
     if((o->type.state & LINE_SEPERATED) != 0){
@@ -42,7 +42,7 @@ Abstract *I64_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *
         end = "\n";
     }
     String_AddBytes(m, os, bytes(eq), 1);
-    String_Add(m, os, String_FromInt(m, s->length));
+    String_Add(m, os, String_FromInt(m, sg->val.value));
     String_AddBytes(m, os, bytes(end), 1);
 
    return (Abstract *)os;
@@ -112,7 +112,7 @@ Abstract *FilePath_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstr
     String_Add(m, os, String_FromInt(m, (int)file->type.state));
     String_AddBytes(m, os, bytes("/"), 1);
 
-    String_Add(m, os, String_FromInt(m, file->path->length));
+    String_Add(m, os, String_FromInt(m, String_Length(file->path)));
     String_AddBytes(m, os, bytes("="), 1);
     String_Add(m, os, file->path);
     String_AddBytes(m, os, bytes(";"), 1);
@@ -121,7 +121,23 @@ Abstract *FilePath_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstr
 }
 
 Abstract *Auth_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
-    return NULL;
+    Auth *auth = asIfc(a, TYPE_AUTH);
+
+    String *os = String_Init(m, STRING_EXTEND);
+    if(key != NULL){
+        String_Add(m, os, key);
+        String_AddBytes(m, os, bytes(":"), 1);
+    }
+
+    String_Add(m, os, odef->name);
+    String_AddBytes(m, os, bytes("/2={"), 4);
+    String_Add(m, os, 
+        Oset_To(m, String_Make(m, bytes("salt")), (Abstract *)auth->saltenc));
+    String_Add(m, os, 
+        Oset_To(m, String_Make(m, bytes("digest")), (Abstract *)String_ToHex(m, auth->digest)));
+    String_AddBytes(m, os, bytes("}"), 1);
+
+    return (Abstract *)os;
 }
 
 Abstract *EncPair_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){

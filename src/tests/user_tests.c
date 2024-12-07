@@ -27,5 +27,8 @@ status User_Tests(MemCtx *gm){
     Span *u = User_Open(m, users, userId, pass, ac, NULL);
 
     MemCtx_Free(m);
+    
+    r |= SUCCESS;
+
     return r;
 }

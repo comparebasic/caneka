@@ -23,7 +23,6 @@ String *EncPair_GetKey(String *key, Access *access){
 
 status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
     if(HasAccess(Cont(m, bytes("system")), access)){
-        printf("Extend Called!\n");
         return TableChain_Extend(m, SaltyKeyChain, tbl);
     }else{
         Fatal("Trying to extend key table as non system user", TYPE_ACCESS);

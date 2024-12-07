@@ -30,6 +30,9 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         pwauth.data = Oset_To(m, NULL, (Abstract *)Auth_Make(m, key, secret, ac));
         pwauth.type.state |= FILE_UPDATED;
 
+        Debug_Print((void *)pwauth.data, 0, "Auth: ", COLOR_PURPLE, TRUE);
+        printf("\n");
+
         File user;
         File_Init(&user, String_Make(m, bytes("user.data")), ac, &ctx);
         if(data == NULL){
@@ -39,7 +42,9 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         user.data = Oset_To(m, NULL, (Abstract *)data); 
         user.type.state |= FILE_UPDATED;
 
+        /*
         IoCtx_Persist(m, &ctx); 
+        */
         return data;
     }
 

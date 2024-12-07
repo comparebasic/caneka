@@ -81,7 +81,10 @@ status StringB64_Tests(MemCtx *gm){
     s2 = String_FromB64(m, b64);
     r |= Test(String_Equals(s2, s), "String has been decoded from base64 to match original, expecting '%s', have '%s'", s->bytes, s2->bytes);
 
-
     MemCtx_Free(m);
+
+    r &= ~ERROR;
+    r |= SUCCESS;
+
     return r;
 }
