@@ -3,4 +3,4 @@ typedef struct blank {
     int length;
 } Blank;
 
-Blank *Blank_Make(MemCtx *m){
+Blank *Blank_Make(MemCtx *m);

@@ -36,5 +36,4 @@ Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
     auth->digest = Sha256_Get(m, &sha);
 
     return auth;
-
 }

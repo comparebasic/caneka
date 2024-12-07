@@ -31,29 +31,30 @@ status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
     }
 }
 
+static isFilled(Abstract *a){
+    return (a != NULL && a->type.of != TYPE_BLANK);
+}
+
 status EncPair_Fill(MemCtx *m, String *keyId, EncPair *p, Access *access){
-    if(p->enc != NULL && p->dec != NULL && p->keyId != NULL){
+    if(isFilled(p->enc) && isFilled(p->dec) && isFilled(p->keyId)){
         return (NOOP|SUCCESS);
     }
 
     if(keyId != NULL){
         String *key = (String *)TableChain_Get(SaltyKeyChain, keyId); 
-        if(key == NULL){
-            p->type.state |= ERROR;
-        }else{
-            if(enc == NULL && dec != NULL){
-                p->enc = String_Clone(m, p->dec);
-                p->type.state |= Salty_Enc(m, key, p->enc); 
-                return SUCCESS;
-            }
-            if(enc != NULL && dec == NULL){
-                p->dec = String_Clone(m, p->enc);
-                p->type.state |= Salty_Dec(m, key, p->dec); 
-                return SUCCESS;
-            }
+        if(!isFilled(p->enc) && isFilled(dec)){
+            p->enc = String_Clone(m, p->dec);
+            p->type.state |= Salty_Enc(m, key, p->enc); 
+            return SUCCESS;
+        }
+        if(isFilled(enc) && !isFilled(dec)){
+            p->dec = String_Clone(m, p->enc);
+            p->type.state |= Salty_Dec(m, key, p->dec); 
+            return SUCCESS;
         }
     }
-    return NOOP;
+
+    return ERROR;
 }
 
 EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access *access){

@@ -2,16 +2,23 @@
 #include <caneka.h>
 
 status Sha256_AddString(Sha256 *sha, String *s){
-    return NOOP;
+    r = READY;
+    while(s != NULL){
+        Sha256_process(&_st, s->bytes, s->length);
+        s = String_Next(s);
+        r |= SUCCESS;
+    }
+    return r;
 }
 
-String *Sha256_Get(MemCtx *m, Sha256 *sha, String *s){
-    return NULL;
+String *Sha256_Get(MemCtx *m, Sha256 *sha){
+    byte buff[SHA256_DIGEST_SIZE+1];
+    memset(buff, 0, sizeof(buff));
 
-}
-
-String *Sha256_GetHex(MemCtx *m, Sha256 sha, String *s){
-    return NULL;
+    Sha256_done(sha, buff);
+    String *ret = String_Init(m, SHA256_DIGEST_SIZE);
+    String_AddBytes(m, ret, buff, SHA256_DIGEST_SIZE);
+    return ret;
 }
 
 String *String_Sha256(MemCtx *m, String *s){

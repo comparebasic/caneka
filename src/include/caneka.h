@@ -97,7 +97,7 @@ typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source)
 enum types {
     _TYPE_START,
     TYPE_UNKNOWN,
-    TYPE_BLANK;
+    TYPE_BLANK,
     TYPE_ABSTRACT,
     TYPE_RESERVE,
     TYPE_WRAPPED,
