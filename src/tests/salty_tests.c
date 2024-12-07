@@ -28,16 +28,20 @@ status Salty_Tests(MemCtx *gm){
     s = Cont(m, bytes("One fell over the nest of another, things are good, and that's a never ending scenario, of life!"));
 
     pair = EncPair_Make(m, Cont(m, bytes("test")), NULL, s,  ac);
+    EncPair_Fill(m, pair, ac);
     result = EncPair_Make(m, Cont(m, bytes("test")), pair->enc, NULL, ac);
 
     r |= Test(String_Equals(pair->enc, result->enc), "Encoded matches from original to result");
+    EncPair_Fill(m, result, ac);
     r |= Test(String_Equals(pair->dec, result->dec), "Decoded matches from original to result");
 
 
-    pair = EncPair_Make(m, String_Make(m, bytes("test")), (String *)Blank_Make(m), String_Make(m, bytes("zpants!1923")), ac);
-    String *os = Oset_To(m, NULL, (Abstract *)pair);
-    r |= Test(String_EqualsBytes(os, bytes("span/3=(s/8=poo-head;s/11=fancy-pants;s/11=final-fight;)")), "Span to oset string is equal, have '%s'", os->bytes);
+    pair = EncPair_Make(m, String_Make(m, bytes("test")), NULL, String_Make(m, bytes("zpants!1923")), ac);
+    EncPair_Fill(m, pair, ac);
+    EncPair_Conceal(m, pair);
 
+    String *os = Oset_To(m, NULL, (Abstract *)pair);
+    r |= Test(String_EqualsBytes(os, bytes("enc/3={key:s/4=test;enc:s/22=2bfc98b22fb8b02d33ffe2;dec:x/0=;}")), "Span to oset string is equal, have '%s'", os->bytes);
 
     MemCtx_Free(m);
 

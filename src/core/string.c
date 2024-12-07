@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-char *b64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+byte *b64_chars = bytes("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 char *hex_chars = "0123456789abcdef";
 
 static const byte *digits = (byte *)"0123456789";
@@ -160,7 +160,77 @@ String *String_From(MemCtx *m, byte *bytes){
     return String_Make(m, bytes);
 }
 
+String *String_ToB64(MemCtx *m, String *s){
+    B64Ctx bctx;
+    memset(&bctx, 0, sizeof(B64Ctx));
+    String *bs = String_Init(m, ((s->length/3)*4) + 3);
+
+    int padding = 0;
+    while(s != NULL){
+        int remaining = s->length;
+        int offset = 0;
+        while(remaining > 0){
+            printf("remaining %d\n", remaining);
+            if(remaining < 3){
+                padding = 3 - remaining;
+                memset(&bctx.byte3, 0, 3);
+                for(int i = 0; i < remaining; i++){
+                    bctx.byte3[i] = s->bytes[offset];
+                    offset++;
+                    i++;
+                    remaining--;
+                }
+                remaining = 0;
+            }else{
+                memcpy(&bctx.byte3, s->bytes+offset, 3);
+                offset += 3;
+                remaining -= 3;
+            }
+
+            memset(&bctx.out, 0, 4);
+            bctx.out[0] = bctx.byte3[0] >> 2; 
+            bctx.out[1] = ((bctx.byte3[0] & 3) << 4 ) | ((bctx.byte3[1] & 240) >> 4); 
+            bctx.out[2] = ((bctx.byte3[1] & 15) << 2 ) | ((bctx.byte3[2] & 192) >> 6); 
+            bctx.out[3] = (bctx.byte3[2] & 63); 
+
+            for(int j = 0; j < 4-padding; j++){
+                printf("%c", b64_chars[bctx.out[j]]);
+                String_AddBytes(m, bs, &(b64_chars[bctx.out[j]]), 1);
+            }
+
+            printf("\n");
+        }
+
+        for(int i = 0; i < padding; i++){
+            String_AddBytes(m, bs, bytes("="), 1);
+        }
+
+
+        s = String_Next(s);
+    }
+
+    return bs;
+}
+
 String *String_ToHex(MemCtx *m, String *s){
+    String *ret = String_Init(m, s->length*2);
+    while(s != NULL){
+        byte *b = s->bytes;
+        byte *end = b+s->length;
+        while(b < end){
+            byte c = *b;
+            byte b2[2];
+            b2[0] = hex_chars[((c & 240) >> 4)];
+            b2[1] = hex_chars[(c & 15)];
+            String_AddBytes(m, ret, b2, 2);
+            b++;
+        }
+        s = String_Next(s);
+    };
+    return ret;
+}
+
+String *String_FromB64(MemCtx *m, String *s){
     String *ret = String_Init(m, s->length*2);
     while(s != NULL){
         byte *b = s->bytes;

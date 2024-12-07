@@ -1,12 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
+void Log_AuthFail(MemCtx *m, Auth *auth, Access *ac){
+    return;
+}
+
 boolean Auth_Verify(MemCtx *m, Auth *auth, String *secret, Access *ac){
-    if((EncPair_Fill(m, auth->key, auth->saltenc, ac) & SUCCESS) != 0){
+    if((EncPair_Fill(m, auth->saltenc, ac) & SUCCESS) != 0){
         Sha256 sha;
         Sha256_init(&sha);
-        Sha256_AddString(m, &sha, secret);
-        Sha256_AddString(m, &sha, auth->saltenc->dec);
+        Sha256_AddString(&sha, secret);
+        Sha256_AddString(&sha, auth->saltenc->dec);
         return String_Equals(auth->digest, Sha256_Get(m, &sha));
     }
 
@@ -22,17 +26,15 @@ Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
         return NULL;
     }
 
-    auth->key = key;
-
     String *salt = Crypto_RandomString(m, USER_SALT_LENGTH);
     String *enc = String_Clone(m, salt);
     Salty_Enc(m, skey, enc);
-    auth->saltenc = EncPair_Make(m, key, enc, Blank_Make(m), ac);
+    auth->saltenc = EncPair_Make(m, key, enc, (String *)Blank_Make(m), ac);
 
     Sha256 sha;
     Sha256_init(&sha);
-    Sha256_AddString(m, &sha, secret);
-    Sha256_AddString(m, &sha, salt);
+    Sha256_AddString(&sha, secret);
+    Sha256_AddString(&sha, salt);
     auth->digest = Sha256_Get(m, &sha);
 
     return auth;

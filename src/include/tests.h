@@ -10,6 +10,7 @@ status Blank_Tests(MemCtx *gm);
 
 status Core_Tests(MemCtx *gm);
 status String_Tests(MemCtx *gm);
+status StringB64_Tests(MemCtx *gm);
 status Span_Tests(MemCtx *gm);
 status SpanInline_Tests(MemCtx *gm);
 status Hash_Tests(MemCtx *gm);

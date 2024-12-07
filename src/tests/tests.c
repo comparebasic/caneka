@@ -26,6 +26,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "String - B64",
+        StringB64_Tests,
+        "Tests base 64 encoded strings",
+        FEATURE_COMPLETE,
+    },
+    {
         "Span",
         Span_Tests,
         "Span is the basic data structure for sequential or logorithmic storage access.",

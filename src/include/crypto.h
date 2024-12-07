@@ -21,6 +21,9 @@ struct string *Buff(MemCtx *m);
 boolean TextCharFilter(byte *b, i64 length);
 
 String *String_Sha256(MemCtx *m, String *s);
+status Sha256_AddString(Sha256 *sha, String *s);
+String *Sha256_Get(MemCtx *m, Sha256 *sha);
+String *String_Sha256(MemCtx *m, String *s);
 status EcKeyPair_Make(MemCtx *m, String *priv, String *pub);
 String *Sign_Ecdsa(MemCtx *m, String *s, String *priv);
 boolean Verify_Ecdsa(MemCtx *m, String *s, String *priv);

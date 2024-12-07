@@ -31,17 +31,22 @@ status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
     }
 }
 
+status EncPair_Conceal(MemCtx *m, EncPair *p){
+    p->dec = (String *)Blank_Make(m);
+    return SUCCESS;
+}
+
 static boolean isFilled(String *s){
     return (s != NULL && s->type.of != TYPE_BLANK);
 }
 
-status EncPair_Fill(MemCtx *m, String *keyId, EncPair *p, Access *access){
+status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
     if(isFilled(p->enc) && isFilled(p->dec) && isFilled(p->keyId)){
         return (NOOP|SUCCESS);
     }
 
-    if(keyId != NULL){
-        String *key = (String *)TableChain_Get(SaltyKeyChain, keyId); 
+    if(p->keyId != NULL){
+        String *key = (String *)TableChain_Get(SaltyKeyChain, p->keyId); 
         if(!isFilled(p->enc) && isFilled(p->dec)){
             p->enc = String_Clone(m, p->dec);
             p->type.state |= Salty_Enc(m, key, p->enc); 

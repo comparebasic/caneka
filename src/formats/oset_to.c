@@ -136,7 +136,7 @@ Abstract *EncPair_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstra
     String_Add(m, os, odef->name);
     String_AddBytes(m, os, bytes("/3={"), 4);
     String_Add(m, os, Oset_To(m, String_Make(m, bytes("key")), (Abstract *)p->keyId));
-    String_Add(m, os, Oset_To(m, String_Make(m, bytes("enc")), (Abstract *)p->enc));
+    String_Add(m, os, Oset_To(m, String_Make(m, bytes("enc")), (Abstract *)String_ToHex(m, p->enc)));
     String_Add(m, os, Oset_To(m, String_Make(m, bytes("dec")), (Abstract *)p->dec));
     String_AddBytes(m, os, bytes("}"), 1);
 
@@ -155,6 +155,7 @@ Abstract *Blank_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract
     String_AddBytes(m, os, bytes("x"), 1);
     String_AddBytes(m, os, bytes("/"), 1);
     String_Add(m, os, String_FromInt(m, b->length));
+    String_AddBytes(m, os, bytes("="), 1);
     int l = b->length;
     while(l--){
         String_AddBytes(m, os, bytes("-"), 1);

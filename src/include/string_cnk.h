@@ -13,6 +13,12 @@ enum string_flags {
     FLAG_STRING_TEXT = 1 << 13,
 };
 
+typedef struct b64_ctx {
+   word count; 
+   byte byte3[3];
+   byte out[4];
+} B64Ctx;
+
 typedef struct stringmin {
     Type type;
     int length;
@@ -58,6 +64,8 @@ status String_Reset(String *s);
 
 /* conversions */
 String *String_ToHex(MemCtx *m, String *s);
+String *String_ToB64(MemCtx *m, String *s);
+String *String_FromB64(MemCtx *m, String *s);
 String *String_ToEscaped(MemCtx *m, String *s);
 char *String_ToChars(MemCtx *m, String *s);
 status String_ToSlab(String *a, void *sl, size_t sz);
