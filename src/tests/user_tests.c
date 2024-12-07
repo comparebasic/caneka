@@ -24,7 +24,7 @@ status User_Tests(MemCtx *gm){
 
     String *pass =  String_Make(m, bytes("Bork_Bork128!Bork"));
 
-    Span *u = User_Open(m, users, userId, pass, ac);
+    Span *u = User_Open(m, users, userId, pass, ac, NULL);
 
     MemCtx_Free(m);
     return r;

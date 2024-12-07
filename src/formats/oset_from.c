@@ -6,6 +6,13 @@ Abstract *String_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstr
     return (Abstract *)s;
 }
 
+Abstract *Blank_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
+    String *s = (String *)asIfc(a, TYPE_STRING);
+    Blank *b = Blank_Make(m);
+    b->length = s->length;
+    return (Abstract *)b;
+}
+
 Abstract *I64_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
     String *s = (String *)asIfc(a, TYPE_STRING);
     return (Abstract *)I64_Wrapped(m, I64_FromString((String *)a));
@@ -20,6 +27,14 @@ Abstract *Table_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstra
 }
 
 Abstract *Span_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
+    return (Abstract *)o->item->value;
+}
+
+Abstract *Auth_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
+    return (Abstract *)o->item->value;
+}
+
+Abstract *EncPair_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
     return (Abstract *)o->item->value;
 }
 

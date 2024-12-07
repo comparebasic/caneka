@@ -33,6 +33,12 @@ status Salty_Tests(MemCtx *gm){
     r |= Test(String_Equals(pair->enc, result->enc), "Encoded matches from original to result");
     r |= Test(String_Equals(pair->dec, result->dec), "Decoded matches from original to result");
 
+
+    pair = EncPair_Make(m, String_Make(m, bytes("test")), (String *)Blank_Make(m), String_Make(m, bytes("zpants!1923")), ac);
+    String *os = Oset_To(m, NULL, (Abstract *)pair);
+    r |= Test(String_EqualsBytes(os, bytes("span/3=(s/8=poo-head;s/11=fancy-pants;s/11=final-fight;)")), "Span to oset string is equal, have '%s'", os->bytes);
+
+
     MemCtx_Free(m);
 
     r |= SUCCESS;

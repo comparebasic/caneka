@@ -135,6 +135,7 @@ enum types {
     TYPE_STRUCTEXP,
     TYPE_IOCTX,
     TYPE_ACCESS,
+    TYPE_AUTH,
     _TYPE_SPAN_START,
     TYPE_SPAN,
     TYPE_MINI_SPAN,
@@ -283,6 +284,7 @@ cls Ifc_Get(cls inst);
 #include "testsuite.h"
 #include "mark.h"
 #include "human_present.h"
+#include "auth.h"
 #include "user.h"
 #include "apps.h"
 #ifdef LINUX

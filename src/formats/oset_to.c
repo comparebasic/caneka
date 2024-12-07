@@ -119,3 +119,47 @@ Abstract *FilePath_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstr
 
     return (Abstract *)os;
 }
+
+Abstract *Auth_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
+    return NULL;
+}
+
+Abstract *EncPair_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
+    EncPair *p = asIfc(a, TYPE_ENC_PAIR);
+
+    String *os = String_Init(m, STRING_EXTEND);
+    if(key != NULL){
+        String_Add(m, os, key);
+        String_AddBytes(m, os, bytes(":"), 1);
+    }
+
+    String_Add(m, os, odef->name);
+    String_AddBytes(m, os, bytes("/3={"), 4);
+    String_Add(m, os, Oset_To(m, String_Make(m, bytes("key")), (Abstract *)p->keyId));
+    String_Add(m, os, Oset_To(m, String_Make(m, bytes("enc")), (Abstract *)p->enc));
+    String_Add(m, os, Oset_To(m, String_Make(m, bytes("dec")), (Abstract *)p->dec));
+    String_AddBytes(m, os, bytes("}"), 1);
+
+    return (Abstract *)os;
+}
+
+Abstract *Blank_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
+    Blank *b = asIfc(a, TYPE_BLANK);
+
+    String *os = String_Init(m, STRING_EXTEND);
+    if(key != NULL){
+        String_Add(m, os, key);
+        String_AddBytes(m, os, bytes(":"), 1);
+    }
+
+    String_AddBytes(m, os, bytes("x"), 1);
+    String_AddBytes(m, os, bytes("/"), 1);
+    String_Add(m, os, String_FromInt(m, b->length));
+    int l = b->length;
+    while(l--){
+        String_AddBytes(m, os, bytes("-"), 1);
+    }
+    String_AddBytes(m, os, bytes(";"), 1);
+
+    return (Abstract *)os;
+}

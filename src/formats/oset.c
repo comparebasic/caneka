@@ -35,6 +35,9 @@ static status populateOset(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)OsetDef_Make(m, TYPE_SPAN, String_Make(m, bytes("span")), Span_FromOset, Iter_ToOset));
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)OsetDef_Make(m, TYPE_WRAPPED_I64, String_Make(m, bytes("i64")), I64_FromOset, I64_ToOset));
     r |= Lookup_Add(m, lk, TYPE_FILE, (void *)OsetDef_Make(m, TYPE_FILE, String_Make(m, bytes("file")), FilePath_FromOset, FilePath_ToOset));
+    r |= Lookup_Add(m, lk, TYPE_BLANK, (void *)OsetDef_Make(m, TYPE_BLANK, String_Make(m, bytes("x")), Blank_FromOset, Blank_ToOset));
+    r |= Lookup_Add(m, lk, TYPE_AUTH, (void *)OsetDef_Make(m, TYPE_AUTH, String_Make(m, bytes("auth")), Auth_FromOset, Auth_ToOset));
+    r |= Lookup_Add(m, lk, TYPE_ENC_PAIR, (void *)OsetDef_Make(m, TYPE_ENC_PAIR, String_Make(m, bytes("enc")), EncPair_FromOset, EncPair_ToOset));
     return r;
 }
 

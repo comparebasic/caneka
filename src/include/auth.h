@@ -7,4 +7,4 @@ typedef struct auth {
 
 Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac);
 boolean Auth_Verify(MemCtx *m, Auth *auth, String *secret, Access *ac);
-void Log_AuthFail(MemCtx *m, AUth *auth, Access *ac);
+void Log_AuthFail(MemCtx *m, Auth *auth, Access *ac);

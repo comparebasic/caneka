@@ -16,7 +16,7 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         File *udata = (File *)Table_Get(ctx.files, (Abstract *)String_Make(m, bytes("user.data")));
         File *pwauth = (File *)Table_Get(ctx.files, (Abstract *)String_Make(m, bytes("password.data")));
         File_Load(m, pwauth, ac);
-        Auth *auth = Abs_FromOset(m, pwauth->data);
+        Auth *auth = as(Abs_FromOset(m, pwauth->data), TYPE_AUTH);
         if(!Auth_Verify(m, auth, secret, ac)){
             Log_AuthFail(m, auth, ac);
             return NULL;
@@ -26,18 +26,21 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         return (Span *)Abs_FromOset(m, udata->data);
     }else{
         File pwauth;
-        File_Init(&pwauth, String_Make(m, "password.auth"), ac, ctx);
-        pwauth.data = Oset_To(m, NULL, Auth_Make(m, key, secret, ac));
+        File_Init(&pwauth, String_Make(m, bytes("password.auth")), ac, &ctx);
+        pwauth.data = Oset_To(m, NULL, (Abstract *)Auth_Make(m, key, secret, ac));
         pwauth.type.state |= FILE_UPDATED;
 
         File user;
-        File_Init(&user, String_Make(m, "user.data"), ac, ctx);
+        File_Init(&user, String_Make(m, bytes("user.data")), ac, &ctx);
+        if(data == NULL){
+            data = Span_Make(m, TYPE_TABLE);
+        }
         Table_Set(data, (Abstract *)String_Make(m, bytes("id")), (Abstract *)id);
         user.data = Oset_To(m, NULL, (Abstract *)data); 
         user.type.state |= FILE_UPDATED;
 
         IoCtx_Persist(m, &ctx); 
-        return u;
+        return data;
     }
 
     return NULL;

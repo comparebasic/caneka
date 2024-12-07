@@ -2,9 +2,9 @@
 #include <caneka.h>
 
 status Sha256_AddString(Sha256 *sha, String *s){
-    r = READY;
+    status r = READY;
     while(s != NULL){
-        Sha256_process(&_st, s->bytes, s->length);
+        Sha256_process(sha, s->bytes, s->length);
         s = String_Next(s);
         r |= SUCCESS;
     }

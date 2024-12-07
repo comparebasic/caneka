@@ -59,6 +59,7 @@ extern int DEBUG_FILE;
 extern int DEBUG_OSET;
 extern int DEBUG_NESTED;
 extern int DEBUG_CASH;
+extern int DEBUG_USER;
 
 extern boolean SHOW_SERVE_TESTS;
 

@@ -125,6 +125,7 @@ status Oset_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(f2->path, bytes("fname.txt")), "File from oset matches, have '%s'", f2->path->bytes);
     r |= Test((f2->type.state == 4096), "File from oset matches, have '%d'", f2->type.state);
 
+
     MemCtx_Free(m);
     return r;
 }

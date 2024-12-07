@@ -31,8 +31,8 @@ status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
     }
 }
 
-static isFilled(Abstract *a){
-    return (a != NULL && a->type.of != TYPE_BLANK);
+static boolean isFilled(String *s){
+    return (s != NULL && s->type.of != TYPE_BLANK);
 }
 
 status EncPair_Fill(MemCtx *m, String *keyId, EncPair *p, Access *access){
@@ -42,12 +42,12 @@ status EncPair_Fill(MemCtx *m, String *keyId, EncPair *p, Access *access){
 
     if(keyId != NULL){
         String *key = (String *)TableChain_Get(SaltyKeyChain, keyId); 
-        if(!isFilled(p->enc) && isFilled(dec)){
+        if(!isFilled(p->enc) && isFilled(p->dec)){
             p->enc = String_Clone(m, p->dec);
             p->type.state |= Salty_Enc(m, key, p->enc); 
             return SUCCESS;
         }
-        if(isFilled(enc) && !isFilled(dec)){
+        if(isFilled(p->enc) && !isFilled(p->dec)){
             p->dec = String_Clone(m, p->enc);
             p->type.state |= Salty_Dec(m, key, p->dec); 
             return SUCCESS;
