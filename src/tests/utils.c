@@ -1,6 +1,22 @@
 #include <external.h>
 #include <caneka.h>
 
+static boolean _testKeyAdded = FALSE;
+status Tests_AddTestKey(MemCtx *m){
+    if(!_testKeyAdded){
+        _testKeyAdded = TRUE;
+        Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
+        Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
+
+        Span *keys = Span_Make(m, TYPE_TABLE);
+        Table_Set(keys, (Abstract *)Cont(m, bytes("test")),
+            (Abstract *)Salty_MakeKey(m, Cont(m, bytes("Tests are Fun Fun Fun!"))));
+
+        return EncPair_AddKeyTable(m, keys, system);
+    }
+    return SUCCESS;
+}
+
 static int connectToServer(){
 	struct sockaddr_in server;
 	int incoming_sc = socket(AF_INET , SOCK_STREAM, 0);

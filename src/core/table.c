@@ -63,6 +63,9 @@ static status Table_Resize(Span *tbl, word *queries){
 }
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value){
+    if(a == NULL){
+        return NULL;
+    }
     Hashed *h = Hashed_Make(tbl->m, a);
     if(op != SPAN_OP_GET && op != SPAN_OP_SET){
         return h;

@@ -1,7 +1,7 @@
 #include <external.h> 
 #include <caneka.h> 
 
-static TableChain *SaltyKeyChain;
+static TableChain *SaltyKeyChain = NULL;
 
 status Enc_Init(MemCtx *m){
     if(SaltyKeyChain == NULL){
@@ -23,6 +23,7 @@ String *EncPair_GetKey(String *key, Access *access){
 
 status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
     if(HasAccess(Cont(m, bytes("system")), access)){
+        printf("Extend Called!\n");
         return TableChain_Extend(m, SaltyKeyChain, tbl);
     }else{
         Fatal("Trying to extend key table as non system user", TYPE_ACCESS);
@@ -30,15 +31,9 @@ status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
     }
 }
 
-EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access *access){
-    EncPair *p = (EncPair *)MemCtx_Alloc(m, sizeof(EncPair));
-    p->type.of = TYPE_ENC_PAIR;
-
-    p->enc = enc;
-    p->dec = dec;
-    p->keyId = keyId;
-    if(enc != NULL && dec != NULL && keyId != NULL){
-        return p;
+status EncPair_Fill(MemCtx *m, String *keyId, EncPair *p, Access *access){
+    if(p->enc != NULL && p->dec != NULL && p->keyId != NULL){
+        return (NOOP|SUCCESS);
     }
 
     if(keyId != NULL){
@@ -49,13 +44,25 @@ EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access
             if(enc == NULL && dec != NULL){
                 p->enc = String_Clone(m, p->dec);
                 p->type.state |= Salty_Enc(m, key, p->enc); 
+                return SUCCESS;
             }
             if(enc != NULL && dec == NULL){
                 p->dec = String_Clone(m, p->enc);
                 p->type.state |= Salty_Dec(m, key, p->dec); 
+                return SUCCESS;
             }
         }
     }
+    return NOOP;
+}
+
+EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access *access){
+    EncPair *p = (EncPair *)MemCtx_Alloc(m, sizeof(EncPair));
+    p->type.of = TYPE_ENC_PAIR;
+
+    p->enc = enc;
+    p->dec = dec;
+    p->keyId = keyId;
 
     return p;
 }

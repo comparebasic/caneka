@@ -16,11 +16,8 @@ status Salty_Tests(MemCtx *gm){
     Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
     Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
 
-    Span *keys = Span_Make(m, TYPE_TABLE);
-    Table_Set(keys, (Abstract *)Cont(m, bytes("test")),
-        (Abstract *)Salty_MakeKey(m, Cont(m, bytes("Tests are Fun Fun Fun!"))));
+    status keysAdded = Tests_AddTestKey(gm);
 
-    status keysAdded = EncPair_AddKeyTable(m, keys, system);
     r |= Test((keysAdded & SUCCESS) != 0, "Test key added to key chain");
 
     key = EncPair_GetKey(Cont(m, bytes("bogus")), ac);

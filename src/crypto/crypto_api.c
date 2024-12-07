@@ -1,6 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
+status Sha256_AddString(Sha256 *sha, String *s){
+    return NOOP;
+}
+
+String *Sha256_Get(MemCtx *m, Sha256 *sha, String *s){
+    return NULL;
+
+}
+
+String *Sha256_GetHex(MemCtx *m, Sha256 sha, String *s){
+    return NULL;
+}
+
 String *String_Sha256(MemCtx *m, String *s){
     struct sha256_state _st;
     Sha256_init(&_st);

@@ -97,6 +97,7 @@ typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source)
 enum types {
     _TYPE_START,
     TYPE_UNKNOWN,
+    TYPE_BLANK;
     TYPE_ABSTRACT,
     TYPE_RESERVE,
     TYPE_WRAPPED,
@@ -235,6 +236,7 @@ cls Ifc_Get(cls inst);
 #include "error.h"
 #include "log.h"
 #include "mem.h"
+#include "blank.h"
 #include "single.h"
 #include "boolean.h"
 #include "maker.h"

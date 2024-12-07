@@ -3,6 +3,9 @@ extern char *longCstr;
 
 extern TestSet *Tests;
 
+status Tests_AddTestKey(MemCtx *m);
+
+
 status Blank_Tests(MemCtx *gm);
 
 status Core_Tests(MemCtx *gm);

@@ -8,15 +8,8 @@ status User_Tests(MemCtx *gm){
     IoCtx *root = IoCtxTests_GetRootCtx(m);
     /* add test key */
     Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
-    Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
-
-    Span *keys = Span_Make(m, TYPE_TABLE);
-    Table_Set(keys, (Abstract *)Cont(m, bytes("test")),
-        (Abstract *)Salty_MakeKey(m, Cont(m, bytes("Tests are Fun Fun Fun!"))));
-
-    status keysAdded = EncPair_AddKeyTable(m, keys, system);
+    Tests_AddTestKey(gm);
     /* end add test key */
-
 
     String *users_s = String_Make(m, bytes("users"));
     IoCtx *users = IoCtx_Make(m, users_s, NULL, root);
