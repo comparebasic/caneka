@@ -37,7 +37,14 @@ static String *pathRecurse(MemCtx *m, String *s, IoCtx *ctx, IoCtx *prior){
 String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
     if(ctx->abs == NULL){
         String *s = String_Init(m, STRING_EXTEND);
-        ctx->abs = pathRecurse(m, s, ctx, ctx->prior);
+        if(ctx->prior != NULL && ctx->prior->abs != NULL){
+            String_Add(m, s, ctx->prior->abs);
+            String_AddBytes(m, s, bytes("/"), 1);
+            String_Add(m, s, ctx->root);
+            ctx->abs = s;
+        }else{
+            ctx->abs = pathRecurse(m, s, ctx, ctx->prior);
+        }
     }
     return ctx->abs;
 }
@@ -71,7 +78,7 @@ String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path){
 status IoCtx_LoadOrReserve(MemCtx *m, IoCtx *ctx){
     status r = READY;
     String *s = String_Init(m, STRING_EXTEND);
-    String *path = pathRecurse(m, s, ctx, ctx->prior);
+    String *path = IoCtx_GetAbs(m, ctx);
 
     char *path_cstr = String_ToChars(m, path);
     DIR* dir = opendir(path_cstr);
@@ -79,6 +86,7 @@ status IoCtx_LoadOrReserve(MemCtx *m, IoCtx *ctx){
         closedir(dir);
     }else if(ENOENT == errno){
         if(mkdir(path_cstr, PERMS) != 0){
+            printf("%s: %s\n", path_cstr, strerror(errno));
             Fatal("Unable to make dir", TYPE_IOCTX);
             return ERROR;
         }
@@ -90,7 +98,7 @@ status IoCtx_LoadOrReserve(MemCtx *m, IoCtx *ctx){
 status IoCtx_Load(MemCtx *m, IoCtx *ctx){
     status r = READY;
     String *s = String_Init(m, STRING_EXTEND);
-    String *path = pathRecurse(m, s, ctx, ctx->prior);
+    String *path = IoCtx_GetAbs(m, ctx); 
 
     char *path_cstr = String_ToChars(m, path);
     DIR* dir = opendir(path_cstr);
@@ -115,7 +123,9 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
     
     while((Iter_Next(&it) & END) == 0){
         File *file = (File *)Iter_Get(&it);
-        r |= File_Persist(m, file);
+        if(file != NULL){
+            r |= File_Persist(m, file);
+        }
     }
 
     r |= MemLocal_Persist(m, ctx->mstore, ctx);
@@ -136,7 +146,10 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     Iter_Init(&it, ctx->files);
     while((Iter_Next(&it) & END) == 0){
         File *file = (File *)Iter_Get(&it);
-        File_Delete(file);
+        if(file != NULL){
+            printf("Deleting %s\n", file->abs->bytes);
+            File_Delete(file);
+        }
     }
 
     MemLocal_Destroy(m, ctx);
@@ -158,7 +171,7 @@ status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *pr
     ctx->access = access;
     ctx->prior = prior;
 
-    ctx->files = Span_Make(m, TYPE_SPAN);
+    ctx->files = Span_Make(m, TYPE_TABLE);
     ctx->mstore = MemLocal_Make(m);
 
     return SUCCESS;

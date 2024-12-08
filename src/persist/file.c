@@ -142,9 +142,7 @@ File *File_Init(File *file, String *path, Access *access, IoCtx *ctx){
     file->path = path;
     if(ctx != NULL){
         file->abs = IoCtx_GetPath(ctx->m, ctx, file->path);
-        Span_Add(ctx->files, (Abstract *)file);
-    }else{
-        file->abs = file->path;
+        Table_Set(ctx->files, (Abstract *)file->path, (Abstract *)file);
     }
     
     return file;

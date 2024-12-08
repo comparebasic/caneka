@@ -50,18 +50,16 @@ status IoCtx_Tests(MemCtx *gm){
     IoCtx_Open(m, &one2, name, NULL, root);
 
     String *mlValue = (String *)Table_Get(one2.mstore->tbl, (Abstract *)String_Make(m, bytes("key")));
-    File *fileOne = (File *)Span_Get(one2.files, 0);
+    File *fileOne = (File *)Table_Get(one2.files, (Abstract *)fname);
 
     r |= Test(Ifc_Match(mlValue->type.of, TYPE_STRING), "MemLocal value from ctx matches type, have '%s'", Class_ToString(mlValue->type.of));
     r |= Test(String_EqualsBytes(mlValue, bytes("value")), "MemLocal value from ctx has expected bytes , have '%s'", mlValue->bytes);
     r |= Test(Ifc_Match(fileOne->type.of, TYPE_FILE), "File value from ctx matches type, have '%s'", Class_ToString(fileOne->type.of));
     r |= Test(String_EqualsBytes(fileOne->path, bytes("file.one")), "File value from ctx has expected bytes in path , have '%s'", fileOne->path->bytes);
 
-    /*
     IoCtx_Destroy(m, one, NULL);
     dir = opendir(onePath_cstr);
     r |= Test(dir == NULL, "dir destroyed %s", onePath_cstr);
-    */
 
     MemCtx_Free(m);
     return r;
