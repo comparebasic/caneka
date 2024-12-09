@@ -1,5 +1,20 @@
 #include <external.h>
 #include <caneka.h>
+status User_Delete(MemCtx *m, IoCtx *userCtx, String *id, Access *ac){
+    IoCtx ctx;
+    File file;
+    IoCtx_Init(m, &ctx, id, NULL, userCtx);
+
+    File_Init(&file, String_Make(m, bytes("password.auth")), ac, NULL);
+    file.abs = IoCtx_GetPath(m, &ctx, file.path);
+    File_Delete(&file);
+
+    File_Init(&file, String_Make(m, bytes("user.data")), ac, NULL);
+    file.abs = IoCtx_GetPath(m, &ctx, file.path);
+    File_Delete(&file);
+
+    return IoCtx_Destroy(m, &ctx, ac);
+}
 
 Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *ac, Span *data){
     if(DEBUG_USER){
@@ -12,19 +27,11 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
 
     IoCtx ctx;
     IoCtx_Init(m, &ctx, id, NULL, userCtx);
-    printf("load\n");
     if((IoCtx_Load(m, &ctx) & MISS) == 0 && ctx.files != NULL){
-        printf("load I of: %s\n", Class_ToString(ctx.files->def->typeOf));
-        Debug_Print((void *)ctx.files, 0, "Tbl: ", COLOR_PURPLE, TRUE);
-        printf("\n");
         File *udata = (File *)Table_Get(ctx.files, (Abstract *)String_Make(m, bytes("user.data")));
-        printf("load II\n");
         File *pwauth = (File *)Table_Get(ctx.files, (Abstract *)String_Make(m, bytes("password.data")));
-        printf("load III\n");
         File_Load(m, pwauth, ac);
-        printf("load IV\n");
         Auth *auth = as(Abs_FromOset(m, pwauth->data), TYPE_AUTH);
-        printf("load V\n");
         if(!Auth_Verify(m, auth, secret, ac)){
             Log_AuthFail(m, auth, ac);
             return NULL;
@@ -47,7 +54,6 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         user.data = Oset_To(m, NULL, (Abstract *)data); 
         user.type.state |= FILE_UPDATED;
 
-        printf("persist\n");
         IoCtx_Persist(m, &ctx); 
         return data;
     }

@@ -53,6 +53,7 @@ boolean Verify_Ecdsa(MemCtx *m, String *s, String *priv){
 String *Crypto_RandomString(MemCtx *m, int length){
    File file;
    File_Init(&file, String_Make(m, bytes("/dev/random")), NULL, NULL);
+   file.abs = file.path;
    File_Read(m, &file, NULL, 0, length);
    return file.data;
 }

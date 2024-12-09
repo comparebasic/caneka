@@ -42,8 +42,11 @@ Abstract *FilePath_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abs
     String *s = (String *)asIfc(a, TYPE_STRING);
 
     File *file = MemCtx_Alloc(m, sizeof(File));
-    file->type.of = TYPE_FILE;
-    file->path = s;
+    File_Init(file, s, NULL, NULL);
+
+    Debug_Print((void *)file->path, 0, "File From Oset: ", COLOR_PURPLE, TRUE); 
+    printf("\n");
+
     file->type.state = s->type.state;
 
     return (Abstract *)file;

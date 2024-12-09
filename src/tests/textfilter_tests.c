@@ -15,7 +15,7 @@ status TextFilter_Tests(MemCtx *gm){
     s = String_Make(m, cstr);
     r |= Test(!TextCharFilter(s->bytes, s->length), "normal text is fine, '%s'", String_Present(m, (Abstract *)s)->bytes);
 
-    s = Buff(m);
+    s = Buff(m, NULL);
     r |= Test(String_AddBytes(m, s, bytes("\tHi There\r\n"), strlen("\tHi There\r\n")) == SUCCESS, "SUCCESS from adding valid chars have, '%s'",  String_Present(m, (Abstract *)s)->bytes);
 
     int len = s->length;

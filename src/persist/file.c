@@ -114,6 +114,13 @@ status File_Delete(File *file){
     char buff[PATH_BUFFLEN];
     file->type.state &= ~FILE_UPDATED;
     file->data = NULL;
+    if(file->abs == NULL){
+        printf("no abs path set %s\n", file->path->bytes);
+        return ERROR;
+    }
+    if(DEBUG_FILE){
+        printf("\x1b[%dmDeleting File:%s\n", DEBUG_FILE, file->abs->bytes);
+    }
     if(unlink((char *)file->abs->bytes) == 0){
         if((file->type.state & FILE_TRACKED) != 0){
             int suffixL = strlen(".notes");

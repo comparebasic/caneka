@@ -66,9 +66,10 @@ MemLocal *MemLocal_Load(MemCtx *m, IoCtx *ctx){
 
     int idx = 0;
     File file;
-    String *path = IoCtx_GetMStorePath(m, ctx);
-
+    String *path = Buff(m, NULL);
+    String_Add(m, path, IoCtx_GetMStoreName(m, ctx));
     String_AddBytes(m, path, bytes("/memslab."), strlen("/memslab."));
+
     i64 l = path->length;
     int max = 10;
     while(1){
@@ -76,6 +77,7 @@ MemLocal *MemLocal_Load(MemCtx *m, IoCtx *ctx){
         String_Add(m, path, String_FromInt(m, idx)); 
         File_Init(&file, path, ctx->access, NULL);
         file.abs = IoCtx_GetPath(m, ctx, file.path);
+
         File_Load(m, &file, ctx->access);
         if((file.type.state & NOOP) == 0){
             MemSlab *sl = MemSlab_Make(NULL);
@@ -102,7 +104,10 @@ status MemLocal_Destroy(MemCtx *m, IoCtx *ctx){
     int idx = 0;
     File file;
 
-    String *fname = IoCtx_GetMStorePath(m, ctx);
+    String *fname = Buff(m, NULL);
+    String *mstore = IoCtx_GetMStoreName(m, ctx);
+    String_Add(m, fname, mstore);
+
     i64 dirL = fname->length;
     String_AddBytes(m, fname, bytes("/memslab."), strlen("/memslab."));
     i64 l = fname->length;
@@ -113,6 +118,7 @@ status MemLocal_Destroy(MemCtx *m, IoCtx *ctx){
         fname->length = l;
         String_Add(m, fname, String_FromInt(m, idx)); 
         File_Init(&file, fname, ctx->access, NULL);
+        file.abs = IoCtx_GetPath(m, ctx, file.path);
         File_Delete(&file);
         if((file.type.state & NOOP) != 0){
             break;
@@ -128,8 +134,8 @@ status MemLocal_Destroy(MemCtx *m, IoCtx *ctx){
         r |= NOOP;
     }
 
-    fname->length = dirL;
-    char *dir_cstr = String_ToChars(m, fname);
+    String *dir = IoCtx_GetPath(m, ctx, mstore); 
+    char *dir_cstr = String_ToChars(m, dir);
     if(rmdir(dir_cstr) == 0){
         return r;
     }else{
@@ -143,8 +149,10 @@ status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
     Iter it;
     Iter_Init(&it, mstore->m->index);
 
-    String *fname = IoCtx_GetMStorePath(m, ctx);
-    char *path_cstr = String_ToChars(m, fname);
+    String *fname = Buff(m, NULL);
+    String_Add(m, fname, IoCtx_GetMStoreName(m, ctx));
+
+    char *path_cstr = String_ToChars(m, IoCtx_GetPath(m, ctx, fname));
     DIR* dir = opendir(path_cstr);
     if(dir){
         closedir(dir);
@@ -168,6 +176,7 @@ status MemLocal_Persist(MemCtx *m, MemLocal *mstore, IoCtx *ctx){
             String_Add(m, fname, String_FromInt(m, sl->idx));
 
             File_Init(&f, fname, ctx->access, NULL);
+            f.abs = IoCtx_GetPath(m, ctx, fname);
             f.data = String_Init(m, sizeof(MemSlab));
 
             String_AddBytes(m, f.data, (byte *)sl, sizeof(MemSlab));

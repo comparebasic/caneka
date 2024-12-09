@@ -15,7 +15,8 @@ status CryptoStrings_Tests(MemCtx *gm){
 
     int length = 512;
     s = Crypto_RandomString(m, 512);
-    r |= Test(String_Length(s) == 512, "Random string length is expected");
+    int l = String_Length(s);
+    r |= Test(l == 512, "Random string length is expected, have %d", l);
 
     MemCtx_Free(m);
     return r;

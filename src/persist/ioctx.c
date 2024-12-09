@@ -3,7 +3,8 @@
 
 static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
     File index;
-    File_Init(&index, IoCtx_GetIndexPath(m, ctx), ctx->access, NULL);
+    File_Init(&index, IoCtx_GetIndexName(m, ctx), ctx->access, NULL);
+    index.abs = IoCtx_GetPath(m, ctx, index.path);
     File_Load(m, &index, ctx->access);
     if((index.type.state & FILE_LOADED) != 0){
         ctx->files = (Span *)Abs_FromOset(m, index.data);
@@ -49,8 +50,8 @@ String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
     return ctx->abs;
 }
 
-String *IoCtx_GetIndexPath(MemCtx *m, IoCtx *ctx){
-    return IoCtx_GetPath(m, ctx, String_Make(m, bytes("index")));
+String *IoCtx_GetIndexName(MemCtx *m, IoCtx *ctx){
+    return String_Make(m, bytes("index"));
 }
 
 String *IoCtx_GetMStorePath(MemCtx *m, IoCtx *ctx){
@@ -122,15 +123,18 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
     Iter_Init(&it, ctx->files);
     
     while((Iter_Next(&it) & END) == 0){
-        File *file = (File *)Iter_Get(&it);
-        if(file != NULL){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            File *file = (File *)h->value;
+            file->abs = IoCtx_GetPath(m, ctx, file->path);
             r |= File_Persist(m, file);
         }
     }
 
     r |= MemLocal_Persist(m, ctx->mstore, ctx);
     String *os = Oset_To(m, String_Make(m, bytes("index")), (Abstract *)ctx->files);
-    File *index = File_Make(m, IoCtx_GetIndexPath(m, ctx), NULL, NULL); 
+    File *index = File_Make(m, IoCtx_GetIndexName(m, ctx), NULL, NULL); 
+    index->abs = IoCtx_GetPath(m, ctx, index->path);
     index->data = os;
     index->type.state |= FILE_UPDATED;
     File_Persist(m, index);
@@ -145,12 +149,18 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     Iter it;
     Iter_Init(&it, ctx->files);
     while((Iter_Next(&it) & END) == 0){
-        File *file = (File *)Iter_Get(&it);
-        if(file != NULL){
-            printf("Deleting %s\n", file->abs->bytes);
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            File *file = (File *)h->value;
+            file->abs = IoCtx_GetPath(m, ctx, file->path);
             File_Delete(file);
         }
     }
+
+    File file;
+    File_Init(&file, IoCtx_GetIndexName(m, ctx), access, NULL);
+    file.abs = IoCtx_GetPath(m, ctx, file.path);
+    File_Delete(&file);
 
     MemLocal_Destroy(m, ctx);
 
@@ -159,6 +169,7 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
         return SUCCESS;
     }
 
+    printf("IoCtx Error in Destroy\n");
     return ERROR;
 }
 

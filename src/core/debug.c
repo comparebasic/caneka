@@ -37,7 +37,7 @@ int DEBUG_FILE = 0;
 int DEBUG_OSET = 0;
 int DEBUG_NESTED = 0;
 int DEBUG_CASH = 0;
-int DEBUG_USER = COLOR_YELLOW;
+int DEBUG_USER = 0;
 
 boolean SHOW_SERVE_TESTS = FALSE;
 

@@ -21,8 +21,11 @@ String *Cont(MemCtx *m, byte *bytes){
     return s;
 }
 
-String *Buff(MemCtx *m){
+String *Buff(MemCtx *m, byte *content){
     String *s = String_Init(m, STRING_EXTEND);
     s->type.state |= FLAG_STRING_TEXT;
+    if(content != NULL){
+        String_AddBytes(m, s, content, strlen((char *)content));
+    }
     return s;
 }

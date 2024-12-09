@@ -17,7 +17,7 @@ int Sha256_process(struct sha256_state *md, const unsigned char *in,
 int Sha256_done(struct sha256_state *md, unsigned char *out);
 
 struct string *Cont(MemCtx *m, byte *byte);
-struct string *Buff(MemCtx *m);
+struct string *Buff(MemCtx *m, byte *content);
 boolean TextCharFilter(byte *b, i64 length);
 
 String *String_Sha256(MemCtx *m, String *s);

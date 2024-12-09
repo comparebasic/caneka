@@ -35,7 +35,7 @@ String *Bool_Present(MemCtx *m, Abstract *s){
 
 String *String_Present(MemCtx *m, Abstract *a){
     String *s = (String *)asIfc(a, TYPE_STRING);
-    String *ret = Buff(m);
+    String *ret = Buff(m, NULL);
     boolean in = FALSE;
     if((s->type.state & FLAG_STRING_TEXT) == 0){
         while(s != NULL){
