@@ -158,6 +158,23 @@ int Table_Set(Span *tbl, Abstract *a, Abstract *value){
     return h->idx;
 }
 
+int Table_Merge(Span *tbl, Span *tblB){
+    Iter it;
+    Iter_Init(&it, tbl);
+    status r = READY;
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            h = Hashed_Clone(tbl->m, h);
+
+        }
+    }
+    if(r == READY){
+        r |= NOOP;
+    }
+    return r;
+}
+
 int Table_GetIdx(Span *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
     if(h->type.state == SUCCESS){

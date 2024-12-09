@@ -58,13 +58,13 @@ word endDef[] = {
     PAT_END, 0, 0
 };
 
-static status method(Roebling *rbl){
+static status method(MemCtx *m, Roebling *rbl){
     HttpProto *proto = (HttpProto *)rbl->source;
     Roebling_ResetPatterns(rbl);
     return Roebling_SetLookup(rbl, proto->methods, HTTP_METHOD, -1); 
 }
 
-static status path(Roebling *rbl){
+static status path(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -72,7 +72,7 @@ static status path(Roebling *rbl){
     return r;
 }
 
-static status httpProto(Roebling *rbl){
+static status httpProto(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -80,7 +80,7 @@ static status httpProto(Roebling *rbl){
     return r;
 }
 
-static status header(Roebling *rbl){
+static status header(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -90,7 +90,7 @@ static status header(Roebling *rbl){
     return r;
 }
 
-static status headerValue(Roebling *rbl){
+static status headerValue(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -111,14 +111,13 @@ static status httpParser_Capture(word captureKey, int matchIdx, String *s, Abstr
 }
 
 Roebling *HttpParser_Make(MemCtx *m, String *s, Abstract *source){
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do =  Span_From(m, 7, 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)method),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)path),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)httpProto),
+            (Abstract *)Do_Wrapped(m, (DoFunc)method),
+            (Abstract *)Do_Wrapped(m, (DoFunc)path),
+            (Abstract *)Do_Wrapped(m, (DoFunc)httpProto),
         (Abstract *)Int_Wrapped(m, HTTP_MARK_HEADER), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)header),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)headerValue),
+            (Abstract *)Do_Wrapped(m, (DoFunc)header),
+            (Abstract *)Do_Wrapped(m, (DoFunc)headerValue),
         (Abstract *)Int_Wrapped(m, HTTP_MARK_END));
 
     LookupConfig config[] = {

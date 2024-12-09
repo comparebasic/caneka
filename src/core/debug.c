@@ -255,12 +255,11 @@ void Lookup_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
-status PrintMatchAddr(MemHandle *mh){
-    MHAbstract *ma = (MHAbstract *)as(mh, TYPE_MHABSTRACT);
-    if(ma->a == NULL){
+status PrintMatchAddr(MemCtx *m, Abstract *a){
+    if(a == NULL){
         printf("NULL ");
     }else{
-        printf("0x%lx ", (util)(ma->a));
+        printf("0x%lx ", (util)(a));
     }
     return SUCCESS;
 }

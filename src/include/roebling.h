@@ -1,4 +1,4 @@
-typedef status (*RblFunc)(struct roebling *rbl);
+typedef status (*RblFunc)(MemCtx *m, struct roebling *rbl);
 typedef status (*RblCaptureFunc)(word captureKey, int matchIdx, String *s, Abstract *source);
 
 enum mark_reserved {

@@ -144,6 +144,21 @@ Hashed *Hashed_Make(MemCtx *m, Abstract *a){
     return v;
 }
 
+Hashed *Hashed_Clone(MemCtx *m, Hashed *oh){
+    Hashed *h = MemCtx_Realloc(m, sizeof(Hashed), oh, sizeof(Hashed));
+    if(h->item != NULL && ((h->item = Clone(m, h->item)) == NULL)){
+        return NULL;
+    }
+    if(h->value != NULL && ((h->value = Clone(m, h->item)) == NULL)){
+        return NULL;
+    }
+    if(h->next != NULL && ((h->next = Hashed_Clone(m, h->next)) == NULL)){
+        return NULL;
+    }
+    return h;
+}
+
+
 status Hash_Init(MemCtx *m){
     if(HashChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, populateHash, NULL);

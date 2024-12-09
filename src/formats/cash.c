@@ -16,7 +16,7 @@ static word valueDef[] = {
     PAT_END, 0, 0
 };
 
-static status between(Roebling *rbl){
+static status between(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -28,7 +28,7 @@ static status between(Roebling *rbl){
     return r;
 }
 
-static status value(Roebling *rbl){
+static status value(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -96,11 +96,10 @@ Cash *Cash_Make(MemCtx *m, Getter get, Abstract *source){
     cash->type.of = TYPE_CASH;
     cash->m = m;
 
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do =  Span_From(m, 3, 
         (Abstract *)Int_Wrapped(m, CASH_MARK_START), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)between),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)value));
+            (Abstract *)Do_Wrapped(m, (DoFunc)between),
+            (Abstract *)Do_Wrapped(m, (DoFunc)value));
 
     LookupConfig config[] = {
         {CASH_MARK_START, (Abstract *)String_Make(m, bytes("CASH_START"))},

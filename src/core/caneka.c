@@ -15,6 +15,7 @@ status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= archChecks();
     r |= SpanDef_Init();
+    r |= Clone_Init(m);
     r |= Debug_Init(m);
     r |= Hash_Init(m);
     r |= Oset_Init(m);

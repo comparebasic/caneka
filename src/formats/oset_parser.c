@@ -63,7 +63,7 @@ static word endTableDef[] = {
 };
 
 /* match setups */
-static status start(Roebling *rbl){
+static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -80,7 +80,7 @@ static status start(Roebling *rbl){
     return r;
 }
 
-static status token(Roebling *rbl){
+static status token(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -88,7 +88,7 @@ static status token(Roebling *rbl){
     return r;
 }
 
-static status defineLength(Roebling *rbl){
+static status defineLength(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -100,7 +100,7 @@ static status defineLength(Roebling *rbl){
     return r;
 }
 
-static status value(Roebling *rbl){
+static status value(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -121,7 +121,7 @@ static status value(Roebling *rbl){
     return r;
 }
 
-static status sep(Roebling *rbl){
+static status sep(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -258,15 +258,14 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
 }
 
 Roebling *OsetParser_Make(MemCtx *m, String *s, Abstract *source){
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do =  Span_From(m, 7, 
         (Abstract *)Int_Wrapped(m, OSET_MARK_START), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)start),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)token),
+            (Abstract *)Do_Wrapped(m, (DoFunc)start),
+            (Abstract *)Do_Wrapped(m, (DoFunc)token),
         (Abstract *)Int_Wrapped(m, OSET_MARK_LENGTH), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)defineLength),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)value),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)sep));
+            (Abstract *)Do_Wrapped(m, (DoFunc)defineLength),
+            (Abstract *)Do_Wrapped(m, (DoFunc)value),
+            (Abstract *)Do_Wrapped(m, (DoFunc)sep));
 
     LookupConfig config[] = {
         {OSET_MARK_START, (Abstract *)String_Make(m, bytes("OSET_START"))},

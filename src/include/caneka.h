@@ -72,7 +72,7 @@ typedef struct reserve  {
 extern Abstract Reserved;
 
 typedef struct virt * AbstractPtr;
-typedef status (*DoFunc)(struct mem_handle *mh);
+typedef status (*DoFunc)(struct mem_ctx *m, Abstract *a);
 typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source);
 
 #define ZERO 0
@@ -241,6 +241,7 @@ cls Ifc_Get(cls inst);
 #include "single.h"
 #include "boolean.h"
 #include "maker.h"
+#include "clone.h"
 #include "compare.h"
 #include "mempair.h"
 #include "hash.h"

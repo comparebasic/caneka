@@ -91,7 +91,7 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
             accepted++;
             sctx->metrics.open++;
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
-            Req *req = (Req *)sctx->def->req_mk((MemHandle *)sctx, (Abstract *)sctx);
+            Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
             req->fd = new_fd;
             req->handler = sctx->def->getHandler(sctx, req);
             if(DEBUG_SERVE){

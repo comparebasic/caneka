@@ -87,7 +87,7 @@ static word attUnQuotedDef[] = {
     PAT_END, 0, 0
 };
 
-static status start(Roebling *rbl){
+static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -104,7 +104,7 @@ static status start(Roebling *rbl){
     return r; 
 }
 
-static status attRoute(Roebling *rbl){
+static status attRoute(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -116,7 +116,7 @@ static status attRoute(Roebling *rbl){
     return r; 
 }
 
-static status postAttName(Roebling *rbl){
+static status postAttName(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     /* quoted */
@@ -213,17 +213,16 @@ status XmlParser_Parse(XmlParser *xml, String *s){
 }
 
 XmlParser *XmlParser_Make(MemCtx *m){
-    MemHandle *mh = (MemHandle *)m;
     XmlParser *xml = MemCtx_Alloc(m, sizeof(XmlParser));
-    xml->ctx = XmlCtx_Make(mh);
+    xml->ctx = XmlCtx_Make(m);
 
     Span *parsers_do =  Span_From(m, 7, 
         (Abstract *)Int_Wrapped(m, XML_START), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)start),
+            (Abstract *)Do_Wrapped(m, (DoFunc)start),
         (Abstract *)Int_Wrapped(m, XML_ATTROUTE), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)attRoute),
+            (Abstract *)Do_Wrapped(m, (DoFunc)attRoute),
         (Abstract *)Int_Wrapped(m, XML_ATTR_VALUE), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)postAttName),
+            (Abstract *)Do_Wrapped(m, (DoFunc)postAttName),
         (Abstract *)Int_Wrapped(m, XML_END));
 
     LookupConfig config[] = {
