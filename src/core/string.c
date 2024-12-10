@@ -368,6 +368,7 @@ status String_ToSlab(String *a, void *sl, size_t sz) {
 
     return SUCCESS;
 }
+
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     if(a == NULL){
         Fatal("Error string is NULL", TYPE_STRING_CHAIN);
@@ -385,7 +386,9 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     byte *bytes = (byte *)chars;
 
     String *seg = a;
-    printf("Starting Length:%d %s\n", a->length, chars);
+    if((a->type.state & DEBUG) != 0){
+        printf("\nCopying, Starting Length:\n    %d New Chars:'%s'\n", a->length, chars);
+    }
     byte *p = bytes;
 
     if(a->type.of == TYPE_STRING_CHAIN){
@@ -409,15 +412,14 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         Fatal("unknown type\n", a->type.of);
     }
 
-    printf("Copying:\n");
     while(remaining > 0){
         copy_l = min(remaining, STRING_CHUNK_SIZE-seg->length); 
-        printf("  l:%d -> %ld/%ld\n", seg->length, copy_l, remaining);
+        if((a->type.state & DEBUG) != 0){
+            printf("  l:%d -> %ld/%ld\n", seg->length, copy_l, remaining);
+        }
         memcpy(seg->bytes+seg->length, p, copy_l);
-        printf("  coping...\n");
         seg->length += copy_l;
         if(seg->length == STRING_CHUNK_SIZE){
-            printf("  new chunk...\n");
             String *next = String_Init(m, -1);
             seg->next = next;
             seg = seg->next;
@@ -427,7 +429,13 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     }
 
     if((a->type.state & DEBUG) != 0){
-        printf("Length: %d\n", a->length);
+        printf("  Current(%ld): \n", String_Length(a));
+        String *tail = a;
+        while(tail != NULL){
+            printf("    %d:'%s'\n", tail->length, tail->bytes);
+            tail = String_Next(tail);
+        }
+        printf("\n");
     }
 
     return SUCCESS;

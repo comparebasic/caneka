@@ -60,15 +60,38 @@ status String_Tests(MemCtx *gm){
     r |= Test(String_Length(s) == strlen(cstr), "Expect length %d, have %d", strlen(cstr), String_Length(s));
     r |= Test(String_EqualsBytes(s, bytes(cstr)), "Expect string match of '%s' to be TRUE", cstr);
 
-    printf("START\n");
     s = String_Init(m, STRING_EXTEND);
-    String_Add(m, s, String_Make(m, bytes("Hello there cool it is now a things")));
-    String_Add(m, s, String_Make(m, bytes(" what the hell am I supposed to do fuckheads? Yo,")));
-    String_Add(m, s, String_Make(m, bytes(" and more and more and more.")));
-    String_Add(m, s, String_Make(m, bytes(" And again I add things and do things and it's really really nice")));
-    String_Add(m, s, String_Make(m, bytes(", it's me, again with the needs and wants and complaints and problems.")));
-    String_Add(m, s, String_Make(m, bytes("Me again up at night fucking pissed and angry at the world.")));
-    String_Add(m, s, String_Make(m, bytes(" Always me saying \"fuck you\" to the sky where no-one is listening.")));
+    byte *s1 = bytes("Hello there cool it is now a things");
+    byte *s2 = bytes(" what the hell am I supposed to do fuckheads? Yo,");
+    byte *s3 = bytes(" and more and more and more.");
+    byte *s4 = bytes(" And again I add things and do things and it's really really nice");
+    byte *s5 = bytes(", it's me, again with the needs and wants and complaints and problems.");
+    byte *s6 = bytes("Me again up at night fucking pissed and angry at the world.");
+    byte *s7 = bytes(" Always me saying \"fuck you\" to the sky where no-one is listening.");
+    byte *s8 = bytes(" And a big magical chunk of fancy long-lasting text that has to fit partly in one segment, and then in a lotof other ones and other things and spread out all over the place, like a big inconsiderate squatter. A blight against the sunny day as if the night sky were to arive to soon and squander all the life for the plants. and slowly issue in an era of desert decay, until a hero is born to cut throug the darkness and show that through piercing insights life can be less monotonous... sure yeah that's fucking realistic... fuck! anyway this is a long rant of a paragraph that should test the system well so I can get on with better things :).");
+    byte *s9 = bytes(" And here's another touch, just for kicks.");
+
+    String_AddBytes(m, s, s1, strlen((char *)s1));
+    String_AddBytes(m, s, s2, strlen((char *)s2));
+    String_AddBytes(m, s, s3, strlen((char *)s3));
+    String_AddBytes(m, s, s4, strlen((char *)s4));
+    String_AddBytes(m, s, s5, strlen((char *)s5));
+    String_AddBytes(m, s, s6, strlen((char *)s6));
+    String_AddBytes(m, s, s7, strlen((char *)s7));
+    String_AddBytes(m, s, s8, strlen((char *)s8));
+    String_AddBytes(m, s, s9, strlen((char *)s9));
+
+    byte *all = bytes("Hello there cool it is now a things"
+    " what the hell am I supposed to do fuckheads? Yo,"
+    " and more and more and more."
+    " And again I add things and do things and it's really really nice"
+    ", it's me, again with the needs and wants and complaints and problems."
+    "Me again up at night fucking pissed and angry at the world."
+    " Always me saying \"fuck you\" to the sky where no-one is listening."
+    " And a big magical chunk of fancy long-lasting text that has to fit partly in one segment, and then in a lotof other ones and other things and spread out all over the place, like a big inconsiderate squatter. A blight against the sunny day as if the night sky were to arive to soon and squander all the life for the plants. and slowly issue in an era of desert decay, until a hero is born to cut throug the darkness and show that through piercing insights life can be less monotonous... sure yeah that's fucking realistic... fuck! anyway this is a long rant of a paragraph that should test the system well so I can get on with better things :)."
+    " And here's another touch, just for kicks.");
+
+    r |= Test(String_EqualsBytes(s, all), "Comparing long string made in pieces");
 
     MemCtx_Free(m);
     return r;
