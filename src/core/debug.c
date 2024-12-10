@@ -35,6 +35,7 @@ int DEBUG_EXAMPLE_HANDLERS = 0;
 int DEBUG_QUEUE = 0;
 int DEBUG_FILE = 0;
 int DEBUG_OSET = 0;
+int DEBUG_OSET_COMPLETE = 0;
 int DEBUG_NESTED = 0;
 int DEBUG_CASH = 0;
 int DEBUG_USER = 0;
@@ -147,7 +148,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     if(HasFlag(def->flags, INLINE)){
                         t = *((Abstract **)t);
                     }
-                    if(!HasFlag(def->flags, RAW)){
+                    if(!HasFlag(def->flags, SPAN_RAW)){
                         i64 n = (util)t;
                         if(def->itemSize == sizeof(int)){
                             printf("%u", (int)n);
@@ -531,8 +532,20 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
         }
         printf("%s\x1b[%dmS<%s\x1b[0;%dm", msg, color, state, color);
         do {
-            String *esc = String_ToEscaped(DebugM, s);
-            printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
+            int l = s->length;
+            String *_s = s;
+            if((s->type.state & FLAG_STRING_BINARY) != 0){
+                _s = String_ToHex(DebugM, s);
+            }else{
+                _s = String_ToEscaped(DebugM, s);
+            }
+
+            if(strlen((char *)_s->bytes) != l){
+                printf("0 mismatch strlen%ld vs l%d: ", strlen((char *)_s->bytes), l);
+            }else{
+                printf("match l%d :", l);
+            }
+            printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", l, color, _s->bytes, color);
             s = s->next;
         } while(s != NULL);
         printf("\x1b[%dm>\x1b[0m", color);

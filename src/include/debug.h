@@ -57,6 +57,7 @@ extern int DEBUG_EXAMPLE_HANDLERS;
 extern int DEBUG_QUEUE;
 extern int DEBUG_FILE;
 extern int DEBUG_OSET;
+extern int DEBUG_OSET_COMPLETE;
 extern int DEBUG_NESTED;
 extern int DEBUG_CASH;
 extern int DEBUG_USER;

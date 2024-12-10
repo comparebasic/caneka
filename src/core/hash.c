@@ -3,8 +3,7 @@
 
 Chain *HashChain;
 
-static util Hash_Bytes(byte *bt, size_t length){
-	util h = 5381;
+static util _Hash_Bytes(byte *bt, size_t length, util h){
 	util i = 0;
 	byte c;
 	while (i++ < length) {
@@ -12,6 +11,12 @@ static util Hash_Bytes(byte *bt, size_t length){
 		h = (h << 5) + h + (h << 9) + h + (h << 31) + h + (h << 49) + h + c;
 	}
     return h;
+}
+
+
+static util Hash_Bytes(byte *bt, size_t length){
+	util h = 5381;
+    return _Hash_Bytes(bt, length, h);
 }
 
 static util Hash_Abstract(Abstract *a){
@@ -35,13 +40,13 @@ static util Hash_PatCharDef(Abstract *a){
 }
 
 static util Hash_String(Abstract *a){
-    String *s = (String *)as(a, TYPE_STRING_CHAIN);
-    return Hash_Bytes(s->bytes, s->length);
-}
-
-static util Hash_StringFixed(Abstract *a){
-    String *s = (String *)as(a, TYPE_STRING_FIXED);
-    return Hash_Bytes(s->bytes, s->length);
+    String *s = (String *)asIfc(a, TYPE_STRING);
+	util h = 5381;
+    while(s != NULL){
+        h = _Hash_Bytes(s->bytes, s->length, h);
+        s = String_Next(s);
+    }
+    return h;
 }
 
 static util Hash_SCursor(Abstract *a){
@@ -72,7 +77,8 @@ static status populateHash(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)Hash_PatCharDef);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_Match);
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)Hash_String);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)Hash_StringFixed);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)Hash_String);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)Hash_String);
     r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)Hash_SCursor);
     r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Hash_Range);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);

@@ -11,6 +11,8 @@ enum string_flags {
     FLAG_STRING_IS_CASH = 1 << 11,
     FLAG_STRING_WHITESPACE = 1 << 12,
     FLAG_STRING_TEXT = 1 << 13,
+    FLAG_STRING_BINARY = 1 << 14,
+    FLAG_STRING_HEX = 1 << 15,
 };
 
 typedef struct b64_ctx {

@@ -56,9 +56,6 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         pwauth.data = Oset_To(m, NULL, (Abstract *)Auth_Make(m, key, secret, ac));
         pwauth.type.state |= FILE_UPDATED;
 
-        Debug_Print((void *)pwauth.data, 0, "Auth Raw: ", COLOR_YELLOW, TRUE);
-        printf("\n");
-
         File user;
         File_Init(&user, String_Make(m, bytes("user.data")), ac, &ctx);
 

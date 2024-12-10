@@ -27,9 +27,14 @@ boolean Auth_Verify(MemCtx *m, Auth *auth, String *secret, Access *ac){
         String_Add(m, s, auth->saltenc->dec);
         String *digest = String_Sha256(m, s);
 
-        Debug_Print((void *)digest, 0, "s256: ", COLOR_PURPLE, TRUE);
-        printf("\n");
+        Debug_Print((void *)s, 0, "s: ", COLOR_CYAN, TRUE);
+        s->length = 130;
+        printf("%c/%d %c/%d %c/%d\n", s->bytes[128],s->bytes[128],s->bytes[129],s->bytes[129],s->bytes[130],s->bytes[130]);
+        Hashed *h = Hashed_Make(m, (Abstract *)s);
 
+        printf(" -> %ld\n", h->id);
+        Debug_Print((void *)digest, 0, "digest: ", COLOR_CYAN, TRUE);
+        printf("\n");
         Debug_Print((void *)auth->digest, 0, "vs Auth->Digest: ", COLOR_CYAN, TRUE);
         printf("\n");
 
@@ -50,16 +55,12 @@ Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
             return NULL;
         }
 
-        /*
         String *salt = Crypto_RandomString(m, USER_SALT_LENGTH);
-        */
-
-        String *salt = String_Make(m, bytes("qerjfkdlkieurjfhdic3k83"));;
 
 
         String *enc = String_Clone(m, salt);
         Salty_Enc(m, skey, enc);
-        auth->saltenc = EncPair_Make(m, key, enc, (String *)Blank_Make(m), ac, USER_SALT_LENGTH);
+        auth->saltenc = EncPair_Make(m, key, enc, NULL, ac, USER_SALT_LENGTH);
 
         /*
         Sha256 sha;
@@ -75,12 +76,20 @@ Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
 
         auth->digest = String_Sha256(m, s);
 
+        Debug_Print((void *)s, 0, "s: ", COLOR_YELLOW, TRUE);
+        s->length = 130;
+        printf("%c/%d %c/%d %c/%d\n", s->bytes[128],s->bytes[128],s->bytes[129],s->bytes[129],s->bytes[130],s->bytes[130]);
+        Hashed *h = Hashed_Make(m, (Abstract *)s);
+        printf(" -> %ld\n", h->id);
+
+        /*
         Debug_Print((void *)secret, 0, "Secret: ", COLOR_YELLOW, TRUE);
         printf("\n");
         Debug_Print((void *)salt, 0, "Salt: ", COLOR_YELLOW, TRUE);
         printf("\n");
         Debug_Print((void *)auth->digest, 0, "Digest: ", COLOR_YELLOW, TRUE);
         printf("\n");
+        */
     }
 
     return auth;

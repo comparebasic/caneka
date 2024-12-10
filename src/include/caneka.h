@@ -191,7 +191,7 @@ enum status_types {
     ERROR = 1 << 0,
     SUCCESS = 1 << 1,
     NOOP = 1 << 2,
-    RAW = 1 << 3,
+    DEBUG = 1 << 3,
     HASHED = 1 << 4,
     MISS = 1 << 5,
     END = 1 << 6,
@@ -223,7 +223,7 @@ char *Class_ToString(cls type);
 #define TEST_OK READY
 #define ELASTIC INLINE
 #define TERM_FOUND TRACKED
-#define NO_COLOR RAW
+#define NO_COLOR NOOP 
 #define MATCH_GOTO NEXT 
 
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */

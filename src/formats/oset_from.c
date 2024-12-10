@@ -14,6 +14,9 @@ Abstract *Blank_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstra
 }
 
 Abstract *I64_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *a){
+    if(a->type.of == TYPE_WRAPPED_I64){
+        return a;
+    }
     String *s = (String *)asIfc(a, TYPE_STRING);
     return (Abstract *)I64_Wrapped(m, I64_FromString((String *)a));
 }
@@ -51,8 +54,6 @@ Abstract *EncPair_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abst
     String *enchex = (String *)Table_Get(tbl, (Abstract *)String_Make(m, bytes("enc")));
     if(enchex != NULL){
         enc = String_FromHex(m, enchex);
-        Debug_Print((void *)enc, 0, "Enc resurrected: ", 0, TRUE);
-        printf("\n");
     }
     Single *l_sg = (Single *)Table_Get(tbl, (Abstract *)String_Make(m, bytes("length")));
     int l = 0;

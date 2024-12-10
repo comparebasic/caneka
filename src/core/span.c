@@ -51,7 +51,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
         if(HasFlag(p->def->flags, INLINE)){
             size_t sz = (size_t)p->def->itemSize;
-            if(!HasFlag(p->def->flags, RAW) && t != NULL && t->type.of == TYPE_RESERVE){
+            if(!HasFlag(p->def->flags, SPAN_RAW) && t != NULL && t->type.of == TYPE_RESERVE){
                 sz = sizeof(Reserve);
             }
             if(sq->op == SPAN_OP_REMOVE){
@@ -117,7 +117,7 @@ void *Span_GetFromQ(SpanQuery *sq){
     SpanState *st = sq->stack;
     void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
     if(HasFlag(def->flags, INLINE)){
-        if(!HasFlag(def->flags, RAW) && (*(util *)ptr) == 0){
+        if(!HasFlag(def->flags, SPAN_RAW) && (*(util *)ptr) == 0){
             sq->value = NULL;
         }else{
             sq->value = ptr;

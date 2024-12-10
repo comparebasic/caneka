@@ -31,16 +31,13 @@ static status Salty_process(MemCtx *m, String *key, String *s, Salty_Proc proc){
 
     while(s != NULL){
         void *ptr = (void *)s->bytes;
-        int offset = 0;
 
         int rounds = s->length / SALTY_VALUE_SIZE;
         if(s->length % SALTY_VALUE_SIZE != 0){
             rounds++;
             s->length = rounds * SALTY_VALUE_SIZE;
         }
-        printf("rounds: %d/%ld = %d\n", s->length, SALTY_VALUE_SIZE, rounds);
         for(int i = 0; i < rounds; i++){
-            printf("offset %ld\n", (byte *)ptr - s->bytes);
             int keyRounds = key->length / SALTY_KEY_SEGSIZE;
             void *kPtr = (void *)key->bytes;
             if(proc == Tea_decipher){
@@ -55,7 +52,6 @@ static status Salty_process(MemCtx *m, String *key, String *s, Salty_Proc proc){
                 }
             }
             ptr += SALTY_VALUE_SIZE;
-            offset += SALTY_VALUE_SIZE;
         }
         s = String_Next(s);
     }

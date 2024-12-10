@@ -261,6 +261,7 @@ String *String_FromHex(MemCtx *m, String *s){
         }
         s = String_Next(s);
     };
+    ret->type.state |= FLAG_STRING_BINARY;
     return ret;
 }
 
@@ -331,6 +332,7 @@ String *String_FromB64(MemCtx *m, String *bs){
 status String_Add(MemCtx *m, String *a, String *b) {
     status r = READY;
     while(b != NULL && r != ERROR){
+        a->type.state |= (b->type.state & FLAG_STRING_BINARY);
         r = String_AddBytes(m, a, b->bytes, b->length);
         b = String_Next(b);
     }
@@ -389,6 +391,11 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         while(seg->next != NULL){
             seg = seg->next;
         }
+        if(seg->length == TYPE_STRING_CHAIN){
+            String *next = String_Init(m, -1);
+            seg->next = next;
+            seg = next;
+        }
     }else if(a->type.of == TYPE_STRING_FIXED){
         if(a->length+length > STRING_FIXED_SIZE){
             Fatal("length exceeds fixed size\n", a->type.of);
@@ -401,49 +408,21 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         Fatal("unknown type\n", a->type.of);
     }
 
-    /* copy the initial chunk */
-    if(seg->type.of == TYPE_STRING_CHAIN){
-        copy_l = min((STRING_CHUNK_SIZE - seg->length), remaining);
-    }
-
-    if(copy_l < remaining && a->type.of != TYPE_STRING_CHAIN){
-        printf("Returing ERROR not a flexible string\n");
-        return ERROR;
-    }
-
-    memcpy(seg->bytes+seg->length, p, copy_l);
-    seg->length += copy_l;
-    remaining -= copy_l;
-    byte *_b = p;
-    p += copy_l;
-
-    /* if more than a string seg remains, make a new one */
-    while(remaining > STRING_CHUNK_SIZE){
-        String *next = String_Init(m, -1);
-        memcpy(next->bytes, p, STRING_CHUNK_SIZE);
-        next->length = STRING_CHUNK_SIZE;
-        p += STRING_CHUNK_SIZE;
-
-        if(seg == NULL){
-            seg = next;
-        }else{
+    while(remaining > 0){
+        copy_l = min(remaining, STRING_CHUNK_SIZE-seg->length); 
+        memcpy(seg->bytes+seg->length, p, copy_l);
+        seg->length += copy_l;
+        if(seg->length == STRING_CHUNK_SIZE){
+            String *next = String_Init(m, -1);
             seg->next = next;
-            seg = next;
+            seg = seg->next;
         }
-        remaining -= STRING_CHUNK_SIZE;
+        remaining -= copy_l;
+        p += copy_l;
     }
 
-    /* if any remains, make a final seg */
-    if(remaining > 0){
-        String *next = String_Init(m, -1);
-        memcpy(next->bytes, p, remaining);
-        next->length = remaining;
-
-        if(seg == NULL){
-            seg = next;
-        }else{
-            seg->next = next;
-        }
+    if((a->type.state & DEBUG) != 0){
+        printf("Length: %d\n", a->length);
     }
 
     return SUCCESS;

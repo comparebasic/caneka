@@ -242,9 +242,17 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         item->parent = oset->item;
         oset->item = item;
     }else if(captureKey == OSET_CLOSE_ARRAY || captureKey == OSET_CLOSE_LIST || captureKey == OSET_CLOSE_TABLE){
+        if(DEBUG_OSET_COMPLETE){
+            Debug_Print((void *)oset->item->def->name, 0, "Finalizing Complex Type", DEBUG_OSET_COMPLETE, TRUE);
+            printf("\n");
+        }
         oset->item = oset->item->parent;
         addToParent(oset);
     }else if(captureKey == OSET_VALUE){
+        if(DEBUG_OSET_COMPLETE){
+            Debug_Print((void *)oset->item->def->name, 0, "Finalizing Complex Type", DEBUG_OSET_COMPLETE, TRUE);
+            printf("\n");
+        }
         if(oset->item == NULL){
             Fatal("Oset item expected to be non-null", TYPE_OSET);
             return ERROR;

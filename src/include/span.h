@@ -21,8 +21,10 @@ related: include/slab.h
 
 enum span_flags {
     SLAB_ACTIVE = 1 << 8,
-    SLAB_FULL = 1 << 10,
+    SLAB_FULL = 1 << 9,
+    /* INLINE = 1 << 10,*/
     FLAG_SPAN_HAS_GAPS = 1 << 11,
+    SPAN_RAW = 1 << 15,
 };
 
 typedef void *(*SpanDefFunc)(MemCtx *m, struct span_def *def);

@@ -49,7 +49,7 @@ status Salty_Tests(MemCtx *gm){
     EncPair_Fill(m, pair, ac);
     EncPair_Conceal(m, pair);
 
-    char *exp ="enc/3={key:s/4=test;enc:s/32=2bfc98b22fb8b02d33ffe258111e3438;length:i64/1=11;}";
+    char *exp ="enc/3={key:s/4=test;enc:s/32=2bfc98b22fb8b02d33ffe258111e3438;length:i64/2=11;}";
     
     String *os = String_ToEscaped(m, Oset_To(m, NULL, (Abstract *)pair));
     r |= Test(String_EqualsBytes(os, bytes(exp)), "EncPair to oset string is equal, expected '%s', have '%s'", exp, os->bytes);
