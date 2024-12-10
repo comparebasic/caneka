@@ -152,8 +152,10 @@ Abstract *EncPair_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstra
     String_Add(m, os, odef->name);
     String_AddBytes(m, os, bytes("/3={"), 4);
     String_Add(m, os, Oset_To(m, String_Make(m, bytes("key")), (Abstract *)p->keyId));
+    Debug_Print((void *)p->enc, 0, "Enc orig: ", 0, TRUE);
+    printf("\n");
     String_Add(m, os, Oset_To(m, String_Make(m, bytes("enc")), (Abstract *)String_ToHex(m, p->enc)));
-    String_Add(m, os, Oset_To(m, String_Make(m, bytes("dec")), (Abstract *)p->dec));
+    String_Add(m, os, Oset_To(m, String_Make(m, bytes("length")), (Abstract *)I64_Wrapped(m, p->length)));
     String_AddBytes(m, os, bytes("}"), 1);
 
     return (Abstract *)os;

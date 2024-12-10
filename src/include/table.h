@@ -13,3 +13,4 @@ Hashed *Table_GetHashed(Span *tbl, Abstract *a);
 int Table_GetIdx(Span *tbl, Abstract *a);
 int Table_Set(Span *tbl, Abstract *a, Abstract *value);
 Span *Table_Make(MemCtx *m);
+status Table_Merge(Span *tbl, Span *oldTbl);

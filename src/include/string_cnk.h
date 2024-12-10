@@ -64,6 +64,7 @@ status String_Reset(String *s);
 
 /* conversions */
 String *String_ToHex(MemCtx *m, String *s);
+String *String_FromHex(MemCtx *m, String *s);
 String *String_ToB64(MemCtx *m, String *s);
 String *String_FromB64(MemCtx *m, String *s);
 String *String_ToEscaped(MemCtx *m, String *s);

@@ -48,12 +48,18 @@ status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
         String *key = (String *)TableChain_Get(SaltyKeyChain, p->keyId); 
         if(!isFilled(p->enc) && isFilled(p->dec)){
             p->enc = String_Clone(m, p->dec);
+            printf("setting length: %d\n", p->length);
             p->type.state |= Salty_Enc(m, key, p->enc); 
             return SUCCESS;
         }
         if(isFilled(p->enc) && !isFilled(p->dec)){
             p->dec = String_Clone(m, p->enc);
             p->type.state |= Salty_Dec(m, key, p->dec); 
+
+            p->dec->length = p->length;
+            Debug_Print((void *)p->dec, 0, "Decrypted: ", 0, TRUE);
+            printf("\n");
+
             return SUCCESS;
         }
     }
@@ -61,11 +67,12 @@ status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
     return ERROR;
 }
 
-EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access *access){
+EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access *access, int length){
     EncPair *p = (EncPair *)MemCtx_Alloc(m, sizeof(EncPair));
     p->type.of = TYPE_ENC_PAIR;
 
     p->enc = enc;
+    p->length = length;
     p->dec = dec;
     p->keyId = keyId;
 

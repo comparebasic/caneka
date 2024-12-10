@@ -34,6 +34,9 @@ String *Bool_Present(MemCtx *m, Abstract *s){
 }
 
 String *String_Present(MemCtx *m, Abstract *a){
+    if(a == NULL){
+        return NULL;
+    }
     String *s = (String *)asIfc(a, TYPE_STRING);
     String *ret = Buff(m, NULL);
     boolean in = FALSE;

@@ -165,6 +165,9 @@ static char *captureKey_ToChars(word captureKey){
 }
 
 static status addToParent(FmtCtx *oset){
+    if(oset->item == NULL){
+        return NOOP;
+    }
     if((oset->item->type.state & PARENT_TYPE_ARRAY) != 0){
         int idx = -1;
         if(oset->item->key != NULL){
@@ -180,7 +183,12 @@ static status addToParent(FmtCtx *oset){
             Fatal("Expected oset key for table sub-item", TYPE_OSET);
             return ERROR;
         }
+        if(oset->item->def->id != TYPE_TABLE){
+            oset->item->value = oset->item->def->from(oset->m, oset->item->def, oset, oset->item->key, oset->item->value);
+        }
+
         Table_Set((Span *)oset->item->parent->value, (Abstract *)oset->item->key, oset->item->value); 
+
     }
 
     return SUCCESS;
@@ -227,20 +235,13 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_TABLE){
-        if(oset->item->def->id != TYPE_TABLE){
-            return ERROR;
-        }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_TABLE);
         
         FmtItem *item = FmtItem_Make(oset->m, oset);
         item->type.state |= PARENT_TYPE_TABLE;
         item->parent = oset->item;
         oset->item = item;
-
     }else if(captureKey == OSET_CLOSE_ARRAY || captureKey == OSET_CLOSE_LIST || captureKey == OSET_CLOSE_TABLE){
-        oset->item = oset->item->parent;
-        addToParent(oset);
-    }else if(captureKey == OSET_CLOSE_TABLE){
         oset->item = oset->item->parent;
         addToParent(oset);
     }else if(captureKey == OSET_VALUE){
