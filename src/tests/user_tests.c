@@ -28,8 +28,6 @@ status User_Tests(MemCtx *gm){
     Table_Set(data, (Abstract *)String_Make(m, bytes("email")), (Abstract *)email);
 
     Span *u = User_Open(m, users, userId, pass, ac, data);
-    Debug_Print((void *)u, 0, "User: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     String *abs = Buff(m, NULL);
     String_Add(m, abs, users->abs);
@@ -46,8 +44,9 @@ status User_Tests(MemCtx *gm){
     r |= Test(file.data->length == 231, "Auth Oset has expected length, have %d", file.data->length);
 
     Span *u2 = User_Open(m, users, userId, pass, ac, NULL);
-    Debug_Print((void *)u2, 0, "User2: ", COLOR_PURPLE, TRUE);
-    printf("\n");
+    r |= Test(u2 != NULL, "Re-opened user table is not null", file.data->length);
+    String *e2 = (String *)Table_Get(u2, (Abstract *)String_Make(m, bytes("email")));
+    r |= Test(String_Equals(e2, email), "Email from newly opened user table matches original, have '%s'", email->bytes);
 
     r |= Test(User_Delete(m, users, userId, ac) & SUCCESS, "User Delete has flag SUCCESS");
 
