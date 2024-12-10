@@ -266,14 +266,13 @@ FmtCtx *FmtHtml_Make(MemCtx *m){
 
     addPatterns(ctx);
 
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do =  Span_From(m, 7,
         (Abstract *)Int_Wrapped(m, FORMATTER_MARK_START), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)start),
+            (Abstract *)Do_Wrapped(m, (DoFunc)start),
         (Abstract *)Int_Wrapped(m, FORMATTER_MARK_LINE), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)line),
+            (Abstract *)Do_Wrapped(m, (DoFunc)line),
         (Abstract *)Int_Wrapped(m, FORMATTER_MARK_VALUES), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)value),
+            (Abstract *)Do_Wrapped(m, (DoFunc)value),
         (Abstract *)Int_Wrapped(m, FORMATTER_MARK_END));
 
     LookupConfig config[] = {

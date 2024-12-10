@@ -1,9 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static Abstract *hdrCookieProcess(MemCtx *source, Abstract *a){
-    Req *req = (Req *) as(source, TYPE_REQ);
-    MemCtx *m = MemCtx_FromHandle((MemHandle *)req);
+static Abstract *hdrCookieProcess(MemCtx *m, Abstract *a){
+    Req *req = (Req *) as(a, TYPE_REQ);
     String *s = (String *)asIfc(a, TYPE_STRING);
     HttpProto *proto = (HttpProto*)req->proto;
     proto->sid = s;

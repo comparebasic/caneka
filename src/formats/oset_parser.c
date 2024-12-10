@@ -63,7 +63,7 @@ static word endTableDef[] = {
 };
 
 /* match setups */
-static status start(Roebling *rbl){
+static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -80,7 +80,7 @@ static status start(Roebling *rbl){
     return r;
 }
 
-static status token(Roebling *rbl){
+static status token(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -88,7 +88,7 @@ static status token(Roebling *rbl){
     return r;
 }
 
-static status defineLength(Roebling *rbl){
+static status defineLength(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -100,7 +100,7 @@ static status defineLength(Roebling *rbl){
     return r;
 }
 
-static status value(Roebling *rbl){
+static status value(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -121,7 +121,7 @@ static status value(Roebling *rbl){
     return r;
 }
 
-static status sep(Roebling *rbl){
+static status sep(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -165,6 +165,9 @@ static char *captureKey_ToChars(word captureKey){
 }
 
 static status addToParent(FmtCtx *oset){
+    if(oset->item == NULL){
+        return NOOP;
+    }
     if((oset->item->type.state & PARENT_TYPE_ARRAY) != 0){
         int idx = -1;
         if(oset->item->key != NULL){
@@ -180,7 +183,12 @@ static status addToParent(FmtCtx *oset){
             Fatal("Expected oset key for table sub-item", TYPE_OSET);
             return ERROR;
         }
+        if(oset->item->def->id != TYPE_TABLE){
+            oset->item->value = oset->item->def->from(oset->m, oset->item->def, oset, oset->item->key, oset->item->value);
+        }
+
         Table_Set((Span *)oset->item->parent->value, (Abstract *)oset->item->key, oset->item->value); 
+
     }
 
     return SUCCESS;
@@ -227,20 +235,13 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_TABLE){
-        if(oset->item->def->id != TYPE_TABLE){
-            return ERROR;
-        }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_TABLE);
         
         FmtItem *item = FmtItem_Make(oset->m, oset);
         item->type.state |= PARENT_TYPE_TABLE;
         item->parent = oset->item;
         oset->item = item;
-
     }else if(captureKey == OSET_CLOSE_ARRAY || captureKey == OSET_CLOSE_LIST || captureKey == OSET_CLOSE_TABLE){
-        oset->item = oset->item->parent;
-        addToParent(oset);
-    }else if(captureKey == OSET_CLOSE_TABLE){
         oset->item = oset->item->parent;
         addToParent(oset);
     }else if(captureKey == OSET_VALUE){
@@ -258,15 +259,14 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
 }
 
 Roebling *OsetParser_Make(MemCtx *m, String *s, Abstract *source){
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do =  Span_From(m, 7, 
         (Abstract *)Int_Wrapped(m, OSET_MARK_START), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)start),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)token),
+            (Abstract *)Do_Wrapped(m, (DoFunc)start),
+            (Abstract *)Do_Wrapped(m, (DoFunc)token),
         (Abstract *)Int_Wrapped(m, OSET_MARK_LENGTH), 
-            (Abstract *)Do_Wrapped(mh, (DoFunc)defineLength),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)value),
-            (Abstract *)Do_Wrapped(mh, (DoFunc)sep));
+            (Abstract *)Do_Wrapped(m, (DoFunc)defineLength),
+            (Abstract *)Do_Wrapped(m, (DoFunc)value),
+            (Abstract *)Do_Wrapped(m, (DoFunc)sep));
 
     LookupConfig config[] = {
         {OSET_MARK_START, (Abstract *)String_Make(m, bytes("OSET_START"))},

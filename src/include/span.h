@@ -59,7 +59,7 @@ void *Span_Set(Span *p, int idx, Abstract *t);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
 Span *Span_From(MemCtx *m, int count, ...);
-status Span_Run(MemHandle *mh, Span *p, DoFunc func);
+status Span_Run(MemCtx *m, Span *p, DoFunc func);
 status Span_Merge(Span *dest, Span *additional);
 int Span_GetIdx(Span *p, void *a, EqualFunc eq);
 Abstract *Span_Search(Span *p, void *a, EqualFunc eq);

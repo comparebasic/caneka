@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Single *Do_Wrapped(MemHandle *mh, DoFunc dof){
-    MemCtx *m = MemCtx_FromHandle(mh);
+Single *Do_Wrapped(MemCtx *m, DoFunc dof){
     Single *sgl = (Single *)MemCtx_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_DO;
     sgl->type.state = TYPE_MAKER;

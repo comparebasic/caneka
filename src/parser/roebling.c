@@ -188,7 +188,7 @@ status Roebling_RunCycle(Roebling *rbl){
         if((rbl->type.state & PROCESSING) == 0){
             rbl->type.state |= PROCESSING;
             wdof = as(wdof, TYPE_WRAPPED_DO);
-            ((RblFunc)(wdof->val.dof))(rbl);
+            ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
             if(DEBUG_ROEBLING){
                 printf("\x1b[%dmRbl Run 0x%lx idx:\x1b[1;%dm%d\x1b[0;%dm ", DEBUG_ROEBLING, (util)wdof, DEBUG_ROEBLING, rbl->idx, DEBUG_ROEBLING);
                 Debug_Print((void *)rbl, 0, "", DEBUG_ROEBLING, TRUE);

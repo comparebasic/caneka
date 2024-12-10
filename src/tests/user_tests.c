@@ -24,7 +24,12 @@ status User_Tests(MemCtx *gm){
 
     String *pass =  String_Make(m, bytes("Bork_Bork128!Bork"));
 
-    Span *u = User_Open(m, users, userId, pass, ac, NULL);
+    Span *data = Span_Make(m, TYPE_TABLE);
+    Table_Set(data, (Abstract *)String_Make(m, bytes("email")), (Abstract *)email);
+
+    Span *u = User_Open(m, users, userId, pass, ac, data);
+    Debug_Print((void *)u, 0, "User: ", COLOR_PURPLE, TRUE);
+    printf("\n");
 
     String *abs = Buff(m, NULL);
     String_Add(m, abs, users->abs);
@@ -38,8 +43,11 @@ status User_Tests(MemCtx *gm){
     file.abs = file.path;
     File_Load(m, &file, ac);
 
-    char *exp = "auth/2={salt:enc/3={key:s/4=test;enc:s/226=05c5aa8d72060d43f8365ac92ad9c101b40c849ed1b7a9ec656ea50cd3afc4c08d80cfbbeae4ab6893748912589d33a0a47ef1b8af385c7aabe6d0dd5ad9fbfff763cec3367c3ef2a20082aa4431b85176d9b370172f598bff24db36ffd08f46f69653e5a25a84b8e81c16d6b9dd6fb0d1;dec:x/0=;}digest:s/64=838bf7f8636e6a279c269260f61e31a8c55bcd93856310b5c61942ff2fa08ce9;}";
     r |= Test(file.data->length == 231, "Auth Oset has expected length, have %d", file.data->length);
+
+    Span *u2 = User_Open(m, users, userId, pass, ac, NULL);
+    Debug_Print((void *)u2, 0, "User2: ", COLOR_PURPLE, TRUE);
+    printf("\n");
 
     r |= Test(User_Delete(m, users, userId, ac) & SUCCESS, "User Delete has flag SUCCESS");
 

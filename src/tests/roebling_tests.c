@@ -21,7 +21,7 @@ static status Found(word captureKey, int matchIdx, String *s, Abstract *source){
     return SUCCESS;
 }
 
-status SetWord1(Abstract *a){
+status SetWord1(MemCtx *m, Abstract *a){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     Lookup *lk = Lookup_Make(rbl->m, ONE, NULL, NULL); 
     Lookup_Add(rbl->m, lk, ONE, 
@@ -40,14 +40,14 @@ static word nl[] = {NL_DEF};
 static word nl_upper[] = {PAT_INVERT|PAT_TERM|PAT_NO_CAPTURE, '\n', '\n', PAT_END, 0, 0};
 static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_END, 0, 0};
 
-status SetWord2(Roebling *rbl){
+status SetWord2(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)text, 0, -1);
     return r; 
 }
 
-status SetNextOrEnd(Roebling *rbl){
+status SetNextOrEnd(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)nl_upper, 0, RBL_TEST_START);
@@ -63,12 +63,12 @@ status Roebling_Tests(MemCtx *gm){
 
     Roebling *rbl = NULL;
     Span *parsers_do = Span_Make(m, TYPE_SPAN);
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped((MemHandle *)m, (DoFunc)SetWord1)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped((MemHandle *)m, (DoFunc)SetWord2)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, String_Init(m, STRING_EXTEND), Found, NULL); 
 
     Single *dof = as(Span_Get(rbl->parsers_do, 0), TYPE_WRAPPED_DO);
-    dof->val.dof((MemHandle *)rbl);
+    ((RblFunc)dof->val.dof)(rbl->m, rbl);
 
     r |= Test(rbl->matches->nvalues == 3, "Roebling has three match values loaded up");
 
@@ -81,10 +81,9 @@ status RoeblingRun_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
 
     Roebling *rbl = NULL;
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do = Span_Make(m, TYPE_SPAN);
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord1)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord2)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, String_Init(m, STRING_EXTEND), Found, NULL); 
 
     String *s = NULL; 
@@ -118,12 +117,11 @@ status RoeblingMark_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
 
     Roebling *rbl = NULL;
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do = Span_Make(m, TYPE_SPAN);
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_START)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord1)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord2)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetNextOrEnd)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetNextOrEnd)); 
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_END)); 
 
     LookupConfig config[] = {
@@ -184,9 +182,8 @@ status RoeblingStartStop_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
 
     Roebling *rbl = NULL;
-    MemHandle *mh = (MemHandle *)m;
     Span *parsers_do = Span_Make(m, TYPE_SPAN);
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(mh, (DoFunc)SetWord2)); 
+    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
 
     String *s = String_Init(m, STRING_EXTEND);
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, s, Found, NULL); 

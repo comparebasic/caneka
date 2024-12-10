@@ -1,6 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
+File *File_Clone(MemCtx *m, File *o){
+    File *file = MemCtx_Realloc(m, sizeof(File), o, sizeof(File));
+    file->path = String_Clone(m, file->path);
+    file->abs = String_Clone(m, file->abs);
+    file->data = String_Clone(m, file->data);
+    return file;
+}
+
 status File_Persist(MemCtx *m, File *file){
     char buff[PATH_BUFFLEN];
 

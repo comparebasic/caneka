@@ -8,8 +8,6 @@ related: core/mem.c
 */
 #define MEM_SLAB_SIZE 4096
 
-#define MemH(x) MemCtx_FromHandle((MemHandle *)(x))
-
 typedef struct mem_slab {
     byte bytes[MEM_SLAB_SIZE];
     word idx;
@@ -30,11 +28,6 @@ typedef struct mem_ctx {
     } latest;
 } MemCtx;
 
-typedef struct mem_handle  {
-    Type type;
-    struct mem_ctx *m;
-} MemHandle;
-
 size_t MemCount();
 void *MemCtx_Alloc(MemCtx *m, size_t s);
 void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize);
@@ -48,6 +41,3 @@ void *MemSlab_Alloc(MemSlab *sl, size_t s);
 i64 MemCtx_Used(MemCtx *m);
 
 void *MemCtx_GetSlab(MemCtx *m, void *addr);
-
-/* utils */
-MemCtx *MemCtx_FromHandle(MemHandle *a);

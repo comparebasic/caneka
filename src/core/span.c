@@ -211,20 +211,12 @@ Span *Span_From(MemCtx *m, int count, ...){
     return p;
 }
 
-status Span_Run(MemHandle *mh, Span *p, DoFunc func){
+status Span_Run(MemCtx *m, Span *p, DoFunc func){
     status r = READY;
-    MHAbstract ma;
-    MemCtx *m = NULL;
-    if(mh != NULL){
-        mh = asIfc(mh, TYPE_MEMHANDLE);
-        m = mh->m;
-    }
-    MHAbstract_Init(&ma, m, NULL);
     for(int i = 0; i < p->nvalues; i++){
         Abstract *a = (Abstract *)Span_Get(p, i);
         if(a != NULL && (*(util *)a) != 0){
-            ma.a = a;
-            r |= func((MemHandle *)&ma);
+            r |= func(m, a);
         }
     }
     return r;
@@ -341,6 +333,27 @@ status Span_ReInit(Span *p){
     p->nvalues = 0;
     p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
     return SUCCESS;
+}
+
+Span *Span_Clone(MemCtx *m, Span *op){
+    Span *p = Span_Make(m, op->type.of);
+    if((p->def->flags & INLINE) != 0){
+        p->def = SpanDef_Clone(m, SpanDef_FromCls(op->type.of));
+        p->type.of = p->def->typeOf;
+    }
+    Iter it;
+    Iter_Init(&it, op);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *o = Iter_Get(&it);
+        if(o != NULL){
+            Abstract *a = Clone(m, o); 
+            if(a == NULL){
+                return NULL;
+            }
+            Span_Set(p, it.idx, a);
+        }
+    }
+    return p;
 }
 
 Span *Span_Make(MemCtx *m, cls type){

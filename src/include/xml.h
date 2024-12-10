@@ -33,7 +33,7 @@ typedef struct xml_ctx {
     void *source;
 } XmlCtx;
 
-XmlCtx *XmlCtx_Make(MemHandle *mh);
+XmlCtx *XmlCtx_Make(MemCtx *m);
 status XmlCtx_Open(XmlCtx *ctx, String *tagName);
 status XmlCtx_Close(XmlCtx *ctx, String *tagName);
 status XmlCtx_SetAttr(XmlCtx *ctx, String *attName);

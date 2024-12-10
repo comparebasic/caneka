@@ -6,6 +6,16 @@ char *hex_chars = "0123456789abcdef";
 
 static const byte *digits = (byte *)"0123456789";
 
+static byte hexCharToOrd(byte b){
+    if(b >= '0' && b <= '9'){
+        return b - '0';
+    }else if(b >= 'a' && b <= 'f'){
+        return b - 'a' + 10;
+    }else{
+        return 0;
+    }
+}
+
 static int _String_FromI64(MemCtx *m, i64 i, byte buff[]){
     memset(buff, 0, MAX_BASE10+1);
 
@@ -227,6 +237,27 @@ String *String_ToHex(MemCtx *m, String *s){
             b2[1] = hex_chars[(c & 15)];
             String_AddBytes(m, ret, b2, 2);
             b++;
+        }
+        s = String_Next(s);
+    };
+    return ret;
+}
+
+String *String_FromHex(MemCtx *m, String *s){
+    String *ret = String_Init(m, s->length/2);
+    byte b2[2];
+    byte b = 0;
+    int offset = 0;
+    while(s != NULL){
+        while(offset < s->length){
+            memcpy(b2, s->bytes+offset, 2);
+            byte a0 = b2[0];
+            byte a1 = b2[1];
+            b2[0] = hexCharToOrd(b2[0]);
+            b2[1] = hexCharToOrd(b2[1]);
+            b = (b2[0] << 4) | b2[1];
+            String_AddBytes(m, ret, bytes(&b), 1);
+            offset += 2;
         }
         s = String_Next(s);
     };
