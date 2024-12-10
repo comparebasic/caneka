@@ -37,8 +37,6 @@ status Salty_Tests(MemCtx *gm){
 
     char *cstr = "qerjfkdlkieurjfhdic3k83";
     String *salt = String_Make(m, bytes(cstr));;
-    Debug_Print((void *)salt, 0, "S: ", COLOR_RED, TRUE);
-    printf("\n");
     pair = EncPair_Make(m, Cont(m, bytes("test")), NULL, salt,  ac, salt->length);
     EncPair_Fill(m, pair, ac);
     result = EncPair_Make(m, Cont(m, bytes("test")), pair->enc, NULL, ac, salt->length);

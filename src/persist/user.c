@@ -18,7 +18,7 @@ status User_Delete(MemCtx *m, IoCtx *userCtx, String *id, Access *ac){
 
 Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *ac, Span *data){
     if(DEBUG_USER){
-        Debug_Print((void *)id, 0, "Making user: ", COLOR_PURPLE, TRUE);
+        Debug_Print((void *)id, 0, "Making user: ", DEBUG_USER, TRUE);
         printf("\n");
     }
 
@@ -28,7 +28,14 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
     IoCtx ctx;
     IoCtx_Init(m, &ctx, id, NULL, userCtx);
     if((IoCtx_Load(m, &ctx) & MISS) == 0 && ctx.files != NULL){
+        if(DEBUG_USER){
+            Debug_Print((void *)id, 0, "Found: ", DEBUG_USER, TRUE);
+            printf("\n");
+        }
         File *pwauth = (File *)Table_Get(ctx.files, (Abstract *)String_Make(m, bytes("password.auth")));
+        if(pwauth == NULL){
+            Fatal("pwauth file not found for ser", TYPE_AUTH);
+        }
         pwauth->abs = IoCtx_GetPath(m, &ctx, pwauth->path);
         File_Load(m, pwauth, ac);
 
@@ -51,10 +58,16 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         IoCtx_Persist(m, &ctx); 
         return udataTbl;
     }else{
+        if(DEBUG_USER){
+            Debug_Print((void *)id, 0, "Making new: ", DEBUG_USER, TRUE);
+            printf("\n");
+        }
         File pwauth;
         File_Init(&pwauth, String_Make(m, bytes("password.auth")), ac, &ctx);
         pwauth.data = Oset_To(m, NULL, (Abstract *)Auth_Make(m, key, secret, ac));
         pwauth.type.state |= FILE_UPDATED;
+        Debug_Print((void *)pwauth.data, 0, "PwAuthOset: ", COLOR_PURPLE, TRUE);
+        printf("\n");
 
         File user;
         File_Init(&user, String_Make(m, bytes("user.data")), ac, &ctx);
@@ -66,6 +79,11 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         user.data = Oset_To(m, NULL, (Abstract *)data); 
         user.type.state |= FILE_UPDATED;
 
+        if(DEBUG_USER){
+            Debug_Print((void *)ctx.files, 0, "persisting?", DEBUG_USER, TRUE);
+            printf("\n");
+        }
+        
         IoCtx_Persist(m, &ctx); 
         return data;
     }

@@ -385,6 +385,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     byte *bytes = (byte *)chars;
 
     String *seg = a;
+    printf("Starting Length:%d %s\n", a->length, chars);
     byte *p = bytes;
 
     if(a->type.of == TYPE_STRING_CHAIN){
@@ -408,11 +409,15 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         Fatal("unknown type\n", a->type.of);
     }
 
+    printf("Copying:\n");
     while(remaining > 0){
         copy_l = min(remaining, STRING_CHUNK_SIZE-seg->length); 
+        printf("  l:%d -> %ld/%ld\n", seg->length, copy_l, remaining);
         memcpy(seg->bytes+seg->length, p, copy_l);
+        printf("  coping...\n");
         seg->length += copy_l;
         if(seg->length == STRING_CHUNK_SIZE){
+            printf("  new chunk...\n");
             String *next = String_Init(m, -1);
             seg->next = next;
             seg = seg->next;

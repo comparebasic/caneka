@@ -60,6 +60,16 @@ status String_Tests(MemCtx *gm){
     r |= Test(String_Length(s) == strlen(cstr), "Expect length %d, have %d", strlen(cstr), String_Length(s));
     r |= Test(String_EqualsBytes(s, bytes(cstr)), "Expect string match of '%s' to be TRUE", cstr);
 
+    printf("START\n");
+    s = String_Init(m, STRING_EXTEND);
+    String_Add(m, s, String_Make(m, bytes("Hello there cool it is now a things")));
+    String_Add(m, s, String_Make(m, bytes(" what the hell am I supposed to do fuckheads? Yo,")));
+    String_Add(m, s, String_Make(m, bytes(" and more and more and more.")));
+    String_Add(m, s, String_Make(m, bytes(" And again I add things and do things and it's really really nice")));
+    String_Add(m, s, String_Make(m, bytes(", it's me, again with the needs and wants and complaints and problems.")));
+    String_Add(m, s, String_Make(m, bytes("Me again up at night fucking pissed and angry at the world.")));
+    String_Add(m, s, String_Make(m, bytes(" Always me saying \"fuck you\" to the sky where no-one is listening.")));
+
     MemCtx_Free(m);
     return r;
 }

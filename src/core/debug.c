@@ -38,7 +38,7 @@ int DEBUG_OSET = 0;
 int DEBUG_OSET_COMPLETE = 0;
 int DEBUG_NESTED = 0;
 int DEBUG_CASH = 0;
-int DEBUG_USER = 0;
+int DEBUG_USER = COLOR_CYAN;
 
 boolean SHOW_SERVE_TESTS = FALSE;
 
@@ -540,11 +540,6 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
                 _s = String_ToEscaped(DebugM, s);
             }
 
-            if(strlen((char *)_s->bytes) != l){
-                printf("0 mismatch strlen%ld vs l%d: ", strlen((char *)_s->bytes), l);
-            }else{
-                printf("match l%d :", l);
-            }
             printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", l, color, _s->bytes, color);
             s = s->next;
         } while(s != NULL);
