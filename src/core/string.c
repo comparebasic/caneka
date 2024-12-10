@@ -232,7 +232,8 @@ String *String_ToHex(MemCtx *m, String *s){
         byte *end = b+s->length;
         while(b < end){
             byte c = *b;
-            byte b2[2];
+            byte b2[3];
+            b2[2] = 0;
             b2[0] = hex_chars[((c & 240) >> 4)];
             b2[1] = hex_chars[(c & 15)];
             String_AddBytes(m, ret, b2, 2);
@@ -380,8 +381,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         }
     }
 
-    size_t l = length;
-    size_t remaining = l;
+    size_t remaining = length;
     size_t copy_l = remaining;
     byte *bytes = (byte *)chars;
 
@@ -393,12 +393,17 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
 
     if(a->type.of == TYPE_STRING_CHAIN){
         while(seg->next != NULL){
+            if((a->type.state & DEBUG) != 0){
+                printf("  > next\n");
+            }
             seg = seg->next;
         }
-        if(seg->length == TYPE_STRING_CHAIN){
-            String *next = String_Init(m, -1);
-            seg->next = next;
-            seg = next;
+        if((a->type.state & DEBUG) != 0){
+            printf("  Seg len %d\n", seg->length);
+        }
+        if(seg->length == STRING_CHUNK_SIZE){
+            seg->next = String_Init(m, -1);
+            seg = seg->next;
         }
     }else if(a->type.of == TYPE_STRING_FIXED){
         if(a->length+length > STRING_FIXED_SIZE){
@@ -420,6 +425,9 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         memcpy(seg->bytes+seg->length, p, copy_l);
         seg->length += copy_l;
         if(seg->length == STRING_CHUNK_SIZE){
+            if((a->type.state & DEBUG) != 0){
+                printf("  > new seg\n");
+            }
             String *next = String_Init(m, -1);
             seg->next = next;
             seg = seg->next;

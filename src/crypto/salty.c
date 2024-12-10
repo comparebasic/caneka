@@ -25,7 +25,11 @@ static void Tea_decipher(unsigned int rounds, uint32_t v[2], uint32_t const key[
 
 static status Salty_process(MemCtx *m, String *key, String *s, Salty_Proc proc){
     if(key->length % SALTY_KEY_SEGSIZE != 0){
-        printf("Error: key string not on bounds, is it aligned?\n");
+        Fatal("Error: multi-segment keys not yet supported by Salty", TYPE_STRING);
+        return ERROR;
+    }
+    if(String_Length(s) > STRING_CHUNK_SIZE){
+        Fatal("Error: multi-segment content not yet supported by Salty", TYPE_STRING);
         return ERROR;
     }
 

@@ -55,7 +55,6 @@ status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
         if(isFilled(p->enc) && !isFilled(p->dec)){
             p->dec = String_Clone(m, p->enc);
             p->type.state |= Salty_Dec(m, key, p->dec); 
-
             p->dec->length = p->length;
 
             return SUCCESS;

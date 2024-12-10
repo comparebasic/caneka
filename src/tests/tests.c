@@ -13,21 +13,18 @@ status Tests_Init(MemCtx *m){
 }
 
 static TestSet _Tests[] = {
-    /*
     {
         "Core",
         Core_Tests,
         "Initializing core system tests",
         FEATURE_COMPLETE,
     },
-    */
     {
         "String",
         String_Tests,
         "Tests for the basic string object and convienience features",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "String - B64",
         StringB64_Tests,
@@ -52,14 +49,14 @@ static TestSet _Tests[] = {
         "Inline spans hold data directly in thier memory space, instead of storing pointers to data held elsewhere.",
         FEATURE_COMPLETE,
     },
-    / *
+    /*
     {
         "SpanClone",
         SpanClone_Tests,
         "Clone a span",
         NOT_STARTED,
     },
-    * /
+    */
     {
         "Hash",
         Hash_Tests,
@@ -260,14 +257,14 @@ static TestSet _Tests[] = {
         "Generating Sha256 summaries of strings. And random data strings.",
         FEATURE_COMPLETE,
     },
-    / *
+    /*
     {
         "Crypto - Ecdsa",
         Ecdsa_Tests,
         "Ecsda sugnatures for strings.",
         NOT_STARTED,
     },
-    * /
+    */
     {
         "Crypto - Salty",
         Salty_Tests,
@@ -292,7 +289,6 @@ static TestSet _Tests[] = {
         "Email send flow tests with CycleServe and Roebling.",
         NOT_STARTED,
     },
-    */
     {
         NULL,
         NULL,

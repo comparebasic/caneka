@@ -6,7 +6,6 @@ void Log_AuthFail(MemCtx *m, Auth *auth, Access *ac){
 }
 
 boolean Auth_Verify(MemCtx *m, Auth *auth, String *secret, Access *ac){
-    printf("verifying...\n");
     if((EncPair_Fill(m, auth->saltenc, ac) & SUCCESS) != 0){
         /*
         Sha256 sha;
@@ -24,7 +23,6 @@ boolean Auth_Verify(MemCtx *m, Auth *auth, String *secret, Access *ac){
         return String_Equals(auth->digest, digest);
     }
 
-    printf("verifying...FALSE\n");
     return FALSE;
 }
 
@@ -39,7 +37,6 @@ Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
         }
 
         String *salt = Crypto_RandomString(m, USER_SALT_LENGTH);
-
 
         String *enc = String_Clone(m, salt);
         Salty_Enc(m, skey, enc);

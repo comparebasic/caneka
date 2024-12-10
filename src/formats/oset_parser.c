@@ -210,6 +210,10 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             Fatal("Error: type not found\n", TYPE_OSET);
         }
         oset->item->def = def;
+        if(DEBUG_OSET_DEF){
+            Debug_Print((void *)def->name, 0, "OsetDef: ", DEBUG_OSET_DEF, TRUE);
+            printf("\n");
+        }
     }else if(captureKey == OSET_FLAG){
         oset->item->flags = (word)Int_FromString(s);
     }else if(captureKey == OSET_LENGTH){
@@ -250,7 +254,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         addToParent(oset);
     }else if(captureKey == OSET_VALUE){
         if(DEBUG_OSET_COMPLETE){
-            Debug_Print((void *)oset->item->def->name, 0, "Finalizing Complex Type", DEBUG_OSET_COMPLETE, TRUE);
+            Debug_Print((void *)oset->item->def->name, 0, "Finalizing Value Type", DEBUG_OSET_COMPLETE, TRUE);
             printf("\n");
         }
         if(oset->item == NULL){

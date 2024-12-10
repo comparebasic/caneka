@@ -35,15 +35,9 @@ Abstract *I64_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract *
     String_AddBytes(m, os, bytes("/"), 1);
     String *s = String_FromI64(m, sg->val.value);
     String_Add(m, os, String_FromInt(m, s->length));
-    char *eq = "=";
-    char *end = ";";
-    if((o->type.state & LINE_SEPERATED) != 0){
-        eq = " ";
-        end = "\n";
-    }
-    String_AddBytes(m, os, bytes(eq), 1);
+    String_AddBytes(m, os, bytes("="), 1);
     String_Add(m, os, String_FromInt(m, sg->val.value));
-    String_AddBytes(m, os, bytes(end), 1);
+    String_AddBytes(m, os, bytes(";"), 1);
 
    return (Abstract *)os;
 }
