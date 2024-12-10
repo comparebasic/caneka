@@ -2,9 +2,7 @@
 #include <caneka.h>
 #include <tests.h>
 
-/*
 #define CYCLE_SERVE 1
-*/
 
 status Tests_Init(MemCtx *m){
    status r = READY;
@@ -275,7 +273,7 @@ static TestSet _Tests[] = {
         "UserTests - PasswordFlow",
         User_Tests,
         "A Basic user password flow using CycleServe and IoCtx",
-        NOT_STARTED,
+        PARTIAL_FEATURE,
     },
     {
         "Smtp",
