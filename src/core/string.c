@@ -461,15 +461,35 @@ i64 String_Length(String *s) {
     return length;
 }
 
-boolean String_EqualsBytes(String *a, byte *cstr){
-    int l = strlen((char *)cstr); 
+boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
+    /* TODO: test this across different string types */
     int pos = 0;
-    if(String_Length(a) != l){
+    int actual = 0;
+    int offset = 0;
+    String *tail = a;
+    if(pos_fl == STRING_POS_END){
+        while(a->type.of == TYPE_STRING_CHAIN && tail->next != NULL
+                && tail->next->length > length){
+            tail = tail->next;
+        }
+        pos = tail->length - length;
+        if(tail->next != NULL){
+            pos += tail->next->length;
+        }
+    }else if(String_Length(a) != length){
         return FALSE;
     }
-    String *tail = a;
     byte *p = cstr;
-    while(tail != NULL && (pos+tail->length) <= l){
+    while(tail != NULL && (pos+tail->length) <= length){
+        if((actual + tail->length) < pos){
+            actual += tail->length;
+            tail = String_Next(tail);
+            continue;
+        }
+
+        if( pos > acutal){
+            offset = 
+        }
         if(strncmp((char *)tail->bytes, (char *)p, tail->length) != 0){
             return FALSE;
         }
@@ -478,11 +498,15 @@ boolean String_EqualsBytes(String *a, byte *cstr){
         tail = String_Next(tail);
     }
 
-    if(tail == NULL && pos == l){
+    if(tail == NULL && pos == String_Length(a)){
         return TRUE;
     }
 
     return FALSE;
+}
+
+boolean String_EqualsBytes(String *a, byte *cstr){
+    return String_PosEqualsBytes(a, cstr, strlen(cstr), STRING_POS_ALL);
 }
 
 boolean String_Eq(Abstract *a, void *b){

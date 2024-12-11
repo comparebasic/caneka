@@ -4,7 +4,8 @@
 static char *srcDir = "src";
 static char *distDir = "dist";
 
-status Trans_transDir(MemCtx *m, Transp *p, String *path){
+static status Trans_transDir(MemCtx *m, String *path, Abstract *source){
+    Transp *p = as(source, TYPE_TRANSP);
     String *new = String_Init(m, STRING_EXTEND);
     String_Add(m, p->dist);
     String_AddBytes(m, new, bytes("/"), 1);
@@ -14,49 +15,50 @@ status Trans_transDir(MemCtx *m, Transp *p, String *path){
     if(dir){
         closedir(dir);
     }else if(ENOENT == errno){
-        printf("\x1b[%dmMaking Dist Directory %s\x1b[0m\n", MSG_COLOR, dist_cstr.content);
         return Dir_CheckCreate(m, path);
     }
     return TRUE;
 }
 
-static int transpile(Cstr *source, Cstr *dest){
-    printf("\x1b[1;34m%s -> %s\x1b[0m\n", source->content, dest->content);
+static static int Transp_transFile(Cstr *source, Cstr *dest){
+    printf("\x1b[1;34m%s -> %s\x1b[0m\n", source->bytes, dest->bytes);
     return TRUE;
 }
 
 static int copy(Cstr *source, Cstr *dest){
     /*
-    printf("\x1b[33m%s -> %s\x1b[0m\n", source->content, dest->content);
+    printf("\x1b[33m%s -> %s\x1b[0m\n", source->bytes, dest->bytes);
     */
     return TRUE;
 }
 
-int transFile(Cstr *dir_cstr, Cstr *file_cstr){
+int transFile(MemCtx *m, String *dir, String *file, Abstract *source){
+    Transp *p = as(source, TYPE_TRANSP);
     char *C = ".c";
     char *Cnk = ".cnk";
     char *H = ".h";
 
-    Cstr source;
-    Cstr_Init(&source, dir_cstr->content);
-    Cstr_Add(&source, "/");
-    Cstr_Add(&source, file_cstr->content);
+    String *source = String_Init(m, STRING_EXTEND);
+    String_Add(m, source, dir);
+    String_AddBytes(m, source, bytes("/"), 1);
+    String_Add(m, source, file);
 
-    Cstr dest;
-    Cstr_Init(&dest, distDir);
-    Cstr_Add(&dest, "/");
-    Cstr_Add(&dest, dir_cstr->content);
-    Cstr_Add(&dest, "/");
-    Cstr_Add(&dest, file_cstr->content);
+    String *dest = String_Init(m, STRING_EXTEND);
+    String_Add(m, source, p->dist);
+    String_AddBytes(m, source, bytes("/"), 1);
+    String_Add(m, source, dir);
+    String_AddBytes(m, source, bytes("/"), 1);
+    String_Add(m, source, file);
 
-    if(Cstr_Match(file_cstr->content, C, MATCH_END) || Cstr_Match(file_cstr->content, H, MATCH_END)){
+    if(String_PosEqualsBytes(source, bytes(C), strlen(H), STRING_POS_END) || 
+            String_PosEqualsBytes(source, bytes(H), strlen(H), STRING_POS_END)){
         copy(&source, &dest);
-    }else if(Cstr_Match(file_cstr->content, Cnk, MATCH_END)){
+    }else if(String_PosEqualsBytes(source, bytes(Cnk), strlen(Cnk), STRING_POS_END)){
         int l = strlen(dest.content);
         dest.content[l-2] = '\0';
         transpile(&source, &dest);
     }else{
-        copy(dir_cstr, file_cstr);
+        copy(dir, file);
     }
 
     return TRUE;

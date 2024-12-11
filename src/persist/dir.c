@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Dir_Climb(MemCtx *m, String *path, DoFunc dir, DblFunc file){
+status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *source){
     struct dirent *ent;
     DIR *d = opendir((char *)path->bytes);
     if(d != NULL){
@@ -14,10 +14,10 @@ status Dir_Climb(MemCtx *m, String *path, DoFunc dir, DblFunc file){
                 String_Add(m, s, path);
                 String_AddBytes(m, s, bytes("/"), 1);
                 String_AddBytes(m, s, bytes(ent->d_name), strlen(ent->d_name));
-                dir(m, (Abstract *)s);
+                dir(m, s, source);
                 Dir_Climb(m, s, dir, file);
             }else{
-                file(m, (Abstract *)path, (Abstract *)String_Make(m, bytes(ent->d_name)));
+                file(m, path, String_Make(m, bytes(ent->d_name)), source);
             }
         }
         closedir(d);

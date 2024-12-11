@@ -5,6 +5,11 @@ string library
 related: core/string.h
 */
 
+enum string_pos {
+    STRING_POS_ALL = 1,
+    STRING_POS_END,
+};
+
 enum string_flags {
     FLAG_STRING_IS_NUM = 1 << 9,
     FLAG_STRING_IS_BOOL = 1 << 10,
