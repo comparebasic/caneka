@@ -67,8 +67,6 @@ int transFile(Cstr *dir_cstr, Cstr *file_cstr){
     return TRUE;
 }
 
-
-
 void Trans(){
     Cstr dir_cstr;
     Cstr_Init(&dir_cstr, srcDir);

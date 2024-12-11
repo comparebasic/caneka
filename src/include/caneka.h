@@ -73,6 +73,7 @@ extern Abstract Reserved;
 
 typedef struct virt * AbstractPtr;
 typedef status (*DoFunc)(struct mem_ctx *m, Abstract *a);
+typedef status (*DblFunc)(struct mem_ctx *m, Abstract *a, Abstract *b);
 typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source);
 
 #define ZERO 0
@@ -278,6 +279,7 @@ cls Ifc_Get(cls inst);
 #include "oset_item.h"
 #include "oset.h"
 #include "access.h"
+#include "dir.h"
 #include "ioctx.h"
 #include "memlocal.h"
 #include "file.h"
