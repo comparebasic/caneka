@@ -1,4 +1,4 @@
-#include "include/builder.h"
+#include "mini/builder.h"
 
 #define TEST_REQ 1
 
@@ -12,7 +12,7 @@
 #define LIBTARGET "libcaneka"
 #define MAIN "main.c"
 #define ALL allobj
-#define VERBOSE 2
+#define VERBOSE 0
 
 static Target targets[] = {
     {"testreq", "tests/testreq.c"}, {"caneka", "main.c"}, {"formatter", "formatter.c"}, {NULL, NULL},
@@ -59,6 +59,7 @@ static BuildSubdir formatsobj = {"formats", {
 static BuildSubdir langobj = {"lang", {
     "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
     "fmt_ctx.c", "fmt_item.c", "fmt_html.c","fmt_def.c",
+    "caneka_parser.c",
     NULL
 }};
 
@@ -103,4 +104,4 @@ BuildSubdir *allobj[] = {
     NULL
 };
 
-#include "builder.c"
+#include "mini/builder.c"

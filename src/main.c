@@ -11,6 +11,7 @@ This file is mostly an example Caneka application, and it runs the tests
 
 #define servecmd "serve"
 #define testcmd "test"
+#define transcmd "trans"
 
 static status test(MemCtx *m, char *arg){
     status r = TEST_OK;
@@ -45,10 +46,17 @@ status serve(MemCtx *m, char *arg){
     return Serve_Run(sctx, port);
 }
 
+status transpile(MemCtx *m, char *arg){
+    printf("Transpiling %s :)\n", arg);
+    return SUCCESS;
+}
+
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
     if(strncmp(arg, servecmd, strlen(servecmd)) == 0){
         return serve(m, arg);
+    }else if(strncmp(arg, transcmd, strlen(servecmd)) == 0){
+        return transpile(m, arg);
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
         status r = test(m, arg);
         if(r == TEST_OK){
@@ -63,7 +71,7 @@ static status handle(MemCtx *m, char *arg){
 
 int main(int argc, char **argv){
     if(argc == 1){
-        printf("%s [test,serve=port]\n", argv[0]);
+        printf("%s [test,serve=port,trans]\n", argv[0]);
         exit(1);
     }
 

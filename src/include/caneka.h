@@ -177,6 +177,8 @@ enum types {
     TYPE_NESTEDD,
     TYPE_ENC_PAIR,
     TYPE_FMT_HTML,
+    TYPE_LANG_CNK,
+    TYPE_LANG_CNK_SPACE,
     _TYPE_CORE_END,
 };
 
@@ -296,6 +298,7 @@ cls Ifc_Get(cls inst);
 #include "lang/nestedd.h"
 #include "lang/xmlt.h"
 #include "lang/fmt_html.h"
+#include "lang/caneka.h"
 
 status Caneka_Init(MemCtx *m);
 boolean Caneka_Truthy(Abstract *a);

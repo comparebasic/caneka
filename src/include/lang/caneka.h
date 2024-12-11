@@ -1,10 +1,11 @@
 enum cnk_lang_range {
-    CNK_LANG_START = 1;
-    CNK_LANG_LINE;
-    CNK_LANG_TYPE;
-    CNK_LANG_C;
-    CNK_LANG_VARDEF;
-    CNK_LANG_ASSIGN_VAL;
+    CNK_LANG_START = 1,
+    CNK_LANG_LINE,
+    CNK_LANG_TYPE,
+    CNK_LANG_C,
+    CNK_LANG_END_C,
+    CNK_LANG_VARDEF,
+    CNK_LANG_ASSIGN_VAL,
 };
 
 typedef struct caneka_lang_space {
@@ -17,4 +18,5 @@ typedef struct caneka_lang_space {
 typedef struct caneka_lang_ctx {
     Type type;
     CnkLangSpace *space;
+    Roebling *rbl;
 } CnkLangCtx;
