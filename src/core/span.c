@@ -29,6 +29,21 @@ int Span_Capacity(Span *p){
 
 
 /* API */
+char **Span_ToCharArr(MemCtx *m, Span *p){
+    size_t sz = sizeof(char *)*(p->nvalues+1);
+    char **arr = MemCtx_Alloc(m, sz);
+    memset(arr, 0, sz); 
+    Iter it;
+    Iter_Init(&it, p);
+    int i = 0;
+    while((Iter_Next(&it) & END) == 0){
+        String *s = (String *)asIfc(Iter_Get(&it), TYPE_STRING);
+        if(s != NULL){
+            arr[i++] = String_ToChars(m, s);
+        }
+    }
+    return arr;
+}
 void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
 
     Span *p = sq->span;

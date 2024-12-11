@@ -43,7 +43,8 @@ static BuildSubdir coreobj = { "core", {
 }};
 
 static BuildSubdir persistobj = { "persist", {
-    "ioctx.c", "file.c", "session.c","memlocal.c", "access.c", "user.c", "auth.c","dir.c",
+    "ioctx.c", "file.c", "session.c","memlocal.c", "access.c", "user.c", "auth.c",
+    "dir.c", "subprocess.c",
     NULL
 }};
 

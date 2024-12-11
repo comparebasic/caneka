@@ -26,3 +26,12 @@ status Dir_Climb(MemCtx *m, String *path, DoFunc dir, DblFunc file){
         return ERROR;
     }
 }
+
+status Dir_CheckCreate(MemCtx *m, String *path){
+    Span *cmd = Span_Make(m, TYPE_SPAN);
+    Span_Add(cmd, (Abstract *)String_Make(m, bytes("mkdir")));
+    Span_Add(cmd, (Abstract *)String_Make(m, bytes("-p")));
+    Span_Add(cmd, (Abstract *)path);
+
+    return SubProcess(m, cmd, path);
+}

@@ -1,26 +1,21 @@
-#include "mini/cnk.c"
+#include <external.h>
+#include <caneka.h>
 
 static char *srcDir = "src";
 static char *distDir = "dist";
 
-int transDir(Cstr *dir_cstr){
-    Cstr dist_cstr;
-    Cstr_Init(&dist_cstr, distDir);
-    Cstr_Add(&dist_cstr, "/");
-    Cstr_Add(&dist_cstr, dir_cstr->content); 
+status Trans_transDir(MemCtx *m, Transp *p, String *path){
+    String *new = String_Init(m, STRING_EXTEND);
+    String_Add(m, p->dist);
+    String_AddBytes(m, new, bytes("/"), 1);
+    String_Add(m, new, path);
 
-    DIR* dir = opendir(dist_cstr.content);
+    DIR* dir = opendir(path->bytes);
     if(dir){
         closedir(dir);
     }else if(ENOENT == errno){
         printf("\x1b[%dmMaking Dist Directory %s\x1b[0m\n", MSG_COLOR, dist_cstr.content);
-        StrArr mkdir;
-        Arr_Init(&mkdir, MKDIR);
-        Arr_Add(&mkdir, "-p");
-        Arr_Add(&mkdir, dist_cstr.content);
-        if(!subProcess(&mkdir, "Folder Make")){
-            return FALSE;
-        }
+        return Dir_CheckCreate(m, path);
     }
     return TRUE;
 }
@@ -71,4 +66,10 @@ void Trans(){
     Cstr dir_cstr;
     Cstr_Init(&dir_cstr, srcDir);
     FolderClimb(&dir_cstr, transDir, transFile);
+}
+
+Transp *Transp_Make(MemCtx *m){
+    Transp *t = MemCtx_Alloc(m, sizeof(Transp));
+    t->type.of = TYPE_TRANSP;
+    return t;
 }

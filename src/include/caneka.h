@@ -279,6 +279,7 @@ cls Ifc_Get(cls inst);
 #include "oset_item.h"
 #include "oset.h"
 #include "access.h"
+#include "subprocess.h"
 #include "dir.h"
 #include "ioctx.h"
 #include "memlocal.h"
@@ -291,6 +292,7 @@ cls Ifc_Get(cls inst);
 #include "human_present.h"
 #include "auth.h"
 #include "user.h"
+#include "transp.h"
 #include "apps.h"
 #ifdef LINUX
     #include "linux.h"
