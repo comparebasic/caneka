@@ -7,8 +7,8 @@ typedef struct transp {
     struct {
         String *source;
         String *dest;
-        File *sourceFile;
-        File *destFile;
+        File sourceFile;
+        File destFile;
     } current;
     OutFunc out;
     Roebling *rbl;

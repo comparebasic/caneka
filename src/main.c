@@ -47,10 +47,12 @@ status serve(MemCtx *m, char *arg){
 }
 
 status transpile(MemCtx *m, char *arg){
-    printf("Transpiling %s :)\n", arg);
     Transp *tp = Transp_Make(m);
     tp->src = String_Make(m, bytes("src"));
     tp->dist = String_Make(m, bytes("dist"));
+    Debug_Print((void *)tp->src, 0, "[Transpiling  ", COLOR_BLUE, FALSE);
+    Debug_Print((void *)tp->dist, 0, "->", COLOR_BLUE, FALSE);
+    printf("\x1b[%dm]\n", COLOR_BLUE);
     return Transp_Trans(tp);
 }
 

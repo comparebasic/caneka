@@ -25,3 +25,4 @@ status File_Load(MemCtx *m, File *file, Access *access, OutFunc out);
 status File_AbsFromCtx(MemCtx *m, File *file, Access *access, IoCtx *ctx);
 status File_Read(MemCtx *m, File *file, Access *access, int pos, int length);
 status File_Copy(MemCtx *m, String *a, String *b, Access *ac);
+boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac);

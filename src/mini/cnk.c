@@ -222,7 +222,7 @@ static int FolderMake(char *dirname){
     return TRUE;
 }
 
-static int NeedsBuild(Cstr *source_cstr, Cstr *build_cstr){
+static int SourceUpdated(Cstr *source_cstr, Cstr *build_cstr){
     struct stat source_stat;
     struct stat build_stat;
     int r = 0;

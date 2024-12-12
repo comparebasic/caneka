@@ -4,6 +4,15 @@ static int REBUILD_ALL = FALSE;
 static int REBUILD_BINARY = FALSE;
 static Cstr lib_cstr;
 
+struct builder {
+    struct {
+        uint16_t of;
+        uint16_t state;
+    } type;
+    char *srcDir;
+    char *buildDir;
+} GlobalBuilder;
+
 /* build functions */
 static int Cstr_AddBuildName(Cstr *cstr, char *fname){
     Cstr_Add(cstr, fname);
@@ -22,18 +31,20 @@ static int BuildSource(char *binary, char *fname, char *subdir){
     StrArr arr;
 
     Cstr build_cstr;
-    Cstr_Init(&build_cstr, "build/");
+    Cstr_Init(&build_cstr, GlobalBuilder.buildDir);
+    Cstr_Add(&build_cstr, "/");
     Cstr_Add(&build_cstr, subdir);
     Cstr_Add(&build_cstr, "/");
     Cstr_AddBuildName(&build_cstr, fname);
 
     Cstr source_cstr;
-    Cstr_Init(&source_cstr, "src/");
+    Cstr_Init(&source_cstr, GlobalBuilder.srcDir);
+    Cstr_Add(&source_cstr, "/");
     Cstr_Add(&source_cstr, subdir);
     Cstr_Add(&source_cstr, "/");
     Cstr_Add(&source_cstr, fname);
 
-    if(NeedsBuild(&source_cstr, &build_cstr)){
+    if(SourceUpdated(&source_cstr, &build_cstr)){
         REBUILD_BINARY = TRUE;
         Arr_Init(&arr, CC);
         Arr_AddArr(&arr, CFLAGS);
@@ -64,14 +75,16 @@ static int BuildBinary(char *binaryName, char *sourceName){
     StrArr arr;
 
     Cstr binary_cstr;
-    Cstr_Init(&binary_cstr, "build/");
+    Cstr_Init(&binary_cstr, GlobalBuilder.buildDir);
+    Cstr_Add(&binary_cstr, "/");
     Cstr_Add(&binary_cstr, binaryName);
 
     Cstr source_cstr;
-    Cstr_Init(&source_cstr, "src/");
+    Cstr_Init(&source_cstr, GlobalBuilder.srcDir);
+    Cstr_Add(&source_cstr, "/");
     Cstr_Add(&source_cstr, sourceName);
 
-    if(!REBUILD_BINARY && !NeedsBuild(&source_cstr, &binary_cstr)){
+    if(!REBUILD_BINARY && !SourceUpdated(&source_cstr, &binary_cstr)){
         return FALSE;
     }
 
@@ -88,7 +101,8 @@ static int BuildBinary(char *binaryName, char *sourceName){
 }
 
 int BuildLib(){
-    Cstr_Init(&lib_cstr, "build/");
+    Cstr_Init(&lib_cstr, GlobalBuilder.buildDir);
+    Cstr_Add(&lib_cstr, "/");
     Cstr_Add(&lib_cstr, LIBTARGET);
     Cstr_Add(&lib_cstr, ".a");
 
@@ -128,7 +142,8 @@ int Clean(){
     Cstr path;
     StrArr rm;
     while(*set != NULL){
-        Cstr_Init(&path, "build/");
+        Cstr_Init(&path, GlobalBuilder.buildDir);
+        Cstr_Add(&path, "/");
         Cstr_Add(&path, (*set)->name);
 
         Arr_Init(&rm, RM);
@@ -145,7 +160,8 @@ int Clean(){
     while(target->bin != NULL){
         Arr_Init(&rm, RM);
         Arr_Add(&rm, "-rfv");
-        Cstr_Init(&path, "build/");
+        Cstr_Init(&path, GlobalBuilder.buildDir);
+        Cstr_Add(&path, "/");
         Cstr_Add(&path, target->bin);
         Arr_Add(&rm, path.content);
         if(!subProcess(&rm, name)){
@@ -156,7 +172,8 @@ int Clean(){
 
     Arr_Init(&rm, RM);
     Arr_Add(&rm, "-rfv");
-    Cstr_Init(&path, "build/");
+    Cstr_Init(&path, GlobalBuilder.buildDir);
+    Cstr_Add(&path, "/");
     Cstr_Add(&path, LIBTARGET);
     Cstr_Add(&path, ".a");
     Arr_Add(&rm, path.content);
@@ -176,6 +193,9 @@ void **cmdSet[] = {
 
 /* main */
 int main(int argc, char *argv[]){
+    memset(&GlobalBuilder, 0, sizeof(GlobalBuilder));
+    GlobalBuilder.srcDir = "dist/src";
+    GlobalBuilder.buildDir = "build";
     if(argc > 1){
         int i = 0;
         for(int ai = 1; ai < argc; ai++){

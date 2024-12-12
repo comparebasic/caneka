@@ -6,7 +6,7 @@ static char *distDir = "dist";
 
 static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
     Transp *tp = as(_tp, TYPE_TRANSP);
-    Spool_Add(m, s, (Abstract *)tp->current.destFile);
+    Spool_Add(m, s, (Abstract *)&tp->current.destFile);
     return tp->type.state;
 }
 
@@ -18,18 +18,19 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
 }
 
 static status Transp_transpile(Transp *p){
-    return File_Load(p->m, p->current.sourceFile, NULL, Transp_onInput);
+    return File_Load(p->m, &p->current.sourceFile, NULL, Transp_onInput);
 }
 
-static int Transp_copy(Transp *p){
-    File_Copy(p->m, p->current.source, p->current.dest, NULL);
-    return TRUE;
+static status Transp_copy(Transp *p){
+    if(File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
+        Debug_Print((void *)p->current.dest,0,  "Updating :",  COLOR_YELLOW, FALSE);
+        printf("\n");
+        return File_Copy(p->m, p->current.source, p->current.dest, NULL);
+    }
+    return NOOP;
 }
 
 static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
-    Debug_Print((void *)path, 0, "Dir Found:", COLOR_YELLOW, TRUE);
-    printf("\n");
-
     Transp *p = as(source, TYPE_TRANSP);
     String *new = String_Init(m, STRING_EXTEND);
     String_Add(m, new, p->dist);
@@ -71,8 +72,8 @@ static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *s
     }else if(String_PosEqualsBytes(p->current.source, bytes(Cnk), strlen(Cnk), STRING_POS_END)){
         String_Trunc(p->current.dest, -2);
 
-        Spool_Init(p->current.sourceFile, p->current.source, NULL, NULL);
-        Spool_Init(p->current.destFile, p->current.dest, NULL, NULL);
+        Spool_Init(&p->current.sourceFile, p->current.source, NULL, NULL);
+        Spool_Init(&p->current.destFile, p->current.dest, NULL, NULL);
         Transp_transpile(p);
     }else{
         Transp_copy(p);
