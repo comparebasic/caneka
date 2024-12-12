@@ -397,6 +397,9 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
                 printf("  > next\n");
             }
             seg = seg->next;
+            if(seg->length == 0){
+                break;
+            }
         }
         if((a->type.state & DEBUG) != 0){
             printf("  Seg len %d\n", seg->length);
@@ -428,8 +431,9 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
             if((a->type.state & DEBUG) != 0){
                 printf("  > new seg\n");
             }
-            String *next = String_Init(m, -1);
-            seg->next = next;
+            if(seg->next == NULL ){
+                seg->next = String_Init(m, -1);
+            }
             seg = seg->next;
         }
         remaining -= copy_l;

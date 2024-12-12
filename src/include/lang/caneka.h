@@ -16,7 +16,15 @@ typedef struct caneka_lang_space {
 } CnkLangSpace;
 
 typedef struct caneka_lang_ctx {
-    Type type;
-    CnkLangSpace *space;
+    /* Transp */
+    Type type;   
+    String *src;
+    String *dist;
+    struct {
+        File *source;
+        File *dest;
+    } current;
     Roebling *rbl;
+    /* End Transp */
+    CnkLangSpace *space;
 } CnkLangCtx;

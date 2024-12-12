@@ -20,12 +20,25 @@ static status Trans_transDir(MemCtx *m, String *path, Abstract *source){
     return TRUE;
 }
 
-static static int Transp_transFile(Cstr *source, Cstr *dest){
-    printf("\x1b[1;34m%s -> %s\x1b[0m\n", source->bytes, dest->bytes);
-    return TRUE;
+static Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
+    Transp *tp = as(_tp, TYPE_TRANSP);
+    Spool_Add(m, s, (Abstract *)tp->dest);
+    return tp->type.state;
 }
 
-static int copy(Cstr *source, Cstr *dest){
+static Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
+    Transp *tp = as(_tp, TYPE_TRANSP);
+    Roebling_Add(tp->rbl, s);
+    while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR)) == 0);
+    return tp->type.state;
+}
+
+static status Transp_transpile(MemCtx *m, Transp *tp){
+    File *in = Spool_Make(m, source, NULL, NULL);
+    return File_Load(m, in, NULL, NULL, Transp_onInput);
+}
+
+static int Transp_copy(Cstr *source, Cstr *dest){
     /*
     printf("\x1b[33m%s -> %s\x1b[0m\n", source->bytes, dest->bytes);
     */
@@ -52,11 +65,14 @@ int transFile(MemCtx *m, String *dir, String *file, Abstract *source){
 
     if(String_PosEqualsBytes(source, bytes(C), strlen(H), STRING_POS_END) || 
             String_PosEqualsBytes(source, bytes(H), strlen(H), STRING_POS_END)){
-        copy(&source, &dest);
+        Transp_copy(&source, &dest);
     }else if(String_PosEqualsBytes(source, bytes(Cnk), strlen(Cnk), STRING_POS_END)){
         int l = strlen(dest.content);
         dest.content[l-2] = '\0';
-        transpile(&source, &dest);
+
+        Spool_Init(p->source, source, NULL, NULL);
+        Spool_Init(p->dest, dest, NULL, NULL);
+        Transp_transpile(m, p);
     }else{
         copy(dir, file);
     }
@@ -64,10 +80,9 @@ int transFile(MemCtx *m, String *dir, String *file, Abstract *source){
     return TRUE;
 }
 
-void Trans(){
-    Cstr dir_cstr;
-    Cstr_Init(&dir_cstr, srcDir);
-    FolderClimb(&dir_cstr, transDir, transFile);
+void Trans(MemCtx *m, String *src, String *dist){
+    Transp *tp = Transp_Make(m);
+    FolderClimb(m, transDir, transFile);
 }
 
 Transp *Transp_Make(MemCtx *m){

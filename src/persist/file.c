@@ -14,7 +14,11 @@ status File_Persist(MemCtx *m, File *file){
 
     if(file->data != NULL){
         if((file->type.state & FILE_UPDATED) != 0){
-            FILE *f = fopen((char *)file->abs->bytes, "w");
+            char *mode = "w";
+            if((file->type.state & FILE_SPOOL) != 0){
+                mode = "a";
+            }
+            FILE *f = fopen((char *)file->abs->bytes, mode);
             if(f == NULL){
                 return ERROR;
             }
@@ -88,7 +92,8 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
     return SUCCESS;
 }
 
-status File_Load(MemCtx *m, File *file, Access *access){
+status File_Load(MemCtx *m, File *file, Access *access, OutFunc out){
+    String *s = NULL;
     FILE *f = fopen((char *)file->abs->bytes, "r");
     if(f == NULL){
         file->type.state |= NOOP;
@@ -97,11 +102,21 @@ status File_Load(MemCtx *m, File *file, Access *access){
         file->type.state &= ~NOOP;
     }
 
+    if(out != NULL){
+        String *s = String_Init(m, STRING_EXTEND);
+    }
+
     file->data = String_Init(m, STRING_EXTEND);
     char buff[FILE_READ_LENGTH+1];
     size_t l = fread(buff, 1, FILE_READ_LENGTH, f);
     while(l > 0){
-        String_AddBytes(m, file->data, bytes(buff), l);
+        if(out != NULL){
+            String_Reset(s);
+            String_AddBytes(m, s, bytes(buff), l);
+            out(m, s, (Abstract *file);
+        }else{
+            String_AddBytes(m, file->data, bytes(buff), l);
+        }
         if(l < FILE_READ_LENGTH){
             break;
         }

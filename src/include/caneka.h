@@ -163,6 +163,7 @@ enum types {
     TYPE_MEMPAIR,
     TYPE_STRINGTABLE,
     TYPE_FILE,
+    TYPE_SPOOL,
     TYPE_LOOKUP,
     TYPE_ITER,
     TYPE_SINGLE,
