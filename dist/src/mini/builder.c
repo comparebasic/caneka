@@ -71,7 +71,6 @@ static int BuildSource(char *binary, char *fname, char *subdir){
 }
 
 static int BuildBinary(char *binaryName, char *sourceName){
-    printf("\x1b[%dmBuilding binary %s\x1b[0m\n", MSG_COLOR, binaryName);
     StrArr arr;
 
     Cstr binary_cstr;
@@ -85,11 +84,12 @@ static int BuildBinary(char *binaryName, char *sourceName){
     Cstr_Add(&source_cstr, sourceName);
 
     int updated = SourceUpdated(&source_cstr, &binary_cstr);
-    printf("updated %s -> %s ? %d\n", source_cstr.content, binary_cstr.content, updated);
 
     if(!REBUILD_BINARY && !updated){
         return FALSE;
     }
+
+    printf("\x1b[%dmBuilding binary %s\x1b[0m\n", MSG_COLOR, binaryName);
 
     Arr_Init(&arr, CC);
     Arr_AddArr(&arr, CFLAGS);
@@ -128,11 +128,7 @@ int Build(){
         Target *target = TARGETS;
         int r = FALSE;
         while(target->bin != NULL){
-            r = BuildBinary(target->bin, target->src);
-            printf("resp %d\n", r);
-            if(!r){
-                return r;
-            }
+            BuildBinary(target->bin, target->src);
             target++;
         }
         return r;
@@ -206,7 +202,6 @@ int main(int argc, char *argv[]){
             char *arg = argv[ai];
             for(; cmdSet[i] != NULL; i+=2){
                 char *cmd = (char *)cmdSet[i];
-                printf("cmd %s vs arg %s\n", cmd, arg);
                 Anon func = (Anon)cmdSet[i+1];
                 if(!strcmp(arg, cmd)){
                     printf("Running %s\n", cmd);

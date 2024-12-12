@@ -21,6 +21,7 @@ status Spool_Add(MemCtx *m, String *s, Abstract *a){
 File *Spool_Init(File *file, String *path, Access *access, IoCtx *ctx){
     File_Init(file, path, access, ctx);
     file->type.state |= FILE_SPOOL;
+    file->abs = file->path;
     return file;
 }
 

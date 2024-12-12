@@ -12,7 +12,7 @@
 #define LIBTARGET "libcaneka"
 #define MAIN "main.c"
 #define ALL allobj
-#define VERBOSE 0
+#define VERBOSE 2
 
 static Target targets[] = {
     {"testreq", "tests/testreq.c"}, {"caneka", "main.c"}, {"formatter", "formatter.c"}, {NULL, NULL},

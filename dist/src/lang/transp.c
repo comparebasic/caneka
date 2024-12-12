@@ -11,14 +11,26 @@ static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
 }
 
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
+    Debug_Print((void *)s, 0, "Input to transpile", COLOR_PURPLE, FALSE);
+    printf("\n");
     Transp *tp = as(_tp, TYPE_TRANSP);
+    /*
     Roebling_Add(tp->rbl, s);
     while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR)) == 0);
+    */
     return tp->type.state;
 }
 
 static status Transp_transpile(Transp *p){
-    return File_Load(p->m, &p->current.sourceFile, NULL, Transp_onInput);
+    if(File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
+        Debug_Print((void *)p->current.source,0,  "Transpiling ",  COLOR_YELLOW, FALSE);
+        Debug_Print((void *)p->current.dest,0,  " -> ",  COLOR_YELLOW, FALSE);
+        printf("\n");
+        printf("%s\n", p->current.sourceFile.abs->bytes);
+        return File_Stream(p->m, &p->current.sourceFile,
+            NULL, Transp_onInput, (Abstract *)p);
+    }
+    return NOOP;
 }
 
 static status Transp_copy(Transp *p){

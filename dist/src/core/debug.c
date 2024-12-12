@@ -548,7 +548,7 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
         } while(s != NULL);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[1;%dm\"", color);
+        printf("\x1b[%dm%s\x1b[1;%dm\"",color, msg, color);
         do {
             String *esc = String_ToEscaped(DebugM, s);
             printf("%s",esc->bytes);

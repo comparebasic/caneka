@@ -78,7 +78,7 @@ MemLocal *MemLocal_Load(MemCtx *m, IoCtx *ctx){
         File_Init(&file, path, ctx->access, NULL);
         file.abs = IoCtx_GetPath(m, ctx, file.path);
 
-        File_Load(m, &file, ctx->access, NULL);
+        File_Load(m, &file, ctx->access);
         if((file.type.state & NOOP) == 0){
             MemSlab *sl = MemSlab_Make(NULL);
             String_ToSlab(file.data, (void *)sl,  sizeof(MemSlab)); 

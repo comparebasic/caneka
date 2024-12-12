@@ -39,7 +39,7 @@ status User_Tests(MemCtx *gm){
     File file;
     File_Init(&file, abs, NULL, NULL);
     file.abs = file.path;
-    File_Load(m, &file, ac, NULL);
+    File_Load(m, &file, ac);
 
     r |= Test(file.data->length == 231, "Auth Oset has expected length, have %d", file.data->length);
 

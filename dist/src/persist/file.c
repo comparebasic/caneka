@@ -124,10 +124,11 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
     return SUCCESS;
 }
 
-status File_Load(MemCtx *m, File *file, Access *access, OutFunc out){
+status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract *source){
     String *s = NULL;
     FILE *f = fopen((char *)file->abs->bytes, "r");
     if(f == NULL){
+        printf("Warning: Unable to openfile %s\n", file->abs->bytes);
         file->type.state |= NOOP;
         return file->type.state;
     }else{
@@ -135,7 +136,7 @@ status File_Load(MemCtx *m, File *file, Access *access, OutFunc out){
     }
 
     if(out != NULL){
-        String *s = String_Init(m, STRING_EXTEND);
+        s = String_Init(m, STRING_EXTEND);
     }
 
     file->data = String_Init(m, STRING_EXTEND);
@@ -145,7 +146,7 @@ status File_Load(MemCtx *m, File *file, Access *access, OutFunc out){
         if(out != NULL){
             String_Reset(s);
             String_AddBytes(m, s, bytes(buff), l);
-            out(m, s, (Abstract *)file);
+            out(m, s, source);
         }else{
             String_AddBytes(m, file->data, bytes(buff), l);
         }
@@ -163,6 +164,11 @@ status File_Load(MemCtx *m, File *file, Access *access, OutFunc out){
     }
 
     return ERROR;
+
+}
+
+status File_Load(MemCtx *m, File *file, Access *access){
+    return File_Stream(m, file, access, NULL, NULL);
 }
 
 status File_Delete(File *file){

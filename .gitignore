@@ -2,3 +2,4 @@ build
 caneka.core
 tmp
 src/secure
+dist/src/secure
