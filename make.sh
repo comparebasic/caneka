@@ -1,6 +1,7 @@
 #!/bin/sh
 mkdir -p build
 rm -Rf build/*
+rm -Rf dist/src/*
 if [ -e $HOME/cb_phrase.txt ]; then
     mkdir -p src/secure/
     file=src/secure/phrase.c
