@@ -84,7 +84,10 @@ static int BuildBinary(char *binaryName, char *sourceName){
     Cstr_Add(&source_cstr, "/");
     Cstr_Add(&source_cstr, sourceName);
 
-    if(!REBUILD_BINARY && !SourceUpdated(&source_cstr, &binary_cstr)){
+    int updated = SourceUpdated(&source_cstr, &binary_cstr);
+    printf("updated %s -> %s ? %d\n", source_cstr.content, binary_cstr.content, updated);
+
+    if(!REBUILD_BINARY && !updated){
         return FALSE;
     }
 
@@ -126,6 +129,7 @@ int Build(){
         int r = FALSE;
         while(target->bin != NULL){
             r = BuildBinary(target->bin, target->src);
+            printf("resp %d\n", r);
             if(!r){
                 return r;
             }

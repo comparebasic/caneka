@@ -11,7 +11,7 @@ This file is mostly an example Caneka application, and it runs the tests
 
 #define servecmd "serve"
 #define testcmd "test"
-#define transcmd "trans"
+#define transcmd "transp"
 
 static status test(MemCtx *m, char *arg){
     status r = TEST_OK;
@@ -52,7 +52,7 @@ status transpile(MemCtx *m, char *arg){
     tp->dist = String_Make(m, bytes("dist"));
     Debug_Print((void *)tp->src, 0, "[Transpiling  ", COLOR_BLUE, FALSE);
     Debug_Print((void *)tp->dist, 0, "->", COLOR_BLUE, FALSE);
-    printf("\x1b[%dm]\n", COLOR_BLUE);
+    printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
     return Transp_Trans(tp);
 }
 

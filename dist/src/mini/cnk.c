@@ -168,6 +168,7 @@ static int subProcess(StrArr *cmd_arr, char *msg){
     }
 
     child = fork();
+    printf("forking...\n");
     if(child == (pid_t)-1){
         Fatal(1, "Fork for %s", msg); 
     }else if(!child){
@@ -192,11 +193,13 @@ static int subProcess(StrArr *cmd_arr, char *msg){
     }
 
     int code = WEXITSTATUS(r);    
+    printf("return code %d\n", code);
     if(code != 0){
         Fatal(1, "subProcess failed for obj %s return code %d", msg, code); 
         return FALSE;
     }
 
+    printf("SUCCESS\n");
     return TRUE;
 }
 

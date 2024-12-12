@@ -1,5 +1,8 @@
 #!/bin/sh
 ./scripts/clean.sh
+if [ -e build/caneka ]; then
+    ./build/caneka transp
+fi
 if [ -e $HOME/cb_phrase.txt ]; then
     mkdir -p src/secure/
     file=src/secure/phrase.c
