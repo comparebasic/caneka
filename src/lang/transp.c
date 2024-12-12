@@ -4,14 +4,36 @@
 static char *srcDir = "src";
 static char *distDir = "dist";
 
-static status Trans_transDir(MemCtx *m, String *path, Abstract *source){
+static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
+    Transp *tp = as(_tp, TYPE_TRANSP);
+    Spool_Add(m, s, (Abstract *)tp->current.destFile);
+    return tp->type.state;
+}
+
+static status Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
+    Transp *tp = as(_tp, TYPE_TRANSP);
+    Roebling_Add(tp->rbl, s);
+    while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR)) == 0);
+    return tp->type.state;
+}
+
+static status Transp_transpile(Transp *p){
+    return File_Load(p->m, p->current.sourceFile, NULL, Transp_onInput);
+}
+
+static int Transp_copy(Transp *p){
+    File_Copy(p->m, p->current.source, p->current.dest, NULL);
+    return TRUE;
+}
+
+static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
     Transp *p = as(source, TYPE_TRANSP);
     String *new = String_Init(m, STRING_EXTEND);
-    String_Add(m, p->dist);
+    String_Add(m, new, p->dist);
     String_AddBytes(m, new, bytes("/"), 1);
     String_Add(m, new, path);
 
-    DIR* dir = opendir(path->bytes);
+    DIR* dir = opendir(String_ToChars(m, path));
     if(dir){
         closedir(dir);
     }else if(ENOENT == errno){
@@ -20,69 +42,43 @@ static status Trans_transDir(MemCtx *m, String *path, Abstract *source){
     return TRUE;
 }
 
-static Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
-    Transp *tp = as(_tp, TYPE_TRANSP);
-    Spool_Add(m, s, (Abstract *)tp->dest);
-    return tp->type.state;
-}
-
-static Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
-    Transp *tp = as(_tp, TYPE_TRANSP);
-    Roebling_Add(tp->rbl, s);
-    while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR)) == 0);
-    return tp->type.state;
-}
-
-static status Transp_transpile(MemCtx *m, Transp *tp){
-    File *in = Spool_Make(m, source, NULL, NULL);
-    return File_Load(m, in, NULL, NULL, Transp_onInput);
-}
-
-static int Transp_copy(Cstr *source, Cstr *dest){
-    /*
-    printf("\x1b[33m%s -> %s\x1b[0m\n", source->bytes, dest->bytes);
-    */
-    return TRUE;
-}
-
-int transFile(MemCtx *m, String *dir, String *file, Abstract *source){
+static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *source){
     Transp *p = as(source, TYPE_TRANSP);
     char *C = ".c";
     char *Cnk = ".cnk";
     char *H = ".h";
 
-    String *source = String_Init(m, STRING_EXTEND);
-    String_Add(m, source, dir);
-    String_AddBytes(m, source, bytes("/"), 1);
-    String_Add(m, source, file);
+    p->current.source = String_Init(m, STRING_EXTEND);
+    String_Add(m, p->current.source, dir);
+    String_AddBytes(m, p->current.source, bytes("/"), 1);
+    String_Add(m, p->current.source, file);
 
-    String *dest = String_Init(m, STRING_EXTEND);
-    String_Add(m, source, p->dist);
-    String_AddBytes(m, source, bytes("/"), 1);
-    String_Add(m, source, dir);
-    String_AddBytes(m, source, bytes("/"), 1);
-    String_Add(m, source, file);
+    p->current.dest = String_Init(m, STRING_EXTEND);
+    String_Add(m, p->current.dest, p->dist);
+    String_AddBytes(m, p->current.dest, bytes("/"), 1);
+    String_Add(m, p->current.dest, dir);
+    String_AddBytes(m, p->current.dest, bytes("/"), 1);
+    String_Add(m, p->current.dest, file);
 
-    if(String_PosEqualsBytes(source, bytes(C), strlen(H), STRING_POS_END) || 
-            String_PosEqualsBytes(source, bytes(H), strlen(H), STRING_POS_END)){
-        Transp_copy(&source, &dest);
-    }else if(String_PosEqualsBytes(source, bytes(Cnk), strlen(Cnk), STRING_POS_END)){
-        int l = strlen(dest.content);
-        dest.content[l-2] = '\0';
+    if(String_PosEqualsBytes(p->current.source, bytes(C), strlen(H), STRING_POS_END) || 
+            String_PosEqualsBytes(p->current.source, bytes(H), strlen(H), STRING_POS_END)){
+            Transp_copy(p);
+    }else if(String_PosEqualsBytes(p->current.source, bytes(Cnk), strlen(Cnk), STRING_POS_END)){
+        String_Trunc(p->current.dest, -2);
 
-        Spool_Init(p->source, source, NULL, NULL);
-        Spool_Init(p->dest, dest, NULL, NULL);
-        Transp_transpile(m, p);
+        Spool_Init(p->current.sourceFile, p->current.source, NULL, NULL);
+        Spool_Init(p->current.destFile, p->current.dest, NULL, NULL);
+        Transp_transpile(p);
     }else{
-        copy(dir, file);
+        Transp_copy(p);
     }
 
     return TRUE;
 }
 
-void Trans(MemCtx *m, String *src, String *dist){
-    Transp *tp = Transp_Make(m);
-    FolderClimb(m, transDir, transFile);
+
+status Transp_Trans(Transp *p){
+    return Dir_Climb(p->m, p->src, Transp_transDir, Transp_transFile, (Abstract *)p);
 }
 
 Transp *Transp_Make(MemCtx *m){

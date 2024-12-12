@@ -44,7 +44,7 @@ static BuildSubdir coreobj = { "core", {
 
 static BuildSubdir persistobj = { "persist", {
     "ioctx.c", "file.c", "session.c","memlocal.c", "access.c", "user.c", "auth.c",
-    "dir.c", "subprocess.c",
+    "dir.c", "subprocess.c", "spool.c",
     NULL
 }};
 
@@ -59,7 +59,7 @@ static BuildSubdir formatsobj = {"formats", {
 
 static BuildSubdir langobj = {"lang", {
     "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
-    "fmt_ctx.c", "fmt_item.c", "fmt_html.c","fmt_def.c",
+    "fmt_ctx.c", "fmt_item.c", "fmt_html.c","fmt_def.c", "transp.c",
     "caneka_parser.c",
     NULL
 }};

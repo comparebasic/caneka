@@ -48,6 +48,7 @@ status serve(MemCtx *m, char *arg){
 
 status transpile(MemCtx *m, char *arg){
     printf("Transpiling %s :)\n", arg);
+    Transp *tp = Transp_Make(m);
     return SUCCESS;
 }
 

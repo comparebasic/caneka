@@ -137,6 +137,10 @@ status String_EndMatchTests(MemCtx *gm){
     s = String_Make(m, bytes("file1.cnk"));
     r |= Test(String_PosEqualsBytes(s, bytes(match), strlen(match), STRING_POS_END), "file ending in '.cnk' matches successfully, had '%s'", s->bytes);
 
+    match = ".c";
+    String_Trunc(s, -2);
+    r |= Test(String_PosEqualsBytes(s, bytes(match), strlen(match), STRING_POS_END), "file ending in '.cnk' matches \".c\" after String_Trunc successfully, had '%s'", s->bytes);
+
     match = "bork!";
     s = String_Make(m, bytes("Super long sentance that spans more than a single chunk, but ends in a very special word and the word is so amazing it's like super duper, amazingly amazing, like the most amazing-ness waste of a long sentence that could have been short, but oh well, we have to test longs tuff sometimes so here it is: bork!"));
     r |= Test(String_PosEqualsBytes(s, bytes(match), strlen(match), STRING_POS_END), "file ending in 'bork!' matches successfully, had '%s'", s->bytes);

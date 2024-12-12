@@ -59,6 +59,8 @@ i64 String_Length(String *s);
 String *String_FromRange(MemCtx *m, struct strcursor_range *range);
 String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
+size_t String_GetSegSize(String *s);
+status String_Trunc(String *s, i64 len);
 
 /* makers */
 status String_AddInt(MemCtx *m, String *s, int i);

@@ -181,6 +181,7 @@ enum types {
     TYPE_FMT_HTML,
     TYPE_LANG_CNK,
     TYPE_LANG_CNK_SPACE,
+    TYPE_TRANSP,
     _TYPE_CORE_END,
 };
 
@@ -285,6 +286,7 @@ cls Ifc_Get(cls inst);
 #include "ioctx.h"
 #include "memlocal.h"
 #include "file.h"
+#include "spool.h"
 #include "session.h"
 #include "serve.h"
 #include "req.h"
@@ -293,13 +295,13 @@ cls Ifc_Get(cls inst);
 #include "human_present.h"
 #include "auth.h"
 #include "user.h"
-#include "transp.h"
 #include "apps.h"
 #ifdef LINUX
     #include "linux.h"
 #endif
 
 #include "formats/cash.h"
+#include "lang/transp.h"
 #include "lang/nestedd.h"
 #include "lang/xmlt.h"
 #include "lang/fmt_html.h"

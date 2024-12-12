@@ -26,7 +26,7 @@ File *Spool_Init(File *file, String *path, Access *access, IoCtx *ctx){
 
 
 File *Spool_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx){
-    File *file = File_Make(file, path, access, ctx);
+    File *file = File_Make(m, path, access, ctx);
     file->type.state |= FILE_SPOOL;
     return file;
 }

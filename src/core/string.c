@@ -1,6 +1,39 @@
 #include <external.h>
 #include <caneka.h>
 
+size_t String_GetSegSize(String *s){
+    asIfc(s, TYPE_STRING);
+    if(s->type.of == TYPE_STRING_CHAIN){
+        return STRING_CHUNK_SIZE;
+    }else if(s->type.of == TYPE_STRING_FIXED){
+        return STRING_FIXED_SIZE;
+    }else if(s->type.of == TYPE_STRING_FULL){
+        return STRING_FULL_SIZE;
+    }
+    return 0;
+}
+
+status String_Trunc(String *s, i64 len){
+    if(len < 0){
+        len = String_Length(s) + len;
+    }
+    i64 actual = 0;
+    String *tail = s;
+    size_t sz = String_GetSegSize(s);
+    while(tail != NULL){
+        if(actual+tail->length > len){
+            tail->length = len - actual;
+            memset(tail->bytes+tail->length, 0, sz-tail->length);
+            tail->next = NULL;
+            return SUCCESS;
+        }
+        actual += tail->length; 
+        tail = String_Next(s); 
+    };
+
+    return NOOP;
+}
+
 String *String_Clone(MemCtx *m, String *s){
     String *s2 = String_Init(m, s->length);
     String_Add(m, s2, s);

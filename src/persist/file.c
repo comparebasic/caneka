@@ -9,6 +9,15 @@ File *File_Clone(MemCtx *m, File *o){
     return file;
 }
 
+status File_Copy(MemCtx *m, String *a, String *b, Access *ac){
+    Span *cmd = Span_Make(m, TYPE_SPAN);
+    Span_Add(cmd, (Abstract *)String_Make(m, bytes("cp")));
+    Span_Add(cmd, (Abstract *)a);
+    Span_Add(cmd, (Abstract *)b);
+
+    return SubProcess(m, cmd, String_Make(m, bytes("copying file")));
+}
+
 status File_Persist(MemCtx *m, File *file){
     char buff[PATH_BUFFLEN];
 
