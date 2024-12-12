@@ -15,7 +15,7 @@ status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *
                 String_AddBytes(m, s, bytes("/"), 1);
                 String_AddBytes(m, s, bytes(ent->d_name), strlen(ent->d_name));
                 dir(m, s, source);
-                Dir_Climb(m, s, dir, file);
+                Dir_Climb(m, s, dir, file, source);
             }else{
                 file(m, path, String_Make(m, bytes(ent->d_name)), source);
             }

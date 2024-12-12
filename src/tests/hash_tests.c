@@ -6,7 +6,7 @@ status Hash_Tests(MemCtx *gm){
     String *s;
     status r = SUCCESS;
 
-    s = String_From(m, bytes("Hi"));
+    s = String_Make(m, bytes("Hi"));
 
     util expected;
     util h;

@@ -37,7 +37,7 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
             Fatal("pwauth file not found for ser", TYPE_AUTH);
         }
         pwauth->abs = IoCtx_GetPath(m, &ctx, pwauth->path);
-        File_Load(m, pwauth, ac);
+        File_Load(m, pwauth, ac, NULL);
 
         Auth *auth = as(Abs_FromOset(m, pwauth->data), TYPE_AUTH);
         if(!Auth_Verify(m, auth, secret, ac)){
@@ -47,7 +47,7 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
 
         File *udata = (File *)Table_Get(ctx.files, (Abstract *)String_Make(m, bytes("user.data")));
         udata->abs = IoCtx_GetPath(m, &ctx, udata->path);
-        File_Load(m, udata, ac);
+        File_Load(m, udata, ac, NULL);
         Span *udataTbl = (Span *)Abs_FromOset(m, udata->data);
         if(data != NULL){
             Table_Merge(udataTbl, data);

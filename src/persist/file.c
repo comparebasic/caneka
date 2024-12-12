@@ -113,7 +113,7 @@ status File_Load(MemCtx *m, File *file, Access *access, OutFunc out){
         if(out != NULL){
             String_Reset(s);
             String_AddBytes(m, s, bytes(buff), l);
-            out(m, s, (Abstract *file);
+            out(m, s, (Abstract *)file);
         }else{
             String_AddBytes(m, file->data, bytes(buff), l);
         }

@@ -24,7 +24,7 @@ char *longCstr = "" \
 status String_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     String *s;
-    s = String_From(m, bytes("Hi"));
+    s = String_Make(m, bytes("Hi"));
     status r = READY;
     r |= Test(s->type.of == TYPE_STRING_FIXED, 
         "Expect string to have fixed type %s found %s", 
@@ -32,7 +32,7 @@ status String_Tests(MemCtx *gm){
     r |= Test(s->length == 2, "Expect string length of %ld found %ld", 2, s->length);
     r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of '%s' found '%s'", "Hi", s->bytes);
 
-    s = String_From(m, bytes(longCstr));
+    s = String_Make(m, bytes(longCstr));
     int ls_l = strlen(longCstr);
 
     r |= Test(s->type.of == TYPE_STRING_CHAIN, 
@@ -43,7 +43,7 @@ status String_Tests(MemCtx *gm){
 
     int value = 35072;
     s = String_FromInt(m, value);
-    String *expected_is = String_From(m, bytes("35072"));
+    String *expected_is = String_Make(m, bytes("35072"));
     r |= Test(String_Length(s) == expected_is->length, "Expect for int value %d  length of %d found %d", value, expected_is->length, String_Length(s));
     r |= Test(String_Equals(s, expected_is) == TRUE, "Expect string match of int of %d to string", value);
 
@@ -103,7 +103,7 @@ status StringB64_Tests(MemCtx *gm){
     String *s;
     String *s2;
     String *b64;
-    s = String_From(m, bytes("Some content to be b64 encoded."));
+    s = String_Make(m, bytes("Some content to be b64 encoded."));
     b64 = String_ToB64(m, s);
 
     Debug_Print((void *)b64, 0, "B64: ", COLOR_PURPLE, TRUE);
@@ -116,8 +116,32 @@ status StringB64_Tests(MemCtx *gm){
 
     MemCtx_Free(m);
 
+    /* TODO: don't force this to e pass */
     r &= ~ERROR;
-    r |= SUCCESS;
+
+    return r;
+}
+
+status String_EndMatchTests(MemCtx *gm){
+    status r = READY;
+    MemCtx *m = MemCtx_Make();
+    String *s;
+    String *s2;
+    char *match;
+
+    match = ".c";
+    s = String_Make(m, bytes("file1.c"));
+    r |= Test(String_PosEqualsBytes(s, bytes(match), strlen(match), STRING_POS_END), "file ending in '.c' matches successfully, had '%s'", s->bytes);
+
+    match = ".cnk";
+    s = String_Make(m, bytes("file1.cnk"));
+    r |= Test(String_PosEqualsBytes(s, bytes(match), strlen(match), STRING_POS_END), "file ending in '.cnk' matches successfully, had '%s'", s->bytes);
+
+    match = "bork!";
+    s = String_Make(m, bytes("Super long sentance that spans more than a single chunk, but ends in a very special word and the word is so amazing it's like super duper, amazingly amazing, like the most amazing-ness waste of a long sentence that could have been short, but oh well, we have to test longs tuff sometimes so here it is: bork!"));
+    r |= Test(String_PosEqualsBytes(s, bytes(match), strlen(match), STRING_POS_END), "file ending in 'bork!' matches successfully, had '%s'", s->bytes);
+
+    MemCtx_Free(m);
 
     return r;
 }

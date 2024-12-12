@@ -24,6 +24,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "String - End Matches",
+        String_EndMatchTests,
+        "Tests for Matching the end of the string",
+        FEATURE_COMPLETE,
+    },
+    {
         "String - B64",
         StringB64_Tests,
         "Tests base 64 encoded strings",

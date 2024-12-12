@@ -3,7 +3,7 @@
 
 static char *okBase_cstr = "HTTP/1.1 200 OK\r\nServer: caneka\r\nContent-Length: ";
 static String *packageResponse(MemCtx *m, String *content){
-    String *s = String_From(m, bytes(okBase_cstr));
+    String *s = String_Make(m, bytes(okBase_cstr));
     String *length_s = String_FromInt(m, (int)content->length); 
     String_Add(m, s, length_s);
     String_AddBytes(m, s, bytes("\r\n\r\n"), 4);
@@ -14,7 +14,7 @@ static String *packageResponse(MemCtx *m, String *content){
 
 static char *errBase_cstr = "HTTP/1.1 500 Error\r\nServer: caneka\r\nContent-Length: ";
 static String *packageError(MemCtx *m, String *content){
-    String *s = String_From(m, bytes(errBase_cstr));
+    String *s = String_Make(m, bytes(errBase_cstr));
     String *length_s = String_FromInt(m, (int)content->length); 
     String_Add(m, s, length_s);
     String_AddBytes(m, s, bytes("\r\n\r\n"), 4);

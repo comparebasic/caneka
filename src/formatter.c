@@ -28,7 +28,7 @@ int main(int argc, char **argv){
         String *inpath = String_Make(m, bytes(in));
         File inf;
         File_Init(&inf, inpath, NULL, NULL);
-        if((File_Load(m, &inf, NULL) & SUCCESS) != 0){
+        if((File_Load(m, &inf, NULL, NULL) & SUCCESS) != 0){
             Roebling_Reset(m, ctx->rbl, inf.data);
         }
     }

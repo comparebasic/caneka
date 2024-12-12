@@ -12,6 +12,8 @@ related: core/debug.c
 #define COLOR_CYAN 36
 #define COLOR_DARK 37
 
+#define isDebug(x) (((x)->type.state & DEBUG) != 0)
+
 extern MemCtx *DebugM;
 
 typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean extended);

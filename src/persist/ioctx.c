@@ -5,7 +5,7 @@ static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
     File index;
     File_Init(&index, IoCtx_GetIndexName(m, ctx), ctx->access, NULL);
     index.abs = IoCtx_GetPath(m, ctx, index.path);
-    File_Load(m, &index, ctx->access);
+    File_Load(m, &index, ctx->access, NULL);
     if((index.type.state & FILE_LOADED) != 0){
         ctx->files = (Span *)Abs_FromOset(m, index.data);
         if(ctx->files != NULL && ctx->files->type.of == TYPE_TABLE){

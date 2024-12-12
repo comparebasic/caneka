@@ -33,7 +33,7 @@ static char *libs[] = {
 };
 
 static BuildSubdir coreobj = { "core", {
-    "caneka.c", "mem.c",  "string.c", "error.c",
+    "caneka.c", "mem.c",  "string.c", "string_makers.c", "string_equals.c", "error.c",
 	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c", "table_chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 

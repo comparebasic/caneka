@@ -53,21 +53,25 @@ typedef struct string {
 String *String_Make(MemCtx *m, byte *bytes);
 String *String_MakeFull(MemCtx *m, byte *bytes);
 String *String_MakeFixed(MemCtx *m, byte *bytes, int length);
-String *String_From(MemCtx *m, byte *bytes);
 status String_Add(MemCtx *m, String *dest, String *toAdd);
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length);
 i64 String_Length(String *s);
-boolean String_EqualsBytes(String *a, byte *cstr);
-String *String_FromInt(MemCtx *m, int i);
-String *String_FromI64(MemCtx *m, i64 i);
 String *String_FromRange(MemCtx *m, struct strcursor_range *range);
 String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
-boolean String_Equals(String *a, String *b);
-boolean String_Eq(Abstract *a, void *b);
+
+/* makers */
 status String_AddInt(MemCtx *m, String *s, int i);
 status String_AddI64(MemCtx *m, String *s, i64 i);
 status String_Reset(String *s);
+String *String_FromInt(MemCtx *m, int i);
+String *String_FromI64(MemCtx *m, i64 i);
+
+/* equals */
+boolean String_Equals(String *a, String *b);
+boolean String_EqualsBytes(String *a, byte *cstr);
+boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl);
+boolean String_Eq(Abstract *a, void *b);
 
 /* conversions */
 String *String_ToHex(MemCtx *m, String *s);

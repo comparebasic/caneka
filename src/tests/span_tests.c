@@ -11,13 +11,13 @@ status Span_Tests(MemCtx *gm){
     r |= Test(p->type.of == TYPE_SPAN, "Span has type span %s found %s", 
         Class_ToString(TYPE_SPAN), Class_ToString(p->type.of));
 
-    String *s1 = String_From(m, bytes("Hello there"));
+    String *s1 = String_Make(m, bytes("Hello there"));
     Span_Add(p, (Abstract *)s1);
-    String *s7 = String_From(m, bytes("Seven"));
+    String *s7 = String_Make(m, bytes("Seven"));
     Span_Set(p, 6, (Abstract *)s7);
-    String *s3 = String_From(m, bytes("Three"));
+    String *s3 = String_Make(m, bytes("Three"));
     Span_Set(p, 2, (Abstract *)s3);
-    String *s8 = String_From(m, bytes("Eight"));
+    String *s8 = String_Make(m, bytes("Eight"));
     Span_Add(p, (Abstract *)s8);
 
     s = (String *)Span_Get(p, 0);
@@ -44,13 +44,13 @@ status Span_Tests(MemCtx *gm){
     r |= Test(String_Equals(s8, s), "String 8 equals %s found %s", 
         s8->bytes, s->bytes);
 
-    String *s4079 = String_From(m, bytes("Four Hundred Seventy Nine"));
+    String *s4079 = String_Make(m, bytes("Four Hundred Seventy Nine"));
     Span_Set(p, 4078, (Abstract *)s4079);
 
-    String *s512 = String_From(m, bytes("Five Twelve"));
+    String *s512 = String_Make(m, bytes("Five Twelve"));
     Span_Set(p, 511, (Abstract *)s512);
 
-    String *s513 = String_From(m, bytes("Five Thirteen"));
+    String *s513 = String_Make(m, bytes("Five Thirteen"));
     Span_Set(p, 512, (Abstract *)s513);
 
     s = (String *)Span_Get(p, 0);
