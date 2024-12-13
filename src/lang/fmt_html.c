@@ -86,7 +86,7 @@ static word lastValueDef[] = {
     PAT_END, 0, 0
 };
 
-static status start(Roebling *rbl){
+static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -106,7 +106,7 @@ static status start(Roebling *rbl){
     return r;
 }
 
-static status line(Roebling *rbl){
+static status line(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -116,7 +116,7 @@ static status line(Roebling *rbl){
     return r;
 }
 
-static status value(Roebling *rbl){
+static status value(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 

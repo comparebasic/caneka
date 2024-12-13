@@ -18,13 +18,20 @@ typedef struct caneka_lang_space {
 typedef struct caneka_lang_ctx {
     /* Transp */
     Type type;   
+    MemCtx *m;
     String *src;
     String *dist;
     struct {
-        File *source;
-        File *dest;
+        String *source;
+        String *dest;
+        File sourceFile;
+        File destFile;
     } current;
+    OutFunc out;
     Roebling *rbl;
     /* End Transp */
     CnkLangSpace *space;
 } CnkLangCtx;
+
+CnkLangCtx *CnkLangCtx_Make(MemCtx *m);
+CnkLangSpace *CnkLangSpace_Make(MemCtx *m);

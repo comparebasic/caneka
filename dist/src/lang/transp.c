@@ -5,7 +5,7 @@ static char *srcDir = "src";
 static char *distDir = "dist";
 
 static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
-    Transp *tp = as(_tp, TYPE_TRANSP);
+    Transp *tp = asIfc(_tp, TYPE_TRANSP);
     Spool_Add(m, s, (Abstract *)&tp->current.destFile);
     return tp->type.state;
 }
@@ -13,11 +13,9 @@ static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
     Debug_Print((void *)s, 0, "Input to transpile", COLOR_PURPLE, FALSE);
     printf("\n");
-    Transp *tp = as(_tp, TYPE_TRANSP);
-    /*
+    Transp *tp = asIfc(_tp, TYPE_TRANSP);
     Roebling_Add(tp->rbl, s);
     while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR)) == 0);
-    */
     return tp->type.state;
 }
 
@@ -43,7 +41,7 @@ static status Transp_copy(Transp *p){
 }
 
 static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
-    Transp *p = as(source, TYPE_TRANSP);
+    Transp *p = asIfc(source, TYPE_TRANSP);
     String *new = String_Init(m, STRING_EXTEND);
     String_Add(m, new, p->dist);
     String_AddBytes(m, new, bytes("/"), 1);
@@ -61,7 +59,7 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
 }
 
 static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *source){
-    Transp *p = as(source, TYPE_TRANSP);
+    Transp *p = asIfc(source, TYPE_TRANSP);
     char *C = ".c";
     char *Cnk = ".cnk";
     char *H = ".h";
@@ -82,7 +80,7 @@ static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *s
             String_PosEqualsBytes(p->current.source, bytes(H), strlen(H), STRING_POS_END)){
             Transp_copy(p);
     }else if(String_PosEqualsBytes(p->current.source, bytes(Cnk), strlen(Cnk), STRING_POS_END)){
-        String_Trunc(p->current.dest, -2);
+        String_Trunc(p->current.dest, -1);
 
         Spool_Init(&p->current.sourceFile, p->current.source, NULL, NULL);
         Spool_Init(&p->current.destFile, p->current.dest, NULL, NULL);

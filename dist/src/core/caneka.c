@@ -308,6 +308,8 @@ boolean Ifc_Match(cls inst, cls ifc){
         return (inst == TYPE_SPAN || inst == TYPE_QUEUE_SPAN || 
             inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN ||
             inst == TYPE_TABLE);
+    }else if(ifc == TYPE_TRANSP){ 
+        return (inst == TYPE_TRANSP || inst == TYPE_LANG_CNK);
     }
 
     return inst == ifc;

@@ -2,19 +2,6 @@
 #include <external.h> 
 #include <caneka.h> 
 
-/*
-#Type Cash {
-    Make(MemCtx m, Getter get, Abs source){
-        this.m = m;
-        this.rbl = /between({^$.},$ -> value),value({_\{^\}.} -> between)/
-        this.get = get;
-        this.source = source;
-        this
-    }
-}
-#C
-*/
-
 static word betweenDef[] = {
     PAT_KO, '$', '$', patText,
     PAT_END, 0, 0

@@ -55,7 +55,7 @@ static word lineDef[] = {
     PAT_END, 0, 0
 };
 
-static status start(Roebling *rbl){
+static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -87,8 +87,9 @@ CnkLangSpace *CnkLangSpace_Make(MemCtx *m){
 }
 
 CnkLangCtx *CnkLangCtx_Make(MemCtx *m){
-    CnkLangCtx *ctx = CnkLangCtx_Make(m);
+    CnkLangCtx *ctx = MemCtx_Alloc(m, sizeof(CnkLangCtx));
     ctx->type.of = TYPE_LANG_CNK;
+    ctx->m = m;
 
 
     Span *parsers = Span_Make(m, TYPE_SPAN);
