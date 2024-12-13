@@ -25,6 +25,7 @@ enum match_flags {
     ANCHOR_CONTAINS = 1 << 12,
     ANCHOR_START = 1 << 13,
     SEARCH = 1 << 14, 
+    SUCCESS_EMPTY = 1 << 15,
 };
 
 #define patText \

@@ -11,11 +11,9 @@ static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
 }
 
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
-    Debug_Print((void *)s, 0, "Input to transpile", COLOR_PURPLE, FALSE);
-    printf("\n");
     Transp *tp = asIfc(_tp, TYPE_TRANSP);
     Roebling_Add(tp->rbl, s);
-    while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR)) == 0);
+    while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR|BREAK)) == 0);
     return tp->type.state;
 }
 

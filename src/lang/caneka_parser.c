@@ -6,6 +6,10 @@ static char * cnkRangeToChars(word range){
         return "CNK_LANG_START";
     }else if(range == CNK_LANG_LINE){
         return "CNK_LANG_LINE";
+    }else if(range == CNK_LANG_REQUIRE){
+        return "CNK_LANG_REQUIRE";
+    }else if(range == CNK_LANG_PACKAGE){
+        return "CNK_LANG_PACKAGE";
     }else if(range == CNK_LANG_TYPE){
         return "CNK_LANG_TYPE";
     }else if(range == CNK_LANG_C){
@@ -21,6 +25,33 @@ static char * cnkRangeToChars(word range){
     }
 }
 
+static word reqDef[] = {
+    PAT_TERM|PAT_NO_CAPTURE, '#', '#',
+    PAT_TERM, 'R', 'R',
+    PAT_TERM, 'e', 'e',
+    PAT_TERM, 'q', 'q',
+    PAT_TERM, 'u', 'u',
+    PAT_TERM, 'i', 'i',
+    PAT_TERM, 'r', 'r',
+    PAT_TERM, 'e', 'e',
+    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE,'\t','\t', PAT_MANY|PAT_NO_CAPTURE,'\r', '\r',PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\r', '\r',
+    PAT_END, 0, 0
+};
+
+static word pkgDef[] = {
+    PAT_TERM|PAT_NO_CAPTURE, '#', '#',
+    PAT_TERM, 'P', 'P',
+    PAT_TERM, 'a', 'a',
+    PAT_TERM, 'c', 'c',
+    PAT_TERM, 'k', 'k',
+    PAT_TERM, 'a', 'a',
+    PAT_TERM, 'g', 'g',
+    PAT_TERM, 'e', 'e',
+    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE,'\t','\t', PAT_MANY|PAT_NO_CAPTURE,'\r', '\r',PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\r', '\r',
+    PAT_END, 0, 0
+};
+
+
 static word typeDef[] = {
     PAT_TERM|PAT_NO_CAPTURE, '#', '#',
     PAT_TERM, 'T', 'T',
@@ -32,7 +63,6 @@ static word typeDef[] = {
 };
 
 static word cDef[] = {
-    PAT_KO, '\n', '\n',
     PAT_TERM|PAT_NO_CAPTURE, '#', '#',
     PAT_TERM, 'C', 'C',
     PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE,'\t','\t', PAT_MANY|PAT_NO_CAPTURE,'\r', '\r',PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\r', '\r',
@@ -40,7 +70,6 @@ static word cDef[] = {
 };
 
 static word cEndDef[] = {
-    PAT_KO, '\n', '\n',
     PAT_TERM|PAT_NO_CAPTURE, '#', '#',
     PAT_TERM, 'e', 'e',
     PAT_TERM, 'n', 'n',
@@ -51,7 +80,7 @@ static word cEndDef[] = {
 };
 
 static word lineDef[] = {
-    PAT_KO, '\n', '\n', patText,
+    PAT_KO|PAT_CONSUME, '\n', '\n', patText,
     PAT_END, 0, 0
 };
 
@@ -60,13 +89,22 @@ static status start(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)reqDef, CNK_LANG_REQUIRE, CNK_LANG_START);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)pkgDef, CNK_LANG_PACKAGE, CNK_LANG_START);
+    r |= Roebling_SetPattern(rbl,
         (PatCharDef*)typeDef, CNK_LANG_TYPE, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)cDef, CNK_LANG_C, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)cEndDef, CNK_LANG_END_C, CNK_LANG_START);
-    r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)lineDef, CNK_LANG_LINE, CNK_LANG_START);
+
+    PatCharDef *def = (PatCharDef *)lineDef;
+    Match *mt = Span_ReserveNext(rbl->matches);
+    r |= Match_SetPattern(mt, def);
+    mt->captureKey = CNK_LANG_LINE;
+    mt->jump = Roebling_GetMarkIdx(rbl, CNK_LANG_START);
+    mt->type.state |= SUCCESS_EMPTY;
 
     return r;
 }
@@ -75,7 +113,9 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     status r = READY;
     CnkLangCtx *ctx = (CnkLangCtx *)as(source, TYPE_LANG_CNK);
     if(DEBUG_LANG_CNK){
-        printf("\x1b[%dmCnk Capture: %s - '%s'\x1b[0m\n", DEBUG_LANG_CNK, cnkRangeToChars(captureKey), s->bytes);
+        printf("\x1b[%dmCnk Capture: %s", DEBUG_LANG_CNK, cnkRangeToChars(captureKey));
+        Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
     }
     return SUCCESS;
 }

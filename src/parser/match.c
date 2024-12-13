@@ -56,19 +56,23 @@ static void match_StartOfTerm(Match *mt){
 
 static status match_FeedPat(Match *mt, word c){
     if(HasFlag(mt->type.state, MISS)){
+
         if(DEBUG_PATMATCH){
             printf("\x1b[%dm'%c' - \x1b[0m", COLOR_RED, c);
             Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "MISS - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
             printf("\n");
         }
+
         return mt->type.state;
     }
     boolean matched = FALSE;
     PatCharDef *def;
+
     if(DEBUG_PATMATCH){
         Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
         printf("\n");
     }
+
     while(mt->def.pat.curDef < mt->def.pat.endDef){
         def = mt->def.pat.curDef;
         if(HasFlag(def->flags, PAT_CMD)){
@@ -85,6 +89,7 @@ static status match_FeedPat(Match *mt, word c){
         if(DEBUG_PATMATCH){
             Match_midDebug('_', c, def, mt, matched);
         }
+
         if(matched){
             if(HasFlag(def->flags, PAT_KO)){
                 if(HasFlag(def->flags, PAT_LEAVE)){
@@ -94,11 +99,12 @@ static status match_FeedPat(Match *mt, word c){
                 if(!HasFlag(def->flags, PAT_NO_CAPTURE) || HasFlag(def->flags, PAT_CONSUME)){
                     mt->tail++;
                 }
-                if(HasFlag(def->flags, PAT_SET_NOOP) || mt->count == 0){
+                if(HasFlag(def->flags, PAT_SET_NOOP) || ((mt->type.state & SUCCESS_EMPTY) == 0 && mt->count == 0)){
                     mt->type.state |= MISS;
                     mt->def.pat.curDef = mt->def.pat.startDef;
                     return mt->type.state;
                 }
+
                 mt->type.state &= ~PROCESSING;
                 match_NextTerm(mt);
                 break;
@@ -166,6 +172,7 @@ miss:
 
     if(mt->def.pat.curDef == mt->def.pat.endDef){
         mt->type.state = (mt->type.state | COMPLETE) & ~PROCESSING;
+
         if(DEBUG_MATCH_COMPLETE){
             Debug_Print(mt, 0, "Match Completed:%s", DEBUG_MATCH_COMPLETE, TRUE);
             printf("\n");

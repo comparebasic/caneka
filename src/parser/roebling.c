@@ -4,7 +4,7 @@
 static status Roebling_RunMatches(Roebling *rbl){
     int i = 0;
     byte c = 0;
-    rbl->type.state &= ~(NEXT|BREAK|COMPLETE);
+    rbl->type.state &= ~(NEXT|BREAK|SUCCESS);
     if(rbl->matches->nvalues == 0){
         rbl->type.state |= NEXT;
     }
@@ -17,16 +17,20 @@ static status Roebling_RunMatches(Roebling *rbl){
         Match *mt = NULL;
         for(int i = 0; i < rbl->matches->nvalues; i++){
             mt = Span_Get(rbl->matches, i);
+
             if(DEBUG_ROEBLING){
                 printf("\x1b[%dm%d ", DEBUG_ROEBLING, i);
                 Debug_Print(mt, 0, "Roebling Running Match: ", DEBUG_ROEBLING, TRUE);
             }
+
             if(mt != NULL){
+
                if(DEBUG_PATMATCH){
                     printf("\x1b[%dmmatch: %d - ", DEBUG_PATMATCH, i);
                }
+
                Match_Feed(mt, c);
-               if(HasFlag(mt->type.state, COMPLETE)){
+               if((mt->type.state & SUCCESS) != 0){
                      rbl->type.state &= ~PROCESSING;
                      rbl->matches->metrics.selected = i;
                      if(mt->jump > -1){
@@ -38,6 +42,7 @@ static status Roebling_RunMatches(Roebling *rbl){
                          SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
                      }
                      rbl->tail = mt->tail;
+
                      if(DEBUG_ROEBLING_COMPLETE){
                          printf("\x1b[%dm#%d ", DEBUG_ROEBLING_COMPLETE, i);
                          Debug_Print((void *)mt, 0, "Match Found: ", DEBUG_ROEBLING_COMPLETE, TRUE);
@@ -47,6 +52,7 @@ static status Roebling_RunMatches(Roebling *rbl){
                          printf("\x1b[1;%dm)\n\x1b[0m", DEBUG_ROEBLING_COMPLETE);
                          printf("\n");
                      }
+
                      break;
                }
             }
@@ -163,10 +169,12 @@ status Roebling_RunCycle(Roebling *rbl){
         if(rbl->jump > -1){
             rbl->idx = rbl->jump;
             rbl->jump = -1;
+
             if(DEBUG_ROEBLING_MARK){
                 String *mark_s = Roebling_GetMarkDebug(rbl, rbl->idx);
                 printf("\x1b[%dmJumping to %s(%d)\n", DEBUG_ROEBLING_MARK, mark_s != NULL ? (char *)mark_s->bytes : "", rbl->idx);
             }
+
         }
     }else{
         if(rbl->jumpMiss > -1){
@@ -180,20 +188,27 @@ status Roebling_RunCycle(Roebling *rbl){
 
     Single *wdof = Span_Get(rbl->parsers_do, rbl->idx);
     if(wdof == NULL){
-        rbl->type.state = COMPLETE;
+        rbl->type.state = SUCCESS;
+        if(DEBUG_ROEBLING_COMPLETE){
+            printf("\x1b[%dmRbl DONE wof == NULL\x1b[0m\n", DEBUG_ROEBLING_COMPLETE);
+        }
+
         if(DEBUG_ROEBLING){
             printf("\x1b[%dmRbl DONE wof == NULL\x1b[0m\n", DEBUG_ROEBLING);
         }
+
     }else{
         if((rbl->type.state & PROCESSING) == 0){
             rbl->type.state |= PROCESSING;
             wdof = as(wdof, TYPE_WRAPPED_DO);
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
+
             if(DEBUG_ROEBLING){
                 printf("\x1b[%dmRbl Run 0x%lx idx:\x1b[1;%dm%d\x1b[0;%dm ", DEBUG_ROEBLING, (util)wdof, DEBUG_ROEBLING, rbl->idx, DEBUG_ROEBLING);
                 Debug_Print((void *)rbl, 0, "", DEBUG_ROEBLING, TRUE);
                 printf("\n");
             }
+
         }
         Roebling_RunMatches(rbl);
     }

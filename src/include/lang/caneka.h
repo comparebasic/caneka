@@ -1,6 +1,8 @@
 enum cnk_lang_range {
     CNK_LANG_START = 1,
     CNK_LANG_LINE,
+    CNK_LANG_REQUIRE,
+    CNK_LANG_PACKAGE,
     CNK_LANG_TYPE,
     CNK_LANG_C,
     CNK_LANG_END_C,
