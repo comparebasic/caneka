@@ -47,7 +47,7 @@ Abstract *Iter_Get(Iter *it){
 Iter *Iter_Init(Iter *it, Span *values){
     memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_ITER;
-    it->values = values;
+    it->values = asIfc(values, TYPE_SPAN);
     it->idx = -1;
     return it;
 }

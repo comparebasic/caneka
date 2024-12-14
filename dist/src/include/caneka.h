@@ -76,6 +76,7 @@ typedef struct virt * AbstractPtr;
 typedef status (*DoFunc)(struct mem_ctx *m, Abstract *a);
 typedef status (*DblFunc)(struct mem_ctx *m, Abstract *a, Abstract *b);
 typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source);
+typedef char *(*RangeToChars)(word);
 
 #define ZERO 0
 #define MAX_BASE10 22

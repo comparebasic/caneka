@@ -29,6 +29,11 @@ static status Transp_transpile(Transp *p, FmtCtx *fmt){
 
         status r = File_Stream(p->m, &p->current.sourceFile,
             NULL, Transp_onInput, (Abstract *)fmt);
+
+        Transp_PrintTree(p);
+
+        printf("done!\n");
+
 #ifdef DEBUG_STACK
         DebugStack_Pop();
 #endif
@@ -103,6 +108,46 @@ static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *s
     return TRUE;
 }
 
+void Transp_PrintFmtTree(Transp *p, FmtCtx *fmt, FmtItem *item, int indent){
+    if(item->value != NULL){
+        Iter it;
+        Iter_Init(&it, (Span *)item->value);
+        while((Iter_Next(&it) & END) == 0){
+            Abstract *a = Iter_Get(&it);
+            if(a != NULL){
+                if(Ifc_Match(a->type.of, TYPE_FMT_ITEM)){
+                    FmtItem *item = (FmtItem *)a;
+                    int i = indent;
+                    while(i--){
+                        printf("  ");
+                    }
+                    printf("Found: %s\n", fmt->rangeToChars(it.idx));
+                    Transp_PrintFmtTree(p, fmt, item, indent+1);
+                }else{
+                    int i = indent;
+                    while(i--){
+                        printf("  ");
+                    }
+                    Debug_Print((void *)a, 0, "Item: ", 0, FALSE);
+                    printf("\n");
+                }
+            }
+        }
+    }
+}
+
+
+void Transp_PrintTree(Transp *p){
+    Iter it;
+    Iter_Init(&it, p->formats);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            FmtCtx *fmt = (FmtCtx *)h->value;
+            Transp_PrintFmtTree(p, fmt, fmt->root, 0);
+        }
+    }
+}
 
 status Transp_Trans(Transp *p){
     return Dir_Climb(p->m, p->src, Transp_transDir, Transp_transFile, (Abstract *)p);

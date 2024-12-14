@@ -12,6 +12,7 @@ typedef struct fmt_item {
     Type type;
     word flags;
     FmtDef *def;
+    word spaceIdx;
     int offset;
     String *content;
     String *key;
@@ -23,14 +24,15 @@ typedef struct fmt_item {
 typedef struct formatter {
     Type type;
     MemCtx *m;
-    word spaceIdx;
     FmtDef *def;
     FmtItem *item;
+    FmtItem *root;
     word offset;
     Roebling *rbl;
     Chain *byId;
     TableChain *byName;
     TableChain *byAlias;
+    RangeToChars rangeToChars;
 } FmtCtx;
 
 FmtItem *FmtItem_Make(MemCtx *m, FmtCtx *fctx);

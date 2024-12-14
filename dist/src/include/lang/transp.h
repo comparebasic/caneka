@@ -16,3 +16,5 @@ typedef struct transp {
 
 Transp *Transp_Make(MemCtx*m);
 status Transp_Trans(Transp *p);
+void Transp_PrintFmtTree(Transp *p, FmtCtx *fmt, FmtItem *item, int indent);
+void Transp_PrintTree(Transp *p);

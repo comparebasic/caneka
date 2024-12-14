@@ -1,5 +1,5 @@
-Require Caneka
-Package Formats 
+Require { Caneka }
+Package { Formats }
 
 Type Cash {
 
@@ -8,33 +8,6 @@ struct {
     get = Getter
     source? = Abs
     rbl = /between({^$.},$ -> value),value({_\{^\}.} -> between)/ -> Capture
-}
-
-Capture (word key, int matchIdx, String s, Cash cash) {
-    key is Cash.BETWEEN {
-        cash.s += s
-    } key is Cash.VALUE {
-        val = null
-        a = cash[s]
-        a? {
-            type(a) is String {
-            val = a 
-            } cash.presenter? {
-                func = cash.presenter[type(a)]
-                func? {
-                    val = func(a)
-                }
-            }
-        }
-        val? {
-            cash.s += value
-            cash & SUCCESS ~ MISS
-        } else {
-            cash & MISS ~ SUCCESS 
-        }
-    }
-
-    cash
 }
 
 }
