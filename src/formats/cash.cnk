@@ -1,9 +1,12 @@
-#Require Caneka
-#Package Formats 
+Require Caneka
+Package Formats 
 
-#Type Cash
+Type Cash {
 
-struct (Mem m, Getter get, Abs source) {
+struct {
+    m = Mem()
+    get = Getter
+    source? = Abs
     rbl = /between({^$.},$ -> value),value({_\{^\}.} -> between)/ -> Capture
 }
 
@@ -32,4 +35,6 @@ Capture (word key, int matchIdx, String s, Cash cash) {
     }
 
     cash
+}
+
 }

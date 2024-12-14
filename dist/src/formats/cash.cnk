@@ -1,11 +1,40 @@
-#Require Caneka
+Require Caneka
+Package Formats 
 
-#Type Cash {
-    Make(MemCtx m, Getter get, Abs source) -> Cash {
-        this.m = m;
-        this.rbl = /between({^$.},$ -> value),value({_\{^\}.} -> between)/
-        this.get = get;
-        this.source = source;
-        this
+Type Cash {
+
+struct {
+    m = Mem()
+    get = Getter
+    source? = Abs
+    rbl = /between({^$.},$ -> value),value({_\{^\}.} -> between)/ -> Capture
+}
+
+Capture (word key, int matchIdx, String s, Cash cash) {
+    key is Cash.BETWEEN {
+        cash.s += s
+    } key is Cash.VALUE {
+        val = null
+        a = cash[s]
+        a? {
+            type(a) is String {
+            val = a 
+            } cash.presenter? {
+                func = cash.presenter[type(a)]
+                func? {
+                    val = func(a)
+                }
+            }
+        }
+        val? {
+            cash.s += value
+            cash & SUCCESS ~ MISS
+        } else {
+            cash & MISS ~ SUCCESS 
+        }
     }
+
+    cash
+}
+
 }
