@@ -10,21 +10,21 @@ static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
     return tp->type.state;
 }
 
-static status Transp_onInput(MemCtx *m, String *s, Abstract *_tp){
-    Transp *tp = asIfc(_tp, TYPE_TRANSP);
-    Roebling_Add(tp->rbl, s);
-    while((Roebling_RunCycle(tp->rbl) & (SUCCESS|END|ERROR|BREAK)) == 0);
-    return tp->type.state;
+static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
+    FmtCtx *fmt = asIfc(_fmt, TYPE_FMT_CTX);
+    Roebling_Add(fmt->rbl, s);
+    while((Roebling_RunCycle(fmt->rbl) & (SUCCESS|END|ERROR|BREAK)) == 0);
+    return fmt->type.state;
 }
 
-static status Transp_transpile(Transp *p){
+static status Transp_transpile(Transp *p, FmtCtx *fmt){
     if(File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
         Debug_Print((void *)p->current.source,0,  "Transpiling ",  COLOR_YELLOW, FALSE);
         Debug_Print((void *)p->current.dest,0,  " -> ",  COLOR_YELLOW, FALSE);
         printf("\n");
         printf("%s\n", p->current.sourceFile.abs->bytes);
         return File_Stream(p->m, &p->current.sourceFile,
-            NULL, Transp_onInput, (Abstract *)p);
+            NULL, Transp_onInput, (Abstract *)fmt);
     }
     return NOOP;
 }
@@ -58,9 +58,6 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
 
 static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *source){
     Transp *p = asIfc(source, TYPE_TRANSP);
-    char *C = ".c";
-    char *Cnk = ".cnk";
-    char *H = ".h";
 
     p->current.source = String_Init(m, STRING_EXTEND);
     String_Add(m, p->current.source, dir);
@@ -74,18 +71,23 @@ static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *s
     String_AddBytes(m, p->current.dest, bytes("/"), 1);
     String_Add(m, p->current.dest, file);
 
-    if(String_PosEqualsBytes(p->current.source, bytes(C), strlen(H), STRING_POS_END) || 
-            String_PosEqualsBytes(p->current.source, bytes(H), strlen(H), STRING_POS_END)){
-            Transp_copy(p);
-    }else if(String_PosEqualsBytes(p->current.source, bytes(Cnk), strlen(Cnk), STRING_POS_END)){
-        String_Trunc(p->current.dest, -1);
+    Iter it;
+    Iter_Init(&it, p->formats);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            String *abbrev = (String *)h->item;
+            if(String_PosEqualsBytes(p->current.source, abbrev->bytes, abbrev->length, STRING_POS_END)){
+                String_Trunc(p->current.dest, -1);
 
-        Spool_Init(&p->current.sourceFile, p->current.source, NULL, NULL);
-        Spool_Init(&p->current.destFile, p->current.dest, NULL, NULL);
-        Transp_transpile(p);
-    }else{
-        Transp_copy(p);
+                Spool_Init(&p->current.sourceFile, p->current.source, NULL, NULL);
+                Spool_Init(&p->current.destFile, p->current.dest, NULL, NULL);
+                return Transp_transpile(p, (FmtCtx *)h->value);
+            }
+        }
     }
+
+    return Transp_copy(p);
 
     return TRUE;
 }
@@ -99,5 +101,6 @@ Transp *Transp_Make(MemCtx *m){
     Transp *t = MemCtx_Alloc(m, sizeof(Transp));
     t->type.of = TYPE_TRANSP;
     t->m = m;
+    t->formats = Span_Make(m, TYPE_TABLE); 
     return t;
 }

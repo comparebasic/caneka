@@ -190,7 +190,7 @@ static status value(MemCtx *m, Roebling *rbl){
 
 static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     status r = READY;
-    Transp *ctx = (Transp *)as(source, TYPE_LANG_CNK);
+    FmtCtx *ctx = (FmtCtx *)as(source, TYPE_FMT_CTX);
     if(DEBUG_LANG_CNK){
         printf("\x1b[%dmCnk Capture %s: %s ", DEBUG_LANG_CNK, 
             cnkRangeToChars(ctx->spaceIdx), cnkRangeToChars(captureKey));
@@ -214,14 +214,8 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
-CnkLangSpace *CnkLangSpace_Make(MemCtx *m){
-    CnkLangSpace *space = MemCtx_Alloc(m, sizeof(CnkLangSpace));
-    space->type.of = TYPE_LANG_CNK_SPACE;
-    return space;
-}
-
-Transp *CnkLangCtx_Make(MemCtx *m){
-    Transp *ctx = MemCtx_Alloc(m, sizeof(Transp));
+FmtCtx *CnkLangCtx_Make(MemCtx *m){
+    FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
     ctx->type.of = TYPE_LANG_CNK;
     ctx->m = m;
 

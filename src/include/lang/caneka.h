@@ -15,12 +15,4 @@ enum cnk_lang_range {
     CNK_LANG_VALUE,
 };
 
-typedef struct caneka_lang_space {
-    Type type;
-    word spaceType;
-    Abstract *space;
-    struct caneka_lang_space *parent;
-} CnkLangSpace;
-
-Transp *CnkLangCtx_Make(MemCtx *m); /* Transp < Formatter < MemHandle */
-CnkLangSpace *CnkLangSpace_Make(MemCtx *m);
+FmtCtx *CnkLangCtx_Make(MemCtx *m); /* Formatter < MemHandle */

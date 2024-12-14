@@ -1,16 +1,6 @@
 typedef struct transp {
     Type type;   
     MemCtx *m;
-    /* formatter */
-    word spaceIdx;
-    FmtDef *def;
-    FmtItem *item;
-    word offset;
-    Roebling *rbl;
-    Chain *byId;
-    TableChain *byName;
-    TableChain *byAlias;
-    /* Transp */
     String *src;
     String *dist;
     struct {
@@ -20,6 +10,7 @@ typedef struct transp {
         File destFile;
     } current;
     OutFunc out;
+    Span *formats; /* FmtCtx */
     /* End Transp */
 } Transp;
 
