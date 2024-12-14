@@ -69,8 +69,6 @@ extern int DEBUG_SUBPROCESS;
 
 extern boolean SHOW_SERVE_TESTS;
 
-
-
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanDef_Print(SpanDef *def);

@@ -13,6 +13,8 @@ enum cnk_lang_range {
     CNK_LANG_POST_TOKEN,
     CNK_LANG_ASSIGN,
     CNK_LANG_VALUE,
+    CNK_LANG_INVOKE,
+    CNK_LANG_LINE_END,
 };
 
 FmtCtx *CnkLangCtx_Make(MemCtx *m); /* Formatter < MemHandle */

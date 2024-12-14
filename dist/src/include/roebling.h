@@ -1,3 +1,5 @@
+#define ROEBLING_GUARD_MAX 1024
+
 typedef status (*RblFunc)(MemCtx *m, struct roebling *rbl);
 typedef status (*RblCaptureFunc)(word captureKey, int matchIdx, String *s, Abstract *source);
 
@@ -25,6 +27,7 @@ typedef struct roebling {
     int tail;
     /* debug */
     Lookup *markLabels;
+    Guard guard;
 } Roebling;
 
 Roebling *Roebling_Make(MemCtx *m,

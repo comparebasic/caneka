@@ -35,6 +35,7 @@ struct structexp;
 struct lookup;
 struct strcursor;
 struct strcursor_range;
+struct guard;
 struct roebling;
 struct span_def;
 struct mem_handle;
@@ -131,6 +132,7 @@ enum types {
     TYPE_SCURSOR,
     TYPE_RANGE,
     TYPE_MATCH,
+    TYPE_GUARD,
     TYPE_STRINGMATCH,
     TYPE_PATMATCH,
     TYPE_PATCHARDEF,
@@ -183,6 +185,8 @@ enum types {
     TYPE_LANG_CNK,
     TYPE_LANG_CNK_SPACE,
     TYPE_TRANSP,
+    TYPE_DEBUG_STACK,
+    TYPE_DEBUG_STACK_ENTRY,
     _TYPE_CORE_END,
 };
 
@@ -271,6 +275,10 @@ cls Ifc_Get(cls inst);
 #include "range.h"
 #include "lookup.h"
 #include "debug.h"
+#ifdef DEBUG_STACK
+#include "debug_stack.h"
+#endif
+#include "guard.h"
 #include "roebling.h"
 #include "queue.h"
 #include "handler.h"

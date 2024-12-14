@@ -15,6 +15,9 @@ status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= archChecks();
     r |= SpanDef_Init();
+#ifdef DEBUG_STACK
+    r |= DebugStack_Init();
+#endif
     r |= Clone_Init(m);
     r |= Debug_Init(m);
     r |= Hash_Init(m);
@@ -292,6 +295,10 @@ cls Ifc_Get(cls inst){
 }
 
 boolean Ifc_Match(cls inst, cls ifc){
+    if(inst == ifc){
+        return TRUE;
+    }
+
     if(ifc == TYPE_MEMCTX){
         return inst == TYPE_SPAN || inst == TYPE_REQ || inst == TYPE_SERVECTX 
             || inst == TYPE_ROEBLING;
@@ -310,7 +317,9 @@ boolean Ifc_Match(cls inst, cls ifc){
             inst == TYPE_TABLE);
     }else if(ifc == TYPE_TRANSP){ 
         return (inst == TYPE_TRANSP || inst == TYPE_LANG_CNK);
+    }else if(ifc == TYPE_FMT_CTX){ 
+        return (inst == TYPE_FMT_CTX || inst == TYPE_LANG_CNK);
     }
 
-    return inst == ifc;
+    return FALSE;
 }

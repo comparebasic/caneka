@@ -138,9 +138,14 @@ static status match_FeedPat(Match *mt, word c){
                 mt->def.pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
-                if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, TERM_FOUND)){
-                    goto miss;
-                    break;
+                if(HasFlag(def->flags, PAT_TERM)){
+                    if((mt->type.state & TERM_FOUND) != 0){
+                        match_NextTerm(mt);
+                        continue;
+                    }else{
+                        goto miss;
+                        break;
+                    }
                 }else{
                     mt->def.pat.curDef++;
                     continue;
@@ -171,7 +176,7 @@ miss:
     }
 
     if(mt->def.pat.curDef == mt->def.pat.endDef){
-        mt->type.state = (mt->type.state | COMPLETE) & ~PROCESSING;
+        mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
 
         if(DEBUG_MATCH_COMPLETE){
             Debug_Print(mt, 0, "Match Completed:%s", DEBUG_MATCH_COMPLETE, TRUE);
@@ -199,7 +204,7 @@ static status match_FeedString(Match *mt, byte c){
         mt->count++;
         if(mt->def.str.position == mt->def.str.s->length){
             mt->def.str.position = 0;
-            mt->type.state = COMPLETE;
+            mt->type.state = SUCCESS;
             if(DEBUG_ROEBLING_COMPLETE){
                 Debug_Print((void *)mt, 0, "Match Complete: ", DEBUG_ROEBLING_COMPLETE, TRUE);
                 printf("\n");

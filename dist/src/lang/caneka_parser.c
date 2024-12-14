@@ -8,6 +8,8 @@ static char * cnkRangeToChars(word range){
         return "CNK_LANG_LINE";
     }else if(range == CNK_LANG_INDENT){
         return "CNK_LANG_INDENT";
+    }else if(range == CNK_LANG_LINE_END){
+        return "CNK_LANG_LINE_END";
     }else if(range == CNK_LANG_STRUCT){
         return "CNK_LANG_STRUCT";
     }else if(range == CNK_LANG_REQUIRE){
@@ -40,7 +42,7 @@ static word indentDef[] = {
     PAT_END, 0, 0
 };
 
-static word blankLineDef[] = {
+static word lineEndDef[] = {
     PAT_ANY, ' ',' ', PAT_ANY,'\t','\t', PAT_ANY, '\r', '\r', PAT_TERM, '\n', '\n',
     PAT_END, 0, 0
 };
@@ -82,7 +84,6 @@ static word structDef[] = {
     PAT_END, 0, 0
 };
 
-
 static word typeDef[] = {
     PAT_TERM, 'T', 'T',
     PAT_TERM, 'y', 'y',
@@ -98,8 +99,14 @@ static word tokenDef[] = {
     PAT_END, 0, 0
 };
 
+static word invokeDef[] = {
+    PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM, '(', '(', patText, PAT_TERM, ')', ')',
+    PAT_END, 0, 0
+};
+
+
 static word tokenDotDef[] = {
-    PAT_KO, '.','.',PAT_ANY, '-', '-',PAT_ANY, '_', '_',PAT_ANY, '0', '9',PAT_ANY, 'A', 'Z',PAT_ANY|PAT_TERM, 'a', 'z', 
+    PAT_KO, '.','.',PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', 
     PAT_END, 0, 0
 };
 
@@ -126,10 +133,9 @@ static word assignDef[] = {
 static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
-    printf("setting up start\n");
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)blankLineDef, CNK_LANG_INDENT, CNK_LANG_START);
+        (PatCharDef*)lineEndDef, CNK_LANG_LINE_END, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)reqDef, CNK_LANG_REQUIRE, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
@@ -156,11 +162,13 @@ static status str(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lineEndDef, CNK_LANG_LINE_END, CNK_LANG_STRUCT);
+    r |= Roebling_SetPattern(rbl,
         (PatCharDef*)indentDef, CNK_LANG_INDENT, CNK_LANG_STRUCT);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)tokenDef, CNK_LANG_TOKEN, -1);
+        (PatCharDef*)tokenDef, CNK_LANG_TOKEN, CNK_LANG_POST_TOKEN);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)tokenDotDef, CNK_LANG_PACKAGE, CNK_LANG_STRUCT);
+        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, CNK_LANG_STRUCT);
 
     return r;
 }
@@ -180,17 +188,33 @@ static status value(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lineEndDef, CNK_LANG_LINE_END, -1);
+    r |= Roebling_SetPattern(rbl,
         (PatCharDef*)tokenDef, CNK_LANG_TOKEN, -1);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, CNK_LANG_VALUE);
+        (PatCharDef*)invokeDef, CNK_LANG_INVOKE, -1);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, -1);
 
     return r;
 }
 
+static status lineEnd(MemCtx *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    printf("setting line end\n");
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lineEndDef, CNK_LANG_LINE_END, -1);
+
+    Debug_Print((void *)rbl, 0, "Rbl at lineEnd: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+    return r;
+}
 
 static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     status r = READY;
-    FmtCtx *ctx = (FmtCtx *)as(source, TYPE_FMT_CTX);
+    FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
     if(DEBUG_LANG_CNK){
         printf("\x1b[%dmCnk Capture %s: %s ", DEBUG_LANG_CNK, 
             cnkRangeToChars(ctx->spaceIdx), cnkRangeToChars(captureKey));
@@ -202,13 +226,9 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
             ctx->spaceIdx = captureKey;
     }
     if(captureKey == CNK_LANG_TOKEN){
-        printf("token :)");
         if(ctx->spaceIdx == CNK_LANG_PACKAGE || ctx->spaceIdx == CNK_LANG_REQUIRE){
             ctx->spaceIdx = 0;
             Roebling_JumpTo(ctx->rbl, CNK_LANG_START);
-            printf("setting jump %s\n", cnkRangeToChars(CNK_LANG_START));
-        }else{
-            printf("nope %s",cnkRangeToChars(ctx->spaceIdx));
         }
     }
     return SUCCESS;
@@ -225,10 +245,11 @@ FmtCtx *CnkLangCtx_Make(MemCtx *m){
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)start));
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_STRUCT));
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)str));
-    Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_POST_TOKEN));
-    Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)post));
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_VALUE));
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)value));
+    Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)lineEnd));
+    Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_POST_TOKEN));
+    Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)post));
 
     LookupConfig config[] = {
         {CNK_LANG_START, (Abstract *)String_Make(m, bytes("START"))},

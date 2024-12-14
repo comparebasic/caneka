@@ -2,6 +2,9 @@
 #include <caneka.h>
 
 static status Roebling_RunMatches(Roebling *rbl){
+#ifdef DEBUG_STACK
+    DebugStack_Push(bytes("Roebling_RunMatches"), (Abstract *)rbl);
+#endif
     int i = 0;
     byte c = 0;
     rbl->type.state &= ~(NEXT|BREAK|SUCCESS);
@@ -9,6 +12,7 @@ static status Roebling_RunMatches(Roebling *rbl){
         rbl->type.state |= NEXT;
     }
     while((rbl->type.state & (NEXT|BREAK)) == 0){
+        Guard_Incr(&rbl->guard);
         if(HasFlag(rbl->range.potential.type.state, END)){
             rbl->type.state |= BREAK;
             continue;
@@ -32,16 +36,24 @@ static status Roebling_RunMatches(Roebling *rbl){
                Match_Feed(mt, c);
                if((mt->type.state & SUCCESS) != 0){
                      rbl->type.state &= ~PROCESSING;
+                     rbl->type.state = NEXT;
+
                      rbl->matches->metrics.selected = i;
                      if(mt->jump > -1){
                         rbl->jump = mt->jump;
                      }
-                     rbl->type.state = NEXT;
+
+                     if(mt->lead+mt->count+mt->tail == 0){
+                        Fatal("No increment value for successful match", TYPE_MATCH);
+                     }
+
                      SCursor_Incr(&(rbl->range.start), mt->lead);
                      if(mt->count){
                          SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
                      }
                      rbl->tail = mt->tail;
+
+
 
                      if(DEBUG_ROEBLING_COMPLETE){
                          printf("\x1b[%dm#%d ", DEBUG_ROEBLING_COMPLETE, i);
@@ -62,6 +74,10 @@ static status Roebling_RunMatches(Roebling *rbl){
         }
         SCursor_Incr(&(rbl->range.potential), 1);
     }
+
+#ifdef DEBUG_STACK
+    DebugStack_Pop();
+#endif
     return rbl->type.state;
 }
 
@@ -307,6 +323,7 @@ Roebling *Roebling_Make(MemCtx *m,
     rbl->markLabels = markLabels;
     Roebling_Prepare(rbl, parsers);
     Roebling_Reset(m, rbl, s);
+    Guard_Setup(m, &rbl->guard, ROEBLING_GUARD_MAX, bytes("Roebling Guard"));
 
     return rbl;
 }

@@ -18,14 +18,25 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
 }
 
 static status Transp_transpile(Transp *p, FmtCtx *fmt){
+#ifdef DEBUG_STACK
+    DebugStack_Push(bytes("Transp_transpile"), NULL);
+#endif
     if(File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
         Debug_Print((void *)p->current.source,0,  "Transpiling ",  COLOR_YELLOW, FALSE);
         Debug_Print((void *)p->current.dest,0,  " -> ",  COLOR_YELLOW, FALSE);
         printf("\n");
         printf("%s\n", p->current.sourceFile.abs->bytes);
-        return File_Stream(p->m, &p->current.sourceFile,
+
+        status r = File_Stream(p->m, &p->current.sourceFile,
             NULL, Transp_onInput, (Abstract *)fmt);
+#ifdef DEBUG_STACK
+        DebugStack_Pop();
+#endif
+        return r;
     }
+#ifdef DEBUG_STACK
+    DebugStack_Pop();
+#endif
     return NOOP;
 }
 
