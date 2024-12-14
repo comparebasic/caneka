@@ -24,7 +24,7 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./src/include/", "-I./src/apps/include/",
+    "-I./dist/src/include/", "-I./dist/src/apps/include/",
     NULL
 };
 
