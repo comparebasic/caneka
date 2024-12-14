@@ -40,6 +40,11 @@ static word indentDef[] = {
     PAT_END, 0, 0
 };
 
+static word blankLineDef[] = {
+    PAT_ANY, ' ',' ', PAT_ANY,'\t','\t', PAT_ANY, '\r', '\r', PAT_TERM, '\n', '\n',
+    PAT_END, 0, 0
+};
+
 
 static word reqDef[] = {
     PAT_TERM, 'R', 'R',
@@ -107,7 +112,7 @@ static word cDef[] = {
 };
 
 static word lineDef[] = {
-    PAT_KO|PAT_CONSUME, '\n', '\n', patText,
+    PAT_KO, '\n', '\n', patText,
     PAT_END, 0, 0
 };
 
@@ -121,11 +126,14 @@ static word assignDef[] = {
 static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
+    printf("setting up start\n");
 
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)blankLineDef, CNK_LANG_INDENT, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)reqDef, CNK_LANG_REQUIRE, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)pkgDef, CNK_LANG_PACKAGE, CNK_LANG_START);
+        (PatCharDef*)pkgDef, CNK_LANG_PACKAGE, CNK_LANG_VALUE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)typeDef, CNK_LANG_TYPE, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
@@ -182,11 +190,26 @@ static status value(MemCtx *m, Roebling *rbl){
 
 static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     status r = READY;
-    CnkLangCtx *ctx = (CnkLangCtx *)as(source, TYPE_LANG_CNK);
+    Transp *ctx = (Transp *)as(source, TYPE_LANG_CNK);
     if(DEBUG_LANG_CNK){
-        printf("\x1b[%dmCnk Capture: %s", DEBUG_LANG_CNK, cnkRangeToChars(captureKey));
+        printf("\x1b[%dmCnk Capture %s: %s ", DEBUG_LANG_CNK, 
+            cnkRangeToChars(ctx->spaceIdx), cnkRangeToChars(captureKey));
         Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
+    }
+    if(captureKey == CNK_LANG_REQUIRE || captureKey == CNK_LANG_PACKAGE || 
+        captureKey == CNK_LANG_TYPE || captureKey == CNK_LANG_STRUCT){
+            ctx->spaceIdx = captureKey;
+    }
+    if(captureKey == CNK_LANG_TOKEN){
+        printf("token :)");
+        if(ctx->spaceIdx == CNK_LANG_PACKAGE || ctx->spaceIdx == CNK_LANG_REQUIRE){
+            ctx->spaceIdx = 0;
+            Roebling_JumpTo(ctx->rbl, CNK_LANG_START);
+            printf("setting jump %s\n", cnkRangeToChars(CNK_LANG_START));
+        }else{
+            printf("nope %s",cnkRangeToChars(ctx->spaceIdx));
+        }
     }
     return SUCCESS;
 }
@@ -197,8 +220,8 @@ CnkLangSpace *CnkLangSpace_Make(MemCtx *m){
     return space;
 }
 
-CnkLangCtx *CnkLangCtx_Make(MemCtx *m){
-    CnkLangCtx *ctx = MemCtx_Alloc(m, sizeof(CnkLangCtx));
+Transp *CnkLangCtx_Make(MemCtx *m){
+    Transp *ctx = MemCtx_Alloc(m, sizeof(Transp));
     ctx->type.of = TYPE_LANG_CNK;
     ctx->m = m;
 
@@ -229,7 +252,9 @@ CnkLangCtx *CnkLangCtx_Make(MemCtx *m){
         Capture,
         (Abstract *)ctx
     ); 
+    /*
     ctx->space = CnkLangSpace_Make(m);
+    */
 
     return ctx;
 }

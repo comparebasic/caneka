@@ -7,6 +7,7 @@ enum formatter_flags {
     FMT_FL_AUTO_ID = 1 << 14,
     FMT_FL_SPACE_FOR_WS = 1 << 15,
 };
+
 typedef struct fmt_item {
     Type type;
     word flags;
@@ -22,11 +23,10 @@ typedef struct fmt_item {
 typedef struct formatter {
     Type type;
     MemCtx *m;
-    /* current item */
+    word spaceIdx;
     FmtDef *def;
     FmtItem *item;
     word offset;
-    /* internal */
     Roebling *rbl;
     Chain *byId;
     TableChain *byName;

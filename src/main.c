@@ -47,13 +47,13 @@ status serve(MemCtx *m, char *arg){
 }
 
 status transpile(MemCtx *m, char *arg){
-    CnkLangCtx *ctx = CnkLangCtx_Make(m);
+    Transp *ctx = CnkLangCtx_Make(m);
     ctx->src = String_Make(m, bytes("src"));
     ctx->dist = String_Make(m, bytes("dist"));
     Debug_Print((void *)ctx->src, 0, "[Transpiling  ", COLOR_BLUE, FALSE);
     Debug_Print((void *)ctx->dist, 0, "->", COLOR_BLUE, FALSE);
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
-    return Transp_Trans((Transp*)ctx);
+    return Transp_Trans(ctx);
 }
 
 static status handle(MemCtx *m, char *arg){

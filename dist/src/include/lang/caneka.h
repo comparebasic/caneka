@@ -22,23 +22,5 @@ typedef struct caneka_lang_space {
     struct caneka_lang_space *parent;
 } CnkLangSpace;
 
-typedef struct caneka_lang_ctx {
-    /* Transp */
-    Type type;   
-    MemCtx *m;
-    String *src;
-    String *dist;
-    struct {
-        String *source;
-        String *dest;
-        File sourceFile;
-        File destFile;
-    } current;
-    OutFunc out;
-    Roebling *rbl;
-    /* End Transp */
-    CnkLangSpace *space;
-} CnkLangCtx;
-
-CnkLangCtx *CnkLangCtx_Make(MemCtx *m);
+Transp *CnkLangCtx_Make(MemCtx *m); /* Transp < Formatter < MemHandle */
 CnkLangSpace *CnkLangSpace_Make(MemCtx *m);

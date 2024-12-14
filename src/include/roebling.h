@@ -50,5 +50,6 @@ int Roebling_GetMatchIdx(Roebling *rbl);
 Match *Roebling_GetMatch(Roebling *rbl);
 Match *Roebling_GetValueMatch(Roebling *rbl);
 status SCursor_Finish(Roebling *rbl, Match *mt);
+status Roebling_JumpTo(Roebling *rbl, int mark);
 /* debug */
 String *Roebling_GetMarkDebug(Roebling *rbl, int idx);

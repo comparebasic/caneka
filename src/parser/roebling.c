@@ -156,6 +156,12 @@ status Roebling_Run(Roebling *rbl){
     return rbl->type.state;
 }
 
+status Roebling_JumpTo(Roebling *rbl, int mark){
+    rbl->jump = Roebling_GetMarkIdx(rbl, mark);
+    rbl->type.state &= ~PROCESSING;
+    return rbl->type.state;
+}
+
 status Roebling_RunCycle(Roebling *rbl){
     if(DEBUG_ROEBLING_MARK){
         printf("\x1b[%dmRblIdx:%d\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx);
@@ -201,6 +207,7 @@ status Roebling_RunCycle(Roebling *rbl){
         if((rbl->type.state & PROCESSING) == 0){
             rbl->type.state |= PROCESSING;
             wdof = as(wdof, TYPE_WRAPPED_DO);
+            printf("RESETTING MATCHES\n");
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
 
             if(DEBUG_ROEBLING){
@@ -209,6 +216,8 @@ status Roebling_RunCycle(Roebling *rbl){
                 printf("\n");
             }
 
+        }else{
+            printf("NOT RESETTING MATCHES\n");
         }
         Roebling_RunMatches(rbl);
     }
