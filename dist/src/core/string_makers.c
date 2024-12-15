@@ -204,6 +204,23 @@ String *String_ToHex(MemCtx *m, String *s){
     return ret;
 }
 
+status String_MakeLower(String *s){
+    int delta = 'A' - 'a';
+    while(s != NULL){
+        byte *b = s->bytes;
+        byte *end = b+s->length;
+        while(b < end){
+            byte c = *b;
+            if(c >= 'A' && c <= 'Z'){
+                *b = c - delta;
+            }
+            b++;
+        }
+        s = String_Next(s);
+    };
+    return SUCCESS;
+}
+
 String *String_FromHex(MemCtx *m, String *s){
     String *ret = String_Init(m, s->length/2);
     byte b2[2];

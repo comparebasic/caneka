@@ -148,7 +148,7 @@ static word tokenDef[] = {
 };
 
 static word invokeDef[] = {
-    PAT_KO, '(', '(', PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z',
+    PAT_MANY|PAT_KO|PAT_LEAVE, '.', '.', PAT_KO, '(', '(', PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z',
 /*
     PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_NO_CAPTURE, '(', PAT_KO|PAT_MANY, ')', PAT_MANY|PAT_TERM, 0, 255,
     */
@@ -226,10 +226,29 @@ static status str(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)tokenNullDef, CNK_LANG_TOKEN_NULLABLE, CNK_LANG_POST_TOKEN);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, CNK_LANG_STRUCT);
+        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, CNK_LANG_TOKEN);
 
     return r;
 }
+
+static status token(MemCtx *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lineEndDef, CNK_LANG_LINE_END, -1);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)curlyCloseDef, CNK_LANG_CURLY_CLOSE, CNK_LANG_VALUE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)tokenDef, CNK_LANG_TOKEN, CNK_LANG_POST_TOKEN);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)tokenNullDef, CNK_LANG_TOKEN_NULLABLE, CNK_LANG_POST_TOKEN);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, CNK_LANG_TOKEN);
+
+    return r;
+}
+
 
 static status post(MemCtx *m, Roebling *rbl){
     status r = READY;
@@ -237,6 +256,8 @@ static status post(MemCtx *m, Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)assignDef, CNK_LANG_ASSIGN, CNK_LANG_VALUE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)curlyCloseDef, CNK_LANG_CURLY_CLOSE, CNK_LANG_VALUE);
 
     return r;
 }
@@ -256,7 +277,7 @@ static status value(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)invokeDef, CNK_LANG_INVOKE, CNK_LANG_ARG_LIST);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, -1);
+        (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, CNK_LANG_TOKEN);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)rblDef, CNK_LANG_ROEBLING, -1);
 
@@ -344,7 +365,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         }
     }
 
-    if(captureKey == CNK_LANG_INVOKE || captureKey == CNK_LANG_TOKEN_NULLABLE || captureKey == CNK_LANG_TOKEN || captureKey == CNK_LANG_VALUE){
+    if(captureKey == CNK_LANG_INVOKE || captureKey == CNK_LANG_TOKEN_NULLABLE || captureKey == CNK_LANG_TOKEN || captureKey == CNK_LANG_VALUE || captureKey == CNK_LANG_TOKEN_DOT){
         if(ctx->item->value == NULL){
             ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
         }
@@ -367,6 +388,8 @@ FmtCtx *CnkLangCtx_Make(MemCtx *m){
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)start));
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_STRUCT));
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)str));
+    Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_TOKEN));
+    Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)token));
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_VALUE));
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)value));
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)lineEnd));

@@ -1,5 +1,4 @@
-Require { Caneka }
-Package { Formats }
+Package { Caneka.Formats }
 
 Type Cash {
 

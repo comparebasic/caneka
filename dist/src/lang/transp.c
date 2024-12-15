@@ -122,6 +122,14 @@ void Transp_PrintFmtTree(Transp *p, FmtCtx *fmt, FmtItem *item, int indent){
                         printf("  ");
                     }
                     printf("Found: %s\n", fmt->rangeToChars(it.idx));
+                    if(it.idx == CNK_LANG_CURLY_OPEN){
+                        Debug_Print((void *)CnkLang_requireFromSpan(fmt->m, (Span *)item->value), 
+                        0,
+                        "Header: ",
+                        COLOR_PURPLE,
+                        TRUE
+                        );
+                    }
                     Transp_PrintFmtTree(p, fmt, item, indent+1);
                 }else{
                     int i = indent;

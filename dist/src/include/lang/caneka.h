@@ -32,3 +32,5 @@ enum cnk_lang_range {
 };
 
 FmtCtx *CnkLangCtx_Make(MemCtx *m); /* Formatter < MemHandle */
+/* utils */
+String *CnkLang_requireFromSpan(MemCtx *m, Span *p);

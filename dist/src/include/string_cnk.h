@@ -68,6 +68,7 @@ status String_AddI64(MemCtx *m, String *s, i64 i);
 status String_Reset(String *s);
 String *String_FromInt(MemCtx *m, int i);
 String *String_FromI64(MemCtx *m, i64 i);
+status String_MakeLower(String *s);
 
 /* equals */
 boolean String_Equals(String *a, String *b);

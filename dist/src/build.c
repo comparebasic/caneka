@@ -62,7 +62,7 @@ static BuildSubdir formatsobj = {"formats", {
 static BuildSubdir langobj = {"lang", {
     "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
     "fmt_ctx.c", "fmt_item.c", "fmt_html.c","fmt_def.c", "transp.c",
-    "caneka_parser.c",
+    "caneka_parser.c", "caneka_utils.c",
     NULL
 }};
 
