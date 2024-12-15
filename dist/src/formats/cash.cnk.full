@@ -1,8 +1,3 @@
-Require Caneka
-Package Formats 
-
-Type Cash {
-
 struct {
     m = Mem()
     get = Getter

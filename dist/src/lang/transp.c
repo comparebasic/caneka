@@ -74,6 +74,8 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
 
 static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *source){
     Transp *p = asIfc(source, TYPE_TRANSP);
+    p->dir = dir;
+    p->file = file;
 
     p->current.source = String_Init(m, STRING_EXTEND);
     String_Add(m, p->current.source, dir);
@@ -152,6 +154,7 @@ void Transp_PrintTree(Transp *p){
         Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL){
             FmtCtx *fmt = (FmtCtx *)h->value;
+            printf("\x1b[%dmExporting package:%s module:%s\x1b[0m\n", COLOR_PURPLE, p->dir->bytes, p->file->bytes);
             Transp_PrintFmtTree(p, fmt, fmt->root, 0);
         }
     }
