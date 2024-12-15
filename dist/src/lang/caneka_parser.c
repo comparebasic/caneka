@@ -34,8 +34,8 @@ static char * cnkRangeToChars(word range){
         return "CNK_LANG_TOKEN_DOT";
     }else if(range == CNK_LANG_POST_TOKEN){
         return "CNK_LANG_POST_TOKEN";
-    }else if(range == CNK_LANG_ASSIGN){
-        return "CNK_LANG_ASSIGN";
+    }else if(range == CNK_LANG_OP){
+        return "CNK_LANG_OP";
     }else if(range == CNK_LANG_VALUE){
         return "CNK_LANG_VALUE";
     }else if(range == CNK_LANG_LINE_END){
@@ -179,10 +179,26 @@ static word lineDef[] = {
     PAT_END, 0, 0
 };
 
-static word assignDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
-    PAT_TERM, '=', '=', 
-    PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
+static word opDef[] = {
+    PAT_MANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
+    PAT_MANY, '=', '=', 
+    PAT_MANY, '<', '<', 
+    PAT_MANY, '>', '>', 
+    PAT_MANY, 'i', 'i', 
+    PAT_MANY, 's', 's', 
+    PAT_MANY, 'e', 'e', 
+    PAT_MANY, 'q', 'q', 
+    PAT_MANY, 'c', 'c', 
+    PAT_MANY, 'm', 'm', 
+    PAT_MANY, 'p', 'p', 
+    PAT_MANY, '!', '!', 
+    PAT_MANY, '&', '&', 
+    PAT_MANY, '~', '~', 
+    PAT_MANY, '+', '+', 
+    PAT_MANY, '-', '-', 
+    PAT_MANY, '*', '*', 
+    PAT_MANY, '/', '/', 
+    PAT_MANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
     PAT_END, 0, 0
 };
 
@@ -255,7 +271,7 @@ static status post(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)assignDef, CNK_LANG_ASSIGN, CNK_LANG_VALUE);
+        (PatCharDef*)opDef, CNK_LANG_OP, CNK_LANG_VALUE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)curlyCloseDef, CNK_LANG_CURLY_CLOSE, CNK_LANG_VALUE);
 
@@ -339,6 +355,10 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
             Roebling_JumpTo(ctx->rbl, CNK_LANG_START);
         }
     }
+    if(captureKey == CNK_LANG_OP){
+        FmtDef *def = TableChain_Get(fmt->byAlias, s);
+        /* set operation by alias */
+    }
     if(captureKey == CNK_LANG_INVOKE){
         pushItem(ctx, CNK_LANG_ARG_LIST);
     }
@@ -377,11 +397,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
-FmtCtx *CnkLangCtx_Make(MemCtx *m){
-    FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
-    ctx->type.of = TYPE_LANG_CNK;
-    ctx->m = m;
-
+Roebling *CnkLangCtx_RblMake(MemCtx *m){
 
     Span *parsers = Span_Make(m, TYPE_SPAN);
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_START));
@@ -409,16 +425,11 @@ FmtCtx *CnkLangCtx_Make(MemCtx *m){
 
     String *s = String_Init(m, STRING_EXTEND);
 
-    ctx->rbl = Roebling_Make(m, TYPE_ROEBLING,
+    return Roebling_Make(m, TYPE_ROEBLING,
         parsers,
         desc,
         s,
         Capture,
         (Abstract *)ctx
     ); 
-    ctx->rangeToChars = cnkRangeToChars;
-    ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
-    ctx->root->spaceIdx = CNK_LANG_START;
-
-    return ctx;
 }

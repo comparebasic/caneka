@@ -16,7 +16,19 @@ enum cnk_lang_range {
     CNK_LANG_TOKEN_DOT,
     CNK_LANG_TOKEN_NULLABLE,
     CNK_LANG_POST_TOKEN,
+    _CNK_LANG_OP_START,
+    CNK_LANG_OP,
     CNK_LANG_ASSIGN,
+    CNK_LANG_ADD_AND,
+    CNK_LANG_GT,
+    CNK_LANG_LT,
+    CNK_LANG_IS,
+    CNK_LANG_NOT,
+    CNK_LANG_EQ,
+    CNK_LANG_CMP,
+    CNK_LANG_FLAG_ADD,
+    CNK_LANG_FLAG_SUB,
+    _CNK_LANG_OP_END,
     CNK_LANG_VALUE,
     CNK_LANG_INVOKE,
     _CNK_LANG_CLOSER,
@@ -28,9 +40,16 @@ enum cnk_lang_range {
     _CNK_LANG_RETURNS_END,
     _CNK_LANG_OBJ,
     CNK_LANG_ROEBLING,
+    CNK_LANG_KEYS,
+    CNK_LANG_IDXS,
+    CNK_LANG_SEQ,
     _CNK_LANG_OBJ_END,
 };
 
+Roebling *CnkLangCtx_RblMake(MemCtx *m);
 FmtCtx *CnkLangCtx_Make(MemCtx *m); /* Formatter < MemHandle */
 /* utils */
 String *CnkLang_requireFromSpan(MemCtx *m, Span *p);
+
+/* format to functs */
+String *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);

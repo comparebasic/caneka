@@ -257,6 +257,7 @@ status Roebling_ResetPatterns(Roebling *rbl){
     Span_ReInit(rbl->matches);
     rbl->jump = -1;
     rbl->jumpMiss = -1;
+    rbl->guard.count = 0;
     return READY;
 }
 
