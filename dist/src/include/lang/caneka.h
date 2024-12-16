@@ -46,10 +46,11 @@ enum cnk_lang_range {
     _CNK_LANG_OBJ_END,
 };
 
-Roebling *CnkLangCtx_RblMake(MemCtx *m);
+Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx);
 FmtCtx *CnkLangCtx_Make(MemCtx *m); /* Formatter < MemHandle */
 /* utils */
 String *CnkLang_requireFromSpan(MemCtx *m, Span *p);
 
 /* format to functs */
-String *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
+Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
+char * CnkLang_RangeToChars(word range);

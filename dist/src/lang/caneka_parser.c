@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static char * cnkRangeToChars(word range){
+char * CnkLang_RangeToChars(word range){
     if(range == 0){
         return "ZERO";
     }else if(range == CNK_LANG_START){
@@ -330,7 +330,7 @@ static void pushItem(FmtCtx *ctx, word captureKey){
     item->spaceIdx = captureKey;
     item->parent = ctx->item;
 
-    printf("setting iten as %s in %s\n", cnkRangeToChars(captureKey), cnkRangeToChars(ctx->item->spaceIdx)); 
+    printf("setting iten as %s in %s\n", CnkLang_RangeToChars(captureKey), CnkLang_RangeToChars(ctx->item->spaceIdx)); 
     if(ctx->item->value == NULL){
         ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
     }
@@ -345,7 +345,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     if(DEBUG_LANG_CNK){
         printf("\x1b[%dmCnk Capture %s: %s ", DEBUG_LANG_CNK, 
-            cnkRangeToChars(ctx->item->spaceIdx), cnkRangeToChars(captureKey));
+            CnkLang_RangeToChars(ctx->item->spaceIdx), CnkLang_RangeToChars(captureKey));
         Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
     }
@@ -356,7 +356,8 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         }
     }
     if(captureKey == CNK_LANG_OP){
-        FmtDef *def = TableChain_Get(fmt->byAlias, s);
+        printf("Getting from table\n");
+        FmtDef *def = TableChain_Get(ctx->byAlias, s);
         /* set operation by alias */
     }
     if(captureKey == CNK_LANG_INVOKE){
@@ -397,7 +398,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
-Roebling *CnkLangCtx_RblMake(MemCtx *m){
+Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx){
 
     Span *parsers = Span_Make(m, TYPE_SPAN);
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_START));

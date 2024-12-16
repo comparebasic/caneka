@@ -33,6 +33,7 @@ typedef struct formatter {
     TableChain *byName;
     TableChain *byAlias;
     RangeToChars rangeToChars;
+    OutFunc out;
 } FmtCtx;
 
 FmtItem *FmtItem_Make(MemCtx *m, FmtCtx *fctx);

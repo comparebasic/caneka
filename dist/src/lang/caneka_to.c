@@ -1,9 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-String *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
     Span *p = (Span *)fmt->item->value;
-    if(p == NULL || !Ifc_Match(p, TYPE_SPAN)){
+    if(p == NULL || !Ifc_Match(p->type.of, TYPE_SPAN)){
         return NULL;
     }
     String *out = String_Init(m, STRING_EXTEND);
@@ -23,5 +23,5 @@ String *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abst
         }
     }
     String_MakeLower(out);
-    return out;
+    return (Abstract *)out;
 }

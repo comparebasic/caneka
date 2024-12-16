@@ -9,7 +9,9 @@ status Fmt_Add(MemCtx *m, FmtCtx *o, Lookup *fmtDefs){
     while((Iter_Next(it) & END) == 0){
         FmtDef *def = (FmtDef *)Iter_Get(it);
         if(def != NULL){
-            Table_Set(byName, (Abstract *)def->name, (Abstract *)def);
+            if(def->name != NULL){
+                Table_Set(byName, (Abstract *)def->name, (Abstract *)def);
+            }
             if(def->alias != NULL){
                 Table_Set(byAlias, (Abstract *)def->alias, (Abstract *)def);
             }
@@ -38,5 +40,6 @@ FmtCtx *FmtCtx_Make(MemCtx *m){
     FmtCtx *fmt = (FmtCtx *)MemCtx_Alloc(m, sizeof(FmtCtx));
     fmt->type.of = TYPE_FMT_CTX;
     fmt->m = m;
+    fmt->out = ToStdOut;
     return fmt;
 }

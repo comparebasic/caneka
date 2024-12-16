@@ -241,6 +241,9 @@ typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);
 cls Ifc_Get(cls inst);
+status Caneka_Init(struct mem_ctx *m);
+boolean Caneka_Truthy(Abstract *a);
+status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 
 #include "abstract.h"
 #include "time_cnk.h"
@@ -317,5 +320,3 @@ cls Ifc_Get(cls inst);
 #include "lang/fmt_html.h"
 #include "lang/caneka.h"
 
-status Caneka_Init(MemCtx *m);
-boolean Caneka_Truthy(Abstract *a);

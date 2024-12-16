@@ -113,7 +113,6 @@ boolean Hashed_LocalEquals(MemCtx *m, Hashed *a, Hashed *b){
     if(a->id != b->id){
         return FALSE;
     }
-    printf("LocalEquals %d\n", (m->type.state & LOCAL_PTR) != 0);
     return Abs_Eq(MemLocal_Trans(m, a->item), (void *)MemLocal_Trans(m, b->item));
 }
 

@@ -4,12 +4,6 @@
 static char *srcDir = "src";
 static char *distDir = "dist";
 
-static status Transp_writeOut(MemCtx *m, String *s, Abstract *_tp){
-    Transp *tp = asIfc(_tp, TYPE_TRANSP);
-    Spool_Add(m, s, (Abstract *)&tp->current.destFile);
-    return tp->type.state;
-}
-
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
     FmtCtx *fmt = asIfc(_fmt, TYPE_FMT_CTX);
     Roebling_Add(fmt->rbl, s);
@@ -124,14 +118,6 @@ void Transp_PrintFmtTree(Transp *p, FmtCtx *fmt, FmtItem *item, int indent){
                         printf("  ");
                     }
                     printf("Found: %s\n", fmt->rangeToChars(it.idx));
-                    if(it.idx == CNK_LANG_CURLY_OPEN){
-                        Debug_Print((void *)CnkLang_requireFromSpan(fmt->m, (Span *)item->value), 
-                        0,
-                        "Header: ",
-                        COLOR_PURPLE,
-                        TRUE
-                        );
-                    }
                     Transp_PrintFmtTree(p, fmt, item, indent+1);
                 }else{
                     int i = indent;
@@ -145,7 +131,6 @@ void Transp_PrintFmtTree(Transp *p, FmtCtx *fmt, FmtItem *item, int indent){
         }
     }
 }
-
 
 void Transp_PrintTree(Transp *p){
     Iter it;

@@ -294,6 +294,14 @@ cls Ifc_Get(cls inst){
     return inst;
 }
 
+status ToStdOut(MemCtx *m, String *s, Abstract *source){
+    while(s != NULL){
+        puts((char *)s->bytes);
+        s = String_Next(s);
+    }
+    return SUCCESS;
+}
+
 boolean Ifc_Match(cls inst, cls ifc){
     if(inst == ifc){
         return TRUE;
