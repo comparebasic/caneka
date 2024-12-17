@@ -742,6 +742,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_ENC_PAIR, (void *)EncPair_Print);
     r |= Lookup_Add(m, lk, TYPE_GUARD, (void *)Guard_Print);
     r |= Lookup_Add(m, lk, TYPE_DEBUG_STACK_ENTRY, (void *)DebugStackEntry_Print);
+    r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
     
     return r;
 }

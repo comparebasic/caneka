@@ -1,5 +1,10 @@
 typedef Abstract *(*FmtTrans)(MemCtx *m, struct format_def *def, struct formatter *fmt, String *key, Abstract *a);
 
+enum formatter_flags {
+    FMT_DEF_INDENT = 1 << 8,
+    FMT_DEF_OUTDENT = 1 << 9,
+};
+
 typedef struct format_def {
     Type type;
     int id;
