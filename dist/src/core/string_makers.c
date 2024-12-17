@@ -307,6 +307,25 @@ String *String_FromB64(MemCtx *m, String *bs){
     return s;
 }
 
+status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean extended){
+    status r = READY;
+    for(int i = length-1; i >= 0;i--){
+        byte b = bt[i];
+        if(extended){
+            String_AddInt(m, s, (int)b); 
+            String_AddBytes(m, s, bytes("="), 1);
+        }
+        for(int j = 7; j >= 0;j--){
+            r |= SUCCESS;
+            String_AddInt(m, s, (b & (1 << j)) ? '1' : '0'); 
+        }
+        if(extended){
+            String_AddBytes(m, s, bytes(" "), 1);
+        }
+    }
+    return r;
+}
+
 
 status String_ToSlab(String *a, void *sl, size_t sz) {
     if(String_Length(a) > sz){

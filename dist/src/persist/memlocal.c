@@ -11,7 +11,7 @@ status MemLocal_GetLocal(MemCtx *m, void *addr, LocalPtr *lptr){
     }else{
         Fatal("Slab not found, addr outside this memory context\n", TYPE_MEMLOCAL);
     }
-    return MISS;
+    return NOOP;
 }
 
 static boolean canBeLocal(cls inst){

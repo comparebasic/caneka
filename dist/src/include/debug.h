@@ -22,6 +22,7 @@ extern Chain *DebugPrintChain;
 status Debug_Init(MemCtx *m);
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
 void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
+void Flag16_ToString(word flag, int color, boolean extended);
 void indent_Print(int indent);
 void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched);
 
@@ -69,6 +70,7 @@ extern int DEBUG_SUBPROCESS;
 
 extern boolean SHOW_SERVE_TESTS;
 
+char *State_ToChars(status state);
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanDef_Print(SpanDef *def);

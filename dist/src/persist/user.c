@@ -27,7 +27,7 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
 
     IoCtx ctx;
     IoCtx_Init(m, &ctx, id, NULL, userCtx);
-    if((IoCtx_Load(m, &ctx) & MISS) == 0 && ctx.files != NULL){
+    if((IoCtx_Load(m, &ctx) & NOOP) == 0 && ctx.files != NULL){
         if(DEBUG_USER){
             Debug_Print((void *)id, 0, "Found: ", DEBUG_USER, TRUE);
             printf("\n");

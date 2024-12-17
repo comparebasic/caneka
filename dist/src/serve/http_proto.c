@@ -5,7 +5,7 @@ static char *toLog(Req *req){
     HttpProto *proto = (HttpProto *)req->proto;
     String *s = String_Init(req->m, STRING_EXTEND);
     String_AddBytes(req->m, s, bytes("HttpProto<"), strlen("HttpProto<"));
-    char *state = State_ToString(req->type.state);
+    char *state = State_ToChars(req->type.state);
     String_AddBytes(req->m, s, bytes(state), strlen(state));
     String_AddBytes(req->m, s, bytes(" "), 1);
     char *method = HttpProto_MethodToChars(proto->method);

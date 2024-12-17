@@ -64,7 +64,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
-        if(HasFlag(p->def->flags, INLINE)){
+        if(HasFlag(p->def->flags, SPAN_INLINE)){
             size_t sz = (size_t)p->def->itemSize;
             if(!HasFlag(p->def->flags, SPAN_RAW) && t != NULL && t->type.of == TYPE_RESERVE){
                 sz = sizeof(Reserve);
@@ -131,7 +131,7 @@ void *Span_GetFromQ(SpanQuery *sq){
 
     SpanState *st = sq->stack;
     void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
-    if(HasFlag(def->flags, INLINE)){
+    if(HasFlag(def->flags, SPAN_INLINE)){
         if(!HasFlag(def->flags, SPAN_RAW) && (*(util *)ptr) == 0){
             sq->value = NULL;
         }else{
@@ -278,7 +278,7 @@ status Span_Extend(SpanQuery *sq){
         st = SpanQuery_SetStack(sq, dims, 0, 0);
         if(st->slab == NULL){
             if(sq->op != SPAN_OP_SET && sq->op != SPAN_OP_RESERVE){
-                return MISS;
+                return NOOP;
             }
             void *new_sl = NULL;
             if(dims > 1){
@@ -352,7 +352,7 @@ status Span_ReInit(Span *p){
 
 Span *Span_Clone(MemCtx *m, Span *op){
     Span *p = Span_Make(m, op->type.of);
-    if((p->def->flags & INLINE) != 0){
+    if((p->def->flags & SPAN_INLINE) != 0){
         p->def = SpanDef_Clone(m, SpanDef_FromCls(op->type.of));
         p->type.of = p->def->typeOf;
     }
@@ -402,7 +402,7 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     }
 
     p->def->slotSize = pwrSlot;
-    p->def->flags |= INLINE;
+    p->def->flags |= SPAN_INLINE;
     p->root = Span_valueSlab_Make(m, p->def);
     return p;
 }

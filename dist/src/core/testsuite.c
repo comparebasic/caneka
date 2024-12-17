@@ -99,5 +99,5 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
         printf("</div>\n");
     }
-    return !fail ? SUCCESS : MISS;
+    return !fail ? SUCCESS : ERROR;
 }

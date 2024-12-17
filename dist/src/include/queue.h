@@ -1,6 +1,11 @@
 typedef quad (*GetDelayFunc)(status r);
 typedef int (*SkipSlabFunc)(Abstract *source, int idx);
 
+enum queue_flags {
+   QUEUE_INCOMING = 1 << 9, 
+   QUEUE_RESPONDING = 1 << 10, 
+};
+
 typedef struct queue_idx {
     void *item; /* slab or value */
     word flags; /* active, full, etc. */

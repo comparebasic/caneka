@@ -186,7 +186,7 @@ status Serve_ServeRound(Serve *sctx){
                 req->type.state |= hstate|END;
             }else{
                 if(DEBUG_REQ){
-                    printf("\x1b[%dm   calling handler %s\x1b[0m\n", DEBUG_REQ, State_ToString(h->type.state));
+                    printf("\x1b[%dm   calling handler %s\x1b[0m\n", DEBUG_REQ, State_ToChars(h->type.state));
                 }
                 h->func(h, req, sctx);
             }

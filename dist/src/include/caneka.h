@@ -204,18 +204,18 @@ enum status_types {
     NOOP = 1 << 2,
     DEBUG = 1 << 3,
     HASHED = 1 << 4,
-    MISS = 1 << 5,
+    LOCAL_PTR = 1 << 5,
     END = 1 << 6,
-    TRACKED = 1 << 7,
+    PROCESSING = 1 << 7,
     /* class speciric */
-    LOCAL_PTR = 1 << 8,
-    INVERTED = 1 << 9,
-    INLINE = 1 << 10,
-    BREAK = 1 << 11,
-    NEXT = 1 << 12,
-    INCOMING = 1 << 13,
-    PROCESSING = 1 << 14,
-    RESPONDING = 1 << 15,
+    CLS_FLAG_ALPHA = 1 << 8,
+    CLS_FLAG_BRAVO = 1 << 9,
+    CLS_FLAG_CHARLIE = 1 << 10,
+    CLS_FLAG_DELTA = 1 << 11,
+    CLS_FLAG_ECHO = 1 << 12,
+    CLS_FLAG_FOXTROT = 1 << 13,
+    CLS_FLAG_GOLF = 1 << 14,
+    CLS_FLAG_HOTEL = 1 << 15,
 };
 
 
@@ -227,12 +227,12 @@ enum positions {
     POSITION_END,
 };
 
-char *State_ToString(status state);
+struct string *State_ToString(struct mem_ctx *m, status state);
 char *Class_ToString(cls type);
 
 #define COMPLETE SUCCESS
 #define TEST_OK READY
-#define ELASTIC INLINE
+#define ELASTIC SPAN_INLINE
 #define TERM_FOUND TRACKED
 #define NO_COLOR NOOP 
 #define MATCH_GOTO NEXT 
@@ -293,6 +293,7 @@ status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 #include "fmt_ctx.h"
 #include "oset_item.h"
 #include "oset.h"
+#include "persist.h"
 #include "access.h"
 #include "subprocess.h"
 #include "dir.h"

@@ -11,7 +11,7 @@ typedef struct cnf  {
 } Cnf;
 
 word rollupToken[] = {CNK_LANG_TOKEN_DOT,
-    CNK_LANG_TOKEN_NULLABLE, 0};
+    CNK_LANG_TOKEN_NULLABLE, CNK_LANG_INVOKE, 0};
 word rollupOp[] = {CNK_LANG_ASSIGN,CNK_LANG_ADD_AND,CNK_LANG_GT,CNK_LANG_LT,
     CNK_LANG_IS,CNK_LANG_NOT,CNK_LANG_EQ,CNK_LANG_CMP,CNK_LANG_FLAG_ADD,
     CNK_LANG_FLAG_SUB,0};
@@ -152,26 +152,108 @@ static status addDefs(FmtCtx *ctx){
             def->parent = Lookup_Get(lk, cnf->parentIdx);
         }
 
-        r |= Lookup_Add(ctx->m, lk, cnf->id, def);
         if(cnf->rollups != 0){
+            def->type.state |= FMT_FL_TAXONAMY;
             word *rl = cnf->rollups;
             while(*rl != 0){
                 r |= Lookup_Add(ctx->m, lk, *rl, def);
                 rl++;
             }
         }
+        r |= Lookup_Add(ctx->m, lk, cnf->id, def);
         cnf++;
     }
 
     return Fmt_Add(ctx->m, ctx, lk);
 }
 
+static void pushItem(FmtCtx *ctx, word captureKey){
+    FmtItem *item =  FmtItem_Make(ctx->m, ctx);
+    item->spaceIdx = captureKey;
+    item->parent = ctx->item;
+
+    printf("setting iten as %s in %s\n", CnkLang_RangeToChars(captureKey), CnkLang_RangeToChars(ctx->item->spaceIdx)); 
+    if(ctx->item->value == NULL){
+        ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
+    }
+    Span_Set((Span *)ctx->item->value, captureKey, (Abstract *)item);
+
+    ctx->item = item;
+}
+
+static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
+    status r = READY;
+    FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
+
+    FmtDef *def = Chain_Get(ctx->ById, captureKey);
+    if(def == NULL || (def->tpye.state & FMT_FL_TAXONAMY) != 0){
+        TableChain_Get(ctx->byAlias, s);
+    }
+
+    if(DEBUG_LANG_CNK){
+        printf("\x1b[%dmCnk Capture %s: %s ", DEBUG_LANG_CNK, CnkLang_RangeToChars(captureKey));
+        Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
+        Debug_Print((void *)def, 0, "FmtDef: ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
+    }
+
+    /*
+    if(captureKey == CNK_LANG_TOKEN){
+        if(ctx->item->spaceIdx == CNK_LANG_PACKAGE || ctx->item->spaceIdx == CNK_LANG_REQUIRE){
+            ctx->item->spaceIdx = 0;
+            Roebling_JumpTo(ctx->rbl, CNK_LANG_START);
+        }
+    }
+    if(captureKey == CNK_LANG_OP){
+        printf("Getting from table\n");
+        FmtDef *def = TableChain_Get(ctx->byAlias, s);
+        / * set operation by alias * /
+    }
+    if(captureKey == CNK_LANG_INVOKE){
+        pushItem(ctx, CNK_LANG_ARG_LIST);
+    }
+    if(captureKey > _CNK_LANG_MAJOR && captureKey < _CNK_LANG_MAJOR_END){
+        pushItem(ctx, captureKey);
+    }
+    if(captureKey > _CNK_LANG_CLOSER && captureKey < _CNK_LANG_CLOSER_END){
+        if(ctx->item->parent != NULL){
+            ctx->item = ctx->item->parent;
+            if(ctx->item->spaceIdx > 0){
+                Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
+            }
+        }
+        if(captureKey == CNK_LANG_CURLY_CLOSE){
+            / * closes twice intentionally * /
+            if(ctx->item->parent != NULL){
+                ctx->item = ctx->item->parent;
+            }
+        }
+    }
+    if(captureKey > _CNK_LANG_RETURNS && captureKey < _CNK_LANG_RETURNS_END){
+        if(ctx->item->spaceIdx > 0){
+            Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
+        }
+    }
+
+    if(captureKey == CNK_LANG_INVOKE || captureKey == CNK_LANG_TOKEN_NULLABLE || captureKey == CNK_LANG_TOKEN || captureKey == CNK_LANG_VALUE || captureKey == CNK_LANG_TOKEN_DOT){
+        if(ctx->item->value == NULL){
+            ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
+        }
+        if(ctx->item->value->type.of == TYPE_SPAN){
+            Span_Add((Span *)ctx->item->value, (Abstract *)s);
+        }
+    }
+    */
+
+    return SUCCESS;
+}
 
 FmtCtx *CnkLangCtx_Make(MemCtx *m){
     FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
     ctx->type.of = TYPE_LANG_CNK;
     ctx->m = m;
-    ctx->rbl = CnkLangCtx_RblMake(m, ctx);
+    ctx->rbl = CnkLangCtx_RblMake(m, ctx, Capture);
 
     ctx->rangeToChars = CnkLang_RangeToChars;
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);

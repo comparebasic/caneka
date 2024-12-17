@@ -6,7 +6,7 @@ static quad exampleDelayTicks(status r){
         return 0;
     }else if(r == NOOP){
         return 1;
-    }else if(r == INCOMING || r == RESPONDING){
+    }else if(r == QUEUE_INCOMING || r == QUEUE_RESPONDING){
         return 2;
     }
     return 0;

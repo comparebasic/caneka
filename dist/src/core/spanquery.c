@@ -70,10 +70,10 @@ status Span_Query(SpanQuery *sr){
     MemCtx *m = sr->span->m;
     if(sr->dimsNeeded > sr->dims){
         if(sr->op == SPAN_OP_GET){
-            return MISS;
+            return NOOP;
         }
         if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
-            return MISS;
+            return NOOP;
         }
         Span_GrowToNeeded(sr);
     }

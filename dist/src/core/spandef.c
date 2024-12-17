@@ -29,7 +29,7 @@ status SpanDef_Init(){
     tableDef.idxStride = SPAN_DEFAULT_STRIDE;
     tableDef.slotSize = sizeof(Hashed)/sizeof(void*);
     tableDef.itemSize = sizeof(Hashed);
-    tableDef.flags = INLINE;
+    tableDef.flags = SPAN_INLINE;
     tableDef.dim_lookups[0] = 15;
     tableDef.dim_lookups[1] = 255;
     tableDef.dim_lookups[2] = 4095;
@@ -47,7 +47,7 @@ status SpanDef_Init(){
     spanPollMapDef.idxStride = SPAN_DEFAULT_STRIDE;
     spanPollMapDef.slotSize = sizeof(struct pollfd)/sizeof(void*);
     spanPollMapDef.itemSize = sizeof(struct pollfd);
-    spanPollMapDef.flags = INLINE;
+    spanPollMapDef.flags = SPAN_INLINE;
 
     /* span16x32m */
     memset(&span16x32mDef, 0, sizeof(SpanDef));
@@ -57,7 +57,7 @@ status SpanDef_Init(){
     span16x32mDef.idxSize = sizeof(QueueIdx) / SPAN_SLOT_BYTES;
     span16x32mDef.slotSize = span16x32mDef.idxSize;
     span16x32mDef.itemSize = sizeof(QueueIdx);
-    span16x32mDef.flags = INLINE;
+    span16x32mDef.flags = SPAN_INLINE;
 
     /* span16x32m */
     memset(&spanMemSlabDef, 0, sizeof(SpanDef));
@@ -88,7 +88,7 @@ status SpanDef_Init(){
     nestedStackDef.slotSize = sizeof(NestedState)/sizeof(void *);
     nestedStackDef.itemSize = sizeof(NestedState);
     nestedStackDef.valueHdr = SPAN_DEFAULT_HDR;
-    nestedStackDef.flags = INLINE;
+    nestedStackDef.flags = SPAN_INLINE;
 
 
     /* span4x16 */

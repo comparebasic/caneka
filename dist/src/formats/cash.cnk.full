@@ -21,9 +21,9 @@ Capture (String s) {
         }
         val? {
             this.s += value
-            this & SUCCESS ~ MISS
+            this & SUCCESS ~ NOOP
         } else {
-            this & MISS ~ SUCCESS 
+            this & NOOP ~ SUCCESS 
         }
     }
 }

@@ -325,80 +325,7 @@ static status lineEnd(MemCtx *m, Roebling *rbl){
     return r;
 }
 
-static void pushItem(FmtCtx *ctx, word captureKey){
-    FmtItem *item =  FmtItem_Make(ctx->m, ctx);
-    item->spaceIdx = captureKey;
-    item->parent = ctx->item;
-
-    printf("setting iten as %s in %s\n", CnkLang_RangeToChars(captureKey), CnkLang_RangeToChars(ctx->item->spaceIdx)); 
-    if(ctx->item->value == NULL){
-        ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
-    }
-    Span_Set((Span *)ctx->item->value, captureKey, (Abstract *)item);
-
-    ctx->item = item;
-}
-
-static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
-    status r = READY;
-    FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
-
-    if(DEBUG_LANG_CNK){
-        printf("\x1b[%dmCnk Capture %s: %s ", DEBUG_LANG_CNK, 
-            CnkLang_RangeToChars(ctx->item->spaceIdx), CnkLang_RangeToChars(captureKey));
-        Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
-        printf("\n");
-    }
-    if(captureKey == CNK_LANG_TOKEN){
-        if(ctx->item->spaceIdx == CNK_LANG_PACKAGE || ctx->item->spaceIdx == CNK_LANG_REQUIRE){
-            ctx->item->spaceIdx = 0;
-            Roebling_JumpTo(ctx->rbl, CNK_LANG_START);
-        }
-    }
-    if(captureKey == CNK_LANG_OP){
-        printf("Getting from table\n");
-        FmtDef *def = TableChain_Get(ctx->byAlias, s);
-        /* set operation by alias */
-    }
-    if(captureKey == CNK_LANG_INVOKE){
-        pushItem(ctx, CNK_LANG_ARG_LIST);
-    }
-    if(captureKey > _CNK_LANG_MAJOR && captureKey < _CNK_LANG_MAJOR_END){
-        pushItem(ctx, captureKey);
-    }
-    if(captureKey > _CNK_LANG_CLOSER && captureKey < _CNK_LANG_CLOSER_END){
-        if(ctx->item->parent != NULL){
-            ctx->item = ctx->item->parent;
-            if(ctx->item->spaceIdx > 0){
-                Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
-            }
-        }
-        if(captureKey == CNK_LANG_CURLY_CLOSE){
-            /* closes twice intentionally */
-            if(ctx->item->parent != NULL){
-                ctx->item = ctx->item->parent;
-            }
-        }
-    }
-    if(captureKey > _CNK_LANG_RETURNS && captureKey < _CNK_LANG_RETURNS_END){
-        if(ctx->item->spaceIdx > 0){
-            Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
-        }
-    }
-
-    if(captureKey == CNK_LANG_INVOKE || captureKey == CNK_LANG_TOKEN_NULLABLE || captureKey == CNK_LANG_TOKEN || captureKey == CNK_LANG_VALUE || captureKey == CNK_LANG_TOKEN_DOT){
-        if(ctx->item->value == NULL){
-            ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
-        }
-        if(ctx->item->value->type.of == TYPE_SPAN){
-            Span_Add((Span *)ctx->item->value, (Abstract *)s);
-        }
-    }
-
-    return SUCCESS;
-}
-
-Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx){
+Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx, RblCaptureFunc capture){
 
     Span *parsers = Span_Make(m, TYPE_SPAN);
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_START));
@@ -430,7 +357,7 @@ Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx){
         parsers,
         desc,
         s,
-        Capture,
+        capture,
         (Abstract *)ctx
     ); 
 }

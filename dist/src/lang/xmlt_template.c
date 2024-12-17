@@ -25,7 +25,7 @@ static void setFlags(Mess *e){
             value->type.state |= FLAG_XML_HIDDEN;
         }
     }
-    e->type.state |= TRACKED;
+    e->type.state |= PERSIST_TRACKED;
 }
 
 static boolean earlyOutAtts(Mess *e, String *key, NestedD *nd){
@@ -50,7 +50,7 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
 
     Span *tbl = nd->current_tbl;
     boolean outdent = FALSE;
-    if((e->type.state & TRACKED) == 0){
+    if((e->type.state & PERSIST_TRACKED) == 0){
         setFlags(e); 
     }
 

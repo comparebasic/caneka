@@ -1,5 +1,6 @@
 enum formatter_flags {
     FMT_FL_TO_PARENT = 1 << 8,
+    FMT_FL_TAXONAMY = 1 << 9,
     FMT_FL_TO_NEXT_ID = 1 << 10,
     FMT_FL_TO_PARENT_ON_LAST = 1 << 11,
     FMT_FL_TO_NEXT_ON_LAST = 1 << 12,

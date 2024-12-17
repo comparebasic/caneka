@@ -18,12 +18,12 @@ status Match_Tests(MemCtx *gm){
         Match_Feed(&mt, s->bytes[i]);
     }
 
-    r |= Test(mt.type.state != COMPLETE, "Non match has unsuccessful state found %s", State_ToString(mt.type.state)); 
+    r |= Test(mt.type.state != COMPLETE, "Non match has unsuccessful state found %s", State_ToChars(mt.type.state)); 
     s = String_Make(m, bytes("poo"));
     for(int i = 0; i < s->length; i++){
         Match_Feed(&mt, s->bytes[i]);
     }
-    r |= Test(mt.type.state == COMPLETE, "Matching string has successful state found %s", State_ToString(mt.type.state)); 
+    r |= Test(mt.type.state == COMPLETE, "Matching string has successful state found %s", State_ToChars(mt.type.state)); 
 
 
     /* test pat match */
@@ -58,7 +58,7 @@ status MatchElastic_Tests(MemCtx *gm){
     int i = 0;
     Match_Feed(&mt, s->bytes[i]);
     i++;
-    r |= Test(HasFlag(mt.type.state, PROCESSING), "Has PROCESSING status %s", State_ToString(mt.type.state));
+    r |= Test(HasFlag(mt.type.state, PROCESSING), "Has PROCESSING status %s", State_ToChars(mt.type.state));
     r |= Test(mt.def.pat.curDef == (mt.def.pat.startDef+1) , "On second pos, position is %d", (util)(mt.def.pat.curDef - mt.def.pat.startDef) / sizeof(PatCharDef));
 
     int count = 0;
@@ -74,7 +74,7 @@ status MatchElastic_Tests(MemCtx *gm){
 
     r |= Test(i ==  4, "Tag -Stopped on the fourth character");
     r |= Test(count == 3, "Tag -Found three chars");
-    r |= Test(HasFlag(mt.type.state, SUCCESS), "Tag- Found SUCCESS have %s", State_ToString(mt.type.state));
+    r |= Test(HasFlag(mt.type.state, SUCCESS), "Tag- Found SUCCESS have %s", State_ToChars(mt.type.state));
     PatCharDef *def = mt.def.pat.curDef;
     r |= Test((def->flags == PAT_END), "Tag -At end");
 

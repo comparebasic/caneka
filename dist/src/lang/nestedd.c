@@ -60,7 +60,7 @@ status NestedD_With(MemCtx *m, NestedD *nd, Abstract *key){
         nest(nd, (Span *)t, NESTED_WITH);
         return SUCCESS;
     }
-    return MISS;
+    return NOOP;
 }
 
 status NestedD_For(NestedD *nd, Abstract *key){
@@ -69,7 +69,7 @@ status NestedD_For(NestedD *nd, Abstract *key){
         nest(nd, (Span *)t, NESTED_FOR);
         return SUCCESS;
     }
-    return MISS;
+    return NOOP;
 }
 
 status NestedD_Outdent(NestedD *nd){

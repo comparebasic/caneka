@@ -9,7 +9,7 @@ static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean 
 
 static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Req *req = (Req *) as(a, TYPE_REQ);
-    printf("%s\x1b[1;%dm%p Req(%d)<%s ", msg, color, req, req->fd, State_ToString(req->type.state));
+    printf("%s\x1b[1;%dm%p Req(%d)<%s ", msg, color, req, req->fd, State_ToChars(req->type.state));
     Debug_Print((void *)req->proto, 0, "", color, extended);
     if(req->in.rbl != NULL && extended){
         printf(" ");
@@ -20,7 +20,7 @@ static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean exten
 
 static void Serve_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Serve *sctx = (Serve *) as(a, TYPE_SERVECTX);
-    printf("\x1b[%dm%sServe<%s", color, msg, State_ToString(sctx->type.state));
+    printf("\x1b[%dm%sServe<%s", color, msg, State_ToChars(sctx->type.state));
     if(extended){
         Debug_Print((void *)&sctx->queue, 0, " next=", color, extended);
     }else{
@@ -32,11 +32,11 @@ static void Serve_Print(Abstract *a, cls type, char *msg, int color, boolean ext
 static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     XmlCtx *ctx = (XmlCtx *)as(a, TYPE_XMLCTX);
     if(extended){
-        printf("\x1b[%dm%sXmlCtx<%s nodes=", color, msg, State_ToString(ctx->type.state));
+        printf("\x1b[%dm%sXmlCtx<%s nodes=", color, msg, State_ToChars(ctx->type.state));
         Debug_Print((void *)ctx->root, 0, "", color, FALSE);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[%dm%sXmlCtx<%s>\x1b[0m", color, msg, State_ToString(ctx->type.state));
+        printf("\x1b[%dm%sXmlCtx<%s>\x1b[0m", color, msg, State_ToChars(ctx->type.state));
     }
 }
 

@@ -3,6 +3,11 @@
 typedef status (*RblFunc)(MemCtx *m, struct roebling *rbl);
 typedef status (*RblCaptureFunc)(word captureKey, int matchIdx, String *s, Abstract *source);
 
+enum roebling_flags {
+    ROEBLING_NEXT = 1 << 9,
+    ROEBLING_BREAK = 1 << 10,
+};
+
 enum mark_reserved {
     LOOP_MARK = 0,
     _FIRST_MARK,

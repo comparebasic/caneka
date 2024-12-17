@@ -52,6 +52,10 @@ static Abstract *Print(MemCtx *m, Abstract *a){
     return NULL;
 }
 
+char *State_ToChars(status state){
+    return String_ToChars(DebugM, State_ToString(DebugM, state));
+}
+
 char *QueueFlags_ToChars(word flags){
     String *s = String_Init(DebugM, 64);
     if((flags & SLAB_ACTIVE) != 0){
@@ -74,7 +78,7 @@ void spanState_Print(SpanState *st, int color){
 
 void NestedD_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     NestedD *nd = (NestedD *)as(a, TYPE_NESTEDD);
-    printf("\x1b[%dmND<%s: ", color, State_ToString(nd->type.state));
+    printf("\x1b[%dmND<%s: ", color, State_ToChars(nd->type.state));
     Debug_Print((void *)nd->current_tbl, 0, "", color, extended);
     Iter it;
     Iter_InitReverse(&it, nd->stack);
@@ -90,10 +94,20 @@ void NestedD_Print(Abstract *a, cls type, char *msg, int color, boolean extended
     printf("\x1b[%dm)>\x1b[0m", color);
 }
 
+void FmtDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    FmtDef *def = (FmtDef *)as(a, TYPE_FMT_DEF);
+    printf("\x1b[%dm%sFmtDef<\x1b[1;%dm%s\x1b[%dm/%s %d %s>\x1b[0m", color, msg,
+        color,
+        String_ToChars(DebugM, def->name),
+        color,
+        String_ToChars(DebugM, def->alias),
+        def->id,
+        State_ToChars(def->type.state));
+}
 
 void Queue_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Queue *q = as(a, TYPE_QUEUE);
-    printf("\x1b[%dm%sQ<%s\x1b[0m", color, msg, State_ToString(q->type.state));
+    printf("\x1b[%dm%sQ<%s\x1b[0m", color, msg, State_ToChars(q->type.state));
     if(extended){
         Debug_Print((void *)q->span, 0, "", color, TRUE);
         printf("\n");
@@ -115,7 +129,7 @@ void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extend
 
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SpanQuery *sq = as(a, TYPE_SPAN_QUERY);
-    printf("\x1b[%dm%sSQ<%s idx:%d op:%d dims:%hu/%hu", color, msg, State_ToString(sq->type.state), sq->idx, sq->op, sq->dims, sq->dimsNeeded);
+    printf("\x1b[%dm%sSQ<%s idx:%d op:%d dims:%hu/%hu", color, msg, State_ToChars(sq->type.state), sq->idx, sq->op, sq->dims, sq->dimsNeeded);
     SpanState *st = sq->stack;
     for(int i = 0; i <= sq->span->dims; i++){
         printf("\n");
@@ -148,7 +162,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     Debug_Print((void *)qidx->item, 0, "", color, TRUE);
                     printf("\x1b[%dm", color);
                 }else{
-                    if(HasFlag(def->flags, INLINE)){
+                    if(HasFlag(def->flags, SPAN_INLINE)){
                         t = *((Abstract **)t);
                     }
                     if(!HasFlag(def->flags, SPAN_RAW)){
@@ -223,7 +237,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
 
 void SpanDef_Print(SpanDef *def){
     char *flags = "";
-    if(HasFlag(def->flags, INLINE)){
+    if(HasFlag(def->flags, SPAN_INLINE)){
         flags = "(inline)";
     }
     printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d%s itemSize:%d, valueHdr:%d", 
@@ -365,14 +379,14 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->jump, mt->count, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToChars(mt->type.state), mt->jump, mt->count, mt->remaining);
         printf("\x1b[1;%dm[", color);
         Debug_Print((void *)mt->def.pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
         printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);
         Debug_Print((void *)mt->def.pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[%dm%sMatch<state=%s>\x1b[0m", color, msg, State_ToString(mt->type.state));
+        printf("\x1b[%dm%sMatch<state=%s>\x1b[0m", color, msg, State_ToChars(mt->type.state));
     }
 }
 
@@ -426,10 +440,10 @@ static void Mess_Print(Abstract *a, cls type, char *msg, int color, boolean exte
 static void Match_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_MATCH);
     if(extended){
-        printf("%sMatch<%s:state=%s'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), color, mt->def.str.s->bytes, color);
+        printf("%sMatch<%s:state=%s'\x1b[%d;1m%s\x1b[0;%dm'>", msg, Class_ToString(mt->type.of), State_ToChars(mt->type.state), color, mt->def.str.s->bytes, color);
     }else{
         char *jump = "";
-        printf("%sMatch<state=%s", msg, State_ToString(mt->type.state));
+        printf("%sMatch<state=%s", msg, State_ToChars(mt->type.state));
         if(mt->jump >= 0){
             printf(":jmp=%d\n", mt->jump);
         }
@@ -445,11 +459,11 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_STRINGMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jmp=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToString(mt->type.state), mt->def.str.position, mt->jump, mt->count, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:pos=%d:jmp=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToChars(mt->type.state), mt->def.str.position, mt->jump, mt->count, mt->remaining);
         Debug_Print((void *)mt->def.str.s, 0, "", color, FALSE);
         printf(">\x1b[0m");
     }else{
-        printf("\x1b[%dm%sMatch<state=%s:pos=%d ", color, msg, State_ToString(mt->type.state), mt->def.str.position);
+        printf("\x1b[%dm%sMatch<state=%s:pos=%d ", color, msg, State_ToChars(mt->type.state), mt->def.str.position);
         Debug_Print((void *)mt->def.str.s, 0, "", color, FALSE);
         printf(">\x1b[0m");
     }
@@ -461,7 +475,7 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
     if(extended){
         char *state = "";
         if(s->type.state != 0){
-            state = State_ToString(s->type.state);
+            state = State_ToChars(s->type.state);
         }
         printf("%s\x1b[%dmSFixed<%s\x1b[0;%dm", msg, color,state, color);
         printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
@@ -477,7 +491,7 @@ static void StringFull_Print(Abstract *a, cls type, char *msg, int color, boolea
     if(extended){
         char *state = "";
         if(s->type.state != 0){
-            state = State_ToString(s->type.state);
+            state = State_ToChars(s->type.state);
         }
         printf("%s\x1b[%dmSFull<%s\x1b[0;%dm", msg, color,state, color);
         printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
@@ -490,7 +504,7 @@ static void StringFull_Print(Abstract *a, cls type, char *msg, int color, boolea
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToString(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
+    printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToChars(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
     if(extended){
         printf(" idx:%d jump:%d ", rbl->idx, rbl->jump);
@@ -546,7 +560,7 @@ static void DebugStackEntry_Print(Abstract *a, cls type, char *msg, int color, b
    if((e->type.state & ERROR) != 0){
         color = COLOR_RED;
    }
-   printf("\x1b[%dm%sStack<%s", color, msg, State_ToString(e->type.state));
+   printf("\x1b[%dm%sStack<%s", color, msg, State_ToChars(e->type.state));
    Debug_Print((void *)&e->name, 0, ":", color, FALSE);
    Debug_Print((void *)&e->file, 0, ":", color, FALSE);
    printf("\x1b[%dm line:%d\x1b[0m", color, e->line);
@@ -564,7 +578,7 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     if(extended){
         char *state = "";
         if(s->type.state != 0){
-            state = State_ToString(s->type.state);
+            state = State_ToChars(s->type.state);
         }
         printf("%s\x1b[%dmS<%s\x1b[0;%dm", msg, color, state, color);
         do {
@@ -623,7 +637,7 @@ static void Abstract_Print(Abstract *t, cls type, char *msg, int color, boolean 
 static void Iter_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Iter *it = (Iter *)as(a, TYPE_ITER);
     printf("\x1b[%dm%sI<%s:%d of %d>\x1b[0m", color, msg,
-        State_ToString(it->type.state), it->idx, it->values->nvalues);
+        State_ToChars(it->type.state), it->idx, it->values->nvalues);
 }
 
 
@@ -655,7 +669,7 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     SCursor *sc = (SCursor *)a;
-    printf("\x1b[%dm%sC<%s:\x1b[1;%dm%s\x1b[0;%dm[%c@%ld]>", color, msg, State_ToString(sc->type.state), color, sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "NULL", color, sc->seg != NULL ? sc->seg->bytes[sc->position] : '?',  sc->position);
+    printf("\x1b[%dm%sC<%s:\x1b[1;%dm%s\x1b[0;%dm[%c@%ld]>", color, msg, State_ToChars(sc->type.state), color, sc->seg != NULL ? (char *)(String_ToEscaped(DebugM, sc->seg)->bytes) : "NULL", color, sc->seg != NULL ? sc->seg->bytes[sc->position] : '?',  sc->position);
 }
 
 static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -681,7 +695,7 @@ static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean ext
 static void EncPair_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     EncPair *pair = (EncPair *)as(a, TYPE_ENC_PAIR);
     printf("\x1b[%dm%sEnc<%s %s:",
-        color, msg, State_ToString(pair->type.state), pair->keyId->bytes);
+        color, msg, State_ToChars(pair->type.state), pair->keyId->bytes);
     String *enc = String_Present(DebugM, (Abstract *)pair->enc);
     while(enc != NULL){
         printf("%s", enc->bytes);
@@ -800,13 +814,13 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
 void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched){
     if(c == '\n'){
         printf("\x1b[%dm  %c \x1b[0;1m'\\n'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
+            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToChars(mt->type.state));
     }else if(c == '\r'){
         printf("\x1b[%dm  %c \x1b[0;1m'\\r'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
+            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToChars(mt->type.state));
     }else{
         printf("\x1b[%dm  %c \x1b[0;1m'%c'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToString(mt->type.state));
+            c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToChars(mt->type.state));
     }
     Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
     printf("\n");

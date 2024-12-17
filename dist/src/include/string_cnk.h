@@ -64,6 +64,7 @@ status String_Trunc(String *s, i64 len);
 
 /* makers */
 status String_AddInt(MemCtx *m, String *s, int i);
+status String_AddBitPrint(MemCtx *m, String *s, byte *b, size_t length, boolean extended);
 status String_AddI64(MemCtx *m, String *s, i64 i);
 status String_Reset(String *s);
 String *String_FromInt(MemCtx *m, int i);

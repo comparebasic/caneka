@@ -55,11 +55,11 @@ static void match_StartOfTerm(Match *mt){
 }
 
 static status match_FeedPat(Match *mt, word c){
-    if(HasFlag(mt->type.state, MISS)){
+    if(HasFlag(mt->type.state, NOOP)){
 
         if(DEBUG_PATMATCH){
             printf("\x1b[%dm'%c' - \x1b[0m", COLOR_RED, c);
-            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "MISS - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
+            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "NOOP - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
             printf("\n");
         }
 
@@ -100,7 +100,7 @@ static status match_FeedPat(Match *mt, word c){
                     mt->tail++;
                 }
                 if(HasFlag(def->flags, PAT_SET_NOOP) || ((mt->type.state & SUCCESS_EMPTY) == 0 && mt->count == 0)){
-                    mt->type.state |= MISS;
+                    mt->type.state |= NOOP;
                     mt->def.pat.curDef = mt->def.pat.startDef;
                     return mt->type.state;
                 }
@@ -164,7 +164,7 @@ miss:
                 if(HasFlag(mt->type.state, SEARCH)){
                     match_Reset(mt);
                 }else{
-                    mt->type.state |= MISS;
+                    mt->type.state |= NOOP;
                 }
                 break;
             }
@@ -185,7 +185,7 @@ miss:
     }
 
     if(DEBUG_PATMATCH){
-        printf("\x1b[%dmround: <%s> on \x1b[0m", DEBUG_PATMATCH, State_ToString(mt->type.state));
+        printf("\x1b[%dmround: <%s> on \x1b[0m", DEBUG_PATMATCH, State_ToChars(mt->type.state));
         Debug_Print(def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
         printf("\n");
     }
@@ -214,7 +214,7 @@ static status match_FeedString(Match *mt, byte c){
         }
     }else{
         mt->def.str.position = 0;
-        mt->type.state = MISS;
+        mt->type.state = NOOP;
     }
     return mt->type.state;
 }

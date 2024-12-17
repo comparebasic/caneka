@@ -28,63 +28,69 @@ status Caneka_Init(MemCtx *m){
 }
 
 static word states[] = {
+    READY,
     ERROR,
-    LOCAL_PTR,
-    NOOP,
-    INLINE,
-    BREAK,
-    TRACKED,
-    INCOMING,
-    PROCESSING,
-    RESPONDING,
-    SPAN_RAW,
-    MISS,
-    HASHED,
-    INVERTED,
-    END,
-    NEXT,
     SUCCESS,
+    NOOP,
+    DEBUG,
+    HASHED,
+    LOCAL_PTR,
+    END,
+    PROCESSING,
 };
 
 static char *stateNames[] = {
-    "ERROR,",
-    "LOCAL_PTR,",
-    "NOOP/WHITESPACE,",
-    "INLINE/ELASTIC,",
-    "BREAK,",
-    "TRACKED/TERM_FOUND,",
-    "INCOMING,",
-    "PROCESSING,",
-    "RESPONDING,",
-    "SPAN_RAW,",
-    "MISS,",
-    "HASHED,",
-    "INVERTED,",
-    "END,",
-    "NEXT,",
-    "SUCCESS,",
+    "READY",
+    "ERROR",
+    "SUCCESS",
+    "NOOP",
+    "DEBUG",
+    "HASHED",
+    "LOCAL_PTR",
+    "END",
+    "PROCESSING",
     NULL,
 };
 
-static char _buff[1024];
-char *State_ToString(status state){
-    int pos = 0;
-    memset(_buff, 0, 1024);
-    int i = 0;
+String *State_ToString(MemCtx *m, status state){
+    String *s = String_Init(m, STRING_EXTEND);
     char *name = NULL;
     if(state == 0){
-        memcpy(_buff, "ZERO", strlen("ZERO"));
+        String_AddBytes(m, s, bytes("ZERO"), strlen("ZERO"));
     }else{
+        int i = 0;
         while((name = stateNames[i]) != NULL){
             if((state & states[i]) != 0){
-                int l = strlen(stateNames[i]);
-                memcpy(_buff+pos, stateNames[i], l);
-                pos += l;
+                String_AddBytes(m, s, bytes(stateNames[i]), strlen(stateNames[i]));
             }
             i++;
         }
     }
-    return _buff;
+
+    String_AddBytes(m, s, bytes("<<"), strlen("<<"));
+    if((state & 1 << 8) != 0){
+        String_AddBytes(m, s, bytes("8,"), strlen("8,"));
+    }else if(state == 1 << 9){
+        String_AddBytes(m, s, bytes("9,"), strlen("9,"));
+    }else if(state == 1 << 10){
+        String_AddBytes(m, s, bytes("10,"), strlen("10,"));
+    }else if(state == 1 << 11){
+        String_AddBytes(m, s, bytes("11,"), strlen("11,"));
+    }else if(state == 1 << 12){
+        String_AddBytes(m, s, bytes("12,"), strlen("12,"));
+    }else if(state == 1 << 13){
+        String_AddBytes(m, s, bytes("13,"), strlen("13,"));
+    }else if(state == 1 << 14){
+        String_AddBytes(m, s, bytes("14,"), strlen("14,"));
+    }else if(state == 1 << 15){
+        String_AddBytes(m, s, bytes("15,"), strlen("15,"));
+    }
+    String_AddBytes(m, s, bytes(" "), 1);
+
+    byte upper = (byte) (state >> 8);
+    String_AddBytes(m, s, &upper, sizeof(byte));
+
+    return s;
 }
 
 char *Class_ToString(cls type){

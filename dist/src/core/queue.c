@@ -101,7 +101,7 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
             }
             while(TRUE){
                 SpanQuery_Setup(&q->current, q->span, SPAN_OP_GET, q->current.idx);
-                if((Span_Query(&q->current) & MISS) == 0){
+                if((Span_Query(&q->current) & NOOP) == 0){
                     break;
                 }
                 /* capture an available slot if we just found one in dim 0*/

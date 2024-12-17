@@ -70,7 +70,7 @@ status ServeHandle_Tests(MemCtx *gm){
     Serve_ServeRound(sctx);
     Serve_ServeRound(sctx);
     Serve_ServeRound(sctx);
-    r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToChars(req->in.rbl->type.state));
 
     int st = 0;
     pid_t pid = waitpid(child, &st, 0);
@@ -115,7 +115,7 @@ status ServeChunked_Tests(MemCtx *gm){
     Serve_ServeRound(sctx);
     h = Handler_Current(req->handler);
     r |= Test(h->func == Example_Recieve, "Req has the second handler set");
-    r |= Test(!HasFlag(req->in.rbl->type.state, SUCCESS), "Req Roebling does not have state SUCCESS yet, have %s", State_ToString(req->in.rbl->type.state));
+    r |= Test(!HasFlag(req->in.rbl->type.state, SUCCESS), "Req Roebling does not have state SUCCESS yet, have %s", State_ToChars(req->in.rbl->type.state));
 
     Delay();
     Delay();
@@ -125,7 +125,7 @@ status ServeChunked_Tests(MemCtx *gm){
     Delay();
     Serve_ServeRound(sctx);
     Serve_ServeRound(sctx);
-    r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToString(req->in.rbl->type.state));
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Req Roebling has status of SUCCESS, have %s", State_ToChars(req->in.rbl->type.state));
 
     r |= TestChild(child);
 

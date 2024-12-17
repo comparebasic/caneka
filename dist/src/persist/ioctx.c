@@ -104,7 +104,7 @@ status IoCtx_Load(MemCtx *m, IoCtx *ctx){
     char *path_cstr = String_ToChars(m, path);
     DIR* dir = opendir(path_cstr);
     if(dir == NULL && ENOENT == errno){
-        return MISS;
+        return NOOP;
     }
     closedir(dir);
 

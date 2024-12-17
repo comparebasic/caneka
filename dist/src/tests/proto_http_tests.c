@@ -32,7 +32,7 @@ status ProtoHttp_Tests(MemCtx *gm){
 
     Roebling_RunCycle(req->in.rbl);
 
-    r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToString(req->in.rbl->type.state));
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToChars(req->in.rbl->type.state));
     String *method_s = Lookup_Get(sctx->def->methods, proto->method);
     r |= Test(proto->method == TYPE_METHOD_GET, "Expect method to be set to get found %d(%s)", proto->method, method_s->bytes);
     r |= Test(String_Equals(proto->path, String_Make(m, bytes("/page1.html"))), "Expect string path to equal have '%s'", proto->path->bytes);
@@ -49,7 +49,7 @@ status ProtoHttp_Tests(MemCtx *gm){
     String_Add(req->m, req->in.shelf, body);
 
     Roebling_RunCycle(req->in.rbl);
-    r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToString(req->in.rbl->type.state));
+    r |= Test(req->in.rbl->type.state == SUCCESS, "Expect roebling to be SUCCESS have %s", State_ToChars(req->in.rbl->type.state));
 
     method_s = Lookup_Get(sctx->def->methods, proto->method);
     r |= Test(proto->method == TYPE_METHOD_POST, "Expect method to be set to get found %d(%s)", proto->method, method_s->bytes);

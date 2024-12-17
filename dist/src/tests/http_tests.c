@@ -95,7 +95,7 @@ status Http_Tests(MemCtx *gm){
     }
 
     r |= Test(position == 12, "Reached end of test captures, have %d", position);
-    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling HttpParser has state SUCCESS, have '%s'", State_ToString(rbl->type.state));
+    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling HttpParser has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
 
     MemCtx_Free(m);
 

@@ -19,7 +19,7 @@ status Example_Recieve(Handler *h, Req *req, Serve *sctx){
     status r = Req_Recv(sctx, req);
     h->type.state |= (r & (SUCCESS|ERROR));
     if(DEBUG_EXAMPLE_HANDLERS){
-        printf("\x1b[%dmRecieved %s\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS, State_ToString(h->type.state));
+        printf("\x1b[%dmRecieved %s\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS, State_ToChars(h->type.state));
     }
     return h->type.state;
 }
