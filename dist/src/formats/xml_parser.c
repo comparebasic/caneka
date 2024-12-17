@@ -200,13 +200,13 @@ status XmlParser_Parse(XmlParser *xml, String *s){
     if(s != NULL){
         Roebling_AddBytes(xml->rbl, s->bytes, s->length);
     }
-    while(!HasFlag(xml->rbl->type.state, BREAK)
+    while(!HasFlag(xml->rbl->type.state, END)
             && !HasFlag(xml->ctx->type.state, SUCCESS)){
         Roebling_RunCycle(xml->rbl);
     };
 
     xml->type.state = 
-        (xml->rbl->type.state & (BREAK|ERROR)) | 
+        (xml->rbl->type.state & (END|ERROR)) | 
             (xml->ctx->type.state & (ERROR|SUCCESS));
 
     return xml->type.state;

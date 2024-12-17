@@ -21,6 +21,9 @@ enum pat_flags {
 
 enum match_flags {
     /* */
+    MATCH_GOTO = 1 << 8,
+    MATCH_INVERTED = 1 << 9,
+    MATCH_TERM_FOUND = 1 << 10,
     ANCHOR_UNTIL = 1 << 11,
     ANCHOR_CONTAINS = 1 << 12,
     ANCHOR_START = 1 << 13,

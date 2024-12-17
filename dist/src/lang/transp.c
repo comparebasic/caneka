@@ -7,7 +7,7 @@ static char *distDir = "dist";
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
     FmtCtx *fmt = asIfc(_fmt, TYPE_FMT_CTX);
     Roebling_Add(fmt->rbl, s);
-    while((Roebling_RunCycle(fmt->rbl) & (SUCCESS|END|ERROR|BREAK)) == 0);
+    while((Roebling_RunCycle(fmt->rbl) & (SUCCESS|END|ERROR)) == 0);
     return fmt->type.state;
 }
 

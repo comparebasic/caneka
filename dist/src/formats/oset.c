@@ -79,7 +79,7 @@ Abstract *Abs_FromOset(MemCtx *m, String *s){
     _oset->type.state = ZERO;
     _oset->m = m;
     status r = READY;
-    while((r & (SUCCESS|ERROR|BREAK)) == 0
+    while((r & (SUCCESS|ERROR|END)) == 0
             && !HasFlag(_oset->type.state, SUCCESS)){
         r = Roebling_RunCycle(_oset->rbl);
     };

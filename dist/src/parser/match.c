@@ -112,7 +112,7 @@ static status match_FeedPat(Match *mt, word c){
             mt->type.state |= PROCESSING;
 
             if(HasFlag(def->flags, PAT_LEAVE)){
-                mt->type.state |= INVERTED;
+                mt->type.state |= MATCH_INVERTED;
             }else if(HasFlag(def->flags, PAT_NO_CAPTURE)){
                 if(mt->count == 0){
                     mt->lead++;
@@ -126,10 +126,10 @@ static status match_FeedPat(Match *mt, word c){
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
                     ((def->flags & PAT_COUNT) != 0 && (--mt->remaining) > 0)){
                 match_StartOfTerm(mt);
-                mt->type.state |= TERM_FOUND;
+                mt->type.state |= MATCH_TERM_FOUND;
             }else{
                 match_NextTerm(mt);
-                mt->type.state &= ~TERM_FOUND;
+                mt->type.state &= ~MATCH_TERM_FOUND;
             }
 
             break;
@@ -139,7 +139,7 @@ static status match_FeedPat(Match *mt, word c){
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
                 if(HasFlag(def->flags, PAT_TERM)){
-                    if((mt->type.state & TERM_FOUND) != 0){
+                    if((mt->type.state & MATCH_TERM_FOUND) != 0){
                         match_NextTerm(mt);
                         continue;
                     }else{
@@ -151,7 +151,7 @@ static status match_FeedPat(Match *mt, word c){
                     continue;
                 }
             }else if((def->flags & (PAT_ANY)) != 0){
-                if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, TERM_FOUND)){
+                if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, MATCH_TERM_FOUND)){
                     match_NextTerm(mt);
                     break;
                 }else{

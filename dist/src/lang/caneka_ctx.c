@@ -185,13 +185,13 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     status r = READY;
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
 
-    FmtDef *def = Chain_Get(ctx->ById, captureKey);
-    if(def == NULL || (def->tpye.state & FMT_FL_TAXONAMY) != 0){
+    FmtDef *def = Chain_Get(ctx->byId, captureKey);
+    if(def == NULL || (def->type.state & FMT_FL_TAXONAMY) != 0){
         TableChain_Get(ctx->byAlias, s);
     }
 
     if(DEBUG_LANG_CNK){
-        printf("\x1b[%dmCnk Capture %s: %s ", DEBUG_LANG_CNK, CnkLang_RangeToChars(captureKey));
+        printf("\x1b[%dmCnk Capture %s:", DEBUG_LANG_CNK, CnkLang_RangeToChars(captureKey));
         Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
         Debug_Print((void *)def, 0, "FmtDef: ", DEBUG_LANG_CNK, TRUE);

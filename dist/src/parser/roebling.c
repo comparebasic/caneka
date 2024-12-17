@@ -7,14 +7,14 @@ static status Roebling_RunMatches(Roebling *rbl){
 #endif
     int i = 0;
     byte c = 0;
-    rbl->type.state &= ~(ROEBLING_NEXT|ROEBLING_BREAK|SUCCESS);
+    rbl->type.state &= ~(ROEBLING_NEXT|END|SUCCESS);
     if(rbl->matches->nvalues == 0){
         rbl->type.state |= ROEBLING_NEXT;
     }
-    while((rbl->type.state & (ROEBLING_NEXT|ROEBLING_BREAK)) == 0){
+    while((rbl->type.state & (ROEBLING_NEXT|END)) == 0){
         Guard_Incr(&rbl->guard);
         if(HasFlag(rbl->range.potential.type.state, END)){
-            rbl->type.state |= ROEBLING_BREAK;
+            rbl->type.state |= END;
             continue;
         }
         c = Range_GetByte(&(rbl->range));
@@ -69,7 +69,7 @@ static status Roebling_RunMatches(Roebling *rbl){
                }
             }
         }
-        if(HasFlag(mt->type.state, INVERTED)){
+        if(HasFlag(mt->type.state, MATCH_INVERTED)){
             break;
         }
         SCursor_Incr(&(rbl->range.potential), 1);
@@ -165,10 +165,10 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
 
 status Roebling_Run(Roebling *rbl){
     status r = READY;
-    while((r & (SUCCESS|ERROR|ROEBLING_BREAK)) == 0){
+    while((r & (SUCCESS|ERROR|END)) == 0){
         r = Roebling_RunCycle(rbl);
     }
-    rbl->type.state &= ~ROEBLING_BREAK;
+    rbl->type.state &= ~END;
     return rbl->type.state;
 }
 
@@ -182,7 +182,7 @@ status Roebling_RunCycle(Roebling *rbl){
     if(DEBUG_ROEBLING_MARK){
         printf("\x1b[%dmRblIdx:%d\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx);
     }
-    rbl->type.state &= ~ROEBLING_BREAK;
+    rbl->type.state &= ~END;
     if(HasFlag(rbl->type.state, ROEBLING_NEXT)){
         rbl->idx++;
         SCursor_Incr(&(rbl->range.end), rbl->tail);
@@ -292,7 +292,7 @@ status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){
         Range_Set(&rbl->range, s);
     }
     /*
-    rbl->type.state &= ~(SUCCESS|ERROR|ROEBLING_BREAK);
+    rbl->type.state &= ~(SUCCESS|ERROR|END);
     */
     Roebling_ResetPatterns(rbl);
     rbl->type.state = ZERO;
