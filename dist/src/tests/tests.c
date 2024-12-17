@@ -302,3 +302,17 @@ static TestSet _Tests[] = {
 };
 
 TestSet *Tests = _Tests;
+
+/*
+static TestSet solo[] = {
+    {
+        "XML Templating",
+        XmlTTemplate_Tests,
+        "XML templating for building web applications.",
+        FEATURE_COMPLETE,
+    }
+};
+
+TestSet *Tests = solo;
+*/
+

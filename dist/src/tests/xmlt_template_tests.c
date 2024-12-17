@@ -11,6 +11,9 @@ static status populatePresenters(MemCtx *m, Lookup *lk){
 }
 
 status XmlTTemplate_Tests(MemCtx *gm){
+#ifdef DEBUG_STACK
+    DebugStack_Push(bytes("XtmlTTemplate_Tests"), NULL);
+#endif
 
     status r = READY;
     MemCtx *m = MemCtx_Make();
@@ -70,6 +73,7 @@ status XmlTTemplate_Tests(MemCtx *gm){
 
     xml_s = String_Make(m, bytes("<root><h1 with=\"session\">Session expires: ${expires}</h1><e for=\"items\" if=\"show-items\" color=\"${item-color}\"><p>${msg}</p><span if-not=\"no-details\" if=\"details\">${details}</span></e></root>"));
 
+    SetRef((Abstract *)xml_s);
 
     XmlT_Parse(xmlt, xml_s, tbl);
 

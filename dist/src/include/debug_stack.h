@@ -17,4 +17,5 @@ status DebugStack_Init();
 void _DebugStack_Push(byte *name, Abstract *a, char *file, int line);
 #define DebugStack_Push(name, a) _DebugStack_Push((name), (a), __FILE__, __LINE__)
 void DebugStack_Pop();
-void DebugStack_Print();
+int DebugStack_Print();
+void DebugStack_SetRef(Abstract *a);

@@ -565,11 +565,9 @@ static void DebugStackEntry_Print(Abstract *a, cls type, char *msg, int color, b
    Debug_Print((void *)&e->file, 0, ":", color, FALSE);
    printf("\x1b[%dm line:%d\x1b[0m", color, e->line);
    if(e->a != NULL){
-        printf("\n");
-        printf("\n");
-        Debug_Print((void *)e->a, 0, "", color, TRUE);
-        printf("\n");
+        Debug_Print((void *)e->a, 0, "  ref:", color, (e->type.state & ERROR) != 0);
    }
+   printf("\x1b[%dm>\x1b[0m", color);
 }
 #endif
 

@@ -168,8 +168,8 @@ status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract 
 }
 
 status File_Load(MemCtx *m, File *file, Access *access){
-    printf("File Load\n");
-    return File_Stream(m, file, access, NULL, NULL);
+    Stack("File Load", (Abstract *)file->path);
+    Return File_Stream(m, file, access, NULL, NULL);
 }
 
 status File_Delete(File *file){

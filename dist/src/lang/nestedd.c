@@ -14,9 +14,10 @@ char *NestedD_opToChars(status op){
 }
 
 static status nest(NestedD *nd, Span *t, status op){
+    Stack(bytes("NestedD_nest"), NULL);
     MemCtx *m = nd->m;
     if(t == NULL || !Ifc_Match(t->type.of, TYPE_SPAN)){
-        return ERROR;
+        Return ERROR;
     }
 
     if((op & NESTED_FOR) != 0){
@@ -27,7 +28,7 @@ static status nest(NestedD *nd, Span *t, status op){
         nd->current_tbl = t;
     }else if((op & NESTED_OUTDENT) == 0){
         nd->type.state |= ERROR;
-        return nd->type.state;
+        Return nd->type.state;
     }
 
     if((op & NESTED_OUTDENT) == 0){
@@ -51,40 +52,43 @@ static status nest(NestedD *nd, Span *t, status op){
     }
 
 
-    return SUCCESS;
+    Return SUCCESS;
 }
 
 status NestedD_With(MemCtx *m, NestedD *nd, Abstract *key){
+    Stack(bytes("NestedD_With"), NULL);
     Abstract *t =  Table_Get(nd->current_tbl, key);
     if(t != NULL && t->type.of == TYPE_TABLE){
         nest(nd, (Span *)t, NESTED_WITH);
-        return SUCCESS;
+        Return SUCCESS;
     }
-    return NOOP;
+    Return NOOP;
 }
 
 status NestedD_For(NestedD *nd, Abstract *key){
+    Stack(bytes("NestedD_For"), NULL);
     Abstract *t =  Table_Get(nd->current_tbl, key);
     if(t != NULL && Ifc_Match(t->type.of, TYPE_SPAN)){
         nest(nd, (Span *)t, NESTED_FOR);
-        return SUCCESS;
+        Return SUCCESS;
     }
-    return NOOP;
+    Return NOOP;
 }
 
 status NestedD_Outdent(NestedD *nd){
+    Stack(bytes("NestedD_Outdent"), NULL);
     Span_Cull(nd->stack, 1);
 
     NestedState *ns = Span_Get(nd->stack, nd->stack->max_idx);
     if(ns == NULL || ns->t == NULL){
-        return ERROR;
+        Return ERROR;
     }
 
     status r = nest(nd, ns->t, (ns->flags|NESTED_OUTDENT));
     if((nd->type.state & NESTED_FOR) != 0){
         nd->it.idx = ns->idx;
     }
-    return r;
+    Return r;
 }
 
 Abstract *NestedD_Get(NestedD *nd, Abstract *key){

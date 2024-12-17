@@ -2,6 +2,10 @@
 #include <caneka.h> 
 
 status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
+    Stack(bytes("XmlT_AddAttsStr"), (Abstract *)e->name);
+    if(e->atts == NULL){
+        return NOOP;
+    }
     MemCtx *m = xmlt->m;
     Iter it;
     Iter_Init(&it, e->atts);
@@ -32,7 +36,7 @@ status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
         }
     }
 
-    return SUCCESS;
+    Return SUCCESS;
 }
 
 status XmlT_Out(MemCtx *_, String *s, Abstract *source){
@@ -45,6 +49,9 @@ status XmlT_Out(MemCtx *_, String *s, Abstract *source){
 }
 
 status XmlT_Parse(XmlTCtx *xmlt, String *s, Span *tbl){
+#ifdef DEBUG_STACK
+    DebugStack_Push(bytes("XmlT_Parse"), NULL);
+#endif
     status r = (XmlParser_Parse(xmlt->parser, s) & SUCCESS);
     if((r & SUCCESS) != 0){
         NestedD_Init(xmlt->m, xmlt->nd, tbl);

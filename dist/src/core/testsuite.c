@@ -22,13 +22,14 @@ static char *statusCstr(word status){
 }
 
 status Test(int condition, char *msg, ...){
+    Stack(bytes("Test"), (Abstract *)String_Make(DebugM, bytes(msg)));
 	va_list args;
     va_start(args, msg);
     if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
         printf("        <li class=\"test result result-%s\">", condition ? "pass" : "fail");
         vprintf(msg, args);
         printf("</li>\n");
-        return condition ? SUCCESS : ERROR;
+        Return condition ? SUCCESS : ERROR;
     }else{
         if(!condition){
             if(!HasFlag(GLOBAL_flags, NO_COLOR)){
@@ -40,7 +41,7 @@ status Test(int condition, char *msg, ...){
                 printf("\x1b[0m");
             }
             printf("\n");
-            return ERROR;
+            Return ERROR;
         }else{
             if(!HasFlag(GLOBAL_flags, NO_COLOR)){
                 printf("\x1b[32m");
@@ -51,7 +52,7 @@ status Test(int condition, char *msg, ...){
                 printf("\x1b[0m");
             }
             printf("\n");
-            return SUCCESS;
+            Return SUCCESS;
         }
     }
 }
@@ -62,6 +63,10 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     char *name = NULL;
     int pass = 0;
     int fail = 0;
+#ifdef DEBUG_STACK
+    DebugStack_Push(bytes("Test_Runner"), 
+        (Abstract *)String_Make(DebugM, bytes(suiteName)));
+#endif
     if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
         printf("<div class=\"suite\">\n    <span class=\"label\">Suite %s</span>\n", suiteName);
     }

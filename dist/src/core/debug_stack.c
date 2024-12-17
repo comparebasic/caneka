@@ -35,7 +35,14 @@ void DebugStack_Pop(){
     _stackIdx--;
 }
 
-void DebugStack_Print(){
+void DebugStack_SetRef(Abstract *a){
+    DebugStackEntry *entry = (((DebugStackEntry *)_stackDebug)+(_stackIdx-1));
+    if(entry->type.of == TYPE_DEBUG_STACK_ENTRY){
+        entry->a = a;
+    }
+}
+
+int DebugStack_Print(){
     if(_stackIdx > 0){
         int idx = _stackIdx;
         boolean top = TRUE;
@@ -48,5 +55,7 @@ void DebugStack_Print(){
             Debug_Print((void *)entry, 0, "    ", DEBUG_STACK_COLOR, TRUE);
             printf("\n");
         }
+        return _stackIdx;
     }
+    return 0;
 }
