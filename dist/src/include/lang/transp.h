@@ -1,11 +1,11 @@
 typedef struct transp {
     Type type;   
     MemCtx *m;
-    String *dir;
-    String *file;
     String *src;
     String *dist;
     struct {
+        String *dir;
+        String *fname;
         String *source;
         String *dest;
         File sourceFile;

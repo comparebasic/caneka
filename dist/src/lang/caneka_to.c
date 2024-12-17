@@ -25,3 +25,58 @@ Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
     String_MakeLower(out);
     return (Abstract *)out;
 }
+
+Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
+    String *s = String_Init(m, STRING_EXTEND);
+    char *cstr = "#include <external.h>\n#include <caneka.h>\n";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    cstr = "#include <";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    String *hfile = String_Init(m, STRING_EXTEND);
+    String_Add(m, hfile, (String *)item->value);
+    String_MakeLower(hfile);
+    cstr = ".h";
+    String_AddBytes(m, hfile, bytes(cstr), strlen(cstr));
+    String_Add(m, s, hfile);
+    cstr = ">\n";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    return (Abstract *)s;
+}
+
+Abstract *CnkLang_Struct(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
+    String *module = (String *)asIfc(fmt->root->value, TYPE_STRING);
+
+    String *s = String_Init(m, STRING_EXTEND);
+    String_Add(m, s, module);
+    char *cstr = " *";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    String_Add(m, s, module);
+    cstr = "_Make(MemCtx *m){\n";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    cstr = "    ";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    String_Add(m, s, module);
+    cstr = " *o = (";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    String_Add(m, s, module);
+    cstr = "*)MemCtx_Alloc(m, sizeof(";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    String_Add(m, s, module);
+    cstr = "));\n    o->type.of = ";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+
+    String *type = String_Init(m, STRING_EXTEND);
+    cstr = "TYPE_";
+    String_AddBytes(m, type, bytes(cstr), strlen(cstr));
+    String_Add(m, type, module);
+    String_MakeUpper(type);
+
+    String_Add(m, s, type);
+
+    cstr = ";\n    return o;\n}\n";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+
+    return (Abstract *)s;
+}

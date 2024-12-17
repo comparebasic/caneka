@@ -1,6 +1,6 @@
 typedef Abstract *(*FmtTrans)(MemCtx *m, struct format_def *def, struct formatter *fmt, String *key, Abstract *a);
 
-enum formatter_flags {
+enum formatter_def_flags {
     FMT_DEF_INDENT = 1 << 8,
     FMT_DEF_OUTDENT = 1 << 9,
 };
@@ -8,7 +8,7 @@ enum formatter_flags {
 typedef struct format_def {
     Type type;
     int id;
-    word _;
+    int flags;
     String *name;
     String *alias;
     FmtTrans from;

@@ -3,6 +3,8 @@
 
 typedef struct cnf  {
     word id;
+    word state;
+    int flags;
     char *name;
     char *alias;
     FmtTrans to;
@@ -22,15 +24,29 @@ static status addDefs(FmtCtx *ctx){
 
     Cnf configs[] = {
         {
-            CNK_LANG_STRUCT,
+            CNK_LANG_START,
+            0,
+            0,
             "struct",
             NULL,
+            CnkLang_Start,
             NULL,
+            -1
+        },
+        {
+            CNK_LANG_STRUCT,
+            FMT_DEF_INDENT,
+            0,
+            "struct",
+            NULL,
+            CnkLang_Struct,
             NULL,
             -1
         },
         {
             CNK_LANG_REQUIRE,
+            FMT_DEF_INDENT,
+            0,
             "require",
             NULL,
             CnkLang_RequireTo,
@@ -39,6 +55,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_PACKAGE,
+            FMT_DEF_INDENT,
+            0,
             "package",
             NULL,
             NULL,
@@ -47,6 +65,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_TYPE,
+            FMT_DEF_INDENT,
+            0,
             "type",
             NULL,
             NULL,
@@ -55,6 +75,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_ARG_LIST,
+            FMT_DEF_INDENT,
+            0,
             "arg-list",
             NULL,
             NULL,
@@ -63,6 +85,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_C,
+            FMT_DEF_INDENT,
+            0,
             "c",
             NULL,
             NULL,
@@ -71,6 +95,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_TOKEN,
+            0,
+            0,
             "token",
             NULL,
             NULL,
@@ -79,6 +105,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_OP,
+            0,
+            0,
             "op",
             NULL,
             NULL,
@@ -87,6 +115,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_VALUE,
+            0,
+            0,
             "value",
             NULL,
             NULL,
@@ -95,6 +125,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_ROEBLING,
+            0,
+            0,
             "roebling",
             NULL,
             NULL,
@@ -103,6 +135,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_KEYS,
+            0,
+            0,
             "keys",
             NULL,
             NULL,
@@ -111,6 +145,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_IDXS,
+            0,
+            0,
             "idxs",
             NULL,
             NULL,
@@ -119,6 +155,8 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_SEQ,
+            0,
+            0,
             "seq",
             NULL,
             NULL,
@@ -126,6 +164,28 @@ static status addDefs(FmtCtx *ctx){
             -1
         },
         {
+            CNK_LANG_LIST_CLOSE,
+            FMT_DEF_OUTDENT,
+            0,
+            "seq",
+            NULL,
+            NULL,
+            NULL,
+            -1
+        },
+        {
+            CNK_LANG_CURLY_CLOSE,
+            FMT_DEF_OUTDENT,
+            0,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            -1
+        },
+        {
+            0,
+            0,
             0,
             NULL,
             NULL,
@@ -141,6 +201,8 @@ static status addDefs(FmtCtx *ctx){
         
         FmtDef *def = FmtDef_Make(m);
         def->id = cnf->id;
+        def->type.state = cnf->state;
+        def->flags = cnf->flags;
         if(cnf->name != NULL){
             def->name = String_Make(m, bytes(cnf->name));
         }
@@ -172,11 +234,10 @@ static void pushItem(FmtCtx *ctx, word captureKey){
     item->spaceIdx = captureKey;
     item->parent = ctx->item;
 
-    printf("setting iten as %s in %s\n", CnkLang_RangeToChars(captureKey), CnkLang_RangeToChars(ctx->item->spaceIdx)); 
-    if(ctx->item->value == NULL){
-        ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
+    if(item->parent->children == NULL){
+        item->parent->children = Span_Make(ctx->m, TYPE_SPAN);
     }
-    Span_Set((Span *)ctx->item->value, captureKey, (Abstract *)item);
+    Span_Add(item->parent->children, (Abstract *)item);
 
     ctx->item = item;
 }
@@ -197,6 +258,19 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         Debug_Print((void *)def, 0, "FmtDef: ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
     }
+
+    if(def != NULL){
+        if((def->type.state & FMT_DEF_INDENT) != 0){
+            pushItem(ctx, captureKey);
+        }else if((def->type.state & FMT_DEF_OUTDENT) != 0 && ctx->item != NULL){
+            ctx->item = ctx->item->parent;
+        }
+
+        if(ctx->item != NULL && ctx->item->def == NULL){
+            ctx->item->def = def;
+        }
+    }
+    printf("\n");
 
     /*
     if(captureKey == CNK_LANG_TOKEN){
@@ -249,16 +323,59 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
-FmtCtx *CnkLangCtx_Make(MemCtx *m){
+static status genOut(FmtCtx *ctx, FmtItem *item, OutFunc out){
+    String *s = (String *)item->def->to(ctx->m, item->def, ctx, item->key, (Abstract *)item);
+    return out(ctx->m, s, ctx->source);
+}
+
+static status Generate(FmtCtx *ctx, OutFunc out){
+    FmtItem *item = ctx->root;
+
+    String *ext = String_Make(ctx->m, bytes(".cnk"));
+
+    Transp *tp = (Transp *)as(ctx->source, TYPE_TRANSP);
+    String *module = String_ToCamel(ctx->m, tp->current.fname);
+    String_Trunc(module, ext->length);
+    ctx->root->value = (Abstract *)module;
+
+    Iter it;
+    while(item != NULL){
+        if(item->def->to != NULL){
+            genOut(ctx, item, out);
+        }
+
+
+        if(item->children != NULL){
+            Iter_Init(&it, item->children);
+            if((Iter_Next(&it) & END) == 0){
+                FmtItem *itm = (FmtItem *)Iter_Get(&it);
+                if(itm != NULL && itm->def != NULL && itm->def->to != NULL){
+                    genOut(ctx, itm, out);
+                }
+            }
+        }
+        item = NULL;
+    }
+    return NOOP;
+}
+
+
+FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
     FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
     ctx->type.of = TYPE_LANG_CNK;
     ctx->m = m;
     ctx->rbl = CnkLangCtx_RblMake(m, ctx, Capture);
+    ctx->generate = Generate;
 
     ctx->rangeToChars = CnkLang_RangeToChars;
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
     ctx->root->spaceIdx = CNK_LANG_START;
     addDefs(ctx);
+    ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
+    ctx->item->spaceIdx = CNK_LANG_START;
+    FmtDef *def = Chain_Get(ctx->byId, ctx->item->spaceIdx);
+    ctx->item->def = def;
+    ctx->source = source;
 
     return ctx;
 }

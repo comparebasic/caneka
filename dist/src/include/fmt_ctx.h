@@ -11,17 +11,21 @@ enum formatter_flags {
 
 typedef struct fmt_item {
     Type type;
-    word flags;
+    int flags;
+    int subId;
     FmtDef *def;
     word spaceIdx;
     int offset;
     String *content;
     String *key;
     Abstract *value;
+    Span *children;
     int remaining;
     struct fmt_item *parent;
 } FmtItem;
 
+
+typedef status (*FmtGenFunc)(struct formatter *ctx, OutFunc out);
 typedef struct formatter {
     Type type;
     MemCtx *m;
@@ -34,9 +38,10 @@ typedef struct formatter {
     TableChain *byName;
     TableChain *byAlias;
     RangeToChars rangeToChars;
-    OutFunc out;
+    FmtGenFunc generate;
+    Abstract *source;
 } FmtCtx;
 
 FmtItem *FmtItem_Make(MemCtx *m, FmtCtx *fctx);
-FmtCtx *FmtCtx_Make(MemCtx *m);
+FmtCtx *FmtCtx_Make(MemCtx *m, FmtGenFunc generate);
 status Fmt_Add(MemCtx *m, FmtCtx *fmt, Lookup *fmtDefs);

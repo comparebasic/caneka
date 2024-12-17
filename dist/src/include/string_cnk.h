@@ -70,6 +70,7 @@ status String_Reset(String *s);
 String *String_FromInt(MemCtx *m, int i);
 String *String_FromI64(MemCtx *m, i64 i);
 status String_MakeLower(String *s);
+status String_MakeUpper(String *s);
 
 /* equals */
 boolean String_Equals(String *a, String *b);
@@ -78,6 +79,7 @@ boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl);
 boolean String_Eq(Abstract *a, void *b);
 
 /* conversions */
+String *String_ToCamel(MemCtx *m, String *s);
 String *String_ToHex(MemCtx *m, String *s);
 String *String_FromHex(MemCtx *m, String *s);
 String *String_ToB64(MemCtx *m, String *s);

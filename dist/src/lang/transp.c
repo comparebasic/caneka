@@ -12,9 +12,7 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
 }
 
 static status Transp_transpile(Transp *p, FmtCtx *fmt){
-#ifdef DEBUG_STACK
-    DebugStack_Push(bytes("Transp_transpile"), NULL);
-#endif
+    Stack(bytes("Transp_transpile"), NULL);
     if(File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
         Debug_Print((void *)p->current.source,0,  "Transpiling ",  COLOR_YELLOW, FALSE);
         Debug_Print((void *)p->current.dest,0,  " -> ",  COLOR_YELLOW, FALSE);
@@ -24,19 +22,17 @@ static status Transp_transpile(Transp *p, FmtCtx *fmt){
         status r = File_Stream(p->m, &p->current.sourceFile,
             NULL, Transp_onInput, (Abstract *)fmt);
 
-        Transp_PrintTree(p);
+        fprintf(stderr, "\x1b[%dmFinished parsing\x1b[0m\n", COLOR_YELLOW);
+        if((r & SUCCESS) != 0){
+            fmt->generate(fmt, ToStdOut);
+        }else{
+            Fatal("Parsing file broke", TYPE_FMT_CTX);
+            Return ERROR;
+        }
 
-        printf("done!\n");
-
-#ifdef DEBUG_STACK
-        DebugStack_Pop();
-#endif
-        return r;
+        Return r;
     }
-#ifdef DEBUG_STACK
-    DebugStack_Pop();
-#endif
-    return NOOP;
+    Return NOOP;
 }
 
 static status Transp_copy(Transp *p){
@@ -66,22 +62,22 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
     return TRUE;
 }
 
-static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *source){
+static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *source){
     Transp *p = asIfc(source, TYPE_TRANSP);
-    p->dir = dir;
-    p->file = file;
+    p->current.dir = dir;
+    p->current.fname = fname;
 
     p->current.source = String_Init(m, STRING_EXTEND);
     String_Add(m, p->current.source, dir);
     String_AddBytes(m, p->current.source, bytes("/"), 1);
-    String_Add(m, p->current.source, file);
+    String_Add(m, p->current.source, fname);
 
     p->current.dest = String_Init(m, STRING_EXTEND);
     String_Add(m, p->current.dest, p->dist);
     String_AddBytes(m, p->current.dest, bytes("/"), 1);
     String_Add(m, p->current.dest, dir);
     String_AddBytes(m, p->current.dest, bytes("/"), 1);
-    String_Add(m, p->current.dest, file);
+    String_Add(m, p->current.dest, fname);
 
     Iter it;
     Iter_Init(&it, p->formats);
@@ -102,47 +98,6 @@ static status Transp_transFile(MemCtx *m, String *dir, String *file, Abstract *s
     return Transp_copy(p);
 
     return TRUE;
-}
-
-void Transp_PrintFmtTree(Transp *p, FmtCtx *fmt, FmtItem *item, int indent){
-    if(item->value != NULL){
-        Iter it;
-        Iter_Init(&it, (Span *)item->value);
-        while((Iter_Next(&it) & END) == 0){
-            Abstract *a = Iter_Get(&it);
-            if(a != NULL){
-                if(Ifc_Match(a->type.of, TYPE_FMT_ITEM)){
-                    FmtItem *item = (FmtItem *)a;
-                    int i = indent;
-                    while(i--){
-                        printf("  ");
-                    }
-                    printf("Found: %s\n", fmt->rangeToChars(it.idx));
-                    Transp_PrintFmtTree(p, fmt, item, indent+1);
-                }else{
-                    int i = indent;
-                    while(i--){
-                        printf("  ");
-                    }
-                    Debug_Print((void *)a, 0, "Item: ", 0, FALSE);
-                    printf("\n");
-                }
-            }
-        }
-    }
-}
-
-void Transp_PrintTree(Transp *p){
-    Iter it;
-    Iter_Init(&it, p->formats);
-    while((Iter_Next(&it) & END) == 0){
-        Hashed *h = (Hashed *)Iter_Get(&it);
-        if(h != NULL){
-            FmtCtx *fmt = (FmtCtx *)h->value;
-            printf("\x1b[%dmExporting package:%s module:%s\x1b[0m\n", COLOR_PURPLE, p->dir->bytes, p->file->bytes);
-            Transp_PrintFmtTree(p, fmt, fmt->root, 0);
-        }
-    }
 }
 
 status Transp_Trans(Transp *p){

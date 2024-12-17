@@ -51,7 +51,7 @@ status Oset_Init(MemCtx *m){
 }
 
 FmtCtx *Oset_Make(MemCtx *m, Lookup *osetDefs){
-    FmtCtx *o = FmtCtx_Make(m);
+    FmtCtx *o = FmtCtx_Make(m, NULL);
     o->type.of = TYPE_OSET;
     o->rbl = OsetParser_Make(m, NULL, (Abstract *)o);
     Fmt_Add(m, o, osetDefs);

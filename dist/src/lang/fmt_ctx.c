@@ -36,10 +36,10 @@ status Fmt_Add(MemCtx *m, FmtCtx *o, Lookup *fmtDefs){
     return SUCCESS;
 }
 
-FmtCtx *FmtCtx_Make(MemCtx *m){
+FmtCtx *FmtCtx_Make(MemCtx *m, FmtGenFunc generate){
     FmtCtx *fmt = (FmtCtx *)MemCtx_Alloc(m, sizeof(FmtCtx));
     fmt->type.of = TYPE_FMT_CTX;
     fmt->m = m;
-    fmt->out = ToStdOut;
+    fmt->generate = generate;
     return fmt;
 }

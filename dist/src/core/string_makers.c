@@ -204,6 +204,24 @@ String *String_ToHex(MemCtx *m, String *s){
     return ret;
 }
 
+status String_MakeUpper(String *s){
+    int delta = 'A' - 'a';
+    while(s != NULL){
+        byte *b = s->bytes;
+        byte *end = b+s->length;
+        while(b < end){
+            byte c = *b;
+            if(c >= 'a' && c <= 'z'){
+                *b = c + delta;
+            }
+            b++;
+        }
+        s = String_Next(s);
+    };
+    return SUCCESS;
+}
+
+
 status String_MakeLower(String *s){
     int delta = 'A' - 'a';
     while(s != NULL){
@@ -219,6 +237,32 @@ status String_MakeLower(String *s){
         s = String_Next(s);
     };
     return SUCCESS;
+}
+
+String *String_ToCamel(MemCtx *m, String *s){
+    boolean first = TRUE;
+    int delta = 'A' - 'a';
+    String *ret = String_Init(m, s->length);
+    while(s != NULL){
+        byte *b = s->bytes;
+        byte *end = b+s->length;
+        while(b < end){
+            byte c = *b;
+            if(first == TRUE && c >= 'a' && c <= 'z'){
+                *b = c + delta;
+                String_AddBytes(m, ret, b, 1);
+                first = FALSE;
+            }else if((c >= 'a' && c <= 'z') || c >= 'A' && c <= 'Z' || c == '_' || c == '-' || (c >= '0' && c <= '9')){
+                String_AddBytes(m, ret, b, 1);
+            }else{
+                first = TRUE;
+            }
+            b++;
+        }
+        s = String_Next(s);
+    };
+
+    return ret;
 }
 
 String *String_FromHex(MemCtx *m, String *s){

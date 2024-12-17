@@ -260,7 +260,7 @@ static void addPatterns(FmtCtx *fmt){
 }
 
 FmtCtx *FmtHtml_Make(MemCtx *m){
-    FmtCtx *ctx = FmtCtx_Make(m);
+    FmtCtx *ctx = FmtCtx_Make(m, NULL);
     ctx->type.of = TYPE_FMT_HTML;
     ctx->type.state |= FMT_FL_AUTO_ID;
 
