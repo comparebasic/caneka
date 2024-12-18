@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    printf("Struct from called\n");
     FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
 
     char *cstr = "";

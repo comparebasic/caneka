@@ -2,9 +2,8 @@
 #include <caneka.h>
 
 static status Roebling_RunMatches(Roebling *rbl){
-#ifdef DEBUG_STACK
-    DebugStack_Push(bytes("Roebling_RunMatches"), (Abstract *)rbl);
-#endif
+    Stack(bytes("Roebling_RunMatches"), (Abstract *)rbl);
+
     int i = 0;
     byte c = 0;
     rbl->type.state &= ~(ROEBLING_NEXT|END|SUCCESS);
@@ -30,7 +29,8 @@ static status Roebling_RunMatches(Roebling *rbl){
             if(mt != NULL){
 
                if(DEBUG_PATMATCH){
-                    printf("\x1b[%dmmatch: %d - ", DEBUG_PATMATCH, i);
+                    String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
+                    printf("\x1b[%dmrbl:%s/match:%d - ", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), i);
                }
 
                Match_Feed(mt, c);
@@ -61,8 +61,7 @@ static status Roebling_RunMatches(Roebling *rbl){
                          String *s = Range_Copy(rbl->m, &(rbl->range));
                          printf(" \x1b[1;%dm(", DEBUG_ROEBLING_COMPLETE);
                          Debug_Print((void *)s, 0, "", DEBUG_ROEBLING_COMPLETE, TRUE);
-                         printf("\x1b[1;%dm)\n\x1b[0m", DEBUG_ROEBLING_COMPLETE);
-                         printf("\n");
+                         printf("\x1b[1;%dmjumpTo:%d)\n\x1b[0m", DEBUG_ROEBLING_COMPLETE, mt->jump);
                      }
 
                      break;
@@ -75,10 +74,7 @@ static status Roebling_RunMatches(Roebling *rbl){
         SCursor_Incr(&(rbl->range.potential), 1);
     }
 
-#ifdef DEBUG_STACK
-    DebugStack_Pop();
-#endif
-    return rbl->type.state;
+    Return rbl->type.state;
 }
 
 String *Roebling_GetMarkDebug(Roebling *rbl, int idx){

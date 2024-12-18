@@ -275,7 +275,6 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         def = Chain_Get(ctx->byId, CNK_LANG_ARG_LIST);
     }
 
-
     if(def != NULL){
         if((def->type.state & FMT_DEF_INDENT) != 0){
             pushItem(ctx, captureKey);
@@ -289,12 +288,12 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     if(ctx->item != NULL && ctx->item->parent != NULL){
         if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0) && ctx->item != NULL){
-            ctx->item = ctx->item->parent;
             if(ctx->item->def->to != NULL){
                 ctx->item->def->to(ctx->m, ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
             }else{
                 Debug_Print((void *)ctx->item->def, 0, "FmtDef ->to is NULL: ", COLOR_CYAN, TRUE);
             }
+            ctx->item = ctx->item->parent;
         }else{
             if(ctx->item->def->from != NULL){
                 ctx->item->value = ctx->item->def->from(ctx->m, ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
@@ -314,7 +313,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         printf("\n");
     }
 
-    if(captureKey == CNK_LANG_LINE_END){
+    if(captureKey == CNK_LANG_LINE_END || captureKey == CNK_LANG_CURLY_CLOSE){
         Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
     }
 

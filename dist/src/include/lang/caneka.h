@@ -31,6 +31,7 @@ enum cnk_lang_range {
     _CNK_LANG_OP_END,
     CNK_LANG_VALUE,
     CNK_LANG_INVOKE,
+    CNK_LANG_FUNC_PTR,
     _CNK_LANG_CLOSER,
     CNK_LANG_LIST_CLOSE,
     CNK_LANG_CURLY_CLOSE,

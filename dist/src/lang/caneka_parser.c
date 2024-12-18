@@ -38,6 +38,8 @@ char * CnkLang_RangeToChars(word range){
         return "CNK_LANG_OP";
     }else if(range == CNK_LANG_VALUE){
         return "CNK_LANG_VALUE";
+    }else if(range == CNK_LANG_FUNC_PTR){
+        return "CNK_LANG_FUNC_PTR";
     }else if(range == CNK_LANG_LINE_END){
         return "CNK_LANG_LINE_END";
     }else if(range == CNK_LANG_ARG_LIST){
@@ -68,7 +70,7 @@ static word sepDef[] = {
 
 static word curlyCloseDef[] = {
     PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_ANY|PAT_NO_CAPTURE, '\n', '\n', PAT_TERM, '}', '}',
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, '\n', '\n',
+    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_NO_CAPTURE|PAT_TERM, '\n', '\n',
     PAT_END, 0, 0
 };
 
@@ -137,7 +139,7 @@ static word typeDef[] = {
 };
 
 static word rblDef[] = {
-    PAT_TERM, '/', '/',
+    PAT_TERM|PAT_NO_CAPTURE, '/', '/',PAT_KO, '/','/', patText,
     PAT_END, 0, 0
 };
 
@@ -155,6 +157,13 @@ static word invokeDef[] = {
     PAT_END, 0, 0
 };
 
+static word toFuncDef[] = {
+    PAT_MANY|PAT_TERM|PAT_NO_CAPTURE, ' ', ' ',
+    PAT_TERM, '-','-',
+    PAT_TERM, '>','>',
+    PAT_ANY|PAT_TERM|PAT_NO_CAPTURE, ' ', ' ',
+    PAT_END, 0, 0
+};
 
 static word tokenDotDef[] = {
     PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_NO_CAPTURE, '.','.',
@@ -236,6 +245,8 @@ static status str(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)lineEndDef, CNK_LANG_LINE_END, CNK_LANG_STRUCT);
     r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)curlyCloseDef, CNK_LANG_CURLY_CLOSE, -1);
+    r |= Roebling_SetPattern(rbl,
         (PatCharDef*)indentDef, CNK_LANG_INDENT, CNK_LANG_STRUCT);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)tokenDef, CNK_LANG_TOKEN, CNK_LANG_POST_TOKEN);
@@ -295,7 +306,9 @@ static status value(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)tokenDotDef, CNK_LANG_TOKEN_DOT, CNK_LANG_TOKEN);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)rblDef, CNK_LANG_ROEBLING, -1);
+        (PatCharDef*)rblDef, CNK_LANG_ROEBLING, CNK_LANG_VALUE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)toFuncDef, CNK_LANG_FUNC_PTR, CNK_LANG_VALUE);
 
     return r;
 }
@@ -346,6 +359,12 @@ Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx, RblCaptureFunc capture){
 
     LookupConfig config[] = {
         {CNK_LANG_START, (Abstract *)String_Make(m, bytes("START"))},
+        {CNK_LANG_STRUCT, (Abstract *)String_Make(m, bytes("STRUCT"))},
+        {CNK_LANG_TOKEN, (Abstract *)String_Make(m, bytes("TOKEN"))},
+        {CNK_LANG_VALUE, (Abstract *)String_Make(m, bytes("VALUE"))},
+        {CNK_LANG_POST_TOKEN, (Abstract *)String_Make(m, bytes("POST_TOKEN"))},
+        {CNK_LANG_ARG_LIST, (Abstract *)String_Make(m, bytes("ARG_LIST"))},
+        {CNK_LANG_LINE_END, (Abstract *)String_Make(m, bytes("LINE_END"))},
         {0, NULL},
     };
 

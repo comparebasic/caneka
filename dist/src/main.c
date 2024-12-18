@@ -60,8 +60,7 @@ status transpile(MemCtx *m, char *arg){
         Table_Set(ctx->formats, (Abstract *)String_Make(m, bytes(".cnk")), (Abstract *)cnkLang);
     }
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
-
-    Return SUCCESS;
+    Return Transp_Trans(ctx);
 }
 
 static status handle(MemCtx *m, char *arg){

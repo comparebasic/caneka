@@ -1,0 +1,4 @@
+struct {
+    data = Keys
+    rbl = /between({^$.},$ -> value),value({_\{^\}.} -> between)/ -> Capture
+}
