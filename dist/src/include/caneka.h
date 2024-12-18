@@ -194,7 +194,7 @@ enum types {
     TYPE_ENC_PAIR,
     TYPE_FMT_HTML,
     TYPE_LANG_CNK,
-    TYPE_LANG_CNK_SPACE,
+    TYPE_LANG_CNK_MODULE,
     TYPE_TRANSP,
     TYPE_DEBUG_STACK,
     TYPE_DEBUG_STACK_ENTRY,
@@ -330,4 +330,5 @@ status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 #include "lang/xmlt.h"
 #include "lang/fmt_html.h"
 #include "lang/caneka.h"
+#include "lang/caneka_module.h"
 

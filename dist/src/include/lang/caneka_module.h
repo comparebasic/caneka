@@ -18,12 +18,16 @@ typedef struct caneka_func_def {
 
 typedef struct caneka_module {
     Type type;
+    int spaceIdx;
     String *name;
+    String *typeName;
+    Span *states;
     String *hfile;
     String *cfile;
-    String *typeName;
-    String *typeId;
     Span *args;
     Span *funcDefs;
     struct caneka_module *parent;
 } CnkLangModule;
+
+CnkLangModule *CnkLangModule_Make(MemCtx *m);
+status CnkLangModule_SetItem(MemCtx *m, CnkLangModule *mod, FmtItem *item);

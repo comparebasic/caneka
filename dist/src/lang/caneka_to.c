@@ -44,39 +44,33 @@ Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstra
     return (Abstract *)s;
 }
 
-Abstract *CnkLang_Struct(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
-    String *module = (String *)asIfc(fmt->root->value, TYPE_STRING);
+Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    CnkLangModule *mod = (CnkLangModule *)as(a, TYPE_LANG_CNK_MODULE);
 
     String *s = String_Init(m, STRING_EXTEND);
-    String_Add(m, s, module);
+    String_Add(m, s, mod->name);
     char *cstr = " *";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, module);
+    String_Add(m, s, mod->name);
     cstr = "_Make(MemCtx *m){\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
     cstr = "    ";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, module);
+    String_Add(m, s, mod->name);
     cstr = " *o = (";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, module);
+    String_Add(m, s, mod->name);
     cstr = "*)MemCtx_Alloc(m, sizeof(";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, module);
+    String_Add(m, s, mod->name);
     cstr = "));\n    o->type.of = ";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-
-    String *type = String_Init(m, STRING_EXTEND);
-    cstr = "TYPE_";
-    String_AddBytes(m, type, bytes(cstr), strlen(cstr));
-    String_Add(m, type, module);
-    String_MakeUpper(type);
-
-    String_Add(m, s, type);
+    String_Add(m, s, mod->typeName);
 
     cstr = ";\n    return o;\n}\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+
+    fmt->out(m, s, fmt->source);
 
     return (Abstract *)s;
 }

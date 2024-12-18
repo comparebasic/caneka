@@ -47,9 +47,8 @@ status serve(MemCtx *m, char *arg){
 }
 
 status transpile(MemCtx *m, char *arg){
-#ifdef DEBUG_STACK
-    DebugStack_Push(bytes("transpile"), NULL);
-#endif
+    Stack(bytes("transpile"), NULL);
+
     Transp *ctx = Transp_Make(m);
     ctx->src = String_Make(m, bytes("src"));
     ctx->dist = String_Make(m, bytes("dist"));
@@ -62,11 +61,7 @@ status transpile(MemCtx *m, char *arg){
     }
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
 
-    status r =  Transp_Trans(ctx);
-#ifdef DEBUG_STACK
-    DebugStack_Pop();
-#endif
-    return r;
+    Return SUCCESS;
 }
 
 static status handle(MemCtx *m, char *arg){

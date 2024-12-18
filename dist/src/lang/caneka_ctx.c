@@ -8,6 +8,7 @@ typedef struct cnf  {
     char *name;
     char *alias;
     FmtTrans to;
+    FmtTrans from;
     word *rollups;
     int parentIdx;
 } Cnf;
@@ -31,6 +32,7 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             CnkLang_Start,
             NULL,
+            NULL,
             -1
         },
         {
@@ -39,7 +41,8 @@ static status addDefs(FmtCtx *ctx){
             0,
             "struct",
             NULL,
-            CnkLang_Struct,
+            CnkLang_StructTo,
+            CnkLang_StructFrom,
             NULL,
             -1
         },
@@ -51,6 +54,7 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             CnkLang_RequireTo,
             NULL,
+            NULL,
             -1
         },
         {
@@ -58,6 +62,7 @@ static status addDefs(FmtCtx *ctx){
             FMT_DEF_INDENT,
             0,
             "package",
+            NULL,
             NULL,
             NULL,
             NULL,
@@ -71,6 +76,7 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
+            NULL,
             -1
         },
         {
@@ -78,6 +84,7 @@ static status addDefs(FmtCtx *ctx){
             FMT_DEF_INDENT,
             0,
             "arg-list",
+            NULL,
             NULL,
             NULL,
             NULL,
@@ -91,6 +98,7 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
+            NULL,
             -1
         },
         {
@@ -98,6 +106,7 @@ static status addDefs(FmtCtx *ctx){
             0,
             0,
             "token",
+            NULL,
             NULL,
             NULL,
             rollupToken,
@@ -108,6 +117,7 @@ static status addDefs(FmtCtx *ctx){
             0,
             0,
             "op",
+            NULL,
             NULL,
             NULL,
             rollupOp,
@@ -121,6 +131,7 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
+            NULL,
             -1
         },
         {
@@ -128,6 +139,7 @@ static status addDefs(FmtCtx *ctx){
             0,
             0,
             "roebling",
+            NULL,
             NULL,
             NULL,
             NULL,
@@ -141,6 +153,7 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
+            NULL,
             -1
         },
         {
@@ -148,6 +161,7 @@ static status addDefs(FmtCtx *ctx){
             0,
             0,
             "idxs",
+            NULL,
             NULL,
             NULL,
             NULL,
@@ -161,6 +175,7 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
+            NULL,
             -1
         },
         {
@@ -168,6 +183,7 @@ static status addDefs(FmtCtx *ctx){
             FMT_DEF_OUTDENT,
             0,
             "list-close",
+            NULL,
             NULL,
             NULL,
             NULL,
@@ -181,12 +197,14 @@ static status addDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
+            NULL,
             -1
         },
         {
             0,
             0,
             0,
+            NULL,
             NULL,
             NULL,
             NULL,
@@ -241,7 +259,6 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     status r = READY;
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
 
-
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
     if(def == NULL || (def->type.state & FMT_FL_TAXONAMY) != 0){
         TableChain_Get(ctx->byAlias, s);
@@ -273,7 +290,15 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     if(ctx->item != NULL && ctx->item->parent != NULL){
         if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0) && ctx->item != NULL){
             ctx->item = ctx->item->parent;
+            if(ctx->item->def->to != NULL){
+                ctx->item->def->to(ctx->m, ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
+            }else{
+                Debug_Print((void *)ctx->item->def, 0, "FmtDef ->to is NULL: ", COLOR_CYAN, TRUE);
+            }
         }else{
+            if(ctx->item->def->from != NULL){
+                ctx->item->value = ctx->item->def->from(ctx->m, ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
+            }
             if(ctx->item->parent->children == NULL){
                 ctx->item->parent->children = Span_Make(ctx->m, TYPE_SPAN);
             }
@@ -293,100 +318,15 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
     }
 
-    /*
-    if(captureKey == CNK_LANG_TOKEN){
-        if(ctx->item->spaceIdx == CNK_LANG_PACKAGE || ctx->item->spaceIdx == CNK_LANG_REQUIRE){
-            ctx->item->spaceIdx = 0;
-            Roebling_JumpTo(ctx->rbl, CNK_LANG_START);
-        }
-    }
-    if(captureKey == CNK_LANG_OP){
-        printf("Getting from table\n");
-        FmtDef *def = TableChain_Get(ctx->byAlias, s);
-        / * set operation by alias * /
-    }
-    if(captureKey == CNK_LANG_INVOKE){
-        pushItem(ctx, CNK_LANG_ARG_LIST);
-    }
-    if(captureKey > _CNK_LANG_MAJOR && captureKey < _CNK_LANG_MAJOR_END){
-        pushItem(ctx, captureKey);
-    }
-    if(captureKey > _CNK_LANG_CLOSER && captureKey < _CNK_LANG_CLOSER_END){
-        if(ctx->item->parent != NULL){
-            ctx->item = ctx->item->parent;
-            if(ctx->item->spaceIdx > 0){
-                Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
-            }
-        }
-        if(captureKey == CNK_LANG_CURLY_CLOSE){
-            / * closes twice intentionally * /
-            if(ctx->item->parent != NULL){
-                ctx->item = ctx->item->parent;
-            }
-        }
-    }
-    if(captureKey > _CNK_LANG_RETURNS && captureKey < _CNK_LANG_RETURNS_END){
-        if(ctx->item->spaceIdx > 0){
-            Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
-        }
-    }
-
-    if(captureKey == CNK_LANG_INVOKE || captureKey == CNK_LANG_TOKEN_NULLABLE || captureKey == CNK_LANG_TOKEN || captureKey == CNK_LANG_VALUE || captureKey == CNK_LANG_TOKEN_DOT){
-        if(ctx->item->value == NULL){
-            ctx->item->value = (Abstract *)Span_Make(ctx->m, TYPE_SPAN);
-        }
-        if(ctx->item->value->type.of == TYPE_SPAN){
-            Span_Add((Span *)ctx->item->value, (Abstract *)s);
-        }
-    }
-    */
-
     return SUCCESS;
 }
-
-static status genOut(FmtCtx *ctx, FmtItem *item, OutFunc out){
-    String *s = (String *)item->def->to(ctx->m, item->def, ctx, item->key, (Abstract *)item);
-    return out(ctx->m, s, ctx->source);
-}
-
-static status Generate(FmtCtx *ctx, OutFunc out){
-    FmtItem *item = ctx->root;
-
-    String *ext = String_Make(ctx->m, bytes(".cnk"));
-
-    Transp *tp = (Transp *)as(ctx->source, TYPE_TRANSP);
-    String *module = String_ToCamel(ctx->m, tp->current.fname);
-    String_Trunc(module, ext->length);
-    ctx->root->value = (Abstract *)module;
-
-    Iter it;
-    while(item != NULL){
-        if(item->def->to != NULL){
-            genOut(ctx, item, out);
-        }
-
-
-        if(item->children != NULL){
-            Iter_Init(&it, item->children);
-            if((Iter_Next(&it) & END) == 0){
-                FmtItem *itm = (FmtItem *)Iter_Get(&it);
-                if(itm != NULL && itm->def != NULL && itm->def->to != NULL){
-                    genOut(ctx, itm, out);
-                }
-            }
-        }
-        item = NULL;
-    }
-    return NOOP;
-}
-
 
 FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
     FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
     ctx->type.of = TYPE_LANG_CNK;
     ctx->m = m;
     ctx->rbl = CnkLangCtx_RblMake(m, ctx, Capture);
-    ctx->generate = Generate;
+    ctx->out = ToStdOut;
 
     ctx->rangeToChars = CnkLang_RangeToChars;
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);

@@ -55,4 +55,5 @@ char * CnkLang_RangeToChars(word range);
 /* format to functs */
 Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
-Abstract *CnkLang_Struct(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
+Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
+Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);

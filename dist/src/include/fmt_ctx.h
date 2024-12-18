@@ -25,7 +25,6 @@ typedef struct fmt_item {
 } FmtItem;
 
 
-typedef status (*FmtGenFunc)(struct formatter *ctx, OutFunc out);
 typedef struct formatter {
     Type type;
     MemCtx *m;
@@ -38,10 +37,10 @@ typedef struct formatter {
     TableChain *byName;
     TableChain *byAlias;
     RangeToChars rangeToChars;
-    FmtGenFunc generate;
+    OutFunc out;
     Abstract *source;
 } FmtCtx;
 
 FmtItem *FmtItem_Make(MemCtx *m, FmtCtx *fctx);
-FmtCtx *FmtCtx_Make(MemCtx *m, FmtGenFunc generate);
+FmtCtx *FmtCtx_Make(MemCtx *m, OutFunc out);
 status Fmt_Add(MemCtx *m, FmtCtx *fmt, Lookup *fmtDefs);

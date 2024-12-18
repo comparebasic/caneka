@@ -23,12 +23,6 @@ static status Transp_transpile(Transp *p, FmtCtx *fmt){
             NULL, Transp_onInput, (Abstract *)fmt);
 
         fprintf(stderr, "\n\x1b[%dmFinished parsing\x1b[0m\n", COLOR_BLUE);
-        if((r & SUCCESS) != 0){
-            fmt->generate(fmt, ToStdOut);
-        }else{
-            Fatal("Parsing file broke", TYPE_FMT_CTX);
-            Return ERROR;
-        }
 
         Return r;
     }

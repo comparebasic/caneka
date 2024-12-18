@@ -1,6 +1,0 @@
-struct {
-    m = Mem()
-    get = Getter
-    source? = Abs
-    rbl = /between({^$.},$ -> value),value({_\{^\}.} -> between)/ -> Capture
-}
