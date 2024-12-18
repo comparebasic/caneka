@@ -197,7 +197,7 @@ static word opDef[] = {
     PAT_MANY, '+', '+', 
     PAT_MANY, '-', '-', 
     PAT_MANY, '*', '*', 
-    PAT_MANY, '/', '/', 
+    PAT_MANY|PAT_TERM, '/', '/', 
     PAT_MANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
     PAT_END, 0, 0
 };

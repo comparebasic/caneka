@@ -88,3 +88,4 @@ String *String_ToEscaped(MemCtx *m, String *s);
 char *String_ToChars(MemCtx *m, String *s);
 status String_ToSlab(String *a, void *sl, size_t sz);
 String *String_Clone(MemCtx *m, String *s);
+status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean extended);

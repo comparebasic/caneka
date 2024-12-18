@@ -2,7 +2,8 @@ typedef Abstract *(*FmtTrans)(MemCtx *m, struct format_def *def, struct formatte
 
 enum formatter_def_flags {
     FMT_DEF_INDENT = 1 << 8,
-    FMT_DEF_OUTDENT = 1 << 9,
+    /*FMT_FL_TAXONAMY = 1 << 9,*/
+    FMT_DEF_OUTDENT = 1 << 10,
 };
 
 typedef struct format_def {

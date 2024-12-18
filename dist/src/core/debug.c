@@ -96,7 +96,7 @@ void NestedD_Print(Abstract *a, cls type, char *msg, int color, boolean extended
 
 void FmtDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     FmtDef *def = (FmtDef *)as(a, TYPE_FMT_DEF);
-    printf("\x1b[%dm%sFmtDef<\x1b[1;%dm%s\x1b[%dm/%s %d %s>\x1b[0m", color, msg,
+    printf("\x1b[%dm%sFmtDef<\x1b[1;%dm%s\x1b[%dm/%s id:%d %s>\x1b[0m", color, msg,
         color,
         String_ToChars(DebugM, def->name),
         color,

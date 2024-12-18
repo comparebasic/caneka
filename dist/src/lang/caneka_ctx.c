@@ -167,7 +167,7 @@ static status addDefs(FmtCtx *ctx){
             CNK_LANG_LIST_CLOSE,
             FMT_DEF_OUTDENT,
             0,
-            "seq",
+            "list-close",
             NULL,
             NULL,
             NULL,
@@ -234,11 +234,6 @@ static void pushItem(FmtCtx *ctx, word captureKey){
     item->spaceIdx = captureKey;
     item->parent = ctx->item;
 
-    if(item->parent->children == NULL){
-        item->parent->children = Span_Make(ctx->m, TYPE_SPAN);
-    }
-    Span_Add(item->parent->children, (Abstract *)item);
-
     ctx->item = item;
 }
 
@@ -246,31 +241,57 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     status r = READY;
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
 
+
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
     if(def == NULL || (def->type.state & FMT_FL_TAXONAMY) != 0){
         TableChain_Get(ctx->byAlias, s);
+    }
+
+    if(captureKey == CNK_LANG_INVOKE){
+        if(ctx->item != NULL && ctx->item->parent != NULL){
+            if(ctx->item->parent->children == NULL){
+                ctx->item->parent->children = Span_Make(ctx->m, TYPE_SPAN);
+            }
+            Span_Add(ctx->item->parent->children, (Abstract *)ctx->item);
+        }
+
+        def = Chain_Get(ctx->byId, CNK_LANG_ARG_LIST);
+    }
+
+
+    if(def != NULL){
+        if((def->type.state & FMT_DEF_INDENT) != 0){
+            pushItem(ctx, captureKey);
+        }
+
+        if(ctx->item != NULL && ctx->item->def == NULL){
+            ctx->item->def = def;
+        }
+
+    }
+
+    if(ctx->item != NULL && ctx->item->parent != NULL){
+        if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0) && ctx->item != NULL){
+            ctx->item = ctx->item->parent;
+        }else{
+            if(ctx->item->parent->children == NULL){
+                ctx->item->parent->children = Span_Make(ctx->m, TYPE_SPAN);
+            }
+            Span_Add(ctx->item->parent->children, (Abstract *)ctx->item);
+        }
     }
 
     if(DEBUG_LANG_CNK){
         printf("\x1b[%dmCnk Capture %s:", DEBUG_LANG_CNK, CnkLang_RangeToChars(captureKey));
         Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
-        Debug_Print((void *)def, 0, "FmtDef: ", DEBUG_LANG_CNK, TRUE);
+        Debug_Print((void *)ctx->item->def, 0, "FmtDef: ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
     }
 
-    if(def != NULL){
-        if((def->type.state & FMT_DEF_INDENT) != 0){
-            pushItem(ctx, captureKey);
-        }else if((def->type.state & FMT_DEF_OUTDENT) != 0 && ctx->item != NULL){
-            ctx->item = ctx->item->parent;
-        }
-
-        if(ctx->item != NULL && ctx->item->def == NULL){
-            ctx->item->def = def;
-        }
+    if(captureKey == CNK_LANG_LINE_END){
+        Roebling_JumpTo(ctx->rbl, ctx->item->spaceIdx);
     }
-    printf("\n");
 
     /*
     if(captureKey == CNK_LANG_TOKEN){

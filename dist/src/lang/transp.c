@@ -22,7 +22,7 @@ static status Transp_transpile(Transp *p, FmtCtx *fmt){
         status r = File_Stream(p->m, &p->current.sourceFile,
             NULL, Transp_onInput, (Abstract *)fmt);
 
-        fprintf(stderr, "\x1b[%dmFinished parsing\x1b[0m\n", COLOR_YELLOW);
+        fprintf(stderr, "\n\x1b[%dmFinished parsing\x1b[0m\n", COLOR_BLUE);
         if((r & SUCCESS) != 0){
             fmt->generate(fmt, ToStdOut);
         }else{

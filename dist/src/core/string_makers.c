@@ -361,7 +361,8 @@ status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean
         }
         for(int j = 7; j >= 0;j--){
             r |= SUCCESS;
-            String_AddInt(m, s, (b & (1 << j)) ? '1' : '0'); 
+            byte x = (b & (1 << j)) ? '1' : '0';
+            String_AddBytes(m, s, &x, 1); 
         }
         if(extended){
             String_AddBytes(m, s, bytes(" "), 1);
