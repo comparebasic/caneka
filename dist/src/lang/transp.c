@@ -79,15 +79,11 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL){
-            Debug_Print((void*)h->item, 0, "Formats: ", COLOR_PURPLE, TRUE);
-            Debug_Print((void*)p->current.source, 0, " vs  ", COLOR_PURPLE, TRUE);
-            printf("\n");
             String *abbrev = (String *)h->item;
             p->current.ext = abbrev;
             if(String_PosEqualsBytes(p->current.source, abbrev->bytes, abbrev->length, STRING_POS_END)){
                 String_Trunc(p->current.dest, -1);
 
-                printf("transFile found\a");
                 Spool_Init(&p->current.sourceFile, p->current.source, NULL, NULL);
                 Spool_Init(&p->current.destFile, p->current.dest, NULL, NULL);
                 return Transp_transpile(p, (FmtCtx *)h->value);

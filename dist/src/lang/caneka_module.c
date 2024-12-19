@@ -27,10 +27,6 @@ status CnkLangModule_SetItem(MemCtx *m, CnkLangModule *mod, FmtItem *item, Abstr
         Result *second = (Result *)Span_Get(item->children, 0);
         Result *third = (Result *)Span_Get(item->children, 1);
 
-        printf("second id:%s\n", CnkLang_RangeToChars(second->range));
-        Debug_Print((void *)second, 0, "second: ", COLOR_PURPLE, TRUE);
-        printf("\n");
-
         if(third != NULL && (third->type.of == TYPE_RESULT && second->type.of == TYPE_RESULT) && second->range == CNK_LANG_ASSIGN){
              ref = CnkLangModRef_Make(m); 
              ref->name = third->s;

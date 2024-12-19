@@ -247,7 +247,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             def->name = String_Make(m, bytes(cnf->name));
         }
         if(cnf->alias != NULL){
-            printf("Assigning Alias %s\n", cnf->alias);
             def->alias = String_Make(m, bytes(cnf->alias));
         }
         def->to = cnf->to;

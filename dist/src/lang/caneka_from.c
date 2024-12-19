@@ -3,7 +3,6 @@
 
 Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
     FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
-    printf("Struct From %s\n", CnkLang_RangeToChars(item->spaceIdx));
 
     char *cstr = "";
     CnkLangModule *mod = CnkLangModule_Make(m); 
@@ -11,9 +10,6 @@ Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, A
 
     Transp *tp = (Transp*)as(fmt->source, TYPE_TRANSP);
     mod->cfile = tp->current.dest;
-
-    Debug_Print((void *)tp->current.ext, 0, "Ext: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     String *name_ = String_Clone(m, tp->current.fname);
     String_Trunc(name_, -(tp->current.ext->length));
@@ -24,9 +20,6 @@ Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, A
     String_AddBytes(m, mod->ref->typeName, bytes(cstr), strlen(cstr));
     String_Add(m, mod->ref->typeName, mod->ref->name);
     String_MakeUpper(mod->ref->typeName);
-
-    Debug_Print((void *)item->children, 0, "Children:", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     if(item->children != NULL){
         Iter it;
