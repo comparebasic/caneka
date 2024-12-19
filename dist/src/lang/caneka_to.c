@@ -138,7 +138,7 @@ Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abs
     cstr = "\n    return o;\n}\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
 
-
+    Transp *tp = (Transp *)asIfc(fmt->source, TYPE_TRANSP);
     fmt->out(m, s, fmt->source);
 
     return (Abstract *)s;

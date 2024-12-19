@@ -73,6 +73,8 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
     String_AddBytes(m, p->current.dest, bytes("/"), 1);
     String_Add(m, p->current.dest, fname);
 
+    p->current.destHeaderFile = String_Clone(m, p->current.dest);
+
 
     Iter it;
     Iter_Init(&it, p->formats);
@@ -82,10 +84,13 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
             String *abbrev = (String *)h->item;
             p->current.ext = abbrev;
             if(String_PosEqualsBytes(p->current.source, abbrev->bytes, abbrev->length, STRING_POS_END)){
-                String_Trunc(p->current.dest, -1);
+                String_Trunc(p->current.dest, -2);
+                String_Trunc(p->current.destHeader, -3);
+                String_AddBytes(m, p->current.destHeader, bytes("h") 1);
 
                 Spool_Init(&p->current.sourceFile, p->current.source, NULL, NULL);
                 Spool_Init(&p->current.destFile, p->current.dest, NULL, NULL);
+                Spool_Init(&p->current.destHeaderFile, p->current.dest, NULL, NULL);
                 return Transp_transpile(p, (FmtCtx *)h->value);
             }else{
                 printf("nope: %s\a", fname->bytes);

@@ -8,9 +8,11 @@ typedef struct transp {
         String *fname;
         String *source;
         String *dest;
+        String *destHeader;
         String *ext;
         File sourceFile;
         File destFile;
+        File destHeaderFile;
     } current;
     OutFunc out;
     Span *formats; /* FmtCtx */
