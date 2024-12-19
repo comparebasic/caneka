@@ -73,6 +73,7 @@ char *TypeStrings[] = {
     "TYPE_STRING_FULL",
     "TYPE_STRING_SLAB",
     "TYPE_TESTSUITE",
+    "TYPE_RESULT",
     "TYPE_PARSER",
     "TYPE_ROEBLING",
     "TYPE_MULTIPARSER",
@@ -129,8 +130,6 @@ char *TypeStrings[] = {
     "TYPE_NESTEDD",
     "TYPE_ENC_PAIR",
     "TYPE_FMT_HTML",
-    "TYPE_LANG_CNK",
-    "TYPE_LANG_CNK_MODULE",
     "TYPE_TRANSP",
     "TYPE_DEBUG_STACK",
     "TYPE_DEBUG_STACK_ENTRY",
@@ -894,6 +893,7 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     if(func != NULL){
         return func(a, type, msg, color, extended);
     }else{
+        printf("type: %hu\n", type);
         printf("%s:%s unkown_debug(%p)", msg, Class_ToString(type), t);
     }
 

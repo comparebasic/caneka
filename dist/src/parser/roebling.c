@@ -4,7 +4,6 @@
 static status Roebling_RunMatches(Roebling *rbl){
     Stack(bytes("Roebling_RunMatches"), (Abstract *)rbl);
 
-    int i = 0;
     byte c = 0;
     rbl->type.state &= ~(ROEBLING_NEXT|END|SUCCESS);
     if(rbl->matches->nvalues == 0){
@@ -18,7 +17,9 @@ static status Roebling_RunMatches(Roebling *rbl){
         }
         c = Range_GetByte(&(rbl->range));
         Match *mt = NULL;
-        for(int i = 0; i < rbl->matches->nvalues; i++){
+        int ranCount = 0;
+        int i = 0;
+        for(i = 0; i < rbl->matches->nvalues; i++){
             mt = Span_Get(rbl->matches, i);
 
             if(DEBUG_ROEBLING){
@@ -32,8 +33,10 @@ static status Roebling_RunMatches(Roebling *rbl){
                     String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
                     printf("\x1b[%dmrbl:%s/match:%d - ", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), i);
                }
-
                Match_Feed(mt, c);
+               if((mt->type.state & NOOP) == 0){
+                    ranCount++;
+               }
                if((mt->type.state & SUCCESS) != 0){
                      rbl->type.state &= ~PROCESSING;
                      rbl->type.state = ROEBLING_NEXT;
@@ -68,11 +71,15 @@ static status Roebling_RunMatches(Roebling *rbl){
                }
             }
         }
+        if(ranCount == 0){
+            rbl->type.state |= (NOOP|END);
+        }
         if(HasFlag(mt->type.state, MATCH_INVERTED)){
             break;
         }
         SCursor_Incr(&(rbl->range.potential), 1);
     }
+
 
     Return rbl->type.state;
 }
