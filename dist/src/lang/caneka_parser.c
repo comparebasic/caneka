@@ -1,62 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-char * CnkLang_RangeToChars(word range){
-    if(range == 0){
-        return "ZERO";
-    }else if(range == CNK_LANG_START){
-        return "CNK_LANG_START";
-    }else if(range == CNK_LANG_LINE){
-        return "CNK_LANG_LINE";
-    }else if(range == CNK_LANG_INDENT){
-        return "CNK_LANG_INDENT";
-    }else if(range == CNK_LANG_LINE_END){
-        return "CNK_LANG_LINE_END";
-    }else if(range == CNK_LANG_STRUCT){
-        return "CNK_LANG_STRUCT";
-    }else if(range == CNK_LANG_REQUIRE){
-        return "CNK_LANG_REQUIRE";
-    }else if(range == CNK_LANG_PACKAGE){
-        return "CNK_LANG_PACKAGE";
-    }else if(range == CNK_LANG_TYPE){
-        return "CNK_LANG_TYPE";
-    }else if(range == CNK_LANG_C){
-        return "CNK_LANG_C";
-    }else if(range == CNK_LANG_END_C){
-        return "CNK_LANG_END_C";
-    }else if(range == CNK_LANG_TOKEN){
-        return "CNK_LANG_TOKEN";
-    }else if(range == CNK_LANG_TOKEN_NULLABLE){
-        return "CNK_LANG_TOKEN_NULLABLE";
-    }else if(range == CNK_LANG_INVOKE){
-        return "CNK_LANG_INVOKE";
-    }else if(range == CNK_LANG_TOKEN_DOT){
-        return "CNK_LANG_TOKEN_DOT";
-    }else if(range == CNK_LANG_POST_TOKEN){
-        return "CNK_LANG_POST_TOKEN";
-    }else if(range == CNK_LANG_OP){
-        return "CNK_LANG_OP";
-    }else if(range == CNK_LANG_VALUE){
-        return "CNK_LANG_VALUE";
-    }else if(range == CNK_LANG_FUNC_PTR){
-        return "CNK_LANG_FUNC_PTR";
-    }else if(range == CNK_LANG_LINE_END){
-        return "CNK_LANG_LINE_END";
-    }else if(range == CNK_LANG_ARG_LIST){
-        return "CNK_LANG_ARG_LIST";
-    }else if(range == CNK_LANG_CURLY_OPEN){
-        return "CNK_LANG_CURLY_OPEN";
-    }else if(range == CNK_LANG_CURLY_CLOSE){
-        return "CNK_LANG_CURLY_CLOSE";
-    }else if(range == CNK_LANG_LIST_CLOSE){
-        return "CNK_LANG_LIST_CLOSE";
-    }else if(range == CNK_LANG_ROEBLING){
-        return "CNK_LANG_ROEBLING";
-    }else{
-        return "unknown";
-    }
-}
-
 static word indentDef[] = {
     PAT_MANY, ' ',' ', PAT_MANY|PAT_TERM,'\t','\t',
     PAT_END, 0, 0
@@ -91,6 +35,10 @@ static word lineEndDef[] = {
     PAT_END, 0, 0
 };
 
+static word blankLineDef[] = {
+    PAT_MANY, ' ',' ', PAT_MANY,'\t','\t', PAT_MANY, '\r', '\r', PAT_MANY|PAT_TERM, '\n', '\n',
+    PAT_END, 0, 0
+};
 
 static word reqDef[] = {
     PAT_TERM, 'R', 'R',
@@ -125,6 +73,7 @@ static word structDef[] = {
     PAT_TERM, 't', 't',
     PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\t','\t',
     PAT_TERM|PAT_NO_CAPTURE, '{', '{',
+    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE,'\r', '\r',PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,'\n', '\n',
     PAT_END, 0, 0
 };
 
@@ -133,7 +82,7 @@ static word typeDef[] = {
     PAT_TERM, 'y', 'y',
     PAT_TERM, 'p', 'p',
     PAT_TERM, 'e', 'e',
-    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE,'\t','\t', PAT_MANY|PAT_NO_CAPTURE,'\r', '\r',PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\r', '\r',
+    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE,'\t','\t', PAT_MANY|PAT_NO_CAPTURE,'\r', '\r',PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\n', '\n',
     PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,'\t','\t',
     PAT_END, 0, 0
 };
@@ -216,7 +165,7 @@ static status start(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)lineEndDef, CNK_LANG_LINE_END, CNK_LANG_START);
+        (PatCharDef*)blankLineDef, CNK_LANG_BLANK_LINE, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)reqDef, CNK_LANG_REQUIRE, CNK_LANG_VALUE);
     r |= Roebling_SetPattern(rbl,
@@ -227,14 +176,6 @@ static status start(MemCtx *m, Roebling *rbl){
         (PatCharDef*)cDef, CNK_LANG_C, CNK_LANG_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)structDef, CNK_LANG_STRUCT, CNK_LANG_STRUCT);
-
-    PatCharDef *def = (PatCharDef *)lineDef;
-    Match *mt = Span_ReserveNext(rbl->matches);
-    r |= Match_SetPattern(mt, def);
-    mt->captureKey = CNK_LANG_LINE;
-    mt->jump = Roebling_GetMarkIdx(rbl, CNK_LANG_START);
-    mt->type.state |= SUCCESS_EMPTY;
-
     return r;
 }
 

@@ -1,6 +1,66 @@
 #include <external.h>
 #include <caneka.h>
 
+char * CnkLang_RangeToChars(word range){
+    if(range == 0){
+        return "ZERO";
+    }else if(range == CNK_LANG_START){
+        return "CNK_LANG_START";
+    }else if(range == CNK_LANG_BLANK_LINE){
+        return "CNK_LANG_BLANK_LINE";
+    }else if(range == CNK_LANG_LINE){
+        return "CNK_LANG_LINE";
+    }else if(range == CNK_LANG_INDENT){
+        return "CNK_LANG_INDENT";
+    }else if(range == CNK_LANG_LINE_END){
+        return "CNK_LANG_LINE_END";
+    }else if(range == CNK_LANG_STRUCT){
+        return "CNK_LANG_STRUCT";
+    }else if(range == CNK_LANG_REQUIRE){
+        return "CNK_LANG_REQUIRE";
+    }else if(range == CNK_LANG_PACKAGE){
+        return "CNK_LANG_PACKAGE";
+    }else if(range == CNK_LANG_TYPE){
+        return "CNK_LANG_TYPE";
+    }else if(range == CNK_LANG_C){
+        return "CNK_LANG_C";
+    }else if(range == CNK_LANG_END_C){
+        return "CNK_LANG_END_C";
+    }else if(range == CNK_LANG_TOKEN){
+        return "CNK_LANG_TOKEN";
+    }else if(range == CNK_LANG_TOKEN_NULLABLE){
+        return "CNK_LANG_TOKEN_NULLABLE";
+    }else if(range == CNK_LANG_INVOKE){
+        return "CNK_LANG_INVOKE";
+    }else if(range == CNK_LANG_TOKEN_DOT){
+        return "CNK_LANG_TOKEN_DOT";
+    }else if(range == CNK_LANG_POST_TOKEN){
+        return "CNK_LANG_POST_TOKEN";
+    }else if(range == CNK_LANG_OP){
+        return "CNK_LANG_OP";
+    }else if(range == CNK_LANG_VALUE){
+        return "CNK_LANG_VALUE";
+    }else if(range == CNK_LANG_FUNC_PTR){
+        return "CNK_LANG_FUNC_PTR";
+    }else if(range == CNK_LANG_LINE_END){
+        return "CNK_LANG_LINE_END";
+    }else if(range == CNK_LANG_ARG_LIST){
+        return "CNK_LANG_ARG_LIST";
+    }else if(range == CNK_LANG_CURLY_OPEN){
+        return "CNK_LANG_CURLY_OPEN";
+    }else if(range == CNK_LANG_CURLY_CLOSE){
+        return "CNK_LANG_CURLY_CLOSE";
+    }else if(range == CNK_LANG_LIST_CLOSE){
+        return "CNK_LANG_LIST_CLOSE";
+    }else if(range == CNK_LANG_ROEBLING){
+        return "CNK_LANG_ROEBLING";
+    }else{
+        return "unknown";
+    }
+}
+
+
+
 static void CnkModule_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     CnkLangModule *mod = (CnkLangModule *)as(a, TYPE_LANG_CNK_MODULE);
     printf("\x1b[%dm%sCnkModule<%s", color, msg, CnkLang_RangeToChars(mod->ref->spaceIdx));

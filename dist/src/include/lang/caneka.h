@@ -13,6 +13,7 @@ enum cnk_lang_range {
     CNK_LANG_ARG_LIST,
     CNK_LANG_CURLY_OPEN,
     _CNK_LANG_MAJOR_END,
+    CNK_LANG_BLANK_LINE,
     CNK_LANG_LINE,
     CNK_LANG_INDENT,
     CNK_LANG_C,
@@ -65,3 +66,4 @@ Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
+status CnkLang_AddDefs(FmtCtx *ctx);
