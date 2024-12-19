@@ -1,11 +1,12 @@
 #include <external.h>
 #include <caneka.h>
 
-static void pushItem(FmtCtx *ctx, word captureKey, FmtDef *def){
+static void pushItem(FmtCtx *ctx, word captureKey, String *s, FmtDef *def){
     FmtItem *item =  FmtItem_Make(ctx->m, ctx);
     item->spaceIdx = captureKey;
     item->parent = ctx->item;
     item->def = def;
+    item->content = s;
 
     ctx->item = item;
 }
@@ -16,10 +17,8 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
     if(def == NULL){
+        printf("looking by alias %s", String_ToChars(DebugM, s));
         def = TableChain_Get(ctx->byAlias, s);
-    }
-    if(def == NULL || (def->type.state & FMT_FL_TAXONAMY) != 0){
-        def = Chain_Get(ctx->byId, captureKey);
     }
 
     if(captureKey == CNK_LANG_INVOKE){
@@ -40,6 +39,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         Debug_Print((void *)def, 0, "def: ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
     }
+
     if(ctx->item != NULL && ctx->item->parent != NULL){
         if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0)){
             printf("Outdenting from %s to %s\n", CnkLang_RangeToChars(ctx->item->spaceIdx), CnkLang_RangeToChars(ctx->item->parent->spaceIdx));
@@ -64,12 +64,12 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     if(def != NULL){
         if((def->type.state & FMT_DEF_INDENT) != 0){
-            pushItem(ctx, captureKey, def);
+            pushItem(ctx, captureKey, s, def);
             printf("Indenting %s from %s\n", CnkLang_RangeToChars(ctx->item->spaceIdx), CnkLang_RangeToChars(ctx->item->parent->spaceIdx));
             printf("Adding %s to %s\n", CnkLang_RangeToChars(ctx->item->spaceIdx), CnkLang_RangeToChars(ctx->item->parent->spaceIdx));
             Span_Add(FmtItem_GetChildren(ctx->m, ctx->item->parent), (Abstract *)ctx->item);
         }else if((def->type.state & FMT_DEF_OUTDENT) == 0){
-            Abstract *child = (Abstract *)Result_Make(ctx->m, captureKey, s, source);
+            Abstract *child = (Abstract *)Result_Make(ctx->m, def->id, s, source);
             printf("Adding %s/%s to %s\n", String_ToChars(ctx->m, s), CnkLang_RangeToChars(captureKey), CnkLang_RangeToChars(ctx->item->spaceIdx));
             Span_Add(FmtItem_GetChildren(ctx->m, ctx->item), child);
         }

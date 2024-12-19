@@ -59,15 +59,12 @@ char * CnkLang_RangeToChars(word range){
     }
 }
 
-
-
 static void CnkModule_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     CnkLangModule *mod = (CnkLangModule *)as(a, TYPE_LANG_CNK_MODULE);
-    printf("\x1b[%dm%sCnkModule<%s", color, msg, CnkLang_RangeToChars(mod->ref->spaceIdx));
-    Debug_Print((void *)mod->ref->name, 0, " name:", color, FALSE);
-    Debug_Print((void *)mod->ref->typeName, 0, " typeName:", color, FALSE);
+    printf("\x1b[%dm%sCnkModule<", color, msg);
+    Debug_Print((void *)mod->ref, 0, "", color, extended);
     printf("\n");
-    Debug_Print((void *)mod->args, 0, "args:", color, FALSE);
+    Debug_Print((void *)mod->args, 0, "args:", color, TRUE);
     printf("\n");
     Debug_Print((void *)mod->states, 0, "states:", color, FALSE);
     printf("\n");
@@ -80,9 +77,36 @@ static void CnkModule_Print(Abstract *a, cls type, char *msg, int color, boolean
 
 }
 
+static void CnkModuleRef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    CnkLangModRef *ref = (CnkLangModRef *)as(a, TYPE_LANG_CNK_MOD_REF);
+    printf("\x1b[%dm%sCnkRef<%s", color, msg, CnkLang_RangeToChars(ref->spaceIdx));
+    Debug_Print((void *)ref->name, 0, " name:", color, FALSE);
+    Debug_Print((void *)ref->typeName, 0, " typeName:", color, FALSE);
+    printf("\x1b[%dm>\x1b[0m", color);
+
+}
+
+static void FmtItem_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
+    printf("\x1b[%dm%sFmtItem<\x1b[1;%dm%s\x1b[%dm/%s\x1b[0m", color, msg,
+        color,
+        CnkLang_RangeToChars(item->spaceIdx),
+        color,
+        State_ToChars(item->type.state));
+    Debug_Print((void *)item->content, 0, "", color, extended);
+    Debug_Print((void *)item->value, 0, "", color, extended);
+    Debug_Print((void *)item->children, 0, "", color, extended);
+    printf("\x1b[%dm>\x1b[0m\n", color);
+}
+
 static status populatePrint(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_LANG_CNK_MODULE, (void *)CnkModule_Print);
+    r |= Lookup_Add(m, lk, TYPE_LANG_CNK_MOD_REF, (void *)CnkModuleRef_Print);
+
+    /* overwriting native fmt item */
+    r |= Lookup_Add(m, DebugPrintChain->funcs, TYPE_FMT_ITEM, (void *)FmtItem_Print);
+    
     return r;
 }
 

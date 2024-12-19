@@ -4,6 +4,12 @@
 void *TableChain_Get(TableChain *chain, String *s){
 
     Abstract *t = Table_Get(chain->tbl, (Abstract *)s);
+    Debug_Print((void *)s, 0, "Table Chain Get s: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+    Debug_Print((void *)chain->tbl, 0, "Table Chain Get: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+    Debug_Print((void *)t, 0, "Table Chain Get t: ", COLOR_PURPLE, TRUE);
+    printf("\n");
 
     if(t != NULL){
        return (void *)t; 

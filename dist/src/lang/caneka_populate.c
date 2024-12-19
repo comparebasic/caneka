@@ -15,7 +15,7 @@ typedef struct cnf  {
 
 word rollupToken[] = {CNK_LANG_TOKEN_DOT,
     CNK_LANG_TOKEN_NULLABLE, CNK_LANG_INVOKE, 0};
-word rollupOp[] = {CNK_LANG_ASSIGN,CNK_LANG_ADD_AND,CNK_LANG_GT,CNK_LANG_LT,
+word rollupOp[] = {CNK_LANG_ADD_AND,CNK_LANG_GT,CNK_LANG_LT,
     CNK_LANG_IS,CNK_LANG_NOT,CNK_LANG_EQ,CNK_LANG_CMP,CNK_LANG_FLAG_ADD,
     CNK_LANG_FLAG_SUB,0};
 
@@ -113,11 +113,11 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             -1
         },
         {
-            CNK_LANG_OP,
+            CNK_LANG_ASSIGN,
             0,
             0,
             "op",
-            NULL,
+            "=",
             NULL,
             NULL,
             rollupOp,
@@ -247,6 +247,7 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             def->name = String_Make(m, bytes(cnf->name));
         }
         if(cnf->alias != NULL){
+            printf("Assigning Alias %s\n", cnf->alias);
             def->alias = String_Make(m, bytes(cnf->alias));
         }
         def->to = cnf->to;

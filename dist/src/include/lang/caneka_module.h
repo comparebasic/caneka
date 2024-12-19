@@ -22,6 +22,7 @@ typedef struct caneka_modref {
     String *token;
     String *name;
     String *typeName;
+    struct caneka_modref *next;
 } CnkLangModRef;
 
 typedef struct caneka_module {

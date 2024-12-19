@@ -264,20 +264,14 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     Debug_Print((void *)qidx->item, 0, "", color, TRUE);
                     printf("\x1b[%dm", color);
                 }else{
-                    if(HasFlag(def->flags, SPAN_INLINE)){
+                    if(!HasFlag(def->flags, SPAN_INLINE)){
                         t = *((Abstract **)t);
                     }
                     if(!HasFlag(def->flags, SPAN_RAW)){
                         i64 n = (util)t;
                         if(def->itemSize == sizeof(int)){
                             printf("%u", (int)n);
-                        }else{
-                            if(def->typeOf == TYPE_TABLE){
-                               Debug_Print((void *)a, TYPE_HASHED, "", color, FALSE); 
-                           }
-                        }
-                    }else{
-                        if(t->type.of != 0){
+                        }else if(t->type.of != 0){
                             Debug_Print((void *)t, 0, "", color, TRUE);
                         }else{
                             printf("0x%lx", *a);
@@ -560,9 +554,9 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void Result_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Result *v = (Result *)a;
-    printf("\x1b[%dm%sR<%s:%d:", color, msg, State_ToChars(v->type.state), v->range);
-    Debug_Print((void *)v->s, 0, "", color, extended);
-    printf("\x1b[%dm>\x1b[0m\n", color);
+    printf("\x1b[%dm%sR<%s:\x1b[1;%dm%d\x1b[0;%dm:", color, msg, State_ToChars(v->type.state), color, v->range, color);
+    Debug_Print((void *)v->s, 0, "", color, FALSE);
+    printf("\x1b[%dm>\x1b[0m", color);
 }
 
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

@@ -44,6 +44,64 @@ Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstra
     return (Abstract *)s;
 }
 
+static void addArgs(MemCtx *m, CnkLangModule *mod, String *s){
+    Iter it;;
+    Iter_Init(&it, mod->args);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            CnkLangModRef *ref = (CnkLangModRef *)as(h->value, TYPE_LANG_CNK_MOD_REF);
+            if(ref->spaceIdx == CNK_LANG_VALUE){
+                String_AddBytes(m, s, bytes(", "), 2); 
+                String_Add(m, s, ref->name); 
+                String_AddBytes(m, s, bytes(" *"), 2); 
+                String_Add(m, s, (String *)h->item); 
+            }
+        }
+    }
+}
+
+static void addInst(MemCtx *m, CnkLangModule *mod, String *s){
+    Iter it;;
+    Iter_Init(&it, mod->args);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            CnkLangModRef *ref = (CnkLangModRef *)as(h->value, TYPE_LANG_CNK_MOD_REF);
+            if(ref->spaceIdx == CNK_LANG_VALUE){
+                char *cstr = "    o->";
+                String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                String_Add(m, s, (String *)h->item); 
+                String_AddBytes(m, s, bytes(" = "), 3); 
+                String_Add(m, s, (String *)h->item); 
+                String_AddBytes(m, s, bytes(";\n"), 2); 
+            }else if(ref->spaceIdx == CNK_LANG_ROEBLING){
+                char *cstr = "    o->";
+                String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                String_Add(m, s, (String *)h->item); 
+                String_AddBytes(m, s, bytes(" = "), 3); 
+                String_Add(m, s, (String *)mod->ref->name); 
+                cstr = "_RblMake_";
+                String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                String_Add(m, s, (String *)h->item); 
+                cstr = "(m, (Abstract *)o, ";
+                String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                String_Add(m, s, (String *)mod->ref->name); 
+                if(ref->next != NULL){
+                    cstr = "_";
+                    String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                    String_Add(m, s, (String *)ref->next->name); 
+                    cstr = ");\n";
+                    String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                }else{
+                    cstr = "_Capture);\n";
+                    String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                }
+            }
+        }
+    }
+}
+
 Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
     FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
     CnkLangModule *mod = (CnkLangModule *)as(item->value, TYPE_LANG_CNK_MODULE);
@@ -53,7 +111,12 @@ Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abs
     char *cstr = " *";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
     String_Add(m, s, mod->ref->name);
-    cstr = "_Make(MemCtx *m){\n";
+    cstr = "_Make(MemCtx *m";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+
+    addArgs(m, mod, s);
+
+    cstr = "){\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
     cstr = "    ";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
@@ -67,9 +130,14 @@ Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abs
     cstr = "));\n    o->type.of = ";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
     String_Add(m, s, mod->ref->typeName);
-
-    cstr = ";\n    return o;\n}\n";
+    cstr = ";\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+
+    addInst(m, mod, s);
+
+    cstr = "\n    return o;\n}\n";
+    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+
 
     fmt->out(m, s, fmt->source);
 
