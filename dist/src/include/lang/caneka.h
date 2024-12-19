@@ -3,6 +3,7 @@ enum cnk_lang_range {
     CNK_LANG_START,
     TYPE_LANG_CNK,
     TYPE_LANG_CNK_MODULE,
+    TYPE_LANG_CNK_MOD_REF,
     _TYPE_LANG_CNK_END,
     _CNK_LANG_MAJOR,
     CNK_LANG_STRUCT,

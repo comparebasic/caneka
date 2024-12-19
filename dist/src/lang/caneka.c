@@ -3,9 +3,9 @@
 
 static void CnkModule_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     CnkLangModule *mod = (CnkLangModule *)as(a, TYPE_LANG_CNK_MODULE);
-    printf("\x1b[%dm%sCnkModule<%s", color, msg, CnkLang_RangeToChars(mod->spaceIdx));
-    Debug_Print((void *)mod->name, 0, " name:", color, FALSE);
-    Debug_Print((void *)mod->typeName, 0, " typeName:", color, FALSE);
+    printf("\x1b[%dm%sCnkModule<%s", color, msg, CnkLang_RangeToChars(mod->ref->spaceIdx));
+    Debug_Print((void *)mod->ref->name, 0, " name:", color, FALSE);
+    Debug_Print((void *)mod->ref->typeName, 0, " typeName:", color, FALSE);
     printf("\n");
     Debug_Print((void *)mod->args, 0, "args:", color, FALSE);
     printf("\n");

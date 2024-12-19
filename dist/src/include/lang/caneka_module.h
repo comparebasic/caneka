@@ -16,11 +16,17 @@ typedef struct caneka_func_def {
     Span *args;
 } CnkLangFuncDef;
 
-typedef struct caneka_module {
+typedef struct caneka_modref {
     Type type;
     int spaceIdx;
+    String *token;
     String *name;
     String *typeName;
+} CnkLangModRef;
+
+typedef struct caneka_module {
+    Type type;
+    CnkLangModRef *ref;
     Span *states;
     String *hfile;
     String *cfile;
@@ -29,5 +35,7 @@ typedef struct caneka_module {
     struct caneka_module *parent;
 } CnkLangModule;
 
+
 CnkLangModule *CnkLangModule_Make(MemCtx *m);
-status CnkLangModule_SetItem(MemCtx *m, CnkLangModule *mod, FmtItem *item);
+CnkLangModRef *CnkLangModRef_Make(MemCtx *m);
+status CnkLangModule_SetItem(MemCtx *m, CnkLangModule *mod, FmtItem *item, Abstract *a);

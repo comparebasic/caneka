@@ -49,24 +49,24 @@ Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abs
     CnkLangModule *mod = (CnkLangModule *)as(item->value, TYPE_LANG_CNK_MODULE);
 
     String *s = String_Init(m, STRING_EXTEND);
-    String_Add(m, s, mod->name);
+    String_Add(m, s, mod->ref->name);
     char *cstr = " *";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, mod->name);
+    String_Add(m, s, mod->ref->name);
     cstr = "_Make(MemCtx *m){\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
     cstr = "    ";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, mod->name);
+    String_Add(m, s, mod->ref->name);
     cstr = " *o = (";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, mod->name);
+    String_Add(m, s, mod->ref->name);
     cstr = "*)MemCtx_Alloc(m, sizeof(";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, mod->name);
+    String_Add(m, s, mod->ref->name);
     cstr = "));\n    o->type.of = ";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String_Add(m, s, mod->typeName);
+    String_Add(m, s, mod->ref->typeName);
 
     cstr = ";\n    return o;\n}\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));

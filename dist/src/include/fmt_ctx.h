@@ -42,5 +42,6 @@ typedef struct formatter {
 } FmtCtx;
 
 FmtItem *FmtItem_Make(MemCtx *m, FmtCtx *fctx);
+Span *FmtItem_GetChildren(MemCtx *m, FmtItem *fi);
 FmtCtx *FmtCtx_Make(MemCtx *m, OutFunc out);
 status Fmt_Add(MemCtx *m, FmtCtx *fmt, Lookup *fmtDefs);
