@@ -301,18 +301,18 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     if(ctx->item != NULL && ctx->item->parent != NULL){
         if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0)){
-            if(ctx->item->def->from != NULL){
-                ctx->item->value = ctx->item->def->from(ctx->m,
-                    ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
-            }
-            if(ctx->item->def->to != NULL){
-                ctx->item->def->to(ctx->m,
-                    ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
-            }
             FmtItem *item = ctx->item;
             while(item->parent != NULL && (item->def->type.state & FMT_DEF_PARENT_ON_PARENT) != 0){
                 printf("Outdenting from %s to %s\n", CnkLang_RangeToChars(ctx->item->spaceIdx), CnkLang_RangeToChars(ctx->item->parent->spaceIdx));
                 item = item->parent;
+                if(item->def->from != NULL){
+                    item->value = item->def->from(ctx->m,
+                        item->def, ctx, item->key, (Abstract *)item);
+                }
+                if(item->def->to != NULL){
+                    item->def->to(ctx->m,
+                        item->def, ctx, item->key, (Abstract *)item);
+                }
             }
             ctx->item = item;
         }
