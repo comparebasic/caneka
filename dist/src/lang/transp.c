@@ -83,6 +83,7 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
             Debug_Print((void*)p->current.source, 0, " vs  ", COLOR_PURPLE, TRUE);
             printf("\n");
             String *abbrev = (String *)h->item;
+            p->current.ext = abbrev;
             if(String_PosEqualsBytes(p->current.source, abbrev->bytes, abbrev->length, STRING_POS_END)){
                 String_Trunc(p->current.dest, -1);
 

@@ -8,6 +8,7 @@ typedef struct transp {
         String *fname;
         String *source;
         String *dest;
+        String *ext;
         File sourceFile;
         File destFile;
     } current;

@@ -103,7 +103,7 @@ static status addDefs(FmtCtx *ctx){
         },
         {
             CNK_LANG_TOKEN,
-            0,
+            FMT_DEF_INDENT|FMT_DEF_PARENT_ON_PARENT,
             0,
             "token",
             NULL,
@@ -228,6 +228,7 @@ static status addDefs(FmtCtx *ctx){
             def->alias = String_Make(m, bytes(cnf->alias));
         }
         def->to = cnf->to;
+        def->from = cnf->from;
         if(def->parent > 0){
             def->parent = Lookup_Get(lk, cnf->parentIdx);
         }
@@ -247,10 +248,11 @@ static status addDefs(FmtCtx *ctx){
     return Fmt_Add(ctx->m, ctx, lk);
 }
 
-static void pushItem(FmtCtx *ctx, word captureKey){
+static void pushItem(FmtCtx *ctx, word captureKey, FmtDef *def){
     FmtItem *item =  FmtItem_Make(ctx->m, ctx);
     item->spaceIdx = captureKey;
     item->parent = ctx->item;
+    item->def = def;
 
     ctx->item = item;
 }
@@ -261,13 +263,13 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
     if(def == NULL || (def->type.state & FMT_FL_TAXONAMY) != 0){
-        TableChain_Get(ctx->byAlias, s);
+        def = TableChain_Get(ctx->byAlias, s);
     }
 
     if(captureKey == CNK_LANG_INVOKE){
         if(ctx->item != NULL && ctx->item->parent != NULL){
-            if(ctx->item->parent->children == NULL){
-                ctx->item->parent->children = Span_Make(ctx->m, TYPE_SPAN);
+            if(ctx->item->children == NULL){
+                ctx->item->children = Span_Make(ctx->m, TYPE_SPAN);
             }
             Span_Add(ctx->item->parent->children, (Abstract *)ctx->item);
         }
@@ -275,41 +277,48 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         def = Chain_Get(ctx->byId, CNK_LANG_ARG_LIST);
     }
 
-    if(def != NULL){
-        if((def->type.state & FMT_DEF_INDENT) != 0){
-            pushItem(ctx, captureKey);
-        }
-
-        if(ctx->item != NULL && ctx->item->def == NULL){
-            ctx->item->def = def;
-        }
-
-    }
-
-    if(ctx->item != NULL && ctx->item->parent != NULL){
-        if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0) && ctx->item != NULL){
-            if(ctx->item->def->to != NULL){
-                ctx->item->def->to(ctx->m, ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
-            }else{
-                Debug_Print((void *)ctx->item->def, 0, "FmtDef ->to is NULL: ", COLOR_CYAN, TRUE);
-            }
-            ctx->item = ctx->item->parent;
-        }else{
-            if(ctx->item->def->from != NULL){
-                ctx->item->value = ctx->item->def->from(ctx->m, ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
-            }
-            if(ctx->item->parent->children == NULL){
-                ctx->item->parent->children = Span_Make(ctx->m, TYPE_SPAN);
-            }
-            Span_Add(ctx->item->parent->children, (Abstract *)ctx->item);
-        }
-    }
-
     if(DEBUG_LANG_CNK){
         printf("\x1b[%dmCnk Capture %s:", DEBUG_LANG_CNK, CnkLang_RangeToChars(captureKey));
         Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
-        Debug_Print((void *)ctx->item->def, 0, "FmtDef: ", DEBUG_LANG_CNK, TRUE);
+        Debug_Print((void *)def, 0, "def: ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
+    }
+
+    if(ctx->item != NULL && ctx->item->parent != NULL){
+        if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0)){
+            if(ctx->item->def->from != NULL){
+                ctx->item->value = ctx->item->def->from(ctx->m, 
+                    ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
+            }
+            if(ctx->item->def->to != NULL){
+                ctx->item->def->to(ctx->m, 
+                    ctx->item->def, ctx, ctx->item->key, (Abstract *)ctx->item);
+            }
+            FmtItem *item = ctx->item;
+            while(item->parent != NULL && (item->def->type.state & FMT_DEF_PARENT_ON_PARENT) != 0){
+                item = item->parent;
+            }
+            ctx->item = item;
+        }
+    }
+
+    if(def != NULL){
+        if(ctx->item->children == NULL){
+            ctx->item->children = Span_Make(ctx->m, TYPE_SPAN);
+        }
+        printf("Adding %s to parent %s\n", CnkLang_RangeToChars(captureKey), CnkLang_RangeToChars(ctx->item->spaceIdx));
+        Span_Add(ctx->item->children, (Abstract *)Result_Make(ctx->m, captureKey, s, source));
+        
+        if((def->type.state & FMT_DEF_INDENT) != 0){
+            printf("indenting\n");
+            pushItem(ctx, captureKey, def);
+        }
+    }
+
+    if(DEBUG_LANG_CNK){
+        Debug_Print((void *)ctx->item->def, 0, "Base FmtDef: ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
         printf("\n");
     }
 
@@ -328,8 +337,6 @@ FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
     ctx->out = ToStdOut;
 
     ctx->rangeToChars = CnkLang_RangeToChars;
-    ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
-    ctx->root->spaceIdx = CNK_LANG_START;
     addDefs(ctx);
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
     ctx->item->spaceIdx = CNK_LANG_START;

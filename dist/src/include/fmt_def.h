@@ -4,6 +4,7 @@ enum formatter_def_flags {
     FMT_DEF_INDENT = 1 << 8,
     /*FMT_FL_TAXONAMY = 1 << 9,*/
     FMT_DEF_OUTDENT = 1 << 10,
+    FMT_DEF_PARENT_ON_PARENT = 1 << 11,
 };
 
 typedef struct format_def {

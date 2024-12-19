@@ -43,6 +43,109 @@ int DEBUG_USER = 0;
 int DEBUG_LANG_CNK = COLOR_YELLOW;
 int DEBUG_SUBPROCESS = 0;
 
+char *TypeStrings[] = {
+    "_TYPE_START",
+    "TYPE_UNKNOWN",
+    "TYPE_BLANK",
+    "TYPE_ABSTRACT",
+    "TYPE_BUILDER",
+    "TYPE_RESERVE",
+    "TYPE_WRAPPED",
+    "TYPE_WRAPPED_FUNC",
+    "TYPE_WRAPPED_DO",
+    "TYPE_WRAPPED_UTIL",
+    "TYPE_WRAPPED_I64",
+    "TYPE_WRAPPED_TIME64",
+    "TYPE_WRAPPED_BOOL",
+    "TYPE_WRAPPED_PTR",
+    "TYPE_UTIL",
+    "TYPE_UNIT",
+    "TYPE_MEMCTX",
+    "TYPE_MEMHANDLE",
+    "TYPE_MHABSTRACT",
+    "TYPE_MEMLOCAL",
+    "TYPE_MESS",
+    "TYPE_MAKER",
+    "TYPE_MEMSLAB",
+    "TYPE_STRING",
+    "TYPE_STRING_CHAIN",
+    "TYPE_STRING_FIXED",
+    "TYPE_STRING_FULL",
+    "TYPE_STRING_SLAB",
+    "TYPE_TESTSUITE",
+    "TYPE_PARSER",
+    "TYPE_ROEBLING",
+    "TYPE_MULTIPARSER",
+    "TYPE_SCURSOR",
+    "TYPE_RANGE",
+    "TYPE_MATCH",
+    "TYPE_GUARD",
+    "TYPE_STRINGMATCH",
+    "TYPE_PATMATCH",
+    "TYPE_PATCHARDEF",
+    "TYPE_STRUCTEXP",
+    "TYPE_IOCTX",
+    "TYPE_ACCESS",
+    "TYPE_AUTH",
+    "_TYPE_SPAN_START",
+    "TYPE_SPAN",
+    "TYPE_MINI_SPAN",
+    "TYPE_MEM_SPAN",
+    "TYPE_QUEUE_SPAN",
+    "TYPE_QUEUE_IDX",
+    "TYPE_SLAB_SPAN",
+    "TYPE_STRING_SPAN",
+    "TYPE_NESTED_SPAN",
+    "TYPE_TABLE",
+    "TYPE_POLL_MAP_SPAN",
+    "_TYPE_SPAN_END",
+    "TYPE_COORDS",
+    "TYPE_MEM_KEYED",
+    "TYPE_SPAN_STATE",
+    "TYPE_SPAN_DEF",
+    "TYPE_QUEUE",
+    "TYPE_CHAIN",
+    "TYPE_SPAN_QUERY",
+    "TYPE_SLAB",
+    "TYPE_TABLE_CHAIN",
+    "TYPE_HASHED",
+    "TYPE_HASHED_LINKED",
+    "TYPE_MEMPAIR",
+    "TYPE_STRINGTABLE",
+    "TYPE_FILE",
+    "TYPE_SPOOL",
+    "TYPE_LOOKUP",
+    "TYPE_ITER",
+    "TYPE_SINGLE",
+    "TYPE_RBL_MARK",
+    "TYPE_OSET_ITEM",
+    "TYPE_FMT_ITEM",
+    "TYPE_FMT_DEF",
+    "TYPE_OSET",
+    "TYPE_FMT_CTX",
+    "TYPE_OSET_DEF",
+    "TYPE_CASH",
+    "TYPE_XMLT",
+    "TYPE_NESTEDD",
+    "TYPE_ENC_PAIR",
+    "TYPE_FMT_HTML",
+    "TYPE_LANG_CNK",
+    "TYPE_LANG_CNK_MODULE",
+    "TYPE_TRANSP",
+    "TYPE_DEBUG_STACK",
+    "TYPE_DEBUG_STACK_ENTRY",
+    "_TYPE_CORE_END",
+    NULL,
+};
+
+char *Class_ToString(cls type){
+    if(type <= _TYPE_CORE_END){
+       return TypeStrings[type]; 
+    }else{
+        return "TYPE_unknown";
+    }
+}
+
 boolean SHOW_SERVE_TESTS = FALSE;
 
 MemCtx *DebugM = NULL;
@@ -456,6 +559,13 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     printf("\x1b[%dm%sSingle<%s:%u:%ld>\x1b[0m", color, msg, Class_ToString(v->type.of), v->type.state, v->val.value);
 }
 
+static void Result_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Result *v = (Result *)a;
+    printf("\x1b[%dm%sR<%s:%d:", color, msg, State_ToChars(v->type.state), v->range);
+    Debug_Print((void *)v->s, 0, "", color, extended);
+    printf("\x1b[%dm>\x1b[0m\n", color);
+}
+
 static void StringMatch_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_STRINGMATCH);
     if(extended){
@@ -743,6 +853,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_GUARD, (void *)Guard_Print);
     r |= Lookup_Add(m, lk, TYPE_DEBUG_STACK_ENTRY, (void *)DebugStackEntry_Print);
     r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
+    r |= Lookup_Add(m, lk, TYPE_RESULT, (void *)Result_Print);
     
     return r;
 }

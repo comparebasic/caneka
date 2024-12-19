@@ -2,7 +2,9 @@
 #include <caneka.h>
 #include <tests.h>
 
+/*
 #define CYCLE_SERVE 1
+*/
 
 status Tests_Init(MemCtx *m){
    status r = READY;

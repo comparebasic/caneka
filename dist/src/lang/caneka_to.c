@@ -45,8 +45,8 @@ Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstra
 }
 
 Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    printf("StructTo\n");
-    CnkLangModule *mod = (CnkLangModule *)as(a, TYPE_LANG_CNK_MODULE);
+    FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
+    CnkLangModule *mod = (CnkLangModule *)as(item->value, TYPE_LANG_CNK_MODULE);
 
     String *s = String_Init(m, STRING_EXTEND);
     String_Add(m, s, mod->name);

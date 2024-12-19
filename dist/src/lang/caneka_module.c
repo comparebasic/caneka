@@ -10,5 +10,9 @@ CnkLangModule *CnkLangModule_Make(MemCtx *m){
 }
 
 status CnkLangModule_SetItem(MemCtx *m, CnkLangModule *mod, FmtItem *item){
+    if(DEBUG_LANG_CNK){
+        Debug_Print((void *)item->value, 0, "setting item: ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
+    }
     return NOOP; 
 }

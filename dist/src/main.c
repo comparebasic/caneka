@@ -56,6 +56,7 @@ status transpile(MemCtx *m, char *arg){
     Debug_Print((void *)ctx->dist, 0, "->", COLOR_BLUE, FALSE);
     int l = strlen("transp=cnk");
     if(strncmp(arg, "transp=cnk", l) == 0){
+        CnkLang_Init(m);
         FmtCtx *cnkLang = CnkLangCtx_Make(m, (Abstract *)ctx);
         Table_Set(ctx->formats, (Abstract *)String_Make(m, bytes(".cnk")), (Abstract *)cnkLang);
     }

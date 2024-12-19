@@ -1,5 +1,9 @@
 enum cnk_lang_range {
-    CNK_LANG_START = 1,
+    _CNK_LANG_START = _TYPE_APPS_END,
+    CNK_LANG_START,
+    TYPE_LANG_CNK,
+    TYPE_LANG_CNK_MODULE,
+    _TYPE_LANG_CNK_END,
     _CNK_LANG_MAJOR,
     CNK_LANG_STRUCT,
     CNK_LANG_REQUIRE,
@@ -45,8 +49,10 @@ enum cnk_lang_range {
     CNK_LANG_IDXS,
     CNK_LANG_SEQ,
     _CNK_LANG_OBJ_END,
+    _CNK_LANG_END,
 };
 
+status CnkLang_Init(MemCtx *m);
 Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx, RblCaptureFunc Capture);
 FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source); /* Formatter < MemHandle */
 /* utils */

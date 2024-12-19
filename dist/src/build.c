@@ -34,13 +34,13 @@ static char *libs[] = {
 };
 
 static BuildSubdir coreobj = { "core", {
-    "caneka.c", "mem.c",  "string.c", "string_makers.c", "string_equals.c", "error.c",
+    "core.c", "mem.c",  "string.c", "string_makers.c", "string_equals.c", "error.c",
 	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c", "table_chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "array.c", "int.c", "maker.c", "do.c", 
     "mess.c", "single.c", "debug.c", "abstract.c", "time.c",
     "queue.c", "boolean.c","blank.c","clone.c","guard.c",
-    "debug_stack.c",
+    "debug_stack.c", "result.c",
     NULL
 }};
 
@@ -63,7 +63,7 @@ static BuildSubdir langobj = {"lang", {
     "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
     "fmt_ctx.c", "fmt_item.c", "fmt_html.c","fmt_def.c", "transp.c",
     "caneka_parser.c", "caneka_to.c", "caneka_from.c", "caneka_ctx.c",
-    "caneka_module.c", 
+    "caneka_module.c", "caneka.c",
     NULL
 }};
 

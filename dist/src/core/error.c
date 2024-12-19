@@ -4,7 +4,7 @@
 void *_Fatal(char *msg, cls t, char *func, char *file, int line){
     
 #ifdef DEBUG_STACK
-    printf("\x1b[%dmFatal Error: %s - type(%s) %s:%s:%d\x1b[0m\n" , COLOR_RED, msg, Class_ToString(t), func, file, line);
+    printf("\x1b[%dmFatal Error: %s - type(%s/%d) %s:%s:%d\x1b[0m\n" , COLOR_RED, msg, Class_ToString(t), t, func, file, line);
     DebugStack_Print();
 #else
     printf("Fatal Error: %s - type(%s) %s:%s:%d\n" , msg, Class_ToString(t), func, file, line);

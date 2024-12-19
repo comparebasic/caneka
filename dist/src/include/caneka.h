@@ -137,6 +137,7 @@ enum types {
     TYPE_STRING_FULL,
     TYPE_STRING_SLAB,
     TYPE_TESTSUITE,
+    TYPE_RESULT,
     TYPE_PARSER,
     TYPE_ROEBLING,
     TYPE_MULTIPARSER,
@@ -193,8 +194,6 @@ enum types {
     TYPE_NESTEDD,
     TYPE_ENC_PAIR,
     TYPE_FMT_HTML,
-    TYPE_LANG_CNK,
-    TYPE_LANG_CNK_MODULE,
     TYPE_TRANSP,
     TYPE_DEBUG_STACK,
     TYPE_DEBUG_STACK_ENTRY,
@@ -284,6 +283,7 @@ status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 #include "table.h"
 #include "table_chain.h"
 #include "tokens.h"
+#include "result.h"
 #include "match.h"
 #include "scursor.h"
 #include "range.h"
