@@ -193,7 +193,7 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             CNK_LANG_CURLY_CLOSE,
             FMT_DEF_OUTDENT,
             0,
-            NULL,
+            "curly-close",
             NULL,
             NULL,
             NULL,
