@@ -40,7 +40,9 @@ int DEBUG_OSET_DEF = 0;
 int DEBUG_NESTED = 0;
 int DEBUG_CASH = 0;
 int DEBUG_USER = 0;
+int DEBUG_LANG_TRANSP = 0;
 int DEBUG_LANG_CNK = 0;
+int DEBUG_LANG_CNK_OUT = 0;
 int DEBUG_SUBPROCESS = 0;
 
 char *TypeStrings[] = {

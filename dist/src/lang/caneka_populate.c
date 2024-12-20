@@ -8,7 +8,6 @@ typedef struct cnf  {
     char *name;
     char *alias;
     FmtTrans to;
-    FmtTrans from;
     word *rollups;
     int parentIdx;
 } Cnf;
@@ -30,8 +29,7 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             0,
             "struct",
             NULL,
-            CnkLang_Start,
-            NULL,
+            CnkLang_StartTo,
             NULL,
             -1
         },
@@ -42,7 +40,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             "struct",
             NULL,
             CnkLang_StructTo,
-            CnkLang_StructFrom,
             NULL,
             -1
         },
@@ -54,7 +51,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             CnkLang_RequireTo,
             NULL,
-            NULL,
             -1
         },
         {
@@ -62,7 +58,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             FMT_DEF_INDENT,
             0,
             "package",
-            NULL,
             NULL,
             NULL,
             NULL,
@@ -76,7 +71,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
-            NULL,
             -1
         },
         {
@@ -84,7 +78,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             FMT_DEF_INDENT,
             0,
             "arg-list",
-            NULL,
             NULL,
             NULL,
             NULL,
@@ -98,7 +91,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
-            NULL,
             -1
         },
         {
@@ -106,7 +98,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             FMT_DEF_INDENT|FMT_DEF_PARENT_ON_PARENT,
             0,
             "token",
-            NULL,
             NULL,
             NULL,
             rollupToken,
@@ -119,7 +110,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             "op",
             "=",
             NULL,
-            NULL,
             rollupOp,
             -1
         },
@@ -128,7 +118,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             0,
             0,
             "value",
-            NULL,
             NULL,
             NULL,
             NULL,
@@ -142,7 +131,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
-            NULL,
             -1
         },
         {
@@ -150,7 +138,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             0,
             0,
             "keys",
-            NULL,
             NULL,
             NULL,
             NULL,
@@ -164,7 +151,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
-            NULL,
             -1
         },
         {
@@ -172,7 +158,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             0,
             0,
             "seq",
-            NULL,
             NULL,
             NULL,
             NULL,
@@ -186,7 +171,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
-            NULL,
             -1
         },
         {
@@ -197,14 +181,12 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
-            NULL,
             -1
         },
         {
             CNK_LANG_BLANK_LINE,
             0,
             0,
-            NULL,
             NULL,
             NULL,
             NULL,
@@ -219,14 +201,12 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             NULL,
             NULL,
             NULL,
-            NULL,
             -1
         },
         {
             0,
             0,
             0,
-            NULL,
             NULL,
             NULL,
             NULL,
@@ -250,7 +230,6 @@ status CnkLang_AddDefs(FmtCtx *ctx){
             def->alias = String_Make(m, bytes(cnf->alias));
         }
         def->to = cnf->to;
-        def->from = cnf->from;
         if(def->parent > 0){
             def->parent = Lookup_Get(lk, cnf->parentIdx);
         }

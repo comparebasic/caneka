@@ -11,6 +11,20 @@ static void pushItem(FmtCtx *ctx, word captureKey, String *s, FmtDef *def){
     ctx->item = item;
 }
 
+static status runTo(FmtCtx *ctx, FmtItem *item, word flags){
+    ctx->type.state |= flags;
+    status r = READY;
+    if(item->def->to != NULL){
+        item->def->to(ctx->m,
+            item->def, ctx, item->key, (Abstract *)item);
+        r |= SUCCESS;
+    }else{
+        r |= NOOP;
+    }
+    ctx->type.state &= ~flags;
+    return r;
+}
+
 static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     status r = READY;
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
@@ -42,14 +56,8 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     if(ctx->item != NULL && ctx->item->parent != NULL){
         if(def != NULL && ((def->type.state & FMT_DEF_OUTDENT) != 0)){
             FmtItem *item = ctx->item;
-            if(item->def->from != NULL){
-                item->value = item->def->from(ctx->m,
-                    item->def, ctx, item->key, (Abstract *)item);
-            }
-            if(item->def->to != NULL){
-                item->def->to(ctx->m,
-                    item->def, ctx, item->key, (Abstract *)item);
-            }
+            
+            runTo(ctx, item, FMT_CTX_CHILDREN_DONE);
             item = ctx->item = ctx->item->parent;
             while(item->parent != NULL && (item->def->type.state & FMT_DEF_PARENT_ON_PARENT) != 0){
                 item = item->parent;
@@ -63,6 +71,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         if((def->type.state & FMT_DEF_INDENT) != 0){
             pushItem(ctx, captureKey, s, def);
             Span_Add(FmtItem_GetChildren(ctx->m, ctx->item->parent), (Abstract *)ctx->item);
+            runTo(ctx, ctx->item, FMT_CTX_ENCOUNTER);
         }else if((def->type.state & FMT_DEF_OUTDENT) == 0){
             Abstract *child = (Abstract *)Result_Make(ctx->m, def->id, s, source);
             Span_Add(FmtItem_GetChildren(ctx->m, ctx->item), child);
@@ -82,6 +91,10 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
+status CnkLangCtx_Start(FmtCtx *ctx){
+    return runTo(ctx, ctx->root, FMT_CTX_ENCOUNTER);
+}
+
 FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
     FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
     ctx->type.of = TYPE_LANG_CNK;
@@ -96,6 +109,7 @@ FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
     FmtDef *def = Chain_Get(ctx->byId, ctx->item->spaceIdx);
     ctx->item->def = def;
     ctx->source = source;
+    ctx->start = CnkLangCtx_Start;
 
     return ctx;
 }

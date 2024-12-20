@@ -13,12 +13,14 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
 
 static status Transp_transpile(Transp *p, FmtCtx *fmt){
     Stack(bytes("Transp_transpile"), NULL);
-    if(File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
+    if(1 || File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
         Debug_Print((void *)p->current.source,0,  "Transpiling ",  COLOR_YELLOW, FALSE);
         Debug_Print((void *)p->current.dest,0,  " -> ",  COLOR_YELLOW, FALSE);
         printf("\n");
-        printf("%s\n", p->current.sourceFile.abs->bytes);
 
+        if(fmt->start){
+            fmt->start(fmt);
+        }
         status r = File_Stream(p->m, &p->current.sourceFile,
             NULL, Transp_onInput, (Abstract *)fmt);
 
@@ -45,6 +47,11 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
     String_AddBytes(m, new, bytes("/"), 1);
     String_Add(m, new, path);
 
+    String *inc = String_Init(m, STRING_EXTEND);
+    String_Add(m, inc, p->dist);
+    String_AddBytes(m, inc, bytes("/include/"), 1);
+    String_Add(m, inc, path);
+
     DIR* dir = opendir(String_ToChars(m, new));
     if(dir){
         closedir(dir);
@@ -52,6 +59,15 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
         Debug_Print((void *)path, 0, "Making Dir:", COLOR_YELLOW, TRUE);
         printf("\n");
         return Dir_CheckCreate(m, new);
+    }
+
+    dir = opendir(String_ToChars(m, inc));
+    if(dir){
+        closedir(dir);
+    }else if(ENOENT == errno){
+        Debug_Print((void *)path, 0, "Making Dir:", COLOR_YELLOW, TRUE);
+        printf("\n");
+        return Dir_CheckCreate(m, inc);
     }
     return TRUE;
 }
@@ -73,8 +89,12 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
     String_AddBytes(m, p->current.dest, bytes("/"), 1);
     String_Add(m, p->current.dest, fname);
 
-    p->current.destHeaderFile = String_Clone(m, p->current.dest);
-
+    p->current.destHeader = String_Init(m, STRING_EXTEND);
+    String_Add(m, p->current.destHeader, p->dist);
+    String_AddBytes(m, p->current.destHeader, bytes("/include/"), 1);
+    String_Add(m, p->current.destHeader, dir);
+    String_AddBytes(m, p->current.destHeader, bytes("/"), 1);
+    String_Add(m, p->current.destHeader, fname);
 
     Iter it;
     Iter_Init(&it, p->formats);
@@ -84,16 +104,20 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
             String *abbrev = (String *)h->item;
             p->current.ext = abbrev;
             if(String_PosEqualsBytes(p->current.source, abbrev->bytes, abbrev->length, STRING_POS_END)){
+                if(DEBUG_LANG_TRANSP){
+                    Debug_Print((void *)p->current.source, 0, "Transpiling: ", DEBUG_LANG_TRANSP, FALSE);
+                    printf("\n");
+                }
                 String_Trunc(p->current.dest, -2);
                 String_Trunc(p->current.destHeader, -3);
-                String_AddBytes(m, p->current.destHeader, bytes("h") 1);
+                String_AddBytes(m, p->current.destHeader, bytes("h"), 1);
 
                 Spool_Init(&p->current.sourceFile, p->current.source, NULL, NULL);
                 Spool_Init(&p->current.destFile, p->current.dest, NULL, NULL);
+                Spool_Trunc(&p->current.destFile);
                 Spool_Init(&p->current.destHeaderFile, p->current.dest, NULL, NULL);
+                Spool_Trunc(&p->current.destHeaderFile);
                 return Transp_transpile(p, (FmtCtx *)h->value);
-            }else{
-                printf("nope: %s\a", fname->bytes);
             }
         }
     }
@@ -101,6 +125,17 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
     return Transp_copy(p);
 
     return TRUE;
+}
+
+status Transp_Out(Transp *p, String *s){
+    Stack(bytes("Transp_Out"), (Abstract *)s);
+    status r = Spool_Add(p->m, s, (Abstract *)&p->current.destFile);
+    Return r;
+}
+
+status Transp_OutHeader(Transp *p, String *s){
+    Stack(bytes("Transp_OutHeader"), (Abstract *)s);
+    Return Spool_Add(p->m, s, (Abstract *)&p->current.destHeaderFile);
 }
 
 status Transp_Trans(Transp *p){

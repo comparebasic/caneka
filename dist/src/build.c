@@ -55,14 +55,15 @@ static BuildSubdir parserobj = {"parser", {
 }};
 
 static BuildSubdir formatsobj = {"formats", {
-    "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c","oset_from.c", "oset_item.c", "cash.c",
+    "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c","oset_from.c", "oset_item.c",
+    "cash.c", "cash_rbl.c",
     NULL
 }};
 
 static BuildSubdir langobj = {"lang", {
     "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
     "fmt_ctx.c", "fmt_item.c", "fmt_html.c","fmt_def.c", "transp.c",
-    "caneka_parser.c", "caneka_to.c", "caneka_from.c", "caneka_ctx.c",
+    "caneka_parser.c", "caneka_to.c", "caneka_ctx.c",
     "caneka_module.c", "caneka.c", "caneka_populate.c",
     NULL
 }};

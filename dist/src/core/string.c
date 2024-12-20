@@ -24,7 +24,9 @@ status String_Trunc(String *s, i64 len){
         if(actual+tail->length > len){
             tail->length = len - actual;
             memset(tail->bytes+tail->length, 0, sz-tail->length);
-            tail->next = NULL;
+            if(String_Next(s) != NULL){
+                tail->next = NULL;
+            }
             return SUCCESS;
         }
         actual += tail->length; 

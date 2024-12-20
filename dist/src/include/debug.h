@@ -65,8 +65,10 @@ extern int DEBUG_OSET_COMPLETE;
 extern int DEBUG_NESTED;
 extern int DEBUG_CASH;
 extern int DEBUG_USER;
+extern int DEBUG_LANG_TRANSP;
 extern int DEBUG_LANG_CNK;
 extern int DEBUG_SUBPROCESS;
+extern int DEBUG_LANG_CNK_OUT;
 
 extern boolean SHOW_SERVE_TESTS;
 

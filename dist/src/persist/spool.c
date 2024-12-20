@@ -2,20 +2,27 @@
 #include <caneka.h>
 
 status Spool_Add(MemCtx *m, String *s, Abstract *a){
+    Stack(bytes("Spool_Add"), (Abstract *)a);
     File *spool = (File *)as(a, TYPE_FILE);
+    if(spool->data == NULL){
+        spool->data = String_Init(m, STRING_EXTEND);
+    }
     String_Add(m, spool->data, s);
     spool->type.state |= FILE_UPDATED;
-    if(String_Length(spool->data) > SPOOL_STRING_COUNT){
-        if((File_Persist(m, spool) & SUCCESS) != 0){
-            String *s = spool->data;
-            while(s != NULL){
-                s->length = 0;
-                s = String_Next(s);
-            }
-        }
-        return SUCCESS;
+    status r = File_Persist(m, spool);
+    if((r & ERROR) == 0){
+        String_Reset(spool->data);
     }
-    return NOOP;
+    Return r;
+}
+
+status Spool_Trunc(File *file){
+    FILE *f = fopen((char *)file->abs->bytes, "w");
+    if(f == NULL){
+        return ERROR;
+    }
+    fclose(f);
+    return SUCCESS;
 }
 
 File *Spool_Init(File *file, String *path, Access *access, IoCtx *ctx){

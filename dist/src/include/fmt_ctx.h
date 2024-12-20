@@ -1,4 +1,4 @@
-enum formatter_flags {
+enum format_item_flags {
     FMT_FL_TO_PARENT = 1 << 8,
     FMT_FL_TAXONAMY = 1 << 9,
     FMT_FL_TO_NEXT_ID = 1 << 10,
@@ -7,6 +7,11 @@ enum formatter_flags {
     FMT_FL_CLOSE_AFTER_CHILD = 1 << 13,
     FMT_FL_AUTO_ID = 1 << 14,
     FMT_FL_SPACE_FOR_WS = 1 << 15,
+};
+
+enum format_ctx_flags {
+    FMT_CTX_ENCOUNTER = 1 << 8,
+    FMT_CTX_CHILDREN_DONE = 1 << 9,
 };
 
 typedef struct fmt_item {
@@ -38,6 +43,7 @@ typedef struct formatter {
     TableChain *byAlias;
     RangeToChars rangeToChars;
     OutFunc out;
+    status (*start)(struct formatter *ctx);
     Abstract *source;
 } FmtCtx;
 

@@ -206,6 +206,8 @@ extern int METHOD_SET;
 extern int METHOD_UPDATE;
 extern int METHOD_DELETE;
 
+#define OBJ_STATE ((word)0b1111111100000000)
+
 enum status_types {
     READY = 0,
     ERROR = 1 << 0,

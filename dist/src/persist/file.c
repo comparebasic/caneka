@@ -126,6 +126,9 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
 
 status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract *source){
     String *s = NULL;
+    if(DEBUG_FILE){
+        printf("\x1b[%dmFile_Stread streaming: '%s'\x1b[0m\n", DEBUG_FILE, file->abs->bytes);
+    }
     FILE *f = fopen((char *)file->abs->bytes, "r");
     if(f == NULL){
         printf("Warning: Unable to openfile %s\n", file->abs->bytes);
@@ -143,6 +146,9 @@ status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract 
     char buff[FILE_READ_LENGTH+1];
     size_t l = fread(buff, 1, FILE_READ_LENGTH, f);
     while(l > 0){
+        if(DEBUG_FILE){
+            printf("\x1b[%dmFile_Stread read %ld bytes\x1b[0m\n", DEBUG_FILE, l);
+        }
         if(out != NULL){
             String_Reset(s);
             String_AddBytes(m, s, bytes(buff), l);

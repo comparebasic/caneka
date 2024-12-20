@@ -19,4 +19,6 @@ typedef struct cash {
 } Cash;
 
 Cash *Cash_Make(MemCtx *m, Getter get, Abstract *source);
+Roebling *Cash_RblMake_rbl(MemCtx *m, Abstract *cash, RblCaptureFunc capture);
 String *Cash_Replace(MemCtx *m, Cash *cash, String *s);
+status Cash_Capture(word captureKey, int matchIdx, String *s, Abstract *source);

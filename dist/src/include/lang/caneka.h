@@ -57,13 +57,14 @@ enum cnk_lang_range {
 status CnkLang_Init(MemCtx *m);
 Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx, RblCaptureFunc Capture);
 FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source); /* Formatter < MemHandle */
+status CnkLangCtx_Start(FmtCtx *ctx); /* Formatter < MemHandle */
 /* utils */
 String *CnkLang_requireFromSpan(MemCtx *m, Span *p);
 
 char * CnkLang_RangeToChars(word range);
 /* format to functs */
 Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
-Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
+Abstract *CnkLang_StartTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 status CnkLang_AddDefs(FmtCtx *ctx);

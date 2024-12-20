@@ -1,6 +1,28 @@
 #include <external.h>
 #include <caneka.h>
 
+Abstract *CnkLang_StartTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    Stack(bytes("CnkLang_Start"), (Abstract *)a);
+    if((fmt->type.state & FMT_CTX_ENCOUNTER) != 0){
+        Transp *tp = (Transp *)asIfc(fmt->source, TYPE_TRANSP);
+
+        String *s = String_Init(m, STRING_EXTEND);
+        char *cstr = "#include <external.h>\n#include <caneka.h>\n\n";
+        String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+        
+        if(DEBUG_LANG_CNK_OUT){
+            Debug_Print((void *)s, 0, "", DEBUG_LANG_CNK_OUT, TRUE);
+            printf("\n");
+        }
+
+        Transp_Out(tp, s);
+
+        Return (Abstract *)s;
+    }else{
+        Return NULL;
+    }
+}
+
 Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
     Span *p = (Span *)fmt->item->value;
     if(p == NULL || !Ifc_Match(p->type.of, TYPE_SPAN)){
@@ -24,24 +46,6 @@ Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
     }
     String_MakeLower(out);
     return (Abstract *)out;
-}
-
-Abstract *CnkLang_Start(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
-    String *s = String_Init(m, STRING_EXTEND);
-    char *cstr = "#include <external.h>\n#include <caneka.h>\n";
-    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    cstr = "#include <";
-    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    String *hfile = String_Init(m, STRING_EXTEND);
-    String_Add(m, hfile, (String *)item->value);
-    String_MakeLower(hfile);
-    cstr = ".h";
-    String_AddBytes(m, hfile, bytes(cstr), strlen(cstr));
-    String_Add(m, s, hfile);
-    cstr = ">\n";
-    String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-    return (Abstract *)s;
 }
 
 static void addArgs(MemCtx *m, CnkLangModule *mod, String *s){
@@ -102,7 +106,56 @@ static void addInst(MemCtx *m, CnkLangModule *mod, String *s){
     }
 }
 
+Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
+
+    char *cstr = "";
+    CnkLangModule *mod = CnkLangModule_Make(m); 
+    mod->ref = CnkLangModRef_Make(m);
+
+    Transp *tp = (Transp*)as(fmt->source, TYPE_TRANSP);
+    mod->cfile = tp->current.dest;
+
+    String *name_ = String_Clone(m, tp->current.fname);
+
+    String_Trunc(name_, -(tp->current.ext->length));
+
+    mod->ref->name = String_ToCamel(m, name_);
+
+    mod->ref->typeName = String_Init(m, STRING_EXTEND);
+    cstr = "TYPE_";
+    String_AddBytes(m, mod->ref->typeName, bytes(cstr), strlen(cstr));
+    String_Add(m, mod->ref->typeName, mod->ref->name);
+    String_MakeUpper(mod->ref->typeName);
+
+    if(item->children != NULL){
+        Iter it;
+        Iter_Init(&it, item->children);
+        while((Iter_Next(&it) & END) == 0){
+            Abstract *x = Iter_Get(&it);
+            CnkLangModule_SetItem(m, mod, item, x);
+        }
+    }
+
+    if(DEBUG_LANG_CNK){
+        Debug_Print((void *)mod, 0, "Struct mod: ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
+    }
+
+    item->value = (Abstract *)mod;
+
+    return (Abstract *)mod;
+}
+
+
+
 Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    if(fmt->type.state & FMT_CTX_CHILDREN_DONE){
+        CnkLang_StructFrom(m, def, fmt, key, a);
+    }else{
+        return NULL;
+    }
+
     FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
     CnkLangModule *mod = (CnkLangModule *)as(item->value, TYPE_LANG_CNK_MODULE);
 
@@ -111,7 +164,8 @@ Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abs
     char *cstr = " *";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
     String_Add(m, s, mod->ref->name);
-    cstr = "_Make(MemCtx *m";
+
+    cstr = "_Make(";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
 
     addArgs(m, mod, s);
@@ -137,9 +191,14 @@ Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abs
 
     cstr = "\n    return o;\n}\n";
     String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-
     Transp *tp = (Transp *)asIfc(fmt->source, TYPE_TRANSP);
-    fmt->out(m, s, fmt->source);
+    
+    if(DEBUG_LANG_CNK_OUT){
+        Debug_Print((void *)s, 0, "", DEBUG_LANG_CNK_OUT, TRUE);
+        printf("\n");
+    }
+
+    Transp_Out(tp, s);
 
     return (Abstract *)s;
 }
