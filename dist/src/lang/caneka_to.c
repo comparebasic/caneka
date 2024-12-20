@@ -51,15 +51,24 @@ Abstract *CnkLang_RequireTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 static void addArgs(MemCtx *m, CnkLangModule *mod, String *s){
     Iter it;;
     Iter_Init(&it, mod->args);
+    Span *modules = CnkLang_GetModules(m);
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL){
             CnkLangModRef *ref = (CnkLangModRef *)as(h->value, TYPE_LANG_CNK_MOD_REF);
             if(ref->spaceIdx == CNK_LANG_VALUE){
-                String_AddBytes(m, s, bytes(", "), 2); 
+
+                CnkLangModule *o = (CnkLangModule *)Table_Get(modules, (Abstract *)ref->name);
                 String_Add(m, s, ref->name); 
-                String_AddBytes(m, s, bytes(" *"), 2); 
+                if(o != NULL && (o->type.state & CNK_LANG_MOD_FUNC_PTR) != 0){
+                    String_AddBytes(m, s, bytes(" "), 1); 
+                }else{
+                    String_AddBytes(m, s, bytes(" *"), 2); 
+                }
                 String_Add(m, s, (String *)h->item); 
+                if((it.type.state & FLAG_ITER_LAST) == 0){
+                    String_AddBytes(m, s, bytes(", "), 2); 
+                }
             }
         }
     }
@@ -80,7 +89,12 @@ static void addInst(MemCtx *m, CnkLangModule *mod, String *s){
                 String_Add(m, s, (String *)h->item); 
                 String_AddBytes(m, s, bytes(";\n"), 2); 
             }else if(ref->spaceIdx == CNK_LANG_ROEBLING){
-                char *cstr = "    o->";
+                char *cstr = "    /* Roebling = /";
+                String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                String_Add(m, s, ref->name); 
+                cstr = "/ */\n";
+                String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
+                cstr = "    o->";
                 String_AddBytes(m, s, bytes(cstr), strlen(cstr)); 
                 String_Add(m, s, (String *)h->item); 
                 String_AddBytes(m, s, bytes(" = "), 3); 

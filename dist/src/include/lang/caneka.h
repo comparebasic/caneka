@@ -68,3 +68,4 @@ Abstract *CnkLang_StartTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abst
 Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a);
 status CnkLang_AddDefs(FmtCtx *ctx);
+Span *CnkLang_GetModules(MemCtx *m);

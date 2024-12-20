@@ -69,6 +69,7 @@ String *State_ToString(MemCtx *m, status state){
     }
 
     byte upper = (byte) (state >> 8);
+    String_AddBitPrint(m, s, &upper, sizeof(byte), TRUE);
     if(upper != 0){
         String_AddBytes(m, s, bytes("<<"), strlen("<<"));
         if((state & (1 << 8)) != 0){
@@ -97,8 +98,6 @@ String *State_ToString(MemCtx *m, status state){
         }
         String_AddBytes(m, s, bytes(" "), 1);
     }
-
-    String_AddBitPrint(m, s, &upper, sizeof(byte), TRUE);
 
     return s;
 }

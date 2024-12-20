@@ -1,6 +1,8 @@
 enum cnk_module_flags {
     CNK_LANG_PRIVATE = 1 << 8,
     CNK_LANG_OPTIONAL = 1 << 9,
+    CNK_LANG_MOD_FUNC_PTR = 1 << 10,
+    CNK_LANG_MOD_REF_DEFAULT = 1 << 11,
 };
 
 typedef struct caneka_statement {

@@ -1,6 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
+static Lookup *funcs = NULL;
+static Span *modules = NULL;
+
 char * CnkLang_RangeToChars(word range){
     if(range == 0){
         return "ZERO";
@@ -61,7 +64,7 @@ char * CnkLang_RangeToChars(word range){
 
 static void CnkModule_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     CnkLangModule *mod = (CnkLangModule *)as(a, TYPE_LANG_CNK_MODULE);
-    printf("\x1b[%dm%sCnkModule<", color, msg);
+    printf("\x1b[%dm%sCnkModule<%s", color, msg, State_ToChars(mod->type.state));
     Debug_Print((void *)mod->ref, 0, "", color, extended);
     printf("\n");
     Debug_Print((void *)mod->args, 0, "args:", color, TRUE);
@@ -110,11 +113,34 @@ static status populatePrint(MemCtx *m, Lookup *lk){
     return r;
 }
 
-static Lookup *funcs = NULL;
 status CnkLang_Init(MemCtx *m){
     if(funcs == NULL){
         funcs = Lookup_Make(m, CNK_LANG_START, populatePrint, NULL);
         return Chain_Extend(m, DebugPrintChain, funcs);
     }
     return NOOP;
+}
+
+static status populateModules(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_LANG_CNK_MODULE, (void *)CnkModule_Print);
+    r |= Lookup_Add(m, lk, TYPE_LANG_CNK_MOD_REF, (void *)CnkModuleRef_Print);
+
+    /* overwriting native fmt item */
+    r |= Lookup_Add(m, DebugPrintChain->funcs, TYPE_FMT_ITEM, (void *)FmtItem_Print);
+    
+    return r;
+}
+
+Span * CnkLang_GetModules(MemCtx *m){
+    if(modules == NULL){
+        modules = Span_Make(m, TYPE_TABLE);
+        CnkLangModule *mod;
+        mod = CnkLangModule_Make(m);
+        mod->ref = CnkLangModRef_Make(m);
+        mod->ref->name = String_Make(m, bytes("Getter"));
+        mod->type.state |= CNK_LANG_MOD_FUNC_PTR;
+        Table_Set(modules, (Abstract *)mod->ref->name, (Abstract *)mod);
+    }
+    return modules;
 }
