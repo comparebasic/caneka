@@ -2,5 +2,5 @@ struct {
     m = MemCtx
     get = Getter
     source = Abstract
-    rbl = /between({^$.+},$ -> value),value({_{{^}}.+} -> between)/ -> Capture
+    rbl = /between({^$.+},$ -> value),value({_\{^\}.+} -> between)/ -> Capture
 }
