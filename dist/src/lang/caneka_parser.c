@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+#include "rbl_parser_defs.c"
+
 static word indentDef[] = {
     PAT_MANY, ' ',' ', PAT_MANY|PAT_TERM,'\t','\t',
     PAT_END, 0, 0

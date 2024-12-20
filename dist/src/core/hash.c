@@ -31,10 +31,6 @@ static util Hash_MemPair(MemPair *mp){
     return Hash_Bytes((byte *)mp, sizeof(MemPair));
 }
 
-static util Hash_Match(Abstract *a){
-    return 0;
-}
-
 static util Hash_PatMatch(Abstract *a){
     return 0;
 }
@@ -76,10 +72,8 @@ static util Hash_Span(Abstract *a){
 static status populateHash(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
-    r |= Lookup_Add(m, lk, TYPE_MATCH, (void *)Hash_Match);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_PatMatch);
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)Hash_PatCharDef);
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_Match);
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)Hash_String);
     r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)Hash_String);
     r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)Hash_String);

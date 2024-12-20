@@ -2,11 +2,7 @@
 #include <caneka.h>
 
 static void match_Reset(Match *mt){
-    if(mt->type.of == TYPE_PATMATCH){
-        mt->def.pat.curDef = mt->def.pat.startTermDef = mt->def.pat.startDef;
-    }else if (mt->type.of == TYPE_STRINGMATCH){
-        mt->def.str.position = 0;
-    }
+    mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
     mt->count = 0;
     mt->lead = 0;
 }
@@ -27,39 +23,39 @@ static boolean charMatched(word c, PatCharDef *def){
 
 static void match_NextTerm(Match *mt){
     while(
-            (mt->def.pat.curDef < mt->def.pat.endDef) &&
-            !HasFlag(mt->def.pat.curDef->flags, PAT_TERM)){
-        mt->def.pat.curDef++;
+            (mt->pat.curDef < mt->pat.endDef) &&
+            !HasFlag(mt->pat.curDef->flags, PAT_TERM)){
+        mt->pat.curDef++;
     }
-    if(HasFlag(mt->def.pat.curDef->flags, PAT_TERM)){
-        mt->def.pat.curDef++;
+    if(HasFlag(mt->pat.curDef->flags, PAT_TERM)){
+        mt->pat.curDef++;
     }
 }
 
 static void match_StartOfTerm(Match *mt){
-    if(mt->def.pat.curDef > mt->def.pat.startDef){
-        PatCharDef *prev = mt->def.pat.curDef;
+    if(mt->pat.curDef > mt->pat.startDef){
+        PatCharDef *prev = mt->pat.curDef;
         prev--;
         while(
                 !HasFlag(prev->flags, PAT_TERM) &&
-                (mt->def.pat.curDef > mt->def.pat.startDef)){
-            if(prev == mt->def.pat.startDef){
-                mt->def.pat.curDef = mt->def.pat.startDef;
+                (mt->pat.curDef > mt->pat.startDef)){
+            if(prev == mt->pat.startDef){
+                mt->pat.curDef = mt->pat.startDef;
                 break;
             }else{
-                mt->def.pat.curDef--;
+                mt->pat.curDef--;
             }
             prev--;
         }
     }
 }
 
-static status match_FeedPat(Match *mt, word c){
+status Match_Feed(Match *mt, word c){
     if(HasFlag(mt->type.state, NOOP)){
 
         if(DEBUG_PATMATCH){
             printf("\x1b[%dm'%c' - \x1b[0m", COLOR_RED, c);
-            Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "NOOP - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
+            Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "NOOP - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
             printf("\n");
         }
 
@@ -69,19 +65,27 @@ static status match_FeedPat(Match *mt, word c){
     PatCharDef *def;
 
     if(DEBUG_PATMATCH){
-        Debug_Print(mt->def.pat.curDef, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
+        Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
         printf("\n");
     }
 
-    while(mt->def.pat.curDef < mt->def.pat.endDef){
-        def = mt->def.pat.curDef;
+    while(mt->pat.curDef < mt->pat.endDef){
+        def = mt->pat.curDef;
         if(HasFlag(def->flags, PAT_CMD)){
             mt->counter = def->to;
             if(HasFlag(def->from, PAT_GO_ON_FAIL)){
                 mt->type.state |= MATCH_GOTO;
             }
-            mt->def.pat.curDef++;
+            mt->pat.curDef++;
             continue;
+        }else if((mt->type.state & MATCH_KO) != 0 && (def->flags & PAT_KO) == 0){
+            if((mt->type.state & MATCH_LEAVE) != 0){
+                goto miss;
+                break;
+            }
+            mt->type.state &= ~PROCESSING;
+            match_NextTerm(mt);
+            break;
         }
 
         matched = charMatched(c, def);
@@ -91,23 +95,28 @@ static status match_FeedPat(Match *mt, word c){
         }
 
         if(matched){
-            if(HasFlag(def->flags, PAT_KO)){
-                if(HasFlag(def->flags, PAT_LEAVE)){
-                    goto miss;
-                    break;
-                }
-                if(!HasFlag(def->flags, PAT_NO_CAPTURE) || HasFlag(def->flags, PAT_CONSUME)){
-                    mt->tail++;
-                }
-                if(HasFlag(def->flags, PAT_SET_NOOP) || ((mt->type.state & SUCCESS_EMPTY) == 0 && mt->count == 0)){
-                    mt->type.state |= NOOP;
-                    mt->def.pat.curDef = mt->def.pat.startDef;
-                    return mt->type.state;
-                }
+            if((def->flags & (PAT_KO|PAT_INVERT)) != 0){
+                mt->type.state |= MATCH_KO_INVERT;
+                mt->pat.curDef++;
+                continue;
+            }
+            if((def->flags & PAT_KO) != 0){
+                if((mt->type.state & MATCH_KO_INVERT) != 0){
+                    mt->type.state &= ~MATCH_KO_INVERT;
+                }else{
+                    mt->type.state |= MATCH_KO;
+                    if((def->flags & PAT_LEAVE) != 0){
+                        mt->type.state |= MATCH_LEAVE;
+                    }
+                    if((def->flags & PAT_INVERT_CAPTURE) != 0){
+                        mt->tail++;
+                    }
 
-                mt->type.state &= ~PROCESSING;
-                match_NextTerm(mt);
-                break;
+                    mt->pat.curDef++;
+                    continue;
+                }
+            }
+            if((mt->type.state & MATCH_KO) != 0){
             }
             mt->type.state |= PROCESSING;
 
@@ -135,7 +144,7 @@ static status match_FeedPat(Match *mt, word c){
             break;
         }else{
             if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
-                mt->def.pat.curDef++;
+                mt->pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
                 if(HasFlag(def->flags, PAT_TERM)){
@@ -147,7 +156,7 @@ static status match_FeedPat(Match *mt, word c){
                         break;
                     }
                 }else{
-                    mt->def.pat.curDef++;
+                    mt->pat.curDef++;
                     continue;
                 }
             }else if((def->flags & (PAT_ANY)) != 0){
@@ -155,7 +164,7 @@ static status match_FeedPat(Match *mt, word c){
                     match_NextTerm(mt);
                     break;
                 }else{
-                    mt->def.pat.curDef++;
+                    mt->pat.curDef++;
                     continue;
                 }
             }else{
@@ -172,10 +181,10 @@ miss:
     }
 
     if(DEBUG_PATMATCH){
-        Match_midDebug('E', c, def, mt, charMatched(c, mt->def.pat.curDef));
+        Match_midDebug('E', c, def, mt, charMatched(c, mt->pat.curDef));
     }
 
-    if(mt->def.pat.curDef == mt->def.pat.endDef){
+    if(mt->pat.curDef == mt->pat.endDef){
         mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
 
         if(DEBUG_MATCH_COMPLETE){
@@ -193,49 +202,6 @@ miss:
     return mt->type.state;
 }
 
-static status match_FeedString(Match *mt, byte c){
-    if(DEBUG_MATCH){
-       printf("\x1b[%dm%c of %s %u", DEBUG_MATCH, c, mt->def.str.s->bytes, mt->def.str.s->length);
-       Debug_Print(mt, 0, " FeedPat: ", DEBUG_MATCH, TRUE);
-       printf("\n");
-    }
-    if(mt->def.str.s->bytes[mt->def.str.position] == c){
-        mt->def.str.position++;
-        mt->count++;
-        if(mt->def.str.position == mt->def.str.s->length){
-            mt->def.str.position = 0;
-            mt->type.state = SUCCESS;
-            if(DEBUG_ROEBLING_COMPLETE){
-                Debug_Print((void *)mt, 0, "Match Complete: ", DEBUG_ROEBLING_COMPLETE, TRUE);
-                printf("\n");
-            }
-        }else{
-            mt->type.state = PROCESSING;
-        }
-    }else{
-        mt->def.str.position = 0;
-        mt->type.state = NOOP;
-    }
-    return mt->type.state;
-}
-
-status Match_Feed(Match *mt, byte c){
-    if(DEBUG_ROEBLING_CONTENT){
-        if(c == '\r'){
-            printf("\x1b[%dm\\r\x1b[0m", DEBUG_ROEBLING_CONTENT);
-        }else if(c == '\n'){
-            printf("\x1b[%dm\\n\x1b[0m", DEBUG_ROEBLING_CONTENT);
-        }else{
-            printf("\x1b[%dm%c\x1b[0m", DEBUG_ROEBLING_CONTENT, c);
-        }
-    }
-    if(mt->type.of == TYPE_PATMATCH){
-        return match_FeedPat(mt, c);
-    }else{
-        return match_FeedString(mt, c);
-    }
-}
-
 status Match_FeedEnd(Match *mt){
     if(mt->remaining == 0){
         mt->type.state = SUCCESS;
@@ -246,7 +212,7 @@ status Match_FeedEnd(Match *mt){
 status Match_SetPattern(Match *mt, PatCharDef *def){
     memset(mt, 0, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;
-    mt->def.pat.startDef = mt->def.pat.curDef = def;
+    mt->pat.startDef = mt->pat.curDef = def;
     int count = 0;
     while(def->flags != PAT_END){
        def++;
@@ -255,20 +221,10 @@ status Match_SetPattern(Match *mt, PatCharDef *def){
        }
     }
     if(def->flags == PAT_END){
-        mt->def.pat.endDef = def;
+        mt->pat.endDef = def;
     }else{
         Fatal("PatCharDef: end not found", TYPE_PATCHARDEF);
     }
-    mt->remaining = -1;
-    mt->jump = -1;
-
-    return SUCCESS;
-}
-
-status Match_SetString(Match *mt, String *s){
-    memset(mt, 0, sizeof(Match));
-    mt->type.of = TYPE_STRINGMATCH;
-    mt->def.str.s = s;
     mt->remaining = -1;
     mt->jump = -1;
 

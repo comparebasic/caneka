@@ -8,27 +8,24 @@ enum pat_flags {
     PAT_ANY = 1 << 3, /* N */
     PAT_INVERT = 1 << 4, /* I */
     PAT_COUNT = 1 << 5, /* C */
-    PAT_SET_NOOP = 1 << 6, /* U */
-    PAT_NO_CAPTURE = 1 << 7, /* G */
-    PAT_ALL = 1 << 8, /* A */
-    PAT_KO = 1 << 9, /* K */
-    PAT_SINGLE = 1 << 10, /* S */
-    PAT_CONSUME  = 1 << 11, /* O */
-    PAT_LEAVE  = 1 << 12, /* L */
-    PAT_CMD = 1 << 13, /* D */
-    PAT_GO_ON_FAIL = 1 << 14, /* T */
+    PAT_INVERT_CAPTURE = 1 << 6, /* G */
+    PAT_ALL = 1 << 7, /* A */
+    PAT_KO = 1 << 8, /* K */
+    PAT_SINGLE = 1 << 9, /* S */
+    PAT_LEAVE  = 1 << 10, /* L */
+    PAT_CMD = 1 << 11, /* D */
+    PAT_GO_ON_FAIL = 1 << 12, /* T */
 };
 
 enum match_flags {
-    /* */
     MATCH_GOTO = 1 << 8,
     MATCH_INVERTED = 1 << 9,
     MATCH_TERM_FOUND = 1 << 10,
-    ANCHOR_UNTIL = 1 << 11,
-    ANCHOR_CONTAINS = 1 << 12,
+    MATCH_KO_INVERT = 1 << 11,
+    MATCH_KO = 1 << 12,
     ANCHOR_START = 1 << 13,
     SEARCH = 1 << 14, 
-    SUCCESS_EMPTY = 1 << 15,
+    MATCH_LEAVE = 1 << 15
 };
 
 #define patText \
@@ -60,24 +57,16 @@ typedef struct range_chardef {
     word to;
 } PatCharDef;
 
-typedef struct _pat_match {
+typedef struct pat_match {
     PatCharDef *startDef;
     PatCharDef *endDef;
     PatCharDef *curDef;
     PatCharDef *startTermDef;
-} _patMatch;
-
-typedef struct _string_match {
-    String *s;
-    int position;
-}_stringMatch;
+} PatMatch;
 
 typedef struct match {
     Type type; 
-    union {
-        _patMatch pat;
-        _stringMatch str;
-    } def;
+    PatMatch pat;
     int jump;
     int remaining;
     int count;
@@ -90,6 +79,6 @@ typedef struct match {
 Match *Match_Make(MemCtx *m, String *s, word flags);
 status Match_SetPattern(Match *mt, PatCharDef *def);
 status Match_SetString(Match *mt, String *s);
-status Match_Feed(Match *mt, byte c);
+status Match_Feed(Match *mt, word c);
 status Match_FeedEnd(Match *mt);
 PatCharDef *Match_GetDef(Match *mt);

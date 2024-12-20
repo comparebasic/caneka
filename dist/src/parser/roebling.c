@@ -47,7 +47,7 @@ static status Roebling_RunMatches(Roebling *rbl){
                      }
 
                      if(mt->lead+mt->count+mt->tail == 0){
-                        Fatal("No increment value for successful match", TYPE_MATCH);
+                        Fatal("No increment value for successful match", TYPE_PATMATCH);
                      }
 
                      SCursor_Incr(&(rbl->range.start), mt->lead);
@@ -317,7 +317,7 @@ Roebling *Roebling_Make(MemCtx *m,
     rbl->m = m;
     rbl->source = source;
     rbl->capture = capture;
-    rbl->matches = Span_MakeInline(rbl->m, TYPE_MATCH, (int)sizeof(Match));  
+    rbl->matches = Span_MakeInline(rbl->m, TYPE_PATMATCH, (int)sizeof(Match));  
     rbl->parsers_do = Span_Make(m, TYPE_SPAN);
     int markStart = 0;
     if(markLabels != NULL){
