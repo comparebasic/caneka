@@ -106,9 +106,6 @@ status StringB64_Tests(MemCtx *gm){
     s = String_Make(m, bytes("Some content to be b64 encoded."));
     b64 = String_ToB64(m, s);
 
-    Debug_Print((void *)b64, 0, "B64: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     r |= Test(String_EqualsBytes(b64, bytes("U29tZSBjb250ZW50IHRvIGJlIGI2NCBlbmNvZGVkLg==")), "String has been encoded in base64, have '%s'", b64->bytes);
 
     s2 = String_FromB64(m, b64);

@@ -124,7 +124,7 @@ status MatchKo_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(i == s->length, "Length matches for string that has no escape or closing quote %d\n", i);
+    r |= Test(i == s->length, "Length matches for string that has no escape or closing quote %d", i);
 
     s = String_Make(m, bytes("Hi there this is a \\\"quoted string\\\""));
     Match_SetPattern(&mt, (PatCharDef *)def);
@@ -137,7 +137,7 @@ status MatchKo_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(i == s->length-2, "Length matches for string minus escape cahrs that has two escapes in it %d\n", i);
+    r |= Test(i == s->length-2, "Length matches for string minus escape cahrs that has two escapes in it %d", i);
 
     s = String_Make(m, bytes("Hi there this is a string ending \" here"));
     Match_SetPattern(&mt, (PatCharDef *)def);
@@ -150,7 +150,7 @@ status MatchKo_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(i == s->length-5, "Length matches for string that has a terminator quote in it %d\n", i);
+    r |= Test(i == s->length-5, "Length matches for string that has a terminator quote in it %d", i);
 
 
 
@@ -170,8 +170,8 @@ status MatchKo_Tests(MemCtx *gm){
         }
     }
     
-    r |= Test(i == 10, "It took 10 counts to get to the end, have %d\n", i);
-    r |= Test(mt.count == 7, "terminator 'end' is omited from the count have, %d\n", mt.count);
+    r |= Test(i == 10, "It took 10 counts to get to the end, have %d", i);
+    r |= Test(mt.count == 7, "terminator 'end' is omited from the count have, %d", mt.count);
 
     MemCtx_Free(m);
     return r;

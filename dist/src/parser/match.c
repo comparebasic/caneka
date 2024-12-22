@@ -91,7 +91,7 @@ status Match_Feed(Match *mt, word c){
         }
 
         if(matched){
-            if((def->flags & (PAT_KO|PAT_INVERT)) != 0){
+            if((def->flags & (PAT_KO|PAT_INVERT)) == (PAT_KO|PAT_INVERT)){
                 mt->type.state |= MATCH_KO_INVERT;
                 mt->pat.curDef++;
                 continue;
@@ -112,8 +112,6 @@ status Match_Feed(Match *mt, word c){
                     continue;
                 }
             }
-            if((mt->type.state & MATCH_KO) != 0){
-            }
             mt->type.state |= PROCESSING;
 
             if(HasFlag(def->flags, PAT_LEAVE)){
@@ -127,7 +125,7 @@ status Match_Feed(Match *mt, word c){
             }else{
                 mt->count++;
             }
-
+            
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
                     ((def->flags & PAT_COUNT) != 0 && (--mt->remaining) > 0)){
                 match_StartOfTerm(mt);
@@ -163,6 +161,9 @@ status Match_Feed(Match *mt, word c){
                     mt->pat.curDef++;
                     continue;
                 }
+            }else if((mt->type.state & (MATCH_KO)) != 0){
+                match_NextTerm(mt);
+                continue;
             }else{
 miss:
                 mt->type.state &= ~PROCESSING;

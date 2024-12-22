@@ -19,8 +19,5 @@ String *PatChar_FromString(MemCtx *m, String *s){
     pdef.to = 0;
     String_AddBytes(m, pat, (byte *)&pdef, sizeof(PatCharDef));
 
-    Debug_Print((void *)pat->bytes, TYPE_PATCHARDEF, "PatChar_FromString: ", COLOR_CYAN, TRUE);
-    printf("\n");
-
     return pat;
 }
