@@ -4,41 +4,41 @@
 #define TAG_ATTR_PAT PAT_MANY,':',':',PAT_MANY,'-','-',PAT_MANY,'_','_',PAT_MANY,'a','z',PAT_MANY,'0','9',PAT_MANY|PAT_TERM,'A','Z'
 
 static word tagDef[] = {
-    PAT_TERM|PAT_NO_CAPTURE, '<', '<',
+    PAT_TERM|PAT_INVERT_CAPTURE, '<', '<',
     TAG_ATTR_PAT, 
     PAT_END, 0, 0
 };
 
 static word closeTagDef[] = {
-    PAT_TERM|PAT_NO_CAPTURE, '<', '<',
-    PAT_TERM|PAT_NO_CAPTURE, '/', '/',
+    PAT_TERM|PAT_INVERT_CAPTURE, '<', '<',
+    PAT_TERM|PAT_INVERT_CAPTURE, '/', '/',
     TAG_ATTR_PAT,
-    PAT_TERM|PAT_NO_CAPTURE, '>', '>',
+    PAT_TERM|PAT_INVERT_CAPTURE, '>', '>',
     PAT_END, 0, 0
 };
 
 static word bodyDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, '<', '<', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
+    PAT_KO|PAT_INVERT_CAPTURE, '<', '<', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
     PAT_END, 0, 0
 };
 
 static word bodyCashDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, '<', '<',  patText,
+    PAT_KO|PAT_INVERT_CAPTURE, '<', '<',  patText,
     PAT_END, 0, 0
 };
 
 
 static word bodyWsDef[] = {
-    PAT_KO|PAT_NO_CAPTURE, '<', '<', patWhiteSpace, 
+    PAT_KO|PAT_INVERT_CAPTURE, '<', '<', patWhiteSpace, 
     PAT_END, 0, 0
 };
 
 static word attDef[] = {
-    PAT_NO_CAPTURE|PAT_MANY, '\t', '\t', PAT_NO_CAPTURE|PAT_MANY, '\r', '\r', 
-    PAT_NO_CAPTURE|PAT_MANY, '\n', '\n', PAT_NO_CAPTURE|PAT_MANY|PAT_TERM, ' ', ' ',
-    PAT_KO|PAT_NO_CAPTURE, '=', '=',
-    PAT_KO|PAT_NO_CAPTURE, '/', '/',
-    PAT_KO|PAT_NO_CAPTURE, '>', '>',
+    PAT_INVERT_CAPTURE|PAT_MANY, '\t', '\t', PAT_INVERT_CAPTURE|PAT_MANY, '\r', '\r', 
+    PAT_INVERT_CAPTURE|PAT_MANY, '\n', '\n', PAT_INVERT_CAPTURE|PAT_MANY|PAT_TERM, ' ', ' ',
+    PAT_KO|PAT_INVERT_CAPTURE, '=', '=',
+    PAT_KO|PAT_INVERT_CAPTURE, '/', '/',
+    PAT_KO|PAT_INVERT_CAPTURE, '>', '>',
     TAG_ATTR_PAT,
     PAT_END, 0, 0
 };
@@ -55,34 +55,34 @@ static word selfCloseDef[] = {
 };
 
 static word attQuotedDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM, '=', '=',
-    PAT_NO_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
+    PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
+    PAT_INVERT_CAPTURE|PAT_TERM, '"', '"',
+    PAT_KO|PAT_INVERT_CAPTURE, '"', '"', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
     PAT_END, 0, 0
 };
 
 static word attQuotedNumDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM, '=', '=',
-    PAT_NO_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"', PAT_MANY|PAT_TERM, '0', '9',
+    PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
+    PAT_INVERT_CAPTURE|PAT_TERM, '"', '"',
+    PAT_KO|PAT_INVERT_CAPTURE, '"', '"', PAT_MANY|PAT_TERM, '0', '9',
     PAT_END, 0, 0
 };
 
 static word attQuotedCashDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM, '=', '=',
-    PAT_NO_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_NO_CAPTURE|PAT_CONSUME, '"', '"',  patText,
+    PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
+    PAT_INVERT_CAPTURE|PAT_TERM, '"', '"',
+    PAT_KO|PAT_INVERT_CAPTURE, '"', '"',  patText,
     PAT_END, 0, 0
 };
 
 static word attUnQuotedNumDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
     PAT_MANY|PAT_TERM, '0', '9',
     PAT_END, 0, 0
 };
 
 static word attUnQuotedDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
     TAG_ATTR_PAT,
     PAT_END, 0, 0
 };

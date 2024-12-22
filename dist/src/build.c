@@ -51,7 +51,7 @@ static BuildSubdir persistobj = { "persist", {
 }};
 
 static BuildSubdir parserobj = {"parser", {
-    "match.c", "roebling.c", "scursor.c", "range.c", NULL
+    "match.c", "roebling.c", "scursor.c", "range.c", "patchar.c", NULL
 }};
 
 static BuildSubdir formatsobj = {"formats", {

@@ -13,7 +13,7 @@ static word startDef[] = {
 };
 
 static word valueDef[] = {
-    PAT_TERM|PAT_NO_CAPTURE, '{', '{', PAT_KO, '}', '}', patText,
+    PAT_TERM|PAT_INVERT_CAPTURE, '{', '{', PAT_KO, '}', '}', patText,
     PAT_END, 0, 0
 };
 

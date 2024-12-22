@@ -128,7 +128,7 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump){
     for(int i = 0; i < lk->values->nvalues; i++){
         Match *mt = Span_ReserveNext(rbl->matches);
         String *s = (String *)Span_Get(lk->values, i);
-        Match_SetString(mt, s);
+        Match_SetString(rbl->m, mt, s);
         mt->captureKey = captureKey;
         if(jump != -1){
             mt->jump = Roebling_GetMarkIdx(rbl, jump);

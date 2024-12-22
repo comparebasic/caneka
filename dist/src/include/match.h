@@ -9,12 +9,11 @@ enum pat_flags {
     PAT_INVERT = 1 << 4, /* I */
     PAT_COUNT = 1 << 5, /* C */
     PAT_INVERT_CAPTURE = 1 << 6, /* G */
-    PAT_ALL = 1 << 7, /* A */
-    PAT_KO = 1 << 8, /* K */
-    PAT_SINGLE = 1 << 9, /* S */
-    PAT_LEAVE  = 1 << 10, /* L */
-    PAT_CMD = 1 << 11, /* D */
-    PAT_GO_ON_FAIL = 1 << 12, /* T */
+    PAT_KO = 1 << 7, /* K */
+    PAT_SINGLE = 1 << 8, /* S */
+    PAT_LEAVE  = 1 << 9, /* L */
+    PAT_CMD = 1 << 10, /* D */
+    PAT_GO_ON_FAIL = 1 << 11, /* T */
 };
 
 enum match_flags {
@@ -78,7 +77,7 @@ typedef struct match {
 
 Match *Match_Make(MemCtx *m, String *s, word flags);
 status Match_SetPattern(Match *mt, PatCharDef *def);
-status Match_SetString(Match *mt, String *s);
+status Match_SetString(MemCtx *m, Match *mt, String *s);
 status Match_Feed(Match *mt, word c);
 status Match_FeedEnd(Match *mt);
 PatCharDef *Match_GetDef(Match *mt);

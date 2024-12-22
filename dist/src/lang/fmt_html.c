@@ -46,7 +46,7 @@ static char *captureToChars(int captureKey){
 }
 
 static word indentDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE,' ' ,' ',PAT_MANY|PAT_TERM, '>', '>',PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,' ' ,' ',
+    PAT_ANY|PAT_INVERT_CAPTURE,' ' ,' ',PAT_MANY|PAT_TERM, '>', '>',PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' ',
     PAT_END, 0, 0
 };
 
@@ -61,7 +61,7 @@ static word nlDef[] = {
 };
 
 static word dashDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE, ' ', ' ', PAT_TERM, '-', '-',PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,' ' ,' ',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' ', PAT_TERM, '-', '-',PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' ',
     PAT_END, 0, 0
 };
 
@@ -72,7 +72,7 @@ static word plusDef[] = {
 
 
 static word cmdDef[] = {
-    PAT_TERM|PAT_NO_CAPTURE, '.', '.', PAT_KO, ':', ':', patText,
+    PAT_TERM|PAT_INVERT_CAPTURE, '.', '.', PAT_KO, ':', ':', patText,
     PAT_END, 0, 0
 };
 

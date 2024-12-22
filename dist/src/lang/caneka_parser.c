@@ -9,20 +9,20 @@ static word indentDef[] = {
 };
 
 static word sepDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_ANY|PAT_NO_CAPTURE, '\n', '\n', PAT_TERM, ',', ',',
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, '\n', '\n',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r', PAT_ANY|PAT_INVERT_CAPTURE, '\n', '\n', PAT_TERM, ',', ',',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r', PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, '\n', '\n',
     PAT_END, 0, 0
 };
 
 static word curlyCloseDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_ANY|PAT_NO_CAPTURE, '\n', '\n', PAT_TERM, '}', '}',
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_NO_CAPTURE|PAT_TERM, '\n', '\n',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r', PAT_ANY|PAT_INVERT_CAPTURE, '\n', '\n', PAT_TERM, '}', '}',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r', PAT_INVERT_CAPTURE|PAT_TERM, '\n', '\n',
     PAT_END, 0, 0
 };
 
 static word curlyOpenDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_ANY|PAT_NO_CAPTURE, '\n', '\n', PAT_TERM, '{', '{',
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE, '\r', '\r', PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, '\n', '\n',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r', PAT_ANY|PAT_INVERT_CAPTURE, '\n', '\n', PAT_TERM, '{', '{',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r', PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, '\n', '\n',
     PAT_END, 0, 0
 };
 
@@ -50,7 +50,7 @@ static word reqDef[] = {
     PAT_TERM, 'i', 'i',
     PAT_TERM, 'r', 'r',
     PAT_TERM, 'e', 'e',
-    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\t','\t',
+    PAT_MANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM,'\t','\t',
     PAT_END, 0, 0
 };
 
@@ -62,7 +62,7 @@ static word pkgDef[] = {
     PAT_TERM, 'a', 'a',
     PAT_TERM, 'g', 'g',
     PAT_TERM, 'e', 'e',
-    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\t','\t',
+    PAT_MANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM,'\t','\t',
     PAT_END, 0, 0
 };
 
@@ -73,9 +73,9 @@ static word structDef[] = {
     PAT_TERM, 'u', 'u',
     PAT_TERM, 'c', 'c',
     PAT_TERM, 't', 't',
-    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\t','\t',
-    PAT_TERM|PAT_NO_CAPTURE, '{', '{',
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE,'\t','\t', PAT_ANY|PAT_NO_CAPTURE,'\r', '\r',PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,'\n', '\n',
+    PAT_MANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM,'\t','\t',
+    PAT_TERM|PAT_INVERT_CAPTURE, '{', '{',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_ANY|PAT_INVERT_CAPTURE,'\r', '\r',PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,'\n', '\n',
     PAT_END, 0, 0
 };
 
@@ -84,13 +84,13 @@ static word typeDef[] = {
     PAT_TERM, 'y', 'y',
     PAT_TERM, 'p', 'p',
     PAT_TERM, 'e', 'e',
-    PAT_MANY|PAT_NO_CAPTURE, ' ',' ', PAT_MANY|PAT_NO_CAPTURE,'\t','\t', PAT_MANY|PAT_NO_CAPTURE,'\r', '\r',PAT_MANY|PAT_NO_CAPTURE|PAT_TERM,'\n', '\n',
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,'\t','\t',
+    PAT_MANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_MANY|PAT_INVERT_CAPTURE,'\t','\t', PAT_MANY|PAT_INVERT_CAPTURE,'\r', '\r',PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM,'\n', '\n',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,'\t','\t',
     PAT_END, 0, 0
 };
 
 static word rblDef[] = {
-    PAT_TERM|PAT_NO_CAPTURE, '/', '/',PAT_KO, '/','/', patText,
+    PAT_TERM|PAT_INVERT_CAPTURE, '/', '/',PAT_KO, '/','/', patText,
     PAT_END, 0, 0
 };
 
@@ -103,34 +103,34 @@ static word tokenDef[] = {
 static word invokeDef[] = {
     PAT_MANY|PAT_KO|PAT_LEAVE, '.', '.', PAT_KO, '(', '(', PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z',
 /*
-    PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_NO_CAPTURE, '(', PAT_KO|PAT_MANY, ')', PAT_MANY|PAT_TERM, 0, 255,
+    PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_INVERT_CAPTURE, '(', PAT_KO|PAT_MANY, ')', PAT_MANY|PAT_TERM, 0, 255,
     */
     PAT_END, 0, 0
 };
 
 static word toFuncDef[] = {
-    PAT_MANY|PAT_TERM|PAT_NO_CAPTURE, ' ', ' ',
+    PAT_MANY|PAT_TERM|PAT_INVERT_CAPTURE, ' ', ' ',
     PAT_TERM, '-','-',
     PAT_TERM, '>','>',
-    PAT_ANY|PAT_TERM|PAT_NO_CAPTURE, ' ', ' ',
+    PAT_ANY|PAT_TERM|PAT_INVERT_CAPTURE, ' ', ' ',
     PAT_END, 0, 0
 };
 
 static word tokenDotDef[] = {
-    PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_NO_CAPTURE, '.','.',
+    PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_INVERT_CAPTURE, '.','.',
     PAT_END, 0, 0
 };
 
 static word tokenNullDef[] = {
-    PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_NO_CAPTURE, '?','?',
+    PAT_MANY, '-', '-',PAT_MANY, '_', '_',PAT_MANY, '0', '9',PAT_MANY, 'A', 'Z',PAT_MANY|PAT_TERM, 'a', 'z', PAT_TERM|PAT_INVERT_CAPTURE, '?','?',
     PAT_END, 0, 0
 };
 
 static word cDef[] = {
     PAT_TERM, 'C', 'C',
-    PAT_ANY|PAT_NO_CAPTURE, ' ',' ', PAT_ANY|PAT_NO_CAPTURE|PAT_TERM,'\t','\t',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ',' ', PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,'\t','\t',
     PAT_TERM, '{', '{',
-    PAT_MANY|PAT_NO_CAPTURE,'\r', '\r',PAT_NO_CAPTURE|PAT_TERM,'\n', '\n',
+    PAT_MANY|PAT_INVERT_CAPTURE,'\r', '\r',PAT_INVERT_CAPTURE|PAT_TERM,'\n', '\n',
     PAT_END, 0, 0
 };
 
@@ -140,7 +140,7 @@ static word lineDef[] = {
 };
 
 static word opDef[] = {
-    PAT_MANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
+    PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' ', 
     PAT_MANY, '=', '=', 
     PAT_MANY, '<', '<', 
     PAT_MANY, '>', '>', 
@@ -158,7 +158,7 @@ static word opDef[] = {
     PAT_MANY, '-', '-', 
     PAT_MANY, '*', '*', 
     PAT_MANY|PAT_TERM, '/', '/', 
-    PAT_MANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
+    PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' ', 
     PAT_END, 0, 0
 };
 

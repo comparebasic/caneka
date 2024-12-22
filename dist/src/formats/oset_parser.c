@@ -3,22 +3,22 @@
 
 /* token patCharDefs */
 static word labelDef[] = {
-    PAT_KO|PAT_CONSUME, ':',':', patText,
+    PAT_KO, ':',':', patText,
     PAT_END, 0, 0
 };
 
 static word tokenNameDef[] = {
-    PAT_NO_CAPTURE|PAT_KO,'/','/',PAT_NO_CAPTURE|PAT_KO,'|','|',patText,
+    PAT_INVERT_CAPTURE|PAT_KO,'/','/',PAT_INVERT_CAPTURE|PAT_KO,'|','|',patText,
     PAT_END, 0, 0
 };
 
 static word flagsDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM,'|','|',PAT_NO_CAPTURE|PAT_KO,'/','/',PAT_MANY|PAT_TERM,'0', '9',
+    PAT_INVERT_CAPTURE|PAT_TERM,'|','|',PAT_INVERT_CAPTURE|PAT_KO,'/','/',PAT_MANY|PAT_TERM,'0', '9',
     PAT_END, 0, 0
 };
 
 static word lengthDef[] = {
-    PAT_NO_CAPTURE|PAT_TERM,'/','/',PAT_MANY|PAT_TERM,'0', '9',PAT_NO_CAPTURE|PAT_TERM, '=', '=',
+    PAT_INVERT_CAPTURE|PAT_TERM,'/','/',PAT_MANY|PAT_TERM,'0', '9',PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
     PAT_END, 0, 0
 };
 

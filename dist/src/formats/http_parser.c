@@ -18,7 +18,7 @@ char *HttpProto_MethodToChars(int methodIdx){
 
 
 word pathDef[] = {
-    PAT_TERM|PAT_NO_CAPTURE,' ',' ', 
+    PAT_TERM|PAT_INVERT_CAPTURE,' ',' ', 
     PAT_KO,' ',' ', 
     patText,
     PAT_END, 0, 0
@@ -33,8 +33,8 @@ word protoDef[] = {
     PAT_TERM,'1','1', 
     PAT_TERM,'.','.', 
     PAT_TERM,'1', '2',
-    PAT_TERM|PAT_NO_CAPTURE, '\r', '\r',
-    PAT_TERM|PAT_NO_CAPTURE, '\n', '\n',
+    PAT_TERM|PAT_INVERT_CAPTURE, '\r', '\r',
+    PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n',
     PAT_END, 0, 0
 };
 
@@ -45,9 +45,9 @@ word headerDef[] = {
 };
 
 word headerValueDef[] = {
-    PAT_ANY|PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', 
+    PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' ', 
     PAT_KO, '\r', '\r', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, 
-    PAT_TERM|PAT_NO_CAPTURE|PAT_CONSUME, '\n', '\n',
+    PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n',
     PAT_CMD|PAT_INVERT, PAT_GO_ON_FAIL, 1, PAT_INVERT|PAT_LEAVE, ' ', ' ', PAT_INVERT|PAT_LEAVE|PAT_TERM, '\t', '\t',
     PAT_END, 0, 0
 };
@@ -59,9 +59,12 @@ word endDef[] = {
 };
 
 static status method(MemCtx *m, Roebling *rbl){
+    /*
     HttpProto *proto = (HttpProto *)rbl->source;
     Roebling_ResetPatterns(rbl);
     return Roebling_SetLookup(rbl, proto->methods, HTTP_METHOD, -1); 
+    */
+    return NOOP;
 }
 
 static status path(MemCtx *m, Roebling *rbl){

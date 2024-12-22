@@ -53,9 +53,9 @@ status SetWord1(MemCtx *m, Abstract *a){
     return r; 
 }
 
-static word text[] = {PAT_NO_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, PAT_END, 0, 0};
+static word text[] = {PAT_INVERT_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, PAT_END, 0, 0};
 static word nl[] = {NL_DEF};
-static word nl_upper[] = {PAT_INVERT|PAT_TERM|PAT_NO_CAPTURE, '\n', '\n', PAT_END, 0, 0};
+static word nl_upper[] = {PAT_INVERT|PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n', PAT_END, 0, 0};
 static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_END, 0, 0};
 
 status SetWord2(MemCtx *m, Roebling *rbl){

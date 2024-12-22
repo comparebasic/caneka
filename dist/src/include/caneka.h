@@ -162,6 +162,7 @@ enum types {
     TYPE_TABLE,
     TYPE_POLL_MAP_SPAN,
     _TYPE_SPAN_END,
+    TYPE_STRRAY,
     TYPE_COORDS,
     TYPE_MEM_KEYED,
     TYPE_SPAN_STATE,
@@ -284,6 +285,7 @@ status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 #include "table_chain.h"
 #include "tokens.h"
 #include "result.h"
+#include "patchar.h"
 #include "match.h"
 #include "scursor.h"
 #include "range.h"

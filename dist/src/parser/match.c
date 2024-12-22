@@ -9,11 +9,7 @@ static void match_Reset(Match *mt){
 
 static boolean charMatched(word c, PatCharDef *def){
     boolean matched = FALSE;
-    if((def->flags & PAT_ALL) != 0){
-        matched =  TRUE;
-    }else{
-        matched = (c >= def->from && c <= def->to);
-    }
+    matched = (c >= def->from && c <= def->to);
 
     if((def->flags & PAT_INVERT) != 0){
         matched = !matched;
@@ -122,7 +118,7 @@ status Match_Feed(Match *mt, word c){
 
             if(HasFlag(def->flags, PAT_LEAVE)){
                 mt->type.state |= MATCH_INVERTED;
-            }else if(HasFlag(def->flags, PAT_NO_CAPTURE)){
+            }else if(HasFlag(def->flags, PAT_INVERT_CAPTURE)){
                 if(mt->count == 0){
                     mt->lead++;
                 }else {
@@ -207,6 +203,15 @@ status Match_FeedEnd(Match *mt){
         mt->type.state = SUCCESS;
     }
     return mt->type.state;
+}
+
+status Match_SetString(MemCtx *m, Match *mt, String *s){
+    String *ret = PatChar_FromString(m, s);
+    if(ret == NULL){
+        return ERROR;
+    }
+
+    return Match_SetPattern(mt, (PatCharDef *)ret->bytes); 
 }
 
 status Match_SetPattern(Match *mt, PatCharDef *def){

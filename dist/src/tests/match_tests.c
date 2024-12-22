@@ -11,7 +11,7 @@ status Match_Tests(MemCtx *gm){
     String *s;
 
     s = String_Make(m, bytes("poo"));
-    Match_SetString(&mt, s);
+    Match_SetString(m, &mt, s);
 
     s = String_Make(m, bytes("no"));
     for(int i = 0; i < s->length; i++){
@@ -20,11 +20,12 @@ status Match_Tests(MemCtx *gm){
 
     r |= Test(mt.type.state != COMPLETE, "Non match has unsuccessful state found %s", State_ToChars(mt.type.state)); 
     s = String_Make(m, bytes("poo"));
+
+    mt.type.state = READY;
     for(int i = 0; i < s->length; i++){
         Match_Feed(&mt, s->bytes[i]);
     }
     r |= Test(mt.type.state == COMPLETE, "Matching string has successful state found %s", State_ToChars(mt.type.state)); 
-
 
     /* test pat match */
     word line[] = { PAT_KO, '\n', '\n', patText, PAT_END, 0, 0};  
@@ -52,7 +53,7 @@ status MatchElastic_Tests(MemCtx *gm){
 
     String *s = String_Make(m, bytes("<tag atts=\"poo\">hi</tab>"));
 
-    word pat[] = { PAT_NO_CAPTURE|PAT_TERM, '<', '<', PAT_MANY, 'a', 'z', PAT_END, 0, 0};
+    word pat[] = { PAT_INVERT_CAPTURE|PAT_TERM, '<', '<', PAT_MANY, 'a', 'z', PAT_END, 0, 0};
     Match mt;
     Match_SetPattern(&mt, (PatCharDef *)pat);
     int i = 0;
@@ -78,7 +79,7 @@ status MatchElastic_Tests(MemCtx *gm){
     PatCharDef *def = mt.pat.curDef;
     r |= Test((def->flags == PAT_END), "Tag -At end");
 
-    word att[] = { PAT_NO_CAPTURE|PAT_TERM, ' ', ' ', PAT_KO, '=', '=', PAT_MANY|PAT_TERM, 'a', 'z', PAT_END, 0, 0};
+    word att[] = { PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' ', PAT_KO, '=', '=', PAT_MANY|PAT_TERM, 'a', 'z', PAT_END, 0, 0};
     Match_SetPattern(&mt, (PatCharDef *)att);
     count = 0;
     while(1){
@@ -170,7 +171,7 @@ status MatchKo_Tests(MemCtx *gm){
     }
     
     r |= Test(i == 10, "It took 10 counts to get to the end, have %d\n", i);
-    r |= Test(mt->count == 7, "terminator 'end' is omited from the count have, %d\n", mt->count);
+    r |= Test(mt.count == 7, "terminator 'end' is omited from the count have, %d\n", mt.count);
 
     MemCtx_Free(m);
     return r;

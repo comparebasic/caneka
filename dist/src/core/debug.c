@@ -5,7 +5,7 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_PURPLE;
 int DEBUG_MATCH_COMPLETE = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
@@ -380,48 +380,39 @@ status PrintMatchAddr(MemCtx *m, Abstract *a){
     return SUCCESS;
 }
 
+static word matchFlags[] = {
+    PAT_END, /* E */
+    PAT_TERM, /* X */
+    PAT_OPTIONAL, /* P */
+    PAT_MANY, /* M */
+    PAT_ANY, /* N */
+    PAT_INVERT, /* I */
+    PAT_COUNT, /* C */
+    PAT_INVERT_CAPTURE, /* G */
+    PAT_KO, /* K */
+    PAT_SINGLE, /* S */
+    PAT_LEAVE , /* L */
+    PAT_CMD, /* D */
+    PAT_GO_ON_FAIL, /* T */
+};
+
+static char *matchFlagChars = "EXPMNICGKSLDT";
+
 static status patFlagStr(word flags, char str[]){
+    int p = 0;
     int i = 0;
+    /* 0 and & x != 0 dont mix well */
     if(flags == PAT_END){
         str[i++] = 'E';
     }
-    if((flags & PAT_TERM) != 0){
-        str[i++] = 'X';
+    int l = strlen(matchFlagChars);
+    while(i < l){
+       if((flags &matchFlags[i]) != 0){
+            str[p++] = matchFlagChars[i];
+       }
+       i++;
     }
-    if((flags & PAT_OPTIONAL) != 0){
-        str[i++] = 'P';
-    }
-    if((flags & PAT_CONSUME) != 0){
-        str[i++] = 'O';
-    }
-    if((flags & PAT_MANY) != 0){
-        str[i++] = 'M';
-    }
-    if((flags & PAT_ANY) != 0){
-        str[i++] = 'N';
-    }
-    if((flags & PAT_INVERT) != 0){
-        str[i++] = 'I';
-    }
-    if((flags & PAT_COUNT) != 0){
-        str[i++] = 'C';
-    }
-    if((flags & PAT_SET_NOOP) != 0){
-        str[i++] = 'U';
-    }
-    if((flags & PAT_NO_CAPTURE) != 0){
-        str[i++] = 'G';
-    }
-    if((flags & PAT_SINGLE) != 0){
-        str[i++] = 'S';
-    }
-    if((flags & PAT_KO) != 0){
-        str[i++] = 'K';
-    }
-    if((flags & PAT_LEAVE) != 0){
-        str[i++] = 'L';
-    }
-    str[i] = '\0';
+    str[p] = '\0';
     return SUCCESS;
 }
 
@@ -434,7 +425,7 @@ static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int col
         }else{
             printf("%s%s=%cx%hu", msg, flag_cstr, (char)def->from, def->to);
         }
-    }else if((def->flags & PAT_ALL) != 0 || def->flags == PAT_END){
+    }else if(def->flags == PAT_END){
         printf("%s%s", msg, flag_cstr);
     }else if(def->from == def->to){
         if(def->from == '\r' || def->from == '\n' || def->from == '\t'){

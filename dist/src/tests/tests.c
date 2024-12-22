@@ -93,6 +93,18 @@ static TestSet _Tests[] = {
         "Character pattern matching system for the Roebling parser.",
         FEATURE_COMPLETE,
     },
+
+
+    {
+        NULL,
+        NULL,
+        NULL,
+        0,
+    },
+
+
+
+
     {
         "MatchElastic",
         MatchElastic_Tests,
