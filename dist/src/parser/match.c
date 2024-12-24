@@ -11,7 +11,7 @@ static boolean charMatched(word c, PatCharDef *def){
     boolean matched = FALSE;
     matched = (c >= def->from && c <= def->to);
 
-    if((def->flags & PAT_INVERT) != 0){
+    if((def->flags & PAT_INVERT) != 0 && (def->flags & PAT_KO) == 0){
         matched = !matched;
     }
     return matched;
@@ -62,7 +62,15 @@ status Match_Feed(Match *mt, word c){
 
     if(DEBUG_PATMATCH){
         Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
-        printf("\n");
+        printf("\n\x1b[1;%dm", DEBUG_PATMATCH);
+        if(c == '\n'){
+            printf("    '\\n'");
+        }else if(c == '\r'){
+            printf("    '\\r'");
+        }else{
+            printf("    '%c'", c);
+        }
+        printf(": \x1b[0m");
     }
 
     while(mt->pat.curDef < mt->pat.endDef){
@@ -87,18 +95,17 @@ status Match_Feed(Match *mt, word c){
         matched = charMatched(c, def);
 
         if(DEBUG_PATMATCH){
-            Match_midDebug('_', c, def, mt, matched);
+            Match_midDebug('_', c, def, mt, matched, FALSE);
         }
 
         if(matched){
             if((def->flags & (PAT_KO|PAT_INVERT)) == (PAT_KO|PAT_INVERT)){
                 mt->type.state |= MATCH_KO_INVERT;
-                mt->pat.curDef++;
-                continue;
-            }
-            if((def->flags & PAT_KO) != 0){
+            }else if((def->flags & PAT_KO) != 0){
                 if((mt->type.state & MATCH_KO_INVERT) != 0){
                     mt->type.state &= ~MATCH_KO_INVERT;
+                    mt->pat.curDef++;
+                    continue;
                 }else{
                     mt->type.state |= MATCH_KO;
                     if((def->flags & PAT_LEAVE) != 0){
@@ -108,15 +115,15 @@ status Match_Feed(Match *mt, word c){
                         mt->tail++;
                     }
 
-                    mt->pat.curDef++;
-                    continue;
+                    match_StartOfTerm(mt);
+                    break;
                 }
             }
             mt->type.state |= PROCESSING;
 
             if(HasFlag(def->flags, PAT_LEAVE)){
                 mt->type.state |= MATCH_INVERTED;
-            }else if(HasFlag(def->flags, PAT_INVERT_CAPTURE)){
+            }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
                 if(mt->count == 0){
                     mt->lead++;
                 }else {
@@ -177,10 +184,6 @@ miss:
         }
     }
 
-    if(DEBUG_PATMATCH){
-        Match_midDebug('E', c, def, mt, charMatched(c, mt->pat.curDef));
-    }
-
     if(mt->pat.curDef == mt->pat.endDef){
         mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
 
@@ -191,8 +194,9 @@ miss:
     }
 
     if(DEBUG_PATMATCH){
-        printf("\x1b[%dmround: <%s> on \x1b[0m", DEBUG_PATMATCH, State_ToChars(mt->type.state));
-        Debug_Print(def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
+        printf("\n");
+        Match_midDebug('_', c, def, mt, matched, TRUE);
+        Debug_Print(def, TYPE_PATCHARDEF, " on ", DEBUG_PATMATCH, FALSE);
         printf("\n");
     }
 

@@ -421,23 +421,23 @@ static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int col
     patFlagStr(def->flags, flag_cstr);
     if((def->flags & PAT_COUNT) != 0){
         if(def->from == '\r' || def->from == '\n'){
-            printf("%s%s=0x%hux0x%hu", msg, flag_cstr, def->from, def->to);
+            printf("%s=0x%hux0x%hu", flag_cstr, def->from, def->to);
         }else{
-            printf("%s%s=%cx%hu", msg, flag_cstr, (char)def->from, def->to);
+            printf("%s=%cx%hu", flag_cstr, (char)def->from, def->to);
         }
     }else if(def->flags == PAT_END){
-        printf("%s%s", msg, flag_cstr);
+        printf("%s", flag_cstr);
     }else if(def->from == def->to){
         if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
-            printf("%s%s=#%hu", msg, flag_cstr, def->from);
+            printf("%s=#%hu", flag_cstr, def->from);
         }else{
-            printf("%s%s=%c/%hu", msg, flag_cstr, (char)def->from, (i8)def->from);
+            printf("%s=%c/%hu", flag_cstr, (char)def->from, (i8)def->from);
         }
     }else{
         if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32) || (def->to > 128 || def->to > 127)){
-            printf("%s%s=#%hu-#%hu", msg, flag_cstr, def->from, def->to);
+            printf("%s=#%hu-#%hu", flag_cstr, def->from, def->to);
         }else{
-            printf("%s%s=%c-%c", msg, flag_cstr, (char)def->from, (char)def->to);
+            printf("%s=%c-%c", flag_cstr, (char)def->from, (char)def->to);
         }
     }
     if((def->flags & PAT_TERM) != 0){
@@ -879,19 +879,24 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
 }
 
 
-void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched){
-    if(c == '\n'){
-        printf("\x1b[%dm  %c \x1b[0;1m'\\n'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToChars(mt->type.state));
-    }else if(c == '\r'){
-        printf("\x1b[%dm  %c \x1b[0;1m'\\r'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            DEBUG_PATMATCH, matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToChars(mt->type.state));
+void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched, boolean extended){
+    if(extended){
+        printf("    \x1b[%dm%s [lead:%d/count:%d/tail:%d]", DEBUG_PATMATCH, 
+        State_ToChars(mt->type.state),mt->lead, mt->count, mt->tail);
+        Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
     }else{
-        printf("\x1b[%dm  %c \x1b[0;1m'%c'\x1b[0;%dm=%s - [count:%d lead:%d tail:%d] %s ", DEBUG_PATMATCH, type,
-            c, DEBUG_PATMATCH,  matched ? "matched" : "no-match", mt->count, mt->lead, mt->tail, State_ToChars(mt->type.state));
+        if(matched){
+            printf("\x1b[1;%dmY\x1b[%dm/\x1b[0m", DEBUG_PATMATCH, DEBUG_PATMATCH);
+        }else{
+            printf("\x1b[%dmN/\x1b[0m", DEBUG_PATMATCH);
+        }
+        Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
+        if(matched){
+            printf("\x1b[%dm, \x1b[0m", DEBUG_PATMATCH);
+        }else{
+            printf("\x1b[%dm, \x1b[0m", DEBUG_PATMATCH);
+        }
     }
-    Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
-    printf("\n");
 }
 
 

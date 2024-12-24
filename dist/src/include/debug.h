@@ -24,7 +24,7 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
 void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
 void Flag16_ToString(word flag, int color, boolean extended);
 void indent_Print(int indent);
-void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched);
+void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched, boolean extended);
 
 extern char *rbl_debug_cstr[];
 

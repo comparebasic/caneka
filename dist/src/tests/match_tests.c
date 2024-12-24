@@ -109,7 +109,7 @@ status MatchKo_Tests(MemCtx *gm){
     int i = 0;
 
     word def[] = {
-        PAT_KO|PAT_INVERT, '\\', '\\', PAT_KO, '"', '"', patText,
+        PAT_MANY|PAT_KO|PAT_INVERT, '\\', '\\', PAT_MANY|PAT_KO, '"', '"', patText,
         PAT_END, 0, 0
     };
 
@@ -137,7 +137,7 @@ status MatchKo_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(i == s->length-2, "Length matches for string minus escape cahrs that has two escapes in it %d", i);
+    r |= Test(i == s->length, "Length matches for string minus escape cahrs that has two escapes in it, expecting %d, have %d", s->length-2, i);
 
     s = String_Make(m, bytes("Hi there this is a string ending \" here"));
     Match_SetPattern(&mt, (PatCharDef *)def);
@@ -150,9 +150,20 @@ status MatchKo_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(i == s->length-5, "Length matches for string that has a terminator quote in it %d", i);
+    r |= Test(i == s->length-5, "Length matches for string that has a terminator quote in it, have %d", i);
 
-
+    s = String_Make(m, bytes("Hi there this is a string ending \\\" here"));
+    Match_SetPattern(&mt, (PatCharDef *)def);
+    i = 0;
+    while(1){
+        Match_Feed(&mt, s->bytes[i]);
+        if(HasFlag(mt.type.state, PROCESSING)){
+            i++;
+        }else{
+            break;
+        }
+    }
+    r |= Test(i == s->length, "Length matches for string that has a escaped terminator quote in it, have %d", i);
 
     word multiKoDef[] = {
         PAT_KO, 'e', 'e', PAT_KO, 'n', 'n', PAT_KO, 'd', 'd', patText,
