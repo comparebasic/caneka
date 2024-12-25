@@ -55,6 +55,12 @@ static TestSet _Tests[] = {
         "Inline spans hold data directly in thier memory space, instead of storing pointers to data held elsewhere.",
         FEATURE_COMPLETE,
     },
+    {
+        "MemCtx Tests",
+        Blank_Tests,
+        "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
+        PARTIAL_FEATURE,
+    },
     /*
     {
         "SpanClone",

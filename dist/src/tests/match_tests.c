@@ -150,7 +150,7 @@ status MatchKo_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(i == s->length-5, "Length matches for string that has a terminator quote in it, have %d", i);
+    r |= Test(i == s->length-6, "Length matches for string that has a terminator quote in it, have %d", i);
 
     s = String_Make(m, bytes("Hi there this is a string ending \\\" here"));
     Match_SetPattern(&mt, (PatCharDef *)def);
@@ -181,8 +181,22 @@ status MatchKo_Tests(MemCtx *gm){
         }
     }
     
-    r |= Test(i == 10, "It took 10 counts to get to the end, have %d", i);
+    r |= Test(i == 9, "It took 10 counts to get to the end, have %d", i);
     r |= Test(mt.count == 7, "terminator 'end' is omited from the count have, %d", mt.count);
+
+    s = String_Make(m, bytes("it's not all engaging until the end!"));
+
+    Match_SetPattern(&mt, (PatCharDef *)multiKoDef);
+    i = 0;
+    while(1){
+        Match_Feed(&mt, s->bytes[i]);
+        if(HasFlag(mt.type.state, PROCESSING)){
+            i++;
+        }else{
+            break;
+        }
+    }
+    r |= Test(mt.count == s->length-4, "terminator 'end' is omited and last punctuation as well, from the count have, %d", mt.count);
 
     MemCtx_Free(m);
     return r;

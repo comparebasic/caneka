@@ -83,6 +83,7 @@ status Match_Feed(Match *mt, word c){
             mt->pat.curDef++;
             continue;
         }else if((mt->type.state & MATCH_KO) != 0 && (def->flags & PAT_KO) == 0){
+goko:
             if((mt->type.state & MATCH_LEAVE) != 0){
                 goto miss;
                 break;
@@ -111,12 +112,17 @@ status Match_Feed(Match *mt, word c){
                     if((def->flags & PAT_LEAVE) != 0){
                         mt->type.state |= MATCH_LEAVE;
                     }
-                    if((def->flags & PAT_INVERT_CAPTURE) != 0){
+                    if((def->flags & PAT_INVERT_CAPTURE) == 0){
                         mt->tail++;
                     }
 
-                    match_StartOfTerm(mt);
-                    break;
+                    PatCharDef *nextDef = def+1;
+                    if((nextDef->flags & PAT_KO) == 0){
+                        goto goko;
+                    }else{
+                        match_StartOfTerm(mt);
+                        break;
+                    }
                 }
             }
             mt->type.state |= PROCESSING;
@@ -130,7 +136,8 @@ status Match_Feed(Match *mt, word c){
                     mt->tail++;
                 }
             }else{
-                mt->count++;
+                mt->count = mt->count + mt->tail + 1;
+                mt->tail = 0;
             }
             
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
@@ -145,6 +152,7 @@ status Match_Feed(Match *mt, word c){
             break;
         }else{
             if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
+                mt->type.state &= ~(MATCH_KO);
                 mt->pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
@@ -237,6 +245,7 @@ status Match_SetPattern(Match *mt, PatCharDef *def){
     }
     mt->remaining = -1;
     mt->jump = -1;
+
 
     return SUCCESS;
 }

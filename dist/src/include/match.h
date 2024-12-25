@@ -10,10 +10,10 @@ enum pat_flags {
     PAT_COUNT = 1 << 5, /* C */
     PAT_INVERT_CAPTURE = 1 << 6, /* G */
     PAT_KO = 1 << 7, /* K */
-    PAT_SINGLE = 1 << 8, /* S */
-    PAT_LEAVE  = 1 << 9, /* L */
-    PAT_CMD = 1 << 10, /* D */
-    PAT_GO_ON_FAIL = 1 << 11, /* T */
+    PAT_SINGLE = 1 << 9, /* S */
+    PAT_LEAVE  = 1 << 10, /* L */
+    PAT_CMD = 1 << 11, /* D */
+    PAT_GO_ON_FAIL = 1 << 12, /* T */
 };
 
 enum match_flags {

@@ -234,8 +234,6 @@ status Roebling_RunCycle(Roebling *rbl){
                 printf("\n");
             }
 
-        }else{
-            printf("NOT RESETTING MATCHES\n");
         }
         Roebling_RunMatches(rbl);
     }

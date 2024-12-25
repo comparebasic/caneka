@@ -423,6 +423,7 @@ static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int col
         if(def->from == '\r' || def->from == '\n'){
             printf("%s=0x%hux0x%hu", flag_cstr, def->from, def->to);
         }else{
+            printf("?");
             printf("%s=%cx%hu", flag_cstr, (char)def->from, def->to);
         }
     }else if(def->flags == PAT_END){
