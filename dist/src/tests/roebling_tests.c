@@ -170,6 +170,7 @@ status RoeblingMark_Tests(MemCtx *gm){
     Roebling_RunCycle(rbl);
     Roebling_RunCycle(rbl);
     s = Range_Copy(m, &(rbl->range));
+
     r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals ONE, have %s", s->bytes);
     r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT after 'ONE'");
 

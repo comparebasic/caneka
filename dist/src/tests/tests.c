@@ -320,13 +320,12 @@ TestSet *Tests = _Tests;
 /*
 static TestSet solo[] = {
     {
-        "XML Templating",
-        XmlTTemplate_Tests,
-        "XML templating for building web applications.",
+        "XML",
+        Xml_Tests,
+        "Basic XML parsing implemented using the Roebling Parser",
         FEATURE_COMPLETE,
     }
 };
 
 TestSet *Tests = solo;
 */
-

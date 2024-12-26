@@ -404,7 +404,7 @@ static status patFlagStr(word flags, char str[]){
     int i = 0;
     /* 0 and & x != 0 dont mix well */
     if(flags == PAT_END){
-        str[i++] = 'E';
+        str[p++] = 'E';
     }
     int l = strlen(matchFlagChars);
     while(i < l){
@@ -452,14 +452,18 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
     printf("\x1b[%dm%s", color, msg);
     if(extended){
         boolean first = TRUE;
-        while(def->flags != PAT_END){
-            if(first){
-                first = FALSE;
-            }else{
-                printf(",");
-            }
+        if(def->flags == PAT_END){
             patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
-            def++;
+        }else{
+            while(def->flags != PAT_END){
+                if(first){
+                    first = FALSE;
+                }else{
+                    printf(",");
+                }
+                patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
+                def++;
+            }
         }
     }else{
         patCharDef_PrintSingle(def, TYPE_PATCHARDEF, msg, color, extended);
@@ -470,7 +474,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, Class_ToString(mt->type.of), State_ToChars(mt->type.state), mt->jump, mt->count, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->count, mt->remaining);
         printf("\x1b[1;%dm[", color);
         Debug_Print((void *)mt->pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
         printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);

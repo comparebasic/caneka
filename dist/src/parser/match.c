@@ -125,8 +125,7 @@ status Match_Feed(Match *mt, word c){
                     }
 
                     match_EndOfKoTerm(mt);
-                    def = mt->pat.curDef;
-                    PatCharDef *nextDef = def+1;
+                    PatCharDef *nextDef = mt->pat.curDef+1;
 
                     if((nextDef->flags & PAT_KO) == 0){
                         if((mt->type.state & MATCH_LEAVE) != 0){
@@ -217,11 +216,15 @@ miss:
     }
 
     if(mt->pat.curDef == mt->pat.endDef){
-        mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
+        if(Match_Total(mt) == 0){
+            mt->type.state = NOOP;
+        }else{
+            mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
 
-        if(DEBUG_MATCH_COMPLETE){
-            Debug_Print(mt, 0, "Match Completed:%s", DEBUG_MATCH_COMPLETE, TRUE);
-            printf("\n");
+            if(DEBUG_MATCH_COMPLETE){
+                Debug_Print(mt, 0, "Match Completed:%s", DEBUG_MATCH_COMPLETE, TRUE);
+                printf("\n");
+            }
         }
     }
 
