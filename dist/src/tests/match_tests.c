@@ -166,9 +166,10 @@ status MatchKo_Tests(MemCtx *gm){
     r |= Test(i == s->length, "Length matches for string that has a escaped terminator quote in it, have %d", i);
 
     word multiKoDef[] = {
-        PAT_KO, 'e', 'e', PAT_KO, 'n', 'n', PAT_KO, 'd', 'd', patText,
+        PAT_KO|PAT_KO_TERM, 'e', 'e', PAT_KO|PAT_KO_TERM, 'n', 'n', PAT_KO|PAT_KO_TERM, 'd', 'd', patText,
         PAT_END, 0, 0
     };
+
     s = String_Make(m, bytes("it all end. did it end?"));
     Match_SetPattern(&mt, (PatCharDef *)multiKoDef);
     i = 0;
@@ -182,7 +183,7 @@ status MatchKo_Tests(MemCtx *gm){
     }
     
     r |= Test(i == 9, "It took 10 counts to get to the end, have %d", i);
-    r |= Test(mt.count == 7, "terminator 'end' is omited from the count have, %d", mt.count);
+    r |= Test(mt.count == 7, "terminator 'end' is omited from the count expecting 7, have %d", mt.count);
 
     s = String_Make(m, bytes("it's not all engaging until the end!"));
 
@@ -196,7 +197,26 @@ status MatchKo_Tests(MemCtx *gm){
             break;
         }
     }
-    r |= Test(mt.count == s->length-4, "terminator 'end' is omited and last punctuation as well, from the count have, %d", mt.count);
+    r |= Test(mt.count == s->length-4, "terminator 'end' is omited and last punctuation as well, from the count, expecting %d, have %d", s->length-4, mt.count);
+
+    word eqDef[] = {
+        PAT_KO, '!', '!',PAT_KO, '=', '=',PAT_KO, '<', '<',PAT_KO|PAT_KO_TERM, '>', '>',PAT_INVERT_CAPTURE|PAT_MANY,' ', ' ', patText,
+        PAT_END, 0, 0
+    };
+
+    s = String_Make(m, bytes("9 != sessionMax"));
+    Match_SetPattern(&mt, (PatCharDef *)eqDef);
+    i = 0;
+    while(1){
+        Match_Feed(&mt, s->bytes[i]);
+        if(HasFlag(mt.type.state, PROCESSING)){
+            i++;
+        }else{
+            break;
+        }
+    }
+    r |= Test(mt.count == 1, "counted first letter only, have %d", mt.count);
+
 
     MemCtx_Free(m);
     return r;

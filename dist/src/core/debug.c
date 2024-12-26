@@ -5,7 +5,7 @@ Chain *DebugPrintChain = NULL;
 
 int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = 0;
+int DEBUG_PATMATCH = COLOR_CYAN;
 int DEBUG_MATCH_COMPLETE = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
@@ -390,13 +390,14 @@ static word matchFlags[] = {
     PAT_COUNT, /* C */
     PAT_INVERT_CAPTURE, /* G */
     PAT_KO, /* K */
+    PAT_KO_TERM, /* O */
     PAT_SINGLE, /* S */
     PAT_LEAVE , /* L */
     PAT_CMD, /* D */
     PAT_GO_ON_FAIL, /* T */
 };
 
-static char *matchFlagChars = "EXPMNICGKSLDT";
+static char *matchFlagChars = "EXPMNICGKOSLDT";
 
 static status patFlagStr(word flags, char str[]){
     int p = 0;

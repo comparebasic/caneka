@@ -18,6 +18,7 @@ static boolean charMatched(word c, PatCharDef *def){
 }
 
 static void match_NextTerm(Match *mt){
+    printf("next term\n");
     while(
             (mt->pat.curDef < mt->pat.endDef) &&
             !HasFlag(mt->pat.curDef->flags, PAT_TERM)){
@@ -43,6 +44,20 @@ static void match_StartOfTerm(Match *mt){
             }
             prev--;
         }
+    }
+}
+
+static void match_NextKoTerm(Match *mt){
+    while(
+            (mt->pat.curDef < mt->pat.endDef) &&
+            ((mt->pat.curDef->flags & PAT_KO) != 0) && 
+            ((mt->pat.curDef->flags & PAT_KO_TERM) == 0)){
+        printf("ko incr\n");
+        mt->pat.curDef++;
+    }
+    if((mt->pat.curDef->flags & PAT_KO_TERM) != 0){
+        printf("moving\n");
+        mt->pat.curDef++;
     }
 }
 
@@ -75,28 +90,20 @@ status Match_Feed(Match *mt, word c){
 
     while(mt->pat.curDef < mt->pat.endDef){
         def = mt->pat.curDef;
-        if(HasFlag(def->flags, PAT_CMD)){
+
+        matched = charMatched(c, def);
+
+        if(DEBUG_PATMATCH){
+            Match_midDebug('_', c, def, mt, matched, FALSE);
+        }
+
+        if((def->flags & PAT_CMD) != 0){
             mt->counter = def->to;
             if(HasFlag(def->from, PAT_GO_ON_FAIL)){
                 mt->type.state |= MATCH_GOTO;
             }
             mt->pat.curDef++;
             continue;
-        }else if((mt->type.state & MATCH_KO) != 0 && (def->flags & PAT_KO) == 0){
-goko:
-            if((mt->type.state & MATCH_LEAVE) != 0){
-                goto miss;
-                break;
-            }
-            mt->type.state &= ~PROCESSING;
-            match_NextTerm(mt);
-            break;
-        }
-
-        matched = charMatched(c, def);
-
-        if(DEBUG_PATMATCH){
-            Match_midDebug('_', c, def, mt, matched, FALSE);
         }
 
         if(matched){
@@ -116,11 +123,26 @@ goko:
                         mt->tail++;
                     }
 
+                    match_NextKoTerm(mt);
+                    def = mt->pat.curDef;
                     PatCharDef *nextDef = def+1;
+
+                    Debug_Print((void *)nextDef, TYPE_PATCHARDEF, "nextDef: ", 
+                        COLOR_YELLOW, TRUE);
+                    printf("\n");
+
                     if((nextDef->flags & PAT_KO) == 0){
-                        goto goko;
-                    }else{
+                        printf("early out KO\n");
+                        if((mt->type.state & MATCH_LEAVE) != 0){
+                            goto miss;
+                            break;
+                        }
                         match_StartOfTerm(mt);
+                        break;
+                    }else{
+                        Debug_Print((void *)nextDef, TYPE_PATCHARDEF, "another ko: ", 
+                            COLOR_YELLOW, TRUE);
+                        printf("\n");
                         break;
                     }
                 }
@@ -151,8 +173,21 @@ goko:
 
             break;
         }else{
-            if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
-                mt->type.state &= ~(MATCH_KO);
+            if((mt->type.state & MATCH_KO) != 0){
+                if((def->flags & PAT_KO) == 0){
+                    mt->type.state &= ~MATCH_KO;
+                    if((mt->type.state & MATCH_LEAVE) != 0){
+                        goto miss;
+                        break;
+                    }
+                    mt->type.state &= ~PROCESSING;
+                    mt->pat.curDef++;
+                    continue;
+                }else{
+                    match_NextKoTerm(mt);
+                    continue;
+                }
+            }else if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
                 mt->pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
@@ -176,19 +211,15 @@ goko:
                     mt->pat.curDef++;
                     continue;
                 }
-            }else if((mt->type.state & (MATCH_KO)) != 0){
-                match_NextTerm(mt);
-                continue;
-            }else{
-miss:
-                mt->type.state &= ~PROCESSING;
-                if(HasFlag(mt->type.state, SEARCH)){
-                    match_Reset(mt);
-                }else{
-                    mt->type.state |= NOOP;
-                }
-                break;
             }
+miss:
+            mt->type.state &= ~PROCESSING;
+            if(HasFlag(mt->type.state, SEARCH)){
+                match_Reset(mt);
+            }else{
+                mt->type.state |= NOOP;
+            }
+            break;
         }
     }
 

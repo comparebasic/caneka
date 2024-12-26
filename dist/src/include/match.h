@@ -10,6 +10,7 @@ enum pat_flags {
     PAT_COUNT = 1 << 5, /* C */
     PAT_INVERT_CAPTURE = 1 << 6, /* G */
     PAT_KO = 1 << 7, /* K */
+    PAT_KO_TERM = 1 << 8, /* O */
     PAT_SINGLE = 1 << 9, /* S */
     PAT_LEAVE  = 1 << 10, /* L */
     PAT_CMD = 1 << 11, /* D */
