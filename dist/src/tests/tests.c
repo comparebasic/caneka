@@ -111,15 +111,6 @@ static TestSet _Tests[] = {
         "Testing the knockout and content termination capabilities of the match system.",
         FEATURE_COMPLETE,
     },
-
-
-    {
-        NULL,
-        NULL,
-        NULL,
-        0,
-    },
-
     {
         "Roebling",
         Roebling_Tests,

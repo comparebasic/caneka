@@ -18,7 +18,6 @@ static boolean charMatched(word c, PatCharDef *def){
 }
 
 static void match_NextTerm(Match *mt){
-    printf("next term\n");
     while(
             (mt->pat.curDef < mt->pat.endDef) &&
             !HasFlag(mt->pat.curDef->flags, PAT_TERM)){
@@ -47,16 +46,18 @@ static void match_StartOfTerm(Match *mt){
     }
 }
 
-static void match_NextKoTerm(Match *mt){
+static void match_EndOfKoTerm(Match *mt){
     while(
             (mt->pat.curDef < mt->pat.endDef) &&
             ((mt->pat.curDef->flags & PAT_KO) != 0) && 
             ((mt->pat.curDef->flags & PAT_KO_TERM) == 0)){
-        printf("ko incr\n");
         mt->pat.curDef++;
     }
+}
+
+static void match_NextKoTerm(Match *mt){
+    match_EndOfKoTerm(mt);
     if((mt->pat.curDef->flags & PAT_KO_TERM) != 0){
-        printf("moving\n");
         mt->pat.curDef++;
     }
 }
@@ -123,26 +124,18 @@ status Match_Feed(Match *mt, word c){
                         mt->tail++;
                     }
 
-                    match_NextKoTerm(mt);
+                    match_EndOfKoTerm(mt);
                     def = mt->pat.curDef;
                     PatCharDef *nextDef = def+1;
 
-                    Debug_Print((void *)nextDef, TYPE_PATCHARDEF, "nextDef: ", 
-                        COLOR_YELLOW, TRUE);
-                    printf("\n");
-
                     if((nextDef->flags & PAT_KO) == 0){
-                        printf("early out KO\n");
                         if((mt->type.state & MATCH_LEAVE) != 0){
                             goto miss;
                             break;
                         }
-                        match_StartOfTerm(mt);
+                        match_NextTerm(mt);
                         break;
                     }else{
-                        Debug_Print((void *)nextDef, TYPE_PATCHARDEF, "another ko: ", 
-                            COLOR_YELLOW, TRUE);
-                        printf("\n");
                         break;
                     }
                 }
