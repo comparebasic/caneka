@@ -27,6 +27,17 @@ static status runTo(FmtCtx *ctx, FmtItem *item, word flags){
 
 static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     status r = READY;
+
+    if(DEBUG_LANG_CNK){
+        printf("\x1b[%dmCnk Capture %s:", DEBUG_LANG_CNK, CnkLang_RangeToChars(captureKey));
+        Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
+        printf("\n");
+    }
+
+    if(captureKey > _CNK_LANG_RBL_START && captureKey < _CNK_LANG_RBL_END){
+        return CnkRoebling_Capture(captureKey, matchIdx, s, source);
+    }
+
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
 
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
@@ -46,9 +57,6 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     }
 
     if(DEBUG_LANG_CNK){
-        printf("\x1b[%dmCnk Capture %s:", DEBUG_LANG_CNK, CnkLang_RangeToChars(captureKey));
-        Debug_Print((void *)s, 0, " - ", DEBUG_LANG_CNK, TRUE);
-        printf("\n");
         Debug_Print((void *)def, 0, "def: ", DEBUG_LANG_CNK, TRUE);
         printf("\n");
     }

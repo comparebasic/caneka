@@ -286,13 +286,19 @@ static TestSet _Tests[] = {
     {
         "Crypto - Salty",
         Salty_Tests,
-        "Bi-directional encryption with a variable sized key",
+        "Bi-directional encryption with a variable sized key.",
         PARTIAL_FEATURE,
     },
     {
         "UserTests - PasswordFlow",
         User_Tests,
-        "A Basic user password flow using CycleServe and IoCtx",
+        "A Basic user password flow using CycleServe and IoCtx.",
+        PARTIAL_FEATURE,
+    },
+    {
+        "CanekaLang - Roebling Syntax",
+        Roebling_SyntaxTests,
+        "Tests for the Roebling pattern match portion of Caneka syntax.",
         PARTIAL_FEATURE,
     },
     {

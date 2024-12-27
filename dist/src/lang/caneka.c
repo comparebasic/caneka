@@ -57,6 +57,16 @@ char * CnkLang_RangeToChars(word range){
         return "CNK_LANG_LIST_CLOSE";
     }else if(range == CNK_LANG_ROEBLING){
         return "CNK_LANG_ROEBLING";
+    }else if(range == CNK_LANG_RBL_START){
+        return "CNK_LANG_RBL_START";
+    }else if(range == CNK_LANG_RBL_OPEN_CLOSE){
+        return "CNK_LANG_RBL_OPEN_CLOSE";
+    }else if(range == CNK_LANG_RBL_TEXT){
+        return "CNK_LANG_RBL_TEXT";
+    }else if(range == CNK_LANG_RBL_PAT_KEY){
+        return "CNK_LANG_RBL_PAT_KEY";
+    }else if(range == CNK_LANG_RBL_PAT){
+        return "CNK_LANG_RBL_PAT";
     }else{
         return "unknown";
     }

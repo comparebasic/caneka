@@ -42,6 +42,7 @@ int DEBUG_CASH = 0;
 int DEBUG_USER = 0;
 int DEBUG_LANG_TRANSP = 0;
 int DEBUG_LANG_CNK = 0;
+int DEBUG_LANG_CNK_RBL = COLOR_YELLOW;
 int DEBUG_LANG_CNK_OUT = 0;
 int DEBUG_SUBPROCESS = 0;
 
@@ -556,7 +557,7 @@ static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boole
         printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"", color, msg, color, esc->bytes, color);
+        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"\x1b[0m", color, msg, color, esc->bytes, color);
     }
 }
 
@@ -572,7 +573,7 @@ static void StringFull_Print(Abstract *a, cls type, char *msg, int color, boolea
         printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"", color, msg, color, esc->bytes, color);
+        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"\x1b[0m", color, msg, color, esc->bytes, color);
     }
 }
 

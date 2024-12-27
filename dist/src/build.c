@@ -75,7 +75,7 @@ static BuildSubdir testobj = { "tests", {
     "serve_tests.c", "queue_tests.c","mock_109strings.c","ioctx_tests.c",
     "oset_tests.c","memlocal_tests.c","blank_test.c","nestedd_tests.c",
     "xmlt_template_tests.c","textfilter_tests.c","crypto_tests.c",
-    "salty_tests.c","user_tests.c",
+    "salty_tests.c","user_tests.c", "roebling_syntax_tests.c",
     NULL
 }};
 

@@ -67,6 +67,7 @@ extern int DEBUG_CASH;
 extern int DEBUG_USER;
 extern int DEBUG_LANG_TRANSP;
 extern int DEBUG_LANG_CNK;
+extern int DEBUG_LANG_CNK_RBL;
 extern int DEBUG_SUBPROCESS;
 extern int DEBUG_LANG_CNK_OUT;
 
