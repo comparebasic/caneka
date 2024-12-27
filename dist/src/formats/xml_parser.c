@@ -57,21 +57,21 @@ static word selfCloseDef[] = {
 static word attQuotedDef[] = {
     PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
     PAT_INVERT_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_INVERT_CAPTURE, '"', '"', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
+    PAT_KO, '"', '"', PAT_MANY|PAT_LEAVE|PAT_KO, '$', '$', patText,
     PAT_END, 0, 0
 };
 
 static word attQuotedNumDef[] = {
     PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
     PAT_INVERT_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_INVERT_CAPTURE, '"', '"', PAT_MANY|PAT_TERM, '0', '9',
+    PAT_KO, '"', '"', PAT_MANY|PAT_TERM, '0', '9',
     PAT_END, 0, 0
 };
 
 static word attQuotedCashDef[] = {
     PAT_INVERT_CAPTURE|PAT_TERM, '=', '=',
     PAT_INVERT_CAPTURE|PAT_TERM, '"', '"',
-    PAT_KO|PAT_INVERT_CAPTURE, '"', '"',  patText,
+    PAT_KO, '"', '"',  patText,
     PAT_END, 0, 0
 };
 

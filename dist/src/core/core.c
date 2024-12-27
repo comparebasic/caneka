@@ -62,6 +62,7 @@ String *State_ToString(MemCtx *m, status state){
         while((name = stateNames[i]) != NULL){
             if((state & states[i]) != 0){
                 String_AddBytes(m, s, bytes(stateNames[i]), strlen(stateNames[i]));
+                String_AddBytes(m, s, bytes(","), 1);
             }
             i++;
         }

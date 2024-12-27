@@ -89,10 +89,8 @@ status Http_Tests(MemCtx *gm){
     setTestCapture(expected1);
     for(int i = 0; i < 13; i++){
         Roebling_RunCycle(rbl);
-        /*
-        Debug_Print((void *)rbl, 0, "Rbl: ", COLOR_PURPLE, TRUE);
-        */
     }
+    Debug_Print((void *)rbl, 0, "Rbl: ", COLOR_PURPLE, TRUE);
 
     r |= Test(position == 12, "Reached end of test captures, have %d", position);
     r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling HttpParser has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));

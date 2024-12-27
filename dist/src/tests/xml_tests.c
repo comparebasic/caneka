@@ -53,6 +53,10 @@ status XmlNested_Tests(MemCtx *gm){
     r |= Test(rbl->jump == Roebling_GetMarkIdx(rbl, XML_START), "Jump set to XML_START");
     
     Roebling_RunCycle(rbl);
+    r |= Test(node->firstChild != NULL, "Body is not null");
+    if(( r & ERROR) != 0){
+        return r;
+    }
     r |= Test(String_EqualsBytes(node->firstChild->body, bytes("\n  ")), "Whitespace before tag added as body, have '%s'", String_ToEscaped(m, node->firstChild->body)->bytes);
 
     for(int i = 0; i < 10; i++){
@@ -108,6 +112,7 @@ status XmlStringType_Tests(MemCtx *gm){
     String *s = NULL;
 
     s = String_Make(m, bytes("<main type=\"root\" cat=\"${fancy}\" count=\"19\" max=3>Not a cash<s>${body}</s></main>"));
+
     XmlParser_Parse(xml, s);
     Mess *node = xml->ctx->root->firstChild;
 
