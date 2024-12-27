@@ -51,6 +51,9 @@ enum cnk_lang_range {
     CNK_LANG_IDXS,
     CNK_LANG_SEQ,
     _CNK_LANG_OBJ_END,
+    _CNK_LANG_RBL_START,
+    CNK_LANG_RBL_START,
+    _CNK_LANG_RBL_END,
     _CNK_LANG_END,
 };
 

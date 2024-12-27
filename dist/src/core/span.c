@@ -208,6 +208,23 @@ status Span_Cull(Span *p, int count){
     return NOOP;
 }
 
+status Span_Concat(Span *p, Span *add){
+    status r = READY;
+    Iter it;
+    Iter_Init(&it, add);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        if(a != NULL){
+            r |= Span_Add(p, a);
+        }
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
 
 status Span_Move(Span *p, int fromIdx, int toIdx){
     return NOOP;

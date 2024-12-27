@@ -87,6 +87,7 @@ void *Span_GetFromQ(struct span_query *sq);
 status Span_Extend(struct span_query *sq);
 status Span_GrowToNeeded(struct span_query *sq);
 char **Span_ToCharArr(MemCtx *m, Span *p);
+status Span_Concat(Span *p, Span *add);
 
 /* SpanDef */
 SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def);

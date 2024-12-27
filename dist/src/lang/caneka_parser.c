@@ -1,8 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-#include "rbl_parser_defs.c"
-
 static word indentDef[] = {
     PAT_MANY, ' ',' ', PAT_MANY|PAT_TERM,'\t','\t',
     PAT_END, 0, 0
@@ -314,6 +312,8 @@ Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx, RblCaptureFunc capture){
     Lookup *desc = Lookup_FromConfig(m, config, NULL);
 
     String *s = String_Init(m, STRING_EXTEND);
+
+    CnkRoebling_AddParsers(m, parsers, desc);
 
     return Roebling_Make(m, TYPE_ROEBLING,
         parsers,

@@ -46,6 +46,24 @@ status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     return ERROR;
 }
 
+status Lookup_Concat(MemCtx *m, Lookup *lk, Lookup *add){
+    status r = READY;
+    Iter it;
+    Iter_Init(&it, add->values);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        if(a != NULL){
+            r |= Lookup_Add(m, lk, it.idx+add->offset, a);
+        }
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
+
 Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
     lk->type.of = TYPE_LOOKUP;

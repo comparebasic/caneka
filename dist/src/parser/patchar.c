@@ -9,7 +9,7 @@ String *PatChar_FromString(MemCtx *m, String *s){
         return NULL;
     }
     for(int i = 0; i < s->length; i++){
-        pdef.flags = PAT_SINGLE;
+        pdef.flags = PAT_TERM;
         pdef.from = (word)s->bytes[i];
         pdef.to = (word)s->bytes[i];
         String_AddBytes(m, pat, (byte *)&pdef, sizeof(PatCharDef));

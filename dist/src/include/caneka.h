@@ -333,4 +333,5 @@ status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 #include "lang/fmt_html.h"
 #include "lang/caneka.h"
 #include "lang/caneka_module.h"
+#include "lang/cnk_roebling_syntax.h"
 

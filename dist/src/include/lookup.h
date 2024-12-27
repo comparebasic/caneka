@@ -17,6 +17,7 @@ Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *a
 Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg);
 void *Lookup_Get(Lookup *lk, word type);
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value);
+status Lookup_Concat(MemCtx *m, Lookup *lk, Lookup *add);
 word Lookup_AbsFromIdx(Lookup *lk, word idx);
 Lookup *Lookup_FromConfig(MemCtx *m, LookupConfig *config, Abstract *arg);
 int Lookup_GetKey(Lookup *lk, int idx);

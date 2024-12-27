@@ -302,6 +302,13 @@ status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){
     return SUCCESS;
 }
 
+status Roebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks, Span *additions, Lookup *desc){
+    status r = READY;
+    r |= Span_Concat(parsers, additions);
+    r |= Lookup_Concat(m, marks, desc);
+    return r;
+}
+
 Roebling *Roebling_Make(MemCtx *m,
         cls type,
         Span *parsers,
