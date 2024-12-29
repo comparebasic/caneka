@@ -36,17 +36,11 @@ word escapeDef[] = {
 
 word patKeyDef[] = {
     PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' ',
-    PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t',
-    PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r',
-    PAT_ANY|PAT_INVERT_CAPTURE, '\n', '\n',
     PAT_SINGLE|PAT_OPTIONAL, 'a', 'z',
     PAT_SINGLE|PAT_OPTIONAL, 'A', 'Z',
     PAT_SINGLE|PAT_OPTIONAL, '_', '_',
     PAT_SINGLE|PAT_OPTIONAL|PAT_TERM, '0', '9',
     PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' ',
-    PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t',
-    PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r',
-    PAT_ANY|PAT_INVERT_CAPTURE, '\n', '\n',
     PAT_ANY, 'a', 'z',
     PAT_ANY, 'A', 'Z',
     PAT_ANY, '_', '_',
