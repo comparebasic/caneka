@@ -143,10 +143,10 @@ status Match_Feed(Match *mt, word c){
 
             if(HasFlag(def->flags, PAT_LEAVE)){
                 mt->type.state |= MATCH_INVERTED;
-            }else if((def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
+            }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;
-            }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
-                if(mt->count == 0){
+            }else if((def->flags & PAT_CONSUME) != 0 || (def->flags & PAT_INVERT_CAPTURE) != 0){
+                if(mt->count == 0 && (def->flags & PAT_CONSUME) == 0){
                     mt->lead++;
                 }else {
                     mt->tail++;
@@ -181,7 +181,7 @@ status Match_Feed(Match *mt, word c){
                     match_NextKoTerm(mt);
                     continue;
                 }
-            }else if((def->flags & (PAT_KO|PAT_OPTIONAL)) != 0){
+            }else if((def->flags & (PAT_KO|PAT_OPTIONAL|PAT_ANY)) != 0){
                 mt->pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
@@ -193,14 +193,6 @@ status Match_Feed(Match *mt, word c){
                         goto miss;
                         break;
                     }
-                }else{
-                    mt->pat.curDef++;
-                    continue;
-                }
-            }else if((def->flags & (PAT_ANY)) != 0){
-                if(HasFlag(def->flags, PAT_TERM) && !HasFlag(mt->type.state, MATCH_TERM_FOUND)){
-                    match_NextTerm(mt);
-                    break;
                 }else{
                     mt->pat.curDef++;
                     continue;

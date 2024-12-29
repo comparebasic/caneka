@@ -396,9 +396,10 @@ static word matchFlags[] = {
     PAT_LEAVE , /* L */
     PAT_CMD, /* D */
     PAT_GO_ON_FAIL, /* T */
+    PAT_CONSUME, /* U */
 };
 
-static char *matchFlagChars = "EXPMNICGKOSLDT";
+static char *matchFlagChars = "EXPMNICGKOSLDTU";
 
 static status patFlagStr(word flags, char str[]){
     int p = 0;

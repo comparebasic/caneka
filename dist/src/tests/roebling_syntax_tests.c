@@ -10,7 +10,7 @@ status Roebling_SyntaxTests(MemCtx *gm){
     ctx = CnkRoeblingCtx_Make(m, NULL);
 
     /* phrase */
-    s = String_Make(m, bytes("/hi-there/\n"));
+    s = String_Make(m, bytes("/(hi-there)/\n"));
     Debug_Print((void *)s, 0, "Phrase:", COLOR_PURPLE, FALSE);
     printf("\n");
 
@@ -18,7 +18,7 @@ status Roebling_SyntaxTests(MemCtx *gm){
     Roebling_Run(ctx->rbl);
 
     /* line */
-    s = String_Make(m, bytes("/{.*[\\n]}/\n"));
+    s = String_Make(m, bytes("/({.*[\\n]})/\n"));
     Debug_Print((void *)s, 0, "Line:", COLOR_PURPLE, FALSE);
     printf("\n");
 
@@ -37,7 +37,7 @@ status Roebling_SyntaxTests(MemCtx *gm){
     s = String_Make(m, bytes(
         "/\n"
         "   method(GET,POST)\n"
-        "   \\s\n" 
+        "   (\\s)\n" 
         "   path(.*[\\s])\n"
         "   proto(HTTP\\/1.{1-2})\n"
         "/\n"

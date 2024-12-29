@@ -20,6 +20,7 @@ word patDef[] = {
     PAT_KO|PAT_MANY|PAT_INVERT_CAPTURE, '/', '/', 
     PAT_KO|PAT_MANY|PAT_INVERT_CAPTURE, ')', ')', 
     PAT_KO|PAT_MANY|PAT_INVERT_CAPTURE, ' ', ' ', 
+    PAT_KO|PAT_MANY|PAT_INVERT_CAPTURE, ',', ',', 
     PAT_KO|PAT_MANY|PAT_INVERT_CAPTURE, '\t', '\t', 
     PAT_KO|PAT_MANY|PAT_INVERT_CAPTURE, '\r', '\r', 
     PAT_KO|PAT_MANY|PAT_INVERT_CAPTURE|PAT_KO_TERM, '\n', '\n', 
@@ -34,16 +35,32 @@ word escapeDef[] = {
 };
 
 word patKeyDef[] = {
-    PAT_KO|PAT_KO_TERM, '(', '(',
-    PAT_MANY, 'a', 'z',
-    PAT_MANY, 'A', 'Z',
-    PAT_MANY, '_', '_',
-    PAT_MANY, '-', '-',
-    PAT_MANY|PAT_TERM, '0', '9',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' ',
+    PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t',
+    PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r',
+    PAT_ANY|PAT_INVERT_CAPTURE, '\n', '\n',
+    PAT_SINGLE|PAT_OPTIONAL, 'a', 'z',
+    PAT_SINGLE|PAT_OPTIONAL, 'A', 'Z',
+    PAT_SINGLE|PAT_OPTIONAL, '_', '_',
+    PAT_SINGLE|PAT_OPTIONAL|PAT_TERM, '0', '9',
+    PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' ',
+    PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t',
+    PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r',
+    PAT_ANY|PAT_INVERT_CAPTURE, '\n', '\n',
+    PAT_ANY, 'a', 'z',
+    PAT_ANY, 'A', 'Z',
+    PAT_ANY, '_', '_',
+    PAT_ANY, '-', '-',
+    PAT_ANY|PAT_TERM, '0', '9',
+    PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '(', '(',
     PAT_END, 0, 0,
 };
 
 word patTokenDef[] = {
+    PAT_SINGLE, 'a', 'z',
+    PAT_SINGLE, 'A', 'Z',
+    PAT_SINGLE, '_', '_',
+    PAT_SINGLE|PAT_TERM, '0', '9',
     PAT_MANY, 'a', 'z',
     PAT_MANY, 'A', 'Z',
     PAT_MANY, '_', '_',
@@ -53,7 +70,7 @@ word patTokenDef[] = {
 };
 
 word keyCloseDef[] = {
-    PAT_TERM, ')', ')',
+    PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, ')', ')',
     PAT_END, 0, 0,
 };
 
@@ -140,7 +157,7 @@ static status start(MemCtx *m, Roebling *rbl){
     
     r |= Roebling_SetPattern(rbl, (PatCharDef *)openCloseDef, 
         CNK_LANG_RBL_OPEN_CLOSE,  
-        CNK_LANG_RBL_PAT);
+        CNK_LANG_RBL_SEP);
 
     return r;
 }
@@ -149,18 +166,9 @@ static status pat(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     
-    r |= Roebling_SetPattern(rbl, (PatCharDef *)jumpDef, 
-        CNK_LANG_RBL_JUMP,  
-        CNK_LANG_RBL_JUMP_TOKEN);
-    r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
-        CNK_LANG_RBL_SEP,
-        CNK_LANG_RBL_PAT);
-    r |= Roebling_SetPattern(rbl, (PatCharDef *)patKeyDef, 
-        CNK_LANG_RBL_PAT_KEY,
-        CNK_LANG_RBL_PAT);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)keyCloseDef, 
         CNK_LANG_RBL_PAT_KEY_CLOSE,
-        CNK_LANG_RBL_PAT);
+        CNK_LANG_RBL_SEP);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patDef, 
         CNK_LANG_RBL_PAT,
         CNK_LANG_RBL_PAT);
@@ -204,6 +212,33 @@ static status pat(MemCtx *m, Roebling *rbl){
         CNK_LANG_RBL_PAT_KEY,
         CNK_LANG_RBL_PAT);
 
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
+        CNK_LANG_RBL_SEP,
+        CNK_LANG_RBL_PAT);
+
+    return r;
+}
+
+static status sep(MemCtx *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)jumpDef, 
+        CNK_LANG_RBL_JUMP,  
+        CNK_LANG_RBL_JUMP_TOKEN);
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
+        CNK_LANG_RBL_SEP,
+        CNK_LANG_RBL_SEP);
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)patKeyDef, 
+        CNK_LANG_RBL_PAT_KEY,
+        CNK_LANG_RBL_PAT);
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)openCloseDef, 
+        CNK_LANG_RBL_OPEN_CLOSE,  
+        CNK_LANG_RBL_SEP);
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)wsDef,
+        CNK_LANG_RBL_WS,
+        CNK_LANG_RBL_SEP);
+
     return r;
 }
 
@@ -213,7 +248,7 @@ static status jumpToken(MemCtx *m, Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patTokenDef, 
         CNK_LANG_RBL_JUMP_TOKEN,
-        CNK_LANG_RBL_PAT);
+        CNK_LANG_RBL_SEP);
 
     return r;
 }
@@ -234,6 +269,8 @@ status CnkRoebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks){
     Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)start));
     Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_PAT));
     Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)pat));
+    Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_SEP));
+    Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)sep));
     Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_JUMP_TOKEN));
     Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)jumpToken));
     Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_END));

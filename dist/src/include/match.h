@@ -15,6 +15,7 @@ enum pat_flags {
     PAT_LEAVE  = 1 << 10, /* L */
     PAT_CMD = 1 << 11, /* D */
     PAT_GO_ON_FAIL = 1 << 12, /* T */
+    PAT_CONSUME = 1 << 13, /* U */
 };
 
 enum match_flags {
