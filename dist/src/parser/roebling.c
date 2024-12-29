@@ -56,8 +56,6 @@ static status Roebling_RunMatches(Roebling *rbl){
                      }
                      rbl->tail = mt->tail;
 
-
-
                      if(DEBUG_ROEBLING_COMPLETE){
                          printf("\x1b[%dm#%d ", DEBUG_ROEBLING_COMPLETE, i);
                          Debug_Print((void *)mt, 0, "Match Found: ", DEBUG_ROEBLING_COMPLETE, TRUE);
@@ -317,6 +315,7 @@ Roebling *Roebling_Make(MemCtx *m,
         RblCaptureFunc capture,
         Abstract *source
     ){
+
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;

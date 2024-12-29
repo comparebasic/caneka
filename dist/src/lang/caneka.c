@@ -65,8 +65,38 @@ char * CnkLang_RangeToChars(word range){
         return "CNK_LANG_RBL_TEXT";
     }else if(range == CNK_LANG_RBL_PAT_KEY){
         return "CNK_LANG_RBL_PAT_KEY";
+    }else if(range == CNK_LANG_RBL_PAT_KEY_CLOSE){
+        return "CNK_LANG_RBL_PAT_KEY_CLOSE";
     }else if(range == CNK_LANG_RBL_PAT){
         return "CNK_LANG_RBL_PAT";
+    }else if(range == CNK_LANG_RBL_INVERT){
+        return "CNK_LANG_RBL_INVERT";
+    }else if(range == CNK_LANG_RBL_ESCAPE){
+        return "CNK_LANG_RBL_ESCAPE";
+    }else if(range == CNK_LANG_RBL_MANY){
+        return "CNK_LANG_RBL_MANY";
+    }else if(range == CNK_LANG_RBL_ANY){
+        return "CNK_LANG_RBL_ANY";
+    }else if(range == CNK_LANG_RBL_INVERT_CAPTURE){
+        return "CNK_LANG_RBL_INVERT_CAPTURE";
+    }else if(range == CNK_LANG_RBL_SUPER){
+        return "CNK_LANG_RBL_SUPER";
+    }else if(range == CNK_LANG_RBL_SUPER_CLOSE){
+        return "CNK_LANG_RBL_SUPER_CLOSE";
+    }else if(range == CNK_LANG_RBL_KO){
+        return "CNK_LANG_RBL_KO";
+    }else if(range == CNK_LANG_RBL_KO_CLOSE){
+        return "CNK_LANG_RBL_KO_CLOSE";
+    }else if(range == CNK_LANG_RBL_WS){
+        return "CNK_LANG_RBL_WS";
+    }else if(range == CNK_LANG_RBL_COMMENT){
+        return "CNK_LANG_RBL_COMMENT";
+    }else if(range == CNK_LANG_RBL_JUMP){
+        return "CNK_LANG_RBL_JUMP";
+    }else if(range == CNK_LANG_RBL_JUMP_TOKEN){
+        return "CNK_LANG_RBL_JUMP_TOKEN";
+    }else if(range == CNK_LANG_RBL_SEP){
+        return "CNK_LANG_RBL_SEP";
     }else{
         return "unknown";
     }

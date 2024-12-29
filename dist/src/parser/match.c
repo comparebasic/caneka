@@ -143,6 +143,8 @@ status Match_Feed(Match *mt, word c){
 
             if(HasFlag(def->flags, PAT_LEAVE)){
                 mt->type.state |= MATCH_INVERTED;
+            }else if((def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
+                /* no increment if it's an invert and no capture */;
             }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
                 if(mt->count == 0){
                     mt->lead++;
@@ -222,7 +224,8 @@ miss:
             mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
 
             if(DEBUG_MATCH_COMPLETE){
-                Debug_Print(mt, 0, "Match Completed:%s", DEBUG_MATCH_COMPLETE, TRUE);
+                printf("\x1b[%dmCapture:%d jump:%d ", DEBUG_MATCH_COMPLETE, mt->captureKey, mt->jump);
+                Debug_Print(mt, 0, "Match Completed:", DEBUG_MATCH_COMPLETE, TRUE);
                 printf("\n");
             }
         }
