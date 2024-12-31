@@ -37,7 +37,7 @@ static BuildSubdir coreobj = { "core", {
     "core.c", "mem.c",  "string.c", "string_makers.c", "string_equals.c", "error.c",
 	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c", "table_chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
-    "iter.c", "array.c", "int.c", "maker.c", "do.c", 
+    "iter.c", "iter_str.c", "array.c", "int.c", "maker.c", "do.c", 
     "mess.c", "single.c", "debug.c", "abstract.c", "time.c",
     "queue.c", "boolean.c","blank.c","clone.c","guard.c",
     "debug_stack.c", "result.c",
@@ -76,6 +76,7 @@ static BuildSubdir testobj = { "tests", {
     "oset_tests.c","memlocal_tests.c","blank_test.c","nestedd_tests.c",
     "xmlt_template_tests.c","textfilter_tests.c","crypto_tests.c",
     "salty_tests.c","user_tests.c", "roebling_syntax_tests.c",
+    "iter_str_tests.c",
     NULL
 }};
 

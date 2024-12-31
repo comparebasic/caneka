@@ -46,6 +46,7 @@ struct access;
 struct ioctx;
 struct mem_local;
 struct test_set;
+struct strcursor;
 
 struct format_def;
 struct formatter;
@@ -86,8 +87,8 @@ typedef char *(*RangeToChars)(word);
 
 #define STRING_SEG_FOOTPRINT 256
 #define STRING_EXTRAS (sizeof(Type)+sizeof(int)+sizeof(struct string *)+sizeof(MemCtx *))
-#define STRING_CHUNK_SIZE (STRING_SEG_FOOTPRINT - STRING_EXTRAS)-1
-#define STRING_FIXED_SIZE (64  - (sizeof(struct typehdr)+sizeof(int)))-1
+#define STRING_CHUNK_SIZE ((STRING_SEG_FOOTPRINT - STRING_EXTRAS)-1)
+#define STRING_FIXED_SIZE ((64  - (sizeof(struct typehdr)+sizeof(int)))-1)
 #define STRING_FULL_SIZE 127
 
 #define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
@@ -180,6 +181,7 @@ enum types {
     TYPE_SPOOL,
     TYPE_LOOKUP,
     TYPE_ITER,
+    TYPE_ITER_STRING,
     TYPE_SINGLE,
     TYPE_RBL_MARK,
     TYPE_OSET_ITEM,
@@ -288,6 +290,7 @@ status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 #include "patchar.h"
 #include "match.h"
 #include "scursor.h"
+#include "iter_str.h"
 #include "range.h"
 #include "lookup.h"
 #include "debug.h"

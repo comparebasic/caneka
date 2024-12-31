@@ -51,3 +51,4 @@ status CryptoStrings_Tests(MemCtx *gm);
 status Salty_Tests(MemCtx *gm);
 status User_Tests(MemCtx *gm);
 status Roebling_SyntaxTests(MemCtx *gm);
+status IterStr_Tests(MemCtx *gm);

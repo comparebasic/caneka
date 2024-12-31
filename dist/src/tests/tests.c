@@ -94,6 +94,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "IterStr",
+        IterStr_Tests,
+        "Iter Strings are strings that contain arrays of other items.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Match",
         Match_Tests,
         "Character pattern matching system for the Roebling parser.",

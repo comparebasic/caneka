@@ -1,8 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
+status SCursor_Init(SCursor *sc, String *s){
+    memset(sc, 0, sizeof(SCursor));
+    sc->type.of = TYPE_SCURSOR;
+    sc->s = s;
+    sc->seg = sc->s;
+    return SUCCESS;
+}
+
 SCursor* SCursor_Make(MemCtx *m, String *s){
     SCursor *sc = (SCursor *) MemCtx_Alloc(m, sizeof(SCursor));
+    sc->type.of = TYPE_SCURSOR;
     sc->s = s;
     sc->seg = sc->s;
 
@@ -28,6 +37,7 @@ status SCursor_Incr(SCursor *sc, i64 length){
         local = sc->seg->length - sc->position;
         if(local > remaining){
             sc->position += remaining;
+            sc->total += remaining;
             remaining = 0;
             break;
         }else{
