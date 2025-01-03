@@ -19,3 +19,4 @@ typedef struct format_def {
 } FmtDef;
 
 FmtDef *FmtDef_Make(MemCtx *m);
+void FmtDef_PushItem(struct formatter *ctx, word captureKey, String *s, FmtDef *def);

@@ -14,6 +14,17 @@ enum format_ctx_flags {
     FMT_CTX_CHILDREN_DONE = 1 << 9,
 };
 
+typedef struct fmt_cnf  {
+    word id;
+    word state;
+    int flags;
+    char *name;
+    char *alias;
+    FmtTrans to;
+    word *rollups;
+    int parentIdx;
+} FmtCnf;
+
 typedef struct fmt_item {
     Type type;
     int flags;

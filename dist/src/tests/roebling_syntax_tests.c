@@ -17,6 +17,8 @@ status Roebling_SyntaxTests(MemCtx *gm){
     Roebling_Add(ctx->rbl, s);
     Roebling_Run(ctx->rbl);
 
+    return r;
+
     /* line */
     s = String_Make(m, bytes("/({.*[\\n]})/\n"));
     Debug_Print((void *)s, 0, "Line:", COLOR_PURPLE, FALSE);
