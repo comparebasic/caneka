@@ -257,9 +257,6 @@ status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         printf("\n");
     }
 
-    printf("get by key %s\n", CnkLang_RangeToChars(captureKey));
-    Debug_Print((void *)ctx->byId, 0, "ById: ", DEBUG_LANG_CNK_RBL, TRUE);
-    printf("\n");
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
     if(def != NULL && def->to){
         if((def->type.state & FMT_DEF_INDENT) != 0){
@@ -267,9 +264,14 @@ status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         }
         Debug_Print((void *)def, 0, "def: ", COLOR_BLUE, TRUE);
         printf("\n");
-        def->to(ctx->rbl->m, def, ctx, s, source);
+        if(def->to != NULL && (def->type.state & FMT_DEF_TO_ON_CLOSE) == 0){
+            def->to(ctx->rbl->m, def, ctx, s, source);
+        }
         if((def->type.state & FMT_DEF_OUTDENT) != 0){
             ctx->item = ctx->item->parent;
+            if((def->to != NULL) && (def->type.state & FMT_DEF_TO_ON_CLOSE) != 0){
+                def->to(ctx->rbl->m, def, ctx, s, source);
+            }
         }
     }else{
         printf("\x1b[%dmno def\x1b[0m", COLOR_BLUE);
@@ -330,7 +332,7 @@ FmtCtx *CnkRoeblingCtx_Make(MemCtx *m, Abstract *source){
     ctx->rangeToChars = CnkLang_RangeToChars;
     CnkRblLang_AddDefs(ctx);
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
-    ctx->root->value = Span_Make(m, TYPE_TABLE);
+    ctx->root->value = (Abstract *)Span_Make(m, TYPE_TABLE);
     ctx->item->spaceIdx = CNK_LANG_ROEBLING;
     FmtDef *def = Chain_Get(ctx->byId, ctx->item->spaceIdx);
     ctx->item->def = def;

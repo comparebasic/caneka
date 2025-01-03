@@ -50,20 +50,10 @@ Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstra
 }
 
 Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
-    String_AddBytes(m, s, bytes("_pat"), 4);
-    Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
+    String_AddBytes(m, s, bytes("pat"), 3);
+    Span *sp = (Span *)as(fmt->root->value, TYPE_SPAN);
     String_AddInt(m, s, sp->nvalues);
     Debug_Print((void *)s, 0, "Making Pat Table Entry: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
-    Table_Set(sp, (Abstract *)s,  (Abstract *)fmt->item);
-
-    return NULL;
-}
-
-Abstract *CnkRbl_Out(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
-    Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
-    Debug_Print((void *)sp, 0, "Patterns: ", COLOR_PURPLE, TRUE);
     printf("\n");
 
     return NULL;
@@ -77,10 +67,10 @@ status CnkRblLang_AddDefs(FmtCtx *ctx){
         {
             CNK_LANG_RBL_OPEN_CLOSE,
             0,
-            FMT_DEF_TO_ON_CLOSE,
+            0,
             "",
             NULL,
-            CnkRbl_Out,  
+            NULL,
             NULL,
             -1
         },
