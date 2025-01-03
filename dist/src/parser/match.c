@@ -77,7 +77,8 @@ status Match_Feed(Match *mt, word c){
     PatCharDef *def;
 
     if(DEBUG_PATMATCH){
-        Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "\nmatch_FeedPat: of ", DEBUG_PATMATCH, TRUE);
+        printf("\n\x1b[%dm%s", DEBUG_PATMATCH, State_ToChars(mt->type.state));
+        Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "match_FeedPat: of ", DEBUG_PATMATCH, TRUE);
         printf("\n\x1b[1;%dm", DEBUG_PATMATCH);
         if(c == '\n'){
             printf("    '\\n'");

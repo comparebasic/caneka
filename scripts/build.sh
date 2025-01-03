@@ -15,6 +15,6 @@ if [ -e ./build/caneka ]; then
     ./build/caneka transp
 fi
 if [ ! -e ./build/build ] ; then
-    clang -o build/build dist/src/build.c
+    clang -I dist/src/include -o build/build dist/src/build.c
 fi
 ./build/build

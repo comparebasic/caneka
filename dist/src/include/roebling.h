@@ -6,6 +6,7 @@ typedef status (*RblCaptureFunc)(word captureKey, int matchIdx, String *s, Abstr
 enum roebling_flags {
     /*MATCH_INVERTED = 1 << 9,*/
     ROEBLING_NEXT = 1 << 10,
+    ROEBLING_REPEAT = 1 << 11,
 };
 
 enum mark_reserved {

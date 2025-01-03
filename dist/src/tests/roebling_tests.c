@@ -13,6 +13,11 @@ enum rbl_test_marks {
     RBL_TEST_END,
 };
 
+
+static word text[] = {PAT_INVERT_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, PAT_END, 0, 0};
+static word nl[] = {NL_DEF};
+static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_END, 0, 0};
+
 static status Found(word captureKey, int matchIdx, String *s, Abstract *source){
     if(DEBUG_ROEBLING){
         Debug_Print((void *)s, 0, "found s: ", COLOR_YELLOW, TRUE);
@@ -47,6 +52,7 @@ status SetWord1(MemCtx *m, Abstract *a){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     Roebling_ResetPatterns(rbl);
 
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)dbl_nl, 0, RBL_TEST_END);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)oneDef, 0, -1);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)twoDef, 0, -1);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)threeDef, 0, -1);
@@ -54,23 +60,10 @@ status SetWord1(MemCtx *m, Abstract *a){
     return r; 
 }
 
-static word text[] = {PAT_INVERT_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, PAT_END, 0, 0};
-static word nl[] = {NL_DEF};
-static word nl_upper[] = {PAT_INVERT|PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n', PAT_END, 0, 0};
-static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_END, 0, 0};
-
 status SetWord2(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl, (PatCharDef *)text, 0, -1);
-    return r; 
-}
-
-status SetNextOrEnd(MemCtx *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl, (PatCharDef *)nl_upper, 0, RBL_TEST_START);
-    r |= Roebling_SetPattern(rbl,(PatCharDef *)dbl_nl, 0, RBL_TEST_END);
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)text, 0, RBL_TEST_START);
     return r; 
 }
 
@@ -85,11 +78,12 @@ status Roebling_Tests(MemCtx *gm){
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, String_Init(m, STRING_EXTEND), Found, NULL); 
+    rbl->type.state |= ROEBLING_REPEAT;
 
     Single *dof = as(Span_Get(rbl->parsers_do, 0), TYPE_WRAPPED_DO);
     ((RblFunc)dof->val.dof)(rbl->m, rbl);
 
-    r |= Test(rbl->matches->nvalues == 3, "Roebling has three match values loaded up");
+    r |= Test(rbl->matches->nvalues == 4, "Roebling has four match values loaded up, have %d", rbl->matches->nvalues);
 
     MemCtx_Free(m);
     return r;
@@ -141,7 +135,6 @@ status RoeblingMark_Tests(MemCtx *gm){
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_START)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetNextOrEnd)); 
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_END)); 
 
     LookupConfig config[] = {
@@ -168,9 +161,9 @@ status RoeblingMark_Tests(MemCtx *gm){
     r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT after 'for the weekend'");
 
     Roebling_RunCycle(rbl);
-    Roebling_RunCycle(rbl);
     s = Range_Copy(m, &(rbl->range));
 
+    printf("hi\n");
     r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals ONE, have %s", s->bytes);
     r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT after 'ONE'");
 
@@ -179,7 +172,6 @@ status RoeblingMark_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(s, bytes("for good measure")), "Roebling has captured the rest of the line: '%s'", s->bytes);
     r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT");
 
-    Roebling_RunCycle(rbl);
     Roebling_RunCycle(rbl);
     s = Range_Copy(m, &(rbl->range));
     r |= Test(String_EqualsBytes(s, bytes("THREE")), "Content equals THREE, have %s", s->bytes);

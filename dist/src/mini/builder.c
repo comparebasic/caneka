@@ -1,3 +1,4 @@
+#include <external.h>
 #include "./cnk.c"
 
 static int REBUILD_ALL = FALSE;

@@ -4,6 +4,11 @@
 static status Roebling_RunMatches(Roebling *rbl){
     Stack(bytes("Roebling_RunMatches"), (Abstract *)rbl);
 
+    if(DEBUG_ROEBLING_CURRENT){
+        Debug_Print((void *)rbl, 0, "RblCurrent - RunMatches", DEBUG_ROEBLING_CURRENT, FALSE);
+        printf("\n");
+    }
+
     byte c = 0;
     rbl->type.state &= ~(ROEBLING_NEXT|END|SUCCESS);
     if(rbl->matches->nvalues == 0){
@@ -181,7 +186,7 @@ status Roebling_JumpTo(Roebling *rbl, int mark){
 
 status Roebling_RunCycle(Roebling *rbl){
     if(DEBUG_ROEBLING_MARK){
-        printf("\x1b[%dmRblIdx:%d\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx);
+        printf("\x1b[%dmRblIdx:%d %s\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx, State_ToChars(rbl->type.state));
     }
     rbl->type.state &= ~END;
     if(HasFlag(rbl->type.state, ROEBLING_NEXT)){
@@ -197,7 +202,6 @@ status Roebling_RunCycle(Roebling *rbl){
                 String *mark_s = Roebling_GetMarkDebug(rbl, rbl->idx);
                 printf("\x1b[%dmJumping to %s(%d)\n", DEBUG_ROEBLING_MARK, mark_s != NULL ? (char *)mark_s->bytes : "", rbl->idx);
             }
-
         }
     }else{
         if(rbl->jumpMiss > -1){
@@ -211,15 +215,21 @@ status Roebling_RunCycle(Roebling *rbl){
 
     Single *wdof = Span_Get(rbl->parsers_do, rbl->idx);
     if(wdof == NULL){
-        rbl->type.state = SUCCESS;
-        if(DEBUG_ROEBLING_COMPLETE){
-            printf("\x1b[%dmRbl DONE wof == NULL\x1b[0m\n", DEBUG_ROEBLING_COMPLETE);
-        }
+        printf("wdof is null\n");
+        if((rbl->type.state & ROEBLING_REPEAT) != 0){
+            printf("repeating\n");
+            rbl->type.state |= ROEBLING_NEXT; 
+            rbl->jump = 0;
+        }else{
+            rbl->type.state = SUCCESS;
+            if(DEBUG_ROEBLING_COMPLETE){
+                printf("\x1b[%dmRbl DONE wof == NULL\x1b[0m\n", DEBUG_ROEBLING_COMPLETE);
+            }
 
-        if(DEBUG_ROEBLING){
-            printf("\x1b[%dmRbl DONE wof == NULL\x1b[0m\n", DEBUG_ROEBLING);
+            if(DEBUG_ROEBLING){
+                printf("\x1b[%dmRbl DONE wof == NULL\x1b[0m\n", DEBUG_ROEBLING);
+            }
         }
-
     }else{
         if((rbl->type.state & PROCESSING) == 0){
             rbl->type.state |= PROCESSING;

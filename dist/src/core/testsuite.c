@@ -84,9 +84,7 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
         }
         if(HasFlag(r, ERROR) || !HasFlag(r, SUCCESS)){
             fail++;
-            /*
             break;
-            */
         }
         pass++;
         i+= 2;
