@@ -70,10 +70,8 @@ String *String_ToEscaped(MemCtx *m, String *s){
     int position;
     for(int i = 0; i < s->length; i++){
         b = s->bytes[i];
-        byte buff[MAX_BASE10+1];
         if(b > 31 && b < 127){
             String_AddBytes(m, s2, &b, 1);
-            continue;
         }else{
             String_AddBytes(m, s2, bytes("\\"), 1);
             if(b == '\r'){

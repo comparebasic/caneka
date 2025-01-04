@@ -11,8 +11,11 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     /* phrase */
     s = String_Make(m, bytes("/(hi-there)/\n"));
+
+    /*
     Debug_Print((void *)s, 0, "Phrase:", COLOR_PURPLE, FALSE);
     printf("\n");
+    */
 
     Roebling_Add(ctx->rbl, s);
     Roebling_Run(ctx->rbl);
@@ -33,14 +36,10 @@ status Roebling_SyntaxTests(MemCtx *gm){
     "    {PAT_END, 0, 0}\n"
     "};\n";
 
-    String *exp = String_Make(m, bytes(cstr));
+    String *exp = String_Init(m, STRING_EXTEND);
+    String_AddBytes(m, exp, bytes(cstr), strlen(cstr));
 
-    csource->type.state |= DEBUG;
-    r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code, expected '%s', have '%s'", String_ToChars(m, exp), String_ToChars(m, csource));
-    Debug_Print((void *)csource, 0, "csource:\n", COLOR_PURPLE, TRUE);
-    printf("\n");
-    Debug_Print((void *)exp, 0, "exp:\n", COLOR_PURPLE, TRUE);
-    printf("\n");
+    r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code");
 
     return r;
 

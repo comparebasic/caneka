@@ -2,9 +2,6 @@
 #include <caneka.h>
 
 Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    Debug_Print((void *)key, 0, "Found Pat: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     FmtItem *item = fmt->item;
     if(item == NULL){
         Fatal("Need item to add pattern to", TYPE_LANG_CNK_RBL);
@@ -28,9 +25,6 @@ Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract 
 }
 
 Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
-    Debug_Print((void *)s, 0, "Found Pat: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     FmtItem *item = fmt->item;
     if(item == NULL){
         Fatal("Need item to add pattern to", TYPE_LANG_CNK_RBL);
@@ -42,9 +36,6 @@ Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstra
     pat.from = 0;
     pat.to = 0;
     String_AddBytes(m, item->content, bytes(&pat), sizeof(PatCharDef));
-
-    Debug_Print((void *)item->content->bytes, TYPE_PATCHARDEF, "Defined Pat: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     return NULL;
 }
@@ -59,17 +50,13 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
         Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
         String_AddInt(m, ukey, sp->nvalues);
 
-        printf("Setting Table Entry for item of space %s\n", CnkLang_RangeToChars(fmt->item->def->id));
-
         Table_Set(sp, (Abstract *)ukey,  (Abstract *)fmt->item);
 
         return NULL;
     }else{
-        Debug_Print((void *)key, 0, "Rendering Pat: ", COLOR_PURPLE, TRUE);
-        printf("\n");
-
         FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
         String *out = String_Init(m, STRING_EXTEND);
+
         char *cstr = "static PatCharDef ";
         String_AddBytes(m, out, bytes(cstr), strlen(cstr));
         String_Add(m, out, key);
@@ -92,18 +79,19 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
             String_AddAsciiSrc(m, out, (byte)pat->to);
             cstr = "}";
             String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-            if((its.type.state & FLAG_ITER_LAST) == 0){
-                cstr = ", ";
-                String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-            }else{
-                cstr = "\n";
-                String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-            }
             if((pat->flags & PAT_TERM) != 0){
-                cstr = "\n";
+                cstr = ",\n";
                 String_AddBytes(m, out, bytes(cstr), strlen(cstr));
                 if((its.type.state & FLAG_ITER_LAST) == 0){
                     cstr = "    ";
+                    String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                }
+            }else{
+                if((its.type.state & FLAG_ITER_LAST) == 0){
+                    cstr = ", ";
+                    String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                }else{
+                    cstr = "\n";
                     String_AddBytes(m, out, bytes(cstr), strlen(cstr));
                 }
             }
@@ -117,8 +105,6 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 
 Abstract *CnkRbl_Out(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
     Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
-    Debug_Print((void *)sp, 0, "Patterns: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     String *out = String_Init(m, STRING_EXTEND);
     Iter it;
@@ -128,7 +114,6 @@ Abstract *CnkRbl_Out(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a
         if(h != NULL){
             FmtItem *item = (FmtItem *)h->value;
             if(item->def->to == CnkRbl_Out){
-                printf("oops wrong item\n");
                 continue;
             }
             String_Add(m, out, 
@@ -162,7 +147,6 @@ status CnkRblLang_AddDefs(FmtCtx *ctx){
             def->parent = Lookup_Get(lk, cnf->parentIdx);
         }
 
-        printf("Adding %s\n", CnkLang_RangeToChars(cnf->id));
         r |= Lookup_Add(ctx->m, lk, cnf->id, def);
         cnf++;
     }

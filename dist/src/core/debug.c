@@ -24,7 +24,7 @@ int DEBUG_XML_TEMPLATE = 0;
 int DEBUG_XML_TEMPLATE_NESTING = 0;
 int DEBUG_XML_TEMPLATE_OUT = 0;
 int DEBUG_ROEBLING_NAME = 0;
-int DEBUG_HTTP = COLOR_YELLOW;
+int DEBUG_HTTP = 0;
 int DEBUG_SERVE = 0;
 int DEBUG_SERVE_ACCEPT = 0;
 int DEBUG_SERVE_POLLING = 0;
@@ -42,7 +42,7 @@ int DEBUG_CASH = 0;
 int DEBUG_USER = 0;
 int DEBUG_LANG_TRANSP = 0;
 int DEBUG_LANG_CNK = 0;
-int DEBUG_LANG_CNK_RBL = COLOR_YELLOW;
+int DEBUG_LANG_CNK_RBL = 0;
 int DEBUG_LANG_CNK_OUT = 0;
 int DEBUG_SUBPROCESS = 0;
 
@@ -664,16 +664,18 @@ static void String_Print(Abstract *a, cls type, char *msg, int color, boolean ex
             }else{
                 _s = String_ToEscaped(DebugM, s);
             }
-
-            printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", l, color, _s->bytes, color);
+            printf("s/%u=\"\x1b[1;%dm", l, color);
+            do {
+                printf("%s", _s->bytes);
+            } while((_s = String_Next(_s)) != NULL);
+            printf("\x1b[0;%dm\"", color);
             s = s->next;
         } while(s != NULL);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
         printf("\x1b[%dm%s\x1b[1;%dm\"",color, msg, color);
         do {
-            String *esc = String_ToEscaped(DebugM, s);
-            printf("%s",esc->bytes);
+            printf("%d/%lu'%s'",s->length,strlen((char *)s->bytes),s->bytes);
             s = s->next;
         } while(s != NULL);
         printf("\"\x1b[0m");
