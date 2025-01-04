@@ -4,7 +4,7 @@
 status XmlT_AddAttsStr(XmlTCtx *xmlt, Mess *e, String *s){
     Stack(bytes("XmlT_AddAttsStr"), (Abstract *)e->name);
     if(e->atts == NULL){
-        return NOOP;
+        Return NOOP;
     }
     MemCtx *m = xmlt->m;
     Iter it;
@@ -49,15 +49,13 @@ status XmlT_Out(MemCtx *_, String *s, Abstract *source){
 }
 
 status XmlT_Parse(XmlTCtx *xmlt, String *s, Span *tbl){
-#ifdef DEBUG_STACK
-    DebugStack_Push(bytes("XmlT_Parse"), NULL);
-#endif
+    Stack(bytes("XmlT_Parse"), NULL);
     status r = (XmlParser_Parse(xmlt->parser, s) & SUCCESS);
     if((r & SUCCESS) != 0){
         NestedD_Init(xmlt->m, xmlt->nd, tbl);
         r = XmlT_Template(xmlt, xmlt->parser->ctx->root->firstChild, xmlt->nd, XmlT_Out);   
     }
-    return r;
+    Return r;
 }
 
 XmlTCtx *XmlT_Make(MemCtx *m, String *result, Lookup *presenters){

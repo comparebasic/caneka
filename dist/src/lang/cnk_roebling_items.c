@@ -2,10 +2,11 @@
 #include <caneka.h>
 
 Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    Stack(bytes("CnkRbl_Pat"), (Abstract *)key);
     FmtItem *item = fmt->item;
     if(item == NULL){
         Fatal("Need item to add pattern to", TYPE_LANG_CNK_RBL);
-        return NULL;
+        Return NULL;
     }
 
     IterStr it;
@@ -21,7 +22,7 @@ Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract 
         String_AddBytes(m, item->content, bytes(&pat), sizeof(PatCharDef));
     }
 
-    return NULL;
+    Return NULL;
 }
 
 Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
@@ -41,6 +42,7 @@ Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstra
 }
 
 Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
+    Stack(bytes("CnkRbl_PatKeyOpen"), (Abstract *)key);
     if(def->id == CNK_LANG_RBL_PAT_KEY){
         fmt->item->key = key;
 
@@ -52,7 +54,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 
         Table_Set(sp, (Abstract *)ukey,  (Abstract *)fmt->item);
 
-        return NULL;
+        Return NULL;
     }else{
         FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
         String *out = String_Init(m, STRING_EXTEND);
@@ -99,7 +101,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
         cstr = "};\n";
         String_AddBytes(m, out, bytes(cstr), strlen(cstr));
 
-        return (Abstract *)out;
+        Return (Abstract *)out;
     }
 }
 

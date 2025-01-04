@@ -63,10 +63,8 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     char *name = NULL;
     int pass = 0;
     int fail = 0;
-#ifdef DEBUG_STACK
-    DebugStack_Push(bytes("Test_Runner"), 
+    Stack(bytes("Test_Runner"), 
         (Abstract *)String_Make(DebugM, bytes(suiteName)));
-#endif
     if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
         printf("<div class=\"suite\">\n    <span class=\"label\">Suite %s</span>\n", suiteName);
     }
@@ -104,5 +102,5 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
         printf("</div>\n");
     }
-    return !fail ? SUCCESS : ERROR;
+    Return !fail ? SUCCESS : ERROR;
 }

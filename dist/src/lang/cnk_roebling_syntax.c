@@ -125,10 +125,6 @@ word jumpDef[] = {
     PAT_ANY|PAT_INVERT_CAPTURE,'\n','\n',
     PAT_TERM,'-','-',
     PAT_TERM,'>','>',
-    PAT_ANY|PAT_INVERT_CAPTURE,' ',' ',
-    PAT_ANY|PAT_INVERT_CAPTURE,'\t','\t',
-    PAT_ANY|PAT_INVERT_CAPTURE,'\r','\r',
-    PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,'\n','\n',
     PAT_END, 0, 0,
 };
 
@@ -160,6 +156,9 @@ static status pat(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)jumpDef, 
+        CNK_LANG_RBL_JUMP,  
+        CNK_LANG_RBL_JUMP_TOKEN_PAT);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)keyCloseDef, 
         CNK_LANG_RBL_PAT_KEY_CLOSE,
         CNK_LANG_RBL_SEP);
@@ -205,7 +204,6 @@ static status pat(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patKeyDef, 
         CNK_LANG_RBL_PAT_KEY,
         CNK_LANG_RBL_PAT);
-
     r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
         CNK_LANG_RBL_SEP,
         CNK_LANG_RBL_PAT);
@@ -221,7 +219,7 @@ static status sep(MemCtx *m, Roebling *rbl){
         CNK_LANG_RBL_JUMP,  
         CNK_LANG_RBL_JUMP_TOKEN);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
-        CNK_LANG_RBL_SEP,
+        CNK_LANG_RBL_KEY_SEP,
         CNK_LANG_RBL_SEP);
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patKeyDef, 
         CNK_LANG_RBL_PAT_KEY,
@@ -246,6 +244,24 @@ static status jumpToken(MemCtx *m, Roebling *rbl){
 
     return r;
 }
+
+static status jumpTokenPat(MemCtx *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)patTokenDef, 
+        CNK_LANG_RBL_JUMP_TOKEN,
+        CNK_LANG_RBL_PAT);
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)wsDef,
+        CNK_LANG_RBL_WS,
+        CNK_LANG_RBL_JUMP_TOKEN_PAT);
+    r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
+        CNK_LANG_RBL_SEP,
+        CNK_LANG_RBL_PAT);
+
+    return r;
+}
+
 
 status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_LANG_CNK_RBL);
@@ -287,6 +303,8 @@ status CnkRoebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks){
     Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)sep));
     Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_JUMP_TOKEN));
     Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)jumpToken));
+    Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_JUMP_TOKEN_PAT));
+    Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)jumpTokenPat));
     Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_END));
 
     LookupConfig config[] = {

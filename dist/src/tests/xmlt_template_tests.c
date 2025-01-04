@@ -11,9 +11,7 @@ static status populatePresenters(MemCtx *m, Lookup *lk){
 }
 
 status XmlTTemplate_Tests(MemCtx *gm){
-#ifdef DEBUG_STACK
-    DebugStack_Push(bytes("XtmlTTemplate_Tests"), NULL);
-#endif
+    Stack(bytes("XtmlTTemplate_Tests"), NULL);
 
     status r = READY;
     MemCtx *m = MemCtx_Make();
@@ -85,5 +83,5 @@ status XmlTTemplate_Tests(MemCtx *gm){
     r |= Test(String_Equals(xmlt->result, expected_s), "XmlT created expected output from: %s", xml_cstr);
 
     MemCtx_Free(m);
-    return r;
+    Return r;
 }

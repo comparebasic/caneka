@@ -6,7 +6,8 @@ void FmtDef_PushItem(FmtCtx *ctx, word captureKey, String *s, FmtDef *def){
     item->spaceIdx = captureKey;
     item->parent = ctx->item;
     item->def = def;
-    item->content = s;
+    item->content = String_Init(ctx->m, STRING_EXTEND);
+    String_Add(ctx->m, item->content, s);
 
     ctx->item = item;
 }

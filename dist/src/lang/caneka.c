@@ -95,8 +95,12 @@ char * CnkLang_RangeToChars(word range){
         return "CNK_LANG_RBL_JUMP";
     }else if(range == CNK_LANG_RBL_JUMP_TOKEN){
         return "CNK_LANG_RBL_JUMP_TOKEN";
+    }else if(range == CNK_LANG_RBL_JUMP_TOKEN_PAT){
+        return "CNK_LANG_RBL_JUMP_TOKEN_PAT";
     }else if(range == CNK_LANG_RBL_SEP){
         return "CNK_LANG_RBL_SEP";
+    }else if(range == CNK_LANG_RBL_KEY_SEP){
+        return "CNK_LANG_RBL_KEY_SEP";
     }else{
         return "unknown";
     }
