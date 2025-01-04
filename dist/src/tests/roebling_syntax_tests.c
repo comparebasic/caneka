@@ -17,6 +17,10 @@ status Roebling_SyntaxTests(MemCtx *gm){
     Roebling_Add(ctx->rbl, s);
     Roebling_Run(ctx->rbl);
 
+    r |= Test(ctx->item->spaceIdx == CNK_LANG_RBL_START, "ctx item is the root item which is the CNK_LANG_ROEBLING item");
+
+    ctx->item->def->to(m, ctx->item->def, ctx, NULL, NULL);
+
     return r;
 
     /* line */
