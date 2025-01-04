@@ -45,7 +45,7 @@ status Roebling_SyntaxTests(MemCtx *gm){
     r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code");
 
     /* line */
-    s = String_Make(m, bytes("/strings(\\n -> end,ONE,TWO,THREE), line(.+[\\n]) -> strings/\n"));
+    s = String_Make(m, bytes("/strings(\\n -> ,ONE,TWO,THREE), line(.+[\\n]) -> strings/\n"));
     DebugStack_SetRef((Abstract *)s);
 
     Debug_Print((void *)s, 0, "Line:", COLOR_PURPLE, FALSE);
