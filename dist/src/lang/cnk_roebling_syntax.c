@@ -250,11 +250,11 @@ static status jumpToken(MemCtx *m, Roebling *rbl){
 status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_LANG_CNK_RBL);
     if(DEBUG_LANG_CNK_RBL){
-        printf("\x1b[%dmCnkRbl Capture %s:", DEBUG_LANG_CNK_RBL, CnkLang_RangeToChars(captureKey));
+        printf("\n\n\x1b[%dmCnkRbl Capture %s:", DEBUG_LANG_CNK_RBL, CnkLang_RangeToChars(captureKey));
         Debug_Print((void *)s, 0, " ", DEBUG_LANG_CNK_RBL, TRUE);
         printf("\n");
-        Debug_Print((void *)ctx->item, 0, "item: ", DEBUG_LANG_CNK_RBL, TRUE);
-        printf("\n");
+        Debug_Print((void *)ctx->item->def, 0, "item->def: ", DEBUG_LANG_CNK_RBL, TRUE);
+        printf("\x1b[%dm(%s)\x1b[0m\n", DEBUG_LANG_CNK_RBL, CnkLang_RangeToChars(ctx->item->def->id));
     }
 
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
@@ -263,6 +263,7 @@ status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         Debug_Print((void *)def, 0, "def: ", COLOR_BLUE, TRUE);
         printf("\n");
         if((def->flags & FMT_DEF_INDENT) != 0){
+            printf("push...\n");
             FmtDef_PushItem(ctx, captureKey, s, def);
         }
         if(def->to != NULL && (def->type.state & FMT_DEF_TO_ON_CLOSE) == 0){
@@ -273,9 +274,8 @@ status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             if((def->to != NULL) && (def->type.state & FMT_DEF_TO_ON_CLOSE) != 0){
                 def->to(ctx->rbl->m, def, ctx, s, source);
             }
+            printf("pop...\n");
         }
-    }else{
-        printf("\x1b[%dmno def\x1b[0m", COLOR_BLUE);
     }
 
     return NOOP;

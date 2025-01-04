@@ -371,6 +371,19 @@ status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean
     return r;
 }
 
+status String_AddAsciiSrc(MemCtx *m, String *s, byte c) {
+    if(c >= 32 && c <= 126){
+        char *cstr = "'";
+        String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+        String_AddBytes(m, s, &c, 1);
+        cstr = "'";
+        String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+    }else{
+        String_AddInt(m, s, c);
+    }
+
+    return SUCCESS;
+}
 
 status String_ToSlab(String *a, void *sl, size_t sz) {
     if(String_Length(a) > sz){

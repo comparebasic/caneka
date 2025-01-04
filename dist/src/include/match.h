@@ -82,5 +82,6 @@ status Match_SetPattern(Match *mt, PatCharDef *def);
 status Match_SetString(MemCtx *m, Match *mt, String *s);
 status Match_Feed(Match *mt, word c);
 status Match_FeedEnd(Match *mt);
+status Match_AddFlagsToStr(MemCtx *m, String *s, word flag);
 PatCharDef *Match_GetDef(Match *mt);
 #define Match_Total(x) ((x)->count+(x)->tail+(x)->lead)

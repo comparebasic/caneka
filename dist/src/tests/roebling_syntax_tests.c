@@ -19,7 +19,28 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     r |= Test(ctx->item->spaceIdx == CNK_LANG_RBL_START, "ctx item is the root item which is the CNK_LANG_ROEBLING item");
 
-    ctx->item->def->to(m, ctx->item->def, ctx, NULL, NULL);
+    String *csource = (String *)asIfc(ctx->item->def->to(m, ctx->item->def, ctx, NULL, NULL), TYPE_STRING);
+
+    char *cstr = "static PatCharDef _pat0[] = {\n"
+    "    {PAT_TERM, 'h', 'h'},\n"
+    "    {PAT_TERM, 'i', 'i'},\n"
+    "    {PAT_TERM, '-', '-'},\n"
+    "    {PAT_TERM, 't', 't'},\n"
+    "    {PAT_TERM, 'h', 'h'},\n"
+    "    {PAT_TERM, 'e', 'e'},\n"
+    "    {PAT_TERM, 'r', 'r'},\n"
+    "    {PAT_TERM, 'e', 'e'},\n"
+    "    {PAT_END, 0, 0}\n"
+    "};\n";
+
+    String *exp = String_Make(m, bytes(cstr));
+
+    csource->type.state |= DEBUG;
+    r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code, expected '%s', have '%s'", String_ToChars(m, exp), String_ToChars(m, csource));
+    Debug_Print((void *)csource, 0, "csource:\n", COLOR_PURPLE, TRUE);
+    printf("\n");
+    Debug_Print((void *)exp, 0, "exp:\n", COLOR_PURPLE, TRUE);
+    printf("\n");
 
     return r;
 

@@ -16,6 +16,11 @@ boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
         }
         pos = l - length;
     }else if(String_Length(a) != length){
+
+        if((a->type.state & DEBUG) != 0){
+            printf("String_Equals:mismatch@length(%ld/%d)\n", String_Length(a), length);
+        }
+
         return FALSE;
     }
     byte *p = cstr;
@@ -34,6 +39,9 @@ boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
         }
 
         if(strncmp((char *)tail->bytes+offset, (char *)p, tail->length-offset) != 0){
+            if((a->type.state & DEBUG) != 0){
+                
+            }
             return FALSE;
         }
 
@@ -72,18 +80,28 @@ boolean String_Equals(String *a, String *b){
     if(b == NULL){
         Fatal("String b is NULL", TYPE_STRING_CHAIN);
     }
-    if(String_Length(a) != String_Length(b)){
+    i64 aLength = String_Length(a);
+    i64 bLength = String_Length(b);
+    if(aLength != bLength){
+        if((a->type.state & DEBUG) != 0){
+            printf("String_Equals:mismatch@length(%ld/%ld)\n", aLength, bLength);
+        }
         return FALSE;
     }
     String *aTail = a;
     String *bTail = b;
+    i64 total = 0;
     while(aTail != NULL && bTail != NULL){
         if(aTail->length != bTail->length){
             return FALSE;
         }
         if(strncmp((char *)aTail->bytes, (char *)bTail->bytes, aTail->length) != 0){
+            if((a->type.state & DEBUG) != 0){
+                printf("String_Equals:mismatch@[%ld..%ld]\n", total, total + aTail->length);
+            }
             return FALSE;
         }
+        total += aTail->length;
         if(aTail->type.of == TYPE_STRING_CHAIN){
             aTail = aTail->next;
         }else{
@@ -99,6 +117,10 @@ boolean String_Equals(String *a, String *b){
 
     if(aTail == NULL && bTail == NULL){
         return TRUE;
+    }
+    
+    if((a->type.state & DEBUG) != 0){
+        printf("String_Equals:mismatch:end-not-null@[%ld..%ld]", total, total + aTail->length);
     }
 
     return FALSE;
