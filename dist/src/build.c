@@ -15,7 +15,7 @@
 #define VERBOSE 2
 
 static Target targets[] = {
-    {"testreq", "tests/testreq.c"}, {"caneka", "main.c"}, {"formatter", "formatter.c"}, {NULL, NULL},
+    {"testreq", "tests/testreq.c"}, {"caneka", "main.c"}, {"formatter", "formatter.c"}, {"loop", "loop.c"}, {NULL, NULL},
 };
 
 static char *cflags[] = {

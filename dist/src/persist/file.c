@@ -124,20 +124,8 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
     return SUCCESS;
 }
 
-status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract *source){
+status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source){
     String *s = NULL;
-    if(DEBUG_FILE){
-        printf("\x1b[%dmFile_Stread streaming: '%s'\x1b[0m\n", DEBUG_FILE, file->abs->bytes);
-    }
-    FILE *f = fopen((char *)file->abs->bytes, "r");
-    if(f == NULL){
-        printf("Warning: Unable to openfile %s\n", file->abs->bytes);
-        file->type.state |= NOOP;
-        return file->type.state;
-    }else{
-        file->type.state &= ~NOOP;
-    }
-
     if(out != NULL){
         s = String_Init(m, STRING_EXTEND);
     }
@@ -171,6 +159,22 @@ status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract 
 
     return ERROR;
 
+}
+
+status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract *source){
+    if(DEBUG_FILE){
+        printf("\x1b[%dmFile_Stread streaming: '%s'\x1b[0m\n", DEBUG_FILE, file->abs->bytes);
+    }
+    FILE *f = fopen((char *)file->abs->bytes, "r");
+    if(f == NULL){
+        printf("Warning: Unable to openfile %s\n", file->abs->bytes);
+        file->type.state |= NOOP;
+        return file->type.state;
+    }else{
+        file->type.state &= ~NOOP;
+    }
+
+    return File_StreamWithOpen(m, f, file, access, out, source);
 }
 
 status File_Load(MemCtx *m, File *file, Access *access){

@@ -279,6 +279,31 @@ miss:
     return mt->type.state;
 }
 
+status Match_FeedString(Match *mt, String *s, int offset){
+    if((mt->type.state & NOOP) != 0){
+        return mt->type.state;
+    }
+    int pos = 0;
+    while(s != NULL && s->length < offset){
+        offset -= s->length;
+        pos += s->length;
+        s = String_Next(s);
+    }
+    while(s != NULL){
+        for(int i = offset; i < s->length; i++){
+            byte b = s->bytes[i];
+            Match_Feed(mt, (word)b);
+            if((mt->type.state & SUCCESS) != 0){
+                break;
+            }
+        }
+        s = String_Next(s); 
+        offset = 0;
+    }
+
+    return mt->type.state;
+}
+
 status Match_FeedEnd(Match *mt){
     if(mt->remaining == 0){
         mt->type.state = SUCCESS;
