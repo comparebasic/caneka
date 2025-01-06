@@ -42,7 +42,7 @@ int DEBUG_CASH = 0;
 int DEBUG_USER = 0;
 int DEBUG_LANG_TRANSP = 0;
 int DEBUG_LANG_CNK = 0;
-int DEBUG_LANG_CNK_RBL = COLOR_YELLOW;
+int DEBUG_LANG_CNK_RBL = 0;
 int DEBUG_LANG_CNK_OUT = 0;
 int DEBUG_SUBPROCESS = 0;
 
@@ -476,7 +476,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d:remainig=%d ", color, msg, State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->count, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d/%d/%d:remainig=%d ", color, msg, State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->lead, mt->count, mt->tail, mt->remaining);
         printf("\x1b[1;%dm[", color);
         Debug_Print((void *)mt->pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
         printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);

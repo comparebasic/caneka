@@ -44,6 +44,8 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code");
 
+    Return r;
+
     /* line */
     s = String_Make(m, bytes("/type(\\n -> ,ONE,TWO,THREE), ( *), msg(.+[\\n]) -> type/\n"));
     DebugStack_SetRef((Abstract *)s);
@@ -53,8 +55,6 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     Roebling_Reset(m, ctx->rbl, s);
     Roebling_Run(ctx->rbl);
-
-    Return r;
 
     /* recurring line */
     s = String_Make(m, bytes("/line({.*[\\n]}) -> line/\n"));

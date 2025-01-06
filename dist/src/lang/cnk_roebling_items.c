@@ -3,7 +3,22 @@
 
 Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
     Stack(bytes("CnkRbl_Pat"), (Abstract *)key);
-    FmtItem *item = fmt->item;
+
+    Span *p = (Span *)asIfc(fmt->item->value, TYPE_SPAN);
+
+    FmtItem *item = Span_Get(p, p->metrics.set);
+    if(item == NULL){
+        FmtDef_PushItem(fmt, def->id, NULL, def);
+        item = fmt->item;
+        item->key = String_Init(m, STRING_EXTEND);
+        String_Add(m, item->key, item->parent->key);
+        char *cstr = "_pat";
+        String_AddBytes(m, item->key, bytes(cstr), strlen(cstr));
+        String_AddInt(m, item->key, p->nvalues-1);
+
+        Span_Add(p, (Abstract *)item);
+    }
+
     if(item == NULL){
         Fatal("Need item to add pattern to", TYPE_LANG_CNK_RBL);
         Return NULL;
@@ -38,6 +53,8 @@ Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstra
     pat.to = 0;
     String_AddBytes(m, item->content, bytes(&pat), sizeof(PatCharDef));
 
+    fmt->item = fmt->item->parent;
+
     return NULL;
 }
 
@@ -45,61 +62,73 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
     Stack(bytes("CnkRbl_PatKeyOpen"), (Abstract *)key);
     if(def->id == CNK_LANG_RBL_PAT_KEY){
         fmt->item->key = key;
+        Span *sp = (Span *)asIfc(fmt->root->value, TYPE_TABLE);
+        fmt->item->value = (Abstract *)Span_Make(m, TYPE_SPAN);
 
-        String *ukey = String_Clone(m, key);
-
-        String_AddBytes(m, ukey, bytes("_pat"), 4);
-        Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
-        String_AddInt(m, ukey, sp->nvalues);
-
-        Table_Set(sp, (Abstract *)ukey,  (Abstract *)fmt->item);
+        Table_Set(sp, (Abstract *)key,  (Abstract *)fmt->item);
 
         Return NULL;
     }else{
-        FmtItem *item = (FmtItem *)as(a, TYPE_FMT_ITEM);
+
+        Span *p = (Span *)asIfc(fmt->item->value, TYPE_SPAN);
         String *out = String_Init(m, STRING_EXTEND);
 
-        char *cstr = "static PatCharDef ";
-        String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-        String_Add(m, out, key);
-        cstr = "[] = {\n    ";
-        String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+        Iter it;
+        Iter_Init(&it, p);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = (Hashed *)Iter_Get(&it);
+            if(h != NULL){
+                FmtItem *item = (FmtItem *)h->value;
 
-        IterStr its;
-        PatCharDef pout;
-        IterStr_Init(&its, item->content, sizeof(PatCharDef), bytes(&pout));
-        while((IterStr_Next(&its) & END) == 0){
-            PatCharDef *pat = (PatCharDef *)IterStr_Get(&its);
-            cstr = "{";
-            String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-            Match_AddFlagsToStr(m, out, pat->flags);
-            cstr = ", ";
-            String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-            String_AddAsciiSrc(m, out, (byte)pat->from);
-            cstr = ", ";
-            String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-            String_AddAsciiSrc(m, out, (byte)pat->to);
-            cstr = "}";
-            String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-            if((pat->flags & PAT_TERM) != 0){
-                cstr = ",\n";
-                String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-                if((its.type.state & FLAG_ITER_LAST) == 0){
-                    cstr = "    ";
+                Iter patIt;
+                Iter_Init(&patIt, (Span *)asIfc(item->value, TYPE_SPAN));
+                while((Iter_Next(&patIt) & END) == 0){
+                    FmtItem *item = (FmtItem *)as(Iter_Get(&patIt), TYPE_FMT_ITEM);
+
+                    char *cstr = "static PatCharDef ";
                     String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-                }
-            }else{
-                if((its.type.state & FLAG_ITER_LAST) == 0){
-                    cstr = ", ";
+                    String_Add(m, out, item->key);
+                    cstr = "[] = {\n    ";
                     String_AddBytes(m, out, bytes(cstr), strlen(cstr));
-                }else{
-                    cstr = "\n";
+
+                    IterStr its;
+                    PatCharDef pout;
+                    IterStr_Init(&its, item->content, sizeof(PatCharDef), bytes(&pout));
+                    while((IterStr_Next(&its) & END) == 0){
+                        PatCharDef *pat = (PatCharDef *)IterStr_Get(&its);
+                        cstr = "{";
+                        String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                        Match_AddFlagsToStr(m, out, pat->flags);
+                        cstr = ", ";
+                        String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                        String_AddAsciiSrc(m, out, (byte)pat->from);
+                        cstr = ", ";
+                        String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                        String_AddAsciiSrc(m, out, (byte)pat->to);
+                        cstr = "}";
+                        String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                        if((pat->flags & PAT_TERM) != 0){
+                            cstr = ",\n";
+                            String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                            if((its.type.state & FLAG_ITER_LAST) == 0){
+                                cstr = "    ";
+                                String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                            }
+                        }else{
+                            if((its.type.state & FLAG_ITER_LAST) == 0){
+                                cstr = ", ";
+                                String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                            }else{
+                                cstr = "\n";
+                                String_AddBytes(m, out, bytes(cstr), strlen(cstr));
+                            }
+                        }
+                    }
+                    cstr = "};\n";
                     String_AddBytes(m, out, bytes(cstr), strlen(cstr));
                 }
             }
         }
-        cstr = "};\n";
-        String_AddBytes(m, out, bytes(cstr), strlen(cstr));
 
         Return (Abstract *)out;
     }

@@ -42,6 +42,27 @@ String *String_Clone(MemCtx *m, String *s){
     return s2;
 }
 
+String *String_Sub(MemCtx *m, String *s, i64 start, i64 end){
+    String *ret = String_Init(m, STRING_EXTEND);
+    i64 pos = 0;
+    while(s != NULL && pos + s->length < start){
+        s = String_Next(s);
+        pos += s->length;
+    }
+
+    start -= pos;
+    int length = min(s->length-start, end-pos);
+    while(s != NULL && length > 0){
+        int length = min(s->length-start, end-pos);
+        String_AddBytes(m, ret, s->bytes+start, length);
+        pos += length;
+        s = String_Next(s); 
+        start = 0;
+    }
+
+    return ret;
+}
+
 String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
     String *s = String_Init(m, length); 
     String_AddBytes(m, s, bytes, length);

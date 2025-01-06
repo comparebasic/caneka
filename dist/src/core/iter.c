@@ -23,7 +23,6 @@ status Iter_Next(Iter *it){
             if(it->idx == 0){
                 it->type.state |= FLAG_ITER_LAST;
             }
-
         }
     }else{
         if((it->idx+1) > it->values->max_idx){

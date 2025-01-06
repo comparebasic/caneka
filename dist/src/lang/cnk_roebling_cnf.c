@@ -26,7 +26,7 @@ static FmtCnf _configs[] = {
         CNK_LANG_RBL_PAT_KEY,
         0,
         FMT_DEF_INDENT,
-        "",
+        "patKey",
         NULL,
         CnkRbl_PatKeyOpen,  
         NULL,
