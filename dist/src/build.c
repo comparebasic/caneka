@@ -15,7 +15,12 @@
 #define VERBOSE 2
 
 static Target targets[] = {
-    {"testreq", "tests/testreq.c"}, {"caneka", "main.c"}, {"formatter", "formatter.c"}, {"loopit", "loopit.c"}, {NULL, NULL},
+    {"testreq", "tests/testreq.c"},
+    {"caneka", "main.c"},
+    {"formatter", "formatter.c"},
+    {"loopit", "loopit.c"},
+    {"rblsh", "roebling_shell.c"},
+    {NULL, NULL},
 };
 
 static char *cflags[] = {
@@ -34,8 +39,9 @@ static char *libs[] = {
 };
 
 static BuildSubdir coreobj = { "core", {
-    "core.c", "mem.c",  "string.c", "string_makers.c", "string_equals.c", "error.c",
-	"log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c", "chain.c", "table_chain.c",
+    "core.c", "mem.c",  "string.c", "string_makers.c", "string_equals.c", "string_utils.c",
+    "error.c", "log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c",
+    "chain.c", "table_chain.c",
     "testsuite.c", "hash.c", "table.c", "compare.c", 
     "iter.c", "iter_str.c", "array.c", "int.c", "maker.c", "do.c", 
     "mess.c", "single.c", "debug.c", "abstract.c", "time.c",

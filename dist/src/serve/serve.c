@@ -212,21 +212,35 @@ status Serve_PreRun(Serve *sctx, int port){
     return SUCCESS;
 }
 
-status Serve_Run(Serve *sctx, int port){
+status Serve_AddFd(Serve *sctx, int fd){
+    Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
+    req->fd = fd;
+    req->handler = sctx->def->getHandler(sctx, req);
+    req->queueIdx = Queue_Add(&(sctx->queue), (Abstract *)req); 
+    Serve_SetPollFds(sctx, req);
+
+    return SUCCESS;
+}
+
+status Serve_RunPort(Serve *sctx, int port){
     status r = Serve_PreRun(sctx, port);
     if(r == SUCCESS){
-        int cadance = 0;
-        while(sctx->serving){
-            int delay = (sctx->queue.count == 0 ? 
-                ACCEPT_LONGDELAY_MILLIS : 
-                0);
-            Serve_AcceptPoll(sctx, delay);
-            Serve_ServeRound(sctx);
-        }
-
-        return SUCCESS;
+        return Serve_Run(sctx);
     }
     return r;
+}
+
+status Serve_Run(Serve *sctx){
+    sctx->serving = TRUE;
+    while(sctx->serving){
+        int delay = (sctx->queue.count == 0 ? 
+            ACCEPT_LONGDELAY_MILLIS : 
+            0);
+        Serve_AcceptPoll(sctx, delay);
+        Serve_ServeRound(sctx);
+    }
+
+    return SUCCESS;
 }
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def){
@@ -237,5 +251,7 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     sctx->pollMap = Span_Make(m, TYPE_POLL_MAP_SPAN);
     Queue_Init(m, &sctx->queue, def->getDelay);
     sctx->queue.source = (Abstract *)sctx;
+    sctx->socket_fd = -1;
+    sctx->port = -1;
     return sctx;
 }

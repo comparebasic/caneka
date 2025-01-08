@@ -16,6 +16,8 @@ enum proto_types {
     TYPE_METHOD_SET,
     TYPE_METHOD_UPDATE, 
     TYPE_METHOD_DELETE,
+    TYPE_IO_PROTO,
+    TYPE_IO_PROTODEF,
     _TYPE_APPS_END,
 };
 

@@ -43,7 +43,7 @@ status serve(MemCtx *m, char *arg){
     Serve *sctx = Serve_Make(m, def);
     def->source = (Abstract *)sctx;
 
-    return Serve_Run(sctx, port);
+    return Serve_RunPort(sctx, port);
 }
 
 status transpile(MemCtx *m, char *arg){

@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 enum lp_types {
-    _LOOP_TYPE_START = _TYPE_CORE_END,
+    _LOOP_TYPE_START = _TYPE_APPS_END,
     TYPE_LOOP_CTX,
 };
 

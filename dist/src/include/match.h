@@ -32,6 +32,9 @@ enum match_flags {
 #define patText \
     PAT_OPTIONAL|PAT_MANY, '\t', '\t', PAT_OPTIONAL|PAT_MANY, '\r', '\r', PAT_OPTIONAL|PAT_MANY, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31
 
+#define patTextDef \
+    {PAT_OPTIONAL|PAT_MANY, '\t', '\t'}, {PAT_OPTIONAL|PAT_MANY, '\r', '\r'}, {PAT_OPTIONAL|PAT_MANY, '\n', '\n'}, {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31}
+
 #define patTextAny \
     PAT_OPTIONAL|PAT_ANY, '\t', '\t', PAT_OPTIONAL|PAT_ANY, '\r', '\r', PAT_OPTIONAL|PAT_ANY, '\n', '\n', PAT_INVERT|PAT_ANY|PAT_TERM, 0, 31
 
