@@ -6,5 +6,5 @@ typedef struct io_proto {
     Lookup *methods;
 } IoProto;
 
-ProtoDef *IoProtoDef_Make(MemCtx *m);
+ProtoDef *IoProtoDef_Make(MemCtx *m, Maker reqMake);
 Proto *IoProto_Make(MemCtx *m, ProtoDef *def);

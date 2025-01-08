@@ -153,6 +153,7 @@ status Roebling_SetMark(Roebling *rbl, int mark, int _idx){
 }
 
 status Roebling_Prepare(Roebling *rbl, Span *parsers){
+    Stack(bytes("Roebling_Prepare"), (Abstract *)parsers);
     int idx = 0;
     int rblIdx = 0;
     Abstract *t = NULL;
@@ -166,7 +167,7 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
         }
         idx++;
     }
-    return SUCCESS;
+    Return SUCCESS;
 }
 
 status Roebling_Run(Roebling *rbl){
@@ -325,6 +326,7 @@ Roebling *Roebling_Make(MemCtx *m,
         RblCaptureFunc capture,
         Abstract *source
     ){
+    Stack(bytes("Roebling_Make"), NULL);
 
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
@@ -343,5 +345,5 @@ Roebling *Roebling_Make(MemCtx *m,
     Roebling_Reset(m, rbl, s);
     Guard_Setup(m, &rbl->guard, ROEBLING_GUARD_MAX, bytes("Roebling Guard"));
 
-    return rbl;
+    Return rbl;
 }

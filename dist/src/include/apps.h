@@ -1,8 +1,38 @@
 #include <formats/http.h>
+#include <formats/rblsh.h>
 #include <proto/http.h>
+#include <proto/io.h>
+
+enum boundries {
+    _APP_BOUNDRY_START = _TYPE_CORE_END,
+    _IO_START,
+    IO_RECV,
+    IO_RUN,
+    IO_DONE,
+    _IO_END,
+    _CASH_START,
+    CASH_MARK_START,
+    CASH_BETWEEN,
+    CASH_VALUE,
+    CASH_NOOP,
+    _CASH_END,
+    _RBLSH_START,
+    TYPE_RBLSH_CTX,
+    RBLSH_MARK_START,
+    RBLSH_MARK_END,
+    RBLSH_WS,
+    RBLSH_ARG,
+    RBLSH_STRING_LIT,
+    RBLSH_STRING_OP,
+    _RBLSH_END,
+    _APPS_BOUNDRIES_START = _TYPE_CORE_END,
+    _APPS_CASH_START,
+    _APPS_RBLSH_START = _CASH_END,
+    _APPS_TYPE_START = _RBLSH_END,
+};
 
 enum proto_types {
-    _TYPE_APPS_START = _TYPE_CORE_END,
+    _TYPE_APPS_START = _APPS_TYPE_START,
     TYPE_SERVECTX,
     TYPE_REQ,
     TYPE_PROTO,

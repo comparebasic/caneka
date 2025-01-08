@@ -17,7 +17,12 @@ static word valueDef[] = {
     PAT_END, 0, 0
 };
 
-static status between(MemCtx *m, Roebling *rbl){
+static word valueQuotedDef[] = {
+    PAT_KO|PAT_KO_TERM,'"','"',PAT_TERM|PAT_INVERT_CAPTURE, '{', '{', PAT_KO, '}', '}', patText,
+    PAT_END, 0, 0
+};
+
+status Cash_Between(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -29,7 +34,17 @@ static status between(MemCtx *m, Roebling *rbl){
     return r;
 }
 
-static status value(MemCtx *m, Roebling *rbl){
+status Cash_Value(MemCtx *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)valueDef, CASH_VALUE, CASH_MARK_START);
+
+    return r;
+}
+
+status Cash_ValueQuoted(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -95,8 +110,8 @@ String *Cash_Replace(MemCtx *m, Cash *cash, String *s){
 Roebling *Cash_RblMake_rbl(MemCtx *m, Abstract *cash, RblCaptureFunc capture){
     Span *parsers_do =  Span_From(m, 3, 
         (Abstract *)Int_Wrapped(m, CASH_MARK_START), 
-            (Abstract *)Do_Wrapped(m, (DoFunc)between),
-            (Abstract *)Do_Wrapped(m, (DoFunc)value));
+            (Abstract *)Do_Wrapped(m, (DoFunc)Cash_Between),
+            (Abstract *)Do_Wrapped(m, (DoFunc)Cash_Value));
 
     LookupConfig config[] = {
         {CASH_MARK_START, (Abstract *)String_Make(m, bytes("CASH_START"))},

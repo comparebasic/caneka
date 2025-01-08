@@ -324,10 +324,10 @@ status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
 #include "human_present.h"
 #include "auth.h"
 #include "user.h"
-#include "apps.h"
 #ifdef LINUX
     #include "linux.h"
 #endif
+#include "apps.h"
 
 #include "formats/cash.h"
 #include "lang/transp.h"

@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
-    String *pat = PatChar_KoFromString(m, s);
+    String *pat = PatChar_KoFromString(m, sep);
     PatCharDef pdef[] = {
        patTextDef 
     };
@@ -14,17 +14,28 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
 
     Span *p = Span_Make(m, TYPE_SPAN);
 
-    i64 offset = 0;
+    i64 offset = 1;
     Match mt;
-    Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
+
     while(s != NULL){
-        for(int i = 0; i < s->length; i++){
+        Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
+        for(int i = offset; i < s->length; i++){
             status mr = Match_Feed(&mt, (word)s->bytes[i]);
             if((mr & SUCCESS) != 0){
                 String *arg = String_Sub(m, s, offset, mt.count);  
+
                 Span_Add(p, (Abstract *)arg);
                 offset += mt.count+mt.lead+mt.tail;
+                Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
             }
+        }
+        status mr = Match_Feed(&mt, (word)'/');
+        if((mr & SUCCESS) != 0){
+            String *arg = String_Sub(m, s, offset, mt.count);  
+
+            Span_Add(p, (Abstract *)arg);
+            offset += mt.count+mt.lead+mt.tail;
+            Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
         }
 
         s = String_Next(s);

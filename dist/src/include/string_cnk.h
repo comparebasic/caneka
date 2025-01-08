@@ -91,3 +91,6 @@ status String_ToSlab(String *a, void *sl, size_t sz);
 String *String_Clone(MemCtx *m, String *s);
 String *String_Sub(MemCtx *m, String *s, i64 start, i64 end);
 status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean extended);
+
+/* utils */
+struct span *String_SplitToSpan(MemCtx *m, String *s, String *sep);

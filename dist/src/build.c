@@ -19,7 +19,7 @@ static Target targets[] = {
     {"caneka", "main.c"},
     {"formatter", "formatter.c"},
     {"loopit", "loopit.c"},
-    {"rblsh", "roebling_shell.c"},
+    {"rblsh", "rblsh.c"},
     {NULL, NULL},
 };
 
@@ -62,7 +62,7 @@ static BuildSubdir parserobj = {"parser", {
 
 static BuildSubdir formatsobj = {"formats", {
     "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c","oset_from.c", "oset_item.c",
-    "cash.c", "cash_rbl.c",
+    "cash.c", "cash_rbl.c", "rblsh.c",
     NULL
 }};
 
@@ -97,7 +97,7 @@ static BuildSubdir secureobj = { "secure", {
 }};
 
 static BuildSubdir serveobj = { "serve", {
-    "serve.c", "proto.c", "req.c", "http_proto.c", "handler.c", "linux.c",
+    "serve.c", "proto.c", "req.c", "http_proto.c", "io_proto.c","handler.c", "linux.c",
     NULL
 }};
 
