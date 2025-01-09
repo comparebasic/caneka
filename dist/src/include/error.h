@@ -1,3 +1,5 @@
+void Cleanup(Abstract *a);
+
 void *Error(char *msg);
 void LogError(char *msg, ...);
 void ExitError(int code, char *msg, ...);

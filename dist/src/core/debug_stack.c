@@ -3,7 +3,7 @@
 
 int DEBUG_STACK_COLOR = COLOR_GREEN;
 
-DebugStackEntry _stackDebug[15+1];
+DebugStackEntry _stackDebug[DEBUG_STACK_MAX+1];
 int _stackIdx = 0;
 
 static void DebugStackEntry_init(DebugStackEntry *entry){
@@ -14,9 +14,21 @@ static void DebugStackEntry_init(DebugStackEntry *entry){
     entry->idx = _stackIdx;
 }
 
+static void sigH(int sig, siginfo_t *info, void *ptr){
+    Fatal("SigFault", 0);
+    exit(1);
+}
+
 status DebugStack_Init(){
     memset(&_stackDebug, 0, sizeof(_stackDebug));
     _stackIdx = 0;
+
+    struct sigaction a;
+    memset(&a, 0, sizeof(struct sigaction));
+    a.sa_flags = SA_NODEFER;
+    a.sa_sigaction = sigH;
+    sigaction(SIGSEGV, &a, NULL);
+
     return SUCCESS;
 }
 

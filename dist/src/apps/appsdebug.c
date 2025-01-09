@@ -9,8 +9,8 @@ static void ProtoDef_Print(Abstract *a, cls type, char *msg, int color, boolean 
 
 static void Req_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Req *req = (Req *) as(a, TYPE_REQ);
-    printf("%s\x1b[1;%dm%p Req(%d)<%s ", msg, color, req, req->fd, State_ToChars(req->type.state));
-    Debug_Print((void *)req->proto, 0, "", color, extended);
+    printf("%s\x1b[1;%dmReq(%d/%p)<%s ", msg, color, req->fd, req, State_ToChars(req->type.state));
+    Debug_Print((void *)req->sctx->def->source, 0, "", color, extended);
     if(req->in.rbl != NULL && extended){
         printf(" ");
         Debug_Print((void *)req->in.rbl, 0, "", color, extended);

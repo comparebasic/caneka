@@ -22,6 +22,10 @@ static int connectToServer(){
     }
 }
 
+void Cleanup(Abstract *a){
+    return;
+}
+
 int main(int argc, char *argv[]){
     char *msg = argv[1];
     ReqTestSpec specs[] = {

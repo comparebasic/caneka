@@ -157,6 +157,10 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
     int idx = 0;
     int rblIdx = 0;
     Abstract *t = NULL;
+    if(rbl->capture == NULL){
+        Fatal("Roebling->capture not defined", TYPE_ROEBLING);
+        return ERROR;
+    }
     while(idx < parsers->nvalues){
         t = Span_Get(parsers, idx);
         if(t->type.of == TYPE_WRAPPED_UTIL){
@@ -171,12 +175,13 @@ status Roebling_Prepare(Roebling *rbl, Span *parsers){
 }
 
 status Roebling_Run(Roebling *rbl){
+    Stack(bytes("Roebling_Run"), (Abstract *)rbl);
     status r = READY;
     while((r & (SUCCESS|ERROR|END)) == 0){
         r = Roebling_RunCycle(rbl);
     }
     rbl->type.state &= ~END;
-    return rbl->type.state;
+    Return rbl->type.state;
 }
 
 status Roebling_JumpTo(Roebling *rbl, int mark){
@@ -186,6 +191,10 @@ status Roebling_JumpTo(Roebling *rbl, int mark){
 }
 
 status Roebling_RunCycle(Roebling *rbl){
+    Stack(bytes("Roebling_RunCycle"), (Abstract *)rbl);
+    if(rbl->parsers_do->nvalues == 0){
+        Fatal("Roebling parsers not set", TYPE_ROEBLING);
+    }
     if(DEBUG_ROEBLING_MARK){
         printf("\x1b[%dmRblIdx:%d %s\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx, State_ToChars(rbl->type.state));
     }
@@ -254,13 +263,13 @@ status Roebling_RunCycle(Roebling *rbl){
             if(HasFlag(mt->type.state, SUCCESS) && mt->jump > -1){
                 rbl->jump = mt->jump; 
             }
+            String *s = Range_Copy(rbl->m, &(rbl->range));
+            int matchIdx = Roebling_GetMatchIdx(rbl);
+            rbl->capture(mt->captureKey, matchIdx, s, rbl->source);
         }
-        String *s = Range_Copy(rbl->m, &(rbl->range));
-        int matchIdx = Roebling_GetMatchIdx(rbl);
-        rbl->capture(mt->captureKey, matchIdx, s, rbl->source);
     }
         
-    return rbl->type.state;
+    Return rbl->type.state;
 }
 
 status Roebling_ResetPatterns(Roebling *rbl){
@@ -293,8 +302,9 @@ status Roebling_Add(Roebling *rbl, String *s){
 }
 
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
+    Stack(bytes("Roebling_AddBytes"), (Abstract *)rbl);
     status r = String_AddBytes(rbl->m, rbl->range.search, bytes, length);
-    return roebling_AddReset(rbl);
+    Return roebling_AddReset(rbl);
 }
 
 status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){

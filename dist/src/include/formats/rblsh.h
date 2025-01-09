@@ -7,6 +7,7 @@ typedef struct rblsh_ctx {
     } cwd;
     Span *env;
     Span *path;
+    struct cash *cash;
 } RblShCtx;
 
-Roebling *RblShParser_Make(MemCtx *m, RblShCtx *ctx, String *s, RblCaptureFunc capture);
+Roebling *RblShParser_Make(MemCtx *m, RblShCtx *ctx, String *s);

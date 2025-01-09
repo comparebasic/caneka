@@ -7,7 +7,10 @@ static char *toLog(Req *req){
     String_AddBytes(req->m, s, bytes("IoProto<"), strlen("IoProto<"));
     char *state = State_ToChars(req->type.state);
     String_AddBytes(req->m, s, bytes(state), strlen(state));
-    String_AddBytes(req->m, s, bytes(">"), 1);
+    char *cstr = " shelf:\"";
+    String_AddBytes(req->m, s, bytes(cstr), strlen(cstr));
+    String_Add(req->m, s, req->in.shelf);
+    String_AddBytes(req->m, s, bytes("\">"), 2);
 
     return (char *)s->bytes;
 }

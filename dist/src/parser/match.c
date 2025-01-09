@@ -49,7 +49,6 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
 static void match_Reset(Match *mt){
     mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
     mt->count = 0;
-    mt->lead = 0;
 }
 
 static boolean charMatched(word c, PatCharDef *def){
@@ -248,6 +247,7 @@ miss:
             mt->type.state &= ~PROCESSING;
             if(HasFlag(mt->type.state, SEARCH)){
                 match_Reset(mt);
+                mt->lead++;
             }else{
                 mt->type.state |= NOOP;
             }

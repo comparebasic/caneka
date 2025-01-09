@@ -47,6 +47,7 @@ struct ioctx;
 struct mem_local;
 struct test_set;
 struct strcursor;
+struct cash;
 
 struct format_def;
 struct formatter;

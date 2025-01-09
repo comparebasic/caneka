@@ -56,6 +56,13 @@ Handler *Handler_Get(Handler *h){
     return cursor;
 }
 
+status Handler_AddPrior(MemCtx *m, Handler *orig, Handler *h){
+    if(orig->prior == NULL){
+        orig->prior = Span_Make(m, TYPE_SPAN);
+    }
+    return Span_Add(orig->prior, (Abstract *)h);
+}
+
 Handler *Handler_Make(MemCtx *m, HandleFunc func, Abstract *data, int direction){
     Handler *h = MemCtx_Alloc(m, sizeof(Handler));
     h->func = func;

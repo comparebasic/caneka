@@ -8,9 +8,11 @@
 #include <sys/stat.h>
 #include <poll.h>
 #include <unistd.h>
+#include <termios.h>
 #include <arpa/inet.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <time.h>
 #include <dirent.h>

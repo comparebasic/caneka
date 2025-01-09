@@ -48,6 +48,22 @@ status Req_Recv(Serve *sctx, Req *req){
     return NOOP;
 }
 
+status Req_Read(Serve *sctx, Req *req){
+    byte buff[SERV_READ_SIZE];
+    memset(buff, 0, SERV_READ_SIZE);
+    ssize_t l = read(req->fd, buff, SERV_READ_SIZE);
+    if(DEBUG_REQ_RECV){
+        printf("\x1b[%dmRecv: %ld \x1b[1;%dm'%s'\x1b[0m\n", DEBUG_REQ_RECV, l, DEBUG_REQ_RECV, buff);
+    }
+    status r = NOOP;
+    if(l > 0){
+        Roebling_AddBytes(req->in.rbl, buff, l);
+        return Roebling_Run(req->in.rbl);
+    }
+
+    return NOOP;
+}
+
 Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto){
     MemCtx *rm = MemCtx_Make();
     Req* req = (Req *)MemCtx_Alloc(rm, sizeof(Req));

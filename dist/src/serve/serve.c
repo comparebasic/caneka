@@ -137,11 +137,12 @@ static int pollSkipSlab(Abstract *source, int idx){
 }
 
 status Serve_ServeRound(Serve *sctx){
+    Stack(bytes("Serve_ServeRound"), NULL);
     status r = READY;
     Queue *q = &sctx->queue;
 
     if(q->count == 0){
-        return NOOP;
+        Return NOOP;
     }
 
     while(TRUE){
@@ -165,6 +166,7 @@ status Serve_ServeRound(Serve *sctx){
 
         Req *req = (Req *)qidx->item;
         sctx->active = req;
+        DebugStack_SetRef((Abstract *)req);
 
         if((req->type.state & (END|ERROR)) != 0){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
@@ -174,28 +176,34 @@ status Serve_ServeRound(Serve *sctx){
             if(DEBUG_REQ){
                 Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
                 printf("\n");
+
+                char *msg = req->proto->toLog(req);
+                printf("\x1b[%dmmsg: %s\x1b[0m\n",DEBUG_REQ, msg);
             }
 
             Handler *h = Handler_Get(req->handler);
-            status hstate = h->type.state & (SUCCESS|ERROR);
-            if(hstate != 0){
+            if(h == NULL || (h->type.state & (SUCCESS|ERROR)) != 0){
                 if(DEBUG_REQ){
                     Debug_Print((void *)req, 0, "ServeReq_Handle(END): ", DEBUG_REQ, FALSE);
                     printf("\n");
                 }
-                req->type.state |= hstate|END;
-            }else{
-                if(DEBUG_REQ){
-                    printf("\x1b[%dm   calling handler %s\x1b[0m\n", DEBUG_REQ, State_ToChars(h->type.state));
+                if(h == NULL){
+                    req->type.state |= ERROR;
+                }else{
+                    req->type.state |= (h->type.state & (SUCCESS|ERROR))|END;
                 }
+            }else{
                 h->func(h, req, sctx);
+                if(DEBUG_REQ){
+                    printf("\x1b[%dm   called handler %s\x1b[0m\n", DEBUG_REQ, State_ToChars(h->type.state));
+                }
             }
             r |= req->type.state;
         }
     }
 
     Delay();
-    return r;
+    Return r;
 }
 
 status Serve_Stop(Serve *sctx){
@@ -231,6 +239,7 @@ status Serve_RunPort(Serve *sctx, int port){
 }
 
 status Serve_Run(Serve *sctx){
+    Stack(bytes("Serve_Run"), NULL);
     sctx->serving = TRUE;
     while(sctx->serving){
         int delay = (sctx->queue.count == 0 ? 
@@ -240,7 +249,7 @@ status Serve_Run(Serve *sctx){
         Serve_ServeRound(sctx);
     }
 
-    return SUCCESS;
+    Return SUCCESS;
 }
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def){

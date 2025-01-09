@@ -46,6 +46,10 @@ static status doStuff(MemCtx *m, String *s, Abstract *a){
     return r;
 }
 
+void Cleanup(Abstract *a){
+    return;
+}
+
 int main(int argc, char **argv){
     status r = READY;
     if(argc == 1){
