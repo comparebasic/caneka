@@ -11,26 +11,36 @@ static PatCharDef hupDef[] = {
     {PAT_END, 0, 0},
 };
 
+#define sepKoDef {PAT_KO, ' ', ' '},{PAT_KO|PAT_INVERT_CAPTURE, '\n', '\n'},{PAT_KO|PAT_KO_TERM, '\t', '\t'}
+
 static PatCharDef argDef[] = {
-    {PAT_KO, ' ', ' '},{PAT_KO|PAT_KO_TERM, '\t', '\t'},{PAT_INVERT|PAT_MANY, '"', '"'}, {PAT_INVERT|PAT_MANY, '\'', '\''},{PAT_INVERT|PAT_MANY|PAT_MANY|PAT_TERM, 0, 31},
+    sepKoDef,
+    {PAT_INVERT|PAT_MANY, '"', '"'}, {PAT_INVERT|PAT_MANY, '\'', '\''},{PAT_INVERT|PAT_MANY|PAT_MANY|PAT_TERM, 0, 31},
     {PAT_END, 0, 0},
 };
 
 static PatCharDef flagDef[] = {
+    sepKoDef,
     {PAT_TERM, '-', '-'},
-    {PAT_INVERT|PAT_MANY, '"', '"'}, {PAT_INVERT|PAT_MANY, '\'', '\''},{PAT_INVERT|PAT_MANY, ' ', ' '},{PAT_INVERT|PAT_MANY, '\t', '\t'}, {PAT_INVERT|PAT_MANY|PAT_MANY|PAT_TERM, 0, 31},
+    {PAT_INVERT|PAT_MANY, '"', '"'}, {PAT_INVERT|PAT_MANY, '\'', '\''}, {PAT_INVERT|PAT_MANY|PAT_MANY|PAT_TERM, 0, 31},
     {PAT_END, 0, 0},
 };
 
 static PatCharDef dblFlagDef[] = {
+    sepKoDef,
     {PAT_TERM, '-', '-'},
     {PAT_TERM, '-', '-'},
-    {PAT_INVERT|PAT_MANY, '"', '"'}, {PAT_INVERT|PAT_MANY, '\'', '\''},{PAT_INVERT|PAT_MANY, ' ', ' '},{PAT_INVERT|PAT_MANY, '\t', '\t'}, {PAT_INVERT|PAT_MANY|PAT_MANY|PAT_TERM, 0, 31},
+    {PAT_INVERT|PAT_MANY, '"', '"'},{PAT_INVERT|PAT_MANY|PAT_MANY|PAT_TERM, 0, 31},
     {PAT_END, 0, 0},
 };
 
 static PatCharDef wsDef[] = {
     {PAT_MANY, ' ', ' '},{PAT_MANY|PAT_TERM, '\t', '\t'},
+    {PAT_END, 0, 0},
+};
+
+static PatCharDef nlDef[] = {
+    {PAT_TERM, '\n', '\n'},
     {PAT_END, 0, 0},
 };
 
@@ -76,6 +86,8 @@ static status start(MemCtx *m, Roebling *rbl){
     mt->type.state |= SEARCH;
 
     r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)nlDef, RBLSH_NL, RBLSH_MARK_START);
+    r |= Roebling_SetPattern(rbl,
         (PatCharDef*)argDef, RBLSH_ARG, RBLSH_MARK_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)flagDef, RBLSH_FLAG, RBLSH_MARK_START);
@@ -96,7 +108,10 @@ static status start(MemCtx *m, Roebling *rbl){
 static status RblSh_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     Stack(bytes("RblSh_Capture"), (Abstract *)s);
     RblShCtx *ctx = (RblShCtx *)as(source, TYPE_RBLSH_CTX);
-    Debug_Print((void *)s, 0, "Captured: ", COLOR_YELLOW, FALSE);
+    printf("\x1b[%dmCaptured %s/\x1b[0m", COLOR_YELLOW, 
+        AppRange_ToChars(captureKey));
+    Debug_Print((void *)s, 0, "", COLOR_YELLOW, FALSE);
+    Debug_Print((void *)ctx->shelf, 0, " shelf: ", COLOR_YELLOW, TRUE);
     printf("\n");
 
     if(captureKey == RBLSH_TERM || captureKey == RBLSH_HUP){

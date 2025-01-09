@@ -2,9 +2,10 @@ typedef struct rblsh_ctx {
     Type type;
     int idx;
     struct {
-	Span *p;
-	String *s;
+        Span *p;
+        String *s;
     } cwd;
+    String *shelf;
     Span *env;
     Span *path;
     struct cash *cash;

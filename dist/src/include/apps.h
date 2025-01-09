@@ -22,6 +22,7 @@ enum boundries {
     RBLSH_TERM,
     RBLSH_HUP,
     RBLSH_WS,
+    RBLSH_NL,
     RBLSH_ARG,
     RBLSH_FLAG,
     RBLSH_WORDFLAG,
@@ -57,3 +58,4 @@ enum proto_types {
 };
 
 status AppsDebug_Init(MemCtx *m);
+char *AppRange_ToChars(word range);

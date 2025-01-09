@@ -220,14 +220,14 @@ status Serve_PreRun(Serve *sctx, int port){
     return SUCCESS;
 }
 
-status Serve_AddFd(Serve *sctx, int fd){
+Req *Serve_AddFd(Serve *sctx, int fd){
     Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
     req->fd = fd;
     req->handler = sctx->def->getHandler(sctx, req);
     req->queueIdx = Queue_Add(&(sctx->queue), (Abstract *)req); 
     Serve_SetPollFds(sctx, req);
 
-    return SUCCESS;
+    return req;
 }
 
 status Serve_RunPort(Serve *sctx, int port){

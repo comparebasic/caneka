@@ -65,6 +65,108 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     return r;
 }
 
+char *AppRange_ToChars(word range){
+    if(range == _APP_BOUNDRY_START){
+        return "_APP_BOUNDRY_START";
+    }else if(range == _IO_START){
+        return "_IO_START";
+    }else if(range == IO_RECV){
+        return "IO_RECV";
+    }else if(range == IO_RUN){
+        return "IO_RUN";
+    }else if(range == IO_DONE){
+        return "IO_DONE";
+    }else if(range == _IO_END){
+        return "_IO_END";
+    }else if(range == _CASH_START){
+        return "_CASH_START";
+    }else if(range == CASH_MARK_START){
+        return "CASH_MARK_START";
+    }else if(range == CASH_BETWEEN){
+        return "CASH_BETWEEN";
+    }else if(range == CASH_VALUE){
+        return "CASH_VALUE";
+    }else if(range == CASH_NOOP){
+        return "CASH_NOOP";
+    }else if(range == _CASH_END){
+        return "_CASH_END";
+    }else if(range == _RBLSH_START){
+        return "_RBLSH_START";
+    }else if(range == RBLSH_MARK_START){
+        return "RBLSH_MARK_START";
+    }else if(range == RBLSH_MARK_END){
+        return "RBLSH_MARK_END";
+    }else if(range == RBLSH_TERM){
+        return "RBLSH_TERM";
+    }else if(range == RBLSH_HUP){
+        return "RBLSH_HUP";
+    }else if(range == RBLSH_WS){
+        return "RBLSH_WS";
+    }else if(range == RBLSH_NL){
+        return "RBLSH_NL";
+    }else if(range == RBLSH_ARG){
+        return "RBLSH_ARG";
+    }else if(range == RBLSH_FLAG){
+        return "RBLSH_FLAG";
+    }else if(range == RBLSH_WORDFLAG){
+        return "RBLSH_WORDFLAG";
+    }else if(range == RBLSH_OP){
+        return "RBLSH_OP";
+    }else if(range == RBLSH_STRING_LIT){
+        return "RBLSH_STRING_LIT";
+    }else if(range == RBLSH_STRING_OP){
+        return "RBLSH_STRING_OP";
+    }else if(range == _RBLSH_END){
+        return "_RBLSH_END";
+    }else if(range == _APPS_BOUNDRIES_START){
+        return "_APPS_BOUNDRIES_START";
+    }else if(range == _APPS_CASH_START){
+        return "_APPS_CASH_START";
+    }else if(range == _APPS_RBLSH_START){
+        return "_APPS_RBLSH_START";
+    }else if(range == _APPS_TYPE_START){
+        return "_APPS_TYPE_START";
+    }else if(range == _TYPE_APPS_START){
+        return "_TYPE_APPS_START";
+    }else if(range == TYPE_RBLSH_CTX){
+        return "TYPE_RBLSH_CTX";
+    }else if(range == TYPE_SERVECTX){
+        return "TYPE_SERVECTX";
+    }else if(range == TYPE_REQ){
+        return "TYPE_REQ";
+    }else if(range == TYPE_PROTO){
+        return "TYPE_PROTO";
+    }else if(range == TYPE_PROTODEF){
+        return "TYPE_PROTODEF";
+    }else if(range == TYPE_XMLCTX){
+        return "TYPE_XMLCTX";
+    }else if(range == TYPE_HTTP_PROTO){
+        return "TYPE_HTTP_PROTO";
+    }else if(range == TYPE_HTTP_PROTODEF){
+        return "TYPE_HTTP_PROTODEF";
+    }else if(range == _TYPE_HTTP_METHODS_START){
+        return "_TYPE_HTTP_METHODS_START";
+    }else if(range == TYPE_METHOD_GET){
+        return "TYPE_METHOD_GET";
+    }else if(range == TYPE_METHOD_POST){
+        return "TYPE_METHOD_POST";
+    }else if(range == TYPE_METHOD_SET){
+        return "TYPE_METHOD_SET";
+    }else if(range == TYPE_METHOD_UPDATE ){
+        return "TYPE_METHOD_UPDATE ";
+    }else if(range == TYPE_METHOD_DELETE){
+        return "TYPE_METHOD_DELETE";
+    }else if(range == TYPE_IO_PROTO){
+        return "TYPE_IO_PROTO";
+    }else if(range == TYPE_IO_PROTODEF){
+        return "TYPE_IO_PROTODEF";
+    }else if(range == _TYPE_APPS_END){
+        return "_TYPE_APPS_END";
+    }else{
+        return "UNKNOWN";
+    }
+};
+
 status AppsDebug_Init(MemCtx *m){
     Lookup *funcs = Lookup_Make(m, _TYPE_APPS_START, populateDebugPrint, NULL);
     return Chain_Extend(m, DebugPrintChain, funcs);

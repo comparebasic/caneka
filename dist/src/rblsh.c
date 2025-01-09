@@ -3,10 +3,6 @@
 
 static status RblSh_RecvCmd(Handler *h, Req *req, Serve *sctx){
     status r = Req_Read(sctx, req);
-    if((r & SUCCESS) != 0){
-        Roebling_Reset(req->m, req->in.rbl, NULL);
-    }
-
     return h->type.state;
 }
 
@@ -94,7 +90,7 @@ static status rawMode(boolean enable){
     if(enable){
        int r = tcgetattr(STDIN_FILENO, &current_tios);
        if(r != -1){
-           current_tios.c_lflag &= ~(ICANON|ISIG);
+           current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
            /*
            current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
            current_tios.c_cflag |= (CS8);
@@ -129,13 +125,13 @@ int main(int argc, char **argv){
     RblShCtx *ctx = RblShCtx_Make(m);
 
     Handler *h = NULL;
-    Req *req = NULL;;
     ProtoDef *def = IoProtoDef_Make(m, (Maker)RblSh_ReqMake);
     def->getHandler = RblSh_getHandler;
     def->source = (Abstract *)ctx;
     Serve *sctx = Serve_Make(m, def);
 
-    Serve_AddFd(sctx, 0);
+    Req *req = Serve_AddFd(sctx, 0);
+    ctx->shelf = req->in.shelf;
 
     setOrigTios();
     rawMode(TRUE);
