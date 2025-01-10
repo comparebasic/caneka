@@ -266,10 +266,10 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     Debug_Print((void *)qidx->item, 0, "", color, TRUE);
                     printf("\x1b[%dm", color);
                 }else{
-                    if(!HasFlag(def->flags, SPAN_INLINE)){
+                    if((def->flags & SPAN_INLINE) == 0){
                         t = *((Abstract **)t);
                     }
-                    if(!HasFlag(def->flags, SPAN_RAW)){
+                    if((def->flags & SPAN_RAW) == 0){
                         i64 n = (util)t;
                         if(def->itemSize == sizeof(int)){
                             printf("%u", (int)n);
@@ -335,7 +335,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
 
 void SpanDef_Print(SpanDef *def){
     char *flags = "";
-    if(HasFlag(def->flags, SPAN_INLINE)){
+    if((def->flags & SPAN_INLINE) != 0){
         flags = "(inline)";
     }
     printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d%s itemSize:%d, valueHdr:%d", 
@@ -475,7 +475,8 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:count=%d/%d/%d:remainig=%d ", color, msg, State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->lead, mt->count, mt->tail, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:remainig=%d ", color, msg,
+            State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->remaining);
         printf("\x1b[1;%dm[", color);
         Debug_Print((void *)mt->pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
         printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);
@@ -584,7 +585,7 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
     printf(":");
     if(extended){
         printf(" idx:%d jump:%d ", rbl->idx, rbl->jump);
-        Debug_Print((void *)&(rbl->range), 0, "", color, extended);
+        Debug_Print((void *)&(rbl->cursor), 0, "", color, extended);
         if(rbl->marks->values->nvalues > 0){
             printf("\n  \x1b[%dmmarks=\n    ", color);
             for(int i = 0; i <= rbl->marks->values->max_idx; i++){
@@ -611,7 +612,7 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
         printf("\n");
     }else{
         printf(" idx:%d ", rbl->idx);
-        Debug_Print((void *)&(rbl->range), 0, "", color, extended);
+        Debug_Print((void *)&(rbl->cursor), 0, "", color, extended);
     }
     printf("\x1b[%dm>\x1b[0m", color);
 }
@@ -863,8 +864,8 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
 
 void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched, boolean extended){
     if(extended){
-        printf("    \x1b[%dm%s [lead:%d/count:%d/tail:%d]", DEBUG_PATMATCH, 
-        State_ToChars(mt->type.state),mt->lead, mt->count, mt->tail);
+        printf("    \x1b[%dm%s ", DEBUG_PATMATCH, 
+        State_ToChars(mt->type.state));
         Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
     }else{
         if(matched){

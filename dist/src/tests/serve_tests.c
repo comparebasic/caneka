@@ -115,7 +115,7 @@ status ServeChunked_Tests(MemCtx *gm){
     Serve_ServeRound(sctx);
     h = Handler_Current(req->handler);
     r |= Test(h->func == Example_Recieve, "Req has the second handler set");
-    r |= Test(!HasFlag(req->in.rbl->type.state, SUCCESS), "Req Roebling does not have state SUCCESS yet, have %s", State_ToChars(req->in.rbl->type.state));
+    r |= Test((req->in.rbl->type.state & SUCCESS) == 0, "Req Roebling does not have state SUCCESS yet, have %s", State_ToChars(req->in.rbl->type.state));
 
     Delay();
     Delay();

@@ -34,7 +34,7 @@ status Match_Tests(MemCtx *gm){
     Match_SetPattern(&mt, (PatCharDef *)line);
     for(int i = 0; i < s->length; i++){
         Match_Feed(&mt, s->bytes[i]);
-        if(!HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) == 0){
             break;
         }
     }
@@ -59,13 +59,13 @@ status MatchElastic_Tests(MemCtx *gm){
     int i = 0;
     Match_Feed(&mt, s->bytes[i]);
     i++;
-    r |= Test(HasFlag(mt.type.state, PROCESSING), "Has PROCESSING status %s", State_ToChars(mt.type.state));
+    r |= Test((mt.type.state & PROCESSING) != 0, "Has PROCESSING status %s", State_ToChars(mt.type.state));
     r |= Test(mt.pat.curDef == (mt.pat.startDef+1) , "On second pos, position is %d", (util)(mt.pat.curDef - mt.pat.startDef) / sizeof(PatCharDef));
 
     int count = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             count++;
             i++;
         }else{
@@ -75,7 +75,7 @@ status MatchElastic_Tests(MemCtx *gm){
 
     r |= Test(i ==  4, "Tag -Stopped on the fourth character");
     r |= Test(count == 3, "Tag -Found three chars");
-    r |= Test(HasFlag(mt.type.state, SUCCESS), "Tag- Found SUCCESS have %s", State_ToChars(mt.type.state));
+    r |= Test((mt.type.state & SUCCESS) != 0, "Tag- Found SUCCESS have %s", State_ToChars(mt.type.state));
     PatCharDef *def = mt.pat.curDef;
     r |= Test((def->flags == PAT_END), "Tag -At end");
 
@@ -84,7 +84,7 @@ status MatchElastic_Tests(MemCtx *gm){
     count = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             count++;
             i++;
         }else{
@@ -118,7 +118,7 @@ status MatchKo_Tests(MemCtx *gm){
     i = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             i++;
         }else{
             break;
@@ -131,7 +131,7 @@ status MatchKo_Tests(MemCtx *gm){
     i = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             i++;
         }else{
             break;
@@ -144,7 +144,7 @@ status MatchKo_Tests(MemCtx *gm){
     i = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             i++;
         }else{
             break;
@@ -157,7 +157,7 @@ status MatchKo_Tests(MemCtx *gm){
     i = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             i++;
         }else{
             break;
@@ -175,7 +175,7 @@ status MatchKo_Tests(MemCtx *gm){
     i = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             i++;
         }else{
             break;
@@ -191,7 +191,7 @@ status MatchKo_Tests(MemCtx *gm){
     i = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             i++;
         }else{
             break;
@@ -209,7 +209,7 @@ status MatchKo_Tests(MemCtx *gm){
     i = 0;
     while(1){
         Match_Feed(&mt, s->bytes[i]);
-        if(HasFlag(mt.type.state, PROCESSING)){
+        if((mt.type.state & PROCESSING) != 0){
             i++;
         }else{
             break;

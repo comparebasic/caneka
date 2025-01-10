@@ -110,16 +110,16 @@ status RoeblingRun_Tests(MemCtx *gm){
     s = Cursor_ToString(m, &(rbl->cursor));
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
     r |= Test(idx = 1, "Match Idx equals expected");
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
     s = Cursor_ToString(rbl->m, &(rbl->cursor));
     r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line, expected 'for the weekend', have '%s'", s->bytes);
     /*
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
-    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS");
+    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS");
     */
 
     MemCtx_Free(m);
@@ -153,38 +153,38 @@ status RoeblingMark_Tests(MemCtx *gm){
     Roebling_RunCycle(rbl);
     s = Cursor_ToString(m, &(rbl->cursor));
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals TWO, have %s", s->bytes);
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT after 'TWO'");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'TWO'");
 
     Roebling_RunCycle(rbl);
     s = Cursor_ToString(m, &(rbl->cursor));
     r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT after 'for the weekend'");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'for the weekend'");
 
     Roebling_RunCycle(rbl);
     s = Cursor_ToString(m, &(rbl->cursor));
 
     printf("hi\n");
     r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals ONE, have %s", s->bytes);
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT after 'ONE'");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'ONE'");
 
     Roebling_RunCycle(rbl);
     s = Cursor_ToString(m, &(rbl->cursor));
     r |= Test(String_EqualsBytes(s, bytes("for good measure")), "Roebling has captured the rest of the line: '%s'", s->bytes);
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
     s = Cursor_ToString(m, &(rbl->cursor));
     r |= Test(String_EqualsBytes(s, bytes("THREE")), "Content equals THREE, have %s", s->bytes);
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
     s = Cursor_ToString(m, &(rbl->cursor));
     r |= Test(String_EqualsBytes(s, bytes("for all!")), "Roebling has captured the rest of the line: '%s'", s->bytes);
-    r |= Test(HasFlag(rbl->type.state, ROEBLING_NEXT), "Roebling has state ROEBLING_NEXT");
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
     Roebling_RunCycle(rbl);
-    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling has state SUCCESS %s", State_ToChars(rbl->type.state));
+    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS %s", State_ToChars(rbl->type.state));
 
     MemCtx_Free(m);
     return r;

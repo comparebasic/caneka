@@ -66,10 +66,10 @@ static boolean charMatched(word c, PatCharDef *def){
 static void match_NextTerm(Match *mt){
     while(
             (mt->pat.curDef < mt->pat.endDef) &&
-            !HasFlag(mt->pat.curDef->flags, PAT_TERM)){
+            (mt->pat.curDef->flags & PAT_TERM) == 0){
         mt->pat.curDef++;
     }
-    if(HasFlag(mt->pat.curDef->flags, PAT_TERM)){
+    if((mt->pat.curDef->flags & PAT_TERM) != 0){
         mt->pat.curDef++;
     }
 }
@@ -79,7 +79,7 @@ static void match_StartOfTerm(Match *mt){
         PatCharDef *prev = mt->pat.curDef;
         prev--;
         while(
-                !HasFlag(prev->flags, PAT_TERM) &&
+                (prev->flags & PAT_TERM) == 0 &&
                 (mt->pat.curDef > mt->pat.startDef)){
             if(prev == mt->pat.startDef){
                 mt->pat.curDef = mt->pat.startDef;
@@ -109,7 +109,7 @@ static void match_NextKoTerm(Match *mt){
 }
 
 status Match_Feed(Match *mt, word c){
-    if(HasFlag(mt->type.state, NOOP)){
+    if((mt->type.state & NOOP) != 0){
 
         if(DEBUG_PATMATCH){
             printf("\x1b[%dm'%c' - \x1b[0m", COLOR_RED, c);
@@ -147,7 +147,7 @@ status Match_Feed(Match *mt, word c){
 
         if((def->flags & PAT_CMD) != 0){
             mt->counter = def->to;
-            if(HasFlag(def->from, PAT_GO_ON_FAIL)){
+            if((def->from & PAT_GO_ON_FAIL) != 0){
                 mt->type.state |= MATCH_GOTO;
             }
             mt->pat.curDef++;
@@ -188,7 +188,7 @@ status Match_Feed(Match *mt, word c){
             }
             mt->type.state |= PROCESSING;
 
-            if(HasFlag(def->flags, PAT_LEAVE)){
+            if((def->flags & PAT_LEAVE) != 0){
                 mt->type.state |= MATCH_INVERTED;
             }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;
@@ -232,7 +232,7 @@ status Match_Feed(Match *mt, word c){
                 mt->pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
-                if(HasFlag(def->flags, PAT_TERM)){
+                if((def->flags & PAT_TERM) != 0){
                     if((mt->type.state & MATCH_TERM_FOUND) != 0){
                         match_NextTerm(mt);
                         continue;
@@ -247,7 +247,7 @@ status Match_Feed(Match *mt, word c){
             }
 miss:
             mt->type.state &= ~PROCESSING;
-            if(HasFlag(mt->type.state, SEARCH)){
+            if((mt->type.state & SEARCH) != 0){
                 match_Reset(mt);
                 mt->lead++;
             }else{

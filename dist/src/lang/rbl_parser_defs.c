@@ -1,3 +1,6 @@
+#include <external.h>
+#include <caneka.h>
+
 static word rblLabelDef[] = {
     PAT_KO,'(','(',PAT_MANY,'_','_',PAT_MANY,'-','-',PAT_MANY,'A','Z',PAT_MANY,'a','z',PAT_MANY,'0','9',
     PAT_END, '0', '0'

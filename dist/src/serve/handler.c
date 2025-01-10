@@ -9,7 +9,7 @@ Handler *Handler_Current(Handler *h){
     while(
             h != NULL && 
             h->prior != NULL && 
-            (h->prior== NULL || !HasFlag(h->prior->type.state, SUCCESS))
+            (h->prior== NULL || (h->prior->type.state & SUCCESS) == 0)
         ){
         h = Span_GetSelected(h->prior);
     }
@@ -35,7 +35,7 @@ Handler *Handler_Get(Handler *h){
     while(
             cursor != NULL && 
             cursor->prior != NULL && 
-            (recent == NULL || !HasFlag(recent->type.state, SUCCESS))
+            (recent == NULL || (recent->type.state & SUCCESS) == 0)
         ){
         recent = cursor->prior;
         if(recent->metrics.selected == -1){
@@ -45,7 +45,7 @@ Handler *Handler_Get(Handler *h){
         cursor = Span_GetSelected(recent);
     }
 
-    if(HasFlag(cursor->type.state, SUCCESS)){
+    if((cursor->type.state & SUCCESS) != 0){
         recent->metrics.selected++;  
         if(recent->metrics.selected > recent->max_idx){
             recent->type.state |= SUCCESS;

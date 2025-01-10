@@ -25,7 +25,6 @@
 #include "core/error.h"
 #include "core/guard.h"
 #include "core/log.h"
-#include "core/mempair.h"
 #include "core/testsuite.h"
 
 /* util */
@@ -81,23 +80,22 @@
 
 /* serve */
 #include "serve/proto/proto.h"
-#include "serve/proto/io.h"
-#include "serve/proto/http.h"
 #include "serve/req.h"
 #include "serve/serve.h"
 #include "serve/handler.h"
+
+/* apps */
+#include "apps/apps.h"
 
 /* formats */
 #include "formats/fmt_def.h"
 #include "formats/fmt_ctx.h"
 #include "formats/cash.h"
-#include "formats/http.h"
 #include "formats/io.h"
 #include "formats/oset.h"
 #include "formats/oset_from.h"
 #include "formats/oset_item.h"
 #include "formats/oset_to.h"
-#include "formats/rblsh.h"
 #include "formats/xml.h"
 
 /* lang */
@@ -113,6 +111,3 @@
 /* tests */
 #include "tests/mock_109strings.h"
 #include "tests/tests.h"
-
-/* apps */
-#include "apps/apps.h"

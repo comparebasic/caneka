@@ -93,7 +93,7 @@ status Http_Tests(MemCtx *gm){
     Debug_Print((void *)rbl, 0, "Rbl: ", COLOR_PURPLE, TRUE);
 
     r |= Test(position == 12, "Reached end of test captures, have %d", position);
-    r |= Test(HasFlag(rbl->type.state, SUCCESS), "Roebling HttpParser has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
+    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling HttpParser has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
 
     MemCtx_Free(m);
 

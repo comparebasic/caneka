@@ -23,11 +23,11 @@ void *Error(char *msg){
 void LogError(char *msg, ...){
 	va_list args;
     va_start(args, msg);
-    if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+    if((GLOBAL_flags & NO_COLOR) == 0){
         printf("\x1b[31m");
     }
     vprintf(msg, args);
-    if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+    if((GLOBAL_flags & NO_COLOR) == 0){
         printf("\x1b[0m");
     }
     printf("\n");
@@ -36,11 +36,11 @@ void LogError(char *msg, ...){
 void ExitError(int code, char *msg, ...){
 	va_list args;
     va_start(args, msg);
-    if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+    if((GLOBAL_flags & NO_COLOR) == 0){
         printf("\x1b[31m");
     }
     vprintf(msg, args);
-    if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+    if((GLOBAL_flags & NO_COLOR) == 0){
         printf("\x1b[0m");
     }
     printf("\n");

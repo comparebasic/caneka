@@ -58,15 +58,15 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         printf("\n\x1b[0m");
     }
 
-    if(HasFlag(r, SUCCESS)){
+    if((r & SUCCESS) != 0){
         SpanState *st = sq->stack;
         if(sq->idx > p->max_idx+1){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
         void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
-        if(HasFlag(p->def->flags, SPAN_INLINE)){
+        if((p->def->flags & SPAN_INLINE) != 0){
             size_t sz = (size_t)p->def->itemSize;
-            if(!HasFlag(p->def->flags, SPAN_RAW) && t != NULL && t->type.of == TYPE_RESERVE){
+            if((p->def->flags & SPAN_RAW) == 0 && t != NULL && t->type.of == TYPE_RESERVE){
                 sz = sizeof(Reserve);
             }
             if(sq->op == SPAN_OP_REMOVE){
@@ -131,8 +131,8 @@ void *Span_GetFromQ(SpanQuery *sq){
 
     SpanState *st = sq->stack;
     void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
-    if(HasFlag(def->flags, SPAN_INLINE)){
-        if(!HasFlag(def->flags, SPAN_RAW) && (*(util *)ptr) == 0){
+    if((def->flags & SPAN_INLINE) != 0){
+        if((def->flags & SPAN_RAW) == 0 && (*(util *)ptr) == 0){
             sq->value = NULL;
         }else{
             sq->value = ptr;

@@ -50,7 +50,6 @@ static BuildSubdir coreobj = { "core", {
     "error.c",
     "guard.c",
     "log.c",
-    "mempair.c",
     "testsuite.c",
     NULL
 }};
@@ -66,8 +65,6 @@ static BuildSubdir cryptoobj = { "crypto", {
 
 static BuildSubdir formatsobj = { "formats", {
     "cash.c",
-    "cash.cnk",
-    "cash.cnk.full",
     "cash_rbl.c",
     "http_parser.c",
     "oset.c",

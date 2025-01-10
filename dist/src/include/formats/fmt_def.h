@@ -1,4 +1,4 @@
-typedef Abstract *(*FmtTrans)(MemCtx *m, struct format_def *def, struct formatter *fmt, String *key, Abstract *a);
+typedef Abstract *(*FmtTrans)(MemCtx *m, struct format_def *def, struct fmt_ctx *fmt, String *key, Abstract *a);
 
 enum formatter_def_flags {
     FMT_DEF_INDENT = 1 << 8,
@@ -20,4 +20,4 @@ typedef struct format_def {
 } FmtDef;
 
 FmtDef *FmtDef_Make(MemCtx *m);
-void FmtDef_PushItem(struct formatter *ctx, word captureKey, String *s, FmtDef *def);
+void FmtDef_PushItem(struct fmt_ctx *ctx, word captureKey, String *s, FmtDef *def);

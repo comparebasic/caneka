@@ -61,7 +61,7 @@ static status Roebling_RunMatches(Roebling *rbl){
             rbl->type.state |= (NOOP|END);
         }
 
-        if(HasFlag(mt->type.state, MATCH_INVERTED)){
+        if((mt->type.state & MATCH_INVERTED) != 0){
             break;
         }
 
@@ -87,7 +87,7 @@ status Roebling_RunCycle(Roebling *rbl){
         printf("\x1b[%dmRblIdx:%d %s\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx, State_ToChars(rbl->type.state));
     }
     rbl->type.state &= ~END;
-    if(HasFlag(rbl->type.state, ROEBLING_NEXT)){
+    if((rbl->type.state & ROEBLING_NEXT) != 0){
         rbl->idx++;
         Cursor_Incr(&(rbl->cursor), rbl->tail);
         rbl->tail = 0;

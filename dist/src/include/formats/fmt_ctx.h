@@ -54,7 +54,7 @@ typedef struct fmt_ctx {
     TableChain *byAlias;
     RangeToChars rangeToChars;
     OutFunc out;
-    status (*start)(struct formatter *ctx);
+    status (*start)(struct fmt_ctx *ctx);
     Abstract *source;
 } FmtCtx;
 

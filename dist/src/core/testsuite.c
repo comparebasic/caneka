@@ -25,30 +25,30 @@ status Test(int condition, char *msg, ...){
     Stack(bytes("Test"), (Abstract *)String_Make(DebugM, bytes(msg)));
 	va_list args;
     va_start(args, msg);
-    if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
+    if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("        <li class=\"test result result-%s\">", condition ? "pass" : "fail");
         vprintf(msg, args);
         printf("</li>\n");
         Return condition ? SUCCESS : ERROR;
     }else{
         if(!condition){
-            if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+            if((GLOBAL_flags & NO_COLOR) == 0){
                 printf("\x1b[31m");
             }
             printf("FAIL: ");
             vprintf(msg, args);
-            if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+            if((GLOBAL_flags & NO_COLOR) == 0){
                 printf("\x1b[0m");
             }
             printf("\n");
             Return ERROR;
         }else{
-            if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+            if((GLOBAL_flags & NO_COLOR) == 0){
                 printf("\x1b[32m");
             }
             printf("PASS: ");
             vprintf(msg, args);
-            if(!HasFlag(GLOBAL_flags, NO_COLOR)){
+            if((GLOBAL_flags & NO_COLOR) == 0){
                 printf("\x1b[0m");
             }
             printf("\n");
@@ -65,11 +65,11 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     int fail = 0;
     Stack(bytes("Test_Runner"), 
         (Abstract *)String_Make(DebugM, bytes(suiteName)));
-    if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
+    if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("<div class=\"suite\">\n    <span class=\"label\">Suite %s</span>\n", suiteName);
     }
     while(set->func != NULL){
-        if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
+        if((GLOBAL_flags & HTML_OUTPUT) != 0){
             printf("<div class=\"set\">\n    <span class=\"set-label\">%s</span>\n", set->name);
             printf("    <span class=\"status\" data-status=\"%d\">%s</span>\n    <p>%s</p>\n    <ol class=\"tests\">\n",
                 set->status, statusCstr(set->status), set->description);
@@ -77,10 +77,10 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
             printf("[Testing %s]\n", set->name);
         }
         status r = set->func(m);
-        if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
+        if((GLOBAL_flags & HTML_OUTPUT) != 0){
             printf("    </ol>\n</div>\n");
         }
-        if(HasFlag(r, ERROR) || !HasFlag(r, SUCCESS)){
+        if((r & ERROR) != 0 || (r & SUCCESS) == 0){
             fail++;
             break;
         }
@@ -88,9 +88,9 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
         i+= 2;
         set++;
     }
-    if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
+    if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("\n    <span class=\"result\">Suite %s pass:%d fail:%d</span>\n", suiteName, pass, fail);
-    }else if(HasFlag(GLOBAL_flags, NO_COLOR)){
+    }else if((GLOBAL_flags & NO_COLOR) != 0){
         printf("Suite %s pass:%d fail:%d\n", suiteName, pass, fail);
     }else{
         if(!fail){
@@ -99,7 +99,7 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
             printf("\x1b[%dmSuite %s pass:%d \x1b[1;%dmfail:%d\x1b[0m\n", COLOR_RED, suiteName, pass, COLOR_RED,  fail);
         }
     }
-    if(HasFlag(GLOBAL_flags, HTML_OUTPUT)){
+    if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("</div>\n");
     }
     Return !fail ? SUCCESS : ERROR;
