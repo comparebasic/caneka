@@ -11,7 +11,7 @@ typedef struct protodef {
     cls reqType;
     Maker req_mk;
     Maker proto_mk;
-    Handler *(*getHandler)(struct serve_ctx *sctx, struct serve_req *req);
+    struct handler *(*getHandler)(struct serve_ctx *sctx, struct serve_req *req);
     Abstract *source;
     GetDelayFunc getDelay;
     Lookup *methods;

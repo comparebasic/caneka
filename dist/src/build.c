@@ -38,6 +38,11 @@ static char *libs[] = {
     NULL
 };
 
+static BuildSubdir memobj = { "mem", {
+    "mem.c",
+    NULL
+}};
+
 static BuildSubdir coreobj = { "core", {
     "core.c",
     "debug.c",
@@ -45,7 +50,6 @@ static BuildSubdir coreobj = { "core", {
     "error.c",
     "guard.c",
     "log.c",
-    "mem.c",
     "mempair.c",
     "testsuite.c",
     NULL
@@ -223,7 +227,7 @@ static BuildSubdir appsobj = { "apps", {
 }};
 
 BuildSubdir *allobj[] = {
-    &appsobj,
+    &memobj,
     &coreobj,
     &formatsobj,
     &langobj,
@@ -238,6 +242,7 @@ BuildSubdir *allobj[] = {
     &cryptoobj,
     &secureobj,
 #endif
+    &appsobj,
     NULL
 };
 

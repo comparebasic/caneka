@@ -1,15 +1,15 @@
-typedef struct serve_req {
+typedef struct req {
     Type type;
     MemCtx *m;
-    Handler *handler;
+    struct handler *handler;
     int queueIdx;
     int fd;
     String *id;
-    Serve *sctx;
-    Proto *proto;
+    struct serve_ctx *sctx;
+    struct proto *proto;
     struct {
         String *shelf;
-        Roebling *rbl;
+        struct roebling *rbl;
     } in;
     struct {
         String *response;
@@ -17,11 +17,11 @@ typedef struct serve_req {
     } out;
 } Req;
 
-Req *Req_Make(MemCtx *m, struct serve_ctx *sctx, Proto *proto);
-status Req_SetError(Serve *sctx, Req *req, String *msg);
-status Req_Recv(Serve *sctx, Req *req);
-status Req_Read(Serve *sctx, Req *req);
-status Req_Respond(Serve *sctx, Req *req);
-status Req_Handle(Serve *sctx, Req *req);
-status Req_Process(Serve *sctx, Req *req);
-status Req_SetResponse(Req *req, int code, Span *headers, String *body);
+struct req *Req_Make(MemCtx *m, struct serve_ctx *sctx, struct proto *proto);
+status Req_SetError(struct serve_ctx *sctx, struct req *req, String *msg);
+status Req_Recv(struct serve_ctx *sctx, struct req *req);
+status Req_Read(struct serve_ctx *sctx, struct req *req);
+status Req_Respond(struct serve_ctx *sctx, struct req *req);
+status Req_Handle(struct serve_ctx *sctx, struct req *req);
+status Req_Process(struct serve_ctx *sctx, struct req *req);
+status Req_SetResponse(struct req *req, int code, Span *headers, String *body);

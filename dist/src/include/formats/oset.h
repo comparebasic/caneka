@@ -1,12 +1,4 @@
-enum http_captures {
-    OSET_LABEL,
-    OSET_TYPE,
-    OSET_LENGTH,
-    OSET_VALUE,
-    _OSET_MAX = 1 << 15
-};
-
-enum http_marks {
+enum oset_marks {
     OSET_MARK_START,
     OSET_MARK_LENGTH,
     _OSET_MARK_MAX = 1 << 15
@@ -27,11 +19,8 @@ enum oset_states {
     OSET_CLOSE_LIST,
     OSET_CLOSE_ARRAY,
     OSET_CLOSE_TABLE,
-};
-
-enum oset_marks {
-    OSET_MARK_START = 1,
-    OSET_MARK_LENGTH,
+    OSET_LABEL,
+    OSET_TYPE,
 };
 
 enum oset_flags {

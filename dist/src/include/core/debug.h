@@ -8,6 +8,8 @@
 
 #define isDebug(x) (((x)->type.state & DEBUG) != 0)
 
+extern struct chain *DebugPrintChain;
+
 extern int DEBUG_MATCH;
 extern int DEBUG_PATMATCH;
 extern int DEBUG_MATCH_COMPLETE;
@@ -56,13 +58,12 @@ extern MemCtx *DebugM;
 
 typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean extended);
 
-extern Chain *DebugPrintChain;
 status Debug_Init(MemCtx *m);
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
 void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
 void Flag16_ToString(word flag, int color, boolean extended);
 void indent_Print(int indent);
-void Match_midDebug(char type, word c, struct patchardef *def, Match *mt, boolean matched, boolean extended);
+void Match_midDebug(char type, word c, struct patchardef *def, struct match *mt, boolean matched, boolean extended);
 
 extern char *rbl_debug_cstr[];
 

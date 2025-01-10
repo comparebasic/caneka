@@ -20,4 +20,4 @@ typedef struct strsnipabs {
 #define StrSnip_Total(sn) (sn->start+sn->length)
 status StrSnip_Init(StrSnip *sn, int start, int length);
 StrSnip *StrSnip_Last(MemCtx *m, String *s);
-StrSnip *StrSnip_Add(MemCtx *m, String *s, 0, 0);
+StrSnip *StrSnip_Add(MemCtx *m, String *s, int start, int length);

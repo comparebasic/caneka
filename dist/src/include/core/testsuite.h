@@ -37,11 +37,3 @@ typedef struct test_set {
 #define TEST_RECV SOCK_IN
 #define TEST_SERVE_END -1 
 #define TEST_DELAY_ONLY 0 
-
-/* utils */
-int ServeTests_ForkRequest(MemCtx *m, char *msg, ReqTestSpec[]);
-status TestChild(int child);
-status ServeTests_SpawnRequest(MemCtx *m, char *msg);
-IoCtx *IoCtxTests_GetRootCtx(MemCtx *m);
-
-#include <tests.h>

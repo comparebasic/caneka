@@ -1,8 +1,8 @@
 typedef struct debug_stack {
     Type type;
     int idx;
-    String name;
-    String file;
+    struct string name;
+    struct string file;
     int line;
     Abstract *a;
 } DebugStackEntry;

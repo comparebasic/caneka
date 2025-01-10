@@ -1,6 +1,6 @@
 typedef struct http_proto {
     Type type;
-    char *(*toLog)(Req *req);
+    char *(*toLog)(struct req *req);
     Span *headers_tbl;
     String *body;
     Lookup *methods;
@@ -16,6 +16,6 @@ typedef struct http_proto {
     ProtoDef *def;
 } HttpProto;
 
-ProtoDef *HttpProtoDef_Make(MemCtx *m);
-Proto *HttpProto_Make(MemCtx *m, ProtoDef *def);
-Req *HttpReq_Make(MemCtx *m, Serve *sctx);
+struct protodef *HttpProtoDef_Make(MemCtx *m);
+struct proto *HttpProto_Make(MemCtx *m, struct protodef *def);
+struct req *HttpReq_Make(MemCtx *m, struct serve_ctx *sctx);

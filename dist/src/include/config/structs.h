@@ -54,6 +54,14 @@ struct patchardef;
 struct pat_match;
 struct match;
 struct roebling;
+/* serve */
+struct handler;
+struct req;
+struct serve_ctx;
+struct proto;
+struct protodef;
+struct io_proto;
+struct http_proto;
 /* formats */
 struct cash;
 struct rblsh_ctx;

@@ -7,7 +7,7 @@ typedef struct hashed {
     struct hashed *next;
 } Hashed;
 
-extern Chain *HashChain;
+extern struct chain *HashChain;
 status Hash_Init(MemCtx *m);
 
 typedef util (*HashFunc)(Abstract *a);

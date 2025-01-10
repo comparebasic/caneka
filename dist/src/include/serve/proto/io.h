@@ -1,6 +1,6 @@
 typedef struct io_proto {
     Type type;
-    char *(*toLog)(Req *req);
+    char *(*toLog)(struct req *req);
     Span *headers_tbl;
     String *body;
     Lookup *methods;

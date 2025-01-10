@@ -1,11 +1,17 @@
-#include <mock_109strings.h>
+#include "mock_109strings.h"
 extern char *longCstr;
 
 extern TestSet *Tests;
 
 status Tests_AddTestKey(MemCtx *m);
 
+/* utils */
+int ServeTests_ForkRequest(MemCtx *m, char *msg, ReqTestSpec[]);
+status TestChild(int child);
+status ServeTests_SpawnRequest(MemCtx *m, char *msg);
+IoCtx *IoCtxTests_GetRootCtx(MemCtx *m);
 
+/* tests */
 status Blank_Tests(MemCtx *gm);
 
 status Core_Tests(MemCtx *gm);
