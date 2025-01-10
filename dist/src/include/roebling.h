@@ -26,7 +26,7 @@ typedef struct roebling {
     Lookup *marks;
     RblCaptureFunc capture;
     /* run specific */
-    Range range;
+    Cursor cursor;
     /* step specific */
     i8 jump;
     i8 jumpMiss;
@@ -36,6 +36,8 @@ typedef struct roebling {
     Guard guard;
 } Roebling;
 
+
+/* > Instantation */
 Roebling *Roebling_Make(MemCtx *m,
     cls type,
     Span *parsers,
@@ -44,22 +46,26 @@ Roebling *Roebling_Make(MemCtx *m,
     RblCaptureFunc capture,
     Abstract *source
 );
+status Roebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks, Span *additions, Lookup *desc);
+
+/* > Reset */
+status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s);
+
+/* > Debug */
+String *Roebling_GetMarkDebug(Roebling *rbl, int idx);
+Match *Roebling_GetMatch(Roebling *rbl);
+int Roebling_GetMatchIdx(Roebling *rbl);
+Match *Roebling_GetValueMatch(Roebling *rbl);
+
+/* > Run */
 status Roebling_Run(Roebling *sexp);
 status Roebling_RunCycle(Roebling *sexp);
-int Roebling_GetMarkIdx(Roebling *rlb, int mark);
-status Roebling_SetMark(Roebling *rlb, int mark, int idx);
-status Roebling_Prepare(Roebling *rbl, Span *parsers);
-status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump);
-status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
-status Roebling_ResetPatterns(Roebling *rbl);
-status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s);
-status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
-status Roebling_Add(Roebling *rbl, String *s);
-int Roebling_GetMatchIdx(Roebling *rbl);
-Match *Roebling_GetMatch(Roebling *rbl);
-Match *Roebling_GetValueMatch(Roebling *rbl);
-status SCursor_Finish(Roebling *rbl, Match *mt);
 status Roebling_JumpTo(Roebling *rbl, int mark);
-status Roebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks, Span *additions, Lookup *desc);
-/* debug */
-String *Roebling_GetMarkDebug(Roebling *rbl, int idx);
+
+/* > Setup Cycle */
+status Roebling_Add(Roebling *rbl, String *s);
+status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
+status Roebling_ResetPatterns(Roebling *rbl);
+status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
+status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump);
+int Roebling_GetMarkIdx(Roebling *rlb, int mark);

@@ -750,26 +750,6 @@ static void SCursor_Print(Abstract *a, cls type, char *msg, int color, boolean e
     printf("\x1b[0m");
 }
 
-static void Range_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    Range *range = (Range *)a;
-    printf("%s\x1b[%dmR<", msg, color);
-    if(extended){
-        printf("s=");
-        Debug_Print((void *)range->search, 0, "", color, extended);
-        printf(" ");
-    }
-    String *s = Range_Copy(DebugM, range);
-    Debug_Print((void *)s, 0, " current=", color, extended);
-    if(extended){
-        printf("\n  \x1b[%dmCursors=\n    ", color);
-        Debug_Print((void *)&(range->start), TYPE_SCURSOR, "S=", color, extended);
-        Debug_Print((void *)&(range->potential), TYPE_SCURSOR, "P=", color, extended);
-        Debug_Print((void *)&(range->end), TYPE_SCURSOR, "E=", color, extended);
-        printf("\x1b[%dm", color);
-    }
-    printf("\x1b[%dm>\x1b[0m", color);
-}
-
 static void EncPair_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     EncPair *pair = (EncPair *)as(a, TYPE_ENC_PAIR);
     printf("\x1b[%dm%sEnc<%s %s:",
@@ -798,7 +778,6 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)StringFixed_Print);
     r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)StringFull_Print);
     r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)SCursor_Print);
-    r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Range_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_MINI_SPAN, (void *)Span_Print);

@@ -13,6 +13,15 @@ status Cursor_Init(MemCtx *m, Cursor *cur, String *s){
     return _Cursor_Init(m, cur, s);
 }
 
+status Cursor_ReInit(MemCtx *m, Cursor *cur, String *s){
+    cur->s = s;
+    memset(&cur->position, sizeof(StrSnipAbs));
+    cur->position.type.of = TYPE_STRSNIP;
+    cur->position.type.state |= STRSNIP_ABSOLUTE;
+    Span_ReInit(cur->spaces);
+    return _Cursor_Init(m, cur, s);
+}
+
 String *Cursor_ToString(MemCtx *m, Cursor *cur){
     String *ret = String_Init(m, STRING_EXTEND);
 

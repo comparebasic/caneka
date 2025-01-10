@@ -1,5 +1,6 @@
 typedef struct cursor {
     Type type;
+    byte *ptr;
     String *s;
     String *seg;
     StrSnipAbs position;
@@ -15,3 +16,4 @@ status Cursor_AddGap(Cursor *cur, int length);
 status Cursor_Incr(Cursor *cur, int length);
 
 String *Cursor_ToString(MemCtx *m, Cursor *cur, String *s);
+#define Cursor_GetByte(cur) (*((cur)->ptr))
