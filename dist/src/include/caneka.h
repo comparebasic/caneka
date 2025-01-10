@@ -1,21 +1,9 @@
-#define COMPLETE SUCCESS
-#define TEST_OK READY
-#define ELASTIC SPAN_INLINE
-#define TERM_FOUND TRACKED
-#define NO_COLOR NOOP 
-#define MATCH_GOTO NEXT 
-
-#ifdef LINUX
-    #include "linux.h"
-#endif
-
-/* apps */
-#include "apps/apps.h"
-
 /* config */
+#include "config/external.h"
 #include "config/status_types.h"
 #include "config/type_range.h"
 #include "config/typedefs.h"
+#include "config/structs.h"
 
 /* core */
 #include "core/core.h"
@@ -57,7 +45,9 @@
 #include "lang/xmlt.h"
 
 /* os */
-#include "linux/linux.h"
+#ifdef LINUX
+    #include "linux.h"
+#endif
 
 /* parser */
 #include "parser/match.h"
@@ -123,3 +113,7 @@
 #include "util/result.h"
 #include "util/single.h"
 #include "util/time.h"
+
+/* apps */
+#include "apps/apps.h"
+

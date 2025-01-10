@@ -29,7 +29,7 @@ enum match_flags {
     MATCH_LEAVE = 1 << 15
 };
 
-typedef struct range_chardef {
+typedef struct patchardef {
     word flags;
     word from;
     word to;

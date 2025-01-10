@@ -11,7 +11,7 @@ typedef struct strsnip {
     int length;
 } StrSnip;
 
-typedef struct strsnip {
+typedef struct strsnipabs {
     Type type;
     int offset;
     int local;
