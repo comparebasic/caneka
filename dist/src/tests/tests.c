@@ -327,17 +327,17 @@ static TestSet _Tests[] = {
     },
 };
 
-TestSet *Tests = _Tests;
-
 /*
+TestSet *Tests = _Tests;
+*/
+
 static TestSet solo[] = {
     {
-        "XML",
-        Xml_Tests,
-        "Basic XML parsing implemented using the Roebling Parser",
+        "IterStr",
+        IterStr_Tests,
+        "Iter Strings are strings that contain arrays of other items.",
         FEATURE_COMPLETE,
-    }
+    },
 };
 
 TestSet *Tests = solo;
-*/
