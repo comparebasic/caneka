@@ -49,14 +49,6 @@ static util Hash_String(Abstract *a){
     return h;
 }
 
-static util Hash_SCursor(Abstract *a){
-    return 0;
-}
-
-static util Hash_Range(Abstract *a){
-    return 0;
-}
-
 static util Hash_Req(Abstract *a){
     return 0;
 }
@@ -77,8 +69,6 @@ static status populateHash(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)Hash_String);
     r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)Hash_String);
     r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)Hash_String);
-    r |= Lookup_Add(m, lk, TYPE_SCURSOR, (void *)Hash_SCursor);
-    r |= Lookup_Add(m, lk, TYPE_RANGE, (void *)Hash_Range);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);

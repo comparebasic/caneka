@@ -30,19 +30,13 @@ Abstract *IterStr_Get(IterStr *it){
     return (Abstract *)it->cursor->ptr;
 }
 
-status IterStr_Init(IterStr *it, String *s, size_t sz, byte *item){
-    memset(it, 0, sizeof(IterStr));
+IterStr *IterStr_Make(MemCtx *m, String *s, size_t sz, byte *item){
+    IterStr *it = (IterStr *)MemCtx_Alloc(m, sizeof(IterStr));
     it->type.of = TYPE_ITER_STRING;
     it->sz = sz;
     it->idx = -1;
     it->item = item;
     it->count = String_Length(s) / sz;
-
-    return SCursor_Init(&it->cursor, s);
-}
-
-IterStr *IterStr_Make(MemCtx *m){
-    IterStr *it = (IterStr *)MemCtx_Alloc(m, sizeof(IterStr));
-    it->type.of = TYPE_ITER_STRING;
+    Cursor_Init(&it->cursor, s);
     return it;
 }

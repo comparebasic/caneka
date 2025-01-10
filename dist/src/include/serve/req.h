@@ -13,7 +13,7 @@ typedef struct serve_req {
     } in;
     struct {
         String *response;
-        SCursor *cursor;
+        Cursor *cursor;
     } out;
 } Req;
 

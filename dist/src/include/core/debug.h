@@ -73,6 +73,8 @@ extern int DEBUG_LANG_CNK_OUT;
 
 extern boolean SHOW_SERVE_TESTS;
 
+struct string *State_ToString(struct mem_ctx *m, status state);
+char *Class_ToString(cls type);
 char *State_ToChars(status state);
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended);

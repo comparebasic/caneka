@@ -39,55 +39,85 @@ static char *libs[] = {
 };
 
 static BuildSubdir coreobj = { "core", {
-    "core.c", "mem.c",  "string.c", "string_makers.c", "string_equals.c", "string_utils.c",
-    "error.c", "log.c", "spandef.c", "span.c", "spanquery.c", "slab.c", "lookup.c",
-    "chain.c", "table_chain.c",
-    "testsuite.c", "hash.c", "table.c", "compare.c", 
-    "iter.c", "iter_str.c", "array.c", "int.c", "maker.c", "do.c", 
-    "mess.c", "single.c", "debug.c", "abstract.c", "time.c",
-    "queue.c", "boolean.c","blank.c","clone.c","guard.c",
-    "debug_stack.c", "result.c",
-    NULL
-}};
-
-static BuildSubdir persistobj = { "persist", {
-    "ioctx.c", "file.c", "session.c","memlocal.c", "access.c", "user.c", "auth.c",
-    "dir.c", "subprocess.c", "spool.c",
-    NULL
-}};
-
-static BuildSubdir parserobj = {"parser", {
-    "match.c", "roebling.c", "scursor.c", "range.c", "patchar.c", NULL
-}};
-
-static BuildSubdir formatsobj = {"formats", {
-    "xml.c", "xml_parser.c", "http_parser.c", "oset.c", "oset_parser.c", "oset_to.c","oset_from.c", "oset_item.c",
-    "cash.c", "cash_rbl.c", "rblsh.c",
-    NULL
-}};
-
-static BuildSubdir langobj = {"lang", {
-    "xmlt.c", "xmlt_template.c", "nestedd.c", "human_present.c",
-    "fmt_ctx.c", "fmt_item.c", "fmt_html.c","fmt_def.c", "transp.c",
-    "caneka_parser.c", "caneka_to.c", "caneka_ctx.c", "caneka_module.c",
-    "caneka.c", "caneka_populate.c", "cnk_roebling_cnf.c", "cnk_roebling_syntax.c", "cnk_roebling_items.c",
-    NULL
-}};
-
-static BuildSubdir testobj = { "tests", {
-    "utils.c","tests.c","span_setup_tests.c","core_tests.c",
-    "string_tests.c","table_tests.c","match_tests.c","span_tests.c",
-    "hash_tests.c","roebling_tests.c","xml_tests.c", "http_tests.c",
-    "serve_tests.c", "queue_tests.c","mock_109strings.c","ioctx_tests.c",
-    "oset_tests.c","memlocal_tests.c","blank_test.c","nestedd_tests.c",
-    "xmlt_template_tests.c","textfilter_tests.c","crypto_tests.c",
-    "salty_tests.c","user_tests.c", "roebling_syntax_tests.c",
-    "iter_str_tests.c",
+    "core.c",
+    "debug.c",
+    "debug_stack.c",
+    "error.c",
+    "guard.c",
+    "log.c",
+    "mem.c",
+    "mempair.c",
+    "testsuite.c",
     NULL
 }};
 
 static BuildSubdir cryptoobj = { "crypto", {
-    "sane.c", "sha256.c", "crypto_api.c", "enc_pair.c", "salty.c",
+    "crypto_api.c",
+    "enc_pair.c",
+    "salty.c",
+    "sane.c",
+    "sha256.c",
+    NULL
+}};
+
+static BuildSubdir formatsobj = { "formats", {
+    "cash.c",
+    "cash.cnk",
+    "cash.cnk.full",
+    "cash_rbl.c",
+    "http_parser.c",
+    "oset.c",
+    "oset_from.c",
+    "oset_item.c",
+    "oset_parser.c",
+    "oset_to.c",
+    "rblsh.c",
+    "xml.c",
+    "xml_parser.c",
+    NULL
+}};
+
+static BuildSubdir langobj = { "lang", {
+    "caneka.c",
+    "caneka_ctx.c",
+    "caneka_module.c",
+    "caneka_parser.c",
+    "caneka_populate.c",
+    "caneka_to.c",
+    "cnk_roebling_cnf.c",
+    "cnk_roebling_items.c",
+    "cnk_roebling_syntax.c",
+    "fmt_ctx.c",
+    "fmt_def.c",
+    "fmt_html.c",
+    "fmt_item.c",
+    "human_present.c",
+    "nestedd.c",
+    "rbl_parser_defs.c",
+    "transp.c",
+    "xmlt.c",
+    "xmlt_template.c",
+    NULL
+}};
+
+static BuildSubdir parserobj = { "parser", {
+    "match.c",
+    "patchar.c",
+    "roebling.c",
+    NULL
+}};
+
+static BuildSubdir persistobj = { "persist", {
+    "access.c",
+    "auth.c",
+    "dir.c",
+    "file.c",
+    "ioctx.c",
+    "memlocal.c",
+    "session.c",
+    "spool.c",
+    "subprocess.c",
+    "user.c",
     NULL
 }};
 
@@ -96,23 +126,118 @@ static BuildSubdir secureobj = { "secure", {
     NULL
 }};
 
+static BuildSubdir sequenceobj = { "sequence", {
+    "array.c",
+    "chain.c",
+    "iter.c",
+    "lookup.c",
+    "mess.c",
+    "queue.c",
+    "slab.c",
+    "span.c",
+    "spandef.c",
+    "spanquery.c",
+    "table.c",
+    "table_chain.c",
+    NULL
+}};
+
 static BuildSubdir serveobj = { "serve", {
-    "serve.c", "proto.c", "req.c", "http_proto.c", "io_proto.c","handler.c", "linux.c",
+    "handler.c",
+    "http_proto.c",
+    "io_proto.c",
+    "linux.c",
+    "proto.c",
+    "req.c",
+    "serve.c",
+    NULL
+}};
+
+static BuildSubdir stringobj = { "string", {
+    "cursor.c",
+    "iter_str.c",
+    "string.c",
+    "string_equals.c",
+    "string_makers.c",
+    "string_utils.c",
+    "strray.c",
+    "strsnip.c",
+    NULL
+}};
+
+static BuildSubdir testsobj = { "tests", {
+    "blank_test.c",
+    "core_tests.c",
+    "crypto_tests.c",
+    "formatter.c",
+    "hash_tests.c",
+    "http_tests.c",
+    "ioctx_tests.c",
+    "iter_str_tests.c",
+    "match_tests.c",
+    "memlocal_tests.c",
+    "mock_109strings.c",
+    "nestedd_tests.c",
+    "oset_tests.c",
+    "patmatch_tests.c",
+    "proto_http_tests.c",
+    "queue_tests.c",
+    "roebling_syntax_tests.c",
+    "roebling_tests.c",
+    "salty_tests.c",
+    "serve_tests.c",
+    "span_setup_tests.c",
+    "span_tests.c",
+    "string_tests.c",
+    "table_tests.c",
+    "testreq.c",
+    "tests.c",
+    "textfilter_tests.c",
+    "user_tests.c",
+    "utils.c",
+    "xml_tests.c",
+    "xmlt_template_tests.c",
+    NULL
+}};
+
+static BuildSubdir utilobj = { "util", {
+    "abstract.c",
+    "blank.c",
+    "boolean.c",
+    "clone.c",
+    "compare.c",
+    "do.c",
+    "hash.c",
+    "int.c",
+    "maker.c",
+    "result.c",
+    "single.c",
+    "time.c",
     NULL
 }};
 
 static BuildSubdir appsobj = { "apps", {
-    "appsdebug.c", "example.c",
+    "appsdebug.c",
+    "example.c",
     NULL
 }};
 
 BuildSubdir *allobj[] = {
-    &coreobj, &testobj, &parserobj, &formatsobj, &persistobj,
+    &appsobj,
+    &coreobj,
+    &formatsobj,
+    &langobj,
+    &parserobj,
+    &persistobj,
+    &sequenceobj,
+    &serveobj,
+    &stringobj,
+    &testsobj,
+    &utilobj,
 #ifdef CRYPTO
     &cryptoobj,
     &secureobj,
 #endif
-    &serveobj, &appsobj, &langobj,
     NULL
 };
 

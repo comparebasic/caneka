@@ -45,7 +45,7 @@ static status Roebling_RunMatches(Roebling *rbl){
 
                  Cursor_Incr(&(rbl->cursor), mt->lead);
                  if(mt->count){
-                     SCursor_Incr(&(rbl->range.end), mt->lead+mt->count);
+                     Cursor_Incr(&(rbl->cursor), mt->lead+mt->count);
                  }
 
                  rbl->tail = mt->tail;
@@ -65,7 +65,7 @@ static status Roebling_RunMatches(Roebling *rbl){
             break;
         }
 
-        SCursor_Incr(&(rbl->range.potential), 1);
+        Cursor_Incr(&(rbl->cursor), 1);
         rbl->type.state |= (rbl->cursor.type.state & END);
     }
 
@@ -89,9 +89,11 @@ status Roebling_RunCycle(Roebling *rbl){
     rbl->type.state &= ~END;
     if(HasFlag(rbl->type.state, ROEBLING_NEXT)){
         rbl->idx++;
-        SCursor_Incr(&(rbl->range.end), rbl->tail);
+        Cursor_Incr(&(rbl->cursor), rbl->tail);
         rbl->tail = 0;
-        Range_Sync(&(rbl->range), &(rbl->range.end));
+        /*
+        Range_Sync(&(rbl->range), &(rbl->cursor));
+        */
         if(rbl->jump > -1){
             rbl->idx = rbl->jump;
             rbl->jump = -1;
@@ -101,7 +103,9 @@ status Roebling_RunCycle(Roebling *rbl){
             rbl->idx = rbl->jumpMiss;
             rbl->jumpMiss = -1;
             rbl->type.state &= ~ROEBLING_NEXT;
-            Range_Sync(&(rbl->range), &(rbl->range.end));
+            /*
+            Range_Sync(&(rbl->range), &(rbl->cursor));
+            */
         }
     }
     rbl->type.state &= ~(ROEBLING_NEXT|NOOP); 
@@ -173,6 +177,7 @@ int Roebling_GetMatchIdx(Roebling *rbl){
 
 /* > Setup Cycle */
 static status roebling_AddReset(Roebling *rbl){
+    /*
     if((rbl->range.potential.type.state & END) != 0){
         rbl->range.potential.type.state &= ~END;
         SCursor_Incr(&(rbl->range.potential), 1);
@@ -185,17 +190,18 @@ static status roebling_AddReset(Roebling *rbl){
         SCursor_Incr(&(rbl->range.start), 1);
         rbl->range.start.type.state &= ~END;
     }
+    */
     return SUCCESS;
 }
 
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
     Stack(bytes("Roebling_AddBytes"), (Abstract *)rbl);
-    status r = String_AddBytes(rbl->m, rbl->range.search, bytes, length);
+    status r = String_AddBytes(rbl->m, rbl->cursor.s, bytes, length);
     Return roebling_AddReset(rbl);
 }
 
 status Roebling_Add(Roebling *rbl, String *s){
-    String_Add(rbl->m, rbl->range.search, s);
+    String_Add(rbl->m, rbl->scursor.s, s);
     return roebling_AddReset(rbl);
 }
 
