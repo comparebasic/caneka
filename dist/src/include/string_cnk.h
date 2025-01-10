@@ -11,6 +11,7 @@ enum string_pos {
 };
 
 enum string_flags {
+    FLAG_STRING_CONTIGUOUS = 1 << 8,
     FLAG_STRING_IS_NUM = 1 << 9,
     FLAG_STRING_IS_BOOL = 1 << 10,
     FLAG_STRING_IS_CASH = 1 << 11,
@@ -59,7 +60,7 @@ i64 String_Length(String *s);
 String *String_FromRange(MemCtx *m, struct strcursor_range *range);
 String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
-size_t String_GetSegSize(String *s);
+i64 String_GetSegSize(String *s);
 status String_Trunc(String *s, i64 len);
 
 /* makers */

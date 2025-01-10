@@ -7,6 +7,7 @@ enum roebling_flags {
     /*MATCH_INVERTED = 1 << 9,*/
     ROEBLING_NEXT = 1 << 10,
     ROEBLING_REPEAT = 1 << 11,
+    ROEBLING_LOAD_MATCHES = 1 << 12,
 };
 
 enum mark_reserved {

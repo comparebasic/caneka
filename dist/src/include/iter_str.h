@@ -2,8 +2,7 @@ typedef struct iter_string {
     Type type;
     int idx;
     size_t sz;
-    byte *item;
-    SCursor cursor;
+    Cursor cursor;
     i64 count;
 } IterStr;
 

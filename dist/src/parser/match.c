@@ -48,7 +48,9 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
 
 static void match_Reset(Match *mt){
     mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
-    mt->count = 0;
+    String_Reset(mt->snips);
+    Snip_Add(mt->snips, 0, 0, 0);
+
 }
 
 static boolean charMatched(word c, PatCharDef *def){

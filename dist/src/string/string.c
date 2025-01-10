@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-size_t String_GetSegSize(String *s){
+i64 String_GetSegSize(String *s){
     asIfc(s, TYPE_STRING);
     if(s->type.of == TYPE_STRING_CHAIN){
         return STRING_CHUNK_SIZE;
@@ -80,7 +80,7 @@ status String_Add(MemCtx *m, String *a, String *b) {
     return r;
 }
 
-status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
+byte *String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     if(a == NULL){
         Fatal("Error string is NULL", TYPE_STRING_CHAIN);
     }
@@ -131,7 +131,15 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     }
 
     while(remaining > 0){
-        copy_l = min(remaining, STRING_CHUNK_SIZE-seg->length); 
+        if((a->type.state & FLAG_STRING_CONTIGUOUS) != 0){
+            if(STRING_CHUNK_SIZE-seg->length < remaining){
+                seg->next = String_Init(m, -1);
+                seg = seg->next;
+            }
+            copy_l = remaining; 
+        }else{
+            copy_l = min(remaining, STRING_CHUNK_SIZE-seg->length); 
+        }
         if((a->type.state & DEBUG) != 0){
             printf("  l:%d -> %ld/%ld\n", seg->length, copy_l, remaining);
         }

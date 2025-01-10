@@ -71,11 +71,8 @@ typedef struct pat_match {
 typedef struct match {
     Type type; 
     PatMatch pat;
-    int jump;
+    String *snips;
     int remaining;
-    int count;
-    int lead;
-    int tail;
     word counter;
     word captureKey;
 } Match;

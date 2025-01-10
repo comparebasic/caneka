@@ -19,3 +19,5 @@ typedef struct strsnip {
 
 #define StrSnip_Total(sn) (sn->start+sn->length)
 status StrSnip_Init(StrSnip *sn, int start, int length);
+StrSnip *StrSnip_Last(MemCtx *m, String *s);
+StrSnip *StrSnip_Add(MemCtx *m, String *s, 0, 0);

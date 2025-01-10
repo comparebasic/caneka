@@ -3,8 +3,11 @@
 
 status _Cursor_Init(MemCtx *m, Cursor *cur, String *s){
     cur->type.of = TYPE_CURSOR;
-    cur->spaces = Span_MakeInline(m, TYPE_STRSNIP, (int)sizeof(StrSnip));
-    cur->s = s;
+    cur->snips = String_Init(m, STRING_EXTEND);
+    cur->snips->type.state |= FLAG_STRING_CONTIGUOUS;
+    cur->seg = cur->s = s;
+    cur->position.type.of = TYPE_STRSNIP;
+    cur->position.type.state |= STRSNIP_ABSOLUTE;
     return SUCCESS;
 }
 
@@ -14,12 +17,12 @@ status Cursor_Init(MemCtx *m, Cursor *cur, String *s){
 }
 
 status Cursor_ReInit(MemCtx *m, Cursor *cur, String *s){
-    cur->s = s;
+    cur->seg = cur->s = s;
     memset(&cur->position, sizeof(StrSnipAbs));
     cur->position.type.of = TYPE_STRSNIP;
     cur->position.type.state |= STRSNIP_ABSOLUTE;
-    Span_ReInit(cur->spaces);
-    return _Cursor_Init(m, cur, s);
+    String_Reset(cur->snips);
+    return SUCCESS;
 }
 
 String *Cursor_ToString(MemCtx *m, Cursor *cur){
@@ -91,6 +94,17 @@ status Cursor_AddGap(Cursor *cur, int length){
 }
 
 status Cursor_Incr(Cursor *cur, int length){
-    cur->position += length;
+    cur->position.local += length;
+    i64 segSz = String_GetSegSize(cur->s);
+    i64 max = segSz;
+    if((cur->s->type.state & FLAG_STRING_CONTIGUOUS) != 0){
+        max = segSz - (segSz % length);
+    }
+    if(cur->position.local >= max){
+        cur->position.offset += max;
+        cur->position.local -= max;
+        cur->seg = String_Next(cur->seg);
+    }
+    cur->b = cur->seg->bytes+cur->position.local;
     return SUCCESS;
 }

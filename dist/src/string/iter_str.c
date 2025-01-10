@@ -19,7 +19,7 @@ status IterStr_Next(IterStr *it){
             it->type.state |= FLAG_ITER_LAST;
         }
         if(it->idx > 0){
-            SCursor_Incr(&it->cursor, it->sz);
+            Cursor_Incr(&it->cursor, it->sz);
         }
     }
 
@@ -27,19 +27,7 @@ status IterStr_Next(IterStr *it){
 }
 
 Abstract *IterStr_Get(IterStr *it){
-    int remaining = it->sz;
-    memset(it->item, 0, it->sz);
-    int len = min(it->cursor.s->length - it->cursor.position, it->sz);
-    memcpy(it->item, it->cursor.seg->bytes+it->cursor.position, len);
-    remaining -= len;
-    if(remaining > 0){
-        String *s = String_Next(it->cursor.seg);
-        if(s == NULL){
-            return NULL;
-        }
-        memcpy(it->item+len, s->bytes, remaining);
-    }
-    return (Abstract *)it->item;
+    return (Abstract *)it->cursor->ptr;
 }
 
 status IterStr_Init(IterStr *it, String *s, size_t sz, byte *item){

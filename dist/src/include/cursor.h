@@ -4,7 +4,7 @@ typedef struct cursor {
     String *s;
     String *seg;
     StrSnipAbs position;
-    Span *spaces;
+    String *snips;
 } Cursor;
 
 status _Cursor_Init(MemCtx *m, Cursor *cur, String *s);
