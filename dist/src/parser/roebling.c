@@ -78,6 +78,22 @@ static status Roebling_RunMatches(Roebling *rbl){
     Return rbl->type.state;
 }
 
+static state Roebling_resetSnips(Roebling *rbl){
+    Iter it;
+    Iter_Init(&it, rbl->matches);
+    while((Iter_Next(&it) & END) == 0){
+        String *sns = (String *)Span_Get(rbl->snips, it.idx);
+        if(sns == NULL){
+            String *s = String_Init(rbl->m, STRING_EXTEND);
+            s->type.state |= FLAG_STRING_CONTIGUOUS;
+            Span_Add(rbl->snips, (Abstract *s);
+        }else{
+            String_Reset(sns);
+        }
+    }
+    return SUCCESS;
+}
+
 status Roebling_RunCycle(Roebling *rbl){
     Stack(bytes("Roebling_RunCycle"), (Abstract *)rbl);
     if(rbl->parsers_do->nvalues == 0){
@@ -123,6 +139,7 @@ status Roebling_RunCycle(Roebling *rbl){
             wdof = as(wdof, TYPE_WRAPPED_DO);
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
             rbl->type.state &= ~ROEBLING_LOAD_MATCHES;
+            Roebling_resetSnips(rbl);
         }
         Roebling_RunMatches(rbl);
     }
@@ -308,6 +325,7 @@ Roebling *Roebling_Make(MemCtx *m,
     rbl->source = source;
     rbl->capture = capture;
     rbl->matches = Span_MakeInline(rbl->m, TYPE_PATMATCH, (int)sizeof(Match));  
+    rbl->snips = Span_Make(rbl->m, TYPE_SPAN);  
     rbl->parsers_do = Span_Make(m, TYPE_SPAN);
     int markStart = 0;
     if(markLabels != NULL){

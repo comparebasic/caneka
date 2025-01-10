@@ -18,10 +18,11 @@ enum mark_reserved {
 typedef struct roebling {
     Type type;
     MemCtx *m;
-    int idx;
     Abstract *source; 
     /* current */
+    int idx;
     Span * matches;
+    Span * snips;
     /* overall */
     Span *parsers_do;
     Lookup *marks;
