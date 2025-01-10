@@ -57,7 +57,6 @@ String *String_MakeFixed(MemCtx *m, byte *bytes, int length);
 status String_Add(MemCtx *m, String *dest, String *toAdd);
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length);
 i64 String_Length(String *s);
-String *String_FromRange(MemCtx *m, struct strcursor_range *range);
 String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
 i64 String_GetSegSize(String *s);

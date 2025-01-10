@@ -65,7 +65,6 @@ char *TypeStrings[] = {
     "TYPE_UNIT",
     "TYPE_MEMCTX",
     "TYPE_MEMHANDLE",
-    "TYPE_MHABSTRACT",
     "TYPE_MEMLOCAL",
     "TYPE_MESS",
     "TYPE_MAKER",

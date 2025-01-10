@@ -1,9 +1,3 @@
-/* 
-Debug
-Configuration file for showing debugging information, the debug flags are located in core/debug.c
-
-related: core/debug.c
-*/
 #define COLOR_RED 31
 #define COLOR_GREEN 32
 #define COLOR_YELLOW 33
@@ -13,20 +7,6 @@ related: core/debug.c
 #define COLOR_DARK 37
 
 #define isDebug(x) (((x)->type.state & DEBUG) != 0)
-
-extern MemCtx *DebugM;
-
-typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean extended);
-
-extern Chain *DebugPrintChain;
-status Debug_Init(MemCtx *m);
-void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
-void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
-void Flag16_ToString(word flag, int color, boolean extended);
-void indent_Print(int indent);
-void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched, boolean extended);
-
-extern char *rbl_debug_cstr[];
 
 extern int DEBUG_MATCH;
 extern int DEBUG_PATMATCH;
@@ -72,10 +52,23 @@ extern int DEBUG_SUBPROCESS;
 extern int DEBUG_LANG_CNK_OUT;
 
 extern boolean SHOW_SERVE_TESTS;
+extern MemCtx *DebugM;
+
+typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean extended);
+
+extern Chain *DebugPrintChain;
+status Debug_Init(MemCtx *m);
+void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
+void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
+void Flag16_ToString(word flag, int color, boolean extended);
+void indent_Print(int indent);
+void Match_midDebug(char type, word c, struct patchardef *def, Match *mt, boolean matched, boolean extended);
+
+extern char *rbl_debug_cstr[];
 
 struct string *State_ToString(struct mem_ctx *m, status state);
 char *Class_ToString(cls type);
 char *State_ToChars(status state);
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
-void SpanDef_Print(SpanDef *def);
+void SpanDef_Print(struct span_def *def);

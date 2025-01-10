@@ -41,7 +41,7 @@ typedef struct fmt_item {
 } FmtItem;
 
 
-typedef struct formatter {
+typedef struct fmt_ctx {
     Type type;
     MemCtx *m;
     FmtDef *def;

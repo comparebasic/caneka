@@ -1,3 +1,8 @@
+/* os */
+#ifdef LINUX
+    #include "linux.h"
+#endif
+
 /* config */
 #include "config/external.h"
 #include "config/status_types.h"
@@ -16,10 +21,71 @@
 #include "core/mempair.h"
 #include "core/testsuite.h"
 
+/* string */
+#include "string/string.h"
+#include "string/strsnip.h"
+#include "string/cursor.h"
+#include "string/iter_str.h"
+
+/* util */
+#include "util/blank.h"
+#include "util/boolean.h"
+#include "util/clone.h"
+#include "util/compare.h"
+#include "util/get.h"
+#include "util/hash.h"
+#include "util/int.h"
+#include "util/maker.h"
+#include "util/result.h"
+#include "util/single.h"
+#include "util/time.h"
+
+/* sequence */
+#include "sequence/spanquery.h"
+#include "sequence/spandef.h"
+#include "sequence/slab.h"
+#include "sequence/span.h"
+#include "sequence/array.h"
+#include "sequence/chain.h"
+#include "sequence/fixedlist.h"
+#include "sequence/lookup.h"
+#include "sequence/mess.h"
+#include "sequence/table.h"
+#include "sequence/table_chain.h"
+#include "sequence/iter.h"
+#include "sequence/queue.h"
+
+/* parser */
+#include "parser/patchar.h"
+#include "parser/match.h"
+#include "parser/match_predefs.h"
+#include "parser/roebling.h"
+
 /* crypto */
 #include "crypto/crypto.h"
 #include "crypto/enc_pair.h"
 #include "crypto/salty.h"
+
+/* persist */
+#include "persist/access.h"
+#include "persist/ioctx.h"
+#include "persist/auth.h"
+#include "persist/dir.h"
+#include "persist/file.h"
+#include "persist/memlocal.h"
+#include "persist/persist.h"
+#include "persist/session.h"
+#include "persist/spool.h"
+#include "persist/subprocess.h"
+#include "persist/user.h"
+
+/* serve */
+#include "serve/proto/proto.h"
+#include "serve/proto/io.h"
+#include "serve/proto/http.h"
+#include "serve/req.h"
+#include "serve/serve.h"
+#include "serve/handler.h"
 
 /* formats */
 #include "formats/cash.h"
@@ -44,76 +110,9 @@
 #include "lang/transp.h"
 #include "lang/xmlt.h"
 
-/* os */
-#ifdef LINUX
-    #include "linux.h"
-#endif
-
-/* parser */
-#include "parser/match.h"
-#include "parser/match_predefs.h"
-#include "parser/patchar.h"
-#include "parser/roebling.h"
-
-/* persist */
-#include "persist/access.h"
-#include "persist/auth.h"
-#include "persist/dir.h"
-#include "persist/file.h"
-#include "persist/ioctx.h"
-#include "persist/memlocal.h"
-#include "persist/persist.h"
-#include "persist/session.h"
-#include "persist/spool.h"
-#include "persist/subprocess.h"
-#include "persist/user.h"
-
-/* sequence */
-#include "sequence/array.h"
-#include "sequence/chain.h"
-#include "sequence/fixedlist.h"
-#include "sequence/iter.h"
-#include "sequence/lookup.h"
-#include "sequence/mess.h"
-#include "sequence/queue.h"
-#include "sequence/slab.h"
-#include "sequence/span.h"
-#include "sequence/spandef.h"
-#include "sequence/spanquery.h"
-#include "sequence/table.h"
-#include "sequence/table_chain.h"
-
-/* serve */
-#include "serve/handler.h"
-#include "serve/proto"
-#include "serve/req.h"
-#include "serve/serve.h"
-
-/* string */
-#include "string/cursor.h"
-#include "string/iter_str.h"
-#include "string/string.h"
-#include "string/strray.h"
-#include "string/strsnip.h"
-
 /* tests */
 #include "tests/mock_109strings.h"
 #include "tests/tests.h"
 
-/* util */
-#include "util/abstract.h"
-#include "util/blank.h"
-#include "util/boolean.h"
-#include "util/clone.h"
-#include "util/compare.h"
-#include "util/get.h"
-#include "util/hash.h"
-#include "util/int.h"
-#include "util/maker.h"
-#include "util/result.h"
-#include "util/single.h"
-#include "util/time.h"
-
 /* apps */
 #include "apps/apps.h"
-

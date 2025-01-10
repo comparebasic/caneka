@@ -19,7 +19,6 @@ struct strray;
 struct strsnip;
 struct strsnipabs;
 /* util */
-struct mhabstract;
 struct blank;
 struct hashed;
 struct int_pair;
@@ -67,7 +66,7 @@ struct caneka_modref;
 struct caneka_module;
 struct fmt_cnf ;
 struct fmt_item;
-struct formatter;
+struct fmt_ctx;
 struct format_def;
 struct formatter_ctx;
 struct nested_state;
