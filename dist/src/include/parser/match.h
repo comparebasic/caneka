@@ -45,6 +45,8 @@ typedef struct pat_match {
 typedef struct match {
     Type type; 
     PatMatch pat;
+    StrSnip snip;
+    String *snipBuff;
     int jump;
     int remaining;
     word counter;

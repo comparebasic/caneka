@@ -106,7 +106,15 @@ static void match_NextKoTerm(Match *mt){
     }
 }
 
-status Match_Feed(Match *mt, word c){
+static void addCount(MemCtx *m, Match *mt, word flags int length){
+    if((sns->type.state & flags) == 0){
+        String_AddBytes(m, mt->snipBuff, &mt->snip, sizeof(StrSnip));
+        StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);
+    }
+    mt->snip->length++;
+}
+
+status Match_Feed(MemCtx *m, Match *mt, word c){
     if((mt->type.state & NOOP) != 0){
 
         if(DEBUG_PATMATCH){
@@ -166,7 +174,7 @@ status Match_Feed(Match *mt, word c){
                         mt->type.state |= MATCH_LEAVE;
                     }
                     if((def->flags & PAT_INVERT_CAPTURE) == 0){
-                        mt->tail++;
+                        addCount(m, mt, MISS, 1, sns);
                     }
 
                     match_EndOfKoTerm(mt);
@@ -191,14 +199,13 @@ status Match_Feed(Match *mt, word c){
             }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;
             }else if((def->flags & PAT_CONSUME) != 0 || (def->flags & PAT_INVERT_CAPTURE) != 0){
-                if(mt->count == 0 && (def->flags & PAT_CONSUME) == 0){
-                    mt->lead++;
-                }else {
-                    mt->tail++;
-                }
+                addCount(m, mt, MISS, 1, sns);
             }else{
-                mt->count = mt->count + mt->tail + 1;
-                mt->tail = 0;
+                if((mt->snip.type.state & MISS) != 0){
+                    mt->snip.type.state &= ~MISS;
+                    mt->snip.type.state |= ~SUCCESS;
+                }
+                addCount(m, mt, SUCCESS, 1, sns);
             }
             
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
@@ -247,7 +254,7 @@ miss:
             mt->type.state &= ~PROCESSING;
             if((mt->type.state & SEARCH) != 0){
                 match_Reset(mt);
-                mt->lead++;
+                addCount(m, mt, MISS, 1, sns);
             }else{
                 mt->type.state |= NOOP;
             }

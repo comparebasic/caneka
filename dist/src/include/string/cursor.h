@@ -3,8 +3,8 @@ typedef struct cursor {
     byte *ptr;
     String *s;
     String *seg;
-    StrSnipAbs position;
-    String *snips;
+    i64 offset;
+    i64 local;
 } Cursor;
 
 status _Cursor_Init(MemCtx *m, Cursor *cur, String *s);
