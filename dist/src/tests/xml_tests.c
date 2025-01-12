@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status Xml_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     String *s = NULL;
@@ -29,7 +29,7 @@ status Xml_Tests(MemCtx *gm){
 }
 
 status XmlNested_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     String *s = String_Make(m, bytes("<main type=\"root\">\n  <alpha>\n    <t model=\"foo\" baseline=\"fancy-pants\">Gotta Get It!</t>\n  </alpha>\n  <alpha>\n    <t model=\"geese\" baseline=\"fancy-pants\">Have It!</t>\n  </alpha>\n</main>"));
@@ -92,7 +92,7 @@ status XmlNested_Tests(MemCtx *gm){
 }
 
 status XmlParser_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
     XmlParser *xml = XmlParser_Make(m); 
 
@@ -106,7 +106,7 @@ status XmlParser_Tests(MemCtx *gm){
 }
 
 status XmlStringType_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
     XmlParser *xml = XmlParser_Make(m); 
     String *s = NULL;

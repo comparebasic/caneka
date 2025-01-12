@@ -20,21 +20,21 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
     while(s != NULL){
         Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
         for(int i = offset; i < s->length; i++){
-            status mr = Match_Feed(&mt, (word)s->bytes[i]);
+            status mr = Match_Feed(m, &mt, (word)s->bytes[i]);
             if((mr & SUCCESS) != 0){
-                String *arg = String_Sub(m, s, offset, mt.count);  
+                String *arg = String_Sub(m, s, offset, mt.snip.length);
 
                 Span_Add(p, (Abstract *)arg);
-                offset += mt.count+mt.lead+mt.tail;
+                offset += Match_Total(&mt);
                 Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
             }
         }
-        status mr = Match_Feed(&mt, (word)'/');
+        status mr = Match_Feed(m, &mt, (word)'/');
         if((mr & SUCCESS) != 0){
-            String *arg = String_Sub(m, s, offset, mt.count);  
+            String *arg = String_Sub(m, s, offset, mt.snip.length);  
 
             Span_Add(p, (Abstract *)arg);
-            offset += mt.count+mt.lead+mt.tail;
+            offset += Match_Total(&mt);
             Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
         }
 

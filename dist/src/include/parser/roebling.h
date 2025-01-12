@@ -22,6 +22,7 @@ typedef struct roebling {
     /* current */
     int idx;
     Span * matches;
+    Span *snips;
     /* overall */
     Span *parsers_do;
     Lookup *marks;

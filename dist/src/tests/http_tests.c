@@ -69,7 +69,7 @@ TestCapture expected1[] = {
 };
 
 status Http_Tests(MemCtx *gm){
-    r = TEST_OK;
+    r = READY;
     MemCtx *m = MemCtx_Make();
 
     String *s = NULL;

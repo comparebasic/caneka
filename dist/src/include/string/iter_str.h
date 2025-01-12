@@ -8,5 +8,5 @@ typedef struct iter_string {
 
 status IterStr_Next(IterStr *it);
 Abstract *IterStr_Get(IterStr *it);
-status IterStr_Init(IterStr *it, String *s, size_t sz, byte *item);
-IterStr *IterStr_Make(MemCtx *m);
+IterStr *IterStr_Make(MemCtx *m, String *s, size_t sz);
+status IterStr_Init(IterStr *it, String *s, size_t sz);

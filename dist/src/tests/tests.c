@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <tests.h>
+#include <tests/tests.h>
 
 /*
 #define CYCLE_SERVE 1

@@ -14,7 +14,7 @@ typedef byte boolean;
 
 struct string;
 struct serve_ctx;
-struct serve_req;
+struct req;
 struct handler;
 struct mem_ctx;
 struct mem_slab;

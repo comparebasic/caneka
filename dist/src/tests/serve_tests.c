@@ -9,7 +9,7 @@ static char *req1_cstr = "GET /home HTTP/1.1\r\nContent-Leng";
 static char *req2_cstr = "th: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
 
 status Serve_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     ProtoDef *def = HttpProtoDef_Make(m);
@@ -37,7 +37,7 @@ status Serve_Tests(MemCtx *gm){
 }
 
 status ServeHandle_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     Handler *h = NULL;
@@ -84,7 +84,7 @@ status ServeHandle_Tests(MemCtx *gm){
 }
 
 status ServeChunked_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     Handler *h = NULL;
@@ -144,7 +144,7 @@ int atOncePids[MULTIPLE_COUNT] = {
 };
 
 status ServeMultiple_Tests(MemCtx *gm){
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     Handler *h = NULL;

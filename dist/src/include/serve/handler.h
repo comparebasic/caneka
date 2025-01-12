@@ -1,4 +1,4 @@
-typedef status (*HandleFunc)(struct handler *h, struct serve_req *req, struct serve_ctx *sctx);
+typedef status (*HandleFunc)(struct handler *h, struct req *req, struct serve_ctx *sctx);
 
 typedef struct handler {
     Type type;

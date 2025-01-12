@@ -26,7 +26,7 @@ typedef struct serve_ctx {
     int port;
     boolean serving;
     ProtoDef *def;
-    struct serve_req *active;
+    struct req *active;
     struct {
         int open;
         int served;
@@ -39,12 +39,12 @@ typedef struct serve_ctx {
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def);
 status Serve_PreRun(Serve *sctx, int port);
-struct serve_req *Serve_AddFd(Serve *sctx, int fd);
+struct req *Serve_AddFd(Serve *sctx, int fd);
 status Serve_RunPort(Serve *sctx, int port);
 status Serve_Run(Serve *sctx);
 status Serve_Stop(Serve *sctx);
-status Serve_NextState(Serve *sctx, struct serve_req *req);
+status Serve_NextState(Serve *sctx, struct req *req);
 status Serve_AcceptPoll(Serve *sctx, int delay);
 status Serve_ServeRound(Serve *sctx);
-status Serve_CloseReq(Serve *sctx, struct serve_req *req, int idx);
+status Serve_CloseReq(Serve *sctx, struct req *req, int idx);
 void Delay();

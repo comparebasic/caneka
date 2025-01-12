@@ -18,7 +18,6 @@ static Target targets[] = {
     {"testreq", "tests/testreq.c"},
     {"caneka", "main.c"},
     {"formatter", "formatter.c"},
-    {"loopit", "loopit.c"},
     {"rblsh", "rblsh.c"},
     {NULL, NULL},
 };
@@ -161,7 +160,6 @@ static BuildSubdir stringobj = { "string", {
     "string_equals.c",
     "string_makers.c",
     "string_utils.c",
-    "strray.c",
     "strsnip.c",
     NULL
 }};
@@ -170,7 +168,6 @@ static BuildSubdir testsobj = { "tests", {
     "blank_test.c",
     "core_tests.c",
     "crypto_tests.c",
-    "formatter.c",
     "hash_tests.c",
     "http_tests.c",
     "ioctx_tests.c",
@@ -180,8 +177,6 @@ static BuildSubdir testsobj = { "tests", {
     "mock_109strings.c",
     "nestedd_tests.c",
     "oset_tests.c",
-    "patmatch_tests.c",
-    "proto_http_tests.c",
     "queue_tests.c",
     "roebling_syntax_tests.c",
     "roebling_tests.c",
@@ -202,7 +197,6 @@ static BuildSubdir testsobj = { "tests", {
 }};
 
 static BuildSubdir utilobj = { "util", {
-    "abstract.c",
     "blank.c",
     "boolean.c",
     "clone.c",

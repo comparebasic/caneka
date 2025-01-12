@@ -1,6 +1,6 @@
 typedef struct proto {
     Type type;
-    char *(*toLog)(struct serve_req *req);
+    char *(*toLog)(struct req *req);
     Span *headers_tbl;
     String *body;
     Lookup *methods;
@@ -11,7 +11,7 @@ typedef struct protodef {
     cls reqType;
     Maker req_mk;
     Maker proto_mk;
-    struct handler *(*getHandler)(struct serve_ctx *sctx, struct serve_req *req);
+    struct handler *(*getHandler)(struct serve_ctx *sctx, struct req *req);
     Abstract *source;
     GetDelayFunc getDelay;
     Lookup *methods;

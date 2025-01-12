@@ -48,7 +48,7 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
 
 static void match_Reset(Match *mt){
     mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
-    String_Reset(mt->snips);
+    String_Reset(mt->snipBuff);
 }
 
 static boolean charMatched(word c, PatCharDef *def){
@@ -106,12 +106,16 @@ static void match_NextKoTerm(Match *mt){
     }
 }
 
-static void addCount(MemCtx *m, Match *mt, word flags int length){
-    if((sns->type.state & flags) == 0){
-        String_AddBytes(m, mt->snipBuff, &mt->snip, sizeof(StrSnip));
+static void addCount(MemCtx *m, Match *mt, word flags, int length){
+    if((mt->snipBuff->type.state & flags) == 0){
+        String_AddBytes(m, mt->snipBuff, bytes(&mt->snip), sizeof(StrSnip));
         StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);
     }
-    mt->snip->length++;
+    mt->snip.length++;
+}
+
+int Match_Total(Match *mt){
+    return StrSnipStr_Total(mt->snipBuff, SUCCESS);
 }
 
 status Match_Feed(MemCtx *m, Match *mt, word c){
@@ -174,7 +178,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                         mt->type.state |= MATCH_LEAVE;
                     }
                     if((def->flags & PAT_INVERT_CAPTURE) == 0){
-                        addCount(m, mt, MISS, 1, sns);
+                        addCount(m, mt, NOOP, 1);
                     }
 
                     match_EndOfKoTerm(mt);
@@ -199,13 +203,13 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;
             }else if((def->flags & PAT_CONSUME) != 0 || (def->flags & PAT_INVERT_CAPTURE) != 0){
-                addCount(m, mt, MISS, 1, sns);
+                addCount(m, mt, NOOP, 1);
             }else{
-                if((mt->snip.type.state & MISS) != 0){
-                    mt->snip.type.state &= ~MISS;
+                if((mt->snip.type.state & NOOP) != 0){
+                    mt->snip.type.state &= ~NOOP;
                     mt->snip.type.state |= ~SUCCESS;
                 }
-                addCount(m, mt, SUCCESS, 1, sns);
+                addCount(m, mt, SUCCESS, 1);
             }
             
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
@@ -254,7 +258,7 @@ miss:
             mt->type.state &= ~PROCESSING;
             if((mt->type.state & SEARCH) != 0){
                 match_Reset(mt);
-                addCount(m, mt, MISS, 1, sns);
+                addCount(m, mt, NOOP, 1);
             }else{
                 mt->type.state |= NOOP;
             }
@@ -263,6 +267,7 @@ miss:
     }
 
     if(mt->pat.curDef == mt->pat.endDef){
+        String_AddBytes(m, mt->snipBuff, bytes(&mt->snip), sizeof(StrSnip));
         if(Match_Total(mt) == 0){
             mt->type.state = NOOP;
         }else{
@@ -286,7 +291,7 @@ miss:
     return mt->type.state;
 }
 
-status Match_FeedString(Match *mt, String *s, int offset){
+status Match_FeedString(MemCtx *m, Match *mt, String *s, int offset){
     if((mt->type.state & NOOP) != 0){
         return mt->type.state;
     }
@@ -299,7 +304,7 @@ status Match_FeedString(Match *mt, String *s, int offset){
     while(s != NULL){
         for(int i = offset; i < s->length; i++){
             byte b = s->bytes[i];
-            Match_Feed(mt, (word)b);
+            Match_Feed(m, mt, (word)b);
             if((mt->type.state & SUCCESS) != 0){
                 break;
             }
@@ -311,7 +316,7 @@ status Match_FeedString(Match *mt, String *s, int offset){
     return mt->type.state;
 }
 
-status Match_FeedEnd(Match *mt){
+status Match_FeedEnd(MemCtx *m, Match *mt){
     if(mt->remaining == 0){
         mt->type.state = SUCCESS;
     }

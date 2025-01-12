@@ -80,7 +80,7 @@ status String_Add(MemCtx *m, String *a, String *b) {
     return r;
 }
 
-byte *String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
+status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     if(a == NULL){
         Fatal("Error string is NULL", TYPE_STRING_CHAIN);
     }

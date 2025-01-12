@@ -4,7 +4,7 @@
 status Roebling_SyntaxTests(MemCtx *gm){
     Stack(bytes("Roebling_SyntaxTests"), NULL);
 
-    status r = TEST_OK;
+    status r = READY;
     MemCtx *m = MemCtx_Make();
 
     String *s = NULL;

@@ -27,16 +27,20 @@ status IterStr_Next(IterStr *it){
 }
 
 Abstract *IterStr_Get(IterStr *it){
-    return (Abstract *)it->cursor->ptr;
+    return (Abstract *)it->cursor.ptr;
 }
 
-IterStr *IterStr_Make(MemCtx *m, String *s, size_t sz, byte *item){
-    IterStr *it = (IterStr *)MemCtx_Alloc(m, sizeof(IterStr));
+status IterStr_Init(IterStr *it, String *s, size_t sz){
     it->type.of = TYPE_ITER_STRING;
     it->sz = sz;
     it->idx = -1;
-    it->item = item;
     it->count = String_Length(s) / sz;
     Cursor_Init(&it->cursor, s);
+    return SUCCESS;
+}
+
+IterStr *IterStr_Make(MemCtx *m, String *s, size_t sz){
+    IterStr *it = (IterStr *)MemCtx_Alloc(m, sizeof(IterStr));
+    IterStr_Init(it, s, sz);
     return it;
 }

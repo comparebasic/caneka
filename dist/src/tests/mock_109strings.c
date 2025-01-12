@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <mock_109strings.h>
+#include <tests/mock_109strings.h>
 
 String *zero_s;
 String *one_s;

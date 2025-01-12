@@ -5,5 +5,7 @@ typedef struct strsnip {
 } StrSnip;
 
 #define StrSnip_Total(sn) (sn->start+sn->length)
-status StrSnip_Init(StrSnip *sn, int start, int length);
+status StrSnip_Init(StrSnip *sn, word flags, int start, int length);
 StrSnip *StrSnip_Add(MemCtx *m, String *s, int start, int length);
+String *StrSnip_ToString(MemCtx *m, String *sns, String *s);
+int StrSnipStr_Total(String *sns, word flags);

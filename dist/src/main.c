@@ -6,7 +6,7 @@ This file is mostly an example Caneka application, and it runs the tests
 */
 #include <external.h>
 #include <caneka.h>
-#include <tests.h>
+#include <tests/tests.h>
 #include <example.h>
 
 #define servecmd "serve"
@@ -14,7 +14,7 @@ This file is mostly an example Caneka application, and it runs the tests
 #define transcmd "transp"
 
 static status test(MemCtx *m, char *arg){
-    status r = TEST_OK;
+    status r = READY;
     word flags = 0;
     if(strncmp(arg, "test=no-color", strlen("test=no-color")) == 0){
         GLOBAL_flags |= NO_COLOR;
@@ -71,12 +71,7 @@ static status handle(MemCtx *m, char *arg){
     }else if(strncmp(arg, transcmd, strlen(servecmd)) == 0){
         return transpile(m, arg);
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
-        status r = test(m, arg);
-        if(r == TEST_OK){
-            return SUCCESS;
-        }else{
-            return r;
-        }
+        return test(m, arg);
     }
 
     return NOOP;
