@@ -116,6 +116,9 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
             ((flags & SUCCESS) == 0 ? ")" : "")
         );
     }
+    if(mt->snip.type.state == ZERO){
+        mt->snip.type.state = flags;
+    }
     if((mt->snip.type.state & flags) == 0){
         String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
         StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);

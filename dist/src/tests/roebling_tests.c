@@ -104,16 +104,15 @@ status RoeblingRun_Tests(MemCtx *gm){
 
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
     Match *mt = Roebling_GetMatch(rbl);
+
     s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
     int idx = Roebling_GetMatchIdx(rbl);
     r |= Test(idx = 1, "Match Idx equals expected");
 
     Roebling_RunCycle(rbl);
+    mt = Roebling_GetMatch(rbl);
     s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-
-    Debug_Print((void *)s, 0, "s: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line, expected 'for the weekend', have '%s'", String_ToChars(m, s));
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
@@ -128,7 +127,7 @@ status RoeblingRun_Tests(MemCtx *gm){
 status RoeblingMark_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
-    /*
+    Match *mt = NULL;
 
     Roebling *rbl = NULL;
     Span *parsers_do = Span_Make(m, TYPE_SPAN);
@@ -151,41 +150,46 @@ status RoeblingMark_Tests(MemCtx *gm){
     Roebling_AddBytes(rbl, s->bytes, s->length);
 
     Roebling_RunCycle(rbl);
-    s = Cursor_ToString(m, &(rbl->cursor));
+    mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals TWO, have %s", s->bytes);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'TWO'");
 
     Roebling_RunCycle(rbl);
-    s = Cursor_ToString(m, &(rbl->cursor));
+    mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'for the weekend'");
 
     Roebling_RunCycle(rbl);
-    s = Cursor_ToString(m, &(rbl->cursor));
+    mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
 
     printf("hi\n");
     r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals ONE, have %s", s->bytes);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'ONE'");
 
     Roebling_RunCycle(rbl);
-    s = Cursor_ToString(m, &(rbl->cursor));
+    mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     r |= Test(String_EqualsBytes(s, bytes("for good measure")), "Roebling has captured the rest of the line: '%s'", s->bytes);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
-    s = Cursor_ToString(m, &(rbl->cursor));
+    mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     r |= Test(String_EqualsBytes(s, bytes("THREE")), "Content equals THREE, have %s", s->bytes);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
-    s = Cursor_ToString(m, &(rbl->cursor));
+    mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     r |= Test(String_EqualsBytes(s, bytes("for all!")), "Roebling has captured the rest of the line: '%s'", s->bytes);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
     Roebling_RunCycle(rbl);
     r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS %s", State_ToChars(rbl->type.state));
-    */
 
     MemCtx_Free(m);
     return r;
@@ -194,7 +198,7 @@ status RoeblingMark_Tests(MemCtx *gm){
 status RoeblingStartStop_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
-    /*
+    Match *mt = NULL;
 
     Roebling *rbl = NULL;
     Span *parsers_do = Span_Make(m, TYPE_SPAN);
@@ -211,11 +215,11 @@ status RoeblingStartStop_Tests(MemCtx *gm){
     Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
     Roebling_Run(rbl);
 
-    s = Cursor_ToString(m, &(rbl->cursor));
+    mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     Test(String_EqualsBytes(s, bytes("Hi how are you today?")), "String equals 'Hi how are you today?', have '%s'", (char *)s->bytes);
     r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
 
-    */
     MemCtx_Free(m);
     return r;
 }

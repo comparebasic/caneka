@@ -16,3 +16,4 @@ status Cursor_AddGap(Cursor *cur, int length);
 status Cursor_Incr(Cursor *cur, int length);
 
 #define Cursor_GetByte(cur) (*((cur)->ptr))
+#define Cursor_Total(cur) ((cur)->offset+(cur)->local)

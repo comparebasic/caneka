@@ -6,11 +6,7 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
     IterStr it;
     IterStr_Init(&it, sns, sizeof(StrSnip));
 
-    Debug_Print((void*)sns, TYPE_STRSNIP_STRING, "Copying from snips: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     while((IterStr_Next(&it) & END) == 0){
-        printf("iter\n");
         if(s == NULL){
             break;
         }
@@ -29,7 +25,6 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
 
         while(s != NULL && remaining > 0){
             i64 length = min(s->length-start, remaining);
-            printf("    bytes %ld at %ld of '%s'\n", length, start, s->bytes);
             String_AddBytes(m, ret, s->bytes+start, length);
             remaining -= length;
             start -= length;
@@ -38,9 +33,6 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
             }
         }
     }
-
-    Debug_Print((void*)ret, 0, "Copied to have: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     return ret;
 }
