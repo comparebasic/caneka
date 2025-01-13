@@ -13,7 +13,6 @@ enum rbl_test_marks {
     RBL_TEST_END,
 };
 
-
 static word text[] = {PAT_INVERT_CAPTURE|PAT_ANY|PAT_TERM, ' ', ' ', PAT_KO, '\n', '\n', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, PAT_END, 0, 0};
 static word nl[] = {NL_DEF};
 static word dbl_nl[] = {PAT_TERM, '\n', '\n', PAT_END, 0, 0};
@@ -68,7 +67,6 @@ status SetWord2(MemCtx *m, Roebling *rbl){
 }
 
 status Roebling_Tests(MemCtx *gm){
-
     status r = READY;
     MemCtx *m = MemCtx_Make();
     String *s = NULL; 
@@ -92,7 +90,6 @@ status Roebling_Tests(MemCtx *gm){
 status RoeblingRun_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
-    /*
 
     Roebling *rbl = NULL;
     Span *parsers_do = Span_Make(m, TYPE_SPAN);
@@ -105,22 +102,24 @@ status RoeblingRun_Tests(MemCtx *gm){
     Roebling_AddBytes(rbl, s->bytes, s->length);
     Roebling_RunCycle(rbl);
 
-    Match *mt = Roebling_GetMatch(rbl);
-    s = Cursor_ToString(rbl->m, &(rbl->cursor));
-    int idx = Roebling_GetMatchIdx(rbl);
-    s = Cursor_ToString(m, &(rbl->cursor));
-    r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
-    r |= Test(idx = 1, "Match Idx equals expected");
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
+    Match *mt = Roebling_GetMatch(rbl);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
+    r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
+    int idx = Roebling_GetMatchIdx(rbl);
+    r |= Test(idx = 1, "Match Idx equals expected");
 
     Roebling_RunCycle(rbl);
-    s = Cursor_ToString(rbl->m, &(rbl->cursor));
-    r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line, expected 'for the weekend', have '%s'", s->bytes);
+    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
+
+    Debug_Print((void *)s, 0, "s: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+
+    r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line, expected 'for the weekend', have '%s'", String_ToChars(m, s));
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
 
     Roebling_RunCycle(rbl);
     r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS");
-    */
 
     MemCtx_Free(m);
     return r;

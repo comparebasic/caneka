@@ -19,6 +19,7 @@ static status Roebling_RunMatches(Roebling *rbl){
     int noopCount = 0;
     rbl->type.state |= (rbl->cursor.type.state & END);
     while((rbl->type.state & (ROEBLING_NEXT|END)) == 0){
+        printf("I\n");
         Guard_Incr(&rbl->guard);
         c = Cursor_GetByte(&(rbl->cursor));
         Match *mt = NULL;
@@ -26,6 +27,7 @@ static status Roebling_RunMatches(Roebling *rbl){
         Iter_Init(&it, rbl->matches);
         while((Iter_Next(&it) & END) == 0){
            mt = (Match *)Iter_Get(&it);
+           printf("I.%d %p\n", it.idx, mt);
 
            if(DEBUG_PATMATCH){
                 String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
@@ -44,12 +46,15 @@ static status Roebling_RunMatches(Roebling *rbl){
                     rbl->jump = mt->jump;
                  }
 
-                 String *s = StrSnip_ToString(rbl->m, mt->backlog, rbl->cursor.s);
+                 printf("before\n");
+                 String *s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
+                 printf("after\n");
                  rbl->capture(mt->captureKey, it.idx, s, rbl->source);
                  break;
              }
         }
 
+        printf("II\n");
         if(noopCount == rbl->matches->nvalues){
             rbl->type.state |= (NOOP|END);
         }
@@ -200,6 +205,15 @@ status Roebling_Add(Roebling *rbl, String *s){
 
 status Roebling_ResetPatterns(Roebling *rbl){
     Span_ReInit(rbl->matches);
+    Iter it;
+    Iter_Init(&it, rbl->snips);
+    while((Iter_Next(&it) & END) == 0){
+        String *sns = (String *)Iter_Get(&it);
+        if(sns != NULL){
+            String_Reset(sns);
+        }
+    }
+
     rbl->jump = -1;
     rbl->jumpMiss = -1;
     rbl->guard.count = 0;
@@ -212,18 +226,18 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int 
 
     String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
     if(sns == NULL){
-        String *s = String_Init(rbl->m, STRING_EXTEND);
-        s->type.state |= FLAG_STRING_CONTIGUOUS;
-        Span_Add(rbl->snips, (Abstract *)s);
-    }else{
-        String_Reset(sns);
+        sns = String_Init(rbl->m, STRING_EXTEND);
+        sns->type.state |= FLAG_STRING_CONTIGUOUS;
+        Span_Add(rbl->snips, (Abstract *)sns);
     }
 
     r |= Match_SetPattern(mt, def, sns);
+    mt->backlog = sns;
     mt->captureKey = captureKey;
     if(jump != -1){
         mt->jump = Roebling_GetMarkIdx(rbl, jump);
     }
+
     return r;
 }
 

@@ -161,6 +161,7 @@ static BuildSubdir stringobj = { "string", {
     "string_makers.c",
     "string_utils.c",
     "strsnip.c",
+    "strsnipstr.c",
     NULL
 }};
 
