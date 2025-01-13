@@ -327,10 +327,9 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
     {
         "IterStr",
@@ -341,3 +340,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/

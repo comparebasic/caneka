@@ -6,7 +6,6 @@ status IterStr_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     String *s;
 
-
     int source[] = {
          1, 73451,
          2, 73452,
@@ -83,6 +82,7 @@ status IterStr_Tests(MemCtx *gm){
     s = String_Init(m, sizeof(source));
 
     IntPair *expected = (IntPair*)source;
+    s->type.state |= FLAG_STRING_CONTIGUOUS;
     while(expected->a > 0){
         String_AddBytes(m, s, bytes(expected), sizeof(IntPair));
         expected++;

@@ -3,7 +3,6 @@
 
 Chain *DebugPrintChain = NULL;
 
-int DEBUG_SCURSOR = 0;
 int DEBUG_MATCH = 0;
 int DEBUG_PATMATCH = 0;
 int DEBUG_MATCH_COMPLETE = 0;
@@ -79,7 +78,6 @@ char *TypeStrings[] = {
     "TYPE_PARSER",
     "TYPE_ROEBLING",
     "TYPE_MULTIPARSER",
-    "TYPE_SCURSOR",
     "TYPE_RANGE",
     "TYPE_MATCH",
     "TYPE_GUARD",
@@ -539,6 +537,17 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     printf("\x1b[%dm%sSingle<%s:%u:%ld>\x1b[0m", color, msg, Class_ToString(v->type.of), v->type.state, v->val.value);
 }
 
+static void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Cursor *cur = (Cursor *)as(a, TYPE_CURSOR);
+    printf("\x1b[%dm%sCursor<%s ptr=%c offset=%ld local=%ld", color, msg,
+        State_ToChars(cur->type.state), (cur->ptr != NULL ? *(cur->ptr) : 0), 
+        cur->offset, cur->local);
+    if(extended){
+        Debug_Print((void*)cur->seg, 0, " seg=", color, extended);
+    }
+    printf("\x1b[%dm>\x1b[0m", color);
+}
+
 static void Result_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Result *v = (Result *)a;
     printf("\x1b[%dm%sR<%s:\x1b[1;%dm%d\x1b[0;%dm:", color, msg, State_ToChars(v->type.state), color, v->range, color);
@@ -794,6 +803,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_DEBUG_STACK_ENTRY, (void *)DebugStackEntry_Print);
     r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
     r |= Lookup_Add(m, lk, TYPE_RESULT, (void *)Result_Print);
+    r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     
     return r;
 }
