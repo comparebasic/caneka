@@ -71,3 +71,4 @@ status Roebling_ResetPatterns(Roebling *rbl);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump);
 int Roebling_GetMarkIdx(Roebling *rlb, int mark);
+Match *Roebling_LatestMatch(Roebling *rbl);

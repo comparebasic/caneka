@@ -48,7 +48,7 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
 
 static void match_Reset(Match *mt){
     mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
-    String_Reset(mt->snipBuff);
+    String_Reset(mt->backlog);
 }
 
 static boolean charMatched(word c, PatCharDef *def){
@@ -107,18 +107,22 @@ static void match_NextKoTerm(Match *mt){
 }
 
 static void addCount(MemCtx *m, Match *mt, word flags, int length){
-    if((mt->snipBuff->type.state & flags) == 0){
-        String_AddBytes(m, mt->snipBuff, bytes(&mt->snip), sizeof(StrSnip));
+    Stack(bytes("Match.addCount"), NULL);
+    if((mt->snip.type.state & flags) == 0){
+        String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
         StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);
+    }else{
+        mt->snip.length += length;
     }
-    mt->snip.length++;
+    Return;
 }
 
 int Match_Total(Match *mt){
-    return StrSnipStr_Total(mt->snipBuff, SUCCESS);
+    return StrSnipStr_Total(mt->backlog, SUCCESS);
 }
 
 status Match_Feed(MemCtx *m, Match *mt, word c){
+    Stack(bytes("Match_Feed"), NULL);
     if((mt->type.state & NOOP) != 0){
 
         if(DEBUG_PATMATCH){
@@ -127,7 +131,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             printf("\n");
         }
 
-        return mt->type.state;
+        Return mt->type.state;
     }
     boolean matched = FALSE;
     PatCharDef *def;
@@ -267,7 +271,7 @@ miss:
     }
 
     if(mt->pat.curDef == mt->pat.endDef){
-        String_AddBytes(m, mt->snipBuff, bytes(&mt->snip), sizeof(StrSnip));
+        String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
         if(Match_Total(mt) == 0){
             mt->type.state = NOOP;
         }else{
@@ -288,7 +292,7 @@ miss:
         printf("\n");
     }
 
-    return mt->type.state;
+    Return mt->type.state;
 }
 
 status Match_FeedString(MemCtx *m, Match *mt, String *s, int offset){
@@ -323,16 +327,16 @@ status Match_FeedEnd(MemCtx *m, Match *mt){
     return mt->type.state;
 }
 
-status Match_SetString(MemCtx *m, Match *mt, String *s){
+status Match_SetString(MemCtx *m, Match *mt, String *s, String *backlog){
     String *ret = PatChar_FromString(m, s);
     if(ret == NULL){
         return ERROR;
     }
 
-    return Match_SetPattern(mt, (PatCharDef *)ret->bytes); 
+    return Match_SetPattern(mt, (PatCharDef *)ret->bytes, backlog); 
 }
 
-status Match_SetPattern(Match *mt, PatCharDef *def){
+status Match_SetPattern(Match *mt, PatCharDef *def, String *backlog){
     memset(mt, 0, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;
     mt->pat.startDef = mt->pat.curDef = def;
@@ -350,7 +354,7 @@ status Match_SetPattern(Match *mt, PatCharDef *def){
     }
     mt->remaining = -1;
     mt->jump = -1;
-
+    mt->backlog = backlog;
 
     return SUCCESS;
 }

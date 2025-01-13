@@ -46,7 +46,7 @@ int DEBUG_LANG_CNK_OUT = 0;
 int DEBUG_SUBPROCESS = 0;
 
 char *TypeStrings[] = {
-    "_TYPE_START",
+    "_TYPE_START,"
     "TYPE_UNKNOWN",
     "TYPE_BLANK",
     "TYPE_ABSTRACT",
@@ -64,6 +64,7 @@ char *TypeStrings[] = {
     "TYPE_UNIT",
     "TYPE_MEMCTX",
     "TYPE_MEMHANDLE",
+    "TYPE_MHABSTRACT",
     "TYPE_MEMLOCAL",
     "TYPE_MESS",
     "TYPE_MAKER",
@@ -73,15 +74,16 @@ char *TypeStrings[] = {
     "TYPE_STRING_FIXED",
     "TYPE_STRING_FULL",
     "TYPE_STRING_SLAB",
+    "TYPE_STRSNIP",
+    "TYPE_STRSNIP_STRING",
+    "TYPE_CURSOR",
     "TYPE_TESTSUITE",
     "TYPE_RESULT",
     "TYPE_PARSER",
     "TYPE_ROEBLING",
     "TYPE_MULTIPARSER",
-    "TYPE_RANGE",
-    "TYPE_MATCH",
+    "TYPE_SCURSOR",
     "TYPE_GUARD",
-    "TYPE_STRINGMATCH",
     "TYPE_PATMATCH",
     "TYPE_PATCHARDEF",
     "TYPE_STRUCTEXP",
@@ -100,6 +102,7 @@ char *TypeStrings[] = {
     "TYPE_TABLE",
     "TYPE_POLL_MAP_SPAN",
     "_TYPE_SPAN_END",
+    "TYPE_STRRAY",
     "TYPE_COORDS",
     "TYPE_MEM_KEYED",
     "TYPE_SPAN_STATE",
@@ -117,6 +120,7 @@ char *TypeStrings[] = {
     "TYPE_SPOOL",
     "TYPE_LOOKUP",
     "TYPE_ITER",
+    "TYPE_ITER_STRING",
     "TYPE_SINGLE",
     "TYPE_RBL_MARK",
     "TYPE_OSET_ITEM",
@@ -470,11 +474,32 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
     printf("\x1b[0m");
 }
 
+static void StrSnipString_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    String *s = (String *)asIfc(a, TYPE_STRING);
+    IterStr it;
+    IterStr_Init(&it, s, sizeof(StrSnip));
+    printf("\x1b[%dm%s", color, msg);
+    while((IterStr_Next(&it) & END) == 0){
+        StrSnip *sn = (StrSnip *)IterStr_Get(&it);
+        if((sn->type.state & SUCCESS) != 0){
+            printf("%d/%d", sn->start, sn->length);
+        }else{
+            printf("gap(%d/%d)", sn->start, sn->length);
+        }
+        if((it.type.state & FLAG_ITER_LAST) == 0){
+            printf(",");
+        }else{
+            printf("\x1b[0m");
+        }
+    }
+}
+
 static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:remainig=%d ", color, msg,
-            State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->remaining);
+        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:remainig=%d:%d/%d", color, msg,
+            State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->remaining, mt->snip.start, mt->snip.length);
+            Debug_Print(mt->backlog, TYPE_STRSNIP_STRING, ":backlog=", color, FALSE);
         printf("\x1b[1;%dm[", color);
         Debug_Print((void *)mt->pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
         printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);
@@ -804,6 +829,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
     r |= Lookup_Add(m, lk, TYPE_RESULT, (void *)Result_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRSNIP_STRING, (void *)StrSnipString_Print);
     
     return r;
 }

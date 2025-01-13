@@ -44,7 +44,7 @@ static status Roebling_RunMatches(Roebling *rbl){
                     rbl->jump = mt->jump;
                  }
 
-                 String *s = StrSnip_ToString(rbl->m, mt->snipBuff, rbl->cursor.s);
+                 String *s = StrSnip_ToString(rbl->m, mt->backlog, rbl->cursor.s);
                  rbl->capture(mt->captureKey, it.idx, s, rbl->source);
                  break;
              }
@@ -69,22 +69,6 @@ static status Roebling_RunMatches(Roebling *rbl){
     }
 
     Return rbl->type.state;
-}
-
-static status Roebling_resetSnips(Roebling *rbl){
-    Iter it;
-    Iter_Init(&it, rbl->matches);
-    while((Iter_Next(&it) & END) == 0){
-        String *sns = (String *)Span_Get(rbl->snips, it.idx);
-        if(sns == NULL){
-            String *s = String_Init(rbl->m, STRING_EXTEND);
-            s->type.state |= FLAG_STRING_CONTIGUOUS;
-            Span_Add(rbl->snips, (Abstract *)s);
-        }else{
-            String_Reset(sns);
-        }
-    }
-    return SUCCESS;
 }
 
 status Roebling_RunCycle(Roebling *rbl){
@@ -128,7 +112,6 @@ status Roebling_RunCycle(Roebling *rbl){
             wdof = as(wdof, TYPE_WRAPPED_DO);
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
             rbl->type.state &= ~ROEBLING_LOAD_MATCHES;
-            Roebling_resetSnips(rbl);
         }
         Roebling_RunMatches(rbl);
     }
@@ -167,6 +150,10 @@ String *Roebling_GetMarkDebug(Roebling *rbl, int idx){
 
 Match *Roebling_GetMatch(Roebling *rbl){
     return Span_GetSelected(rbl->matches);
+}
+
+Match *Roebling_LatestMatch(Roebling *rbl){
+    return Span_Get(rbl->matches, rbl->matches->metrics.set);
 }
 
 Match *Roebling_GetValueMatch(Roebling *rbl){
@@ -222,7 +209,17 @@ status Roebling_ResetPatterns(Roebling *rbl){
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump){
     Match *mt = Span_ReserveNext(rbl->matches);
     status r = READY;
-    r |= Match_SetPattern(mt, def);
+
+    String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
+    if(sns == NULL){
+        String *s = String_Init(rbl->m, STRING_EXTEND);
+        s->type.state |= FLAG_STRING_CONTIGUOUS;
+        Span_Add(rbl->snips, (Abstract *)s);
+    }else{
+        String_Reset(sns);
+    }
+
+    r |= Match_SetPattern(mt, def, sns);
     mt->captureKey = captureKey;
     if(jump != -1){
         mt->jump = Roebling_GetMarkIdx(rbl, jump);
@@ -234,7 +231,17 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump){
     for(int i = 0; i < lk->values->nvalues; i++){
         Match *mt = Span_ReserveNext(rbl->matches);
         String *s = (String *)Span_Get(lk->values, i);
-        Match_SetString(rbl->m, mt, s);
+
+        String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
+        if(sns == NULL){
+            String *s = String_Init(rbl->m, STRING_EXTEND);
+            s->type.state |= FLAG_STRING_CONTIGUOUS;
+            Span_Add(rbl->snips, (Abstract *)s);
+        }else{
+            String_Reset(sns);
+        }
+
+        Match_SetString(rbl->m, mt, s, sns);
         mt->captureKey = captureKey;
         if(jump != -1){
             mt->jump = Roebling_GetMarkIdx(rbl, jump);

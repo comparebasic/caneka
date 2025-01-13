@@ -2,36 +2,39 @@
 #include <caneka.h>
 
 status Match_Tests(MemCtx *gm){
+    Stack(bytes("Match_Tests"), NULL);
     MemCtx *m = MemCtx_Make();
     Span *p;
     status r = READY;
-    /*
 
     Match mt;
     Match ko;
     String *s;
+    String *backlog = String_Init(m, STRING_EXTEND);
+    backlog->type.state |= FLAG_STRING_CONTIGUOUS;
 
     s = String_Make(m, bytes("poo"));
-    Match_SetString(m, &mt, s);
+    Match_SetString(m, &mt, s, backlog);
 
     s = String_Make(m, bytes("no"));
     for(int i = 0; i < s->length; i++){
         Match_Feed(m, &mt, s->bytes[i]);
     }
 
-    r |= Test(mt.type.state != COMPLETE, "Non match has unsuccessful state found %s", State_ToChars(mt.type.state)); 
+    r |= Test(mt.type.state != SUCCESS, "Non match has unsuccessful state found %s", State_ToChars(mt.type.state)); 
     s = String_Make(m, bytes("poo"));
 
     mt.type.state = READY;
     for(int i = 0; i < s->length; i++){
         Match_Feed(m, &mt, s->bytes[i]);
     }
-    r |= Test(mt.type.state == COMPLETE, "Matching string has successful state found %s", State_ToChars(mt.type.state)); 
+    r |= Test(mt.type.state == SUCCESS, "Matching string has successful state found %s", State_ToChars(mt.type.state)); 
 
     word line[] = { PAT_KO, '\n', '\n', patText, PAT_END, 0, 0};  
 
     s = String_Make(m, bytes("A good line :)\n"));
-    Match_SetPattern(&mt, (PatCharDef *)line);
+    String_Reset(backlog);
+    Match_SetPattern(&mt, (PatCharDef *)line, backlog);
     for(int i = 0; i < s->length; i++){
         Match_Feed(m, &mt, s->bytes[i]);
         if((mt.type.state & PROCESSING) == 0){
@@ -39,12 +42,11 @@ status Match_Tests(MemCtx *gm){
         }
     }
 
-    r |= Test(mt.count == s->length-1, "Matched length of string, less termMatching, expected %d have %d",
-        s->length-1, mt.count);
-    */
+    r |= Test(Match_Total(&mt) == s->length-1, "Matched length of string, less termMatching, expected %d have %d",
+        s->length-1, Match_Total(&mt));
 
     MemCtx_Free(m);
-    return r;
+    Return r;
 }
 
 status MatchElastic_Tests(MemCtx *gm){

@@ -16,9 +16,11 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
 
     i64 offset = 1;
     Match mt;
+    String *backlog = String_Init(m, STRING_EXTEND);
+    backlog->type.state |= FLAG_STRING_CONTIGUOUS;
 
     while(s != NULL){
-        Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
+        Match_SetPattern(&mt, (PatCharDef *)pat->bytes, backlog); 
         for(int i = offset; i < s->length; i++){
             status mr = Match_Feed(m, &mt, (word)s->bytes[i]);
             if((mr & SUCCESS) != 0){
@@ -26,7 +28,8 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
 
                 Span_Add(p, (Abstract *)arg);
                 offset += Match_Total(&mt);
-                Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
+                String_Reset(backlog);
+                Match_SetPattern(&mt, (PatCharDef *)pat->bytes, backlog);
             }
         }
         status mr = Match_Feed(m, &mt, (word)'/');
@@ -35,7 +38,8 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
 
             Span_Add(p, (Abstract *)arg);
             offset += Match_Total(&mt);
-            Match_SetPattern(&mt, (PatCharDef *)pat->bytes); 
+            String_Reset(backlog);
+            Match_SetPattern(&mt, (PatCharDef *)pat->bytes, backlog); 
         }
 
         s = String_Next(s);

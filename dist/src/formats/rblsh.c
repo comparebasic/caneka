@@ -73,16 +73,14 @@ static status start(MemCtx *m, Roebling *rbl){
 
     Match *mt = NULL;
 
-    mt = Span_ReserveNext(rbl->matches);
-    r |= Match_SetPattern(mt, cCDef);
-    mt->captureKey = RBLSH_TERM;
-    mt->jump = Roebling_GetMarkIdx(rbl, RBLSH_MARK_END);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)cCDef, RBLSH_TERM, RBLSH_MARK_END);
+    mt = Roebling_LatestMatch(rbl);
     mt->type.state |= SEARCH;
 
-    mt = Span_ReserveNext(rbl->matches);
-    r |= Match_SetPattern(mt, hupDef);
-    mt->captureKey = RBLSH_HUP;
-    mt->jump = Roebling_GetMarkIdx(rbl, RBLSH_MARK_END);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)hupDef, RBLSH_HUP, RBLSH_MARK_END);
+    mt = Roebling_LatestMatch(rbl);
     mt->type.state |= SEARCH;
 
     r |= Roebling_SetPattern(rbl,

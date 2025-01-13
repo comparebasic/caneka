@@ -111,11 +111,10 @@ static status value(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)startTableDef, OSET_LENGTH_TABLE, OSET_MARK_START);
 
-    Match *mt = Span_ReserveNext(rbl->matches);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef *)valueDef, OSET_VALUE, -1);
+    Match *mt = Roebling_LatestMatch(rbl);
     FmtCtx *oset = (FmtCtx *)as(rbl->source, TYPE_OSET);
-
-    r |= Match_SetPattern(mt, (PatCharDef *)valueDef);
-    mt->captureKey = OSET_VALUE;
     mt->remaining = oset->item->remaining;
 
     return r;

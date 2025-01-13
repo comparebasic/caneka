@@ -46,7 +46,7 @@ typedef struct match {
     Type type; 
     PatMatch pat;
     StrSnip snip;
-    String *snipBuff;
+    String *backlog;
     int jump;
     int remaining;
     word counter;
@@ -54,8 +54,8 @@ typedef struct match {
 } Match;
 
 Match *Match_Make(MemCtx *m, String *s, word flags);
-status Match_SetPattern(Match *mt, PatCharDef *def);
-status Match_SetString(MemCtx *m, Match *mt, String *s);
+status Match_SetPattern(Match *mt, PatCharDef *def, String *backlog);
+status Match_SetString(MemCtx *m, Match *mt, String *s, String *backlog);
 status Match_Feed(MemCtx *m, Match *mt, word c);
 status Match_FeedString(MemCtx *m, Match *mt, String *s, int offset);
 status Match_FeedEnd(MemCtx *m, Match *mt);
