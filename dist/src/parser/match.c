@@ -108,6 +108,14 @@ static void match_NextKoTerm(Match *mt){
 
 static void addCount(MemCtx *m, Match *mt, word flags, int length){
     Stack(bytes("Match.addCount"), NULL);
+    if(DEBUG_PATMATCH){
+        printf("\n\x1b[%dmaddCount:%s%d%s\x1b[0m", 
+            DEBUG_PATMATCH,
+            ((flags & SUCCESS) == 0 ? "gap(" : ""), 
+            length,
+            ((flags & SUCCESS) == 0 ? ")" : "")
+        );
+    }
     if((mt->snip.type.state & flags) == 0){
         String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
         StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);
@@ -209,10 +217,6 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             }else if((def->flags & PAT_CONSUME) != 0 || (def->flags & PAT_INVERT_CAPTURE) != 0){
                 addCount(m, mt, NOOP, 1);
             }else{
-                if((mt->snip.type.state & NOOP) != 0){
-                    mt->snip.type.state &= ~NOOP;
-                    mt->snip.type.state |= ~SUCCESS;
-                }
                 addCount(m, mt, SUCCESS, 1);
             }
             
@@ -230,6 +234,8 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             if((mt->type.state & MATCH_KO) != 0){
                 if((def->flags & PAT_KO) == 0){
                     mt->type.state &= ~MATCH_KO;
+                    mt->snip.type.state &= ~NOOP;
+                    mt->snip.type.state |= SUCCESS;
                     if((mt->type.state & MATCH_LEAVE) != 0){
                         goto miss;
                         break;

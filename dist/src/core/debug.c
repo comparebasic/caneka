@@ -499,8 +499,8 @@ static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean 
     if(extended){
         printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:remainig=%d:%d/%d", color, msg,
             State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->remaining, mt->snip.start, mt->snip.length);
-            Debug_Print(mt->backlog, TYPE_STRSNIP_STRING, ":backlog=", color, FALSE);
-        printf("\x1b[1;%dm[", color);
+        Debug_Print(mt->backlog, TYPE_STRSNIP_STRING, ":backlog=(", color, FALSE);
+        printf(") \x1b[1;%dm[", color);
         Debug_Print((void *)mt->pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
         printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);
         Debug_Print((void *)mt->pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
