@@ -196,6 +196,7 @@ status RoeblingMark_Tests(MemCtx *gm){
 }
 
 status RoeblingStartStop_Tests(MemCtx *gm){
+    Stack(bytes("RoeblingStartStop_Tests"), NULL);
     status r = READY;
     MemCtx *m = MemCtx_Make();
     Match *mt = NULL;
@@ -211,15 +212,24 @@ status RoeblingStartStop_Tests(MemCtx *gm){
     Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
     Roebling_Run(rbl);
 
+    Debug_Print((void*)rbl, 0, "Parser: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+
     cstr = "today?\n";
     Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
     Roebling_Run(rbl);
 
+    Debug_Print((void*)rbl, 0, "Parser: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+
     mt = Roebling_GetMatch(rbl);
+    Debug_Print((void*)mt, 0, "Match: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+
     s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
     Test(String_EqualsBytes(s, bytes("Hi how are you today?")), "String equals 'Hi how are you today?', have '%s'", (char *)s->bytes);
     r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
 
     MemCtx_Free(m);
-    return r;
+    Return r;
 }

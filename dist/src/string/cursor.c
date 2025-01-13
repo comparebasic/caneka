@@ -22,18 +22,39 @@ Cursor *Cursor_Make(MemCtx *m, String *s){
 };
 
 status Cursor_Incr(Cursor *cur, int length){
-    cur->local += length;
+    Stack(bytes("Cursor_Incr"), NULL);
+
+    i64 offset = cur->offset;
+    i64 local = cur->local;;
+    String *seg = cur->seg;
+    
+
     i64 segSz = String_GetSegSize(cur->s);
     i64 max = segSz;
     if((cur->s->type.state & FLAG_STRING_CONTIGUOUS) != 0){
         max = segSz - (segSz % length);
     }
-    if(cur->local >= max){
-        cur->offset += max;
-        cur->local -= max;
-        cur->seg = String_Next(cur->seg);
-    }
-    cur->ptr = cur->seg->bytes+cur->local;
 
-    return SUCCESS;
+    local += length;
+    if(local >= seg->length){
+        seg = String_Next(seg);
+        if(seg == NULL){
+           cur->type.state |= END; 
+           Return cur->type.state;
+        }else{
+           offset += max;
+           local -= max;
+        }
+    }
+
+    if((cur->type.state & END) == 0){
+        cur->offset = offset;
+        cur->local = local;
+        cur->seg = seg;
+        cur->ptr = cur->seg->bytes+cur->local;
+        Return SUCCESS;
+    }else{
+        Return ERROR;
+    }
+
 }

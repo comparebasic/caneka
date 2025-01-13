@@ -170,20 +170,9 @@ int Roebling_GetMatchIdx(Roebling *rbl){
 
 /* > Setup Cycle */
 static status roebling_AddReset(Roebling *rbl){
-    /*
-    if((rbl->range.potential.type.state & END) != 0){
-        rbl->range.potential.type.state &= ~END;
-        SCursor_Incr(&(rbl->range.potential), 1);
-    }
-    if((rbl->range.end.type.state & END) != 0){
-        SCursor_Incr(&(rbl->range.end), 1);
-        rbl->range.end.type.state &= ~END;
-    }
-    if((rbl->range.start.type.state & END) != 0){
-        SCursor_Incr(&(rbl->range.start), 1);
-        rbl->range.start.type.state &= ~END;
-    }
-    */
+    rbl->cursor.type.state &= ~END;
+    rbl->type.state &= ~END;
+    Return rbl->type.state;
     return SUCCESS;
 }
 

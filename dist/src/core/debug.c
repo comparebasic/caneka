@@ -10,7 +10,7 @@ int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
 int DEBUG_ROEBLING = 0;
 int DEBUG_ROEBLING_MARK = 0;
-int DEBUG_ROEBLING_COMPLETE = COLOR_CYAN;
+int DEBUG_ROEBLING_COMPLETE = 0;
 int DEBUG_ROEBLING_CONTENT = 0;
 int DEBUG_ROEBLING_CURRENT = 0;
 int DEBUG_ALLOC = 0;
@@ -44,6 +44,7 @@ int DEBUG_LANG_CNK = 0;
 int DEBUG_LANG_CNK_RBL = 0;
 int DEBUG_LANG_CNK_OUT = 0;
 int DEBUG_SUBPROCESS = 0;
+int DEBUG_STRSNIP = 0;
 
 char *TypeStrings[] = {
     "_TYPE_START,"
@@ -619,7 +620,7 @@ static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean 
     printf(":");
     if(extended){
         printf(" idx:%d jump:%d ", rbl->idx, rbl->jump);
-        Debug_Print((void *)&(rbl->cursor), 0, "", color, extended);
+        Debug_Print((void *)&(rbl->cursor), 0, "Cursor: ", color, extended);
         if(rbl->marks->values->nvalues > 0){
             printf("\n  \x1b[%dmmarks=\n    ", color);
             for(int i = 0; i <= rbl->marks->values->max_idx; i++){
@@ -918,4 +919,12 @@ void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean match
     }
 }
 
+void DPrint(Abstract *a, int color, char *msg, ...){
+    printf("\x1b[%dm", color);
+	va_list args;
+    va_start(args, msg);
+    vprintf(msg, args);
+    Debug_Print((void *)a, 0,  "", color, TRUE);
+    printf("\x1b[0m\n");
+}
 

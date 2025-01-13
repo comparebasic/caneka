@@ -51,6 +51,7 @@ extern int DEBUG_LANG_CNK;
 extern int DEBUG_LANG_CNK_RBL;
 extern int DEBUG_SUBPROCESS;
 extern int DEBUG_LANG_CNK_OUT;
+extern int DEBUG_STRSNIP;
 
 extern boolean SHOW_SERVE_TESTS;
 extern MemCtx *DebugM;
@@ -58,6 +59,7 @@ extern MemCtx *DebugM;
 typedef void (*DebugPrintFunc)(void *t, cls type, char *msg, int color, boolean extended);
 
 status Debug_Init(MemCtx *m);
+void DPrint(Abstract *a, int color, char *msg, ...);
 void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
 void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
 void Flag16_ToString(word flag, int color, boolean extended);

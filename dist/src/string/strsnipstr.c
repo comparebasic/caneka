@@ -34,6 +34,14 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         }
     }
 
+    if(DEBUG_STRSNIP){
+        Debug_Print((void *)sns,
+            TYPE_STRSNIP_STRING, "StrSnipStr_ToString (sns): ", DEBUG_STRSNIP, TRUE);
+        printf("\n");
+        DPrint((Abstract *)ret, DEBUG_STRSNIP, "StrSnipStr_ToString: ");
+        printf("\n");
+    }
+
     return ret;
 }
 
