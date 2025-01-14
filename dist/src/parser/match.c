@@ -129,6 +129,8 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
 }
 
 int Match_Total(Match *mt){
+    printf("match total\n");
+    fflush(stdout);
     return StrSnipStr_Total(mt->backlog, SUCCESS);
 }
 
@@ -165,7 +167,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
         def = mt->pat.curDef;
 
         matched = charMatched(c, def);
-        mt->type.state &= ~MATCH_BY_INVERT;
+        mt->type.state &= ~MATCH_NO_INCR;
 
         if(DEBUG_PATMATCH){
             Match_midDebug('_', c, def, mt, matched, FALSE);
@@ -195,6 +197,8 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                     }
                     if((def->flags & PAT_INVERT_CAPTURE) == 0){
                         addCount(m, mt, NOOP, 1);
+                    }else{
+                        mt->type.state |= MATCH_NO_INCR;
                     }
 
                     match_EndOfKoTerm(mt);
@@ -248,7 +252,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                     continue;
                 }else{
                     match_NextKoTerm(mt);
-                    mt->type.state |= MATCH_BY_INVERT;
+                    mt->type.state |= MATCH_NO_INCR;
                     continue;
                 }
             }else if((def->flags & (PAT_KO|PAT_OPTIONAL|PAT_ANY)) != 0){
@@ -258,7 +262,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                 if((def->flags & PAT_TERM) != 0){
                     if((mt->type.state & MATCH_TERM_FOUND) != 0){
                         match_NextTerm(mt);
-                        mt->type.state |= MATCH_BY_INVERT;
+                        mt->type.state |= MATCH_NO_INCR;
                         continue;
                     }else{
                         goto miss;

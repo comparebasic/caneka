@@ -4,7 +4,8 @@
 /* > Run */
 static status Roebling_RunMatches(Roebling *rbl){
     Stack(bytes("Roebling_RunMatches"), (Abstract *)rbl);
-
+    printf(">\n");
+    fflush(stdout);
     if(DEBUG_ROEBLING_CURRENT){
         Debug_Print((void *)rbl, 0, "RblCurrent - RunMatches", DEBUG_ROEBLING_CURRENT, FALSE);
         printf("\n");
@@ -21,18 +22,26 @@ static status Roebling_RunMatches(Roebling *rbl){
     while((rbl->type.state & (ROEBLING_NEXT|END)) == 0){
         Guard_Incr(&rbl->guard);
         c = Cursor_GetByte(&(rbl->cursor));
+
+        printf("-%c- ", c);
+        fflush(stdout);
+
         Match *mt = NULL;
         Iter it;
         Iter_Init(&it, rbl->matches);
         while((Iter_Next(&it) & END) == 0){
-           mt = (Match *)Iter_Get(&it);
+            printf("-%d/%d\n", it.idx, rbl->matches->nvalues);
+            fflush(stdout);
+            mt = (Match *)Iter_Get(&it);
 
-           if(DEBUG_PATMATCH){
+            printf("I,");
+            if(DEBUG_PATMATCH){
                 String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
                 printf("\x1b[%dmrbl:%s/match:%d - ", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), it.idx);
-           }
+            }
 
-           if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
+            if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
+                 printf("II,");
                  if(Match_Total(mt) == 0){
                     Fatal("No increment value for successful match", TYPE_PATMATCH);
                  }
@@ -45,10 +54,13 @@ static status Roebling_RunMatches(Roebling *rbl){
                     rbl->jump = mt->jump;
                  }
 
+                 printf("III,");
                  String *s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
+                 printf("IV,");
                  rbl->capture(mt->captureKey, it.idx, s, rbl->source);
+                 printf("V,");
                  break;
-             }
+            }
         }
 
         if(noopCount == rbl->matches->nvalues){
@@ -59,18 +71,13 @@ static status Roebling_RunMatches(Roebling *rbl){
             break;
         }
 
-        if((mt->type.state & (MATCH_BY_INVERT)) == 0){
+        if((mt->type.state & (MATCH_NO_INCR)) == 0){
             Cursor_Incr(&(rbl->cursor), 1);
         }
         rbl->type.state |= (rbl->cursor.type.state & END);
     }
 
-    if((rbl->type.state & ROEBLING_NEXT)){
-        Match *mt = Roebling_GetValueMatch(rbl);
-        if(mt != NULL){
-        }
-    }
-
+    printf("<\n");
     Return rbl->type.state;
 }
 
@@ -239,15 +246,14 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump){
 
         String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
         if(sns == NULL){
-            String *s = String_Init(rbl->m, STRING_EXTEND);
-            s->type.state |= FLAG_STRING_CONTIGUOUS;
-            Span_Add(rbl->snips, (Abstract *)s);
-        }else{
-            String_Reset(sns);
+            sns = String_Init(rbl->m, STRING_EXTEND);
+            sns->type.state |= FLAG_STRING_CONTIGUOUS;
+            Span_Add(rbl->snips, (Abstract *)sns);
         }
 
         Match_SetString(rbl->m, mt, s, sns);
         mt->captureKey = captureKey;
+        mt->backlog = sns;
         if(jump != -1){
             mt->jump = Roebling_GetMarkIdx(rbl, jump);
         }

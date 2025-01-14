@@ -69,6 +69,7 @@ TestCapture expected1[] = {
 };
 
 status Http_Tests(MemCtx *gm){
+    Stack(bytes("Http_Tests"), NULL);
     r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -97,6 +98,6 @@ status Http_Tests(MemCtx *gm){
 
     MemCtx_Free(m);
 
-    return r;
+    Return r;
 }
 

@@ -2,11 +2,14 @@
 #include <caneka.h>
 
 String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
+    Stack(bytes("StrSnipStr_ToString"), NULL);
     String *ret = String_Init(m, STRING_EXTEND);
     IterStr it;
     IterStr_Init(&it, sns, sizeof(StrSnip));
 
     while((IterStr_Next(&it) & END) == 0){
+        printf("%d", it.idx);
+        fflush(stdout);
         if(s == NULL){
             break;
         }
@@ -19,20 +22,31 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         i64 remaining = sn->length;
 
         while(s != NULL && start > s->length){
+            printf("b");
+            fflush(stdout);
             s = String_Next(s);
             start -= s->length;
         }
 
         while(s != NULL && remaining > 0){
+            printf("c%ld/%ld", start, remaining);
+            fflush(stdout);
             i64 length = min(s->length-start, remaining);
-            String_AddBytes(m, ret, s->bytes+start, length);
+            printf("\n1 - %d: %s\n", (int)start, s->bytes+(int)start);
+            String_AddBytes(m, ret, s->bytes+((int)start), length);
+            printf("\n2\n");
             remaining -= length;
             start -= length;
+            printf("%ld\n", remaining);
             if(remaining > 0){
                 s = String_Next(s);
             }
+            printf("c - end");
+            fflush(stdout);
         }
+        printf("?\n");
     }
+
 
     if(DEBUG_STRSNIP){
         Debug_Print((void *)sns,
@@ -42,10 +56,13 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         printf("\n");
     }
 
-    return ret;
+    printf("end");
+
+    Return ret;
 }
 
 int StrSnipStr_Total(String *sns, word flags){
+    Stack(bytes("StrSnipStr_Total"), NULL);
     IterStr it;
     int total = 0;
     IterStr_Init(&it, sns, sizeof(StrSnip));
@@ -55,5 +72,6 @@ int StrSnipStr_Total(String *sns, word flags){
             total += sn->length;
         }
     }
-    return total;
+
+    Return total;
 }

@@ -24,7 +24,7 @@ enum match_flags {
     MATCH_TERM_FOUND = 1 << 10,
     MATCH_KO_INVERT = 1 << 11,
     MATCH_KO = 1 << 12,
-    MATCH_BY_INVERT = 1 << 13,
+    MATCH_NO_INCR = 1 << 13,
     SEARCH = 1 << 14, 
     MATCH_LEAVE = 1 << 15
 };

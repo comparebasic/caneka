@@ -15,7 +15,7 @@ static void DebugStackEntry_init(DebugStackEntry *entry){
 }
 
 static void sigH(int sig, siginfo_t *info, void *ptr){
-    Fatal("SigFault", 0);
+    Fatal("Sig", 0);
     exit(1);
 }
 
@@ -24,10 +24,16 @@ status DebugStack_Init(){
     _stackIdx = 0;
 
     struct sigaction a;
+    struct sigaction b;
     memset(&a, 0, sizeof(struct sigaction));
     a.sa_flags = SA_NODEFER;
     a.sa_sigaction = sigH;
     sigaction(SIGSEGV, &a, NULL);
+
+    memset(&b, 0, sizeof(struct sigaction));
+    b.sa_flags = SA_NODEFER;
+    b.sa_sigaction = sigH;
+    sigaction(SIGINT, &b, NULL);
 
     return SUCCESS;
 }

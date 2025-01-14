@@ -44,7 +44,6 @@ status XmlCtx_TagClosed(XmlCtx *ctx){
 }
 
 status XmlCtx_Close(XmlCtx *ctx, String *tagName){
-    printf("closing tag\n");
     if(ctx->current == ctx->root->firstChild || ctx->parent == ctx->root->firstChild){
         ctx->type.state = SUCCESS;
     }else{

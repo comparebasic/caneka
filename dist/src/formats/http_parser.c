@@ -62,7 +62,6 @@ static status method(MemCtx *m, Roebling *rbl){
     HttpProto *proto = (HttpProto *)rbl->source;
     Roebling_ResetPatterns(rbl);
     return Roebling_SetLookup(rbl, proto->methods, HTTP_METHOD, -1); 
-    return NOOP;
 }
 
 static status path(MemCtx *m, Roebling *rbl){

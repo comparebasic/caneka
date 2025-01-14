@@ -19,11 +19,12 @@ int DEBUG_TABLE = 0;
 int DEBUG_SPAN = 0;
 int DEBUG_SPAN_GET_SET = 0;
 int DEBUG_XML = 0;
+int DEBUG_XML_CAPTURE = 0;
 int DEBUG_XML_TEMPLATE = 0;
 int DEBUG_XML_TEMPLATE_NESTING = 0;
 int DEBUG_XML_TEMPLATE_OUT = 0;
 int DEBUG_ROEBLING_NAME = 0;
-int DEBUG_HTTP = 0;
+int DEBUG_HTTP = COLOR_CYAN;
 int DEBUG_SERVE = 0;
 int DEBUG_SERVE_ACCEPT = 0;
 int DEBUG_SERVE_POLLING = 0;
@@ -565,8 +566,9 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 
 static void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Cursor *cur = (Cursor *)as(a, TYPE_CURSOR);
-    printf("\x1b[%dm%sCursor<%s ptr=%c offset=%ld local=%ld", color, msg,
-        State_ToChars(cur->type.state), (cur->ptr != NULL ? *(cur->ptr) : 0), 
+    printf("\x1b[%dm%sCursor<%s ptr=\x1b[1;%dm'%c'\x1b[0;%dm offset=%ld local=%ld", color, msg,
+        State_ToChars(cur->type.state), 
+        color, (cur->ptr != NULL ? *(cur->ptr) : 0), color,
         cur->offset, cur->local);
     if(extended){
         Debug_Print((void*)cur->seg, 0, " seg=", color, extended);
