@@ -4,8 +4,6 @@
 /* > Run */
 static status Roebling_RunMatches(Roebling *rbl){
     Stack(bytes("Roebling_RunMatches"), (Abstract *)rbl);
-    printf(">\n");
-    fflush(stdout);
     if(DEBUG_ROEBLING_CURRENT){
         Debug_Print((void *)rbl, 0, "RblCurrent - RunMatches", DEBUG_ROEBLING_CURRENT, FALSE);
         printf("\n");
@@ -23,25 +21,18 @@ static status Roebling_RunMatches(Roebling *rbl){
         Guard_Incr(&rbl->guard);
         c = Cursor_GetByte(&(rbl->cursor));
 
-        printf("-%c- ", c);
-        fflush(stdout);
-
         Match *mt = NULL;
         Iter it;
         Iter_Init(&it, rbl->matches);
         while((Iter_Next(&it) & END) == 0){
-            printf("-%d/%d\n", it.idx, rbl->matches->nvalues);
-            fflush(stdout);
             mt = (Match *)Iter_Get(&it);
 
-            printf("I,");
             if(DEBUG_PATMATCH){
                 String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
                 printf("\x1b[%dmrbl:%s/match:%d - ", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), it.idx);
             }
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
-                 printf("II,");
                  if(Match_Total(mt) == 0){
                     Fatal("No increment value for successful match", TYPE_PATMATCH);
                  }
@@ -54,11 +45,8 @@ static status Roebling_RunMatches(Roebling *rbl){
                     rbl->jump = mt->jump;
                  }
 
-                 printf("III,");
                  String *s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-                 printf("IV,");
                  rbl->capture(mt->captureKey, it.idx, s, rbl->source);
-                 printf("V,");
                  break;
             }
         }
@@ -77,7 +65,6 @@ static status Roebling_RunMatches(Roebling *rbl){
         rbl->type.state |= (rbl->cursor.type.state & END);
     }
 
-    printf("<\n");
     Return rbl->type.state;
 }
 

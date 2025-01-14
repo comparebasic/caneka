@@ -6,10 +6,7 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
     String *ret = String_Init(m, STRING_EXTEND);
     IterStr it;
     IterStr_Init(&it, sns, sizeof(StrSnip));
-
     while((IterStr_Next(&it) & END) == 0){
-        printf("%d", it.idx);
-        fflush(stdout);
         if(s == NULL){
             break;
         }
@@ -17,34 +14,26 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         if(sn->length <= 0 || (sn->type.state & SUCCESS) == 0){
             continue;
         }
+        printf("\x1b[%dmCopy %d from %d\x1b[0m\n", COLOR_CYAN, sn->length, sn->start);
 
         i64 start = sn->start;
         i64 remaining = sn->length;
 
         while(s != NULL && start > s->length){
-            printf("b");
-            fflush(stdout);
             s = String_Next(s);
             start -= s->length;
         }
 
         while(s != NULL && remaining > 0){
-            printf("c%ld/%ld", start, remaining);
-            fflush(stdout);
             i64 length = min(s->length-start, remaining);
-            printf("\n1 - %d: %s\n", (int)start, s->bytes+(int)start);
+            ret->type.state |= DEBUG;
             String_AddBytes(m, ret, s->bytes+((int)start), length);
-            printf("\n2\n");
             remaining -= length;
             start -= length;
-            printf("%ld\n", remaining);
             if(remaining > 0){
                 s = String_Next(s);
             }
-            printf("c - end");
-            fflush(stdout);
         }
-        printf("?\n");
     }
 
 
@@ -55,8 +44,6 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         DPrint((Abstract *)ret, DEBUG_STRSNIP, "StrSnipStr_ToString: ");
         printf("\n");
     }
-
-    printf("end");
 
     Return ret;
 }

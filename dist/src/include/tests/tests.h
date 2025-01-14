@@ -59,3 +59,5 @@ status User_Tests(MemCtx *gm);
 status Roebling_SyntaxTests(MemCtx *gm);
 status IterStr_Tests(MemCtx *gm);
 status ProtoHttp_Tests(MemCtx *gm);
+status StrSnip_Tests(MemCtx *gm);
+status StrSnipBoundry_Tests(MemCtx *gm);

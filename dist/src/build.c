@@ -186,6 +186,7 @@ static BuildSubdir testsobj = { "tests", {
     "span_setup_tests.c",
     "span_tests.c",
     "string_tests.c",
+    "strsnip_tests.c",
     "table_tests.c",
     "testreq.c",
     "tests.c",

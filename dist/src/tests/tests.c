@@ -118,6 +118,18 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "StrSnip",
+        StrSnip_Tests,
+        "Test for snip ranges of strings to copy.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "StrSnip",
+        StrSnipBoundry_Tests,
+        "Test for snip ranges of strings to copy in large strings.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Roebling",
         Roebling_Tests,
         "Tests for the Roebling character pattern matching parser, with programmable hooks and capture ranges.",
@@ -327,17 +339,29 @@ static TestSet _Tests[] = {
     },
 };
 
-TestSet *Tests = _Tests;
-
 /*
+TestSet *Tests = _Tests;
+*/
+
 static TestSet solo[] = {
     {
-        "IterStr",
-        IterStr_Tests,
-        "Iter Strings are strings that contain arrays of other items.",
+        "StrSnip",
+        StrSnip_Tests,
+        "Test for snip ranges of strings to copy.",
         FEATURE_COMPLETE,
+    },
+    {
+        "StrSnip",
+        StrSnipBoundry_Tests,
+        "Test for snip ranges of strings to copy in large strings.",
+        FEATURE_COMPLETE,
+    },
+    {
+        NULL,
+        NULL,
+        NULL,
+        0
     },
 };
 
 TestSet *Tests = solo;
-*/

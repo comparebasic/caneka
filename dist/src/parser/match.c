@@ -129,8 +129,6 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
 }
 
 int Match_Total(Match *mt){
-    printf("match total\n");
-    fflush(stdout);
     return StrSnipStr_Total(mt->backlog, SUCCESS);
 }
 
