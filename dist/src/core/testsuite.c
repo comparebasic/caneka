@@ -22,7 +22,7 @@ static char *statusCstr(word status){
 }
 
 status Test(int condition, char *msg, ...){
-    Stack(bytes("Test"), (Abstract *)String_Make(DebugM, bytes(msg)));
+    Stack(bytes("Test"), NULL);
 	va_list args;
     va_start(args, msg);
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
@@ -79,6 +79,11 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
         status r = set->func(m);
         if((GLOBAL_flags & HTML_OUTPUT) != 0){
             printf("    </ol>\n</div>\n");
+        }else{
+            String *s = String_Init(m, STRING_EXTEND);
+            String_AddBytes(m, s, bytes("mem: "), strlen("mem: "));
+            String_AddMemCount(m, s, MemCount());
+            printf("%s\n", String_ToChars(m, s));
         }
         if((r & ERROR) != 0 || (r & SUCCESS) == 0){
             fail++;

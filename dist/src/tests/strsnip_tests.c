@@ -11,7 +11,7 @@ static char *longStrLines[] = {
     "wires to a strand.[46] This was the first use of bundling in a suspension \n",
     "bridge and took several months for workers to tie together.[48] Since the \n",
     "2000s, the main cables have also supported a series of 24-watt LED lighting \n",
-    "fixtures, referred to as \\\"necklace lights\\\" due to their shape.[49] \n",
+    "fixtures, referred to as \"necklace lights\" due to their shape.[49] \n",
     "\n",
     "In addition, either 1,088,[25] 1,096,[50] or 1,520 galvanized steel wire \n",
     "suspender cables hang downward from the main cables.[23] Another 400 cable \n",
@@ -35,8 +35,7 @@ static char *longStrNoNl[] = {
     "wires to a strand.[46] This was the first use of bundling in a suspension ",
     "bridge and took several months for workers to tie together.[48] Since the ",
     "2000s, the main cables have also supported a series of 24-watt LED lighting ",
-    "fixtures, referred to as \"necklace lights\" due to their shape.[49] \n",
-    "\n",
+    "fixtures, referred to as \"necklace lights\" due to their shape.[49] ",
     "In addition, either 1,088,[25] 1,096,[50] or 1,520 galvanized steel wire ",
     "suspender cables hang downward from the main cables.[23] Another 400 cable ",
     "stays extend diagonally from the towers. The vertical suspender cables and ",
@@ -44,8 +43,7 @@ static char *longStrNoNl[] = {
     "deck.[23][25][50] The bridge's suspenders originally used wire rope, which was ",
     "replaced in the 1980s with galvanized steel made by Bethlehem Steel.[23][51] ",
     "The vertical suspender cables measure 8 to 130 feet (2.4 to 39.6 m) long, and ",
-    "the diagonal stays measure 138 to 449 feet (42 to 137 m) long.[50] \n",
-    "\n",
+    "the diagonal stays measure 138 to 449 feet (42 to 137 m) long.[50] ",
     NULL,
 };
 
@@ -100,19 +98,38 @@ status StrSnipBoundry_Tests(MemCtx *gm){
     String *res = NULL;
     String *sns = String_Init(m, STRING_EXTEND);
     sns->type.state |= FLAG_STRING_CONTIGUOUS;
+    String *expectedSns = String_Init(m, STRING_EXTEND);
+    expectedSns->type.state |= FLAG_STRING_CONTIGUOUS;
     Match mt;
     StrSnip sn;
 
     s = String_Init(m, STRING_EXTEND);
-    s->type.state |= FLAG_STRING_CONTIGUOUS;
     char **cptr = longStrLines;
+    i64 pos = 0;
+    i64 adj = pos;
     while(*cptr != NULL){
-        String_AddBytes(m, s, bytes(*cptr), strlen(*cptr));
+        i64 len = strlen(*cptr);
+        adj = pos;
+        String_AddBytes(m, s, bytes(*cptr), len);
+        if(*cptr[0] != '\n'){
+            StrSnip_Init(&sn, SUCCESS, pos, len-1);
+            String_AddBytes(m, expectedSns, bytes(&sn), sizeof(StrSnip));
+            StrSnip_Init(&sn, NOOP, pos+len-1, 1);
+            String_AddBytes(m, expectedSns, bytes(&sn), sizeof(StrSnip));
+        }else{
+            StrSnip_Init(&sn, NOOP, pos, 1);
+            String_AddBytes(m, expectedSns, bytes(&sn), sizeof(StrSnip));
+        }
+        pos += len;
         cptr++;
     }
 
-    Debug_Print((void *)s, 0, "Str: ", COLOR_PURPLE, TRUE);
-    printf("\n");
+    cptr = longStrNoNl;
+    exp = String_Init(m, STRING_EXTEND);
+    while(*cptr != NULL){
+        String_AddBytes(m, exp, bytes(*cptr), strlen(*cptr));
+        cptr++;
+    }
 
     Match_SetPattern(&mt, textNl, sns);
     StrSnip_Init(&sn, SUCCESS, 0, 0);
@@ -122,26 +139,16 @@ status StrSnipBoundry_Tests(MemCtx *gm){
         byte *b = (byte *)IterStr_Get(&it);
         Match_Feed(m, &mt, *b);
         if((mt.type.state & SUCCESS) != 0){
-            i64 prev = sn.start+sn.length;
             i64 pos = it.cursor.offset+it.cursor.local;
-            StrSnip_Init(&sn, SUCCESS, prev, pos-prev-2);
-            String_AddBytes(m, sns, bytes(&sn), sizeof(StrSnip));
-
-            StrSnip_Init(&sn, NOOP, pos-1, 1);
-            String_AddBytes(m, sns, bytes(&sn), sizeof(StrSnip));
             Match_SetPattern(&mt, textNl, sns);
+            mt.snip.start = pos+1;
         }
     }
 
-    Debug_Print((void *)&mt, 0, "Match: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-    Debug_Print((void *)&it.cursor, 0, "Cursor 1: ", COLOR_PURPLE, TRUE);
-    printf("\n");
+    r |= Test(String_Equals(sns, expectedSns), "Expect SNS from match to equals expected SNS built manually");
 
-    /*
     res = StrSnipStr_ToString(m, sns, s);
     r |= Test(String_Equals(res, exp), "Expected String without quotes or newlines, have '%s'", String_ToChars(m, res));
-    */
 
     MemCtx_Free(m);
     Return r;

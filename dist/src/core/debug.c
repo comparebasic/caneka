@@ -4,7 +4,7 @@
 Chain *DebugPrintChain = NULL;
 
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = COLOR_YELLOW;
+int DEBUG_PATMATCH = 0;
 int DEBUG_MATCH_COMPLETE = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;

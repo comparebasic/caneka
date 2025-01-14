@@ -369,6 +369,34 @@ status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean
     return r;
 }
 
+status String_AddMemCount(MemCtx *m, String *s, i64 mem) {
+    if(mem == 0){
+       String_AddBytes(m, s, bytes("0b"), 2); 
+       return NOOP;
+    }
+    char *abbrev = "bkmg";
+    i64 div = 1024;
+    for(int i = 0; i < 4; i++){
+       if(i > 0){
+           String_AddBytes(m, s, bytes(" "), 1); 
+       }
+       i64 value = mem % div;
+       i64 uval = value;
+       if(div > 1024){
+          uval = value / 1024;
+       }
+       if(uval == 0){
+            continue;
+       }
+       String_AddInt(m, s, uval); 
+       String_AddBytes(m, s, bytes(abbrev+i), 1); 
+       div *= 1024;
+       mem -= value;
+    }
+
+    return SUCCESS;
+}
+
 status String_AddAsciiSrc(MemCtx *m, String *s, byte c) {
     if(c >= 32 && c <= 126){
         char *cstr = "'";

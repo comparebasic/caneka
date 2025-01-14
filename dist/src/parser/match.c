@@ -368,6 +368,7 @@ status Match_SetPattern(Match *mt, PatCharDef *def, String *backlog){
     mt->remaining = -1;
     mt->jump = -1;
     mt->backlog = backlog;
+    mt->snip.type.of = TYPE_STRSNIP;
 
     return SUCCESS;
 }

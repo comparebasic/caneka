@@ -37,7 +37,7 @@ status IterStr_Init(IterStr *it, String *s, size_t sz){
     it->sz = sz;
     it->idx = -1;
     it->count = String_Length(s) / sz;
-    if((s->type.state & FLAG_STRING_CONTIGUOUS) == 0){
+    if(sz != 1 && (s->type.state & FLAG_STRING_CONTIGUOUS) == 0){
         Fatal("IterStr only works with contigously flagged strings\n", TYPE_ITER_STRING);
         return ERROR;
     }

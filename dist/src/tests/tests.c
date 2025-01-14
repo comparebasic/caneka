@@ -124,7 +124,7 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "StrSnip",
+        "StrSnip Boundry",
         StrSnipBoundry_Tests,
         "Test for snip ranges of strings to copy in large strings.",
         FEATURE_COMPLETE,
@@ -339,10 +339,9 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
     {
         "StrSnip",
@@ -351,7 +350,7 @@ static TestSet solo[] = {
         FEATURE_COMPLETE,
     },
     {
-        "StrSnip",
+        "StrSnip Boundry",
         StrSnipBoundry_Tests,
         "Test for snip ranges of strings to copy in large strings.",
         FEATURE_COMPLETE,
@@ -365,3 +364,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/
