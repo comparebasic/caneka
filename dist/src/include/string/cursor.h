@@ -14,6 +14,7 @@ Cursor *Cursor_Make(MemCtx *m, String *s);
 status Cursor_AddMatch(Cursor *cur, int length);
 status Cursor_AddGap(Cursor *cur, int length);
 status Cursor_Incr(Cursor *cur, int length);
+status Cursor_Decr(Cursor *cur, int length);
 
 #define Cursor_GetByte(cur) (*((cur)->ptr))
 #define Cursor_Total(cur) ((cur)->offset+(cur)->local)

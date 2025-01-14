@@ -21,13 +21,23 @@ Cursor *Cursor_Make(MemCtx *m, String *s){
     return cur;
 };
 
+status Cursor_Decr(Cursor *cur, int length){
+   if(cur->local > length){
+        cur->local -= length;
+   }else{
+        i64 pos = (cur->offset+cur->local)-length;
+        cur->offset = cur->local = 0;
+        Cursor_Incr(cur, pos);
+   }
+   return SUCCESS;
+}
+
 status Cursor_Incr(Cursor *cur, int length){
     Stack(bytes("Cursor_Incr"), NULL);
 
     i64 offset = cur->offset;
     i64 local = cur->local;;
     String *seg = cur->seg;
-    
 
     i64 segSz = String_GetSegSize(cur->s);
     i64 max = segSz;

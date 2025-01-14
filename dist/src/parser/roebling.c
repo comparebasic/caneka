@@ -38,6 +38,7 @@ static status Roebling_RunMatches(Roebling *rbl){
                  }
 
                  rbl->type.state = ROEBLING_NEXT;
+                 rbl->type.state &= ~PROCESSING;
                  rbl->matches->metrics.selected = it.idx;
 
                  if(mt->jump > -1){
@@ -58,7 +59,9 @@ static status Roebling_RunMatches(Roebling *rbl){
             break;
         }
 
-        Cursor_Incr(&(rbl->cursor), 1);
+        if((mt->type.state & (MATCH_BY_INVERT)) == 0){
+            Cursor_Incr(&(rbl->cursor), 1);
+        }
         rbl->type.state |= (rbl->cursor.type.state & END);
     }
 
@@ -108,10 +111,11 @@ status Roebling_RunCycle(Roebling *rbl){
             rbl->type.state = SUCCESS;
         }
     }else{
-        if((rbl->type.state & ROEBLING_LOAD_MATCHES) == 0){
+        if((rbl->type.state & (PROCESSING|ROEBLING_LOAD_MATCHES)) == 0){
             wdof = as(wdof, TYPE_WRAPPED_DO);
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
             rbl->type.state &= ~ROEBLING_LOAD_MATCHES;
+            rbl->type.state |= PROCESSING;
         }
         Roebling_RunMatches(rbl);
     }
@@ -170,14 +174,16 @@ int Roebling_GetMatchIdx(Roebling *rbl){
 
 /* > Setup Cycle */
 static status roebling_AddReset(Roebling *rbl){
-    rbl->cursor.type.state &= ~END;
+    if((rbl->cursor.type.state & END) != 0){
+        rbl->cursor.type.state &= ~END;
+        Cursor_Incr(&(rbl->cursor), 1);
+    }
     rbl->type.state &= ~END;
-    Return rbl->type.state;
-    return SUCCESS;
+    return rbl->type.state;
 }
 
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
-    Stack(bytes("Roebling_AddBytes"), (Abstract *)rbl);
+    Stack(bytes("Roebling_AddBytes"), NULL);
     status r = String_AddBytes(rbl->m, rbl->cursor.s, bytes, length);
     Return roebling_AddReset(rbl);
 }

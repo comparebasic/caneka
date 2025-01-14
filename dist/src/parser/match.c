@@ -165,6 +165,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
         def = mt->pat.curDef;
 
         matched = charMatched(c, def);
+        mt->type.state &= ~MATCH_BY_INVERT;
 
         if(DEBUG_PATMATCH){
             Match_midDebug('_', c, def, mt, matched, FALSE);
@@ -236,18 +237,18 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
         }else{
             if((mt->type.state & MATCH_KO) != 0){
                 if((def->flags & PAT_KO) == 0){
-                    mt->type.state &= ~MATCH_KO;
                     mt->snip.type.state &= ~NOOP;
                     mt->snip.type.state |= SUCCESS;
                     if((mt->type.state & MATCH_LEAVE) != 0){
                         goto miss;
                         break;
                     }
-                    mt->type.state &= ~PROCESSING;
+                    mt->type.state &= ~(PROCESSING|MATCH_KO);
                     mt->pat.curDef++;
                     continue;
                 }else{
                     match_NextKoTerm(mt);
+                    mt->type.state |= MATCH_BY_INVERT;
                     continue;
                 }
             }else if((def->flags & (PAT_KO|PAT_OPTIONAL|PAT_ANY)) != 0){
@@ -257,6 +258,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                 if((def->flags & PAT_TERM) != 0){
                     if((mt->type.state & MATCH_TERM_FOUND) != 0){
                         match_NextTerm(mt);
+                        mt->type.state |= MATCH_BY_INVERT;
                         continue;
                     }else{
                         goto miss;

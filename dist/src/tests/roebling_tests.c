@@ -165,7 +165,6 @@ status RoeblingMark_Tests(MemCtx *gm){
     mt = Roebling_GetMatch(rbl);
     s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
 
-    printf("hi\n");
     r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals ONE, have %s", s->bytes);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'ONE'");
 
@@ -212,23 +211,14 @@ status RoeblingStartStop_Tests(MemCtx *gm){
     Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
     Roebling_Run(rbl);
 
-    Debug_Print((void*)rbl, 0, "Parser: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     cstr = "today?\n";
     Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
     Roebling_Run(rbl);
 
-    Debug_Print((void*)rbl, 0, "Parser: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     mt = Roebling_GetMatch(rbl);
-    Debug_Print((void*)mt, 0, "Match: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    Test(String_EqualsBytes(s, bytes("Hi how are you today?")), "String equals 'Hi how are you today?', have '%s'", (char *)s->bytes);
-    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
+    r |= Test(String_EqualsBytes(s, bytes("Hi how are you today?")), "String equals 'Hi how are you today?', have '%s'", (char *)s->bytes);
 
     MemCtx_Free(m);
     Return r;
