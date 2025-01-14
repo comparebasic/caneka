@@ -173,13 +173,12 @@ void *Span_GetSelected(Span *p){
 }
 
 int Span_Add(Span *p, Abstract *t){
-    Stack(bytes("Span_Add"), t);
     int idx = Span_NextIdx(p);
     if(Span_Set(p, idx, t) != NULL){
-        Return idx;
+        return idx;
     }
 
-    Return 0;
+    return 0;
 }
 
 void *Span_ReserveNext(Span *p){

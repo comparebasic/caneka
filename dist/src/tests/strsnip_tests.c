@@ -151,5 +151,6 @@ status StrSnipBoundry_Tests(MemCtx *gm){
     r |= Test(String_Equals(res, exp), "Expected String without quotes or newlines, have '%s'", String_ToChars(m, res));
 
     MemCtx_Free(m);
+
     Return r;
 }

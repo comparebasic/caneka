@@ -58,13 +58,13 @@ status Test(int condition, char *msg, ...){
 }
 
 status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
+    Stack(bytes("Test_Runner"), 
+        (Abstract *)String_Make(DebugM, bytes(suiteName)));
     int i = 0;
     TestSet *set = tests;
     char *name = NULL;
     int pass = 0;
     int fail = 0;
-    Stack(bytes("Test_Runner"), 
-        (Abstract *)String_Make(DebugM, bytes(suiteName)));
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("<div class=\"suite\">\n    <span class=\"label\">Suite %s</span>\n", suiteName);
     }

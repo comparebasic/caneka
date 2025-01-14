@@ -61,14 +61,6 @@ static TestSet _Tests[] = {
         "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
         PARTIAL_FEATURE,
     },
-    /*
-    {
-        "SpanClone",
-        SpanClone_Tests,
-        "Clone a span",
-        NOT_STARTED,
-    },
-    */
     {
         "Hash",
         Hash_Tests,
@@ -293,14 +285,12 @@ static TestSet _Tests[] = {
         "Generating Sha256 summaries of strings. And random data strings.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "Crypto - Ecdsa",
-        Ecdsa_Tests,
+        Blank_Tests,
         "Ecsda sugnatures for strings.",
         NOT_STARTED,
     },
-    */
     {
         "Crypto - Salty",
         Salty_Tests,
