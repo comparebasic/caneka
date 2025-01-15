@@ -8,10 +8,12 @@ status MemCtx_Tests(MemCtx *gm){
     String *s = NULL;
 
     int stackOffset = MemCtx_TempLevel;
+    printf("making string 1\n");
     s = String_Init(m, STRING_EXTEND);
 
     Stack(bytes("StackOne"), NULL);
     m->type.state |= MEMCTX_TEMP;
+    printf("making string 2\n");
     s = String_Init(m, STRING_EXTEND);
     m->type.state &= ~MEMCTX_TEMP;
     DebugStack_Pop();

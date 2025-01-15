@@ -127,9 +127,8 @@ MemCtx *MemCtx_Make(){
 i64 MemCtx_Total(MemCtx *m, i16 level){
     MemSlab *last = m->start_sl;
     i64 total = 0;
-    while(last != NULL && last->next != NULL){
-        printf("last %d\n", last->idx);
-        if((level == 0) || last->level == level){
+    while(last != NULL){
+        if(level == 0 || last->level == level){
             total += MEM_SLAB_SIZE;
         }
         last = last->next;
@@ -139,12 +138,22 @@ i64 MemCtx_Total(MemCtx *m, i16 level){
 
 status MemCtx_FreeTemp(MemCtx *m, i16 level){
     MemSlab *current = m->start_sl, *next = NULL;
+    MemSlab *prev = NULL;
     while(current != NULL){
-        next = current->next;
-        if(level == 0 || current->level == level){
-            trackFree(current, sizeof(MemSlab));
+        if(current->next == NULL){
+           next = current; 
+        }else{
+           next = current->next;
         }
-        current = next;
+        if(level == 0 || next->level >= level){
+            current->next = next->next;
+            trackFree(next, sizeof(MemSlab));
+        }else{
+            current = current->next;
+        }
+        if(next == current){
+            break;
+        }
     }
     return SUCCESS;
 }

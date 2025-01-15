@@ -839,6 +839,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
 
 status Debug_Init(MemCtx *m){
     DebugM = m;
+    m->type.state |= MEMCTX_TEMP;
     if(DebugPrintChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);
         DebugPrintChain = Chain_Make(m, funcs);

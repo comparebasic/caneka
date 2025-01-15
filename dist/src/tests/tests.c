@@ -329,10 +329,9 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
     {
         "MemCtx Tests",
@@ -349,3 +348,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/

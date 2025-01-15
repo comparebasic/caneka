@@ -48,6 +48,7 @@ static char *longStrNoNl[] = {
 };
 
 status StrSnip_Tests(MemCtx *gm){
+    Stack(bytes("StrSnip_Tests"), NULL);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -90,6 +91,7 @@ static PatCharDef textNl[] = {
 };
 
 status StrSnipBoundry_Tests(MemCtx *gm){
+    Stack(bytes("StrSnipBoundry_Tests"), NULL);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 

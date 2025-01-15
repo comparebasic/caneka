@@ -85,5 +85,6 @@ status SpanSetup_Tests(MemCtx *gm){
     p = Span_Make(m, TYPE_SLAB_SPAN);
     r |= testSpan(p, "SlabSpan", 0, 1, 512, 32, 4096, 512);
 
+    MemCtx_Free(m);
     return r;
 }

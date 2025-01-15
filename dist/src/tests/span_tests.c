@@ -160,7 +160,5 @@ status SpanClone_Tests(MemCtx *gm){
     Span_Set(p, 17, (Abstract *)String_Make(m, bytes("Seventeen")));
 
     MemCtx_Free(m);
-
-    r |= SUCCESS;
     return r;
 }

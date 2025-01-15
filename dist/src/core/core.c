@@ -19,7 +19,8 @@ status Caneka_Init(MemCtx *m){
     r |= DebugStack_Init();
 #endif
     r |= Clone_Init(m);
-    r |= Debug_Init(m);
+    MemCtx *dm = MemCtx_Make();
+    r |= Debug_Init(dm);
     r |= Hash_Init(m);
     r |= Oset_Init(m);
     r |= Enc_Init(m);

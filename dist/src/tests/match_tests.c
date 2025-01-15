@@ -51,7 +51,6 @@ status Match_Tests(MemCtx *gm){
 
 status MatchElastic_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
-    Span *p;
     status r = READY;
     String *backlog = String_Init(m, STRING_EXTEND);
     backlog->type.state |= FLAG_STRING_CONTIGUOUS;
@@ -229,7 +228,6 @@ status MatchKo_Tests(MemCtx *gm){
         }
     }
     r |= Test(Match_Total(&mt) == 1, "counted first letter only, have %d", Match_Total(&mt));
-
 
     MemCtx_Free(m);
     return r;
