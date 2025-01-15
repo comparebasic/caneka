@@ -20,11 +20,39 @@ static void trackFree(void *p, size_t s){
     cmem -= s;
 }
 
+
+static size_t MemSlab_Available(MemSlab *sl, i16 level){
+    return (level == 0 || sl->level == level) && MEM_SLAB_SIZE - (sl->addr - MemSlab_GetStart(sl));
+}
+
+static void *MemSlab_Alloc(MemSlab *sl, size_t s){
+    void *p = sl->addr; 
+    sl->addr += s;
+
+    return p;
+}
+
 size_t MemCount(){
     return cmem;
 }
 
-void *MemCtx_Alloc(MemCtx *m, size_t sz){
+void *MemSlab_GetStart(MemSlab *sl){
+    return ((void *)sl->bytes);
+}
+
+MemSlab *MemSlab_Make(MemCtx *m, i16 level){
+    size_t sz = sizeof(MemSlab);
+    MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
+    sl->addr = MemSlab_GetStart(sl);
+    sl->level = level;
+    if(m != NULL){
+        return MemSlab_Attach(m, sl);
+    }else{
+        return sl;
+    }
+}
+
+void *MemCtx_AllocTemp(MemCtx *m, size_t sz, i16 level){
     if(DEBUG_ALLOC){
         printf("\x1b[%dmAlloc %ld of %p\x1b[0m\n", DEBUG_ALLOC, sz, m);
     }
@@ -33,14 +61,14 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     }
     MemSlab *sl = NULL, *last = m->start_sl;
     while(last != NULL){
-        if(MemSlab_Available(last) >= sz){
+        if(MemSlab_Available(last, level) >= sz){
             sl = last;
             break;
         }
         last = last->next;
     }
     if(sl == NULL){
-        sl = MemSlab_Make(m);
+        sl = MemSlab_Make(m, level);
     }
 
     void *ptr = MemSlab_Alloc(sl, sz);
@@ -50,6 +78,10 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     m->latest.offset = ptr - (void *)sl->bytes;
 
     return ptr;
+}
+
+void *MemCtx_Alloc(MemCtx *m, size_t s){
+    return MemCtx_AllocTemp(m, s, 0);
 }
 
 i64 MemCtx_Used(MemCtx *m){
@@ -79,20 +111,22 @@ MemCtx *MemCtx_Make(){
     return m;
 }
 
-status MemCtx_Free(MemCtx *m){
+status MemCtx_FreeTemp(MemCtx *m, i16 level){
     MemSlab *current = m->start_sl, *next = NULL;
     while(current != NULL){
         next = current->next;
-        trackFree(current, sizeof(MemSlab));
+        if(level == 0 || current->level == level){
+            trackFree(current, sizeof(MemSlab));
+        }
         current = next;
     }
-    trackFree(m, sizeof(MemCtx));
-
     return SUCCESS;
 }
 
-void *MemSlab_GetStart(MemSlab *sl){
-    return ((void *)sl->bytes);
+status MemCtx_Free(MemCtx *m){
+    MemCtx_FreeTemp(m, 0);
+    trackFree(m, sizeof(MemCtx));
+    return SUCCESS;
 }
 
 MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
@@ -113,31 +147,6 @@ MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
     }
     return sl;
 
-}
-
-MemSlab *MemSlab_Make(MemCtx *m){
-    size_t sz = sizeof(MemSlab);
-    MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
-    sl->addr = MemSlab_GetStart(sl);
-    if(m != NULL){
-        return MemSlab_Attach(m, sl);
-    }else{
-        return sl;
-    }
-}
-
-size_t MemSlab_Available(MemSlab *sl){
-    return MEM_SLAB_SIZE - (sl->addr - MemSlab_GetStart(sl));
-}
-
-void *MemSlab_Alloc(MemSlab *sl, size_t s){
-    if((MemSlab_Available(sl) - s) < 0){
-        Fatal("Trying to allocation (slab) too much memory at once", TYPE_MEMSLAB);
-    }
-    void *p = sl->addr; 
-    sl->addr += s;
-
-    return p;
 }
 
 /* utils */

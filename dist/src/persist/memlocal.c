@@ -80,7 +80,7 @@ MemLocal *MemLocal_Load(MemCtx *m, IoCtx *ctx){
 
         File_Load(m, &file, ctx->access);
         if((file.type.state & NOOP) == 0){
-            MemSlab *sl = MemSlab_Make(NULL);
+            MemSlab *sl = MemSlab_Make(NULL, 0);
             String_ToSlab(file.data, (void *)sl,  sizeof(MemSlab)); 
             MemSlab_Attach(ml->m, sl);
         }else{
