@@ -20,9 +20,8 @@ static void trackFree(void *p, size_t s){
     cmem -= s;
 }
 
-
-static size_t MemSlab_Available(MemSlab *sl, i16 level){
-    return (level == 0 || sl->level == level) && MEM_SLAB_SIZE - (sl->addr - MemSlab_GetStart(sl));
+static size_t MemSlab_Available(MemSlab *sl){
+    return MEM_SLAB_SIZE - MemSlab_Taken(sl);
 }
 
 static void *MemSlab_Alloc(MemSlab *sl, size_t s){
@@ -32,12 +31,22 @@ static void *MemSlab_Alloc(MemSlab *sl, size_t s){
     return p;
 }
 
+i16 MemCtx_TempLevel = 0;
+
 size_t MemCount(){
     return cmem;
 }
 
-void *MemSlab_GetStart(MemSlab *sl){
-    return ((void *)sl->bytes);
+i64 MemCtx_MemCount(MemCtx *m, i16 level){
+    MemSlab *sl = NULL, *last = m->start_sl;
+    i64 total = 0;
+    while(last != NULL){
+        if((level == 0 || last->level == level)){
+            total += MemSlab_Taken(last);
+        }
+        last = last->next;
+    }
+    return total;
 }
 
 MemSlab *MemSlab_Make(MemCtx *m, i16 level){
@@ -61,7 +70,7 @@ void *MemCtx_AllocTemp(MemCtx *m, size_t sz, i16 level){
     }
     MemSlab *sl = NULL, *last = m->start_sl;
     while(last != NULL){
-        if(MemSlab_Available(last, level) >= sz){
+        if((level == 0 || last->level == level) && MemSlab_Available(last) >= sz){
             sl = last;
             break;
         }
@@ -81,7 +90,11 @@ void *MemCtx_AllocTemp(MemCtx *m, size_t sz, i16 level){
 }
 
 void *MemCtx_Alloc(MemCtx *m, size_t s){
-    return MemCtx_AllocTemp(m, s, 0);
+    i16 level = 0;
+    if((m->type.state & MEMCTX_TEMP) != 0){
+       level = MemCtx_TempLevel; 
+    }
+    return MemCtx_AllocTemp(m, s, level);
 }
 
 i64 MemCtx_Used(MemCtx *m){
@@ -109,6 +122,19 @@ MemCtx *MemCtx_Make(){
     MemCtx *m = (MemCtx *) trackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
     m->type.of = TYPE_MEMCTX;
     return m;
+}
+
+i64 MemCtx_Total(MemCtx *m, i16 level){
+    MemSlab *last = m->start_sl;
+    i64 total = 0;
+    while(last != NULL && last->next != NULL){
+        printf("last %d\n", last->idx);
+        if((level == 0) || last->level == level){
+            total += MEM_SLAB_SIZE;
+        }
+        last = last->next;
+    }
+    return total;
 }
 
 status MemCtx_FreeTemp(MemCtx *m, i16 level){

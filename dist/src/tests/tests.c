@@ -57,9 +57,9 @@ static TestSet _Tests[] = {
     },
     {
         "MemCtx Tests",
-        Blank_Tests,
+        MemCtx_Tests,
         "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
-        PARTIAL_FEATURE,
+        FEATURE_COMPLETE,
     },
     {
         "Hash",
@@ -329,20 +329,15 @@ static TestSet _Tests[] = {
     },
 };
 
-TestSet *Tests = _Tests;
-
 /*
+TestSet *Tests = _Tests;
+*/
+
 static TestSet solo[] = {
     {
-        "StrSnip",
-        StrSnip_Tests,
-        "Test for snip ranges of strings to copy.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "StrSnip Boundry",
-        StrSnipBoundry_Tests,
-        "Test for snip ranges of strings to copy in large strings.",
+        "MemCtx Tests",
+        MemCtx_Tests,
+        "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
         FEATURE_COMPLETE,
     },
     {
@@ -354,4 +349,3 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
-*/

@@ -8,6 +8,12 @@ related: core/mem.c
 */
 #define MEM_SLAB_SIZE 4096
 
+enum memctx_flags {
+    MEMCTX_TEMP = 1 << 8,
+};
+
+extern i16 MemCtx_TempLevel;
+
 typedef struct mem_slab {
     byte bytes[MEM_SLAB_SIZE];
     word idx;
@@ -41,3 +47,9 @@ void *MemCtx_GetSlab(MemCtx *m, void *addr);
 MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl);
 void *MemSlab_GetStart(MemSlab *sl);
 MemSlab *MemSlab_Make(MemCtx *m, i16 level);
+i64 MemCtx_MemCount(MemCtx *m, i16 level);
+i64 MemCtx_Total(MemCtx *m, i16 level);
+
+#define MemSlab_GetStart(sl) ((void *)(sl)->bytes)
+#define MemSlab_Taken(sl) ((sl)->addr - MemSlab_GetStart((sl)))
+

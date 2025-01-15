@@ -174,6 +174,7 @@ static BuildSubdir testsobj = { "tests", {
     "ioctx_tests.c",
     "iter_str_tests.c",
     "match_tests.c",
+    "memctx_tests.c",
     "memlocal_tests.c",
     "mock_109strings.c",
     "nestedd_tests.c",

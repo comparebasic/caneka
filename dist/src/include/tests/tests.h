@@ -61,3 +61,4 @@ status IterStr_Tests(MemCtx *gm);
 status ProtoHttp_Tests(MemCtx *gm);
 status StrSnip_Tests(MemCtx *gm);
 status StrSnipBoundry_Tests(MemCtx *gm);
+status MemCtx_Tests(MemCtx *gm);

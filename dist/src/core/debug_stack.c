@@ -47,10 +47,12 @@ void _DebugStack_Push(byte *name, Abstract *a, char *file, int line){
     entry->idx = _stackIdx;
     entry->a = a;
     _stackIdx++;
+    MemCtx_TempLevel = _stackIdx;
 }
 
 void DebugStack_Pop(){
     _stackIdx--;
+    MemCtx_TempLevel = _stackIdx;
 }
 
 void DebugStack_SetRef(Abstract *a){
