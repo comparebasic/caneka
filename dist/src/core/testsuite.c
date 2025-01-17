@@ -57,8 +57,7 @@ status Test(int condition, char *msg, ...){
 }
 
 status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
-    Stack(bytes("Test_Runner"), 
-        (Abstract *)String_Make(DebugM, bytes(suiteName)));
+    DebugStack_Push("Test_Runner"); 
     int i = 0;
     TestSet *set = tests;
     char *name = NULL;
@@ -87,12 +86,13 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
             printf("[Testing %s]\n", set->name);
         }
 
-        Stack(bytes("Test->func"), NULL);
+        DebugStack_Push("Test->func");
         m->type.state |= MEMCTX_TEMP;
         status r = set->func(m);
         MemCtx_FreeTemp(m, MemCtx_TempLevel);
         MemCtx_FreeTemp(DebugM, MemCtx_TempLevel);
         DebugStack_Pop();
+
         m->type.state &= ~MEMCTX_TEMP;
         if((GLOBAL_flags & HTML_OUTPUT) != 0){
             printf("    </ol>\n</div>\n");
@@ -139,5 +139,6 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("</div>\n");
     }
-    Return !fail ? SUCCESS : ERROR;
+    DebugStack_Pop();
+    return !fail ? SUCCESS : ERROR;
 }

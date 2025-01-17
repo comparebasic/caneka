@@ -90,13 +90,3 @@ typedef char *(*RangeToChars)(word);
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
-
-#ifdef DEBUG_STACK
-#define Return DebugStack_Pop(); return 
-#define Stack(x, a) DebugStack_Push(bytes(x), (a))
-#define SetRef(a) DebugStack_SetRef((a))
-#else
-#define Return return 
-#define Stack(x, a) ()
-#define SetRef(a) ()
-#endif

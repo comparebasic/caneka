@@ -16,7 +16,7 @@ status Caneka_Init(MemCtx *m){
     r |= archChecks();
     r |= SpanDef_Init();
 #ifdef DEBUG_STACK
-    r |= DebugStack_Init();
+    r |= DebugStack_Init(m);
 #endif
     r |= Clone_Init(m);
     MemCtx *dm = MemCtx_Make();

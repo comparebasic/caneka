@@ -3,24 +3,9 @@
 
 Chain *HashChain;
 
-static util _Hash_Bytes(byte *bt, size_t length, util h){
-	util i = 0;
-	byte c;
-	while (i++ < length) {
-		c = *bt;
-		h = (h << 5) + h + (h << 9) + h + (h << 31) + h + (h << 49) + h + c;
-        if(i > 110 && i < 115){
-            printf("'%c'/%u - %lu:%lu\n", c,c, i, h);
-        }
-        bt++;
-	}
-    return h;
-}
-
-
 static util Hash_Bytes(byte *bt, size_t length){
 	util h = 5381;
-    return _Hash_Bytes(bt, length, h);
+    return Hash_Bytes(bt, length, h);
 }
 
 static util Hash_Abstract(Abstract *a){
@@ -39,7 +24,7 @@ static util Hash_String(Abstract *a){
     String *s = (String *)asIfc(a, TYPE_STRING);
 	util h = 5381;
     while(s != NULL){
-        h = _Hash_Bytes(s->bytes, s->length, h);
+        h = Hash_Bytes(s->bytes, s->length, h);
         s = String_Next(s);
     }
     return h;
@@ -69,6 +54,20 @@ static status populateHash(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
     return r;
+}
+
+util Hash_Bytes(byte *bt, size_t length, util h){
+	util i = 0;
+	byte c;
+	while (i++ < length) {
+		c = *bt;
+		h = (h << 5) + h + (h << 9) + h + (h << 31) + h + (h << 49) + h + c;
+        if(i > 110 && i < 115){
+            printf("'%c'/%u - %lu:%lu\n", c,c, i, h);
+        }
+        bt++;
+	}
+    return h;
 }
 
 util Get_Hash(Abstract *a){

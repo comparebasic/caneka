@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-void *TableChain_Get(TableChain *chain, String *s){
-
+void *TableChain_Get(TableChain *chain, Abstract *a){
     Abstract *t = Table_Get(chain->tbl, (Abstract *)s);
 
     if(t != NULL){
