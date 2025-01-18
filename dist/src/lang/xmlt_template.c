@@ -44,7 +44,6 @@ static boolean earlyOutAtts(Mess *e, String *key, NestedD *nd){
 }
 
 status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
-    Stack(bytes("XmlT_Template"), NULL);
     MemCtx *m = xmlt->m;
     status r = ERROR;
 
@@ -64,13 +63,13 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
 
     if((e->type.state & FLAG_XML_IF) != 0 && (e->type.state & FLAG_XML_IN_PROGRESS) == 0){
         if(earlyOutAtts(e, String_Make(m, bytes("if")), nd)){
-            Return NOOP;
+            return NOOP;
         }
     }
 
     if((e->type.state & FLAG_XML_IF_NOT) != 0 && (e->type.state & FLAG_XML_IN_PROGRESS) == 0){
         if(!earlyOutAtts(e, String_Make(m, bytes("if-not")), nd)){
-            Return NOOP;
+            return NOOP;
         }
     }
 
@@ -84,7 +83,7 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
         if(with_s != NULL){
             r = NestedD_With(m, nd, with_s);
             if(r != SUCCESS){
-                Return r;
+                return r;
             }
             tbl = nd->current_tbl;
         }
@@ -92,13 +91,13 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
 
         if((e->type.state & FLAG_XML_IF)){
             if(earlyOutAtts(e, String_Make(m, bytes("if")), nd)){
-                Return NOOP;
+                return NOOP;
             }
         }
 
         if((e->type.state & FLAG_XML_IF_NOT)){
             if(earlyOutAtts(e, String_Make(m, bytes("if-not")), nd)){
-                Return NOOP;
+                return NOOP;
             }
         }
 
@@ -111,7 +110,7 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
         r = NestedD_For(nd, for_s);
         if(r != SUCCESS){
             printf("For nest did not succeed\n");
-            Return NOOP;
+            return NOOP;
         }
 
         tbl = nd->current_tbl;
@@ -121,7 +120,7 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
         }
         e->type.state &= ~(FLAG_XML_IN_PROGRESS);
         NestedD_Outdent(nd);
-        Return SUCCESS;
+        return SUCCESS;
     }
 
     if(0 && DEBUG_XML_TEMPLATE){
@@ -188,5 +187,5 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
         NestedD_Outdent(nd);
     }
 
-    Return SUCCESS;
+    return SUCCESS;
 }

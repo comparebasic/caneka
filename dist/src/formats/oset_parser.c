@@ -204,7 +204,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
     if(captureKey == OSET_KEY){
         oset->item->key = s;
     }else if(captureKey == OSET_TOKEN){
-        FmtDef *def = TableChain_Get(oset->byName, s);
+        FmtDef *def = TableChain_Get(oset->byName, (Abstract *)s);
         if(def == NULL){
             Fatal("Error: type not found\n", TYPE_OSET);
         }

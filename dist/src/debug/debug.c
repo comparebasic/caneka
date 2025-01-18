@@ -664,27 +664,6 @@ static void Guard_Print(Abstract *a, cls type, char *msg, int color, boolean ext
    printf(" \x1b[%dm%s:%d>\x1b[0m", color, g->file, g->line);
 }
 
-#ifdef DEBUG_STACK
-static void DebugStackEntry_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-   if(a->type.of != TYPE_DEBUG_STACK_ENTRY){
-        printf("Error debug stack entry of incorrect cls, have %d\n", a->type.of);
-        exit(1);
-   }
-   DebugStackEntry *e = (DebugStackEntry *)a;
-   if((e->type.state & ERROR) != 0){
-        color = COLOR_RED;
-   }
-   printf("\x1b[%dm%sStack<%s", color, msg, State_ToChars(e->type.state));
-   Debug_Print((void *)&e->name, 0, ":", color, FALSE);
-   Debug_Print((void *)&e->file, 0, ":", color, FALSE);
-   printf("\x1b[%dm line:%d\x1b[0m", color, e->line);
-   if(e->a != NULL){
-        Debug_Print((void *)e->a, 0, "  ref:", color, (e->type.state & ERROR) != 0);
-   }
-   printf("\x1b[%dm>\x1b[0m", color);
-}
-#endif
-
 static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)as(a, TYPE_STRING_CHAIN);
     if(extended){
@@ -828,7 +807,6 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
     r |= Lookup_Add(m, lk, TYPE_ENC_PAIR, (void *)EncPair_Print);
     r |= Lookup_Add(m, lk, TYPE_GUARD, (void *)Guard_Print);
-    r |= Lookup_Add(m, lk, TYPE_DEBUG_STACK_ENTRY, (void *)DebugStackEntry_Print);
     r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
     r |= Lookup_Add(m, lk, TYPE_RESULT, (void *)Result_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);

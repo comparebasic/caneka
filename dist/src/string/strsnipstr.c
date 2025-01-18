@@ -2,7 +2,6 @@
 #include <caneka.h>
 
 String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
-    Stack(bytes("StrSnipStr_ToString"), NULL);
     String *ret = String_Init(m, STRING_EXTEND);
 
     i64 pos = 0;
@@ -46,11 +45,10 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         printf("\n");
     }
 
-    Return ret;
+    return ret;
 }
 
 int StrSnipStr_Total(String *sns, word flags){
-    Stack(bytes("StrSnipStr_Total"), NULL);
     IterStr it;
     int total = 0;
     IterStr_Init(&it, sns, sizeof(StrSnip));
@@ -61,5 +59,5 @@ int StrSnipStr_Total(String *sns, word flags){
         }
     }
 
-    Return total;
+    return total;
 }

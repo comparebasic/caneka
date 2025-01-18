@@ -205,9 +205,9 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         }
         FmtDef *def = NULL;
         if(captureKey == FORMATTER_ALIAS){
-            def = TableChain_Get(ctx->byAlias, s); 
+            def = TableChain_Get(ctx->byAlias, (Abstract *)s); 
         }else{
-            def = TableChain_Get(ctx->byName, s); 
+            def = TableChain_Get(ctx->byName, (Abstract *)s); 
         }
         if(def != NULL){
             if(ctx->def == NULL || ctx->def->parent != def){

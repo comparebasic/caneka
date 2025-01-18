@@ -2,8 +2,6 @@
 #include <caneka.h>
 
 Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    Stack(bytes("CnkRbl_Pat"), (Abstract *)key);
-
     Span *p = (Span *)asIfc(fmt->item->value, TYPE_SPAN);
 
     FmtItem *item = Span_Get(p, p->metrics.set);
@@ -21,7 +19,7 @@ Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract 
 
     if(item == NULL){
         Fatal("Need item to add pattern to", TYPE_LANG_CNK_RBL);
-        Return NULL;
+        return NULL;
     }
 
     IterStr it;
@@ -36,7 +34,7 @@ Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract 
         String_AddBytes(m, item->content, bytes(&pat), sizeof(PatCharDef));
     }
 
-    Return NULL;
+    return NULL;
 }
 
 Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
@@ -58,7 +56,6 @@ Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstra
 }
 
 Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    Stack(bytes("CnkRbl_PatKeyOpen"), (Abstract *)key);
     if(def->id == CNK_LANG_RBL_PAT_KEY){
         fmt->item->key = key;
         Span *sp = (Span *)asIfc(fmt->root->value, TYPE_TABLE);
@@ -66,7 +63,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 
         Table_Set(sp, (Abstract *)key,  (Abstract *)fmt->item);
 
-        Return NULL;
+        return NULL;
     }else{
 
         Span *p = (Span *)asIfc(fmt->item->value, TYPE_SPAN);
@@ -128,7 +125,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
             }
         }
 
-        Return (Abstract *)out;
+        return (Abstract *)out;
     }
 }
 

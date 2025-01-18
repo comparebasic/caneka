@@ -33,8 +33,6 @@ status Cursor_Decr(Cursor *cur, int length){
 }
 
 status Cursor_Incr(Cursor *cur, int length){
-    Stack(bytes("Cursor_Incr"), NULL);
-
     i64 offset = cur->offset;
     i64 local = cur->local;;
     String *seg = cur->seg;
@@ -50,7 +48,7 @@ status Cursor_Incr(Cursor *cur, int length){
         seg = String_Next(seg);
         if(seg == NULL){
            cur->type.state |= END; 
-           Return cur->type.state;
+           return cur->type.state;
         }else{
            offset += max;
            local -= max;
@@ -62,9 +60,8 @@ status Cursor_Incr(Cursor *cur, int length){
         cur->local = local;
         cur->seg = seg;
         cur->ptr = cur->seg->bytes+cur->local;
-        Return SUCCESS;
+        return SUCCESS;
     }else{
-        Return ERROR;
+        return ERROR;
     }
-
 }

@@ -3,8 +3,6 @@ MemCtx
 Memory context
 
 This is the manually-run garbage collector.
-
-related: core/mem.c
 */
 #define MEM_SLAB_SIZE 4096
 

@@ -11,8 +11,6 @@ static status populatePresenters(MemCtx *m, Lookup *lk){
 }
 
 status XmlTTemplate_Tests(MemCtx *gm){
-    Stack(bytes("XtmlTTemplate_Tests"), NULL);
-
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -28,9 +26,6 @@ status XmlTTemplate_Tests(MemCtx *gm){
     String *out_s = NULL;
     String *expected_s = NULL;
     Span *tbl = NULL;
-
-
-
 
     Span *session = Span_Make(m, TYPE_TABLE);
     Table_Set(session, (Abstract *)String_Make(m, bytes("scid")), (Abstract *)String_Make(m, bytes("a87c782a")));
@@ -71,8 +66,6 @@ status XmlTTemplate_Tests(MemCtx *gm){
 
     xml_s = String_Make(m, bytes("<root><h1 with=\"session\">Session expires: ${expires}</h1><e for=\"items\" if=\"show-items\" color=\"${item-color}\"><p>${msg}</p><span if-not=\"no-details\" if=\"details\">${details}</span></e></root>"));
 
-    SetRef((Abstract *)xml_s);
-
     XmlT_Parse(xmlt, xml_s, tbl);
 
     s = ctx->root->firstChild->name;
@@ -83,5 +76,5 @@ status XmlTTemplate_Tests(MemCtx *gm){
     r |= Test(String_Equals(xmlt->result, expected_s), "XmlT created expected output from: %s", xml_cstr);
 
     MemCtx_Free(m);
-    Return r;
+    return r;
 }

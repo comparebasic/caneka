@@ -2,7 +2,6 @@
 #include <caneka.h>
 
 status Match_Tests(MemCtx *gm){
-    Stack(bytes("Match_Tests"), NULL);
     MemCtx *m = MemCtx_Make();
     Span *p;
     status r = READY;
@@ -46,7 +45,7 @@ status Match_Tests(MemCtx *gm){
         s->length-1, Match_Total(&mt));
 
     MemCtx_Free(m);
-    Return r;
+    return r;
 }
 
 status MatchElastic_Tests(MemCtx *gm){

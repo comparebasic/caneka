@@ -3,7 +3,7 @@
 
 /* > Run */
 static status Roebling_RunMatches(Roebling *rbl){
-    Stack(bytes("Roebling_RunMatches"), (Abstract *)rbl);
+    
     if(DEBUG_ROEBLING_CURRENT){
         Debug_Print((void *)rbl, 0, "RblCurrent - RunMatches", DEBUG_ROEBLING_CURRENT, FALSE);
         printf("\n");
@@ -65,11 +65,11 @@ static status Roebling_RunMatches(Roebling *rbl){
         rbl->type.state |= (rbl->cursor.type.state & END);
     }
 
-    Return rbl->type.state;
+    return rbl->type.state;
 }
 
 status Roebling_RunCycle(Roebling *rbl){
-    Stack(bytes("Roebling_RunCycle"), (Abstract *)rbl);
+    
     if(rbl->parsers_do->nvalues == 0){
         Fatal("Roebling parsers not set", TYPE_ROEBLING);
     }
@@ -114,7 +114,7 @@ status Roebling_RunCycle(Roebling *rbl){
         Roebling_RunMatches(rbl);
     }
 
-    Return rbl->type.state;
+    return rbl->type.state;
 }
 
 status Roebling_JumpTo(Roebling *rbl, int mark){
@@ -123,13 +123,13 @@ status Roebling_JumpTo(Roebling *rbl, int mark){
 }
 
 status Roebling_Run(Roebling *rbl){
-    Stack(bytes("Roebling_Run"), (Abstract *)rbl);
+    
     status r = READY;
     while((r & (SUCCESS|ERROR|END)) == 0){
         r = Roebling_RunCycle(rbl);
     }
     rbl->type.state &= ~END;
-    Return rbl->type.state;
+    return rbl->type.state;
 }
 
 /* > Debug */
@@ -177,9 +177,9 @@ static status roebling_AddReset(Roebling *rbl){
 }
 
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
-    Stack(bytes("Roebling_AddBytes"), NULL);
+    
     status r = String_AddBytes(rbl->m, rbl->cursor.s, bytes, length);
-    Return roebling_AddReset(rbl);
+    return roebling_AddReset(rbl);
 }
 
 status Roebling_Add(Roebling *rbl, String *s){
@@ -275,7 +275,7 @@ static status Roebling_SetMark(Roebling *rbl, int mark, int _idx){
 }
 
 static status Roebling_Prepare(Roebling *rbl, Span *parsers){
-    Stack(bytes("Roebling_Prepare"), (Abstract *)parsers);
+    
     int idx = 0;
     int rblIdx = 0;
     Abstract *t = NULL;
@@ -293,7 +293,7 @@ static status Roebling_Prepare(Roebling *rbl, Span *parsers){
         }
         idx++;
     }
-    Return SUCCESS;
+    return SUCCESS;
 }
 
 status Roebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks, Span *additions, Lookup *desc){
@@ -311,7 +311,6 @@ Roebling *Roebling_Make(MemCtx *m,
         RblCaptureFunc capture,
         Abstract *source
     ){
-    Stack(bytes("Roebling_Make"), NULL);
 
     Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
@@ -332,5 +331,5 @@ Roebling *Roebling_Make(MemCtx *m,
     Roebling_Reset(m, rbl, s);
     Guard_Setup(m, &rbl->guard, ROEBLING_GUARD_MAX, bytes("Roebling Guard"));
 
-    Return rbl;
+    return rbl;
 }

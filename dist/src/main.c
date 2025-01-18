@@ -47,8 +47,6 @@ status serve(MemCtx *m, char *arg){
 }
 
 status transpile(MemCtx *m, char *arg){
-    Stack(bytes("transpile"), NULL);
-
     Transp *ctx = Transp_Make(m);
     ctx->src = String_Make(m, bytes("src"));
     ctx->dist = String_Make(m, bytes("dist"));
@@ -61,7 +59,7 @@ status transpile(MemCtx *m, char *arg){
         Table_Set(ctx->formats, (Abstract *)String_Make(m, bytes(".cnk")), (Abstract *)cnkLang);
     }
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
-    Return Transp_Trans(ctx);
+    return Transp_Trans(ctx);
 }
 
 static status handle(MemCtx *m, char *arg){

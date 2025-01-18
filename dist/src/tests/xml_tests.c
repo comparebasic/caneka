@@ -29,7 +29,6 @@ status Xml_Tests(MemCtx *gm){
 }
 
 status XmlNested_Tests(MemCtx *gm){
-    Stack(bytes("XmlNested_Tests"), NULL);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -57,7 +56,7 @@ status XmlNested_Tests(MemCtx *gm){
     Roebling_RunCycle(rbl);
     r |= Test(node->firstChild != NULL, "Body is not null");
     if(( r & ERROR) != 0){
-        Return r;
+        return r;
     }
     r |= Test(String_EqualsBytes(node->firstChild->body, bytes("\n  ")), "Whitespace before tag added as body, have '%s'", String_ToEscaped(m, node->firstChild->body)->bytes);
 
@@ -90,7 +89,7 @@ status XmlNested_Tests(MemCtx *gm){
     r |= Test((ctx->type.state & SUCCESS) != 0, "XML has state success", State_ToChars(ctx->type.state));
 
     MemCtx_Free(m);
-    Return r;
+    return r;
 }
 
 status XmlParser_Tests(MemCtx *gm){

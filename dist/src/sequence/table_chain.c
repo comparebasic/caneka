@@ -2,13 +2,13 @@
 #include <caneka.h>
 
 void *TableChain_Get(TableChain *chain, Abstract *a){
-    Abstract *t = Table_Get(chain->tbl, (Abstract *)s);
+    Abstract *t = Table_Get(chain->tbl, (Abstract *)a);
 
     if(t != NULL){
        return (void *)t; 
     }
     if(chain->next != NULL){
-        return TableChain_Get(chain->next, s);
+        return TableChain_Get(chain->next, a);
     }else{
         return NULL;
     }

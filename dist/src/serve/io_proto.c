@@ -26,7 +26,6 @@ Proto *IoProto_Make(MemCtx *m, ProtoDef *def){
 }
 
 ProtoDef *IoProtoDef_Make(MemCtx *m, Maker reqMake){
-    Stack(bytes("IoProtoDef_Make"), NULL);
     Lookup *lk = Lookup_Make(m, _IO_START, NULL, NULL); 
     Lookup_Add(m, lk, IO_RECV, 
          (void *)String_Make(m, bytes("RECV")));
@@ -35,7 +34,7 @@ ProtoDef *IoProtoDef_Make(MemCtx *m, Maker reqMake){
     Lookup_Add(m, lk, IO_DONE, 
          (void *)String_Make(m, bytes("DONE")));
 
-    Return ProtoDef_Make(m, TYPE_IO_PROTODEF,
+    return ProtoDef_Make(m, TYPE_IO_PROTODEF,
         (Maker)reqMake,
         (Maker)IoProto_Make,
         lk

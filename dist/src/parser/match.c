@@ -107,7 +107,6 @@ static void match_NextKoTerm(Match *mt){
 }
 
 static void addCount(MemCtx *m, Match *mt, word flags, int length){
-    Stack(bytes("Match.addCount"), NULL);
     if(DEBUG_PATMATCH){
         printf("\n\x1b[%dmaddCount:%s%d%s\x1b[0m", 
             DEBUG_PATMATCH,
@@ -125,7 +124,7 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
     }else{
         mt->snip.length += length;
     }
-    Return;
+    return;
 }
 
 int Match_Total(Match *mt){
@@ -133,7 +132,6 @@ int Match_Total(Match *mt){
 }
 
 status Match_Feed(MemCtx *m, Match *mt, word c){
-    Stack(bytes("Match_Feed"), NULL);
     if((mt->type.state & NOOP) != 0){
 
         if(DEBUG_PATMATCH){
@@ -142,7 +140,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             printf("\n");
         }
 
-        Return mt->type.state;
+        return mt->type.state;
     }
     boolean matched = FALSE;
     PatCharDef *def;
@@ -305,7 +303,7 @@ miss:
         printf("\n");
     }
 
-    Return mt->type.state;
+    return mt->type.state;
 }
 
 status Match_FeedString(MemCtx *m, Match *mt, String *s, int offset){

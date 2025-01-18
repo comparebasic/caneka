@@ -7,7 +7,7 @@ static void sigH(int sig, siginfo_t *info, void *ptr){
     exit(1);
 }
 
-static setSigs(){
+static void setSigs(){
     struct sigaction a;
     struct sigaction b;
     memset(&a, 0, sizeof(struct sigaction));
@@ -26,26 +26,25 @@ int _stackIdx = 0;
 
 status DebugStack_Init(MemCtx *m){
     _stackIdx = 0;
-    stack = Span_Make(m);
+    stack = Span_Make(m, TYPE_SPAN);
     setSigs();
     return SUCCESS;
 }
 
 void DebugStack_Push(char *cstr){
-    Span_Set(stack, ++_stackIdx, (Abstract*)cstr);
+    Span_Set(stack, _stackIdx++, (Abstract*)cstr);
 }
 
 void DebugStack_Pop(){
     _stackIdx--;
     Span_Cull(stack, 1);
-    MemCtx_TempLevel = _stackIdx;
 }
 
 int DebugStack_Print(){
     Iter it;
     Iter_Init(&it, stack);
     while((Iter_Next(&it) & END) == 0){
-        void *cstr = (void *)Iter_Get(&it);
+        char *cstr = (char *)Iter_Get(&it);
         int color = DEBUG_STACK_COLOR;
         if((it.type.state & FLAG_ITER_LAST) != 0){
             color = COLOR_RED;

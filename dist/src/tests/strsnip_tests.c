@@ -48,8 +48,7 @@ static char *longStrNoNl[] = {
 };
 
 status StrSnip_Tests(MemCtx *gm){
-    Stack(bytes("StrSnip_Tests"), NULL);
-    status r = READY;
+        status r = READY;
     MemCtx *m = MemCtx_Make();
 
     String *s = NULL;
@@ -80,7 +79,7 @@ status StrSnip_Tests(MemCtx *gm){
     r |= Test(String_Equals(res, exp), "Expected String without quotes, have '%s'", String_ToChars(m, res));
 
     MemCtx_Free(m);
-    Return r;
+    return r;
 }
 
 static PatCharDef textNl[] = {
@@ -91,7 +90,6 @@ static PatCharDef textNl[] = {
 };
 
 status StrSnipBoundry_Tests(MemCtx *gm){
-    Stack(bytes("StrSnipBoundry_Tests"), NULL);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -154,5 +152,5 @@ status StrSnipBoundry_Tests(MemCtx *gm){
 
     MemCtx_Free(m);
 
-    Return r;
+    return r;
 }

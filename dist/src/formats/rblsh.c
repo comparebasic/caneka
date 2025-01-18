@@ -104,7 +104,6 @@ static status start(MemCtx *m, Roebling *rbl){
 }
 
 static status RblSh_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
-    Stack(bytes("RblSh_Capture"), (Abstract *)s);
     RblShCtx *ctx = (RblShCtx *)as(source, TYPE_RBLSH_CTX);
     printf("\x1b[%dmCaptured %s/\x1b[0m", COLOR_YELLOW, 
         AppRange_ToChars(captureKey));
@@ -120,11 +119,10 @@ static status RblSh_Capture(word captureKey, int matchIdx, String *s, Abstract *
         Cash_Capture(captureKey, matchIdx, s, (Abstract *)ctx->cash);
     }
 
-    Return SUCCESS;
+    return SUCCESS;
 }
 
 Roebling *RblShParser_Make(MemCtx *m, RblShCtx *ctx, String *s){ 
-    Stack(bytes("RblShParser_Make"), NULL);
     Span *parsers_do =  Span_Make(m, TYPE_SPAN); 
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBLSH_MARK_START));
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)start));
@@ -142,7 +140,7 @@ Roebling *RblShParser_Make(MemCtx *m, RblShCtx *ctx, String *s){
 
     Lookup *desc = Lookup_FromConfig(m, config, NULL);
 
-    Return Roebling_Make(m,
+    return Roebling_Make(m,
          TYPE_ROEBLING,
          parsers_do,
          desc,

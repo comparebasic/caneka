@@ -137,12 +137,11 @@ static int pollSkipSlab(Abstract *source, int idx){
 }
 
 status Serve_ServeRound(Serve *sctx){
-    Stack(bytes("Serve_ServeRound"), NULL);
     status r = READY;
     Queue *q = &sctx->queue;
 
     if(q->count == 0){
-        Return NOOP;
+        return NOOP;
     }
 
     while(TRUE){
@@ -166,7 +165,6 @@ status Serve_ServeRound(Serve *sctx){
 
         Req *req = (Req *)qidx->item;
         sctx->active = req;
-        DebugStack_SetRef((Abstract *)req);
 
         if((req->type.state & (END|ERROR)) != 0){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
@@ -203,7 +201,7 @@ status Serve_ServeRound(Serve *sctx){
     }
 
     Delay();
-    Return r;
+    return r;
 }
 
 status Serve_Stop(Serve *sctx){
@@ -239,7 +237,6 @@ status Serve_RunPort(Serve *sctx, int port){
 }
 
 status Serve_Run(Serve *sctx){
-    Stack(bytes("Serve_Run"), NULL);
     sctx->serving = TRUE;
     while(sctx->serving){
         int delay = (sctx->queue.count == 0 ? 
@@ -249,7 +246,7 @@ status Serve_Run(Serve *sctx){
         Serve_ServeRound(sctx);
     }
 
-    Return SUCCESS;
+    return SUCCESS;
 }
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def){

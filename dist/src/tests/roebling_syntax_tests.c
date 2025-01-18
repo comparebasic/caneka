@@ -2,8 +2,6 @@
 #include <caneka.h>
 
 status Roebling_SyntaxTests(MemCtx *gm){
-    Stack(bytes("Roebling_SyntaxTests"), NULL);
-
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -13,7 +11,6 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     /* phrase */
     s = String_Make(m, bytes("/(hi-there)/\n"));
-    DebugStack_SetRef((Abstract *)s);
 
     /*
     Debug_Print((void *)s, 0, "Phrase:", COLOR_PURPLE, FALSE);
@@ -44,11 +41,8 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code");
 
-    Return r;
-
     /* line */
     s = String_Make(m, bytes("/type(\\n -> ,ONE,TWO,THREE), ( *), msg(.+[\\n]) -> type/\n"));
-    DebugStack_SetRef((Abstract *)s);
 
     Debug_Print((void *)s, 0, "Line:", COLOR_PURPLE, FALSE);
     printf("\n");
@@ -82,6 +76,6 @@ status Roebling_SyntaxTests(MemCtx *gm){
     MemCtx_Free(m);
 
     r |= SUCCESS;
-    Return r;
+    return r;
 }
 

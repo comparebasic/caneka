@@ -42,7 +42,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     FmtDef *def = Chain_Get(ctx->byId, captureKey);
     if(def == NULL){
-        def = TableChain_Get(ctx->byAlias, s);
+        def = TableChain_Get(ctx->byAlias, (Abstract *)s);
     }
 
     if(captureKey == CNK_LANG_INVOKE){

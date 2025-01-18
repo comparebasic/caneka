@@ -23,7 +23,6 @@ static Handler *RblSh_getHandler(Serve *sctx, Req *req){
 }
 
 static Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx){
-    Stack(bytes("RblSh_ReqMake"), NULL);
     MemCtx *m = MemCtx_Make();
     IoProto *proto = (IoProto *)IoProto_Make(m, (ProtoDef *)sctx->def);
 
@@ -32,7 +31,7 @@ static Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx){
         (RblShCtx *)sctx->def->source,
         req->in.shelf);
 
-    Return req;
+    return req;
 }
 
 static Abstract *RblShCtx_GetVar(Abstract *store, Abstract *key){
@@ -115,7 +114,6 @@ void Cleanup(Abstract *a){
 }
 
 int main(int argc, char **argv){
-    Stack(bytes("rblsh:main"), NULL);
     status r = READY;
 
     MemCtx *m = MemCtx_Make();
@@ -140,5 +138,5 @@ int main(int argc, char **argv){
 
     MemCtx_Free(m);
     r |= SUCCESS;
-    Return r;
+    return r;
 }

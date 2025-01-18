@@ -2,7 +2,6 @@
 #include <caneka.h>
 
 Abstract *CnkLang_StartTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    Stack(bytes("CnkLang_Start"), (Abstract *)a);
     if((fmt->type.state & FMT_CTX_ENCOUNTER) != 0){
         Transp *tp = (Transp *)asIfc(fmt->source, TYPE_TRANSP);
 
@@ -17,9 +16,9 @@ Abstract *CnkLang_StartTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abst
 
         Transp_Out(tp, s);
 
-        Return (Abstract *)s;
+        return (Abstract *)s;
     }else{
-        Return NULL;
+        return NULL;
     }
 }
 

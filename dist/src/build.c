@@ -44,13 +44,17 @@ static BuildSubdir memobj = { "mem", {
 
 static BuildSubdir coreobj = { "core", {
     "core.c",
-    "debug.c",
-    "debug_stack.c",
     "error.c",
     "guard.c",
     "log.c",
     "testsuite.c",
     NULL
+}};
+
+static BuildSubdir debugobj = { "debug", {
+    "debug.c",
+    "debug_stack.c",
+    NULL,
 }};
 
 static BuildSubdir cryptoobj = { "crypto", {
@@ -223,6 +227,7 @@ static BuildSubdir appsobj = { "apps", {
 BuildSubdir *allobj[] = {
     &memobj,
     &coreobj,
+    &debugobj,
     &formatsobj,
     &langobj,
     &parserobj,

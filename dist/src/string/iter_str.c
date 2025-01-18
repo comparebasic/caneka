@@ -2,10 +2,9 @@
 #include <caneka.h>
 
 status IterStr_Next(IterStr *it){
-    Stack(bytes("IterStr_Next"), NULL);
     if(it->cursor.s == NULL){
         it->type.state |= END;
-        Return it->type.state;
+        return it->type.state;
     }
     if((it->type.state & END) != 0){
         it->idx = -1;
@@ -24,7 +23,7 @@ status IterStr_Next(IterStr *it){
         }
     }
 
-    Return it->type.state;
+    return it->type.state;
 }
 
 Abstract *IterStr_Get(IterStr *it){

@@ -195,7 +195,6 @@ status RoeblingMark_Tests(MemCtx *gm){
 }
 
 status RoeblingStartStop_Tests(MemCtx *gm){
-    Stack(bytes("RoeblingStartStop_Tests"), NULL);
     status r = READY;
     MemCtx *m = MemCtx_Make();
     Match *mt = NULL;
@@ -221,5 +220,5 @@ status RoeblingStartStop_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(s, bytes("Hi how are you today?")), "String equals 'Hi how are you today?', have '%s'", (char *)s->bytes);
 
     MemCtx_Free(m);
-    Return r;
+    return r;
 }

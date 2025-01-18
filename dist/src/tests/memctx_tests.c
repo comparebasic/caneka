@@ -11,12 +11,11 @@ status MemCtx_Tests(MemCtx *gm){
     printf("making string 1\n");
     s = String_Init(m, STRING_EXTEND);
 
-    Stack(bytes("StackOne"), NULL);
+    MemCtx_TempLevel++;
     m->type.state |= MEMCTX_TEMP;
-    printf("making string 2\n");
     s = String_Init(m, STRING_EXTEND);
     m->type.state &= ~MEMCTX_TEMP;
-    DebugStack_Pop();
+    MemCtx_TempLevel--;
 
     i64 allCount = MemCtx_MemCount(m, 0);
     i64 stackedCount = MemCtx_MemCount(m, stackOffset+1);

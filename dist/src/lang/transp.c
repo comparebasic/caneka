@@ -12,7 +12,6 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
 }
 
 static status Transp_transpile(Transp *p, FmtCtx *fmt){
-    Stack(bytes("Transp_transpile"), NULL);
     if(1 || File_CmpUpdated(p->m, p->current.source, p->current.dest, NULL)){
         Debug_Print((void *)p->current.source,0,  "Transpiling ",  COLOR_YELLOW, FALSE);
         Debug_Print((void *)p->current.dest,0,  " -> ",  COLOR_YELLOW, FALSE);
@@ -26,9 +25,9 @@ static status Transp_transpile(Transp *p, FmtCtx *fmt){
 
         fprintf(stderr, "\n\x1b[%dmFinished parsing\x1b[0m\n", COLOR_BLUE);
 
-        Return r;
+        return r;
     }
-    Return NOOP;
+    return NOOP;
 }
 
 static status Transp_copy(Transp *p){
@@ -128,14 +127,12 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
 }
 
 status Transp_Out(Transp *p, String *s){
-    Stack(bytes("Transp_Out"), (Abstract *)s);
     status r = Spool_Add(p->m, s, (Abstract *)&p->current.destFile);
-    Return r;
+    return r;
 }
 
 status Transp_OutHeader(Transp *p, String *s){
-    Stack(bytes("Transp_OutHeader"), (Abstract *)s);
-    Return Spool_Add(p->m, s, (Abstract *)&p->current.destHeaderFile);
+    return Spool_Add(p->m, s, (Abstract *)&p->current.destHeaderFile);
 }
 
 status Transp_Trans(Transp *p){

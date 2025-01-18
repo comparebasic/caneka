@@ -2,7 +2,6 @@
 #include <caneka.h>
 
 status Spool_Add(MemCtx *m, String *s, Abstract *a){
-    Stack(bytes("Spool_Add"), (Abstract *)a);
     File *spool = (File *)as(a, TYPE_FILE);
     if(spool->data == NULL){
         spool->data = String_Init(m, STRING_EXTEND);
@@ -13,7 +12,7 @@ status Spool_Add(MemCtx *m, String *s, Abstract *a){
     if((r & ERROR) == 0){
         String_Reset(spool->data);
     }
-    Return r;
+    return r;
 }
 
 status Spool_Trunc(File *file){

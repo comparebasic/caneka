@@ -21,12 +21,14 @@
 
 /* core */
 #include "core/core.h"
-#include "core/debug.h"
-#include "core/debug_stack.h"
 #include "core/error.h"
 #include "core/guard.h"
 #include "core/log.h"
 #include "core/testsuite.h"
+
+/* debug */
+#include "debug/debug.h"
+#include "debug/debug_stack.h"
 
 /* util */
 #include "util/single.h"
