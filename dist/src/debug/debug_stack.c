@@ -49,7 +49,7 @@ int DebugStack_Print(){
         if((it.type.state & FLAG_ITER_LAST) != 0){
             color = COLOR_RED;
         }
-        printf("    %s\n", cstr);
+        printf("\x1b[%dm    %s\x1b[0m\n", color, cstr);
     }
     return 0;
 }

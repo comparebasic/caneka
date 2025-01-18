@@ -15,7 +15,7 @@ status Enc_Init(MemCtx *m){
 
 String *EncPair_GetKey(String *key, Access *access){
     if(HasAccess(key, access)){
-        return TableChain_Get(SaltyKeyChain, key);
+        return TableChain_Get(SaltyKeyChain, (Abstract *)key);
     }
     access->type.state |= ERROR;
     return NULL;
@@ -45,7 +45,7 @@ status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
     }
 
     if(p->keyId != NULL){
-        String *key = (String *)TableChain_Get(SaltyKeyChain, p->keyId); 
+        String *key = (String *)TableChain_Get(SaltyKeyChain, (Abstract *)p->keyId); 
         if(!isFilled(p->enc) && isFilled(p->dec)){
             p->enc = String_Clone(m, p->dec);
             p->type.state |= Salty_Enc(m, key, p->enc); 

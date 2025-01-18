@@ -86,12 +86,12 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
             printf("[Testing %s]\n", set->name);
         }
 
-        DebugStack_Push("Test->func");
+        MemCtx_TempLevel++;
         m->type.state |= MEMCTX_TEMP;
         status r = set->func(m);
         MemCtx_FreeTemp(m, MemCtx_TempLevel);
         MemCtx_FreeTemp(DebugM, MemCtx_TempLevel);
-        DebugStack_Pop();
+        MemCtx_TempLevel--;
 
         m->type.state &= ~MEMCTX_TEMP;
         if((GLOBAL_flags & HTML_OUTPUT) != 0){
