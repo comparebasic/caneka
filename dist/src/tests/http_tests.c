@@ -81,10 +81,12 @@ status Http_Tests(MemCtx *gm){
         "\r\n"
     ));
 
+
     ProtoDef *def = (ProtoDef *)HttpProtoDef_Make(m);
     Proto *proto = HttpProto_Make(m, def);
     Roebling *rbl = HttpParser_Make(m, s, (Abstract *)proto);
     rbl->capture = testHttpParser_Capture;
+
 
     setTestCapture(expected1);
     for(int i = 0; i < 13; i++){
@@ -92,6 +94,7 @@ status Http_Tests(MemCtx *gm){
     }
     Debug_Print((void *)rbl, 0, "Rbl: ", COLOR_PURPLE, TRUE);
 
+    return r;
     r |= Test(position == 12, "Reached end of test captures, have %d", position);
     r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling HttpParser has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
 

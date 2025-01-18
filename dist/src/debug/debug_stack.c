@@ -42,14 +42,18 @@ void DebugStack_Pop(){
 
 int DebugStack_Print(){
     Iter it;
-    Iter_Init(&it, stack);
+    Iter_InitReverse(&it, stack);
+    boolean first = TRUE;
     while((Iter_Next(&it) & END) == 0){
         char *cstr = (char *)Iter_Get(&it);
-        int color = DEBUG_STACK_COLOR;
-        if((it.type.state & FLAG_ITER_LAST) != 0){
-            color = COLOR_RED;
+        if(cstr != NULL){
+            int color = DEBUG_STACK_COLOR;
+            if(first){
+                color = COLOR_RED;
+                first = FALSE;
+            }
+            printf("\x1b[%dm    %s\x1b[0m\n", color, cstr);
         }
-        printf("\x1b[%dm    %s\x1b[0m\n", color, cstr);
     }
     return 0;
 }

@@ -3,7 +3,7 @@
 
 /* > Run */
 static status Roebling_RunMatches(Roebling *rbl){
-    
+    DebugStack_Push("Roebling_RunMatches");
     if(DEBUG_ROEBLING_CURRENT){
         Debug_Print((void *)rbl, 0, "RblCurrent - RunMatches", DEBUG_ROEBLING_CURRENT, FALSE);
         printf("\n");
@@ -65,11 +65,12 @@ static status Roebling_RunMatches(Roebling *rbl){
         rbl->type.state |= (rbl->cursor.type.state & END);
     }
 
+    DebugStack_Pop();
     return rbl->type.state;
 }
 
 status Roebling_RunCycle(Roebling *rbl){
-    
+    DebugStack_Push("Roebling_RunCycle");
     if(rbl->parsers_do->nvalues == 0){
         Fatal("Roebling parsers not set", TYPE_ROEBLING);
     }
@@ -114,6 +115,7 @@ status Roebling_RunCycle(Roebling *rbl){
         Roebling_RunMatches(rbl);
     }
 
+    DebugStack_Pop();
     return rbl->type.state;
 }
 
