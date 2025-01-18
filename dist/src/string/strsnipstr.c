@@ -2,8 +2,8 @@
 #include <caneka.h>
 
 String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
+    DebugStack_Push("StrSnipStr_ToString");
     String *ret = String_Init(m, STRING_EXTEND);
-
     i64 pos = 0;
     IterStr it;
     IterStr_Init(&it, sns, sizeof(StrSnip));
@@ -20,8 +20,8 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         i64 remaining = sn->length;
 
         while(s != NULL && start > s->length){
-            s = String_Next(s);
             start -= s->length;
+            s = String_Next(s);
         }
 
         while(s != NULL && remaining > 0){
@@ -45,6 +45,7 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
         printf("\n");
     }
 
+    DebugStack_Pop();
     return ret;
 }
 
