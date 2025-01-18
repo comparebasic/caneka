@@ -218,7 +218,10 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                 mt->type.state |= MATCH_INVERTED;
             }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;
-            }else if((def->flags & PAT_CONSUME) != 0 || (def->flags & PAT_INVERT_CAPTURE) != 0){
+                mt->type.state |= MATCH_NO_INCR;
+            }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
+                addCount(m, mt, NOOP, 1);
+            }else if((def->flags & PAT_CONSUME) != 0){
                 addCount(m, mt, NOOP, 1);
             }else{
                 addCount(m, mt, SUCCESS, 1);

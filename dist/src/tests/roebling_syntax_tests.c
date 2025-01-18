@@ -20,6 +20,9 @@ status Roebling_SyntaxTests(MemCtx *gm){
     Roebling_Add(ctx->rbl, s);
     Roebling_Run(ctx->rbl);
 
+    Debug_Print((void *)ctx->rbl, 0, "Cnk Rbl: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+
     r |= Test(ctx->item->spaceIdx == CNK_LANG_RBL_START, "ctx item is the root item which is the CNK_LANG_ROEBLING item");
 
     String *csource = (String *)asIfc(ctx->item->def->to(m, ctx->item->def, ctx, NULL, NULL), TYPE_STRING);
@@ -40,6 +43,11 @@ status Roebling_SyntaxTests(MemCtx *gm){
     String_AddBytes(m, exp, bytes(cstr), strlen(cstr));
 
     r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code");
+
+    Debug_Print((void *)csource, 0, "CSource: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+    return r;
+
 
     /* line */
     s = String_Make(m, bytes("/type(\\n -> ,ONE,TWO,THREE), ( *), msg(.+[\\n]) -> type/\n"));
