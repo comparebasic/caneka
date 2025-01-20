@@ -155,6 +155,7 @@ static status start(MemCtx *m, Roebling *rbl){
 static status pat(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
     
     r |= Roebling_SetPattern(rbl, (PatCharDef *)jumpDef, 
         CNK_LANG_RBL_JUMP,  
@@ -162,6 +163,9 @@ static status pat(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl, (PatCharDef *)keyCloseDef, 
         CNK_LANG_RBL_PAT_KEY_CLOSE,
         CNK_LANG_RBL_SEP);
+    mt = Roebling_LatestMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patDef, 
         CNK_LANG_RBL_PAT,
         CNK_LANG_RBL_PAT);
@@ -204,7 +208,7 @@ static status pat(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patKeyDef, 
         CNK_LANG_RBL_PAT_KEY,
         CNK_LANG_RBL_PAT);
-    Match *mt = Roebling_LatestMatch(rbl);
+    mt = Roebling_LatestMatch(rbl);
     mt->type.state |= MATCH_ACCEPT_EMPTY;
 
     r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
@@ -270,6 +274,7 @@ static status jumpTokenPat(MemCtx *m, Roebling *rbl){
 
 
 status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
+    DebugStack_Push("CnkRoebling_Capture"); 
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_LANG_CNK_RBL);
 
     if(DEBUG_LANG_CNK_RBL){
@@ -296,6 +301,7 @@ status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         }
     }
 
+    DebugStack_Pop();
     return NOOP;
 }
 

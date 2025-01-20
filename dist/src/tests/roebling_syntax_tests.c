@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status Roebling_SyntaxTests(MemCtx *gm){
+    DebugStack_Push("Roebling_SyntaxTests"); 
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -20,10 +21,9 @@ status Roebling_SyntaxTests(MemCtx *gm){
     Roebling_Add(ctx->rbl, s);
     Roebling_Run(ctx->rbl);
 
-    Debug_Print((void *)ctx->rbl, 0, "Cnk Rbl: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
     r |= Test(ctx->item->spaceIdx == CNK_LANG_RBL_START, "ctx item is the root item which is the CNK_LANG_ROEBLING item");
+
+    return r;
 
     String *csource = (String *)asIfc(ctx->item->def->to(m, ctx->item->def, ctx, NULL, NULL), TYPE_STRING);
 
@@ -84,6 +84,7 @@ status Roebling_SyntaxTests(MemCtx *gm){
     MemCtx_Free(m);
 
     r |= SUCCESS;
+    DebugStack_Pop();
     return r;
 }
 
