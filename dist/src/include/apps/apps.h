@@ -54,6 +54,7 @@ enum proto_types {
     TYPE_METHOD_DELETE,
     TYPE_IO_PROTO,
     TYPE_IO_PROTODEF,
+    TYPE_LANG_CDOC,
     _TYPE_APPS_END,
 };
 

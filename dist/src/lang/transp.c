@@ -1,9 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static char *srcDir = "src";
-static char *distDir = "dist";
-
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
     FmtCtx *fmt = asIfc(_fmt, TYPE_FMT_CTX);
     Roebling_Add(fmt->rbl, s);
@@ -87,13 +84,6 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
     String_Add(m, p->current.dest, dir);
     String_AddBytes(m, p->current.dest, bytes("/"), 1);
     String_Add(m, p->current.dest, fname);
-
-    p->current.destHeader = String_Init(m, STRING_EXTEND);
-    String_Add(m, p->current.destHeader, p->dist);
-    String_AddBytes(m, p->current.destHeader, bytes("/include/"), 1);
-    String_Add(m, p->current.destHeader, dir);
-    String_AddBytes(m, p->current.destHeader, bytes("/"), 1);
-    String_Add(m, p->current.destHeader, fname);
 
     Iter it;
     Iter_Init(&it, p->formats);

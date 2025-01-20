@@ -94,6 +94,7 @@
 #include "formats/fmt_def.h"
 #include "formats/fmt_ctx.h"
 #include "formats/cash.h"
+#include "formats/cdoc/cdoc.h"
 #include "formats/io.h"
 #include "formats/oset.h"
 #include "formats/oset_from.h"

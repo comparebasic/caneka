@@ -12,6 +12,7 @@ This file is mostly an example Caneka application, and it runs the tests
 #define servecmd "serve"
 #define testcmd "test"
 #define transcmd "transp"
+#define doccmd "doc"
 
 static status test(MemCtx *m, char *arg){
     status r = READY;
@@ -49,7 +50,7 @@ status serve(MemCtx *m, char *arg){
 status transpile(MemCtx *m, char *arg){
     Transp *ctx = Transp_Make(m);
     ctx->src = String_Make(m, bytes("src"));
-    ctx->dist = String_Make(m, bytes("dist"));
+    ctx->dist = String_Make(m, bytes("dist/src"));
     Debug_Print((void *)ctx->src, 0, "[Transpiling  ", COLOR_BLUE, FALSE);
     Debug_Print((void *)ctx->dist, 0, "->", COLOR_BLUE, FALSE);
     int l = strlen("transp=cnk");
@@ -62,6 +63,20 @@ status transpile(MemCtx *m, char *arg){
     return Transp_Trans(ctx);
 }
 
+status doc(MemCtx *m, char *arg){
+    Transp *ctx = Transp_Make(m);
+    ctx->src = String_Make(m, bytes("dist/src/include"));
+    ctx->dist = String_Make(m, bytes("dist/doc/"));
+    Debug_Print((void *)ctx->src, 0, "[Generating Documentation  ", COLOR_BLUE, FALSE);
+    Debug_Print((void *)ctx->dist, 0, " ->  ", COLOR_BLUE, FALSE);
+    printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
+    FmtCtx *cdocLang = CdocCtx_Make(m, (Abstract *)ctx);
+    Table_Set(ctx->formats, (Abstract *)String_Make(m, bytes(".h")), (Abstract *)cdocLang);
+
+    return Transp_Trans(ctx);
+}
+
+
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
     if(strncmp(arg, servecmd, strlen(servecmd)) == 0){
@@ -70,6 +85,8 @@ static status handle(MemCtx *m, char *arg){
         return transpile(m, arg);
     }else if(strncmp(arg, testcmd, strlen(testcmd)) == 0){
         return test(m, arg);
+    }else if(strncmp(arg, doccmd, strlen(doccmd)) == 0){
+        return doc(m, arg);
     }
 
     return NOOP;

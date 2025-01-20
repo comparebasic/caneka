@@ -5,7 +5,7 @@ FmtCtx *CdocCtx_Make(MemCtx *m, Abstract *source){
     FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
     ctx->type.of = TYPE_LANG_CDOC;
     ctx->m = m;
-    ctx->rbl = CdocCtx_RblMake(m, ctx);
+    ctx->rbl = Cdoc_RblMake(m, ctx);
     ctx->out = ToStdOut;
     /*
 

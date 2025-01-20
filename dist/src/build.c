@@ -81,6 +81,13 @@ static BuildSubdir formatsobj = { "formats", {
     NULL
 }};
 
+static BuildSubdir cdocobj = { "formats/cdoc", {
+    "cdoc_capture.c",
+    "cdoc_ctx.c",
+    "cdoc_parser.c",
+    NULL
+}};
+
 static BuildSubdir langobj = { "lang", {
     "caneka.c",
     "caneka_ctx.c",
@@ -229,6 +236,7 @@ BuildSubdir *allobj[] = {
     &coreobj,
     &debugobj,
     &formatsobj,
+    &cdocobj,
     &langobj,
     &parserobj,
     &persistobj,
