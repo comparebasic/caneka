@@ -46,7 +46,7 @@ word patKeyDef[] = {
     PAT_ANY, '_', '_',
     PAT_ANY, '-', '-',
     PAT_ANY|PAT_TERM, '0', '9',
-    PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '(', '(',
+    PAT_TERM|PAT_INVERT_CAPTURE, '(', '(',
     PAT_END, 0, 0,
 };
 
@@ -204,6 +204,9 @@ static status pat(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patKeyDef, 
         CNK_LANG_RBL_PAT_KEY,
         CNK_LANG_RBL_PAT);
+    Match *mt = Roebling_LatestMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+
     r |= Roebling_SetPattern(rbl, (PatCharDef *)sepDef, 
         CNK_LANG_RBL_SEP,
         CNK_LANG_RBL_PAT);
@@ -224,6 +227,9 @@ static status sep(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl, (PatCharDef *)patKeyDef, 
         CNK_LANG_RBL_PAT_KEY,
         CNK_LANG_RBL_PAT);
+    Match *mt = Roebling_LatestMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+
     r |= Roebling_SetPattern(rbl, (PatCharDef *)openCloseDef, 
         CNK_LANG_RBL_OPEN_CLOSE,  
         CNK_LANG_RBL_SEP);

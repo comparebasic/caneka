@@ -25,7 +25,8 @@ enum match_flags {
     MATCH_KO_INVERT = 1 << 11,
     MATCH_KO = 1 << 12,
     MATCH_SEARCH = 1 << 13, 
-    MATCH_LEAVE = 1 << 14
+    MATCH_LEAVE = 1 << 14,
+    MATCH_ACCEPT_EMPTY = 1 << 15
 };
 
 typedef struct patchardef {

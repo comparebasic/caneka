@@ -290,7 +290,7 @@ miss:
 
     if(mt->pat.curDef == mt->pat.endDef){
         String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
-        if(Match_Total(mt) == 0){
+        if(Match_Total(mt) == 0 && (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
             mt->type.state = NOOP;
         }else{
             mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
