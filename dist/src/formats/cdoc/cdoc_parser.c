@@ -1,3 +1,6 @@
+#include <external.h>
+#include <caneka.h>
+
 PatCharDef commentDef[] = {
     {PAT_TERM, '/', '/'},
     {PAT_TERM, '*', '*'},
@@ -49,3 +52,33 @@ PatCharDef wsDef[] = {
     {PAT_ANY, '\n', '\n'},
     {PAT_END, 0, 0},
 };
+
+status start(MemCtx *m, Roebling *rbl){
+    ;
+}
+
+status thing(MemCtx *m, Roebling *rbl){
+    ;
+}
+
+status Cdoc_AddParsers(MemCtx *m, Span *parsers, Lookup *desc){
+    ;
+}
+
+Roebling *Cdoc_RblMake(MemCtx *m, FmtCtx *ctx){
+    Span *parsers = Span_Make(m, TYPE_SPAN);
+    Lookup *desc = Lookup_Make(m, CNK_LANG_CDOC_START, NULL, NULL);
+
+    String *s = String_Init(m, STRING_EXTEND);
+
+    Cdoc_AddParsers(m, parsers, desc);
+
+    return Roebling_Make(m, TYPE_ROEBLING,
+        parsers,
+        desc,
+        s,
+        Cdoc_Capture,
+        (Abstract *)ctx
+    ); 
+}
+
