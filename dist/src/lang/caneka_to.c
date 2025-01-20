@@ -14,7 +14,7 @@ Abstract *CnkLang_StartTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abst
             printf("\n");
         }
 
-        Transp_Out(tp, s);
+        Transp_Out(tp, s, FMT_OUT_CNK);
 
         return (Abstract *)s;
     }else{
@@ -127,11 +127,9 @@ Abstract *CnkLang_StructFrom(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, A
     mod->ref = CnkLangModRef_Make(m);
 
     Transp *tp = (Transp*)as(fmt->source, TYPE_TRANSP);
-    mod->cfile = tp->current.dest;
+    mod->cfile = tp->source->path;
 
-    String *name_ = String_Clone(m, tp->current.fname);
-
-    String_Trunc(name_, -(tp->current.ext->length));
+    String *name_ = String_Clone(m, tp->source->fname);
 
     mod->ref->name = String_ToCamel(m, name_);
 
@@ -211,7 +209,7 @@ Abstract *CnkLang_StructTo(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abs
         printf("\n");
     }
 
-    Transp_Out(tp, s);
+    Transp_Out(tp, s, FMT_OUT_CNK);
 
     return (Abstract *)s;
 }

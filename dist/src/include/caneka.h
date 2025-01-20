@@ -90,9 +90,14 @@
 /* apps */
 #include "apps/apps.h"
 
+/* transp */
+#include "transp/fmt_def.h"
+#include "transp/fmt_ctx.h"
+#include "transp/source.h"
+#include "transp/target.h"
+#include "transp/transp.h"
+
 /* formats */
-#include "formats/fmt_def.h"
-#include "formats/fmt_ctx.h"
 #include "formats/cash.h"
 #include "formats/cdoc/cdoc.h"
 #include "formats/io.h"
@@ -109,8 +114,8 @@
 #include "lang/fmt_html.h"
 #include "lang/human_present.h"
 #include "lang/nestedd.h"
-#include "lang/transp.h"
 #include "lang/xmlt.h"
+
 
 /* tests */
 #include "tests/mock_109strings.h"

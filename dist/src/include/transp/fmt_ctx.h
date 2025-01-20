@@ -41,6 +41,12 @@ typedef struct fmt_item {
 } FmtItem;
 
 
+/*
+ * .SetupTargets is a function that creates an output @Target. There may be
+ * several of these for a single file that is transpiled, for example, a Caneka
+ * lang file will generate a C source, and C header file, so it would have two
+ * targets.
+ */
 typedef struct fmt_ctx {
     Type type;
     MemCtx *m;
@@ -54,7 +60,7 @@ typedef struct fmt_ctx {
     TableChain *byAlias;
     RangeToChars rangeToChars;
     OutFunc out;
-    status (*start)(struct fmt_ctx *ctx);
+    status (*Setup)(struct fmt_ctx *ctx, Lookup *targets);
     Abstract *source;
 } FmtCtx;
 

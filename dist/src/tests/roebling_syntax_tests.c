@@ -13,17 +13,10 @@ status Roebling_SyntaxTests(MemCtx *gm){
     /* phrase */
     s = String_Make(m, bytes("/(hi-there)/\n"));
 
-    /*
-    Debug_Print((void *)s, 0, "Phrase:", COLOR_PURPLE, FALSE);
-    printf("\n");
-    */
-
     Roebling_Add(ctx->rbl, s);
     Roebling_Run(ctx->rbl);
 
     r |= Test(ctx->item->spaceIdx == CNK_LANG_RBL_START, "ctx item is the root item which is the CNK_LANG_ROEBLING item");
-
-    return r;
 
     String *csource = (String *)asIfc(ctx->item->def->to(m, ctx->item->def, ctx, NULL, NULL), TYPE_STRING);
 
@@ -46,10 +39,8 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     Debug_Print((void *)csource, 0, "CSource: ", COLOR_PURPLE, TRUE);
     printf("\n");
-    return r;
 
-
-    /* line */
+    /* line
     s = String_Make(m, bytes("/type(\\n -> ,ONE,TWO,THREE), ( *), msg(.+[\\n]) -> type/\n"));
 
     Debug_Print((void *)s, 0, "Line:", COLOR_PURPLE, FALSE);
@@ -57,16 +48,18 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     Roebling_Reset(m, ctx->rbl, s);
     Roebling_Run(ctx->rbl);
+    */
 
-    /* recurring line */
+    /* recurring line
     s = String_Make(m, bytes("/line({.*[\\n]}) -> line/\n"));
     Debug_Print((void *)s, 0, "Recurring:", COLOR_PURPLE, FALSE);
     printf("\n");
 
     Roebling_Reset(m, ctx->rbl, s);
     Roebling_Run(ctx->rbl);
+    */
 
-    /* http proto */
+    /* http proto 
     s = String_Make(m, bytes(
         "/\n"
         "   method(GET,POST)\n"
@@ -80,6 +73,7 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     Roebling_Reset(m, ctx->rbl, s);
     Roebling_Run(ctx->rbl);
+    */
 
     MemCtx_Free(m);
 

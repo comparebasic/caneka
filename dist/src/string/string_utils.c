@@ -1,6 +1,21 @@
 #include <external.h>
 #include <caneka.h>
 
+String *String_SubMatch(MemCtx *m, String *s, Match *mt){
+    while(s != NULL){
+        for(int i = 0; i < s->length; i++){
+            Match_Feed(m, mt, (word)s->bytes[i]);
+        }
+        s = String_Next(s);
+    };
+
+    Match_FeedEnd(m, mt);
+    if((mt->type.state & SUCCESS)){
+        return StrSnipStr_ToString(m, mt->backlog, s);
+    }
+    return NULL;
+}
+
 Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
     String *pat = PatChar_KoFromString(m, sep);
     PatCharDef pdef[] = {

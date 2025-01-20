@@ -88,6 +88,17 @@ static BuildSubdir cdocobj = { "formats/cdoc", {
     NULL
 }};
 
+static BuildSubdir transpobj = { "transp", {
+    "ext_match.c",
+    "fmt_ctx.c",
+    "fmt_def.c",
+    "fmt_item.c",
+    "source.c",
+    "target.c",
+    "transp.c",
+    NULL
+}};
+
 static BuildSubdir langobj = { "lang", {
     "caneka.c",
     "caneka_ctx.c",
@@ -98,14 +109,10 @@ static BuildSubdir langobj = { "lang", {
     "cnk_roebling_cnf.c",
     "cnk_roebling_items.c",
     "cnk_roebling_syntax.c",
-    "fmt_ctx.c",
-    "fmt_def.c",
     "fmt_html.c",
-    "fmt_item.c",
     "human_present.c",
     "nestedd.c",
     "rbl_parser_defs.c",
-    "transp.c",
     "xmlt.c",
     "xmlt_template.c",
     NULL
@@ -235,6 +242,7 @@ BuildSubdir *allobj[] = {
     &memobj,
     &coreobj,
     &debugobj,
+    &transpobj,
     &formatsobj,
     &cdocobj,
     &langobj,

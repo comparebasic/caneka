@@ -99,7 +99,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
-status CnkLangCtx_Start(FmtCtx *ctx){
+status CnkLangCtx_Setup(FmtCtx *ctx, Lookup *targets){
     return runTo(ctx, ctx->root, FMT_CTX_ENCOUNTER);
 }
 
@@ -117,7 +117,7 @@ FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
     FmtDef *def = Chain_Get(ctx->byId, ctx->item->spaceIdx);
     ctx->item->def = def;
     ctx->source = source;
-    ctx->start = CnkLangCtx_Start;
+    ctx->Setup = CnkLangCtx_Setup;
 
     return ctx;
 }

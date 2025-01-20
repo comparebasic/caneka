@@ -26,6 +26,7 @@ Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract 
 
     IterStr it;
     IterStr_Init(&it, key, sizeof(byte));
+    item->content->type.state |= FLAG_STRING_CONTIGUOUS;
     
     PatCharDef pat;
     while((IterStr_Next(&it) & END) == 0){
@@ -71,7 +72,6 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
         DebugStack_Pop();
         return NULL;
     }else{
-
         Span *p = (Span *)asIfc(fmt->item->value, TYPE_SPAN);
         String *out = String_Init(m, STRING_EXTEND);
 

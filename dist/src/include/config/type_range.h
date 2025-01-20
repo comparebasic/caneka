@@ -90,6 +90,8 @@ enum types {
     TYPE_TRANSP,
     TYPE_DEBUG_STACK,
     TYPE_DEBUG_STACK_ENTRY,
+    TYPE_TARGET,
+    TYPE_SOURCE,
     _TYPE_CORE_END,
 };
 

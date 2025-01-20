@@ -57,7 +57,7 @@ status transpile(MemCtx *m, char *arg){
     if(strncmp(arg, "transp=cnk", l) == 0){
         CnkLang_Init(m);
         FmtCtx *cnkLang = CnkLangCtx_Make(m, (Abstract *)ctx);
-        Table_Set(ctx->formats, (Abstract *)String_Make(m, bytes(".cnk")), (Abstract *)cnkLang);
+        Table_Set(ctx->fmts, (Abstract *)String_Make(m, bytes(".cnk")), (Abstract *)cnkLang);
     }
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
     return Transp_Trans(ctx);
@@ -71,7 +71,7 @@ status doc(MemCtx *m, char *arg){
     Debug_Print((void *)ctx->dist, 0, " ->  ", COLOR_BLUE, FALSE);
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
     FmtCtx *cdocLang = CdocCtx_Make(m, (Abstract *)ctx);
-    Table_Set(ctx->formats, (Abstract *)String_Make(m, bytes(".h")), (Abstract *)cdocLang);
+    Table_Set(ctx->fmts, (Abstract *)String_Make(m, bytes(".h")), (Abstract *)cdocLang);
 
     return Transp_Trans(ctx);
 }

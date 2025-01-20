@@ -5,6 +5,8 @@ enum cnk_lang_range {
     TYPE_LANG_CNK_MODULE,
     TYPE_LANG_CNK_MOD_REF,
     TYPE_LANG_CNK_RBL,
+    FMT_OUT_CNK,
+    FMT_OUT_CNK_HDR,
     _TYPE_LANG_CNK_END,
     _CNK_LANG_MAJOR,
     CNK_LANG_STRUCT,
@@ -83,7 +85,7 @@ enum cnk_lang_range {
 status CnkLang_Init(MemCtx *m);
 Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx, RblCaptureFunc Capture);
 FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source); /* Formatter  */
-status CnkLangCtx_Start(FmtCtx *ctx); /* Formatter */
+status CnkLangCtx_Setup(FmtCtx *ctx, Lookup *targets); 
 /* utils */
 String *CnkLang_requireFromSpan(MemCtx *m, Span *p);
 
