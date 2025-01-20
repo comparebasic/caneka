@@ -44,14 +44,19 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
     String *backlog = String_Init(m, STRING_EXTEND);
     backlog->type.state |= FLAG_STRING_CONTIGUOUS;
     ExtMatch_Init(&mt, backlog);
+
     String *ext = String_SubMatch(m, fname, &mt);
     Source_Reset(m, p->source, dir, fname, ext);
 
     Abstract *a = Table_Get(p->fmts, (Abstract *)ext);
-    if(a != NULL && Ifc_Match(a->type.of, TYPE_FMT_CTX)){
+    if(a != NULL && Ifc_Match(a->type.of, TYPE_WRAPPED_DO)){
+        Single *sg = (Single *)a;
+        sg->val.dof(m, (Abstract *)p);
+        return SUCCESS;
+    }else if(a != NULL){
         FmtCtx *fmt = (FmtCtx *)a;
         p->fmts->metrics.selected = p->fmts->metrics.get;
-        DPrint((Abstract *)p->source->path, COLOR_PURPLE, "Transpiling");
+        DPrint((Abstract *)p->source->path, COLOR_PURPLE, "Transpiling: ");
         return SUCCESS;
         /*
         Spool_Init(&p->current.sourceFile, path, NULL, NULL);
@@ -86,5 +91,6 @@ Transp *Transp_Make(MemCtx *m){
     t->type.of = TYPE_TRANSP;
     t->m = m;
     t->source = Source_Make(m);
+    t->fmts = Span_Make(m, TYPE_TABLE);
     return t;
 }

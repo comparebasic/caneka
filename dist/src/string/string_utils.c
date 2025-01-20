@@ -2,11 +2,12 @@
 #include <caneka.h>
 
 String *String_SubMatch(MemCtx *m, String *s, Match *mt){
-    while(s != NULL){
-        for(int i = 0; i < s->length; i++){
-            Match_Feed(m, mt, (word)s->bytes[i]);
+    String *seg = s;
+    while(seg != NULL){
+        for(int i = 0; i < seg->length; i++){
+            Match_Feed(m, mt, (word)seg->bytes[i]);
         }
-        s = String_Next(s);
+        seg = String_Next(seg);
     };
 
     Match_FeedEnd(m, mt);

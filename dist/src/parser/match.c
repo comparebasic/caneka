@@ -339,9 +339,7 @@ status Match_FeedString(MemCtx *m, Match *mt, String *s, int offset){
 }
 
 status Match_FeedEnd(MemCtx *m, Match *mt){
-    if(mt->remaining == 0){
-        mt->type.state = SUCCESS;
-    }
+    Match_Feed(m, mt, 0);
     return mt->type.state;
 }
 
