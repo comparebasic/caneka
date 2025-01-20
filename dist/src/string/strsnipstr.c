@@ -12,7 +12,7 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
             break;
         }
         StrSnip *sn = (StrSnip *)IterStr_Get(&it);
-        if(sn->length <= 0 || (sn->type.state & SUCCESS) == 0){
+        if(sn->length <= 0 || (sn->type.state & STRSNIP_CONTENT) == 0){
             continue;
         }
 
@@ -55,7 +55,7 @@ int StrSnipStr_Total(String *sns, word flags){
     IterStr_Init(&it, sns, sizeof(StrSnip));
     while((IterStr_Next(&it) & END) == 0){
         StrSnip *sn = (StrSnip *)IterStr_Get(&it);
-        if((sn->type.state & flags) == (flags) || (sn->type.state & flags) != 0){
+        if((sn->type.state & flags) == (flags) || flags == 0){
             total += sn->length;
         }
     }

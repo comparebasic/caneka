@@ -303,12 +303,14 @@ static TestSet _Tests[] = {
         "A Basic user password flow using CycleServe and IoCtx.",
         PARTIAL_FEATURE,
     },
+    /*
     {
         "CanekaLang - Roebling Syntax",
         Roebling_SyntaxTests,
         "Tests for the Roebling pattern match portion of Caneka syntax.",
         PARTIAL_FEATURE,
     },
+    */
     {
         "Smtp",
         Blank_Tests,

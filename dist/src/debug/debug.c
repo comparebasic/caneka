@@ -4,7 +4,7 @@
 Chain *DebugPrintChain = NULL;
 
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = COLOR_CYAN;
+int DEBUG_PATMATCH = 0;
 int DEBUG_MATCH_COMPLETE = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
@@ -483,10 +483,14 @@ static void StrSnipString_Print(Abstract *a, cls type, char *msg, int color, boo
     printf("\x1b[%dm%s", color, msg);
     while((IterStr_Next(&it) & END) == 0){
         StrSnip *sn = (StrSnip *)IterStr_Get(&it);
-        if((sn->type.state & SUCCESS) != 0){
+        if((sn->type.state & STRSNIP_CONTENT) != 0){
             printf("%d/%d", sn->start, sn->length);
-        }else{
+        }else if((sn->type.state & STRSNIP_UNCLAIMED) != 0){
+            printf("unclaimed(%d/%d)", sn->start, sn->length);
+        }else if((sn->type.state & STRSNIP_GAP) != 0){
             printf("gap(%d/%d)", sn->start, sn->length);
+        }else{
+            printf("%hd(%d/%d)", sn->type.state, sn->start, sn->length);
         }
         if((it.type.state & FLAG_ITER_LAST) == 0){
             printf(",");

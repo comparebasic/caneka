@@ -63,15 +63,15 @@ status StrSnip_Tests(MemCtx *gm){
     sns->type.state |= FLAG_STRING_CONTIGUOUS;
 
     StrSnip sn;
-    StrSnip_Init(&sn, SUCCESS, 0, 11);
+    StrSnip_Init(&sn, STRSNIP_CONTENT, 0, 11);
     String_AddBytes(m, sns, bytes(&sn), sizeof(StrSnip));
-    StrSnip_Init(&sn, NOOP, 11, 1);
+    StrSnip_Init(&sn, STRSNIP_GAP, 11, 1);
     String_AddBytes(m, sns, bytes(&sn), sizeof(StrSnip));
-    StrSnip_Init(&sn, SUCCESS, 12, 5);
+    StrSnip_Init(&sn, STRSNIP_CONTENT, 12, 5);
     String_AddBytes(m, sns, bytes(&sn), sizeof(StrSnip));
-    StrSnip_Init(&sn, NOOP, 17, 1);
+    StrSnip_Init(&sn, STRSNIP_GAP, 17, 1);
     String_AddBytes(m, sns, bytes(&sn), sizeof(StrSnip));
-    StrSnip_Init(&sn, SUCCESS, 18, 1);
+    StrSnip_Init(&sn, STRSNIP_CONTENT, 18, 1);
     String_AddBytes(m, sns, bytes(&sn), sizeof(StrSnip));
 
     res = StrSnipStr_ToString(m, sns, s);
@@ -112,12 +112,12 @@ status StrSnipBoundry_Tests(MemCtx *gm){
         adj = pos;
         String_AddBytes(m, s, bytes(*cptr), len);
         if(*cptr[0] != '\n'){
-            StrSnip_Init(&sn, SUCCESS, pos, len-1);
+            StrSnip_Init(&sn, STRSNIP_CONTENT, pos, len-1);
             String_AddBytes(m, expectedSns, bytes(&sn), sizeof(StrSnip));
-            StrSnip_Init(&sn, NOOP, pos+len-1, 1);
+            StrSnip_Init(&sn, STRSNIP_GAP, pos+len-1, 1);
             String_AddBytes(m, expectedSns, bytes(&sn), sizeof(StrSnip));
         }else{
-            StrSnip_Init(&sn, NOOP, pos, 1);
+            StrSnip_Init(&sn, STRSNIP_GAP, pos, 1);
             String_AddBytes(m, expectedSns, bytes(&sn), sizeof(StrSnip));
         }
         pos += len;
@@ -132,7 +132,7 @@ status StrSnipBoundry_Tests(MemCtx *gm){
     }
 
     Match_SetPattern(&mt, textNl, sns);
-    StrSnip_Init(&sn, SUCCESS, 0, 0);
+    StrSnip_Init(&sn, STRSNIP_CONTENT, 0, 0);
     IterStr it;
     IterStr_Init(&it, s, 1);
     while((IterStr_Next(&it) & END) == 0){
@@ -146,6 +146,11 @@ status StrSnipBoundry_Tests(MemCtx *gm){
     }
 
     r |= Test(String_Equals(sns, expectedSns), "Expect SNS from match to equals expected SNS built manually");
+    Debug_Print((void *)sns, TYPE_STRSNIP_STRING, "Sns: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+
+    Debug_Print((void *)expectedSns, TYPE_STRSNIP_STRING, "Sns: ", COLOR_PURPLE, TRUE);
+    printf("\n");
 
     res = StrSnipStr_ToString(m, sns, s);
     r |= Test(String_Equals(res, exp), "Expected String without quotes or newlines, have '%s'", String_ToChars(m, res));

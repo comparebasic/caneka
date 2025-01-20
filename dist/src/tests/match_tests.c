@@ -12,7 +12,7 @@ status Match_Tests(MemCtx *gm){
     String *backlog = String_Init(m, STRING_EXTEND);
     backlog->type.state |= FLAG_STRING_CONTIGUOUS;
 
-    s = String_Make(m, bytes("poo"));
+    s = String_Make(m, bytes("pox"));
     Match_SetString(m, &mt, s, backlog);
 
     s = String_Make(m, bytes("no"));
@@ -21,7 +21,7 @@ status Match_Tests(MemCtx *gm){
     }
 
     r |= Test(mt.type.state != SUCCESS, "Non match has unsuccessful state found %s", State_ToChars(mt.type.state)); 
-    s = String_Make(m, bytes("poo"));
+    s = String_Make(m, bytes("pox"));
 
     mt.type.state = READY;
     for(int i = 0; i < s->length; i++){
@@ -192,7 +192,7 @@ status MatchKo_Tests(MemCtx *gm){
     }
     
     r |= Test(i == 9, "It took 10 counts to get to the end, have %d", i);
-    r |= Test(Match_Total(&mt) == 7, "terminator 'end' is omited from the count expecting 7, have %d", Match_Total(&mt));
+    r |= Test(Match_Total(&mt) == 7, "Terminator 'end' is omited from the count expecting 7, have %d", Match_Total(&mt));
 
     s = String_Make(m, bytes("it's not all engaging until the end!"));
 
@@ -208,6 +208,10 @@ status MatchKo_Tests(MemCtx *gm){
         }
     }
     r |= Test(Match_Total(&mt) == s->length-4, "terminator 'end' is omited and last punctuation as well, from the count, expecting %d, have %d", s->length-4,Match_Total(&mt));
+    Debug_Print((void *)s, 0, "S: ", COLOR_PURPLE, TRUE);
+    printf("\n");
+    Debug_Print((void *)mt.backlog, TYPE_STRSNIP_STRING, "Backlog: ", COLOR_PURPLE, TRUE);
+    printf("\n");
 
     word eqDef[] = {
         PAT_KO, '!', '!',PAT_KO, '=', '=',PAT_KO, '<', '<',PAT_KO|PAT_KO_TERM, '>', '>',PAT_INVERT_CAPTURE|PAT_MANY,' ', ' ', patText,

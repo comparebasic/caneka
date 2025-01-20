@@ -48,7 +48,8 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
 
 static void match_Reset(Match *mt){
     mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
-    String_Reset(mt->backlog);
+    mt->remaining = 0;
+    mt->counter = 0;
 }
 
 static boolean charMatched(word c, PatCharDef *def){
@@ -110,25 +111,25 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
     if(DEBUG_PATMATCH){
         printf("\n\x1b[%dmaddCount:%s%d%s\x1b[0m", 
             DEBUG_PATMATCH,
-            ((flags & SUCCESS) == 0 ? "gap(" : ""), 
+            ((flags & STRSNIP_GAP) != 0 ? "gap(" : (flags & STRSNIP_UNCLAIMED) != 0 ? "unclaimed(" : ""), 
             length,
-            ((flags & SUCCESS) == 0 ? ")" : "")
+            ((flags & STRSNIP_CONTENT) == 0 ? ")" : "")
         );
     }
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
     }
-    if((mt->snip.type.state & flags) == 0){
+    if((mt->snip.type.state & flags) == flags){
+        mt->snip.length += length;
+    }else{
         String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
         StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);
-    }else{
-        mt->snip.length += length;
     }
     return;
 }
 
 int Match_Total(Match *mt){
-    return StrSnipStr_Total(mt->backlog, SUCCESS);
+    return StrSnipStr_Total(mt->backlog, STRSNIP_CONTENT);
 }
 
 status Match_Feed(MemCtx *m, Match *mt, word c){
@@ -163,7 +164,6 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
         def = mt->pat.curDef;
 
         matched = charMatched(c, def);
-        mt->type.state &= ~MATCH_NO_INCR;
 
         if(DEBUG_PATMATCH){
             Match_midDebug('_', c, def, mt, matched, FALSE);
@@ -191,10 +191,10 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                     if((def->flags & PAT_LEAVE) != 0){
                         mt->type.state |= MATCH_LEAVE;
                     }
-                    if((def->flags & PAT_INVERT_CAPTURE) == 0){
-                        addCount(m, mt, NOOP, 1);
+                    if((def->flags & PAT_INVERT_CAPTURE) != 0){
+                        addCount(m, mt, STRSNIP_UNCLAIMED, 1);
                     }else{
-                        mt->type.state |= MATCH_NO_INCR;
+                        addCount(m, mt, STRSNIP_GAP, 1);
                     }
 
                     match_EndOfKoTerm(mt);
@@ -214,18 +214,21 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             }
             mt->type.state |= PROCESSING;
 
+            word snipFlag = ZERO;
             if((def->flags & PAT_LEAVE) != 0){
                 mt->type.state |= MATCH_INVERTED;
+                snipFlag = STRSNIP_UNCLAIMED;
             }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;
-                mt->type.state |= MATCH_NO_INCR;
+                snipFlag = STRSNIP_UNCLAIMED;
             }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
-                addCount(m, mt, NOOP, 1);
+                snipFlag = STRSNIP_GAP;
             }else if((def->flags & PAT_CONSUME) != 0){
-                addCount(m, mt, NOOP, 1);
+                snipFlag = STRSNIP_GAP;
             }else{
-                addCount(m, mt, SUCCESS, 1);
+                snipFlag = STRSNIP_CONTENT;
             }
+            addCount(m, mt, snipFlag, 1);
             
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
                     ((def->flags & PAT_COUNT) != 0 && (--mt->remaining) > 0)){
@@ -241,7 +244,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             if((mt->type.state & MATCH_KO) != 0){
                 if((def->flags & PAT_KO) == 0){
                     mt->snip.type.state &= ~NOOP;
-                    mt->snip.type.state |= SUCCESS;
+                    mt->snip.type.state = STRSNIP_CONTENT;
                     if((mt->type.state & MATCH_LEAVE) != 0){
                         goto miss;
                         break;
@@ -251,7 +254,6 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                     continue;
                 }else{
                     match_NextKoTerm(mt);
-                    mt->type.state |= MATCH_NO_INCR;
                     continue;
                 }
             }else if((def->flags & (PAT_KO|PAT_OPTIONAL|PAT_ANY)) != 0){
@@ -261,7 +263,9 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                 if((def->flags & PAT_TERM) != 0){
                     if((mt->type.state & MATCH_TERM_FOUND) != 0){
                         match_NextTerm(mt);
-                        mt->type.state |= MATCH_NO_INCR;
+                        if(mt->pat.curDef == mt->pat.endDef){
+                            addCount(m, mt, STRSNIP_UNCLAIMED, 1);
+                        }
                         continue;
                     }else{
                         goto miss;
@@ -274,9 +278,9 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             }
 miss:
             mt->type.state &= ~PROCESSING;
-            if((mt->type.state & SEARCH) != 0){
+            if((mt->type.state & MATCH_SEARCH) != 0){
                 match_Reset(mt);
-                addCount(m, mt, NOOP, 1);
+                addCount(m, mt, STRSNIP_GAP, 1);
             }else{
                 mt->type.state |= NOOP;
             }

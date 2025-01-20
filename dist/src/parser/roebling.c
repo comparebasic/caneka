@@ -24,9 +24,10 @@ static status Roebling_RunMatches(Roebling *rbl){
         Match *mt = NULL;
         Iter it;
         Iter_Init(&it, rbl->matches);
+        boolean incr = TRUE;
         while((Iter_Next(&it) & END) == 0){
             mt = (Match *)Iter_Get(&it);
-
+            incr = TRUE;
             if(DEBUG_PATMATCH){
                 String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
                 printf("\x1b[%dmrbl:%s/match:%d - ", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), it.idx);
@@ -47,6 +48,12 @@ static status Roebling_RunMatches(Roebling *rbl){
 
                  String *s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
                  rbl->capture(mt->captureKey, it.idx, s, rbl->source);
+                 if((mt->snip.type.state & STRSNIP_UNCLAIMED) != 0){
+                    incr = FALSE;
+                    if(mt->snip.length > 1){
+                        Cursor_Decr(&(rbl->cursor), mt->snip.length-1);
+                    }
+                 }
                  break;
             }
         }
@@ -59,7 +66,7 @@ static status Roebling_RunMatches(Roebling *rbl){
             break;
         }
 
-        if((mt->type.state & (MATCH_NO_INCR)) == 0){
+        if(incr){
             Cursor_Incr(&(rbl->cursor), 1);
         }
         rbl->type.state |= (rbl->cursor.type.state & END);
