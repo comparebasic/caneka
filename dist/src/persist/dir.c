@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *source){
+    DebugStack_Push("Dir_Climb"); 
     struct dirent *ent;
     DIR *d = opendir((char *)path->bytes);
     if(d != NULL){
@@ -23,8 +24,10 @@ status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *
             }
         }
         closedir(d);
+        DebugStack_Pop();
         return SUCCESS;
     }else{
+        DebugStack_Pop();
         return ERROR;
     }
 }

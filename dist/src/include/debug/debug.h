@@ -52,6 +52,7 @@ extern int DEBUG_LANG_CNK_RBL;
 extern int DEBUG_SUBPROCESS;
 extern int DEBUG_LANG_CNK_OUT;
 extern int DEBUG_STRSNIP;
+extern int DEBUG_CDOC;
 
 extern boolean SHOW_SERVE_TESTS;
 extern MemCtx *DebugM;

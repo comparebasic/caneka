@@ -40,6 +40,12 @@ typedef struct fmt_item {
     struct fmt_item *parent;
 } FmtItem;
 
+typedef struct fmt_def_resolver {
+    Type type;
+    Chain *byId;
+    TableChain *byName;
+    TableChain *byAlias;
+} FmtResolver;
 
 /*
  * .SetupTargets is a function that creates an output @Target. There may be
@@ -55,9 +61,7 @@ typedef struct fmt_ctx {
     FmtItem *root;
     word offset;
     Roebling *rbl;
-    Chain *byId;
-    TableChain *byName;
-    TableChain *byAlias;
+    FmtResolver *resolver;
     RangeToChars rangeToChars;
     OutFunc out;
     status (*Setup)(struct fmt_ctx *ctx, Lookup *targets);

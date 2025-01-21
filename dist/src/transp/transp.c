@@ -9,18 +9,32 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
 }
 
 static status Transp_transpile(Transp *p, FmtCtx *fmt){
+    DebugStack_Push("Transp_transpile"); 
+    printf("I\n");
+    if(p->targets == NULL){
+        Fatal("No Targets defined for Transp", TYPE_TRANSP);
+        DebugStack_Pop();
+        return NOOP;
+    }
     Target *t =  Span_GetSelected(p->targets->values);
     if(File_CmpUpdated(p->m, p->source->path, t->path, NULL)){
+        printf("II\n");
         if(fmt->Setup != NULL){
             fmt->Setup(fmt, p->targets);
         }
+        printf("III\n");
         status r = File_Stream(p->m, &(p->source->sourceFile),
             NULL, Transp_onInput, (Abstract *)fmt);
 
         fprintf(stderr, "\n\x1b[%dmFinished parsing\x1b[0m\n", COLOR_BLUE);
 
+        printf("IV\n");
+        DebugStack_Pop();
         return r;
     }
+        printf("V - end\n");
+        DebugStack_Pop();
+    DebugStack_Pop();
     return NOOP;
 }
 
@@ -38,6 +52,7 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
 }
 
 static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *source){
+    DebugStack_Push("Transp_transFile"); 
     Transp *p = asIfc(source, TYPE_TRANSP);
     
     Match mt;
@@ -52,19 +67,19 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
     if(a != NULL && Ifc_Match(a->type.of, TYPE_WRAPPED_DO)){
         Single *sg = (Single *)a;
         sg->val.dof(m, (Abstract *)p);
+        DebugStack_Pop();
         return SUCCESS;
     }else if(a != NULL){
         FmtCtx *fmt = (FmtCtx *)a;
         p->fmts->metrics.selected = p->fmts->metrics.get;
         DPrint((Abstract *)p->source->path, COLOR_PURPLE, "Transpiling: ");
-        return SUCCESS;
-        /*
-        Spool_Init(&p->current.sourceFile, path, NULL, NULL);
-        return Transp_transpile(p, fmt);
-        */
+        Spool_Init(&p->source->sourceFile, p->source->path, NULL, NULL);
+        status r = Transp_transpile(p, fmt);
+        DebugStack_Pop();
+        return r;
     }else{
         DPrint((Abstract *)p->source->path, COLOR_PURPLE, "Not Transpiling");
-        return SUCCESS;
+        DebugStack_Pop();
         return NOOP;
     }
 }
@@ -83,7 +98,10 @@ status Transp_Out(Transp *p, String *s, word targetId){
 }
 
 status Transp_Trans(Transp *p){
-    return Dir_Climb(p->m, p->src, NULL, Transp_transFile, (Abstract *)p);
+    DebugStack_Push("Transp_Trans"); 
+    status r =  Dir_Climb(p->m, p->src, NULL, Transp_transFile, (Abstract *)p);
+    DebugStack_Pop();
+    return r;
 }
 
 Transp *Transp_Make(MemCtx *m){

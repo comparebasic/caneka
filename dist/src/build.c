@@ -85,6 +85,7 @@ static BuildSubdir cdocobj = { "formats/cdoc", {
     "cdoc_capture.c",
     "cdoc_ctx.c",
     "cdoc_parser.c",
+    "cdoc_utils.c",
     NULL
 }};
 

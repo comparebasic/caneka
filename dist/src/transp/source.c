@@ -13,6 +13,7 @@ status Source_Reset(MemCtx *m, Source *source, String *dir, String *fname, Strin
     String_Trunc(fname, -(ext->length));
     source->fname = fname;
     source->ext = ext;
+
     return SUCCESS;
 }
 

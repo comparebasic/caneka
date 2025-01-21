@@ -40,6 +40,11 @@ void DebugStack_Pop(){
     Span_Cull(stack, 1);
 }
 
+
+status DebugStack_SetChars(char *cstr){
+    return SUCCESS;
+}
+
 int DebugStack_Print(){
     Iter it;
     Iter_InitReverse(&it, stack);

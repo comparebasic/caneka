@@ -79,6 +79,7 @@ enum types {
     TYPE_OSET_ITEM,
     TYPE_FMT_ITEM,
     TYPE_FMT_DEF,
+    TYPE_FMT_RESOLVER,
     TYPE_OSET,
     TYPE_FMT_CTX,
     TYPE_OSET_DEF,

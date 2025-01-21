@@ -46,6 +46,7 @@ int DEBUG_LANG_CNK_RBL = 0;
 int DEBUG_LANG_CNK_OUT = 0;
 int DEBUG_SUBPROCESS = 0;
 int DEBUG_STRSNIP = 0;
+int DEBUG_CDOC = COLOR_YELLOW;
 
 char *TypeStrings[] = {
     "_TYPE_START,"
@@ -915,4 +916,3 @@ void DPrint(Abstract *a, int color, char *msg, ...){
     Debug_Print((void *)a, 0,  "", color, TRUE);
     printf("\x1b[0m\n");
 }
-

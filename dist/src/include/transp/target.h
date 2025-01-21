@@ -8,6 +8,7 @@ typedef struct target {
     String *fname;
     String *ext;
     File destFile;
+    FmtResolver *resolver;
 } Target;
 
 Target *Target_Make(MemCtx *m, String *dir, String *fname, String *ext);
