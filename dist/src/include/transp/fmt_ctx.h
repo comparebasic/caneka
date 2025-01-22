@@ -40,13 +40,6 @@ typedef struct fmt_item {
     struct fmt_item *parent;
 } FmtItem;
 
-typedef struct fmt_def_resolver {
-    Type type;
-    Chain *byId;
-    TableChain *byName;
-    TableChain *byAlias;
-} FmtResolver;
-
 /*
  * .SetupTargets is a function that creates an output @Target. There may be
  * several of these for a single file that is transpiled, for example, a Caneka

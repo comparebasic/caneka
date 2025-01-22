@@ -24,7 +24,6 @@ static Target targets[] = {
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-    "-DDEBUG_STACK",
     NULL
 };
 
@@ -66,18 +65,42 @@ static BuildSubdir cryptoobj = { "crypto", {
     NULL
 }};
 
-static BuildSubdir formatsobj = { "formats", {
+static BuildSubdir cashobj = { "formats/cash", {
     "cash.c",
     "cash_rbl.c",
-    "http_parser.c",
+    NULL,
+}};
+static BuildSubdir osetobj = { "formats/oset", {
     "oset.c",
     "oset_from.c",
     "oset_item.c",
     "oset_parser.c",
     "oset_to.c",
-    "rblsh.c",
+    NULL,
+}};
+static BuildSubdir xmlobj = { "formats/xml", {
     "xml.c",
     "xml_parser.c",
+    NULL,
+}};
+
+static BuildSubdir rblshobj = { "formats/rblsh", {
+    "rblsh.c",
+    "rbl_parser_defs.c",
+    "rblsh_capture.c",
+    "rblsh_cnf.c",
+    "rblsh_items.c",
+    "rblsh_syntax.c",
+    NULL,
+}};
+
+static BuildSubdir fmtobj = { "formats/fmt", {
+    "fmt_html.c",
+    NULL
+}};
+
+static BuildSubdir httpobj = { "formats/http", {
+    "http_parser.c",
     NULL
 }};
 
@@ -89,31 +112,29 @@ static BuildSubdir cdocobj = { "formats/cdoc", {
     NULL
 }};
 
-static BuildSubdir transpobj = { "transp", {
-    "ext_match.c",
-    "fmt_ctx.c",
-    "fmt_def.c",
-    "fmt_item.c",
-    "source.c",
-    "target.c",
-    "transp.c",
-    NULL
-}};
-
-static BuildSubdir langobj = { "lang", {
+static BuildSubdir canekaobj = { "formats/caneka", {
     "caneka.c",
     "caneka_ctx.c",
     "caneka_module.c",
     "caneka_parser.c",
     "caneka_populate.c",
     "caneka_to.c",
-    "cnk_roebling_cnf.c",
-    "cnk_roebling_items.c",
-    "cnk_roebling_syntax.c",
-    "fmt_html.c",
-    "human_present.c",
-    "nestedd.c",
-    "rbl_parser_defs.c",
+    NULL
+}};
+
+static BuildSubdir transpobj = { "transp", {
+    "ext_match.c",
+    "fmt_ctx.c",
+    "fmt_def.c",
+    "fmt_item.c",
+    "fmt_resolver.c",
+    "source.c",
+    "target.c",
+    "transp.c",
+    NULL
+}};
+
+static BuildSubdir xmltobj = { "lang/xmlt", {
     "xmlt.c",
     "xmlt_template.c",
     NULL
@@ -151,6 +172,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     "iter.c",
     "lookup.c",
     "mess.c",
+    "nestedd.c",
     "queue.c",
     "slab.c",
     "span.c",
@@ -185,6 +207,11 @@ static BuildSubdir stringobj = { "string", {
 }};
 
 static BuildSubdir testsobj = { "tests", {
+    "tests.c",
+    NULL
+}};
+
+static BuildSubdir testsuitesobj = { "tests/tests", {
     "blank_test.c",
     "core_tests.c",
     "crypto_tests.c",
@@ -195,7 +222,6 @@ static BuildSubdir testsobj = { "tests", {
     "match_tests.c",
     "memctx_tests.c",
     "memlocal_tests.c",
-    "mock_109strings.c",
     "nestedd_tests.c",
     "oset_tests.c",
     "queue_tests.c",
@@ -208,14 +234,19 @@ static BuildSubdir testsobj = { "tests", {
     "string_tests.c",
     "strsnip_tests.c",
     "table_tests.c",
-    "testreq.c",
-    "tests.c",
     "textfilter_tests.c",
     "user_tests.c",
-    "utils.c",
     "xml_tests.c",
     "xmlt_template_tests.c",
     NULL
+}};
+
+static BuildSubdir testfixturesobj = { "tests/fixtures", {
+    "cycleserve_example.c",
+    "mock_109strings.c",
+    "testreq.c",
+    "utils.c",
+    NULL,
 }};
 
 static BuildSubdir utilobj = { "util", {
@@ -225,6 +256,7 @@ static BuildSubdir utilobj = { "util", {
     "compare.c",
     "do.c",
     "hash.c",
+    "human_present.c",
     "int.c",
     "maker.c",
     "result.c",
@@ -233,32 +265,31 @@ static BuildSubdir utilobj = { "util", {
     NULL
 }};
 
-static BuildSubdir appsobj = { "apps", {
-    "appsdebug.c",
-    "example.c",
-    NULL
-}};
-
 BuildSubdir *allobj[] = {
     &memobj,
     &coreobj,
     &debugobj,
-    &transpobj,
-    &formatsobj,
+    &cryptoobj,
+    &cashobj,
+    &osetobj,
+    &xmlobj,
+    &rblshobj,
+    &fmtobj,
+    &httpobj,
     &cdocobj,
-    &langobj,
+    &canekaobj,
+    &transpobj,
+    &xmltobj,
     &parserobj,
     &persistobj,
+    &secureobj,
     &sequenceobj,
     &serveobj,
     &stringobj,
     &testsobj,
+    &testsuitesobj,
+    &testfixturesobj,
     &utilobj,
-#ifdef CRYPTO
-    &cryptoobj,
-    &secureobj,
-#endif
-    &appsobj,
     NULL
 };
 

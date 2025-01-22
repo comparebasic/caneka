@@ -40,9 +40,9 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
 
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_FMT_CTX);
 
-    FmtDef *def = Chain_Get(ctx->byId, captureKey);
+    FmtDef *def = Chain_Get(ctx->resolver->byId, captureKey);
     if(def == NULL){
-        def = TableChain_Get(ctx->byAlias, (Abstract *)s);
+        def = TableChain_Get(ctx->resolver->byAlias, (Abstract *)s);
     }
 
     if(captureKey == CNK_LANG_INVOKE){
@@ -53,7 +53,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
             Span_Add(ctx->item->parent->children, (Abstract *)ctx->item);
         }
 
-        def = Chain_Get(ctx->byId, CNK_LANG_ARG_LIST);
+        def = Chain_Get(ctx->resolver->byId, CNK_LANG_ARG_LIST);
     }
 
     if(DEBUG_LANG_CNK){
@@ -114,7 +114,7 @@ FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
     CnkLang_AddDefs(ctx);
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
     ctx->item->spaceIdx = CNK_LANG_START;
-    FmtDef *def = Chain_Get(ctx->byId, ctx->item->spaceIdx);
+    FmtDef *def = Chain_Get(ctx->resolver->byId, ctx->item->spaceIdx);
     ctx->item->def = def;
     ctx->source = source;
     ctx->Setup = CnkLangCtx_Setup;

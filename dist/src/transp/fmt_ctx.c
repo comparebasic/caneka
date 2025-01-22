@@ -18,21 +18,9 @@ status Fmt_Add(MemCtx *m, FmtCtx *o, Lookup *fmtDefs){
             Lookup_Add(m, byId, def->id, (Abstract *)def);
         }
     }
-    if(o->byId == NULL){
-        o->byId = Chain_Make(m, byId);
-    }else{
-        Chain_Extend(m, o->byId, byId);
-    }
-    if(o->byName == NULL){
-        o->byName = TableChain_Make(m, byName);
-    }else{
-        TableChain_Extend(m, o->byName,  byName);
-    }
-    if(o->byAlias == NULL){
-        o->byAlias = TableChain_Make(m, byAlias);
-    }else{
-        TableChain_Extend(m, o->byAlias,  byAlias);
-    }
+    Chain_Extend(m, o->resolver->byId, byId);
+    TableChain_Extend(m, o->resolver->byName,  byName);
+    TableChain_Extend(m, o->resolver->byAlias,  byAlias);
     return SUCCESS;
 }
 
@@ -41,5 +29,6 @@ FmtCtx *FmtCtx_Make(MemCtx *m, OutFunc out){
     fmt->type.of = TYPE_FMT_CTX;
     fmt->m = m;
     fmt->out = out;
+    fmt->resolver = FmtResolver_Make(m);
     return fmt;
 }

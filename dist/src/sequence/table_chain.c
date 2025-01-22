@@ -2,6 +2,9 @@
 #include <caneka.h>
 
 void *TableChain_Get(TableChain *chain, Abstract *a){
+    if(chain->tbl == NULL){
+        return NULL;
+    }
     Abstract *t = Table_Get(chain->tbl, (Abstract *)a);
 
     if(t != NULL){
@@ -19,7 +22,11 @@ status TableChain_Extend(MemCtx *m, TableChain *chain, Span *tbl){
     while(last->next != NULL){
         last = last->next;
     }
-    last->next = TableChain_Make(m, tbl);
+    if(last->tbl == NULL){
+        last->tbl = tbl;
+    }else{
+        last->next = TableChain_Make(m, tbl);
+    }
     return SUCCESS;
 }
 

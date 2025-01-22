@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <example.h>
 
 static char *sid = "Azjfhuei3";
 static char *req_cstr = "GET /home HTTP/1.1\r\nContent-Length: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  

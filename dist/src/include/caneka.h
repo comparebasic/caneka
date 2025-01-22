@@ -86,12 +86,12 @@
 #include "serve/req.h"
 #include "serve/serve.h"
 #include "serve/handler.h"
-
-/* apps */
-#include "apps/apps.h"
+#include "serve/proto/http.h"
+#include "serve/proto/io.h"
 
 /* transp */
 #include "transp/fmt_def.h"
+#include "transp/fmt_resolver.h"
 #include "transp/fmt_ctx.h"
 #include "transp/source.h"
 #include "transp/target.h"
@@ -106,6 +106,9 @@
 #include "formats/oset_item.h"
 #include "formats/oset_to.h"
 #include "formats/xml.h"
+#include <formats/http.h>
+#include <formats/rblsh.h>
+
 
 /* lang */
 #include "lang/caneka.h"
@@ -120,3 +123,4 @@
 /* tests */
 #include "tests/mock_109strings.h"
 #include "tests/tests.h"
+#include "tests/fixtures/cycleserve_example.h"

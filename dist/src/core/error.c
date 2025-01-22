@@ -2,15 +2,9 @@
 #include <caneka.h>
 
 void *_Fatal(char *msg, cls t, char *func, char *file, int line){
-    
-#ifdef DEBUG_STACK
     Cleanup(NULL);
     printf("\x1b[%dmFatal Error: %s - type(%s/%d) %s:%s:%d\x1b[0m\n" , COLOR_RED, msg, Class_ToString(t), t, func, file, line);
     DebugStack_Print();
-#else
-    printf("Fatal Error: %s - type(%s) %s:%s:%d\n" , msg, Class_ToString(t), func, file, line);
-    Cleanup(NULL);
-#endif
     exit(13);
     return NULL;
 }

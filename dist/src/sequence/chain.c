@@ -2,6 +2,9 @@
 #include <caneka.h>
 
 void *Chain_Get(Chain *chain, word type){
+    if(chain->funcs == NULL){
+        return NULL;
+    }
     Abstract *t = Lookup_Get(chain->funcs, type);
     if(t != NULL){
        return (void *)t; 
@@ -31,7 +34,11 @@ status Chain_Extend(MemCtx *m, Chain *chain, Lookup *funcs){
     while(last->next != NULL){
         last = last->next;
     }
-    last->next = Chain_Make(m, funcs);
+    if(last->funcs == NULL){
+        last->funcs = funcs;
+    }else{
+        last->next = Chain_Make(m, funcs);
+    }
     return SUCCESS;
 }
 

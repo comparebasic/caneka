@@ -15,16 +15,13 @@ status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= archChecks();
     r |= SpanDef_Init();
-#ifdef DEBUG_STACK
     r |= DebugStack_Init(m);
-#endif
     r |= Clone_Init(m);
     MemCtx *dm = MemCtx_Make();
     r |= Debug_Init(dm);
     r |= Hash_Init(m);
     r |= Oset_Init(m);
     r |= Enc_Init(m);
-    r |= AppsDebug_Init(m);
     return r;
 }
 

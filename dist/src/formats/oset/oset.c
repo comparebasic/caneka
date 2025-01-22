@@ -62,7 +62,7 @@ String *Oset_To(MemCtx *m, String *key, Abstract *a){
     if(_oset == NULL){
         Fatal("Oset not intialized", TYPE_OSET);
     }
-    Abstract *found = Chain_Get(_oset->byId, Ifc_Get(a->type.of));
+    Abstract *found = Chain_Get(_oset->resolver->byId, Ifc_Get(a->type.of));
     if(found != NULL){
         FmtDef *def = as(found, TYPE_OSET_DEF);
         return asIfc(def->to(m, def, _oset, key, a), TYPE_STRING);

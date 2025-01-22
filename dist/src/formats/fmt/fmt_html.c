@@ -150,7 +150,7 @@ static void out(FmtCtx *ctx, int captureKey){
     printf("<%s>", def->name->bytes);
 
     if((def->type.state & FMT_FL_TO_NEXT_ID) != 0){
-        ctx->def = Chain_Get(ctx->byId, def->id+1); 
+        ctx->def = Chain_Get(ctx->resolver->byId, def->id+1); 
         out(ctx, captureKey);
         return;
     }
@@ -168,9 +168,9 @@ static void out(FmtCtx *ctx, int captureKey){
     if(captureKey == FORMATTER_LAST_VALUE){
         outClose(ctx, FMT_FL_TO_PARENT_ON_LAST);
         if(def->type.state & FMT_FL_TO_NEXT_ON_LAST){
-            ctx->def = Chain_Get(ctx->byId, ctx->def->id+1);
+            ctx->def = Chain_Get(ctx->resolver->byId, ctx->def->id+1);
         }else{
-            ctx->def = Chain_Get(ctx->byId, ctx->def->id-1);
+            ctx->def = Chain_Get(ctx->resolver->byId, ctx->def->id-1);
         }
     }else if(captureKey == FORMATTER_NEXT){
         outClose(ctx, (FMT_FL_TO_PARENT|FMT_FL_TO_PARENT_ON_LAST));
@@ -193,11 +193,11 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     printf("\x1b[%dmcaptured %s/'%s'\x1b[0m\n", COLOR_YELLOW, captureToChars(captureKey), s->bytes);
     */
     if(ctx->def == NULL){
-        ctx->def = Chain_Get(ctx->byId, 0);
+        ctx->def = Chain_Get(ctx->resolver->byId, 0);
     }
 
     if(captureKey == FORMATTER_INDENT){
-        ctx->def = Chain_Get(ctx->byId, s->length);
+        ctx->def = Chain_Get(ctx->resolver->byId, s->length);
     }else if(captureKey == FORMATTER_ALIAS || captureKey == FORMATTER_METHOD){
         if(String_Length(ctx->item->content) > 0){
             out(ctx, captureKey);
@@ -205,9 +205,9 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
         }
         FmtDef *def = NULL;
         if(captureKey == FORMATTER_ALIAS){
-            def = TableChain_Get(ctx->byAlias, (Abstract *)s); 
+            def = TableChain_Get(ctx->resolver->byAlias, (Abstract *)s); 
         }else{
-            def = TableChain_Get(ctx->byName, (Abstract *)s); 
+            def = TableChain_Get(ctx->resolver->byName, (Abstract *)s); 
         }
         if(def != NULL){
             if(ctx->def == NULL || ctx->def->parent != def){
