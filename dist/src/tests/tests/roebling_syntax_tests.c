@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status Roebling_SyntaxTests(MemCtx *gm){
-    DebugStack_Push("Roebling_SyntaxTests"); 
+    DebugStack_Push(NULL); 
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -12,6 +12,8 @@ status Roebling_SyntaxTests(MemCtx *gm){
 
     /* phrase */
     s = String_Make(m, bytes("/(hi-there)/\n"));
+
+    DebugStack_SetRef(s, s->type.of);
 
     Roebling_Add(ctx->rbl, s);
     Roebling_Run(ctx->rbl);

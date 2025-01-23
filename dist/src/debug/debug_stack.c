@@ -26,13 +26,21 @@ int _stackIdx = 0;
 
 status DebugStack_Init(MemCtx *m){
     _stackIdx = 0;
-    stack = Span_Make(m, TYPE_SPAN);
+    stack = Span_MakeInline(m, TYPE_SPAN, sizeof(StackEntry));
     setSigs();
     return SUCCESS;
 }
 
-void DebugStack_Push(char *cstr){
-    Span_Set(stack, _stackIdx++, (Abstract*)cstr);
+void _DebugStack_Push(char *cstr, char *fname, void *ref, int line, int pos){
+    StackEntry entry = {
+        cstr,
+        fname,
+        ref,
+        0,
+        line,
+        pos
+    };
+    Span_Set(stack, _stackIdx++, (Abstract*)&entry);
 }
 
 void DebugStack_Pop(){
@@ -40,6 +48,11 @@ void DebugStack_Pop(){
     Span_Cull(stack, 1);
 }
 
+void DebugStack_SetRef(void *v, word typeOf){
+    StackEntry *entry = Span_Get(stack, _stackIdx-1);
+    entry->ref = v;
+    entry->typeOf = typeOf;
+}
 
 status DebugStack_SetChars(char *cstr){
     return SUCCESS;
@@ -50,14 +63,24 @@ int DebugStack_Print(){
     Iter_InitReverse(&it, stack);
     boolean first = TRUE;
     while((Iter_Next(&it) & END) == 0){
-        char *cstr = (char *)Iter_Get(&it);
-        if(cstr != NULL){
+        StackEntry *entry = (StackEntry*)Iter_Get(&it);
+        if(entry != NULL){
             int color = DEBUG_STACK_COLOR;
             if(first){
                 color = COLOR_RED;
                 first = FALSE;
             }
-            printf("\x1b[%dm    %s\x1b[0m\n", color, cstr);
+            printf("\x1b[1;%dm    %s\x1b[0;%dm - %s:%d", color,
+                entry->funcName,
+                color,
+                entry->fname,
+                entry->line);
+            if(entry->ref != NULL && entry->typeOf != 0){
+                Debug_Print((void *)entry->ref, entry->typeOf, " - ", color, TRUE);
+            }else if(entry->ref != NULL && entry->typeOf == 0){
+                printf("\x1b[%dm - %s", color, (char *)entry->ref);
+            }
+            printf("\x1b[0m\n");
         }
     }
     return 0;
