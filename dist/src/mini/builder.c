@@ -81,7 +81,7 @@ static int BuildBinary(char *binaryName, char *sourceName){
 
     Cstr source_cstr;
     Cstr_Init(&source_cstr, GlobalBuilder.srcDir);
-    Cstr_Add(&source_cstr, "/");
+    Cstr_Add(&source_cstr, "/programs/");
     Cstr_Add(&source_cstr, sourceName);
 
     int updated = SourceUpdated(&source_cstr, &binary_cstr);

@@ -7,7 +7,7 @@ This file is mostly an example Caneka application, and it runs the tests
 #include <external.h>
 #include <caneka.h>
 #include <tests/tests.h>
-#include <example.h>
+#include <tests/fixtures/cycleserve_example.h>
 
 #define servecmd "serve"
 #define testcmd "test"

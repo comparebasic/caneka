@@ -15,7 +15,7 @@
 #define VERBOSE 2
 
 static Target targets[] = {
-    {"testreq", "tests/testreq.c"},
+    {"testreq", "testreq.c"},
     {"caneka", "main.c"},
     {"formatter", "formatter.c"},
     {"rblsh", "rblsh.c"},
@@ -244,7 +244,6 @@ static BuildSubdir testsuitesobj = { "tests/tests", {
 static BuildSubdir testfixturesobj = { "tests/fixtures", {
     "cycleserve_example.c",
     "mock_109strings.c",
-    "testreq.c",
     "utils.c",
     NULL,
 }};
