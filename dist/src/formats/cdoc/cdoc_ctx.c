@@ -2,11 +2,10 @@
 #include <caneka.h>
 
 FmtCtx *CdocCtx_Make(MemCtx *m, Abstract *source){
-    FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
+    FmtCtx *ctx = FmtCtx_Make(m, ToStdOut);
     ctx->type.of = TYPE_LANG_CDOC;
     ctx->m = m;
     ctx->rbl = Cdoc_RblMake(m, ctx);
-    ctx->out = ToStdOut;
     /*
 
     ctx->rangeToChars = CnkLang_RangeToChars;

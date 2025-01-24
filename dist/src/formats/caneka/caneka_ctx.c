@@ -104,11 +104,10 @@ status CnkLangCtx_Setup(FmtCtx *ctx, Lookup *targets){
 }
 
 FmtCtx *CnkLangCtx_Make(MemCtx *m, Abstract *source){
-    FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
+    FmtCtx *ctx = FmtCtx_Make(m, ToStdOut);
     ctx->type.of = TYPE_LANG_CNK;
     ctx->m = m;
     ctx->rbl = CnkLangCtx_RblMake(m, ctx, Capture);
-    ctx->out = ToStdOut;
 
     ctx->rangeToChars = CnkLang_RangeToChars;
     CnkLang_AddDefs(ctx);

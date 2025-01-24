@@ -317,11 +317,10 @@ Roebling *CnkRoeblingCtx_RblMake(MemCtx *m, FmtCtx *ctx){
 }
 
 FmtCtx *CnkRoeblingCtx_Make(MemCtx *m, Abstract *source){
-    FmtCtx *ctx = MemCtx_Alloc(m, sizeof(FmtCtx));
+    FmtCtx *ctx = FmtCtx_Make(m, ToStdOut);
     ctx->type.of = TYPE_LANG_CNK_RBL;
     ctx->m = m;
     ctx->rbl = CnkRoeblingCtx_RblMake(m, ctx);
-    ctx->out = ToStdOut;
 
     ctx->rangeToChars = CnkLang_RangeToChars;
     CnkRblLang_AddDefs(ctx);
