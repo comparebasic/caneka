@@ -31,12 +31,12 @@ status DebugStack_Init(MemCtx *m){
     return SUCCESS;
 }
 
-void _DebugStack_Push(char *cstr, char *fname, void *ref, int line, int pos){
+void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, int line, int pos){
     StackEntry entry = {
         cstr,
         fname,
         ref,
-        0,
+        typeOf,
         line,
         pos
     };
@@ -52,10 +52,6 @@ void DebugStack_SetRef(void *v, word typeOf){
     StackEntry *entry = Span_Get(stack, _stackIdx-1);
     entry->ref = v;
     entry->typeOf = typeOf;
-}
-
-status DebugStack_SetChars(char *cstr){
-    return SUCCESS;
 }
 
 int DebugStack_Print(){
@@ -76,7 +72,7 @@ int DebugStack_Print(){
                 entry->fname,
                 entry->line);
             if(entry->ref != NULL && entry->typeOf != 0){
-                Debug_Print((void *)entry->ref, entry->typeOf, " - ", color, TRUE);
+                Debug_Print((void *)entry->ref, entry->typeOf, " - ", color, FALSE);
             }else if(entry->ref != NULL && entry->typeOf == 0){
                 printf("\x1b[%dm - %s", color, (char *)entry->ref);
             }

@@ -57,7 +57,7 @@ status Test(int condition, char *msg, ...){
 }
 
 status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
-    DebugStack_Push("Test_Runner"); 
+    DebugStack_Push(suiteName, TYPE_CSTR); 
     int i = 0;
     TestSet *set = tests;
     char *name = NULL;

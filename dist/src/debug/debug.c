@@ -49,7 +49,7 @@ int DEBUG_STRSNIP = 0;
 int DEBUG_CDOC = COLOR_YELLOW;
 
 char *TypeStrings[] = {
-    "_TYPE_START,"
+    "_TYPE_START",
     "TYPE_UNKNOWN",
     "TYPE_BLANK",
     "TYPE_ABSTRACT",
@@ -72,6 +72,7 @@ char *TypeStrings[] = {
     "TYPE_MESS",
     "TYPE_MAKER",
     "TYPE_MEMSLAB",
+    "TYPE_CSTR",
     "TYPE_STRING",
     "TYPE_STRING_CHAIN",
     "TYPE_STRING_FIXED",
@@ -129,6 +130,7 @@ char *TypeStrings[] = {
     "TYPE_OSET_ITEM",
     "TYPE_FMT_ITEM",
     "TYPE_FMT_DEF",
+    "TYPE_FMT_RESOLVER",
     "TYPE_OSET",
     "TYPE_FMT_CTX",
     "TYPE_OSET_DEF",
@@ -140,6 +142,57 @@ char *TypeStrings[] = {
     "TYPE_TRANSP",
     "TYPE_DEBUG_STACK",
     "TYPE_DEBUG_STACK_ENTRY",
+    "TYPE_TARGET",
+    "TYPE_SOURCE",
+    "_APP_BOUNDRY_START",
+    "_IO_START",
+    "IO_RECV",
+    "IO_RUN",
+    "IO_DONE",
+    "_IO_END",
+    "_CASH_START",
+    "CASH_MARK_START",
+    "CASH_BETWEEN",
+    "CASH_VALUE",
+    "CASH_NOOP",
+    "_CASH_END",
+    "_RBLSH_START",
+    "RBLSH_MARK_START",
+    "RBLSH_MARK_END",
+    "RBLSH_TERM",
+    "RBLSH_HUP",
+    "RBLSH_WS",
+    "RBLSH_NL",
+    "RBLSH_ARG",
+    "RBLSH_FLAG",
+    "RBLSH_WORDFLAG",
+    "RBLSH_OP",
+    "RBLSH_STRING_LIT",
+    "RBLSH_STRING_OP",
+    "_RBLSH_END",
+    "_APPS_BOUNDRIES_START",
+    "_APPS_CASH_START",
+    "_APPS_RBLSH_START = _CASH_END",
+    "_APPS_TYPE_START",
+    "_TYPE_APPS_START",
+    "TYPE_RBLSH_CTX",
+    "TYPE_SERVECTX",
+    "TYPE_REQ",
+    "TYPE_PROTO",
+    "TYPE_PROTODEF",
+    "TYPE_XMLCTX",
+    "TYPE_HTTP_PROTO",
+    "TYPE_HTTP_PROTODEF",
+    "_TYPE_HTTP_METHODS_START",
+    "TYPE_METHOD_GET",
+    "TYPE_METHOD_POST",
+    "TYPE_METHOD_SET",
+    "TYPE_METHOD_UPDATE", 
+    "TYPE_METHOD_DELETE",
+    "TYPE_IO_PROTO",
+    "TYPE_IO_PROTODEF",
+    "TYPE_LANG_CDOC",
+    "_TYPE_APPS_END",
     "_TYPE_CORE_END",
     NULL,
 };
@@ -898,6 +951,20 @@ static void Iter_Print(Abstract *a, cls type, char *msg, int color, boolean exte
 }
 
 
+static void Transp_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Transp *p = (Transp*)as(a, TYPE_TRANSP);
+    printf("\x1b[%dm%sTransp<", color, msg);
+    if(p->source != NULL){
+        Debug_Print((void *)p->source->path, 0, "", color, FALSE);
+    }
+    Target *t = Span_GetSelected(p->targets->values);
+    if(t != NULL){
+        Debug_Print((void *)t->path, 0, " -> ", color, FALSE);
+    }
+    printf("\x1b[%dm>\x1b[0m\n", color);
+}
+
+
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(extended){
@@ -942,6 +1009,10 @@ static void EncPair_Print(Abstract *a, cls type, char *msg, int color, boolean e
     printf(">\x1b[0m");
 }
 
+static void Cstr_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    printf("\x1b[%dm%s%s\x1b[0m", color, msg, (char *)a);
+}
+
 static status populateDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
@@ -982,6 +1053,8 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_RESULT, (void *)Result_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     r |= Lookup_Add(m, lk, TYPE_STRSNIP_STRING, (void *)StrSnipString_Print);
+    r |= Lookup_Add(m, lk, TYPE_CSTR, (void *)Cstr_Print);
+    r |= Lookup_Add(m, lk, TYPE_TRANSP, (void *)Transp_Print);
     
     return r;
 }

@@ -7,5 +7,14 @@ Target *Target_Make(MemCtx *m, String *dir, String *fname, String *ext){
     t->dir = dir;
     t->fname = fname;
     t->ext = ext;
+
+    String *path = String_Init(m, STRING_EXTEND);
+    String_Add(m, path, dir);
+    String_AddBytes(m, path, bytes("/"), 1);
+    String_Add(m, path, fname);
+    String_Add(m, path, ext);
+
+    t->path = path;
+
     return t;
 }

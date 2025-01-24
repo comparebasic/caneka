@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *source){
-    DebugStack_Push("Dir_Climb"); 
+    DebugStack_Push(path, path->type.of); 
     struct dirent *ent;
     DIR *d = opendir((char *)path->bytes);
     if(d != NULL){

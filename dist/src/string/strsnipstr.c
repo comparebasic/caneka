@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
-    DebugStack_Push("StrSnipStr_ToString");
+    DebugStack_Push(sns, TYPE_STRSNIP_STRING);
     String *ret = String_Init(m, STRING_EXTEND);
 
     i64 pos = 0;

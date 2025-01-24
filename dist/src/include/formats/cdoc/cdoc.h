@@ -1,5 +1,8 @@
 enum cdoc_types {
    _CDOC_START = _TYPE_APPS_END,
+   CDOC_TARGET_FMT,
+   CDOC_TARGET_HTML,
+   CDOC_TARGET_MD,
    CDOC_START,
    CDOC_COMMENT,
    CDOC_WS,

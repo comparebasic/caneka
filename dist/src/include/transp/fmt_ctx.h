@@ -57,7 +57,7 @@ typedef struct fmt_ctx {
     FmtResolver *resolver;
     RangeToChars rangeToChars;
     OutFunc out;
-    status (*Setup)(struct fmt_ctx *ctx, Lookup *targets);
+    status (*Setup)(struct fmt_ctx *ctx, struct transp *p);
     Abstract *source;
 } FmtCtx;
 

@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status CnkRoebling_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
-    DebugStack_Push("CnkRoebling_Capture"); 
+    DebugStack_Push(s, s->type.of); 
     FmtCtx *ctx = (FmtCtx *)asIfc(source, TYPE_LANG_CNK_RBL);
 
     if(DEBUG_LANG_CNK_RBL){

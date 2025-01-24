@@ -94,6 +94,7 @@ enum types {
     TYPE_DEBUG_STACK_ENTRY,
     TYPE_TARGET,
     TYPE_SOURCE,
+    _TYPE_CORE_END,
     _APP_BOUNDRY_START,
     _IO_START,
     IO_RECV,
@@ -143,6 +144,5 @@ enum types {
     TYPE_IO_PROTODEF,
     TYPE_LANG_CDOC,
     _TYPE_APPS_END,
-    _TYPE_CORE_END,
 };
 

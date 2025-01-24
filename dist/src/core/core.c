@@ -165,7 +165,7 @@ boolean Ifc_Match(cls inst, cls ifc){
     }else if(ifc == TYPE_TRANSP){ 
         return (inst == TYPE_TRANSP || inst == TYPE_LANG_CNK);
     }else if(ifc == TYPE_FMT_CTX){ 
-        return (inst == TYPE_FMT_CTX || inst == TYPE_LANG_CNK);
+        return (inst == TYPE_FMT_CTX || inst == TYPE_LANG_CNK || inst == TYPE_LANG_CDOC);
     }
 
     return FALSE;

@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status Roebling_SyntaxTests(MemCtx *gm){
-    DebugStack_Push(NULL); 
+    DebugStack_Push(NULL, 0); 
     status r = READY;
     MemCtx *m = MemCtx_Make();
 

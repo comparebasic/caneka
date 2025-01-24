@@ -99,7 +99,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     return SUCCESS;
 }
 
-status CnkLangCtx_Setup(FmtCtx *ctx, Lookup *targets){
+status CnkLangCtx_Setup(FmtCtx *ctx, Transp *p){
     return runTo(ctx, ctx->root, FMT_CTX_ENCOUNTER);
 }
 

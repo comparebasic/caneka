@@ -9,31 +9,20 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
 }
 
 static status Transp_transpile(Transp *p, FmtCtx *fmt){
-    DebugStack_Push("Transp_transpile"); 
-    printf("I\n");
-    if(p->targets == NULL){
-        Fatal("No Targets defined for Transp", TYPE_TRANSP);
-        DebugStack_Pop();
-        return NOOP;
+    DebugStack_Push(p->source->path, p->source->path->type.of);
+    if(fmt->Setup != NULL){
+        fmt->Setup(fmt, p);
     }
     Target *t =  Span_GetSelected(p->targets->values);
     if(File_CmpUpdated(p->m, p->source->path, t->path, NULL)){
-        printf("II\n");
-        if(fmt->Setup != NULL){
-            fmt->Setup(fmt, p->targets);
-        }
-        printf("III\n");
         status r = File_Stream(p->m, &(p->source->sourceFile),
             NULL, Transp_onInput, (Abstract *)fmt);
 
         fprintf(stderr, "\n\x1b[%dmFinished parsing\x1b[0m\n", COLOR_BLUE);
 
-        printf("IV\n");
         DebugStack_Pop();
         return r;
     }
-        printf("V - end\n");
-        DebugStack_Pop();
     DebugStack_Pop();
     return NOOP;
 }
@@ -52,7 +41,7 @@ static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
 }
 
 static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *source){
-    DebugStack_Push("Transp_transFile"); 
+    DebugStack_Push(fname, fname->type.of); 
     Transp *p = asIfc(source, TYPE_TRANSP);
     
     Match mt;
@@ -98,7 +87,7 @@ status Transp_Out(Transp *p, String *s, word targetId){
 }
 
 status Transp_Trans(Transp *p){
-    DebugStack_Push("Transp_Trans"); 
+    DebugStack_Push(p, p->type.of); 
     status r =  Dir_Climb(p->m, p->src, NULL, Transp_transFile, (Abstract *)p);
     DebugStack_Pop();
     return r;
@@ -110,5 +99,6 @@ Transp *Transp_Make(MemCtx *m){
     t->m = m;
     t->source = Source_Make(m);
     t->fmts = Span_Make(m, TYPE_TABLE);
+    t->targets = Lookup_Make(m, _APP_BOUNDRY_START, NULL, NULL);
     return t;
 }

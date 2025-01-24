@@ -66,7 +66,7 @@ status transpile(MemCtx *m, char *arg){
 status doc(MemCtx *m, char *arg){
     Transp *ctx = Transp_Make(m);
     ctx->src = String_Make(m, bytes("dist/src/include"));
-    ctx->dist = String_Make(m, bytes("dist/doc/"));
+    ctx->dist = String_Make(m, bytes("dist/doc"));
     Debug_Print((void *)ctx->src, 0, "[Generating Documentation  ", COLOR_BLUE, FALSE);
     Debug_Print((void *)ctx->dist, 0, " ->  ", COLOR_BLUE, FALSE);
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);

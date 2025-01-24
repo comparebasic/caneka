@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    DebugStack_Push("CnkRbl_Pat"); 
+    DebugStack_Push(key, key->type.of); 
     Span *p = (Span *)asIfc(fmt->item->value, TYPE_SPAN);
 
     FmtItem *item = Span_Get(p, p->metrics.set);
@@ -60,7 +60,7 @@ Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstra
 }
 
 Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
-    DebugStack_Push("CnkRbl_PatKeyOpen"); 
+    DebugStack_Push(key, key->type.of); 
     if(def->id == CNK_LANG_RBL_PAT_KEY){
         printf("pat key opening\n");
         fmt->item->key = key;
@@ -137,7 +137,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 }
 
 Abstract *CnkRbl_Out(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
-    DebugStack_Push("CnkRbl_Out"); 
+    DebugStack_Push(s, s->type.of); 
     Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
 
     String *out = String_Init(m, STRING_EXTEND);
