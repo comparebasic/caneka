@@ -74,43 +74,8 @@ static status debug_Init(MemCtx *m){
     return Chain_Extend(m, DebugPrintChain, funcs);
 }
 
-struct termios orig_tios;
-struct termios current_tios;
-static status setOrigTios(){
-   int r = tcgetattr(STDIN_FILENO, &current_tios);
-   if(r != -1){
-       memcpy(&orig_tios, &current_tios, sizeof(struct termios));
-       return SUCCESS;
-   }
-   return ERROR;
-}
-
-static status rawMode(boolean enable){
-    if(enable){
-       int r = tcgetattr(STDIN_FILENO, &current_tios);
-       if(r != -1){
-           current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
-           /*
-           current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
-           current_tios.c_cflag |= (CS8);
-           current_tios.c_oflag &= ~(OPOST);
-           */
-           current_tios.c_cc[VMIN] = 1;
-           current_tios.c_cc[VTIME] = 0;
-       }
-   }else{
-       memcpy(&current_tios, &orig_tios, sizeof(struct termios));
-   }
-
-   if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &current_tios) != -1){
-       return SUCCESS;
-   }
-
-   return ERROR; 
-}
-
 void Cleanup(Abstract *a){
-    rawMode(FALSE);
+    RawMode(FALSE);
 }
 
 int main(int argc, char **argv){
@@ -131,8 +96,8 @@ int main(int argc, char **argv){
     Req *req = Serve_AddFd(sctx, 0);
     ctx->shelf = req->in.shelf;
 
-    setOrigTios();
-    rawMode(TRUE);
+    SetOriginalTios();
+    RawMode(TRUE);
 
     Serve_Run(sctx);
 

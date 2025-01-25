@@ -53,6 +53,7 @@ static BuildSubdir coreobj = { "core", {
 static BuildSubdir debugobj = { "debug", {
     "debug.c",
     "debug_stack.c",
+    "stepper.c",
     NULL,
 }};
 
@@ -206,6 +207,11 @@ static BuildSubdir stringobj = { "string", {
     NULL
 }};
 
+static BuildSubdir termioobj = { "termio", {
+    "rawmode.c",
+    NULL
+}};
+
 static BuildSubdir testsobj = { "tests", {
     "tests.c",
     NULL
@@ -286,6 +292,7 @@ BuildSubdir *allobj[] = {
     &serveobj,
     &stringobj,
     &testsobj,
+    &termioobj,
     &testsuitesobj,
     &testfixturesobj,
     &utilobj,
