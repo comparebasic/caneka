@@ -7,6 +7,7 @@ struct mem_persist;
 struct mem_pair;
 struct req_test_spec;
 struct test_set;
+struct step;
 /* string */
 struct cursor;
 struct iter_string;

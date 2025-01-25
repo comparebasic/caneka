@@ -23,6 +23,11 @@ static util Hash_Bytes(byte *bt, size_t length){
     return _Hash_Bytes(bt, length, h);
 }
 
+static util Hash_Ptr(void *ptr){
+	util h = 5381;
+    return _Hash_Bytes(&ptr, sizeof(void *), h);
+}
+
 static util Hash_Abstract(Abstract *a){
     return 0;
 }
@@ -81,10 +86,7 @@ util Get_Hash(Abstract *a){
     if(func != NULL){
         return func(a);
     }else{
-        Debug_Print((void *)a, 0, "Error Debug: ", COLOR_RED, TRUE);
-        printf("\n");
-        Fatal("Hash func for type not found", a->type.of);
-        return 0;
+        return Hash_Ptr(void *a);
     }
 }
 

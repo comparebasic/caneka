@@ -28,6 +28,42 @@ static status test(MemCtx *m, char *arg){
     return r;
 }
 
+static status debugFlag(char *arg){
+    int color = 0;
+    int l = strlen(arg);
+    int l2 = 0;
+    if(l < 3){
+        return NOOP;
+    }
+
+    char *names[] = {
+        "yellow", "red", "green", "cyan", "blue", "purple",   
+    };
+
+    int colors[] = {
+        COLOR_YELLOW, COLOR_RED, COLOR_GREEN, COLOR_CYAN, 
+        COLOR_BLUE, COLOR_PURPLE,
+    };
+
+    if(strncmp(arg, "d=", 2) == 0){
+        arg += 2;
+        l -= 2;
+        for(int i = 0; i < 6; i++){
+            l2 = strlen(names[i]);
+            if(l >= l2 && strncmp(arg, names[i], l2) == 0){
+                color = colors[i];
+            }
+        }
+    }
+
+    if(color != 0){
+        DEBUG_PATMATCH = color;
+        return SUCCESS;
+    }
+
+    return NOOP;
+}
+
 status serve(MemCtx *m, char *arg){
     printf("ARg '%s;\n", arg);
     int l = strlen("serve=port:");
@@ -107,6 +143,9 @@ int main(int argc, char **argv){
     
     if(argc > 1){
         for(int i = 1; i < argc; i++){
+            if((debugFlag(argv[i]) & SUCCESS) != 0){
+                continue;
+            }
             if(handle(m, argv[i]) == ERROR){
                 exit(1);
             }

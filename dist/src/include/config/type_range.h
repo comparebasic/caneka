@@ -87,6 +87,7 @@ enum types {
     TYPE_PROTODEF,
     TYPE_IO_PROTO,
     TYPE_IO_PROTODEF,
+    TYPE_STEP,
     _TYPE_CORE_END,
     _APP_BOUNDRY_START,
     TYPE_RBL_MARK,
