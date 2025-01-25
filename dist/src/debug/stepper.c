@@ -2,12 +2,19 @@
 #include <caneka.h>
 
 word StepperFlags = ZERO;
+static int bypassFor = 0;
+static String *num_s = NULL;
 void Stepper(Abstract *a){
-    if((a->type.state & DEBUG) == 0){
+    if((a->type.state & DEBUG) == 0 || (bypassFor > 0 && --bypassFor > 0)){
         return; 
     }
     SetOriginalTios();
-
+    bypassFor = 0;
+    if(num_s == NULL){
+        num_s = String_Init(DebugM, STRING_EXTEND);
+    }else{
+        String_Reset(num_s);
+    }
     char buff[SERV_READ_SIZE];
     int delay = ACCEPT_LONGDELAY_MILLIS;
     struct pollfd pfd = {
@@ -24,8 +31,19 @@ void Stepper(Abstract *a){
         for(int i = 0; i < l; i++){
             if(buff[i] == 'q' || buff[i] == 3){
                 Fatal("Quit from Stepper", 0);
+            }else if(buff[i] >= '0' && buff[i] <= '9'){
+                if(num_s->length == 0){
+                    printf("bypass for:");
+                }
+                printf("%c", buff[i]);
+                fflush(stdout);
+                String_AddBytes(DebugM, num_s, bytes(buff+i), 1);
             }else if(buff[i] == 'n'){
                 StepperFlags |= STEPPER_END;
+                if(num_s->length > 0){
+                    bypassFor = Int_FromString(num_s);
+                }
+                printf("\n");
             }else if(buff[i] == 'p'){
                 DPrint(a, COLOR_PURPLE, "Stepper: ");
             }else if(buff[i] == 'c'){

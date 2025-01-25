@@ -1,8 +1,5 @@
 /*
-MemCtx
-Memory context
-
-This is the manually-run garbage collector.
+This is the semi-manually-run garbage collector.
 */
 #define MEM_SLAB_SIZE 4096
 
@@ -12,6 +9,14 @@ enum memctx_flags {
 
 extern i16 MemCtx_TempLevel;
 
+/*
+ * Individual slabs of memory that have tracking information for the next
+ * available address range.
+ *
+ * .bytes is the available memory
+ * .addr is the next starting address
+ * .next is a pointer to the next slab
+ */
 typedef struct mem_slab {
     byte bytes[MEM_SLAB_SIZE];
     word idx;
@@ -20,6 +25,11 @@ typedef struct mem_slab {
     struct mem_slab *next;
 } MemSlab;
 
+/*
+ * Main memory context object
+ *
+ * .start_sl is the first memory slab in a linked list of memory slabs
+ */
 typedef struct mem_ctx {
     Type type;
     MemSlab *start_sl;

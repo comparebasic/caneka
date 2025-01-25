@@ -2,11 +2,10 @@
 #include <caneka.h>
 
 static PatCharDef commentDef[] = {
-    {PAT_TERM, '/', '/'},
-    {PAT_TERM, '*', '*'},
-    patText,
-    {PAT_TERM, '*', '*'},
-    {PAT_TERM, '/', '/'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '/', '/'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '*', '*'},
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, '\n', '\n'},
+    {PAT_KO|PAT_KO_TERM, '*', '*'}, {PAT_KO|PAT_KO_TERM, '/', '/'}, patText,
     {PAT_END, 0, 0},
 };
 

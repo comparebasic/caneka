@@ -4,7 +4,7 @@
 Chain *DebugPrintChain = NULL;
 
 int DEBUG_MATCH = 0;
-int DEBUG_PATMATCH = COLOR_YELLOW;
+int DEBUG_PATMATCH = 0;
 int DEBUG_MATCH_COMPLETE = 0;
 int DEBUG_CURSOR = 0;
 int DEBUG_PARSER = 0;
@@ -728,7 +728,8 @@ static void StringFull_Print(Abstract *a, cls type, char *msg, int color, boolea
 
 static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    printf("\x1b[%dm%sRbl<%s:source=%u", color, msg, State_ToChars(rbl->type.state), rbl->source != NULL ? rbl->source->type.of: 0);
+    String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
+    printf("\x1b[%dm%sRbl<%s\x1b[1;%dm%s\x1b[0;%dm source=%u", color, msg, State_ToChars(rbl->type.state), color, String_ToChars(DebugM, sec), color, rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
     if(extended){
         printf(" idx:%d jump:%d ", rbl->idx, rbl->jump);

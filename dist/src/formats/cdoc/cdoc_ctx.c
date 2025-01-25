@@ -33,6 +33,7 @@ static status Cdoc_AddDefs(FmtCtx *ctx){
 }
 
 static char *Cdoc_RangeToChars(word range){
+    printf("range to chars\n");
     return "UNKNOWN";
 }
 

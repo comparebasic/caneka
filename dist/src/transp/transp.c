@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
-    DebugStack_Push(s, s->type.of);
+    DebugStack_Push(_fmt, _fmt->type.of);
     FmtCtx *fmt = asIfc(_fmt, TYPE_FMT_CTX);
     if(DEBUG_LANG_TRANSP){
         DPrint((Abstract *)s, DEBUG_LANG_TRANSP, "Transp_onInput s:");
@@ -19,8 +19,10 @@ static status Transp_transpile(Transp *p, FmtCtx *fmt){
     if(fmt->Setup != NULL){
         fmt->Setup(fmt, p);
     }
-    Target *t =  Span_GetSelected(p->targets->values);
+    Target *t = Span_GetSelected(p->targets->values);
     if(File_CmpUpdated(p->m, p->source->path, t->path, NULL)){
+        Roebling_Reset(fmt->rbl->m, fmt->rbl, NULL);
+    
         status r = File_Stream(p->m, &(p->source->sourceFile),
             NULL, Transp_onInput, (Abstract *)fmt);
 

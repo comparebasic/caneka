@@ -31,8 +31,7 @@ static status Roebling_RunMatches(Roebling *rbl){
             incr = TRUE;
             if(DEBUG_PATMATCH){
                 String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
-                printf("\x1b[%dmrbl:%s/match:%d - ", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), it.idx);
-                Stepper((Abstract *)rbl);
+                printf("\x1b[1;%dmmrbl:%s/match:%d - \x1b[0m", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), it.idx);
             }
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
@@ -73,6 +72,10 @@ static status Roebling_RunMatches(Roebling *rbl){
             Cursor_Incr(&(rbl->cursor), 1);
         }
         rbl->type.state |= (rbl->cursor.type.state & END);
+
+        if(DEBUG_PATMATCH){
+            Stepper((Abstract *)rbl);
+        }
     }
 
     DebugStack_Pop();

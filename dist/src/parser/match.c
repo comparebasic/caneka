@@ -108,7 +108,7 @@ static void match_NextKoTerm(Match *mt){
 }
 
 static void addCount(MemCtx *m, Match *mt, word flags, int length){
-    if(DEBUG_PATMATCH){
+    if(0 && DEBUG_PATMATCH){
         printf("\n\x1b[%dmaddCount:%s%d%s\x1b[0m", 
             DEBUG_PATMATCH,
             ((flags & STRSNIP_GAP) != 0 ? "gap(" : (flags & STRSNIP_UNCLAIMED) != 0 ? "unclaimed(" : ""), 
