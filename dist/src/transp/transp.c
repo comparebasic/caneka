@@ -2,9 +2,14 @@
 #include <caneka.h>
 
 static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
+    DebugStack_Push(s, s->type.of);
+    if(DEBUG_LANG_TRANSP){
+        DPrint((Abstract *)s, DEBUG_LANG_TRANSP, "Transp_onInput s:");
+    }
     FmtCtx *fmt = asIfc(_fmt, TYPE_FMT_CTX);
     Roebling_Add(fmt->rbl, s);
     while((Roebling_RunCycle(fmt->rbl) & (SUCCESS|END|ERROR)) == 0);
+    DebugStack_Pop();
     return fmt->type.state;
 }
 
