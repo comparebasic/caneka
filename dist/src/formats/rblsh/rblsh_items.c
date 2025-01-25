@@ -62,7 +62,6 @@ Abstract *CnkRbl_PatClose(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstra
 Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract *a){
     DebugStack_Push(key, key->type.of); 
     if(def->id == CNK_LANG_RBL_PAT_KEY){
-        printf("pat key opening\n");
         fmt->item->key = key;
         Span *sp = (Span *)asIfc(fmt->root->value, TYPE_TABLE);
         fmt->item->value = (Abstract *)Span_Make(m, TYPE_SPAN);
@@ -137,7 +136,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 }
 
 Abstract *CnkRbl_Out(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
-    DebugStack_Push(s, s->type.of); 
+    DebugStack_Push(s, s != NULL ? s->type.of : 0); 
     Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
 
     String *out = String_Init(m, STRING_EXTEND);

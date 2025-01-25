@@ -75,4 +75,3 @@ char *State_ToChars(status state);
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanState_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void SpanDef_Print(struct span_def *def);
-char *AppRange_ToChars(word range);
