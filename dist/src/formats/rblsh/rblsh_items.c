@@ -136,7 +136,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
 }
 
 Abstract *CnkRbl_Out(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *s, Abstract *a){
-    DebugStack_Push(s, s != NULL ? s->type.of : 0); 
+    DebugStack_Push(s, s->type.of); 
     Span *sp = (Span *)asIfc(fmt->root->value, TYPE_SPAN);
 
     String *out = String_Init(m, STRING_EXTEND);
