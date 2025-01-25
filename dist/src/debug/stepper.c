@@ -1,26 +1,24 @@
 #include <external.h>
 #include <caneka.h>
 
-word StepperFlags = ZERO;
-static int bypassFor = 0;
-static String *num_s = NULL;
-Span *steps = NULL;
+static Span *steps = NULL;
 
-static status Steps_Init(MemCtx *m){
+status Steps_Init(MemCtx *m){
     steps = Span_Make(m, TYPE_TABLE);
+    return SUCCESS;
 }
 
 Step *Stepper_Make(MemCtx *m, Abstract *a, word flags, String *desc, String *num_s){
     Step *st = MemCtx_Alloc(m, sizeof(Step)); 
     st->type.of = TYPE_STEP;
     st->type.state = flags;
-    st->dest = desc;
+    st->desc = desc;
     st->num_s = num_s;
     st->a = a;
-
+    st->Func = Stepper_GetDescFunc(a->type.of);
     a->type.state |= DEBUG;
-    Table_Set(steps, a, a);
-    return Step;
+    Table_Set(steps, a, (Abstract *)st);
+    return st;
 }
 
 status Stepper_BypassFor(Step *st, int num){
@@ -28,14 +26,21 @@ status Stepper_BypassFor(Step *st, int num){
     return SUCCESS;
 }
 
-void Stepper(Abstract *a){
+void Stepper(MemCtx *m, Abstract *a){
+    DebugStack_Push(NULL, 0);
     if((a->type.state & DEBUG) == 0){ 
+        DebugStack_Pop();
         return; 
     }
     
     Step *st = (Step *)Table_Get(steps, a);
     if(st->bypassFor > 0 && --(st->bypassFor) > 0){
+        DebugStack_Pop();
         return; 
+    }
+
+    if(st->Func != NULL){
+        st->Func(m, st->a, (Abstract *)st->desc);
     }
 
     SetOriginalTios();
@@ -52,7 +57,10 @@ void Stepper(Abstract *a){
         SOCK_IN,
         POLLHUP
     };
-    printf("\x1b[1;30mStepping > n = next, c = continue, p = print, q = quit\x1b[0m\n");
+
+    Debug_Print((void *)st->desc, 0, "\rStepping> ", COLOR_DARK, FALSE);
+    printf("\x1b[%dm n = next, c = continue, p = print, q = quit\x1b[0m\n", COLOR_DARK);
+
     RawMode(TRUE);
     st->type.state &= ~STEPPER_END;
     while((st->type.state & (STEPPER_BYPASS|STEPPER_END)) == 0){
@@ -83,6 +91,8 @@ void Stepper(Abstract *a){
         }
     }
     RawMode(FALSE);
+    DebugStack_Pop();
+    return;
 }
 
 

@@ -54,6 +54,7 @@ static BuildSubdir debugobj = { "debug", {
     "debug.c",
     "debug_stack.c",
     "stepper.c",
+    "stepper_funcs.c",
     NULL,
 }};
 

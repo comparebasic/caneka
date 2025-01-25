@@ -5,16 +5,18 @@ enum stepper_flags {
 
 typedef struct step {
     Type type;
-    bypassFor;
+    int bypassFor;
     Abstract *a;
     String *desc;
     String *num_s;
-    Maker Func; /* a callback for updating the prompt */
+    Exch Func; /* a callback for updating the prompt */
 } Step;
 
-extern word StepperFlags;
-
-void Stepper(Abstract *a);
-status Stepper_Make(MemCtx *m, Abstract *a, word flags, String *desc, String *num_s);
+void Stepper(MemCtx *m, Abstract *a);
+status Steps_Init(MemCtx *m);
+Step *Stepper_Make(MemCtx *m, Abstract *a, word flags, String *desc, String *num_s);
 status Stepper_BypassFor(Step *st, int num);
-static status Steps_Init(MemCtx *m);
+Exch Stepper_GetDescFunc(word type);
+
+/* desc Exch funcs */
+Abstract *Roebling_StepDesc(MemCtx *m, Abstract *a, Abstract *b);

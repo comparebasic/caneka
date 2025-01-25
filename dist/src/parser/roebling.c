@@ -74,7 +74,7 @@ static status Roebling_RunMatches(Roebling *rbl){
         rbl->type.state |= (rbl->cursor.type.state & END);
 
         if(DEBUG_PATMATCH){
-            Stepper((Abstract *)rbl);
+            Stepper(rbl->m, (Abstract *)rbl);
         }
         if(noopCount == rbl->matches->nvalues){
             rbl->type.state |= (NOOP|END);
@@ -143,7 +143,6 @@ status Roebling_JumpTo(Roebling *rbl, int mark){
 status Roebling_Run(Roebling *rbl){
     status r = READY;
     while((r & (SUCCESS|ERROR|END|NOOP)) == 0){
-        printf("cycle\n");
         r = Roebling_RunCycle(rbl);
     }
     rbl->type.state &= ~END;
@@ -280,7 +279,7 @@ status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){
         Cursor_Init(&rbl->cursor, s);
     }
     Roebling_ResetPatterns(rbl);
-    rbl->type.state = ZERO;
+    rbl->type.state = (rbl->type.state & DEBUG);
     rbl->idx = 0;
 
     return SUCCESS;

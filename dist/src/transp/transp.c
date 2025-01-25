@@ -8,12 +8,6 @@ static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
         /*
         DPrint((Abstract *)s, DEBUG_LANG_TRANSP, "Transp_onInput s:");
         */
-        fmt->rbl->type.state |= DEBUG;
-        Stepper_Make(m, 
-            (Abstract *)fmt->rbl, 
-            ZERO,
-            String_Make(m, bytes("")),
-            String_Init(m, STRING_EXTEND));
     }
     Roebling_Add(fmt->rbl, s);
     while((Roebling_RunCycle(fmt->rbl) & (SUCCESS|END|ERROR)) == 0);

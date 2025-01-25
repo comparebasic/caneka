@@ -25,7 +25,7 @@ static util Hash_Bytes(byte *bt, size_t length){
 
 static util Hash_Ptr(void *ptr){
 	util h = 5381;
-    return _Hash_Bytes(&ptr, sizeof(void *), h);
+    return _Hash_Bytes((byte *)&ptr, sizeof(void *), h);
 }
 
 static util Hash_Abstract(Abstract *a){
@@ -86,7 +86,7 @@ util Get_Hash(Abstract *a){
     if(func != NULL){
         return func(a);
     }else{
-        return Hash_Ptr(void *a);
+        return Hash_Ptr((void *)a);
     }
 }
 

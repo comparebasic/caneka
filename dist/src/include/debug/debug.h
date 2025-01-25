@@ -1,3 +1,4 @@
+#define COLOR_BLACK 30
 #define COLOR_RED 31
 #define COLOR_GREEN 32
 #define COLOR_YELLOW 33

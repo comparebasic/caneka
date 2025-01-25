@@ -107,6 +107,15 @@ status doc(MemCtx *m, char *arg){
     Debug_Print((void *)ctx->dist, 0, " ->  ", COLOR_BLUE, FALSE);
     printf("\x1b[%dm]\x1b[0m\n", COLOR_BLUE);
     FmtCtx *cdocLang = CdocCtx_Make(m, (Abstract *)ctx);
+    
+    if(DEBUG_CDOC){
+        Stepper_Make(m, 
+            (Abstract *)cdocLang->rbl, 
+            ZERO,
+            String_Make(m, bytes("")),
+            String_Init(m, STRING_EXTEND));
+    }
+
     Table_Set(ctx->fmts, (Abstract *)String_Make(m, bytes(".h")), (Abstract *)cdocLang);
 
     return Transp_Trans(ctx);
