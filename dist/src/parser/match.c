@@ -118,7 +118,12 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
     }
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
+        /*
+    }else if((mt->snip.type.state & STRSNIP_CONTENT) == 0 && (flags & STRSNIP_CONTENT)){
+        flags = mt->snip.type.state;
+        */
     }
+
     if((mt->snip.type.state & flags) == flags){
         mt->snip.length += length;
     }else{

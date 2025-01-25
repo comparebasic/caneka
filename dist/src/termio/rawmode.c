@@ -28,6 +28,7 @@ status RawMode(boolean enable){
        }
    }else{
        memcpy(&current_tios, &orig_tios, sizeof(struct termios));
+       current_tios.c_lflag |= ECHO;
    }
 
    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &current_tios) != -1){

@@ -26,6 +26,7 @@ static status Roebling_RunMatches(Roebling *rbl){
         Iter it;
         Iter_Init(&it, rbl->matches);
         boolean incr = TRUE;
+        noopCount = 0;
         while((Iter_Next(&it) & END) == 0){
             mt = (Match *)Iter_Get(&it);
             incr = TRUE;
@@ -58,10 +59,9 @@ static status Roebling_RunMatches(Roebling *rbl){
                  }
                  break;
             }
-        }
-
-        if(noopCount == rbl->matches->nvalues){
-            rbl->type.state |= (NOOP|END);
+            if((mt->type.state & NOOP) != 0){
+                noopCount++;
+            }
         }
 
         if((mt->type.state & MATCH_INVERTED) != 0){
@@ -75,6 +75,9 @@ static status Roebling_RunMatches(Roebling *rbl){
 
         if(DEBUG_PATMATCH){
             Stepper((Abstract *)rbl);
+        }
+        if(noopCount == rbl->matches->nvalues){
+            rbl->type.state |= (NOOP|END);
         }
     }
 
@@ -108,7 +111,7 @@ status Roebling_RunCycle(Roebling *rbl){
             */
         }
     }
-    rbl->type.state &= ~(ROEBLING_NEXT|NOOP); 
+    rbl->type.state &= ~(ROEBLING_NEXT); 
 
     Single *wdof = Span_Get(rbl->parsers_do, rbl->idx);
     if(wdof == NULL){
@@ -138,9 +141,9 @@ status Roebling_JumpTo(Roebling *rbl, int mark){
 }
 
 status Roebling_Run(Roebling *rbl){
-    
     status r = READY;
-    while((r & (SUCCESS|ERROR|END)) == 0){
+    while((r & (SUCCESS|ERROR|END|NOOP)) == 0){
+        printf("cycle\n");
         r = Roebling_RunCycle(rbl);
     }
     rbl->type.state &= ~END;

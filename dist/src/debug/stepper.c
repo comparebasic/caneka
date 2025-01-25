@@ -30,6 +30,7 @@ void Stepper(Abstract *a){
         ssize_t l = read(pfd.fd, buff, SERV_READ_SIZE);
         for(int i = 0; i < l; i++){
             if(buff[i] == 'q' || buff[i] == 3){
+                RawMode(FALSE);
                 Fatal("Quit from Stepper", 0);
             }else if(buff[i] >= '0' && buff[i] <= '9'){
                 if(num_s->length == 0){

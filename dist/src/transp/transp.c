@@ -73,6 +73,9 @@ static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *
         Spool_Init(&p->source->sourceFile, p->source->path, NULL, NULL);
         status r = Transp_transpile(p, fmt);
         DebugStack_Pop();
+
+        exit(1);
+
         return r;
     }else{
         DPrint((Abstract *)p->source->path, COLOR_PURPLE, "Not Transpiling");

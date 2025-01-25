@@ -6,6 +6,10 @@ static PatCharDef commentDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '*', '*'},
     {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, '\n', '\n'},
     {PAT_KO|PAT_KO_TERM, '*', '*'}, {PAT_KO|PAT_KO_TERM, '/', '/'}, patText,
+    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '},
+    {PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
+    {PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r'},
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, '\n', '\n'},
     {PAT_END, 0, 0},
 };
 
@@ -52,6 +56,17 @@ static PatCharDef wsDef[] = {
     {PAT_END, 0, 0},
 };
 
+static PatCharDef otherDef[] = {
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    patText,
+    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '},
+    {PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
+    {PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r'},
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, '\n', '\n'},
+    {PAT_END, 0, 0},
+};
+
+
 static status start(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
@@ -71,6 +86,7 @@ static status thing(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl, typeDef, CDOC_TYPE, CDOC_START);
     r |= Roebling_SetPattern(rbl, commentDef, CDOC_COMMENT, CDOC_THING);
     r |= Roebling_SetPattern(rbl, wsDef, CDOC_WS, CDOC_THING);
+    r |= Roebling_SetPattern(rbl, otherDef, CDOC_OTHER, CDOC_START);
 
     return r;
 }

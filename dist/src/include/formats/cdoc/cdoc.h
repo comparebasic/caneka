@@ -6,6 +6,7 @@ enum cdoc_types {
    CDOC_START,
    CDOC_COMMENT,
    CDOC_WS,
+   CDOC_OTHER,
    CDOC_TYPE,
    CDOC_THING,
    CDOC_END,

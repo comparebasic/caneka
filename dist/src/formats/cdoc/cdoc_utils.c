@@ -10,6 +10,8 @@ char *CdocRange_ToChars(word range){
         return "CDOC_COMMENT";
     }else if(range == CDOC_WS){
         return "CDOC_WS";
+    }else if(range == CDOC_OTHER){
+        return "CDOC_OTHER";
     }else if(range == CDOC_TYPE){
         return "CDOC_TYPE";
     }else if(range == CDOC_THING){
