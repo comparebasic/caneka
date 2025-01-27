@@ -55,6 +55,7 @@ static BuildSubdir debugobj = { "debug", {
     "debug_stack.c",
     "stepper.c",
     "stepper_funcs.c",
+    "debug_typestrings.c",
     NULL,
 }};
 
@@ -146,6 +147,7 @@ static BuildSubdir parserobj = { "parser", {
     "match.c",
     "patchar.c",
     "roebling.c",
+    "parser_debug.c",
     NULL
 }};
 
@@ -205,6 +207,7 @@ static BuildSubdir stringobj = { "string", {
     "string_utils.c",
     "strsnip.c",
     "strsnipstr.c",
+    "string_debug.c",
     NULL
 }};
 

@@ -165,6 +165,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
         printf(": \x1b[0m");
     }
 
+    boolean unclaimed = FALSE;
     while(mt->pat.curDef < mt->pat.endDef){
         def = mt->pat.curDef;
 
@@ -184,6 +185,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
         }
 
         if(matched){
+            unclaimed = FALSE;
             if((def->flags & (PAT_KO|PAT_INVERT)) == (PAT_KO|PAT_INVERT)){
                 mt->type.state |= MATCH_KO_INVERT;
             }else if((def->flags & PAT_KO) != 0){
@@ -247,6 +249,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
             break;
         }else{
             if((mt->type.state & MATCH_KO) != 0){
+                unclaimed = TRUE;
                 if((def->flags & PAT_KO) == 0){
                     mt->snip.type.state &= ~NOOP;
                     mt->snip.type.state = STRSNIP_CONTENT;
@@ -262,15 +265,14 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                     continue;
                 }
             }else if((def->flags & (PAT_KO|PAT_OPTIONAL|PAT_ANY)) != 0){
+                unclaimed = TRUE;
                 mt->pat.curDef++;
                 continue;
             }else if((def->flags & (PAT_MANY)) != 0){
+                unclaimed = TRUE;
                 if((def->flags & PAT_TERM) != 0){
                     if((mt->type.state & MATCH_TERM_FOUND) != 0){
                         match_NextTerm(mt);
-                        if(mt->pat.curDef == mt->pat.endDef){
-                            addCount(m, mt, STRSNIP_UNCLAIMED, 1);
-                        }
                         continue;
                     }else{
                         goto miss;
@@ -294,6 +296,9 @@ miss:
     }
 
     if(mt->pat.curDef == mt->pat.endDef){
+        if(unclaimed){
+            addCount(m, mt, STRSNIP_UNCLAIMED, 1);
+        }
         String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
         if(Match_Total(mt) == 0 && (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
             mt->type.state = NOOP;

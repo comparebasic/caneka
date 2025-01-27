@@ -121,7 +121,6 @@ status doc(MemCtx *m, char *arg){
     return Transp_Trans(ctx);
 }
 
-
 static status handle(MemCtx *m, char *arg){
     int servecmd_l = strlen(servecmd);
     if(strncmp(arg, servecmd, strlen(servecmd)) == 0){

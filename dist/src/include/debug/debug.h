@@ -11,6 +11,8 @@
 
 extern struct chain *DebugPrintChain;
 
+extern char *TypeStrings[];
+
 extern int DEBUG_MATCH;
 extern int DEBUG_PATMATCH;
 extern int DEBUG_MATCH_COMPLETE;

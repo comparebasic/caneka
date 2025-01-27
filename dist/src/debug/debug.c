@@ -48,162 +48,6 @@ int DEBUG_SUBPROCESS = 0;
 int DEBUG_STRSNIP = 0;
 int DEBUG_CDOC = COLOR_YELLOW;
 
-char *TypeStrings[] = {
-     "_TYPE_START",
-     "TYPE_UNKNOWN",
-     "TYPE_BLANK",
-     "TYPE_ABSTRACT",
-     "TYPE_BUILDER",
-     "TYPE_RESERVE",
-     "TYPE_WRAPPED",
-     "TYPE_WRAPPED_FUNC",
-     "TYPE_WRAPPED_DO",
-     "TYPE_WRAPPED_UTIL",
-     "TYPE_WRAPPED_I64",
-     "TYPE_WRAPPED_TIME64",
-     "TYPE_WRAPPED_BOOL",
-     "TYPE_WRAPPED_PTR",
-     "TYPE_UTIL",
-     "TYPE_UNIT",
-     "TYPE_MEMCTX",
-     "TYPE_MEMHANDLE",
-     "TYPE_MHABSTRACT",
-     "TYPE_MEMLOCAL",
-     "TYPE_MESS",
-     "TYPE_MAKER",
-     "TYPE_MEMSLAB",
-     "TYPE_CSTR",
-     "TYPE_STRING",
-     "TYPE_STRING_CHAIN",
-     "TYPE_STRING_FIXED",
-     "TYPE_STRING_FULL",
-     "TYPE_STRING_SLAB",
-     "TYPE_STRSNIP",
-     "TYPE_STRSNIP_STRING",
-     "TYPE_CURSOR",
-     "TYPE_TESTSUITE",
-     "TYPE_RESULT",
-     "TYPE_PARSER",
-     "TYPE_ROEBLING",
-     "TYPE_MULTIPARSER",
-     "TYPE_SCURSOR",
-     "TYPE_GUARD",
-     "TYPE_PATMATCH",
-     "TYPE_PATCHARDEF",
-     "TYPE_STRUCTEXP",
-     "TYPE_IOCTX",
-     "TYPE_ACCESS",
-     "TYPE_AUTH",
-     "_TYPE_SPAN_START",
-     "TYPE_SPAN",
-     "TYPE_MINI_SPAN",
-     "TYPE_MEM_SPAN",
-     "TYPE_QUEUE_SPAN",
-     "TYPE_QUEUE_IDX",
-     "TYPE_SLAB_SPAN",
-     "TYPE_STRING_SPAN",
-     "TYPE_NESTED_SPAN",
-     "TYPE_TABLE",
-     "TYPE_POLL_MAP_SPAN",
-     "_TYPE_SPAN_END",
-     "TYPE_STRRAY",
-     "TYPE_COORDS",
-     "TYPE_MEM_KEYED",
-     "TYPE_SPAN_STATE",
-     "TYPE_SPAN_DEF",
-     "TYPE_QUEUE",
-     "TYPE_CHAIN",
-     "TYPE_SPAN_QUERY",
-     "TYPE_SLAB",
-     "TYPE_TABLE_CHAIN",
-     "TYPE_HASHED",
-     "TYPE_HASHED_LINKED",
-     "TYPE_MEMPAIR",
-     "TYPE_STRINGTABLE",
-     "TYPE_FILE",
-     "TYPE_SPOOL",
-     "TYPE_LOOKUP",
-     "TYPE_ITER",
-     "TYPE_ITER_STRING",
-     "TYPE_SINGLE",
-     "TYPE_TRANSP",
-     "TYPE_DEBUG_STACK",
-     "TYPE_DEBUG_STACK_ENTRY",
-     "TYPE_TARGET",
-     "TYPE_SOURCE",
-     "TYPE_SERVECTX",
-     "TYPE_REQ",
-     "TYPE_PROTO",
-     "TYPE_PROTODEF",
-     "TYPE_IO_PROTO",
-     "TYPE_IO_PROTODEF",
-     "_TYPE_CORE_END",
-     "_APP_BOUNDRY_START",
-     "TYPE_RBL_MARK",
-     "TYPE_OSET_ITEM",
-     "TYPE_FMT_ITEM",
-     "TYPE_FMT_DEF",
-     "TYPE_FMT_RESOLVER",
-     "TYPE_OSET",
-     "TYPE_FMT_CTX",
-     "TYPE_OSET_DEF",
-     "TYPE_CASH",
-     "TYPE_XMLT",
-     "TYPE_NESTEDD",
-     "TYPE_ENC_PAIR",
-     "TYPE_FMT_HTML",
-     "_IO_START",
-     "IO_RECV",
-     "IO_RUN",
-     "IO_DONE",
-     "_IO_END",
-     "_CASH_START",
-     "CASH_MARK_START",
-     "CASH_BETWEEN",
-     "CASH_VALUE",
-     "CASH_NOOP",
-     "_CASH_END",
-     "_RBLSH_START",
-     "RBLSH_MARK_START",
-     "RBLSH_MARK_END",
-     "RBLSH_TERM",
-     "RBLSH_HUP",
-     "RBLSH_WS",
-     "RBLSH_NL",
-     "RBLSH_ARG",
-     "RBLSH_FLAG",
-     "RBLSH_WORDFLAG",
-     "RBLSH_OP",
-     "RBLSH_STRING_LIT",
-     "RBLSH_STRING_OP",
-     "_RBLSH_END",
-     "_APPS_CASH_START",
-     "_APPS_RBLSH_START = _CASH_END",
-     "_APPS_TYPE_START",
-     "_TYPE_APPS_START",
-     "TYPE_RBLSH_CTX",
-     "TYPE_XMLCTX",
-     "TYPE_HTTP_PROTO",
-     "TYPE_HTTP_PROTODEF",
-     "_TYPE_HTTP_METHODS_START",
-     "TYPE_METHOD_GET",
-     "TYPE_METHOD_POST",
-     "TYPE_METHOD_SET",
-     "TYPE_METHOD_UPDATE", 
-     "TYPE_METHOD_DELETE",
-     "TYPE_LANG_CDOC",
-     "_TYPE_APPS_END",
-    NULL,
-};
-
-char *Class_ToString(cls type){
-    if(type <= _TYPE_CORE_END){
-       return TypeStrings[type]; 
-    }else{
-        return "TYPE_unknown";
-    }
-}
-
 boolean SHOW_SERVE_TESTS = FALSE;
 
 MemCtx *DebugM = NULL;
@@ -211,10 +55,6 @@ MemCtx *DebugM = NULL;
 static Abstract *Print(MemCtx *m, Abstract *a){
     Debug_Print(a, 0, "", 0, TRUE);
     return NULL;
-}
-
-char *State_ToChars(status state){
-    return String_ToChars(DebugM, State_ToString(DebugM, state));
 }
 
 char *QueueFlags_ToChars(word flags){
@@ -481,15 +321,6 @@ void Lookup_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
-status PrintMatchAddr(MemCtx *m, Abstract *a){
-    if(a == NULL){
-        printf("NULL ");
-    }else{
-        printf("0x%lx ", (util)(a));
-    }
-    return SUCCESS;
-}
-
 static word matchFlags[] = {
     PAT_END, /* E */
     PAT_TERM, /* X */
@@ -582,47 +413,6 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
     printf("\x1b[0m");
 }
 
-static void StrSnipString_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    String *s = (String *)asIfc(a, TYPE_STRING);
-    IterStr it;
-    IterStr_Init(&it, s, sizeof(StrSnip));
-    printf("\x1b[%dm%s", color, msg);
-    while((IterStr_Next(&it) & END) == 0){
-        StrSnip *sn = (StrSnip *)IterStr_Get(&it);
-        if((sn->type.state & STRSNIP_CONTENT) != 0){
-            printf("%d/%d", sn->start, sn->length);
-        }else if((sn->type.state & STRSNIP_UNCLAIMED) != 0){
-            printf("unclaimed(%d/%d)", sn->start, sn->length);
-        }else if((sn->type.state & STRSNIP_GAP) != 0){
-            printf("gap(%d/%d)", sn->start, sn->length);
-        }else{
-            printf("%hd(%d/%d)", sn->type.state, sn->start, sn->length);
-        }
-        if((it.type.state & FLAG_ITER_LAST) == 0){
-            printf(",");
-        }else{
-            printf("\x1b[0m");
-        }
-    }
-}
-
-static void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
-    Match *mt = (Match *)as(a, TYPE_PATMATCH);
-    if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:remainig=%d:%d/%d", color, msg,
-            State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->remaining, mt->snip.start, mt->snip.length);
-        Debug_Print(mt->backlog, TYPE_STRSNIP_STRING, ":backlog=(", color, FALSE);
-        printf(") \x1b[1;%dm[", color);
-        Debug_Print((void *)mt->pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
-        printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);
-        Debug_Print((void *)mt->pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
-        printf("\x1b[%dm>\x1b[0m", color);
-    }else{
-        printf("\x1b[%dm%sMatch<state=%s>\x1b[0m", color, msg, State_ToChars(mt->type.state));
-    }
-}
-
-
 static void mess_PrintRecurse(Mess *ms, char *msg, int color, boolean extended, int indent){
     indent_Print(indent);
     printf("\x1b[%dm%sM<%s value=\x1b[0m", color, msg, Class_ToString(ms->type.of));
@@ -674,94 +464,10 @@ static void Single_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     printf("\x1b[%dm%sSingle<%s:%u:%ld>\x1b[0m", color, msg, Class_ToString(v->type.of), v->type.state, v->val.value);
 }
 
-static void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    Cursor *cur = (Cursor *)as(a, TYPE_CURSOR);
-    printf("\x1b[%dm%sCursor<%s ptr=\x1b[1;%dm'%c'\x1b[0;%dm offset=%ld local=%ld", color, msg,
-        State_ToChars(cur->type.state), 
-        color, (cur->ptr != NULL ? *(cur->ptr) : 0), color,
-        cur->offset, cur->local);
-    if(extended){
-        Debug_Print((void*)cur->seg, 0, " seg=", color, extended);
-    }
-    printf("\x1b[%dm>\x1b[0m", color);
-}
-
 static void Result_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Result *v = (Result *)a;
     printf("\x1b[%dm%sR<%s:\x1b[1;%dm%d\x1b[0;%dm:", color, msg, State_ToChars(v->type.state), color, v->range, color);
     Debug_Print((void *)v->s, 0, "", color, FALSE);
-    printf("\x1b[%dm>\x1b[0m", color);
-}
-
-static void StringFixed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    String *s = (String *)as(a, TYPE_STRING_FIXED);
-    String *esc = String_ToEscaped(DebugM, s);
-    if(extended){
-        char *state = "";
-        if(s->type.state != 0){
-            state = State_ToChars(s->type.state);
-        }
-        printf("%s\x1b[%dmSFixed<%s\x1b[0;%dm", msg, color,state, color);
-        printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
-        printf("\x1b[%dm>\x1b[0m", color);
-    }else{
-        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"\x1b[0m", color, msg, color, esc->bytes, color);
-    }
-}
-
-static void StringFull_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    String *s = (String *)as(a, TYPE_STRING_FULL);
-    String *esc = String_ToEscaped(DebugM, s);
-    if(extended){
-        char *state = "";
-        if(s->type.state != 0){
-            state = State_ToChars(s->type.state);
-        }
-        printf("%s\x1b[%dmSFull<%s\x1b[0;%dm", msg, color,state, color);
-        printf("s/%u=\"\x1b[1;%dm%s\x1b[0;%dm\"", s->length, color, esc->bytes, color);
-        printf("\x1b[%dm>\x1b[0m", color);
-    }else{
-        printf("\x1b[%dm%s\"\x1b[1;%dm%s\x1b[0;%dm\"\x1b[0m", color, msg, color, esc->bytes, color);
-    }
-}
-
-
-static void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
-    printf("\x1b[%dm%sRbl<%s\x1b[1;%dm%s\x1b[0;%dm source=%u", color, msg, State_ToChars(rbl->type.state), color, String_ToChars(DebugM, sec), color, rbl->source != NULL ? rbl->source->type.of: 0);
-    printf(":");
-    if(extended){
-        printf(" idx:%d jump:%d ", rbl->idx, rbl->jump);
-        Debug_Print((void *)&(rbl->cursor), 0, "Cursor: ", color, extended);
-        if(rbl->marks->values->nvalues > 0){
-            printf("\n  \x1b[%dmmarks=\n    ", color);
-            for(int i = 0; i <= rbl->marks->values->max_idx; i++){
-                Debug_Print((void *)Span_Get(rbl->markLabels->values, i), 0, "", color, FALSE);
-                printf("=");
-                int *n = Span_Get(rbl->marks->values, i);
-                if(n != NULL){
-                    printf("%u", *n);
-                }
-                printf(" ");
-            }
-        }
-        printf("\n  \x1b[%dmmatches=\n", color);
-        Match *mt = NULL;
-        for(int i = 0; i < rbl->matches->nvalues; i++){
-            mt = Span_Get(rbl->matches, i);
-            Debug_Print((void *)mt, 0, "    ", color, extended);
-            if(i < rbl->matches->nvalues-1){
-                printf(",\n");
-            }
-        }
-        printf("\n  \x1b[%dmParsers(DoF)=\n    ", color);
-        Span_Run(NULL, rbl->parsers_do, PrintMatchAddr);
-        printf("\n");
-    }else{
-        printf(" idx:%d ", rbl->idx);
-        Debug_Print((void *)&(rbl->cursor), 0, "", color, extended);
-    }
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
@@ -773,43 +479,6 @@ static void Guard_Print(Abstract *a, cls type, char *msg, int color, boolean ext
    printf("\x1b[%dm%sG<count %d of max %d ", color, msg, g->count, g->max);
    Debug_Print((void *)&g->msg, 0, "", color, FALSE);
    printf(" \x1b[%dm%s:%d>\x1b[0m", color, g->file, g->line);
-}
-
-static void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    String *s = (String *)as(a, TYPE_STRING_CHAIN);
-    if(extended){
-        char *state = "";
-        if(s->type.state != 0){
-            state = State_ToChars(s->type.state);
-        }
-        printf("%s\x1b[%dmS<%s\x1b[0;%dm", msg, color, state, color);
-        do {
-            int l = s->length;
-            String *_s = s;
-            if((s->type.state & FLAG_STRING_BINARY) != 0){
-                _s = String_ToHex(DebugM, s);
-            }else{
-                _s = String_ToEscaped(DebugM, s);
-            }
-            printf("s/%u=\"\x1b[1;%dm", l, color);
-            do {
-                printf("%s", _s->bytes);
-            } while((_s = String_Next(_s)) != NULL);
-            printf("\x1b[0;%dm\"", color);
-            s = s->next;
-        } while(s != NULL);
-        printf("\x1b[%dm>\x1b[0m", color);
-    }else{
-        printf("\x1b[%dm%s\x1b[1;%dm\"",color, msg, color);
-        do {
-            /*
-            printf("%d/%lu'%s'",s->length,strlen((char *)s->bytes),s->bytes);
-            */
-            printf("%s",s->bytes);
-            s = s->next;
-        } while(s != NULL);
-        printf("\"\x1b[0m");
-    }
 }
 
 static void Wrapped_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -847,7 +516,6 @@ static void Iter_Print(Abstract *a, cls type, char *msg, int color, boolean exte
         State_ToChars(it->type.state), it->idx, it->values->nvalues);
 }
 
-
 static void Transp_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Transp *p = (Transp*)as(a, TYPE_TRANSP);
     printf("\x1b[%dm%sTransp<", color, msg);
@@ -860,7 +528,6 @@ static void Transp_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     }
     printf("\x1b[%dm>\x1b[0m\n", color);
 }
-
 
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
@@ -904,10 +571,6 @@ static void EncPair_Print(Abstract *a, cls type, char *msg, int color, boolean e
         dec = String_Next(dec);
     }
     printf(">\x1b[0m");
-}
-
-static void Cstr_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
-    printf("\x1b[%dm%s%s\x1b[0m", color, msg, (char *)a);
 }
 
 static status populateDebugPrint(MemCtx *m, Lookup *lk){
@@ -964,6 +627,7 @@ status Debug_Init(MemCtx *m){
         DebugPrintChain = Chain_Make(m, funcs);
         return SUCCESS;
     }
+
     return NOOP;
 }
 
@@ -1020,26 +684,6 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
     printf("\x1b[0m");
 }
 
-
-void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched, boolean extended){
-    if(extended){
-        printf("    \x1b[%dm%s ", DEBUG_PATMATCH, 
-        State_ToChars(mt->type.state));
-        Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
-    }else{
-        if(matched){
-            printf("\x1b[1;%dmY\x1b[%dm/\x1b[0m", DEBUG_PATMATCH, DEBUG_PATMATCH);
-        }else{
-            printf("\x1b[%dmN/\x1b[0m", DEBUG_PATMATCH);
-        }
-        Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
-        if(matched){
-            printf("\x1b[%dm, \x1b[0m", DEBUG_PATMATCH);
-        }else{
-            printf("\x1b[%dm, \x1b[0m", DEBUG_PATMATCH);
-        }
-    }
-}
 
 void DPrint(Abstract *a, int color, char *msg, ...){
     printf("\x1b[%dm", color);
