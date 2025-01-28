@@ -46,8 +46,8 @@ String *String_Sub(MemCtx *m, String *s, i64 start, i64 end){
     String *ret = String_Init(m, STRING_EXTEND);
     i64 pos = 0;
     while(s != NULL && pos + s->length < start){
-        s = String_Next(s);
         pos += s->length;
+        s = String_Next(s);
     }
 
     start -= pos;
