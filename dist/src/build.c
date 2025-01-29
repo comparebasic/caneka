@@ -13,12 +13,13 @@
 #define MAIN "main.c"
 #define ALL allobj
 #define VERBOSE 2
+#define DIST "build"
+#define SRC "dist/src"
 
 static Target targets[] = {
     {"testreq", "testreq.c"},
     {"caneka", "main.c"},
     {"formatter", "formatter.c"},
-    {"rblsh", "rblsh.c"},
     {NULL, NULL},
 };
 
@@ -28,7 +29,7 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./dist/src/include/", "-I./dist/src/apps/include/",
+    "-I./dist/src/include/",
     NULL
 };
 
@@ -87,8 +88,7 @@ static BuildSubdir xmlobj = { "formats/xml", {
     NULL,
 }};
 
-static BuildSubdir rblshobj = { "formats/rblsh", {
-    "rblsh.c",
+static BuildSubdir rblshobj = { "formats/cnkrbl", {
     "rbl_parser_defs.c",
     "rblsh_capture.c",
     "rblsh_cnf.c",

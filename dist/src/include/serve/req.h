@@ -1,3 +1,8 @@
+/*
+ * uses SERVE_ALPHA through SERVE_ 
+enum req_flags {};
+*/
+
 typedef struct req {
     Type type;
     MemCtx *m;

@@ -195,8 +195,8 @@ void **cmdSet[] = {
 /* main */
 int main(int argc, char *argv[]){
     memset(&GlobalBuilder, 0, sizeof(GlobalBuilder));
-    GlobalBuilder.srcDir = "dist/src";
-    GlobalBuilder.buildDir = "build";
+    GlobalBuilder.srcDir = SRC;
+    GlobalBuilder.buildDir = DIST;
     if(argc > 1){
         int i = 0;
         for(int ai = 1; ai < argc; ai++){

@@ -17,6 +17,13 @@
     #define SOCK_OUT POLLOUT
 #endif
 
+enum serve_ctx_flags {
+    /* reserver for app specific use */
+    SERVE_ALPHA = 1 << 8, 
+    SERVE_BRAVO = 1 << 9,
+    SERVE_CHARLIE = 1 << 10,
+};
+
 typedef struct serve_ctx {
     Type type;
     MemCtx *m;

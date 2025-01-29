@@ -20,7 +20,7 @@ static char *toLog(Req *req){
 static status reqHttpParser_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     HttpProto *proto = (HttpProto *)source;
     if(captureKey == HTTP_METHOD){
-        proto->method = Lookup_GetKey(proto->methods, matchIdx);
+        proto->method = Lookup_GetKey((Lookup *)proto->def->custom, matchIdx);
     }else if(captureKey == HTTP_PATH){
         proto->path = s;
     }else if(captureKey == HTTP_HEADER){
@@ -73,8 +73,8 @@ Proto *HttpProto_Make(MemCtx *m, ProtoDef *def){
     HttpProto *p = (HttpProto *)MemCtx_Alloc(m, sizeof(HttpProto));
     p->type.of = TYPE_HTTP_PROTO;
     p->toLog = toLog;
+    p->def = def;
     p->headers_tbl = Span_Make(m, TYPE_TABLE);
-    p->methods = def->methods;
 
     return (Proto *)p;
 }
@@ -102,9 +102,10 @@ ProtoDef *HttpProtoDef_Make(MemCtx *m){
     Lookup_Add(m, lk, HTTP_METHOD_DELETE, 
          (void *)String_Make(m, bytes("DELETE")));
 
-    return ProtoDef_Make(m, TYPE_HTTP_PROTODEF,
+    ProtoDef *def =  ProtoDef_Make(m, TYPE_HTTP_PROTODEF,
         (Maker)HttpReq_Make,
-        (Maker)HttpProto_Make,
-        lk
-    ); 
+        (Maker)HttpProto_Make); 
+
+    def->custom = (Abstract *)lk;
+    return def;
 }

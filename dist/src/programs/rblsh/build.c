@@ -10,6 +10,8 @@
 #define LIBTARGET "librblsh"
 #define ALL allobj
 #define VERBOSE 2
+#define DIST "build"
+#define SRC "dist/src/programs/rblsh"
 
 static Target targets[] = {
     {"rblsh", "rblsh/rblsh.c"},
@@ -22,7 +24,7 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./include/", "-I./programs/rblsh/include/",
+    "-I./dist/src/include/", "-I./dist/src/programs/rblsh/include/",
     NULL
 };
 
@@ -32,6 +34,10 @@ static char *libs[] = {
 };
 
 static BuildSubdir obj = { ".", {
+    "ctx.c",
+    "debug.c",
+    "parser.c",
+    "req.c",
     NULL
 }};
 

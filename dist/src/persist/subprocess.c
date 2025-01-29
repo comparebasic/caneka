@@ -1,9 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
-status SubProcess(MemCtx *m, Span *cmd_p, String *msg_s){
+int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
     char **cmd = Span_ToCharArr(m, cmd_p);
-    char *msg = String_ToChars(m, msg_s);
+    char *msg = "";
+    if(msg_s != NULL){
+        msg = String_ToChars(m, msg_s);
+    }
+
+    int p0[2];
+    int p1[2];
+    int p2[2];
 
     pid_t child, p;
     int r;
@@ -23,31 +30,62 @@ status SubProcess(MemCtx *m, Span *cmd_p, String *msg_s){
     if(child == (pid_t)-1){
         Fatal("Fork for subprocess", 0); 
     }else if(!child){
+        if(source->type.of == TYPE_SERVECTX){
+            Serve *sctx = (Serve *)source;
+            dup2(0, p0[1]);
+            dup2(1, p1[1]);
+            dup2(2, p2[1]);
+
+            Req *req = NULL;
+            sctx->type.state |= SERVE_ALPHA;
+            req = Serve_AddFd(sctx, p0[0]);
+            sctx->type.state &= ~SERVE_ALPHA;
+            sctx->type.state |= SERVE_BRAVO;
+            req = Serve_AddFd(sctx, p1[0]);
+            sctx->type.state &= ~SERVE_BRAVO;
+            sctx->type.state |= SERVE_CHARLIE;
+            req = Serve_AddFd(sctx, p2[0]);
+        }
+        
         execvp(cmd[0], cmd);
         Fatal("Execv failed", 0);
-        return ERROR;
+        return 1;
+    }else{
+        return child;
     }
 
+    return 1;
+}
+
+int SubStatus(int pid, boolean wait){
+    int r;
+    pid_t p;
     do {
         r = 0;
-        p = waitpid(child, &r, 0);
+        p = waitpid(pid, &r, wait ? WNOHANG : 0);
         if(p == (pid_t)-1 && errno != EINTR){
             Fatal("subProcess failed for SubProcess", 0); 
             break;
         }
-    } while(p != child);
+    } while(p != pid && !wait);
 
-    if(p != child || !WIFEXITED(r)){
+    if(p != pid){
+        return -1;
+    }
+
+    if(p != pid || !WIFEXITED(r)){
         Fatal("subProcess failed for SubProcess process did not exit propery", 0); 
         return FALSE;
     }
 
-    int code = WEXITSTATUS(r);    
-    if(code != 0){
-        Fatal("subProcess failed for obj SubProcess", 0); 
-        return ERROR;
-    }
+    return  WEXITSTATUS(r);    
+}
 
-    return SUCCESS;
+status SubProcess(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
+    pid_t pid = SubCall(m, cmd_p, msg_s, source) ;
+    if(pid != -1){
+        return SubStatus(pid, TRUE) == 0 ? SUCCESS : ERROR;
+    }
+    return ERROR;
 }
 

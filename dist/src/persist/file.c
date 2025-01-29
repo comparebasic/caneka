@@ -15,7 +15,7 @@ status File_Copy(MemCtx *m, String *a, String *b, Access *ac){
     Span_Add(cmd, (Abstract *)a);
     Span_Add(cmd, (Abstract *)b);
 
-    return SubProcess(m, cmd, String_Make(m, bytes("copying file")));
+    return SubProcess(m, cmd, String_Make(m, bytes("copying file")), NULL);
 }
 
 boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
