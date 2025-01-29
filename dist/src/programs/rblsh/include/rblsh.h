@@ -1,0 +1,5 @@
+#define INREQ SERVE_ALPHA 
+#define OUTREQ SERVE_BRAVO 
+#define ERRREQ SERVE_CHARLIE 
+
+/* req */
