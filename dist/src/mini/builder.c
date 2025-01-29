@@ -4,6 +4,7 @@
 static int REBUILD_ALL = FALSE;
 static int REBUILD_BINARY = FALSE;
 static Cstr lib_cstr;
+static Cstr folder_cstr;
 
 struct builder {
     struct {
@@ -34,16 +35,23 @@ static int BuildSource(char *binary, char *fname, char *subdir){
     Cstr build_cstr;
     Cstr_Init(&build_cstr, GlobalBuilder.buildDir);
     Cstr_Add(&build_cstr, "/");
-    Cstr_Add(&build_cstr, subdir);
+    Cstr_Add(&build_cstr, LIBTARGET);
     Cstr_Add(&build_cstr, "/");
+    if(strlen(subdir) > 0){
+        Cstr_Add(&build_cstr, subdir);
+        Cstr_Add(&build_cstr, "/");
+    }
     Cstr_AddBuildName(&build_cstr, fname);
 
     Cstr source_cstr;
     Cstr_Init(&source_cstr, GlobalBuilder.srcDir);
     Cstr_Add(&source_cstr, "/");
-    Cstr_Add(&source_cstr, subdir);
-    Cstr_Add(&source_cstr, "/");
+    if(strlen(subdir) > 0){
+        Cstr_Add(&source_cstr, subdir);
+        Cstr_Add(&source_cstr, "/");
+    }
     Cstr_Add(&source_cstr, fname);
+
 
     if(SourceUpdated(&source_cstr, &build_cstr)){
         REBUILD_BINARY = TRUE;
@@ -81,7 +89,7 @@ static int BuildBinary(char *binaryName, char *sourceName){
 
     Cstr source_cstr;
     Cstr_Init(&source_cstr, GlobalBuilder.srcDir);
-    Cstr_Add(&source_cstr, "/programs/");
+    Cstr_Add(&source_cstr, "/");
     Cstr_Add(&source_cstr, sourceName);
 
     int updated = SourceUpdated(&source_cstr, &binary_cstr);
@@ -105,6 +113,7 @@ static int BuildBinary(char *binaryName, char *sourceName){
 }
 
 int BuildLib(){
+    FolderMake(LIBTARGET);
     Cstr_Init(&lib_cstr, GlobalBuilder.buildDir);
     Cstr_Add(&lib_cstr, "/");
     Cstr_Add(&lib_cstr, LIBTARGET);
@@ -113,7 +122,12 @@ int BuildLib(){
     BuildSubdir **set = ALL;
     while(*set != NULL){
         BuildSubdir *dir = *set;
-        FolderMake(dir->name);
+         
+        Cstr_Init(&folder_cstr, LIBTARGET);
+        Cstr_Add(&folder_cstr, "/");
+        Cstr_Add(&folder_cstr, dir->name);
+        FolderMake(folder_cstr.content);
+
         char **fname = dir->sources;
         while(*fname != NULL){
             BuildSource(LIBTARGET, *fname, dir->name);

@@ -2,10 +2,8 @@ typedef struct io_proto {
     Type type;
     char *(*toLog)(struct req *req);
     ProtoDef *def;
-    Span *headers_tbl;
-    String *body;
-    Lookup *methods;
-    Abstract *data;
+    Abstract *source;
+    Abstract *custom;
 } IoProto;
 
 ProtoDef *IoProtoDef_Make(MemCtx *m, Maker reqMake);

@@ -11,23 +11,30 @@ int main(int argc, char **argv){
 
     MemCtx *m = MemCtx_Make();
     Caneka_Init(m);
-    debug_Init(m);
+    RblShDebug_Init(m);
 
     RblShCtx *ctx = RblShCtx_Make(m);
 
     Handler *h = NULL;
+
     ProtoDef *def = IoProtoDef_Make(m, (Maker)RblSh_ReqMake);
-    def->getHandler = RblSh_getHandler;
+    def->getHandler = RblSh_GetHandler;
     def->source = (Abstract *)ctx;
     Serve *sctx = Serve_Make(m, def);
 
+    sctx->type.state |= DRIVEREQ;
     Req *req = Serve_AddFd(sctx, 0);
-    ctx->shelf = req->in.shelf;
+    req->in.rbl->source = (Abstract *)ctx;
+    ((IoProto *)as(req->proto, TYPE_IO_PROTO))->custom = (Abstract *)ctx;
+    sctx->type.state &= ~DRIVEREQ;
 
     SetOriginalTios();
     RawMode(TRUE);
 
-    Serve_Run(sctx);
+    ctx->sctx = sctx;
+    Serve_RunFds(sctx);
+
+    RawMode(FALSE);
 
     MemCtx_Free(m);
     r |= SUCCESS;

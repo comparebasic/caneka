@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include <rblsh.h>
 
 static void RblShCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     RblShCtx *ctx = (RblShCtx *)as(a, TYPE_RBLSH_CTX);

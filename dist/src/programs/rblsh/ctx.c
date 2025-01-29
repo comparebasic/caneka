@@ -1,5 +1,18 @@
 #include <external.h>
 #include <caneka.h>
+#include <rblsh.h>
+
+status RblShCtx_Capture(word rkey, int matchIdx, String *s, Abstract *source){
+    RblShCtx *ctx = (RblShCtx *)as(source, TYPE_RBLSH_CTX);
+    for(int i = 0; i < s->length; i++){
+        byte b = s->bytes[i];
+        printf("Recieved key %c\n", b);
+        if(b == KEY_INT || b == KEY_HUP){
+            ctx->sctx->serving = FALSE; 
+        }
+    }
+    return SUCCESS;
+}
 
 Abstract *RblShCtx_GetVar(Abstract *store, Abstract *key){
     RblShCtx *ctx = (RblShCtx *)as(store, TYPE_RBLSH_CTX);
@@ -17,11 +30,6 @@ RblShCtx *RblShCtx_Make(MemCtx *m){
     char *path = getcwd(buff, PATH_BUFFLEN);
     ctx->cwd.s = String_Make(m, bytes(path));
     ctx->cwd.p = String_SplitToSpan(m, ctx->cwd.s, String_Make(m, bytes("/")));
-
-    Debug_Print((void *)ctx->cwd.s, 0, "Cwd(s):", COLOR_PURPLE, FALSE);
-    printf("\n");
-    Debug_Print((void *)ctx->cwd.p, 0, "Cwd(p):", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     return ctx;
 }

@@ -15,10 +15,21 @@ enum mark_reserved {
     _FIRST_MARK,
 };
 
+typedef struct roebling_blank {
+    Type type;
+    MemCtx *m;
+    Cursor cursor;
+    Abstract *source; 
+    RblCaptureFunc capture;
+} RoeblingBlank;
+
 typedef struct roebling {
     Type type;
     MemCtx *m;
+    Cursor cursor;
     Abstract *source; 
+    RblCaptureFunc capture;
+    /* end of roebling blank */
     /* current */
     int idx;
     Span * matches;
@@ -26,9 +37,7 @@ typedef struct roebling {
     /* overall */
     Span *parsers_do;
     Lookup *marks;
-    RblCaptureFunc capture;
     /* run specific */
-    Cursor cursor;
     /* step specific */
     i8 jump;
     i8 jumpMiss;
@@ -48,6 +57,7 @@ Roebling *Roebling_Make(MemCtx *m,
     RblCaptureFunc capture,
     Abstract *source
 );
+RoeblingBlank *RoeblingBlank_Make(MemCtx *m, String *s, Abstract *source, RblCaptureFunc capture);
 status Roebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks, Span *additions, Lookup *desc);
 
 /* > Reset */

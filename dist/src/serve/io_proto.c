@@ -20,7 +20,6 @@ Proto *IoProto_Make(MemCtx *m, ProtoDef *def){
     p->type.of = TYPE_IO_PROTO;
     p->toLog = toLog;
     p->def = def;
-    p->headers_tbl = Span_Make(m, TYPE_TABLE);
 
     return (Proto *)p;
 }

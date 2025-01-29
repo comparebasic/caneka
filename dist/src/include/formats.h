@@ -1,3 +1,4 @@
+#include "formats/ansi.h"
 #include "formats/caneka_module.h"
 #include "formats/rblsh_syntax.h"
 #include "formats/cash.h"
@@ -10,5 +11,5 @@
 #include "formats/oset_to.h"
 #include "formats/xml.h"
 #include "formats/http.h"
-#include "formats/rblsh.h"
 #include "formats/caneka.h"
+#include "formats/termio.h"

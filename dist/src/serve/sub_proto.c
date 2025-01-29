@@ -17,20 +17,16 @@ static char *toLog(Req *req){
 
 Proto *SubProto_Make(MemCtx *m, ProtoDef *def){
     SubProto *p = (SubProto *)MemCtx_Alloc(m, sizeof(SubProto));
-    p->type.of = TYPE_IO_PROTO;
+    p->type.of = TYPE_SUB_PROTO;
     p->toLog = toLog;
-    p->headers_tbl = Span_Make(m, TYPE_TABLE);
-    p->methods = def->methods;
+    p->cmds_p = Span_Make(m, TYPE_SPAN);
 
     return (Proto *)p;
 }
 
 ProtoDef *SubProtoDef_Make(MemCtx *m, Maker reqMake){
-    Lookup *lk = Lookup_Make(m, _IO_START, NULL, NULL); 
-
     return ProtoDef_Make(m, TYPE_SUB_PROTODEF,
         (Maker)reqMake,
-        (Maker)SubProto_Make,
-        lk
+        (Maker)SubProto_Make
     ); 
 }

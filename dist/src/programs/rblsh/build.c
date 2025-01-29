@@ -14,7 +14,7 @@
 #define SRC "dist/src/programs/rblsh"
 
 static Target targets[] = {
-    {"rblsh", "rblsh/rblsh.c"},
+    {"rblsh", "rblsh.c"},
     {NULL, NULL},
 };
 
@@ -33,11 +33,13 @@ static char *libs[] = {
     NULL
 };
 
-static BuildSubdir obj = { ".", {
+static BuildSubdir obj = { "", {
     "ctx.c",
     "debug.c",
     "parser.c",
+    "rblsh.c",
     "req.c",
+    "super.c",
     NULL
 }};
 

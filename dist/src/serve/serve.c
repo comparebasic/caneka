@@ -249,6 +249,18 @@ status Serve_Run(Serve *sctx){
     return SUCCESS;
 }
 
+status Serve_RunFds(Serve *sctx){
+    sctx->serving = TRUE;
+    while(sctx->serving){
+        int delay = (sctx->queue.count == 0 ? 
+            ACCEPT_LONGDELAY_MILLIS : 
+            0);
+        Serve_ServeRound(sctx);
+    }
+
+    return SUCCESS;
+}
+
 Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->type.of = TYPE_SERVECTX;

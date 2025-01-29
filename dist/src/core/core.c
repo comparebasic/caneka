@@ -158,6 +158,8 @@ boolean Ifc_Match(cls inst, cls ifc){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL;
     }else if(ifc == TYPE_STRING){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
+    }else if(ifc == TYPE_ROEBLING){
+        return inst == TYPE_ROEBLING || inst == TYPE_ROEBLING_BLANK;
     }else if(ifc == TYPE_SPAN){ 
         return (inst == TYPE_SPAN || inst == TYPE_QUEUE_SPAN || 
             inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN ||

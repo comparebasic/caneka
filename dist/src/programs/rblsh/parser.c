@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include <rblsh.h>
 
 static PatCharDef cCDef[] = {
     {PAT_TERM, 3, 3},

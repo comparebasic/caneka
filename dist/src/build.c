@@ -17,9 +17,9 @@
 #define SRC "dist/src"
 
 static Target targets[] = {
-    {"testreq", "testreq.c"},
-    {"caneka", "main.c"},
-    {"formatter", "formatter.c"},
+    {"testreq", "programs/testreq.c"},
+    {"caneka", "programs/main.c"},
+    {"formatter", "programs/formatter.c"},
     {NULL, NULL},
 };
 
@@ -74,6 +74,12 @@ static BuildSubdir cashobj = { "formats/cash", {
     "cash_rbl.c",
     NULL,
 }};
+
+static BuildSubdir termiofmtobj = { "formats/termio", {
+    "termio_parser.c",
+    NULL,
+}};
+
 static BuildSubdir osetobj = { "formats/oset", {
     "oset.c",
     "oset_from.c",
@@ -191,6 +197,7 @@ static BuildSubdir serveobj = { "serve", {
     "handler.c",
     "http_proto.c",
     "io_proto.c",
+    "sub_proto.c",
     "linux.c",
     "proto.c",
     "req.c",
@@ -284,6 +291,7 @@ BuildSubdir *allobj[] = {
     &xmlobj,
     &rblshobj,
     &fmtobj,
+    &termiofmtobj,
     &httpobj,
     &cdocobj,
     &canekaobj,

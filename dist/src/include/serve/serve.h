@@ -22,6 +22,11 @@ enum serve_ctx_flags {
     SERVE_ALPHA = 1 << 8, 
     SERVE_BRAVO = 1 << 9,
     SERVE_CHARLIE = 1 << 10,
+    SERVE_DELTA = 1 << 11,
+    SERVE_ECHO = 1 << 12,
+    SERVE_FOXTROT = 1 << 13,
+    SERVE_GOLF = 1 << 14,
+    SERVE_HOTEL = 1 << 15,
 };
 
 typedef struct serve_ctx {
@@ -49,6 +54,7 @@ status Serve_PreRun(Serve *sctx, int port);
 struct req *Serve_AddFd(Serve *sctx, int fd);
 status Serve_RunPort(Serve *sctx, int port);
 status Serve_Run(Serve *sctx);
+status Serve_RunFds(Serve *sctx);
 status Serve_Stop(Serve *sctx);
 status Serve_NextState(Serve *sctx, struct req *req);
 status Serve_AcceptPoll(Serve *sctx, int delay);

@@ -141,6 +141,14 @@ status Roebling_JumpTo(Roebling *rbl, int mark){
 }
 
 status Roebling_Run(Roebling *rbl){
+    if(rbl->type.of == TYPE_ROEBLING_BLANK){
+        i64 total = Cursor_Total(&rbl->cursor);
+        String *s = String_Sub(rbl->m, rbl->cursor.s, total, String_Length(rbl->cursor.s)-total);
+
+        rbl->capture(0, 0, s, rbl->source);
+        Cursor_Incr(&rbl->cursor, s->length);
+        return SUCCESS;
+    }
     status r = READY;
     while((r & (SUCCESS|ERROR|END|NOOP)) == 0){
         r = Roebling_RunCycle(rbl);
@@ -194,7 +202,6 @@ static status roebling_AddReset(Roebling *rbl){
 }
 
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
-    
     status r = String_AddBytes(rbl->m, rbl->cursor.s, bytes, length);
     return roebling_AddReset(rbl);
 }
@@ -318,6 +325,17 @@ status Roebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks, Span *additi
     r |= Span_Concat(parsers, additions);
     r |= Lookup_Concat(m, marks, desc);
     return r;
+}
+
+RoeblingBlank *RoeblingBlank_Make(MemCtx *m, String *s, Abstract *source, RblCaptureFunc capture){
+    RoeblingBlank *rbl = (RoeblingBlank *)MemCtx_Alloc(m, sizeof(Roebling));
+    rbl->type.of = TYPE_ROEBLING_BLANK;
+    rbl->m = m;
+    rbl->capture = capture;
+    rbl->source = source;
+    Cursor_Init(&rbl->cursor, s); 
+
+    return rbl;
 }
 
 Roebling *Roebling_Make(MemCtx *m,
