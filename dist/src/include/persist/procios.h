@@ -1,7 +1,8 @@
-#define INREQ SERVE_ALPHA
-#define OUTREQ SERVE_BRAVO 
-#define ERRREQ SERVE_CHARLIE 
-#define DRIVEREQ SERVE_DELTA 
+enum procio_flags {
+    PROCIO_INREQ = 1 << 8,
+    PROCIO_OUTREQ = 1 << 9, 
+    PROCIO_ERRREQ = 1 << 10,
+};
 
 typedef struct procioset {
     Type type;

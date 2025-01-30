@@ -37,16 +37,20 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
             dup2(2, p2[1]);
 
             ProcIoSet *set = ProcIoSet_Make(m);
+            set->cmds = cmd_p;
             Serve_StartGroup(sctx, (Abstract *)set);
+
             Req *req = NULL;
-            sctx->type.state |= SERVE_ALPHA;
-            req = Serve_AddFd(sctx, p0[0]);
-            sctx->type.state &= ~SERVE_ALPHA;
-            sctx->type.state |= SERVE_BRAVO;
-            req = Serve_AddFd(sctx, p1[0]);
-            sctx->type.state &= ~SERVE_BRAVO;
-            sctx->type.state |= SERVE_CHARLIE;
+
+            req = Serve_AddFd(sctx, p0[0], PROCIO_INREQ);
+            ProcIoSet_Add(sctx->group, req);
+
+            req = Serve_AddFd(sctx, p1[0], PROCIO_OUTREQ);
+            ProcIoSet_Add(sctx->group, req);
+
             req = Serve_AddFd(sctx, p2[0]);
+            ProcIoSet_Add(sctx->group, req, PROCIO_ERRREQ);
+
             Serve_StartGroup(sctx, NULL);
         }
         

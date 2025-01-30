@@ -9,13 +9,13 @@ ProcIoSet *ProcIoSet_Make(MemCtx *m){
 }
 
 status ProcIoSet_Add(ProcIoSet *set, Req *req){
-    if((req->type.state & INREQ) != 0){
+    if((req->type.state & PROCIO_INREQ) != 0){
         set->in = req;
         return SUCCESS;
-    }else if((req->type.state & OUTREQ) != 0){
+    }else if((req->type.state & PROCIO_OUTREQ) != 0){
         set->out = req;
         return SUCCESS;
-    }else if((req->type.state & ERRREQ) != 0){
+    }else if((req->type.state & PROCIO_ERRREQ) != 0){
         set->err = req;
         return SUCCESS;
     }

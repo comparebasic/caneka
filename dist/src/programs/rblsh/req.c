@@ -61,7 +61,6 @@ Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx){
     }else{
         Req *req =  Req_Make(m, sctx, (Proto *)proto);
         req->type.state |= (sctx->type.state & (INREQ|OUTREQ|ERRREQ|DRIVEREQ));
-        ProcIoSet_Add(sctx->group, req);
         if((sctx->type.of & INREQ) != 0){
             req->in.rbl = RblShParser_Make(m, 
                 (RblShCtx *)sctx->def->source,

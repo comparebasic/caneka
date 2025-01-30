@@ -1,8 +1,8 @@
 typedef struct protodef {
     Type type;
     cls reqType;
-    Maker req_mk;
-    Maker proto_mk;
+    FlagMaker req_mk;
+    FlagMaker proto_mk;
     struct handler *(*getHandler)(struct serve_ctx *sctx, struct req *req);
     Abstract *source;
     GetDelayFunc getDelay;
@@ -16,8 +16,8 @@ typedef struct proto {
 } Proto;
 
 ProtoDef *ProtoDef_Make(MemCtx *m, cls type,
-    Maker req_mk,
-    Maker proto_mk
+    FlagMaker req_mk,
+    FlagMaker proto_mk
 );
 
 char *Proto_ToChars(struct proto *proto);

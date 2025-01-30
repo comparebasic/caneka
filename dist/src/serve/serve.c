@@ -91,7 +91,7 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
             accepted++;
             sctx->metrics.open++;
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
-            Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
+            Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx, sctx->type.state);
             req->fd = new_fd;
             req->handler = sctx->def->getHandler(sctx, req);
             if(DEBUG_SERVE){
@@ -218,8 +218,8 @@ status Serve_PreRun(Serve *sctx, int port){
     return SUCCESS;
 }
 
-Req *Serve_AddFd(Serve *sctx, int fd){
-    Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx);
+Req *Serve_AddFd(Serve *sctx, int fd, word flags){
+    Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx, flags);
     req->fd = fd;
     req->handler = sctx->def->getHandler(sctx, req);
     req->queueIdx = Queue_Add(&(sctx->queue), (Abstract *)req); 
