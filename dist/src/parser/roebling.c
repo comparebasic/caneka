@@ -192,7 +192,7 @@ int Roebling_GetMatchIdx(Roebling *rbl){
 }
 
 /* > Setup Cycle */
-static status roebling_AddReset(Roebling *rbl){
+status Roebling_AddReset(Roebling *rbl){
     if((rbl->cursor.type.state & END) != 0){
         rbl->cursor.type.state &= ~END;
         Cursor_Incr(&(rbl->cursor), 1);
@@ -203,12 +203,12 @@ static status roebling_AddReset(Roebling *rbl){
 
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length){
     status r = String_AddBytes(rbl->m, rbl->cursor.s, bytes, length);
-    return roebling_AddReset(rbl);
+    return Roebling_AddReset(rbl);
 }
 
 status Roebling_Add(Roebling *rbl, String *s){
     String_Add(rbl->m, rbl->cursor.s, s);
-    return roebling_AddReset(rbl);
+    return Roebling_AddReset(rbl);
 }
 
 status Roebling_ResetPatterns(Roebling *rbl){
@@ -282,13 +282,19 @@ int Roebling_GetMarkIdx(Roebling *rbl, int mark){
 
 /* > Reset */
 status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){
+    DebugStack_Push("Roebling_Reset", TYPE_CSTR); 
+
     if(s != NULL){
         Cursor_Init(&rbl->cursor, s);
     }
-    Roebling_ResetPatterns(rbl);
-    rbl->type.state = (rbl->type.state & DEBUG);
-    rbl->idx = 0;
 
+    if(rbl->type.of != TYPE_ROEBLING_BLANK){
+        Roebling_ResetPatterns(rbl);
+        rbl->idx = 0;
+    }
+
+    rbl->type.state = (rbl->type.state & DEBUG);
+    DebugStack_Pop();
     return SUCCESS;
 }
 

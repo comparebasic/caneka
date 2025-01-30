@@ -14,6 +14,13 @@ static status RblSh_TermIo(Handler *h, Req *req, Serve *sctx){
 
 static status RblSh_Driver(Handler *h, Req *req, Serve *sctx){
     status r = Req_Read(sctx, req);
+    if((r & NOOP) == 0){
+        IoProto *def = (IoProto*)as(req->proto, TYPE_IO_PROTO);
+        RblShCtx *ctx = (RblShCtx*)def->custom;
+        Roebling_AddReset(ctx->rbl);
+        status rr = Roebling_Run(ctx->rbl);
+        return h->type.state;
+    }
     return h->type.state;
 }
 
@@ -42,20 +49,19 @@ Handler *RblSh_GetHandler(Serve *sctx, Req *req){
 }
 
 Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx){
+    DebugStack_Push("RblSh_ReqMake", TYPE_CSTR); 
     MemCtx *m = MemCtx_Make();
+    SubProto *proto = (SubProto *)SubProto_Make(m, (ProtoDef *)sctx->def);
     if((sctx->type.state & DRIVEREQ) != 0){
-        IoProto *proto = (IoProto *)IoProto_Make(m, (ProtoDef *)sctx->def);
         Req *req =  Req_Make(m, sctx, (Proto *)proto);
-        req->in.rbl = (Roebling *)RoeblingBlank_Make(m, 
-            req->in.shelf, NULL, RblShCtx_Capture); 
         req->type.state |= (sctx->type.state & (INREQ|OUTREQ|ERRREQ|DRIVEREQ));
+        req->in.rbl = RblShParser_Make(m, NULL, req->in.shelf);
+        DebugStack_Pop();
         return req;
     }else{
-        SubProto *proto = (SubProto *)SubProto_Make(m, (ProtoDef *)sctx->def);
         Req *req =  Req_Make(m, sctx, (Proto *)proto);
-        RblShSuper *super = RblShSuper_Make(m, req);
-        proto->super = (Abstract *)super;
-
+        req->type.state |= (sctx->type.state & (INREQ|OUTREQ|ERRREQ|DRIVEREQ));
+        ProcIoSet_Add(sctx->group, req);
         if((sctx->type.of & INREQ) != 0){
             req->in.rbl = RblShParser_Make(m, 
                 (RblShCtx *)sctx->def->source,
@@ -66,7 +72,7 @@ Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx){
                 (Abstract *)super,
                 RblShSuper_Capture);
         }
-        req->type.state |= (sctx->type.state & (INREQ|OUTREQ|ERRREQ|DRIVEREQ));
+        DebugStack_Pop();
         return req;
     }
 }

@@ -13,6 +13,8 @@ int main(int argc, char **argv){
     Caneka_Init(m);
     RblShDebug_Init(m);
 
+    DebugStack_Push("rblsh", TYPE_CSTR); 
+
     RblShCtx *ctx = RblShCtx_Make(m);
 
     Handler *h = NULL;
@@ -24,9 +26,12 @@ int main(int argc, char **argv){
 
     sctx->type.state |= DRIVEREQ;
     Req *req = Serve_AddFd(sctx, 0);
+    sctx->type.state &= ~DRIVEREQ;
+
     req->in.rbl->source = (Abstract *)ctx;
     ((IoProto *)as(req->proto, TYPE_IO_PROTO))->custom = (Abstract *)ctx;
-    sctx->type.state &= ~DRIVEREQ;
+
+    Roebling_Reset(m, ctx->rbl, req->in.rbl->cursor.s);
 
     SetOriginalTios();
     RawMode(TRUE);
@@ -35,6 +40,8 @@ int main(int argc, char **argv){
     Serve_RunFds(sctx);
 
     RawMode(FALSE);
+
+    DebugStack_Pop();
 
     MemCtx_Free(m);
     r |= SUCCESS;

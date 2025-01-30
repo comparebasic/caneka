@@ -4,6 +4,7 @@
 #include "persist/dir.h"
 #include "persist/file.h"
 #include "persist/memlocal.h"
+#include "persist/procios.h"
 #include "persist/persist.h"
 #include "persist/session.h"
 #include "persist/spool.h"

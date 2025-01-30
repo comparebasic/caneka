@@ -1,8 +1,3 @@
-#define DRIVEREQ SERVE_ALPHA 
-#define INREQ SERVE_BRAVO
-#define OUTREQ SERVE_CHARLIE 
-#define ERRREQ SERVE_DELTA 
-
 enum rblsh_type_range {
     _RBLSH_START = _TYPE_APPS_END,
     TYPE_RBLSH_SUPER,
@@ -42,7 +37,8 @@ typedef struct rblsh_ctx {
         Span *p;
         String *s;
     } cwd;
-    String *shelf;
+    struct {
+    Roebling *rbl;
     Span *env;
     Span *path;
     struct cash *cash;
@@ -52,7 +48,7 @@ typedef struct rblsh_ctx {
 Roebling *RblShParser_Make(MemCtx *m, RblShCtx *ctx, String *s);
 
 /* Super */
-RblShSuper *RblShSuper_Make(MemCtx *m, Req *req);
+RblShSuper *RblShSuper_Make(MemCtx *m, RblShCtx *ctx);
 status RblShSuper_Capture(word rkey, int matchIdx, String *s, Abstract *source);
 
 /* req */
@@ -64,3 +60,4 @@ Abstract *RblShCtx_GetVar(Abstract *store, Abstract *key);
 RblShCtx *RblShCtx_Make(MemCtx *m);
 status RblShDebug_Init(MemCtx *m);
 status RblShCtx_Capture(word rkey, int matchIdx, String *s, Abstract *source);
+status RblShCtx_RunCmd(RblShCtx *ctx);

@@ -261,6 +261,11 @@ status Serve_RunFds(Serve *sctx){
     return SUCCESS;
 }
 
+status Serve_StartGroup(Serve *sctx, Abstract *group){
+    sctx->group = group;
+    return SUCCESS;
+}
+
 Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     Serve *sctx = (Serve *)MemCtx_Alloc(m, sizeof(Serve)); 
     sctx->type.of = TYPE_SERVECTX;

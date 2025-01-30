@@ -36,6 +36,8 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
             dup2(1, p1[1]);
             dup2(2, p2[1]);
 
+            ProcIoSet *set = ProcIoSet_Make(m);
+            Serve_StartGroup(sctx, (Abstract *)set);
             Req *req = NULL;
             sctx->type.state |= SERVE_ALPHA;
             req = Serve_AddFd(sctx, p0[0]);
@@ -45,6 +47,7 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
             sctx->type.state &= ~SERVE_BRAVO;
             sctx->type.state |= SERVE_CHARLIE;
             req = Serve_AddFd(sctx, p2[0]);
+            Serve_StartGroup(sctx, NULL);
         }
         
         execvp(cmd[0], cmd);

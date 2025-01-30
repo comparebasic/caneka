@@ -12,7 +12,7 @@
 #define KEY_BELL 7
 #define KEY_BACKSPACE 8
 #define KEY_TAB 9
-#define KEY_LINEFEED 10
+#define KEY_NEWLINE 10
 #define KEY_VERT_TAB 11
 #define KEY_NEWPAGE 12
 #define KEY_RETURN 13

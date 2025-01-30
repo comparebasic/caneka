@@ -1,10 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
+static boolean crashing = FALSE;
+
 void *_Fatal(char *msg, cls t, char *func, char *file, int line){
-    Cleanup(NULL);
+    RawMode(FALSE);
     printf("\x1b[%dmFatal Error: \x1b[1;%dm%s\x1b[0;%dm - type(%s/%d) %s:%s:%d\x1b[0m\n" , COLOR_RED, COLOR_RED, msg, COLOR_RED, Class_ToString(t), t, func, file, line);
-    DebugStack_Print();
+    if(!crashing){
+        crashing = TRUE;
+        DebugStack_Print();
+    }
     exit(13);
     return NULL;
 }

@@ -77,6 +77,7 @@ status Roebling_JumpTo(Roebling *rbl, int mark);
 /* > Setup Cycle */
 status Roebling_Add(Roebling *rbl, String *s);
 status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
+status Roebling_AddReset(Roebling *rbl);
 status Roebling_ResetPatterns(Roebling *rbl);
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump);

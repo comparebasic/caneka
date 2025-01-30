@@ -108,12 +108,7 @@ static status RblSh_Capture(word captureKey, int matchIdx, String *s, Abstract *
     RblShCtx *ctx = (RblShCtx *)as(source, TYPE_RBLSH_CTX);
     printf("\x1b[%dmCaptured %s/\x1b[0m", COLOR_YELLOW, Class_ToString(captureKey));
     Debug_Print((void *)s, 0, "", COLOR_YELLOW, FALSE);
-    Debug_Print((void *)ctx->shelf, 0, " shelf: ", COLOR_YELLOW, TRUE);
     printf("\n");
-
-    if(captureKey == RBLSH_TERM || captureKey == RBLSH_HUP){
-        exit(0);
-    }
 
     if(captureKey >= _CASH_START && captureKey <= _CASH_END){
         Cash_Capture(captureKey, matchIdx, s, (Abstract *)ctx->cash);

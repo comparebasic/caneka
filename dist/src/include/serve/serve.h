@@ -38,6 +38,7 @@ typedef struct serve_ctx {
     int port;
     boolean serving;
     ProtoDef *def;
+    Abstract *group;
     struct req *active;
     struct {
         int open;
@@ -50,6 +51,7 @@ typedef struct serve_ctx {
 } Serve;
 
 Serve *Serve_Make(MemCtx *m, ProtoDef *def);
+status Serve_StartGroup(Serve *sctx, Abstract *group);
 status Serve_PreRun(Serve *sctx, int port);
 struct req *Serve_AddFd(Serve *sctx, int fd);
 status Serve_RunPort(Serve *sctx, int port);

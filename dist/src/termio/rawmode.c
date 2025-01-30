@@ -1,8 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-struct termios orig_tios;
-struct termios current_tios;
+static boolean change = FALSE;
+static struct termios orig_tios;
+static struct termios current_tios;
 
 status SetOriginalTios(){
    int r = tcgetattr(STDIN_FILENO, &current_tios);
@@ -27,10 +28,14 @@ status RawMode(boolean enable){
            current_tios.c_cc[VTIME] = 0;
        }
    }else{
+       if(!change){
+            return NOOP;
+       }
        memcpy(&current_tios, &orig_tios, sizeof(struct termios));
        current_tios.c_lflag |= ECHO;
    }
 
+   change = TRUE;
    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &current_tios) != -1){
        return SUCCESS;
    }
