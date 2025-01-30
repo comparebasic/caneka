@@ -38,7 +38,10 @@ typedef struct rblsh_ctx {
         String *s;
     } cwd;
     struct {
+    /* cli input */
+    Span *cmds;
     Roebling *rbl;
+    /* end cli input */
     Span *env;
     Span *path;
     struct cash *cash;
