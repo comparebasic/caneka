@@ -6,7 +6,7 @@ status MemLocal_GetLocal(MemCtx *m, void *addr, LocalPtr *lptr){
     MemSlab *sl = MemCtx_GetSlab(m, addr);
     if(sl != NULL){
         lptr->slabIdx = sl->idx;
-        lptr->offset = ((void *)addr - (void *)MemSlab_GetStart(sl));
+        lptr->offset = ((void *)addr - (void *)sl->bytes);
         return SUCCESS;
     }else{
         Fatal("Slab not found, addr outside this memory context\n", TYPE_MEMLOCAL);
@@ -45,7 +45,7 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
     MemSlab *sl = Span_Get(m->index, lptr->slabIdx);
     Abstract *a = NULL;
     if(sl != NULL){
-       a = MemSlab_GetStart(sl)+lptr->offset; 
+       a = (Abstract *)sl->bytes+lptr->offset; 
     }else{
        Fatal("MemLocal Slab not found", TYPE_MEMLOCAL);
     }
