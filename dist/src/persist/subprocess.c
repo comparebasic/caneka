@@ -43,13 +43,13 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
             Req *req = NULL;
 
             req = Serve_AddFd(sctx, p0[0], PROCIO_INREQ);
-            ProcIoSet_Add(sctx->group, req);
+            ProcIoSet_Add((ProcIoSet *)sctx->group, req);
 
             req = Serve_AddFd(sctx, p1[0], PROCIO_OUTREQ);
-            ProcIoSet_Add(sctx->group, req);
+            ProcIoSet_Add((ProcIoSet *)sctx->group, req);
 
-            req = Serve_AddFd(sctx, p2[0]);
-            ProcIoSet_Add(sctx->group, req, PROCIO_ERRREQ);
+            req = Serve_AddFd(sctx, p2[0], PROCIO_ERRREQ);
+            ProcIoSet_Add((ProcIoSet *)sctx->group, req);
 
             Serve_StartGroup(sctx, NULL);
         }

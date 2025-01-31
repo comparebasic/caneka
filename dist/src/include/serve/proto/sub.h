@@ -10,4 +10,4 @@ typedef struct sub_proto {
 } SubProto;
 
 ProtoDef *SubProtoDef_Make(MemCtx *m, Maker reqMake);
-Proto *SubProto_Make(MemCtx *m, ProtoDef *def);
+Proto *SubProto_Make(MemCtx *m, ProtoDef *def, word flags);

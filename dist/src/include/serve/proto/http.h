@@ -17,5 +17,5 @@ typedef struct http_proto {
 } HttpProto;
 
 struct protodef *HttpProtoDef_Make(MemCtx *m);
-struct proto *HttpProto_Make(MemCtx *m, struct protodef *def);
-struct req *HttpReq_Make(MemCtx *m, struct serve_ctx *sctx);
+struct proto *HttpProto_Make(MemCtx *m, struct protodef *def, word flags);
+struct req *HttpReq_Make(MemCtx *m, struct serve_ctx *sctx, word flags);

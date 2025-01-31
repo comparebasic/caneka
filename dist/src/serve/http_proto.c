@@ -69,7 +69,7 @@ status Req_SetResponse(Req *req, int code, Span *headers, String *body){
    return SUCCESS;
 }
 
-Proto *HttpProto_Make(MemCtx *m, ProtoDef *def){
+Proto *HttpProto_Make(MemCtx *m, ProtoDef *def, word flags){
     HttpProto *p = (HttpProto *)MemCtx_Alloc(m, sizeof(HttpProto));
     p->type.of = TYPE_HTTP_PROTO;
     p->toLog = toLog;
@@ -79,9 +79,9 @@ Proto *HttpProto_Make(MemCtx *m, ProtoDef *def){
     return (Proto *)p;
 }
 
-Req *HttpReq_Make(MemCtx *_m, Serve *sctx){
+Req *HttpReq_Make(MemCtx *_m, Serve *sctx, word flags){
     MemCtx *m = MemCtx_Make();
-    HttpProto *proto = (HttpProto *)HttpProto_Make(m, (ProtoDef *)sctx->def);
+    HttpProto *proto = (HttpProto *)HttpProto_Make(m, (ProtoDef *)sctx->def, flags);
     Req *req =  Req_Make(m, sctx, (Proto *)proto);
     req->in.rbl = HttpParser_Make(m, req->in.shelf, (Abstract *)proto);
     req->in.rbl->capture = reqHttpParser_Capture; 
@@ -103,8 +103,8 @@ ProtoDef *HttpProtoDef_Make(MemCtx *m){
          (void *)String_Make(m, bytes("DELETE")));
 
     ProtoDef *def =  ProtoDef_Make(m, TYPE_HTTP_PROTODEF,
-        (Maker)HttpReq_Make,
-        (Maker)HttpProto_Make); 
+        (FlagMaker)HttpReq_Make,
+        (FlagMaker)HttpProto_Make); 
 
     def->custom = (Abstract *)lk;
     return def;

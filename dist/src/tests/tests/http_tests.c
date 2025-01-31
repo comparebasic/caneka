@@ -83,7 +83,7 @@ status Http_Tests(MemCtx *gm){
 
 
     ProtoDef *def = (ProtoDef *)HttpProtoDef_Make(m);
-    Proto *proto = HttpProto_Make(m, def);
+    Proto *proto = HttpProto_Make(m, def, 0);
     Roebling *rbl = HttpParser_Make(m, s, (Abstract *)proto);
     rbl->capture = testHttpParser_Capture;
 

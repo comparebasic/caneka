@@ -15,7 +15,7 @@ static char *toLog(Req *req){
     return (char *)s->bytes;
 }
 
-Proto *SubProto_Make(MemCtx *m, ProtoDef *def){
+Proto *SubProto_Make(MemCtx *m, ProtoDef *def, word flags){
     SubProto *p = (SubProto *)MemCtx_Alloc(m, sizeof(SubProto));
     p->type.of = TYPE_SUB_PROTO;
     p->toLog = toLog;
@@ -26,7 +26,7 @@ Proto *SubProto_Make(MemCtx *m, ProtoDef *def){
 
 ProtoDef *SubProtoDef_Make(MemCtx *m, Maker reqMake){
     return ProtoDef_Make(m, TYPE_SUB_PROTODEF,
-        (Maker)reqMake,
-        (Maker)SubProto_Make
+        (FlagMaker)reqMake,
+        (FlagMaker)SubProto_Make
     ); 
 }

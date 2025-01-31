@@ -5,7 +5,7 @@ char *Proto_ToChars(Proto *proto){
     return "Proto";
 }
 
-ProtoDef *ProtoDef_Make(MemCtx *m, cls type, Maker req_mk, Maker proto_mk){
+ProtoDef *ProtoDef_Make(MemCtx *m, cls type, FlagMaker req_mk, FlagMaker proto_mk){
     ProtoDef *def = (ProtoDef *)MemCtx_Alloc(m, sizeof(ProtoDef));
     def->type.of = TYPE_PROTODEF;
     def->reqType = type;

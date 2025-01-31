@@ -7,4 +7,4 @@ typedef struct io_proto {
 } IoProto;
 
 ProtoDef *IoProtoDef_Make(MemCtx *m, Maker reqMake);
-Proto *IoProto_Make(MemCtx *m, ProtoDef *def);
+Proto *IoProto_Make(MemCtx *m, ProtoDef *def, word flags);

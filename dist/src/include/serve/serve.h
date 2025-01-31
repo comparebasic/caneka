@@ -53,7 +53,7 @@ typedef struct serve_ctx {
 Serve *Serve_Make(MemCtx *m, ProtoDef *def);
 status Serve_StartGroup(Serve *sctx, Abstract *group);
 status Serve_PreRun(Serve *sctx, int port);
-struct req *Serve_AddFd(Serve *sctx, int fd);
+struct req *Serve_AddFd(Serve *sctx, int fd, word flags);
 status Serve_RunPort(Serve *sctx, int port);
 status Serve_Run(Serve *sctx);
 status Serve_RunFds(Serve *sctx);
