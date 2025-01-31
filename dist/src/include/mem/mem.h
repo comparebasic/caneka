@@ -3,12 +3,6 @@ This is the semi-manually-run garbage collector.
 */
 #define MEM_SLAB_SIZE 4096
 
-enum memctx_flags {
-    MEMCTX_TEMP = 1 << 8,
-};
-
-extern i16 MemCtx_TempLevel;
-
 /*
  * Individual slabs of memory that have tracking information for the next
  * available address range.
@@ -31,7 +25,7 @@ typedef struct mem_slab {
  * .start_sl is the first memory slab in a linked list of memory slabs
  */
 typedef struct mem_ctx {
-    Type type;
+    RangeType type;
     MemSlab *start_sl;
     int count;
     struct span *index;
@@ -102,8 +96,6 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level);
  * */
 i64 MemCtx_Total(MemCtx *m, i16 level);
 
-/* Gets the starting address of the memory section of the MemSlab struct */
-#define MemSlab_GetStart(sl) ((void *)(sl)->bytes)
 /* Gets the amount of bytes used in a particular slab */
-#define MemSlab_Taken(sl) ((sl)->addr - MemSlab_GetStart((sl)))
+#define MemSlab_Taken(sl) ((sl)->addr - (void *)(sl)->bytes)
 

@@ -87,7 +87,6 @@ status Http_Tests(MemCtx *gm){
     Roebling *rbl = HttpParser_Make(m, s, (Abstract *)proto);
     rbl->capture = testHttpParser_Capture;
 
-
     setTestCapture(expected1);
     for(int i = 0; i < 13; i++){
         Roebling_RunCycle(rbl);

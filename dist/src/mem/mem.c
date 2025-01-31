@@ -3,15 +3,15 @@
 
 static size_t cmem = 0;
 
-static void *trackMalloc(size_t s, cls t){
-    void *p = malloc(s);
+static void *trackMalloc(size_t sz, cls t){
+    void *p = malloc(sz);
     if(p == NULL){
         Fatal("Allocating", t);
         /* not reached */
         return NULL;
     }
-    cmem += s;
-    memset(p, 0, s);
+    cmem += sz;
+    memset(p, 0, sz);
     return p;
 }
 
@@ -30,8 +30,6 @@ static void *MemSlab_Alloc(MemSlab *sl, size_t s){
 
     return p;
 }
-
-i16 MemCtx_TempLevel = 0;
 
 size_t MemCount(){
     return cmem;
@@ -52,7 +50,7 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level){
 MemSlab *MemSlab_Make(MemCtx *m, i16 level){
     size_t sz = sizeof(MemSlab);
     MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
-    sl->addr = MemSlab_GetStart(sl);
+    sl->addr = sl->bytes;
     sl->level = level;
     if(m != NULL){
         return MemSlab_Attach(m, sl);
@@ -90,18 +88,14 @@ void *MemCtx_AllocTemp(MemCtx *m, size_t sz, i16 level){
 }
 
 void *MemCtx_Alloc(MemCtx *m, size_t s){
-    i16 level = 0;
-    if((m->type.state & MEMCTX_TEMP) != 0){
-       level = MemCtx_TempLevel; 
-    }
-    return MemCtx_AllocTemp(m, s, level);
+    return MemCtx_AllocTemp(m, s, max(m->type.range, 0));
 }
 
 i64 MemCtx_Used(MemCtx *m){
     i64 n = 0;
     MemSlab *sl = m->start_sl;
     while(sl != NULL){
-        n += (sl->addr - MemSlab_GetStart(sl));
+        n += (sl->addr - (void *)(sl->bytes));
         sl = sl->next;
     }
 
@@ -159,8 +153,10 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
 }
 
 status MemCtx_Free(MemCtx *m){
-    MemCtx_FreeTemp(m, 0);
-    trackFree(m, sizeof(MemCtx));
+    MemCtx_FreeTemp(m, max(m->type.range, 0));
+    if(m->type.range <= 0){
+        trackFree(m, sizeof(MemCtx));
+    }
     return SUCCESS;
 }
 
@@ -188,9 +184,9 @@ MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
 void *MemCtx_GetSlab(MemCtx *m, void *addr){
     MemSlab *sl = m->start_sl;
     while(sl != NULL){
-        void *start = MemSlab_GetStart(sl);
+        void *start = (void *)sl->bytes;
         void *end = start + MEM_SLAB_SIZE;
-        if(MemSlab_GetStart(sl) <= addr && addr < end){
+        if((void *)(sl->bytes) <= addr && addr < end){
             return sl;
         }
         sl = sl->next;

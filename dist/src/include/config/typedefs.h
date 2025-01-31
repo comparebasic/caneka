@@ -54,6 +54,11 @@ typedef struct typehdr {
     status state;
 } Type;
 
+typedef struct rangehdr {
+    cls of;
+    i16 range;
+} RangeType;
+
 typedef struct virt  {
     Type type;
 } Abstract;

@@ -7,15 +7,13 @@ status MemCtx_Tests(MemCtx *gm){
 
     String *s = NULL;
 
-    int stackOffset = MemCtx_TempLevel;
+    int stackOffset = m->type.range;
     printf("making string 1\n");
     s = String_Init(m, STRING_EXTEND);
 
-    MemCtx_TempLevel++;
-    m->type.state |= MEMCTX_TEMP;
+    m->type.range++;
     s = String_Init(m, STRING_EXTEND);
-    m->type.state &= ~MEMCTX_TEMP;
-    MemCtx_TempLevel--;
+    m->type.range--;
 
     i64 allCount = MemCtx_MemCount(m, 0);
     i64 stackedCount = MemCtx_MemCount(m, stackOffset+1);

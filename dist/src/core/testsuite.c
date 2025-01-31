@@ -64,7 +64,7 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
     int pass = 0;
     int fail = 0;
 
-    int baseStackLevel = MemCtx_TempLevel;
+    word baseStackLevel = m->type.range;
     String *s = String_Init(m, STRING_EXTEND);
     String_AddBytes(m, s, bytes("BaseMem: at "), strlen("mem: at "));
     String_AddInt(m, s, baseStackLevel);
@@ -86,14 +86,14 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
             printf("[Testing %s]\n", set->name);
         }
 
-        MemCtx_TempLevel++;
-        m->type.state |= MEMCTX_TEMP;
+        m->type.range++;
+        DebugM->type.range++;
         status r = set->func(m);
-        MemCtx_FreeTemp(m, MemCtx_TempLevel);
-        MemCtx_FreeTemp(DebugM, MemCtx_TempLevel);
-        MemCtx_TempLevel--;
+        MemCtx_Free(m);
+        MemCtx_Free(DebugM);
+        DebugM->type.range--;
+        m->type.range--;
 
-        m->type.state &= ~MEMCTX_TEMP;
         if((GLOBAL_flags & HTML_OUTPUT) != 0){
             printf("    </ol>\n</div>\n");
         }else{
@@ -101,7 +101,7 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
             i64 memUsed = MemCount()-baseMem;
             i64 overRollingUsed = MemCount()-rollingBaseMem;
 
-            int stackLevel = MemCtx_TempLevel-baseStackLevel;
+            word stackLevel = m->type.range-baseStackLevel;
             if(overRollingUsed > 0 || stackLevel > 0){
                 String_AddBytes(m, s, bytes("\x1b[31m"), strlen("\x1b[31m"));
             }else if(memUsed > 0){

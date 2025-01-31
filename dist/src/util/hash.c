@@ -119,7 +119,7 @@ Hashed *Hashed_Make(MemCtx *m, Abstract *a){
     Hashed *v = (Hashed *)MemCtx_Alloc(m, sizeof(Hashed));
     v->type.of = TYPE_HASHED;
     v->id = Get_Hash(a);
-    if((m->type.state & a->type.state & LOCAL_PTR) != 0){
+    if(m->type.range == -1 && (a->type.state & LOCAL_PTR) != 0){
         v->type.state |= LOCAL_PTR;
         LocalPtr lp;
         if((MemLocal_GetLocal(m, a, &lp) & SUCCESS) != 0){

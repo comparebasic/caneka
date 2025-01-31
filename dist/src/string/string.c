@@ -226,7 +226,9 @@ String *String_Init(MemCtx *m, int expected){
     }
     String *s = (String *)MemCtx_Alloc(m, sz);
     s->type.of = type;
-    s->type.state |= (m->type.state & LOCAL_PTR);
+    if(m->type.range == -1){
+        s->type.state |= LOCAL_PTR;
+    }
 
     return s;
 }

@@ -38,7 +38,7 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
         return NULL;
     }
     Iter it;
-    if(m->index == NULL || (m->type.state & LOCAL_PTR) == 0){
+    if(m->index == NULL || (m->type.range > -1)){
         Fatal("Index is null or not a LOCAL_PTR MemCtx", TYPE_MEMCTX);
         return NULL;
     }
@@ -54,7 +54,7 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
 }
 
 Abstract *MemLocal_Trans(MemCtx *m, Abstract *a){
-    if((m->type.state & LOCAL_PTR) != 0){
+    if((m->type.range < -1)){
         return MemLocal_GetPtr(m, (LocalPtr *)&a);
     }
 
@@ -207,7 +207,7 @@ status MemLocal_Awake(MemLocal *ml){
 
 MemLocal *MemLocal_MakeBare(MemCtx *_m){
     MemCtx *m = (MemCtx *)MemCtx_Make();
-    m->type.state |= LOCAL_PTR;
+    m->type.range = -1;
     m->index = Span_Make(_m, TYPE_MEM_SPAN);
 
     MemLocal *ml = (MemLocal*)MemCtx_Alloc(_m, sizeof(MemLocal));
