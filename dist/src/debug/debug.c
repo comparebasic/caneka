@@ -213,7 +213,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                 Abstract *t = (Abstract *)ptr;
                 if(def->typeOf == TYPE_QUEUE_SPAN){
                     QueueIdx *qidx = (QueueIdx *)t;
-                    Debug_Print((void *)qidx->item, 0, "", color, TRUE);
+                    Debug_Print((void *)qidx->item, 0, "", color, FALSE);
                     printf("\x1b[%dm", color);
                 }else{
                     if((def->flags & SPAN_INLINE) == 0){
@@ -224,7 +224,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                         if(def->itemSize == sizeof(int)){
                             printf("%u", (int)n);
                         }else if(t->type.of != 0){
-                            Debug_Print((void *)t, 0, "", color, TRUE);
+                            Debug_Print((void *)t, 0, "", color, FALSE);
                         }else{
                             printf("0x%lx", *a);
                         }

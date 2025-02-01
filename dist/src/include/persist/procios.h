@@ -7,6 +7,8 @@ enum procio_flags {
 typedef struct procioset {
     Type type;
     Span *cmds;
+    pid_t pid;
+    int code;
     struct req *in;
     struct req *out;
     struct req *err;
@@ -14,3 +16,4 @@ typedef struct procioset {
 
 ProcIoSet *ProcIoSet_Make(MemCtx *m);
 status ProcIoSet_Add(ProcIoSet *set, struct req *req);
+status ProcIoSet_FlagAll(ProcIoSet *pio, word set, word unset);

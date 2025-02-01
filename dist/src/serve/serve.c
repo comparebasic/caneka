@@ -121,29 +121,51 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
 }
 
 static int pollSkipSlab(Abstract *source, int idx){
+    DebugStack_Push("pollSkipSlab", TYPE_CSTR); 
     Serve *sctx = as(source, TYPE_SERVECTX);
     SpanQuery sq;
     SpanQuery_Setup(&sq, sctx->pollMap, SPAN_OP_GET, idx);
     Span_Query(&sq);
+    int ready = 0;
     if(sq.stack[0].slab != NULL){
-        int ready = poll(sq.stack[0].slab, sctx->pollMap->def->stride, 1);
+        ready += poll(sq.stack[0].slab, sctx->pollMap->def->stride, 1);
         if(DEBUG_SERVE_POLLING){
             struct pollfd *pfd = sq.stack[0].slab;
             printf("\x1b[%dmPoll Found %d, first fd:%d events:%d\x1b[0m\n", DEBUG_SERVE_POLLING, ready, pfd->fd, pfd->events);
         }
-        return ready;
     }
-    return 0;
+
+    if((sctx->metrics.ticks % CHECK_TICKS) == 0){
+        Iter it;
+        Iter_Init(&it, sctx->queue.span);
+        it.idx = idx;
+        for(int i = 0; i < sq.span->def->stride; i++){
+            Req *req = (Req *)Iter_Get(&it);
+            if(req != NULL && (req->type.state & END) != 0){
+                printf("Found req with END state %d %s\n", req->fd, State_ToChars(req->type.state));
+                ready++;
+            }
+            if((Iter_Next(&it) & END) != 0){
+                break;
+            }
+        }
+    }
+
+    DebugStack_Pop();
+    return ready;
 }
 
 status Serve_ServeRound(Serve *sctx){
+    DebugStack_Push("Serve_ServeRound", TYPE_CSTR); 
     status r = READY;
     Queue *q = &sctx->queue;
 
     if(q->count == 0){
+        DebugStack_Pop();
         return NOOP;
     }
 
+    boolean anyFinished = FALSE;
     while(TRUE){
         /*
         user poll on a slab of pollfds here to determine if the whole block should be skipped
@@ -170,6 +192,7 @@ status Serve_ServeRound(Serve *sctx){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
             Log(logStatus, "Served %s - mem: %ld/%ld - QIdx:%d", req->proto->toLog(req), MemCtx_Used(req->m), MemCount(), sctx->queue.current.idx);
             r |= Serve_CloseReq(sctx, req, q->current.idx);
+            anyFinished = TRUE;
         }else{
             if(DEBUG_REQ){
                 Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
@@ -200,7 +223,13 @@ status Serve_ServeRound(Serve *sctx){
         }
     }
 
+    if(anyFinished){
+        DPrint((Abstract*)sctx->queue.span, COLOR_PURPLE, "queue->span: ");
+    }
+
+    sctx->metrics.ticks++;
     Delay();
+    DebugStack_Pop();
     return r;
 }
 
@@ -244,6 +273,7 @@ status Serve_Run(Serve *sctx){
             0);
         Serve_AcceptPoll(sctx, delay);
         Serve_ServeRound(sctx);
+        sctx->metrics.ticks++;
     }
 
     return SUCCESS;

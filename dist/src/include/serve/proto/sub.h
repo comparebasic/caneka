@@ -4,10 +4,8 @@ typedef struct sub_proto {
     ProtoDef *def;
     Abstract *custom;
     /* end proto */
-    Span *cmds_p;
     String *name;
-    int code;
-    Abstract *super;
+    ProcIoSet *procio;
 } SubProto;
 
 ProtoDef *SubProtoDef_Make(MemCtx *m, Maker reqMake);

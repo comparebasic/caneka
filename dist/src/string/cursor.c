@@ -21,6 +21,34 @@ Cursor *Cursor_Make(MemCtx *m, String *s){
     return cur;
 };
 
+status Cursor_Flush(MemCtx *m, Cursor *cur, OutFunc func, Abstract *source){
+    if(cur->seg == NULL){
+        return NOOP;
+    }
+    i64 local = cur->local;
+    status r = READY;
+    if(local > 0){
+       String *_s = String_Init(m, STRING_EXTEND); 
+       String_AddBytes(m, _s, cur->seg->bytes+local, cur->seg->length-local);
+       _s = String_Next(cur->seg);
+       r = func(m, _s, source);
+    }else{
+       r = func(m, cur->seg, source);
+    }
+
+    if(r & SUCCESS){
+        cur->offset = cur->seg->length-cur->local;
+        cur->local = 0;
+        cur->seg = String_Next(cur->seg);
+        while(cur->seg != NULL){
+            cur->offset += cur->seg->length;
+        }
+        return r;
+    }else{
+        return ERROR;
+    }
+}
+
 status Cursor_Decr(Cursor *cur, int length){
    if(cur->local > length){
         cur->local -= length;

@@ -15,6 +15,7 @@ status Cursor_AddMatch(Cursor *cur, int length);
 status Cursor_AddGap(Cursor *cur, int length);
 status Cursor_Incr(Cursor *cur, int length);
 status Cursor_Decr(Cursor *cur, int length);
+status Cursor_Flush(MemCtx *m, Cursor *cur, OutFunc func, Abstract *source);
 
 #define Cursor_GetByte(cur) (*((cur)->ptr))
 #define Cursor_Total(cur) ((cur)->offset+(cur)->local)

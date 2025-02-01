@@ -73,6 +73,7 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
         Serve *sctx = (Serve *)source;
         ProcIoSet *set = ProcIoSet_Make(m);
         set->cmds = cmd_p;
+        set->pid = child;
         Serve_StartGroup(sctx, (Abstract *)set);
 
         Req *req = NULL;
@@ -97,18 +98,20 @@ int SubStatus(int pid, boolean wait){
         r = 0;
         p = waitpid(pid, &r, wait ? WNOHANG : 0);
         if(p == (pid_t)-1 && errno != EINTR){
-            Fatal("subProcess failed for SubProcess", 0); 
             break;
         }
     } while(p != pid && !wait);
 
     if(p != pid){
+        if(!wait){
+            Fatal("subProcess wait failed for SubProcess", 0); 
+        }
         return -1;
     }
 
     if(p != pid || !WIFEXITED(r)){
         Fatal("subProcess failed for SubProcess process did not exit propery", 0); 
-        return FALSE;
+        return -1;
     }
 
     return  WEXITSTATUS(r);    

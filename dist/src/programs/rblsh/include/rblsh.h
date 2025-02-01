@@ -39,6 +39,7 @@ typedef struct rblsh_ctx {
     Serve *sctx;
     RblShSuper *current;
     Span *supers;
+    OutFunc out;
     struct {
         Span *p;
         String *s;
@@ -56,7 +57,7 @@ typedef struct rblsh_ctx {
 char *RblShRange_ToChars(word range);
 
 /* parser */
-Roebling *RblShParser_Make(MemCtx *m, RblShCtx *ctx, String *s);
+Roebling *RblShParser_Make(MemCtx *m, String *s, Abstract *source);
 
 /* Super */
 RblShSuper *RblShSuper_Make(MemCtx *m, RblShCtx *ctx);

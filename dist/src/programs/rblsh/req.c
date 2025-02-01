@@ -8,8 +8,19 @@ static status RblSh_RecvCmd(Handler *h, Req *req, Serve *sctx){
 }
 
 static status RblSh_TermIo(Handler *h, Req *req, Serve *sctx){
+    SubProto *proto = (SubProto *)req->proto;
+    RblShCtx *ctx = (RblShCtx *)as(sctx->def->source, TYPE_RBLSH_CTX);
+    int code = SubStatus(proto->procio->pid, TRUE);
     status r = Req_Read(sctx, req);
-    DPrint((Abstract *)req->in.rbl->cursor.s, COLOR_GREEN, "");
+    if((r & PROCESSING) != 0){
+        Cursor_Flush(ctx->m, req->out.cursor, ctx->out, (Abstract *)ctx); 
+    }
+    if(code != -1){
+        printf("command finished %d\n", code);
+        h->type.state |= SUCCESS;
+        ProcIoSet_FlagAll(proto->procio, END, 0);
+    }
+
     return h->type.state;
 }
 
@@ -56,7 +67,7 @@ Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx, word flags){
     if((flags & DRIVEREQ) != 0){
         Req *req =  Req_Make(m, sctx, (Proto *)proto);
         req->type.state |= flags;
-        req->in.rbl = RblShParser_Make(m, NULL, req->in.shelf);
+        req->in.rbl = RblShParser_Make(m, req->in.shelf, (Abstract *)req);
         DebugStack_Pop();
         return req;
     }else{
@@ -64,13 +75,12 @@ Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx, word flags){
         req->type.state |= flags;
         if((flags & PROCIO_INREQ) != 0){
             req->in.rbl = RblShParser_Make(m, 
-                NULL,
-                req->in.shelf);
+                req->in.shelf,(Abstract *)req);
         }else{
             req->in.rbl = TermIo_RblMake(m, 
-                req->in.shelf,
-                NULL,
-                RblShSuper_Capture);
+                req->in.shelf, RblShSuper_Capture, (Abstract *)req);
+            req->out.response = req->in.shelf;
+            req->out.cursor = Cursor_Make(m, req->out.response);
         }
         DebugStack_Pop();
         return req;

@@ -8,6 +8,7 @@
 #define ACCEPT_AT_ONEC_MAX 8 
 #define ACCEPT_DELAY_MILLIS 50
 #define ACCEPT_LONGDELAY_MILLIS 5000
+#define CHECK_TICKS 8
 
 #ifdef LINUX
     #define SOCK_OUT EPOLLOUT
@@ -44,6 +45,7 @@ typedef struct serve_ctx {
         int open;
         int served;
         int error;
+        i64 ticks;
         int collected;
         struct timespec started;
         int tickNanos;

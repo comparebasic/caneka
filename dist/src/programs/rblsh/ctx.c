@@ -49,6 +49,7 @@ RblShCtx *RblShCtx_Make(MemCtx *m){
     ctx->cmds = Span_Make(m, TYPE_SPAN);
     ctx->supers = Span_Make(m, TYPE_SPAN);
     ctx->current = RblShSuper_Make(m, ctx);
+    ctx->out = ToStdOut;
 
     ctx->rbl = (Roebling *)RoeblingBlank_Make(m, NULL,
         (Abstract *)ctx, RblShCtx_Capture);

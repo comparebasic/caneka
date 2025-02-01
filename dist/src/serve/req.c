@@ -55,13 +55,20 @@ status Req_Read(Serve *sctx, Req *req){
     if(DEBUG_REQ_RECV || (req->type.state & DEBUG) != 0){
         printf("\x1b[%dmRecv(%d): %ld \x1b[1;%dm'%s'\x1b[0m\n", DEBUG_REQ_RECV, req->fd, l, DEBUG_REQ_RECV, buff);
     }
-    status r = NOOP;
+
+    status r = READY;
     if(l > 0){
+        r |= PROCESSING;
         Roebling_AddBytes(req->in.rbl, buff, l);
-        return Roebling_Run(req->in.rbl);
+        r |= Roebling_Run(req->in.rbl);
+        return r;
     }
 
-    return NOOP;
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
 }
 
 Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto){

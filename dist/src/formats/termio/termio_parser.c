@@ -84,7 +84,7 @@ static status values(MemCtx *m, Roebling *rbl){
     return r;
 }
 
-Roebling *TermIo_RblMake(MemCtx *m, String *s, Abstract *source, RblCaptureFunc capture){
+Roebling *TermIo_RblMake(MemCtx *m, String *s, RblCaptureFunc capture, Abstract *source ){
     Span *parsers =  Span_Make(m, TYPE_SPAN); 
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, TERMIO_START));
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)start));

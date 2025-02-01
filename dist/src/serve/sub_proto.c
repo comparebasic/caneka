@@ -19,7 +19,6 @@ Proto *SubProto_Make(MemCtx *m, ProtoDef *def, word flags){
     SubProto *p = (SubProto *)MemCtx_Alloc(m, sizeof(SubProto));
     p->type.of = TYPE_SUB_PROTO;
     p->toLog = toLog;
-    p->cmds_p = Span_Make(m, TYPE_SPAN);
 
     return (Proto *)p;
 }
