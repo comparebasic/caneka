@@ -1,3 +1,8 @@
+enum rblsh_req_flags {
+    /* PROCIO 8 through 10 */
+    DRIVEREQ = 1 << 11,
+};
+
 enum rblsh_type_range {
     _RBLSH_START = _TYPE_APPS_END,
     TYPE_RBLSH_SUPER,
@@ -29,6 +34,7 @@ typedef struct rblsh_driver {
 
 typedef struct rblsh_ctx {
     Type type;
+    MemCtx *m;
     int idx;
     Serve *sctx;
     RblShSuper *current;
@@ -37,7 +43,6 @@ typedef struct rblsh_ctx {
         Span *p;
         String *s;
     } cwd;
-    struct {
     /* cli input */
     Span *cmds;
     Roebling *rbl;
@@ -47,6 +52,9 @@ typedef struct rblsh_ctx {
     struct cash *cash;
 } RblShCtx;
 
+/* debug */
+char *RblShRange_ToChars(word range);
+
 /* parser */
 Roebling *RblShParser_Make(MemCtx *m, RblShCtx *ctx, String *s);
 
@@ -55,7 +63,7 @@ RblShSuper *RblShSuper_Make(MemCtx *m, RblShCtx *ctx);
 status RblShSuper_Capture(word rkey, int matchIdx, String *s, Abstract *source);
 
 /* req */
-Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx);
+Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx, word flags);
 Handler *RblSh_GetHandler(Serve *sctx, Req *req);
 
 /* ctx */

@@ -24,12 +24,11 @@ int main(int argc, char **argv){
     def->source = (Abstract *)ctx;
     Serve *sctx = Serve_Make(m, def);
 
-    sctx->type.state |= DRIVEREQ;
-    Req *req = Serve_AddFd(sctx, 0);
-    sctx->type.state &= ~DRIVEREQ;
+    Req *req = Serve_AddFd(sctx, 0, DRIVEREQ);
 
     req->in.rbl->source = (Abstract *)ctx;
-    ((IoProto *)as(req->proto, TYPE_IO_PROTO))->custom = (Abstract *)ctx;
+    SubProto *proto = (SubProto *)as(req->proto, TYPE_SUB_PROTO);
+    proto->custom = (Abstract *)ctx;
 
     Roebling_Reset(m, ctx->rbl, req->in.rbl->cursor.s);
 

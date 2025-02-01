@@ -3,7 +3,9 @@
 #include <rblsh.h>
 
 status RblShCtx_RunCmd(RblShCtx *ctx){
-    printf("running command\n");
+    DPrint((Abstract *)ctx->cmds, COLOR_PURPLE, "CMD");
+    SubCall(ctx->m, ctx->cmds, NULL, (Abstract *)ctx->sctx);
+    ctx->cmds = Span_Make(ctx->m, TYPE_SPAN);
     return SUCCESS; 
 }
 
@@ -35,6 +37,7 @@ Abstract *RblShCtx_GetVar(Abstract *store, Abstract *key){
 RblShCtx *RblShCtx_Make(MemCtx *m){
     RblShCtx *ctx = MemCtx_Alloc(m, sizeof(RblShCtx));
     ctx->type.of = TYPE_RBLSH_CTX;
+    ctx->m = m;
 
     ctx->cash = Cash_Make(m, RblShCtx_GetVar, (Abstract *)ctx);
     ctx->cash->rbl = NULL;
@@ -43,7 +46,9 @@ RblShCtx *RblShCtx_Make(MemCtx *m){
     char *path = getcwd(buff, PATH_BUFFLEN);
     ctx->cwd.s = String_Make(m, bytes(path));
     ctx->cwd.p = String_SplitToSpan(m, ctx->cwd.s, String_Make(m, bytes("/")));
-    ctx->current = RblShSuper_Make(m, NULL);
+    ctx->cmds = Span_Make(m, TYPE_SPAN);
+    ctx->supers = Span_Make(m, TYPE_SPAN);
+    ctx->current = RblShSuper_Make(m, ctx);
 
     ctx->rbl = (Roebling *)RoeblingBlank_Make(m, NULL,
         (Abstract *)ctx, RblShCtx_Capture);

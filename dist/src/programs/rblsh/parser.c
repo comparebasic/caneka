@@ -106,9 +106,13 @@ static status start(MemCtx *m, Roebling *rbl){
 
 static status RblSh_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     RblShCtx *ctx = (RblShCtx *)as(source, TYPE_RBLSH_CTX);
-    printf("\x1b[%dmCaptured %s/\x1b[0m", COLOR_YELLOW, Class_ToString(captureKey));
+    printf("\x1b[%dmCaptured %s/\x1b[0m", COLOR_YELLOW, RblShRange_ToChars(captureKey));
     Debug_Print((void *)s, 0, "", COLOR_YELLOW, FALSE);
     printf("\n");
+
+    if(captureKey == RBLSH_ARG){
+        Span_Add(ctx->cmds, (Abstract *)s);
+    }
 
     if(captureKey >= _CASH_START && captureKey <= _CASH_END){
         Cash_Capture(captureKey, matchIdx, s, (Abstract *)ctx->cash);

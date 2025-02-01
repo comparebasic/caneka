@@ -52,8 +52,8 @@ status Req_Read(Serve *sctx, Req *req){
     byte buff[SERV_READ_SIZE];
     memset(buff, 0, SERV_READ_SIZE);
     ssize_t l = read(req->fd, buff, SERV_READ_SIZE);
-    if(DEBUG_REQ_RECV){
-        printf("\x1b[%dmRecv: %ld \x1b[1;%dm'%s'\x1b[0m\n", DEBUG_REQ_RECV, l, DEBUG_REQ_RECV, buff);
+    if(DEBUG_REQ_RECV || (req->type.state & DEBUG) != 0){
+        printf("\x1b[%dmRecv(%d): %ld \x1b[1;%dm'%s'\x1b[0m\n", DEBUG_REQ_RECV, req->fd, l, DEBUG_REQ_RECV, buff);
     }
     status r = NOOP;
     if(l > 0){

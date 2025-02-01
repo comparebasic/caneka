@@ -13,6 +13,7 @@ typedef struct proto {
     Type type;
     char *(*toLog)(struct req *req);
     ProtoDef *def;
+    Abstract *custom;
 } Proto;
 
 ProtoDef *ProtoDef_Make(MemCtx *m, cls type,

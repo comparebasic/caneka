@@ -9,14 +9,15 @@ static status RblSh_RecvCmd(Handler *h, Req *req, Serve *sctx){
 
 static status RblSh_TermIo(Handler *h, Req *req, Serve *sctx){
     status r = Req_Read(sctx, req);
+    DPrint((Abstract *)req->in.rbl->cursor.s, COLOR_GREEN, "");
     return h->type.state;
 }
 
 static status RblSh_Driver(Handler *h, Req *req, Serve *sctx){
     status r = Req_Read(sctx, req);
     if((r & NOOP) == 0){
-        IoProto *def = (IoProto*)as(req->proto, TYPE_IO_PROTO);
-        RblShCtx *ctx = (RblShCtx*)def->custom;
+        SubProto *def = (SubProto*)as(req->proto, TYPE_SUB_PROTO);
+        RblShCtx *ctx = (RblShCtx*)as(def->custom, TYPE_RBLSH_CTX);
         Roebling_AddReset(ctx->rbl);
         status rr = Roebling_Run(ctx->rbl);
         return h->type.state;
@@ -38,7 +39,7 @@ static status RblSh_Wait(Handler *h, Req *req, Serve *sctx){
 Handler *RblSh_GetHandler(Serve *sctx, Req *req){
     MemCtx *m = req->m;
     Handler *h = NULL;
-    if((req->type.state & INREQ) != 0){
+    if((req->type.state & PROCIO_INREQ) != 0){
         h = Handler_Make(m, RblSh_Wait, NULL, SOCK_IN);
     }else if((req->type.state & DRIVEREQ) != 0){
         h = Handler_Make(m, RblSh_Driver, NULL, SOCK_IN);
@@ -48,27 +49,27 @@ Handler *RblSh_GetHandler(Serve *sctx, Req *req){
     return h;
 }
 
-Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx){
+Req *RblSh_ReqMake(MemCtx *_m, Serve *sctx, word flags){
     DebugStack_Push("RblSh_ReqMake", TYPE_CSTR); 
     MemCtx *m = MemCtx_Make();
-    SubProto *proto = (SubProto *)SubProto_Make(m, (ProtoDef *)sctx->def);
-    if((sctx->type.state & DRIVEREQ) != 0){
+    SubProto *proto = (SubProto *)SubProto_Make(m, (ProtoDef *)sctx->def, flags);
+    if((flags & DRIVEREQ) != 0){
         Req *req =  Req_Make(m, sctx, (Proto *)proto);
-        req->type.state |= (sctx->type.state & (INREQ|OUTREQ|ERRREQ|DRIVEREQ));
+        req->type.state |= flags;
         req->in.rbl = RblShParser_Make(m, NULL, req->in.shelf);
         DebugStack_Pop();
         return req;
     }else{
         Req *req =  Req_Make(m, sctx, (Proto *)proto);
-        req->type.state |= (sctx->type.state & (INREQ|OUTREQ|ERRREQ|DRIVEREQ));
-        if((sctx->type.of & INREQ) != 0){
+        req->type.state |= flags;
+        if((flags & PROCIO_INREQ) != 0){
             req->in.rbl = RblShParser_Make(m, 
-                (RblShCtx *)sctx->def->source,
+                NULL,
                 req->in.shelf);
         }else{
             req->in.rbl = TermIo_RblMake(m, 
                 req->in.shelf,
-                (Abstract *)super,
+                NULL,
                 RblShSuper_Capture);
         }
         DebugStack_Pop();
