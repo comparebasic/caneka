@@ -1,15 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-void Delay(){
-    struct timespec ts = {
-        ROUND_DELAY_SEC,
-        ROUND_DELAY_TVSEC,
-    };
-    struct timespec remaining;
-    nanosleep(&ts, &remaining);
-}
-
 static int openPortToFd(int port){
     int fd = 0;
 	struct sockaddr_in serv_addr;
@@ -49,7 +40,57 @@ static int openPortToFd(int port){
     return fd;
 }
 
+static int pollSkipSlab(Abstract *source, int idx){
+    DebugStack_Push("pollSkipSlab", TYPE_CSTR); 
+    Serve *sctx = as(source, TYPE_SERVECTX);
+    int ready = 0;
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, sctx->pollMap, SPAN_OP_GET, idx);
+    Span_Query(&sq);
+    if(sq.stack[0].slab != NULL){
+        ready += poll(sq.stack[0].slab, sctx->pollMap->def->stride, 1);
+        if(DEBUG_SERVE_POLLING){
+            struct pollfd *pfd = sq.stack[0].slab;
+            printf("\x1b[%dmPoll Found %d, first fd:%d events:%d\x1b[0m\n", DEBUG_SERVE_POLLING, ready, pfd->fd, pfd->events);
+        }
+    }
+
+    SpanQuery_Setup(&sq, sctx->flagMap, SPAN_OP_GET, idx);
+    Span_Query(&sq);
+    if(sq.stack[0].slab != NULL){
+        for(int i = 0; i < sctx->flagMap->def->stride; i++){
+            status *ptr = (status *)Slab_valueAddr(sq.stack[0].slab,
+                sctx->flagMap->def, i);
+            if((*ptr) != 0){
+                ready++;
+            }
+        }
+    }
+
+    DebugStack_Pop();
+    return ready;
+}
+
+void Delay(){
+    struct timespec ts = {
+        ROUND_DELAY_SEC,
+        ROUND_DELAY_TVSEC,
+    };
+    struct timespec remaining;
+    nanosleep(&ts, &remaining);
+}
+
+status Serve_ClobberFlags(Serve *sctx, Req *req, status flags){
+    i64 slot = 0;
+    slot += flags;
+    if(Span_Set(sctx->flagMap, req->queueIdx, (Abstract *)&slot) != NULL){
+        return SUCCESS;
+    }
+    return ERROR;
+}
+
 status Serve_CloseReq(Serve *sctx, Req *req, int idx){
+    Serve_ClobberFlags(sctx, req, ZERO);
     Queue_Remove(&(sctx->queue), idx);
     close(req->fd);
     sctx->metrics.open--;
@@ -118,41 +159,6 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
     }
 
     return r;
-}
-
-static int pollSkipSlab(Abstract *source, int idx){
-    DebugStack_Push("pollSkipSlab", TYPE_CSTR); 
-    Serve *sctx = as(source, TYPE_SERVECTX);
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, sctx->pollMap, SPAN_OP_GET, idx);
-    Span_Query(&sq);
-    int ready = 0;
-    if(sq.stack[0].slab != NULL){
-        ready += poll(sq.stack[0].slab, sctx->pollMap->def->stride, 1);
-        if(DEBUG_SERVE_POLLING){
-            struct pollfd *pfd = sq.stack[0].slab;
-            printf("\x1b[%dmPoll Found %d, first fd:%d events:%d\x1b[0m\n", DEBUG_SERVE_POLLING, ready, pfd->fd, pfd->events);
-        }
-    }
-
-    if((sctx->metrics.ticks % CHECK_TICKS) == 0){
-        Iter it;
-        Iter_Init(&it, sctx->queue.span);
-        it.idx = idx;
-        for(int i = 0; i < sq.span->def->stride; i++){
-            Req *req = (Req *)Iter_Get(&it);
-            if(req != NULL && (req->type.state & END) != 0){
-                printf("Found req with END state %d %s\n", req->fd, State_ToChars(req->type.state));
-                ready++;
-            }
-            if((Iter_Next(&it) & END) != 0){
-                break;
-            }
-        }
-    }
-
-    DebugStack_Pop();
-    return ready;
 }
 
 status Serve_ServeRound(Serve *sctx){
@@ -249,6 +255,10 @@ status Serve_PreRun(Serve *sctx, int port){
 
 Req *Serve_AddFd(Serve *sctx, int fd, word flags){
     Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx, flags);
+    if(fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
+        Fatal("Unable to set non block when adding fd to Req", 0); 
+        return NULL;
+    }
     req->fd = fd;
     req->handler = sctx->def->getHandler(sctx, req);
     req->queueIdx = Queue_Add(&(sctx->queue), (Abstract *)req); 
@@ -302,6 +312,7 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     sctx->m = m;
     sctx->def = def;
     sctx->pollMap = Span_Make(m, TYPE_POLL_MAP_SPAN);
+    sctx->flagMap = Span_Make(m, TYPE_FLAG_MAP_SPAN);
     Queue_Init(m, &sctx->queue, def->getDelay);
     sctx->queue.source = (Abstract *)sctx;
     sctx->socket_fd = -1;

@@ -219,15 +219,14 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     if((def->flags & SPAN_INLINE) == 0){
                         t = *((Abstract **)t);
                     }
-                    if((def->flags & SPAN_RAW) == 0){
-                        i64 n = (util)t;
-                        if(def->itemSize == sizeof(int)){
-                            printf("%u", (int)n);
-                        }else if(t->type.of != 0){
-                            Debug_Print((void *)t, 0, "", color, FALSE);
-                        }else{
-                            printf("0x%lx", *a);
-                        }
+                    i64 n = (util)t;
+                    if(def->itemSize == sizeof(int)){
+                        printf("%u", (int)n);
+                    }else if((def->flags & SPAN_INLINE) == 0 && t->type.of != 0){
+                        printf("ho?%d", def->flags);
+                        Debug_Print((void *)t, 0, "", color, FALSE);
+                    }else{
+                        Bits_Print((byte *)a, sizeof(void *)*def->slotSize, "", color, FALSE);
                     }
                 }
                 printf(" ");

@@ -79,7 +79,6 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
                 memset(ptr, 0, sizeof(void *));
             }else{
                 if(p->m->type.range == -1){
-                    printf("making local in set\n");
                     LocalPtr lp;
                     if((MemLocal_GetLocal(p->m, &t, (LocalPtr *)&lp) & SUCCESS) != 0){
                         memcpy(ptr, &lp, sizeof(void *));
@@ -140,7 +139,6 @@ void *Span_GetFromQ(SpanQuery *sq){
     }else if(*((Abstract **)ptr) != NULL){
         void **dptr = (void **)ptr;
         if(p->m->type.range == -1){
-            printf("making local\n");
             LocalPtr lp;
             if((MemLocal_GetLocal(p->m, *dptr, (LocalPtr *)&lp) & SUCCESS) != 0){
                 memcpy(ptr, &lp, sizeof(void *));

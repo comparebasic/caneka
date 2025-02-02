@@ -35,6 +35,7 @@ typedef struct serve_ctx {
     MemCtx *m;
     Queue queue;
     Span *pollMap;
+    Span *flagMap;
     int socket_fd;
     int port;
     boolean serving;
@@ -64,4 +65,5 @@ status Serve_NextState(Serve *sctx, struct req *req);
 status Serve_AcceptPoll(Serve *sctx, int delay);
 status Serve_ServeRound(Serve *sctx);
 status Serve_CloseReq(Serve *sctx, struct req *req, int idx);
+status Serve_ClobberFlags(Serve *sctx, Req *req, status flags);
 void Delay();

@@ -8,29 +8,15 @@ ProcIoSet *ProcIoSet_Make(MemCtx *m){
     return set;
 }
 
-status ProcIoSet_FlagAll(ProcIoSet *pio, word set, word unset){
-    status r = READY;
-    if(pio->in != NULL){
-        pio->in->type.state |= set;
-        pio->in->type.state &= ~unset;
-        r |= SUCCESS;
-    }
-    if(pio->out != NULL){
-        pio->out->type.state |= set;
-        pio->out->type.state &= ~unset;
-        r |= SUCCESS;
-    }
-    if(pio->err != NULL){
-        pio->err->type.state |= set;
-        pio->err->type.state &= ~unset;
-        r |= SUCCESS;
-    }
-
-    if(r == READY){
-        r |= NOOP;
-    }
-    
-    return r;
+status ProcIoSet_SegFlags(ProcIoSet *pio, Serve *sctx, status flags){
+    pio->in->type.state |= flags;
+    pio->out->type.state |= flags;
+    pio->err->type.state |= flags;
+    Serve_ClobberFlags(sctx, pio->in, flags);
+    Serve_ClobberFlags(sctx, pio->out, flags);
+    Serve_ClobberFlags(sctx, pio->err, flags);
+    DPrint((Abstract *)sctx->flagMap, COLOR_PURPLE, "Flags: ");
+    return SUCCESS;
 }
 
 status ProcIoSet_Add(ProcIoSet *set, Req *req){

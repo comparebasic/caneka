@@ -18,7 +18,7 @@ static status RblSh_TermIo(Handler *h, Req *req, Serve *sctx){
     if(code != -1){
         printf("command finished %d\n", code);
         h->type.state |= SUCCESS;
-        ProcIoSet_FlagAll(proto->procio, END, 0);
+        ProcIoSet_SegFlags(proto->procio, sctx, END);
     }
 
     return h->type.state;

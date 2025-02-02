@@ -9,6 +9,7 @@ static SpanDef span4kx32mDef;
 static SpanDef span4x16Def;
 static SpanDef spanStringDef;
 static SpanDef spanPollMapDef;
+static SpanDef spanFlagMapDef;
 static SpanDef nestedStackDef;
 
 status SpanDef_Init(){
@@ -40,6 +41,16 @@ status SpanDef_Init(){
     tableDef.dim_lookups[7] = 0;
 
     /* pollMap */
+    memset(&spanFlagMapDef, 0, sizeof(SpanDef));
+    spanFlagMapDef.typeOf = TYPE_FLAG_MAP_SPAN;
+    spanFlagMapDef.stride = 16;
+    spanFlagMapDef.idxSize = SPAN_DEFAULT_IDX_SIZE;
+    spanFlagMapDef.idxStride = SPAN_DEFAULT_STRIDE;
+    spanFlagMapDef.slotSize = 1;
+    spanFlagMapDef.itemSize = sizeof(status);
+    spanFlagMapDef.flags = SPAN_INLINE;
+
+    /* flagMap */
     memset(&spanPollMapDef, 0, sizeof(SpanDef));
     spanPollMapDef.typeOf = TYPE_POLL_MAP_SPAN;
     spanPollMapDef.stride = 16;
@@ -48,6 +59,7 @@ status SpanDef_Init(){
     spanPollMapDef.slotSize = sizeof(struct pollfd)/sizeof(void*);
     spanPollMapDef.itemSize = sizeof(struct pollfd);
     spanPollMapDef.flags = SPAN_INLINE;
+
 
     /* span16x32m */
     memset(&span16x32mDef, 0, sizeof(SpanDef));
@@ -135,6 +147,8 @@ SpanDef *SpanDef_FromCls(word cls){
         return &spanStringDef;
     }else if(cls == TYPE_POLL_MAP_SPAN){
         return &spanPollMapDef;
+    }else if(cls == TYPE_FLAG_MAP_SPAN){
+        return &spanFlagMapDef;
     }else if(cls == TYPE_NESTED_SPAN){
         return &nestedStackDef;
     }else{
