@@ -19,12 +19,17 @@ static byte hexCharToOrd(byte b){
 static int _String_FromI64(MemCtx *m, i64 i, byte buff[]){
     memset(buff, 0, MAX_BASE10+1);
 
+
     int base = 10;
     int pows = 0;
     int position = MAX_BASE10-1;
     i64 val;
     byte digit = digits[0];
     boolean found = FALSE;
+    boolean negative = i < 0;
+    if(negative){
+        i = labs(i);
+    }
     while(i > 0){
         found = TRUE;
         val = i % base;
@@ -37,6 +42,11 @@ static int _String_FromI64(MemCtx *m, i64 i, byte buff[]){
 
     if(!found){
         buff[position] = digits[0];
+        position--;
+    }
+
+    if(negative){
+        buff[position] = '-';
         position--;
     }
 

@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+char *ProcIoSet_FlagsToChars(word flags){
+    if(flags & PROCIO_INREQ){
+        return "PROCIO_INREQ";
+    }else if(flags & PROCIO_OUTREQ){
+        return "PROCIO_OUTREQ";
+    }else if(flags & PROCIO_ERRREQ){
+        return "PROCIO_ERRREQ";
+    }else{
+        return "UNKNOWN";
+    }
+}
+
 ProcIoSet *ProcIoSet_Make(MemCtx *m){
     ProcIoSet *set = MemCtx_Alloc(m, sizeof(ProcIoSet));
     set->type.of = TYPE_PROC_IO_SET;
@@ -38,6 +50,8 @@ status ProcIoSet_Add(ProcIoSet *set, Req *req){
 ProcIoSet *ProcIoSet_SubProc(Serve *sctx, Span *cmds){
     MemCtx *m = MemCtx_Make();
     ProcIoSet *set = ProcIoSet_Make(m);
+    ProcDets_Init(&set->pd);
+    set->pd.type.state |= PROCDETS_ASYNC;
     m->owner = (Abstract *)set;
     set->cmds = cmds;
 

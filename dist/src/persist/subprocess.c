@@ -10,7 +10,6 @@ status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
     int p2[2];
 
     if(pd != NULL){
-        ProcDets_Init(pd);
         if((pipe(p0) != 0 || pipe(p1) != 0 || pipe(p2) != 0)
             ||
             (
@@ -77,36 +76,42 @@ status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
     return SUCCESS;
 }
 
-int SubStatus(int pid, boolean wait){
+status SubStatus(ProcDets *pd){
     int r;
     pid_t p;
+    boolean wait = (pd->type.state & PROCDETS_ASYNC) != 0;
     do {
         r = 0;
-        p = waitpid(pid, &r, wait ? WNOHANG : 0);
+        p = waitpid(pd->pid, &r, wait ? WNOHANG : 0);
         if(p == (pid_t)-1 && errno != EINTR){
             break;
         }
-    } while(p != pid && !wait);
+    } while(p != pd->pid && !wait);
 
-    if(p != pid){
+    if(p != pd->pid){
         if(!wait){
             Fatal("subProcess wait failed for SubProcess", 0); 
         }
-        return -1;
+        return NOOP;
     }
 
-    if(p != pid || !WIFEXITED(r)){
+    if(!WIFEXITED(r)){
         Fatal("subProcess failed for SubProcess process did not exit propery", 0); 
-        return -1;
+        return ERROR;
     }
 
-    return  WEXITSTATUS(r);    
+    pd->code = WEXITSTATUS(r);    
+    if(pd->code != -1){
+        return SUCCESS;
+    }else{
+        return NOOP;
+    }
 }
 
 status SubProcess(MemCtx *m, Span *cmd_p, ProcDets *pd){
     pid_t pid = SubCall(m, cmd_p, pd);
     if(pid != -1){
-        return SubStatus(pid, TRUE) == 0 ? SUCCESS : ERROR;
+        return SubStatus(pd);
     }
     return ERROR;
 }

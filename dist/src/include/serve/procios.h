@@ -14,6 +14,7 @@ typedef struct procioset {
     struct req *err;
 }ProcIoSet;
 
+char *ProcIoSet_FlagsToChars(word flags);
 ProcIoSet *ProcIoSet_Make(MemCtx *m);
 status ProcIoSet_Add(ProcIoSet *set, struct req *req);
 status ProcIoSet_SegFlags(ProcIoSet *pio, struct serve_ctx *sctx, status flags);

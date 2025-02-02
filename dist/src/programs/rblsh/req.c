@@ -10,17 +10,18 @@ static status RblSh_RecvCmd(Handler *h, Req *req, Serve *sctx){
 static status RblSh_TermIo(Handler *h, Req *req, Serve *sctx){
     SubProto *proto = (SubProto *)req->proto;
     RblShCtx *ctx = (RblShCtx *)as(sctx->def->source, TYPE_RBLSH_CTX);
-    int code = SubStatus(proto->procio->pd.pid, TRUE);
     status r = Req_Read(sctx, req);
     if((r & PROCESSING) != 0){
         Cursor_Flush(ctx->m, req->out.cursor, ctx->out, (Abstract *)ctx); 
         ProcIoSet_SegFlags(proto->procio, sctx, PROCESSING);
     }
 
-    if(code != -1 && (r & PROCIO_INREQ) == 0){
+    if(proto->procio->pd.code != -1 && (r & PROCESSING) == 0){
         h->type.state |= SUCCESS;
         ProcIoSet_SegFlags(proto->procio, sctx, END);
     }
+
+    h->type.state |= (SubStatus(&proto->procio->pd) & ERROR);
 
     return h->type.state;
 }

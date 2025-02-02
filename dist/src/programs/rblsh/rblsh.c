@@ -23,6 +23,7 @@ int main(int argc, char **argv){
     def->getHandler = RblSh_GetHandler;
     def->source = (Abstract *)ctx;
     Serve *sctx = Serve_Make(m, def);
+    sctx->type.state |= SERVE_TERM;
 
     Req *req = Serve_AddFd(m, sctx, 0, DRIVEREQ);
 

@@ -78,7 +78,7 @@ typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 typedef char *(*RangeToChars)(word);
 
 #define ZERO 0
-#define MAX_BASE10 22
+#define MAX_BASE10 23
 #define SLAB_START_SIZE 2
 
 #define MAX_DIMS 16

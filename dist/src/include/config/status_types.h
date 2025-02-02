@@ -4,7 +4,7 @@ enum status_types {
     SUCCESS = 1 << 1,
     NOOP = 1 << 2,
     DEBUG = 1 << 3,
-    HASHED = 1 << 4,
+    MORE = 1 << 4,
     LOCAL_PTR = 1 << 5,
     END = 1 << 6,
     PROCESSING = 1 << 7,

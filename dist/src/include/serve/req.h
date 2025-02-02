@@ -1,7 +1,13 @@
-/*
- * uses SERVE_ALPHA through SERVE_ 
-enum req_flags {};
-*/
+enum req_flags {
+    REQ_ALPHA = 1 << 8,
+    REQ_BRAVO = 1 << 9,
+    REQ_CHARLIE = 1 << 10,
+    REQ_DELTA = 1 << 11,
+    REQ_ECHO = 1 << 12,
+    REQ_FOXTROT = 1 << 13,
+    REQ_GOLF = 1 << 14,
+    REQ_HOTEL = 1 << 15,
+};
 
 typedef struct req {
     Type type;

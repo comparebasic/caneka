@@ -7,9 +7,16 @@ static char *toLog(Req *req){
     String_AddBytes(req->m, s, bytes("SubProto<"), strlen("SubProto<"));
     char *state = State_ToChars(req->type.state);
     String_AddBytes(req->m, s, bytes(state), strlen(state));
-    char *cstr = " shelf:\"";
+    state = ProcIoSet_FlagsToChars(req->type.state);
+    String_AddBytes(req->m, s, bytes(state), strlen(state));
+    char *cstr = " pid/ret:\"";
     String_AddBytes(req->m, s, bytes(cstr), strlen(cstr));
-    String_Add(req->m, s, req->in.shelf);
+    String_AddInt(req->m, s, proto->procio->pd.pid);
+    String_AddBytes(req->m, s, bytes("/"), 1);
+    String_AddInt(req->m, s, proto->procio->pd.code);
+    cstr = " shelf-length:\"";
+    String_AddBytes(req->m, s, bytes(cstr), strlen(cstr));
+    String_AddInt(req->m, s, String_Length(req->in.shelf));
     String_AddBytes(req->m, s, bytes("\">"), 2);
 
     return (char *)s->bytes;

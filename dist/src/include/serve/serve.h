@@ -19,15 +19,7 @@
 #endif
 
 enum serve_ctx_flags {
-    /* reserver for app specific use */
-    SERVE_ALPHA = 1 << 8, 
-    SERVE_BRAVO = 1 << 9,
-    SERVE_CHARLIE = 1 << 10,
-    SERVE_DELTA = 1 << 11,
-    SERVE_ECHO = 1 << 12,
-    SERVE_FOXTROT = 1 << 13,
-    SERVE_GOLF = 1 << 14,
-    SERVE_HOTEL = 1 << 15,
+    SERVE_TERM = 1 << 8, 
 };
 
 typedef struct serve_ctx {

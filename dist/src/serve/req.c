@@ -59,6 +59,9 @@ status Req_Read(Serve *sctx, Req *req){
     status r = READY;
     if(l > 0){
         r |= PROCESSING;
+        if(l == SERV_READ_SIZE){
+            r |= MORE;
+        }
         Roebling_AddBytes(req->in.rbl, buff, l);
         r |= Roebling_Run(req->in.rbl);
         return r;
