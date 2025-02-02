@@ -24,7 +24,7 @@ int main(int argc, char **argv){
     def->source = (Abstract *)ctx;
     Serve *sctx = Serve_Make(m, def);
 
-    Req *req = Serve_AddFd(sctx, 0, DRIVEREQ);
+    Req *req = Serve_AddFd(m, sctx, 0, DRIVEREQ);
 
     req->in.rbl->source = (Abstract *)ctx;
     SubProto *proto = (SubProto *)as(req->proto, TYPE_SUB_PROTO);

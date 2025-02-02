@@ -4,7 +4,9 @@
 
 status RblShCtx_RunCmd(RblShCtx *ctx){
     DPrint((Abstract *)ctx->cmds, COLOR_PURPLE, "CMD");
-    SubCall(ctx->m, ctx->cmds, NULL, (Abstract *)ctx->sctx);
+
+    ProcIoSet *set = ProcIoSet_SubProc(ctx->sctx, ctx->cmds);
+
     ctx->cmds = Span_Make(ctx->m, TYPE_SPAN);
     return SUCCESS; 
 }

@@ -164,10 +164,10 @@ static BuildSubdir persistobj = { "persist", {
     "file.c",
     "ioctx.c",
     "memlocal.c",
-    "procioset.c",
     "session.c",
     "spool.c",
     "subprocess.c",
+    "procdets.c",
     "user.c",
     NULL
 }};
@@ -201,6 +201,7 @@ static BuildSubdir serveobj = { "serve", {
     "sub_proto.c",
     "linux.c",
     "proto.c",
+    "procioset.c",
     "req.c",
     "serve.c",
     NULL

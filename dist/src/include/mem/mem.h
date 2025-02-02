@@ -29,6 +29,7 @@ typedef struct mem_ctx {
     MemSlab *start_sl;
     int count;
     struct span *index;
+    Abstract *owner;
     struct {
         void *ptr;
         size_t sz;

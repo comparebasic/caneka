@@ -1,19 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
-int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
+status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
     char **cmd = Span_ToCharArr(m, cmd_p);
     char *msg = "";
-    if(msg_s != NULL){
-        msg = String_ToChars(m, msg_s);
-    }
 
     int p0[2];
     int p1[2];
     int p2[2];
 
-    boolean isServeProc = source->type.of == TYPE_SERVECTX;
-    if(isServeProc){
+    if(pd != NULL){
+        ProcDets_Init(pd);
         if((pipe(p0) != 0 || pipe(p1) != 0 || pipe(p2) != 0)
             ||
             (
@@ -26,8 +23,8 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
             )
 
         ){
-            Fatal("Unable to open SubCall pipes", 0); 
-            return 1;
+            printf("Unable to open SubCall pipes"); 
+            return ERROR;
         }
     }
 
@@ -48,9 +45,10 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
 
     child = fork();
     if(child == (pid_t)-1){
-        Fatal("Fork for subprocess", 0); 
+        printf("Error: Fork for subprocess"); 
+        return ERROR;
     }else if(!child){
-        if(isServeProc){
+        if(pd != NULL){
             close(0);
             close(1);
             close(2);
@@ -62,33 +60,21 @@ int SubCall(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
             close(p2[0]);
         }
         execvp(cmd[0], cmd);
-        Fatal("Execv failed", 0);
-        return 1;
+        printf("Execv failed");
+        return ERROR;
     }
 
-    if(source->type.of == TYPE_SERVECTX){
+    if(pd != NULL){
         close(p0[0]);
         close(p1[1]);
         close(p2[1]);
-        Serve *sctx = (Serve *)source;
-        ProcIoSet *set = ProcIoSet_Make(m);
-        set->cmds = cmd_p;
-        set->pid = child;
-        Serve_StartGroup(sctx, (Abstract *)set);
-
-        Req *req = NULL;
-        req = Serve_AddFd(sctx, p0[1], PROCIO_INREQ);
-        ProcIoSet_Add((ProcIoSet *)sctx->group, req);
-
-        req = Serve_AddFd(sctx, p1[0], PROCIO_OUTREQ);
-        ProcIoSet_Add((ProcIoSet *)sctx->group, req);
-
-        req = Serve_AddFd(sctx, p2[0], PROCIO_ERRREQ);
-        ProcIoSet_Add((ProcIoSet *)sctx->group, req);
-
-        Serve_StartGroup(sctx, NULL);
+        pd->inFd = p0[1];
+        pd->outFd = p1[0];
+        pd->errFd = p2[0];
+        pd->pid = child;
     }
-    return child;
+
+    return SUCCESS;
 }
 
 int SubStatus(int pid, boolean wait){
@@ -117,8 +103,8 @@ int SubStatus(int pid, boolean wait){
     return  WEXITSTATUS(r);    
 }
 
-status SubProcess(MemCtx *m, Span *cmd_p, String *msg_s, Abstract *source){
-    pid_t pid = SubCall(m, cmd_p, msg_s, source) ;
+status SubProcess(MemCtx *m, Span *cmd_p, ProcDets *pd){
+    pid_t pid = SubCall(m, cmd_p, pd);
     if(pid != -1){
         return SubStatus(pid, TRUE) == 0 ? SUCCESS : ERROR;
     }

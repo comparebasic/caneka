@@ -99,7 +99,9 @@ status Serve_CloseReq(Serve *sctx, Req *req, int idx){
     }else{
         sctx->metrics.served++;
     }
-    MemCtx_Free(req->m);
+    if(req->m->owner == NULL || req->m->owner == (Abstract *)req){
+        MemCtx_Free(req->m);
+    }
     return SUCCESS;
 }
 
@@ -132,7 +134,7 @@ status Serve_AcceptPoll(Serve *sctx, int delay){
             accepted++;
             sctx->metrics.open++;
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
-            Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx, sctx->type.state);
+            Req *req = (Req *)sctx->def->req_mk(NULL, (Abstract *)sctx, sctx->type.state);
             req->fd = new_fd;
             req->handler = sctx->def->getHandler(sctx, req);
             if(DEBUG_SERVE){
@@ -247,8 +249,8 @@ status Serve_PreRun(Serve *sctx, int port){
     return SUCCESS;
 }
 
-Req *Serve_AddFd(Serve *sctx, int fd, word flags){
-    Req *req = (Req *)sctx->def->req_mk(sctx->m, (Abstract *)sctx, flags);
+Req *Serve_AddFd(MemCtx *m, Serve *sctx, int fd, word flags){
+    Req *req = (Req *)sctx->def->req_mk(m, (Abstract *)sctx, flags);
     if(fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
         Fatal("Unable to set non block when adding fd to Req", 0); 
         return NULL;
@@ -292,11 +294,6 @@ status Serve_RunFds(Serve *sctx){
         Serve_ServeRound(sctx);
     }
 
-    return SUCCESS;
-}
-
-status Serve_StartGroup(Serve *sctx, Abstract *group){
-    sctx->group = group;
     return SUCCESS;
 }
 

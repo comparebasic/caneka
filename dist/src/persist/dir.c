@@ -38,5 +38,5 @@ status Dir_CheckCreate(MemCtx *m, String *path){
     Span_Add(cmd, (Abstract *)String_Make(m, bytes("-p")));
     Span_Add(cmd, (Abstract *)path);
 
-    return SubProcess(m, cmd, path, NULL);
+    return SubProcess(m, cmd, NULL);
 }

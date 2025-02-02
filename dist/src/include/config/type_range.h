@@ -75,6 +75,7 @@ enum types {
     TYPE_FILE,
     TYPE_SPOOL,
     TYPE_LOOKUP,
+    TYPE_PROCDETS,
     TYPE_ITER,
     TYPE_ITER_STRING,
     TYPE_SINGLE,

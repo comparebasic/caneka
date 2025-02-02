@@ -48,6 +48,7 @@ struct access;
 struct auth;
 struct file;
 struct ioctx;
+struct procdets;
 struct mem_local;
 struct local_ptr;
 /* parser */

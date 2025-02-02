@@ -34,3 +34,25 @@ status ProcIoSet_Add(ProcIoSet *set, Req *req){
 
     return NOOP;
 }
+
+ProcIoSet *ProcIoSet_SubProc(Serve *sctx, Span *cmds){
+    MemCtx *m = MemCtx_Make();
+    ProcIoSet *set = ProcIoSet_Make(m);
+    m->owner = (Abstract *)set;
+    set->cmds = cmds;
+
+    set->type.state |= SubCall(sctx->m, cmds, &set->pd);
+    if(set->type.state & SUCCESS){
+        Req *req = NULL;
+        req = Serve_AddFd(m, sctx, set->pd.inFd, PROCIO_INREQ);
+        ProcIoSet_Add(set, req);
+
+        req = Serve_AddFd(m, sctx, set->pd.outFd, PROCIO_OUTREQ);
+        ProcIoSet_Add(set, req);
+
+        req = Serve_AddFd(m, sctx, set->pd.errFd, PROCIO_ERRREQ);
+        ProcIoSet_Add(set, req);
+    }
+
+    return set;
+}

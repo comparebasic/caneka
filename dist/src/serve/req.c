@@ -72,13 +72,15 @@ status Req_Read(Serve *sctx, Req *req){
 }
 
 Req *Req_Make(MemCtx *m, Serve *sctx, Proto *proto){
-    MemCtx *rm = MemCtx_Make();
-    Req* req = (Req *)MemCtx_Alloc(rm, sizeof(Req));
+    if(m == NULL){
+        m = MemCtx_Make();
+    }
+    Req* req = (Req *)MemCtx_Alloc(m, sizeof(Req));
     req->type.of = TYPE_REQ;
-    req->m = rm;
+    req->m = m;
     req->sctx = sctx;
     req->proto = proto;
-    req->in.shelf = String_Init(req->m, STRING_EXTEND);
+    req->in.shelf = String_Init(m, STRING_EXTEND);
 
     return req;
 }
