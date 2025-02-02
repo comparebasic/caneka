@@ -14,9 +14,9 @@ static status RblSh_TermIo(Handler *h, Req *req, Serve *sctx){
     status r = Req_Read(sctx, req);
     if((r & PROCESSING) != 0){
         Cursor_Flush(ctx->m, req->out.cursor, ctx->out, (Abstract *)ctx); 
+        ProcIoSet_SegFlags(proto->procio, sctx, PROCESSING);
     }
-    if(code != -1){
-        printf("command finished %d\n", code);
+    if(code != -1 && (r & PROCIO_INREQ) == 0){
         h->type.state |= SUCCESS;
         ProcIoSet_SegFlags(proto->procio, sctx, END);
     }

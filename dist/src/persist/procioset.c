@@ -15,7 +15,6 @@ status ProcIoSet_SegFlags(ProcIoSet *pio, Serve *sctx, status flags){
     Serve_ClobberFlags(sctx, pio->in, flags);
     Serve_ClobberFlags(sctx, pio->out, flags);
     Serve_ClobberFlags(sctx, pio->err, flags);
-    DPrint((Abstract *)sctx->flagMap, COLOR_PURPLE, "Flags: ");
     return SUCCESS;
 }
 

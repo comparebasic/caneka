@@ -171,7 +171,6 @@ status Serve_ServeRound(Serve *sctx){
         return NOOP;
     }
 
-    boolean anyFinished = FALSE;
     while(TRUE){
         /*
         user poll on a slab of pollfds here to determine if the whole block should be skipped
@@ -198,7 +197,6 @@ status Serve_ServeRound(Serve *sctx){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
             Log(logStatus, "Served %s - mem: %ld/%ld - QIdx:%d", req->proto->toLog(req), MemCtx_Used(req->m), MemCount(), sctx->queue.current.idx);
             r |= Serve_CloseReq(sctx, req, q->current.idx);
-            anyFinished = TRUE;
         }else{
             if(DEBUG_REQ){
                 Debug_Print((void *)req, 0, "ServeReq_Handle: ", DEBUG_REQ, FALSE);
@@ -227,10 +225,6 @@ status Serve_ServeRound(Serve *sctx){
             }
             r |= req->type.state;
         }
-    }
-
-    if(anyFinished){
-        DPrint((Abstract*)sctx->queue.span, COLOR_PURPLE, "queue->span: ");
     }
 
     sctx->metrics.ticks++;
