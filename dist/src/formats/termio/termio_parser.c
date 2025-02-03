@@ -2,13 +2,18 @@
 #include <caneka.h>
 
 PatCharDef betweenDef[] = {
-    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '\x1b', '\x1b'},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, KEY_ESCAPE, KEY_ESCAPE},
     patText,
     {PAT_END, 0, 0},
 };
 
 PatCharDef textDef[] = {
     patText,
+    {PAT_END, 0, 0},
+};
+
+PatCharDef ansiEscapeDef[] = {
+    {PAT_TERM, KEY_ESCAPE, KEY_ESCAPE},
     {PAT_END, 0, 0},
 };
 
@@ -52,6 +57,8 @@ static status start(MemCtx *m, Roebling *rbl){
         (PatCharDef*)betweenDef, TERMIO_TEXT, TERMIO_CMD);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)textDef, TERMIO_TEXT, TERMIO_START);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)betweenDef, TERMIO_ESCAPE, TERMIO_CMD);
 
     return r;
 }

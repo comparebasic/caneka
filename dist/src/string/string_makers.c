@@ -104,7 +104,6 @@ String *String_ToEscaped(MemCtx *m, String *s){
     return s2;
 }
 
-
 String *String_FromInt(MemCtx *m, int i){
     byte buff[MAX_BASE10+1];
     int position = _String_FromI64(m, (i64)i, buff);

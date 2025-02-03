@@ -113,9 +113,15 @@ void Cstr_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
 
 void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Cursor *cur = (Cursor *)as(a, TYPE_CURSOR);
-    printf("\x1b[%dm%sCursor<%s ptr=\x1b[1;%dm'%c'\x1b[0;%dm offset=%ld local=%ld", color, msg,
+    String *s = String_Init(DebugM, 1);
+    String *focus = NULL;
+    if(cur->ptr != NULL){
+        String_AddBytes(DebugM, s, cur->ptr, 1);
+        focus = String_ToEscaped(DebugM, s);
+    }
+    printf("\x1b[%dm%sCursor<%s ptr=\x1b[1;%dm'%s'\x1b[0;%dm offset=%ld local=%ld", color, msg,
         State_ToChars(cur->type.state), 
-        color, (cur->ptr != NULL ? *(cur->ptr) : 0), color,
+        color, (focus != NULL ? (char *)focus->bytes : "?"), color,
         cur->offset, cur->local);
     if(extended){
         MemCtx *m = DebugM;
@@ -129,7 +135,7 @@ void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
         }
         Debug_Print((void*)String_ToEscaped(m, String_Sub(m, cur->s, max(total-36, 0), start)), 0, "", color, FALSE);
 
-        printf("\x1b[1;%d;37m%c\x1b[0;%dm", color+10, (cur->ptr != NULL ? *(cur->ptr) : 0), color);
+        printf("\x1b[1;%d;37m%s\x1b[0;%dm", color+10, (focus != NULL ? (char *)focus->bytes: "?"), color);
         Debug_Print((void*)String_ToEscaped(m, String_Sub(m, cur->s, total+1, total+36)), 0, "", color, FALSE);
         printf("\x1b[1;%dm\"", color);
     }

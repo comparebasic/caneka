@@ -20,11 +20,11 @@ status TermIoFormat_Tests(MemCtx *gm){
     r |= File_Load(m, file, NULL);
     r |= Test((r & ERROR) == 0 && (file->type.state & FILE_LOADED) != 0, "File loaded and without error");
 
-    
     Roebling *rbl = TermIo_RblMake(m, file->data, capture, NULL);
 
+    DPrint((Abstract *)rbl, COLOR_PURPLE, "Rbl: ");
     Roebling_RunCycle(rbl);
-
+    Roebling_RunCycle(rbl);
     DPrint((Abstract *)rbl, COLOR_PURPLE, "Rbl: ");
 
     MemCtx_Free(m);
