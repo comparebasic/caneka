@@ -66,6 +66,7 @@ String *String_ToEscaped(MemCtx *m, String *s){
                 b == '\t' ||
                 b == '\n' ||
                 b == '\\' ||
+                b == KEY_ESCAPE || 
                 b < 10
             ){
                 length += 2;
@@ -92,6 +93,8 @@ String *String_ToEscaped(MemCtx *m, String *s){
                 String_AddBytes(m, s2, bytes("\\"), 1);
             }else if(b == '\t'){
                 String_AddBytes(m, s2, bytes("t"), 1);
+            }else if(b == KEY_ESCAPE){
+                String_AddBytes(m, s2, bytes("e"), 1);
             }else{
                 String_AddInt(m, s2, b);
             }

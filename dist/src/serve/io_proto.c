@@ -27,5 +27,6 @@ Proto *IoProto_Make(MemCtx *m, ProtoDef *def, word flags){
 ProtoDef *IoProtoDef_Make(MemCtx *m, Maker reqMake){
     return ProtoDef_Make(m, TYPE_IO_PROTODEF,
         (FlagMaker)reqMake,
+        NULL,
         (FlagMaker)IoProto_Make); 
 }

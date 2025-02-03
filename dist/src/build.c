@@ -254,6 +254,7 @@ static BuildSubdir testsuitesobj = { "tests/tests", {
     "strsnip_tests.c",
     "table_tests.c",
     "textfilter_tests.c",
+    "termio_format_tests.c",
     "user_tests.c",
     "xml_tests.c",
     "xmlt_template_tests.c",

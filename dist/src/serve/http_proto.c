@@ -104,6 +104,7 @@ ProtoDef *HttpProtoDef_Make(MemCtx *m){
 
     ProtoDef *def =  ProtoDef_Make(m, TYPE_HTTP_PROTODEF,
         (FlagMaker)HttpReq_Make,
+        NULL,
         (FlagMaker)HttpProto_Make); 
 
     def->custom = (Abstract *)lk;

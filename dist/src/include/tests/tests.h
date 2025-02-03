@@ -1,4 +1,5 @@
 #include "mock_109strings.h"
+
 extern char *longCstr;
 
 extern TestSet *Tests;
@@ -62,3 +63,4 @@ status ProtoHttp_Tests(MemCtx *gm);
 status StrSnip_Tests(MemCtx *gm);
 status StrSnipBoundry_Tests(MemCtx *gm);
 status MemCtx_Tests(MemCtx *gm);
+status TermIoFormat_Tests(MemCtx *gm);

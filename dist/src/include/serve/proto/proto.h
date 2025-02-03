@@ -2,6 +2,7 @@ typedef struct protodef {
     Type type;
     cls reqType;
     FlagMaker req_mk;
+    FlagMaker reqFree_mk;
     FlagMaker proto_mk;
     struct handler *(*getHandler)(struct serve_ctx *sctx, struct req *req);
     Abstract *source;
@@ -18,6 +19,7 @@ typedef struct proto {
 
 ProtoDef *ProtoDef_Make(MemCtx *m, cls type,
     FlagMaker req_mk,
+    FlagMaker reqFree_mk,
     FlagMaker proto_mk
 );
 

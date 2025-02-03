@@ -33,6 +33,7 @@ Proto *SubProto_Make(MemCtx *m, ProtoDef *def, word flags){
 ProtoDef *SubProtoDef_Make(MemCtx *m, Maker reqMake){
     return ProtoDef_Make(m, TYPE_SUB_PROTODEF,
         (FlagMaker)reqMake,
+        NULL,
         (FlagMaker)SubProto_Make
     ); 
 }

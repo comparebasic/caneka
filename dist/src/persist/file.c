@@ -125,6 +125,7 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
 }
 
 status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source){
+    DebugStack_Push("File_StreamWithOpen", TYPE_CSTR); 
     String *s = NULL;
     if(out != NULL){
         s = String_Init(m, STRING_EXTEND);
@@ -152,29 +153,40 @@ status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFu
 
     if(feof(f)){
         file->type.state |= FILE_LOADED;
+        DebugStack_Pop();
         return SUCCESS;
     }else if(ferror(f)){
+        DebugStack_Pop();
         return ERROR;
     }
 
+    DebugStack_Pop();
     return ERROR;
-
 }
 
 status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract *source){
+    DebugStack_Push("File_Stream", TYPE_CSTR); 
     if(DEBUG_FILE){
         printf("\x1b[%dmFile_Stread streaming: '%s'\x1b[0m\n", DEBUG_FILE, file->abs->bytes);
+    }
+    if(file->abs == NULL){
+        Fatal("No Abs path for File object", TYPE_FILE);
+        DebugStack_Pop();
+        return ERROR;
     }
     FILE *f = fopen((char *)file->abs->bytes, "r");
     if(f == NULL){
         printf("Warning: Unable to openfile %s\n", file->abs->bytes);
         file->type.state |= NOOP;
+        DebugStack_Pop();
         return file->type.state;
     }else{
         file->type.state &= ~NOOP;
     }
 
-    return File_StreamWithOpen(m, f, file, access, out, source);
+    status r = File_StreamWithOpen(m, f, file, access, out, source);
+    DebugStack_Pop();
+    return r;
 }
 
 status File_Load(MemCtx *m, File *file, Access *access){

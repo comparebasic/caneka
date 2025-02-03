@@ -121,10 +121,8 @@ void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
         MemCtx *m = DebugM;
         i64 total = Cursor_Total(cur);
 
-        DPrint((Abstract *)cur->s, COLOR_CYAN, "S: ");
-        printf(" \x1b[%dmseg=\x1b[1;%dm\"", color, color);
+        printf(" \x1b[%dmseg(%ld/%ld of %ld)=\x1b[1;%dm\"", color, max(total-36, 0), total, String_Length(cur->s), color);
 
-        printf("%ld/%ld\n", max(total-36, 0), total);
         i64 start = 36;
         if(total < 36){
             start = total;
