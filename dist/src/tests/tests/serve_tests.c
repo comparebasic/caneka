@@ -9,6 +9,7 @@ static char *req2_cstr = "th: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";
 
 status Serve_Tests(MemCtx *gm){
     status r = READY;
+    long base = MemCount();
     MemCtx *m = MemCtx_Make();
 
     ProtoDef *def = HttpProtoDef_Make(m);

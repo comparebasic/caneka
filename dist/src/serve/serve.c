@@ -236,6 +236,17 @@ status Serve_ServeRound(Serve *sctx){
 }
 
 status Serve_Stop(Serve *sctx){
+    Queue *q = &sctx->queue;
+    status r = READY;
+    q->type.state &= ~END;
+    while((q->type.state & END) == 0 && (r & ERROR) == 0){
+        QueueIdx *qidx = Queue_Next(q, NULL);
+        if(qidx != NULL){
+            Req *req = (Req *)qidx->item;
+            sctx->active = req;
+            r |= Serve_CloseReq(sctx, req, q->current.idx);
+        }
+    }
     close(sctx->socket_fd);
     return SUCCESS;
 }

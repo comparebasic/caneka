@@ -338,9 +338,9 @@ TestSet *Tests = _Tests;
 /*
 static TestSet solo[] = {
     {
-        "MemCtx Tests",
-        MemCtx_Tests,
-        "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
+        "Serve",
+        Serve_Tests,
+        "Basic CycleServe network server initialization tests.",
         FEATURE_COMPLETE,
     },
     {
