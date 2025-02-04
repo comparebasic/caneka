@@ -37,7 +37,7 @@ static status Roebling_RunMatches(Roebling *rbl){
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
                  if(StrSnipStr_Total(mt->backlog, (STRSNIP_CONTENT)) == 0
-                    && StrSnipStr_Total(mt->backlog, (STRSNIP_GAP)) == 0){
+                    && StrSnipStr_Total(mt->backlog, (STRSNIP_GAP)) == 0 && (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
                     Fatal("No increment value for successful match", TYPE_PATMATCH);
                  }
 

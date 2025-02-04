@@ -282,6 +282,9 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                     mt->pat.curDef++;
                     continue;
                 }
+            }else if((def->flags & PAT_TERM) == 0){
+                mt->pat.curDef++;
+                continue;
             }
 miss:
             mt->type.state &= ~PROCESSING;

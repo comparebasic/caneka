@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 PatCharDef betweenDef[] = {
-    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, KEY_ESCAPE, KEY_ESCAPE},
+    {PAT_KO|PAT_KO_TERM, KEY_ESCAPE, KEY_ESCAPE},
     patText,
     {PAT_END, 0, 0},
 };
@@ -18,7 +18,7 @@ PatCharDef ansiEscapeDef[] = {
 };
 
 PatCharDef ansiStartDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '[', '['},
+    {PAT_TERM, '[', '['},
     {PAT_END, 0, 0},
 };
 
@@ -54,11 +54,13 @@ static status start(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)betweenDef, TERMIO_TEXT, TERMIO_CMD);
+        (PatCharDef*)betweenDef, TERMIO_TEXT, TERMIO_CMD_TYPE);
+    Match *mt = Roebling_LatestMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)textDef, TERMIO_TEXT, TERMIO_START);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)betweenDef, TERMIO_ESCAPE, TERMIO_CMD);
+        (PatCharDef*)betweenDef, TERMIO_ESCAPE, TERMIO_CMD_TYPE);
 
     return r;
 }
@@ -86,7 +88,7 @@ static status values(MemCtx *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)ansiSepDef, TERMIO_SEP, TERMIO_VALUE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)ansiCmdDef, TERMIO_CMD, TERMIO_VALUE);
+        (PatCharDef*)ansiCmdDef, TERMIO_CMD, TERMIO_START);
 
     return r;
 }

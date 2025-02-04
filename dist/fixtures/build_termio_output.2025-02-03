@@ -1,4 +1,4 @@
-[34m[Cleaning build/*][0m
+[34m[Cleaning build][0m
 [33mMaking Directory build/libcaneka[0m
 [35mmkdir [0m[35m-p [0m[35mbuild/libcaneka [0m
 [33mMaking Directory build/libcaneka/mem[0m

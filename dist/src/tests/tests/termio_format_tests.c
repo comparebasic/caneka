@@ -3,9 +3,16 @@
 
 #define TERMIO_TEST_PATH "./dist/fixtures/build_termio_output.2025-02-03" 
 
+static word _captureKey;
+static String *_s;
+
 static status capture(word captureKey, int matchIdx, String *s, Abstract *source){
+    /*
     DPrint((Abstract *)s, COLOR_YELLOW, 
-        "TermIoCaptured: %s", Class_ToString(captureKey)); 
+        "TermIoCaptured(%s)", Class_ToString(captureKey)); 
+    */
+    _captureKey = captureKey;
+    _s = s;
     return SUCCESS;
 }
 
@@ -22,10 +29,30 @@ status TermIoFormat_Tests(MemCtx *gm){
 
     Roebling *rbl = TermIo_RblMake(m, file->data, capture, NULL);
 
-    DPrint((Abstract *)rbl, COLOR_PURPLE, "Rbl: ");
-    Roebling_RunCycle(rbl);
-    Roebling_RunCycle(rbl);
-    DPrint((Abstract *)rbl, COLOR_PURPLE, "Rbl: ");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_TEXT && String_EqualsBytes(_s, bytes("")), "First is empty text");
+
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_MODE && String_EqualsBytes(_s, bytes("[")), "Then Command Mode '['");
+
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_NUM && String_EqualsBytes(_s, bytes("34")), "Then the number '34'");
+
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_CMD && String_EqualsBytes(_s, bytes("m")), "Then the color comand 'm'");
+
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_TEXT && String_EqualsBytes(_s, bytes("[Cleaning build]")), "Followed by some text %s/'%s'", Class_ToString(_captureKey), String_ToChars(DebugM, _s));
 
     MemCtx_Free(m);
 

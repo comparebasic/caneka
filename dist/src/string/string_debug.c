@@ -1,19 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-char *Class_ToString(cls type){
-    if(type <= _TYPE_CORE_END){
-       return TypeStrings[type]; 
-    }else{
-        return "TYPE_unknown";
-    }
-}
-
-char *State_ToChars(status state){
-    return String_ToChars(DebugM, State_ToString(DebugM, state));
-}
-
-
 void StrSnipString_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)asIfc(a, TYPE_STRING);
     IterStr it;

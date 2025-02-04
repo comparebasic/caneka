@@ -59,6 +59,7 @@ char *TypeStrings[] = {
     "TYPE_NESTED_SPAN",
     "TYPE_TABLE",
     "TYPE_POLL_MAP_SPAN",
+    "TYPE_FLAG_MAP_SPAN",
     "_TYPE_SPAN_END",
     "TYPE_STRRAY",
     "TYPE_COORDS",
@@ -137,6 +138,7 @@ char *TypeStrings[] = {
     "TYPE_LANG_CDOC",
     "_TERMIO_START",
     "TERMIO_START",
+    "TERMIO_ESCAPE",
     "TERMIO_BETWEEN",
     "TERMIO_TEXT",
     "TERMIO_CMD_TYPE",
@@ -151,3 +153,17 @@ char *TypeStrings[] = {
     "_TYPE_APPS_END",
     NULL,
 };
+
+char *Class_ToString(cls type){
+    if(type <= _TYPE_APPS_END){
+       return TypeStrings[type]; 
+    }else{
+        return "TYPE_unknown";
+    }
+}
+
+char *State_ToChars(status state){
+    return String_ToChars(DebugM, State_ToString(DebugM, state));
+}
+
+
