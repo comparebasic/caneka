@@ -6,3 +6,4 @@ typedef status (*FileFunc)(MemCtx *m, String *path, String *file, Abstract *sour
 
 status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *source);
 status Dir_CheckCreate(MemCtx *m, String *path);
+status Dir_Destroy(MemCtx *m, String *path);

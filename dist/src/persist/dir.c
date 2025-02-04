@@ -1,8 +1,24 @@
 #include <external.h>
 #include <caneka.h>
 
+static rmDir(MemCtx *m, String *path, Abstract *source){
+    return unlink(String_ToChars(m, path) == 0 ? SUCCESS : ERROR;
+}
+
+static rmFile(MemCtx *m, String *path, String *file, Abstract *source){
+    String *fpath = String_Clone(m, path); 
+    String_AddBytes(m, fpath, bytes("/"), 1);
+    String_Add(m, fpath, file);
+    return unlink(String_ToChars(m, fpath) == 0 ? SUCCESS : ERROR;
+}
+
+status Dir_Destroy(MemCtx *m, String *path){
+    return DirClimb(m, path, rmDir, rmFile, NULL);
+}
+
 status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *source){
     DebugStack_Push(path, path->type.of); 
+    status r = READY;
     struct dirent *ent;
     DIR *d = opendir((char *)path->bytes);
     if(d != NULL){
@@ -15,20 +31,20 @@ status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *
                 String_Add(m, s, path);
                 String_AddBytes(m, s, bytes("/"), 1);
                 String_AddBytes(m, s, bytes(ent->d_name), strlen(ent->d_name));
-                if(dir != NULL){
-                    dir(m, s, source);
-                }
                 Dir_Climb(m, s, dir, file, source);
+                if(dir != NULL){
+                    r |= dir(m, s, source);
+                }
             }else{
-                file(m, path, String_Make(m, bytes(ent->d_name)), source);
+                r | = file(m, path, String_Make(m, bytes(ent->d_name)), source);
             }
         }
         closedir(d);
         DebugStack_Pop();
-        return SUCCESS;
+        return r|SUCCESS;
     }else{
         DebugStack_Pop();
-        return ERROR;
+        return r|ERROR;
     }
 }
 
