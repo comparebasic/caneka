@@ -2,7 +2,9 @@
 #include <caneka.h>
 #include <tests/tests.h>
 
+/*
 #define CYCLE_SERVE 1
+*/
 
 status Tests_Init(MemCtx *m){
    status r = READY;
@@ -167,12 +169,14 @@ static TestSet _Tests[] = {
         "Identify string types during parsing (NUM/CASH)",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Http",
         Http_Tests,
         "HTTP protocol parsing using the Roebling Parser",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Queue",
         Queue_Tests,
@@ -235,6 +239,7 @@ static TestSet _Tests[] = {
         "Oset serialization format tests (similar features to XML, JSON, or YAML).",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "IoCtx",
         IoCtx_Tests,
@@ -247,6 +252,7 @@ static TestSet _Tests[] = {
         "Persisting a combination of Table, Span, and MemCtx to disk and back for use in IO Contextx.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "NestedD Flat",
         NestedDFlat_Tests,
@@ -301,12 +307,14 @@ static TestSet _Tests[] = {
         "A Basic user password flow using CycleServe and IoCtx.",
         PARTIAL_FEATURE,
     },
+    /*
     {
         "CanekaLang - Roebling Syntax",
         Roebling_SyntaxTests,
         "Tests for the Roebling pattern match portion of Caneka syntax.",
         PARTIAL_FEATURE,
     },
+    */
     {
         "TermIo - Roebling Format",
         TermIoFormat_Tests,

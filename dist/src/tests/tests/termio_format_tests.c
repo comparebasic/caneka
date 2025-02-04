@@ -54,6 +54,39 @@ status TermIoFormat_Tests(MemCtx *gm){
     } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
     r |= Test(_captureKey == TERMIO_TEXT && String_EqualsBytes(_s, bytes("[Cleaning build]")), "Followed by some text %s/'%s'", Class_ToString(_captureKey), String_ToChars(DebugM, _s));
 
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_MODE && String_EqualsBytes(_s, bytes("[")), "Set mode");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_NUM && String_EqualsBytes(_s, bytes("0")), "Set no color (0)");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_CMD && String_EqualsBytes(_s, bytes("m")), "Set mode is color");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_TEXT && String_EqualsBytes(_s, bytes("\n")), "Text content for newline");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_MODE && String_EqualsBytes(_s, bytes("[")), "Set mode");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_NUM && String_EqualsBytes(_s, bytes("33")), "Color yellow (33)");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_CMD && String_EqualsBytes(_s, bytes("m")), "Set color cmd");
+    do {
+        Roebling_RunCycle(rbl);
+    } while((rbl->type.state & (ROEBLING_NEXT|NOOP)) == 0);
+    r |= Test(_captureKey == TERMIO_TEXT && String_EqualsBytes(_s, bytes("Making Directory build/libcaneka")), "Have expected text %s/'%s'", Class_ToString(_captureKey),String_ToChars(DebugM, _s));
+
     MemCtx_Free(m);
 
     DebugStack_Pop();
