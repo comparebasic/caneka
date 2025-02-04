@@ -29,6 +29,7 @@ static status Roebling_RunMatches(Roebling *rbl){
         noopCount = 0;
         while((Iter_Next(&it) & END) == 0){
             mt = (Match *)Iter_Get(&it);
+            DebugStack_SetRef(mt, mt->type.of);
             incr = TRUE;
             if(DEBUG_PATMATCH){
                 String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);

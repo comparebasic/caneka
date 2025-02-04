@@ -185,8 +185,8 @@ static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 static void HttpProto_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     HttpProto *proto = (HttpProto *)as(a, TYPE_HTTP_PROTO);
     printf("\x1b[%dmHttpProto<%s path='%s' ", color, HttpProto_MethodToChars(proto->method), proto->path != NULL ? (char *)String_ToEscaped(DebugM, proto->path)->bytes : "");
-    Debug_Print(proto->body, 0, "body=", color, TRUE);
-    Debug_Print(proto->headers_tbl, 0, " headers=", color, TRUE);
+    Debug_Print(proto->body, 0, "body=", color, FALSE);
+    Debug_Print(proto->headers_tbl, 0, " headers=", color, FALSE);
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
@@ -225,7 +225,11 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     }else if((def->flags & SPAN_INLINE) == 0 && t->type.of != 0){
                         Debug_Print((void *)t, 0, "", color, FALSE);
                     }else{
-                        Bits_Print((byte *)a, sizeof(void *)*def->slotSize, "", color, FALSE);
+                        if(def->slotSize > 1){
+                            printf("\x1b[%dm%ldbytes", color, def->slotSize*sizeof(void *));
+                        }else{
+                            Bits_Print((byte *)a, sizeof(void *)*def->slotSize, "", color, FALSE);
+                        }
                     }
                 }
                 printf(" ");

@@ -62,7 +62,9 @@ void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extende
         Debug_Print((void *)mt->pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[%dm%sMatch<state=%s>\x1b[0m", color, msg, State_ToChars(mt->type.state));
+        printf("\x1b[%dm%sMatch<state=%s ", color, msg, State_ToChars(mt->type.state));
+        Debug_Print((void *)mt->pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
+        printf("\x1b[%dm>\x1b[0m", color);
     }
 }
 

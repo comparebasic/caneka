@@ -8,6 +8,7 @@ static char *req1_cstr = "GET /home HTTP/1.1\r\nContent-Leng";
 static char *req2_cstr = "th: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";  
 
 status Serve_Tests(MemCtx *gm){
+    DebugStack_Push("Serve_Tests", TYPE_CSTR);
     status r = READY;
     long base = MemCount();
     MemCtx *m = MemCtx_Make();
@@ -33,10 +34,13 @@ status Serve_Tests(MemCtx *gm){
 
     Serve_Stop(sctx);
     MemCtx_Free(m);
+
+    DebugStack_Pop();
     return r;
 }
 
 status ServeHandle_Tests(MemCtx *gm){
+    DebugStack_Push("ServeHandle_Tests", TYPE_CSTR);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -80,10 +84,12 @@ status ServeHandle_Tests(MemCtx *gm){
     Serve_Stop(sctx);
 
     MemCtx_Free(m);
+    DebugStack_Pop();
     return r;
 }
 
 status ServeChunked_Tests(MemCtx *gm){
+    DebugStack_Push("ServeHandle_Tests", TYPE_CSTR);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -132,6 +138,8 @@ status ServeChunked_Tests(MemCtx *gm){
     Serve_Stop(sctx);
 
     MemCtx_Free(m);
+
+    DebugStack_Pop();
     return r;
 }
 
@@ -144,6 +152,8 @@ int atOncePids[MULTIPLE_COUNT] = {
 };
 
 status ServeMultiple_Tests(MemCtx *gm){
+    DebugStack_Push("ServeMultiple_Tests", TYPE_CSTR);
+
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -193,5 +203,7 @@ status ServeMultiple_Tests(MemCtx *gm){
     Serve_Stop(sctx);
 
     MemCtx_Free(m);
+
+    DebugStack_Pop();
     return r;
 }

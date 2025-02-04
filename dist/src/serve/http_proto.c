@@ -18,9 +18,14 @@ static char *toLog(Req *req){
 }
 
 static status reqHttpParser_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
-    HttpProto *proto = (HttpProto *)source;
+    DebugStack_Push("reqHttpParser_Capture", TYPE_CSTR);
+    HttpProto *proto = (HttpProto *)as(source, TYPE_HTTP_PROTO);
+
+    if(DEBUG_HTTP){
+        printf("\x1b[%dmHttpCaptured: %s", DEBUG_HTTP, Class_ToString(captureKey));
+    }
     if(captureKey == HTTP_METHOD){
-        proto->method = Lookup_GetKey((Lookup *)proto->def->custom, matchIdx);
+        proto->method = Lookup_GetKey((Lookup *)proto->def->methods, matchIdx);
     }else if(captureKey == HTTP_PATH){
         proto->path = s;
     }else if(captureKey == HTTP_HEADER){
@@ -30,11 +35,12 @@ static status reqHttpParser_Capture(word captureKey, int matchIdx, String *s, Ab
     }
 
     if(DEBUG_HTTP){
-        Debug_Print(proto, 0, "HttpCaptured: ", DEBUG_HTTP, TRUE);
+        Debug_Print(proto, 0, " ", DEBUG_HTTP, TRUE);
         printf("\n");
     }
 
     status r = SUCCESS;
+    DebugStack_Pop();
     return r;
 }
 
