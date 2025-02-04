@@ -13,7 +13,7 @@ Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract 
         String_Add(m, item->key, item->parent->key);
         char *cstr = "_pat";
         String_AddBytes(m, item->key, bytes(cstr), strlen(cstr));
-        String_AddInt(m, item->key, p->nvalues-1);
+        String_AddInt(m, item->key, p->nvalues);
 
         Span_Add(p, (Abstract *)item);
     }

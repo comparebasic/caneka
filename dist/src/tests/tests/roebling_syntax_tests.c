@@ -38,9 +38,9 @@ status Roebling_SyntaxTests(MemCtx *gm){
     String_AddBytes(m, exp, bytes(cstr), strlen(cstr));
 
     r |= Test(String_EqualsBytes(csource, bytes(cstr)), "Pattern hi-there produces expected C source code");
-
-    Debug_Print((void *)csource, 0, "CSource: ", COLOR_PURPLE, TRUE);
-    printf("\n");
+    if(r & ERROR){
+        printf("\x1b[%dmr = %s\n'%s'\nvs\n'%s'\x1b[0m\n", COLOR_RED, State_ToChars(r), String_ToChars(DebugM, csource), cstr);
+    }
 
     /* line
     s = String_Make(m, bytes("/type(\\n -> ,ONE,TWO,THREE), ( *), msg(.+[\\n]) -> type/\n"));
