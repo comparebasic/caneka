@@ -1,19 +1,18 @@
 typedef struct http_proto {
     Type type;
     char *(*toLog)(struct req *req);
+    ProtoDef *def;
+    Abstract *custom;
+    /* end proto props */
     Span *headers_tbl;
     String *body;
-    Lookup *methods;
-    /* end proto props */
     String *path;
     String *sid;
     byte method;
     String *host;
-    Abstract *session;
     /* mid parsing */
     i64 contentLength;
     String *nextHeader;
-    ProtoDef *def;
 } HttpProto;
 
 struct protodef *HttpProtoDef_Make(MemCtx *m);

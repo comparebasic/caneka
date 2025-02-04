@@ -33,8 +33,10 @@ void setTestCapture(TestCapture *capture){
 }
 
 static status testHttpParser_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
+    DebugStack_Push("testHttpParser_Capture", TYPE_CSTR); 
+
     if(DEBUG_HTTP){
-        printf("%d\n", captureKey);
+        printf("%s\n", Class_ToString(captureKey));
         Debug_Print(s, 0, "TestCaptured: ", DEBUG_HTTP, TRUE);
         printf("\n");
     }
@@ -49,6 +51,7 @@ static status testHttpParser_Capture(word captureKey, int matchIdx, String *s, A
         r |= Test(String_EqualsBytes(s, b), "Expected content '%s', have '%s'", b, String_ToEscaped(DebugM, s)->bytes);
     }
     position++;
+    DebugStack_Pop();
     return NOOP;
 }
 
@@ -69,6 +72,7 @@ TestCapture expected1[] = {
 };
 
 status Http_Tests(MemCtx *gm){
+    DebugStack_Push("Http_Tests", TYPE_CSTR); 
     r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -81,7 +85,6 @@ status Http_Tests(MemCtx *gm){
         "\r\n"
     ));
 
-
     ProtoDef *def = (ProtoDef *)HttpProtoDef_Make(m);
     Proto *proto = HttpProto_Make(m, def, 0);
     Roebling *rbl = HttpParser_Make(m, s, (Abstract *)proto);
@@ -91,14 +94,13 @@ status Http_Tests(MemCtx *gm){
     for(int i = 0; i < 13; i++){
         Roebling_RunCycle(rbl);
     }
-    Debug_Print((void *)rbl, 0, "Rbl: ", COLOR_PURPLE, TRUE);
 
-    return r;
     r |= Test(position == 12, "Reached end of test captures, have %d", position);
     r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling HttpParser has state SUCCESS, have '%s'", State_ToChars(rbl->type.state));
 
     MemCtx_Free(m);
 
+    DebugStack_Pop();
     return r;
 }
 

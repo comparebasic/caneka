@@ -107,6 +107,6 @@ ProtoDef *HttpProtoDef_Make(MemCtx *m){
         NULL,
         (FlagMaker)HttpProto_Make); 
 
-    def->custom = (Abstract *)lk;
+    def->methods = lk;
     return def;
 }

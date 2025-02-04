@@ -61,7 +61,7 @@ static word endDef[] = {
 static status method(MemCtx *m, Roebling *rbl){
     HttpProto *proto = (HttpProto *)rbl->source;
     Roebling_ResetPatterns(rbl);
-    return Roebling_SetLookup(rbl, proto->methods, HTTP_METHOD, -1); 
+    return Roebling_SetLookup(rbl, proto->def->methods, HTTP_METHOD, -1); 
 }
 
 static status path(MemCtx *m, Roebling *rbl){
@@ -132,11 +132,12 @@ Roebling *HttpParser_Make(MemCtx *m, String *s, Abstract *source){
         s = String_Init(m, STRING_EXTEND);
     }
 
-    return Roebling_Make(m, TYPE_ROEBLING,
+    Roebling *rbl = Roebling_Make(m, TYPE_ROEBLING,
         parsers_do,
         desc,
         s,
         httpParser_Capture,
         source 
     ); 
+    return rbl;
 }

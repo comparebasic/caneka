@@ -251,6 +251,7 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int 
 }
 
 status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump){
+    DebugStack_Push("Roebling_SetLookup", TYPE_CSTR); 
     for(int i = 0; i < lk->values->nvalues; i++){
         Match *mt = Span_ReserveNext(rbl->matches);
         String *s = (String *)Span_Get(lk->values, i);
@@ -269,6 +270,7 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump){
             mt->jump = Roebling_GetMarkIdx(rbl, jump);
         }
     }
+    DebugStack_Pop();
     return SUCCESS;
 }
 

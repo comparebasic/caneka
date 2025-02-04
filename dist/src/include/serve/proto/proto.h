@@ -8,6 +8,8 @@ typedef struct protodef {
     Abstract *source;
     GetDelayFunc getDelay;
     Abstract *custom;
+    /* end protodef */
+    Lookup *methods;
 } ProtoDef;
 
 typedef struct proto {
