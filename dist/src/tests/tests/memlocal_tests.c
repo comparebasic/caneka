@@ -2,19 +2,25 @@
 #include <caneka.h>
 
 status MemLocal_Tests(MemCtx *gm){
+    DebugStack_Push("MemLocal_Test", TYPE_CSTR);
     status r = READY;
-    /*
     MemCtx *m = MemCtx_Make();
     Span *ml = MemLocal_Make();
 
     String *s = String_Make(ml->m, bytes("Hidy Ho!"));
-    Table_Set(ml, String_Make(ml->m, bytes("keyHi")), (Abstract *)s);
+    Table_Set(ml, (Abstract *)String_Make(ml->m, bytes("keyHi")), (Abstract *)s);
 
+    char buff[PATH_BUFFLEN];
+    String *path = String_Make(m, bytes(getcwd(buff, PATH_BUFFLEN)));
+    char *cstr = "/tmp/mstore";
+    String_AddBytes(m, path, bytes(cstr), strlen(cstr));
+
+    MemLocal_Persist(m, ml, path, NULL);
+
+    /*
     String *key = String_Make(m, bytes("keyHi"));
-    String *exp = (String *)Table_Get(ml->tbl, (Abstract *)key);
+    String *exp = (String *)Table_Get(ml, (Abstract *)key);
     r |= Test(String_Equals(s, exp), "Retrieved string equals, even though it was saved with local coords, have '%s'", exp->bytes);
-
-    IoCtx *root = IoCtxTests_GetRootCtx(m);
 
     String *mlName = String_Make(m, bytes("memlocal"));
     IoCtx *mlctx = IoCtx_Make(m, mlName, NULL, root);
@@ -34,10 +40,11 @@ status MemLocal_Tests(MemCtx *gm){
     DIR* dir = opendir(onePath_cstr);
     dir = opendir(onePath_cstr);
     r |= Test(dir == NULL, "MemLocal dir destroyed %s", onePath_cstr);
-
-    IoCtx_Destroy(m, mlctx, NULL);
+    */
 
     MemCtx_Free(ml->m);
-    */
+    MemCtx_Free(m);
+
+    DebugStack_Pop();
     return r;
 }

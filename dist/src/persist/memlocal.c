@@ -22,6 +22,19 @@ static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
     return r;
 }
 
+status MemLocal_Init(MemCtx *m){
+    if(MemLocalToChain == NULL){
+        Lookup *funcs = Lookup_Make(m, _TYPE_START, MemLocal_addTo, NULL);
+        MemLocalToChain = Chain_Make(m, funcs);
+
+        funcs = Lookup_Make(m, _TYPE_START, MemLocal_addFrom, NULL);
+        MemLocalFromChain = Chain_Make(m, funcs);
+        return SUCCESS;
+    }
+
+    return NOOP;
+}
+
 status MemLocal_GetLocal(MemCtx *m, void *addr, LocalPtr *lptr){
     memset(lptr, 0, sizeof(LocalPtr));
     MemSlab *sl = MemCtx_GetSlab(m, addr);
@@ -46,46 +59,29 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
     return NULL;
 }
 
-Span *MemLocal_Load(MemCtx *m, String *path, IoCtx *ctx){
+Span *MemLocal_Load(MemCtx *m, String *path){
     status r = READY;
     Iter it;
 
-    MemCtx *ml = MemCtx_Make();
-    String *fpath = IoCtx_GetPath(m, ctx, path);
+    MemCtx *mlm = MemCtx_Make();
+    String_AddBytes(m, path, bytes("/memslab."), strlen("/memslab."));
+    i64 l = path->length;
 
-    String *idxPath = String_Clone(m, fpath);
-    String_AddBytes(m, idxPath, bytes("/"), 1);
-    String_AddBytes(m, idxPath, bytes(INDEX_PATHNAME), strlen(INDEX_PATHNAME));
-    File *indexFile = File_Make(m, idxPath, NULL, NULL);
-    indexFile->abs = indexFile->path;
-    r |= File_Load(m, indexFile, NULL);
-    if((r & ERROR) != 0){
-        Fatal("Unable to load memlocal indexFile", TYPE_MEMLOCAL);
-    }
-    Span *index = (Span *)as(Abs_FromOset(m, indexFile->data), TYPE_TABLE);
-
-    Span *slabFnames = Span_Make(m, TYPE_SPAN);
-    slabFnames->type.state |= SPAN_ORDERED;
-    r |= Dir_Gather(m, path, slabFnames);
-    Iter_Init(&it, slabFnames);
+    int i = 0;
     File slabFile;
-    while((Iter_Next(&it) & END) == 0){
-        String *fname = (String *)Iter_Get(&it);
-        if(fname != NULL 
-                && asIfc(fname, TYPE_STRING) 
-                && !String_EqualsBytes(fname, bytes(INDEX_PATHNAME))){
-            File_Init(&slabFile, fname, NULL, NULL);
-            r |= File_Load(m, &slabFile, NULL);
-            if((r & ERROR) != 0){
-                Fatal("Unable to load memlocal slabs", TYPE_MEMLOCAL);
-            }
-            MemSlab_Attach(ml, (MemSlab *)String_ToChars(m, slabFile.data));
-        }
+    String_Add(m, path, String_FromInt(m, sl->idx));
+    File_Init(&slabFile, path, NULL, NULL);
+    slabFile.abs = slabFile.path;
+    slabFile.data = String_Init(m, sizeof(MemSlab));
+    while((File_Stream(m, &slabFile, access, NULL, NULL) & NOOP) == 0){
+        MemSlab_Attach(mlm, (MemSlab *)String_ToChars(m, slabFile.data));
     }
 
-    Iter_Init(&it, index);
+    Span *ml = as(mlm->start_sl->bytes, TYPE_TABLE);
+
+    Iter_Init(&it, ml);
     while((Iter_Next(&it) & END) == 0){
-        MemLocalItem *item = as(Iter_Get(&it), TYPE_MEMLOCAL_ITEM);
+        MemLocalItem *item = asIfc(Iter_Get(&it), TYPE_MEMLOCAL_ITEM);
         if(item != NULL){
             DoFunc func = Chain_Get(MemLocalFromChain, item->typeOf);
             if(func == NULL){
@@ -99,24 +95,26 @@ Span *MemLocal_Load(MemCtx *m, String *path, IoCtx *ctx){
         }
     }
 
-    return as(ml->start_sl->bytes, TYPE_TABLE);
+    return ml;
 }
 
 status MemLocal_Destroy(MemCtx *m, String *path, IoCtx *ctx){
     return Dir_Destroy(m, IoCtx_GetPath(m, ctx, path));
 }
 
-status MemLocal_Persist(MemCtx *m, Span *tbl, String *path, IoCtx *ctx){
+status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
+    DebugStack_Push("MemLocal_Persist", TYPE_CSTR);
     status r = READY;
 
     Iter it;
-    Iter_Init(&it, tbl);
+    Iter_Init(&it, ml);
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
         if(a != NULL){
             DoFunc func = Chain_Get(MemLocalToChain, a->type.of);
             if(func == NULL){
                 Fatal("Unable to find conversion to MemLocal Abstract", TYPE_MEMLOCAL);
+                DebugStack_Pop();
                 return ERROR;
             }
             r |= func(m, a); 
@@ -126,30 +124,30 @@ status MemLocal_Persist(MemCtx *m, Span *tbl, String *path, IoCtx *ctx){
         }
     }
 
-    String *fname = IoCtx_GetPath(m, ctx, path);
-    char *path_cstr = String_ToChars(m, IoCtx_GetPath(m, ctx, path));
+    char *path_cstr = String_ToChars(m, path);
     DIR* dir = opendir(path_cstr);
     if(dir){
         closedir(dir);
     }else if(ENOENT == errno){
         if(mkdir(path_cstr, PERMS) != 0){
             Fatal("Unable to make dir", TYPE_IOCTX);
+            DebugStack_Pop();
             return ERROR;
         }
     }
 
-    String_AddBytes(m, fname, bytes("/memslab."), strlen("/memslab."));
-    i64 l = fname->length;
+    String_AddBytes(m, path, bytes("/memslab."), strlen("/memslab."));
+    i64 l = path->length;
 
     File f;
-    MemSlab *sl = m->start_sl;
+    MemSlab *sl = ml->m->start_sl;
     while(sl != NULL){
-        File_Init(&f, fname, ctx->access, NULL);
-        fname->length = l;
-        String_Add(m, fname, String_FromInt(m, sl->idx));
+        File_Init(&f, path, access, NULL);
+        path->length = l;
+        String_Add(m, path, String_FromInt(m, sl->idx));
 
-        File_Init(&f, fname, ctx->access, NULL);
-        f.abs = IoCtx_GetPath(m, ctx, fname);
+        File_Init(&f, String_Clone(m, path), access, NULL);
+        f.abs = f.path;
         f.data = String_Init(m, sizeof(MemSlab));
 
         String_AddBytes(m, f.data, (byte *)sl, sizeof(MemSlab));
@@ -159,20 +157,8 @@ status MemLocal_Persist(MemCtx *m, Span *tbl, String *path, IoCtx *ctx){
         sl = sl->next;
     }
 
+    DebugStack_Pop();
     return r;
-}
-
-status MemLocal_Init(MemCtx *m){
-    if(MemLocalToChain == NULL){
-        Lookup *funcs = Lookup_Make(m, _TYPE_START, MemLocal_addTo, NULL);
-        MemLocalToChain = Chain_Make(m, funcs);
-
-        funcs = Lookup_Make(m, _TYPE_START, MemLocal_addFrom, NULL);
-        MemLocalFromChain = Chain_Make(m, funcs);
-        return SUCCESS;
-    }
-
-    return NOOP;
 }
 
 Span *MemLocal_Make(){

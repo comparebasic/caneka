@@ -333,14 +333,15 @@ static TestSet _Tests[] = {
     },
 };
 
-TestSet *Tests = _Tests;
-
 /*
+TestSet *Tests = _Tests;
+*/
+
 static TestSet solo[] = {
     {
-        "Serve",
-        Serve_Tests,
-        "Basic CycleServe network server initialization tests.",
+        "MemLocal",
+        MemLocal_Tests,
+        "Persisting a combination of Table, Span, and MemCtx to disk and back for use in IO Contextx.",
         FEATURE_COMPLETE,
     },
     {
@@ -352,4 +353,3 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
-*/
