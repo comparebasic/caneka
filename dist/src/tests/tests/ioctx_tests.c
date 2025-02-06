@@ -43,13 +43,13 @@ status IoCtx_Tests(MemCtx *gm){
     r |= Test(l == file->data->length, "file length match, have %ld", l);
     r |= Test(String_EqualsBytes(file->data, bytes(buff)), "String content matches, have: '%s'", buff);
 
-    MemLocal_Set(one->mstore, String_Make(one->mstore->m, bytes("key")), (Abstract *)String_Make(one->mstore->m, bytes("value")));
+    Table_Set(one->mstore, (Abstract *)String_Make(one->mstore->m, bytes("key")), (Abstract *)String_Make(one->mstore->m, bytes("value")));
     IoCtx_Persist(m, one);
 
     IoCtx one2;
     IoCtx_Open(m, &one2, name, NULL, root);
 
-    String *mlValue = (String *)Table_Get(one2.mstore->tbl, (Abstract *)String_Make(m, bytes("key")));
+    String *mlValue = (String *)Table_Get(one2.mstore, (Abstract *)String_Make(m, bytes("key")));
     File *fileOne = (File *)Table_Get(one2.files, (Abstract *)fname);
 
     r |= Test(Ifc_Match(mlValue->type.of, TYPE_STRING), "MemLocal value from ctx matches type, have '%s'", Class_ToString(mlValue->type.of));

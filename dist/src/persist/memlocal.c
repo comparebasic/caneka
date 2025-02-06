@@ -4,7 +4,7 @@
 Chain *MemLocalToChain = NULL;
 Chain *MemLocalFromChain = NULL;
 
-static status MemLocal_addTo(MemCtx *m, DoFunc from, DoFunc to){
+static status MemLocal_addTo(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING, (void *)String_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_ToLocal);
@@ -13,7 +13,7 @@ static status MemLocal_addTo(MemCtx *m, DoFunc from, DoFunc to){
     return r;
 }
 
-static status MemLocal_addFrom(MemCtx *m, DoFunc from, DoFunc to){
+static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING, (void *)String_FromLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_FromLocal);
@@ -39,7 +39,7 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
     MemSlab *sl = m->start_sl;
     while(sl != NULL){
         if(sl->idx == lptr->slabIdx){
-            return sl->bytes+lptr->offset;
+            return (Abstract *)(sl->bytes+lptr->offset);
         }
         sl = sl->next;
     }
@@ -48,37 +48,49 @@ Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
 
 Span *MemLocal_Load(MemCtx *m, String *path, IoCtx *ctx){
     status r = READY;
+    Iter it;
 
     MemCtx *ml = MemCtx_Make();
-    Span *tbl = Span_Make(ml, TYPE_TABLE);
-
     String *fpath = IoCtx_GetPath(m, ctx, path);
 
     String *idxPath = String_Clone(m, fpath);
     String_AddBytes(m, idxPath, bytes("/"), 1);
-    String_Add(m, idxPath, bytes(INDEX_PATHNAME), strlen(INDEX_PATHNAME));
-    File *index = File_Make(m, idxPath, NULL, NULL);
-    index->abs = index->path;
-    r |= File_Load(m, index, NULL);
+    String_AddBytes(m, idxPath, bytes(INDEX_PATHNAME), strlen(INDEX_PATHNAME));
+    File *indexFile = File_Make(m, idxPath, NULL, NULL);
+    indexFile->abs = indexFile->path;
+    r |= File_Load(m, indexFile, NULL);
     if((r & ERROR) != 0){
-        Fatal("Unable to load memlocal index", TYPE_MEMLOCAL);
+        Fatal("Unable to load memlocal indexFile", TYPE_MEMLOCAL);
     }
-    Span *tbl = (Span *)as(Abs_FromOset(m, index->data), TYPE_TABLE);
+    Span *index = (Span *)as(Abs_FromOset(m, indexFile->data), TYPE_TABLE);
 
-    r |= Dir_Climb(m, fpath, NULL, setMl, (Abstract *ml));
-    if((r & ERROR) != 0){
-        Fatal("Unable to load memlocal slabs", TYPE_MEMLOCAL);
+    Span *slabFnames = Span_Make(m, TYPE_SPAN);
+    slabFnames->type.state |= SPAN_ORDERED;
+    r |= Dir_Gather(m, path, slabFnames);
+    Iter_Init(&it, slabFnames);
+    File slabFile;
+    while((Iter_Next(&it) & END) == 0){
+        String *fname = (String *)Iter_Get(&it);
+        if(fname != NULL 
+                && asIfc(fname, TYPE_STRING) 
+                && !String_EqualsBytes(fname, bytes(INDEX_PATHNAME))){
+            File_Init(&slabFile, fname, NULL, NULL);
+            r |= File_Load(m, &slabFile, NULL);
+            if((r & ERROR) != 0){
+                Fatal("Unable to load memlocal slabs", TYPE_MEMLOCAL);
+            }
+            MemSlab_Attach(ml, (MemSlab *)String_ToChars(m, slabFile.data));
+        }
     }
 
-    Iter it;
-    Iter_Init(&it, tbl);
+    Iter_Init(&it, index);
     while((Iter_Next(&it) & END) == 0){
         MemLocalItem *item = as(Iter_Get(&it), TYPE_MEMLOCAL_ITEM);
         if(item != NULL){
-            DoFunc func = Lookup_Get(MemLocalFromChain, item->typeOf);
+            DoFunc func = Chain_Get(MemLocalFromChain, item->typeOf);
             if(func == NULL){
                 Fatal("Unable to find conversion to MemLocal Abstract", TYPE_MEMLOCAL);
-                return ERROR;
+                return NULL;
             }
             r |= func(ml, item->a); 
             if((r & ERROR) != 0){
@@ -94,7 +106,7 @@ status MemLocal_Destroy(MemCtx *m, String *path, IoCtx *ctx){
     return Dir_Destroy(m, IoCtx_GetPath(m, ctx, path));
 }
 
-status MemLocal_Persist(MemCtx *m, Span *tbl, Span *path, IoCtx *ctx){
+status MemLocal_Persist(MemCtx *m, Span *tbl, String *path, IoCtx *ctx){
     status r = READY;
 
     Iter it;
@@ -102,7 +114,7 @@ status MemLocal_Persist(MemCtx *m, Span *tbl, Span *path, IoCtx *ctx){
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
         if(a != NULL){
-            DoFunc func = Lookup_Get(MemLocalToChain, a->type.of);
+            DoFunc func = Chain_Get(MemLocalToChain, a->type.of);
             if(func == NULL){
                 Fatal("Unable to find conversion to MemLocal Abstract", TYPE_MEMLOCAL);
                 return ERROR;

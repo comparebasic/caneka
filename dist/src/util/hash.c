@@ -94,14 +94,14 @@ boolean Hashed_LocalEquals(MemCtx *m, Hashed *a, Hashed *b){
     if(a->id != b->id){
         return FALSE;
     }
-    return Abs_Eq(MemLocal_Trans(m, a->item), (void *)MemLocal_Trans(m, b->item));
+    return Abs_Eq(a->item, b->item);
 }
 
 boolean Hashed_ExternalEquals(MemCtx *m, Hashed *a, Hashed *b){
     if(a->id != b->id){
         return FALSE;
     }
-    return Abs_Eq(a->item, (void *)MemLocal_Trans(m, b->item));
+    return Abs_Eq(a->item, b->item);
 }
 
 

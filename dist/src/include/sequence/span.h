@@ -24,6 +24,7 @@ enum span_flags {
     SLAB_FULL = 1 << 9,
     SPAN_INLINE = 1 << 10,
     FLAG_SPAN_HAS_GAPS = 1 << 11,
+    SPAN_ORDERED = 1 << 12,
     SPAN_RAW = 1 << 15,
 };
 
@@ -60,6 +61,7 @@ Span *Span_Clone(MemCtx *m, Span *p);
 void *Span_Set(Span *p, int idx, Abstract *t);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
+int Span_AddOrdered(Span *p, Abstract *t);
 Span *Span_From(MemCtx *m, int count, ...);
 status Span_Run(MemCtx *m, Span *p, DoFunc func);
 status Span_Merge(Span *dest, Span *additional);

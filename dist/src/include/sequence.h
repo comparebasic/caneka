@@ -11,3 +11,4 @@
 #include "sequence/iter.h"
 #include "sequence/queue.h"
 #include "sequence/nestedd.h"
+#include "sequence/span_tolocal.h"

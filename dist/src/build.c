@@ -189,6 +189,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     "span.c",
     "spandef.c",
     "spanquery.c",
+    "span_tolocal.c",
     "table.c",
     "table_chain.c",
     NULL
@@ -217,6 +218,7 @@ static BuildSubdir stringobj = { "string", {
     "strsnip.c",
     "strsnipstr.c",
     "string_debug.c",
+    "string_tolocal.c",
     NULL
 }};
 
@@ -273,6 +275,7 @@ static BuildSubdir utilobj = { "util", {
     "boolean.c",
     "clone.c",
     "compare.c",
+    "cmp.c",
     "do.c",
     "hash.c",
     "human_present.c",
@@ -281,6 +284,8 @@ static BuildSubdir utilobj = { "util", {
     "result.c",
     "single.c",
     "time.c",
+    "single_tolocal.c",
+    "hashed_tolocal.c",
     NULL
 }};
 

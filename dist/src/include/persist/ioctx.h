@@ -9,7 +9,7 @@ typedef struct ioctx {
     String *abs;
     Access *access;
     struct ioctx *prior;
-    struct mem_local *mstore;
+    Span *mstore;
     Span *files;
 } IoCtx;
 

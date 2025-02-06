@@ -54,10 +54,6 @@ String *IoCtx_GetIndexName(MemCtx *m, IoCtx *ctx){
     return String_Make(m, bytes("index"));
 }
 
-String *IoCtx_GetMStorePath(MemCtx *m, IoCtx *ctx){
-    return IoCtx_GetPath(m, ctx, IoCtx_GetMStoreName(m, ctx));
-}
-
 String *IoCtx_GetMStoreName(MemCtx *m, IoCtx *ctx){
     return String_Make(m, bytes("mstore"));
 }
@@ -108,7 +104,7 @@ status IoCtx_Load(MemCtx *m, IoCtx *ctx){
     }
     closedir(dir);
 
-    ctx->mstore = MemLocal_Load(m, ctx);
+    ctx->mstore = MemLocal_Load(m, IoCtx_GetMStoreName(m, ctx), ctx);
     ioCtx_LoadFileList(m, ctx);
 
     return SUCCESS;
@@ -131,7 +127,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
         }
     }
 
-    r |= MemLocal_Persist(m, ctx->mstore, ctx);
+    r |= MemLocal_Persist(ctx->m, ctx->mstore, IoCtx_GetMStoreName(m, ctx), ctx);
     String *os = Oset_To(m, String_Make(m, bytes("index")), (Abstract *)ctx->files);
     File *index = File_Make(m, IoCtx_GetIndexName(m, ctx), NULL, NULL); 
     index->abs = IoCtx_GetPath(m, ctx, index->path);
@@ -162,7 +158,7 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     file.abs = IoCtx_GetPath(m, ctx, file.path);
     File_Delete(&file);
 
-    MemLocal_Destroy(m, ctx);
+    MemLocal_Destroy(m, IoCtx_GetMStoreName(m, ctx), ctx);
 
     /* remove dir */
     if(rmdir(abs_cstr) == 0){
@@ -183,7 +179,7 @@ status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *pr
     ctx->prior = prior;
 
     ctx->files = Span_Make(m, TYPE_TABLE);
-    ctx->mstore = MemLocal_Make(m);
+    ctx->mstore = MemLocal_Make();
 
     return SUCCESS;
 }

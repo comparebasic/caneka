@@ -4,3 +4,4 @@
 #include "string/cursor.h"
 #include "string/iter_str.h"
 #include "string/string_debug.h"
+#include "string/string_tolocal.h"

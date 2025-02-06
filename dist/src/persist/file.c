@@ -93,6 +93,37 @@ status File_Persist(MemCtx *m, File *file){
     return NOOP;
 }
 
+status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
+    int remaining = length;
+    FILE *f = fopen((char *)file->abs->bytes, "r");
+    if(f == NULL){
+        file->type.state |= NOOP;
+        return file->type.state;
+    }else{
+        file->type.state &= ~NOOP;
+    }
+
+    char *buff[FILE_READ_LENGTH+1];
+    memset(buff, 0, FILE_READ_LENGTH+1);
+
+    if(file->data == NULL){
+        file->data = String_Init(m, STRING_EXTEND);
+    }
+
+    while(remaining > 0){
+        int amount = min(remaining, FILE_READ_LENGTH);
+        size_t read = fread(buff, 1, amount, f);
+        if(read != amount){
+            return ERROR;
+        }
+        remaining -= read;
+        String_AddBytes(m, file->data, bytes(buff), read);
+    }
+
+    fclose(f);
+    return SUCCESS;
+}
+
 status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source){
     DebugStack_Push("File_StreamWithOpen", TYPE_CSTR); 
     String *s = NULL;

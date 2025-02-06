@@ -170,7 +170,25 @@ void *Span_GetSelected(Span *p){
     return Span_Get(p, p->metrics.selected);
 }
 
+int Span_AddOrdered(Span *p, Abstract *t){
+    int idx = p->max_idx+1;
+    int bIdx = p->max_idx;
+    Abstract *b = Span_Get(p, bIdx);
+    while(Abs_Cmp(t, b) > 0){
+        Span_Set(p, idx, b);
+        idx = bIdx;
+        b = Span_Get(p, --bIdx);
+    }
+    if(Span_Set(p, idx, t) != NULL){
+        return idx;
+    }
+    return -1;
+}
+
 int Span_Add(Span *p, Abstract *t){
+    if((p->type.state & SPAN_ORDERED) != 0){
+        return Span_AddOrdered(p, t);
+    }
     int idx = Span_NextIdx(p);
     if(Span_Set(p, idx, t) != NULL){
         return idx;

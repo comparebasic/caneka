@@ -50,7 +50,7 @@ struct file;
 struct ioctx;
 struct procdets;
 struct mem_local;
-struct local_ptr;
+struct localptr;
 /* parser */
 struct patchardef;
 struct pat_match;
