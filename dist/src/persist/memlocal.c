@@ -161,7 +161,11 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     return r;
 }
 
-Span *MemLocal_Make(){
-    MemCtx *m = MemCtx_Make();
-    return Span_Make(m, TYPE_TABLE);
+Span *MemLocal_Make(word typeOf){
+    if(Ifc_Match(ctypeOf, TYPE_SPAN)){
+        MemCtx *m = MemCtx_Make();
+        return Span_Make(m, typeOf);
+    }else{
+        Fatal("MemLocal typeOf not found as possible root types", TYPE_MEMLOCAL);
+    }
 }

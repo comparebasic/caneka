@@ -11,6 +11,7 @@ typedef uint64_t util;
 typedef word cls;
 typedef word status;
 typedef byte boolean;
+typedef byte flags8;
 
 struct string;
 struct serve_ctx;
