@@ -92,6 +92,8 @@ typedef char *(*RangeToChars)(word);
 
 #define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
+#define asIfcOffset(x, ifc, offset) (((x) != NULL  && Ifc_Match((((Abstract *)(x))->type.of-HTYPE_LOCAL), ifc)) ? (x) : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
+
 #define asIfc(x, ifc) (((x) != NULL  && Ifc_Match(((Abstract *)(x))->type.of, ifc)) ? (x) : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
 #define min(a, b) ((a) < (b) ? (a) : (b))

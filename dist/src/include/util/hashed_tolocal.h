@@ -1,2 +1,2 @@
-status Hashed_ToLocal(MemCtx *m, struct localptr *lptr);
-status Hashed_FromLocal(MemCtx *m, struct localptr *lptr);
+status Hashed_ToLocal(MemCtx *m, Abstract *a);
+status Hashed_FromLocal(MemCtx *m, Abstract *a);

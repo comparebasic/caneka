@@ -15,11 +15,13 @@ typedef struct memlocal_item {
 extern Chain *MemLocalToChain;
 extern Chain *MemLocalFromChain;
 
-Span *MemLocal_Make();
+Span *MemLocal_Make(cls typeOf);
 status MemLocal_Init(MemCtx *m);
 
 status MemLocal_Persist(MemCtx *m, Span *tbl, String *path, Access *access);
-Span *MemLocal_Load(MemCtx *m, String *path, struct ioctx *ctx);
-status MemLocal_Destroy(MemCtx *m, String *path, IoCtx *ctx);
+Span *MemLocal_Load(MemCtx *m, String *path, Access *access);
+status MemLocal_Destroy(MemCtx *m, String *path, Access *access);
 status MemLocal_GetLocal(MemCtx *m, void *addr, LocalPtr *lptr);
 Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr);
+status MemLocal_To(MemCtx *m, Abstract *a);
+status MemLocal_From(MemCtx *m, Abstract *a);

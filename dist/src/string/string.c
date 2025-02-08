@@ -199,9 +199,6 @@ status String_Reset(String *s){
 
 String *String_Next(String *s){
     if(s->type.of == TYPE_STRING_CHAIN){
-        if((s->type.state & LOCAL_PTR) != 0 && s->m != NULL){
-            return (String *)MemLocal_GetPtr(s->m, (LocalPtr *)s->next);
-        }
         return s->next;
     }
     return NULL;

@@ -152,6 +152,9 @@ boolean Ifc_Match(cls inst, cls ifc){
     if(ifc == TYPE_MEMCTX){
         return inst == TYPE_SPAN || inst == TYPE_REQ || inst == TYPE_SERVECTX 
             || inst == TYPE_ROEBLING;
+    if(ifc == TYPE_MEMLOCAL_ITEM){
+        return inst >= HTYPE_LOCAL;
+    }
     }else if(ifc == TYPE_WRAPPED){
         return inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL || inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR;
     }else if(ifc == TYPE_STRING){

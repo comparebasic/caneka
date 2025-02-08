@@ -9,9 +9,6 @@ static util _Hash_Bytes(byte *bt, size_t length, util h){
 	while (i++ < length) {
 		c = *bt;
 		h = (h << 5) + h + (h << 9) + h + (h << 31) + h + (h << 49) + h + c;
-        if(i > 110 && i < 115){
-            printf("'%c'/%u - %lu:%lu\n", c,c, i, h);
-        }
         bt++;
 	}
     return h;

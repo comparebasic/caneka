@@ -26,7 +26,7 @@ static status gatherFile(MemCtx *m, String *path, String *file, Abstract *source
     return Span_Add(p, (Abstract *)fname);
 }
 
-status Dir_Destroy(MemCtx *m, String *path){
+status Dir_Destroy(MemCtx *m, String *path, Access *access){
     return Dir_Climb(m, path, rmDir, rmFile, NULL);
 }
 

@@ -1,6 +1,3 @@
-
-
-
 enum types {
     _TYPE_START,
     TYPE_UNKNOWN,
@@ -23,10 +20,6 @@ enum types {
     TYPE_MHABSTRACT,
     TYPE_MEMLOCAL,
     TYPE_MEMLOCAL_ITEM,
-    TYPE_STRING_LOCAL,
-    TYPE_HASHED_LOCAL,
-    TYPE_SINGLE_LOCAL,
-    TYPE_SPAN_LOCAL,
     TYPE_MESS,
     TYPE_MAKER,
     TYPE_MEMSLAB,
@@ -171,5 +164,9 @@ enum types {
     TERMIO_END,
     _TERMIO_END,
     _TYPE_APPS_END,
+};
+
+enum high_types {
+    HTYPE_LOCAL = 1 << 14,
 };
 
