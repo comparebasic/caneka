@@ -23,18 +23,25 @@ static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
 }
 
 status MemLocal_To(MemCtx *m, Abstract *a){
+    if(a->type.of > HTYPE_LOCAL){
+        return NOOP;
+    }
     DoFunc func = Chain_Get(MemLocalToChain, Ifc_Get(a->type.of));
     if(func == NULL){
-        Fatal("Unable to find conversion to MemLocal Abstract", TYPE_MEMLOCAL);
+        Fatal("Unable to find To conversion to MemLocal Abstract", TYPE_MEMLOCAL);
         return ERROR;
     }
     return func(m, a); 
 }
 
 status MemLocal_From(MemCtx *m, Abstract *a){
+    if(a->type.of < HTYPE_LOCAL){
+        printf("noop from\n");
+        return NOOP;
+    }
     DoFunc func = Chain_Get(MemLocalFromChain, Ifc_Get(a->type.of-HTYPE_LOCAL));
     if(func == NULL){
-        Fatal("Unable to find conversion to MemLocal Abstract", TYPE_MEMLOCAL);
+        Fatal("Unable to find From conversion to MemLocal Abstract", TYPE_MEMLOCAL);
         return ERROR;
     }
     return func(m, a); 

@@ -64,3 +64,5 @@ status StrSnip_Tests(MemCtx *gm);
 status StrSnipBoundry_Tests(MemCtx *gm);
 status MemCtx_Tests(MemCtx *gm);
 status TermIoFormat_Tests(MemCtx *gm);
+status MemLocal_ToFromTests(MemCtx *gm);
+status MemLocal_Tests(MemCtx *gm);

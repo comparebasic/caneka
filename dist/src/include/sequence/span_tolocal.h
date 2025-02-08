@@ -1,2 +1,2 @@
-status Span_ToLocal(MemCtx *m, struct localptr *lptr);
-status Span_FromLocal(MemCtx *m, struct localptr *lptr);
+status Span_ToLocal(MemCtx *m, Abstract *a);
+status Span_FromLocal(MemCtx *m, Abstract *a);

@@ -5,7 +5,7 @@ static status slab_ToLocal(MemCtx *m, byte dim, SpanDef *def, void *sl){
     status r = READY;
     if(dim > 0){
         int stride = def->idxStride;
-        for(int i = 0; i < stride; i += p->idxSize){
+        for(int i = 0; i < stride; i += def->idxSize){
             void *subSl = (void *)Slab_nextSlot(sl, def, i);
             if(subSl != NULL){
                 slab_ToLocal(m, dim-1, def, subSl);
