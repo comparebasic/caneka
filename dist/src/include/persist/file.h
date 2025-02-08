@@ -15,6 +15,7 @@ enum file_status {
     FILE_SPOOL = 1 << 15,
 };
 
+status File_Exists(String *path);
 status File_Persist(MemCtx *m, File *file);
 status File_SetAbs(MemCtx *m, File *file, IoCtx *ctx);
 File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx);

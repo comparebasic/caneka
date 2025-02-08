@@ -14,6 +14,7 @@ i64 String_GetSegSize(String *s){
 }
 
 status String_Trunc(String *s, i64 len){
+    DebugStack_Push("String_Trunc", TYPE_CSTR);
     if(len < 0){
         len = String_Length(s) + len;
     }
@@ -27,12 +28,14 @@ status String_Trunc(String *s, i64 len){
             if(String_Next(s) != NULL){
                 tail->next = NULL;
             }
+            DebugStack_Pop();
             return SUCCESS;
         }
         actual += tail->length; 
         tail = String_Next(s); 
     };
 
+    DebugStack_Pop();
     return NOOP;
 }
 

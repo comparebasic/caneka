@@ -25,7 +25,6 @@ status MemLocal_Tests(MemCtx *gm){
     Span *ml = MemLocal_Make(TYPE_SPAN);
 
     String *one = String_Make(ml->m, bytes(cstr));
-    DPrint((Abstract *)one, COLOR_PURPLE, "Content: ");
 
     i64 len = String_Length(one);
     MemLocal_To(ml->m, (Abstract *)one);
@@ -44,7 +43,6 @@ status MemLocal_Tests(MemCtx *gm){
     next->value = (Abstract *)String_Make(ml->m, bytes("There"));
     h->next = next;
 
-    printf("I\n");
     MemLocal_To(ml->m, (Abstract *)h);
 
     char buff[PATH_BUFFLEN];
@@ -54,8 +52,11 @@ status MemLocal_Tests(MemCtx *gm){
 
     MemLocal_Persist(m, ml, path, NULL);
     Span *mlLoaded = MemLocal_Load(m, path, NULL);
+    DPrint((Abstract *)mlLoaded, COLOR_CYAN, "ml: ");
 
+    /*
     MemLocal_Destroy(m, path, NULL);
+    */
 
     MemCtx_Free(m);
 

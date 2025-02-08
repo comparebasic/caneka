@@ -90,32 +90,31 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
     String_AddBytes(m, path, bytes("/memslab."), strlen("/memslab."));
     i64 l = path->length;
 
-    int idx = 0;
     File slabFile;
+    int idx = 0;
     String_Add(m, path, String_FromInt(m, idx));
-    File_Init(&slabFile, path, NULL, NULL);
-    slabFile.abs = slabFile.path;
-    slabFile.data = String_Init(m, sizeof(MemSlab));
-    while((File_Stream(m, &slabFile, access, NULL, NULL) & NOOP) == 0){
+
+    while(File_Exists(path) & SUCCESS){
+        File_Init(&slabFile, path, NULL, NULL);
+        slabFile.abs = slabFile.path;
+        slabFile.data = String_Init(m, sizeof(MemSlab));
+        File_Stream(m, &slabFile, access, NULL, NULL); 
+
         i64 offset = 0;
         MemSlab *sl = MemSlab_Make(m, 0);
         String *s = slabFile.data;
         while(s != NULL){
-            memcpy(sl+offset, s->bytes, s->length);
+            memcpy(((void *)sl)+offset, s->bytes, s->length);
             offset += s->length;
             s = String_Next(s);
         }
         MemSlab_Attach(mlm, sl);
-        idx++;
+
         String_Trunc(slabFile.path, l);
-        slabFile.abs = slabFile.path;
-        String_Add(m, path, String_FromInt(m, idx));
-        File_Init(&slabFile, path, NULL, NULL);
-        slabFile.abs = slabFile.path;
-        String_Trunc(slabFile.abs, 0);
+        String_Add(m, path, String_FromInt(m, ++idx));
     }
 
-    Span *ml = as(mlm->start_sl->bytes, TYPE_TABLE);
+    Span *ml = as(mlm->start_sl->bytes, TYPE_SPAN);
 
     Iter_Init(&it, ml);
     while((Iter_Next(&it) & END) == 0){
@@ -173,8 +172,6 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     String *fname = String_Clone(m, path);
     String_AddBytes(m, fname, bytes("/memslab."), strlen("/memslab."));
     i64 l = fname->length;
-
-    DPrint((Abstract *)fname, COLOR_YELLOW, "Path: ");
 
     File f;
     MemSlab *sl = ml->m->start_sl;

@@ -18,6 +18,18 @@ status File_Copy(MemCtx *m, String *a, String *b, Access *ac){
     return SubProcess(m, cmd, NULL);
 }
 
+status File_Exists(String *path){
+    struct stat st;
+    int r = 0;
+
+    r = stat((char *)path->bytes, &st);
+    if(r != 0){
+        return NOOP;
+    }
+
+    return SUCCESS;
+}
+
 boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
     struct stat source_stat;
     struct stat build_stat;
@@ -176,7 +188,7 @@ status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract 
     }
     FILE *f = fopen((char *)file->abs->bytes, "r");
     if(f == NULL){
-        printf("Warning: Unable to openfile %s\n", file->abs->bytes);
+        printf("Warning: Unable to openfile '%s'\n", file->abs->bytes);
         file->type.state |= NOOP;
         DebugStack_Pop();
         return file->type.state;
