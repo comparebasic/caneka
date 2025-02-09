@@ -78,14 +78,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             if(sq->op == SPAN_OP_REMOVE){
                 memset(ptr, 0, sizeof(void *));
             }else{
-                if(p->m->type.range == -1){
-                    LocalPtr lp;
-                    if((MemLocal_GetLocal(p->m, &t, (LocalPtr *)&lp) & SUCCESS) != 0){
-                        memcpy(ptr, &lp, sizeof(void *));
-                    }
-                }else{
-                    memcpy(ptr, &t, sizeof(void *));
-                }
+                memcpy(ptr, &t, sizeof(void *));
             }
         }
         if(sq->op == SPAN_OP_REMOVE){
@@ -138,15 +131,7 @@ void *Span_GetFromQ(SpanQuery *sq){
         }
     }else if(*((Abstract **)ptr) != NULL){
         void **dptr = (void **)ptr;
-        if(p->m->type.range == -1){
-            LocalPtr lp;
-            if((MemLocal_GetLocal(p->m, *dptr, (LocalPtr *)&lp) & SUCCESS) != 0){
-                memcpy(ptr, &lp, sizeof(void *));
-            }
-
-        }else{
-            sq->value = *dptr;
-        }
+        sq->value = *dptr;
     }
     p->metrics.get = sq->idx;
     return sq->value;

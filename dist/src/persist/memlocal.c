@@ -3,48 +3,32 @@
 
 Chain *MemLocalToChain = NULL;
 Chain *MemLocalFromChain = NULL;
+Lookup *ExemptLocal = NULL;
 
 static status MemLocal_addTo(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING, (void *)String_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_ToLocal);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_ToLocal);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_ToLocal);
     return r;
 }
 
 static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_STRING, (void *)String_FromLocal);
-    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_FromLocal);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_FromLocal);
-    r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_FromLocal);
+    r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN+HTYPE_LOCAL, (void *)String_FromLocal);
+    r |= Lookup_Add(m, lk, TYPE_SPAN+HTYPE_LOCAL, (void *)Span_FromLocal);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR+HTYPE_LOCAL, (void *)WrappedPtr_FromLocal);
+    r |= Lookup_Add(m, lk, TYPE_HASHED+HTYPE_LOCAL, (void *)Hashed_FromLocal);
     return r;
 }
 
-status MemLocal_To(MemCtx *m, Abstract *a){
-    if(a->type.of > HTYPE_LOCAL){
-        return NOOP;
-    }
-    DoFunc func = Chain_Get(MemLocalToChain, Ifc_Get(a->type.of));
-    if(func == NULL){
-        Fatal("Unable to find To conversion to MemLocal Abstract", TYPE_MEMLOCAL);
-        return ERROR;
-    }
-    return func(m, a); 
-}
-
-status MemLocal_From(MemCtx *m, Abstract *a){
-    if(a->type.of < HTYPE_LOCAL){
-        printf("noop from\n");
-        return NOOP;
-    }
-    DoFunc func = Chain_Get(MemLocalFromChain, Ifc_Get(a->type.of-HTYPE_LOCAL));
-    if(func == NULL){
-        Fatal("Unable to find From conversion to MemLocal Abstract", TYPE_MEMLOCAL);
-        return ERROR;
-    }
-    return func(m, a); 
+static status MemLocal_addExempt(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)TRUE);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)TRUE);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)TRUE);
+    return r;
 }
 
 status MemLocal_Init(MemCtx *m){
@@ -54,38 +38,95 @@ status MemLocal_Init(MemCtx *m){
 
         funcs = Lookup_Make(m, _TYPE_START, MemLocal_addFrom, NULL);
         MemLocalFromChain = Chain_Make(m, funcs);
+
+        ExemptLocal = Lookup_Make(m, _TYPE_START, MemLocal_addExempt, NULL);
         return SUCCESS;
     }
 
     return NOOP;
 }
 
-status MemLocal_GetLocal(MemCtx *m, void *addr, LocalPtr *lptr){
-    DebugStack_Push("MemLocal_GetLocal", TYPE_CSTR);
-    memset(lptr, 0, sizeof(LocalPtr));
+status MemLocal_To(MemCtx *m, Abstract *a){
+    if(a == NULL || a->type.of > HTYPE_LOCAL){
+        return NOOP;
+    }
+    DoFunc func = Chain_Get(MemLocalToChain, Ifc_Get(a->type.of));
+    if(func == NULL){
+        if(Lookup_Get(ExemptLocal, Ifc_Get(a->type.of)) != NULL){
+            return NOOP;
+        }
+        Fatal("Unable to find To conversion to MemLocal Abstract", TYPE_MEMLOCAL);
+        return ERROR;
+    }
+    return func(m, a); 
+}
+
+status MemLocal_From(MemCtx *m, Abstract *a){
+    if(a == NULL || a->type.of < HTYPE_LOCAL){
+        return NOOP;
+    }
+    DoFunc func = Chain_Get(MemLocalFromChain, Ifc_Get(a->type.of));
+    if(func == NULL){
+        if(Lookup_Get(ExemptLocal, Ifc_Get(a->type.of)) != NULL){
+            return NOOP;
+        }
+        Fatal("Unable to find From conversion to MemLocal Abstract", TYPE_MEMLOCAL);
+        return ERROR;
+    }
+    return func(m, a); 
+}
+
+status MemLocal_SetLocal(MemCtx *m, Abstract **addr){
+    if(*addr == NULL){
+        return NOOP;
+    }
+    boolean subTo = TRUE;
+    if((*addr)->type.of == TYPE_MEMLOCAL_SETTER){
+        addr = (Abstract **)(*((LocalSetter **)addr))->dptr;
+        subTo = FALSE;
+    }
+    DebugStack_Push("MemLocal_SetLocal", TYPE_CSTR);
     MemSlab *sl = MemCtx_GetSlab(m, addr);
+    LocalPtr *lptr = (LocalPtr *)addr;
+    memset(lptr, 0, sizeof(LocalPtr));
     if(sl != NULL){
+        if(subTo){
+            MemLocal_To(m, (Abstract *)*addr);
+        }
         lptr->slabIdx = sl->idx;
         lptr->offset = ((void *)addr - (void *)sl->bytes);
         DebugStack_Pop();
         return SUCCESS;
     }else{
         Fatal("Slab not found, addr outside this memory context\n", TYPE_MEMLOCAL);
+        DebugStack_Pop();
+        return ERROR;
     }
 
     DebugStack_Pop();
     return NOOP;
 }
 
-Abstract *MemLocal_GetPtr(MemCtx *m, LocalPtr *lptr){
+status MemLocal_UnSetLocal(MemCtx *m, LocalPtr *lptr){
+    if(lptr->slabIdx == 0 && lptr->offset == 0){
+        return NOOP;
+    }
+    DebugStack_Push("MemLocal_UnSetLocal", TYPE_CSTR);
     MemSlab *sl = m->start_sl;
+    void *ptr = NULL;
     while(sl != NULL){
         if(sl->idx == lptr->slabIdx){
-            return (Abstract *)(sl->bytes+lptr->offset);
+            ptr = (sl->bytes+lptr->offset);
         }
         sl = sl->next;
     }
-    return NULL;
+    if(ptr == NULL){
+        DebugStack_Pop();
+        return ERROR;
+    }
+    memcpy(lptr, &ptr, sizeof(void *));
+    DebugStack_Pop();
+    return SUCCESS;
 }
 
 Span *MemLocal_Load(MemCtx *m, String *path, Access *access){

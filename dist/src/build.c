@@ -284,7 +284,7 @@ static BuildSubdir utilobj = { "util", {
     "result.c",
     "single.c",
     "time.c",
-    "single_tolocal.c",
+    "wrappedptr_tolocal.c",
     "hashed_tolocal.c",
     NULL
 }};

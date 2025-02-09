@@ -49,7 +49,6 @@ status MemLocal_ToFromTests(MemCtx *gm){
     String *one = String_Make(ml->m, bytes(cstr));
 
     i64 len = String_Length(one);
-    printf("to: \n");
     MemLocal_To(ml->m, (Abstract *)one);
     r |= Test(one->type.of-HTYPE_LOCAL == TYPE_STRING_CHAIN, "String type has been adjusted to local");
 

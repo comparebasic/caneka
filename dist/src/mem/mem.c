@@ -50,6 +50,7 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level){
 MemSlab *MemSlab_Make(MemCtx *m, i16 level){
     size_t sz = sizeof(MemSlab);
     MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
+    sl->type.of = TYPE_MEMSLAB;
     sl->addr = sl->bytes;
     sl->level = level;
     if(m != NULL){

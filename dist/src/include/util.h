@@ -12,5 +12,5 @@
 #include "util/maker.h"
 #include "util/exch.h"
 #include "util/result.h"
-#include "util/single_tolocal.h"
+#include "util/wrappedptr_tolocal.h"
 #include "util/time.h"

@@ -12,10 +12,11 @@ This is the semi-manually-run garbage collector.
  * .next is a pointer to the next slab
  */
 typedef struct mem_slab {
-    byte bytes[MEM_SLAB_SIZE];
+    Type type;
     word idx;
     i16 level;
     void *addr;
+    byte bytes[MEM_SLAB_SIZE];
     struct mem_slab *next;
 } MemSlab;
 

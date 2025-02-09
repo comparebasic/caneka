@@ -7,14 +7,7 @@ int TABLE_REQUERY_MAX[7] = {4, 4,  8, 16, 32, 0, 0};
 
 static void setValuePtr(Span *tbl, Hashed *h, Abstract *value){
     LocalPtr lp;
-    if((tbl->m->type.range == -1 && value->type.state & LOCAL_PTR) != 0 &&
-            (MemLocal_GetLocal(tbl->m, value, &lp) & SUCCESS) != 0){
-
-        void **lptr = (void **)&lp;
-        h->value = (Abstract *)*lptr;
-    }else{
-        h->value = value;
-    }
+    h->value = value;
 }
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
@@ -146,11 +139,7 @@ Hashed *Table_SetValue(Span *tbl, Abstract *a){
 
 Abstract *Table_Get(Span *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
-    if(tbl->m->type.range == -1){
-        return MemLocal_GetPtr(tbl->m, (LocalPtr *)&h->value);
-    }else{
-        return h->value;
-    }
+    return h->value;
 }
 
 int Table_Set(Span *tbl, Abstract *a, Abstract *value){
