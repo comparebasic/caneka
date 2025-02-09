@@ -7,7 +7,7 @@ Lookup *ExemptLocal = NULL;
 
 static status MemLocal_addTo(MemCtx *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_STRING, (void *)String_ToLocal);
+    r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_ToLocal);
@@ -25,9 +25,9 @@ static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
 
 static status MemLocal_addExempt(MemCtx *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)TRUE);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)TRUE);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)TRUE);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)1);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)1);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)1);
     return r;
 }
 
@@ -50,9 +50,10 @@ status MemLocal_To(MemCtx *m, Abstract *a){
     if(a == NULL || a->type.of > HTYPE_LOCAL){
         return NOOP;
     }
-    DoFunc func = Chain_Get(MemLocalToChain, Ifc_Get(a->type.of));
+    DoFunc func = Chain_Get(MemLocalToChain, a->type.of);
     if(func == NULL){
-        if(Lookup_Get(ExemptLocal, Ifc_Get(a->type.of)) != NULL){
+        Lookup_Get(ExemptLocal, a->type.of); 
+        if((ExemptLocal->type.state & SUCCESS) != 0){
             return NOOP;
         }
         Fatal("Unable to find To conversion to MemLocal Abstract", TYPE_MEMLOCAL);
@@ -76,25 +77,23 @@ status MemLocal_From(MemCtx *m, Abstract *a){
     return func(m, a); 
 }
 
-status MemLocal_SetLocal(MemCtx *m, Abstract **addr){
-    if(*addr == NULL){
+status MemLocal_SetLocal(MemCtx *m, Abstract **dblAddr){
+    DebugStack_Push("MemLocal_SetLocal", TYPE_CSTR);
+    Abstract *addr = *dblAddr;
+    if(addr == NULL){
         return NOOP;
     }
     boolean subTo = TRUE;
-    if((*addr)->type.of == TYPE_MEMLOCAL_SETTER){
-        addr = (Abstract **)(*((LocalSetter **)addr))->dptr;
-        subTo = FALSE;
-    }
-    DebugStack_Push("MemLocal_SetLocal", TYPE_CSTR);
     MemSlab *sl = MemCtx_GetSlab(m, addr);
-    LocalPtr *lptr = (LocalPtr *)addr;
-    memset(lptr, 0, sizeof(LocalPtr));
+    LocalPtr lptr;
     if(sl != NULL){
-        if(subTo){
-            MemLocal_To(m, (Abstract *)*addr);
+        memset(&lptr, 0, sizeof(LocalPtr));
+        lptr.slabIdx = sl->idx;
+        lptr.offset = (i32)(((void *)addr) - ((void *)(sl->bytes)));
+        if(DEBUG_MEMLOCAL){
+            printf("\x1b[%dmSetting To %d/%d for %ld\x1b[0m\n", DEBUG_MEMLOCAL, lptr.slabIdx, lptr.offset, (i64)addr);
         }
-        lptr->slabIdx = sl->idx;
-        lptr->offset = ((void *)addr - (void *)sl->bytes);
+        memcpy(dblAddr, &lptr, sizeof(void *));
         DebugStack_Pop();
         return SUCCESS;
     }else{
@@ -107,16 +106,19 @@ status MemLocal_SetLocal(MemCtx *m, Abstract **addr){
     return NOOP;
 }
 
-status MemLocal_UnSetLocal(MemCtx *m, LocalPtr *lptr){
-    if(lptr->slabIdx == 0 && lptr->offset == 0){
+status MemLocal_UnSetLocal(MemCtx *m, Abstract **dblAddr){
+    DebugStack_Push("MemLocal_UnSetLocal", TYPE_CSTR);
+    LocalPtr *lptr = (LocalPtr *)dblAddr;
+    if(lptr == NULL || lptr->slabIdx == 0 && lptr->offset == 0){
         return NOOP;
     }
-    DebugStack_Push("MemLocal_UnSetLocal", TYPE_CSTR);
     MemSlab *sl = m->start_sl;
     void *ptr = NULL;
     while(sl != NULL){
         if(sl->idx == lptr->slabIdx){
-            ptr = (sl->bytes+lptr->offset);
+            ptr = sl->bytes;
+            ptr += lptr->offset;
+            break;
         }
         sl = sl->next;
     }
@@ -124,7 +126,11 @@ status MemLocal_UnSetLocal(MemCtx *m, LocalPtr *lptr){
         DebugStack_Pop();
         return ERROR;
     }
-    memcpy(lptr, &ptr, sizeof(void *));
+    if(DEBUG_MEMLOCAL){
+        printf("\x1b[%dmSetting From %d/%d for %ld of sl %ld math:%ld\x1b[0m\n", DEBUG_MEMLOCAL, 
+            lptr->slabIdx, lptr->offset, (i64)ptr, (i64)sl->bytes, (((i64)sl->bytes) + ((i64)lptr->offset)));
+    }
+    memcpy(dblAddr, &ptr, sizeof(void *));
     DebugStack_Pop();
     return SUCCESS;
 }

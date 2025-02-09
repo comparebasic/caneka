@@ -4,8 +4,8 @@ typedef struct localsetter {
 } LocalSetter;
 
 typedef struct localptr {
-    int slabIdx;
-    int offset;
+    i32 slabIdx;
+    i32 offset;
 } LocalPtr;
 
 typedef struct memlocal_item {
@@ -25,7 +25,7 @@ Span *MemLocal_Make(cls typeOf);
 status MemLocal_Init(MemCtx *m);
 
 status MemLocal_SetLocal(MemCtx *m, Abstract **addr);
-status MemLocal_UnSetLocal(MemCtx *m, LocalPtr *lptr);
+status MemLocal_UnSetLocal(MemCtx *m, Abstract **addr);
 
 status MemLocal_Persist(MemCtx *m, Span *tbl, String *path, Access *access);
 Span *MemLocal_Load(MemCtx *m, String *path, Access *access);

@@ -7,7 +7,7 @@ status String_ToLocal(MemCtx *m, Abstract *a){
     String *s = asIfc(a, TYPE_STRING_CHAIN);
     while(s != NULL){
         s->type.of += HTYPE_LOCAL;
-        if(String_Next(s) != NULL){
+        if(s->next != NULL){
             String *_next = s->next;
             r |= MemLocal_SetLocal(m, (Abstract **)&s->next);
             s = _next;
@@ -31,8 +31,8 @@ status String_FromLocal(MemCtx *m, Abstract *a){
     while(s != NULL){
         s->type.of -= HTYPE_LOCAL;
         if(s->next != NULL){
-            s->type.of -= HTYPE_LOCAL;
-            MemLocal_UnSetLocal(m, (LocalPtr *)&s->next);
+            LocalPtr *debugLptr = (LocalPtr *)&s->next;
+            MemLocal_UnSetLocal(m, (Abstract **)&s->next);
             s = s->next;
             r |= SUCCESS;
         }else{

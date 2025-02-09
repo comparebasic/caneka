@@ -123,15 +123,21 @@ void *Span_GetFromQ(SpanQuery *sq){
 
     SpanState *st = sq->stack;
     void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
+    sq->span->type.state &= ~(SUCCESS|NOOP);
     if((def->flags & SPAN_INLINE) != 0){
         if((def->flags & SPAN_RAW) == 0 && (*(util *)ptr) == 0){
+            sq->span->type.state |= NOOP;
             sq->value = NULL;
         }else{
+            sq->span->type.state |= SUCCESS;
             sq->value = ptr;
         }
     }else if(*((Abstract **)ptr) != NULL){
         void **dptr = (void **)ptr;
         sq->value = *dptr;
+        sq->span->type.state |= SUCCESS;
+    }else{
+        sq->span->type.state |= NOOP;
     }
     p->metrics.get = sq->idx;
     return sq->value;
