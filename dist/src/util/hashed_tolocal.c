@@ -22,8 +22,11 @@ status Hashed_FromLocal(MemCtx *m, Abstract *a){
     status r = READY;
     Hashed *h = asIfcOffset(a, TYPE_HASHED, HTYPE_LOCAL);
     r |= MemLocal_UnSetLocal(m, (Abstract **)&h->item);
+    MemLocal_From(m, h->item);
     r |= MemLocal_UnSetLocal(m, (Abstract **)&h->value);
+    MemLocal_From(m, h->value);
     r |= MemLocal_UnSetLocal(m, (Abstract **)&h->next);
+    MemLocal_From(m, (Abstract *)h->next);
     h->type.of -= HTYPE_LOCAL;
 
     DebugStack_Pop();

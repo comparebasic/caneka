@@ -1,8 +1,3 @@
-typedef struct localsetter {
-    Type type;
-    void **dptr;
-} LocalSetter;
-
 typedef struct localptr {
     i32 slabIdx;
     i32 offset;

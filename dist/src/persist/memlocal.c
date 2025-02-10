@@ -9,6 +9,7 @@ static status MemLocal_addTo(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_ToLocal);
+    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_ToLocal);
     return r;
@@ -18,6 +19,7 @@ static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN+HTYPE_LOCAL, (void *)String_FromLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN+HTYPE_LOCAL, (void *)Span_FromLocal);
+    r |= Lookup_Add(m, lk, TYPE_TABLE+HTYPE_LOCAL, (void *)Span_FromLocal);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR+HTYPE_LOCAL, (void *)WrappedPtr_FromLocal);
     r |= Lookup_Add(m, lk, TYPE_HASHED+HTYPE_LOCAL, (void *)Hashed_FromLocal);
     return r;
@@ -68,7 +70,8 @@ status MemLocal_From(MemCtx *m, Abstract *a){
     }
     DoFunc func = Chain_Get(MemLocalFromChain, Ifc_Get(a->type.of));
     if(func == NULL){
-        if(Lookup_Get(ExemptLocal, Ifc_Get(a->type.of)) != NULL){
+        Lookup_Get(ExemptLocal, Ifc_Get(a->type.of));
+        if((ExemptLocal->type.state & SUCCESS) != 0){
             return NOOP;
         }
         Fatal("Unable to find From conversion to MemLocal Abstract", TYPE_MEMLOCAL);
@@ -198,18 +201,14 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
         if(a != NULL){
-            DoFunc func = Chain_Get(MemLocalToChain, a->type.of);
-            if(func == NULL){
-                Fatal("Unable to find conversion to MemLocal Abstract", TYPE_MEMLOCAL);
-                DebugStack_Pop();
-                return ERROR;
-            }
-            r |= func(m, a); 
+            r |= MemLocal_To(ml->m, a);
             if((r & ERROR) != 0){
                 break;
             }
         }
     }
+    ml->type.of += HTYPE_LOCAL;
+    ml->m->type.of += HTYPE_LOCAL;
 
     char *path_cstr = String_ToChars(m, path);
     DIR* dir = opendir(path_cstr);

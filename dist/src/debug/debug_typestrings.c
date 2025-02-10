@@ -24,7 +24,6 @@ char *TypeStrings[] = {
     "TYPE_MHABSTRACT",
     "TYPE_MEMLOCAL",
     "TYPE_MEMLOCAL_ITEM",
-    "TYPE_MEMLOCAL_SETTER",
     "TYPE_MESS",
     "TYPE_MAKER",
     "TYPE_CSTR",

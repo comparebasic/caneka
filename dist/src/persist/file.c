@@ -138,6 +138,7 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
 
 status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source){
     DebugStack_Push("File_StreamWithOpen", TYPE_CSTR); 
+    DebugStack_SetRef(file->abs, file->abs->type.of);
     String *s = NULL;
     if(out != NULL){
         s = String_Init(m, STRING_EXTEND);

@@ -3,9 +3,9 @@
 
 void *Lookup_Get(Lookup *lk, word type){
     void *result = NULL;
+    lk->type.state &= ~(SUCCESS|NOOP|ERROR);
     if(type >= lk->offset && type <= lk->offset+lk->values->max_idx){
         result = (void *)Span_Get(lk->values, (int)(type-lk->offset));
-        lk->type.state &= ~(SUCCESS|NOOP|ERROR);
         lk->type.state |= (lk->values->type.state & (SUCCESS|NOOP|ERROR));
         if(result != NULL){
             lk->latest_idx = type-lk->offset;

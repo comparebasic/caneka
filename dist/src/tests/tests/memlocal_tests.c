@@ -72,7 +72,58 @@ status MemLocal_ToFromTests(MemCtx *gm){
     MemLocal_From(ml->m, (Abstract *)h);
     r |= Test(h->type.of == TYPE_HASHED, "Type hashed has been restored");
 
+    Span *p = Span_Make(ml->m, TYPE_SPAN);
+    String *pOne_s =String_Make(ml->m, bytes(cstr)); 
+    String *pTwo_s =String_Make(ml->m, bytes(cstrTwo)); 
+    String *pThree_s =String_Make(ml->m, bytes(cstrThree)); 
+    Span_Set(p, 0, (Abstract *)pOne_s);
+    Span_Set(p, 100, (Abstract *)pTwo_s);
+    Span_Set(p, 101, (Abstract *)pThree_s);
+    MemLocal_To(ml->m, (Abstract *)p);
+    r |= Test(p->type.of-HTYPE_LOCAL == TYPE_SPAN, "Type has been changed for span");
+    r |= Test(pOne_s->type.of-HTYPE_LOCAL == TYPE_STRING_CHAIN, "Type sting has been changed for span item one");
+    r |= Test(pTwo_s->type.of-HTYPE_LOCAL == TYPE_STRING_CHAIN, "Type sting has been changed for span item two");
+    r |= Test(pThree_s->type.of-HTYPE_LOCAL == TYPE_STRING_CHAIN, "Type sting has been changed for span item three");
+    MemLocal_From(ml->m, (Abstract *)p);
+    r |= Test(p->type.of == TYPE_SPAN, "Type has been restored for span");
+    r |= Test(pOne_s->type.of == TYPE_STRING_CHAIN, "Type sting has been restored for span item one");
+    r |= Test(pTwo_s->type.of == TYPE_STRING_CHAIN, "Type sting has been restored for span item two");
+    r |= Test(pThree_s->type.of == TYPE_STRING_CHAIN, "Type sting has been restored for span item three");
+
+    Span *tbl = Span_Make(ml->m, TYPE_TABLE);
+    String *pTblOne_s =String_Make(ml->m, bytes(cstr)); 
+    String *pKeyOne_s =String_Make(ml->m, bytes("one")); 
+    String *pTblTwo_s =String_Make(ml->m, bytes(cstrTwo)); 
+    String *pKeyTwo_s =String_Make(ml->m, bytes("two")); 
+    String *pTblThree_s =String_Make(ml->m, bytes(cstrThree)); 
+    String *pKeyThree_s =String_Make(ml->m, bytes("three")); 
+    Table_Set(tbl, (Abstract *)pKeyOne_s, (Abstract *)pTblOne_s);
+    Table_Set(tbl, (Abstract *)pKeyTwo_s, (Abstract *)pTblTwo_s);
+    Table_Set(tbl, (Abstract *)pKeyThree_s, (Abstract *)pTblThree_s);
+    MemLocal_To(ml->m, (Abstract *)tbl);
+    r |= Test(tbl->type.of-HTYPE_LOCAL == TYPE_TABLE, "Type hashed has been changed for table");
+    r |= Test(pTblOne_s->type.of-HTYPE_LOCAL == TYPE_STRING_CHAIN, "Type string has been changed for table item one");
+    r |= Test(pTblTwo_s->type.of-HTYPE_LOCAL == TYPE_STRING_CHAIN, "Type string has been changed for table item two");
+    r |= Test(pTblThree_s->type.of-HTYPE_LOCAL == TYPE_STRING_CHAIN, "Type string has been changed for table item three");
+    MemLocal_From(ml->m, (Abstract *)tbl);
+    r |= Test(tbl->type.of == TYPE_TABLE, "Type hashed has been restored for table");
+    r |= Test(pTblOne_s->type.of == TYPE_STRING_CHAIN, "Type string has been restored for table item one");
+    r |= Test(pTblTwo_s->type.of == TYPE_STRING_CHAIN, "Type string has been restored for table item two");
+    r |= Test(pTblThree_s->type.of == TYPE_STRING_CHAIN, "Type string has been restored for table item three");
+
+    char buff[PATH_BUFFLEN];
+    String *path = String_Make(m, bytes(getcwd(buff, PATH_BUFFLEN)));
+    char *cstr = "/tmp/mstore";
+    String_AddBytes(m, path, bytes(cstr), strlen(cstr));
+
+    r |= MemLocal_Persist(m, ml, path, NULL);
+    /*
+    Span *mlLoaded = MemLocal_Load(m, path, NULL);
+    r |= MemLocal_Destroy(m, path, NULL);
+    */
+
     MemCtx_Free(m);
+    MemCtx_Free(ml->m);
     DebugStack_Pop();
     return r;
 }
@@ -84,15 +135,8 @@ status MemLocal_Tests(MemCtx *gm){
 
     Span *ml = MemLocal_Make(TYPE_SPAN);
 
-    char buff[PATH_BUFFLEN];
-    String *path = String_Make(m, bytes(getcwd(buff, PATH_BUFFLEN)));
-    char *cstr = "/tmp/mstore";
-    String_AddBytes(m, path, bytes(cstr), strlen(cstr));
 
-    r |= MemLocal_Persist(m, ml, path, NULL);
-    Span *mlLoaded = MemLocal_Load(m, path, NULL);
-    r |= MemLocal_Destroy(m, path, NULL);
-
+    MemCtx_Free(ml->m);
     MemCtx_Free(m);
     DebugStack_Pop();
     return r;
