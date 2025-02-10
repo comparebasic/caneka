@@ -339,15 +339,9 @@ TestSet *Tests = _Tests;
 
 static TestSet solo[] = {
     {
-        "MemLocal - ToFrom",
-        MemLocal_ToFromTests,
-        "Calling To and From persistance functions for MemLocal.",
-        FEATURE_COMPLETE,
-    },
-    {
         "MemLocal",
         MemLocal_Tests,
-        "Calling functions to save and restore MemLocal.",
+        "Calling To and From persistance functions for MemLocal and to save and restore MemLocal.",
         FEATURE_COMPLETE,
     },
     {

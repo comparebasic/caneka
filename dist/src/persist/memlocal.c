@@ -84,6 +84,7 @@ status MemLocal_SetLocal(MemCtx *m, Abstract **dblAddr){
     DebugStack_Push("MemLocal_SetLocal", TYPE_CSTR);
     Abstract *addr = *dblAddr;
     if(addr == NULL){
+        DebugStack_Pop();
         return NOOP;
     }
     boolean subTo = TRUE;
@@ -113,6 +114,7 @@ status MemLocal_UnSetLocal(MemCtx *m, Abstract **dblAddr){
     DebugStack_Push("MemLocal_UnSetLocal", TYPE_CSTR);
     LocalPtr *lptr = (LocalPtr *)dblAddr;
     if(lptr == NULL || lptr->slabIdx == 0 && lptr->offset == 0){
+        DebugStack_Pop();
         return NOOP;
     }
     MemSlab *sl = m->start_sl;
@@ -144,6 +146,7 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
     Iter it;
 
     MemCtx *mlm = MemCtx_Make();
+
     String_AddBytes(m, path, bytes("/memslab."), strlen("/memslab."));
     i64 l = path->length;
 
@@ -158,7 +161,7 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
         File_Stream(m, &slabFile, access, NULL, NULL); 
 
         i64 offset = 0;
-        MemSlab *sl = MemSlab_Make(m, 0);
+        MemSlab *sl = MemSlab_Make(NULL, 0);
         String *s = slabFile.data;
         while(s != NULL){
             memcpy(((void *)sl)+offset, s->bytes, s->length);
@@ -167,23 +170,22 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
         }
         MemSlab_Attach(mlm, sl);
 
+        LocalPtr *lptr = (LocalPtr *)&sl->addr;
+        void *ptr = NULL;
+        ptr = sl->bytes;
+        ptr += lptr->offset;
+        memcpy(&sl->addr, &ptr, sizeof(void *));
+
         String_Trunc(slabFile.path, l);
         String_Add(m, path, String_FromInt(m, ++idx));
     }
 
-    Span *ml = as(mlm->start_sl->bytes, TYPE_SPAN);
-
-    Iter_Init(&it, ml);
-    while((Iter_Next(&it) & END) == 0){
-        Abstract *item = asIfc(Iter_Get(&it), TYPE_MEMLOCAL_ITEM);
-        if(item != NULL){
-            r |= MemLocal_To(ml->m, item);
-            if((r & ERROR) != 0){
-                break;
-            }
-        }
+    if((MemLocal_From(m, (Abstract *)mlm->start_sl->bytes) & ERROR) != 0){
+        Fatal("Error with MemLocal_From during load", TYPE_MEMLOCAL);
+        return NULL;
     }
 
+    Span *ml = asIfc(mlm->start_sl->bytes, TYPE_SPAN);
     DebugStack_Pop();
     return ml;
 }
@@ -196,18 +198,8 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     DebugStack_Push("MemLocal_Persist", TYPE_CSTR);
     status r = READY;
 
-    Iter it;
-    Iter_Init(&it, ml);
-    while((Iter_Next(&it) & END) == 0){
-        Abstract *a = Iter_Get(&it);
-        if(a != NULL){
-            r |= MemLocal_To(ml->m, a);
-            if((r & ERROR) != 0){
-                break;
-            }
-        }
-    }
-    ml->type.of += HTYPE_LOCAL;
+    MemLocal_To(m, (Abstract *)ml);
+
     ml->m->type.of += HTYPE_LOCAL;
 
     char *path_cstr = String_ToChars(m, path);
@@ -229,6 +221,14 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     File f;
     MemSlab *sl = ml->m->start_sl;
     while(sl != NULL){
+        MemSlab *next = sl->next;
+        sl->next = NULL;
+
+        LocalPtr lptr;
+        lptr.slabIdx = sl->idx;
+        lptr.offset = (i32)(((void *)sl->addr) - ((void *)(sl->bytes)));
+        memcpy(&sl->addr, &lptr, sizeof(void *));
+
         File_Init(&f, fname, access, NULL);
         fname->length = l;
         String_Add(m, fname, String_FromInt(m, sl->idx));
@@ -241,7 +241,7 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
         f.type.state |= FILE_UPDATED;
 
         r |= File_Persist(m, &f);
-        sl = sl->next;
+        sl = next;
     }
 
     DebugStack_Pop();

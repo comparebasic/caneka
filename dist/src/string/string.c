@@ -84,12 +84,14 @@ status String_Add(MemCtx *m, String *a, String *b) {
 }
 
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
+    DebugStack_Push("String_AddBytes", TYPE_CSTR);
     if(a == NULL){
         Fatal("Error string is NULL", TYPE_STRING_CHAIN);
     }
 
     if((a->type.state & FLAG_STRING_TEXT) != 0){
         if(!TextCharFilter(chars, length)){
+            DebugStack_Pop();
             return ERROR;
         }
     }
@@ -100,10 +102,13 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
 
     String *seg = a;
     if((a->type.state & DEBUG) != 0){
-        printf("\nCopying, Starting Length:\n    %d New Chars:'%s'\n", a->length, chars);
+        printf("\nCopying, Starting Length:\n    %d New Chars:%d/'%s'\n", a->length, length, chars);
     }
     byte *p = bytes;
 
+    if(isDebug(a)){
+        printf("I\n");
+    }
     if(a->type.of == TYPE_STRING_CHAIN){
         while(seg->next != NULL){
             if((a->type.state & DEBUG) != 0){
@@ -120,6 +125,9 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         if(seg->length == STRING_CHUNK_SIZE){
             seg->next = String_Init(m, -1);
             seg = seg->next;
+        }
+        if(isDebug(a)){
+            printf("II chain\n");
         }
     }else if(a->type.of == TYPE_STRING_FIXED){
         if(a->length+length > STRING_FIXED_SIZE){
@@ -144,7 +152,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
             copy_l = min(remaining, STRING_CHUNK_SIZE-seg->length); 
         }
         if((a->type.state & DEBUG) != 0){
-            printf("  l:%d -> %ld/%ld\n", seg->length, copy_l, remaining);
+            printf("  l:%d -> +%ld remaining %ld\n", seg->length, copy_l, remaining);
         }
         memcpy(seg->bytes+seg->length, p, copy_l);
         seg->length += copy_l;
@@ -152,6 +160,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
             if((a->type.state & DEBUG) != 0){
                 printf("  > new seg\n");
             }
+            seg->next = String_Init(m, -1);
             if(seg->next == NULL ){
                 seg->next = String_Init(m, -1);
             }
@@ -171,6 +180,7 @@ status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
         printf("\n");
     }
 
+    DebugStack_Pop();
     return SUCCESS;
 }
 

@@ -39,6 +39,7 @@ static char *libs[] = {
 
 static BuildSubdir memobj = { "mem", {
     "mem.c",
+    "mem_debug.c",
     NULL
 }};
 

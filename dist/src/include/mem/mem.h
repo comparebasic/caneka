@@ -29,7 +29,6 @@ typedef struct mem_ctx {
     RangeType type;
     MemSlab *start_sl;
     int count;
-    struct span *index;
     Abstract *owner;
     struct {
         void *ptr;
@@ -83,6 +82,8 @@ void *MemCtx_GetSlab(MemCtx *m, void *addr);
 MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl);
 /* Make MemSlab */
 MemSlab *MemSlab_Make(MemCtx *m, i16 level);
+/* Get available space in a slab */
+size_t MemSlab_Available(MemSlab *sl);
 /* Returns the amount of bytes used in this level across multiple slabs in one
  * MemCtx
  * 

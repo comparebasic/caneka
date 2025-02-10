@@ -44,7 +44,6 @@ typedef struct string {
     int length;
     byte bytes[STRING_CHUNK_SIZE];
     struct string *next;
-    MemCtx *m;
 } String;
 
 #define STRING_EXTEND -1

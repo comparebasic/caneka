@@ -39,7 +39,7 @@ char *cstrThree = ""
     "featured in our termination analogy."
     ;
 
-status MemLocal_ToFromTests(MemCtx *gm){
+status MemLocal_Tests(MemCtx *gm){
     DebugStack_Push("MemLocal_ToFromTests", TYPE_CSTR);
     status r = READY;
     MemCtx *m = MemCtx_Make();
@@ -117,27 +117,18 @@ status MemLocal_ToFromTests(MemCtx *gm){
     String_AddBytes(m, path, bytes(cstr), strlen(cstr));
 
     r |= MemLocal_Persist(m, ml, path, NULL);
-    /*
+    MemCtx *temp = MemCtx_Make();
+    String_Make(temp, bytes("just to throw off the footprint"));
     Span *mlLoaded = MemLocal_Load(m, path, NULL);
+
+    DPrint((Abstract *)mlLoaded, COLOR_PURPLE, "loaded: ");
+
+    /*
     r |= MemLocal_Destroy(m, path, NULL);
     */
 
     MemCtx_Free(m);
     MemCtx_Free(ml->m);
-    DebugStack_Pop();
-    return r;
-}
-
-status MemLocal_Tests(MemCtx *gm){
-    DebugStack_Push("MemLocal_Tests", TYPE_CSTR);
-    status r = READY;
-    MemCtx *m = MemCtx_Make();
-
-    Span *ml = MemLocal_Make(TYPE_SPAN);
-
-
-    MemCtx_Free(ml->m);
-    MemCtx_Free(m);
     DebugStack_Pop();
     return r;
 }

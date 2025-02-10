@@ -618,6 +618,7 @@ static status populateDebugPrint(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STRSNIP_STRING, (void *)StrSnipString_Print);
     r |= Lookup_Add(m, lk, TYPE_CSTR, (void *)Cstr_Print);
     r |= Lookup_Add(m, lk, TYPE_TRANSP, (void *)Transp_Print);
+    r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCtx_Print);
     
     return r;
 }

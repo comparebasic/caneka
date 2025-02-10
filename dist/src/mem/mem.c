@@ -20,15 +20,15 @@ static void trackFree(void *p, size_t s){
     cmem -= s;
 }
 
-static size_t MemSlab_Available(MemSlab *sl){
-    return MEM_SLAB_SIZE - MemSlab_Taken(sl);
-}
-
 static void *MemSlab_Alloc(MemSlab *sl, size_t s){
     void *p = sl->addr; 
     sl->addr += s;
 
     return p;
+}
+
+size_t MemSlab_Available(MemSlab *sl){
+    return MEM_SLAB_SIZE - MemSlab_Taken(sl);
 }
 
 size_t MemCount(){
@@ -171,12 +171,7 @@ MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
         }
         last->next = sl;
     }
-    if(m->index != NULL){
-        Span_Add((Span *)m->index, (Abstract *)sl);
-        sl->idx = m->index->metrics.set;
-    }else{
-        sl->idx = m->count++;
-    }
+    sl->idx = m->count++;
     return sl;
 
 }
