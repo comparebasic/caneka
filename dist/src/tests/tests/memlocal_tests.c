@@ -39,7 +39,7 @@ char *cstrThree = ""
     "featured in our termination analogy."
     ;
 
-status MemLocal_Tests(MemCtx *gm){
+status MemLocal_ToFromTests(MemCtx *gm){
     DebugStack_Push("MemLocal_ToFromTests", TYPE_CSTR);
     status r = READY;
     MemCtx *m = MemCtx_Make();
@@ -111,24 +111,57 @@ status MemLocal_Tests(MemCtx *gm){
     r |= Test(pTblTwo_s->type.of == TYPE_STRING_CHAIN, "Type string has been restored for table item two");
     r |= Test(pTblThree_s->type.of == TYPE_STRING_CHAIN, "Type string has been restored for table item three");
 
+    MemCtx_Free(m);
+    MemCtx_Free(ml->m);
+    DebugStack_Pop();
+    return r;
+}
+
+status MemLocal_Tests(MemCtx *gm){
+    DebugStack_Push("MemLocal_ToFromTests", TYPE_CSTR);
+    status r = READY;
+    MemCtx *m = MemCtx_Make();
+
+    Span *ml = MemLocal_Make(TYPE_SPAN);
+
+    String *one = String_Make(ml->m, bytes(cstr));
+    i64 len = String_Length(one);
+    Span_Set(ml, 0, (Abstract *)one);
+
+    Span *tbl = Span_Make(ml->m, TYPE_TABLE);
+    String *pTblOne_s = String_Make(ml->m, bytes(cstr)); 
+    String *pKeyOne_s = String_Make(ml->m, bytes("one")); 
+    String *pTblTwo_s = String_Make(ml->m, bytes(cstrTwo)); 
+    String *pKeyTwo_s = String_Make(ml->m, bytes("two")); 
+    String *pTblThree_s = String_Make(ml->m, bytes(cstrThree)); 
+    String *pKeyThree_s = String_Make(ml->m, bytes("three")); 
+    String *expTwo_s = String_Clone(m, pTblTwo_s);
+    Table_Set(tbl, (Abstract *)pKeyOne_s, (Abstract *)pTblOne_s);
+    Table_Set(tbl, (Abstract *)pKeyTwo_s, (Abstract *)pTblTwo_s);
+    Table_Set(tbl, (Abstract *)pKeyThree_s, (Abstract *)pTblThree_s);
+    Span_Set(ml, 1, (Abstract *)tbl);
+
     char buff[PATH_BUFFLEN];
     String *path = String_Make(m, bytes(getcwd(buff, PATH_BUFFLEN)));
     char *cstr = "/tmp/mstore";
     String_AddBytes(m, path, bytes(cstr), strlen(cstr));
 
     r |= MemLocal_Persist(m, ml, path, NULL);
-    MemCtx *temp = MemCtx_Make();
-    String_Make(temp, bytes("just to throw off the footprint"));
     Span *mlLoaded = MemLocal_Load(m, path, NULL);
 
-    DPrint((Abstract *)mlLoaded, COLOR_PURPLE, "loaded: ");
-
-    /*
     r |= MemLocal_Destroy(m, path, NULL);
-    */
+    r |= Test((r & ERROR) == 0, "MemLocal destroy has no errors");
+
+    String *rOne = (String *)Span_Get(mlLoaded, 0); 
+    Span *rtbl = (Span *)Span_Get(mlLoaded, 1);
+    String *rTblTwo_s = (String *)Table_Get(tbl, (Abstract *)pKeyTwo_s); 
+
+    r |= Test(String_Length(rOne) == len, "Result string length matches");
+    r |= Test(String_Equals(rTblTwo_s, expTwo_s), "Result key string matches");
 
     MemCtx_Free(m);
     MemCtx_Free(ml->m);
+    MemCtx_Free(mlLoaded->m);
     DebugStack_Pop();
     return r;
 }

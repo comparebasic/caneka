@@ -2,7 +2,9 @@
 #include <caneka.h>
 #include <tests/tests.h>
 
+/*
 #define CYCLE_SERVE 1
+*/
 
 status Tests_Init(MemCtx *m){
    status r = READY;
@@ -235,16 +237,24 @@ static TestSet _Tests[] = {
         "Oset serialization format tests (similar features to XML, JSON, or YAML).",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "IoCtx",
         IoCtx_Tests,
         "File and storage persistance context tests.",
         FEATURE_COMPLETE,
     },
+    */
+    {
+        "MemLocal - To/From",
+        MemLocal_ToFromTests,
+        "Calling To and From persistance functions for MemLocal.",
+        FEATURE_COMPLETE,
+    },
     {
         "MemLocal",
         MemLocal_Tests,
-        "Persisting a combination of Table, Span, and MemCtx to disk and back for use in IO Contextx.",
+        "Calling save and restore MemLocal functions.",
         FEATURE_COMPLETE,
     },
     {
@@ -295,12 +305,14 @@ static TestSet _Tests[] = {
         "Bi-directional encryption with a variable sized key.",
         PARTIAL_FEATURE,
     },
+    /*
     {
         "UserTests - PasswordFlow",
         User_Tests,
         "A Basic user password flow using CycleServe and IoCtx.",
         PARTIAL_FEATURE,
     },
+    */
     {
         "CanekaLang - Roebling Syntax",
         Roebling_SyntaxTests,
@@ -333,11 +345,16 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
+    {
+        "MemLocal - To/From",
+        MemLocal_ToFromTests,
+        "Calling To and From persistance functions for MemLocal.",
+        FEATURE_COMPLETE,
+    },
     {
         "MemLocal",
         MemLocal_Tests,
@@ -353,3 +370,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/

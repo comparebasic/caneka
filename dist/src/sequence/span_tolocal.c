@@ -92,6 +92,7 @@ status Span_FromLocal(MemCtx *m, Abstract *a){
         return ERROR;
     }
     r |= slab_FromLocal(m, p->dims, p->def, p->root);
+    p->m = m;
     a->type.of -= HTYPE_LOCAL;
 
     if(r == READY){

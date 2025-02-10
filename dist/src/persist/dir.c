@@ -2,14 +2,16 @@
 #include <caneka.h>
 
 static status rmDir(MemCtx *m, String *path, Abstract *source){
-    return unlink(String_ToChars(m, path)) == 0 ? SUCCESS : ERROR;
+    char *dirPath = String_ToChars(m, path);
+    return rmdir(dirPath) == 0 ? SUCCESS : ERROR;
 }
 
 static status rmFile(MemCtx *m, String *path, String *file, Abstract *source){
     String *fpath = String_Clone(m, path); 
     String_AddBytes(m, fpath, bytes("/"), 1);
     String_Add(m, fpath, file);
-    return unlink(String_ToChars(m, fpath)) == 0 ? SUCCESS : ERROR;
+    char *rmPath = String_ToChars(m, fpath);
+    return unlink(rmPath) == 0 ? SUCCESS : ERROR;
 }
 
 static status gatherDir(MemCtx *m, String *path, Abstract *source){
@@ -27,7 +29,10 @@ static status gatherFile(MemCtx *m, String *path, String *file, Abstract *source
 }
 
 status Dir_Destroy(MemCtx *m, String *path, Access *access){
-    return Dir_Climb(m, path, rmDir, rmFile, NULL);
+    status r = READY;
+    r |= Dir_Climb(m, path, rmDir, rmFile, NULL);
+    r |= rmDir(m, path, NULL);
+    return r;
 }
 
 status Dir_Gather(MemCtx *m, String *path, Span *sp){

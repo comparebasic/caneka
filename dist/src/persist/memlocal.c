@@ -147,15 +147,17 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
 
     MemCtx *mlm = MemCtx_Make();
 
-    String_AddBytes(m, path, bytes("/memslab."), strlen("/memslab."));
-    i64 l = path->length;
+    String *fname = String_Clone(m, path);
+    String_AddBytes(m, fname, bytes("/memslab."), strlen("/memslab."));
+    i64 l = fname->length;
 
     File slabFile;
     int idx = 0;
-    String_Add(m, path, String_FromInt(m, idx));
 
-    while(File_Exists(path) & SUCCESS){
-        File_Init(&slabFile, path, NULL, NULL);
+    String_Add(m, fname, String_FromInt(m, idx));
+
+    while(File_Exists(fname) & SUCCESS){
+        File_Init(&slabFile, fname, NULL, NULL);
         slabFile.abs = slabFile.path;
         slabFile.data = String_Init(m, sizeof(MemSlab));
         File_Stream(m, &slabFile, access, NULL, NULL); 
@@ -177,10 +179,10 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
         memcpy(&sl->addr, &ptr, sizeof(void *));
 
         String_Trunc(slabFile.path, l);
-        String_Add(m, path, String_FromInt(m, ++idx));
+        String_Add(m, fname, String_FromInt(m, ++idx));
     }
 
-    if((MemLocal_From(m, (Abstract *)mlm->start_sl->bytes) & ERROR) != 0){
+    if((MemLocal_From(mlm, (Abstract *)mlm->start_sl->bytes) & ERROR) != 0){
         Fatal("Error with MemLocal_From during load", TYPE_MEMLOCAL);
         return NULL;
     }
@@ -198,7 +200,7 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     DebugStack_Push("MemLocal_Persist", TYPE_CSTR);
     status r = READY;
 
-    MemLocal_To(m, (Abstract *)ml);
+    MemLocal_To(ml->m, (Abstract *)ml);
 
     ml->m->type.of += HTYPE_LOCAL;
 

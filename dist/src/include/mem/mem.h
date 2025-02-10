@@ -2,6 +2,7 @@
 This is the semi-manually-run garbage collector.
 */
 #define MEM_SLAB_SIZE 4096
+extern int MemSlab_Count;
 
 /*
  * Individual slabs of memory that have tracking information for the next

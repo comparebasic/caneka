@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 static size_t cmem = 0;
+int MemSlab_Count = 0;
 
 static void *trackMalloc(size_t sz, cls t){
     void *p = malloc(sz);
@@ -53,6 +54,7 @@ MemSlab *MemSlab_Make(MemCtx *m, i16 level){
     sl->type.of = TYPE_MEMSLAB;
     sl->addr = sl->bytes;
     sl->level = level;
+    MemSlab_Count++;
     if(m != NULL){
         return MemSlab_Attach(m, sl);
     }else{
@@ -132,22 +134,26 @@ i64 MemCtx_Total(MemCtx *m, i16 level){
 }
 
 status MemCtx_FreeTemp(MemCtx *m, i16 level){
-    MemSlab *current = m->start_sl, *next = NULL;
-    MemSlab *prev = NULL;
+    MemSlab *current = m->start_sl;
+    MemSlab *next = NULL;
+    MemSlab *latest = NULL;
     while(current != NULL){
-        if(current->next == NULL){
-           next = current; 
+        next = current->next;
+        if(level == 0 || current->level >= level){
+            trackFree(current, sizeof(MemSlab));
+            MemSlab_Count--;
+            if(latest == NULL){
+                m->start_sl = NULL; 
+            }else{
+                latest->next = next;
+            }
+            current = next;
         }else{
-           next = current->next;
-        }
-        if(level == 0 || next->level >= level){
-            current->next = next->next;
-            trackFree(next, sizeof(MemSlab));
-        }else{
-            current = current->next;
-        }
-        if(next == current){
-            break;
+            if(m->start_sl == NULL){
+                m->start_sl = current;
+            }
+            latest = current;
+            current = next;
         }
     }
     return SUCCESS;

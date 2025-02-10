@@ -97,11 +97,13 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
         if((GLOBAL_flags & HTML_OUTPUT) != 0){
             printf("    </ol>\n</div>\n");
         }else{
-            String *s = String_Init(m, STRING_EXTEND);
+            word stackLevel = m->type.range-baseStackLevel;
+            m->type.range++;
             i64 memUsed = MemCount()-baseMem;
             i64 overRollingUsed = MemCount()-rollingBaseMem;
+            rollingBaseMem = MemCount();
+            String *s = String_Init(m, STRING_EXTEND);
 
-            word stackLevel = m->type.range-baseStackLevel;
             if(overRollingUsed > 0 || stackLevel > 0){
                 String_AddBytes(m, s, bytes("\x1b[31m"), strlen("\x1b[31m"));
             }else if(memUsed > 0){
@@ -115,7 +117,8 @@ status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
                 String_AddBytes(m, s, bytes("\x1b[0m"), strlen("\x1b[0m"));
             }
             printf("%s\n", String_ToChars(m, s));
-            rollingBaseMem = MemCount();
+            MemCtx_Free(m);
+            m->type.range--;
         }
         if((r & ERROR) != 0 || (r & SUCCESS) == 0){
             fail++;
