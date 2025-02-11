@@ -191,6 +191,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     "spandef.c",
     "spanquery.c",
     "span_tolocal.c",
+    "sequence_debug.c",
     "table.c",
     "table_chain.c",
     NULL

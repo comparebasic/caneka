@@ -21,12 +21,15 @@ boolean Auth_Verify(MemCtx *m, Auth *auth, String *secret, Access *ac){
 }
 
 Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
+    DebugStack_Push(key, key->type.of);
     Auth *auth = MemCtx_Alloc(m, sizeof(Auth));
     auth->type.of = TYPE_AUTH;
 
     if(key != NULL){
         String *skey = EncPair_GetKey(key, ac);
         if(skey == NULL){
+            Fatal("Key for auth is NULL", TYPE_AUTH);
+            DebugStack_Pop();
             return NULL;
         }
 
@@ -43,5 +46,6 @@ Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
         auth->digest = Sha256_Get(m, &sha);
     }
 
+    DebugStack_Pop();
     return auth;
 }

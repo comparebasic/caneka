@@ -9,7 +9,8 @@ status User_Tests(MemCtx *gm){
     IoCtx *root = IoCtxTests_GetRootCtx(m);
     /* add test key */
     Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
-    Tests_AddTestKey(gm);
+    r |= Tests_AddTestKey(gm);
+    printf("Added test key %s\n", State_ToChars(r));
     /* end add test key */
 
     String *users_s = String_Make(m, bytes("users"));

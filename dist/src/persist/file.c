@@ -55,7 +55,9 @@ boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
 
 status File_Persist(MemCtx *m, File *file){
     char buff[PATH_BUFFLEN];
-
+    if(DEBUG_FILE){
+        DPrint((Abstract *)file->abs, DEBUG_FILE, "Persisting: ");
+    }
     if(file->data != NULL){
         if((file->type.state & FILE_UPDATED) != 0){
             char *mode = "w";
@@ -239,6 +241,7 @@ status File_Delete(File *file){
 }
 
 File *File_Init(File *file, String *path, Access *access, IoCtx *ctx){
+    DebugStack_Push(path, path->type.of);
     memset(file, 0, sizeof(File));
     file->type.of = TYPE_FILE;
     file->access = access;
@@ -248,6 +251,7 @@ File *File_Init(File *file, String *path, Access *access, IoCtx *ctx){
         Table_Set(ctx->files, (Abstract *)file->path, (Abstract *)file);
     }
     
+    DebugStack_Pop();
     return file;
 }
 

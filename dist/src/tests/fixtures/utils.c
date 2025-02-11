@@ -1,20 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
-static boolean _testKeyAdded = FALSE;
 status Tests_AddTestKey(MemCtx *m){
-    if(!_testKeyAdded){
-        _testKeyAdded = TRUE;
-        Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
-        Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
+    Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
+    Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
 
-        Span *keys = Span_Make(m, TYPE_TABLE);
-        Table_Set(keys, (Abstract *)Cont(m, bytes("test")),
-            (Abstract *)Salty_MakeKey(m, Cont(m, bytes("Tests are Fun Fun Fun!"))));
+    Span *keys = Span_Make(m, TYPE_TABLE);
+    String *name = Cont(m, bytes("test"));
 
+    if(EncPair_GetKey(name, ac) == NULL){
+        String *key = Salty_MakeKey(m, Cont(m, bytes("Tests are Fun Fun Fun!")));
+        Table_Set(keys, (Abstract *)name, (Abstract *)key);
         return EncPair_AddKeyTable(m, keys, system);
     }
-    return SUCCESS;
+    return NOOP;
 }
 
 static int connectToServer(){

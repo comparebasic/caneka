@@ -12,3 +12,4 @@
 #include "sequence/queue.h"
 #include "sequence/nestedd.h"
 #include "sequence/span_tolocal.h"
+#include "sequence/sequence_debug.h"

@@ -17,6 +17,7 @@ status User_Delete(MemCtx *m, IoCtx *userCtx, String *id, Access *ac){
 }
 
 Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *ac, Span *data){
+    DebugStack_Push(id, id->type.of);
     if(DEBUG_USER){
         Debug_Print((void *)id, 0, "Making user: ", DEBUG_USER, TRUE);
         printf("\n");
@@ -42,6 +43,7 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         Auth *auth = as(Abs_FromOset(m, pwauth->data), TYPE_AUTH);
         if(!Auth_Verify(m, auth, secret, ac)){
             Log_AuthFail(m, auth, ac);
+            DebugStack_Pop();
             return NULL;
         }
 
@@ -56,21 +58,27 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         }
 
         IoCtx_Persist(m, &ctx); 
+        DebugStack_Pop();
         return udataTbl;
     }else{
         if(DEBUG_USER){
             Debug_Print((void *)id, 0, "Making new: ", DEBUG_USER, TRUE);
             printf("\n");
         }
+        printf("I\n");
         File pwauth;
+        printf("II\n");
         File_Init(&pwauth, String_Make(m, bytes("password.auth")), ac, &ctx);
-        pwauth.data = Oset_To(m, NULL, (Abstract *)Auth_Make(m, key, secret, ac));
+        printf("III\n");
+        Auth *auth = Auth_Make(m, key, secret, ac);
+        DPrint((Abstract *)auth, COLOR_PURPLE, "auth:");
+        pwauth.data = Oset_To(m, NULL, (Abstract *)auth);
         pwauth.type.state |= FILE_UPDATED;
 
-        /*
-        Debug_Print((void *)pwauth.data, 0, "PwAuthOset: ", COLOR_PURPLE, TRUE);
-        printf("\n");
-        */
+        if(DEBUG_USER){
+            Debug_Print((void *)pwauth.data, 0, "PwAuthOset: ", DEBUG_USER, TRUE);
+            printf("\n");
+        }
 
         File user;
         File_Init(&user, String_Make(m, bytes("user.data")), ac, &ctx);
@@ -88,8 +96,10 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         }
         
         IoCtx_Persist(m, &ctx); 
+        DebugStack_Pop();
         return data;
     }
 
+    DebugStack_Pop();
     return NULL;
 }

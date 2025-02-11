@@ -39,6 +39,18 @@ status Dir_Gather(MemCtx *m, String *path, Span *sp){
     return Dir_Climb(m, path, gatherDir, gatherFile, (Abstract *)sp);
 }
 
+status Dir_Exists(MemCtx *m, String *path){
+    char *path_cstr = String_ToChars(m, path);
+    DIR* dir = opendir(path_cstr);
+    if(dir){
+        closedir(dir);
+        return SUCCESS;
+    }else if(ENOENT == errno){
+        return NOOP;
+    }
+    return ERROR;
+}
+
 status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *source){
     DebugStack_Push(path, path->type.of); 
     status r = READY;

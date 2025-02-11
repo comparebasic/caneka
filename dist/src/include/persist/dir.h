@@ -8,3 +8,4 @@ status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *
 status Dir_Gather(MemCtx *m, String *path, Span *sp);
 status Dir_CheckCreate(MemCtx *m, String *path);
 status Dir_Destroy(MemCtx *m, String *path, Access *access);
+status Dir_Exists(MemCtx *m, String *path);

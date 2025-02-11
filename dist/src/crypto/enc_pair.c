@@ -15,6 +15,7 @@ status Enc_Init(MemCtx *m){
 
 String *EncPair_GetKey(String *key, Access *access){
     if(HasAccess(key, access)){
+        DPrint((Abstract *)SaltyKeyChain, COLOR_PURPLE, "SaltyKeyChain:");
         return TableChain_Get(SaltyKeyChain, (Abstract *)key);
     }
     access->type.state |= ERROR;

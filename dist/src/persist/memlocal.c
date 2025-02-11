@@ -145,7 +145,9 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
     status r = READY;
     Iter it;
 
-    MemCtx *mlm = MemCtx_Make();
+    if((Dir_Exists(m, path) & SUCCESS) == 0){
+        return NULL;
+    }
 
     String *fname = String_Clone(m, path);
     String_AddBytes(m, fname, bytes("/memslab."), strlen("/memslab."));
@@ -155,6 +157,8 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
     int idx = 0;
 
     String_Add(m, fname, String_FromInt(m, idx));
+
+    MemCtx *mlm = MemCtx_Make();
 
     while(File_Exists(fname) & SUCCESS){
         File_Init(&slabFile, fname, NULL, NULL);
@@ -199,6 +203,9 @@ status MemLocal_Destroy(MemCtx *m, String *path, Access *access){
 status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     DebugStack_Push("MemLocal_Persist", TYPE_CSTR);
     status r = READY;
+    if(ml == NULL){
+        return NOOP;
+    }
 
     MemLocal_To(ml->m, (Abstract *)ml);
 

@@ -59,17 +59,20 @@ FmtCtx *Oset_Make(MemCtx *m, Lookup *osetDefs){
 }
 
 String *Oset_To(MemCtx *m, String *key, Abstract *a){
+    DebugStack_Push(a, a->type.of);
     if(_oset == NULL){
         Fatal("Oset not intialized", TYPE_OSET);
     }
     Abstract *found = Chain_Get(_oset->resolver->byId, Ifc_Get(a->type.of));
     if(found != NULL){
         FmtDef *def = as(found, TYPE_OSET_DEF);
+        DebugStack_Pop();
         return asIfc(def->to(m, def, _oset, key, a), TYPE_STRING);
     }else{
         Debug_Print((void *)a, 0, "Uknown oset type for:" , COLOR_RED, TRUE);
         Fatal("Uknown type for parsing Oset", TYPE_ABSTRACT);
     }
+    DebugStack_Pop();
     return NULL;
 }
 
