@@ -14,11 +14,14 @@ status Enc_Init(MemCtx *m){
 }
 
 String *EncPair_GetKey(String *key, Access *access){
+    DebugStack_Push(key, key->type.of);
     if(HasAccess(key, access)){
-        DPrint((Abstract *)SaltyKeyChain, COLOR_PURPLE, "SaltyKeyChain:");
-        return TableChain_Get(SaltyKeyChain, (Abstract *)key);
+        String *s = TableChain_Get(SaltyKeyChain, (Abstract *)key);
+        DebugStack_Pop();
+        return s;
     }
     access->type.state |= ERROR;
+    DebugStack_Pop();
     return NULL;
 }
 

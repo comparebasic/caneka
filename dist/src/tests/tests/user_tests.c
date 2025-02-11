@@ -10,7 +10,6 @@ status User_Tests(MemCtx *gm){
     /* add test key */
     Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
     r |= Tests_AddTestKey(gm);
-    printf("Added test key %s\n", State_ToChars(r));
     /* end add test key */
 
     String *users_s = String_Make(m, bytes("users"));
@@ -51,6 +50,9 @@ status User_Tests(MemCtx *gm){
     r |= Test(String_Equals(e2, email), "Email from newly opened user table matches original, have '%s'", email->bytes);
 
     r |= Test(User_Delete(m, users, userId, ac) & SUCCESS, "User Delete has flag SUCCESS");
+
+    IoCtx_Destroy(m, users, NULL);
+    IoCtx_Destroy(m, session, NULL);
 
     MemCtx_Free(m);
     DebugStack_Pop();

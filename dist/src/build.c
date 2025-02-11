@@ -207,6 +207,7 @@ static BuildSubdir serveobj = { "serve", {
     "procioset.c",
     "req.c",
     "serve.c",
+    "serve_debug.c",
     NULL
 }};
 

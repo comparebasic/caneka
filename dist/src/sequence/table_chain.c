@@ -2,17 +2,23 @@
 #include <caneka.h>
 
 void *TableChain_Get(TableChain *chain, Abstract *a){
+    DebugStack_Push(a, a->type.of);
     if(chain->tbl == NULL){
+        DebugStack_Pop();
         return NULL;
     }
     Abstract *t = Table_Get(chain->tbl, (Abstract *)a);
 
     if(t != NULL){
-       return (void *)t; 
+        DebugStack_Pop();
+        return (void *)t; 
     }
     if(chain->next != NULL){
-        return TableChain_Get(chain->next, a);
+        Abstract *_a = TableChain_Get(chain->next, a);
+        DebugStack_Pop();
+        return _a;
     }else{
+        DebugStack_Pop();
         return NULL;
     }
 }

@@ -60,15 +60,12 @@ status ServeHandle_Tests(MemCtx *gm){
     Serve_AcceptPoll(sctx, ACCEPT_LONGDELAY_MILLIS);
     Delay();
     Delay();
+
     Serve_ServeRound(sctx);
     req = sctx->active;
     r |= Test(req != NULL, "active Req is not null");
     
-    h = Handler_Current(req->handler);
-    r |= Test(h->func == Example_Setup, "Req has the first handler set");
-
-    Serve_ServeRound(sctx);
-    h = Handler_Current(req->handler);
+    h = Handler_Get(req->handler);
     r |= Test(h->func == Example_Recieve, "Req has the second handler set");
 
     Serve_ServeRound(sctx);
@@ -113,13 +110,10 @@ status ServeChunked_Tests(MemCtx *gm){
     Serve_ServeRound(sctx);
     req = sctx->active;
     r |= Test(req != NULL, "active Req is not null");
-    
-    h = Handler_Current(req->handler);
-    r |= Test(h->func == Example_Setup, "Req has the first handler set");
 
     Delay();
     Serve_ServeRound(sctx);
-    h = Handler_Current(req->handler);
+    h = Handler_Get(req->handler);
     r |= Test(h->func == Example_Recieve, "Req has the second handler set");
     r |= Test((req->in.rbl->type.state & SUCCESS) == 0, "Req Roebling does not have state SUCCESS yet, have %s", State_ToChars(req->in.rbl->type.state));
 

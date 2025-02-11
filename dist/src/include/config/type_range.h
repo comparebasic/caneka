@@ -90,6 +90,7 @@ enum types {
     TYPE_SOURCE,
     TYPE_PROC_IO_SET,
     TYPE_SERVECTX,
+    TYPE_HANDLER,
     TYPE_REQ,
     TYPE_PROTO,
     TYPE_PROTODEF,

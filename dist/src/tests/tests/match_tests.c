@@ -208,10 +208,6 @@ status MatchKo_Tests(MemCtx *gm){
         }
     }
     r |= Test(Match_Total(&mt) == s->length-4, "terminator 'end' is omited and last punctuation as well, from the count, expecting %d, have %d", s->length-4,Match_Total(&mt));
-    Debug_Print((void *)s, 0, "S: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-    Debug_Print((void *)mt.backlog, TYPE_STRSNIP_STRING, "Backlog: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     word eqDef[] = {
         PAT_KO, '!', '!',PAT_KO, '=', '=',PAT_KO, '<', '<',PAT_KO|PAT_KO_TERM, '>', '>',PAT_INVERT_CAPTURE|PAT_MANY,' ', ' ', patText,

@@ -1,6 +1,7 @@
 #include "serve/proto/proto.h"
 #include "serve/req.h"
 #include "serve/serve.h"
+#include "serve/serve_debug.h"
 #include "serve/handler.h"
 #include "serve/procios.h"
 #include "serve/proto/http.h"

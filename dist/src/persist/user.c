@@ -65,13 +65,9 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
             Debug_Print((void *)id, 0, "Making new: ", DEBUG_USER, TRUE);
             printf("\n");
         }
-        printf("I\n");
         File pwauth;
-        printf("II\n");
         File_Init(&pwauth, String_Make(m, bytes("password.auth")), ac, &ctx);
-        printf("III\n");
         Auth *auth = Auth_Make(m, key, secret, ac);
-        DPrint((Abstract *)auth, COLOR_PURPLE, "auth:");
         pwauth.data = Oset_To(m, NULL, (Abstract *)auth);
         pwauth.type.state |= FILE_UPDATED;
 

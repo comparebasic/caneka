@@ -1,32 +1,10 @@
 #include <external.h>
 #include <caneka.h>
-Handler *Handler_Current(Handler *h){
-    if((h->type.state & (SUCCESS|ERROR)) != 0){
-        return h;
-    }
-
-    Handler *cursor = h;
-    while(
-            h != NULL && 
-            h->prior != NULL && 
-            (h->prior== NULL || (h->prior->type.state & SUCCESS) == 0)
-        ){
-        h = Span_GetSelected(h->prior);
-    }
-    return h;
-}
 
 Handler *Handler_Get(Handler *h){
     /* if the root handler is finished, the request is complete */
     if((h->type.state & (SUCCESS|ERROR)) != 0){
-        if(DEBUG_EXAMPLE_HANDLERS){
-            printf("\x1b[%dm   returning same handler\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS);
-        }
         return h;
-    }
-
-    if(DEBUG_EXAMPLE_HANDLERS){
-        printf("\x1b[%dm   returning new handler\x1b[0m\n", DEBUG_EXAMPLE_HANDLERS);
     }
 
     Handler *cursor = h;
@@ -63,10 +41,12 @@ status Handler_AddPrior(MemCtx *m, Handler *orig, Handler *h){
     return Span_Add(orig->prior, (Abstract *)h);
 }
 
-Handler *Handler_Make(MemCtx *m, HandleFunc func, Abstract *data, int direction){
+Handler *Handler_Make(MemCtx *m, HandleFunc func, Abstract *data, int direction, int id){
     Handler *h = MemCtx_Alloc(m, sizeof(Handler));
+    h->type.of = TYPE_HANDLER;
     h->func = func;
     h->data = data;
     h->direction = direction;
+    h->id = id;
     return h;
 }

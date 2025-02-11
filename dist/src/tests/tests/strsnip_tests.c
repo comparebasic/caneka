@@ -146,11 +146,6 @@ status StrSnipBoundry_Tests(MemCtx *gm){
     }
 
     r |= Test(String_Equals(sns, expectedSns), "Expect SNS from match to equals expected SNS built manually");
-    Debug_Print((void *)sns, TYPE_STRSNIP_STRING, "Sns: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-
-    Debug_Print((void *)expectedSns, TYPE_STRSNIP_STRING, "Sns: ", COLOR_PURPLE, TRUE);
-    printf("\n");
 
     res = StrSnipStr_ToString(m, sns, s);
     r |= Test(String_Equals(res, exp), "Expected String without quotes or newlines, have '%s'", String_ToChars(m, res));

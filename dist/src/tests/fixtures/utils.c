@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status Tests_AddTestKey(MemCtx *m){
+    MemCtx_SetToBase(m);
     Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
     Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
 
@@ -11,8 +12,11 @@ status Tests_AddTestKey(MemCtx *m){
     if(EncPair_GetKey(name, ac) == NULL){
         String *key = Salty_MakeKey(m, Cont(m, bytes("Tests are Fun Fun Fun!")));
         Table_Set(keys, (Abstract *)name, (Abstract *)key);
-        return EncPair_AddKeyTable(m, keys, system);
+        status r = EncPair_AddKeyTable(m, keys, system);
+        MemCtx_SetFromBase(m);
+        return r;
     }
+    MemCtx_SetFromBase(m);
     return NOOP;
 }
 

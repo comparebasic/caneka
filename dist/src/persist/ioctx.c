@@ -7,8 +7,6 @@ static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
     index.abs = IoCtx_GetPath(m, ctx, index.path);
     File_Load(m, &index, ctx->access);
 
-    DPrint((Abstract *)index.data, COLOR_PURPLE, "index: ");
-
     if((index.type.state & FILE_LOADED) != 0){
         ctx->files = (Span *)Abs_FromOset(m, index.data);
         if(ctx->files != NULL && ctx->files->type.of == TYPE_TABLE){
@@ -128,13 +126,12 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 
     r |= IoCtx_LoadOrReserve(m, ctx);
     if(r & ERROR){
-        printf("error making dir\n");
+        printf("Error making dir\n");
         return r;
     }
 
     Iter it;
     Iter_Init(&it, ctx->files);
-    
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL){
@@ -144,14 +141,17 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
         }
     }
 
-    r |= MemLocal_Persist(ctx->m, ctx->mstore, IoCtx_GetMStorePath(m, ctx), NULL);
-
     String *os = Oset_To(m, NULL, (Abstract *)ctx->files);
+    if(DEBUG_IOCTX){
+        DPrint((Abstract *)os, DEBUG_IOCTX, "FileOset: ");
+    }
     File *index = File_Make(m, IoCtx_GetIndexName(m, ctx), NULL, NULL); 
     index->abs = IoCtx_GetPath(m, ctx, index->path);
     index->data = os;
     index->type.state |= FILE_UPDATED;
     File_Persist(m, index);
+
+    r |= MemLocal_Persist(ctx->m, ctx->mstore, IoCtx_GetMStorePath(m, ctx), NULL);
 
     DebugStack_Pop();
     return r;

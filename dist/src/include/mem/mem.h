@@ -103,3 +103,9 @@ i64 MemCtx_Total(MemCtx *m, i16 level);
 /* Gets the amount of bytes used in a particular slab */
 #define MemSlab_Taken(sl) ((sl)->addr - (void *)(sl)->bytes)
 
+
+/* This macro sets the memory range to be at level (0) in a way that can be
+ * restored: by setting it to negative, the absolute value is where it was
+ * before */
+#define MemCtx_SetToBase(m) ((m)->type.range = -((m)->type.range));
+#define MemCtx_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
