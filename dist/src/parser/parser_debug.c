@@ -1,6 +1,24 @@
 #include <external.h>
 #include <caneka.h>
 
+static char *flagStrs[] = {
+    "PAT_TERM",
+    "PAT_OPTIONAL",
+    "PAT_MANY",
+    "PAT_ANY",
+    "PAT_INVERT",
+    "PAT_COUNT",
+    "PAT_INVERT_CAPTURE",
+    "PAT_KO",
+    "PAT_KO_TERM",
+    "PAT_SINGLE",
+    "PAT_LEAVE ",
+    "PAT_CMD",
+    "PAT_GO_ON_FAIL",
+    "PAT_CONSUME",
+    NULL,
+};
+
 status PrintMatchAddr(MemCtx *m, Abstract *a){
     if(a == NULL){
         printf("NULL ");
@@ -9,6 +27,34 @@ status PrintMatchAddr(MemCtx *m, Abstract *a){
     }
     return SUCCESS;
 }
+
+status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
+    status r = READY;
+    char *cstr = "";
+    boolean first = TRUE;
+    if(flag == 0){
+        cstr = "PAT_END";
+        String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+        r |= SUCCESS;
+    }
+    for(int i = 0; i <= 13; i++){
+        if((flag & (1 << i)) != 0){
+            if(!first){
+                cstr = "|";
+                String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+            }
+            first = FALSE;
+            cstr = flagStrs[i];
+            String_AddBytes(m, s, bytes(cstr), strlen(cstr));
+            r |= SUCCESS;
+        }
+    }
+    if(r == READY){
+        r |= NOOP;
+    }
+    return r;
+}
+
 
 void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);

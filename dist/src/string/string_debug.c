@@ -52,10 +52,11 @@ void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
     }else{
         printf("\x1b[%dm%s\x1b[1;%dm",color, msg, color);
         do {
-            /*
-            printf("%d/%lu'%s'",s->length,strlen((char *)s->bytes),s->bytes);
-            */
-            printf("%s",s->bytes);
+            if(s->type.state & FLAG_STRING_BINARY){
+                printf("\x1b[%dmS<Binary/%d>\x1b[0m", color, s->length);
+            }else{
+                printf("%s",s->bytes);
+            }
             s = s->next;
         } while(s != NULL);
         printf("\x1b[0m");

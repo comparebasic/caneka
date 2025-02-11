@@ -303,14 +303,12 @@ static TestSet _Tests[] = {
         "Bi-directional encryption with a variable sized key.",
         PARTIAL_FEATURE,
     },
-    /*
     {
         "UserTests - PasswordFlow",
         User_Tests,
         "A Basic user password flow using CycleServe and IoCtx.",
         PARTIAL_FEATURE,
     },
-    */
     {
         "CanekaLang - Roebling Syntax",
         Roebling_SyntaxTests,
@@ -344,8 +342,8 @@ static TestSet _Tests[] = {
 };
 
 TestSet *Tests = _Tests;
-/*
 
+/*
 static TestSet solo[] = {
     {
         "IoCtx",

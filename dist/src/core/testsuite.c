@@ -56,7 +56,8 @@ status Test(int condition, char *msg, ...){
     }
 }
 
-status Test_Runner(MemCtx *m, char *suiteName, TestSet *tests){
+status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
+    MemCtx *m = MemCtx_Make();
     DebugStack_Push(suiteName, TYPE_CSTR); 
     int i = 0;
     TestSet *set = tests;

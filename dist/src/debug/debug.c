@@ -223,7 +223,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
                     i64 n = (util)t;
                     if(def->itemSize == sizeof(int)){
                         printf("%u", (int)n);
-                    }else if((def->flags & SPAN_INLINE) == 0 && t->type.of != 0){
+                    }else if((def->flags & SPAN_RAW) == 0 && t->type.of != 0){
                         Debug_Print((void *)t, 0, "", color, FALSE);
                     }else{
                         if(def->slotSize > 1){

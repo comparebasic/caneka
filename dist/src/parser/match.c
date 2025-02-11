@@ -1,51 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static char *flagStrs[] = {
-    "PAT_TERM",
-    "PAT_OPTIONAL",
-    "PAT_MANY",
-    "PAT_ANY",
-    "PAT_INVERT",
-    "PAT_COUNT",
-    "PAT_INVERT_CAPTURE",
-    "PAT_KO",
-    "PAT_KO_TERM",
-    "PAT_SINGLE",
-    "PAT_LEAVE ",
-    "PAT_CMD",
-    "PAT_GO_ON_FAIL",
-    "PAT_CONSUME",
-    NULL,
-};
-
-status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
-    status r = READY;
-    char *cstr = "";
-    boolean first = TRUE;
-    if(flag == 0){
-        cstr = "PAT_END";
-        String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-        r |= SUCCESS;
-    }
-    for(int i = 0; i <= 13; i++){
-        if((flag & (1 << i)) != 0){
-            if(!first){
-                cstr = "|";
-                String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-            }
-            first = FALSE;
-            cstr = flagStrs[i];
-            String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-            r |= SUCCESS;
-        }
-    }
-    if(r == READY){
-        r |= NOOP;
-    }
-    return r;
-}
-
 static void match_Reset(Match *mt){
     mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
     mt->remaining = 0;
@@ -108,8 +63,9 @@ static void match_NextKoTerm(Match *mt){
 }
 
 static void addCount(MemCtx *m, Match *mt, word flags, int length){
-    if(0 && DEBUG_PATMATCH){
-        printf("\n\x1b[%dmaddCount:%s%d%s\x1b[0m", 
+    DebugStack_Push(mt, mt->type.of);
+    if(DEBUG_PATMATCH){
+        printf("\n    \x1b[%dmaddCount:%s%d%s\x1b[0m", 
             DEBUG_PATMATCH,
             ((flags & STRSNIP_GAP) != 0 ? "gap(" : (flags & STRSNIP_UNCLAIMED) != 0 ? "unclaimed(" : ""), 
             length,
@@ -118,10 +74,6 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
     }
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
-        /*
-    }else if((mt->snip.type.state & STRSNIP_CONTENT) == 0 && (flags & STRSNIP_CONTENT)){
-        flags = mt->snip.type.state;
-        */
     }
 
     if((mt->snip.type.state & flags) == flags){
@@ -130,6 +82,20 @@ static void addCount(MemCtx *m, Match *mt, word flags, int length){
         String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
         StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);
     }
+
+    if(DEBUG_PATMATCH){
+        printf(" \x1b[%dm{\x1b[0m", DEBUG_PATMATCH);
+        Debug_Print((void *)mt->backlog, TYPE_STRSNIP_STRING, "sns:", DEBUG_PATMATCH, TRUE);
+        printf("\x1b[%dm + %s%d/%d%s }", 
+            DEBUG_PATMATCH,
+            ((mt->snip.type.state & STRSNIP_GAP) != 0 ? "gap(" : (mt->snip.type.state & STRSNIP_UNCLAIMED) != 0 ? "unclaimed(" : ""), 
+            mt->snip.start,
+            mt->snip.length,
+            ((mt->snip.type.state & STRSNIP_CONTENT) == 0 ? ")" : "")
+        );
+    }
+
+    DebugStack_Pop();
     return;
 }
 

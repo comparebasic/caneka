@@ -86,6 +86,7 @@ status String_Add(MemCtx *m, String *a, String *b) {
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     DebugStack_Push(chars, TYPE_CSTR);
     if(length == 0){
+       DebugStack_Pop();
        return NOOP; 
     }
     if(a == NULL){

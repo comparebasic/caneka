@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status User_Tests(MemCtx *gm){
+    DebugStack_Push("User_Tests", TYPE_CSTR);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -51,5 +52,6 @@ status User_Tests(MemCtx *gm){
     r |= Test(User_Delete(m, users, userId, ac) & SUCCESS, "User Delete has flag SUCCESS");
 
     MemCtx_Free(m);
+    DebugStack_Pop();
     return r;
 }

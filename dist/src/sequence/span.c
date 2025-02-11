@@ -111,7 +111,6 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanDef *def = p->def;
-
     if(DEBUG_SPAN_GET_SET){
         printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
         SpanDef_Print(sq->span->def);
@@ -138,6 +137,7 @@ void *Span_GetFromQ(SpanQuery *sq){
         sq->span->type.state |= SUCCESS;
     }else{
         sq->span->type.state |= NOOP;
+        sq->value = NULL;
     }
     p->metrics.get = sq->idx;
     return sq->value;

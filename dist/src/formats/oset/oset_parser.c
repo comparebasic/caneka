@@ -64,6 +64,7 @@ static word endTableDef[] = {
 
 /* match setups */
 static status start(MemCtx *m, Roebling *rbl){
+    printf("start\n");
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
@@ -81,6 +82,7 @@ static status start(MemCtx *m, Roebling *rbl){
 }
 
 static status token(MemCtx *m, Roebling *rbl){
+    printf("token\n");
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,

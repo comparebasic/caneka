@@ -233,10 +233,11 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int 
     Match *mt = Span_ReserveNext(rbl->matches);
     status r = READY;
 
+    rbl->snips->type.state |= DEBUG;
     String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
     if(sns == NULL){
         sns = String_Init(rbl->m, STRING_EXTEND);
-        sns->type.state |= FLAG_STRING_CONTIGUOUS;
+        sns->type.state |= (FLAG_STRING_CONTIGUOUS|FLAG_STRING_BINARY);
         Span_Add(rbl->snips, (Abstract *)sns);
     }
 
@@ -260,7 +261,7 @@ status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump){
         String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
         if(sns == NULL){
             sns = String_Init(rbl->m, STRING_EXTEND);
-            sns->type.state |= FLAG_STRING_CONTIGUOUS;
+            sns->type.state |= (FLAG_STRING_CONTIGUOUS|FLAG_STRING_BINARY);
             Span_Add(rbl->snips, (Abstract *)sns);
         }
 
