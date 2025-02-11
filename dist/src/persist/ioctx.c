@@ -6,13 +6,15 @@ static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
     File_Init(&index, IoCtx_GetIndexName(m, ctx), ctx->access, NULL);
     index.abs = IoCtx_GetPath(m, ctx, index.path);
     File_Load(m, &index, ctx->access);
+
+    DPrint((Abstract *)index.data, COLOR_PURPLE, "index: ");
+
     if((index.type.state & FILE_LOADED) != 0){
         ctx->files = (Span *)Abs_FromOset(m, index.data);
         if(ctx->files != NULL && ctx->files->type.of == TYPE_TABLE){
             return SUCCESS;
         }
     }
-
     return NOOP;
 }
 
@@ -85,25 +87,29 @@ status IoCtx_LoadOrReserve(MemCtx *m, IoCtx *ctx){
     DIR* dir = opendir(path_cstr);
     if(dir){
         closedir(dir);
+        return NOOP;
     }else if(ENOENT == errno){
         if(mkdir(path_cstr, PERMS) != 0){
             printf("%s: %s\n", path_cstr, strerror(errno));
             Fatal("Unable to make dir", TYPE_IOCTX);
             return ERROR;
         }
+        return SUCCESS;
     }
-
-    return SUCCESS;
+    return NOOP;
 }
 
 status IoCtx_Load(MemCtx *m, IoCtx *ctx){
+    DebugStack_Push(ctx->root, ctx->root->type.of);
     status r = READY;
     String *s = String_Init(m, STRING_EXTEND);
     String *path = IoCtx_GetAbs(m, ctx); 
+    DebugStack_SetRef(path, path->type.of);
 
     char *path_cstr = String_ToChars(m, path);
     DIR* dir = opendir(path_cstr);
     if(dir == NULL && ENOENT == errno){
+        DebugStack_Pop();
         return NOOP;
     }
     closedir(dir);
@@ -111,14 +117,20 @@ status IoCtx_Load(MemCtx *m, IoCtx *ctx){
     ctx->mstore = MemLocal_Load(m, IoCtx_GetMStorePath(m, ctx), NULL);
     ioCtx_LoadFileList(m, ctx);
 
+    DebugStack_Pop();
     return SUCCESS;
 }
 
 status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
-    DebugStack_Push("IoCtx_Persis", TYPE_CSTR);
+    String *abs = IoCtx_GetAbs(m, ctx);
+    DebugStack_Push(abs, abs->type.of);
     status r = READY;
 
     r |= IoCtx_LoadOrReserve(m, ctx);
+    if(r & ERROR){
+        printf("error making dir\n");
+        return r;
+    }
 
     Iter it;
     Iter_Init(&it, ctx->files);
@@ -134,7 +146,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 
     r |= MemLocal_Persist(ctx->m, ctx->mstore, IoCtx_GetMStorePath(m, ctx), NULL);
 
-    String *os = Oset_To(m, String_Make(m, bytes("index")), (Abstract *)ctx->files);
+    String *os = Oset_To(m, NULL, (Abstract *)ctx->files);
     File *index = File_Make(m, IoCtx_GetIndexName(m, ctx), NULL, NULL); 
     index->abs = IoCtx_GetPath(m, ctx, index->path);
     index->data = os;
@@ -146,6 +158,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
 }
 
 status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
+    status r = READY;
     String *abs = IoCtx_GetAbs(m, ctx); 
     char *abs_cstr = String_ToChars(m, abs);
     /* TODO: remove files ... */
@@ -165,15 +178,16 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     file.abs = IoCtx_GetPath(m, ctx, file.path);
     File_Delete(&file);
 
-    MemLocal_Destroy(m, IoCtx_GetMStoreName(m, ctx), NULL);
+    String *memLocalPath = IoCtx_GetPath(m, ctx, IoCtx_GetMStoreName(m, ctx));
+    r |= MemLocal_Destroy(m, memLocalPath, NULL);
 
     /* remove dir */
     if(rmdir(abs_cstr) == 0){
-        return SUCCESS;
+        return r|SUCCESS;
     }
 
     printf("IoCtx Error in Destroy\n");
-    return ERROR;
+    return r|ERROR;
 }
 
 status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
@@ -184,9 +198,7 @@ status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *pr
     ctx->root = root;
     ctx->access = access;
     ctx->prior = prior;
-
     ctx->files = Span_Make(m, TYPE_TABLE);
-    ctx->mstore = MemLocal_Make(TYPE_TABLE);
 
     return SUCCESS;
 }
@@ -197,12 +209,16 @@ IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
     }
 	IoCtx* ctx = (IoCtx*)MemCtx_Alloc(m, sizeof(IoCtx));
     IoCtx_Init(m, ctx, root, access, prior);
+    ctx->mstore = MemLocal_Make(TYPE_TABLE);
 
     return ctx;
 }
 
 status IoCtx_Open(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
+    DebugStack_Push("IoCtx_Open", TYPE_CSTR);
     IoCtx_Init(m, ctx, root, access, prior);
-    return IoCtx_Load(m, ctx);
+    status r = IoCtx_Load(m, ctx);
+    DebugStack_Pop();
+    return r;
 }
 

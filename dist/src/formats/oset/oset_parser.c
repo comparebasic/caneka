@@ -194,6 +194,7 @@ static status addToParent(FmtCtx *oset){
 }
 
 static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
+    DebugStack_Push(s, s->type.of);
     if(DEBUG_OSET){
         printf("\x1b[%dmOset_Capture(%s %s)\x1b[0m\n", DEBUG_OSET, captureKey_ToChars(captureKey), s->bytes);
     }
@@ -219,6 +220,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         oset->item->remaining = Int_FromString(s);
     }else if(captureKey == OSET_LENGTH_ARRAY){
         if(oset->item->def->id != TYPE_SPAN){
+            DebugStack_Pop();
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
@@ -229,6 +231,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_LIST){
         if(oset->item->def->id != TYPE_SPAN){
+            DebugStack_Pop();
             return ERROR;
         }
         oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
@@ -258,6 +261,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
         }
         if(oset->item == NULL){
             Fatal("Oset item expected to be non-null", TYPE_OSET);
+            DebugStack_Pop();
             return ERROR;
         }
         s->type.state |= oset->item->flags;
@@ -266,6 +270,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
     }else if(captureKey == OSET_SEP){
         addToParent(oset);
     }
+    DebugStack_Pop();
     return SUCCESS;
 }
 

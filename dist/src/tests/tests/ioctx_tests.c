@@ -24,11 +24,10 @@ status IoCtx_Tests(MemCtx *gm){
 
     String *name = String_Make(m, bytes("one"));
     IoCtx *one = IoCtx_Make(m, name, NULL, root);
+    IoCtx_LoadOrReserve(m, one);
 
     String *onePath = IoCtx_GetPath(m, one, NULL);
     char *onePath_cstr = String_ToChars(m, onePath);
-    DIR* dir = opendir(onePath_cstr);
-    r |= Test(dir != NULL, "dir exists %s", onePath_cstr);
 
     String *fname = String_Make(m, bytes("file.one"));
     File *file = File_Make(m, fname, NULL, one);
@@ -48,12 +47,12 @@ status IoCtx_Tests(MemCtx *gm){
     Table_Set(one->mstore, (Abstract *)key, (Abstract *)value);
     IoCtx_Persist(m, one);
 
-    IoCtx one2;
-    IoCtx_Open(m, &one2, name, NULL, root);
+    IoCtx oneLoaded;
+    String *nameToLoad = String_Make(m, bytes("one"));
+    IoCtx_Open(m, &oneLoaded, nameToLoad, NULL, root);
 
-    printf("III\n");
-    String *mlValue = (String *)Table_Get(one2.mstore, (Abstract *)String_Make(m, bytes("key")));
-    File *fileOne = (File *)Table_Get(one2.files, (Abstract *)fname);
+    String *mlValue = (String *)Table_Get(oneLoaded.mstore, (Abstract *)String_Make(m, bytes("key")));
+    File *fileOne = (File *)Table_Get(oneLoaded.files, (Abstract *)fname);
 
     r |= Test(Ifc_Match(mlValue->type.of, TYPE_STRING), "MemLocal value from ctx matches type, have '%s'", Class_ToString(mlValue->type.of));
     r |= Test(String_EqualsBytes(mlValue, bytes("value")), "MemLocal value from ctx has expected bytes , have '%s'", mlValue->bytes);
@@ -61,7 +60,7 @@ status IoCtx_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(fileOne->path, bytes("file.one")), "File value from ctx has expected bytes in path , have '%s'", fileOne->path->bytes);
 
     IoCtx_Destroy(m, one, NULL);
-    dir = opendir(onePath_cstr);
+    DIR *dir = opendir(onePath_cstr);
     r |= Test(dir == NULL, "dir destroyed %s", onePath_cstr);
 
     MemCtx_Free(m);

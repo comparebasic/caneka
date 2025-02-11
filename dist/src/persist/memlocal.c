@@ -141,7 +141,7 @@ status MemLocal_UnSetLocal(MemCtx *m, Abstract **dblAddr){
 }
 
 Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
-    DebugStack_Push("MemLocal_Load", TYPE_CSTR);
+    DebugStack_Push(path, path->type.of);
     status r = READY;
     Iter it;
 
@@ -254,7 +254,6 @@ Span *MemLocal_Make(cls typeOf){
     DebugStack_Push("MemLocal_Make", TYPE_CSTR);
     if(Ifc_Match(typeOf, TYPE_SPAN)){
         MemCtx *m = MemCtx_Make();
-        printf("%s\n", Class_ToString(m->type.of));
         DebugStack_Pop();
         return Span_Make(m, typeOf);
     }else{

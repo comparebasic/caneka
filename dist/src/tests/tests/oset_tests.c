@@ -125,6 +125,12 @@ status Oset_Tests(MemCtx *gm){
     r |= Test(String_EqualsBytes(f2->path, bytes("fname.txt")), "File from oset matches, have '%s'", f2->path->bytes);
     r |= Test((f2->type.state == 4096), "File from oset matches, have '%d'", f2->type.state);
 
+    s = String_Make(m, bytes("tbl/1={file.one:file|4096/8=file.one;}"));
+    tbl = (Span *)Abs_FromOset(m, s);
+    r |= Test(tbl->type.of == TYPE_TABLE, "Have table from '%s'", String_ToChars(m, s));
+    File *f3 = (File *)Table_Get(tbl, (Abstract *)String_Make(m, bytes("file.one")));
+    r |= Test(String_EqualsBytes(f3->path, bytes("file.one")), "File inside table from oset matches, have '%s'", f3->path->bytes);
+    r |= Test((f3->type.state == 4096), "File from oset matches, have '%d'", f3->type.state);
 
     MemCtx_Free(m);
     return r;
