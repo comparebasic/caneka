@@ -115,6 +115,7 @@ status IoCtx_Load(MemCtx *m, IoCtx *ctx){
 }
 
 status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
+    DebugStack_Push("IoCtx_Persis", TYPE_CSTR);
     status r = READY;
 
     r |= IoCtx_LoadOrReserve(m, ctx);
@@ -140,6 +141,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
     index->type.state |= FILE_UPDATED;
     File_Persist(m, index);
 
+    DebugStack_Pop();
     return r;
 }
 

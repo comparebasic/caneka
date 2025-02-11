@@ -218,9 +218,11 @@ String *String_Next(String *s){
 }
 
 String *String_Make(MemCtx *m, byte *bytes){
+    DebugStack_Push("String_Make", TYPE_CSTR);
     int length = strlen((char *)bytes);
     String *s = String_Init(m, length); 
     String_AddBytes(m, s, bytes, length);
+    DebugStack_Pop();
     return s;
 }
 

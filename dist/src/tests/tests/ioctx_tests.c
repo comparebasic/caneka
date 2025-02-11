@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status IoCtx_Tests(MemCtx *gm){
+    DebugStack_Push("IoCtx_Tests", TYPE_CSTR);
     status r = READY;
     MemCtx *m = MemCtx_Make();
 
@@ -23,7 +24,6 @@ status IoCtx_Tests(MemCtx *gm){
 
     String *name = String_Make(m, bytes("one"));
     IoCtx *one = IoCtx_Make(m, name, NULL, root);
-    IoCtx_Persist(m, one);
 
     String *onePath = IoCtx_GetPath(m, one, NULL);
     char *onePath_cstr = String_ToChars(m, onePath);
@@ -43,12 +43,15 @@ status IoCtx_Tests(MemCtx *gm){
     r |= Test(l == file->data->length, "file length match, have %ld", l);
     r |= Test(String_EqualsBytes(file->data, bytes(buff)), "String content matches, have: '%s'", buff);
 
-    Table_Set(one->mstore, (Abstract *)String_Make(one->mstore->m, bytes("key")), (Abstract *)String_Make(one->mstore->m, bytes("value")));
+    String *key = String_Make(one->mstore->m, bytes("key"));
+    String *value = String_Make(one->mstore->m, bytes("value"));
+    Table_Set(one->mstore, (Abstract *)key, (Abstract *)value);
     IoCtx_Persist(m, one);
 
     IoCtx one2;
     IoCtx_Open(m, &one2, name, NULL, root);
 
+    printf("III\n");
     String *mlValue = (String *)Table_Get(one2.mstore, (Abstract *)String_Make(m, bytes("key")));
     File *fileOne = (File *)Table_Get(one2.files, (Abstract *)fname);
 
@@ -62,5 +65,6 @@ status IoCtx_Tests(MemCtx *gm){
     r |= Test(dir == NULL, "dir destroyed %s", onePath_cstr);
 
     MemCtx_Free(m);
+    DebugStack_Pop();
     return r;
 }

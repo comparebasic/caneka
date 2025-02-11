@@ -254,6 +254,7 @@ Span *MemLocal_Make(cls typeOf){
     DebugStack_Push("MemLocal_Make", TYPE_CSTR);
     if(Ifc_Match(typeOf, TYPE_SPAN)){
         MemCtx *m = MemCtx_Make();
+        printf("%s\n", Class_ToString(m->type.of));
         DebugStack_Pop();
         return Span_Make(m, typeOf);
     }else{

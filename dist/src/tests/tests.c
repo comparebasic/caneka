@@ -237,14 +237,12 @@ static TestSet _Tests[] = {
         "Oset serialization format tests (similar features to XML, JSON, or YAML).",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "IoCtx",
         IoCtx_Tests,
         "File and storage persistance context tests.",
         FEATURE_COMPLETE,
     },
-    */
     {
         "MemLocal - To/From",
         MemLocal_ToFromTests,
