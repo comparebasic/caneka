@@ -1,5 +1,5 @@
 #!/bin/sh
-./make.sh
+./scripts/make.sh
 now=$(date +%s)
 human=$(date)
 mkdir -p dist

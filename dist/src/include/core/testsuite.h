@@ -6,6 +6,7 @@ status Tests_Init(MemCtx *m);
 #define TEST_PORT 1200
 
 enum test_status {
+    SECTION_LABEL = 1 << 8,
     NOT_STARTED = 1 << 9,
     PREVIOUSLY_WORKING = 1 << 10,
     PARTIAL_FEATURE = 1 << 11,

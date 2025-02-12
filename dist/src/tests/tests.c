@@ -12,6 +12,12 @@ status Tests_Init(MemCtx *m){
 
 static TestSet _Tests[] = {
     {
+        "Basic Features",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
         "Core",
         Core_Tests,
         "Initializing core system tests",
@@ -90,6 +96,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Roebling Parser",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
         "Match",
         Match_Tests,
         "Character pattern matching system for the Roebling parser.",
@@ -144,6 +156,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Roebling Formats",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
         "XML",
         Xml_Tests,
         "Basic XML parsing implemented using the Roebling Parser",
@@ -174,6 +192,24 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "TermIo - Roebling Format",
+        TermIoFormat_Tests,
+        "Digesting terminal output to consider control characters, such as color and motion.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Oset",
+        Oset_Tests,
+        "Oset serialization format tests (similar features to XML, JSON, or YAML).",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Scheduling",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
         "Queue",
         Queue_Tests,
         "Queue built on top of the Span storage architecture.",
@@ -192,6 +228,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
 #ifdef CYCLE_SERVE
+    {
+        "CycleServe IO Server",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
     {
         "Serve",
         Serve_Tests,
@@ -230,10 +272,10 @@ static TestSet _Tests[] = {
     },
 #endif
     {
-        "Oset",
-        Oset_Tests,
-        "Oset serialization format tests (similar features to XML, JSON, or YAML).",
-        FEATURE_COMPLETE,
+        "Persistance and Storage",
+        NULL,
+        NULL,
+        SECTION_LABEL,
     },
     {
         "IoCtx",
@@ -252,6 +294,12 @@ static TestSet _Tests[] = {
         MemLocal_Tests,
         "Calling save and restore MemLocal functions.",
         FEATURE_COMPLETE,
+    },
+    {
+        "Programming Language and Tools",
+        NULL,
+        NULL,
+        SECTION_LABEL,
     },
     {
         "NestedD Flat",
@@ -276,6 +324,18 @@ static TestSet _Tests[] = {
         XmlTTemplate_Tests,
         "XML templating for building web applications.",
         FEATURE_COMPLETE,
+    },
+    {
+        "CanekaLang - Roebling Syntax",
+        Roebling_SyntaxTests,
+        "Tests for the Roebling pattern match portion of Caneka syntax.",
+        PARTIAL_FEATURE,
+    },
+    {
+        "Security",
+        NULL,
+        NULL,
+        SECTION_LABEL,
     },
     {
         "TextFilter",
@@ -308,16 +368,10 @@ static TestSet _Tests[] = {
         PARTIAL_FEATURE,
     },
     {
-        "CanekaLang - Roebling Syntax",
-        Roebling_SyntaxTests,
-        "Tests for the Roebling pattern match portion of Caneka syntax.",
-        PARTIAL_FEATURE,
-    },
-    {
-        "TermIo - Roebling Format",
-        TermIoFormat_Tests,
-        "Digesting terminal output to consider control characters, such as color and motion.",
-        FEATURE_COMPLETE,
+        "Email",
+        NULL,
+        NULL,
+        SECTION_LABEL,
     },
     {
         "Smtp",
