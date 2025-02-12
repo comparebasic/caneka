@@ -97,6 +97,49 @@ status String_Tests(MemCtx *gm){
     return r;
 }
 
+char *toBorNot2B = ""
+    "If you value and admire the poople close to you, friends, family, co-workers "
+    "and bosses. And you value products and services you can be a part of: loca "
+    "restuarants, community organizaions, local art productions. You're sel "
+    "confidence, agency, and optamism is likely fairly high."
+    "\n"
+    "Contrast this with the experience of only admiring far away celebrities "
+    "pundints, guru's, influencers, and authors you will likely never meet. And  "
+    "dependence on products and media made far away that you will likely never b "
+    "part of making."
+    "\n"
+    "This far away world is lonelier and your confidence and optamism are likel "
+    "much lower. Let's bring it closer."
+    "\n"
+    "Every product from Compare Basic is intended to increase self-expression "
+    "utalize personal experience, increase agency, and deepen insights and analysis."
+    "\n"
+    "The software technology is developed from the ground up to re-imagine ho "
+    "computer software can be authored with the intentions of the users composition "
+    "and developers comprehension in mind."
+    ;
+
+char * expectedCstr = ""    
+    "SWYgeW91IHZhbHVlIGFuZCBhZG1pcmUgdGhlIHBvb3BsZSBjbG9zZSB0byB5b3UsIGZyaWVuZHMs"
+    "IGZhbWlseSwgY28td29ya2VycyBhbmQgYm9zc2VzLiBBbmQgeW91IHZhbHVlIHByb2R1Y3RzIGFu"
+    "ZCBzZXJ2aWNlcyB5b3UgY2FuIGJlIGEgcGFydCBvZjogbG9jYSByZXN0dWFyYW50cywgY29tbXVu"
+    "aXR5IG9yZ2FuaXphaW9ucywgbG9jYWwgYXJ0IHByb2R1Y3Rpb25zLiBZb3UncmUgc2VsIGNvbmZp"
+    "ZGVuY2UsIGFnZW5jeSwgYW5kIG9wdGFtaXNtIGlzIGxpa2VseSBmYWlybHkgaGlnaC4KQ29udHJh"
+    "c3QgdGhpcyB3aXRoIHRoZSBleHBlcmllbmNlIG9mIG9ubHkgYWRtaXJpbmcgZmFyIGF3YXkgY2Vs"
+    "ZWJyaXRpZXMgcHVuZGludHMsIGd1cnUncywgaW5mbHVlbmNlcnMsIGFuZCBhdXRob3JzIHlvdSB3"
+    "aWxsIGxpa2VseSBuZXZlciBtZWV0LiBBbmQgIGRlcGVuZGVuY2Ugb24gcHJvZHVjdHMgYW5kIG1l"
+    "ZGlhIG1hZGUgZmFyIGF3YXkgdGhhdCB5b3Ugd2lsbCBsaWtlbHkgbmV2ZXIgYiBwYXJ0IG9mIG1h"
+    "a2luZy4KVGhpcyBmYXIgYXdheSB3b3JsZCBpcyBsb25lbGllciBhbmQgeW91ciBjb25maWRlbmNl"
+    "IGFuZCBvcHRhbWlzbSBhcmUgbGlrZWwgbXVjaCBsb3dlci4gTGV0J3MgYnJpbmcgaXQgY2xvc2Vy"
+    "LgpFdmVyeSBwcm9kdWN0IGZyb20gQ29tcGFyZSBCYXNpYyBpcyBpbnRlbmRlZCB0byBpbmNyZWFz"
+    "ZSBzZWxmLWV4cHJlc3Npb24gdXRhbGl6ZSBwZXJzb25hbCBleHBlcmllbmNlLCBpbmNyZWFzZSBh"
+    "Z2VuY3ksIGFuZCBkZWVwZW4gaW5zaWdodHMgYW5kIGFuYWx5c2lzLgpUaGUgc29mdHdhcmUgdGVj"
+    "aG5vbG9neSBpcyBkZXZlbG9wZWQgZnJvbSB0aGUgZ3JvdW5kIHVwIHRvIHJlLWltYWdpbmUgaG8g"
+    "Y29tcHV0ZXIgc29mdHdhcmUgY2FuIGJlIGF1dGhvcmVkIHdpdGggdGhlIGludGVudGlvbnMgb2Yg"
+    "dGhlIHVzZXJzIGNvbXBvc2l0aW9uIGFuZCBkZXZlbG9wZXJzIGNvbXByZWhlbnNpb24gaW4gbWlu"
+    "ZC4="
+    ;
+
 status StringB64_Tests(MemCtx *gm){
     status r = READY;
     MemCtx *m = MemCtx_Make();
@@ -111,11 +154,17 @@ status StringB64_Tests(MemCtx *gm){
     s2 = String_FromB64(m, b64);
     r |= Test(String_Equals(s2, s), "String has been decoded from base64 to match original, expecting '%s', have '%s'", s->bytes, s2->bytes);
 
+    s = String_Make(m, bytes(toBorNot2B));
+    b64 = String_ToB64(m, s);
+
+    String *exp = String_Make(m, bytes(expectedCstr));
+    r |= Test(String_Equals(b64, exp), "String has been encoded in base64,\nexpecting:\n%s\nhave:\n'%s'", expectedCstr, String_ToChars(DebugM, b64));
+
+    s2 = String_FromB64(m, b64);
+    r |= Test(String_Equals(s2, s), "String has been decoded from base64 to match original,\n expecting:\n'%s', \nhave:\n'%s'",
+        String_ToChars(DebugM, s), String_ToChars(DebugM,s2));
+
     MemCtx_Free(m);
-
-    /* TODO: don't force this to e pass */
-    r &= ~ERROR;
-
     return r;
 }
 

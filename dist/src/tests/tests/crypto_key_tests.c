@@ -11,9 +11,9 @@ status Crypto_KeyTests(MemCtx *gm){
     char *cstr = "/dist/fixtures/";
     String_AddBytes(m, path, bytes(cstr), strlen(cstr));
     String *pubPath = String_Clone(m, path);
-    cstr = "key.pem";
+    cstr = "key.ecdsa.b64";
     String_AddBytes(m, path, bytes(cstr), strlen(cstr));
-    cstr = "pub-key.pem";
+    cstr = "pub.ecdsa.b64";
     String_AddBytes(m, pubPath, bytes(cstr), strlen(cstr));
     
     EcKey *ecKey = EcKey_FromPaths(m, path, pubPath, NULL);

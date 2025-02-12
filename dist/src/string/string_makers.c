@@ -315,6 +315,7 @@ static byte b64CharValue(byte b){
     }else if(b == '='){
         return 0;
     }else{
+        printf("'%c' %hd\n", b, b);
         Fatal("Character out of range for Base64", TYPE_STRING);
         return 0;
     }
@@ -326,19 +327,27 @@ String *String_FromB64(MemCtx *m, String *bs){
     String *s = String_Init(m, (bs->length / 4) * 3);
 
     int padding = 0;
+    int previous = 0;
     while(bs != NULL){
         int remaining = bs->length;
         int offset = 0;
         while(remaining > 0){
+            for(int i = 0; i < 4; i++){
+               if(*(bs->bytes+offset+i) ==  '='){
+                    padding++;
+               }
+            }
             if(remaining < 4){
-                return NULL;
-            }else if(remaining == 4){
-                for(int i = 0; i < 4; i++){
-                   if(*(bs->bytes+offset+i) ==  '='){
-                        padding++;
-                   }
-                }
+                memcpy(&bctx.out, bs->bytes+offset, remaining);
+                previous = 4 - remaining;
                 remaining = 0;
+                continue;
+            }else if(previous > 0){
+                int total = 4-previous;
+                memcpy((&bctx.out)+previous, bs->bytes+previous, total);
+                offset += total;
+                remaining -= total;
+                previous = 0;
             }else{
                 memcpy(&bctx.out, bs->bytes+offset, 4);
                 offset += 4;
@@ -352,10 +361,13 @@ String *String_FromB64(MemCtx *m, String *bs){
             byte b3 = b64CharValue(bctx.out[3]);
 
             bctx.byte3[0] = (b0 << 2) | (b1 >> 4);
-            bctx.byte3[1] = '0';
-            bctx.byte3[2] = '0';
+            bctx.byte3[1] = (b1 << 4) | (b2 >> 2);
+            bctx.byte3[2] = (b2 << 6) | b3;
 
-            String_AddBytes(m, s, bctx.byte3, 3-padding);
+            String_AddBytes(m, s, bctx.byte3, 3);
+        }
+        if(padding > 0){
+            s->length -= padding;
         }
 
         bs = String_Next(bs);
