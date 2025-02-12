@@ -66,3 +66,4 @@ status MemCtx_Tests(MemCtx *gm);
 status TermIoFormat_Tests(MemCtx *gm);
 status MemLocal_ToFromTests(MemCtx *gm);
 status MemLocal_Tests(MemCtx *gm);
+status Crypto_KeyTests(MemCtx *gm);

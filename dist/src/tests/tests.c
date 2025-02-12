@@ -350,6 +350,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Crypto - KeyTests",
+        Crypto_KeyTests,
+        "Makein Ecsda keys and reading pem files.",
+        PARTIAL_FEATURE,
+    },
+    {
         "Crypto - Ecdsa",
         Blank_Tests,
         "Ecsda sugnatures for strings.",

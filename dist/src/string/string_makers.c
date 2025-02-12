@@ -129,6 +129,9 @@ status String_AddInt(MemCtx *m, String *s, int i){
 }
 
 char *String_ToChars(MemCtx *m, String *s){
+    if(s == NULL){
+        return NULL;
+    }
     i64 l = String_Length(s); 
     if(l > MEM_SLAB_SIZE){
         Fatal("Error, unable to allocate a fixed block larger than the memblock size", TYPE_STRING);

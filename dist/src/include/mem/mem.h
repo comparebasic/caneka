@@ -109,3 +109,8 @@ i64 MemCtx_Total(MemCtx *m, i16 level);
  * before */
 #define MemCtx_SetToBase(m) ((m)->type.range = -((m)->type.range));
 #define MemCtx_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
+
+/* Function to tracking raw malloc memory count */
+void *TrackMalloc(size_t sz, cls t);
+/* Function to tracking raw malloc memory count */
+void TrackFree(void *p, size_t s);

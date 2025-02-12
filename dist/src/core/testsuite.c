@@ -41,6 +41,7 @@ status Test(int condition, char *msg, ...){
                 printf("\x1b[0m");
             }
             printf("\n");
+            fflush(stdout);
             return ERROR;
         }else{
             if((GLOBAL_flags & NO_COLOR) == 0){
@@ -52,6 +53,7 @@ status Test(int condition, char *msg, ...){
                 printf("\x1b[0m");
             }
             printf("\n");
+            fflush(stdout);
             return SUCCESS;
         }
     }
@@ -76,12 +78,14 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
 
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("        <span class=\"mem-label\">%s</span>\n", s->bytes);
+        fflush(stdout);
     }else{
         printf("%s\n", s->bytes);
     }
 
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
         printf("<div class=\"suite\">\n    <span class=\"label\">Suite %s</span>\n", suiteName);
+        fflush(stdout);
     }
     while(set->name != NULL){
 
@@ -100,6 +104,7 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
             printf("<div class=\"set\">\n    <span class=\"set-label\">%s</span>\n", set->name);
             printf("    <span class=\"status\" data-status=\"%d\">%s</span>\n    <p>%s</p>\n    <ol class=\"tests\">\n",
                 set->status, statusCstr(set->status), set->description);
+            fflush(stdout);
         }else{
             printf("[Testing %s]\n", set->name);
         }
@@ -145,8 +150,10 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
                 }
             }
             if((GLOBAL_flags & HTML_OUTPUT) != 0){
-                printf("        <span class=\"mem-label%s\">%s</span>\n", htmlCls, String_ToChars(m, s));
-                printf("    </ol>\n</div>\n");
+                printf("    <li><span class=\"mem-label%s\">%s</span></li>\n", htmlCls, String_ToChars(m, s));
+                printf("    </ol>\n");
+                printf("</div>\n");
+                fflush(stdout);
             }else{
                 printf("%s\n", String_ToChars(m, s));
             }

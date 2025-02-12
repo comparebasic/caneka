@@ -110,6 +110,7 @@ enum types {
     TYPE_FMT_CTX,
     TYPE_OSET_DEF,
     TYPE_CASH,
+    TYPE_EC_KEY,
     TYPE_XMLT,
     TYPE_NESTEDD,
     TYPE_ENC_PAIR,

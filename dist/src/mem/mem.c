@@ -4,7 +4,14 @@
 static size_t cmem = 0;
 int MemSlab_Count = 0;
 
-static void *trackMalloc(size_t sz, cls t){
+static void *MemSlab_Alloc(MemSlab *sl, size_t s){
+    void *p = sl->addr; 
+    sl->addr += s;
+
+    return p;
+}
+
+void *TrackMalloc(size_t sz, cls t){
     void *p = malloc(sz);
     if(p == NULL){
         Fatal("Allocating", t);
@@ -16,16 +23,11 @@ static void *trackMalloc(size_t sz, cls t){
     return p;
 }
 
-static void trackFree(void *p, size_t s){
-    free(p);
+void TrackFree(void *p, size_t s){
+    if(p != NULL){
+        free(p);
+    }
     cmem -= s;
-}
-
-static void *MemSlab_Alloc(MemSlab *sl, size_t s){
-    void *p = sl->addr; 
-    sl->addr += s;
-
-    return p;
 }
 
 size_t MemSlab_Available(MemSlab *sl){
@@ -50,7 +52,7 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level){
 
 MemSlab *MemSlab_Make(MemCtx *m, i16 level){
     size_t sz = sizeof(MemSlab);
-    MemSlab *sl = (MemSlab *) trackMalloc(sz, TYPE_MEMSLAB);
+    MemSlab *sl = (MemSlab *) TrackMalloc(sz, TYPE_MEMSLAB);
     sl->type.of = TYPE_MEMSLAB;
     sl->addr = sl->bytes;
     sl->level = level;
@@ -116,7 +118,7 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 }
 
 MemCtx *MemCtx_Make(){
-    MemCtx *m = (MemCtx *) trackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
+    MemCtx *m = (MemCtx *) TrackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
     m->type.of = TYPE_MEMCTX;
     return m;
 }
@@ -140,7 +142,7 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
     while(current != NULL){
         next = current->next;
         if(level == 0 || current->level >= level){
-            trackFree(current, sizeof(MemSlab));
+            TrackFree(current, sizeof(MemSlab));
             MemSlab_Count--;
             if(latest == NULL){
                 m->start_sl = NULL; 
@@ -162,7 +164,7 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
 status MemCtx_Free(MemCtx *m){
     MemCtx_FreeTemp(m, max(m->type.range, 0));
     if(m->type.range <= 0){
-        trackFree(m, sizeof(MemCtx));
+        TrackFree(m, sizeof(MemCtx));
     }
     return SUCCESS;
 }

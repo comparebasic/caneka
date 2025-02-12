@@ -25,6 +25,7 @@ static Target targets[] = {
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+    "-DOPENSSL",
     NULL
 };
 
@@ -34,6 +35,8 @@ static char *inc[] = {
 };
 
 static char *libs[] = {
+    "-lssl",
+    "-lcrypto",
     NULL
 };
 
@@ -64,6 +67,7 @@ static BuildSubdir debugobj = { "debug", {
 static BuildSubdir cryptoobj = { "crypto", {
     "crypto_api.c",
     "enc_pair.c",
+    "key.c",
     "salty.c",
     "sane.c",
     "sha256.c",
@@ -263,6 +267,7 @@ static BuildSubdir testsuitesobj = { "tests/tests", {
     "user_tests.c",
     "xml_tests.c",
     "xmlt_template_tests.c",
+    "crypto_key_tests.c",
     NULL
 }};
 
