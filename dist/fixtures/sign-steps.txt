@@ -1,0 +1,8 @@
+openssl ecparam -name secp256k1 -out secp256k1.pem
+openssl ecparam -in secp256k1.pem -genkey -noout -out key.secp256k1.pem
+openssl ec -in key.secp256k1.pem -pubout > pub.secp256k1.pem
+
+#openssl dgst -sha256 -sign key.secp256k1.pem ../src/build.c | base64
+
+openssl dgst -sha256 -sign key.secp256k1.pem ../src/build.c > build.c.sign.raw
+openssl dgst -sha256 -verify pub.secp256k1.pem -signature build.c.sign.raw ../src/build.c
