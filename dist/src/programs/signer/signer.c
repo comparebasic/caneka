@@ -28,7 +28,7 @@ status setIdentityFileArg(char *arg, char *value){
 SiArgs argFuncs[] =  {
     {"-i", setIdentityFileArg},
     {"-f", setFileArg},
-    NULL
+    {NULL, NULL},
 };
 
 int main(int argc, char *argv[]){
@@ -40,11 +40,11 @@ int main(int argc, char *argv[]){
 
     charSetterFunc func = NULL;
     char *prev = NULL;
-    for(int i = 0; i < argc; i++){
+    for(int i = 1; i < argc; i++){
         char *arg = argv[i];
         if(func == NULL){
             SiArgs *sa = argFuncs;
-            while(sa != NULL){
+            while(sa->arg != NULL){
                 if(strncmp(sa->arg, arg, strlen(arg)) == 0){
                     func = sa->func;
                     prev = sa->arg;
@@ -53,11 +53,12 @@ int main(int argc, char *argv[]){
                 sa++;
             }
             if(func == NULL){
-                fprintf(stderr, "Error arg not found: %s", arg);
+                fprintf(stderr, "Error arg not found: %s\n", arg);
                 exit(1);
             }
         }else{
             func(prev, arg);
+            func = NULL;
         }
     }
 
