@@ -37,7 +37,10 @@ static char *libs[] = {
 };
 
 static BuildSubdir obj = { "", {
-    "signer_parser.c",
+    "signer_args.c",
+    "signer_ctx.c",
+    "signer_debug.c",
+    "signer_init.c",
     NULL
 }};
 

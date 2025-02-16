@@ -42,6 +42,7 @@ typedef struct roebling {
     i8 jump;
     i8 jumpMiss;
     int tail;
+    int length;
     /* debug */
     Lookup *markLabels;
     Guard guard;

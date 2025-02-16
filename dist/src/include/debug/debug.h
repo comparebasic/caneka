@@ -49,6 +49,7 @@ extern int DEBUG_STRSNIP;
 extern int DEBUG_CDOC;
 extern int DEBUG_MEMLOCAL;
 extern int DEBUG_IOCTX;
+extern int DEBUG_KVE;
 
 extern boolean SHOW_SERVE_TESTS;
 extern MemCtx *DebugM;

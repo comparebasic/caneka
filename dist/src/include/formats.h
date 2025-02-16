@@ -4,6 +4,7 @@
 #include "formats/cash.h"
 #include "formats/cdoc/cdoc.h"
 #include "formats/fmt_html.h"
+#include "formats/kve/kve_parser.h"
 #include "formats/io.h"
 #include "formats/oset.h"
 #include "formats/oset_from.h"

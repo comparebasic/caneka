@@ -168,6 +168,14 @@ enum types {
     TERMIO_SEP,
     TERMIO_END,
     _TERMIO_END,
+    _KVE_START,
+    KVE_START,
+    KVE_KEY,
+    KVE_VALUE,
+    KVE_KVALUE,
+    KVE_CONTENT,
+    KVE_END,
+    _KVE_END,
     _TYPE_APPS_END,
 };
 

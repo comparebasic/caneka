@@ -80,6 +80,12 @@ static BuildSubdir cashobj = { "formats/cash", {
     NULL,
 }};
 
+static BuildSubdir kveobj = { "formats/kve", {
+    "kve_capture.c",
+    "kve_parser.c",
+    NULL,
+}};
+
 static BuildSubdir termiofmtobj = { "formats/termio", {
     "termio_parser.c",
     NULL,
@@ -303,6 +309,7 @@ BuildSubdir *allobj[] = {
     &debugobj,
     &cryptoobj,
     &cashobj,
+    &kveobj,
     &osetobj,
     &xmlobj,
     &rblshobj,

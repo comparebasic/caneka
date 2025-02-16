@@ -29,12 +29,6 @@ enum match_flags {
     MATCH_ACCEPT_EMPTY = 1 << 15
 };
 
-typedef struct patchardef {
-    word flags;
-    word from;
-    word to;
-} PatCharDef;
-
 typedef struct pat_match {
     PatCharDef *startDef;
     PatCharDef *endDef;
