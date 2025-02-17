@@ -23,6 +23,7 @@ SiArgs argFuncs[] =  {
 
 
 status Signer_SetArgs(SignerCtx *ctx, int argc, char *argv[]){
+    DebugStack_Push("Signer_SetArgs", TYPE_CSTR);
     charSetterFunc func = NULL;
     char *prev = NULL;
     for(int i = 1; i < argc; i++){
@@ -40,6 +41,7 @@ status Signer_SetArgs(SignerCtx *ctx, int argc, char *argv[]){
             if(func == NULL){
                 fprintf(stderr, "Error arg not found: %s\n", arg);
                 ctx->type.state |= ERROR;
+                DebugStack_Pop();
                 return ctx->type.state;
             }
         }else{
@@ -48,5 +50,6 @@ status Signer_SetArgs(SignerCtx *ctx, int argc, char *argv[]){
         }
     }
 
+    DebugStack_Pop();
     return ctx->type.state;
 }

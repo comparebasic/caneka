@@ -49,6 +49,7 @@ static status content(MemCtx *m, Roebling *rbl){
 }
 
 Roebling *Kve_RblMake(MemCtx *m, String *s, Abstract *source, RblCaptureFunc capture){
+    DebugStack_Push("Kve_RblMake", TYPE_CSTR); 
     Span *parsers_do =  Span_Make(m, TYPE_SPAN);
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, KVE_START));
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)start));
@@ -71,11 +72,13 @@ Roebling *Kve_RblMake(MemCtx *m, String *s, Abstract *source, RblCaptureFunc cap
         s = String_Init(m, STRING_EXTEND);
     }
 
-    return Roebling_Make(m, TYPE_ROEBLING,
+    Roebling *rbl = Roebling_Make(m, TYPE_ROEBLING,
         parsers_do,
         desc,
         s,
         capture,
         source 
     ); 
+    DebugStack_Pop();
+    return rbl;
 }

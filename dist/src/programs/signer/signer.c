@@ -15,8 +15,8 @@ int main(int argc, char *argv[]){
 
     Signer_Init(m);
 
-    SignerCtx *ctx = SingerCtx_Make(m);
-    if(Signer_SetArgs(ctx, argc, arvg) & ERROR){
+    SignerCtx *ctx = SignerCtx_Make(m);
+    if(Signer_SetArgs(ctx, argc, argv) & ERROR){
         exit(1);
     }
     ctx->rbl = Kve_RblMake(m, NULL, (Abstract *)ctx->identTbl, Kve_Capture);
@@ -25,5 +25,5 @@ int main(int argc, char *argv[]){
 
     MemCtx_Free(m);
     DebugStack_Pop();
-    return r;
+    return 0;
 }

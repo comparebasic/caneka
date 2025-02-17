@@ -100,6 +100,7 @@ void Cstr_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
 }
 
 void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    DebugStack_Push("Cursor_Print", TYPE_CSTR);
     Cursor *cur = (Cursor *)as(a, TYPE_CURSOR);
     String *s = String_Init(DebugM, 1);
     String *focus = NULL;
@@ -116,17 +117,20 @@ void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
         i64 total = Cursor_Total(cur);
 
         printf(" \x1b[%dmseg(%ld/%ld of %ld)=\x1b[1;%dm\"", color, max(total-36, 0), total, String_Length(cur->s), color);
+        if(cur->s != NULL && cur->s->length > 0){
+            i64 start = 36;
+            if(total < 36){
+                start = total;
+            }
+            Debug_Print((void*)String_ToEscaped(m, String_Sub(m, cur->s, max(total-36, 0), start)), 0, "", color, FALSE);
 
-        i64 start = 36;
-        if(total < 36){
-            start = total;
+            printf("\x1b[1;%d;37m%s\x1b[0;%dm", color+10, (focus != NULL ? (char *)focus->bytes: "?"), color);
+            Debug_Print((void*)String_ToEscaped(m, String_Sub(m, cur->s, total+1, total+36)), 0, "", color, FALSE);
+            printf("\x1b[1;%dm\"", color);
         }
-        Debug_Print((void*)String_ToEscaped(m, String_Sub(m, cur->s, max(total-36, 0), start)), 0, "", color, FALSE);
-
-        printf("\x1b[1;%d;37m%s\x1b[0;%dm", color+10, (focus != NULL ? (char *)focus->bytes: "?"), color);
-        Debug_Print((void*)String_ToEscaped(m, String_Sub(m, cur->s, total+1, total+36)), 0, "", color, FALSE);
-        printf("\x1b[1;%dm\"", color);
     }
     printf("\x1b[%dm>\x1b[0m", color);
+    DebugStack_Pop();
+    return;
 }
 

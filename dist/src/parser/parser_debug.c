@@ -57,6 +57,7 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
 
 
 void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    DebugStack_Push("Roebling_Print", TYPE_CSTR);
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
     printf("\x1b[%dm%sRbl<%s\x1b[1;%dm%s\x1b[0;%dm source=%u", color, msg, State_ToChars(rbl->type.state), color, String_ToChars(DebugM, sec), color, rbl->source != NULL ? rbl->source->type.of: 0);
@@ -93,6 +94,8 @@ void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extende
         Debug_Print((void *)&(rbl->cursor), 0, "", color, extended);
     }
     printf("\x1b[%dm>\x1b[0m", color);
+    DebugStack_Pop();
+    return;
 }
 
 
