@@ -1,7 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-byte *b64_chars = bytes("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 char *hex_chars = "0123456789abcdef";
 
 static const byte *digits = (byte *)"0123456789";
@@ -150,54 +149,6 @@ char *String_ToChars(MemCtx *m, String *s){
     return cstr;
 }
 
-String *String_ToB64(MemCtx *m, String *s){
-    B64Ctx bctx;
-    memset(&bctx, 0, sizeof(B64Ctx));
-    String *bs = String_Init(m, ((s->length/3)*4) + 3);
-
-    int padding = 0;
-    while(s != NULL){
-        int remaining = s->length;
-        int offset = 0;
-        while(remaining > 0){
-            if(remaining < 3){
-                padding = 3 - remaining;
-                memset(&bctx.byte3, 0, 3);
-                for(int i = 0; i < remaining; i++){
-                    bctx.byte3[i] = s->bytes[offset];
-                    offset++;
-                    i++;
-                    remaining--;
-                }
-                remaining = 0;
-            }else{
-                memcpy(&bctx.byte3, s->bytes+offset, 3);
-                offset += 3;
-                remaining -= 3;
-            }
-
-            memset(&bctx.out, 0, 4);
-            bctx.out[0] = bctx.byte3[0] >> 2; 
-            bctx.out[1] = ((bctx.byte3[0] & 3) << 4 ) | ((bctx.byte3[1] & 240) >> 4); 
-            bctx.out[2] = ((bctx.byte3[1] & 15) << 2 ) | ((bctx.byte3[2] & 192) >> 6); 
-            bctx.out[3] = (bctx.byte3[2] & 63); 
-
-            for(int j = 0; j < 4-padding; j++){
-                String_AddBytes(m, bs, &(b64_chars[bctx.out[j]]), 1);
-            }
-        }
-
-        for(int i = 0; i < padding; i++){
-            String_AddBytes(m, bs, bytes("="), 1);
-        }
-
-
-        s = String_Next(s);
-    }
-
-    return bs;
-}
-
 String *String_ToHex(MemCtx *m, String *s){
     String *ret = String_Init(m, s->length*2);
     while(s != NULL){
@@ -298,82 +249,6 @@ String *String_FromHex(MemCtx *m, String *s){
     };
     ret->type.state |= FLAG_STRING_BINARY;
     return ret;
-}
-
-static byte b64CharValue(byte b){
-
-    if(b >= 'A' && b <= 'Z'){
-        return b - 'A';
-    }else if(b >= 'a' && b <= 'z'){
-        return b - 'a' + 26;
-    }else if(b >= '0' && b <= '9'){
-        return b - '0' + 52;
-    }else if (b == '+'){
-        return 62;
-    }else if (b == '/'){
-        return 63;
-    }else if(b == '='){
-        return 0;
-    }else{
-        printf("'%c' %hd\n", b, b);
-        Fatal("Character out of range for Base64", TYPE_STRING);
-        return 0;
-    }
-}
-
-String *String_FromB64(MemCtx *m, String *bs){
-    B64Ctx bctx;
-    memset(&bctx, 0, sizeof(B64Ctx));
-    String *s = String_Init(m, (bs->length / 4) * 3);
-
-    int padding = 0;
-    int previous = 0;
-    while(bs != NULL){
-        int remaining = bs->length;
-        int offset = 0;
-        while(remaining > 0){
-            for(int i = 0; i < 4; i++){
-               if(*(bs->bytes+offset+i) ==  '='){
-                    padding++;
-               }
-            }
-            if(remaining < 4){
-                memcpy(&bctx.out, bs->bytes+offset, remaining);
-                previous = 4 - remaining;
-                remaining = 0;
-                continue;
-            }else if(previous > 0){
-                int total = 4-previous;
-                memcpy((&bctx.out)+previous, bs->bytes+previous, total);
-                offset += total;
-                remaining -= total;
-                previous = 0;
-            }else{
-                memcpy(&bctx.out, bs->bytes+offset, 4);
-                offset += 4;
-                remaining -= 4;
-            }
-
-            memset(&bctx.byte3, 0, 3);
-            byte b0 = b64CharValue(bctx.out[0]);
-            byte b1 = b64CharValue(bctx.out[1]);
-            byte b2 = b64CharValue(bctx.out[2]);
-            byte b3 = b64CharValue(bctx.out[3]);
-
-            bctx.byte3[0] = (b0 << 2) | (b1 >> 4);
-            bctx.byte3[1] = (b1 << 4) | (b2 >> 2);
-            bctx.byte3[2] = (b2 << 6) | b3;
-
-            String_AddBytes(m, s, bctx.byte3, 3);
-        }
-        if(padding > 0){
-            s->length -= padding;
-        }
-
-        bs = String_Next(bs);
-    }
-
-    return s;
 }
 
 status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean extended){

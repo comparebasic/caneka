@@ -1,3 +1,7 @@
+enum cursor_flags {
+    FLAG_CURSOR_SEGMENTED = 1 << 12,
+};
+
 typedef struct cursor {
     Type type;
     byte *ptr;
@@ -16,6 +20,7 @@ status Cursor_AddGap(Cursor *cur, int length);
 status Cursor_Incr(Cursor *cur, int length);
 status Cursor_Decr(Cursor *cur, int length);
 status Cursor_Flush(MemCtx *m, Cursor *cur, OutFunc func, Abstract *source);
+i64 Cursor_GetPad(Cursor *cur, size_t sz);
 
 #define Cursor_GetByte(cur) (*((cur)->ptr))
 #define Cursor_Total(cur) ((cur)->offset+(cur)->local)

@@ -90,7 +90,7 @@ status IterStr_Tests(MemCtx *gm){
 
     expected = (IntPair*)source;
     IterStr it;
-    IterStr_Init(&it, s, sizeof(IntPair));
+    IterStr_Init(&it, s, sizeof(IntPair), NULL);
     int i = 0;
     while((IterStr_Next(&it) & END) == 0){
         IntPair *x = (IntPair *)IterStr_Get(&it);

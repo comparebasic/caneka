@@ -25,7 +25,7 @@ Abstract *CnkRbl_Pat(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Abstract 
     }
 
     IterStr it;
-    IterStr_Init(&it, key, sizeof(byte));
+    IterStr_Init(&it, key, sizeof(byte), NULL);
     item->content->type.state |= FLAG_STRING_CONTIGUOUS;
     
     PatCharDef pat;
@@ -93,7 +93,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
                     String_AddBytes(m, out, bytes(cstr), strlen(cstr));
 
                     IterStr its;
-                    IterStr_Init(&its, item->content, sizeof(PatCharDef));
+                    IterStr_Init(&its, item->content, sizeof(PatCharDef), NULL);
                     while((IterStr_Next(&its) & END) == 0){
                         PatCharDef *pat = (PatCharDef *)IterStr_Get(&its);
                         cstr = "{";

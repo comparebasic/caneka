@@ -22,7 +22,7 @@ enum string_flags {
 };
 
 typedef struct b64_ctx {
-   word count; 
+   word count;
    byte byte3[3];
    byte out[4];
 } B64Ctx;

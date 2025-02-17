@@ -7,7 +7,7 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
 
     i64 pos = 0;
     IterStr it;
-    IterStr_Init(&it, sns, sizeof(StrSnip));
+    IterStr_Init(&it, sns, sizeof(StrSnip), NULL);
     while((IterStr_Next(&it) & END) == 0){
         if(s == NULL){
             break;
@@ -53,7 +53,7 @@ String *StrSnipStr_ToString(MemCtx *m, String *sns, String *s){
 int StrSnipStr_Total(String *sns, word flags){
     IterStr it;
     int total = 0;
-    IterStr_Init(&it, sns, sizeof(StrSnip));
+    IterStr_Init(&it, sns, sizeof(StrSnip), NULL);
     while((IterStr_Next(&it) & END) == 0){
         StrSnip *sn = (StrSnip *)IterStr_Get(&it);
         if((sn->type.state & flags) == (flags) || flags == 0){

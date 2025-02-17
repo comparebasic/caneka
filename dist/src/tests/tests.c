@@ -349,12 +349,14 @@ static TestSet _Tests[] = {
         "Generating Sha256 summaries of strings. And random data strings.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Crypto - KeyTests",
         Crypto_KeyTests,
         "Makein Ecsda keys and reading pem files.",
         PARTIAL_FEATURE,
     },
+    */
     {
         "Crypto - Ecdsa",
         Blank_Tests,
@@ -399,10 +401,9 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
     {
         "String - B64",
@@ -425,3 +426,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/

@@ -8,6 +8,15 @@ status _Cursor_Init(Cursor *cur, String *s){
     return SUCCESS;
 }
 
+i64 Cursor_GetPad(Cursor *cur, size_t sz){
+    i64 pad = 0;
+    if(String_Next(cur->seg) == NULL){
+        i64 taken = (cur->seg->length - cur->local);
+        pad = sz - taken;
+    }
+    return pad;
+}
+
 status Cursor_Init(Cursor *cur, String *s){
     memset(cur, 0, sizeof(Cursor));
     cur->type.of = TYPE_CURSOR;
@@ -84,6 +93,11 @@ status Cursor_Incr(Cursor *cur, int length){
     }
 
     if((cur->type.state & END) == 0){
+        if((segSz - local) < length){
+            cur->type.state |= FLAG_CURSOR_SEGMENTED;
+        }else{
+            cur->type.state &= ~FLAG_CURSOR_SEGMENTED;
+        }
         cur->offset = offset;
         cur->local = local;
         cur->seg = seg;

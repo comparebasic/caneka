@@ -46,9 +46,8 @@ static word headerDef[] = {
 
 static word headerValueDef[] = {
     PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' ', 
-    PAT_KO, '\r', '\r', PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31, 
-    PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n',
-    PAT_CMD|PAT_INVERT, PAT_GO_ON_FAIL, 1, PAT_INVERT|PAT_LEAVE, ' ', ' ', PAT_INVERT|PAT_LEAVE|PAT_TERM, '\t', '\t',
+    PAT_KO|PAT_KO_TERM, '\r', '\r', PAT_KO|PAT_KO_TERM, '\n', '\n',
+    patText,
     PAT_END, 0, 0
 };
 

@@ -227,6 +227,7 @@ static BuildSubdir stringobj = { "string", {
     "string.c",
     "string_equals.c",
     "string_makers.c",
+    "string_b64.c",
     "string_utils.c",
     "strsnip.c",
     "strsnipstr.c",

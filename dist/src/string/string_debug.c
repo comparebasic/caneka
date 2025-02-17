@@ -4,7 +4,7 @@
 void StrSnipString_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)asIfc(a, TYPE_STRING);
     IterStr it;
-    IterStr_Init(&it, s, sizeof(StrSnip));
+    IterStr_Init(&it, s, sizeof(StrSnip), NULL);
     printf("\x1b[%dm%s", color, msg);
     while((IterStr_Next(&it) & END) == 0){
         StrSnip *sn = (StrSnip *)IterStr_Get(&it);

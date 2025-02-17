@@ -134,7 +134,7 @@ status StrSnipBoundry_Tests(MemCtx *gm){
     Match_SetPattern(&mt, textNl, sns);
     StrSnip_Init(&sn, STRSNIP_CONTENT, 0, 0);
     IterStr it;
-    IterStr_Init(&it, s, 1);
+    IterStr_Init(&it, s, 1, NULL);
     while((IterStr_Next(&it) & END) == 0){
         byte *b = (byte *)IterStr_Get(&it);
         Match_Feed(m, &mt, *b);
