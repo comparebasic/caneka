@@ -207,13 +207,16 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
                     ((def->flags & PAT_COUNT) != 0 && (--mt->remaining) > 0)){
                 match_StartOfTerm(mt);
                 mt->type.state |= MATCH_TERM_FOUND;
+            }else if(def->flags & PAT_INVERT){
+                mt->pat.curDef++;
+                continue;
             }else{
                 match_NextTerm(mt);
                 mt->type.state &= ~MATCH_TERM_FOUND;
             }
 
             break;
-        }else{
+        }else{ /* matched is FALSE */
             if((mt->type.state & MATCH_KO) != 0){
                 unclaimed = TRUE;
                 if((def->flags & PAT_KO) == 0){

@@ -25,3 +25,4 @@ status Signer_SetArgs(SignerCtx *ctx, int argc, char *argv[]);
 void SignerCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 status Signer_Init(MemCtx *m);
 SignerCtx *SignerCtx_Make(MemCtx *m);
+status SignerCtx_DigestIdent(SignerCtx *ctx);

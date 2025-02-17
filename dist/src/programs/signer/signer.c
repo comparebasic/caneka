@@ -21,6 +21,12 @@ int main(int argc, char *argv[]){
     }
     ctx->rbl = Kve_RblMake(m, NULL, (Abstract *)ctx->identTbl, Kve_Capture);
 
+    if(ctx->configPath != NULL){
+        while((SignerCtx_DigestIdent(ctx) & (SUCCESS|ERROR)) == 0){
+            printf("digesting ident file\n");
+        }
+    }
+
     DPrint((Abstract *)ctx, COLOR_PURPLE, "Ctx: ");
 
     MemCtx_Free(m);

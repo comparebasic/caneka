@@ -29,3 +29,4 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length);
 status File_Copy(MemCtx *m, String *a, String *b, Access *ac);
 boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac);
 status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source);
+String *File_GetCwdPath(MemCtx *m, String *path);

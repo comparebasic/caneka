@@ -21,7 +21,6 @@ SiArgs argFuncs[] =  {
     {NULL, NULL},
 };
 
-
 status Signer_SetArgs(SignerCtx *ctx, int argc, char *argv[]){
     DebugStack_Push("Signer_SetArgs", TYPE_CSTR);
     charSetterFunc func = NULL;

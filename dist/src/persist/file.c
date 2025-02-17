@@ -1,6 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
+String *File_GetCwdPath(MemCtx *m, String *path){
+    char buff[PATH_BUFFLEN];
+    char *pathCstr = getcwd(buff, PATH_BUFFLEN);
+    String *s = String_Make(m, bytes(pathCstr));
+    String_AddBytes(m, s, bytes("/"), 1);
+    String_Add(m, s, path);
+    return s;
+}
+
 File *File_Clone(MemCtx *m, File *o){
     File *file = MemCtx_Realloc(m, sizeof(File), o, sizeof(File));
     file->path = String_Clone(m, file->path);

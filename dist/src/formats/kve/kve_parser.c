@@ -3,15 +3,25 @@
 
 PatCharDef keyDef[] = {
     {PAT_KO|PAT_KO_TERM, ':', ':'},
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'}, {PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_END, '\n', '\n'},
     patText,
     {PAT_END, 0, 0},
 };
 
+PatCharDef wsDef[] = {
+    {PAT_MANY, ' ', ' '}, {PAT_MANY, '\t', '\t'}, {PAT_MANY, '\r', '\r'},{PAT_MANY|PAT_TERM, '\n', '\n'},
+    {PAT_END, 0, 0},
+};
+
+
 PatCharDef valueDef[] = {
     {PAT_KO|PAT_KO_TERM, ';', ';'},
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'}, {PAT_ANY|PAT_INVERT_CAPTURE, '\r', '\r'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_END, '\n', '\n'},
-    {PAT_INVERT, ':', ':'}, patText,
+    {PAT_INVERT|PAT_MANY, ':', ':'}, patText,
+    {PAT_END, 0, 0},
+};
+
+PatCharDef numValueDef[] = {
+    {PAT_KO|PAT_KO_TERM, ';', ';'},
+    {PAT_MANY|PAT_TERM, '0', '9'},
     {PAT_END, 0, 0},
 };
 
@@ -25,6 +35,7 @@ static status start(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl, keyDef, KVE_KEY, KVE_VALUE);
     r |= Roebling_SetPattern(rbl, valueDef, KVE_KVALUE, KVE_START);
+    r |= Roebling_SetPattern(rbl, wsDef, KVE_WS, KVE_START);
 
     return r;
 }
@@ -32,7 +43,9 @@ static status start(MemCtx *m, Roebling *rbl){
 static status value(MemCtx *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl, valueDef, KVE_KVALUE, KVE_START);
+    r |= Roebling_SetPattern(rbl, numValueDef, KVE_NUMVALUE, KVE_START);
+    r |= Roebling_SetPattern(rbl, valueDef, KVE_VALUE, KVE_START);
+    r |= Roebling_SetPattern(rbl, wsDef, KVE_WS, KVE_VALUE);
     return r;
 }
 

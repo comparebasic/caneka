@@ -49,7 +49,7 @@ int DEBUG_STRSNIP = 0;
 int DEBUG_CDOC = 0;
 int DEBUG_MEMLOCAL = 0;
 int DEBUG_IOCTX = 0;
-int DEBUG_KVE = COLOR_YELLOW;
+int DEBUG_KVE = 0;
 
 boolean SHOW_SERVE_TESTS = FALSE;
 
@@ -541,10 +541,12 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
 
 
 void DPrint(Abstract *a, int color, char *msg, ...){
+    DebugStack_Push(msg, TYPE_CSTR);
     printf("\x1b[%dm", color);
 	va_list args;
     va_start(args, msg);
     vprintf(msg, args);
     Debug_Print((void *)a, 0,  "", color, TRUE);
     printf("\x1b[0m\n");
+    DebugStack_Pop();
 }
