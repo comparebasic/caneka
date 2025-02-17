@@ -139,7 +139,7 @@ cls Ifc_Get(cls inst){
 
 status ToStdOut(MemCtx *m, String *s, Abstract *source){
     while(s != NULL){
-        puts((char *)s->bytes);
+        printf("%s", ((char *)s->bytes));
         s = String_Next(s);
     }
     return SUCCESS;

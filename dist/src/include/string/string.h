@@ -72,6 +72,7 @@ String *String_FromInt(MemCtx *m, int i);
 String *String_FromI64(MemCtx *m, i64 i);
 status String_MakeLower(String *s);
 status String_MakeUpper(String *s);
+String *String_FromAbs(MemCtx *m, Abstract *a);
 
 /* equals */
 boolean String_Equals(String *a, String *b);

@@ -384,16 +384,12 @@ static void Transp_Print(Abstract *a, cls type, char *msg, int color, boolean ex
 static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(extended){
-        printf("\x1b[%dm%sH<%u:%lu itm=", color, msg, h->idx, h->id);
-        if((h->type.state & LOCAL_PTR) != 0){
-            printf("\x1b[%dm LOCAL_PTR", color);
-        }else{
-            Debug_Print((void *)h->item, 0, "", color, extended);
-            printf("\x1b[%dm v=", color);
-            Debug_Print((void *)h->value, 0, "", color, extended);
-            if(h->next != NULL){
-                printf("\x1b[%dm next=%p", color, h);
-            }
+        printf("\x1b[%dm%sH<%s%u:%lu itm=", color, msg, State_ToChars(h->type.state), h->idx, h->id);
+        Debug_Print((void *)h->item, 0, "", color, extended);
+        printf("\x1b[%dm v=", color);
+        Debug_Print((void *)h->value, 0, "", color, extended);
+        if(h->next != NULL){
+            printf("\x1b[%dm next=%p", color, h);
         }
         printf("\x1b[%dm>\x1b[0m", color);
     }else{

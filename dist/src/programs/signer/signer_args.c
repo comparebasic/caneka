@@ -15,9 +15,18 @@ static status setIdentityFileArg(SignerCtx *ctx, char *arg, char *value){
     return SUCCESS;
 }
 
+static status setNameArg(SignerCtx *ctx, char *arg, char *value){
+    char *cstr = "kve";
+    Table_Set(ctx->headerTbl, 
+        (Abstract *)String_Make(ctx->m, bytes(cstr)), 
+        (Abstract *)String_Make(ctx->m, bytes(value)));
+    return SUCCESS;
+}
+
 SiArgs argFuncs[] =  {
     {"-i", setIdentityFileArg},
     {"-f", setFileArg},
+    {"-n", setNameArg},
     {NULL, NULL},
 };
 

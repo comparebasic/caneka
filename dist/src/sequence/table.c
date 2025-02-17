@@ -60,6 +60,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
         return NULL;
     }
     Hashed *h = Hashed_Make(tbl->m, a);
+    tbl->type.state &= ~SUCCESS;
     if(op != SPAN_OP_GET && op != SPAN_OP_SET){
         return h;
     }
@@ -86,13 +87,9 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
             _h = (Hashed *)Span_Get(tbl, hkey);
             if(op == SPAN_OP_GET){
                 if(_h != NULL && *((util *)_h) != 0){
-                    while(_h != NULL){
-                        if(Hashed_ExternalEquals(tbl->m, h, _h)){
-                            h = _h;
-                            found = TRUE;
-                            break;
-                        }
-                        _h = _h->next;
+                    if(Hashed_ExternalEquals(tbl->m, h, _h)){
+                        h = _h;
+                        found = TRUE;
                     }
                 }else{
                     found = TRUE;
@@ -100,15 +97,12 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                 }
             }else if(op == SPAN_OP_SET){
                 if(_h != NULL && *((util *)_h) != 0){
-                    while(_h != NULL){
-                        if(Hashed_LocalEquals(tbl->m, h, _h)){
-                            h = _h;
-                            h->idx = hkey;
-                            h->value = value;
-                            found = TRUE;
-                            break;
-                        }
-                        _h = _h->next;
+                    if(Hashed_LocalEquals(tbl->m, h, _h)){
+                        h = _h;
+                        h->idx = hkey;
+                        h->value = value;
+                        found = TRUE;
+                        break;
                     }
                 }else{
                     h->idx = hkey;
@@ -119,6 +113,11 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
             }
         }
     }
+
+    if(found){
+        tbl->type.state |= SUCCESS;
+    }
+
     return h;
 }
 
@@ -170,9 +169,17 @@ status Table_Merge(Span *tbl, Span *oldTbl){
     return r;
 }
 
+Abstract *Table_FromIdx(Span *tbl, int idx){
+    Hashed *h = (Hashed *)Span_Get(tbl, idx);
+    if(h != NULL){
+        return h->value;
+    }
+    return NULL;
+}
+
 int Table_GetIdx(Span *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
-    if(h->type.state == SUCCESS){
+    if(tbl->type.state & SUCCESS){
         return h->idx;
     }else{
         return -1;

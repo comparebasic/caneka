@@ -83,6 +83,7 @@ static BuildSubdir cashobj = { "formats/cash", {
 static BuildSubdir kveobj = { "formats/kve", {
     "kve_capture.c",
     "kve_parser.c",
+    "kve_from.c",
     NULL,
 }};
 

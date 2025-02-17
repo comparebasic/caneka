@@ -251,6 +251,16 @@ String *String_FromHex(MemCtx *m, String *s){
     return ret;
 }
 
+String *String_FromAbs(MemCtx *m, Abstract *a){
+    if(Ifc_Match(a->type.of, TYPE_STRING)){
+        return (String *)a;
+    }else if(a->type.of == TYPE_WRAPPED_I64 || a->type.of == TYPE_WRAPPED_UTIL){
+        Single *sg = (Single *)a;
+        return String_FromI64(m, sg->val.value);
+    }
+    return NULL;
+}
+
 status String_AddBitPrint(MemCtx *m, String *s, byte *bt, size_t length, boolean extended){
     status r = READY;
     for(int i = length-1; i >= 0;i--){

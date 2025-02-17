@@ -16,7 +16,8 @@ typedef struct signer_ctx {
     String *filePath;
     String *configPath;
     Span *identTbl;
-    Span *outputTbl;
+    Span *headerTbl;
+    Span *summaryTbl;
     String *content;
     Roebling *rbl;
 } SignerCtx;
@@ -26,3 +27,5 @@ void SignerCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extend
 status Signer_Init(MemCtx *m);
 SignerCtx *SignerCtx_Make(MemCtx *m);
 status SignerCtx_DigestIdent(SignerCtx *ctx);
+status SignerCtx_HeaderOut(SignerCtx *ctx, OutFunc out);
+status SignerCtx_SummaryOut(SignerCtx *ctx, OutFunc out);
