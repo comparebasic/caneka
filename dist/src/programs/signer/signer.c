@@ -41,13 +41,18 @@ int main(int argc, char *argv[]){
         }
     }
 
-    /*
-    DPrint((Abstract *)ctx, COLOR_PURPLE, "Ctx: ");
-    DPrint((Abstract *)file.data, COLOR_CYAN, "File.data: ");
-    */
+    if(ctx->content == NULL){
+        Fatal("No file contents to summarize", 0);
+        exit(1);
+    }
 
     SignerCtx_HeaderOut(ctx, ToStdOut);
     ToStdOut(ctx->m, ctx->content, NULL);
+    SignerCtx_SetupSummary(ctx);
+    if(SignerCtx_Sign(ctx) & ERROR){
+        Fatal("Signing Error", 0);
+        exit(1);
+    }
     SignerCtx_SummaryOut(ctx, ToStdOut);
 
     MemCtx_Free(m);

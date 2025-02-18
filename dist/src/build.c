@@ -180,6 +180,7 @@ static BuildSubdir persistobj = { "persist", {
     "spool.c",
     "subprocess.c",
     "procdets.c",
+    "persist_debug.c",
     "user.c",
     NULL
 }};
@@ -205,6 +206,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     "sequence_debug.c",
     "table.c",
     "table_chain.c",
+    "ordered_table.c",
     NULL
 }};
 

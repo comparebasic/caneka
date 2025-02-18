@@ -323,6 +323,25 @@ status String_AddAsciiSrc(MemCtx *m, String *s, byte c) {
     return SUCCESS;
 }
 
+String *String_FromFd(MemCtx *m, int fd){
+    String *s = String_Init(m, STRING_EXTEND);
+    byte *ptr = s->bytes;
+    int sz = String_GetSegSize(s);
+    int remaining = sz;
+    ssize_t l = 0;
+    while((l = read(fd, ptr, min(remaining, SERV_READ_SIZE))) > 0){
+        s->length += l;
+        if(s->length == sz){
+            s->next = String_Init(m, -1);
+            ptr = s->bytes;
+            remaining = sz;
+        }else{
+            remaining -= l;
+        }
+    }
+    return s;
+}
+
 status String_ToSlab(String *a, void *sl, size_t sz) {
     if(String_Length(a) > sz){
         return ERROR;

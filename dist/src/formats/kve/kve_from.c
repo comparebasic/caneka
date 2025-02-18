@@ -14,16 +14,23 @@ static status Kve_Out(MemCtx *m, Hashed *h, OutFunc out){
 
 status Kve_OutFromTable(MemCtx *m, Span *p, String *first, OutFunc out){
     status r = READY;
-    Span *tbl = (Span *)as(p, TYPE_TABLE);
-    int kveIdx = Table_GetIdx(tbl, (Abstract *)first);
-    int endIdx = Table_GetIdx(tbl, (Abstract *)String_Make(m, bytes("end")));
-    if(kveIdx != -1){
-        Hashed *h = (Hashed *)Span_Get(tbl, kveIdx);
-        r |= Kve_Out(m, h, out);
-    }
+    Span *tbl = (Span *)asIfc(p, TYPE_TABLE);
+    int kveIdx = -1;
+    int endIdx = -1;
 
     Iter it;
-    Iter_Init(&it, p);
+    if(p->type.of == TYPE_ORDERED_TABLE){
+        OrderedTable *op = (OrderedTable *)p;
+        Iter_Init(&it, op->order);
+    }else{
+        int kveIdx = Table_GetIdx(tbl, (Abstract *)first);
+        int endIdx = Table_GetIdx(tbl, (Abstract *)String_Make(m, bytes("end")));
+        if(kveIdx != -1){
+            Hashed *h = (Hashed *)Span_Get(tbl, kveIdx);
+            r |= Kve_Out(m, h, out);
+        }
+        Iter_Init(&it, p);
+    }
     while((Iter_Next(&it) & END) == 0){
         if(it.idx == kveIdx || it.idx == endIdx){
             continue;

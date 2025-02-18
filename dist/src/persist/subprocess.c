@@ -102,9 +102,11 @@ status SubStatus(ProcDets *pd){
 
     pd->code = WEXITSTATUS(r);    
     if(pd->code != -1){
-        return SUCCESS;
+        pd->type.state |= SUCCESS;
+        return pd->type.state;
     }else{
-        return NOOP;
+        pd->type.state |= ERROR;
+        return ERROR;
     }
 }
 

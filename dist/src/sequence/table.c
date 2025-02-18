@@ -107,6 +107,10 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                 }else{
                     h->idx = hkey;
                     Span_Set(tbl, hkey, (Abstract *)h);
+                    if(tbl->type.of == TYPE_ORDERED_TABLE){
+                        OrderedTable *otbl = (OrderedTable *)as(tbl, TYPE_ORDERED_TABLE);
+                        Span_Add(otbl->order, (Abstract *)h);
+                    }
                     found = TRUE;
                     break;
                 }

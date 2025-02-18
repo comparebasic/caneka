@@ -167,9 +167,11 @@ boolean Ifc_Match(cls inst, cls ifc){
     }else if(ifc == TYPE_SPAN){ 
         return (inst == TYPE_SPAN || inst == TYPE_QUEUE_SPAN || 
             inst == TYPE_STRING_SPAN || inst ==  TYPE_SLAB_SPAN || inst == TYPE_MINI_SPAN ||
-            inst == TYPE_TABLE);
+            inst == TYPE_TABLE || inst == TYPE_ORDERED_TABLE);
     }else if(ifc == TYPE_TRANSP){ 
         return (inst == TYPE_TRANSP || inst == TYPE_LANG_CNK);
+    }else if(ifc == TYPE_TABLE){ 
+        return (inst == TYPE_TABLE || inst == TYPE_ORDERED_TABLE);
     }else if(ifc == TYPE_FMT_CTX){ 
         return (inst == TYPE_FMT_CTX || inst == TYPE_LANG_CNK || inst == TYPE_LANG_CDOC);
     }

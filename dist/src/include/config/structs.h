@@ -39,6 +39,7 @@ struct span_def;
 struct span_state;
 struct span_query;
 struct table_chain;
+struct ordered_table;
 /* crypto */
 struct sha256_state;
 struct enc_pair;

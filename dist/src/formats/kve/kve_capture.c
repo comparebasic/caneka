@@ -3,7 +3,7 @@
 
 status Kve_Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     DebugStack_Push("Kve_Capture", TYPE_CSTR);
-    Span *tbl = as(source, TYPE_TABLE);
+    Span *tbl = (Span *)asIfc(source, TYPE_TABLE);
     if(DEBUG_KVE){
         DPrint((Abstract *)s, DEBUG_KVE, "Kve_Capture(%s): ", Class_ToString(captureKey));
     }

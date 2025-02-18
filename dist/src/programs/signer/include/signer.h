@@ -28,4 +28,6 @@ status Signer_Init(MemCtx *m);
 SignerCtx *SignerCtx_Make(MemCtx *m);
 status SignerCtx_DigestIdent(SignerCtx *ctx);
 status SignerCtx_HeaderOut(SignerCtx *ctx, OutFunc out);
+status SignerCtx_SetupSummary(SignerCtx *ctx);
 status SignerCtx_SummaryOut(SignerCtx *ctx, OutFunc out);
+status SignerCtx_Sign(SignerCtx *ctx);
