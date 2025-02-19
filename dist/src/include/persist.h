@@ -6,6 +6,7 @@
 #include "persist/memlocal.h"
 #include "persist/persist.h"
 #include "persist/persist_debug.h"
+#include "persist/path.h"
 #include "persist/session.h"
 #include "persist/spool.h"
 #include "persist/procdets.h"

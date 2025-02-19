@@ -16,7 +16,8 @@ status SignerCtx_DigestIdent(SignerCtx *ctx){
     file.abs = file.path;
     r |= File_Stream(ctx->m, &file, NULL, SignerCtx_streamIdent, (Abstract *)ctx->rbl);
 
-    String *identBasePath = String_Clone(ctx->m, ctx->configPath);
+    String *base = Path_Base(ctx->m, ctx->configPath);
+    Table_Set(ctx->identTbl, (Abstract *)String_Make(ctx->m, bytes("_identBaseDir")), (Abstract *)base);
 
     DebugStack_Pop();
     return r;
@@ -26,6 +27,18 @@ status SignerCtx_Sign(SignerCtx *ctx){
     String *key = (String *)Table_Get(ctx->identTbl, 
         (Abstract *)String_Make(ctx->m, bytes("key")));
     if(key != NULL){
+        String *keyPrefix = (String *)Table_Get(ctx->identTbl, (Abstract *)String_Make(ctx->m, bytes("_identBaseDir")));
+        String *keyPath = key;
+        if(keyPrefix && keyPath->bytes[0] != '/'){
+            keyPath = String_Init(ctx->m, STRING_EXTEND);
+            String_Add(ctx->m, keyPath, keyPrefix);
+            String_Add(ctx->m, keyPath, key);
+        }
+        if((File_Exists(keyPath) & NOOP) != 0){
+            DebugStack_SetRef(keyPath, keyPath->type.of);
+            Fatal("Key indicated but not found on disk", 0);
+        }
+
         ProcDets pd;
         ProcDets_Init(&pd);
         Span *cmd = Span_Make(ctx->m, TYPE_SPAN);
@@ -33,7 +46,7 @@ status SignerCtx_Sign(SignerCtx *ctx){
         Span_Add(cmd, (Abstract *)String_Make(ctx->m, bytes("dgst")));
         Span_Add(cmd, (Abstract *)String_Make(ctx->m, bytes("-sha256")));
         Span_Add(cmd, (Abstract *)String_Make(ctx->m, bytes("-sign")));
-        Span_Add(cmd, (Abstract *)key);
+        Span_Add(cmd, (Abstract *)keyPath);
         Span_Add(cmd, (Abstract *)ctx->filePath);
         SubProcess(ctx->m, cmd, &pd);
         if(pd.type.state & SUCCESS){
