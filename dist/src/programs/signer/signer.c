@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 
     if(ctx->filePath != NULL){
         File_Init(&file, ctx->filePath, NULL, NULL); 
-        file.abs = File_GetCwdPath(ctx->m, file.path);
+        file.abs = ctx->filePath;
         if(File_Load(m, &file, NULL) & ERROR){
             Fatal("Unable to Load file\n", 0);
             exit(1);

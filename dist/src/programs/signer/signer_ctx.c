@@ -9,11 +9,16 @@ static status SignerCtx_streamIdent(MemCtx *m, String *s, Abstract *source){
 }
 
 status SignerCtx_DigestIdent(SignerCtx *ctx){
+    DebugStack_Push(ctx->configPath, ctx->configPath->type.of);
     status r = READY;
     File file;
-    File_Init(&file, File_GetCwdPath(ctx->m, ctx->configPath), NULL, NULL);
+    File_Init(&file, ctx->configPath, NULL, NULL);
     file.abs = file.path;
     r |= File_Stream(ctx->m, &file, NULL, SignerCtx_streamIdent, (Abstract *)ctx->rbl);
+
+    String *identBasePath = String_Clone(ctx->m, ctx->configPath);
+
+    DebugStack_Pop();
     return r;
 }
 

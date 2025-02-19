@@ -7,11 +7,19 @@ static char *configFilePath = NULL;
 
 static status setFileArg(SignerCtx *ctx, char *arg, char *value){
     ctx->filePath = String_Make(ctx->m, bytes(value));
+    String *path = ctx->filePath;
+    if(path->bytes[0] != '/'){
+        ctx->filePath = File_GetCwdPath(ctx->m, path);
+    }
     return SUCCESS;
 }
 
 static status setIdentityFileArg(SignerCtx *ctx, char *arg, char *value){
     ctx->configPath = String_Make(ctx->m, bytes(value));
+    String *path = ctx->configPath;
+    if(path->bytes[0] != '/'){
+        ctx->configPath = File_GetCwdPath(ctx->m, path);
+    }
     return SUCCESS;
 }
 
