@@ -32,16 +32,16 @@ status SignerCtx_Sign(SignerCtx *ctx){
         Span_Add(cmd, (Abstract *)ctx->filePath);
         SubProcess(ctx->m, cmd, &pd);
         if(pd.type.state & SUCCESS){
-            String *keyId = String_Make(ctx->m, bytes("key-id"));
+            String *keyId = String_Make(ctx->m, bytes("keyId"));
             String *value = (String *)Table_Get(ctx->identTbl, (Abstract *)keyId);
             if(value != NULL){
-                String *k = String_Make(ctx->m, bytes("signature-key-id"));
+                String *k = String_Make(ctx->m, bytes("signatureKeyId"));
                 Table_Set(ctx->summaryTbl, (Abstract *)k, (Abstract *)value);
             }
             String *signature = String_FromFd(ctx->m, pd.outFd);
             Table_Set(ctx->summaryTbl, 
-                (Abstract *)String_Make(ctx->m, bytes("signature-type")), 
-                (Abstract *)String_Make(ctx->m, bytes("private-key")));
+                (Abstract *)String_Make(ctx->m, bytes("signatureType")), 
+                (Abstract *)String_Make(ctx->m, bytes("privateKey")));
             Table_Set(ctx->summaryTbl, 
                 (Abstract *)String_Make(ctx->m, bytes("signature")), 
                 (Abstract *)String_ToB64(ctx->m, signature));
@@ -68,7 +68,7 @@ status SignerCtx_SetupSummary(SignerCtx *ctx){
     String *shaHex = String_ToHex(ctx->m, shaDigest);
     Table_Set(ctx->summaryTbl, (Abstract *)key, (Abstract *)shaHex);
 
-    key = String_Make(ctx->m, bytes("digest-type"));
+    key = String_Make(ctx->m, bytes("digestType"));
     value = String_Make(ctx->m, bytes("sha256"));
     if(value != NULL){
         Table_Set(ctx->summaryTbl, (Abstract *)key, (Abstract *)value);

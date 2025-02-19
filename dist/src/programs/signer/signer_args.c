@@ -24,11 +24,22 @@ static status setNameArg(SignerCtx *ctx, char *arg, char *value){
 }
 
 SiArgs argFuncs[] =  {
-    {"-i", setIdentityFileArg},
-    {"-f", setFileArg},
-    {"-n", setNameArg},
-    {NULL, NULL},
+    {"-i", setIdentityFileArg, "IdentityFilePath<kve,party,role,key,pubKey,keyId>"},
+    {"-f", setFileArg, "FileToSignPath"},
+    {"-n", setNameArg, "Name"},
+    {NULL, NULL, NULL},
 };
+
+status Signer_ShowArgs(SignerCtx *ctx){
+    printf("signer ");
+    SiArgs *si = argFuncs;
+    while(si->arg != NULL){
+        printf("%s %s ", si->arg, si->desc);
+        si++;
+    }
+    printf("\n");
+    return SUCCESS;
+}
 
 status Signer_SetArgs(SignerCtx *ctx, int argc, char *argv[]){
     DebugStack_Push("Signer_SetArgs", TYPE_CSTR);

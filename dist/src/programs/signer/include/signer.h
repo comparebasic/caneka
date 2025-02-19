@@ -3,6 +3,7 @@ typedef status (*charSetterFunc)(struct signer_ctx *ctx, char *arg, char *value)
 typedef struct si_args  {
     char *arg;
     charSetterFunc func;
+    char *desc;
 } SiArgs;
 
 enum signer_types {
@@ -23,6 +24,7 @@ typedef struct signer_ctx {
 } SignerCtx;
 
 status Signer_SetArgs(SignerCtx *ctx, int argc, char *argv[]);
+status Signer_ShowArgs(SignerCtx *ctx);
 void SignerCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 status Signer_Init(MemCtx *m);
 SignerCtx *SignerCtx_Make(MemCtx *m);

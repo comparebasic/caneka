@@ -17,7 +17,10 @@ int main(int argc, char *argv[]){
     Signer_Init(m);
 
     SignerCtx *ctx = SignerCtx_Make(m);
-    if(Signer_SetArgs(ctx, argc, argv) & ERROR){
+    if(argc < 2){
+        Signer_ShowArgs(ctx);
+        exit(1);
+    }else if(Signer_SetArgs(ctx, argc, argv) & ERROR){
         exit(1);
     }
     ctx->rbl = Kve_RblMake(m, NULL, (Abstract *)ctx->identTbl, Kve_Capture);
