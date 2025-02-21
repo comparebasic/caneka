@@ -231,3 +231,12 @@ void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean match
     }
 }
 
+status ParserDebug_Init(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
+    r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
+    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
+    r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
+    r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
+    return r;
+}

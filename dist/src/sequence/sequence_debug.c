@@ -1,6 +1,23 @@
 #include <external.h>
 #include <caneka.h>
 
+status SequenceDebug_Init(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_QUEUE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
+    r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
+    r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
+    r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
+    r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
+    r |= Lookup_Add(m, lk, TYPE_MINI_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_TABLE_CHAIN, (void *)TableChain_Print);
+    r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
+    r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
+    return r;
+}
+
 char *QueueFlags_ToChars(word flags){
     String *s = String_Init(DebugM, 64);
     if((flags & SLAB_ACTIVE) != 0){

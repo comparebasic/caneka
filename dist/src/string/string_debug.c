@@ -134,3 +134,13 @@ void Cursor_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
     return;
 }
 
+status StringDebug_Init(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)StringFixed_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)StringFull_Print);
+    r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRSNIP_STRING, (void *)StrSnipString_Print);
+    r |= Lookup_Add(m, lk, TYPE_CSTR, (void *)Cstr_Print);
+    return r;
+}

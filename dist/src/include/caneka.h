@@ -1,3 +1,6 @@
+#ifndef __CNK_HEADER
+#define __CNK_HEADER
+
 #include "config.h"
 #include "mem.h"
 #include "str.h"
@@ -14,3 +17,5 @@
 #include "formats.h"
 #include "lang.h"
 #include "test.h"
+
+#endif

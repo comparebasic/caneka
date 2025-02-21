@@ -1,3 +1,6 @@
+#ifndef __CNK_EXTERNAL_HEADER
+#define __CNK_EXTERNAL_HEADER
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -23,4 +26,6 @@
     #include <openssl/ecdsa.h>
     #include <openssl/err.h>
     #include <openssl/conf.h>
+#endif
+
 #endif

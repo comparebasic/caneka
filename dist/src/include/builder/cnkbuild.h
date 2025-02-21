@@ -1,7 +1,7 @@
-typedef struct target {
+typedef struct executable {
     char *bin;
     char *src;
-} Target;
+} Executable;
 
 typedef struct build_subdir {
     char *name;
@@ -11,9 +11,10 @@ typedef struct build_subdir {
 typedef struct buildctx {
     Type type;
     MemCtx *m;
-    Target *targets;
+    Executable *targets;
     char *dist;
     char *src;
+    char *libtarget;
     struct {
         char *cc;
         char *ar;
@@ -26,5 +27,5 @@ typedef struct buildctx {
     BuildSubdir **objdirs;
 } BuildCtx;
 
-static int BuildSource(BuildCtx *ctx, char *binary, char *fname, char *subdir);
-static int BuildTarget(BuildCtx *ctx, char *binary, char *fname);
+status BuildCtx_Init(BuildCtx *ctx);
+status Build(BuildCtx *ctx);

@@ -5,58 +5,10 @@ Chain *DebugPrintChain = NULL;
 
 MemCtx *DebugM = NULL;
 
-static Abstract *Print(MemCtx *m, Abstract *a){
-    Debug_Print(a, 0, "", 0, TRUE);
-    return NULL;
-}
-
 static status populateDebugPrint(MemCtx *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
-    r |= Lookup_Add(m, lk, TYPE_XMLCTX, (void *)XmlCtx_Print);
-    r |= Lookup_Add(m, lk, TYPE_HTTP_PROTODEF, (void *)HttpProtoDef_Print);
-    r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
-    r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
-    r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
-    r |= Lookup_Add(m, lk, TYPE_SERVECTX, (void *)Serve_Print);
-    r |= Lookup_Add(m, lk, TYPE_HANDLER, (void *)Handler_Print);
-    r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
-    r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
-    r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_Print);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)StringFixed_Print);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)StringFull_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_QUEUE_SPAN, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_MINI_SPAN, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
-    r |= Lookup_Add(m, lk, TYPE_TABLE_CHAIN, (void *)TableChain_Print);
-    r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
-    r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
-    r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
-    r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)WrappedI64_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
-    r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
-    r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
-    r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
-    r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
-    r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
     r |= Lookup_Add(m, lk, TYPE_ENC_PAIR, (void *)EncPair_Print);
-    r |= Lookup_Add(m, lk, TYPE_GUARD, (void *)Guard_Print);
     r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
-    r |= Lookup_Add(m, lk, TYPE_RESULT, (void *)Result_Print);
-    r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
-    r |= Lookup_Add(m, lk, TYPE_STRSNIP_STRING, (void *)StrSnipString_Print);
-    r |= Lookup_Add(m, lk, TYPE_CSTR, (void *)Cstr_Print);
-    r |= Lookup_Add(m, lk, TYPE_TRANSP, (void *)Transp_Print);
-    r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCtx_Print);
-    r |= Lookup_Add(m, lk, TYPE_PROCDETS, (void *)ProcDets_Print);
-    
     return r;
 }
 
@@ -124,7 +76,6 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
     }
     printf("\x1b[0m");
 }
-
 
 void DPrint(Abstract *a, int color, char *msg, ...){
     DebugStack_Push(msg, TYPE_CSTR);

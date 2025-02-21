@@ -110,3 +110,14 @@ static void Result_Print(Abstract *a, cls type, char *msg, int color, boolean ex
     Debug_Print((void *)v->s, 0, "", color, FALSE);
     printf("\x1b[%dm>\x1b[0m", color);
 }
+
+status UtilDebug_Init(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
+    r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
+    r |= Lookup_Add(m, lk, TYPE_RESULT, (void *)Result_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)WrappedI64_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
+    return r;
+}

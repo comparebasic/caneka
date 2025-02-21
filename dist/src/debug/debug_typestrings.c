@@ -5,6 +5,7 @@ char *TypeStrings[] = {
     "_TYPE_START",
     "TYPE_UNKNOWN",
     "TYPE_BLANK",
+    "TYPE_BUILDCTX",
     "TYPE_ABSTRACT",
     "TYPE_BUILDER",
     "TYPE_RESERVE",

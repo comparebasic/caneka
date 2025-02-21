@@ -1,44 +1,33 @@
-#include "mini/builder.h"
+#include <external.h>
+#include <caneka.h>
+#include <builder.h>
 
 #define TEST_REQ 1
 
-/* configuration */
-#define CC "clang"
-#define AR "ar"
-#define CFLAGS cflags
-#define INC inc 
-#define LIBS libs
-#define TARGETS targets 
-#define LIBTARGET "libcaneka"
-#define MAIN "main.c"
-#define ALL allobj
-#define VERBOSE 2
-#define DIST "build"
-#define SRC "dist/src"
+/* parameters */
 
-static Target targets[] = {
+static Executable targets[] = {
     {"testreq", "programs/testreq.c"},
     {"caneka", "programs/main.c"},
     {"formatter", "programs/formatter.c"},
     {NULL, NULL},
 };
-
 static char *cflags[] = {
-    "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-    "-DOPENSSL",
-    NULL
+        "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+        "-DOPENSSL",
+        NULL
 };
-
 static char *inc[] = {
     "-I./dist/src/include/",
     NULL
 };
-
 static char *libs[] = {
     "-lssl",
     "-lcrypto",
     NULL
 };
+
+/* sources */
 
 static BuildSubdir memobj = { "mem", {
     "mem.c",
@@ -48,6 +37,8 @@ static BuildSubdir memobj = { "mem", {
 
 static BuildSubdir coreobj = { "core", {
     "core.c",
+    "init.c",
+    "eq.c",
     "error.c",
     "guard.c",
     "log.c",
@@ -202,6 +193,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     "queue.c",
     "slab.c",
     "span.c",
+    "span_utils.c",
     "spandef.c",
     "spanquery.c",
     "span_tolocal.c",
@@ -309,7 +301,7 @@ static BuildSubdir utilobj = { "util", {
     NULL
 }};
 
-BuildSubdir *allobj[] = {
+static BuildSubdir *objdirs[] = {
     &memobj,
     &coreobj,
     &debugobj,
@@ -340,4 +332,23 @@ BuildSubdir *allobj[] = {
     NULL
 };
 
-#include "mini/builder.c"
+int main(int argc, char **argv){
+    BuildCtx ctx;
+    BuildCtx_Init(&ctx);
+
+    ctx.tools.cc = "clang";
+    ctx.tools.ar = "ar";
+    ctx.libtarget = "libcaneka";
+    ctx.dist = "build";
+    ctx.src = "dist/src";
+    ctx.targets = (Executable *)targets;
+    ctx.args.cflags = cflags;
+    ctx.args.inc = inc;
+    ctx.args.libs = libs;
+    ctx.objdirs = (BuildSubdir **)objdirs;
+
+    printf("wohoo\n");
+
+    return 0;
+}
+

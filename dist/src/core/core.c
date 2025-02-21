@@ -11,22 +11,6 @@ static status archChecks(){
     return ERROR; 
 }
 
-status Caneka_Init(MemCtx *m){
-    status r = READY;
-    r |= archChecks();
-    r |= SpanDef_Init();
-    r |= DebugStack_Init(m);
-    r |= Clone_Init(m);
-    r |= Debug_Init(MemCtx_Make());
-    r |= Hash_Init(m);
-    r |= MemLocal_Init(m);
-    r |= Oset_Init(m);
-    r |= Enc_Init(m);
-    r |= Steps_Init(m);
-    r |= KeyInit(m);
-    return r;
-}
-
 static word states[] = {
     READY,
     ERROR,
@@ -103,29 +87,6 @@ String *State_ToString(MemCtx *m, status state){
     return s;
 }
 
-boolean Abs_Eq(Abstract *a, void *b){
-    if(a == NULL || b == NULL){
-        return FALSE;
-    }
-    if(a->type.of == TYPE_STRING_CHAIN || a->type.of == TYPE_STRING_FIXED){
-        return String_Eq(a, b);
-    }else{
-        return ((void *)a) == b;
-    }
-}
-
-boolean Caneka_Truthy(Abstract *a){
-    if(a == NULL){
-        return FALSE;
-    }else if(Ifc_Match(a->type.of, TYPE_WRAPPED_I64)){
-        return ((Single *)a)->val.value != 0;
-    }else if(Ifc_Match(a->type.of, TYPE_STRING)){
-        return ((String *)a)->length > 1;
-    }else{
-        return FALSE;
-    }
-}
-
 cls Ifc_Get(cls inst){
     if(inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL || inst == TYPE_STRING_SLAB){
         return TYPE_STRING;
@@ -178,3 +139,4 @@ boolean Ifc_Match(cls inst, cls ifc){
 
     return FALSE;
 }
+

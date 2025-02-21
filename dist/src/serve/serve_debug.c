@@ -56,3 +56,16 @@ void Handler_Print(Abstract *a, cls type, char *msg, int color, boolean extended
     }
     printf("\x1b[%dm>\x1b[0m", color);
 }
+
+status ServeDebug_Init(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
+    r |= Lookup_Add(m, lk, TYPE_XMLCTX, (void *)XmlCtx_Print);
+    r |= Lookup_Add(m, lk, TYPE_HTTP_PROTODEF, (void *)HttpProtoDef_Print);
+    r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
+    r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
+    r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
+    r |= Lookup_Add(m, lk, TYPE_SERVECTX, (void *)Serve_Print);
+    r |= Lookup_Add(m, lk, TYPE_HANDLER, (void *)Handler_Print);
+    return r;
+}

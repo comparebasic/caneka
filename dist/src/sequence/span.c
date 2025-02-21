@@ -25,9 +25,6 @@ int Span_Capacity(Span *p){
     return increment * p->def->idxStride;
 }
 
-/* DEBUG */
-
-
 /* API */
 char **Span_ToCharArr(MemCtx *m, Span *p){
     size_t sz = sizeof(char *)*(p->nvalues+1);
@@ -49,15 +46,6 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
 
     Span *p = sq->span;
     status r = Span_Query(sq);
-
-    if(DEBUG_SPAN_GET_SET){
-        printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
-        SpanDef_Print(sq->span->def);
-        printf("\n");
-        SpanQuery_Print((Abstract *)sq, TYPE_SPAN_QUERY, "Span_SetFromQ: ", DEBUG_SPAN_GET_SET, TRUE);
-        printf("\n");
-        printf("\n\x1b[0m");
-    }
 
     if((r & SUCCESS) != 0){
         SpanState *st = sq->stack;
@@ -112,14 +100,6 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanDef *def = p->def;
-    if(DEBUG_SPAN_GET_SET){
-        printf("\x1b[%dm", DEBUG_SPAN_GET_SET);
-        SpanDef_Print(sq->span->def);
-        printf("\n");
-        SpanQuery_Print((Abstract *)sq, TYPE_SPAN_QUERY, "Span_Get: ", DEBUG_SPAN_GET_SET, TRUE);
-        printf("\n");
-        printf("\n\x1b[0m");
-    }
 
     SpanState *st = sq->stack;
     void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
@@ -162,44 +142,13 @@ void *Span_GetSelected(Span *p){
     return Span_Get(p, p->metrics.selected);
 }
 
-int Span_AddOrdered(Span *p, Abstract *t){
-    int idx = p->max_idx+1;
-    int bIdx = p->max_idx;
-    Abstract *b = Span_Get(p, bIdx);
-    while(Abs_Cmp(t, b) > 0){
-        Span_Set(p, idx, b);
-        idx = bIdx;
-        b = Span_Get(p, --bIdx);
-    }
-    if(Span_Set(p, idx, t) != NULL){
-        return idx;
-    }
-    return -1;
-}
-
 int Span_Add(Span *p, Abstract *t){
-    if((p->type.state & SPAN_ORDERED) != 0){
-        return Span_AddOrdered(p, t);
-    }
     int idx = Span_NextIdx(p);
     if(Span_Set(p, idx, t) != NULL){
         return idx;
     }
 
     return 0;
-}
-
-void *Span_ReserveNext(Span *p){
-    Reserve rsv;
-    memset(&rsv, 0, sizeof(Reserve));
-    rsv.type.of = TYPE_RESERVE;
-    return Span_Set(p, Span_NextIdx(p), (Abstract *)&rsv);
-}
-
-status Span_Remove(Span *p, int idx){
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
-    return Span_Query(&sq);
 }
 
 status Span_Cull(Span *p, int count){
@@ -216,50 +165,11 @@ status Span_Cull(Span *p, int count){
     return NOOP;
 }
 
-status Span_Concat(Span *p, Span *add){
-    status r = READY;
-    Iter it;
-    Iter_Init(&it, add);
-    while((Iter_Next(&it) & END) == 0){
-        Abstract *a = Iter_Get(&it);
-        if(a != NULL){
-            r |= Span_Add(p, a);
-        }
-    }
 
-    if(r == READY){
-        r |= NOOP;
-    }
-
-    return r;
-}
-
-status Span_Move(Span *p, int fromIdx, int toIdx){
-    return NOOP;
-}
-
-/* utils */
-Span *Span_From(MemCtx *m, int count, ...){
-    Span *p = Span_Make(m, TYPE_SPAN);
-    Abstract *v = NULL;
-	va_list arg;
-    va_start(arg, count);
-    for(int i = 0; i < count; i++){
-        v = va_arg(arg, AbstractPtr);
-        Span_Add(p, v);
-    }
-    return p;
-}
-
-status Span_Run(MemCtx *m, Span *p, DoFunc func){
-    status r = READY;
-    for(int i = 0; i < p->nvalues; i++){
-        Abstract *a = (Abstract *)Span_Get(p, i);
-        if(a != NULL && (*(util *)a) != 0){
-            r |= func(m, a);
-        }
-    }
-    return r;
+status Span_Remove(Span *p, int idx){
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
+    return Span_Query(&sq);
 }
 
 /* internals */
@@ -365,47 +275,6 @@ void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
     return MemCtx_Alloc(m, sz);
 }
 
-void *Span_reserve(SpanQuery *sq){
-    return NULL;
-}
-
-status Span_ReInit(Span *p){
-    p->nvalues = 0;
-    p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
-    return SUCCESS;
-}
-
-Span *Span_Clone(MemCtx *m, Span *op){
-    Span *p = Span_Make(m, op->type.of);
-    if((p->def->flags & SPAN_INLINE) != 0){
-        p->def = SpanDef_Clone(m, SpanDef_FromCls(op->type.of));
-        p->type.of = p->def->typeOf;
-    }
-    Iter it;
-    Iter_Init(&it, op);
-    while((Iter_Next(&it) & END) == 0){
-        Abstract *o = Iter_Get(&it);
-        if(o != NULL){
-            Abstract *a = Clone(m, o); 
-            if(a == NULL){
-                return NULL;
-            }
-            Span_Set(p, it.idx, a);
-        }
-    }
-    return p;
-}
-
-Span *Span_Make(MemCtx *m, cls type){
-    Span *p = MemCtx_Alloc(m, sizeof(Span));
-    p->m = m;
-    p->def = SpanDef_FromCls(type);
-    p->type.of = p->def->typeOf;
-    p->root = Span_valueSlab_Make(m, p->def);
-    p->max_idx = -1;
-    return p;
-}
-
 Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->m = m;
@@ -429,5 +298,15 @@ Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
     p->def->slotSize = pwrSlot;
     p->def->flags |= SPAN_INLINE;
     p->root = Span_valueSlab_Make(m, p->def);
+    return p;
+}
+
+Span *Span_Make(MemCtx *m, cls type){
+    Span *p = MemCtx_Alloc(m, sizeof(Span));
+    p->m = m;
+    p->def = SpanDef_FromCls(type);
+    p->type.of = p->def->typeOf;
+    p->root = Span_valueSlab_Make(m, p->def);
+    p->max_idx = -1;
     return p;
 }

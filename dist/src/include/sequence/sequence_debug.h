@@ -4,3 +4,4 @@ void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extend
 void SpanDef_Print(SpanDef *def);
 void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 void Lookup_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
+status SequenceDebug_Init(MemCtx *m, Lookup *lk);
