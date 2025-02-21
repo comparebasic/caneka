@@ -48,6 +48,7 @@ static BuildSubdir coreobj = { "core", {
 
 static BuildSubdir debugobj = { "debug", {
     "debug.c",
+    "debug_flags.c",
     "debug_stack.c",
     "stepper.c",
     "stepper_funcs.c",
@@ -59,6 +60,7 @@ static BuildSubdir cryptoobj = { "crypto", {
     "crypto_api.c",
     "enc_pair.c",
     "key.c",
+    "digest.c",
     "salty.c",
     "sane.c",
     NULL
@@ -292,6 +294,7 @@ static BuildSubdir utilobj = { "util", {
     "time.c",
     "wrappedptr_tolocal.c",
     "hashed_tolocal.c",
+    "util_debug.c",
     NULL
 }};
 

@@ -26,6 +26,63 @@
 #include "persist/procdets.c"
 #include "persist/subprocess.c"
 
+static status buildExec(BuildCtx *ctx, String *destDir, String *lib, Executable *target){
+    DebugStack_Push(target->bin, TYPE_CSTR);
+    status r = READY;
+    MemCtx *m = ctx->m;
+    Span *cmd = Span_Make(m, TYPE_SPAN);
+    Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.cc)));
+    char **ptr = ctx->args.cflags;
+    while(*ptr != NULL){
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
+        ptr++;
+    }
+    ptr = ctx->args.inc;
+    while(*ptr != NULL){
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
+        ptr++;
+    }
+    Span_Add(cmd, (Abstract *)String_Make(m, bytes("-o")));
+
+    String *dest = String_Init(m, STRING_EXTEND);
+    String_Add(m, dest, destDir);
+    char *cstr = "/";
+    String_AddBytes(m, dest, bytes(cstr), strlen(cstr));
+    String_AddBytes(m, dest, bytes(target->bin), strlen(target->bin));
+    Span_Add(cmd, (Abstract *)dest);
+
+    String *source = File_GetAbsPath(m, String_Make(m, bytes(ctx->src)));
+    String_AddBytes(m, source, bytes("/programs/"), 1);
+    String_AddBytes(m, source, bytes(target->src), strlen(target->src));
+
+    Span_Add(cmd, (Abstract *)source);
+    Span_Add(cmd, (Abstract *)lib);
+    ptr = ctx->args.libs;
+    while(*ptr != NULL){
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
+        ptr++;
+    }
+
+    if(File_CmpUpdated(m, source, dest, NULL)){
+        Debug_Print((void *)dest, 0, "build exec: ", COLOR_CYAN, FALSE);
+        printf("\n");
+
+        ProcDets pd;
+        ProcDets_Init(&pd);
+        r |= SubProcess(m, cmd, &pd);
+        if(r & ERROR){
+            Fatal("Build error for source file", 0);
+        }
+
+        DebugStack_Pop();
+        return r;
+    }
+
+    DebugStack_Pop();
+    return NOOP;
+}
+
+
 static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String *dest, String *source){
     DebugStack_Push(source, source->type.of);
     status r = READY;
@@ -47,7 +104,7 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     Span_Add(cmd, (Abstract *)dest);
     Span_Add(cmd, (Abstract *)source);
 
-    Debug_Print((void *)dest, 0, "building: ", COLOR_YELLOW, FALSE);
+    Debug_Print((void *)dest, 0, "build obj: ", COLOR_YELLOW, FALSE);
     printf("\n");
 
     ProcDets pd;
@@ -145,6 +202,12 @@ static status buildLib(BuildCtx *ctx){
     while(*dir != NULL){
         buildDirToLib(ctx, libDir, lib, *dir);
         dir++;
+    }
+
+    Executable *target = ctx->targets;
+    while(target->bin != NULL){
+        buildExec(ctx, dist, lib, target);
+        target++;
     }
 
     DebugStack_Pop();
