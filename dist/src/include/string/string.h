@@ -51,15 +51,13 @@ typedef struct string {
 #define bytes(cstr) ((byte *)cstr)
 
 String *String_Make(MemCtx *m, byte *bytes);
-String *String_MakeFull(MemCtx *m, byte *bytes);
-String *String_MakeFixed(MemCtx *m, byte *bytes, int length);
 status String_Add(MemCtx *m, String *dest, String *toAdd);
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length);
 i64 String_Length(String *s);
 String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
 i64 String_GetSegSize(String *s);
-status String_Trunc(String *s, i64 len);
+char *String_ToChars(MemCtx *m, String *s);
 
 /* makers */
 status String_AddAsciiSrc(MemCtx *m, String *s, byte c);
@@ -67,7 +65,6 @@ status String_AddInt(MemCtx *m, String *s, int i);
 status String_AddMemCount(MemCtx *m, String *s, i64 mem);
 status String_AddBitPrint(MemCtx *m, String *s, byte *b, size_t length, boolean extended);
 status String_AddI64(MemCtx *m, String *s, i64 i);
-status String_Reset(String *s);
 String *String_FromInt(MemCtx *m, int i);
 String *String_FromI64(MemCtx *m, i64 i);
 status String_MakeLower(String *s);
@@ -88,7 +85,6 @@ String *String_FromHex(MemCtx *m, String *s);
 String *String_ToB64(MemCtx *m, String *s);
 String *String_FromB64(MemCtx *m, String *s);
 String *String_ToEscaped(MemCtx *m, String *s);
-char *String_ToChars(MemCtx *m, String *s);
 status String_ToSlab(String *a, void *sl, size_t sz);
 String *String_Clone(MemCtx *m, String *s);
 String *String_Sub(MemCtx *m, String *s, i64 start, i64 length);
@@ -97,3 +93,7 @@ String *String_SubMatch(MemCtx *m, String *s, struct match *mt);
 
 /* utils */
 struct span *String_SplitToSpan(MemCtx *m, String *s, String *sep);
+status String_Trunc(String *s, i64 len);
+String *String_MakeFull(MemCtx *m, byte *bytes);
+String *String_MakeFixed(MemCtx *m, byte *bytes, int length);
+status String_Reset(String *s);

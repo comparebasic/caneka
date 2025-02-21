@@ -16,6 +16,7 @@ typedef struct signer_ctx {
     MemCtx *m;
     String *filePath;
     String *configPath;
+    String *date;
     Span *identTbl;
     Span *headerTbl;
     Span *summaryTbl;

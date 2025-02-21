@@ -91,6 +91,10 @@ status SignerCtx_SetupSummary(SignerCtx *ctx){
     if(value != NULL){
         Table_Set(ctx->summaryTbl, (Abstract *)key, (Abstract *)value);
     }
+    if(ctx->date != NULL){
+        key = String_Make(ctx->m, bytes("date"));
+        Table_Set(ctx->summaryTbl, (Abstract *)key, (Abstract *)ctx->date);
+    }
     key = String_Make(ctx->m, bytes("end"));
     value = (String *)Table_Get(ctx->headerTbl, (Abstract *)key);
     if(value != NULL){

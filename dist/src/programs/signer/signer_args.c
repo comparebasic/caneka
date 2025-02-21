@@ -31,10 +31,22 @@ static status setNameArg(SignerCtx *ctx, char *arg, char *value){
     return SUCCESS;
 }
 
+static status setDateArg(SignerCtx *ctx, char *arg, char *value){
+    String *date = NULL;
+    if(strncmp(value, "today", min(strlen(value), 5)) == 0){
+        date = Time_Today(ctx->m);
+    }else{
+        date = String_Make(ctx->m, bytes(value));
+    }
+    ctx->date = date;
+    return SUCCESS;
+}
+
 SiArgs argFuncs[] =  {
     {"-i", setIdentityFileArg, "IdentityFilePath<kve,party,role,key,pubKey,keyId>"},
     {"-f", setFileArg, "FileToSignPath"},
     {"-n", setNameArg, "Name"},
+    {"-d", setDateArg, "yyyy-mm-dd|today"},
     {NULL, NULL, NULL},
 };
 

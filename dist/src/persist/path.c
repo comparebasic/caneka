@@ -45,9 +45,6 @@ status Path_Pair(MemCtx *m, String *path, String *base, String *fname){
     String *backlog = String_Init(m, STRING_EXTEND);
     backlog->type.state |= (FLAG_STRING_CONTIGUOUS|FLAG_STRING_BINARY);
     markPath(m, path, backlog);
-    Debug_Print((Abstract *)path, 0, "path: ", COLOR_PURPLE, TRUE);
-    printf("\n");
-    Debug_Print((Abstract *)backlog, TYPE_STRSNIP_STRING, "backlog: ", COLOR_PURPLE, TRUE);
 
     i64 endsep = -1;
     IterStr it;

@@ -1,6 +1,98 @@
 #include <external.h>
 #include <caneka.h>
 
+static word matchFlags[] = {
+    PAT_END, /* E */
+    PAT_TERM, /* X */
+    PAT_OPTIONAL, /* P */
+    PAT_MANY, /* M */
+    PAT_ANY, /* N */
+    PAT_INVERT, /* I */
+    PAT_COUNT, /* C */
+    PAT_INVERT_CAPTURE, /* G */
+    PAT_KO, /* K */
+    PAT_KO_TERM, /* O */
+    PAT_SINGLE, /* S */
+    PAT_LEAVE , /* L */
+    PAT_CMD, /* D */
+    PAT_GO_ON_FAIL, /* T */
+    PAT_CONSUME, /* U */
+};
+
+static char *matchFlagChars = "EXPMNICGKOSLDTU";
+
+static status patFlagStr(word flags, char str[]){
+    int p = 0;
+    int i = 0;
+    /* 0 and & x != 0 dont mix well */
+    if(flags == PAT_END){
+        str[p++] = 'E';
+    }
+    int l = strlen(matchFlagChars);
+    while(i < l){
+       if((flags &matchFlags[i]) != 0){
+            str[p++] = matchFlagChars[i];
+       }
+       i++;
+    }
+    str[p] = '\0';
+    return SUCCESS;
+}
+
+static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int color, boolean extended){
+    char flag_cstr[12];
+    patFlagStr(def->flags, flag_cstr);
+    if((def->flags & PAT_COUNT) != 0){
+        if(def->from == '\r' || def->from == '\n'){
+            printf("%s=0x%hux0x%hu", flag_cstr, def->from, def->to);
+        }else{
+            printf("?");
+            printf("%s=%cx%hu", flag_cstr, (char)def->from, def->to);
+        }
+    }else if(def->flags == PAT_END){
+        printf("%s", flag_cstr);
+    }else if(def->from == def->to){
+        if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
+            printf("%s=#%hu", flag_cstr, def->from);
+        }else{
+            printf("%s=%c/%hu", flag_cstr, (char)def->from, (i8)def->from);
+        }
+    }else{
+        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32) || (def->to > 128 || def->to > 127)){
+            printf("%s=#%hu-#%hu", flag_cstr, def->from, def->to);
+        }else{
+            printf("%s=%c-%c", flag_cstr, (char)def->from, (char)def->to);
+        }
+    }
+    if((def->flags & PAT_TERM) != 0){
+        printf(".");
+    }
+}
+
+static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    PatCharDef *def = (PatCharDef *)a;
+    printf("\x1b[%dm%s", color, msg);
+    if(extended){
+        boolean first = TRUE;
+        if(def->flags == PAT_END){
+            patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
+        }else{
+            while(def->flags != PAT_END){
+                if(first){
+                    first = FALSE;
+                }else{
+                    printf(",");
+                }
+                patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
+                def++;
+            }
+        }
+    }else{
+        patCharDef_PrintSingle(def, TYPE_PATCHARDEF, msg, color, extended);
+    }
+    printf("\x1b[0m");
+}
+
 static char *flagStrs[] = {
     "PAT_TERM",
     "PAT_OPTIONAL",

@@ -127,28 +127,6 @@ status String_AddInt(MemCtx *m, String *s, int i){
     return String_AddBytes(m, s, buff+position+1, MAX_BASE10-position-1);
 }
 
-char *String_ToChars(MemCtx *m, String *s){
-    if(s == NULL){
-        return NULL;
-    }
-    i64 l = String_Length(s); 
-    if(l > MEM_SLAB_SIZE){
-        Fatal("Error, unable to allocate a fixed block larger than the memblock size", TYPE_STRING);
-        return NULL;
-    }
-
-    char *cstr = (char *)MemCtx_Alloc(m, l+1);
-    i64 offset = 0;
-    while(s != NULL){
-        memcpy(cstr+offset, s->bytes, s->length);
-        offset += s->length;
-        s = String_Next(s);
-    }
-
-    cstr[offset] = '\0';
-    return cstr;
-}
-
 String *String_ToHex(MemCtx *m, String *s){
     String *ret = String_Init(m, s->length*2);
     while(s != NULL){

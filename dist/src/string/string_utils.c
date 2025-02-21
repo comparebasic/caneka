@@ -1,6 +1,63 @@
 #include <external.h>
 #include <caneka.h>
 
+String *String_Sub(MemCtx *m, String *s, i64 start, i64 end){
+    String *ret = String_Init(m, STRING_EXTEND);
+    i64 pos = 0;
+    while(s != NULL && pos + s->length < start){
+        pos += s->length;
+        s = String_Next(s);
+    }
+
+    start -= pos;
+    int length = min(s->length-start, end-pos);
+    while(s != NULL && length > 0){
+        int length = min(s->length-start, end-pos);
+        String_AddBytes(m, ret, s->bytes+start, length);
+        pos += length;
+        s = String_Next(s); 
+        start = 0;
+    }
+
+    return ret;
+}
+
+String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
+    String *s = String_Init(m, length); 
+    String_AddBytes(m, s, bytes, length);
+
+    return s;
+}
+
+
+
+status String_Trunc(String *s, i64 len){
+    DebugStack_Push("String_Trunc", TYPE_CSTR);
+    if(len < 0){
+        len = String_Length(s) + len;
+    }
+    i64 actual = 0;
+    String *tail = s;
+    size_t sz = String_GetSegSize(s);
+    while(tail != NULL){
+        if(actual+tail->length > len){
+            tail->length = len - actual;
+            memset(tail->bytes+tail->length, 0, sz-tail->length);
+            if(String_Next(s) != NULL){
+                tail->next = NULL;
+            }
+            DebugStack_Pop();
+            return SUCCESS;
+        }
+        actual += tail->length; 
+        tail = String_Next(s); 
+    };
+
+    DebugStack_Pop();
+    return NOOP;
+}
+
+
 String *String_SubMatch(MemCtx *m, String *s, Match *mt){
     String *seg = s;
     while(seg != NULL){
@@ -63,3 +120,17 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
 
     return p;
 }
+
+status String_Reset(String *s){
+    status r = NOOP;
+    while(s != NULL){
+        if(s->length > 0){
+            memset(s->bytes, 0, s->length);
+            r |= SUCCESS;
+        }
+        s->length = 0;
+        s = String_Next(s);
+    }
+    return r;
+}
+

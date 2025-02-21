@@ -174,6 +174,7 @@ static BuildSubdir persistobj = { "persist", {
     "auth.c",
     "dir.c",
     "file.c",
+    "file_status.c",
     "ioctx.c",
     "memlocal.c",
     "path.c",

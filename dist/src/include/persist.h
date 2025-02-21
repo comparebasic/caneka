@@ -3,6 +3,7 @@
 #include "persist/auth.h"
 #include "persist/dir.h"
 #include "persist/file.h"
+#include "persist/file_status.h"
 #include "persist/memlocal.h"
 #include "persist/persist.h"
 #include "persist/persist_debug.h"

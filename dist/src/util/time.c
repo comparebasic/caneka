@@ -30,3 +30,17 @@ Single *Time64_Wrapped(MemCtx *m, time64_t n){
     sgl->val.value = (util)n;
     return sgl;
 }
+
+String *Time_Today(MemCtx *m){
+    struct timespec ts;
+    clock_gettime(0, &ts);
+    return TimeSpec_ToDayString(m, &ts);
+}
+
+String *TimeSpec_ToDayString(MemCtx *m, struct timespec *ts){
+    struct tm *t = localtime(&(ts->tv_sec));
+    String *s = String_Init(m, STRING_EXTEND);
+    size_t l = strftime((char *)s->bytes, (size_t)String_GetSegSize(s), "%Y-%m-%d", t);
+    s->length = l; 
+    return s;
+}

@@ -44,6 +44,7 @@ char **Span_ToCharArr(MemCtx *m, Span *p){
     }
     return arr;
 }
+
 void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
 
     Span *p = sq->span;

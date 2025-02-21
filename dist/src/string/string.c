@@ -1,6 +1,28 @@
 #include <external.h>
 #include <caneka.h>
 
+char *String_ToChars(MemCtx *m, String *s){
+    if(s == NULL){
+        return NULL;
+    }
+    i64 l = String_Length(s); 
+    if(l > MEM_SLAB_SIZE){
+        Fatal("Error, unable to allocate a fixed block larger than the memblock size", TYPE_STRING);
+        return NULL;
+    }
+
+    char *cstr = (char *)MemCtx_Alloc(m, l+1);
+    i64 offset = 0;
+    while(s != NULL){
+        memcpy(cstr+offset, s->bytes, s->length);
+        offset += s->length;
+        s = String_Next(s);
+    }
+
+    cstr[offset] = '\0';
+    return cstr;
+}
+
 i64 String_GetSegSize(String *s){
     asIfc(s, TYPE_STRING);
     if(s->type.of == TYPE_STRING_CHAIN){
@@ -13,64 +35,10 @@ i64 String_GetSegSize(String *s){
     return 0;
 }
 
-status String_Trunc(String *s, i64 len){
-    DebugStack_Push("String_Trunc", TYPE_CSTR);
-    if(len < 0){
-        len = String_Length(s) + len;
-    }
-    i64 actual = 0;
-    String *tail = s;
-    size_t sz = String_GetSegSize(s);
-    while(tail != NULL){
-        if(actual+tail->length > len){
-            tail->length = len - actual;
-            memset(tail->bytes+tail->length, 0, sz-tail->length);
-            if(String_Next(s) != NULL){
-                tail->next = NULL;
-            }
-            DebugStack_Pop();
-            return SUCCESS;
-        }
-        actual += tail->length; 
-        tail = String_Next(s); 
-    };
-
-    DebugStack_Pop();
-    return NOOP;
-}
-
 String *String_Clone(MemCtx *m, String *s){
     String *s2 = String_Init(m, s->length);
     String_Add(m, s2, s);
     return s2;
-}
-
-String *String_Sub(MemCtx *m, String *s, i64 start, i64 end){
-    String *ret = String_Init(m, STRING_EXTEND);
-    i64 pos = 0;
-    while(s != NULL && pos + s->length < start){
-        pos += s->length;
-        s = String_Next(s);
-    }
-
-    start -= pos;
-    int length = min(s->length-start, end-pos);
-    while(s != NULL && length > 0){
-        int length = min(s->length-start, end-pos);
-        String_AddBytes(m, ret, s->bytes+start, length);
-        pos += length;
-        s = String_Next(s); 
-        start = 0;
-    }
-
-    return ret;
-}
-
-String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
-    String *s = String_Init(m, length); 
-    String_AddBytes(m, s, bytes, length);
-
-    return s;
 }
 
 status String_Add(MemCtx *m, String *a, String *b) {
@@ -199,20 +167,6 @@ i64 String_Length(String *s) {
     }
     return length;
 }
-
-status String_Reset(String *s){
-    status r = NOOP;
-    while(s != NULL){
-        if(s->length > 0){
-            memset(s->bytes, 0, s->length);
-            r |= SUCCESS;
-        }
-        s->length = 0;
-        s = String_Next(s);
-    }
-    return r;
-}
-
 
 String *String_Next(String *s){
     if(s->type.of == TYPE_STRING_CHAIN){

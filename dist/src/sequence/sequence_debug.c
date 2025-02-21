@@ -1,6 +1,66 @@
 #include <external.h>
 #include <caneka.h>
 
+char *QueueFlags_ToChars(word flags){
+    String *s = String_Init(DebugM, 64);
+    if((flags & SLAB_ACTIVE) != 0){
+        String_AddBytes(DebugM, s, bytes("A"), 1);
+    }
+    if((flags & SLAB_FULL) != 0){
+        String_AddBytes(DebugM, s, bytes("F"), 1);
+    }
+
+    if(s->length == 0){
+        return "ZERO";
+    }
+
+    return (char *)s->bytes;
+}
+
+static void Iter_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Iter *it = (Iter *)as(a, TYPE_ITER);
+    printf("\x1b[%dm%sI<%s:%d of %d>\x1b[0m", color, msg,
+        State_ToChars(it->type.state), it->idx, it->values->nvalues);
+}
+
+void Queue_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Queue *q = as(a, TYPE_QUEUE);
+    printf("\x1b[%dm%sQ<%s\x1b[0m", color, msg, State_ToChars(q->type.state));
+    if(extended){
+        Debug_Print((void *)q->span, 0, "", color, TRUE);
+        printf("\n");
+        Debug_Print((void *)&q->current, 0, "current=", color, FALSE);
+        printf("\n");
+        Debug_Print((void *)&q->available, 0, "available=", color, FALSE);
+        printf("\n");
+        printf("\x1b[%dm>\x1b[0m", color);
+    }else{
+        printf("\x1b[%dm values:%d current:%d available:%d>\x1b[0m", color, q->span->nvalues, q->current.idx, q->available.idx);
+    }
+}
+
+
+
+void NestedD_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    NestedD *nd = (NestedD *)as(a, TYPE_NESTEDD);
+    printf("\x1b[%dmND<%s: ", color, State_ToChars(nd->type.state));
+    Debug_Print((void *)nd->current_tbl, 0, "", color, extended);
+    Iter it;
+    Iter_InitReverse(&it, nd->stack);
+    printf("\x1b[%dm stack/%d=(", color, nd->stack->nvalues);
+    while((Iter_Next(&it) & END) == 0){
+        NestedState *ns = (NestedState *)Iter_Get(&it);
+        printf("\x1b[%dm%s -> ", color, NestedD_opToChars(ns->flags));
+        Debug_Print((void *) ns->t, 0, "", color, FALSE);
+        if((it.type.state & FLAG_ITER_LAST) == 0){
+            printf("\x1b[%dm,", color);
+        }
+    }
+    printf("\x1b[%dm)>\x1b[0m", color);
+}
+
+
+
 void TableChain_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     TableChain *tch = (TableChain *)as(a, TYPE_TABLE_CHAIN);
     printf("\x1b[%dmTChain<", color);

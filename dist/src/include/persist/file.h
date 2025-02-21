@@ -15,7 +15,6 @@ enum file_status {
     FILE_SPOOL = 1 << 15,
 };
 
-status File_Exists(String *path);
 status File_Persist(MemCtx *m, File *file);
 status File_SetAbs(MemCtx *m, File *file, IoCtx *ctx);
 File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx);
@@ -27,6 +26,4 @@ status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract 
 status File_AbsFromCtx(MemCtx *m, File *file, Access *access, IoCtx *ctx);
 status File_Read(MemCtx *m, File *file, Access *access, int pos, int length);
 status File_Copy(MemCtx *m, String *a, String *b, Access *ac);
-boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac);
 status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source);
-String *File_GetCwdPath(MemCtx *m, String *path);
