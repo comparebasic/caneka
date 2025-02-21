@@ -2,8 +2,8 @@
 ./scripts/make.sh
 now=$(date +%s)
 human=$(date)
-mkdir -p dist
-out=dist/test_run.html
+mkdir -p artifact
+out=artifact/test_run.html
 
 echo "<div class=\"test-run\"><h2>Caneka Tests run $now ($human)</h2>" > $out 
 echo "<p>" >> $out

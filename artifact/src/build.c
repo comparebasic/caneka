@@ -337,7 +337,7 @@ int main(int argc, char **argv){
     ctx.tools.ar = "ar";
     ctx.libtarget = "libcaneka";
     ctx.dist = "build";
-    ctx.src = "dist/src";
+    ctx.src = "artifact/src";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
