@@ -16,7 +16,7 @@ rest of the system by launching other processes.
     ./scripts/make.sh
 
 Further configuration can be specified at the top of
-[build_config.h](./build_config.h)
+[build.c](./artifact/src/build.c)
 
 To rebuild the code, the build command can be run directly:
 
@@ -32,17 +32,10 @@ Currently the system builds and runs on FreeBSD and Linux, and is expected to
 build on any POSIX compatible operating system, including Mac, Windows, iOS,
 and Android, though these platforms are untested.
 
-The current featureset, covers all of the expected type system, and most of the
-network server system, with the only elements remaining in the
-[persist](./src/persist) module, which controls passporting and file
-persistance and session io, including cryptography.
-
 ## Tests
 
 Tests can be found in the `tests` folder and are runnable from the `caneka`
 binary with the argument `test`.
-
-Output is also regularly commited to [dist/test_run.txt](./dist/test_run.txt)
 
 ## Run Tests
 
@@ -56,59 +49,12 @@ For example, on port 8000
 
     ./build/caneka serve=port:8000 
 
-## Key Source Files
+## Folder Layout
 
-Folder Layout:
-
- - [include](./include/) - All include files for C sources.
- - [core](./core/) - Data Structures and memory management system. String,
-   Span, Table, MemCtx, etc.
- - [tests](./tests/) - All tests for each module.
- - [parser](./parser/) - Parser system, Roebling, Match, Range, etc.
- - [formats](./formats/) - Formats that the parser currently supports, HTTP,
-   XML, Oset, etc.
- - [persist](./persist/) - File persistance and session context.
- - [serve](./serve/) - Network server, CycleServe.
- - [apps](./apps/) - Example app with necessary configuration to run a
-   CycleServe instance.
- - [main.c](./main.c) - Example binary which runs tests and the example app.
-
-
-Here is a list of the cornerstone source code files for the basics of the
-system, each has a comment at the top about it's purpose and related source
-code files:
-
-- [include/caneka.h](./include/caneka.h) - Main include. This defines the types
-  and structs for the runtime-polymorphic type system, and all of Caneka.
-
-- [include/mem.h](./include/mem.h) - Memory Context. This is the manually-run
-  garbage collector.
-
-- [include/span.h](./include/span.h) - Data Strucutre for slab allocation of
-  segmented arrays. This is the main work-horse data structure for storing and
-  retrieving data, Table is biult on top of this.
-
-- [include/string_cnk.h](./include/string_cnk.h) - Data Strucutre for slab
-  allocation of segmented arrays. This is the main work-horse data structure
-  for storing and retrieving data, Table is biult on top of this.
-
-- [include/debug.h](./include/debug.h) - Configuration file for showing
-  debugging information, the debug flags are located in core/debug.c.
-
-- [main.c](./main.c) - Example and test runner. This file is mostly an example
-  Caneka application, and it runs the tests
-
-## Debug Flags
-
-The debug flags are contained in [./src/core/debug.c](./src/core/debug.c)
-setting them to colors will show details of each module as it runs, in an
-example app or test.
-
-For example, changing the value of DEBUG_PATMATCH from 0 to COLOR_YELLOW, will
-print out lots of details about each pattern matched by the Roebling module, in
-the color yellow.
-
-    src/core/debug.c line 8: int DEBUG_PATMATCH = COLOR_YELLOW;
+Because Caneka is intended to be written in another syntax and transpiled into
+C, most of the actively developed source code is currently locaed in the
+[artifact src folder](./artifact/src/). This is because, over time, caneka will
+be transpiled from it's own, more convienient syntax.
 
 ## Licence
 
