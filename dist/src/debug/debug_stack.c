@@ -71,6 +71,7 @@ int DebugStack_Print(){
                 color,
                 entry->fname,
                 entry->line);
+
             if(entry->ref != NULL && entry->typeOf != 0){
                 Debug_Print((void *)entry->ref, entry->typeOf, " - ", color, FALSE);
             }else if(entry->ref != NULL && entry->typeOf == 0){

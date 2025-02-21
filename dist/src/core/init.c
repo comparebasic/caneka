@@ -1,6 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
+static status archChecks(){
+    size_t sec = sizeof(i64);
+    if(sec != 8){
+        Fatal("Unkown architecture with less than 8 bits for a util\n", TYPE_STRING);
+    }
+    return ERROR; 
+}
+
 status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= archChecks();

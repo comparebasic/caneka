@@ -41,6 +41,33 @@ String *String_Clone(MemCtx *m, String *s){
     return s2;
 }
 
+status String_Trunc(String *s, i64 len){
+    DebugStack_Push("String_Trunc", TYPE_CSTR);
+    if(len < 0){
+        len = String_Length(s) + len;
+    }
+    i64 actual = 0;
+    String *tail = s;
+    size_t sz = String_GetSegSize(s);
+    while(tail != NULL){
+        if(actual+tail->length > len){
+            tail->length = len - actual;
+            memset(tail->bytes+tail->length, 0, sz-tail->length);
+            if(String_Next(s) != NULL){
+                tail->next = NULL;
+            }
+            DebugStack_Pop();
+            return SUCCESS;
+        }
+        actual += tail->length; 
+        tail = String_Next(s); 
+    };
+
+    DebugStack_Pop();
+    return NOOP;
+}
+
+
 status String_Add(MemCtx *m, String *a, String *b) {
     status r = READY;
     while(b != NULL && r != ERROR){
@@ -52,7 +79,7 @@ status String_Add(MemCtx *m, String *a, String *b) {
 }
 
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
-    DebugStack_Push(chars, TYPE_CSTR);
+    DebugStack_Push(a, a->type.of);
     if(length == 0){
        DebugStack_Pop();
        return NOOP; 

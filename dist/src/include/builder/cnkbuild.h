@@ -27,5 +27,5 @@ typedef struct buildctx {
     BuildSubdir **objdirs;
 } BuildCtx;
 
-status BuildCtx_Init(BuildCtx *ctx);
+status BuildCtx_Init(MemCtx *m, BuildCtx *ctx);
 status Build(BuildCtx *ctx);

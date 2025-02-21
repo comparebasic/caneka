@@ -86,9 +86,3 @@ Span *Span_Clone(MemCtx *m, Span *op){
     }
     return p;
 }
-
-status Span_ReInit(Span *p){
-    p->nvalues = 0;
-    p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
-    return SUCCESS;
-}

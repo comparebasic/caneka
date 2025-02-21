@@ -29,35 +29,6 @@ String *String_MakeFixed(MemCtx *m, byte *bytes, int length){
     return s;
 }
 
-
-
-status String_Trunc(String *s, i64 len){
-    DebugStack_Push("String_Trunc", TYPE_CSTR);
-    if(len < 0){
-        len = String_Length(s) + len;
-    }
-    i64 actual = 0;
-    String *tail = s;
-    size_t sz = String_GetSegSize(s);
-    while(tail != NULL){
-        if(actual+tail->length > len){
-            tail->length = len - actual;
-            memset(tail->bytes+tail->length, 0, sz-tail->length);
-            if(String_Next(s) != NULL){
-                tail->next = NULL;
-            }
-            DebugStack_Pop();
-            return SUCCESS;
-        }
-        actual += tail->length; 
-        tail = String_Next(s); 
-    };
-
-    DebugStack_Pop();
-    return NOOP;
-}
-
-
 String *String_SubMatch(MemCtx *m, String *s, Match *mt){
     String *seg = s;
     while(seg != NULL){

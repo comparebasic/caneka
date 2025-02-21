@@ -21,6 +21,13 @@ String *File_GetCwdPath(MemCtx *m, String *path){
     return s;
 }
 
+String *File_GetAbsPath(MemCtx *m, String *path){
+    if(path != NULL && path->bytes[0] != '/'){
+        return File_GetCwdPath(m, path);
+    }
+    return path;
+}
+
 boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
     struct stat source_stat;
     struct stat build_stat;

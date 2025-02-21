@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
+    DebugStack_Push(pd, pd->type.of);
     char **cmd = Span_ToCharArr(m, cmd_p);
     char *msg = "";
 
@@ -9,7 +10,7 @@ status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
     int p1[2];
     int p2[2];
 
-    if(pd != NULL){
+    if(pd->type.state & PROCDETS_PIPES){
         if((pipe(p0) != 0 || pipe(p1) != 0 || pipe(p2) != 0)
             ||
             (
@@ -23,6 +24,7 @@ status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
 
         ){
             printf("Unable to open SubCall pipes"); 
+            DebugStack_Pop();
             return ERROR;
         }
     }
@@ -45,9 +47,10 @@ status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
     child = fork();
     if(child == (pid_t)-1){
         printf("Error: Fork for subprocess"); 
+        DebugStack_Pop();
         return ERROR;
     }else if(!child){
-        if(pd != NULL){
+        if(pd->type.state & PROCDETS_PIPES){
             close(0);
             close(1);
             close(2);
@@ -60,23 +63,26 @@ status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
         }
         execvp(cmd[0], cmd);
         printf("Execv failed");
+        DebugStack_Pop();
         return ERROR;
     }
 
-    if(pd != NULL){
+    if(pd->type.state & PROCDETS_PIPES){
         close(p0[0]);
         close(p1[1]);
         close(p2[1]);
         pd->inFd = p0[1];
         pd->outFd = p1[0];
         pd->errFd = p2[0];
-        pd->pid = child;
     }
+    pd->pid = child;
 
+    DebugStack_Pop();
     return SUCCESS;
 }
 
 status SubStatus(ProcDets *pd){
+    DebugStack_Push(pd, pd->type.of);
     int r;
     pid_t p;
     boolean wait = (pd->type.state & PROCDETS_ASYNC) != 0;
@@ -92,29 +98,36 @@ status SubStatus(ProcDets *pd){
         if(!wait){
             Fatal("subProcess wait failed for SubProcess", 0); 
         }
+        DebugStack_Pop();
         return NOOP;
     }
 
     if(!WIFEXITED(r)){
         Fatal("subProcess failed for SubProcess process did not exit propery", 0); 
+        DebugStack_Pop();
         return ERROR;
     }
 
     pd->code = WEXITSTATUS(r);    
-    if(pd->code != -1){
+    if(pd->code == 0){
         pd->type.state |= SUCCESS;
-        return pd->type.state;
     }else{
         pd->type.state |= ERROR;
-        return ERROR;
     }
+
+    DebugStack_Pop();
+    return pd->type.state;
 }
 
 status SubProcess(MemCtx *m, Span *cmd_p, ProcDets *pd){
-    pid_t pid = SubCall(m, cmd_p, pd);
-    if(pid != -1){
-        return SubStatus(pd);
+    DebugStack_Push(cmd_p, cmd_p->type.of);
+    status r = SubCall(m, cmd_p, pd);
+    if(r & SUCCESS){
+        status r = SubStatus(pd);
+        DebugStack_Pop();
+        return r;
     }
+    DebugStack_Pop();
     return ERROR;
 }
 

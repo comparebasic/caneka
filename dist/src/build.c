@@ -333,8 +333,9 @@ static BuildSubdir *objdirs[] = {
 };
 
 int main(int argc, char **argv){
+    MemCtx *m = MemCtx_Make();
     BuildCtx ctx;
-    BuildCtx_Init(&ctx);
+    BuildCtx_Init(m, &ctx);
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
@@ -347,7 +348,7 @@ int main(int argc, char **argv){
     ctx.args.libs = libs;
     ctx.objdirs = (BuildSubdir **)objdirs;
 
-    printf("wohoo\n");
+    Build(&ctx);
 
     return 0;
 }

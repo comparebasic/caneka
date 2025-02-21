@@ -17,7 +17,7 @@ void MemCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
    printf("\x1b[%d>\x1b[0m", color);
 }
 
-status MemCtxDebug_Init(){
+status MemCtxDebug_Init(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCtx_Print);
     return r;
