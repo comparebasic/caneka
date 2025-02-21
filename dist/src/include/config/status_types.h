@@ -1,3 +1,7 @@
+extern word NORMAL_FLAGS;
+extern word UPPER_FLAGS;
+extern word GLOBAL_flags;
+
 enum status_types {
     READY = 0,
     ERROR = 1 << 0,

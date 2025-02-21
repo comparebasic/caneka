@@ -22,3 +22,10 @@ static void XmlCtx_Print(Abstract *a, cls type, char *msg, int color, boolean ex
         printf("\x1b[%dm%sXmlCtx<%s>\x1b[0m", color, msg, State_ToChars(ctx->type.state));
     }
 }
+
+status FormatDebug_Init(MemCtx *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
+    r |= Lookup_Add(m, lk, TYPE_XMLCTX, (void *)XmlCtx_Print);
+    return r;
+}

@@ -49,6 +49,7 @@ enum types {
     TYPE_STRUCTEXP,
     TYPE_IOCTX,
     TYPE_ACCESS,
+    TYPE_PERMISSION,
     TYPE_AUTH,
     _TYPE_SPAN_START,
     TYPE_SPAN,

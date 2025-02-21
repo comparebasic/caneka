@@ -11,8 +11,6 @@ status Salty_Tests(MemCtx *gm){
     EncPair *result = NULL;
     String *s = NULL;
 
-    r |= Test(CB_Phrase(m) != NULL, "Phrase is not null");
-
     Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
     Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
 

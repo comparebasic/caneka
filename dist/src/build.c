@@ -61,7 +61,6 @@ static BuildSubdir cryptoobj = { "crypto", {
     "key.c",
     "salty.c",
     "sane.c",
-    "sha256.c",
     NULL
 }};
 
@@ -175,11 +174,6 @@ static BuildSubdir persistobj = { "persist", {
     "procdets.c",
     "persist_debug.c",
     "user.c",
-    NULL
-}};
-
-static BuildSubdir secureobj = { "secure", {
-    "phrase.c",
     NULL
 }};
 
@@ -320,7 +314,6 @@ static BuildSubdir *objdirs[] = {
     &xmltobj,
     &parserobj,
     &persistobj,
-    &secureobj,
     &sequenceobj,
     &serveobj,
     &stringobj,

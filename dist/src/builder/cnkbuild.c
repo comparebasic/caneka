@@ -106,7 +106,10 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
         String_Trunc(dest, String_Length(dest)-1);
         String_AddBytes(m, dest, bytes("o"), 1);
 
-        buildSourceToLib(ctx, libDir, lib, dest, source);
+        if(File_CmpUpdated(m, source, dest, NULL)){
+            buildSourceToLib(ctx, libDir, lib, dest, source);
+        }
+
         MemCtx_Free(m);
         MemCtx_Free(DebugM);
         sourceCstr++;

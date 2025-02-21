@@ -1,3 +1,5 @@
+#include <external.h>
+#include <caneka.h>
 
 int Span_AddOrdered(Span *p, Abstract *t){
     int idx = p->max_idx+1;

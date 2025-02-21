@@ -1,3 +1,5 @@
+#include <external.h>
+#include <caneka.h>
 
 status File_Exists(String *path){
     struct stat st;
@@ -29,13 +31,14 @@ String *File_GetAbsPath(MemCtx *m, String *path){
 }
 
 boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
+    DebugStack_Push(a, a->type.of);
     struct stat source_stat;
     struct stat build_stat;
     int r = 0;
 
     r = stat(String_ToChars(m, a), &source_stat);
     if(r != 0){
-        Fatal("Source not found %s", TYPE_FILE);
+        Fatal("Source not found", TYPE_FILE);
         exit(1);
     }
     r = stat(String_ToChars(m, b), &build_stat);
@@ -45,8 +48,10 @@ boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
     }
 
     if(source_stat.st_mtime > build_mtime){
+        DebugStack_Pop();
         return TRUE;
     }else{
+        DebugStack_Pop();
         return FALSE;
     }
 }

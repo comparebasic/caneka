@@ -1,5 +1,4 @@
 #!/bin/sh
-./scripts/phrase.sh
 if [ -e ./build/caneka ]; then
     ./build/caneka transp
 fi

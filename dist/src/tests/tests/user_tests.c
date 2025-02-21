@@ -21,7 +21,7 @@ status User_Tests(MemCtx *gm){
     IoCtx_Persist(m, session);
 
     String *email =  String_Make(m, bytes("me@example.com"));
-    String *userId = String_ToHex(m, String_Sha256(m, email));
+    String *userId = String_ToHex(m, Digest_Sha256(m, email));
 
     String *pass =  String_Make(m, bytes("Bork_Bork128!Bork"));
 

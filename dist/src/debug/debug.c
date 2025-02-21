@@ -5,18 +5,11 @@ Chain *DebugPrintChain = NULL;
 
 MemCtx *DebugM = NULL;
 
-static status populateDebugPrint(MemCtx *m, Lookup *lk){
-    status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_ENC_PAIR, (void *)EncPair_Print);
-    r |= Lookup_Add(m, lk, TYPE_FMT_DEF, (void *)FmtDef_Print);
-    return r;
-}
-
 status Debug_Init(MemCtx *m){
     DebugM = m;
     m->type.range++;
     if(DebugPrintChain == NULL){
-        Lookup *funcs = Lookup_Make(m, _TYPE_START, populateDebugPrint, NULL);
+        Lookup *funcs = Lookup_Make(m, _TYPE_START, NULL, NULL);
         DebugPrintChain = Chain_Make(m, funcs);
         return SUCCESS;
     }

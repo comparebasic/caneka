@@ -6,7 +6,6 @@ static TableChain *SaltyKeyChain = NULL;
 status Enc_Init(MemCtx *m){
     if(SaltyKeyChain == NULL){
         Span *keys = Span_Make(m, TYPE_TABLE);
-        Table_Set(keys, (Abstract *)Cont(m, bytes("system")), (Abstract *)CB_Phrase(m));
         SaltyKeyChain = TableChain_Make(m, keys);
         return SUCCESS;
     }
@@ -15,7 +14,8 @@ status Enc_Init(MemCtx *m){
 
 String *EncPair_GetKey(String *key, Access *access){
     DebugStack_Push(key, key->type.of);
-    if(HasAccess(key, access)){
+    Access_SetFl(access, ACCESS_KEY);
+    if(HasAccess(access, (Abstract *)key)){
         String *s = TableChain_Get(SaltyKeyChain, (Abstract *)key);
         DebugStack_Pop();
         return s;
@@ -26,7 +26,8 @@ String *EncPair_GetKey(String *key, Access *access){
 }
 
 status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
-    if(HasAccess(Cont(m, bytes("system")), access)){
+    Access_SetFl(access, (ACCESS_KEY|ACCESS_CREATE));
+    if(HasAccess(access, (Abstract *)Cont(m, bytes("system")))){
         return TableChain_Extend(m, SaltyKeyChain, tbl);
     }else{
         Fatal("Trying to extend key table as non system user", TYPE_ACCESS);

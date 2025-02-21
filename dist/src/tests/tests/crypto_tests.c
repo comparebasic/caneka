@@ -9,7 +9,7 @@ status CryptoStrings_Tests(MemCtx *gm){
     String *hex;
 
     s = Cont(m, bytes("Hidy Hody, Hi ho ho hi ho ho"));
-    sum = String_Sha256(m, s);
+    sum = Digest_Sha256(m, s);
     hex = String_ToHex(m, sum);
     r |= Test(String_EqualsBytes(hex, bytes("68760b4a88c113b8ce4aed641911caf8ef01d5969754a20271e601698997881b")), "Sha256 matches, have '%s'",hex->bytes);
 

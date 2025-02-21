@@ -60,7 +60,6 @@ void Handler_Print(Abstract *a, cls type, char *msg, int color, boolean extended
 status ServeDebug_Init(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
-    r |= Lookup_Add(m, lk, TYPE_XMLCTX, (void *)XmlCtx_Print);
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTODEF, (void *)HttpProtoDef_Print);
     r |= Lookup_Add(m, lk, TYPE_HTTP_PROTO, (void *)HttpProto_Print);
     r |= Lookup_Add(m, lk, TYPE_PROTODEF, (void *)ProtoDef_Print);
