@@ -32,7 +32,6 @@ typedef struct target {
     char *src;
 } Target;
 
-
 typedef struct build_subdir {
     char *name;
     char *sources[];
