@@ -6,10 +6,12 @@
 #include "core/core.c"
 #include "core/error.c"
 #include "string/string.c"
+#include "string/string_makers.c"
 #include "debug/debug_flags.c"
 #include "debug/debug_typestrings.c"
 #include "debug/debug_stack.c"
 #include "builder/debug_mocks.c"
+#include "crypto/sane.c"
 /* span */
 #include "sequence/slab.c"
 #include "sequence/spandef.c"
