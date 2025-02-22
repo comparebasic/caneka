@@ -7,6 +7,7 @@
 #include "core/error.c"
 #include "string/string.c"
 #include "string/string_makers.c"
+#include "string/string_equals.c"
 #include "debug/debug_flags.c"
 #include "debug/debug_typestrings.c"
 #include "debug/debug_stack.c"

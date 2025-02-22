@@ -25,7 +25,7 @@ Auth *Auth_Make(MemCtx *m, String *key, String *secret, Access *ac){
     auth->type.of = TYPE_AUTH;
 
     if(key != NULL){
-        String *skey = EncPair_GetKey(key, ac);
+        String *skey = EncPair_GetKey(m, key, ac);
         if(skey == NULL){
             Fatal("Key for auth is NULL", TYPE_AUTH);
             DebugStack_Pop();

@@ -24,7 +24,7 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
     }
 
     String *key = Cont(m, bytes("test"));
-    String *skey = EncPair_GetKey(key, ac);
+    String *skey = EncPair_GetKey(m, key, ac);
 
     IoCtx ctx;
     IoCtx_Init(m, &ctx, id, NULL, userCtx);

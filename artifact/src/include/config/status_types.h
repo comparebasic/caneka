@@ -4,8 +4,8 @@ extern word GLOBAL_flags;
 
 enum status_types {
     READY = 0,
-    ERROR = 1 << 0,
-    SUCCESS = 1 << 1,
+    SUCCESS = 1,
+    ERROR = 1 << 1,
     NOOP = 1 << 2,
     DEBUG = 1 << 3,
     MORE = 1 << 4,

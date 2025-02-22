@@ -52,9 +52,9 @@ status Salty_Tests(MemCtx *gm){
 
     r |= Test((keysAdded & SUCCESS) != 0, "Test key added to key chain");
 
-    key = EncPair_GetKey(Cont(m, bytes("bogus")), ac);
+    key = EncPair_GetKey(m, Cont(m, bytes("bogus")), ac);
     r |= Test(key == NULL, "'bogus' user is unable to access 'test' key");
-    key = EncPair_GetKey(Cont(m, bytes("test")), ac);
+    key = EncPair_GetKey(m, Cont(m, bytes("test")), ac);
     r |= Test(key != NULL, "'test' user can access 'test' key, have, '%s'", key->bytes);
 
     s = Cont(m, bytes("One fell over the nest of another, things are good, and that's a never ending scenario, of life!"));

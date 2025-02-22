@@ -24,3 +24,10 @@ Single *I64_Wrapped(MemCtx *m, i64 n){
     sgl->val.value = (util)n;
     return sgl;
 }
+
+Range *Range_Wrapped(MemCtx *m, word r){
+    Range *w = (Range *)MemCtx_Alloc(m, sizeof(Range));
+    w->type.of = TYPE_RANGE;
+    w->type.range = r;
+    return w;
+}

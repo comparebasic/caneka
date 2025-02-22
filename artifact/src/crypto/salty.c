@@ -1,10 +1,6 @@
 #include <external.h> 
 #include <caneka.h> 
 
-String *Salty_MakeKey(MemCtx *m, String *s){
-    return Digest_Sha256(m, s);
-}
-
 String *Salty_Enc(MemCtx *m, String *key, String *s){
     if((key->type.state & FLAG_STRING_BINARY) == 0){
         key = Digest_Sha256(m, key);

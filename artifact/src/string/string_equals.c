@@ -69,59 +69,65 @@ boolean String_EqualsBytes(String *a, byte *cstr){
 }
 
 boolean String_Eq(Abstract *a, void *b){
-    if(a->type.of != TYPE_STRING_CHAIN && a->type.of != TYPE_STRING_FIXED
-        || ((Abstract *)b)->type.of != TYPE_STRING_CHAIN && ((Abstract *)b)->type.of != TYPE_STRING_FIXED
-    ){
-       Fatal("", TYPE_STRING_CHAIN); 
-    }
     String *sa = (String *)a;
     String *sb = (String *)b;
     return String_Equals(sa, sb);
 }
 
-boolean String_Equals(String *a, String *b){
-    if(a == NULL){
-        Fatal("String a is NULL", TYPE_STRING_CHAIN);
+boolean String_EqualsPartial(String *a, String *b, word pos){
+    if(a == NULL || a->length == 0){
+        Fatal("String a is NULL or of 0 length", TYPE_STRING_CHAIN);
     }
-    if(b == NULL){
-        Fatal("String b is NULL", TYPE_STRING_CHAIN);
+    if(b == NULL || b->length == 0){
+        Fatal("String b is NULL or of 0 length", TYPE_STRING_CHAIN);
     }
     i64 aLength = String_Length(a);
     i64 bLength = String_Length(b);
-    if(aLength != bLength){
+    if(pos == STRING_POS_ALL && aLength != bLength){
         if((a->type.state & DEBUG) != 0){
             printf("String_Equals:mismatch@length(%ld/%ld)\n", aLength, bLength);
         }
         return FALSE;
+    }else if (bLength > aLength){
+        return FALSE;
+    }
+
+    i64 remaining = aLength;
+    i64 start = 0;
+    int length = 0;
+    if(pos != STRING_POS_ALL){
+        remaining = bLength;
+    }
+    if(pos == STRING_POS_END){
+        start = aLength - bLength;
     }
     String *aTail = a;
     String *bTail = b;
     i64 total = 0;
-    while(aTail != NULL && bTail != NULL){
+    while(aTail != NULL && bTail != NULL && remaining > 0){
         if(aTail->length != bTail->length){
             return FALSE;
         }
-        if(strncmp((char *)aTail->bytes, (char *)bTail->bytes, aTail->length) != 0){
-            if((a->type.state & DEBUG) != 0){
-                printf("String_Equals:mismatch@[%ld..%ld]\n", total, total + aTail->length);
+        if(start <= 0){
+            byte *aPtr = aTail->bytes+start;
+            byte *bPtr = bTail->bytes+start;
+            length = min(remaining, aTail->length-start);
+            if(strncmp((char *)aPtr, (char *)bPtr, length) != 0){
+                if((a->type.state & DEBUG) != 0){
+                    printf("String_Equals:mismatch@[%ld..%ld]\n", total, total + aTail->length);
+                }
+                return FALSE;
             }
-            return FALSE;
-        }
-        total += aTail->length;
-        if(aTail->type.of == TYPE_STRING_CHAIN){
-            aTail = aTail->next;
+            remaining -= length;
         }else{
-            aTail = NULL;
+            length = aTail->length;
         }
-
-        if(bTail->type.of == TYPE_STRING_CHAIN){
-            bTail = bTail->next;
-        }else{
-            bTail = NULL;
-        }
+        total += length;
+        aTail = String_Next(aTail);
+        bTail = String_Next(bTail);
     }
 
-    if(aTail == NULL && bTail == NULL){
+    if(remaining == 0){
         return TRUE;
     }
     
@@ -130,4 +136,16 @@ boolean String_Equals(String *a, String *b){
     }
 
     return FALSE;
+}
+
+boolean String_Equals(String *a, String *b){
+    return String_EqualsPartial(a, b, STRING_POS_ALL);
+}
+
+boolean String_StartsWith(String *a, String *b){
+    return String_EqualsPartial(a, b, STRING_POS_START);
+}
+
+boolean String_EndsWith(String *a, String *b){
+    return String_EqualsPartial(a, b, STRING_POS_END);
 }

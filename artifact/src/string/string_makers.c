@@ -320,6 +320,16 @@ String *String_FromFd(MemCtx *m, int fd){
     return s;
 }
 
+String *String_Prefixed(MemCtx *m, String *s, String *prefix){
+    if(String_StartsWith(s, prefix)){
+        return s;
+    }
+    String *ret = String_Init(m, String_Length(s)+String_Length(prefix));
+    String_Add(m, ret, prefix);
+    String_Add(m, ret, s);
+    return ret;
+}
+
 status String_ToSlab(String *a, void *sl, size_t sz) {
     if(String_Length(a) > sz){
         return ERROR;

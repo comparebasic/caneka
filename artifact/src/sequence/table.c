@@ -76,24 +76,22 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
             queries++;
             Table_Resize(tbl, &queries);
             int hkey = getReQueryKey(tbl->def, h->id, j, tbl->dims);
+            _h = (Hashed *)Span_Get(tbl, hkey);
             if(DEBUG_TABLE){
-                Debug_Print((void *)h->item, 0, "Placing ", DEBUG_TABLE, FALSE);
+                Debug_Print((void *)h->item, 0, "At ", DEBUG_TABLE, FALSE);
                 printf("\x1b[%dm dimsize=%hu key/%lu=", DEBUG_TABLE, tbl->dims, tbl->def->dim_lookups[tbl->dims]);
                 Bits_Print((byte *)&hkey, TABLE_DIM_BYTESIZES[tbl->dims], "", DEBUG_TABLE, TRUE);
                 printf("\x1b[%dm%d half-byte of ", DEBUG_TABLE, j+1);
                 Bits_Print((byte *)&(h->id), sizeof(int), "", DEBUG_TABLE, FALSE);
                 printf("\x1b[%dm query=%d>\x1b[0m\n", DEBUG_TABLE, queries);
+                DPrint((Abstract *)_h, DEBUG_TABLE, "_h: ");
             }
-            _h = (Hashed *)Span_Get(tbl, hkey);
             if(op == SPAN_OP_GET){
                 if(_h != NULL && *((util *)_h) != 0){
                     if(Hashed_ExternalEquals(tbl->m, h, _h)){
                         h = _h;
                         found = TRUE;
                     }
-                }else{
-                    found = TRUE;
-                    break;
                 }
             }else if(op == SPAN_OP_SET){
                 if(_h != NULL && *((util *)_h) != 0){
@@ -106,7 +104,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                     }
                 }else{
                     h->idx = hkey;
-                    Span_Set(tbl, hkey, (Abstract *)h);
+                    h = (Hashed *)Span_Set(tbl, hkey, (Abstract *)h);
                     if(tbl->type.of == TYPE_ORDERED_TABLE){
                         OrderedTable *otbl = (OrderedTable *)as(tbl, TYPE_ORDERED_TABLE);
                         Span_Add(otbl->order, (Abstract *)h);
@@ -138,6 +136,19 @@ Hashed *Table_SetValue(Span *tbl, Abstract *a){
         return h;
     }
     return NULL;
+}
+
+Hashed *Table_GetHashed(Span *tbl, Abstract *a){
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
+    if(h->value != NULL){
+        return h;
+    }
+    return NULL;
+}
+
+Hashed *Table_SetHashed(Span *tbl, Abstract *a, Abstract *value){
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
+    return h;
 }
 
 Abstract *Table_Get(Span *tbl, Abstract *a){

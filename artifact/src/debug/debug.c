@@ -13,6 +13,7 @@ status Debug_Init(MemCtx *m){
         DebugPrintChain = Chain_Make(m, funcs);
         StringDebug_Init(m, funcs);
         SequenceDebug_Init(m, funcs);
+        UtilDebug_Init(m, funcs);
         /* todo add other debug inits here */
         return SUCCESS;
     }
@@ -46,7 +47,6 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     if(func != NULL){
         return func(a, type, msg, color, extended);
     }else{
-        printf("type: %hu\n", type);
         printf("%s:%s unkown_debug(%p)", msg, Class_ToString(type), t);
     }
 

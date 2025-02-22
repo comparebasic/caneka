@@ -13,8 +13,8 @@ static void Hashed_Print(Abstract *a, cls type, char *msg, int color, boolean ex
         }
         printf("\x1b[%dm>\x1b[0m", color);
     }else{
-        printf("\x1b[%dm%sH<", color, msg);
-        Debug_Print((void *)h->item, 0, "", color, FALSE);
+        printf("\x1b[%dm%sH<%s ", color, msg, State_ToChars(h->type.state));
+        Debug_Print((void *)h->item, 0, "k=", color, FALSE);
         if(h->value != NULL){
             printf("\x1b[%dm v=", color);
             Debug_Print((void *)h->value, 0, "", color, FALSE);

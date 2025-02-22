@@ -2,11 +2,20 @@
 #include <caneka.h>
 
 boolean Abs_Eq(Abstract *a, void *b){
+    printf("Abs_eq\n");
+    cls ifcOf = Ifc_Get(a->type.of);
     if(a == NULL || b == NULL){
         return FALSE;
+    }else if(ifcOf != 0 && ifcOf != Ifc_Get(((Abstract *)b)->type.of)){
+        return FALSE;
     }
-    if(a->type.of == TYPE_STRING_CHAIN || a->type.of == TYPE_STRING_FIXED){
-        return String_Eq(a, b);
+
+    if(ifcOf == TYPE_STRING){
+        return String_Equals((String *)a, (String *)b);
+    }else if(a->type.of == TYPE_WRAPPED_UTIL || a->type.of == TYPE_WRAPPED_I64){
+        Single *wa = (Single *)a;
+        Single *wb = (Single *)b;
+        return wa->val.value == wb->val.value;
     }else{
         return ((void *)a) == b;
     }

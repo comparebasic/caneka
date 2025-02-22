@@ -278,6 +278,12 @@ static TestSet _Tests[] = {
         SECTION_LABEL,
     },
     {
+        "Access",
+        Access_Tests,
+        "Access passporting and permissions.",
+        FEATURE_COMPLETE,
+    },
+    {
         "IoCtx",
         IoCtx_Tests,
         "File and storage persistance context tests.",
@@ -407,10 +413,10 @@ TestSet *Tests = _Tests;
 
 static TestSet solo[] = {
     {
-        "Crypto - Salty",
-        Salty_Tests,
-        "Bi-directional encryption with a variable input-size fixed-sized key.",
-        PARTIAL_FEATURE,
+        "Access",
+        Access_Tests,
+        "Access passporting and permissions.",
+        FEATURE_COMPLETE,
     },
     {
         NULL,

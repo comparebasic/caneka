@@ -12,27 +12,13 @@ status Enc_Init(MemCtx *m){
     return NOOP;
 }
 
-String *EncPair_GetKey(String *key, Access *access){
-    DebugStack_Push(key, key->type.of);
+String *EncPair_GetKey(MemCtx *m, String *key, Access *access){
+    DebugStack_Push(NULL, 0);
+    String *s = String_Prefixed(m, key, String_Make(m, bytes("_keys.")));
     Access_SetFl(access, ACCESS_KEY);
-    if(HasAccess(access, (Abstract *)key)){
-        String *s = TableChain_Get(SaltyKeyChain, (Abstract *)key);
-        DebugStack_Pop();
-        return s;
-    }
-    access->type.state |= ERROR;
+    String *ret =  GetAccess(access, key);
     DebugStack_Pop();
-    return NULL;
-}
-
-status EncPair_AddKeyTable(MemCtx *m, Span *tbl, Access *access){
-    Access_SetFl(access, (ACCESS_KEY|ACCESS_CREATE));
-    if(HasAccess(access, (Abstract *)Cont(m, bytes("system")))){
-        return TableChain_Extend(m, SaltyKeyChain, tbl);
-    }else{
-        Fatal("Trying to extend key table as non system user", TYPE_ACCESS);
-        return ERROR;
-    }
+    return ret;
 }
 
 status EncPair_Conceal(MemCtx *m, EncPair *p){

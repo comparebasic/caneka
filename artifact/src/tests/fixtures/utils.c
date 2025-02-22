@@ -2,20 +2,15 @@
 #include <caneka.h>
 
 status Tests_AddTestKey(MemCtx *m){
+    status r = READY;
     MemCtx_SetToBase(m);
+
+    Access *sys = Access_Make(m, Cont(m, bytes("system")), NULL);
     Access *ac = Access_Make(m, Cont(m, bytes("test")), NULL);
-    Access *system = Access_Make(m, Cont(m, bytes("system")), NULL);
+    String *key = String_Make(m, bytes("_keys.test"));
+    String *keyValue = String_Make(m, bytes("Tests are Fun Fun Fun!"));
+    r |= Access_Grant(m, ac, ACCESS_KEY, key, (Abstract *)keyValue, sys);
 
-    Span *keys = Span_Make(m, TYPE_TABLE);
-    String *name = Cont(m, bytes("test"));
-
-    if(EncPair_GetKey(name, ac) == NULL){
-        String *key = Salty_MakeKey(m, Cont(m, bytes("Tests are Fun Fun Fun!")));
-        Table_Set(keys, (Abstract *)name, (Abstract *)key);
-        status r = EncPair_AddKeyTable(m, keys, system);
-        MemCtx_SetFromBase(m);
-        return r;
-    }
     MemCtx_SetFromBase(m);
     return NOOP;
 }

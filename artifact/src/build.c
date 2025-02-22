@@ -269,6 +269,7 @@ static BuildSubdir testsuitesobj = { "tests/tests", {
     "xml_tests.c",
     "xmlt_template_tests.c",
     "crypto_key_tests.c",
+    "access_tests.c",
     NULL
 }};
 

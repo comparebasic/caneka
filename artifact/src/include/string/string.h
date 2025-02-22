@@ -8,6 +8,7 @@ related: core/string.h
 enum string_pos {
     STRING_POS_ALL = 1,
     STRING_POS_END,
+    STRING_POS_START,
 };
 
 enum string_flags {
@@ -71,12 +72,14 @@ status String_MakeLower(String *s);
 status String_MakeUpper(String *s);
 String *String_FromAbs(MemCtx *m, Abstract *a);
 String *String_FromFd(MemCtx *m, int fd);
+String *String_Prefixed(MemCtx *m, String *s, String *prefix);
 
 /* equals */
 boolean String_Equals(String *a, String *b);
 boolean String_EqualsBytes(String *a, byte *cstr);
 boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl);
-boolean String_Eq(Abstract *a, void *b);
+boolean String_EndsWith(String *a, String *b);
+boolean String_StartsWith(String *a, String *b);
 
 /* conversions */
 String *String_ToCamel(MemCtx *m, String *s);
