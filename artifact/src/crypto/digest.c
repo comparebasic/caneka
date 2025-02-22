@@ -43,6 +43,7 @@ String *Digest_Sha256(MemCtx *m, String *s){
 
     String *ret = String_Init(m, STRING_EXTEND);
     String_AddBytes(m, ret, bytes(digest), len);
+    ret->type.state |= FLAG_STRING_BINARY;
 
     EVP_MD_CTX_free(mdctx);
     DebugStack_Pop();

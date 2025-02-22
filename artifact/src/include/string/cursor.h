@@ -21,6 +21,7 @@ status Cursor_Incr(Cursor *cur, int length);
 status Cursor_Decr(Cursor *cur, int length);
 status Cursor_Flush(MemCtx *m, Cursor *cur, OutFunc func, Abstract *source);
 i64 Cursor_GetPad(Cursor *cur, size_t sz);
+i64 Cursor_GetPartial(Cursor *cur, size_t sz);
 
 #define Cursor_GetByte(cur) (*((cur)->ptr))
 #define Cursor_Total(cur) ((cur)->offset+(cur)->local)

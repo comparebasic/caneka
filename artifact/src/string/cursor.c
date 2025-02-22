@@ -17,6 +17,14 @@ i64 Cursor_GetPad(Cursor *cur, size_t sz){
     return pad;
 }
 
+i64 Cursor_GetPartial(Cursor *cur, size_t sz){
+    i64 partial = 0;
+    if(String_Next(cur->seg) == NULL){
+        partial = (cur->seg->length - cur->local);
+    }
+    return partial;
+}
+
 status Cursor_Init(Cursor *cur, String *s){
     memset(cur, 0, sizeof(Cursor));
     cur->type.of = TYPE_CURSOR;

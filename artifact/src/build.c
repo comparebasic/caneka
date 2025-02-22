@@ -64,6 +64,7 @@ static BuildSubdir cryptoobj = { "crypto", {
     "digest.c",
     "salty.c",
     "sane.c",
+    "symetric.c",
     NULL
 }};
 

@@ -15,11 +15,6 @@ static util _Hash_Bytes(byte *bt, size_t length, util h){
 }
 
 
-static util Hash_Bytes(byte *bt, size_t length){
-	util h = 5381;
-    return _Hash_Bytes(bt, length, h);
-}
-
 static util Hash_Ptr(void *ptr){
 	util h = 5381;
     return _Hash_Bytes((byte *)&ptr, sizeof(void *), h);
@@ -71,6 +66,11 @@ static status populateHash(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
     return r;
+}
+
+util Hash_Bytes(byte *bt, size_t length){
+	util h = 5381;
+    return _Hash_Bytes(bt, length, h);
 }
 
 util Get_Hash(Abstract *a){

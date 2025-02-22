@@ -36,11 +36,7 @@ void String_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
         do {
             int l = s->length;
             String *_s = s;
-            if((s->type.state & FLAG_STRING_BINARY) != 0){
-                _s = String_ToHex(DebugM, s);
-            }else{
-                _s = String_ToEscaped(DebugM, s);
-            }
+            _s = String_ToEscaped(DebugM, s);
             printf("s/%u=\"\x1b[1;%dm", l, color);
             do {
                 printf("%s", _s->bytes);

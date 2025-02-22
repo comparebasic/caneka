@@ -401,20 +401,15 @@ static TestSet _Tests[] = {
     },
 };
 
-TestSet *Tests = _Tests;
-
 /*
+TestSet *Tests = _Tests;
+*/
+
 static TestSet solo[] = {
     {
-        "String - B64",
-        StringB64_Tests,
-        "Tests base 64 encoded strings",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Crypto - KeyTests",
-        Crypto_KeyTests,
-        "Makein Ecsda keys and reading pem files.",
+        "Crypto - Salty",
+        Salty_Tests,
+        "Bi-directional encryption with a variable input-size fixed-sized key.",
         PARTIAL_FEATURE,
     },
     {
@@ -426,4 +421,3 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
-*/

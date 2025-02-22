@@ -1,9 +1,43 @@
 #include <external.h>
 #include <caneka.h>
 
+char *cstr = ""
+    "They system scales in powers of the span size. in this case dimension one "
+    "has 8 slots, dimension 2 has 64 slots and dimension 3 has 512 slots. The "
+    "standard Caneka span has a dimsize of 16 with 16/256/4096/65,536/1,048,576 "
+    "per dimension. This makes a 5 dimension table capable of holding around a "
+    "million disperate values.\n"
+    "\n"
+    "In the below example, the disparate set of values from 0,1,2,3,6, and,225 "
+    "can all be consistently accessed and stored with only 5 allocated span "
+    "slabs."
+    ;
+
+char *cstrTwo = ""
+    "One factor of consideration is that each dimension adds an additional hop "
+    "to element accesss. This is not fundementally different than an expanding "
+    "binary tree where comparisons are common no matter how consisten they are. "
+    "However, because of this, the Span shines in use-cases where items are "
+    "accessed either both directly and iteratively becuase iteration can "
+    "traverse each span with no lookup cost between consecutive items."
+    ;
+
 status Salty_Tests(MemCtx *gm){
+    DebugStack_Push(NULL, 0);
     status r = READY;
     MemCtx *m = MemCtx_Make();
+
+
+    String *keyOne = String_Make(m, bytes(cstr));
+    String *contentTwo = String_Make(m, bytes(cstrTwo));
+    String *enc = Salty_Enc(m, keyOne, contentTwo);
+    r |= Test(enc != NULL && enc->type.state & FLAG_STRING_BINARY,
+        "enc is not null and binary flagged");
+    String *dec = Salty_Dec(m, keyOne, enc);
+    r |= Test(dec != NULL && (dec->type.state & FLAG_STRING_BINARY) == 0,
+        "enc is not null and not binary flagged");
+    r |= Test(String_Equals(contentTwo, dec),
+        "decrypted equals original");
 
     String *phrase = NULL;
     String *key = NULL;
@@ -53,6 +87,7 @@ status Salty_Tests(MemCtx *gm){
     MemCtx_Free(m);
 
     r |= SUCCESS;
+    DebugStack_Pop();
     return r;
 }
 

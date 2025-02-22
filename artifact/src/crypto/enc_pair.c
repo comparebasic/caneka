@@ -52,16 +52,11 @@ status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
     if(p->keyId != NULL){
         String *key = (String *)TableChain_Get(SaltyKeyChain, (Abstract *)p->keyId); 
         if(!isFilled(p->enc) && isFilled(p->dec)){
-            p->enc = String_Clone(m, p->dec);
-            p->type.state |= Salty_Enc(m, key, p->enc); 
-            p->enc->type.of |= FLAG_STRING_BINARY;
+            p->enc = Salty_Enc(m, key, p->dec); 
             return SUCCESS;
         }
         if(isFilled(p->enc) && !isFilled(p->dec)){
-            p->dec = String_Clone(m, p->enc);
-            p->type.state |= Salty_Dec(m, key, p->dec); 
-            p->dec->length = p->length;
-
+            p->dec = Salty_Dec(m, key, p->enc); 
             return SUCCESS;
         }
     }

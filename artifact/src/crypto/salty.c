@@ -5,10 +5,18 @@ String *Salty_MakeKey(MemCtx *m, String *s){
     return Digest_Sha256(m, s);
 }
 
-status Salty_Enc(MemCtx *m, String *key, String *s){
-    return SUCCESS;
+String *Salty_Enc(MemCtx *m, String *key, String *s){
+    if((key->type.state & FLAG_STRING_BINARY) == 0){
+        key = Digest_Sha256(m, key);
+    }
+
+    return Symetric_Enc(m, key, s);
 }
 
-status Salty_Dec(MemCtx *m, String *key, String *s){
-    return SUCCESS;
+String *Salty_Dec(MemCtx *m, String *key, String *s){
+    if((key->type.state & FLAG_STRING_BINARY) == 0){
+        key = Digest_Sha256(m, key);
+    }
+
+    return Symetric_Dec(m, key, s);
 }

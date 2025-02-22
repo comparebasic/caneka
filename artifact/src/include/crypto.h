@@ -3,3 +3,4 @@
 #include "crypto/digest.h"
 #include "crypto/key.h"
 #include "crypto/salty.h"
+#include "crypto/symetric.h"

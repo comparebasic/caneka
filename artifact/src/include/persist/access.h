@@ -31,4 +31,5 @@ boolean HasAccess(Access *access, Abstract *a);
 Access *Access_Make(MemCtx *m, String *owner, Span *groups);
 Permission *Access_MakePermission(MemCtx *m, word flags, Abstract *a);
 
-#define Access_SetFl(access, fl)  ((access)->type.state = (((access)->type.state & NOOP) | fl))
+#define Access_SetFl(access, fl) \
+    ((access)->type.state = (((access)->type.state & NORMAL_FLAGS) | fl))
