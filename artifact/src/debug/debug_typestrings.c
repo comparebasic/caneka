@@ -20,6 +20,8 @@ char *TypeStrings[] = {
     "TYPE_UTIL",
     "TYPE_UNIT",
     "TYPE_MEMCTX",
+    "TYPE_EXTERNAL_FREE",
+    "TYPE_CRYPTO_DIGEST",
     "TYPE_MEMSLAB",
     "TYPE_MEMHANDLE",
     "TYPE_MHABSTRACT",

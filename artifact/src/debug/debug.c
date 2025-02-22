@@ -11,6 +11,9 @@ status Debug_Init(MemCtx *m){
     if(DebugPrintChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, NULL, NULL);
         DebugPrintChain = Chain_Make(m, funcs);
+        StringDebug_Init(m, funcs);
+        SequenceDebug_Init(m, funcs);
+        /* todo add other debug inits here */
         return SUCCESS;
     }
 

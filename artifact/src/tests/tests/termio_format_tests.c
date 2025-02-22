@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-#define TERMIO_TEST_PATH "./dist/fixtures/build_termio_output.2025-02-03" 
+#define TERMIO_TEST_PATH "./artifact/fixtures/build_termio_output.2025-02-03" 
 
 static word _captureKey;
 static String *_s;

@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
+    DebugStack_Push(a, a->type.of);
     /* TODO: test this across different string types */
     int pos = 0;
     int actual = 0;
@@ -12,6 +13,7 @@ boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
     if(pos_fl == STRING_POS_END){
         l = String_Length(a);
         if(length > l){
+            DebugStack_Pop();
             return FALSE;
         }
         pos = l - length;
@@ -21,6 +23,7 @@ boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
             printf("String_Equals:mismatch@length(%ld/%d)\n", String_Length(a), length);
         }
 
+        DebugStack_Pop();
         return FALSE;
     }
     byte *p = cstr;
@@ -42,6 +45,7 @@ boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
             if((a->type.state & DEBUG) != 0){
                 
             }
+            DebugStack_Pop();
             return FALSE;
         }
 
@@ -52,9 +56,11 @@ boolean String_PosEqualsBytes(String *a, byte *cstr, int length, word pos_fl){
     }
 
     if(tail == NULL && pos == l){
+        DebugStack_Pop();
         return TRUE;
     }
 
+    DebugStack_Pop();
     return FALSE;
 }
 

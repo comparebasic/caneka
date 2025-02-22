@@ -18,7 +18,7 @@ static char *cflags[] = {
         NULL
 };
 static char *inc[] = {
-    "-I./dist/src/include/",
+    "-I./artifact/src/include/",
     NULL
 };
 static char *libs[] = {
@@ -32,6 +32,7 @@ static char *libs[] = {
 static BuildSubdir memobj = { "mem", {
     "mem.c",
     "mem_debug.c",
+    "ext_free.c",
     NULL
 }};
 

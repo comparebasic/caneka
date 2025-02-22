@@ -110,6 +110,7 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
         }
 
         status r = READY;
+        DebugStack_SetRef(set->name, TYPE_CSTR);
         if(set->func != NULL){
             m->type.range++;
             DebugM->type.range++;

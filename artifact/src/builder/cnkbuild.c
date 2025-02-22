@@ -26,7 +26,7 @@
 #include "persist/procdets.c"
 #include "persist/subprocess.c"
 
-static status buildExec(BuildCtx *ctx, String *destDir, String *lib, Executable *target){
+static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
     MemCtx *m = ctx->m;
@@ -63,7 +63,7 @@ static status buildExec(BuildCtx *ctx, String *destDir, String *lib, Executable 
         ptr++;
     }
 
-    if(File_CmpUpdated(m, source, dest, NULL)){
+    if(force || File_CmpUpdated(m, source, dest, NULL)){
         Debug_Print((void *)dest, 0, "build exec: ", COLOR_CYAN, FALSE);
         printf("\n");
 
@@ -88,30 +88,33 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     status r = READY;
     MemCtx *m = ctx->m;
     Span *cmd = Span_Make(m, TYPE_SPAN);
-    Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.cc)));
-    char **ptr = ctx->args.cflags;
-    while(*ptr != NULL){
-        Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
-        ptr++;
-    }
-    ptr = ctx->args.inc;
-    while(*ptr != NULL){
-        Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
-        ptr++;
-    }
-    Span_Add(cmd, (Abstract *)String_Make(m, bytes("-c")));
-    Span_Add(cmd, (Abstract *)String_Make(m, bytes("-o")));
-    Span_Add(cmd, (Abstract *)dest);
-    Span_Add(cmd, (Abstract *)source);
-
-    Debug_Print((void *)dest, 0, "build obj: ", COLOR_YELLOW, FALSE);
-    printf("\n");
-
     ProcDets pd;
-    ProcDets_Init(&pd);
-    r |= SubProcess(m, cmd, &pd);
-    if(r & ERROR){
-        Fatal("Build error for source file", 0);
+    if(File_CmpUpdated(m, source, dest, NULL)){
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.cc)));
+        char **ptr = ctx->args.cflags;
+        while(*ptr != NULL){
+            Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
+            ptr++;
+        }
+        ptr = ctx->args.inc;
+        while(*ptr != NULL){
+            Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
+            ptr++;
+        }
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes("-c")));
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes("-o")));
+        Span_Add(cmd, (Abstract *)dest);
+        Span_Add(cmd, (Abstract *)source);
+
+        Debug_Print((void *)dest, 0, "build obj: ", COLOR_YELLOW, FALSE);
+        printf("\n");
+
+        ProcDets_Init(&pd);
+        r |= SubProcess(m, cmd, &pd);
+        if(r & ERROR){
+            DebugStack_SetRef(cmd, cmd->type.of);
+            Fatal("Build error for source file", 0);
+        }
     }
 
     Span_ReInit(cmd);
@@ -120,9 +123,15 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     Span_Add(cmd, (Abstract *)lib);
     Span_Add(cmd, (Abstract *)dest);
     ProcDets_Init(&pd);
-    r |= SubProcess(m, cmd, &pd);
-    if(r & ERROR){
+    DPrint((Abstract *)dest, COLOR_DARK, "linking: ");
+    status re = SubProcess(m, cmd, &pd);
+    if(re & ERROR){
+        DebugStack_SetRef(cmd, cmd->type.of);
         Fatal("Build error for adding object to lib ", 0);
+    }
+
+    if(r == READY){
+        r = NOOP;
     }
 
     DebugStack_Pop();
@@ -163,9 +172,7 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
         String_Trunc(dest, String_Length(dest)-1);
         String_AddBytes(m, dest, bytes("o"), 1);
 
-        if(File_CmpUpdated(m, source, dest, NULL)){
-            buildSourceToLib(ctx, libDir, lib, dest, source);
-        }
+        r |= buildSourceToLib(ctx, libDir, lib, dest, source);
 
         MemCtx_Free(m);
         MemCtx_Free(DebugM);
@@ -175,10 +182,11 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
     m->type.range--;
 
     DebugStack_Pop();
-    return SUCCESS;
+    return r;
 }
 
-static status buildLib(BuildCtx *ctx){
+static status build(BuildCtx *ctx){
+    status r = READY;
     DebugStack_Push(NULL, 0);
     MemCtx *m = ctx->m;
     String *libDir = String_Init(m, STRING_EXTEND);
@@ -198,20 +206,25 @@ static status buildLib(BuildCtx *ctx){
     cstr = ".a";
     String_AddBytes(m, lib, bytes(cstr), strlen(cstr));
 
+    if((File_Exists(lib) & SUCCESS) != 0 && (File_Unlink(lib) & ERROR)){
+        Fatal("Error unlinking existing static lib", TYPE_BUILDCTX);
+        return ERROR;
+    }
+
     BuildSubdir **dir = ctx->objdirs;
     while(*dir != NULL){
-        buildDirToLib(ctx, libDir, lib, *dir);
+        r |= buildDirToLib(ctx, libDir, lib, *dir);
         dir++;
     }
 
     Executable *target = ctx->targets;
     while(target->bin != NULL){
-        buildExec(ctx, dist, lib, target);
+        buildExec(ctx, ((r & SUCCESS) != 0), dist, lib, target);
         target++;
     }
 
     DebugStack_Pop();
-    return SUCCESS;
+    return r;
 }
 
 status BuildCtx_Init(MemCtx *m, BuildCtx *ctx){
@@ -227,7 +240,7 @@ status Build(BuildCtx *ctx){
     r |= SpanDef_Init();
     r |= DebugStack_Init(ctx->m);
     DebugStack_Push(ctx, ctx->type.of);
-    r |= buildLib(ctx);
+    r |= build(ctx);
     DebugStack_Pop();
     return r;
 }

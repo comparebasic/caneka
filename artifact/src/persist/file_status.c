@@ -13,6 +13,13 @@ status File_Exists(String *path){
     return SUCCESS;
 }
 
+status File_Unlink(String *path){
+    if(unlink((char *)path->bytes) == 0){
+        return SUCCESS;
+    }
+    return ERROR;
+}
+
 String *File_GetCwdPath(MemCtx *m, String *path){
     char buff[PATH_BUFFLEN];
     char *pathCstr = getcwd(buff, PATH_BUFFLEN);
