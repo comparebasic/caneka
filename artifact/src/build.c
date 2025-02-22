@@ -22,7 +22,6 @@ static char *inc[] = {
     NULL
 };
 static char *libs[] = {
-    "-lssl",
     "-lcrypto",
     NULL
 };
