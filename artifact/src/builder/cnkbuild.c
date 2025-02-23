@@ -124,7 +124,8 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     Span_Add(cmd, (Abstract *)lib);
     Span_Add(cmd, (Abstract *)dest);
     ProcDets_Init(&pd);
-    DPrint((Abstract *)dest, COLOR_DARK, "linking: ");
+    Debug_Print((Abstract *)dest, 0,  "  linking: ", COLOR_DARK, FALSE);
+    printf("\n");
     status re = SubProcess(m, cmd, &pd);
     if(re & ERROR){
         DebugStack_SetRef(cmd, cmd->type.of);

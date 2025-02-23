@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status Tests_AddTestKey(MemCtx *m){
+    DebugStack_Push(NULL, 0);
     status r = READY;
     MemCtx_SetToBase(m);
 
@@ -12,7 +13,8 @@ status Tests_AddTestKey(MemCtx *m){
     r |= Access_Grant(m, ac, ACCESS_KEY, key, (Abstract *)keyValue, sys);
 
     MemCtx_SetFromBase(m);
-    return NOOP;
+    DebugStack_Pop();
+    return r;
 }
 
 static int connectToServer(){

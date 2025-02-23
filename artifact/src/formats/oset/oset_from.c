@@ -42,7 +42,7 @@ Abstract *Auth_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstrac
     }
     String *digest = (String *)Table_Get(tbl, (Abstract *)String_Make(m, bytes("digest")));
     if(digest != NULL){
-        auth->digest = String_FromHex(m, digest);
+        auth->digest = String_FromB64(m, digest);
     }
     
     return (Abstract *)auth;
@@ -53,7 +53,7 @@ Abstract *EncPair_FromOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abst
     String *enc = NULL;
     String *enchex = (String *)Table_Get(tbl, (Abstract *)String_Make(m, bytes("enc")));
     if(enchex != NULL){
-        enc = String_FromHex(m, enchex);
+        enc = String_FromB64(m, enchex);
     }
     Single *l_sg = (Single *)Table_Get(tbl, (Abstract *)String_Make(m, bytes("length")));
     int l = 0;

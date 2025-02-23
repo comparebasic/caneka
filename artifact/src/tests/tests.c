@@ -407,10 +407,9 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
     {
         "Access",
@@ -427,3 +426,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/

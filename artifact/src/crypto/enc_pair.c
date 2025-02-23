@@ -16,7 +16,7 @@ String *EncPair_GetKey(MemCtx *m, String *key, Access *access){
     DebugStack_Push(NULL, 0);
     String *s = String_Prefixed(m, key, String_Make(m, bytes("_keys.")));
     Access_SetFl(access, ACCESS_KEY);
-    String *ret =  GetAccess(access, key);
+    String *ret = GetAccess(access, s);
     DebugStack_Pop();
     return ret;
 }
@@ -31,22 +31,27 @@ static boolean isFilled(String *s){
 }
 
 status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
+    DebugStack_Push(access->owner, access->owner->type.of);
     if(isFilled(p->enc) && isFilled(p->dec) && isFilled(p->keyId)){
+        DebugStack_Pop();
         return (NOOP|SUCCESS);
     }
 
     if(p->keyId != NULL){
-        String *key = (String *)TableChain_Get(SaltyKeyChain, (Abstract *)p->keyId); 
+        String *key = EncPair_GetKey(m, access->owner, access);
         if(!isFilled(p->enc) && isFilled(p->dec)){
             p->enc = Salty_Enc(m, key, p->dec); 
+            DebugStack_Pop();
             return SUCCESS;
         }
         if(isFilled(p->enc) && !isFilled(p->dec)){
             p->dec = Salty_Dec(m, key, p->enc); 
+            DebugStack_Pop();
             return SUCCESS;
         }
     }
 
+    DebugStack_Pop();
     return ERROR;
 }
 

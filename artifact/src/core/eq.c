@@ -2,7 +2,6 @@
 #include <caneka.h>
 
 boolean Abs_Eq(Abstract *a, void *b){
-    printf("Abs_eq\n");
     cls ifcOf = Ifc_Get(a->type.of);
     if(a == NULL || b == NULL){
         return FALSE;

@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-char *cstr = ""
+static char *cstr = ""
     "Most of the efficiency comes from allowing integers and static indexes to "
     "be used more often than string interpretation during runtime. Remembring "
     "the position of something without needing the steps you took to find it "
@@ -17,7 +17,7 @@ char *cstr = ""
     "\n"
     ;
 
-char *cstrTwo = ""
+static char *cstrTwo = ""
     "Given that cycles are a better representation of computer processing than "
     "objects, there is high potential in this approach to a general purpose "
     "programming language."
@@ -31,7 +31,7 @@ char *cstrTwo = ""
     "Programming."
     ;
 
-char *cstrThree = ""
+static char *cstrThree = ""
     "Caneka is based on a common computer science challenge: How to handle "
     "something, and move on, when the order is not the same. The langauge "
     "automatically populates virtual stacks and queues to handle tasks that "

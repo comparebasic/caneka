@@ -26,19 +26,23 @@ status Access_Init(MemCtx *m){
 }
 
 status Access_Grant(MemCtx *m, Access *grantee, word fl, String *key, Abstract *value, Access *access){
+    DebugStack_Push(grantee->owner, grantee->owner->type.of);
     Access_SetFl(access, (fl|ACCESS_GRANT));
     if(GetAccess(access, String_Make(m, bytes("grant"))) == NULL){
+        DebugStack_Pop();
         return ERROR;
     }
 
+    Span *userPerms = NULL;
     Hashed *h = Table_GetHashed(_perms, (Abstract *)grantee->owner); 
-    Span *userPerms = (Span *)h->value;
 
     MemCtx_SetToBase(m);
     String *userKey = String_Clone(m, grantee->owner);
-    if(userPerms == NULL){
+    if(h == NULL){
         userPerms = Span_Make(m, TYPE_TABLE);    
         h = Table_SetHashed(_perms, (Abstract *)userKey, (Abstract *)userPerms); 
+    }else{
+        userPerms = (Span *)h->value;
     }
     h->type.state |= fl;
 
@@ -46,6 +50,7 @@ status Access_Grant(MemCtx *m, Access *grantee, word fl, String *key, Abstract *
     h->type.state |= fl;
 
     MemCtx_SetFromBase(m);
+    DebugStack_Pop();
     return SUCCESS;
 }
 
@@ -64,27 +69,23 @@ String *GetGroupAccess(Access *access, String *s){
 
 String *GetAccess(Access *access, String *s){
     DebugStack_Push(access->owner, access->owner->type.of);
-    DPrint((Abstract *)_perms, COLOR_PURPLE, "perms: ");
     Hashed *h = Table_GetHashed(_perms, (Abstract *)access->owner);
     if(h == NULL){
-        DPrint((Abstract *)access->owner, COLOR_PURPLE, "h is null for: ");
-        DPrint((Abstract *)Table_Get(_perms, (Abstract *)access->owner), COLOR_PURPLE, "h is null for direct?: ");
+        printf("eI\n");
         DebugStack_Pop();
         return NULL;
     }
     word fl = (access->type.state & UPPER_FLAGS);
     if((fl & h->type.state) != fl){
+        printf("eII\n");
         DebugStack_Pop();
-        printf("flag mismatch\n");
         return NULL;
     }
     
     Span *tbl = (Span *)as(h->value, TYPE_TABLE);
-    DPrint((Abstract *)tbl, COLOR_PURPLE, "usertbl: ");
-    h = Table_GetHashed(_perms, (Abstract *)s);
-    if((fl & h->type.state) != fl){
+    h = Table_GetHashed(tbl, (Abstract *)s);
+    if(h == NULL || (fl & h->type.state) != fl){
         DebugStack_Pop();
-        printf("flag II  mismatch\n");
         return NULL;
     }
 

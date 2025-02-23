@@ -76,10 +76,10 @@ boolean String_Eq(Abstract *a, void *b){
 
 boolean String_EqualsPartial(String *a, String *b, word pos){
     if(a == NULL || a->length == 0){
-        Fatal("String a is NULL or of 0 length", TYPE_STRING_CHAIN);
+        return FALSE;
     }
     if(b == NULL || b->length == 0){
-        Fatal("String b is NULL or of 0 length", TYPE_STRING_CHAIN);
+        return FALSE;
     }
     i64 aLength = String_Length(a);
     i64 bLength = String_Length(b);

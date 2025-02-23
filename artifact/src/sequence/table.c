@@ -84,7 +84,6 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                 printf("\x1b[%dm%d half-byte of ", DEBUG_TABLE, j+1);
                 Bits_Print((byte *)&(h->id), sizeof(int), "", DEBUG_TABLE, FALSE);
                 printf("\x1b[%dm query=%d>\x1b[0m\n", DEBUG_TABLE, queries);
-                DPrint((Abstract *)_h, DEBUG_TABLE, "_h: ");
             }
             if(op == SPAN_OP_GET){
                 if(_h != NULL && *((util *)_h) != 0){
@@ -97,6 +96,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                 if(_h != NULL && *((util *)_h) != 0){
                     if(Hashed_LocalEquals(tbl->m, h, _h)){
                         h = _h;
+                        printf("idx:%d hkey:%d\n", h->idx, hkey);
                         h->idx = hkey;
                         h->value = value;
                         found = TRUE;
