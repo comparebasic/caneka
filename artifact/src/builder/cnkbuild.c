@@ -33,6 +33,7 @@ static status renderStatus(MemCtx *m, Abstract *a){
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
     while(cli->lines->nvalues < 4){
         Span_Add(cli->lines, (Abstract *)String_Init(m, STRING_EXTEND));
+        Span_Add(cli->buffs, (Abstract *)String_Init(m, STRING_EXTEND));
     }
 
     String *action = Span_Get(cli->lines, 0);
@@ -55,21 +56,42 @@ static status renderStatus(MemCtx *m, Abstract *a){
     String_AddBytes(m, task, bytes(cstr), strlen(cstr));
 
     String *count = Span_Get(cli->lines, 2);
-    String_Reset(count);
-    cstr = "\x1b[0;44mtask ";
-    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
-    String_AddInt(m, task, ctx->steps.count);
+    String *countBuff = Span_Get(cli->buffs, 2);
+    String_Reset(countBuff);
+    cstr = " task ";
+    String_AddBytes(m, countBuff, bytes(cstr), strlen(cstr));
+    String_AddInt(m, countBuff, ctx->steps.count);
     cstr = " of ";
-    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
-    String_AddInt(m, task, ctx->steps.total);
-    for(int i = 0;i < ctx->steps.total; i++){
-        cstr = " ";
-        String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    String_AddBytes(m, countBuff, bytes(cstr), strlen(cstr));
+    String_AddInt(m, countBuff, ctx->steps.total);
+    int all = ctx->steps.total + ctx->steps.count;
+
+    String_Reset(count);
+    cstr = "\x1b[37;44m";
+    String_AddBytes(m, count, bytes(cstr), strlen(cstr));
+    if(countBuff->length > all){
+        String_AddSub(m, count, countBuff, 0, all);
+        cstr = "\x1b[0;45m";
+        String_AddBytes(m, count, bytes(cstr), strlen(cstr));
+        String_AddSub(m, count, countBuff, all, max(String_Length(countBuff), all));
+    }else{
+        String_Add(m, count, countBuff);
+    }
+    if(countBuff->length-strlen(cstr) < 100){
+        int delta = 100 - countBuff->length;
+        for(int i = 0; i < delta; i++){ 
+            cstr = " ";
+            String_AddBytes(m, count, bytes(cstr), strlen(cstr));
+            if(i == all){
+                cstr = "\x1b[0;45m";
+                String_AddBytes(m, count, bytes(cstr), strlen(cstr));
+            }
+        }
     }
     cstr = " \x1b[0m\n";
-    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    String_AddBytes(m, count, bytes(cstr), strlen(cstr));
 
-    String *mems = Span_Get(cli->lines, 2);
+    String *mems = Span_Get(cli->lines, 3);
     String_Reset(mems);
     cstr = "\x1b[0mmem: ";
     String_AddBytes(m, mems, bytes(cstr), strlen(cstr));

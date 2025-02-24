@@ -59,6 +59,7 @@ String *String_Init(MemCtx *m, int expected);
 String *String_Next(String *s);
 i64 String_GetSegSize(String *s);
 char *String_ToChars(MemCtx *m, String *s);
+status String_AddSub(MemCtx *m, String *s, String *b, i64 start, i64 end);
 
 /* makers */
 status String_AddAsciiSrc(MemCtx *m, String *s, byte c);

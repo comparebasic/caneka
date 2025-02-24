@@ -3,6 +3,7 @@ typedef struct cli_status {
     DoFunc render;
     Abstract *source;
     Span *lines;
+    Span *buffs;
 } CliStatus;
 
 CliStatus *CliStatus_Make(MemCtx *m, DoFunc render, Abstract *source);

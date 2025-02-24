@@ -91,6 +91,32 @@ status String_Add(MemCtx *m, String *a, String *b) {
     return r;
 }
 
+status String_AddSub(MemCtx *m, String *s, String *b, i64 start, i64 end) {
+    status r = READY;
+    i64 pos = 0;
+    while(b != NULL && pos + b->length < start){
+        pos += b->length;
+        b = String_Next(b);
+    }
+
+    start -= pos;
+    int length = min(s->length, end-pos);
+    while(b != NULL && length > 0){
+        int length = min(b->length-start, end-pos);
+        String_AddBytes(m, s, b->bytes+start, length);
+        pos += length;
+        b = String_Next(b); 
+        start = 0;
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
+
 status String_AddBytes(MemCtx *m, String *a, byte *chars, int length) {
     DebugStack_Push(a, a->type.of);
     if(length == 0){
