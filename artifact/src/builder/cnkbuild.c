@@ -31,7 +31,7 @@
 static status renderStatus(MemCtx *m, Abstract *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
-    while(cli->lines->nvalues < 3){
+    while(cli->lines->nvalues < 4){
         Span_Add(cli->lines, (Abstract *)String_Init(m, STRING_EXTEND));
     }
 
@@ -68,6 +68,14 @@ static status renderStatus(MemCtx *m, Abstract *a){
     }
     cstr = " \x1b[0m\n";
     String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+
+    String *mems = Span_Get(cli->lines, 2);
+    String_Reset(mems);
+    cstr = "\x1b[0mmem: ";
+    String_AddBytes(m, mems, bytes(cstr), strlen(cstr));
+    String_AddMemCount(m, mems, MemCount());
+    cstr = " \x1b[0m\n";
+    String_AddBytes(m, mems, bytes(cstr), strlen(cstr));
 
     return SUCCESS;
 }
