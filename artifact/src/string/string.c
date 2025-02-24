@@ -23,6 +23,19 @@ char *String_ToChars(MemCtx *m, String *s){
     return cstr;
 }
 
+status String_Reset(String *s){
+    status r = NOOP;
+    while(s != NULL){
+        if(s->length > 0){
+            memset(s->bytes, 0, s->length);
+            r |= SUCCESS;
+        }
+        s->length = 0;
+        s = String_Next(s);
+    }
+    return r;
+}
+
 i64 String_GetSegSize(String *s){
     asIfc(s, TYPE_STRING);
     if(s->type.of == TYPE_STRING_CHAIN){

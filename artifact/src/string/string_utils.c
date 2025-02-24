@@ -92,16 +92,3 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
     return p;
 }
 
-status String_Reset(String *s){
-    status r = NOOP;
-    while(s != NULL){
-        if(s->length > 0){
-            memset(s->bytes, 0, s->length);
-            r |= SUCCESS;
-        }
-        s->length = 0;
-        s = String_Next(s);
-    }
-    return r;
-}
-

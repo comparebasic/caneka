@@ -13,6 +13,7 @@
 #include "debug/debug_stack.c"
 #include "builder/debug_mocks.c"
 #include "crypto/sane.c"
+#include "termio/cli_status.c"
 /* span */
 #include "sequence/slab.c"
 #include "sequence/spandef.c"
@@ -26,6 +27,50 @@
 /* spawn */
 #include "persist/procdets.c"
 #include "persist/subprocess.c"
+
+static status renderStatus(MemCtx *m, Abstract *a){
+    CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
+    BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
+    while(cli->lines->nvalues < 3){
+        Span_Add(cli->lines, (Abstract *)String_Init(m, STRING_EXTEND));
+    }
+
+    String *action = Span_Get(cli->lines, 0);
+    String_Reset(action);
+    char *cstr = "\x1b[33m";
+    String_AddBytes(m, action, bytes(cstr), strlen(cstr));
+    String_Add(m, action, ctx->steps.name);
+    cstr = "\x1b[0m\n";
+    String_AddBytes(m, action, bytes(cstr), strlen(cstr));
+
+    String *task = Span_Get(cli->lines, 1);
+    String_Reset(task);
+    cstr = "\x1b[35m";
+    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    String_Add(m, task, ctx->current.action);
+    cstr = ": ";
+    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    String_Add(m, task, ctx->current.dest);
+    cstr = "\x1b[0m\n";
+    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+
+    String *count = Span_Get(cli->lines, 2);
+    String_Reset(count);
+    cstr = "\x1b[0;44mtask ";
+    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    String_AddInt(m, task, ctx->steps.count);
+    cstr = " of ";
+    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    String_AddInt(m, task, ctx->steps.total);
+    for(int i = 0;i < ctx->steps.total; i++){
+        cstr = " ";
+        String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    }
+    cstr = " \x1b[0m\n";
+    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+
+    return SUCCESS;
+}
 
 static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
@@ -83,14 +128,18 @@ static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *l
     return NOOP;
 }
 
-
 static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String *dest, String *source){
     DebugStack_Push(source, source->type.of);
     status r = READY;
     MemCtx *m = ctx->m;
     Span *cmd = Span_Make(m, TYPE_SPAN);
     ProcDets pd;
+    ctx->current.source = String_Clone(DebugM, source);
+    ctx->current.dest = String_Clone(DebugM, dest);
+    ctx->steps.count++;
     if(File_CmpUpdated(m, source, dest, NULL)){
+        ctx->current.action = String_Make(DebugM, bytes("build obj"));
+        CliStatus_Print(DebugM, ctx->cli);
         Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.cc)));
         char **ptr = ctx->args.cflags;
         while(*ptr != NULL){
@@ -107,15 +156,15 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
         Span_Add(cmd, (Abstract *)dest);
         Span_Add(cmd, (Abstract *)source);
 
-        Debug_Print((void *)dest, 0, "build obj: ", COLOR_YELLOW, FALSE);
-        printf("\n");
-
         ProcDets_Init(&pd);
         r |= SubProcess(m, cmd, &pd);
         if(r & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
             Fatal("Build error for source file", 0);
         }
+    }else{
+        ctx->current.action = String_Make(DebugM, bytes("add to archive"));
+        CliStatus_Print(DebugM, ctx->cli);
     }
 
     Span_ReInit(cmd);
@@ -124,8 +173,6 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     Span_Add(cmd, (Abstract *)lib);
     Span_Add(cmd, (Abstract *)dest);
     ProcDets_Init(&pd);
-    Debug_Print((Abstract *)dest, 0,  "  linking: ", COLOR_DARK, FALSE);
-    printf("\n");
     status re = SubProcess(m, cmd, &pd);
     if(re & ERROR){
         DebugStack_SetRef(cmd, cmd->type.of);
@@ -164,8 +211,10 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
     i64 destL = String_Length(dest);
     char **sourceCstr = dir->sources;
 
+    ctx->steps.name = String_Make(DebugM, bytes(dir->name));;
+    ctx->steps.count = 0;
+
     m->type.range++;
-    DebugM->type.range++;
     while(*sourceCstr != NULL){
         String_Trunc(source, sourceL);
         String_AddBytes(m, source, bytes(*sourceCstr), strlen(*sourceCstr));
@@ -177,12 +226,12 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
         r |= buildSourceToLib(ctx, libDir, lib, dest, source);
 
         MemCtx_Free(m);
-        MemCtx_Free(DebugM);
         sourceCstr++;
     }
-    DebugM->type.range--;
     m->type.range--;
 
+    ctx->steps.total += ctx->steps.count;
+    ctx->steps.count = 0;
     DebugStack_Pop();
     return r;
 }
@@ -218,6 +267,7 @@ static status build(BuildCtx *ctx){
         r |= buildDirToLib(ctx, libDir, lib, *dir);
         dir++;
     }
+    CliStatus_PrintFinish(DebugM, ctx->cli);
 
     Executable *target = ctx->targets;
     while(target->bin != NULL){
@@ -229,19 +279,27 @@ static status build(BuildCtx *ctx){
     return r;
 }
 
+status Init(MemCtx *m){
+    status r = READY;
+    r |= Debug_Init(m);
+    r |= SpanDef_Init();
+    r |= DebugStack_Init(m);
+    return r;
+}
+
 status BuildCtx_Init(MemCtx *m, BuildCtx *ctx){
+    Init(m);
     memset(ctx, 0, sizeof(BuildCtx));
     ctx->type.of = TYPE_BUILDCTX;
-    ctx->m = m;
+    ctx->m = MemCtx_Make();
+    ctx->cli = CliStatus_Make(m, renderStatus, (Abstract *)ctx);
     return SUCCESS;
 }
 
+
 status Build(BuildCtx *ctx){
-    status r = READY;
-    r |= Debug_Init(ctx->m);
-    r |= SpanDef_Init();
-    r |= DebugStack_Init(ctx->m);
     DebugStack_Push(ctx, ctx->type.of);
+    status r = READY;
     r |= build(ctx);
     DebugStack_Pop();
     return r;

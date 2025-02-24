@@ -160,6 +160,7 @@ enum types {
     HTTP_END,
     _HTTP_MAX,
     TYPE_LANG_CDOC,
+    TYPE_CLI_STATUS,
     _TERMIO_START,
     TERMIO_START,
     TERMIO_ESCAPE,
