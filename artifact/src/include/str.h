@@ -5,3 +5,6 @@
 #include "string/iter_str.h"
 #include "string/string_debug.h"
 #include "string/string_tolocal.h"
+#include "string/str.h"
+#include "string/strvector.h"
+#include "string/sviter.h"

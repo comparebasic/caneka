@@ -3,7 +3,8 @@
 
 String *String_Sub(MemCtx *m, String *s, i64 start, i64 end){
     String *ret = String_Init(m, STRING_EXTEND);
-    return String_AddSub(m, ret, s, start, end);
+    String_AddSub(m, ret, s, start, end);
+    return ret;
 }
 
 String *String_MakeFixed(MemCtx *m, byte *bytes, int length){

@@ -22,12 +22,6 @@ enum string_flags {
     FLAG_STRING_HEX = 1 << 15,
 };
 
-typedef struct b64_ctx {
-   word count;
-   byte byte3[3];
-   byte out[4];
-} B64Ctx;
-
 typedef struct stringmin {
     Type type;
     int length;

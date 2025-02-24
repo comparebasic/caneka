@@ -217,6 +217,7 @@ static BuildSubdir serveobj = { "serve", {
 
 static BuildSubdir stringobj = { "string", {
     "cursor.c",
+    "str.c",
     "iter_str.c",
     "string.c",
     "string_equals.c",
@@ -227,6 +228,9 @@ static BuildSubdir stringobj = { "string", {
     "strsnipstr.c",
     "string_debug.c",
     "string_tolocal.c",
+    "sviter.c",
+    "string.c",
+    "strvec.c",
     NULL
 }};
 
@@ -243,6 +247,7 @@ static BuildSubdir testsobj = { "tests", {
 static BuildSubdir testsuitesobj = { "tests/tests", {
     "blank_test.c",
     "core_tests.c",
+    "strvec_tests.c",
     "crypto_tests.c",
     "hash_tests.c",
     "http_tests.c",

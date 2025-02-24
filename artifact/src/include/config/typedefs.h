@@ -12,6 +12,7 @@ typedef word cls;
 typedef word status;
 typedef byte boolean;
 typedef byte flags8;
+typedef quad flags32;
 
 struct string;
 struct serve_ctx;

@@ -38,7 +38,9 @@ status String_Reset(String *s){
 
 i64 String_GetSegSize(String *s){
     asIfc(s, TYPE_STRING);
-    if(s->type.of == TYPE_STRING_CHAIN){
+    if(s->type.of == TYPE_STR){
+        return s->length;
+    }else if(s->type.of == TYPE_STRING_CHAIN){
         return STRING_CHUNK_SIZE;
     }else if(s->type.of == TYPE_STRING_FIXED){
         return STRING_FIXED_SIZE;
@@ -262,9 +264,6 @@ String *String_Init(MemCtx *m, int expected){
     }
     String *s = (String *)MemCtx_Alloc(m, sz);
     s->type.of = type;
-    if(m->type.range == -1){
-        s->type.state |= LOCAL_PTR;
-    }
 
     return s;
 }

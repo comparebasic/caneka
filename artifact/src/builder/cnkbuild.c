@@ -192,22 +192,23 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
             DebugStack_SetRef(cmd, cmd->type.of);
             Fatal("Build error for source file", 0);
         }
+
+        Span_ReInit(cmd);
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.ar)));
+        Span_Add(cmd, (Abstract *)String_Make(m, bytes("-rc")));
+        Span_Add(cmd, (Abstract *)lib);
+        Span_Add(cmd, (Abstract *)dest);
+        ProcDets_Init(&pd);
+        status re = SubProcess(m, cmd, &pd);
+        if(re & ERROR){
+            DebugStack_SetRef(cmd, cmd->type.of);
+            Fatal("Build error for adding object to lib ", 0);
+        }
     }else{
-        ctx->current.action = String_Make(DebugM, bytes("add to archive"));
+        ctx->current.action = String_Make(DebugM, bytes("built before"));
         CliStatus_Print(DebugM, ctx->cli);
     }
 
-    Span_ReInit(cmd);
-    Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.ar)));
-    Span_Add(cmd, (Abstract *)String_Make(m, bytes("-rc")));
-    Span_Add(cmd, (Abstract *)lib);
-    Span_Add(cmd, (Abstract *)dest);
-    ProcDets_Init(&pd);
-    status re = SubProcess(m, cmd, &pd);
-    if(re & ERROR){
-        DebugStack_SetRef(cmd, cmd->type.of);
-        Fatal("Build error for adding object to lib ", 0);
-    }
 
     if(r == READY){
         r = NOOP;
@@ -286,11 +287,6 @@ static status build(BuildCtx *ctx){
     String_AddBytes(m, lib, bytes(ctx->libtarget), strlen(ctx->libtarget));
     cstr = ".a";
     String_AddBytes(m, lib, bytes(cstr), strlen(cstr));
-
-    if((File_Exists(lib) & SUCCESS) != 0 && (File_Unlink(lib) & ERROR)){
-        Fatal("Error unlinking existing static lib", TYPE_BUILDCTX);
-        return ERROR;
-    }
 
     BuildSubdir **dir = ctx->objdirs;
     while(*dir != NULL){

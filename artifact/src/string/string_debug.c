@@ -1,6 +1,46 @@
 #include <external.h>
 #include <caneka.h>
 
+void Str_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Str *s = (Str *)as(a, TYPE_STR);
+    printf("\x1b[%dm%sStr<%s", color, msg, State_ToChars(s->type.state));
+    while(s != NULL){
+        printf("\x1b[0;%dm%d=\x1b[1;%dm", color, s->length, color);
+        fflush(stdout);
+        write(1, s->bytes, s->length);
+        if(s->type.state & CONTINUED){
+            printf(", ");
+            s = s->next;
+        }else{
+            s = NULL;
+        }
+    }
+    printf("\x1b[0;%dm>\x1b[0m", color);
+}
+
+void StrVec_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    StrVec *vh = as(a, TYPE_STRVEC);
+    printf("\x1b[%dm%sSV(%ld)<%s", color, msg, vh->total, State_ToChars(vh->type.state));
+    fflush(stdout);
+    SvIter it;
+    SvIter_Init(&it, vh);
+    while((SvIter_Next(&it) & END) == 0){
+        StrVecEntry *ve = SvIter_Get(&it);
+        char *cstr = "E<";
+        if(ve == vh->last){
+            cstr = "LE<";
+        }
+        write(1, cstr, strlen(cstr));
+        write(1, ve->content, ve->length);
+        cstr = ">,";
+        if((it.type.state & FLAG_ITER_LAST) != 0){
+            cstr = ">";
+        }
+        write(1, cstr, strlen(cstr));
+    }
+    printf("\x1b[%dm>\x1b[0m", color);
+}
+
 void StrSnipString_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     String *s = (String *)asIfc(a, TYPE_STRING);
     IterStr it;
@@ -138,5 +178,7 @@ status StringDebug_Init(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     r |= Lookup_Add(m, lk, TYPE_STRSNIP_STRING, (void *)StrSnipString_Print);
     r |= Lookup_Add(m, lk, TYPE_CSTR, (void *)Cstr_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
+    r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
     return r;
 }

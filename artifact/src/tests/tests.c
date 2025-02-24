@@ -407,14 +407,15 @@ static TestSet _Tests[] = {
     },
 };
 
-TestSet *Tests = _Tests;
-
 /*
+TestSet *Tests = _Tests;
+*/
+
 static TestSet solo[] = {
     {
-        "Access",
-        Access_Tests,
-        "Access passporting and permissions.",
+        "StrVec",
+        StrVec_Tests,
+        "A vector-style string builder.",
         FEATURE_COMPLETE,
     },
     {
@@ -426,4 +427,3 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
-*/
