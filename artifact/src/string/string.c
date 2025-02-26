@@ -38,9 +38,7 @@ status String_Reset(String *s){
 
 i64 String_GetSegSize(String *s){
     asIfc(s, TYPE_STRING);
-    if(s->type.of == TYPE_STR){
-        return s->length;
-    }else if(s->type.of == TYPE_STRING_CHAIN){
+    if(s->type.of == TYPE_STRING_CHAIN){
         return STRING_CHUNK_SIZE;
     }else if(s->type.of == TYPE_STRING_FIXED){
         return STRING_FIXED_SIZE;

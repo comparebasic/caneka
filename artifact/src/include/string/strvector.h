@@ -13,6 +13,7 @@ typedef struct strvec_hdr {
 } StrVec;
 
 status StrVec_ToFd(StrVec *vh, int fd);
-Str *StrVec_ToStr(MemCtx *m, StrVec *vh);
+String *StrVec_ToStr(MemCtx *m, StrVec *vh);
 status StrVec_Add(MemCtx *m, StrVec *vh, byte *ptr, int length);
 StrVec *StrVec_Make(MemCtx *m, byte *ptr, int length);
+status StrVecEntry_Set(StrVecEntry *ve, byte *ptr, int length);

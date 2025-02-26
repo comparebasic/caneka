@@ -113,7 +113,7 @@ boolean Ifc_Match(cls inst, cls ifc){
     }else if(ifc == TYPE_WRAPPED){
         return inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL || inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR;
     }else if(ifc == TYPE_STRING){
-        return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL || TYPE_STR;
+        return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL;
     }else if(ifc == TYPE_STRING){
         return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
     }else if(ifc == TYPE_ROEBLING){

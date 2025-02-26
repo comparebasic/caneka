@@ -3,9 +3,11 @@ typedef struct cli_status {
     DoFunc render;
     Abstract *source;
     Span *lines;
-    Span *buffs;
+    i32 cols;
+    i32 rows;
 } CliStatus;
 
 CliStatus *CliStatus_Make(MemCtx *m, DoFunc render, Abstract *source);
 status CliStatus_Print(MemCtx *m, CliStatus *cli);
 status CliStatus_PrintFinish(MemCtx *m, CliStatus *cli);
+status CliStatus_SetDims(CliStatus *cli, i32 cols, i32 rows);

@@ -12,12 +12,10 @@ status SvIter_Init(SvIter *it, StrVec *vh){
 
 status SvIter_Next(SvIter *it){
     if(it->idx == -1){
-        printf("to first\n");
         it->idx++;
     }else if(it->ve == it->vh->last){
         it->type.state |= END;
     }else{
-        printf("to next\n");
         if(it->ve->jump != NULL){
             it->ve = it->ve->jump;
         }else{

@@ -8,18 +8,19 @@ status CliStatus_Print(MemCtx *m, CliStatus *cli){
         int count = cli->lines->nvalues;
         if((cli->type.state & PROCESSING) != 0){
             printf("\r\x1b[%dA", count);
+            fflush(stdout);
         }
         if(count > 0){
             cli->type.state |= PROCESSING;
         }
         while((Iter_Next(&it) & END) == 0){
-            String *line = (String *)Iter_Get(&it);
+            StrVec *line = (StrVec *)Iter_Get(&it);
             printf("\r\x1b[0K");
-            if(line != NULL && line->length > 0){
-                ToStdOut(m, line, NULL); 
-            }else{
-                printf("\n");
+            fflush(stdout);
+            if(line != NULL){
+                StrVec_ToFd(line, 1);
             }
+            write(1, "\n", 1);
         }
         return SUCCESS;
     }
@@ -31,11 +32,24 @@ status CliStatus_PrintFinish(MemCtx *m, CliStatus *cli){
     return SUCCESS;
 }
 
+status CliStatus_SetDims(CliStatus *cli, i32 cols, i32 rows){
+    if(cols == 0 && rows == 0){
+        struct winsize w;
+        ioctl(0, TIOCGWINSZ, &w);
+
+        cli->cols = w.ws_col;
+        cli->rows = w.ws_row;
+    }else{
+        cli->cols = cols;
+        cli->rows = rows;
+    }
+    return SUCCESS;
+}
+
 CliStatus *CliStatus_Make(MemCtx *m, DoFunc render, Abstract *source){
     CliStatus *st = (CliStatus *)MemCtx_Alloc(m, sizeof(CliStatus));
     st->type.of = TYPE_CLI_STATUS;
     st->lines = Span_Make(m, TYPE_SPAN);
-    st->buffs = Span_Make(m, TYPE_SPAN);
     st->render = render;
     st->source = source;
     return st;

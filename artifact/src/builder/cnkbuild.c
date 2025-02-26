@@ -8,6 +8,8 @@
 #include "string/string.c"
 #include "string/string_makers.c"
 #include "string/string_equals.c"
+#include "string/strvec.c"
+#include "string/sviter.c"
 #include "debug/debug_flags.c"
 #include "debug/debug_typestrings.c"
 #include "debug/debug_stack.c"
@@ -31,73 +33,89 @@
 static status renderStatus(MemCtx *m, Abstract *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
-    while(cli->lines->nvalues < 4){
-        Span_Add(cli->lines, (Abstract *)String_Init(m, STRING_EXTEND));
-        Span_Add(cli->buffs, (Abstract *)String_Init(m, STRING_EXTEND));
-    }
 
-    String *action = Span_Get(cli->lines, 0);
-    String_Reset(action);
-    char *cstr = "\x1b[33m";
-    String_AddBytes(m, action, bytes(cstr), strlen(cstr));
-    String_Add(m, action, ctx->steps.name);
-    cstr = "\x1b[0m\n";
-    String_AddBytes(m, action, bytes(cstr), strlen(cstr));
+    String_Reset(ctx->fields.steps.count_s);
+    String_Reset(ctx->fields.steps.total_s);
+    String_AddInt(m, ctx->fields.steps.count_s, ctx->fields.steps.count);
+    String_AddInt(m, ctx->fields.steps.total_s, ctx->fields.steps.total);
+    ctx->fields.steps.count_ve->length = ctx->fields.steps.count_s->length;
+    ctx->fields.steps.total_ve->length = ctx->fields.steps.total_s->length;
 
-    String *task = Span_Get(cli->lines, 1);
-    String_Reset(task);
-    cstr = "\x1b[35m";
-    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
-    String_Add(m, task, ctx->current.action);
-    cstr = ": ";
-    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
-    String_Add(m, task, ctx->current.dest);
-    cstr = "\x1b[0m\n";
-    String_AddBytes(m, task, bytes(cstr), strlen(cstr));
+    i32 width = ctx->cli->cols;
+    float _progress = ((float)ctx->cli->cols) * ((float)ctx->fields.steps.count)/((float)ctx->fields.steps.total);
+    i32 progress = (i32)_progress;
+    ctx->fields.steps.barStart->length = progress;
+    ctx->fields.steps.barEnd->length = ctx->cli->cols - progress;
 
-    String *count = Span_Get(cli->lines, 2);
-    String *countBuff = Span_Get(cli->buffs, 2);
-    String_Reset(countBuff);
-    cstr = " task ";
-    String_AddBytes(m, countBuff, bytes(cstr), strlen(cstr));
-    String_AddInt(m, countBuff, ctx->steps.count);
-    cstr = " of ";
-    String_AddBytes(m, countBuff, bytes(cstr), strlen(cstr));
-    String_AddInt(m, countBuff, ctx->steps.total);
-    int all = ctx->steps.total + ctx->steps.count;
+    String_Reset(ctx->fields.mem_s);
+    String_AddMemCount(m, ctx->fields.mem_s, MemCount());
+    ctx->fields.mem->length = ctx->fields.mem_s->length;
+     
+    return SUCCESS;
+}
 
-    String_Reset(count);
-    cstr = "\x1b[37;44m";
-    String_AddBytes(m, count, bytes(cstr), strlen(cstr));
-    if(countBuff->length > all){
-        String_AddSub(m, count, countBuff, 0, all);
-        cstr = "\x1b[0;45m";
-        String_AddBytes(m, count, bytes(cstr), strlen(cstr));
-        String_AddSub(m, count, countBuff, all, max(String_Length(countBuff), all));
-    }else{
-        String_Add(m, count, countBuff);
-    }
-    if(countBuff->length-strlen(cstr) < 100){
-        int delta = 100 - countBuff->length;
-        for(int i = 0; i < delta; i++){ 
-            cstr = " ";
-            String_AddBytes(m, count, bytes(cstr), strlen(cstr));
-            if(i == all){
-                cstr = "\x1b[0;45m";
-                String_AddBytes(m, count, bytes(cstr), strlen(cstr));
-            }
+static status setupStatus(BuildCtx *ctx){
+    Span *lines = ctx->cli->lines;
+    MemCtx *m = ctx->m;
+    memset(&ctx->fields, 0, sizeof(ctx->fields));
+
+    CliStatus_SetDims(ctx->cli, 0, 0);
+    i32 width = ctx->cli->cols;
+
+    StrVec *vh = StrVec_Make(m, bytes("\x1b[33m"), 0);
+    StrVec_Add(m, vh, NULL, 0);
+    ctx->fields.steps.name = vh->last;
+    StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
+    Span_Add(ctx->cli->lines, (Abstract *)vh);
+
+    vh = StrVec_Make(m, bytes("\x1b[35m"), 0);
+    StrVec_Add(m, vh, NULL, 0);
+    ctx->fields.current.action = vh->last;
+    StrVec_Add(m, vh, NULL, 0);
+    ctx->fields.current.source = vh->last;
+    StrVec_Add(m, vh, NULL, 0);
+    ctx->fields.current.dest = vh->last;
+    StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
+    Span_Add(ctx->cli->lines, (Abstract *)vh);
+
+    ctx->fields.steps.count_s = String_Init(m, MAX_BASE10+1);
+    ctx->fields.steps.total_s = String_Init(m, MAX_BASE10+1);
+    vh = StrVec_Make(m, NULL, 0);
+    StrVec_Add(m, vh, ctx->fields.steps.count_s->bytes, 0);
+    ctx->fields.steps.count_ve = vh->last;
+    StrVec_Add(m, vh, bytes(" of "), 0);
+    StrVec_Add(m, vh, ctx->fields.steps.total_s->bytes, 0);
+    ctx->fields.steps.total_ve = vh->last;
+    Span_Add(ctx->cli->lines, (Abstract *)vh);
+
+    String *s100 = String_Init(m, width);
+    memset(s100->bytes, ' ', width);
+    vh = StrVec_Make(m, bytes("\x1b[44m"), 0);
+    StrVec_Add(m, vh, s100->bytes, 0);
+    ctx->fields.steps.barStart = vh->last;
+    StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
+    StrVec_Add(m, vh, s100->bytes, 0);
+    ctx->fields.steps.barEnd = vh->last;
+    StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
+    Span_Add(ctx->cli->lines, (Abstract *)vh);
+
+    ctx->fields.mem_s = String_Init(m, STRING_EXTEND);
+    vh = StrVec_Make(m, bytes("\x1b[0m"), 0);
+    StrVec_Add(m, vh, bytes("Memory count: "), 0);
+    StrVec_Add(m, vh, ctx->fields.mem_s->bytes, 0);
+    ctx->fields.mem = vh->last;
+    StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
+    Span_Add(ctx->cli->lines, (Abstract *)vh);
+
+    BuildSubdir **dir = ctx->objdirs;
+    while(*dir != NULL){
+        char **sourceCstr = (*dir)->sources;
+        while(*sourceCstr != NULL){
+            ctx->fields.steps.total++;
+            sourceCstr++;
         }
+        dir++;
     }
-    cstr = " \x1b[0m\n";
-    String_AddBytes(m, count, bytes(cstr), strlen(cstr));
-
-    String *mems = Span_Get(cli->lines, 3);
-    String_Reset(mems);
-    cstr = "\x1b[0mmem: ";
-    String_AddBytes(m, mems, bytes(cstr), strlen(cstr));
-    String_AddMemCount(m, mems, MemCount());
-    cstr = " \x1b[0m\n";
-    String_AddBytes(m, mems, bytes(cstr), strlen(cstr));
 
     return SUCCESS;
 }
@@ -164,11 +182,10 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     MemCtx *m = ctx->m;
     Span *cmd = Span_Make(m, TYPE_SPAN);
     ProcDets pd;
-    ctx->current.source = String_Clone(DebugM, source);
-    ctx->current.dest = String_Clone(DebugM, dest);
-    ctx->steps.count++;
+    StrVecEntry_Set(ctx->fields.current.dest, dest->bytes, dest->length);
+    ctx->fields.steps.count++;
     if(File_CmpUpdated(m, source, dest, NULL)){
-        ctx->current.action = String_Make(DebugM, bytes("build obj"));
+        StrVecEntry_Set(ctx->fields.current.action, bytes("build obj: "), 0);
         CliStatus_Print(DebugM, ctx->cli);
         Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.cc)));
         char **ptr = ctx->args.cflags;
@@ -205,7 +222,7 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
             Fatal("Build error for adding object to lib ", 0);
         }
     }else{
-        ctx->current.action = String_Make(DebugM, bytes("built before"));
+        StrVecEntry_Set(ctx->fields.current.action, bytes("built before"), 0);
         CliStatus_Print(DebugM, ctx->cli);
     }
 
@@ -242,8 +259,7 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
     i64 destL = String_Length(dest);
     char **sourceCstr = dir->sources;
 
-    ctx->steps.name = String_Make(DebugM, bytes(dir->name));;
-    ctx->steps.count = 0;
+    StrVecEntry_Set(ctx->fields.steps.name, bytes(dir->name), 0);
 
     m->type.range++;
     while(*sourceCstr != NULL){
@@ -261,8 +277,6 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
     }
     m->type.range--;
 
-    ctx->steps.total += ctx->steps.count;
-    ctx->steps.count = 0;
     DebugStack_Pop();
     return r;
 }
@@ -271,6 +285,7 @@ static status build(BuildCtx *ctx){
     status r = READY;
     DebugStack_Push(NULL, 0);
     MemCtx *m = ctx->m;
+    setupStatus(ctx);
     String *libDir = String_Init(m, STRING_EXTEND);
     String *dist = File_GetAbsPath(m, String_Make(m, bytes(ctx->dist)));
     String_Add(m, libDir, dist);

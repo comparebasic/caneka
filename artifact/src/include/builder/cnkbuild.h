@@ -8,21 +8,33 @@ typedef struct build_subdir {
     char *sources[];
 } BuildSubdir;
 
+typedef struct build_cli_fields {
+    struct {
+        StrVecEntry *name; 
+        int count;
+        int total;
+        String *count_s;
+        String *total_s;
+        StrVecEntry *count_ve; 
+        StrVecEntry *total_ve; 
+        StrVecEntry *barStart; 
+        StrVecEntry *barEnd; 
+    } steps;
+    struct {
+        StrVecEntry *source; 
+        StrVecEntry *dest; 
+        StrVecEntry *action; 
+    } current;
+    StrVecEntry *mem; 
+    String *mem_s; 
+} BuildCliFields;
+
 typedef struct buildctx {
     Type type;
     MemCtx *m;
     Executable *targets;
     CliStatus *cli;
-    struct {
-        String *name; 
-        int count;
-        int total;
-    } steps;
-    struct {
-        String *source;
-        String *dest;
-        String *action;
-    } current;
+    BuildCliFields fields;
     char *dist;
     char *src;
     char *libtarget;

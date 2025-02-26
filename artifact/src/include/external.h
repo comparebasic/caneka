@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <poll.h>
 #include <unistd.h>
 #include <termios.h>

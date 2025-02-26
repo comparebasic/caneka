@@ -20,7 +20,7 @@ void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
     }else if(Ifc_Match(type, TYPE_SPAN)){
         if(extended){
             printf("\x1b[%dm%sT<%s:%s nvalues:%d items: <", color, msg, Class_ToString(type), 
-                t != NULL ? State_ToChars(((Abstract *)t)->type.of): "NULL", 
+                t != NULL ? State_ToChars(((Abstract *)t)->type.state): "NULL", 
                 ((Span *)t)->nvalues);
         }else{
             printf("\x1b[%dm%s", color, msg);

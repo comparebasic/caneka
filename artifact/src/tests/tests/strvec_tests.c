@@ -71,7 +71,7 @@ status StrVec_Tests(MemCtx *gm){
     StrVec_Add(m, vc, bytes("\n\n"), 0);
     StrVec_Add(m, vc, bytes(ponyTailCstr), 0);
     StrVec_Add(m, vc, bytes(ponyTailTwoCstr), 0);
-    Str *s = StrVec_ToStr(m, vc);
+    String *s = StrVec_ToStr(m, vc);
 
     DPrint((Abstract *)vc, COLOR_PURPLE, "vc: ");
     DPrint((Abstract *)s, COLOR_YELLOW, "str: ");

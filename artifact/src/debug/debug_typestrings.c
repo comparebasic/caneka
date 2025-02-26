@@ -36,7 +36,6 @@ char *TypeStrings[] = {
     "TYPE_STRING_FIXED",
     "TYPE_STRING_FULL",
     "TYPE_STRING_SLAB",
-    "TYPE_STR",
     "TYPE_STRVEC",
     "TYPE_STRVEC_ENTRY",
     "TYPE_STRVEC_ITER",

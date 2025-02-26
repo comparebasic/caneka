@@ -217,7 +217,6 @@ static BuildSubdir serveobj = { "serve", {
 
 static BuildSubdir stringobj = { "string", {
     "cursor.c",
-    "str.c",
     "iter_str.c",
     "string.c",
     "string_equals.c",

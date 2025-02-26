@@ -11,55 +11,26 @@ status StrVec_ToFd(StrVec *vh, int fd){
     return SUCCESS;
 }
 
-Str *StrVec_ToStr(MemCtx *m, StrVec *vh){
-    Str *ret = Str_Make(m, NULL, 0);
-    Str *s = ret;
-    i64 remaining = vh->total;
-    i64 segment = min(remaining, MEM_SLAB_SIZE);
-    byte *ptr = s->bytes = MemCtx_Alloc(m, (size_t)segment); 
-
+String *StrVec_ToStr(MemCtx *m, StrVec *vh){
+    String *s = String_Init(m, STRING_EXTEND);
     SvIter it;
     SvIter_Init(&it, vh);
-    int length = 0;
-    int remainder = 0;
-    int used = 0;
     StrVecEntry *ve = NULL;
-    byte *vePtr = NULL;
     while((SvIter_Next(&it) & END) == 0){
         ve = SvIter_Get(&it);
-        vePtr = ve->content;
-        do {
-            int length = ve->length;
-            if(remainder > 0){
-                length = remainder;
-            }
-            if(s->length + length > STR_MAX){
-                int use = MEM_SLAB_SIZE - s->length;
-                remainder = length - use;
-                length = use;
-                printf("over max! using %d remaining %d\n", length, remainder);
-            }else{
-                remainder = 0;
-            }
-            printf("length: %d of %d\n", length, ve->length); 
-            memcpy(ptr, vePtr, length);
-            s->length += length;
-            remaining -= length;
-            vePtr += length;
-            if(remainder > 0){
-                segment = min(remaining, MEM_SLAB_SIZE);
-                printf("making string %ld\n", segment);
-                ptr = MemCtx_Alloc(m, (size_t)segment);
-                s->type.state |= CONTINUED;
-                s->next = Str_Make(m, ptr, 0);
-                s = s->next;
-            }else{
-                ptr += length;
-            }
-        } while(remainder > 0);
+        String_AddBytes(m, s, ve->content, ve->length);
     }
 
-    return ret;
+    return s;
+}
+
+status StrVecEntry_Set(StrVecEntry *ve, byte *ptr, int length){
+    ve->content = ptr;
+    if(length == 0 && ptr != NULL){
+       length = strlen((char *)ptr); 
+    }
+    ve->length = length;
+    return SUCCESS;
 }
 
 status StrVec_Add(MemCtx *m, StrVec *vh, byte *ptr, int length){
@@ -75,7 +46,7 @@ status StrVec_Add(MemCtx *m, StrVec *vh, byte *ptr, int length){
     vh->count++;
 
     ve->content = ptr;
-    if(length == 0){
+    if(length == 0 && ptr != NULL){
         length = strlen((char *)ptr);
     }
     ve->length = length;
@@ -90,7 +61,7 @@ StrVec *StrVec_Make(MemCtx *m, byte *ptr, int length){
     vh->type.of = TYPE_STRVEC;
     ve->type.of = TYPE_STRVEC_ENTRY;
 
-    if(length == 0){
+    if(length == 0 && ptr != NULL){
         length = strlen((char *)ptr);
     }
 
