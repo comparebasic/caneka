@@ -63,6 +63,8 @@ static status setupStatus(BuildCtx *ctx){
     i32 width = ctx->cli->cols;
 
     StrVec *vh = StrVec_Make(m, bytes("\x1b[33m"), 0);
+    StrVec_Add(m, vh, bytes("module: "), 0);
+    StrVec_Add(m, vh, bytes("\x1b[1;33m"), 0);
     StrVec_Add(m, vh, NULL, 0);
     ctx->fields.steps.name = vh->last;
     StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
