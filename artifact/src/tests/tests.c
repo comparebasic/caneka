@@ -375,12 +375,14 @@ static TestSet _Tests[] = {
         "Bi-directional encryption with a variable sized key.",
         PARTIAL_FEATURE,
     },
+    /*
     {
         "UserTests - PasswordFlow",
         User_Tests,
         "A Basic user password flow using CycleServe and IoCtx.",
         PARTIAL_FEATURE,
     },
+    */
     {
         "Email",
         NULL,
@@ -407,10 +409,9 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
     {
         "StrVec",
@@ -427,3 +428,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/

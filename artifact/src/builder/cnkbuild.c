@@ -41,11 +41,22 @@ static status renderStatus(MemCtx *m, Abstract *a){
     ctx->fields.steps.count_ve->length = ctx->fields.steps.count_s->length;
     ctx->fields.steps.total_ve->length = ctx->fields.steps.total_s->length;
 
+    String_Reset(ctx->fields.steps.modCount_s);
+    String_Reset(ctx->fields.steps.modTotal_s);
+    String_AddInt(m, ctx->fields.steps.modCount_s, ctx->fields.steps.modCount);
+    String_AddInt(m, ctx->fields.steps.modTotal_s, ctx->fields.steps.modTotal);
+    ctx->fields.steps.modCount_ve->length = ctx->fields.steps.modCount_s->length;
+    ctx->fields.steps.modTotal_ve->length = ctx->fields.steps.modTotal_s->length;
+
     i32 width = ctx->cli->cols;
     float _progress = ((float)ctx->cli->cols) * ((float)ctx->fields.steps.count)/((float)ctx->fields.steps.total);
     i32 progress = (i32)_progress;
     ctx->fields.steps.barStart->length = progress;
-    ctx->fields.steps.barEnd->length = ctx->cli->cols - progress;
+
+    i32 remainingModSrc =ctx->fields.steps.modSrcTotal - ctx->fields.steps.modSrcCount;
+    _progress = ((float)ctx->cli->cols) * ((float)remainingModSrc)/((float)ctx->fields.steps.total);
+    progress = (i32)_progress;
+    ctx->fields.steps.barEnd->length = progress;
 
     String_Reset(ctx->fields.mem_s);
     String_AddMemCount(m, ctx->fields.mem_s, MemCount());
@@ -62,12 +73,19 @@ static status setupStatus(BuildCtx *ctx){
     CliStatus_SetDims(ctx->cli, 0, 0);
     i32 width = ctx->cli->cols;
 
+    ctx->fields.steps.modCount_s = String_Init(m, MAX_BASE10+1);
+    ctx->fields.steps.modTotal_s = String_Init(m, MAX_BASE10+1);
     StrVec *vh = StrVec_Make(m, bytes("\x1b[33m"), 0);
-    StrVec_Add(m, vh, bytes("module: "), 0);
+    StrVec_Add(m, vh, bytes("module "), 0);
+    StrVec_Add(m, vh, ctx->fields.steps.modCount_s->bytes, 0);
+    ctx->fields.steps.modCount_ve = vh->last;
+    StrVec_Add(m, vh, bytes(" of "), 0);
+    StrVec_Add(m, vh, ctx->fields.steps.modTotal_s->bytes, 0);
+    ctx->fields.steps.modTotal_ve = vh->last;
     StrVec_Add(m, vh, bytes("\x1b[1;33m"), 0);
+    StrVec_Add(m, vh, bytes(": "), 0);
     StrVec_Add(m, vh, NULL, 0);
     ctx->fields.steps.name = vh->last;
-    StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
     Span_Add(ctx->cli->lines, (Abstract *)vh);
 
     vh = StrVec_Make(m, bytes("\x1b[35m"), 0);
@@ -82,7 +100,7 @@ static status setupStatus(BuildCtx *ctx){
 
     ctx->fields.steps.count_s = String_Init(m, MAX_BASE10+1);
     ctx->fields.steps.total_s = String_Init(m, MAX_BASE10+1);
-    vh = StrVec_Make(m, NULL, 0);
+    vh = StrVec_Make(m, bytes("sources: "), 0);
     StrVec_Add(m, vh, ctx->fields.steps.count_s->bytes, 0);
     ctx->fields.steps.count_ve = vh->last;
     StrVec_Add(m, vh, bytes(" of "), 0);
@@ -95,7 +113,7 @@ static status setupStatus(BuildCtx *ctx){
     vh = StrVec_Make(m, bytes("\x1b[44m"), 0);
     StrVec_Add(m, vh, s100->bytes, 0);
     ctx->fields.steps.barStart = vh->last;
-    StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
+    StrVec_Add(m, vh, bytes("\x1b[43m"), 0);
     StrVec_Add(m, vh, s100->bytes, 0);
     ctx->fields.steps.barEnd = vh->last;
     StrVec_Add(m, vh, bytes("\x1b[0m"), 0);
@@ -186,6 +204,7 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     ProcDets pd;
     StrVecEntry_Set(ctx->fields.current.dest, dest->bytes, dest->length);
     ctx->fields.steps.count++;
+    ctx->fields.steps.modSrcCount++;
     if(File_CmpUpdated(m, source, dest, NULL)){
         StrVecEntry_Set(ctx->fields.current.action, bytes("build obj: "), 0);
         CliStatus_Print(DebugM, ctx->cli);
@@ -259,11 +278,20 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
     String_Add(m, dest, dirPath);
     String_AddBytes(m, dest, bytes("/"), 1);
     i64 destL = String_Length(dest);
-    char **sourceCstr = dir->sources;
 
     StrVecEntry_Set(ctx->fields.steps.name, bytes(dir->name), 0);
 
     m->type.range++;
+
+    ctx->fields.steps.modSrcCount = 0;
+    ctx->fields.steps.modSrcTotal = 0;
+    char **sourceCstr = dir->sources;
+    while(*sourceCstr != NULL){
+        ctx->fields.steps.modSrcTotal++;
+        sourceCstr++;
+    }
+
+    sourceCstr = dir->sources;
     while(*sourceCstr != NULL){
         String_Trunc(source, sourceL);
         String_AddBytes(m, source, bytes(*sourceCstr), strlen(*sourceCstr));
@@ -306,8 +334,18 @@ static status build(BuildCtx *ctx){
     String_AddBytes(m, lib, bytes(cstr), strlen(cstr));
 
     BuildSubdir **dir = ctx->objdirs;
+
+    ctx->fields.steps.modCount = 0;
+    ctx->fields.steps.modTotal = 0;
+    while(*dir != NULL){
+        ctx->fields.steps.modTotal++;
+        dir++;
+    }
+
+    dir = ctx->objdirs;
     while(*dir != NULL){
         r |= buildDirToLib(ctx, libDir, lib, *dir);
+        ctx->fields.steps.modCount++;
         dir++;
     }
     CliStatus_PrintFinish(DebugM, ctx->cli);

@@ -13,8 +13,16 @@ typedef struct build_cli_fields {
         StrVecEntry *name; 
         int count;
         int total;
+        int modSrcCount;
+        int modSrcTotal;
+        int modCount;
+        int modTotal;
+        String *modCount_s;
+        String *modTotal_s;
         String *count_s;
         String *total_s;
+        StrVecEntry *modCount_ve;
+        StrVecEntry *modTotal_ve;
         StrVecEntry *count_ve; 
         StrVecEntry *total_ve; 
         StrVecEntry *barStart; 
