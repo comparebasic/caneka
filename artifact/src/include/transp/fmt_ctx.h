@@ -12,6 +12,7 @@ enum format_item_flags {
 enum format_ctx_flags {
     FMT_CTX_ENCOUNTER = 1 << 8,
     FMT_CTX_CHILDREN_DONE = 1 << 9,
+    FMT_CTX_WAS_LAST = 1 << 10,
 };
 
 typedef struct fmt_cnf  {

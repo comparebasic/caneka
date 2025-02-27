@@ -14,14 +14,14 @@ static struct pat_config pats[] = {
     {FMT_FL_SPACE_FOR_WS, NULL, "h2", 0},
     {FMT_FL_SPACE_FOR_WS, NULL, "h3", 0},
     {FMT_FL_SPACE_FOR_WS, NULL, "h4", 0},
-    {FMT_FL_SPACE_FOR_WS|FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, "-", "ul", 0},
+    {SUCCESS|FMT_FL_SPACE_FOR_WS|FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, "-", "ul", 0},
     {FMT_FL_SPACE_FOR_WS|FMT_FL_TO_PARENT|FMT_FL_SPACE_FOR_WS, NULL, "li", -1},
-    {FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, "+", "table", 0},
-    {FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "thead", -1},
-    {FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_LAST|FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, NULL, "tr", -1},
-    {FMT_FL_TO_PARENT_ON_LAST|FMT_FL_TO_NEXT_ON_LAST , NULL, "th", -1},
-    {FMT_FL_TO_PARENT|FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "tr", -4},
-    {FMT_FL_TO_PARENT_ON_LAST, NULL, "td", -1},
+    {SUCCESS|FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, "+", "table", 0},
+    {PROCESSING|FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "thead", 0},
+    {PROCESSING|FMT_FL_TO_NEXT_ID|FMT_FL_TO_PARENT_ON_LAST|FMT_FL_CLOSE_AFTER_CHILD|FMT_FL_TO_NEXT_ID, NULL, "tr", -1},
+    {PROCESSING|FMT_FL_TO_PARENT_ON_LAST|FMT_FL_TO_NEXT_ON_LAST , NULL, "th", -1},
+    {PROCESSING|FMT_FL_TO_PARENT|FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "tr", -4},
+    {CONTINUED|FMT_FL_TO_PARENT_ON_LAST, NULL, "td", -1},
     {SUCCESS|FMT_FL_CLOSE_AFTER_CHILD, NULL, "table", 0},
     {PROCESSING|FMT_FL_TO_PARENT_ON_LAST|FMT_FL_CLOSE_AFTER_CHILD, NULL, "tr", -1},
     {CONTINUED|FMT_FL_TO_PARENT_ON_LAST, ":", "td", -1},
@@ -204,7 +204,7 @@ static void out(FmtCtx *ctx, int captureKey){
     }
 
     if(captureKey == FORMATTER_LAST_VALUE){
-        outClose(ctx, FMT_FL_TO_PARENT_ON_LAST);
+        outClose(ctx, PROCESSING);
         if(def->type.state & FMT_FL_TO_NEXT_ON_LAST){
             ctx->def = Chain_Get(ctx->resolver->byId, ctx->def->id+1);
         }else{
@@ -272,6 +272,14 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
             String_Add(ctx->m, ctx->item->content, s);
         }
         if(captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
+            if(ctx->type.state &FMT_CTX_WAS_LAST & ctx->def->type.state & (SUCCESS|CONTINUED)){
+                openTags(ctx, ctx->def, PROCESSING);
+            }
+            if(captureKey == FORMATTER_LAST_VALUE){
+                ctx->type.state |= FMT_CTX_WAS_LAST;
+            }else{
+                ctx->type.state &= ~FMT_CTX_WAS_LAST;
+            }
             out(ctx, captureKey);
             reset(ctx);
         }

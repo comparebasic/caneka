@@ -96,7 +96,6 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                 if(_h != NULL && *((util *)_h) != 0){
                     if(Hashed_LocalEquals(tbl->m, h, _h)){
                         h = _h;
-                        printf("idx:%d hkey:%d\n", h->idx, hkey);
                         h->idx = hkey;
                         h->value = value;
                         found = TRUE;
