@@ -107,7 +107,7 @@ status Match_Feed(MemCtx *m, Match *mt, word c){
     if((mt->type.state & NOOP) != 0){
 
         if(DEBUG_PATMATCH){
-            printf("\x1b[%dm'%c' - \x1b[0m", COLOR_RED, c);
+            printf("\x1b[1%dm'%c'\x1b[%dm - \x1b[0m", DEBUG_PATMATCH, c, DEBUG_PATMATCH);
             Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "NOOP - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
             printf("\n");
         }

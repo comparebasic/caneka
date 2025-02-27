@@ -22,35 +22,31 @@ static struct pat_config pats[] = {
     {FMT_FL_TO_PARENT_ON_LAST|FMT_FL_TO_NEXT_ON_LAST , NULL, "th", -1},
     {FMT_FL_TO_PARENT|FMT_FL_TO_NEXT_ID|FMT_FL_CLOSE_AFTER_CHILD, NULL, "tr", -4},
     {FMT_FL_TO_PARENT_ON_LAST, NULL, "td", -1},
+    {SUCCESS|FMT_FL_CLOSE_AFTER_CHILD, NULL, "table", 0},
+    {PROCESSING|FMT_FL_TO_PARENT_ON_LAST|FMT_FL_CLOSE_AFTER_CHILD, NULL, "tr", -1},
+    {CONTINUED|FMT_FL_TO_PARENT_ON_LAST, ":", "td", -1},
     {0, NULL, NULL, 0},
 };
 
-static char *captureToChars(int captureKey){
-   if(captureKey == FORMATTER_INDENT){
-        return "FORMATTER_INDENT";
-   }else if(captureKey == FORMATTER_ALIAS){
-        return "FORMATTER_ALIAS";
-   }else if(captureKey == FORMATTER_LINE){
-        return "FORMATTER_LINE";
-   }else if(captureKey == FORMATTER_LAST_VALUE){
-        return "FORMATTER_LAST_VALUE";
-   }else if(captureKey == FORMATTER_VALUE){
-        return "FORMATTER_VALUE";
-   }else if(captureKey == FORMATTER_NEXT){
-        return "FORMATTER_NEXT";
-   }else if(captureKey == FORMATTER_METHOD){
-        return "FORMATTER_METHOD";
-   }else{
-        return "unknown";
-   }
-}
-
 static word indentDef[] = {
-    PAT_ANY|PAT_INVERT_CAPTURE,' ' ,' ',PAT_MANY|PAT_TERM, '>', '>',PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' ',
+    PAT_ANY|PAT_INVERT_CAPTURE,' ' ,' ',PAT_MANY|PAT_TERM, '=', '=',PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' ',
     PAT_END, 0, 0
 };
 
 static word lineDef[] = {
+    PAT_KO, '\n', '\n', patText,
+    PAT_END, 0, 0
+};
+
+static word kvKeyDef[] = {
+    PAT_KO, '\n','\n', PAT_KO,':', ':', patText,
+    PAT_ANY,' ',' ', PAT_ANY|PAT_TERM,'\r','\r',PAT_ANY|PAT_TERM,'\t','\t',
+    PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM,'\n', '\n',
+    PAT_END, 0, 0
+};
+
+static word noLeadLineDef[] = {
+    PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' ',
     PAT_KO, '\n', '\n', patText,
     PAT_END, 0, 0
 };
@@ -69,7 +65,6 @@ static word plusDef[] = {
     PAT_ANY, ' ', ' ', PAT_TERM, '+', '+',
     PAT_END, 0, 0
 };
-
 
 static word cmdDef[] = {
     PAT_TERM|PAT_INVERT_CAPTURE, '.', '.', PAT_KO, ':', ':', patText,
@@ -91,17 +86,19 @@ static status start(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)nlDef, FORMATTER_NEXT, FORMATTER_MARK_START);
+        (PatCharDef*)nlDef, FORMATTER_NEXT, FORMATTER_START);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)indentDef, FORMATTER_INDENT, FORMATTER_MARK_LINE);
+        (PatCharDef*)indentDef, FORMATTER_INDENT, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)dashDef, FORMATTER_ALIAS, FORMATTER_MARK_LINE);
+        (PatCharDef*)dashDef, FORMATTER_ALIAS, FORMATTER_NOLEADLINE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)plusDef, FORMATTER_ALIAS, FORMATTER_MARK_VALUES);
+        (PatCharDef*)plusDef, FORMATTER_ALIAS, FORMATTER_VALUE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)cmdDef, FORMATTER_METHOD, FORMATTER_MARK_VALUES);
+        (PatCharDef*)cmdDef, FORMATTER_METHOD, FORMATTER_VALUE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)lineDef, FORMATTER_LINE, FORMATTER_MARK_START);
+        (PatCharDef*)kvKeyDef, FORMATTER_KV_KEY, FORMATTER_KV_VALUE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lineDef, FORMATTER_LINE, FORMATTER_START);
 
     return r;
 }
@@ -111,7 +108,21 @@ static status line(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)lineDef, FORMATTER_LINE, FORMATTER_MARK_START);
+        (PatCharDef*)lineDef, FORMATTER_LINE, FORMATTER_START);
+
+    return r;
+}
+
+static status noLeadLine(MemCtx *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)dashDef, FORMATTER_ALIAS, FORMATTER_NOLEADLINE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)noLeadLineDef, FORMATTER_LINE, FORMATTER_NOLEADLINE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)nlDef, FORMATTER_NEXT, FORMATTER_START);
 
     return r;
 }
@@ -121,11 +132,21 @@ static status value(MemCtx *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)nlDef, FORMATTER_NEXT, FORMATTER_MARK_START);
+        (PatCharDef*)nlDef, FORMATTER_NEXT, FORMATTER_START);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)commaSepDef, FORMATTER_VALUE, FORMATTER_MARK_VALUES);
+        (PatCharDef*)commaSepDef, FORMATTER_VALUE, FORMATTER_VALUE);
     r |= Roebling_SetPattern(rbl,
-        (PatCharDef*)lastValueDef, FORMATTER_LAST_VALUE, FORMATTER_MARK_VALUES);
+        (PatCharDef*)lastValueDef, FORMATTER_LAST_VALUE, FORMATTER_VALUE);
+
+    return r;
+}
+
+static status kvValue(MemCtx *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)lineDef, FORMATTER_KV_VALUE, FORMATTER_START);
 
     return r;
 }
@@ -134,11 +155,24 @@ static void reset(FmtCtx *ctx){
     String_Reset(ctx->item->content);
 }
 
+static void openTags(FmtCtx *ctx, FmtDef *def, word fl){
+    FmtDef *parent = def;
+    while(parent != NULL && parent->parent != NULL){
+        parent = parent->parent;
+    }
+    while(parent != NULL && parent != def){ 
+       if((parent->type.state & fl) != 0 || fl == 0){
+           printf("<%s>", parent->name->bytes);
+       }
+       parent = parent->child;
+    }
+}
+
 static void outClose(FmtCtx *ctx, word fl){
     FmtDef *curDef = ctx->def;
-    while(curDef != NULL && curDef->parent != NULL &&  
-           (curDef->type.state & fl) != 0){
-       if(curDef->parent->type.state & FMT_FL_CLOSE_AFTER_CHILD){
+    while(curDef != NULL && curDef->parent != NULL){
+       word pfl = curDef->parent->type.state;
+       if((pfl & fl) != 0 && pfl & FMT_FL_CLOSE_AFTER_CHILD){
             printf("</%s>", curDef->parent->name->bytes);
        }
        curDef = curDef->parent;
@@ -147,7 +181,9 @@ static void outClose(FmtCtx *ctx, word fl){
 
 static void out(FmtCtx *ctx, int captureKey){
     FmtDef *def = ctx->def;
-    printf("<%s>", def->name->bytes);
+    if(captureKey != FORMATTER_NEXT || String_Length(ctx->item->content)){
+        printf("<%s>", def->name->bytes);
+    }
 
     if((def->type.state & FMT_FL_TO_NEXT_ID) != 0){
         ctx->def = Chain_Get(ctx->resolver->byId, def->id+1); 
@@ -162,7 +198,9 @@ static void out(FmtCtx *ctx, int captureKey){
     }
 
     if((def->type.state & FMT_FL_CLOSE_AFTER_CHILD) == 0){
-        printf("</%s>", def->name->bytes);
+        if(captureKey != FORMATTER_NEXT || String_Length(ctx->item->content)){
+            printf("</%s>", def->name->bytes);
+        }
     }
 
     if(captureKey == FORMATTER_LAST_VALUE){
@@ -173,7 +211,7 @@ static void out(FmtCtx *ctx, int captureKey){
             ctx->def = Chain_Get(ctx->resolver->byId, ctx->def->id-1);
         }
     }else if(captureKey == FORMATTER_NEXT){
-        outClose(ctx, (FMT_FL_TO_PARENT|FMT_FL_TO_PARENT_ON_LAST));
+        outClose(ctx, SUCCESS);
         ctx->def = NULL;
         reset(ctx);
     }
@@ -189,15 +227,27 @@ static status Fmt_SetMethod(FmtCtx *ctx, cls id){
 
 static status Capture(word captureKey, int matchIdx, String *s, Abstract *source){
     FmtCtx *ctx = as(source, TYPE_FMT_HTML);
-    /*
-    printf("\x1b[%dmcaptured %s/'%s'\x1b[0m\n", COLOR_YELLOW, captureToChars(captureKey), s->bytes);
-    */
+    if(DEBUG_FMT){
+        printf("\x1b[%dmcaptured %s/'%s'\x1b[0m\n", COLOR_YELLOW, Class_ToString(captureKey), s->bytes);
+    }
     if(ctx->def == NULL){
         ctx->def = Chain_Get(ctx->resolver->byId, 0);
     }
 
     if(captureKey == FORMATTER_INDENT){
         ctx->def = Chain_Get(ctx->resolver->byId, s->length);
+    }else if(captureKey == FORMATTER_KV_KEY){
+        FmtDef *def = TableChain_Get(ctx->resolver->byAlias, (Abstract *)String_Make(ctx->m, bytes(":")));
+        openTags(ctx, def,  def == ctx->def ? PROCESSING : (PROCESSING|SUCCESS));
+        ctx->def = def;
+        String_Add(ctx->m, ctx->item->content, s);
+        out(ctx, captureKey);
+        reset(ctx);
+    }else if(captureKey == FORMATTER_KV_VALUE){
+        String_Add(ctx->m, ctx->item->content, s);
+        out(ctx, captureKey);
+        outClose(ctx, PROCESSING);
+        reset(ctx);
     }else if(captureKey == FORMATTER_ALIAS || captureKey == FORMATTER_METHOD){
         if(String_Length(ctx->item->content) > 0){
             out(ctx, captureKey);
@@ -252,6 +302,9 @@ static void addPatterns(FmtCtx *fmt){
         def->type.state = cnf->flags;
         if(cnf->parent != 0){
             def->parent = Lookup_Get(lk, def->id+cnf->parent);
+            if(def->parent != NULL){
+                def->parent->child = def;
+            }
         }
         Lookup_Add(fmt->m, lk, def->id, def);
         cnf++;
@@ -266,18 +319,24 @@ FmtCtx *FmtHtml_Make(MemCtx *m){
 
     addPatterns(ctx);
 
-    Span *parsers_do =  Span_From(m, 7,
-        (Abstract *)Int_Wrapped(m, FORMATTER_MARK_START), 
+    Span *parsers_do =  Span_From(m, 11,
+        (Abstract *)Int_Wrapped(m, FORMATTER_START), 
             (Abstract *)Do_Wrapped(m, (DoFunc)start),
-        (Abstract *)Int_Wrapped(m, FORMATTER_MARK_LINE), 
+        (Abstract *)Int_Wrapped(m, FORMATTER_LINE), 
             (Abstract *)Do_Wrapped(m, (DoFunc)line),
-        (Abstract *)Int_Wrapped(m, FORMATTER_MARK_VALUES), 
+        (Abstract *)Int_Wrapped(m, FORMATTER_NOLEADLINE), 
+            (Abstract *)Do_Wrapped(m, (DoFunc)noLeadLine),
+        (Abstract *)Int_Wrapped(m, FORMATTER_VALUE), 
             (Abstract *)Do_Wrapped(m, (DoFunc)value),
-        (Abstract *)Int_Wrapped(m, FORMATTER_MARK_END));
+        (Abstract *)Int_Wrapped(m, FORMATTER_KV_VALUE), 
+            (Abstract *)Do_Wrapped(m, (DoFunc)kvValue),
+        (Abstract *)Int_Wrapped(m, FORMATTER_END));
 
     LookupConfig config[] = {
-        {FORMATTER_MARK_START, (Abstract *)String_Make(m, bytes("START"))},
-        {FORMATTER_MARK_LINE, (Abstract *)String_Make(m, bytes("LINE"))},
+        {FORMATTER_START, (Abstract *)String_Make(m, bytes("START"))},
+        {FORMATTER_LINE, (Abstract *)String_Make(m, bytes("LINE"))},
+        {FORMATTER_NOLEADLINE, (Abstract *)String_Make(m, bytes("NOLEADLINE"))},
+        {FORMATTER_VALUE, (Abstract *)String_Make(m, bytes("VALUES"))},
         {0, NULL},
     };
 

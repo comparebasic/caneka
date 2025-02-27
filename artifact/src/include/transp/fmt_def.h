@@ -17,6 +17,7 @@ typedef struct format_def {
     FmtTrans from;
     FmtTrans to;
     struct format_def *parent;
+    struct format_def *child;
 } FmtDef;
 
 FmtDef *FmtDef_Make(MemCtx *m);

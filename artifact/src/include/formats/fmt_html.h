@@ -1,28 +1,3 @@
-enum formatter_marks {
-    FORMATTER_MARK_START,
-    FORMATTER_MARK_LINE,
-    FORMATTER_MARK_VALUES,
-    FORMATTER_MARK_END,
-};
-
-enum formatter_captures {
-    FORMATTER_INDENT,
-    FORMATTER_METHOD,
-    FORMATTER_ALIAS,
-    FORMATTER_CLOSE,
-    _FORMATTER_OUT,
-    FORMATTER_LINE,
-    FORMATTER_VALUE,
-    FORMATTER_LAST_VALUE,
-    FORMATTER_NEXT,
-    _FORMATTER_OUT_END,
-};
-
-enum formatter_types {
-    _TYPE_FORMATTER_START = _TYPE_CORE_END,
-    _TYPE_FORMATTER_END,
-};
-
 enum formatter_methods {
     FMT_UL = 1,
     FMT_TBL,
@@ -43,4 +18,3 @@ typedef struct formatter_ctx {
 } FmtHtml;
 
 FmtCtx *FmtHtml_Make(MemCtx *m);
-status Fmt_Run(MemCtx *m, char *in, char *out);

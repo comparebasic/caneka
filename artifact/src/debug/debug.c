@@ -14,6 +14,7 @@ status Debug_Init(MemCtx *m){
         StringDebug_Init(m, funcs);
         SequenceDebug_Init(m, funcs);
         UtilDebug_Init(m, funcs);
+        ParserDebug_Init(m, funcs);
         /* todo add other debug inits here */
         return SUCCESS;
     }

@@ -48,5 +48,6 @@ int DEBUG_CDOC = 0;
 int DEBUG_MEMLOCAL = 0;
 int DEBUG_IOCTX = 0;
 int DEBUG_KVE = 0;
+int DEBUG_FMT = 0;
 
 boolean SHOW_SERVE_TESTS = FALSE;

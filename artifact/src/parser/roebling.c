@@ -74,11 +74,15 @@ static status Roebling_RunMatches(Roebling *rbl){
         }
         rbl->type.state |= (rbl->cursor.type.state & END);
 
-        if(DEBUG_PATMATCH){
+        if(DEBUG_PATMATCH && rbl->type.state & DEBUG){
             Stepper(rbl->m, (Abstract *)rbl);
         }
         if(noopCount == rbl->matches->nvalues){
-            rbl->type.state |= (NOOP|END);
+            if(DEBUG_PATMATCH){
+                printf("\x1b[%dnoopCount rached adding NOOP|END flags\x1b[0m\n",
+                    DEBUG_PATMATCH);
+            }
+            rbl->type.state |= (NOOP|END|ERROR);
         }
     }
 
@@ -233,7 +237,6 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int 
     Match *mt = Span_ReserveNext(rbl->matches);
     status r = READY;
 
-    rbl->snips->type.state |= DEBUG;
     String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
     if(sns == NULL){
         sns = String_Init(rbl->m, STRING_EXTEND);

@@ -181,6 +181,7 @@ static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *l
         Debug_Print((void *)dest, 0, "build exec: ", COLOR_CYAN, FALSE);
         printf("\n");
 
+        DebugStack_SetRef(cmd, cmd->type.of);
         ProcDets pd;
         ProcDets_Init(&pd);
         r |= SubProcess(m, cmd, &pd);
@@ -243,10 +244,9 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
             Fatal("Build error for adding object to lib ", 0);
         }
     }else{
-        StrVecEntry_Set(ctx->fields.current.action, bytes("built before"), 0);
+        StrVecEntry_Set(ctx->fields.current.action, bytes(" link obj:"), 0);
         CliStatus_Print(DebugM, ctx->cli);
     }
-
 
     if(r == READY){
         r = NOOP;

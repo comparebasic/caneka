@@ -100,7 +100,7 @@ status String_AddSub(MemCtx *m, String *s, String *b, i64 start, i64 end) {
     }
 
     start -= pos;
-    int length = min(s->length, end-pos);
+    int length = min(b->length, end-pos);
     while(b != NULL && length > 0){
         int length = min(b->length-start, end-pos);
         String_AddBytes(m, s, b->bytes+start, length);
