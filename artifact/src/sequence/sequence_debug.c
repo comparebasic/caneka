@@ -213,6 +213,11 @@ void SpanDef_Print(SpanDef *def){
     printf("]");
 }
 
+void OrdTable_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    OrdTable *otbl = (OrdTable *)as(a, TYPE_ORDERED_TABLE);
+    Debug_Print((void *)otbl->order, 0, msg, color,extended); 
+}
+
 void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Span *p = (Span *)asIfc(a, TYPE_SPAN);
     printf("\x1b[0;%dm%sP<%u items in dims:%u ", color, msg,
@@ -300,6 +305,8 @@ status SequenceDebug_Init(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_TABLE_CHAIN, (void *)TableChain_Print);
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
+    r |= Lookup_Add(m, lk, TYPE_ORDERED_TABLE, (void *) OrdTable_Print);
+
     return r;
 }
 

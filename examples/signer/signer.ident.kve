@@ -1,1 +1,0 @@
-kve signer-ident; party: Firecrow Silvernight; role: Director; key: ../../dist/fixtures/key.secp256k1.pem; pubKey: ../../dist/fixtures/pub.secp256k1.pem; keyId: firecrow1-ec; end;

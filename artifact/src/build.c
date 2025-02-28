@@ -9,7 +9,6 @@
 static Executable targets[] = {
     {"testreq", "programs/testreq.c"},
     {"caneka", "programs/main.c"},
-    {"formatter", "programs/formatter.c"},
     {NULL, NULL},
 };
 static char *cflags[] = {
@@ -64,6 +63,8 @@ static BuildSubdir cryptoobj = { "crypto", {
     "salty.c",
     "sane.c",
     "symetric.c",
+    "asymetric.c",
+    "secure.c",
     NULL
 }};
 
@@ -197,7 +198,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     "sequence_debug.c",
     "table.c",
     "table_chain.c",
-    "ordered_table.c",
+    "ord_table.c",
     NULL
 }};
 

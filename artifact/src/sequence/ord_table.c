@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-OrderedTable *OrderedTable_Make(MemCtx *m){
-    OrderedTable *p = MemCtx_Alloc(m, sizeof(OrderedTable));
+OrdTable *OrdTable_Make(MemCtx *m){
+    OrdTable *p = MemCtx_Alloc(m, sizeof(OrdTable));
     p->m = m;
     p->def = SpanDef_FromCls(TYPE_TABLE);
     p->type.of = p->def->typeOf = TYPE_ORDERED_TABLE;

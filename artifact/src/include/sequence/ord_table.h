@@ -18,6 +18,6 @@ typedef struct ordered_table {
     } metrics;
     /* end span */
     Span *order;
-} OrderedTable;
+} OrdTable;
 
-OrderedTable *OrderedTable_Make(MemCtx *m);
+OrdTable *OrdTable_Make(MemCtx *m);

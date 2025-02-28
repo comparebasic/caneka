@@ -24,6 +24,7 @@
 
 #ifdef OPENSSL
     #include <openssl/evp.h>
+    #include <openssl/pem.h>
     #include <openssl/ecdsa.h>
     #include <openssl/err.h>
     #include <openssl/conf.h>

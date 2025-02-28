@@ -355,14 +355,12 @@ static TestSet _Tests[] = {
         "Generating Sha256 summaries of strings. And random data strings.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "Crypto - KeyTests",
         Crypto_KeyTests,
         "Makein Ecsda keys and reading pem files.",
         PARTIAL_FEATURE,
     },
-    */
     {
         "Crypto - Ecdsa",
         Blank_Tests,

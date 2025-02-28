@@ -27,3 +27,4 @@ status File_AbsFromCtx(MemCtx *m, File *file, Access *access, IoCtx *ctx);
 status File_Read(MemCtx *m, File *file, Access *access, int pos, int length);
 status File_Copy(MemCtx *m, String *a, String *b, Access *ac);
 status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source);
+FILE *File_GetFILE(MemCtx *m, File *file, Access *access);

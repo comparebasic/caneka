@@ -20,7 +20,7 @@ status Kve_OutFromTable(MemCtx *m, Span *p, String *first, OutFunc out){
 
     Iter it;
     if(p->type.of == TYPE_ORDERED_TABLE){
-        OrderedTable *op = (OrderedTable *)p;
+        OrdTable *op = (OrdTable *)p;
         Iter_Init(&it, op->order);
     }else{
         int kveIdx = Table_GetIdx(tbl, (Abstract *)first);

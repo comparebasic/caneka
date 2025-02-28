@@ -13,4 +13,4 @@
 #include "sequence/nestedd.h"
 #include "sequence/span_tolocal.h"
 #include "sequence/sequence_debug.h"
-#include "sequence/ordered_table.h"
+#include "sequence/ord_table.h"

@@ -72,9 +72,14 @@ status File_Persist(MemCtx *m, File *file){
     return NOOP;
 }
 
+FILE *File_GetFILE(MemCtx *m, File *file, Access *access){
+    /* accessy stuff */
+    return fopen((char *)file->abs->bytes, "r");
+}
+
 status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
     int remaining = length;
-    FILE *f = fopen((char *)file->abs->bytes, "r");
+    FILE *f = File_GetFILE(m, file, access);;
     if(f == NULL){
         file->type.state |= NOOP;
         return file->type.state;
