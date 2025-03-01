@@ -358,14 +358,8 @@ static TestSet _Tests[] = {
     {
         "Crypto - KeyTests",
         Crypto_KeyTests,
-        "Makein Ecsda keys and reading pem files.",
+        "Signatures and verification using Ecsda keys and reading pem files.",
         PARTIAL_FEATURE,
-    },
-    {
-        "Crypto - Ecdsa",
-        Blank_Tests,
-        "Ecsda sugnatures for strings.",
-        NOT_STARTED,
     },
     {
         "Crypto - Salty",

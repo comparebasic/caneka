@@ -19,7 +19,9 @@ status Crypto_KeyTests(MemCtx *gm){
     cstr = "pub.secp256k1.pem";
     String_AddBytes(m, pubPath, bytes(cstr), strlen(cstr));
     
+    Secure *Key = Secure_Key(m, path, NULL);
     Secure *pubKey = Secure_PubKey(m, pubPath, NULL);
+    r |= Test(Key != NULL, "Key is non-null");
     r |= Test(pubKey != NULL, "PubKey is non-null");
 
     String *content = String_Make(m, bytes("and here is the file of wonder\n"));
@@ -31,6 +33,10 @@ status Crypto_KeyTests(MemCtx *gm){
     re = Asymetric_Verify(m, content, sig, pubKey);
     r |= Test(re & SUCCESS, "Successful verification of ec signature using public key");
 
+    String *sig2 = Asymetric_Sign(m, content, Key);
+    r |= Test(String_Equals(sig2, sig), "Sig equals expected sig");
+    re = Asymetric_Verify(m, content, sig2, pubKey);
+    r |= Test(re & SUCCESS, "Signature generated from code is successful.");
 
     MemCtx_Free(m);
     DebugStack_Pop();

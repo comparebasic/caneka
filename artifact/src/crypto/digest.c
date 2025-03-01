@@ -26,23 +26,22 @@ String *Digest_Sha256(MemCtx *m, String *s){
         s = String_Next(s);
     }
 
-    unsigned char *digest;
     size_t sz = EVP_MD_size(EVP_sha256());
-    if((digest = (unsigned char *)OPENSSL_malloc(sz)) == NULL){
-        Fatal("Error allocating sha256 digest", TYPE_CRYPTO_DIGEST);
+    String *ret = String_Init(m, STRING_EXTEND);
+    if(sz > String_GetSegSize(ret)){
+        Fatal("Error allocating sha256 digest, longer than string", TYPE_CRYPTO_DIGEST);
         DebugStack_Pop();
         return NULL;
     }
 
     unsigned int len;
-	if(1 != EVP_DigestFinal_ex(mdctx, digest, &len)){
+	if(1 != EVP_DigestFinal(mdctx, ret->bytes, &len)){
         Fatal("Error finalizing sha256 digest", TYPE_CRYPTO_DIGEST);
         DebugStack_Pop();
         return NULL;
     }
 
-    String *ret = String_Init(m, STRING_EXTEND);
-    String_AddBytes(m, ret, bytes(digest), len);
+    ret->length = len;
     ret->type.state |= FLAG_STRING_BINARY;
 
     EVP_MD_CTX_free(mdctx);
