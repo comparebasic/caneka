@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+Secure *Asymetric_VerifyInit(MemCtx *m, String *s, String *sig, Secure *pubKey){
+    return NULL;
+}
+
+status Asymetric_VerifyUpdate(Secure *asym, String *s){
+    return NOOP;
+}
+
+Secure *Asymetric_VerifyFinal(Secure *asym, String *s){
+    return NULL;
+}
+
 status Asymetric_Verify(MemCtx *m, String *s, String *sig, Secure *pubKey){
     DebugStack_Push(NULL, 0);
     status r = READY;

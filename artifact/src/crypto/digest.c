@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+Secure *Digest_Sha256Init(MemCtx *m){
+    return NULL;
+}
+
+status Digest_Sha256Update(Secure *sha, String *s){
+    return NOOP;
+}
+
+String *Digest_Sha256Final(MemCtx *m){
+    return NULL;
+}
+
 String *Digest_Sha256(MemCtx *m, String *s){
     DebugStack_Push(NULL, 0);
     EVP_MD_CTX *mdctx;
