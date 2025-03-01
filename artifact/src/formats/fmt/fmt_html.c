@@ -38,6 +38,11 @@ static word lineDef[] = {
     PAT_END, 0, 0
 };
 
+static word leadLineDef[] = {
+    PAT_KO, '\n', '\n', PAT_TERM|PAT_INVERT_CAPTURE, ' ', ' ', PAT_KO, '\n', '\n', patText,
+    PAT_END, 0, 0
+};
+
 static word kvKeyDef[] = {
     PAT_KO, '\n','\n', PAT_KO,':', ':', patText,
     PAT_ANY,' ',' ', PAT_ANY|PAT_TERM,'\r','\r',PAT_ANY|PAT_TERM,'\t','\t',
@@ -97,6 +102,8 @@ static status start(MemCtx *m, Roebling *rbl){
         (PatCharDef*)cmdDef, FORMATTER_METHOD, FORMATTER_VALUE);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)kvKeyDef, FORMATTER_KV_KEY, FORMATTER_KV_VALUE);
+    r |= Roebling_SetPattern(rbl,
+        (PatCharDef*)leadLineDef, FORMATTER_LEAD_LINE, FORMATTER_START);
     r |= Roebling_SetPattern(rbl,
         (PatCharDef*)lineDef, FORMATTER_LINE, FORMATTER_START);
 
@@ -174,6 +181,7 @@ static void outClose(FmtCtx *ctx, word fl){
        word pfl = curDef->parent->type.state;
        if((pfl & fl) != 0 && pfl & FMT_FL_CLOSE_AFTER_CHILD){
             printf("</%s>", curDef->parent->name->bytes);
+            fflush(stdout);
        }
        curDef = curDef->parent;
     }
@@ -265,9 +273,13 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
             }
         }
     }else if(captureKey > _FORMATTER_OUT && captureKey < _FORMATTER_OUT_END){
-        if(captureKey == FORMATTER_LINE || captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
+        if(captureKey == FORMATTER_LINE || captureKey == FORMATTER_LEAD_LINE || captureKey == FORMATTER_VALUE || captureKey == FORMATTER_LAST_VALUE){
             if(ctx->def != NULL && (ctx->def->type.state & FMT_FL_SPACE_FOR_WS) != 0 && String_Length(ctx->item->content) > 0){
                 String_AddBytes(ctx->m, ctx->item->content, bytes(" "), 1);
+            }
+            if(captureKey == FORMATTER_LEAD_LINE && ctx->item->content->length > 0){
+                char *cstr = "<br/>";
+                String_AddBytes(ctx->m, ctx->item->content, bytes(cstr), strlen(cstr));
             }
             String_Add(ctx->m, ctx->item->content, s);
         }
