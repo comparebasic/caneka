@@ -56,3 +56,4 @@ status Match_FeedEnd(MemCtx *m, Match *mt);
 status Match_AddFlagsToStr(MemCtx *m, String *s, word flag);
 int Match_Total(Match *mt);
 PatCharDef *Match_GetDef(Match *mt);
+status Match_SetCount(Match *mt, i32 count);

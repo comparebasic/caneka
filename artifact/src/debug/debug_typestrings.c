@@ -108,6 +108,8 @@ char *TypeStrings[] = {
     "TYPE_SUB_PROTO",
     "TYPE_SUB_PROTODEF",
     "TYPE_STEP",
+    "TYPE_SECURE_PRIVKEY",
+    "TYPE_SECURE_PUBKEY",
     "_TYPE_CORE_END",
     "_APP_BOUNDRY_START",
     "TYPE_RBL_MARK",

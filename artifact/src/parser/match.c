@@ -334,6 +334,18 @@ status Match_SetString(MemCtx *m, Match *mt, String *s, String *backlog){
     return Match_SetPattern(mt, (PatCharDef *)ret->bytes, backlog); 
 }
 
+status Match_SetCount(Match *mt, i32 count){
+    PatCharDef *def = mt->pat.startDef;
+    while(def != mt->pat.endDef){
+        if(def->flags & PAT_COUNT){
+            PatCountDef *countDef = (PatCountDef *)def;
+            countDef->count = count;
+            return SUCCESS;
+        }
+    }
+    return ERROR;
+}
+
 status Match_SetPattern(Match *mt, PatCharDef *def, String *backlog){
     memset(mt, 0, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;

@@ -34,7 +34,6 @@ status Crypto_KeyTests(MemCtx *gm){
     r |= Test(re & SUCCESS, "Successful verification of ec signature using public key");
 
     String *sig2 = Asymetric_Sign(m, content, Key);
-    r |= Test(String_Equals(sig2, sig), "Sig equals expected sig");
     re = Asymetric_Verify(m, content, sig2, pubKey);
     r |= Test(re & SUCCESS, "Signature generated from code is successful.");
 

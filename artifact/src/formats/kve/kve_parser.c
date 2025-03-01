@@ -61,25 +61,28 @@ static status content(MemCtx *m, Roebling *rbl){
     return r;
 }
 
+status Kve_AddRblFuncs(MemCtx *m, Span *funcs, Lookup *desc){
+    status r = READY;
+    Span_Add(funcs, (Abstract *)Int_Wrapped(m, KVE_START));
+    Span_Add(funcs, (Abstract *)Do_Wrapped(m, (DoFunc)start));
+    Span_Add(funcs, (Abstract *)Int_Wrapped(m, KVE_VALUE));
+    Span_Add(funcs, (Abstract *)Do_Wrapped(m, (DoFunc)value));
+    Span_Add(funcs, (Abstract *)Int_Wrapped(m, KVE_CONTENT));
+    Span_Add(funcs, (Abstract *)Do_Wrapped(m, (DoFunc)content));
+    Span_Add(funcs, (Abstract *)Int_Wrapped(m, KVE_END));
+
+    Lookup_Add(m, desc, KVE_START, (Abstract *)String_Make(m, bytes("START")));
+    Lookup_Add(m, desc, KVE_VALUE, (Abstract *)String_Make(m, bytes("VALUE")));
+    Lookup_Add(m, desc, KVE_CONTENT, (Abstract *)String_Make(m, bytes("CONTENT")));
+
+    return r;
+}
+
 Roebling *Kve_RblMake(MemCtx *m, String *s, Abstract *source, RblCaptureFunc capture){
     DebugStack_Push("Kve_RblMake", TYPE_CSTR); 
     Span *parsers_do =  Span_Make(m, TYPE_SPAN);
-    Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, KVE_START));
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)start));
-    Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, KVE_VALUE));
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)value));
-    Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, KVE_CONTENT));
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)content));
-    Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, KVE_END));
-
-    LookupConfig config[] = {
-        {KVE_START, (Abstract *)String_Make(m, bytes("START"))},
-        {KVE_VALUE, (Abstract *)String_Make(m, bytes("VALUE"))},
-        {KVE_CONTENT, (Abstract *)String_Make(m, bytes("CONTENT"))},
-        {0, NULL},
-    };
-
-    Lookup *desc = Lookup_FromConfig(m, config, NULL);
+    Lookup *desc = Lookup_Make(m, _TYPE_CORE_END, NULL, NULL);
+    Kve_AddRblFuncs(m, parsers_do, desc);
 
     if(s == NULL){
         s = String_Init(m, STRING_EXTEND);
