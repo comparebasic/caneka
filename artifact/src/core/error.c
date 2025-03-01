@@ -8,6 +8,14 @@ void *_Fatal(char *msg, cls t, char *func, char *file, int line){
     RawMode(FALSE);
 #endif
     printf("\x1b[%dmFatal Error: \x1b[1;%dm%s\x1b[0;%dm - type(%s/%d) %s:%s:%d\x1b[0m\n" , COLOR_RED, COLOR_RED, msg, COLOR_RED, Class_ToString(t), t, func, file, line);
+#ifdef OPENSSL
+    char _buff[256];
+    unsigned long e = ERR_get_error();
+    if(e != 0){
+        char *openssl_err = ERR_error_string(e, _buff);
+        printf("  \x1b[%dm%s\x1b[0m", COLOR_RED, openssl_err);
+    }
+#endif
     if(!crashing){
         crashing = TRUE;
         DebugStack_Print();

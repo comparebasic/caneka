@@ -7,6 +7,7 @@
 #include "formats/format_debug.h"
 #include "formats/kve/kve_parser.h"
 #include "formats/kve/kve_from.h"
+#include "formats/kve/kve_to.h"
 #include "formats/io.h"
 #include "formats/oset.h"
 #include "formats/oset_from.h"

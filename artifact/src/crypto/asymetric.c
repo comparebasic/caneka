@@ -76,22 +76,27 @@ String *Asymetric_Sign(MemCtx *m, String *s, Secure *Key){
         s = String_Next(s);
     }
 
-    size_t sz = EVP_MD_CTX_get_size(mdctx);
+    size_t len;
+	if(1 != EVP_DigestSignFinal(mdctx, NULL, &len)){
+        DebugStack_Pop();
+        Fatal("Error finalizing digest verify", TYPE_CRYPTO_DIGEST);
+        return NULL;
+    }
     String *ret = String_Init(m, STRING_EXTEND);
-    if(sz > String_GetSegSize(ret)){
-        Fatal("Error allocating sha256 digest, longer than string", TYPE_CRYPTO_DIGEST);
+    if(len > String_GetSegSize(ret)){
+        Fatal("Error allocating digest verify, longer than string", TYPE_CRYPTO_DIGEST);
         DebugStack_Pop();
         return NULL;
     }
-
-    size_t len;
 	if(1 != EVP_DigestSignFinal(mdctx, ret->bytes, &len)){
         DebugStack_Pop();
+        Fatal("Error finalizing copying digest verify", TYPE_CRYPTO_DIGEST);
         return NULL;
     }
     ret->length = len;
     ret->type.state |= FLAG_STRING_BINARY;
 
+    EVP_MD_CTX_destroy(mdctx);
     DebugStack_Pop();
     return ret;
 }

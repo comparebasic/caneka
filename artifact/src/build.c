@@ -78,6 +78,7 @@ static BuildSubdir kveobj = { "formats/kve", {
     "kve_capture.c",
     "kve_parser.c",
     "kve_from.c",
+    "kve_to.c",
     NULL,
 }};
 
