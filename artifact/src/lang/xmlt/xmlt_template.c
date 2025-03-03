@@ -43,22 +43,22 @@ static boolean earlyOutAtts(Mess *e, String *key, NestedD *nd){
     return FALSE;
 }
 
-status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
+status XmlT_Template(XmlTCtx *xmlt, MessSet *set, Abstract *a, NestedD *nd, OutFunc func){
     MemCtx *m = xmlt->m;
     status r = ERROR;
+
+    String *body = NULL;
+    Mess *e = NULL;
+    if(a->type.of == TYPE_STRING){
+        body = (String *)a; 
+    }else if(a->type.of == TYPE_STRING){
+        e = (Mess *)a;
+    }
 
     Span *tbl = nd->current_tbl;
     boolean outdent = FALSE;
     if((e->type.state & PERSIST_TRACKED) == 0){
         setFlags(e); 
-    }
-
-    if(DEBUG_XML_TEMPLATE){
-        Debug_Print((void *)e->name, 0, "Start of Elem: ", DEBUG_XML_TEMPLATE, FALSE);
-        Debug_Print((void *)e->atts, 0, ": ", DEBUG_XML_TEMPLATE, TRUE);
-        printf("\n");
-        Debug_Print((void *)nd->current_tbl, 0, "tbl: ", DEBUG_XML_TEMPLATE, TRUE);
-        printf("\x1b[%dmflags: %d\n", DEBUG_XML_TEMPLATE, e->type.state);
     }
 
     if((e->type.state & FLAG_XML_IF) != 0 && (e->type.state & FLAG_XML_IN_PROGRESS) == 0){
@@ -116,7 +116,7 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
         tbl = nd->current_tbl;
         e->type.state |= FLAG_XML_IN_PROGRESS;
         while((NestedD_Next(nd) & END) == 0){
-            XmlT_Template(xmlt, e, nd, func);
+            XmlT_Template(xmlt, set, (Abstract *)e, nd, func);
         }
         e->type.state &= ~(FLAG_XML_IN_PROGRESS);
         NestedD_Outdent(nd);
@@ -132,17 +132,19 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
 
     String *build = String_Init(m, STRING_EXTEND);
 
-    boolean hasBody = e->body != NULL;
-    boolean hasChildren = e->firstChild != NULL;
+    boolean hasBody = e->type.of == TYPE_STRING;
+    boolean hasChildren = e->children != NULL && e->children->nvalues > 0;
     boolean selfContained = !hasBody && !hasChildren;
 
     if(DEBUG_XML_TEMPLATE){
         printf("\x1b[%dmHasBody:%d,HasChildren:%d,selfContained:%d\x1b[0m\n", DEBUG_XML_TEMPLATE, hasBody, hasChildren, selfContained);
     }
 
-    if(e->name != NULL){
+    String *tag = NULL;
+    if(e->tagIdx != 0){
+        tag = Span_Get(set->tagTbl, e->tagIdx);
         String_AddBytes(m, build, bytes("<"), 1);
-        String_Add(m, build, e->name);
+        String_Add(m, build, tag);
         XmlT_AddAttsStr(xmlt, e, build);
 
         if(selfContained){
@@ -155,26 +157,27 @@ status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func){
     func(m, build, (Abstract *)xmlt);
 
     if(hasBody){
-        String *body = e->body;
+        String *body = (String *)e;
         if((body->type.state & FLAG_STRING_IS_CASH) != 0){
             body = Cash_Replace(xmlt->m, xmlt->cash, body);
         }
         func(m, body, (Abstract *)xmlt); 
     }
 
-    if(e->name != NULL){
+    if(e->tagIdx != 0){
         if(hasChildren){
-            Mess *child = e->firstChild;
-            while(child != NULL){
-                XmlT_Template(xmlt, child, nd, func);
-                child = child->next;
+            Iter it;
+            Iter_Init(&it, e->children);
+            while((Iter_Next(&it) & END) == 0){
+                Mess *child = (Mess *)Iter_Get(&it);
+                XmlT_Template(xmlt, set, (Abstract *)child, nd, func);
             }
         }
 
         if(!selfContained){
             String *closeTag = String_Init(m, STRING_EXTEND);
             String_AddBytes(m, closeTag, bytes("</"), 2);
-            String_Add(m, closeTag, e->name);
+            String_Add(m, closeTag, tag);
             String_AddBytes(m, closeTag, bytes(">"), 1);
             func(m, closeTag, (Abstract *)xmlt); 
         }

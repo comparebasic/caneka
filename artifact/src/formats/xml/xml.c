@@ -2,15 +2,18 @@
 #include <caneka.h>
 
 status XmlCtx_Open(XmlCtx *ctx, String *tagName){
-    Single *tag = Table_Get(ctx->set->tabTbl, (Abstract *)tagName);
+    Span *tagTbl = ctx->set->tagTbl;
+    Single *tag = (Single *)Table_Get(tagTbl, (Abstract *)tagName);
     word tagIdx = 0;
-    if(tag != NULL){
+    if(tag == NULL){
+        tagIdx = (word)Table_SetIdxEntry(tagTbl, (Abstract *)tagName);
+    }else{
         tagIdx = (word)tag->val.value; 
     }
 
     Mess *ms = Mess_Make(ctx->m, tagIdx);
-    ms->atts = OrdTable_Make(ctx->m);
-    Mess_Append(ctx->parent, NULL, (Abstract *)ms);
+    ms->atts = (Span *)OrdTable_Make(ctx->m);
+    Mess_Append(ctx->set, ctx->parent, NULL, (Abstract *)ms);
     ctx->count++;
     ctx->current = ms;
     return SUCCESS;
@@ -50,8 +53,8 @@ status XmlCtx_Close(XmlCtx *ctx, String *tagName){
 XmlCtx *XmlCtx_Make(MemCtx *m){
     XmlCtx *ctx = (XmlCtx*)MemCtx_Alloc(m, sizeof(XmlCtx));
     ctx->m = m;
-    ctx->root = MessSet_Make(ctx->m);
-    ctx->parent = ctx->root;
+    ctx->set = MessSet_Make(ctx->m);
+    ctx->parent = ctx->set->root;
     ctx->type.of = TYPE_XMLCTX;
     return ctx;
 }

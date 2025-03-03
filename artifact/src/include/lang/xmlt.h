@@ -24,4 +24,4 @@ status XmlT_GetPropFlags(Mess *e, String *prop, Abstract *value);
 XmlTCtx *XmlT_Make(MemCtx *m, String *result, Lookup *presenters);
 status XmlT_Parse(XmlTCtx *xmlt, String *s, Span *tbl);
 status XmlT_Out(MemCtx *_, String *s, Abstract *source);
-status XmlT_Template(XmlTCtx *xmlt, Mess *e, NestedD *nd, OutFunc func);
+status XmlT_Template(XmlTCtx *xmlt, MessSet *set, Abstract *a, NestedD *nd, OutFunc func);

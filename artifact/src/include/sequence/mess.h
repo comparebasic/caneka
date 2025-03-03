@@ -2,18 +2,19 @@ typedef struct mess {
     Type type;
     word _;
     word tagIdx;
-    struct ordered_table *atts;
+    Span *atts;
     Span *children; /* mess, ordtbl, or string */
+    struct mess *parent;
 } Mess;
 
 typedef struct mess_set {
     Type type;
-    Lookup *tags;
+    MemCtx *m;
     Span *tagTbl;
     Mess *root;
 } MessSet;
 
 MessSet *MessSet_Make(MemCtx *m);
 Mess *Mess_Make(MemCtx *m, word tagIdx);
-status Mess_Append(Mess *existing, Mess *ms);
-status Mess_AddAtt(Mess *ms, String *key, Abstract *value);
+status Mess_Append(MessSet *set, Mess *ms, Abstract *key, Abstract *a);
+status Mess_AddAtt(Mess *ms, Abstract *key, Abstract *value);

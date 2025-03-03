@@ -133,6 +133,14 @@ status Table_SetKey(Span *tbl, Abstract *a){
     return SUCCESS;
 }
 
+i32 Table_SetIdxEntry(Span *tbl, Abstract *a){
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, NULL);
+    i32 value = tbl->metrics.set;
+    Single *tag = Int_Wrapped(tagTbl->m, value);
+    h->value = (Abstract *)tag;
+    return (i32)value;
+}
+
 Hashed *Table_SetValue(Span *tbl, Abstract *a){
     Hashed *h = Span_Get(tbl, tbl->metrics.set);
     if(h != NULL){
@@ -154,6 +162,11 @@ Hashed *Table_GetHashed(Span *tbl, Abstract *a){
 Hashed *Table_SetHashed(Span *tbl, Abstract *a, Abstract *value){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
     return h;
+}
+
+Abstract *Table_GetKey(Span *tbl, i32 idx){
+    Hashed *h = Span_Get(tbl, idx);
+    return h->item;
 }
 
 Abstract *Table_Get(Span *tbl, Abstract *a){

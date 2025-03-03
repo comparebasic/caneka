@@ -15,10 +15,14 @@ static status mess_Extend(Mess *existing, Mess *new){
 }
 */
 
-status Mess_Append(Mess *ms, Span *key, Abstract *a){
+status Mess_Append(MessSet *set, Mess *ms, Abstract *key, Abstract *a){
     if(ms->children == NULL){
-        ms->children = OrdTable_Make(m); 
+        ms->children = OrdTable_Make(set->m); 
     } 
+    if(a->type.of == TYPE_MESS){
+        Mess *child = (Mess *)a;
+        child->parent = ms;
+    }
     return Table_Set(ms->children->order, key, a);
 }
 

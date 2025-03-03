@@ -51,7 +51,8 @@ status XmlT_Parse(XmlTCtx *xmlt, String *s, Span *tbl){
     status r = (XmlParser_Parse(xmlt->parser, s) & SUCCESS);
     if((r & SUCCESS) != 0){
         NestedD_Init(xmlt->m, xmlt->nd, tbl);
-        r = XmlT_Template(xmlt, xmlt->parser->ctx->root->firstChild, xmlt->nd, XmlT_Out);   
+        r = XmlT_Template(xmlt, xmlt->parser->ctx->set, 
+            (Abstract *)xmlt->parser->ctx->set->root, xmlt->nd, XmlT_Out);   
     }
     return r;
 }
