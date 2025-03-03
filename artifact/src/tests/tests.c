@@ -401,14 +401,15 @@ static TestSet _Tests[] = {
     },
 };
 
-TestSet *Tests = _Tests;
-
 /*
+TestSet *Tests = _Tests;
+*/
+
 static TestSet solo[] = {
     {
-        "StrVec",
-        StrVec_Tests,
-        "A vector-style string builder.",
+        "XML",
+        Xml_Tests,
+        "Basic XML parsing implemented using the Roebling Parser",
         FEATURE_COMPLETE,
     },
     {
@@ -420,4 +421,3 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
-*/

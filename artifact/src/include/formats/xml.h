@@ -27,7 +27,7 @@ typedef struct xml_ctx {
     Type type;
     MemCtx *m;
     int count;
-    Mess *root;
+    MessSet *set;
     Mess *current;
     Mess *parent;
     void *source;

@@ -56,10 +56,16 @@ static status Table_Resize(Span *tbl, word *queries){
 }
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value){
-    if(a == NULL){
-        return NULL;
-    }
     Hashed *h = Hashed_Make(tbl->m, a);
+    if(a == NULL){
+        if(tbl->type.of == TYPE_ORDERED_TABLE){
+            OrdTable *otbl = (OrdTable *)as(tbl, TYPE_ORDERED_TABLE);
+            Span_Add(otbl->order, (Abstract *)h);
+            return h;
+        }else{
+            return NULL;
+        }
+    }
     tbl->type.state &= ~SUCCESS;
     if(op != SPAN_OP_GET && op != SPAN_OP_SET){
         return h;
