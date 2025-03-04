@@ -17,4 +17,4 @@ typedef struct mess_set {
 MessSet *MessSet_Make(MemCtx *m);
 Mess *Mess_Make(MemCtx *m, word tagIdx);
 status Mess_Append(MessSet *set, Mess *ms, Abstract *key, Abstract *a);
-status Mess_AddAtt(Mess *ms, Abstract *key, Abstract *value);
+status Mess_AddAtt(MessSet *set, Mess *ms, Abstract *key, Abstract *value);

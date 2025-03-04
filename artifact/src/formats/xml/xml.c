@@ -24,7 +24,7 @@ status XmlCtx_SetAttr(XmlCtx *ctx, String *attName){
 }
 
 status XmlCtx_BodyAppend(XmlCtx *ctx, String *body){
-    return Mess_Append(ctx->parent, NULL, (Abstract *)body);
+    return Mess_Append(ctx->set, ctx->parent, NULL, (Abstract *)body);
 }
 
 status XmlCtx_SetAttrValue(XmlCtx *ctx, Abstract *value){

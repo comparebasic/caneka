@@ -17,18 +17,18 @@ static status mess_Extend(Mess *existing, Mess *new){
 
 status Mess_Append(MessSet *set, Mess *ms, Abstract *key, Abstract *a){
     if(ms->children == NULL){
-        ms->children = OrdTable_Make(set->m); 
+        ms->children = (Span *)OrdTable_Make(set->m); 
     } 
     if(a->type.of == TYPE_MESS){
         Mess *child = (Mess *)a;
         child->parent = ms;
     }
-    return Table_Set(ms->children->order, key, a);
+    return Table_Set(ms->children, key, a);
 }
 
-status Mess_AddAtt(Mess *ms, String *key, Abstract *value){
+status Mess_AddAtt(MessSet *set, Mess *ms, String *key, Abstract *value){
     if(ms->atts == NULL){
-        ms->atts = OrdTable_Make(m); 
+        ms->atts = OrdTable_Make(set->m); 
     } 
     return Table_Set(ms->atts, (Abstract *)key, value);
 }
