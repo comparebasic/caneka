@@ -8,40 +8,31 @@ related: core/span.c
 related: include/slab.h
 */
 #define SPAN_SLOT_BYTES sizeof(void *)
-#define SPAN_DEFAULT_STRIDE 16
-#define SPAN_DEFAULT_STRIDE 16
-#define SPAN_DEFAULT_SLOT_SIZE 1
-#define SPAN_DEFAULT_IDX_SIZE 1
-#define SPAN_DEFAULT_ITEM_SIZE 1
-#define SPAN_DEFAULT_IDX_EXTRA_SLOTS 0
-#define SPAN_DEFAULT_HDR 0
 
 #define SPAN_VALUE_SIZE(def) (sizeof(Abstract *)*def->stride*def->slotSize)
 #define SPAN_IDX_SIZE(def) (sizeof(Abstract *)*(def->idxSize)*def->idxStride)
 
+#define SPAN_STRIDE 16
+
 enum span_flags {
     SLAB_ACTIVE = 1 << 8,
     SLAB_FULL = 1 << 9,
-    SPAN_INLINE = 1 << 10,
+
     FLAG_SPAN_HAS_GAPS = 1 << 11,
     SPAN_ORDERED = 1 << 12,
     SPAN_RAW = 1 << 15,
 };
 
-typedef void *(*SpanDefFunc)(MemCtx *m, struct span_def *def);
 typedef void *(*SpanAddrFunc)(struct span_query *sq);
 
 typedef struct span {
     Type type;
-    MemCtx *m;
-    SpanDef *def;
-    /* Queue Idx */
-	void *root;
-    word flags;
-    word count;
-    quad  delayTicks;
-    /* end QueuIdx */
+    byte _;
+    byte ptrSlot;
+    byte slotSize;
     byte dims;
+    void *root;
+    MemCtx *m;
 	int nvalues;
     int max_idx;
     struct {
@@ -52,7 +43,6 @@ typedef struct span {
 } Span;
 
 Span* Span_Make(MemCtx* m, cls type);
-Span* Span_MakeInline(MemCtx* m, cls type, int itemSize);
 status Span_Remove(Span *p, int idx);
 status Span_Cull(Span *p, int count);
 status Span_ReInit(Span *p);

@@ -8,36 +8,15 @@ extern int MemSlab_Count;
  * Individual slabs of memory that have tracking information for the next
  * available address range.
  *
- * .bytes is the available memory
- * .addr is the next starting address
- * .next is a pointer to the next slab
  */
-typedef struct mem_slab {
+typedef struct mem_slab_idx {
     Type type;
-    word idx;
     i16 level;
-    void *addr;
-    byte bytes[MEM_SLAB_SIZE];
-    struct mem_slab *next;
+    i16 remaining;
+    void *bytes;
 } MemSlab;
 
-/*
- * Main memory context object
- *
- * .start_sl is the first memory slab in a linked list of memory slabs
- */
-typedef struct mem_ctx {
-    RangeType type;
-    MemSlab *start_sl;
-    int count;
-    Abstract *owner;
-    struct {
-        void *ptr;
-        size_t sz;
-        int slabIdx;
-        int offset;
-    } latest;
-} MemCtx;
+typedef struct span MemCtx;
 
 size_t MemCount();
 /* Main call for allocating a section of memory
@@ -84,7 +63,8 @@ MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl);
 /* Make MemSlab */
 MemSlab *MemSlab_Make(MemCtx *m, i16 level);
 /* Get available space in a slab */
-size_t MemSlab_Available(MemSlab *sl);
+#define MemSlab_Available(sl) (sl)->remaining
+
 /* Returns the amount of bytes used in this level across multiple slabs in one
  * MemCtx
  * 
@@ -101,7 +81,7 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level);
 i64 MemCtx_Total(MemCtx *m, i16 level);
 
 /* Gets the amount of bytes used in a particular slab */
-#define MemSlab_Taken(sl) ((sl)->addr - (void *)(sl)->bytes)
+#define MemSlab_Taken(sl) (((word)MEM_SLAB_SIZE) - (sl)->remaining)
 
 
 /* This macro sets the memory range to be at level (0) in a way that can be

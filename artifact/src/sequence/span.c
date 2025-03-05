@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-int Span_availableByDim(int dims, int stride, int idxStride){
+int Span_availableByDim(int dims, int stride){
     int _dims = dims;
     int n = stride;
     int r = n;
@@ -11,7 +11,7 @@ int Span_availableByDim(int dims, int stride, int idxStride){
         return stride;
     }else{
         while(dims > 1){
-            n *= idxStride;
+            n *= stride;
             dims--;
         }
         r = n;
@@ -21,8 +21,8 @@ int Span_availableByDim(int dims, int stride, int idxStride){
 }
 
 int Span_Capacity(Span *p){
-    int increment = Span_availableByDim(p->dims, p->def->stride, p->def->idxStride);
-    return increment * p->def->idxStride;
+    int increment = Span_availableByDim(p->dims, SPAN_STRIDE, SPAN_STRIDE);
+    return increment * SPAN_STRIDE;
 }
 
 /* API */
@@ -52,23 +52,11 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         if(sq->idx > p->max_idx+1){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
-        void *ptr = Slab_valueAddr(st->slab, p->def, st->localIdx);
-        if((p->def->flags & SPAN_INLINE) != 0){
-            size_t sz = (size_t)p->def->itemSize;
-            if((p->def->flags & SPAN_RAW) == 0 && t != NULL && t->type.of == TYPE_RESERVE){
-                sz = sizeof(Reserve);
-            }
-            if(sq->op == SPAN_OP_REMOVE){
-                memset(ptr, 0, sz);
-            }else{
-                memcpy(ptr, t, sz);
-            }
+        void *ptr = Slab_valueAddr(st->slab, st->localIdx);
+        if(sq->op == SPAN_OP_REMOVE){
+            memset(ptr, 0, sizeof(void *));
         }else{
-            if(sq->op == SPAN_OP_REMOVE){
-                memset(ptr, 0, sizeof(void *));
-            }else{
-                memcpy(ptr, &t, sizeof(void *));
-            }
+            memcpy(ptr, &t, sizeof(void *));
         }
         if(sq->op == SPAN_OP_REMOVE){
             p->nvalues--;
@@ -99,20 +87,11 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
-    SpanDef *def = p->def;
 
     SpanState *st = sq->stack;
-    void *ptr = Slab_valueAddr(st->slab, def, st->localIdx);
+    void *ptr = Slab_valueAddr(st->slab, st->localIdx);
     sq->span->type.state &= ~(SUCCESS|NOOP);
-    if((def->flags & SPAN_INLINE) != 0){
-        if((def->flags & SPAN_RAW) == 0 && (*(util *)ptr) == 0){
-            sq->span->type.state |= NOOP;
-            sq->value = NULL;
-        }else{
-            sq->span->type.state |= SUCCESS;
-            sq->value = ptr;
-        }
-    }else if(*((Abstract **)ptr) != NULL){
+    if(*((Abstract **)ptr) != NULL){
         void **dptr = (void **)ptr;
         sq->value = *dptr;
         sq->span->type.state |= SUCCESS;
@@ -175,26 +154,25 @@ status Span_Remove(Span *p, int idx){
 /* internals */
 status Span_GrowToNeeded(SpanQuery *sq){
     boolean expand = sq->span->dims < sq->dimsNeeded;
-    SpanDef *def = sq->span->def;
     Span *p = sq->span;
 
     if(expand){
         void *exp_sl = NULL;
         void *shelf_sl = NULL;
         while(p->dims < sq->dimsNeeded){
-            void *new_sl = Span_idxSlab_Make(p->m, def);
+            void *new_sl = Span_idxSlab_Make(p->m);
 
             if(exp_sl == NULL){
                 shelf_sl = sq->span->root;
                 sq->span->root = new_sl;
             }else{
-                Slab_setSlot(exp_sl, p->def, 0, &new_sl, sizeof(void *));
+                Slab_setSlot(exp_sl, 0, &new_sl, sizeof(void *));
             }
 
             exp_sl = new_sl;
             p->dims++;
         }
-        Slab_setSlot(exp_sl, p->def, 0, &shelf_sl, sizeof(void *));
+        Slab_setSlot(exp_sl, 0, &shelf_sl, sizeof(void *));
     }
 
     sq->dims = p->dims;
@@ -217,12 +195,12 @@ status Span_Extend(SpanQuery *sq){
             }
             void *new_sl = NULL;
             if(dims > 1){
-                new_sl = Span_idxSlab_Make(p->m, p->def); 
+                new_sl = Span_idxSlab_Make(p->m); 
             }else{
-                new_sl = Span_valueSlab_Make(p->m, p->def); 
+                new_sl = Span_valueSlab_Make(p->m);
             }
             SpanState *prev = SpanQuery_StateByDim(sq, dims+1);
-            Slab_setSlot(prev->slab, p->def, prev->localIdx, &new_sl, sizeof(void *));
+            Slab_setSlot(prev->slab, prev->localIdx, &new_sl, sizeof(void *));
             st->slab = new_sl;
         }else{
             sq->queryDim = dims;
@@ -240,7 +218,7 @@ status Span_Extend(SpanQuery *sq){
         Fatal("Slab not found, SpanState is null\n", TYPE_SPAN);
     }
 
-    if(st->localIdx >= p->def->stride){
+    if(st->localIdx >= SPAN_STRIDE){
         Fatal("localIdx greater than stride", p->type.of);
     }
 
@@ -248,30 +226,25 @@ status Span_Extend(SpanQuery *sq){
     return sq->type.state;
 }
 
-byte SpanDef_GetDimNeeded(SpanDef *def, int idx){
-    if(idx < def->stride){
+byte Span_GetDimNeeded(int idx){
+    if(idx < SPAN_STRIDE){
         return 0;
     }
 
-    int nslabs = idx / def->stride;
+    int nslabs = idx / SPAN_STRIDE;
     if(idx % nslabs > 0){
         nslabs++;
     }
     int dims = 1;
-    while(Span_availableByDim(dims, def->stride, def->idxStride) < nslabs){
+    while(Span_availableByDim(dims, SPAN_STRIDE) < nslabs){
         dims++;
     }
 
     return dims;
 }
 
-void *Span_valueSlab_Make(MemCtx *m, SpanDef *def){
-    i64 sz = SPAN_VALUE_SIZE(def);
-    return MemCtx_Alloc(m, sz);
-}
-
-void *Span_idxSlab_Make(MemCtx *m, SpanDef *def){
-    i64 sz = SPAN_IDX_SIZE(def);
+void *Span_Slab_Make(MemCtx *m){
+    i64 sz = SPAN_STRIDE*sizeof(void *);
     return MemCtx_Alloc(m, sz);
 }
 
@@ -281,38 +254,11 @@ status Span_ReInit(Span *p){
     return SUCCESS;
 }
 
-Span* Span_MakeInline(MemCtx* m, cls type, int itemSize){
+Span *Span_Make(MemCtx *m){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->m = m;
-    p->def = SpanDef_Clone(m, SpanDef_FromCls(type));
-    p->type.of = p->def->typeOf;
+    p->type.of = TYPE_SPAN;
+    p->root = Span_Slab_Make(m);
     p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
-
-    p->def->itemSize = itemSize;
-    int slotSize = 1;
-    if(itemSize > sizeof(void *)){
-        slotSize = itemSize / sizeof(void *);
-        if(itemSize % sizeof(void *) > 1){
-            slotSize += 1;
-        }
-    }
-    int pwrSlot = p->def->stride;
-    while((pwrSlot / 2) >= slotSize){
-        pwrSlot /= 2;
-    }
-
-    p->def->slotSize = pwrSlot;
-    p->def->flags |= SPAN_INLINE;
-    p->root = Span_valueSlab_Make(m, p->def);
-    return p;
-}
-
-Span *Span_Make(MemCtx *m, cls type){
-    Span *p = MemCtx_Alloc(m, sizeof(Span));
-    p->m = m;
-    p->def = SpanDef_FromCls(type);
-    p->type.of = p->def->typeOf;
-    p->root = Span_valueSlab_Make(m, p->def);
-    p->max_idx = -1;
     return p;
 }
