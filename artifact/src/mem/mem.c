@@ -21,6 +21,7 @@ static size_t cmem = 0;
 int MemSlab_Count = 0;
 
 static void *MemSlab_Alloc(MemSlab *sl, word sz){
+    printf("  -> %hd taking %hd\n", sl->remaining, sz);
     sl->remaining -= sz;
     return sl->bytes+sl->remaining; 
 }
@@ -79,6 +80,7 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     }
 
     if(m->type.of == TYPE_MEMCTX_NATIVE){
+        printf("native nvalues:%d", m->nvalues);
         return TrackMalloc(sz, TYPE_MEMCTX_NATIVE);
     }
 
@@ -90,7 +92,7 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     MemSlab *sl = NULL;
     while((Iter_Next(&it) & END) == 0){
         MemSlab *_sl = (MemSlab *)Iter_Get(&it);
-        printf("iter _sl:%p %d\n", _sl, _sl->remaining);
+        printf("iter level:%d/%d _sl:%p sz:%ld/%hd remaining:%d\n", level, _sl->level, _sl, sz, _sz, _sl->remaining);
         if((level == 0 || _sl->level == level) && _sl->remaining >= _sz){
             sl = _sl;
             break;

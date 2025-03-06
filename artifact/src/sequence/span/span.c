@@ -247,11 +247,6 @@ byte Span_GetDimNeeded(int idx){
     return dims;
 }
 
-void *Span_Slab_Make(MemCtx *m){
-    i64 sz = SPAN_STRIDE*sizeof(void *);
-    return MemCtx_Alloc(m, sz);
-}
-
 status Span_ReInit(Span *p){
     p->nvalues = 0;
     p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
@@ -264,7 +259,7 @@ Span *Span_Make(MemCtx *m){
     p->type.of = TYPE_SPAN;
     p->slotSize = 1;
     p->ptrSlot = 0;
-    p->root = Span_Slab_Make(m);
+    p->root = Slab_Make(m);
     p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
     return p;
 }
