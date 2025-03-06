@@ -61,7 +61,7 @@ status CliStatus_SetDims(CliStatus *cli, i32 cols, i32 rows){
 CliStatus *CliStatus_Make(MemCtx *m, DoFunc render, Abstract *source){
     CliStatus *st = (CliStatus *)MemCtx_Alloc(m, sizeof(CliStatus));
     st->type.of = TYPE_CLI_STATUS;
-    st->lines = Span_Make(m, TYPE_SPAN);
+    st->lines = Span_Make(m);
     st->render = render;
     st->source = source;
     return st;

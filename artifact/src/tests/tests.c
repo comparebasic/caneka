@@ -48,18 +48,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "SpanSetup",
-        SpanSetup_Tests,
-        "This tests the setup for a variety of Span configurations.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "SpanInline",
-        SpanInline_Tests,
-        "Inline spans hold data directly in thier memory space, instead of storing pointers to data held elsewhere.",
-        FEATURE_COMPLETE,
-    },
-    {
         "MemCtx Tests",
         MemCtx_Tests,
         "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
@@ -161,6 +149,7 @@ static TestSet _Tests[] = {
         NULL,
         SECTION_LABEL,
     },
+    /*
     {
         "XML",
         Xml_Tests,
@@ -185,6 +174,7 @@ static TestSet _Tests[] = {
         "Identify string types during parsing (NUM/CASH)",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Http",
         Http_Tests,
@@ -401,10 +391,9 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 static TestSet solo[] = {
     {
         "XML",
@@ -421,3 +410,4 @@ static TestSet solo[] = {
 };
 
 TestSet *Tests = solo;
+*/

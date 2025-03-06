@@ -41,7 +41,7 @@ Span *String_SplitToSpan(MemCtx *m, String *s, String *sep){
     };
     String_AddBytes(m, pat, bytes(pend), sizeof(pend));
 
-    Span *p = Span_Make(m, TYPE_SPAN);
+    Span *p = Span_Make(m);
 
     i64 offset = 1;
     Match mt;

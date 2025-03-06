@@ -84,7 +84,7 @@ status Example_Complete(Handler *h, Req *req, Serve *sctx){
 Handler *Example_getHandler(Serve *sctx, Req *req){
     MemCtx *m = req->m;
     Handler *startHandler = Handler_Make(m, Example_Complete, NULL, SOCK_OUT|SOCK_IN,TYPE_EXAMPLE_H_START);
-    startHandler->prior = Span_Make(m, TYPE_SPAN); 
+    startHandler->prior = Span_Make(m); 
     Span_Add(startHandler->prior, 
         (Abstract *)Handler_Make(m, Example_Setup, 
             NULL, SOCK_IN, TYPE_EXAMPLE_H_SETUP));

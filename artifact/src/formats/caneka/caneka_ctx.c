@@ -48,7 +48,7 @@ static status Capture(word captureKey, int matchIdx, String *s, Abstract *source
     if(captureKey == CNK_LANG_INVOKE){
         if(ctx->item != NULL && ctx->item->parent != NULL){
             if(ctx->item->children == NULL){
-                ctx->item->children = Span_Make(ctx->m, TYPE_SPAN);
+                ctx->item->children = Span_Make(ctx->m);
             }
             Span_Add(ctx->item->parent->children, (Abstract *)ctx->item);
         }

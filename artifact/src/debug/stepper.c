@@ -4,7 +4,7 @@
 static Span *steps = NULL;
 
 status Steps_Init(MemCtx *m){
-    steps = Span_Make(m, TYPE_TABLE);
+    steps = Span_Make(m);
     return SUCCESS;
 }
 

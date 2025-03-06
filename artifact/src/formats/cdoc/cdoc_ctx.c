@@ -57,7 +57,7 @@ FmtCtx *CdocCtx_Make(MemCtx *m, Abstract *source){
 
     Cdoc_AddDefs(ctx);
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
-    ctx->root->value = (Abstract *)Span_Make(m, TYPE_TABLE);
+    ctx->root->value = (Abstract *)Span_Make(m);
     ctx->item->spaceIdx = CDOC_START;
     FmtDef *def = Chain_Get(ctx->resolver->byId, ctx->item->spaceIdx);
     ctx->item->def = def;

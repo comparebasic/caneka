@@ -113,7 +113,7 @@ status NestedD_Next(NestedD *nd){
 
 status NestedD_Init(MemCtx *m, NestedD *nd, Span *tbl){
     nd->type.state = ZERO;
-    nd->stack = Span_Make(m, TYPE_NESTED_SPAN);
+    nd->stack = Span_Make(m);
     if(tbl != NULL){
         nd->current_tbl = tbl;
         nest(nd, tbl, NESTED_WITH);

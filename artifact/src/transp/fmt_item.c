@@ -3,7 +3,7 @@
 
 Span *FmtItem_GetChildren(MemCtx *m, FmtItem *item){
     if(item->children == NULL){
-        item->children = Span_Make(m, TYPE_SPAN);
+        item->children = Span_Make(m);
     }
 
     return item->children;

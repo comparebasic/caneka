@@ -178,7 +178,7 @@ static status populateModules(MemCtx *m, Lookup *lk){
 
 Span * CnkLang_GetModules(MemCtx *m){
     if(modules == NULL){
-        modules = Span_Make(m, TYPE_TABLE);
+        modules = Span_Make(m);
         CnkLangModule *mod;
         mod = CnkLangModule_Make(m);
         mod->ref = CnkLangModRef_Make(m);

@@ -7,7 +7,7 @@ status Span_Tests(MemCtx *gm){
     status r = READY;
     String *s;
 
-    p = Span_Make(m, TYPE_SPAN);
+    p = Span_Make(m);
     r |= Test(p->type.of == TYPE_SPAN, "Span has type span %s found %s", 
         Class_ToString(TYPE_SPAN), Class_ToString(p->type.of));
 
@@ -95,7 +95,7 @@ status Span_Tests(MemCtx *gm){
     r |= Test(String_Equals(s513, s), "String 513 equals %s found %s", 
         s513->bytes, s->bytes);
 
-    p = Span_Make(m, TYPE_SPAN);
+    p = Span_Make(m);
     Span_Set(p, 0, (Abstract *)Int_Wrapped(m, 0));
     Span_Set(p, 1, (Abstract *)Int_Wrapped(m, 1));
     Span_Set(p, 2, (Abstract *)Int_Wrapped(m, 2));
@@ -106,51 +106,12 @@ status Span_Tests(MemCtx *gm){
     return r;
 }
 
-status SpanInline_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
-    Span *p;
-    status r = READY;
-
-    Single *sgl = NULL;
-    p = Span_MakeInline(m, TYPE_SPAN, sizeof(Single));
-    String *s;
-
-
-    sgl = Int_Wrapped(m, 12);
-    Span_Add(p, (Abstract *)sgl);
-    sgl = Int_Wrapped(m, 45);
-    Span_Add(p, (Abstract *)sgl);
-    sgl = Int_Wrapped(m, 72);
-    Span_Set(p, 45, (Abstract *)sgl);
-
-    int idx;
-    util expected;
-
-    idx = 0;
-    expected = 12;
-    sgl = (Single *)Span_Get(p, idx);
-    r |= Test(sgl->val.value == expected, "Inline Span idx %u match expected %ld have %ld", idx, expected, sgl->val.value);
-
-    idx = 1;
-    expected = 45;
-    sgl = (Single *)Span_Get(p, idx);
-    r |= Test(sgl->val.value == expected, "Inline Span idx %u match expected %ld have %ld", idx, expected, sgl->val.value);
-
-    idx = 45;
-    expected = 72;
-    sgl = (Single *)Span_Get(p, idx);
-    r |= Test(sgl->val.value == expected, "Inline Span idx %u match expected %ld have %ld", idx, expected, sgl->val.value);
-
-    MemCtx_Free(m);
-    return r;
-}
-
 status SpanClone_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
     Span *p;
     status r = READY;
 
-    p = Span_MakeInline(m, TYPE_MINI_SPAN, sizeof(Single));
+    p = Span_Make(m);
     String *s;
 
     Span_Set(p, 0, (Abstract *)String_Make(m, bytes("Zero")));

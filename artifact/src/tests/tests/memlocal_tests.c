@@ -72,7 +72,7 @@ status MemLocal_ToFromTests(MemCtx *gm){
     MemLocal_From(ml->m, (Abstract *)h);
     r |= Test(h->type.of == TYPE_HASHED, "Type hashed has been restored");
 
-    Span *p = Span_Make(ml->m, TYPE_SPAN);
+    Span *p = Span_Make(ml->m);
     String *pOne_s =String_Make(ml->m, bytes(cstr)); 
     String *pTwo_s =String_Make(ml->m, bytes(cstrTwo)); 
     String *pThree_s =String_Make(ml->m, bytes(cstrThree)); 
@@ -90,7 +90,7 @@ status MemLocal_ToFromTests(MemCtx *gm){
     r |= Test(pTwo_s->type.of == TYPE_STRING_CHAIN, "Type sting has been restored for span item two");
     r |= Test(pThree_s->type.of == TYPE_STRING_CHAIN, "Type sting has been restored for span item three");
 
-    Span *tbl = Span_Make(ml->m, TYPE_TABLE);
+    Span *tbl = Span_Make(ml->m);
     String *pTblOne_s =String_Make(ml->m, bytes(cstr)); 
     String *pKeyOne_s =String_Make(ml->m, bytes("one")); 
     String *pTblTwo_s =String_Make(ml->m, bytes(cstrTwo)); 
@@ -128,7 +128,7 @@ status MemLocal_Tests(MemCtx *gm){
     i64 len = String_Length(one);
     Span_Set(ml, 0, (Abstract *)one);
 
-    Span *tbl = Span_Make(ml->m, TYPE_TABLE);
+    Span *tbl = Span_Make(ml->m);
     String *pTblOne_s = String_Make(ml->m, bytes(cstr)); 
     String *pKeyOne_s = String_Make(ml->m, bytes("one")); 
     String *pTblTwo_s = String_Make(ml->m, bytes(cstrTwo)); 

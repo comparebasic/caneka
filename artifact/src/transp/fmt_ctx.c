@@ -4,8 +4,8 @@
 status Fmt_Add(MemCtx *m, FmtCtx *o, Lookup *fmtDefs){
     Iter *it = Iter_Make(m, fmtDefs->values);
     Lookup *byId = Lookup_Make(m, fmtDefs->offset, NULL, NULL);
-    Span *byName = Span_Make(m, TYPE_TABLE);
-    Span *byAlias = Span_Make(m, TYPE_TABLE);
+    Span *byName = Span_Make(m);
+    Span *byAlias = Span_Make(m);
     while((Iter_Next(it) & END) == 0){
         FmtDef *def = (FmtDef *)Iter_Get(it);
         if(def != NULL){

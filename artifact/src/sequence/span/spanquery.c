@@ -8,18 +8,13 @@ SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim){
     return sq->stack+dim;
 }
 
-status SpanQuery_Refresh(SpanQuery *sq){
-    return SUCCESS;
-}
-
-SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset){
-    SpanDef *def = sq->span->def;
+SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim){
     Span *p = sq->span;
 
     void *sl = NULL;
     word localIdx = 0;
     SpanState *st = SpanQuery_StateByDim(sq, dim);
-    int increment = Span_availableByDim(dim, def->stride, def->idxStride);
+    int increment = Span_availableByDim(dim, SPAN_STRIDE);
 
     if(dim == p->dims){
         SpanState *st = SpanQuery_StateByDim(sq, p->dims);
@@ -30,22 +25,18 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset){
         SpanState *prev = SpanQuery_StateByDim(sq, dim+1);
 
         localIdx = ((sq->idx - prev->offset) / increment);
-        int localMax = sq->span->def->stride;
-        if(dim > 0){
-            localMax = sq->span->def->idxStride;
-        }
+        int localMax = SPAN_STRIDE;
         if(localIdx >= localMax){
             printf("LocalIdx:%d prevLocalIdx:%d offset:%d dim:%d\n", localIdx, prev->localIdx, prev->offset, dim);
             Fatal("local_idx greater than stride max", sq->span->type.of);
+            return NULL;
         }
         st->offset = prev->offset + increment*localIdx;
-        sl = (void *)Slab_nextSlot(prev->slab, sq->span->def, prev->localIdx);
+        sl = (void *)Slab_nextSlot(prev->slab, p->slotSize, p->ptrSlot, prev->localIdx);
     }
 
     st->slab = sl;
     st->localIdx = localIdx;
-    st->flags |= set;
-    st->flags &= ~unset;
     st->dim = dim;
     st->increment = increment;
 
@@ -61,7 +52,7 @@ void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
     sr->span = p;
     sr->dims = p->dims;
     sr->idx = idx;
-    sr->dimsNeeded = SpanDef_GetDimNeeded(p->def, (idx));
+    sr->dimsNeeded = Span_GetDimNeeded(idx);
 
     return;
 }
@@ -69,9 +60,6 @@ void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
 status Span_Query(SpanQuery *sr){
     MemCtx *m = sr->span->m;
     if(sr->dimsNeeded > sr->dims){
-        if(sr->op == SPAN_OP_GET){
-            return NOOP;
-        }
         if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
             return NOOP;
         }
@@ -79,4 +67,3 @@ status Span_Query(SpanQuery *sr){
     }
     return Span_Extend(sr);
 }
-

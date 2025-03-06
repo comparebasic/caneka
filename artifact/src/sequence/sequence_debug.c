@@ -108,7 +108,8 @@ void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extend
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
-static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
+static void Slab_Print(void *sl, int color, byte dim, int parentIdx, byte indent, boolean extended, byte totalDims, int offset){
+    /*
     indent_Print(indent);
     printf("%d(%d)= ", parentIdx,offset);
     if(dim == 0){
@@ -118,7 +119,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
         printf("Values[ ");
         void *ptr = sl;
         boolean any = FALSE;
-        for(int i = 0; i < def->stride; i++){
+        for(int i = 0; i < SPAN_STRIDE; i++){
             util *a = (util *)ptr;
             if(*a != 0){
                 printf("%d=", i);
@@ -153,13 +154,13 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
         if(extended){
             printf("#%p->", sl);
         }
-        printf("Idx(%d/%d)[ ",  dim, Span_availableByDim(dim, def->stride, def->idxStride));
+        printf("Idx(%d/%d)[ ",  dim, Span_availableByDim(dim, SPAN_STRIDE, def->idxStride));
         boolean any = FALSE;
         void *ptr = sl;
         for(int i = 0; i < def->idxStride; i++){
             util *a = (util *)ptr;
             if(*a != 0){
-                int increment = Span_availableByDim(dim, def->stride, def->idxStride);
+                int increment = Span_availableByDim(dim, SPAN_STRIDE, def->idxStride);
                 util pos = offset+increment*i;
                 if(def->typeOf == TYPE_QUEUE_SPAN){
                     QueueIdx *qidx = (QueueIdx *)a;
@@ -179,7 +180,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
             util *a = (util *)ptr;
             if(*a != 0){
                 printf("\n");
-                offset += Span_availableByDim(dim, def->stride, def->idxStride)*i;
+                offset += Span_availableByDim(dim, SPAN_STRIDE, def->idxStride)*i;
 
                 Slab_Print((void *)*a, def, color, dim-1, i, indent+1, extended, totalDims, offset);
                 any = TRUE;
@@ -195,22 +196,7 @@ static void Slab_Print(void *sl, SpanDef *def, int color, byte dim, int parentId
             printf("\n");
         }
     }
-}
-
-void SpanDef_Print(SpanDef *def){
-    char *flags = "";
-    if((def->flags & SPAN_INLINE) != 0){
-        flags = "(inline)";
-    }
-    printf("def=[idxStride:%d stride:%d idxSize:%d slotSize:%d%s itemSize:%d, valueHdr:%d", 
-         def->idxStride, def->stride, def->idxSize, def->slotSize, flags, def->itemSize, def->valueHdr);
-    if(def->dim_lookups[0] != 0){
-        printf(" lookups: ");
-        for(int i = 0; i < 8; i ++){
-            printf("%lu ", def->dim_lookups[i]);
-        }
-    }
-    printf("]");
+    */
 }
 
 void OrdTable_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
@@ -226,12 +212,11 @@ void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
         if(p->metrics.selected >= 0){
             printf("sel:%d ", p->metrics.selected);
         }
-        if(p->def->typeOf == TYPE_QUEUE_SPAN){
-            printf("%s ", QueueFlags_ToChars(p->flags));
+        if(p->type.of == TYPE_QUEUE_SPAN){
+            printf("%s ", QueueFlags_ToChars(p->type.state));
         }
-        SpanDef_Print(p->def);
         printf("\n");
-        Slab_Print(p->root, p->def, color, p->dims, 0, 1, TRUE, p->dims, 0);
+        Slab_Print(p->root, color, p->dims, 0, 1, TRUE, p->dims, 0);
     }
     printf(">\x1b[0m");
 }
@@ -244,9 +229,9 @@ void Lookup_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
 }
 
 static void mess_PrintRecurse(Mess *ms, char *msg, int color, boolean extended, int indent){
+    /*
     indent_Print(indent);
     printf("\x1b[%dm%sM<%s value=\x1b[0m", color, msg, Class_ToString(ms->type.of));
-    Debug_Print((void *)ms->name, 0, "", color, extended);
     printf(" ");
     if(ms->atts != NULL){
         printf("\x1b[%dmatts=[", color);
@@ -282,6 +267,7 @@ static void mess_PrintRecurse(Mess *ms, char *msg, int color, boolean extended, 
         printf(">\x1b[0m");
     }
     printf("\n");
+    */
 }
 
 static void Mess_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

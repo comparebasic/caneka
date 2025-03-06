@@ -262,7 +262,7 @@ Span *MemLocal_Make(cls typeOf){
     if(Ifc_Match(typeOf, TYPE_SPAN)){
         MemCtx *m = MemCtx_Make();
         DebugStack_Pop();
-        return Span_Make(m, typeOf);
+        return Span_Make(m);
     }else{
         Fatal("MemLocal typeOf not found as possible root types", TYPE_MEMLOCAL);
         DebugStack_Pop();

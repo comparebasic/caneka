@@ -190,16 +190,19 @@ static BuildSubdir sequenceobj = { "sequence", {
     "mess.c",
     "nestedd.c",
     "queue.c",
-    "slab.c",
-    "span.c",
-    "span_utils.c",
-    "spandef.c",
-    "spanquery.c",
-    "span_tolocal.c",
     "sequence_debug.c",
     "table.c",
     "table_chain.c",
     "ord_table.c",
+    NULL
+}};
+
+static BuildSubdir spanobj = { "sequence/span", {
+    "slab.c",
+    "span.c",
+    "spanquery.c",
+    "span_tolocal.c",
+    "span_utils.c",
     NULL
 }};
 
@@ -264,7 +267,6 @@ static BuildSubdir testsuitesobj = { "tests/tests", {
     "roebling_tests.c",
     "salty_tests.c",
     "serve_tests.c",
-    "span_setup_tests.c",
     "span_tests.c",
     "string_tests.c",
     "strsnip_tests.c",
@@ -326,6 +328,7 @@ static BuildSubdir *objdirs[] = {
     &parserobj,
     &persistobj,
     &sequenceobj,
+    &spanobj,
     &serveobj,
     &stringobj,
     &testsobj,

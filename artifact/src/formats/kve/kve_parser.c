@@ -80,7 +80,7 @@ status Kve_AddRblFuncs(MemCtx *m, Span *funcs, Lookup *desc){
 
 Roebling *Kve_RblMake(MemCtx *m, String *s, Abstract *source, RblCaptureFunc capture){
     DebugStack_Push("Kve_RblMake", TYPE_CSTR); 
-    Span *parsers_do =  Span_Make(m, TYPE_SPAN);
+    Span *parsers_do =  Span_Make(m);
     Lookup *desc = Lookup_Make(m, _TYPE_CORE_END, NULL, NULL);
     Kve_AddRblFuncs(m, parsers_do, desc);
 

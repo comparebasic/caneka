@@ -11,7 +11,7 @@ status NestedDFlat_Tests(MemCtx *gm){
     Abstract *value = NULL;
     Single *sg = NULL;
 
-    tbl = Span_Make(m, TYPE_TABLE);
+    tbl = Span_Make(m);
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("yes")), (Abstract *)Int_Wrapped(m, TRUE));
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("no")), (Abstract *)Int_Wrapped(m, FALSE));
     nd = NestedD_Make(m, tbl);
@@ -36,13 +36,13 @@ status NestedDWith_Tests(MemCtx *gm){
     Abstract *value = NULL;
     Single *sg = NULL;
 
-    Span *session = Span_Make(m, TYPE_TABLE);
+    Span *session = Span_Make(m);
     Table_Set(session, (Abstract *)String_Make(m, bytes("scid")), (Abstract *)String_Make(m, bytes("a87c782a")));
     Table_Set(session, (Abstract *)String_Make(m, bytes("domain")), (Abstract *)String_Make(m, bytes("customer")));
     struct timespec ts = {1709645616, 277122774};
     Table_Set(session, (Abstract *)String_Make(m, bytes("expires")), (Abstract *)I64_Wrapped(m, Time64_FromSpec(&ts)));
 
-    tbl = Span_Make(m, TYPE_TABLE);
+    tbl = Span_Make(m);
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("name")), (Abstract *)String_Make(m, bytes("SuppaSuppa")));
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("title")), (Abstract *)String_Make(m, bytes("Master Of It All")));
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("session")), (Abstract *)session);
@@ -86,7 +86,7 @@ status NestedDFor_Tests(MemCtx *gm){
     Single *sg = NULL;
     status state = READY;
 
-    Span *hobby1 = Span_Make(m, TYPE_TABLE);
+    Span *hobby1 = Span_Make(m);
     Table_Set(hobby1, (Abstract *)String_Make(m, bytes("name")),
         (Abstract *)String_Make(m, bytes("Heavy Metal")));
     Table_Set(hobby1, (Abstract *)String_Make(m, bytes("category")),
@@ -94,7 +94,7 @@ status NestedDFor_Tests(MemCtx *gm){
     Table_Set(hobby1, (Abstract *)String_Make(m, bytes("status")),
         (Abstract *)Int_Wrapped(m, 2));
 
-    Span *hobby2 = Span_Make(m, TYPE_TABLE);
+    Span *hobby2 = Span_Make(m);
     Table_Set(hobby2, (Abstract *)String_Make(m, bytes("name")),
         (Abstract *)String_Make(m, bytes("Knitting")));
     Table_Set(hobby2, (Abstract *)String_Make(m, bytes("category")),
@@ -102,7 +102,7 @@ status NestedDFor_Tests(MemCtx *gm){
     Table_Set(hobby2, (Abstract *)String_Make(m, bytes("status")),
         (Abstract *)Int_Wrapped(m, 7));
 
-    Span *hobby3 = Span_Make(m, TYPE_TABLE);
+    Span *hobby3 = Span_Make(m);
     Table_Set(hobby3, (Abstract *)String_Make(m, bytes("name")),
         (Abstract *)String_Make(m, bytes("Ramen")));
     Table_Set(hobby3, (Abstract *)String_Make(m, bytes("category")),
@@ -110,12 +110,12 @@ status NestedDFor_Tests(MemCtx *gm){
     Table_Set(hobby3, (Abstract *)String_Make(m, bytes("status")),
         (Abstract *)Int_Wrapped(m, 99));
 
-    Span *hobbies_sp = Span_Make(m, TYPE_SPAN);
+    Span *hobbies_sp = Span_Make(m);
     Span_Add(hobbies_sp, (Abstract *)hobby1);
     Span_Add(hobbies_sp, (Abstract *)hobby2);
     Span_Add(hobbies_sp, (Abstract *)hobby3);
 
-    tbl = Span_Make(m, TYPE_TABLE);
+    tbl = Span_Make(m);
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("name")), (Abstract *)String_Make(m, bytes("SuppaSuppa")));
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("title")), (Abstract *)String_Make(m, bytes("Master Of It All")));
     Table_Set(tbl, (Abstract *)String_Make(m, bytes("hobbies")), (Abstract *)hobbies_sp);

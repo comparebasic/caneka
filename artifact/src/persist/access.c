@@ -7,13 +7,13 @@ status Access_Init(MemCtx *m){
     if(_perms == NULL){
         MemCtx_SetToBase(m);
 
-        Span *tbl = Span_Make(m, TYPE_TABLE);
+        Span *tbl = Span_Make(m);
         String *key = String_Make(m, bytes("grant"));
         Hashed *h = Table_SetHashed(tbl, (Abstract *)key, (Abstract *)Range_Wrapped(m, SUCCESS));
         h->type.state |= UPPER_FLAGS;
 
         key = String_Make(m, bytes("system"));
-        _perms = Span_Make(m, TYPE_TABLE);
+        _perms = Span_Make(m);
         h = Table_SetHashed(_perms, (Abstract *)key, (Abstract *)tbl);
         h->type.state |= UPPER_FLAGS;
 
@@ -39,7 +39,7 @@ status Access_Grant(MemCtx *m, Access *grantee, word fl, String *key, Abstract *
     MemCtx_SetToBase(m);
     String *userKey = String_Clone(m, grantee->owner);
     if(h == NULL){
-        userPerms = Span_Make(m, TYPE_TABLE);    
+        userPerms = Span_Make(m);
         h = Table_SetHashed(_perms, (Abstract *)userKey, (Abstract *)userPerms); 
     }else{
         userPerms = (Span *)h->value;
@@ -97,7 +97,7 @@ Access *Access_Make(MemCtx *m, String *owner, Span *groups){
     Access *a = (Access *)MemCtx_Alloc(m, sizeof(Access));
     a->type.of = TYPE_ACCESS;
     a->owner = owner;
-    if(groups != NULL && groups->def->typeOf != TYPE_TABLE){
+    if(groups != NULL && groups->type.of != TYPE_TABLE){
         Fatal("Group span is expected to be a table", TYPE_ACCESS);
         return NULL;
     }

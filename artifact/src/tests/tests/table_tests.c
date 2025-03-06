@@ -54,7 +54,7 @@ char *values2[] = {
 
 status Table_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
-    Span *tbl = Span_Make(m, TYPE_TABLE);
+    Span *tbl = Span_Make(m);
     status r = SUCCESS;
     String *s;
     String *value;
@@ -96,7 +96,7 @@ status Table_Tests(MemCtx *gm){
 
 status TableResize_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
-    Span *tbl = Span_Make(m, TYPE_TABLE);
+    Span *tbl = Span_Make(m);
     status r = SUCCESS;
     String *s;
     String *value;
@@ -138,7 +138,7 @@ status TableResize_Tests(MemCtx *gm){
 
 status TablePreKey_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
-    Span *tbl = Span_Make(m, TYPE_TABLE);
+    Span *tbl = Span_Make(m);
     status r = SUCCESS;
     String *s;
     String *value;
@@ -156,7 +156,7 @@ status TablePreKey_Tests(MemCtx *gm){
         found != NULL ? (char *)(found->bytes) : "NULL");
 
 
-    tbl = Span_Make(m, TYPE_TABLE);
+    tbl = Span_Make(m);
     for(int i = 0; ; i+= 2){
         if(values2[i] == NULL){
             break;

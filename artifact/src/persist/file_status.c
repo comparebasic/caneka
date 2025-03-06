@@ -43,8 +43,10 @@ boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
     struct stat build_stat;
     int r = 0;
 
-    r = stat(String_ToChars(m, a), &source_stat);
+    char *path_cstr = String_ToChars(m, a);
+    r = stat(path_cstr, &source_stat);
     if(r != 0){
+        printf("%s\n", path_cstr);
         Fatal("Source not found", TYPE_FILE);
         exit(1);
     }

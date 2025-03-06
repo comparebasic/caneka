@@ -1,4 +1,3 @@
-#include "sequence/spandef.h"
 #include "sequence/slab.h"
 #include "sequence/span.h"
 #include "sequence/spanquery.h"

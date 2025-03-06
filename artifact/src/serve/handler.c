@@ -36,7 +36,7 @@ Handler *Handler_Get(Handler *h){
 
 status Handler_AddPrior(MemCtx *m, Handler *orig, Handler *h){
     if(orig->prior == NULL){
-        orig->prior = Span_Make(m, TYPE_SPAN);
+        orig->prior = Span_Make(m);
     }
     return Span_Add(orig->prior, (Abstract *)h);
 }

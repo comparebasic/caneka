@@ -48,7 +48,7 @@ static int pollSkipSlab(Abstract *source, int idx){
     SpanQuery_Setup(&sq, sctx->pollMap, SPAN_OP_GET, idx);
     Span_Query(&sq);
     if(sq.stack[0].slab != NULL){
-        ready += poll(sq.stack[0].slab, sctx->pollMap->def->stride, 1);
+        ready += poll(sq.stack[0].slab, SPAN_STRIDE, 1);
         if(DEBUG_SERVE_POLLING){
             struct pollfd *pfd = sq.stack[0].slab;
             printf("\x1b[%dmPoll Found %d, first fd:%d events:%d\x1b[0m\n", DEBUG_SERVE_POLLING, ready, pfd->fd, pfd->events);
@@ -58,9 +58,9 @@ static int pollSkipSlab(Abstract *source, int idx){
     SpanQuery_Setup(&sq, sctx->flagMap, SPAN_OP_GET, idx);
     Span_Query(&sq);
     if(sq.stack[0].slab != NULL){
-        for(int i = 0; i < sctx->flagMap->def->stride; i++){
-            status *ptr = (status *)Slab_valueAddr(sq.stack[0].slab,
-                sctx->flagMap->def, i);
+        for(int i = 0; i < SPAN_STRIDE; i++){
+            status *ptr = (status *)Slab_valueAddr(sq.stack[0].slab, i, 
+                sctx->flagMap->slotSize, sctx->flagMap->ptrSlot);
             if((*ptr) != 0){
                 ready++;
             }
@@ -313,8 +313,8 @@ Serve *Serve_Make(MemCtx *m, ProtoDef *def){
     sctx->type.of = TYPE_SERVECTX;
     sctx->m = m;
     sctx->def = def;
-    sctx->pollMap = Span_Make(m, TYPE_POLL_MAP_SPAN);
-    sctx->flagMap = Span_Make(m, TYPE_FLAG_MAP_SPAN);
+    sctx->pollMap = Span_Make(m);
+    sctx->flagMap = Span_Make(m);
     Queue_Init(m, &sctx->queue, def->getDelay);
     sctx->queue.source = (Abstract *)sctx;
     sctx->socket_fd = -1;

@@ -110,7 +110,7 @@ Transp *Transp_Make(MemCtx *m){
     t->type.of = TYPE_TRANSP;
     t->m = m;
     t->source = Source_Make(m);
-    t->fmts = Span_Make(m, TYPE_TABLE);
+    t->fmts = Span_Make(m);
     t->targets = Lookup_Make(m, _APP_BOUNDRY_START, NULL, NULL);
     return t;
 }

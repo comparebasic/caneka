@@ -1,7 +1,6 @@
 typedef struct ordered_table {
     Type type;
     MemCtx *m;
-    SpanDef *def;
     /* Queue Idx */
 	void *root;
     word flags;

@@ -106,7 +106,7 @@ status Cdoc_AddParsers(MemCtx *m, Span *parsers, Lookup *desc){
 }
 
 Roebling *Cdoc_RblMake(MemCtx *m, FmtCtx *ctx){
-    Span *parsers = Span_Make(m, TYPE_SPAN);
+    Span *parsers = Span_Make(m);
     Lookup *desc = Lookup_Make(m, CDOC_START, NULL, NULL);
 
     String *s = String_Init(m, STRING_EXTEND);

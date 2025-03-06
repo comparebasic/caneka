@@ -46,7 +46,7 @@ status Span_Move(Span *p, int fromIdx, int toIdx){
 }
 
 Span *Span_From(MemCtx *m, int count, ...){
-    Span *p = Span_Make(m, TYPE_SPAN);
+    Span *p = Span_Make(m);
     Abstract *v = NULL;
 	va_list arg;
     va_start(arg, count);
@@ -69,11 +69,7 @@ status Span_Run(MemCtx *m, Span *p, DoFunc func){
 }
 
 Span *Span_Clone(MemCtx *m, Span *op){
-    Span *p = Span_Make(m, op->type.of);
-    if((p->def->flags & SPAN_INLINE) != 0){
-        p->def = SpanDef_Clone(m, SpanDef_FromCls(op->type.of));
-        p->type.of = p->def->typeOf;
-    }
+    Span *p = Span_Make(m);
     Iter it;
     Iter_Init(&it, op);
     while((Iter_Next(&it) & END) == 0){

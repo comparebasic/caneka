@@ -5,7 +5,7 @@ static TableChain *SaltyKeyChain = NULL;
 
 status Enc_Init(MemCtx *m){
     if(SaltyKeyChain == NULL){
-        Span *keys = Span_Make(m, TYPE_TABLE);
+        Span *keys = Span_Make(m);
         SaltyKeyChain = TableChain_Make(m, keys);
         return SUCCESS;
     }

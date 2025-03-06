@@ -80,7 +80,7 @@ Proto *HttpProto_Make(MemCtx *m, ProtoDef *def, word flags){
     p->type.of = TYPE_HTTP_PROTO;
     p->toLog = toLog;
     p->def = def;
-    p->headers_tbl = Span_Make(m, TYPE_TABLE);
+    p->headers_tbl = Span_Make(m);
 
     return (Proto *)p;
 }

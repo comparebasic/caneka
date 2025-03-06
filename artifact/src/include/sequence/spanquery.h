@@ -29,7 +29,7 @@ typedef struct span_query {
     byte dimsNeeded;
 } SpanQuery; /* sr */
 
-SpanState * SpanQuery_SetStack(SpanQuery *sq, byte dim, word set, word unset);
+SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim);
 SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim);
 status SpanQuery_Refresh(SpanQuery *sq);
 void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, int idx);

@@ -66,6 +66,7 @@ status Queue_Remove(Queue *q, int idx){
 }
 
 QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
+    /*
     if(DEBUG_QUEUE){
         Debug_Print((void *)q, 0, "Queue_Next called:", DEBUG_QUEUE, FALSE);
     }
@@ -83,12 +84,12 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
             return NULL;
         }
         if(skip != NULL && skip(q->source, 0) == 0){
-            q->current.idx += Span_availableByDim(1, q->span->def->stride, q->span->def->idxStride);
+            q->current.idx += Span_availableByDim(1, SPAN_STRIDE);
             return Queue_Next(q, skip); 
         }
         return Span_GetFromQ(&q->current);
     }else{
-        /* Use the Span_GetFromQ function to find the next value, jumping by increment amounts if it finds missing slabs */
+        / * Use the Span_GetFromQ function to find the next value, jumping by increment amounts if it finds missing slabs * /
         int maxIdx = Span_Capacity(q->span);
         while(TRUE){
             int increment = Span_availableByDim(q->current.queryDim, q->span->def->stride, q->span->def->idxStride);
@@ -104,7 +105,7 @@ QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip){
                 if((Span_Query(&q->current) & NOOP) == 0){
                     break;
                 }
-                /* capture an available slot if we just found one in dim 0*/
+                / * capture an available slot if we just found one in dim 0* /
                 if(q->current.queryDim == 0 && q->available.stack[0].slab == NULL){
                     SpanQuery_Setup(&q->available, q->span, SPAN_OP_GET, q->current.idx);
                     Span_Query(&q->available);
@@ -128,12 +129,16 @@ end:
         q->type.state &= ~PROCESSING;
         return NULL;
     }
+    */
+    return NULL;
 }
 
 status Queue_Init(MemCtx *m, Queue *q, GetDelayFunc getDelay){
     memset(q, 0, sizeof(Queue));
     q->type.of = TYPE_QUEUE;
-    q->span = Span_Make(m, TYPE_QUEUE_SPAN);;
+    q->span = Span_Make(m);
+    q->span->slotSize = sizeof(QueueIdx) / SLOT_BYTE_SIZE;
+    q->span->ptrSlot = 1;
     SpanQuery_Setup(&q->current, q->span, SPAN_OP_SET, 0); 
     memset(&q->available, 0, sizeof(SpanQuery)); 
     q->getDelay = getDelay;

@@ -64,7 +64,7 @@ Abstract *CnkRbl_PatKeyOpen(MemCtx *m, FmtDef *def, FmtCtx *fmt, String *key, Ab
     if(def->id == CNK_LANG_RBL_PAT_KEY){
         fmt->item->key = key;
         Span *sp = (Span *)asIfc(fmt->root->value, TYPE_TABLE);
-        fmt->item->value = (Abstract *)Span_Make(m, TYPE_SPAN);
+        fmt->item->value = (Abstract *)Span_Make(m);
 
         Table_Set(sp, (Abstract *)key,  (Abstract *)fmt->item);
 

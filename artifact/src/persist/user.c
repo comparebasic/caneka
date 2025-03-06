@@ -80,7 +80,7 @@ Span *User_Open(MemCtx *m, IoCtx *userCtx, String *id, String *secret, Access *a
         File_Init(&user, String_Make(m, bytes("user.data")), ac, &ctx);
 
         if(data == NULL){
-            data = Span_Make(m, TYPE_TABLE);
+            data = Span_Make(m);
         }
         Table_Set(data, (Abstract *)String_Make(m, bytes("id")), (Abstract *)id);
         user.data = Oset_To(m, NULL, (Abstract *)data); 

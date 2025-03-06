@@ -54,7 +54,7 @@ Abstract *Iter_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract 
     String_AddBytes(m, os, bytes("/"), 1);
     String_Add(m, os, String_FromInt(m, p->nvalues));
     String_AddBytes(m, os, bytes("="), 1);
-    if(p->def->typeOf == TYPE_TABLE){
+    if(p->type.of == TYPE_TABLE){
         String_AddBytes(m, os, bytes("{"), 1);
     }else if((p->type.state & FLAG_SPAN_HAS_GAPS) != 0){
         String_AddBytes(m, os, bytes("["), 1);
@@ -81,7 +81,7 @@ Abstract *Iter_ToOset(MemCtx *m, FmtDef *odef, FmtCtx *o, String *key, Abstract 
         }
     }
 
-    if(p->def->typeOf == TYPE_TABLE){
+    if(p->type.of == TYPE_TABLE){
         String_AddBytes(m, os, bytes("}"), 1);
     }else if((p->type.state & FLAG_SPAN_HAS_GAPS) != 0){
         String_AddBytes(m, os, bytes("]"), 1);

@@ -1,12 +1,12 @@
 /*
 Slab
 The slab element used by Span, the slab is almost entirely internal.
-
-related: core/slab.c
-related: include/span.h
 */
 
-status Slab_setSlot(void *sl, struct span_def *def, int idx, void *value, size_t sz);
-void *Slab_nextSlot(void *sl, struct span_def *def, int local_idx);
-void **Slab_nextSlotPtr(void *sl, struct span_def *def, int local_idx);
-void *Slab_valueAddr(void *sl, struct span_def *def, int local_idx);
+#define SLOT_BYTE_SIZE (sizeof(void *))
+
+status Slab_setSlot(void *sl, int idx, byte slotSize, byte ptrSlot, void *value);
+void **Slab_nextSlotPtr(void *sl, int localIdx, byte slotSize, byte ptrSlot);
+void *Slab_nextSlot(void *sl, int localIdx, byte slotSize, byte ptrSlot);
+void *Slab_valueAddr(void *sl, int localIdx, byte slotSize, byte ptrSlot);
+void *Slab_Make(MemCtx *m);

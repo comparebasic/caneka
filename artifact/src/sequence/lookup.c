@@ -70,9 +70,8 @@ Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
     lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
-    lk->values = Span_MakeInline(m, TYPE_SPAN, sizeof(int));
+    lk->values = Span_Make(m);
     lk->values->type.state |= SPAN_RAW;
-    lk->values->def->flags |= SPAN_RAW;
     lk->arg = arg;
 
     return lk;
@@ -82,7 +81,7 @@ Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *a
     Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
     lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
-    lk->values = Span_Make(m, TYPE_SPAN);
+    lk->values = Span_Make(m);
     lk->arg = arg;
     if(populate != NULL){
         populate(m, lk);

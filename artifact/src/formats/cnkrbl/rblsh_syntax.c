@@ -273,7 +273,7 @@ static status jumpTokenPat(MemCtx *m, Roebling *rbl){
 }
 
 status CnkRoebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks){
-    Span *additions = Span_Make(m, TYPE_SPAN);
+    Span *additions = Span_Make(m);
     Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_START));
     Span_Add(additions, (Abstract *)Do_Wrapped(m, (DoFunc)start));
     Span_Add(additions, (Abstract *)Int_Wrapped(m, CNK_LANG_RBL_PAT));
@@ -300,7 +300,7 @@ status CnkRoebling_AddParsers(MemCtx *m, Span *parsers, Lookup *marks){
 }
 
 Roebling *CnkRoeblingCtx_RblMake(MemCtx *m, FmtCtx *ctx){
-    Span *parsers = Span_Make(m, TYPE_SPAN);
+    Span *parsers = Span_Make(m);
     Lookup *desc = Lookup_Make(m, CNK_LANG_RBL_START, NULL, NULL);
 
     String *s = String_Init(m, STRING_EXTEND);
@@ -325,7 +325,7 @@ FmtCtx *CnkRoeblingCtx_Make(MemCtx *m, Abstract *source){
     ctx->rangeToChars = CnkLang_RangeToChars;
     CnkRblLang_AddDefs(ctx);
     ctx->root = ctx->item = FmtItem_Make(ctx->m, ctx);
-    ctx->root->value = (Abstract *)Span_Make(m, TYPE_TABLE);
+    ctx->root->value = (Abstract *)Span_Make(m);
     ctx->item->spaceIdx = CNK_LANG_RBL_START;
     FmtDef *def = Chain_Get(ctx->resolver->byId, ctx->item->spaceIdx);
     ctx->item->def = def;

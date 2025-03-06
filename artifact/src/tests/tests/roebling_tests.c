@@ -72,7 +72,7 @@ status Roebling_Tests(MemCtx *gm){
     String *s = NULL; 
 
     Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m, TYPE_SPAN);
+    Span *parsers_do = Span_Make(m);
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, String_Init(m, STRING_EXTEND), Found, NULL); 
@@ -92,7 +92,7 @@ status RoeblingRun_Tests(MemCtx *gm){
     MemCtx *m = MemCtx_Make();
 
     Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m, TYPE_SPAN);
+    Span *parsers_do = Span_Make(m);
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
     rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, String_Init(m, STRING_EXTEND), Found, NULL); 
@@ -130,7 +130,7 @@ status RoeblingMark_Tests(MemCtx *gm){
     Match *mt = NULL;
 
     Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m, TYPE_SPAN);
+    Span *parsers_do = Span_Make(m);
     Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_START)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
@@ -200,7 +200,7 @@ status RoeblingStartStop_Tests(MemCtx *gm){
     Match *mt = NULL;
 
     Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m, TYPE_SPAN);
+    Span *parsers_do = Span_Make(m);
     Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
 
     String *s = String_Init(m, STRING_EXTEND);

@@ -17,10 +17,9 @@
 #include "crypto/sane.c"
 #include "termio/cli_status.c"
 /* span */
-#include "sequence/slab.c"
-#include "sequence/spandef.c"
-#include "sequence/span.c"
-#include "sequence/spanquery.c"
+#include "sequence/span/slab.c"
+#include "sequence/span/span.c"
+#include "sequence/span/spanquery.c"
 #include "sequence/iter.c"
 /* file status */
 #include "persist/file_status.c"
@@ -144,7 +143,7 @@ static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *l
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
     MemCtx *m = ctx->m;
-    Span *cmd = Span_Make(m, TYPE_SPAN);
+    Span *cmd = Span_Make(m);
     Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.cc)));
     char **ptr = ctx->args.cflags;
     while(*ptr != NULL){
@@ -201,7 +200,7 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     DebugStack_Push(source, source->type.of);
     status r = READY;
     MemCtx *m = ctx->m;
-    Span *cmd = Span_Make(m, TYPE_SPAN);
+    Span *cmd = Span_Make(m);
     ProcDets pd;
     StrVecEntry_Set(ctx->fields.current.dest, dest->bytes, dest->length);
     ctx->fields.steps.count++;
@@ -363,7 +362,6 @@ static status build(BuildCtx *ctx){
 status Init(MemCtx *m){
     status r = READY;
     r |= Debug_Init(m);
-    r |= SpanDef_Init();
     r |= DebugStack_Init(m);
     return r;
 }

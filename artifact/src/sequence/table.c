@@ -3,6 +3,7 @@
 
 int TABLE_DIM_BYTESIZES[7] = {1, 1, 2, 2, 4, 0, 0};
 int TABLE_REQUERY_MAX[7] = {4, 4,  8, 16, 32, 0, 0};
+static i64 dim_lookups[8] = {15, 255, 4095, 0, 0, 0, 0, 0};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
 static void setValuePtr(Span *tbl, Hashed *h, Abstract *value){
@@ -12,17 +13,16 @@ static void setValuePtr(Span *tbl, Hashed *h, Abstract *value){
 
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
 
-static int getReQueryKey(SpanDef *def, i64 hash, int position, byte dim){
-    return (int) ((hash >> (position*4)) & def->dim_lookups[dim]);
+static int getReQueryKey(i64 hash, int position, byte dim){
+    return (int) ((hash >> (position*4)) & dim_lookups[dim]);
 }
 
 static boolean shouldResize(Span *tbl, word *queries){
-    SpanDef *def = tbl->def;
-    if(def->dim_lookups[tbl->dims] == 0){
-        Fatal("Dim lookup value not set for SpanDef\n", tbl->type.of);
+    if(dim_lookups[tbl->dims] == 0){
+        Fatal("Dim lookup value not set dim\n", tbl->type.of);
         return FALSE;
     }
-    if(tbl->nvalues > ((def->dim_lookups[tbl->dims] / 2) + (def->dim_lookups[tbl->dims] / 4)) 
+    if(tbl->nvalues > ((dim_lookups[tbl->dims] / 2) + (dim_lookups[tbl->dims] / 4)) 
             || *queries > TABLE_REQUERY_MAX[tbl->dims]){
             *queries = 0;
             return TRUE;
@@ -31,10 +31,9 @@ static boolean shouldResize(Span *tbl, word *queries){
 }
 
 static status Table_Resize(Span *tbl, word *queries){
-    SpanDef *def = tbl->def;
     if(shouldResize(tbl, queries)){
         *queries = 0;
-        Span *newTbl = Span_Make(tbl->m, TYPE_TABLE);
+        Span *newTbl = Span_Make(tbl->m);
 
         SpanQuery sr;
         SpanQuery_Setup(&sr, newTbl, SPAN_OP_RESIZE, 0);
@@ -81,11 +80,11 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
         for(int j = 0; !found && j < TABLE_REQUERY_MAX[tbl->dims]; j++){
             queries++;
             Table_Resize(tbl, &queries);
-            int hkey = getReQueryKey(tbl->def, h->id, j, tbl->dims);
+            int hkey = getReQueryKey(h->id, j, tbl->dims);
             _h = (Hashed *)Span_Get(tbl, hkey);
             if(DEBUG_TABLE){
                 Debug_Print((void *)h->item, 0, "At ", DEBUG_TABLE, FALSE);
-                printf("\x1b[%dm dimsize=%hu key/%lu=", DEBUG_TABLE, tbl->dims, tbl->def->dim_lookups[tbl->dims]);
+                printf("\x1b[%dm dimsize=%hu key/%lu=", DEBUG_TABLE, tbl->dims, dim_lookups[tbl->dims]);
                 Bits_Print((byte *)&hkey, TABLE_DIM_BYTESIZES[tbl->dims], "", DEBUG_TABLE, TRUE);
                 printf("\x1b[%dm%d half-byte of ", DEBUG_TABLE, j+1);
                 Bits_Print((byte *)&(h->id), sizeof(int), "", DEBUG_TABLE, FALSE);
@@ -136,7 +135,7 @@ status Table_SetKey(Span *tbl, Abstract *a){
 i32 Table_SetIdxEntry(Span *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, NULL);
     i32 value = tbl->metrics.set;
-    Single *tag = Int_Wrapped(tagTbl->m, value);
+    Single *tag = Int_Wrapped(tbl->m, value);
     h->value = (Abstract *)tag;
     return (i32)value;
 }

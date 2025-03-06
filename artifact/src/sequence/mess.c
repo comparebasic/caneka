@@ -26,11 +26,11 @@ status Mess_Append(MessSet *set, Mess *ms, Abstract *key, Abstract *a){
     return Table_Set(ms->children, key, a);
 }
 
-status Mess_AddAtt(MessSet *set, Mess *ms, String *key, Abstract *value){
+status Mess_AddAtt(MessSet *set, Mess *ms,  Abstract *key, Abstract *value){
     if(ms->atts == NULL){
-        ms->atts = OrdTable_Make(set->m); 
+        ms->atts = (Span *)OrdTable_Make(set->m); 
     } 
-    return Table_Set(ms->atts, (Abstract *)key, value);
+    return Table_Set(ms->atts, key, value);
 }
 
 Mess *Mess_Make(MemCtx *m, word tagIdx){

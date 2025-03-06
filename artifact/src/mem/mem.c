@@ -1,28 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
-static MemCtx nativeM = {
-    .type = {TYPE_MEMCTX_NATIVE, 0},
-    .itemSize = 0,
-    .slotSize = 0,
-    .dims = 0,
-    .root = NULL,
-    .m = NULL,
-    .nvalues = 0,
-    .max_idx = 0,
-    .metrics = {
-        .get = -1,
-        .set = -1,
-        .selected = -1,
-    }
-};
-
 static size_t cmem = 0;
 int MemSlab_Count = 0;
 
-static void *MemSlab_Alloc(MemSlab *sl, word sz){
-    sl->remaining -= sz;
-    return sl->bytes+sl->remaining; 
+static void *MemSlab_Alloc(MemSlab *sl, size_t s){
+    void *p = sl->addr; 
+    sl->addr += s;
+
+    return p;
 }
 
 void *TrackMalloc(size_t sz, cls t){
@@ -44,67 +30,81 @@ void TrackFree(void *p, size_t s){
     cmem -= s;
 }
 
+size_t MemSlab_Available(MemSlab *sl){
+    return MEM_SLAB_SIZE - MemSlab_Taken(sl);
+}
+
 size_t MemCount(){
     return cmem;
 }
 
 i64 MemCtx_MemCount(MemCtx *m, i16 level){
-    Iter it;
-    Iter_Init(&it, m);
+    MemSlab *sl = NULL, *last = m->start_sl;
     i64 total = 0;
-    while((SpanMem_IterNext(&it) & END) == 0){
-        MemSlab *sl = (MemSlab *)Iter_Get(&it);
-        if(level == 0 || sl->level == level){
-            total += MEM_SLAB_SIZE;
+    while(last != NULL){
+        if((level == 0 || last->level == level)){
+            total += MemSlab_Taken(last);
         }
+        last = last->next;
     }
-
     return total;
 }
 
 MemSlab *MemSlab_Make(MemCtx *m, i16 level){
-    void *slab = TrackMalloc(MEM_SLAB_SIZE, TYPE_MEMSLAB);
-    MemSlab sl = {
-        .type = {TYPE_MEMSLAB, 0},
-        .level = level,
-        .remaining = MEM_SLAB_SIZE,
-        .bytes = slab,
-    };
-    return MemSlab_Attach(m, &sl);
+    size_t sz = sizeof(MemSlab);
+    MemSlab *sl = (MemSlab *) TrackMalloc(sz, TYPE_MEMSLAB);
+    sl->type.of = TYPE_MEMSLAB;
+    sl->addr = sl->bytes;
+    sl->level = level;
+    MemSlab_Count++;
+    if(m != NULL){
+        return MemSlab_Attach(m, sl);
+    }else{
+        return sl;
+    }
 }
 
-void *MemCtx_Alloc(MemCtx *m, size_t sz){
+void *MemCtx_AllocTemp(MemCtx *m, size_t sz, i16 level){
+    if(DEBUG_ALLOC){
+        printf("\x1b[%dmAlloc %ld of %p\x1b[0m\n", DEBUG_ALLOC, sz, m);
+    }
     if(sz > MEM_SLAB_SIZE){
         Fatal("Trying to allocation too much memory at once", TYPE_MEMCTX);
     }
-
-    if(m->type.of == TYPE_MEMCTX_NATIVE){
-        return TrackMalloc(sz, TYPE_MEMCTX_NATIVE);
-    }
-
-    i16 level = max(m->type.state, 0);
-    word _sz = (word)_sz;
-
-    Iter it;
-    Iter_Init(&it, m);
-    MemSlab *sl = NULL;
-    while((SpanMem_IterNext(&it) & END) == 0){
-        MemSlab *_sl = (MemSlab *)Iter_Get(&it);
-        if((level == 0 || _sl->level == level) && _sl->remaining >= _sz){
-            sl = _sl;
+    MemSlab *sl = NULL, *last = m->start_sl;
+    while(last != NULL){
+        if((level == 0 || last->level == level) && MemSlab_Available(last) >= sz){
+            sl = last;
             break;
         }
+        last = last->next;
     }
-
     if(sl == NULL){
         sl = MemSlab_Make(m, level);
     }
 
-    return  MemSlab_Alloc(sl, _sz);
+    void *ptr = MemSlab_Alloc(sl, sz);
+    m->latest.ptr = ptr;
+    m->latest.sz = sz;
+    m->latest.slabIdx = sl->idx;
+    m->latest.offset = ptr - (void *)sl->bytes;
+
+    return ptr;
+}
+
+void *MemCtx_Alloc(MemCtx *m, size_t s){
+    return MemCtx_AllocTemp(m, s, max(m->type.range, 0));
 }
 
 i64 MemCtx_Used(MemCtx *m){
-    return MemCtx_MemCount(m, 0);
+    i64 n = 0;
+    MemSlab *sl = m->start_sl;
+    while(sl != NULL){
+        n += (sl->addr - (void *)(sl->bytes));
+        sl = sl->next;
+    }
+
+    return n;
 }
 
 void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
@@ -118,85 +118,82 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 }
 
 MemCtx *MemCtx_Make(){
-    return SpanMem_Make(&nativeM);
+    MemCtx *m = (MemCtx *) TrackMalloc(sizeof(MemCtx), TYPE_MEMCTX);
+    m->type.of = TYPE_MEMCTX;
+    return m;
 }
 
 i64 MemCtx_Total(MemCtx *m, i16 level){
-    return MemCtx_MemCount(m, level);
-}
-
-status MemCtx_WipeTemp(MemCtx *m, i16 level){
-    status r = READY;
-
-    Iter it;
-    Iter_Init(&it, m);
-    while((SpanMem_IterNext(&it) & END) == 0){
-        MemSlab *sl = (MemSlab *)Iter_Get(&it);
-        if((level == 0 || sl->level >= level) && sl->remaining < MEM_SLAB_SIZE){
-            size_t sz = MemSlab_Taken(sl); 
-            memset(sl->bytes+sl->remaining, 0, sz);
-            sl->remaining = MEM_SLAB_SIZE;
-            r = SUCCESS;
+    MemSlab *last = m->start_sl;
+    i64 total = 0;
+    while(last != NULL){
+        if(level == 0 || last->level == level){
+            total += MEM_SLAB_SIZE;
         }
+        last = last->next;
     }
-
-    if(r == READY){
-        r |= NOOP;
-    }
-
-    return r;
+    return total;
 }
 
 status MemCtx_FreeTemp(MemCtx *m, i16 level){
-    status r = READY;
-
-    Iter it;
-    Iter_Init(&it, m);
-    while((SpanMem_IterNext(&it) & END) == 0){
-        MemSlab *sl = (MemSlab *)Iter_Get(&it);
-        if(level == 0 || sl->level >= level){
-            TrackFree(sl->bytes, sizeof(MemSlab));
-            sl->remaining = 0;
-            r = SUCCESS;
+    MemSlab *current = m->start_sl;
+    MemSlab *next = NULL;
+    MemSlab *latest = NULL;
+    while(current != NULL){
+        next = current->next;
+        if(level == 0 || current->level >= level){
+            TrackFree(current, sizeof(MemSlab));
+            MemSlab_Count--;
+            if(latest == NULL){
+                m->start_sl = NULL; 
+            }else{
+                latest->next = next;
+            }
+            current = next;
+        }else{
+            if(m->start_sl == NULL){
+                m->start_sl = current;
+            }
+            latest = current;
+            current = next;
         }
     }
-
-    if(r == READY){
-        r |= NOOP;
-    }
-
-    return r;
+    return SUCCESS;
 }
 
 status MemCtx_Free(MemCtx *m){
-    MemCtx_FreeTemp(m, max(m->type.state, 0));
-    if(m->type.state <= 0){
+    MemCtx_FreeTemp(m, max(m->type.range, 0));
+    if(m->type.range <= 0){
         TrackFree(m, sizeof(MemCtx));
     }
     return SUCCESS;
 }
 
 MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, m, SPAN_OP_SET, m->max_idx+1);
-    SpanMem_SetFromQ(&sq, (Abstract *)sl);
-    if(sq.type.state & SUCCESS){
-        return sl;
+    if(m->start_sl == NULL){
+        m->start_sl = sl;
+    }else{
+        MemSlab *last = m->start_sl;
+        while(last != NULL && last->next != NULL){
+            last = last->next;
+        }
+        last->next = sl;
     }
-    return NULL;
+    sl->idx = m->count++;
+    return sl;
+
 }
 
 /* utils */
 void *MemCtx_GetSlab(MemCtx *m, void *addr){
-    Iter it;
-    Iter_Init(&it, m);
-    while((SpanMem_IterNext(&it) & END) == 0){
-        MemSlab *sl = (MemSlab *)Iter_Get(&it);
+    MemSlab *sl = m->start_sl;
+    while(sl != NULL){
         void *start = (void *)sl->bytes;
-        void *end = sl->bytes + MEM_SLAB_SIZE;
+        void *end = start + MEM_SLAB_SIZE;
         if((void *)(sl->bytes) <= addr && addr < end){
             return sl;
         }
+        sl = sl->next;
     }
     return NULL;
 }

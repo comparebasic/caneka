@@ -198,7 +198,7 @@ status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *pr
     ctx->root = root;
     ctx->access = access;
     ctx->prior = prior;
-    ctx->files = Span_Make(m, TYPE_TABLE);
+    ctx->files = Span_Make(m);
 
     return SUCCESS;
 }

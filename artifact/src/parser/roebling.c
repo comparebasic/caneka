@@ -365,9 +365,9 @@ Roebling *Roebling_Make(MemCtx *m,
     rbl->m = m;
     rbl->source = source;
     rbl->capture = capture;
-    rbl->matches = Span_MakeInline(rbl->m, TYPE_PATMATCH, (int)sizeof(Match));  
-    rbl->snips = Span_Make(m, TYPE_SPAN);
-    rbl->parsers_do = Span_Make(m, TYPE_SPAN);
+    rbl->matches = Span_Make(rbl->m);  
+    rbl->snips = Span_Make(m);
+    rbl->parsers_do = Span_Make(m);
     int markStart = 0;
     if(markLabels != NULL){
         markStart = markLabels->offset;

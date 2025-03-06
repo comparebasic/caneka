@@ -223,7 +223,7 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             DebugStack_Pop();
             return ERROR;
         }
-        oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
+        oset->item->value = (Abstract *)Span_Make(oset->m);
 
         FmtItem *item = FmtItem_Make(oset->m, oset);
         item->parent = oset->item;
@@ -234,14 +234,14 @@ static status Oset_Capture(word captureKey, int matchIdx, String *s, Abstract *s
             DebugStack_Pop();
             return ERROR;
         }
-        oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_SPAN);
+        oset->item->value = (Abstract *)Span_Make(oset->m);
         
         FmtItem *item = FmtItem_Make(oset->m, oset);
         item->parent = oset->item;
         item->type.state |= PARENT_TYPE_ARRAY;
         oset->item = item;
     }else if(captureKey == OSET_LENGTH_TABLE){
-        oset->item->value = (Abstract *)Span_Make(oset->m, TYPE_TABLE);
+        oset->item->value = (Abstract *)Span_Make(oset->m);
         
         FmtItem *item = FmtItem_Make(oset->m, oset);
         item->type.state |= PARENT_TYPE_TABLE;

@@ -281,7 +281,7 @@ static status lineEnd(MemCtx *m, Roebling *rbl){
 
 Roebling *CnkLangCtx_RblMake(MemCtx *m, FmtCtx *ctx, RblCaptureFunc capture){
 
-    Span *parsers = Span_Make(m, TYPE_SPAN);
+    Span *parsers = Span_Make(m);
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_START));
     Span_Add(parsers, (Abstract *)Do_Wrapped(m, (DoFunc)start));
     Span_Add(parsers, (Abstract *)Int_Wrapped(m, CNK_LANG_STRUCT));

@@ -26,7 +26,7 @@ int _stackIdx = 0;
 
 status DebugStack_Init(MemCtx *m){
     _stackIdx = 0;
-    stack = Span_MakeInline(m, TYPE_SPAN, sizeof(StackEntry));
+    stack = Span_Make(m);
     setSigs();
     return SUCCESS;
 }

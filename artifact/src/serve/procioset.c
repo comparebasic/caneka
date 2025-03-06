@@ -16,7 +16,7 @@ char *ProcIoSet_FlagsToChars(word flags){
 ProcIoSet *ProcIoSet_Make(MemCtx *m){
     ProcIoSet *set = MemCtx_Alloc(m, sizeof(ProcIoSet));
     set->type.of = TYPE_PROC_IO_SET;
-    set->cmds = Span_Make(m, TYPE_SPAN);
+    set->cmds = Span_Make(m);
     return set;
 }
 

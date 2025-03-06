@@ -42,7 +42,7 @@ typedef struct span {
     } metrics;
 } Span;
 
-Span* Span_Make(MemCtx* m, cls type);
+Span* Span_Make(MemCtx* m);
 status Span_Remove(Span *p, int idx);
 status Span_Cull(Span *p, int count);
 status Span_ReInit(Span *p);
@@ -61,15 +61,7 @@ void *Span_GetSelected(Span *p);
 void *Span_ReserveNext(Span *p);
 #define Span_NextIdx(p) (p->max_idx+1)
 
-/* span type makers */
-SpanDef *Span4x16_MakeDef();
-SpanDef *Span16_MakeDef();
-SpanDef *Span16x32m_MakeDef();
-SpanDef *Span4kx32m_MakeDef();
-SpanDef *SpanString_MakeDef();
-
-void *Span_valueSlab_Make(MemCtx *m, SpanDef *def);
-void *Span_idxSlab_Make(MemCtx *m, SpanDef *def);
+void *Span_Slab_Make(MemCtx *m);
 void *Span_reserve(struct span_query *sq);
 
 status Span_GrowToNeeded(struct span_query *sq);
@@ -80,12 +72,9 @@ status Span_Extend(struct span_query *sq);
 status Span_GrowToNeeded(struct span_query *sq);
 char **Span_ToCharArr(MemCtx *m, Span *p);
 status Span_Concat(Span *p, Span *add);
-
-/* SpanDef */
-SpanDef *SpanDef_Clone(MemCtx *m, SpanDef *_def);
-byte SpanDef_GetDimNeeded(SpanDef *def, int idx);
+byte Span_GetDimNeeded(int idx);
 
 /* debug */
 void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
-int Span_availableByDim(int dims, int stride, int idxStride);
+int Span_availableByDim(int dims, int stride);
 int Span_Capacity(Span *p);

@@ -12,7 +12,6 @@ static status archChecks(){
 status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= archChecks();
-    r |= SpanDef_Init();
     r |= DebugStack_Init(m);
     r |= Clone_Init(m);
     r |= Debug_Init(MemCtx_Make());

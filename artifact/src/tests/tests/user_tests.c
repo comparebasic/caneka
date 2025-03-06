@@ -25,7 +25,7 @@ status User_Tests(MemCtx *gm){
 
     String *pass =  String_Make(m, bytes("Bork_Bork128!Bork"));
 
-    Span *data = Span_Make(m, TYPE_TABLE);
+    Span *data = Span_Make(m);
     Table_Set(data, (Abstract *)String_Make(m, bytes("email")), (Abstract *)email);
 
     Span *u = User_Open(m, users, userId, pass, ac, data);

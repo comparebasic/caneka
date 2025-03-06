@@ -85,7 +85,7 @@ status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *
 
 status Dir_CheckCreate(MemCtx *m, String *path){
     DebugStack_Push(path, path->type.of);
-    Span *cmd = Span_Make(m, TYPE_SPAN);
+    Span *cmd = Span_Make(m);
     Span_Add(cmd, (Abstract *)String_Make(m, bytes("mkdir")));
     Span_Add(cmd, (Abstract *)String_Make(m, bytes("-p")));
     Span_Add(cmd, (Abstract *)path);

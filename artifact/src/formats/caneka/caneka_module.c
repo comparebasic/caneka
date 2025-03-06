@@ -10,8 +10,8 @@ CnkLangModRef *CnkLangModRef_Make(MemCtx *m){
 CnkLangModule *CnkLangModule_Make(MemCtx *m){
     CnkLangModule *mod = MemCtx_Alloc(m, sizeof(CnkLangModule));
     mod->type.of = TYPE_LANG_CNK_MODULE;
-    mod->args = Span_Make(m, TYPE_TABLE);
-    mod->funcDefs = Span_Make(m, TYPE_SPAN);
+    mod->args = Span_Make(m);
+    mod->funcDefs = Span_Make(m);
     return mod;
 }
 
