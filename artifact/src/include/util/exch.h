@@ -1,1 +1,1 @@
-typedef Abstract *(*Exch)(struct mem_ctx *m, Abstract *a, Abstract *b);
+typedef Abstract *(*Exch)(struct span *m, Abstract *a, Abstract *b);

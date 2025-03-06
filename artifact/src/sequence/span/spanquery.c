@@ -32,7 +32,7 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim){
             return NULL;
         }
         st->offset = prev->offset + increment*localIdx;
-        sl = (void *)Slab_nextSlot(prev->slab, p->slotSize, p->ptrSlot, prev->localIdx);
+        sl = (void *)Slab_nextSlot(prev->slab, prev->localIdx, p->slotSize, p->ptrSlot);
     }
 
     st->slab = sl;

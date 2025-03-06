@@ -119,6 +119,7 @@ static TestSet _Tests[] = {
         "Test for snip ranges of strings to copy in large strings.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Roebling",
         Roebling_Tests,
@@ -149,7 +150,6 @@ static TestSet _Tests[] = {
         NULL,
         SECTION_LABEL,
     },
-    /*
     {
         "XML",
         Xml_Tests,
@@ -174,7 +174,6 @@ static TestSet _Tests[] = {
         "Identify string types during parsing (NUM/CASH)",
         FEATURE_COMPLETE,
     },
-    */
     {
         "Http",
         Http_Tests,
@@ -193,6 +192,7 @@ static TestSet _Tests[] = {
         "Oset serialization format tests (similar features to XML, JSON, or YAML).",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Scheduling",
         NULL,

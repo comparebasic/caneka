@@ -54,6 +54,7 @@ status Span_Tests(MemCtx *gm){
     Span_Set(p, 512, (Abstract *)s513);
 
     s = (String *)Span_Get(p, 0);
+    r |= Test(s != 0, "After expand, Span item 0 is not null");
     r |= Test(s->type.of == s1->type.of, "After expand, Span item 0 has type string %s found %s", 
         Class_ToString(s1->type.of), Class_ToString(s->type.of));
     r |= Test(String_Equals(s1, s), "String 1 equals %s found %s", 

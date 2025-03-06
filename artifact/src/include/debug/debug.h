@@ -67,7 +67,7 @@ void Match_midDebug(char type, word c, struct patchardef *def, struct match *mt,
 
 extern char *rbl_debug_cstr[];
 
-struct string *State_ToString(struct mem_ctx *m, status state);
+struct string *State_ToString(struct span *m, status state);
 char *Class_ToString(cls type);
 char *State_ToChars(status state);
 void SpanQuery_Print(Abstract *a, cls type, char *msg, int color, boolean extended);

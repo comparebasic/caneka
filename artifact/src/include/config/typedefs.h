@@ -73,9 +73,9 @@ typedef struct reserve  {
 extern Abstract Reserved;
 
 typedef struct virt * AbstractPtr;
-typedef status (*DoFunc)(struct mem_ctx *m, Abstract *a);
-typedef status (*DblFunc)(struct mem_ctx *m, Abstract *a, Abstract *b);
-typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source);
+typedef status (*DoFunc)(struct span *m, Abstract *a);
+typedef status (*DblFunc)(struct span *m, Abstract *a, Abstract *b);
+typedef status (*OutFunc)(struct span *m, struct string *s, Abstract *source);
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
 typedef char *(*RangeToChars)(word);
 

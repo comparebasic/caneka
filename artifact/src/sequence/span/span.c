@@ -155,6 +155,9 @@ status Span_GrowToNeeded(SpanQuery *sq){
     byte ptrSlot = p->ptrSlot;
 
     if(expand){
+        if(DEBUG_SPAN){
+            printf("\x1b[%dmSpanGrow for %d\n", DEBUG_SPAN, sq->idx);
+        }
         void *exp_sl = NULL;
         void *shelf_sl = NULL;
         while(p->dims < sq->dimsNeeded){
@@ -179,12 +182,19 @@ status Span_GrowToNeeded(SpanQuery *sq){
 }
 
 status Span_Extend(SpanQuery *sq){
+    if(DEBUG_SPAN){
+        printf("\x1b[%dmSpanExtend for %d\x1b[0m\n", DEBUG_SPAN, sq->idx);
+    }
     /* resize the span by adding dimensions and slabs as needed */
     Span *p = sq->span;
 
     byte dims = p->dims;
     SpanState *st = NULL;
     while(TRUE){
+        if(DEBUG_SPAN){
+            printf("\x1b[%dmSpan_Extend: query round dim:%d\x1b[0m\n", DEBUG_SPAN,
+                dims);
+        }
         /* make new if not exists */
         st = SpanQuery_SetStack(sq, dims);
         if(st->slab == NULL){

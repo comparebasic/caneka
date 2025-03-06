@@ -1,6 +1,6 @@
 boolean Abs_Eq(Abstract *a, void *b);
 boolean Ifc_Match(cls inst, cls ifc);
 cls Ifc_Get(cls inst);
-status Caneka_Init(struct mem_ctx *m);
+status Caneka_Init(struct span *m);
 boolean Caneka_Truthy(Abstract *a);
-status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);
+status ToStdOut(struct span *m, struct string *s, Abstract *source);
