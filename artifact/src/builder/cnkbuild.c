@@ -2,7 +2,12 @@
 #include <caneka.h>
 #include <builder.h>
 
+#include "mem/mem_chapter.c"
 #include "mem/mem.c"
+#include "mem/span/slab.c"
+#include "mem/span/span.c"
+#include "mem/span/spanquery.c"
+#include "mem/iter.c"
 #include "core/core.c"
 #include "core/error.c"
 #include "string/string.c"
@@ -17,10 +22,6 @@
 #include "crypto/sane.c"
 #include "termio/cli_status.c"
 /* span */
-#include "sequence/span/slab.c"
-#include "sequence/span/span.c"
-#include "sequence/span/spanquery.c"
-#include "sequence/iter.c"
 /* file status */
 #include "persist/file_status.c"
 /* dir */
@@ -58,7 +59,7 @@ static status renderStatus(MemCtx *m, Abstract *a){
     ctx->fields.steps.barEnd->length = progress;
 
     String_Reset(ctx->fields.mem_s);
-    String_AddMemCount(m, ctx->fields.mem_s, MemCount());
+    String_AddMemCount(m, ctx->fields.mem_s, MemCount(0));
     ctx->fields.mem->length = ctx->fields.mem_s->length;
      
     return SUCCESS;

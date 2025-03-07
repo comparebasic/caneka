@@ -31,6 +31,7 @@ static BuildSubdir memobj = { "mem", {
     "mem.c",
     "mem_debug.c",
     "ext_free.c",
+    "iter.c",
     NULL
 }};
 
@@ -185,7 +186,6 @@ static BuildSubdir persistobj = { "persist", {
 static BuildSubdir sequenceobj = { "sequence", {
     "array.c",
     "chain.c",
-    "iter.c",
     "lookup.c",
     "mess.c",
     "nestedd.c",
@@ -197,7 +197,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     NULL
 }};
 
-static BuildSubdir spanobj = { "sequence/span", {
+static BuildSubdir spanobj = { "mem/span", {
     "slab.c",
     "span.c",
     "spanquery.c",

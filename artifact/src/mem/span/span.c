@@ -264,7 +264,7 @@ Span *Span_Setup(Span *p){
 
 Span *Span_Make(MemCtx *m){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
-    Span_Init(p);
+    Span_Setup(p);
     p->m = m;
     p->root = Slab_Make(m);
     return p;

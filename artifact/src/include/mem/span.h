@@ -32,7 +32,7 @@ typedef struct span {
     byte slotSize;
     byte dims;
     void *root;
-    MemCtx *m;
+    struct span *m;
 	int nvalues;
     int max_idx;
     struct {
@@ -43,19 +43,19 @@ typedef struct span {
     } metrics;
 } Span;
 
-Span *Span_Make(MemCtx* m);
+Span *Span_Make(struct span* m);
 Span *Span_Setup(Span *p);
 status Span_Remove(Span *p, int idx);
 status Span_Cull(Span *p, int count);
 status Span_ReInit(Span *p);
 status Span_Query(struct span_query *sq);
-Span *Span_Clone(MemCtx *m, Span *p);
+Span *Span_Clone(struct span *m, Span *p);
 void *Span_Set(Span *p, int idx, Abstract *t);
 void *Span_Get(Span *p, int idx);
 int Span_Add(Span *p, Abstract *t);
 int Span_AddOrdered(Span *p, Abstract *t);
-Span *Span_From(MemCtx *m, int count, ...);
-status Span_Run(MemCtx *m, Span *p, DoFunc func);
+Span *Span_From(struct span *m, int count, ...);
+status Span_Run(struct span *m, Span *p, DoFunc func);
 status Span_Merge(Span *dest, Span *additional);
 int Span_GetIdx(Span *p, void *a, EqualFunc eq);
 Abstract *Span_Search(Span *p, void *a, EqualFunc eq);
@@ -63,7 +63,7 @@ void *Span_GetSelected(Span *p);
 void *Span_ReserveNext(Span *p);
 #define Span_NextIdx(p) (p->max_idx+1)
 
-void *Span_Slab_Make(MemCtx *m);
+void *Span_Slab_Make(struct span *m);
 void *Span_reserve(struct span_query *sq);
 
 status Span_GrowToNeeded(struct span_query *sq);
@@ -72,7 +72,7 @@ void *Span_GetFromQ(struct span_query *sq);
 
 status Span_Extend(struct span_query *sq);
 status Span_GrowToNeeded(struct span_query *sq);
-char **Span_ToCharArr(MemCtx *m, Span *p);
+char **Span_ToCharArr(struct span *m, Span *p);
 status Span_Concat(Span *p, Span *add);
 byte Span_GetDimNeeded(int idx);
 

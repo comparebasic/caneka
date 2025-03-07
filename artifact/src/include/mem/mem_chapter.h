@@ -1,14 +1,17 @@
-#define CHAPTER_SIZE 16mb
-#define PAGE_SIZE 4096
+/* 16mb or  4096x4096 */
+#define PAGE_SIZE sysconf(_SC_PAGE_SIZE)
+#define CHAPTER_SIZE (sysconf(_SC_PAGE_SIZE)*4096)
 
 typedef struct mem_chapter {
     Type type;
     int size;
     void *start;
-    MemCtx *m;
-    Span *pages;
-    Iter it;
-};
-void *MemChapter_GetBytes(MemChapter *cp, MemCtx *m, i16 level);
-status MemChapter_FreeSlab(MemChapter *cp, MemCtx *m, MemSlab *sl);
+    struct span *m;
+    struct span *pages;
+    struct iter it;
+} MemChapter;
+void *MemChapter_GetBytes();
+status MemChapter_FreeSlab(struct span *m, struct mem_slab *sl);
 status MemChapter_Make(MemChapter **cp);
+status MemChapter_Claim(struct mem_slab *sl);
+i64 MemCount(i16 level);

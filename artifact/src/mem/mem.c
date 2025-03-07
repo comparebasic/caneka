@@ -1,51 +1,28 @@
 #include <external.h>
 #include <caneka.h>
 
-static MemCtx nativeM = {
-    .type = {TYPE_MEMCTX_NATIVE, 0},
-    .slotSize = sizeof(MemSlab),
-    .ptrSlot = 1,
-    .dims = 0,
-    .root = NULL,
-    .m = NULL,
-    .nvalues = 0,
-    .max_idx = 0,
-    .metrics = {
-        .get = -1,
-        .set = -1,
-        .selected = -1,
-    }
-};
-
-static size_t cmem = 0;
-int MemSlab_Count = 0;
-
-static void *MemSlab_Alloc(MemSlab *sl, word sz){
-    printf("  -> %hd taking %hd\n", sl->remaining, sz);
-    sl->remaining -= sz;
-    return sl->bytes+sl->remaining; 
-}
-
-static  status MemSlab_Attach(MemCtx *m, i16 level){
-    void *bytes = MemChapter_GetSlab(m->chapter, m, level);
+MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
+    void *bytes = MemChapter_GetBytes();
     if(bytes == NULL){
-        return ERROR;
+        return NULL;
     }
 
     MemSlab sl = {
         .type = {TYPE_MEMSLAB, 0},
-        .level = level;
-        .remaining = MEM_SLAB_SIZE;
-        .bytes = bytes;
-    }
+        .level = level,
+        .remaining = MEM_SLAB_SIZE,
+        .bytes = bytes,
+    };
 
     int idx = Span_NextIdx(m);
-    return Span_Set(m, idx, &sl)
+    return Span_Set(m, idx, (Abstract *)&sl);
 }
 
-size_t MemCount(){
-    return cmem;
+void *MemSlab_Alloc(MemSlab *sl, word sz){
+    sl->remaining -= sz;
+    return sl->bytes+sl->remaining; 
 }
+
 
 i64 MemCtx_MemCount(MemCtx *m, i16 level){
     Iter it;
@@ -65,11 +42,6 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level){
 void *MemCtx_Alloc(MemCtx *m, size_t sz){
     if(sz > MEM_SLAB_SIZE){
         Fatal("Trying to allocation too much memory at once", TYPE_MEMCTX);
-    }
-
-    if(m->type.of == TYPE_MEMCTX_NATIVE){
-        printf("native nvalues:%d", m->nvalues);
-        return TrackMalloc(sz, TYPE_MEMCTX_NATIVE);
     }
 
     i16 level = max(m->type.state, 0);
@@ -112,27 +84,25 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 }
 
 MemCtx *MemCtx_Make(){
-    void *bytes = MemChapter_GetBytes(_chapterGlobal, m, level);
-
+    void *bytes = MemChapter_GetBytes();
     MemSlab sl = {
         .type = {TYPE_MEMSLAB, 0},
-        .level = level;
-        .remaining = MEM_SLAB_SIZE;
-        .bytes = bytes;
-    }
+        .level = 0,
+        .remaining = MEM_SLAB_SIZE,
+        .bytes = bytes,
+    };
 
-    MemCtx *m = (MemCtx *)MemSlab_Alloc(&sl, sizeof(MemCtx*));
-    Span_Init(m);
-
+    MemCtx *m = (MemCtx *)MemSlab_Alloc(&sl, sizeof(MemCtx));
+    Span_Setup(m);
     m->slotSize = sizeof(MemSlab);
     m->ptrSlot = 1;
 
     int idx = Span_NextIdx(m);
-    MemSlab *_sl = (MemSlab *)Span_Set(m, idx, &sl)
+    MemSlab *_sl = (MemSlab *)Span_Set(m, idx, (Abstract *)&sl);
     if(_sl == NULL){
         return NULL;
     }
-    MemChapter_Claim(m->chapter, _sl);
+    MemChapter_Claim(_sl);
     return m;
 }
 
@@ -170,7 +140,7 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
     while((Iter_Next(&it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&it);
         if(level == 0 || sl->level >= level){
-            r |= MemChapter_FreeSlab(MemChapter *cp, MemCtx *m, MemSlab *sl);
+            r |= MemChapter_FreeSlab(m, sl);
             r |= Span_Remove(m, it.idx);
         }
     }
@@ -183,15 +153,7 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
 }
 
 status MemCtx_Free(MemCtx *m){
-    MemCtx_FreeTemp(m, max(m->type.state, 0));
-    if(m->type.state <= 0){
-        TrackFree(m, sizeof(MemCtx));
-    }
-    return SUCCESS;
-}
-
-MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
-    return sl;
+    return MemCtx_FreeTemp(m, max(m->type.state, 0));
 }
 
 /* utils */

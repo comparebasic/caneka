@@ -1,7 +1,7 @@
 /*
 This is the semi-manually-run garbage collector.
 */
-#define MEM_SLAB_SIZE 4096
+#define MEM_SLAB_SIZE PAGE_SIZE 
 extern int MemSlab_Count;
 
 /*
@@ -9,7 +9,7 @@ extern int MemSlab_Count;
  * available address range.
  *
  */
-typedef struct mem_slab_idx {
+typedef struct mem_slab {
     Type type;
     i16 level;
     i16 remaining;
@@ -18,7 +18,6 @@ typedef struct mem_slab_idx {
 
 typedef struct span MemCtx;
 
-size_t MemCount();
 /* Main call for allocating a section of memory
  *
  * .s is the size of bytes to allocate 
@@ -55,11 +54,10 @@ i64 MemCtx_Used(MemCtx *m);
 void *MemCtx_GetSlab(MemCtx *m, void *addr);
 /* 
  * Add a slab to an existing MemCtx
- *
- * .m MemCtx to add to
- * .sl slab to add to the MemCtx .m
  * */
-MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl);
+MemSlab *MemSlab_Attach(MemCtx *m, i16 level);
+/* reserve space in a slabs bytes */
+void *MemSlab_Alloc(MemSlab *sl, word sz);
 /* Make MemSlab */
 MemSlab *MemSlab_Make(MemCtx *m, i16 level);
 /* Get available space in a slab */
