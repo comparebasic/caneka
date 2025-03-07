@@ -26,23 +26,21 @@ static void *MemSlab_Alloc(MemSlab *sl, word sz){
     return sl->bytes+sl->remaining; 
 }
 
-void *TrackMalloc(size_t sz, cls t){
-    void *p = malloc(sz);
-    if(p == NULL){
-        Fatal("Allocating", t);
-        /* not reached */
-        return NULL;
+static  status MemSlab_Attach(MemCtx *m, i16 level){
+    void *bytes = MemChapter_GetSlab(m->chapter, m, level);
+    if(bytes == NULL){
+        return ERROR;
     }
-    cmem += sz;
-    memset(p, 0, sz);
-    return p;
-}
 
-void TrackFree(void *p, size_t s){
-    if(p != NULL){
-        free(p);
+    MemSlab sl = {
+        .type = {TYPE_MEMSLAB, 0},
+        .level = level;
+        .remaining = MEM_SLAB_SIZE;
+        .bytes = bytes;
     }
-    cmem -= s;
+
+    int idx = Span_NextIdx(m);
+    return Span_Set(m, idx, &sl)
 }
 
 size_t MemCount(){
@@ -63,16 +61,6 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level){
     return total;
 }
 
-MemSlab *MemSlab_Make(MemCtx *m, i16 level){
-    MemSlab *sl = (MemSlab *)TrackMalloc(sizeof(MemSlab), TYPE_MEMSLAB);
-    void *bytes = (void *)TrackMalloc(MEM_SLAB_SIZE, TYPE_MEMSLAB);
-    sl->type.of = TYPE_MEMSLAB;
-    sl->level = level;
-    sl->remaining = MEM_SLAB_SIZE;
-    sl->bytes = bytes;
-
-    return MemSlab_Attach(m, sl);
-}
 
 void *MemCtx_Alloc(MemCtx *m, size_t sz){
     if(sz > MEM_SLAB_SIZE){
@@ -100,7 +88,7 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     }
 
     if(sl == NULL){
-        sl = MemSlab_Make(m, level);
+        sl = MemSlab_Attach(m, level);
     }else{
         printf("found sl\n");
     }
@@ -124,9 +112,27 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 }
 
 MemCtx *MemCtx_Make(){
-    MemCtx *m = Span_Make(&nativeM);
+    void *bytes = MemChapter_GetBytes(_chapterGlobal, m, level);
+
+    MemSlab sl = {
+        .type = {TYPE_MEMSLAB, 0},
+        .level = level;
+        .remaining = MEM_SLAB_SIZE;
+        .bytes = bytes;
+    }
+
+    MemCtx *m = (MemCtx *)MemSlab_Alloc(&sl, sizeof(MemCtx*));
+    Span_Init(m);
+
     m->slotSize = sizeof(MemSlab);
     m->ptrSlot = 1;
+
+    int idx = Span_NextIdx(m);
+    MemSlab *_sl = (MemSlab *)Span_Set(m, idx, &sl)
+    if(_sl == NULL){
+        return NULL;
+    }
+    MemChapter_Claim(m->chapter, _sl);
     return m;
 }
 
@@ -164,9 +170,8 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
     while((Iter_Next(&it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&it);
         if(level == 0 || sl->level >= level){
-            TrackFree(sl->bytes, sizeof(MemSlab));
-            sl->remaining = 0;
-            r = SUCCESS;
+            r |= MemChapter_FreeSlab(MemChapter *cp, MemCtx *m, MemSlab *sl);
+            r |= Span_Remove(m, it.idx);
         }
     }
 
@@ -186,7 +191,6 @@ status MemCtx_Free(MemCtx *m){
 }
 
 MemSlab *MemSlab_Attach(MemCtx *m, MemSlab *sl){
-    Span_Add(m, (Abstract *)sl);
     return sl;
 }
 

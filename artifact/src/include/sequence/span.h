@@ -39,10 +39,12 @@ typedef struct span {
         int get;
         int set;
         int selected;
+        int available;
     } metrics;
 } Span;
 
-Span* Span_Make(MemCtx* m);
+Span *Span_Make(MemCtx* m);
+Span *Span_Setup(Span *p);
 status Span_Remove(Span *p, int idx);
 status Span_Cull(Span *p, int count);
 status Span_ReInit(Span *p);
@@ -78,3 +80,4 @@ byte Span_GetDimNeeded(int idx);
 void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
 int Span_availableByDim(int dims, int stride);
 int Span_Capacity(Span *p);
+Span *Span_Init(Span *p);

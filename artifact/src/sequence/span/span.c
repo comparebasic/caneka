@@ -55,6 +55,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             memset(ptr, 0, sizeof(void *));
             p->nvalues--;
             p->metrics.set = -1;
+            p->metrics.available = sq->idx;
         }else{
             memcpy(ptr, &t, sizeof(void *));
             p->nvalues++;
@@ -253,13 +254,18 @@ status Span_ReInit(Span *p){
     return SUCCESS;
 }
 
-Span *Span_Make(MemCtx *m){
-    Span *p = MemCtx_Alloc(m, sizeof(Span));
-    p->m = m;
+Span *Span_Setup(Span *p){
     p->type.of = TYPE_SPAN;
     p->slotSize = 1;
     p->ptrSlot = 0;
-    p->root = Slab_Make(m);
     p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
+    return p;
+}
+
+Span *Span_Make(MemCtx *m){
+    Span *p = MemCtx_Alloc(m, sizeof(Span));
+    Span_Init(p);
+    p->m = m;
+    p->root = Slab_Make(m);
     return p;
 }
