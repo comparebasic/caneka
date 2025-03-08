@@ -46,6 +46,8 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level);
 /* 
  * Returns the amount in bytes used by the parent allocator (usually malloc) */
 i64 MemCtx_Used(MemCtx *m);
+/* Create a MemCtx on an existing memeory page */
+MemCtx *MemCtx_OnPage(void *page, MemSlab **slp);
 /* 
  * Returns the slab that contains a pointer 
  *

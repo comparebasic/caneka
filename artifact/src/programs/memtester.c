@@ -19,6 +19,9 @@
 #include "../crypto/sane.c"
 
 int main(int argc, char *argv[]){
-    MemChapter_Init();
+    status r = MemChapter_Init();
+    if(r & SUCCESS){
+        printf("MemChapter created successfully\n");
+    }
     exit(0);
 }

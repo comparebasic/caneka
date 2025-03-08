@@ -254,17 +254,12 @@ status Span_ReInit(Span *p){
     return SUCCESS;
 }
 
-Span *Span_Setup(Span *p){
+Span *Span_Make(MemCtx *m){
+    Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->type.of = TYPE_SPAN;
     p->slotSize = 1;
     p->ptrSlot = 0;
-    p->max_idx = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
-    return p;
-}
-
-Span *Span_Make(MemCtx *m){
-    Span *p = MemCtx_Alloc(m, sizeof(Span));
-    Span_Setup(p);
+    p->max_idx = p->metrics.available = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
     p->m = m;
     p->root = Slab_Make(m);
     return p;

@@ -7,21 +7,23 @@ MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
         return NULL;
     }
 
-    MemSlab sl = {
+    MemSlab _sl = {
         .type = {TYPE_MEMSLAB, 0},
         .level = level,
         .remaining = MEM_SLAB_SIZE,
         .bytes = bytes,
     };
+    MemSlab *sl = MemSlab_Alloc(&_sl, sizeof(MemSlab));
+    memcpy(sl, &_sl, sizeof(MemSlab));
 
     int idx = Span_NextIdx(m);
-    return Span_Set(m, idx, (Abstract *)&sl);
+    Span_Set(m, idx, (Abstract *)sl);
+    MemChapter_Claim(sl);
+    return sl;
 }
 
 void *MemSlab_Alloc(MemSlab *sl, word sz){
     sl->remaining -= sz;
-    printf("remaining:%d sz:%hd total:%hd bytes:%ld pos:%ld\n",
-        sl->remaining, sz, sl->remaining+sz, (i64)sl->bytes, (i64)sl->bytes+((size_t)sl->remaining));
     return sl->bytes+((size_t)sl->remaining); 
 }
 
@@ -54,7 +56,6 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     MemSlab *sl = NULL;
     while((Iter_Next(&it) & END) == 0){
         MemSlab *_sl = (MemSlab *)Iter_Get(&it);
-        printf("iter level:%d/%d _sl:%p sz:%ld/%hd remaining:%d\n", level, _sl->level, _sl, sz, _sz, _sl->remaining);
         if((level == 0 || _sl->level == level) && _sl->remaining >= _sz){
             sl = _sl;
             break;
@@ -63,11 +64,8 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
 
     if(sl == NULL){
         sl = MemSlab_Attach(m, level);
-    }else{
-        printf("found sl\n");
     }
 
-    printf("nvalues:%d\n", m->nvalues);
     return MemSlab_Alloc(sl, _sz);
 }
 
@@ -85,26 +83,34 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
     return p; 
 }
 
-MemCtx *MemCtx_Make(){
-    void *bytes = MemChapter_GetBytes();
-    MemSlab sl = {
+MemCtx *MemCtx_OnPage(void *page, MemSlab **slp){
+    MemSlab _sl = {
         .type = {TYPE_MEMSLAB, 0},
         .level = 0,
         .remaining = MEM_SLAB_SIZE,
-        .bytes = bytes,
+        .bytes = page,
     };
+    MemSlab *sl = MemSlab_Alloc(&_sl, sizeof(MemSlab));
+    memcpy(sl, &_sl, sizeof(MemSlab));
+    *slp = sl;
 
-    MemCtx *m = (MemCtx *)MemSlab_Alloc(&sl, sizeof(MemCtx));
-    Span_Setup(m);
-    m->slotSize = sizeof(MemSlab);
-    m->ptrSlot = 1;
+    MemCtx *m = (MemCtx *)MemSlab_Alloc(sl, sizeof(MemCtx));
+    m->type.of = TYPE_SPAN;
+    m->slotSize = 1;
+    m->ptrSlot = 0;
+    m->max_idx = m->metrics.available = m->metrics.get = m->metrics.selected = m->metrics.set = -1;
+    m->m = m;
+    m->root = MemSlab_Alloc(sl, SLOT_BYTE_SIZE*SPAN_STRIDE);
 
-    int idx = Span_NextIdx(m);
-    MemSlab *_sl = (MemSlab *)Span_Set(m, idx, (Abstract *)&sl);
-    if(_sl == NULL){
-        return NULL;
-    }
-    MemChapter_Claim(_sl);
+    Span_Set(m, 0, (Abstract *)sl);
+    return m;
+}
+
+MemCtx *MemCtx_Make(){
+    void *bytes = MemChapter_GetBytes();
+    MemSlab *sl = NULL;
+    MemCtx *m = MemCtx_OnPage(bytes, &sl);
+    MemChapter_Claim(sl);
     return m;
 }
 

@@ -340,6 +340,7 @@ static BuildSubdir *objdirs[] = {
 };
 
 int main(int argc, char **argv){
+    MemChapter_Init();
     MemCtx *m = MemCtx_Make();
     BuildCtx ctx;
     BuildCtx_Init(m, &ctx);

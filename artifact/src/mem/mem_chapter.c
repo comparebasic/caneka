@@ -49,7 +49,10 @@ void *MemChapter_GetBytes(){
         }
     }
     if(idx != -1){
-        return cp->start+(idx*PAGE_SIZE);
+        cp->pages->metrics.selected = idx;
+        void *page = cp->start+(idx*PAGE_SIZE);
+        memset(page, 0, PAGE_SIZE);
+        return page;
     }
     /* make new chapter here as all chapters are full */
     Fatal("Next chapter not implemented", TYPE_CHAPTER);
@@ -58,7 +61,7 @@ void *MemChapter_GetBytes(){
 
 status MemChapter_Claim(MemSlab *sl){
     MemChapter *cp = _chapterGlobal;
-    if(cp->pages->metrics.selected){
+    if(cp->pages->metrics.selected != -1){
         Span_Set(cp->pages, cp->pages->metrics.selected, (Abstract *)sl);
         cp->pages->metrics.selected = -1;
         return SUCCESS;
@@ -76,33 +79,30 @@ status MemChapter_Make(MemChapter **_cp){
         return ERROR;
     }
 
-    MemSlab sl = {
-        .type = {TYPE_MEMSLAB, 0},
-        .level = 0,
-        .remaining = MEM_SLAB_SIZE,
-        .bytes = start,
-    };
-    MemCtx *m = (MemCtx *)MemSlab_Alloc(&sl, sizeof(MemCtx));
-    printf("chapter:%ld m:%p from %p %ld sizeof(%ld)\n",
-        CHAPTER_SIZE, m, start, ((void *)m)-start, sizeof(MemCtx));
+    MemSlab *sl = NULL;
+    MemCtx *m = MemCtx_OnPage(start, &sl);
+    if(sl == NULL){
+        Fatal("Unable to make first MemCtx", TYPE_CHAPTER);
+        return ERROR;
+    }
 
-    Span_Setup(m);
-    m->slotSize = sizeof(MemSlab);
-    m->ptrSlot = 1;
-    /*
-    Span_Set(m, 0, (Abstract *)&sl);
-
-    MemChapter *cp = (MemChapter *)MemSlab_Alloc(&sl, sizeof(MemChapter));
-    cp->type.of = TYPE_CHAPTER;
-    cp->size = CHAPTER_SIZE;
-    cp->m = m;
+    MemChapter *cp = MemSlab_Alloc(sl, sizeof(MemChapter));
+    cp->m = m; 
     cp->start = start;
-    Span_Setup(cp->pages);
+
+    Span *p = MemSlab_Alloc(sl, sizeof(Span));
+    p->type.of = TYPE_SPAN;
+    p->slotSize = 1;
+    p->ptrSlot = 0;
+    p->max_idx = p->metrics.available = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
+    p->m = m;
+    p->root = MemSlab_Alloc(sl, SLOT_BYTE_SIZE*SPAN_STRIDE);
+    p->max_idx = PAGE_MAX;
+    cp->pages = p;
     Iter_Init(&cp->it, cp->pages);
+
     *_cp = cp;
-
-    MemChapter_Claim((MemSlab *)start);
-    */
-
+    cp->pages->metrics.selected = 0;
+    MemChapter_Claim(sl);
     return SUCCESS;
 }

@@ -1,8 +1,3 @@
-/* 16mb or  4096x4096 */
-#define PAGE_SIZE sysconf(_SC_PAGE_SIZE)
-#define CHAPTER_SIZE (sysconf(_SC_PAGE_SIZE)*256)
-#define MEM_FILENAME "/tmp/caneka.mem.fd"
-
 typedef struct mem_chapter {
     Type type;
     int size;
