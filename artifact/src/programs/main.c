@@ -145,6 +145,11 @@ int main(int argc, char **argv){
         exit(1);
     }
 
+    if(MemChapter_Make(NULL) == NULL){
+        Fatal("Unable to allocate Mem_Chapter", TYPE_CHAPTER);
+        exit(1);
+    };
+
     MemCtx *m = MemCtx_Make();
     Caneka_Init(m);
     

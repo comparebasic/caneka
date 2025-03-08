@@ -88,11 +88,12 @@ status MemLocal_SetLocal(MemCtx *m, Abstract **dblAddr){
         return NOOP;
     }
     boolean subTo = TRUE;
-    MemSlab *sl = MemCtx_GetSlab(m, addr);
+    i32 idx = -1;
+    MemSlab *sl = MemCtx_GetSlab(m, addr, &idx);
     LocalPtr lptr;
-    if(sl != NULL){
+    if(sl != NULL && idx != -1){
         memset(&lptr, 0, sizeof(LocalPtr));
-        lptr.slabIdx = sl->idx;
+        lptr.slabIdx = idx;
         lptr.offset = (i32)(((void *)addr) - ((void *)(sl->bytes)));
         if(DEBUG_MEMLOCAL){
             printf("\x1b[%dmSetting To %d/%d for %ld\x1b[0m\n", DEBUG_MEMLOCAL, lptr.slabIdx, lptr.offset, (i64)addr);
@@ -111,22 +112,29 @@ status MemLocal_SetLocal(MemCtx *m, Abstract **dblAddr){
 }
 
 status MemLocal_UnSetLocal(MemCtx *m, Abstract **dblAddr){
+    /*
     DebugStack_Push("MemLocal_UnSetLocal", TYPE_CSTR);
     LocalPtr *lptr = (LocalPtr *)dblAddr;
     if(lptr == NULL || lptr->slabIdx == 0 && lptr->offset == 0){
         DebugStack_Pop();
         return NOOP;
     }
-    MemSlab *sl = m->start_sl;
+
     void *ptr = NULL;
-    while(sl != NULL){
-        if(sl->idx == lptr->slabIdx){
-            ptr = sl->bytes;
-            ptr += lptr->offset;
-            break;
+    Iter_Reset(&m->it);
+    while((Iter_Next(&m->it) & END) == 0){
+        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        if(sl != NULL){
+            if(m->it.idx == lptr->slabIdx){
+                ptr = sl->bytes;
+                ptr += lptr->offset;
+                break;
+            }
+
         }
-        sl = sl->next;
     }
+    Iter_Reset(&m->it);
+
     if(ptr == NULL){
         DebugStack_Pop();
         return ERROR;
@@ -137,10 +145,12 @@ status MemLocal_UnSetLocal(MemCtx *m, Abstract **dblAddr){
     }
     memcpy(dblAddr, &ptr, sizeof(void *));
     DebugStack_Pop();
+    */
     return SUCCESS;
 }
 
 Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
+    /*
     DebugStack_Push(path, path->type.of);
     status r = READY;
     Iter it;
@@ -194,6 +204,8 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
     Span *ml = asIfc(mlm->start_sl->bytes, TYPE_SPAN);
     DebugStack_Pop();
     return ml;
+    */
+    return NULL;
 }
 
 status MemLocal_Destroy(MemCtx *m, String *path, Access *access){
@@ -203,6 +215,7 @@ status MemLocal_Destroy(MemCtx *m, String *path, Access *access){
 status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     DebugStack_Push("MemLocal_Persist", TYPE_CSTR);
     status r = READY;
+    /*
     if(ml == NULL){
         return NOOP;
     }
@@ -254,6 +267,7 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
     }
 
     DebugStack_Pop();
+    */
     return r;
 }
 

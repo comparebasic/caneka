@@ -10,7 +10,7 @@ static char *req2_cstr = "th: 9\r\nHost: test.example.com\r\n\r\n{\"id\":23}";
 status Serve_Tests(MemCtx *gm){
     DebugStack_Push("Serve_Tests", TYPE_CSTR);
     status r = READY;
-    long base = MemCount();
+    long base = MemCount(0);
     MemCtx *m = MemCtx_Make();
 
     ProtoDef *def = HttpProtoDef_Make(m);

@@ -137,8 +137,6 @@ status Queue_Init(MemCtx *m, Queue *q, GetDelayFunc getDelay){
     memset(q, 0, sizeof(Queue));
     q->type.of = TYPE_QUEUE;
     q->span = Span_Make(m);
-    q->span->slotSize = sizeof(QueueIdx) / SLOT_BYTE_SIZE;
-    q->span->ptrSlot = 1;
     SpanQuery_Setup(&q->current, q->span, SPAN_OP_SET, 0); 
     memset(&q->available, 0, sizeof(SpanQuery)); 
     q->getDelay = getDelay;

@@ -34,7 +34,7 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level){
     i64 total = 0;
     while((Iter_Next(&m->it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
-        if(level == 0 || sl->level == level){
+        if(sl != NULL && (level == 0 || sl->level == level)){
             total += MEM_SLAB_SIZE;
         }
     }
@@ -53,7 +53,7 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     MemSlab *sl = NULL;
     while((Iter_Next(&m->it) & END) == 0){
         MemSlab *_sl = (MemSlab *)Iter_Get(&m->it);
-        if((level == 0 || _sl->level == level) && _sl->remaining >= _sz){
+        if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
             sl = _sl;
             break;
         }
@@ -83,6 +83,7 @@ void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
 
 status MemCtx_Setup(MemCtx *m, MemSlab *sl){
     memcpy(&m->first, sl, sizeof(MemSlab));
+    m->type.of = TYPE_MEMCTX;
     Span *p = &m->p;
     Span_Setup(p);
     p->m = m;
@@ -121,7 +122,7 @@ status MemCtx_WipeTemp(MemCtx *m, i16 level){
 
     while((Iter_Next(&m->it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
-        if((level == 0 || sl->level >= level) && sl->remaining < MEM_SLAB_SIZE){
+        if(sl != NULL && (level == 0 || sl->level >= level) && sl->remaining < MEM_SLAB_SIZE){
             size_t sz = MemSlab_Taken(sl); 
             memset(sl->bytes+sl->remaining, 0, sz);
             sl->remaining = MEM_SLAB_SIZE;
@@ -141,17 +142,21 @@ status MemCtx_WipeTemp(MemCtx *m, i16 level){
 status MemCtx_FreeTemp(MemCtx *m, i16 level){
     status r = READY;
 
+    Iter_InitReverse(&m->it, &m->p);
     while((Iter_Next(&m->it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
-        if(level == 0 || sl->level >= level){
+        if(sl != NULL && (level == 0 || sl->level >= level)){
+            if(m->it.idx > 0){
+                r |= Span_Remove(&m->p, m->it.idx);
+            }
             r |= MemChapter_FreeSlab(m, sl);
-            r |= Span_Remove(&m->p, m->it.idx);
         }
     }
 
     if(r == READY){
         r |= NOOP;
     }
+    Iter_Reset(&m->it);
 
     return r;
 }
@@ -161,15 +166,20 @@ status MemCtx_Free(MemCtx *m){
 }
 
 /* utils */
-void *MemCtx_GetSlab(MemCtx *m, void *addr){
+void *MemCtx_GetSlab(MemCtx *m, void *addr, i32 *idx){
+    Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
-        void *start = (void *)sl->bytes;
-        void *end = sl->bytes + MEM_SLAB_SIZE;
-        if((void *)(sl->bytes) <= addr && addr < end){
-            return sl;
+        if(sl != NULL){
+            void *start = (void *)sl->bytes;
+            void *end = sl->bytes + MEM_SLAB_SIZE;
+            if((void *)(sl->bytes) <= addr && addr < end){
+                *idx = m->it.idx;
+                return sl;
+            }
         }
     }
     Iter_Reset(&m->it);
+    *idx = -1;
     return NULL;
 }

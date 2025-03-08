@@ -13,7 +13,7 @@ static Executable targets[] = {
 };
 static char *cflags[] = {
         "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-        "-DOPENSSL",
+        "-DOPENSSL","-DINSECURE",
         NULL
 };
 static char *inc[] = {
@@ -29,6 +29,7 @@ static char *libs[] = {
 
 static BuildSubdir memobj = { "mem", {
     "mem.c",
+    "mem_chapter.c",
     "mem_debug.c",
     "ext_free.c",
     "iter.c",
@@ -340,7 +341,10 @@ static BuildSubdir *objdirs[] = {
 };
 
 int main(int argc, char **argv){
-    MemChapter_Init();
+    if(MemChapter_Make(NULL) == NULL){
+        Fatal("Unable to allocate Mem_Chapter", TYPE_CHAPTER);
+        exit(1);
+    };
     MemCtx *m = MemCtx_Make();
     BuildCtx ctx;
     BuildCtx_Init(m, &ctx);

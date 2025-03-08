@@ -3,15 +3,9 @@ Span
 Data Strucutre for slab allocation of segmented arrays.
 
 This is the main work-horse data structure for storing and retrieving data, Table is biult on top of this.
-
-related: core/span.c
-related: include/slab.h
 */
+
 #define SPAN_SLOT_BYTES sizeof(void *)
-
-#define SPAN_VALUE_SIZE(def) (sizeof(Abstract *)*def->stride*def->slotSize)
-#define SPAN_IDX_SIZE(def) (sizeof(Abstract *)*(def->idxSize)*def->idxStride)
-
 #define SPAN_STRIDE 16
 
 enum span_flags {
@@ -28,8 +22,8 @@ typedef void *(*SpanAddrFunc)(struct span_query *sq);
 typedef struct span {
     Type type;
     byte _;
-    byte ptrSlot;
-    byte slotSize;
+    byte _2;
+    byte _3;
     byte dims;
     void *root;
     struct mem_ctx *m;

@@ -19,6 +19,7 @@ typedef struct queue_idx {
 typedef struct queue {
     Type type;
     Span *span;
+    Span *meta;
     int count;
     SpanQuery current;
     SpanQuery available;

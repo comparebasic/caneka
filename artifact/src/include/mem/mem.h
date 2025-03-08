@@ -22,6 +22,7 @@ typedef struct mem_ctx {
     Span p;
     MemSlab first;
     Iter it;
+    Abstract *owner;
 } MemCtx;
 
 /* Main call for allocating a section of memory
@@ -61,7 +62,7 @@ status MemCtx_Setup(MemCtx *m, MemSlab *sl);
  *
  * .addr is the pointer to use to search from the slab address
  * */
-void *MemCtx_GetSlab(MemCtx *m, void *addr);
+void *MemCtx_GetSlab(MemCtx *m, void *addr, i32 *idx);
 /* 
  * Add a slab to an existing MemCtx
  * */
@@ -95,8 +96,3 @@ i64 MemCtx_Total(MemCtx *m, i16 level);
  * before */
 #define MemCtx_SetToBase(m) ((m)->type.range = -((m)->type.range));
 #define MemCtx_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
-
-/* Function to tracking raw malloc memory count */
-void *TrackMalloc(size_t sz, cls t);
-/* Function to tracking raw malloc memory count */
-void TrackFree(void *p, size_t s);

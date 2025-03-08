@@ -138,16 +138,12 @@ static void Slab_Print(void *sl, int color, byte dim, int parentIdx, byte indent
                     }else if((def->flags & SPAN_RAW) == 0 && t->type.of != 0){
                         Debug_Print((void *)t, 0, "", color, FALSE);
                     }else{
-                        if(def->slotSize > 1){
-                            printf("\x1b[%dm%ldbytes", color, def->slotSize*sizeof(void *));
-                        }else{
-                            Bits_Print((byte *)a, sizeof(void *)*def->slotSize, "", color, FALSE);
-                        }
+                        Bits_Print((byte *)a, sizeof(void *), "", color, FALSE);
                     }
                 }
                 printf(" ");
             }
-            ptr += sizeof(void *)*def->slotSize;
+            ptr += sizeof(void *);
         }
         printf("]");
     }else{

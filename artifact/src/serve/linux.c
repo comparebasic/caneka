@@ -25,7 +25,7 @@ status Serve_Epoll(Serve *sctx){
 
         if((req->type.state & (END|ERROR)) != 0){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
-            Log(logStatus, "Served %s - mem: %ld", req->proto->toLog(req), MemCount());
+            Log(logStatus, "Served %s - mem: %ld", req->proto->toLog(req), MemCount(0));
             r = Serve_CloseReq(sctx, req);
         }else{
             ServeReq_Handle(sctx, req);

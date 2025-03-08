@@ -6,5 +6,6 @@
 #include "mem/iter.h"
 #include "mem/mem.h"
 #include "mem/mem_chapter.h"
+#include "mem/mem_range.h"
 #include "mem/mem_debug.h"
 #include "mem/ext_free.h"

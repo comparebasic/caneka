@@ -59,8 +59,7 @@ static int pollSkipSlab(Abstract *source, int idx){
     Span_Query(&sq);
     if(sq.stack[0].slab != NULL){
         for(int i = 0; i < SPAN_STRIDE; i++){
-            status *ptr = (status *)Slab_valueAddr(sq.stack[0].slab, i, 
-                sctx->flagMap->slotSize, sctx->flagMap->ptrSlot);
+            status *ptr = (status *)Slab_valueAddr(sq.stack[0].slab, i);
             if((*ptr) != 0){
                 ready++;
             }
@@ -197,7 +196,7 @@ status Serve_ServeRound(Serve *sctx){
 
         if((req->type.state & (END|ERROR)) != 0){
             int logStatus = ((req->type.state & ERROR) != 0) ? 1 : 0;
-            Log(logStatus, "Served %s - mem: %ld/%ld - QIdx:%d", req->proto->toLog(req), MemCtx_Used(req->m), MemCount(), sctx->queue.current.idx);
+            Log(logStatus, "Served %s - mem: %ld/%ld - QIdx:%d", req->proto->toLog(req), MemCtx_Used(req->m), MemCount(0), sctx->queue.current.idx);
             r |= Serve_CloseReq(sctx, req, q->current.idx);
         }else{
             if(DEBUG_REQ){

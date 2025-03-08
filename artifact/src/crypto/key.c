@@ -50,7 +50,6 @@ EcKey *EcKey_From(MemCtx *m, String *priv, String *pub){
     EVP_PKEY *evpKey = EVP_PKEY_new();
     ecKey->evp = evpKey;
 
-    TrackMalloc(_EVP_PKEY_SIZE, TYPE_EC_KEY);
     if(evpKey == NULL){
         printf("initial evp error\n");
         goto error;
@@ -92,6 +91,5 @@ error:
 
 status EcKey_Free(MemCtx *m, EcKey *key){
     EVP_PKEY_free(key->evp);
-    TrackFree(NULL, _EVP_PKEY_SIZE);
     return SUCCESS;
 }

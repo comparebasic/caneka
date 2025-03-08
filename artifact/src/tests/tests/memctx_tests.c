@@ -2,30 +2,49 @@
 #include <caneka.h>
 
 status MemCtx_Tests(MemCtx *gm){
+    DebugStack_Push(NULL, 0);
     status r = READY;
+
     MemCtx *m = MemCtx_Make();
+    MemChapter *cp = NULL;
+#ifdef INSECURE
+    cp = MemChapter_Get(m);
+#endif
+    i32 count = 0;
+    if(cp != NULL){
+        count = cp->pages.nvalues;
+        r |= Test(count > 0, "Chapter slab count is greater than 0, have %d.", count);
+    }
 
-    String *s = NULL;
-
-    int stackOffset = m->type.range;
-    printf("making string 1\n");
-    s = String_Init(m, STRING_EXTEND);
+    i64 max = 1024;
+    for(i64 i = 0; i < max; i++){
+        i64 *p = MemCtx_Alloc(m, sizeof(i64));
+        memcpy(p, &i, sizeof(i64));
+    }
 
     m->type.range++;
-    s = String_Init(m, STRING_EXTEND);
-    m->type.range--;
+    for(i64 i = 0; i < max; i++){
+        i64 *p = MemCtx_Alloc(m, sizeof(i64));
+        memcpy(p, &i, sizeof(i64));
+    }
 
-    i64 allCount = MemCtx_MemCount(m, 0);
-    i64 stackedCount = MemCtx_MemCount(m, stackOffset+1);
-    r |= Test(allCount != stackedCount, "All count and Stack count differ");
-    r |= Test(allCount - stackedCount == sizeof(String), "Stack count has one String size of difference from all count, have %ld", allCount - stackedCount);
-    i64 total = MemCtx_Total(m, 0);
-    r |= Test(total == MEM_SLAB_SIZE*2, "Total is the size of two mem slabs, have %ld", total);
-
-    MemCtx_FreeTemp(m, stackOffset+1);
-    total = MemCtx_Total(m, 0);
-    r |= Test(total == MEM_SLAB_SIZE*1, "Total is the size of one mem slabs after free temp, have %ld", total);
+    r |= Test(m->p.nvalues == 6, "Six slabs registered");
+    if(cp != NULL){
+        r |= Test(cp->pages.nvalues == count+5, "Five additional slabs registered in chapter, have %d", cp->pages.nvalues);
+    }
 
     MemCtx_Free(m);
+    r |= Test(m->p.nvalues == 3, "Three slabs registered, after temp wipe");
+    if(cp != NULL){
+        r |= Test(cp->pages.nvalues == count+2, "Two additional slabs registered in chapter, have", cp->pages.nvalues);
+    }
+
+    m->type.range--;
+    MemCtx_Free(m);
+    if(cp != NULL){
+        r |= Test(cp->pages.nvalues == count-1, "After removal one less page than count, because it belonged to the MemCtx, have %d.", cp->pages.nvalues);
+    }
+
+    DebugStack_Pop();
     return r;
 }
