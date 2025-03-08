@@ -20,7 +20,9 @@ MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
 
 void *MemSlab_Alloc(MemSlab *sl, word sz){
     sl->remaining -= sz;
-    return sl->bytes+sl->remaining; 
+    printf("remaining:%d sz:%hd total:%hd bytes:%ld pos:%ld\n",
+        sl->remaining, sz, sl->remaining+sz, (i64)sl->bytes, (i64)sl->bytes+((size_t)sl->remaining));
+    return sl->bytes+((size_t)sl->remaining); 
 }
 
 

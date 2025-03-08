@@ -19,6 +19,6 @@
 #include "../crypto/sane.c"
 
 int main(int argc, char *argv[]){
-    write(0, "hi\n", 3);
+    MemChapter_Init();
     exit(0);
 }

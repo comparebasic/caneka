@@ -1,6 +1,7 @@
 /* 16mb or  4096x4096 */
 #define PAGE_SIZE sysconf(_SC_PAGE_SIZE)
-#define CHAPTER_SIZE (sysconf(_SC_PAGE_SIZE)*4096)
+#define CHAPTER_SIZE (sysconf(_SC_PAGE_SIZE)*256)
+#define MEM_FILENAME "/tmp/caneka.mem.fd"
 
 typedef struct mem_chapter {
     Type type;
@@ -15,3 +16,4 @@ status MemChapter_FreeSlab(struct span *m, struct mem_slab *sl);
 status MemChapter_Make(MemChapter **cp);
 status MemChapter_Claim(struct mem_slab *sl);
 i64 MemCount(i16 level);
+status MemChapter_Init();
