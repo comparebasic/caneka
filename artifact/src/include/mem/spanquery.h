@@ -17,7 +17,7 @@ typedef struct span_state {
 
 typedef struct span_query {
     Type type;
-    struct span *m;
+    struct mem_ctx *m;
     struct span *span;
     /* end SpanState */
     SpanState stack[MAX_DIMS+1];

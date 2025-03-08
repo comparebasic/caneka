@@ -72,7 +72,7 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
     String_AddBytes(m, s, bytes("BaseMem: at "), strlen("mem: at "));
     String_AddInt(m, s, baseStackLevel);
     String_AddBytes(m, s, bytes(" "), strlen(" "));
-    i64 baseMem = MemCount();
+    i64 baseMem = MemCount(0);
     i64 rollingBaseMem = baseMem;
     String_AddMemCount(m, s, baseMem);
 
@@ -122,9 +122,9 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
 
             word stackLevel = m->type.range-baseStackLevel;
             m->type.range++;
-            i64 memUsed = MemCount()-baseMem;
-            i64 overRollingUsed = MemCount()-rollingBaseMem;
-            rollingBaseMem = MemCount();
+            i64 memUsed = MemCount(0)-baseMem;
+            i64 overRollingUsed = MemCount(0)-rollingBaseMem;
+            rollingBaseMem = MemCount(0);
             String *s = String_Init(m, STRING_EXTEND);
 
             char *htmlCls = "";

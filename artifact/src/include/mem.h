@@ -4,7 +4,7 @@
 #include "mem/spanquery.h"
 #include "mem/span_tolocal.h"
 #include "mem/iter.h"
-#include "mem/mem_chapter.h"
 #include "mem/mem.h"
+#include "mem/mem_chapter.h"
 #include "mem/mem_debug.h"
 #include "mem/ext_free.h"

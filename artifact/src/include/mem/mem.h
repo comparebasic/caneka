@@ -16,7 +16,13 @@ typedef struct mem_slab {
     void *bytes;
 } MemSlab;
 
-typedef struct span MemCtx;
+typedef struct mem_ctx {
+    RangeType type;
+    i32 _;
+    Span p;
+    MemSlab first;
+    Iter it;
+} MemCtx;
 
 /* Main call for allocating a section of memory
  *
@@ -47,7 +53,9 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level);
  * Returns the amount in bytes used by the parent allocator (usually malloc) */
 i64 MemCtx_Used(MemCtx *m);
 /* Create a MemCtx on an existing memeory page */
-MemCtx *MemCtx_OnPage(void *page, MemSlab **slp);
+MemCtx *MemCtx_OnPage(void *page);
+/* Setup a memctx and copy the MemSlab struct into the first slab */
+status MemCtx_Setup(MemCtx *m, MemSlab *sl);
 /* 
  * Returns the slab that contains a pointer 
  *

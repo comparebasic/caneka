@@ -254,6 +254,15 @@ status Span_ReInit(Span *p){
     return SUCCESS;
 }
 
+status Span_Setup(Span *p){
+    p->type.of = TYPE_SPAN;
+    p->slotSize = 1;
+    p->ptrSlot = 0;
+    p->max_idx = p->metrics.available = \
+        p->metrics.get = p->metrics.selected = p->metrics.set = -1;
+    return SUCCESS;
+}
+
 Span *Span_Make(MemCtx *m){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->type.of = TYPE_SPAN;

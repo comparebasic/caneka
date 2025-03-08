@@ -6,12 +6,10 @@ void MemCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended)
     printf("\x1b[%dmMemCtx(%p)<", color, m);
     printf("(idx^level)[slabAddr/available]=(");
 
-    Iter it;
-    Iter_Init(&it, m);
-    while((Iter_Next(&it) & END) == 0){
-         MemSlab *sl = (MemSlab *)Iter_Get(&it);
-         printf("(%d^%d)[%p/%ud]", it.idx, sl->level, sl, MemSlab_Available(sl));
-         if((it.type.state & FLAG_ITER_LAST) != 0){
+    while((Iter_Next(&m->it) & END) == 0){
+         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+         printf("(%d^%d)[%p/%ud]", m->it.idx, sl->level, sl, MemSlab_Available(sl));
+         if((m->it.type.state & FLAG_ITER_LAST) != 0){
             printf(", ");
          }
     }

@@ -281,7 +281,7 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
 
     StrVecEntry_Set(ctx->fields.steps.name, bytes(dir->name), 0);
 
-    m->type.state++;
+    m->type.range++;
 
     ctx->fields.steps.modSrcCount = 0;
     ctx->fields.steps.modSrcTotal = 0;
@@ -305,7 +305,7 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
         MemCtx_Free(m);
         sourceCstr++;
     }
-    m->type.state--;
+    m->type.range--;
 
     DebugStack_Pop();
     return r;

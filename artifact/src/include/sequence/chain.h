@@ -5,8 +5,7 @@ typedef struct chain {
 } Chain;
 
 
-Chain *Chain_Make(struct span *m, struct lookup *funcs);
-status Chain_Extend(struct span *m, Chain *chain, struct lookup *funcs);
+Chain *Chain_Make(struct mem_ctx *m, struct lookup *funcs);
+status Chain_Extend(struct mem_ctx *m, Chain *chain, struct lookup *funcs);
 void *Chain_Get(Chain *chain, word type);
 void *Chain_GetIfc(Chain *chain, word type);
-

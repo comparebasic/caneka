@@ -13,4 +13,5 @@ status Iter_Next(Iter *it);
 Abstract *Iter_Get(Iter *it);
 Iter *Iter_Init(Iter *it, Span *values);
 Iter *Iter_InitReverse(Iter *it, Span *values);
-Iter *Iter_Make(struct span *m, Span *values);
+Iter *Iter_Make(struct mem_ctx *m, Span *values);
+status Iter_Reset(Iter *it);

@@ -43,6 +43,12 @@ Abstract *Iter_Get(Iter *it){
     return Span_Get(it->values, it->idx);
 }
 
+status Iter_Reset(Iter *it){
+    it->idx = -1;
+    it->type.state = 0;
+    return SUCCESS;
+}
+
 Iter *Iter_Init(Iter *it, Span *values){
     memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_ITER;
