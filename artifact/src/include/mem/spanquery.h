@@ -11,8 +11,8 @@ enum span_ops {
 typedef struct span_state {
     void *slab;
     word flags; /* active, full, etc. */
-    word localIdx; 
-    word offset;
+    i16 localIdx; 
+    i16 offset;
     int increment;
     byte dim;
 } SpanState;

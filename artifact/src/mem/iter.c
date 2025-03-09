@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status Iter_Next(Iter *it){
-    if(it->values == NULL){
+    if(it->values == NULL || it->values->nvalues == 0){
         it->type.state |= END;
         return it->type.state;
     }
@@ -29,10 +29,13 @@ status Iter_Next(Iter *it){
             it->type.state |= END;
         }else{
             it->idx++;
+            it->sq.idx++;
             byte i = 0;
             while(i <= it->sq.dims){
                 if(it->sq.stack[i].localIdx < SPAN_LOCAL_MAX){
                     it->sq.stack[i].localIdx++;
+                    printf("localidx incr to %d for %p dim:%d\n",
+                        it->sq.stack[i].localIdx++, it->sq.stack[i].slab, i);
                     break;
                 }else{
                     it->sq.stack[i].localIdx = 0;
@@ -40,6 +43,7 @@ status Iter_Next(Iter *it){
                 i++;
             }
             while(i >= 0){
+                printf("setting stack %d\n", i);
                 SpanQuery_SetStack(&it->sq, i);
                 if(i == 0){
                     break;
@@ -57,8 +61,9 @@ status Iter_Next(Iter *it){
 }
 
 Abstract *Iter_Get(Iter *it){
-    printf("get: %d\n", it->idx);
-    return Span_GetFromQ(&it->sq);
+    Abstract *a = Span_GetFromQ(&it->sq);
+    printf("get: %d/%d %p\n", it->idx, it->values->nvalues, a);
+    return a;
 }
 
 status Iter_Reset(Iter *it){
@@ -71,9 +76,10 @@ Iter *Iter_Init(Iter *it, Span *values){
     memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_ITER;
     it->values = asIfc(values, TYPE_SPAN);
-    it->idx = -1;
     SpanQuery_Setup(&it->sq, values, SPAN_OP_GET, 0);
     status r = Span_Query(&it->sq);
+    it->idx = -1;
+    it->sq.stack[0].localIdx = -1;
     return it;
 }
 

@@ -89,6 +89,7 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanState *st = sq->stack;
+    printf("getting %d from %p\n", st->localIdx, st->slab);
     void *ptr = Slab_valueAddr(st->slab, st->localIdx);
     sq->span->type.state &= ~(SUCCESS|NOOP);
     if(*((Abstract **)ptr) != NULL){
