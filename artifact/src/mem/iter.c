@@ -29,6 +29,23 @@ status Iter_Next(Iter *it){
             it->type.state |= END;
         }else{
             it->idx++;
+            byte i = 0;
+            while(i <= it->sq.dims){
+                if(it->sq.stack[i].localIdx < SPAN_LOCAL_MAX){
+                    it->sq.stack[i].localIdx++;
+                    break;
+                }else{
+                    it->sq.stack[i].localIdx = 0;
+                }
+                i++;
+            }
+            while(i >= 0){
+                SpanQuery_SetStack(&it->sq, i);
+                if(i == 0){
+                    break;
+                }
+                i--;
+            }
             it->type.state |= SUCCESS;
             if(it->idx == it->values->max_idx){
                 it->type.state |= FLAG_ITER_LAST;
@@ -40,7 +57,8 @@ status Iter_Next(Iter *it){
 }
 
 Abstract *Iter_Get(Iter *it){
-    return Span_Get(it->values, it->idx);
+    printf("get: %d\n", it->idx);
+    return Span_GetFromQ(&it->sq);
 }
 
 status Iter_Reset(Iter *it){
@@ -54,6 +72,8 @@ Iter *Iter_Init(Iter *it, Span *values){
     it->type.of = TYPE_ITER;
     it->values = asIfc(values, TYPE_SPAN);
     it->idx = -1;
+    SpanQuery_Setup(&it->sq, values, SPAN_OP_GET, 0);
+    status r = Span_Query(&it->sq);
     return it;
 }
 

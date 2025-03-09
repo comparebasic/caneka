@@ -2,6 +2,7 @@ typedef struct iter {
     Type type;
     int idx;
     Span *values;
+    SpanQuery sq;
 } Iter;
 
 enum iter_flags {

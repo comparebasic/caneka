@@ -1,3 +1,5 @@
+#define SPAN_LOCAL_MAX (SPAN_STRIDE-1)
+
 enum span_ops {
     SPAN_OP_GET = 1,
     SPAN_OP_SET = 2,
