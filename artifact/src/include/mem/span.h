@@ -5,9 +5,6 @@ Data Strucutre for slab allocation of segmented arrays.
 This is the main work-horse data structure for storing and retrieving data, Table is biult on top of this.
 */
 
-#define SPAN_SLOT_BYTES sizeof(void *)
-#define SPAN_STRIDE 16
-
 enum span_flags {
     SLAB_ACTIVE = 1 << 8,
     SLAB_FULL = 1 << 9,
@@ -18,40 +15,40 @@ enum span_flags {
 };
 
 typedef void *(*SpanAddrFunc)(struct span_query *sq);
+extern i32 _increments[SPAN_MAX_DIMS];
 
 typedef struct span {
     Type type;
-    byte _;
-    byte _2;
-    byte _3;
+    word _;
+    byte _1;
     byte dims;
-    void *root;
+    slab *root;
     struct mem_ctx *m;
-	int nvalues;
-    int max_idx;
+	i32 nvalues;
+    i32 max_idx;
     struct {
-        int get;
-        int set;
-        int selected;
-        int available;
+        i32 get;
+        i32 set;
+        i32 selected;
+        i32 available;
     } metrics;
 } Span;
 
 Span *Span_Make(struct mem_ctx *m);
 status Span_Setup(Span *p);
-status Span_Remove(Span *p, int idx);
-status Span_Cull(Span *p, int count);
+status Span_Remove(Span *p, i32 idx);
+status Span_Cull(Span *p, i32 count);
 status Span_ReInit(Span *p);
 status Span_Query(struct span_query *sq);
 Span *Span_Clone(struct mem_ctx *m, Span *p);
-void *Span_Set(Span *p, int idx, Abstract *t);
-void *Span_Get(Span *p, int idx);
-int Span_Add(Span *p, Abstract *t);
-int Span_AddOrdered(Span *p, Abstract *t);
-Span *Span_From(struct mem_ctx *m, int count, ...);
+void *Span_Set(Span *p, i32 idx, Abstract *t);
+void *Span_Get(Span *p, i32 idx);
+i32 Span_Add(Span *p, Abstract *t);
+i32 Span_AddOrdered(Span *p, Abstract *t);
+Span *Span_From(struct mem_ctx *m, i32 count, ...);
 status Span_Run(struct mem_ctx *m, Span *p, DoFunc func);
 status Span_Merge(Span *dest, Span *additional);
-int Span_GetIdx(Span *p, void *a, EqualFunc eq);
+i32 Span_GetIdx(Span *p, void *a, EqualFunc eq);
 Abstract *Span_Search(Span *p, void *a, EqualFunc eq);
 void *Span_GetSelected(Span *p);
 void *Span_ReserveNext(Span *p);
@@ -68,10 +65,9 @@ status Span_Extend(struct span_query *sq);
 status Span_GrowToNeeded(struct span_query *sq);
 char **Span_ToCharArr(struct mem_ctx *m, Span *p);
 status Span_Concat(Span *p, Span *add);
-byte Span_GetDimNeeded(int idx);
+byte Span_GetDimNeeded(i32 idx);
 
 /* debug */
-void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
-int Span_availableByDim(int dims, int stride);
+void Span_Print(Abstract *a, cls type, char *msg, i32 color, boolean extended);
 int Span_Capacity(Span *p);
 Span *Span_Init(Span *p);

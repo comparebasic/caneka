@@ -8,41 +8,6 @@ SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim){
     return sq->stack+dim;
 }
 
-SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim){
-    Span *p = sq->span;
-
-    void *sl = NULL;
-    word localIdx = 0;
-    SpanState *st = SpanQuery_StateByDim(sq, dim);
-    int increment = Span_availableByDim(dim, SPAN_STRIDE);
-
-    if(dim == p->dims){
-        SpanState *st = SpanQuery_StateByDim(sq, p->dims);
-        sl = p->root;
-        localIdx = sq->idx / increment;
-        st->offset = localIdx * increment;
-    }else{
-        SpanState *prev = SpanQuery_StateByDim(sq, dim+1);
-
-        localIdx = ((sq->idx - prev->offset) / increment);
-        int localMax = SPAN_STRIDE;
-        if(localIdx >= localMax){
-            printf("LocalIdx:%d prevLocalIdx:%d offset:%d dim:%d\n", localIdx, prev->localIdx, prev->offset, dim);
-            Fatal("local_idx greater than stride max", sq->span->type.of);
-            return NULL;
-        }
-        st->offset = prev->offset + increment*localIdx;
-        printf("get %d from dim:%d using slab:%p\n", prev->localIdx, dim, prev->slab);
-        sl = (void *)Slab_nextSlot(prev->slab, prev->localIdx);
-    }
-
-    st->slab = sl;
-    st->localIdx = localIdx;
-    st->dim = dim;
-    st->increment = increment;
-
-    return st;
-}
 
 void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
     memset(sr, 0, sizeof(SpanQuery));
@@ -60,11 +25,67 @@ void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
 
 status Span_Query(SpanQuery *sr){
     MemCtx *m = sr->span->m;
+    i32 idx = sr->idx;
+    Span *p = sr->span;
+    /* increase the dims with blank slabs if necessary */
     if(sr->dimsNeeded > sr->dims){
         if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
             return NOOP;
         }
-        Span_GrowToNeeded(sr);
+        slab *exp_sl = NULL;
+        slab *shelf_sl = NULL;
+        while(p->dims < sr->dimsNeeded){
+            slab *new_sl = Slab_Make(p->m);
+
+            if(exp_sl == NULL){
+                shelf_sl = sr->span->root;
+                sr->span->root = new_sl;
+            }else{
+                Slab_setSlot(exp_sl, 0, &new_sl);
+            }
+
+            exp_sl = new_sl;
+            p->dims++;
+        }
+        Slab_setSlot(exp_sl, 0, &shelf_sl);
     }
-    return Span_Extend(sr);
+    sr->dims = p->dims;
+
+    /* resize the span by adding dimensions and slabs as needed */
+    byte dims = p->dims;
+    SpanState *st = NULL;
+    while(TRUE){
+        /* make new if not exists */
+        SpanQuery_SetStack(sr, dims, st);
+        if(st->slab == NULL){
+            if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
+                return NOOP;
+            }
+            slab *new_sl = Slab_Make(p->m); 
+            SpanState *prev = SpanQuery_StateByDim(sr, dims+1);
+            Slab_setSlot(prev->slab, prev->localIdx, &new_sl);
+            st->slab = new_sl;
+        }else{
+            sr->queryDim = dims;
+        }
+
+        /* find or allocate a space for the new span */
+        if(dims == 0){
+            break;
+        }
+
+        dims--;
+    }
+
+    if(st == NULL){
+        Fatal("Slab not found, SpanState is null\n", TYPE_SPAN);
+    }
+
+    if(st->localIdx >= SPAN_STRIDE){
+        Fatal("localIdx greater than stride", p->type.of);
+    }
+
+    sr->type.state |= SUCCESS;
+    return sq->type.state;
+
 }

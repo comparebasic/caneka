@@ -5,6 +5,7 @@ typedef uint16_t word;
 typedef int32_t i32;
 typedef uint32_t quad;
 typedef int64_t i64;
+typedef uint64_t slot;
 typedef i64 time64_t;
 typedef uint64_t util;
 
@@ -14,36 +15,9 @@ typedef byte boolean;
 typedef byte flags8;
 typedef quad flags32;
 
-struct string;
-struct serve_ctx;
-struct req;
-struct handler;
-struct mem_ctx;
-struct mem_slab;
-struct strcursor_range;
-struct span;
-struct span_query;
-struct span_slab;
-struct structexp;
-struct lookup;
-struct strcursor;
-struct strcursor_range;
-struct guard;
-struct roebling;
-struct span_def;
-struct mem_handle;
-struct mem_keyed;
-struct oset;
-struct oset_def;
-struct access;
-struct ioctx;
-struct mem_local;
-struct test_set;
-struct strcursor;
-struct cash;
-
-struct format_def;
-struct formatter;
+#define SPAN_STRIDE 16
+#define SPAN_MAX_DIMS 5
+typedef slot slab[SPAN_STRIDE];
 
 extern word GLOBAL_flags;
 enum global_flags {
@@ -81,9 +55,6 @@ typedef char *(*RangeToChars)(word);
 
 #define ZERO 0
 #define MAX_BASE10 23
-#define SLAB_START_SIZE 2
-
-#define MAX_DIMS 16
 
 #define STRING_SEG_FOOTPRINT 256
 #define STRING_EXTRAS (sizeof(Type)+sizeof(int)+sizeof(struct string *)+sizeof(MemCtx *))

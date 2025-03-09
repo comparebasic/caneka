@@ -8,48 +8,75 @@ status Iter_Next(Iter *it){
     }
     if((it->type.state & END) != 0){
         if((it->type.state & FLAG_ITER_REVERSE) != 0){
-            it->idx = it->values->nvalues;
+            it->idx = it->values->max_idx;
         }else{
             it->idx = 0;
         }
+        SpanQuery_Setup(&it->sq, it->values, SPAN_OP_GET, 0);
+        Span_Query(&it->sq);
         it->type.state &= ~(END|FLAG_ITER_LAST);
     }
     if((it->type.state & FLAG_ITER_REVERSE) != 0){
-        if((it->idx-1) < 0){
+        if(it->idx == 0){
             it->type.state |= END;
-        }else{
-            it->idx--;
-            it->type.state |= SUCCESS;
-            if(it->idx == 0){
-                it->type.state |= FLAG_ITER_LAST;
+            return it->type.state;
+        }
+
+        byte dim = 0;
+        SpanQuery *sq = &it->sq;
+        SpanState *st = NULL;
+        while(dim <= sq->dims){
+            st = sq->stack[dim];
+            slot *start = (slot *)st->slab;
+            slot *ptr = start+st->localIdx;
+            while(ptr > start && 
+                st->localIdx-- && sq->idx -= st->increment && *(--ptr) == NULL){};
+            if(ptr != NULL && ptr != start){
+                break;
+            }else{
+                sq->idx += (SPAN_STRIDE-1)-st->localIdx;
+                st->localIdx = SPAN_STRIDE-1;
+                dim++;
             }
+        }
+        while(i >= 0){
+            SpanQuery_SetStack(&it->sq, i, st);
+            i--;
+        }
+        it->idx = it->sq.idx;
+        it->type.state |= SUCCESS;
+
+        if(it->idx == 0){
+            it->type.state |= FLAG_ITER_LAST;
         }
     }else{
         if((it->idx+1) > it->values->max_idx){
             it->type.state |= END;
         }else{
-            it->idx++;
-            it->sq.idx++;
-            byte i = 0;
-            while(i <= it->sq.dims){
-                if(it->sq.stack[i].localIdx < SPAN_LOCAL_MAX){
-                    it->sq.stack[i].localIdx++;
-                    printf("localidx incr to %d for %p dim:%d\n",
-                        it->sq.stack[i].localIdx++, it->sq.stack[i].slab, i);
+            byte dim = 0;
+            SpanQuery *sq = &it->sq;
+            SpanState *st = NULL;
+            while(dim <= sq->dims){
+                st = sq->stack[dim];
+                slot *start = (slot *)st->slab;
+                slot *ptr = start+st->localIdx;
+                slot *last = start+(SPAN_STRIDE-1);
+                start = ptr;
+                while(ptr < last && 
+                    st->localIdx++ && sq->idx += st->increment && *(++ptr) == NULL){};
+                if(ptr != NULL && ptr != start){
                     break;
                 }else{
-                    it->sq.stack[i].localIdx = 0;
+                    sq->idx -= st->localIdx;
+                    st->localIdx = 0;
+                    dim++;
                 }
-                i++;
             }
             while(i >= 0){
-                printf("setting stack %d\n", i);
-                SpanQuery_SetStack(&it->sq, i);
-                if(i == 0){
-                    break;
-                }
+                SpanQuery_SetStack(&it->sq, i, st);
                 i--;
             }
+            it->idx = it->sq.idx;
             it->type.state |= SUCCESS;
             if(it->idx == it->values->max_idx){
                 it->type.state |= FLAG_ITER_LAST;
@@ -75,11 +102,8 @@ status Iter_Reset(Iter *it){
 Iter *Iter_Init(Iter *it, Span *values){
     memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_ITER;
+    it->type.state |= END;
     it->values = asIfc(values, TYPE_SPAN);
-    SpanQuery_Setup(&it->sq, values, SPAN_OP_GET, 0);
-    status r = Span_Query(&it->sq);
-    it->idx = -1;
-    it->sq.stack[0].localIdx = -1;
     return it;
 }
 

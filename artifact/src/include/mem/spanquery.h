@@ -35,3 +35,29 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim);
 SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim);
 status SpanQuery_Refresh(SpanQuery *sq);
 void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, int idx);
+
+#define SpanQuery_SetStack(sq, dim, st) \
+(do { \
+    Span *p = sq->span; \
+    slab *sl = NULL; \
+    word localIdx = 0; \
+    st = SpanQuery_StateByDim(sq, dim); \
+    i32 increment = _increments[dim, SPAN_STRIDE]; \
+    if(dim == p->dims){ \
+        SpanState *st = SpanQuery_StateByDim(sq, p->dims); \
+        sl = p->root; \
+        localIdx = sq->idx / increment; \
+        st->offset = localIdx * increment; \
+    }else{ \
+        SpanState *prev = SpanQuery_StateByDim(sq, dim+1); \
+        localIdx = ((sq->idx - prev->offset) / increment); \
+        word localMax = SPAN_STRIDE; \
+        st->offset = prev->offset + increment*localIdx; \
+        sl = (slab *)Slab_nextSlot(prev->slab, prev->localIdx); \
+    } \
+    st->slab = sl; \
+    st->localIdx = localIdx; \
+    st->dim = dim; \
+    st->increment = increment; \
+} while(0))
+

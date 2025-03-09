@@ -1,9 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-int TABLE_DIM_BYTESIZES[7] = {1, 1, 2, 2, 4, 0, 0};
-int TABLE_REQUERY_MAX[7] = {4, 4,  8, 16, 32, 0, 0};
-static i64 dim_lookups[8] = {15, 255, 4095, 0, 0, 0, 0, 0};
+int TABLE_DIM_BYTESIZES[TABLE_MAX_DIMS] = {1, 1, 2, 2, 4};
+int TABLE_REQUERY_MAX[TABLE_MAX_DIMS] = {8, 8, 4, 4, 2};
+static i64 dim_lookups[TABLE_MAX_DIMS] = {15, 255, 4095, 65535, 1048575};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
 static void setValuePtr(Span *tbl, Hashed *h, Abstract *value){
@@ -14,7 +14,7 @@ static void setValuePtr(Span *tbl, Hashed *h, Abstract *value){
 static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
 
 static int getReQueryKey(i64 hash, int position, byte dim){
-    return (int) ((hash >> (position*4)) & dim_lookups[dim]);
+    return (int) ((hash >> (position*TABLE_DIM_BYTESIZES[dim])) & dim_lookups[dim]);
 }
 
 static boolean shouldResize(Span *tbl, word *queries){

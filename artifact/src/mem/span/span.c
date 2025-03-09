@@ -1,27 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-int Span_availableByDim(int dims, int stride){
-    int _dims = dims;
-    int n = stride;
-    int r = n;
-    if(dims <= 0){
-        r = 1;
-    }else if(dims == 1){
-        return stride;
-    }else{
-        while(dims > 1){
-            n *= stride;
-            dims--;
-        }
-        r = n;
-    }
-
-    return r;
-}
+i32 _increments[SPAN_MAX_DIMS] = {16, 256, 4096, 65536, 1048576};
 
 int Span_Capacity(Span *p){
-    int increment = Span_availableByDim(p->dims, SPAN_STRIDE);
+    int increment = _increments[p->dims];
     return increment * SPAN_STRIDE;
 }
 
@@ -154,86 +137,6 @@ status Span_Remove(Span *p, int idx){
 }
 
 /* internals */
-status Span_GrowToNeeded(SpanQuery *sq){
-    boolean expand = sq->span->dims < sq->dimsNeeded;
-    Span *p = sq->span;
-
-    if(expand){
-        if(DEBUG_SPAN){
-            printf("\x1b[%dmSpanGrow for %d\n", DEBUG_SPAN, sq->idx);
-        }
-        void *exp_sl = NULL;
-        void *shelf_sl = NULL;
-        while(p->dims < sq->dimsNeeded){
-            void *new_sl = Slab_Make(p->m);
-
-            if(exp_sl == NULL){
-                shelf_sl = sq->span->root;
-                sq->span->root = new_sl;
-            }else{
-                Slab_setSlot(exp_sl, 0, &new_sl);
-            }
-
-            exp_sl = new_sl;
-            p->dims++;
-        }
-        Slab_setSlot(exp_sl, 0, &shelf_sl);
-    }
-
-    sq->dims = p->dims;
-
-    return SUCCESS;
-}
-
-status Span_Extend(SpanQuery *sq){
-    if(DEBUG_SPAN){
-        printf("\x1b[%dmSpanExtend for %d\x1b[0m\n", DEBUG_SPAN, sq->idx);
-    }
-    /* resize the span by adding dimensions and slabs as needed */
-    Span *p = sq->span;
-
-    byte dims = p->dims;
-    SpanState *st = NULL;
-    while(TRUE){
-        if(DEBUG_SPAN){
-            printf("\x1b[%dmSpan_Extend: query round dim:%d\x1b[0m\n", DEBUG_SPAN,
-                dims);
-        }
-        /* make new if not exists */
-        st = SpanQuery_SetStack(sq, dims);
-        if(st->slab == NULL){
-            if(sq->op != SPAN_OP_SET && sq->op != SPAN_OP_RESERVE){
-                return NOOP;
-            }
-            void *new_sl = NULL;
-            new_sl = Slab_Make(p->m); 
-            SpanState *prev = SpanQuery_StateByDim(sq, dims+1);
-            Slab_setSlot(prev->slab, prev->localIdx, &new_sl);
-            st->slab = new_sl;
-        }else{
-            sq->queryDim = dims;
-        }
-
-        /* find or allocate a space for the new span */
-        if(dims == 0){
-            break;
-        }
-
-        dims--;
-    }
-
-    if(st == NULL){
-        Fatal("Slab not found, SpanState is null\n", TYPE_SPAN);
-    }
-
-    if(st->localIdx >= SPAN_STRIDE){
-        Fatal("localIdx greater than stride", p->type.of);
-    }
-
-    sq->type.state |= SUCCESS;
-    return sq->type.state;
-}
-
 byte Span_GetDimNeeded(int idx){
     if(idx < SPAN_STRIDE){
         return 0;
@@ -244,7 +147,7 @@ byte Span_GetDimNeeded(int idx){
         nslabs++;
     }
     int dims = 1;
-    while(Span_availableByDim(dims, SPAN_STRIDE) < nslabs){
+    while(_increments[dims] < nslabs){
         dims++;
     }
 

@@ -1,4 +1,4 @@
-typedef quad (*GetDelayFunc)(status r);
+typedef status (*SetBitFunc)(Queue *q, Abstract *item, Abstract *source);
 typedef int (*SkipSlabFunc)(Abstract *source, int idx);
 
 enum queue_flags {
@@ -6,33 +6,19 @@ enum queue_flags {
    QUEUE_RESPONDING = 1 << 10, 
 };
 
-typedef struct queue_idx {
-    void *item; /* slab or value */
-    word flags; /* active, full, etc. */
-    word count; 
-    /* delayTicks is a counter of the number of rounds the server has done
-     * since it's last cleanup round, this is the minimum delay of any item
-     * contained within this slab */
-    quad delayTicks; 
-} QueueIdx;
-
 typedef struct queue {
     Type type;
     Span *span;
-    Span *meta;
-    int count;
-    SpanQuery current;
-    SpanQuery available;
-    GetDelayFunc getDelay;
+    Span *available;
+    Span *bits;
+    Iter it;
+    SetBitFunc setBits;
     Abstract *source;
 } Queue;
 
 status Queue_Init(MemCtx *m, Queue *q, GetDelayFunc getDelay);
 
-char *QueueFlags_ToChars(word flags);
-Span *Queue_Make(MemCtx *m, GetDelayFunc getDelay);
-QueueIdx *Queue_Set(Queue *q, int idx, void *value, quad delayTicks);
-int Queue_Add(Queue *q, Abstract *value);
-QueueIdx *Queue_Next(Queue *q, SkipSlabFunc skip);
-status Queue_SetDelay(SpanQuery *sq, quad delayTicks);
+Queue *Queue_Make(MemCtx *m, GetDelayFunc getDelay);
+i32 Queue_Add(Queue *q, Abstract *value);
+Abstract *Queue_Next(Queue *q);
 status Queue_Remove(Queue *q, int idx);
