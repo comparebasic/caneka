@@ -22,15 +22,15 @@ status Iter_Next(Iter *it){
         start = (void **)st->slab;
         ptr = start+(st->localIdx);
         if(*ptr != 0){
-            return it->type.state;
+            goto found;
         }
     }
     if((it->idx+1) > it->values->max_idx){
         goto end;
     }else{
-        printf("\n- next nvalues:%d\n", sq->span->nvalues);
+        printf("- next nvalues:%d\n", sq->span->nvalues);
         while(dim <= sq->dims){
-            printf("\n--- dim while %d\n", dim);
+            printf("--- dim while %d\n", dim);
             st = &sq->stack[dim];
             i32 increment = _increments[dim];
             start = (void **)st->slab;
@@ -43,16 +43,16 @@ status Iter_Next(Iter *it){
                     goto end;
                 }
                 if(*(++ptr) != NULL){
-                    printf("\n    --- breaking ptr while localIdx:%ld\n", (i64)((ptr) - start));
+                    printf("    --- breaking ptr while localIdx:%ld\n", (i64)((ptr) - start));
                     break;
                 }
-                printf("\n    --- ptr while localIdx:%ld slot:%p\n", (i64)(ptr - start), ptr);
+                printf("    --- ptr while localIdx:%ld slot:%p\n", (i64)(ptr - start), ptr);
                 sq->idx += increment;
             }
             if(*ptr != NULL && ptr != start){
                 i32 localIdx = (i32)(ptr - start);
                 sq->idx = st->offset + (localIdx * _increments[dim]);
-                printf("\n    --- break at dim:%d localIdx:%d idx:%d",
+                printf("    --- break at dim:%d localIdx:%d idx:%d\n",
                     dim, localIdx, sq->idx);
                 break;
             }else{
@@ -65,9 +65,11 @@ status Iter_Next(Iter *it){
         }
         it->idx = sq->idx;
         it->type.state |= SUCCESS;
-        if(it->idx == it->values->max_idx){
-            it->type.state |= FLAG_ITER_LAST;
-        }
+    }
+found:
+    printf("\x1b[%dmidx after Iter_Next:%d\x1b[0m\n", 32, it->idx);
+    if(it->idx == it->values->max_idx){
+        it->type.state |= FLAG_ITER_LAST;
     }
     return it->type.state;
 end:

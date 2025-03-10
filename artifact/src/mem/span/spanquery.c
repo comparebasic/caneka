@@ -1,6 +1,20 @@
 #include <external.h>
 #include <caneka.h>
 
+void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
+    memset(sr, 0, sizeof(SpanQuery));
+
+    sr->type.of = TYPE_SPAN_QUERY;
+    sr->op = op;
+    sr->m = p->m;
+    sr->span = p;
+    sr->dims = p->dims;
+    sr->idx = idx;
+    sr->dimsNeeded = Span_GetDimNeeded(idx);
+
+    return;
+}
+
 SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     Span *p = sq->span; 
     slab *sl = NULL;
@@ -25,20 +39,6 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     st->increment = increment;
 
     return st;
-}
-
-void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
-    memset(sr, 0, sizeof(SpanQuery));
-
-    sr->type.of = TYPE_SPAN_QUERY;
-    sr->op = op;
-    sr->m = p->m;
-    sr->span = p;
-    sr->dims = p->dims;
-    sr->idx = idx;
-    sr->dimsNeeded = Span_GetDimNeeded(idx);
-
-    return;
 }
 
 status Span_Query(SpanQuery *sr){
@@ -109,5 +109,4 @@ status Span_Query(SpanQuery *sr){
 
     sr->type.state |= SUCCESS;
     return sr->type.state;
-
 }

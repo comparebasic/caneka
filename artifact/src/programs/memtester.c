@@ -24,6 +24,13 @@ int main(int argc, char *argv[]){
     if(m != NULL){
         printf("MemCtx created successfully\n");
     }
+
+    MemCtx_Print((Abstract *)m, 0, "MemCtx: ", COLOR_BLUE, TRUE);
+    printf("\n");
+    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_YELLOW, TRUE);
+    printf("\n");
+
+    /*
     i64 max = 1024;
     for(i64 i = 0; i < max; i++){
         printf("adding %ld (%ld), ", i, sizeof(i64)*i);
@@ -53,6 +60,7 @@ int main(int argc, char *argv[]){
     MemCtx_Free(m);
     MemChapter_Print((Abstract *)cp, 0, "MemChapter After Free 0: ", COLOR_YELLOW, TRUE);
     printf("\n");
+    */
 
     exit(0);
 }
