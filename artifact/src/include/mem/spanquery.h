@@ -54,8 +54,7 @@ do { \
         localIdx = (((sq)->idx - prev->offset) / increment); \
         word localMax = SPAN_STRIDE; \
         st->offset = prev->offset + increment*localIdx; \
-        void **ptr = (void **)prev->slab; \
-        sl = (slab *)ptr+prev->localIdx; \
+        sl = (slab *)Slab_GetSlot(prev->slab, prev->localIdx); \
     } \
     st->slab = sl; \
     st->localIdx = localIdx; \

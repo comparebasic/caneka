@@ -33,8 +33,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         if(sq->idx > p->max_idx+1){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
-        void **ptr = (void **)st->slab;
-        ptr += st->localIdx;
+        void **ptr = Slab_GetSlot(st->slab, st->localIdx);
         if(sq->op == SPAN_OP_REMOVE){
             *ptr = 0;
             p->nvalues--;
@@ -69,8 +68,7 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanState *st = sq->stack;
-    void **ptr = (void **)st->slab;
-    ptr += st->localIdx;
+    void **ptr = Slab_GetSlot(st->slab, st->localIdx);
     sq->span->type.state &= ~(SUCCESS|NOOP);
     if(*ptr != NULL){
         sq->value = *ptr;
