@@ -2,12 +2,11 @@
 #include <caneka.h>
 
 SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim){
-    if(dim > MAX_DIMS){
+    if(dim > SPAN_MAX_DIMS){
         Fatal("Greater dim than available stack", TYPE_SPAN);
     }
     return sq->stack+dim;
 }
-
 
 void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
     memset(sr, 0, sizeof(SpanQuery));
@@ -86,6 +85,6 @@ status Span_Query(SpanQuery *sr){
     }
 
     sr->type.state |= SUCCESS;
-    return sq->type.state;
+    return sr->type.state;
 
 }

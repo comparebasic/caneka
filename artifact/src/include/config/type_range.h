@@ -31,6 +31,7 @@ enum types {
     TYPE_MESS,
     TYPE_MAKER,
     TYPE_CSTR,
+    TYPE_STR,
     TYPE_STRING,
     TYPE_STRING_CHAIN,
     TYPE_STRING_FIXED,

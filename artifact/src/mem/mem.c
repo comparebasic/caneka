@@ -89,7 +89,7 @@ status MemCtx_Setup(MemCtx *m, MemSlab *sl){
     Span *p = &m->p;
     Span_Setup(p);
     p->m = m;
-    p->root = MemSlab_Alloc(&m->first, SLOT_BYTE_SIZE*SPAN_STRIDE);
+    p->root = MemSlab_Alloc(&m->first, sizeof(slot)*SPAN_STRIDE);
     Iter_Init(&m->it, p);
     Span_Set(&m->p, 0, (Abstract *)&m->first);
     return SUCCESS;

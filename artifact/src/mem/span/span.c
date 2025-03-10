@@ -3,12 +3,20 @@
 
 i32 _increments[SPAN_MAX_DIMS] = {16, 256, 4096, 65536, 1048576};
 
+void **Slab_nextSlotPtr(slot *sl, i32 localIdx){
+    return (void **)sl+localIdx;
+}
+
+void *Slab_nextSlot(slot *sl, i32 localIdx){
+    void **ptr = Slab_nextSlotPtr(sl, localIdx); 
+    return *ptr;
+}
+
 int Span_Capacity(Span *p){
     int increment = _increments[p->dims];
     return increment * SPAN_STRIDE;
 }
 
-/* API */
 char **Span_ToCharArr(MemCtx *m, Span *p){
     size_t sz = sizeof(char *)*(p->nvalues+1);
     char **arr = MemCtx_Alloc(m, sz);
@@ -17,9 +25,9 @@ char **Span_ToCharArr(MemCtx *m, Span *p){
     Iter_Init(&it, p);
     int i = 0;
     while((Iter_Next(&it) & END) == 0){
-        String *s = (String *)asIfc(Iter_Get(&it), TYPE_STRING);
+        Str *s = (Str *)asIfc(Iter_Get(&it), TYPE_STR);
         if(s != NULL){
-            arr[i++] = String_ToChars(m, s);
+            arr[i++] = Str_ToCstr(m, s);
         }
     }
     return arr;
@@ -72,7 +80,6 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanState *st = sq->stack;
-    printf("getting %d from %p\n", st->localIdx, st->slab);
     void *ptr = Slab_valueAddr(st->slab, st->localIdx);
     sq->span->type.state &= ~(SUCCESS|NOOP);
     if(*((Abstract **)ptr) != NULL){
@@ -105,8 +112,8 @@ void *Span_GetSelected(Span *p){
     return Span_Get(p, p->metrics.selected);
 }
 
-int Span_Add(Span *p, Abstract *t){
-    int idx = Span_NextIdx(p);
+i32 Span_Add(Span *p, Abstract *t){
+    i32 idx = p->max_idx+1;
     if(Span_Set(p, idx, t) != NULL){
         return idx;
     }

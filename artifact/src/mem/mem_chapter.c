@@ -136,7 +136,7 @@ MemChapter *MemChapter_Make(MemChapter *prev){
     Span *p = &cp->pages;
     Span_Setup(p);
     p->m = &cp->m;
-    p->root = MemSlab_Alloc(&cp->m.first, SLOT_BYTE_SIZE*SPAN_STRIDE);
+    p->root = MemSlab_Alloc(&cp->m.first, sizeof(slot)*SPAN_STRIDE);
     p->max_idx = PAGE_MAX;
     Iter_Init(&cp->it, &cp->pages);
 

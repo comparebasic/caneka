@@ -15,6 +15,9 @@ typedef byte boolean;
 typedef byte flags8;
 typedef quad flags32;
 
+#define TRUE 1
+#define FALSE 0
+
 #define SPAN_STRIDE 16
 #define SPAN_MAX_DIMS 5
 typedef slot slab[SPAN_STRIDE];

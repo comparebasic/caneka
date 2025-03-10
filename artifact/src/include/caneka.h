@@ -4,9 +4,10 @@
 #include "config.h"
 #include "mem.h"
 #include "str.h"
+#include "core.h"
+/*
 #include "util.h"
 #include "debug.h"
-#include "core.h"
 #include "sequence.h"
 #include "parser.h"
 #include "crypto.h"
@@ -17,5 +18,6 @@
 #include "formats.h"
 #include "lang.h"
 #include "test.h"
+*/
 
 #endif

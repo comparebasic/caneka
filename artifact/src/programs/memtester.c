@@ -8,16 +8,10 @@
 #include "../mem/span/spanquery.c"
 #include "../mem/iter.c"
 #include "../mem/mem_debug.c"
-#include "../core/core.c"
-#include "../core/error.c"
-#include "../string/string.c"
-#include "../string/string_makers.c"
-#include "../string/string_equals.c"
+#include "../error_mocks.c"
+#include "../debug_mocks.c"
 #include "../debug/debug_flags.c"
 #include "../debug/debug_typestrings.c"
-#include "../debug/debug_stack.c"
-#include "../builder/debug_mocks.c"
-#include "../crypto/sane.c"
 
 int main(int argc, char *argv[]){
     MemChapter *cp = MemChapter_Make(NULL);

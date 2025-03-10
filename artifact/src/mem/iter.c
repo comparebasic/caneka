@@ -26,12 +26,12 @@ status Iter_Next(Iter *it){
         SpanQuery *sq = &it->sq;
         SpanState *st = NULL;
         while(dim <= sq->dims){
-            st = sq->stack[dim];
+            st = &sq->stack[dim];
             slot *start = (slot *)st->slab;
             slot *ptr = start+st->localIdx;
             while(ptr > start && 
-                st->localIdx-- && sq->idx -= st->increment && *(--ptr) == NULL){};
-            if(ptr != NULL && ptr != start){
+                st->localIdx-- && sq->idx -= st->increment && *(--ptr) == 0){};
+            if(*ptr != 0 && ptr != start){
                 break;
             }else{
                 sq->idx += (SPAN_STRIDE-1)-st->localIdx;
@@ -63,8 +63,8 @@ status Iter_Next(Iter *it){
                 slot *last = start+(SPAN_STRIDE-1);
                 start = ptr;
                 while(ptr < last && 
-                    st->localIdx++ && sq->idx += st->increment && *(++ptr) == NULL){};
-                if(ptr != NULL && ptr != start){
+                    st->localIdx++ && sq->idx += st->increment && *(++ptr) == 0){};
+                if(*ptr != 0 && ptr != start){
                     break;
                 }else{
                     sq->idx -= st->localIdx;
