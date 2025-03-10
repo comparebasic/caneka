@@ -21,7 +21,7 @@ status Iter_Next(Iter *it){
 
         st = &sq->stack[dim];
         start = (void **)st->slab;
-        ptr = start+(st->localIdx*sizeof(slot));
+        ptr = start+(st->localIdx);
         if(*ptr != 0){
             return it->type.state;
         }
@@ -34,7 +34,7 @@ status Iter_Next(Iter *it){
         while(dim <= sq->dims && loop){
             st = &sq->stack[dim];
             start = (void **)st->slab;
-            ptr = start+(st->localIdx*sizeof(slot));
+            ptr = start+(st->localIdx);
             last = start+(SPAN_STRIDE-1);
             start = ptr;
             while(ptr < last){
@@ -52,7 +52,6 @@ status Iter_Next(Iter *it){
                     dim, it->values->nvalues, it->values->max_idx,
                     st->localIdx, (void *)*ptr , ptr); 
                     */
-                exit(1);
             }
             if(*ptr != 0 && ptr != start){
                 break;

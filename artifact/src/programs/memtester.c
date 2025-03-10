@@ -26,10 +26,11 @@ int main(int argc, char *argv[]){
     }
     i64 max = 1024;
     for(i64 i = 0; i < max; i++){
-        printf("adding i64 %ld mem:%d\n", i, sizeof(i64)*(i+1)+sizeof(MemSlab)+sizeof(MemCtx));
+        printf("adding %ld (%ld), ", i, sizeof(i64)*i);
         i64 *p = MemCtx_Alloc(m, sizeof(i64));
         memcpy(p, &i, sizeof(i64));
     }
+    printf("added first round\n");
 
     m->type.range++;
     for(i64 i = 0; i < max; i++){

@@ -70,7 +70,7 @@ void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanState *st = sq->stack;
     void **ptr = (void **)st->slab;
-    ptr += st->localIdx*sizeof(slot);
+    ptr += st->localIdx;
     sq->span->type.state &= ~(SUCCESS|NOOP);
     if(*ptr != NULL){
         sq->value = *ptr;
