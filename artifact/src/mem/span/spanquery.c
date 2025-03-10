@@ -40,13 +40,15 @@ status Span_Query(SpanQuery *sr){
                 shelf_sl = sr->span->root;
                 sr->span->root = new_sl;
             }else{
-                Slab_setSlot(exp_sl, 0, &new_sl);
+                void **ptr = (void *)exp_sl;
+                *ptr = new_sl;
             }
 
             exp_sl = new_sl;
             p->dims++;
         }
-        Slab_setSlot(exp_sl, 0, &shelf_sl);
+        void **ptr = (void *)exp_sl;
+        *ptr = shelf_sl;
     }
     sr->dims = p->dims;
 
@@ -62,7 +64,9 @@ status Span_Query(SpanQuery *sr){
             }
             slab *new_sl = Slab_Make(p->m); 
             SpanState *prev = SpanQuery_StateByDim(sr, dims+1);
-            Slab_setSlot(prev->slab, prev->localIdx, &new_sl);
+            void **ptr = (void **)prev->slab;
+            ptr += prev->localIdx;
+            *ptr = new_sl;
             st->slab = new_sl;
         }else{
             sr->queryDim = dims;

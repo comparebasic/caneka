@@ -38,6 +38,7 @@ static BuildSubdir memobj = { "mem", {
 
 static BuildSubdir coreobj = { "core", {
     "core.c",
+    "ifc.c",
     "init.c",
     "eq.c",
     "error.c",

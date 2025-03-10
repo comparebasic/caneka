@@ -17,7 +17,7 @@ typedef struct span {
     Type type;
     word _;
     byte _1;
-    byte dims;
+    i8 dims;
     slab *root;
     struct mem_ctx *m;
 	i32 nvalues;
@@ -30,8 +30,6 @@ typedef struct span {
     } metrics;
 } Span;
 
-void **Slab_nextSlotPtr(slot *sl, i32 localIdx);
-void *Slab_nextSlot(slot *sl, i32 localIdx);
 i32 Span_Capacity(Span *p);
 char **Span_ToCharArr(struct mem_ctx *m, Span *p);
 void *Span_SetFromQ(struct span_query *sq, Abstract *t);

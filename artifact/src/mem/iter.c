@@ -2,86 +2,74 @@
 #include <caneka.h>
 
 status Iter_Next(Iter *it){
+    i8 dim = 0;
+    SpanQuery *sq = &it->sq;
+    SpanState *st = NULL;
+    void **start = NULL;
+    void **ptr = NULL;
+    void **last = NULL;
+    int max_idx = it->values->max_idx;
     if(it->values == NULL || it->values->nvalues == 0){
         it->type.state |= END;
         return it->type.state;
     }
     if((it->type.state & END) != 0){
-        if((it->type.state & FLAG_ITER_REVERSE) != 0){
-            it->idx = it->values->max_idx;
-        }else{
-            it->idx = 0;
-        }
+        it->idx = 0;
         SpanQuery_Setup(&it->sq, it->values, SPAN_OP_GET, 0);
         Span_Query(&it->sq);
         it->type.state &= ~(END|FLAG_ITER_LAST);
-    }
-    if((it->type.state & FLAG_ITER_REVERSE) != 0){
-        if(it->idx == 0){
-            it->type.state |= END;
+
+        st = &sq->stack[dim];
+        start = (void **)st->slab;
+        ptr = start+(st->localIdx*sizeof(slot));
+        if(*ptr != 0){
             return it->type.state;
         }
-
-        byte dim = 0;
-        SpanQuery *sq = &it->sq;
-        SpanState *st = NULL;
-        while(dim <= sq->dims){
+    }
+    if((it->idx+1) > it->values->max_idx){
+        it->type.state |= END;
+        return it->type.state;
+    }else{
+        boolean loop = TRUE;
+        while(dim <= sq->dims && loop){
             st = &sq->stack[dim];
-            slot *start = (slot *)st->slab;
-            slot *ptr = start+st->localIdx;
-            while(ptr > start && 
-                st->localIdx-- && sq->idx -= st->increment && *(--ptr) == 0){};
+            start = (void **)st->slab;
+            ptr = start+(st->localIdx*sizeof(slot));
+            last = start+(SPAN_STRIDE-1);
+            start = ptr;
+            while(ptr < last){
+                if(sq->idx >= max_idx){
+                    loop = FALSE;
+                    break;
+                }
+                st->localIdx++;
+                sq->idx += st->increment;
+                if(*(++ptr) != 0){
+                    break;
+                }
+                /*
+                printf("dim %d nvalues:%d max_idx:%d localIdx: %d %p %p\n", 
+                    dim, it->values->nvalues, it->values->max_idx,
+                    st->localIdx, (void *)*ptr , ptr); 
+                    */
+                exit(1);
+            }
             if(*ptr != 0 && ptr != start){
                 break;
             }else{
-                sq->idx += (SPAN_STRIDE-1)-st->localIdx;
-                st->localIdx = SPAN_STRIDE-1;
+                sq->idx -= st->localIdx;
+                st->localIdx = 0;
                 dim++;
             }
         }
-        while(i >= 0){
-            SpanQuery_SetStack(&it->sq, i, st);
-            i--;
+        while(dim >= 0){
+            SpanQuery_SetStack(&it->sq, dim, st);
+            dim--;
         }
         it->idx = it->sq.idx;
         it->type.state |= SUCCESS;
-
-        if(it->idx == 0){
+        if(it->idx == it->values->max_idx){
             it->type.state |= FLAG_ITER_LAST;
-        }
-    }else{
-        if((it->idx+1) > it->values->max_idx){
-            it->type.state |= END;
-        }else{
-            byte dim = 0;
-            SpanQuery *sq = &it->sq;
-            SpanState *st = NULL;
-            while(dim <= sq->dims){
-                st = sq->stack[dim];
-                slot *start = (slot *)st->slab;
-                slot *ptr = start+st->localIdx;
-                slot *last = start+(SPAN_STRIDE-1);
-                start = ptr;
-                while(ptr < last && 
-                    st->localIdx++ && sq->idx += st->increment && *(++ptr) == 0){};
-                if(*ptr != 0 && ptr != start){
-                    break;
-                }else{
-                    sq->idx -= st->localIdx;
-                    st->localIdx = 0;
-                    dim++;
-                }
-            }
-            while(i >= 0){
-                SpanQuery_SetStack(&it->sq, i, st);
-                i--;
-            }
-            it->idx = it->sq.idx;
-            it->type.state |= SUCCESS;
-            if(it->idx == it->values->max_idx){
-                it->type.state |= FLAG_ITER_LAST;
-            }
-
         }
     }
     return it->type.state;
@@ -89,13 +77,14 @@ status Iter_Next(Iter *it){
 
 Abstract *Iter_Get(Iter *it){
     Abstract *a = Span_GetFromQ(&it->sq);
-    printf("get: %d/%d %p\n", it->idx, it->values->nvalues, a);
+    /*
+    printf("get: idx:%d/nvalues:%d value:%p\n", it->sq.idx, it->values->nvalues, a);
+    */
     return a;
 }
 
 status Iter_Reset(Iter *it){
-    it->idx = -1;
-    it->type.state = 0;
+    it->type.state |= END;
     return SUCCESS;
 }
 

@@ -9,7 +9,7 @@ enum span_ops {
 };
 
 typedef struct span_state {
-    void *slab;
+    slab *slab;
     word flags; /* active, full, etc. */
     i16 localIdx; 
     i16 offset;
@@ -39,22 +39,23 @@ status Span_Query(SpanQuery *sr);
 
 #define SpanQuery_SetStack(sq, d, st) \
 do { \
-    Span *p = sq->span; \
+    Span *p = (sq)->span; \
     slab *sl = NULL; \
     word localIdx = 0; \
-    (st) = SpanQuery_StateByDim(sq, (d)); \
+    (st) = SpanQuery_StateByDim((sq), (d)); \
     i32 increment = _increments[(d)]; \
     if((d) == p->dims){ \
-        SpanState *st = SpanQuery_StateByDim(sq, p->dims); \
+        SpanState *st = SpanQuery_StateByDim((sq), p->dims); \
         sl = p->root; \
-        localIdx = sq->idx / increment; \
+        localIdx = (sq)->idx / increment; \
         st->offset = localIdx * increment; \
     }else{ \
-        SpanState *prev = SpanQuery_StateByDim(sq, (d)+1); \
-        localIdx = ((sq->idx - prev->offset) / increment); \
+        SpanState *prev = SpanQuery_StateByDim((sq), (d)+1); \
+        localIdx = (((sq)->idx - prev->offset) / increment); \
         word localMax = SPAN_STRIDE; \
         st->offset = prev->offset + increment*localIdx; \
-        sl = (slab *)Slab_nextSlot(prev->slab, prev->localIdx); \
+        void **ptr = (void **)prev->slab; \
+        sl = (slab *)ptr+prev->localIdx; \
     } \
     st->slab = sl; \
     st->localIdx = localIdx; \

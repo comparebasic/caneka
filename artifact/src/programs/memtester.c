@@ -3,15 +3,16 @@
 
 #include "../mem/mem_chapter.c"
 #include "../mem/mem.c"
-#include "../mem/span/slab.c"
 #include "../mem/span/span.c"
 #include "../mem/span/spanquery.c"
 #include "../mem/iter.c"
 #include "../mem/mem_debug.c"
-#include "../error_mocks.c"
-#include "../debug_mocks.c"
+#include "../core/ifc.c"
+#include "./mocks.c"
 #include "../debug/debug_flags.c"
+/*
 #include "../debug/debug_typestrings.c"
+*/
 
 int main(int argc, char *argv[]){
     MemChapter *cp = MemChapter_Make(NULL);
@@ -20,8 +21,12 @@ int main(int argc, char *argv[]){
     }
 
     MemCtx *m = MemCtx_Make();
+    if(m != NULL){
+        printf("MemCtx created successfully\n");
+    }
     i64 max = 1024;
     for(i64 i = 0; i < max; i++){
+        printf("adding i64 %ld mem:%d\n", i, sizeof(i64)*(i+1)+sizeof(MemSlab)+sizeof(MemCtx));
         i64 *p = MemCtx_Alloc(m, sizeof(i64));
         memcpy(p, &i, sizeof(i64));
     }

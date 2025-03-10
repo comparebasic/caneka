@@ -51,9 +51,7 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     word _sz = (word)sz;
 
     MemSlab *sl = NULL;
-    printf("-> while\n");
     while((Iter_Next(&m->it) & END) == 0){
-        printf("-> get\n");
         MemSlab *_sl = (MemSlab *)Iter_Get(&m->it);
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
             sl = _sl;

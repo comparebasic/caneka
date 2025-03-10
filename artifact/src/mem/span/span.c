@@ -1,16 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-i32 _increments[SPAN_MAX_DIMS] = {16, 256, 4096, 65536, 1048576};
-
-void **Slab_nextSlotPtr(slot *sl, i32 localIdx){
-    return (void **)sl+localIdx;
-}
-
-void *Slab_nextSlot(slot *sl, i32 localIdx){
-    void **ptr = Slab_nextSlotPtr(sl, localIdx); 
-    return *ptr;
-}
+i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536, 1048576};
 
 int Span_Capacity(Span *p){
     int increment = _increments[p->dims];
@@ -20,7 +11,7 @@ int Span_Capacity(Span *p){
 char **Span_ToCharArr(MemCtx *m, Span *p){
     size_t sz = sizeof(char *)*(p->nvalues+1);
     char **arr = MemCtx_Alloc(m, sz);
-    memset(arr, 0, sz); 
+    /*
     Iter it;
     Iter_Init(&it, p);
     int i = 0;
@@ -30,6 +21,7 @@ char **Span_ToCharArr(MemCtx *m, Span *p){
             arr[i++] = Str_ToCstr(m, s);
         }
     }
+    */
     return arr;
 }
 
@@ -41,17 +33,15 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         if(sq->idx > p->max_idx+1){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
-        void *ptr = Slab_valueAddr(st->slab, st->localIdx);
+        void **ptr = (void **)st->slab;
+        ptr += st->localIdx;
         if(sq->op == SPAN_OP_REMOVE){
-            memset(ptr, 0, sizeof(void *));
+            *ptr = 0;
             p->nvalues--;
             p->metrics.set = -1;
             p->metrics.available = sq->idx;
-            if(sq->idx >= p->max_idx){
-                p->max_idx--;
-            }
         }else{
-            memcpy(ptr, &t, sizeof(void *));
+            *ptr = (void *)t;
             p->nvalues++;
             p->metrics.set = sq->idx;
             if(sq->idx > p->max_idx){
@@ -59,8 +49,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             }
         }
 
-
-        sq->value = ptr;
+        sq->value = (Abstract *)*ptr;
 
         return sq->value;
     }
@@ -80,11 +69,11 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanState *st = sq->stack;
-    void *ptr = Slab_valueAddr(st->slab, st->localIdx);
+    void **ptr = (void **)st->slab;
+    ptr += st->localIdx*sizeof(slot);
     sq->span->type.state &= ~(SUCCESS|NOOP);
-    if(*((Abstract **)ptr) != NULL){
-        void **dptr = (void **)ptr;
-        sq->value = *dptr;
+    if(*ptr != NULL){
+        sq->value = *ptr;
         sq->span->type.state |= SUCCESS;
     }else{
         sq->span->type.state |= NOOP;
@@ -135,30 +124,19 @@ status Span_Cull(Span *p, int count){
     return NOOP;
 }
 
+i8 Span_GetDimNeeded(int idx){
+    i8 dims = 0;
+    while(_increments[dims] < idx){
+        dims++;
+    }
+    return dims;
+}
 
 status Span_Remove(Span *p, int idx){
     SpanQuery sq;
     SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
     Span_SetFromQ(&sq, NULL);
     return sq.type.state;
-}
-
-/* internals */
-byte Span_GetDimNeeded(int idx){
-    if(idx < SPAN_STRIDE){
-        return 0;
-    }
-
-    int nslabs = idx / SPAN_STRIDE;
-    if(idx % nslabs > 0){
-        nslabs++;
-    }
-    int dims = 1;
-    while(_increments[dims] < nslabs){
-        dims++;
-    }
-
-    return dims;
 }
 
 status Span_ReInit(Span *p){

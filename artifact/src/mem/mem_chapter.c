@@ -71,6 +71,12 @@ void *MemChapter_GetBytes(){
             }
         }
     }
+    /*
+    printf("it->idx:%d, idx:%d max_idx:%d nvalues:%d\n", cp->it.idx, idx, cp->pages.max_idx, cp->pages.nvalues);
+    */
+    if(idx == -1 && cp->pages.max_idx+1 < CHAPTER_MAX){
+        idx = cp->pages.max_idx+1;
+    }
     if(idx != -1){
         cp->pages.metrics.selected = idx;
         void *page = cp->start+(idx*PAGE_SIZE);
@@ -137,7 +143,6 @@ MemChapter *MemChapter_Make(MemChapter *prev){
     Span_Setup(p);
     p->m = &cp->m;
     p->root = MemSlab_Alloc(&cp->m.first, sizeof(slot)*SPAN_STRIDE);
-    p->max_idx = PAGE_MAX;
     Iter_Init(&cp->it, &cp->pages);
 
     cp->pages.metrics.selected = 0;
