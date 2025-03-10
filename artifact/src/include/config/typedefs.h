@@ -5,7 +5,6 @@ typedef uint16_t word;
 typedef int32_t i32;
 typedef uint32_t quad;
 typedef int64_t i64;
-typedef uint64_t slot;
 typedef i64 time64_t;
 typedef uint64_t util;
 
@@ -20,7 +19,7 @@ typedef quad flags32;
 
 #define SPAN_STRIDE 16
 #define SPAN_MAX_DIMS 6
-typedef slot slab[SPAN_STRIDE];
+typedef void *slab[SPAN_STRIDE];
 
 extern word GLOBAL_flags;
 enum global_flags {

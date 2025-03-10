@@ -124,7 +124,7 @@ status Span_Cull(Span *p, int count){
 
 i8 Span_GetDimNeeded(int idx){
     i8 dims = 0;
-    while(_increments[dims] < idx){
+    while(_increments[dims+1] < idx){
         dims++;
     }
     return dims;

@@ -1,11 +1,30 @@
 #include <external.h>
 #include <caneka.h>
 
-SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim){
-    if(dim > SPAN_MAX_DIMS){
-        Fatal("Greater dim than available stack", TYPE_SPAN);
+SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
+    Span *p = sq->span; 
+    slab *sl = NULL;
+    word localIdx = 0;
+    SpanState *st = sq->stack+dim;
+    i32 increment = _increments[dim];
+    if(dim == p->dims){
+        SpanState *st = sq->stack+p->dims;
+        sl = p->root;
+        localIdx = (sq)->idx / increment;
+        st->offset = localIdx * increment;
+    }else{
+        SpanState *prev = sq->stack+(dim+1);
+        localIdx = ((sq->idx - prev->offset) / increment);
+        word localMax = SPAN_STRIDE;
+        st->offset = prev->offset + increment*localIdx;
+        sl = (slab *)Slab_GetSlot(prev->slab, prev->localIdx);
     }
-    return sq->stack+dim;
+    st->slab = sl;
+    st->localIdx = localIdx;
+    st->dim = dim;
+    st->increment = increment;
+
+    return st;
 }
 
 void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
@@ -57,13 +76,13 @@ status Span_Query(SpanQuery *sr){
     SpanState *st = NULL;
     while(TRUE){
         /* make new if not exists */
-        SpanQuery_SetStack(sr, dims, st);
+        st = SpanQuery_SetStack(sr, dims);
         if(st->slab == NULL){
             if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
                 return NOOP;
             }
             slab *new_sl = Slab_Make(p->m); 
-            SpanState *prev = SpanQuery_StateByDim(sr, dims+1);
+            SpanState *prev = sr->stack+(dims+1);
             void **ptr = (void **)prev->slab;
             ptr += prev->localIdx;
             *ptr = new_sl;

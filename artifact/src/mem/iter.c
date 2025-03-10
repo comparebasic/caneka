@@ -10,13 +10,12 @@ status Iter_Next(Iter *it){
     void **last = NULL;
     int max_idx = it->values->max_idx;
     if(it->values == NULL || it->values->nvalues == 0){
-        it->type.state |= END;
-        return it->type.state;
+        goto end;
     }
     if((it->type.state & END) != 0){
         it->idx = 0;
-        SpanQuery_Setup(&it->sq, it->values, SPAN_OP_GET, 0);
-        Span_Query(&it->sq);
+        SpanQuery_Setup(sq, it->values, SPAN_OP_GET, 0);
+        Span_Query(sq);
         it->type.state &= ~(END|FLAG_ITER_LAST);
 
         st = &sq->stack[dim];
@@ -27,58 +26,58 @@ status Iter_Next(Iter *it){
         }
     }
     if((it->idx+1) > it->values->max_idx){
-        it->type.state |= END;
-        return it->type.state;
+        goto end;
     }else{
-        boolean loop = TRUE;
-        while(dim <= sq->dims && loop){
+        printf("\n- next nvalues:%d\n", sq->span->nvalues);
+        while(dim <= sq->dims){
+            printf("\n--- dim while %d\n", dim);
             st = &sq->stack[dim];
+            i32 increment = _increments[dim];
             start = (void **)st->slab;
             ptr = start+(st->localIdx);
             last = start+(SPAN_STRIDE-1);
             start = ptr;
+
             while(ptr < last){
                 if(sq->idx >= max_idx){
-                    loop = FALSE;
+                    goto end;
+                }
+                if(*(++ptr) != NULL){
+                    printf("\n    --- breaking ptr while localIdx:%ld\n", (i64)((ptr) - start));
                     break;
                 }
-                st->localIdx++;
-                sq->idx += st->increment;
-                if(*(++ptr) != 0){
-                    break;
-                }
-                /*
-                printf("dim %d nvalues:%d max_idx:%d localIdx: %d %p %p\n", 
-                    dim, it->values->nvalues, it->values->max_idx,
-                    st->localIdx, (void *)*ptr , ptr); 
-                    */
+                printf("\n    --- ptr while localIdx:%ld slot:%p\n", (i64)(ptr - start), ptr);
+                sq->idx += increment;
             }
-            if(*ptr != 0 && ptr != start){
+            if(*ptr != NULL && ptr != start){
+                i32 localIdx = (i32)(ptr - start);
+                sq->idx = st->offset + (localIdx * _increments[dim]);
+                printf("\n    --- break at dim:%d localIdx:%d idx:%d",
+                    dim, localIdx, sq->idx);
                 break;
             }else{
-                sq->idx -= st->localIdx;
-                st->localIdx = 0;
                 dim++;
             }
         }
         while(dim >= 0){
-            SpanQuery_SetStack(&it->sq, dim, st);
+            st = SpanQuery_SetStack(sq, dim);
             dim--;
         }
-        it->idx = it->sq.idx;
+        it->idx = sq->idx;
         it->type.state |= SUCCESS;
         if(it->idx == it->values->max_idx){
             it->type.state |= FLAG_ITER_LAST;
         }
     }
     return it->type.state;
+end:
+    it->type.state |= END;
+    return it->type.state;
 }
 
 Abstract *Iter_Get(Iter *it){
     Abstract *a = Span_GetFromQ(&it->sq);
-    /*
-    printf("get: idx:%d/nvalues:%d value:%p\n", it->sq.idx, it->values->nvalues, a);
-    */
+    printf("\nget: idx:%d/nvalues:%d value:%p\n", it->sq.idx, it->values->nvalues, a);
     return a;
 }
 

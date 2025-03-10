@@ -142,7 +142,7 @@ MemChapter *MemChapter_Make(MemChapter *prev){
     Span *p = &cp->pages;
     Span_Setup(p);
     p->m = &cp->m;
-    p->root = MemSlab_Alloc(&cp->m.first, sizeof(slot)*SPAN_STRIDE);
+    p->root = MemSlab_Alloc(&cp->m.first, sizeof(slab));
     Iter_Init(&cp->it, &cp->pages);
 
     cp->pages.metrics.selected = 0;

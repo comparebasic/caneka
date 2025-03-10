@@ -3,9 +3,7 @@
 
 void *MemSlab_Alloc(MemSlab *sl, word sz){
     sl->remaining -= sz;
-    /*
     printf("MemSlab_Alloc:%p sz:%hu remaining:%hu\n", sl, sz, sl->remaining);
-    */
     return sl->bytes+((size_t)sl->remaining); 
 }
 
@@ -24,7 +22,7 @@ MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
     MemSlab *sl = MemSlab_Alloc(&_sl, sizeof(MemSlab));
     memcpy(sl, &_sl, sizeof(MemSlab));
 
-    int idx = m->p.max_idx+1;
+    i32 idx = m->p.max_idx+1;
     Span_Set(&m->p, idx, (Abstract *)sl);
     MemChapter_Claim(sl);
     return sl;
@@ -87,7 +85,7 @@ status MemCtx_Setup(MemCtx *m, MemSlab *sl){
     Span *p = &m->p;
     Span_Setup(p);
     p->m = m;
-    p->root = MemSlab_Alloc(&m->first, sizeof(slot)*SPAN_STRIDE);
+    p->root = MemSlab_Alloc(&m->first, sizeof(slab));
     Iter_Init(&m->it, p);
     Span_Set(&m->p, 0, (Abstract *)&m->first);
     return SUCCESS;

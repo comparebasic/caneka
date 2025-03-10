@@ -14,7 +14,7 @@ typedef struct span_state {
     i16 localIdx; 
     i16 offset;
     i32 increment;
-    byte dim;
+    i8 dim;
 } SpanState;
 
 typedef struct span_query {
@@ -26,38 +26,13 @@ typedef struct span_query {
     i32 idx;
     Abstract *value;
     byte op;
-    byte dims;
+    i8 dims;
     byte queryDim;
-    byte dimsNeeded;
+    i8 dimsNeeded;
 } SpanQuery; /* sr */
 
-SpanState *SpanQuery_SetStack(SpanQuery *sq, byte dim);
-SpanState *SpanQuery_StateByDim(SpanQuery *sq, byte dim);
+SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim);
+SpanState *SpanQuery_StateByDim(SpanQuery *sq, i8 dim);
 status SpanQuery_Refresh(SpanQuery *sq);
 void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, i32 idx);
 status Span_Query(SpanQuery *sr);
-
-#define SpanQuery_SetStack(sq, d, st) \
-do { \
-    Span *p = (sq)->span; \
-    slab *sl = NULL; \
-    word localIdx = 0; \
-    (st) = SpanQuery_StateByDim((sq), (d)); \
-    i32 increment = _increments[(d)]; \
-    if((d) == p->dims){ \
-        SpanState *st = SpanQuery_StateByDim((sq), p->dims); \
-        sl = p->root; \
-        localIdx = (sq)->idx / increment; \
-        st->offset = localIdx * increment; \
-    }else{ \
-        SpanState *prev = SpanQuery_StateByDim((sq), (d)+1); \
-        localIdx = (((sq)->idx - prev->offset) / increment); \
-        word localMax = SPAN_STRIDE; \
-        st->offset = prev->offset + increment*localIdx; \
-        sl = (slab *)Slab_GetSlot(prev->slab, prev->localIdx); \
-    } \
-    st->slab = sl; \
-    st->localIdx = localIdx; \
-    st->dim = (d); \
-    st->increment = increment; \
-} while(0);

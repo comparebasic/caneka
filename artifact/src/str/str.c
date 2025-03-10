@@ -2,9 +2,9 @@
 Str *Str_From(MemCtx *m, byte *bytes, word length){
     Str *s = MemCtx_Alloc(m, sizeof(Str));
     word alloc = length;
-    word rmd = length % sizeof(slot);
+    word rmd = length % sizeof(void *);
     if(rmd){
-        alloc += sizeof(slot)-rmd;
+        alloc += sizeof(void *)-rmd;
     }
     byte *_bytes = MemCtx_Alloc(m, alloc);
     memcpy(_bytes, bytes, length);
