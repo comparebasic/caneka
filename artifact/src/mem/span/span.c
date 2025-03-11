@@ -51,14 +51,12 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         }
 
         sq->value = (Abstract *)*ptr;
-
-        printf("----------------%p\n", t);
-        Span_Print(sq->span, 0, "", 35, TRUE);
-        printf("\n");
-
         return sq->value;
     }
 
+    if(p->type.state & DEBUG){
+        printf("SetFromQ: Error\n");
+    }
 
     return NULL;
 }

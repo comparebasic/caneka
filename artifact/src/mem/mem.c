@@ -83,6 +83,7 @@ status MemCtx_Setup(MemCtx *m, MemSlab *sl){
     m->type.of = TYPE_MEMCTX;
     Span *p = &m->p;
     Span_Setup(p);
+    p->type.state |= DEBUG;
     p->m = m;
     p->root = MemSlab_Alloc(&m->first, sizeof(slab));
     Iter_Init(&m->it, p);

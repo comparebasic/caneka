@@ -140,6 +140,9 @@ MemChapter *MemChapter_Make(MemChapter *prev){
     MemChapter *cp = MemSlab_Alloc(&sl, sizeof(MemChapter));
     cp->type.of = TYPE_CHAPTER;
     MemCtx_Setup(&cp->m, &sl);
+
+    cp->m.p.type.state |= DEBUG;
+
     cp->start = start;
     mrange->chapter = cp;
 

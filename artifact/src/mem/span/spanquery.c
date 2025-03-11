@@ -30,13 +30,29 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
         SpanState *prev = sq->stack+(dim+1);
         localIdx = ((sq->idx - prev->offset) / increment);
         word localMax = SPAN_STRIDE;
-        st->offset = prev->offset + increment*localIdx;
-        sl = (slab *)Slab_GetSlot(prev->slab, prev->localIdx);
+        st->offset = prev->offset;
+        if(dim > 0){
+            st->offset += increment*localIdx;
+        }
+        void **ptr = (slab *)Slab_GetSlot(prev->slab, prev->localIdx);
+        if(ptr != NULL){
+            sl = *ptr;
+        }else{
+            sl = NULL;
+        }
     }
     st->slab = sl;
     st->localIdx = localIdx;
     st->dim = dim;
     st->increment = increment;
+
+    /*
+    if(sq->span->type.state & DEBUG && sq->span->dims > 0){
+        printf("SetStack: ");
+        SpanState_Print(st, dim, 33);
+        printf("\n");
+    }
+    */
 
     return st;
 }
@@ -64,6 +80,7 @@ status Span_Query(SpanQuery *sr){
     MemCtx *m = sr->span->m;
     i32 idx = sr->idx;
     Span *p = sr->span;
+    MemSlab *mem_sl = NULL;
     /* increase the dims with blank slabs if necessary */
     if(sr->dimsNeeded > sr->dims){
         if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
@@ -71,11 +88,10 @@ status Span_Query(SpanQuery *sr){
         }
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
-        MemSlab *sl = NULL;
         while(p->dims < sr->dimsNeeded){
             slab *new_sl = NULL;
             if(p == &p->m->p){
-                new_sl = Slab_WhileExpanding(&sl);
+                new_sl = Slab_WhileExpanding(&mem_sl);
             }else{
                 new_sl = Slab_Make(p->m);
             }
@@ -106,7 +122,12 @@ status Span_Query(SpanQuery *sr){
             if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
                 return NOOP;
             }
-            slab *new_sl = Slab_Make(p->m); 
+            slab *new_sl = NULL; 
+            if(p == &p->m->p){
+                new_sl = Slab_WhileExpanding(&mem_sl);
+            }else{
+                new_sl = Slab_Make(p->m);
+            }
             SpanState *prev = sr->stack+(dims+1);
             void **ptr = (void **)prev->slab;
             ptr += prev->localIdx;

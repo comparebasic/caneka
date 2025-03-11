@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
     printf("\n");
     Span_Print((Abstract *)&m->p, 0, "Mem Span: ", COLOR_CYAN, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_YELLOW, TRUE);
+    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_BLUE, TRUE);
     printf("\n");
     Span_Print((Abstract *)&cp->pages, 0, "Chapter Span: ", COLOR_CYAN, TRUE);
     printf("\n");
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
     printf("\n");
     Span_Print((Abstract *)&m->p, 0, "Mem Span: ", COLOR_CYAN, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_YELLOW, TRUE);
+    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_BLUE, TRUE);
     printf("\n");
     Span_Print((Abstract *)&cp->pages, 0, "Chapter Span: ", COLOR_CYAN, TRUE);
     printf("\n");
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
         COLOR_BLUE, TRUE);
     printf("\n");
     MemChapter_Print((Abstract *)cp, 0, "MemChapter: ",
-        COLOR_YELLOW, TRUE);
+        COLOR_BLUE, TRUE);
     printf("\n");
 
     i = max;
@@ -77,21 +77,14 @@ int main(int argc, char *argv[]){
         COLOR_BLUE, TRUE);
     printf("\n");
     MemChapter_Print((Abstract *)cp, 0, "MemChapter (after x4): ", 
-        COLOR_YELLOW, TRUE);
+        COLOR_BLUE, TRUE);
     printf("\n");
 
     MemCtx_Free(m);
     MemCtx_Print((Abstract *)m, 0, "MemCtx: ", COLOR_BLUE, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter After Free 1: ", COLOR_YELLOW, TRUE);
+    MemChapter_Print((Abstract *)cp, 0, "MemChapter After Free 1: ", COLOR_BLUE, TRUE);
     printf("\n");
-
-    /*
-    m->type.range--;
-    MemCtx_Free(m);
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter After Free 0: ", COLOR_YELLOW, TRUE);
-    printf("\n");
-    */
 
     exit(0);
 }

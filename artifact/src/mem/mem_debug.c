@@ -8,8 +8,16 @@ static void wsOut(i8 dim){
 }
 
 void SpanState_Print(SpanState *st, i8 dim, int color){
-    printf("\x1b[%dmSpanState<%pslab, %hddim, %dlocalIdx, %doffset>\x1b[0m", 
-        color, st, dim, st->localIdx, st->offset);
+    i32 idx = st->offset;
+    if(dim == 0){
+        idx += st->localIdx;
+    }
+    void *slot = NULL;
+    if(st->slab != NULL){
+        slot = *(((void **)st->slab) + st->localIdx);
+    }
+    printf("\x1b[%dmSpanState<\x1b[1;%dm%d\x1b[0;%dmo+idx, \x1b[1;%dm%p\x1b[0;%dmslot, \x1b[1;%dm%p\x1b[0;%dmslab, %hddim, \x1b[1;%dm%d\x1b[0;%dmlocalIdx, %doffset>\x1b[0m", 
+        color, color, idx, color, color, slot, color, color, st->slab, color, dim, color, st->localIdx, color, st->offset);
 }
 
 void Slab_Print(slab *slab, i8 dim, i8 dims, int color){
