@@ -7,15 +7,17 @@
 #include "core.h"
 /*
 #include "util.h"
-#include "debug.h"
 */
+#include "debug.h"
 #include "sequence.h"
 /*
 #include "parser.h"
 #include "crypto.h"
 #include "persist.h"
 #include "serve.h"
+*/
 #include "termio.h"
+/*
 #include "transp.h"
 #include "formats.h"
 #include "lang.h"

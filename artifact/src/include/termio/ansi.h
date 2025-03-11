@@ -1,0 +1,2 @@
+#define ANSI_ESCAPE_MAX 12
+#define CHAR_ESC 27

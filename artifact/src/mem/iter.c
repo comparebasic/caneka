@@ -102,7 +102,6 @@ status Iter_Reset(Iter *it){
 }
 
 Iter *Iter_Init(Iter *it, Span *values){
-    memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_ITER;
     it->type.state |= END;
     it->values = asIfc(values, TYPE_SPAN);

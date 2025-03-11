@@ -84,10 +84,6 @@ void *MemChapter_GetBytes(){
         return page;
     }
     /* make new chapter here as all chapters are full */
-    MemChapter_Print((Abstract *)cp, 0, "Chapter: ", 31, TRUE);
-    printf("\n");
-    Span_Print((Abstract *)&cp->pages, 0, "ChapterSpan: ", 31, TRUE);
-    printf("\n");
     Fatal("Next chapter not implemented", TYPE_CHAPTER);
 
     if(MemChapter_Make(cp) != NULL){

@@ -71,7 +71,6 @@ Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
     lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
     lk->values = Span_Make(m);
-    lk->values->type.state |= SPAN_RAW;
     lk->arg = arg;
 
     return lk;

@@ -4,7 +4,7 @@
 static status archChecks(){
     size_t sec = sizeof(i64);
     if(sec != 8){
-        Fatal("Unkown architecture with less than 8 bits for a util\n", TYPE_STRING);
+        Fatal("Unkown architecture with less than 8 bytes for a util\n", TYPE_STRING);
     }
     return ERROR; 
 }
@@ -12,6 +12,8 @@ static status archChecks(){
 status Caneka_Init(MemCtx *m){
     status r = READY;
     r |= archChecks();
+    r |= Debug_Init(MemCtx_Make());
+    /*
     r |= DebugStack_Init(m);
     r |= Clone_Init(m);
     r |= Debug_Init(MemCtx_Make());
@@ -22,5 +24,6 @@ status Caneka_Init(MemCtx *m){
     r |= Steps_Init(m);
     r |= Access_Init(m);
     r |= KeyInit(m);
+    */
     return r;
 }

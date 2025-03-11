@@ -1,20 +1,23 @@
 #include <external.h>
 #include <caneka.h>
 
-Chain *DebugPrintChain = NULL;
+Lookup *DebugPrintChain = NULL;
 
-MemCtx *DebugM = NULL;
+MemCtx *_debugM = NULL;
 
 status Debug_Init(MemCtx *m){
-    DebugM = m;
+    _debugM = m;
     m->type.range++;
     if(DebugPrintChain == NULL){
-        Lookup *funcs = Lookup_Make(m, _TYPE_START, NULL, NULL);
-        DebugPrintChain = Chain_Make(m, funcs);
+        DebugPrintChain = Lookup_Make(m, _TYPE_START, NULL, NULL);
+        Mem_DebugInit(m, DebugPrintChain);
+        Str_DebugInit(m, DebugPrintChain);
+        /*
         StringDebug_Init(m, funcs);
         SequenceDebug_Init(m, funcs);
         UtilDebug_Init(m, funcs);
         ParserDebug_Init(m, funcs);
+        */
         /* todo add other debug inits here */
         return SUCCESS;
     }
@@ -26,35 +29,6 @@ void indent_Print(int indent){
     while(indent--){
         printf("  ");
     }
-}
-
-void Debug_Print(void *t, cls type, char *msg, int color, boolean extended){
-    if(color >= 0){
-        printf("\x1b[%dm", color);
-    }
-
-    if(t == NULL){
-        printf("%s\x1b[%dmNULL\x1b[0m", msg, color);
-        return;
-    }
-
-    Abstract *a = (Abstract *)t;
-    if(type == 0){
-        a = (Abstract *)t;
-        type = a->type.of;
-    }
-
-    DebugPrintFunc func = (DebugPrintFunc)Chain_Get(DebugPrintChain, type);
-    if(func != NULL){
-        return func(a, type, msg, color, extended);
-    }else{
-        printf("%s:%s unkown_debug(%p)", msg, Class_ToString(type), t);
-    }
-
-    if(color >= 0){
-        printf("\x1b[0m");
-    }
-    fflush(stdout);
 }
 
 void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
@@ -74,13 +48,26 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
     printf("\x1b[0m");
 }
 
-void DPrint(Abstract *a, int color, char *msg, ...){
-    DebugStack_Push(msg, TYPE_CSTR);
-    printf("\x1b[%dm", color);
-	va_list args;
-    va_start(args, msg);
-    vprintf(msg, args);
-    Debug_Print((void *)a, 0,  "", color, TRUE);
-    printf("\x1b[0m\n");
-    DebugStack_Pop();
+i64 Str_Debug(MemCtx *m, StrVec *v, void *t, cls type, boolean extended){
+    if(t == NULL){
+        return StrVec_Add(v, Str_Ref(m, (byte *)"NULL", 4, 4));
+    }
+
+    Abstract *a = (Abstract *)t;
+    if(type == 0){
+        a = (Abstract *)t;
+        type = a->type.of;
+    }
+
+    DebugPrintFunc func = (DebugPrintFunc)Lookup_Get(DebugPrintChain, type);
+    if(func != NULL){
+        return func(m, v, a, type, extended);
+    }else{
+        printf("unknown debug\n");
+        /*
+        Out("%s:%s unkown_debug(%p)", msg, Class_ToString(type), t);
+        */
+        return 0;
+    }
 }
+

@@ -10,15 +10,10 @@ struct test_set;
 struct step;
 /* string */
 struct cursor;
-struct iter_string;
-struct b64_ctx;
-struct stringmin;
-struct stringful;
-struct string;
-struct strray_slab;
-struct strray;
+struct str;
+struct strvec;
 struct strsnip;
-struct strsnipabs;
+struct string;
 /* util */
 struct blank;
 struct hashed;

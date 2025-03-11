@@ -1,3 +1,39 @@
+#include <external.h>
+#include <caneka.h>
+
+Str *Str_FromI64(MemCtx *m, i64 i){
+    Str *s = Str_Make(m, MAX_BASE10);
+    byte *end = s->bytes+(MAX_BASE10-1);
+    byte *b = end;
+
+    i32 base = 10;
+    i64 val;
+    boolean negative = i < 0;
+    if(negative){
+        i = labs(i);
+    }
+    *b = '0';
+    while(i > 0){
+        val = i % base;
+        *(b--) = '0'+val;
+        i -= val;
+        i /= base;
+    }
+
+    if(negative){
+        *(b--) = '-';
+    }
+
+    i64 length = end - b;
+    s->alloc = length;
+    s->length = length;
+    s->bytes = b+1;
+    return s;
+}
+
+i64 Str_ToFd(Str *s, int fd){
+    return write(fd, s->bytes, s->length);
+}
 
 Str *Str_From(MemCtx *m, byte *bytes, word length){
     Str *s = MemCtx_Alloc(m, sizeof(Str));

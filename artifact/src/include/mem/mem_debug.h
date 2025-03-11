@@ -1,7 +1,5 @@
-void MemCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
-void MemChapter_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
-void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended);
-void SpanState_Print(SpanState *st, i8 dim, int color);
-/*
-status MemDebug_Init(MemCtx *m, Lookup *lk);
-*/
+i64 MemCtx_Print(MemCtx *m, struct strvec *v, Abstract *a, cls type, boolean extended);
+i64 MemChapter_Print(MemCtx *m, struct strvec *v, Abstract *a, cls type, boolean extended);
+i64 Span_Print(MemCtx *m, struct strvec *v, Abstract *a, cls type, boolean extended);
+i64 SpanState_Print(MemCtx *m, struct strvec *v, SpanState *st, i8 dim);
+status Mem_DebugInit(MemCtx *m, struct lookup *lk);

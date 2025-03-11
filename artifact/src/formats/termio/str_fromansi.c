@@ -1,0 +1,4 @@
+
+String *Str_FromAnsi(){
+
+}
