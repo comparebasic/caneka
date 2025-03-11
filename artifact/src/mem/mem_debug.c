@@ -12,43 +12,50 @@ void SpanState_Print(SpanState *st, i8 dim, int color){
         color, st, dim, st->localIdx, st->offset);
 }
 
-void Slab_Print(slab *slab, i8 dim, int color){
-    wsOut(dim);
-    printf("\x1b[%dm%p{", color, slab);
+void Slab_Print(slab *slab, i8 dim, i8 dims, int color){
+    printf("\x1b[%dm(%p){", color, slab);
     void **slot = (void **)slab;
     void **end = slot+SPAN_STRIDE;
     int i = 0;
+
     while(slot < end){
         if(*slot != NULL){
             if(slot != (void **)slab){
                 printf(", ");
             }
-            printf("\x1b[1;%dm%d\x1b[0;%dm=%p", color, i, color,*slot);
+            printf("\x1b[1;%dm%d\x1b[0;%dm=%p", color, i, color, *slot);
         }
         i++;
         slot++;
     }
+    printf("}\x1b[0m");
 
     if(dim > 0){
         slot = (void **)slab;
         end = slot+SPAN_STRIDE;
         i = 0;
         while(slot < end){
-            printf("slot %d\n", i);
             if(*slot != NULL){
-               Slab_Print(*slot, dim-1, color); 
+                printf("\n");
+                wsOut(dims-(dim-1));
+                printf("\x1b[%dm{\n", color);
+                wsOut(dims-(dim-1)+1);
+                printf("%d=", i);
+                Slab_Print(*slot, dim-1, dims, color); 
             }
             i++;
             slot++;
         }
+        printf("\n");
     }
-    printf("}\x1b[0m");
+
+    printf("\x1b[%dm}\x1b[0m", color);
 }
 
 void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     Span *p = (Span*)as(a, TYPE_SPAN); 
     printf("\x1b[%dm%sSpan<\x1b[1;%dm%d\x1b[0;%dmval/\x1b[1;%dm%hd\x1b[0;%dmdim ", color, msg, color, p->nvalues, color, color, p->dims, color);
-    Slab_Print(p->root, p->dims, color);
+    Slab_Print(p->root, p->dims, p->dims, color);
     printf("\x1b[%dm>\x1b[0m", color);
 }
 
@@ -65,9 +72,9 @@ void MemSlab_Print(Abstract *a, cls type, char *msg, int color, boolean extended
     }else{
         printf("(");
     }
-    printf("%p:\x1b[%d;%dm%d\x1b[0;%dm)[\x1b[1;%dm%hd\x1b[0;%dm/%hd]", 
-         sl, bcolor, lcolor, sl->level, color, color, MemSlab_Taken(sl), color,
-         MemSlab_Available(sl));
+    printf("%p/%p:\x1b[%d;%dm%d\x1b[0;%dm)[\x1b[1;%dm%hd\x1b[0;%dm/%hd]", 
+         sl, sl->bytes, bcolor, lcolor, sl->level, color, color, 
+         MemSlab_Taken(sl), color, MemSlab_Available(sl));
 }
 
 void MemCtx_Print(Abstract *a, cls type, char *msg, int color, boolean extended){

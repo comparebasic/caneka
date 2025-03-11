@@ -36,3 +36,4 @@ SpanState *SpanQuery_StateByDim(SpanQuery *sq, i8 dim);
 status SpanQuery_Refresh(SpanQuery *sq);
 void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, i32 idx);
 status Span_Query(SpanQuery *sr);
+slab *Slab_WhileExpanding(struct mem_slab **_sl);

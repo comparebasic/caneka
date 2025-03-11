@@ -1,6 +1,3 @@
-#include <external.h>
-#include <caneka.h>
-
 void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
     memset(sr, 0, sizeof(SpanQuery));
 
@@ -22,10 +19,13 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     SpanState *st = sq->stack+dim;
     i32 increment = _increments[dim];
     if(dim == p->dims){
-        SpanState *st = sq->stack+p->dims;
         sl = p->root;
         localIdx = sq->idx / increment;
-        st->offset = localIdx * increment;
+        if(dim == 0){
+            st->offset = 0;
+        }else{
+            st->offset = localIdx * increment;
+        }
     }else{
         SpanState *prev = sq->stack+(dim+1);
         localIdx = ((sq->idx - prev->offset) / increment);
@@ -41,6 +41,25 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     return st;
 }
 
+slab *Slab_WhileExpanding(MemSlab **_sl){
+    MemSlab *sl = *_sl;
+    if(sl == NULL){
+        void *bytes = MemChapter_GetBytes();
+        if(bytes == NULL){
+            return NULL;
+        }
+        MemSlab inl = {
+            .type = {TYPE_MEMSLAB, 0},
+            .level = 0,
+            .remaining = MEM_SLAB_SIZE,
+            .bytes = bytes,
+        };
+        *_sl = sl = MemSlab_Alloc(&inl, sizeof(MemSlab));
+        memcpy(sl, &inl, sizeof(MemSlab));
+    }
+    return MemSlab_Alloc(sl, sizeof(void *)*SPAN_STRIDE);
+}
+
 status Span_Query(SpanQuery *sr){
     MemCtx *m = sr->span->m;
     i32 idx = sr->idx;
@@ -52,8 +71,14 @@ status Span_Query(SpanQuery *sr){
         }
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
+        MemSlab *sl = NULL;
         while(p->dims < sr->dimsNeeded){
-            slab *new_sl = Slab_Make(p->m);
+            slab *new_sl = NULL;
+            if(p == &p->m->p){
+                new_sl = Slab_WhileExpanding(&sl);
+            }else{
+                new_sl = Slab_Make(p->m);
+            }
 
             if(exp_sl == NULL){
                 shelf_sl = sr->span->root;

@@ -29,18 +29,18 @@ status Iter_Next(Iter *it){
         goto end;
     }else{
         /*
-        printf("- next nvalues:%d\n", sq->span->nvalues);
+        printf("- next nvalues:%d starting at %d\n", sq->span->nvalues, sq->idx);
         */
         while(dim <= sq->dims){
-            /*
-            printf("--- dim while %d\n", dim);
-            */
             st = &sq->stack[dim];
             i32 increment = _increments[dim];
             start = (void **)st->slab;
             ptr = start+(st->localIdx);
+            void **orig = ptr;
             last = start+(SPAN_STRIDE-1);
-            start = ptr;
+            /*
+            printf("--- dim while %d localIdx:%d\n", dim, (i32)(ptr - start));
+            */
 
             while(ptr < last){
                 if(sq->idx >= max_idx){
@@ -57,13 +57,13 @@ status Iter_Next(Iter *it){
                 */
                 sq->idx += increment;
             }
-            if(*ptr != NULL && ptr != start){
+            if(*ptr != NULL && ptr != orig){
                 i32 localIdx = (i32)(ptr - start);
                 sq->idx = st->offset + (localIdx * _increments[dim]);
                 /*
                 printf("    --- break at dim:%d localIdx:%d idx:%d\n",
                     dim, localIdx, sq->idx);
-                */
+                    */
                 break;
             }else{
                 dim++;
@@ -90,6 +90,9 @@ end:
 }
 
 Abstract *Iter_Get(Iter *it){
+    /*
+    printf("Get:%d\n", it->idx);
+    */
     return Span_GetFromQ(&it->sq);
 }
 

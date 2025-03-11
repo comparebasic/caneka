@@ -3,6 +3,8 @@
 
 i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536, 1048576};
 
+#include "./spanquery.c"
+
 int Span_Capacity(Span *p){
     int increment = _increments[p->dims];
     return increment * SPAN_STRIDE;
@@ -35,7 +37,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         }
         void **ptr = Slab_GetSlot(st->slab, st->localIdx);
         if(sq->op == SPAN_OP_REMOVE){
-            *ptr = 0;
+            *ptr = NULL;
             p->nvalues--;
             p->metrics.set = -1;
             p->metrics.available = sq->idx;
@@ -50,8 +52,13 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
 
         sq->value = (Abstract *)*ptr;
 
+        printf("----------------%p\n", t);
+        Span_Print(sq->span, 0, "", 35, TRUE);
+        printf("\n");
+
         return sq->value;
     }
+
 
     return NULL;
 }
@@ -124,9 +131,10 @@ status Span_Cull(Span *p, int count){
 
 i8 Span_GetDimNeeded(int idx){
     i8 dims = 0;
-    while(_increments[dims+1] < idx){
+    while(_increments[dims+1] <= idx){
         dims++;
     }
+
     return dims;
 }
 

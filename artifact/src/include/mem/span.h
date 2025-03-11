@@ -37,6 +37,7 @@ void *Span_Set(Span *p, i32 idx, Abstract *t);
 void *Span_GetFromQ(struct span_query *sq);
 void *Span_Get(Span *p, i32 idx);
 i32 Span_Add(Span *p, Abstract *t);
+i8 Span_GetDimNeeded(int idx);
 status Span_Cull(Span *p, i32 count);
 status Span_Remove(Span *p, i32 idx);
 status Span_ReInit(Span *p);

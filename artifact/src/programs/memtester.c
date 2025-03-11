@@ -4,7 +4,6 @@
 #include "../mem/mem_chapter.c"
 #include "../mem/mem.c"
 #include "../mem/span/span.c"
-#include "../mem/span/spanquery.c"
 #include "../mem/iter.c"
 #include "../mem/mem_debug.c"
 #include "../core/ifc.c"
@@ -72,10 +71,12 @@ int main(int argc, char *argv[]){
         memcpy(p, &i, sizeof(i64));
     }
 
-    MemCtx_Print((Abstract *)m, 0, "MemCtx (after x8): ", 
+    Span_Print((Abstract *)&m->p, 0, "MemCtx Span (after x4): ", COLOR_CYAN, TRUE);
+    printf("\n");
+    MemCtx_Print((Abstract *)m, 0, "MemCtx (after x4): ", 
         COLOR_BLUE, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter (after x8): ", 
+    MemChapter_Print((Abstract *)cp, 0, "MemChapter (after x4): ", 
         COLOR_YELLOW, TRUE);
     printf("\n");
 

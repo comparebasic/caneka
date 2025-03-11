@@ -11,7 +11,7 @@
 #define COLOR_DARK 37
 
 void *_Fatal(char *msg, cls t, char *func, char *file, int line){
-    printf("poo: %s\n", msg);    
+    printf("poo: %s %s:%d:%s\n", msg, file, line, func);    
     exit(1);
     return NULL;
 }
