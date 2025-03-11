@@ -28,9 +28,13 @@ status Iter_Next(Iter *it){
     if((it->idx+1) > it->values->max_idx){
         goto end;
     }else{
+        /*
         printf("- next nvalues:%d\n", sq->span->nvalues);
+        */
         while(dim <= sq->dims){
+            /*
             printf("--- dim while %d\n", dim);
+            */
             st = &sq->stack[dim];
             i32 increment = _increments[dim];
             start = (void **)st->slab;
@@ -43,17 +47,23 @@ status Iter_Next(Iter *it){
                     goto end;
                 }
                 if(*(++ptr) != NULL){
+                    /*
                     printf("    --- breaking ptr while localIdx:%ld\n", (i64)((ptr) - start));
+                    */
                     break;
                 }
+                /*
                 printf("    --- ptr while localIdx:%ld slot:%p\n", (i64)(ptr - start), ptr);
+                */
                 sq->idx += increment;
             }
             if(*ptr != NULL && ptr != start){
                 i32 localIdx = (i32)(ptr - start);
                 sq->idx = st->offset + (localIdx * _increments[dim]);
+                /*
                 printf("    --- break at dim:%d localIdx:%d idx:%d\n",
                     dim, localIdx, sq->idx);
+                */
                 break;
             }else{
                 dim++;
@@ -67,7 +77,9 @@ status Iter_Next(Iter *it){
         it->type.state |= SUCCESS;
     }
 found:
+    /*
     printf("\x1b[%dmidx after Iter_Next:%d\x1b[0m\n", 32, it->idx);
+    */
     if(it->idx == it->values->max_idx){
         it->type.state |= FLAG_ITER_LAST;
     }
@@ -78,9 +90,7 @@ end:
 }
 
 Abstract *Iter_Get(Iter *it){
-    Abstract *a = Span_GetFromQ(&it->sq);
-    printf("\nget: idx:%d/nvalues:%d value:%p\n", it->sq.idx, it->values->nvalues, a);
-    return a;
+    return Span_GetFromQ(&it->sq);
 }
 
 status Iter_Reset(Iter *it){

@@ -3,7 +3,6 @@
 
 void *MemSlab_Alloc(MemSlab *sl, word sz){
     sl->remaining -= sz;
-    printf("MemSlab_Alloc:%p sz:%hu remaining:%hu\n", sl, sz, sl->remaining);
     return sl->bytes+((size_t)sl->remaining); 
 }
 

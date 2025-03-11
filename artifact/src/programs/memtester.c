@@ -27,27 +27,56 @@ int main(int argc, char *argv[]){
 
     MemCtx_Print((Abstract *)m, 0, "MemCtx: ", COLOR_BLUE, TRUE);
     printf("\n");
+    Span_Print((Abstract *)&m->p, 0, "Mem Span: ", COLOR_CYAN, TRUE);
+    printf("\n");
     MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_YELLOW, TRUE);
     printf("\n");
+    Span_Print((Abstract *)&cp->pages, 0, "Chapter Span: ", COLOR_CYAN, TRUE);
+    printf("\n");
 
-    /*
     i64 max = 1024;
     for(i64 i = 0; i < max; i++){
-        printf("adding %ld (%ld), ", i, sizeof(i64)*i);
         i64 *p = MemCtx_Alloc(m, sizeof(i64));
         memcpy(p, &i, sizeof(i64));
     }
+
     printf("added first round\n");
-
-    m->type.range++;
-    for(i64 i = 0; i < max; i++){
-        i64 *p = MemCtx_Alloc(m, sizeof(i64));
-        memcpy(p, &i, sizeof(i64));
-    }
-
     MemCtx_Print((Abstract *)m, 0, "MemCtx: ", COLOR_BLUE, TRUE);
     printf("\n");
+    Span_Print((Abstract *)&m->p, 0, "Mem Span: ", COLOR_CYAN, TRUE);
+    printf("\n");
     MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_YELLOW, TRUE);
+    printf("\n");
+    Span_Print((Abstract *)&cp->pages, 0, "Chapter Span: ", COLOR_CYAN, TRUE);
+    printf("\n");
+
+    m->type.range++;
+    i64 i = max;
+    max *= 2;
+    for(; i < max; i++){
+        i64 *p = MemCtx_Alloc(m, sizeof(i64));
+        memcpy(p, &i, sizeof(i64));
+    }
+
+    MemCtx_Print((Abstract *)m, 0, "MemCtx: ",
+        COLOR_BLUE, TRUE);
+    printf("\n");
+    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ",
+        COLOR_YELLOW, TRUE);
+    printf("\n");
+
+    i = max;
+    max *= 4;
+    for(; i < max; i++){
+        i64 *p = MemCtx_Alloc(m, sizeof(i64));
+        memcpy(p, &i, sizeof(i64));
+    }
+
+    MemCtx_Print((Abstract *)m, 0, "MemCtx (after x8): ", 
+        COLOR_BLUE, TRUE);
+    printf("\n");
+    MemChapter_Print((Abstract *)cp, 0, "MemChapter (after x8): ", 
+        COLOR_YELLOW, TRUE);
     printf("\n");
 
     MemCtx_Free(m);
@@ -56,6 +85,7 @@ int main(int argc, char *argv[]){
     MemChapter_Print((Abstract *)cp, 0, "MemChapter After Free 1: ", COLOR_YELLOW, TRUE);
     printf("\n");
 
+    /*
     m->type.range--;
     MemCtx_Free(m);
     MemChapter_Print((Abstract *)cp, 0, "MemChapter After Free 0: ", COLOR_YELLOW, TRUE);

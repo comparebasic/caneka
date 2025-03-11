@@ -1,6 +1,57 @@
 #include <external.h>
 #include <caneka.h>
 
+static void wsOut(i8 dim){
+    while(dim-- > 0){
+        printf("    ");
+    }
+}
+
+void SpanState_Print(SpanState *st, i8 dim, int color){
+    printf("\x1b[%dmSpanState<%pslab, %hddim, %dlocalIdx, %doffset>\x1b[0m", 
+        color, st, dim, st->localIdx, st->offset);
+}
+
+void Slab_Print(slab *slab, i8 dim, int color){
+    wsOut(dim);
+    printf("\x1b[%dm%p{", color, slab);
+    void **slot = (void **)slab;
+    void **end = slot+SPAN_STRIDE;
+    int i = 0;
+    while(slot < end){
+        if(*slot != NULL){
+            if(slot != (void **)slab){
+                printf(", ");
+            }
+            printf("\x1b[1;%dm%d\x1b[0;%dm=%p", color, i, color,*slot);
+        }
+        i++;
+        slot++;
+    }
+
+    if(dim > 0){
+        slot = (void **)slab;
+        end = slot+SPAN_STRIDE;
+        i = 0;
+        while(slot < end){
+            printf("slot %d\n", i);
+            if(*slot != NULL){
+               Slab_Print(*slot, dim-1, color); 
+            }
+            i++;
+            slot++;
+        }
+    }
+    printf("}\x1b[0m");
+}
+
+void Span_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+    Span *p = (Span*)as(a, TYPE_SPAN); 
+    printf("\x1b[%dm%sSpan<\x1b[1;%dm%d\x1b[0;%dmval/\x1b[1;%dm%hd\x1b[0;%dmdim ", color, msg, color, p->nvalues, color, color, p->dims, color);
+    Slab_Print(p->root, p->dims, color);
+    printf("\x1b[%dm>\x1b[0m", color);
+}
+
 void MemSlab_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
     MemSlab *sl = (MemSlab*)as(a, TYPE_MEMSLAB); 
     int bcolor = 0;
@@ -10,7 +61,7 @@ void MemSlab_Print(Abstract *a, cls type, char *msg, int color, boolean extended
         lcolor = 30;
     }
     if(sl->bytes == NULL){
-        printf("(\x1b[1;%d;%dmnullBytes\x1b[0;%dm ", color+10, color, color);
+        printf("(\x1b[1;%d;%dmnullBytes \x1b[0;%dm ", color+10, color, color);
     }else{
         printf("(");
     }

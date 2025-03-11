@@ -24,7 +24,7 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     if(dim == p->dims){
         SpanState *st = sq->stack+p->dims;
         sl = p->root;
-        localIdx = (sq)->idx / increment;
+        localIdx = sq->idx / increment;
         st->offset = localIdx * increment;
     }else{
         SpanState *prev = sq->stack+(dim+1);
@@ -104,6 +104,8 @@ status Span_Query(SpanQuery *sr){
     }
 
     if(st->localIdx >= SPAN_STRIDE){
+        SpanState_Print(st, 0, 31);
+        printf("\n");
         Fatal("localIdx greater than stride", p->type.of);
     }
 

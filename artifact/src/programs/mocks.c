@@ -12,6 +12,7 @@
 
 void *_Fatal(char *msg, cls t, char *func, char *file, int line){
     printf("poo: %s\n", msg);    
+    exit(1);
     return NULL;
 }
 

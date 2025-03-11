@@ -74,7 +74,7 @@ void *MemChapter_GetBytes(){
     /*
     printf("it->idx:%d, idx:%d max_idx:%d nvalues:%d\n", cp->it.idx, idx, cp->pages.max_idx, cp->pages.nvalues);
     */
-    if(idx == -1 && cp->pages.max_idx+1 < CHAPTER_MAX){
+    if(idx == -1 && cp->pages.max_idx+1 < PAGE_COUNT){
         idx = cp->pages.max_idx+1;
     }
     if(idx != -1){
@@ -84,6 +84,10 @@ void *MemChapter_GetBytes(){
         return page;
     }
     /* make new chapter here as all chapters are full */
+    MemChapter_Print((Abstract *)cp, 0, "Chapter: ", 31, TRUE);
+    printf("\n");
+    Span_Print((Abstract *)&cp->pages, 0, "ChapterSpan: ", 31, TRUE);
+    printf("\n");
     Fatal("Next chapter not implemented", TYPE_CHAPTER);
 
     if(MemChapter_Make(cp) != NULL){
