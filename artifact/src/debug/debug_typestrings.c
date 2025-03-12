@@ -213,16 +213,10 @@ char *TypeStrings[] = {
     NULL,
 };
 
-char *Class_ToString(cls type){
+const char *Type_ToChars(cls type){
     if(type <= _TYPE_APPS_END){
-       return TypeStrings[type]; 
+        return TypeStrings[type]; 
     }else{
         return "TYPE_unknown";
     }
 }
-
-char *State_ToChars(status state){
-    return String_ToChars(DebugM, State_ToString(DebugM, state));
-}
-
-

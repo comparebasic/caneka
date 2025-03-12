@@ -1,6 +1,6 @@
 #define isDebug(x) (((x)->type.state & DEBUG) != 0)
 
-typedef i64 (*DebugPrintFunc)(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended);
+typedef i64 (*DebugPrintFunc)(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended);
 
 extern struct lookup *DebugPrintChain;
 extern char *TypeStrings[];
@@ -17,8 +17,7 @@ void Match_midDebug(char type, word c, struct patchardef *def, struct match *mt,
 
 extern char *rbl_debug_cstr[];
 
-i64 Str_Debug(MemCtx *m, StrVec *v, void *t, cls type, boolean extended);
-struct string *State_ToString(struct mem_ctx *m, status state);
-char *Class_ToString(cls type);
-char *State_ToChars(status state);
-char *State_ToChars(status state);
+const char *Type_ToChars(cls type);
+const char *State_ToChars(cls type);
+Str *State_ToStr(status state);
+i64 Str_Debug(MemCtx *m, StrVec *v, i32 fd, void *t, cls type, boolean extended);

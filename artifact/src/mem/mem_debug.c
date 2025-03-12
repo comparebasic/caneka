@@ -1,25 +1,27 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 wsOut(MemCtx *m, StrVec *v, i8 dim){
+#include "../inc/handle_io.c"
+
+static inline i64 wsOut(MemCtx *m, StrVec *v, i32 fd, i8 dim){
     while(dim-- > 0){
         return StrVec_Add(v, Str_Ref(m, (byte *)"    ", 4, 4)); 
     }
     return 0;
 }
 
-i64 SpanState_Print(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended){
+i64 SpanState_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     SpanState *st = (SpanState *)a;
     i32 idx = st->localIdx;
     void *slot = NULL;
     if(st->slab != NULL){
         slot = *(((void **)st->slab) + st->localIdx);
     }
-    return StrVec_FmtAdd(m, v, "SpanState<^B_i4^b^o+idx, ^B_a^b^slot, ^B_a^b^slab, ^B_i4^b^localIdx, ^B_i4^b^offset>", 
+    return StrVec_FmtAdd(m, v, fd, "SpanState<^B_i4^b^o+idx, ^B_a^b^slot, ^B_a^b^slab, ^B_i4^b^localIdx, ^B_i4^b^offset>", 
         idx, slot, st->slab, (i32)st->localIdx, (i32)st->offset);
 }
 
-i64 Slab_Print(MemCtx *m, StrVec *v, slab *slab, i8 dim, i8 dims){
+i64 Slab_Print(MemCtx *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
     /*
     printf("\x1b[%dm(%p){", color, slab);
     void **slot = (void **)slab;
@@ -62,7 +64,7 @@ i64 Slab_Print(MemCtx *m, StrVec *v, slab *slab, i8 dim, i8 dims){
     return 0;
 }
 
-i64 Span_Print(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended){
+i64 Span_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     Span *p = (Span*)as(a, TYPE_SPAN); 
     /*
     printf("\x1b[%dm%sSpan<\x1b[1;%dm%d\x1b[0;%dmval/\x1b[1;%dm%hd\x1b[0;%dmdim ", color, msg, color, p->nvalues, color, color, p->dims, color);
@@ -72,7 +74,7 @@ i64 Span_Print(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended){
     return 0;
 }
 
-i64 MemSlab_Print(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended){
+i64 MemSlab_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     MemSlab *sl = (MemSlab*)as(a, TYPE_MEMSLAB); 
     /*
     i32 bcolor = 0;
@@ -93,7 +95,7 @@ i64 MemSlab_Print(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended)
     return 0;
 }
 
-i64 MemCtx_Print(MemCtx *_m, StrVec *v, Abstract *a, cls type, boolean extended){
+i64 MemCtx_Print(MemCtx *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     MemCtx *m = (MemCtx*)as(a, TYPE_MEMCTX); 
     /*
     printf("\x1b[%dm%sMemCtx(%p)<%d ", color, msg, m, m->p.nvalues);
@@ -121,7 +123,7 @@ i64 MemCtx_Print(MemCtx *_m, StrVec *v, Abstract *a, cls type, boolean extended)
     return 0;
 }
 
-i64 MemChapter_Print(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended){
+i64 MemChapter_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     MemChapter *cp = (MemChapter*)as(a, TYPE_CHAPTER); 
 /*
     printf("\x1b[%dm%sMemChapter<start:%p/pages:%d)[available:%d selected:%d]",

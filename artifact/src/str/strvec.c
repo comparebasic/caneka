@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 StrVecCursor _strVecCurs;
+StrVecCursor _strVecCursB;
 
 i64 StrVec_ToFd(StrVec *v, int fd){
     Iter *it = &v->it;
@@ -34,10 +35,9 @@ status StrVecCurs_Setup(StrVec *v, StrVecCursor *curs){
 
 status StrVec_NextSlot(StrVec *v, StrVecCursor *curs){
     i64 offset = 0;
+    util needed = 8;
     curs->slot = 0;
     do {
-        printf("\x1b[%dm%p/%p remaining:%ld - total:%ld offset: %ld\x1b[0m\n", 
-            36, curs->ptr, curs->end, curs->end-curs->ptr, curs->total, offset);
         if(curs->ptr == curs->end){
             if((Iter_Next(&v->it) & END) != 0){
                 return ERROR;
@@ -48,15 +48,15 @@ status StrVec_NextSlot(StrVec *v, StrVecCursor *curs){
             curs->end = s->bytes+s->length;
         }
         i64 remaining = ((curs->end) - curs->ptr);
-        i64 len = min(remaining, sizeof(util)-offset);
-        printf(">>> len: %ld offset %ld\n", len, offset);
+        i64 len = min(remaining, needed);
         if(len == 0){
             break;
         }
         memcpy(((byte *)(&curs->slot))+offset, curs->ptr, len);
         curs->ptr += len;
         curs->total += len;
-        offset = sizeof(util) - curs->total % sizeof(util);
+        offset = curs->total & 7;
+        needed = 8 - offset;
     } while(offset != 0);
 
     curs->type.state |= SUCCESS;

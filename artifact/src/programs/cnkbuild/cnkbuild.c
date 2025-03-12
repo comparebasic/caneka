@@ -1,34 +1,41 @@
 #include <external.h>
 #include <caneka.h>
-#include <builder.h>
+#include <cnkbuild.h>
 
-#include "mem/mem_chapter.c"
-#include "mem/mem.c"
-#include "mem/span/slab.c"
-#include "mem/span/span.c"
-#include "mem/span/spanquery.c"
-#include "mem/iter.c"
-#include "core/core.c"
-#include "core/error.c"
-#include "string/string.c"
-#include "string/string_makers.c"
-#include "string/string_equals.c"
-#include "string/strvec.c"
-#include "string/sviter.c"
-#include "debug/debug_flags.c"
-#include "debug/debug_typestrings.c"
-#include "debug/debug_stack.c"
-#include "builder/debug_mocks.c"
-#include "crypto/sane.c"
-#include "termio/cli_status.c"
-/* span */
+#include "../mem/mem_chapter.c"
+#include "../mem/mem_ctx.c"
+#include "../mem/span.c"
+#include "../mem/iter.c"
+#include "../mem/mem_debug.c"
+#include "../core/ifc.c"
+#include "../core/init.c"
+#include "../core/equals.c"
+#include "../str/str.c"
+#include "../str/strvec.c"
+#include "../str/strvec_fmt.c"
+#include "../str/str_utils.c"
+#include "../str/str_debug.c"
+#include "../str/str_equals.c"
+#include "../str/str_makers.c"
+#include "../termio/ansi_str.c"
+#include "../sequence/lookup.c"
+#include "../debug/debug.c"
+#include "../debug/debug_flags.c"
+#include "../debug/debug_typestrings.c"
+#include "../debug/debug_stack.c"
+#include "../crypto/sane.c"
+#include "../termio/cli_status.c"
+#include "../core/error.c"
+
 /* file status */
-#include "persist/file_status.c"
+#include "../persist/file_status.c"
 /* dir */
-#include "persist/dir.c"
+#include "../persist/dir.c"
 /* spawn */
-#include "persist/procdets.c"
-#include "persist/subprocess.c"
+#include "../persist/procdets.c"
+#include "../persist/subprocess.c"
+
+#include "./debug_mocks.c"
 
 static status renderStatus(MemCtx *m, Abstract *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);

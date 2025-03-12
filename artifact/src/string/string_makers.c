@@ -2,10 +2,9 @@
 #include <caneka.h>
 
 char *hex_chars = "0123456789abcdef";
-
 static const byte *digits = (byte *)"0123456789";
 
-static byte hexCharToOrd(byte b){
+static inline byte hexCharToOrd(byte b){
     if(b >= '0' && b <= '9'){
         return b - '0';
     }else if(b >= 'a' && b <= 'f'){
@@ -17,7 +16,6 @@ static byte hexCharToOrd(byte b){
 
 static int _String_FromI64(MemCtx *m, i64 i, byte buff[]){
     memset(buff, 0, MAX_BASE10+1);
-
 
     int base = 10;
     int pows = 0;

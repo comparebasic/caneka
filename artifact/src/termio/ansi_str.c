@@ -8,7 +8,7 @@ Str *Str_FromAnsi(MemCtx *m, char **_ptr, char *end){
     byte *_s = s->bytes; 
     byte *b = s->bytes; 
     byte *e = s->bytes+s->alloc-1;
-    *(b++) = CHAR_ESC;
+    *(b++) = KEY_ESCAPE;
     *(b++) = '[';
     while(b <= e && ptr <= end){
         c = *(ptr);

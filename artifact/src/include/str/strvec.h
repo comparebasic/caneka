@@ -21,6 +21,7 @@ Str *StrVec_ToStr(MemCtx *m, StrVec *v);
 StrVec *StrVec_Make(MemCtx *m);
 status StrVec_Add(StrVec *v, Str *s);
 StrVec *StrVec_Fmt(MemCtx *m, char *fmt, ...);
-i64 StrVec_FmtAdd(MemCtx *m, StrVec *v, char *fmt, ...);
+i64 StrVec_FmtAdd(MemCtx *m, StrVec *v, i32 fd, char *fmt, ...);
 status StrVecCurs_Setup(StrVec *v, StrVecCursor *curs);
 status StrVec_NextSlot(StrVec *v, StrVecCursor *curs);
+i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd);

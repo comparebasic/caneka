@@ -10,31 +10,27 @@ typedef struct build_subdir {
 
 typedef struct build_cli_fields {
     struct {
-        StrVecEntry *name; 
+        Str *name; 
         int count;
         int total;
         int modSrcCount;
         int modSrcTotal;
         int modCount;
         int modTotal;
-        String *modCount_s;
-        String *modTotal_s;
-        String *count_s;
-        String *total_s;
-        StrVecEntry *modCount_ve;
-        StrVecEntry *modTotal_ve;
-        StrVecEntry *count_ve; 
-        StrVecEntry *total_ve; 
-        StrVecEntry *barStart; 
-        StrVecEntry *barEnd; 
+        Str *modCount_s;
+        Str *modTotal_s;
+        Str *count_s;
+        Str *total_s;
+        Str *barStart; 
+        Str *barEnd; 
     } steps;
     struct {
-        StrVecEntry *source; 
-        StrVecEntry *dest; 
-        StrVecEntry *action; 
+        Str *source; 
+        Str *dest; 
+        Str *action; 
     } current;
-    StrVecEntry *mem; 
-    String *mem_s; 
+    Str *mem; 
+    Str *mem_s; 
 } BuildCliFields;
 
 typedef struct buildctx {

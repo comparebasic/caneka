@@ -43,40 +43,53 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     util *ptrB = NULL;
     StrVecCursor *curs = &_strVecCurs;
     StrVecCurs_Setup(b, curs);
-    while(length >= sizeof(util) && (StrVec_NextSlot(b, curs) & END) == 0){
-        write(0, "current: '", strlen("current: '"));
-        write(0, &curs->slot, 8);
-        write(0, "' vs '", strlen("' vs '"));
-        write(0, ptrA, 8);
-        write(0, "'\n", 2);
+    while(length >= 8 && (StrVec_NextSlot(b, curs) & END) == 0){
         if(*ptrA != curs->slot){
             return FALSE;
         }
         ptrA++;
         ptrB++;
-        length -= sizeof(util);
+        length -= 8;
     }
 
-    while(length > 0 && (StrVec_NextSlot(b, curs) & END) == 0){
-       util shelfA = 0;
-       memcpy(&shelfA, ptrA, length);
-        write(0, "current: '", strlen("current: '"));
-        write(0, &curs->slot, 8);
-        write(0, "' vs '", strlen("' vs '"));
-        write(0, &shelfA, 8);
-        write(0, "'\n", 2);
-       if(shelfA != curs->slot){
-           return FALSE;
-       }
+    if(length > 0 && (StrVec_NextSlot(b, curs) & END) == 0){
+        util shelfA = 0;
+        memcpy(&shelfA, ptrA, length);
+        if(shelfA != curs->slot){
+            return FALSE;
+        }
     }
 
     return TRUE;
 }
 
-boolean StrVec_EqualsStr(StrVec *a, Str *b){
-    return FALSE;
-}
-
 boolean StrVec_EqualsStrVec(StrVec *a, StrVec *b){
-    return FALSE;
+    if(a == NULL || b == NULL){
+       return FALSE; 
+    }
+    if(a->total != b->total){
+        return FALSE;
+    }
+    i32 length = a->total;
+    StrVecCursor *cursA = &_strVecCurs;
+    StrVecCurs_Setup(a, cursA);
+    StrVecCursor *cursB = &_strVecCursB;
+    StrVecCurs_Setup(b, cursB);
+    while(length > 8 && (StrVec_NextSlot(a, cursA) & END) == 0 && 
+            (StrVec_NextSlot(b, cursB) & END) == 0){
+        if(cursA->slot != cursB->slot){
+            return FALSE;
+        }
+        length -= 8;
+    }
+
+    if(length > 0 &&
+            (StrVec_NextSlot(a, cursA) & END) == 0 && 
+            (StrVec_NextSlot(b, cursB) & END) == 0){
+        if(cursA->slot != cursB->slot){
+            return FALSE;
+        }
+    }
+
+    return TRUE;
 }

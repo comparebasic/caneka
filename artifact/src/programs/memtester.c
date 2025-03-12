@@ -201,6 +201,19 @@ int main(int argc, char *argv[]){
         Out(m, "^r^And Nope _D  equal a StrVec with an early and later change!^0\n", f_s);
     }
 
+    StrVec *v2 = StrVec_Make(m);
+    StrVec_Add(v2, Str_Ref(m, (byte *)"Pa", 2, 2));
+    cstr = "rt one of the Saga.";
+    StrVec_Add(v2, Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)));
+    cstr = "..";
+    StrVec_Add(v2, Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)));
+
+    if(Equals((Abstract *)v2, (Abstract *)v)){
+        Out(m, "^g^And Yes two equal a StrVecs equal: _D ^0\n", v2);
+    }else{
+        Out(m, "^r^And Yes two equal a StrVecs equal: _D^0\n", v2);
+    }
+
 
     exit(0);
 }

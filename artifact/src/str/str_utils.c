@@ -22,9 +22,7 @@ Str *Str_FromAbs(MemCtx *m, Abstract *a){
 }
 
 i64 Out(MemCtx *m, char *fmt, ...){
-    StrVec *v = StrVec_Make(m);
 	va_list args;
     va_start(args, fmt);
-    StrVec_FmtAddArgs(m, v, fmt, args);
-    return StrVec_ToFd(v, 0);
+    return StrVec_FmtHandle(m, NULL, fmt, args, 0);
 }

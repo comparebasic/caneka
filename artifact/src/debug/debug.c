@@ -5,6 +5,8 @@ Lookup *DebugPrintChain = NULL;
 
 MemCtx *_debugM = NULL;
 
+#include "../inc/handle_io.c"
+
 status Debug_Init(MemCtx *m){
     _debugM = m;
     m->type.range++;
@@ -48,9 +50,9 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
     printf("\x1b[0m");
 }
 
-i64 Str_Debug(MemCtx *m, StrVec *v, void *t, cls type, boolean extended){
+i64 Str_Debug(MemCtx *m, StrVec *v, i32 fd, void *t, cls type, boolean extended){
     if(t == NULL){
-        return StrVec_Add(v, Str_Ref(m, (byte *)"NULL", 4, 4));
+        return handleIo(v, fd, Str_Ref(m, (byte *)"NULL", 4, 4));
     }
 
     Abstract *a = (Abstract *)t;
@@ -61,7 +63,7 @@ i64 Str_Debug(MemCtx *m, StrVec *v, void *t, cls type, boolean extended){
 
     DebugPrintFunc func = (DebugPrintFunc)Lookup_Get(DebugPrintChain, type);
     if(func != NULL){
-        return func(m, v, a, type, extended);
+        return func(m, v, fd, a, type, extended);
     }else{
         printf("unknown debug\n");
         /*

@@ -1,7 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 StrVec_FmtAddArgs(MemCtx *m, StrVec *v, char *fmt, va_list args){
+#include "../inc/handle_io.c"
+
+i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
     size_t l = strlen(fmt);
     char *end = fmt+l;
     char *ptr = fmt;
@@ -17,22 +19,22 @@ static i64 StrVec_FmtAddArgs(MemCtx *m, StrVec *v, char *fmt, va_list args){
         }else if(state == PROCESSING){
             if(c == 'v'){
                 s = Str_FromAbs(m, va_arg(args, Abstract *));
-                StrVec_Add(v, s);
+                handleIo(v, fd, s);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){
-                total += Str_Debug(m, v, va_arg(args, Abstract *), 0, FALSE);
+                total += Str_Debug(m, v, fd, va_arg(args, Abstract *), 0, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'D'){
-                total += Str_Debug(m, v, va_arg(args, Abstract *), 0, TRUE);
+                total += Str_Debug(m, v, fd, va_arg(args, Abstract *), 0, TRUE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'M'){
                 Abstract *obj = va_arg(args, Abstract *);
                 cls type = va_arg(args, i32);
-                total += Str_Debug(m, v, obj, type, TRUE);
+                total += Str_Debug(m, v, fd, obj, type, TRUE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'i'){
@@ -54,19 +56,18 @@ static i64 StrVec_FmtAddArgs(MemCtx *m, StrVec *v, char *fmt, va_list args){
                     ptr--;
                 }
                 s = Str_FromI64(m, i);
-                StrVec_Add(v, s);
+                handleIo(v, fd, s);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'a'){
                 i32 l = 2;
                 s = Str_Ref(m, (byte *)"*=", l, l);
-                StrVec_Add(v, s);
+                handleIo(v, fd, s);
                 total += s->length;
                 util u = (i64)va_arg(args, util);
                 s = Str_FromI64(m, u);
-                StrVec_Add(v, s);
-                StrVec_Add(v, s);
+                handleIo(v, fd, s);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
@@ -89,14 +90,14 @@ static i64 StrVec_FmtAddArgs(MemCtx *m, StrVec *v, char *fmt, va_list args){
                     ptr--;
                 }
                 s = Str_FromI64(m, i);
-                StrVec_Add(v, s);
+                handleIo(v, fd, s);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
             }
         }else if(state == CONTINUED){
             Str *s = Str_FromAnsi(m, &ptr, end);
-            StrVec_Add(v, s);
+            handleIo(v, fd, s);
             total += s->length;
             state = SUCCESS; 
             goto next;
@@ -118,37 +119,37 @@ outnext:
             word length = (word)(ptr - start);
             if(length > 0){
                 s = Str_Ref(m, (byte *)start, length, length);
-                StrVec_Add(v, s);
+                handleIo(v, fd, s);
                 total += s->length;
             }
        }
        ptr++;
        continue;
-   }
+    }
 
-   if(state != SUCCESS && start != ptr){
+    if(state != SUCCESS && start != ptr){
         word length = (word)(ptr - start);
         if(length > 0){
             s = Str_Ref(m, (byte *)start, length, length);
-            StrVec_Add(v, s);
+            handleIo(v, fd, s);
             total += s->length;
         }
-   }
+    }
 
     return total; 
 }
 
-i64 StrVec_FmtAdd(MemCtx *m, StrVec *v, char *fmt, ...){
+i64 StrVec_FmtAdd(MemCtx *m, StrVec *v, i32 fd, char *fmt, ...){
 	va_list args;
     va_start(args, fmt);
-    return StrVec_FmtAddArgs(m, v, fmt, args);
+    return StrVec_FmtHandle(m, v, fmt, args, fd);
 }
 
 StrVec *StrVec_Fmt(MemCtx *m, char *fmt, ...){
     StrVec *v = StrVec_Make(m);
 	va_list args;
     va_start(args, fmt);
-    StrVec_FmtAddArgs(m, v, fmt, args);
+    StrVec_FmtHandle(m, v, fmt, args, -1);
     return v;
 }
 

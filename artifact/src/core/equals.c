@@ -12,7 +12,7 @@ boolean Equals(Abstract *a, Abstract *b){
         if(a->type.of == b->type.of){
             return StrVec_EqualsStrVec((StrVec *)a, (StrVec *)b);
         }else if(b->type.of == TYPE_STR){
-            return StrVec_EqualsStr((StrVec *)a, (Str *)b);
+            return Str_EqualsStrVec((Str *)b, (StrVec *)a);
         }
     }
     return FALSE;
