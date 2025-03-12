@@ -11,6 +11,7 @@
 #include "../core/equals.c"
 #include "../str/str.c"
 #include "../str/strvec.c"
+#include "../str/str_makers.c"
 #include "../str/strvec_fmt.c"
 #include "../str/str_utils.c"
 #include "../str/str_debug.c"
