@@ -11,6 +11,7 @@ typedef struct strvec {
     Type type;
     i32 count;
     i64 total;
+    i64 pos;
     Iter it;
 } StrVec;
 

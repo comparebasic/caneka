@@ -6,8 +6,7 @@ enum strsnip_flags {
 
 typedef struct strsnip {
     Type type;
-    int start;
-    int length;
+    32 length;
 } StrSnip;
 
 #define StrSnip_Total(sn) (sn->start+sn->length)
