@@ -44,18 +44,21 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     byte *end;
     i16 needed = sizeof(util);
     i64 pos = 0;
+    util shelfA = 0;
     util shelfB = 0;
     Str *s = NULL;
     Iter_Reset(&b->it);
+    i64 remaining = 0;
     while(length > 0 && (Iter_Next(&b->it) & END) == 0){
         pos = 0;
         s = (Str *)Iter_Get(&b->it);
+        printf("next S%hd\n", s->length);
         ptrBb = s->bytes+pos;
         end = s->bytes+s->length-1;
         while(ptrBb < end){
             printf("needed: %d\n", needed);
             while(needed > 0 && ptrBb < end){
-                i64 remaining = end - ptrBb;
+                remaining = (end+1) - ptrBb;
                 word len = min(remaining, needed);
                 printf("copying %d\n", len);
                 memcpy(((byte *)(&shelfB))+pos, ptrBb, len);
@@ -72,14 +75,14 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
             if(length < sizeof(util)){
                 util shelfA = 0;
                 memcpy(&shelfA, ptrA, length);
-                if(shelfA != shelfB){
-                    return FALSE;
-                }
-            }else if(needed > 0){
+            }
+            if(needed > 0 && remaining > 0){
                 printf("need:%d pos:%ld\n", needed, pos);
                 fflush(stdout);
                 write(0, &shelfB, 8);
                 break;
+            }else if(shelfA != shelfB){
+                    return FALSE;
             }else if(*ptrA != shelfB){
                 return FALSE;
             }
