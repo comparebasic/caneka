@@ -8,9 +8,6 @@ i64 StrVec_ToFd(StrVec *v, int fd){
     while((Iter_Next(it) & END) == 0){
         Str *s = (Str *)Iter_Get(it);
         if(s != NULL){
-        /*
-            printf("out %hd %c\n", s->length, s->bytes[0]);
-            */
             total += Str_ToFd(s, fd);
         }
     }
@@ -22,7 +19,10 @@ Str *StrVec_ToStr(MemCtx *m, StrVec *v){
 }
 
 status StrVec_Add(StrVec *v, Str *s){
-    return Span_Add(v->it.values, (Abstract *)s);
+    status r = Span_Add(v->it.values, (Abstract *)s);
+    v->count++;
+    v->total += s->length;
+    return r;
 }
 
 status StrVec_AddBytes(MemCtx *m, StrVec *v, byte *ptr, i64 length){

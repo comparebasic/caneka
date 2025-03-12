@@ -22,6 +22,8 @@ Str *Str_FromI64(MemCtx *m, i64 i){
 
     if(negative){
         *(b--) = '-';
+    }else if(b == end){
+        *(b--) = '0';
     }
 
     i64 length = end - b;
@@ -37,14 +39,9 @@ i64 Str_ToFd(Str *s, int fd){
 
 Str *Str_From(MemCtx *m, byte *bytes, word length){
     Str *s = MemCtx_Alloc(m, sizeof(Str));
-    word alloc = length;
-    word rmd = length % sizeof(void *);
-    if(rmd){
-        alloc += sizeof(void *)-rmd;
-    }
-    byte *_bytes = MemCtx_Alloc(m, alloc);
+    byte *_bytes = MemCtx_Alloc(m, length);
     memcpy(_bytes, bytes, length);
-    Str_Init(s, _bytes, length, alloc);
+    Str_Init(s, _bytes, length, length);
     return s;
 }
 

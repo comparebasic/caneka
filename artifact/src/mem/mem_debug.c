@@ -8,17 +8,15 @@ static i64 wsOut(MemCtx *m, StrVec *v, i8 dim){
     return 0;
 }
 
-i64 SpanState_Print(MemCtx *m, StrVec *v, SpanState *st, i8 dim){
-    i32 idx = st->offset;
-    if(dim == 0){
-        idx += st->localIdx;
-    }
+i64 SpanState_Print(MemCtx *m, StrVec *v, Abstract *a, cls type, boolean extended){
+    SpanState *st = (SpanState *)a;
+    i32 idx = st->localIdx;
     void *slot = NULL;
     if(st->slab != NULL){
         slot = *(((void **)st->slab) + st->localIdx);
     }
-    return StrVec_FmtAdd(m, v, "SpanState<%_B_%i4%_b_o+idx, %_B_%a%_b_slot, %_B_%a%_b_slab, %i4dim, %_B_%i4%_b_localIdx, %_B_%i4%_b_offset>", 
-        idx, slot, st->slab, (i32)dim, (i32)st->localIdx, (i32)st->offset);
+    return StrVec_FmtAdd(m, v, "SpanState<^B_i4^b^o+idx, ^B_a^b^slot, ^B_a^b^slab, ^B_i4^b^localIdx, ^B_i4^b^offset>", 
+        idx, slot, st->slab, (i32)st->localIdx, (i32)st->offset);
 }
 
 i64 Slab_Print(MemCtx *m, StrVec *v, slab *slab, i8 dim, i8 dims){
@@ -155,5 +153,6 @@ status Mem_DebugInit(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_CHAPTER, (void *)MemChapter_Print);
     r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemSlab_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_SPANSTATE, (void *)SpanState_Print);
     return r;
 }

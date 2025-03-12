@@ -29,6 +29,12 @@ static i64 StrVec_FmtAddArgs(MemCtx *m, StrVec *v, char *fmt, va_list args){
                 total += Str_Debug(m, v, va_arg(args, Abstract *), 0, TRUE);
                 state = SUCCESS; 
                 goto next;
+            }else if(c == 'M'){
+                Abstract *obj = va_arg(args, Abstract *);
+                cls type = va_arg(args, i32);
+                total += Str_Debug(m, v, obj, type, TRUE);
+                state = SUCCESS; 
+                goto next;
             }else if(c == 'i'){
                 c = *(++ptr);
                 i64 i = 0;
@@ -62,6 +68,8 @@ static i64 StrVec_FmtAddArgs(MemCtx *m, StrVec *v, char *fmt, va_list args){
                 StrVec_Add(v, s);
                 StrVec_Add(v, s);
                 total += s->length;
+                state = SUCCESS; 
+                goto next;
             }else if(c == 'u'){
                 c = *(++ptr);
                 i64 i = 0;

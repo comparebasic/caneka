@@ -3,3 +3,4 @@
 #include "core/guard.h"
 #include "core/log.h"
 #include "core/testsuite.h"
+#include "core/equals.h"

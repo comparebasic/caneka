@@ -8,11 +8,13 @@
 #include "../mem/mem_debug.c"
 #include "../core/ifc.c"
 #include "../core/init.c"
+#include "../core/equals.c"
 #include "../str/str.c"
 #include "../str/strvec.c"
 #include "../str/strvec_fmt.c"
 #include "../str/str_utils.c"
 #include "../str/str_debug.c"
+#include "../str/str_equals.c"
 #include "../termio/ansi_str.c"
 #include "../debug/debug.c"
 #include "./mocks.c"
@@ -145,6 +147,60 @@ int main(int argc, char *argv[]){
     
     Str *three = Str_FromI64(m, -3038);
     Out(m, "value is ^r_D^0 ^yor^0 _d ^csimply ^0_v\n", three, three, three);
+
+    char *cstr = "-3038";
+    Str *three_s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr));
+    Out(m, "Str is _D\n", three_s);
+    if(Equals((Abstract *)three, (Abstract *)three_s)){
+        Out(m, "Yay _D and _D equal!\n", three, three_s);
+    }
+
+    cstr = "And a bit more, across a few boundaries!";
+    Str *a_s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr));
+    Str *b_s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr));
+    if(Equals((Abstract *)a_s, (Abstract *)b_s)){
+        Out(m, "^g^Yay _D and _D equal!^0\n", a_s, b_s);
+    }
+    cstr = "And a bit more, across a few boundaries.";
+    Str *c_s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr));
+    if(!Equals((Abstract *)a_s, (Abstract *)c_s)){
+        Out(m, "^gAnd Nope _D and _D equal!^0\n", a_s, c_s);
+    }
+
+    StrVec *v = StrVec_Make(m);
+    cstr = "Part one of the Saga";
+    StrVec_Add(v, Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)));
+
+    cstr = ".";
+    StrVec_Add(v, Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)));
+    StrVec_Add(v, Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)));
+    StrVec_Add(v, Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)));
+
+    cstr = "Part one of the Saga...";
+    Str *d_s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr));
+
+    if(Equals((Abstract *)d_s, (Abstract *)v)){
+        Out(m, "^g^And Yes _D  equal a StrVec!^0\n", d_s);
+    }else{
+        Out(m, "^rAnd Yes _D  equal a StrVec!^0\n", d_s);
+    }
+
+    cstr = "Part one of the Saga!!!";
+    Str *e_s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr));
+    if(!Equals((Abstract *)e_s, (Abstract *)v)){
+        Out(m, "^g^And Nope _D  equal a StrVec with a later change!^0\n", e_s);
+    }else{
+        Out(m, "^r^And Nope _D  equal a StrVec with a later change!^0\n", e_s);
+    }
+
+    cstr = "Part Two of the Saga!!!";
+    Str *f_s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr));
+    if(!Equals((Abstract *)f_s, (Abstract *)v)){
+        Out(m, "^g^And Nope _D  equal a StrVec with an early and later change!^0\n", f_s);
+    }else{
+        Out(m, "^r^And Nope _D  equal a StrVec with an early and later change!^0\n", f_s);
+    }
+
 
     exit(0);
 }
