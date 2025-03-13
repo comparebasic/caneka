@@ -4,3 +4,7 @@
 #define PAGE_MAX (256-1)
 #define CHAPTER_SIZE (sysconf(_SC_PAGE_SIZE)*PAGE_COUNT)
 #define CHAPTER_MAX 16
+#define SPAN_STRIDE 16
+#define SPAN_MAX_DIMS 5 /* 1,048,576 total items */
+#define SPAN_LOCAL_MAX (SPAN_STRIDE-1)
+#define TABLE_MAX_DIMS SPAN_MAX_DIMS

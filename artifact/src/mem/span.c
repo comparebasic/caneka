@@ -1,23 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536, 1048576};
+extern i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536, 1048576};
 
-void SpanQuery_Setup(SpanQuery *sr, Span *p, byte op, int idx){
-    memset(sr, 0, sizeof(SpanQuery));
-
-    sr->type.of = TYPE_SPAN_QUERY;
-    sr->op = op;
-    sr->m = p->m;
-    sr->span = p;
-    sr->dims = p->dims;
-    sr->idx = idx;
-    sr->dimsNeeded = Span_GetDimNeeded(idx);
-
-    return;
-}
-
-SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
+static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     Span *p = sq->span; 
     slab *sl = NULL;
     word localIdx = 0;
@@ -34,12 +20,12 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     }else{
         SpanState *prev = sq->stack+(dim+1);
         localIdx = ((sq->idx - prev->offset) / increment);
-        word localMax = SPAN_STRIDE;
         st->offset = prev->offset;
         if(dim > 0){
             st->offset += increment*localIdx;
         }
-        void **ptr = (void **)Slab_GetSlot(prev->slab, prev->localIdx);
+        void **ptr = (void **)sl;
+        ptr += idx;
         if(ptr != NULL){
             sl = *ptr;
         }else{
@@ -52,6 +38,15 @@ SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     st->increment = increment;
 
     return st;
+}
+
+void SpanQuery_Setup(SpanQuery *sr, Span *p, status op, i32 idx){
+    memset(sr, 0, sizeof(SpanQuery));
+    sr->type.of = TYPE_SPAN_QUERY;
+    sr->type.state = op;
+    sr->span = p;
+    sr->idx = idx;
+    return;
 }
 
 slab *Slab_WhileExpanding(MemSlab **_sl){
@@ -74,23 +69,29 @@ slab *Slab_WhileExpanding(MemSlab **_sl){
 }
 
 status Span_Query(SpanQuery *sr){
+    sr->type.state &= ~SUCCESS;
     MemCtx *m = sr->span->m;
     i32 idx = sr->idx;
+
+    i8 dimsNeeded = 0;
+    while(_increments[dims+1] <= idx){
+        dimsNeeded++;
+    }
+
     Span *p = sr->span;
     MemSlab *mem_sl = NULL;
-    /* increase the dims with blank slabs if necessary */
-    if(sr->dimsNeeded > sr->dims){
-        if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
+    if(dimsNeeded > p->dims){
+        if((sr->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NOOP;
         }
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
-        while(p->dims < sr->dimsNeeded){
+        while(p->dims < dimsNeeded){
             slab *new_sl = NULL;
             if(p == &p->m->p){
                 new_sl = Slab_WhileExpanding(&mem_sl);
             }else{
-                new_sl = Slab_Make(p->m);
+                new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
             }
 
             if(exp_sl == NULL){
@@ -107,36 +108,26 @@ status Span_Query(SpanQuery *sr){
         void **ptr = (void *)exp_sl;
         *ptr = shelf_sl;
     }
-    sr->dims = p->dims;
 
-    /* resize the span by adding dimensions and slabs as needed */
-    byte dims = p->dims;
+    i8 dims = p->dims;
     SpanState *st = NULL;
-    while(TRUE){
-        /* make new if not exists */
+    while(dims != -1){
         st = SpanQuery_SetStack(sr, dims);
         if(st->slab == NULL){
-            if(sr->op != SPAN_OP_SET && sr->op != SPAN_OP_RESERVE){
+            if((sr->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
                 return NOOP;
             }
             slab *new_sl = NULL; 
             if(p == &p->m->p){
                 new_sl = Slab_WhileExpanding(&mem_sl);
             }else{
-                new_sl = Slab_Make(p->m);
+                new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
             }
             SpanState *prev = sr->stack+(dims+1);
             void **ptr = (void **)prev->slab;
             ptr += prev->localIdx;
             *ptr = new_sl;
             st->slab = new_sl;
-        }else{
-            sr->queryDim = dims;
-        }
-
-        /* find or allocate a space for the new span */
-        if(dims == 0){
-            break;
         }
 
         dims--;
@@ -155,8 +146,8 @@ status Span_Query(SpanQuery *sr){
 }
 
 
-int Span_Capacity(Span *p){
-    int increment = _increments[p->dims];
+i32 Span_Capacity(Span *p){
+    i32 increment = _increments[p->dims];
     return increment * SPAN_STRIDE;
 }
 
@@ -185,8 +176,9 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
         if(sq->idx > p->max_idx+1){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
-        void **ptr = Slab_GetSlot(st->slab, st->localIdx);
-        if(sq->op == SPAN_OP_REMOVE){
+        void **ptr = (void **)st->slab;
+        ptr +=st->localIdx;
+        if(sq->type.state & SPAN_OP_REMOVE){
             *ptr = NULL;
             p->nvalues--;
             p->metrics.set = -1;
@@ -211,7 +203,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
     return NULL;
 }
 
-void *Span_Set(Span *p, int idx, Abstract *t){
+void *Span_Set(Span *p, i32 idx, Abstract *t){
     if(idx < 0 || t == NULL){
         return NULL;
     }
@@ -223,7 +215,8 @@ void *Span_Set(Span *p, int idx, Abstract *t){
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
     SpanState *st = sq->stack;
-    void **ptr = Slab_GetSlot(st->slab, st->localIdx);
+    void **ptr = (void **)st->slab;
+    ptr += st->localIdx;
     sq->span->type.state &= ~(SUCCESS|NOOP);
     if(*ptr != NULL){
         sq->value = *ptr;
@@ -236,7 +229,7 @@ void *Span_GetFromQ(SpanQuery *sq){
     return sq->value;
 }
 
-void *Span_Get(Span *p, int idx){
+void *Span_Get(Span *p, i32 idx){
     if(idx < 0){
         return NULL;
     }
@@ -263,10 +256,10 @@ i32 Span_Add(Span *p, Abstract *t){
     return 0;
 }
 
-status Span_Cull(Span *p, int count){
+status Span_Cull(Span *p, i32 count){
     SpanQuery sq;
     while(count-- > 0){
-        int idx = p->max_idx;
+        i32 idx = p->max_idx;
         if(idx >= 0){
             SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
             Span_Query(&sq);
@@ -277,16 +270,7 @@ status Span_Cull(Span *p, int count){
     return NOOP;
 }
 
-i8 Span_GetDimNeeded(int idx){
-    i8 dims = 0;
-    while(_increments[dims+1] <= idx){
-        dims++;
-    }
-
-    return dims;
-}
-
-status Span_Remove(Span *p, int idx){
+status Span_Remove(Span *p, i32 idx){
     SpanQuery sq;
     SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
     Span_SetFromQ(&sq, NULL);
@@ -311,6 +295,6 @@ Span *Span_Make(MemCtx *m){
     p->type.of = TYPE_SPAN;
     p->max_idx = p->metrics.available = p->metrics.get = p->metrics.selected = p->metrics.set = -1;
     p->m = m;
-    p->root = Slab_Make(m);
+    p->root = (slab *)MemCtx_Alloc((m), sizeof(slab));
     return p;
 }

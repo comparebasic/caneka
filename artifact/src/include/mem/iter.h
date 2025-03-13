@@ -1,6 +1,6 @@
 typedef struct iter {
     Type type;
-    int idx;
+    i32 idx;
     Span *values;
     SpanQuery sq;
 } Iter;

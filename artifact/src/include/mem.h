@@ -1,5 +1,4 @@
 #include "mem/page.h"
-#include "mem/slab.h"
 #include "mem/span.h"
 #include "mem/spanquery.h"
 #include "mem/span_tolocal.h"

@@ -17,8 +17,6 @@ typedef quad flags32;
 #define TRUE 1
 #define FALSE 0
 
-#define SPAN_STRIDE 16
-#define SPAN_MAX_DIMS 6
 typedef void *slab[SPAN_STRIDE];
 
 extern word GLOBAL_flags;

@@ -1,35 +1,26 @@
-#define SPAN_LOCAL_MAX (SPAN_STRIDE-1)
-
 enum span_ops {
-    SPAN_OP_GET = 1,
-    SPAN_OP_SET = 2,
-    SPAN_OP_REMOVE = 3,
-    SPAN_OP_RESERVE = 4,
-    SPAN_OP_RESIZE = 5,
+    SPAN_OP_GET = 1 << 8,
+    SPAN_OP_SET = 1 << 9,
+    SPAN_OP_REMOVE = 1 << 10,
+    SPAN_OP_RESERVE = 1 << 11,
+    SPAN_OP_RESIZE = 1 << 12,
 };
 
 typedef struct span_state {
-    slab *slab;
-    word flags; /* active, full, etc. */
-    i16 localIdx; 
-    i16 offset;
-    i32 increment;
     i8 dim;
+    i8 localIdx; 
+    i16 increment;
+    i32 offset;
+    slab *slab;
 } SpanState;
 
 typedef struct span_query {
     Type type;
-    struct mem_ctx *m;
-    struct span *span;
-    /* end SpanState */
-    SpanState stack[SPAN_MAX_DIMS+1];
     i32 idx;
+    struct span *span;
     Abstract *value;
-    byte op;
-    i8 dims;
-    byte queryDim;
-    i8 dimsNeeded;
-} SpanQuery; /* sr */
+    SpanState stack[SPAN_MAX_DIMS];
+} SpanQuery;
 
 SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim);
 SpanState *SpanQuery_StateByDim(SpanQuery *sq, i8 dim);

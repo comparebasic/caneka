@@ -1,11 +1,7 @@
 /*
 Table
 The hash based key-value lookup structure, built on top of the Span Data Structure.
-
-related: core/table.c
-related: include/span.h
 */
-#define TABLE_MAX_DIMS SPAN_MAX_DIMS
 Abstract *Table_Get(Span *tbl, Abstract *a);
 Abstract *Table_FromIdx(Span *tbl, int idx);
 Hashed *Table_SetValue(Span *tbl, Abstract *a);
