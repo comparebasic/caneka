@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 /* > Run */
-static status Roebling_RunMatches(Roebling *rbl){
+static status Roebling_RunMatches(Roebling *rbl, Str *s){
     DebugStack_Push(rbl, rbl->type.of);
     if(DEBUG_ROEBLING_CURRENT){
         Debug_Print((void *)rbl, 0, "RblCurrent - RunMatches", DEBUG_ROEBLING_CURRENT, FALSE);
@@ -15,12 +15,14 @@ static status Roebling_RunMatches(Roebling *rbl){
         rbl->type.state |= ROEBLING_NEXT;
     }
 
+    byte *ptr = s->bytes;
+    byte *end = s->bytes+s->length-1;
     int noopCount = 0;
     rbl->type.state |= (rbl->cursor.type.state & END);
-    while((rbl->type.state & (ROEBLING_NEXT|END)) == 0){
+    while(start <= end && (rbl->type.state & (ROEBLING_NEXT|END)) == 0){
         Guard_Incr(&rbl->guard);
 
-        c = Cursor_GetByte(&(rbl->cursor));
+        c = *ptr++;
 
         Match *mt = NULL;
         Iter it;

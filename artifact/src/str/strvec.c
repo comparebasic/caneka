@@ -24,6 +24,12 @@ StrVec *StrVec_Snip(MemCtx *m, Span *sns, StrVec *v){
 }
 
 status StrVec_Copy(StrVec *from, StrVec *to, i64 start, i64 end){
+    /* navigate to the start position */
+
+    /* add the str objects to the to strvec: */
+
+    /* decide if it's a continuation of the same string as new segments of 'from'
+     * are encountered */
     return NOOP;
 }
 
@@ -40,7 +46,8 @@ i64 StrVec_ToFd(StrVec *v, int fd){
     return total;
 }
 
-Str *StrVec_ToStr(MemCtx *m, StrVec *v){
+Str *StrVec_ReAlign(MemCtx *m, StrVec *v){
+    /* make long strings instead of short ones and re attach a new span to 'v' */
     return NULL;
 }
 
