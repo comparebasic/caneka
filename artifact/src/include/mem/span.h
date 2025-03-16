@@ -11,7 +11,7 @@ enum span_flags {
     FLAG_SPAN_ORDERED = 1 << 10,
 };
 
-extern i32 _increments[SPAN_MAX_DIMS];
+typedef void *slab[5];
 
 typedef struct span {
     Type type;

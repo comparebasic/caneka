@@ -12,6 +12,7 @@ struct step;
 struct cursor;
 struct str;
 struct strvec;
+struct strvec_cursor;
 struct strsnip;
 struct string;
 /* util */

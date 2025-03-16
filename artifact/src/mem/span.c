@@ -1,8 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-extern i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536, 1048576};
-
 static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     Span *p = sq->span; 
     slab *sl = NULL;
@@ -25,7 +23,7 @@ static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
             st->offset += increment*localIdx;
         }
         void **ptr = (void **)sl;
-        ptr += idx;
+        ptr += sq->idx;
         if(ptr != NULL){
             sl = *ptr;
         }else{
@@ -74,7 +72,7 @@ status Span_Query(SpanQuery *sr){
     i32 idx = sr->idx;
 
     i8 dimsNeeded = 0;
-    while(_increments[dims+1] <= idx){
+    while(_increments[dimsNeeded+1] <= idx){
         dimsNeeded++;
     }
 

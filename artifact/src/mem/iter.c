@@ -31,7 +31,8 @@ status Iter_Next(Iter *it){
         /*
         printf("- next nvalues:%d starting at %d\n", sq->span->nvalues, sq->idx);
         */
-        while(dim <= sq->dims){
+        i8 dims = sq->span->dims;
+        while(dim <= dims){
             st = &sq->stack[dim];
             i32 increment = _increments[dim];
             start = (void **)st->slab;

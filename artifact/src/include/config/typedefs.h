@@ -17,8 +17,6 @@ typedef quad flags32;
 #define TRUE 1
 #define FALSE 0
 
-typedef void *slab[SPAN_STRIDE];
-
 extern word GLOBAL_flags;
 enum global_flags {
     NO_COLOR = 1 << 10,

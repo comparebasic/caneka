@@ -6,14 +6,6 @@ enum span_ops {
     SPAN_OP_RESIZE = 1 << 12,
 };
 
-typedef struct span_state {
-    i8 dim;
-    i8 localIdx; 
-    i16 increment;
-    i32 offset;
-    slab *slab;
-} SpanState;
-
 typedef struct span_query {
     Type type;
     i32 idx;
@@ -22,9 +14,8 @@ typedef struct span_query {
     SpanState stack[SPAN_MAX_DIMS];
 } SpanQuery;
 
-SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim);
 SpanState *SpanQuery_StateByDim(SpanQuery *sq, i8 dim);
 status SpanQuery_Refresh(SpanQuery *sq);
-void SpanQuery_Setup(struct span_query *sq, Span *p, byte op, i32 idx);
+void SpanQuery_Setup(struct span_query *sq, Span *p, status op, i32 idx);
 status Span_Query(SpanQuery *sr);
 slab *Slab_WhileExpanding(struct mem_slab **_sl);
