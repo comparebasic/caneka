@@ -41,10 +41,10 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     i32 length = a->length;
     util *ptrA = (util *)a->bytes;
     util *ptrB = NULL;
-    StrVecCursor *curs = &_strVecCurs;
-    StrVecCurs_Setup(b, curs);
-    while(length >= 8 && (StrVec_NextSlot(b, curs) & END) == 0){
-        if(*ptrA != curs->slot){
+    Cursor curs;
+    Cursor_Setup(&curs, b);
+    while(length >= 8 && (StrVec_NextSlot(b, &curs) & END) == 0){
+        if(*ptrA != curs.slot){
             return FALSE;
         }
         ptrA++;
@@ -52,10 +52,10 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
         length -= 8;
     }
 
-    if(length > 0 && (StrVec_NextSlot(b, curs) & END) == 0){
+    if(length > 0 && (StrVec_NextSlot(b, &curs) & END) == 0){
         util shelfA = 0;
         memcpy(&shelfA, ptrA, length);
-        if(shelfA != curs->slot){
+        if(shelfA != curs.slot){
             return FALSE;
         }
     }
@@ -71,22 +71,22 @@ boolean StrVec_EqualsStrVec(StrVec *a, StrVec *b){
         return FALSE;
     }
     i32 length = a->total;
-    StrVecCursor *cursA = &_strVecCurs;
-    StrVecCurs_Setup(a, cursA);
-    StrVecCursor *cursB = &_strVecCursB;
-    StrVecCurs_Setup(b, cursB);
-    while(length > 8 && (StrVec_NextSlot(a, cursA) & END) == 0 && 
-            (StrVec_NextSlot(b, cursB) & END) == 0){
-        if(cursA->slot != cursB->slot){
+    Cursor cursA;
+    Cursor_Setup(&cursA, a);
+    Cursor cursB;
+    Cursor_Setup(&cursB, b);
+    while(length > 8 && (StrVec_NextSlot(a, &cursA) & END) == 0 && 
+            (StrVec_NextSlot(b, &cursB) & END) == 0){
+        if(cursA.slot != cursB.slot){
             return FALSE;
         }
         length -= 8;
     }
 
     if(length > 0 &&
-            (StrVec_NextSlot(a, cursA) & END) == 0 && 
-            (StrVec_NextSlot(b, cursB) & END) == 0){
-        if(cursA->slot != cursB->slot){
+            (StrVec_NextSlot(a, &cursA) & END) == 0 && 
+            (StrVec_NextSlot(b, &cursB) & END) == 0){
+        if(cursA.slot != cursB.slot){
             return FALSE;
         }
     }

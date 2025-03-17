@@ -1,7 +1,6 @@
 /*
 This is the semi-manually-run garbage collector.
 */
-#define MEM_SLAB_SIZE PAGE_SIZE 
 extern int MemSlab_Count;
 
 /*

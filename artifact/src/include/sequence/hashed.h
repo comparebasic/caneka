@@ -4,7 +4,6 @@ typedef struct hashed {
     util id;
     Abstract *item;
     Abstract *value;
-    struct hashed *next;
 } Hashed;
 
 extern struct chain *HashChain;

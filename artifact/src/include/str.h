@@ -1,5 +1,6 @@
 #include "str/str.h"
 #include "str/strvec.h"
+#include "str/strvec_fmt.h"
 #include "str/cursor.h"
 #include "str/str_debug.h"
 #include "str/str_equals.h"

@@ -12,3 +12,4 @@ typedef struct strsnip {
 
 status StrSnip_Init(StrSnip *sn, word flags, int start, int length);
 StrSnip *StrSnip_Add(MemCtx *m, String *s, int start, int length);
+StrVec *StrVec_Snip(MemCtx *m, Span *sns, Cursor *curs);

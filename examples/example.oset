@@ -1,0 +1,15 @@
+auth; salt/2; key: test; enc:74 HB71N1+U+TU+aJyd3DBvXs3yfmjb9TXCQ8L+e9nxIyNKeD0Vu2fcStahY6RaL5qgUMIMoQeIwA73PWsjgJgWJrAYonP/5lOaz8TAw0OUhqR6dB5Wz5k=; digest:40 1b34c964da9c831dc0b761cefb400effa887a5c0476b08645d7d3746705b892e; end;
+
+/* creates
+Hashed ->
+    key: auth
+    item = Table {
+            salt: Table { 
+                key = "test"
+                enc = HB71N1+U+TU+aJyd3DBvXs3yfmjb9TXCQ8L+e9nxIyNKeD0Vu2fcStahY6RaL5qgUMIMoQeIwA73PWsjgJgWJrAYonP/5lOaz8TAw0OUhqR6dB5Wz5k=
+            }
+                digest:   1b34c964da9c831dc0b761cefb400effa887a5c0476b08645d7d3746705b892e
+            }
+        }
+    }
+*/

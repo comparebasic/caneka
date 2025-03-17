@@ -7,4 +7,16 @@ static inline i64 handleIo(StrVec *v, i32 fd, Str *s){
         return StrVec_Add(v, s);
     }
 }
+
+static inline boolean TextCharFilter(byte *b, i64 length){
+    byte *end = b+length;
+    while(b < end){
+        byte c = *b;
+        if(!IS_VISIBLE(c)){
+            return FALSE;
+        }
+        b++;
+    }
+    return TRUE;
+}
 #endif

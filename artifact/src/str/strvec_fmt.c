@@ -31,7 +31,7 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 total += Str_Debug(m, v, fd, va_arg(args, Abstract *), 0, TRUE);
                 state = SUCCESS; 
                 goto next;
-            }else if(c == 'M'){
+            }else if(c == 'T'){
                 Abstract *obj = va_arg(args, Abstract *);
                 cls type = va_arg(args, i32);
                 total += Str_Debug(m, v, fd, obj, type, TRUE);
@@ -95,7 +95,7 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 state = SUCCESS; 
                 goto next;
             }
-        }else if(state == CONTINUED){
+        }else if(state == MORE){
             Str *s = Str_FromAnsi(m, &ptr, end);
             handleIo(v, fd, s);
             total += s->length;
@@ -105,7 +105,7 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
         
         c = *ptr;
         if(c == '^'){
-           state = CONTINUED; 
+           state = MORE; 
            goto outnext;
         }else if(c == '_'){
            state = PROCESSING; 

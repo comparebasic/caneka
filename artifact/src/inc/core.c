@@ -9,6 +9,7 @@
 #include "../str/str.c"
 #include "../str/strvec.c"
 #include "../str/strvec_fmt.c"
+#include "../str/cursor.c"
 #include "../str/str_utils.c"
 #include "../str/str_debug.c"
 #include "../str/str_equals.c"
@@ -19,7 +20,6 @@
 #include "../debug/debug_flags.c"
 #include "../debug/debug_typestrings.c"
 #include "../debug/debug_stack.c"
-#include "../crypto/sane.c"
 #include "../termio/cli_status.c"
 #include "../core/error.c"
 

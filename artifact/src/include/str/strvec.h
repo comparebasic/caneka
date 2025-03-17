@@ -1,4 +1,3 @@
-
 typedef struct strvec {
     Type type;
     i32 count;

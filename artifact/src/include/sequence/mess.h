@@ -3,7 +3,7 @@ typedef struct mess {
     word _;
     word tagIdx;
     Span *atts;
-    Span *children; /* mess, ordtbl, or string */
+    Span *children; /* mess, ordtbl, hashed, strvec, or str */
     struct mess *parent;
 } Mess;
 

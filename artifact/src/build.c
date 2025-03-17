@@ -196,6 +196,7 @@ static BuildSubdir sequenceobj = { "sequence", {
     "table.c",
     "table_chain.c",
     "ord_table.c",
+    "hashed.c",
     NULL
 }};
 
@@ -297,7 +298,6 @@ static BuildSubdir utilobj = { "util", {
     "compare.c",
     "cmp.c",
     "do.c",
-    "hash.c",
     "human_present.c",
     "int.c",
     "maker.c",

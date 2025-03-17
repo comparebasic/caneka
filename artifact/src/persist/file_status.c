@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status File_Exists(String *path){
+status File_Exists(Str *path){
     struct stat st;
     int r = 0;
 
@@ -13,44 +13,42 @@ status File_Exists(String *path){
     return SUCCESS;
 }
 
-status File_Unlink(String *path){
+status File_Unlink(Str *path){
     if(unlink((char *)path->bytes) == 0){
         return SUCCESS;
     }
     return ERROR;
 }
 
-String *File_GetCwdPath(MemCtx *m, String *path){
-    char buff[PATH_BUFFLEN];
-    char *pathCstr = getcwd(buff, PATH_BUFFLEN);
-    String *s = String_Init(m, STRING_EXTEND);
-    String_AddBytes(m, s, bytes(pathCstr), strlen(pathCstr));
-    String_AddBytes(m, s, bytes("/"), 1);
-    String_Add(m, s, path);
-    return s;
+Str *File_GetCwdPath(MemCtx *m, Str *path){
+    char buff[STR_DEFAULT];
+    char *cstr = getcwd(buff, STR_DEFAULT);
+    i64 length = strlen(cstr);
+    Str *s = Str_Make(m, length+1);
+    return Str_Add(s, bytes(pathCstr), length);
 }
 
-String *File_GetAbsPath(MemCtx *m, String *path){
+Str *File_GetAbsPath(MemCtx *m, Str *path){
     if(path != NULL && path->bytes[0] != '/'){
         return File_GetCwdPath(m, path);
     }
     return path;
 }
 
-boolean File_CmpUpdated(MemCtx *m, String *a, String *b, Access *ac){
+boolean File_CmpUpdated(MemCtx *m, Str *a, Str *b, Access *ac){
     DebugStack_Push(a, a->type.of);
     struct stat source_stat;
     struct stat build_stat;
     int r = 0;
 
-    char *path_cstr = String_ToChars(m, a);
+    char *path_cstr = Str_ToChars(m, a);
     r = stat(path_cstr, &source_stat);
     if(r != 0){
         printf("%s\n", path_cstr);
         Fatal("Source not found", TYPE_FILE);
         exit(1);
     }
-    r = stat(String_ToChars(m, b), &build_stat);
+    r = stat(Str_ToChars(m, b), &build_stat);
     time_t build_mtime = 0;
     if(r == 0){
         build_mtime = build_stat.st_mtime;

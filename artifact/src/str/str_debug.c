@@ -29,13 +29,13 @@ i64 StrVec_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ex
         total += StrVec_FmtAdd(m, v, fd, "^B\""); 
     }
 
-    Iter *it = &vObj->it;
-    Iter_Reset(it);
-    while((Iter_Next(it) & END) == 0){
-        Str *s = (Str *)Iter_Get(it);
+    Iter it;
+    Iter_Init(&it, vObj->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
         if(s != NULL){
             Str_Print(m, v, fd, (Abstract *)s, type, extended);
-            if((it->type.state & FLAG_ITER_LAST) == 0){
+            if((it.type.state & FLAG_ITER_LAST) == 0){
                 total += handleIo(v, fd, Str_Ref(m, (byte *)", ", 2, 2));
             }
         }

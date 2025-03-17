@@ -10,9 +10,9 @@
 */
 #include "debug.h"
 #include "sequence.h"
+#include "crypto.h"
 /*
 #include "parser.h"
-#include "crypto.h"
 #include "persist.h"
 #include "serve.h"
 */

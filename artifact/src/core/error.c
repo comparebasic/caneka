@@ -3,17 +3,22 @@
 
 static boolean crashing = FALSE;
 
-void *_Fatal(char *msg, cls t, char *func, char *file, int line){
+void *_Fatal(char *msg, cls t, i32 fd, char *func, char *file, int line){
 #ifdef CLI    
     RawMode(FALSE);
 #endif
-    printf("\x1b[%dmFatal Error: \x1b[1;%dm%s\x1b[0;%dm - type(%s/%d) %s:%s:%d\x1b[0m\n" , COLOR_RED, COLOR_RED, msg, COLOR_RED, Class_ToString(t), t, func, file, line);
+    
+    StrVec_FmtAdd(_debugM, NULL, 0, 
+        "^r^Fatal Error: ^B_T^B - type(_T/_i4) _T:_T:_i4^0\n",
+        msg, TYPE_CSTR, Type_ToChars(t), TYPE_CSTR, t, func, TYPE_CSTR, 
+        file, TYPE_CSTR, line);
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();
     if(e != 0){
         char *openssl_err = ERR_error_string(e, _buff);
-        printf("  \x1b[%dm%s\x1b[0m", COLOR_RED, openssl_err);
+        StrVec_FmtAdd(_debugM, NULL, 0"^rB^_T^0");
+        StrVec_FmtAdd(_debugM, NULL, 0"  ^rB^_T^0", openssl_err, TYPE_CSTR);
     }
 #endif
     if(!crashing){
