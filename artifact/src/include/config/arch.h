@@ -14,6 +14,7 @@ const size_t SPAN_LOCAL_MAX = (SPAN_STRIDE-1);
 const size_t TABLE_MAX_DIMS = SPAN_MAX_DIMS;
 const size_t STR_MAX = MEM_SLAB_SIZE;
 const size_t STR_DEFAULT = 512;
+const size_t STR_DEFAULT_MAX = STR_DEFAULT-1;
 const size_t READ_MAX = STR_DEFAULT;
 const size_t WRITE_MAX = STR_DEFAULT;
 #endif

@@ -13,6 +13,14 @@ i64 Str_Add(Str *s, byte *b, i64 length){
     return len;
 }
 
+status Str_AddCStr(Str *s, char *cstr){
+    i64 len = strlen(cstr);
+    if(Str_Add(s, (byte *)cstr, len) != len){
+        return ERROR;
+    }
+    return SUCCESS;
+}
+
 char *Str_Cstr(MemCtx *m, Str *s){
     if(TextCharFilter(s->bytes, s->length)){
         byte *b;
@@ -27,6 +35,17 @@ char *Str_Cstr(MemCtx *m, Str *s){
     return NULL;
 }
 
+Str *Str_Clone(MemCtx *m, Str *s, word alloc){
+    if(alloc < s->length){
+        return NULL;
+    }
+    Str *ret = MemCtx_Alloc(m, sizeof(Str));
+    byte *_bytes = MemCtx_Alloc(m, alloc);
+    memcpy(_bytes, s->bytes, s->length);
+    Str_Init(ret, _bytes, s->length, alloc);
+    return ret;
+}
+
 Str *Str_From(MemCtx *m, byte *bytes, word length){
     Str *s = MemCtx_Alloc(m, sizeof(Str));
     byte *_bytes = MemCtx_Alloc(m, length);
@@ -38,6 +57,13 @@ Str *Str_From(MemCtx *m, byte *bytes, word length){
 Str *Str_Ref(MemCtx *m, byte *bytes, word length, word alloc){
     Str *s = MemCtx_Alloc(m, sizeof(Str));
     Str_Init(s, bytes, length, alloc);
+    return s;
+}
+
+Str *Str_CstrRef(MemCtx *m, char *cstr){
+    i64 len = strlen(cstr);
+    Str *s = MemCtx_Alloc(m, sizeof(Str));
+    Str_Init(s, (byte *)cstr, len, len+1);
     return s;
 }
 

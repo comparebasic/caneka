@@ -21,16 +21,21 @@ status File_Unlink(Str *path){
 }
 
 Str *File_GetCwdPath(MemCtx *m, Str *path){
-    char buff[STR_DEFAULT];
-    char *cstr = getcwd(buff, STR_DEFAULT);
-    i64 length = strlen(cstr);
-    Str *s = Str_Make(m, length+1);
-    return Str_Add(s, bytes(pathCstr), length);
+    Str *s = Str_Make(m, STR_DEFAULT);
+    char *cstr = getcwd((char *)s->bytes, STR_DEFAULT_MAX);
+    i64 len = strlen(cstr);
+    if(Str_AddCStr(s, "/") & SUCCESS && Str_AddCStr(s, cstr) & SUCCESS){
+        return s;
+    }
+    return NULL;
 }
 
 Str *File_GetAbsPath(MemCtx *m, Str *path){
     if(path != NULL && path->bytes[0] != '/'){
         return File_GetCwdPath(m, path);
+    }
+    if(path->alloc != STR_DEFAULT){
+        return Str_Clone(m, path, STR_DEFAULT);
     }
     return path;
 }

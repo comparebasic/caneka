@@ -84,7 +84,7 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.total_ve = vh->last;
     Span_Add(ctx->cli->lines, (Abstract *)vh);
 
-    String *s100 = String_Init(m, width);
+    Str *s100 = String_Init(m, width);
     memset(s100->bytes, ' ', width);
     vh = StrVec_Make(m, bytes("\x1b[44m"), 0);
     StrVec_Add(m, vh, s100->bytes, 0);
@@ -116,7 +116,7 @@ static status setupStatus(BuildCtx *ctx){
     return SUCCESS;
 }
 
-static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *lib, Executable *target){
+static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
     MemCtx *m = ctx->m;
@@ -134,14 +134,14 @@ static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *l
     }
     Span_Add(cmd, (Abstract *)String_Make(m, bytes("-o")));
 
-    String *dest = String_Init(m, STRING_EXTEND);
+    Str *dest = String_Init(m, STRING_EXTEND);
     String_Add(m, dest, destDir);
     char *cstr = "/";
     String_AddBytes(m, dest, bytes(cstr), strlen(cstr));
     String_AddBytes(m, dest, bytes(target->bin), strlen(target->bin));
     Span_Add(cmd, (Abstract *)dest);
 
-    String *source = File_GetAbsPath(m, String_Make(m, bytes(ctx->src)));
+    Str *source = File_GetAbsPath(m, String_Make(m, bytes(ctx->src)));
     String_AddBytes(m, source, bytes("/programs/"), 1);
     String_AddBytes(m, source, bytes(target->src), strlen(target->src));
 
@@ -173,7 +173,7 @@ static status buildExec(BuildCtx *ctx, boolean force, String *destDir, String *l
     return NOOP;
 }
 
-static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String *dest, String *source){
+static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, Str *source){
     DebugStack_Push(source, source->type.of);
     status r = READY;
     MemCtx *m = ctx->m;
@@ -232,11 +232,11 @@ static status buildSourceToLib(BuildCtx *ctx, String *libDir, String *lib,String
     return r;
 }
 
-static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSubdir *dir){
+static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *dir){
     DebugStack_Push(NULL, 0);
     status r = READY;
     MemCtx *m = ctx->m;
-    String *dirPath = String_Init(m, STRING_EXTEND);
+    Str *dirPath = String_Init(m, STRING_EXTEND);
     String_Add(m, dirPath, libDir);
     char *cstr = "/";
     String_AddBytes(m, dirPath, bytes(cstr), strlen(cstr));
@@ -244,13 +244,13 @@ static status buildDirToLib(BuildCtx *ctx, String *libDir, String *lib, BuildSub
     DebugStack_SetRef(dirPath, dirPath->type.of);
     Dir_CheckCreate(m, dirPath);
 
-    String *source = File_GetAbsPath(m, String_Make(m, bytes(ctx->src)));
+    Str *source = File_GetAbsPath(m, String_Make(m, bytes(ctx->src)));
     String_AddBytes(m, source, bytes("/"), 1);
     String_AddBytes(m, source, bytes(dir->name), strlen(dir->name));
     String_AddBytes(m, source, bytes("/"), 1);
     i64 sourceL = String_Length(source);
 
-    String *dest = String_Init(m, STRING_EXTEND);
+    Str *dest = String_Init(m, STRING_EXTEND);
     String_Add(m, dest, dirPath);
     String_AddBytes(m, dest, bytes("/"), 1);
     i64 destL = String_Length(dest);
@@ -292,8 +292,8 @@ static status build(BuildCtx *ctx){
     DebugStack_Push(NULL, 0);
     MemCtx *m = ctx->m;
     setupStatus(ctx);
-    String *libDir = String_Init(m, STRING_EXTEND);
-    String *dist = File_GetAbsPath(m, String_Make(m, bytes(ctx->dist)));
+    Str *libDir = Str_Make(m, STR_DEFAULT);
+    Str *dist = File_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
     String_Add(m, libDir, dist);
     char *cstr = "/";
     String_AddBytes(m, libDir, bytes(cstr), strlen(cstr));
@@ -301,7 +301,7 @@ static status build(BuildCtx *ctx){
 
     Dir_CheckCreate(m, libDir);
 
-    String *lib = String_Init(m, STRING_EXTEND);
+    Str *lib = String_Init(m, STRING_EXTEND);
     String_Add(m, lib, libDir);
     cstr = "/";
     String_AddBytes(m, lib, bytes(cstr), strlen(cstr));
