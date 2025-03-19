@@ -11,9 +11,9 @@
 #include "debug.h"
 #include "sequence.h"
 #include "crypto.h"
+#include "persist.h"
 /*
 #include "parser.h"
-#include "persist.h"
 #include "serve.h"
 */
 #include "termio.h"

@@ -11,23 +11,23 @@ enum access_flags {
 
 typedef struct signed_content {
     Type type;
-    String *content;
-    String *keyId;
-    String *signature;
+    Str *content;
+    Str *keyId;
+    Str *signature;
 } SignedContent;
 
 typedef struct access {
     Type type;
-    String *owner;
+    Str *owner;
     Span *groups; /* acccess objects */
     SignedContent *cert;
 } Access;
 
 status Access_Init(MemCtx *m);
-Access *Access_Make(MemCtx *m, String *owner, Span *groups);
-String *GetAccess(Access *access, String *s);
-String *GetGroupAccess(Access *access, String *s);
-status Access_Grant(MemCtx *m, Access *grantee, word fl, String *key, Abstract *value, Access *access);
+Access *Access_Make(MemCtx *m, Str *owner, Span *groups);
+Str *GetAccess(Access *access, Str *s);
+Str *GetGroupAccess(Access *access, Str *s);
+status Access_Grant(MemCtx *m, Access *grantee, word fl, Str *key, Abstract *value, Access *access);
 
 #define Access_SetFl(access, fl) \
     ((access)->type.state = (((access)->type.state & NORMAL_FLAGS) | fl))

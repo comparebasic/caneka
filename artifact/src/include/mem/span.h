@@ -11,7 +11,7 @@ enum span_flags {
     FLAG_SPAN_ORDERED = 1 << 10,
 };
 
-typedef void *slab[5];
+typedef void *slab[SPAN_STRIDE];
 
 typedef struct span {
     Type type;
