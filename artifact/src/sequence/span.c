@@ -24,8 +24,8 @@ static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
         if(dim > 0){
             st->offset += increment*localIdx;
         }
-        void **ptr = (void **)sl;
-        ptr += sq->idx;
+        void **ptr = (void **)prev->slab;
+        ptr += localIdx;
         if(ptr != NULL){
             sl = *ptr;
         }else{

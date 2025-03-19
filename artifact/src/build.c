@@ -342,6 +342,7 @@ static BuildSubdir *objdirs[] = {
 };
 
 int main(int argc, char **argv){
+    printf("making\n");
     if(MemChapter_Make(NULL) == NULL){
         Fatal("Unable to allocate Mem_Chapter", TYPE_CHAPTER);
         exit(1);
@@ -363,6 +364,6 @@ int main(int argc, char **argv){
 
     Build(&ctx);
 
+    printf("done making\n");
     return 0;
 }
-
