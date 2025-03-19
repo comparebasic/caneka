@@ -8,6 +8,14 @@ static inline i64 handleIo(StrVec *v, i32 fd, Str *s){
     }
 }
 
+static inline i64 handleVecIo(StrVec *v, i32 fd, StrVec *v2){
+    if(v == NULL && fd >= 0){
+        return StrVec_ToFd(v2, fd);
+    }else{
+        return StrVec_AddVec(v, v2);
+    }
+}
+
 static inline boolean TextCharFilter(byte *b, i64 length){
     byte *end = b+length;
     while(b < end){

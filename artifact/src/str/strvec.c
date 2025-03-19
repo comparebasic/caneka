@@ -64,6 +64,19 @@ status StrVec_Add(StrVec *v, Str *s){
     return r;
 }
 
+status StrVec_AddVec(StrVec *v, StrVec *v2){
+    Iter it;
+    Iter_Init(&it, v2->p);
+    i64 total = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s != NULL){
+            StrVec_Add(v, s);
+        }
+    }
+    return SUCCESS;
+}
+
 status StrVec_AddBytes(MemCtx *m, StrVec *v, byte *ptr, i64 length){
     Str *s = Span_Get(v->p, v->p->max_idx);
     status r = READY;

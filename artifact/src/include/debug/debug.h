@@ -8,16 +8,12 @@ extern boolean SHOW_SERVE_TESTS;
 extern MemCtx *_debugM;
 
 status Debug_Init(MemCtx *m);
-void DPrint(Abstract *a, int color, char *msg, ...);
-void Debug_Print(void *t, cls type, char *msg, int color, boolean extended);
 void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended);
-void Flag16_ToString(word flag, int color, boolean extended);
 void indent_Print(int indent);
 void Match_midDebug(char type, word c, struct patchardef *def, struct match *mt, boolean matched, boolean extended);
 
 extern char *rbl_debug_cstr[];
 
 const char *Type_ToChars(cls type);
-const char *State_ToChars(cls type);
-Str *State_ToStr(status state);
+Str *State_ToStr(MemCtx *m, status state);
 i64 Str_Debug(MemCtx *m, StrVec *v, i32 fd, void *t, cls type, boolean extended);

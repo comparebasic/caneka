@@ -17,10 +17,16 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
             start = ptr;
             state = READY;
         }else if(state == PROCESSING){
-            if(c == 'v'){
+            if(c == 't'){
                 s = Str_FromAbs(m, va_arg(args, Abstract *));
                 handleIo(v, fd, s);
                 total += s->length;
+                state = SUCCESS; 
+                goto next;
+            }else if(c == 'T'){
+                Abstract *obj = va_arg(args, Abstract *);
+                cls type = va_arg(args, i32);
+                total += Str_Debug(m, v, fd, obj, type, TRUE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){
@@ -31,10 +37,10 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 total += Str_Debug(m, v, fd, va_arg(args, Abstract *), 0, TRUE);
                 state = SUCCESS; 
                 goto next;
-            }else if(c == 'T'){
-                Abstract *obj = va_arg(args, Abstract *);
-                cls type = va_arg(args, i32);
-                total += Str_Debug(m, v, fd, obj, type, TRUE);
+            }else if(c == 'c'){
+                char *cstr = (char *)va_arg(args, char *);
+                s = Str_CstrRef(m, cstr);
+                handleIo(v, fd, s);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'i'){
@@ -71,6 +77,11 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
+            }else if(c == '+'){
+                StrVec *v2 = (StrVec *)as(va_arg(args, StrVec *), TYPE_STRVEC);
+                total += handleVecIo(v, fd, v2);
+                state = SUCCESS; 
+                goto next;
             }else if(c == 'u'){
                 c = *(++ptr);
                 i64 i = 0;
@@ -90,6 +101,14 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                     ptr--;
                 }
                 s = Str_FromI64(m, i);
+                handleIo(v, fd, s);
+                total += s->length;
+                state = SUCCESS; 
+                goto next;
+            }else if(c == '^'){
+                char *cstr = (char *)va_arg(args, char *);
+                char *cstr_end = cstr+(strlen(cstr)-1);
+                Str *s = Str_FromAnsi(m, &cstr, cstr_end);
                 handleIo(v, fd, s);
                 total += s->length;
                 state = SUCCESS; 

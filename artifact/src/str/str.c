@@ -1,6 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
+status Str_Reset(Str *s){
+    s->length = 0;
+    return SUCCESS;
+}
+
+status Str_Wipe(Str *s){
+    memset(s->bytes, 0, s->length);
+    return SUCCESS;
+}
+
 i64 Str_ToFd(Str *s, int fd){
     return write(fd, s->bytes, s->length);
 }
@@ -9,6 +19,9 @@ i64 Str_Add(Str *s, byte *b, i64 length){
     i64 len = min(s->alloc - s->length, length);
     if(len > 0){
         memcpy(s->bytes+s->length, b, len);
+    }
+    if(length != len){
+        s->type.state |= ERROR;
     }
     return len;
 }

@@ -17,10 +17,10 @@ Str *Str_FromAnsi(MemCtx *m, char **_ptr, char *end){
                 *(b++) = ';';
             }
             *(b++) = '0';
-        }else if(c == 'b'){
+        }else if(c == 'd'){
             *(b++) = '2';
             *(b++) = '2';
-        }else if(c == 'B'){
+        }else if(c == 'D'){
             *(b++) = '1';
         }else if(c == 'r'){
             if(b > _s){
@@ -118,7 +118,7 @@ Str *Str_FromAnsi(MemCtx *m, char **_ptr, char *end){
             }
             *(b++) = '4';
             *(b++) = '0';
-        }else if(c == '^'){
+        }else if(c == '.'){
             break;
         }else{
             ptr--;

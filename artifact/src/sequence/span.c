@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+static i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536};
+
 static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     Span *p = sq->span; 
     slab *sl = NULL;

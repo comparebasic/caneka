@@ -19,3 +19,5 @@ char *Str_Cstr(MemCtx *m, Str *s);
 Str *Str_CstrRef(MemCtx *m, char *cstr);
 status Str_AddCStr(Str *s, char *cstr);
 Str *Str_Clone(MemCtx *m, Str *s, word alloc);
+status Str_Wipe(Str *s);
+status Str_Reset(Str *s);

@@ -11,3 +11,4 @@ i64 StrVec_ToFd(StrVec *v, int fd);
 Str *StrVec_ToStr(MemCtx *m, StrVec *v);
 status StrVecCurs_Setup(StrVec *v, struct strvec_cursor *curs);
 status StrVec_NextSlot(StrVec *v, struct strvec_cursor *curs);
+status StrVec_AddVec(StrVec *v, StrVec *v2);

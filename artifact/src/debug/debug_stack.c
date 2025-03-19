@@ -61,23 +61,18 @@ int DebugStack_Print(){
     while((Iter_Next(&it) & END) == 0){
         StackEntry *entry = (StackEntry*)Iter_Get(&it);
         if(entry != NULL){
-            int color = DEBUG_STACK_COLOR;
+            char *color = "^y.";
             if(first){
-                color = COLOR_RED;
+                color = "^r.";
                 first = FALSE;
             }
-            printf("\x1b[1;%dm    %s\x1b[0;%dm - %s:%d", color,
-                entry->funcName,
-                color,
-                entry->fname,
-                entry->line);
-
+            Out(_debugM, "^D_^_c - _c:_i4^0\n", color, entry->funcName, entry->fname, entry->line);
             if(entry->ref != NULL && entry->typeOf != 0){
-                Debug_Print((void *)entry->ref, entry->typeOf, " - ", color, FALSE);
+                Out(_debugM, "_^_d^0", color, entry->ref);
             }else if(entry->ref != NULL && entry->typeOf == 0){
-                printf("\x1b[%dm - %s", color, (char *)entry->ref);
+                Out(_debugM, "_^_c^0", color, entry->ref);
             }
-            printf("\x1b[0m\n");
+            Out(_debugM, "\n");
         }
     }
     return 0;
