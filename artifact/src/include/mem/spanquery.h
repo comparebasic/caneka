@@ -11,7 +11,7 @@ typedef struct span_query {
     i32 idx;
     struct span *span;
     Abstract *value;
-    SpanState stack[5];
+    SpanState stack[SPAN_MAX_DIMS];
 } SpanQuery;
 
 SpanState *SpanQuery_StateByDim(SpanQuery *sq, i8 dim);

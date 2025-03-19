@@ -3,8 +3,6 @@
 #include <cnkbuild.h>
 
 #include "../../inc/core.c"
-#include "./debug_mocks.c"
-
 
 static status renderStatus(MemCtx *m, Abstract *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);

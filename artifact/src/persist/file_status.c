@@ -25,7 +25,8 @@ Str *File_GetCwdPath(MemCtx *m, Str *path){
     char *cstr = getcwd(buff, STR_DEFAULT);
     i64 length = strlen(cstr);
     Str *s = Str_Make(m, length+1);
-    return Str_Add(s, bytes(pathCstr), length);
+    Str_Add(s, (byte *)cstr, length);
+    return s;
 }
 
 Str *File_GetAbsPath(MemCtx *m, Str *path){
@@ -41,14 +42,14 @@ boolean File_CmpUpdated(MemCtx *m, Str *a, Str *b, Access *ac){
     struct stat build_stat;
     int r = 0;
 
-    char *path_cstr = Str_ToChars(m, a);
+    char *path_cstr = Str_Cstr(m, a);
     r = stat(path_cstr, &source_stat);
     if(r != 0){
         printf("%s\n", path_cstr);
         Fatal("Source not found", TYPE_FILE);
         exit(1);
     }
-    r = stat(Str_ToChars(m, b), &build_stat);
+    r = stat(Str_Cstr(m, b), &build_stat);
     time_t build_mtime = 0;
     if(r == 0){
         build_mtime = build_stat.st_mtime;
@@ -62,4 +63,3 @@ boolean File_CmpUpdated(MemCtx *m, Str *a, Str *b, Access *ac){
         return FALSE;
     }
 }
-

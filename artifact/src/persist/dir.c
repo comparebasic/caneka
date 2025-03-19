@@ -1,46 +1,56 @@
 #include <external.h>
 #include <caneka.h>
 
-static status rmDir(MemCtx *m, String *path, Abstract *source){
-    char *dirPath = String_ToChars(m, path);
+static Str _globalS;
+static byte _buff[STR_DEFAULT];
+
+static status fnameStr(MemCtx *m, Str *s, Str *path, Str *file){
+    Str_Add(s, path->bytes, path->length);
+    Str_Add(s, (byte *)"/", 1);
+    Str_Add(s, file->bytes, file->length);
+    return SUCCESS;
+}
+
+static status rmDir(MemCtx *m, Str *path, Abstract *source){
+    char *dirPath = Str_Cstr(m, path);
     return rmdir(dirPath) == 0 ? SUCCESS : ERROR;
 }
 
-static status rmFile(MemCtx *m, String *path, String *file, Abstract *source){
-    String *fpath = String_Clone(m, path); 
-    String_AddBytes(m, fpath, bytes("/"), 1);
-    String_Add(m, fpath, file);
-    char *rmPath = String_ToChars(m, fpath);
+static status rmFile(MemCtx *m, Str *path, Str *file, Abstract *source){
+    Str *s = &_globalS;
+    Str_Init(s, _buff, STR_DEFAULT, STR_DEFAULT);
+    fnameStr(m, s, path, file);
+    char *rmPath = Str_Cstr(m, s);
     return unlink(rmPath) == 0 ? SUCCESS : ERROR;
 }
 
-static status gatherDir(MemCtx *m, String *path, Abstract *source){
+static status gatherDir(MemCtx *m, Str *path, Abstract *source){
     Span *p = asIfc(source, TYPE_SPAN);
     return Span_Add(p, (Abstract *)path);
 }
 
-static status gatherFile(MemCtx *m, String *path, String *file, Abstract *source){
+static status gatherFile(MemCtx *m, Str *path, Str *file, Abstract *source){
     Span *p = asIfc(source, TYPE_SPAN);
-    String *fname = String_Init(m, path->length+path->length+1);
-    String_Add(m, fname, path);
-    String_AddBytes(m, fname, bytes("/"), 1);
-    String_Add(m, fname, file);
-    return Span_Add(p, (Abstract *)fname);
+    StrVec *v = StrVec_Make(m);
+    StrVec_Add(v, path);
+    StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1));
+    StrVec_Add(v, file);
+    return Span_Add(p, (Abstract *)v);
 }
 
-status Dir_Destroy(MemCtx *m, String *path, Access *access){
+status Dir_Destroy(MemCtx *m, Str *path, Access *access){
     status r = READY;
     r |= Dir_Climb(m, path, rmDir, rmFile, NULL);
     r |= rmDir(m, path, NULL);
     return r;
 }
 
-status Dir_Gather(MemCtx *m, String *path, Span *sp){
+status Dir_Gather(MemCtx *m, Str *path, Span *sp){
     return Dir_Climb(m, path, gatherDir, gatherFile, (Abstract *)sp);
 }
 
-status Dir_Exists(MemCtx *m, String *path){
-    char *path_cstr = String_ToChars(m, path);
+status Dir_Exists(MemCtx *m, Str *path){
+    char *path_cstr = Str_Cstr(m, path);
     DIR* dir = opendir(path_cstr);
     if(dir){
         closedir(dir);
@@ -51,7 +61,7 @@ status Dir_Exists(MemCtx *m, String *path){
     return ERROR;
 }
 
-status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *source){
+status Dir_Climb(MemCtx *m, Str *path, DirFunc dir, FileFunc file, Abstract *source){
     DebugStack_Push(path, path->type.of); 
     status r = READY;
     struct dirent *ent;
@@ -61,17 +71,17 @@ status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *
             if(ent->d_name[0] == '.' && (ent->d_name[0] == '.' || ent->d_name[0] == '0')){
                 continue;
             }
+            i64 len = strlen(ent->d_name);
+            Str *e = Str_Ref(m, (byte *)ent->d_name, len, len+1);
             if(ent->d_type == IS_DIR){
-                String *s = String_Init(m, -1);
-                String_Add(m, s, path);
-                String_AddBytes(m, s, bytes("/"), 1);
-                String_AddBytes(m, s, bytes(ent->d_name), strlen(ent->d_name));
+                Str *s = Str_Make(m, STR_DEFAULT);
+                fnameStr(m, s, path, e);
                 Dir_Climb(m, s, dir, file, source);
                 if(dir != NULL){
                     r |= dir(m, s, source);
                 }
             }else{
-                r |= file(m, path, String_Make(m, bytes(ent->d_name)), source);
+                r |= file(m, path, e, source);
             }
         }
         closedir(d);
@@ -83,11 +93,15 @@ status Dir_Climb(MemCtx *m, String *path, DirFunc dir, FileFunc file, Abstract *
     }
 }
 
-status Dir_CheckCreate(MemCtx *m, String *path){
+status Dir_CheckCreate(MemCtx *m, Str *path){
     DebugStack_Push(path, path->type.of);
     Span *cmd = Span_Make(m);
-    Span_Add(cmd, (Abstract *)String_Make(m, bytes("mkdir")));
-    Span_Add(cmd, (Abstract *)String_Make(m, bytes("-p")));
+    char *cstr = "mkdir";
+    i64 len = strlen(cstr);
+    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1));
+    cstr = "-p";
+    len = strlen(cstr);
+    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1));
     Span_Add(cmd, (Abstract *)path);
 
     ProcDets pd;
