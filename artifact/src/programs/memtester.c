@@ -47,9 +47,9 @@ char *longCstr = "" \
 
 
 int main(int argc, char *argv[]){
-    MemChapter *cp = MemChapter_Make(NULL);
+    MemBook *cp = MemBook_Make(NULL);
     if(cp != NULL){
-        printf("MemChapter created successfully\n");
+        printf("MemBook created successfully\n");
     }
 
     MemCtx *m = MemCtx_Make();
@@ -65,9 +65,9 @@ int main(int argc, char *argv[]){
     Out("\n");
     Span_Print((Abstract *)&m->p, 0, "Mem Span: ", COLOR_CYAN, TRUE);
     Out("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_BLUE, TRUE);
+    MemBook_Print((Abstract *)cp, 0, "MemBook: ", COLOR_BLUE, TRUE);
     Out("\n");
-    Span_Print((Abstract *)&cp->pages, 0, "Chapter Span: ", COLOR_CYAN, TRUE);
+    Span_Print((Abstract *)&cp->pages, 0, "Book Span: ", COLOR_CYAN, TRUE);
     Out("\n");
 
     i64 max = 1024;
@@ -81,9 +81,9 @@ int main(int argc, char *argv[]){
     printf("\n");
     Span_Print((Abstract *)&m->p, 0, "Mem Span: ", COLOR_CYAN, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ", COLOR_BLUE, TRUE);
+    MemBook_Print((Abstract *)cp, 0, "MemBook: ", COLOR_BLUE, TRUE);
     printf("\n");
-    Span_Print((Abstract *)&cp->pages, 0, "Chapter Span: ", COLOR_CYAN, TRUE);
+    Span_Print((Abstract *)&cp->pages, 0, "Book Span: ", COLOR_CYAN, TRUE);
     printf("\n");
 
     m->type.range++;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]){
     MemCtx_Print((Abstract *)m, 0, "MemCtx: ",
         COLOR_BLUE, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter: ",
+    MemBook_Print((Abstract *)cp, 0, "MemBook: ",
         COLOR_BLUE, TRUE);
     printf("\n");
 
@@ -113,14 +113,14 @@ int main(int argc, char *argv[]){
     MemCtx_Print((Abstract *)m, 0, "MemCtx (after x4): ", 
         COLOR_BLUE, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter (after x4): ", 
+    MemBook_Print((Abstract *)cp, 0, "MemBook (after x4): ", 
         COLOR_BLUE, TRUE);
     printf("\n");
 
     MemCtx_Free(m);
     MemCtx_Print((Abstract *)m, 0, "MemCtx: ", COLOR_BLUE, TRUE);
     printf("\n");
-    MemChapter_Print((Abstract *)cp, 0, "MemChapter After Free 1: ", COLOR_BLUE, TRUE);
+    MemBook_Print((Abstract *)cp, 0, "MemBook After Free 1: ", COLOR_BLUE, TRUE);
 
     fflush(stdout);
     Str_ToFd(three, 0);

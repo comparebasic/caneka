@@ -123,10 +123,10 @@ i64 MemCtx_Print(MemCtx *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean e
     return 0;
 }
 
-i64 MemChapter_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
-    MemChapter *cp = (MemChapter*)as(a, TYPE_CHAPTER); 
+i64 MemBook_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+    MemBook *cp = (MemBook*)as(a, TYPE_BOOK); 
 /*
-    printf("\x1b[%dm%sMemChapter<start:%p/pages:%d)[available:%d selected:%d]",
+    printf("\x1b[%dm%sMemBook<start:%p/pages:%d)[available:%d selected:%d]",
         color, msg, cp->start, cp->pages.nvalues, cp->pages.metrics.available,
         cp->pages.metrics.selected);
     Iter it;
@@ -152,7 +152,7 @@ i64 MemChapter_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolea
 status Mem_DebugInit(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCtx_Print);
-    r |= Lookup_Add(m, lk, TYPE_CHAPTER, (void *)MemChapter_Print);
+    r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
     r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemSlab_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_SPANSTATE, (void *)SpanState_Print);

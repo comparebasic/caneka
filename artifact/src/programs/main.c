@@ -145,8 +145,8 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    if(MemChapter_Make(NULL) == NULL){
-        Fatal("Unable to allocate Mem_Chapter", TYPE_CHAPTER);
+    if(MemBook_Make(NULL) == NULL){
+        Fatal("Unable to allocate Mem_Book", TYPE_CHAPTER);
         exit(1);
     };
 

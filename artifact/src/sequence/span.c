@@ -52,7 +52,7 @@ void SpanQuery_Setup(SpanQuery *sr, Span *p, status op, i32 idx){
 slab *Slab_WhileExpanding(MemSlab **_sl){
     MemSlab *sl = *_sl;
     if(sl == NULL){
-        void *bytes = MemChapter_GetBytes();
+        void *bytes = MemBook_GetBytes();
         if(bytes == NULL){
             return NULL;
         }

@@ -1,5 +1,5 @@
 typedef struct mem_range {
-    MemChapter *chapter;
+    MemBook *book;
     void *start;
     void *end;
 } MemRange;

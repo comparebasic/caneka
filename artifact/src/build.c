@@ -343,8 +343,8 @@ static BuildSubdir *objdirs[] = {
 
 int main(int argc, char **argv){
     printf("making\n");
-    if(MemChapter_Make(NULL) == NULL){
-        Fatal("Unable to allocate Mem_Chapter", TYPE_CHAPTER);
+    if(MemBook_Make(NULL) == NULL){
+        Fatal("Unable to allocate Mem_Book", TYPE_BOOK);
         exit(1);
     };
     MemCtx *m = MemCtx_Make();

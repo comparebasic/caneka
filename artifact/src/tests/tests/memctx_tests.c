@@ -6,14 +6,14 @@ status MemCtx_Tests(MemCtx *gm){
     status r = READY;
 
     MemCtx *m = MemCtx_Make();
-    MemChapter *cp = NULL;
+    MemBook *cp = NULL;
 #ifdef INSECURE
-    cp = MemChapter_Get(m);
+    cp = MemBook_Get(m);
 #endif
     i32 count = 0;
     if(cp != NULL){
         count = cp->pages.nvalues;
-        r |= Test(count > 0, "Chapter slab count is greater than 0, have %d.", count);
+        r |= Test(count > 0, "Book slab count is greater than 0, have %d.", count);
     }
 
     i64 max = 1024;

@@ -1,154 +1,183 @@
 #include <external.h>
 #include <caneka.h>
 
-static int _chapterIdx = -1;
-static MemRange _chapters[16] = {
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL},
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL},
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL},
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}
-};
-
-static MemChapter *MemChapter_get(void *addr){
-    int idx = _chapterIdx;
-    if(addr == NULL){
-        return _chapters[idx].chapter;
-    }
-    while(idx >= 0){
-        MemRange *mrange = _chapters+idx;
-        if(addr >= mrange->start && addr <= mrange->end){
-            return mrange->chapter;
-        }
-        idx--;
-    }
-    Fatal("MemChapter not found", TYPE_CHAPTER);
-    return NULL;
+void *MemSlab_Alloc(MemSlab *sl, word sz){
+    sl->remaining -= sz;
+    return sl->bytes+((size_t)sl->remaining); 
 }
 
-#ifdef INSECURE
-MemChapter *MemChapter_Get(void *addr){
-    return MemChapter_get(addr);
-}
-#endif
+MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
+    void *bytes = MemBook_GetBytes();
+    if(bytes == NULL){
+        return NULL;
+    }
 
-i64 MemCount(i16 level){
+    MemSlab _sl = {
+        .type = {TYPE_MEMSLAB, 0},
+        .level = level,
+        .remaining = MEM_SLAB_SIZE,
+        .bytes = bytes,
+    };
+    MemSlab *sl = MemSlab_Alloc(&_sl, sizeof(MemSlab));
+    memcpy(sl, &_sl, sizeof(MemSlab));
+
+    i32 idx = m->p.max_idx+1;
+    Span_Set(&m->p, idx, (Abstract *)sl);
+    MemBook_Claim(sl);
+    return sl;
+}
+
+i64 MemCtx_MemCount(MemCtx *m, i16 level){
     i64 total = 0;
-    Iter it;
-    for(int i = 0; i <= _chapterIdx; i++){
-        MemChapter *cp = _chapters[i].chapter;
-        Iter_Init(&it, &cp->pages);
-        while((Iter_Next(&it) & END) == 0){
-            MemSlab *sl = (MemSlab *)Iter_Get(&it);
-            if(sl != NULL && sl->level >= level){
-                total += MemSlab_Taken(sl);
-            }
+    while((Iter_Next(&m->it) & END) == 0){
+        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        if(sl != NULL && (level == 0 || sl->level == level)){
+            total += MEM_SLAB_SIZE;
         }
     }
+
     return total;
 }
 
-status MemChapter_FreeSlab(MemCtx *m, MemSlab *sl){
-    size_t sz = MemSlab_Taken(sl); 
-    memset(sl->bytes+sl->remaining, 0, sz);
-    MemChapter *cp = MemChapter_get(m);
-    int idx = (((void *)sl) - cp->start)/PAGE_SIZE;
-    return Span_Remove(&cp->pages, idx);
-}
+void *MemCtx_Alloc(MemCtx *m, size_t sz){
+    if(sz > MEM_SLAB_SIZE){
+        Fatal("Trying to allocation too much memory at once", TYPE_MEMCTX);
+    }
 
-void *MemChapter_GetBytes(){
-    MemChapter *cp = MemChapter_get(NULL);
-    int idx = -1;
-    if(cp->pages.metrics.available != -1){
-        idx = cp->pages.metrics.available;
-        cp->pages.metrics.available = -1;
-    }else{
-        while((Iter_Next(&cp->it) & END) == 0){
-            MemSlab *sl = (MemSlab *)Iter_Get(&cp->it);
-            if(sl == NULL){
-                idx = cp->it.idx;
-                cp->pages.metrics.selected = idx;
-                break;
-            }
+    i16 level = max(m->type.range, 0);
+    word _sz = (word)sz;
+
+    MemSlab *sl = NULL;
+    while((Iter_Next(&m->it) & END) == 0){
+        MemSlab *_sl = (MemSlab *)Iter_Get(&m->it);
+        if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
+            sl = _sl;
+            break;
         }
     }
-    /*
-    printf("it->idx:%d, idx:%d max_idx:%d nvalues:%d\n", cp->it.idx, idx, cp->pages.max_idx, cp->pages.nvalues);
-    */
-    if(idx == -1 && cp->pages.max_idx+1 < PAGE_COUNT){
-        idx = cp->pages.max_idx+1;
-    }
-    if(idx != -1){
-        cp->pages.metrics.selected = idx;
-        void *page = cp->start+(idx*PAGE_SIZE);
-        memset(page, 0, PAGE_SIZE);
-        return page;
-    }
-    /* make new chapter here as all chapters are full */
-    Fatal("Next chapter not implemented", TYPE_CHAPTER);
 
-    if(MemChapter_Make(cp) != NULL){
-        return MemChapter_GetBytes();
+    if(sl == NULL){
+        sl = MemSlab_Attach(m, level);
     }
-    return NULL;
+    Iter_Reset(&m->it);
+
+    return MemSlab_Alloc(sl, _sz);
 }
 
-status MemChapter_Claim(MemSlab *sl){
-    MemChapter *cp = MemChapter_get(sl);
-    if(cp->pages.metrics.selected != -1){
-        Span_Set(&cp->pages, cp->pages.metrics.selected, (Abstract *)sl);
-        cp->pages.metrics.selected = -1;
-        return SUCCESS;
-    }
-    return ERROR;
+i64 MemCtx_Used(MemCtx *m){
+    return MemCtx_MemCount(m, 0);
 }
 
-MemChapter *MemChapter_Make(MemChapter *prev){
-    _chapterIdx++;
-    if(_chapterIdx >= CHAPTER_MAX){
-        Fatal("Chapter already taken", TYPE_CHAPTER);
+void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
+    if(s > origsize){
+        Fatal("Asking to copy more than newly allocated", TYPE_MEMCTX);
         return NULL;
     }
-    MemRange *mrange = _chapters+_chapterIdx;
-    if(mrange->chapter != NULL){
-        Fatal("Chapter already taken", TYPE_CHAPTER);
-        return NULL;
-    }
+    void *p = MemCtx_Alloc(m, s);
+    memcpy(p, orig, origsize);
+    return p; 
+}
 
-    void *start = mmap(prev, 
-        CHAPTER_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+status MemCtx_Setup(MemCtx *m, MemSlab *sl){
+    memcpy(&m->first, sl, sizeof(MemSlab));
+    m->type.of = TYPE_MEMCTX;
+    Span *p = &m->p;
+    Span_Setup(p);
+    p->type.state |= DEBUG;
+    p->m = m;
+    p->root = MemSlab_Alloc(&m->first, sizeof(slab));
+    Iter_Init(&m->it, p);
+    Span_Set(&m->p, 0, (Abstract *)&m->first);
+    return SUCCESS;
+}
 
-    mrange->start = start;
-    mrange->end = start+CHAPTER_SIZE-sizeof(void *);
-
-    if(start == MAP_FAILED){
-        printf("err:%s\n", strerror(errno));
-        Fatal("Unable to map memory", TYPE_CHAPTER);
-        return NULL;
-    }
-
-    MemSlab sl = {
+MemCtx *MemCtx_OnPage(void *page){
+    MemSlab _sl = {
         .type = {TYPE_MEMSLAB, 0},
         .level = 0,
         .remaining = MEM_SLAB_SIZE,
-        .bytes = start,
+        .bytes = page,
     };
 
-    MemChapter *cp = MemSlab_Alloc(&sl, sizeof(MemChapter));
-    cp->type.of = TYPE_CHAPTER;
-    MemCtx_Setup(&cp->m, &sl);
+    MemCtx *m = (MemCtx *)MemSlab_Alloc(&_sl, sizeof(MemCtx));
+    MemCtx_Setup(m, &_sl);
+    return m;
+}
 
-    cp->m.p.type.state |= DEBUG;
+MemCtx *MemCtx_Make(){
+    void *bytes = MemBook_GetBytes();
+    MemCtx *m = MemCtx_OnPage(bytes);
+    MemBook_Claim(&m->first);
+    return m;
+}
 
-    cp->start = start;
-    mrange->chapter = cp;
+i64 MemCtx_Total(MemCtx *m, i16 level){
+    return MemCtx_MemCount(m, level);
+}
 
-    Span *p = &cp->pages;
-    Span_Setup(p);
-    p->m = &cp->m;
-    p->root = MemSlab_Alloc(&cp->m.first, sizeof(slab));
-    Iter_Init(&cp->it, &cp->pages);
+status MemCtx_WipeTemp(MemCtx *m, i16 level){
+    status r = READY;
 
-    cp->pages.metrics.selected = 0;
-    MemChapter_Claim(&cp->m.first);
-    return cp;
+    while((Iter_Next(&m->it) & END) == 0){
+        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        if(sl != NULL && (level == 0 || sl->level >= level) && sl->remaining < MEM_SLAB_SIZE){
+            size_t sz = MemSlab_Taken(sl); 
+            memset(sl->bytes+sl->remaining, 0, sz);
+            sl->remaining = MEM_SLAB_SIZE;
+            r = SUCCESS;
+        }
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    Iter_Reset(&m->it);
+
+    return r;
+}
+
+status MemCtx_FreeTemp(MemCtx *m, i16 level){
+    status r = READY;
+
+    Iter_InitReverse(&m->it, &m->p);
+    while((Iter_Next(&m->it) & END) == 0){
+        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        if(sl != NULL && (level == 0 || sl->level >= level)){
+            if(m->it.idx > 0){
+                r |= Span_Remove(&m->p, m->it.idx);
+            }
+            r |= MemBook_FreeSlab(m, sl);
+        }
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+    Iter_Reset(&m->it);
+
+    return r;
+}
+
+status MemCtx_Free(MemCtx *m){
+    return MemCtx_FreeTemp(m, max(m->type.range, 0));
+}
+
+/* utils */
+void *MemCtx_GetSlab(MemCtx *m, void *addr, i32 *idx){
+    Iter_Reset(&m->it);
+    while((Iter_Next(&m->it) & END) == 0){
+        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        if(sl != NULL){
+            void *start = (void *)sl->bytes;
+            void *end = sl->bytes + MEM_SLAB_SIZE;
+            if((void *)(sl->bytes) <= addr && addr < end){
+                *idx = m->it.idx;
+                return sl;
+            }
+        }
+    }
+    Iter_Reset(&m->it);
+    *idx = -1;
+    return NULL;
 }
