@@ -41,6 +41,7 @@ static status setupStatus(BuildCtx *ctx){
 
     CliStatus_SetDims(ctx->cli, 0, 0);
     i32 width = ctx->cli->cols;
+    IntPair coords = {0, 0};
 
     StrVec *v = StrVec_Make(m);
     ctx->fields.steps.modCount_s = Str_Make(m, MAX_BASE10+1);
@@ -49,6 +50,12 @@ static status setupStatus(BuildCtx *ctx){
     StrVec_FmtAdd(m, v, -1, "^ymodule _+ of _+: ^yD._+^0", ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
+    coords.a = ctx->cli->lines->max_idx;
+    coords.b = StrVec_GetIdx(v, ctx->fields.steps.modCount_s);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "modCount"), &coords);
+    coords.b = StrVec_GetIdx(v, ctx->fields.steps.modTotal_s);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "modTotal"), &coords);
+
     v = StrVec_Make(m);
     ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
@@ -56,11 +63,25 @@ static status setupStatus(BuildCtx *ctx){
     StrVec_FmtAdd(m, v, -1, "^b_+: _+ -> ^bD._+^0", ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
+    coords.a = ctx->cli->lines->max_idx;
+    coords.b = StrVec_GetIdx(v, ctx->fields.current.action);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "action"), &coords);
+    coords.b = StrVec_GetIdx(v, ctx->fields.current.source);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "source"), &coords);
+    coords.b = StrVec_GetIdx(v, ctx->fields.current.dest);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "dest"), &coords);
+
     v = StrVec_Make(m);
     ctx->fields.steps.count_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.total_s = Str_Make(m, MAX_BASE10+1);
     StrVec_FmtAdd(m, v, -1, "sources: _+ of _+^0", ctx->fields.steps.count_s, ctx->fields.steps.total_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
+
+    coords.a = ctx->cli->lines->max_idx;
+    coords.b = StrVec_GetIdx(v, ctx->fields.steps.count_s);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "stepAction"), &coords);
+    coords.b = StrVec_GetIdx(v, ctx->fields.steps.total_s);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "stepTotal"), &coords);
 
     ctx->fields.steps.barStart = Str_Make(m, width);
     memset(ctx->fields.steps.barStart->bytes, ' ', width);
@@ -74,6 +95,9 @@ static status setupStatus(BuildCtx *ctx){
     StrVec_FmtAdd(m, v, -1, "^cMemory Count: _+^0", ctx->fields.mem_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
+    coords.a = ctx->cli->lines->max_idx;
+    coords.b = StrVec_GetIdx(v, ctx->fields.mem_s);
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "memCount"), &coords);
 
     BuildSubdir **dir = ctx->objdirs;
     while(*dir != NULL){

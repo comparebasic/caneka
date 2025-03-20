@@ -12,3 +12,4 @@ Str *StrVec_ToStr(MemCtx *m, StrVec *v);
 status StrVecCurs_Setup(StrVec *v, struct strvec_cursor *curs);
 status StrVec_NextSlot(StrVec *v, struct strvec_cursor *curs);
 status StrVec_AddVec(StrVec *v, StrVec *v2);
+i32 StrVec_GetIdx(StrVec *v, Str *s);

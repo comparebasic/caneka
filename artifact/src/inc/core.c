@@ -9,6 +9,8 @@
 #include "../sequence/span.c"
 #include "../sequence/iter.c"
 #include "../sequence/lookup.c"
+#include "../sequence/table.c"
+#include "../sequence/hashed.c"
 #include "../str/str.c"
 #include "../str/strvec.c"
 #include "../str/strvec_fmt.c"

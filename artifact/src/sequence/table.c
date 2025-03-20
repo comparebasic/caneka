@@ -6,12 +6,7 @@ int TABLE_REQUERY_MAX[TABLE_MAX_DIMS] = {8, 8, 4, 4, 2};
 static i64 dim_lookups[TABLE_MAX_DIMS] = {15, 255, 4095, 65535, 1048575};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
-static void setValuePtr(Span *tbl, Hashed *h, Abstract *value){
-    LocalPtr lp;
-    h->value = value;
-}
-
-static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value);
+static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *value);
 
 static int getReQueryKey(i64 hash, int position, byte dim){
     return (int) ((hash >> (position*TABLE_DIM_BYTESIZES[dim])) & dim_lookups[dim]);
@@ -37,8 +32,7 @@ static status Table_Resize(Span *tbl, word *queries){
 
         SpanQuery sr;
         SpanQuery_Setup(&sr, newTbl, SPAN_OP_RESIZE, 0);
-        sr.dimsNeeded = tbl->dims+1;
-        Span_GrowToNeeded(&sr);
+        Span_Set(tbl, _increments[tbl->dims], NULL);
 
         for(int i = 0; i <= tbl->max_idx; i++){
             Hashed *h = (Hashed *)Span_Get(tbl, i);
@@ -54,25 +48,31 @@ static status Table_Resize(Span *tbl, word *queries){
     return NOOP;
 }
 
-static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *value){
+static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *value){
     Hashed *h = Hashed_Make(tbl->m, a);
     if(a == NULL){
+        /*
         if(tbl->type.of == TYPE_ORDERED_TABLE){
             OrdTable *otbl = (OrdTable *)as(tbl, TYPE_ORDERED_TABLE);
             Span_Add(otbl->order, (Abstract *)h);
             return h;
         }else{
+        */
             return NULL;
+            /*
         }
+        */
     }
     tbl->type.state &= ~SUCCESS;
     if(op != SPAN_OP_GET && op != SPAN_OP_SET){
         return h;
     }
     Hashed *_h = NULL;
+    /*
     if(op != SPAN_OP_GET && value != NULL){
         setValuePtr(tbl, h, value);
     }
+    */
     Abstract *v = NULL;
     boolean found = FALSE;
     word queries = 0;
@@ -82,14 +82,6 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
             Table_Resize(tbl, &queries);
             int hkey = getReQueryKey(h->id, j, tbl->dims);
             _h = (Hashed *)Span_Get(tbl, hkey);
-            if(DEBUG_TABLE){
-                Debug_Print((void *)h->item, 0, "At ", DEBUG_TABLE, FALSE);
-                printf("\x1b[%dm dimsize=%hu key/%lu=", DEBUG_TABLE, tbl->dims, dim_lookups[tbl->dims]);
-                Bits_Print((byte *)&hkey, TABLE_DIM_BYTESIZES[tbl->dims], "", DEBUG_TABLE, TRUE);
-                printf("\x1b[%dm%d half-byte of ", DEBUG_TABLE, j+1);
-                Bits_Print((byte *)&(h->id), sizeof(int), "", DEBUG_TABLE, FALSE);
-                printf("\x1b[%dm query=%d>\x1b[0m\n", DEBUG_TABLE, queries);
-            }
             if(op == SPAN_OP_GET){
                 if(_h != NULL && *((util *)_h) != 0){
                     if(Hashed_ExternalEquals(tbl->m, h, _h)){
@@ -109,10 +101,12 @@ static Hashed *Table_GetSetHashed(Span *tbl, byte op, Abstract *a, Abstract *val
                 }else{
                     h->idx = hkey;
                     h = (Hashed *)Span_Set(tbl, hkey, (Abstract *)h);
+                    /*
                     if(tbl->type.of == TYPE_ORDERED_TABLE){
                         OrdTable *otbl = (OrdTable *)as(tbl, TYPE_ORDERED_TABLE);
                         Span_Add(otbl->order, (Abstract *)h);
                     }
+                    */
                     found = TRUE;
                     break;
                 }
@@ -131,6 +125,18 @@ status Table_SetKey(Span *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, NULL);
     return SUCCESS;
 }
+
+status Table_SetRaw(Span *tbl, Str *key, util *u){
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, (Abstract *)key, (Abstract *)*u);
+    h->type.state |= FLAG_SPAN_RAW;
+    return SUCCESS;
+}
+
+util Table_GetRaw(Span *tbl, Str *key){
+    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, (Abstract *)key, NULL);
+    return (util)h->item;
+}
+
 
 i32 Table_SetIdxEntry(Span *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, NULL);

@@ -5,9 +5,7 @@
 #include "mem.h"
 #include "str.h"
 #include "core.h"
-/*
 #include "util.h"
-*/
 #include "debug.h"
 #include "sequence.h"
 #include "crypto.h"

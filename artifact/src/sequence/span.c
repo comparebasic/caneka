@@ -243,6 +243,35 @@ void *Span_Get(Span *p, i32 idx){
     return Span_GetFromQ(&sq);
 }
 
+void *Span_SetRaw(Span *p, i32 idx, util *u){
+    if(idx < 0 || u == NULL){
+        return NULL;
+    }
+    p->type.state |= FLAG_SPAN_RAW;
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, p, SPAN_OP_SET, idx);
+    return Span_SetFromQ(&sq, (Abstract *)*u);
+}
+
+util Span_GetRaw(Span *p, i32 idx){
+    if(idx < 0){
+        return 0;
+    }
+    if((p->type.state & FLAG_SPAN_RAW) == 0){
+        Fatal("Tried to get raw value from non raw span", TYPE_SPAN);
+        return 0;
+    }
+    SpanQuery sq;
+    SpanQuery_Setup(&sq, p, SPAN_OP_GET, idx);
+    status r = Span_Query(&sq);
+    if((r & SUCCESS) == 0){
+        p->type.state |= ERROR;
+        return 0;
+    }
+    return (util)Span_GetFromQ(&sq);
+}
+
+
 void *Span_GetSelected(Span *p){
     return Span_Get(p, p->metrics.selected);
 }

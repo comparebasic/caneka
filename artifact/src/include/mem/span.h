@@ -9,6 +9,8 @@ enum span_flags {
     FLAG_SPAN_INLINE_SLOTS = 1 << 8,
     FLAG_SPAN_HAS_GAPS = 1 << 9,
     FLAG_SPAN_ORDERED = 1 << 10,
+    FLAG_SPAN_RAW = 1 << 11,
+    FLAG_SPAN_TABLE = 1 << 12,
 };
 
 typedef void *slab[SPAN_STRIDE];
@@ -36,6 +38,8 @@ void *Span_SetFromQ(struct span_query *sq, Abstract *t);
 void *Span_Set(Span *p, i32 idx, Abstract *t);
 void *Span_GetFromQ(struct span_query *sq);
 void *Span_Get(Span *p, i32 idx);
+void *Span_SetRaw(Span *p, i32 idx, util *u);
+util Span_GetRaw(Span *p, i32 idx);
 i32 Span_Add(Span *p, Abstract *t);
 i8 Span_GetDimNeeded(int idx);
 status Span_Cull(Span *p, i32 count);

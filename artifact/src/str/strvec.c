@@ -58,6 +58,19 @@ status StrVec_NextSlot(StrVec *v, Cursor *curs){
     return curs->type.state;
 }
 
+i32 StrVec_GetIdx(StrVec *v, Str *s){
+    Iter it;
+    Iter_Init(&it, v->p);
+    i64 total = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *_s = (Str *)Iter_Get(&it);
+        if(_s != NULL && _s == s){
+            return it.idx;
+        }
+    }
+    return -1;
+}
+
 status StrVec_Add(StrVec *v, Str *s){
     status r = Span_Add(v->p, (Abstract *)s);
     v->total += s->length;

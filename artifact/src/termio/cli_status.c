@@ -1,6 +1,21 @@
 #include <external.h>
 #include <caneka.h>
 
+status CliStatus_SetKey(MemCtx *m, CliStatus *cli, Str *key, IntPair *pair){
+    return Table_SetRaw(cli->tbl, key, (util *)pair);
+}
+
+status CliStatus_SetByKey(MemCtx *m, CliStatus *cli, Str *key, Str *s){
+    util _pair = Table_GetRaw(cli->tbl, key);
+    IntPair *pair = (IntPair *)&_pair;
+    if(cli->tbl->type.state & SUCCESS){
+        StrVec *line = Span_Get(cli->lines, pair->a);
+        Span_Set(cli->lines, pair->b, (Abstract *)s);
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 status CliStatus_Print(MemCtx *m, CliStatus *cli){
     if((cli->render(m, (Abstract *)cli) & NOOP) == 0){
         Iter it;
@@ -64,5 +79,7 @@ CliStatus *CliStatus_Make(MemCtx *m, DoFunc render, Abstract *source){
     st->lines = Span_Make(m);
     st->render = render;
     st->source = source;
+    st->tbl = Span_Make(m);
+    st->tbl->type.state |= FLAG_SPAN_TABLE;
     return st;
 }

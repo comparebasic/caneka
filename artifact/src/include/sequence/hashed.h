@@ -1,3 +1,7 @@
+enum hash_flags {
+    FLAG_HASHED_RAW = 1 << 11,
+};
+
 typedef struct hashed {
     Type type;
     int idx;

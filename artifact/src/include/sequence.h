@@ -3,9 +3,10 @@
 #include "sequence/chain.h"
 */
 #include "sequence/lookup.h"
+#include "sequence/hashed.h"
+#include "sequence/table.h"
 /*
 #include "sequence/mess.h"
-#include "sequence/table.h"
 #include "sequence/table_chain.h"
 #include "sequence/queue.h"
 #include "sequence/nestedd.h"

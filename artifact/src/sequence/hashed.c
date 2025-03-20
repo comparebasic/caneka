@@ -32,12 +32,11 @@ static util Hash_PatCharDef(Abstract *a){
     return 0;
 }
 
-static util Hash_String(Abstract *a){
-    String *s = (String *)asIfc(a, TYPE_STRING);
+static util Hash_Str(Abstract *a){
+    String *s = (Str *)asIfc(a, TYPE_STR);
 	util h = 5381;
     while(s != NULL){
         h = _Hash_Bytes(s->bytes, s->length, h);
-        s = String_Next(s);
     }
     return h;
 }
@@ -59,9 +58,7 @@ static status populateHash(MemCtx *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_PatMatch);
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)Hash_PatCharDef);
-    r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)Hash_String);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)Hash_String);
-    r |= Lookup_Add(m, lk, TYPE_STRING_FULL, (void *)Hash_String);
+    r |= Lookup_Add(m, lk, TYPE_STR, (void *)Hash_Str);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);

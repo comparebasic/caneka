@@ -14,3 +14,5 @@ Span *Table_Make(MemCtx *m);
 status Table_Merge(Span *tbl, Span *oldTbl);
 i32 Table_SetIdxEntry(Span *tbl, Abstract *a);
 Abstract *Table_GetKey(Span *tbl, i32 idx);
+status Table_SetRaw(Span *tbl, Str *key, util *u);
+util Table_GetRaw(Span *tbl, Str *key);
