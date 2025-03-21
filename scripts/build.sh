@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 if [ -e ./build/caneka ]; then
     echo -e "\x1b[33m[Transpiling]\x1b[0m"
     ./build/caneka transp

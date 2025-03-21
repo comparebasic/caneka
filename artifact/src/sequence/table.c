@@ -84,14 +84,14 @@ static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *val
             _h = (Hashed *)Span_Get(tbl, hkey);
             if(op == SPAN_OP_GET){
                 if(_h != NULL && *((util *)_h) != 0){
-                    if(Hashed_ExternalEquals(tbl->m, h, _h)){
+                    if(Hashed_Equals(h, _h)){
                         h = _h;
                         found = TRUE;
                     }
                 }
             }else if(op == SPAN_OP_SET){
                 if(_h != NULL && *((util *)_h) != 0){
-                    if(Hashed_LocalEquals(tbl->m, h, _h)){
+                    if(Hashed_Equals(h, _h)){
                         h = _h;
                         h->idx = hkey;
                         h->value = value;
@@ -182,29 +182,6 @@ Abstract *Table_Get(Span *tbl, Abstract *a){
 int Table_Set(Span *tbl, Abstract *a, Abstract *value){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
     return h->idx;
-}
-
-/* untested */
-status Table_Merge(Span *tbl, Span *oldTbl){
-    Iter it;
-    Iter_Init(&it, oldTbl);
-    status r = READY;
-    while((Iter_Next(&it) & END) == 0){
-        Hashed *h = (Hashed *)Iter_Get(&it);
-        if(h != NULL){
-            h = Hashed_Clone(tbl->m, h);
-            if(Table_GetSetHashed(tbl, SPAN_OP_SET, h->item, h->value) != NULL){
-                r |= SUCCESS;
-            }else{
-                r |= ERROR;
-                break;
-            }
-        }
-    }
-    if(r == READY){
-        r |= NOOP;
-    }
-    return r;
 }
 
 Abstract *Table_FromIdx(Span *tbl, int idx){

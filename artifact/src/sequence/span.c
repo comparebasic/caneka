@@ -319,6 +319,20 @@ status Span_Setup(Span *p){
     return SUCCESS;
 }
 
+Span *Span_Clone(MemCtx *m, Span *p){
+    Iter it;
+    Iter_Init(&it, p);
+    Span *p2 = Span_Make(m);
+    int i = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = asIfc(Iter_Get(&it), TYPE_STR);
+        if(a != NULL){
+            Span_Set(p2, it.idx, a); 
+        }
+    }
+    return p2;
+}
+
 Span *Span_Make(MemCtx *m){
     Span *p = MemCtx_Alloc(m, sizeof(Span));
     p->type.of = TYPE_SPAN;

@@ -47,3 +47,4 @@ status Span_Remove(Span *p, i32 idx);
 status Span_ReInit(Span *p);
 status Span_Setup(Span *p);
 Span *Span_Make(struct mem_ctx *m);
+Span *Span_Clone(struct mem_ctx *m, Span *p);

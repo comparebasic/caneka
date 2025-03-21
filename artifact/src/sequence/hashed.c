@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Chain *HashChain;
+Lookup *HashLookup;
 
 static util _Hash_Bytes(byte *bt, size_t length, util h){
 	util i = 0;
@@ -33,7 +33,7 @@ static util Hash_PatCharDef(Abstract *a){
 }
 
 static util Hash_Str(Abstract *a){
-    String *s = (Str *)asIfc(a, TYPE_STR);
+    Str *s = (Str *)asIfc(a, TYPE_STR);
 	util h = 5381;
     while(s != NULL){
         h = _Hash_Bytes(s->bytes, s->length, h);
@@ -76,7 +76,7 @@ util Get_Hash(Abstract *a){
         return h->id;
     }
 
-    HashFunc func = (HashFunc)Chain_Get(HashChain, a->type.of);
+    HashFunc func = (HashFunc)Lookup_Get(HashLookup, a->type.of);
     if(func != NULL){
         return func(a);
     }else{
@@ -84,26 +84,11 @@ util Get_Hash(Abstract *a){
     }
 }
 
-boolean Hashed_LocalEquals(MemCtx *m, Hashed *a, Hashed *b){
-    if(a->id != b->id){
-        return FALSE;
-    }
-    return Abs_Eq(a->item, b->item);
-}
-
-boolean Hashed_ExternalEquals(MemCtx *m, Hashed *a, Hashed *b){
-    if(a->id != b->id){
-        return FALSE;
-    }
-    return Abs_Eq(a->item, b->item);
-}
-
-
 boolean Hashed_Equals(Hashed *a, Hashed *b){
     if(a->id != b->id){
         return FALSE;
     }
-    return Abs_Eq(a->item, (void *)b->item);
+    return Equals(a->item, (void *)b->item);
 }
 
 Hashed *Hashed_Make(MemCtx *m, Abstract *a){
@@ -125,17 +110,13 @@ Hashed *Hashed_Clone(MemCtx *m, Hashed *oh){
     if(h->value != NULL && ((h->value = Clone(m, h->item)) == NULL)){
         return NULL;
     }
-    if(h->next != NULL && ((h->next = Hashed_Clone(m, h->next)) == NULL)){
-        return NULL;
-    }
     return h;
 }
 
 
 status Hash_Init(MemCtx *m){
-    if(HashChain == NULL){
-        Lookup *funcs = Lookup_Make(m, _TYPE_START, populateHash, NULL);
-        HashChain = Chain_Make(m, funcs);
+    if(HashLookup == NULL){
+        Lookup *HashLookup  = Lookup_Make(m, _TYPE_START, populateHash, NULL);
         return SUCCESS;
     }
     return NOOP;

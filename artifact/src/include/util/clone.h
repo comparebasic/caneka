@@ -1,3 +1,3 @@
-extern struct chain *CloneChain;
+extern struct lookup *CloneLookup;
 status Clone_Init(MemCtx *m);
 Abstract *Clone(MemCtx *m, Abstract *a);
