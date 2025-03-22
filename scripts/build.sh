@@ -3,6 +3,8 @@ if [ ! -e ./build/libcnkbase.a ] ; then
     echo "Building Base Library"
     mkdir -p build/libcnkbase/
     clang -g -Wno-gnu-folding-constant -I artifact/src/include -c -o build/libcnkbase/libcnkbase.a artifact/src/base/inc.c
+    clang -g  -I artifact/src/include -I artifact/src/programs/basetests/include -o build/basetests \
+        artifact/src/programs/basetests/tests.c artifact/src/programs/basetests/main.c
 fi
 #if [ ! -e ./build/build ] ; then
 #    echo -e "\x1b[33m[Building Build Binary]\x1b[0m"
