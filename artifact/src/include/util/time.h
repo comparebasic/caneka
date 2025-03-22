@@ -4,5 +4,5 @@ time64_t Time64_FromMillis(i64 millis);
 i64 Time64_ToMillis(time64_t tm);
 time64_t Time64_Now();
 struct single *Time64_Wrapped(struct mem_ctx *m, time64_t n);
-String *TimeSpec_ToDayString(struct mem_ctx *m, struct timespec *ts);
-String *Time_Today(struct mem_ctx *m);
+Str *TimeSpec_ToDayStr(struct mem_ctx *m, struct timespec *ts);
+Str *Time_Today(struct mem_ctx *m);

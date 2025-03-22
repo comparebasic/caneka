@@ -1,11 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-#define TIME_BUFF_LEN 42
+#define TIME_BUFF_LEN 64
 
 Str *Time64_ToStr(MemCtx *m, Abstract *a){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
-    String *s = String_Init(m, TIME_BUFF_LEN);
+    Str *s = Str_Make(m, TIME_BUFF_LEN);
     struct timespec ts;
     struct tm tm;
     Time64_ToSpec(&ts, (time64_t)sg->val.value);
@@ -13,8 +13,8 @@ Str *Time64_ToStr(MemCtx *m, Abstract *a){
     gmtime_r(&ts.tv_sec, &tm);
     strftime((char *)s->bytes, TIME_BUFF_LEN, "%Y-%m-%dT%H:%M:%S.", &tm);
     s->length = strlen((char *)s->bytes);
-    String_AddI64(m, s, ts.tv_nsec);
-    String_AddBytes(m, s, bytes("+00"), 3);
+    Str_AddI64(s, ts.tv_nsec);
+    Str_Add(s, (byte *)"+00", 3);
     return s;
 }
 
@@ -48,16 +48,16 @@ Single *Time64_Wrapped(MemCtx *m, time64_t n){
     return sgl;
 }
 
-String *Time_Today(MemCtx *m){
+Str *Time_Today(MemCtx *m){
     struct timespec ts;
     clock_gettime(0, &ts);
-    return TimeSpec_ToDayString(m, &ts);
+    return TimeSpec_ToDayStr(m, &ts);
 }
 
-String *TimeSpec_ToDayString(MemCtx *m, struct timespec *ts){
+Str *TimeSpec_ToDayStr(MemCtx *m, struct timespec *ts){
     struct tm *t = localtime(&(ts->tv_sec));
-    String *s = String_Init(m, STRING_EXTEND);
-    size_t l = strftime((char *)s->bytes, (size_t)String_GetSegSize(s), "%Y-%m-%d", t);
+    Str *s = Str_Make(m, STR_DEFAULT);
+    size_t l = strftime((char *)s->bytes, (size_t)STR_DEFAULT, "%Y-%m-%d", t);
     s->length = l; 
     return s;
 }
