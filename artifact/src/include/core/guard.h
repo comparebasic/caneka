@@ -4,7 +4,6 @@ typedef struct guard {
     int max;
     char *file;
     int line;
-    Str msg;
 } Guard;
 
 status Guard_Setup(MemCtx *m, Guard *g, int max, byte *msg);

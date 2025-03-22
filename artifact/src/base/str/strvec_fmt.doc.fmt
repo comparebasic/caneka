@@ -1,0 +1,50 @@
+= StrVec Formatter
+
+== Arguments
+
+=== Type arguments
+
+_: Followd by One of the following
+
+==== Options
+
+t: Typed output
+T: Typed output, with a type flag argument
+d: Debug output
+D: Verbose debug output
+c: C string (null terminated)
+i#: Integer (i4 for a 4 byte i32 or i8 for an 8 byte i64)
+u#: Unsigned Integer (u4 for a 4 byte quad or u8 for an 8 byte util)
+a: Address
++: StrVec (adds to the strvec `v` or outputs to the file descriptor)
+
+=== Ansi arguments
+
+^: Ansi sequence (terminated by '.' or a non-ansi code character)
+
+==== Options
+
+0: Clear formatting
+D: Bold text
+d: Clear bold text
+R: Red background
+r: Red foreground
+G: Green background
+g: Green foreground
+Y: Yellow background
+y: Yellow foreground
+B: Blue background
+b: Blue foreground
+P: Purple background
+p: Purple foregrpound
+C: Cyan background
+c: Cyan foreground
+K: Black background
+k: black foreground
+x: Whatever 30 is
+.: End sequence (will happen automatically if it's none of the above)
+
+
+
+
+

@@ -14,6 +14,7 @@ enum span_flags {
 };
 
 typedef void *slab[SPAN_STRIDE];
+extern i32 _increments[SPAN_MAX_DIMS];
 
 typedef struct span {
     Type type;
