@@ -9,16 +9,15 @@ void *_Fatal(char *msg, cls t, i32 fd, char *func, char *file, int line){
 #endif
     
     StrVec_FmtAdd(_debugM, NULL, 0, 
-        "^r^Fatal Error: ^B_T^B - type(_T/_i4) _T:_T:_i4^0\n",
-        msg, TYPE_CSTR, Type_ToChars(t), TYPE_CSTR, t, func, TYPE_CSTR, 
-        file, TYPE_CSTR, line);
+        "^r.Fatal Error: ^D_c^d - type(_c/_i4) _c:_c:_i4^0\n",
+        msg, Type_ToChars(t), (i32)t, func, file, line);
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();
     if(e != 0){
         char *openssl_err = ERR_error_string(e, _buff);
-        StrVec_FmtAdd(_debugM, NULL, 0"^rB^_T^0");
-        StrVec_FmtAdd(_debugM, NULL, 0"  ^rB^_T^0", openssl_err, TYPE_CSTR);
+        StrVec_FmtAdd(_debugM, NULL, 0"^rD^_T^0");
+        StrVec_FmtAdd(_debugM, NULL, 0"  ^rD^_T^0", openssl_err, TYPE_CSTR);
     }
 #endif
     if(!crashing){

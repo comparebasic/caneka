@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 char *hex_chars = "0123456789abcdef";
-static const byte *digits = (byte *)"0123456789";
+static const byte zeroDigit = (byte)'0';
 
 static inline byte hexCharToOrd(byte b){
     if(b >= '0' && b <= '9'){
@@ -30,7 +30,7 @@ i64 Str_AddI64(Str *s, i64 i){
     byte *end = _b+(MAX_BASE10-1);
     byte *b = end;
 
-    i32 base = 10;
+    i64 base = 10;
     i64 val;
     boolean negative = i < 0;
     if(negative){
@@ -39,7 +39,7 @@ i64 Str_AddI64(Str *s, i64 i){
     *b = '0';
     while(i > 0){
         val = i % base;
-        *(b--) = '0'+val;
+        *(b--) = zeroDigit+val;
         i -= val;
         i /= base;
     }

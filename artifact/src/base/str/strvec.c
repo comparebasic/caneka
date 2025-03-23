@@ -113,6 +113,6 @@ status StrVec_AddBytes(MemCtx *m, StrVec *v, byte *ptr, i64 length){
 StrVec *StrVec_Make(MemCtx *m){
     StrVec *v = MemCtx_Alloc(m, sizeof(StrVec));
     v->type.of = TYPE_STRVEC;
-    Span *p = Span_Make(m);
+    v->p = Span_Make(m);
     return v;
 }

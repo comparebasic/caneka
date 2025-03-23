@@ -1,5 +1,5 @@
 typedef status (*TestFunc)(MemCtx *m);
-status Test(boolean condition, StrVec *msg);
+status Test(boolean condition, char *fmt, ...);
 status Test_Runner(MemCtx *m, char *suiteName, struct test_set *tests);
 status Tests_Init(MemCtx *m);
 

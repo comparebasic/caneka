@@ -21,9 +21,15 @@ static char *statusCstr(word status){
     }
 }
 
-status Test(boolean condition, StrVec *msg){
+status Test(boolean condition, char *fmt, ...){
+	va_list args;
+    va_start(args, fmt);
+
+    StrVec *v = StrVec_Make(_debugM);
+    StrVec_FmtHandle(_debugM, v, fmt, args, -1);
+
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        Out(_debugM, "        <li class=\"test result result-_c\">_+</li>", condition ? "pass" : "fail");
+        Out(_debugM, "        <li class=\"test result result-_c\">_+</li>", condition ? "pass" : "fail", v);
         return condition ? SUCCESS : ERROR;
     }else{
         if(!condition){
@@ -53,10 +59,13 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
     i64 rollingBaseMem = baseMem;
     StrVec_Add(v, Str_MemCount(m, baseMem));
 
+    printf("test runner %s II\n", suiteName);
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
         Out(m, "        <span class=\"mem-label\">_+</span>\n", v);
     }else{
+        printf("test runner %s II.1\n", suiteName);
         Out(m, "_+", v);
+        printf("test runner %s II.2\n", suiteName);
     }
 
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
@@ -65,6 +74,7 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
 
     while(set->name != NULL){
 
+        printf("test runnger %s III\n", suiteName);
         if(set->status == SECTION_LABEL){
             if((GLOBAL_flags & HTML_OUTPUT) != 0){
                 Out(m, "<h4>_c</h4>\n", set->name);

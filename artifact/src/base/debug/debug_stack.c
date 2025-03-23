@@ -32,15 +32,18 @@ status DebugStack_Init(MemCtx *m){
 }
 
 void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, int line, int pos){
-    StackEntry entry = {
-        cstr,
-        fname,
-        ref,
-        typeOf,
-        line,
-        pos
-    };
-    Span_Set(stack, _stackIdx++, (Abstract*)&entry);
+    stack->m->type.range--;
+
+    StackEntry *entry = MemCtx_Alloc(stack->m, sizeof(StackEntry));
+    entry->funcName = cstr;
+    entry->fname = fname;
+    entry->ref = ref;
+    entry->typeOf = typeOf;
+    entry->line = line;
+    entry->pos = pos;
+
+    Span_Set(stack, _stackIdx++, (Abstract*)entry);
+    stack->m->type.range++;
 }
 
 void DebugStack_Pop(){
@@ -61,16 +64,12 @@ int DebugStack_Print(){
     while((Iter_Next(&it) & END) == 0){
         StackEntry *entry = (StackEntry*)Iter_Get(&it);
         if(entry != NULL){
-            char *color = "^y.";
-            if(first){
-                color = "^r.";
-                first = FALSE;
-            }
-            Out(_debugM, "^D_^_c - _c:_i4^0\n", color, entry->funcName, entry->fname, entry->line);
+            Out(_debugM, "    ^D^y_c - _c:_i4^0 ", 
+                entry->funcName, entry->fname, entry->line);
             if(entry->ref != NULL && entry->typeOf != 0){
-                Out(_debugM, "_^_d^0", color, entry->ref);
+                Out(_debugM, "^y_d^0", entry->ref);
             }else if(entry->ref != NULL && entry->typeOf == 0){
-                Out(_debugM, "_^_c^0", color, entry->ref);
+                Out(_debugM, "^y_c^0", entry->ref);
             }
             Out(_debugM, "\n");
         }
