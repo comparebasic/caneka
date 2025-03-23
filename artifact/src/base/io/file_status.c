@@ -24,7 +24,7 @@ Str *File_GetCwdPath(MemCtx *m, Str *path){
     Str *s = Str_Make(m, STR_DEFAULT);
     char *cstr = getcwd((char *)s->bytes, STR_DEFAULT_MAX);
     i64 len = strlen(cstr);
-    if(Str_AddCStr(s, "/") & SUCCESS && Str_AddCStr(s, cstr) & SUCCESS){
+    if(Str_AddCstr(s, "/") != 1 && Str_AddCstr(s, cstr) == len){
         return s;
     }
     return NULL;

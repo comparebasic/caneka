@@ -26,12 +26,9 @@ i64 Str_Add(Str *s, byte *b, i64 length){
     return len;
 }
 
-status Str_AddCStr(Str *s, char *cstr){
+i64 Str_AddCstr(Str *s, char *cstr){
     i64 len = strlen(cstr);
-    if(Str_Add(s, (byte *)cstr, len) != len){
-        return ERROR;
-    }
-    return SUCCESS;
+    return Str_Add(s, (byte *)cstr, len);
 }
 
 char *Str_Cstr(MemCtx *m, Str *s){

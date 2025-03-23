@@ -83,14 +83,14 @@ Str *Str_MemCount(MemCtx *m, i64 mem) {
 
 i64 Str_AddMemCount(Str *s, i64 mem) {
     if(mem == 0){
-       return Str_AddCStr(s, "0b"); 
+       return Str_AddCstr(s, "0b"); 
     }
     char *abbrev = "bkmg";
     i64 total = 0;
     i64 div = 1024;
     for(int i = 0; i < 4; i++){
        if(i > 0){
-           total += Str_AddCStr(s, " ");
+           total += Str_AddCstr(s, " ");
        }
        i64 value = mem % div;
        i64 uval = value;

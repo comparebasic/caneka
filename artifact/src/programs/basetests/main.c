@@ -41,17 +41,9 @@ void Cleanup(Abstract *m){
 }
 
 int main(int argc, char **argv){
-    if(argc == 1){
-        printf("%s [test,serve=port,trans]\n", argv[0]);
-        exit(1);
-    }
-
-    if(MemBook_Make(NULL) == NULL){
-        Fatal("Unable to allocate Mem_Book", TYPE_BOOK);
-        exit(1);
-    };
-
+    printf("running base tests\n");
     MemCtx *m = MemCtx_Make();
+    printf("running base tests II\n");
     Caneka_Init(m);
     
     if(argc > 1){

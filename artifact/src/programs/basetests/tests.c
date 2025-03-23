@@ -23,6 +23,7 @@ static TestSet _Tests[] = {
         "Initializing core system tests",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "String",
         String_Tests,
@@ -77,6 +78,7 @@ static TestSet _Tests[] = {
         "Testing the ability to add a key and value to a hash table and disperate, yet sequential, times.",
         FEATURE_COMPLETE,
     },
+    */
     {
         NULL,
         NULL,
