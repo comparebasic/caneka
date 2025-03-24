@@ -30,7 +30,7 @@ static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     if(sq->span->type.state & DEBUG){
         printf("\x1b[33midx:%d i+o+i:%d Stack<%ddim %dlocalIdx %doffset *%ldsl>\x1b[0m\n",
             (i32)sq->idx, (i32)st->offset+(st->localIdx*st->increment),
-            (i32)dim, st->localIdx, (i32)st->offset, (util)sl);
+            (i32)dim, st->localIdx, (i32)st->offset, (util)*st->ptr);
     }
 
     return st;
