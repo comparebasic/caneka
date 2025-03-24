@@ -28,9 +28,6 @@ status Iter_Next(Iter *it){
     if((it->idx+1) > it->values->max_idx){
         goto end;
     }else{
-        /*
-        printf("- next nvalues:%d starting at %d\n", sq->span->nvalues, sq->idx);
-        */
         i8 dims = sq->span->dims;
         while(dim <= dims){
             st = &sq->stack[dim];
@@ -39,32 +36,19 @@ status Iter_Next(Iter *it){
             ptr = start+(st->localIdx);
             void **orig = ptr;
             last = start+(SPAN_STRIDE-1);
-            /*
-            printf("--- dim while %d localIdx:%d\n", dim, (i32)(ptr - start));
-            */
 
             while(ptr < last){
                 if(sq->idx >= max_idx){
                     goto end;
                 }
                 if(*(++ptr) != NULL){
-                    /*
-                    printf("    --- breaking ptr while localIdx:%ld\n", (i64)((ptr) - start));
-                    */
                     break;
                 }
-                /*
-                printf("    --- ptr while localIdx:%ld slot:%p\n", (i64)(ptr - start), ptr);
-                */
                 sq->idx += increment;
             }
             if(*ptr != NULL && ptr != orig){
                 i32 localIdx = (i32)(ptr - start);
                 sq->idx = st->offset + (localIdx * _increments[dim]);
-                /*
-                printf("    --- break at dim:%d localIdx:%d idx:%d\n",
-                    dim, localIdx, sq->idx);
-                    */
                 break;
             }else{
                 dim++;
@@ -78,9 +62,6 @@ status Iter_Next(Iter *it){
         it->type.state |= SUCCESS;
     }
 found:
-    /*
-    printf("\x1b[%dmidx after Iter_Next:%d\x1b[0m\n", 32, it->idx);
-    */
     if(it->idx == it->values->max_idx){
         it->type.state |= FLAG_ITER_LAST;
     }
