@@ -147,8 +147,6 @@ MemBook *MemBook_Make(MemBook *prev){
     cp->type.of = TYPE_BOOK;
     MemCtx_Setup(&cp->m, &sl);
 
-    cp->m.p.type.state |= DEBUG;
-
     cp->start = start;
     mrange->book = cp;
 

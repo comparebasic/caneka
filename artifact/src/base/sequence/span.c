@@ -17,13 +17,16 @@ static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
         }else{
             st->offset = localIdx * increment;
         }
+        if(sq->span->type.state & DEBUG){
+            printf("idx:%d dim:%d increment:%d localIdx:%d\n", sq->idx, (i32)dim, increment, localIdx);
+        }
     }else{
         SpanState *prev = sq->stack+(dim+1);
-        localIdx = ((sq->idx - prev->offset) / increment);
-        st->offset = prev->offset;
-        if(dim > 0){
-            st->offset += increment*localIdx;
+        localIdx = (sq->idx - prev->offset)  / increment;
+        if(sq->span->type.state & DEBUG){
+            printf("idx:%d dim:%d prev->offset:%d increment:%d localIdx:%d\n", sq->idx, (i32)dim, prev->offset, increment, localIdx);
         }
+        st->offset = prev->offset + increment*localIdx;
         void **ptr = (void **)prev->slab;
         ptr += localIdx;
         if(ptr != NULL){
@@ -36,6 +39,10 @@ static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     st->localIdx = localIdx;
     st->dim = dim;
     st->increment = increment;
+
+    if(sq->span->type.state & DEBUG){
+        printf("\x1b[33m%d:idx %hd:dim \x1b[41;37m %d:offset \x1b[0;33m %ld:slab\x1b[0m\n", sq->idx, (i32)st->dim, (i32)st->offset, (util)st->slab);
+    }
 
     return st;
 }
@@ -81,6 +88,9 @@ status Span_Query(SpanQuery *sr){
     Span *p = sr->span;
     MemSlab *mem_sl = NULL;
     if(dimsNeeded > p->dims){
+        if(p->type.state & DEBUG){
+            Out(_debugM, "^kB. Expanding! _i4 to _i4^0\n", p->dims, dimsNeeded);
+        }
         if((sr->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NOOP;
         }
@@ -91,13 +101,22 @@ status Span_Query(SpanQuery *sr){
             if(p == &p->m->p){
                 new_sl = Slab_WhileExpanding(&mem_sl);
             }else{
+                if(p->type.state & DEBUG){
+                    Out(_debugM, "^kB. Making Slab ^0\n");
+                }
                 new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
             }
 
             if(exp_sl == NULL){
+                if(p->type.state & DEBUG){
+                    Out(_debugM, "^kB. Placing in root ^0\n");
+                }
                 shelf_sl = sr->span->root;
                 sr->span->root = new_sl;
             }else{
+                if(p->type.state & DEBUG){
+                    Out(_debugM, "^kB. Placing in _a ^0\n", exp_sl);
+                }
                 void **ptr = (void *)exp_sl;
                 *ptr = new_sl;
             }
@@ -109,10 +128,13 @@ status Span_Query(SpanQuery *sr){
         *ptr = shelf_sl;
     }
 
-    i8 dims = p->dims;
+    i8 dim = p->dims;
     SpanState *st = NULL;
-    while(dims != -1){
-        st = SpanQuery_SetStack(sr, dims);
+    while(dim != -1){
+        if(p->type.state & DEBUG){
+            printf("\x1b[32mSetting dim %d\n", (i32)dim);
+        }
+        st = SpanQuery_SetStack(sr, dim);
         if(st->slab == NULL){
             if((sr->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
                 return NOOP;
@@ -123,14 +145,14 @@ status Span_Query(SpanQuery *sr){
             }else{
                 new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
             }
-            SpanState *prev = sr->stack+(dims+1);
+            SpanState *prev = sr->stack+(dim+1);
             void **ptr = (void **)prev->slab;
             ptr += prev->localIdx;
             *ptr = new_sl;
             st->slab = new_sl;
         }
 
-        dims--;
+        dim--;
     }
 
     if(st == NULL){
@@ -138,7 +160,13 @@ status Span_Query(SpanQuery *sr){
     }
 
     if(st->localIdx >= SPAN_STRIDE){
+        printf("%d\n", (i32)st->localIdx);
         Fatal("localIdx greater than stride", p->type.of);
+    }
+
+    if(p->type.state & DEBUG){
+        SpanQuery_Print(_debugM, NULL, 0, (Abstract *)sr, 0, TRUE);
+        Out(_debugM, "\n");
     }
 
     sr->type.state |= SUCCESS;

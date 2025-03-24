@@ -12,10 +12,12 @@ i64 SpanState_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean
     i32 idx = st->localIdx;
     void *slot = NULL;
     if(st->slab != NULL){
-        slot = *(((void **)st->slab) + st->localIdx);
+        void **ptr = (void **)st->slab;
+        ptr += st->localIdx;
+        slot = *ptr;
     }
-    return StrVec_FmtAdd(m, v, fd, "SpanState<^B_i4^b^o+idx, ^B_a^b^slot, ^B_a^b^slab, ^B_i4^b^localIdx, ^B_i4^b^offset>", 
-        idx, slot, st->slab, (i32)st->localIdx, (i32)st->offset);
+    return StrVec_FmtAdd(m, v, fd, "SpanState<^D._i4^d.dim, ^D._i4^d.localIdx, , ^D._i4^d.offset, ^D._a^d.slot, ^D._a^d.slab>", 
+        (i32)st->dim, (i32)st->localIdx, (i32)st->offset, slot, st->slab);
 }
 
 i64 Slab_Print(MemCtx *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
@@ -63,30 +65,45 @@ i64 Slab_Print(MemCtx *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
 
 i64 Span_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     Span *p = (Span*)as(a, TYPE_SPAN); 
-    /*
-    printf("\x1b[%dm%sSpan<\x1b[1;%dm%d\x1b[0;%dmval/\x1b[1;%dm%hd\x1b[0;%dmdim ", color, msg, color, p->nvalues, color, color, p->dims, color);
-    Slab_Print(m, v, p->root, p->dims, p->dims, color);
-    printf("\x1b[%dm>\x1b[0m", color);
-    */
-    return 0;
+
+    i64 total = 0;
+    total += StrVec_FmtAdd(m, v, fd, "Span<_i4values/0.._i4/_i4dims>", 
+        p->nvalues, p->max_idx, (i32)p->dims); 
+    
+    return total;
 }
 
 
 i64 SpanQuery_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     SpanQuery *sq = as(a, TYPE_SPAN_QUERY);
-    /*
-    printf("\x1b[%dm%sSQ<%s idx:%d op:%d dims:%hu/%hu", color, msg, State_ToChars(sq->type.state), sq->idx, sq->op, sq->dims, sq->dimsNeeded);
-    SpanState *st = sq->stack;
-    for(int i = 0; i <= sq->span->dims; i++){
-        printf("\n");
-        indent_Print(1);
-        printf("\x1b[%dm%d: ", color, i);
-        spanState_Print(st, color);
-        st++;
+    i64 total = 0;
+    total += StrVec_FmtAdd(m, v, fd, "SpanQuery<^D_i4^d: [\n", sq->idx);
+    if(sq->span == NULL){
+        total += StrVec_FmtAdd(m, v, fd, "span=null");
+    }else{
+        i8 dim = 0;
+        while(dim <= sq->span->dims){
+            total += StrVec_FmtAdd(m, v, fd, "  ^D._i4^d.dim: ", (i32)dim);
+            SpanState *st = ((SpanState *)sq->stack)+dim;
+            if(st != NULL){
+                total += SpanState_Print(m, v, fd, 
+                    (Abstract *)st, TYPE_SPAN_STATE, extended);
+                if(st->slab == sq->span->root){
+                    total += StrVec_FmtAdd(m, v, fd, " ^D(root)^d");
+                }
+            }else{
+                total += StrVec_FmtAdd(m, v, fd, "NULL\n");
+            }
+
+            if(dim < sq->span->dims){
+                total += StrVec_FmtAdd(m, v, fd, ",\n");
+            }else{
+                total += StrVec_FmtAdd(m, v, fd, "\n");
+            }
+            dim++;
+        }
     }
-    printf("\n");
-    printf("\x1b[%dm>\x1b[0m", color);
-    */
+    total += StrVec_FmtAdd(m, v, fd, "]>");
     return 0;
 }
 

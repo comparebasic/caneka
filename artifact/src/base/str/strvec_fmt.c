@@ -70,7 +70,7 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 goto next;
             }else if(c == 'a'){
                 i32 l = 2;
-                s = Str_Ref(m, (byte *)"*=", l, l);
+                s = Str_Ref(m, (byte *)"*", l, l);
                 handleIo(v, fd, s);
                 total += s->length;
                 util u = (i64)va_arg(args, util);
