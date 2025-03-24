@@ -4,5 +4,5 @@ typedef struct span_state {
     word _;
     i32 increment;
     i64 offset;
-    slab *slab;
+    void **ptr;
 } SpanState;

@@ -2,11 +2,11 @@
 #include <caneka.h>
 
 status Iter_Next(Iter *it){
+    /*
     i8 dim = 0;
     SpanQuery *sq = &it->sq;
     SpanState *st = NULL;
     void **start = NULL;
-    void **ptr = NULL;
     void **last = NULL;
     int max_idx = it->values->max_idx;
     if(it->values == NULL || it->values->nvalues == 0){
@@ -19,9 +19,7 @@ status Iter_Next(Iter *it){
         it->type.state &= ~(END|FLAG_ITER_LAST);
 
         st = &sq->stack[dim];
-        start = (void **)st->slab;
-        ptr = start+(st->localIdx);
-        if(*ptr != 0){
+        if(*(st->ptr) != 0){
             goto found;
         }
     }
@@ -34,7 +32,7 @@ status Iter_Next(Iter *it){
             i32 increment = _increments[dim];
             start = (void **)st->slab;
             ptr = start+(st->localIdx);
-            void **orig = ptr;
+            void **orig = st->ptr;
             last = start+(SPAN_STRIDE-1);
 
             while(ptr < last){
@@ -68,13 +66,11 @@ found:
     return it->type.state;
 end:
     it->type.state |= END;
+    */
     return it->type.state;
 }
 
 Abstract *Iter_Get(Iter *it){
-    /*
-    printf("Get:%d\n", it->idx);
-    */
     return Span_GetFromQ(&it->sq);
 }
 

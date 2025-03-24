@@ -10,24 +10,28 @@ static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
     SpanState *st = sq->stack+dim;
     i32 increment = _increments[dim];
     i64 offset = 0;
+    void **ptr = NULL;
     if(dim == p->dims){
-        sl = p->root;
+        ptr = (void **)p->root;
         localIdx = sq->idx / increment;
     }else{
         SpanState *prev = sq->stack+(dim+1);
         offset = prev->increment*prev->localIdx;
         localIdx = (sq->idx - offset) / increment;
-        void **ptr = (void **)prev->slab;
+        ptr = prev->ptr;
         ptr += localIdx;
-        if(ptr != NULL){
-            sl = *ptr;
-        }
     }
-    st->slab = sl;
+    st->ptr = ptr;
     st->localIdx = localIdx;
     st->dim = dim;
     st->increment = increment;
     st->offset = offset;
+
+    if(sq->span->type.state & DEBUG){
+        printf("\x1b[33midx:%d i+o+i:%d Stack<%ddim %dlocalIdx %doffset *%ldsl>\x1b[0m\n",
+            (i32)sq->idx, (i32)st->offset+(st->localIdx*st->increment),
+            (i32)dim, st->localIdx, (i32)st->offset, (util)sl);
+    }
 
     return st;
 }
@@ -84,6 +88,7 @@ status Span_Query(SpanQuery *sr){
                 new_sl = Slab_WhileExpanding(&mem_sl);
             }else{
                 new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
+                printf("making new base sl %ld\n", (util)new_sl);
             }
 
             if(exp_sl == NULL){
@@ -105,7 +110,7 @@ status Span_Query(SpanQuery *sr){
     SpanState *st = NULL;
     while(dim != -1){
         st = SpanQuery_SetStack(sr, dim);
-        if(st->slab == NULL){
+        if(*(st->ptr) == NULL){
             if((sr->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
                 return NOOP;
             }
@@ -114,12 +119,9 @@ status Span_Query(SpanQuery *sr){
                 new_sl = Slab_WhileExpanding(&mem_sl);
             }else{
                 new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
+                printf("making new value sl %ld\n", (util)new_sl);
             }
-            SpanState *prev = sr->stack+(dim+1);
-            void **ptr = (void **)prev->slab;
-            ptr += prev->localIdx;
-            *ptr = new_sl;
-            st->slab = new_sl;
+            *(st->ptr) = new_sl;
         }
 
         dim--;
@@ -162,21 +164,20 @@ char **Span_ToCharArr(MemCtx *m, Span *p){
 
 void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
     Span *p = sq->span;
+    p->type.state &= ~(SUCCESS|NOOP);
     status r = Span_Query(sq);
     if((r & SUCCESS) != 0){
         SpanState *st = sq->stack;
         if(sq->idx > p->max_idx+1){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
-        void **ptr = (void **)st->slab;
-        ptr +=st->localIdx;
         if(sq->type.state & SPAN_OP_REMOVE){
-            *ptr = NULL;
+            *(st->ptr) = NULL;
             p->nvalues--;
             p->metrics.set = -1;
             p->metrics.available = sq->idx;
         }else{
-            *ptr = (void *)t;
+            *(st->ptr) = (void *)t;
             p->nvalues++;
             p->metrics.set = sq->idx;
             if(sq->idx > p->max_idx){
@@ -184,7 +185,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             }
         }
 
-        sq->value = (Abstract *)*ptr;
+        sq->value = (Abstract *)*(st->ptr);
         return sq->value;
     }
 
@@ -202,12 +203,16 @@ void *Span_Set(Span *p, i32 idx, Abstract *t){
 
 void *Span_GetFromQ(SpanQuery *sq){
     Span *p = sq->span;
+    p->type.state &= ~(SUCCESS|NOOP);
+    status r = Span_Query(sq);
+    if((r & SUCCESS) == 0){
+        p->type.state |= ERROR;
+        return NULL;
+    }
+
     SpanState *st = sq->stack;
-    void **ptr = (void **)st->slab;
-    ptr += st->localIdx;
-    sq->span->type.state &= ~(SUCCESS|NOOP);
-    if(*ptr != NULL){
-        sq->value = *ptr;
+    if(*(st->ptr) != NULL){
+        sq->value = *(st->ptr);
         sq->span->type.state |= SUCCESS;
     }else{
         sq->span->type.state |= NOOP;
@@ -223,11 +228,6 @@ void *Span_Get(Span *p, i32 idx){
     }
     SpanQuery sq;
     SpanQuery_Setup(&sq, p, SPAN_OP_GET, idx);
-    status r = Span_Query(&sq);
-    if((r & SUCCESS) == 0){
-        p->type.state |= ERROR;
-        return NULL;
-    }
     return Span_GetFromQ(&sq);
 }
 

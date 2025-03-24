@@ -11,16 +11,42 @@ status Span_Tests(MemCtx *gm){
     /* set and retrieve numbers beyond stride */
     p = Span_Make(m);
     p->type.state |= DEBUG;
-    i64 max = SPAN_STRIDE+1;
+    i64 max = 6;
     for(i64 i = 0; i < max; i++){
         Single *g = I64_Wrapped(m, i);
+        printf("Set %ld\n", i);
         Span_Set(p, i, (Abstract *)g);
     }
 
+    p->type.state |= DEBUG;
     for(i64 i = 0; i < max; i++){
+        printf("Get %ld\n", i);
         Single *g = Span_Get(p, i);
+        r |= Test(g != NULL, "Retrieved item is not null _i", i);
+        if(r & ERROR){
+            return r;
+        }
         r |= Test(g->val.value == i, 
-            "Retrieve an object with the same value as the index _i8", i);
+            "Retrieve an object with the same value as the index _i8 vs %_i8", i, g->val.value);
+    }
+
+    max = SPAN_STRIDE+1;
+    for(i64 i = 0; i < max; i++){
+        Single *g = I64_Wrapped(m, i);
+        printf("Set %ld\n", i);
+        Span_Set(p, i, (Abstract *)g);
+    }
+
+    p->type.state |= DEBUG;
+    for(i64 i = 0; i < max; i++){
+        printf("Get %ld\n", i);
+        Single *g = Span_Get(p, i);
+        r |= Test(g != NULL, "Retrieved item is not null _i", i);
+        if(r & ERROR){
+            return r;
+        }
+        r |= Test(g->val.value == i, 
+            "Retrieve an object with the same value as the index _i8 vs %_i8", i, g->val.value);
     }
 
     /* set and retrieve strings */
