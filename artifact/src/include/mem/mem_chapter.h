@@ -17,10 +17,9 @@ typedef struct mem_slab {
 
 typedef struct mem_ctx {
     RangeType type;
-    i32 _;
-    Span p;
-    MemSlab first;
-    Iter it;
+    i16 nextIdx;
+    i16 nextCount;
+    SpanIter it;
     Abstract *owner;
 } MemCtx;
 

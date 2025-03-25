@@ -3,7 +3,7 @@
 
 i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536};
 
-static inline SpanQuery_SetStack(SpanQuery *sq, i8 dim, i32 offset){
+static inline SpanIter_SetStack(SpanIter *sq, i8 dim, i32 offset){
     Span *p = sq->span; 
     void **ptr = sq->stack+dim;
     i32 increment = _increments[dim];
@@ -18,8 +18,22 @@ static inline SpanQuery_SetStack(SpanQuery *sq, i8 dim, i32 offset){
     return offset % increment;
 }
 
-void SpanQuery_Setup(SpanQuery *sr, Span *p, status op, i32 idx){
-    memset(sr, 0, sizeof(SpanQuery));
+status SpanIter_Next(SpanIter *it){
+    return it->type.state;
+}
+
+Abstract *SpanIter_Get(SpanIter *it){
+    return Span_GetFromQ(&it->sq);
+}
+
+status SpanIter_Reset(SpanIter *it){
+    it->type.state |= END;
+    return SUCCESS;
+}
+
+
+void SpanIter_Setup(SpanIter *sr, Span *p, status op, i32 idx){
+    memset(sr, 0, sizeof(SpanIter));
     sr->type.of = TYPE_SPAN_QUERY;
     sr->type.state = op;
     sr->span = p;
@@ -27,26 +41,7 @@ void SpanQuery_Setup(SpanQuery *sr, Span *p, status op, i32 idx){
     return;
 }
 
-slab *Slab_WhileExpanding(MemSlab **_sl){
-    MemSlab *sl = *_sl;
-    if(sl == NULL){
-        void *bytes = MemBook_GetBytes();
-        if(bytes == NULL){
-            return NULL;
-        }
-        MemSlab inl = {
-            .type = {TYPE_MEMSLAB, 0},
-            .level = 0,
-            .remaining = MEM_SLAB_SIZE,
-            .bytes = bytes,
-        };
-        *_sl = sl = MemSlab_Alloc(&inl, sizeof(MemSlab));
-        memcpy(sl, &inl, sizeof(MemSlab));
-    }
-    return MemSlab_Alloc(sl, sizeof(void *)*SPAN_STRIDE);
-}
-
-status Span_Query(SpanQuery *sr){
+status Span_Query(SpanIter *sr){
     sr->type.state &= ~SUCCESS;
     MemCtx *m = sr->span->m;
     i32 idx = sr->idx;
@@ -66,12 +61,7 @@ status Span_Query(SpanQuery *sr){
         slab *shelf_sl = NULL;
         while(p->dims < dimsNeeded){
             slab *new_sl = NULL;
-            if(p == &p->m->p){
-                new_sl = Slab_WhileExpanding(&mem_sl);
-            }else{
-                new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
-                printf("making new base sl %ld\n", (util)new_sl);
-            }
+            new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
 
             if(exp_sl == NULL){
                 shelf_sl = sr->span->root;
@@ -92,17 +82,13 @@ status Span_Query(SpanQuery *sr){
     i32 offset = idx;
     void **ptr = NULL;
     while(dim != -1){
-        offset = SpanQuery_SetStack(sr, dim, offset);
+        offset = SpanIter_SetStack(sr, dim, offset);
         ptr = sr->stack+dim;
         if(*ptr == NULL){
             if((sr->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
                 return NOOP;
             }
-            if(p == &p->m->p){
-                *ptr = Slab_WhileExpanding(&mem_sl);
-            }else{
-                *ptr = (slab *)MemCtx_Alloc((m), sizeof(slab));
-            }
+            *ptr = (slab *)MemCtx_Alloc((m), sizeof(slab));
         }
 
         dim--;
@@ -136,7 +122,7 @@ char **Span_ToCharArr(MemCtx *m, Span *p){
     return arr;
 }
 
-void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
+void *Span_SetFromQ(SpanIter *sq, Abstract *t){
     Span *p = sq->span;
     p->type.state &= ~(SUCCESS|NOOP);
     status r = Span_Query(sq);
@@ -168,12 +154,12 @@ void *Span_Set(Span *p, i32 idx, Abstract *t){
     if(idx < 0 || t == NULL){
         return NULL;
     }
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, p, SPAN_OP_SET, idx);
+    SpanIter sq;
+    SpanIter_Setup(&sq, p, SPAN_OP_SET, idx);
     return Span_SetFromQ(&sq, t);
 }
 
-void *Span_GetFromQ(SpanQuery *sq){
+void *Span_GetFromQ(SpanIter *sq){
     Span *p = sq->span;
     p->type.state &= ~(SUCCESS|NOOP);
     status r = Span_Query(sq);
@@ -197,8 +183,8 @@ void *Span_Get(Span *p, i32 idx){
     if(idx < 0){
         return NULL;
     }
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, p, SPAN_OP_GET, idx);
+    SpanIter sq;
+    SpanIter_Setup(&sq, p, SPAN_OP_GET, idx);
     return Span_GetFromQ(&sq);
 }
 
@@ -207,8 +193,8 @@ void *Span_SetRaw(Span *p, i32 idx, util *u){
         return NULL;
     }
     p->type.state |= FLAG_SPAN_RAW;
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, p, SPAN_OP_SET, idx);
+    SpanIter sq;
+    SpanIter_Setup(&sq, p, SPAN_OP_SET, idx);
     return Span_SetFromQ(&sq, (Abstract *)*u);
 }
 
@@ -220,8 +206,8 @@ util Span_GetRaw(Span *p, i32 idx){
         Fatal("Tried to get raw value from non raw span", TYPE_SPAN);
         return 0;
     }
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, p, SPAN_OP_GET, idx);
+    SpanIter sq;
+    SpanIter_Setup(&sq, p, SPAN_OP_GET, idx);
     status r = Span_Query(&sq);
     if((r & SUCCESS) == 0){
         p->type.state |= ERROR;
@@ -245,11 +231,11 @@ i32 Span_Add(Span *p, Abstract *t){
 }
 
 status Span_Cull(Span *p, i32 count){
-    SpanQuery sq;
+    SpanIter sq;
     while(count-- > 0){
         i32 idx = p->max_idx;
         if(idx >= 0){
-            SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
+            SpanIter_Setup(&sq, p, SPAN_OP_REMOVE, idx);
             Span_Query(&sq);
         }
         p->max_idx--;
@@ -259,8 +245,8 @@ status Span_Cull(Span *p, i32 count){
 }
 
 status Span_Remove(Span *p, i32 idx){
-    SpanQuery sq;
-    SpanQuery_Setup(&sq, p, SPAN_OP_REMOVE, idx);
+    SpanIter sq;
+    SpanIter_Setup(&sq, p, SPAN_OP_REMOVE, idx);
     Span_SetFromQ(&sq, NULL);
     return sq.type.state;
 }

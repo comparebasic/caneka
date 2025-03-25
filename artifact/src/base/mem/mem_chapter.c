@@ -1,6 +1,51 @@
 #include <external.h>
 #include <caneka.h>
 
+static inline MemCtx_Expand(MemCtx *m){
+    Span *p = m->it.span;
+    i32 idx = p->nvalues+1;
+    slab *slabs = (slab *)Span_Get(p, m->nextIdx);
+    slabs += (MEM_SLAB_SIZE)-sizeof(MemSlab)-(sizeof(slab)*m->nextCount);
+
+    i8 dimsNeeded = 0;
+    while(_increments[dimsNeeded+1] <= idx){
+        dimsNeeded++;
+    }
+
+    MemSlab *mem_sl = NULL;
+    if(dimsNeeded > p->dims){
+        slab *exp_sl = NULL;
+        slab *shelf_sl = NULL;
+        while(p->dims < dimsNeeded){
+            slab *new_sl = NULL;
+            new_sl = (slab *)slabs;
+            slabs++;
+
+            if(exp_sl == NULL){
+                shelf_sl = sr->span->root;
+                sr->span->root = new_sl;
+            }else{
+                void **ptr = (void *)exp_sl;
+                *ptr = new_sl;
+            }
+
+            exp_sl = new_sl;
+            p->dims++;
+        }
+        void **ptr = (void *)exp_sl;
+        *ptr = shelf_sl;
+    }
+
+    if(m->
+}
+
+static inline status MemCtx_ReserveSpanExpand(MemCtx *m, MemSlab *sl, word nextIdx){
+    m->nextIdx = nextIdx;
+    m->nextCount = m->it.span->dims+1;
+    MemSlab_Alloc(sl, sizeof(slab)*m->nextCount);
+    return SUCCESS;
+}
+
 void *MemSlab_Alloc(MemSlab *sl, word sz){
     sl->remaining -= sz;
     return sl->bytes+((size_t)sl->remaining); 
@@ -22,6 +67,12 @@ MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
     memcpy(sl, &_sl, sizeof(MemSlab));
 
     i32 idx = m->p.max_idx+1;
+
+    if(_increments[m->it.span->dims] <(m->it.span.nvalues+1)){
+        MemCtx_Expand(m);
+        MemCtx_ReserveSpanExpand(m, sl, idx);
+    }
+
     Span_Set(&m->p, idx, (Abstract *)sl);
     MemBook_Claim(sl);
     return sl;
@@ -100,6 +151,7 @@ MemCtx *MemCtx_OnPage(void *page){
 
     MemCtx *m = (MemCtx *)MemSlab_Alloc(&_sl, sizeof(MemCtx));
     MemCtx_Setup(m, &_sl);
+    MemCtx_ReserveSpanExpand(m, &_sl, 0);
     return m;
 }
 
