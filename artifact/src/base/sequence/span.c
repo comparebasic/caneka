@@ -3,37 +3,19 @@
 
 i32 _increments[SPAN_MAX_DIMS] = {1, 16, 256, 4096, 65536};
 
-static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim){
+static inline SpanQuery_SetStack(SpanQuery *sq, i8 dim, i32 offset){
     Span *p = sq->span; 
-    slab *sl = NULL;
-    word localIdx = 0;
-    SpanState *st = sq->stack+dim;
+    void **ptr = sq->stack+dim;
     i32 increment = _increments[dim];
-    i64 offset = 0;
-    void **ptr = NULL;
-    if(dim == p->dims){
-        ptr = (void **)p->root;
-        localIdx = sq->idx / increment;
-    }else{
-        SpanState *prev = sq->stack+(dim+1);
-        offset = prev->increment*prev->localIdx;
-        localIdx = (sq->idx - offset) / increment;
-        ptr = prev->ptr;
-        ptr += localIdx;
+    i32 localIdx = (offset / increment);
+    sq->stack[localIdx] = localIdx;
+    if(localIdx > SPAN_STRIDE){
+        printf("Stride %d\n", localIdx);
+        Fatal("Error localIdx larger than span stride");
+        return -1;
     }
-    st->ptr = ptr;
-    st->localIdx = localIdx;
-    st->dim = dim;
-    st->increment = increment;
-    st->offset = offset;
-
-    if(sq->span->type.state & DEBUG){
-        printf("\x1b[33midx:%d i+o+i:%d Stack<%ddim %dlocalIdx %doffset *%ldsl>\x1b[0m\n",
-            (i32)sq->idx, (i32)st->offset+(st->localIdx*st->increment),
-            (i32)dim, st->localIdx, (i32)st->offset, (util)*st->ptr);
-    }
-
-    return st;
+    *ptr = (*ptr)+localIdx;
+    return offset % increment;
 }
 
 void SpanQuery_Setup(SpanQuery *sr, Span *p, status op, i32 idx){
@@ -107,33 +89,25 @@ status Span_Query(SpanQuery *sr){
     }
 
     i8 dim = p->dims;
-    SpanState *st = NULL;
+    i32 offset = idx;
+    void **ptr = NULL;
     while(dim != -1){
-        st = SpanQuery_SetStack(sr, dim);
-        if(*(st->ptr) == NULL){
+        offset = SpanQuery_SetStack(sr, dim, offset);
+        ptr = sr->stack+dim;
+        if(*ptr == NULL){
             if((sr->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
                 return NOOP;
             }
-            slab *new_sl = NULL; 
             if(p == &p->m->p){
-                new_sl = Slab_WhileExpanding(&mem_sl);
+                *ptr = Slab_WhileExpanding(&mem_sl);
             }else{
-                new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
-                printf("making new value sl %ld\n", (util)new_sl);
+                *ptr = (slab *)MemCtx_Alloc((m), sizeof(slab));
             }
-            *(st->ptr) = new_sl;
         }
 
         dim--;
     }
 
-    if(st == NULL){
-        Fatal("Slab not found, SpanState is null\n", TYPE_SPAN);
-    }
-
-    if(st->localIdx >= SPAN_STRIDE){
-        Fatal("localIdx greater than stride", p->type.of);
-    }
 
     sr->type.state |= SUCCESS;
     return sr->type.state;
@@ -167,17 +141,16 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
     p->type.state &= ~(SUCCESS|NOOP);
     status r = Span_Query(sq);
     if((r & SUCCESS) != 0){
-        SpanState *st = sq->stack;
         if(sq->idx > p->max_idx+1){
             p->type.state |= FLAG_SPAN_HAS_GAPS;
         }
         if(sq->type.state & SPAN_OP_REMOVE){
-            *(st->ptr) = NULL;
+            *(sq->stack[0]) = NULL;
             p->nvalues--;
             p->metrics.set = -1;
             p->metrics.available = sq->idx;
         }else{
-            *(st->ptr) = (void *)t;
+            *(sq->stack[0]) = t;
             p->nvalues++;
             p->metrics.set = sq->idx;
             if(sq->idx > p->max_idx){
@@ -185,8 +158,7 @@ void *Span_SetFromQ(SpanQuery *sq, Abstract *t){
             }
         }
 
-        sq->value = (Abstract *)*(st->ptr);
-        return sq->value;
+        return *(sq->stack[0]);
     }
 
     return NULL;
@@ -210,16 +182,15 @@ void *Span_GetFromQ(SpanQuery *sq){
         return NULL;
     }
 
-    SpanState *st = sq->stack;
-    if(*(st->ptr) != NULL){
-        sq->value = *(st->ptr);
+    if(*(st->stack[0]) != NULL){
         sq->span->type.state |= SUCCESS;
+        p->metrics.get = sq->idx;
     }else{
         sq->span->type.state |= NOOP;
-        sq->value = NULL;
+        p->metrics.get = -1;
     }
-    p->metrics.get = sq->idx;
-    return sq->value;
+
+    return *(sq->stack[0]);
 }
 
 void *Span_Get(Span *p, i32 idx){

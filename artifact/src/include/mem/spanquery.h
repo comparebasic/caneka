@@ -10,13 +10,12 @@ typedef struct span_query {
     Type type;
     i32 idx;
     struct span *span;
-    Abstract *value;
-    SpanState stack[SPAN_MAX_DIMS];
+    void *stack[SPAN_MAX_DIMS];
+    i32 stackIdx[SPAN_MAX_DIMS];
 } SpanQuery;
 
-SpanState *SpanQuery_StateByDim(SpanQuery *sq, i8 dim);
 status SpanQuery_Refresh(SpanQuery *sq);
 void SpanQuery_Setup(struct span_query *sq, Span *p, status op, i32 idx);
 status Span_Query(SpanQuery *sr);
 slab *Slab_WhileExpanding(struct mem_slab **_sl);
-static inline SpanState *SpanQuery_SetStack(SpanQuery *sq, i8 dim);
+static inline i32 SpanQuery_SetStack(SpanQuery *sq, i8 dim, i32 offset);

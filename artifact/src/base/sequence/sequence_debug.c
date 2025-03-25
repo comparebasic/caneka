@@ -7,19 +7,6 @@ i64 Iter_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean exte
         State_ToStr(m, it->type.state), it->idx, it->values->nvalues);
 }
 
-i64 SpanState_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
-    SpanState *st = (SpanState *)a;
-    i32 idx = st->localIdx;
-    void *slot = NULL;
-    if(st->slab != NULL){
-        void **ptr = (void **)st->slab;
-        ptr += st->localIdx;
-        slot = *ptr;
-    }
-    return StrVec_FmtAdd(m, v, fd, "SpanState<^D._i4^d.dim, ^D._i4^d.localIdx, , ^D._i4^d.offset, ^D._a^d.slot, ^D._a^d.slab>", 
-        (i32)st->dim, (i32)st->localIdx, (i32)st->offset, slot, st->slab);
-}
-
 i64 Slab_Print(MemCtx *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
     /*
     printf("\x1b[%dm(%p){", color, slab);
@@ -84,17 +71,7 @@ i64 SpanQuery_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean
         i8 dim = 0;
         while(dim <= sq->span->dims){
             total += StrVec_FmtAdd(m, v, fd, "  ^D._i4^d.dim: ", (i32)dim);
-            SpanState *st = ((SpanState *)sq->stack)+dim;
-            if(st != NULL){
-                total += SpanState_Print(m, v, fd, 
-                    (Abstract *)st, TYPE_SPAN_STATE, extended);
-                if(st->slab == sq->span->root){
-                    total += StrVec_FmtAdd(m, v, fd, " ^D(root)^d");
-                }
-            }else{
-                total += StrVec_FmtAdd(m, v, fd, "NULL\n");
-            }
-
+            /* print span state */
             if(dim < sq->span->dims){
                 total += StrVec_FmtAdd(m, v, fd, ",\n");
             }else{
@@ -122,7 +99,6 @@ status SequenceDebug_Init(MemCtx *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN_STATE, (void *)SpanState_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
     r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
