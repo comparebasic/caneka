@@ -3,7 +3,7 @@
 
 static Span *stack = NULL;
 static void sigH(int sig, siginfo_t *info, void *ptr){
-    Fatal("Sig", 0);
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault");
     exit(1);
 }
 
