@@ -19,7 +19,7 @@ typedef struct mem_ctx {
     RangeType type;
     i16 nextIdx;
     i16 nextCount;
-    SpanIter it;
+    Iter it;
     Abstract *owner;
 } MemCtx;
 

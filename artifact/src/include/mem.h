@@ -1,7 +1,7 @@
-#include "mem/span.h"
-#include "mem/spanstate.h"
-#include "mem/spanquery.h"
+/*
 #include "mem/span_tolocal.h"
+*/
+#include "mem/span.h"
 #include "mem/iter.h"
 #include "mem/mem_chapter.h"
 #include "mem/mem_book.h"

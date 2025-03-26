@@ -2,8 +2,7 @@ typedef struct mem_chapter {
     Type type;
     int size;
     void *start;
-    struct span pages;
-    struct iter it;
+    struct iter pagesIt;
     struct mem_ctx m;
 } MemBook;
 void *MemBook_GetBytes();

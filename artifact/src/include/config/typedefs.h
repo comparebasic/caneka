@@ -60,11 +60,11 @@ typedef char *(*RangeToChars)(word);
 #define STRING_FIXED_SIZE 63
 #define STRING_FULL_SIZE 127
 
-#define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
+#define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from abstract mismatch _i4", (i32)(x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
-#define asIfcOffset(x, ifc, offset) (((x) != NULL  && Ifc_Match((((Abstract *)(x))->type.of-HTYPE_LOCAL), ifc)) ? (x) : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
+#define asIfcOffset(x, ifc, offset) (((x) != NULL  && Ifc_Match((((Abstract *)(x))->type.of-HTYPE_LOCAL), ifc)) ? (x) : Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from abstract mismatch _i4", (i32)(x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
-#define asIfc(x, ifc) (((x) != NULL  && Ifc_Match(((Abstract *)(x))->type.of, ifc)) ? (x) : Fatal("Cast from abstract mismatch", (x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
+#define asIfc(x, ifc) (((x) != NULL  && Ifc_Match(((Abstract *)(x))->type.of, ifc)) ? (x) : Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from abstract mismatch", (i32)(x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
