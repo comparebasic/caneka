@@ -1,9 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-status Span_Tests(MemCtx *gm){
+status Span_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
-    MemCtx *m = MemCtx_Make();
+    MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
     Str *s;
@@ -154,13 +154,13 @@ status Span_Tests(MemCtx *gm){
     Span_Set(p, 225, (Abstract *)Int_Wrapped(m, 225));
     */
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status SpanClone_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
+status SpanClone_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
 
@@ -172,6 +172,6 @@ status SpanClone_Tests(MemCtx *gm){
     Span_Set(p, 5, (Abstract *)Str_CstrRef(m, "Five"));
     Span_Set(p, 17, (Abstract *)Str_CstrRef(m, "Seventeen"));
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }

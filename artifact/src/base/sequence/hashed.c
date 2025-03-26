@@ -53,7 +53,7 @@ static util Hash_Span(Abstract *a){
     return 0;
 }
 
-static status populateHash(MemCtx *m, Lookup *lk){
+static status populateHash(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_PatMatch);
@@ -91,19 +91,19 @@ boolean Hashed_Equals(Hashed *a, Hashed *b){
     return Equals(a->item, (void *)b->item);
 }
 
-Hashed *Hashed_Make(MemCtx *m, Abstract *a){
+Hashed *Hashed_Make(MemCh *m, Abstract *a){
     if(a->type.of == TYPE_HASHED){
         return (Hashed *)a;
     }
-    Hashed *v = (Hashed *)MemCtx_Alloc(m, sizeof(Hashed));
+    Hashed *v = (Hashed *)MemCh_Alloc(m, sizeof(Hashed));
     v->type.of = TYPE_HASHED;
     v->id = Get_Hash(a);
     v->item = a;
     return v;
 }
 
-Hashed *Hashed_Clone(MemCtx *m, Hashed *oh){
-    Hashed *h = MemCtx_Realloc(m, sizeof(Hashed), oh, sizeof(Hashed));
+Hashed *Hashed_Clone(MemCh *m, Hashed *oh){
+    Hashed *h = MemCh_Realloc(m, sizeof(Hashed), oh, sizeof(Hashed));
     if(h->item != NULL && ((h->item = Clone(m, h->item)) == NULL)){
         return NULL;
     }
@@ -114,7 +114,7 @@ Hashed *Hashed_Clone(MemCtx *m, Hashed *oh){
 }
 
 
-status Hash_Init(MemCtx *m){
+status Hash_Init(MemCh *m){
     if(HashLookup == NULL){
         Lookup *HashLookup  = Lookup_Make(m, _TYPE_START, populateHash, NULL);
         return SUCCESS;

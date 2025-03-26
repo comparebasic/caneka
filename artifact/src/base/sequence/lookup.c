@@ -27,7 +27,7 @@ word Lookup_AbsFromIdx(Lookup *lk, word idx){
     return idx+lk->offset;
 }
 
-Lookup *Lookup_FromConfig(MemCtx *m, LookupConfig *config, Abstract *arg){
+Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config, Abstract *arg){
     LookupConfig *cnf = config;
     Lookup *lk = Lookup_Make(m, cnf->key, NULL, arg);
     while(cnf->key != 0){
@@ -37,16 +37,16 @@ Lookup *Lookup_FromConfig(MemCtx *m, LookupConfig *config, Abstract *arg){
     return lk;
 }
 
-status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
+status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
-        Fatal("Adding lookup value below zero", TYPE_UNIT);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below zero");
     }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) != NULL){
         return SUCCESS;
     }
     return ERROR;
 }
 
-status Lookup_Concat(MemCtx *m, Lookup *lk, Lookup *add){
+status Lookup_Concat(MemCh *m, Lookup *lk, Lookup *add){
     status r = READY;
     Iter it;
     Iter_Init(&it, add->values);
@@ -64,8 +64,8 @@ status Lookup_Concat(MemCtx *m, Lookup *lk, Lookup *add){
     return r;
 }
 
-Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
-    Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
+Lookup *LookupInt_Make(MemCh *m, word offset, Abstract *arg){
+    Lookup *lk = (Lookup *)MemCh_Alloc(m, sizeof(Lookup));
     lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
     lk->values = Span_Make(m);
@@ -74,8 +74,8 @@ Lookup *LookupInt_Make(MemCtx *m, word offset, Abstract *arg){
     return lk;
 }
 
-Lookup *Lookup_Make(MemCtx *m, word offset, LookupPopulate populate, Abstract *arg){
-    Lookup *lk = (Lookup *)MemCtx_Alloc(m, sizeof(Lookup));
+Lookup *Lookup_Make(MemCh *m, word offset, LookupPopulate populate, Abstract *arg){
+    Lookup *lk = (Lookup *)MemCh_Alloc(m, sizeof(Lookup));
     lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
     lk->values = Span_Make(m);

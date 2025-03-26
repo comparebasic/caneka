@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status SubCall(MemCtx *m, Span *cmd_p, ProcDets *pd){
+status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Push(pd, pd->type.of);
     char **cmd = Span_ToCharArr(m, cmd_p);
     char *msg = "";
@@ -96,14 +96,16 @@ status SubStatus(ProcDets *pd){
 
     if(p != pd->pid){
         if(!wait){
-            Fatal("subProcess wait failed for SubProcess", 0); 
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+                "subProcess wait failed for SubProcess"); 
         }
         DebugStack_Pop();
         return NOOP;
     }
 
     if(!WIFEXITED(r)){
-        Fatal("subProcess failed for SubProcess process did not exit propery", 0); 
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+            "subProcess failed for SubProcess process did not exit propery");
         DebugStack_Pop();
         return ERROR;
     }
@@ -119,7 +121,7 @@ status SubStatus(ProcDets *pd){
     return pd->type.state;
 }
 
-status SubProcess(MemCtx *m, Span *cmd_p, ProcDets *pd){
+status SubProcess(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Push(cmd_p, cmd_p->type.of);
     status r = SubCall(m, cmd_p, pd);
     if(r & SUCCESS){

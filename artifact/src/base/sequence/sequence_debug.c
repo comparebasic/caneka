@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Iter_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Iter_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     Iter *it = (Iter *)as(a, TYPE_ITER);
     return StrVec_FmtAdd(m, v, fd, "I<_t:_i4 of _i4>",
-        State_ToStr(m, it->type.state), it->idx, it->values->nvalues);
+        State_ToStr(m, it->type.state), it->idx, it->span->nvalues);
 }
 
-i64 Slab_Print(MemCtx *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
+i64 Slab_Print(MemCh *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
     /*
     printf("\x1b[%dm(%p){", color, slab);
     void **slot = (void **)slab;
@@ -50,7 +50,7 @@ i64 Slab_Print(MemCtx *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
     return 0;
 }
 
-i64 Span_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Span_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     i64 total = 0;
@@ -61,30 +61,7 @@ i64 Span_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean exte
 }
 
 
-i64 SpanQuery_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
-    SpanQuery *sq = as(a, TYPE_SPAN_QUERY);
-    i64 total = 0;
-    total += StrVec_FmtAdd(m, v, fd, "SpanQuery<^D_i4^d: [\n", sq->idx);
-    if(sq->span == NULL){
-        total += StrVec_FmtAdd(m, v, fd, "span=null");
-    }else{
-        i8 dim = 0;
-        while(dim <= sq->span->dims){
-            total += StrVec_FmtAdd(m, v, fd, "  ^D._i4^d.dim: ", (i32)dim);
-            /* print span state */
-            if(dim < sq->span->dims){
-                total += StrVec_FmtAdd(m, v, fd, ",\n");
-            }else{
-                total += StrVec_FmtAdd(m, v, fd, "\n");
-            }
-            dim++;
-        }
-    }
-    total += StrVec_FmtAdd(m, v, fd, "]>");
-    return 0;
-}
-
-i64 Lookup_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Lookup_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
     /*
     printf("\x1b[%dm%sLk<offset:%d latest_idx:\%d", color, msg, lk->offset, lk->latest_idx);
@@ -95,10 +72,9 @@ i64 Lookup_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ex
 }
 
 
-status SequenceDebug_Init(MemCtx *m, Lookup *lk){
+status SequenceDebug_Init(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
-    r |= Lookup_Add(m, lk, TYPE_SPAN_QUERY, (void *)SpanQuery_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
     r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);

@@ -14,7 +14,7 @@ static int getReQueryKey(i64 hash, int position, byte dim){
 
 static boolean shouldResize(Span *tbl, word *queries){
     if(dim_lookups[tbl->dims] == 0){
-        Fatal("Dim lookup value not set dim\n", tbl->type.of);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Dim lookup value not set dim");
         return FALSE;
     }
     if(tbl->nvalues > ((dim_lookups[tbl->dims] / 2) + (dim_lookups[tbl->dims] / 4)) 
@@ -30,8 +30,8 @@ static status Table_Resize(Span *tbl, word *queries){
         *queries = 0;
         Span *newTbl = Span_Make(tbl->m);
 
-        SpanQuery sr;
-        SpanQuery_Setup(&sr, newTbl, SPAN_OP_RESIZE, 0);
+        Iter it;
+        Iter_Setup(&it, newTbl, SPAN_OP_RESIZE, 0);
         Span_Set(tbl, _increments[tbl->dims], NULL);
 
         for(int i = 0; i <= tbl->max_idx; i++){
@@ -121,8 +121,9 @@ static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *val
     return h;
 }
 
-status Table_SetKey(Span *tbl, Abstract *a){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, NULL);
+status Table_SetKey(Iter *it, Abstract *a){
+    Hashed *h = Table_GetSetHashed(it->span, SPAN_OP_SET, a, NULL);
+    /* set idx here */
     return SUCCESS;
 }
 
@@ -138,19 +139,19 @@ util Table_GetRaw(Span *tbl, Str *key){
 }
 
 
-i32 Table_SetIdxEntry(Span *tbl, Abstract *a){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, NULL);
-    i32 value = tbl->metrics.set;
-    Single *tag = Int_Wrapped(tbl->m, value);
+i32 Table_SetIdxEntry(Iter *it, Abstract *a){
+    Hashed *h = Table_GetSetHashed(it->span, SPAN_OP_SET, a, NULL);
+    i32 value = it->metrics.set;
+    Single *tag = Int_Wrapped(it->span->m, value);
     h->value = (Abstract *)tag;
     return (i32)value;
 }
 
-Hashed *Table_SetValue(Span *tbl, Abstract *a){
-    Hashed *h = Span_Get(tbl, tbl->metrics.set);
+Hashed *Table_SetValue(Iter *it, Abstract *a){
+    Hashed *h = Span_Get(it->span, it->metrics.set);
     if(h != NULL){
         h->value = a;
-        tbl->metrics.set = -1;
+        it->metrics.set = -1;
         return h;
     }
     return NULL;

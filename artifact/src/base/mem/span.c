@@ -3,7 +3,7 @@
 
 status Span_Query(Iter *it){
     it->type.state &= ~SUCCESS;
-    MemCtx *m = it->span->m;
+    MemCh *m = it->span->m;
     i32 idx = it->idx;
 
     i8 dimsNeeded = 0;
@@ -21,7 +21,7 @@ status Span_Query(Iter *it){
         slab *shelf_sl = NULL;
         while(p->dims < dimsNeeded){
             slab *new_sl = NULL;
-            new_sl = (slab *)MemCtx_Alloc((m), sizeof(slab));
+            new_sl = (slab *)MemCh_Alloc((m), sizeof(slab));
 
             if(exp_sl == NULL){
                 shelf_sl = it->span->root;
@@ -49,7 +49,7 @@ status Span_Query(Iter *it){
                 if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
                     return NOOP;
                 }
-                *ptr = (slab *)MemCtx_Alloc((m), sizeof(slab));
+                *ptr = (slab *)MemCh_Alloc((m), sizeof(slab));
                 memset(*ptr, 0, sizeof(slab));
                 /*
                 printf("\x1b[33mSetting slab to %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
@@ -75,9 +75,9 @@ i32 Span_Capacity(Span *p){
     return increment * SPAN_STRIDE;
 }
 
-char **Span_ToCharArr(MemCtx *m, Span *p){
+char **Span_ToCharArr(MemCh *m, Span *p){
     size_t sz = sizeof(char *)*(p->nvalues+1);
-    char **arr = MemCtx_Alloc(m, sz);
+    char **arr = MemCh_Alloc(m, sz);
     /*
     Iter it;
     Iter_Init(&it, p);
@@ -235,7 +235,7 @@ status Span_Setup(Span *p){
     return SUCCESS;
 }
 
-Span *Span_Clone(MemCtx *m, Span *p){
+Span *Span_Clone(MemCh *m, Span *p){
     Iter it;
     Iter_Init(&it, p);
     Span *p2 = Span_Make(m);
@@ -249,12 +249,11 @@ Span *Span_Clone(MemCtx *m, Span *p){
     return p2;
 }
 
-Span *Span_Make(MemCtx *m){
-    Span *p = MemCtx_Alloc(m, sizeof(Span));
+Span *Span_Make(MemCh *m){
+    Span *p = MemCh_Alloc(m, sizeof(Span));
     p->type.of = TYPE_SPAN;
-    p->dims = 0;
     p->max_idx = -1;
     p->m = m;
-    p->root = (slab *)MemCtx_Alloc((m), sizeof(slab));
+    p->root = (slab *)MemCh_Alloc((m), sizeof(slab));
     return p;
 }

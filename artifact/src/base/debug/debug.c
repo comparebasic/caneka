@@ -3,11 +3,11 @@
 
 Lookup *DebugPrintChain = NULL;
 
-MemCtx *_debugM = NULL;
+MemCh *_debugM = NULL;
 
 #include "inline/handle_io.c"
 
-status Debug_Init(MemCtx *m){
+status Debug_Init(MemCh *m){
     if(_debugM == NULL){
         _debugM = m;
     }
@@ -50,7 +50,7 @@ void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
     printf("\x1b[0m");
 }
 
-i64 Str_Debug(MemCtx *m, StrVec *v, i32 fd, void *t, cls type, boolean extended){
+i64 Str_Debug(MemCh *m, StrVec *v, i32 fd, void *t, cls type, boolean extended){
     if(t == NULL){
         return handleIo(v, fd, Str_Ref(m, (byte *)"NULL", 4, 4));
     }

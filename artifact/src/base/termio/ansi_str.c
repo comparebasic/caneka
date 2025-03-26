@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Str *Str_FromAnsi(MemCtx *m, char **_ptr, char *end){
+Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
     char *ptr = *_ptr;
     char c;
     Str *s = Str_Make(m, ANSI_ESCAPE_MAX);
@@ -132,7 +132,7 @@ Str *Str_FromAnsi(MemCtx *m, char **_ptr, char *end){
     return s;
 }
 
-Str *Str_AnsiCstr(MemCtx *m, char *cstr){
+Str *Str_AnsiCstr(MemCh *m, char *cstr){
     i64 length = strlen(cstr);
     return Str_FromAnsi(m, &cstr, cstr+(length-1));
 }

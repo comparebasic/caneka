@@ -24,7 +24,7 @@ static void setSigs(){
 int DEBUG_STACK_COLOR = COLOR_GREEN;
 int _stackIdx = 0;
 
-status DebugStack_Init(MemCtx *m){
+status DebugStack_Init(MemCh *m){
     _stackIdx = 0;
     stack = Span_Make(m);
     setSigs();
@@ -34,7 +34,7 @@ status DebugStack_Init(MemCtx *m){
 void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, int line, int pos){
     stack->m->type.range--;
 
-    StackEntry *entry = MemCtx_Alloc(stack->m, sizeof(StackEntry));
+    StackEntry *entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
     entry->funcName = cstr;
     entry->fname = fname;
     entry->ref = ref;
@@ -59,7 +59,7 @@ void DebugStack_SetRef(void *v, word typeOf){
 
 int DebugStack_Print(){
     Iter it;
-    Iter_InitReverse(&it, stack);
+    Iter_Init(&it, stack);
     boolean first = TRUE;
     while((Iter_Next(&it) & END) == 0){
         StackEntry *entry = (StackEntry*)Iter_Get(&it);

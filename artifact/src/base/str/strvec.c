@@ -24,7 +24,7 @@ i64 StrVec_ToFd(StrVec *v, int fd){
     return total;
 }
 
-Str *StrVec_ReAlign(MemCtx *m, StrVec *v){
+Str *StrVec_ReAlign(MemCh *m, StrVec *v){
     /* make long strings instead of short ones and re attach a new span to 'v' */
     return NULL;
 }
@@ -90,7 +90,7 @@ status StrVec_AddVec(StrVec *v, StrVec *v2){
     return SUCCESS;
 }
 
-status StrVec_AddBytes(MemCtx *m, StrVec *v, byte *ptr, i64 length){
+status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length){
     Str *s = Span_Get(v->p, v->p->max_idx);
     status r = READY;
     while(length > 0){
@@ -110,8 +110,8 @@ status StrVec_AddBytes(MemCtx *m, StrVec *v, byte *ptr, i64 length){
     return r;
 }
 
-StrVec *StrVec_Make(MemCtx *m){
-    StrVec *v = MemCtx_Alloc(m, sizeof(StrVec));
+StrVec *StrVec_Make(MemCh *m){
+    StrVec *v = MemCh_Alloc(m, sizeof(StrVec));
     v->type.of = TYPE_STRVEC;
     v->p = Span_Make(m);
     return v;

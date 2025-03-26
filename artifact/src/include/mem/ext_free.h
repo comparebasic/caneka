@@ -5,4 +5,4 @@ typedef struct external_free {
     void *arg;
 } ExtFree;
 
-ExtFree *ExtFree_Make(MemCtx *m, ExtFreeFunc func, void *arg);
+ExtFree *ExtFree_Make(MemCh *m, ExtFreeFunc func, void *arg);

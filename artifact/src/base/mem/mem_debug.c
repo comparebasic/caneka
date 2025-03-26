@@ -3,7 +3,7 @@
 
 #include "inline/handle_io.c"
 
-static inline i64 wsOut(MemCtx *m, StrVec *v, i32 fd, i8 dim){
+static inline i64 wsOut(MemCh *m, StrVec *v, i32 fd, i8 dim){
     while(dim-- > 0){
         return StrVec_Add(v, Str_Ref(m, (byte *)"    ", 4, 4)); 
     }
@@ -11,7 +11,7 @@ static inline i64 wsOut(MemCtx *m, StrVec *v, i32 fd, i8 dim){
 }
 
 
-i64 MemSlab_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 MemSlab_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     MemSlab *sl = (MemSlab*)as(a, TYPE_MEMSLAB); 
     /*
     i32 bcolor = 0;
@@ -32,10 +32,10 @@ i64 MemSlab_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean e
     return 0;
 }
 
-i64 MemCtx_Print(MemCtx *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
-    MemCtx *m = (MemCtx*)as(a, TYPE_MEMCTX); 
+i64 MemCh_Print(MemCh *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+    MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
     /*
-    printf("\x1b[%dm%sMemCtx(%p)<%d ", color, msg, m, m->p.nvalues);
+    printf("\x1b[%dm%sMemCh(%p)<%d ", color, msg, m, m->p.nvalues);
     printf("(slabAddr:idx^level)[used/available]=(");
 
     Iter it;
@@ -60,7 +60,7 @@ i64 MemCtx_Print(MemCtx *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean e
     return 0;
 }
 
-i64 MemBook_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 MemBook_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     MemBook *cp = (MemBook*)as(a, TYPE_BOOK); 
 /*
     printf("\x1b[%dm%sMemBook<start:%p/pages:%d)[available:%d selected:%d]",
@@ -86,9 +86,9 @@ i64 MemBook_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean e
     return 0;
 }
 
-status Mem_DebugInit(MemCtx *m, Lookup *lk){
+status Mem_DebugInit(MemCh *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCtx_Print);
+    r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
     r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemSlab_Print);
     return r;

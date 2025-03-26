@@ -14,7 +14,7 @@ static inline byte hexCharToOrd(byte b){
     }
 }
 
-Str *Str_FromI64(MemCtx *m, i64 i){
+Str *Str_FromI64(MemCh *m, i64 i){
     Str *s = Str_Make(m, MAX_BASE10);
     Str_AddI64(s, i);
     return s;
@@ -54,9 +54,9 @@ i64 Str_AddI64(Str *s, i64 i){
     return Str_Add(s, b+1, length);
 }
 
-Str *Str_ToHex(MemCtx *m, Str *s){
+Str *Str_ToHex(MemCh *m, Str *s){
     if(s->length*2 > STR_MAX){
-        Fatal("Requested hex string is too long _i4", (i32)s->length*2);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Requested hex string is too long _i4", (i32)s->length*2);
         return NULL;
     }
     Str *ret = Str_Make(m, s->length*2);
@@ -75,7 +75,7 @@ Str *Str_ToHex(MemCtx *m, Str *s){
     return ret;
 }
 
-Str *Str_MemCount(MemCtx *m, i64 mem) {
+Str *Str_MemCount(MemCh *m, i64 mem) {
     Str *s = Str_Make(m, STR_DEFAULT);
     Str_AddMemCount(s, mem);
     return s;

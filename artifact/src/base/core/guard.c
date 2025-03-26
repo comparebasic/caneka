@@ -8,7 +8,7 @@ status Guard_Init(Guard *g, int max){
     return SUCCESS;
 }
 
-status Guard_Setup(MemCtx *m, Guard *g, int max, byte *msg){
+status Guard_Setup(MemCh *m, Guard *g, int max, byte *msg){
     return Guard_Init(g, max);
 }
 
@@ -22,7 +22,7 @@ status _Guard_Incr(Guard *g, char *func, char *file, int line){
         g->type.state |= ERROR;
         g->file = file;
         g->line = line;
-        _Fatal("Guard failure", TYPE_GUARD, 0, func, file, line);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Guard failure");
         return g->type.state;
     }
     return NOOP;

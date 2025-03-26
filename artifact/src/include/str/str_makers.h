@@ -1,5 +1,5 @@
-Str *Str_FromI64(MemCtx *m, i64 i);
-Str *Str_ToHex(MemCtx *m, Str *s);
+Str *Str_FromI64(MemCh *m, i64 i);
+Str *Str_ToHex(MemCh *m, Str *s);
 i64 Str_AddI64(Str *s, i64 i);
-Str *Str_MemCount(MemCtx *m, i64 mem);
+Str *Str_MemCount(MemCh *m, i64 mem);
 i64 Str_AddMemCount(Str *s, i64 mem);

@@ -20,7 +20,7 @@ status File_Unlink(Str *path){
     return ERROR;
 }
 
-Str *File_GetCwdPath(MemCtx *m, Str *path){
+Str *File_GetCwdPath(MemCh *m, Str *path){
     Str *s = Str_Make(m, STR_DEFAULT);
     char *cstr = getcwd((char *)s->bytes, STR_DEFAULT_MAX);
     i64 len = strlen(cstr);
@@ -30,7 +30,7 @@ Str *File_GetCwdPath(MemCtx *m, Str *path){
     return NULL;
 }
 
-Str *File_GetAbsPath(MemCtx *m, Str *path){
+Str *File_GetAbsPath(MemCh *m, Str *path){
     if(path != NULL && path->bytes[0] != '/'){
         return File_GetCwdPath(m, path);
     }
@@ -40,7 +40,7 @@ Str *File_GetAbsPath(MemCtx *m, Str *path){
     return path;
 }
 
-boolean File_CmpUpdated(MemCtx *m, Str *a, Str *b, Access *ac){
+boolean File_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
     DebugStack_Push(a, a->type.of);
     struct stat source_stat;
     struct stat build_stat;
@@ -50,7 +50,7 @@ boolean File_CmpUpdated(MemCtx *m, Str *a, Str *b, Access *ac){
     r = stat(path_cstr, &source_stat);
     if(r != 0){
         printf("%s\n", path_cstr);
-        Fatal("Source not found", TYPE_FILE);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Source not found");
         exit(1);
     }
     r = stat(Str_Cstr(m, b), &build_stat);

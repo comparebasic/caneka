@@ -9,6 +9,6 @@ typedef struct int_range {
 
 int Int_FromStr(Str *s);
 i64 I64_FromStr(Str *s);
-Single *Int_Wrapped(MemCtx *m, int i);
-Range *Range_Wrapped(MemCtx *m, word r);
-Single *I64_Wrapped(MemCtx *m, i64 n);
+Single *Int_Wrapped(MemCh *m, int i);
+Range *Range_Wrapped(MemCh *m, word r);
+Single *I64_Wrapped(MemCh *m, i64 n);

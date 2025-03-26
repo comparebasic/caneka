@@ -42,8 +42,8 @@ status Test(boolean condition, char *fmt, ...){
     }
 }
 
-status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
-    MemCtx *m = MemCtx_Make();
+status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
+    MemCh *m = MemCh_Make();
     DebugStack_Push(suiteName, TYPE_CSTR); 
     TestSet *set = tests;
     char *name = NULL;
@@ -75,8 +75,8 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
             m->type.range++;
             _debugM->type.range++;
             r = set->func(m);
-            MemCtx_Free(m);
-            MemCtx_Free(_debugM);
+            MemCh_Free(m);
+            MemCh_Free(_debugM);
             _debugM->type.range--;
             m->type.range--;
 
@@ -99,7 +99,7 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
                 color, Str_MemCount(m, baseMem), (i32)baseStackLevel, 
                 chapters, Str_MemCount(m, chapters*PAGE_SIZE));
 
-            MemCtx_Free(m);
+            MemCh_Free(m);
             m->type.range--;
             if((r & ERROR) != 0 || (r & SUCCESS) == 0){
                 fail++;

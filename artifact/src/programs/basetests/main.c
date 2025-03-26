@@ -11,7 +11,7 @@ This file is mostly an example Caneka application, and it runs the tests
 
 #include "tests/inc.c"
 
-static status test(MemCtx *m){
+static status test(MemCh *m){
     status r = READY;
     Tests_Init(m);
     r |= Test_Runner(m, "Caneka", Tests);
@@ -33,12 +33,12 @@ int main(int argc, char **argv){
 
     MemBook *cp = MemBook_Make(NULL);
     if(cp == NULL){
-        Fatal("MemBook created successfully\n", 0);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully");
     }
 
-    MemCtx *m = MemCtx_Make();
+    MemCh *m = MemCh_Make();
     if(m == NULL){
-        Fatal("MemCtx created successfully\n", 0);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully");
     }
 
     Caneka_Init(m);

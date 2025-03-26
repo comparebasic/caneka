@@ -32,13 +32,13 @@ i64 Str_AddCstr(Str *s, char *cstr){
     return Str_Add(s, (byte *)cstr, len);
 }
 
-char *Str_Cstr(MemCtx *m, Str *s){
+char *Str_Cstr(MemCh *m, Str *s){
     if(TextCharFilter(s->bytes, s->length)){
         byte *b;
         if(s->alloc == s->length+1){
             b = s->bytes;
         }else{
-            b = MemCtx_Alloc(m, s->length+1);
+            b = MemCh_Alloc(m, s->length+1);
             memcpy(b, s->bytes, s->length);
         }
         return (char *)b;
@@ -46,34 +46,34 @@ char *Str_Cstr(MemCtx *m, Str *s){
     return NULL;
 }
 
-Str *Str_Clone(MemCtx *m, Str *s, word alloc){
+Str *Str_Clone(MemCh *m, Str *s, word alloc){
     if(alloc < s->length){
         return NULL;
     }
-    Str *ret = MemCtx_Alloc(m, sizeof(Str));
-    byte *_bytes = MemCtx_Alloc(m, alloc);
+    Str *ret = MemCh_Alloc(m, sizeof(Str));
+    byte *_bytes = MemCh_Alloc(m, alloc);
     memcpy(_bytes, s->bytes, s->length);
     Str_Init(ret, _bytes, s->length, alloc);
     return ret;
 }
 
-Str *Str_From(MemCtx *m, byte *bytes, word length){
-    Str *s = MemCtx_Alloc(m, sizeof(Str));
-    byte *_bytes = MemCtx_Alloc(m, length);
+Str *Str_From(MemCh *m, byte *bytes, word length){
+    Str *s = MemCh_Alloc(m, sizeof(Str));
+    byte *_bytes = MemCh_Alloc(m, length);
     memcpy(_bytes, bytes, length);
     Str_Init(s, _bytes, length, length);
     return s;
 }
 
-Str *Str_Ref(MemCtx *m, byte *bytes, word length, word alloc){
-    Str *s = MemCtx_Alloc(m, sizeof(Str));
+Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc){
+    Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, bytes, length, alloc);
     return s;
 }
 
-Str *Str_CstrRef(MemCtx *m, char *cstr){
+Str *Str_CstrRef(MemCh *m, char *cstr){
     i64 len = strlen(cstr);
-    Str *s = MemCtx_Alloc(m, sizeof(Str));
+    Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, (byte *)cstr, len, len+1);
     return s;
 }
@@ -86,9 +86,9 @@ status Str_Init(Str *s, byte *bytes, word length, word alloc){
     return SUCCESS;
 }
 
-Str *Str_Make(MemCtx *m, word alloc){
-    Str *s = MemCtx_Alloc(m, sizeof(Str));
-    byte *bytes = MemCtx_Alloc(m, alloc);
+Str *Str_Make(MemCh *m, word alloc){
+    Str *s = MemCh_Alloc(m, sizeof(Str));
+    byte *bytes = MemCh_Alloc(m, alloc);
     Str_Init(s, bytes, 0, alloc);
     return s;
 }

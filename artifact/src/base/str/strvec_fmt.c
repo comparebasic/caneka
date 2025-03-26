@@ -3,7 +3,7 @@
 
 #include "inline/handle_io.c"
 
-i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
+i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
     size_t l = strlen(fmt);
     char *end = fmt+l;
     char *ptr = fmt;
@@ -160,13 +160,13 @@ outnext:
     return total; 
 }
 
-i64 StrVec_FmtAdd(MemCtx *m, StrVec *v, i32 fd, char *fmt, ...){
+i64 StrVec_FmtAdd(MemCh *m, StrVec *v, i32 fd, char *fmt, ...){
 	va_list args;
     va_start(args, fmt);
     return StrVec_FmtHandle(m, v, fmt, args, fd);
 }
 
-StrVec *StrVec_Fmt(MemCtx *m, char *fmt, ...){
+StrVec *StrVec_Fmt(MemCh *m, char *fmt, ...){
     StrVec *v = StrVec_Make(m);
 	va_list args;
     va_start(args, fmt);

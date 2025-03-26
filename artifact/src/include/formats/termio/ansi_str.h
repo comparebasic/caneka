@@ -1,1 +1,1 @@
-Str *Str_FromAnsi(MemCtx *m, char **ptr, char *end);
+Str *Str_FromAnsi(MemCh *m, char **ptr, char *end);

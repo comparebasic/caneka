@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Str *Str_FromTyped(MemCtx *m, void *v, cls type){
+Str *Str_FromTyped(MemCh *m, void *v, cls type){
     if(v == NULL){
         return Str_Ref(m, (byte *)"NULL", 4, 5);
     }else if(type == TYPE_STR){
@@ -13,7 +13,7 @@ Str *Str_FromTyped(MemCtx *m, void *v, cls type){
     }
 }
 
-Str *Str_FromAbs(MemCtx *m, Abstract *a){
+Str *Str_FromAbs(MemCh *m, Abstract *a){
     if(a == NULL){
         return Str_Ref(m, (byte *)"NULL", 4, 5);
     }else{

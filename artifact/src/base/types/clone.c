@@ -3,7 +3,7 @@
 
 Lookup *CloneLookup = NULL;
 
-static status populateClone(MemCtx *m, Lookup *lk){
+static status populateClone(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING, (void *)Str_Clone);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_Clone);
@@ -16,7 +16,7 @@ static status populateClone(MemCtx *m, Lookup *lk){
     return r;
 }
 
-status Clone_Init(MemCtx *m){
+status Clone_Init(MemCh *m){
     if(CloneLookup == NULL){
         Lookup *CloneLookup = Lookup_Make(m, _TYPE_START, populateClone, NULL);
         return SUCCESS;
@@ -24,7 +24,7 @@ status Clone_Init(MemCtx *m){
     return NOOP;
 }
 
-Abstract *Clone(MemCtx *m, Abstract *a){
+Abstract *Clone(MemCh *m, Abstract *a){
     if(a == NULL){
         return NULL;
     }

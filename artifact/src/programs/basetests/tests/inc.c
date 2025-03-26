@@ -5,7 +5,7 @@
 #include "../mock_109strings.c"
 
 #include "core_tests.c"
-#include "memctx_tests.c"
+#include "memch_tests.c"
 #include "span_tests.c"
 /*
 #include "hash_tests.c"
@@ -14,7 +14,7 @@
 #include "strvec_tests.c"
 */
 
-status Tests_Init(MemCtx *m){
+status Tests_Init(MemCh *m){
    status r = READY;
    r |= Make109Strings(m);
    return r;
@@ -34,8 +34,8 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "MemCtx Tests",
-        MemCtx_Tests,
+        "MemCh Tests",
+        MemCh_Tests,
         "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
         FEATURE_COMPLETE,
     },

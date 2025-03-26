@@ -11,11 +11,11 @@ typedef struct hashed {
 } Hashed;
 
 extern struct lookup *HashLookup;
-status Hash_Init(MemCtx *m);
+status Hash_Init(MemCh *m);
 
 typedef util (*HashFunc)(Abstract *a);
 util Get_Hash(Abstract *a);
 util Hash_Bytes(byte *bt, size_t length);
-Hashed *Hashed_Make(MemCtx *m, Abstract *a);
-Hashed *Hashed_Clone(MemCtx *m, Hashed *h);
+Hashed *Hashed_Make(MemCh *m, Abstract *a);
+Hashed *Hashed_Clone(MemCh *m, Hashed *h);
 boolean Hashed_Equals(Hashed *a, Hashed *b);

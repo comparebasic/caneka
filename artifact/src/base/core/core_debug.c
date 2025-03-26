@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-
-status CoreDebug_Init(MemCtx *m, Lookup *lk){
+status CoreDebug_Init(MemCh *m, Lookup *lk){
     status r = READY;
     /*
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);

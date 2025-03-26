@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-status Core_Tests(MemCtx *gm){
+status Core_Tests(MemCh *gm){
     status r = READY;
 
-    MemCtx *m = MemCtx_Make();
+    MemCh *m = MemCh_Make();
     r |= Test(TRUE, "Test that a test can run");
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     r |= SUCCESS;
     return r;
 }

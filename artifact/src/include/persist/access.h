@@ -23,11 +23,11 @@ typedef struct access {
     SignedContent *cert;
 } Access;
 
-status Access_Init(MemCtx *m);
-Access *Access_Make(MemCtx *m, Str *owner, Span *groups);
+status Access_Init(MemCh *m);
+Access *Access_Make(MemCh *m, Str *owner, Span *groups);
 Str *GetAccess(Access *access, Str *s);
 Str *GetGroupAccess(Access *access, Str *s);
-status Access_Grant(MemCtx *m, Access *grantee, word fl, Str *key, Abstract *value, Access *access);
+status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, Abstract *value, Access *access);
 
 #define Access_SetFl(access, fl) \
     ((access)->type.state = (((access)->type.state & NORMAL_FLAGS) | fl))

@@ -1,11 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-status CliStatus_SetKey(MemCtx *m, CliStatus *cli, Str *key, IntPair *pair){
+status CliStatus_SetKey(MemCh *m, CliStatus *cli, Str *key, IntPair *pair){
     return Table_SetRaw(cli->tbl, key, (util *)pair);
 }
 
-status CliStatus_SetByKey(MemCtx *m, CliStatus *cli, Str *key, Str *s){
+status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Str *s){
     util _pair = Table_GetRaw(cli->tbl, key);
     IntPair *pair = (IntPair *)&_pair;
     if(cli->tbl->type.state & SUCCESS){
@@ -16,7 +16,7 @@ status CliStatus_SetByKey(MemCtx *m, CliStatus *cli, Str *key, Str *s){
     return NOOP;
 }
 
-status CliStatus_Print(MemCtx *m, CliStatus *cli){
+status CliStatus_Print(MemCh *m, CliStatus *cli){
     if((cli->render(m, (Abstract *)cli) & NOOP) == 0){
         Iter it;
         Iter_Init(&it, cli->lines);
@@ -42,7 +42,7 @@ status CliStatus_Print(MemCtx *m, CliStatus *cli){
     return NOOP;
 }
 
-status CliStatus_PrintFinish(MemCtx *m, CliStatus *cli){
+status CliStatus_PrintFinish(MemCh *m, CliStatus *cli){
     Iter it;
     Iter_Init(&it, cli->lines);
     int count = cli->lines->nvalues;
@@ -73,8 +73,8 @@ status CliStatus_SetDims(CliStatus *cli, i32 cols, i32 rows){
     return SUCCESS;
 }
 
-CliStatus *CliStatus_Make(MemCtx *m, DoFunc render, Abstract *source){
-    CliStatus *st = (CliStatus *)MemCtx_Alloc(m, sizeof(CliStatus));
+CliStatus *CliStatus_Make(MemCh *m, DoFunc render, Abstract *source){
+    CliStatus *st = (CliStatus *)MemCh_Alloc(m, sizeof(CliStatus));
     st->type.of = TYPE_CLI_STATUS;
     st->lines = Span_Make(m);
     st->render = render;

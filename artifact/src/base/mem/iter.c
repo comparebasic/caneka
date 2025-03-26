@@ -57,7 +57,6 @@ void Iter_Init(Iter *it, Span *p){
 }
 
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx){
-    memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_SPAN_QUERY;
     it->type.state = op;
     it->span = p;

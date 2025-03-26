@@ -3,14 +3,14 @@
 
 static boolean crashing = FALSE;
 
-void *_Fatal(char *msg, cls t, i32 fd, char *func, char *file, int line){
+void *Fatal(i32 fd, char *func, char *file, int line, char *fmt, ...){
+	va_list args;
+    va_start(args, fmt);
 #ifdef CLI    
     RawMode(FALSE);
 #endif
-    
-    StrVec_FmtAdd(_debugM, NULL, 0, 
-        "^r.Fatal Error: ^D_c^d - type(_c/_i4) _c:_c:_i4^0\n",
-        msg, Type_ToChars(t), (i32)t, func, file, line);
+    StrVec_FmtAdd(_debugM, NULL, 0, "^r.Fatal Error: _c:_c:_i4 ", func, file, line);
+    StrVec_FmtHandle(_debugM, NULL, fmt, args, 0);
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();

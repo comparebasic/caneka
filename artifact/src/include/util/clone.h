@@ -1,3 +1,3 @@
 extern struct lookup *CloneLookup;
-status Clone_Init(MemCtx *m);
-Abstract *Clone(MemCtx *m, Abstract *a);
+status Clone_Init(MemCh *m);
+Abstract *Clone(MemCh *m, Abstract *a);

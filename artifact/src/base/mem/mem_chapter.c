@@ -1,34 +1,32 @@
 #include <external.h>
 #include <caneka.h>
 
-static inline MemCtx_Expand(MemCtx *m){
+static inline status MemCh_Expand(MemCh *m){
     Span *p = m->it.span;
     i32 idx = p->nvalues+1;
     slab *slabs = (slab *)Span_Get(p, m->nextIdx);
     slabs += (MEM_SLAB_SIZE)-sizeof(MemSlab)-(sizeof(slab)*m->nextCount);
-
-    i8 dimsNeeded = 0;
-    while(_increments[dimsNeeded+1] <= idx){
+    i8 dimsNeeded = 1;
+    while(_increments[dimsNeeded-1] <= idx){
         dimsNeeded++;
     }
-
     MemSlab *mem_sl = NULL;
     if(dimsNeeded > p->dims){
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
         while(p->dims < dimsNeeded){
             slab *new_sl = NULL;
+
             new_sl = (slab *)slabs;
             slabs++;
 
             if(exp_sl == NULL){
-                shelf_sl = sr->span->root;
-                sr->span->root = new_sl;
+                shelf_sl = p->root;
+                p->root = new_sl;
             }else{
                 void **ptr = (void *)exp_sl;
                 *ptr = new_sl;
             }
-
             exp_sl = new_sl;
             p->dims++;
         }
@@ -36,10 +34,10 @@ static inline MemCtx_Expand(MemCtx *m){
         *ptr = shelf_sl;
     }
 
-    if(m->
+    return SUCCESS;
 }
 
-static inline status MemCtx_ReserveSpanExpand(MemCtx *m, MemSlab *sl, word nextIdx){
+status MemCh_ReserveSpanExpand(MemCh *m, MemSlab *sl, word nextIdx){
     m->nextIdx = nextIdx;
     m->nextCount = m->it.span->dims+1;
     MemSlab_Alloc(sl, sizeof(slab)*m->nextCount);
@@ -51,7 +49,7 @@ void *MemSlab_Alloc(MemSlab *sl, word sz){
     return sl->bytes+((size_t)sl->remaining); 
 }
 
-MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
+MemSlab *MemSlab_Attach(MemCh *m, i16 level){
     void *bytes = MemBook_GetBytes();
     if(bytes == NULL){
         return NULL;
@@ -66,19 +64,19 @@ MemSlab *MemSlab_Attach(MemCtx *m, i16 level){
     MemSlab *sl = MemSlab_Alloc(&_sl, sizeof(MemSlab));
     memcpy(sl, &_sl, sizeof(MemSlab));
 
-    i32 idx = m->p.max_idx+1;
+    i32 idx = m->it.span->max_idx+1;
 
-    if(_increments[m->it.span->dims] <(m->it.span.nvalues+1)){
-        MemCtx_Expand(m);
-        MemCtx_ReserveSpanExpand(m, sl, idx);
+    if(_increments[m->it.span->dims] <(m->it.span->nvalues+1)){
+        MemCh_Expand(m);
+        MemCh_ReserveSpanExpand(m, sl, idx);
     }
 
-    Span_Set(&m->p, idx, (Abstract *)sl);
+    Span_Set(m->it.span, idx, (Abstract *)sl);
     MemBook_Claim(sl);
     return sl;
 }
 
-i64 MemCtx_MemCount(MemCtx *m, i16 level){
+i64 MemCh_MemCount(MemCh *m, i16 level){
     i64 total = 0;
     while((Iter_Next(&m->it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
@@ -90,9 +88,9 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level){
     return total;
 }
 
-void *MemCtx_Alloc(MemCtx *m, size_t sz){
+void *MemCh_Alloc(MemCh *m, size_t sz){
     if(sz > MEM_SLAB_SIZE){
-        Fatal("Trying to allocation too much memory at once", TYPE_MEMCTX);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once");
     }
 
     i16 level = max(m->type.range, 0);
@@ -115,33 +113,33 @@ void *MemCtx_Alloc(MemCtx *m, size_t sz){
     return MemSlab_Alloc(sl, _sz);
 }
 
-i64 MemCtx_Used(MemCtx *m){
-    return MemCtx_MemCount(m, 0);
+i64 MemCh_Used(MemCh *m){
+    return MemCh_MemCount(m, 0);
 }
 
-void *MemCtx_Realloc(MemCtx *m, size_t s, void *orig, size_t origsize){
+void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
     if(s > origsize){
-        Fatal("Asking to copy more than newly allocated", TYPE_MEMCTX);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Asking to copy more than newly allocated");
         return NULL;
     }
-    void *p = MemCtx_Alloc(m, s);
+    void *p = MemCh_Alloc(m, s);
     memcpy(p, orig, origsize);
     return p; 
 }
 
-status MemCtx_Setup(MemCtx *m, MemSlab *sl){
-    memcpy(&m->first, sl, sizeof(MemSlab));
+status MemCh_Setup(MemCh *m, MemSlab *sl){
     m->type.of = TYPE_MEMCTX;
-    Span *p = &m->p;
+    Span *p = MemSlab_Alloc(sl, sizeof(Span));
     Span_Setup(p);
     p->m = m;
-    p->root = MemSlab_Alloc(&m->first, sizeof(slab));
+    p->max_idx = -1;
+    p->root = MemSlab_Alloc(sl, sizeof(slab));
     Iter_Init(&m->it, p);
-    Span_Set(&m->p, 0, (Abstract *)&m->first);
+    Span_Set(p, 0, (Abstract *)sl);
     return SUCCESS;
 }
 
-MemCtx *MemCtx_OnPage(void *page){
+MemCh *MemCh_OnPage(void *page){
     MemSlab _sl = {
         .type = {TYPE_MEMSLAB, 0},
         .level = 0,
@@ -149,24 +147,24 @@ MemCtx *MemCtx_OnPage(void *page){
         .bytes = page,
     };
 
-    MemCtx *m = (MemCtx *)MemSlab_Alloc(&_sl, sizeof(MemCtx));
-    MemCtx_Setup(m, &_sl);
-    MemCtx_ReserveSpanExpand(m, &_sl, 0);
+    MemCh *m = (MemCh *)MemSlab_Alloc(&_sl, sizeof(MemCh));
+    MemCh_Setup(m, &_sl);
+    MemCh_ReserveSpanExpand(m, &_sl, 0);
     return m;
 }
 
-MemCtx *MemCtx_Make(){
+MemCh *MemCh_Make(){
     void *bytes = MemBook_GetBytes();
-    MemCtx *m = MemCtx_OnPage(bytes);
-    MemBook_Claim(&m->first);
+    MemCh *m = MemCh_OnPage(bytes);
+    MemBook_Claim(bytes);
     return m;
 }
 
-i64 MemCtx_Total(MemCtx *m, i16 level){
-    return MemCtx_MemCount(m, level);
+i64 MemCh_Total(MemCh *m, i16 level){
+    return MemCh_MemCount(m, level);
 }
 
-status MemCtx_WipeTemp(MemCtx *m, i16 level){
+status MemCh_WipeTemp(MemCh *m, i16 level){
     status r = READY;
 
     while((Iter_Next(&m->it) & END) == 0){
@@ -188,10 +186,11 @@ status MemCtx_WipeTemp(MemCtx *m, i16 level){
     return r;
 }
 
-status MemCtx_FreeTemp(MemCtx *m, i16 level){
+status MemCh_FreeTemp(MemCh *m, i16 level){
     status r = READY;
 
-    Iter_InitReverse(&m->it, &m->p);
+    Iter_Init(&m->it, m->it.span);
+    m->it.type.state |= FLAG_ITER_REVERSE;
     while((Iter_Next(&m->it) & END) == 0){
         if(m->it.idx == 0){
             continue;
@@ -199,7 +198,7 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
         if(sl != NULL && (level == 0 || sl->level >= level)){
             if(m->it.idx > 0){
-                r |= Span_Remove(&m->p, m->it.idx);
+                r |= Span_Remove(m->it.span, m->it.idx);
             }
             r |= MemBook_FreeSlab(m, sl);
         }
@@ -213,17 +212,17 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
     return r;
 }
 
-status MemCtx_Free(MemCtx *m){
-    status r = MemCtx_FreeTemp(m, max(m->type.range, 0));
+status MemCh_Free(MemCh *m){
+    status r = MemCh_FreeTemp(m, max(m->type.range, 0));
     if(m->type.range == 0){
-        MemSlab *sl = Span_Get(&m->p, 0);
+        MemSlab *sl = Span_Get(m->it.span, 0);
         return MemBook_FreeSlab(m, sl);
     }
     return r;
 }
 
 /* utils */
-void *MemCtx_GetSlab(MemCtx *m, void *addr, i32 *idx){
+void *MemCh_GetSlab(MemCh *m, void *addr, i32 *idx){
     Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);

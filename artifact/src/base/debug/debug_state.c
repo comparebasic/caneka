@@ -26,7 +26,7 @@ static char *stateNames[] = {
     NULL,
 };
 
-Str *State_ToStr(MemCtx *m, status state){
+Str *State_ToStr(MemCh *m, status state){
     Str *s = Str_Make(m, STR_DEFAULT);
     char *name = NULL;
     if(state == 0){

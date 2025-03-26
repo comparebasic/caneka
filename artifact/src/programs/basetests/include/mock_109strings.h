@@ -109,7 +109,7 @@ extern Str *oneHundredSeven_s;
 extern Str *oneHundredEight_s;
 extern Str *oneHundredNine_s;
 
-status Make109Strs(MemCtx *m);
+status Make109Strs(MemCh *m);
 extern Str *all109_s[];
 
 

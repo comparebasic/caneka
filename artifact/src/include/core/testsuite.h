@@ -1,7 +1,7 @@
-typedef status (*TestFunc)(MemCtx *m);
+typedef status (*TestFunc)(MemCh *m);
 status Test(boolean condition, char *fmt, ...);
-status Test_Runner(MemCtx *m, char *suiteName, struct test_set *tests);
-status Tests_Init(MemCtx *m);
+status Test_Runner(MemCh *m, char *suiteName, struct test_set *tests);
+status Tests_Init(MemCh *m);
 
 #define TEST_PORT 1200
 

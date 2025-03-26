@@ -228,7 +228,7 @@ Str *all109_s[] = {
 };
 
 
-status Make109Strings(MemCtx *m){
+status Make109Strings(MemCh *m){
     all109_s[0] = zero_s = Str_CstrRef(m, "zero");
     all109_s[1] = one_s = Str_CstrRef(m, "one");
     all109_s[2] = two_s = Str_CstrRef(m, "two");

@@ -3,7 +3,7 @@
 
 #define TIME_BUFF_LEN 64
 
-Str *Time64_ToStr(MemCtx *m, Abstract *a){
+Str *Time64_ToStr(MemCh *m, Abstract *a){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
     Str *s = Str_Make(m, TIME_BUFF_LEN);
     struct timespec ts;
@@ -41,20 +41,20 @@ i64 Time64_ToMillis(time64_t tm){
     return tm / 1000000;
 }
 
-Single *Time64_Wrapped(MemCtx *m, time64_t n){
-    Single *sgl = (Single *)MemCtx_Alloc(m, sizeof(Single));
+Single *Time64_Wrapped(MemCh *m, time64_t n){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_TIME64;
     sgl->val.value = (util)n;
     return sgl;
 }
 
-Str *Time_Today(MemCtx *m){
+Str *Time_Today(MemCh *m){
     struct timespec ts;
     clock_gettime(0, &ts);
     return TimeSpec_ToDayStr(m, &ts);
 }
 
-Str *TimeSpec_ToDayStr(MemCtx *m, struct timespec *ts){
+Str *TimeSpec_ToDayStr(MemCh *m, struct timespec *ts){
     struct tm *t = localtime(&(ts->tv_sec));
     Str *s = Str_Make(m, STR_DEFAULT);
     size_t l = strftime((char *)s->bytes, (size_t)STR_DEFAULT, "%Y-%m-%d", t);

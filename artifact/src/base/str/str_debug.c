@@ -3,7 +3,7 @@
 
 #include "inline/handle_io.c"
 
-i64 Str_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Str_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     Str *s = (Str*)as(a, TYPE_STR); 
     i64 total = 0;
     if(extended){
@@ -20,7 +20,7 @@ i64 Str_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean exten
     return total;
 }
 
-i64 StrVec_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 StrVec_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     i64 total = 0;
     if(extended){
@@ -44,7 +44,7 @@ i64 StrVec_Print(MemCtx *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ex
     return total;
 }
 
-status Str_DebugInit(MemCtx *m, Lookup *lk){
+status Str_DebugInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
