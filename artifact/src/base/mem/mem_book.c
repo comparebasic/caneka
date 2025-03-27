@@ -16,6 +16,7 @@ static MemBook *MemBook_get(void *addr){
     }
     while(idx >= 0){
         MemRange *mrange = _books+idx;
+        printf("bookIdx:%d %p - %p vs %p\n", idx, mrange->start, mrange->end, addr);
         if(addr >= mrange->start && addr <= mrange->end){
             return mrange->book;
         }
@@ -148,11 +149,12 @@ MemBook *MemBook_Make(MemBook *prev){
     book->start = start;
     mrange->book = book;
 
-    Span *p = book->it.span;
+    Span *p = MemSlab_Alloc(&sl, sizeof(Span));
     Span_Setup(p);
     p->m = &book->m;
     p->root = MemSlab_Alloc(&sl, sizeof(slab));
-    Iter_Init(&book->it, book->it.span);
+    Iter_Init(&book->it, p);
+    book->it.span = p;
 
     book->it.metrics.selected = 0;
     MemBook_Claim(&sl);

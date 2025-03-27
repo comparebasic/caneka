@@ -72,7 +72,7 @@ MemSlab *MemSlab_Attach(MemCh *m, i16 level){
     }
 
     Span_Set(m->it.span, idx, (Abstract *)sl);
-    MemBook_Claim(sl);
+    MemBook_Claim(bytes);
     return sl;
 }
 
