@@ -12,11 +12,11 @@ static MemRange _books[16] = {
 static MemBook *MemBook_get(void *addr){
     int idx = bookIdx;
     if(addr == NULL){
+        printf("returning book %d starting at:%ld\n", idx, (util)_books[idx].start);
         return _books[idx].book;
     }
     while(idx >= 0){
         MemRange *mrange = _books+idx;
-        printf("bookIdx:%d %p - %p vs %p\n", idx, mrange->start, mrange->end, addr);
         if(addr >= mrange->start && addr <= mrange->end){
             return mrange->book;
         }
@@ -66,13 +66,19 @@ status MemBook_FreeSlab(MemCh *m, MemSlab *sl){
     return Span_Remove(book->it.span, idx);
 }
 
-void *MemBook_GetBytes(){
-    MemBook *book = MemBook_get(NULL);
-    int idx = -1;
+void *MemBook_GetPage(void *addr){
+    printf("Getting Page close to %lu\n", (util)addr);
+    MemBook *book = MemBook_get(addr);
+    if(book == NULL){
+        book = MemBook_get(NULL);
+    }
+    i32 idx = -1;
+    printf("Getting Page II\n");
     if(book->it.metrics.available != -1){
         idx = book->it.metrics.available;
         book->it.metrics.available = -1;
     }else{
+        printf("Getting Page III\n");
         while((Iter_Next(&book->it) & END) == 0){
             MemSlab *sl = (MemSlab *)Iter_Get(&book->it);
             if(sl == NULL){
@@ -85,6 +91,7 @@ void *MemBook_GetBytes(){
     if(idx == -1 && book->it.span->max_idx+1 < PAGE_COUNT){
         idx = book->it.span->max_idx+1;
     }
+    printf("Getting Page %d\n", idx);
     if(idx != -1){
         book->it.metrics.selected = idx;
         void *page = book->start+(idx*PAGE_SIZE);
@@ -92,11 +99,13 @@ void *MemBook_GetBytes(){
         return page;
     }
     /* make new chapter here as all chapters are full */
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Next chapter not implemented");
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Next MemBook not implemented");
 
-    if(MemBook_Make(book) != NULL){
-        return MemBook_GetBytes();
+    if((book = MemBook_Make(book)) != NULL){
+        return MemBook_GetPage(book);
     }
+
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook");
     return NULL;
 }
 
@@ -127,6 +136,7 @@ MemBook *MemBook_Make(MemBook *prev){
 
     mrange->start = start;
     mrange->end = start+CHAPTER_SIZE-sizeof(void *);
+    printf("Setting up bookIdx:%d\n", bookIdx);
 
     if(start == MAP_FAILED){
         printf("err:%s\n", strerror(errno));
@@ -134,29 +144,32 @@ MemBook *MemBook_Make(MemBook *prev){
         return NULL;
     }
 
-    MemSlab sl = {
+    MemSlab _sl = {
         .type = {TYPE_MEMSLAB, 0},
         .level = 0,
         .remaining = MEM_SLAB_SIZE,
         .bytes = start,
     };
 
-    MemBook *book = MemSlab_Alloc(&sl, sizeof(MemBook));
+    MemSlab *sl = MemSlab_Alloc(&_sl, sizeof(MemSlab));
+    memcpy(sl, &_sl, sizeof(MemSlab));
+
+    MemBook *book = MemSlab_Alloc(sl, sizeof(MemBook));
     book->type.of = TYPE_BOOK;
-    MemCh_Setup(&book->m, &sl);
-    MemCh_ReserveSpanExpand(&book->m, &sl, 0);
+    MemCh_Setup(&book->m, sl);
+    MemCh_ReserveSpanExpand(&book->m, sl, 0);
 
     book->start = start;
     mrange->book = book;
 
-    Span *p = MemSlab_Alloc(&sl, sizeof(Span));
+    Span *p = MemSlab_Alloc(sl, sizeof(Span));
     Span_Setup(p);
     p->m = &book->m;
-    p->root = MemSlab_Alloc(&sl, sizeof(slab));
+    p->root = MemSlab_Alloc(sl, sizeof(slab));
     Iter_Init(&book->it, p);
     book->it.span = p;
 
     book->it.metrics.selected = 0;
-    MemBook_Claim(&sl);
+    MemBook_Claim(sl);
     return book;
 }

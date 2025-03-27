@@ -35,6 +35,9 @@ status Span_Query(Iter *it){
             p->dims++;
         }
         void **ptr = (void **)exp_sl;
+        if(it->span->type.state & DEBUG){
+            printf("\x1b[33mExpand placing shelf %lu\x1b[0m\n", (util)shelf_sl);
+        }
         *ptr = shelf_sl;
     }
 
@@ -51,13 +54,13 @@ status Span_Query(Iter *it){
                 }
                 *ptr = (slab *)MemCh_Alloc((m), sizeof(slab));
                 memset(*ptr, 0, sizeof(slab));
-                /*
-                printf("\x1b[33mSetting slab to %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
-                */
+                if(it->span->type.state & DEBUG){
+                    printf("\x1b[33mSetting slab to %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
+                }
             }else{
-                /*
-                printf("\x1b[33mSlab exists  %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
-                */
+                if(it->span->type.state & DEBUG){
+                    printf("\x1b[33mSlab exists  %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
+                }
             }
         }
 

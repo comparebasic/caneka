@@ -50,7 +50,7 @@ void *MemSlab_Alloc(MemSlab *sl, word sz){
 }
 
 MemSlab *MemSlab_Attach(MemCh *m, i16 level){
-    void *bytes = MemBook_GetBytes();
+    void *bytes = MemBook_GetPage(m);
     if(bytes == NULL){
         return NULL;
     }
@@ -72,6 +72,7 @@ MemSlab *MemSlab_Attach(MemCh *m, i16 level){
     }
 
     Span_Set(m->it.span, idx, (Abstract *)sl);
+    printf("Claim Attach\n");
     MemBook_Claim(bytes);
     return sl;
 }
@@ -154,8 +155,12 @@ MemCh *MemCh_OnPage(void *page){
 }
 
 MemCh *MemCh_Make(){
-    void *bytes = MemBook_GetBytes();
+    printf("MemCh_Make\n");
+    void *bytes = MemBook_GetPage(NULL);
+    printf("MemCh_Make II\n");
     MemCh *m = MemCh_OnPage(bytes);
+    printf("MemCh_Make III\n");
+    printf("Claim Make\n");
     MemBook_Claim(bytes);
     return m;
 }

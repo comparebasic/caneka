@@ -20,4 +20,4 @@ void *MemSlab_Alloc(MemSlab *sl, word sz){
 }
 
 
-#define MemCtx_Alloc(m, sz) malloc(sz)
+#define MemCh_Alloc(m, sz) malloc(sz)

@@ -5,7 +5,7 @@ typedef struct mem_chapter {
     struct iter it;
     struct mem_ctx m;
 } MemBook;
-void *MemBook_GetBytes();
+void *MemBook_GetPage(void *addr);
 MemBook *MemBook_Make(MemBook *cp);
 status MemBook_FreeSlab(struct mem_ctx *m, struct mem_slab *sl);
 status MemBook_Claim(struct mem_slab *sl);

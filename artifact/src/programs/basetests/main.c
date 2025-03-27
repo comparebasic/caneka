@@ -31,13 +31,12 @@ int main(int argc, char **argv){
         }
     }
 
-    printf("I\n");
     MemBook *cp = MemBook_Make(NULL);
     if(cp == NULL){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully");
     }
 
-    printf("II\n");
+    printf("II MemCh Make\n");
     MemCh *m = MemCh_Make();
     if(m == NULL){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully");

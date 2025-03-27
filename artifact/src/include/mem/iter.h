@@ -31,3 +31,4 @@ status Iter_Next(Iter *it);
 Abstract *Iter_Get(Iter *it);
 status Iter_Reset(Iter *it);
 void Iter_Init(Iter *it, Span *p);
+status Iter_NextItem(Iter *it);
