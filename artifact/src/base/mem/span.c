@@ -79,7 +79,7 @@ status Span_Query(Iter *it){
 
         if(it->span->type.state & DEBUG){
             printf("\x1b[35m\n");
-            Iter_Print(NULL, NULL, 0, it, 0, TRUE);
+            Iter_Print(NULL, NULL, 0, (Abstract *)it, 0, TRUE);
             printf("\x1b[0m\n");
         }
 

@@ -23,9 +23,9 @@ CharIntPair ToTestDim1[] = {
     {1, "ONE"},
     {7, "SEVEN"},
     {16, "SEXTEEN"},
-    {0, NULL},
     {63, "SIXTY-THREE"},
     {64, "SIXTY-FOUR"},
+    {0, NULL},
 };
 
 CharIntPair ToTestDim4[] = {
@@ -58,8 +58,7 @@ static status testPairs(char *desc, CharIntPair *testPairs){
     cpair = testPairs;
     while(cpair->cstr != NULL){
         char *cstr = Span_Get(p, cpair->i);
-        int color = 32; 
-        (r & ERROR) == 0  ? 32 : 31;
+        int color = (r & ERROR) == 0 ? 32 : 31;
         if(strncmp(cpair->cstr, cstr, strlen(cpair->cstr)) == 0){
             r |= SUCCESS;
         }else{
@@ -72,7 +71,9 @@ static status testPairs(char *desc, CharIntPair *testPairs){
 
     Iter it;
     Iter_Init(&it, p);
+    /*
     it.type.state |= DEBUG;
+    */
     while((Iter_Next(&it) & END) == 0){
         char *cstr = (char *)Iter_Get(&it);
         if(cstr != NULL){

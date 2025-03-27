@@ -33,14 +33,10 @@ static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
 
     if(p->type.state & DEBUG){
         printf("set stack op-set:%d for idx:%d dim:%d offset:%d localIdx:%d delta:%lu slab:*%lu ptr:%lu, value:*%lu\n",
-            (i32)((it->type.state & UPPER_FLAGS) == SPAN_OP_SET), it->idx, (i32)dim, offset, localIdx, (util)((void *)ptr-debug)/8, (util)debug, (util)ptr, (util)*ptr);
+            (i32)((it->type.state & UPPER_FLAGS) == SPAN_OP_SET), it->idx, (i32)dim, offset, localIdx, (util)((void *)ptr-debug)/8, (util)debug, (util)ptr, ptr != NULL ? (util)*ptr: 0);
     }
 
-    if(offset >= 0){
-        return offset % increment;
-    }
-
-    return 0;
+    return offset % increment;
 }
 
 status Iter_NextItem(Iter *it){
@@ -56,6 +52,7 @@ status Iter_Next(Iter *it){
     i8 topDim = it->span->dims;
     i32 debugIdx = it->idx;
     i32 idx = it->idx;
+    void **ptr = NULL;
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
         if(it->type.state & DEBUG){
             printf("    Iter_Next - Reset from END\n");
@@ -72,28 +69,40 @@ status Iter_Next(Iter *it){
                 printf("    Iter_Next - Single Incr\n");
             }
             it->stackIdx[0]++;
-            void **ptr = it->stack[0];
-            it->stack[0] = ptr+1;
+            ptr = it->stack[0];
+            if(ptr != NULL){
+                it->stack[0] = ptr+1;
+            }
             idx++;
             it->type.state |= SUCCESS;
             goto end;
 
         }
-        while(dim <= topDim && (it->stackIdx[dim]+1) == SPAN_STRIDE){
-            if(it->type.state & DEBUG){
-                printf("    \x1b[36mIter_Next - Bulk Incr (dim%d)\x1b[0m\n", (i32)dim);
+
+        while(dim <= topDim){
+            if((it->stackIdx[dim]+1) >= SPAN_STRIDE){
+                idx -= it->stackIdx[dim] * _increments[dim];
+                it->stackIdx[dim] = 0;
+                dim++;
+                continue;
             }
-            idx -= it->stackIdx[dim] * _increments[dim];
-            it->stackIdx[dim] = 0;
-            dim++;
-            void **ptr = it->stack[dim];
+            ptr = it->stack[dim];
             it->stack[dim] = ptr+1;
+            it->stackIdx[dim]++;
             idx += _increments[dim];
+            if(1 || it->type.state & DEBUG){
+                printf("    \x1b[36mIter_Next - Bulk Incr (dim%d) to %d *%lu\x1b[0m\n", (i32)dim, it->stackIdx[dim], (util)it->stack[dim]);
+            }
+            break;
         }
 
-        while(dim >= 0){
-            Iter_SetStack(it, dim, -1);
-            dim--;
+        i32 offset = idx;
+        i32 offsetDims = 0;
+        while(offsetDims++ < dim){
+            offset = offset % _increments[offsetDims++];
+        }
+        while(--dim >= 0){
+            Iter_SetStack(it, dim, offset);
         }
     }
 end:
