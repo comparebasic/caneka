@@ -14,6 +14,9 @@ status Span_Query(Iter *it){
     Span *p = it->span;
     MemSlab *mem_sl = NULL;
     if(dimsNeeded > p->dims){
+        if(p->type.state & DEBUG){
+            printf("\x1b[33mExpand %d to %d\x1b[0m\n", p->dims, dimsNeeded);
+        }
         if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NOOP;
         }
@@ -26,8 +29,14 @@ status Span_Query(Iter *it){
             if(exp_sl == NULL){
                 shelf_sl = it->span->root;
                 it->span->root = new_sl;
+                if(p->type.state & DEBUG){
+                    printf("    \x1b[33mExpand shelving root:%lu new_sl:%lu\x1b[0m\n", (util)shelf_sl, (util)new_sl);
+                }
             }else{
                 void **ptr = (void **)exp_sl;
+                if(p->type.state & DEBUG){
+                    printf("    \x1b[33mExpand placing new_sl %lu on %lu\x1b[0m\n", (util)new_sl, (util)ptr);
+                }
                 *ptr = new_sl;
             }
 
@@ -36,7 +45,7 @@ status Span_Query(Iter *it){
         }
         void **ptr = (void **)exp_sl;
         if(it->span->type.state & DEBUG){
-            printf("\x1b[33mExpand placing shelf %lu\x1b[0m\n", (util)shelf_sl);
+            printf("    \x1b[33mExpand placing shelf %lu\x1b[0m\n", (util)shelf_sl);
         }
         *ptr = shelf_sl;
     }
@@ -45,23 +54,33 @@ status Span_Query(Iter *it){
     i32 offset = idx;
     void **ptr = NULL;
     while(dim >= 0){
+        if(it->span->type.state & DEBUG){
+            printf("\x1b[33mSearching for %d at dim:%d\x1b[0m\n", idx, (i32)dim);
+        }
         offset = Iter_SetStack(it, dim, offset);
         ptr = (void **)it->stack[dim];
         if(dim > 0){
             if(*ptr == NULL){
                 if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
+                    printf("NOT FOUND RETUR\n");
                     return NOOP;
                 }
                 *ptr = (slab *)MemCh_Alloc((m), sizeof(slab));
                 memset(*ptr, 0, sizeof(slab));
                 if(it->span->type.state & DEBUG){
-                    printf("\x1b[33mSetting slab to %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
+                    printf("    \x1b[33mSetting slab to %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
                 }
             }else{
                 if(it->span->type.state & DEBUG){
-                    printf("\x1b[33mSlab exists  %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
+                    printf("    \x1b[33mSlab exists %lu dim:%d\x1b[0m\n", (util)*ptr, (i32)dim);
                 }
             }
+        }
+
+        if(it->span->type.state & DEBUG){
+            printf("\x1b[35m\n");
+            Iter_Print(NULL, NULL, 0, it, 0, TRUE);
+            printf("\x1b[0m\n");
         }
 
         dim--;
