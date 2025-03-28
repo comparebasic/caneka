@@ -35,9 +35,10 @@ CharIntPair ToTestDim4[] = {
     {16, "SEXTEEN"},
     {63, "SIXTY-THREE"},
     {64, "SIXTY-FOUR"},
+    {279, "TWO-79"},
     {4073, "FourK73"},
+    {10777, "Ten777"},
     {70123, "SeventyK123"},
-    {0, NULL},
 };
 
 static status testPairs(char *desc, CharIntPair *testPairs){

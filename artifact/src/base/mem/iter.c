@@ -64,36 +64,28 @@ status Iter_Next(Iter *it){
         idx = 0;
         goto end;
     }else{
-        if((it->stackIdx[0]+1) < SPAN_STRIDE){
-            if(it->type.state & DEBUG){
-                printf("    Iter_Next - Single Incr\n");
-            }
-            it->stackIdx[0]++;
-            ptr = it->stack[0];
-            if(ptr != NULL){
-                it->stack[0] = ptr+1;
-            }
-            idx++;
-            it->type.state |= SUCCESS;
-            goto end;
-
-        }
-
         while(dim <= topDim){
-            if((it->stackIdx[dim]+1) >= SPAN_STRIDE){
+            if((it->stackIdx[dim]+1) < SPAN_STRIDE){
+                it->stackIdx[dim]++;
+                ptr = it->stack[dim];
+                if(ptr != NULL){
+                    it->stack[dim] = ptr+1;
+                }
+                idx += _increments[dim];
+                it->type.state |= SUCCESS;
+                if(dim > 0 && (1 || it->type.state & DEBUG)){
+                    printf("    \x1b[36mIter_Next - Bulk Incr (dim%d) to %d *%lu\x1b[0m\n", (i32)dim, it->stackIdx[dim], (util)it->stack[dim]);
+                    printf("\x1b[35m\n");
+                    Iter_Print(NULL, NULL, 0, (Abstract *)it, 0, TRUE);
+                    printf("\x1b[0m\n");
+                }
+                break;
+            }else{
                 idx -= it->stackIdx[dim] * _increments[dim];
                 it->stackIdx[dim] = 0;
                 dim++;
                 continue;
             }
-            ptr = it->stack[dim];
-            it->stack[dim] = ptr+1;
-            it->stackIdx[dim]++;
-            idx += _increments[dim];
-            if(1 || it->type.state & DEBUG){
-                printf("    \x1b[36mIter_Next - Bulk Incr (dim%d) to %d *%lu\x1b[0m\n", (i32)dim, it->stackIdx[dim], (util)it->stack[dim]);
-            }
-            break;
         }
 
         i32 offset = idx;
@@ -101,6 +93,7 @@ status Iter_Next(Iter *it){
         while(offsetDims++ < dim){
             offset = offset % _increments[offsetDims++];
         }
+
         while(--dim >= 0){
             Iter_SetStack(it, dim, offset);
         }

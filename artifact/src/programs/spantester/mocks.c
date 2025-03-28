@@ -8,6 +8,7 @@ word UPPER_FLAGS = 0b1111111100000000;
 
 void *Fatal(i32 fd, char *func, char *file, int line, char *fmt, ...){
     printf("poo: %s\n", fmt);
+    exit(1);
     return NULL;
 }
 
@@ -18,7 +19,6 @@ void *MemBook_GetBytes(){
 void *MemSlab_Alloc(MemSlab *sl, word sz){
     return NULL;
 }
-
 
 #define MemCh_Alloc(m, sz) malloc(sz)
 
