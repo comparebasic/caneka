@@ -67,7 +67,11 @@ static status testPairs(char *desc, CharIntPair *testPairs){
             color = 31;
             r |= ERROR;
         }
-        printf("Get cpair:%d/%s -> \x1b[%dm%s\x1b[0m\n", cpair->i,cpair->cstr, color, cstr);
+
+        printf("Get cpair:%d/%s -> \x1b[%dm%s\x1b[0m\n",
+            cpair->i,cpair->cstr, color, cstr);
+        printf("nvalues:%d\n", p->nvalues);
+        printf("\n");
         cpair++;
     }
 

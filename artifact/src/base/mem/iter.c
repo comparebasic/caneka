@@ -120,6 +120,7 @@ status Iter_Query(Iter *it){
     while(_increments[dimsNeeded+1] <= idx){
         dimsNeeded++;
     }
+    printf("dimsNeeded:%d\n", (i32)dimsNeeded);
 
     Span *p = it->span;
     MemSlab *mem_sl = NULL;
@@ -149,6 +150,7 @@ status Iter_Query(Iter *it){
     }
 
     i8 dim = p->dims;
+    printf("dims:%d\n", (i32)dim);
     i32 offset = idx;
     void **ptr = NULL;
     while(dim >= 0){
@@ -161,6 +163,14 @@ status Iter_Query(Iter *it){
                 ptr = (void **)it->stack[dim];
                 *ptr = it->value;
                 it->type.state |= SUCCESS;
+                if(it->type.state & SPAN_OP_SET){
+                    p->nvalues++;
+                    if(it->idx > p->max_idx){
+                        p->max_idx = it->idx;
+                    }
+                }else{
+                    p->nvalues--;
+                }
             }else if(it->type.state & (SPAN_OP_GET)){
                 ptr = (void **)it->stack[dim];
                 it->value = *ptr;

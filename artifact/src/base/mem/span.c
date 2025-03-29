@@ -31,7 +31,13 @@ status Span_Set(Span *p, i32 idx, Abstract *t){
     memset(&it, 0, sizeof(Iter));
     Iter_Setup(&it, p, SPAN_OP_SET, idx);
     it.value = (void *)t;
-    return Iter_Query(&it);
+    status r = Iter_Query(&it);
+    if(it.type.state & SUCCESS){
+        printf("\x1b[35m");
+        Iter_Print(NULL, NULL, 0, (Abstract *)&it, 0, TRUE);
+        printf("\x1b[0m");
+    }
+    return r;
 }
 
 void *Span_Get(Span *p, i32 idx){
@@ -42,7 +48,17 @@ void *Span_Get(Span *p, i32 idx){
     memset(&it, 0, sizeof(Iter));
     Iter_Setup(&it, p, SPAN_OP_GET, idx);
     if(Iter_Query(&it) & SUCCESS){
+        if(it.type.state & SUCCESS){
+            printf("\x1b[35m");
+            Iter_Print(NULL, NULL, 0, (Abstract *)&it, 0, TRUE);
+            printf("\x1b[0m");
+        }
         return it.value;
+    }
+    if(it.type.state & SUCCESS){
+        printf("\x1b[35m");
+        Iter_Print(NULL, NULL, 0, (Abstract *)&it, 0, TRUE);
+        printf("\x1b[0m");
     }
     return NULL;
 }

@@ -24,7 +24,9 @@ void *MemSlab_Alloc(MemSlab *sl, word sz){
 
 i64 Iter_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     Iter *it = (Iter *)a;
-    printf("It<%d root:*%lu/\x1b[1m%lu\x1b[22m\n", it->idx, (util)it->span->root, (util)*((void **)it->span->root));
+    printf("It<%d dims:%d root:*%lu/\x1b[1m%lu\x1b[22m\n",
+        it->idx, (i32)it->span->dims, (util)it->span->root,
+        (util)*((void **)it->span->root));
     i8 dim = it->span->dims;
     while(dim >= 0){
         if(it->stack[dim] > 0){
@@ -40,15 +42,14 @@ i64 Iter_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean exten
             }
             printf("   dim:%d localIdx:%d = (+%lu) *%lu/\x1b[1m%lu\x1b[22m\n", 
                 (i32)dim, it->stackIdx[dim], delta, (util)it->stack[dim], 
-                it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : 0);
+                /*it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : */0);
         }else{
             printf("   dim:%d localIdx:%d = *%lu/\x1b[1m%lu\x1b[22m\n", 
                 (i32)dim, it->stackIdx[dim], (util)it->stack[dim], 
-                it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : 0);
+                /*it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : */0);
         }
         dim--;
     }
     printf(">\n");
     return 0;
 }
-
