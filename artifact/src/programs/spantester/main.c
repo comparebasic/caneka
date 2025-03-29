@@ -36,18 +36,19 @@ CharIntPair ToTestDim4[] = {
     {63, "SIXTY-THREE"},
     {64, "SIXTY-FOUR"},
     {279, "TWO-79"},
+
+    {0, NULL},
     {4073, "FourK73"},
     {10777, "Ten777"},
     {70123, "SeventyK123"},
+    {0, NULL},
 };
 
 static status testPairs(char *desc, CharIntPair *testPairs){
     printf("\x1b[1m[%s]\x1b[22m\n", desc);
     status r = READY;
     Span *p = Span_Make(NULL);
-    /*
     p->type.state |= DEBUG;
-    */
     CharIntPair *cpair = testPairs;
     int idx = -1;
     while(cpair->cstr != NULL){
@@ -72,11 +73,9 @@ static status testPairs(char *desc, CharIntPair *testPairs){
 
     Iter it;
     Iter_Init(&it, p);
-    /*
     it.type.state |= DEBUG;
-    */
     while((Iter_Next(&it) & END) == 0){
-        char *cstr = (char *)Iter_Get(&it);
+        char *cstr = (char *)it.value;
         if(cstr != NULL){
             printf("    \x1b[33m%s\x1b[0m\n", cstr);
         }

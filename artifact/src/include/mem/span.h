@@ -31,9 +31,10 @@ i32 Span_Capacity(Span *p);
 char **Span_ToCharArr(struct mem_ctx *m, Span *p);
 void *Span_SetFromQ(struct iter *it, Abstract *t);
 void *Span_GetFromQ(struct iter *it);
-void *Span_Set(Span *p, i32 idx, Abstract *t);
+
+status Span_Set(Span *p, i32 idx, Abstract *t);
 void *Span_Get(Span *p, i32 idx);
-void *Span_SetRaw(Span *p, i32 idx, util *u);
+status Span_SetRaw(Span *p, i32 idx, util *u);
 util Span_GetRaw(Span *p, i32 idx);
 i32 Span_Add(Span *p, Abstract *t);
 status Span_Cull(Span *p, i32 count);

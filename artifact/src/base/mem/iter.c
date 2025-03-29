@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 i32 _increments[SPAN_MAX_DIMS+1] = {1, 16, 256, 4096, 65536, 1048576};
+i32 _modulos[SPAN_MAX_DIMS+1] = {15, 255, 4095, 65535, 1048575, 16777215};
 
 static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
     Span *p = it->span; 
@@ -10,12 +11,20 @@ static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
     i32 localIdx = 0;
     i32 increment = _increments[dim];
     localIdx = (offset / increment);
+
+    if(localIdx > SPAN_STRIDE){
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+            "Error localIdx larger than span stride _i4", localIdx);
+        return -1;
+    }
+
     if(dim == p->dims){
         ptr = (void **)p->root;
         it->stackIdx[dim] = 0;
     }else{
         if(it->stack[dim+1] == NULL){
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error expected ptr to span in SetStack");
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+                "Error expected ptr to span in SetStack");
         }
         ptr = *((void **)it->stack[dim+1]); 
         it->stackIdx[dim] = localIdx;
@@ -25,17 +34,18 @@ static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
     ptr += localIdx;
     it->stack[dim] = ptr;
     it->stackIdx[dim] = localIdx;
-
-    if(localIdx > SPAN_STRIDE){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error localIdx larger than span stride _i4", localIdx);
-        return -1;
+    if(dim > 0 && *ptr == NULL){
+        if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESIZE)) == 0){
+            it->type.state |= NOOP;
+            return 0;
+        }
+        *ptr = (slab *)MemCh_Alloc((m), sizeof(slab));
+        memset(*ptr, 0, sizeof(slab));
     }
 
-    if(p->type.state & DEBUG){
-        printf("set stack op-set:%d for idx:%d dim:%d offset:%d localIdx:%d delta:%lu slab:*%lu ptr:%lu, value:*%lu\n",
-            (i32)((it->type.state & UPPER_FLAGS) == SPAN_OP_SET), it->idx, (i32)dim, offset, localIdx, (util)((void *)ptr-debug)/8, (util)debug, (util)ptr, ptr != NULL ? (util)*ptr: 0);
-    }
-
+    /*
+    return offset & _modulos[dim];
+    */
     return offset % increment;
 }
 
@@ -45,22 +55,16 @@ status Iter_NextItem(Iter *it){
 }
 
 status Iter_Next(Iter *it){
-    if(it->type.state & DEBUG){
-        printf("Iter_Next:\n");
-    }
     i8 dim = 0;
     i8 topDim = it->span->dims;
     i32 debugIdx = it->idx;
     i32 idx = it->idx;
     void **ptr = NULL;
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
-        if(it->type.state & DEBUG){
-            printf("    Iter_Next - Reset from END\n");
-        }
         word fl = ((it->type.state) & (~END));
         Iter_Setup(it, it->span, SPAN_OP_GET, 0);
         it->type.state |= (fl|PROCESSING);
-        Span_Query(it);
+        Iter_Query(it);
         idx = 0;
         goto end;
     }else{
@@ -73,12 +77,6 @@ status Iter_Next(Iter *it){
                 }
                 idx += _increments[dim];
                 it->type.state |= SUCCESS;
-                if(dim > 0 && (1 || it->type.state & DEBUG)){
-                    printf("    \x1b[36mIter_Next - Bulk Incr (dim%d) to %d *%lu\x1b[0m\n", (i32)dim, it->stackIdx[dim], (util)it->stack[dim]);
-                    printf("\x1b[35m\n");
-                    Iter_Print(NULL, NULL, 0, (Abstract *)it, 0, TRUE);
-                    printf("\x1b[0m\n");
-                }
                 break;
             }else{
                 idx -= it->stackIdx[dim] * _increments[dim];
@@ -90,7 +88,7 @@ status Iter_Next(Iter *it){
 
         i32 offset = idx;
         i32 offsetDims = 0;
-        while(offsetDims++ < dim){
+        while(offsetDims < dim){
             offset = offset % _increments[offsetDims++];
         }
 
@@ -101,21 +99,80 @@ status Iter_Next(Iter *it){
 end:
     if(idx > it->span->max_idx){
         it->type.state |= END;
-        if(it->type.state & DEBUG){
-            printf("    Iter_Next END - from %d to %d - maxIdx:%d\n", debugIdx, idx, it->span->max_idx);
-        }
-    }else{
-        if(it->span->type.state & DEBUG){
-            printf("    Iter_Next from %d to %d - maxIdx:%d\n", debugIdx, idx, it->span->max_idx);
-        }
     }
+
     it->idx = idx;
+    if(it->stack[0] != NULL){
+        it->value = *((void **)it->stack[0]);
+    }else{
+        it->value = NULL;
+    }
+
     return it->type.state;
 }
 
-Abstract *Iter_Get(Iter *it){
-    return it->stack[0] != NULL ? *((void **)it->stack[0]) : NULL;
+status Iter_Query(Iter *it){
+    it->type.state &= ~SUCCESS;
+    MemCh *m = it->span->m;
+    i32 idx = it->idx;
+
+    i8 dimsNeeded = 0;
+    while(_increments[dimsNeeded+1] <= idx){
+        dimsNeeded++;
+    }
+
+    Span *p = it->span;
+    MemSlab *mem_sl = NULL;
+    if(dimsNeeded > p->dims){
+        if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
+            return NOOP;
+        }
+        slab *exp_sl = NULL;
+        slab *shelf_sl = NULL;
+        while(p->dims < dimsNeeded){
+            slab *new_sl = NULL;
+            new_sl = (slab *)MemCh_Alloc((m), sizeof(slab));
+
+            if(exp_sl == NULL){
+                shelf_sl = it->span->root;
+                it->span->root = new_sl;
+            }else{
+                void **ptr = (void **)exp_sl;
+                *ptr = new_sl;
+            }
+
+            exp_sl = new_sl;
+            p->dims++;
+        }
+        void **ptr = (void **)exp_sl;
+        *ptr = shelf_sl;
+    }
+
+    i8 dim = p->dims;
+    i32 offset = idx;
+    void **ptr = NULL;
+    while(dim >= 0){
+        offset = Iter_SetStack(it, dim, offset);
+        if(it->type.state & NOOP){
+            break;
+        }
+        if(dim == 0){
+            if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE)){
+                ptr = (void **)it->stack[dim];
+                *ptr = it->value;
+                it->type.state |= SUCCESS;
+            }else if(it->type.state & (SPAN_OP_GET)){
+                ptr = (void **)it->stack[dim];
+                it->value = *ptr;
+                it->type.state |= SUCCESS;
+            }
+        }
+        dim--;
+    }
+
+    return it->type.state;
 }
+
 
 status Iter_Reset(Iter *it){
     it->type.state |= END;
