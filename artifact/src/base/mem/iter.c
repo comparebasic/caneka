@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 i32 _increments[SPAN_MAX_DIMS+1] = {1, 16, 256, 4096, 65536, 1048576};
-i32 _modulos[SPAN_MAX_DIMS+1] = {15, 255, 4095, 65535, 1048575, 16777215};
+i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535, 1048575};
 
 static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
     Span *p = it->span; 
@@ -36,17 +36,14 @@ static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
     it->stackIdx[dim] = localIdx;
     if(dim > 0 && *ptr == NULL){
         if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESIZE)) == 0){
-            it->type.state |= NOOP;
+            it->type.state |= CONTINUE;
             return 0;
         }
         *ptr = (slab *)MemCh_Alloc((m), sizeof(slab));
         memset(*ptr, 0, sizeof(slab));
     }
 
-    /*
     return offset & _modulos[dim];
-    */
-    return offset % increment;
 }
 
 status Iter_NextItem(Iter *it){
@@ -59,6 +56,7 @@ status Iter_Next(Iter *it){
     i8 topDim = it->span->dims;
     i32 debugIdx = it->idx;
     i32 idx = it->idx;
+    it->value = NULL;
     void **ptr = NULL;
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
         word fl = ((it->type.state) & (~END));
@@ -68,32 +66,60 @@ status Iter_Next(Iter *it){
         idx = 0;
         goto end;
     }else{
-        while(dim <= topDim){
+        if(topDim == 0){
             if((it->stackIdx[dim]+1) < SPAN_STRIDE){
                 it->stackIdx[dim]++;
                 ptr = it->stack[dim];
-                if(ptr != NULL){
-                    it->stack[dim] = ptr+1;
-                }
-                idx += _increments[dim];
-                it->type.state |= SUCCESS;
-                break;
-            }else{
-                idx -= it->stackIdx[dim] * _increments[dim];
-                it->stackIdx[dim] = 0;
-                dim++;
-                continue;
+                it->stack[dim] = ptr+1;
             }
-        }
+            idx += _increments[dim];
+            it->value = *((void **)it->stack[dim]);
+        }else{
+            i32 incr = 1;
+            while(it->value == NULL && dim <= topDim && idx <= it->span->max_idx){
+                if((it->stackIdx[dim]+ incr) < SPAN_STRIDE){
+                    it->stackIdx[dim] += incr;
 
-        i32 offset = idx;
-        i32 offsetDims = 0;
-        while(offsetDims < dim){
-            offset = offset % _increments[offsetDims++];
-        }
+                    if(dim == topDim){
+                        ptr = (void **)it->span->root;
+                    }else{
+                        ptr = *((void **)it->stack[dim+1]);
+                    }
 
-        while(--dim >= 0){
-            Iter_SetStack(it, dim, offset);
+                    ptr += it->stackIdx[dim];
+                    it->stack[dim] = ptr;
+                    idx += _increments[dim];
+
+                    if(dim == 0){
+                        if(ptr != NULL){
+                            it->value = *ptr;
+                        }
+                        continue;
+                    }else if(*ptr != NULL){
+                        i32 offset = idx & _modulos[dim];
+                        while(dim-1 >= 0){
+                            dim--;
+                            if(dim == topDim){
+                                ptr = (void **)it->span->root;
+                            }else{
+                                ptr = *((void **)it->stack[dim+1]);
+                            }
+                            it->stack[dim] = ptr;
+                            if(ptr == NULL){
+                                dim++;
+                                break;
+                            }else if(dim == 0){
+                                it->value = *ptr;
+                            }
+                        }
+                    }
+                    incr = 1;
+                }else{
+                    idx -= it->stackIdx[dim] * _increments[dim];
+                    it->stackIdx[dim] = 0;
+                    dim++;
+                }
+            }
         }
     }
 end:
@@ -102,10 +128,12 @@ end:
     }
 
     it->idx = idx;
-    if(it->stack[0] != NULL){
-        it->value = *((void **)it->stack[0]);
+    if(it->value != NULL){
+        it->type.state &= ~NOOP;
+        it->type.state |= SUCCESS;
     }else{
-        it->value = NULL;
+        it->type.state |= NOOP;
+        it->type.state &= ~SUCCESS;
     }
 
     return it->type.state;
@@ -120,7 +148,6 @@ status Iter_Query(Iter *it){
     while(_increments[dimsNeeded+1] <= idx){
         dimsNeeded++;
     }
-    printf("dimsNeeded:%d\n", (i32)dimsNeeded);
 
     Span *p = it->span;
     MemSlab *mem_sl = NULL;
@@ -150,7 +177,6 @@ status Iter_Query(Iter *it){
     }
 
     i8 dim = p->dims;
-    printf("dims:%d\n", (i32)dim);
     i32 offset = idx;
     void **ptr = NULL;
     while(dim >= 0){

@@ -36,17 +36,17 @@ i64 Iter_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean exten
                 if(dim == it->span->dims){
                     base = (util)it->span->root; 
                 }else{
-                    base = (util)it->stack[dim+1];
+                    base = (util)*((void **)it->stack[dim+1]);
                 }
                 delta = ((util)it->stack[dim] - (util)base)/8;
             }
             printf("   dim:%d localIdx:%d = (+%lu) *%lu/\x1b[1m%lu\x1b[22m\n", 
                 (i32)dim, it->stackIdx[dim], delta, (util)it->stack[dim], 
-                /*it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : */0);
+                it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : 0);
         }else{
             printf("   dim:%d localIdx:%d = *%lu/\x1b[1m%lu\x1b[22m\n", 
                 (i32)dim, it->stackIdx[dim], (util)it->stack[dim], 
-                /*it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : */0);
+                it->stack[dim] != NULL ? (util)*((void **)it->stack[dim]) : 0);
         }
         dim--;
     }
