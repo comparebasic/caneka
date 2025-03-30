@@ -46,11 +46,6 @@ static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
     return offset & _modulos[dim];
 }
 
-status Iter_NextItem(Iter *it){
-    while((Iter_Next(it) & END) == 0 && *((void **)it->stack[0]) == NULL){}
-    return it->type.state;
-}
-
 status Iter_Next(Iter *it){
     i8 dim = 0;
     i8 topDim = it->span->dims;
@@ -76,7 +71,8 @@ status Iter_Next(Iter *it){
             it->value = *((void **)it->stack[dim]);
         }else{
             i32 incr = 1;
-            while(it->value == NULL && dim <= topDim && idx <= it->span->max_idx){
+            while(it->value == NULL && dim <= topDim && 
+                    idx <= it->span->max_idx){
                 if((it->stackIdx[dim]+ incr) < SPAN_STRIDE){
                     it->stackIdx[dim] += incr;
 
@@ -211,7 +207,7 @@ status Iter_Query(Iter *it){
 
 
 status Iter_Reset(Iter *it){
-    it->type.state |= END;
+    it->type.state &= ~PROCESSING;
     return SUCCESS;
 }
 

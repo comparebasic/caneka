@@ -27,19 +27,8 @@ typedef struct span {
     i32 max_idx;
 } Span;
 
-i32 Span_Capacity(Span *p);
-char **Span_ToCharArr(struct mem_ctx *m, Span *p);
-void *Span_SetFromQ(struct iter *it, Abstract *t);
-void *Span_GetFromQ(struct iter *it);
-
 status Span_Set(Span *p, i32 idx, Abstract *t);
 void *Span_Get(Span *p, i32 idx);
-status Span_SetRaw(Span *p, i32 idx, util *u);
-util Span_GetRaw(Span *p, i32 idx);
-i32 Span_Add(Span *p, Abstract *t);
-status Span_Cull(Span *p, i32 count);
 status Span_Remove(Span *p, i32 idx);
-status Span_ReInit(Span *p);
 status Span_Setup(Span *p);
 Span *Span_Make(struct mem_ctx *m);
-Span *Span_Clone(struct mem_ctx *m, Span *p);
