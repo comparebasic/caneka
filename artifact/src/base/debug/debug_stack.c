@@ -62,7 +62,7 @@ int DebugStack_Print(){
     Iter_Init(&it, stack);
     boolean first = TRUE;
     while((Iter_Next(&it) & END) == 0){
-        StackEntry *entry = (StackEntry*)Iter_Get(&it);
+        StackEntry *entry = (StackEntry*)it.value;
         if(entry != NULL){
             Out(_debugM, "    ^D^y_c - _c:_i4^0 ", 
                 entry->funcName, entry->fname, entry->line);

@@ -16,7 +16,7 @@ i64 StrVec_ToFd(StrVec *v, int fd){
     Iter_Init(&it, v->p);
     i64 total = 0;
     while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)Iter_Get(&it);
+        Str *s = (Str *)it.value;
         if(s != NULL){
             total += Str_ToFd(s, fd);
         }
@@ -38,7 +38,7 @@ status StrVec_NextSlot(StrVec *v, Cursor *curs){
             if((Iter_Next(&curs->it) & END) != 0){
                 return ERROR;
             }
-            Str *s = (Str *)Iter_Get(&curs->it);
+            Str *s = (Str *)curs->it.value;
             curs->ptr = s->bytes;
             curs->end = s->bytes+s->length-1;
         }
@@ -63,7 +63,7 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
     Iter_Init(&it, v->p);
     i64 total = 0;
     while((Iter_Next(&it) & END) == 0){
-        Str *_s = (Str *)Iter_Get(&it);
+        Str *_s = (Str *)it.value;
         if(_s != NULL && _s == s){
             return it.idx;
         }
@@ -82,7 +82,7 @@ status StrVec_AddVec(StrVec *v, StrVec *v2){
     Iter_Init(&it, v2->p);
     i64 total = 0;
     while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)Iter_Get(&it);
+        Str *s = (Str *)it.value;
         if(s != NULL){
             StrVec_Add(v, s);
         }

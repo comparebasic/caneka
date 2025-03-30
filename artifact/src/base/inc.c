@@ -18,6 +18,7 @@
 #include "./mem/mem_book.c"
 #include "./mem/mem_chapter.c"
 #include "./mem/mem_debug.c"
+#include "./sequence/span_utils.c"
 #include "./sequence/hashed.c"
 #include "./sequence/lookup.c"
 #include "./sequence/sequence_debug.c"

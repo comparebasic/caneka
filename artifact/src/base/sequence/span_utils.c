@@ -88,3 +88,15 @@ Span *Span_Clone(MemCh *m, Span *p){
     }
     return p2;
 }
+
+status Span_Add(Span *p, Abstract *t){
+    if(idx < 0 || t == NULL){
+        return NOOP;
+    }
+    Iter it;
+    memset(&it, 0, sizeof(Iter));
+    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
+    it.value = (void *)t;
+    status r = Iter_Query(&it);
+    return r;
+}

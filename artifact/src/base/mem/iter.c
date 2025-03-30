@@ -4,7 +4,7 @@
 i32 _increments[SPAN_MAX_DIMS+1] = {1, 16, 256, 4096, 65536, 1048576};
 i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535, 1048575};
 
-static inline i32 Iter_SetStack(Iter *it, i8 dim, i32 offset){
+static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
     Span *p = it->span; 
     void **ptr = NULL;
     void *debug = NULL;
@@ -52,6 +52,7 @@ status Iter_Next(Iter *it){
     i32 debugIdx = it->idx;
     i32 idx = it->idx;
     it->value = NULL;
+    boolean skipNull = (it->type.state & SPAN_OP_ADD) == 0;
     void **ptr = NULL;
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
         word fl = ((it->type.state) & (~END));
@@ -90,7 +91,11 @@ status Iter_Next(Iter *it){
                         if(ptr != NULL){
                             it->value = *ptr;
                         }
-                        continue;
+                        if(skipNull){
+                            continue;
+                        }else{
+                            goto end;
+                        }
                     }else if(*ptr != NULL){
                         i32 offset = idx & _modulos[dim];
                         while(dim-1 >= 0){
@@ -106,6 +111,9 @@ status Iter_Next(Iter *it){
                                 break;
                             }else if(dim == 0){
                                 it->value = *ptr;
+                                if(!skipNull){
+                                    goto end;
+                                }
                             }
                         }
                     }
@@ -176,7 +184,7 @@ status Iter_Query(Iter *it){
     i32 offset = idx;
     void **ptr = NULL;
     while(dim >= 0){
-        offset = Iter_SetStack(it, dim, offset);
+        offset = Iter_SetStack(p->m, it, dim, offset);
         if(it->type.state & NOOP){
             break;
         }

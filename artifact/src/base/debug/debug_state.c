@@ -8,7 +8,7 @@ static word states[] = {
     NOOP,
     DEBUG,
     MORE,
-    _,
+    CONTINUE,
     END,
     PROCESSING,
 };
@@ -20,7 +20,7 @@ static char *stateNames[] = {
     "NOOP",
     "DEBUG",
     "MORE",
-    "_",
+    "CONTINUE",
     "END",
     "PROCESSING",
     NULL,
