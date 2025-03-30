@@ -249,10 +249,8 @@ int main(int argc, char *argv[]){
     testPairs("Test to 7", ToTest);
     testPairs("Test to 64", ToTestDim1);
     testPairs("Test to 279", ToTestDim2);
-    /*
     testPairs("Test to 70123", ToTestDim4);
     testPairs("Test to 137 Items", ToTest137ValuesDim2);
-    */
 
     return 0;
 }
