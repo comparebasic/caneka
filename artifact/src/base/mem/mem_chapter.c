@@ -80,7 +80,7 @@ MemSlab *MemSlab_Attach(MemCh *m, i16 level){
 i64 MemCh_MemCount(MemCh *m, i16 level){
     i64 total = 0;
     while((Iter_Next(&m->it) & END) == 0){
-        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        MemSlab *sl = (MemSlab *)m->it.value;
         if(sl != NULL && (level == 0 || sl->level == level)){
             total += MEM_SLAB_SIZE;
         }
@@ -99,7 +99,7 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 
     MemSlab *sl = NULL;
     while((Iter_Next(&m->it) & END) == 0){
-        MemSlab *_sl = (MemSlab *)Iter_Get(&m->it);
+        MemSlab *_sl = (MemSlab *)m->it.value;
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
             sl = _sl;
             break;
@@ -173,7 +173,7 @@ status MemCh_WipeTemp(MemCh *m, i16 level){
     status r = READY;
 
     while((Iter_Next(&m->it) & END) == 0){
-        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        MemSlab *sl = (MemSlab *)m->it.value;
         if(sl != NULL && (level == 0 || sl->level >= level) && sl->remaining < MEM_SLAB_SIZE){
             size_t sz = MemSlab_Taken(sl); 
             memset(sl->bytes+sl->remaining, 0, sz);
@@ -200,7 +200,7 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
         if(m->it.idx == 0){
             continue;
         }
-        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        MemSlab *sl = (MemSlab *)m->it.value;
         if(sl != NULL && (level == 0 || sl->level >= level)){
             if(m->it.idx > 0){
                 r |= Span_Remove(m->it.span, m->it.idx);
@@ -230,7 +230,7 @@ status MemCh_Free(MemCh *m){
 void *MemCh_GetSlab(MemCh *m, void *addr, i32 *idx){
     Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
-        MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
+        MemSlab *sl = (MemSlab *)m->it.value;
         if(sl != NULL){
             void *start = (void *)sl->bytes;
             void *end = sl->bytes + MEM_SLAB_SIZE;

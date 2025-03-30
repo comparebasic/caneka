@@ -29,7 +29,7 @@ status CliStatus_Print(MemCh *m, CliStatus *cli){
             cli->type.state |= PROCESSING;
         }
         while((Iter_Next(&it) & END) == 0){
-            StrVec *line = (StrVec *)Iter_Get(&it);
+            StrVec *line = (StrVec *)it.value;
             printf("\r\x1b[0K");
             fflush(stdout);
             if(line != NULL){

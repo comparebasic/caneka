@@ -51,28 +51,13 @@ static status Table_Resize(Span *tbl, word *queries){
 static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *value){
     Hashed *h = Hashed_Make(tbl->m, a);
     if(a == NULL){
-        /*
-        if(tbl->type.of == TYPE_ORDERED_TABLE){
-            OrdTable *otbl = (OrdTable *)as(tbl, TYPE_ORDERED_TABLE);
-            Span_Add(otbl->order, (Abstract *)h);
-            return h;
-        }else{
-        */
-            return NULL;
-            /*
-        }
-        */
+        return NULL;
     }
     tbl->type.state &= ~SUCCESS;
     if(op != SPAN_OP_GET && op != SPAN_OP_SET){
         return h;
     }
     Hashed *_h = NULL;
-    /*
-    if(op != SPAN_OP_GET && value != NULL){
-        setValuePtr(tbl, h, value);
-    }
-    */
     Abstract *v = NULL;
     boolean found = FALSE;
     word queries = 0;
@@ -100,13 +85,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *val
                     }
                 }else{
                     h->idx = hkey;
-                    h = (Hashed *)Span_Set(tbl, hkey, (Abstract *)h);
-                    /*
-                    if(tbl->type.of == TYPE_ORDERED_TABLE){
-                        OrdTable *otbl = (OrdTable *)as(tbl, TYPE_ORDERED_TABLE);
-                        Span_Add(otbl->order, (Abstract *)h);
-                    }
-                    */
+                    Span_Set(tbl, hkey, (Abstract *)h);
                     found = TRUE;
                     break;
                 }

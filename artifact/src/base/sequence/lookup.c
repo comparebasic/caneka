@@ -40,7 +40,7 @@ Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config, Abstract *arg){
 status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below zero");
-    }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) != NULL){
+    }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) & SUCCESS){
         return SUCCESS;
     }
     return ERROR;
@@ -51,7 +51,7 @@ status Lookup_Concat(MemCh *m, Lookup *lk, Lookup *add){
     Iter it;
     Iter_Init(&it, add->values);
     while((Iter_Next(&it) & END) == 0){
-        Abstract *a = Iter_Get(&it);
+        Abstract *a = (Abstract *)it.value;
         if(a != NULL){
             r |= Lookup_Add(m, lk, it.idx+add->offset, a);
         }

@@ -32,7 +32,7 @@ i64 StrVec_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ext
     Iter it;
     Iter_Init(&it, vObj->p);
     while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)Iter_Get(&it);
+        Str *s = (Str *)it.value;
         if(s != NULL){
             Str_Print(m, v, fd, (Abstract *)s, type, extended);
             if((it.type.state & FLAG_ITER_LAST) == 0){

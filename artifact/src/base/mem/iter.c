@@ -54,12 +54,22 @@ status Iter_Next(Iter *it){
     it->value = NULL;
     boolean skipNull = (it->type.state & SPAN_OP_ADD) == 0;
     void **ptr = NULL;
+
+    if(it->type.state & SPAN_OP_ADD){
+        if(it->idx != it->span->max_idx){
+            idx = it->idx = it->span->max_idx;
+            Iter_Query(it);
+            it->type.state |= PROCESSING;
+        }
+        it->type.state &= ~END;
+    }
+
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
         word fl = ((it->type.state) & (~END));
-        Iter_Setup(it, it->span, SPAN_OP_GET, 0);
+        idx = 0;
+        Iter_Setup(it, it->span, fl, idx);
         it->type.state |= (fl|PROCESSING);
         Iter_Query(it);
-        idx = 0;
         goto end;
     }else{
         if(topDim == 0){

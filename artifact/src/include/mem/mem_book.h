@@ -1,4 +1,4 @@
-typedef struct mem_chapter {
+typedef struct mem_book {
     Type type;
     int size;
     void *start;

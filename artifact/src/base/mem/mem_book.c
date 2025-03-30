@@ -18,6 +18,7 @@ static MemBook *MemBook_get(void *addr){
     while(idx >= 0){
         MemRange *mrange = _books+idx;
         if(addr >= mrange->start && addr <= mrange->end){
+            printf(">>> returning book %d %p\n", idx, mrange->book);
             return mrange->book;
         }
         idx--;
@@ -39,7 +40,7 @@ i64 MemCount(i16 level){
         MemBook *book = _books[i].book;
         Iter_Init(&it, book->it.span);
         while((Iter_Next(&it) & END) == 0){
-            MemSlab *sl = (MemSlab *)Iter_Get(&it);
+            MemSlab *sl = (MemSlab *)it.value;
             if(sl != NULL && sl->level >= level){
                 total += MemSlab_Taken(sl);
             }
@@ -80,7 +81,7 @@ void *MemBook_GetPage(void *addr){
     }else{
         printf("Getting Page III\n");
         while((Iter_Next(&book->it) & END) == 0){
-            MemSlab *sl = (MemSlab *)Iter_Get(&book->it);
+            MemSlab *sl = (MemSlab *)book->it.value;
             if(sl == NULL){
                 idx = book->it.idx;
                 book->it.metrics.selected = idx;
@@ -112,6 +113,7 @@ void *MemBook_GetPage(void *addr){
 status MemBook_Claim(MemSlab *sl){
     MemBook *book = MemBook_get(sl);
     if(book->it.metrics.selected != -1){
+        printf(">>> Span in Claim: %p book:%p\n", book->it.span, book);
         Span_Set(book->it.span, book->it.metrics.selected, (Abstract *)sl);
         book->it.metrics.selected = -1;
         return SUCCESS;
@@ -136,7 +138,6 @@ MemBook *MemBook_Make(MemBook *prev){
 
     mrange->start = start;
     mrange->end = start+CHAPTER_SIZE-sizeof(void *);
-    printf("Setting up bookIdx:%d\n", bookIdx);
 
     if(start == MAP_FAILED){
         printf("err:%s\n", strerror(errno));
@@ -166,10 +167,14 @@ MemBook *MemBook_Make(MemBook *prev){
     Span_Setup(p);
     p->m = &book->m;
     p->root = MemSlab_Alloc(sl, sizeof(slab));
-    Iter_Init(&book->it, p);
-    book->it.span = p;
 
+    Iter_Init(&book->it, p);
     book->it.metrics.selected = 0;
+    mrange->book = book;
+
+    printf("book/span:%p book:%p\n", book->it.span, book);
+
     MemBook_Claim(sl);
+
     return book;
 }

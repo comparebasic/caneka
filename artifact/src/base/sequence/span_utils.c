@@ -90,7 +90,7 @@ Span *Span_Clone(MemCh *m, Span *p){
 }
 
 status Span_Add(Span *p, Abstract *t){
-    if(idx < 0 || t == NULL){
+    if(t == NULL){
         return NOOP;
     }
     Iter it;
