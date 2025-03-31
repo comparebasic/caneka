@@ -12,7 +12,9 @@ static status archChecks(){
 status Caneka_Init(MemCh *m){
     status r = READY;
     r |= archChecks();
-    r |= Debug_Init(MemCh_Make());
+    MemCh *md = MemCh_Make();
+    r |= Debug_Init(md);
+    r |= StrUtils_Init(md);
     r |= DebugStack_Init(m);
     r |= Hash_Init(m);
     /*

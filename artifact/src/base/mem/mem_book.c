@@ -13,13 +13,11 @@ static MemRange _books[16] = {
 static MemBook *MemBook_get(void *addr){
     int idx = bookIdx;
     if(addr == NULL){
-        printf("returning book %d starting at:%ld\n", idx, (util)_books[idx].start);
         return _books[idx].book;
     }
     while(idx >= 0){
         MemRange *mrange = _books+idx;
         if(addr >= mrange->start && addr <= mrange->end){
-            printf(">>> returning book %d %p\n", idx, mrange->book);
             return mrange->book;
         }
         idx--;
@@ -39,31 +37,22 @@ i64 MemCount(i16 level){
     Iter it;
     for(int i = 0; i <= bookIdx; i++){
         MemBook *book = _books[i].book;
-        void *page = book->start;
-        for(i32 j = 0; j < PAGE_MAX; j++){
-            MemPage *sl = (MemPage *)page+(MEM_SLAB_SIZE-(sizeof(MemPage)));
-            if(sl != NULL && sl->type.of == TYPE_MEMSLAB){
+        for(i32 j = 0; j < pageIdx && j < PAGE_MAX; j++){
+            void *page = book->start+(j*PAGE_SIZE);
+            MemPage *sl = (MemPage *)(page+(MEM_SLAB_SIZE-(sizeof(MemPage))));
+            if(sl->type.of == TYPE_MEMSLAB){
                 total += MemPage_Taken(sl); 
             }
-            page += MEM_SLAB_SIZE;
-
         }
     }
     return total;
 }
 
 i64 MemChapterCount(){
-    i64 total = 0;
-    Iter it;
-    for(int i = 0; i <= bookIdx; i++){
-        MemBook *book = _books[i].book;
-        total += (i64)book->it.span->nvalues;
-    }
-    return total;
+    return pageIdx;
 }
 
 status MemBook_FreePage(MemCh *m, MemPage *sl){
-    printf("\x1b[33mFreeing page %lu \x1b[0m\n", (util)sl->bytes);
     size_t sz = MemPage_Taken(sl); 
     memset(sl->bytes+sl->remaining, 0, sz);
     MemBook *book = MemBook_get(m);
@@ -77,7 +66,6 @@ status MemBook_FreePage(MemCh *m, MemPage *sl){
 }
 
 void *MemBook_GetPage(void *addr){
-    printf("Getting Page close to %lu\n", (util)addr);
     MemBook *book = MemBook_get(addr);
     if(book == NULL){
         book = MemBook_get(NULL);
@@ -85,18 +73,14 @@ void *MemBook_GetPage(void *addr){
     i32 idx = -1;
     Iter_Reset(&book->it);
     if(book->it.span->nvalues > 0){
-        printf("nvalues %d\n",book->it.span->nvalues); 
         idx = book->it.span->max_idx;
         Span_Remove(book->it.span, book->it.span->max_idx);
-        printf("\x1b[34mReturning Available Page *%lu\x1b[0m\n", (util)book->start+(idx*PAGE_SIZE));
         return book->start+(idx*PAGE_SIZE);
     }else{
         for(i32 i = pageIdx; i < PAGE_MAX; i++){
             void *page = book->start+(i*PAGE_SIZE);
             MemPage *sl = (MemPage *)(page+(MEM_SLAB_SIZE-(sizeof(MemPage))));
-            printf("Pag full? page:%lu sl:%lu/%d\n", (util)page, (util)sl, (i32)sl->type.of);
             if(sl->type.of == 0){
-                printf("\x1b[34mReturning New Page *%lu\x1b[0m\n", (util)page);
                 if(i >= pageIdx){
                     pageIdx = i+1;
                 }
@@ -166,8 +150,6 @@ MemBook *MemBook_Make(MemBook *prev){
 
     Iter_Setup(&book->it, p, SPAN_OP_GET, 0);
     mrange->book = book;
-
-    printf("book/span:%lu book:%lu\n", (util)book->m.it.span, (util)book->it.span);
 
     return book;
 }

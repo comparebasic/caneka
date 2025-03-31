@@ -1,6 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
+Str *NL = NULL;
+
+status StrUtils_Init(MemCh *m){
+    if(NL == NULL){
+        NL = Str_Ref(m, (byte *)"\n", 1, 2);
+    }
+    return SUCCESS;
+}
+
 Str *Str_FromTyped(MemCh *m, void *v, cls type){
     if(v == NULL){
         return Str_Ref(m, (byte *)"NULL", 4, 5);

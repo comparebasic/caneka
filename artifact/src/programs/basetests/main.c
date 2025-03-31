@@ -31,18 +31,21 @@ int main(int argc, char **argv){
         }
     }
 
+    printf("MemBook Creating\n");
     MemBook *cp = MemBook_Make(NULL);
     if(cp == NULL){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully");
     }
 
-    printf("II MemCh Make\n");
+    printf("MemChapter Creating\n");
     MemCh *m = MemCh_Make();
     if(m == NULL){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully");
     }
 
+    printf("Caneka_Init running\n");
     Caneka_Init(m);
+    printf("Testing\n");
     test(m);
 
     return 0;

@@ -3,14 +3,14 @@
 
 void *MemPage_Alloc(MemPage *sl, word sz){
     sl->remaining -= sz;
-    return sl->bytes+((size_t)sl->remaining); 
+    return sl->bytes+sl->remaining; 
 }
 
 MemPage *MemPage_Attach(MemCh *m, i16 level){
     MemPage *sl = MemPage_Make(m, level);
     i32 idx = m->it.span->max_idx+1;
 
-    if(_increments[m->it.span->dims] <(m->it.span->nvalues+1)){
+    if(_increments[m->it.span->dims+1] < (m->it.span->nvalues+1)){
         MemCh_Expand(m);
         MemCh_ReserveSpanExpand(m, sl, idx);
     }
@@ -31,8 +31,7 @@ MemPage *MemPage_Make(MemCh *m, i16 level){
         .remaining = MEM_SLAB_SIZE,
         .bytes = bytes,
     };
-    MemPage *sl = MemPage_Alloc(&_sl, sizeof(MemPage));
+    MemPage *sl = MemPage_Alloc(&_sl, (i16)sizeof(MemPage));
     memcpy(sl, &_sl, sizeof(MemPage));
-    printf("MemPage_Make page:%lu sl%lu/%d\n", bytes, (util)sl, (i32)sl->type.of);
     return sl;
 }
