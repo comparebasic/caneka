@@ -11,8 +11,8 @@ static inline i64 wsOut(MemCh *m, StrVec *v, i32 fd, i8 dim){
 }
 
 
-i64 MemSlab_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
-    MemSlab *sl = (MemSlab*)as(a, TYPE_MEMSLAB); 
+i64 MemPage_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+    MemPage *sl = (MemPage*)as(a, TYPE_MEMSLAB); 
     /*
     i32 bcolor = 0;
     i32 lcolor = color;
@@ -27,7 +27,7 @@ i64 MemSlab_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ex
     }
     printf("%p/%p:\x1b[%d;%dm%d\x1b[0;%dm)[\x1b[1;%dm%hd\x1b[0;%dm/%hd]", 
          sl, sl->bytes, bcolor, lcolor, sl->level, color, color, 
-         MemSlab_Taken(sl), color, MemSlab_Available(sl));
+         MemPage_Taken(sl), color, MemPage_Available(sl));
      */
     return 0;
 }
@@ -41,13 +41,13 @@ i64 MemCh_Print(MemCh *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ext
     Iter it;
     Iter_Init(&it, &m->p);
     while((Iter_Next(&it) & END) == 0){
-         MemSlab *sl = (MemSlab *)Iter_Get(&it);
+         MemPage *sl = (MemPage *)Iter_Get(&it);
          if(sl != NULL){
              if(extended){
                 printf("\n    ");
              }
              printf("\x1b[%dm%d:", color, it.idx);
-             MemSlab_Print(m, v, (Abstract *)sl, 0, color, extended, "");
+             MemPage_Print(m, v, (Abstract *)sl, 0, color, extended, "");
              if((it.type.state & FLAG_ITER_LAST) == 0){
                 printf(", ");
              }
@@ -69,13 +69,13 @@ i64 MemBook_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ex
     Iter it;
     Iter_Init(&it, &cp->pages);
     while((Iter_Next(&it) & END) == 0){
-         MemSlab *sl = (MemSlab *)Iter_Get(&it);
+         MemPage *sl = (MemPage *)Iter_Get(&it);
          if(sl != NULL){
              if(extended){
                 printf("\n    ");
              }
              printf("\x1b[%dm%d:", color, it.idx);
-             MemSlab_Print(m, v, (Abstract *)sl, 0, color, extended, "");
+             MemPage_Print(m, v, (Abstract *)sl, 0, color, extended, "");
              if((it.type.state & FLAG_ITER_LAST) == 0){
                 printf(", ");
              }
@@ -90,6 +90,6 @@ status Mem_DebugInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
-    r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemSlab_Print);
+    r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemPage_Print);
     return r;
 }

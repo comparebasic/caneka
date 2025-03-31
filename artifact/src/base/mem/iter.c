@@ -164,7 +164,7 @@ status Iter_Query(Iter *it){
     }
 
     Span *p = it->span;
-    MemSlab *mem_sl = NULL;
+    MemPage *mem_sl = NULL;
     if(dimsNeeded > p->dims){
         if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NOOP;
@@ -223,9 +223,8 @@ status Iter_Query(Iter *it){
     return it->type.state;
 }
 
-
 status Iter_Reset(Iter *it){
-    it->type.state &= ~PROCESSING;
+    it->type.state = it->type.state & NORMAL_FLAGS;
     return SUCCESS;
 }
 

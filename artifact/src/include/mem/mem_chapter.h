@@ -1,10 +1,3 @@
-typedef struct mem_slab {
-    Type type;
-    i16 level;
-    i16 remaining;
-    void *bytes;
-} MemSlab;
-
 typedef struct mem_ctx {
     RangeType type;
     i16 nextIdx;
@@ -20,17 +13,13 @@ MemCh *MemCh_Make();
 status MemCh_Free(MemCh *m);
 status MemCh_FreeTemp(MemCh *m, i16 level);
 i64 MemCh_Used(MemCh *m);
-MemCh *MemCh_OnPage(void *page);
-status MemCh_Setup(MemCh *m, MemSlab *sl);
-void *MemCh_GetSlab(MemCh *m, void *addr, i32 *idx);
-MemSlab *MemSlab_Attach(MemCh *m, i16 level);
-void *MemSlab_Alloc(MemSlab *sl, word sz);
-MemSlab *MemSlab_Make(MemCh *m, i16 level);
-#define MemSlab_Available(sl) (sl)->remaining
+MemCh *MemCh_OnPage();
+status MemCh_Setup(MemCh *m, MemPage *sl);
+void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx);
+status MemCh_Expand(MemCh *m);
 i64 MemCh_MemCount(MemCh *m, i16 level);
 i64 MemCh_Total(MemCh *m, i16 level);
-#define MemSlab_Taken(sl) (((word)MEM_SLAB_SIZE) - (sl)->remaining)
 #define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range));
 #define MemCh_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
 i64 MemChapterCount();
-status MemCh_ReserveSpanExpand(MemCh *m, MemSlab *sl, word nextIdx);
+status MemCh_ReserveSpanExpand(MemCh *m, MemPage *sl, word nextIdx);

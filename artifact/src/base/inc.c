@@ -15,6 +15,7 @@
 #include "./mem/ext_free.c"
 #include "./mem/span.c"
 #include "./mem/iter.c"
+#include "./mem/mem_page.c"
 #include "./mem/mem_book.c"
 #include "./mem/mem_chapter.c"
 #include "./mem/mem_debug.c"

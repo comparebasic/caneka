@@ -1,7 +1,7 @@
 /* core */
 struct debug_stack;
 struct guard;
-struct mem_slab;
+struct mem_page;
 struct mem_ctx;
 struct mem_persist;
 struct mem_pair;
