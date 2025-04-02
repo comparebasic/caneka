@@ -164,7 +164,6 @@ status Iter_Query(Iter *it){
     }
 
     Span *p = it->span;
-    MemPage *mem_sl = NULL;
     if(dimsNeeded > p->dims){
         if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NOOP;

@@ -39,7 +39,7 @@ i64 MemCount(i16 level){
         MemBook *book = _books[i].book;
         for(i32 j = 0; j < pageIdx && j < PAGE_MAX; j++){
             void *page = book->start+(j*PAGE_SIZE);
-            MemPage *sl = (MemPage *)(page+(MEM_SLAB_SIZE-(sizeof(MemPage))));
+            MemPage *sl = (MemPage *)page;
             if(sl->type.of == TYPE_MEMSLAB){
                 total += MemPage_Taken(sl); 
             }
@@ -52,14 +52,14 @@ i64 MemChapterCount(){
     return pageIdx;
 }
 
-status MemBook_FreePage(MemCh *m, MemPage *sl){
-    size_t sz = MemPage_Taken(sl); 
-    memset(sl->bytes+sl->remaining, 0, sz);
+status MemBook_FreePage(MemCh *m, MemPage *pg){
+    memset(pg, 0, PAGE_SIZE);
+
     MemBook *book = MemBook_get(m);
-    int idx = (((void *)sl) - book->start)/PAGE_SIZE;
     Iter_Setup(&book->it, book->it.span, SPAN_OP_ADD, book->it.idx);
-    book->it.value = sl->bytes;
+    book->it.value = pg;
     status r = Iter_Query(&book->it);
+
     book->it.type.state &= ~SPAN_OP_ADD;
     book->it.type.state |= SPAN_OP_GET;
     return r;
@@ -79,7 +79,7 @@ void *MemBook_GetPage(void *addr){
     }else{
         for(i32 i = pageIdx; i < PAGE_MAX; i++){
             void *page = book->start+(i*PAGE_SIZE);
-            MemPage *sl = (MemPage *)(page+(MEM_SLAB_SIZE-(sizeof(MemPage))));
+            MemPage *sl = (MemPage *)page;
             if(sl->type.of == 0){
                 if(i >= pageIdx){
                     pageIdx = i+1;
@@ -124,15 +124,10 @@ MemBook *MemBook_Make(MemBook *prev){
         return NULL;
     }
 
-    MemPage _sl = {
-        .type = {TYPE_MEMSLAB, 0},
-        .level = 0,
-        .remaining = MEM_SLAB_SIZE,
-        .bytes = start,
-    };
 
-    MemPage *sl = MemPage_Alloc(&_sl, sizeof(MemPage));
-    memcpy(sl, &_sl, sizeof(MemPage));
+    MemPage *sl = (MemPage *)start;
+    sl->type.of = TYPE_MEMSLAB;
+    sl->remaining = MEM_SLAB_SIZE;
 
     MemBook *book = MemPage_Alloc(sl, sizeof(MemBook));
     book->type.of = TYPE_BOOK;

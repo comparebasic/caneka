@@ -1,11 +1,11 @@
 /*
 This is the semi-manually-run garbage collector.
-MemSlab_Count:
+MemPage_Count:
 
 */
 
 /*
- * MemSlab:
+ * MemPage:
  * Individual slabs of memory that have tracking information for the next
  * available address range.
  *
@@ -40,8 +40,8 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level);
 i64 MemCtx_Used(MemCtx *m);
 /* Create a MemCtx on an existing memeory page */
 MemCtx *MemCtx_OnPage(void *page);
-/* Setup a memctx and copy the MemSlab struct into the first slab */
-status MemCtx_Setup(MemCtx *m, MemSlab *sl);
+/* Setup a memctx and copy the MemPage struct into the first slab */
+status MemCtx_Setup(MemCtx *m, MemPage *sl);
 /* 
  * Returns the slab that contains a pointer 
  *
@@ -51,13 +51,13 @@ void *MemCtx_GetSlab(MemCtx *m, void *addr, i32 *idx);
 /* 
  * Add a slab to an existing MemCtx
  * */
-MemSlab *MemSlab_Attach(MemCtx *m, i16 level);
+MemPage *MemPage_Attach(MemCtx *m, i16 level);
 /* reserve space in a slabs bytes */
-void *MemSlab_Alloc(MemSlab *sl, word sz);
-/* Make MemSlab */
-MemSlab *MemSlab_Make(MemCtx *m, i16 level);
+void *MemPage_Alloc(MemPage *sl, word sz);
+/* Make MemPage */
+MemPage *MemPage_Make(MemCtx *m, i16 level);
 /* Get available space in a slab */
-#define MemSlab_Available(sl) (sl)->remaining
+#define MemPage_Available(sl) (sl)->remaining
 /* Returns the amount of bytes used in this level across multiple slabs in one
  * MemCtx
  * 
@@ -74,7 +74,7 @@ i64 MemCtx_MemCount(MemCtx *m, i16 level);
 i64 MemCtx_Total(MemCtx *m, i16 level);
 
 /* Gets the amount of bytes used in a particular slab */
-#define MemSlab_Taken(sl) (((word)MEM_SLAB_SIZE) - (sl)->remaining)
+#define MemPage_Taken(sl) (((word)MEM_SLAB_SIZE) - (sl)->remaining)
 
 /* This macro sets the memory range to be at level (0) in a way that can be
  * restored: by setting it to negative, the absolute value is where it was
@@ -83,4 +83,4 @@ i64 MemCtx_Total(MemCtx *m, i16 level);
 #define MemCtx_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
 
 i64 MemChapterCount();
-inline status MemCtx_ReserveSpanExpand(MemCtx *m, MemSlab *sl, word nextIdx);
+inline status MemCtx_ReserveSpanExpand(MemCtx *m, MemPage *sl, word nextIdx);

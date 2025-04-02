@@ -2,8 +2,9 @@ typedef struct mem_page {
     Type type;
     i16 level;
     i16 remaining;
-    void *bytes;
 } MemPage;
+
+#define MEM_SLAB_SIZE (PAGE_SIZE-sizeof(MemPage))
 
 MemPage *MemPage_Attach(struct mem_ctx *m, i16 level);
 void *MemPage_Alloc(MemPage *sl, word sz);

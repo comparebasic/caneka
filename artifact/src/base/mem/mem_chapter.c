@@ -10,7 +10,6 @@ status MemCh_Expand(MemCh *m){
     while(_increments[dimsNeeded-1] <= idx){
         dimsNeeded++;
     }
-    MemPage *mem_sl = NULL;
     if(dimsNeeded > p->dims){
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
@@ -96,11 +95,14 @@ status MemCh_WipeTemp(MemCh *m, i16 level){
     status r = READY;
 
     while((Iter_Next(&m->it) & END) == 0){
-        MemPage *sl = (MemPage *)m->it.value;
-        if(sl != NULL && (level == 0 || sl->level >= level) && sl->remaining < MEM_SLAB_SIZE){
-            size_t sz = MemPage_Taken(sl); 
-            memset(sl->bytes+sl->remaining, 0, sz);
-            sl->remaining = MEM_SLAB_SIZE;
+        MemPage *pg = (MemPage *)m->it.value;
+        if(pg != NULL && (level == 0 || pg->level >= level) && pg->remaining < MEM_SLAB_SIZE){
+            size_t sz = MemPage_Taken(pg); 
+            void *ptr = pg;
+            ptr += sizeof(MemPage);
+            ptr += pg->remaining;
+            memset(ptr, 0, sz);
+            pg->remaining = MEM_SLAB_SIZE;
             r = SUCCESS;
         }
     }
@@ -123,12 +125,12 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
         if(m->it.idx == 0){
             continue;
         }
-        MemPage *sl = (MemPage *)m->it.value;
-        if(sl != NULL && (level == 0 || sl->level >= level)){
+        MemPage *pg = (MemPage *)m->it.value;
+        if(pg != NULL && (level == 0 || pg->level >= level)){
             if(m->it.idx > 0){
                 r |= Span_Remove(m->it.span, m->it.idx);
             }
-            r |= MemBook_FreePage(m, sl);
+            r |= MemBook_FreePage(m, pg);
         }
     }
 
@@ -143,8 +145,8 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
 status MemCh_Free(MemCh *m){
     status r = MemCh_FreeTemp(m, max(m->type.range, 0));
     if(m->type.range == 0){
-        MemPage *sl = Span_Get(m->it.span, 0);
-        return MemBook_FreePage(m, sl);
+        MemPage *pg = Span_Get(m->it.span, 0);
+        return MemBook_FreePage(m, pg);
     }
     return r;
 }
@@ -152,47 +154,49 @@ status MemCh_Free(MemCh *m){
 void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx){
     Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
-        MemPage *sl = (MemPage *)m->it.value;
-        if(sl != NULL){
-            void *start = (void *)sl->bytes;
-            void *end = sl->bytes + MEM_SLAB_SIZE;
-            if((void *)(sl->bytes) <= addr && addr < end){
+        MemPage *pg = (MemPage *)m->it.value;
+        if(pg != NULL){
+            void *start = (void *)pg;
+            void *end = (void *)pg;
+            end += sizeof(MemPage)+MEM_SLAB_SIZE;
+            if(addr >= start && addr <= end){
                 *idx = m->it.idx;
-                return sl;
+                return pg;
             }
         }
     }
+
     Iter_Reset(&m->it);
     *idx = -1;
     return NULL;
 }
 
-status MemCh_ReserveSpanExpand(MemCh *m, MemPage *sl, word nextIdx){
+status MemCh_ReserveSpanExpand(MemCh *m, MemPage *pg, word nextIdx){
     m->nextIdx = nextIdx;
     m->nextCount = m->it.span->dims+1;
-    MemPage_Alloc(sl, sizeof(slab)*m->nextCount);
+    MemPage_Alloc(pg, sizeof(slab)*m->nextCount);
     return SUCCESS;
 }
 
-status MemCh_Setup(MemCh *m, MemPage *sl){
+status MemCh_Setup(MemCh *m, MemPage *pg){
     m->type.of = TYPE_MEMCTX;
-    Span *p = MemPage_Alloc(sl, sizeof(Span));
+    Span *p = MemPage_Alloc(pg, sizeof(Span));
     Span_Setup(p);
     p->m = m;
     p->max_idx = -1;
-    p->root = MemPage_Alloc(sl, sizeof(slab));
+    p->root = MemPage_Alloc(pg, sizeof(slab));
     Iter_Setup(&m->it, p, SPAN_OP_SET, 0);
-    m->it.value = (void *)sl;
+    m->it.value = (void *)pg;
     status r = Iter_Query(&m->it);
     m->it.type.state = ((m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET);
     return r;
 }
 
 MemCh *MemCh_OnPage(){
-    MemPage *sl = (MemPage *)MemPage_Make(NULL, 0);
-    MemCh *m = (MemCh *)MemPage_Alloc(sl, sizeof(MemCh));
-    MemCh_Setup(m, sl);
-    MemCh_ReserveSpanExpand(m, sl, 0);
+    MemPage *pg = (MemPage *)MemPage_Make(NULL, 0);
+    MemCh *m = (MemCh *)MemPage_Alloc(pg, sizeof(MemCh));
+    MemCh_Setup(m, pg);
+    MemCh_ReserveSpanExpand(m, pg, 0);
     return m;
 }
 
@@ -200,4 +204,3 @@ MemCh *MemCh_Make(){
     MemCh *m = MemCh_OnPage();
     return m;
 }
-
