@@ -28,6 +28,9 @@ status DebugStack_Init(MemCh *m){
     _stackIdx = 0;
     stack = Span_Make(m);
     setSigs();
+
+    i32 idx;
+    MemPage *pg = MemCh_GetPage(m, stack, &idx);
     return SUCCESS;
 }
 
@@ -53,6 +56,9 @@ void DebugStack_Pop(){
 
 void DebugStack_SetRef(void *v, word typeOf){
     StackEntry *entry = Span_Get(stack, _stackIdx-1);
+    if(entry == NULL){
+        return;
+    }
     entry->ref = v;
     entry->typeOf = typeOf;
 }

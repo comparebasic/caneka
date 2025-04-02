@@ -23,10 +23,10 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 
     MemPage *sl = NULL;
     while((Iter_Next(&m->it) & END) == 0){
-        if(m->it.span->type.state & DEBUG){
-            printf("Looking for mem at %d of %d level %d\n", m->it.idx, m->it.span->nvalues, level);
-        }
         MemPage *_sl = (MemPage *)m->it.value;
+        if(m->it.span->type.state & DEBUG){
+            printf("Looking for mem at %d of %d level %d *%lu\n", m->it.idx, m->it.span->nvalues, level, (util)_sl);
+        }
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
             sl = _sl;
             break;
@@ -38,6 +38,9 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
             printf("New Page for level%d\n", level);
         }
         sl = MemPage_Make(m, level);
+        if(m->it.type.state & DEBUG){
+            printf("\x1b[36mNew Page: *%lu\x1b[0m\n", (util)sl);
+        }
         m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
         m->it.value = (void *)sl;
         Iter_Query(&m->it);
@@ -98,8 +101,8 @@ status MemCh_WipeTemp(MemCh *m, i16 level){
 
 status MemCh_FreeTemp(MemCh *m, i16 level){
     status r = READY;
+    level = max(level, 0);
 
-    Iter_Init(&m->it, m->it.span);
     m->it.type.state |= FLAG_ITER_REVERSE;
     while((Iter_Next(&m->it) & END) == 0){
         if(m->it.idx == 0){
@@ -111,6 +114,9 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
                 r |= Span_Remove(m->it.span, m->it.idx);
             }
             r |= MemBook_FreePage(m, pg);
+            if(m->it.type.state & DEBUG){
+                printf("\x1b[36mFreeing Page *%lu of m:*%lu\x1b[0m\n", (util)pg, (util)m);
+            }
         }
     }
 
@@ -123,9 +129,12 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
 }
 
 status MemCh_Free(MemCh *m){
-    status r = MemCh_FreeTemp(m, max(m->type.range, 0));
+    status r = MemCh_FreeTemp(m, m->type.range);
     if(m->type.range == 0){
         MemPage *pg = Span_Get(m->it.span, 0);
+        if(m->it.type.state & DEBUG){
+            printf("\x1b[36mMemCh_Free last page:*%lu\x1b[0m\n", (util)pg);
+        }
         return MemBook_FreePage(m, pg);
     }
     return r;

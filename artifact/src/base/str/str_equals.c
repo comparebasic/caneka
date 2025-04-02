@@ -56,6 +56,7 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
         util shelfA = 0;
         memcpy(&shelfA, ptrA, length);
         if(shelfA != curs.slot){
+            printf("mismatch II\n");
             return FALSE;
         }
     }

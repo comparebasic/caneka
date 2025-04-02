@@ -1,16 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-status StrVec_Copy(StrVec *from, StrVec *to, i64 start, i64 end){
-    /* navigate to the start position */
-
-    /* add the str objects to the to strvec: */
-
-    /* decide if it's a continuation of the same string as new segments of 'from'
-     * are encountered */
-    return NOOP;
-}
-
 i64 StrVec_ToFd(StrVec *v, int fd){
     Iter it;
     Iter_Init(&it, v->p);
@@ -24,9 +14,27 @@ i64 StrVec_ToFd(StrVec *v, int fd){
     return total;
 }
 
-Str *StrVec_ReAlign(MemCh *m, StrVec *v){
-    /* make long strings instead of short ones and re attach a new span to 'v' */
-    return NULL;
+StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
+    StrVec *v = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, orig->p);
+    Str *s = Str_Make(m, STR_DEFAULT);
+    StrVec_Add(v, s);
+    i64 length = 0;
+    i64 offset = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *os = (Str *)it.value;
+        offset = 0;
+        length = os->length;
+        while(length > 0){
+            s = Str_Make(m, STR_DEFAULT);
+            StrVec_Add(v, s);
+            offset += Str_Add(s, os->bytes+offset, length);
+            length -= offset;
+        }
+    }
+
+    return v;
 }
 
 status StrVec_NextSlot(StrVec *v, Cursor *curs){
@@ -42,13 +50,17 @@ status StrVec_NextSlot(StrVec *v, Cursor *curs){
             curs->ptr = s->bytes;
             curs->end = s->bytes+s->length-1;
         }
-        i64 remaining = ((curs->end) - curs->ptr);
+        i64 remaining = ((curs->end+1) - curs->ptr);
         i64 len = min(remaining, needed);
         if(len == 0){
             break;
         }
         memcpy(((byte *)(&curs->slot))+offset, curs->ptr, len);
-        curs->ptr += len;
+        if(len == remaining){
+            curs->ptr = curs->end;
+        }else{
+            curs->ptr += len;
+        }
         curs->pos += len;
         offset = curs->pos & 7;
         needed = 8 - offset;

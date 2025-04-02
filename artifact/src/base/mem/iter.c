@@ -65,7 +65,7 @@ status Iter_Next(Iter *it){
     }
 
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
-        word fl = ((it->type.state) & (~END));
+        word fl = it->type.state & ~END;
         idx = 0;
         Iter_Setup(it, it->span, fl, idx);
         it->type.state |= (fl|PROCESSING);
@@ -165,16 +165,22 @@ end:
 }
 
 status Iter_Query(Iter *it){
+    if(it->span->type.state & DEBUG){
+        printf("Iter_Query %d\n", it->idx);
+    }
     it->type.state &= ~(SUCCESS|NOOP);
     MemCh *m = it->span->m;
     if(it->type.state & SPAN_OP_ADD){
         it->idx = it->span->max_idx+1;
     }
-    i32 idx = it->idx;
 
     i8 dimsNeeded = 0;
-    while(_increments[dimsNeeded+1] <= idx){
+    while(_increments[dimsNeeded+1] <= it->idx){
         dimsNeeded++;
+    }
+
+    if(it->span->type.state & DEBUG){
+        printf("Iter_Query II %d\n", it->idx);
     }
 
     Span *p = it->span;
@@ -203,8 +209,12 @@ status Iter_Query(Iter *it){
         *ptr = shelf_sl;
     }
 
+    if(it->span->type.state & DEBUG){
+        printf("Iter_Query III %d\n", it->idx);
+    }
+
     i8 dim = p->dims;
-    i32 offset = idx;
+    i32 offset = it->idx;
     void **ptr = NULL;
     while(dim >= 0){
         offset = Iter_SetStack(p->m, it, dim, offset);
@@ -217,7 +227,7 @@ status Iter_Query(Iter *it){
         if(dim == 0){
             if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE|SPAN_OP_ADD)){
                 if(it->span->type.state & DEBUG){
-                    printf("DEBUG %d\n", it->type.state & SPAN_OP_ADD);
+                    printf("Span Add? %d idx:%d\n", (it->type.state & SPAN_OP_ADD) != 0, it->idx);
                 }
                 ptr = (void **)it->stack[dim];
                 *ptr = it->value;
@@ -229,6 +239,9 @@ status Iter_Query(Iter *it){
                     }
                 }else if(it->type.state & SPAN_OP_REMOVE){
                     p->nvalues--;
+                    if(it->idx == p->max_idx){
+                        p->max_idx--;
+                    }
                 }
             }else if(it->type.state & (SPAN_OP_GET)){
                 ptr = (void **)it->stack[dim];
@@ -239,11 +252,15 @@ status Iter_Query(Iter *it){
         dim--;
     }
 
+    if(it->span->type.state & DEBUG){
+        printf("Iter at:%d\n", it->idx);
+    }
+
     return it->type.state;
 }
 
 status Iter_Reset(Iter *it){
-    it->type.state = (it->type.state & UPPER_FLAGS) | END;
+    it->type.state = (it->type.state & (UPPER_FLAGS|DEBUG)) | END;
     return SUCCESS;
 }
 

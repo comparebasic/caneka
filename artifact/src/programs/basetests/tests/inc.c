@@ -7,11 +7,10 @@
 #include "core_tests.c"
 #include "memch_tests.c"
 #include "span_tests.c"
-/*
-#include "hash_tests.c"
-#include "inc.c"
-#include "string_tests.c"
 #include "strvec_tests.c"
+/*
+#include "string_tests.c"
+#include "hash_tests.c"
 */
 
 status Tests_Init(MemCh *m){
@@ -45,13 +44,13 @@ static TestSet _Tests[] = {
         "Span is the basic data structure for sequential or logorithmic storage access.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "StrVec",
         StrVec_Tests,
         "Testing String Vectors",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "String",
         String_Tests,

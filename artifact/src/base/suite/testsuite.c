@@ -56,7 +56,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i64 rollingBaseMem = baseMem;
 
     i64 chapters = MemChapterCount();
-    Out(m, "Starting Mem at  _t/level_i4 (_i8 chapters/_i8 total)\n", 
+    Out(m, "Starting Mem at  _t/level_i4 (_i8 chapters/_i8 total+stack)\n", 
         Str_MemCount(m, baseMem), (i32)baseStackLevel, chapters, chapters *PAGE_SIZE);
 
     while(set->name != NULL){
@@ -74,7 +74,6 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
         if(set->func != NULL){
             m->type.range++;
             _debugM->type.range++;
-            printf(">>> about to run\n");
             r = set->func(m);
             MemCh_Free(m);
             MemCh_Free(_debugM);
@@ -96,7 +95,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             }
 
             i64 chapters = MemChapterCount();
-            Out(m, "_tMem: _t/level_i4 (_i8 chapters/_t total)^0\n", 
+            Out(m, "_tMem: _t/level_i4 (_i8 chapters/_t total+stack)^0\n", 
                 color, Str_MemCount(m, baseMem), (i32)baseStackLevel, 
                 chapters, Str_MemCount(m, chapters*PAGE_SIZE));
 

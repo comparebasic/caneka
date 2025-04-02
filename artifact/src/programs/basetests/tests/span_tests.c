@@ -10,17 +10,13 @@ status Span_Tests(MemCh *gm){
 
     /* set and retrieve numbers beyond stride */
     p = Span_Make(m);
-    p->type.state |= DEBUG;
     i64 max = 6;
     for(i64 i = 0; i < max; i++){
         Single *g = I64_Wrapped(m, i);
-        printf("Set %ld\n", i);
         Span_Set(p, i, (Abstract *)g);
     }
 
-    p->type.state |= DEBUG;
     for(i64 i = 0; i < max; i++){
-        printf("Get %ld\n", i);
         Single *g = Span_Get(p, i);
         r |= Test(g != NULL, "Retrieved item is not null _i", i);
         if(r & ERROR){
@@ -33,13 +29,10 @@ status Span_Tests(MemCh *gm){
     max = SPAN_STRIDE+1;
     for(i64 i = 0; i < max; i++){
         Single *g = I64_Wrapped(m, i);
-        printf("Set %ld\n", i);
         Span_Set(p, i, (Abstract *)g);
     }
 
-    p->type.state |= DEBUG;
     for(i64 i = 0; i < max; i++){
-        printf("Get %ld\n", i);
         Single *g = Span_Get(p, i);
         r |= Test(g != NULL, "Retrieved item is not null _i", i);
         if(r & ERROR){
@@ -86,11 +79,6 @@ status Span_Tests(MemCh *gm){
         Type_ToChars(s8->type.of), Type_ToChars(s->type.of));
     r |= Test(Equals((Abstract *)s8, (Abstract *)s), "String 8 equals '_t' found '_t'", 
         s8, s);
-
-    Out(m, "^c");
-    Span_Print(m, NULL, 0, (Abstract *)p, 0, TRUE);
-    Out(m, "^0\n");
-
 
     /* expand tests */
     Str *s4079 = Str_CstrRef(m, "Four Hundred Seventy Nine");

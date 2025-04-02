@@ -62,6 +62,11 @@ status MemBook_FreePage(MemCh *m, MemPage *pg){
 
     book->it.type.state &= ~SPAN_OP_ADD;
     book->it.type.state |= SPAN_OP_GET;
+
+    if(book->type.state & DEBUG){
+        printf("\x1b[1;34mFree Page nvalues:%d \x1b[0m\n", book->it.span->nvalues);
+    }
+
     return r;
 }
 
@@ -74,8 +79,12 @@ void *MemBook_GetPage(void *addr){
     Iter_Reset(&book->it);
     if(book->it.span->nvalues > 0){
         idx = book->it.span->max_idx;
-        Span_Remove(book->it.span, book->it.span->max_idx);
-        return book->start+(idx*PAGE_SIZE);
+        void *page = Span_Get(book->it.span, idx);
+        Span_Remove(book->it.span, idx);
+        if(book->type.state & DEBUG){
+            printf("\x1b[1;33mGiving Recycled Page *%lu\x1b[0m\n", (util)page);
+        }
+        return page;
     }else{
         for(i32 i = pageIdx; i < PAGE_MAX; i++){
             void *page = book->start+(i*PAGE_SIZE);
@@ -83,6 +92,9 @@ void *MemBook_GetPage(void *addr){
             if(sl->type.of == 0){
                 if(i >= pageIdx){
                     pageIdx = i+1;
+                }
+                if(book->type.state & DEBUG){
+                    printf("\x1b[1;33mGiving Page *%lu\x1b[0m\n", (util)page);
                 }
                 return page;
             }
@@ -124,23 +136,22 @@ MemBook *MemBook_Make(MemBook *prev){
         return NULL;
     }
 
+    MemPage *pg = (MemPage *)start;
+    pg->type.of = TYPE_MEMSLAB;
+    pg->remaining = MEM_SLAB_SIZE;
 
-    MemPage *sl = (MemPage *)start;
-    sl->type.of = TYPE_MEMSLAB;
-    sl->remaining = MEM_SLAB_SIZE;
-
-    MemBook *book = MemPage_Alloc(sl, sizeof(MemBook));
+    MemBook *book = MemPage_Alloc(pg, sizeof(MemBook));
     book->type.of = TYPE_BOOK;
     
-    MemCh_Setup(&book->m, sl);
+    MemCh_Setup(&book->m, pg);
 
     book->start = start;
     mrange->book = book;
 
-    Span *p = MemPage_Alloc(sl, sizeof(Span));
+    Span *p = MemPage_Alloc(pg, sizeof(Span));
     Span_Setup(p);
     p->m = &book->m;
-    p->root = MemPage_Alloc(sl, sizeof(slab));
+    p->root = MemPage_Alloc(pg, sizeof(slab));
 
     Iter_Setup(&book->it, p, SPAN_OP_GET, 0);
     mrange->book = book;

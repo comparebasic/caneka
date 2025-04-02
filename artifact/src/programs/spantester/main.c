@@ -199,7 +199,6 @@ static status testPairs(char *desc, CharIntPair *testPairs){
     printf("\x1b[1m[%s]\x1b[22m\n", desc);
     status r = READY;
     Span *p = Span_Make(NULL);
-    p->type.state |= DEBUG;
     CharIntPair *cpair = testPairs;
     int idx = -1;
     while(cpair->cstr != NULL){
@@ -226,7 +225,6 @@ static status testPairs(char *desc, CharIntPair *testPairs){
     cpair = testPairs;
     Iter it;
     Iter_Init(&it, p);
-    it.type.state |= DEBUG;
     while((Iter_Next(&it) & END) == 0){
         char *cstr = (char *)it.value;
         if(cstr != NULL){

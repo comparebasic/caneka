@@ -5,7 +5,7 @@ void *MemPage_Alloc(MemPage *pg, word sz){
     void *ptr = pg;
     ptr += sizeof(MemPage);
     pg->remaining -= sz;
-    return ptr+pg->remaining; 
+    return ptr+((util)pg->remaining); 
 }
 
 MemPage *MemPage_Attach(MemCh *m, i16 level){
@@ -22,8 +22,12 @@ MemPage *MemPage_Make(MemCh *m, i16 level){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error allocating page");
         return NULL;
     }
+    if(m != NULL && m->it.type.state & DEBUG){
+        printf("\x1b[36mAllocating Page *%lu\x1b[0m\n", (util)bytes);
+    }
     MemPage *pg = (MemPage *)bytes;
     pg->type.of = TYPE_MEMSLAB;
     pg->remaining = MEM_SLAB_SIZE;
+    pg->level = level;
     return pg;
 }

@@ -61,22 +61,23 @@ static char *ponyTailTwoCstr = ""
     "digital representation of hair and hair movement.[8]"
     ;
 
-status StrVec_Tests(MemCtx *gm){
+status StrVec_Tests(MemCh *gm){
     status r = READY;
-    MemCtx *m = MemCtx_Make();
+    MemCh *m = MemCh_Make();
 
-    StrVec *vc = StrVec_Make(m, bytes("hi dude"), 0);
-    StrVec_Add(m, vc, bytes(" what a wild ride!"), 0);
+    StrVec *vc = StrVec_Make(m);
+    StrVec_Add(vc, Str_CstrRef(m, "hi dude"));
+    StrVec_Add(vc, Str_CstrRef(m, ", what a wild ride!"));
+    Str *s = Str_CstrRef(m, "hi dude, what a wild ride!");
+    Test(Equals(vc, s), "Testing StrVec and Str '_+' vs '_t'", vc, s);
 
-    StrVec_Add(m, vc, bytes("\n\n"), 0);
-    StrVec_Add(m, vc, bytes(ponyTailCstr), 0);
-    StrVec_Add(m, vc, bytes(ponyTailTwoCstr), 0);
-    String *s = StrVec_ToStr(m, vc);
+    /*
+    StrVec_Add(vc, Str_CstrRef(m, "\n\n"));
+    StrVec_Add(vc, Str_CstrRef(m, ponyTailCstr));
+    StrVec_Add(vc, Str_CstrRef(m, ponyTailTwoCstr));
+    */
 
-    DPrint((Abstract *)vc, COLOR_PURPLE, "vc: ");
-    DPrint((Abstract *)s, COLOR_YELLOW, "str: ");
-
-    MemCtx_Free(m);
+    MemCh_Free(m);
 
     return r;
 }

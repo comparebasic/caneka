@@ -23,7 +23,6 @@ status MemCh_Tests(MemCh *gm){
     }
 
     m->type.range++;
-    m->it.span->type.state |= DEBUG;
     for(i64 i = 0; i < max; i++){
         i64 *p = MemCh_Alloc(m, sizeof(i64));
         memcpy(p, &i, sizeof(i64));
