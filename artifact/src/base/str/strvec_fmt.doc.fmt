@@ -10,6 +10,8 @@ _: Followd by One of the following
 
 t: Typed output
 T: Typed output, with a type flag argument
+o: Show typeOf for an abstract object
+O: Show name of typeOf flag
 d: Debug output
 D: Verbose debug output
 c: C string (null terminated)

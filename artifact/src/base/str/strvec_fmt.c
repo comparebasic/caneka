@@ -26,7 +26,19 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
             }else if(c == 'T'){
                 Abstract *a = va_arg(args, Abstract *);
                 cls type = va_arg(args, i32);
-                total += Str_Debug(m, v, fd, a, type, FALSE);
+                total += Str_Debug(m, v, fd, a, (cls)type, FALSE);
+                state = SUCCESS; 
+                goto next;
+            }else if(c == 'o'){
+                Abstract *a = (Abstract *)va_arg(args, Abstract *);
+                s = Str_CstrRef(m, (char *)Type_ToChars(a->type.of));
+                handleIo(v, fd, s);
+                state = SUCCESS; 
+                goto next;
+            }else if(c == 'O'){
+                i32 i = (i32)va_arg(args, i32);
+                s = Str_CstrRef(m, (char *)Type_ToChars((cls)i));
+                handleIo(v, fd, s);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){

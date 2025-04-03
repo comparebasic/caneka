@@ -8,8 +8,8 @@
 #include "memch_tests.c"
 #include "span_tests.c"
 #include "strvec_tests.c"
+#include "str_tests.c"
 /*
-#include "string_tests.c"
 #include "hash_tests.c"
 */
 
@@ -50,13 +50,13 @@ static TestSet _Tests[] = {
         "Testing String Vectors",
         FEATURE_COMPLETE,
     },
-    /*
     {
-        "String",
-        String_Tests,
+        "Str",
+        Str_Tests,
         "Tests for the basic string object and convienience features",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "String - End Matches",
         String_EndMatchTests,
