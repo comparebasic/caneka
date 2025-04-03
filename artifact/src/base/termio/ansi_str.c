@@ -10,10 +10,11 @@ Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
     byte *e = s->bytes+s->alloc-1;
     *(b++) = KEY_ESCAPE;
     *(b++) = '[';
+    byte *start = b;
     while(b <= e && ptr <= end){
         c = *(ptr);
         if(c == '0'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '0';
@@ -23,97 +24,97 @@ Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
         }else if(c == 'D'){
             *(b++) = '1';
         }else if(c == 'r'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '1';
         }else if(c == 'R'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';
             *(b++) = '1';
         }else if(c == 'g'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '2';
         }else if(c == 'G'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';
             *(b++) = '2';
         }else if(c == 'y'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '3';
         }else if(c == 'Y'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';
             *(b++) = '3';
         }else if(c == 'b'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '4';
         }else if(c == 'B'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';
             *(b++) = '4';
         }else if(c == 'p'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '5';
         }else if(c == 'P'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';
             *(b++) = '5';
         }else if(c == 'c'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '6';
         }else if(c == 'C'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';
             *(b++) = '6';
         }else if(c == 'k'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '7';
         }else if(c == 'K'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';
             *(b++) = '7';
         }else if(c == 'x'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '3';
             *(b++) = '0';
         }else if(c == 'X'){
-            if(b > _s){
+            if(b > start){
                 *(b++) = ';';
             }
             *(b++) = '4';

@@ -7,15 +7,15 @@ i64 Str_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extend
     Str *s = (Str*)as(a, TYPE_STR); 
     i64 total = 0;
     if(extended){
-        total += StrVec_FmtAdd(m, v, fd, "Str<_i4/_i4:^B\"", s->length, s->alloc); 
+        total += StrVec_FmtAdd(m, v, fd, "Str<_i4/_i4:^D\"", s->length, s->alloc); 
     }else{
-        total += StrVec_FmtAdd(m, v, fd, "^B\""); 
+        total += StrVec_FmtAdd(m, v, fd, "^D\""); 
     }
     total += handleIo(v, fd, s);
     if(extended){
-        total += StrVec_FmtAdd(m, v, fd, "\"^b^>");
+        total += StrVec_FmtAdd(m, v, fd, "\"^d.>");
     }else{
-        total += StrVec_FmtAdd(m, v, fd, "\"^b");
+        total += StrVec_FmtAdd(m, v, fd, "\"^d.");
     }
     return total;
 }

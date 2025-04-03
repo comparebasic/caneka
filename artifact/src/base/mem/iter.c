@@ -30,17 +30,21 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
         it->stackIdx[dim] = localIdx;
     }
 
-    debug = ptr;
     ptr += localIdx;
     it->stack[dim] = ptr;
     it->stackIdx[dim] = localIdx;
+    if(it->span->type.state & DEBUG){
+        printf("Setting dim %d to *%lu/%d\n", (i32)dim, (util)ptr, localIdx);
+    }
     if(dim > 0 && *ptr == NULL){
-        if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESIZE)) == 0){
+        if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESIZE|SPAN_OP_ADD)) == 0){
             it->type.state |= CONTINUE;
             return 0;
         }
         *ptr = (slab *)MemCh_Alloc((m), sizeof(slab));
-        memset(*ptr, 0, sizeof(slab));
+        if(it->span->type.state & DEBUG){
+            printf("New Slab:*%lu\n", (util)*ptr);
+        }
     }
 
     return offset & _modulos[dim];
@@ -185,6 +189,9 @@ status Iter_Query(Iter *it){
 
     Span *p = it->span;
     if(dimsNeeded > p->dims){
+        if(it->span->type.state & DEBUG){
+            printf("Expanding to %d\n", (i32)dimsNeeded);
+        }
         if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD)) == 0){
             return NOOP;
         }
@@ -227,7 +234,7 @@ status Iter_Query(Iter *it){
         if(dim == 0){
             if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE|SPAN_OP_ADD)){
                 if(it->span->type.state & DEBUG){
-                    printf("Span Add? %d idx:%d\n", (it->type.state & SPAN_OP_ADD) != 0, it->idx);
+                    printf("Span Add? %d idx:%d dim/dims:%d/%d *%lu\n", (it->type.state & SPAN_OP_ADD) != 0, it->idx, (i32)dim, (i32)p->dims, (util)it->stack[dim]);
                 }
                 ptr = (void **)it->stack[dim];
                 *ptr = it->value;

@@ -24,9 +24,9 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'T'){
-                Abstract *obj = va_arg(args, Abstract *);
+                Abstract *a = va_arg(args, Abstract *);
                 cls type = va_arg(args, i32);
-                total += Str_Debug(m, v, fd, obj, type, TRUE);
+                total += Str_Debug(m, v, fd, a, type, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){

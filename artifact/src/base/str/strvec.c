@@ -22,15 +22,22 @@ StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
     StrVec_Add(v, s);
     i64 length = 0;
     i64 offset = 0;
+    i64 taken = 0;
     while((Iter_Next(&it) & END) == 0){
         Str *os = (Str *)it.value;
         offset = 0;
         length = os->length;
+        taken = Str_Add(s, os->bytes+offset, length);
+        offset += taken;
+        length -= taken;
+        v->total += taken;
         while(length > 0){
             s = Str_Make(m, STR_DEFAULT);
             StrVec_Add(v, s);
-            offset += Str_Add(s, os->bytes+offset, length);
-            length -= offset;
+            taken = Str_Add(s, os->bytes+offset, length);
+            offset += taken;
+            length -= taken;
+            v->total += taken;
         }
     }
 
@@ -42,13 +49,13 @@ status StrVec_NextSlot(StrVec *v, Cursor *curs){
     util needed = 8;
     curs->slot = 0;
     do {
-        if(curs->ptr == curs->end){
+        if(curs->ptr == NULL){
             if((Iter_Next(&curs->it) & END) != 0){
                 return ERROR;
             }
             Str *s = (Str *)curs->it.value;
             curs->ptr = s->bytes;
-            curs->end = s->bytes+s->length-1;
+            curs->end = s->bytes+(s->length-1);
         }
         i64 remaining = ((curs->end+1) - curs->ptr);
         i64 len = min(remaining, needed);
@@ -57,7 +64,7 @@ status StrVec_NextSlot(StrVec *v, Cursor *curs){
         }
         memcpy(((byte *)(&curs->slot))+offset, curs->ptr, len);
         if(len == remaining){
-            curs->ptr = curs->end;
+            curs->ptr = NULL;
         }else{
             curs->ptr += len;
         }
@@ -86,6 +93,7 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
 status StrVec_Add(StrVec *v, Str *s){
     status r = Span_Add(v->p, (Abstract *)s);
     v->total += s->length;
+    v->count++;
     return r;
 }
 
