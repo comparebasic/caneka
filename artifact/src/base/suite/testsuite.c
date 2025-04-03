@@ -56,18 +56,19 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i64 rollingBaseMem = baseMem;
 
     i64 chapters = MemChapterCount();
-    Out(m, "Starting Mem at  _t/level_i4 (_i8 chapters/_i8 total+stack)\n", 
-        Str_MemCount(m, baseMem), (i32)baseStackLevel, chapters, chapters *PAGE_SIZE);
+    Out(m, "= Test Suite: _c\n", suiteName);
+    Out(m, "Starting Mem at _t (_i8 chapters/_i8 total+stack)\n", 
+        Str_MemCount(m, baseMem), chapters, chapters *PAGE_SIZE);
 
     while(set->name != NULL){
 
         if(set->status == SECTION_LABEL){
-            Out(m, "== _c ==\n", set->name);
+            Out(m, "== _c\n", set->name);
             set++;
             continue;
         }
 
-        Out(m, "[Testing _c]\n", set->name);
+        Out(m, "=== Testing: _c\n", set->name);
 
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
@@ -89,14 +90,14 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             char *htmlCls = "";
             Str *color = Str_CstrRef(m, "");
             if(overRollingUsed > 0 || stackLevel > 0){
-                color = Str_AnsiCstr(m, "^r");
+                color = Str_AnsiCstr(m, "^r.");
             }else if(memUsed > 0){
-                color = Str_AnsiCstr(m, "^b");
+                color = Str_AnsiCstr(m, "^b.");
             }
 
             i64 chapters = MemChapterCount();
-            Out(m, "_tMem: _t/level_i4 (_i8 chapters/_t total+stack)^0\n", 
-                color, Str_MemCount(m, baseMem), (i32)baseStackLevel, 
+            Out(m, "_tMem: _t (_i8 chapters/_t total+stack)^0\n", 
+                color, Str_MemCount(m, overRollingUsed), 
                 chapters, Str_MemCount(m, chapters*PAGE_SIZE));
 
             MemCh_Free(m);

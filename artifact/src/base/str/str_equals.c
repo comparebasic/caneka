@@ -36,7 +36,6 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
        return FALSE; 
     }
     if(a->length != b->total){
-        printf("Length mismatch %ld vs %ld\n", a->length, b->total);
         return FALSE;
     }
     i32 length = a->length;
@@ -45,20 +44,6 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     Cursor curs;
     Cursor_Setup(&curs, b);
     while(length >= 8 && (StrVec_NextSlot(b, &curs) & END) == 0){
-        if(b->type.state & DEBUG){
-            fflush(stdout);
-            char *x = (char *)ptrA;
-            printf("\n");
-            for(i32 i = 0; i < 8; i++){
-                printf("%d,",  (i32)*(x+i), (char)*(x+i));
-            }
-            x = (char *)&curs.slot;
-            printf("\n");
-            for(i32 i = 0; i < 8; i++){
-                printf("%d,",  (i32)*(x+i), (char)*(x+i));
-            }
-            printf("\n");
-        }
         if(*ptrA != curs.slot){
             return FALSE;
         }
@@ -71,7 +56,6 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
         util shelfA = 0;
         memcpy(&shelfA, ptrA, length);
         if(shelfA != curs.slot){
-            printf("mismatch II\n");
             return FALSE;
         }
     }
