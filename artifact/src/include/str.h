@@ -5,3 +5,5 @@
 #include "str/str_debug.h"
 #include "str/str_equals.h"
 #include "str/str_makers.h"
+#include "str/stream.h"
+#include "str/stream_makers.h"

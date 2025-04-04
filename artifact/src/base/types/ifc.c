@@ -2,9 +2,7 @@
 #include <caneka.h>
 
 cls Ifc_Get(cls inst){
-    if(inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL || inst == TYPE_STRING_SLAB){
-        return TYPE_STRING;
-    }else if(inst == TYPE_SPAN || inst == TYPE_TABLE){
+    if(inst == TYPE_SPAN || inst == TYPE_TABLE){
         return TYPE_SPAN;
     }
 
@@ -24,10 +22,6 @@ boolean Ifc_Match(cls inst, cls ifc){
     }
     }else if(ifc == TYPE_WRAPPED){
         return inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL || inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR;
-    }else if(ifc == TYPE_STRING){
-        return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED || inst == TYPE_STRING_FULL;
-    }else if(ifc == TYPE_STRING){
-        return inst == TYPE_STRING_CHAIN || inst == TYPE_STRING_FIXED;
     }else if(ifc == TYPE_ROEBLING){
         return inst == TYPE_ROEBLING || inst == TYPE_ROEBLING_BLANK;
     }else if(ifc == TYPE_SPAN){ 

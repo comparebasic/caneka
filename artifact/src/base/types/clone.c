@@ -5,7 +5,7 @@ Lookup *CloneLookup = NULL;
 
 static status populateClone(MemCh *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_STRING, (void *)Str_Clone);
+    r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Clone);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_Clone);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Clone);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Clone);

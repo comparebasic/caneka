@@ -13,8 +13,7 @@ struct cursor;
 struct str;
 struct strvec;
 struct strvec_cursor;
-struct strsnip;
-struct string;
+struct stream;
 /* util */
 struct blank;
 struct hashed;

@@ -29,7 +29,7 @@ boolean Caneka_Truthy(Abstract *a){
         return FALSE;
     }else if(Ifc_Match(a->type.of, TYPE_WRAPPED_I64)){
         return ((Single *)a)->val.value != 0;
-    }else if(Ifc_Match(a->type.of, TYPE_STRING)){
+    }else if(Ifc_Match(a->type.of, TYPE_STR)){
         return ((Str *)a)->length > 1;
     }else{
         return FALSE;

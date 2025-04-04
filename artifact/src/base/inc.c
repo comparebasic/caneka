@@ -32,6 +32,8 @@
 #include "./str/str_utils.c"
 #include "./str/strvec.c"
 #include "./str/strvec_fmt.c"
+#include "./str/stream.c"
+#include "./str/stream_makers.c"
 #include "./termio/ansi_str.c"
 #include "./termio/cli_status.c"
 #include "./termio/rawmode.c"

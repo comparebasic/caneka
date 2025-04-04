@@ -3,4 +3,3 @@ boolean Ifc_Match(cls inst, cls ifc);
 cls Ifc_Get(cls inst);
 status Caneka_Init(struct mem_ctx *m);
 boolean Caneka_Truthy(Abstract *a);
-status ToStdOut(struct mem_ctx *m, struct string *s, Abstract *source);

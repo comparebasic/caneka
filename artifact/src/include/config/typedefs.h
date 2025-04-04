@@ -37,28 +37,11 @@ typedef struct virt  {
     Type type;
 } Abstract;
 
-typedef struct reserve  {
-    Type type;
-    i32 nunits;
-} Reserve;
-
-extern Abstract Reserved;
-
-typedef struct virt * AbstractPtr;
 typedef status (*DoFunc)(struct mem_ctx *m, Abstract *a);
-typedef status (*DblFunc)(struct mem_ctx *m, Abstract *a, Abstract *b);
-typedef status (*OutFunc)(struct mem_ctx *m, struct string *s, Abstract *source);
 typedef boolean (*EqualFunc)(Abstract *a, void *b); /* eq */
-typedef char *(*RangeToChars)(word);
 
 #define ZERO 0
 #define MAX_BASE10 23
-
-#define STRING_SEG_FOOTPRINT 256
-#define STRING_EXTRAS (sizeof(Type)+sizeof(int)+sizeof(struct string *)+sizeof(MemCtx *))
-#define STRING_CHUNK_SIZE 255
-#define STRING_FIXED_SIZE 63
-#define STRING_FULL_SIZE 127
 
 #define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from abstract mismatch _i4", (i32)(x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
 
