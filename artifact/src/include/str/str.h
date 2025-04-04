@@ -1,3 +1,7 @@
+enum str_flags {
+    STRING_CONST = 1 << 8,
+};
+
 typedef struct str {
     Type type;
     word length;

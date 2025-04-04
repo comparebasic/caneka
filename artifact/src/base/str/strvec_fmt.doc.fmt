@@ -8,6 +8,7 @@ _: Followd by One of the following
 
 ==== Options
 
+\_: Ignore underscore
 t: Typed output
 T: Typed output, with a type flag argument
 o: Show typeOf for an abstract object

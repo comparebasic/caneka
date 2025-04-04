@@ -52,6 +52,10 @@ i64 MemChapterCount(){
     return pageIdx;
 }
 
+i64 MemAvailableChapterCount(){
+    return _books[0].book->it.span->nvalues;
+}
+
 status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
 

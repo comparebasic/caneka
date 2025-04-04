@@ -68,6 +68,7 @@ Str *Str_From(MemCh *m, byte *bytes, word length){
 Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc){
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, bytes, length, alloc);
+    s->type.state |= STRING_CONST;
     return s;
 }
 
@@ -75,6 +76,7 @@ Str *Str_CstrRef(MemCh *m, char *cstr){
     i64 len = strlen(cstr);
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, (byte *)cstr, len, len+1);
+    s->type.state |= STRING_CONST;
     return s;
 }
 

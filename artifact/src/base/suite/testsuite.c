@@ -96,9 +96,10 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             }
 
             i64 chapters = MemChapterCount();
-            Out(m, "_tMem: _t (_i8 chapters/_t total+stack)^0\n", 
+            i64 availableCh = MemAvailableChapterCount();
+            Out(m, "_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\n", 
                 color, Str_MemCount(m, overRollingUsed), 
-                chapters, Str_MemCount(m, chapters*PAGE_SIZE));
+                chapters, availableCh, Str_MemCount(m, chapters*PAGE_SIZE));
 
             MemCh_Free(m);
             m->type.range--;

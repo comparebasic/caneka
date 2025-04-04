@@ -1,16 +1,22 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean Str_EqualsStr(Str *a, Str *b){
+static boolean Str_equalsStrPos(Str *a, i32 offsetA, Str *b, i32 offsetB){
     if(a == NULL || b == NULL){
        return FALSE; 
     }
-    if(a->length != b->length){
+
+    i32 aLength = a->length - offsetA;
+    i32 bLength = b->length - offsetB;
+    if(aLength < 0 || bLength < 0){
         return FALSE;
     }
-    i32 length = a->length;
-    util *ptrA = (util *)a->bytes;
-    util *ptrB = (util *)b->bytes;
+    if(aLength != bLength){
+        return FALSE;
+    }
+    i32 length = aLength;
+    util *ptrA = (util *)(a->bytes+offsetA);
+    util *ptrB = (util *)(b->bytes+offsetB);
     while(length >= sizeof(util)){
         length -= sizeof(util);
         if(*ptrA != *ptrB){
@@ -29,6 +35,17 @@ boolean Str_EqualsStr(Str *a, Str *b){
        }
     }
     return TRUE;
+}
+
+boolean Str_EqualsStr(Str *a, Str *b){
+    return Str_equalsStrPos(a, 0, b, 0);
+}
+
+boolean Str_EndMatch(Str *a, Str *b){
+    if(b->length > a->length){
+        return FALSE;
+    }
+    return Str_equalsStrPos(a, a->length - b->length, b, 0);
 }
 
 boolean Str_EqualsStrVec(Str *a, StrVec *b){

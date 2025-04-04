@@ -21,4 +21,5 @@ i64 MemCh_Total(MemCh *m, i16 level);
 #define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range));
 #define MemCh_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
 i64 MemChapterCount();
+i64 MemAvailableChapterCount();
 status MemCh_ReserveSpanExpand(MemCh *m, MemPage *sl, word nextIdx);

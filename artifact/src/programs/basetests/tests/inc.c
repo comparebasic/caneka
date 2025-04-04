@@ -56,13 +56,13 @@ static TestSet _Tests[] = {
         "Tests for the basic string object and convienience features",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "String - End Matches",
-        String_EndMatchTests,
+        Str_EndMatchTests,
         "Tests for Matching the end of the string",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "String - B64",
         StringB64_Tests,

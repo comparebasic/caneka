@@ -81,6 +81,32 @@ Str *Str_MemCount(MemCh *m, i64 mem) {
     return s;
 }
 
+i64 Str_Trunc(Str *s, i64 amount){
+    if(s->type.state & STRING_CONST){
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Str_Trunc cannot modify a const char * '_t'", s);
+    }
+    if(amount == 0){
+        return 0;
+    }else if(amount < 0){
+        amount = abs(amount);
+        if(s->length < amount){
+            return 0;
+        }
+        byte *ptr = s->bytes+(s->length-amount);
+        memset(ptr, 0, amount);
+        s->length -= amount;
+    }else if(amount > 0){
+        if(amount > s->length){
+            return 0;
+        }
+        byte *ptr = s->bytes;
+        memset(ptr, 0, amount);
+        s->bytes += amount;
+        s->length -= amount;
+    }
+    return amount;
+}
+
 i64 Str_AddMemCount(Str *s, i64 mem) {
     if(mem == 0){
        return Str_AddCstr(s, "0b"); 

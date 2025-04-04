@@ -1,6 +1,11 @@
 enum stream_flags {
-    STREAM_128_BYTES = 1 << 8,
-    STREAM_512_BYTES = 1 << 9,
+    STREAM_STRVEC = 1 << 8,
+    STREAM_CHAIN = 1 << 9,
+    STREAM_FROM_FD = 1 << 10,
+    STREAM_TO_FD = 1 << 11,
+    STREAM_MESS = 1 << 12,
+    STREAM_SOCKET = 1 << 13,
+    STREAM_BUFFER = 1 << 14,
 };
 
 typedef i64 (*StreamFunc)(struct stream *sm, byte *b, i32 length);
@@ -9,11 +14,18 @@ typedef struct stream {
     Type type;
     i32 fd;
     MemCh *m;
-    StrVec *v;
-    Abstract *source;
     StreamFunc func;
-    Iter it;
+    union {
+        Cursor *curs;
+        struct mess *mset;
+        Iter *it;
+    } dest;
+    Abstract *source;
 } Stream;
 
-Stream *Stream_Make(MemCh *m, i32 fd, word flags, StreamFunc func);
+Stream *Stream_Make(MemCh *m);
 i64 Stream_To(Stream *sm, byte *b, i32 length);
+Stream *Stream_MakeStrVec(MemCh *m);
+Stream *Stream_MakeChain(MemCh *m, Span *chain);
+Stream *Stream_MakeFromFd(MemCh *m, i32 fd, word flags);
+Stream *Stream_MakeToFd(MemCh *m, i32 fd, StrVec *v, word flags);

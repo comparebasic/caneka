@@ -6,9 +6,9 @@
 #include "sequence/hashed.h"
 #include "sequence/table.h"
 #include "sequence/span_utils.h"
+#include "sequence/mess.h"
 /*
 #include "sequence/sequence_debug.h"
-#include "sequence/mess.h"
 #include "sequence/table_chain.h"
 #include "sequence/queue.h"
 #include "sequence/nestedd.h"

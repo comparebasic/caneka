@@ -137,8 +137,13 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
         }
         
         c = *ptr;
-        if(c == '^'){
+        if(state == NOOP){
+            state = READY;
+        }else if(c == '^'){
            state = MORE; 
+           goto outnext;
+        }else if(c == '\\'){
+           state = NOOP; 
            goto outnext;
         }else if(c == '_'){
            state = PROCESSING; 
