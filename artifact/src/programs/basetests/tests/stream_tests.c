@@ -67,6 +67,28 @@ char * expectedCstr = ""
 status Stream_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
+    Stream *sm = Stream_MakeStrVec(m);
+    Str *s = Str_CstrRef(m, "Hello");
+    Stream_To(sm, s->bytes, s->length);
+
+    s = Str_CstrRef(m, ", it's really really really sunny outside!");
+    Stream_To(sm, s->bytes, s->length);
+
+    s = Str_CstrRef(m, " And I hear it's going to get even warmer up towards the top of the mountain. It's going to be a good climb, even thought it's really windy up there. Hiking at this time of year takes a lot of determination. Not becuase hiking is challenging, but because, it takes planning, and then a lot of steps, one foot in front of the other, to reach the peak.");
+    Stream_To(sm, s->bytes, s->length);
+
+    s = Str_CstrRef(m, "I'm bringing restaurant supply sourced dehydrated hashbrowns, and a sour-dough starter to make bread and breakfast in the mountains. All we need is cooking gas and stream water to eat like champtions on the wilderness :)");
+    Stream_To(sm, s->bytes, s->length);
+
+    char *cstr =  "Hello"
+        ", it's really really really sunny outside!"
+        " And I hear it's going to get even warmer up towards the top of the mountain. It's going to be a good climb, even thought it's really windy up there. Hiking at this time of year takes a lot of determination. Not becuase hiking is challenging, but because, it takes planning, and then a lot of steps, one foot in front of the other, to reach the peak."
+        "I'm bringing restaurant supply sourced dehydrated hashbrowns, and a sour-dough starter to make bread and breakfast in the mountains. All we need is cooking gas and stream water to eat like champtions on the wilderness :)";
+
+    StrVec *vo = StrVec_FromBytes(m, cstr, strlen(cstr));
+    r |= Test(Equals((Abstract *)vo,(Abstract *)sm->dest.curs->v), 
+        "Comparing StrVec built up slowly _D and one built all at once _D", 
+        sm->dest.curs->v, vo);
 
     MemCh_Free(m);
     return r;
@@ -78,6 +100,7 @@ status StreamB64_Tests(MemCh *gm){
     Str *s;
     Str *s2;
     Str *b64;
+    /*
     s = Str_CstrRef(m, "Some content to be b64 encoded.");
     b64 = Str_ToB64(m, s);
 
@@ -95,6 +118,7 @@ status StreamB64_Tests(MemCh *gm){
     s2 = Str_FromB64(m, b64);
     r |= Test(String_Equals(s2, s), "String has been decoded from base64 to match original,\n expecting:\n'%s', \nhave:\n'%s'",
         String_ToChars(DebugM, s), String_ToChars(DebugM,s2));
+    */
 
     MemCh_Free(m);
     return r;

@@ -88,7 +88,7 @@ i64 Str_Trunc(Str *s, i64 amount){
     if(amount == 0){
         return 0;
     }else if(amount < 0){
-        amount = abs(amount);
+        amount = labs(amount);
         if(s->length < amount){
             return 0;
         }

@@ -9,8 +9,9 @@ void *Fatal(i32 fd, char *func, char *file, int line, char *fmt, ...){
 #ifdef CLI    
     RawMode(FALSE);
 #endif
-    StrVec_FmtAdd(_debugM, NULL, 0, "^r.Fatal Error: _c:_c:_i4 ", func, file, line);
+    StrVec_FmtAdd(_debugM, NULL, 0, "^r.Fatal Error: _c:_c:_i4 ^D", func, file, line);
     StrVec_FmtHandle(_debugM, NULL, fmt, args, 0);
+    StrVec_FmtAdd(_debugM, NULL, 0, "^d");
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();

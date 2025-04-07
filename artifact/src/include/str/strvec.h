@@ -1,6 +1,6 @@
 typedef struct strvec {
     Type type;
-    i32 count;
+    i32 _;
     i64 total;
     Span *p;
 } StrVec;

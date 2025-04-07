@@ -16,11 +16,19 @@ i64 Stream_Read(Stream *sm, i32 length){
     return 0;
 }
 
+status Stream_SetupMakeStrVec(MemCh *m, Stream *sm, StrVec *v){
+    sm->type.of = TYPE_STREAM;
+    sm->m = m;
+    sm->type.state |= STREAM_STRVEC;
+    sm->dest.curs = Cursor_Make(m, v);
+    sm->func = Stream_ToStrVec;
+    return SUCCESS;
+}
+
 Stream *Stream_MakeStrVec(MemCh *m){
     Stream *sm = Stream_Make(m);
-    sm->type.state |= STREAM_STRVEC;
     StrVec *v = StrVec_Make(m);
-    Cursor_Setup(sm->dest.curs, v);
+    Stream_SetupMakeStrVec(m, sm, v);
     return sm;
 }
 
@@ -44,7 +52,10 @@ Stream *Stream_MakeToFd(MemCh *m, i32 fd, StrVec *v, word flags){
     Stream *sm = Stream_Make(m);
     sm->type.state |= (STREAM_TO_FD|flags);
     sm->fd = fd;
-    Cursor_Setup(sm->dest.curs, v);
+    sm->func = Stream_ToFd;
+    if(v != NULL){
+        sm->dest.curs = Cursor_Make(m, v);
+    }
     return sm;
 }
 

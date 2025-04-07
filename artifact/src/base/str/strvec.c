@@ -93,7 +93,6 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
 status StrVec_Add(StrVec *v, Str *s){
     status r = Span_Add(v->p, (Abstract *)s);
     v->total += s->length;
-    v->count++;
     return r;
 }
 

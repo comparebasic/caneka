@@ -3,7 +3,7 @@
 
 #include "inline/handle_io.c"
 
-i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
+i64 StrVec_FmtHandle(Stream *sm, StrVec *v, char *fmt, va_list args){
     size_t l = strlen(fmt);
     char *end = fmt+l;
     char *ptr = fmt;
@@ -19,7 +19,7 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
         }else if(state == PROCESSING){
             if(c == 't'){
                 s = Str_FromAbs(m, va_arg(args, Abstract *));
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
@@ -32,13 +32,13 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
             }else if(c == 'o'){
                 Abstract *a = (Abstract *)va_arg(args, Abstract *);
                 s = Str_CstrRef(m, (char *)Type_ToChars(a->type.of));
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'O'){
                 i32 i = (i32)va_arg(args, i32);
                 s = Str_CstrRef(m, (char *)Type_ToChars((cls)i));
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){
@@ -54,7 +54,7 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
             }else if(c == 'c'){
                 char *cstr = (char *)va_arg(args, char *);
                 s = Str_CstrRef(m, cstr);
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'i'){
@@ -76,18 +76,18 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
                     ptr--;
                 }
                 s = Str_FromI64(m, (i64)i);
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'a'){
                 i32 l = 2;
                 s = Str_Ref(m, (byte *)"*", l, l);
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 util u = (i64)va_arg(args, util);
                 s = Str_FromI64(m, u);
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
@@ -115,7 +115,7 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
                     ptr--;
                 }
                 s = Str_FromI64(m, i);
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
@@ -123,14 +123,14 @@ i64 StrVec_FmtHandle(MemCh *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 char *cstr = (char *)va_arg(args, char *);
                 char *cstr_end = cstr+(strlen(cstr)-1);
                 Str *s = Str_FromAnsi(m, &cstr, cstr_end);
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
             }
         }else if(state == MORE){
             Str *s = Str_FromAnsi(m, &ptr, end);
-            handleIo(v, fd, s);
+            Stream_To(sm, s->bytes, s->length);
             total += s->length;
             state = SUCCESS; 
             goto next;
@@ -157,7 +157,7 @@ outnext:
             word length = (word)(ptr - start);
             if(length > 0){
                 s = Str_Ref(m, (byte *)start, length, length);
-                handleIo(v, fd, s);
+                Stream_To(sm, s->bytes, s->length);
                 total += s->length;
             }
        }
@@ -169,7 +169,7 @@ outnext:
         word length = (word)(ptr - start);
         if(length > 0){
             s = Str_Ref(m, (byte *)start, length, length);
-            handleIo(v, fd, s);
+            Stream_To(sm, s->bytes, s->length);
             total += s->length;
         }
     }
@@ -182,6 +182,13 @@ i64 StrVec_FmtAdd(MemCh *m, StrVec *v, i32 fd, char *fmt, ...){
     va_start(args, fmt);
     return StrVec_FmtHandle(m, v, fmt, args, fd);
 }
+
+i64 StrVec_FmtStream(Stream *sm, char *fmt, ...){
+	va_list args;
+    va_start(args, fmt);
+    return StrVec_FmtHandle(sm, fmt, args);
+}
+
 
 StrVec *StrVec_Fmt(MemCh *m, char *fmt, ...){
     StrVec *v = StrVec_Make(m);

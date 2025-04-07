@@ -11,3 +11,4 @@ typedef struct strvec_cursor {
 extern Cursor _strVecCurs;
 status Cursor_Setup(Cursor *curs, StrVec *v);
 status Cursor_SetPos(Cursor *curs, i32 pos);
+Cursor *Cursor_Make(MemCh *m, StrVec *v);

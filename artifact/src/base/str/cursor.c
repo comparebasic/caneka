@@ -12,3 +12,10 @@ status Cursor_Setup(Cursor *curs, StrVec *v){
     Iter_Init(&curs->it, v->p);
     return SUCCESS;
 }
+
+Cursor *Cursor_Make(MemCh *m, StrVec *v){
+    Cursor *curs = (Cursor *)MemCh_Alloc(m, sizeof(Cursor));
+    curs->type.of = TYPE_CURSOR;
+    Cursor_Setup(curs, v);
+    return curs;
+}

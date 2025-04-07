@@ -9,6 +9,7 @@
 #include "span_tests.c"
 #include "strvec_tests.c"
 #include "str_tests.c"
+#include "stream_tests.c"
 /*
 #include "hash_tests.c"
 */
@@ -60,6 +61,12 @@ static TestSet _Tests[] = {
         "String - End Matches",
         Str_EndMatchTests,
         "Tests for Matching the end of the string",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Stream Tests",
+        Stream_Tests,
+        "Testing setting up and running multiple stream types and stream chains",
         FEATURE_COMPLETE,
     },
     /*

@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 Lookup *DebugPrintChain = NULL;
+Stream *DebugOut;
 
 MemCh *_debugM = NULL;
 
@@ -16,13 +17,15 @@ status Debug_Init(MemCh *m){
         Mem_DebugInit(m, DebugPrintChain);
         Str_DebugInit(m, DebugPrintChain);
         /*
-        StringDebug_Init(m, funcs);
         SequenceDebug_Init(m, funcs);
         UtilDebug_Init(m, funcs);
         ParserDebug_Init(m, funcs);
         */
         /* todo add other debug inits here */
         return SUCCESS;
+    }
+    if(DebugOut == NULL){
+        DebugOut = Stream_MakeToFd(_debugM, 0, NULL, 0);
     }
     m->type.range++;
     return NOOP;

@@ -2,10 +2,16 @@
 #include <caneka.h>
 
 Str *NL = NULL;
+Lookup *ToStreamLookup;
 
 status StrUtils_Init(MemCh *m){
     if(NL == NULL){
         NL = Str_Ref(m, (byte *)"\n", 1, 2);
+    }
+    if(ToStreamLookup == NULL){
+        ToStreamLookup = Lookup_Make(m, _TYPE_START, NULL, NULL);
+        Mem_DebugInit(m, ToStreamLookup);
+        Str_DebugInit(m, ToStreamLookup);
     }
     return SUCCESS;
 }

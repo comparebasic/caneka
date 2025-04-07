@@ -24,9 +24,9 @@ i64 StrVec_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ext
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     i64 total = 0;
     if(extended){
-        total += StrVec_FmtAdd(m, v, fd, "StrVec<_i4/_i8:\"", vObj->count, vObj->total); 
+        total += StrVec_FmtAdd(m, v, fd, "StrVec<_i4/_i8:\"", vObj->p->nvalues, vObj->total); 
     }else{
-        total += StrVec_FmtAdd(m, v, fd, "^B\""); 
+        total += StrVec_FmtAdd(m, v, fd, "^D\""); 
     }
 
     Iter it;
@@ -40,7 +40,22 @@ i64 StrVec_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ext
             }
         }
     }
-    total += StrVec_FmtAdd(m, v, fd, "\"^b");
+    if(extended){
+        total += StrVec_FmtAdd(m, v, fd, "\"^d>");
+    }else{
+        total += StrVec_FmtAdd(m, v, fd, "\"^d");
+    }
+    return total;
+}
+
+i64 Stream_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+    Stream *sm = (Stream *)as(a, TYPE_STREAM);
+    i64 total = 0;
+    total += StrVec_FmtAdd(m, v, fd, "Stream<"); 
+    if(sm->type.state & STREAM_STRVEC){
+        total += StrVec_Print(m, v, fd, (Abstract *)sm->dest.curs->v, type, extended);
+    }
+    total += StrVec_FmtAdd(m, v, fd, ">"); 
     return total;
 }
 
@@ -48,5 +63,6 @@ status Str_DebugInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
+    r |= Lookup_Add(m, lk, TYPE_STREAM, (void *)Stream_Print);
     return r;
 }

@@ -20,11 +20,10 @@ i64 Str_Add(Str *s, byte *b, i64 length){
     if(len > 0){
         memcpy(s->bytes+s->length, b, len);
         s->length += len;
+        return len;
+    }else{
+        return 0;
     }
-    if(length != len){
-        s->type.state |= ERROR;
-    }
-    return len;
 }
 
 i64 Str_AddCstr(Str *s, char *cstr){
