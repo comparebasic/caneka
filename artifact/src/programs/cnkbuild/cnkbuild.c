@@ -2,9 +2,8 @@
 #include <caneka.h>
 #include <cnkbuild.h>
 
-#include "../../inc/core.c"
 
-static status renderStatus(MemCtx *m, Abstract *a){
+static status renderStatus(MemCh *m, Abstract *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
 
@@ -36,18 +35,19 @@ static status renderStatus(MemCtx *m, Abstract *a){
 
 static status setupStatus(BuildCtx *ctx){
     Span *lines = ctx->cli->lines;
-    MemCtx *m = ctx->m;
+    MemCh *m = ctx->m;
     memset(&ctx->fields, 0, sizeof(ctx->fields));
 
     CliStatus_SetDims(ctx->cli, 0, 0);
     i32 width = ctx->cli->cols;
     IntPair coords = {0, 0};
 
-    StrVec *v = StrVec_Make(m);
+    Stream *sm = Stream_MakeStrVec(m);
+    StrVec *v = sm->dest.curs->v;
     ctx->fields.steps.modCount_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.modTotal_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.name = Str_Make(m, STR_DEFAULT);
-    StrVec_FmtAdd(m, v, -1, "^ymodule _+ of _+: ^yD._+^0", ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name);
+    StrVec_Fmt(sm, "^ymodule _+ of _+: ^yD._+^0", ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -56,11 +56,12 @@ static status setupStatus(BuildCtx *ctx){
     coords.b = StrVec_GetIdx(v, ctx->fields.steps.modTotal_s);
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "modTotal"), &coords);
 
-    v = StrVec_Make(m);
+    sm = Stream_MakeStrVec(m);
+    v = sm->dest.curs->v;
     ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.dest = Str_Make(m, STR_DEFAULT);
-    StrVec_FmtAdd(m, v, -1, "^b_+: _+ -> ^bD._+^0", ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest);
+    StrVec_Fmt(sm, "^b_+: _+ -> ^bD._+^0", ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -71,10 +72,11 @@ static status setupStatus(BuildCtx *ctx){
     coords.b = StrVec_GetIdx(v, ctx->fields.current.dest);
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "dest"), &coords);
 
-    v = StrVec_Make(m);
+    sm = Stream_MakeStrVec(m);
+    v = sm->dest.curs->v;
     ctx->fields.steps.count_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.total_s = Str_Make(m, MAX_BASE10+1);
-    StrVec_FmtAdd(m, v, -1, "sources: _+ of _+^0", ctx->fields.steps.count_s, ctx->fields.steps.total_s);
+    StrVec_Fmt(sm, "sources: _+ of _+^0", ctx->fields.steps.count_s, ctx->fields.steps.total_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -86,13 +88,15 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.barStart = Str_Make(m, width);
     memset(ctx->fields.steps.barStart->bytes, ' ', width);
     ctx->fields.steps.barEnd = Str_Clone(m, ctx->fields.steps.barStart, width);
-    v = StrVec_Make(m);
-    StrVec_FmtAdd(m, v, -1, "^B_+^Y_+^0", ctx->fields.steps.barStart,ctx->fields.steps.barEnd);
+    sm = Stream_MakeStrVec(m);
+    v = sm->dest.curs->v;
+    StrVec_Fmt(sm, "^B_+^Y_+^0", ctx->fields.steps.barStart,ctx->fields.steps.barEnd);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
-    v = StrVec_Make(m);
+    sm = Stream_MakeStrVec(m);
+    v = sm->dest.curs->v;
     ctx->fields.mem_s = Str_Make(m, STR_DEFAULT);
-    StrVec_FmtAdd(m, v, -1, "^cMemory Count: _+^0", ctx->fields.mem_s);
+    StrVec_Fmt(sm, "^cMemory Count: _+^0", ctx->fields.mem_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -115,7 +119,7 @@ static status setupStatus(BuildCtx *ctx){
 static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
-    MemCtx *m = ctx->m;
+    MemCh *m = ctx->m;
     Span *cmd = Span_Make(m);
     Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.cc));
     char **ptr = ctx->args.cflags;
@@ -149,14 +153,14 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
     }
 
     if(force || File_CmpUpdated(m, source, dest, NULL)){
-        Out(m, "^cbuild exec: _t^0\n", dest);
+        Out("^cbuild exec: _t^0\n", dest);
 
         DebugStack_SetRef(cmd, cmd->type.of);
         ProcDets pd;
         ProcDets_Init(&pd);
         r |= SubProcess(m, cmd, &pd);
         if(r & ERROR){
-            Fatal("Build error for source file", 0);
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Build error for source file");
         }
 
         DebugStack_Pop();
@@ -171,7 +175,7 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     DebugStack_Push(source, source->type.of);
     status r = READY;
     /*
-    MemCtx *m = ctx->m;
+    MemCh *m = ctx->m;
     Span *cmd = Span_Make(m);
     ProcDets pd;
     StrVecEntry_Set(ctx->fields.current.dest, dest->bytes, dest->length);
@@ -232,7 +236,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     DebugStack_Push(NULL, 0);
     status r = READY;
     /*
-    MemCtx *m = ctx->m;
+    MemCh *m = ctx->m;
     Str *dirPath = Str_Make(m, STR_DEFAULT);
     String_Add(m, dirPath, libDir);
     char *cstr = "/";
@@ -275,7 +279,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
 
         r |= buildSourceToLib(ctx, libDir, lib, dest, source);
 
-        MemCtx_Free(m);
+        MemCh_Free(m);
         sourceCstr++;
     }
     m->type.range--;
@@ -289,7 +293,7 @@ static status build(BuildCtx *ctx){
     status r = READY;
     /*
     DebugStack_Push(NULL, 0);
-    MemCtx *m = ctx->m;
+    MemCh *m = ctx->m;
     setupStatus(ctx);
     Str *libDir = File_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
     char *cstr = "/";
@@ -336,18 +340,18 @@ static status build(BuildCtx *ctx){
     return r;
 }
 
-status Init(MemCtx *m){
+status Init(MemCh *m){
     status r = READY;
     r |= Debug_Init(m);
     r |= DebugStack_Init(m);
     return r;
 }
 
-status BuildCtx_Init(MemCtx *m, BuildCtx *ctx){
+status BuildCtx_Init(MemCh *m, BuildCtx *ctx){
     Init(m);
     memset(ctx, 0, sizeof(BuildCtx));
     ctx->type.of = TYPE_BUILDCTX;
-    ctx->m = MemCtx_Make();
+    ctx->m = MemCh_Make();
     ctx->cli = CliStatus_Make(m, renderStatus, (Abstract *)ctx);
     return SUCCESS;
 }

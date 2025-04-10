@@ -35,7 +35,7 @@ typedef struct build_cli_fields {
 
 typedef struct buildctx {
     Type type;
-    MemCtx *m;
+    MemCh *m;
     Executable *targets;
     CliStatus *cli;
     BuildCliFields fields;
@@ -54,5 +54,5 @@ typedef struct buildctx {
     BuildSubdir **objdirs;
 } BuildCtx;
 
-status BuildCtx_Init(MemCtx *m, BuildCtx *ctx);
+status BuildCtx_Init(MemCh *m, BuildCtx *ctx);
 status Build(BuildCtx *ctx);

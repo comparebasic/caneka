@@ -57,6 +57,17 @@ static char *runTestsCoreCmd[] = {
     NULL
 };
 
+static const char *mkDirCnkBuildCmd[] = {
+    "mkdir", "-p", "./build/libcnkbuild/",
+    NULL
+};
+
+static char *buildBuilderCmd[] = {
+    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", "./build/libcnkbuild/libcnkbuild.a", 
+    "./artifact/src/programs/cnkbuild/cnkbuild.c",
+    NULL
+};
+
 static void showMsg(char *name, char **sources){
     printf("%s", name);
     char **p = sources;
@@ -179,5 +190,7 @@ int main(int argc, char *argv[]){
     run("Building core", (char **)coreCmd);
     run("Building core tests", (char **)testsCoreCmd);
     run("Run tests", (char **)runTestsCoreCmd);
+    run("Make CnkBuild dir", (char **)mkDirCnkBuildCmd);
+    run("Build CnkBuild", (char **)buildBuilderCmd);
     exit(0);
 }
