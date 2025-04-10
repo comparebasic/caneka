@@ -1,3 +1,17 @@
+typedef struct guard {
+    Type type;
+    int count;
+    int max;
+    char *file;
+    int line;
+} Guard;
+
+#ifdef LINUX
+#define Guard_Incr(g) _Guard_Incr((g), __func__, __FILE__, __LINE__)
+#else
+#define Guard_Incr(g) _Guard_Incr((g), "unknown", __FILE__, __LINE__)
+#endif
+
 status Guard_Init(Guard *g, int max);
 status Guard_Setup(MemCh *m, Guard *g, int max, byte *msg);
 status Guard_Reset(Guard *g);

@@ -1,3 +1,4 @@
+#include "mem/iter.h"
 #include "mem/mem_book.h"
 #include "mem/mem_chapter.h"
 #include "mem/mem_chapter.doc.fmt"
@@ -5,4 +6,3 @@
 #include "mem/mem_page.h"
 #include "mem/span.h"
 #include "mem/ext_free.h"
-#include "mem/iter.h"

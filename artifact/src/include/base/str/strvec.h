@@ -1,3 +1,10 @@
+typedef struct strvec {
+    Type type;
+    i32 _;
+    i64 total;
+    Span *p;
+} StrVec;
+
 i64 StrVec_ToFd(StrVec *v, int fd);
 StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig);
 status StrVec_NextSlot(StrVec *v, Cursor *curs);

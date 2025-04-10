@@ -1,3 +1,17 @@
+typedef struct lookup {
+    Type type;
+    word offset;
+    Span *values;
+    Abstract *arg;
+    int latest_idx;
+} Lookup;
+
+typedef struct lookup_config {
+    i32 key;
+    Abstract *a;
+} LookupConfig;
+
+typedef status (*LookupPopulate)(MemCh *m, Lookup *lk);
 void *Lookup_Get(Lookup *lk, word type);
 int Lookup_GetKey(Lookup *lk, int idx);
 word Lookup_AbsFromIdx(Lookup *lk, word idx);

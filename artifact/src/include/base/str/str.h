@@ -1,3 +1,16 @@
+enum str_flags {
+    STRING_CONST = 1 << 8,
+};
+
+typedef struct str {
+    Type type;
+    word length;
+    word alloc;
+    byte *bytes;
+} Str;
+
+extern Str *NL;
+
 boolean TextCharFilter(byte *b, i64 length);
 status Str_Reset(Str *s);
 status Str_Wipe(Str *s);

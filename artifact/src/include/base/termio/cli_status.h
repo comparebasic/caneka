@@ -1,3 +1,13 @@
+typedef struct cli_status {
+    Type type;
+    DoFunc render;
+    Abstract *source;
+    Span *lines;
+    Span *tbl;
+    i32 cols;
+    i32 rows;
+} CliStatus;
+
 status CliStatus_SetKey(MemCh *m, CliStatus *cli, Str *key, IntPair *pair);
 status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Str *s);
 status CliStatus_Print(MemCh *m, CliStatus *cli);

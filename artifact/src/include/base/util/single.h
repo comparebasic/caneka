@@ -1,3 +1,13 @@
+typedef struct single  {
+    Type type;
+    union {
+        util value;
+        Abstract *a;
+        void *ptr;
+        DoFunc dof;
+    } val;
+} Single;
+
 Single *Single_Clone(MemCh *m, Abstract *og);
 Single *Single_Ptr(MemCh *m, void *ptr);
 Single *Bool_Wrapped(MemCh *m, int n);

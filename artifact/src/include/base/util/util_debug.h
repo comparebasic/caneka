@@ -1,1 +1,1 @@
-status UtilDebug_Init(MemCh *m, Lookup *lk);
+status UtilDebug_Init(MemCh *m, struct lookup *lk);

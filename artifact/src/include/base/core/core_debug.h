@@ -1,1 +1,1 @@
-status CoreDebug_Init(MemCh *m, Lookup *lk);
+status CoreDebug_Init(MemCh *m, struct lookup *lk);
