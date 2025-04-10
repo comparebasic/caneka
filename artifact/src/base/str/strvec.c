@@ -99,7 +99,6 @@ status StrVec_Add(StrVec *v, Str *s){
 status StrVec_AddVec(StrVec *v, StrVec *v2){
     Iter it;
     Iter_Init(&it, v2->p);
-    i64 total = 0;
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)it.value;
         if(s != NULL){

@@ -1,6 +1,6 @@
 #define isDebug(x) (((x)->type.state & DEBUG) != 0)
 
-typedef i64 (*DebugPrintFunc)(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended);
+typedef i64 (*DebugPrintFunc)(Stream *sm, Abstract *a, cls type, boolean extended);
 
 extern struct lookup *DebugPrintChain;
 extern char *TypeStrings[];
@@ -17,4 +17,4 @@ extern char *rbl_debug_cstr[];
 
 const char *Type_ToChars(cls type);
 Str *State_ToStr(MemCh *m, status state);
-i64 Str_Debug(MemCh *m, StrVec *v, i32 fd, void *t, cls type, boolean extended);
+i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended);

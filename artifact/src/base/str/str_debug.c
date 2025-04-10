@@ -1,32 +1,30 @@
 #include <external.h>
 #include <caneka.h>
 
-#include "inline/handle_io.c"
-
-i64 Str_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Str_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Str *s = (Str*)as(a, TYPE_STR); 
     i64 total = 0;
     if(extended){
-        total += StrVec_FmtAdd(m, v, fd, "Str<_i4/_i4:^D\"", s->length, s->alloc); 
+        total += StrVec_Fmt(sm, "Str<_i4/_i4:^D\"", s->length, s->alloc); 
     }else{
-        total += StrVec_FmtAdd(m, v, fd, "^D\""); 
+        total += StrVec_Fmt(sm, "^D\""); 
     }
-    total += handleIo(v, fd, s);
+    total += Stream_To(sm, s->bytes, s->length);
     if(extended){
-        total += StrVec_FmtAdd(m, v, fd, "\"^d.>");
+        total += StrVec_Fmt(sm, "\"^d.>");
     }else{
-        total += StrVec_FmtAdd(m, v, fd, "\"^d.");
+        total += StrVec_Fmt(sm, "\"^d.");
     }
     return total;
 }
 
-i64 StrVec_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     i64 total = 0;
     if(extended){
-        total += StrVec_FmtAdd(m, v, fd, "StrVec<_i4/_i8:\"", vObj->p->nvalues, vObj->total); 
+        total += StrVec_Fmt(sm, "StrVec<_i4/_i8:\"", vObj->p->nvalues, vObj->total); 
     }else{
-        total += StrVec_FmtAdd(m, v, fd, "^D\""); 
+        total += StrVec_Fmt(sm, "^D\""); 
     }
 
     Iter it;
@@ -34,28 +32,28 @@ i64 StrVec_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ext
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)it.value;
         if(s != NULL){
-            Str_Print(m, v, fd, (Abstract *)s, type, extended);
+            Str_Print(sm, (Abstract *)s, type, extended);
             if((it.type.state & FLAG_ITER_LAST) == 0){
-                total += handleIo(v, fd, Str_Ref(m, (byte *)", ", 2, 2));
+                total += Stream_To(sm, (byte *)", ", 2);
             }
         }
     }
     if(extended){
-        total += StrVec_FmtAdd(m, v, fd, "\"^d>");
+        total += StrVec_Fmt(sm, "\"^d>");
     }else{
-        total += StrVec_FmtAdd(m, v, fd, "\"^d");
+        total += StrVec_Fmt(sm, "\"^d");
     }
     return total;
 }
 
-i64 Stream_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
-    Stream *sm = (Stream *)as(a, TYPE_STREAM);
+i64 Stream_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    Stream *smObj = (Stream *)as(a, TYPE_STREAM);
     i64 total = 0;
-    total += StrVec_FmtAdd(m, v, fd, "Stream<"); 
+    total += StrVec_Fmt(sm, "Stream<"); 
     if(sm->type.state & STREAM_STRVEC){
-        total += StrVec_Print(m, v, fd, (Abstract *)sm->dest.curs->v, type, extended);
+        total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, type, extended);
     }
-    total += StrVec_FmtAdd(m, v, fd, ">"); 
+    total += StrVec_Fmt(sm, ">"); 
     return total;
 }
 

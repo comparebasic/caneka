@@ -5,6 +5,17 @@ i64 Stream_To(Stream *sm, byte *b, i32 length){
     return sm->func(sm, b, length);
 }
 
+i64 Stream_VecTo(Stream *sm, StrVec *v){
+    Iter it;
+    Iter_Init(&it, v->p);
+    i64 total = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)it.value;
+        total += Stream_To(sm, s->bytes, s->length);
+    }
+    return total;
+}
+
 i64 Stream_Read(Stream *sm, i32 length){
     if(sm->type.of & STREAM_FROM_FD){
         if(sm->type.of & STREAM_SOCKET){

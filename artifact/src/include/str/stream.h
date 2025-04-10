@@ -25,6 +25,7 @@ typedef struct stream {
 
 Stream *Stream_Make(MemCh *m);
 i64 Stream_To(Stream *sm, byte *b, i32 length);
+i64 Stream_VecTo(Stream *sm, StrVec *v);
 status Stream_SetupMakeStrVec(MemCh *m, Stream *sm, StrVec *v);
 Stream *Stream_MakeStrVec(MemCh *m);
 Stream *Stream_MakeChain(MemCh *m, Span *chain);

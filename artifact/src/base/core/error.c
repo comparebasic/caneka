@@ -9,16 +9,16 @@ void *Fatal(i32 fd, char *func, char *file, int line, char *fmt, ...){
 #ifdef CLI    
     RawMode(FALSE);
 #endif
-    StrVec_FmtAdd(_debugM, NULL, 0, "^r.Fatal Error: _c:_c:_i4 ^D", func, file, line);
-    StrVec_FmtHandle(_debugM, NULL, fmt, args, 0);
-    StrVec_FmtAdd(_debugM, NULL, 0, "^d");
+    StrVec_Fmt(DebugOut, "^r.Fatal Error: _c:_c:_i4 ^D", func, file, line);
+    StrVec_FmtHandle(DebugOut, fmt, args);
+    StrVec_Fmt(DebugOut, "^d");
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();
     if(e != 0){
         char *openssl_err = ERR_error_string(e, _buff);
-        StrVec_FmtAdd(_debugM, NULL, 0"^rD^_T^0");
-        StrVec_FmtAdd(_debugM, NULL, 0"  ^rD^_T^0", openssl_err, TYPE_CSTR);
+        StrVec_Fmt(DebugOut, "^rD^_T^0");
+        StrVec_Fmt(DebugOut, "  ^rD^_T^0", openssl_err, TYPE_CSTR);
     }
 #endif
     Str_ToFd(NL, 0);

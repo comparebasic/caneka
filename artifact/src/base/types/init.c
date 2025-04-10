@@ -13,6 +13,7 @@ status Caneka_Init(MemCh *m){
     status r = READY;
     r |= archChecks();
     MemCh *md = MemCh_Make();
+    r |= Core_Init(md);
     r |= Debug_Init(md);
     r |= StrUtils_Init(md);
     r |= DebugStack_Init(m);

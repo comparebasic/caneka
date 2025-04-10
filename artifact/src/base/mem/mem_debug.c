@@ -1,17 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-#include "inline/handle_io.c"
-
-static inline i64 wsOut(MemCh *m, StrVec *v, i32 fd, i8 dim){
+static inline i64 wsOut(Stream *sm, i8 dim){
     while(dim-- > 0){
-        return StrVec_Add(v, Str_Ref(m, (byte *)"    ", 4, 4)); 
+        return Stream_To(sm, (byte *)"    ", 4); 
     }
     return 0;
 }
 
 
-i64 MemPage_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 MemPage_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     MemPage *sl = (MemPage*)as(a, TYPE_MEMSLAB); 
     /*
     i32 bcolor = 0;
@@ -32,7 +30,7 @@ i64 MemPage_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ex
     return 0;
 }
 
-i64 MemCh_Print(MemCh *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 MemCh_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
     /*
     printf("\x1b[%dm%sMemCh(%p)<%d ", color, msg, m, m->p.nvalues);
@@ -60,7 +58,7 @@ i64 MemCh_Print(MemCh *_m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ext
     return 0;
 }
 
-i64 MemBook_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 MemBook_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     MemBook *cp = (MemBook*)as(a, TYPE_BOOK); 
 /*
     printf("\x1b[%dm%sMemBook<start:%p/pages:%d)[available:%d selected:%d]",

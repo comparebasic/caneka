@@ -1,10 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 ProcDets_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     ProcDets *pd = (ProcDets *)as(a, TYPE_PROCDETS);
-    return StrVec_FmtAdd(m, v, fd, "ProcDets<_t _i8 return:_i4>", 
-        State_ToStr(m, pd->type.state), pd->pid, pd->code);
+    return StrVec_Fmt(sm, "ProcDets<_t _i8 return:_i4>", 
+        State_ToStr(sm->m, pd->type.state), pd->pid, pd->code);
 }
 
 status PersistDebug_Init(MemCh *m, Lookup *lk){

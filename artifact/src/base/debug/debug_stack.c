@@ -70,14 +70,14 @@ int DebugStack_Print(){
     while((Iter_Next(&it) & END) == 0){
         StackEntry *entry = (StackEntry*)it.value;
         if(entry != NULL){
-            Out(_debugM, "    ^D^y_c - _c:_i4^0 ", 
+            Out("    ^D^y_c - _c:_i4^0 ", 
                 entry->funcName, entry->fname, entry->line);
             if(entry->ref != NULL && entry->typeOf != 0){
-                Out(_debugM, "^y_d^0", entry->ref);
+                Out("^y_d^0", entry->ref);
             }else if(entry->ref != NULL && entry->typeOf == 0){
-                Out(_debugM, "^y_c^0", entry->ref);
+                Out("^y_c^0", entry->ref);
             }
-            Out(_debugM, "\n");
+            Out("\n");
         }
     }
     return 0;

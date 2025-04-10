@@ -1,6 +1,21 @@
 #include <external.h>
 #include <caneka.h>
 
+boolean TextCharFilter(byte *b, i64 length){
+    byte *end = b+(length-1);
+    while(TRUE){
+        byte _b = *b;
+        if(_b < 32 && ( _b != '\r' && _b != '\n' && _b != '\t')){
+            return FALSE;
+        }
+        if(b == end){
+            break;
+        }
+        b++;
+    }
+    return TRUE;
+}
+
 status Str_Reset(Str *s){
     s->length = 0;
     return SUCCESS;

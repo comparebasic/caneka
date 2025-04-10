@@ -23,7 +23,7 @@ status Span_Tests(MemCh *gm){
             return r;
         }
         r |= Test(g->val.value == i, 
-            "Retrieve an object with the same value as the index _i8 vs %_i8", i, g->val.value);
+            "Retrieve an object with the same value as the index _i8 vs _i8", i, g->val.value);
     }
 
     max = SPAN_STRIDE+1;
@@ -39,13 +39,15 @@ status Span_Tests(MemCh *gm){
             return r;
         }
         r |= Test(g->val.value == i, 
-            "Retrieve an object with the same value as the index _i8 vs %_i8", i, g->val.value);
+            "Retrieve an object with the same value as the index _i8 vs _i8", i, g->val.value);
     }
 
     /* set and retrieve strings */
     p = Span_Make(m);
     r |= Test(p->type.of == TYPE_SPAN, "Span has type span '_c' found '_c'", 
         Type_ToChars(TYPE_SPAN), Type_ToChars(p->type.of));
+
+    printf("%s\n", Type_ToChars(p->type.of));
 
     Str *s1 = Str_CstrRef(m, "Hello there");
     Span_Add(p, (Abstract *)s1);

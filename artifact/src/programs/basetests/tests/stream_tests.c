@@ -85,7 +85,7 @@ status Stream_Tests(MemCh *gm){
         " And I hear it's going to get even warmer up towards the top of the mountain. It's going to be a good climb, even thought it's really windy up there. Hiking at this time of year takes a lot of determination. Not becuase hiking is challenging, but because, it takes planning, and then a lot of steps, one foot in front of the other, to reach the peak."
         "I'm bringing restaurant supply sourced dehydrated hashbrowns, and a sour-dough starter to make bread and breakfast in the mountains. All we need is cooking gas and stream water to eat like champtions on the wilderness :)";
 
-    StrVec *vo = StrVec_FromBytes(m, cstr, strlen(cstr));
+    StrVec *vo = StrVec_FromBytes(m, (byte *)cstr, strlen(cstr));
     r |= Test(Equals((Abstract *)vo,(Abstract *)sm->dest.curs->v), 
         "Comparing StrVec built up slowly _D and one built all at once _D", 
         sm->dest.curs->v, vo);

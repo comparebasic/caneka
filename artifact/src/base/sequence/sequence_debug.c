@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Iter_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Iter_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Iter *it = (Iter *)as(a, TYPE_ITER);
-    return StrVec_FmtAdd(m, v, fd, "I<_t:_i4 of _i4>",
-        State_ToStr(m, it->type.state), it->idx, it->span->nvalues);
+    return StrVec_Fmt(sm, "I<_t:_i4 of _i4>",
+        State_ToStr(sm->m, it->type.state), it->idx, it->span->nvalues);
 }
 
-i64 Slab_Print(MemCh *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
+i64 Slab_Print(struct stream *sm, slab *slab, i8 dim, i8 dims){
     /*
     printf("\x1b[%dm(%p){", color, slab);
     void **slot = (void **)slab;
@@ -50,18 +50,17 @@ i64 Slab_Print(MemCh *m, StrVec *v, i32 fd, slab *slab, i8 dim, i8 dims){
     return 0;
 }
 
-i64 Span_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Span_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     i64 total = 0;
-    total += StrVec_FmtAdd(m, v, fd, "Span<_i4values/0.._i4/_i4dims>", 
+    total += StrVec_Fmt(sm, "Span<_i4values/0.._i4/_i4dims>", 
         p->nvalues, p->max_idx, (i32)p->dims); 
     
     return total;
 }
 
-
-i64 Lookup_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
+i64 Lookup_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
     Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
     /*
     printf("\x1b[%dm%sLk<offset:%d latest_idx:\%d", color, msg, lk->offset, lk->latest_idx);
@@ -70,7 +69,6 @@ i64 Lookup_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean ext
     */
     return 0;
 }
-
 
 status SequenceDebug_Init(MemCh *m, Lookup *lk){
     status r = READY;

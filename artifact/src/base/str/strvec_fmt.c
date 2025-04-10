@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-#include "inline/handle_io.c"
-
-i64 StrVec_FmtHandle(Stream *sm, StrVec *v, char *fmt, va_list args){
+i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
     size_t l = strlen(fmt);
+    MemCh *m = sm->m;
     char *end = fmt+l;
     char *ptr = fmt;
     Str *s = NULL;
+    StrVec *v = NULL;
     char *start = NULL;
     status state = SUCCESS;
     i64 total = 0;
@@ -18,15 +18,21 @@ i64 StrVec_FmtHandle(Stream *sm, StrVec *v, char *fmt, va_list args){
             state = READY;
         }else if(state == PROCESSING){
             if(c == 't'){
-                s = Str_FromAbs(m, va_arg(args, Abstract *));
-                Stream_To(sm, s->bytes, s->length);
+                Abstract *a = va_arg(args, Abstract *);
+                if(a != NULL || a->type.of == TYPE_STR){
+                    s = Str_FromAbs(m, a);
+                    Stream_To(sm, s->bytes, s->length);
+                }else{
+                    v = StrVec_FromAbs(m, a);
+                    Stream_VecTo(sm, v);
+                }
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'T'){
                 Abstract *a = va_arg(args, Abstract *);
                 cls type = va_arg(args, i32);
-                total += Str_Debug(m, v, fd, a, (cls)type, FALSE);
+                total += Str_Debug(sm, a, (cls)type, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'o'){
@@ -43,12 +49,12 @@ i64 StrVec_FmtHandle(Stream *sm, StrVec *v, char *fmt, va_list args){
                 goto next;
             }else if(c == 'd'){
                 Abstract *a = va_arg(args, Abstract *);
-                total += Str_Debug(m, v, fd, a, 0, FALSE);
+                total += Str_Debug(sm, a, 0, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'D'){
                 Abstract *a = va_arg(args, Abstract *);
-                total += Str_Debug(m, v, fd, a, 0, TRUE);
+                total += Str_Debug(sm, a, 0, TRUE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'c'){
@@ -93,7 +99,7 @@ i64 StrVec_FmtHandle(Stream *sm, StrVec *v, char *fmt, va_list args){
                 goto next;
             }else if(c == '+'){
                 StrVec *v2 = (StrVec *)va_arg(args, StrVec *);
-                total += handleVecIo(v, fd, v2);
+                total += Stream_VecTo(sm, v2);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'u'){
@@ -177,24 +183,8 @@ outnext:
     return total; 
 }
 
-i64 StrVec_FmtAdd(MemCh *m, StrVec *v, i32 fd, char *fmt, ...){
-	va_list args;
-    va_start(args, fmt);
-    return StrVec_FmtHandle(m, v, fmt, args, fd);
-}
-
-i64 StrVec_FmtStream(Stream *sm, char *fmt, ...){
+i64 StrVec_Fmt(Stream *sm, char *fmt, ...){
 	va_list args;
     va_start(args, fmt);
     return StrVec_FmtHandle(sm, fmt, args);
 }
-
-
-StrVec *StrVec_Fmt(MemCh *m, char *fmt, ...){
-    StrVec *v = StrVec_Make(m);
-	va_list args;
-    va_start(args, fmt);
-    StrVec_FmtHandle(m, v, fmt, args, -1);
-    return v;
-}
-
