@@ -31,7 +31,12 @@ i64 Str_ToFd(Str *s, int fd){
 }
 
 i64 Str_Add(Str *s, byte *b, i64 length){
-    i64 len = min(s->alloc - s->length, length);
+    i64 len = length;
+    i64 remaining = (i64)s->alloc - s->length;
+    if(length > remaining){
+       len = remaining; 
+       s->type.state |= ERROR;
+    }
     if(len > 0){
         memcpy(s->bytes+s->length, b, len);
         s->length += len;

@@ -136,16 +136,21 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
 
     Str *dest = Str_Make(m, STR_DEFAULT);
     Str_Add(dest, destDir->bytes, destDir->length);
-    Str_AddCStr(dest, "/");
-    Str_AddCStr(dest, target->bin);
+    Str_AddCstr(dest, "/");
+    Str_AddCstr(dest, target->bin);
+    if(dest->type.state & ERROR){
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error building dest str");
+    }
     Span_Add(cmd, (Abstract *)dest);
 
     Str *source = File_GetAbsPath(m, Str_CstrRef(m, ctx->src));
-    Str_AddCStr(source, "/programs/");
-    Str_AddCStr(source, target->src);
+    Str_AddCstr(source, "/programs/");
+    Str_AddCstr(source, target->src);
 
     Span_Add(cmd, (Abstract *)source);
     Span_Add(cmd, (Abstract *)lib);
+
+
     ptr = ctx->args.libs;
     while(*ptr != NULL){
         Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
