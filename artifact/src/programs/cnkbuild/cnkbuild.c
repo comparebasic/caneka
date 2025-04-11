@@ -119,6 +119,7 @@ static status setupStatus(BuildCtx *ctx){
 static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
+    /*
     MemCh *m = ctx->m;
     Span *cmd = Span_Make(m);
     Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.cc));
@@ -171,7 +172,7 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
         DebugStack_Pop();
         return r;
     }
-
+    */
     DebugStack_Pop();
     return NOOP;
 }
@@ -240,28 +241,30 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
 static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *dir){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    /*
     MemCh *m = ctx->m;
-    Str *dirPath = Str_Make(m, STR_DEFAULT);
-    String_Add(m, dirPath, libDir);
-    char *cstr = "/";
-    String_AddBytes(m, dirPath, bytes(cstr), strlen(cstr));
-    String_AddBytes(m, dirPath, bytes(dir->name), strlen(dir->name));
+
+    Str *dirPath = Str_Clone(m, libDir, STR_DEFAULT);
+    Str_AddCstr(dirPath, "/");
+    Str_AddCstr(dirPath, dir->name);
     DebugStack_SetRef(dirPath, dirPath->type.of);
     Dir_CheckCreate(m, dirPath);
 
-    Str *source = File_GetAbsPath(m, String_Make(m, bytes(ctx->src)));
-    String_AddBytes(m, source, bytes("/"), 1);
-    String_AddBytes(m, source, bytes(dir->name), strlen(dir->name));
-    String_AddBytes(m, source, bytes("/"), 1);
-    i64 sourceL = String_Length(source);
+    Str *source = File_GetAbsPath(m, Str_CstrRef(m, ctx->src));
+    Str_AddCstr(source, "/");
+    Str_AddCstr(source, dir->name);
+    Str_AddCstr(source, "/");
+    i64 sourceL = source->length;
 
     Str *dest = Str_Make(m, STR_DEFAULT);
-    String_Add(m, dest, dirPath);
-    String_AddBytes(m, dest, bytes("/"), 1);
-    i64 destL = String_Length(dest);
-
-    StrVecEntry_Set(ctx->fields.steps.name, bytes(dir->name), 0);
+    Str_Add(dest, dirPath->bytes, dirPath->length);
+    Str_AddCstr(dest, "/");
+    i64 destL = dest->length;
+    Out("^y.Dest: _d^0\n", dest);
+    
+    /*
+    CliStatus_SetByKey(m, ctx->cli, Str_CstrRef(m, "source"), 
+        Str_CstrRef(m, dir->name));  
+        */
 
     m->type.range++;
 
@@ -274,13 +277,15 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     }
 
     sourceCstr = dir->sources;
+
     while(*sourceCstr != NULL){
-        String_Trunc(source, sourceL);
-        String_AddBytes(m, source, bytes(*sourceCstr), strlen(*sourceCstr));
-        String_Trunc(dest, destL);
-        String_AddBytes(m, dest, bytes(*sourceCstr), strlen(*sourceCstr));
-        String_Trunc(dest, String_Length(dest)-1);
-        String_AddBytes(m, dest, bytes("o"), 1);
+        Str_Trunc(source, sourceL);
+        Str_AddCstr(source, *sourceCstr);
+        Str_Trunc(dest, destL);
+        Str_AddCstr(dest, *sourceCstr);
+        Str_Trunc(dest, -1);
+        Str_AddCstr(dest, "o");
+        Out("^p.Building: _d -> _d^0\n", source, dest);
 
         r |= buildSourceToLib(ctx, libDir, lib, dest, source);
 
@@ -289,7 +294,6 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     }
     m->type.range--;
 
-    */
     DebugStack_Pop();
     return r;
 }
@@ -304,16 +308,12 @@ static status build(BuildCtx *ctx){
     Str_AddCstr(libDir, "/");
     Str_AddCstr(libDir, ctx->libtarget);
 
-    Out("^plibDir: _t^0\n\n", libDir);
     Dir_CheckCreate(m, libDir);
 
-    /*
     Str *lib = Str_Clone(m, libDir, STR_DEFAULT);
-    cstr = "/";
-    Str_Add(lib, bytes(cstr), strlen(cstr));
-    Str_Add(lib, bytes(ctx->libtarget), strlen(ctx->libtarget));
-    cstr = ".a";
-    Str_Add(lib, bytes(cstr), strlen(cstr));
+    Str_AddCstr(lib, "/");
+    Str_AddCstr(lib, ctx->libtarget);
+    Str_AddCstr(lib, ".a");
     if(lib->type.state & ERROR){
         return ERROR;
     }
@@ -333,16 +333,15 @@ static status build(BuildCtx *ctx){
         ctx->fields.steps.modCount++;
         dir++;
     }
-    CliStatus_PrintFinish(DebugM, ctx->cli);
+    CliStatus_PrintFinish(_debugM, ctx->cli);
 
+    Str *dist = File_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
     Executable *target = ctx->targets;
     while(target->bin != NULL){
         buildExec(ctx, ((r & SUCCESS) != 0), dist, lib, target);
         target++;
     }
-
     DebugStack_Pop();
-    */
     return r;
 }
 

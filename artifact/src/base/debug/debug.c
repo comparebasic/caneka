@@ -66,7 +66,7 @@ i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){
     if(func != NULL){
         return func(sm, a, type, extended);
     }else{
-        StrVec_Fmt(DebugOut, "_c: unkown_debug", Type_ToChars(type));
+        StrVec_Fmt(DebugOut, "_c: unkown\\_debug", Type_ToChars(type));
         return 0;
     }
 }

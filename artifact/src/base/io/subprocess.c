@@ -85,6 +85,7 @@ status SubStatus(ProcDets *pd){
     DebugStack_Push(pd, pd->type.of);
     int r;
     pid_t p;
+
     boolean wait = (pd->type.state & PROCDETS_ASYNC) != 0;
     do {
         r = 0;
@@ -124,11 +125,13 @@ status SubStatus(ProcDets *pd){
 status SubProcess(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Push(cmd_p, cmd_p->type.of);
     status r = SubCall(m, cmd_p, pd);
+    /*
     if(r & SUCCESS){
         status r = SubStatus(pd);
         DebugStack_Pop();
         return r;
     }
+    */
     DebugStack_Pop();
     return ERROR;
 }

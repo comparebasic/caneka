@@ -9,17 +9,15 @@ i32 Span_Capacity(Span *p){
 char **Span_ToCharArr(MemCh *m, Span *p){
     size_t sz = sizeof(char *)*(p->nvalues+1);
     char **arr = MemCh_Alloc(m, sz);
-    /*
     Iter it;
     Iter_Init(&it, p);
     int i = 0;
     while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)asIfc(Iter_Get(&it), TYPE_STR);
+        Str *s = (Str *)asIfc(it.value, TYPE_STR);
         if(s != NULL){
-            arr[i++] = Str_ToCstr(m, s);
+            arr[i++] = Str_Cstr(m, s);
         }
     }
-    */
     return arr;
 }
 

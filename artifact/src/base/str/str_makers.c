@@ -99,10 +99,9 @@ i64 Str_Trunc(Str *s, i64 amount){
         if(amount > s->length){
             return 0;
         }
-        byte *ptr = s->bytes;
-        memset(ptr, 0, amount);
-        s->bytes += amount;
-        s->length -= amount;
+        i64 removed = s->length - amount;
+        s->length = amount;
+        memset(s->bytes+s->length, 0, removed);
     }
     return amount;
 }

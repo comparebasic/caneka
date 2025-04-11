@@ -69,7 +69,7 @@ status Iter_Next(Iter *it){
     }
 
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
-        word fl = it->type.state & ~END;
+        word fl = it->type.state & ~(END|FLAG_ITER_LAST);
         idx = 0;
         Iter_Setup(it, it->span, fl, idx);
         it->type.state |= (fl|PROCESSING);
@@ -154,6 +154,8 @@ status Iter_Next(Iter *it){
 end:
     if(idx > it->span->max_idx){
         it->type.state |= END;
+    }else if(idx == it->span->max_idx){
+        it->type.state |= FLAG_ITER_LAST;
     }
 
     it->idx = idx;

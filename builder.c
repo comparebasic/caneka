@@ -64,7 +64,7 @@ static const char *mkDirCnkBuildLibCmd[] = {
 
 static char *buildBuilderLibCmd[] = {
     COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-c", "-o", "./build/libcnkbuild/libcnkbuild.a", 
-    "./artifact/src/programs/cnkbuild/cnkbuild.c", "./build/libcnkbase/libcnkbase.a",
+    "./artifact/src/programs/cnkbuild/cnkbuild.c",
     NULL
 };
 
@@ -87,7 +87,6 @@ static void showMsg(char *name, char **sources){
 }
 
 static void successMsg(char *name, char **sources){
-    printf("\r\x1b[1A\x1b[0K");
     printf("%s", name);
     char **p = sources;
     printf("... \x1b[32mdone\n");

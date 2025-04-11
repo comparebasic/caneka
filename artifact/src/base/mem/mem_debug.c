@@ -84,10 +84,33 @@ i64 MemBook_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     return 0;
 }
 
+i64 Span_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
+    Span *p = (Span*)as(a, TYPE_SPAN); 
+
+    i64 total = 0;
+    total += StrVec_Fmt(sm, "Span<_i4values/0.._i4/_i4dims [", 
+        p->nvalues, p->max_idx, (i32)p->dims); 
+    Iter it;
+    Iter_Init(&it, p);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = it.value;
+        if(a != NULL){
+            total += StrVec_Fmt(sm, "_i4:_d", it.idx, it.value);
+            if((it.type.state & FLAG_ITER_LAST) == 0){
+                total += Stream_To(sm, (byte *)", ", 2);
+            }
+        }
+    }
+    total += StrVec_Fmt(sm, "]>^0");
+    
+    return total;
+}
+
 status Mem_DebugInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
     r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemPage_Print);
+    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     return r;
 }
