@@ -142,6 +142,7 @@ MemBook *MemBook_Make(MemBook *prev){
     pg->remaining = MEM_SLAB_SIZE;
 
     MemBook *book = MemPage_Alloc(pg, sizeof(MemBook));
+    book->start = start;
     book->type.of = TYPE_BOOK;
     _books[bookIdx] = book;
     

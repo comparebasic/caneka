@@ -106,18 +106,6 @@ status Table_SetKey(Iter *it, Abstract *a){
     return SUCCESS;
 }
 
-status Table_SetRaw(Span *tbl, Str *key, util *u){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, (Abstract *)key, (Abstract *)*u);
-    h->type.state |= FLAG_SPAN_RAW;
-    return SUCCESS;
-}
-
-util Table_GetRaw(Span *tbl, Str *key){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, (Abstract *)key, NULL);
-    return (util)h->item;
-}
-
-
 i32 Table_SetIdxEntry(Iter *it, Abstract *a){
     Hashed *h = Table_GetSetHashed(it->span, SPAN_OP_SET, a, NULL);
     i32 value = it->metrics.set;

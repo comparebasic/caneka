@@ -47,7 +47,7 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.modCount_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.modTotal_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.name = Str_Make(m, STR_DEFAULT);
-    StrVec_Fmt(sm, "^ymodule _+ of _+: ^yD._+^0", ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name);
+    StrVec_Fmt(sm, "^ymodule _t of _t: ^yD._t^0", ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -61,7 +61,7 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.dest = Str_Make(m, STR_DEFAULT);
-    StrVec_Fmt(sm, "^b_+: _+ -> ^bD._+^0", ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest);
+    StrVec_Fmt(sm, "^b_t: _t -> ^bD._t^0", ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -76,7 +76,7 @@ static status setupStatus(BuildCtx *ctx){
     v = sm->dest.curs->v;
     ctx->fields.steps.count_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.total_s = Str_Make(m, MAX_BASE10+1);
-    StrVec_Fmt(sm, "sources: _+ of _+^0", ctx->fields.steps.count_s, ctx->fields.steps.total_s);
+    StrVec_Fmt(sm, "sources: _t of _t^0", ctx->fields.steps.count_s, ctx->fields.steps.total_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -90,13 +90,13 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.barEnd = Str_Clone(m, ctx->fields.steps.barStart, width);
     sm = Stream_MakeStrVec(m);
     v = sm->dest.curs->v;
-    StrVec_Fmt(sm, "^B_+^Y_+^0", ctx->fields.steps.barStart,ctx->fields.steps.barEnd);
+    StrVec_Fmt(sm, "^B_t^Y_t^0", ctx->fields.steps.barStart,ctx->fields.steps.barEnd);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     sm = Stream_MakeStrVec(m);
     v = sm->dest.curs->v;
     ctx->fields.mem_s = Str_Make(m, STR_DEFAULT);
-    StrVec_Fmt(sm, "^cMemory Count: _+^0", ctx->fields.mem_s);
+    StrVec_Fmt(sm, "^cMemory Count: _t^0", ctx->fields.mem_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -296,17 +296,18 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
 
 static status build(BuildCtx *ctx){
     status r = READY;
-    /*
     DebugStack_Push(NULL, 0);
     MemCh *m = ctx->m;
     setupStatus(ctx);
     Str *libDir = File_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
-    char *cstr = "/";
-    String_AddBytes(m, libDir, bytes(cstr), strlen(cstr));
-    String_AddBytes(m, libDir, bytes(ctx->libtarget), strlen(ctx->libtarget));
 
+    Str_AddCstr(libDir, "/");
+    Str_AddCstr(libDir, ctx->libtarget);
+
+    Out("^plibDir: _t^0\n\n", libDir);
     Dir_CheckCreate(m, libDir);
 
+    /*
     Str *lib = Str_Clone(m, libDir, STR_DEFAULT);
     cstr = "/";
     Str_Add(lib, bytes(cstr), strlen(cstr));

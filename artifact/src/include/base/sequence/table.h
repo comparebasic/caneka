@@ -1,6 +1,4 @@
 status Table_SetKey(Iter *it, Abstract *a);
-status Table_SetRaw(Span *tbl, Str *key, util *u);
-util Table_GetRaw(Span *tbl, Str *key);
 i32 Table_SetIdxEntry(Iter *it, Abstract *a);
 Hashed *Table_SetValue(Iter *it, Abstract *a);
 Hashed *Table_GetHashed(Span *tbl, Abstract *a);

@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <builder.h>
+#include <cnkbuild.h>
 
 #define TEST_REQ 1
 
@@ -342,12 +342,12 @@ static BuildSubdir *objdirs[] = {
 };
 
 int main(int argc, char **argv){
-    printf("making\n");
     if(MemBook_Make(NULL) == NULL){
-        Fatal("Unable to allocate Mem_Book", TYPE_BOOK);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Unable to allocate Mem_Book");
         exit(1);
     };
-    MemCtx *m = MemCtx_Make();
+    MemCh *m = MemCh_Make();
+    Caneka_Init(m);
     BuildCtx ctx;
     BuildCtx_Init(m, &ctx);
 
@@ -364,6 +364,5 @@ int main(int argc, char **argv){
 
     Build(&ctx);
 
-    printf("done making\n");
     return 0;
 }

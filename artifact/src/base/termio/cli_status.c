@@ -2,16 +2,18 @@
 #include <caneka.h>
 
 status CliStatus_SetKey(MemCh *m, CliStatus *cli, Str *key, IntPair *pair){
-    return Table_SetRaw(cli->tbl, key, (util *)pair);
+    return Table_Set(cli->tbl, (Abstract *)key, (Abstract *)I64_Wrapped(m, *((util *)pair)));
 }
 
 status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Str *s){
-    util _pair = Table_GetRaw(cli->tbl, key);
-    IntPair *pair = (IntPair *)&_pair;
-    if(cli->tbl->type.state & SUCCESS){
-        StrVec *line = Span_Get(cli->lines, pair->a);
-        Span_Set(cli->lines, pair->b, (Abstract *)s);
-        return SUCCESS;
+    Single *sg = (Single *)Table_Get(cli->tbl, (Abstract *)key);
+    if(sg != NULL){
+        IntPair *pair = (IntPair *)&sg->val.value;
+        if(cli->tbl->type.state & SUCCESS){
+            StrVec *line = Span_Get(cli->lines, pair->a);
+            Span_Set(cli->lines, pair->b, (Abstract *)s);
+            return SUCCESS;
+        }
     }
     return NOOP;
 }

@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Lookup *HashLookup;
+Lookup *HashLookup = NULL;
 
 static util _Hash_Bytes(byte *bt, size_t length, util h){
 	util i = 0;
@@ -35,9 +35,7 @@ static util Hash_PatCharDef(Abstract *a){
 static util Hash_Str(Abstract *a){
     Str *s = (Str *)asIfc(a, TYPE_STR);
 	util h = 5381;
-    while(s != NULL){
-        h = _Hash_Bytes(s->bytes, s->length, h);
-    }
+    h = _Hash_Bytes(s->bytes, s->length, h);
     return h;
 }
 
@@ -116,7 +114,7 @@ Hashed *Hashed_Clone(MemCh *m, Hashed *oh){
 
 status Hash_Init(MemCh *m){
     if(HashLookup == NULL){
-        Lookup *HashLookup  = Lookup_Make(m, _TYPE_START, populateHash, NULL);
+        HashLookup = Lookup_Make(m, _TYPE_START, populateHash, NULL);
         return SUCCESS;
     }
     return NOOP;

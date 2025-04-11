@@ -24,7 +24,10 @@ Str *File_GetCwdPath(MemCh *m, Str *path){
     Str *s = Str_Make(m, STR_DEFAULT);
     char *cstr = getcwd((char *)s->bytes, STR_DEFAULT_MAX);
     i64 len = strlen(cstr);
-    if(Str_AddCstr(s, "/") != 1 && Str_AddCstr(s, cstr) == len){
+    Str_AddCstr(s, cstr);
+    Str_AddCstr(s, "/");
+    Str_Add(s, path->bytes, path->length);
+    if((s->type.state & ERROR) == 0){
         return s;
     }
     return NULL;
@@ -49,7 +52,6 @@ boolean File_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
     char *path_cstr = Str_Cstr(m, a);
     r = stat(path_cstr, &source_stat);
     if(r != 0){
-        printf("%s\n", path_cstr);
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Source not found");
         exit(1);
     }

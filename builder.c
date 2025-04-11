@@ -57,14 +57,25 @@ static char *runTestsCoreCmd[] = {
     NULL
 };
 
-static const char *mkDirCnkBuildCmd[] = {
+static const char *mkDirCnkBuildLibCmd[] = {
     "mkdir", "-p", "./build/libcnkbuild/",
     NULL
 };
 
+static char *buildBuilderLibCmd[] = {
+    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-c", "-o", "./build/libcnkbuild/libcnkbuild.a", 
+    "./artifact/src/programs/cnkbuild/cnkbuild.c", "./build/libcnkbase/libcnkbase.a",
+    NULL
+};
+
 static char *buildBuilderCmd[] = {
-    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", "./build/libcnkbuild/libcnkbuild.a", 
-    "./artifact/src/programs/cnkbuild/cnkbuild.c",
+    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", "./build/build",
+    "./artifact/src/build.c", "./build/libcnkbase/libcnkbase.a","./build/libcnkbuild/libcnkbuild.a", 
+    NULL
+};
+
+static char *runBuilderCmd[] = {
+    "./build/build",
     NULL
 };
 
@@ -190,7 +201,9 @@ int main(int argc, char *argv[]){
     run("Building core", (char **)coreCmd);
     run("Building core tests", (char **)testsCoreCmd);
     run("Run tests", (char **)runTestsCoreCmd);
-    run("Make CnkBuild dir", (char **)mkDirCnkBuildCmd);
-    run("Build CnkBuild", (char **)buildBuilderCmd);
+    run("Make CnkBuild dir", (char **)mkDirCnkBuildLibCmd);
+    run("Build CnkBuild", (char **)buildBuilderLibCmd);
+    run("Build Builder", (char **)buildBuilderCmd);
+    run("Run Builder", (char **)runBuilderCmd);
     exit(0);
 }
