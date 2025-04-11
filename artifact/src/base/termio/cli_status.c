@@ -11,7 +11,7 @@ status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Str *s){
         IntPair *pair = (IntPair *)&sg->val.value;
         if(cli->tbl->type.state & SUCCESS){
             StrVec *line = Span_Get(cli->lines, pair->a);
-            Span_Set(cli->lines, pair->b, (Abstract *)s);
+            Span_Set(line->p, pair->b, (Abstract *)s);
             return SUCCESS;
         }
     }
@@ -33,9 +33,8 @@ status CliStatus_Print(MemCh *m, CliStatus *cli){
         while((Iter_Next(&it) & END) == 0){
             StrVec *line = (StrVec *)it.value;
             printf("\r\x1b[0K");
-            fflush(stdout);
             if(line != NULL){
-                StrVec_ToFd(line, 1);
+                StrVec_ToFd(line, 0);
             }
             write(1, "\n", 1);
         }

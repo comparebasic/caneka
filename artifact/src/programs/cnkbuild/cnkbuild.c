@@ -2,7 +2,6 @@
 #include <caneka.h>
 #include <cnkbuild.h>
 
-
 static status renderStatus(MemCh *m, Abstract *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
@@ -42,12 +41,15 @@ static status setupStatus(BuildCtx *ctx){
     i32 width = ctx->cli->cols;
     IntPair coords = {0, 0};
 
+    StrVec *v = StrVec_Make(m);;
+    Span_Add(ctx->cli->lines, (Abstract *)v);
+
     Stream *sm = Stream_MakeStrVec(m);
-    StrVec *v = sm->dest.curs->v;
+    v = sm->dest.curs->v;
     ctx->fields.steps.modCount_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.modTotal_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.name = Str_Make(m, STR_DEFAULT);
-    StrVec_Fmt(sm, "^ymodule _t of _t: ^yD._t^0", ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name);
+    StrVec_Fmt(sm, "^ymodule _s of _s: ^yD._s^0", ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -61,14 +63,17 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.dest = Str_Make(m, STR_DEFAULT);
-    StrVec_Fmt(sm, "^b_t: _t -> ^bD._t^0", ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest);
+    StrVec_Fmt(sm, "^b_s: _s -> ^bD._s^0", ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
+
     coords.b = StrVec_GetIdx(v, ctx->fields.current.action);
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "action"), &coords);
+
     coords.b = StrVec_GetIdx(v, ctx->fields.current.source);
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "source"), &coords);
+
     coords.b = StrVec_GetIdx(v, ctx->fields.current.dest);
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "dest"), &coords);
 
@@ -76,7 +81,7 @@ static status setupStatus(BuildCtx *ctx){
     v = sm->dest.curs->v;
     ctx->fields.steps.count_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.total_s = Str_Make(m, MAX_BASE10+1);
-    StrVec_Fmt(sm, "sources: _t of _t^0", ctx->fields.steps.count_s, ctx->fields.steps.total_s);
+    StrVec_Fmt(sm, "sources: _s of _s^0", ctx->fields.steps.count_s, ctx->fields.steps.total_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -90,13 +95,13 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.barEnd = Str_Clone(m, ctx->fields.steps.barStart, width);
     sm = Stream_MakeStrVec(m);
     v = sm->dest.curs->v;
-    StrVec_Fmt(sm, "^B_t^Y_t^0", ctx->fields.steps.barStart,ctx->fields.steps.barEnd);
+    StrVec_Fmt(sm, "^B_s^Y_s^0", ctx->fields.steps.barStart,ctx->fields.steps.barEnd);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     sm = Stream_MakeStrVec(m);
     v = sm->dest.curs->v;
     ctx->fields.mem_s = Str_Make(m, STR_DEFAULT);
-    StrVec_Fmt(sm, "^cMemory Count: _t^0", ctx->fields.mem_s);
+    StrVec_Fmt(sm, "^cMemory Count: _s^0", ctx->fields.mem_s);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -180,29 +185,32 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
 static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, Str *source){
     DebugStack_Push(source, source->type.of);
     status r = READY;
-    /*
     MemCh *m = ctx->m;
     Span *cmd = Span_Make(m);
     ProcDets pd;
-    StrVecEntry_Set(ctx->fields.current.dest, dest->bytes, dest->length);
+
+    CliStatus_SetByKey(m, ctx->cli, Str_CstrRef(m, "dest"), dest);
+
     ctx->fields.steps.count++;
     ctx->fields.steps.modSrcCount++;
     if(File_CmpUpdated(m, source, dest, NULL)){
-        StrVecEntry_Set(ctx->fields.current.action, bytes("build obj: "), 0);
-        CliStatus_Print(DebugM, ctx->cli);
-        Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.cc)));
+
+        CliStatus_SetByKey(m, ctx->cli, Str_CstrRef(m, "action"), Str_CstrRef(m, "build obj"));
+
+        CliStatus_Print(_debugM, ctx->cli);
+        Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.cc));
         char **ptr = ctx->args.cflags;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
+            Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
             ptr++;
         }
         ptr = ctx->args.inc;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)String_Make(m, bytes(*ptr)));
+            Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
             ptr++;
         }
-        Span_Add(cmd, (Abstract *)String_Make(m, bytes("-c")));
-        Span_Add(cmd, (Abstract *)String_Make(m, bytes("-o")));
+        Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-c"));
+        Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-o"));
         Span_Add(cmd, (Abstract *)dest);
         Span_Add(cmd, (Abstract *)source);
 
@@ -210,23 +218,23 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
         r |= SubProcess(m, cmd, &pd);
         if(r & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
-            Fatal("Build error for source file", 0);
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Build error for source file");
         }
 
         Span_ReInit(cmd);
-        Span_Add(cmd, (Abstract *)String_Make(m, bytes(ctx->tools.ar)));
-        Span_Add(cmd, (Abstract *)String_Make(m, bytes("-rc")));
+        Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.ar));
+        Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-rc"));
         Span_Add(cmd, (Abstract *)lib);
         Span_Add(cmd, (Abstract *)dest);
         ProcDets_Init(&pd);
         status re = SubProcess(m, cmd, &pd);
         if(re & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
-            Fatal("Build error for adding object to lib ", 0);
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Build error for adding object to lib ", 0);
         }
     }else{
-        StrVecEntry_Set(ctx->fields.current.action, bytes(" link obj:"), 0);
-        CliStatus_Print(DebugM, ctx->cli);
+        CliStatus_SetByKey(m, ctx->cli, Str_CstrRef(m, "action"), Str_CstrRef(m, " link obj"));
+        CliStatus_Print(_debugM, ctx->cli);
     }
 
     if(r == READY){
@@ -234,7 +242,6 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     }
 
     DebugStack_Pop();
-    */
     return r;
 }
 
@@ -259,12 +266,9 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     Str_Add(dest, dirPath->bytes, dirPath->length);
     Str_AddCstr(dest, "/");
     i64 destL = dest->length;
-    Out("^y.Dest: _d^0\n", dest);
     
-    /*
     CliStatus_SetByKey(m, ctx->cli, Str_CstrRef(m, "source"), 
         Str_CstrRef(m, dir->name));  
-        */
 
     m->type.range++;
 
@@ -285,8 +289,6 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         Str_AddCstr(dest, *sourceCstr);
         Str_Trunc(dest, -1);
         Str_AddCstr(dest, "o");
-        Out("^p.Building: _d -> _d^0\n", source, dest);
-
         r |= buildSourceToLib(ctx, libDir, lib, dest, source);
 
         MemCh_Free(m);

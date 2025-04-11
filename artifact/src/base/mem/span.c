@@ -3,7 +3,6 @@
 
 status Span_Set(Span *p, i32 idx, Abstract *t){
     if(idx < 0 || t == NULL){
-        printf("Span Set NOop\n");
         return NOOP;
     }
     Iter it;

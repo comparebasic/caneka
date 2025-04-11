@@ -125,13 +125,11 @@ status SubStatus(ProcDets *pd){
 status SubProcess(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Push(cmd_p, cmd_p->type.of);
     status r = SubCall(m, cmd_p, pd);
-    /*
     if(r & SUCCESS){
         status r = SubStatus(pd);
         DebugStack_Pop();
         return r;
     }
-    */
     DebugStack_Pop();
     return ERROR;
 }

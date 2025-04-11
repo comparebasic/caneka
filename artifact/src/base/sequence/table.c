@@ -68,14 +68,14 @@ static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *val
             int hkey = getReQueryKey(h->id, j, tbl->dims);
             _h = (Hashed *)Span_Get(tbl, hkey);
             if(op == SPAN_OP_GET){
-                if(_h != NULL && *((util *)_h) != 0){
+                if(_h != NULL){
                     if(Hashed_Equals(h, _h)){
                         h = _h;
                         found = TRUE;
                     }
                 }
             }else if(op == SPAN_OP_SET){
-                if(_h != NULL && *((util *)_h) != 0){
+                if(_h != NULL){
                     if(Hashed_Equals(h, _h)){
                         h = _h;
                         h->idx = hkey;
@@ -85,6 +85,7 @@ static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *val
                     }
                 }else{
                     h->idx = hkey;
+                    h->value = value;
                     Span_Set(tbl, hkey, (Abstract *)h);
                     found = TRUE;
                     break;

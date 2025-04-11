@@ -35,6 +35,23 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
                 total += Str_Debug(sm, a, (cls)type, FALSE);
                 state = SUCCESS; 
                 goto next;
+            }else if(c == 's'){
+                Abstract *a = va_arg(args, Abstract *);
+                if(a == NULL){
+                    total += Stream_To(sm, (byte *)"NULL", 4);
+                }else if(a->type.of == TYPE_STR){
+                    s = (Str *)a;
+                    if(sm->type.state & STREAM_STRVEC){
+                        Cursor_Add(sm->dest.curs, s);
+                        total += s->length;
+                    }else{
+                        total += Stream_To(sm, s->bytes, s->length);
+                    }
+                }else{
+                    as(a, TYPE_STR);
+                }
+                state = SUCCESS; 
+                goto next;
             }else if(c == 'o'){
                 Abstract *a = (Abstract *)va_arg(args, Abstract *);
                 s = Str_CstrRef(m, (char *)Type_ToChars(a->type.of));

@@ -32,9 +32,13 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)it.value;
         if(s != NULL){
+            total += StrVec_Fmt(sm, "_i4: ", it.idx); 
             Str_Print(sm, (Abstract *)s, type, extended);
             if((it.type.state & FLAG_ITER_LAST) == 0){
                 total += Stream_To(sm, (byte *)", ", 2);
+            }
+            if((it.type.state & FLAG_ITER_LAST) == 0){
+                total += StrVec_Fmt(sm, ", "); 
             }
         }
     }

@@ -3,5 +3,6 @@
 
 #include "config.h"
 #include "base.h"
+#include "crypto.h"
 
 #endif

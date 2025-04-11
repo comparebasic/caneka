@@ -11,6 +11,7 @@ static Executable targets[] = {
     {"caneka", "programs/main.c"},
     {NULL, NULL},
 };
+
 static char *cflags[] = {
         "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
         "-DOPENSSL","-DINSECURE",
@@ -26,48 +27,17 @@ static char *libs[] = {
 };
 
 /* sources */
-
-static BuildSubdir memobj = { "mem", {
-    "mem.c",
-    "mem_chapter.c",
-    "mem_debug.c",
-    "ext_free.c",
-    "iter.c",
-    NULL
-}};
-
-static BuildSubdir coreobj = { "core", {
-    "core.c",
-    "ifc.c",
-    "init.c",
-    "eq.c",
-    "error.c",
-    "guard.c",
-    "log.c",
-    "testsuite.c",
-    NULL
-}};
-
-static BuildSubdir debugobj = { "debug", {
-    "debug.c",
-    "debug_flags.c",
-    "debug_stack.c",
-    "stepper.c",
-    "stepper_funcs.c",
-    "debug_typestrings.c",
-    NULL,
-}};
-
 static BuildSubdir cryptoobj = { "crypto", {
+    "asymetric.c",
+    "bio.c",
     "crypto_api.c",
+    "crypto_debug.c",
+    "digest.c",
     "enc_pair.c",
     "key.c",
-    "digest.c",
     "salty.c",
-    "sane.c",
-    "symetric.c",
-    "asymetric.c",
     "secure.c",
+    "symetric.c",
     NULL
 }};
 
@@ -164,48 +134,21 @@ static BuildSubdir parserobj = { "parser", {
     "patchar.c",
     "roebling.c",
     "parser_debug.c",
+    "snip.c",
     NULL
 }};
 
 static BuildSubdir persistobj = { "persist", {
-    "access.c",
     "auth.c",
-    "dir.c",
     "file.c",
-    "file_status.c",
     "ioctx.c",
     "memlocal.c",
     "path.c",
     "session.c",
+    "single_tolocal.c",
     "spool.c",
-    "subprocess.c",
-    "procdets.c",
-    "persist_debug.c",
+    "tolocal",
     "user.c",
-    NULL
-}};
-
-static BuildSubdir sequenceobj = { "sequence", {
-    "array.c",
-    "chain.c",
-    "lookup.c",
-    "mess.c",
-    "nestedd.c",
-    "queue.c",
-    "sequence_debug.c",
-    "table.c",
-    "table_chain.c",
-    "ord_table.c",
-    "hashed.c",
-    NULL
-}};
-
-static BuildSubdir spanobj = { "mem/span", {
-    "slab.c",
-    "span.c",
-    "spanquery.c",
-    "span_tolocal.c",
-    "span_utils.c",
     NULL
 }};
 
@@ -220,29 +163,6 @@ static BuildSubdir serveobj = { "serve", {
     "req.c",
     "serve.c",
     "serve_debug.c",
-    NULL
-}};
-
-static BuildSubdir stringobj = { "string", {
-    "cursor.c",
-    "iter_str.c",
-    "string.c",
-    "string_equals.c",
-    "string_makers.c",
-    "string_b64.c",
-    "string_utils.c",
-    "strsnip.c",
-    "strsnipstr.c",
-    "string_debug.c",
-    "string_tolocal.c",
-    "sviter.c",
-    "string.c",
-    "strvec.c",
-    NULL
-}};
-
-static BuildSubdir termioobj = { "termio", {
-    "rawmode.c",
     NULL
 }};
 
@@ -291,29 +211,7 @@ static BuildSubdir testfixturesobj = { "tests/fixtures", {
     NULL,
 }};
 
-static BuildSubdir utilobj = { "util", {
-    "blank.c",
-    "boolean.c",
-    "clone.c",
-    "compare.c",
-    "cmp.c",
-    "do.c",
-    "human_present.c",
-    "int.c",
-    "maker.c",
-    "result.c",
-    "single.c",
-    "time.c",
-    "wrappedptr_tolocal.c",
-    "hashed_tolocal.c",
-    "util_debug.c",
-    NULL
-}};
-
 static BuildSubdir *objdirs[] = {
-    &memobj,
-    &coreobj,
-    &debugobj,
     &cryptoobj,
     &cashobj,
     &kveobj,
@@ -329,15 +227,10 @@ static BuildSubdir *objdirs[] = {
     &xmltobj,
     &parserobj,
     &persistobj,
-    &sequenceobj,
-    &spanobj,
     &serveobj,
-    &stringobj,
     &testsobj,
-    &termioobj,
     &testsuitesobj,
     &testfixturesobj,
-    &utilobj,
     NULL
 };
 

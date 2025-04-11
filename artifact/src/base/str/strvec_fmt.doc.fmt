@@ -11,6 +11,7 @@ _: Followd by One of the following
 \_: Ignore underscore
 t: Typed output
 T: Typed output, with a type flag argument
+s: Str to new Str if in StrVec mode, normal output otherwise
 o: Show typeOf for an abstract object
 O: Show name of typeOf flag
 d: Debug output

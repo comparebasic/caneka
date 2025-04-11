@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 StrVec_ToFd(StrVec *v, int fd){
+i64 StrVec_ToFd(StrVec *v, i32 fd){
     Iter it;
     Iter_Init(&it, v->p);
     i64 total = 0;
