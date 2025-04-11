@@ -7,6 +7,7 @@
 #include "./debug/debug_stack.c"
 #include "./debug/debug_state.c"
 #include "./debug/debug_typestrings.c"
+#include "./io/access.c"
 #include "./io/dir.c"
 #include "./io/file_status.c"
 #include "./io/io_debug.c"

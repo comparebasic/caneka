@@ -21,7 +21,7 @@ void *Fatal(i32 fd, char *func, char *file, int line, char *fmt, ...){
         StrVec_Fmt(DebugOut, "  ^rD^_T^0", openssl_err, TYPE_CSTR);
     }
 #endif
-    Str_ToFd(NL, 0);
+    Str_ToFd(Str_CstrRef(_debugM, "\n"), 0);
     if(!crashing){
         crashing = TRUE;
         DebugStack_Print();

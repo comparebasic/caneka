@@ -7,7 +7,7 @@ typedef struct strvec {
 
 i64 StrVec_ToFd(StrVec *v, int fd);
 StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig);
-status StrVec_NextSlot(StrVec *v, Cursor *curs);
+status StrVec_NextSlot(StrVec *v, struct cursor *curs);
 i32 StrVec_GetIdx(StrVec *v, Str *s);
 status StrVec_Add(StrVec *v, Str *s);
 status StrVec_AddVec(StrVec *v, StrVec *v2);

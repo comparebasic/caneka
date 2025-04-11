@@ -20,7 +20,7 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
             if(c == 't'){
                 Abstract *a = va_arg(args, Abstract *);
                 if(a != NULL || a->type.of == TYPE_STR){
-                    s = Str_FromAbs(m, a);
+                    s = (Str *)a;
                     Stream_To(sm, s->bytes, s->length);
                 }else{
                     v = StrVec_FromAbs(m, a);

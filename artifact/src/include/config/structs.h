@@ -12,7 +12,6 @@ struct step;
 struct cursor;
 struct str;
 struct strvec;
-struct strvec_cursor;
 struct stream;
 /* util */
 struct blank;

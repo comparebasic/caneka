@@ -3,22 +3,22 @@
 
 static int bookIdx = -1;
 static i32 pageIdx = 0;
-static MemRange _books[16] = {
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL},
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL},
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL},
-    {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}, {NULL, NULL, NULL}
+static MemBook *_books[16] = {
+    NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL,
 };
 
 static MemBook *MemBook_get(void *addr){
     int idx = bookIdx;
     if(addr == NULL){
-        return _books[idx].book;
+        return _books[idx];
     }
     while(idx >= 0){
-        MemRange *mrange = _books+idx;
-        if(addr >= mrange->start && addr <= mrange->end){
-            return mrange->book;
+        MemBook *mb = _books[idx];
+        if(addr >= mb->start && addr <= mb->start+CHAPTER_SIZE){
+            return mb;
         }
         idx--;
     }
@@ -36,7 +36,7 @@ i64 MemCount(i16 level){
     i64 total = 0;
     Iter it;
     for(int i = 0; i <= bookIdx; i++){
-        MemBook *book = _books[i].book;
+        MemBook *book = _books[i];
         for(i32 j = 0; j < pageIdx && j < PAGE_MAX; j++){
             void *page = book->start+(j*PAGE_SIZE);
             MemPage *sl = (MemPage *)page;
@@ -53,7 +53,7 @@ i64 MemChapterCount(){
 }
 
 i64 MemAvailableChapterCount(){
-    return _books[0].book->it.span->nvalues;
+    return _books[0]->it.span->nvalues;
 }
 
 status MemBook_FreePage(MemCh *m, MemPage *pg){
@@ -122,17 +122,14 @@ MemBook *MemBook_Make(MemBook *prev){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken");
         return NULL;
     }
-    MemRange *mrange = _books+bookIdx;
-    if(mrange->book != NULL){
+    MemBook *mb = _books[bookIdx];
+    if(mb != NULL){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken");
         return NULL;
     }
 
     void *start = mmap(prev, 
         CHAPTER_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-
-    mrange->start = start;
-    mrange->end = start+CHAPTER_SIZE-sizeof(void *);
 
     if(start == MAP_FAILED){
         printf("err:%s\n", strerror(errno));
@@ -146,11 +143,9 @@ MemBook *MemBook_Make(MemBook *prev){
 
     MemBook *book = MemPage_Alloc(pg, sizeof(MemBook));
     book->type.of = TYPE_BOOK;
+    _books[bookIdx] = book;
     
     MemCh_Setup(&book->m, pg);
-
-    book->start = start;
-    mrange->book = book;
 
     Span *p = MemPage_Alloc(pg, sizeof(Span));
     Span_Setup(p);
@@ -158,7 +153,6 @@ MemBook *MemBook_Make(MemBook *prev){
     p->root = MemPage_Alloc(pg, sizeof(slab));
 
     Iter_Setup(&book->it, p, SPAN_OP_GET, 0);
-    mrange->book = book;
 
     return book;
 }

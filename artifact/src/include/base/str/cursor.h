@@ -1,4 +1,4 @@
-typedef struct strvec_cursor {
+typedef struct cursor {
     Type type;
     i32 pos;
     StrVec *v;

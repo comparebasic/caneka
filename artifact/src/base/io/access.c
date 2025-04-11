@@ -3,32 +3,32 @@
 
 static Span *_perms = NULL;
 
-status Access_Init(MemCtx *m){
+status Access_Init(MemCh *m){
     if(_perms == NULL){
-        MemCtx_SetToBase(m);
+        MemCh_SetToBase(m);
 
         Span *tbl = Span_Make(m);
-        String *key = String_Make(m, bytes("grant"));
+        Str *key = Str_CstrRef(m, "grant");
         Hashed *h = Table_SetHashed(tbl, (Abstract *)key, (Abstract *)Range_Wrapped(m, SUCCESS));
         h->type.state |= UPPER_FLAGS;
 
-        key = String_Make(m, bytes("system"));
+        key = Str_CstrRef(m, "system");
         _perms = Span_Make(m);
         h = Table_SetHashed(_perms, (Abstract *)key, (Abstract *)tbl);
         h->type.state |= UPPER_FLAGS;
 
 
-        MemCtx_SetFromBase(m);
+        MemCh_SetFromBase(m);
 
         return SUCCESS;
     }
     return NOOP;
 }
 
-status Access_Grant(MemCtx *m, Access *grantee, word fl, String *key, Abstract *value, Access *access){
+status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, Abstract *value, Access *access){
     DebugStack_Push(grantee->owner, grantee->owner->type.of);
     Access_SetFl(access, (fl|ACCESS_GRANT));
-    if(GetAccess(access, String_Make(m, bytes("grant"))) == NULL){
+    if(GetAccess(access, Str_CstrRef(m, "grant")) == NULL){
         DebugStack_Pop();
         return ERROR;
     }
@@ -36,8 +36,8 @@ status Access_Grant(MemCtx *m, Access *grantee, word fl, String *key, Abstract *
     Span *userPerms = NULL;
     Hashed *h = Table_GetHashed(_perms, (Abstract *)grantee->owner); 
 
-    MemCtx_SetToBase(m);
-    String *userKey = String_Clone(m, grantee->owner);
+    MemCh_SetToBase(m);
+    Str *userKey = Str_Clone(m, grantee->owner, grantee->owner->alloc);
     if(h == NULL){
         userPerms = Span_Make(m);
         h = Table_SetHashed(_perms, (Abstract *)userKey, (Abstract *)userPerms); 
@@ -49,17 +49,17 @@ status Access_Grant(MemCtx *m, Access *grantee, word fl, String *key, Abstract *
     h = Table_SetHashed(userPerms, (Abstract *)key, (Abstract *)value); 
     h->type.state |= fl;
 
-    MemCtx_SetFromBase(m);
+    MemCh_SetFromBase(m);
     DebugStack_Pop();
     return SUCCESS;
 }
 
-String *GetGroupAccess(Access *access, String *s){
+Str *GetGroupAccess(Access *access, Str *s){
     Iter it;
     Iter_Init(&it, access->groups);
-    String *v = NULL;
+    Str *v = NULL;
     while((Iter_Next(&it) & END) == 0){
-        Access *ac = (Access *)Iter_Get(&it);
+        Access *ac = (Access *)it.value;
         if(ac != NULL && (v = GetAccess(ac, s)) != NULL){
             break;
         }
@@ -67,7 +67,7 @@ String *GetGroupAccess(Access *access, String *s){
     return v;
 }
 
-String *GetAccess(Access *access, String *s){
+Str *GetAccess(Access *access, Str *s){
     DebugStack_Push(access->owner, access->owner->type.of);
     Hashed *h = Table_GetHashed(_perms, (Abstract *)access->owner);
     if(h == NULL){
@@ -90,15 +90,15 @@ String *GetAccess(Access *access, String *s){
     }
 
     DebugStack_Pop();
-    return (String *)h->value;
+    return (Str *)h->value;
 }
 
-Access *Access_Make(MemCtx *m, String *owner, Span *groups){
-    Access *a = (Access *)MemCtx_Alloc(m, sizeof(Access));
+Access *Access_Make(MemCh *m, Str *owner, Span *groups){
+    Access *a = (Access *)MemCh_Alloc(m, sizeof(Access));
     a->type.of = TYPE_ACCESS;
     a->owner = owner;
     if(groups != NULL && groups->type.of != TYPE_TABLE){
-        Fatal("Group span is expected to be a table", TYPE_ACCESS);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Group span is expected to be a table");
         return NULL;
     }
     a->groups = groups;

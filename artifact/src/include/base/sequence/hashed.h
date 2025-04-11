@@ -11,6 +11,7 @@ typedef struct hashed {
 } Hashed;
 
 extern struct lookup *HashLookup;
+typedef util (*HashFunc)(Abstract *a);
 
 util Get_Hash(Abstract *a);
 boolean Hashed_Equals(Hashed *a, Hashed *b);

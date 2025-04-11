@@ -4,7 +4,7 @@
 #include "base/core.h"
 #include "base/io.h"
 #include "base/sequence.h"
-#include "base/termio.h"
 #include "base/types.h"
 #include "base/util.h"
+#include "base/termio.h"
 #include "base/suite.h"

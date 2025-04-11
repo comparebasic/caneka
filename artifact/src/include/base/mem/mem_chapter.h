@@ -6,7 +6,11 @@ typedef struct mem_ctx {
     Abstract *owner;
 } MemCh;
 
+#define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range));
+#define MemCh_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
+
 i64 MemCh_MemCount(MemCh *m, i16 level);
+void *MemCh_Alloc(MemCh *m, size_t sz);
 i64 MemCh_Used(MemCh *m);
 i64 MemCh_Total(MemCh *m, i16 level);
 status MemCh_WipeTemp(MemCh *m, i16 level);

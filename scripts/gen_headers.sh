@@ -14,6 +14,6 @@ for mod in $(ls $section); do
         echo "== $ffile";
         hfile=$(echo "$ffile" | sed -e 's/\.c/.h/');
         echo "#include \"$hfile\"" >> "include/$sfile";
-        cat "$section/$ffile" | grep '^[A-Za-z0-9]\+\** \+\**[A-Za-z0-9_]\+([A-Za-z0-9, *]*) *{$' | sed 's/{$/;/' >> include/$section/$hfile;
+        cat "$section/$ffile" | grep '^[A-Za-z0-9_]\+\** \+\**[A-Za-z0-9_]\+([-A-Za-z0-9_, .*]*) *{$' | sed 's/{$/;/' >> include/$section/$hfile;
     done;
 done

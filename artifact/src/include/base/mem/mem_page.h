@@ -9,5 +9,5 @@ typedef struct mem_page {
 #define MemPage_Taken(sl) (((word)MEM_SLAB_SIZE) - (sl)->remaining)
 
 void *MemPage_Alloc(MemPage *pg, word sz);
-MemPage *MemPage_Attach(MemCh *m, i16 level);
-MemPage *MemPage_Make(MemCh *m, i16 level);
+MemPage *MemPage_Attach(struct mem_ctx *m, i16 level);
+MemPage *MemPage_Make(struct mem_ctx *m, i16 level);
