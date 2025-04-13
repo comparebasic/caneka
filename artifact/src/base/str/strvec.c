@@ -14,6 +14,18 @@ i64 StrVec_ToFd(StrVec *v, i32 fd){
     return total;
 }
 
+i64 StrVec_FfIter(Iter *it, i64 offset){
+    i64 pos = 0;
+    while((Iter_Next(it) & END) == 0){
+        Str *s = (Str *)it->value;
+        if(pos + s->length > offset){
+            return offset - pos;
+        }
+        pos += s->length;
+    }
+    return offset;
+}
+
 StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
     StrVec *v = StrVec_Make(m);
     Iter it;

@@ -64,14 +64,6 @@ static void match_NextKoTerm(Match *mt){
 
 static void addCount(MemCh *m, Match *mt, word flags, int length){
     DebugStack_Push(mt, mt->type.of);
-    if(DEBUG_PATMATCH){
-        printf("\n    \x1b[%dmaddCount:%s%d%s\x1b[0m", 
-            DEBUG_PATMATCH,
-            ((flags & SNIP_GAP) != 0 ? "gap(" : (flags & SNIP_UNCLAIMED) != 0 ? "unclaimed(" : ""), 
-            length,
-            ((flags & SNIP_CONTENT) == 0 ? ")" : "")
-        );
-    }
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
     }
@@ -79,68 +71,27 @@ static void addCount(MemCh *m, Match *mt, word flags, int length){
     if((mt->snip.type.state & flags) == flags){
         mt->snip.length += length;
     }else{
-        String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
-        StrSnip_Init(&mt->snip, flags, mt->snip.start+mt->snip.length, length);
-    }
-
-    if(DEBUG_PATMATCH){
-        printf(" \x1b[%dm{\x1b[0m", DEBUG_PATMATCH);
-        Debug_Print((void *)mt->backlog, TYPE_SNIP_STRING, "sns:", DEBUG_PATMATCH, TRUE);
-        printf("\x1b[%dm + %s%d/%d%s }", 
-            DEBUG_PATMATCH,
-            ((mt->snip.type.state & SNIP_GAP) != 0 ? "gap(" : (mt->snip.type.state & SNIP_UNCLAIMED) != 0 ? "unclaimed(" : ""), 
-            mt->snip.start,
-            mt->snip.length,
-            ((mt->snip.type.state & SNIP_CONTENT) == 0 ? ")" : "")
-        );
+        SnipSpan_Add(mt->backlog, &mt->snip);
+        mt->snip.type.state = flags;
+        mt->snip.length = length;
     }
 
     DebugStack_Pop();
     return;
 }
 
-int Match_Total(Match *mt){
-    return StrSnipStr_Total(mt->backlog, SNIP_CONTENT);
-}
-
-status Match_Feed(MemCh *m, Match *mt, word c){
+status Match_Feed(MemCh *m, Match *mt, byte c){
     if((mt->type.state & NOOP) != 0){
-
-        if(DEBUG_PATMATCH){
-            printf("\x1b[1%dm'%c'\x1b[%dm - \x1b[0m", DEBUG_PATMATCH, c, DEBUG_PATMATCH);
-            Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "NOOP - match_FeedPat: of ", DEBUG_PATMATCH, FALSE);
-            printf("\n");
-        }
-
         return mt->type.state;
     }
     boolean matched = FALSE;
     PatCharDef *def;
-
-    if(DEBUG_PATMATCH){
-        printf("\n\x1b[%dm%s", DEBUG_PATMATCH, State_ToChars(mt->type.state));
-        Debug_Print(mt->pat.curDef, TYPE_PATCHARDEF, "match_FeedPat: of ", DEBUG_PATMATCH, TRUE);
-        printf("\n\x1b[1;%dm", DEBUG_PATMATCH);
-        if(c == '\n'){
-            printf("    '\\n'");
-        }else if(c == '\r'){
-            printf("    '\\r'");
-        }else{
-            printf("    '%c'", c);
-        }
-        printf(": \x1b[0m");
-    }
 
     boolean unclaimed = FALSE;
     while(mt->pat.curDef < mt->pat.endDef){
         def = mt->pat.curDef;
 
         matched = charMatched(c, def);
-
-        if(DEBUG_PATMATCH){
-            Match_midDebug('_', c, def, mt, matched, FALSE);
-        }
-
         if((def->flags & PAT_CMD) != 0){
             mt->counter = def->to;
             if((def->from & PAT_GO_ON_FAIL) != 0){
@@ -271,51 +222,39 @@ miss:
         if(unclaimed){
             addCount(m, mt, SNIP_UNCLAIMED, 1);
         }
-        String_AddBytes(m, mt->backlog, bytes(&mt->snip), sizeof(StrSnip));
-        if(Match_Total(mt) == 0 && (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
+        SnipSpan_Add(mt->backlog, &mt->snip);
+        if(SnipSpan_Total(mt->backlog, SNIP_CONTENT) == 0 &&
+                (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
             mt->type.state = NOOP;
         }else{
             mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
-
-            if(DEBUG_MATCH_COMPLETE){
-                printf("\x1b[%dmCapture:%d jump:%d ", DEBUG_MATCH_COMPLETE, mt->captureKey, mt->jump);
-                Debug_Print(mt, 0, "Match Completed:", DEBUG_MATCH_COMPLETE, TRUE);
-                printf("\n");
-            }
         }
-    }
-
-    if(DEBUG_PATMATCH){
-        printf("\n");
-        Match_midDebug('_', c, def, mt, matched, TRUE);
-        Debug_Print(def, TYPE_PATCHARDEF, " on ", DEBUG_PATMATCH, FALSE);
-        printf("\n");
     }
 
     return mt->type.state;
 }
 
-status Match_FeedString(MemCh *m, Match *mt, String *s, int offset){
+status Match_FeedStrVec(MemCh *m, Match *mt, StrVec *v, i32 offset){
     if((mt->type.state & NOOP) != 0){
         return mt->type.state;
     }
-    int pos = 0;
-    while(s != NULL && s->length < offset){
-        offset -= s->length;
-        pos += s->length;
-        s = String_Next(s);
-    }
-    while(s != NULL){
-        for(int i = offset; i < s->length; i++){
+
+    i32 pos = 0;
+    Iter it;
+    Iter_Init(&it, v->p);
+    offset = StrVec_FfIter(&it, offset);
+    do {
+        Str *s = (Str *)it.value;
+        i64 i = offset;
+        for(; i < s->length; i++){
             byte b = s->bytes[i];
             Match_Feed(m, mt, (word)b);
             if((mt->type.state & SUCCESS) != 0){
                 break;
             }
         }
-        s = String_Next(s); 
-        offset = 0;
-    }
+        offset -= (i-1);
+    } while((Iter_Next(&it) & END) == 0);
 
     return mt->type.state;
 }
@@ -323,15 +262,6 @@ status Match_FeedString(MemCh *m, Match *mt, String *s, int offset){
 status Match_FeedEnd(MemCh *m, Match *mt){
     Match_Feed(m, mt, 0);
     return mt->type.state;
-}
-
-status Match_SetString(MemCh *m, Match *mt, String *s, String *backlog){
-    String *ret = PatChar_FromString(m, s);
-    if(ret == NULL){
-        return ERROR;
-    }
-
-    return Match_SetPattern(mt, (PatCharDef *)ret->bytes, backlog); 
 }
 
 status Match_SetCount(Match *mt, i32 count){
@@ -346,26 +276,28 @@ status Match_SetCount(Match *mt, i32 count){
     return ERROR;
 }
 
-status Match_SetPattern(Match *mt, PatCharDef *def, String *backlog){
-    memset(mt, 0, sizeof(Match));
+Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
+    Match *mt = (Match *)MemCh_Alloc(m, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;
     mt->pat.startDef = mt->pat.curDef = def;
-    int count = 0;
+    i32 count = 0;
     while(def->flags != PAT_END){
        def++;
        if(++count > PAT_CHAR_MAX_LENGTH){
-            Fatal("PatCharDef: PAT_END not found before max", TYPE_PATCHARDEF);
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+                "PatCharDef: PAT_END not found before max");
        }
     }
     if(def->flags == PAT_END){
         mt->pat.endDef = def;
     }else{
-        Fatal("PatCharDef: end not found", TYPE_PATCHARDEF);
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+            "PatCharDef: end not found");
     }
     mt->remaining = -1;
     mt->jump = -1;
     mt->backlog = backlog;
     mt->snip.type.of = TYPE_SNIP;
 
-    return SUCCESS;
+    return mt;
 }

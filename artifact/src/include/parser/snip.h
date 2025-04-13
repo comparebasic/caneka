@@ -5,9 +5,13 @@ enum strvec_snip {
     SNIP_UNCLAIMED = 1 << 11,
 };
 
-struct snip {
+typedef struct snip {
     Type type;
     i32 length;
 } Snip;
 
 StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *curs);
+Snip *Snip_From(MemCh *m, Snip *sn);
+Snip *Snip_Make(MemCh *m);
+status SnipSpan_Add(Span *sns, Snip *sn);
+i64 SnipSpan_Total(Span *sns, word flags);

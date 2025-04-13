@@ -47,13 +47,8 @@ typedef struct match {
     word captureKey;
 } Match;
 
-Match *Match_Make(MemCh *m, Str *s, word flags);
-status Match_SetPattern(Match *mt, PatCharDef *def, Str *backlog);
-status Match_SetStr(MemCh *m, Match *mt, Str *s, Str *backlog);
-status Match_Feed(MemCh *m, Match *mt, word c);
-status Match_FeedStr(MemCh *m, Match *mt, Str *s, int offset);
+Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog);
+status Match_Feed(MemCh *m, Match *mt, byte c);
+status Match_FeedStrVec(MemCh *m, Match *mt, StrVec *v, i32 offset);
 status Match_FeedEnd(MemCh *m, Match *mt);
-status Match_AddFlagsToStr(MemCh *m, Str *s, word flag);
-int Match_Total(Match *mt);
-PatCharDef *Match_GetDef(Match *mt);
 status Match_SetCount(Match *mt, i32 count);
