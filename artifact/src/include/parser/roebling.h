@@ -25,40 +25,32 @@ typedef struct roebling_blank {
 
 typedef struct roebling {
     Type type;
+    i32 idx;
     MemCh *m;
-    Cursor cursor;
+    Cursor *curs;
     Abstract *source; 
     RblCaptureFunc capture;
-    /* end of roebling blank */
-    /* current */
-    int idx;
-    Span * matches;
     Span *snips;
-    /* overall */
     Span *parsers_do;
     Lookup *marks;
-    /* run specific */
-    /* step specific */
     i8 jump;
     i8 jumpMiss;
-    int tail;
-    int length;
-    /* debug */
+    i32 tail;
+    i32 length;
     Lookup *markLabels;
     Guard guard;
+    Iter matchIt;
 } Roebling;
-
 
 /* > Instantation */
 Roebling *Roebling_Make(MemCh *m,
     cls type,
-    Span *parsers,
     Lookup *markLabels,
-    Str *s,
+    Cursor *curs,
     RblCaptureFunc capture,
     Abstract *source
 );
-RoeblingBlank *RoeblingBlank_Make(MemCh *m, Str *s, Abstract *source, RblCaptureFunc capture);
+
 status Roebling_AddParsers(MemCh *m, Span *parsers, Lookup *marks, Span *additions, Lookup *desc);
 
 /* > Reset */

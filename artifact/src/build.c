@@ -29,9 +29,9 @@ static char *libs[] = {
 /* sources */
 static BuildSubdir parserobj = { "parser", {
     "match.c",
-    /*
     "patchar.c",
     "roebling.c",
+    /*
     "parser_debug.c",
     "snip.c",
     */

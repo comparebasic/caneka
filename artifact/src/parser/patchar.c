@@ -1,41 +1,30 @@
 #include <external.h>
 #include <caneka.h>
 
-String *PatChar_FromString(MemCtx *m, String *s){
-    String *pat = String_Init(m, STRING_EXTEND);
-    PatCharDef pdef;
-    if(String_Next(s) != NULL || (s->length+1) * sizeof(PatCharDef) > STRING_CHUNK_SIZE){
-        Fatal("Pat char not yet implemented for strings of this length", TYPE_STRING);
+static Str *PatChar_fromStr(MemCh *m, Str *s, word flags){
+    Str *pat = Str_Make(m, STR_DEFAULT);
+    i32 max = (STR_DEFAULT / sizeof(PatCharDef))-1;
+    if(s->length > max){
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Str longer than pat char max");
         return NULL;
     }
-    for(int i = 0; i < s->length; i++){
-        pdef.flags = PAT_TERM;
-        pdef.from = (word)s->bytes[i];
-        pdef.to = (word)s->bytes[i];
-        String_AddBytes(m, pat, (byte *)&pdef, sizeof(PatCharDef));
+    PatCharDef *pdef = (PatCharDef *)pat->bytes;
+    for(i32 i = 0; i < s->length; i++, pdef++){
+        pdef->flags = flags;
+        pdef->from = pdef->to = s->bytes[i];
     }
-    pdef.flags = PAT_END;
-    pdef.from = 0;
-    pdef.to = 0;
-    String_AddBytes(m, pat, (byte *)&pdef, sizeof(PatCharDef));
+    pdef->flags = PAT_END;
+    pdef->from = 0;
+    pdef->to = 0;
 
     return pat;
 }
 
-String *PatChar_KoFromString(MemCtx *m, String *s){
-    String *pat = String_Init(m, STRING_EXTEND);
-    PatCharDef pdef;
-    if(String_Next(s) != NULL || (s->length+1) * sizeof(PatCharDef) > STRING_CHUNK_SIZE){
-        Fatal("Pat char not yet implemented for strings of this length", TYPE_STRING);
-        return NULL;
-    }
-    for(int i = 0; i < s->length; i++){
-        pdef.flags = PAT_KO|PAT_KO_TERM;
-        pdef.from = (word)s->bytes[i];
-        pdef.to = (word)s->bytes[i];
-        String_AddBytes(m, pat, (byte *)&pdef, sizeof(PatCharDef));
-    }
+Str *PatChar_FromStr(MemCh *m, Str *s){
+    return PatChar_fromStr(m, s, PAT_TERM);
+}
 
-    return pat;
+Str *PatChar_KoFromStr(MemCh *m, Str *s){
+    return PatChar_fromStr(m, s, (PAT_KO|PAT_KO_TERM));
 }
 

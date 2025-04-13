@@ -268,6 +268,7 @@ status Match_SetCount(Match *mt, i32 count){
     PatCharDef *def = mt->pat.startDef;
     while(def != mt->pat.endDef){
         if(def->flags & PAT_COUNT){
+            mt->remaining = count;
             PatCountDef *countDef = (PatCountDef *)def;
             countDef->count = count;
             return SUCCESS;
