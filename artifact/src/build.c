@@ -27,6 +27,27 @@ static char *libs[] = {
 };
 
 /* sources */
+static BuildSubdir parserobj = { "parser", {
+    "match.c",
+    "patchar.c",
+    "roebling.c",
+    "parser_debug.c",
+    "snip.c",
+    NULL
+}};
+
+static BuildSubdir transpobj = { "transp", {
+    "ext_match.c",
+    "fmt_ctx.c",
+    "fmt_def.c",
+    "fmt_item.c",
+    "fmt_resolver.c",
+    "source.c",
+    "target.c",
+    "transp.c",
+    NULL
+}};
+
 static BuildSubdir cryptoobj = { "crypto", {
     "asymetric.c",
     "bio.c",
@@ -39,6 +60,12 @@ static BuildSubdir cryptoobj = { "crypto", {
     "secure.c",
     "symetric.c",
     NULL
+}};
+
+static BuildSubdir xmlobj = { "formats/xml", {
+    "xml.c",
+    "xml_parser.c",
+    NULL,
 }};
 
 static BuildSubdir cashobj = { "formats/cash", {
@@ -66,11 +93,6 @@ static BuildSubdir osetobj = { "formats/oset", {
     "oset_item.c",
     "oset_parser.c",
     "oset_to.c",
-    NULL,
-}};
-static BuildSubdir xmlobj = { "formats/xml", {
-    "xml.c",
-    "xml_parser.c",
     NULL,
 }};
 
@@ -111,30 +133,9 @@ static BuildSubdir canekaobj = { "formats/caneka", {
     NULL
 }};
 
-static BuildSubdir transpobj = { "transp", {
-    "ext_match.c",
-    "fmt_ctx.c",
-    "fmt_def.c",
-    "fmt_item.c",
-    "fmt_resolver.c",
-    "source.c",
-    "target.c",
-    "transp.c",
-    NULL
-}};
-
 static BuildSubdir xmltobj = { "lang/xmlt", {
     "xmlt.c",
     "xmlt_template.c",
-    NULL
-}};
-
-static BuildSubdir parserobj = { "parser", {
-    "match.c",
-    "patchar.c",
-    "roebling.c",
-    "parser_debug.c",
-    "snip.c",
     NULL
 }};
 
@@ -212,6 +213,8 @@ static BuildSubdir testfixturesobj = { "tests/fixtures", {
 }};
 
 static BuildSubdir *objdirs[] = {
+    &parserobj,
+    &transpobj,
     &cryptoobj,
     &cashobj,
     &kveobj,
@@ -223,9 +226,7 @@ static BuildSubdir *objdirs[] = {
     &httpobj,
     &cdocobj,
     &canekaobj,
-    &transpobj,
     &xmltobj,
-    &parserobj,
     &persistobj,
     &serveobj,
     &testsobj,

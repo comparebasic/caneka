@@ -13,6 +13,7 @@ typedef struct hashed {
 extern struct lookup *HashLookup;
 typedef util (*HashFunc)(Abstract *a);
 
+util Hash_Bytes(byte *bt, size_t length);
 util Get_Hash(Abstract *a);
 boolean Hashed_Equals(Hashed *a, Hashed *b);
 Hashed *Hashed_Make(MemCh *m, Abstract *a);

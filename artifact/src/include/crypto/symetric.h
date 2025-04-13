@@ -1,2 +1,2 @@
-Str *Symetric_Enc(MemCh *m, Str *key, Str *content);
-Str *Symetric_Dec(MemCh *m, Str *key, Str *content);
+StrVec *Symetric_Enc(MemCh *m, Str *key, StrVec *content);
+StrVec *Symetric_Dec(MemCh *m, Str *key, StrVec *content);

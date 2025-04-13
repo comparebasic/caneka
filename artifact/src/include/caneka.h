@@ -3,6 +3,8 @@
 
 #include "config.h"
 #include "base.h"
+#include "parser.h"
 #include "crypto.h"
+#include "persist.h"
 
 #endif

@@ -5,7 +5,7 @@ Chain *MemLocalToChain = NULL;
 Chain *MemLocalFromChain = NULL;
 Lookup *ExemptLocal = NULL;
 
-static status MemLocal_addTo(MemCtx *m, Lookup *lk){
+static status MemLocal_addTo(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN, (void *)String_ToLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_ToLocal);
@@ -15,7 +15,7 @@ static status MemLocal_addTo(MemCtx *m, Lookup *lk){
     return r;
 }
 
-static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
+static status MemLocal_addFrom(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STRING_CHAIN+HTYPE_LOCAL, (void *)String_FromLocal);
     r |= Lookup_Add(m, lk, TYPE_SPAN+HTYPE_LOCAL, (void *)Span_FromLocal);
@@ -25,7 +25,7 @@ static status MemLocal_addFrom(MemCtx *m, Lookup *lk){
     return r;
 }
 
-static status MemLocal_addExempt(MemCtx *m, Lookup *lk){
+static status MemLocal_addExempt(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)1);
     r |= Lookup_Add(m, lk, TYPE_STRING_FIXED, (void *)1);
@@ -33,7 +33,7 @@ static status MemLocal_addExempt(MemCtx *m, Lookup *lk){
     return r;
 }
 
-status MemLocal_Init(MemCtx *m){
+status MemLocal_Init(MemCh *m){
     if(MemLocalToChain == NULL){
         Lookup *funcs = Lookup_Make(m, _TYPE_START, MemLocal_addTo, NULL);
         MemLocalToChain = Chain_Make(m, funcs);
@@ -48,7 +48,7 @@ status MemLocal_Init(MemCtx *m){
     return NOOP;
 }
 
-status MemLocal_To(MemCtx *m, Abstract *a){
+status MemLocal_To(MemCh *m, Abstract *a){
     if(a == NULL || a->type.of > HTYPE_LOCAL){
         return NOOP;
     }
@@ -64,7 +64,7 @@ status MemLocal_To(MemCtx *m, Abstract *a){
     return func(m, a); 
 }
 
-status MemLocal_From(MemCtx *m, Abstract *a){
+status MemLocal_From(MemCh *m, Abstract *a){
     if(a == NULL || a->type.of < HTYPE_LOCAL){
         return NOOP;
     }
@@ -80,7 +80,7 @@ status MemLocal_From(MemCtx *m, Abstract *a){
     return func(m, a); 
 }
 
-status MemLocal_SetLocal(MemCtx *m, Abstract **dblAddr){
+status MemLocal_SetLocal(MemCh *m, Abstract **dblAddr){
     DebugStack_Push("MemLocal_SetLocal", TYPE_CSTR);
     Abstract *addr = *dblAddr;
     if(addr == NULL){
@@ -89,7 +89,7 @@ status MemLocal_SetLocal(MemCtx *m, Abstract **dblAddr){
     }
     boolean subTo = TRUE;
     i32 idx = -1;
-    MemSlab *sl = MemCtx_GetSlab(m, addr, &idx);
+    MemSlab *sl = MemCh_GetSlab(m, addr, &idx);
     LocalPtr lptr;
     if(sl != NULL && idx != -1){
         memset(&lptr, 0, sizeof(LocalPtr));
@@ -111,7 +111,7 @@ status MemLocal_SetLocal(MemCtx *m, Abstract **dblAddr){
     return NOOP;
 }
 
-status MemLocal_UnSetLocal(MemCtx *m, Abstract **dblAddr){
+status MemLocal_UnSetLocal(MemCh *m, Abstract **dblAddr){
     /*
     DebugStack_Push("MemLocal_UnSetLocal", TYPE_CSTR);
     LocalPtr *lptr = (LocalPtr *)dblAddr;
@@ -149,7 +149,7 @@ status MemLocal_UnSetLocal(MemCtx *m, Abstract **dblAddr){
     return SUCCESS;
 }
 
-Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
+Span *MemLocal_Load(MemCh *m, String *path, Access *access){
     /*
     DebugStack_Push(path, path->type.of);
     status r = READY;
@@ -168,7 +168,7 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
 
     String_Add(m, fname, String_FromInt(m, idx));
 
-    MemCtx *mlm = MemCtx_Make();
+    MemCh *mlm = MemCh_Make();
 
     while(File_Exists(fname) & SUCCESS){
         File_Init(&slabFile, fname, NULL, NULL);
@@ -208,11 +208,11 @@ Span *MemLocal_Load(MemCtx *m, String *path, Access *access){
     return NULL;
 }
 
-status MemLocal_Destroy(MemCtx *m, String *path, Access *access){
+status MemLocal_Destroy(MemCh *m, String *path, Access *access){
     return Dir_Destroy(m, path, access);
 }
 
-status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
+status MemLocal_Persist(MemCh *m, Span *ml, String *path, Access *access){
     DebugStack_Push("MemLocal_Persist", TYPE_CSTR);
     status r = READY;
     /*
@@ -274,7 +274,7 @@ status MemLocal_Persist(MemCtx *m, Span *ml, String *path, Access *access){
 Span *MemLocal_Make(cls typeOf){
     DebugStack_Push("MemLocal_Make", TYPE_CSTR);
     if(Ifc_Match(typeOf, TYPE_SPAN)){
-        MemCtx *m = MemCtx_Make();
+        MemCh *m = MemCh_Make();
         DebugStack_Pop();
         return Span_Make(m);
     }else{

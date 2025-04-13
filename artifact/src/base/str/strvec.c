@@ -128,6 +128,12 @@ status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length){
     return r;
 }
 
+StrVec *StrVec_From(MemCh *m, Str *s){
+    StrVec *v = StrVec_Make(m);
+    StrVec_Add(m, s);
+    return v;
+}
+
 StrVec *StrVec_Make(MemCh *m){
     StrVec *v = MemCh_Alloc(m, sizeof(StrVec));
     v->type.of = TYPE_STRVEC;

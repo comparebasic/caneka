@@ -1,36 +1,36 @@
 #include <external.h> 
 #include <caneka.h> 
 
-static TableChain *SaltyKeyChain = NULL;
+static Span *SaltyKeyTbl = NULL;
 
-status Enc_Init(MemCtx *m){
-    if(SaltyKeyChain == NULL){
+status Enc_Init(MemCh *m){
+    if(SaltyKeyTbl == NULL){
         Span *keys = Span_Make(m);
-        SaltyKeyChain = TableChain_Make(m, keys);
+        SaltyKeyTbl = Span_Make(m);
         return SUCCESS;
     }
     return NOOP;
 }
 
-String *EncPair_GetKey(MemCtx *m, String *key, Access *access){
+Str *EncPair_GetKey(MemCh *m, Str *key, Access *access){
     DebugStack_Push(NULL, 0);
-    String *s = String_Prefixed(m, key, String_Make(m, bytes("_keys.")));
+    Str *s = Str_Prefixed(m, key, Str_CstrRef(m, "_keys."));
     Access_SetFl(access, ACCESS_KEY);
-    String *ret = GetAccess(access, s);
+    Str *ret = GetAccess(access, s);
     DebugStack_Pop();
     return ret;
 }
 
-status EncPair_Conceal(MemCtx *m, EncPair *p){
+status EncPair_Conceal(MemCh *m, EncPair *p){
     p->dec = NULL;
     return SUCCESS;
 }
 
-static boolean isFilled(String *s){
-    return (s != NULL && s->type.of != TYPE_BLANK);
+static boolean isFilled(void *v){
+    return (v != NULL);
 }
 
-status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
+status EncPair_Fill(MemCh *m, EncPair *p, Access *access){
     DebugStack_Push(access->owner, access->owner->type.of);
     if(isFilled(p->enc) && isFilled(p->dec) && isFilled(p->keyId)){
         DebugStack_Pop();
@@ -38,7 +38,7 @@ status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
     }
 
     if(p->keyId != NULL){
-        String *key = EncPair_GetKey(m, access->owner, access);
+        Str *key = EncPair_GetKey(m, access->owner, access);
         if(!isFilled(p->enc) && isFilled(p->dec)){
             p->enc = Salty_Enc(m, key, p->dec); 
             DebugStack_Pop();
@@ -55,8 +55,8 @@ status EncPair_Fill(MemCtx *m, EncPair *p, Access *access){
     return ERROR;
 }
 
-EncPair *EncPair_Make(MemCtx *m, String *keyId, String *enc, String *dec, Access *access, int length){
-    EncPair *p = (EncPair *)MemCtx_Alloc(m, sizeof(EncPair));
+EncPair *EncPair_Make(MemCh *m, Str *keyId, StrVec *enc, StrVec *dec, Access *access, int length){
+    EncPair *p = (EncPair *)MemCh_Alloc(m, sizeof(EncPair));
     p->type.of = TYPE_ENC_PAIR;
 
     p->enc = enc;

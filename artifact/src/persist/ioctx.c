@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
+static status ioCtx_LoadFileList(MemCh *m, IoCtx *ctx){
     File index;
     File_Init(&index, IoCtx_GetIndexName(m, ctx), ctx->access, NULL);
     index.abs = IoCtx_GetPath(m, ctx, index.path);
@@ -16,7 +16,7 @@ static status ioCtx_LoadFileList(MemCtx *m, IoCtx *ctx){
     return NOOP;
 }
 
-static String *pathRecurse(MemCtx *m, String *s, IoCtx *ctx, IoCtx *prior){
+static String *pathRecurse(MemCh *m, String *s, IoCtx *ctx, IoCtx *prior){
     if(prior != NULL && prior->prior != NULL){
         String_Add(m, s, pathRecurse(m, s, prior, prior->prior));
     }else{
@@ -35,7 +35,7 @@ static String *pathRecurse(MemCtx *m, String *s, IoCtx *ctx, IoCtx *prior){
 }
 
 
-String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
+String *IoCtx_GetAbs(MemCh *m, IoCtx *ctx){
     if(ctx->abs == NULL){
         String *s = String_Init(m, STRING_EXTEND);
         if(ctx->prior != NULL && ctx->prior->abs != NULL){
@@ -50,19 +50,19 @@ String *IoCtx_GetAbs(MemCtx *m, IoCtx *ctx){
     return ctx->abs;
 }
 
-String *IoCtx_GetIndexName(MemCtx *m, IoCtx *ctx){
+String *IoCtx_GetIndexName(MemCh *m, IoCtx *ctx){
     return String_Make(m, bytes("index"));
 }
 
-String *IoCtx_GetMStoreName(MemCtx *m, IoCtx *ctx){
+String *IoCtx_GetMStoreName(MemCh *m, IoCtx *ctx){
     return String_Make(m, bytes("mstore"));
 }
 
-String *IoCtx_GetMStorePath(MemCtx *m, IoCtx *ctx){
+String *IoCtx_GetMStorePath(MemCh *m, IoCtx *ctx){
     return IoCtx_GetPath(m, ctx, IoCtx_GetMStoreName(m, ctx));
 }
 
-String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path){
+String *IoCtx_GetPath(MemCh *m, IoCtx *ctx, String *path){
     String *s = String_Init(m, STRING_EXTEND);
     String *abs = IoCtx_GetAbs(m, ctx); 
     String_Add(m, s, abs);
@@ -76,7 +76,7 @@ String *IoCtx_GetPath(MemCtx *m, IoCtx *ctx, String *path){
 	return s;
 }
 
-status IoCtx_LoadOrReserve(MemCtx *m, IoCtx *ctx){
+status IoCtx_LoadOrReserve(MemCh *m, IoCtx *ctx){
     status r = READY;
     String *s = String_Init(m, STRING_EXTEND);
     String *path = IoCtx_GetAbs(m, ctx);
@@ -97,7 +97,7 @@ status IoCtx_LoadOrReserve(MemCtx *m, IoCtx *ctx){
     return NOOP;
 }
 
-status IoCtx_Load(MemCtx *m, IoCtx *ctx){
+status IoCtx_Load(MemCh *m, IoCtx *ctx){
     DebugStack_Push(ctx->root, ctx->root->type.of);
     status r = READY;
     String *s = String_Init(m, STRING_EXTEND);
@@ -119,7 +119,7 @@ status IoCtx_Load(MemCtx *m, IoCtx *ctx){
     return SUCCESS;
 }
 
-status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
+status IoCtx_Persist(MemCh *m, IoCtx *ctx){
     String *abs = IoCtx_GetAbs(m, ctx);
     DebugStack_Push(abs, abs->type.of);
     status r = READY;
@@ -157,7 +157,7 @@ status IoCtx_Persist(MemCtx *m, IoCtx *ctx){
     return r;
 }
 
-status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
+status IoCtx_Destroy(MemCh *m, IoCtx *ctx, Access *access){
     status r = READY;
     String *abs = IoCtx_GetAbs(m, ctx); 
     char *abs_cstr = String_ToChars(m, abs);
@@ -190,7 +190,7 @@ status IoCtx_Destroy(MemCtx *m, IoCtx *ctx, Access *access){
     return r|ERROR;
 }
 
-status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
+status IoCtx_Init(MemCh *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
     memset(ctx, 0, sizeof(IoCtx));
 
     ctx->m = m;
@@ -203,18 +203,18 @@ status IoCtx_Init(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *pr
     return SUCCESS;
 }
 
-IoCtx *IoCtx_Make(MemCtx *m, String *root, Access *access, IoCtx *prior){
+IoCtx *IoCtx_Make(MemCh *m, String *root, Access *access, IoCtx *prior){
     if(root == NULL){
         Fatal("Error getAbsPath: missing base_s on ioctx\n", TYPE_IOCTX);
     }
-	IoCtx* ctx = (IoCtx*)MemCtx_Alloc(m, sizeof(IoCtx));
+	IoCtx* ctx = (IoCtx*)MemCh_Alloc(m, sizeof(IoCtx));
     IoCtx_Init(m, ctx, root, access, prior);
     ctx->mstore = MemLocal_Make(TYPE_TABLE);
 
     return ctx;
 }
 
-status IoCtx_Open(MemCtx *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
+status IoCtx_Open(MemCh *m, IoCtx *ctx, String *root, Access *access, IoCtx *prior){
     DebugStack_Push("IoCtx_Open", TYPE_CSTR);
     IoCtx_Init(m, ctx, root, access, prior);
     status r = IoCtx_Load(m, ctx);

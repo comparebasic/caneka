@@ -106,6 +106,19 @@ i64 Str_Trunc(Str *s, i64 amount){
     return amount;
 }
 
+Str *Str_Prefixed(MemCh *m, Str *s, Str *prefix){
+    if(s->length + prefix->length < s->alloc){
+        memmove(s->bytes+prefix->length, s->bytes, s->length);
+        memcpy(s->bytes, prefix->bytes, prefix->length);
+        return s;
+    }else{
+        Str *s2 = Str_Make(m, s->length+prefix->length+1);
+        memcpy(s2->bytes, prefix->bytes, prefix->length);
+        memcpy(s2->bytes+prefix->length, s->bytes, s->length);
+        return s2;
+    }
+}
+
 i64 Str_AddMemCount(Str *s, i64 mem) {
     if(mem == 0){
        return Str_AddCstr(s, "0b"); 

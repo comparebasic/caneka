@@ -40,6 +40,7 @@ static status patFlagStr(word flags, char str[]){
 }
 
 static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int color, boolean extended){
+    /*
     char flag_cstr[12];
     patFlagStr(def->flags, flag_cstr);
     if((def->flags & PAT_COUNT) != 0){
@@ -67,10 +68,12 @@ static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int col
     if((def->flags & PAT_TERM) != 0){
         printf(".");
     }
+    */
 }
 
-static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+static void PatCharDef_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     PatCharDef *def = (PatCharDef *)a;
+    /*
     printf("\x1b[%dm%s", color, msg);
     if(extended){
         boolean first = TRUE;
@@ -91,6 +94,7 @@ static void PatCharDef_Print(Abstract *a, cls type, char *msg, int color, boolea
         patCharDef_PrintSingle(def, TYPE_PATCHARDEF, msg, color, extended);
     }
     printf("\x1b[0m");
+    */
 }
 
 static char *flagStrs[] = {
@@ -148,9 +152,10 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
 }
 
 
-void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extended){
+void Roebling_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     DebugStack_Push("Roebling_Print", TYPE_CSTR);
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
+    /*
     String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
     printf("\x1b[%dm%sRbl<%s\x1b[1;%dm%s\x1b[0;%dm source=%u", color, msg, State_ToChars(rbl->type.state), color, String_ToChars(DebugM, sec), color, rbl->source != NULL ? rbl->source->type.of: 0);
     printf(":");
@@ -186,13 +191,15 @@ void Roebling_Print(Abstract *a, cls type, char *msg, int color, boolean extende
         Debug_Print((void *)&(rbl->cursor), 0, "", color, extended);
     }
     printf("\x1b[%dm>\x1b[0m", color);
+    */
     DebugStack_Pop();
     return;
 }
 
 
-void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extended){
+void Match_PrintPat(Stream *sm, Abstract *a, cls type, boolean extended){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
+    /*
     if(extended){
         printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:remainig=%d:%d/%d", color, msg,
             State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->remaining, mt->snip.start, mt->snip.length);
@@ -207,11 +214,13 @@ void Match_PrintPat(Abstract *a, cls type, char *msg, int color, boolean extende
         Debug_Print((void *)mt->pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
         printf("\x1b[%dm>\x1b[0m", color);
     }
+    */
 }
 
 
 
 void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched, boolean extended){
+    /*
     if(extended){
         printf("    \x1b[%dm%s ", DEBUG_PATMATCH, 
         State_ToChars(mt->type.state));
@@ -229,6 +238,7 @@ void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean match
             printf("\x1b[%dm, \x1b[0m", DEBUG_PATMATCH);
         }
     }
+    */
 }
 
 status ParserDebug_Init(MemCtx *m, Lookup *lk){

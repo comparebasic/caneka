@@ -1,18 +1,18 @@
 #include <external.h> 
 #include <caneka.h> 
 
-String *Salty_Enc(MemCtx *m, String *key, String *s){
-    if((key->type.state & FLAG_STRING_BINARY) == 0){
-        key = Digest_Sha256(m, key);
+StrVec *Salty_Enc(MemCh *m, Str *key, StrVec *v){
+    if((key->type.state & STRING_BINARY) == 0){
+        key = Digest_Sha256(m, StrVec_From(m, key));
     }
 
-    return Symetric_Enc(m, key, s);
+    return Symetric_Enc(m, key, v);
 }
 
-String *Salty_Dec(MemCtx *m, String *key, String *s){
-    if((key->type.state & FLAG_STRING_BINARY) == 0){
-        key = Digest_Sha256(m, key);
+StrVec *Salty_Dec(MemCh *m, Str *key, StrVec *v){
+    if((key->type.state & STRING_BINARY) == 0){
+        key = Digest_Sha256(m, StrVec_From(m, key));
     }
 
-    return Symetric_Dec(m, key, s);
+    return Symetric_Dec(m, key, v);
 }

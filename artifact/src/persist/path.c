@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status markPath(MemCtx *m, String *path, String *backlog){
+static status markPath(MemCh *m, String *path, String *backlog){
     Match mt;
     String *pat = PatChar_FromString(m, String_Make(m, bytes("/")));
     status r =  Match_SetPattern(&mt, (PatCharDef *)pat->bytes, backlog); 
@@ -29,19 +29,19 @@ static status markPath(MemCtx *m, String *path, String *backlog){
     return mt.type.state;
 }
 
-String *Path_Base(MemCtx *m, String *path){
+String *Path_Base(MemCh *m, String *path){
     String *s = String_Init(m, STRING_EXTEND);
     Path_Pair(m, path, s, NULL);
     return s;
 }
 
-String *Path_File(MemCtx *m, String *path){
+String *Path_File(MemCh *m, String *path){
     String *s = String_Init(m, STRING_EXTEND);
     Path_Pair(m, path, NULL, s);
     return s;
 }
 
-status Path_Pair(MemCtx *m, String *path, String *base, String *fname){
+status Path_Pair(MemCh *m, String *path, String *base, String *fname){
     String *backlog = String_Init(m, STRING_EXTEND);
     backlog->type.state |= (FLAG_STRING_CONTIGUOUS|FLAG_STRING_BINARY);
     markPath(m, path, backlog);

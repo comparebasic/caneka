@@ -3,7 +3,7 @@
 
 static EVP_PKEY_CTX *pctx = NULL;
 
-status KeyInit(MemCtx *m){
+status KeyInit(MemCh *m){
     if(pctx == NULL){
         ERR_load_crypto_strings();
         OpenSSL_add_all_algorithms();
@@ -13,38 +13,38 @@ status KeyInit(MemCtx *m){
     return NOOP;
 }
 
-status KeyCleanup(MemCtx *m){
+status KeyCleanup(MemCh *m){
     EVP_cleanup();
     CRYPTO_cleanup_all_ex_data();
     ERR_free_strings();
     return SUCCESS;
 }
 
-EcKey *EcKey_FromPaths(MemCtx *m, String *priv, String *pub, Access *access){
+EcKey *EcKey_FromPaths(MemCh *m, Str *priv, Str *pub, Access *access){
     status r = READY;
-    String *priv_s = NULL;
-    String *pub_s = NULL;
+    Str *priv_s = NULL;
+    Str *pub_s = NULL;
 
     if(priv != NULL){
         File privFile;
         File_Init(&privFile, priv, access, NULL);
         privFile.abs = privFile.path;
         r |= File_Load(m, &privFile, access);
-        priv_s = privFile.data;
+        priv_s = privFile.sm->dest.curs->it.value;
     }
     if(pub != NULL){
         File pubFile;
         File_Init(&pubFile, pub, access, NULL);
         pubFile.abs = pubFile.path;
         r |= File_Load(m, &pubFile, access);
-        pub_s = pubFile.data;
+        pub_s = pubFile.sm->dest.curs->it.value;
     }
 
     return EcKey_From(m, priv_s, pub_s);
 }
 
-EcKey *EcKey_From(MemCtx *m, String *priv, String *pub){
-    EcKey *ecKey = MemCtx_Alloc(m, sizeof(EcKey));
+EcKey *EcKey_From(MemCh *m, Str *priv, Str *pub){
+    EcKey *ecKey = MemCh_Alloc(m, sizeof(EcKey));
     ecKey->type.of = TYPE_EC_KEY;
 
     EVP_PKEY *evpKey = EVP_PKEY_new();
@@ -55,13 +55,11 @@ EcKey *EcKey_From(MemCtx *m, String *priv, String *pub){
         goto error;
     }
 
-    DPrint((void *)priv, COLOR_PURPLE, "privKey: ");
-    DPrint((void *)pub, COLOR_PURPLE, "pubKey: ");
     if(priv != NULL){
         printf("decoding priv key\n");
-        String *rawPriv = String_FromB64(m, priv);
-        size_t privLen = String_Length(rawPriv);
-        byte *privBytes = bytes(String_ToChars(m, rawPriv));
+        Str *rawPriv = Span_Get(StrVec_FromB64(m, StrVec_From(m, priv))->p, 0);
+        size_t privLen = rawPriv->length;
+        byte *privBytes = rawPriv->bytes;
         if(!EVP_PKEY_get_raw_private_key(evpKey, privBytes, &privLen)){
                 printf("priv key evp error\n");
                 goto error;
@@ -69,12 +67,11 @@ EcKey *EcKey_From(MemCtx *m, String *priv, String *pub){
             printf("key success\n");
         }
     }
-    size_t pubLen = String_Length(pub);
+    size_t pubLen = pub->length;
     if(pub != NULL){
-        printf("decoding pub key\n");
-        String *rawPub = String_FromB64(m, pub);
-        size_t pubLen = String_Length(rawPub);
-        byte *pubBytes = bytes(String_ToChars(m, rawPub));
+        Str *rawPub = Span_Get(StrVec_FromB64(m, StrVec_From(m, pub))->p, 0);
+        size_t pubLen = rawPub->length;
+        byte *pubBytes = rawPub->bytes;
         if(!EVP_PKEY_get_raw_public_key(evpKey, 
                pubBytes, &pubLen)){
             printf("pub key evp error\n");
@@ -89,7 +86,7 @@ error:
     return ecKey;
 }
 
-status EcKey_Free(MemCtx *m, EcKey *key){
+status EcKey_Free(MemCh *m, EcKey *key){
     EVP_PKEY_free(key->evp);
     return SUCCESS;
 }

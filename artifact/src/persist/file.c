@@ -1,15 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-File *File_Clone(MemCtx *m, File *o){
-    File *file = MemCtx_Realloc(m, sizeof(File), o, sizeof(File));
+File *File_Clone(MemCh *m, File *o){
+    File *file = MemCh_Realloc(m, sizeof(File), o, sizeof(File));
     file->path = String_Clone(m, file->path);
     file->abs = String_Clone(m, file->abs);
     file->data = String_Clone(m, file->data);
     return file;
 }
 
-status File_Copy(MemCtx *m, String *a, String *b, Access *ac){
+status File_Copy(MemCh *m, String *a, String *b, Access *ac){
     Span *cmd = Span_Make(m);
     Span_Add(cmd, (Abstract *)String_Make(m, bytes("cp")));
     Span_Add(cmd, (Abstract *)a);
@@ -18,7 +18,7 @@ status File_Copy(MemCtx *m, String *a, String *b, Access *ac){
     return SubProcess(m, cmd, NULL);
 }
 
-status File_Persist(MemCtx *m, File *file){
+status File_Persist(MemCh *m, File *file){
     char buff[PATH_BUFFLEN];
     if(DEBUG_FILE){
         DPrint((Abstract *)file->abs, DEBUG_FILE, "Persisting: ");
@@ -72,12 +72,12 @@ status File_Persist(MemCtx *m, File *file){
     return NOOP;
 }
 
-FILE *File_GetFILE(MemCtx *m, File *file, Access *access){
+FILE *File_GetFILE(MemCh *m, File *file, Access *access){
     /* accessy stuff */
     return fopen((char *)file->abs->bytes, "r");
 }
 
-status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
+status File_Read(MemCh *m, File *file, Access *access, int pos, int length){
     int remaining = length;
     FILE *f = File_GetFILE(m, file, access);;
     if(f == NULL){
@@ -108,7 +108,7 @@ status File_Read(MemCtx *m, File *file, Access *access, int pos, int length){
     return SUCCESS;
 }
 
-status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source){
+status File_StreamWithOpen(MemCh *m, FILE *f, File *file, Access *access, OutFunc out, Abstract *source){
     DebugStack_Push("File_StreamWithOpen", TYPE_CSTR); 
     DebugStack_SetRef(file->abs, file->abs->type.of);
     String *s = NULL;
@@ -149,7 +149,7 @@ status File_StreamWithOpen(MemCtx *m, FILE *f, File *file, Access *access, OutFu
     return ERROR;
 }
 
-status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract *source){
+status File_Stream(MemCh *m, File *file, Access *access, OutFunc out, Abstract *source){
     DebugStack_Push("File_Stream", TYPE_CSTR); 
     if(DEBUG_FILE){
         printf("\x1b[%dmFile_Stread streaming: '%s'\x1b[0m\n", DEBUG_FILE, file->abs->bytes);
@@ -174,7 +174,7 @@ status File_Stream(MemCtx *m, File *file, Access *access, OutFunc out, Abstract 
     return r;
 }
 
-status File_Load(MemCtx *m, File *file, Access *access){
+status File_Load(MemCh *m, File *file, Access *access){
     return File_Stream(m, file, access, NULL, NULL);
 }
 
@@ -225,7 +225,7 @@ File *File_Init(File *file, String *path, Access *access, IoCtx *ctx){
     return file;
 }
 
-File *File_Make(MemCtx *m, String *path, Access *access, IoCtx *ctx){
-    File *file = MemCtx_Alloc(m, sizeof(File));
+File *File_Make(MemCh *m, String *path, Access *access, IoCtx *ctx){
+    File *file = MemCh_Alloc(m, sizeof(File));
     return File_Init(file, path, access, ctx);
 }

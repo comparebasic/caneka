@@ -1,0 +1,7 @@
+#include "parser/patchar.h"
+#include "parser/snip.h"
+#include "parser/match.h"
+#include "parser/match_predefs.h"
+#include "parser/parser_debug.h"
+#include "parser/snip.h"
+#include "parser/roebling.h"

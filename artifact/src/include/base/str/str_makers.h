@@ -1,6 +1,7 @@
 Str *Str_FromI64(MemCh *m, i64 i);
 i64 Str_AddI64(Str *s, i64 i);
 Str *Str_ToHex(MemCh *m, Str *s);
-Str *Str_MemCount(MemCh *m, i64 mem) ;
+Str *Str_MemCount(MemCh *m, i64 mem);
 i64 Str_Trunc(Str *s, i64 amount);
-i64 Str_AddMemCount(Str *s, i64 mem) ;
+i64 Str_AddMemCount(Str *s, i64 mem);
+Str *Str_Prefixed(MemCh *m, Str *s, Str *prefix);

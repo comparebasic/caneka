@@ -12,6 +12,7 @@
 #include "stream_tests.c"
 /*
 #include "hash_tests.c"
+#include "table_tests.c"
 */
 
 status Tests_Init(MemCh *m){
