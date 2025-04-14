@@ -3,88 +3,53 @@
 
 static status Roebling_RunMatches(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
-    /*
 
-    byte c = 0;
-    rbl->type.state &= ~(ROEBLING_NEXT|END|SUCCESS);
-    if(rbl->matches->nvalues == 0){
-        rbl->type.state |= ROEBLING_NEXT;
-    }
-
-    byte *ptr = s->bytes;
-    byte *end = s->bytes+s->length-1;
-    int noopCount = 0;
     rbl->type.state |= (rbl->cursor.type.state & END);
-    while(start <= end && (rbl->type.state & (ROEBLING_NEXT|END)) == 0){
+    while((rbl->type.state & END) == 0){
         Guard_Incr(&rbl->guard);
 
-        c = *ptr++;
+        byte c = *(rbl->curs.it.ptr);
+        i32 noopCount = 0;
 
-        Match *mt = NULL;
-        Iter it;
-        Iter_Init(&it, rbl->matches);
-        boolean incr = TRUE;
-        noopCount = 0;
-        while((Iter_Next(&it) & END) == 0){
-            mt = (Match *)Iter_Get(&it);
+        Type_SetFlag(rbl->matchIt, SPAN_OP_GET);
+        rbl->matchIt.idx = 0;
+        rbl->matchIt.type.state &= ~PROCESSING;
+        while((Iter_Next(&rbl->matchIt) & END) == 0){
+            Match *mt = (Match *)rbl->matchIt.value;
             DebugStack_SetRef(mt, mt->type.of);
-            incr = TRUE;
-            if(DEBUG_PATMATCH){
-                String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
-                printf("\x1b[1;%dmmrbl:%s/match:%d - \x1b[0m", DEBUG_PATMATCH, String_ToChars(rbl->m, sec), it.idx);
-            }
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
-                 if(StrSnipStr_Total(mt->backlog, (STRSNIP_CONTENT)) == 0
-                    && StrSnipStr_Total(mt->backlog, (STRSNIP_GAP)) == 0 && (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
-                    Fatal("No increment value for successful match", TYPE_PATMATCH);
-                 }
+                rbl->type.state = ROEBLING_NEXT;
+                rbl->type.state &= ~PROCESSING;
 
-                 rbl->type.state = ROEBLING_NEXT;
-                 rbl->type.state &= ~PROCESSING;
-                 rbl->matches->metrics.selected = it.idx;
+                StrVec *v = StrVec_Snip(rbl->m,
+                    mt->backlog, Cursor_Copy(rbl->curs));
+                rbl->capture(mt->captureKey, it.idx, s, rbl->source);
 
-                 if(mt->jump > -1){
-                    rbl->jump = mt->jump;
-                 }
+                if((mt->snip.type.state & STRSNIP_UNCLAIMED) != 0 &&
+                        mt->snip.length > 1){
+                    Cursor_Decr(&rbl->cursor, mt->snip.length-1);
+                }else{
+                    Cursor_NextByte(&rbl->cursor);
+                }
 
-                 String *s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-                 rbl->capture(mt->captureKey, it.idx, s, rbl->source);
-                 if((mt->snip.type.state & STRSNIP_UNCLAIMED) != 0){
-                    incr = FALSE;
-                    if(mt->snip.length > 1){
-                        Cursor_Decr(&(rbl->cursor), mt->snip.length-1);
-                    }
-                 }
-                 break;
+                rbl->type.state |= (rbl->cursor.type.state & END);
+                DebugStack_Pop();
+                return rbl->type.state;
             }
+
             if((mt->type.state & NOOP) != 0){
-                noopCount++;
+                if(++noopCount == rbl->matchIt.span->nvalues){
+                    rbl->type.state |= (NOOP|END|ERROR);
+                    return rbl->type.state;
+                }
             }
         }
 
-        if((mt->type.state & MATCH_INVERTED) != 0){
-            break;
-        }
-
-        if(incr){
-            Cursor_Incr(&(rbl->cursor), 1);
-        }
+        Cursor_NextByte(&rbl->cursor);
         rbl->type.state |= (rbl->cursor.type.state & END);
-
-        if(DEBUG_PATMATCH && rbl->type.state & DEBUG){
-            Stepper(rbl->m, (Abstract *)rbl);
-        }
-        if(noopCount == rbl->matches->nvalues){
-            if(DEBUG_PATMATCH){
-                printf("\x1b[%dnoopCount rached adding NOOP|END flags\x1b[0m\n",
-                    DEBUG_PATMATCH);
-            }
-            rbl->type.state |= (NOOP|END|ERROR);
-        }
     }
 
-    */
     DebugStack_Pop();
     return rbl->type.state;
 }
@@ -97,19 +62,14 @@ status Roebling_RunCycle(Roebling *rbl){
     }
     rbl->type.state &= ~END;
     if((rbl->type.state & ROEBLING_NEXT) != 0){
+        Match *mt = rbl->matchIt.value;
         rbl->tail = 0;
-        if(rbl->jump > -1){
-            rbl->parseIt.idx = rbl->jump;
-            rbl->jump = -1;
+        if(mt != NULL && mt->jump > -1){
+            rbl->parseIt.idx = mt->jump;
         }else{
             rbl->parseIt.idx++;
         }
         rbl->type.state &= ~ROEBLING_NEXT;
-    }else{
-        if(rbl->jumpMiss > -1){
-            rbl->parseIt.idx = rbl->jumpMiss;
-            rbl->jumpMiss = -1;
-        }
     }
 
     Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_GET);
@@ -117,7 +77,7 @@ status Roebling_RunCycle(Roebling *rbl){
     Single *wdof = rbl->parseIt.value;
     if(wdof == NULL){
         if((rbl->type.state & ROEBLING_REPEAT) != 0){
-            rbl->type.state |= (ROEBLING_NEXT|ROEBLING_LOAD_MATCHES); 
+            rbl->type.state |= ROEBLING_NEXT;
             rbl->jump = 0;
         }else{
             rbl->type.state = SUCCESS;

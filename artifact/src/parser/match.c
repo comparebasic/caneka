@@ -140,7 +140,6 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
 
             word snipFlag = ZERO;
             if((def->flags & PAT_LEAVE) != 0){
-                mt->type.state |= MATCH_INVERTED;
                 snipFlag = SNIP_UNCLAIMED;
             }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;

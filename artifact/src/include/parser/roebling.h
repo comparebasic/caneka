@@ -4,10 +4,8 @@ typedef status (*RblFunc)(MemCh *m, struct roebling *rbl);
 typedef status (*RblCaptureFunc)(word captureKey, int matchIdx, Str *s, Abstract *source);
 
 enum roebling_flags {
-    /*MATCH_INVERTED = 1 << 9,*/
     ROEBLING_NEXT = 1 << 10,
     ROEBLING_REPEAT = 1 << 11,
-    ROEBLING_LOAD_MATCHES = 1 << 12,
 };
 
 enum mark_reserved {
@@ -33,8 +31,6 @@ typedef struct roebling {
     Span *snips;
     Iter parseIt;
     Lookup *marks;
-    i8 jump;
-    i8 jumpMiss;
     i32 tail;
     i32 length;
     Lookup *markLabels;

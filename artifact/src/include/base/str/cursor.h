@@ -10,6 +10,10 @@ typedef struct cursor {
 
 extern Cursor _strVecCurs;
 
+status Cursor_NextByte(Cursor *curs);
+status Cursor_Decr(Cursor *curs, i32 length);
 status Cursor_Add(Cursor *curs, Str *s);
 status Cursor_Setup(Cursor *curs, StrVec *v);
 Cursor *Cursor_Make(MemCh *m, StrVec *v);
+Cursor *Cursor_Copy(MemCh *m, Cursor *_curs);
+status Cursor_NextByte(Cursor *curs);

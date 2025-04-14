@@ -2,7 +2,7 @@
 
 enum match_flags {
     MATCH_GOTO = 1 << 8,
-    MATCH_INVERTED = 1 << 9,
+    /*MATCH__ = 1 << 9,*/
     MATCH_TERM_FOUND = 1 << 10,
     MATCH_KO_INVERT = 1 << 11,
     MATCH_KO = 1 << 12,
