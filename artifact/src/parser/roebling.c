@@ -4,14 +4,14 @@
 static status Roebling_RunMatches(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
 
-    rbl->type.state |= (rbl->cursor.type.state & END);
+    rbl->type.state |= (rbl->curs->type.state & END);
     while((rbl->type.state & END) == 0){
         Guard_Incr(&rbl->guard);
 
-        byte c = *(rbl->curs.it.ptr);
+        byte c = *(rbl->curs->ptr);
         i32 noopCount = 0;
 
-        Type_SetFlag(rbl->matchIt, SPAN_OP_GET);
+        Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
         rbl->matchIt.idx = 0;
         rbl->matchIt.type.state &= ~PROCESSING;
         while((Iter_Next(&rbl->matchIt) & END) == 0){
@@ -23,17 +23,17 @@ static status Roebling_RunMatches(Roebling *rbl){
                 rbl->type.state &= ~PROCESSING;
 
                 StrVec *v = StrVec_Snip(rbl->m,
-                    mt->backlog, Cursor_Copy(rbl->curs));
-                rbl->capture(mt->captureKey, it.idx, s, rbl->source);
+                    mt->backlog, Cursor_Copy(rbl->m, rbl->curs));
+                rbl->capture(rbl, mt->captureKey, v);
 
-                if((mt->snip.type.state & STRSNIP_UNCLAIMED) != 0 &&
+                if((mt->snip.type.state & SNIP_UNCLAIMED) != 0 &&
                         mt->snip.length > 1){
-                    Cursor_Decr(&rbl->cursor, mt->snip.length-1);
+                    Cursor_Decr(rbl->curs, mt->snip.length-1);
                 }else{
-                    Cursor_NextByte(&rbl->cursor);
+                    Cursor_NextByte(rbl->curs);
                 }
 
-                rbl->type.state |= (rbl->cursor.type.state & END);
+                rbl->type.state |= (rbl->curs->type.state & END);
                 DebugStack_Pop();
                 return rbl->type.state;
             }
@@ -46,8 +46,8 @@ static status Roebling_RunMatches(Roebling *rbl){
             }
         }
 
-        Cursor_NextByte(&rbl->cursor);
-        rbl->type.state |= (rbl->cursor.type.state & END);
+        Cursor_NextByte(rbl->curs);
+        rbl->type.state |= (rbl->curs->type.state & END);
     }
 
     DebugStack_Pop();
@@ -78,7 +78,6 @@ status Roebling_RunCycle(Roebling *rbl){
     if(wdof == NULL){
         if((rbl->type.state & ROEBLING_REPEAT) != 0){
             rbl->type.state |= ROEBLING_NEXT;
-            rbl->jump = 0;
         }else{
             rbl->type.state = SUCCESS;
         }
@@ -97,7 +96,7 @@ status Roebling_RunCycle(Roebling *rbl){
 
 status Roebling_JumpTo(Roebling *rbl, i32 mark){
     Single *sg = Lookup_Get(rbl->marks, mark);
-    rbl->jump = sg->val.value;
+    rbl->parseIt.idx = sg->val.value;
     return rbl->type.state;
 }
 
@@ -122,8 +121,6 @@ status Roebling_ResetPatterns(Roebling *rbl){
     MemCh_Free(rbl->m);
     Iter_Init(&rbl->matchIt, Span_Make(rbl->m));
     rbl->snips = Span_Make(rbl->m);
-    rbl->jump = -1;
-    rbl->jumpMiss = -1;
     rbl->guard.count = 0;
     return READY;
 }
