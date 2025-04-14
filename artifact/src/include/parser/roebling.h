@@ -31,7 +31,7 @@ typedef struct roebling {
     Abstract *source; 
     RblCaptureFunc capture;
     Span *snips;
-    Span *parsers_do;
+    Span *parsers;
     Lookup *marks;
     i8 jump;
     i8 jumpMiss;

@@ -3,6 +3,7 @@
 
 static status Roebling_RunMatches(Roebling *rbl, Str *s){
     DebugStack_Push(rbl, rbl->type.of);
+    /*
 
     byte c = 0;
     rbl->type.state &= ~(ROEBLING_NEXT|END|SUCCESS);
@@ -83,17 +84,16 @@ static status Roebling_RunMatches(Roebling *rbl, Str *s){
         }
     }
 
+    */
     DebugStack_Pop();
     return rbl->type.state;
 }
 
 status Roebling_RunCycle(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
-    if(rbl->parsers_do->nvalues == 0){
+    /*
+    if(rbl->parsers->nvalues == 0){
         Fatal("Roebling parsers not set", TYPE_ROEBLING);
-    }
-    if(DEBUG_ROEBLING_MARK){
-        printf("\x1b[%dmRblIdx:%d %s\x1b[0m\n", DEBUG_ROEBLING_MARK, rbl->idx, State_ToChars(rbl->type.state));
     }
     rbl->type.state &= ~END;
     if((rbl->type.state & ROEBLING_NEXT) != 0){
@@ -108,14 +108,11 @@ status Roebling_RunCycle(Roebling *rbl){
             rbl->idx = rbl->jumpMiss;
             rbl->jumpMiss = -1;
             rbl->type.state &= ~ROEBLING_NEXT;
-            /*
-            Range_Sync(&(rbl->range), &(rbl->cursor));
-            */
         }
     }
     rbl->type.state &= ~(ROEBLING_NEXT); 
 
-    Single *wdof = Span_Get(rbl->parsers_do, rbl->idx);
+    Single *wdof = Span_Get(rbl->parsers, rbl->idx);
     if(wdof == NULL){
         if((rbl->type.state & ROEBLING_REPEAT) != 0){
             rbl->type.state |= (ROEBLING_NEXT|ROEBLING_LOAD_MATCHES); 
@@ -133,6 +130,7 @@ status Roebling_RunCycle(Roebling *rbl){
         Roebling_RunMatches(rbl);
     }
 
+    */
     DebugStack_Pop();
     return rbl->type.state;
 }
@@ -162,34 +160,29 @@ i32 Roebling_GetMatchIdx(Roebling *rbl){
 
 status Roebling_ResetPatterns(Roebling *rbl){
     MemCh_Free(rbl->m);
-    Iter_Setup(&rbl->matchIt, = Span_Make(rbl->m));
-    rbl->snips = Span_Make(m);
+    Iter_Init(&rbl->matchIt, Span_Make(rbl->m));
+    rbl->snips = Span_Make(rbl->m);
     rbl->jump = -1;
     rbl->jumpMiss = -1;
     rbl->guard.count = 0;
     return READY;
 }
 
-status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump){
-    Match *mt = Span_ReserveNext(rbl->matches);
-    status r = READY;
+status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i32 jump){
 
-    String *sns = (String *)Span_Get(rbl->snips, rbl->matches->max_idx);
+    Span *sns = (Span *)Span_Get(rbl->snips, rbl->matches->max_idx);
     if(sns == NULL){
-        sns = String_Init(rbl->m, STRING_EXTEND);
-        sns->type.state |= (FLAG_STRING_CONTIGUOUS|FLAG_STRING_BINARY);
+        sns = Span_Make(rbl->m);
         Span_Add(rbl->snips, (Abstract *)sns);
     }
 
-    r |= Match_SetPattern(mt, def, sns);
-    mt->backlog = sns;
+    Match *mt = Match_Make(rbl->m, def, sns);
     mt->captureKey = captureKey;
-    mt->snip.start = Cursor_Total(&rbl->cursor);
     if(jump != -1){
         mt->jump = Roebling_GetMarkIdx(rbl, jump);
     }
 
-    return r;
+    return SUCCESS;
 }
 
 i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
@@ -200,7 +193,7 @@ i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
     return -1; 
 }
 
-status Roebling_Reset(MemCtx *m, Roebling *rbl, String *s){
+status Roebling_Reset(MemCh *m, Roebling *rbl, String *s){
     DebugStack_Push("Roebling_Reset", TYPE_CSTR); 
     if(s != NULL){
         Cursor_Init(&rbl->cursor, s);
@@ -230,7 +223,7 @@ status Roebling_AddStep(Roebling *rbl, Abstract *step){
     return Span_Add(rbl->parsers, rbl->parsers->max_idx, step);
 }
 
-Roebling *Roebling_Make(MemCtx *m,
+Roebling *Roebling_Make(MemCh *m,
         cls type,
         Lookup *markLabels,
         Cursor *curs,
@@ -238,7 +231,7 @@ Roebling *Roebling_Make(MemCtx *m,
         Abstract *source
     ){
 
-    Roebling *rbl = (Roebling *)MemCtx_Alloc(m, sizeof(Roebling));
+    Roebling *rbl = (Roebling *)MemCh_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;
     rbl->m = m;
     rbl->source = source;
@@ -246,7 +239,7 @@ Roebling *Roebling_Make(MemCtx *m,
     rbl->curs = curs;
     rbl->marks = Lookup_Make(m, _TYPE_CORE_END, (Abstract *)rbl); 
     Roebling_Reset(m, rbl, s);
-    Guard_Setup(m, &rbl->guard, ROEBLING_GUARD_MAX, bytes("Roebling Guard"));
+    Guard_Setup(m, &rbl->guard, ROEBLING_GUARD_MAX, (byte *)"Roebling Guard");
 
     return rbl;
 }

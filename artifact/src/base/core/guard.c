@@ -8,7 +8,7 @@ status Guard_Init(Guard *g, int max){
     return SUCCESS;
 }
 
-status Guard_Setup(MemCh *m, Guard *g, int max, byte *msg){
+status Guard_Setup(MemCh *m, Guard *g, i32 max, byte *msg){
     return Guard_Init(g, max);
 }
 
