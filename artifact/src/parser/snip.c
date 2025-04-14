@@ -1,22 +1,31 @@
 #include <external.h>
 #include <caneka.h>
 
-StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *curs){
-    DebugStack_Push(sns, TYPE_STRSNIP_STRING);
-    StrVec *ret = StrVec_Make(m);
+StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
+    DebugStack_Push(sns, TYPE_SPAN);
+
+    Cursor *curs = Cursor_Copy(_curs);
+    Cursor_Decr(curs, SnipSpan_Total(sns, 0));
+    StrVec *v = StrVec_Make(m);
 
     Iter it;
     Iter_Init(&it, sns);
-    i32 pos = 0;
-    Iter_Reset(&curs->it); 
+
+    Iter_Reset(&curs->it);
+    Iter_Next(&curs->it);
+    Str *s = (Str *)curs->it.value;
     while((Iter_Next(&it) & END) == 0){
-        StrSnip sn = (StrSnip)((util)Iter_Get(&it));
-        if(s.type.state & STRSNIP_CONTENT){
-            StrVec_Copy(v, ret, pos, pos+sn.length);
+        Snip *sn = (Snip *)it.value;
+        if(sn->type.state & SNIP_STR_BOUNDRY){
+            curs->it.idx++;
+            Iter_Query(&curs->it);
+            s = (Str *)curs->it.value;
+        }else if(sn->type.state & SNIP_CONTENT){
+            StrVec_AddBytes(m, v, pos, pos+sn.length);
         }
-        pos += sn.length;
     }
 
+    DebugStack_Pop();
     return ret;
 }
 

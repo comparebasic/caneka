@@ -80,6 +80,14 @@ static void addCount(MemCh *m, Match *mt, word flags, int length){
     return;
 }
 
+status Match_AddBoundrySnip(MemCh *m, Match *mt){
+    if(mt->snip.length > 0 || mt->backlog->nvalues > 0){
+        addCount(m, mt, SNIP_STR_BOUNDRY, 0);
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 status Match_Feed(MemCh *m, Match *mt, byte c){
     if((mt->type.state & NOOP) != 0){
         return mt->type.state;

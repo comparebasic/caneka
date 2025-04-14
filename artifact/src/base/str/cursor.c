@@ -49,7 +49,7 @@ status Cursor_NextByte(Cursor *curs){
         }else{
             curs->it.idx++;
             Iter_Query(&curs->it);
-            return Cursor_SetStr(curs);
+            return Cursor_SetStr(curs) | CURSOR_STR_BOUNDRY;
         }
     }else if(curs->ptr < curs->end){
         curs->ptr++;

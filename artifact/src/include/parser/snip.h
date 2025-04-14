@@ -1,7 +1,7 @@
 enum strvec_snip {
     SNIP_CONTENT = 1 << 8,
     SNIP_GAP = 1 << 9,
-    SNIP_STRVEC_END = 1 << 10,
+    SNIP_STR_BOUNDRY = 1 << 10,
     SNIP_UNCLAIMED = 1 << 11,
 };
 

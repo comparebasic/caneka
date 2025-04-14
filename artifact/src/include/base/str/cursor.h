@@ -1,3 +1,7 @@
+enum cursor_flags {
+    CURSOR_STR_BOUNDRY = 1 << 8,
+};
+
 typedef struct cursor {
     Type type;
     i32 pos;
