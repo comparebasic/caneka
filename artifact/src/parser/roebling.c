@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Roebling_RunMatches(Roebling *rbl, Str *s){
+static status Roebling_RunMatches(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
     /*
 
@@ -91,28 +91,30 @@ static status Roebling_RunMatches(Roebling *rbl, Str *s){
 
 status Roebling_RunCycle(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
-    /*
-    if(rbl->parsers->nvalues == 0){
-        Fatal("Roebling parsers not set", TYPE_ROEBLING);
+    if(rbl->parseIt.span->nvalues == 0){
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+            "Roebling parsers not set");
     }
     rbl->type.state &= ~END;
     if((rbl->type.state & ROEBLING_NEXT) != 0){
-        rbl->idx++;
         rbl->tail = 0;
         if(rbl->jump > -1){
-            rbl->idx = rbl->jump;
+            rbl->parseIt.idx = rbl->jump;
             rbl->jump = -1;
+        }else{
+            rbl->parseIt.idx++;
         }
+        rbl->type.state &= ~ROEBLING_NEXT;
     }else{
         if(rbl->jumpMiss > -1){
-            rbl->idx = rbl->jumpMiss;
+            rbl->parseIt.idx = rbl->jumpMiss;
             rbl->jumpMiss = -1;
-            rbl->type.state &= ~ROEBLING_NEXT;
         }
     }
-    rbl->type.state &= ~(ROEBLING_NEXT); 
 
-    Single *wdof = Span_Get(rbl->parsers, rbl->idx);
+    Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_GET);
+    Iter_Query(&rbl->parseIt);
+    Single *wdof = rbl->parseIt.value;
     if(wdof == NULL){
         if((rbl->type.state & ROEBLING_REPEAT) != 0){
             rbl->type.state |= (ROEBLING_NEXT|ROEBLING_LOAD_MATCHES); 
@@ -121,16 +123,14 @@ status Roebling_RunCycle(Roebling *rbl){
             rbl->type.state = SUCCESS;
         }
     }else{
-        if((rbl->type.state & (PROCESSING|ROEBLING_LOAD_MATCHES)) == 0){
+        if((rbl->type.state & PROCESSING) == 0){
             wdof = as(wdof, TYPE_WRAPPED_DO);
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
-            rbl->type.state &= ~ROEBLING_LOAD_MATCHES;
             rbl->type.state |= PROCESSING;
         }
         Roebling_RunMatches(rbl);
     }
 
-    */
     DebugStack_Pop();
     return rbl->type.state;
 }
@@ -169,20 +169,24 @@ status Roebling_ResetPatterns(Roebling *rbl){
 }
 
 status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i32 jump){
-
-    Span *sns = (Span *)Span_Get(rbl->snips, rbl->matches->max_idx);
-    if(sns == NULL){
-        sns = Span_Make(rbl->m);
-        Span_Add(rbl->snips, (Abstract *)sns);
-    }
-
-    Match *mt = Match_Make(rbl->m, def, sns);
+    Match *mt = Match_Make(rbl->m, def, NULL);
     mt->captureKey = captureKey;
     if(jump != -1){
         mt->jump = Roebling_GetMarkIdx(rbl, jump);
     }
 
-    return SUCCESS;
+    Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_ADD);
+    rbl->matchIt.value = mt;
+    status r = Iter_Query(&rbl->matchIt);
+
+    Span *sns = (Span *)Span_Get(rbl->snips, rbl->matchIt.idx);
+    if(sns == NULL){
+        sns = Span_Make(rbl->m);
+        Span_Set(rbl->snips, rbl->matchIt.idx, (Abstract *)sns);
+    }
+    mt->backlog = sns;
+
+    return r;
 }
 
 i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
@@ -193,15 +197,16 @@ i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
     return -1; 
 }
 
-status Roebling_Reset(MemCh *m, Roebling *rbl, String *s){
+status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v){
     DebugStack_Push("Roebling_Reset", TYPE_CSTR); 
-    if(s != NULL){
-        Cursor_Init(&rbl->cursor, s);
+    Roebling_ResetPatterns(rbl);
+    if(v != NULL){
+        Cursor_Setup(rbl->curs, v);
     }
 
     if(rbl->type.of != TYPE_ROEBLING_BLANK){
         Roebling_ResetPatterns(rbl);
-        rbl->idx = 0;
+        rbl->parseIt.idx = 0;
     }
 
     rbl->type.state = (rbl->type.state & DEBUG);
@@ -211,16 +216,20 @@ status Roebling_Reset(MemCh *m, Roebling *rbl, String *s){
 
 status Roebling_AddStep(Roebling *rbl, Abstract *step){
     if(step->type.of == TYPE_WRAPPED_DO){
-        Single *sg = Span_Get(rbl->parsers, rbl->parsers->max_idx);
+        Single *sg = rbl->parseIt.value;
         if(sg->type.of == TYPE_WRAPPED_I64){
             i64 mark = sg->val.value;
-            sg->val.value = rbl->parsers->max_idx;
-            Span_Set(rbl->marks, sg->val.value, (Abstract *)sg);
-            return Span_Set(rbl->parsers, rbl->parsers->max_idx, step);
+            sg->val.value = rbl->parseIt.idx;
+            Lookup_Add(rbl->m, rbl->marks, (word)sg->val.value, (Abstract *)sg);
+            Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_SET);
+            rbl->parseIt.value = step;
+            return Iter_Query(&rbl->parseIt);
         }
     }
 
-    return Span_Add(rbl->parsers, rbl->parsers->max_idx, step);
+    Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_ADD);
+    rbl->parseIt.value = step;
+    return Iter_Query(&rbl->parseIt);
 }
 
 Roebling *Roebling_Make(MemCh *m,
@@ -236,9 +245,11 @@ Roebling *Roebling_Make(MemCh *m,
     rbl->m = m;
     rbl->source = source;
     rbl->capture = capture;
+    Span *p = Span_Make(m);
+    Iter_Init(&rbl->parseIt, p);
     rbl->curs = curs;
-    rbl->marks = Lookup_Make(m, _TYPE_CORE_END, (Abstract *)rbl); 
-    Roebling_Reset(m, rbl, s);
+    rbl->marks = Lookup_Make(m, _TYPE_CORE_END, NULL, (Abstract *)rbl); 
+    Roebling_Reset(m, rbl, NULL);
     Guard_Setup(m, &rbl->guard, ROEBLING_GUARD_MAX, (byte *)"Roebling Guard");
 
     return rbl;

@@ -25,13 +25,13 @@ typedef struct roebling_blank {
 
 typedef struct roebling {
     Type type;
-    i32 idx;
+    i32 _;
     MemCh *m;
     Cursor *curs;
     Abstract *source; 
     RblCaptureFunc capture;
     Span *snips;
-    Span *parsers;
+    Iter parseIt;
     Lookup *marks;
     i8 jump;
     i8 jumpMiss;
@@ -42,37 +42,13 @@ typedef struct roebling {
     Iter matchIt;
 } Roebling;
 
-/* > Instantation */
-Roebling *Roebling_Make(MemCh *m,
-    cls type,
-    Lookup *markLabels,
-    Cursor *curs,
-    RblCaptureFunc capture,
-    Abstract *source
-);
-
-status Roebling_AddParsers(MemCh *m, Span *parsers, Lookup *marks, Span *additions, Lookup *desc);
-
-/* > Reset */
-status Roebling_Reset(MemCh *m, Roebling *rbl, Str *s);
-
-/* > Debug */
-Str *Roebling_GetMarkDebug(Roebling *rbl, int idx);
+status Roebling_RunCycle(Roebling *rbl);
+status Roebling_JumpTo(Roebling *rbl, i32 mark);
+status Roebling_Run(Roebling *rbl);
 Match *Roebling_GetMatch(Roebling *rbl);
-int Roebling_GetMatchIdx(Roebling *rbl);
-Match *Roebling_GetValueMatch(Roebling *rbl);
-
-/* > Run */
-status Roebling_Run(Roebling *sexp);
-status Roebling_RunCycle(Roebling *sexp);
-status Roebling_JumpTo(Roebling *rbl, int mark);
-
-/* > Setup Cycle */
-status Roebling_Add(Roebling *rbl, Str *s);
-status Roebling_AddBytes(Roebling *rbl, byte bytes[], int length);
-status Roebling_AddReset(Roebling *rbl);
+i32 Roebling_GetMatchIdx(Roebling *rbl);
 status Roebling_ResetPatterns(Roebling *rbl);
-status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, int jump);
-status Roebling_SetLookup(Roebling *rbl, Lookup *lk, word captureKey, int jump);
-int Roebling_GetMarkIdx(Roebling *rlb, int mark);
-Match *Roebling_LatestMatch(Roebling *rbl);
+status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i32 jump);
+i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark);
+status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v);
+status Roebling_AddStep(Roebling *rbl, Abstract *step);

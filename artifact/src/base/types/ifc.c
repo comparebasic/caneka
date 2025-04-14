@@ -1,6 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
+void Type_SetFlag(Abstract *a, word flags){
+    a->type.state = (a->type.state & NORMAL_FLAGS) | flags;
+}
+
 cls Ifc_Get(cls inst){
     if(inst == TYPE_SPAN || inst == TYPE_TABLE){
         return TYPE_SPAN;
