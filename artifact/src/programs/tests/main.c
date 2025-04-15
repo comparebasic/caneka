@@ -2,22 +2,16 @@
 #include <caneka.h>
 #include <tests.h>
 
-#include "../mock_109strings.c"
-
-#include "core_tests.c"
-#include "memch_tests.c"
-#include "span_tests.c"
-#include "strvec_tests.c"
-#include "str_tests.c"
-#include "stream_tests.c"
-/*
-#include "hash_tests.c"
-#include "table_tests.c"
-*/
+static status test(MemCh *m){
+    status r = READY;
+    Tests_Init(m);
+    r |= Test_Runner(m, "Caneka", Tests);
+    return r;
+}
 
 status Tests_Init(MemCh *m){
    status r = READY;
-   r |= Make109Strings(m);
+   r |= Make109Strs(m);
    return r;
 }
 
@@ -117,3 +111,32 @@ static TestSet _Tests[] = {
 };
 
 TestSet *Tests = _Tests;
+
+i32 main(int argc, char **argv){
+    if(argc > 1){
+        for(int i = 1; i < argc; i++){
+            char *arg = argv[i];
+            if(strncmp(arg, "no-color", strlen("no-color")) == 0){
+                GLOBAL_flags |= NO_COLOR;
+            }
+            if(strncmp(arg, "html", strlen("html")) == 0){
+                GLOBAL_flags |= HTML_OUTPUT;
+            }
+        }
+    }
+
+    MemBook *cp = MemBook_Make(NULL);
+    if(cp == NULL){
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully");
+    }
+
+    MemCh *m = MemCh_Make();
+    if(m == NULL){
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully");
+    }
+
+    Caneka_Init(m);
+    test(m);
+
+    return 0;
+}

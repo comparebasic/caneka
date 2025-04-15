@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include <tests.h>
 
 status Str_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();

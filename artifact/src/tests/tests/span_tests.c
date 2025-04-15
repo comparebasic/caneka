@@ -47,8 +47,6 @@ status Span_Tests(MemCh *gm){
     r |= Test(p->type.of == TYPE_SPAN, "Span has type span '_c' found '_c'", 
         Type_ToChars(TYPE_SPAN), Type_ToChars(p->type.of));
 
-    printf("%s\n", Type_ToChars(p->type.of));
-
     Str *s1 = Str_CstrRef(m, "Hello there");
     Span_Add(p, (Abstract *)s1);
     Str *s7 = Str_CstrRef(m, "Seven");

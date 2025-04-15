@@ -36,7 +36,11 @@ status Test(boolean condition, char *fmt, ...){
             Out("^g.Pass: ");
         }
         StrVec_FmtHandle(OutStream, fmt, args);
-        Stream_To(OutStream, (byte *)"\n", 1);
+        if(!condition){
+            Stream_To(OutStream, (byte *)"\n", 1);
+        }else{
+            Stream_To(OutStream, (byte *)"\x1b[2K\r", 5);
+        }
         return condition ? SUCCESS : ERROR;
     }
 }
@@ -96,7 +100,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
             i64 chapters = MemChapterCount();
             i64 availableCh = MemAvailableChapterCount();
-            Out("_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\n", 
+            Out("_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\x1b[2K\r", 
                 color, Str_MemCount(m, overRollingUsed), 
                 chapters, availableCh, Str_MemCount(m, chapters*PAGE_SIZE));
 

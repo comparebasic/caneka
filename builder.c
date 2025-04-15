@@ -43,20 +43,6 @@ static const char *coreCmd[] = {
     NULL
 };
 
-static const char *testsCoreCmd[] = {
-    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/basetests/include", "-o", "./build/basetests", 
-    "./artifact/src/programs/basetests/main.c", "./build/libcnkbase/libcnkbase.a",
-    NULL
-};
-
-static char *runTestsCoreCmd[] = {
-    /*
-    "lldb", "./build/basetests",
-    */
-    "./build/basetests",
-    NULL
-};
-
 static const char *mkDirCnkBuildLibCmd[] = {
     "mkdir", "-p", "./build/libcnkbuild/",
     NULL
@@ -70,12 +56,26 @@ static char *buildBuilderLibCmd[] = {
 
 static char *buildBuilderCmd[] = {
     COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", "./build/build",
-    "./artifact/src/build.c", "./build/libcnkbase/libcnkbase.a","./build/libcnkbuild/libcnkbuild.a", 
+    "./artifact/src/build.c", "./build/libcnkbuild/libcnkbuild.a", "./build/libcnkbase/libcnkbase.a",
     NULL
 };
 
 static char *runBuilderCmd[] = {
     "./build/build",
+    NULL
+};
+
+static const char *testsCoreCmd[] = {
+    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/tests/include", "-o", "./build/tests", 
+    "./build/libcaneka/libcaneka.a", "./build/libcnkbase/libcnkbase.a", "./artifact/src/programs/tests/main.c",
+    NULL
+};
+
+static char *runTestsCoreCmd[] = {
+    /*
+    "lldb", "./build/basetests",
+    */
+    "./build/tests",
     NULL
 };
 
@@ -198,11 +198,11 @@ static state run(char *name, char **sources){
 int main(int argc, char *argv[]){
     run("Make build dir", (char **)mkDirCmd);
     run("Building core", (char **)coreCmd);
-    run("Building core tests", (char **)testsCoreCmd);
-    run("Run tests", (char **)runTestsCoreCmd);
     run("Make CnkBuild dir", (char **)mkDirCnkBuildLibCmd);
     run("Build CnkBuild", (char **)buildBuilderLibCmd);
     run("Build Builder", (char **)buildBuilderCmd);
     run("Run Builder", (char **)runBuilderCmd);
+    run("Building tests", (char **)testsCoreCmd);
+    run("Run tests", (char **)runTestsCoreCmd);
     exit(0);
 }

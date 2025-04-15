@@ -169,12 +169,24 @@ static BuildSubdir serveobj = { "serve", {
     NULL
 }};
 
-static BuildSubdir testsobj = { "tests", {
-    "tests.c",
-    NULL
+
+static BuildSubdir fixturesobj = { "tests/fixtures", {
+    "mock_109strings.c",
+    /*
+    "cycleserve_example.c",
+    "utils.c",
+    */
+    NULL,
 }};
 
-static BuildSubdir testsuitesobj = { "tests/tests", {
+static BuildSubdir testsobj = { "tests/tests", {
+    "core_tests.c",
+    "memch_tests.c",
+    "span_tests.c",
+    "strvec_tests.c",
+    "str_tests.c",
+    "stream_tests.c",
+    /*
     "blank_test.c",
     "core_tests.c",
     "strvec_tests.c",
@@ -204,18 +216,15 @@ static BuildSubdir testsuitesobj = { "tests/tests", {
     "xmlt_template_tests.c",
     "crypto_key_tests.c",
     "access_tests.c",
+    */
     NULL
 }};
 
-static BuildSubdir testfixturesobj = { "tests/fixtures", {
-    "cycleserve_example.c",
-    "mock_109strings.c",
-    "utils.c",
-    NULL,
-}};
 
 static BuildSubdir *objdirs[] = {
     &parserobj,
+    &testsobj,
+    &fixturesobj,
     /*
     &transpobj,
     &cryptoobj,
@@ -233,8 +242,6 @@ static BuildSubdir *objdirs[] = {
     &persistobj,
     &serveobj,
     &testsobj,
-    &testsuitesobj,
-    &testfixturesobj,
     */
     NULL
 };

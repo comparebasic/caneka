@@ -47,15 +47,11 @@ status CliStatus_PrintFinish(MemCh *m, CliStatus *cli){
     Iter it;
     Iter_Init(&it, cli->lines);
     int count = cli->lines->nvalues;
-    if((cli->type.state & PROCESSING) != 0){
-        printf("\r\x1b[%dA", count);
-        fflush(stdout);
-    }
     while((Iter_Next(&it) & END) == 0){
-        printf("\r\x1b[0K");
+        printf("\x1b[2K\r");
         fflush(stdout);
-        write(1, "\n", 1);
     }
+    write(1, "\n", 1);
     cli->type.state &= ~PROCESSING;
     return SUCCESS;
 }
