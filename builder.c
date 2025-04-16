@@ -40,6 +40,7 @@ static const char *mkDirCmd[] = {
 static const char *coreCmd[] = {
     COMPILER, "-g", "-Wno-gnu-folding-constant", "-I", "artifact/src/include", "-c", "-o", "./build/libcnkbase/libcnkbase.a",
     "./artifact/src/base/inc.c", 
+    "-DINSECURE",
     NULL
 };
 
@@ -67,7 +68,8 @@ static char *runBuilderCmd[] = {
 
 static const char *testsCoreCmd[] = {
     COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/tests/include", "-o", "./build/tests", 
-    "./build/libcaneka/libcaneka.a", "./build/libcnkbase/libcnkbase.a", "./artifact/src/programs/tests/main.c",
+    "./artifact/src/programs/tests/main.c", "./build/libcaneka/libcaneka.a", "./build/libcnkbase/libcnkbase.a",
+    "-DINSECURE",
     NULL
 };
 

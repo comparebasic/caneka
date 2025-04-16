@@ -13,7 +13,7 @@ status MemCh_Tests(MemCh *gm){
     i32 count = 0;
     if(cp != NULL){
         count = cp->it.span->nvalues;
-        r |= Test(count > 0, "Book slab count is greater than 0, have %d.", count);
+        r |= Test(count > 0, "Book slab count is greater than 0, have _i4.", count);
     }
 
     i64 max = 1024;
@@ -30,7 +30,7 @@ status MemCh_Tests(MemCh *gm){
 
     r |= Test(m->it.span->nvalues == 6, "Six slabs registered, have _i4", m->it.span->nvalues);
     if(cp != NULL){
-        r |= Test(cp->it.span->nvalues == count+5, "Five additional slabs registered in chapter, have %d", cp->it.span->nvalues);
+        r |= Test(cp->it.span->nvalues == count+5, "Five additional slabs registered in chapter, have _i4", cp->it.span->nvalues);
     }
 
     MemCh_Free(m);
@@ -42,7 +42,7 @@ status MemCh_Tests(MemCh *gm){
     m->type.range--;
     MemCh_Free(m);
     if(cp != NULL){
-        r |= Test(cp->it.span->nvalues == count-1, "After removal one less page than count, because it belonged to the MemCh, have %d.", cp->it.span->nvalues);
+        r |= Test(cp->it.span->nvalues == count-1, "After removal one less page than count, because it belonged to the MemCh, have _i4.", cp->it.span->nvalues);
     }
 
     DebugStack_Pop();
