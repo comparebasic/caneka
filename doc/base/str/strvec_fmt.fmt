@@ -10,7 +10,7 @@ _: Followd by One of the following
 
 \_: Ignore underscore
 t: Typed output
-T: Typed output, with a type flag argument
+T: Typed output, with a type flag argument (requires type argument following)
 s: Str to new Str if in StrVec mode, normal output otherwise
 o: Show typeOf for an abstract object
 O: Show name of typeOf flag
@@ -21,6 +21,8 @@ i#: Integer (i4 for a 4 byte i32 or i8 for an 8 byte i64)
 u#: Unsigned Integer (u4 for a 4 byte quad or u8 for an 8 byte util)
 a: Address
 +: StrVec (adds to the strvec `v` or outputs to the file descriptor)
+b: Bits (requires size argument following);
+B: Bits extended, with numbers (requires size argument following);
 
 === Ansi arguments
 
@@ -47,8 +49,3 @@ K: Black background
 k: black foreground
 x: Whatever 30 is
 .: End sequence (will happen automatically if it's none of the above)
-
-
-
-
-

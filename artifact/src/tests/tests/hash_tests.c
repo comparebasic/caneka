@@ -1,19 +1,20 @@
 #include <external.h>
 #include <caneka.h>
 
-status Hash_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
-    String *s;
+status Hash_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
+    Str *s;
     status r = SUCCESS;
 
-    s = String_Make(m, bytes("Hi"));
+    s = Str_CstrRef(m, "Hi");
 
     util expected;
     util h;
 
     h = Get_Hash((Abstract *)s);
     expected = 4291084750259606489;
-    r = Test(h == expected, "Expected hash to equal %ld, found: %ld", expected, h);
+    r = Test(h == expected, "Expected hash to equal _i8/_b, found: _i8/_b",
+        expected, &expected, sizeof(expected), h, &h, sizeof(h));
 
     int x;
     /*
@@ -39,6 +40,6 @@ status Hash_Tests(MemCtx *gm){
     printf("\n");
     */
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }

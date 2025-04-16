@@ -64,23 +64,17 @@ static TestSet _Tests[] = {
         "Testing setting up and running multiple stream types and stream chains",
         FEATURE_COMPLETE,
     },
+    {
+        "Hash",
+        Hash_Tests,
+        "Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "String - B64",
         StringB64_Tests,
         "Tests base 64 encoded strings",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Span",
-        Span_Tests,
-        "Span is the basic data structure for sequential or logorithmic storage access.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Hash",
-        Hash_Tests,
-        "Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.",
         FEATURE_COMPLETE,
     },
     {

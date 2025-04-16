@@ -35,20 +35,21 @@ void indent_Print(int indent){
     }
 }
 
-void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
+i64 Bits_Print(Stream *sm, byte *bt, size_t length, boolean extended){
+    i64 total = 0;
     for(int i = length-1; i >= 0;i--){
         byte b = bt[i];
         if(extended){
-            printf("%03hu=", b);
+            total += StrVec_Fmt(sm, "_i4=", (i32)b);
         }
         for(int j = 7; j >= 0;j--){
-            printf("%c", (b & (1 << j)) ? '1' : '0');
+            total += Stream_To(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
         }
         if(extended){
-            printf(" ");
+            total += Stream_To(sm, (byte *)" ", 1);
         }
     }
-    printf("\x1b[0m");
+    return total;
 }
 
 i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){

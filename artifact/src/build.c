@@ -186,12 +186,10 @@ static BuildSubdir testsobj = { "tests/tests", {
     "strvec_tests.c",
     "str_tests.c",
     "stream_tests.c",
-    /*
     "blank_test.c",
-    "core_tests.c",
-    "strvec_tests.c",
-    "crypto_tests.c",
     "hash_tests.c",
+    /*
+    "crypto_tests.c",
     "http_tests.c",
     "ioctx_tests.c",
     "iter_str_tests.c",
@@ -241,7 +239,6 @@ static BuildSubdir *objdirs[] = {
     &xmltobj,
     &persistobj,
     &serveobj,
-    &testsobj,
     */
     NULL
 };

@@ -114,6 +114,18 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
+            }else if(c == 'b'){
+                void *b = va_arg(args, void *);
+                size_t sz = va_arg(args, size_t);
+                total += Bits_Print(sm, b, sz, FALSE);
+                state = SUCCESS; 
+                goto next;
+            }else if(c == 'B'){
+                void *b = va_arg(args, void *);
+                size_t sz = va_arg(args, size_t);
+                total += Bits_Print(sm, b, sz, TRUE);
+                state = SUCCESS; 
+                goto next;
             }else if(c == '+'){
                 StrVec *v2 = (StrVec *)va_arg(args, StrVec *);
                 total += Stream_VecTo(sm, v2);

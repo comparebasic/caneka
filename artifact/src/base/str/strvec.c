@@ -142,7 +142,7 @@ status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length){
 
 StrVec *StrVec_From(MemCh *m, Str *s){
     StrVec *v = StrVec_Make(m);
-    StrVec_Add(m, s);
+    StrVec_Add(v, s);
     return v;
 }
 
