@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static int bookIdx = -1;
+static i32 bookIdx = -1;
 static i32 pageIdx = 0;
 static MemBook *_books[16] = {
     NULL, NULL, NULL, NULL,
@@ -11,7 +11,7 @@ static MemBook *_books[16] = {
 };
 
 static MemBook *MemBook_get(void *addr){
-    int idx = bookIdx;
+    i32 idx = bookIdx;
     if(addr == NULL){
         return _books[idx];
     }
@@ -30,12 +30,36 @@ static MemBook *MemBook_get(void *addr){
 MemBook *MemBook_Get(void *addr){
     return MemBook_get(addr);
 }
+i32 MemBook_GetBookIdx(void *addr){
+    return bookIdx;
+}
+i32 MemBook_GetPageIdx(void *addr){
+    return pageIdx;
+}
+#else
+void _insecureMemError(void *addr){
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+        "MemBook is private unless otherwise specified at compile time, _a", addr);
+}
+MemBook *MemBook_Get(void *addr){
+    _insecureMemError(addr);
+    return NULL;
+}
+
+i32 MemBook_GetPageIdx(void *addr){
+    _insecureMemError(addr);
+    return 0;
+}
+i32 MemBook_GetBookIdx(void *addr){
+    _insecureMemError(addr);
+    return 0;
+}
 #endif
 
 i64 MemCount(i16 level){
     i64 total = 0;
     Iter it;
-    for(int i = 0; i <= bookIdx; i++){
+    for(i32 i = 0; i <= bookIdx; i++){
         MemBook *book = _books[i];
         for(i32 j = 0; j < pageIdx && j < PAGE_MAX; j++){
             void *page = book->start+(j*PAGE_SIZE);
@@ -53,22 +77,22 @@ i64 MemChapterCount(){
 }
 
 i64 MemAvailableChapterCount(){
-    return _books[0]->it.span->nvalues;
+    return _books[0]->recycled.span->nvalues;
 }
 
 status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
 
     MemBook *book = MemBook_get(m);
-    Iter_Setup(&book->it, book->it.span, SPAN_OP_ADD, book->it.idx);
-    book->it.value = pg;
-    status r = Iter_Query(&book->it);
+    Iter_Setup(&book->recycled, book->recycled.span, SPAN_OP_ADD, book->recycled.idx);
+    book->recycled.value = pg;
+    status r = Iter_Query(&book->recycled);
 
-    book->it.type.state &= ~SPAN_OP_ADD;
-    book->it.type.state |= SPAN_OP_GET;
+    book->recycled.type.state &= ~SPAN_OP_ADD;
+    book->recycled.type.state |= SPAN_OP_GET;
 
     if(book->type.state & DEBUG){
-        printf("\x1b[1;34mFree Page nvalues:%d \x1b[0m\n", book->it.span->nvalues);
+        printf("\x1b[1;34mFree Page nvalues:%d \x1b[0m\n", book->recycled.span->nvalues);
     }
 
     return r;
@@ -80,11 +104,11 @@ void *MemBook_GetPage(void *addr){
         book = MemBook_get(NULL);
     }
     i32 idx = -1;
-    Iter_Reset(&book->it);
-    if(book->it.span->nvalues > 0){
-        idx = book->it.span->max_idx;
-        void *page = Span_Get(book->it.span, idx);
-        Span_Remove(book->it.span, idx);
+    Iter_Reset(&book->recycled);
+    if(book->recycled.span->nvalues > 0){
+        idx = book->recycled.span->max_idx;
+        void *page = Span_Get(book->recycled.span, idx);
+        Span_Remove(book->recycled.span, idx);
         if(book->type.state & DEBUG){
             printf("\x1b[1;33mGiving Recycled Page *%lu\x1b[0m\n", (util)page);
         }
@@ -118,6 +142,7 @@ void *MemBook_GetPage(void *addr){
 
 MemBook *MemBook_Make(MemBook *prev){
     bookIdx++;
+    printf("bookIdx is %d\n", bookIdx);
     if(bookIdx >= CHAPTER_MAX){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken");
         return NULL;
@@ -153,7 +178,7 @@ MemBook *MemBook_Make(MemBook *prev){
     p->m = &book->m;
     p->root = MemPage_Alloc(pg, sizeof(slab));
 
-    Iter_Setup(&book->it, p, SPAN_OP_GET, 0);
+    Iter_Setup(&book->recycled, p, SPAN_OP_GET, 0);
 
     return book;
 }

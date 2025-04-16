@@ -39,7 +39,10 @@ status Test(boolean condition, char *fmt, ...){
         if(!condition){
             Stream_To(OutStream, (byte *)"\n", 1);
         }else{
+            /*
             Stream_To(OutStream, (byte *)"\x1b[2K\r", 5);
+            */
+            Stream_To(OutStream, (byte *)"\n", 1);
         }
         return condition ? SUCCESS : ERROR;
     }

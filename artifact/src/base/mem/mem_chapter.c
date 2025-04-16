@@ -132,9 +132,6 @@ status MemCh_Free(MemCh *m){
     status r = MemCh_FreeTemp(m, m->type.range);
     if(m->type.range == 0){
         MemPage *pg = Span_Get(m->it.span, 0);
-        if(m->it.type.state & DEBUG){
-            printf("\x1b[36mMemCh_Free last page:*%lu\x1b[0m\n", (util)pg);
-        }
         return MemBook_FreePage(m, pg);
     }
     return r;

@@ -52,12 +52,14 @@ static const char *mkDirCnkBuildLibCmd[] = {
 static char *buildBuilderLibCmd[] = {
     COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-c", "-o", "./build/libcnkbuild/libcnkbuild.a", 
     "./artifact/src/programs/cnkbuild/cnkbuild.c",
+    "-DINSECURE",
     NULL
 };
 
 static char *buildBuilderCmd[] = {
     COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", "./build/build",
     "./artifact/src/build.c", "./build/libcnkbuild/libcnkbuild.a", "./build/libcnkbase/libcnkbase.a",
+    "-DINSECURE",
     NULL
 };
 
