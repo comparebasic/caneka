@@ -70,13 +70,6 @@ static TestSet _Tests[] = {
         "Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.",
         FEATURE_COMPLETE,
     },
-    /*
-    {
-        "String - B64",
-        StringB64_Tests,
-        "Tests base 64 encoded strings",
-        FEATURE_COMPLETE,
-    },
     {
         "Table",
         Table_Tests,
@@ -89,10 +82,17 @@ static TestSet _Tests[] = {
         "Resize features of the auto-scaling hash-table.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "TablePreKey",
         TablePreKey_Tests,
         "Testing the ability to add a key and value to a hash table and disperate, yet sequential, times.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "String - B64",
+        StringB64_Tests,
+        "Tests base 64 encoded strings",
         FEATURE_COMPLETE,
     },
     */

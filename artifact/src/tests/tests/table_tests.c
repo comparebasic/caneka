@@ -52,27 +52,21 @@ char *values2[] = {
     NULL, NULL,
 };
 
-status Table_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
+status Table_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
     Span *tbl = Span_Make(m);
     status r = SUCCESS;
-    String *s;
-    String *value;
-    String *found;
+    Str *s;
+    Str *value;
+    Str *found;
 
     for(int i = 0; ; i+= 2){
         if(values[i] == NULL){
             break;
         }
-        s = String_Make(m, bytes(values[i]));
-        value = String_Make(m, bytes(values[i+1]));
+        s = Str_CstrRef(m, values[i]);
+        value = Str_CstrRef(m, values[i+1]);
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
-        if(DEBUG_TABLE){
-            Debug_Print((void *)s, 0, "Setting: ", DEBUG_TABLE, TRUE);
-            printf("\n");
-            Debug_Print((void *)tbl, 0, "In Table: ", DEBUG_TABLE, TRUE);
-            printf("\n");
-        }
     }
 
 
@@ -80,41 +74,35 @@ status Table_Tests(MemCtx *gm){
         if(values[i] == NULL){
             break;
         }
-        s = String_Make(m, bytes(values[i]));
-        value = String_Make(m, bytes(values[i+1]));
-        found = (String *)Table_Get(tbl, (Abstract *)s);
+        s = Str_CstrRef(m, values[i]);
+        value = Str_CstrRef(m, values[i+1]);
+        found = (Str *)Table_Get(tbl, (Abstract *)s);
         r |= Test(found != NULL, 
-            "Expect strings to not be NULL from key:%s", (char *)(s->bytes));
-        r |= Test(String_Equals(value, found), 
-            "Expect strings to equal %s from key:%s found %s", (char *)(value->bytes), (char *)(s->bytes),
-            found != NULL ? (char *)(found->bytes) : "NULL");
+            "Expect strings to not be NULL from key:_t", s);
+        r |= Test(Equals((Abstract *)value, (Abstract *)found), 
+            "Expect strings to equal _t from key:_t found _t", value, s,
+            found != NULL ? found : NULL);
     }
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }
 
-status TableResize_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
+status TableResize_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
     Span *tbl = Span_Make(m);
     status r = SUCCESS;
-    String *s;
-    String *value;
-    String *found;
+    Str *s;
+    Str *value;
+    Str *found;
 
     for(int i = 0; ; i+= 2){
         if(valuesResize[i] == NULL){
             break;
         }
-        s = String_Make(m, bytes(valuesResize[i]));
-        value = String_Make(m, bytes(valuesResize[i+1]));
+        s = Str_CstrRef(m, valuesResize[i]);
+        value = Str_CstrRef(m, valuesResize[i+1]);
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
-        if(DEBUG_TABLE){
-            Debug_Print((void *)s, 0, "Setting: ", DEBUG_TABLE, TRUE);
-            printf("\n");
-            Debug_Print((void *)tbl, 0, "In Table: ", DEBUG_TABLE, TRUE);
-            printf("\n");
-        }
     }
 
 
@@ -122,38 +110,37 @@ status TableResize_Tests(MemCtx *gm){
         if(valuesResize[i] == NULL){
             break;
         }
-        s = String_Make(m, bytes(valuesResize[i]));
-        value = String_Make(m, bytes(valuesResize[i+1]));
-        found = (String *)Table_Get(tbl, (Abstract *)s);
-        r |= Test(found != NULL, 
-            "Expect strings to not be NULL from key:%s", (char *)(s->bytes));
-        r |= Test(String_Equals(value, found), 
-            "Expect strings to equal %s from key:%s found %s", (char *)(value->bytes), (char *)(s->bytes),
-            found != NULL ? (char *)(found->bytes) : "NULL");
+        s = Str_CstrRef(m, valuesResize[i]);
+        value = Str_CstrRef(m, valuesResize[i+1]);
+        found = (Str *)Table_Get(tbl, (Abstract *)s);
+        r |= Test(found != NULL, "Expect strings to not be NULL from key:_t", s);
+        r |= Test(Equals((Abstract *)value, (Abstract *)found), 
+            "Expect strings to equal _t from key:_t found _t", value, s,
+            found != NULL ? found : NULL);
     }
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }
 
-status TablePreKey_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
+status TablePreKey_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
     Span *tbl = Span_Make(m);
-    status r = SUCCESS;
-    String *s;
-    String *value;
-    String *found;
+    status r = READY;
+    /*
+    Str *s;
+    Str *value;
+    Str *found;
 
-    s = String_Make(m, bytes("PreKey"));
-    value = String_Make(m, bytes("After Value"));
+    s = Str_CstrRef(m, "PreKey");
+    value = Str_CstrRef(m, "After Value");
     Table_SetKey(tbl, (Abstract *)s);
     Table_SetValue(tbl, (Abstract *)value);
-    found = (String *)Table_Get(tbl, (Abstract *)s);
+    found = (Str *)Table_Get(tbl, (Abstract *)s);
     r |= Test(found != NULL, 
-        "Expect SetKey and SetValue to effect the same entry: strings to not be NULL from key:'%s'", (char *)(s->bytes));
-    r |= Test(String_Equals(value, found), 
-        "Expect SetKey and SetValue to effect the same entry: strings to equal '%s' from key:'%s' found '%s'", (char *)(value->bytes), (char *)(s->bytes),
-        found != NULL ? (char *)(found->bytes) : "NULL");
+        "Expect SetKey and SetValue to effect the same entry: strings to not be NULL from key:'_t", s);
+    r |= Test(Equals((Abstract *)value, (Abstract *)found), 
+        "Expect SetKey and SetValue to effect the same entry: strings to equal '_t' from key:'_t' found '_t'", value, s, found);
 
 
     tbl = Span_Make(m);
@@ -161,11 +148,12 @@ status TablePreKey_Tests(MemCtx *gm){
         if(values2[i] == NULL){
             break;
         }
-        s = String_Make(m, bytes(values2[i]));
-        value = String_Make(m, bytes(values2[i+1]));
+        s = Str_CstrRef(m, values2[i]);
+        value = Str_CstrRef(m, values2[i+1]);
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
     }
+    */
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }
