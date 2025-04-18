@@ -1,51 +1,30 @@
 #include <external.h>
 #include <caneka.h>
 
-int TABLE_DIM_BYTESIZES[TABLE_MAX_DIMS] = {1, 1, 2, 2, 4};
-int TABLE_REQUERY_MAX[TABLE_MAX_DIMS] = {8, 8, 4, 4, 2};
-static i64 dim_lookups[TABLE_MAX_DIMS] = {15, 255, 4095, 65535, 1048575};
+const query_max = 4;
 static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {12, 192, 3072, 49152, 786432};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
-static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *value);
-
-static int getReQueryKey(i64 hash, int position, byte dim){
-    return (int) ((hash >> (position*TABLE_DIM_BYTESIZES[dim])) & dim_lookups[dim]);
-}
-
-static boolean shouldResize(Span *tbl, word queries){
-    if(tbl->nvalues > dim_nvalue_max[tbl->dims] || queries > TABLE_REQUERY_MAX[tbl->dims]){
-            return TRUE;
-    }
-    return FALSE;
-}
-
-static status Table_Resize(Span *tbl, word *queries){
-    printf("resizing\n");
-    *queries = 0;
-    Span *newTbl = Span_Make(tbl->m);
-
-    Iter it;
-    Iter_Setup(&it, newTbl, SPAN_OP_RESIZE, _capacity[tbl->dims]);
-    Iter_Query(&it);
-
-    Iter_Setup(&it, tbl, SPAN_OP_GET, 0);
-    newTbl->type.state |= DEBUG;
-    while((Iter_Next(&it) & END) == 0){
-        printf("iter %d\n", it.idx);
-        Hashed *h = (Hashed *)it.value;
-        if(h != NULL){
-            Out("re-inserting _a _D hKey:_i4 _B\n", h, h->value, h->idx, &h->id, sizeof(util));
-            Table_GetSetHashed(newTbl, SPAN_OP_SET, (Abstract *)h, (Abstract *)h->value);
+static inline i32 HKey_valFromHKey(HKey *hk, i8 dim){
+    /* TODO: make the algorithm pull
+        The first upper dim
+        then all smaller values inside that section of the hash
+        then move on the the higher bits at the higher dim
+    */
+    if(hk->type.state & NOOP){
+        hk->pos++;
+        if(hk->pos > 4 && dim == 0){ 
+            ;
         }
     }
-    memcpy(tbl, newTbl, sizeof(Span));
-    printf("Resized\n");
-    return SUCCESS;
+    if(hk->pos > 4 && dim == 0){ 
+        hk->type.state |= END;
+    }
+    hk->idx = (int) ((hk->id >> (position*dim*4)) & _modulos[dim+1]);
+    return hk->type.state;
 }
 
 static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *value){
-    printf("GetSetHased\n");
     Hashed *h = Hashed_Make(tbl->m, a);
     if(a == NULL){
         return NULL;
@@ -60,42 +39,33 @@ static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *val
     word queries = 0;
     Iter it;
     Iter_Setup(&it, tbl, SPAN_OP_GET, 0);
-    printf("GetSetHased II\n");
-    for(i32 i = 0; !found && i <= tbl->dims && i < TABLE_MAX_DIMS; i++){
-        for(i32 j = 0; !found && j < TABLE_REQUERY_MAX[tbl->dims]; j++){
-            printf("GetSetHased III i:%d j:%d\n", i, j);
-            queries++;
-            if(shouldResize(tbl, queries)){
-                Table_Resize(tbl, &queries);
-            }
-            i32 hkey = getReQueryKey(h->id, j, tbl->dims);
-            it.idx = hkey;
-            printf("GetSetHased III i:%d j:%d about to find %d dims:%d\n", i, j, hkey, it.span->dims);
-            Iter_Query(&it);
-            printf("GetSetHased III i:%d j:%d about to found\n", i, j);
-            if(op == SPAN_OP_GET){
-                if(it.value != NULL){
-                    if(Hashed_Equals(h, (Hashed *)it.value)){
-                        h = (Hashed *)it.value;
-                        found = TRUE;
-                    }
+    HKey hk = {{TYPE_HKEY,0} tbl->dims, -1, h->id};
+    i8 dims = tbl->dims;
+    while(HKey_valFromHKey(hk, dims) != END){
+        it.idx = hk->idx;
+        Iter_Query(&it);
+        if(op == SPAN_OP_GET){
+            if(it.value != NULL){
+                if(Hashed_Equals(h, (Hashed *)it.value)){
+                    h = (Hashed *)it.value;
+                    found = TRUE;
                 }
-            }else if(op == SPAN_OP_SET){
-                if(it.value != NULL){
-                    if(Hashed_Equals(h, (Hashed *)it.value)){
-                        h = (Hashed *)it.value;
-                        h->idx = hkey;
-                        h->value = value;
-                        found = TRUE;
-                        break;
-                    }
-                }else{
+            }
+        }else if(op == SPAN_OP_SET){
+            if(it.value != NULL){
+                if(Hashed_Equals(h, (Hashed *)it.value)){
+                    h = (Hashed *)it.value;
                     h->idx = hkey;
                     h->value = value;
-                    Iter_Set(&it, h);
                     found = TRUE;
                     break;
                 }
+            }else{
+                h->idx = hkey;
+                h->value = value;
+                Iter_Set(&it, h);
+                found = TRUE;
+                break;
             }
         }
     }

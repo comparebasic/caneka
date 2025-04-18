@@ -33,6 +33,12 @@ typedef struct rangehdr {
     i16 range;
 } RangeType;
 
+typedef struct subrangehdr {
+    cls of;
+    i8 range8;
+    i8 normalState;
+} SubRangeType;
+
 typedef struct virt  {
     Type type;
 } Abstract;

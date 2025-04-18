@@ -1,3 +1,15 @@
+typedef Span Table;
+
+typedef struct hkey {
+   Type type; 
+   i32 idx;
+   util id;
+   i8 dim;
+   i8 pos[SPAN_MAX_DIMS];
+} HKey;
+
+typedef Pair Collision; 
+
 status Table_SetKey(Iter *it, Abstract *a);
 i32 Table_SetIdxEntry(Iter *it, Abstract *a);
 Hashed *Table_SetValue(Iter *it, Abstract *a);
