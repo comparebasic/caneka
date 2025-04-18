@@ -3,6 +3,7 @@
 
 i32 _increments[SPAN_MAX_DIMS+1] = {1, 16, 256, 4096, 65536, 1048576};
 i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535, 1048575};
+i32 _capacity[SPAN_MAX_DIMS+1] = {16, 256, 4096, 65536, 1048576, 16777216};
 
 static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
     Span *p = it->span; 
@@ -170,6 +171,21 @@ end:
     return it->type.state;
 }
 
+status Iter_Set(Iter *it, void *value){
+    Span *p = it->span;
+    void **ptr = (void **)it->span->root;
+    if(p->dims > 0){
+        ptr = (void **)*((void **)it->stack[1]); 
+    }
+    ptr += (it->idx & _modulos[1]);
+    *ptr = value;
+    p->nvalues++;
+    if(it->idx > p->max_idx){
+        p->max_idx = it->idx;
+    }
+    return SUCCESS;
+}
+
 status Iter_Query(Iter *it){
     if(it->span->type.state & DEBUG){
         printf("Iter_Query %d\n", it->idx);
@@ -194,7 +210,7 @@ status Iter_Query(Iter *it){
         if(it->span->type.state & DEBUG){
             printf("Expanding to %d\n", (i32)dimsNeeded);
         }
-        if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD)) == 0){
+        if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD|SPAN_OP_RESIZE)) == 0){
             return NOOP;
         }
         slab *exp_sl = NULL;
@@ -234,6 +250,10 @@ status Iter_Query(Iter *it){
             break;
         }
         if(dim == 0){
+            if(it->span->type.state & DEBUG){
+                printf("ope %d?\n");
+                Out("ope _b?", &it->type.state, 2);
+            }
             if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE|SPAN_OP_ADD)){
                 if(it->span->type.state & DEBUG){
                     printf("Span Add? %d idx:%d dim/dims:%d/%d *%lu\n", (it->type.state & SPAN_OP_ADD) != 0, it->idx, (i32)dim, (i32)p->dims, (util)it->stack[dim]);

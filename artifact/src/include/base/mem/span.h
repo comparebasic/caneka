@@ -8,6 +8,7 @@ enum span_flags {
 
 typedef util *slab[SPAN_STRIDE];
 extern i32 _increments[SPAN_MAX_DIMS+1];
+extern i32 _capacity[SPAN_MAX_DIMS+1];
 
 typedef struct span {
     Type type;

@@ -96,20 +96,16 @@ status TableResize_Tests(MemCh *gm){
     Str *value;
     Str *found;
 
-    for(int i = 0; ; i+= 2){
-        if(valuesResize[i] == NULL){
-            break;
-        }
+    printf("initial\n");
+    for(i32 i = 0; valuesResize[i] != NULL; i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
+        printf("Setting %d: %s -> %s\n", i / 2, valuesResize[i], valuesResize[i+1]);
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
     }
+    printf("After initial\n");
 
-
-    for(int i = 0; ; i+= 2){
-        if(valuesResize[i] == NULL){
-            break;
-        }
+    for(i32 i = 0; valuesResize[i] != NULL;i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
         found = (Str *)Table_Get(tbl, (Abstract *)s);

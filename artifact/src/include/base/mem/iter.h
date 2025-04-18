@@ -30,3 +30,4 @@ status Iter_Reset(Iter *it);
 void Iter_Init(Iter *it, Span *p);
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx);
 Iter *Iter_Make(struct mem_ctx *m, Span *p);
+status Iter_Set(Iter *it, void *value);
