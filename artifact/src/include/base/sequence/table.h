@@ -8,10 +8,6 @@ typedef struct hkey {
    i8 pos;
 } HKey;
 
-typedef Pair Collision; 
-
-status HKey_Init(HKey *hk, Table *tbl, util id);
-inline status Table_HKeyVal(Table *tbl, HKey *hk);
 status Table_SetKey(Iter *it, Abstract *a);
 i32 Table_SetIdxEntry(Iter *it, Abstract *a);
 Hashed *Table_SetValue(Iter *it, Abstract *a);

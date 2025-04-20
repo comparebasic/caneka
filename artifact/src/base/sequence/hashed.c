@@ -86,7 +86,7 @@ boolean Hashed_Equals(Hashed *a, Hashed *b){
     if(a->id != b->id){
         return FALSE;
     }
-    return Equals(a->item, (void *)b->item);
+    return Equals(a->item, b->item);
 }
 
 Hashed *Hashed_Make(MemCh *m, Abstract *a){

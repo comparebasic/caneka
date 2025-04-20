@@ -1,11 +1,10 @@
 enum hash_flags {
     FLAG_HASHED_RAW = 1 << 11,
-    FLAG_HASHED_COLLISION = 1 << 12,
 };
 
 typedef struct hashed {
     Type type;
-    int idx;
+    i32 idx;
     util id;
     Abstract *item;
     Abstract *value;

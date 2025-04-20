@@ -15,8 +15,6 @@ status Core_Init(MemCh *m){
     return NOOP;
 }
 
-i64 Out(char *fmt, ...){
-	va_list args;
-    va_start(args, fmt);
+i64 Out(char *fmt, void **args){
     return StrVec_FmtHandle(OutStream, fmt, args);
 }

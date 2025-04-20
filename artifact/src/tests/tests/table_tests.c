@@ -60,6 +60,8 @@ status Table_Tests(MemCh *gm){
     Str *value;
     Str *found;
 
+    tbl->type.state |= DEBUG;
+
     for(int i = 0; ; i+= 2){
         if(values[i] == NULL){
             break;

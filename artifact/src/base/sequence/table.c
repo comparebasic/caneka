@@ -1,11 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-const query_max = 4;
 static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {12, 192, 3072, 49152, 786432};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
-inline status Table_HKeyVal(Table *tbl, HKey *hk){
+static inline status Table_HKeyVal(Table *tbl, HKey *hk){
     if((hk->type.state & PROCESSING) == 0){
         hk->type.state |= PROCESSING;
     }else{
@@ -20,11 +19,19 @@ inline status Table_HKeyVal(Table *tbl, HKey *hk){
             hk->pos++;
         }
     }
-    hk->idx = (i32) ((hk->id >> (position*hk->dim*4)) & _modulos[hk->dim+1]);
+    hk->idx = (i32) ((hk->id >> (hk->pos*hk->dim*4)) & _modulos[hk->dim+1]);
     return hk->type.state;
 }
 
-status HKey_Init(HKey *hk, Table *tbl, util id){
+static inline Hashed *Table_setHValue(MemCh *m, HKey *hk, Iter *it, Abstract *key, Abstract *value){
+    Hashed *h = Hashed_Make(m, key);
+    h->idx = hk->idx;
+    h->value = value;
+    Iter_Set(it, h);
+    return h;
+}
+
+static status HKey_Init(HKey *hk, Table *tbl, util id){
     hk->type.state = TYPE_HKEY;
     hk->idx = 0;
     hk->id = id;
@@ -33,55 +40,65 @@ status HKey_Init(HKey *hk, Table *tbl, util id){
     return SUCCESS;
 }
 
-static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *a, Abstract *value){
-    Hashed *h = Hashed_Make(tbl->m, a);
-    if(a == NULL){
+static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *value){
+    tbl->type.state &= ~SUCCESS;
+    if(key == NULL){
         return NULL;
     }
-    tbl->type.state &= ~SUCCESS;
-    if(op != SPAN_OP_GET && op != SPAN_OP_SET){
-        return h;
-    }
-    Hashed *_h = NULL;
-    Abstract *v = NULL;
-    boolean found = FALSE;
-    word queries = 0;
+    Hashed *h = NULL;
+    util hash = Get_Hash(key);
+
     Iter it;
     Iter_Setup(&it, tbl, SPAN_OP_GET, 0);
+
     HKey hk;
-    HKey_Init(&hk, Table *tbl, h->id);
-    i8 dims = tbl->dims;
-    while(Table_HKeyVal(tbl, &hk) != END){
-        it.idx = hk->idx;
+    HKey_Init(&hk, tbl, hash);
+
+    while((tbl->type.state & SUCCESS) == 0 &&
+            (Table_HKeyVal(tbl, &hk) & END) == 0){
+        it.idx = hk.idx;
         Iter_Query(&it);
+        if(tbl->type.state & DEBUG){
+            Out("^p.Table_GetSetHashed _i4 ^0.\n", 10);
+        }
         if(op == SPAN_OP_GET){
             if(it.value != NULL){
-                if(Hashed_Equals(h, (Hashed *)it.value)){
+                h = it.value;
+                if(h->id == hash && Equals(key, h->item)){
                     h = (Hashed *)it.value;
-                    found = TRUE;
+                    tbl->type.state |= SUCCESS;
                 }
             }
         }else if(op == SPAN_OP_SET){
             if(it.value != NULL){
-                if(Hashed_Equals(h, (Hashed *)it.value)){
-                    h = (Hashed *)it.value;
-                    h->idx = hkey;
+                h = (Hashed *)it.value;
+                if(h->id == hash && Equals(key, h->item)){
+                    h->idx = hk.idx;
                     h->value = value;
-                    found = TRUE;
-                    break;
+                    tbl->type.state |= SUCCESS;
                 }
             }else{
-                h->idx = hkey;
-                h->value = value;
-                Iter_Set(&it, h);
-                found = TRUE;
-                break;
+                h = Table_setHValue(tbl->m, &hk, &it, key, value);
+                tbl->type.state |= SUCCESS;
             }
         }
     }
 
-    if(found){
-        tbl->type.state |= SUCCESS;
+    if(op == SPAN_OP_SET && (tbl->type.state & SUCCESS) == 0){
+        HKey_Init(&hk, tbl, hash);
+        Iter_Setup(&it, tbl, SPAN_OP_GET, hk.idx);
+        while((tbl->type.state & SUCCESS) == 0 &&
+                (Iter_Next(&it) & END) == 0){
+            if(it.value == NULL){
+                h = Table_setHValue(tbl->m, &hk, &it, key, value);
+                tbl->type.state |= SUCCESS;
+            }
+        }
+        if((tbl->type.state & SUCCESS) == 0){
+            Iter_Setup(&it, tbl, SPAN_OP_ADD, it.idx);
+            h = Table_setHValue(tbl->m, &hk, &it, key, value);
+            tbl->type.state |= SUCCESS;
+        }
     }
 
     return h;
@@ -147,15 +164,15 @@ Abstract *Table_FromIdx(Table *tbl, i32 idx){
     return NULL;
 }
 
-int Table_GetIdx(Table *tbl, Abstract *a){
-
-Table *Table_Make(MemCh *m){
-    return (Table *)Span_Make(m);
-}
+i32 Table_GetIdx(Table *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
     if(tbl->type.state & SUCCESS){
         return h->idx;
     }else{
         return -1;
     }
+}
+
+Table *Table_Make(MemCh *m){
+    return (Table *)Span_Make(m);
 }

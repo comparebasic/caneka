@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
+i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
     size_t l = strlen(fmt);
     MemCh *m = sm->m;
     char *end = fmt+l;
@@ -18,7 +18,7 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
             state = READY;
         }else if(state == PROCESSING){
             if(c == 't'){
-                Abstract *a = va_arg(args, Abstract *);
+                Abstract *a = args++;
                 if(a != NULL || a->type.of == TYPE_STR){
                     s = (Str *)a;
                     Stream_To(sm, s->bytes, s->length);
@@ -30,13 +30,13 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'T'){
-                Abstract *a = va_arg(args, Abstract *);
-                cls type = va_arg(args, i32);
+                Abstract *a = args++;
+                cls type = *(args++);
                 total += Str_Debug(sm, a, (cls)type, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 's'){
-                Abstract *a = va_arg(args, Abstract *);
+                Abstract *a = args++;
                 if(a == NULL){
                     total += Stream_To(sm, (byte *)"NULL", 4);
                 }else if(a->type.of == TYPE_STR){
@@ -53,29 +53,29 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'o'){
-                Abstract *a = (Abstract *)va_arg(args, Abstract *);
+                Abstract *a = (Abstract *)args++;
                 s = Str_CstrRef(m, (char *)Type_ToChars(a->type.of));
                 Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'O'){
-                i32 i = (i32)va_arg(args, i32);
+                i32 i = (i32)*(args++);
                 s = Str_CstrRef(m, (char *)Type_ToChars((cls)i));
                 Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){
-                Abstract *a = va_arg(args, Abstract *);
+                Abstract *a = args++;
                 total += Str_Debug(sm, a, 0, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'D'){
-                Abstract *a = va_arg(args, Abstract *);
+                Abstract *a = args++;
                 total += Str_Debug(sm, a, 0, TRUE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'c'){
-                char *cstr = (char *)va_arg(args, char *);
+                char *cstr = (char *)args++;
                 s = Str_CstrRef(m, cstr);
                 Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
@@ -83,19 +83,17 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
             }else if(c == 'i'){
                 c = *(++ptr);
                 i64 i = 0;
-                /*
                 if(c == '2'){
-                    i = (i64)va_arg(args, word);
+                    i = (i64)*(args++);
                 }else if(c == '1'){
-                    i = (i64)va_arg(args, byte);
+                    i = (i64)*(args++);
                 }else if(c == '8'){
-                    */
                 if(c == '8'){
-                    i = (i64)va_arg(args, i64);
+                    i = (i64)*(args++);
                 }else if(c == '4'){ 
-                    i = (i32)va_arg(args, i32);
+                    i = (i32)*(args++);
                 }else{ /* 4 is the default */
-                    i = (i64)va_arg(args, i32);
+                    i = (i64)*(args++);
                     ptr--;
                 }
                 s = Str_FromI64(m, (i64)i);
@@ -108,45 +106,43 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
                 s = Str_Ref(m, (byte *)"*", l, l);
                 Stream_To(sm, s->bytes, s->length);
                 total += s->length;
-                util u = (i64)va_arg(args, util);
+                util u = (i64)*(args++);
                 s = Str_FromI64(m, u);
                 Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'b'){
-                void *b = va_arg(args, void *);
-                size_t sz = va_arg(args, size_t);
+                void *b = args++;
+                size_t sz = *(args++);
                 total += Bits_Print(sm, b, sz, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'B'){
-                void *b = va_arg(args, void *);
-                size_t sz = va_arg(args, size_t);
+                void *b = args++;
+                size_t sz = *(args++);
                 total += Bits_Print(sm, b, sz, TRUE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == '+'){
-                StrVec *v2 = (StrVec *)va_arg(args, StrVec *);
+                StrVec *v2 = (StrVec *)args++;
                 total += Stream_VecTo(sm, v2);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'u'){
                 c = *(++ptr);
                 i64 i = 0;
-                /*
                 if(c == '2'){
-                    i = (i64)va_arg(args, word);
+                    i = (i64)*(args++);
                 }else if(c == '1'){
-                    i = (i64)va_arg(args, byte);
+                    i = (i64)*(args++);
                 }else if(c == '8'){
-                    */
                 if(c == '8'){
-                    i = (i64)va_arg(args, util);
+                    i = (i64)*(args++);
                 }else if(c == '4'){ 
-                    i = (i64)va_arg(args, quad);
+                    i = (i64)*(args++);
                 }else{ /* 4 is the default */
-                    i = (i64)va_arg(args, quad);
+                    i = (i64)*(args++);
                     ptr--;
                 }
                 s = Str_FromI64(m, i);
@@ -155,7 +151,7 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, va_list args){
                 state = SUCCESS; 
                 goto next;
             }else if(c == '^'){
-                char *cstr = (char *)va_arg(args, char *);
+                char *cstr = (char *)args++;
                 char *cstr_end = cstr+(strlen(cstr)-1);
                 Str *s = Str_FromAnsi(m, &cstr, cstr_end);
                 Stream_To(sm, s->bytes, s->length);
@@ -212,8 +208,6 @@ outnext:
     return total; 
 }
 
-i64 StrVec_Fmt(Stream *sm, char *fmt, ...){
-	va_list args;
-    va_start(args, fmt);
+i64 StrVec_Fmt(Stream *sm, char *fmt, void **args){
     return StrVec_FmtHandle(sm, fmt, args);
 }
