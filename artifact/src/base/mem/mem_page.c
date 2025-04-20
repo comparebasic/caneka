@@ -19,11 +19,9 @@ MemPage *MemPage_Attach(MemCh *m, i16 level){
 MemPage *MemPage_Make(MemCh *m, i16 level){
     void *bytes = MemBook_GetPage(m);
     if(bytes == NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error allocating page");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+            "Error allocating page", NULL);
         return NULL;
-    }
-    if(m != NULL && m->it.type.state & DEBUG){
-        printf("\x1b[36mAllocating Page *%lu\x1b[0m\n", (util)bytes);
     }
     MemPage *pg = (MemPage *)bytes;
     pg->type.of = TYPE_MEMSLAB;

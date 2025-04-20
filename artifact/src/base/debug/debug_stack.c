@@ -3,7 +3,7 @@
 
 static Span *stack = NULL;
 static void sigH(int sig, siginfo_t *info, void *ptr){
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault");
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
     exit(1);
 }
 
@@ -70,14 +70,16 @@ int DebugStack_Print(){
     while((Iter_Next(&it) & END) == 0){
         StackEntry *entry = (StackEntry*)it.value;
         if(entry != NULL){
-            Out("    ^D^y_c - _c:_i4^0 ", 
-                entry->funcName, entry->fname, entry->line);
+            void *args[] = { &entry->funcName, &entry->fname, &entry->line};
+            Out("    ^D^y_c - _c:_i4^0 ", args);
             if(entry->ref != NULL && entry->typeOf != 0){
-                Out("^y_d^0", entry->ref);
+                void *args[] = {&entry->ref};
+                Out("^y_d^0", args);
             }else if(entry->ref != NULL && entry->typeOf == 0){
-                Out("^y_c^0", entry->ref);
+                void *args[] = {&entry->ref};
+                Out("^y_c^0", args);
             }
-            Out("\n");
+            Out("\n", NULL);
         }
     }
     return 0;

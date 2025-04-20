@@ -22,7 +22,7 @@ static MemBook *MemBook_get(void *addr){
         }
         idx--;
     }
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook not found");
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook not found", NULL);
     return NULL;
 }
 
@@ -38,8 +38,9 @@ i32 MemBook_GetPageIdx(void *addr){
 }
 #else
 void _insecureMemError(void *addr){
+    void *args[] = {addr, NULL};
     Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
-        "MemBook is private unless otherwise specified at compile time, _a", addr);
+        "MemBook is private unless otherwise specified at compile time, _a", args);
 }
 MemBook *MemBook_Get(void *addr){
     _insecureMemError(addr);
@@ -130,13 +131,13 @@ void *MemBook_GetPage(void *addr){
     }
 
     /* make new chapter here as all chapters are full */
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Next MemBook not implemented");
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Next MemBook not implemented", NULL);
 
     if((book = MemBook_Make(book)) != NULL){
         return MemBook_GetPage(book);
     }
 
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook");
+    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook", NULL);
     return NULL;
 }
 
@@ -144,12 +145,12 @@ MemBook *MemBook_Make(MemBook *prev){
     bookIdx++;
     printf("bookIdx is %d\n", bookIdx);
     if(bookIdx >= CHAPTER_MAX){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
         return NULL;
     }
     MemBook *mb = _books[bookIdx];
     if(mb != NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
         return NULL;
     }
 
@@ -158,7 +159,7 @@ MemBook *MemBook_Make(MemBook *prev){
 
     if(start == MAP_FAILED){
         printf("err:%s\n", strerror(errno));
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Unable to map memory");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Unable to map memory", NULL);
         return NULL;
     }
 

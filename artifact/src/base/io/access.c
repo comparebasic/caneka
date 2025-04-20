@@ -82,7 +82,7 @@ Str *GetAccess(Access *access, Str *s){
         return NULL;
     }
     
-    Span *tbl = (Span *)as(h->value, TYPE_TABLE);
+    Table *tbl = (Table *)as(h->value, TYPE_TABLE);
     h = Table_GetHashed(tbl, (Abstract *)s);
     if(h == NULL || (fl & h->type.state) != fl){
         DebugStack_Pop();
@@ -98,7 +98,7 @@ Access *Access_Make(MemCh *m, Str *owner, Span *groups){
     a->type.of = TYPE_ACCESS;
     a->owner = owner;
     if(groups != NULL && groups->type.of != TYPE_TABLE){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Group span is expected to be a table");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Group span is expected to be a table", NULL);
         return NULL;
     }
     a->groups = groups;

@@ -18,7 +18,7 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
             state = READY;
         }else if(state == PROCESSING){
             if(c == 't'){
-                Abstract *a = args++;
+                Abstract *a = (Abstract *)args++;
                 if(a != NULL || a->type.of == TYPE_STR){
                     s = (Str *)a;
                     Stream_To(sm, s->bytes, s->length);
@@ -30,13 +30,13 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'T'){
-                Abstract *a = args++;
-                cls type = *(args++);
+                Abstract *a = (Abstract *)args++;
+                cls type = *((cls *)(args++));
                 total += Str_Debug(sm, a, (cls)type, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 's'){
-                Abstract *a = args++;
+                Abstract *a = (Abstract *)args++;
                 if(a == NULL){
                     total += Stream_To(sm, (byte *)"NULL", 4);
                 }else if(a->type.of == TYPE_STR){
@@ -59,18 +59,18 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'O'){
-                i32 i = (i32)*(args++);
+                i32 i = (i32)*((i32 *)(args++));
                 s = Str_CstrRef(m, (char *)Type_ToChars((cls)i));
                 Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){
-                Abstract *a = args++;
+                Abstract *a = (Abstract *)args++;
                 total += Str_Debug(sm, a, 0, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'D'){
-                Abstract *a = args++;
+                Abstract *a = (Abstract *)args++;
                 total += Str_Debug(sm, a, 0, TRUE);
                 state = SUCCESS; 
                 goto next;
@@ -84,19 +84,18 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 c = *(++ptr);
                 i64 i = 0;
                 if(c == '2'){
-                    i = (i64)*(args++);
+                    i = (i64)*((i16 *)(args++));
                 }else if(c == '1'){
-                    i = (i64)*(args++);
+                    i = (i64)*((i8 *)(args++));
                 }else if(c == '8'){
-                if(c == '8'){
-                    i = (i64)*(args++);
-                }else if(c == '4'){ 
-                    i = (i32)*(args++);
+                    i = (i64)*((i64 *)(args++));
+                }else if(c == '4'){
+                    i = (i64)*((i32 *)(args++));
                 }else{ /* 4 is the default */
-                    i = (i64)*(args++);
+                    i = (i64)*((i32 *)(args++));
                     ptr--;
                 }
-                s = Str_FromI64(m, (i64)i);
+                s = Str_FromI64(m, i);
                 Stream_To(sm, s->bytes, s->length);
                 total += s->length;
                 state = SUCCESS; 
@@ -114,13 +113,13 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 goto next;
             }else if(c == 'b'){
                 void *b = args++;
-                size_t sz = *(args++);
+                size_t sz = *((size_t *)(args++));
                 total += Bits_Print(sm, b, sz, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'B'){
                 void *b = args++;
-                size_t sz = *(args++);
+                size_t sz = *((size_t *)(args++));
                 total += Bits_Print(sm, b, sz, TRUE);
                 state = SUCCESS; 
                 goto next;
@@ -133,16 +132,15 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 c = *(++ptr);
                 i64 i = 0;
                 if(c == '2'){
-                    i = (i64)*(args++);
+                    i = (i64)*((i64 *)(args++));
                 }else if(c == '1'){
-                    i = (i64)*(args++);
+                    i = (i64)*((i64 *)(args++));
                 }else if(c == '8'){
-                if(c == '8'){
-                    i = (i64)*(args++);
+                    i = (i64)*((i64 *)(args++));
                 }else if(c == '4'){ 
                     i = (i64)*(args++);
                 }else{ /* 4 is the default */
-                    i = (i64)*(args++);
+                    i = (i64)*((i64 *)(args++));
                     ptr--;
                 }
                 s = Str_FromI64(m, i);
@@ -177,6 +175,11 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
            state = NOOP; 
            goto outnext;
         }else if(c == '_'){
+           if(args == NULL){
+                Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+                    "Expecting arg, found NULL instead", NULL);
+                return total;
+           }
            state = PROCESSING; 
            goto outnext;
         }

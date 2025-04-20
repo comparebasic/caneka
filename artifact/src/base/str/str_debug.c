@@ -5,15 +5,16 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Str *s = (Str*)as(a, TYPE_STR); 
     i64 total = 0;
     if(extended){
-        total += StrVec_Fmt(sm, "Str<_i4/_i4:^D\"", s->length, s->alloc); 
+        void *args[] = {&s->length, &s->alloc, NULL};
+        total += StrVec_Fmt(sm, "Str<_i4/_i4:^D\"", args); 
     }else{
-        total += StrVec_Fmt(sm, "^D\""); 
+        total += StrVec_Fmt(sm, "^D\"", NULL); 
     }
     total += Stream_To(sm, s->bytes, s->length);
     if(extended){
-        total += StrVec_Fmt(sm, "\"^d.>");
+        total += StrVec_Fmt(sm, "\"^d.>", NULL);
     }else{
-        total += StrVec_Fmt(sm, "\"^d.");
+        total += StrVec_Fmt(sm, "\"^d.", NULL);
     }
     return total;
 }
@@ -22,9 +23,10 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     i64 total = 0;
     if(extended){
-        total += StrVec_Fmt(sm, "StrVec<_i4/_i8:\"", vObj->p->nvalues, vObj->total); 
+        void *args[] = { &vObj->p->nvalues, &vObj->total, NULL};
+        total += StrVec_Fmt(sm, "StrVec<_i4/_i8:\"", args); 
     }else{
-        total += StrVec_Fmt(sm, "^D\""); 
+        total += StrVec_Fmt(sm, "^D\"", NULL); 
     }
 
     Iter it;
@@ -32,20 +34,21 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)it.value;
         if(s != NULL){
-            total += StrVec_Fmt(sm, "_i4: ", it.idx); 
+            void *args[] = {&it.idx, NULL};
+            total += StrVec_Fmt(sm, "_i4: ", args); 
             Str_Print(sm, (Abstract *)s, type, extended);
             if((it.type.state & FLAG_ITER_LAST) == 0){
                 total += Stream_To(sm, (byte *)", ", 2);
             }
             if((it.type.state & FLAG_ITER_LAST) == 0){
-                total += StrVec_Fmt(sm, ", "); 
+                total += StrVec_Fmt(sm, ", ", NULL); 
             }
         }
     }
     if(extended){
-        total += StrVec_Fmt(sm, "\"^d>");
+        total += StrVec_Fmt(sm, "\"^d>", NULL);
     }else{
-        total += StrVec_Fmt(sm, "\"^d");
+        total += StrVec_Fmt(sm, "\"^d", NULL);
     }
     return total;
 }
@@ -53,11 +56,11 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
 i64 Stream_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Stream *smObj = (Stream *)as(a, TYPE_STREAM);
     i64 total = 0;
-    total += StrVec_Fmt(sm, "Stream<"); 
+    total += StrVec_Fmt(sm, "Stream<", NULL); 
     if(sm->type.state & STREAM_STRVEC){
         total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, type, extended);
     }
-    total += StrVec_Fmt(sm, ">"); 
+    total += StrVec_Fmt(sm, ">", NULL); 
     return total;
 }
 

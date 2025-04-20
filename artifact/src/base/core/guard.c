@@ -22,7 +22,7 @@ status _Guard_Incr(Guard *g, char *func, char *file, int line){
         g->type.state |= ERROR;
         g->file = file;
         g->line = line;
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Guard failure");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Guard failure", NULL);
         return g->type.state;
     }
     return NOOP;

@@ -21,15 +21,11 @@ static char *statusCstr(word status){
     }
 }
 
-status Test(boolean condition, char *fmt, ...){
-	va_list args;
-    va_start(args, fmt);
-
-
+status Test(boolean condition, char *fmt, void **args){
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
         char *cstr = condition ? "pass" : "fail";
-        void *args[] = { cstr, NULL };
-        Out("        <li class=\"test result result-_c\">_+</li>", args);
+        void *_args[] = { cstr, NULL };
+        Out("        <li class=\"test result result-_c\">_+</li>", _args);
         return condition ? SUCCESS : ERROR;
     }else{
         if(!condition){
@@ -54,7 +50,6 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     MemCh *m = MemCh_Make();
     DebugStack_Push(suiteName, TYPE_CSTR); 
     TestSet *set = tests;
-    void **args;
     char *name = NULL;
     int pass = 0;
     int fail = 0;
@@ -65,23 +60,22 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i64 rollingBaseMem = baseMem;
 
     i64 chapters = MemChapterCount();
-    args = { suiteName, NULL };
-    Out("= Test Suite: _c\n", args);
-    i32 memCount = Str_MemCount(m, baseMem);
+    void *args1[] = { &suiteName, NULL };
+    Out("= Test Suite: _c\n", args1);
     i32 chap = chapters *PAGE_SIZE;
-    args = { &memCount, &chap, NULL };
-    Out("Starting Mem at _t (_i8 chapters/_i8 total+stack)\n", args);
+    void *args2[] = { Str_MemCount(m, baseMem), &chap, NULL };
+    Out("Starting Mem at _t (_i8 chapters/_i8 total+stack)\n", args2);
 
     while(set->name != NULL){
 
-        args = {set->name, NULL };
+        void *args3[] = {set->name, NULL };
         if(set->status == SECTION_LABEL){
-            Out("== _c\n", args);
+            Out("== _c\n", args3);
             set++;
             continue;
         }
 
-        Out("=== Testing: _c\n", args);
+        Out("=== Testing: _c\n", args3);
 
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
@@ -110,14 +104,15 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
             i64 chapters = MemChapterCount();
             i64 availableCh = MemAvailableChapterCount();
-
-            i64 strMemCount = Str_MemCount(m, overRollingUsed);
-            i64 strMemTotal = Str_MemCount(m, chapters*PAGE_SIZE);
-            args = {
-                &color, &strMemCount, &chapters, &availableCh,
-                &strMemTotal, NULL
+            void *args4[] = {
+                color,
+                Str_MemCount(m, overRollingUsed),
+                &chapters,
+                &availableCh,
+                Str_MemCount(m, chapters*PAGE_SIZE),
+                NULL
             }; 
-            Out("_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\x1b[2K\r", args);
+            Out("_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\x1b[2K\r", args4);
 
             MemCh_Free(m);
             m->type.range--;
@@ -131,22 +126,22 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
         set++;
     }
-    args = {suiteName, &pass, &fail};
+    void *args5[] = {suiteName, &pass, &fail};
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        Out("\n    <span class=\"result\">Suite _c pass:_i4 fail:_i4</span>\n", args);
+        Out("\n    <span class=\"result\">Suite _c pass:_i4 fail:_i4</span>\n", args5);
     }else if((GLOBAL_flags & NO_COLOR) != 0){
-        Out("Suite _c pass:_i4 fail:_i4\n", args);
+        Out("Suite _c pass:_i4 fail:_i4\n", args5);
     }else{
         if(!fail){
-            Out("^g");
+            Out("^g", NULL);
         }else{
-            Out("^r");
+            Out("^r", NULL);
         }
-        Out("Suite _c pass:_i4 fail:_i4^0\n", args);
+        Out("Suite _c pass:_i4 fail:_i4^0\n", args5);
 
     }
     if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        Out("</div>\n");
+        Out("</div>\n", NULL);
     }
     DebugStack_Pop();
     return !fail ? SUCCESS : ERROR;

@@ -241,7 +241,7 @@ static BuildSubdir *objdirs[] = {
 
 int main(int argc, char **argv){
     if(MemBook_Make(NULL) == NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Unable to allocate Mem_Book");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Unable to allocate Mem_Book", NULL);
         exit(1);
     };
     MemCh *m = MemCh_Make();

@@ -25,12 +25,12 @@ static status rmFile(MemCh *m, Str *path, Str *file, Abstract *source){
 }
 
 static status gatherDir(MemCh *m, Str *path, Abstract *source){
-    Span *p = asIfc(source, TYPE_SPAN);
+    Span *p = (Span *)asIfc(source, TYPE_SPAN);
     return Span_Add(p, (Abstract *)path);
 }
 
 static status gatherFile(MemCh *m, Str *path, Str *file, Abstract *source){
-    Span *p = asIfc(source, TYPE_SPAN);
+    Span *p = (Span *)asIfc(source, TYPE_SPAN);
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, path);
     StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1));

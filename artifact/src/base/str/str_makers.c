@@ -55,8 +55,10 @@ i64 Str_AddI64(Str *s, i64 i){
 }
 
 Str *Str_ToHex(MemCh *m, Str *s){
-    if(s->length*2 > STR_MAX){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Requested hex string is too long _i4", (i32)s->length*2);
+    i32 _len = s->length*2;
+    if(_len > STR_MAX){
+        void *args[] = { &_len, NULL};
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Requested hex string is too long _i4", args);
         return NULL;
     }
     Str *ret = Str_Make(m, s->length*2);
@@ -83,7 +85,8 @@ Str *Str_MemCount(MemCh *m, i64 mem) {
 
 i64 Str_Trunc(Str *s, i64 amount){
     if(s->type.state & STRING_CONST){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Str_Trunc cannot modify a const char * '_t'", s);
+        void *args[] = {s ,NULL};
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Str_Trunc cannot modify a const char * '_t'", args);
     }
     if(amount == 0){
         return 0;

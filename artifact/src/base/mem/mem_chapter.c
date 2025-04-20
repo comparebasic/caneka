@@ -15,7 +15,7 @@ i64 MemCh_MemCount(MemCh *m, i16 level){
 
 void *MemCh_Alloc(MemCh *m, size_t sz){
     if(sz > MEM_SLAB_SIZE){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
     }
 
     i16 level = max(m->type.range, 0);
@@ -62,7 +62,7 @@ i64 MemCh_Used(MemCh *m){
 
 void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
     if(s > origsize){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Asking to copy more than newly allocated");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Asking to copy more than newly allocated", NULL);
         return NULL;
     }
     void *p = MemCh_Alloc(m, s);

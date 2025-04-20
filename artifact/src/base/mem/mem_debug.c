@@ -88,20 +88,21 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     i64 total = 0;
-    total += StrVec_Fmt(sm, "Span<_i4values/0.._i4/_i4dims [", 
-        p->nvalues, p->max_idx, (i32)p->dims); 
+    void *args[] = {&p->nvalues, &p->max_idx, &p->dims, NULL};
+    total += StrVec_Fmt(sm, "Span<_i4values/0.._i4/_i1dims [", args);
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = it.value;
         if(a != NULL){
-            total += StrVec_Fmt(sm, "_i4:_d", it.idx, it.value);
+            void *args[] = {&it.idx, it.value, NULL};
+            total += StrVec_Fmt(sm, "_i4:_d", args);
             if((it.type.state & FLAG_ITER_LAST) == 0){
                 total += Stream_To(sm, (byte *)", ", 2);
             }
         }
     }
-    total += StrVec_Fmt(sm, "]>^0");
+    total += StrVec_Fmt(sm, "]>^0", NULL);
     
     return total;
 }

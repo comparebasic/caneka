@@ -3,8 +3,8 @@
 
 i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     ProcDets *pd = (ProcDets *)as(a, TYPE_PROCDETS);
-    return StrVec_Fmt(sm, "ProcDets<_t _i8 return:_i4>", 
-        State_ToStr(sm->m, pd->type.state), pd->pid, pd->code);
+    void *args[] = { State_ToStr(sm->m, pd->type.state), &pd->pid, & pd->code, NULL};
+    return StrVec_Fmt(sm, "ProcDets<_t _i8 return:_i4>", args); 
 }
 
 status PersistDebug_Init(MemCh *m, Lookup *lk){

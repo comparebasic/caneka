@@ -52,7 +52,7 @@ boolean File_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
     char *path_cstr = Str_Cstr(m, a);
     r = stat(path_cstr, &source_stat);
     if(r != 0){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Source not found");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Source not found", NULL);
         exit(1);
     }
     r = stat(Str_Cstr(m, b), &build_stat);

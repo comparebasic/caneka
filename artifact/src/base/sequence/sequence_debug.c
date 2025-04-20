@@ -3,8 +3,9 @@
 
 i64 Iter_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Iter *it = (Iter *)as(a, TYPE_ITER);
-    return StrVec_Fmt(sm, "I<_t:_i4 of _i4>",
-        State_ToStr(sm->m, it->type.state), it->idx, it->span->nvalues);
+    Str *s = State_ToStr(sm->m, it->type.state);
+    void *args[] = {s, &it->idx, &it->span->nvalues, NULL};
+    return StrVec_Fmt(sm, "I<_t:_i4 of _i4>", args);
 }
 
 i64 HKey_Print(Stream *sm, Abstract *a, cls type, boolean extended){

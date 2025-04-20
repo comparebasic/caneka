@@ -50,11 +50,5 @@ typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 #define ZERO 0
 #define MAX_BASE10 23
 
-#define as(x, t) ((x) != NULL && ((Abstract *)(x))->type.of == (t) ? x : Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from abstract mismatch _O", (i32)(x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
-
-#define asIfcOffset(x, ifc, offset) (((x) != NULL  && Ifc_Match((((Abstract *)(x))->type.of-HTYPE_LOCAL), ifc)) ? (x) : Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from abstract mismatch _i4", (i32)(x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
-
-#define asIfc(x, ifc) (((x) != NULL  && Ifc_Match(((Abstract *)(x))->type.of, ifc)) ? (x) : Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from abstract mismatch", (i32)(x != NULL ? ((Abstract *)x)->type.of : TYPE_UNKNOWN)))
-
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))

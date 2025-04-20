@@ -40,7 +40,8 @@ i64 Bits_Print(Stream *sm, byte *bt, size_t length, boolean extended){
     for(int i = length-1; i >= 0;i--){
         byte b = bt[i];
         if(extended){
-            total += StrVec_Fmt(sm, "_i4=", (i32)b);
+            void *args[] = {&b, NULL};
+            total += StrVec_Fmt(sm, "_i1=", args);
         }
         for(int j = 7; j >= 0;j--){
             total += Stream_To(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
@@ -67,7 +68,9 @@ i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){
     if(func != NULL){
         return func(sm, a, type, extended);
     }else{
-        StrVec_Fmt(DebugOut, "_c: unkown\\_debug", Type_ToChars(type));
+        const char *cstr = Type_ToChars(type);
+        void *args[] = {(void *)cstr, NULL};
+        StrVec_Fmt(DebugOut, "_c: unkown\\_debug", args);
         return 0;
     }
 }

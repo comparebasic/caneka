@@ -59,7 +59,8 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
         it.idx = hk.idx;
         Iter_Query(&it);
         if(tbl->type.state & DEBUG){
-            Out("^p.Table_GetSetHashed _i4 ^0.\n", 10);
+            void *args[] = {&hk, NULL};
+            Out("^p.Table_GetSetHashed _D^0.\n", args);
         }
         if(op == SPAN_OP_GET){
             if(it.value != NULL){
@@ -174,5 +175,7 @@ i32 Table_GetIdx(Table *tbl, Abstract *a){
 }
 
 Table *Table_Make(MemCh *m){
-    return (Table *)Span_Make(m);
+    Table *tbl =  (Table *)Span_Make(m);
+    tbl->type.of = TYPE_TABLE;
+    return tbl;
 }
