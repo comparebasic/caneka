@@ -5,26 +5,35 @@ const query_max = 4;
 static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {12, 192, 3072, 49152, 786432};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
-static inline i32 HKey_valFromHKey(HKey *hk, i8 dim){
-    /* TODO: make the algorithm pull
-        The first upper dim
-        then all smaller values inside that section of the hash
-        then move on the the higher bits at the higher dim
-    */
-    if(hk->type.state & NOOP){
-        hk->pos++;
-        if(hk->pos > 4 && dim == 0){ 
-            ;
+inline status Table_HKeyVal(Table *tbl, HKey *hk){
+    if((hk->type.state & PROCESSING) == 0){
+        hk->type.state |= PROCESSING;
+    }else{
+        if(hk->pos == 4){
+            if(hk->dim == 0){
+                hk->type.state |= END;
+            }else{
+                hk->dim--;
+                hk->pos = 0;
+            }
+        }else{
+            hk->pos++;
         }
     }
-    if(hk->pos > 4 && dim == 0){ 
-        hk->type.state |= END;
-    }
-    hk->idx = (int) ((hk->id >> (position*dim*4)) & _modulos[dim+1]);
+    hk->idx = (i32) ((hk->id >> (position*hk->dim*4)) & _modulos[hk->dim+1]);
     return hk->type.state;
 }
 
-static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *value){
+status HKey_Init(HKey *hk, Table *tbl, util id){
+    hk->type.state = TYPE_HKEY;
+    hk->idx = 0;
+    hk->id = id;
+    hk->dim = tbl->dims;
+    hk->pos = 0;
+    return SUCCESS;
+}
+
+static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *a, Abstract *value){
     Hashed *h = Hashed_Make(tbl->m, a);
     if(a == NULL){
         return NULL;
@@ -39,9 +48,10 @@ static Hashed *Table_GetSetHashed(Span *tbl, word op, Abstract *a, Abstract *val
     word queries = 0;
     Iter it;
     Iter_Setup(&it, tbl, SPAN_OP_GET, 0);
-    HKey hk = {{TYPE_HKEY,0} tbl->dims, -1, h->id};
+    HKey hk;
+    HKey_Init(&hk, Table *tbl, h->id);
     i8 dims = tbl->dims;
-    while(HKey_valFromHKey(hk, dims) != END){
+    while(Table_HKeyVal(tbl, &hk) != END){
         it.idx = hk->idx;
         Iter_Query(&it);
         if(op == SPAN_OP_GET){
@@ -101,7 +111,7 @@ Hashed *Table_SetValue(Iter *it, Abstract *a){
     return NULL;
 }
 
-Hashed *Table_GetHashed(Span *tbl, Abstract *a){
+Hashed *Table_GetHashed(Table *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
     if(h->value != NULL){
         return h;
@@ -109,27 +119,27 @@ Hashed *Table_GetHashed(Span *tbl, Abstract *a){
     return NULL;
 }
 
-Hashed *Table_SetHashed(Span *tbl, Abstract *a, Abstract *value){
+Hashed *Table_SetHashed(Table *tbl, Abstract *a, Abstract *value){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
     return h;
 }
 
-Abstract *Table_GetKey(Span *tbl, i32 idx){
+Abstract *Table_GetKey(Table *tbl, i32 idx){
     Hashed *h = Span_Get(tbl, idx);
     return h->item;
 }
 
-Abstract *Table_Get(Span *tbl, Abstract *a){
+Abstract *Table_Get(Table *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
     return h->value;
 }
 
-i32 Table_Set(Span *tbl, Abstract *a, Abstract *value){
+i32 Table_Set(Table *tbl, Abstract *a, Abstract *value){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
     return h->idx;
 }
 
-Abstract *Table_FromIdx(Span *tbl, i32 idx){
+Abstract *Table_FromIdx(Table *tbl, i32 idx){
     Hashed *h = (Hashed *)Span_Get(tbl, idx);
     if(h != NULL){
         return h->value;
@@ -137,7 +147,11 @@ Abstract *Table_FromIdx(Span *tbl, i32 idx){
     return NULL;
 }
 
-int Table_GetIdx(Span *tbl, Abstract *a){
+int Table_GetIdx(Table *tbl, Abstract *a){
+
+Table *Table_Make(MemCh *m){
+    return (Table *)Span_Make(m);
+}
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
     if(tbl->type.state & SUCCESS){
         return h->idx;
