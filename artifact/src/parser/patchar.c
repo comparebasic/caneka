@@ -5,7 +5,7 @@ static Str *PatChar_fromStr(MemCh *m, Str *s, word flags){
     Str *pat = Str_Make(m, STR_DEFAULT);
     i32 max = (STR_DEFAULT / sizeof(PatCharDef))-1;
     if(s->length > max){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Str longer than pat char max");
+        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Str longer than pat char max", NULL);
         return NULL;
     }
     PatCharDef *pdef = (PatCharDef *)pat->bytes;

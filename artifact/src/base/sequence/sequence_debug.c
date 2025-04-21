@@ -10,12 +10,8 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, boolean extended){
 
 i64 HKey_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     HKey *hk = (HKey *)as(a, TYPE_HKEY);
-    return 0;
-    /*
-    return StrVec_Fmt(sm, "Hk<_B/_b ^D._i4^d.dim ^D._i4^d.pos>",
-        &hk->id, sizeof(util), &hk->idx, sizeof(i32),
-        (i32)hk->dim, (i32)hk->pos);
-        */
+    void *args[] = {&hk->id, &hk->idx, &hk->dim, &hk->pos, NULL};
+    return StrVec_Fmt(sm, "Hk<_b8/_b4 ^D._i1^d.dim ^D._i1^d.pos>", args);
 }
 
 i64 Slab_Print(struct stream *sm, slab *slab, i8 dim, i8 dims){
@@ -79,4 +75,3 @@ status SequenceDebug_Init(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_HKEY, (void *)HKey_Print);
     return r;
 }
-

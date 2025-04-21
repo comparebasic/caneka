@@ -24,7 +24,7 @@ status Stream_Tests(MemCh *gm){
 
     StrVec *vo = StrVec_FromBytes(m, (byte *)cstr, strlen(cstr));
     r |= Test(Equals((Abstract *)vo,(Abstract *)sm->dest.curs->v), 
-        "Comparing StrVec built up slowly, and one built all at once ");
+        "Comparing StrVec built up slowly, and one built all at once ", NULL);
 
     MemCh_Free(m);
     return r;

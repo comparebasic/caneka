@@ -9,10 +9,9 @@ static inline Abstract *as(Abstract *x, cls type){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
     }else {
         if(x->type.of != type){
-            const char *typeCstr = Type_ToChars(type); 
-            const char *typeOfCstr = Type_ToChars(x->type.of); 
-            void *args[] = {(void *)typeCstr, (void *)typeOfCstr, NULL};
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatch expecting '_c', have '_c'", args);
+            printf("%s:%s %d vs %d\n", FILENAME, FUNCNAME, x->type.of, type);
+            void *args[] = {(void *)Type_ToChars(type), (void *)Type_ToChars(x->type.of), NULL};
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched type expecting '_c', have '_c'", args);
             return NULL;
         }
     }
@@ -24,10 +23,8 @@ static inline Abstract *asIfc(Abstract *x, cls type){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
     }else{
         if(!Ifc_Match(x->type.of, type)){
-            const char *typeCstr = Type_ToChars(type); 
-            const char *typeOfCstr = Type_ToChars(x->type.of); 
-            void *args[] = {(void *)typeCstr, (void *)typeOfCstr, NULL};
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatch expecting '_c', have '_c'", args);
+            void *args[] = {(void *)Type_ToChars(type), (void *)Type_ToChars(x->type.of), NULL};
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched interface, expecting '_c', have '_c'", args);
             return NULL;
         }
     }
@@ -39,10 +36,8 @@ static inline Abstract *asIfcOffset(Abstract *x, cls type, word offset){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
     }else{
         if(!Ifc_Match(x->type.of-HTYPE_LOCAL, type)){
-            const char *typeCstr = Type_ToChars(type); 
-            const char *typeOfCstr = Type_ToChars(x->type.of); 
-            void *args[] = {(void *)typeCstr, (void *)typeOfCstr, NULL};
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatch expecting '_c', have '_c'", args);
+            void *args[] = {(void *)Type_ToChars(type), (void *)Type_ToChars(x->type.of), NULL};
+            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched interface with offset expecting '_c', have '_c'", args);
             return NULL;
         }
     }

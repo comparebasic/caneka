@@ -14,8 +14,8 @@ status Debug_Init(MemCh *m){
         DebugPrintChain = Lookup_Make(m, _TYPE_START, NULL, NULL);
         Mem_DebugInit(m, DebugPrintChain);
         Str_DebugInit(m, DebugPrintChain);
+        SequenceDebug_Init(m, DebugPrintChain);
         /*
-        SequenceDebug_Init(m, funcs);
         UtilDebug_Init(m, funcs);
         ParserDebug_Init(m, funcs);
         */
@@ -68,9 +68,8 @@ i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){
     if(func != NULL){
         return func(sm, a, type, extended);
     }else{
-        const char *cstr = Type_ToChars(type);
-        void *args[] = {(void *)cstr, NULL};
-        StrVec_Fmt(DebugOut, "_c: unkown\\_debug", args);
+        void *args[] = {Type_ToChars(type), NULL};
+        StrVec_Fmt(DebugOut, "_c: unknown-debug", args);
         return 0;
     }
 }

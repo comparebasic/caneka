@@ -60,7 +60,7 @@ status Roebling_RunCycle(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
     if(rbl->parseIt.span->nvalues == 0){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
-            "Roebling parsers not set");
+            "Roebling parsers not set", NULL);
     }
     rbl->type.state &= ~END;
     if((rbl->type.state & ROEBLING_NEXT) != 0){
@@ -85,7 +85,7 @@ status Roebling_RunCycle(Roebling *rbl){
         }
     }else{
         if((rbl->type.state & PROCESSING) == 0){
-            wdof = as(wdof, TYPE_WRAPPED_DO);
+            wdof = (Single *)as((Abstract *)wdof, TYPE_WRAPPED_DO);
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
             rbl->type.state |= PROCESSING;
         }

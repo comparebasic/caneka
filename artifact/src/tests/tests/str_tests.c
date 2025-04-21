@@ -7,24 +7,32 @@ status Str_Tests(MemCh *gm){
     Str *s;
     s = Str_CstrRef(m, "Hi");
     status r = READY;
-    r |= Test(s->type.of == TYPE_STR, "Expect string to have fixed type _O found _o", (i32)TYPE_STR, s);
-    r |= Test(s->length == 2, "Expect string length of _i4 found _i4", 2, s->length);
-    r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of '_c' found '_t'", "Hi", s);
-
-    return r;
+    cls type = TYPE_STR;
+    void *args1[] = { &type, s, NULL};
+    r |= Test(s->type.of == TYPE_STR, "Expect string to have fixed type _O found _o", args1);
+    i32 two = 2;
+    void *args2[] = {&two, &s->length, NULL};
+    r |= Test(s->length == 2, "Expect string length of _i4 found _i4", args2);
+    void *args3[] = {"Hi", s, NULL};
+    r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of '_c' found '_t'", args3);
 
     s = Str_CstrRef(m, longCstr);
     i32 ls_l = strlen(longCstr);
-
+    
+    cls typeOf = s->type.of;
+    void *args4[] = {&type, &typeOf, NULL};
     r |= Test(s->type.of == TYPE_STR, 
-        "Expect string to have chain type _O found _o", (i32)TYPE_STR, s->type.of);
-    r |= Test(s->length == ls_l, "Expect string length of _i4 found _i4", ls_l, s->length);
+        "Expect string to have chain type _O found _o", args4);
+    void *args5[] = {&ls_l, &s->length, NULL};
+    r |= Test(s->length == ls_l, "Expect string length of _i4 found _i4", args5);
 
     i64 value = 35072;
     s = Str_FromI64(m, value);
     Str *expected_is = Str_CstrRef(m, "35072");
-    r |= Test(s->length == expected_is->length, "Expect for i32 value _i4  length of _i4 found _i4", value, expected_is->length, s->length);
-    r |= Test(Equals((Abstract *)s, (Abstract *)expected_is) == TRUE, "Expect string match of i32 of _i4 to string", value);
+    void *args6[] = {&value, &expected_is->length, &s->length, NULL};
+    r |= Test(s->length == expected_is->length, "Expect for i32 value _i4  length of _i4 found _i4", args6);
+    void *args7[] = {&value, NULL};
+    r |= Test(Equals((Abstract *)s, (Abstract *)expected_is) == TRUE, "Expect string match of i32 of _i4 to string", args7);
 
 
     char *cstr = "GET /path.html HTTP/1.1\r\n"
@@ -35,8 +43,9 @@ status Str_Tests(MemCh *gm){
     "\r\n";
 
     s = Str_CstrRef(m, cstr);
-
-    r |= Test(s->length == strlen(cstr), "Expect length _i8, have _i4", strlen(cstr), s->length);
+    i64 len = strlen(cstr);
+    void *args8[] = {&len, &s->length, NULL};
+    r |= Test(s->length == strlen(cstr), "Expect length _i8, have _i4", args8);
 
     MemCh_Free(m);
     return r;
@@ -51,16 +60,19 @@ status Str_EndMatchTests(MemCh *gm){
 
     match = ".c";
     s = Str_CstrRef(m, "file1.c");
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.c' matches successfully, had '_t'", s);
+    void *args1[] = {s, NULL};
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.c' matches successfully, had '_t'", args1);
 
     match = ".cnk";
     s = Str_CstrRef(m, "file1.cnk");
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches successfully, had '_t'", s);
+    void *args2[] = {s, NULL};
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches successfully, had '_t'", args2);
 
     match = ".c";
     s = Str_Clone(m, s, s->alloc);
     Str_Trunc(s, -2);
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches \".c\" after String\\_Trunc successfully, had '_t'", s);
+    void *args3[] = {s , NULL};
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches \".c\" after String\\_Trunc successfully, had '_t'", args3);
     /*
 
     match = "bork!";

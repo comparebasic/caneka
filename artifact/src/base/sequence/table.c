@@ -1,10 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {12, 192, 3072, 49152, 786432};
+static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000, 50000};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
 static inline status Table_HKeyVal(Table *tbl, HKey *hk){
+    i8 dimp = hk->dim+1;
     if((hk->type.state & PROCESSING) == 0){
         hk->type.state |= PROCESSING;
     }else{
@@ -19,7 +20,7 @@ static inline status Table_HKeyVal(Table *tbl, HKey *hk){
             hk->pos++;
         }
     }
-    hk->idx = (i32) ((hk->id >> (hk->pos*hk->dim*4)) & _modulos[hk->dim+1]);
+    hk->idx = (i32) ((hk->id >> (hk->pos*(dimp)*4)) & _modulos[dimp]);
     return hk->type.state;
 }
 
@@ -32,7 +33,8 @@ static inline Hashed *Table_setHValue(MemCh *m, HKey *hk, Iter *it, Abstract *ke
 }
 
 static status HKey_Init(HKey *hk, Table *tbl, util id){
-    hk->type.state = TYPE_HKEY;
+    hk->type.of = TYPE_HKEY;
+    hk->type.state = 0;
     hk->idx = 0;
     hk->id = id;
     hk->dim = tbl->dims;
@@ -49,18 +51,21 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
     util hash = Get_Hash(key);
 
     Iter it;
-    Iter_Setup(&it, tbl, SPAN_OP_GET, 0);
+    Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
+
+    it.type.state |= DEBUG;
 
     HKey hk;
     HKey_Init(&hk, tbl, hash);
-
+    i32 count = 0;
     while((tbl->type.state & SUCCESS) == 0 &&
             (Table_HKeyVal(tbl, &hk) & END) == 0){
         it.idx = hk.idx;
         Iter_Query(&it);
         if(tbl->type.state & DEBUG){
-            void *args[] = {&hk, NULL};
-            Out("^p.Table_GetSetHashed _D^0.\n", args);
+            void *args[] = {&hk, it.value, NULL};
+            printf("value:%p %d\n", it.value, (i32)it.type.state);
+            Out("^p.Table GetSetHashed _D/_d^0.\n", args);
         }
         if(op == SPAN_OP_GET){
             if(it.value != NULL){
@@ -79,13 +84,22 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
                     tbl->type.state |= SUCCESS;
                 }
             }else{
+                printf("Setting %d\n", it.idx);
                 h = Table_setHValue(tbl->m, &hk, &it, key, value);
                 tbl->type.state |= SUCCESS;
             }
         }
+        if(tbl->nvalues > dim_nvalue_max[tbl->dims]){
+            printf("Resizing\n");
+            Iter_Setup(&it, tbl, SPAN_OP_ADD, _capacity[tbl->dims]);
+            Iter_Query(&it);
+            Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
+        }
     }
 
     if(op == SPAN_OP_SET && (tbl->type.state & SUCCESS) == 0){
+        printf("BOTTOM STUFF\n");
+        /*
         HKey_Init(&hk, tbl, hash);
         Iter_Setup(&it, tbl, SPAN_OP_GET, hk.idx);
         while((tbl->type.state & SUCCESS) == 0 &&
@@ -100,6 +114,7 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
             h = Table_setHValue(tbl->m, &hk, &it, key, value);
             tbl->type.state |= SUCCESS;
         }
+        */
     }
 
     return h;

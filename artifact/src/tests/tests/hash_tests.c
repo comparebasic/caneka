@@ -13,8 +13,8 @@ status Hash_Tests(MemCh *gm){
 
     h = Get_Hash((Abstract *)s);
     expected = 4291084750259606489;
-    r = Test(h == expected, "Expected hash to equal _i8/_b, found: _i8/_b",
-        expected, &expected, sizeof(expected), h, &h, sizeof(h));
+    void *args1[] = {&expected, &expected, &h, &h, NULL};
+    r = Test(h == expected, "Expected hash to equal _i8/_b8, found: _i8/_b8", args1);
 
     int x;
     /*

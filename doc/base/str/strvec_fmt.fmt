@@ -21,7 +21,7 @@ i#: Integer (i4 for a 4 byte i32 or i8 for an 8 byte i64)
 u#: Unsigned Integer (u4 for a 4 byte quad or u8 for an 8 byte util)
 a: Address
 +: StrVec (adds to the strvec `v` or outputs to the file descriptor)
-b: Bits (requires size argument following);
+b#: Bits, b1/b2/b4/b8 for 1,2,4, o4 8 bytes respectively.
 B: Bits extended, with numbers (requires size argument following);
 
 === Ansi arguments

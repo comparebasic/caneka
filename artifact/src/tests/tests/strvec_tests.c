@@ -69,22 +69,28 @@ status StrVec_Tests(MemCh *gm){
     StrVec_Add(vc, Str_CstrRef(m, "hi dude"));
     StrVec_Add(vc, Str_CstrRef(m, ", what a wild ride!"));
     Str *s = Str_CstrRef(m, "hi dude, what a wild ride!");
-    r |= Test(Equals((Abstract *)vc, (Abstract *)s), "Testing StrVec and Str '_+' vs '_t'", vc, s);
+    void *args1[] = {vc, s, NULL};
+    r |= Test(Equals((Abstract *)vc, (Abstract *)s), "Testing StrVec and Str '_+' vs '_t'", args1);
     StrVec *vr = StrVec_ReAlign(m, vc);
-    r |= Test(Equals((Abstract *)vr, (Abstract *)s), "Testing ReAligned StrVec and Str '_+' vs '_t'", vr, s);
+    void *args2[] = {vr, s, NULL};
+    r |= Test(Equals((Abstract *)vr, (Abstract *)s), "Testing ReAligned StrVec and Str '_+' vs '_t'", args2);
 
     Str *st = Str_CstrRef(m, "time");
     Str *sa = Str_CstrRef(m, "afterwards");
     Str *sf = Str_CstrRef(m, "four");
     char *cstr = ", all alone";
     Stream *sm = Stream_MakeStrVec(m);
-    StrVec_Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '_t' '_T' _d _D _i4 _i8 _+",
-        st, sa, (i32)TYPE_STR, sf, sf, 29, 5987263, vc);
+    i32 twentyNine = 29;
+    i64 fiveK = 5987263;
+    cls type = TYPE_STR;
+
+    void *args3[] = {st, sa, &type, sf, sf, &twentyNine, &fiveK, vc, NULL};
+    StrVec_Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '_t' '_T' _d _D _i4 _i8 _+", args3);
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");
 
     r |= Test(Equals((Abstract *)sm->dest.curs->v, (Abstract *)s),
-        "Testing StrVec and StrVec from Fmt via Stream");
+        "Testing StrVec and StrVec from Fmt via Stream", NULL);
 
     /*
     StrVec_Add(vc, Str_CstrRef(m, "\n\n"));

@@ -62,8 +62,8 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i64 chapters = MemChapterCount();
     void *args1[] = { &suiteName, NULL };
     Out("= Test Suite: _c\n", args1);
-    i32 chap = chapters *PAGE_SIZE;
-    void *args2[] = { Str_MemCount(m, baseMem), &chap, NULL };
+    i64 chap = chapters*PAGE_SIZE;
+    void *args2[] = {Str_MemCount(m, baseMem), &chap, &chapters, NULL };
     Out("Starting Mem at _t (_i8 chapters/_i8 total+stack)\n", args2);
 
     while(set->name != NULL){

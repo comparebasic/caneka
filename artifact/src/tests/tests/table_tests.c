@@ -79,11 +79,12 @@ status Table_Tests(MemCh *gm){
         s = Str_CstrRef(m, values[i]);
         value = Str_CstrRef(m, values[i+1]);
         found = (Str *)Table_Get(tbl, (Abstract *)s);
+        void *args1[] = {s, NULL};
         r |= Test(found != NULL, 
-            "Expect strings to not be NULL from key:_t", s);
+            "Expect strings to not be NULL from key:_t", args1);
+        void *args2[] = {value, s, (found != NULL ? found : NULL), NULL};
         r |= Test(Equals((Abstract *)value, (Abstract *)found), 
-            "Expect strings to equal _t from key:_t found _t", value, s,
-            found != NULL ? found : NULL);
+            "Expect strings to equal _t from key:_t found _t", args2);
     }
 
     MemCh_Free(m);
@@ -98,23 +99,23 @@ status TableResize_Tests(MemCh *gm){
     Str *value;
     Str *found;
 
-    printf("initial\n");
+    tbl->type.state |= DEBUG;
+
     for(i32 i = 0; valuesResize[i] != NULL; i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
-        printf("Setting %d: %s -> %s\n", i / 2, valuesResize[i], valuesResize[i+1]);
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
     }
-    printf("After initial\n");
 
     for(i32 i = 0; valuesResize[i] != NULL;i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
         found = (Str *)Table_Get(tbl, (Abstract *)s);
-        r |= Test(found != NULL, "Expect strings to not be NULL from key:_t", s);
+        void *args1[] = {s, NULL};
+        r |= Test(found != NULL, "Expect strings to not be NULL from key:_t", args1);
+        void *args2[] = {value, s, (found != NULL ? found : NULL), NULL};
         r |= Test(Equals((Abstract *)value, (Abstract *)found), 
-            "Expect strings to equal _t from key:_t found _t", value, s,
-            found != NULL ? found : NULL);
+            "Expect strings to equal _t from key:_t found _t", args2);
     }
 
     MemCh_Free(m);

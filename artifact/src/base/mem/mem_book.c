@@ -143,7 +143,6 @@ void *MemBook_GetPage(void *addr){
 
 MemBook *MemBook_Make(MemBook *prev){
     bookIdx++;
-    printf("bookIdx is %d\n", bookIdx);
     if(bookIdx >= CHAPTER_MAX){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
         return NULL;

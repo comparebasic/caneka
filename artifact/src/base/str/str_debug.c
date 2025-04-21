@@ -6,7 +6,7 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     i64 total = 0;
     if(extended){
         void *args[] = {&s->length, &s->alloc, NULL};
-        total += StrVec_Fmt(sm, "Str<_i4/_i4:^D\"", args); 
+        total += StrVec_Fmt(sm, "Str<_i2/_i2:^D\"", args); 
     }else{
         total += StrVec_Fmt(sm, "^D\"", NULL); 
     }

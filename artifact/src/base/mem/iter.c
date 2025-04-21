@@ -243,7 +243,7 @@ status Iter_Query(Iter *it){
                         p->max_idx--;
                     }
                 }
-            }else if(it->type.state & (SPAN_OP_GET)){
+            }else if(it->type.state & (SPAN_OP_GET|SPAN_OP_RESERVE)){
                 ptr = (void **)it->stack[dim];
                 it->value = *ptr;
                 it->type.state |= SUCCESS;
