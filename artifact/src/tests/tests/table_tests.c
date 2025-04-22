@@ -53,8 +53,6 @@ status Table_Tests(MemCh *gm){
     Str *value;
     Str *found;
 
-    tbl->type.state |= DEBUG;
-
     for(int i = 0; ; i+= 2){
         if(values[i] == NULL){
             break;
@@ -91,8 +89,6 @@ status TableResize_Tests(MemCh *gm){
     Str *s;
     Str *value;
     Str *found;
-
-    tbl->type.state |= DEBUG;
 
     for(i32 i = 0; valuesResize[i] != NULL; i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);

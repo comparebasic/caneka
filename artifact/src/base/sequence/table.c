@@ -41,12 +41,65 @@ static status HKey_Init(HKey *hk, Table *tbl, util id){
     return SUCCESS;
 }
 
+static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Abstract *key, Abstract *value, util hash){
+    void *args[] = {&it->idx, &it->idx, it, NULL};
+    Hashed *h = NULL;
+    if(tbl->type.state & DEBUG){
+        void *args[] = {hk, it->value, NULL};
+        Out("  ^p.Table GetSetHashed _D/_d^0.\n", args);
+    }
+    if(op & SPAN_OP_GET){
+        if(it->value != NULL){
+            h = it->value;
+            if(h->id == hash && Equals(key, h->item)){
+                if(tbl->type.state & DEBUG){
+                    Out("  ^p.Getting ^Dg._i4^dp./_b4^0.\n", args);
+                }
+                h = (Hashed *)it->value;
+                tbl->type.state |= SUCCESS;
+            }
+        }
+    }else if(op & SPAN_OP_SET){
+        if(it->value != NULL){
+            h = (Hashed *)it->value;
+            if(h->id == hash && Equals(key, h->item)){
+                if(tbl->type.state & DEBUG){
+                    Out("  ^p.Updating _i4/_b4^0.\n", args);
+                }
+                h->idx = hk->idx;
+                h->value = value;
+                tbl->type.state |= SUCCESS;
+            }else{
+                if(tbl->type.state & DEBUG){
+                    Out("  ^p.Collision ^Dg._i4^dp./_b4^0.\n", args);
+                }
+            }
+        }else{
+            if(tbl->type.state & DEBUG){
+                Out("  ^p.Setting ^D._i4^d./_b4^0.\n", args);
+            }
+            h = Table_setHValue(tbl->m, hk, it, key, value);
+            tbl->type.state |= SUCCESS;
+        }
+    }
+    if(tbl->nvalues > dim_nvalue_max[tbl->dims]){
+        Iter_Setup(it, tbl, SPAN_OP_ADD, _capacity[tbl->dims]);
+        Iter_Query(it);
+        Iter_Setup(it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
+        Iter_Query(it);
+        Str *z = Str_CstrRef(tbl->m, "hi");
+    }
+
+    return h;
+}
+
 static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *value){
     if(tbl->type.state & DEBUG){
         char *cstr = (op & SPAN_OP_GET) != 0 ? "GET" : "SET";
         void *args[] = {cstr, key, NULL};
         Out("^p.Table GetSetHashed _c/_D^0.\n", args);
     }
+
     tbl->type.state &= ~SUCCESS;
     if(key == NULL){
         return NULL;
@@ -64,78 +117,18 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
             (Table_HKeyVal(tbl, &hk) & END) == 0){
         it.idx = hk.idx;
         Iter_Query(&it);
-        void *args[] = {&it.idx, &it.idx, &it, NULL};
-        if(tbl->type.state & DEBUG){
-            void *args[] = {&hk, it.value, NULL};
-            Out("  ^p.Table GetSetHashed _D/_d^0.\n", args);
-        }
-        if(op == SPAN_OP_GET){
-            if(it.value != NULL){
-                h = it.value;
-                if(h->id == hash && Equals(key, h->item)){
-                    if(tbl->type.state & DEBUG){
-                        Out("  ^p.Getting ^Dg._i4^dp./_b4^0.\n", args);
-                    }
-                    h = (Hashed *)it.value;
-                    tbl->type.state |= SUCCESS;
-                }
-            }
-        }else if(op == SPAN_OP_SET){
-            if(it.value != NULL){
-                h = (Hashed *)it.value;
-                if(h->id == hash && Equals(key, h->item)){
-                    if(tbl->type.state & DEBUG){
-                        Out("  ^p.Updating _i4/_b4^0.\n", args);
-                    }
-                    h->idx = hk.idx;
-                    h->value = value;
-                    tbl->type.state |= SUCCESS;
-                }else{
-                    if(tbl->type.state & DEBUG){
-                        Out("  ^p.Collision ^Dg._i4^dp./_b4^0.\n", args);
-                    }
-                }
-            }else{
-                if(tbl->type.state & DEBUG){
-                    Out("  ^p.Setting ^D._i4^d./_b4^0.\n", args);
-                }
-                h = Table_setHValue(tbl->m, &hk, &it, key, value);
-                tbl->type.state |= SUCCESS;
-            }
-        }
-        if(tbl->nvalues > dim_nvalue_max[tbl->dims]){
-            Iter_Setup(&it, tbl, SPAN_OP_ADD, _capacity[tbl->dims]);
-            Iter_Query(&it);
-            /*
-            it.type.state &= ~DEBUG;
-            */
-            Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
-            Iter_Query(&it);
-            Str *z = Str_CstrRef(tbl->m, "hi");
-            void *args[] = {&it, NULL};
-            Out("  ^y.Resized _D^0.\n", args);
-            it.type.state |= DEBUG;
-        }
+        h = Table_getOrSet(tbl, op, &it, &hk, key, value, hash);
     }
 
     if(op == SPAN_OP_SET && (tbl->type.state & SUCCESS) == 0){
-        printf("  BOTTOM STUFF\n");
-        /*
         HKey_Init(&hk, tbl, hash);
-        Iter_Setup(&it, tbl, SPAN_OP_GET, hk.idx);
+        hk.dim = 0;
+        Table_HKeyVal(tbl, &hk);
+        Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, hk.idx);
         while((tbl->type.state & SUCCESS) == 0 &&
-                (Iter_Next(&it) & END) == 0){
-            if(it.value == NULL){
-                h = Table_setHValue(tbl->m, &hk, &it, key, value);
-                tbl->type.state |= SUCCESS;
-            }
+            (Iter_Next(&it) & END) == 0){
+            h = Table_getOrSet(tbl, op, &it, &hk, key, value, hash);
         }
-        if((tbl->type.state & SUCCESS) == 0){
-            Iter_Setup(&it, tbl, SPAN_OP_ADD, it.idx);
-            h = Table_setHValue(tbl->m, &hk, &it, key, value);
-            tbl->type.state |= SUCCESS;
-        }
-        */
     }
 
     return h;

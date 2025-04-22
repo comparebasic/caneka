@@ -3,14 +3,19 @@
 
 i64 HKey_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     HKey *hk = (HKey *)as(a, TYPE_HKEY);
-    void *args[] = {&hk->id, &hk->idx, &hk->idx, &hk->dim, &hk->pos, NULL};
-    return StrVec_Fmt(sm, "HKey<_b8/_b4/_i4 ^D._i1^d.dim ^D._i1^d.pos>", args);
+    void *args[] = {&hk->idx, &hk->idx, &hk->dim, &hk->pos, NULL};
+    return StrVec_Fmt(sm, "HKey<_b4/_i4 ^D._i1^d.dim ^D._i1^d.pos>", args);
 }
 
 i64 Hashed_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
-    void *args[] = {&h->idx, &h->id, h->item, h->value, NULL};
-    return StrVec_Fmt(sm, "H<_i4 _b8/_d -> _D>", args);
+    if(extended){
+        void *args[] = {&h->idx, &h->id, h->item, h->value, NULL};
+        return StrVec_Fmt(sm, "H<_i4 _b8/_d -> _D>", args);
+    }else{
+        void *args[] = {&h->idx, h->item, h->value, NULL};
+        return StrVec_Fmt(sm, "H<_i4 _d -> _D>", args);
+    }
 }
 
 i64 Slab_Print(struct stream *sm, slab *slab, i8 dim, i8 dims){
