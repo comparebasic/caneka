@@ -94,6 +94,12 @@ static TestSet _Tests[] = {
         "Making patterns from strings.",
         FEATURE_COMPLETE,
     },
+    {
+        "Match Tests",
+        Match_Tests,
+        "Matching various patterns.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",

@@ -34,6 +34,8 @@ char *TypeStrings[] = {
     "TYPE_STRSNIP",
     "TYPE_CURSOR",
     "TYPE_TESTSUITE",
+    "TYPE_SNIP",
+    "TYPE_SNIPSPAN",
     "TYPE_ROEBLING",
     "TYPE_ROEBLING_BLANK",
     "TYPE_GUARD",

@@ -1,8 +1,8 @@
 enum strvec_snip {
-    SNIP_CONTENT = 1 << 8,
-    SNIP_GAP = 1 << 9,
-    SNIP_STR_BOUNDRY = 1 << 10,
-    SNIP_UNCLAIMED = 1 << 11,
+    SNIP_CONTENT = 1 << 8, /* C */
+    SNIP_GAP = 1 << 9, /* G */
+    SNIP_STR_BOUNDRY = 1 << 10, /* B */
+    SNIP_UNCLAIMED = 1 << 11, /* U */
 };
 
 typedef struct snip {

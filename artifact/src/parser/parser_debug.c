@@ -1,43 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-static word matchFlags[] = {
-    PAT_END, /* E */
-    PAT_TERM, /* X */
-    PAT_OPTIONAL, /* P */
-    PAT_MANY, /* M */
-    PAT_ANY, /* N */
-    PAT_INVERT, /* I */
-    PAT_COUNT, /* C */
-    PAT_INVERT_CAPTURE, /* G */
-    PAT_KO, /* K */
-    PAT_KO_TERM, /* O */
-    PAT_SINGLE, /* S */
-    PAT_LEAVE , /* L */
-    PAT_CMD, /* D */
-    PAT_GO_ON_FAIL, /* T */
-    PAT_CONSUME, /* U */
-};
-
 static const size_t PAT_FLAG_DEBUG_MAX = 17;
 static char *matchFlagChars = "EXPMNICGKOSLDTU";
 
+static char *snipChars = "________CGBU____";
+
 static status patFlagStr(word flags, char str[]){
-    int p = 0;
-    int i = 0;
-    /* 0 and & x != 0 dont mix well */
-    if(flags == PAT_END){
-        str[p++] = 'E';
-    }
-    int l = strlen(matchFlagChars);
-    while(i < l){
-       if((flags &matchFlags[i]) != 0){
-            str[p++] = matchFlagChars[i];
-       }
-       i++;
-    }
-    str[p] = '\0';
-    return SUCCESS;
+    return FlagStr(flags, str, matchFlagChars);
 }
 
 static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, boolean extended){
@@ -96,6 +66,27 @@ static i64 PatCharDef_Print(Stream *sm, Abstract *a, cls type, boolean extended)
         pat++;
     }
     total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
+    total += StrVec_Fmt(sm, ">", NULL);
+    return total;
+}
+
+
+static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    Span *sns = (Span *)as(a, TYPE_SPAN);
+    i64 total = 0;
+    total += StrVec_Fmt(sm, "Sns<", NULL);
+    Iter it;
+    Iter_Init(&it, sns);
+    while((Iter_Next(&it) & END) == 0){
+        Snip *sn = (Snip *)it.value; 
+
+        char flagStr[FLAG_CSTR_LENGTH];
+        memset(flagStr, 0, FLAG_CSTR_LENGTH);
+        FlagStr(sn->type.state & UPPER_FLAGS, flagStr, snipChars);
+
+        void *args[] = {flagStr, &sn->length, NULL};
+        total += StrVec_Fmt(sm, "_c^D._i4^d.,", args);
+    }
     total += StrVec_Fmt(sm, ">", NULL);
     return total;
 }
@@ -219,5 +210,6 @@ status ParserDebug_Init(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
+    r |= Lookup_Add(m, lk, TYPE_SNIPSPAN, (void *)SnipSpan_Print);
     return r;
 }
