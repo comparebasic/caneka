@@ -47,6 +47,7 @@ char *TypeStrings[] = {
     "TYPE_SPAN",
     "TYPE_SPAN_STATE",
     "TYPE_TABLE",
+    "TYPE_HKEY",
     "TYPE_ORDERED_TABLE",
     "TYPE_POLL_MAP_SPAN",
     "TYPE_FLAG_MAP_SPAN",
@@ -184,9 +185,9 @@ char *TypeStrings[] = {
     NULL,
 };
 
-const char *Type_ToChars(cls type){
+char *Type_ToChars(cls type){
     if(type <= _TYPE_APPS_END){
-        return TypeStrings[type]; 
+        return (char *)TypeStrings[type]; 
     }else{
         return "TYPE_unknown";
     }

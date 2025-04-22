@@ -107,11 +107,45 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
     return total;
 }
 
+i64 Iter_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    Iter *it = (Iter *)as(a, TYPE_ITER);
+    Str *s = State_ToStr(sm->m, it->type.state);
+    if(extended){
+        i64 total = 0;
+        void *args[] = {s, &it->idx, &it->span->nvalues, &it->span->dims, NULL};
+        total += StrVec_Fmt(sm, "I<_t@_i4 of _i4/_i1dims\n", args);
+        void *ptr = it->span->root;
+        for(i8 i = it->span->dims; i >= 0; i--){
+            if(it->stack[i] == NULL){
+                void *args[] = {&i};
+                total += StrVec_Fmt(sm, "  _i1: NULL\n", args);
+            }else{
+                i64 delta = 0;
+                if(i > 0 && it->stack[i] != NULL){
+                    delta = (it->stack[i] - ptr) / sizeof(void *);
+                }
+                void *args[] = {&i, ptr, &delta, &it->stackIdx[i], it->stack[i], NULL};
+                total += StrVec_Fmt(sm, "  _i1: _a+_i4/_i4 = _a\n", args);
+            }
+            if(i > 0 && it->stack[i] != NULL){
+                ptr = *((void **)it->stack[i]);
+            }
+        }
+        void *args2[] = {it->value, NULL};
+        total += StrVec_Fmt(sm, "value=_D>", args2);
+        return total;
+    }else{
+        void *args[] = {s, &it->idx, &it->span->nvalues, NULL};
+        return StrVec_Fmt(sm, "I<_t:_i4 of _i4>", args);
+    }
+}
+
 status Mem_DebugInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
     r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemPage_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
     return r;
 }

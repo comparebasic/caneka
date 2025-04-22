@@ -58,6 +58,7 @@ i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){
         return Stream_To(sm, (byte *)"NULL", 4);
     }
 
+
     Abstract *a = (Abstract *)t;
     if(type == 0){
         a = (Abstract *)t;
@@ -68,8 +69,8 @@ i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){
     if(func != NULL){
         return func(sm, a, type, extended);
     }else{
-        void *args[] = {Type_ToChars(type), NULL};
-        StrVec_Fmt(DebugOut, "_c: unknown-debug", args);
+        void *args[] = {Type_ToChars(type), &type, NULL};
+        StrVec_Fmt(sm, "_c/_i2: unknown-debug", args);
         return 0;
     }
 }

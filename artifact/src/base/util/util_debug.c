@@ -1,31 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 Hashed_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
-    Hashed *h = (Hashed *)as(a, TYPE_HASHED);
-    /*
-    if(extended){
-        printf("\x1b[%dm%sH<%s%u:%lu itm=", color, msg, State_ToChars(h->type.state), h->idx, h->id);
-        Debug_Print((void *)h->item, 0, "", color, extended);
-        printf("\x1b[%dm v=", color);
-        Debug_Print((void *)h->value, 0, "", color, extended);
-        if(h->next != NULL){
-            printf("\x1b[%dm next=%p", color, h);
-        }
-        printf("\x1b[%dm>\x1b[0m", color);
-    }else{
-        printf("\x1b[%dm%sH<%s ", color, msg, State_ToChars(h->type.state));
-        Debug_Print((void *)h->item, 0, "k=", color, FALSE);
-        if(h->value != NULL){
-            printf("\x1b[%dm v=", color);
-            Debug_Print((void *)h->value, 0, "", color, FALSE);
-        }
-        printf("\x1b[%dm>\x1b[0m", color);
-    }
-    */
-    return 0;
-}
-
 static i64 Wrapped_Print(MemCh *m, StrVec *v, i32 fd, Abstract *a, cls type, boolean extended){
     /*
     String *s = (String *)asIfc(a, TYPE_WRAPPED);

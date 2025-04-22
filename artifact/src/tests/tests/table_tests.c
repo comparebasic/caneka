@@ -9,13 +9,6 @@ char *values[] = {
     "Echo", "Elevator",
     "Foxtrot", "Five Minutes",
     "Golf", "Gophers Are Cool",
-    "Hotel", "Happy Go Lucky",
-    "India", "Idio-syncratic",
-    "Juliet", "Jockey Rider",
-    /*
-    "Kilo", "Kangaroo",
-    "Lima", "Lefties",
-    */
     NULL,
     NULL,
 };

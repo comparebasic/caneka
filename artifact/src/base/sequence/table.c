@@ -5,11 +5,10 @@ static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000, 50000};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
 static inline status Table_HKeyVal(Table *tbl, HKey *hk){
-    i8 dimp = hk->dim+1;
     if((hk->type.state & PROCESSING) == 0){
         hk->type.state |= PROCESSING;
     }else{
-        if(hk->pos == 4){
+        if(hk->pos == 3){
             if(hk->dim == 0){
                 hk->type.state |= END;
             }else{
@@ -20,7 +19,7 @@ static inline status Table_HKeyVal(Table *tbl, HKey *hk){
             hk->pos++;
         }
     }
-    hk->idx = (i32) ((hk->id >> (hk->pos*(dimp)*4)) & _modulos[dimp]);
+    hk->idx = (i32) ((hk->id >> (hk->pos*(hk->dim+1)*4)) & _modulos[hk->dim+1]);
     return hk->type.state;
 }
 
@@ -43,6 +42,11 @@ static status HKey_Init(HKey *hk, Table *tbl, util id){
 }
 
 static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *value){
+    if(tbl->type.state & DEBUG){
+        char *cstr = (op & SPAN_OP_GET) != 0 ? "GET" : "SET";
+        void *args[] = {cstr, key, NULL};
+        Out("^p.Table GetSetHashed _c/_D^0.\n", args);
+    }
     tbl->type.state &= ~SUCCESS;
     if(key == NULL){
         return NULL;
@@ -53,8 +57,6 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
     Iter it;
     Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
 
-    it.type.state |= DEBUG;
-
     HKey hk;
     HKey_Init(&hk, tbl, hash);
     i32 count = 0;
@@ -62,15 +64,18 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
             (Table_HKeyVal(tbl, &hk) & END) == 0){
         it.idx = hk.idx;
         Iter_Query(&it);
+        void *args[] = {&it.idx, &it.idx, &it, NULL};
         if(tbl->type.state & DEBUG){
             void *args[] = {&hk, it.value, NULL};
-            printf("value:%p %d\n", it.value, (i32)it.type.state);
-            Out("^p.Table GetSetHashed _D/_d^0.\n", args);
+            Out("  ^p.Table GetSetHashed _D/_d^0.\n", args);
         }
         if(op == SPAN_OP_GET){
             if(it.value != NULL){
                 h = it.value;
                 if(h->id == hash && Equals(key, h->item)){
+                    if(tbl->type.state & DEBUG){
+                        Out("  ^p.Getting ^Dg._i4^dp./_b4^0.\n", args);
+                    }
                     h = (Hashed *)it.value;
                     tbl->type.state |= SUCCESS;
                 }
@@ -79,26 +84,42 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
             if(it.value != NULL){
                 h = (Hashed *)it.value;
                 if(h->id == hash && Equals(key, h->item)){
+                    if(tbl->type.state & DEBUG){
+                        Out("  ^p.Updating _i4/_b4^0.\n", args);
+                    }
                     h->idx = hk.idx;
                     h->value = value;
                     tbl->type.state |= SUCCESS;
+                }else{
+                    if(tbl->type.state & DEBUG){
+                        Out("  ^p.Collision ^Dg._i4^dp./_b4^0.\n", args);
+                    }
                 }
             }else{
-                printf("Setting %d\n", it.idx);
+                if(tbl->type.state & DEBUG){
+                    Out("  ^p.Setting ^D._i4^d./_b4^0.\n", args);
+                }
                 h = Table_setHValue(tbl->m, &hk, &it, key, value);
                 tbl->type.state |= SUCCESS;
             }
         }
         if(tbl->nvalues > dim_nvalue_max[tbl->dims]){
-            printf("Resizing\n");
             Iter_Setup(&it, tbl, SPAN_OP_ADD, _capacity[tbl->dims]);
             Iter_Query(&it);
+            /*
+            it.type.state &= ~DEBUG;
+            */
             Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
+            Iter_Query(&it);
+            Str *z = Str_CstrRef(tbl->m, "hi");
+            void *args[] = {&it, NULL};
+            Out("  ^y.Resized _D^0.\n", args);
+            it.type.state |= DEBUG;
         }
     }
 
     if(op == SPAN_OP_SET && (tbl->type.state & SUCCESS) == 0){
-        printf("BOTTOM STUFF\n");
+        printf("  BOTTOM STUFF\n");
         /*
         HKey_Init(&hk, tbl, hash);
         Iter_Setup(&it, tbl, SPAN_OP_GET, hk.idx);

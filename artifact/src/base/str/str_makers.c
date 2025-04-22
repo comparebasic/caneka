@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 char *hex_chars = "0123456789abcdef";
-static const byte zeroDigit = (byte)'0';
+static byte zeroDigit = (byte)'0';
 
 static inline byte hexCharToOrd(byte b){
     if(b >= '0' && b <= '9'){

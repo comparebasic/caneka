@@ -112,7 +112,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
                 Str_MemCount(m, chapters*PAGE_SIZE),
                 NULL
             }; 
-            Out("_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\x1b[2K\r", args4);
+            Out("_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\n", args4);
 
             MemCh_Free(m);
             m->type.range--;

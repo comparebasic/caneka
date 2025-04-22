@@ -41,13 +41,17 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
         if(m->it.type.state & DEBUG){
             printf("\x1b[36mNew Page: *%lu\x1b[0m\n", (util)sl);
         }
-        m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
+        Iter_Setup(&m->it, m->it.span, SPAN_OP_SET, m->it.span->max_idx+1); 
         m->it.value = (void *)sl;
         Iter_Query(&m->it);
-        if(_increments[m->it.span->dims+1] < (m->it.span->nvalues+1)){
-            m->it.value = NULL;
-            Iter_Query(&m->it);
+        if(_capacity[m->it.span->dims] <= (m->it.span->max_idx+1)){
+            printf("\n\nEXPANDING\n\n");
+            Iter it;
+            Iter_Setup(&it, m->it.span, SPAN_OP_RESERVE, m->it.span->max_idx+1); 
+            it.value = NULL;
+            _Iter_QueryPage(&it, sl);
         }
+        Iter_Setup(&m->it, m->it.span, SPAN_OP_SET, 0);
     }
 
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;

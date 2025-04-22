@@ -1,17 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Iter_Print(Stream *sm, Abstract *a, cls type, boolean extended){
-    Iter *it = (Iter *)as(a, TYPE_ITER);
-    Str *s = State_ToStr(sm->m, it->type.state);
-    void *args[] = {s, &it->idx, &it->span->nvalues, NULL};
-    return StrVec_Fmt(sm, "I<_t:_i4 of _i4>", args);
-}
-
 i64 HKey_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     HKey *hk = (HKey *)as(a, TYPE_HKEY);
-    void *args[] = {&hk->id, &hk->idx, &hk->dim, &hk->pos, NULL};
-    return StrVec_Fmt(sm, "Hk<_b8/_b4 ^D._i1^d.dim ^D._i1^d.pos>", args);
+    void *args[] = {&hk->id, &hk->idx, &hk->idx, &hk->dim, &hk->pos, NULL};
+    return StrVec_Fmt(sm, "HKey<_b8/_b4/_i4 ^D._i1^d.dim ^D._i1^d.pos>", args);
+}
+
+i64 Hashed_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    Hashed *h = (Hashed *)as(a, TYPE_HASHED);
+    void *args[] = {&h->idx, &h->id, h->item, h->value, NULL};
+    return StrVec_Fmt(sm, "H<_i4 _b8/_d -> _D>", args);
 }
 
 i64 Slab_Print(struct stream *sm, slab *slab, i8 dim, i8 dims){
@@ -70,8 +69,8 @@ i64 Lookup_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
 status SequenceDebug_Init(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
-    r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
     r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_HKEY, (void *)HKey_Print);
+    r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     return r;
 }

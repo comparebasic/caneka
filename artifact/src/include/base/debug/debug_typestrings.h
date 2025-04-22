@@ -1,1 +1,1 @@
-const char *Type_ToChars(cls type);
+char *Type_ToChars(cls type);

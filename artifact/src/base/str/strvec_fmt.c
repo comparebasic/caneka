@@ -59,7 +59,7 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'O'){
-                i32 i = (i32)*((i32 *)(args++));
+                i32 i = (i32)*((i32 *)*(args++));
                 s = Str_CstrRef(m, (char *)Type_ToChars((cls)i));
                 Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
