@@ -19,6 +19,7 @@ static word matchFlags[] = {
     PAT_CONSUME, /* U */
 };
 
+static const size_t PAT_FLAG_DEBUG_MAX = 17;
 static char *matchFlagChars = "EXPMNICGKOSLDTU";
 
 static status patFlagStr(word flags, char str[]){
@@ -39,64 +40,67 @@ static status patFlagStr(word flags, char str[]){
     return SUCCESS;
 }
 
-static void patCharDef_PrintSingle(PatCharDef *def, cls type, char *msg, int color, boolean extended){
-    /*
-    char flag_cstr[12];
-    patFlagStr(def->flags, flag_cstr);
-    if((def->flags & PAT_COUNT) != 0){
-        if(def->from == '\r' || def->from == '\n'){
-            printf("%s=0x%hux0x%hu", flag_cstr, def->from, def->to);
-        }else{
-            printf("?");
-            printf("%s=%cx%hu", flag_cstr, (char)def->from, def->to);
-        }
-    }else if(def->flags == PAT_END){
-        printf("%s", flag_cstr);
-    }else if(def->from == def->to){
-        if(def->from == '\r' || def->from == '\n' || def->from == '\t'){
-            printf("%s=#%hu", flag_cstr, def->from);
-        }else{
-            printf("%s=%c/%hu", flag_cstr, (char)def->from, (i8)def->from);
-        }
+static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    ;
+    PatCharDef *pat = (PatCharDef *)a;
+    char cstr[PAT_FLAG_DEBUG_MAX];
+    char ending[2] = {0, 0};
+    i64 total = 0;
+    patFlagStr(pat->flags, cstr);
+    if(pat->flags & PAT_TERM){
+        ending[0] = '.';
     }else{
-        if((def->from == '\r' || def->from == '\n') || (def->to == '\r' || def->to == '\n') || (def->to < 32 || def->to < 32) || (def->to > 128 || def->to > 127)){
-            printf("%s=#%hu-#%hu", flag_cstr, def->from, def->to);
-        }else{
-            printf("%s=%c-%c", flag_cstr, (char)def->from, (char)def->to);
-        }
+        ending[0] = ',';
     }
-    if((def->flags & PAT_TERM) != 0){
-        printf(".");
+
+    char *to = (char *)&pat->to;
+    size_t toLen = 1;
+    char *from = (char *)&pat->from;
+    size_t fromLen = 1;
+    if(*to == '\r'){
+        to = "\\r";
+        toLen = 2;
+    }else if(*to == '\n'){
+        to = "\\n";
+        toLen = 2;
     }
-    */
+    if(*from == '\r'){
+        from = "\\r";
+        fromLen = 2;
+    }else if(*from == '\n'){
+        from = "\\n";
+        fromLen = 2;
+    }
+
+    if(pat->flags == PAT_END){
+        void *args[] = {cstr,  NULL};
+        total += StrVec_Fmt(sm, "_c", args);
+    } else if(pat->to == pat->from){
+        void *args[] = {cstr, from, (void *)fromLen, ending, NULL};
+        total += StrVec_Fmt(sm, "_c^D._C^d._c", args);
+    }else{
+        void *args[] = {cstr, from, (void *)fromLen,
+            to,(void *)toLen,
+            ending, NULL};
+        total += StrVec_Fmt(sm, "_c^D._C-_C^d._c", args);
+    }
+    return total;
 }
 
-static void PatCharDef_Print(Stream *sm, Abstract *a, cls type, boolean extended){
-    PatCharDef *def = (PatCharDef *)a;
-    /*
-    printf("\x1b[%dm%s", color, msg);
-    if(extended){
-        boolean first = TRUE;
-        if(def->flags == PAT_END){
-            patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
-        }else{
-            while(def->flags != PAT_END){
-                if(first){
-                    first = FALSE;
-                }else{
-                    printf(",");
-                }
-                patCharDef_PrintSingle(def, TYPE_PATCHARDEF, "", color, extended);
-                def++;
-            }
-        }
-    }else{
-        patCharDef_PrintSingle(def, TYPE_PATCHARDEF, msg, color, extended);
+static i64 PatCharDef_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    PatCharDef *pat = (PatCharDef *)a;
+    i64 total = 0;
+    total += StrVec_Fmt(sm, "Pat<", NULL);
+    while(pat->flags != PAT_END){
+        total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
+        pat++;
     }
-    printf("\x1b[0m");
-    */
+    total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
+    total += StrVec_Fmt(sm, ">", NULL);
+    return total;
 }
 
+/*
 static char *flagStrs[] = {
     "PAT_TERM",
     "PAT_OPTIONAL",
@@ -114,15 +118,6 @@ static char *flagStrs[] = {
     "PAT_CONSUME",
     NULL,
 };
-
-status PrintMatchAddr(MemCtx *m, Abstract *a){
-    if(a == NULL){
-        printf("NULL ");
-    }else{
-        printf("0x%lx ", (util)(a));
-    }
-    return SUCCESS;
-}
 
 status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
     status r = READY;
@@ -150,6 +145,7 @@ status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
     }
     return r;
 }
+*/
 
 
 void Roebling_Print(Stream *sm, Abstract *a, cls type, boolean extended){
@@ -217,36 +213,11 @@ void Match_PrintPat(Stream *sm, Abstract *a, cls type, boolean extended){
     */
 }
 
-
-
-void Match_midDebug(char type, word c, PatCharDef *def, Match *mt, boolean matched, boolean extended){
-    /*
-    if(extended){
-        printf("    \x1b[%dm%s ", DEBUG_PATMATCH, 
-        State_ToChars(mt->type.state));
-        Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
-    }else{
-        if(matched){
-            printf("\x1b[1;%dmY\x1b[%dm/\x1b[0m", DEBUG_PATMATCH, DEBUG_PATMATCH);
-        }else{
-            printf("\x1b[%dmN/\x1b[0m", DEBUG_PATMATCH);
-        }
-        Debug_Print((void *)def, TYPE_PATCHARDEF, "", DEBUG_PATMATCH, FALSE);
-        if(matched){
-            printf("\x1b[%dm, \x1b[0m", DEBUG_PATMATCH);
-        }else{
-            printf("\x1b[%dm, \x1b[0m", DEBUG_PATMATCH);
-        }
-    }
-    */
-}
-
-status ParserDebug_Init(MemCtx *m, Lookup *lk){
+status ParserDebug_Init(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
-    r |= Lookup_Add(m, lk, TYPE_RBL_MARK, (void *)Single_Print);
     return r;
 }

@@ -17,6 +17,7 @@ O: Show name of typeOf flag
 d: Debug output
 D: Verbose debug output
 c: C string (null terminated)
+C: C string of length (requires second size_t length argument)
 i#: Integer (i4 for a 4 byte i32 or i8 for an 8 byte i64)
 u#: Unsigned Integer (u4 for a 4 byte quad or u8 for an 8 byte util)
 a: Address

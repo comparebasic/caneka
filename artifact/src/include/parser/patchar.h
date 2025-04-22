@@ -27,5 +27,6 @@ typedef struct patcountdef {
     i16 count;
 } PatCountDef;
 
-Str *PatChar_FromStr(MemCh *m, Str *s);
-Str *PatChar_KoFromStr(MemCh *m, Str *s);
+PatCharDef *PatChar_FromStr(MemCh *m, Str *s);
+PatCharDef *PatChar_KoFromStr(MemCh *m, Str *s);
+PatCharDef *PatChar_FromStrVec(MemCh *m, StrVec *v);

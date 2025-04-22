@@ -20,3 +20,4 @@ status TableResize_Tests(MemCh *gm);
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);
 status Stream_Tests(MemCh *gm);
+status PatChar_Tests(MemCh *gm);

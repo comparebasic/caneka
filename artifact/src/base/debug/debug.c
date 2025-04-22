@@ -37,7 +37,7 @@ void indent_Print(int indent){
 
 i64 Bits_Print(Stream *sm, byte *bt, size_t length, boolean extended){
     i64 total = 0;
-    for(int i = length-1; i >= 0;i--){
+    for(int i = 0; i < length;i++){
         byte b = bt[i];
         if(extended){
             void *args[] = {&b, NULL};

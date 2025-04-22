@@ -1,3 +1,4 @@
+#include "parser/parser.h"
 #include "parser/patchar.h"
 #include "parser/snip.h"
 #include "parser/match.h"

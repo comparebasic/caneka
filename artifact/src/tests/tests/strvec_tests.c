@@ -82,9 +82,7 @@ status StrVec_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     i32 twentyNine = 29;
     i64 fiveK = 5987263;
-    cls type = TYPE_STR;
-
-    void *args3[] = {st, sa, &type, sf, sf, &twentyNine, &fiveK, vc, NULL};
+    void *args3[] = {st, sa, (void *)((i64)TYPE_STR), sf, sf, &twentyNine, &fiveK, vc, NULL};
     StrVec_Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '_t' '_T' _d _D _i4 _i8 _+", args3);
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");

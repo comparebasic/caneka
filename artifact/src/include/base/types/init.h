@@ -1,1 +1,1 @@
-status Caneka_Init(MemCh *m);
+status Caneka_InitBase(MemCh *m);

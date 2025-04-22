@@ -4,9 +4,10 @@
 StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
     DebugStack_Push(sns, TYPE_SPAN);
 
-    Cursor *curs = Cursor_Copy(_curs);
-    Cursor_Decr(curs, SnipSpan_Total(sns, 0));
     StrVec *v = StrVec_Make(m);
+    /*
+    Cursor *curs = Cursor_Copy(m, _curs);
+    Cursor_Decr(curs, SnipSpan_Total(sns, 0));
 
     Iter it;
     Iter_Init(&it, sns);
@@ -21,16 +22,17 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
             Iter_Query(&curs->it);
             s = (Str *)curs->it.value;
         }else if(sn->type.state & SNIP_CONTENT){
-            StrVec_AddBytes(m, v, pos, pos+sn.length);
+            StrVec_AddBytes(m, v, pos, pos+sn->length);
         }
     }
 
+    */
     DebugStack_Pop();
-    return ret;
+    return v;
 }
 
 status SnipSpan_Add(Span *sns, Snip *sn){
-    return Span_Add(sns, Snip_From(sns->m, sn));
+    return Span_Add(sns, (Abstract *)Snip_From(sns->m, sn));
 }
 
 i64 SnipSpan_Total(Span *sns, word flags){

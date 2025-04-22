@@ -27,14 +27,17 @@ static char *libs[] = {
 };
 
 /* sources */
+static BuildSubdir typesobj = { "types", {
+    "init.c",
+    NULL
+}};
 static BuildSubdir parserobj = { "parser", {
     "match.c",
     "patchar.c",
     "roebling.c",
-    /*
+    "parser.c",
     "parser_debug.c",
     "snip.c",
-    */
     NULL
 }};
 
@@ -189,16 +192,16 @@ static BuildSubdir testsobj = { "tests/tests", {
     "blank_test.c",
     "hash_tests.c",
     "table_tests.c",
+    "patchar_tests.c",
     /*
+    "match_tests.c",
     "crypto_tests.c",
     "http_tests.c",
     "ioctx_tests.c",
     "iter_str_tests.c",
-    "match_tests.c",
     "memlocal_tests.c",
     "nestedd_tests.c",
     "oset_tests.c",
-    "queue_tests.c",
     "roebling_syntax_tests.c",
     "roebling_tests.c",
     "salty_tests.c",
@@ -216,6 +219,7 @@ static BuildSubdir testsobj = { "tests/tests", {
 
 
 static BuildSubdir *objdirs[] = {
+    &typesobj,
     &parserobj,
     &testsobj,
     &fixturesobj,
@@ -245,7 +249,7 @@ int main(int argc, char **argv){
         exit(1);
     };
     MemCh *m = MemCh_Make();
-    Caneka_Init(m);
+    Caneka_InitBase(m);
     BuildCtx ctx;
     BuildCtx_Init(m, &ctx);
 

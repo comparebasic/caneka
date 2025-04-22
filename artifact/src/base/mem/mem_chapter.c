@@ -17,6 +17,7 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
     if(sz > MEM_SLAB_SIZE){
         Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
     }
+    Guard_Incr(&m->guard, MEM_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
     i16 level = max(m->type.range, 0);
     word _sz = (word)sz;
@@ -24,9 +25,6 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
     MemPage *sl = NULL;
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *_sl = (MemPage *)m->it.value;
-        if(m->it.span->type.state & DEBUG){
-            printf("Looking for mem at %d of %d level %d *%lu\n", m->it.idx, m->it.span->nvalues, level, (util)_sl);
-        }
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
             sl = _sl;
             break;
@@ -34,18 +32,11 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
     }
 
     if(sl == NULL){
-        if(m->it.span->type.state & DEBUG){
-            printf("New Page for level%d\n", level);
-        }
         sl = MemPage_Make(m, level);
-        if(m->it.type.state & DEBUG){
-            printf("\x1b[36mNew Page: *%lu\x1b[0m\n", (util)sl);
-        }
         Iter_Setup(&m->it, m->it.span, SPAN_OP_SET, m->it.span->max_idx+1); 
         m->it.value = (void *)sl;
         Iter_Query(&m->it);
         if(_capacity[m->it.span->dims] <= (m->it.span->max_idx+1)){
-            printf("\n\nEXPANDING\n\n");
             Iter it;
             Iter_Setup(&it, m->it.span, SPAN_OP_RESERVE, m->it.span->max_idx+1); 
             it.value = NULL;
@@ -57,6 +48,7 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
     Iter_Reset(&m->it);
 
+    Guard_Reset(&m->guard);
     return MemPage_Alloc(sl, _sz);
 }
 

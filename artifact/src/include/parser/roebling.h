@@ -23,7 +23,8 @@ typedef struct roebling_blank {
 
 typedef struct roebling {
     Type type;
-    i32 _;
+    i16 _;
+    i16 guard;
     MemCh *m;
     Cursor *curs;
     Abstract *source; 
@@ -34,7 +35,6 @@ typedef struct roebling {
     i32 tail;
     i32 length;
     Lookup *markLabels;
-    Guard guard;
     Iter matchIt;
 } Roebling;
 

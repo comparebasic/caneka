@@ -82,6 +82,18 @@ static TestSet _Tests[] = {
         "Resize features of the auto-scaling hash-table.",
         FEATURE_COMPLETE,
     },
+    {
+        "Roebling Parser",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
+        "Patter Character Tests",
+        PatChar_Tests,
+        "Making patterns from strings.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",

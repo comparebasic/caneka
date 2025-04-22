@@ -31,8 +31,8 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 goto next;
             }else if(c == 'T'){
                 Abstract *a = (Abstract *)*(args++);
-                cls *type = (cls *)*(args++);
-                total += Str_Debug(sm, a, *type, FALSE);
+                cls type = (cls)((i64 *)*(args++));
+                total += Str_Debug(sm, a, type, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 's'){
@@ -80,11 +80,18 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 Stream_To(sm, s->bytes, s->length);
                 state = SUCCESS; 
                 goto next;
+            }else if(c == 'C'){
+                char *cstr = (char *)*(args++);
+                size_t length = (size_t)*(args++);
+                Stream_To(sm, cstr, length);
+                state = SUCCESS; 
+                goto next;
             }else if(c == 'i'){
                 c = *(++ptr);
                 i64 *ip = *(args++);
                 i64 i = 0;
                 if(c == '1'){
+                    printf("i1\n");
                     i = (i64)*((i8 *)ip);
                 }else if(c == '2'){
                     i = (i64)*((i16 *)ip);

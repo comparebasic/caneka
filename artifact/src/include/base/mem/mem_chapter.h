@@ -1,7 +1,7 @@
 typedef struct mem_ctx {
     RangeType type;
-    i16 nextIdx;
-    i16 nextCount;
+    i16 _;
+    i16 guard;
     Iter it;
     Abstract *owner;
 } MemCh;

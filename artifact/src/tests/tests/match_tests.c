@@ -1,18 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
-status Match_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
+status Match_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
 
     Match mt;
     Match ko;
-    String *s;
-    String *backlog = String_Init(m, STRING_EXTEND);
-    backlog->type.state |= FLAG_STRING_CONTIGUOUS;
+    Str *s;
+    Str *backlog = Span_Make(m);
 
-    s = String_Make(m, bytes("pox"));
+    s = Str_CstrRef(m, "pox");
     Match_SetString(m, &mt, s, backlog);
 
     s = String_Make(m, bytes("no"));
@@ -44,17 +43,17 @@ status Match_Tests(MemCtx *gm){
     r |= Test(Match_Total(&mt) == s->length-1, "Matched length of string, less termMatching, expected %d have %d",
         s->length-1, Match_Total(&mt));
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }
 
-status MatchElastic_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
+status MatchElastic_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
     status r = READY;
-    String *backlog = String_Init(m, STRING_EXTEND);
+    Str *backlog = String_Init(m, STRING_EXTEND);
     backlog->type.state |= FLAG_STRING_CONTIGUOUS;
 
-    String *s = String_Make(m, bytes("<tag atts=\"poo\">hi</tab>"));
+    Str *s = String_Make(m, bytes("<tag atts=\"poo\">hi</tab>"));
 
     word pat[] = { PAT_INVERT_CAPTURE|PAT_TERM, '<', '<', PAT_MANY, 'a', 'z', PAT_END, 0, 0};
     Match mt;
@@ -97,19 +96,19 @@ status MatchElastic_Tests(MemCtx *gm){
     }
     r |= Test(Match_Total(&mt) == 4, "Att - Found 4 chars, count is %d", Match_Total(&mt));
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }
 
-status MatchKo_Tests(MemCtx *gm){
-    MemCtx *m = MemCtx_Make();
+status MatchKo_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
 
     Match mt;
     Match ko;
-    String *s;
-    String *backlog = String_Init(m, STRING_EXTEND);
+    Str *s;
+    Str *backlog = String_Init(m, STRING_EXTEND);
     backlog->type.state |= FLAG_STRING_CONTIGUOUS;
     int i = 0;
 
@@ -228,6 +227,6 @@ status MatchKo_Tests(MemCtx *gm){
     }
     r |= Test(Match_Total(&mt) == 1, "counted first letter only, have %d", Match_Total(&mt));
 
-    MemCtx_Free(m);
+    MemCh_Free(m);
     return r;
 }

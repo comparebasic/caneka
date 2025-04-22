@@ -9,7 +9,7 @@ static status archChecks(){
     return ERROR; 
 }
 
-status Caneka_Init(MemCh *m){
+status Caneka_InitBase(MemCh *m){
     status r = READY;
     r |= archChecks();
     MemCh *md = MemCh_Make();
@@ -18,14 +18,5 @@ status Caneka_Init(MemCh *m){
     r |= StrUtils_Init(md);
     r |= DebugStack_Init(m);
     r |= Hash_Init(m);
-    /*
-    r |= Clone_Init(m);
-    r |= MemLocal_Init(m);
-    r |= Oset_Init(m);
-    r |= Enc_Init(m);
-    r |= Steps_Init(m);
-    r |= Access_Init(m);
-    r |= KeyInit(m);
-    */
     return r;
 }

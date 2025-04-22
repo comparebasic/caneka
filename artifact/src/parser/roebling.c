@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Roebling_RunMatches(Roebling *rbl){
+static inline status Roebling_RunMatches(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
 
     rbl->type.state |= (rbl->curs->type.state & END);
     Cursor_NextByte(rbl->curs);
     while((rbl->type.state & END) == 0){
-        Guard_Incr(&rbl->guard);
+        Guard_Incr(&rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         byte c = *(rbl->curs->ptr);
         i32 noopCount = 0;
@@ -32,12 +32,14 @@ static status Roebling_RunMatches(Roebling *rbl){
 
                 rbl->type.state |= (rbl->curs->type.state & END);
                 DebugStack_Pop();
+                Guard_Reset(&rbl->guard);
                 return rbl->type.state;
             }
 
             if((mt->type.state & NOOP) != 0){
                 if(++noopCount == rbl->matchIt.span->nvalues){
                     rbl->type.state |= (NOOP|END|ERROR);
+                    Guard_Reset(&rbl->guard);
                     return rbl->type.state;
                 }
             }
@@ -53,6 +55,7 @@ static status Roebling_RunMatches(Roebling *rbl){
     }
 
     DebugStack_Pop();
+    Guard_Reset(&rbl->guard);
     return rbl->type.state;
 }
 
@@ -123,7 +126,7 @@ status Roebling_ResetPatterns(Roebling *rbl){
     MemCh_Free(rbl->m);
     Iter_Init(&rbl->matchIt, Span_Make(rbl->m));
     rbl->snips = Span_Make(rbl->m);
-    rbl->guard.count = 0;
+    Guard_Reset(&rbl->guard);
     return READY;
 }
 
@@ -209,7 +212,6 @@ Roebling *Roebling_Make(MemCh *m,
     rbl->curs = curs;
     rbl->marks = Lookup_Make(m, _TYPE_CORE_END, NULL, (Abstract *)rbl); 
     Roebling_Reset(m, rbl, NULL);
-    Guard_Setup(m, &rbl->guard, ROEBLING_GUARD_MAX, (byte *)"Roebling Guard");
 
     return rbl;
 }
