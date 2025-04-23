@@ -15,11 +15,7 @@ status Debug_Init(MemCh *m){
         Mem_DebugInit(m, DebugPrintChain);
         Str_DebugInit(m, DebugPrintChain);
         SequenceDebug_Init(m, DebugPrintChain);
-        /*
-        UtilDebug_Init(m, funcs);
-        ParserDebug_Init(m, funcs);
-        */
-        /* todo add other debug inits here */
+        UtilDebug_Init(m, DebugPrintChain);
         return SUCCESS;
     }
     if(DebugOut == NULL){

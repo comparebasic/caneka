@@ -123,9 +123,14 @@ i32 Roebling_GetMatchIdx(Roebling *rbl){
 }
 
 status Roebling_ResetPatterns(Roebling *rbl){
-    MemCh_Free(rbl->m);
-    Iter_Init(&rbl->matchIt, Span_Make(rbl->m));
-    rbl->snips = Span_Make(rbl->m);
+    if(rbl->m->type.range > 0){
+        MemCh_Free(rbl->m);
+        Iter_Init(&rbl->matchIt, Span_Make(rbl->m));
+    }
+
+    Span *p = Span_Make(rbl->m);
+    Iter_Init(&rbl->matchIt, p);
+
     Guard_Reset(&rbl->guard);
     return READY;
 }
@@ -139,16 +144,7 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i32 
 
     Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_ADD);
     rbl->matchIt.value = mt;
-    status r = Iter_Query(&rbl->matchIt);
-
-    Span *sns = (Span *)Span_Get(rbl->snips, rbl->matchIt.idx);
-    if(sns == NULL){
-        sns = Span_Make(rbl->m);
-        Span_Set(rbl->snips, rbl->matchIt.idx, (Abstract *)sns);
-    }
-    mt->backlog = sns;
-
-    return r;
+    return Iter_Query(&rbl->matchIt);
 }
 
 i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
@@ -179,7 +175,7 @@ status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v){
 status Roebling_AddStep(Roebling *rbl, Abstract *step){
     if(step->type.of == TYPE_WRAPPED_DO){
         Single *sg = rbl->parseIt.value;
-        if(sg->type.of == TYPE_WRAPPED_I64){
+        if(sg != NULL && sg->type.of == TYPE_WRAPPED_I64){
             i64 mark = sg->val.value;
             sg->val.value = rbl->parseIt.idx;
             Lookup_Add(rbl->m, rbl->marks, (word)sg->val.value, (Abstract *)sg);
@@ -191,12 +187,11 @@ status Roebling_AddStep(Roebling *rbl, Abstract *step){
 
     Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_ADD);
     rbl->parseIt.value = step;
+    void *args[] = {step, NULL};
     return Iter_Query(&rbl->parseIt);
 }
 
 Roebling *Roebling_Make(MemCh *m,
-        cls type,
-        Lookup *markLabels,
         Cursor *curs,
         RblCaptureFunc capture,
         Abstract *source
@@ -207,9 +202,9 @@ Roebling *Roebling_Make(MemCh *m,
     rbl->m = m;
     rbl->source = source;
     rbl->capture = capture;
+    rbl->curs = curs;
     Span *p = Span_Make(m);
     Iter_Init(&rbl->parseIt, p);
-    rbl->curs = curs;
     rbl->marks = Lookup_Make(m, _TYPE_CORE_END, NULL, (Abstract *)rbl); 
     Roebling_Reset(m, rbl, NULL);
 

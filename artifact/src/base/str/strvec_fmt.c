@@ -91,7 +91,6 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 i64 *ip = *(args++);
                 i64 i = 0;
                 if(c == '1'){
-                    printf("i1\n");
                     i = (i64)*((i8 *)ip);
                 }else if(c == '2'){
                     i = (i64)*((i16 *)ip);
@@ -113,7 +112,7 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
                 s = Str_Ref(m, (byte *)"*", l, l);
                 Stream_To(sm, s->bytes, s->length);
                 total += s->length;
-                util u = (i64)*(args++);
+                util u = (util)*(args++);
                 s = Str_FromI64(m, u);
                 Stream_To(sm, s->bytes, s->length);
                 total += s->length;

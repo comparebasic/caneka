@@ -194,6 +194,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "table_tests.c",
     "patchar_tests.c",
     "match_tests.c",
+    "roebling_tests.c",
     /*
     "crypto_tests.c",
     "http_tests.c",
@@ -203,7 +204,6 @@ static BuildSubdir testsobj = { "tests/tests", {
     "nestedd_tests.c",
     "oset_tests.c",
     "roebling_syntax_tests.c",
-    "roebling_tests.c",
     "salty_tests.c",
     "serve_tests.c",
     "textfilter_tests.c",

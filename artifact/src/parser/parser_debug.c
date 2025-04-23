@@ -118,43 +118,16 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, boolean extended){
 void Roebling_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     DebugStack_Push("Roebling_Print", TYPE_CSTR);
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
-    /*
-    String *sec = Roebling_GetMarkDebug(rbl, rbl->idx);
-    printf("\x1b[%dm%sRbl<%s\x1b[1;%dm%s\x1b[0;%dm source=%u", color, msg, State_ToChars(rbl->type.state), color, String_ToChars(DebugM, sec), color, rbl->source != NULL ? rbl->source->type.of: 0);
-    printf(":");
-    if(extended){
-        printf(" idx:%d jump:%d ", rbl->idx, rbl->jump);
-        Debug_Print((void *)&(rbl->cursor), 0, "Cursor: ", color, extended);
-        if(rbl->marks->values->nvalues > 0){
-            printf("\n  \x1b[%dmmarks=\n    ", color);
-            for(int i = 0; i <= rbl->marks->values->max_idx; i++){
-                Debug_Print((void *)Span_Get(rbl->markLabels->values, i), 0, "", color, FALSE);
-                printf("=");
-                int *n = Span_Get(rbl->marks->values, i);
-                if(n != NULL){
-                    printf("%u", *n);
-                }
-                printf(" ");
-            }
-        }
-        printf("\n  \x1b[%dmmatches=\n", color);
-        Match *mt = NULL;
-        for(int i = 0; i < rbl->matches->nvalues; i++){
-            mt = Span_Get(rbl->matches, i);
-            Debug_Print((void *)mt, 0, "    ", color, extended);
-            if(i < rbl->matches->nvalues-1){
-                printf(",\n");
-            }
-        }
-        printf("\n  \x1b[%dmParsers(DoF)=\n    ", color);
-        Span_Run(NULL, rbl->parsers_do, PrintMatchAddr);
-        printf("\n");
-    }else{
-        printf(" idx:%d ", rbl->idx);
-        Debug_Print((void *)&(rbl->cursor), 0, "", color, extended);
-    }
-    printf("\x1b[%dm>\x1b[0m", color);
-    */
+    i64 total = 0;
+    void *args1[] = {State_ToStr(_debugM, rbl->type.state), NULL};
+    total += StrVec_Fmt(sm, "Rbl<_t\n", args1);
+    void *args2[] = {rbl->parseIt.span, NULL};
+    total += StrVec_Fmt(sm, "  parsers:_D\n", args2);
+    void *args3[] = {rbl->matchIt.span, NULL};
+    total += StrVec_Fmt(sm, "  matches:_D\n", args3);
+    void *args4[] = {rbl->marks, NULL};
+    total += StrVec_Fmt(sm, "  marks:_D\n", args4);
+    total += StrVec_Fmt(sm, ">", NULL);
     DebugStack_Pop();
     return;
 }

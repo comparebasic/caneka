@@ -61,14 +61,22 @@ i64 Slab_Print(struct stream *sm, slab *slab, i8 dim, i8 dims){
     return 0;
 }
 
-i64 Lookup_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
+i64 Lookup_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
-    /*
-    printf("\x1b[%dm%sLk<offset:%d latest_idx:\%d", color, msg, lk->offset, lk->latest_idx);
-    Debug_Print((void *)lk->values, 0, "", color, TRUE);
-    printf("\x1b[%dm>\x1b[0m", color);
-    */
-    return 0;
+    i64 total = 0;
+    total += StrVec_Fmt(sm, "Lk<", NULL);
+    Iter it;
+    Iter_Init(&it, lk->values);
+    while((Iter_Next(&it) & END) == 0){
+        if(it.value != NULL){
+            char *sep = (it.type.state & FLAG_ITER_LAST) ? "" : ", ";
+            i64 sepLen = (it.type.state & FLAG_ITER_LAST) ? 0 : 2;
+            void *args[] = {&it.idx, it.value, sep, (void *)sepLen, NULL};
+            total += StrVec_Fmt(sm, "_i4 -> _d_C", args);
+        }
+    }
+    total += StrVec_Fmt(sm, ">", NULL);
+    return total;
 }
 
 status SequenceDebug_Init(MemCh *m, Lookup *lk){

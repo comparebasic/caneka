@@ -199,7 +199,6 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     ctx->fields.steps.count++;
     ctx->fields.steps.modSrcCount++;
     if(File_CmpUpdated(m, source, dest, NULL)){
-
         CliStatus_SetByKey(m, ctx->cli, Str_CstrRef(m, "action"), Str_CstrRef(m, "build obj"));
 
         CliStatus_Print(_debugM, ctx->cli);

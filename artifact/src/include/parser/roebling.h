@@ -29,7 +29,6 @@ typedef struct roebling {
     Cursor *curs;
     Abstract *source; 
     RblCaptureFunc capture;
-    Span *snips;
     Iter parseIt;
     Lookup *marks;
     i32 tail;
@@ -38,6 +37,7 @@ typedef struct roebling {
     Iter matchIt;
 } Roebling;
 
+Roebling *Roebling_Make(MemCh *m, Cursor *curs, RblCaptureFunc capture, Abstract *source);
 status Roebling_RunCycle(Roebling *rbl);
 status Roebling_JumpTo(Roebling *rbl, i32 mark);
 status Roebling_Run(Roebling *rbl);

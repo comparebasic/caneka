@@ -112,6 +112,12 @@ static TestSet _Tests[] = {
         "Testing knockout patterns in match definitions.",
         FEATURE_COMPLETE,
     },
+    {
+        "Roebling Tesst",
+        Roebling_Tests,
+        "Roebling tests for adding and running a basic parser.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",
