@@ -63,7 +63,7 @@ status Cursor_NextByte(Cursor *curs){
 
 Cursor *Cursor_Copy(MemCh *m, Cursor *_curs){
     Cursor *curs = MemCh_Alloc(m, sizeof(Cursor));
-    memcpy(_curs, curs, sizeof(Cursor));
+    memcpy(curs, _curs, sizeof(Cursor));
     return curs;
 }
 
@@ -74,7 +74,7 @@ status Cursor_Add(Cursor *curs, Str *s){
 }
 
 status Cursor_Setup(Cursor *curs, StrVec *v){
-    curs->type.of = TYPE_STRVEC_CURS;
+    curs->type.of = TYPE_CURSOR;
     curs->type.state = READY;
     curs->pos = 0;
     curs->slot = 0;

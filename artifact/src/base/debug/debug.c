@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 Lookup *DebugPrintChain = NULL;
-Stream *DebugOut;
+Stream *DebugOut = NULL;
 
 MemCh *_debugM = NULL;
 

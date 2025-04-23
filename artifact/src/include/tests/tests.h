@@ -23,6 +23,7 @@ status Match_Tests(MemCh *gm);
 status MatchElastic_Tests(MemCh *gm);
 status MatchKo_Tests(MemCh *gm);
 status Roebling_Tests(MemCh *gm);
+status RoeblingRun_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

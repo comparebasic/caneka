@@ -13,14 +13,6 @@ enum mark_reserved {
     _FIRST_MARK,
 };
 
-typedef struct roebling_blank {
-    Type type;
-    MemCh *m;
-    Cursor cursor;
-    Abstract *source; 
-    RblCaptureFunc capture;
-} RoeblingBlank;
-
 typedef struct roebling {
     Type type;
     i16 _;

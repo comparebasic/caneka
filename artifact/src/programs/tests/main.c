@@ -113,9 +113,15 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Roebling Tesst",
+        "Roebling Init Test",
         Roebling_Tests,
         "Roebling tests for adding and running a basic parser.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Roebling Run Tests",
+        RoeblingRun_Tests,
+        "Roebling basic run tests.",
         FEATURE_COMPLETE,
     },
     /*

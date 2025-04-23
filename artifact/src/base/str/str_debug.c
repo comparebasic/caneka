@@ -24,9 +24,9 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     i64 total = 0;
     if(extended){
         void *args[] = { &vObj->p->nvalues, &vObj->total, NULL};
-        total += StrVec_Fmt(sm, "StrVec<_i4/_i8:\"", args); 
+        total += StrVec_Fmt(sm, "StrVec<_i4/_i8 [", args); 
     }else{
-        total += StrVec_Fmt(sm, "^D\"", NULL); 
+        total += StrVec_Fmt(sm, "^D", NULL); 
     }
 
     Iter it;
@@ -46,9 +46,9 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
         }
     }
     if(extended){
-        total += StrVec_Fmt(sm, "\"^d>", NULL);
+        total += StrVec_Fmt(sm, "]^d>", NULL);
     }else{
-        total += StrVec_Fmt(sm, "\"^d", NULL);
+        total += StrVec_Fmt(sm, "^d", NULL);
     }
     return total;
 }
@@ -64,10 +64,27 @@ i64 Stream_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     return total;
 }
 
+i64 Cursor_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    Cursor *curs = (Cursor *)as(a, TYPE_CURSOR);
+    if(curs->v == NULL){
+        return  StrVec_Fmt(sm, "Curs<v:NULL>", NULL); 
+    }
+    if(extended){
+        i64 length = (i64)(curs->end - curs->ptr);
+        void *args[] = {&length, &curs->v->total, curs->ptr, (void *)length, curs->v, NULL};
+        return  StrVec_Fmt(sm, "Curs<_i8/_i8^D.'_C'^d. _D>", args); 
+    }else{
+        void *args[] = {&curs->v->total, curs->ptr, (void *)(i64)(curs->end - curs->ptr), NULL};
+        return  StrVec_Fmt(sm, "Curs<_i8_^D.'_C'^d.>", args); 
+
+    }
+}
+
 status Str_DebugInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
     r |= Lookup_Add(m, lk, TYPE_STREAM, (void *)Stream_Print);
+    r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     return r;
 }

@@ -94,40 +94,51 @@ status Roebling_Tests(MemCh *gm){
 }
 
 status RoeblingRun_Tests(MemCh *gm){
+    DebugStack_Push(NULL, 0);
     status r = READY;
     MemCh *m = MemCh_Make();
-    /*
-
-    Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m);
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
-    rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, String_Init(m, STRING_EXTEND), Found, NULL); 
 
     Str *s = NULL; 
-    s = String_Make(m, bytes("TWO for the weekend\n"));
-    Roebling_AddBytes(rbl, s->bytes, s->length);
+    StrVec *v = NULL;
+    Cursor *curs = Cursor_Make(m, StrVec_Make(m));
+    Roebling *rbl = NULL;
+
+    rbl = Roebling_Make(m, curs, Capture, NULL); 
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+
+    s = Str_CstrRef(m, "TWO for the weekend\n");
+    Cursor_Add(curs, s);
     Roebling_RunCycle(rbl);
 
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
+    void *args[] = {rbl->curs, NULL};
+    Out("^p.Cursor: _D^d.\n", args);
+
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
     Match *mt = Roebling_GetMatch(rbl);
 
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals expected, have %s", s->bytes);
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    s = Str_CstrRef(m, "TWO");
+    void *args1[] = {s, v, NULL};
+    r |= Test(Equals((Abstract *)v, (Abstract *)s), "Content equals expected '_d', have _D", args1);
     i32 idx = Roebling_GetMatchIdx(rbl);
-    r |= Test(idx = 1, "Match Idx equals expected");
+    void *args2[] = {&idx, NULL};
+    r |= Test(idx = 1, "Match Idx equals expected, have _i4", args2);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
 
-    r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line, expected 'for the weekend', have '%s'", String_ToChars(m, s));
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
+    s = Str_CstrRef(m, "for the weekend");
+    void *args3[] = {s, v, NULL};
+    r |= Test(Equals((Abstract *)v, (Abstract *)s),
+        "Roebling has captured the rest of the line, expected '_d', have '_D'", args3);
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
 
     Roebling_RunCycle(rbl);
-    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS");
-    */
+    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS", NULL);
 
+    DebugStack_Pop();
     MemCh_Free(m);
     return r;
 }

@@ -195,8 +195,9 @@ i64 StrVec_FmtHandle(Stream *sm, char *fmt, void **args){
            goto outnext;
         }else if(c == '_'){
            if(args == NULL){
+                void *args[] = {fmt, NULL};
                 Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
-                    "Expecting arg, found NULL instead", NULL);
+                    "Expecting arg, found NULL instead, '_c'", args);
                 return total;
            }
            state = PROCESSING; 

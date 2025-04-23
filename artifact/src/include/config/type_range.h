@@ -29,7 +29,6 @@ enum types {
     TYPE_CSTR,
     TYPE_STR,
     TYPE_STRVEC,
-    TYPE_STRVEC_CURS,
     TYPE_STREAM,
     TYPE_CURSOR,
     TYPE_TESTSUITE,

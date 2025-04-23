@@ -5,7 +5,6 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
     DebugStack_Push(sns, TYPE_SPAN);
 
     StrVec *v = StrVec_Make(m);
-    /*
     Cursor *curs = Cursor_Copy(m, _curs);
     Cursor_Decr(curs, SnipSpan_Total(sns, 0));
 
@@ -15,18 +14,21 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
     Iter_Reset(&curs->it);
     Iter_Next(&curs->it);
     Str *s = (Str *)curs->it.value;
+    i64 pos;
     while((Iter_Next(&it) & END) == 0){
         Snip *sn = (Snip *)it.value;
         if(sn->type.state & SNIP_STR_BOUNDRY){
             curs->it.idx++;
             Iter_Query(&curs->it);
             s = (Str *)curs->it.value;
+        }else if(sn->type.state & SNIP_GAP){
+            pos = sn->length;
         }else if(sn->type.state & SNIP_CONTENT){
-            StrVec_AddBytes(m, v, pos, pos+sn->length);
+            StrVec_AddBytes(m, v, s->bytes+pos, sn->length);
+            pos = 0;
         }
     }
 
-    */
     DebugStack_Pop();
     return v;
 }
