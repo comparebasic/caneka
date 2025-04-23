@@ -106,6 +106,12 @@ static TestSet _Tests[] = {
         "Testing matches on ranges that have variable or elastic lengths.",
         FEATURE_COMPLETE,
     },
+    {
+        "Match Knockout Tests",
+        MatchKo_Tests,
+        "Testing knockout patterns in match definitions.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",
