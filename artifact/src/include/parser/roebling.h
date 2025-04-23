@@ -30,6 +30,7 @@ typedef struct roebling {
 } Roebling;
 
 Roebling *Roebling_Make(MemCh *m, Cursor *curs, RblCaptureFunc capture, Abstract *source);
+status Roebling_Start(Roebling *rbl);
 status Roebling_RunCycle(Roebling *rbl);
 status Roebling_JumpTo(Roebling *rbl, i32 mark);
 status Roebling_Run(Roebling *rbl);

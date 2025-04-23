@@ -4,7 +4,7 @@ enum cursor_flags {
 
 typedef struct cursor {
     Type type;
-    i32 pos;
+    i32 offset;
     StrVec *v;
     util slot;
     byte *ptr;

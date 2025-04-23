@@ -191,6 +191,11 @@ status Roebling_AddStep(Roebling *rbl, Abstract *step){
     return Iter_Query(&rbl->parseIt);
 }
 
+status Roebling_Start(Roebling *rbl){
+    Iter_Reset(&rbl->parseIt);
+    return SUCCESS;
+}
+
 Roebling *Roebling_Make(MemCh *m,
         Cursor *curs,
         RblCaptureFunc capture,

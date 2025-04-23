@@ -69,13 +69,27 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     if(curs->v == NULL){
         return  StrVec_Fmt(sm, "Curs<v:NULL>", NULL); 
     }
+
+    Iter it;
+    Iter_Init(&it, curs->v->p);
+    i64 pos = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = it.value;
+        if(it.idx == curs->it.idx){
+            pos += (i64)(curs->ptr - s->bytes);
+            break;
+        }
+        pos += s->length;
+    }
+
     if(extended){
         i64 length = (i64)(curs->end - curs->ptr);
-        void *args[] = {&length, &curs->v->total, curs->ptr, (void *)length, curs->v, NULL};
-        return  StrVec_Fmt(sm, "Curs<_i8/_i8^D.'_C'^d. _D>", args); 
+        i64 endPos = pos+length;
+        void *args[] = {&pos, &endPos, &length, &curs->v->total, curs->ptr, (void *)length, curs->v, NULL};
+        return  StrVec_Fmt(sm, "Curs<_i8.._i8 _i8of_i8 ^D.'_C'^d. _D>", args); 
     }else{
-        void *args[] = {&curs->v->total, curs->ptr, (void *)(i64)(curs->end - curs->ptr), NULL};
-        return  StrVec_Fmt(sm, "Curs<_i8_^D.'_C'^d.>", args); 
+        void *args[] = {&pos, &curs->v->total, curs->ptr, (void *)(i64)(curs->end - curs->ptr), NULL};
+        return  StrVec_Fmt(sm, "Curs<_i8/_i8_^D.'_C'^d.>", args); 
 
     }
 }

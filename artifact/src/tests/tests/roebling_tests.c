@@ -54,6 +54,7 @@ status SetWord1(MemCh *m, Abstract *a){
     status r = READY;
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     Roebling_ResetPatterns(rbl);
+    printf("Set word 1\n");
 
     r |= Roebling_SetPattern(rbl, dbl_nl, 0, RBL_TEST_END);
     r |= Roebling_SetPattern(rbl, oneDef, 0, -1);
@@ -66,6 +67,7 @@ status SetWord1(MemCh *m, Abstract *a){
 status SetWord2(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
+    printf("Set word 2\n");
     r |= Roebling_SetPattern(rbl, text, 0, RBL_TEST_START);
     return r; 
 }
@@ -106,13 +108,13 @@ status RoeblingRun_Tests(MemCh *gm){
     rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+    Roebling_Start(rbl);
 
     s = Str_CstrRef(m, "TWO for the weekend\n");
     Cursor_Add(curs, s);
     Roebling_RunCycle(rbl);
 
-    void *args[] = {rbl->curs, NULL};
-    Out("^p.Cursor: _D^d.\n", args);
+    void *args[] = {rbl, NULL};
 
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
     Match *mt = Roebling_GetMatch(rbl);
@@ -120,7 +122,7 @@ status RoeblingRun_Tests(MemCh *gm){
     v = StrVec_Snip(rbl->m, mt->backlog, curs);
     s = Str_CstrRef(m, "TWO");
     void *args1[] = {s, v, NULL};
-    r |= Test(Equals((Abstract *)v, (Abstract *)s), "Content equals expected '_d', have _D", args1);
+    r |= Test(Equals((Abstract *)v, (Abstract *)s), "Content equals expected '_D', have _D", args1);
     i32 idx = Roebling_GetMatchIdx(rbl);
     void *args2[] = {&idx, NULL};
     r |= Test(idx = 1, "Match Idx equals expected, have _i4", args2);

@@ -279,6 +279,7 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
 
 status Iter_Reset(Iter *it){
     it->type.state = (it->type.state & (UPPER_FLAGS|DEBUG)) | END;
+    it->idx = 0;
     return SUCCESS;
 }
 

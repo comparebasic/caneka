@@ -80,8 +80,8 @@ status StrVec_NextSlot(StrVec *v, Cursor *curs){
         }else{
             curs->ptr += len;
         }
-        curs->pos += len;
-        offset = curs->pos & 7;
+        curs->offset += len;
+        offset = curs->offset & 7;
         needed = 8 - offset;
     } while(offset != 0);
 
@@ -134,6 +134,7 @@ status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length){
             length -= take;
             ptr += take;
             s->length += (word)take;
+            v->total += (word)take;
         }
         s = NULL;
     }

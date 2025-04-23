@@ -31,7 +31,6 @@ status Cursor_Decr(Cursor *curs, i32 length){
             }
         }else if(curs->ptr > s->bytes){
             curs->ptr--;
-            curs->pos--;
             curs->type.state |= SUCCESS;
         }else{
             curs->type.state |= NOOP;
@@ -53,7 +52,6 @@ status Cursor_NextByte(Cursor *curs){
         }
     }else if(curs->ptr < curs->end){
         curs->ptr++;
-        curs->pos++;
         curs->type.state |= SUCCESS;
     }else{
         curs->type.state |= NOOP;
@@ -76,8 +74,8 @@ status Cursor_Add(Cursor *curs, Str *s){
 status Cursor_Setup(Cursor *curs, StrVec *v){
     curs->type.of = TYPE_CURSOR;
     curs->type.state = READY;
-    curs->pos = 0;
     curs->slot = 0;
+    curs->offset = 0;
     curs->v = v;
     curs->ptr = NULL;
     curs->end = NULL;

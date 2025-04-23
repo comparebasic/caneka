@@ -6,7 +6,14 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
 
     StrVec *v = StrVec_Make(m);
     Cursor *curs = Cursor_Copy(m, _curs);
+    /*
+    void *args[] = {curs, sns, (void *)((i64)TYPE_SNIPSPAN), NULL};
+    Out("^c.Before Decr _D^0.\n", args); 
+    */
     Cursor_Decr(curs, SnipSpan_Total(sns, 0));
+    /*
+    Out("^c.After Decr _D _T^0.\n", args);
+    */
 
     Iter it;
     Iter_Init(&it, sns);
@@ -14,19 +21,30 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
     Iter_Reset(&curs->it);
     Iter_Next(&curs->it);
     Str *s = (Str *)curs->it.value;
-    i64 pos;
+    curs->ptr = s->bytes;
+    curs->end = s->bytes+s->length-1;
     while((Iter_Next(&it) & END) == 0){
         Snip *sn = (Snip *)it.value;
         if(sn->type.state & SNIP_STR_BOUNDRY){
-            curs->it.idx++;
-            Iter_Query(&curs->it);
-            s = (Str *)curs->it.value;
+            goto nextStr;
         }else if(sn->type.state & SNIP_GAP){
-            pos = sn->length;
+            curs->ptr += sn->length;
         }else if(sn->type.state & SNIP_CONTENT){
-            StrVec_AddBytes(m, v, s->bytes+pos, sn->length);
-            pos = 0;
+            StrVec_AddBytes(m, v, curs->ptr, sn->length);
+            if(curs->ptr + sn->length > curs->end){
+                goto nextStr;
+            }else{
+                curs->ptr += sn->length;
+            }
         }
+        continue;
+nextStr:
+            if(Iter_Next(&curs->it) & END){
+                break;
+            }
+            s = (Str *)curs->it.value;
+            curs->ptr = s->bytes;
+            curs->end = s->bytes+s->length-1;
     }
 
     DebugStack_Pop();

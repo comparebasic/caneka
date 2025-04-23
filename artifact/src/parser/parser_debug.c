@@ -3,7 +3,7 @@
 
 static char *matchFlagChars = "EXPMNICGKOSLDTU__";
 
-static char *snipChars = "________CGBU____";
+static char *snipChars = "_________CGBU_____";
 
 static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, boolean extended){
     PatCharDef *pat = (PatCharDef *)a;
@@ -119,14 +119,21 @@ void Roebling_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     DebugStack_Push("Roebling_Print", TYPE_CSTR);
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     i64 total = 0;
-    void *args1[] = {State_ToStr(_debugM, rbl->type.state), NULL};
-    total += StrVec_Fmt(sm, "Rbl<_t\n", args1);
+    void *args1[] = {
+        State_ToStr(_debugM, rbl->type.state),
+        &rbl->parseIt.idx,
+        rbl->parseIt.value,
+        NULL
+    };
+    total += StrVec_Fmt(sm, "Rbl<_t idx:_i4/_D\n", args1);
     void *args2[] = {rbl->parseIt.span, NULL};
     total += StrVec_Fmt(sm, "  parsers:_D\n", args2);
     void *args3[] = {rbl->matchIt.span, NULL};
     total += StrVec_Fmt(sm, "  matches:_D\n", args3);
     void *args4[] = {rbl->marks, NULL};
     total += StrVec_Fmt(sm, "  marks:_D\n", args4);
+    void *args5[] = {rbl->curs, NULL};
+    total += StrVec_Fmt(sm, "  curs:_D\n", args5);
     total += StrVec_Fmt(sm, ">", NULL);
     DebugStack_Pop();
     return;
