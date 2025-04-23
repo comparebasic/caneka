@@ -62,7 +62,7 @@ static void match_NextKoTerm(Match *mt){
     }
 }
 
-static void addCount(MemCh *m, Match *mt, word flags, int length){
+static void addCount(MemCh *m, Match *mt, word flags, i32 length){
     DebugStack_Push(mt, mt->type.of);
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
@@ -107,6 +107,19 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
             }
             mt->pat.curDef++;
             continue;
+        }
+
+        if(mt->type.state & DEBUG){
+            char *yn = (matched ? "Y":"N");
+            char *yncolor = (matched ? "Dy.":"dp.");
+            void *args[] = {
+                yncolor,
+                yn, (void *)((i64)1), 
+                &c, (void *)((i64)1),
+                mt,
+                NULL
+            };
+            Out("^p.Match-Feed _^_C^dp./^D._C^d. _D>^0\n", args);
         }
 
         if(matched){
@@ -238,6 +251,11 @@ miss:
         }
     }
 
+    if(mt->type.state & DEBUG){
+        void *args[] = {&c, (void *)((i64)1), mt, NULL};
+        Out("^c.Match-Feed ^D._C^d. _d>^0\n", args);
+    }
+
     return mt->type.state;
 }
 
@@ -304,6 +322,9 @@ Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
     }
     mt->remaining = -1;
     mt->jump = -1;
+    if(backlog == 0){
+        backlog = Span_Make(m);
+    }
     mt->backlog = backlog;
     mt->snip.type.of = TYPE_SNIP;
 

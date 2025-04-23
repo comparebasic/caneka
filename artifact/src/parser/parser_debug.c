@@ -1,22 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
-static const size_t PAT_FLAG_DEBUG_MAX = 17;
-static char *matchFlagChars = "EXPMNICGKOSLDTU";
+static char *matchFlagChars = "EXPMNICGKOSLDTU__";
 
 static char *snipChars = "________CGBU____";
 
-static status patFlagStr(word flags, char str[]){
-    return FlagStr(flags, str, matchFlagChars);
-}
-
-static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, boolean extended){
-    ;
+static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, boolean extended){
     PatCharDef *pat = (PatCharDef *)a;
-    char cstr[PAT_FLAG_DEBUG_MAX];
+    char cstr[FLAG_DEBUG_MAX];
     char ending[2] = {0, 0};
     i64 total = 0;
-    patFlagStr(pat->flags, cstr);
+    PatFlagCstr(pat->flags, cstr);
     if(pat->flags & PAT_TERM){
         ending[0] = '.';
     }else{
@@ -33,6 +27,15 @@ static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     }else if(*to == '\n'){
         to = "\\n";
         toLen = 2;
+    }else if(*to == '\t'){
+        to = "\\t";
+        toLen = 2;
+    }else if(*to < 32 || *to > 126){
+        Str *s = Str_Make(_debugM, MAX_BASE10+2);
+        Str_Add(s, (byte *)"\\", 1);
+        Str_AddI64(s, *to);
+        to = (char *)s->bytes;
+        toLen = s->length;
     }
     if(*from == '\r'){
         from = "\\r";
@@ -40,6 +43,15 @@ static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     }else if(*from == '\n'){
         from = "\\n";
         fromLen = 2;
+    }else if(*from == '\t'){
+        from = "\\t";
+        fromLen = 2;
+    }else if(*from < 32 || *from > 126){
+        Str *s = Str_Make(_debugM, MAX_BASE10+2);
+        Str_Add(s, (byte *)"\\", 1);
+        Str_AddI64(s, *from);
+        from = (char *)s->bytes;
+        fromLen = s->length;
     }
 
     if(pat->flags == PAT_END){
@@ -57,19 +69,31 @@ static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     return total;
 }
 
+static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    i64 total = 0;
+    PatCharDef *pat = (PatCharDef *)a;
+    if(extended){
+        total += StrVec_Fmt(sm, "P<", NULL);
+    }
+    total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
+    if(extended){
+        total += StrVec_Fmt(sm, ">", NULL);
+    }
+    return total;
+}
+
 static i64 PatCharDef_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     PatCharDef *pat = (PatCharDef *)a;
     i64 total = 0;
     total += StrVec_Fmt(sm, "Pat<", NULL);
     while(pat->flags != PAT_END){
-        total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
+        total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
         pat++;
     }
     total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
     total += StrVec_Fmt(sm, ">", NULL);
     return total;
 }
-
 
 static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Span *sns = (Span *)as(a, TYPE_SPAN);
@@ -80,8 +104,8 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     while((Iter_Next(&it) & END) == 0){
         Snip *sn = (Snip *)it.value; 
 
-        char flagStr[FLAG_CSTR_LENGTH];
-        memset(flagStr, 0, FLAG_CSTR_LENGTH);
+        char flagStr[FLAG_DEBUG_MAX];
+        memset(flagStr, 0, FLAG_DEBUG_MAX);
         FlagStr(sn->type.state & UPPER_FLAGS, flagStr, snipChars);
 
         void *args[] = {flagStr, &sn->length, NULL};
@@ -90,54 +114,6 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     total += StrVec_Fmt(sm, ">", NULL);
     return total;
 }
-
-/*
-static char *flagStrs[] = {
-    "PAT_TERM",
-    "PAT_OPTIONAL",
-    "PAT_MANY",
-    "PAT_ANY",
-    "PAT_INVERT",
-    "PAT_COUNT",
-    "PAT_INVERT_CAPTURE",
-    "PAT_KO",
-    "PAT_KO_TERM",
-    "PAT_SINGLE",
-    "PAT_LEAVE ",
-    "PAT_CMD",
-    "PAT_GO_ON_FAIL",
-    "PAT_CONSUME",
-    NULL,
-};
-
-status Match_AddFlagsToStr(MemCtx *m, String *s, word flag){
-    status r = READY;
-    char *cstr = "";
-    boolean first = TRUE;
-    if(flag == 0){
-        cstr = "PAT_END";
-        String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-        r |= SUCCESS;
-    }
-    for(int i = 0; i <= 13; i++){
-        if((flag & (1 << i)) != 0){
-            if(!first){
-                cstr = "|";
-                String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-            }
-            first = FALSE;
-            cstr = flagStrs[i];
-            String_AddBytes(m, s, bytes(cstr), strlen(cstr));
-            r |= SUCCESS;
-        }
-    }
-    if(r == READY){
-        r |= NOOP;
-    }
-    return r;
-}
-*/
-
 
 void Roebling_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     DebugStack_Push("Roebling_Print", TYPE_CSTR);
@@ -183,32 +159,39 @@ void Roebling_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     return;
 }
 
-
-void Match_PrintPat(Stream *sm, Abstract *a, cls type, boolean extended){
+i64 Match_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+    i64 total = 0;
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
-    /*
+    void *args[] = {State_ToStr(_debugM, mt->type.state), NULL};
+    total += StrVec_Fmt(sm, "Mt<_t ", args);
+
     if(extended){
-        printf("\x1b[%dm%sMatch<%s:state=%s:jump=%d:remainig=%d:%d/%d", color, msg,
-            State_ToChars(mt->type.state), State_ToChars(mt->type.state), mt->jump, mt->remaining, mt->snip.start, mt->snip.length);
-        Debug_Print(mt->backlog, TYPE_STRSNIP_STRING, ":backlog=(", color, FALSE);
-        printf(") \x1b[1;%dm[", color);
-        Debug_Print((void *)mt->pat.curDef, TYPE_PATCHARDEF, "", color, FALSE);
-        printf("\x1b[1;%dm] \x1b[0;%dm ", color, color);
-        Debug_Print((void *)mt->pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
-        printf("\x1b[%dm>\x1b[0m", color);
-    }else{
-        printf("\x1b[%dm%sMatch<state=%s ", color, msg, State_ToChars(mt->type.state));
-        Debug_Print((void *)mt->pat.startDef, TYPE_PATCHARDEF, "", color, TRUE);
-        printf("\x1b[%dm>\x1b[0m", color);
+        PatCharDef *pd = mt->pat.startDef;
+        while(pd->flags != PAT_END){
+            char *color = "p.";
+            if(pd == mt->pat.curDef){
+                color = "y.";
+            }
+            void *args[] = {color, pd, (void *)((i64)TYPE_PATCHAR), NULL};
+            Out("_^_T", args);
+            pd++;
+        }
+        StrVec_Fmt(sm, "^d", NULL);
     }
-    */
+
+    total += StrVec_Fmt(sm, "^p.>", NULL);
+    return total;
+}
+
+i64 PatFlagCstr(word flags, char *cstr){
+    return FlagStr(flags, cstr,  matchFlagChars);
 }
 
 status ParserDebug_Init(MemCh *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
+    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_Print);
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_PrintPat);
+    r |= Lookup_Add(m, lk, TYPE_PATCHAR, (void *)PatChar_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIPSPAN, (void *)SnipSpan_Print);
     return r;

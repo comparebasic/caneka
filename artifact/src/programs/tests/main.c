@@ -100,6 +100,12 @@ static TestSet _Tests[] = {
         "Matching various patterns.",
         FEATURE_COMPLETE,
     },
+    {
+        "Match Elastic Tests",
+        MatchElastic_Tests,
+        "Testing matches on ranges that have variable or elastic lengths.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",

@@ -7,7 +7,6 @@ status Match_Tests(MemCh *gm){
     status r = READY;
 
     Match *mt = NULL;
-    Match ko;
     Str *s;
     Span *backlog = NULL;
 
@@ -16,6 +15,7 @@ status Match_Tests(MemCh *gm){
     mt = Match_Make(m, PatChar_FromStr(m, s), backlog);
 
     s = Str_CstrRef(m, "no");
+
     for(int i = 0; i < s->length; i++){
         Match_Feed(m, mt, s->bytes[i]);
     }
@@ -37,7 +37,7 @@ status Match_Tests(MemCh *gm){
 
     s = Str_CstrRef(m, "A good line :)\n");
     backlog = Span_Make(m);
-    mt = Match_Make(m, PatChar_FromStr(m, s), backlog); 
+    mt = Match_Make(m, line, backlog); 
     for(int i = 0; i < s->length; i++){
         Match_Feed(m, mt, s->bytes[i]);
         if((mt->type.state & PROCESSING) == 0){
@@ -51,7 +51,6 @@ status Match_Tests(MemCh *gm){
     r |= Test(total == s->length-1, "Matched length of string, less termMatching, expected _i2 have _i8", args3);
 
     void *args4[] = {s, mt->backlog, (void *)((i64)TYPE_SNIPSPAN), NULL};
-    Out("^p.Backlog of '_t' _T^0.\n", args4);
 
     MemCh_Free(m);
     return r;
@@ -60,25 +59,31 @@ status Match_Tests(MemCh *gm){
 status MatchElastic_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
     status r = READY;
-    /*
-    Str *backlog = String_Init(m, STRING_EXTEND);
-    backlog->type.state |= FLAG_STRING_CONTIGUOUS;
 
-    Str *s = String_Make(m, bytes("<tag atts=\"poo\">hi</tab>"));
+    Match *mt = NULL;
+    Str *s;
+    s = Str_CstrRef(m, "<tag atts=\"poo\">hi</tab>");
 
-    word pat[] = { PAT_INVERT_CAPTURE|PAT_TERM, '<', '<', PAT_MANY, 'a', 'z', PAT_END, 0, 0};
-    Match mt;
-    Match_SetPattern(&mt, (PatCharDef *)pat, backlog);
-    int i = 0;
-    Match_Feed(m, &mt, s->bytes[i]);
+    PatCharDef pat[] = {
+        {PAT_INVERT_CAPTURE|PAT_TERM, '<', '<'},
+        {PAT_MANY|PAT_TERM, 'a', 'z'},
+        {PAT_END, 0, 0}
+    };
+    mt = Match_Make(m, pat, NULL);
+
+    i32 i = 0;
+    Match_Feed(m, mt, s->bytes[i]);
     i++;
-    r |= Test((mt.type.state & PROCESSING) != 0, "Has PROCESSING status %s", State_ToChars(mt.type.state));
-    r |= Test(mt.pat.curDef == (mt.pat.startDef+1) , "On second pos, position is %d", (util)(mt.pat.curDef - mt.pat.startDef) / sizeof(PatCharDef));
+    void *args1[] = {State_ToStr(m, mt->type.state), NULL};
+    r |= Test((mt->type.state & PROCESSING) != 0, "Has PROCESSING status _t", args1);
+    i64 delta = mt->pat.curDef - mt->pat.startDef;
+    void *args2[] = {&delta, NULL};
+    r |= Test(mt->pat.curDef == (mt->pat.startDef+1) , "On second pos, position is _i8", args2);
 
     int count = 0;
     while(1){
-        Match_Feed(m, &mt, s->bytes[i]);
-        if((mt.type.state & PROCESSING) != 0){
+        Match_Feed(m, mt, s->bytes[i]);
+        if((mt->type.state & PROCESSING) != 0){
             count++;
             i++;
         }else{
@@ -86,28 +91,30 @@ status MatchElastic_Tests(MemCh *gm){
         }
     }
 
-    r |= Test(i ==  4, "Tag -Stopped on the fourth character");
-    r |= Test(count == 3, "Tag -Found three chars");
-    r |= Test((mt.type.state & SUCCESS) != 0, "Tag- Found SUCCESS have %s", State_ToChars(mt.type.state));
-    PatCharDef *def = mt.pat.curDef;
-    r |= Test((def->flags == PAT_END), "Tag -At end");
+    r |= Test(i ==  4, "Tag -Stopped on the fourth character", NULL);
+    r |= Test(count == 3, "Tag -Found three chars", NULL);
+    void *args3[] = {State_ToStr(m, mt->type.state), NULL};
+    r |= Test((mt->type.state & SUCCESS) != 0, "Tag- Found SUCCESS have _t", args3);
+    PatCharDef *def = mt->pat.curDef;
+    r |= Test((def->flags == PAT_END), "Tag -At end", NULL);
 
-    word att[] = { PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' ', PAT_KO, '=', '=', PAT_MANY|PAT_TERM, 'a', 'z', PAT_END, 0, 0};
-    String_Reset(backlog);
-    Match_SetPattern(&mt, (PatCharDef *)att, backlog);
+    PatCharDef att[] = {{PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '}, {PAT_KO, '=', '='}, {PAT_MANY|PAT_TERM, 'a', 'z'}, {PAT_END, 0, 0}};
+    mt = Match_Make(m, att, NULL);
     count = 0;
     while(1){
-        Match_Feed(m, &mt, s->bytes[i]);
-        if((mt.type.state & PROCESSING) != 0){
+        Match_Feed(m, mt, s->bytes[i]);
+        if((mt->type.state & PROCESSING) != 0){
             count++;
             i++;
         }else{
             break;
         }
     }
-    r |= Test(Match_Total(&mt) == 4, "Att - Found 4 chars, count is %d", Match_Total(&mt));
 
-    */
+    i64 total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
+    void *args4[] = {&total, NULL};
+    r |= Test(total == 4, "Att - Found 4 chars, count is _i8", args4);
+
     MemCh_Free(m);
     return r;
 }

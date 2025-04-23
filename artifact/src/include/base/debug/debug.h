@@ -5,8 +5,7 @@ extern char *TypeStrings[];
 extern boolean SHOW_SERVE_TESTS;
 extern MemCh *_debugM;
 extern Stream *DebugOut;
-
-#define FLAG_CSTR_LENGTH 17
+static const size_t FLAG_DEBUG_MAX = 18;
 
 status Debug_Init(MemCh *m);
 void indent_Print(int indent);

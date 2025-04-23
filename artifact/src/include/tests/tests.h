@@ -22,3 +22,4 @@ status SpanClone_Tests(MemCh *gm);
 status Stream_Tests(MemCh *gm);
 status PatChar_Tests(MemCh *gm);
 status Match_Tests(MemCh *gm);
+status MatchElastic_Tests(MemCh *gm);
