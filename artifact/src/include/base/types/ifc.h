@@ -6,12 +6,15 @@ boolean Ifc_Match(cls inst, cls ifc);
 #define __IFC_HEADER_FUNCS
 static inline Abstract *as(Abstract *x, cls type){
     if(x == NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
     }else {
         if(x->type.of != type){
-            printf("%s:%s %d vs %d\n", FILENAME, FUNCNAME, x->type.of, type);
-            void *args[] = {(void *)Type_ToChars(type), (void *)Type_ToChars(x->type.of), NULL};
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched type expecting '_c', have '_c'", args);
+            Abstract *args[] = {
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
+                NULL
+            };
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched type expecting '$', have '$'", args);
             return NULL;
         }
     }
@@ -20,11 +23,15 @@ static inline Abstract *as(Abstract *x, cls type){
 
 static inline Abstract *asIfc(Abstract *x, cls type){
     if(x == NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
     }else{
         if(!Ifc_Match(x->type.of, type)){
-            void *args[] = {(void *)Type_ToChars(type), (void *)Type_ToChars(x->type.of), NULL};
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched interface, expecting '_c', have '_c'", args);
+            Abstract *args[] = {
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
+                NULL
+            };
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched interface, expecting '$', have '$'", args);
             return NULL;
         }
     }
@@ -33,11 +40,15 @@ static inline Abstract *asIfc(Abstract *x, cls type){
 
 static inline Abstract *asIfcOffset(Abstract *x, cls type, word offset){
     if(x == NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Cast from NULL", NULL);
     }else{
         if(!Ifc_Match(x->type.of-HTYPE_LOCAL, type)){
-            void *args[] = {(void *)Type_ToChars(type), (void *)Type_ToChars(x->type.of), NULL};
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched interface with offset expecting '_c', have '_c'", args);
+            Abstract *args[] = {
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
+                NULL
+            };
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Cast from Abstract mismatched interface with offset expecting '$', have '$'", args);
             return NULL;
         }
     }

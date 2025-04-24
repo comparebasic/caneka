@@ -10,14 +10,14 @@ Single *Single_Clone(MemCh *m, Abstract *og){
     return sg;
 }
 
-Single *Single_Ptr(MemCh *m, void *ptr){
+Single *Ptr_Wrapped(MemCh *m, void *ptr){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_PTR;
     sgl->val.ptr = ptr;
     return sgl;
 }
 
-Single *Single_Cstr(MemCh *m, char *cstr){
+Single *Cstr_Wrapped(MemCh *m, char *cstr){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_CSTR;
     sgl->val.ptr = (void *)cstr;
@@ -47,10 +47,10 @@ Single *Maker_Wrapped(MemCh *m, Maker mk){
     return sgl;
 }
 
-Single *Int_Wrapped(MemCh *m, int n){
+Single *I32_Wrapped(MemCh *m, i32 n){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
-    sgl->type.of = TYPE_WRAPPED_UTIL;
-    sgl->val.value = (util)n;
+    sgl->type.of = TYPE_WRAPPED_I32;
+    sgl->val.i = n;
     return sgl;
 }
 
@@ -58,6 +58,20 @@ Single *I64_Wrapped(MemCh *m, i64 n){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_I64;
     sgl->val.value = (util)n;
+    return sgl;
+}
+
+Single *I16_Wrapped(MemCh *m, word w){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_I16;
+    sgl->val.w = w;
+    return sgl;
+}
+
+Single *I8_Wrapped(MemCh *m, i8 b){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_I16;
+    sgl->val.b = (byte)b;
     return sgl;
 }
 

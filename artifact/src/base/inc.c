@@ -32,7 +32,7 @@
 #include "./str/str_makers.c"
 #include "./str/str_utils.c"
 #include "./str/strvec.c"
-#include "./str/strvec_fmt.c"
+#include "./str/fmt.c"
 #include "./str/stream.c"
 #include "./str/streams.c"
 #include "./termio/ansi_str.c"

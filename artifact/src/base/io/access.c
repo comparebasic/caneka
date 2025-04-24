@@ -98,7 +98,7 @@ Access *Access_Make(MemCh *m, Str *owner, Span *groups){
     a->type.of = TYPE_ACCESS;
     a->owner = owner;
     if(groups != NULL && groups->type.of != TYPE_TABLE){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Group span is expected to be a table", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Group span is expected to be a table", NULL);
         return NULL;
     }
     a->groups = groups;

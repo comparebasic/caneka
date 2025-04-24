@@ -39,7 +39,7 @@ Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config, Abstract *arg){
 
 status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below zero", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below zero", NULL);
     }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) & SUCCESS){
         return SUCCESS;
     }

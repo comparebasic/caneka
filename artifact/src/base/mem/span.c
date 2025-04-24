@@ -10,9 +10,6 @@ status Span_Set(Span *p, i32 idx, Abstract *t){
     Iter_Setup(&it, p, SPAN_OP_SET, idx);
     it.value = (void *)t;
     status r = Iter_Query(&it);
-    if(p->type.state & DEBUG){
-        printf("\x1b[34mSpan_Set %d\x1b[0m\n", p->nvalues);
-    }
     return r;
 }
 

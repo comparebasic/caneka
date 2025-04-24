@@ -14,8 +14,11 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
     localIdx = (offset / increment);
 
     if(localIdx > SPAN_STRIDE){
-        void *args[] = {&localIdx, NULL};
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(m, localIdx), 
+            NULL
+        };
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
             "Error localIdx larger than span stride _i4", args);
         return -1;
     }
@@ -25,7 +28,7 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
         it->stackIdx[dim] = 0;
     }else{
         if(it->stack[dim+1] == NULL){
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, 
                 "Error expected ptr to span in SetStack", NULL);
         }
         ptr = *((void **)it->stack[dim+1]); 
@@ -270,8 +273,8 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
     }
 
     if(it->type.state & DEBUG){
-        void *args[] = {it, NULL};
-        Out("^c.Iter-Query _D^0.\n", args);
+        Abstract *args[] = {(Abstract *)it, NULL};
+        Out("^c.Iter-Query $^0.\n", args);
     }
 
     return it->type.state;

@@ -33,11 +33,13 @@ void indent_Print(int indent){
 
 i64 Bits_Print(Stream *sm, byte *bt, size_t length, boolean extended){
     i64 total = 0;
+    Single sg = {{TYPE_WRAPPED_I8, 0}, 0};
     for(int i = 0; i < length;i++){
         byte b = bt[i];
         if(extended){
-            void *args[] = {&b, NULL};
-            total += StrVec_Fmt(sm, "_i1=", args);
+            sg.val.b = b;
+            Abstract *args[] = {(Abstract *)&sg, NULL};
+            total += Fmt(sm, "$=", args);
         }
         for(int j = 7; j >= 0;j--){
             total += Stream_To(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
@@ -66,7 +68,6 @@ i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){
         return Stream_To(sm, (byte *)"NULL", 4);
     }
 
-
     Abstract *a = (Abstract *)t;
     if(type == 0){
         a = (Abstract *)t;
@@ -77,8 +78,12 @@ i64 Str_Debug(Stream *sm, void *t, cls type, boolean extended){
     if(func != NULL){
         return func(sm, a, type, extended);
     }else{
-        void *args[] = {Type_ToChars(type), &type, NULL};
-        StrVec_Fmt(sm, "_c/_i2: unknown-debug", args);
+        Abstract *args[] = {
+            (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),
+            (Abstract *)I16_Wrapped(sm->m, type),
+            NULL
+        };
+        Fmt(sm, "$/$: unknown-debug", args);
         return 0;
     }
 }

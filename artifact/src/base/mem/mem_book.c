@@ -22,7 +22,7 @@ static MemBook *MemBook_get(void *addr){
         }
         idx--;
     }
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook not found", NULL);
+    Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook not found", NULL);
     return NULL;
 }
 
@@ -38,10 +38,14 @@ i32 MemBook_GetPageIdx(void *addr){
 }
 #else
 void _insecureMemError(void *addr){
-    void *args[] = {addr, NULL};
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
-        "MemBook is private unless otherwise specified at compile time, _a", args);
+    Abstract *args[] = {
+        (Abstract *)Ptr_Wrapped(ErrStream->m, addr), 
+        NULL
+    };
+    Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        "MemBook is private unless otherwise specified at compile time, $", args);
 }
+
 MemBook *MemBook_Get(void *addr){
     _insecureMemError(addr);
     return NULL;
@@ -131,25 +135,25 @@ void *MemBook_GetPage(void *addr){
     }
 
     /* make new chapter here as all chapters are full */
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Next MemBook not implemented", NULL);
+    Fatal(FUNCNAME, FILENAME, LINENUMBER, "Next MemBook not implemented", NULL);
 
     if((book = MemBook_Make(book)) != NULL){
         return MemBook_GetPage(book);
     }
 
-    Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook", NULL);
+    Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook", NULL);
     return NULL;
 }
 
 MemBook *MemBook_Make(MemBook *prev){
     bookIdx++;
     if(bookIdx >= CHAPTER_MAX){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
         return NULL;
     }
     MemBook *mb = _books[bookIdx];
     if(mb != NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
         return NULL;
     }
 
@@ -157,8 +161,7 @@ MemBook *MemBook_Make(MemBook *prev){
         CHAPTER_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
     if(start == MAP_FAILED){
-        printf("err:%s\n", strerror(errno));
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Unable to map memory", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to map memory", NULL);
         return NULL;
     }
 

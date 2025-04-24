@@ -6,7 +6,7 @@ static boolean _fuse = TRUE;
 static void sigH(int sig, siginfo_t *info, void *ptr){
     if(_fuse){
         _fuse = FALSE;
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
     }else{
         write(0, "Double SigH\n", strlen("Double SigH\n"));
     }
@@ -77,14 +77,18 @@ int DebugStack_Print(){
     while((Iter_Next(&it) & END) == 0){
         StackEntry *entry = (StackEntry*)it.value;
         if(entry != NULL){
-            void *args[] = { entry->funcName, entry->fname, &entry->line};
-            Out("    ^Dy._c^d. - _c:_i4^0 ", args);
+            Abstract *args[] = {
+                (Abstract *)Str_CstrRef(ErrStream->m, entry->funcName),
+                (Abstract *)Str_CstrRef(ErrStream->m, entry->fname),
+                (Abstract *)I32_Wrapped(ErrStream->m, entry->line),
+                NULL,
+            };
+            Out("    ^Dy.$^d. - $:$^0 ", args);
+            Abstract *args2[] = {entry->ref, NULL};
             if(entry->ref != NULL && entry->typeOf != 0){
-                void *args[] = {&entry->ref};
-                Out("^y_d^0", args);
+                Out("^y$^0", args2);
             }else if(entry->ref != NULL && entry->typeOf == 0){
-                void *args[] = {&entry->ref};
-                Out("^y_c^0", args);
+                Out("^y$^0", args2);
             }
             Out("\n", NULL);
         }

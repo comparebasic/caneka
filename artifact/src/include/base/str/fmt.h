@@ -8,6 +8,4 @@ enum formatter_types {
     FMT_TYPE_EXTRA_ARG = 1 << 14,
     FMT_TYPE_ANSI = 1 << 15,
 };
-
-i64 StrVec_FmtHandle(Stream *sm, char *fmt, Single args[]);
-i64 StrVec_Fmt(Stream *sm, char *fmt, Single args[]);
+i64 Fmt(Stream *sm, char *fmt, Abstract *args[]);

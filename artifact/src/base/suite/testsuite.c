@@ -21,29 +21,22 @@ static char *statusCstr(word status){
     }
 }
 
-status Test(boolean condition, char *fmt, void **args){
-    if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        char *cstr = condition ? "pass" : "fail";
-        void *_args[] = { cstr, NULL };
-        Out("        <li class=\"test result result-_c\">_+</li>", _args);
-        return condition ? SUCCESS : ERROR;
+status Test(boolean condition, char *fmt, Abstract *args[]){
+    if(!condition){
+        Out("^r.Fail: ", NULL);
     }else{
-        if(!condition){
-            Out("^r.Fail: ", NULL);
-        }else{
-            Out("^g.Pass: ", NULL);
-        }
-        StrVec_FmtHandle(OutStream, fmt, args);
-        if(!condition){
-            Stream_To(OutStream, (byte *)"\n", 1);
-        }else{
-            /*
-            Stream_To(OutStream, (byte *)"\x1b[2K\r", 5);
-            */
-            Stream_To(OutStream, (byte *)"\n", 1);
-        }
-        return condition ? SUCCESS : ERROR;
+        Out("^g.Pass: ", NULL);
     }
+    Fmt(OutStream, fmt, args);
+    if(!condition){
+        Stream_To(OutStream, (byte *)"\n", 1);
+    }else{
+        /*
+        Stream_To(OutStream, (byte *)"\x1b[2K\r", 5);
+        */
+        Stream_To(OutStream, (byte *)"\n", 1);
+    }
+    return condition ? SUCCESS : ERROR;
 }
 
 status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
@@ -51,8 +44,8 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     DebugStack_Push(suiteName, TYPE_CSTR); 
     TestSet *set = tests;
     char *name = NULL;
-    int pass = 0;
-    int fail = 0;
+    i32 pass = 0;
+    i32 fail = 0;
 
     word baseStackLevel = m->type.range;
     StrVec *v = StrVec_Make(m);
@@ -60,22 +53,29 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i64 rollingBaseMem = baseMem;
 
     i64 chapters = MemChapterCount();
-    void *args1[] = { &suiteName, NULL };
+    Abstract *args1[] = { (Abstract *)Str_CstrRef(gm, suiteName), NULL };
     Out("= Test Suite: _c\n", args1);
     i64 chap = chapters*PAGE_SIZE;
-    void *args2[] = {Str_MemCount(m, baseMem), &chap, &chapters, NULL };
-    Out("Starting Mem at _t (_i8 chapters/_i8 total+stack)\n", args2);
+    Abstract *args2[] = {
+        (Abstract *)Str_MemCount(m, baseMem),
+        (Abstract *)I64_Wrapped(gm, chap),
+        (Abstract *)I64_Wrapped(gm, chapters),
+        NULL
+    };
+    Out("Starting Mem at $ ($ chapters/$ total+stack)\n", args2);
 
     while(set->name != NULL){
-
-        void *args3[] = {set->name, NULL };
+        Abstract *args3[] = {
+            (Abstract *)Str_CstrRef(gm, set->name),
+            NULL
+        };
         if(set->status == SECTION_LABEL){
-            Out("== _c\n", args3);
+            Out("== $\n", args3);
             set++;
             continue;
         }
 
-        Out("=== Testing: _c\n", args3);
+        Out("=== Testing: $\n", args3);
 
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
@@ -104,15 +104,15 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
             i64 chapters = MemChapterCount();
             i64 availableCh = MemAvailableChapterCount();
-            void *args4[] = {
-                color,
-                Str_MemCount(m, overRollingUsed),
-                &chapters,
-                &availableCh,
-                Str_MemCount(m, chapters*PAGE_SIZE),
+            Abstract *args4[] = {
+                (Abstract *)color,
+                (Abstract *)Str_MemCount(gm, overRollingUsed),
+                (Abstract *)I64_Wrapped(gm, chapters),
+                (Abstract *)I64_Wrapped(gm, availableCh),
+                (Abstract *)Str_MemCount(m, chapters*PAGE_SIZE),
                 NULL
             }; 
-            Out("_tMem: _t (_i8 chapters/_i8 available/_t total+stack)^0\n", args4);
+            Out("_tMem: $ ($ chapters/$ available/$ total+stack)^0\n", args4);
 
             MemCh_Free(m);
             m->type.range--;
@@ -126,23 +126,19 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
         set++;
     }
-    void *args5[] = {suiteName, &pass, &fail};
-    if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        Out("\n    <span class=\"result\">Suite _c pass:_i4 fail:_i4</span>\n", args5);
-    }else if((GLOBAL_flags & NO_COLOR) != 0){
-        Out("Suite _c pass:_i4 fail:_i4\n", args5);
+    Abstract *args5[] = {
+        (Abstract *)Str_CstrRef(gm, suiteName),
+        (Abstract *)I32_Wrapped(gm, pass),
+        (Abstract *)I32_Wrapped(gm, fail),
+        NULL,
+    };
+    if(!fail){
+        Out("^g", NULL);
     }else{
-        if(!fail){
-            Out("^g", NULL);
-        }else{
-            Out("^r", NULL);
-        }
-        Out("Suite _c pass:_i4 fail:_i4^0\n", args5);
+        Out("^r", NULL);
+    }
+    Out("Suite $ pass:$ fail:$^0\n", args5);
 
-    }
-    if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        Out("</div>\n", NULL);
-    }
     DebugStack_Pop();
     return !fail ? SUCCESS : ERROR;
 }

@@ -10,4 +10,4 @@
 
 void Cleanup(Abstract *a);
 void *Error(char *msg);
-void *Fatal(i32 fd, char *func, char *file, int line, char *fmt, void **args);
+void *Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]);

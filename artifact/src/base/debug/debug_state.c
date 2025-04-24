@@ -43,9 +43,6 @@ Str *State_ToStr(MemCh *m, status state){
 
     }
     byte upper = (byte) (state >> 8);
-    /*
-    String_AddBitPrint(m, s, &upper, sizeof(byte), TRUE);
-    */
     if(upper != 0){
         Str_AddCstr(s, "<<");
         if((state & (1 << 8)) != 0){

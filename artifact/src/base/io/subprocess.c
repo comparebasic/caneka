@@ -23,7 +23,6 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             )
 
         ){
-            printf("Unable to open SubCall pipes"); 
             DebugStack_Pop();
             return ERROR;
         }
@@ -34,19 +33,14 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
 
     if(DEBUG_SUBPROCESS){
         char **arg = &(cmd[1]);
-        printf("\x1b[%dmSubProcess \x1b[1;%dm%s\x1b[0m ", 
-            DEBUG_SUBPROCESS, DEBUG_SUBPROCESS, cmd[0]);
         while (*arg != NULL){
-            printf("\x1b[%dm%s \x1b[0m", DEBUG_SUBPROCESS, *arg);
             arg++;
         }
-        printf("\n");
     }
 
 
     child = fork();
     if(child == (pid_t)-1){
-        printf("Error: Fork for subprocess"); 
         DebugStack_Pop();
         return ERROR;
     }else if(!child){
@@ -62,7 +56,6 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             close(p2[0]);
         }
         execvp(cmd[0], cmd);
-        printf("Execv failed");
         DebugStack_Pop();
         return ERROR;
     }
@@ -97,7 +90,7 @@ status SubStatus(ProcDets *pd){
 
     if(p != pd->pid){
         if(!wait){
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+            Fatal(FUNCNAME, FILENAME, LINENUMBER,
                 "subProcess wait failed for SubProcess", NULL); 
         }
         DebugStack_Pop();
@@ -105,7 +98,7 @@ status SubStatus(ProcDets *pd){
     }
 
     if(!WIFEXITED(r)){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
             "subProcess failed for SubProcess process did not exit propery", NULL);
         DebugStack_Pop();
         return ERROR;

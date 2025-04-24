@@ -5,6 +5,6 @@
 #include "str/cursor.h"
 #include "str/stream.h"
 #include "str/streams.h"
-#include "str/strvec_fmt.h"
 #include "str/str_equals.h"
+#include "str/fmt.h"
 #include "str/str_debug.h"

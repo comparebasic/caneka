@@ -42,19 +42,11 @@ static status HKey_Init(HKey *hk, Table *tbl, util id){
 }
 
 static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Abstract *key, Abstract *value, util hash){
-    void *args[] = {&it->idx, &it->idx, it, NULL};
     Hashed *h = NULL;
-    if(tbl->type.state & DEBUG){
-        void *args[] = {hk, it->value, NULL};
-        Out("  ^p.Table GetSetHashed _D/_d^0.\n", args);
-    }
     if(op & SPAN_OP_GET){
         if(it->value != NULL){
             h = it->value;
             if(h->id == hash && Equals(key, h->item)){
-                if(tbl->type.state & DEBUG){
-                    Out("  ^p.Getting ^Dg._i4^dp./_b4^0.\n", args);
-                }
                 h = (Hashed *)it->value;
                 tbl->type.state |= SUCCESS;
             }
@@ -63,21 +55,11 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
         if(it->value != NULL){
             h = (Hashed *)it->value;
             if(h->id == hash && Equals(key, h->item)){
-                if(tbl->type.state & DEBUG){
-                    Out("  ^p.Updating _i4/_b4^0.\n", args);
-                }
                 h->idx = hk->idx;
                 h->value = value;
                 tbl->type.state |= SUCCESS;
-            }else{
-                if(tbl->type.state & DEBUG){
-                    Out("  ^p.Collision ^Dg._i4^dp./_b4^0.\n", args);
-                }
             }
         }else{
-            if(tbl->type.state & DEBUG){
-                Out("  ^p.Setting ^D._i4^d./_b4^0.\n", args);
-            }
             h = Table_setHValue(tbl->m, hk, it, key, value);
             tbl->type.state |= SUCCESS;
         }
@@ -94,12 +76,6 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
 }
 
 static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *value){
-    if(tbl->type.state & DEBUG){
-        char *cstr = (op & SPAN_OP_GET) != 0 ? "GET" : "SET";
-        void *args[] = {cstr, key, NULL};
-        Out("^p.Table GetSetHashed _c/_D^0.\n", args);
-    }
-
     tbl->type.state &= ~SUCCESS;
     if(key == NULL){
         return NULL;
@@ -143,7 +119,7 @@ status Table_SetKey(Iter *it, Abstract *a){
 i32 Table_SetIdxEntry(Iter *it, Abstract *a){
     Hashed *h = Table_GetSetHashed(it->span, SPAN_OP_SET, a, NULL);
     i32 value = it->metrics.set;
-    Single *tag = Int_Wrapped(it->span->m, value);
+    Single *tag = I32_Wrapped(it->span->m, value);
     h->value = (Abstract *)tag;
     return (i32)value;
 }

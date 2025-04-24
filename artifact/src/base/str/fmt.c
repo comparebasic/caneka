@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Fmt(Stream *sm, char *fmt, Single args[]){
+i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
     size_t l = strlen(fmt);
     MemCh *m = sm->m;
     char *end = fmt+l;
@@ -11,122 +11,109 @@ i64 Fmt(Stream *sm, char *fmt, Single args[]){
     char *start = NULL;
     status state = SUCCESS;
     i64 total = 0;
-    Single *sg = args;
     while(ptr != end){
         char c = *ptr;
         if(state == SUCCESS){
             start = ptr;
             state = READY;
         }else if(state == PROCESSING){
-            if(sg->type.of == TYPE_WRAPPED_CSTR){
-                char *cstr = (char *)(sg++)->type.ptr;
-                if(sg->type.state & FMT_TYPE_EXTRA_ARG){
-                    sg++;
-                    if(sg->type.of = TYPE_WRAPPED_I64){
-                        len = (i64)sg->val.util;
-                    }
-                }else{
-                    len = strlen(cstr);
-                }
-
-                if(sg->type.state & FMT_TYPE_ANSI){
-                    char *cstr_end = cstr+(strlen(cstr)-1);
-                    Str *s = Str_FromAnsi(m, &cstr, cstr_end);
+            Abstract *a = *(args++);
+            if(a->type.of == TYPE_STR && ((s->type.state|sm->type.state) & DEBUG) == 0){
+                Str *s = (Str *)a;
+                if(s->type.state & FMT_TYPE_ANSI){
+                    char *cstr_end = (char *)s->bytes+(s->length-1);
+                    Str *s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
                     Stream_To(sm, s->bytes, s->length);
                     total += s->length;
                 }else{
-                    total += Stream_To(sm, cstr, len);
+                    total += Stream_To(sm, s->bytes, s->length);
                 }
                 state = SUCCESS; 
                 goto next;
+            }else if(Ifc_Match(a->type.of, TYPE_WRAPPED)){
+                Single *sg = (Single *)a;
+                if(a->type.state & FMT_TYPE_BITS){
+                    size_t sz = 0;
+                    void *ptr = NULL;
+                    boolean verbose = (a->type.state & FMT_TYPE_VERBOSE) != 0;
+                    if(a->type.of == TYPE_WRAPPED_PTR){
+                        Single *sg = (Single *)a;
+                        if(sg->type.state & FMT_TYPE_EXTRA_ARG){
+                            if(sg->type.of == TYPE_WRAPPED_I64){
+                                sz = sg->val.value;
+                            }
+                        }else{
+                            Fatal(FUNCNAME, FILENAME, LINENUMBER,
+                                "Expected extra arg", NULL);
+                        }
+                        ptr = sg->val.ptr;
+                    }else if(sg->type.of == TYPE_WRAPPED_I64){
+                        sz = 8;
+                        ptr = &sg->val.value;
+                    }else if(sg->type.of == TYPE_WRAPPED_I32){
+                        sz = 4;
+                        ptr = &sg->val.i;
+                    }else if(sg->type.of == TYPE_WRAPPED_I16){
+                        sz = 2;
+                        ptr = &sg->val.w;
+                    }else if(sg->type.of == TYPE_WRAPPED_I8){
+                        sz = 1;
+                        ptr = &sg->val.b;
+                    }
+
+                    total += Bits_Print(sm, ptr, sz, verbose);
+                    state = SUCCESS; 
+                    goto next;
+                }else if(a->type.of == TYPE_WRAPPED_I64){
+                    s = Str_FromI64(m, sg->val.value);
+                    Stream_To(sm, s->bytes, s->length);
+                    total += s->length;
+                    state = SUCCESS; 
+                    goto next;
+                }else if(sg->type.of == TYPE_WRAPPED_I32){
+                    s = Str_FromI64(m, sg->val.i);
+                    Stream_To(sm, s->bytes, s->length);
+                    total += s->length;
+                    state = SUCCESS; 
+                    goto next;
+                }else if(sg->type.of == TYPE_WRAPPED_I16){
+                    s = Str_FromI64(m, sg->val.w);
+                    Stream_To(sm, s->bytes, s->length);
+                    total += s->length;
+                    state = SUCCESS; 
+                    goto next;
+                }else if(sg->type.of == TYPE_WRAPPED_I8){
+                    s = Str_FromI64(m, sg->val.b);
+                    Stream_To(sm, s->bytes, s->length);
+                    total += s->length;
+                    state = SUCCESS; 
+                    goto next;
+                }else if(sg->type.of == TYPE_WRAPPED_PTR || sg->type.of == TYPE_WRAPPED_DO){
+                    i32 l = 2;
+                    s = Str_Ref(m, (byte *)"*", l, l);
+                    Stream_To(sm, s->bytes, s->length);
+                    total += s->length;
+                    util u = (util)sg;
+                    s = Str_FromI64(m, u);
+                    Stream_To(sm, s->bytes, s->length);
+                    total += s->length;
+                    state = SUCCESS; 
+                    goto next;
+                }
             }else{
-                Abstract *a = (Abstract *)(sg++);
-                if(((sm->type.debug & DEBUG) | 
-                        (v->type.state & DEBUG)) != 0){
+                if(((sm->type.state|a->type.state) & DEBUG) != 0){
                     cls type = 0;
                     if(a->type.state & FMT_TYPE_EXTRA_ARG){
+                        Single *sg = (Single *)*(args++);
                         if(sg->type.of == TYPE_WRAPPED_I16){
                             type = sg->val.w;
-                            sg++;
                         }
                     }
                     total += Str_Debug(sm, a, type, TRUE);
-                }else if(a != NULL || a->type.of == TYPE_STR){
-                    s = (Str *)a;
-                    total += Stream_To(sm, s->bytes, s->length);
                 }else{
                     v = StrVec_FromAbs(m, a);
                     total += Stream_VecTo(sm, v);
                 }
-                total += s->length;
-                state = SUCCESS; 
-                goto next;
-            }else if(Ifc_Match(sg, TYPE_WRAPPED) && 
-                    (sg->type.state & FMT_TYPE_BITS)){
-                size_t sz = 0;
-                void *ptr = NULL;
-                boolean verbose = (sg->type.state & FMT_TYPE_VERBOSE) != 0;
-                if(sg->type.of == TYPE_WRAPPED_PTR){
-                    if(sg->type.state & FMT_TYPE_EXTRA_ARG){
-                        sg++;
-                        if(sg->type.of == TYPE_WRAPPED_I64){
-                            sz = sg->val.value;
-                        }
-                    }else{
-                        Fatal(FUNCNAME, FILENAME, LINENUMBER,
-                            "Expected extra arg", NULL);
-                    }
-                    ptr = sg->val.ptr;
-                }else if(sg->type.of == TYPE_WRAPPED_I64){
-                    sz = 8;
-                    ptr = &sg->val.value;
-                }else if(sg->type.of == TYPE_WRAPPED_I32){
-                    sz = 4;
-                    ptr = &sg->val.i;
-                }else if(sg->type.of == TYPE_WRAPPED_I16){
-                    sz = 2;
-                    ptr = &sg->val.w;
-                }else if(sg->type.of == TYPE_WRAPPED_I8){
-                    sz = 1;
-                    ptr = &sg->val.b;
-                }
-
-                total += Bits_Print(sm, ptr, sz, verbose);
-                state = SUCCESS; 
-                goto next;
-            }else if(sg->type.of == TYPE_WRAPPED_I64){
-                s = Str_FromI64(m, sg->val.value);
-                Stream_To(sm, s->bytes, s->length);
-                total += s->length;
-                state = SUCCESS; 
-                goto next;
-            }else if(sg->type.of == TYPE_WRAPPED_I32){
-                s = Str_FromI64(m, sg->val.i);
-                Stream_To(sm, s->bytes, s->length);
-                total += s->length;
-                state = SUCCESS; 
-                goto next;
-            }else if(sg->type.of == TYPE_WRAPPED_I16){
-                s = Str_FromI64(m, sg->val.w);
-                Stream_To(sm, s->bytes, s->length);
-                total += s->length;
-                state = SUCCESS; 
-                goto next;
-            }else if(sg->type.of == TYPE_WRAPPED_I8){
-                s = Str_FromI64(m, sg->val.b);
-                Stream_To(sm, s->bytes, s->length);
-                total += s->length;
-                state = SUCCESS; 
-                goto next;
-            }else if(sg->type.of == TYPE_WRAPPED_PTR){
-                i32 l = 2;
-                s = Str_Ref(m, (byte *)"*", l, l);
-                Stream_To(sm, s->bytes, s->length);
-                total += s->length;
-                util u = (util)*(sg++);
-                s = Str_FromI64(m, u);
-                Stream_To(sm, s->bytes, s->length);
-                total += s->length;
                 state = SUCCESS; 
                 goto next;
             }
@@ -149,10 +136,11 @@ i64 Fmt(Stream *sm, char *fmt, Single args[]){
            goto outnext;
         }else if(c == '$'){
            if(args == NULL){
-                Single args[] = {
-                    {{TYPE_WRAPPED_CSTR, 0}, .val.ptr = fmt}
+                Abstract *args[] = {
+                    (Abstract *)Str_CstrRef(m, fmt),
+                    NULL
                 };
-                Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+                Fatal(FUNCNAME, FILENAME, LINENUMBER,
                     "Expecting arg, found NULL instead, '$'", args);
                 return total;
            }

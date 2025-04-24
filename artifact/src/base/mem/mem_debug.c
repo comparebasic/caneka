@@ -88,21 +88,30 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, boolean extended){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     i64 total = 0;
-    void *args[] = {&p->nvalues, &p->max_idx, &p->dims, NULL};
-    total += StrVec_Fmt(sm, "Span<^D._i4^d.values/0.._i4/_i1dims [", args);
+    Abstract *args[] = {
+        (Abstract *)I32_Wrapped(sm->m, p->nvalues), 
+        (Abstract *)I32_Wrapped(sm->m, p->max_idx), 
+        (Abstract *)I8_Wrapped(sm->m, p->dims),
+        NULL
+    };
+    total += Fmt(sm, "Span<^D.$^d.values/0..$/$dims [", args);
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = it.value;
         if(a != NULL){
-            void *args[] = {&it.idx, it.value, NULL};
-            total += StrVec_Fmt(sm, "_i4:_d", args);
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(sm->m, it.idx),
+                it.value,
+                NULL
+            };
+            total += Fmt(sm, "$:$", args);
             if((it.type.state & FLAG_ITER_LAST) == 0){
                 total += Stream_To(sm, (byte *)", ", 2);
             }
         }
     }
-    total += StrVec_Fmt(sm, "]>", NULL);
+    total += Stream_To(sm, (byte *)"]>", 2);
     
     return total;
 }
@@ -112,31 +121,58 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     Str *s = State_ToStr(sm->m, it->type.state);
     if(extended){
         i64 total = 0;
-        void *args[] = {s, &it->idx, &it->span->nvalues, &it->span->dims, NULL};
-        total += StrVec_Fmt(sm, "I<_t@_i4 of _i4/_i1dims\n", args);
+        Abstract *args[] = {
+            (Abstract *)s,
+            (Abstract *)I32_Wrapped(sm->m, it->idx),
+            (Abstract *)I32_Wrapped(sm->m, it->span->nvalues),
+            (Abstract *)I8_Wrapped(sm->m, it->span->dims),
+            NULL
+        };
+        total += Fmt(sm, "I<$@$ of $/$dims\n", args);
         void *ptr = it->span->root;
         for(i8 i = it->span->dims; i >= 0; i--){
             if(it->stack[i] == NULL){
-                void *args[] = {&i};
-                total += StrVec_Fmt(sm, "  _i1: NULL\n", args);
+                Abstract *args[] = {
+                    (Abstract *)I32_Wrapped(sm->m, i),
+                    NULL
+                };
+                total += Fmt(sm, "  $: NULL\n", args);
             }else{
                 i64 delta = 0;
                 if(i > 0 && it->stack[i] != NULL){
                     delta = (it->stack[i] - ptr) / sizeof(void *);
                 }
-                void *args[] = {&i, ptr, &delta, &it->stackIdx[i], it->stack[i], NULL};
-                total += StrVec_Fmt(sm, "  _i1: _a+_i4/_i4 = _a\n", args);
+                Abstract *args[] = {
+                    (Abstract *)I32_Wrapped(sm->m, i),
+                    (Abstract *)Ptr_Wrapped(sm->m, ptr),
+                    (Abstract *)I32_Wrapped(sm->m, delta),
+                    (Abstract *)I32_Wrapped(sm->m, it->stackIdx[i]),
+                    (Abstract *)Ptr_Wrapped(sm->m, it->stack[i]), 
+                    NULL
+                };
+                total += Fmt(sm, "  $: $+$/$ = $\n", args);
             }
             if(i > 0 && it->stack[i] != NULL){
                 ptr = *((void **)it->stack[i]);
             }
         }
-        void *args2[] = {it->value, NULL};
-        total += StrVec_Fmt(sm, "value=_D>", args2);
+        word previous = sm->type.state;
+        sm->type.state |= DEBUG;
+        Abstract *args2[] = {
+            (Abstract *)it->value,
+            NULL
+        };
+        total += Fmt(sm, "value=$>", args2);
+        sm->type.state = previous;
         return total;
     }else{
-        void *args[] = {s, &it->idx, &it->span->nvalues, NULL};
-        return StrVec_Fmt(sm, "I<_t:_i4 of _i4>", args);
+        Abstract *args[] = {
+            (Abstract *)s,
+            (Abstract *)I32_Wrapped(sm->m, it->idx),
+            (Abstract *)I32_Wrapped(sm->m, it->span->nvalues),
+            NULL
+        };
+        return Fmt(sm, "I<$:$ of $>", args);
     }
 }
 
