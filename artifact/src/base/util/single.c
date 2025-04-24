@@ -17,6 +17,13 @@ Single *Single_Ptr(MemCh *m, void *ptr){
     return sgl;
 }
 
+Single *Single_Cstr(MemCh *m, char *cstr){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_CSTR;
+    sgl->val.ptr = (void *)cstr;
+    return sgl;
+}
+
 Single *Bool_Wrapped(MemCh *m, int n){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_I64;

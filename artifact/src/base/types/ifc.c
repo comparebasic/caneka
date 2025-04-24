@@ -25,7 +25,10 @@ boolean Ifc_Match(cls inst, cls ifc){
         return inst >= HTYPE_LOCAL;
     }
     }else if(ifc == TYPE_WRAPPED){
-        return inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL || inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR;
+        return (inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL ||
+            inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR ||
+            inst == TYPE_WRAPPED_I64 || inst == TYPE_WRAPPED_I32 ||
+            inst == TYPE_WRAPPED_I16 || inst == TYPE_WRAPPED_I8);
     }else if(ifc == TYPE_ROEBLING){
         return inst == TYPE_ROEBLING || inst == TYPE_ROEBLING_BLANK;
     }else if(ifc == TYPE_SPAN){ 

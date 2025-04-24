@@ -14,6 +14,7 @@ char *TypeStrings[] = {
     "TYPE_WRAPPED_TIME64",
     "TYPE_WRAPPED_BOOL",
     "TYPE_WRAPPED_PTR",
+    "TYPE_WRAPPED_CSTR",
     "TYPE_RANGE",
     "TYPE_UTIL",
     "TYPE_BOOK",
