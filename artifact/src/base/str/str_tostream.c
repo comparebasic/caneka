@@ -1,23 +1,23 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Str_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     Str *s = (Str*)as(a, TYPE_STR); 
     i64 total = 0;
-    if(extended){
+    if(flags & DEBUG & MORE){
         Abstract *args[] = {
             (Abstract *)I16_Wrapped(sm->m, s->length),
             (Abstract *)I16_Wrapped(sm->m, s->alloc),
             NULL
         };
         total += Fmt(sm, "Str<$/$:^D\"", args); 
-    }else{
+    }else if(flags & DEBUG){
         total += Fmt(sm, "^D\"", NULL); 
     }
     total += Stream_To(sm, s->bytes, s->length);
-    if(extended){
+    if(flags & DEBUG & MORE){
         total += Fmt(sm, "\"^d.>", NULL);
-    }else{
+    }else if(flags & DEBUG){
         total += Fmt(sm, "\"^d.", NULL);
     }
     return total;
@@ -121,7 +121,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     }
 }
 
-status Str_DebugInit(MemCh *m, Lookup *lk){
+status Str_ToStreamInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);

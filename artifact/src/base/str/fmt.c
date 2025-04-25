@@ -2,12 +2,9 @@
 #include <caneka.h>
 
 i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
-    size_t l = strlen(fmt);
     MemCh *m = sm->m;
-    char *end = fmt+l;
     char *ptr = fmt;
-    Str *s = NULL;
-    StrVec *v = NULL;
+    char *end = fmt+strlen(fmt);
     char *start = NULL;
     status state = SUCCESS;
     i64 total = 0;
@@ -16,108 +13,28 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
         if(state == SUCCESS){
             start = ptr;
             state = READY;
-        }else if(state == PROCESSING){
+        }else if(state & PROCESSING){
             Abstract *a = *(args++);
-            if(a->type.of == TYPE_STR && ((s->type.state|sm->type.state) & DEBUG) == 0){
+            if(a->type.of == TYPE_STR){
                 Str *s = (Str *)a;
-                if(s->type.state & FMT_TYPE_ANSI){
+                if(s->type.state & STRING_FMT_ANSI){
                     char *cstr_end = (char *)s->bytes+(s->length-1);
-                    Str *s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
-                    Stream_To(sm, s->bytes, s->length);
-                    total += s->length;
-                }else{
+                    s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
                     total += Stream_To(sm, s->bytes, s->length);
-                }
-                state = SUCCESS; 
-                goto next;
-            }else if(Ifc_Match(a->type.of, TYPE_WRAPPED)){
-                Single *sg = (Single *)a;
-                if(a->type.state & FMT_TYPE_BITS){
-                    size_t sz = 0;
-                    void *ptr = NULL;
-                    boolean verbose = (a->type.state & FMT_TYPE_VERBOSE) != 0;
-                    if(a->type.of == TYPE_WRAPPED_PTR){
-                        Single *sg = (Single *)a;
-                        if(sg->type.state & FMT_TYPE_EXTRA_ARG){
-                            if(sg->type.of == TYPE_WRAPPED_I64){
-                                sz = sg->val.value;
-                            }
-                        }else{
-                            Fatal(FUNCNAME, FILENAME, LINENUMBER,
-                                "Expected extra arg", NULL);
-                        }
-                        ptr = sg->val.ptr;
-                    }else if(sg->type.of == TYPE_WRAPPED_I64){
-                        sz = 8;
-                        ptr = &sg->val.value;
-                    }else if(sg->type.of == TYPE_WRAPPED_I32){
-                        sz = 4;
-                        ptr = &sg->val.i;
-                    }else if(sg->type.of == TYPE_WRAPPED_I16){
-                        sz = 2;
-                        ptr = &sg->val.w;
-                    }else if(sg->type.of == TYPE_WRAPPED_I8){
-                        sz = 1;
-                        ptr = &sg->val.b;
-                    }
-
-                    total += Bits_Print(sm, ptr, sz, verbose);
                     state = SUCCESS; 
                     goto next;
-                }else if(a->type.of == TYPE_WRAPPED_I64){
-                    s = Str_FromI64(m, sg->val.value);
-                    Stream_To(sm, s->bytes, s->length);
-                    total += s->length;
-                    state = SUCCESS; 
-                    goto next;
-                }else if(sg->type.of == TYPE_WRAPPED_I32){
-                    s = Str_FromI64(m, sg->val.i);
-                    Stream_To(sm, s->bytes, s->length);
-                    total += s->length;
-                    state = SUCCESS; 
-                    goto next;
-                }else if(sg->type.of == TYPE_WRAPPED_I16){
-                    s = Str_FromI64(m, sg->val.w);
-                    Stream_To(sm, s->bytes, s->length);
-                    total += s->length;
-                    state = SUCCESS; 
-                    goto next;
-                }else if(sg->type.of == TYPE_WRAPPED_I8){
-                    s = Str_FromI64(m, sg->val.b);
-                    Stream_To(sm, s->bytes, s->length);
-                    total += s->length;
-                    state = SUCCESS; 
-                    goto next;
-                }else if(sg->type.of == TYPE_WRAPPED_PTR || sg->type.of == TYPE_WRAPPED_DO){
-                    i32 l = 2;
-                    s = Str_Ref(m, (byte *)"*", l, l);
-                    Stream_To(sm, s->bytes, s->length);
-                    total += s->length;
-                    util u = (util)sg;
-                    s = Str_FromI64(m, u);
-                    Stream_To(sm, s->bytes, s->length);
-                    total += s->length;
+                }else if(s->type.state & STRING_BINARY){
+                    total += Bits_Print(sm, s->bytes, s->length, 
+                        ((s->type|sm->type.state) & DEBUG));
                     state = SUCCESS; 
                     goto next;
                 }
-            }else{
-                if(((sm->type.state|a->type.state) & DEBUG) != 0){
-                    cls type = 0;
-                    if(a->type.state & FMT_TYPE_EXTRA_ARG){
-                        Single *sg = (Single *)*(args++);
-                        if(sg->type.of == TYPE_WRAPPED_I16){
-                            type = sg->val.w;
-                        }
-                    }
-                    total += Str_Debug(sm, a, type, TRUE);
-                }else{
-                    v = StrVec_FromAbs(m, a);
-                    total += Stream_VecTo(sm, v);
-                }
-                state = SUCCESS; 
-                goto next;
             }
-        }else if(state == MORE){
+            total += ToStream(sm, a, type, 
+                ((sm->type.state & DEBUG)|(state & MORE)));
+            state = SUCCESS; 
+            goto next;
+        }else if(state == CONTINUE){
             Str *s = Str_FromAnsi(m, &ptr, end);
             Stream_To(sm, s->bytes, s->length);
             total += s->length;
@@ -129,13 +46,13 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
         if(state == NOOP){
             state = READY;
         }else if(c == '^'){
-           state = MORE; 
+           state = CONTINUE; 
            goto outnext;
         }else if(c == '\\'){
            state = NOOP; 
            goto outnext;
-        }else if(c == '$'){
-           if(args == NULL){
+        }else if(c == '$' || c == '@'){
+            if(args == NULL){
                 Abstract *args[] = {
                     (Abstract *)Str_CstrRef(m, fmt),
                     NULL
@@ -143,9 +60,12 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 Fatal(FUNCNAME, FILENAME, LINENUMBER,
                     "Expecting arg, found NULL instead, '$'", args);
                 return total;
-           }
-           state = PROCESSING; 
-           goto outnext;
+            }
+            state = PROCESSING; 
+            if(c == '@'){
+                state |= MORE;
+            }
+            goto outnext;
         }
 next:
         ptr++;
