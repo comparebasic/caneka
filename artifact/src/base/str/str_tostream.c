@@ -4,6 +4,11 @@
 i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     Str *s = (Str*)as(a, TYPE_STR); 
     i64 total = 0;
+    byte _digitBytes[MAX_BASE10+1];
+    memset(_digitBytes, 0, MAX_BASE10+1);
+    Str digit_s;
+    Str_Init(&digit_s, _digitBytes, 0, MAX_BASE10);
+
     if(flags & DEBUG & MORE){
         Abstract *args[] = {
             (Abstract *)I16_Wrapped(sm->m, s->length),
@@ -14,12 +19,40 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     }else if(flags & DEBUG){
         total += Fmt(sm, "^D\"", NULL); 
     }
-    total += Stream_To(sm, s->bytes, s->length);
+
+    if(flags & DEBUG){
+        byte *b = s->bytes;
+        byte *end = s->bytes+s->length;
+        while(b <= end){
+            byte c = *b;
+            if(c >= 32 || c <= 126){
+                total += Stream_To(sm, b, 1);
+            }else if(c == '\r'){
+                total += Stream_To(sm, (byte *)"\\r", 2);
+            }else if(c == '\n'){
+                total += Stream_To(sm, (byte *)"\\n", 2);
+            }else if(c == '\t'){
+                total += Stream_To(sm, (byte *)"\\t", 2);
+            }else{
+                Str_Add(digit_s, (byte *)"\\{", 1);
+                Str_AddI64(digit_s, (i64)c);
+                Str_Add(digit_s, (byte *)"}", 1);
+                total += Stream_To(sm, digit_s->bytes, digit_s->length);
+                digit_s->length = 0;
+                memset(_digitBytes, 0, MAX_BASE10+1);
+            }
+            b++;
+        }
+    }else{
+        total += Stream_To(sm, s->bytes, s->length);
+    }
+
     if(flags & DEBUG & MORE){
         total += Fmt(sm, "\"^d.>", NULL);
     }else if(flags & DEBUG){
         total += Fmt(sm, "\"^d.", NULL);
     }
+
     return total;
 }
 
