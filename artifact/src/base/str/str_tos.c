@@ -3,20 +3,24 @@
 
 i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     Str *s = (Str*)as(a, TYPE_STR); 
+    if((flags & (MORE|DEBUG)) == 0){
+        return Stream_Bytes(sm, s->bytes, s->length);
+    }
+
     i64 total = 0;
     byte _digitBytes[MAX_BASE10+1];
     memset(_digitBytes, 0, MAX_BASE10+1);
     Str digit_s;
     Str_Init(&digit_s, _digitBytes, 0, MAX_BASE10);
 
-    if(flags & DEBUG & MORE){
+    if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)I16_Wrapped(sm->m, s->length),
             (Abstract *)I16_Wrapped(sm->m, s->alloc),
             NULL
         };
         total += Fmt(sm, "Str<$/$:^D\"", args); 
-    }else if(flags & DEBUG){
+    }else{
         total += Fmt(sm, "^D\"", NULL); 
     }
 
@@ -26,47 +30,47 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
         while(b <= end){
             byte c = *b;
             if(c >= 32 || c <= 126){
-                total += Stream_To(sm, b, 1);
+                total += Stream_Bytes(sm, b, 1);
             }else if(c == '\r'){
-                total += Stream_To(sm, (byte *)"\\r", 2);
+                total += Stream_Bytes(sm, (byte *)"\\r", 2);
             }else if(c == '\n'){
-                total += Stream_To(sm, (byte *)"\\n", 2);
+                total += Stream_Bytes(sm, (byte *)"\\n", 2);
             }else if(c == '\t'){
-                total += Stream_To(sm, (byte *)"\\t", 2);
+                total += Stream_Bytes(sm, (byte *)"\\t", 2);
             }else{
-                Str_Add(digit_s, (byte *)"\\{", 1);
-                Str_AddI64(digit_s, (i64)c);
-                Str_Add(digit_s, (byte *)"}", 1);
-                total += Stream_To(sm, digit_s->bytes, digit_s->length);
-                digit_s->length = 0;
+                Str_Add(&digit_s, (byte *)"\\{", 1);
+                Str_AddI64(&digit_s, (i64)c);
+                Str_Add(&digit_s, (byte *)"}", 1);
+                total += Stream_Bytes(sm, digit_s.bytes, digit_s.length);
+                digit_s.length = 0;
                 memset(_digitBytes, 0, MAX_BASE10+1);
             }
             b++;
         }
     }else{
-        total += Stream_To(sm, s->bytes, s->length);
+        total += Stream_Bytes(sm, s->bytes, s->length);
     }
 
-    if(flags & DEBUG & MORE){
+    if(flags & MORE){
         total += Fmt(sm, "\"^d.>", NULL);
-    }else if(flags & DEBUG){
+    }else{
         total += Fmt(sm, "\"^d.", NULL);
     }
 
     return total;
 }
 
-i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+i64 StrVec_Print(Stream *sm, Abstract *a, cls type, word flags){
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     i64 total = 0;
-    if(extended){
+    if(flags & DEBUG){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, vObj->p->nvalues),
             (Abstract *)I64_Wrapped(sm->m, vObj->total),
             NULL
         };
         total += Fmt(sm, "StrVec<$/$ [", args); 
-    }else{
+    }else if(flags & MORE){
         total += Fmt(sm, "^D", NULL); 
     }
 
@@ -75,43 +79,52 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, boolean extended){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)it.value;
         if(s != NULL){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(sm->m, it.idx),
-                NULL
-            };
-            total += Fmt(sm, "$: ", args); 
-            Str_Print(sm, (Abstract *)s, type, extended);
-            if((it.type.state & FLAG_ITER_LAST) == 0){
-                total += Stream_To(sm, (byte *)", ", 2);
-            }
-            if((it.type.state & FLAG_ITER_LAST) == 0){
-                total += Stream_To(sm, (byte *)", ", 2); 
+            if((flags & (MORE|DEBUG)) == 0){
+                total += Str_Print(sm, (Abstract *)s, type, flags);
+            }else{
+                Abstract *args[] = {
+                    (Abstract *)I32_Wrapped(sm->m, it.idx),
+                    NULL
+                };
+                total += Str_Print(sm, (Abstract *)s, type, flags);
+                total += Fmt(sm, "$: ", args); 
+                if((it.type.state & FLAG_ITER_LAST) == 0){
+                    total += Stream_Bytes(sm, (byte *)", ", 2);
+                }
             }
         }
     }
-    if(extended){
+    if(flags & DEBUG){
         total += Fmt(sm, "]^d>", NULL);
-    }else{
+    }else if (flags & MORE){
         total += Fmt(sm, "^d", NULL);
     }
     return total;
 }
 
-i64 Stream_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+i64 Stream_Print(Stream *sm, Abstract *a, cls type, word flags){
     Stream *smObj = (Stream *)as(a, TYPE_STREAM);
-    i64 total = 0;
-    total += Fmt(sm, "Stream<", NULL); 
-    if(sm->type.state & STREAM_STRVEC){
-        total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, type, extended);
+    if(flags & (MORE|DEBUG)){
+        i64 total = 0;
+        total += Fmt(sm, "Stream<", NULL); 
+        if(sm->type.state & STREAM_STRVEC){
+            total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, type, flags);
+        }
+        total += Fmt(sm, ">", NULL); 
+        return total;
+    }else{
+        return ToStream_NotImpl(sm, a, type, flags);
     }
-    total += Fmt(sm, ">", NULL); 
-    return total;
 }
 
-i64 Cursor_Print(Stream *sm, Abstract *a, cls type, boolean extended){
+i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
     Cursor *curs = (Cursor *)as(a, TYPE_CURSOR);
+    if((flags & (MORE|DEBUG)) == 0){
+        return ToStream_NotImpl(sm, a, type, flags);
+    }
+
     if(curs->v == NULL){
-        return  Fmt(sm, "Curs<v:NULL>", NULL); 
+        return  Fmt(sm, "Curs<v:NULL>", NULL);
     }
 
     Iter it;
@@ -126,7 +139,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, boolean extended){
         pos += s->length;
     }
 
-    if(extended){
+    if(flags & DEBUG){
         i64 length = (i64)(curs->end - curs->ptr);
         i64 endPos = pos+length;
         Single *val = Ptr_Wrapped(sm->m, curs->v);
@@ -140,7 +153,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, boolean extended){
             (Abstract *)val,
             NULL
         };
-        return  Fmt(sm, "Curs<$..$ $of$ ^D.'$'^d. $>", args); 
+        return  Fmt(sm, "Curs<$..$ $of$ ^D.'@'^d. $>", args); 
     }else{
         i64 length = (i64)(curs->end - curs->ptr);
         Abstract *args[] = {
@@ -150,11 +163,11 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, boolean extended){
             NULL
         };
 
-        return  Fmt(sm, "Curs<$/$_^D.'$'^d.>", args); 
+        return  Fmt(sm, "Curs<$/$_^D.'@'^d.>", args); 
     }
 }
 
-status Str_ToStreamInit(MemCh *m, Lookup *lk){
+status Str_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);

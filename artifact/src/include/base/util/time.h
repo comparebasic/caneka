@@ -1,4 +1,4 @@
-Str *Time64_ToStr(MemCh *m, Abstract *a);
+Str *Time64_ToStr(MemCh *m, time64_t t);
 time64_t Time64_FromSpec(struct timespec *ts);
 time64_t Time64_Now();
 void Time64_ToSpec(struct timespec *ts, time64_t tm);

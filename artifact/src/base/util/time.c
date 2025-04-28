@@ -3,12 +3,11 @@
 
 #define TIME_BUFF_LEN 64
 
-Str *Time64_ToStr(MemCh *m, Abstract *a){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
+Str *Time64_ToStr(MemCh *m, time64_t t){
     Str *s = Str_Make(m, TIME_BUFF_LEN);
     struct timespec ts;
     struct tm tm;
-    Time64_ToSpec(&ts, (time64_t)sg->val.value);
+    Time64_ToSpec(&ts, t);
 
     gmtime_r(&ts.tv_sec, &tm);
     strftime((char *)s->bytes, TIME_BUFF_LEN, "%Y-%m-%dT%H:%M:%S.", &tm);

@@ -10,7 +10,7 @@ StrVec *StrVec_FromBytes(MemCh *m, byte *b, i32 length){
     memset(&sm, 0, sizeof(Stream));
     StrVec *v = StrVec_Make(m);
     Stream_SetupMakeStrVec(m, &sm, v);
-    Stream_To(&sm, b, length);
+    Stream_Bytes(&sm, b, length);
     return v;
 }
 

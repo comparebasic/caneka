@@ -1,15 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-Lookup *StreamPrintChain = NULL;
+Lookup *ToStreamLookup = NULL;
 
 status StreamTo_Init(MemCh *m){
-    if(StreamPrintChain == NULL){
-        StreamPrintChain = Lookup_Make(m, _TYPE_START, NULL, NULL);
-        Mem_ToStreamInit(m, StreamPrintChain);
-        Str_ToStreamInit(m, StreamPrintChain);
-        Sequence_ToStreamInit(m, StreamPrintChain);
-        UtilDebug_Init(m, StreamPrintChain);
+    if(ToStreamLookup == NULL){
+        ToStreamLookup = Lookup_Make(m, _TYPE_START, NULL, NULL);
+        Mem_ToSInit(m, ToStreamLookup);
+        Str_ToSInit(m, ToStreamLookup);
+        Sequence_ToSInit(m, ToStreamLookup);
+        Util_ToSInit(m, ToStreamLookup);
         return SUCCESS;
     }
     return NOOP;
@@ -32,10 +32,10 @@ i64 Bits_Print(Stream *sm, byte *bt, size_t length, word flags){
             total += Fmt(sm, "$=", args);
         }
         for(int j = 7; j >= 0;j--){
-            total += Stream_To(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+            total += Stream_Bytes(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
         }
         if(flags & MORE){
-            total += Stream_To(sm, (byte *)" ", 1);
+            total += Stream_Bytes(sm, (byte *)" ", 1);
         }
     }
     return total;
@@ -65,10 +65,10 @@ char *ToStreamChars(word flags){
     }
 }
 
-static i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
-    void *args[] = {
-        Str_CstrRef(m, ToStreamChars(flags)),
-        Str_CstrRef(m, Type_ToChars(type)),
+i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
+    Abstract *args[] = {
+        (Abstract *)Str_CstrRef(sm->m, ToStreamChars(flags)),
+        (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),
         NULL
     };
     Fatal(FUNCNAME, FILENAME, LINENUMBER, 
@@ -76,19 +76,18 @@ static i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
     return 0;
 }
 
-i64 ToStream(Stream *sm, Abstract *a, cls type, word flags){
+i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
     if(a == NULL){
-        return Stream_To(sm, (byte *)"NULL", 4);
+        return Stream_Bytes(sm, (byte *)"NULL", 4);
     }
 
     if(type == 0){
-        a = (Abstract *)t;
         type = a->type.of;
     }
 
-    StreamPrintFunc func = (StreamPrintFunc)Lookup_Get(StreamPrintChain, type);
+    ToSFunc func = (ToSFunc)Lookup_Get(ToStreamLookup, type);
     if(func != NULL){
-        return func(sm, a, type, flag);
+        return func(sm, a, type, flags);
     }else{
         Abstract *args[] = {
             (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),

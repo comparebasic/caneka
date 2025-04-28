@@ -20,23 +20,23 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 if(s->type.state & STRING_FMT_ANSI){
                     char *cstr_end = (char *)s->bytes+(s->length-1);
                     s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
-                    total += Stream_To(sm, s->bytes, s->length);
+                    total += Stream_Bytes(sm, s->bytes, s->length);
                     state = SUCCESS; 
                     goto next;
                 }else if(s->type.state & STRING_BINARY){
                     total += Bits_Print(sm, s->bytes, s->length, 
-                        ((s->type|sm->type.state) & DEBUG));
+                        ((s->type.state|sm->type.state) & DEBUG));
                     state = SUCCESS; 
                     goto next;
                 }
             }
-            total += ToStream(sm, a, type, 
+            total += ToS(sm, a, a->type.of, 
                 ((sm->type.state & DEBUG)|(state & MORE)));
             state = SUCCESS; 
             goto next;
         }else if(state == CONTINUE){
             Str *s = Str_FromAnsi(m, &ptr, end);
-            Stream_To(sm, s->bytes, s->length);
+            Stream_Bytes(sm, s->bytes, s->length);
             total += s->length;
             state = SUCCESS; 
             goto next;
@@ -74,9 +74,8 @@ outnext:
        if(start != ptr){
             word length = (word)(ptr - start);
             if(length > 0){
-                s = Str_Ref(m, (byte *)start, length, length);
-                Stream_To(sm, s->bytes, s->length);
-                total += s->length;
+                Stream_Bytes(sm, (byte *)start, length);
+                total += length;
             }
        }
        ptr++;
@@ -86,9 +85,8 @@ outnext:
     if(state != SUCCESS && start != ptr){
         word length = (word)(ptr - start);
         if(length > 0){
-            s = Str_Ref(m, (byte *)start, length, length);
-            Stream_To(sm, s->bytes, s->length);
-            total += s->length;
+            Stream_Bytes(sm, (byte *)start, length);
+            total += length;
         }
     }
 

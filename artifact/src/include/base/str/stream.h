@@ -23,7 +23,7 @@ typedef struct stream {
     Abstract *source;
 } Stream;
 
-i64 Stream_To(Stream *sm, byte *b, i32 length);
+i64 Stream_Bytes(Stream *sm, byte *b, i32 length);
 i64 Stream_VecTo(Stream *sm, StrVec *v);
 i64 Stream_Read(Stream *sm, i32 length);
 status Stream_SetupMakeStrVec(MemCh *m, Stream *sm, StrVec *v);

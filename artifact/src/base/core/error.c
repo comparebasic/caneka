@@ -28,7 +28,7 @@ void *Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
         Fmt(ErrStream, "^rD^$^0", args2);
     }
 #endif
-    Stream_To(ErrStream, (byte *)"\n", 1);
+    Stream_Bytes(ErrStream, (byte *)"\n", 1);
     if(!crashing){
         crashing = TRUE;
         DebugStack_Print();

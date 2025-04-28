@@ -15,7 +15,7 @@ status Caneka_InitBase(MemCh *m){
     MemCh *md = MemCh_Make();
     r |= Core_Init(md);
     r |= Debug_Init(md);
-    r |= StrUtils_Init(md);
+    r |= StreamTo_Init(md);
     r |= DebugStack_Init(m);
     r |= Hash_Init(m);
     return r;

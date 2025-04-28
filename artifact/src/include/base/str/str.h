@@ -1,12 +1,9 @@
 enum str_flags {
-    STRING_TEXT = 1 << 8
+    STRING_TEXT = 1 << 8,
     STRING_CONST = 1 << 9,
     STRING_BINARY = 1 << 10,
-    STRING_B64 = 1 << 11,
-    STRING_HEX = 1 << 12,
-    STRING_TEA = 1 << 13,
-    STRING_AES = 1 << 14,
-    STRING_FMT_ANSI = 1 << 15,
+    STRING_ENCODED = 1 << 11,
+    STRING_FMT_ANSI = 1 << 12,
 };
 
 typedef struct str {
