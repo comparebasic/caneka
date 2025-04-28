@@ -84,10 +84,10 @@ Str *Str_From(MemCh *m, byte *bytes, word length){
     return s;
 }
 
-Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc){
+Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, bytes, length, alloc);
-    s->type.state |= STRING_CONST;
+    s->type.state = flags;
     return s;
 }
 

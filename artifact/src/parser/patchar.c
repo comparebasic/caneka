@@ -20,7 +20,7 @@ static i64 PatChar_continueFromStr(MemCh *m, Str *s, Str *ps, word flags){
 PatCharDef *PatChar_FromStrVec(MemCh *m, StrVec *v){
     size_t sz = (v->total+1) * sizeof(PatCharDef);
     if(sz > STR_MAX){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
             "StrVec too long for PatChar Str", NULL);
         return NULL;
     }
@@ -45,7 +45,7 @@ PatCharDef *PatChar_FromStrVec(MemCh *m, StrVec *v){
 PatCharDef *PatChar_fromStr(MemCh *m, Str *s, word flags){
     size_t sz = (s->length+1) * sizeof(PatCharDef);
     if(sz > STR_MAX){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, 
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
             "Str too long for PatChar Str", NULL);
         return NULL;
     }

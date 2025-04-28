@@ -110,16 +110,18 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
         }
 
         if(mt->type.state & DEBUG){
-            char *yn = (matched ? "Y":"N");
-            char *yncolor = (matched ? "Dy.":"dp.");
-            void *args[] = {
-                yncolor,
-                yn, (void *)((i64)1), 
-                &c, (void *)((i64)1),
-                mt,
+            Str *yn = Str_CstrRef(m, (matched ? "Y":"N"));
+            Str *yncolor = Str_Ref(m, (byte *)(matched ? "Dy.":"dp."), 3, 4,
+                STRING_FMT_ANSI);
+            Str *cs = Str_Ref(m, (byte *)&c, 1, 1, DEBUG);
+            Abstract *args[] = {
+                (Abstract *)yncolor,
+                (Abstract *)yn, 
+                (Abstract *)cs,
+                (Abstract *)mt,
                 NULL
             };
-            Out("^p.Match-Feed _^_C^dp./^D._C^d. _D>^0\n", args);
+            Out("^p.Match-Feed $$^dp./^D.$^d. @^0\n", args);
         }
 
         if(matched){
@@ -252,8 +254,13 @@ miss:
     }
 
     if(mt->type.state & DEBUG){
-        void *args[] = {&c, (void *)((i64)1), mt, NULL};
-        Out("^c.Match-Feed ^D._C^d. _d>^0\n", args);
+        Str *cs = Str_Ref(m, (byte *)&c, 1, 1, DEBUG);
+        Abstract *args[] = {
+            (Abstract *)cs,
+            (Abstract *)mt,
+            NULL
+        };
+        Out("^c.Match-Feed ^D.$^d. @^0\n", args);
     }
 
     return mt->type.state;
@@ -310,14 +317,14 @@ Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
     while(def->flags != PAT_END){
        def++;
        if(++count > PAT_CHAR_MAX_LENGTH){
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+            Fatal(FUNCNAME, FILENAME, LINENUMBER,
                 "PatCharDef: PAT_END not found before max", NULL);
        }
     }
     if(def->flags == PAT_END){
         mt->pat.endDef = def;
     }else{
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "PatCharDef: end not found", NULL);
     }
     mt->remaining = -1;

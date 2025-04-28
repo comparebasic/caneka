@@ -49,8 +49,13 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.modCount_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.modTotal_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.name = Str_Make(m, STR_DEFAULT);
-    void *args1[] = {ctx->fields.steps.modCount_s, ctx->fields.steps.modTotal_s, ctx->fields.steps.name, NULL};
-    StrVec_Fmt(sm, "^ymodule _s of _s: ^yD._s^0", args1);
+    Abstract *args1[] = {
+        (Abstract *)ctx->fields.steps.modCount_s,
+        (Abstract *)ctx->fields.steps.modTotal_s,
+        (Abstract *)ctx->fields.steps.name,
+        NULL
+    };
+    Fmt(sm, "^y.module @ of @: ^yD.@^0", args1);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -64,8 +69,13 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.dest = Str_Make(m, STR_DEFAULT);
-    void *args2[] = {ctx->fields.current.action, ctx->fields.current.source, ctx->fields.current.dest, NULL};
-    StrVec_Fmt(sm, "^b_s: _s -> ^bD._s^0", args2);
+    Abstract *args2[] = {
+        (Abstract *)ctx->fields.current.action,
+        (Abstract *)ctx->fields.current.source,
+        (Abstract *)ctx->fields.current.dest,
+        (Abstract *)NULL
+    };
+    Fmt(sm, "^b.@: @ -> ^bD.@^0", args2);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -83,8 +93,12 @@ static status setupStatus(BuildCtx *ctx){
     v = sm->dest.curs->v;
     ctx->fields.steps.count_s = Str_Make(m, MAX_BASE10+1);
     ctx->fields.steps.total_s = Str_Make(m, MAX_BASE10+1);
-    void *args3[] = {ctx->fields.steps.count_s, ctx->fields.steps.total_s, NULL};
-    StrVec_Fmt(sm, "sources: _s of _s^0", args3);
+    Abstract *args3[] = {
+        (Abstract *)ctx->fields.steps.count_s,
+        (Abstract *)ctx->fields.steps.total_s,
+        NULL
+    };
+    Fmt(sm, "sources: @ of @^0", args3);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -98,15 +112,22 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.barEnd = Str_Clone(m, ctx->fields.steps.barStart, width);
     sm = Stream_MakeStrVec(m);
     v = sm->dest.curs->v;
-    void *args4[] = {ctx->fields.steps.barStart, ctx->fields.steps.barEnd, NULL};
-    StrVec_Fmt(sm, "^B_s^Y_s^0", args4);
+    Abstract *args4[] = {
+        (Abstract *)ctx->fields.steps.barStart,
+        (Abstract *)ctx->fields.steps.barEnd,
+        NULL
+    };
+    Fmt(sm, "^B@^0^Y@^0", args4);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     sm = Stream_MakeStrVec(m);
     v = sm->dest.curs->v;
     ctx->fields.mem_s = Str_Make(m, STR_DEFAULT);
-    void *args5[] = {ctx->fields.mem_s, NULL};
-    StrVec_Fmt(sm, "^cMemory Count: _s^0", args5);
+    Abstract *args5[] = {
+        (Abstract *)ctx->fields.mem_s,
+        NULL
+    };
+    Fmt(sm, "^c.Memory Count: @^0", args5);
     Span_Add(ctx->cli->lines, (Abstract *)v);
 
     coords.a = ctx->cli->lines->max_idx;
@@ -222,7 +243,7 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
         r |= SubProcess(m, cmd, &pd);
         if(r & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Build error for source file", NULL);
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file", NULL);
         }
 
         Span_ReInit(cmd);
@@ -234,7 +255,7 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
         status re = SubProcess(m, cmd, &pd);
         if(re & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Build error for adding object to lib", NULL);
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding object to lib", NULL);
         }
     }else{
         CliStatus_SetByKey(m, ctx->cli, Str_CstrRef(m, "action"), Str_CstrRef(m, " link obj"));

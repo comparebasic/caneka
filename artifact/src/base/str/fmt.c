@@ -8,12 +8,18 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
     char *start = NULL;
     status state = SUCCESS;
     i64 total = 0;
-    while(ptr != end){
+    printf("\x1b[1m>> FMT:%s\x1b[22m\n", fmt);
+    fflush(stdout);
+    while(ptr < end){
         char c = *ptr;
+        printf("c:%c remaining:%ld\n", c, end - ptr);
+        fflush(stdout);
         if(state == SUCCESS){
             start = ptr;
             state = READY;
         }else if(state & PROCESSING){
+            printf("  proc\n");
+            fflush(stdout);
             Abstract *a = *(args++);
             if(a->type.of == TYPE_STR){
                 Str *s = (Str *)a;
@@ -28,6 +34,10 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                         ((s->type.state|sm->type.state) & DEBUG));
                     state = SUCCESS; 
                     goto next;
+                }else if((state & MORE) && (sm->type.state & STREAM_STRVEC)){
+                    StrVec_Add(sm->dest.curs->v, s);
+                    state = SUCCESS; 
+                    goto next;
                 }
             }
             total += ToS(sm, a, a->type.of, 
@@ -35,6 +45,8 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             state = SUCCESS; 
             goto next;
         }else if(state == CONTINUE){
+            printf("Calling Ansi %c of %s/%ld\n", *ptr, fmt, ptr-fmt);
+            fflush(stdout);
             Str *s = Str_FromAnsi(m, &ptr, end);
             Stream_Bytes(sm, s->bytes, s->length);
             total += s->length;
@@ -43,14 +55,20 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
         }
         
         c = *ptr;
+        printf("  below %c\n", c);
+        fflush(stdout);
         if(state == NOOP){
+            printf("   noop");
+            fflush(stdout);
             state = READY;
         }else if(c == '^'){
-           state = CONTINUE; 
-           goto outnext;
+            printf("   ansi/CONTINUE\n");
+            fflush(stdout);
+            state = CONTINUE; 
+            goto outnext;
         }else if(c == '\\'){
-           state = NOOP; 
-           goto outnext;
+            state = NOOP; 
+            goto outnext;
         }else if(c == '$' || c == '@'){
             if(args == NULL){
                 Abstract *args[] = {
@@ -72,11 +90,11 @@ next:
         continue;
 outnext:
        if(start != ptr){
-            word length = (word)(ptr - start);
-            if(length > 0){
+           word length = (word)(ptr - start);
+           if(length > 0){
                 Stream_Bytes(sm, (byte *)start, length);
                 total += length;
-            }
+           }
        }
        ptr++;
        continue;

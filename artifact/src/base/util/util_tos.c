@@ -70,6 +70,48 @@ static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
+    Str *s = Str_FromI64(sm->m, (i64)sg->val.i);
+    if(flags & (DEBUG|MORE)){
+        Abstract *args[] = {
+            (Abstract *)s,
+            NULL
+        };
+        return Out("Wi64<^D.@^d.>", args);
+    }else{
+        return ToS(sm, (Abstract *)s, 0, flags);
+    }
+}
+
+static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_I16);
+    Str *s = Str_FromI64(sm->m, (i64)sg->val.w);
+    if(flags & (DEBUG|MORE)){
+        Abstract *args[] = {
+            (Abstract *)s,
+            NULL
+        };
+        return Out("Wi64<^D.@^d.>", args);
+    }else{
+        return ToS(sm, (Abstract *)s, 0, flags);
+    }
+}
+
+static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_I8);
+    Str *s = Str_FromI64(sm->m, (i64)sg->val.b);
+    if(flags & (DEBUG|MORE)){
+        Abstract *args[] = {
+            (Abstract *)s,
+            NULL
+        };
+        return Out("Wi64<^D.@^d.>", args);
+    }else{
+        return ToS(sm, (Abstract *)s, 0, flags);
+    }
+}
+
 static i64 WrappedTime64_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
     Str *s = Time64_ToStr(sm->m, sg->val.value);
@@ -117,6 +159,9 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)WrappedI64_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I32, (void *)WrappedI32_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)WrappedI16_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I8, (void *)WrappedI8_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_DO, (void *)Wrapped_Do);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)Wrapped_Ptr);

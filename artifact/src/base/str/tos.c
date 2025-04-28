@@ -53,6 +53,14 @@ i64 FlagStr(word flag, char *dest, char *map){
     return p;
 }
 
+i64 Str_AddFlags(Str *s, word flags, char *map){
+    if(s->alloc - (s->length+FLAG_DEBUG_MAX) < 0){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
+        return 0;
+    }
+    return FlagStr(flags, s->bytes+s->length, map);
+}
+
 char *ToStreamChars(word flags){
     if(flags & DEBUG & MORE){
         return "debug-verbose";

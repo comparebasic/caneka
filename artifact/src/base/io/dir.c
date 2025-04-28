@@ -33,7 +33,7 @@ static status gatherFile(MemCh *m, Str *path, Str *file, Abstract *source){
     Span *p = (Span *)asIfc(source, TYPE_SPAN);
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, path);
-    StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1));
+    StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1, 0));
     StrVec_Add(v, file);
     return Span_Add(p, (Abstract *)v);
 }
@@ -72,7 +72,7 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, Abstract *sour
                 continue;
             }
             i64 len = strlen(ent->d_name);
-            Str *e = Str_Ref(m, (byte *)ent->d_name, len, len+1);
+            Str *e = Str_Ref(m, (byte *)ent->d_name, len, len+1, 0);
             if(ent->d_type == IS_DIR){
                 Str *s = Str_Make(m, STR_DEFAULT);
                 fnameStr(m, s, path, e);
@@ -98,10 +98,10 @@ status Dir_CheckCreate(MemCh *m, Str *path){
     Span *cmd = Span_Make(m);
     char *cstr = "mkdir";
     i64 len = strlen(cstr);
-    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1));
+    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1, 0));
     cstr = "-p";
     len = strlen(cstr);
-    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1));
+    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1, 0));
     Span_Add(cmd, (Abstract *)path);
 
     ProcDets pd;

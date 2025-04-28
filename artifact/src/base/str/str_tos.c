@@ -13,14 +13,14 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     Str digit_s;
     Str_Init(&digit_s, _digitBytes, 0, MAX_BASE10);
 
-    if(flags & MORE){
+    if(flags & (MORE|DEBUG)){
         Abstract *args[] = {
             (Abstract *)I16_Wrapped(sm->m, s->length),
             (Abstract *)I16_Wrapped(sm->m, s->alloc),
             NULL
         };
         total += Fmt(sm, "Str<$/$:^D\"", args); 
-    }else{
+    }else if(flags & MORE){
         total += Fmt(sm, "^D\"", NULL); 
     }
 
@@ -51,9 +51,9 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
         total += Stream_Bytes(sm, s->bytes, s->length);
     }
 
-    if(flags & MORE){
+    if(flags & (MORE|DEBUG)){
         total += Fmt(sm, "\"^d.>", NULL);
-    }else{
+    }else if(flags & MORE){
         total += Fmt(sm, "\"^d.", NULL);
     }
 
@@ -149,7 +149,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I64_Wrapped(sm->m, endPos),
             (Abstract *)I64_Wrapped(sm->m, length),
             (Abstract *)I64_Wrapped(sm->m, curs->v->total),
-            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length+1),
+            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length+1, 0),
             (Abstract *)val,
             NULL
         };
@@ -159,7 +159,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(sm->m, pos),
             (Abstract *)I64_Wrapped(sm->m, curs->v->total),
-            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length+1),
+            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length+1, 0),
             NULL
         };
 

@@ -13,6 +13,8 @@ Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
     byte *start = b;
     while(b <= e && ptr <= end){
         c = *(ptr);
+        printf("\n%c\n", c);
+        fflush(stdout);
         if(c == '0'){
             if(b > start){
                 *(b++) = ';';
@@ -122,11 +124,15 @@ Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
         }else if(c == '.'){
             break;
         }else{
+            printf("BREAK\n");
+            fflush(stdout);
             ptr--;
             break;
         }
         ptr++;
     }
+    printf("DONE\n");
+    fflush(stdout);
     *(b++) = 'm';
     s->length = (word)(b - s->bytes);
     *_ptr = ptr;

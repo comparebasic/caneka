@@ -62,7 +62,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
 status Roebling_RunCycle(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
     if(rbl->parseIt.span->nvalues == 0){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Roebling parsers not set", NULL);
     }
     rbl->type.state &= ~END;

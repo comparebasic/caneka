@@ -184,7 +184,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
-status Mem_DebugInit(MemCh *m, Lookup *lk){
+status Mem_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
