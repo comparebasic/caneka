@@ -17,6 +17,13 @@ Single *Ptr_Wrapped(MemCh *m, void *ptr){
     return sgl;
 }
 
+Single *MemCount_Wrapped(MemCh *m, util u){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_MEMCOUNT;
+    sgl->val.value = u;
+    return sgl;
+}
+
 Single *Cstr_Wrapped(MemCh *m, char *cstr){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_CSTR;

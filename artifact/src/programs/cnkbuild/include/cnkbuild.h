@@ -11,16 +11,12 @@ typedef struct build_subdir {
 typedef struct build_cli_fields {
     struct {
         Str *name; 
-        int count;
-        int total;
-        int modSrcCount;
-        int modSrcTotal;
-        int modCount;
-        int modTotal;
-        Str *modCount_s;
-        Str *modTotal_s;
-        Str *count_s;
-        Str *total_s;
+        Single *count;
+        Single *total;
+        Single *modSrcCount;
+        Single *modSrcTotal;
+        Single *modCount;
+        Single *modTotal;
         Str *barStart; 
         Str *barEnd; 
     } steps;
@@ -29,8 +25,6 @@ typedef struct build_cli_fields {
         Str *dest; 
         Str *action; 
     } current;
-    Str *mem; 
-    Str *mem_s; 
 } BuildCliFields;
 
 typedef struct buildctx {

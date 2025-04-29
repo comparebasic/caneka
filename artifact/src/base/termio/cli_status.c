@@ -5,53 +5,67 @@ status CliStatus_SetKey(MemCh *m, CliStatus *cli, Str *key, IntPair *pair){
     return Table_Set(cli->tbl, (Abstract *)key, (Abstract *)I64_Wrapped(m, *((util *)pair)));
 }
 
-status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Str *s){
+status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Abstract *a){
     Single *sg = (Single *)Table_Get(cli->tbl, (Abstract *)key);
     if(sg != NULL){
         IntPair *pair = (IntPair *)&sg->val.value;
         if(cli->tbl->type.state & SUCCESS){
-            StrVec *line = Span_Get(cli->lines, pair->a);
-            Span_Set(line->p, pair->b, (Abstract *)s);
+            FmtLine *line = (FmtLine *)Span_Get(cli->lines, pair->a);
+            line->args[pair->b] = (Abstract *)a;
             return SUCCESS;
         }
     }
     return NOOP;
 }
 
-status CliStatus_Print(MemCh *m, CliStatus *cli){
-    if((cli->render(m, (Abstract *)cli) & NOOP) == 0){
+Abstract *CliStatus_GetByKey(MemCh *m, CliStatus *cli, Str *key){
+    Single *sg = (Single *)Table_Get(cli->tbl, (Abstract *)key);
+    if(sg != NULL){
+        IntPair *pair = (IntPair *)&sg->val.value;
+        if(cli->tbl->type.state & SUCCESS){
+            FmtLine *line = (FmtLine *)Span_Get(cli->lines, pair->a);
+            return line->args[pair->b];
+        }
+    }
+    return NULL;
+}
+
+status CliStatus_Print(Stream *sm, CliStatus *cli){
+    if((cli->render(sm->m, (Abstract *)cli) & NOOP) == 0){
         Iter it;
         Iter_Init(&it, cli->lines);
         int count = cli->lines->nvalues;
         if((cli->type.state & PROCESSING) != 0){
-            printf("\r\x1b[%dA", count);
-            fflush(stdout);
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(sm->m, cli->lines->nvalues),
+                NULL
+            };
+            Fmt(sm, "\r\x1b[$A", args);
         }
         if(count > 0){
             cli->type.state |= PROCESSING;
         }
         while((Iter_Next(&it) & END) == 0){
-            StrVec *line = (StrVec *)it.value;
-            printf("\r\x1b[0K");
-            if(line != NULL){
-                StrVec_ToFd(line, 0);
+            Stream_Bytes(sm, (byte *)"\r\x1b[0K", 5);
+            if(it.value != NULL){
+                FmtLine *line = (FmtLine *)it.value;
+                Fmt(sm, line->fmt, line->args);
             }
-            write(1, "\n", 1);
+            Stream_Bytes(sm, (byte *)"\n", 1);
         }
         return SUCCESS;
     }
     return NOOP;
 }
 
-status CliStatus_PrintFinish(MemCh *m, CliStatus *cli){
+status CliStatus_PrintFinish(Stream *sm, CliStatus *cli){
     Iter it;
     Iter_Init(&it, cli->lines);
     int count = cli->lines->nvalues;
     while((Iter_Next(&it) & END) == 0){
-        printf("\x1b[2K\r");
-        fflush(stdout);
+        Stream_Bytes(sm, (byte *)"\x1b[2K\r", 5);
     }
-    write(1, "\n", 1);
+    Stream_Bytes(sm, (byte *)"\n", 1);
     cli->type.state &= ~PROCESSING;
     return SUCCESS;
 }

@@ -76,9 +76,6 @@ static const char *testsCoreCmd[] = {
 };
 
 static char *runTestsCoreCmd[] = {
-    /*
-    "lldb", "./build/basetests",
-    */
     "./build/tests",
     NULL
 };

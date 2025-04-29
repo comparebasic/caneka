@@ -3,3 +3,4 @@
 #include "sequence/span_utils.h"
 #include "sequence/table.h"
 #include "sequence/sequence_tos.h"
+#include "sequence/arr.h"

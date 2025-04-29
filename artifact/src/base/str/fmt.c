@@ -5,71 +5,24 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
     MemCh *m = sm->m;
     char *ptr = fmt;
     char *end = fmt+strlen(fmt);
-    char *start = NULL;
+    char *start = fmt;
     status state = SUCCESS;
     i64 total = 0;
-    printf("\x1b[1m>> FMT:%s\x1b[22m\n", fmt);
-    fflush(stdout);
     while(ptr < end){
         char c = *ptr;
-        printf("c:%c remaining:%ld\n", c, end - ptr);
-        fflush(stdout);
-        if(state == SUCCESS){
-            start = ptr;
-            state = READY;
-        }else if(state & PROCESSING){
-            printf("  proc\n");
-            fflush(stdout);
-            Abstract *a = *(args++);
-            if(a->type.of == TYPE_STR){
-                Str *s = (Str *)a;
-                if(s->type.state & STRING_FMT_ANSI){
-                    char *cstr_end = (char *)s->bytes+(s->length-1);
-                    s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
-                    total += Stream_Bytes(sm, s->bytes, s->length);
-                    state = SUCCESS; 
-                    goto next;
-                }else if(s->type.state & STRING_BINARY){
-                    total += Bits_Print(sm, s->bytes, s->length, 
-                        ((s->type.state|sm->type.state) & DEBUG));
-                    state = SUCCESS; 
-                    goto next;
-                }else if((state & MORE) && (sm->type.state & STREAM_STRVEC)){
-                    StrVec_Add(sm->dest.curs->v, s);
-                    state = SUCCESS; 
-                    goto next;
-                }
-            }
-            total += ToS(sm, a, a->type.of, 
-                ((sm->type.state & DEBUG)|(state & MORE)));
-            state = SUCCESS; 
+        if((state & NOOP) != 0){
+            state &= ~NOOP;
             goto next;
-        }else if(state == CONTINUE){
-            printf("Calling Ansi %c of %s/%ld\n", *ptr, fmt, ptr-fmt);
-            fflush(stdout);
-            Str *s = Str_FromAnsi(m, &ptr, end);
-            Stream_Bytes(sm, s->bytes, s->length);
-            total += s->length;
-            state = SUCCESS; 
-            goto next;
-        }
-        
-        c = *ptr;
-        printf("  below %c\n", c);
-        fflush(stdout);
-        if(state == NOOP){
-            printf("   noop");
-            fflush(stdout);
-            state = READY;
-        }else if(c == '^'){
-            printf("   ansi/CONTINUE\n");
-            fflush(stdout);
-            state = CONTINUE; 
-            goto outnext;
         }else if(c == '\\'){
-            state = NOOP; 
-            goto outnext;
+            state |= NOOP;
+            goto next;
         }else if(c == '$' || c == '@'){
+            if(c == '@'){
+                state |= MORE;
+            }else{
+                state &= ~MORE;
+            }
+
             if(args == NULL){
                 Abstract *args[] = {
                     (Abstract *)Str_CstrRef(m, fmt),
@@ -79,28 +32,50 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     "Expecting arg, found NULL instead, '$'", args);
                 return total;
             }
-            state = PROCESSING; 
-            if(c == '@'){
-                state |= MORE;
+
+            if(start != ptr){
+               word length = (word)(ptr - start);
+               if(length > 0){
+                    Stream_Bytes(sm, (byte *)start, length);
+                    total += length;
+               }
+               start = ptr+1;
             }
-            goto outnext;
-        }
+
+            Abstract *a = *(args++);
+            if(a->type.of == TYPE_STR){
+                Str *s = (Str *)a;
+                if(s->type.state & STRING_FMT_ANSI){
+                    char *cstr_end = (char *)s->bytes+(s->length-1);
+                    s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
+                    total += Stream_Bytes(sm, s->bytes, s->length);
+                }else if(s->type.state & STRING_BINARY){
+                    total += Bits_Print(sm, s->bytes, s->length, 
+                        ((s->type.state|sm->type.state) & DEBUG));
+                    goto next;
+                }else if((state & MORE) && (sm->type.state & STREAM_STRVEC)){
+                    StrVec_Add(sm->dest.curs->v, s);
+                    goto next;
+                }
+            }
+            total += ToS(sm, a, a->type.of, 
+                ((sm->type.state & DEBUG)|(state & MORE)));
+            state = SUCCESS; 
+            goto next;
+        }else if(c == '^'){
+            ptr++;
+            Str *s = Str_FromAnsi(m, &ptr, end);
+            Stream_Bytes(sm, s->bytes, s->length);
+            total += s->length;
+            start = ptr+1;
+        }else{
 next:
-        ptr++;
-        continue;
-outnext:
-       if(start != ptr){
-           word length = (word)(ptr - start);
-           if(length > 0){
-                Stream_Bytes(sm, (byte *)start, length);
-                total += length;
-           }
-       }
-       ptr++;
-       continue;
+            ptr++;
+        }
     }
 
-    if(state != SUCCESS && start != ptr){
+
+    if(start < ptr){
         word length = (word)(ptr - start);
         if(length > 0){
             Stream_Bytes(sm, (byte *)start, length);
@@ -109,4 +84,20 @@ outnext:
     }
 
     return total; 
+}
+
+FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
+    FmtLine *ln = (FmtLine *)MemCh_Alloc(m, sizeof(FmtLine));
+    ln->type.of = TYPE_FMT_LINE;
+    ln->fmt = fmt;
+    ln->args = Span_ToArr(m, p);
+    return ln;
+}
+
+FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args){
+    FmtLine *ln = (FmtLine *)MemCh_Alloc(m, sizeof(FmtLine));
+    ln->type.of = TYPE_FMT_LINE;
+    ln->fmt = fmt;
+    ln->args = args;
+    return ln;
 }

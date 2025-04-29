@@ -19,6 +19,7 @@
 #include "./mem/mem_book.c"
 #include "./mem/mem_chapter.c"
 #include "./mem/mem_tos.c"
+#include "./sequence/arr.c"
 #include "./sequence/span_utils.c"
 #include "./sequence/hashed.c"
 #include "./sequence/lookup.c"

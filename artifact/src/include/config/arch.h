@@ -17,4 +17,5 @@
 #define WRITE_MAX STR_DEFAULT
 #define MEM_GUARD_MAX  4
 #define RBL_GUARD_MAX  64
+#define MAX_PTR_ARR 128
 #endif

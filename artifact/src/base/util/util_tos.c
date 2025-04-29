@@ -56,6 +56,12 @@ static i64 WrappedUtil_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+static i64 WrappedMemCount_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_MEMCOUNT);
+    Str *s = Str_MemCount(sm->m, sg->val.value);
+    return Stream_Bytes(sm, s->bytes, s->length);
+}
+
 static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
     Str *s = Str_FromI64(sm->m, sg->val.value);
@@ -165,5 +171,6 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_DO, (void *)Wrapped_Do);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)Wrapped_Ptr);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_MEMCOUNT, (void *)WrappedMemCount_Print);
     return r;
 }

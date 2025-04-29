@@ -58,7 +58,7 @@ i64 Str_AddFlags(Str *s, word flags, char *map){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
         return 0;
     }
-    return FlagStr(flags, s->bytes+s->length, map);
+    return FlagStr(flags, (char *)s->bytes+s->length, map);
 }
 
 char *ToStreamChars(word flags){
