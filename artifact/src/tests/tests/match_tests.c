@@ -33,7 +33,7 @@ status Match_Tests(MemCh *gm){
         Match_Feed(m, mt, s->bytes[i]);
     }
     Abstract *args2[] = {
-        State_ToStr(m, mt->type.state),
+        (Abstract *)State_ToStr(m, mt->type.state),
         NULL
     };
     r |= Test(mt->type.state == SUCCESS, "Matching string has successful state found @", args2); 
@@ -303,7 +303,7 @@ status MatchKo_Tests(MemCh *gm){
 
     total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
     Abstract *args8[] = {
-        &total,
+        (Abstract *)I64_Wrapped(m, total),
         NULL
     };
     r |= Test(total == 1, "counted first letter only, have $", args8);

@@ -14,9 +14,9 @@ status Hash_Tests(MemCh *gm){
     h = Get_Hash((Abstract *)s);
     expected = 4291084750259606489;
     Abstract *args1[] = {
-        (Abstract *)Str_Ref(m, &expected, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
+        (Abstract *)Str_Ref(m, (byte *)&expected, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
         (Abstract *)I64_Wrapped(m, expected),
-        (Abstract *)Str_Ref(m, &h, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
+        (Abstract *)Str_Ref(m, (byte *)&h, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
         (Abstract *)I64_Wrapped(m, h),
         NULL
     };

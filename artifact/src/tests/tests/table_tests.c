@@ -70,12 +70,19 @@ status Table_Tests(MemCh *gm){
         s = Str_CstrRef(m, values[i]);
         value = Str_CstrRef(m, values[i+1]);
         found = (Str *)Table_Get(tbl, (Abstract *)s);
-        void *args1[] = {s, NULL};
+        Abstract *args1[] = {
+            (Abstract *)s, NULL
+        };
         r |= Test(found != NULL, 
-            "Expect strings to not be NULL from key:_t", args1);
-        void *args2[] = {value, s, (found != NULL ? found : NULL), NULL};
+            "Expect strings to not be NULL from key:@", args1);
+        Abstract *args2[] = {
+            (Abstract *)value,
+            (Abstract *)s, 
+            (Abstract *)found,
+            NULL
+        };
         r |= Test(Equals((Abstract *)value, (Abstract *)found), 
-            "Expect strings to equal _t from key:_t found _t", args2);
+            "Expect strings to equal @ from key:@ found @", args2);
     }
 
     MemCh_Free(m);
@@ -100,11 +107,19 @@ status TableResize_Tests(MemCh *gm){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
         found = (Str *)Table_Get(tbl, (Abstract *)s);
-        void *args1[] = {s, NULL};
-        r |= Test(found != NULL, "Expect strings to not be NULL from key:_t", args1);
-        void *args2[] = {value, s, (found != NULL ? found : NULL), NULL};
+        Abstract *args1[] = {
+            (Abstract *)s,
+            NULL
+        };
+        r |= Test(found != NULL, "Expect strings to not be NULL from key:$", args1);
+        Abstract *args2[] = {
+            (Abstract *)value,
+            (Abstract *)s,
+            (Abstract *)found,
+            NULL
+        };
         r |= Test(Equals((Abstract *)value, (Abstract *)found), 
-            "Expect strings to equal _t from key:_t found _t", args2);
+            "Expect strings to equal $ from key:@ found @", args2);
     }
 
     MemCh_Free(m);

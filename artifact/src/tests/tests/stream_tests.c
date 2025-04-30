@@ -6,16 +6,16 @@ status Stream_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
     Stream *sm = Stream_MakeStrVec(m);
     Str *s = Str_CstrRef(m, "Hello");
-    Stream_To(sm, s->bytes, s->length);
+    Stream_Bytes(sm, s->bytes, s->length);
 
     s = Str_CstrRef(m, ", it's really really really sunny outside!");
-    Stream_To(sm, s->bytes, s->length);
+    Stream_Bytes(sm, s->bytes, s->length);
 
     s = Str_CstrRef(m, " And I hear it's going to get even warmer up towards the top of the mountain. It's going to be a good climb, even thought it's really windy up there. Hiking at this time of year takes a lot of determination. Not becuase hiking is challenging, but because, it takes planning, and then a lot of steps, one foot in front of the other, to reach the peak.");
-    Stream_To(sm, s->bytes, s->length);
+    Stream_Bytes(sm, s->bytes, s->length);
 
     s = Str_CstrRef(m, "I'm bringing restaurant supply sourced dehydrated hashbrowns, and a sour-dough starter to make bread and breakfast in the mountains. All we need is cooking gas and stream water to eat like champtions on the wilderness :)");
-    Stream_To(sm, s->bytes, s->length);
+    Stream_Bytes(sm, s->bytes, s->length);
 
     char *cstr =  "Hello"
         ", it's really really really sunny outside!"

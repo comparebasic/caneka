@@ -10,9 +10,10 @@ Single *Single_Clone(MemCh *m, Abstract *og){
     return sg;
 }
 
-Single *Ptr_Wrapped(MemCh *m, void *ptr){
+Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_PTR;
+    sgl->objType.of = typeOf;
     sgl->val.ptr = ptr;
     return sgl;
 }

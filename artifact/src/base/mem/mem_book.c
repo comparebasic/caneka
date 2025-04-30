@@ -39,7 +39,7 @@ i32 MemBook_GetPageIdx(void *addr){
 #else
 void _insecureMemError(void *addr){
     Abstract *args[] = {
-        (Abstract *)Ptr_Wrapped(ErrStream->m, addr), 
+        (Abstract *)Ptr_Wrapped(ErrStream->m, addr, 0),
         NULL
     };
     Fatal(FUNCNAME, FILENAME, LINENUMBER, 

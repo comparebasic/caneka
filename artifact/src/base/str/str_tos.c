@@ -142,7 +142,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & DEBUG){
         i64 length = (i64)(curs->end - curs->ptr);
         i64 endPos = pos+length;
-        Single *val = Ptr_Wrapped(sm->m, curs->v);
+        Single *val = Ptr_Wrapped(sm->m, curs->v, 0);
         val->type.state |= DEBUG;
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(sm->m, pos),

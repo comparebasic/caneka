@@ -163,12 +163,12 @@ i32 main(int argc, char **argv){
 
     MemBook *cp = MemBook_Make(NULL);
     if(cp == NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
     }
 
     MemCh *m = MemCh_Make();
     if(m == NULL){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully", NULL);
     }
 
     Caneka_Init(m);

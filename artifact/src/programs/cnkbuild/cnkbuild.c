@@ -258,7 +258,6 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     Str_AddCstr(ctx->fields.steps.name, dir->name);
 
     sourceCstr = dir->sources;
-
     ctx->fields.steps.modCount->val.i++;
     while(*sourceCstr != NULL){
         Str_Trunc(source, sourceL);
@@ -273,6 +272,8 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         sourceCstr++;
     }
     ctx->fields.steps.count->val.i += ctx->fields.steps.modSrcTotal->val.i;
+    ctx->fields.steps.modSrcCount->val.i = 0;
+    CliStatus_Print(OutStream, ctx->cli);
     m->type.range--;
 
     DebugStack_Pop();

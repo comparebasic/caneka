@@ -8,32 +8,55 @@ status Str_Tests(MemCh *gm){
     s = Str_CstrRef(m, "Hi");
     status r = READY;
     cls type = TYPE_STR;
-    void *args1[] = { &type, s, NULL};
-    r |= Test(s->type.of == TYPE_STR, "Expect string to have fixed type _O found _o", args1);
+    Abstract *args1[] = {
+        (Abstract *)Type_ToStr(m, type),
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(s->type.of == TYPE_STR, "Expect string to have fixed type $ found @", args1);
     i32 two = 2;
-    void *args2[] = {&two, &s->length, NULL};
-    r |= Test(s->length == 2, "Expect string length of _i4 found _i4", args2);
-    void *args3[] = {"Hi", s, NULL};
-    r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of '_c' found '_t'", args3);
+    Abstract *args2[] = {
+        (Abstract *)I32_Wrapped(m, two),
+        (Abstract *)I32_Wrapped(m, s->length),
+        NULL
+    };
+    r |= Test(s->length == 2, "Expect string length of @ found @", args2);
+    Abstract *args3[] = {
+        (Abstract *)Str_CstrRef(m, "Hi"),
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of @ found @", args3);
 
     s = Str_CstrRef(m, longCstr);
     i32 ls_l = strlen(longCstr);
     
     cls typeOf = s->type.of;
-    void *args4[] = {&type, &typeOf, NULL};
+    Abstract *args4[] = {(Abstract *)Type_ToStr(m, type), (Abstract *)Type_ToStr(m, typeOf), NULL};
     r |= Test(s->type.of == TYPE_STR, 
-        "Expect string to have chain type _O found _o", args4);
-    void *args5[] = {&ls_l, &s->length, NULL};
-    r |= Test(s->length == ls_l, "Expect string length of _i4 found _i4", args5);
+        "Expect string to have chain type $ found $", args4);
+    Abstract *args5[] = {
+        (Abstract *)I32_Wrapped(m, ls_l),
+        (Abstract *)I16_Wrapped(m, s->length),
+        NULL
+    };
+    r |= Test(s->length == ls_l, "Expect string length of $ found $", args5);
 
     i64 value = 35072;
     s = Str_FromI64(m, value);
     Str *expected_is = Str_CstrRef(m, "35072");
-    void *args6[] = {&value, &expected_is->length, &s->length, NULL};
-    r |= Test(s->length == expected_is->length, "Expect for i32 value _i4  length of _i4 found _i4", args6);
-    void *args7[] = {&value, NULL};
-    r |= Test(Equals((Abstract *)s, (Abstract *)expected_is) == TRUE, "Expect string match of i32 of _i4 to string", args7);
-
+    Abstract *args6[] = {
+        (Abstract *)I32_Wrapped(m, value), 
+        (Abstract *)I16_Wrapped(m, expected_is->length), 
+        (Abstract *)I16_Wrapped(m, s->length),
+        NULL
+    };
+    r |= Test(s->length == expected_is->length, "Expect for i32 value $ length of $ found $", args6);
+    Abstract *args7[] = {
+        (Abstract *)I32_Wrapped(m, value), 
+        NULL
+    };
+    r |= Test(Equals((Abstract *)s, (Abstract *)expected_is) == TRUE, "Expect string match of i32 of $ to string", args7);
 
     char *cstr = "GET /path.html HTTP/1.1\r\n"
     "Host: localhost\r\n"
@@ -44,8 +67,12 @@ status Str_Tests(MemCh *gm){
 
     s = Str_CstrRef(m, cstr);
     i64 len = strlen(cstr);
-    void *args8[] = {&len, &s->length, NULL};
-    r |= Test(s->length == strlen(cstr), "Expect length _i8, have _i4", args8);
+    Abstract *args8[] = {
+        (Abstract *)I64_Wrapped(m, len),
+        (Abstract *)I16_Wrapped(m, s->length),
+        NULL
+    };
+    r |= Test(s->length == strlen(cstr), "Expect length $, have $", args8);
 
     MemCh_Free(m);
     return r;
@@ -60,19 +87,28 @@ status Str_EndMatchTests(MemCh *gm){
 
     match = ".c";
     s = Str_CstrRef(m, "file1.c");
-    void *args1[] = {s, NULL};
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.c' matches successfully, had '_t'", args1);
+    Abstract *args1[] = {
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.c' matches successfully, had @", args1);
 
     match = ".cnk";
     s = Str_CstrRef(m, "file1.cnk");
-    void *args2[] = {s, NULL};
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches successfully, had '_t'", args2);
+    Abstract *args2[] = {
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches successfully, had @", args2);
 
     match = ".c";
     s = Str_Clone(m, s, s->alloc);
     Str_Trunc(s, -2);
-    void *args3[] = {s , NULL};
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches \".c\" after String\\_Trunc successfully, had '_t'", args3);
+    Abstract *args3[] = {
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches \".c\" after String_Trunc successfully, had @", args3);
     /*
 
     match = "bork!";

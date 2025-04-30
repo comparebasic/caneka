@@ -22,7 +22,7 @@ i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & DEBUG){
         Single *wid = I64_Wrapped(sm->m, h->id);
         wid->type.state |= FMT_TYPE_BITS;
-        Single *val = Ptr_Wrapped(sm->m, h->value);
+        Single *val = Ptr_Wrapped(sm->m, h->value, 0);
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, h->idx), 
             (Abstract *)wid, 
@@ -32,7 +32,7 @@ i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
         };
         return Fmt(sm, "H<$ $/$ -> $>", args);
     }else if(flags & MORE){
-        Single *val = Ptr_Wrapped(sm->m, h->value);
+        Single *val = Ptr_Wrapped(sm->m, h->value, 0);
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, h->idx), 
             h->item, 
@@ -55,7 +55,7 @@ i64 Lookup_Print(Stream *sm, Abstract *a, cls type, word flags){
         Iter_Init(&it, lk->values);
         while((Iter_Next(&it) & END) == 0){
             if(it.value != NULL){
-                Single *val = Ptr_Wrapped(sm->m, it.value);
+                Single *val = Ptr_Wrapped(sm->m, it.value, 0);
                 val->type.state |= DEBUG;
                 Abstract *args[] = {
                     (Abstract *)I32_Wrapped(sm->m, it.idx),

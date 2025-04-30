@@ -36,6 +36,7 @@ status MemCh_Tests(MemCh *gm){
     r |= Test(m->it.span->nvalues == 6, "Six slabs registered, have $", args1);
 
     MemCh_Free(m);
+    m->type.range--;
     Abstract *args2[] = {
         (Abstract *)I32_Wrapped(m, m->it.span->nvalues),
         NULL
@@ -49,6 +50,7 @@ status MemCh_Tests(MemCh *gm){
         r |= Test(cp->recycled.span->nvalues == recycled+3,
             "Two additional slabs registered in chapter, have $", args3);
     }
+    m->type.range++;
 
 #ifdef INSECURE
     pageIdx = MemBook_GetPageIdx(m);

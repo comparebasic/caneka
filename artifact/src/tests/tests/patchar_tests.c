@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status comparePat(Str *label, PatCharDef *pat, PatCharDef *expected){
+static status comparePat(MemCh *m, Str *label, PatCharDef *pat, PatCharDef *expected){
     status r = READY;
     boolean matches = TRUE;
     PatCharDef *p = pat;
@@ -18,12 +18,20 @@ static status comparePat(Str *label, PatCharDef *pat, PatCharDef *expected){
         e++;
     }
 
-    void *args[] = {label, pat, (void *)((i64)TYPE_PATCHARDEF), expected, (void *)((i64)TYPE_PATCHARDEF), NULL};
-    r |= Test(matches, "PatChar _t matches _T vs _T", args);
+    Abstract *args[] = {
+        (Abstract *)label,
+        (Abstract *)Ptr_Wrapped(m, pat, TYPE_PATCHARDEF),
+        (Abstract *)Ptr_Wrapped(m, expected, TYPE_PATCHARDEF),
+        NULL
+    };
+    r |= Test(matches, "PatChar $ matches @ vs @", args);
     if(e->flags != PAT_END){
-        void *args[] = {label, NULL};
+        Abstract *args[] = {
+            (Abstract *)label,
+            NULL
+        };
         r |= Test((e->flags == PAT_END),
-            "PatChar _t end reached", args);
+            "PatChar $ end reached", args);
     }
     return r;
 }
@@ -47,14 +55,14 @@ status PatChar_Tests(MemCh *gm){
         {PAT_TERM, 'T', 'T'},
         {PAT_END, 0, 0}
     };
-    r |= comparePat(Str_CstrRef(m, "basic pattern"), pat, patExpected);
+    r |= comparePat(m, Str_CstrRef(m, "basic pattern"), pat, patExpected);
 
     PatCharDef koExpected[] = {
         {PAT_KO|PAT_KO_TERM, '\r', '\r'},
         {PAT_KO|PAT_KO_TERM, '\n', '\n'},
         {PAT_END, 0, 0}
     };
-    r |= comparePat(Str_CstrRef(m, "ko pattern"), ko, koExpected);
+    r |= comparePat(m, Str_CstrRef(m, "ko pattern"), ko, koExpected);
 
     PatCharDef longExpected[] = {
         {PAT_TERM, 'O', 'O'},
@@ -68,7 +76,7 @@ status PatChar_Tests(MemCh *gm){
         {PAT_TERM, 'o', 'o'},
         {PAT_END, 0, 0}
     };
-    r |= comparePat(Str_CstrRef(m, "long vec pattern"), longPat, longExpected);
+    r |= comparePat(m, Str_CstrRef(m, "long vec pattern"), longPat, longExpected);
 
     MemCh_Free(m);
     DebugStack_Pop();

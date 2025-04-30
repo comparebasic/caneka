@@ -1,5 +1,6 @@
 typedef struct single  {
     Type type;
+    Type objType;
     union {
         byte b;
         word w;
@@ -12,7 +13,7 @@ typedef struct single  {
 } Single;
 
 Single *Single_Clone(MemCh *m, Abstract *og);
-Single *Ptr_Wrapped(MemCh *m, void *ptr);
+Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf);
 Single *Bool_Wrapped(MemCh *m, int n);
 Single *Do_Wrapped(MemCh *m, DoFunc dof);
 Single *Maker_Wrapped(MemCh *m, Maker mk);

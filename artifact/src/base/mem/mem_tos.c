@@ -152,10 +152,10 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
                 }
                 Abstract *args[] = {
                     (Abstract *)I32_Wrapped(sm->m, i),
-                    (Abstract *)Ptr_Wrapped(sm->m, ptr),
+                    (Abstract *)Ptr_Wrapped(sm->m, ptr, 0),
                     (Abstract *)I32_Wrapped(sm->m, delta),
                     (Abstract *)I32_Wrapped(sm->m, it->stackIdx[i]),
-                    (Abstract *)Ptr_Wrapped(sm->m, it->stack[i]), 
+                    (Abstract *)Ptr_Wrapped(sm->m, it->stack[i], 0), 
                     NULL
                 };
                 total += Fmt(sm, "  $: $+$/$ = $\n", args);

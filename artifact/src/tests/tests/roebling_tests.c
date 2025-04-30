@@ -88,8 +88,11 @@ status Roebling_Tests(MemCh *gm){
     Single *dof = (Single *)as(Span_Get(rbl->parseIt.span, 0), TYPE_WRAPPED_DO);
     ((RblFunc)dof->val.dof)(rbl->m, rbl);
 
-    void *args[] = {&rbl->matchIt.span->nvalues , NULL};
-    r |= Test(rbl->matchIt.span->nvalues == 4, "Roebling has four match values loaded up, have _i4", args);
+    Abstract *args[] = {
+        (Abstract *)I32_Wrapped(m, rbl->matchIt.span->nvalues),
+        NULL
+    };
+    r |= Test(rbl->matchIt.span->nvalues == 4, "Roebling has four match values loaded up, have $", args);
 
     MemCh_Free(m);
     return r;
@@ -114,27 +117,40 @@ status RoeblingRun_Tests(MemCh *gm){
     Cursor_Add(curs, s);
     Roebling_RunCycle(rbl);
 
-    void *args[] = {rbl, NULL};
-
+    Abstract *args[] = {
+        (Abstract *)rbl,
+        NULL
+    };
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
     Match *mt = Roebling_GetMatch(rbl);
 
     v = StrVec_Snip(rbl->m, mt->backlog, curs);
     s = Str_CstrRef(m, "TWO");
-    void *args1[] = {s, v, NULL};
-    r |= Test(Equals((Abstract *)v, (Abstract *)s), "Content equals expected '_D', have _D", args1);
+    Abstract *args1[] = {
+        (Abstract *)s,
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)s), "Content equals expected '@', have @", args1);
     i32 idx = Roebling_GetMatchIdx(rbl);
-    void *args2[] = {&idx, NULL};
-    r |= Test(idx = 1, "Match Idx equals expected, have _i4", args2);
+    Abstract *args2[] = {
+        (Abstract *)I32_Wrapped(m, idx),
+        NULL
+    };
+    r |= Test(idx = 1, "Match Idx equals expected, have $", args2);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
     v = StrVec_Snip(rbl->m, mt->backlog, curs);
 
     s = Str_CstrRef(m, "for the weekend");
-    void *args3[] = {s, v, NULL};
+    Abstract *args3[] = {
+        (Abstract *)s,
+        (Abstract *)v,
+        NULL
+    };
     r |= Test(Equals((Abstract *)v, (Abstract *)s),
-        "Roebling has captured the rest of the line, expected '_d', have '_D'", args3);
+        "Roebling has captured the rest of the line, expected '$', have '@'", args3);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
 
     Roebling_RunCycle(rbl);
