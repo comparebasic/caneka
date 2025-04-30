@@ -83,7 +83,7 @@ int DebugStack_Print(){
                 (Abstract *)I32_Wrapped(ErrStream->m, entry->line),
                 NULL,
             };
-            Out("    ^Dy.$^d. - $:$^0 ", args);
+            Fmt(ErrStream, "    ^Dy.$^d. - $:$^0 ", args);
             Abstract *args2[] = {entry->ref, NULL};
             if(entry->ref != NULL && entry->typeOf != 0){
                 Out("^y$^0", args2);

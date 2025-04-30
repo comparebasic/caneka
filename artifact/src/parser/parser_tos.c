@@ -28,22 +28,22 @@ static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, "$", args);
     } else if(pat->to == pat->from){
-        Str *from = Str_Ref(m, (byte *)&pat->from, 1, 1, DEBUG);
+        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
         Abstract *args[] = {
-            fl,
-            from,
-            ending,
+            (Abstract *)fl,
+            (Abstract *)from,
+            (Abstract *)ending,
             NULL
         };
         total += Fmt(sm, "$^D.$^d.$", args);
     }else{
-        Str *from = Str_Ref(m, (byte *)&pat->from, 1, 1, DEBUG);
-        Str *to = Str_Ref(m, (byte *)&pat->to, 1, 1, DEBUG);
+        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
+        Str *to = Str_Ref(sm->m, (byte *)&pat->to, 1, 1, DEBUG);
         Abstract *args[] = {
-            fl,
-            from,
-            to,
-            ending,
+            (Abstract *)fl,
+            (Abstract *)from,
+            (Abstract *)to,
+            (Abstract *)ending,
             NULL
         };
         total += Fmt(sm, "$^D.$-$^d.$", args);
@@ -59,11 +59,11 @@ static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
     i64 total = 0;
     if(flags & DEBUG){
-        total += StrVec_Fmt(sm, "P<", NULL);
+        total += Fmt(sm, "P<", NULL);
     }
-    total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
+    total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
     if(flags & DEBUG){
-        total += StrVec_Fmt(sm, ">", NULL);
+        total += Fmt(sm, ">", NULL);
     }
     return total;
 }
@@ -74,13 +74,13 @@ static i64 PatCharDef_Print(Stream *sm, Abstract *a, cls type, word flags){
         return ToStream_NotImpl(sm, a, type, flags);
     }
     i64 total = 0;
-    total += StrVec_Fmt(sm, "Pat<", NULL);
+    total += Fmt(sm, "Pat<", NULL);
     while(pat->flags != PAT_END){
-        total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
+        total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
         pat++;
     }
-    total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, extended);
-    total += StrVec_Fmt(sm, ">", NULL);
+    total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
+    total += Fmt(sm, ">", NULL);
     return total;
 }
 
@@ -90,13 +90,13 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, word flags){
         return ToStream_NotImpl(sm, a, type, flags);
     }
     i64 total = 0;
-    total += StrVec_Fmt(sm, "Sns<", NULL);
+    total += Fmt(sm, "Sns<", NULL);
     Iter it;
     Iter_Init(&it, sns);
     while((Iter_Next(&it) & END) == 0){
         Snip *sn = (Snip *)it.value; 
-        Str *fl = Str_Make(m, FLAG_DEBUG_MAX+1);
-        Str_AddFlags(fl, pat->flags, snipChars); 
+        Str *fl = Str_Make(sm->m, FLAG_DEBUG_MAX+1);
+        Str_AddFlags(fl, sn->type.state, snipChars); 
         Abstract *args[] = {
             (Abstract *)fl,
             (Abstract *)I32_Wrapped(sm->m, sn->length), 
@@ -111,31 +111,39 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
-void Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
     DebugStack_Push(NULL, 0);
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(sm, a, type, flags);
     }
     i64 total = 0;
-    void *args1[] = {
-        State_ToStr(_debugM, rbl->type.state),
-        &rbl->parseIt.idx,
-        rbl->parseIt.value,
+    Abstract *args1[] = {
+        (Abstract *)State_ToStr(sm->m, rbl->type.state),
+        (Abstract *)I32_Wrapped(sm->m, rbl->parseIt.idx),
+        (Abstract *)rbl->parseIt.value,
         NULL
     };
-    total += StrVec_Fmt(sm, "Rbl<_t idx:_i4/_D\n", args1);
-    void *args2[] = {rbl->parseIt.span, NULL};
-    total += StrVec_Fmt(sm, "  parsers:_D\n", args2);
-    void *args3[] = {rbl->matchIt.span, NULL};
-    total += StrVec_Fmt(sm, "  matches:_D\n", args3);
-    void *args4[] = {rbl->marks, NULL};
-    total += StrVec_Fmt(sm, "  marks:_D\n", args4);
-    void *args5[] = {rbl->curs, NULL};
-    total += StrVec_Fmt(sm, "  curs:_D\n", args5);
-    total += StrVec_Fmt(sm, ">", NULL);
+    total += Fmt(sm, "Rbl<$ idx:$/@\n", args1);
+    Abstract *args2[] = {
+        (Abstract *)rbl->parseIt.span, NULL
+    };
+    total += Fmt(sm, "  parsers:@\n", args2);
+    Abstract *args3[] = {
+        (Abstract *)rbl->matchIt.span, NULL
+    };
+    total += Fmt(sm, "  matches:@\n", args3);
+    Abstract *args4[] = {
+        (Abstract *)rbl->marks, NULL
+    };
+    total += Fmt(sm, "  marks:@\n", args4);
+    Abstract *args5[] = {
+        (Abstract *)rbl->curs, NULL
+    };
+    total += Fmt(sm, "  curs:@\n", args5);
+    total += Fmt(sm, ">", NULL);
     DebugStack_Pop();
-    return;
+    return total;
 }
 
 i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -144,24 +152,28 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
         return ToStream_NotImpl(sm, a, type, flags);
     }
     i64 total = 0;
-    void *args[] = {State_ToStr(_debugM, mt->type.state), NULL};
-    total += StrVec_Fmt(sm, "Mt<_t ", args);
+    Abstract *args[] = {
+        (Abstract *)State_ToStr(_debugM, mt->type.state),
+        NULL
+    };
+    total += Fmt(sm, "Mt<_t ", args);
 
     if(flags & DEBUG){
         PatCharDef *pd = mt->pat.startDef;
         while(pd->flags != PAT_END){
-            char *color = "p.";
+            char *_color = "p.";
             if(pd == mt->pat.curDef){
-                color = "y.";
+                _color = "y.";
             }
-            void *args[] = {color, pd, (void *)((i64)TYPE_PATCHAR), NULL};
-            Out("_^_T", args);
+            Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
+            total += Stream_Bytes(sm, color->bytes, color->length); 
+            total += ToS(sm, (Abstract *)pd, TYPE_PATCHAR, flags); 
             pd++;
         }
-        StrVec_Fmt(sm, "^d", NULL);
+        Fmt(sm, "^d", NULL);
     }
 
-    total += StrVec_Fmt(sm, "^p.>", NULL);
+    total += Fmt(sm, "^p.>", NULL);
     return total;
 }
 

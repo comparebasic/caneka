@@ -11,12 +11,11 @@ static status renderStatus(MemCh *m, Abstract *a){
     i32 progress = (i32)_progress;
     ctx->fields.steps.barStart->length = progress;
 
-    i32 remainingModSrc = ctx->fields.steps.modSrcTotal->val.i - ctx->fields.steps.modSrcCount->val.i;
-    _progress = ((float)ctx->cli->cols) * ((float)remainingModSrc)/((float)ctx->fields.steps.total->val.i);
+    _progress = ((float)ctx->cli->cols) * ((float)ctx->fields.steps.modSrcCount->val.i)/((float)ctx->fields.steps.total->val.i);
     progress = (i32)_progress;
     ctx->fields.steps.barEnd->length = progress;
 
-    Single *sg = (Single *)as(CliStatus_GetByKey(m, cli, Str_CstrRef(m, "memCount")), TYPE_WRAPPED_I64);
+    Single *sg = (Single *)as(CliStatus_GetByKey(m, cli, Str_CstrRef(m, "memCount")), TYPE_WRAPPED_MEMCOUNT);
     sg->val.value = MemCount(0);
      
     return SUCCESS;
@@ -27,7 +26,16 @@ static status setupStatus(BuildCtx *ctx){
     MemCh *m = ctx->m;
     memset(&ctx->fields, 0, sizeof(ctx->fields));
     ctx->fields.steps.total = I32_Wrapped(m, 0);
+    ctx->fields.steps.count = I32_Wrapped(m, 0);
+    ctx->fields.steps.modSrcCount = I32_Wrapped(m, 0);
+    ctx->fields.steps.modSrcTotal = I32_Wrapped(m, 0);
+    ctx->fields.steps.modCount = I32_Wrapped(m, 0);
+    ctx->fields.steps.modTotal = I32_Wrapped(m, 0);
     ctx->fields.steps.name = Str_Make(m, STR_DEFAULT);
+    ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
+    ctx->fields.current.dest = Str_Make(m, STR_DEFAULT);
+    ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
+
 
     BuildSubdir **dir = ctx->objdirs;
     while(*dir != NULL){
@@ -40,8 +48,6 @@ static status setupStatus(BuildCtx *ctx){
     }
 
     dir = ctx->objdirs;
-    ctx->fields.steps.modCount = I32_Wrapped(m, 0);
-    ctx->fields.steps.modTotal = I32_Wrapped(m, 0);
     while(*dir != NULL){
         ctx->fields.steps.modTotal->val.i++;
         dir++;
@@ -68,7 +74,9 @@ static status setupStatus(BuildCtx *ctx){
 
     ctx->fields.steps.barStart = Str_Make(m, width);
     memset(ctx->fields.steps.barStart->bytes, ' ', width);
+    ctx->fields.steps.barStart->length = width;
     ctx->fields.steps.barEnd = Str_Clone(m, ctx->fields.steps.barStart, width);
+    ctx->fields.steps.barStart->length = 0;
     
     arr = Arr_Make(m, 2);
     arr[0] = (Abstract *)ctx->fields.steps.barStart; 
@@ -156,7 +164,6 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     Span *cmd = Span_Make(m);
     ProcDets pd;
 
-    ctx->fields.steps.count->val.i++;
     ctx->fields.steps.modSrcCount->val.i++;
     if(File_CmpUpdated(m, source, dest, NULL)){
         Str_Reset(ctx->fields.current.action);
@@ -225,7 +232,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     Str *source = ctx->fields.current.source;
     Str_Reset(source);
     Str *_source = File_GetAbsPath(m, Str_CstrRef(m, ctx->src));
-    Str_Add(source, _source->bytes, source->length);
+    Str_Add(source, _source->bytes, _source->length);
     Str_AddCstr(source, "/");
     Str_AddCstr(source, dir->name);
     Str_AddCstr(source, "/");
@@ -239,16 +246,20 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
 
     m->type.range++;
 
-    ctx->fields.steps.modSrcCount = 0;
-    ctx->fields.steps.modSrcTotal = 0;
+    ctx->fields.steps.modSrcCount->val.i = 0;
+    ctx->fields.steps.modSrcTotal->val.i = 0;
     char **sourceCstr = dir->sources;
     while(*sourceCstr != NULL){
-        ctx->fields.steps.modSrcTotal++;
+        ctx->fields.steps.modSrcTotal->val.i++;
         sourceCstr++;
     }
 
+    Str_Reset(ctx->fields.steps.name);
+    Str_AddCstr(ctx->fields.steps.name, dir->name);
+
     sourceCstr = dir->sources;
 
+    ctx->fields.steps.modCount->val.i++;
     while(*sourceCstr != NULL){
         Str_Trunc(source, sourceL);
         Str_AddCstr(source, *sourceCstr);
@@ -261,6 +272,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         MemCh_Free(m);
         sourceCstr++;
     }
+    ctx->fields.steps.count->val.i += ctx->fields.steps.modSrcTotal->val.i;
     m->type.range--;
 
     DebugStack_Pop();
@@ -290,7 +302,6 @@ static status build(BuildCtx *ctx){
     BuildSubdir **dir = ctx->objdirs;
     while(*dir != NULL){
         r |= buildDirToLib(ctx, libDir, lib, *dir);
-        ctx->fields.steps.modCount++;
         dir++;
     }
     CliStatus_PrintFinish(OutStream, ctx->cli);

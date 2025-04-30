@@ -39,8 +39,8 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     Stream_Bytes(sm, (byte *)start, length);
                     total += length;
                }
-               start = ptr+1;
             }
+            start = ptr+1;
 
             Abstract *a = *(args++);
             if(a->type.of == TYPE_STR){
@@ -63,6 +63,15 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             state = SUCCESS; 
             goto next;
         }else if(c == '^'){
+            if(start != ptr){
+               word length = (word)(ptr - start);
+               if(length > 0){
+                    Stream_Bytes(sm, (byte *)start, length);
+                    total += length;
+               }
+            }
+            start = ptr+1;
+
             ptr++;
             Str *s = Str_FromAnsi(m, &ptr, end);
             Stream_Bytes(sm, s->bytes, s->length);

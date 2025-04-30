@@ -66,12 +66,9 @@ char *Str_Cstr(MemCh *m, Str *s){
 }
 
 Str *Str_Clone(MemCh *m, Str *s, word alloc){
-    if(alloc < s->length){
-        return NULL;
-    }
     Str *ret = MemCh_Alloc(m, sizeof(Str));
-    byte *_bytes = MemCh_Alloc(m, alloc);
-    memcpy(_bytes, s->bytes, s->length);
+    byte *_bytes = MemCh_Alloc(m, (size_t)alloc);
+    memcpy(_bytes, s->bytes, min(s->length, alloc));
     Str_Init(ret, _bytes, s->length, alloc);
     return ret;
 }
