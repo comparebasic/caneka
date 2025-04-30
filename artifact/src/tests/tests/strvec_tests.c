@@ -69,21 +69,40 @@ status StrVec_Tests(MemCh *gm){
     StrVec_Add(vc, Str_CstrRef(m, "hi dude"));
     StrVec_Add(vc, Str_CstrRef(m, ", what a wild ride!"));
     Str *s = Str_CstrRef(m, "hi dude, what a wild ride!");
-    void *args1[] = {vc, s, NULL};
-    r |= Test(Equals((Abstract *)vc, (Abstract *)s), "Testing StrVec and Str '_+' vs '_t'", args1);
+    Abstract *args1[] = {
+        (Abstract *)vc,
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)vc, (Abstract *)s), "Testing StrVec and Str '$' vs '$'", args1);
     StrVec *vr = StrVec_ReAlign(m, vc);
-    void *args2[] = {vr, s, NULL};
-    r |= Test(Equals((Abstract *)vr, (Abstract *)s), "Testing ReAligned StrVec and Str '_+' vs '_t'", args2);
+    Abstract *args2[] = {
+        (Abstract *)vr,
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)vr, (Abstract *)s), "Testing ReAligned StrVec and Str '$' vs '$'", args2);
 
     Str *st = Str_CstrRef(m, "time");
     Str *sa = Str_CstrRef(m, "afterwards");
     Str *sf = Str_CstrRef(m, "four");
+    Str *sf2 = Str_Clone(m, sf, sf->length);
+    sf2->type.state |= DEBUG;
     char *cstr = ", all alone";
     Stream *sm = Stream_MakeStrVec(m);
     i32 twentyNine = 29;
     i64 fiveK = 5987263;
-    void *args3[] = {st, sa, (void *)((i64)TYPE_STR), sf, sf, &twentyNine, &fiveK, vc, NULL};
-    StrVec_Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '_t' '_T' _d _D _i4 _i8 _+", args3);
+    Abstract *args3[] = {
+        (Abstract *)st,
+        (Abstract *)sa,
+        (Abstract *)sf,
+        (Abstract *)sf2,
+        (Abstract *)I32_Wrapped(m, twentyNine),
+        (Abstract *)I64_Wrapped(m, fiveK),
+        (Abstract *)vc,
+        NULL
+    };
+    Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ @ $ $ $", args3);
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");
 

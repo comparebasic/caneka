@@ -199,3 +199,8 @@ char *Type_ToChars(cls type){
         return "TYPE_unknown";
     }
 }
+
+Str *Type_ToStr(MemCh *m, cls type){
+    char *cstr = Type_ToChars(type);
+    return Str_CstrRef(m, cstr);
+}
