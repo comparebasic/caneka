@@ -13,8 +13,14 @@ status Hash_Tests(MemCh *gm){
 
     h = Get_Hash((Abstract *)s);
     expected = 4291084750259606489;
-    void *args1[] = {&expected, &expected, &h, &h, NULL};
-    r = Test(h == expected, "Expected hash to equal _i8/_b8, found: _i8/_b8", args1);
+    Abstract *args1[] = {
+        (Abstract *)Str_Ref(m, &expected, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
+        (Abstract *)I64_Wrapped(m, expected),
+        (Abstract *)Str_Ref(m, &h, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
+        (Abstract *)I64_Wrapped(m, h),
+        NULL
+    };
+    r = Test(h == expected, "Expected hash to equal @/$, found: @/$", args1);
 
     int x;
     /*
