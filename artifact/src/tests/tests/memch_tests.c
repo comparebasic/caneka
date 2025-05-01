@@ -85,10 +85,14 @@ status MemCh_Tests(MemCh *gm){
     }
 
     m->type.range--;
+    printf("memRange: %d\n", (i32)m->type.range);
     MemCh_Free(m);
     if(cp != NULL){
+        Single sg;
+        sg.type.of = TYPE_WRAPPED_I32;
+        sg.val.i = cp->recycled.span->nvalues;
         Abstract *args7[] = {
-            (Abstract *)I32_Wrapped(m, cp->recycled.span->nvalues),
+            (Abstract *)&sg,
             NULL
         };
         r |= Test(cp->recycled.span->nvalues == recycled+6,

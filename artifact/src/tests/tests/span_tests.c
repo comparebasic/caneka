@@ -205,13 +205,13 @@ status Span_Tests(MemCh *gm){
         (Abstract *)Type_ToStr(m, s->type.of),
         NULL
     };
-    r |= Test(s->type.of == s512->type.of, "Span item 512 has type string _c found _c", args22);
+    r |= Test(s->type.of == s512->type.of, "Span item 512 has type string $ found $", args22);
     Abstract *args23[] = {
         (Abstract *)s512,
         (Abstract *)s,
         NULL
     };
-    r |= Test(Equals((Abstract *)s512, (Abstract *)s), "String 512 equals '_t' found '_t'", args23);
+    r |= Test(Equals((Abstract *)s512, (Abstract *)s), "String 512 equals @ found @", args23);
 
     s = (Str *)Span_Get(p, 4078);
     Abstract *args24[] = {
@@ -219,13 +219,13 @@ status Span_Tests(MemCh *gm){
         (Abstract *)Type_ToStr(m, s->type.of),
         NULL
     };
-    r |= Test(s->type.of == s4079->type.of, "Span item 4079 has type string _c found _c", args24);
+    r |= Test(s->type.of == s4079->type.of, "Span item 4079 has type string $ found $", args24);
     Abstract *args25[] = {
         (Abstract *)s4079,
         (Abstract *)s,
         NULL
     };
-    r |= Test(Equals((Abstract *)s4079, (Abstract *)s), "String 4079 equals '_t' found '_t'", args25);
+    r |= Test(Equals((Abstract *)s4079, (Abstract *)s), "String 4079 equals @ found @", args25);
 
     s = (Str *)Span_Get(p, 512);
     Abstract *args26[] = {
@@ -233,13 +233,13 @@ status Span_Tests(MemCh *gm){
         (Abstract *)Type_ToStr(m, s->type.of),
         NULL
     };
-    r |= Test(s->type.of == s513->type.of, "Span item 513 has type string _c found _c", args26);
+    r |= Test(s->type.of == s513->type.of, "Span item 513 has type string $ found $", args26);
     Abstract *args27[] = {
         (Abstract *)s513,
         (Abstract *)s,
         NULL
     };
-    r |= Test(Equals((Abstract *)s513, (Abstract *)s), "String 513 equals '_t' found '_t'", args27);
+    r |= Test(Equals((Abstract *)s513, (Abstract *)s), "String 513 equals @ found @", args27);
 
     /* raw tests 
     p = Span_Make(m);
