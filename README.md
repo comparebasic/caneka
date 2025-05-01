@@ -32,23 +32,6 @@ Currently the system builds and runs on FreeBSD and Linux, and is expected to
 build on any POSIX compatible operating system, including Mac, Windows, iOS,
 and Android, though these platforms are untested.
 
-## Tests
-
-Tests can be found in the `tests` folder and are runnable from the `caneka`
-binary with the argument `test`.
-
-## Run Tests
-
-Tests can be run using the following command
-
-    ./build/caneka test
-
-## Run Network Server
-
-For example, on port 8000
-
-    ./build/caneka serve=port:8000 
-
 ## Folder Layout
 
 Because Caneka is intended to be written in another syntax and transpiled into
