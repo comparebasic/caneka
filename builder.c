@@ -54,6 +54,35 @@ static char *runTestsCoreCmd[] = {
     NULL
 };
 
+static void showMsg(char *name, char **sources){
+    printf("%s", name);
+    char **p = sources;
+    printf("...\n");
+    fflush(stdout);
+}
+
+static void successMsg(char *name, char **sources){
+    printf("\r\x1b[1A\x1b[0K");
+    printf("%s", name);
+    char **p = sources;
+    printf("... \x1b[32mdone\n");
+    printf("\x1b[0m");
+    fflush(stdout);
+}
+
+static void failureMsg(char *name, char **sources){
+    printf("\r\x1b[0K\x1b[31m");
+    printf("%s:", name);
+    char **p = sources;
+    while(*p != NULL){
+        printf(" %s", *p++);
+    }
+    printf("... error\n");
+    printf("\x1b[0m");
+    fflush(stdout);
+}
+
+
 static state process(Proc *pd){
     pid_t child, p;
 
@@ -128,21 +157,15 @@ static state enqueue(Proc *pd){
 }
 
 static state run(char *name, char **sources){
-    printf("%s:", name);
-    char **p = sources;
-    while(*p != NULL){
-        printf(" %s", *p++);
-    }
-    printf("... ");
-
+    showMsg(name, sources);
     Proc pd = {0, -1, sources, -1};
     while((enqueue(&pd) & (SUCCESS|ERROR)) == 0){ delay(); }
     while((procStatus(&pd) & (SUCCESS|ERROR)) == 0){ delay(); }
     list[pd.idx] = NULL;
     if(pd.code == 0){
-        printf("done\n");
+        successMsg(name, sources);
     }else{
-        printf("Error building %s\n", name);
+        failureMsg(name, sources);
         exit(1);
     }
     return SUCCESS;
