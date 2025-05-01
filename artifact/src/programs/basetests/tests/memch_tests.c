@@ -23,18 +23,19 @@ status MemCh_Tests(MemCh *gm){
     }
 
     m->type.range++;
+    m->it.span->type.state |= DEBUG;
     for(i64 i = 0; i < max; i++){
         i64 *p = MemCh_Alloc(m, sizeof(i64));
         memcpy(p, &i, sizeof(i64));
     }
 
-    r |= Test(m->it.span->nvalues == 6, "Six slabs registered");
+    r |= Test(m->it.span->nvalues == 6, "Six slabs registered, have _i4", m->it.span->nvalues);
     if(cp != NULL){
         r |= Test(cp->it.span->nvalues == count+5, "Five additional slabs registered in chapter, have %d", cp->it.span->nvalues);
     }
 
     MemCh_Free(m);
-    r |= Test(m->it.span->nvalues == 3, "Three slabs registered, after temp wipe");
+    r |= Test(m->it.span->nvalues == 3, "Three slabs registered, after temp wipe have, _i4", m->it.span->nvalues);
     if(cp != NULL){
         r |= Test(cp->it.span->nvalues == count+2, "Two additional slabs registered in chapter, have", cp->it.span->nvalues);
     }

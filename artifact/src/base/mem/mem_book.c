@@ -133,7 +133,6 @@ MemBook *MemBook_Make(MemBook *prev){
     book->type.of = TYPE_BOOK;
     
     MemCh_Setup(&book->m, sl);
-    MemCh_ReserveSpanExpand(&book->m, sl, 0);
 
     book->start = start;
     mrange->book = book;

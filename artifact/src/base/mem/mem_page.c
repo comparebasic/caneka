@@ -12,11 +12,6 @@ MemPage *MemPage_Attach(MemCh *m, i16 level){
     MemPage *pg = MemPage_Make(m, level);
     i32 idx = m->it.span->max_idx+1;
 
-    if(_increments[m->it.span->dims+1] < (m->it.span->nvalues+1)){
-        MemCh_Expand(m);
-        MemCh_ReserveSpanExpand(m, pg, idx);
-    }
-
     Span_Set(m->it.span, idx, (Abstract *)pg);
     return pg;
 }

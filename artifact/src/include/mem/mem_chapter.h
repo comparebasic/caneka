@@ -16,7 +16,6 @@ i64 MemCh_Used(MemCh *m);
 MemCh *MemCh_OnPage();
 status MemCh_Setup(MemCh *m, MemPage *sl);
 void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx);
-status MemCh_Expand(MemCh *m);
 i64 MemCh_MemCount(MemCh *m, i16 level);
 i64 MemCh_Total(MemCh *m, i16 level);
 #define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range));

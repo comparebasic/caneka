@@ -74,6 +74,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
         if(set->func != NULL){
             m->type.range++;
             _debugM->type.range++;
+            printf(">>> about to run\n");
             r = set->func(m);
             MemCh_Free(m);
             MemCh_Free(_debugM);
