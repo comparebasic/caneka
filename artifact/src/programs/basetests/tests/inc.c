@@ -5,11 +5,11 @@
 #include "../mock_109strings.c"
 
 #include "core_tests.c"
+#include "memctx_tests.c"
+#include "span_tests.c"
 /*
 #include "hash_tests.c"
 #include "inc.c"
-#include "memctx_tests.c"
-#include "span_tests.c"
 #include "string_tests.c"
 #include "strvec_tests.c"
 */
@@ -33,7 +33,25 @@ static TestSet _Tests[] = {
         "Initializing core system tests",
         FEATURE_COMPLETE,
     },
+    {
+        "MemCtx Tests",
+        MemCtx_Tests,
+        "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Span",
+        Span_Tests,
+        "Span is the basic data structure for sequential or logorithmic storage access.",
+        FEATURE_COMPLETE,
+    },
     /*
+    {
+        "StrVec",
+        StrVec_Tests,
+        "Testing String Vectors",
+        FEATURE_COMPLETE,
+    },
     {
         "String",
         String_Tests,
@@ -56,12 +74,6 @@ static TestSet _Tests[] = {
         "Span",
         Span_Tests,
         "Span is the basic data structure for sequential or logorithmic storage access.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "MemCtx Tests",
-        MemCtx_Tests,
-        "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
         FEATURE_COMPLETE,
     },
     {

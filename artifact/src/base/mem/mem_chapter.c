@@ -142,6 +142,9 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
 
     Iter_InitReverse(&m->it, &m->p);
     while((Iter_Next(&m->it) & END) == 0){
+        if(m->it.idx == 0){
+            continue;
+        }
         MemSlab *sl = (MemSlab *)Iter_Get(&m->it);
         if(sl != NULL && (level == 0 || sl->level >= level)){
             if(m->it.idx > 0){
@@ -160,7 +163,12 @@ status MemCtx_FreeTemp(MemCtx *m, i16 level){
 }
 
 status MemCtx_Free(MemCtx *m){
-    return MemCtx_FreeTemp(m, max(m->type.range, 0));
+    status r = MemCtx_FreeTemp(m, max(m->type.range, 0));
+    if(m->type.range == 0){
+        MemSlab *sl = Span_Get(&m->p, 0);
+        return MemBook_FreeSlab(m, sl);
+    }
+    return r;
 }
 
 /* utils */

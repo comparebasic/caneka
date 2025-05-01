@@ -19,6 +19,7 @@ i64 Str_Add(Str *s, byte *b, i64 length){
     i64 len = min(s->alloc - s->length, length);
     if(len > 0){
         memcpy(s->bytes+s->length, b, len);
+        s->length += len;
     }
     if(length != len){
         s->type.state |= ERROR;

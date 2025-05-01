@@ -33,11 +33,11 @@ status Test(boolean condition, char *fmt, ...){
         return condition ? SUCCESS : ERROR;
     }else{
         if(!condition){
-            Out(_debugM, "^rFail: ");
+            Out(_debugM, "^r.Fail: ");
         }else{
-            Out(_debugM, "^gPass: ");
+            Out(_debugM, "^g.Pass: ");
         }
-        Out(_debugM, "_c:_+", condition ? "pass" : "fail");
+        Out(_debugM, "_+^0\n",  v);
         return condition ? SUCCESS : ERROR;
     }
 }
@@ -52,46 +52,22 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
 
     word baseStackLevel = m->type.range;
     StrVec *v = StrVec_Make(m);
-    StrVec_Add(v, Str_CstrRef(m, "Basemem: at "));
-    StrVec_Add(v, Str_FromI64(m, baseStackLevel));
-    StrVec_Add(v, Str_CstrRef(m, " "));
     i64 baseMem = MemCount(0);
     i64 rollingBaseMem = baseMem;
-    StrVec_Add(v, Str_MemCount(m, baseMem));
 
-    printf("test runner %s II\n", suiteName);
-    if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        Out(m, "        <span class=\"mem-label\">_+</span>\n", v);
-    }else{
-        printf("test runner %s II.1\n", suiteName);
-        Out(m, "_+", v);
-        printf("test runner %s II.2\n", suiteName);
-    }
-
-    if((GLOBAL_flags & HTML_OUTPUT) != 0){
-        Out(m, "<div class=\"suite\">\n    <span class=\"label\">Suite _c</span>\n", suiteName);
-    }
+    i64 chapters = MemChapterCount();
+    Out(m, "Starting Mem at  _t/level_i4 (_i8 chapters/_i8 total)\n", 
+        Str_MemCount(m, baseMem), (i32)baseStackLevel, chapters, chapters *PAGE_SIZE);
 
     while(set->name != NULL){
 
-        printf("test runnger %s III\n", suiteName);
         if(set->status == SECTION_LABEL){
-            if((GLOBAL_flags & HTML_OUTPUT) != 0){
-                Out(m, "<h4>_c</h4>\n", set->name);
-            }else{
-                Out(m, "== _c ==\n", set->name);
-            }
+            Out(m, "== _c ==\n", set->name);
             set++;
             continue;
         }
 
-        if((GLOBAL_flags & HTML_OUTPUT) != 0){
-            Out(m, "<div class=\"set\">\n    <span class=\"set-label\">_c</span>\n", set->name);
-            Out(m, "    <span class=\"status\" data-status=\"_i4\">_c</span>\n    <p>_c</p>\n    <ol class=\"tests\">\n",
-                set->status, statusCstr(set->status), set->description);
-        }else{
-            Out(m, "[Testing _c]\n", set->name);
-        }
+        Out(m, "[Testing _c]\n", set->name);
 
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
@@ -111,34 +87,18 @@ status Test_Runner(MemCtx *gm, char *suiteName, TestSet *tests){
             rollingBaseMem = MemCount(0);
 
             char *htmlCls = "";
+            Str *color = Str_CstrRef(m, "");
             if(overRollingUsed > 0 || stackLevel > 0){
-                if((GLOBAL_flags & HTML_OUTPUT) != 0){
-                    htmlCls = " text-red"; 
-                }else{
-                    StrVec_Add(v, Str_AnsiCstr(m, "^r"));
-                }
+                color = Str_AnsiCstr(m, "^r");
             }else if(memUsed > 0){
-                if((GLOBAL_flags & HTML_OUTPUT) != 0){
-                    htmlCls = " text-blue"; 
-                }else{
-                    StrVec_Add(v, Str_AnsiCstr(m, "^b"));
-                }
+                color = Str_AnsiCstr(m, "^b");
             }
-            StrVec_Add(v, Str_CstrRef(m, "mem: at "));
-            StrVec_Add(v, Str_FromI64(m, stackLevel));
-            StrVec_Add(v, Str_MemCount(m, memUsed));
-            if(memUsed > 0 || stackLevel > 0){
-                if((GLOBAL_flags & HTML_OUTPUT) == 0){
-                    StrVec_Add(v, Str_AnsiCstr(m, "^0"));
-                }
-            }
-            if((GLOBAL_flags & HTML_OUTPUT) != 0){
-                Out(m, "    <li><span class=\"mem-label_s\">_+</span></li>\n", htmlCls, v);
-                Out(m, "    </ol>\n");
-                Out(m, "</div>\n");
-            }else{
-                Out(m, "_+", v);
-            }
+
+            i64 chapters = MemChapterCount();
+            Out(m, "_tMem: _t/level_i4 (_i8 chapters/_t total)^0\n", 
+                color, Str_MemCount(m, baseMem), (i32)baseStackLevel, 
+                chapters, Str_MemCount(m, chapters*PAGE_SIZE));
+
             MemCtx_Free(m);
             m->type.range--;
             if((r & ERROR) != 0 || (r & SUCCESS) == 0){

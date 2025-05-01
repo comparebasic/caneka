@@ -47,6 +47,16 @@ i64 MemCount(i16 level){
     return total;
 }
 
+i64 MemChapterCount(){
+    i64 total = 0;
+    Iter it;
+    for(int i = 0; i <= bookIdx; i++){
+        MemBook *cp = _books[i].book;
+        total += (i64)cp->pages.nvalues;
+    }
+    return total;
+}
+
 status MemBook_FreeSlab(MemCtx *m, MemSlab *sl){
     size_t sz = MemSlab_Taken(sl); 
     memset(sl->bytes+sl->remaining, 0, sz);

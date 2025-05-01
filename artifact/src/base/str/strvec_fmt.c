@@ -30,11 +30,13 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'd'){
-                total += Str_Debug(m, v, fd, va_arg(args, Abstract *), 0, FALSE);
+                Abstract *a = va_arg(args, Abstract *);
+                total += Str_Debug(m, v, fd, a, 0, FALSE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'D'){
-                total += Str_Debug(m, v, fd, va_arg(args, Abstract *), 0, TRUE);
+                Abstract *a = va_arg(args, Abstract *);
+                total += Str_Debug(m, v, fd, a, 0, TRUE);
                 state = SUCCESS; 
                 goto next;
             }else if(c == 'c'){
@@ -56,12 +58,12 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 if(c == '8'){
                     i = (i64)va_arg(args, i64);
                 }else if(c == '4'){ 
-                    i = (i64)va_arg(args, i32);
+                    i = (i32)va_arg(args, i32);
                 }else{ /* 4 is the default */
                     i = (i64)va_arg(args, i32);
                     ptr--;
                 }
-                s = Str_FromI64(m, i);
+                s = Str_FromI64(m, (i64)i);
                 handleIo(v, fd, s);
                 total += s->length;
                 state = SUCCESS; 
@@ -78,7 +80,7 @@ i64 StrVec_FmtHandle(MemCtx *m, StrVec *v, char *fmt, va_list args, i32 fd){
                 state = SUCCESS; 
                 goto next;
             }else if(c == '+'){
-                StrVec *v2 = (StrVec *)as(va_arg(args, StrVec *), TYPE_STRVEC);
+                StrVec *v2 = (StrVec *)va_arg(args, StrVec *);
                 total += handleVecIo(v, fd, v2);
                 state = SUCCESS; 
                 goto next;

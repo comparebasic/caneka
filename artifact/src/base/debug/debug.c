@@ -8,8 +8,9 @@ MemCtx *_debugM = NULL;
 #include "inline/handle_io.c"
 
 status Debug_Init(MemCtx *m){
-    _debugM = m;
-    m->type.range++;
+    if(_debugM == NULL){
+        _debugM = m;
+    }
     if(DebugPrintChain == NULL){
         DebugPrintChain = Lookup_Make(m, _TYPE_START, NULL, NULL);
         Mem_DebugInit(m, DebugPrintChain);
@@ -23,7 +24,7 @@ status Debug_Init(MemCtx *m){
         /* todo add other debug inits here */
         return SUCCESS;
     }
-
+    m->type.range++;
     return NOOP;
 }
 
@@ -34,7 +35,6 @@ void indent_Print(int indent){
 }
 
 void Bits_Print(byte *bt, int length, char *msg, int color, boolean extended){
-    printf("\x1b[%dm%s", color, msg);
     for(int i = length-1; i >= 0;i--){
         byte b = bt[i];
         if(extended){
@@ -65,10 +65,7 @@ i64 Str_Debug(MemCtx *m, StrVec *v, i32 fd, void *t, cls type, boolean extended)
     if(func != NULL){
         return func(m, v, fd, a, type, extended);
     }else{
-        printf("unknown debug\n");
-        /*
-        Out("%s:%s unkown_debug(%p)", msg, Class_ToString(type), t);
-        */
+        Out(m, "_c:_c unkown_debug(_a)", Type_ToChars(type), t);
         return 0;
     }
 }

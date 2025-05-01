@@ -5,7 +5,7 @@ void *Lookup_Get(Lookup *lk, word type){
     void *result = NULL;
     lk->type.state &= ~(SUCCESS|NOOP|ERROR);
     if(type >= lk->offset && type <= lk->offset+lk->values->max_idx){
-        result = (void *)Span_Get(lk->values, (int)(type-lk->offset));
+        result = (void *)Span_Get(lk->values, (i32)(type-lk->offset));
         lk->type.state |= (lk->values->type.state & (SUCCESS|NOOP|ERROR));
         if(result != NULL){
             lk->latest_idx = type-lk->offset;
@@ -39,10 +39,8 @@ Lookup *Lookup_FromConfig(MemCtx *m, LookupConfig *config, Abstract *arg){
 
 status Lookup_Add(MemCtx *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
-        printf("type:%d offset:%d\n", type, lk->offset);
         Fatal("Adding lookup value below zero", TYPE_UNIT);
-    }
-    if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) != NULL){
+    }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) != NULL){
         return SUCCESS;
     }
     return ERROR;

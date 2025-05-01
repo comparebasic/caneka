@@ -32,14 +32,13 @@ int main(int argc, char **argv){
     }
 
     MemBook *cp = MemBook_Make(NULL);
-    if(cp != NULL){
-        printf("MemBook created successfully\n");
+    if(cp == NULL){
+        Fatal("MemBook created successfully\n", 0);
     }
 
     MemCtx *m = MemCtx_Make();
-    Caneka_Init(m);
-    if(m != NULL){
-        printf("MemCtx created successfully\n");
+    if(m == NULL){
+        Fatal("MemCtx created successfully\n", 0);
     }
 
     Caneka_Init(m);

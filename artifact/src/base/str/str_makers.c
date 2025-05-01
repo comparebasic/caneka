@@ -88,20 +88,20 @@ i64 Str_AddMemCount(Str *s, i64 mem) {
     char *abbrev = "bkmg";
     i64 total = 0;
     i64 div = 1024;
+    boolean exactly = FALSE;
     for(int i = 0; i < 4; i++){
-       if(i > 0){
-           total += Str_AddCstr(s, " ");
-       }
        i64 value = mem % div;
        i64 uval = value;
        if(div > 1024){
           uval = value / 1024;
        }
-       if(uval == 0){
-            continue;
+       if(uval > 0){
+           if(s->length > 0){
+               total += Str_AddCstr(s, " ");
+           }
+           total += Str_AddI64(s, uval); 
+           total += Str_Add(s, (byte *)abbrev+i, 1); 
        }
-       total += Str_AddI64(s, uval); 
-       total += Str_Add(s, (byte *)abbrev+i, 1); 
        div *= 1024;
        mem -= value;
     }

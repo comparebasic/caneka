@@ -95,3 +95,5 @@ i64 MemCtx_Total(MemCtx *m, i16 level);
  * before */
 #define MemCtx_SetToBase(m) ((m)->type.range = -((m)->type.range));
 #define MemCtx_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
+
+i64 MemChapterCount();
