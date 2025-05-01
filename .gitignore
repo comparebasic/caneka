@@ -1,5 +1,5 @@
 build
-caneka.core
+*.core
 tmp
 builder
 *.core
