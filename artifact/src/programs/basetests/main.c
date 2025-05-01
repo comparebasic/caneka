@@ -9,6 +9,8 @@ This file is mostly an example Caneka application, and it runs the tests
 #include <caneka.h>
 #include <tests.h>
 
+#include "tests/inc.c"
+
 #define servecmd "serve"
 #define testcmd "test"
 #define transcmd "transp"

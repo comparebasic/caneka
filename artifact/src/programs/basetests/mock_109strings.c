@@ -1,7 +1,3 @@
-#include <external.h>
-#include <caneka.h>
-#include <mock_109strings.h>
-
 Str *zero_s;
 Str *one_s;
 Str *two_s;

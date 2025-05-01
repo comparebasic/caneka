@@ -45,7 +45,7 @@ static const char *coreCmd[] = {
 
 static const char *testsCoreCmd[] = {
     COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/basetests/include", "-o", "./build/basetests", 
-    "./artifact/src/programs/basetests/tests/inc.c", "./artifact/src/programs/basetests/main.c", "./build/libcnkbase/libcnkbase.a",
+    "./artifact/src/programs/basetests/main.c", "./build/libcnkbase/libcnkbase.a",
     NULL
 };
 
