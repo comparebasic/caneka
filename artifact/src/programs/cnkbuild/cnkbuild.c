@@ -11,7 +11,8 @@ static status renderStatus(MemCh *m, Abstract *a){
     i32 progress = (i32)_progress;
     ctx->fields.steps.barStart->length = progress;
 
-    _progress = ((float)ctx->cli->cols) * ((float)ctx->fields.steps.modSrcCount->val.i)/((float)ctx->fields.steps.total->val.i);
+    _progress = ((float)ctx->cli->cols) * ((float)
+        (ctx->fields.steps.modSrcTotal->val.i - ctx->fields.steps.modSrcCount->val.i))/((float)ctx->fields.steps.total->val.i);
     progress = (i32)_progress;
     ctx->fields.steps.barEnd->length = progress;
 
@@ -266,12 +267,12 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         Str_AddCstr(dest, *sourceCstr);
         Str_Trunc(dest, -1);
         Str_AddCstr(dest, "o");
+        ctx->fields.steps.count->val.i++;
         r |= buildSourceToLib(ctx, libDir, lib, dest, source);
 
         MemCh_Free(m);
         sourceCstr++;
     }
-    ctx->fields.steps.count->val.i += ctx->fields.steps.modSrcTotal->val.i;
     ctx->fields.steps.modSrcCount->val.i = 0;
     CliStatus_Print(OutStream, ctx->cli);
     m->type.range--;

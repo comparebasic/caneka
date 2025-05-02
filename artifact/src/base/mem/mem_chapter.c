@@ -153,7 +153,7 @@ void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx){
     return NULL;
 }
 
-status MemCh_Setup(MemCh *m, MemPage *sl){
+status MemCh_Setup(MemCh *m, MemPage *pg){
     m->type.of = TYPE_MEMCTX;
     Span *p = MemPage_Alloc(pg, sizeof(Span));
     Span_Setup(p);
