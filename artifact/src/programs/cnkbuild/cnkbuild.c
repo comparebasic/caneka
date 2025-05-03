@@ -267,8 +267,8 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         Str_AddCstr(dest, *sourceCstr);
         Str_Trunc(dest, -1);
         Str_AddCstr(dest, "o");
-        ctx->fields.steps.count->val.i++;
         r |= buildSourceToLib(ctx, libDir, lib, dest, source);
+        ctx->fields.steps.count->val.i++;
 
         MemCh_Free(m);
         sourceCstr++;

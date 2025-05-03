@@ -4,11 +4,11 @@
 i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
     MemCh *m = sm->m;
     char *ptr = fmt;
-    char *end = fmt+strlen(fmt);
+    char *end = fmt+(strlen(fmt)-1);
     char *start = fmt;
     status state = SUCCESS;
     i64 total = 0;
-    while(ptr < end){
+    while(ptr <= end){
         char c = *ptr;
         if((state & NOOP) != 0){
             state &= ~NOOP;
@@ -35,10 +35,8 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
 
             if(start != ptr){
                word length = (word)(ptr - start);
-               if(length > 0){
-                    Stream_Bytes(sm, (byte *)start, length);
-                    total += length;
-               }
+                Stream_Bytes(sm, (byte *)start, length);
+                total += length;
             }
             start = ptr+1;
 
@@ -49,17 +47,15 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     char *cstr_end = (char *)s->bytes+(s->length-1);
                     s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
                     total += Stream_Bytes(sm, s->bytes, s->length);
+                    goto next;
                 }else if(s->type.state & STRING_BINARY){
                     total += Bits_Print(sm, s->bytes, s->length, 
                         ((s->type.state|sm->type.state) & DEBUG));
                     goto next;
-                }else if((state & MORE) && (sm->type.state & STREAM_STRVEC)){
-                    StrVec_Add(sm->dest.curs->v, s);
-                    goto next;
                 }
             }
             total += ToS(sm, a, a->type.of, 
-                ((sm->type.state & DEBUG)|(state & MORE)));
+                ((sm->type.state & DEBUG)|(state & MORE)) | a->type.state);
             state = SUCCESS; 
             goto next;
         }else if(c == '^'){
@@ -70,7 +66,6 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     total += length;
                }
             }
-            start = ptr+1;
 
             ptr++;
             Str *s = Str_FromAnsi(m, &ptr, end);
@@ -82,7 +77,6 @@ next:
             ptr++;
         }
     }
-
 
     if(start < ptr){
         word length = (word)(ptr - start);

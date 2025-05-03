@@ -96,10 +96,6 @@ status MemBook_FreePage(MemCh *m, MemPage *pg){
     book->recycled.type.state &= ~SPAN_OP_ADD;
     book->recycled.type.state |= SPAN_OP_GET;
 
-    if(book->type.state & DEBUG){
-        printf("\x1b[1;34mFree Page nvalues:%d \x1b[0m\n", book->recycled.span->nvalues);
-    }
-
     return r;
 }
 
@@ -114,9 +110,6 @@ void *MemBook_GetPage(void *addr){
         idx = book->recycled.span->max_idx;
         void *page = Span_Get(book->recycled.span, idx);
         Span_Remove(book->recycled.span, idx);
-        if(book->type.state & DEBUG){
-            printf("\x1b[1;33mGiving Recycled Page *%lu\x1b[0m\n", (util)page);
-        }
         return page;
     }else{
         for(i32 i = pageIdx; i < PAGE_MAX; i++){
@@ -125,9 +118,6 @@ void *MemBook_GetPage(void *addr){
             if(sl->type.of == 0){
                 if(i >= pageIdx){
                     pageIdx = i+1;
-                }
-                if(book->type.state & DEBUG){
-                    printf("\x1b[1;33mGiving Page *%lu\x1b[0m\n", (util)page);
                 }
                 return page;
             }

@@ -86,7 +86,7 @@ status StrVec_Tests(MemCh *gm){
     Str *st = Str_CstrRef(m, "time");
     Str *sa = Str_CstrRef(m, "afterwards");
     Str *sf = Str_CstrRef(m, "four");
-    Str *sf2 = Str_Clone(m, sf, sf->length);
+    Str *sf2 = Str_Clone(m, sf, sf->alloc);
     sf2->type.state |= DEBUG;
     char *cstr = ", all alone";
     Stream *sm = Stream_MakeStrVec(m);
@@ -106,8 +106,15 @@ status StrVec_Tests(MemCh *gm){
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");
 
+    Abstract *args4[] = {
+        (Abstract *)sm->dest.curs->v,
+        (Abstract *)s,
+        NULL,
+    };
+    sm->dest.curs->v->type.state |= DEBUG;
+    s->type.state |= DEBUG;
     r |= Test(Equals((Abstract *)sm->dest.curs->v, (Abstract *)s),
-        "Testing StrVec and StrVec from Fmt via Stream", NULL);
+        "Testing StrVec and StrVec from Fmt via Stream \n@\nvs\n@", args4);
 
     /*
     StrVec_Add(vc, Str_CstrRef(m, "\n\n"));
