@@ -20,15 +20,8 @@ Str *Str_FromI64(MemCh *m, i64 i){
     return s;
 }
 
-i64 Str_AddI64(Str *s, i64 i){
-    i64 n = i;
-    byte _b[MAX_BASE10];
-    if(s->alloc < s->length+MAX_BASE10){
-        s->type.state |= ERROR;
-        return 0;
-
-    }
-    byte *end = _b+(MAX_BASE10-1);
+i64 Str_I64OnBytes(byte **_b, i64 i){
+    byte *end = (*_b)+(MAX_BASE10-1);
     byte *b = end;
 
     i64 base = 10;
@@ -51,8 +44,21 @@ i64 Str_AddI64(Str *s, i64 i){
         *(b--) = '0';
     }
 
-    i64 length = end - b;
-    return Str_Add(s, b+1, length);
+    *_b = b+1;
+    return end - b;
+}
+
+i64 Str_AddI64(Str *s, i64 i){
+    byte _b[MAX_BASE10];
+    if(s->alloc < s->length+MAX_BASE10){
+        s->type.state |= ERROR;
+        return 0;
+
+    }
+
+    byte *b = _b;
+    i64 length = Str_I64OnBytes(&b, i);
+    return Str_Add(s, b, length);
 }
 
 Str *Str_ToHex(MemCh *m, Str *s){

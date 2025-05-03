@@ -22,11 +22,7 @@ static i64 WrappedDo_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I64_Wrapped(sm->m, (util)sg->val.ptr),
             NULL
         };
-        word prev = sm->type.state;
-        sm->type.state &= ~DEBUG;
-        i64 total = Fmt(sm, "Wdo<$ ^D.*$^d.>", args);
-        sm->type.state = prev;
-        return total;
+        return Fmt(sm, "Wdo<$ ^D.*$^d.>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }
@@ -41,11 +37,7 @@ static i64 Wrapped_Ptr(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)a,
             NULL
         };
-        word prev = sm->type.state;
-        sm->type.state &= ~DEBUG;
-        i64 total = Fmt(sm, "Wptr<$ $>", args);
-        sm->type.state = prev;
-        return total;
+        return Fmt(sm, "Wptr<$ $>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }
@@ -79,11 +71,7 @@ static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        word prev = sm->type.state;
-        sm->type.state &= ~DEBUG;
-        i64 total = Fmt(sm, "Wi64<^D.$^d.>", args);
-        sm->type.state = prev;
-        return total;
+        return Fmt(sm, "Wi64<^D.$^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -98,11 +86,7 @@ static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        word prev = sm->type.state;
-        sm->type.state &= ~DEBUG;
-        i64 total = Fmt(sm, "Wi32<^D.$^d.>", args);
-        sm->type.state = prev;
-        return total;
+        return Fmt(sm, "Wi32<^D.$^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -117,11 +101,7 @@ static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        word prev = sm->type.state;
-        sm->type.state &= ~DEBUG;
-        i64 total = Fmt(sm, "Wi16<^D.^d.>", args);
-        sm->type.state = prev;
-        return total;
+        return Fmt(sm, "Wi16<^D.^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -135,11 +115,7 @@ static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        word prev = sm->type.state;
-        sm->type.state &= ~DEBUG;
-        i64 total = Fmt(sm, "Wi8<^D.^d.>", args);
-        sm->type.state = prev;
-        return total;
+        return Fmt(sm, "Wi8<^D.^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }

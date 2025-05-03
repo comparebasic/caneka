@@ -21,8 +21,19 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I16_Wrapped(sm->m, s->alloc),
             NULL
         };
-        total += Fmt(sm, "Str<$/$:^D\"", args); 
-    }else if(flags & MORE){
+        total += Stream_Bytes(sm, (byte *)"Str<", 4);
+        byte bstr[MAX_BASE10];
+        /* lengths are manual here brcause integer wrappers use Str_Print */
+        byte *b = bstr;
+        i64 len = Str_I64OnBytes(&b, (i64)s->length);
+        total += Stream_Bytes(sm, b, len); 
+        total += Stream_Bytes(sm, (byte *)"/", 1); 
+        b = bstr;
+        len = Str_I64OnBytes(&b, (i64)s->alloc);
+        total += Stream_Bytes(sm, b, len); 
+        total += Stream_Bytes(sm, (byte *)":", 1); 
+    }
+    if(flags & (MORE|DEBUG)){
         total += Fmt(sm, "^D\"", NULL); 
     }
 
@@ -144,7 +155,6 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & DEBUG){
         i64 length = (i64)(curs->end - curs->ptr);
         i64 endPos = pos+length;
-        Single *val = curs->v;
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(sm->m, pos),
             (Abstract *)I64_Wrapped(sm->m, endPos),
