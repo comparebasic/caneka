@@ -14,7 +14,8 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     Str digit_s;
     Str_Init(&digit_s, _digitBytes, 0, sz);
 
-    if(flags & DEBUG){
+    word fl = (DEBUG|MORE);
+    if((flags & fl) == fl){
         Abstract *args[] = {
             (Abstract *)I16_Wrapped(sm->m, s->length),
             (Abstract *)I16_Wrapped(sm->m, s->alloc),
@@ -52,7 +53,7 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
         total += Stream_Bytes(sm, s->bytes, s->length);
     }
 
-    if(flags & DEBUG){
+    if((flags & fl) == fl){
         total += Fmt(sm, "\"^d.>", NULL);
     }else if(flags & MORE){
         total += Fmt(sm, "\"^d.", NULL);

@@ -102,6 +102,7 @@ status StrVec_Tests(MemCh *gm){
         (Abstract *)vc,
         NULL
     };
+    printf("sm debug ?%d\n", (sa->type.state & DEBUG) != 0);
     Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ @ $ $ $", args3);
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");
@@ -111,8 +112,6 @@ status StrVec_Tests(MemCh *gm){
         (Abstract *)s,
         NULL,
     };
-    sm->dest.curs->v->type.state |= DEBUG;
-    s->type.state |= DEBUG;
     r |= Test(Equals((Abstract *)sm->dest.curs->v, (Abstract *)s),
         "Testing StrVec and StrVec from Fmt via Stream \n@\nvs\n@", args4);
 

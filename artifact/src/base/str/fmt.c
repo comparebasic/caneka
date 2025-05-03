@@ -41,6 +41,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             start = ptr+1;
 
             Abstract *a = *(args++);
+            cls type = a->type.of;
             if(a->type.of == TYPE_STR){
                 Str *s = (Str *)a;
                 if(s->type.state & STRING_FMT_ANSI){
@@ -53,10 +54,14 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                         ((s->type.state|sm->type.state) & DEBUG));
                     goto next;
                 }
+            }else if(a->type.of == TYPE_WRAPPED_PTR && ((Single *)a)->objType.of != 0){
+                Single *sg = (Single *)a;
+                type = sg->objType.of;
+                a = sg->val.ptr;
             }
-            total += ToS(sm, a, a->type.of, 
+            total += ToS(sm, a, type, 
                 ((sm->type.state & DEBUG)|(state & MORE)) | a->type.state);
-            state = SUCCESS; 
+            state = SUCCESS;
             goto next;
         }else if(c == '^'){
             if(start != ptr){

@@ -50,25 +50,31 @@ i64 Lookup_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     if(flags & (MORE|DEBUG)){
         i64 total = 0;
-        total += Fmt(sm, "Lk<", NULL);
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, lk->offset),
+            NULL,
+        };
+        total += Fmt(sm, "Lk<^D.$^d.offset values[", args);
         Iter it;
         Iter_Init(&it, lk->values);
         while((Iter_Next(&it) & END) == 0){
             if(it.value != NULL){
+                /*
                 Single *val = Ptr_Wrapped(sm->m, it.value, 0);
                 val->type.state |= DEBUG;
+                */
                 Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(sm->m, it.idx),
-                    (Abstract *)val,
+                    (Abstract *)I32_Wrapped(sm->m, it.idx+lk->offset),
+                    (Abstract *)Type_ToStr(sm->m, it.idx+lk->offset),
                     NULL
                 };
-                total += Fmt(sm, "$ -> $", args);
+                total += Fmt(sm, "$/$", args);
                 if((it.type.state & FLAG_ITER_LAST) == 0){
                     Stream_Bytes(sm, (byte *)", ", 2);
                 }
             }
         }
-        total += Fmt(sm, ">", NULL);
+        total += Fmt(sm, "]>", NULL);
     }else{
         total += ToStream_NotImpl(sm, a, type, flags);
     }

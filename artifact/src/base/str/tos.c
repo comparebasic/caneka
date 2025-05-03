@@ -44,10 +44,14 @@ i64 Bits_Print(Stream *sm, byte *bt, size_t length, word flags){
 i64 FlagStr(word flag, char *dest, char *map){
     i64 p = 0;
     i32 i = 0;
-    for(i32 i = 0; i < 16; i++){ 
-       if((flag & (1 << i)) != 0){
-            dest[p++] = map[i+1];
-       }
+    if(flag == 0){
+        dest[p++] = map[0];
+    }else{
+        for(i32 i = 0; i < 16; i++){ 
+           if((flag & (1 << i)) != 0){
+                dest[p++] = map[i+1];
+           }
+        }
     }
     dest[p] = '\0';
     return p;
@@ -58,7 +62,9 @@ i64 Str_AddFlags(Str *s, word flags, char *map){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
         return 0;
     }
-    return FlagStr(flags, (char *)s->bytes+s->length, map);
+    i64 total = FlagStr(flags, (char *)s->bytes+s->length, map);
+    s->length += (word)total;
+    return total;
 }
 
 char *ToStreamChars(word flags){

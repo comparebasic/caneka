@@ -20,7 +20,7 @@ static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     Str *fl = Str_Make(sm->m, FLAG_DEBUG_MAX+1);
-    Str_AddFlags(fl, pat->flags, matchFlagChars); 
+    Str_AddFlags(fl, pat->flags, matchFlagChars);
     if(pat->flags == PAT_END){
         Abstract *args[] = {
             (Abstract *)fl,
@@ -28,22 +28,25 @@ static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, "$", args);
     } else if(pat->to == pat->from){
-        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
+        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, 0);
+        from->type.state |= DEBUG;
         Abstract *args[] = {
             (Abstract *)fl,
             (Abstract *)from,
-            (Abstract *)ending,
+            (Abstract *)Str_CstrRef(sm->m, ending),
             NULL
         };
         total += Fmt(sm, "$^D.$^d.$", args);
     }else{
-        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
-        Str *to = Str_Ref(sm->m, (byte *)&pat->to, 1, 1, DEBUG);
+        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, 0);
+        from->type.state |= DEBUG;
+        Str *to = Str_Ref(sm->m, (byte *)&pat->to, 1, 1, 0);
+        to->type.state |= DEBUG;
         Abstract *args[] = {
             (Abstract *)fl,
             (Abstract *)from,
             (Abstract *)to,
-            (Abstract *)ending,
+            (Abstract *)Str_CstrRef(sm->m, ending),
             NULL
         };
         total += Fmt(sm, "$^D.$-$^d.$", args);
@@ -79,7 +82,7 @@ static i64 PatCharDef_Print(Stream *sm, Abstract *a, cls type, word flags){
         total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
         pat++;
     }
-    total += PatChar_Print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
+    total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
     total += Fmt(sm, ">", NULL);
     return total;
 }
@@ -182,7 +185,13 @@ status Parser_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_Print);
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)PatCharDef_Print);
     r |= Lookup_Add(m, lk, TYPE_PATCHAR, (void *)PatChar_Print);
+    r |= Lookup_Add(m, lk, TYPE_PATCHAR, (void *)PatChar_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIPSPAN, (void *)SnipSpan_Print);
+    Abstract *args[] = {
+        (Abstract *)lk,
+        NULL
+    };
+    Out("Parser_ToSInit: @\n", args);
     return r;
 }
