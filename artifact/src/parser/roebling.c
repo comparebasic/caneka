@@ -10,6 +10,15 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         Guard_Incr(&rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         byte c = *(rbl->curs->ptr);
+        if(rbl->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)rbl,
+                (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                NULL
+            };
+            Debug("^p.RunMatches($): @^0.", args);
+        }
+
         i32 noopCount = 0;
 
         Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);

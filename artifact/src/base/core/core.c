@@ -24,3 +24,11 @@ status Core_Init(MemCh *m){
 i64 Out(char *fmt, Abstract *args[]){
     return Fmt(OutStream, fmt, args);
 }
+
+i64 Debug(char *fmt, Abstract *args[]){
+    word prev = OutStream->type.state;
+    OutStream->type.state |= DEBUG;
+    i64 total = Fmt(OutStream, fmt, args);
+    OutStream->type.state = prev;
+    return total;
+}

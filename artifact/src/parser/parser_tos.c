@@ -28,8 +28,7 @@ static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, "$", args);
     } else if(pat->to == pat->from){
-        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, 0);
-        from->type.state |= DEBUG;
+        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
         Abstract *args[] = {
             (Abstract *)fl,
             (Abstract *)from,
@@ -38,10 +37,8 @@ static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, "$^D.$^d.$", args);
     }else{
-        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, 0);
-        from->type.state |= DEBUG;
-        Str *to = Str_Ref(sm->m, (byte *)&pat->to, 1, 1, 0);
-        to->type.state |= DEBUG;
+        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
+        Str *to = Str_Ref(sm->m, (byte *)&pat->to, 1, 1, DEBUG);
         Abstract *args[] = {
             (Abstract *)fl,
             (Abstract *)from,

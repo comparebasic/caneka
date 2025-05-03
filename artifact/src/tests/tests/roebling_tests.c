@@ -54,7 +54,6 @@ status SetWord1(MemCh *m, Abstract *a){
     status r = READY;
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     Roebling_ResetPatterns(rbl);
-    printf("Set word 1\n");
 
     r |= Roebling_SetPattern(rbl, dbl_nl, 0, RBL_TEST_END);
     r |= Roebling_SetPattern(rbl, oneDef, 0, -1);
@@ -67,7 +66,6 @@ status SetWord1(MemCh *m, Abstract *a){
 status SetWord2(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
-    printf("Set word 2\n");
     r |= Roebling_SetPattern(rbl, text, 0, RBL_TEST_START);
     return r; 
 }
@@ -109,6 +107,7 @@ status RoeblingRun_Tests(MemCh *gm){
     Roebling *rbl = NULL;
 
     rbl = Roebling_Make(m, curs, Capture, NULL); 
+    rbl->type.state |= DEBUG;
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
     Roebling_Start(rbl);
