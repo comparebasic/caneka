@@ -136,6 +136,12 @@ static TestSet _Tests[] = {
         "Roebling basic run tests.",
         FEATURE_COMPLETE,
     },
+    {
+        "Roebling Mark Tests",
+        RoeblingMark_Tests,
+        "Roebling mark tests.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",

@@ -26,6 +26,7 @@ status MatchKo_Tests(MemCh *gm);
 status Snip_Tests(MemCh *gm);
 status Roebling_Tests(MemCh *gm);
 status RoeblingRun_Tests(MemCh *gm);
+status RoeblingMark_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

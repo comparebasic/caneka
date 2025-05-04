@@ -30,7 +30,6 @@ status Snip_Tests(MemCh *gm){
         (Abstract *)curs,
         NULL
     };
-    Debug("^p.Cursor: @^0.\n", args2);
 
     v = StrVec_Snip(m, sns, curs);
 

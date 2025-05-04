@@ -103,9 +103,9 @@ status RoeblingRun_Tests(MemCh *gm){
 
     Str *s = NULL; 
     StrVec *v = NULL;
-    Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     Roebling *rbl = NULL;
 
+    Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
@@ -162,70 +162,93 @@ status RoeblingRun_Tests(MemCh *gm){
 status RoeblingMark_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
+    Str *s = NULL;
+    StrVec *v = NULL;
     Match *mt = NULL;
-    /*
-
     Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m);
-    Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_START)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1)); 
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
-    Span_Add(parsers_do, (Abstract *)Int_Wrapped(m, RBL_TEST_END)); 
 
-    LookupConfig config[] = {
-        {RBL_TEST_START, (Abstract *)String_Make(m, bytes("START"))},
-        {RBL_TEST_END, (Abstract *)String_Make(m, bytes("END"))},
-        {0, NULL},
+    Cursor *curs = Cursor_Make(m, StrVec_Make(m));
+    rbl = Roebling_Make(m, curs, Capture, NULL); 
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+    Roebling_Start(rbl);
+
+    s = Str_CstrRef(m, "TWO for the weekend\nONE for good measure\nTHREE for all!\n\n");
+    Cursor_Add(curs, s);
+
+    Abstract *args[] = {
+        (Abstract *)s,
+        NULL
     };
-
-    Lookup *desc = Lookup_FromConfig(m, config, NULL);
-    Str *_s = String_Init(m, STRING_EXTEND);
-    rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, desc, _s, Found, NULL); 
-
-    Str *s = String_Make(m, bytes("TWO for the weekend\nONE for good measure\nTHREE for all!\n\n"));
-    Roebling_AddBytes(rbl, s->bytes, s->length);
+    Debug("^c.Str: @^0.\n", args);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    r |= Test(String_EqualsBytes(s, bytes("TWO")), "Content equals TWO, have %s", s->bytes);
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'TWO'");
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    Abstract *args1[] = {
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "TWO")), "Content equals TWO, have @", args1);
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'TWO'", NULL);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    r |= Test(String_EqualsBytes(s, bytes("for the weekend")), "Roebling has captured the rest of the line: '%s'", s->bytes);
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'for the weekend'");
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    Abstract *args2[] = {
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "for the weekend")), "Roebling has captured the rest of the line: @", args2);
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'for the weekend'", NULL);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-
-    r |= Test(String_EqualsBytes(s, bytes("ONE")), "Content equals ONE, have %s", s->bytes);
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'ONE'");
-
-    Roebling_RunCycle(rbl);
-    mt = Roebling_GetMatch(rbl);
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    r |= Test(String_EqualsBytes(s, bytes("for good measure")), "Roebling has captured the rest of the line: '%s'", s->bytes);
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    Abstract *args3[] = {
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "ONE")), "Content equals ONE, have @", args3);
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT after 'ONE'", NULL);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    r |= Test(String_EqualsBytes(s, bytes("THREE")), "Content equals THREE, have %s", s->bytes);
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    Abstract *args4[] = {
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "for good measure")), "Roebling has captured the rest of the line: @", args4);
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT", NULL);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    r |= Test(String_EqualsBytes(s, bytes("for all!")), "Roebling has captured the rest of the line: '%s'", s->bytes);
-    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT");
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    Abstract *args5[] = {
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "THREE")), "Content equals THREE, have @", args5);
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT", NULL);
+
+    Roebling_RunCycle(rbl);
+    mt = Roebling_GetMatch(rbl);
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    Abstract *args6[] = {
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "for all!")), "Roebling has captured the rest of the line: @", args6);
+    r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING_NEXT", NULL);
 
     Roebling_RunCycle(rbl);
     Roebling_RunCycle(rbl);
-    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS %s", State_ToChars(rbl->type.state));
-    */
+    Abstract *args7[] = {
+        (Abstract *)State_ToStr(m, rbl->type.state),
+        NULL
+    };
+    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS, have $", args7);
 
     MemCh_Free(m);
     return r;
