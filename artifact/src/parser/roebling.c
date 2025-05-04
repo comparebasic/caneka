@@ -14,15 +14,6 @@ static inline status Roebling_RunMatches(Roebling *rbl){
 
         byte c = *(rbl->curs->ptr);
         i32 noopCount = 0;
-
-        if(rbl->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
-                (Abstract *)rbl,
-                NULL
-            };
-            Out("^c.RunMatches(^D.$^d.): @^0.\n", args);
-        }
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)rbl->matchIt.value;
             DebugStack_SetRef(mt, mt->type.of);

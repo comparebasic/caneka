@@ -153,7 +153,6 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, word flags){
 }
 
 i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
-    DebugStack_Push(NULL, 0);
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(sm, a, type, flags);
@@ -191,7 +190,6 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
     };
     total += Fmt(sm, "  curs:@\n", args6);
     total += Fmt(sm, ">", NULL);
-    DebugStack_Pop();
     return total;
 }
 

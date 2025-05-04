@@ -24,8 +24,12 @@ status Cursor_Decr(Cursor *curs, i32 length){
     while(length > 0){
         if(length > remaining){
             length -= remaining;
-            if(curs->it.idx == 0){
-                curs->type.state |= NOOP;
+            if(curs->it.idx == 0 && length > 0){
+                Abstract *args[] = {
+                    (Abstract *)I32_Wrapped(ErrStream->m,length),
+                    NULL,
+                };
+                Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to proceed back, length $", args);
                 break;
             }else{
                 curs->it.idx--;
@@ -59,6 +63,7 @@ status Cursor_Incr(Cursor *curs, i32 length){
             curs->it.idx++;
             if(Cursor_SetStr(curs) & NOOP){
                 curs->type.state |= NOOP;
+                break;
             }else{
                 s = curs->it.value;
                 remaining = (curs->end - curs->ptr);

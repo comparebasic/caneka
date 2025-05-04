@@ -178,7 +178,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
 
-        return  Fmt(sm, "Curs<$/$_^D.'@'^d.>", args); 
+        return  Fmt(sm, "Curs<$/$ ^D.'@'^d.>", args); 
     }
 }
 

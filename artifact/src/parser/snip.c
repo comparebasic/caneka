@@ -6,13 +6,13 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
 
     StrVec *v = StrVec_Make(m);
     Cursor *curs = Cursor_Copy(m, _curs);
-    Cursor_Decr(curs, SnipSpan_Total(sns, 0)-1);
+    i64 total = SnipSpan_Total(sns, 0)-1;
+    Cursor_Decr(curs, total);
     Abstract *args[] = {
-        (Abstract *)I64_Wrapped(m, SnipSpan_Total(sns, 0)),
+        (Abstract *)I64_Wrapped(m, total),
         (Abstract *)curs,
         NULL
     };
-    Out("^c.After Decr of $ @^0.\n", args);
 
     Iter it;
     Iter_Init(&it, sns);
@@ -25,7 +25,6 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
                 (Abstract *)Str_Ref(m, curs->ptr, sn->length, sn->length+1, 0),
                 NULL,
             };
-            Debug("Copying @\n", args);
             StrVec_AddBytes(m, v, curs->ptr, sn->length);
             Cursor_Incr(curs, sn->length);
         }else if(sn->type.state){

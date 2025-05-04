@@ -107,7 +107,6 @@ status RoeblingRun_Tests(MemCh *gm){
     Roebling *rbl = NULL;
 
     rbl = Roebling_Make(m, curs, Capture, NULL); 
-    rbl->type.state |= DEBUG;
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
     Roebling_Start(rbl);

@@ -58,7 +58,7 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, int line,
 
 void DebugStack_Pop(){
     _stackIdx--;
-    Span_Cull(stack, 1);
+    stack->max_idx = _stackIdx;
 }
 
 void DebugStack_SetRef(void *v, word typeOf){
