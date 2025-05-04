@@ -6,8 +6,7 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
 
     StrVec *v = StrVec_Make(m);
     Cursor *curs = Cursor_Copy(m, _curs);
-    Cursor_Decr(curs, SnipSpan_Total(sns, 0));
-
+    Cursor_Decr(curs, SnipSpan_Total(sns, 0)-1);
     Abstract *args[] = {
         (Abstract *)I64_Wrapped(m, SnipSpan_Total(sns, 0)),
         (Abstract *)curs,

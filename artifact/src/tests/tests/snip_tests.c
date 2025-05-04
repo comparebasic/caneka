@@ -25,7 +25,7 @@ status Snip_Tests(MemCh *gm){
     sn->length = 8;
     SnipSpan_Add(sns, sn);
 
-    Cursor_Incr(curs, (9 + 8));
+    Cursor_Incr(curs, (9 + 8)-1);
     Abstract *args2[] = {
         (Abstract *)curs,
         NULL

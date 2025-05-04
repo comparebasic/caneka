@@ -9,11 +9,12 @@ static inline status Roebling_RunMatches(Roebling *rbl){
     while((rbl->type.state & END) == 0){
         Guard_Incr(&rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
+        Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
+        Iter_Reset(&rbl->matchIt);
+
         byte c = *(rbl->curs->ptr);
         i32 noopCount = 0;
 
-        Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
-        Iter_Reset(&rbl->matchIt);
         if(rbl->type.state & DEBUG){
             Abstract *args[] = {
                 (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
@@ -22,7 +23,6 @@ static inline status Roebling_RunMatches(Roebling *rbl){
             };
             Out("^c.RunMatches(^D.$^d.): @^0.\n", args);
         }
-
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)rbl->matchIt.value;
             DebugStack_SetRef(mt, mt->type.of);

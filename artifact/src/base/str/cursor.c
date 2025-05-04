@@ -75,8 +75,10 @@ status Cursor_Incr(Cursor *curs, i32 length){
 }
 
 status Cursor_NextByte(Cursor *curs){
-    if(curs->ptr == NULL){
-        return Cursor_SetStr(curs);
+    if((curs->type.state & PROCESSING) == 0){
+        curs->it.idx = 0;
+        Cursor_SetStr(curs);
+        curs->type.state |= PROCESSING;
     }else if(curs->ptr == curs->end){
         if(curs->it.type.state & FLAG_ITER_LAST){
             curs->type.state |= END;
