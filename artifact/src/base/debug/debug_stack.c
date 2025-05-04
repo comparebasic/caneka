@@ -86,9 +86,9 @@ int DebugStack_Print(){
             Fmt(ErrStream, "    ^Dy.$^d. - $:$^0 ", args);
             Abstract *args2[] = {entry->ref, NULL};
             if(entry->ref != NULL && entry->typeOf != 0){
-                Out("^y$^0", args2);
+                Out("^y@^0", args2);
             }else if(entry->ref != NULL && entry->typeOf == 0){
-                Out("^y$^0", args2);
+                Out("^y@^0", args2);
             }
             Out("\n", NULL);
         }

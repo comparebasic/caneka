@@ -158,7 +158,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
                     (Abstract *)Ptr_Wrapped(sm->m, it->stack[i], 0), 
                     NULL
                 };
-                total += Fmt(sm, "  $: $+$/$ = $\n", args);
+                total += Fmt(sm, "  $: $+$/$ = @\n", args);
             }
             if(i > 0 && it->stack[i] != NULL){
                 ptr = *((void **)it->stack[i]);

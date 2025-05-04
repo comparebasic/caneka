@@ -113,6 +113,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Cursor Tests",
+        Cursor_Tests,
+        "Cursor tests for adding and navigation the position of a StrVec",
+        FEATURE_COMPLETE,
+    },
+    {
         "Snip Tests",
         Snip_Tests,
         "Snip tests for capturing a segment of a cursor",

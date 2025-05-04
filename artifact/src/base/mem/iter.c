@@ -377,6 +377,12 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
         Out("^c.Iter-Query $^0.\n", args);
     }
 
+    if(it->idx == p->max_idx){
+        it->type.state |= FLAG_ITER_LAST;
+    }else{
+        it->type.state &= ~FLAG_ITER_LAST;
+    }
+
     return it->type.state;
 }
 

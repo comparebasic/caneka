@@ -10,27 +10,19 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         Guard_Incr(&rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         byte c = *(rbl->curs->ptr);
-        /*
+        i32 noopCount = 0;
+
+        Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
+        Iter_Reset(&rbl->matchIt);
         if(rbl->type.state & DEBUG){
             Abstract *args[] = {
                 (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
                 (Abstract *)rbl,
                 NULL
             };
-            Out("^p.RunMatches(^D.$^d.): @^0.\n", args);
+            Out("^c.RunMatches(^D.$^d.): @^0.\n", args);
         }
-        */
 
-        i32 noopCount = 0;
-
-        Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
-        Iter_Reset(&rbl->matchIt);
-        if(Cursor_NextByte(rbl->curs) & CURSOR_STR_BOUNDRY){
-            while((Iter_Next(&rbl->matchIt) & END) == 0){
-                Match_AddBoundrySnip(rbl->m, (Match *)rbl->matchIt.value);
-            }
-            Iter_Reset(&rbl->matchIt);
-        }
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)rbl->matchIt.value;
             DebugStack_SetRef(mt, mt->type.of);
@@ -52,12 +44,17 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 rbl->capture(rbl, mt->captureKey, v);
                 if((mt->snip.type.state & SNIP_UNCLAIMED) != 0 &&
                         mt->snip.length > 1){
+                    Abstract *args[] = {
+                        (Abstract *)&mt->snip,
+                        NULL
+                    };
+                    Debug("Decr @", args);
                     Cursor_Decr(rbl->curs, mt->snip.length-1);
                 }
 
                 rbl->type.state |= (rbl->curs->type.state & END);
-                DebugStack_Pop();
                 Guard_Reset(&rbl->guard);
+                DebugStack_Pop();
                 return rbl->type.state;
             }
 
@@ -65,16 +62,24 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 if(++noopCount == rbl->matchIt.span->nvalues){
                     rbl->type.state |= (NOOP|END|ERROR);
                     Guard_Reset(&rbl->guard);
+                    DebugStack_Pop();
                     return rbl->type.state;
                 }
             }
         }
 
+        if(Cursor_NextByte(rbl->curs) & CURSOR_STR_BOUNDRY){
+            while((Iter_Next(&rbl->matchIt) & END) == 0){
+                Match_AddBoundrySnip(rbl->m, (Match *)rbl->matchIt.value);
+            }
+            Iter_Reset(&rbl->matchIt);
+        }
+
         rbl->type.state |= (rbl->curs->type.state & END);
     }
 
-    DebugStack_Pop();
     Guard_Reset(&rbl->guard);
+    DebugStack_Pop();
     return rbl->type.state;
 }
 

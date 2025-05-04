@@ -18,6 +18,7 @@ status Hash_Tests(MemCh *gm);
 status Table_Tests(MemCh *gm);
 status TableResize_Tests(MemCh *gm);
 status Stream_Tests(MemCh *gm);
+status Cursor_Tests(MemCh *gm);
 status PatChar_Tests(MemCh *gm);
 status Match_Tests(MemCh *gm);
 status MatchElastic_Tests(MemCh *gm);

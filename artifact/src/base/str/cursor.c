@@ -17,25 +17,60 @@ static status Cursor_SetStr(Cursor *curs){
 }
 
 status Cursor_Decr(Cursor *curs, i32 length){
+    DebugStack_Push(curs, curs->type.of);
+    curs->type.state &= ~NOOP;
     Str *s = curs->it.value;
-    while(--length > 0){
-        if(curs->ptr == NULL){
-            return ERROR;
-        }else if(curs->ptr == s->bytes){
+    i32 remaining = (curs->ptr - s->bytes);
+    while(length > 0){
+        if(length > remaining){
+            length -= remaining;
             if(curs->it.idx == 0){
-                curs->type.state |= END;
+                curs->type.state |= NOOP;
+                break;
             }else{
                 curs->it.idx--;
-                Iter_Query(&curs->it);
-                return Cursor_SetStr(curs);
+                Cursor_SetStr(curs);
+                byte *start = curs->ptr;
+                curs->ptr = curs->end;
+                remaining = (curs->ptr - start);
+                length -= 1;
             }
-        }else if(curs->ptr > s->bytes){
-            curs->ptr--;
-            curs->type.state |= SUCCESS;
         }else{
-            curs->type.state |= NOOP;
+            curs->ptr -= length;
+            DebugStack_Pop();
+            return curs->type.state;
         }
     }
+    DebugStack_Pop();
+    return curs->type.state;
+}
+
+status Cursor_Incr(Cursor *curs, i32 length){
+    DebugStack_Push(curs, curs->type.of);
+    if(curs->ptr == NULL){
+        Cursor_SetStr(curs);
+    }
+    curs->type.state &= ~NOOP;
+    Str *s = curs->it.value;
+    i32 remaining = (curs->end - curs->ptr);
+    while(length > 0){
+        if(length > remaining){
+            length -= remaining;
+            curs->it.idx++;
+            if(Cursor_SetStr(curs) & NOOP){
+                curs->type.state |= NOOP;
+            }else{
+                s = curs->it.value;
+                remaining = (curs->end - curs->ptr);
+                length -= 1;
+            }
+        }else{
+            curs->ptr += length;
+            DebugStack_Pop();
+            return curs->type.state;
+        }
+    }
+    DebugStack_Pop();
     return curs->type.state;
 }
 
@@ -60,8 +95,10 @@ status Cursor_NextByte(Cursor *curs){
 }
 
 Cursor *Cursor_Copy(MemCh *m, Cursor *_curs){
+    DebugStack_Push(_curs, _curs->type.of);
     Cursor *curs = MemCh_Alloc(m, sizeof(Cursor));
     memcpy(curs, _curs, sizeof(Cursor));
+    DebugStack_Pop();
     return curs;
 }
 
