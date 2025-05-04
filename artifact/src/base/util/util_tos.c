@@ -46,7 +46,7 @@ static i64 Wrapped_Ptr(Stream *sm, Abstract *a, cls type, word flags){
 static i64 WrappedUtil_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     Str *s = Str_FromI64(sm->m, sg->val.value);
-    if(flags & (DEBUG|MORE)){
+    if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)s,
             NULL
@@ -66,7 +66,7 @@ static i64 WrappedMemCount_Print(Stream *sm, Abstract *a, cls type, word flags){
 static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
     Str *s = Str_FromI64(sm->m, sg->val.value);
-    if(flags & (DEBUG|MORE)){
+    if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)s,
             NULL
@@ -80,8 +80,7 @@ static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
 static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.i);
-    word fl = (DEBUG|MORE);
-    if((flags & fl) == fl){
+    if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)s,
             NULL
@@ -95,8 +94,7 @@ static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
 static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I16);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.w);
-    word fl = (DEBUG|MORE);
-    if((flags & fl) == fl){
+    if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)s,
             NULL
@@ -110,7 +108,7 @@ static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
 static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I8);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.b);
-    if(flags & (DEBUG|MORE)){
+    if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)s,
             NULL

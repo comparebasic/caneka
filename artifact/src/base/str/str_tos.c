@@ -33,7 +33,7 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
         total += Stream_Bytes(sm, b, len); 
         total += Stream_Bytes(sm, (byte *)":", 1); 
     }
-    if(flags & (MORE|DEBUG)){
+    if(flags & MORE){
         total += Fmt(sm, "^D\"", NULL); 
     }
 
@@ -160,15 +160,15 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I64_Wrapped(sm->m, endPos),
             (Abstract *)I64_Wrapped(sm->m, length),
             (Abstract *)I64_Wrapped(sm->m, curs->v->total),
-            (Abstract *)Str_Ref(sm->m, curs->ptr, 1, 1, DEBUG),
-            (Abstract *)Str_Ref(sm->m, curs->ptr+1, length-1, length, 0),
+            (Abstract *)(curs->ptr != NULL ? 
+                Str_Ref(sm->m, curs->ptr, 1, 1, DEBUG) : 
+                Str_CstrRef(sm->m, "?")),
+            (Abstract *)(curs->ptr != NULL ?
+                Str_Ref(sm->m, curs->ptr+1, length-1, length, 0) :
+                NULL),
             NULL
         };
-        word prev = sm->type.state;;
-        sm->type.state &= ~DEBUG;
-        i64 total =  Fmt(sm, "Curs<$..$ $of$ ^D.\"^c.$^pd.$^D.\"^d.>", args); 
-        sm->type.state = prev;
-        return total;
+        return  Fmt(sm, "Curs<$..$ $of$ ^D.\"$^d.$^D.\"^d.>", args); 
     }else{
         i64 length = (i64)(curs->end - curs->ptr);
         Abstract *args[] = {

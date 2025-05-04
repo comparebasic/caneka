@@ -6,14 +6,11 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
 
     StrVec *v = StrVec_Make(m);
     Cursor *curs = Cursor_Copy(m, _curs);
-    /*
-    void *args[] = {curs, sns, (void *)((i64)TYPE_SNIPSPAN), NULL};
-    Out("^c.Before Decr _D^0.\n", args); 
-    */
     Cursor_Decr(curs, SnipSpan_Total(sns, 0));
-    /*
-    Out("^c.After Decr _D _T^0.\n", args);
-    */
+    Abstract *args[] = {
+        (Abstract *)curs,
+        NULL
+    };
 
     Iter it;
     Iter_Init(&it, sns);
@@ -28,7 +25,11 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
         if(sn->type.state & SNIP_STR_BOUNDRY){
             goto nextStr;
         }else if(sn->type.state & SNIP_GAP){
-            curs->ptr += sn->length;
+            if(curs->ptr + sn->length > curs->end){
+                goto nextStr;
+            }else{
+                curs->ptr += sn->length;
+            }
         }else if(sn->type.state & SNIP_CONTENT){
             StrVec_AddBytes(m, v, curs->ptr, sn->length);
             if(curs->ptr + sn->length > curs->end){

@@ -41,6 +41,12 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             start = ptr+1;
 
             Abstract *a = *(args++);
+            if(a == NULL){
+                if(state & (DEBUG|MORE)){
+                    total += Stream_Bytes(sm, (byte *)"NULL", 4);
+                }
+                goto next;
+            }
             cls type = a->type.of;
             if(a->type.of == TYPE_STR){
                 Str *s = (Str *)a;

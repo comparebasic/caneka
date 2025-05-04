@@ -5,6 +5,32 @@ static char *matchFlagChars = "EXPMNICGKOSLDTU__";
 
 static char *snipChars = "_________CGBU_____";
 
+static Str **snipLabels = NULL;
+static status initSnipLabels(MemCh *m){
+    if(snipLabels == NULL){
+        snipLabels = (Str **)Arr_Make(m, 17);
+        snipLabels[0] = Str_CstrRef(m, "ZERO/READY");
+        snipLabels[1] = Str_CstrRef(m, "SUCCESS");
+        snipLabels[2] = Str_CstrRef(m, "ERROR");
+        snipLabels[3] = Str_CstrRef(m, "NOOP");
+        snipLabels[4] = Str_CstrRef(m, "DEBUG");
+        snipLabels[5] = Str_CstrRef(m, "MORE");
+        snipLabels[6] = Str_CstrRef(m, "CONTINUE");
+        snipLabels[7] = Str_CstrRef(m, "END");
+        snipLabels[8] = Str_CstrRef(m, "PROCESSING");
+        snipLabels[9] = Str_CstrRef(m, "SNIP_CONTENT");
+        snipLabels[10] = Str_CstrRef(m, "SNIP_GAP");
+        snipLabels[11] = Str_CstrRef(m, "SNIP_STR_BOUNDRY");
+        snipLabels[12] = Str_CstrRef(m, "SNIP_UNCLAIMED");
+        snipLabels[13] = Str_CstrRef(m, "CLS_FLAG_ECHO");
+        snipLabels[14] = Str_CstrRef(m, "CLS_FLAG_FOXTROT");
+        snipLabels[15] = Str_CstrRef(m, "CLS_FLAG_GOLF");
+        snipLabels[16] = Str_CstrRef(m, "CLS_FLAG_HOTEL");
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
     PatCharDef *pat = (PatCharDef *)a;
     if((flags & (MORE|DEBUG)) == 0){
@@ -84,6 +110,29 @@ static i64 PatCharDef_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
+static i64 Snip_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Snip *sn = (Snip *)as(a, TYPE_SNIP);
+    if((flags & (MORE|DEBUG)) == 0){
+        return ToStream_NotImpl(sm, a, type, flags);
+    }
+    i64 total = 0;
+    if(flags & DEBUG){
+        total += Fmt(sm, "Sn<", NULL);
+    }
+    Str *fl = Str_Make(sm->m, STR_DEFAULT);
+    Str_AddFlagLabels(fl, sn->type.state, snipLabels); 
+    Abstract *args[] = {
+        (Abstract *)fl,
+        (Abstract *)I32_Wrapped(sm->m, sn->length), 
+        NULL
+    };
+    total += Fmt(sm, "$/$", args);
+    if(flags & DEBUG){
+        total += Stream_Bytes(sm, (byte *)">", 1);
+    }
+    return total;
+}
+
 static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, word flags){
     Span *sns = (Span *)as(a, TYPE_SPAN);
     if((flags & (MORE|DEBUG)) == 0){
@@ -94,16 +143,8 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, word flags){
     Iter it;
     Iter_Init(&it, sns);
     while((Iter_Next(&it) & END) == 0){
-        Snip *sn = (Snip *)it.value; 
-        Str *fl = Str_Make(sm->m, FLAG_DEBUG_MAX+1);
-        Str_AddFlags(fl, sn->type.state, snipChars); 
-        Abstract *args[] = {
-            (Abstract *)fl,
-            (Abstract *)I32_Wrapped(sm->m, sn->length), 
-            NULL
-        };
-        total += Fmt(sm, "$^D.@^d.", args);
-        if(it.type.state & FLAG_ITER_LAST){
+        total += ToS(sm, it.value, 0, flags|MORE);
+        if((it.type.state & FLAG_ITER_LAST) == 0){
             total += Stream_Bytes(sm, (byte *)",", 1);
         }
     }
@@ -124,23 +165,31 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)rbl->parseIt.value,
         NULL
     };
-    total += Fmt(sm, "Rbl<$ idx:$/@\n", args1);
+    total += Fmt(sm, "Rbl<$ idx:$/@ ", args1);
     Abstract *args2[] = {
-        (Abstract *)rbl->parseIt.span, NULL
+        (Abstract *)rbl->matchIt.value, 
+        NULL
     };
-    total += Fmt(sm, "  parsers:@\n", args2);
-    Abstract *args3[] = {
-        (Abstract *)rbl->matchIt.span, NULL
+    total += Fmt(sm, " @ \n ", args2);
+    if(flags & DEBUG){
+        Abstract *args3[] = {
+            (Abstract *)rbl->parseIt.span, NULL
+        };
+        total += Fmt(sm, "  parsers:@\n", args3);
+        Abstract *args4[] = {
+            (Abstract *)rbl->matchIt.span, NULL
+        };
+        total += Fmt(sm, "  matches:@\n", args4);
+        Abstract *args5[] = {
+            (Abstract *)rbl->marks, NULL
+        };
+        total += Fmt(sm, "  marks:@\n", args5);
+    }
+    Abstract *args6[] = {
+        (Abstract *)rbl->curs, 
+        NULL
     };
-    total += Fmt(sm, "  matches:@\n", args3);
-    Abstract *args4[] = {
-        (Abstract *)rbl->marks, NULL
-    };
-    total += Fmt(sm, "  marks:@\n", args4);
-    Abstract *args5[] = {
-        (Abstract *)rbl->curs, NULL
-    };
-    total += Fmt(sm, "  curs:@\n", args5);
+    total += Fmt(sm, "  curs:@\n", args6);
     total += Fmt(sm, ">", NULL);
     DebugStack_Pop();
     return total;
@@ -156,9 +205,9 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)State_ToStr(_debugM, mt->type.state),
         NULL
     };
-    total += Fmt(sm, "Mt<_t ", args);
+    total += Fmt(sm, "Mt<$ ", args);
 
-    if(flags & DEBUG){
+    if(flags & (DEBUG|MORE)){
         PatCharDef *pd = mt->pat.startDef;
         while(pd->flags != PAT_END){
             char *_color = "p.";
@@ -185,10 +234,7 @@ status Parser_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATCHAR, (void *)PatChar_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIPSPAN, (void *)SnipSpan_Print);
-    Abstract *args[] = {
-        (Abstract *)lk,
-        NULL
-    };
-    Out("Parser_ToSInit: @\n", args);
+    r |= Lookup_Add(m, lk, TYPE_SNIP, (void *)Snip_Print);
+    initSnipLabels(m);
     return r;
 }

@@ -67,6 +67,32 @@ i64 Str_AddFlags(Str *s, word flags, char *map){
     return total;
 }
 
+i64 Str_AddFlagLabels(Str *s, word flags, Str **labels){
+    i64 total = 0;
+    if(flags == 0){
+        if(Str_Add(s, labels[0]->bytes, labels[0]->length) != labels[0]->length){
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+                "Not enough room in str", NULL);
+        }
+        total += labels[0]->length;
+    }else{
+        for(i32 i = 0; i < 16; i++){ 
+           if((flags & (1 << i)) != 0){
+                if(s->length > 0){
+                    total += Str_Add(s, (byte *)"|", 1);
+                }
+                Str *label = labels[i+1];
+                if(Str_Add(s, label->bytes, label->length) != label->length){
+                    Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+                        "Not enough room in str", NULL);
+                }
+                total += label->length;
+           }
+        }
+    }
+    return total;
+}
+
 char *ToStreamChars(word flags){
     if(flags & DEBUG & MORE){
         return "debug-verbose";

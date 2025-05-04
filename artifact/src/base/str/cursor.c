@@ -21,7 +21,7 @@ status Cursor_Decr(Cursor *curs, i32 length){
     while(--length > 0){
         if(curs->ptr == NULL){
             return ERROR;
-        }else if(s != NULL && curs->ptr == s->bytes){
+        }else if(curs->ptr == s->bytes){
             if(curs->it.idx == 0){
                 curs->type.state |= END;
             }else{
@@ -66,9 +66,7 @@ Cursor *Cursor_Copy(MemCh *m, Cursor *_curs){
 }
 
 status Cursor_Add(Cursor *curs, Str *s){
-    StrVec_Add(curs->v, s);
-    while((Iter_Next(&curs->it) & END) == 0 && curs->it.value != s){}
-    return SUCCESS;
+    return StrVec_Add(curs->v, s);
 }
 
 status Cursor_Setup(Cursor *curs, StrVec *v){

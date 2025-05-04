@@ -10,30 +10,46 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         Guard_Incr(&rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         byte c = *(rbl->curs->ptr);
+        /*
         if(rbl->type.state & DEBUG){
             Abstract *args[] = {
-                (Abstract *)rbl,
                 (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                (Abstract *)rbl,
                 NULL
             };
-            Debug("^p.RunMatches($): @^0.", args);
+            Out("^p.RunMatches(^D.$^d.): @^0.\n", args);
         }
+        */
 
         i32 noopCount = 0;
 
         Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
         Iter_Reset(&rbl->matchIt);
+        if(Cursor_NextByte(rbl->curs) & CURSOR_STR_BOUNDRY){
+            while((Iter_Next(&rbl->matchIt) & END) == 0){
+                Match_AddBoundrySnip(rbl->m, (Match *)rbl->matchIt.value);
+            }
+            Iter_Reset(&rbl->matchIt);
+        }
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)rbl->matchIt.value;
             DebugStack_SetRef(mt, mt->type.of);
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
-                rbl->type.state = ROEBLING_NEXT;
+                rbl->type.state |= ROEBLING_NEXT;
                 rbl->type.state &= ~PROCESSING;
 
                 StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);
-                rbl->capture(rbl, mt->captureKey, v);
+                if(rbl->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                        (Abstract *)rbl,
+                        NULL
+                    };
+                    Out("^p.Matches Found(^D.$^d.): @^0.\n", args);
+                }
 
+                rbl->capture(rbl, mt->captureKey, v);
                 if((mt->snip.type.state & SNIP_UNCLAIMED) != 0 &&
                         mt->snip.length > 1){
                     Cursor_Decr(rbl->curs, mt->snip.length-1);
@@ -54,12 +70,6 @@ static inline status Roebling_RunMatches(Roebling *rbl){
             }
         }
 
-        if(Cursor_NextByte(rbl->curs) & CURSOR_STR_BOUNDRY){
-            Iter_Reset(&rbl->matchIt);
-            while((Iter_Next(&rbl->matchIt) & END) == 0){
-                Match_AddBoundrySnip(rbl->m, (Match *)rbl->matchIt.value);
-            }
-        }
         rbl->type.state |= (rbl->curs->type.state & END);
     }
 

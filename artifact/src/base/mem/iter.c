@@ -54,6 +54,108 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
     return offset & _modulos[dim];
 }
 
+status Iter_Prev(Iter *it){
+    i8 dim = 0;
+    i8 topDim = it->span->dims;
+    i32 debugIdx = it->idx;
+    i32 idx = it->idx;
+    it->value = NULL;
+    boolean skipNull = (it->type.state & SPAN_OP_ADD) == 0;
+    void **ptr = NULL;
+
+    if(it->type.state & SPAN_OP_GET){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Iter_Prev can only use Get not Set or Add", NULL);
+        return ERROR;
+    }
+
+    if((it->type.state & END) || !(it->type.state & PROCESSING)){
+        word fl = it->type.state & ~(END|FLAG_ITER_LAST);
+        idx = it->span->max_idx;
+        Iter_Setup(it, it->span, fl, idx);
+        it->type.state |= (fl|PROCESSING);
+        Iter_Query(it);
+        goto end;
+    }else{
+        if(topDim == 0){
+            if((it->stackIdx[dim]-1) >= 0){
+                it->stackIdx[dim]--;
+                ptr = it->stack[dim];
+                it->stack[dim] = ptr-1;
+            }
+            idx -= _increments[dim];
+            it->value = *((void **)it->stack[dim]);
+        }else{
+            i32 incr = 1;
+            while(it->value == NULL && dim <= topDim && 
+                    idx <= it->span->max_idx){
+                if((it->stackIdx[dim] - incr) >= 0){
+                    it->stackIdx[dim] -= incr;
+
+                    if(dim == topDim){
+                        ptr = (void **)it->span->root;
+                    }else{
+                        ptr = *((void **)it->stack[dim+1]);
+                    }
+
+                    ptr += it->stackIdx[dim];
+                    it->stack[dim] = ptr;
+                    idx += _increments[dim];
+
+                    if(dim == 0){
+                        if(ptr != NULL){
+                            it->value = *ptr;
+                        }
+                        if(skipNull){
+                            continue;
+                        }else{
+                            goto end;
+                        }
+                    }else if(*ptr != NULL){
+                        i32 offset = idx & _modulos[dim];
+                        while(dim-1 >= 0){
+                            dim--;
+                            if(dim == topDim){
+                                ptr = (void **)it->span->root;
+                            }else{
+                                ptr = *((void **)it->stack[dim+1]);
+                            }
+                            it->stack[dim] = ptr;
+                            if(ptr == NULL){
+                                dim++;
+                                break;
+                            }else if(dim == 0){
+                                it->value = *ptr;
+                                if(!skipNull){
+                                    goto end;
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    idx -= it->stackIdx[dim] * _increments[dim];
+                    it->stackIdx[dim] = 0;
+                    dim++;
+                }
+            }
+        }
+    }
+end:
+    if(idx == 0){
+        it->type.state |= END;
+    }
+
+    it->idx = idx;
+    if(((it->type.state & SPAN_OP_GET) && it->value != NULL)){
+        it->type.state &= ~NOOP;
+        it->type.state |= SUCCESS;
+    }else{
+        it->type.state |= NOOP;
+        it->type.state &= ~SUCCESS;
+    }
+
+    return it->type.state;
+}
+
 status Iter_Next(Iter *it){
     i8 dim = 0;
     i8 topDim = it->span->dims;
@@ -139,14 +241,12 @@ status Iter_Next(Iter *it){
                                 }else{
                                     it->value = *ptr;
                                 }
-                                it->value = *ptr;
                                 if(!skipNull){
                                     goto end;
                                 }
                             }
                         }
                     }
-                    incr = 1;
                 }else{
                     idx -= it->stackIdx[dim] * _increments[dim];
                     it->stackIdx[dim] = 0;

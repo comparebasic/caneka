@@ -107,7 +107,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
                 NULL
             };
             if(flags & (MORE|DEBUG)){
-                total += Fmt(sm, "$:$", args);
+                total += Fmt(sm, "$:@", args);
             }else{
                 total += ToS(sm, it.value, 0, flags);
             }

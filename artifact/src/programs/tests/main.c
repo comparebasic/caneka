@@ -113,6 +113,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Snip Tests",
+        Snip_Tests,
+        "Snip tests for capturing a segment of a cursor",
+        FEATURE_COMPLETE,
+    },
+    {
         "Roebling Init Test",
         Roebling_Tests,
         "Roebling tests for adding and running a basic parser.",

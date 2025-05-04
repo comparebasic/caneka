@@ -97,9 +97,11 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             char *htmlCls = "";
             Str *color = Str_CstrRef(m, "");
             if(overRollingUsed > 0 || stackLevel > 0){
-                color = Str_AnsiCstr(m, "^r.");
+                color = Str_AnsiCstr(m, "b.");
             }else if(memUsed > 0){
-                color = Str_AnsiCstr(m, "^b.");
+                color = Str_AnsiCstr(m, "c.");
+            }else{
+                color = Str_AnsiCstr(m, "c.");
             }
 
             i64 chapters = MemChapterCount();
@@ -112,7 +114,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
                 (Abstract *)Str_MemCount(m, chapters*PAGE_SIZE),
                 NULL
             }; 
-            Out("_tMem: $ ($ chapters/$ available/$ total+stack)^0\n", args4);
+            Out("$Mem: $ ($ chapters/$ available/$ total+stack)^0\n", args4);
 
             MemCh_Free(m);
             m->type.range--;
