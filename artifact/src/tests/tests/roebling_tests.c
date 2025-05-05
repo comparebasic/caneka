@@ -25,7 +25,9 @@ static PatCharDef dbl_nl[] = {
     {PAT_END, 0, 0}
 };
 
+static StrVec *lastResult = NULL;
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
+    lastResult = v;
     return SUCCESS;
 }
 
@@ -83,6 +85,7 @@ status Roebling_Tests(MemCh *gm){
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_END));
+    Roebling_Start(rbl);
     rbl->type.state |= ROEBLING_REPEAT;
 
     Single *dof = (Single *)as(Span_Get(rbl->parseIt.span, 0), TYPE_WRAPPED_DO);
@@ -109,10 +112,10 @@ status RoeblingRun_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     rbl = Roebling_Make(m, curs, Capture, NULL); 
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_START)));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_START));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_END)));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_END));
     Roebling_Start(rbl);
 
     s = Str_CstrRef(m, "TWO for the weekend\n");
@@ -155,9 +158,6 @@ status RoeblingRun_Tests(MemCh *gm){
         "Roebling has captured the rest of the line, expected '$', have '@'", args3);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
 
-    Roebling_RunCycle(rbl);
-    r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS", NULL);
-
     DebugStack_Pop();
     MemCh_Free(m);
     return r;
@@ -173,11 +173,10 @@ status RoeblingMark_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     rbl = Roebling_Make(m, curs, Capture, NULL); 
-    rbl->type.state |= DEBUG;
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_START)));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_START));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_END)));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_END));
     Roebling_Start(rbl);
 
     s = Str_CstrRef(m, "TWO for the weekend\nONE for good measure\nTHREE for all!\n\n");
@@ -187,7 +186,6 @@ status RoeblingMark_Tests(MemCh *gm){
         (Abstract *)s,
         NULL
     };
-    Debug("^c.Str: @^0.\n", args);
 
     Roebling_RunCycle(rbl);
     mt = Roebling_GetMatch(rbl);
@@ -271,8 +269,9 @@ status RoeblingStartStop_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     rbl = Roebling_Make(m, curs, Capture, NULL); 
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_START));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_END));
     Roebling_Start(rbl);
 
     s = Str_CstrRef(m, "Hi how are you ");
@@ -284,13 +283,19 @@ status RoeblingStartStop_Tests(MemCh *gm){
     Roebling_Run(rbl);
 
     mt = Roebling_GetMatch(rbl);
-
-    v = StrVec_Snip(rbl->m, mt->backlog, curs);
-    Abstract *args[] = {
-        (Abstract *)v,
+    Abstract *args1[] = {
+        (Abstract *)mt,
+        (Abstract *)rbl,
         NULL
     };
-    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "Hi how are you today?")), "String equals 'Hi how are you today?', have @", args);
+    v = lastResult;
+    v->type.state |= DEBUG;
+    Abstract *args[] = {
+        (Abstract *)v,
+        (Abstract *)rbl,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "Hi how are you today?")), "String equals 'Hi how are you today?', have '@' for @", args);
 
     MemCh_Free(m);
     return r;

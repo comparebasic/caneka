@@ -153,9 +153,10 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     if(flags & DEBUG){
-        i64 length = (i64)(curs->end - curs->ptr);
+        i64 length = (i64)(curs->end - curs->ptr)+1;
         i64 endPos = pos+length;
         Abstract *args[] = {
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)curs, ToS_FlagLabels),
             (Abstract *)I64_Wrapped(sm->m, pos),
             (Abstract *)I64_Wrapped(sm->m, endPos),
             (Abstract *)I64_Wrapped(sm->m, length),
@@ -164,21 +165,22 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
                 Str_Ref(sm->m, curs->ptr, 1, 1, DEBUG) : 
                 Str_CstrRef(sm->m, "?")),
             (Abstract *)(curs->ptr != NULL ?
-                Str_Ref(sm->m, curs->ptr+1, length-1, length, 0) :
+                Str_Ref(sm->m, curs->ptr, length, length, 0) :
                 NULL),
             NULL
         };
-        return  Fmt(sm, "Curs<$..$ $of$ ^D.\"$^d.$^D.\"^d.>", args); 
+        return  Fmt(sm, "Curs<$ $..$ $of$ ^D.\"$^d.$^D.\"^d.>", args); 
     }else{
-        i64 length = (i64)(curs->end - curs->ptr);
+        i64 length = (i64)(curs->end - curs->ptr)+1;
         Abstract *args[] = {
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)curs, ToS_FlagLabels),
             (Abstract *)I64_Wrapped(sm->m, pos),
             (Abstract *)I64_Wrapped(sm->m, curs->v->total),
-            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length+1, 0),
+            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length, 0),
             NULL
         };
 
-        return  Fmt(sm, "Curs<$/$ ^D.'@'^d.>", args); 
+        return  Fmt(sm, "Curs<$ $/$ ^D.'@'^d.>", args);
     }
 }
 

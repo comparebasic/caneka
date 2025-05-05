@@ -37,7 +37,7 @@ status Roebling_Run(Roebling *rbl);
 Match *Roebling_GetMatch(Roebling *rbl);
 i32 Roebling_GetMatchIdx(Roebling *rbl);
 status Roebling_ResetPatterns(Roebling *rbl);
-status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i32 jump);
+status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i16 jump);
 i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark);
 status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v);
 status Roebling_AddStep(Roebling *rbl, Abstract *step);

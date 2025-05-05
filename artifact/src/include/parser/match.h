@@ -14,8 +14,7 @@ enum match_flags {
 typedef struct match {
     Type type; 
     i32 remaining;
-    i32 jump;
-    word counter;
+    i16 jump;
     word captureKey;
     struct {
         PatCharDef *startDef;

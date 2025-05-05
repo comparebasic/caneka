@@ -148,15 +148,18 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
     total += Fmt(sm, " @ \n", args2);
     if(flags & DEBUG){
         Abstract *args3[] = {
-            (Abstract *)rbl->parseIt.span, NULL
+            (Abstract *)rbl->parseIt.span,
+            NULL
         };
         total += Fmt(sm, "  parsers:@\n", args3);
         Abstract *args4[] = {
-            (Abstract *)rbl->matchIt.span, NULL
+            (Abstract *)rbl->matchIt.span,
+            NULL
         };
         total += Fmt(sm, "  matches:@\n", args4);
         Abstract *args5[] = {
-            (Abstract *)rbl->marks, NULL
+            (Abstract *)rbl->marks,
+            NULL
         };
         total += Fmt(sm, "  marks:@\n", args5);
     }
@@ -182,7 +185,11 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
     };
     total += Fmt(sm, "Mt<$ ", args);
     if(mt->type.state & MATCH_JUMP){
-        total += Fmt(sm, "Mt<$ ", args);
+        Abstract *args[] = {
+            (Abstract *)I16_Wrapped(sm->m, mt->jump),
+            NULL
+        };
+        total += Fmt(sm, " $jump ", args);
     }
 
     if(flags & (DEBUG|MORE)){
@@ -198,6 +205,7 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
             pd++;
         }
         if(flags & MORE){
+            total += Stream_Bytes(sm, (byte *)" ", 1); 
             total += ToS(sm, (Abstract *)mt->backlog, TYPE_SNIPSPAN, MORE);
         }
         total += Fmt(sm, "^d", NULL);

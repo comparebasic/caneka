@@ -39,7 +39,7 @@ Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config, Abstract *arg){
 
 status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
-        void *args[] = {
+        Abstract *args[] = {
             (Abstract *)I16_Wrapped(m, lk->offset),
             (Abstract *)I16_Wrapped(m, type),
             NULL,
@@ -49,6 +49,8 @@ status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
     }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) & SUCCESS){
         return SUCCESS;
     }
+
+    return ERROR;
 }
 
 status Lookup_Concat(MemCh *m, Lookup *lk, Lookup *add){

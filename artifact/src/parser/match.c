@@ -4,7 +4,6 @@
 static void match_Reset(Match *mt){
     mt->pat.curDef = mt->pat.startTermDef = mt->pat.startDef;
     mt->remaining = 0;
-    mt->counter = 0;
 }
 
 static boolean charMatched(word c, PatCharDef *def){
@@ -100,15 +99,6 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
         def = mt->pat.curDef;
 
         matched = charMatched(c, def);
-        if((def->flags & PAT_CMD) != 0){
-            mt->counter = def->to;
-            if((def->from & PAT_GO_ON_FAIL) != 0){
-                mt->type.state |= MATCH_GOTO;
-            }
-            mt->pat.curDef++;
-            continue;
-        }
-
         if(mt->type.state & DEBUG){
             Str *yn = Str_CstrRef(m, (matched ? "Y":"N"));
             Str *yncolor = Str_Ref(m, (byte *)(matched ? "Dy.":"dp."), 3, 4,

@@ -80,6 +80,7 @@ status Cursor_Incr(Cursor *curs, i32 length){
 }
 
 status Cursor_NextByte(Cursor *curs){
+    curs->type.state &= ~CURSOR_STR_BOUNDRY;
     if((curs->type.state & PROCESSING) == 0){
         curs->it.idx = 0;
         Cursor_SetStr(curs);
@@ -90,7 +91,8 @@ status Cursor_NextByte(Cursor *curs){
         }else{
             curs->it.idx++;
             Iter_Query(&curs->it);
-            return Cursor_SetStr(curs) | CURSOR_STR_BOUNDRY;
+            curs->type.state |= CURSOR_STR_BOUNDRY;
+            Cursor_SetStr(curs);
         }
     }else if(curs->ptr < curs->end){
         curs->ptr++;
@@ -110,7 +112,14 @@ Cursor *Cursor_Copy(MemCh *m, Cursor *_curs){
 }
 
 status Cursor_Add(Cursor *curs, Str *s){
-    return StrVec_Add(curs->v, s);
+    status r =  StrVec_Add(curs->v, s);
+    if(curs->type.state & END){
+        curs->type.state &= ~END;
+        curs->it.type.state &= ~FLAG_ITER_LAST;
+    }else{
+        curs->type.state &= ~END;
+    }
+    return r;
 }
 
 status Cursor_Setup(Cursor *curs, StrVec *v){
