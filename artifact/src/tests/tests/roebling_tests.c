@@ -9,7 +9,7 @@ enum rbl_test_enum {
 };
 
 enum rbl_test_marks {
-    RBL_TEST_START = 1000,
+    RBL_TEST_START = _TYPE_CORE_END,
     RBL_TEST_END,
 };
 
@@ -79,8 +79,10 @@ status Roebling_Tests(MemCh *gm){
 
     Roebling *rbl = NULL;
     rbl = Roebling_Make(m, curs, Capture, NULL); 
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_START));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_END));
     rbl->type.state |= ROEBLING_REPEAT;
 
     Single *dof = (Single *)as(Span_Get(rbl->parseIt.span, 0), TYPE_WRAPPED_DO);
@@ -107,8 +109,10 @@ status RoeblingRun_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     rbl = Roebling_Make(m, curs, Capture, NULL); 
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_START)));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_END)));
     Roebling_Start(rbl);
 
     s = Str_CstrRef(m, "TWO for the weekend\n");
@@ -170,8 +174,10 @@ status RoeblingMark_Tests(MemCh *gm){
     Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     rbl = Roebling_Make(m, curs, Capture, NULL); 
     rbl->type.state |= DEBUG;
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_START)));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)I64_Wrapped(m, RBL_TEST_END)));
     Roebling_Start(rbl);
 
     s = Str_CstrRef(m, "TWO for the weekend\nONE for good measure\nTHREE for all!\n\n");

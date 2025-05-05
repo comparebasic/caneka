@@ -99,7 +99,7 @@ static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wi16<^D.^d.>", args);
+        return Fmt(sm, "Wi16<^D.$^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }

@@ -82,11 +82,9 @@ status Roebling_RunCycle(Roebling *rbl){
     }
     rbl->type.state &= ~END;
     if((rbl->type.state & ROEBLING_NEXT) != 0){
-        printf("NEXT\n");
         Match *mt = rbl->matchIt.value;
         rbl->tail = 0;
         if(mt != NULL && (mt->type.state & MATCH_JUMP)){
-            printf("JUMPING 5o %d\n", mt->jump);
             rbl->parseIt.idx = mt->jump;
         }else{
             rbl->parseIt.idx++;
@@ -118,7 +116,7 @@ status Roebling_RunCycle(Roebling *rbl){
 
 status Roebling_JumpTo(Roebling *rbl, i32 mark){
     Single *sg = Lookup_Get(rbl->marks, mark);
-    rbl->parseIt.idx = sg->val.value;
+    rbl->parseIt.idx = sg->val.w;
     return rbl->type.state;
 }
 
@@ -169,7 +167,7 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i32 
 i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
     Single *sg = (Single *)Lookup_Get(rbl->marks, mark); 
     if(sg != NULL){
-        return sg->val.value;
+        return sg->val.w;
     }
     return -1; 
 }
@@ -191,26 +189,40 @@ status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v){
     return SUCCESS;
 }
 
+status Roebling_AddMark(Roebling *rbl, Single *sg){
+    printf("Adding mark\n");
+    i64 mark = sg->val.w;
+    sg->val.w = rbl->parseIt.idx;
+    return Lookup_Add(rbl->m, rbl->marks, mark, (Abstract *)sg);
+}
+
 status Roebling_AddStep(Roebling *rbl, Abstract *step){
     if(step->type.of == TYPE_WRAPPED_DO){
         Single *sg = rbl->parseIt.value;
-        if(sg != NULL && sg->type.of == TYPE_WRAPPED_I64){
-            i64 mark = sg->val.value;
-            sg->val.value = rbl->parseIt.idx;
-            Lookup_Add(rbl->m, rbl->marks, (word)sg->val.value, (Abstract *)sg);
-            Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_SET);
-            rbl->parseIt.value = step;
-            return Iter_Query(&rbl->parseIt);
+        if(sg != NULL && sg->type.of == TYPE_WRAPPED_I16){
+            Roebling_AddMark(rbl, sg);
+            printf("mark added\n");
         }
     }
 
     Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_ADD);
     rbl->parseIt.value = step;
-    void *args[] = {step, NULL};
-    return Iter_Query(&rbl->parseIt);
+    Abstract *args[] = {
+        (Abstract *)step,
+        (Abstract *)rbl,
+        NULL
+    };
+    status r =  Iter_Query(&rbl->parseIt);
+    Debug("Roebling_AddStep @ -> @\n", args);
+    return r;
 }
 
 status Roebling_Start(Roebling *rbl){
+    Single *sg = Span_Get(rbl->matchIt.span, rbl->matchIt.span->max_idx);
+    if(sg != NULL && sg->type.of == TYPE_WRAPPED_I16){
+        Roebling_AddMark(rbl, sg);
+        Span_Set(rbl->matchIt.span, rbl->matchIt.span->max_idx, NULL);
+    }
     Iter_Reset(&rbl->parseIt);
     return SUCCESS;
 }

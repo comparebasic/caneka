@@ -39,11 +39,16 @@ Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config, Abstract *arg){
 
 status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below zero", NULL);
+        void *args[] = {
+            (Abstract *)I16_Wrapped(m, lk->offset),
+            (Abstract *)I16_Wrapped(m, type),
+            NULL,
+        };
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below offset of $, have $ ", args);
+        return ERROR;
     }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) & SUCCESS){
         return SUCCESS;
     }
-    return ERROR;
 }
 
 status Lookup_Concat(MemCh *m, Lookup *lk, Lookup *add){
