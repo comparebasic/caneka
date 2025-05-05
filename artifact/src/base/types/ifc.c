@@ -29,8 +29,6 @@ boolean Ifc_Match(cls inst, cls ifc){
             inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR ||
             inst == TYPE_WRAPPED_I64 || inst == TYPE_WRAPPED_I32 ||
             inst == TYPE_WRAPPED_I16 || inst == TYPE_WRAPPED_I8);
-    }else if(ifc == TYPE_ROEBLING){
-        return inst == TYPE_ROEBLING || inst == TYPE_ROEBLING_BLANK;
     }else if(ifc == TYPE_SPAN){ 
         return (inst == TYPE_SPAN || inst == TYPE_TABLE); 
     /*

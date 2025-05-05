@@ -195,11 +195,6 @@ status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v){
         Cursor_Setup(rbl->curs, v);
     }
 
-    if(rbl->type.of != TYPE_ROEBLING_BLANK){
-        Roebling_ResetPatterns(rbl);
-        rbl->parseIt.idx = 0;
-    }
-
     rbl->type.state = (rbl->type.state & DEBUG);
     DebugStack_Pop();
     return SUCCESS;
