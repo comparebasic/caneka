@@ -328,7 +328,6 @@ Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
             "PatCharDef: end not found", NULL);
     }
     mt->remaining = -1;
-    mt->jump = -1;
     if(backlog == 0){
         backlog = Span_Make(m);
     }

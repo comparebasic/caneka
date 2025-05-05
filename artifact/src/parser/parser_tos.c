@@ -6,30 +6,8 @@ static char *matchFlagChars = "EXPMNICGKOSLDTU__";
 static char *snipChars = "_________CGBU_____";
 
 static Str **snipLabels = NULL;
-static status initSnipLabels(MemCh *m){
-    if(snipLabels == NULL){
-        snipLabels = (Str **)Arr_Make(m, 17);
-        snipLabels[0] = Str_CstrRef(m, "ZERO/READY");
-        snipLabels[1] = Str_CstrRef(m, "SUCCESS");
-        snipLabels[2] = Str_CstrRef(m, "ERROR");
-        snipLabels[3] = Str_CstrRef(m, "NOOP");
-        snipLabels[4] = Str_CstrRef(m, "DEBUG");
-        snipLabels[5] = Str_CstrRef(m, "MORE");
-        snipLabels[6] = Str_CstrRef(m, "CONTINUE");
-        snipLabels[7] = Str_CstrRef(m, "END");
-        snipLabels[8] = Str_CstrRef(m, "PROCESSING");
-        snipLabels[9] = Str_CstrRef(m, "SNIP_CONTENT");
-        snipLabels[10] = Str_CstrRef(m, "SNIP_GAP");
-        snipLabels[11] = Str_CstrRef(m, "SNIP_STR_BOUNDRY");
-        snipLabels[12] = Str_CstrRef(m, "SNIP_UNCLAIMED");
-        snipLabels[13] = Str_CstrRef(m, "CLS_FLAG_ECHO");
-        snipLabels[14] = Str_CstrRef(m, "CLS_FLAG_FOXTROT");
-        snipLabels[15] = Str_CstrRef(m, "CLS_FLAG_GOLF");
-        snipLabels[16] = Str_CstrRef(m, "CLS_FLAG_HOTEL");
-        return SUCCESS;
-    }
-    return NOOP;
-}
+static Str **roeblingLabels = NULL;
+static Str **matchLabels = NULL;
 
 static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
     PatCharDef *pat = (PatCharDef *)a;
@@ -119,10 +97,8 @@ static i64 Snip_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & DEBUG){
         total += Fmt(sm, "Sn<", NULL);
     }
-    Str *fl = Str_Make(sm->m, STR_DEFAULT);
-    Str_AddFlagLabels(fl, sn->type.state, snipLabels); 
     Abstract *args[] = {
-        (Abstract *)fl,
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)sn, ToS_FlagLabels),
         (Abstract *)I32_Wrapped(sm->m, sn->length), 
         NULL
     };
@@ -159,7 +135,7 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
     i64 total = 0;
     Abstract *args1[] = {
-        (Abstract *)State_ToStr(sm->m, rbl->type.state),
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)rbl, ToS_FlagLabels),
         (Abstract *)I32_Wrapped(sm->m, rbl->parseIt.idx),
         (Abstract *)rbl->parseIt.value,
         NULL
@@ -169,7 +145,7 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)rbl->matchIt.value, 
         NULL
     };
-    total += Fmt(sm, " @ \n ", args2);
+    total += Fmt(sm, " @ \n", args2);
     if(flags & DEBUG){
         Abstract *args3[] = {
             (Abstract *)rbl->parseIt.span, NULL
@@ -200,10 +176,14 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
     i64 total = 0;
     Abstract *args[] = {
-        (Abstract *)State_ToStr(_debugM, mt->type.state),
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)mt, ToS_FlagLabels),
+        (Abstract *)I32_Wrapped(sm->m, mt->jump),
         NULL
     };
     total += Fmt(sm, "Mt<$ ", args);
+    if(mt->type.state & MATCH_JUMP){
+        total += Fmt(sm, "Mt<$ ", args);
+    }
 
     if(flags & (DEBUG|MORE)){
         PatCharDef *pd = mt->pat.startDef;
@@ -227,6 +207,75 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
+status Parser_InitLabels(MemCh *m, Lookup *lk){
+    status r = READY;
+    if(snipLabels == NULL){
+        snipLabels = (Str **)Arr_Make(m, 17);
+        snipLabels[0] = Str_CstrRef(m, "ZERO/READY");
+        snipLabels[1] = Str_CstrRef(m, "SUCCESS");
+        snipLabels[2] = Str_CstrRef(m, "ERROR");
+        snipLabels[3] = Str_CstrRef(m, "NOOP");
+        snipLabels[4] = Str_CstrRef(m, "DEBUG");
+        snipLabels[5] = Str_CstrRef(m, "MORE");
+        snipLabels[6] = Str_CstrRef(m, "CONTINUE");
+        snipLabels[7] = Str_CstrRef(m, "END");
+        snipLabels[8] = Str_CstrRef(m, "PROCESSING");
+        snipLabels[9] = Str_CstrRef(m, "SNIP_CONTENT");
+        snipLabels[10] = Str_CstrRef(m, "SNIP_GAP");
+        snipLabels[11] = Str_CstrRef(m, "SNIP_STR_BOUNDRY");
+        snipLabels[12] = Str_CstrRef(m, "SNIP_UNCLAIMED");
+        snipLabels[13] = Str_CstrRef(m, "CLS_FLAG_ECHO");
+        snipLabels[14] = Str_CstrRef(m, "CLS_FLAG_FOXTROT");
+        snipLabels[15] = Str_CstrRef(m, "CLS_FLAG_GOLF");
+        snipLabels[16] = Str_CstrRef(m, "CLS_FLAG_HOTEL");
+        Lookup_Add(m, lk, TYPE_SNIP, (void *)snipLabels);
+        r |= SUCCESS;
+    }
+
+    if(roeblingLabels == NULL){
+        roeblingLabels = (Str **)Arr_Make(m, 17);
+        roeblingLabels[0] = Str_CstrRef(m, "ZERO/READY");
+        roeblingLabels[1] = Str_CstrRef(m, "SUCCESS");
+        roeblingLabels[2] = Str_CstrRef(m, "ERROR");
+        roeblingLabels[3] = Str_CstrRef(m, "NOOP");
+        roeblingLabels[4] = Str_CstrRef(m, "DEBUG");
+        roeblingLabels[5] = Str_CstrRef(m, "MORE");
+        roeblingLabels[6] = Str_CstrRef(m, "CONTINUE");
+        roeblingLabels[7] = Str_CstrRef(m, "END");
+        roeblingLabels[8] = Str_CstrRef(m, "PROCESSING");
+        roeblingLabels[9] = NULL;
+        roeblingLabels[10] = NULL;
+        roeblingLabels[11] = Str_CstrRef(m, "ROEBLING_NEXT");
+        roeblingLabels[12] = Str_CstrRef(m, "ROEBLING_REPEAT");
+        roeblingLabels[13] = NULL;
+        roeblingLabels[14] = NULL;
+        roeblingLabels[15] = NULL;
+        roeblingLabels[16] = NULL;
+        Lookup_Add(m, lk, TYPE_ROEBLING, (void *)roeblingLabels);
+        r |= SUCCESS;
+    }
+
+    if(matchLabels == NULL){
+        matchLabels = (Str **)Arr_Make(m, 17);
+        matchLabels[9] = Str_CstrRef(m, "MATCH_GOTO");
+        matchLabels[10] = Str_CstrRef(m, "MATCH_JUMP");
+        matchLabels[11] = Str_CstrRef(m, "MATCH_TERM_FOUND");
+        matchLabels[12] = Str_CstrRef(m, "MATCH_KO_INVERT");
+        matchLabels[13] = Str_CstrRef(m, "MATCH_KO");
+        matchLabels[14] = Str_CstrRef(m, "MATCH_SEARCH");
+        matchLabels[15] = Str_CstrRef(m, "MATCH_LEAVE");
+        matchLabels[16] = Str_CstrRef(m, "MATCH_ACCEPT_EMPTY");
+        Lookup_Add(m, lk, TYPE_PATMATCH, (void *)matchLabels);
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
+
 status Parser_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Match_Print);
@@ -236,6 +285,5 @@ status Parser_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIPSPAN, (void *)SnipSpan_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIP, (void *)Snip_Print);
-    initSnipLabels(m);
     return r;
 }

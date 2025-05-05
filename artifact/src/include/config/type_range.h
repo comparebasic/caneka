@@ -35,6 +35,7 @@ enum types {
     TYPE_STR,
     TYPE_STRVEC,
     TYPE_STREAM,
+    TYPE_STREAM_TASK,
     TYPE_FMT_LINE,
     TYPE_CURSOR,
     TYPE_TESTSUITE,

@@ -169,6 +169,7 @@ status RoeblingMark_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, StrVec_Make(m));
     rbl = Roebling_Make(m, curs, Capture, NULL); 
+    rbl->type.state |= DEBUG;
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
     Roebling_Start(rbl);
@@ -257,29 +258,33 @@ status RoeblingMark_Tests(MemCh *gm){
 status RoeblingStartStop_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
+    Str *s = NULL;
+    StrVec *v = NULL;
     Match *mt = NULL;
-    /*
-
     Roebling *rbl = NULL;
-    Span *parsers_do = Span_Make(m);
-    Span_Add(parsers_do, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2)); 
 
-    Str *s = String_Init(m, STRING_EXTEND);
-    rbl = Roebling_Make(m, TYPE_ROEBLING, parsers_do, NULL, s, Found, NULL); 
+    Cursor *curs = Cursor_Make(m, StrVec_Make(m));
+    rbl = Roebling_Make(m, curs, Capture, NULL); 
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord1));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
+    Roebling_Start(rbl);
 
-    char *cstr = "Hi how are you ";
-    Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
+    s = Str_CstrRef(m, "Hi how are you ");
+    Cursor_Add(curs, s);
     Roebling_Run(rbl);
 
-    cstr = "today?\n";
-    Roebling_AddBytes(rbl, bytes(cstr), strlen(cstr));
+    s = Str_CstrRef(m, "today?\n");
+    Cursor_Add(curs, s);
     Roebling_Run(rbl);
 
     mt = Roebling_GetMatch(rbl);
 
-    s = StrSnipStr_ToString(rbl->m, mt->backlog, rbl->cursor.s);
-    r |= Test(String_EqualsBytes(s, bytes("Hi how are you today?")), "String equals 'Hi how are you today?', have '%s'", (char *)s->bytes);
-    */
+    v = StrVec_Snip(rbl->m, mt->backlog, curs);
+    Abstract *args[] = {
+        (Abstract *)v,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)Str_CstrRef(m, "Hi how are you today?")), "String equals 'Hi how are you today?', have @", args);
 
     MemCh_Free(m);
     return r;

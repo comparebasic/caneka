@@ -9,6 +9,7 @@ enum stream_flags {
 };
 
 typedef i64 (*StreamFunc)(struct stream *sm, byte *b, i32 length);
+typedef i64 (*StreamAbsFunc)(struct stream *sm, Abstract *a);
 
 typedef struct stream {
     Type type;
@@ -23,6 +24,14 @@ typedef struct stream {
     Abstract *source;
 } Stream;
 
+typedef struct stream_task {
+    Type type;
+    i32 flags32;
+    Stream *sm;
+    Abstract *a;
+    StreamAbsFunc func;
+} StreamTask;
+
 i64 Stream_Bytes(Stream *sm, byte *b, i32 length);
 i64 Stream_VecTo(Stream *sm, StrVec *v);
 i64 Stream_Read(Stream *sm, i32 length);
@@ -32,3 +41,4 @@ Stream *Stream_MakeChain(MemCh *m, Span *chain);
 Stream *Stream_MakeFromFd(MemCh *m, i32 fd, word flags);
 Stream *Stream_MakeToFd(MemCh *m, i32 fd, StrVec *v, word flags);
 Stream *Stream_Make(MemCh *m);
+StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func);

@@ -2,17 +2,47 @@
 #include <caneka.h>
 
 Lookup *ToStreamLookup = NULL;
+Lookup *ToSFlagLookup = NULL;
+Str **stateLabels = NULL;
 
 status StreamTo_Init(MemCh *m){
+    status r = READY;
     if(ToStreamLookup == NULL){
         ToStreamLookup = Lookup_Make(m, _TYPE_START, NULL, NULL);
+        ToSFlagLookup = Lookup_Make(m, _TYPE_START, NULL, NULL);
         Mem_ToSInit(m, ToStreamLookup);
         Str_ToSInit(m, ToStreamLookup);
         Sequence_ToSInit(m, ToStreamLookup);
         Util_ToSInit(m, ToStreamLookup);
-        return SUCCESS;
+        r |= SUCCESS;
     }
-    return NOOP;
+    if(stateLabels == NULL){
+        stateLabels = (Str **)Arr_Make(m, 17);
+        stateLabels[0] = Str_CstrRef(m, "ZERO/READY");
+        stateLabels[1] = Str_CstrRef(m, "SUCCESS");
+        stateLabels[2] = Str_CstrRef(m, "ERROR");
+        stateLabels[3] = Str_CstrRef(m, "NOOP");
+        stateLabels[4] = Str_CstrRef(m, "DEBUG");
+        stateLabels[5] = Str_CstrRef(m, "MORE");
+        stateLabels[6] = Str_CstrRef(m, "CONTINUE");
+        stateLabels[7] = Str_CstrRef(m, "END");
+        stateLabels[8] = Str_CstrRef(m, "PROCESSING");
+        stateLabels[9] = Str_CstrRef(m, "CLS_FLAG_ALPHA");
+        stateLabels[10] = Str_CstrRef(m, "CLS_FLAG_BRAVO");
+        stateLabels[11] = Str_CstrRef(m, "CLS_FLAG_CHARLIE");
+        stateLabels[12] = Str_CstrRef(m, "CLS_FLAG_DELTA");
+        stateLabels[13] = Str_CstrRef(m, "CLS_FLAG_ECHO");
+        stateLabels[14] = Str_CstrRef(m, "CLS_FLAG_FOXTROT");
+        stateLabels[15] = Str_CstrRef(m, "CLS_FLAG_GOLF");
+        stateLabels[16] = Str_CstrRef(m, "CLS_FLAG_HOTEL");
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
 }
 
 void indent_Print(int indent){
@@ -67,26 +97,33 @@ i64 Str_AddFlags(Str *s, word flags, char *map){
     return total;
 }
 
-i64 Str_AddFlagLabels(Str *s, word flags, Str **labels){
+i64 ToS_FlagLabels(Stream *sm, Abstract *a){
+    Str **labels = Lookup_Get(ToSFlagLookup, a->type.of);
+    Str *lbl;
     i64 total = 0;
+    boolean first = TRUE;
+    word flags = a->type.state;
     if(flags == 0){
-        if(Str_Add(s, labels[0]->bytes, labels[0]->length) != labels[0]->length){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, 
-                "Not enough room in str", NULL);
+        if(labels != NULL && labels[0] != NULL){
+            lbl = labels[0];
+        }else{
+            lbl = stateLabels[0];
         }
-        total += labels[0]->length;
+        total += Stream_Bytes(sm, lbl->bytes, lbl->length);
     }else{
         for(i32 i = 0; i < 16; i++){ 
            if((flags & (1 << i)) != 0){
-                if(s->length > 0){
-                    total += Str_Add(s, (byte *)"|", 1);
+                if(first){
+                    first = FALSE;
+                }else{
+                    total += Stream_Bytes(sm, (byte *)"|", 1);
                 }
-                Str *label = labels[i+1];
-                if(Str_Add(s, label->bytes, label->length) != label->length){
-                    Fatal(FUNCNAME, FILENAME, LINENUMBER, 
-                        "Not enough room in str", NULL);
+                if(labels != NULL && labels[i+1] != NULL){
+                    lbl = labels[i+1];
+                }else{
+                    lbl = stateLabels[i+1];
                 }
-                total += label->length;
+                total += Stream_Bytes(sm, lbl->bytes, lbl->length);
            }
         }
     }

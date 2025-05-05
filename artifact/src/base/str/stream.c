@@ -1,6 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
+StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func){
+    StreamTask *tsk = (StreamTask *)MemCh_Alloc(m, sizeof(StreamTask));
+    tsk->type.of = TYPE_STREAM_TASK;
+    tsk->sm = sm;
+    tsk->a = a;
+    tsk->func = func;
+    return tsk;
+}
+
 i64 Stream_Bytes(Stream *sm, byte *b, i32 length){
     return sm->func(sm, b, length);
 }

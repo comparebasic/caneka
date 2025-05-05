@@ -60,6 +60,11 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                         ((s->type.state|sm->type.state) & DEBUG));
                     goto next;
                 }
+            }else if(a->type.of == TYPE_STREAM_TASK){
+                StreamTask *tsk = (StreamTask *)a;
+                total += tsk->func(sm, tsk->a); 
+                state = SUCCESS;
+                goto next;
             }else if(a->type.of == TYPE_WRAPPED_PTR && ((Single *)a)->objType.of != 0){
                 Single *sg = (Single *)a;
                 type = sg->objType.of;

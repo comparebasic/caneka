@@ -142,6 +142,12 @@ static TestSet _Tests[] = {
         "Roebling mark tests.",
         FEATURE_COMPLETE,
     },
+    {
+        "Roebling Start Stop Tests",
+        RoeblingStartStop_Tests,
+        "Roebling start and stop in the middle of recieving input tests.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",

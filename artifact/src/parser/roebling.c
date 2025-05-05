@@ -82,9 +82,11 @@ status Roebling_RunCycle(Roebling *rbl){
     }
     rbl->type.state &= ~END;
     if((rbl->type.state & ROEBLING_NEXT) != 0){
+        printf("NEXT\n");
         Match *mt = rbl->matchIt.value;
         rbl->tail = 0;
-        if(mt != NULL && mt->jump > -1){
+        if(mt != NULL && (mt->type.state & MATCH_JUMP)){
+            printf("JUMPING 5o %d\n", mt->jump);
             rbl->parseIt.idx = mt->jump;
         }else{
             rbl->parseIt.idx++;
@@ -155,6 +157,8 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i32 
     mt->captureKey = captureKey;
     if(jump != -1){
         mt->jump = Roebling_GetMarkIdx(rbl, jump);
+        printf("jump to MarkIdx %d\n", mt->jump);
+        mt->type.state |= MATCH_JUMP;
     }
 
     Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_ADD);
