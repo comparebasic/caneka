@@ -3,7 +3,7 @@
 
 static Span *stack = NULL;
 static boolean _fuse = TRUE;
-static void sigH(int sig, siginfo_t *info, void *ptr){
+static void sigH(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
         _fuse = FALSE;
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
@@ -27,8 +27,8 @@ static void setSigs(){
     sigaction(SIGINT, &b, NULL);
 }
 
-int DEBUG_STACK_COLOR = COLOR_GREEN;
-int _stackIdx = 0;
+i32 DEBUG_STACK_COLOR = COLOR_GREEN;
+i32 _stackIdx = 0;
 
 status DebugStack_Init(MemCh *m){
     _stackIdx = 0;
@@ -40,7 +40,7 @@ status DebugStack_Init(MemCh *m){
     return SUCCESS;
 }
 
-void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, int line, int pos){
+void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line, i32 pos){
     stack->m->type.range--;
 
     StackEntry *entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
@@ -81,17 +81,13 @@ i32 DebugStack_Print(Stream *sm, word flags){
             Stream_Bytes(sm, (byte *)entry->funcName, strlen(entry->funcName));
             Stream_Bytes(sm, (byte *)"\x1b[22m:", 6);
             Stream_Bytes(sm, (byte *)entry->fname, strlen(entry->fname));
-            Stream_Bytes(sm, (byte *)":", 1);
-            byte lineNo[MAX_BASE10+1];
-            byte *b = lineNo;
-            i64 length = Str_I64OnBytes(&b, entry->line);
-            Stream_Bytes(sm, (byte *)b, length);
-            if(flags & MORE){
-                Abstract *args[] = {entry->ref, NULL};
-                if(entry->ref != NULL && entry->typeOf != 0){
-                    Fmt(sm, "^y@^0", args);
-                }else if(entry->ref != NULL && entry->typeOf == 0){
-                    Fmt(sm, "^y@^0", args);
+            if(flags & MORE && entry->ref != NULL){
+                Stream_Bytes(sm, (byte *)" - \x1b[1m", 8);
+                if(entry->typeOf == TYPE_CSTR){
+                    Str *s = Str_CstrRef(sm->m, (char *)entry->ref);
+                    ToS(sm, (Abstract *)s, s->type.of, MORE);
+                }else if(entry->typeOf != 0){
+                    ToS(sm, entry->ref, entry->typeOf, MORE);
                 }
             }
             Stream_Bytes(sm, (byte *)"\x1b[0m\n", 5);
