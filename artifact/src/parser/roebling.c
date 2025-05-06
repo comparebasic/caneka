@@ -39,14 +39,8 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 }
 
                 rbl->capture(rbl, mt->captureKey, v);
-                if((mt->snip.type.state & SNIP_UNCLAIMED) != 0 &&
-                        mt->snip.length > 1){
-                    Abstract *args[] = {
-                        (Abstract *)&mt->snip,
-                        NULL
-                    };
-                    Debug("Decr @", args);
-                    Cursor_Decr(rbl->curs, mt->snip.length-1);
+                if((mt->snip.type.state & SNIP_UNCLAIMED) != 0 && mt->snip.length > 0){
+                    Cursor_Decr(rbl->curs, mt->snip.length);
                 }
 
                 Guard_Reset(&rbl->guard);
