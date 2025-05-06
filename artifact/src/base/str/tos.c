@@ -154,7 +154,9 @@ i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
 }
 
 i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
+    DebugStack_Push(a, type);
     if(a == NULL){
+        DebugStack_Pop();
         return Stream_Bytes(sm, (byte *)"NULL", 4);
     }
 
@@ -164,6 +166,7 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
 
     ToSFunc func = (ToSFunc)Lookup_Get(ToStreamLookup, type);
     if(func != NULL){
+        DebugStack_Pop();
         return func(sm, a, type, flags);
     }else{
         Abstract *args[] = {
@@ -172,6 +175,7 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
         Fmt(sm, "$/$: unknown-debug", args);
+        DebugStack_Pop();
         return 0;
     }
 }

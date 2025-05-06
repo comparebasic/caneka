@@ -70,27 +70,31 @@ void DebugStack_SetRef(void *v, word typeOf){
     entry->typeOf = typeOf;
 }
 
-int DebugStack_Print(){
+i32 DebugStack_Print(Stream *sm, word flags){
     Iter it;
     Iter_Init(&it, stack);
     boolean first = TRUE;
-    while((Iter_Next(&it) & END) == 0){
+    while((Iter_Prev(&it) & END) == 0){
         StackEntry *entry = (StackEntry*)it.value;
         if(entry != NULL){
-            Abstract *args[] = {
-                (Abstract *)Str_CstrRef(ErrStream->m, entry->funcName),
-                (Abstract *)Str_CstrRef(ErrStream->m, entry->fname),
-                (Abstract *)I32_Wrapped(ErrStream->m, entry->line),
-                NULL,
-            };
-            Fmt(ErrStream, "    ^Dy.$^d. - $:$^0 ", args);
-            Abstract *args2[] = {entry->ref, NULL};
-            if(entry->ref != NULL && entry->typeOf != 0){
-                Out("^y@^0", args2);
-            }else if(entry->ref != NULL && entry->typeOf == 0){
-                Out("^y@^0", args2);
+            Stream_Bytes(sm, (byte *)"    \x1b[1;33m", 12);
+            Stream_Bytes(sm, (byte *)entry->funcName, strlen(entry->funcName));
+            Stream_Bytes(sm, (byte *)"\x1b[22m:", 6);
+            Stream_Bytes(sm, (byte *)entry->fname, strlen(entry->fname));
+            Stream_Bytes(sm, (byte *)":", 1);
+            byte lineNo[MAX_BASE10+1];
+            byte *b = lineNo;
+            i64 length = Str_I64OnBytes(&b, entry->line);
+            Stream_Bytes(sm, (byte *)b, length);
+            if(flags & MORE){
+                Abstract *args[] = {entry->ref, NULL};
+                if(entry->ref != NULL && entry->typeOf != 0){
+                    Fmt(sm, "^y@^0", args);
+                }else if(entry->ref != NULL && entry->typeOf == 0){
+                    Fmt(sm, "^y@^0", args);
+                }
             }
-            Out("\n", NULL);
+            Stream_Bytes(sm, (byte *)"\x1b[0m\n", 5);
         }
     }
     return 0;

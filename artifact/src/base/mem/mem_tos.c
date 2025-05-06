@@ -106,13 +106,18 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
                 it.value,
                 NULL
             };
+            if(flags & DEBUG){
+                total += Stream_Bytes(sm, (byte *)"\n    ", 5);
+            }
             if(flags & (MORE|DEBUG)){
                 total += Fmt(sm, "$:@", args);
             }else{
                 total += ToS(sm, it.value, 0, flags);
             }
-            if(flags & (MORE|DEBUG) && (it.type.state & FLAG_ITER_LAST) == 0){
+            if((it.type.state & FLAG_ITER_LAST) == 0 && (flags & MORE)){
                 total += Stream_Bytes(sm, (byte *)", ", 2);
+            }else if (flags & DEBUG){
+                total += Stream_Bytes(sm, (byte *)"\n  ", 3);
             }
         }
     }

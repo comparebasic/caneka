@@ -148,6 +148,12 @@ static TestSet _Tests[] = {
         "Roebling start and stop in the middle of recieving input tests.",
         FEATURE_COMPLETE,
     },
+    {
+        "Mess Tests",
+        Mess_Tests,
+        "From a basic Fmt Roebling parser into the Mess data structures.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",
@@ -196,7 +202,9 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
+    DebugStack_Push(NULL, 0);
     test(m);
 
+    DebugStack_Pop();
     return 0;
 }

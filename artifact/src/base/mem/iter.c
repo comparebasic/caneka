@@ -63,7 +63,7 @@ status Iter_Prev(Iter *it){
     boolean skipNull = (it->type.state & SPAN_OP_ADD) == 0;
     void **ptr = NULL;
 
-    if(it->type.state & SPAN_OP_GET){
+    if((it->type.state & SPAN_OP_GET) == 0){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Iter_Prev can only use Get not Set or Add", NULL);
         return ERROR;
     }
@@ -76,6 +76,10 @@ status Iter_Prev(Iter *it){
         Iter_Query(it);
         goto end;
     }else{
+        if(it->idx == 0){
+            it->type.state |= END;
+            goto end;
+        }
         if(topDim == 0){
             if((it->stackIdx[dim]-1) >= 0){
                 it->stackIdx[dim]--;
@@ -140,10 +144,6 @@ status Iter_Prev(Iter *it){
         }
     }
 end:
-    if(idx == 0){
-        it->type.state |= END;
-    }
-
     it->idx = idx;
     if(((it->type.state & SPAN_OP_GET) && it->value != NULL)){
         it->type.state &= ~NOOP;

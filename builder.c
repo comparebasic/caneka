@@ -95,14 +95,14 @@ static void successMsg(char *name, char **sources){
     fflush(stdout);
 }
 
-static void failureMsg(char *name, char **sources){
+static void failureMsg(char *name, char **sources, int code){
     printf("\r\x1b[0K\x1b[31m");
     printf("%s:", name);
     char **p = sources;
     while(*p != NULL){
         printf(" %s", *p++);
     }
-    printf("... error\n");
+    printf("... error code %d\n", code);
     printf("\x1b[0m");
     fflush(stdout);
 }
@@ -190,7 +190,7 @@ static state run(char *name, char **sources){
     if(pd.code == 0){
         successMsg(name, sources);
     }else{
-        failureMsg(name, sources);
+        failureMsg(name, sources, pd.code);
         exit(1);
     }
     return SUCCESS;

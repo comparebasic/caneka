@@ -165,7 +165,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
                 Str_Ref(sm->m, curs->ptr, 1, 1, DEBUG) : 
                 Str_CstrRef(sm->m, "?")),
             (Abstract *)(curs->ptr != NULL ?
-                Str_Ref(sm->m, curs->ptr, length, length, 0) :
+                Str_Ref(sm->m, curs->ptr, length, length, DEBUG) :
                 NULL),
             NULL
         };
@@ -176,11 +176,11 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)curs, ToS_FlagLabels),
             (Abstract *)I64_Wrapped(sm->m, pos),
             (Abstract *)I64_Wrapped(sm->m, curs->v->total),
-            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length, 0),
+            (Abstract *)Str_Ref(sm->m, curs->ptr, length, length, DEBUG),
             NULL
         };
 
-        return  Fmt(sm, "Curs<$ $/$ ^D.'@'^d.>", args);
+        return  Fmt(sm, "Curs<$ $/$ ^D.'$'^d.>", args);
     }
 }
 

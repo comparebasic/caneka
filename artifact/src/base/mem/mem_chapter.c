@@ -15,9 +15,9 @@ i64 MemCh_MemCount(MemCh *m, i16 level){
 
 void *MemCh_Alloc(MemCh *m, size_t sz){
     if(sz > MEM_SLAB_SIZE){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
+        Fatal("MemCh_Alloc", FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
     }
-    Guard_Incr(&m->guard, MEM_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
+    Guard_Incr(&m->guard, MEM_GUARD_MAX, "MemCh_Alloc", FILENAME, LINENUMBER);
 
     i16 level = max(m->type.range, 0);
     word _sz = (word)sz;

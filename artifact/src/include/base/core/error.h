@@ -8,6 +8,9 @@
 #define LINENUMBER __LINE__
 #endif
 
+extern struct span *ErrorHandlerTable; /* Hashable -> Maker */
+
 void Cleanup(Abstract *a);
-void *Error(char *msg);
-void *Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]);
+void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]);
+void ShowError(char *func, char *file, int line, char *fmt, Abstract *args[]);
+void Error(MemCh *m, Abstract *a, char *func, char *file, int line, char *fmt, Abstract *args[]);

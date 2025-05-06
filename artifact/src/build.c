@@ -75,6 +75,14 @@ static BuildSubdir cryptoobj = { "crypto", {
     NULL
 }};
 
+static BuildSubdir fmtobj = { "formats/fmt", {
+    "fmt.c",
+    "fmt_roebling.c",
+    "fmt_tokenize.c",
+    NULL
+}};
+
+
 static BuildSubdir xmlobj = { "formats/xml", {
     "xml.c",
     "xml_parser.c",
@@ -116,11 +124,6 @@ static BuildSubdir rblshobj = { "formats/cnkrbl", {
     "rblsh_items.c",
     "rblsh_syntax.c",
     NULL,
-}};
-
-static BuildSubdir fmtobj = { "formats/fmt", {
-    "fmt_html.c",
-    NULL
 }};
 
 static BuildSubdir httpobj = { "formats/http", {
@@ -205,6 +208,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "roebling_tests.c",
     "snip_tests.c",
     "cursor_tests.c",
+    "mess_tests.c",
     /*
     "crypto_tests.c",
     "http_tests.c",
@@ -242,7 +246,9 @@ static BuildSubdir *objdirs[] = {
     &osetobj,
     &xmlobj,
     &rblshobj,
+    */
     &fmtobj,
+    /*
     &termiofmtobj,
     &httpobj,
     &cdocobj,

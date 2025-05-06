@@ -1,21 +1,32 @@
 #include <external.h>
 #include <caneka.h>
 
+Table *ErrorHandlerTable = NULL;
 static boolean crashing = FALSE;
 
-void *Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
-#ifdef CLI    
+void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
+    if(crashing){
+        Stream_Bytes(ErrStream, (byte *)"\n\x1b[1;31mFatal called after crashing\x1b[0m", 39);
+        exit(9);
+        return;
+    }
+#ifdef CLI 
     RawMode(FALSE);
 #endif
-    Abstract *args1[] = {
-        (Abstract *)Str_CstrRef(ErrStream->m, func),
-        (Abstract *)Str_CstrRef(ErrStream->m, file),
-        (Abstract *)I32_Wrapped(ErrStream->m, line),
-        NULL
-    };
-    Fmt(ErrStream, "^r.Fatal Error: $:$:$ ^D", args1);
+    crashing = TRUE;
+    Stream_Bytes(ErrStream, (byte *)"\n\x1b[22;31m", 9);
+    Stream_Bytes(ErrStream, (byte *)"Fatal Error:\x1b[1m", 16);
+    Stream_Bytes(ErrStream, (byte *)func, strlen(func));
+    Stream_Bytes(ErrStream, (byte *)"\x1b[22m:", 6);
+    Stream_Bytes(ErrStream, (byte *)file, strlen(file));
+    Stream_Bytes(ErrStream, (byte *)":", 1);
+    byte lineNo[MAX_BASE10+1];
+    byte *b = lineNo;
+    i64 length = Str_I64OnBytes(&b, line);
+    Stream_Bytes(ErrStream, (byte *)b, length);
+    Stream_Bytes(ErrStream, (byte *)" \x1b[1m", 5);
     Fmt(ErrStream, fmt, args);
-    Fmt(ErrStream, "^0.", NULL);
+    Stream_Bytes(ErrStream, (byte *)"\x1b[0m", 4);
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();
@@ -29,10 +40,43 @@ void *Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
     }
 #endif
     Stream_Bytes(ErrStream, (byte *)"\n", 1);
-    if(!crashing){
-        crashing = TRUE;
-        DebugStack_Print();
-    }
+    DebugStack_Print(ErrStream, 0);
     exit(13);
-    return NULL;
+}
+
+void Error(MemCh *m, Abstract *a, char *func, char *file, int line, char *fmt, Abstract *args[]){
+    if(ErrorHandlerTable != NULL){
+        Maker mk = (Maker)Table_Get(ErrorHandlerTable, a);
+        if(mk != NULL){
+            mk(m, a);
+            return;
+        }
+    }
+    ShowError(func, file, line, fmt, args);
+    return;
+}
+
+void ShowError(char *func, char *file, int line, char *fmt, Abstract *args[]){
+    if(crashing){
+        return Fatal(func, file, line, fmt, args);
+    }
+#ifdef CLI 
+    RawMode(FALSE);
+#endif
+    Stream_Bytes(ErrStream, (byte *)"\n\x1b[22;31m", 9);
+    Stream_Bytes(ErrStream, (byte *)"Error:\x1b[1m", 10);
+    Stream_Bytes(ErrStream, (byte *)func, strlen(func));
+    Stream_Bytes(ErrStream, (byte *)"\x1b[22m:", 6);
+    Stream_Bytes(ErrStream, (byte *)file, strlen(file));
+    Stream_Bytes(ErrStream, (byte *)":", 1);
+    byte lineNo[MAX_BASE10+1];
+    byte *b = lineNo;
+    i64 length = Str_I64OnBytes(&b, line);
+    Stream_Bytes(ErrStream, (byte *)b, length);
+    Stream_Bytes(ErrStream, (byte *)" \x1b[1m", 5);
+    Fmt(ErrStream, fmt, args);
+    Stream_Bytes(ErrStream, (byte *)"\x1b[0m", 4);
+    Stream_Bytes(ErrStream, (byte *)"\n", 1);
+    DebugStack_Print(ErrStream, MORE);
+    exit(1);
 }

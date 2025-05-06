@@ -28,6 +28,7 @@ status Roebling_Tests(MemCh *gm);
 status RoeblingRun_Tests(MemCh *gm);
 status RoeblingMark_Tests(MemCh *gm);
 status RoeblingStartStop_Tests(MemCh *gm);
+status Mess_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

@@ -3,6 +3,7 @@ typedef struct mess {
     MemCh *m;
     Node *root;
     Abstract *source;
+    Lookup *tokenizer;
 } Mess;
 
 status Mess_Append(Mess *set, Node *node, Abstract *a);

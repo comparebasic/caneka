@@ -59,7 +59,7 @@ static PatCharDef lastValueDef[] = {
     {PAT_END, 0, 0}
 };
 
-static status start(MemCtx *m, Roebling *rbl){
+static status start(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -82,7 +82,7 @@ static status start(MemCtx *m, Roebling *rbl){
     return r;
 }
 
-static status line(MemCtx *m, Roebling *rbl){
+static status line(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -92,7 +92,7 @@ static status line(MemCtx *m, Roebling *rbl){
     return r;
 }
 
-static status noLeadLine(MemCtx *m, Roebling *rbl){
+static status noLeadLine(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -106,7 +106,7 @@ static status noLeadLine(MemCtx *m, Roebling *rbl){
     return r;
 }
 
-static status value(MemCtx *m, Roebling *rbl){
+static status value(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -120,7 +120,7 @@ static status value(MemCtx *m, Roebling *rbl){
     return r;
 }
 
-static status kvValue(MemCtx *m, Roebling *rbl){
+static status kvValue(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
@@ -131,50 +131,38 @@ static status kvValue(MemCtx *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    MessSet *mset = rbl->mset;
+    Mess *mset = rbl->mess;
     if(rbl->type.state & DEBUG){
         Abstract *args[] = {
-            (Abstract *)Type_ToStr(OutStream->m, captureKey);
+            (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
             (Abstract *)rbl,
             NULL
-        }
+        };
         Debug("^p.Fmt Capture $/@ from @^0\n", args);
     }
     return SUCCESS;
 }
 
-static void addPatterns(FmtCtx *fmt){
-    struct pat_config *cnf = pats;
-    Lookup *lk = Lookup_Make(fmt->m, 0, NULL, (Abstract *)fmt);
-    while(cnf->name != NULL){
-        FmtDef *def = FmtDef_Make(fmt->m);
-        def->name = String_Make(fmt->m, bytes(cnf->name));
-        if(cnf->alias != NULL){
-            def->alias = String_Make(fmt->m, bytes(cnf->alias));
-        }
-        def->id = lk->values->max_idx+1;
-        def->type.state = cnf->flags;
-        if(cnf->parent != 0){
-            def->parent = Lookup_Get(lk, def->id+cnf->parent);
-            if(def->parent != NULL){
-                def->parent->child = def;
-            }
-        }
-        Lookup_Add(fmt->m, lk, def->id, def);
-        cnf++;
-    }
-    Fmt_Add(fmt->m, fmt, lk);
-}
-
-Roebling *FormatFmt_Make(MemCtx *m, Abstract *source){
+Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_START));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)SetWord2));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, RBL_TEST_END));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_START));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)start));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_LINE));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)line));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_NOLEADLINE));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)noLeadLine));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_VALUE));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)value));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_KV_VALUE));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)kvValue));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_END));
     Roebling_Start(rbl);
 
+    rbl->capture = Capture;
+
     rbl->mess = Mess_Make(m);
+    rbl->mess->tokenizer = FormatFmt_Defs;
     rbl->source = source;
     return rbl;
 }
