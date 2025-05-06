@@ -44,10 +44,10 @@ status Span_Setup(Span *p){
 }
 
 Span *Span_Make(MemCh *m){
-    Span *p = MemCh_Alloc(m, sizeof(Span));
+    Span *p = MemCh_AllocOf(m, sizeof(Span), TYPE_SPAN);
     p->type.of = TYPE_SPAN;
     p->max_idx = -1;
     p->m = m;
-    p->root = (slab *)MemCh_Alloc((m), sizeof(slab));
+    p->root = (slab *)MemCh_AllocOf((m), sizeof(slab), TYPE_SLAB);
     return p;
 }

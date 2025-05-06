@@ -47,7 +47,7 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
         if(pg != NULL){
             *ptr = (slab *)MemPage_Alloc(pg, sizeof(slab));
         }else{
-            *ptr = (slab *)MemCh_Alloc((m), sizeof(slab));
+            *ptr = (slab *)MemCh_AllocOf((m), sizeof(slab), TYPE_SLAB);
         }
     }
 
@@ -317,7 +317,7 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
             if(pg != NULL){
                 new_sl = (slab *)MemPage_Alloc(pg, sizeof(slab));
             }else{
-                new_sl = (slab *)MemCh_Alloc((m), sizeof(slab));
+                new_sl = (slab *)MemCh_AllocOf((m), sizeof(slab), TYPE_SLAB);
             }
 
             if(exp_sl == NULL){

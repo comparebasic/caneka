@@ -6,10 +6,14 @@ status Guard_Reset(i16 *g){
     return SUCCESS;
 }
 
+boolean Guard(i16 *g, i16 max, char *func, char *file, int line){
+    return ++(*g) <= max;
+}
+
 status Guard_Incr(i16 *g, i16 max, char *func, char *file, int line){
-    if(++(*g) > max){
-        Fatal(func, file, line, "Guard failure", NULL);
-        return ERROR;
+    if(Guard(g, max, func, file, line)){
+        return SUCCESS;
     }
-    return NOOP;
+    Fatal(func, file, line, "Guard Error", NULL);
+    return ERROR;
 }

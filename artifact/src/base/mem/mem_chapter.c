@@ -14,10 +14,26 @@ i64 MemCh_MemCount(MemCh *m, i16 level){
 }
 
 void *MemCh_Alloc(MemCh *m, size_t sz){
+    return MemCh_AllocOf(m, sz, 0);
+}
+
+void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     if(sz > MEM_SLAB_SIZE){
-        Fatal("MemCh_Alloc", FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
     }
-    Guard_Incr(&m->guard, MEM_GUARD_MAX, "MemCh_Alloc", FILENAME, LINENUMBER);
+
+    if(!Guard(&m->guard, MEM_GUARD_MAX, "MemCh_Alloc", FILENAME, LINENUMBER)){
+        byte _b[128];
+        memset(_b, 0, 128);
+        Str s;
+        s.type.of = TYPE_STR;
+        s.bytes = _b;
+        s.alloc = 128;
+        Str_AddCstr(&s, "Guard Error allocating ");
+        Str_AddCstr(&s, Type_ToChars(typeOf));
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, (char *)s.bytes, NULL);
+        return NULL;
+    }
 
     i16 level = max(m->type.range, 0);
     word _sz = (word)sz;
@@ -35,7 +51,7 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
         sl = MemPage_Make(m, level);
         Iter_Setup(&m->it, m->it.span, SPAN_OP_SET, m->it.span->max_idx+1); 
         m->it.value = (void *)sl;
-        Iter_Query(&m->it);
+        _Iter_QueryPage(&m->it, sl);
         if(_capacity[m->it.span->dims] <= (m->it.span->max_idx+1)){
             Iter it;
             Iter_Setup(&it, m->it.span, SPAN_OP_RESERVE, m->it.span->max_idx+1); 

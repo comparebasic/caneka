@@ -132,14 +132,14 @@ static status kvValue(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mset = rbl->mess;
-    if(rbl->type.state & DEBUG){
+    if(1 || rbl->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
             (Abstract *)rbl,
             NULL
         };
-        Debug("^p.Fmt Capture $/@ from @^0\n", args);
+        Debug("^c.Fmt Capture $/@\n^pfrom @^0\n", args);
     }
     return SUCCESS;
 }

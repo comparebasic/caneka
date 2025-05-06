@@ -22,7 +22,6 @@ status Mess_Tests(MemCh *gm){
 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);
-    rbl->type.state |= DEBUG;
     Roebling_Run(rbl);
 
     MemCh_Free(m);

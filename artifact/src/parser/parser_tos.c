@@ -26,11 +26,7 @@ static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
     Str *fl = Str_Make(sm->m, FLAG_DEBUG_MAX+1);
     Str_AddFlags(fl, pat->flags, matchFlagChars);
     if(pat->flags == PAT_END){
-        Abstract *args[] = {
-            (Abstract *)fl,
-            NULL
-        };
-        total += Fmt(sm, "$", args);
+        total += Stream_Bytes(sm, fl->bytes, fl->length);
     } else if(pat->to == pat->from){
         Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
         Abstract *args[] = {

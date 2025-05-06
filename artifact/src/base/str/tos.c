@@ -166,8 +166,9 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
 
     ToSFunc func = (ToSFunc)Lookup_Get(ToStreamLookup, type);
     if(func != NULL){
+        i64 total = func(sm, a, type, flags);
         DebugStack_Pop();
-        return func(sm, a, type, flags);
+        return total;
     }else{
         Abstract *args[] = {
             (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),

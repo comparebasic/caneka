@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 char *TypeStrings[] = {
-    "_TYPE_START",
+    "TYPE_ZERO",
     "TYPE_UNKNOWN",
     "TYPE_BUILDCTX",
     "TYPE_ABSTRACT",
