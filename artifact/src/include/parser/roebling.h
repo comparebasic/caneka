@@ -20,6 +20,7 @@ typedef struct roebling {
     MemCh *m;
     Cursor *curs;
     Abstract *source; 
+    struct mess *mess;
     RblCaptureFunc capture;
     Iter parseIt;
     Lookup *marks;

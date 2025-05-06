@@ -5,10 +5,10 @@ enum token_flags {
     TOKEN_LAST_SEP = 1 << 11,
 };
 
-typedef struct token {
+typedef struct tokenize {
     Type type;
     i16 captureKey;
-    cls *typeOf;
-} Token;
+    cls typeOf;
+} Tokenize;
 
-Token *Token_Make(MemCh *m, word captureKey, word flags, cls *typeOf);
+Tokenize *Tokenize_Make(MemCh *m, word captureKey, word flags, cls typeOf);

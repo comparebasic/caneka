@@ -7,5 +7,6 @@
 #include "parser.h"
 #include "crypto.h"
 #include "persist.h"
+#include "navigate.h"
 
 #endif

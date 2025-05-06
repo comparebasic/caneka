@@ -31,12 +31,20 @@ static BuildSubdir typesobj = { "types", {
     "init.c",
     NULL
 }};
+
+static BuildSubdir navigateobj = { "navigate", {
+    "node.c",
+    "mess.c",
+    NULL
+}};
+
 static BuildSubdir parserobj = { "parser", {
     "match.c",
     "patchar.c",
     "roebling.c",
     "parser.c",
     "snip.c",
+    "tokenize.c",
     "parser_tos.c",
     NULL
 }};
@@ -222,6 +230,7 @@ static BuildSubdir testsobj = { "tests/tests", {
 
 static BuildSubdir *objdirs[] = {
     &typesobj,
+    &navigateobj,
     &parserobj,
     &testsobj,
     &fixturesobj,

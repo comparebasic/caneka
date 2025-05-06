@@ -26,7 +26,7 @@ struct iter;
 struct lookup;
 struct lookup_config;
 struct mess;
-struct mess_item;
+struct node;
 struct queue_idx;
 struct queue;
 struct span;

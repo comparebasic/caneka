@@ -1,41 +1,36 @@
 #include <external.h>
 #include <caneka.h>
 
-/*
-static status mess_Extend(Mess *existing, Mess *new){
-    if(existing != NULL){
-        while(existing->next != NULL){
-            existing = existing->next;
-        }
-        existing->next = new;
-        return SUCCESS;
-    }
-
-    return ERROR;
-}
-*/
-
-status Mess_Append(MessSet *set, Mess *ms, Abstract *key, Abstract *a){
-    if(ms->children == NULL){
-        ms->children = (Span *)OrdTable_Make(set->m); 
-    } 
+status Mess_Append(Mess *set, Node *node, Abstract *a){
     if(a->type.of == TYPE_MESS){
-        Mess *child = (Mess *)a;
-        child->parent = ms;
+        Node *child = (Node *)a;
+        child->parent = node;
     }
-    return Table_Set(ms->children, key, a);
+    if((node->type.state & (FLAG_CHILD|FLAG_CHILDREN)) == 0){
+        node->child.value = a;
+        node->type.state |= FLAG_CHILD;
+        return node->type.state;
+    }else if((node->type.state & FLAG_CHILD) == 0){
+        Abstract *value = node->child.value;
+        node->child.items = Span_Make(set->m);
+        Span_Add(node->child.items, value);
+    }
+
+    Span_Add(node->child.items, a);
+    return node->type.state;
 }
 
-status Mess_AddAtt(MessSet *set, Mess *ms,  Abstract *key, Abstract *value){
-    if(ms->atts == NULL){
-        ms->atts = (Span *)OrdTable_Make(set->m); 
+status Mess_AddAtt(Mess *mess, Node *node, Abstract *key, Abstract *value){
+    if(node->atts == NULL){
+        node->atts = Table_Make(mess->m); 
     } 
-    return Table_Set(ms->atts, key, value);
+    return Table_Set(node->atts, key, value);
 }
 
-Mess *Mess_Make(MemCtx *m, word tagIdx){
-    Mess *ms = (Mess *)MemCtx_Alloc(m, sizeof(Mess));
-    ms->type.of = TYPE_MESS;
-    ms->tagIdx = tagIdx;
-    return ms;
+Mess *Mess_Make(MemCh *m){
+    Mess *mess = (Mess *)MemCh_Alloc(m, sizeof(Mess));
+    mess->type.of = TYPE_MESS;
+    mess->m = m;
+    mess->root = Node_Make(m, 0);
+    return mess;
 }
