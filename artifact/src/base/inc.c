@@ -41,6 +41,7 @@
 #include "./suite/testsuite.c"
 #include "./types/clone.c"
 #include "./types/equals.c"
+#include "./types/combine.c"
 #include "./types/ifc.c"
 #include "./types/init.c"
 #include "./util/int.c"

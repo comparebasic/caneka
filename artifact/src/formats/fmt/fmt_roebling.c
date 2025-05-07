@@ -131,15 +131,32 @@ static status kvValue(MemCh *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    Mess *mset = rbl->mess;
+    Mess *mess = rbl->mess;
     if(1 || rbl->type.state & DEBUG){
+        Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
-            (Abstract *)rbl,
+            (Abstract *)tk,
+            (Abstract *)mess,
             NULL
         };
+        if(tk != NULL){
+            Mess_Tokenize(mess, tk, v);
+        }else{
+            Abstract *args[] = {
+                (Abstract *)Type_ToStr(rbl->m, captureKey),
+                NULL
+            };
+            Error(rbl->m, (Abstract *)rbl, FUNCNAME, FILENAME, LINENUMBER,
+                "Unable to find Tokenize for this captureKey: $", args);
+            return ERROR;
+        }
+        mess->type.state |= DEBUG;
+        Out("^c.Fmt Capture $/@\n    -> @\n^y.@^0.\n", args);
+        /*
         Debug("^c.Fmt Capture $/@\n^pfrom @^0\n", args);
+        */
     }
     return SUCCESS;
 }

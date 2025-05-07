@@ -81,6 +81,48 @@ i64 Lookup_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
+i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Table *tbl = (Table *)a;
+    if((flags & (DEBUG|MORE)) == 0){
+        return ToStream_NotImpl(sm, a, type, flags);
+    }else{
+        i64 total = 0;
+        if(flags & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tbl, ToS_FlagLabels),
+                (Abstract *)I32_Wrapped(sm->m, tbl->nvalues),
+                NULL
+            };
+            total += Fmt(sm, "Tbl<$ $nvalues\n", args);
+        }else{
+            total += Stream_Bytes(sm, (byte *)"{", 1);
+        }
+        Iter it;
+        Iter_Init(&it, tbl);
+        while((Iter_Next(&it) & END) == 0){
+            if(it.value != NULL){
+                Hashed *h = (Hashed *)it.value;
+                total += ToS(sm, h->item, 0, flags|MORE);
+                total += Stream_Bytes(sm, (byte *)"=", 1);
+                total += ToS(sm, h->value, 0, flags|MORE);
+                if((it.type.state & FLAG_ITER_LAST) == 0){
+                    if(flags & DEBUG){
+                        total += Stream_Bytes(sm, (byte *)"\n", 1);
+                    }else{
+                        total += Stream_Bytes(sm, (byte *)",", 1);
+                    }
+                }
+            }
+        }
+        if(flags & DEBUG){
+            total += Stream_Bytes(sm, (byte *)">", 1);
+        }else{
+            total += Stream_Bytes(sm, (byte *)"}", 1);
+        }
+        return total;
+    }
+}
+
 status Sequence_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);

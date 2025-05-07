@@ -1,0 +1,24 @@
+#include <external.h>
+#include <caneka.h>
+
+boolean Combine(Abstract *a, Abstract *b){
+    if(a->type.of == TYPE_STR && a->type.of == b->type.of){
+        Str *s = (Str *)b;
+        return Str_Add((Str *)a, s->bytes, s->length) == s->length;
+    }else if(a->type.of == TYPE_STRVEC){
+        if(a->type.of == b->type.of){
+            return (StrVec_AddVec((StrVec *)a, (StrVec *)b) & SUCCESS) != 0;
+        }else if(b->type.of == TYPE_STR){
+            return (StrVec_Add((StrVec*)a, (Str*)b) & SUCCESS) != 0;
+        }
+    }else if(a->type.of == TYPE_SPAN){
+        Span *p = (Span *)a;
+        if(b->type.of != TYPE_SPAN){
+            Iter it;
+            Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
+            it.value = b;
+            return (Iter_Query(&it) & SUCCESS) != 0;
+        }
+    }
+    return FALSE;
+}

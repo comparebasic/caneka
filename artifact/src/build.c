@@ -35,6 +35,7 @@ static BuildSubdir typesobj = { "types", {
 static BuildSubdir navigateobj = { "navigate", {
     "node.c",
     "mess.c",
+    "navigate_tos.c",
     NULL
 }};
 

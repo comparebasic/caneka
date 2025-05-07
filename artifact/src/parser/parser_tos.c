@@ -8,6 +8,7 @@ static char *snipChars = "_________CGBU_____";
 static Str **snipLabels = NULL;
 static Str **roeblingLabels = NULL;
 static Str **matchLabels = NULL;
+static Str **tokenizeLabels = NULL;
 
 static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
     PatCharDef *pat = (PatCharDef *)a;
@@ -276,11 +277,36 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
         r |= SUCCESS;
     }
 
+    if(tokenizeLabels == NULL){
+        tokenizeLabels = (Str **)Arr_Make(m, 17);
+        tokenizeLabels[9] = Str_CstrRef(m, "TOKEN_CLOSE");
+        tokenizeLabels[10] = Str_CstrRef(m, "TOKEN_CLOSE_OUTDENT");
+        tokenizeLabels[11] = Str_CstrRef(m, "TOKEN_LAST_ALUE");
+        tokenizeLabels[12] = Str_CstrRef(m, "TOKEN_LAST_SEP");
+        Lookup_Add(m, lk, TYPE_PATMATCH, (void *)tokenizeLabels);
+        r |= SUCCESS;
+    }
+
     if(r == READY){
         r |= NOOP;
     }
 
     return r;
+}
+
+static i64 Tokenize_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Tokenize *tk = (Tokenize *)as(a, TYPE_TOKENIZE); 
+    if((flags & (DEBUG|MORE)) == 0){
+        return ToStream_NotImpl(sm, a, type, flags);
+    }else{
+        Abstract *args[] = {
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tk, ToS_FlagLabels),
+            (Abstract *)Type_ToStr(sm->m, tk->captureKey),
+            (Abstract *)Type_ToStr(sm->m, tk->typeOf),
+            NULL
+        };
+        return Fmt(sm, "Tk<$ ^D.$^d./$>", args);
+    }
 }
 
 status Parser_ToSInit(MemCh *m, Lookup *lk){
@@ -291,6 +317,7 @@ status Parser_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATCHAR, (void *)PatChar_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIPSPAN, (void *)SnipSpan_Print);
+    r |= Lookup_Add(m, lk, TYPE_TOKENIZE, (void *)Tokenize_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIP, (void *)Snip_Print);
     return r;
 }

@@ -1,0 +1,114 @@
+#include <external.h>
+#include <caneka.h>
+
+static Str **nodeLabels = NULL;
+static Str **messLabels = NULL;
+
+static i64 NestedD_Print(Stream *sm, Abstract *a, cls type, word flags){
+    /*
+    NestedD *nd = (NestedD *)as(a, TYPE_NESTEDD);
+    printf("\x1b[%dmND<%s: ", color, State_ToChars(nd->type.state));
+    Debug_Print((void *)nd->current_tbl, 0, "", color, extended);
+    Iter it;
+    Iter_InitReverse(&it, nd->stack);
+    printf("\x1b[%dm stack/%d=(", color, nd->stack->nvalues);
+    while((Iter_Next(&it) & END) == 0){
+        NestedState *ns = (NestedState *)Iter_Get(&it);
+        printf("\x1b[%dm%s -> ", color, NestedD_opToChars(ns->flags));
+        Debug_Print((void *) ns->t, 0, "", color, FALSE);
+        if((it.type.state & FLAG_ITER_LAST) == 0){
+            printf("\x1b[%dm,", color);
+        }
+    }
+    printf("\x1b[%dm)>\x1b[0m", color);
+    */
+    return 0;
+}
+
+static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Node *nd = (Node*)as(a, TYPE_NODE);
+    i64 total = 0;
+    Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
+        (Abstract *)Type_ToStr(sm->m, nd->captureKey),
+        (Abstract *)(nd->parent != NULL ?
+            Type_ToStr(sm->m, nd->parent->type.of) : NULL),
+        (Abstract *)nd->atts,
+        NULL
+    };
+    total += Fmt(sm, "N<$ $ $parent atts:@", args);
+    if(flags & MORE){
+        if(flags & DEBUG){
+            total += Stream_Bytes(sm, (byte *)"\n  =", 4);
+        }else{
+            total += Stream_Bytes(sm, (byte *)" =", 2);
+        }
+        total += ToS(sm, nd->child.value, 0, flags);
+    }
+    if(flags & DEBUG){
+        total += Stream_Bytes(sm, (byte *)"\n", 1);
+    }
+    total += Stream_Bytes(sm, (byte *)">", 1);
+    return total;
+}
+
+static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Mess *ms = (Mess *)as(a, TYPE_MESS);
+    if((flags & (DEBUG|MORE)) == 0){
+        return ToStream_NotImpl(sm, a, type, flags);
+    }else{
+        i64 total = 0;
+        Abstract *args[] = {
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ms, ToS_FlagLabels),
+            NULL
+        };
+        total += Fmt(sm, "Mess<$", args);
+        if(flags & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)ms->current,
+                (Abstract *)ms->currentValue,
+                NULL
+            };
+            total += Fmt(sm, " current:$ value:@\n  [", args);
+        }else{
+            total += Stream_Bytes(sm, (byte *)" [", 2);
+        }
+        total += ToS(sm, (Abstract *)ms->root, 0, flags);
+        total += Stream_Bytes(sm, (byte *)"]>", 2);
+        return total;
+    }
+}
+
+status Navigate_InitLabels(MemCh *m, Lookup *lk){
+    status r = READY;
+    /*
+    if(messLabels == NULL){
+        messLabels = (Str **)Arr_Make(m, 17);
+        Lookup_Add(m, lk, TYPE_PATMATCH, (void *)messLabels);
+        r |= SUCCESS;
+    }
+    */
+    if(nodeLabels == NULL){
+        nodeLabels = (Str **)Arr_Make(m, 17);
+        nodeLabels[9] = Str_CstrRef(m, "FLAG_CHILDREN");
+        nodeLabels[10] = Str_CstrRef(m, "FLAG_CHILD");
+        Lookup_Add(m, lk, TYPE_NODE, (void *)nodeLabels);
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
+
+
+status Navigate_ToSInit(MemCh *m, Lookup *lk){
+    status r = READY;
+    r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
+    r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
+    r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
+    return r;
+}
+

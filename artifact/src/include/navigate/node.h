@@ -5,7 +5,8 @@ enum node_flags {
 
 typedef struct node {
     Type type;
-    i32 idx;
+    i16 _;
+    i16 captureKey;
     struct node *parent; /*util id*/
     Table *atts;
     union {
