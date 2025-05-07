@@ -126,7 +126,7 @@ i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
 status Sequence_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_LOOKUP, (void *)Lookup_Print);
-    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Span_Print);
+    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Table_Print);
     r |= Lookup_Add(m, lk, TYPE_HKEY, (void *)HKey_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     return r;

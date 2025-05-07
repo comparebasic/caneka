@@ -51,6 +51,11 @@ static util Hash_Span(Abstract *a){
     return 0;
 }
 
+static util Hash_WI16(Abstract *a){
+    Single *sg = (Single *)a;
+    return (util)sg->val.w;
+}
+
 static status populateHash(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
@@ -60,6 +65,7 @@ static status populateHash(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)Hash_WI16);
     return r;
 }
 
@@ -111,10 +117,9 @@ Hashed *Hashed_Clone(MemCh *m, Hashed *oh){
     return h;
 }
 
-
 status Hash_Init(MemCh *m){
     if(HashLookup == NULL){
-        HashLookup = Lookup_Make(m, _TYPE_START, populateHash, NULL);
+        HashLookup = Lookup_Make(m, _TYPE_ZERO, populateHash, NULL);
         return SUCCESS;
     }
     return NOOP;

@@ -2,7 +2,7 @@
 
 
 enum types {
-    _TYPE_START,
+    _TYPE_ZERO,
     TYPE_UNKNOWN,
     TYPE_BUILDCTX,
     TYPE_ABSTRACT,
@@ -29,6 +29,7 @@ enum types {
     TYPE_MEMLOCAL,
     TYPE_MEMLOCAL_ITEM,
     TYPE_MESS,
+    TYPE_MESS_CLIMBER,
     TYPE_NODE,
     TYPE_MAKER,
     TYPE_CSTR,

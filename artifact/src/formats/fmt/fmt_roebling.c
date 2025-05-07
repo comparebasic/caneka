@@ -142,6 +142,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             NULL
         };
         if(tk != NULL){
+            tk->type.state |= DEBUG;
             Mess_Tokenize(mess, tk, v);
         }else{
             Abstract *args[] = {
@@ -153,7 +154,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             return ERROR;
         }
         mess->type.state |= DEBUG;
-        Out("^c.Fmt Capture $/@\n    -> @\n^y.@^0.\n", args);
+        Out("^c.Fmt After Capture $/@\n    -> @\n^y.@^0.\n", args);
         /*
         Debug("^c.Fmt Capture $/@\n^pfrom @^0\n", args);
         */

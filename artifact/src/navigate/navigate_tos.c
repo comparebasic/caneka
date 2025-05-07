@@ -30,25 +30,67 @@ static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
+        (Abstract *)Type_ToStr(sm->m, nd->typeOfChild),
         (Abstract *)Type_ToStr(sm->m, nd->captureKey),
         (Abstract *)(nd->parent != NULL ?
-            Type_ToStr(sm->m, nd->parent->type.of) : NULL),
+            Type_ToStr(sm->m, nd->parent->captureKey) : NULL),
         (Abstract *)nd->atts,
         NULL
     };
-    total += Fmt(sm, "N<$ $ $parent atts:@", args);
+    total += Fmt(sm, "N<$/$ $ parent(@) atts:@", args);
     if(flags & MORE){
-        if(flags & DEBUG){
-            total += Stream_Bytes(sm, (byte *)"\n  =", 4);
-        }else{
-            total += Stream_Bytes(sm, (byte *)" =", 2);
-        }
-        total += ToS(sm, nd->child.value, 0, flags);
-    }
-    if(flags & DEBUG){
-        total += Stream_Bytes(sm, (byte *)"\n", 1);
+        total += Stream_Bytes(sm, (byte *)" =", 2);
+        Str *s = Type_ToStr(sm->m, 
+            (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO));
+        total += Stream_Bytes(sm, s->bytes, s->length);
     }
     total += Stream_Bytes(sm, (byte *)">", 1);
+    return total;
+}
+
+static i64 MessClimber_PrintItems(Stream *sm, MessClimber *climber, word flags, i64 total){
+    i32 nested = ++climber->nested;
+    if(climber->current != NULL){
+        Abstract *current = climber->current;
+        total += Stream_Bytes(sm, (byte *)"\n", 1);
+        while(nested--){
+            total += Stream_Bytes(sm, (byte *)"  ", 2);
+        }
+        if(current->type.of == TYPE_NODE){
+            Node *nd = (Node *)climber->current;
+            total += ToS(sm, (Abstract *)nd, 0, flags);
+            if(nd->typeOfChild == TYPE_SPAN){
+                total += Stream_Bytes(sm, (byte *)"[", 1);
+                Iter it;
+                Iter_Init(&it, (Span *)nd->child);
+                while((Iter_Next(&it) & END) == 0){
+                    climber->current = it.value;
+                    total += MessClimber_PrintItems(sm, climber, flags, total);
+                }
+                total += Stream_Bytes(sm, (byte *)"]", 1);
+            }else if(nd->typeOfChild == TYPE_NODE){
+                climber->current = nd->child;
+                total += Stream_Bytes(sm, (byte *)"<", 2);
+                total += MessClimber_PrintItems(sm, climber, flags, total);
+                total += Stream_Bytes(sm, (byte *)">", 1);
+            }else{
+                climber->current = nd->child;
+                total += MessClimber_PrintItems(sm, climber, flags, total);
+            }
+        }else if(current->type.of == TYPE_SPAN){
+            Iter it;
+            Iter_Init(&it, (Span *)current);
+            while((Iter_Next(&it) & END) == 0){
+                climber->current = it.value;
+                total += MessClimber_PrintItems(sm, climber, flags, total);
+            }
+        }else{
+            total += ToS(sm, current, 0, MORE|DEBUG);
+        }
+        climber->current = current;
+    }
+
+    climber->nested--;
     return total;
 }
 
@@ -69,12 +111,18 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
                 (Abstract *)ms->currentValue,
                 NULL
             };
-            total += Fmt(sm, " current:$ value:@\n  [", args);
+            total += Fmt(sm, " current:$ value:@ [", args);
         }else{
             total += Stream_Bytes(sm, (byte *)" [", 2);
         }
-        total += ToS(sm, (Abstract *)ms->root, 0, flags);
-        total += Stream_Bytes(sm, (byte *)"]>", 2);
+        MessClimber climber = {
+            .type = {TYPE_MESS_CLIMBER, 0},
+            .nested = 1,
+            .mess = ms,
+            .current = (Abstract *)ms->root,
+        };
+        total += MessClimber_PrintItems(sm, &climber, flags, 0);
+        total += Stream_Bytes(sm, (byte *)"\n]>", 3);
         return total;
     }
 }

@@ -283,7 +283,9 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
         tokenizeLabels[10] = Str_CstrRef(m, "TOKEN_CLOSE_OUTDENT");
         tokenizeLabels[11] = Str_CstrRef(m, "TOKEN_LAST_ALUE");
         tokenizeLabels[12] = Str_CstrRef(m, "TOKEN_LAST_SEP");
-        Lookup_Add(m, lk, TYPE_PATMATCH, (void *)tokenizeLabels);
+        tokenizeLabels[13] = Str_CstrRef(m, "TOKEN_ATTR_KEY");
+        tokenizeLabels[14] = Str_CstrRef(m, "TOKEN_ATTR_VALUE");
+        Lookup_Add(m, lk, TYPE_TOKENIZE, (void *)tokenizeLabels);
         r |= SUCCESS;
     }
 

@@ -29,6 +29,7 @@ char *TypeStrings[] = {
     "TYPE_MEMLOCAL",
     "TYPE_MEMLOCAL_ITEM",
     "TYPE_MESS",
+    "TYPE_MESS_CLAIMER",
     "TYPE_NODE",
     "TYPE_MAKER",
     "TYPE_CSTR",

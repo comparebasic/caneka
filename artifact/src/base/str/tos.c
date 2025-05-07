@@ -8,8 +8,8 @@ Str **stateLabels = NULL;
 status StreamTo_Init(MemCh *m){
     status r = READY;
     if(ToStreamLookup == NULL){
-        ToStreamLookup = Lookup_Make(m, _TYPE_START, NULL, NULL);
-        ToSFlagLookup = Lookup_Make(m, _TYPE_START, NULL, NULL);
+        ToStreamLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        ToSFlagLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
         Mem_ToSInit(m, ToStreamLookup);
         Str_ToSInit(m, ToStreamLookup);
         Sequence_ToSInit(m, ToStreamLookup);

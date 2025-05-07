@@ -18,7 +18,7 @@ static status populateClone(MemCh *m, Lookup *lk){
 
 status Clone_Init(MemCh *m){
     if(CloneLookup == NULL){
-        Lookup *CloneLookup = Lookup_Make(m, _TYPE_START, populateClone, NULL);
+        Lookup *CloneLookup = Lookup_Make(m, _TYPE_ZERO, populateClone, NULL);
         return SUCCESS;
     }
     return NOOP;
