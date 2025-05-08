@@ -28,6 +28,8 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
                 (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
         }
         a = (Abstract *)nd;
+    }else if(tk->typeOf == TYPE_SPAN){
+        a = (Abstract *)Span_Make(mess->m);
     }
     Mess_GetOrSet(mess, mess->current, a, tk);
     DebugStack_Pop();
@@ -51,12 +53,29 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         a = (Abstract *)Ptr_Wrapped(mess->m, (Abstract *)a, tk->type.of);
     }
 
-    if(tk != NULL && (tk->type.state & TOKEN_NO_COMBINE)){
+    if(tk != NULL && (tk->type.state & TOKEN_NODE_BY_TYPE)){
         if(mess->current->captureKey != tk->captureKey && tk->typeOf != TYPE_NODE){
             Node *nd = Node_Make(mess->m, 0, mess->current);
             nd->captureKey = tk->captureKey;
             Mess_GetOrSet(mess, node, (Abstract *)nd, NULL);
             return Mess_GetOrSet(mess, mess->current, a, tk);
+        }
+    }
+
+    if(tk != NULL && (tk->type.state & TOKEN_SPAN_BY_TYPE)){
+        if(mess->current->latestKey != tk->captureKey){
+            if(mess->current->typeOfChild != TYPE_SPAN){
+                Abstract *value = node.child;
+                node->child = (Abstract *)Span_Make(mess->m);
+                node->typeOfChild = TYPE_SPAN;
+                if(value != NULL){
+                    Span_Add((Span *)node->child, value);
+                }
+            }
+            Span *p = Span_Make(mess->m);
+            StrVec *v = StrVec_Make(mess->m);
+            Span_Add(p, (Abstract *v));
+            Span_Add((Span *)node->child, (Abstract *)p);
         }
     }
 
@@ -118,6 +137,9 @@ end:
     }
     if(current != NULL){
         mess->currentValue = current;
+    }
+    if(tk != NULL){
+        mess->current->latestKey = tk->captureKey;
     }
     return node->type.state;
 }

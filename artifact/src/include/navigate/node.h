@@ -2,6 +2,8 @@ typedef struct node {
     Type type;
     i16 typeOfChild;
     i16 captureKey;
+    i16 latestKey;
+    i16 _;
     struct node *parent; /*util id*/
     Table *atts;
     Abstract *value;

@@ -77,7 +77,7 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         dashDef, FORMATTER_BULLET, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
-        plusDef, FORMATTER_TABLE, FORMATTER_VALUE);
+        plusDef, FORMATTER_TABLE, FORMATTER_TABLE_VALUE);
     r |= Roebling_SetPattern(rbl,
         kvDef, FORMATTER_KEY, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
@@ -109,6 +109,20 @@ static status value(MemCh *m, Roebling *rbl){
         valueDef, FORMATTER_VALUE, FORMATTER_VALUE);
     r |= Roebling_SetPattern(rbl,
         lineDef, FORMATTER_LAST_VALUE, FORMATTER_START);
+
+    return r;
+}
+
+static status tableValue(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        valueDef, FORMATTER_TABLE_VALUE, FORMATTER_TABLE_VALUE);
+    r |= Roebling_SetPattern(rbl,
+        lineDef, FORMATTER_LAST_TABLE_VALUE, FORMATTER_TABLE_VALUE);
+    r |= Roebling_SetPattern(rbl,
+        nlDef, FORMATTER_NEXT, FORMATTER_START);
 
     return r;
 }
@@ -185,6 +199,8 @@ Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)line));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_VALUE));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)value));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_TABLE_VALUE));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)tableValue));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_LABEL));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)label));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_TAG_VALUE));

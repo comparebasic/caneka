@@ -13,6 +13,7 @@ typedef struct mess_climber {
     i32 nested;
     Mess *mess;
     Abstract *current;
+    Abstract *currentChild;
 } MessClimber;
 
 status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v);
