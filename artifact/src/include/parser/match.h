@@ -1,7 +1,7 @@
 #define PAT_CHAR_MAX_LENGTH 64
 
 enum match_flags {
-    MATCH_GOTO = 1 << 8,
+    MATCH_FLOATING = 1 << 8,
     MATCH_JUMP = 1 << 9,
     MATCH_TERM_FOUND = 1 << 10,
     MATCH_KO_INVERT = 1 << 11,

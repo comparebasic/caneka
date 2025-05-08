@@ -37,7 +37,7 @@ static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)nd->atts,
         NULL
     };
-    total += Fmt(sm, "N<$/$ $ parent(@) atts:@", args);
+    total += Fmt(sm, "N<$/$ captureKey($) parent(@) atts:@", args);
     if(flags & MORE){
         total += Stream_Bytes(sm, (byte *)" =", 2);
         Str *s = Type_ToStr(sm->m, 

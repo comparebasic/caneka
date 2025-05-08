@@ -11,21 +11,13 @@ static PatCharDef lineDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef leadLineDef[] = {
-    {PAT_KO, '\n', '\n'}, {PAT_TERM|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_KO, '\n', '\n'}, patText,
+static PatCharDef valueDef[] = {
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},{PAT_KO,',',','}, patText,
     {PAT_END, 0, 0}
 };
 
-static PatCharDef kvKeyDef[] = {
-    {PAT_KO, '\n','\n'}, {PAT_KO,':', ':'}, patText,
-    {PAT_ANY,' ',' '}, {PAT_ANY|PAT_TERM,'\r','\r'},{PAT_ANY|PAT_TERM,'\t','\t'},
-    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM,'\n', '\n'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef noLeadLineDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
-    {PAT_KO, '\n', '\n'}, patText,
+static PatCharDef kvDef[] = {
+    {PAT_KO, ':', ':'}, patText,
     {PAT_END, 0, 0}
 };
 
@@ -35,7 +27,7 @@ static PatCharDef nlDef[] = {
 };
 
 static PatCharDef dashDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_TERM, '-', '-'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},
+    {PAT_ANY|PAT_INVERT_CAPTURE,' ', ' '},{PAT_TERM,'-','-'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},
     {PAT_END, 0, 0}
 };
 
@@ -44,18 +36,33 @@ static PatCharDef plusDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef cmdDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '.', '.'},{PAT_KO, ':', ':'}, patText,
+static PatCharDef tagDef[] = {
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
+    {PAT_TERM, '_', '_'},
+    patText,
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
+    {PAT_KO|PAT_KO_TERM, '=', '='},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef commaSepDef[] = {
-    {PAT_KO, ',', ','}, patText,
+static PatCharDef labelDef[] = {
+    patAnyText,
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
+    {PAT_KO,'/', '/'},{PAT_KO|PAT_KO_TERM,'/','/'},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef lastValueDef[] = {
-    {PAT_KO,'\n','\n'}, patText,
+static PatCharDef urlTldDef[] = {
+    patAnyText,
+    {PAT_TERM, '.', '.'},
+    patText,
+    patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef urlPathDef[] = {
+    patText,
+    {PAT_KO, '.', '.'},{PAT_KO, ' ', ' '},{PAT_KO|PAT_KO_TERM, '\n', '\n'},
     {PAT_END, 0, 0}
 };
 
@@ -64,18 +71,15 @@ static status start(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        nlDef, FORMATTER_NEXT, FORMATTER_START); r |= Roebling_SetPattern(rbl,
+        nlDef, FORMATTER_NEXT, FORMATTER_START);
+    r |= Roebling_SetPattern(rbl,
         indentDef, FORMATTER_INDENT, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
-        dashDef, FORMATTER_ALIAS, FORMATTER_NOLEADLINE);
+        dashDef, FORMATTER_BULLET, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
-        plusDef, FORMATTER_ALIAS, FORMATTER_VALUE);
+        plusDef, FORMATTER_TABLE, FORMATTER_VALUE);
     r |= Roebling_SetPattern(rbl,
-        cmdDef, FORMATTER_METHOD, FORMATTER_VALUE);
-    r |= Roebling_SetPattern(rbl,
-        kvKeyDef, FORMATTER_KV_KEY, FORMATTER_KV_VALUE);
-    r |= Roebling_SetPattern(rbl,
-        leadLineDef, FORMATTER_LEAD_LINE, FORMATTER_START);
+        kvDef, FORMATTER_KEY, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
         lineDef, FORMATTER_LINE, FORMATTER_START);
 
@@ -88,20 +92,11 @@ static status line(MemCh *m, Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         lineDef, FORMATTER_LINE, FORMATTER_START);
-
-    return r;
-}
-
-static status noLeadLine(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-
     r |= Roebling_SetPattern(rbl,
-        dashDef, FORMATTER_ALIAS, FORMATTER_NOLEADLINE);
-    r |= Roebling_SetPattern(rbl,
-        noLeadLineDef, FORMATTER_LINE, FORMATTER_NOLEADLINE);
-    r |= Roebling_SetPattern(rbl,
-        nlDef, FORMATTER_NEXT, FORMATTER_START);
+        tagDef, FORMATTER_LINE, FORMATTER_LABEL);
+
+    Match *mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_FLOATING;
 
     return r;
 }
@@ -111,21 +106,41 @@ static status value(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        nlDef, FORMATTER_NEXT, FORMATTER_START);
+        valueDef, FORMATTER_VALUE, FORMATTER_VALUE);
     r |= Roebling_SetPattern(rbl,
-        commaSepDef, FORMATTER_VALUE, FORMATTER_VALUE);
-    r |= Roebling_SetPattern(rbl,
-        lastValueDef, FORMATTER_LAST_VALUE, FORMATTER_VALUE);
+        lineDef, FORMATTER_LAST_VALUE, FORMATTER_START);
 
     return r;
 }
 
-static status kvValue(MemCh *m, Roebling *rbl){
+static status label(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        lineDef, FORMATTER_KV_VALUE, FORMATTER_START);
+        labelDef, FORMATTER_LABEL, FORMATTER_TAG_VALUE);
+
+    return r;
+}
+
+static status tagValue(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        urlTldDef, FORMATTER_URL, FORMATTER_PATH);
+    r |= Roebling_SetPattern(rbl,
+        lineDef, FORMATTER_TAG_VALUE, FORMATTER_LINE);
+
+    return r;
+}
+
+static status path(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        urlPathDef, FORMATTER_PATH, FORMATTER_LINE);
 
     return r;
 }
@@ -168,12 +183,14 @@ Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)start));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_LINE));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)line));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_NOLEADLINE));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)noLeadLine));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_VALUE));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)value));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_KV_VALUE));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)kvValue));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_LABEL));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)label));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_TAG_VALUE));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)tagValue));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_PATH));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)path));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_END));
     Roebling_Start(rbl);
 

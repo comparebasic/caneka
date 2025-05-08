@@ -10,22 +10,14 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
         };
         Out("Mess_Token: @\n", args);
     }
-    Abstract *a = NULL;
+    Abstract *a = (Abstract *)v;
     Node *nd = NULL;
-    cls typeOf = 0;
     if(tk->type.state & TOKEN_CLOSE_OUTDENT){
         if(mess->currentValue != NULL && mess->currentValue != mess->current->child){
             mess->currentValue = mess->current->child;
         }else if(mess->current->parent != NULL){
             mess->current = mess->current->parent; 
             mess->currentValue = mess->current->child;
-        }else{
-            Abstract *args[] = {
-                (Abstract *)mess->current,
-                NULL
-            };
-            Error(mess->m, (Abstract*)mess, FUNCNAME, FILENAME, LINENUMBER,
-                "Outdent requested wheere no parent exists, mess->current is $", args);
         }
         return mess->type.state;
     }
@@ -33,35 +25,56 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
         nd = Node_Make(mess->m, 0, mess->current);
         nd->captureKey = tk->captureKey;
         a = (Abstract *)nd;
-        typeOf = TYPE_NODE;
         if(tk->type.state & TOKEN_ATTR_VALUE){
             Mess_AddAtt(mess, nd, 
                 (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)v);
         }
-    }else if(tk->typeOf == TYPE_STRVEC){
-        a = (Abstract *)v;
-        typeOf = TYPE_STRVEC;
     }
-    Mess_GetOrSet(mess, mess->current, a, typeOf);
+    Mess_GetOrSet(mess, mess->current, a, tk);
     DebugStack_Pop();
     return mess->type.state;
 }
 
-status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, cls typeOf){
-    if(node == NULL){
+status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
+    if(node == NULL || a == NULL){
         Abstract *args[] = {
+            (Abstract *)a,
             (Abstract *)mess,
             NULL
         };
         Error(mess->m, (Abstract *)mess, FUNCNAME, FILENAME, LINENUMBER,
-            "Node is NULL for mess @", args);
+            "Node is NULL for abstract @, and mess @", args);
         return ERROR;
     }
+
+    Abstract *current = a;
+    if(node->typeOfChild == TYPE_WRAPPED_PTR){
+        a = (Abstract *)Ptr_Wrapped(mess->m, (Abstract *)a, tk->type.of);
+    }
+
+    if(tk != NULL && (tk->type.state & TOKEN_NO_COMBINE)){
+        if(mess->current->captureKey != tk->captureKey){
+            Node *nd = Node_Make(mess->m, 0, mess->current);
+            nd->captureKey = tk->captureKey;
+            Mess_GetOrSet(mess, node, (Abstract *)nd, NULL);
+            return Mess_GetOrSet(mess, mess->current, a, tk);
+        }
+    }
+
     if(node->typeOfChild == 0){
         node->child = a;
         node->typeOfChild = a->type.of;
         goto end;
-    }else if(Combine((Abstract *)mess->currentValue, a)){
+    }else if((tk == NULL || (tk->type.state & TOKEN_NO_COMBINE) == 0) &&
+            Combine((Abstract *)mess->currentValue, a)){
+        Abstract *args[] = {
+            (Abstract *)a,
+            (Abstract *)Type_ToStr(mess->m, mess->currentValue->type.of),
+            (Abstract *)mess->currentValue,
+            NULL
+        };
+        current = NULL;
+        Out("Combining @ into $/@\n", args);
         goto end;
     }else if(node->typeOfChild == TYPE_SPAN){
         Span_Add((Span *)node->child, a);
@@ -74,11 +87,14 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, cls typeOf){
         Span_Add((Span *)node->child, a);
         goto end;
     }
+
 end:
     if(a->type.of == TYPE_NODE){
         mess->current = (Node *)a;
     }
-    mess->currentValue = a;
+    if(current != NULL){
+        mess->currentValue = current;
+    }
     return node->type.state;
 }
 
@@ -87,7 +103,7 @@ status Mess_Append(Mess *mess, Node *node, Abstract *a){
         Node *child = (Node *)a;
         child->parent = node;
     }
-    return Mess_GetOrSet(mess, node, a, 0);
+    return Mess_GetOrSet(mess, node, a, NULL);
 }
 
 status Mess_AddAtt(Mess *mess, Node *node, Abstract *key, Abstract *value){

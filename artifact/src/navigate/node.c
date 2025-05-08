@@ -6,6 +6,5 @@ Node *Node_Make(MemCh *m, word flags, Node *parent){
     node->type.of = TYPE_NODE;
     node->type.state = flags;
     node->parent = parent;
-    printf("making node parent: %p\n", parent);
     return node;
 }

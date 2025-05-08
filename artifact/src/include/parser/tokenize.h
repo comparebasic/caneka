@@ -5,6 +5,7 @@ enum token_flags {
     TOKEN_LAST_SEP = 1 << 11,
     TOKEN_ATTR_KEY = 1 << 12,
     TOKEN_ATTR_VALUE = 1 << 13,
+    TOKEN_NO_COMBINE = 1 << 14,
 };
 
 typedef struct tokenize {

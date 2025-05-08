@@ -17,7 +17,7 @@ char *fmtCstr = ""
     "== Sub\n"
     "Section\n"
     "\n"
-    "A paragraph in the sub section\n."
+    "A paragraph in the sub section.\n"
     "\n"
     "= Table Title\n"
     "\n"
@@ -26,7 +26,7 @@ char *fmtCstr = ""
     "Bannana, 2, 39\n"
     "Cantelope, 3, 39\n"
     "\n"
-    "And the final text here\n."
+    "And the final text here.\n"
 ;
 
 status Mess_Tests(MemCh *gm){
