@@ -4,6 +4,7 @@ typedef struct node {
     i16 captureKey;
     struct node *parent; /*util id*/
     Table *atts;
+    Abstract *value;
     Abstract *child;
 } Node;
 

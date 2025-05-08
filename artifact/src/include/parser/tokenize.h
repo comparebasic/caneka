@@ -1,11 +1,12 @@
 enum token_flags {
-    TOKEN_CLOSE = 1 << 8,
-    TOKEN_CLOSE_OUTDENT = 1 << 9,
+    TOKEN_SEPERATE = 1 << 8,
+    TOKEN_OUTDENT = 1 << 9,
     TOKEN_LAST_VALUE = 1 << 10,
     TOKEN_LAST_SEP = 1 << 11,
     TOKEN_ATTR_KEY = 1 << 12,
     TOKEN_ATTR_VALUE = 1 << 13,
     TOKEN_NO_COMBINE = 1 << 14,
+    TOKEN_NO_CONTENT = 1 << 15,
 };
 
 typedef struct tokenize {

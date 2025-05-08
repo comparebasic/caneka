@@ -27,7 +27,6 @@ static i64 NestedD_Print(Stream *sm, Abstract *a, cls type, word flags){
 
 static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
     Node *nd = (Node*)as(a, TYPE_NODE);
-    i64 total = 0;
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
         (Abstract *)Type_ToStr(sm->m, nd->typeOfChild),
@@ -35,17 +34,14 @@ static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)(nd->parent != NULL ?
             Type_ToStr(sm->m, nd->parent->captureKey) : NULL),
         (Abstract *)nd->atts,
+        (Abstract *)Type_ToStr(sm->m, 
+            (nd->value != NULL ? nd->value->type.of : _TYPE_ZERO)),
+        (Abstract *)nd->value,
+        (Abstract *)Type_ToStr(sm->m, 
+            (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO)),
         NULL
     };
-    total += Fmt(sm, "N<$/$ captureKey($) parent(@) atts:@", args);
-    if(flags & MORE){
-        total += Stream_Bytes(sm, (byte *)" =", 2);
-        Str *s = Type_ToStr(sm->m, 
-            (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO));
-        total += Stream_Bytes(sm, s->bytes, s->length);
-    }
-    total += Stream_Bytes(sm, (byte *)">", 1);
-    return total;
+    return Fmt(sm, "N<$/$ captureKey($) parent(@) atts:@ value:$/@ child:$>", args);
 }
 
 static i64 MessClimber_PrintItems(Stream *sm, MessClimber *climber, word flags, i64 total){

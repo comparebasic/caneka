@@ -1,6 +1,23 @@
 #include <external.h>
 #include <caneka.h>
 
+boolean CanCombine(Abstract *a, Abstract *b){
+    if(a->type.of == TYPE_STR && a->type.of == b->type.of){
+        return TRUE;
+    }else if(a->type.of == TYPE_STRVEC){
+        if(a->type.of == b->type.of){
+            return TRUE;
+        }else if(b->type.of == TYPE_STR){
+            return TRUE;
+        }
+    }else if(a->type.of == TYPE_SPAN){
+        if(b->type.of != TYPE_SPAN){
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 boolean Combine(Abstract *a, Abstract *b){
     if(a->type.of == TYPE_STR && a->type.of == b->type.of){
         Str *s = (Str *)b;

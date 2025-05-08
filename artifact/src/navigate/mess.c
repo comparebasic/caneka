@@ -12,23 +12,22 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
     }
     Abstract *a = (Abstract *)v;
     Node *nd = NULL;
-    if(tk->type.state & TOKEN_CLOSE_OUTDENT){
+    if(tk->type.state & TOKEN_OUTDENT){
         if(mess->currentValue != NULL && mess->currentValue != mess->current->child){
             mess->currentValue = mess->current->child;
         }else if(mess->current->parent != NULL){
             mess->current = mess->current->parent; 
             mess->currentValue = mess->current->child;
         }
-        return mess->type.state;
     }
     if(tk->typeOf == TYPE_NODE){
         nd = Node_Make(mess->m, 0, mess->current);
         nd->captureKey = tk->captureKey;
-        a = (Abstract *)nd;
         if(tk->type.state & TOKEN_ATTR_VALUE){
             Mess_AddAtt(mess, nd, 
-                (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)v);
+                (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
         }
+        a = (Abstract *)nd;
     }
     Mess_GetOrSet(mess, mess->current, a, tk);
     DebugStack_Pop();
@@ -53,7 +52,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
     }
 
     if(tk != NULL && (tk->type.state & TOKEN_NO_COMBINE)){
-        if(mess->current->captureKey != tk->captureKey){
+        if(mess->current->captureKey != tk->captureKey && tk->typeOf != TYPE_NODE){
             Node *nd = Node_Make(mess->m, 0, mess->current);
             nd->captureKey = tk->captureKey;
             Mess_GetOrSet(mess, node, (Abstract *)nd, NULL);
@@ -61,12 +60,37 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         }
     }
 
+    if(tk != NULL && tk->type.state & TOKEN_NO_CONTENT){
+        if(tk->typeOf == TYPE_STRVEC){
+            a = (Abstract *)StrVec_Make(mess->m);
+            current = a;
+        }else{
+            current = NULL;
+            goto end;
+        }
+    }
+    /*
+    } else if(tk != NULL && tk->type.state & TOKEN_ATTR_VALUE && a->type.of != TYPE_NODE){
+        current = NULL;
+        Mess_AddAtt(mess, mess->current, 
+            (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
+        goto end;
+    }else
+    */
+
     if(node->typeOfChild == 0){
         node->child = a;
         node->typeOfChild = a->type.of;
         goto end;
     }else if((tk == NULL || (tk->type.state & TOKEN_NO_COMBINE) == 0) &&
-            Combine((Abstract *)mess->currentValue, a)){
+            CanCombine((Abstract *)mess->currentValue, a)){
+        if(tk != NULL && tk->type.state & TOKEN_SEPERATE && 
+                mess->currentValue->type.of == TYPE_STRVEC &&
+                ((StrVec *)mess->currentValue)->total > 0){
+            Str *s = Str_Ref(mess->m, (byte *)" ", 1, 2, STRING_COPY);
+            Combine((Abstract *)mess->currentValue, (Abstract *)s);
+        }
+        Combine((Abstract *)mess->currentValue, a);
         Abstract *args[] = {
             (Abstract *)a,
             (Abstract *)Type_ToStr(mess->m, mess->currentValue->type.of),

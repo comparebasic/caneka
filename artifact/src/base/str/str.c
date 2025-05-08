@@ -85,6 +85,11 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, bytes, length, alloc);
     s->type.state = flags;
+    if(flags & STRING_COPY){
+        byte *_bytes = MemCh_Alloc(m, alloc);
+        memcpy(_bytes, s->bytes, s->length);
+        s->bytes = _bytes;
+    }
     return s;
 }
 
