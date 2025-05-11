@@ -14,7 +14,7 @@ status MemCh_Tests(MemCh *gm){
     i32 recycled = 0;
     r |= Test(cp != NULL, "Book is not NULL", NULL);
     if(cp != NULL){
-        recycled = cp->recycled.span->nvalues;
+        recycled = cp->recycled.p->nvalues;
     }
 
     i64 max = 1024;
@@ -30,24 +30,24 @@ status MemCh_Tests(MemCh *gm){
     }
 
     Abstract *args1[] = {
-        (Abstract *)I32_Wrapped(m, m->it.span->nvalues), 
+        (Abstract *)I32_Wrapped(m, m->it.p->nvalues), 
         NULL
     };
-    r |= Test(m->it.span->nvalues == 6, "Six slabs registered, have $", args1);
+    r |= Test(m->it.p->nvalues == 6, "Six slabs registered, have $", args1);
 
     MemCh_Free(m);
     m->type.range--;
     Abstract *args2[] = {
-        (Abstract *)I32_Wrapped(m, m->it.span->nvalues),
+        (Abstract *)I32_Wrapped(m, m->it.p->nvalues),
         NULL
     };
-    r |= Test(m->it.span->nvalues == 3, "Three slabs registered, after temp wipe have, $", args2);
+    r |= Test(m->it.p->nvalues == 3, "Three slabs registered, after temp wipe have, $", args2);
     if(cp != NULL){
         Abstract *args3[] = {
-            (Abstract *)I32_Wrapped(m, cp->recycled.span->nvalues),
+            (Abstract *)I32_Wrapped(m, cp->recycled.p->nvalues),
             NULL
         };
-        r |= Test(cp->recycled.span->nvalues == recycled+3,
+        r |= Test(cp->recycled.p->nvalues == recycled+3,
             "Two additional slabs registered in chapter, have $", args3);
     }
     m->type.range++;
@@ -63,17 +63,17 @@ status MemCh_Tests(MemCh *gm){
     }
     Abstract *args4[] = {
         (Abstract *)I64_Wrapped(m, max),
-        (Abstract *)I32_Wrapped(m, m->it.span->nvalues),
+        (Abstract *)I32_Wrapped(m, m->it.p->nvalues),
         NULL
     };
-    r |= Test(m->it.span->nvalues == 4,
+    r |= Test(m->it.p->nvalues == 4,
         "Four slabs registered, after adding $ more i32s, have $", args4);
     if(cp != NULL){
         Abstract *args5[] = {
-            (Abstract *)I32_Wrapped(m, cp->recycled.span->nvalues),
+            (Abstract *)I32_Wrapped(m, cp->recycled.p->nvalues),
             NULL
         };
-        r |= Test(cp->recycled.span->nvalues == recycled+2,
+        r |= Test(cp->recycled.p->nvalues == recycled+2,
             "Two additional slabs registered in chapter, have $", args5);
         i32 currentBookIdx = MemBook_GetPageIdx(m);
         Abstract *args6[] = {
@@ -90,12 +90,12 @@ status MemCh_Tests(MemCh *gm){
     if(cp != NULL){
         Single sg;
         sg.type.of = TYPE_WRAPPED_I32;
-        sg.val.i = cp->recycled.span->nvalues;
+        sg.val.i = cp->recycled.p->nvalues;
         Abstract *args7[] = {
             (Abstract *)&sg,
             NULL
         };
-        r |= Test(cp->recycled.span->nvalues == recycled+6,
+        r |= Test(cp->recycled.p->nvalues == recycled+6,
             "After removal one less page than count, because it belonged to the MemCh, have $.", args7);
     }
 

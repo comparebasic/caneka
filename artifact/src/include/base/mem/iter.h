@@ -12,7 +12,7 @@ enum span_ops {
 typedef struct iter {
     Type type;
     i32 idx;
-    struct span *span;
+    struct span *p;
     void *value;
     void *stack[SPAN_MAX_DIMS+1];
     i32 stackIdx[SPAN_MAX_DIMS+1];

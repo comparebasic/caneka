@@ -111,21 +111,21 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
 }
 
 status Table_SetKey(Iter *it, Abstract *a){
-    Hashed *h = Table_GetSetHashed(it->span, SPAN_OP_SET, a, NULL);
+    Hashed *h = Table_GetSetHashed(it->p, SPAN_OP_SET, a, NULL);
     /* set idx here */
     return SUCCESS;
 }
 
 i32 Table_SetIdxEntry(Iter *it, Abstract *a){
-    Hashed *h = Table_GetSetHashed(it->span, SPAN_OP_SET, a, NULL);
+    Hashed *h = Table_GetSetHashed(it->p, SPAN_OP_SET, a, NULL);
     i32 value = it->metrics.set;
-    Single *tag = I32_Wrapped(it->span->m, value);
+    Single *tag = I32_Wrapped(it->p->m, value);
     h->value = (Abstract *)tag;
     return (i32)value;
 }
 
 Hashed *Table_SetValue(Iter *it, Abstract *a){
-    Hashed *h = Span_Get(it->span, it->metrics.set);
+    Hashed *h = Span_Get(it->p, it->metrics.set);
     if(h != NULL){
         h->value = a;
         it->metrics.set = -1;

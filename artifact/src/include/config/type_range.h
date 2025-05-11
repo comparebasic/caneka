@@ -54,6 +54,7 @@ enum types {
     TYPE_SPAN,
     TYPE_TABLE,
     TYPE_RELATION,
+    TYPE_ARRAY,
     TYPE_HKEY,
     TYPE_ORDERED_TABLE,
     TYPE_COORDS,

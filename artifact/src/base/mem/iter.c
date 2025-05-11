@@ -6,7 +6,7 @@ i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535, 1048575};
 i32 _capacity[SPAN_MAX_DIMS+1] = {16, 256, 4096, 65536, 1048576, 16777216};
 
 static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 offset){
-    Span *p = it->span; 
+    Span *p = it->p; 
     void **ptr = NULL;
     void *debug = NULL;
     i32 localIdx = 0;
@@ -56,7 +56,7 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
 
 status Iter_Prev(Iter *it){
     i8 dim = 0;
-    i8 topDim = it->span->dims;
+    i8 topDim = it->p->dims;
     i32 debugIdx = it->idx;
     i32 idx = it->idx;
     it->value = NULL;
@@ -70,8 +70,8 @@ status Iter_Prev(Iter *it){
 
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
         word fl = it->type.state & ~(END|FLAG_ITER_LAST);
-        idx = it->span->max_idx;
-        Iter_Setup(it, it->span, fl, idx);
+        idx = it->p->max_idx;
+        Iter_Setup(it, it->p, fl, idx);
         it->type.state |= (fl|PROCESSING);
         Iter_Query(it);
         goto end;
@@ -91,12 +91,12 @@ status Iter_Prev(Iter *it){
         }else{
             i32 incr = 1;
             while(it->value == NULL && dim <= topDim && 
-                    idx <= it->span->max_idx){
+                    idx <= it->p->max_idx){
                 if((it->stackIdx[dim] - incr) >= 0){
                     it->stackIdx[dim] -= incr;
 
                     if(dim == topDim){
-                        ptr = (void **)it->span->root;
+                        ptr = (void **)it->p->root;
                     }else{
                         ptr = *((void **)it->stack[dim+1]);
                     }
@@ -119,7 +119,7 @@ status Iter_Prev(Iter *it){
                         while(dim-1 >= 0){
                             dim--;
                             if(dim == topDim){
-                                ptr = (void **)it->span->root;
+                                ptr = (void **)it->p->root;
                             }else{
                                 ptr = *((void **)it->stack[dim+1]);
                             }
@@ -158,7 +158,7 @@ end:
 
 status Iter_Next(Iter *it){
     i8 dim = 0;
-    i8 topDim = it->span->dims;
+    i8 topDim = it->p->dims;
     i32 debugIdx = it->idx;
     i32 idx = it->idx;
     it->value = NULL;
@@ -166,8 +166,8 @@ status Iter_Next(Iter *it){
     void **ptr = NULL;
 
     if(it->type.state & SPAN_OP_ADD){
-        if(it->idx != it->span->max_idx){
-            idx = it->idx = it->span->max_idx;
+        if(it->idx != it->p->max_idx){
+            idx = it->idx = it->p->max_idx;
             Iter_Query(it);
             it->type.state |= PROCESSING;
         }
@@ -177,7 +177,7 @@ status Iter_Next(Iter *it){
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
         word fl = it->type.state & ~(END|FLAG_ITER_LAST);
         idx = 0;
-        Iter_Setup(it, it->span, fl, idx);
+        Iter_Setup(it, it->p, fl, idx);
         it->type.state |= (fl|PROCESSING);
         Iter_Query(it);
         goto end;
@@ -191,19 +191,19 @@ status Iter_Next(Iter *it){
             idx += _increments[dim];
             if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                 *((void **)it->stack[dim]) = it->value;
-                it->span->nvalues++;
+                it->p->nvalues++;
             }else{
                 it->value = *((void **)it->stack[dim]);
             }
         }else{
             i32 incr = 1;
             while(it->value == NULL && dim <= topDim && 
-                    idx <= it->span->max_idx){
+                    idx <= it->p->max_idx){
                 if((it->stackIdx[dim]+ incr) < SPAN_STRIDE){
                     it->stackIdx[dim] += incr;
 
                     if(dim == topDim){
-                        ptr = (void **)it->span->root;
+                        ptr = (void **)it->p->root;
                     }else{
                         ptr = *((void **)it->stack[dim+1]);
                     }
@@ -226,7 +226,7 @@ status Iter_Next(Iter *it){
                         while(dim-1 >= 0){
                             dim--;
                             if(dim == topDim){
-                                ptr = (void **)it->span->root;
+                                ptr = (void **)it->p->root;
                             }else{
                                 ptr = *((void **)it->stack[dim+1]);
                             }
@@ -237,7 +237,7 @@ status Iter_Next(Iter *it){
                             }else if(dim == 0){
                                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                                     *ptr = it->value;
-                                    it->span->nvalues++;
+                                    it->p->nvalues++;
                                 }else{
                                     it->value = *ptr;
                                 }
@@ -256,9 +256,9 @@ status Iter_Next(Iter *it){
         }
     }
 end:
-    if(idx > it->span->max_idx){
+    if(idx > it->p->max_idx){
         it->type.state |= END;
-    }else if(idx == it->span->max_idx){
+    }else if(idx == it->p->max_idx){
         it->type.state |= FLAG_ITER_LAST;
     }
 
@@ -275,8 +275,8 @@ end:
 }
 
 status Iter_Set(Iter *it, void *value){
-    Span *p = it->span;
-    void **ptr = (void **)it->span->root;
+    Span *p = it->p;
+    void **ptr = (void **)it->p->root;
     if(p->dims > 0){
         ptr = (void **)*((void **)it->stack[1]); 
     }
@@ -295,9 +295,9 @@ status Iter_Query(Iter *it){
 
 status _Iter_QueryPage(Iter *it, MemPage *pg){
     it->type.state &= ~(SUCCESS|NOOP);
-    MemCh *m = it->span->m;
+    MemCh *m = it->p->m;
     if(it->type.state & SPAN_OP_ADD){
-        it->idx = it->span->max_idx+1;
+        it->idx = it->p->max_idx+1;
     }
 
     i8 dimsNeeded = 0;
@@ -305,7 +305,7 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
         dimsNeeded++;
     }
 
-    Span *p = it->span;
+    Span *p = it->p;
     if(dimsNeeded > p->dims){
         if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD|SPAN_OP_RESIZE)) == 0){
             return NOOP;
@@ -321,8 +321,8 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
             }
 
             if(exp_sl == NULL){
-                shelf_sl = it->span->root;
-                it->span->root = new_sl;
+                shelf_sl = it->p->root;
+                it->p->root = new_sl;
             }else{
                 void **ptr = (void **)exp_sl;
                 *ptr = new_sl;
@@ -403,7 +403,7 @@ void Iter_Setup(Iter *it, Span *p, status op, i32 idx){
     it->type.state = (it->type.state & NORMAL_FLAGS) | op;
     */
     it->type.state = op;
-    it->span = p;
+    it->p = p;
     it->idx = idx;
     it->metrics.get = it->metrics.set = it->metrics.selected = it->metrics.available = -1;
     memset(it->stack, 0, sizeof(void *)*SPAN_MAX_DIMS);

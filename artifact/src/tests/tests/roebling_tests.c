@@ -88,14 +88,14 @@ status Roebling_Tests(MemCh *gm){
     Roebling_Start(rbl);
     rbl->type.state |= ROEBLING_REPEAT;
 
-    Single *dof = (Single *)as(Span_Get(rbl->parseIt.span, 0), TYPE_WRAPPED_DO);
+    Single *dof = (Single *)as(Span_Get(rbl->parseIt.p, 0), TYPE_WRAPPED_DO);
     ((RblFunc)dof->val.dof)(rbl->m, rbl);
 
     Abstract *args[] = {
-        (Abstract *)I32_Wrapped(m, rbl->matchIt.span->nvalues),
+        (Abstract *)I32_Wrapped(m, rbl->matchIt.p->nvalues),
         NULL
     };
-    r |= Test(rbl->matchIt.span->nvalues == 4, "Roebling has four match values loaded up, have $", args);
+    r |= Test(rbl->matchIt.p->nvalues == 4, "Roebling has four match values loaded up, have $", args);
 
     MemCh_Free(m);
     return r;

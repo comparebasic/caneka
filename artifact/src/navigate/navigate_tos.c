@@ -44,6 +44,32 @@ static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
     return Fmt(sm, "N<$/$ captureKey($) parent(@) atts:@ value:$/@ child:$>", args);
 }
 
+static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
+    status r = READY;
+    i64 total = 0;
+    Relation *rel = (Relation*)as(a, TYPE_RELATION);
+    Abstract *args[] = {
+        (Abstract *)I16_Wrapped(sm->m, rel->stride),
+        (Abstract *)I32_Wrapped(sm->m, rel->it.p->max_idx / rel->stride),
+        (Abstract *)Ptr_Wrapped(sm->m, rel->headers, TYPE_ARRAY),
+        NULL
+    };
+    total +=  Fmt(sm, "Rel<$x$ @ [\n", args);
+    while((Relation_Next(rel) & END) == 0){
+        if(rel->type.state & RELATION_ROW_START){
+            total += Stream_Bytes(sm, (byte *)"  ", 2);
+        }
+        total += ToS(sm, rel->it.value, 0, flags);
+        if(rel->type.state & RELATION_ROW_END){
+            total += Stream_Bytes(sm, (byte *)"\n", 1);
+        }else{
+            total += Stream_Bytes(sm, (byte *)",", 1);
+        }
+    }
+    total += Stream_Bytes(sm, (byte *)"\n]>", 3);
+    return total;
+}
+
 static i64 MessClimber_PrintItems(Stream *sm, MessClimber *climber, word flags, i64 total){
     i32 nested = ++climber->nested;
     if(climber->current != NULL){

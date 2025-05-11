@@ -82,14 +82,14 @@ i64 MemChapterCount(){
 }
 
 i64 MemAvailableChapterCount(){
-    return _books[0]->recycled.span->nvalues;
+    return _books[0]->recycled.p->nvalues;
 }
 
 status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
 
     MemBook *book = MemBook_get(m);
-    Iter_Setup(&book->recycled, book->recycled.span, SPAN_OP_ADD, book->recycled.idx);
+    Iter_Setup(&book->recycled, book->recycled.p, SPAN_OP_ADD, book->recycled.idx);
     book->recycled.value = pg;
     status r = Iter_Query(&book->recycled);
 
@@ -106,10 +106,10 @@ void *MemBook_GetPage(void *addr){
     }
     i32 idx = -1;
     Iter_Reset(&book->recycled);
-    if(book->recycled.span->nvalues > 0){
-        idx = book->recycled.span->max_idx;
-        void *page = Span_Get(book->recycled.span, idx);
-        Span_Remove(book->recycled.span, idx);
+    if(book->recycled.p->nvalues > 0){
+        idx = book->recycled.p->max_idx;
+        void *page = Span_Get(book->recycled.p, idx);
+        Span_Remove(book->recycled.p, idx);
         return page;
     }else{
         for(i32 i = pageIdx; i < PAGE_MAX; i++){

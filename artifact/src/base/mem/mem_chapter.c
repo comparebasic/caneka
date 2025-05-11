@@ -49,16 +49,16 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
     if(sl == NULL){
         sl = MemPage_Make(m, level);
-        Iter_Setup(&m->it, m->it.span, SPAN_OP_SET, m->it.span->max_idx+1); 
+        Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1); 
         m->it.value = (void *)sl;
         _Iter_QueryPage(&m->it, sl);
-        if(_capacity[m->it.span->dims] <= (m->it.span->max_idx+1)){
+        if(_capacity[m->it.p->dims] <= (m->it.p->max_idx+1)){
             Iter it;
-            Iter_Setup(&it, m->it.span, SPAN_OP_RESERVE, m->it.span->max_idx+1); 
+            Iter_Setup(&it, m->it.p, SPAN_OP_RESERVE, m->it.p->max_idx+1); 
             it.value = NULL;
             _Iter_QueryPage(&it, sl);
         }
-        Iter_Setup(&m->it, m->it.span, SPAN_OP_SET, 0);
+        Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, 0);
     }
 
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
@@ -123,7 +123,7 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
         MemPage *pg = (MemPage *)m->it.value;
         if(pg != NULL && (level == 0 || pg->level >= level)){
             if(m->it.idx > 0){
-                r |= Span_Remove(m->it.span, m->it.idx);
+                r |= Span_Remove(m->it.p, m->it.idx);
             }
             r |= MemBook_FreePage(m, pg);
             if(m->it.type.state & DEBUG){
@@ -143,7 +143,7 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
 status MemCh_Free(MemCh *m){
     status r = MemCh_FreeTemp(m, m->type.range);
     if(m->type.range == 0){
-        MemPage *pg = Span_Get(m->it.span, 0);
+        MemPage *pg = Span_Get(m->it.p, 0);
         return MemBook_FreePage(m, pg);
     }
     return r;

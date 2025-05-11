@@ -49,7 +49,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
             }
 
             if((mt->type.state & NOOP) != 0){
-                if(++noopCount == rbl->matchIt.span->nvalues){
+                if(++noopCount == rbl->matchIt.p->nvalues){
                     rbl->type.state |= (NOOP|END|ERROR);
                     Guard_Reset(&rbl->guard);
                     DebugStack_Pop();
@@ -75,7 +75,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
 
 status Roebling_RunCycle(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
-    if(rbl->parseIt.span->nvalues == 0){
+    if(rbl->parseIt.p->nvalues == 0){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Roebling parsers not set", NULL);
     }
@@ -223,10 +223,10 @@ status Roebling_AddStep(Roebling *rbl, Abstract *step){
 }
 
 status Roebling_Start(Roebling *rbl){
-    Single *sg = Span_Get(rbl->parseIt.span, rbl->parseIt.span->max_idx);
+    Single *sg = Span_Get(rbl->parseIt.p, rbl->parseIt.p->max_idx);
     if(sg != NULL && sg->type.of == TYPE_WRAPPED_I16){
         Roebling_AddMark(rbl, sg);
-        Span_Set(rbl->parseIt.span, rbl->parseIt.span->max_idx, NULL);
+        Span_Set(rbl->parseIt.p, rbl->parseIt.p->max_idx, NULL);
     }
     Iter_Reset(&rbl->parseIt);
     if(rbl->type.state & DEBUG){

@@ -137,13 +137,13 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
         Abstract *args[] = {
             (Abstract *)s,
             (Abstract *)I32_Wrapped(sm->m, it->idx),
-            (Abstract *)I32_Wrapped(sm->m, it->span->nvalues),
-            (Abstract *)I8_Wrapped(sm->m, it->span->dims),
+            (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
+            (Abstract *)I8_Wrapped(sm->m, it->p->dims),
             NULL
         };
         total += Fmt(sm, "I<$@$ of $/$dims\n", args);
-        void *ptr = it->span->root;
-        for(i8 i = it->span->dims; i >= 0; i--){
+        void *ptr = it->p->root;
+        for(i8 i = it->p->dims; i >= 0; i--){
             if(it->stack[i] == NULL && (flags & (MORE|DEBUG))){
                 Abstract *args[] = {
                     (Abstract *)I32_Wrapped(sm->m, i),
@@ -179,7 +179,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
         Abstract *args[] = {
             (Abstract *)State_ToStr(sm->m, it->type.state),
             (Abstract *)I32_Wrapped(sm->m, it->idx),
-            (Abstract *)I32_Wrapped(sm->m, it->span->nvalues),
+            (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
             NULL
         };
         total += Fmt(sm, "I<$:$ of $>", args);

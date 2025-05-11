@@ -17,6 +17,22 @@ i64 HKey_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+i64 Array_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Abstract **arr = (Abstract **)a;
+    i64 total = 0;
+    boolean first = TRUE;
+    while(*arr != NULL){
+        if(first){
+            first = FALSE;
+        }else if(flags & MORE){
+            total += Stream_Bytes(sm, (byte *)",", 1);
+        }
+        total += ToS(sm, *arr, 0, flags);
+        arr++;
+    }
+    return total;
+}
+
 i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(flags & DEBUG){
@@ -129,5 +145,6 @@ status Sequence_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Table_Print);
     r |= Lookup_Add(m, lk, TYPE_HKEY, (void *)HKey_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
+    r |= Lookup_Add(m, lk, TYPE_ARRAY, (void *)Array_Print);
     return r;
 }

@@ -145,7 +145,7 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
     total += Fmt(sm, " @ \n", args2);
     if(flags & DEBUG){
         Abstract *args3[] = {
-            (Abstract *)rbl->parseIt.span,
+            (Abstract *)rbl->parseIt.p,
             NULL
         };
         total += Fmt(sm, "  parsers: @\n", args3);
@@ -155,7 +155,7 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, "  marks: @\n", args5);
         Abstract *args4[] = {
-            (Abstract *)rbl->matchIt.span,
+            (Abstract *)rbl->matchIt.p,
             NULL
         };
         word prev = sm->type.state;
