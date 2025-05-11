@@ -65,7 +65,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
     if(tk != NULL && (tk->type.state & TOKEN_SPAN_BY_TYPE)){
         if(mess->current->latestKey != tk->captureKey){
             if(mess->current->typeOfChild != TYPE_SPAN){
-                Abstract *value = node.child;
+                Abstract *value = node->child;
                 node->child = (Abstract *)Span_Make(mess->m);
                 node->typeOfChild = TYPE_SPAN;
                 if(value != NULL){
@@ -74,7 +74,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
             }
             Span *p = Span_Make(mess->m);
             StrVec *v = StrVec_Make(mess->m);
-            Span_Add(p, (Abstract *v));
+            Span_Add(p, (Abstract *)v);
             Span_Add((Span *)node->child, (Abstract *)p);
         }
     }

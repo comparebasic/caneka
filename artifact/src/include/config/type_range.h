@@ -53,6 +53,7 @@ enum types {
     TYPE_AUTH,
     TYPE_SPAN,
     TYPE_TABLE,
+    TYPE_RELATION,
     TYPE_HKEY,
     TYPE_ORDERED_TABLE,
     TYPE_COORDS,

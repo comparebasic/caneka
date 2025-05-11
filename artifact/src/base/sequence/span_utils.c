@@ -51,20 +51,24 @@ util Span_GetRaw(Span *p, i32 idx){
     return (util)0;
 }
 
+status Span_Wipe(Span *p){
+    return Span_Cull(p, p->nvalues);
+}
 
 status Span_Cull(Span *p, i32 count){
+    status r = READY;
     Iter it;
     while(count-- > 0){
         i32 idx = p->max_idx;
         if(idx >= 0){
             memset(&it, 0, sizeof(Iter));
             Iter_Setup(&it, p, SPAN_OP_REMOVE, idx);
-            Iter_Query(&it);
+            r |= Iter_Query(&it);
         }
         p->max_idx--;
     }
 
-    return NOOP;
+    return r;
 }
 
 status Span_ReInit(Span *p){
@@ -72,7 +76,6 @@ status Span_ReInit(Span *p){
     p->max_idx = -1;
     return SUCCESS;
 }
-
 
 Span *Span_Clone(MemCh *m, Span *p){
     Iter it;
