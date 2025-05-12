@@ -72,7 +72,7 @@ i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
             }else if(a->type.of == TYPE_MEMCTX){
                 Stream_Bytes(sm, (byte *)"<ctx>", 5);
             }else{
-                total += ToS(sm, a, 0, MORE);
+                total += ToS(sm, a, 0, flags);
             }
 
             if(osz < 0){
