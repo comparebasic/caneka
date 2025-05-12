@@ -183,7 +183,7 @@ status MemCh_Setup(MemCh *m, MemPage *pg){
     Span_Setup(p);
     p->m = m;
     p->max_idx = -1;
-    p->root = MemPage_Alloc(pg, sizeof(slab));
+    p->root = (slab *)BytesPage_Alloc(pg, sizeof(slab));
     Iter_Setup(&m->it, p, SPAN_OP_SET, 0);
     m->it.value = (void *)pg;
     status r = Iter_Query(&m->it);

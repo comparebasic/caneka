@@ -48,6 +48,6 @@ Span *Span_Make(MemCh *m){
     p->type.of = TYPE_SPAN;
     p->max_idx = -1;
     p->m = m;
-    p->root = (slab *)MemCh_AllocOf((m), sizeof(slab), TYPE_SLAB);
+    p->root = (slab *)Bytes_Alloc((m), sizeof(slab));
     return p;
 }

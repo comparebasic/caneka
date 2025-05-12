@@ -20,35 +20,71 @@ i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
     total = Fmt(sm, "Page<^D.$^d.level ^D.$^d.remaining", args);
 
     if(flags & DEBUG){
+        Stream_Bytes(sm, (byte *)"[ ", 2);
         void *pos = sl;
-        void *end = pos + MEM_SLAB_SIZE;
-        while(pos < end){
-            printf("print shit *%ld\n", (i64)pos);
-            Abstract *a = (Abstract *)pos;
-            if(a->type.of == TYPE_MEMSLAB){
-                Stream_Bytes(sm, (byte *)"<self>", 6);
-            }else{
-                ToS(sm, a, 0, flags);
-            }
+        void *end = pos+PAGE_SIZE;
+        pos += sizeof(MemPage)+(util)sl->remaining;
 
+        size_t sz = MAX_BASE10+3;
+        byte _digitBytes[sz];
+        memset(_digitBytes, 0, sz);
+        Str digit_s;
+        Str_Init(&digit_s, _digitBytes, 0, sz);
+
+        while(pos < end){
+            Abstract *a = (Abstract *)pos;
+            size_t osz = 0;
             if(a->type.of == TYPE_STRLIT){
-                printf(" adding strlit %ld\n", (i64)pos);
                 StrLit *sl = (StrLit *)a;
-                size_t sz = sizeof(RangeType)+sl->type.range;
-                pos += sz;
+                osz = sizeof(RangeType)+sl->type.range;
             }else{
-                printf(" adding non-strlit %ld\n", (i64)pos);
                 i64 _n =  Lookup_GetRaw(SizeLookup, a->type.of);
                 if(_n > 0){
-                    printf(" adding abs %ld + %ld\n", (i64)pos, _n);
-                    pos += _n;
+                    osz = _n;
                 }else{
+                    Abstract *args[] = {
+                        (Abstract *)Type_ToStr(sm->m, a->type.of),
+                        NULL
+                    };
                     Fatal(FUNCNAME, FILENAME, LINENUMBER,
-                        "Unable to find size of type", NULL);
+                        "Unable to find size of type $", args);
                     return 0;
                 }
             }
+
+
+            Stream_Bytes(sm, (byte *)"\x1b[1m*", 5);
+            Str_AddI64(&digit_s, (i64)sl);
+            total += Stream_Bytes(sm, digit_s.bytes, digit_s.length);
+            Stream_Bytes(sm, (byte *)"\x1b[22m/", 6);
+            digit_s.length = 0;
+            memset(_digitBytes, 0, sz);
+
+            Str_AddI64(&digit_s, (i64)sz);
+            total += Stream_Bytes(sm, digit_s.bytes, digit_s.length);
+            Stream_Bytes(sm, (byte *)"bytes:", 6);
+            digit_s.length = 0;
+            memset(_digitBytes, 0, sz);
+
+
+            if(a->type.of == TYPE_MEMSLAB){
+                Stream_Bytes(sm, (byte *)"<self>", 6);
+            }else if(a->type.of == TYPE_MEMCTX){
+                Stream_Bytes(sm, (byte *)"<ctx>", 5);
+            }else{
+                total += ToS(sm, a, 0, MORE);
+            }
+
+            if(osz < 0){
+                break;
+            }
+            pos += osz;
+
+            if(pos < end){
+                Stream_Bytes(sm, (byte *)", ", 2);
+            }
         }
+        Stream_Bytes(sm, (byte *)"]", 1);
     }
 
     return Stream_Bytes(sm, (byte *)">", 1);
@@ -58,47 +94,31 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
     i64 total = 0;
     Abstract *args[] = {
+        (Abstract *)I64_Wrapped(sm->m, m->it.p->nvalues),
         (Abstract *)MemCount_Wrapped(sm->m,  MemCh_Used(m, 0)),
         NULL
     };
 
-    total +=  Fmt(sm, "MemCh<used:$ [", args);
-    Iter it;
-    Iter_Init(&it, m->it.p);
-    while((Iter_Next(&it) & END) == 0){
-        ToS(sm, it.value, 0, flags);
-        if((it.type.state & FLAG_ITER_LAST) == 0){
-            Stream_Bytes(sm, (byte *)",", 1);
+    if(flags & MORE){
+        total +=  Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
+        Iter it;
+        Iter_Init(&it, m->it.p);
+        while((Iter_Next(&it) & END) == 0){
+            ToS(sm, it.value, 0, flags);
+            if((it.type.state & FLAG_ITER_LAST) == 0){
+                Stream_Bytes(sm, (byte *)",", 1);
+            }
         }
-    }
 
-    total +=  Fmt(sm, "]>", args);
+        total +=  Fmt(sm, "]>", args);
+    }else{
+        return  Fmt(sm, "MemCh<used:$>", args);
+    }
     return total;
 }
 
 i64 MemBook_Print(Stream *sm, Abstract *a, cls type, word flags){
     MemBook *cp = (MemBook*)as(a, TYPE_BOOK); 
-/*
-    printf("\x1b[%dm%sMemBook<start:%p/pages:%d)[available:%d selected:%d]",
-        color, msg, cp->start, cp->pages.nvalues, cp->pages.metrics.available,
-        cp->pages.metrics.selected);
-    Iter it;
-    Iter_Init(&it, &cp->pages);
-    while((Iter_Next(&it) & END) == 0){
-         MemPage *sl = (MemPage *)Iter_Get(&it);
-         if(sl != NULL){
-             if(extended){
-                printf("\n    ");
-             }
-             printf("\x1b[%dm%d:", color, it.idx);
-             MemPage_Print(m, v, (Abstract *)sl, 0, color, extended, "");
-             if((it.type.state & FLAG_ITER_LAST) == 0){
-                printf(", ");
-             }
-         }
-    }
-    printf("\x1b[%d>\x1b[0m", color);
-    */
     return 0;
 }
 
@@ -122,14 +142,17 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
         if(a != NULL){
             Abstract *args[] = {
                 (Abstract *)I32_Wrapped(sm->m, it.idx),
-                it.value,
                 NULL
             };
             if(flags & DEBUG){
                 total += Stream_Bytes(sm, (byte *)"\n    ", 5);
             }
             if(flags & (MORE|DEBUG)){
-                total += Fmt(sm, "$:@", args);
+                total += Fmt(sm, "$:", args);
+            }
+            Abstract *item = (Abstract *)it.value;
+            if(item != NULL && item->type.of == TYPE_MEMSLAB){
+                total += ToS(sm, it.value, 0, (flags & ~DEBUG));
             }else{
                 total += ToS(sm, it.value, 0, flags);
             }

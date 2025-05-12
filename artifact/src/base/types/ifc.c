@@ -41,24 +41,34 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_ACCESS, (util)TYPE_ACCESS);
     r |= Lookup_AddRaw(m, lk, TYPE_PERMISSION, (util)TYPE_PERMISSION);
     r |= Lookup_AddRaw(m, lk, TYPE_AUTH, (util)TYPE_AUTH);
-    r |= Lookup_AddRaw(m, lk, TYPE_SPAN, (util)TYPE_SPAN);
-    r |= Lookup_AddRaw(m, lk, TYPE_TABLE, (util)TYPE_TABLE);
-    r |= Lookup_AddRaw(m, lk, TYPE_RELATION, (util)TYPE_RELATION);
+    */
+    r |= Lookup_AddRaw(m, lk, TYPE_SPAN, (util)sizeof(Span));
+    r |= Lookup_AddRaw(m, lk, TYPE_TABLE, (util)sizeof(Table));
+    r |= Lookup_AddRaw(m, lk, TYPE_RELATION, (util)sizeof(Relation));
+    /*
     r |= Lookup_AddRaw(m, lk, TYPE_ARRAY, (util)TYPE_ARRAY);
-    r |= Lookup_AddRaw(m, lk, TYPE_HKEY, (util)TYPE_HKEY);
+    */
+    r |= Lookup_AddRaw(m, lk, TYPE_HKEY, (util)sizeof(HKey));
+    /*
     r |= Lookup_AddRaw(m, lk, TYPE_ORDERED_TABLE, (util)TYPE_ORDERED_TABLE);
     r |= Lookup_AddRaw(m, lk, TYPE_COORDS, (util)TYPE_COORDS);
     r |= Lookup_AddRaw(m, lk, TYPE_SLAB, (util)TYPE_SLAB);
-    r |= Lookup_AddRaw(m, lk, TYPE_HASHED, (util)TYPE_HASHED);
+    */
+    r |= Lookup_AddRaw(m, lk, TYPE_HASHED, (util)sizeof(Hashed));
+    /*
     r |= Lookup_AddRaw(m, lk, TYPE_MEMPAIR, (util)TYPE_MEMPAIR);
     r |= Lookup_AddRaw(m, lk, TYPE_FILE, (util)TYPE_FILE);
     r |= Lookup_AddRaw(m, lk, TYPE_SPOOL, (util)TYPE_SPOOL);
     r |= Lookup_AddRaw(m, lk, TYPE_LOOKUP, (util)TYPE_LOOKUP);
     r |= Lookup_AddRaw(m, lk, TYPE_PROCDETS, (util)TYPE_PROCDETS);
-    r |= Lookup_AddRaw(m, lk, TYPE_ITER, (util)TYPE_ITER);
-    r |= Lookup_AddRaw(m, lk, TYPE_SINGLE, (util)TYPE_SINGLE);
+    */
+    r |= Lookup_AddRaw(m, lk, TYPE_ITER, (util)sizeof(Iter));
+    r |= Lookup_AddRaw(m, lk, TYPE_SINGLE, (util)sizeof(Single));
+    /*
     r |= Lookup_AddRaw(m, lk, TYPE_TRANSP, (util)TYPE_TRANSP);
-    r |= Lookup_AddRaw(m, lk, TYPE_TOKENIZE, (util)TYPE_TOKENIZE);
+    */
+    r |= Lookup_AddRaw(m, lk, TYPE_TOKENIZE, (util)sizeof(Tokenize));
+    /*
     r |= Lookup_AddRaw(m, lk, TYPE_DEBUG_STACK, (util)TYPE_DEBUG_STACK);
     r |= Lookup_AddRaw(m, lk, TYPE_DEBUG_STACK_ENTRY, (util)TYPE_DEBUG_STACK_ENTRY);
     r |= Lookup_AddRaw(m, lk, TYPE_TARGET, (util)TYPE_TARGET);

@@ -13,6 +13,12 @@ static void sigH(i32 sig, siginfo_t *info, void *ptr){
     exit(1);
 }
 
+static void sigI(i32 sig, siginfo_t *info, void *ptr){
+    char *cstr = "SigI - exiting\n";
+    write(0, cstr, strlen(cstr));
+    exit(1);
+}
+
 static void setSigs(){
     struct sigaction a;
     struct sigaction b;
@@ -23,7 +29,7 @@ static void setSigs(){
 
     memset(&b, 0, sizeof(struct sigaction));
     b.sa_flags = SA_NODEFER;
-    b.sa_sigaction = sigH;
+    b.sa_sigaction = sigI;
     sigaction(SIGINT, &b, NULL);
 }
 

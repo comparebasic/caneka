@@ -13,9 +13,9 @@ status Relation_Tests(MemCh *gm){
         (Abstract *)m,
         NULL
     };
-    Debug("Relation: @\n m:@", args);
+    Debug("Relation: @\n m:@\n", args);
     Span *p = Span_Make(m);
-    Debug("Relation: @\n m:@", args);
+    Debug("Relation: @\n ^p.m:@^0\n", args);
 
     MemCh_Free(m);
     return r;

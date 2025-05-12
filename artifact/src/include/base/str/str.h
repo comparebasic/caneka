@@ -14,12 +14,6 @@ typedef struct str {
     byte *bytes;
 } Str;
 
-#ifdef INSECURE
-    #define Bytes_Alloc(m, alloc) StrLit_BytesMake((m), (alloc))
-#else
-    #define Bytes_Alloc(m, alloc) MemCh_Alloc((m), (alloc))
-#endif
-
 boolean TextCharFilter(byte *b, i64 length);
 status Str_Reset(Str *s);
 status Str_Wipe(Str *s);

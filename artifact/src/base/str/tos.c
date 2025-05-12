@@ -56,13 +56,17 @@ i64 Bits_Print(Stream *sm, byte *bt, size_t length, word flags){
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};
     for(int i = 0; i < length;i++){
         byte b = bt[i];
-        if(flags & MORE){
-            sg.val.b = b;
-            Abstract *args[] = {(Abstract *)&sg, NULL};
-            total += Fmt(sm, "$=", args);
-        }
-        for(int j = 7; j >= 0;j--){
-            total += Stream_Bytes(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+        if(b == 0 && (flags & MORE)){
+            total += Stream_Bytes(sm, (byte *)"0", 1);
+        }else{
+            if(flags & MORE){
+                sg.val.b = b;
+                Abstract *args[] = {(Abstract *)&sg, NULL};
+                total += Fmt(sm, "$=", args);
+            }
+            for(int j = 7; j >= 0;j--){
+                total += Stream_Bytes(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+            }
         }
         if(flags & MORE){
             total += Stream_Bytes(sm, (byte *)" ", 1);

@@ -36,17 +36,20 @@ i64 StrLit_Print(Stream *sm, Abstract *a, cls type, word flags){
     StrLit *sl = (StrLit*)as(a, TYPE_STRLIT); 
     i64 total = 0;
     if(flags & (MORE|DEBUG)){
-        total += Stream_Bytes(sm, (byte *)"StrLit<", 9);
+        total += Stream_Bytes(sm, (byte *)"StrLit<", 7);
     }
-    if(flags & DEBUG){
+    if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)I16_Wrapped(sm->m, sl->type.range),
             NULL
         };
-        total += Fmt(sm, "x/$ ", args);
+        total += Fmt(sm, "x/$", args);
     }
-    byte *b = (byte *)((void *)sl)+sizeof(RangeType);
-    total += Bytes_debug(sm, b, b+sl->type.range);
+    if(flags & DEBUG){
+        total += Stream_Bytes(sm, (byte *)" ", 1);
+        byte *b = (byte *)((void *)sl)+sizeof(RangeType);
+        total += Bytes_debug(sm, b, b+sl->type.range);
+    }
     if(flags & (MORE|DEBUG)){
         total += Stream_Bytes(sm, (byte *)">", 1);
     }
