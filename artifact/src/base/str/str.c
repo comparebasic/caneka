@@ -57,7 +57,7 @@ char *Str_Cstr(MemCh *m, Str *s){
         if(s->alloc == s->length+1){
             b = s->bytes;
         }else{
-            b = MemCh_Alloc(m, s->length+1);
+            b = Bytes_Alloc(m, s->length+1);
             memcpy(b, s->bytes, s->length);
         }
         return (char *)b;
@@ -67,7 +67,7 @@ char *Str_Cstr(MemCh *m, Str *s){
 
 Str *Str_Clone(MemCh *m, Str *s, word alloc){
     Str *ret = MemCh_Alloc(m, sizeof(Str));
-    byte *_bytes = MemCh_Alloc(m, (size_t)alloc);
+    byte *_bytes = Bytes_Alloc(m, (size_t)alloc);
     memcpy(_bytes, s->bytes, min(s->length, alloc));
     Str_Init(ret, _bytes, s->length, alloc);
     return ret;
@@ -75,7 +75,7 @@ Str *Str_Clone(MemCh *m, Str *s, word alloc){
 
 Str *Str_From(MemCh *m, byte *bytes, word length){
     Str *s = MemCh_Alloc(m, sizeof(Str));
-    byte *_bytes = MemCh_Alloc(m, length);
+    byte *_bytes = Bytes_Alloc(m, length);
     memcpy(_bytes, bytes, length);
     Str_Init(s, _bytes, length, length);
     return s;
@@ -86,7 +86,7 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     Str_Init(s, bytes, length, alloc);
     s->type.state = flags;
     if(flags & STRING_COPY){
-        byte *_bytes = MemCh_Alloc(m, alloc);
+        byte *_bytes = Bytes_Alloc(m, alloc);
         memcpy(_bytes, s->bytes, s->length);
         s->bytes = _bytes;
     }
@@ -111,7 +111,7 @@ status Str_Init(Str *s, byte *bytes, word length, word alloc){
 
 Str *Str_Make(MemCh *m, word alloc){
     Str *s = MemCh_Alloc(m, sizeof(Str));
-    byte *bytes = MemCh_Alloc(m, alloc);
+    byte *bytes = Bytes_Alloc(m, alloc);
     Str_Init(s, bytes, 0, alloc);
     return s;
 }

@@ -1,6 +1,60 @@
 #include <external.h>
 #include <caneka.h>
 
+static i64 Bytes_debug(Stream *sm, byte *start, byte *end){
+    i64 total = 0;
+    byte *b = start;
+    size_t sz = MAX_BASE10+3;
+    byte _digitBytes[sz];
+    memset(_digitBytes, 0, sz);
+    Str digit_s;
+    Str_Init(&digit_s, _digitBytes, 0, sz);
+    while(b <= end){
+        byte c = *b;
+        if(c >= 32 && c <= 126){
+            total += Stream_Bytes(sm, b, 1);
+        }else if(c == '\r'){
+            total += Stream_Bytes(sm, (byte *)"\\r", 2);
+        }else if(c == '\n'){
+            total += Stream_Bytes(sm, (byte *)"\\n", 2);
+        }else if(c == '\t'){
+            total += Stream_Bytes(sm, (byte *)"\\t", 2);
+        }else{
+            Str_Add(&digit_s, (byte *)"\\{", 2);
+            i64 i = Str_AddI64(&digit_s, (i64)c);
+            Str_Add(&digit_s, (byte *)"}", 1);
+            total += Stream_Bytes(sm, digit_s.bytes, digit_s.length);
+            digit_s.length = 0;
+            memset(_digitBytes, 0, sz);
+        }
+        b++;
+    }
+    return total;
+}
+
+i64 StrLit_Print(Stream *sm, Abstract *a, cls type, word flags){
+    StrLit *sl = (StrLit*)as(a, TYPE_STRLIT); 
+    i64 total = 0;
+    if(flags & (MORE|DEBUG)){
+        total += Stream_Bytes(sm, (byte *)"StrLit<", 9);
+    }
+    if(flags & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)I16_Wrapped(sm->m, sl->type.range),
+            NULL
+        };
+        total += Fmt(sm, "x/$ ", args);
+    }
+    byte *b = (byte *)((void *)sl)+sizeof(RangeType);
+    total += Bytes_debug(sm, b, b+sl->type.range);
+    if(flags & (MORE|DEBUG)){
+        total += Stream_Bytes(sm, (byte *)">", 1);
+    }
+
+    return total;
+}
+
+
 i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     Str *s = (Str*)as(a, TYPE_STR); 
     if((flags & (MORE|DEBUG)) == 0){
@@ -8,12 +62,6 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     i64 total = 0;
-    size_t sz = MAX_BASE10+3;
-    byte _digitBytes[sz];
-    memset(_digitBytes, 0, sz);
-    Str digit_s;
-    Str_Init(&digit_s, _digitBytes, 0, sz);
-
     word fl = (DEBUG|MORE);
     if((flags & fl) == fl){
         Abstract *args[] = {
@@ -38,28 +86,7 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     if(flags & DEBUG){
-        byte *b = s->bytes;
-        byte *end = s->bytes+(s->length-1);
-        while(b <= end){
-            byte c = *b;
-            if(c >= 32 && c <= 126){
-                total += Stream_Bytes(sm, b, 1);
-            }else if(c == '\r'){
-                total += Stream_Bytes(sm, (byte *)"\\r", 2);
-            }else if(c == '\n'){
-                total += Stream_Bytes(sm, (byte *)"\\n", 2);
-            }else if(c == '\t'){
-                total += Stream_Bytes(sm, (byte *)"\\t", 2);
-            }else{
-                Str_Add(&digit_s, (byte *)"\\{", 2);
-                i64 i = Str_AddI64(&digit_s, (i64)c);
-                Str_Add(&digit_s, (byte *)"}", 1);
-                total += Stream_Bytes(sm, digit_s.bytes, digit_s.length);
-                digit_s.length = 0;
-                memset(_digitBytes, 0, sz);
-            }
-            b++;
-        }
+        total += Bytes_debug(sm, s->bytes, s->bytes+(s->length-1));
     }else{
         total += Stream_Bytes(sm, s->bytes, s->length);
     }
@@ -190,5 +217,6 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
     r |= Lookup_Add(m, lk, TYPE_STREAM, (void *)Stream_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
+    r |= Lookup_Add(m, lk, TYPE_STRLIT, (void *)StrLit_Print);
     return r;
 }

@@ -34,6 +34,7 @@ enum types {
     TYPE_MAKER,
     TYPE_CSTR,
     TYPE_STR,
+    TYPE_STRLIT,
     TYPE_STRVEC,
     TYPE_STREAM,
     TYPE_STREAM_TASK,

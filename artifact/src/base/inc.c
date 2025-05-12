@@ -27,6 +27,7 @@
 #include "./sequence/table.c"
 #include "./str/cursor.c"
 #include "./str/str.c"
+#include "./str/strlit.c"
 #include "./str/str_tos.c"
 #include "./str/str_equals.c"
 #include "./str/str_makers.c"

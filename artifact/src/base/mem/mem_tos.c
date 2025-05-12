@@ -9,14 +9,49 @@ static inline i64 wsOut(Stream *sm, i8 dim){
 }
 
 i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
+    i64 total = 0;
     MemPage *sl = (MemPage*)as(a, TYPE_MEMSLAB); 
+
     Abstract *args[] = {
         (Abstract *)I16_Wrapped(sm->m, sl->level),
         (Abstract *)I16_Wrapped(sm->m, sl->remaining),
         NULL
     };
-   
-    return Fmt(sm, "Page<^D.$^d.level ^D.$^d.remaining>", args);
+    total = Fmt(sm, "Page<^D.$^d.level ^D.$^d.remaining", args);
+
+    if(flags & DEBUG){
+        void *pos = sl;
+        void *end = pos + MEM_SLAB_SIZE;
+        while(pos < end){
+            printf("print shit *%ld\n", (i64)pos);
+            Abstract *a = (Abstract *)pos;
+            if(a->type.of == TYPE_MEMSLAB){
+                Stream_Bytes(sm, (byte *)"<self>", 6);
+            }else{
+                ToS(sm, a, 0, flags);
+            }
+
+            if(a->type.of == TYPE_STRLIT){
+                printf(" adding strlit %ld\n", (i64)pos);
+                StrLit *sl = (StrLit *)a;
+                size_t sz = sizeof(RangeType)+sl->type.range;
+                pos += sz;
+            }else{
+                printf(" adding non-strlit %ld\n", (i64)pos);
+                i64 _n =  Lookup_GetRaw(SizeLookup, a->type.of);
+                if(_n > 0){
+                    printf(" adding abs %ld + %ld\n", (i64)pos, _n);
+                    pos += _n;
+                }else{
+                    Fatal(FUNCNAME, FILENAME, LINENUMBER,
+                        "Unable to find size of type", NULL);
+                    return 0;
+                }
+            }
+        }
+    }
+
+    return Stream_Bytes(sm, (byte *)">", 1);
 }
 
 i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){

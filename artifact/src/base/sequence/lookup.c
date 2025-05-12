@@ -1,6 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
+i64 Lookup_GetRaw(Lookup *lk, word type){
+    void *ptr = Lookup_Get(lk, type);
+    if(ptr == NULL){
+        return -1;
+    }else{
+        return (i64)ptr;
+    }
+}
+
+status Lookup_AddRaw(MemCh *m, Lookup *lk, word type, i64 n){
+    return Lookup_Add(m, lk, type, (void *)n);
+}
+
 void *Lookup_Get(Lookup *lk, word type){
     void *result = NULL;
     lk->type.state &= ~(SUCCESS|NOOP|ERROR);

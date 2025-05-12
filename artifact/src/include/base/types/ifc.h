@@ -1,6 +1,8 @@
 void Type_SetFlag(Abstract *a, word flags);
 cls Ifc_Get(cls inst);
 boolean Ifc_Match(cls inst, cls ifc);
+status Ifc_Init(MemCh *m);
+extern Lookup *SizeLookup;
 
 #ifndef __IFC_HEADER_FUNCS
 #define __IFC_HEADER_FUNCS
