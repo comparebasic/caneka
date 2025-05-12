@@ -50,8 +50,10 @@ static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
     Relation *rel = (Relation*)as(a, TYPE_RELATION);
     Abstract *args[] = {
         (Abstract *)I16_Wrapped(sm->m, rel->stride),
-        (Abstract *)I32_Wrapped(sm->m, rel->it.p->max_idx / rel->stride),
-        (Abstract *)Ptr_Wrapped(sm->m, rel->headers, TYPE_ARRAY),
+        (Abstract *)I32_Wrapped(sm->m, (
+            rel->stride > 0 ? rel->it.p->max_idx / (i32)rel->stride: 0)),
+        (Abstract *)(rel->headers != NULL ?
+            Ptr_Wrapped(sm->m, rel->headers, TYPE_ARRAY): NULL),
         NULL
     };
     total +=  Fmt(sm, "Rel<$x$ @ [\n", args);
@@ -66,7 +68,7 @@ static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
             total += Stream_Bytes(sm, (byte *)",", 1);
         }
     }
-    total += Stream_Bytes(sm, (byte *)"\n]>", 3);
+    total += Stream_Bytes(sm, (byte *)"]>", 3);
     return total;
 }
 
@@ -179,6 +181,7 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
+    r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
     return r;
 }
 

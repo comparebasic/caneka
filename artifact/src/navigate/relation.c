@@ -3,6 +3,7 @@
 
 status Relation_HeadFromValues(Relation *rel){
     status r = READY;
+    rel->stride = rel->it.p->nvalues;
     rel->headers = Span_ToArr(rel->it.p->m, rel->it.p);
     r |= Span_Wipe(rel->it.p);
     Iter_Setup(&rel->it, rel->it.p, SPAN_OP_SET, 0);
@@ -37,12 +38,11 @@ status Relation_SetValue(Relation *rel, i16 col, i16 row, Abstract *value){
 }
 
 Relation *Relation_Make(MemCh *m, i16 stride, Abstract **headers){
-    Relation *rel = (Relation *)Span_Make(m);
+    Relation *rel = (Relation *)MemCh_Alloc(m, sizeof(Relation));
     rel->type.of = TYPE_RELATION;
     rel->stride = stride;
     rel->headers = headers;
     Span *p = Span_Make(m);
-    Iter_Setup(&m->it, p, SPAN_OP_SET, 0);
+    Iter_Setup(&rel->it, p, SPAN_OP_SET, 0);
     return rel;
 }
-

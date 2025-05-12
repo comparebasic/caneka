@@ -68,8 +68,16 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     return MemPage_Alloc(sl, _sz);
 }
 
-i64 MemCh_Used(MemCh *m){
-    return MemCh_MemCount(m, 0);
+i64 MemCh_Used(MemCh *m, i16 level){
+    i64 total = 0;
+    while((Iter_Next(&m->it) & END) == 0){
+        MemPage *sl = (MemPage *)m->it.value;
+        if(sl != NULL && (level == 0 || sl->level == level)){
+            total += MEM_SLAB_SIZE - sl->remaining;
+        }
+    }
+
+    return total;
 }
 
 void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){

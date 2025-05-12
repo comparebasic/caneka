@@ -12,7 +12,7 @@ typedef struct mem_ctx {
 i64 MemCh_MemCount(MemCh *m, i16 level);
 void *MemCh_Alloc(MemCh *m, size_t sz);
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf);
-i64 MemCh_Used(MemCh *m);
+i64 MemCh_Used(MemCh *m, i16 level);
 i64 MemCh_Total(MemCh *m, i16 level);
 status MemCh_WipeTemp(MemCh *m, i16 level);
 status MemCh_FreeTemp(MemCh *m, i16 level);

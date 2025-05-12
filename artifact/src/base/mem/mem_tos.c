@@ -10,51 +10,35 @@ static inline i64 wsOut(Stream *sm, i8 dim){
 
 i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
     MemPage *sl = (MemPage*)as(a, TYPE_MEMSLAB); 
-    /*
-    i32 bcolor = 0;
-    i32 lcolor = color;
-    if(sl->level > 0){
-        bcolor = color+10; 
-        lcolor = 30;
-    }
-    if(sl->bytes == NULL){
-        printf("(\x1b[1;%d;%dmnullBytes \x1b[0;%dm ", color+10, color, color);
-    }else{
-        printf("(");
-    }
-    printf("%p/%p:\x1b[%d;%dm%d\x1b[0;%dm)[\x1b[1;%dm%hd\x1b[0;%dm/%hd]", 
-         sl, sl->bytes, bcolor, lcolor, sl->level, color, color, 
-         MemPage_Taken(sl), color, MemPage_Available(sl));
-     */
-    return 0;
+    Abstract *args[] = {
+        (Abstract *)I16_Wrapped(sm->m, sl->level),
+        (Abstract *)I16_Wrapped(sm->m, sl->remaining),
+        NULL
+    };
+   
+    return Fmt(sm, "Page<^D.$^d.level ^D.$^d.remaining>", args);
 }
 
 i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
-    /*
-    printf("\x1b[%dm%sMemCh(%p)<%d ", color, msg, m, m->p.nvalues);
-    printf("(slabAddr:idx^level)[used/available]=(");
+    i64 total = 0;
+    Abstract *args[] = {
+        (Abstract *)MemCount_Wrapped(sm->m,  MemCh_Used(m, 0)),
+        NULL
+    };
 
+    total +=  Fmt(sm, "MemCh<used:$ [", args);
     Iter it;
-    Iter_Init(&it, &m->p);
+    Iter_Init(&it, m->it.p);
     while((Iter_Next(&it) & END) == 0){
-         MemPage *sl = (MemPage *)Iter_Get(&it);
-         if(sl != NULL){
-             if(extended){
-                printf("\n    ");
-             }
-             printf("\x1b[%dm%d:", color, it.idx);
-             MemPage_Print(m, v, (Abstract *)sl, 0, color, extended, "");
-             if((it.type.state & FLAG_ITER_LAST) == 0){
-                printf(", ");
-             }
-         }
+        ToS(sm, it.value, 0, flags);
+        if((it.type.state & FLAG_ITER_LAST) == 0){
+            Stream_Bytes(sm, (byte *)",", 1);
+        }
     }
 
-    printf(")");
-    printf("\x1b[%d>\x1b[0m", color);
-    */
-    return 0;
+    total +=  Fmt(sm, "]>", args);
+    return total;
 }
 
 i64 MemBook_Print(Stream *sm, Abstract *a, cls type, word flags){

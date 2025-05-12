@@ -157,6 +157,11 @@ end:
 }
 
 status Iter_Next(Iter *it){
+    if(it->p == NULL || it->p->nvalues == 0){
+        it->type.state |= END;
+        return it->type.state;
+    }
+
     i8 dim = 0;
     i8 topDim = it->p->dims;
     i32 debugIdx = it->idx;
@@ -263,7 +268,8 @@ end:
     }
 
     it->idx = idx;
-    if(((it->type.state & SPAN_OP_GET) && it->value != NULL) || it->type.state & (SPAN_OP_RESERVE|SPAN_OP_ADD)){
+    if(((it->type.state & SPAN_OP_GET) && it->value != NULL) ||
+            it->type.state & (SPAN_OP_RESERVE|SPAN_OP_ADD)){
         it->type.state &= ~NOOP;
         it->type.state |= SUCCESS;
     }else{

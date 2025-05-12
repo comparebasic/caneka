@@ -211,6 +211,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "snip_tests.c",
     "cursor_tests.c",
     "mess_tests.c",
+    "relation_tests.c",
     /*
     "crypto_tests.c",
     "http_tests.c",
