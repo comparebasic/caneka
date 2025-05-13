@@ -3,8 +3,8 @@ typedef struct single  {
     Type objType;
     union {
         byte b;
-        word w;
-        quad i;
+        i16 w;
+        i32 i;
         util value;
         Abstract *a;
         void *ptr;

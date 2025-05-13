@@ -17,6 +17,11 @@ status Relation_Start(Relation *rel){
 
 status Relation_Next(Relation *rel){
     status r = READY;
+    if(rel->stride == 0){
+        rel->it.type.state |= END;
+        return END;
+    }
+
     r = Iter_Next(&rel->it);
     if((r & END) == 0){
         i32 col = rel->it.idx % rel->stride;
@@ -28,11 +33,21 @@ status Relation_Next(Relation *rel){
         }
         r |= rel->type.state;
     }
+
+    if(r == READY){
+        r |= NOOP;
+    }
     return r;
 }
 
 status Relation_SetValue(Relation *rel, i16 col, i16 row, Abstract *value){
     Iter_Setup(&rel->it, rel->it.p, SPAN_OP_SET, row * rel->stride + col);
+    rel->it.value = value;
+    return Iter_Query(&rel->it);
+}
+
+status Relation_AddValue(Relation *rel, Abstract *value){
+    Iter_Setup(&rel->it, rel->it.p, SPAN_OP_ADD, rel->it.p->max_idx);
     rel->it.value = value;
     return Iter_Query(&rel->it);
 }

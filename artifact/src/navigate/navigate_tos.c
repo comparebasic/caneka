@@ -51,12 +51,17 @@ static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[] = {
         (Abstract *)I16_Wrapped(sm->m, rel->stride),
         (Abstract *)I32_Wrapped(sm->m, (
-            rel->stride > 0 ? rel->it.p->max_idx / (i32)rel->stride: 0)),
+            (rel->stride > 0  && rel->it.p->max_idx >= 0) ?
+            rel->it.p->max_idx / (i32)rel->stride: 0)),
         (Abstract *)(rel->headers != NULL ?
             Ptr_Wrapped(sm->m, rel->headers, TYPE_ARRAY): NULL),
         NULL
     };
-    total +=  Fmt(sm, "Rel<$x$ @ [\n", args);
+    total +=  Fmt(sm, "Rel<$x$ @ [", args);
+    if(rel->it.p->max_idx >= 0){
+        total += Stream_Bytes(sm, (byte *)"\n", 1);
+    }
+
     while((Relation_Next(rel) & END) == 0){
         if(rel->type.state & RELATION_ROW_START){
             total += Stream_Bytes(sm, (byte *)"  ", 2);
