@@ -50,9 +50,7 @@ static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
     Relation *rel = (Relation*)as(a, TYPE_RELATION);
     Abstract *args[] = {
         (Abstract *)I16_Wrapped(sm->m, rel->stride),
-        (Abstract *)I32_Wrapped(sm->m, (
-            (rel->stride > 0  && rel->it.p->max_idx >= 0) ?
-            rel->it.p->max_idx / (i32)rel->stride: 0)),
+        (Abstract *)I32_Wrapped(sm->m, Relation_RowCount(rel)),
         (Abstract *)(rel->headers != NULL ?
             Ptr_Wrapped(sm->m, rel->headers, TYPE_ARRAY): NULL),
         NULL
@@ -68,7 +66,7 @@ static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
         }
         total += ToS(sm, rel->it.value, 0, flags);
         if(rel->type.state & RELATION_ROW_END){
-            total += Stream_Bytes(sm, (byte *)"\n", 1);
+            total += Stream_Bytes(sm, (byte *)",\n", 2);
         }else{
             total += Stream_Bytes(sm, (byte *)",", 1);
         }

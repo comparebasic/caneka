@@ -15,5 +15,6 @@ Relation *Relation_Make(MemCh *m, i16 stride, Abstract **headers);
 status Relation_HeadFromValues(Relation *rel);
 status Relation_Start(Relation *rel);
 status Relation_Next(Relation *rel);
-status Relation_SetValue(Relation *rel, i16 col, i16 row, Abstract *value);
+status Relation_SetValue(Relation *rel, i16 row, i16 col, Abstract *value);
 status Relation_AddValue(Relation *rel, Abstract *value);
+status Relation_RowCount(Relation *rel);

@@ -15,6 +15,12 @@ status Relation_Start(Relation *rel){
     return SUCCESS;
 }
 
+status Relation_RowCount(Relation *rel){
+    return (rel->stride > 0  && rel->it.p->max_idx >= 0) ?
+       ((rel->it.p->max_idx+1) / (i32)rel->stride) :
+       0;
+}
+
 status Relation_Next(Relation *rel){
     status r = READY;
     if(rel->stride == 0){
@@ -22,13 +28,14 @@ status Relation_Next(Relation *rel){
         return END;
     }
 
+    rel->it.type.state = (rel->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
     r = Iter_Next(&rel->it);
     if((r & END) == 0){
         i32 col = rel->it.idx % rel->stride;
         rel->type.state &= NORMAL_FLAGS;
         if(col == 0){
             rel->type.state |= RELATION_ROW_START;
-        }else if(col == 1){
+        }else if(col == rel->stride-1){
             rel->type.state |= RELATION_ROW_END;
         }
         r |= rel->type.state;
@@ -40,7 +47,7 @@ status Relation_Next(Relation *rel){
     return r;
 }
 
-status Relation_SetValue(Relation *rel, i16 col, i16 row, Abstract *value){
+status Relation_SetValue(Relation *rel, i16 row, i16 col, Abstract *value){
     Iter_Setup(&rel->it, rel->it.p, SPAN_OP_SET, row * rel->stride + col);
     rel->it.value = value;
     return Iter_Query(&rel->it);
