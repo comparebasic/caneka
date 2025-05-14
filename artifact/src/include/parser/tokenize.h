@@ -1,7 +1,7 @@
 enum token_flags {
     TOKEN_SEPERATE = 1 << 8,
     TOKEN_OUTDENT = 1 << 9,
-    TOKEN_SPAN_BY_TYPE = 1 << 10,
+    TOKEN_LAST_TYPE = 1 << 10,
     TOKEN_NODE_BY_TYPE = 1 << 11,
     TOKEN_ATTR_KEY = 1 << 12,
     TOKEN_ATTR_VALUE = 1 << 13,

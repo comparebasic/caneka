@@ -12,29 +12,29 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
     }
     Abstract *a = (Abstract *)v;
     Node *nd = NULL;
-    if(tk->type.state & TOKEN_OUTDENT){
-        if(mess->currentValue != NULL && mess->currentValue != mess->current->child){
-            mess->currentValue = mess->current->child;
-        }else if(mess->current->parent != NULL){
-            mess->current = mess->current->parent; 
-            mess->currentValue = mess->current->child;
-        }
+
+    if(tk->type.state & TOKEN_OUTDENT && mess->current->parent != NULL){
+        mess->current = mess->current->parent; 
+        mess->currentValue = mess->current->child;
     }
+
     if(tk->typeOf == TYPE_NODE || tk->typeOf == TYPE_RELATION){
         nd = Node_Make(mess->m, 0, mess->current);
         nd->captureKey = tk->captureKey;
-        if(tk->type.state & TOKEN_ATTR_VALUE){
-            Mess_AddAtt(mess, nd, 
-                (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
-        }
-        a = (Abstract *)nd;
         if(tk->typeOf == TYPE_RELATION){
             nd->typeOfChild = TYPE_RELATION;
             nd->child = (Abstract *)Relation_Make(mess->m, 0, NULL);
+        }else{
+            if(tk->type.state & TOKEN_ATTR_VALUE){
+                Mess_AddAtt(mess, nd, 
+                    (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
+            }
         }
+        a = (Abstract *)nd;
     }else if(tk->typeOf == TYPE_SPAN){
         a = (Abstract *)Span_Make(mess->m);
     }
+
     Mess_GetOrSet(mess, mess->current, a, tk);
     DebugStack_Pop();
     return mess->type.state;
@@ -66,23 +66,6 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         }
     }
 
-    if(tk != NULL && (tk->type.state & TOKEN_SPAN_BY_TYPE)){
-        if(mess->current->latestKey != tk->captureKey){
-            if(mess->current->typeOfChild != TYPE_SPAN){
-                Abstract *value = node->child;
-                node->child = (Abstract *)Span_Make(mess->m);
-                node->typeOfChild = TYPE_SPAN;
-                if(value != NULL){
-                    Span_Add((Span *)node->child, value);
-                }
-            }
-            Span *p = Span_Make(mess->m);
-            StrVec *v = StrVec_Make(mess->m);
-            Span_Add(p, (Abstract *)v);
-            Span_Add((Span *)node->child, (Abstract *)p);
-        }
-    }
-
     if(tk != NULL && tk->type.state & TOKEN_NO_CONTENT){
         if(tk->typeOf == TYPE_STRVEC){
             a = (Abstract *)StrVec_Make(mess->m);
@@ -92,14 +75,6 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
             goto end;
         }
     }
-    /*
-    } else if(tk != NULL && tk->type.state & TOKEN_ATTR_VALUE && a->type.of != TYPE_NODE){
-        current = NULL;
-        Mess_AddAtt(mess, mess->current, 
-            (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
-        goto end;
-    }else
-    */
 
     if(node->typeOfChild == 0){
         node->child = a;
@@ -124,10 +99,16 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         Out("Combining @ into $/@\n", args);
         goto end;
     }else if(node->typeOfChild == TYPE_SPAN){
-        Relation_AddValue((Relation *)node->child, a);
+        Span_Add((Span *)node->child, a);
         goto end;
     }else if(node->typeOfChild == TYPE_RELATION){
-        Span_Add((Span *)node->child, a);
+        Relation *rel = (Relation *)node->child;
+        Relation_AddValue(rel, a);
+        if(tk->type.state & TOKEN_LAST_TYPE){
+            if(rel->stride == 0){
+                Relation_HeadFromValues(rel);
+            }
+        }
         goto end;
     }else{
         Abstract *value = node->child;
@@ -140,7 +121,11 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
 
 end:
     if(a->type.of == TYPE_NODE){
-        mess->current = (Node *)a;
+        Node *nd = (Node *)a;
+        mess->current = nd;
+        if(nd->typeOfChild == TYPE_RELATION){
+            current = nd->child;
+        }
     }
     if(current != NULL){
         mess->currentValue = current;

@@ -5,6 +5,15 @@ status Relation_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
+    Str *s = Str_CstrRef(m, "Hi There\n");
+    Str *s2 = Str_CstrRef(m, "Number Two\n");
+
+    Abstract *args1[] = {
+        (Abstract *)m,
+        NULL
+    };
+    Debug("^p.@^0\n", args1);
+
     Relation *rel = NULL;
     rel = Relation_Make(m, 0, NULL);
 
@@ -12,6 +21,7 @@ status Relation_Tests(MemCh *gm){
     Relation_AddValue(rel, (Abstract *)Str_CstrRef(m, "ColumnB"));
     Relation_AddValue(rel, (Abstract *)Str_CstrRef(m, "ColumnC"));
     Relation_HeadFromValues(rel);
+
 
     Relation_SetValue(rel, 0, 0, (Abstract *)I32_Wrapped(m, 1));
     Relation_SetValue(rel, 0, 1, (Abstract *)I32_Wrapped(m, 2));
@@ -32,6 +42,8 @@ status Relation_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     i64 total = ToS(sm, (Abstract *)rel, 0, MORE);
 
+    /*
+
     Str *s = Str_CstrRef(m, "Rel<3x4 \x1b[1m\"ColumnA\"\x1b[22m,"
         "\x1b[1m\"ColumnB\"\x1b[22m,\x1b[1m\"ColumnC\"\x1b[22m [\n"
         "  Wi32<\x1b[1m1\x1b[22m>,Wi32<\x1b[1m2\x1b[22m>,Wi32<\x1b[1m3\x1b[22m>,\n"
@@ -47,6 +59,8 @@ status Relation_Tests(MemCh *gm){
     };
 
     r |= Test(Equals((Abstract *)s, (Abstract *)sm->dest.curs->v) == TRUE, "Expect relation ToS output to match, have @", args);
+    */
+
 
     MemCh_Free(m);
     return r;

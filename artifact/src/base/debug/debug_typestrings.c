@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 char *TypeStrings[] = {
-    "TYPE_ZERO",
+    "_TYPE_ZERO",
     "TYPE_UNKNOWN",
     "TYPE_BUILDCTX",
     "TYPE_ABSTRACT",
@@ -29,11 +29,12 @@ char *TypeStrings[] = {
     "TYPE_MEMLOCAL",
     "TYPE_MEMLOCAL_ITEM",
     "TYPE_MESS",
-    "TYPE_MESS_CLAIMER",
+    "TYPE_MESS_CLIMBER",
     "TYPE_NODE",
     "TYPE_MAKER",
     "TYPE_CSTR",
     "TYPE_STR",
+    "TYPE_STRLIT",
     "TYPE_STRVEC",
     "TYPE_STREAM",
     "TYPE_STREAM_TASK",
@@ -158,6 +159,7 @@ char *TypeStrings[] = {
     "FORMATTER_URL",
     "FORMATTER_PATH",
     "FORMATTER_NEXT",
+    "FORMATTER_PARAGRAPH",
     "FORMATTER_END",
     "_FORMATTER_END",
     "TYPE_LANG_CDOC",
