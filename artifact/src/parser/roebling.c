@@ -22,6 +22,13 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         i32 noopCount = 0;
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)rbl->matchIt.value;
+            if(mt->type.state & MATCH_SEARCH){
+                Abstract *args[] = {
+                    (Abstract *)mt,
+                    NULL
+                };
+                Out("^p.Match Search @^0.\n", args);
+            }
             DebugStack_SetRef(mt, mt->type.of);
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
@@ -29,7 +36,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 rbl->type.state &= ~PROCESSING;
 
                 StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);
-                if(rbl->type.state & DEBUG){
+                if((rbl->type.state & DEBUG) || (mt->type.state & MATCH_SEARCH)){
                     Abstract *args[] = {
                         (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
                         (Abstract *)rbl,

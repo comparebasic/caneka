@@ -48,7 +48,7 @@ static PatCharDef tagDef[] = {
 static PatCharDef labelDef[] = {
     patAnyText,
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
-    {PAT_KO,'/', '/'},{PAT_KO|PAT_KO_TERM,'/','/'},
+    {PAT_KO,'@', '@'},
     {PAT_END, 0, 0}
 };
 
@@ -79,9 +79,11 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         plusDef, FORMATTER_TABLE, FORMATTER_TABLE_VALUE);
     r |= Roebling_SetPattern(rbl,
-        kvDef, FORMATTER_KEY, FORMATTER_LINE);
-    r |= Roebling_SetPattern(rbl,
         lineDef, FORMATTER_LINE, FORMATTER_START);
+    r |= Roebling_SetPattern(rbl,
+        tagDef, FORMATTER_LINE, FORMATTER_LABEL);
+    r |= Roebling_SetPattern(rbl,
+        kvDef, FORMATTER_KEY, FORMATTER_LINE);
 
     return r;
 }
@@ -96,7 +98,7 @@ static status line(MemCh *m, Roebling *rbl){
         tagDef, FORMATTER_LINE, FORMATTER_LABEL);
 
     Match *mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_FLOATING;
+    mt->type.state |= MATCH_SEARCH;
 
     return r;
 }
@@ -161,35 +163,34 @@ static status path(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mess = rbl->mess;
+    Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
+    Abstract *args[] = {
+        (Abstract *)Type_ToStr(OutStream->m, captureKey),
+        (Abstract *)v,
+        (Abstract *)tk,
+        NULL
+    };
     if(1 || rbl->type.state & DEBUG){
-        Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
-        if(mess->current->parent == NULL && tk->captureKey == FORMATTER_LINE){
-            tk = Lookup_Get(mess->tokenizer, FORMATTER_PARAGRAPH);
-        }
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(OutStream->m, captureKey),
-            (Abstract *)v,
-            (Abstract *)tk,
-            (Abstract *)mess,
-            NULL
-        };
-        if(tk != NULL){
-            tk->type.state |= DEBUG;
-            Mess_Tokenize(mess, tk, v);
-        }else{
-            Abstract *args[] = {
-                (Abstract *)Type_ToStr(rbl->m, captureKey),
-                NULL
-            };
-            Error(rbl->m, (Abstract *)rbl, FUNCNAME, FILENAME, LINENUMBER,
-                "Unable to find Tokenize for this captureKey: $", args);
-            return ERROR;
-        }
         mess->type.state |= DEBUG;
-        Out("^c.Fmt After Capture $/@\n    -> @\n^y.@^0.\n", args);
+        Out("^c.Fmt After Capture $/@ -> @\n", args);
         /*
         Debug("^c.Fmt Capture $/@\n^pfrom @^0\n", args);
         */
+    }
+    if(tk != NULL){
+        if(mess->current->parent == NULL && tk->captureKey == FORMATTER_LINE){
+            tk = Lookup_Get(mess->tokenizer, FORMATTER_PARAGRAPH);
+        }
+        tk->type.state |= DEBUG;
+        Mess_Tokenize(mess, tk, v);
+    }else{
+        Abstract *args[] = {
+            (Abstract *)Type_ToStr(rbl->m, captureKey),
+            NULL
+        };
+        Error(rbl->m, (Abstract *)rbl, FUNCNAME, FILENAME, LINENUMBER,
+            "Unable to find Tokenize for this captureKey: $", args);
+        return ERROR;
     }
     return SUCCESS;
 }

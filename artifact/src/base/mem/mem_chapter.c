@@ -134,9 +134,6 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
                 r |= Span_Remove(m->it.p, m->it.idx);
             }
             r |= MemBook_FreePage(m, pg);
-            if(m->it.type.state & DEBUG){
-                printf("\x1b[36mFreeing Page *%lu of m:*%lu\x1b[0m\n", (util)pg, (util)m);
-            }
         }
     }
 
@@ -151,8 +148,7 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
 status MemCh_Free(MemCh *m){
     status r = MemCh_FreeTemp(m, m->type.range);
     if(m->type.range == 0){
-        MemPage *pg = Span_Get(m->it.p, 0);
-        return MemBook_FreePage(m, pg);
+        return MemBook_FreePage(m, m->first);
     }
     return r;
 }
@@ -179,6 +175,7 @@ void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx){
 
 status MemCh_Setup(MemCh *m, MemPage *pg){
     m->type.of = TYPE_MEMCTX;
+    m->first = pg;
     Span *p = MemPage_Alloc(pg, sizeof(Span));
     Span_Setup(p);
     p->m = m;

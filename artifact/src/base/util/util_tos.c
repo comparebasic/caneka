@@ -39,7 +39,11 @@ static i64 Wrapped_Ptr(Stream *sm, Abstract *a, cls type, word flags){
         };
         return Fmt(sm, "Wptr<$ $>", args);
     }else{
-        return ToStream_NotImpl(sm, a, type, flags);
+        Abstract *args[] = {
+            (Abstract *)I64_Wrapped(sm->m, (util)a),
+            NULL
+        };
+        return Fmt(sm, "*$", args);
     }
 }
 

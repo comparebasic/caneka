@@ -195,9 +195,9 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & (DEBUG|MORE)){
         PatCharDef *pd = mt->pat.startDef;
         while(pd->flags != PAT_END){
-            char *_color = "d.";
+            char *_color = "dp.";
             if(pd == mt->pat.curDef){
-                _color = "D.";
+                _color = "Dy.";
             }
             Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
             total += Stream_Bytes(sm, color->bytes, color->length); 

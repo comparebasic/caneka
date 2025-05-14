@@ -7,7 +7,9 @@ char *fmtCstr = ""
     "And this is a first paragraph\n"
     "with a second line.\n"
     "\n"
-    "Second single sentance.\n"
+    "Second single sentance with details _link=here@http://example.com.\n"
+    "\n"
+    "_image=Image one@image.png"
     "\n"
     "- bullet one.\n"
     "- bullet two\nwith two lines.\n"
@@ -41,6 +43,12 @@ status Mess_Tests(MemCh *gm){
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);
     Roebling_Run(rbl);
+
+    Abstract *args[] = {
+        (Abstract *)rbl->mess,
+        NULL
+    };
+    Debug("^y.Mess @^0.\n", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

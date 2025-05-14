@@ -4,6 +4,7 @@ typedef struct mem_ctx {
     i16 guard;
     Iter it;
     Abstract *owner;
+    MemPage *first;
 } MemCh;
 
 #define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range));

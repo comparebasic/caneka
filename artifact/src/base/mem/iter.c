@@ -380,7 +380,7 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
 
     if(it->type.state & DEBUG){
         Abstract *args[] = {(Abstract *)it, NULL};
-        Out("^c.Iter-Query $^0.\n", args);
+        Out("^c.Iter-Query @^0.\n", args);
     }
 
     if(it->idx == p->max_idx){

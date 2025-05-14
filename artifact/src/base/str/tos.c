@@ -152,7 +152,7 @@ i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),
         NULL
     };
-    Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+    Error(sm->m, a, FUNCNAME, FILENAME, LINENUMBER, 
         "Does not implement $ for type $", args);
     return 0;
 }
