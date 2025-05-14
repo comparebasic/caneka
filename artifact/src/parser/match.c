@@ -87,6 +87,11 @@ status Match_AddBoundrySnip(MemCh *m, Match *mt){
     return NOOP;
 }
 
+status Match_ResolveOverlay(Match *mt, i32 length){
+    SnipSpan_Add(mt->backlog, &mt->snip);
+    return SnipSpan_Remove(mt->backlog, length);
+}
+
 status Match_Feed(MemCh *m, Match *mt, byte c){
     if((mt->type.state & NOOP) != 0){
         return mt->type.state;
@@ -302,13 +307,21 @@ status Match_SetCount(Match *mt, i32 count){
 Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
     Match *mt = (Match *)MemCh_Alloc(m, sizeof(Match));
     mt->type.of = TYPE_PATMATCH;
-    mt->pat.startDef = mt->pat.curDef = def;
+    mt->pat.startDef = mt->pat.curDef = mt->pat.lastTermDef = def;
     i32 count = 0;
+    boolean termStart = FALSE;
     while(def->flags != PAT_END){
        def++;
        if(++count > PAT_CHAR_MAX_LENGTH){
             Fatal(FUNCNAME, FILENAME, LINENUMBER,
                 "PatCharDef: PAT_END not found before max", NULL);
+       }
+       if(termStart && def->flags != PAT_END){
+            mt->pat.lastTermDef = def;
+            termStart = FALSE;
+       }
+       if(def->flags & PAT_TERM){
+            termStart = TRUE;
        }
     }
     if(def->flags == PAT_END){

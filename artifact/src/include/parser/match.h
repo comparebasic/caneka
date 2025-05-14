@@ -1,7 +1,7 @@
 #define PAT_CHAR_MAX_LENGTH 64
 
 enum match_flags {
-    MATCH_ = 1 << 8,
+    MATCH_OVERLAY = 1 << 8,
     MATCH_JUMP = 1 << 9,
     MATCH_TERM_FOUND = 1 << 10,
     MATCH_KO_INVERT = 1 << 11,
@@ -21,6 +21,7 @@ typedef struct match {
         PatCharDef *endDef;
         PatCharDef *curDef;
         PatCharDef *startTermDef;
+        PatCharDef *lastTermDef;
     } pat;
     Snip snip;
     Span *backlog;
@@ -32,3 +33,4 @@ status Match_Feed(MemCh *m, Match *mt, byte c);
 status Match_FeedStrVec(MemCh *m, Match *mt, StrVec *v, i32 offset);
 status Match_FeedEnd(MemCh *m, Match *mt);
 status Match_SetCount(Match *mt, i32 count);
+status Match_ResolveOverlay(Match *mt, i32 length);

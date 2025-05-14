@@ -22,29 +22,37 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         i32 noopCount = 0;
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)rbl->matchIt.value;
-            if(mt->type.state & MATCH_SEARCH){
-                Abstract *args[] = {
-                    (Abstract *)mt,
-                    NULL
-                };
-                Out("^p.Match Search @^0.\n", args);
-            }
             DebugStack_SetRef(mt, mt->type.of);
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
                 rbl->type.state |= ROEBLING_NEXT;
                 rbl->type.state &= ~PROCESSING;
 
-                StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);
-                if((rbl->type.state & DEBUG) || (mt->type.state & MATCH_SEARCH)){
-                    Abstract *args[] = {
-                        (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
-                        (Abstract *)rbl,
-                        NULL
-                    };
-                    Out("^p.Matches Found(^D.$^d.): @^0.\n", args);
+                if((mt->type.state & MATCH_SEARCH)){
+                    i32 idx = rbl->matchIt.idx;
+                    Iter_Reset(&rbl->matchIt);
+                    i64 total = SnipSpan_Total(mt->backlog, 0);
+                    while((Iter_Next(&rbl->matchIt) & END) == 0){
+                        Match *omt = (Match *)rbl->matchIt.value;
+                        if(omt != mt && 
+                                (omt->type.state & PROCESSING) &&
+                                (omt->pat.curDef == omt->pat.lastTermDef)){
+                            Match_ResolveOverlay(omt, total);
+
+                            Abstract *args[] = {
+                                (Abstract *)omt,
+                                NULL
+                            };
+                            StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
+                            rbl->capture(rbl, omt->captureKey, v);
+                            break;
+                        }
+                    }
+                    Iter_Setup(&rbl->matchIt, rbl->matchIt.p, SPAN_OP_GET, idx);
+                    Iter_Query(&rbl->matchIt);
                 }
 
+                StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);
                 rbl->capture(rbl, mt->captureKey, v);
                 if((mt->snip.type.state & SNIP_UNCLAIMED) != 0 && mt->snip.length > 0){
                     Cursor_Decr(rbl->curs, mt->snip.length);

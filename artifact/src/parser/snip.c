@@ -40,6 +40,25 @@ status SnipSpan_Add(Span *sns, Snip *sn){
     return Span_Add(sns, (Abstract *)Snip_From(sns->m, sn));
 }
 
+status SnipSpan_Remove(Span *sns, i32 length){
+    Iter it;
+    Iter_Init(&it, sns);
+    while((Iter_Prev(&it) & END) == 0 && length > 0){
+        Snip *sn = (Snip *)it.value; 
+        if(sn->length <= length){
+            sn->length -= length;
+            length = 0;
+        }else{
+            length -= sn->length;
+            sn->length = 0;
+        }
+    }
+    Snip *sn = Snip_Make(sns->m);
+    sn->type.state |= SNIP_GAP;
+    sn->type.state |= length;
+    return SnipSpan_Add(sns, sn);
+}
+
 i64 SnipSpan_Total(Span *sns, word flags){
     Iter it;
     Iter_Init(&it, sns);

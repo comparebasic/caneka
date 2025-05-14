@@ -38,10 +38,10 @@ static PatCharDef plusDef[] = {
 
 static PatCharDef tagDef[] = {
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
-    {PAT_TERM, '_', '_'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '_', '_'},
+    {PAT_KO|PAT_KO_TERM, '=', '='},
     patText,
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
-    {PAT_KO|PAT_KO_TERM, '=', '='},
     {PAT_END, 0, 0}
 };
 
@@ -81,7 +81,9 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         lineDef, FORMATTER_LINE, FORMATTER_START);
     r |= Roebling_SetPattern(rbl,
-        tagDef, FORMATTER_LINE, FORMATTER_LABEL);
+        tagDef, FORMATTER_TAG, FORMATTER_LABEL);
+    Match *mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_SEARCH;
     r |= Roebling_SetPattern(rbl,
         kvDef, FORMATTER_KEY, FORMATTER_LINE);
 

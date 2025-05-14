@@ -14,4 +14,5 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *curs);
 Snip *Snip_From(MemCh *m, Snip *sn);
 Snip *Snip_Make(MemCh *m);
 status SnipSpan_Add(Span *sns, Snip *sn);
+status SnipSpan_Remove(Span *sns, i32 length);
 i64 SnipSpan_Total(Span *sns, word flags);
