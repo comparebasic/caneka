@@ -20,7 +20,7 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
             mess->currentValue = mess->current->child;
         }
     }
-    if(tk->typeOf == TYPE_NODE){
+    if(tk->typeOf == TYPE_NODE || tk->typeOf == TYPE_RELATION){
         nd = Node_Make(mess->m, 0, mess->current);
         nd->captureKey = tk->captureKey;
         if(tk->type.state & TOKEN_ATTR_VALUE){
@@ -28,6 +28,10 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
                 (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
         }
         a = (Abstract *)nd;
+        if(tk->typeOf == TYPE_RELATION){
+            nd->typeOfChild = TYPE_RELATION;
+            nd->child = (Abstract *)Relation_Make(mess->m, 0, NULL);
+        }
     }else if(tk->typeOf == TYPE_SPAN){
         a = (Abstract *)Span_Make(mess->m);
     }
@@ -120,6 +124,9 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         Out("Combining @ into $/@\n", args);
         goto end;
     }else if(node->typeOfChild == TYPE_SPAN){
+        Relation_AddValue((Relation *)node->child, a);
+        goto end;
+    }else if(node->typeOfChild == TYPE_RELATION){
         Span_Add((Span *)node->child, a);
         goto end;
     }else{

@@ -32,12 +32,12 @@ status Relation_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     i64 total = ToS(sm, (Abstract *)rel, 0, MORE);
 
-    Str *s = Str_CstrRef(m, "Relation: Rel<3x4 \x1b\"[1mColumnA\"\x1b[22m,"
+    Str *s = Str_CstrRef(m, "Rel<3x4 \x1b[1m\"ColumnA\"\x1b[22m,"
         "\x1b[1m\"ColumnB\"\x1b[22m,\x1b[1m\"ColumnC\"\x1b[22m [\n"
-        "  Wi32<\x1b[1m1\x1b[22m>,Wi32<\x1b[1m2>,Wi32<\x1b[1m3>,\n"
-        "  Wi32<\x1b[1m11>,Wi32<\x1b[1m12\x1b[22m>,Wi32<\x1b[1m13\x1b[22m>,\n"
-        "  Wi32<\x1b[1m21>,Wi32<\x1b[1m22\x1b[22m>,Wi32<\x1b[1m23\x1b[22m>,\n"
-        "  Wi32<\x1b[1m31>,Wi32<\x1b[1m32\x1b[22m>,Wi32<\x1b[1m33\x1b[22m>,\n"
+        "  Wi32<\x1b[1m1\x1b[22m>,Wi32<\x1b[1m2\x1b[22m>,Wi32<\x1b[1m3\x1b[22m>,\n"
+        "  Wi32<\x1b[1m11\x1b[22m>,Wi32<\x1b[1m12\x1b[22m>,Wi32<\x1b[1m13\x1b[22m>,\n"
+        "  Wi32<\x1b[1m21\x1b[22m>,Wi32<\x1b[1m22\x1b[22m>,Wi32<\x1b[1m23\x1b[22m>,\n"
+        "  Wi32<\x1b[1m31\x1b[22m>,Wi32<\x1b[1m32\x1b[22m>,Wi32<\x1b[1m33\x1b[22m>,\n"
         "]>"
     );
 

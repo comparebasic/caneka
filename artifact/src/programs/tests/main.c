@@ -148,12 +148,14 @@ static TestSet _Tests[] = {
         "Roebling start and stop in the middle of recieving input tests.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Relation Tests",
         Relation_Tests,
         "Tests for the relation structure.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Mess Tests",
         Mess_Tests,

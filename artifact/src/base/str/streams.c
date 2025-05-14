@@ -33,7 +33,9 @@ i64 Stream_ToStrVec(Stream *sm, byte *b, i32 length){
             s = curs->it.value = Str_Make(sm->m, sz);
             Iter_Query(&curs->it);
         }
+
         taken = Str_Add(s, b+offset, length);
+
         v->total += taken;
         total += taken;
         length -= taken;

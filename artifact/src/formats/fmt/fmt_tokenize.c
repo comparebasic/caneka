@@ -17,7 +17,8 @@ status FormatFmt_DefSpan(MemCh *m, Lookup *lk){
         Tokenize_Make(m, FORMATTER_END, TOKEN_OUTDENT, 0));
     r |= Lookup_Add(m, lk, FORMATTER_TABLE,
         Tokenize_Make(m, FORMATTER_TABLE, 
-            TOKEN_NO_CONTENT|TOKEN_NO_COMBINE|TOKEN_NODE_BY_TYPE, TYPE_SPAN));
+            TOKEN_NO_CONTENT|TOKEN_NO_COMBINE|TOKEN_NODE_BY_TYPE, TYPE_RELATION));
+
     r |= Lookup_Add(m, lk, FORMATTER_TABLE_VALUE,
         Tokenize_Make(m, FORMATTER_TABLE_VALUE, TOKEN_NO_COMBINE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_LAST_TABLE_VALUE,
