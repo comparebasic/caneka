@@ -1,36 +1,73 @@
 # Caneka
 
-Caneka is a language toolset written in C, for the main purpose of writing
-Domain Specific Langauges, and producing minimal yet scalable runtimes.
+## The Anti-Syntax Runtime
 
-It is memory managed with it's own manually-run garbage collector, and focuses
-on Cycle-Oriented-Programming as the main paradigm.
+Caneka was born from the idea that customized syntaxes can unlock the true
+potential of humans using computers.
+
+Think of it like "a regular expression engine that can generate and run data
+structures".
+
+The goal of this approach is to increase configuration and encourage teams to
+map their problem space more directly, using less lines of boiler-plate code.
+
+This is commonly refered to as a Domain Specific Language.
+
+Since the dawn of computing, all computer tasks have been accomplished through
+a combination of user-interaction, protocols, markups, and programming
+langauges. Caneka aims to allow software development to include the definition
+of the langauge syntax. 
+
+For this analogy, here are examples from each category:
+
+Protocols: DNS, HTTP, SMTP/LMTP
+Protocols (binary): TLS, WebSockets, TCP/IP, Bluetooth, WiFi, Serial
+Markups: CSV, XML, JSON, YAML, CBOR, HTML, LaTeX, PDF
+Programming Langauges: Java, Python, TypeScript/Javascript, Go, Scala, Rust...
+
+The comonality between items within each category speaks to the value of
+customizaton, and also highlights the challenges of conformity.
+
+# Caneka Components
+
+Caneka has three main components including a parser with no prefered syntax, a
+network server, and a memory manager for data storage and data structures.
+
+Components:
+
+- [base](artifact/src/base/): includes virtual memory segmented strings,
+  scalable arrays, a key-value lookup, and the memory manager
+- [parser](/artifact/src/parser/): using a pattern matching system which
+  dispatches tokens and assembles them into a usable structure 
+- [network-server](./artifact/src/serve/): routes and handles network requests
+  using a customized handler interface
 
 see [caneka.org](https://caneka.org) for more details.
 
 ## Build Instructions
 
-Canka requires a small build program to be compiled, which can then build the
-rest of the system by launching other processes.
+Canka only requires a C compile to build. A small build program is then used to
+build the rest of the runtime.
 
     ./scripts/make.sh
 
-Further configuration can be specified at the top of
-[build.c](./artifact/src/build.c)
+The ./scripts/build.sh script base compiles a small builder program which
+builds the remaining objects.
 
-To rebuild the code, the build command can be run directly:
+    clang -o build/builder builder.c && ./build/builder
 
-   ./build/build
+If `gcc` is used instead of `clang` it will build the remaining objects using
+the compiler supplied to build the builder, in that case `gcc` and eventually
+`msvc` if that's what was used to build the builder.
 
-However, it does not detect changes to header files yet, so it is necessary to
-run the full `make.sh` script to rebuild everything if header files are
-changed.
+Further customization can be found in the [build.c](./artifact/src/build.c)
+file.
 
 ## Build Status
 
-Currently the system builds and runs on FreeBSD and Linux, and is expected to
-build on any POSIX compatible operating system, including Mac, Windows, iOS,
-and Android, though these platforms are untested.
+The system is currently being updated to include a new base, all components
+have worked in prototype form at one time or another, but it's currently a
+shit-show.
 
 ## Folder Layout
 
