@@ -265,7 +265,7 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
 
     if(matchLabels == NULL){
         matchLabels = (Str **)Arr_Make(m, 17);
-        matchLabels[9] = Str_CstrRef(m, "MATCH_GOTO");
+        matchLabels[9] = Str_CstrRef(m, "MATCH_LAST_TERM");
         matchLabels[10] = Str_CstrRef(m, "MATCH_JUMP");
         matchLabels[11] = Str_CstrRef(m, "MATCH_TERM_FOUND");
         matchLabels[12] = Str_CstrRef(m, "MATCH_KO_INVERT");

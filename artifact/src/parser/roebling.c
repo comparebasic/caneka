@@ -34,16 +34,19 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                     i64 total = SnipSpan_Total(mt->backlog, 0);
                     while((Iter_Next(&rbl->matchIt) & END) == 0){
                         Match *omt = (Match *)rbl->matchIt.value;
-                        if(omt != mt && 
-                                (omt->type.state & PROCESSING) &&
-                                (omt->pat.curDef == omt->pat.lastTermDef)){
+                        if(omt != mt && (omt->type.state & MATCH_LAST_TERM)){
+                            /*
                             Match_ResolveOverlay(omt, total);
+                            */
+                            StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
 
                             Abstract *args[] = {
                                 (Abstract *)omt,
+                                (Abstract *)v,
                                 NULL
                             };
-                            StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
+                            Debug("FOUND SOMETHING @ -> @\n", args);
+
                             rbl->capture(rbl, omt->captureKey, v);
                             break;
                         }

@@ -154,7 +154,13 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                     }
                 }
             }
-            mt->type.state |= PROCESSING;
+
+            if(def >= mt->pat.lastTermDef){
+                mt->type.state |= (PROCESSING|MATCH_LAST_TERM);
+            }else{
+                mt->type.state &= ~MATCH_LAST_TERM;
+                mt->type.state |= PROCESSING;
+            }
 
             word snipFlag = ZERO;
             if((def->flags & PAT_LEAVE) != 0){
@@ -194,7 +200,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                         goto miss;
                         break;
                     }
-                    mt->type.state &= ~(PROCESSING|MATCH_KO);
+                    mt->type.state &= ~(PROCESSING|MATCH_KO|MATCH_LAST_TERM);
                     mt->pat.curDef++;
                     continue;
                 }else{
@@ -224,7 +230,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                 continue;
             }
 miss:
-            mt->type.state &= ~PROCESSING;
+            mt->type.state &= ~(PROCESSING|MATCH_LAST_TERM);
             if((mt->type.state & MATCH_SEARCH) != 0){
                 match_Reset(mt);
                 addCount(m, mt, SNIP_GAP, 1);
@@ -244,7 +250,7 @@ miss:
                 (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
             mt->type.state = NOOP;
         }else{
-            mt->type.state = (mt->type.state | SUCCESS) & ~PROCESSING;
+            mt->type.state = (mt->type.state | SUCCESS) & ~(PROCESSING|MATCH_LAST_TERM);
         }
     }
 
