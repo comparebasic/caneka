@@ -297,37 +297,78 @@ status Iter_Set(Iter *it, void *value){
 
 status Iter_AddWithGaps(Iter *it, MemPage *pg){
     Abstract *value = it->value;
-
-    i8 dim = it->p->dims+1;
-    if((it->p->max_idx & _modulos[dim]) == _modulos[dim]){
+    i8 dimP = it->p->dims+1;
+    if((it->p->max_idx & _modulos[dimP]) == _modulos[dimP]){
         it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_RESERVE;
         it->idx = it->p->max_idx+1;
         it->value = NULL;
         _Iter_QueryPage(it, pg);
-        dim = it->p->dims+1;
+        dimP = it->p->dims+1;
     }
 
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
     _Iter_QueryPage(it, pg);
+    i8 dim = 0;
+    void **sl = NULL;
+    void **last = NULL;
+    void **ptr = NULL;
+    i64 openSlots = -1;
     if(it->type.state & SUCCESS){
         it->type.state &= ~SUCCESS;
-        while((it->type.state & SUCCESS) == 0 && dim > 0){
-            if((it->idx & ~_modulos[dim]) == (it->p->max_idx & ~_modulos[dim])
-                    && (it->p->max_idx & _modulos[dim]) != _modulos[dim]){
-                i32 localIdx = it->idx & _modulos[dim];
-                i32 localMaxIdx = it->p->max_idx & _modulos[dim];
-                void **ptr = it->stack[0];
-                memmove(ptr+1, ptr, ((localMaxIdx+1) - localIdx)*sizeof(void *));
-                it->p->max_idx += _increments[dim-1];
-                it->type.state |= SUCCESS;
+
+
+        if(it->p->dims == 0){
+            i32 localIdx = it->stackIdx[dim];
+            ptr = it->stack[dim];
+            last = ptr+((_capacity[0]-1)-localIdx);
+            openSlots = (it->p->max_idx+1) - it->idx;
+            printf("dim0 - found colllision moving %ld items at %d\n", openSlots+1, it->stackIdx[dim]);
+        }else{
+            while((it->type.state & SUCCESS) == 0){
+                i32 localIdx = it->stackIdx[dim];
+                ptr = it->stack[dim];
+                last = ptr+((_capacity[0]-1)-localIdx);
+                while(*last == NULL){
+                    printf("in while\n");
+                    last--;
+                    if((openSlots = last-ptr) == 0){
+                        break;
+                    }
+                }
+
+                printf("found colllision moving %ld items at %d of dim: %d\n", openSlots+1, it->stackIdx[dim], (i32)dim);
+
+                if(openSlots > 0){
+                    break;
+                }
+                if(dim+1 > it->p->dims){
+                    break;
+                }
+                dim++;
             }
-            dim--;
+        }
+
+        if(openSlots >= 0){
+            sl = ptr+1;
+            memmove(sl, ptr, (openSlots+1)*sizeof(void *));
+            *ptr = NULL;
+            it->p->max_idx += _increments[dim];
+            it->type.state |= SUCCESS;
         }
     }
 
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
     it->value = value;
-    return _Iter_QueryPage(it, pg);
+    _Iter_QueryPage(it, pg);
+    openSlots = it->stackIdx[0]; 
+    if(sl != NULL && dim > 0 && openSlots > 0){
+        printf("copying\n");
+        /*
+        memcpy(it->stack[1], sl, (openSlots)*sizeof(void *));
+        memset(sl, 0, (openSlots)*sizeof(void *));
+        */
+    }
+    Iter_Setup(it, it->p, SPAN_OP_SET, it->idx);
 }
 
 status Iter_Query(Iter *it){

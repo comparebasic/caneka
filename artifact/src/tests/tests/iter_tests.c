@@ -9,6 +9,7 @@ status Iter_Tests(MemCh *gm){
     status r = READY;
     Iter it;
 
+
     p = Span_Make(m);
 
     Abstract *arr[6] = {
@@ -66,6 +67,7 @@ status Iter_Tests(MemCh *gm){
             "Iter_Next first set of values gives expected, expected @, have @", args);
         i++;
     }
+
 
     Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 3);
     it.value = arr2[3];
@@ -161,11 +163,13 @@ status Iter_Tests(MemCh *gm){
         ptr++;
     }
 
+    /*
     Abstract *args1[] = {
         (Abstract *)p,
         NULL
     };
     Debug("^p.After populated 18: @^0\n", args1);
+    */
 
     Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 6);
     it.value = arr5[6];
@@ -175,7 +179,7 @@ status Iter_Tests(MemCh *gm){
         (Abstract *)p,
         NULL
     };
-    Debug("^after multi-level insert: p.@^0\n", args2);
+    Debug("^p.after multi-level insert: p.@^0\n", args2);
 
     i = 0;
     Iter_Setup(&it, p, SPAN_OP_GET, 0);
@@ -189,7 +193,6 @@ status Iter_Tests(MemCh *gm){
             "Iter_Next fourth set of values gives expected, expected @, have @", args);
         i++;
     }
-
 
     MemCh_Free(m);
     DebugStack_Pop();

@@ -2,7 +2,9 @@
 #include <caneka.h>
 
 boolean Equals(Abstract *a, Abstract *b){
-    if(a->type.of == TYPE_STR){
+    if(a == NULL || b == NULL){
+        return FALSE;
+    }else if(a->type.of == TYPE_STR){
         if(a->type.of == b->type.of){
             return Str_EqualsStr((Str *)a, (Str *)b);
         }else if (b->type.of == TYPE_STRVEC){
