@@ -151,7 +151,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             }
             Abstract *item = (Abstract *)it.value;
             if(p->type.state & FLAG_SPAN_RAW){
-                total += Bits_Print(sm, &(it.value), sizeof(void *), MORE);
+                total += Bits_Print(sm, (byte *)&(it.value), sizeof(void *), MORE);
             }else if(item != NULL && item->type.of == TYPE_MEMSLAB){
                 total += ToS(sm, it.value, 0, (flags & ~DEBUG));
             }else{

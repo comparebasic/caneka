@@ -303,10 +303,8 @@ status Iter_AddWithGaps(Iter *it, MemPage *pg){
     Abstract *value = it->value;
     i32 idx = it->idx;
     i8 dimP = it->p->dims+1;
-    void *stack[SPAN_MAX_DIMS+1];
-    memset(&stack, 0, sizeof(stack));
-    i32 stackIdx[SPAN_MAX_DIMS+1];
-    memset(&stackIdx, 0, sizeof(stackIdx));
+    Iter prevIt;
+    i32 prevIdx = -1;
 
     if((it->p->max_idx & _modulos[dimP]) == _modulos[dimP]){
         it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_RESERVE;
@@ -325,7 +323,6 @@ status Iter_AddWithGaps(Iter *it, MemPage *pg){
     i64 openSlots = -1;
     if(it->type.state & SUCCESS){
         it->type.state &= ~SUCCESS;
-
 
         if(it->p->dims == 0){
             i32 localIdx = it->stackIdx[dim];
@@ -355,13 +352,10 @@ status Iter_AddWithGaps(Iter *it, MemPage *pg){
         }
 
         if(openSlots >= 0){
-            if(dim > 0){
-                memcpy(&stack, &it->stack, sizeof(stack));
-                memcpy(&stackIdx, &it->stackIdx, sizeof(stackIdx));
-            }
             memmove(ptr+1, ptr, (openSlots+1)*sizeof(void *));
             *ptr = NULL;
             it->p->max_idx += _increments[dim];
+            prevIdx = (it->idx + _increments[dim]) & ~_modulos[dim];
             it->type.state |= SUCCESS;
         }
     }
@@ -370,23 +364,19 @@ status Iter_AddWithGaps(Iter *it, MemPage *pg){
     it->value = value;
     it->idx = idx;
     _Iter_QueryPage(it, pg);
-    while(dim > 0){
-        if(dim == it->p->dims){
+    if(prevIdx != -1){
+        Iter_Setup(&prevIt, it->p, SPAN_OP_GET, prevIdx);
+        _Iter_QueryPage(&prevIt, pg);
+        while(dim > 0 && (it->type.state & SUCCESS)){
+            sl = *((void **)prevIt.stack[dim]);
+            openSlots = it->stackIdx[dim-1];
+            if(sl != NULL && openSlots > 0){
+                void *destSl = *((void **)it->stack[dim]);
+                memcpy(destSl, sl, (openSlots)*sizeof(void *));
+                memset(sl, 0, (openSlots)*sizeof(void *));
+            }
             dim--;
-            continue;
-        }else{
-            sl = *((void **)stack[dim]);
         }
-        openSlots = stackIdx[dim-1];
-        if(sl != NULL && openSlots > 0){
-            printf("copying %d slots at dim %d from %p\n", openSlots, dim, sl);
-            void *destSl = *((void **)it->stack[dim]);
-            memcpy(destSl, sl, (openSlots)*sizeof(void *));
-            memset(sl, 0, (openSlots)*sizeof(void *));
-        }else{
-            printf("Not copying %d slots at dim %d from \n", openSlots, dim, sl);
-        }
-        dim--;
     }
     Iter_Setup(it, it->p, SPAN_OP_SET, it->idx);
     return it->type.state;
