@@ -159,6 +159,9 @@ i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
 
 i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
     DebugStack_Push(a, type);
+    if((sm->type.state & STREAM_STRVEC) == 0){
+        sm->m->type.range++;
+    }
     if(a == NULL){
         DebugStack_Pop();
         return Stream_Bytes(sm, (byte *)"NULL", 4);
@@ -171,6 +174,10 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
     ToSFunc func = (ToSFunc)Lookup_Get(ToStreamLookup, type);
     if(func != NULL){
         i64 total = func(sm, a, type, flags);
+        if((sm->type.state & STREAM_STRVEC) == 0){
+            MemCh_Free(sm->m);
+            sm->m->type.range--;
+        }
         DebugStack_Pop();
         return total;
     }else{
@@ -184,4 +191,3 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
         return 0;
     }
 }
-

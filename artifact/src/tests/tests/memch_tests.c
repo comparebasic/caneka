@@ -44,11 +44,12 @@ status MemCh_Tests(MemCh *gm){
     r |= Test(m->it.p->nvalues == 3, "Three slabs registered, after temp wipe have, $", args2);
     if(cp != NULL){
         Abstract *args3[] = {
+            (Abstract *)I32_Wrapped(m, recycled),
             (Abstract *)I32_Wrapped(m, cp->recycled.p->nvalues),
             NULL
         };
         r |= Test(cp->recycled.p->nvalues == recycled+3,
-            "Two additional slabs registered in chapter, have $", args3);
+            "Two additional slabs registered in chapter $recycled, have $", args3);
     }
     m->type.range++;
 
@@ -85,7 +86,6 @@ status MemCh_Tests(MemCh *gm){
     }
 
     m->type.range--;
-    printf("memRange: %d\n", (i32)m->type.range);
     MemCh_Free(m);
     if(cp != NULL){
         Single sg;

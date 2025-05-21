@@ -9,6 +9,7 @@ status Iter_Tests(MemCh *gm){
     status r = READY;
     Iter it;
 
+    m->type.range++;
 
     p = Span_Make(m);
 
@@ -163,14 +164,6 @@ status Iter_Tests(MemCh *gm){
         ptr++;
     }
 
-    /*
-    Abstract *args1[] = {
-        (Abstract *)p,
-        NULL
-    };
-    Debug("^p.After populated 18: @^0\n", args1);
-    */
-
     Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 6);
     it.value = arr5[6];
     Iter_Query(&it);
@@ -179,7 +172,7 @@ status Iter_Tests(MemCh *gm){
         (Abstract *)p,
         NULL
     };
-    Debug("^p.after multi-level insert: p.@^0\n", args2);
+    Debug("^p.after multi-level insert: @^0\n", args2);
 
     i = 0;
     Iter_Setup(&it, p, SPAN_OP_GET, 0);
@@ -194,6 +187,43 @@ status Iter_Tests(MemCh *gm){
         i++;
     }
 
+    MemCh_Free(m);
+
+    /*
+    i64 max = 5128;
+    p = Span_Make(m);
+    p->type.state |= FLAG_SPAN_RAW;
+    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
+    for(i64 i = 0; i < max; i++){
+        it.value = (void *)i;
+        Iter_Query(&it);
+    }
+
+    Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 177);
+    it.value = (void*)((i64)177);
+    Iter_Query(&it);
+
+    i64 exp = 0;
+    Iter_Setup(&it, p, SPAN_OP_GET, 0);
+    while((Iter_Next(&it) & END) == 0){
+        if(exp != (i64)it.value){
+            r |= ERROR;
+            printf("\x1b[31m%d: %ld vs %ld\x1b[0m,", it.idx, exp, (i64)it.value); 
+        }else{
+            printf("\x1b[32m%d: %ld vs %ld\x1b[0m,", it.idx, exp, (i64)it.value); 
+        }
+        exp++;
+    }
+
+    Abstract *args3[] = {
+        (Abstract *)I64_Wrapped(m, exp),
+        NULL
+    };
+    r |= Test(i == max,
+        "177 Was added in the middle of 5k values, ended contigous values on $", args3);
+        */
+
+    m->type.range--;
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

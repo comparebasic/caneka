@@ -8,6 +8,9 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
     char *start = fmt;
     status state = SUCCESS;
     i64 total = 0;
+    if((sm->type.state & STREAM_STRVEC) == 0){
+        sm->m->type.range++;
+    }
     while(ptr <= end){
         char c = *ptr;
         if((state & NOOP) != 0){
@@ -88,8 +91,14 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             Stream_Bytes(sm, s->bytes, s->length);
             total += s->length;
             start = ptr+1;
+            if((sm->type.state & STREAM_STRVEC) == 0){
+                MemCh_Free(sm->m);
+            }
         }else{
 next:
+            if((sm->type.state & STREAM_STRVEC) == 0){
+                MemCh_Free(sm->m);
+            }
             ptr++;
         }
     }
@@ -100,6 +109,10 @@ next:
             Stream_Bytes(sm, (byte *)start, length);
             total += length;
         }
+    }
+
+    if((sm->type.state & STREAM_STRVEC) == 0){
+        sm->m->type.range--;
     }
 
     return total; 
