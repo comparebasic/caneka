@@ -32,4 +32,5 @@ void Iter_Init(Iter *it, Span *p);
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx);
 Iter *Iter_Make(struct mem_ctx *m, Span *p);
 status Iter_Set(Iter *it, void *value);
+status Iter_AddWithGaps(Iter *it, struct mem_page *pg);
 status _Iter_QueryPage(Iter *it, struct mem_page *pg);

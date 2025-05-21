@@ -295,6 +295,41 @@ status Iter_Set(Iter *it, void *value){
     return SUCCESS;
 }
 
+status Iter_AddWithGaps(Iter *it, MemPage *pg){
+    Abstract *value = it->value;
+
+    i8 dim = it->p->dims+1;
+    if((it->p->max_idx & _modulos[dim]) == _modulos[dim]){
+        it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_RESERVE;
+        it->idx = it->p->max_idx+1;
+        it->value = NULL;
+        _Iter_QueryPage(it, pg);
+        dim = it->p->dims+1;
+    }
+
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
+    _Iter_QueryPage(it, pg);
+    if(it->type.state & SUCCESS){
+        it->type.state &= ~SUCCESS;
+        while((it->type.state & SUCCESS) == 0 && dim > 0){
+            if((it->idx & ~_modulos[dim]) == (it->p->max_idx & ~_modulos[dim])
+                    && (it->p->max_idx & _modulos[dim]) != _modulos[dim]){
+                i32 localIdx = it->idx & _modulos[dim];
+                i32 localMaxIdx = it->p->max_idx & _modulos[dim];
+                void **ptr = it->stack[0];
+                memmove(ptr+1, ptr, ((localMaxIdx+1) - localIdx)*sizeof(void *));
+                it->p->max_idx += _increments[dim-1];
+                it->type.state |= SUCCESS;
+            }
+            dim--;
+        }
+    }
+
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
+    it->value = value;
+    return _Iter_QueryPage(it, pg);
+}
+
 status Iter_Query(Iter *it){
     return _Iter_QueryPage(it, NULL);
 }
@@ -302,7 +337,11 @@ status Iter_Query(Iter *it){
 status _Iter_QueryPage(Iter *it, MemPage *pg){
     it->type.state &= ~(SUCCESS|NOOP);
     MemCh *m = it->p->m;
+
     if(it->type.state & SPAN_OP_ADD){
+        if(it->type.state & CONTINUE){
+            return Iter_AddWithGaps(it, pg);
+        }
         it->idx = it->p->max_idx+1;
     }
 
@@ -313,7 +352,8 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
 
     Span *p = it->p;
     if(dimsNeeded > p->dims){
-        if((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD|SPAN_OP_RESIZE)) == 0){
+        if((it->type.state &
+                (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD|SPAN_OP_RESIZE)) == 0){
             return NOOP;
         }
         slab *exp_sl = NULL;
@@ -369,10 +409,11 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
                 ptr = (void **)it->stack[dim];
                 if(ptr != NULL){
                     it->value = *ptr;
+                    it->type.state |= SUCCESS;
                 }else{
                     it->value = NULL;
+                    it->type.state |= NOOP;
                 }
-                it->type.state |= SUCCESS;
             }
         }
         dim--;
@@ -405,9 +446,6 @@ void Iter_Init(Iter *it, Span *p){
 
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx){
     it->type.of = TYPE_ITER;
-    /*
-    it->type.state = (it->type.state & NORMAL_FLAGS) | op;
-    */
     it->type.state = op;
     it->p = p;
     it->idx = idx;

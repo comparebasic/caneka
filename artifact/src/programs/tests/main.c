@@ -41,6 +41,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Iter",
+        Iter_Tests,
+        "Iter tests for iteration and insertion.",
+        FEATURE_COMPLETE,
+    },
+    {
         "StrVec",
         StrVec_Tests,
         "Testing String Vectors",

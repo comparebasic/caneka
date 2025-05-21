@@ -66,7 +66,6 @@ i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
             digit_s.length = 0;
             memset(_digitBytes, 0, sz);
 
-
             if(a->type.of == TYPE_MEMSLAB){
                 Stream_Bytes(sm, (byte *)"<self>", 6);
             }else if(a->type.of == TYPE_MEMCTX){
