@@ -131,6 +131,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Snip Modify Tests",
+        SnipModify_Tests,
+        "Snip tests for modifying an existing captur in progress",
+        FEATURE_COMPLETE,
+    },
+    {
         "Roebling Init Test",
         Roebling_Tests,
         "Roebling tests for adding and running a basic parser.",

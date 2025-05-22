@@ -47,3 +47,62 @@ status Snip_Tests(MemCh *gm){
     MemCh_Free(m);
     return r;
 }
+
+status SnipModify_Tests(MemCh *gm){
+    status r = READY;
+    MemCh *m = MemCh_Make();
+    Str *s;
+    StrVec *v;
+    Cursor *curs;
+    Span *sns;
+    Snip *sn;
+    Snip _sn;
+    memset(&_sn, 0, sizeof(Snip));
+    _sn.type.of = TYPE_SNIP;
+
+    sns = Span_Make(m);
+    sn = Snip_Make(m);
+    v = StrVec_Make(m);
+    curs = Cursor_Make(m, StrVec_Make(m));
+    Cursor_Add(curs, Str_CstrRef(m , "Start with some text, "));
+    Cursor_Add(curs, Str_CstrRef(m , "that has a _link=article line@http://example.com inside it."));
+
+    _sn.type.state = SNIP_CONTENT;
+    _sn.length = 22;
+    SnipSpan_Add(sns, &_sn);
+
+    _sn.type.state = SNIP_STR_BOUNDRY;
+    _sn.length = 0;
+    SnipSpan_Add(sns, &_sn);
+
+    _sn.type.state = SNIP_CONTENT;
+    _sn.length = 16;
+    SnipSpan_Add(sns, &_sn);
+
+    Cursor_Incr(curs, 38);
+    Cursor_Decr(curs, 1);
+
+    SnipSpan_Set(m, sns, 33, 5, SNIP_GAP);
+
+    s = Str_CstrRef(m, "Start with some text, that has a ");
+    v = StrVec_Snip(m, sns, curs);
+    Abstract *args1[] = {
+        (Abstract *)v,
+        (Abstract *)s,
+        NULL
+    };
+    r |= Test(Equals((Abstract *)v, (Abstract *)s), 
+        "Start of line matches, expected &, have &", args1);
+    
+    SnipSpan_SetAll(sns, SNIP_GAP);
+    sn = (Snip *)Span_Get(sns, 0);
+    Abstract *args2[] = {
+        (Abstract *)Ptr_Wrapped(OutStream->m, sns, TYPE_SNIPSPAN),
+        NULL
+    };
+    r |= Test((sn->length == 38 && sns->nvalues == 1), 
+        "SnipSpan now has single value which is a gap that spans the total length, have &\n", args2);
+
+    MemCh_Free(m);
+    return r;
+}

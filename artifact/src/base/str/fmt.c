@@ -19,11 +19,16 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
         }else if(c == '\\'){
             state |= NOOP;
             goto next;
-        }else if(c == '$' || c == '@'){
+        }else if(c == '$' || c == '@' || c == '&'){
             if(c == '@'){
                 state |= MORE;
             }else{
                 state &= ~MORE;
+            }
+            if(c == '&'){
+                state |= (DEBUG|MORE);
+            }else{
+                state &= ~DEBUG;
             }
 
             if(args == NULL){
@@ -74,7 +79,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 a = sg->val.ptr;
             }
             total += ToS(sm, a, type, 
-                ((sm->type.state & DEBUG)|(state & MORE)) | a->type.state);
+                ((sm->type.state & DEBUG)|(state & (MORE|DEBUG))) | a->type.state);
             state = SUCCESS;
             goto next;
         }else if(c == '^'){

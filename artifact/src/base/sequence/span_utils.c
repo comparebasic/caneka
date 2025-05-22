@@ -88,6 +88,18 @@ Span *Span_Clone(MemCh *m, Span *p){
     return p2;
 }
 
+status Span_Insert(Span *p, i32 idx, Abstract *t){
+    if(t == NULL){
+        return NOOP;
+    }
+    Iter it;
+    memset(&it, 0, sizeof(Iter));
+    Iter_Setup(&it, p, (SPAN_OP_ADD|CONTINUE), idx);
+    it.value = (void *)t;
+    status r = Iter_Query(&it);
+    return r;
+}
+
 status Span_Add(Span *p, Abstract *t){
     if(t == NULL){
         return NOOP;

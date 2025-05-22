@@ -74,12 +74,6 @@ status Iter_Tests(MemCh *gm){
     it.value = arr2[3];
     Iter_Query(&it);
 
-    Abstract *args[] = {
-        (Abstract *)p,
-        NULL
-    };
-    Debug("^p.@^0\n", args);
-
     i = 0;
     Iter_Setup(&it, p, SPAN_OP_GET, 0);
     while((Iter_Next(&it) & END) == 0){
@@ -168,12 +162,6 @@ status Iter_Tests(MemCh *gm){
     it.value = arr5[6];
     Iter_Query(&it);
 
-    Abstract *args2[] = {
-        (Abstract *)p,
-        NULL
-    };
-    Debug("^p.after multi-level insert: @^0\n", args2);
-
     i = 0;
     Iter_Setup(&it, p, SPAN_OP_GET, 0);
     while((Iter_Next(&it) & END) == 0){
@@ -198,7 +186,7 @@ status Iter_Tests(MemCh *gm){
         Iter_Query(&it);
     }
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 176);
+    Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 177);
     it.value = (void*)((i64)177);
     Iter_Query(&it);
 
@@ -243,9 +231,6 @@ status Iter_Tests(MemCh *gm){
     m->type.range--;
     MemCh_Free(m);
     DebugStack_Pop();
-
-    /* force pass for now */
-    r &= ~ERROR; 
 
     return r;
 }

@@ -51,6 +51,39 @@ void indent_Print(int indent){
     }
 }
 
+i64 Slots_Print(Stream *sm, util *ut, i32 slots, word flags){
+    i64 length = slots;
+    i64 total = 0;
+    Single sg = {{TYPE_WRAPPED_I64, 0}, 0};
+    if(ut == NULL){
+        return Stream_Bytes(sm, (byte *)"NULL", 4);
+    }
+    for(int i = 0; i < length;i++){
+        util u = ut[i];
+        if(u == 0 && (flags & MORE)){
+            total += Stream_Bytes(sm, (byte *)"0", 1);
+        }else{
+            if(flags & MORE){
+                sg.val.value = u;
+                Abstract *args[] = {(Abstract *)&sg, NULL};
+                total += Fmt(sm, "$", args);
+            }
+            if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
+                total += Stream_Bytes(sm, (byte *)"=", 1);
+            }
+            if(flags & DEBUG){
+                for(int j = 65; j >= 0;j--){
+                    total += Stream_Bytes(sm, (byte *)((u & (1 << j)) ? "1" : "0"), 1);
+                }
+            }
+        }
+        if(flags & MORE){
+            total += Stream_Bytes(sm, (byte *)" ", 1);
+        }
+    }
+    return total;
+}
+
 i64 Bits_Print(Stream *sm, byte *bt, size_t length, word flags){
     i64 total = 0;
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};

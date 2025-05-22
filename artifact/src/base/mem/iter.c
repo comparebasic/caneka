@@ -355,7 +355,7 @@ status Iter_AddWithGaps(Iter *it, MemPage *pg){
             memmove(ptr+1, ptr, (openSlots+1)*sizeof(void *));
             *ptr = NULL;
             it->p->max_idx += _increments[dim];
-            prevIdx = (it->idx + _increments[dim]) & ~_modulos[dim];
+            prevIdx = it->idx + _increments[dim];
             it->type.state |= SUCCESS;
         }
     }

@@ -7,6 +7,7 @@ static status Cursor_SetStr(Cursor *curs){
         if(s != NULL){
             curs->ptr = s->bytes;
             curs->end = s->bytes+(s->length-1);
+            curs->type.state |= PROCESSING;
             return SUCCESS;
         }else{
             curs->ptr = NULL;
@@ -18,9 +19,17 @@ static status Cursor_SetStr(Cursor *curs){
 
 status Cursor_Decr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
+    if((curs->type.state & PROCESSING) == 0){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+            "Unable to decr cursor that is not in PROCESSING", NULL);
+        return ERROR;
+    }
     curs->type.state &= ~NOOP;
     Str *s = curs->it.value;
-    i32 remaining = (curs->ptr - s->bytes);
+    i32 remaining = 0;
+    if(s != NULL){
+        remaining = (curs->ptr - s->bytes);
+    }
     while(length > 0){
         if(length > remaining){
             length -= remaining;
@@ -84,7 +93,6 @@ status Cursor_NextByte(Cursor *curs){
     if((curs->type.state & PROCESSING) == 0){
         curs->it.idx = 0;
         Cursor_SetStr(curs);
-        curs->type.state |= PROCESSING;
     }else if(curs->ptr == curs->end){
         if(curs->it.type.state & FLAG_ITER_LAST){
             curs->type.state |= END;

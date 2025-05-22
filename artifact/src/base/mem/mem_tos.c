@@ -214,9 +214,14 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
         }
         word previous = sm->type.state;
         Abstract *args2[] = {
-            (Abstract *)it->value,
+            (Abstract *)((it->p->type.state & FLAG_SPAN_RAW) ?
+                I64_Wrapped(sm->m, (i64)it->value) : it->value),
             NULL
         };
+        if(it->value == NULL){
+            printf("it->value is NULL\n");
+            fflush(stdout);
+        }
         total += Fmt(sm, "value=$>", args2);
     }else if(flags & MORE){
         Abstract *args[] = {

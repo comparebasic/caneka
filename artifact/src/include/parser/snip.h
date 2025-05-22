@@ -16,3 +16,5 @@ Snip *Snip_Make(MemCh *m);
 status SnipSpan_Add(Span *sns, Snip *sn);
 status SnipSpan_Remove(Span *sns, i32 length);
 i64 SnipSpan_Total(Span *sns, word flags);
+status SnipSpan_Set(MemCh *m, Span *sns, i32 pos, i32 length, word flags);
+status SnipSpan_SetAll(Span *sns, word flags);
