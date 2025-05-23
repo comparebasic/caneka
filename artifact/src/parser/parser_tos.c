@@ -219,23 +219,11 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
     status r = READY;
     if(snipLabels == NULL){
         snipLabels = (Str **)Arr_Make(m, 17);
-        snipLabels[0] = Str_CstrRef(m, "ZERO/READY");
-        snipLabels[1] = Str_CstrRef(m, "SUCCESS");
-        snipLabels[2] = Str_CstrRef(m, "ERROR");
-        snipLabels[3] = Str_CstrRef(m, "NOOP");
-        snipLabels[4] = Str_CstrRef(m, "DEBUG");
-        snipLabels[5] = Str_CstrRef(m, "MORE");
-        snipLabels[6] = Str_CstrRef(m, "CONTINUE");
-        snipLabels[7] = Str_CstrRef(m, "END");
-        snipLabels[8] = Str_CstrRef(m, "PROCESSING");
         snipLabels[9] = Str_CstrRef(m, "SNIP_CONTENT");
         snipLabels[10] = Str_CstrRef(m, "SNIP_GAP");
         snipLabels[11] = Str_CstrRef(m, "SNIP_STR_BOUNDRY");
         snipLabels[12] = Str_CstrRef(m, "SNIP_UNCLAIMED");
-        snipLabels[13] = Str_CstrRef(m, "CLS_FLAG_ECHO");
-        snipLabels[14] = Str_CstrRef(m, "CLS_FLAG_FOXTROT");
-        snipLabels[15] = Str_CstrRef(m, "CLS_FLAG_GOLF");
-        snipLabels[16] = Str_CstrRef(m, "CLS_FLAG_HOTEL");
+        snipLabels[13] = Str_CstrRef(m, "SNIP_SKIPPED");
         Lookup_Add(m, lk, TYPE_SNIP, (void *)snipLabels);
         r |= SUCCESS;
     }

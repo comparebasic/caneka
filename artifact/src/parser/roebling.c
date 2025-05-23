@@ -29,30 +29,33 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 rbl->type.state &= ~PROCESSING;
 
                 if((mt->type.state & MATCH_SEARCH)){
-                    i32 idx = rbl->matchIt.idx;
-                    Iter_Reset(&rbl->matchIt);
-                    i64 total = SnipSpan_Total(mt->backlog, 0);
-                    while((Iter_Next(&rbl->matchIt) & END) == 0){
-                        Match *omt = (Match *)rbl->matchIt.value;
-                        if(omt != mt && (omt->type.state & MATCH_LAST_TERM)){
-                            /*
-                            Match_ResolveOverlay(omt, total);
-                            */
-                            StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
+                    Snip *sn = Span_Get(mt->backlog, 0);
+                    if(sn != NULL && sn->length > 0 && sn->type.state & SNIP_SKIPPED){
+                        i32 idx = rbl->matchIt.idx;
+                        Iter_Reset(&rbl->matchIt);
+                        while((Iter_Next(&rbl->matchIt) & END) == 0){
+                            Match *omt = (Match *)rbl->matchIt.value;
+                            if(omt != mt && (omt->type.state & MATCH_LAST_TERM)){
+                                SnipSpan_Add(omt->backlog, &omt->snip);
+                                i64 total = SnipSpan_Total(mt->backlog, ~SNIP_SKIPPED);
+                                SnipSpan_Set(rbl->m, omt->backlog, total, SNIP_GAP);
 
-                            Abstract *args[] = {
-                                (Abstract *)omt,
-                                (Abstract *)v,
-                                NULL
-                            };
-                            Debug("FOUND SOMETHING @ -> @\n", args);
+                                Abstract *args[] = {
+                                    (Abstract *)omt,
+                                    (Abstract *)mt,
+                                    NULL
+                                };
+                                Debug("^p.FOUND SOMETHING & from &^0.\n", args);
 
-                            rbl->capture(rbl, omt->captureKey, v);
-                            break;
+                                StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
+
+                                rbl->capture(rbl, omt->captureKey, v);
+                                break;
+                            }
                         }
+                        Iter_Setup(&rbl->matchIt, rbl->matchIt.p, SPAN_OP_GET, idx);
+                        Iter_Query(&rbl->matchIt);
                     }
-                    Iter_Setup(&rbl->matchIt, rbl->matchIt.p, SPAN_OP_GET, idx);
-                    Iter_Query(&rbl->matchIt);
                 }
 
                 StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);

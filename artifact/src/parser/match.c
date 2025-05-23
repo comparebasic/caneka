@@ -233,7 +233,7 @@ miss:
             mt->type.state &= ~(PROCESSING|MATCH_LAST_TERM);
             if((mt->type.state & MATCH_SEARCH) != 0){
                 match_Reset(mt);
-                addCount(m, mt, SNIP_GAP, 1);
+                addCount(m, mt, SNIP_SKIPPED, 1);
             }else{
                 mt->type.state |= NOOP;
             }
@@ -246,6 +246,7 @@ miss:
             addCount(m, mt, SNIP_UNCLAIMED, 1);
         }
         SnipSpan_Add(mt->backlog, &mt->snip);
+        mt->snip.length = 0;
         if(SnipSpan_Total(mt->backlog, SNIP_CONTENT) == 0 &&
                 (mt->type.state & MATCH_ACCEPT_EMPTY) == 0){
             mt->type.state = NOOP;
@@ -337,7 +338,7 @@ Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
             "PatCharDef: end not found", NULL);
     }
     mt->remaining = -1;
-    if(backlog == 0){
+    if(backlog == NULL){
         backlog = Span_Make(m);
     }
     mt->backlog = backlog;

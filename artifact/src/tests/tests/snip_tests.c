@@ -82,7 +82,7 @@ status SnipModify_Tests(MemCh *gm){
     Cursor_Incr(curs, 38);
     Cursor_Decr(curs, 1);
 
-    SnipSpan_Set(m, sns, 33, 5, SNIP_GAP);
+    SnipSpan_Set(m, sns, 5, SNIP_GAP);
 
     s = Str_CstrRef(m, "Start with some text, that has a ");
     v = StrVec_Snip(m, sns, curs);

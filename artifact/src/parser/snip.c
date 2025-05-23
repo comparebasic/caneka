@@ -45,63 +45,16 @@ status SnipSpan_SetAll(Span *sns, word flags){
     return Span_Add(sns, (Abstract *)sn);
 }
 
-status SnipSpan_Set(MemCh *m, Span *sns, i32 pos, i32 length, word flags){
+status SnipSpan_Set(MemCh *m, Span *sns, i32 length, word flags){
+    Snip *sn = NULL;
     if(length == 0){
         return NOOP;
     }
+
     Iter it;
     Iter_Init(&it, sns);
-    i32 position = 0;
-    Snip *sn = NULL;
-    while((Iter_Next(&it) & END) == 0){
-        sn = (Snip *)it.value;
-        if(position + sn->length > pos){
-            break;
-        }
-        position += sn->length;
-    }
-
-    if(sn->length == 0 ){
-        it.idx++;
-    }else if((sn->type.state & flags) == flags){
-        i32 remove = pos - position;
-        if(sn->length > remove + length){
-            return SUCCESS;
-        }else{
-            length -= (sn->length - remove);
-        }
-    }else{
-        i32 remaining = pos - position;
-        i32 removed = 0;
-        if(sn->length > remaining){
-            removed = sn->length - remaining;
-            sn->length = remaining;
-        }else{
-            sn->length = 0;
-            removed = sn->length;
-        }
-        i32 amount = min(length, removed);
-
-        Snip *sn = Snip_Make(m);
-        sn->length = amount;
-        sn->type.state = flags;
-        Span_Insert(sns, it.idx+1, (Abstract *)sn);
-        length -= amount;
-        it.idx++;
-    }
-
-    Iter_Setup(&it, sns, SPAN_OP_GET, it.idx);
-    it.type.state |= PROCESSING;
-    Iter_Query(&it);
-    while((Iter_Next(&it) & END) == 0 && length > 0){
+    while((Iter_Prev(&it) & END) == 0 && length > 0){
         Snip *sn = (Snip *)it.value;
-
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(OutStream->m, it.idx),
-            (Abstract *)it.value,
-            NULL
-        };
-        Out("^c.Iter_Next below: $:&\n", args);
 
         i32 amount = min(sn->length, length);
         sn->length -= amount;
@@ -110,7 +63,6 @@ status SnipSpan_Set(MemCh *m, Span *sns, i32 pos, i32 length, word flags){
             sn->length = amount;
             sn->type.state = flags;
             Span_Insert(sns, it.idx+1, (Abstract *)sn);
-            it.idx++;
             length -= amount;
         }
     }
