@@ -77,7 +77,7 @@ static BuildSubdir cryptoobj = { "crypto", {
     NULL
 }};
 
-static BuildSubdir fmtobj = { "formats/fmt", {
+static BuildSubdir fmtobj = { "format/fmt", {
     "fmt.c",
     "fmt_roebling.c",
     "fmt_tokenize.c",
@@ -85,19 +85,19 @@ static BuildSubdir fmtobj = { "formats/fmt", {
 }};
 
 
-static BuildSubdir xmlobj = { "formats/xml", {
+static BuildSubdir xmlobj = { "format/xml", {
     "xml.c",
     "xml_parser.c",
     NULL,
 }};
 
-static BuildSubdir cashobj = { "formats/cash", {
+static BuildSubdir cashobj = { "format/cash", {
     "cash.c",
     "cash_rbl.c",
     NULL,
 }};
 
-static BuildSubdir kveobj = { "formats/kve", {
+static BuildSubdir kveobj = { "format/kve", {
     "kve_capture.c",
     "kve_parser.c",
     "kve_from.c",
@@ -105,12 +105,12 @@ static BuildSubdir kveobj = { "formats/kve", {
     NULL,
 }};
 
-static BuildSubdir termiofmtobj = { "formats/termio", {
+static BuildSubdir termiofmtobj = { "format/termio", {
     "termio_parser.c",
     NULL,
 }};
 
-static BuildSubdir osetobj = { "formats/oset", {
+static BuildSubdir osetobj = { "format/oset", {
     "oset.c",
     "oset_from.c",
     "oset_item.c",
@@ -119,7 +119,7 @@ static BuildSubdir osetobj = { "formats/oset", {
     NULL,
 }};
 
-static BuildSubdir rblshobj = { "formats/cnkrbl", {
+static BuildSubdir rblshobj = { "format/cnkrbl", {
     "rbl_parser_defs.c",
     "rblsh_capture.c",
     "rblsh_cnf.c",
@@ -128,12 +128,12 @@ static BuildSubdir rblshobj = { "formats/cnkrbl", {
     NULL,
 }};
 
-static BuildSubdir httpobj = { "formats/http", {
+static BuildSubdir httpobj = { "format/http", {
     "http_parser.c",
     NULL
 }};
 
-static BuildSubdir cdocobj = { "formats/cdoc", {
+static BuildSubdir cdocobj = { "format/cdoc", {
     "cdoc_capture.c",
     "cdoc_ctx.c",
     "cdoc_parser.c",
@@ -141,7 +141,7 @@ static BuildSubdir cdocobj = { "formats/cdoc", {
     NULL
 }};
 
-static BuildSubdir canekaobj = { "formats/caneka", {
+static BuildSubdir canekaobj = { "format/caneka", {
     "caneka.c",
     "caneka_ctx.c",
     "caneka_module.c",
@@ -213,6 +213,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "mess_tests.c",
     "relation_tests.c",
     "iter_tests.c",
+    "binpin_tests.c",
     /*
     "crypto_tests.c",
     "http_tests.c",

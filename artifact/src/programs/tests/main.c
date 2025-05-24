@@ -137,6 +137,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "BinPin Format Tests",
+        BinPin_Tests,
+        "Small example binpin format printout",
+        FEATURE_COMPLETE,
+    },
+    {
         "Roebling Init Test",
         Roebling_Tests,
         "Roebling tests for adding and running a basic parser.",

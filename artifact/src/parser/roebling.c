@@ -39,16 +39,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                                 SnipSpan_Add(omt->backlog, &omt->snip);
                                 i64 total = SnipSpan_Total(mt->backlog, ~SNIP_SKIPPED);
                                 SnipSpan_Set(rbl->m, omt->backlog, total, SNIP_GAP);
-
-                                Abstract *args[] = {
-                                    (Abstract *)omt,
-                                    (Abstract *)mt,
-                                    NULL
-                                };
-                                Debug("^p.FOUND SOMETHING & from &^0.\n", args);
-
                                 StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
-
                                 rbl->capture(rbl, omt->captureKey, v);
                                 break;
                             }
