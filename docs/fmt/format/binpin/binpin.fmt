@@ -1,0 +1,18 @@
+The problem with XML is that it's too verbose to read easily. The problem with
+JSON is that you're still reading it. 
+
+Because almost all JSON or XML is viewed through an unpacker to re-inflate it
+with whitepsace and provide expandable/collapsable navigation, let's let the
+computers talk amongst themselves by using a payload that works for them, and
+assume that humans will read the payload through some unpack or debug program.
+
+There is one consideration when using binary flags, all values are within a
+visible character range so that it does not conflict with any control
+characters.
+
+Even though this is a binary flag based format, it remains within the visisble
+character range to ensure it cannot be executed or pose any conflict to control
+characters.
+
+The node types start at 32, and all numbers are encoded as ascii hex values,
+with an assumption that all content is also in the visible text range.
