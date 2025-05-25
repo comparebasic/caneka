@@ -194,14 +194,18 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
 
     if(flags & (DEBUG|MORE)){
         PatCharDef *pd = mt->pat.startDef;
-        while(pd->flags != PAT_END){
-            char *_color = "dp.";
+        while(pd <= mt->pat.endDef){
+            char *_color = "E.";
             if(pd == mt->pat.curDef){
-                _color = "Dy.";
+                Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
+                total += Stream_Bytes(sm, color->bytes, color->length); 
             }
-            Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
-            total += Stream_Bytes(sm, color->bytes, color->length); 
             total += ToS(sm, (Abstract *)pd, TYPE_PATCHAR, flags|MORE); 
+            _color = "e.";
+            if(pd == mt->pat.curDef){
+                Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
+                total += Stream_Bytes(sm, color->bytes, color->length); 
+            }
             pd++;
         }
         if(flags & MORE){

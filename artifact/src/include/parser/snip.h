@@ -4,6 +4,7 @@ enum strvec_snip {
     SNIP_STR_BOUNDRY = 1 << 10, /* B */
     SNIP_UNCLAIMED = 1 << 11, /* U */
     SNIP_SKIPPED = 1 << 12, /* U */
+    SNIP_SEP = 1 << 13, /* U */
 };
 
 typedef struct snip {
@@ -15,6 +16,7 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *curs);
 Snip *Snip_From(MemCh *m, Snip *sn);
 Snip *Snip_Make(MemCh *m);
 status SnipSpan_Add(Span *sns, Snip *sn);
+status SnipSpan_AddFrom(Span *sns, i32 length, word flags);
 status SnipSpan_Remove(Span *sns, i32 length);
 i64 SnipSpan_Total(Span *sns, word flags);
 status SnipSpan_Set(MemCh *m, Span *sns, i32 length, word flags);

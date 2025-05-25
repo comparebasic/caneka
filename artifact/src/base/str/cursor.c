@@ -58,6 +58,32 @@ status Cursor_Decr(Cursor *curs, i32 length){
     return curs->type.state;
 }
 
+StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
+    StrVec *v = StrVec_Make(m);
+    Cursor *curs = Cursor_Copy(m, _curs);
+    if(length < 0){
+        length = abs(length);
+        Cursor_Decr(curs, length);
+    }
+    if(offset < 0){
+        offset = abs(offset);
+        Cursor_Decr(curs, offset);
+    }else if(offset > 0){
+        Cursor_Incr(curs, offset);
+    }
+    while(length > 0){
+        i64 taken = min(curs->end - curs->ptr, length);
+        StrVec_AddBytes(m, v, curs->ptr, taken);
+        length -= taken;
+        curs->ptr += (taken-1);
+        if((Cursor_NextByte(curs) & END) != 0){
+            break;
+        }
+
+    }
+    return v;
+}
+
 status Cursor_Incr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
     if(curs->ptr == NULL){
@@ -93,7 +119,7 @@ status Cursor_NextByte(Cursor *curs){
     if((curs->type.state & PROCESSING) == 0){
         curs->it.idx = 0;
         Cursor_SetStr(curs);
-    }else if(curs->ptr == curs->end){
+    }else if(curs->ptr >= curs->end){
         if(curs->it.type.state & FLAG_ITER_LAST){
             curs->type.state |= END;
         }else{

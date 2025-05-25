@@ -18,6 +18,50 @@ Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
                 *(b++) = ';';
             }
             *(b++) = '0';
+        }else if(c == 'E'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '7';
+        }else if(c == 'e'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '2';
+            *(b++) = '7';
+        }else if(c == 'L'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '5';
+        }else if(c == 'l'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '2';
+            *(b++) = '5';
+        }else if(c == 'U'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '4';
+        }else if(c == 'u'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '2';
+            *(b++) = '4';
+        }else if(c == 'I'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '3';
+        }else if(c == 'i'){
+            if(b > start){
+                *(b++) = ';';
+            }
+            *(b++) = '2';
+            *(b++) = '3';
         }else if(c == 'd'){
             if(b > start){
                 *(b++) = ';';

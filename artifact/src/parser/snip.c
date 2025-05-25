@@ -70,6 +70,10 @@ status SnipSpan_Set(MemCh *m, Span *sns, i32 length, word flags){
     return SUCCESS;
 }
 
+status SnipSpan_AddFrom(Span *sns, i32 length, word flags){
+    Snip _sn = {.type = {TYPE_SNIP, flags}, length};
+    return Span_Add(sns, (Abstract *)Snip_From(sns->m, &_sn));
+}
 
 status SnipSpan_Add(Span *sns, Snip *sn){
     return Span_Add(sns, (Abstract *)Snip_From(sns->m, sn));
