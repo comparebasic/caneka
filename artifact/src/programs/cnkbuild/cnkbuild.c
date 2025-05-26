@@ -7,18 +7,47 @@ static status renderStatus(MemCh *m, Abstract *a){
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
 
     i32 width = ctx->cli->cols;
-    float _progress = ((float)ctx->cli->cols) * ((float)ctx->fields.steps.count->val.i)/((float)ctx->fields.steps.total->val.i);
-    i32 progress = (i32)_progress;
-    ctx->fields.steps.barStart->length = progress;
+    float total = (float)ctx->fields.steps.total->val.i;
+    float count = (float)ctx->fields.steps.count->val.i;
+    float colsFloat = (float)width;
 
-    _progress = ((float)ctx->cli->cols) * ((float)
-        (ctx->fields.steps.modSrcTotal->val.i - ctx->fields.steps.modSrcCount->val.i))/((float)ctx->fields.steps.total->val.i);
-    progress = (i32)_progress;
-    ctx->fields.steps.barEnd->length = progress;
+    float progress = ceil((count/total) * colsFloat);
+    ctx->fields.steps.barStart->length = (i32)progress;
 
-    Single *sg = (Single *)as(CliStatus_GetByKey(m, cli, Str_CstrRef(m, "memCount")), TYPE_WRAPPED_MEMCOUNT);
-    sg->val.value = MemCount(0);
+    float modSrcTotal = count + (float)(ctx->fields.steps.modSrcTotal->val.i-ctx->fields.steps.modSrcCount->val.i);
+    ctx->fields.steps.barEnd->length = (i32)ceil(((modSrcTotal)/total) * colsFloat) - progress;
+
+    CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memTotal"),
+        (Abstract *)Str_MemCount(ctx->m, MemChapterTotal()*PAGE_SIZE));
+    CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memUsed"),
+        (Abstract *)Str_MemCount(ctx->m, MemCount(0)));
+    Single *sg = (Single *)as(CliStatus_GetByKey(m, 
+        cli, Str_CstrRef(m, "chapters")), TYPE_WRAPPED_I64);
+    sg->val.value = MemChapterCount();
+    sg = (Single *)as(CliStatus_GetByKey(m, 
+        cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
+    sg->val.value = MemChapterTotal();
      
+    return SUCCESS;
+}
+
+static status setupComplete(BuildCtx *ctx){
+    FmtLine *ln = Span_Get(ctx->cli->lines, 0);
+    ln->fmt = "^g.Complete - ^D.$^d.sources/^D.$^d.modules^0.";
+    ln->args = Arr_Make(ctx->m, 2);
+    ln->args[0] = (Abstract *)ctx->fields.steps.total;
+    ln->args[1] = (Abstract *)ctx->fields.steps.modTotal;
+
+    ln = Span_Get(ctx->cli->lines, 1);
+    ln->fmt = "";
+
+    ln = Span_Get(ctx->cli->lines, 2);
+    ctx->fields.steps.barStart->length = ctx->cli->cols;
+    ln->fmt = "^G.$^0.";
+
+    ln = Span_Get(ctx->cli->lines, 3);
+    ln->args[0] = (Abstract *)Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
+
     return SUCCESS;
 }
 
@@ -36,7 +65,6 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.dest = Str_Make(m, STR_DEFAULT);
     ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
-
 
     BuildSubdir **dir = ctx->objdirs;
     while(*dir != NULL){
@@ -85,14 +113,25 @@ static status setupStatus(BuildCtx *ctx){
     Span_Add(ctx->cli->lines,
         (Abstract *)FmtLine_Make(m, "^B.$^0.^Y.$^0", arr));
 
-    arr = Arr_Make(m, 1);
-    arr[0] = (Abstract *)MemCount_Wrapped(m, 0);
+    arr = Arr_Make(m, 5);
+    arr[0] = (Abstract *)Str_Ref(m, (byte *)"c.", 2, 3, STRING_FMT_ANSI);
+    arr[1] = NULL;
+    arr[2] = (Abstract *)I64_Wrapped(m, 0);
+    arr[3] = (Abstract *)I64_Wrapped(m, 0);
+    arr[4] = NULL;
     Span_Add(ctx->cli->lines,
-        (Abstract *)FmtLine_Make(m, "^c.Memory Count: $^0", arr));
+        (Abstract *)FmtLine_Make(m,
+            "$Memory $ ($ of $ chapters) ^D.$^d.used^0", arr));
 
     coords.a = ctx->cli->lines->max_idx;
-    coords.b = 0;
-    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "memCount"), &coords);
+    coords.b = 1;
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "memTotal"), &coords);
+    coords.b = 2;
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chapters"), &coords);
+    coords.b = 3;
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chaptersTotal"), &coords);
+    coords.b = 4;
+    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "memUsed"), &coords);
 
     return SUCCESS;
 }
@@ -165,7 +204,6 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     Span *cmd = Span_Make(m);
     ProcDets pd;
 
-    ctx->fields.steps.modSrcCount->val.i++;
     if(File_CmpUpdated(m, source, dest, NULL)){
         Str_Reset(ctx->fields.current.action);
         Str_AddCstr(ctx->fields.current.action, "build obj");
@@ -269,11 +307,13 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         Str_AddCstr(dest, "o");
         r |= buildSourceToLib(ctx, libDir, lib, dest, source);
         ctx->fields.steps.count->val.i++;
+        ctx->fields.steps.modSrcCount->val.i++;
 
         MemCh_Free(m);
         sourceCstr++;
     }
     ctx->fields.steps.modSrcCount->val.i = 0;
+    ctx->fields.steps.modSrcTotal->val.i = 0;
     CliStatus_Print(OutStream, ctx->cli);
     m->type.range--;
 
@@ -306,6 +346,8 @@ static status build(BuildCtx *ctx){
         r |= buildDirToLib(ctx, libDir, lib, *dir);
         dir++;
     }
+    setupComplete(ctx);
+    CliStatus_Print(OutStream, ctx->cli);
     CliStatus_PrintFinish(OutStream, ctx->cli);
 
     Str *dist = File_GetAbsPath(m, Str_CstrRef(m, ctx->dist));

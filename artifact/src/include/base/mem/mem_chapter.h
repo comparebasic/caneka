@@ -10,6 +10,7 @@ typedef struct mem_ctx {
 #define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range));
 #define MemCh_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
 
+i64 MemChapterTotal();
 i64 MemCh_MemCount(MemCh *m, i16 level);
 void *MemCh_Alloc(MemCh *m, size_t sz);
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf);

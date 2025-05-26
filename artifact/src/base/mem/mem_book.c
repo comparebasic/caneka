@@ -34,7 +34,7 @@ i32 MemBook_GetBookIdx(void *addr){
     return bookIdx;
 }
 i32 MemBook_GetPageIdx(void *addr){
-    return pageIdx;
+    return bookIdx;
 }
 #else
 void _insecureMemError(void *addr){
@@ -78,6 +78,11 @@ i64 MemCount(i16 level){
 }
 
 i64 MemChapterCount(){
+    i32 available = _books[0]->recycled.p->nvalues;
+    return pageIdx - available;
+}
+
+i64 MemChapterTotal(){
     return pageIdx;
 }
 

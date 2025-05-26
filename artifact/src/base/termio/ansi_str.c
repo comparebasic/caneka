@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
+Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
     char *ptr = *_ptr;
     char c;
     Str *s = Str_Make(m, ANSI_ESCAPE_MAX);
@@ -179,8 +179,14 @@ Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
     }
     *(b++) = 'm';
     s->length = (word)(b - s->bytes);
-    *_ptr = ptr;
+    if(consume){
+        *_ptr = ptr;
+    }
     return s;
+}
+
+Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
+    return Str_ConsumeAnsi(m, _ptr, end, FALSE);
 }
 
 Str *Str_AnsiCstr(MemCh *m, char *cstr){

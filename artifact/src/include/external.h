@@ -2,6 +2,7 @@
 #define __CNK_EXTERNAL_HEADER
 
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <stdint.h>

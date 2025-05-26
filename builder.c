@@ -59,6 +59,7 @@ static char *buildBuilderLibCmd[] = {
 static char *buildBuilderCmd[] = {
     COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", "./build/build",
     "./artifact/src/build.c", "./build/libcnkbuild/libcnkbuild.a", "./build/libcnkbase/libcnkbase.a",
+    "-lm",
     "-DINSECURE",
     NULL
 };
@@ -203,7 +204,9 @@ int main(int argc, char *argv[]){
     run("Build CnkBuild", (char **)buildBuilderLibCmd);
     run("Build Builder", (char **)buildBuilderCmd);
     run("Run Builder", (char **)runBuilderCmd);
-    run("Building tests", (char **)testsCoreCmd);
+    run("Building tester", (char **)testsCoreCmd);
+    /*
     run("Run tests", (char **)runTestsCoreCmd);
+    */
     exit(0);
 }

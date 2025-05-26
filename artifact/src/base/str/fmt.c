@@ -61,8 +61,13 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 if(s->type.state & STRING_FMT_ANSI){
                     char *cstr_end = (char *)s->bytes+(s->length-1);
                     s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
-                    total += Stream_Bytes(sm, s->bytes, s->length);
-                    goto next;
+                    if((state & (DEBUG|MORE)) != (DEBUG|MORE)){
+                        total += Stream_Bytes(sm, s->bytes, s->length);
+                        goto next;
+                    }else{
+                        a = (Abstract *)a;
+                        type = s->type.of;
+                    }
                 }else if(s->type.state & STRING_BINARY){
                     total += Bits_Print(sm, s->bytes, s->length, 
                         ((s->type.state|sm->type.state) & DEBUG));
@@ -92,7 +97,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             }
 
             ptr++;
-            Str *s = Str_FromAnsi(m, &ptr, end);
+            Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
             Stream_Bytes(sm, s->bytes, s->length);
             total += s->length;
             start = ptr+1;
