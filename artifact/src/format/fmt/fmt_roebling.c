@@ -39,24 +39,26 @@ static PatCharDef plusDef[] = {
 static PatCharDef tagDef[] = {
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '_', '_'},
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
     {PAT_KO|PAT_KO_TERM, '=', '='},
     patText,
-    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef labelDef[] = {
-    patAnyText,
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
-    {PAT_KO,'@', '@'},
+    {PAT_KO|PAT_KO_TERM,'@', '@'},
+    patAnyText,
     {PAT_END, 0, 0}
 };
 
 static PatCharDef urlTldDef[] = {
-    patAnyText,
-    {PAT_TERM, '.', '.'},
-    patText,
-    patText,
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE|PAT_OPTIONAL, '.', '.'},
+        {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '},
+        {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'},
+        {PAT_KO|PAT_INVERT_CAPTURE, '\r', '\r'},
+        {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '\n', '\n'},
+    {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31},
     {PAT_END, 0, 0}
 };
 
@@ -148,7 +150,7 @@ static status tagValue(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         urlTldDef, FORMATTER_URL, FORMATTER_PATH);
     r |= Roebling_SetPattern(rbl,
-        lineDef, FORMATTER_TAG_VALUE, FORMATTER_LINE);
+        urlPathDef, FORMATTER_PATH, FORMATTER_LINE);
 
     return r;
 }

@@ -191,12 +191,16 @@ i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
 }
 
 i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
-    DebugStack_Push(a, type);
+    if(!_crashing && !_error){
+        DebugStack_Push(a, type);
+    }
     if((sm->type.state & STREAM_STRVEC) == 0){
         sm->m->type.range++;
     }
     if(a == NULL){
-        DebugStack_Pop();
+        if(!_crashing && !_error){
+            DebugStack_Pop();
+        }
         return Stream_Bytes(sm, (byte *)"NULL", 4);
     }
 
@@ -211,7 +215,9 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
             MemCh_Free(sm->m);
             sm->m->type.range--;
         }
-        DebugStack_Pop();
+        if(!_crashing && !_error){
+            DebugStack_Pop();
+        }
         return total;
     }else{
         Abstract *args[] = {
@@ -220,7 +226,9 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
         Fmt(sm, "$/$: unknown-debug", args);
-        DebugStack_Pop();
+        if(!_crashing && !_error){
+            DebugStack_Pop();
+        }
         return 0;
     }
 }

@@ -93,7 +93,7 @@ i32 DebugStack_Print(Stream *sm, word flags){
                     Str *s = Str_CstrRef(sm->m, (char *)entry->ref);
                     ToS(sm, (Abstract *)s, s->type.of, MORE);
                 }else if(entry->typeOf != 0){
-                    ToS(sm, entry->ref, entry->typeOf, MORE);
+                    ToS(sm, entry->ref, entry->typeOf, MORE|DEBUG);
                 }
             }
             Stream_Bytes(sm, (byte *)"\x1b[0m\n", 5);

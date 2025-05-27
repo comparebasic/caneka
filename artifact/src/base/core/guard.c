@@ -14,6 +14,13 @@ status Guard_Incr(i16 *g, i16 max, char *func, char *file, int line){
     if(Guard(g, max, func, file, line)){
         return SUCCESS;
     }
-    Fatal(func, file, line, "Guard Error", NULL);
+    Single sg = {.type = {TYPE_WRAPPED_I16, 0}, .val.w = *g};
+    Single max_sg = {.type = {TYPE_WRAPPED_I16, 0}, .val.w = max};
+    Abstract *args[] = {
+        (Abstract *)&sg,
+        (Abstract *)&max_sg,
+        NULL
+    };
+    Error(ErrStream->m, NULL, func, file, line, "Guard Error $/$", args);
     return ERROR;
 }

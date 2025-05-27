@@ -2,10 +2,11 @@
 #include <caneka.h>
 
 Table *ErrorHandlerTable = NULL;
-static boolean crashing = FALSE;
+boolean _crashing = FALSE;
+boolean _error = FALSE;
 
 void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
-    if(crashing){
+    if(_crashing){
         Stream_Bytes(ErrStream, (byte *)"\n\x1b[1;31mFatal called after crashing\x1b[0m", 39);
         exit(9);
         return;
@@ -13,7 +14,7 @@ void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
 #ifdef CLI 
     RawMode(FALSE);
 #endif
-    crashing = TRUE;
+    _crashing = TRUE;
     Stream_Bytes(ErrStream, (byte *)"\n\x1b[22;31m", 9);
     Stream_Bytes(ErrStream, (byte *)"Fatal Error:\x1b[1m", 16);
     Stream_Bytes(ErrStream, (byte *)func, strlen(func));
@@ -45,6 +46,7 @@ void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
 }
 
 void Error(MemCh *m, Abstract *a, char *func, char *file, int line, char *fmt, Abstract *args[]){
+    _error = TRUE;
     if(ErrorHandlerTable != NULL){
         Maker mk = (Maker)Table_Get(ErrorHandlerTable, a);
         if(mk != NULL){
@@ -53,11 +55,12 @@ void Error(MemCh *m, Abstract *a, char *func, char *file, int line, char *fmt, A
         }
     }
     ShowError(func, file, line, fmt, args);
+    _error = FALSE;
     return;
 }
 
 void ShowError(char *func, char *file, int line, char *fmt, Abstract *args[]){
-    if(crashing){
+    if(_crashing){
         return Fatal(func, file, line, fmt, args);
     }
 #ifdef CLI 

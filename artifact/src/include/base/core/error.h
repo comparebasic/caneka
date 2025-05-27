@@ -9,6 +9,8 @@
 #endif
 
 extern struct span *ErrorHandlerTable; /* Hashable -> Maker */
+extern boolean _crashing;
+extern boolean _error;
 
 void Cleanup(Abstract *a);
 void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]);

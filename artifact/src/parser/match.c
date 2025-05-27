@@ -62,7 +62,6 @@ static void match_NextKoTerm(Match *mt){
 }
 
 static void addCount(MemCh *m, Match *mt, word flags, i32 length){
-    DebugStack_Push(mt, mt->type.of);
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
     }
@@ -75,7 +74,6 @@ static void addCount(MemCh *m, Match *mt, word flags, i32 length){
         mt->snip.length = length;
     }
 
-    DebugStack_Pop();
     return;
 }
 
@@ -153,6 +151,11 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                         break;
                     }
                 }
+            }
+
+            if(mt->type.state & MATCH_KO){
+                mt->type.state &= ~MATCH_KO;
+                mt->snip.type.state = SNIP_CONTENT;
             }
 
             if(def >= mt->pat.lastTermDef){

@@ -159,7 +159,6 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
         word prev = sm->type.state;
-        sm->type.state |= DEBUG;
         total += Fmt(sm, "  matches: @\n", args4);
         sm->type.state = prev;
     }

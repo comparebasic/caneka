@@ -205,8 +205,6 @@ int main(int argc, char *argv[]){
     run("Build Builder", (char **)buildBuilderCmd);
     run("Run Builder", (char **)runBuilderCmd);
     run("Building tester", (char **)testsCoreCmd);
-    /*
     run("Run tests", (char **)runTestsCoreCmd);
-    */
     exit(0);
 }
