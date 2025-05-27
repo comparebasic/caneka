@@ -109,7 +109,7 @@ i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
                 (Abstract *)I32_Wrapped(sm->m, tbl->nvalues),
                 NULL
             };
-            total += Fmt(sm, "Tbl<$ $nvalues\n", args);
+            total += Fmt(sm, "Tbl<$ $nvalues ", args);
         }else{
             total += Stream_Bytes(sm, (byte *)"{", 1);
         }
@@ -123,7 +123,7 @@ i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
                 total += ToS(sm, h->value, 0, flags|MORE);
                 if((it.type.state & FLAG_ITER_LAST) == 0){
                     if(flags & DEBUG){
-                        total += Stream_Bytes(sm, (byte *)"\n", 1);
+                        total += Stream_Bytes(sm, (byte *)", ", 2);
                     }else{
                         total += Stream_Bytes(sm, (byte *)",", 1);
                     }

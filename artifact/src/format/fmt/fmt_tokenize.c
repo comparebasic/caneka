@@ -4,7 +4,7 @@
 status FormatFmt_DefSpan(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, FORMATTER_NEXT,
-        Tokenize_Make(m, FORMATTER_NEXT, TOKEN_OUTDENT|TOKEN_NO_CONTENT, 0));
+        Tokenize_Make(m, FORMATTER_NEXT, TOKEN_OUTDENT|TOKEN_NO_CONTENT, ZERO));
     r |= Lookup_Add(m, lk, FORMATTER_INDENT,
         Tokenize_Make(m, FORMATTER_INDENT,
             TOKEN_ATTR_VALUE|TOKEN_OUTDENT, TYPE_NODE));
@@ -14,7 +14,7 @@ status FormatFmt_DefSpan(MemCh *m, Lookup *lk){
         Tokenize_Make(m, FORMATTER_BULLET,
             TOKEN_NO_CONTENT|TOKEN_NODE_BY_TYPE|TOKEN_NO_COMBINE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_END,
-        Tokenize_Make(m, FORMATTER_END, TOKEN_OUTDENT, 0));
+        Tokenize_Make(m, FORMATTER_END, TOKEN_OUTDENT, ZERO));
     r |= Lookup_Add(m, lk, FORMATTER_TABLE,
         Tokenize_Make(m, FORMATTER_TABLE, 
             TOKEN_NO_COMBINE, TYPE_RELATION));
@@ -30,6 +30,10 @@ status FormatFmt_DefSpan(MemCh *m, Lookup *lk){
         Tokenize_Make(m, FORMATTER_TAG, TOKEN_ATTR_VALUE, TYPE_NODE));
     r |= Lookup_Add(m, lk, FORMATTER_LABEL, 
         Tokenize_Make(m, FORMATTER_LABEL, TOKEN_ATTR_VALUE, TYPE_STRVEC));
+    r |= Lookup_Add(m, lk, FORMATTER_URL, 
+        Tokenize_Make(m, FORMATTER_URL, TOKEN_ATTR_VALUE, TYPE_STRVEC));
+    r |= Lookup_Add(m, lk, FORMATTER_CLASS, 
+        Tokenize_Make(m, FORMATTER_CLASS, TOKEN_ATTR_VALUE, ZERO));
 
     return r;
 }

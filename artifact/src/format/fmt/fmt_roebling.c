@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static PatCharDef indentDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE,' ' ,' '},{PAT_MANY|PAT_TERM, '=', '='},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},{PAT_MANY|PAT_TERM, '=', '='},{PAT_ANY|PAT_TERM,' ' ,' '},
     {PAT_END, 0, 0}
 };
 
@@ -27,12 +27,19 @@ static PatCharDef nlDef[] = {
 };
 
 static PatCharDef dashDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE,' ', ' '},{PAT_TERM,'-','-'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},
+    {PAT_ANY|PAT_INVERT_CAPTURE,' ', ' '},{PAT_TERM,'-','-'},{PAT_ANY|PAT_TERM,' ' ,' '},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef plusDef[] = {
     {PAT_ANY, ' ', ' '}, {PAT_TERM, '+', '+'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef clsDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '.', '.'},
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    patText,
     {PAT_END, 0, 0}
 };
 
@@ -57,14 +64,8 @@ static PatCharDef urlTldDef[] = {
         {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '},
         {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'},
         {PAT_KO|PAT_INVERT_CAPTURE, '\r', '\r'},
-        {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '\n', '\n'},
+        {PAT_KO|PAT_KO_TERM, '\n', '\n'},
     {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef urlPathDef[] = {
-    patText,
-    {PAT_KO, '.', '.'},{PAT_KO, ' ', ' '},{PAT_KO|PAT_KO_TERM, '\n', '\n'},
     {PAT_END, 0, 0}
 };
 
@@ -75,7 +76,11 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         nlDef, FORMATTER_NEXT, FORMATTER_START);
     r |= Roebling_SetPattern(rbl,
+        clsDef, FORMATTER_CLASS, FORMATTER_START);
+    r |= Roebling_SetPattern(rbl,
         indentDef, FORMATTER_INDENT, FORMATTER_LINE);
+    Match *mtd = Roebling_GetMatch(rbl);
+    mtd->type.state |= DEBUG;
     r |= Roebling_SetPattern(rbl,
         dashDef, FORMATTER_BULLET, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
@@ -148,19 +153,7 @@ static status tagValue(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        urlTldDef, FORMATTER_URL, FORMATTER_PATH);
-    r |= Roebling_SetPattern(rbl,
-        urlPathDef, FORMATTER_PATH, FORMATTER_LINE);
-
-    return r;
-}
-
-static status path(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-
-    r |= Roebling_SetPattern(rbl,
-        urlPathDef, FORMATTER_PATH, FORMATTER_LINE);
+        urlTldDef, FORMATTER_URL, FORMATTER_START);
 
     return r;
 }
@@ -213,8 +206,6 @@ Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)label));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_TAG_VALUE));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)tagValue));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_PATH));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)path));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_END));
     Roebling_Start(rbl);
 

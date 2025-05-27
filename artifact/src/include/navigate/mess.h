@@ -3,6 +3,7 @@ typedef struct mess {
     MemCh *m;
     Node *root;
     Node *current;
+    Table *nextAtts;
     Abstract *currentValue;
     Lookup *tokenizer;
     Abstract *source;
@@ -14,6 +15,7 @@ typedef struct mess_climber {
     Mess *mess;
     Abstract *current;
     Abstract *currentChild;
+    Table *nextAtts;
 } MessClimber;
 
 status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v);

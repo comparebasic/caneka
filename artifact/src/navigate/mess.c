@@ -18,8 +18,19 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
         mess->currentValue = mess->current->child;
     }
 
-    if(tk->typeOf == TYPE_NODE || tk->typeOf == TYPE_RELATION){
+    if(tk->typeOf == ZERO){
+        if(tk->type.state & TOKEN_ATTR_VALUE){
+            if(mess->nextAtts == NULL){
+                mess->nextAtts = Table_Make(mess->m);
+            }
+            Table_Set(mess->nextAtts, (Abstract *)I16_Wrapped(mess->m, tk->captureKey),
+                (Abstract *)a);
+        }
+    }else if(tk->typeOf == TYPE_NODE || tk->typeOf == TYPE_RELATION){
         nd = Node_Make(mess->m, 0, mess->current);
+        nd->atts = mess->nextAtts; 
+        mess->nextAtts = NULL;
+
         nd->captureKey = tk->captureKey;
         if(tk->typeOf == TYPE_RELATION){
             nd->typeOfChild = TYPE_RELATION;
@@ -60,6 +71,9 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
     if(tk->type.state & TOKEN_NODE_BY_TYPE){
         if(mess->current->captureKey != tk->captureKey && tk->typeOf != TYPE_NODE){
             Node *nd = Node_Make(mess->m, 0, mess->current);
+            nd->atts = mess->nextAtts; 
+            mess->nextAtts = NULL;
+
             nd->captureKey = tk->captureKey;
             Tokenize _tk;
             memset(&_tk, 0, sizeof(Tokenize));
@@ -78,8 +92,11 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
             goto end;
         }
     }
-
-    if(node->typeOfChild == 0){
+    if(tk->type.state & TOKEN_ATTR_VALUE && 
+            (tk->typeOf != ZERO && tk->typeOf != TYPE_NODE && tk->typeOf != TYPE_RELATION)){
+        Mess_AddAtt(mess, mess->current, 
+            (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
+    }else if(node->typeOfChild == 0){
         node->child = a;
         node->typeOfChild = a->type.of;
         goto end;

@@ -104,7 +104,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
         matched = charMatched(c, def);
         if(mt->type.state & DEBUG){
             Str *yn = Str_CstrRef(m, (matched ? "Y":"N"));
-            Str *yncolor = Str_Ref(m, (byte *)(matched ? "Dy.":"dp."), 3, 4,
+            Str *yncolor = Str_Ref(m, (byte *)(matched ? "DE.":"de."), 3, 4,
                 STRING_FMT_ANSI);
             Str *cs = Str_Ref(m, (byte *)&c, 1, 1, DEBUG);
             Abstract *args[] = {
@@ -114,7 +114,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                 (Abstract *)mt,
                 NULL
             };
-            Out("^p.Match-Feed $$^dp./^D.$^d. @^0\n", args);
+            Out("^p.Match-Feed $$/^D.$^de. @^0\n", args);
         }
 
         if(matched){
@@ -172,7 +172,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                 /* no increment if it's an invert and no capture */;
                 snipFlag = SNIP_UNCLAIMED;
             }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
-                snipFlag = SNIP_GAP;
+                snipFlag = SNIP_UNCLAIMED;
             }else if((def->flags & PAT_CONSUME) != 0){
                 snipFlag = SNIP_GAP;
             }else{
@@ -207,7 +207,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                     mt->pat.curDef++;
                     continue;
                 }else{
-                    match_NextKoTerm(mt);
+                    mt->pat.curDef++;
                     continue;
                 }
             }else if((def->flags & (PAT_KO|PAT_OPTIONAL|PAT_ANY)) != 0){

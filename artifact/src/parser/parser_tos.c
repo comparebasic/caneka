@@ -199,7 +199,7 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
                 Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
                 total += Stream_Bytes(sm, color->bytes, color->length); 
             }
-            total += ToS(sm, (Abstract *)pd, TYPE_PATCHAR, flags|MORE); 
+            total += ToS(sm, (Abstract *)pd, TYPE_PATCHAR, MORE); 
             _color = "e.";
             if(pd == mt->pat.curDef){
                 Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
@@ -210,6 +210,8 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
         if(flags & MORE){
             total += Stream_Bytes(sm, (byte *)" ", 1); 
             total += ToS(sm, (Abstract *)mt->backlog, TYPE_SNIPSPAN, MORE);
+            total += Stream_Bytes(sm, (byte *)" ", 1); 
+            total += ToS(sm, (Abstract *)&mt->snip, TYPE_SNIP, MORE);
         }
         total += Fmt(sm, "^d", NULL);
     }

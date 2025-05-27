@@ -51,8 +51,9 @@ static inline status Roebling_RunMatches(Roebling *rbl){
 
                 StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);
                 rbl->capture(rbl, mt->captureKey, v);
-                if((mt->snip.type.state & SNIP_UNCLAIMED) != 0 && mt->snip.length > 0){
-                    Cursor_Decr(rbl->curs, mt->snip.length);
+                Snip *sn = Span_Get(mt->backlog, mt->backlog->max_idx);
+                if((sn->type.state & SNIP_UNCLAIMED) != 0 && sn->length > 0){
+                    Cursor_Decr(rbl->curs, sn->length);
                 }
 
                 Guard_Reset(&rbl->guard);
