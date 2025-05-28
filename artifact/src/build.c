@@ -37,6 +37,7 @@ static BuildSubdir navigateobj = { "navigate", {
     "mess.c",
     "navigate_tos.c",
     "relation.c",
+    "compare.c",
     NULL
 }};
 

@@ -21,27 +21,7 @@ boolean Equals(Abstract *a, Abstract *b){
         Single *wb = (Single *)b;
         return wa->val.value == wb->val.value;
     }else if(a->type.of == b->type.of){
-        if(a->type.of == TYPE_MESS){
-            return Equals((Abstract *)((Mess *)a)->root,
-                (Abstract *)((Mess *)b)->root);
-        }else if(a->type.of == TYPE_NODE){
-            Node *nA = (Node *)a; 
-            Node *nB = (Node *)b; 
-            if(nA->captureKey != nB->captureKey || 
-                    nA->typeOfChild != nB->typeOfChild){
-                return FALSE;
-            }else{
-                if((nA->value != NULL && nB->value != NULL) &&
-                    !Equals(nA->value, nB->value)){
-                        return FALSE;
-                }else if((nA->atts != NULL && nB->atts != NULL) &&
-                    !Equals((Abstract *)nA->atts, (Abstract *)nB->atts)){
-                        return FALSE;
-                }else{
-                    return Equals(nA->child, nB->child);
-                }
-            }
-        }else if(a->type.of == TYPE_SPAN){
+        if(a->type.of == TYPE_SPAN){
             return FALSE;
         }else if(a->type.of == TYPE_TABLE){
             return FALSE;

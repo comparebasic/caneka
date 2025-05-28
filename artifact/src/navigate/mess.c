@@ -1,6 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
+status Mess_Compare(Mess *a, Mess *b){
+    return Equals((Abstract *)a, (Abstract *)b) ? SUCCESS : NOOP;
+}
+
 status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
     DebugStack_Push(NULL, 0);
     if(tk->type.state & DEBUG){

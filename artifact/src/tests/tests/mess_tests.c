@@ -116,6 +116,9 @@ status Mess_Tests(MemCh *gm){
     };
     Debug("^c.Expected @^0.\n", args1);
 
+    r |= Test(Mess_Compare(rbl->mess, expected) == SUCCESS,
+        "Mess has been built as expected", NULL);
+
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

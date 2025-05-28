@@ -32,6 +32,8 @@ char *TypeStrings[] = {
     "TYPE_MESS_CLIMBER",
     "TYPE_NODE",
     "TYPE_MAKER",
+    "TYPE_COMPRESULT",
+    "TYPE_COMP",
     "TYPE_CSTR",
     "TYPE_STR",
     "TYPE_STRLIT",
