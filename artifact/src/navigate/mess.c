@@ -1,8 +1,20 @@
 #include <external.h>
 #include <caneka.h>
 
-status Mess_Compare(Mess *a, Mess *b){
-    return Equals((Abstract *)a, (Abstract *)b) ? SUCCESS : NOOP;
+status Mess_Compare(MemCh *m, Mess *a, Mess *b){
+    Comp *comp = Comp_Make(m, (Abstract *)a->root, (Abstract *)b->root);
+    comp->type.state |= DEBUG;
+
+    Abstract *args[] = {
+        (Abstract *)comp,
+        NULL
+    };
+    while((Compare(comp) & (SUCCESS|ERROR|NOOP)) == 0){
+        Debug("^p.Compare @^0.\n", args);
+    }
+    Debug("^p.Compare @^0.\n", args);
+
+    return Compare(comp);
 }
 
 status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){

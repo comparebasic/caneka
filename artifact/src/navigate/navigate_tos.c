@@ -4,6 +4,36 @@
 static Str **nodeLabels = NULL;
 static Str **messLabels = NULL;
 
+static i64 CompResult_Print(Stream *sm, Abstract *a, cls type, word flags){
+    CompResult *cr = (CompResult*)as(a, TYPE_COMPRESULT);
+    Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)cr, ToS_FlagLabels),
+        cr->a,
+        cr->b,
+        NULL,
+    };
+    return Fmt(sm, "($\n    $,\n    $)", args);
+}
+
+static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Comp *comp = (Comp*)as(a, TYPE_COMP);
+    i64 total = 0;
+    Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)comp, ToS_FlagLabels),
+        NULL
+    };
+    total += Fmt(sm, "Comp<$\n", args);
+    Iter it;
+    Iter_Init(&it, comp->it.p);
+    while((Iter_Prev(&it) & END) == 0){
+        total += Stream_Bytes(sm, (byte *)"  ", 2);
+        total += ToS(sm, it.value, 0, DEBUG|flags);
+        total += Stream_Bytes(sm, (byte *)"\n", 1);
+    }
+    total += Stream_Bytes(sm, (byte *)">", 1);
+    return total; 
+}
+
 static i64 NestedD_Print(Stream *sm, Abstract *a, cls type, word flags){
     /*
     NestedD *nd = (NestedD *)as(a, TYPE_NESTEDD);
@@ -185,6 +215,8 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
     r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
+    r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
+    r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
     return r;
 }
 

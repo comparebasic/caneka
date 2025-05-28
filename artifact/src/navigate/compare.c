@@ -30,17 +30,44 @@ status Compare(Comp *comp){
             Node *nb = (Node *)b;
             if(na->typeOfChild != nb->typeOfChild){
                 comp->type.state |= NOOP;
+                if(comp->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)na,
+                        (Abstract *)nb,
+                        NULL
+                    };
+                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                        "typeOfChild mismatch $ vs $", args);
+                }
                 return comp->type.state;
             }
             if(na->value != NULL && na->value != nb->value){
                 Compare_Push(comp, na->value, nb->value);
                 if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
+                    if(comp->type.state & DEBUG){
+                        Abstract *args[] = {
+                            (Abstract *)na,
+                            (Abstract *)nb,
+                            NULL
+                        };
+                        Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                            "value mismatch $ vs $", args);
+                    }
                     return comp->type.state;
                 }
             }
             if(na->atts != NULL && na->atts != nb->atts){
                 Compare_Push(comp, (Abstract *)na->atts, (Abstract *)nb->atts);
                 if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
+                    if(comp->type.state & DEBUG){
+                        Abstract *args[] = {
+                            (Abstract *)na,
+                            (Abstract *)nb,
+                            NULL
+                        };
+                        Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                            "atts mismatch $ vs $", args);
+                    }
                     return comp->type.state;
                 }
             }
@@ -58,12 +85,23 @@ status Compare(Comp *comp){
             }
         }else{
             if(!Equals(a, b)){
+                if(comp->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)comp,
+                        NULL
+                    };
+                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                        "mismatch $", args);
+                }
                 comp->type.state |= NOOP;
             }
         }
     }
-    Iter_Prev(&comp->it);
-    if(comp->it.type.state & END){
+    if(cr->a->type.of != TYPE_ITER || (cr->a->type.state & FLAG_ITER_LAST)){
+        comp->it.type.state = (comp->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
+        Iter_Prev(&comp->it);
+    }
+    if((comp->it.type.state & END) && (comp->type.state & (ERROR|NOOP)) == 0){
         comp->type.state |= SUCCESS;
     }
     return comp->type.state;

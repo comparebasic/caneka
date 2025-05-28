@@ -40,6 +40,9 @@ Mess *make_Expected(MemCh *m){
     nd->typeOfChild = TYPE_SPAN;
     nd->child = (Abstract *)Span_Make(m);
     expected->root = nd;
+
+    nd->child = (Abstract*)Span_Make(m);
+    nd->typeOfChild = TYPE_SPAN;
     
     nd = Node_Make(m, ZERO, nd);
     nd->typeOfChild = TYPE_STRVEC;
@@ -116,7 +119,8 @@ status Mess_Tests(MemCh *gm){
     };
     Debug("^c.Expected @^0.\n", args1);
 
-    r |= Test(Mess_Compare(rbl->mess, expected) == SUCCESS,
+
+    r |= Test(Mess_Compare(m, rbl->mess, expected) == SUCCESS,
         "Mess has been built as expected", NULL);
 
     MemCh_Free(m);
