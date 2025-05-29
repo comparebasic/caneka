@@ -35,6 +35,10 @@ boolean Equals(Abstract *a, Abstract *b){
         Single *wa = (Single *)a;
         Single *wb = (Single *)b;
         return wa->val.value == wb->val.value;
+    }else if(a->type.of == TYPE_WRAPPED_I16 && a->type.of == b->type.of){
+        Single *wa = (Single *)a;
+        Single *wb = (Single *)b;
+        return wa->val.w == wb->val.w;
     }else if(a->type.of == b->type.of){
         EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, a->type.of);
         if(func != NULL){

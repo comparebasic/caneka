@@ -20,6 +20,13 @@ static inline status Table_HKeyVal(Table *tbl, HKey *hk){
         }
     }
     hk->idx = (i32) ((hk->id >> (hk->pos*(hk->dim+1)*4)) & _modulos[hk->dim+1]);
+    if(tbl->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)hk,
+            NULL
+        };
+        Debug("Table_HKeyVal &\n", args);
+    }
     return hk->type.state;
 }
 

@@ -62,7 +62,9 @@ Mess *make_Expected(MemCh *m){
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
     nd->captureKey = FORMATTER_PARAGRAPH;
-    nd->child = (Abstract *)StrVec_Make(m);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "And this is a first paragraph with a second line."));
+    nd->child = (Abstract *)v;
     Span_Add((Span *)prev->child, (Abstract *)nd);
 
     v = StrVec_Make(m);
@@ -118,7 +120,7 @@ Mess *make_Expected(MemCh *m){
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
     nd->captureKey = FORMATTER_PARAGRAPH;
-    nd->child = (Abstract *)StrVec_Make(m);
+    v = StrVec_Make(m);
     Span_Add((Span *)prev->child, (Abstract *)nd);
 
     return expected;

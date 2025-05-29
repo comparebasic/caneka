@@ -28,13 +28,14 @@ boolean Table_Eq(Abstract *a, Abstract *b){
                         (Abstract *)h->item,
                         (Abstract *)h->value,
                         (Abstract *)value,
+                        (Abstract *)tblA,
+                        (Abstract *)tblB,
                         NULL
                     };
-                    Debug("^D.Span_Eq false:value mismatch for key $ -> & vs &^0.\n", args);
+                    Debug("^D.Span_Eq false:value mismatch for key $ -> & vs &\n for &\n&^0.\n", args);
                 }
                 return FALSE;
             }
-            return FALSE;
         }
     }
 
