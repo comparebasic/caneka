@@ -154,7 +154,10 @@ Abstract *Table_GetKey(Table *tbl, i32 idx){
 
 Abstract *Table_Get(Table *tbl, Abstract *a){
     Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
-    return h->value;
+    if(h != NULL){
+        return h->value;
+    }
+    return NULL;
 }
 
 i32 Table_Set(Table *tbl, Abstract *a, Abstract *value){

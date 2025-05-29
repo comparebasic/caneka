@@ -1,9 +1,24 @@
 #include <external.h>
 #include <caneka.h>
 
+Lookup *EqualsLookup = NULL;
+
+status Equals_Init(MemCh *m){
+    status r = READY;
+    if(EqualsLookup == NULL){
+        EqualsLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        Mem_EqInit(m, EqualsLookup);
+        Sequence_EqInit(m, EqualsLookup);
+        r |= SUCCESS;
+    }
+    return r;
+}
+
 boolean Equals(Abstract *a, Abstract *b){
     if(a == NULL || b == NULL){
         return FALSE;
+    }if( a == b){
+        return TRUE;
     }else if(a->type.of == TYPE_STR){
         if(a->type.of == b->type.of){
             return Str_EqualsStr((Str *)a, (Str *)b);
@@ -21,15 +36,11 @@ boolean Equals(Abstract *a, Abstract *b){
         Single *wb = (Single *)b;
         return wa->val.value == wb->val.value;
     }else if(a->type.of == b->type.of){
-        if(a->type.of == TYPE_SPAN){
-            return FALSE;
-        }else if(a->type.of == TYPE_TABLE){
-            return FALSE;
-        }else if(a->type.of == TYPE_RELATION){
-            return FALSE;
+        EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, a->type.of);
+        if(func != NULL){
+            return func(a, b);
         }
-    }else{
-        return ((void *)a) == b;
+
     }
     return FALSE;
 }

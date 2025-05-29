@@ -35,17 +35,21 @@ char *fmtCstr = ""
 Mess *make_Expected(MemCh *m){
     Mess *expected = Mess_Make(m);
     Node *nd = NULL;
+    Node *prev = NULL;
     StrVec *v;
     nd = Node_Make(m, ZERO, NULL); 
     nd->typeOfChild = TYPE_SPAN;
     nd->child = (Abstract *)Span_Make(m);
-    expected->root = nd;
+    expected->root = expected->current = nd;
+    prev = nd;
+    
 
     nd->child = (Abstract*)Span_Make(m);
     nd->typeOfChild = TYPE_SPAN;
     
-    nd = Node_Make(m, ZERO, nd);
+    nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_INDENT;
     nd->atts = Table_Make(m);
     v = StrVec_Make(m);
     StrVec_Add(v, Str_CstrRef(m, "="));
@@ -53,6 +57,69 @@ Mess *make_Expected(MemCh *m){
     v = StrVec_Make(m);
     StrVec_Add(v, Str_CstrRef(m, "Hidy Ho"));
     nd->child = (Abstract *)v;
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_PARAGRAPH;
+    nd->child = (Abstract *)StrVec_Make(m);
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "fancy"));
+    Span_Add((Span *)prev->child, (Abstract *)v);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_PARAGRAPH;
+    nd->atts = Table_Make(m);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "fancy"));
+    Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_CLASS), (Abstract *)v);
+    nd->child = (Abstract *)Span_Make(m);
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_PARAGRAPH;
+    nd->atts = Table_Make(m);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "=="));
+    Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_INDENT), (Abstract *)v);
+    nd->child = (Abstract *)StrVec_Make(m);
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_PARAGRAPH;
+    nd->child = (Abstract *)StrVec_Make(m);
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_INDENT;
+    nd->atts = Table_Make(m);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "="));
+    Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_INDENT), (Abstract *)v);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "?"));
+    nd->child = (Abstract *)v;
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_RELATION;
+    nd->captureKey = FORMATTER_TABLE;
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "?"));
+    nd->child = (Abstract *)Relation_Make(m, 0, NULL);
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_PARAGRAPH;
+    nd->child = (Abstract *)StrVec_Make(m);
+    Span_Add((Span *)prev->child, (Abstract *)nd);
 
     return expected;
 }
@@ -117,7 +184,7 @@ status Mess_Tests(MemCh *gm){
         (Abstract *)expected,
         NULL
     };
-    Debug("^c.Expected @^0.\n", args1);
+    Debug("^c.Expected &^0.\n", args1);
 
 
     r |= Test(Mess_Compare(m, rbl->mess, expected) == SUCCESS,

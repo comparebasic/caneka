@@ -12,7 +12,11 @@ static i64 CompResult_Print(Stream *sm, Abstract *a, cls type, word flags){
         cr->b,
         NULL,
     };
-    return Fmt(sm, "($\n    $,\n    $)", args);
+    if(flags & DEBUG){
+        return Fmt(sm, "(^D$^d.\n    ^D.A^d.&,\n    ^D.B^d.&)", args);
+    }else{
+        return Fmt(sm, "(^D$^d.\n    $,\n    $)", args);
+    }
 }
 
 static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -71,7 +75,11 @@ static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
             (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO)),
         NULL
     };
-    return Fmt(sm, "N<$/$ captureKey($) parent(@) atts:@ value:$/@ child:$>", args);
+    if(flags & DEBUG){
+        return Fmt(sm, "N<$/$ captureKey($) parent(@) atts:& valueTypeOf:$/@ childTypeOf:$>", args);
+    }else{
+        return Fmt(sm, "N<$/$ captureKey($) parent(@) atts:@ value:$/@ childTypeOf:$>", args);
+    }
 }
 
 static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -178,7 +186,7 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
             .mess = ms,
             .current = (Abstract *)ms->root,
         };
-        total += MessClimber_PrintItems(sm, &climber, flags, 0);
+        total += MessClimber_PrintItems(sm, &climber, flags|DEBUG, 0);
         total += Stream_Bytes(sm, (byte *)"\n]>", 3);
         return total;
     }

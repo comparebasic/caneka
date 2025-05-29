@@ -84,7 +84,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         a = (Abstract *)Ptr_Wrapped(mess->m, (Abstract *)a, tk->type.of);
     }
 
-    if(tk->type.state & TOKEN_NODE_BY_TYPE){
+    if(tk != NULL && tk->type.state & TOKEN_NODE_BY_TYPE){
         if(mess->current->captureKey != tk->captureKey && tk->typeOf != TYPE_NODE){
             Node *nd = Node_Make(mess->m, 0, mess->current);
             nd->atts = mess->nextAtts; 
@@ -99,7 +99,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         }
     }
 
-    if(tk->type.state & TOKEN_NO_CONTENT){
+    if(tk != NULL && tk->type.state & TOKEN_NO_CONTENT){
         if(tk->typeOf == TYPE_STRVEC){
             a = (Abstract *)StrVec_Make(mess->m);
             current = a;
@@ -108,7 +108,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
             goto end;
         }
     }
-    if(tk->type.state & TOKEN_ATTR_VALUE && 
+    if(tk != NULL && tk->type.state & TOKEN_ATTR_VALUE && 
             (tk->typeOf != ZERO && tk->typeOf != TYPE_NODE && tk->typeOf != TYPE_RELATION)){
         Mess_AddAtt(mess, mess->current, 
             (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
@@ -116,9 +116,9 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         node->child = a;
         node->typeOfChild = a->type.of;
         goto end;
-    }else if(((tk->type.state & TOKEN_NO_COMBINE) == 0) &&
-            CanCombine((Abstract *)mess->currentValue, a)){
-        if(tk->type.state & TOKEN_SEPERATE && 
+    }else if((tk == NULL || ((tk->type.state & TOKEN_NO_COMBINE) == 0)) &&
+            mess->currentValue != NULL && CanCombine((Abstract *)mess->currentValue, a)){
+        if(tk != NULL && (tk->type.state & TOKEN_SEPERATE) && 
                 mess->currentValue->type.of == TYPE_STRVEC &&
                 ((StrVec *)mess->currentValue)->total > 0){
             Str *s = Str_Ref(mess->m, (byte *)" ", 1, 2, STRING_COPY);
@@ -165,7 +165,7 @@ end:
     if(current != NULL){
         mess->currentValue = current;
     }
-    if(tk->captureKey != 0){
+    if(tk != NULL && tk->captureKey != 0){
         mess->current->latestKey = tk->captureKey;
     }
     return node->type.state;

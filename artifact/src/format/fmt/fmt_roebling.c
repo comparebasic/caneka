@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static PatCharDef indentDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},{PAT_MANY|PAT_TERM, '=', '='},{PAT_ANY|PAT_TERM,' ' ,' '},
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},{PAT_MANY|PAT_TERM, '=', '='},{PAT_ANY|PAT_TERM|PAT_INVERT_CAPTURE,' ' ,' '},
     {PAT_END, 0, 0}
 };
 
