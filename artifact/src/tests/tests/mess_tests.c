@@ -72,7 +72,7 @@ Mess *make_Expected(MemCh *m){
     Span_Add((Span *)prev->child, (Abstract *)v);
 
     nd = Node_Make(m, ZERO, prev);
-    nd->typeOfChild = TYPE_STRVEC;
+    nd->typeOfChild = TYPE_SPAN;
     nd->captureKey = FORMATTER_PARAGRAPH;
     nd->atts = Table_Make(m);
     v = StrVec_Make(m);
@@ -80,6 +80,13 @@ Mess *make_Expected(MemCh *m){
     Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_CLASS), (Abstract *)v);
     nd->child = (Abstract *)Span_Make(m);
     Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "Second single sentance with details "));
+    Span_Add((Span*)nd->child, (Abstract *)v);
+
+
+
 
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
@@ -187,7 +194,6 @@ status Mess_Tests(MemCh *gm){
         NULL
     };
     Debug("^c.Expected &^0.\n", args1);
-
 
     r |= Test(Mess_Compare(m, rbl->mess, expected) == SUCCESS,
         "Mess has been built as expected", NULL);

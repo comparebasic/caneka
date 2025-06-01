@@ -9,6 +9,11 @@ status Compare_Push(Comp *comp, Abstract *a, Abstract *b){
 }
 
 status Compare(Comp *comp){
+    if((comp->it.type.state & END) && (comp->type.state & (ERROR|NOOP)) == 0){
+        comp->type.state |= SUCCESS;
+        return comp->type.state;
+    }
+
     CompResult *cr = comp->it.value;
     if(cr == NULL){
         comp->type.state |= ERROR;
@@ -19,10 +24,29 @@ status Compare(Comp *comp){
     }else{
         Abstract *a = cr->a;
         Abstract *b = cr->b;
-        if(cr->a->type.of == TYPE_ITER &&
-                (Iter_Next((Iter *)cr->a) & END) == 0 && (Iter_Next((Iter *)cr->b) & END) == 0){
-            a = ((Iter*)cr->a)->value;
-            b = ((Iter*)cr->b)->value;
+        if(cr->a->type.of == TYPE_ITER){
+            if((Iter_Next((Iter *)cr->a) & END) == 0 && (Iter_Next((Iter *)cr->b) & END) == 0){
+                a = ((Iter*)cr->a)->value;
+                b = ((Iter*)cr->b)->value;
+            }else if((cr->a->type.state & END) == (cr->b->type.state & END)){
+                comp->it.type.state = (comp->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
+                Iter_Prev(&comp->it);
+                comp->it.type.state &= ~SPAN_OP_REMOVE;
+                return Compare(comp);
+            }else{
+                comp->type.state |= NOOP;
+                if(comp->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)comp,
+                        (Abstract *)cr->a,
+                        (Abstract *)cr->b,
+                        NULL
+                    };
+                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                        "iter END mismatch & -^E. @ vs @^e.", args);
+                }
+                return comp->type.state;
+            }
         }
 
         if(a->type.of == TYPE_NODE){
@@ -32,11 +56,13 @@ status Compare(Comp *comp){
                 comp->type.state |= NOOP;
                 if(comp->type.state & DEBUG){
                     Abstract *args[] = {
+                        (Abstract *)Type_ToStr(comp->m, na->typeOfChild),
+                        (Abstract *)Type_ToStr(comp->m, nb->typeOfChild),
                         (Abstract *)comp,
                         NULL
                     };
                     Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
-                        "typeOfChild mismatch &", args);
+                        "typeOfChild mismatch $ vs $ &", args);
                 }
                 return comp->type.state;
             }
@@ -98,11 +124,9 @@ status Compare(Comp *comp){
         }
     }
     if(cr->a->type.of != TYPE_ITER || (cr->a->type.state & FLAG_ITER_LAST)){
-        comp->it.type.state = (comp->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
+        comp->it.type.state = (comp->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
         Iter_Prev(&comp->it);
-    }
-    if((comp->it.type.state & END) && (comp->type.state & (ERROR|NOOP)) == 0){
-        comp->type.state |= SUCCESS;
+        comp->it.type.state &= ~SPAN_OP_REMOVE;
     }
     return comp->type.state;
 }

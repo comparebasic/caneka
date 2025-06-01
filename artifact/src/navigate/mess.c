@@ -12,7 +12,7 @@ status Mess_Compare(MemCh *m, Mess *a, Mess *b){
     while((Compare(comp) & (SUCCESS|ERROR|NOOP)) == 0){
         Debug("^p.Compare @^0.\n", args);
     }
-    Debug("^p.Compare @^0.\n", args);
+    Debug("^p.End Compare @^0.\n", args);
 
     return Compare(comp);
 }

@@ -7,15 +7,6 @@ Str **stateLabels = NULL;
 
 status StreamTo_Init(MemCh *m){
     status r = READY;
-    if(ToStreamLookup == NULL){
-        ToStreamLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
-        ToSFlagLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
-        Mem_ToSInit(m, ToStreamLookup);
-        Str_ToSInit(m, ToStreamLookup);
-        Sequence_ToSInit(m, ToStreamLookup);
-        Util_ToSInit(m, ToStreamLookup);
-        r |= SUCCESS;
-    }
     if(stateLabels == NULL){
         stateLabels = (Str **)Arr_Make(m, 17);
         stateLabels[0] = Str_CstrRef(m, "ZERO/READY");
@@ -35,6 +26,16 @@ status StreamTo_Init(MemCh *m){
         stateLabels[14] = Str_CstrRef(m, "CLS_FLAG_FOXTROT");
         stateLabels[15] = Str_CstrRef(m, "CLS_FLAG_GOLF");
         stateLabels[16] = Str_CstrRef(m, "CLS_FLAG_HOTEL");
+        r |= SUCCESS;
+    }
+    if(ToStreamLookup == NULL){
+        ToStreamLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        ToSFlagLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        Mem_ToSInit(m, ToStreamLookup);
+        Str_ToSInit(m, ToStreamLookup);
+        Sequence_ToSInit(m, ToStreamLookup);
+        Util_ToSInit(m, ToStreamLookup);
+        Mem_InitLabels(m, ToSFlagLookup);
         r |= SUCCESS;
     }
 

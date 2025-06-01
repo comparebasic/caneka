@@ -73,9 +73,23 @@ status Iter_Prev(Iter *it){
         idx = it->p->max_idx;
         Iter_Setup(it, it->p, fl, idx);
         it->type.state |= (fl|PROCESSING);
+
+        word prev = it->type.state & SPAN_OP_REMOVE;
+        it->type.state &= ~SPAN_OP_REMOVE;
         Iter_Query(it);
+        it->type.state |= prev;
+
         goto end;
     }else{
+        if(it->idx == it->p->max_idx && (it->type.state & SPAN_OP_REMOVE)){
+            it->p->nvalues--;
+            it->p->max_idx--;
+            if(it->stack[0] != NULL){
+                ptr = (void **)it->stack[0];
+                *ptr = NULL;
+            }
+        }
+
         if(it->idx == 0){
             it->type.state |= END;
             goto end;
@@ -444,14 +458,15 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
         if(dim == 0){
             if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE|SPAN_OP_ADD)){
                 ptr = (void **)it->stack[dim];
-                *ptr = it->value;
                 it->type.state |= SUCCESS;
                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
+                    *ptr = it->value;
                     p->nvalues++;
                     if(it->idx > p->max_idx){
                         p->max_idx = it->idx;
                     }
                 }else if(it->type.state & SPAN_OP_REMOVE){
+                    *ptr = NULL;
                     p->nvalues--;
                     if(it->idx == p->max_idx){
                         p->max_idx--;

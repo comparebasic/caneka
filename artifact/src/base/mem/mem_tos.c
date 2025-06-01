@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+static Str **iterLabels = NULL;
+
 static inline i64 wsOut(Stream *sm, i8 dim){
     while(dim-- > 0){
         return Stream_Bytes(sm, (byte *)"    ", 4); 
@@ -176,9 +178,8 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
     Iter *it = (Iter *)as(a, TYPE_ITER);
     i64 total = 0;
     if(flags & DEBUG){
-        Str *s = State_ToStr(sm->m, it->type.state);
         Abstract *args[] = {
-            (Abstract *)s,
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, it->idx),
             (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
             (Abstract *)I8_Wrapped(sm->m, it->p->dims),
@@ -218,14 +219,10 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
                 I64_Wrapped(sm->m, (i64)it->value) : it->value),
             NULL
         };
-        if(it->value == NULL){
-            printf("it->value is NULL\n");
-            fflush(stdout);
-        }
         total += Fmt(sm, "value=$>", args2);
     }else if(flags & MORE){
         Abstract *args[] = {
-            (Abstract *)State_ToStr(sm->m, it->type.state),
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, it->idx),
             (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
             NULL
@@ -235,6 +232,24 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
         total += ToStream_NotImpl(sm, a, type, flags);
     }
     return total;
+}
+
+status Mem_InitLabels(MemCh *m, Lookup *lk){
+    status r = READY;
+    if(iterLabels == NULL){
+        iterLabels = (Str **)Arr_Make(m, 17);
+        iterLabels[9] = Str_CstrRef(m, "GET");
+        iterLabels[10] = Str_CstrRef(m, "SET");
+        iterLabels[11] = Str_CstrRef(m, "REMOVE");
+        iterLabels[12] = Str_CstrRef(m, "RESERVE");
+        iterLabels[13] = Str_CstrRef(m, "RESIZE");
+        iterLabels[14] = Str_CstrRef(m, "ADD");
+        iterLabels[15] = Str_CstrRef(m, "LAST");
+        iterLabels[16] = Str_CstrRef(m, "REVERSE");
+        Lookup_Add(m, lk, TYPE_ITER, (void *)iterLabels);
+        r |= SUCCESS;
+    }
+    return r;
 }
 
 status Mem_ToSInit(MemCh *m, Lookup *lk){
