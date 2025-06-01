@@ -185,7 +185,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I8_Wrapped(sm->m, it->p->dims),
             NULL
         };
-        total += Fmt(sm, "I<$@$ of $/$dims\n", args);
+        total += Fmt(sm, "I<$ $ of $/$dims\n", args);
         void *ptr = it->p->root;
         for(i8 i = it->p->dims; i >= 0; i--){
             if(it->stack[i] == NULL && (flags & (MORE|DEBUG))){

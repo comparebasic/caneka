@@ -85,36 +85,73 @@ Mess *make_Expected(MemCh *m){
     StrVec_Add(v, Str_CstrRef(m, "Second single sentance with details "));
     Span_Add((Span*)nd->child, (Abstract *)v);
 
+    Node *cur = Node_Make(m, ZERO, nd);
+    cur->captureKey = FORMATTER_TAG;
+    cur->atts = Table_Make(m);
+    Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_TAG),
+        (Abstract *)Str_CstrRef(m, "link"));
+    Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_LABEL),
+        (Abstract *)Str_CstrRef(m, "here"));
+    Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_URL),
+        (Abstract *)Str_CstrRef(m, "http://example.com"));
+    Span_Add((Span*)nd->child, (Abstract *)cur);
 
+    cur = Node_Make(m, ZERO, nd);
+    cur->captureKey = FORMATTER_TAG;
+    cur->atts = Table_Make(m);
+    Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_TAG),
+        (Abstract *)Str_CstrRef(m, "image"));
+    Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_LABEL),
+        (Abstract *)Str_CstrRef(m, "Image one"));
+    Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_URL),
+        (Abstract *)Str_CstrRef(m, "image.png"));
+    Span_Add((Span*)nd->child, (Abstract *)cur);
 
-
-    nd = Node_Make(m, ZERO, prev);
-    nd->typeOfChild = TYPE_STRVEC;
-    nd->captureKey = FORMATTER_PARAGRAPH;
-    nd->atts = Table_Make(m);
+    cur = Node_Make(m, ZERO, nd);
+    cur->captureKey = FORMATTER_BULLET;
+    cur->typeOfChild = TYPE_SPAN;
+    cur->child = (Abstract *)Span_Make(m);
     v = StrVec_Make(m);
-    StrVec_Add(v, Str_CstrRef(m, "=="));
-    Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_INDENT), (Abstract *)v);
-    nd->child = (Abstract *)StrVec_Make(m);
-    Span_Add((Span *)prev->child, (Abstract *)nd);
-
-    nd = Node_Make(m, ZERO, prev);
-    nd->typeOfChild = TYPE_STRVEC;
-    nd->captureKey = FORMATTER_PARAGRAPH;
-    nd->child = (Abstract *)StrVec_Make(m);
-    Span_Add((Span *)prev->child, (Abstract *)nd);
+    StrVec_Add(v, Str_CstrRef(m, "bullet one."));
+    Span_Add((Span *)cur->child, (Abstract *)v);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "bullet two with two lines."));
+    Span_Add((Span *)cur->child, (Abstract *)v);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "bullet three   with two lines as well."));
+    Span_Add((Span *)cur->child, (Abstract *)v);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "bullet four."));
+    Span_Add((Span *)cur->child, (Abstract *)v);
+    Span_Add((Span*)nd->child, (Abstract *)cur);
 
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
     nd->captureKey = FORMATTER_INDENT;
     nd->atts = Table_Make(m);
     v = StrVec_Make(m);
-    StrVec_Add(v, Str_CstrRef(m, "="));
+    StrVec_Add(v, Str_CstrRef(m, "=="));
     Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_INDENT), (Abstract *)v);
     v = StrVec_Make(m);
-    StrVec_Add(v, Str_CstrRef(m, "?"));
+    StrVec_Add(v, Str_CstrRef(m, "Sub Section"));
     nd->child = (Abstract *)v;
     Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_PARAGRAPH;
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "A paragraph in the sub section."));
+    nd->child = (Abstract *)v;
+    Span_Add((Span *)prev->child, (Abstract *)nd);
+
+    /*
+    nd = Node_Make(m, ZERO, prev);
+    nd->typeOfChild = TYPE_STRVEC;
+    nd->captureKey = FORMATTER_INDENT;
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "="));
+    Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_INDENT), (Abstract *)v);
 
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_RELATION;
@@ -129,6 +166,7 @@ Mess *make_Expected(MemCh *m){
     nd->captureKey = FORMATTER_PARAGRAPH;
     v = StrVec_Make(m);
     Span_Add((Span *)prev->child, (Abstract *)nd);
+    */
 
     return expected;
 }

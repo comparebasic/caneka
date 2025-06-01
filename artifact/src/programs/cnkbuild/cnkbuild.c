@@ -96,10 +96,14 @@ static status setupStatus(BuildCtx *ctx){
     arr = Arr_Make(m, 3);
     arr[0] = (Abstract *)ctx->fields.current.action;
     arr[1] = (Abstract *)ctx->fields.current.source;
-    arr[2] = (Abstract *)ctx->fields.current.dest;
 
     Span_Add(ctx->cli->lines, 
-        (Abstract *)FmtLine_Make(m, "^b.$: $ -> ^D.$^0", arr));
+        (Abstract *)FmtLine_Make(m, "^b.$: $", arr));
+
+    arr = Arr_Make(m, 1);
+    arr[0] = (Abstract *)ctx->fields.current.dest;
+    Span_Add(ctx->cli->lines, 
+        (Abstract *)FmtLine_Make(m, "    -> ^D.$^0", arr));
 
     ctx->fields.steps.barStart = Str_Make(m, width);
     memset(ctx->fields.steps.barStart->bytes, ' ', width);

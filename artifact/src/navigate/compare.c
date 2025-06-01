@@ -25,7 +25,8 @@ status Compare(Comp *comp){
         Abstract *a = cr->a;
         Abstract *b = cr->b;
         if(cr->a->type.of == TYPE_ITER){
-            if((Iter_Next((Iter *)cr->a) & END) == 0 && (Iter_Next((Iter *)cr->b) & END) == 0){
+            if(((Iter_Next((Iter *)cr->a) & END) | (Iter_Next((Iter *)cr->b) & END))
+                    == 0){
                 a = ((Iter*)cr->a)->value;
                 b = ((Iter*)cr->b)->value;
             }else if((cr->a->type.state & END) == (cr->b->type.state & END)){
@@ -93,6 +94,17 @@ status Compare(Comp *comp){
                     }
                     return comp->type.state;
                 }
+            }else if(nb->atts != NULL){
+                if(comp->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)comp,
+                        NULL
+                    };
+                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                        "atts of B mismatch &", args);
+                }
+                comp->type.state |= NOOP;
+                return comp->type.state;
             }
             if(na->child != NULL && na->child != nb->child){
                 if(nb->child->type.of == TYPE_SPAN){
