@@ -173,14 +173,12 @@ static TestSet _Tests[] = {
         "Tests for the relation structure.",
         FEATURE_COMPLETE,
     },
-    */
     {
         "Mess Tests",
         Mess_Tests,
         "From a basic Fmt Roebling parser into the Mess data structures.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "TablePreKey",
         TablePreKey_Tests,
