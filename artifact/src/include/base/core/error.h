@@ -16,3 +16,4 @@ void Cleanup(Abstract *a);
 void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]);
 void ShowError(char *func, char *file, int line, char *fmt, Abstract *args[]);
 void Error(MemCh *m, Abstract *a, char *func, char *file, int line, char *fmt, Abstract *args[]);
+boolean IsZeroed(byte *b, size_t sz, char *func, char *file, int line);

@@ -52,17 +52,17 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     if(a == NULL || b == NULL){
        return FALSE; 
     }
-    if(a->length != b->total){
-        return FALSE;
-    }
     i32 length = a->length;
+    if(a->length != b->total){
+        goto miss;
+    }
     util *ptrA = (util *)a->bytes;
     util *ptrB = NULL;
     Cursor curs;
     Cursor_Setup(&curs, b);
     while(length >= 8 && (StrVec_NextSlot(b, &curs) & END) == 0){
         if(*ptrA != curs.slot){
-            return FALSE;
+            goto miss;
         }
         ptrA++;
         ptrB++;
@@ -73,11 +73,22 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
         util shelfA = 0;
         memcpy(&shelfA, ptrA, length);
         if(shelfA != curs.slot){
-            return FALSE;
+            goto miss;
         }
     }
 
     return TRUE;
+miss:
+    if((a->type.state & DEBUG) || (b->type.state & DEBUG)){
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(ErrStream->m, (i32)a->length - length),
+            (Abstract *)a,
+            (Abstract *)b,
+            NULL
+        };
+        Debug("Str_EqualsStrVec Differ at $ & vs &\n", args);
+    }
+    return FALSE;
 }
 
 boolean StrVec_EqualsStrVec(StrVec *a, StrVec *b){

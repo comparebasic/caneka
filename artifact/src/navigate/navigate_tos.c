@@ -109,7 +109,7 @@ static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
             total += Stream_Bytes(sm, (byte *)",", 1);
         }
     }
-    total += Stream_Bytes(sm, (byte *)"]>", 3);
+    total += Stream_Bytes(sm, (byte *)"]>", 2);
     return total;
 }
 

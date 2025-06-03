@@ -45,6 +45,30 @@ void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
     exit(13);
 }
 
+boolean IsZeroed(byte *b, size_t sz, char *func, char *file, int line){
+    while(sz >= sizeof(util)){
+        util *bu = (util *)b;
+        if(*bu != 0){
+            goto err;
+        }
+        sz -= sizeof(util);
+        b += sizeof(util);
+    }
+    if(sz > 0){
+        while(--sz > 0){
+            if(*b != 0){
+                goto err;
+            }
+            b++;
+        }
+    }
+
+    return TRUE;
+err:
+    Error(ErrStream->m, NULL, func, file, line, "Memory not Zeroed", NULL);
+    return FALSE;
+}
+
 void Error(MemCh *m, Abstract *a, char *func, char *file, int line, char *fmt, Abstract *args[]){
     _error = TRUE;
     if(ErrorHandlerTable != NULL){

@@ -80,7 +80,6 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         indentDef, FORMATTER_INDENT, FORMATTER_LINE);
     Match *mtd = Roebling_GetMatch(rbl);
-    mtd->type.state |= DEBUG;
     r |= Roebling_SetPattern(rbl,
         dashDef, FORMATTER_BULLET, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
@@ -167,12 +166,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         (Abstract *)tk,
         NULL
     };
-    if(1 || rbl->type.state & DEBUG){
-        mess->type.state |= DEBUG;
+    if(rbl->type.state & DEBUG){
         Out("^c.Fmt After Capture $/@ -> @\n", args);
-        /*
-        Debug("^c.Fmt Capture $/@\n^pfrom @^0\n", args);
-        */
     }
     if(tk != NULL){
         if(mess->current->parent == NULL && tk->captureKey == FORMATTER_LINE){

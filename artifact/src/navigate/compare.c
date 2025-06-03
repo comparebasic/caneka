@@ -107,10 +107,16 @@ status Compare(Comp *comp){
                 return comp->type.state;
             }
             if(na->child != NULL && na->child != nb->child){
-                if(nb->child->type.of == TYPE_SPAN){
+                if(nb->child->type.of == TYPE_RELATION){
+                    Relation *ra = (Relation *)na->child;
+                    Relation *rb = (Relation *)nb->child;
                     Compare_Push(comp,
-                        (Abstract *)Iter_Make(comp->m, (Span *)na->child), 
-                        (Abstract *)Iter_Make(comp->m, (Span *)nb->child));
+                        (Abstract *)Iter_Make(comp->m, (Span *)&ra->it), 
+                        (Abstract *)Iter_Make(comp->m, (Span *)&rb->it));
+                }else if(nb->child->type.of == TYPE_SPAN){
+                    Compare_Push(comp,
+                        (Abstract *)na->child, 
+                        (Abstract *)nb->child);
                 }else{
                     Compare_Push(comp,
                         (Abstract *)na->child, 

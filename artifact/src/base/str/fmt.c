@@ -42,7 +42,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             }
 
             if(start != ptr){
-               word length = (word)(ptr - start);
+                word length = (word)(ptr - start);
                 Stream_Bytes(sm, (byte *)start, length);
                 total += length;
             }
@@ -56,6 +56,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 goto next;
             }
             cls type = a->type.of;
+            cls stateOf = a->type.state;
             if(a->type.of == TYPE_STR){
                 Str *s = (Str *)a;
                 if(s->type.state & STRING_FMT_ANSI){
@@ -67,6 +68,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     }else{
                         a = (Abstract *)a;
                         type = s->type.of;
+                        stateOf = a->type.state;
                     }
                 }else if(s->type.state & STRING_BINARY){
                     total += Bits_Print(sm, s->bytes, s->length, 
@@ -83,8 +85,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 type = sg->objType.of;
                 a = sg->val.ptr;
             }
-            total += ToS(sm, a, type, 
-                ((sm->type.state & DEBUG)|(state & (MORE|DEBUG))) | a->type.state);
+            total += ToS(sm, a, type, (state & (MORE|DEBUG)) | stateOf);
             state = SUCCESS;
             goto next;
         }else if(c == '^'){

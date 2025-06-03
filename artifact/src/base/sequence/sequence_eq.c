@@ -32,7 +32,7 @@ boolean Table_Eq(Abstract *a, Abstract *b){
                         (Abstract *)tblB,
                         NULL
                     };
-                    Debug("^D.Span_Eq false:value mismatch for key $ -> & vs &\n for &\n&^0.\n", args);
+                    Debug("^D.Table_Eq false:value mismatch for key $ -> & vs &\n for &\n&^0.\n", args);
                 }
                 return FALSE;
             }

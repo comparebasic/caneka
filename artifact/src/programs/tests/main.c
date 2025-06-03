@@ -166,7 +166,6 @@ static TestSet _Tests[] = {
         "Roebling start and stop in the middle of recieving input tests.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "Relation Tests",
         Relation_Tests,
@@ -179,6 +178,7 @@ static TestSet _Tests[] = {
         "From a basic Fmt Roebling parser into the Mess data structures.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "TablePreKey",
         TablePreKey_Tests,

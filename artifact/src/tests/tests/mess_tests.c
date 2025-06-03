@@ -145,28 +145,51 @@ Mess *make_Expected(MemCh *m){
     nd->child = (Abstract *)v;
     Span_Add((Span *)prev->child, (Abstract *)nd);
 
-    /*
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
     nd->captureKey = FORMATTER_INDENT;
     v = StrVec_Make(m);
     StrVec_Add(v, Str_CstrRef(m, "="));
+    nd->atts = Table_Make(m);
     Table_Set(nd->atts, (Abstract *)I16_Wrapped(m, FORMATTER_INDENT), (Abstract *)v);
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "Table Title"));
+    nd->child = (Abstract *)v;
+    Span_Add((Span *)prev->child, (Abstract *)nd);
 
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_RELATION;
     nd->captureKey = FORMATTER_TABLE;
-    v = StrVec_Make(m);
-    StrVec_Add(v, Str_CstrRef(m, "?"));
-    nd->child = (Abstract *)Relation_Make(m, 0, NULL);
+
+    Relation *rel = Relation_Make(m, 0, NULL);
+
+    Relation_AddValue(rel, (Abstract *)Str_CstrRef(m, "Column A"));
+    Relation_AddValue(rel, (Abstract *)Str_CstrRef(m, "Column B"));
+    Relation_AddValue(rel, (Abstract *)Str_CstrRef(m, "Column C"));
+    Relation_HeadFromValues(rel);
+
+    Relation_SetValue(rel, 0, 0, (Abstract *)Str_CstrRef(m, "Apple"));
+    Relation_SetValue(rel, 0, 1, (Abstract *)I32_Wrapped(m, 1));
+    Relation_SetValue(rel, 0, 2, (Abstract *)I32_Wrapped(m, 37));
+
+    Relation_SetValue(rel, 1, 0, (Abstract *)Str_CstrRef(m, "Bannana"));
+    Relation_SetValue(rel, 1, 1, (Abstract *)I32_Wrapped(m, 2));
+    Relation_SetValue(rel, 1, 2, (Abstract *)I32_Wrapped(m, 39));
+
+    Relation_SetValue(rel, 2, 0, (Abstract *)Str_CstrRef(m, "Cantelope"));
+    Relation_SetValue(rel, 2, 1, (Abstract *)I32_Wrapped(m, 3));
+    Relation_SetValue(rel, 2, 2, (Abstract *)I32_Wrapped(m, 39));
+
+    nd->child = (Abstract *)rel;
     Span_Add((Span *)prev->child, (Abstract *)nd);
 
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
     nd->captureKey = FORMATTER_PARAGRAPH;
     v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "And the final text here."));
+    nd->child = (Abstract *)v;
     Span_Add((Span *)prev->child, (Abstract *)nd);
-    */
 
     return expected;
 }
@@ -233,6 +256,7 @@ status Mess_Tests(MemCh *gm){
     };
     Debug("^c.Expected &^0.\n", args1);
 
+    rbl->mess->type.state |= DEBUG;
     r |= Test(Mess_Compare(m, rbl->mess, expected) == SUCCESS,
         "Mess has been built as expected", NULL);
 
