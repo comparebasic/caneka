@@ -173,7 +173,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(mess->current->parent == NULL && tk->captureKey == FORMATTER_LINE){
             tk = Lookup_Get(mess->tokenizer, FORMATTER_PARAGRAPH);
         }
-        tk->type.state |= DEBUG;
         Mess_Tokenize(mess, tk, v);
     }else{
         Abstract *args[] = {

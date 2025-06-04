@@ -42,11 +42,13 @@ boolean Equals(Abstract *a, Abstract *b){
     }else if(a->type.of == b->type.of){
         EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, a->type.of);
         if(func == NULL){
+            /*
             Abstract *args[] = {
                 (Abstract *)Type_ToStr(ErrStream->m, a->type.of),
                 NULL
             };
             Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, "Equals for $ not registered", args);
+            */
         }else {
             return func(a, b);
         }

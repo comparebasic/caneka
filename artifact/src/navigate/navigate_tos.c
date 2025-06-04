@@ -24,9 +24,10 @@ static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)comp, ToS_FlagLabels),
+        (Abstract *)&comp->it,
         NULL
     };
-    total += Fmt(sm, "Comp<$\n", args);
+    total += Fmt(sm, "Comp<$/It(@)\n", args);
     Iter it;
     Iter_Init(&it, comp->it.p);
     while((Iter_Prev(&it) & END) == 0){

@@ -60,12 +60,17 @@ status Iter_Prev(Iter *it){
     i32 debugIdx = it->idx;
     i32 idx = it->idx;
     it->value = NULL;
-    boolean skipNull = (it->type.state & SPAN_OP_ADD) == 0;
+    boolean skipNull = TRUE;
     void **ptr = NULL;
 
     if((it->type.state & SPAN_OP_GET) == 0){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Iter_Prev can only use Get not Set or Add", NULL);
         return ERROR;
+    }
+
+    if(it->p == NULL || it->p->nvalues == 0){
+        it->type.state |= END; 
+        goto end;
     }
 
     if((it->type.state & END) || !(it->type.state & PROCESSING)){

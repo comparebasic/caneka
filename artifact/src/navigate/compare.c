@@ -24,7 +24,7 @@ status Compare(Comp *comp){
     }else{
         Abstract *a = cr->a;
         Abstract *b = cr->b;
-        if(cr->a->type.of == TYPE_ITER){
+        if(a->type.of == TYPE_ITER){
             if(((Iter_Next((Iter *)cr->a) & END) | (Iter_Next((Iter *)cr->b) & END))
                     == 0){
                 a = ((Iter*)cr->a)->value;
@@ -48,103 +48,114 @@ status Compare(Comp *comp){
                 }
                 return comp->type.state;
             }
-        }
-
-        if(a->type.of == TYPE_NODE){
-            Node *na = (Node *)a;
-            Node *nb = (Node *)b;
-            if(na->typeOfChild != nb->typeOfChild){
-                comp->type.state |= NOOP;
-                if(comp->type.state & DEBUG){
-                    Abstract *args[] = {
-                        (Abstract *)Type_ToStr(comp->m, na->typeOfChild),
-                        (Abstract *)Type_ToStr(comp->m, nb->typeOfChild),
-                        (Abstract *)comp,
-                        NULL
-                    };
-                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
-                        "typeOfChild mismatch $ vs $ &", args);
-                }
-                return comp->type.state;
-            }
-            if(na->value != NULL && na->value != nb->value){
-                Compare_Push(comp, na->value, nb->value);
-                if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
-                    if(comp->type.state & DEBUG){
-                        Abstract *args[] = {
-                            (Abstract *)comp,
-                            NULL
-                        };
-                        Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
-                            "value mismatch &", args);
-                    }
-                    return comp->type.state;
-                }
-            }
-            if(na->atts != NULL && na->atts != nb->atts){
-                Compare_Push(comp, (Abstract *)na->atts, (Abstract *)nb->atts);
-                if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
-                    if(comp->type.state & DEBUG){
-                        Abstract *args[] = {
-                            (Abstract *)comp,
-                            NULL
-                        };
-                        Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
-                            "atts mismatch &", args);
-                    }
-                    return comp->type.state;
-                }
-            }else if(nb->atts != NULL){
-                if(comp->type.state & DEBUG){
-                    Abstract *args[] = {
-                        (Abstract *)comp,
-                        NULL
-                    };
-                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
-                        "atts of B mismatch &", args);
-                }
-                comp->type.state |= NOOP;
-                return comp->type.state;
-            }
-            if(na->child != NULL && na->child != nb->child){
-                if(nb->child->type.of == TYPE_RELATION){
-                    Relation *ra = (Relation *)na->child;
-                    Relation *rb = (Relation *)nb->child;
-                    Compare_Push(comp,
-                        (Abstract *)Iter_Make(comp->m, (Span *)&ra->it), 
-                        (Abstract *)Iter_Make(comp->m, (Span *)&rb->it));
-                }else if(nb->child->type.of == TYPE_SPAN){
-                    Compare_Push(comp,
-                        (Abstract *)na->child, 
-                        (Abstract *)nb->child);
-                }else{
-                    Compare_Push(comp,
-                        (Abstract *)na->child, 
-                        (Abstract *)nb->child);
-                }
-                Compare(comp);
-            }
         }else{
-            a->type.state |= DEBUG;
-            if(!Equals(a, b)){
-                if(comp->type.state & DEBUG){
-                    Abstract *args[] = {
-                        (Abstract *)comp,
-                        (Abstract *)a,
-                        (Abstract *)b,
-                        NULL
-                    };
-                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
-                        "mismatch & - ^p.&^r. vs ^p.&^r.", args);
+            if((cr->type.state & PROCESSING) != 0){
+                /* skip to bottom */
+            }else{
+                cr->type.state |= PROCESSING;
+                if(a->type.of == TYPE_NODE){
+                    Node *na = (Node *)a;
+                    Node *nb = (Node *)b;
+                    if(na->typeOfChild != nb->typeOfChild){
+                        comp->type.state |= NOOP;
+                        if(comp->type.state & DEBUG){
+                            Abstract *args[] = {
+                                (Abstract *)Type_ToStr(comp->m, na->typeOfChild),
+                                (Abstract *)Type_ToStr(comp->m, nb->typeOfChild),
+                                (Abstract *)comp,
+                                NULL
+                            };
+                            Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                                "typeOfChild mismatch $ vs $ &", args);
+                        }
+                        return comp->type.state;
+                    }
+                    if(na->value != NULL && na->value != nb->value){
+                        Compare_Push(comp, na->value, nb->value);
+                        if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
+                            if(comp->type.state & DEBUG){
+                                Abstract *args[] = {
+                                    (Abstract *)comp,
+                                    NULL
+                                };
+                                Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                                    "value mismatch &", args);
+                            }
+                            return comp->type.state;
+                        }
+                    }
+                    if(na->atts != NULL && na->atts != nb->atts){
+                        Compare_Push(comp, (Abstract *)na->atts, (Abstract *)nb->atts);
+                        if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
+                            if(comp->type.state & DEBUG){
+                                Abstract *args[] = {
+                                    (Abstract *)comp,
+                                    NULL
+                                };
+                                Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                                    "atts mismatch &", args);
+                            }
+                            return comp->type.state;
+                        }
+                    }else if(nb->atts != NULL){
+                        if(comp->type.state & DEBUG){
+                            Abstract *args[] = {
+                                (Abstract *)comp,
+                                NULL
+                            };
+                            Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                                "atts of B mismatch &", args);
+                        }
+                        comp->type.state |= NOOP;
+                        return comp->type.state;
+                    }
+                    if(na->child != NULL && na->child != nb->child){
+                        if(nb->child->type.of == TYPE_RELATION){
+                            Relation *ra = (Relation *)na->child;
+                            Relation *rb = (Relation *)nb->child;
+                            Iter_Setup(&ra->it, ra->it.p, SPAN_OP_GET, 0);
+                            Iter_Setup(&rb->it, rb->it.p, SPAN_OP_GET, 0);
+                            Compare_Push(comp,
+                                (Abstract *)&ra->it, 
+                                (Abstract *)&rb->it);
+                        }else if(nb->child->type.of == TYPE_SPAN){
+                            Compare_Push(comp,
+                                (Abstract *)Iter_Make(comp->m, (Span *)na->child), 
+                                (Abstract *)Iter_Make(comp->m, (Span *)na->child));
+                        }else{
+                            Compare_Push(comp,
+                                (Abstract *)na->child, 
+                                (Abstract *)nb->child);
+                        }
+                        Compare(comp);
+                    }
+                }else{
+                    a->type.state |= DEBUG;
+                    if(!Equals(a, b)){
+                        if(comp->type.state & DEBUG){
+                            Abstract *args[] = {
+                                (Abstract *)comp,
+                                (Abstract *)a,
+                                (Abstract *)b,
+                                NULL
+                            };
+                            Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                                "mismatch & - ^p.&^r. vs ^p.&^r.", args);
+                        }
+                        comp->type.state |= NOOP;
+                    }
                 }
-                comp->type.state |= NOOP;
             }
         }
     }
-    if(cr->a->type.of != TYPE_ITER || (cr->a->type.state & FLAG_ITER_LAST)){
+    if((cr->type.state & PROCESSING) != 0 || 
+            (cr->a->type.of != TYPE_ITER || (cr->a->type.state & FLAG_ITER_LAST))){
         comp->it.type.state = (comp->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
         Iter_Prev(&comp->it);
         comp->it.type.state &= ~SPAN_OP_REMOVE;
+    }
+    if(comp->it.type.state & END){
+        comp->type.state |= SUCCESS;
     }
     return comp->type.state;
 }

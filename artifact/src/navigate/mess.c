@@ -7,7 +7,7 @@ status Mess_Compare(MemCh *m, Mess *a, Mess *b){
         comp->type.state |= DEBUG;
     }
     while((Compare(comp) & (SUCCESS|ERROR|NOOP)) == 0){}
-    if(a->type.state & DEBUG){
+    if(comp->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)comp,
             NULL

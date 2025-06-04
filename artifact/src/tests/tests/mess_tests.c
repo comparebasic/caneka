@@ -243,21 +243,9 @@ status Mess_Tests(MemCh *gm){
     rbl = FormatFmt_Make(m, curs, NULL);
     Roebling_Run(rbl);
 
-    Abstract *args[] = {
-        (Abstract *)rbl->mess,
-        NULL
-    };
-    Debug("^y.Mess @^0.\n", args);
-
     Mess *expected = make_Expected(m);
-    Abstract *args1[] = {
-        (Abstract *)expected,
-        NULL
-    };
-    Debug("^c.Expected &^0.\n", args1);
 
-    rbl->mess->type.state |= DEBUG;
-    r |= Test(Mess_Compare(m, rbl->mess, expected) == SUCCESS,
+    r |= Test((Mess_Compare(m, rbl->mess, expected) & SUCCESS) != 0,
         "Mess has been built as expected", NULL);
 
     MemCh_Free(m);
