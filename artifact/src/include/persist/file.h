@@ -2,8 +2,9 @@
 
 typedef struct file {
     Type type;
+    i16 guard;
+    i16 _;
     Str *path;
-    Str *abs;
     Access *access;
     Stream *sm;
 } File;
@@ -15,6 +16,10 @@ enum file_status {
     FILE_SPOOL = 1 << 15,
 };
 
+File *File_Make(MemCh *m, Str *path, Access *access);
+File *File_Init(File *file, Str *path, Access *access);
+
+/*
 status File_Persist(MemCh *m, File *file);
 status File_SetAbs(MemCh *m, File *file, IoCtx *ctx);
 File *File_Make(MemCh *m, Str *path, Access *access, IoCtx *ctx);
@@ -28,3 +33,4 @@ status File_Read(MemCh *m, File *file, Access *access, int pos, int length);
 status File_Copy(MemCh *m, Str *a, Str *b, Access *ac);
 status File_StreamWithOpen(Stream *sm, FILE *f, File *file, Access *access, Abstract *source);
 FILE *File_GetFILE(MemCh *m, File *file, Access *access);
+*/

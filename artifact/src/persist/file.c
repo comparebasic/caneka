@@ -1,15 +1,129 @@
 #include <external.h>
 #include <caneka.h>
 
-File *File_Clone(MemCh *m, File *o){
-    File *file = MemCh_Realloc(m, sizeof(File), o, sizeof(File));
-    file->path = String_Clone(m, file->path);
-    file->abs = String_Clone(m, file->abs);
-    file->data = String_Clone(m, file->data);
-    return file;
+static status _File_Init(MemCh *m, File *file, Str *path, Access *access){
+    DebugStack_Push(path, path->type.of);
+    file->type.of = TYPE_FILE;
+    file->path = path;
+    file->access = access;
+    file->sm = File_MakeFileStream(m, Stream_Make(m), StrVec_Make(m), -1, STREAM_STRVEC|STREAM_TO_FD); 
+    DebugStack_Pop();
+    return SUCCESS;
 }
 
-status File_Copy(MemCh *m, String *a, String *b, Access *ac){
+static status File_MakeFileStream(MemCh *m, Stream *sm, StrVec *v, i32 fd, word flags){
+    sm->type.of = TYPE_STREAM;
+    sm->m = m;
+    sm->fd = fd;
+    sm->type.state |= UPPER_FLAGS & flags;
+    sm->dest.curs = Cursor_Make(m, v);
+    sm->func = Stream_ToStrVec;
+    return SUCCESS;
+}
+
+status File_Write(File *f, i64 max){
+    f->type.state &= ~SUCCESS;
+    if(f->sm->fd == -1){
+        File_Open(f, f->type.state);
+        if((f->type.state & SUCCESS) == 0){
+            f->type.state |= ERROR;
+            Abstract *args[] = {
+                (Abstract *)f->path,
+                NULL
+            };
+            Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+                "Unable to open file @", args);
+            return f->type.state;
+        }
+    }
+    f->sm->func = Stream_ToFd;
+    if(Stream_VecTo(sm, f->sm->v, f->sm->v->total) == f->sm->v->total){
+        f->type.state |= SUCCESS;
+    }
+    return f->type.state;
+}
+
+status File_Read(File *f, i64 max){
+    f->type.state &= ~SUCCESS;
+    if(f->sm->fd == -1){
+        File_Open(f, f->type.state);
+        if((f->type.state & SUCCESS) == 0){
+            f->type.state |= ERROR;
+            Abstract *args[] = {
+                (Abstract *)f->path,
+                NULL
+            };
+            Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+                "Unable to open file @", args);
+            return f->type.state;
+        }
+    }
+
+    f->sm->func = Stream_ToStrVec;
+
+    byte b[FILE_READ_LENGTH];
+    while(max > 0){
+        ssize_t l = read(f->sm->fd, b, min(FILE_READ_LENGTH, max));
+        if(l <= 0){
+            if(l < 0){
+                Abstract *args[] = {
+                    (Abstract *)f->path,
+                    NULL
+                };
+                Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+                    "Error reading file @", args);
+                    f->type.state |= ERROR;
+            }
+            break;
+        }
+        max -= l;
+        Stream_Bytes(f->sm, b, l);
+    }
+
+    if(max == 0){
+        f->type.state |= SUCCESS;
+    }else{
+        f->type.state |= ERROR;
+    }
+    return f->type.state;
+}
+
+status File_Open(File *f, word flags){
+    i32 ioFlags = 0;
+    if((flags & (STREAM_STRVEC|STREAM_TO_FD)) == (STREAM_STRVEC|STREAM_TO_FD)){
+        ioFlags = O_RDWR;
+    }else if (flags & STREAM_STRVEC){
+        ioFlags = O_RONLY;
+    }else if(flags & STREAM_TO_FD){
+        ioFlags = O_WONLY;
+    }else{
+        Error(ErrStream->m, (Abstract *), FUNCNAME, FILENAME, LINENUMBER, 
+            "STRVEC or TO_FD flags required for read or write or both access to a file descriptor", NULL);
+        return ERROR;
+    }
+    f->sm->fd = open(Str_Cstr(f->sm->m, f->path), ioFlags);
+    if(f->sm->fd != -1){
+        f->type.state |= SUCCESS;
+    }else{
+        f->type.state |= ERROR;
+    }
+    return f->type.state;
+}
+
+status File_Close(File *f){
+    if(f->sm->fd != -1){
+        if(!close(f->sm->fd)){
+            f->type.state |= ERROR;
+        }else{
+            f->type.state |= SUCCESS;
+        }
+    }
+    return f->type.state;
+}
+
+
+/*
+status File_Copy(MemCh *m, Str *a, Str *b, Access *ac){
     Span *cmd = Span_Make(m);
     Span_Add(cmd, (Abstract *)String_Make(m, bytes("cp")));
     Span_Add(cmd, (Abstract *)a);
@@ -73,7 +187,6 @@ status File_Persist(MemCh *m, File *file){
 }
 
 FILE *File_GetFILE(MemCh *m, File *file, Access *access){
-    /* accessy stuff */
     return fopen((char *)file->abs->bytes, "r");
 }
 
@@ -209,23 +322,10 @@ status File_Delete(File *file){
     file->type.state |= ERROR;
     return file->type.state;
 }
+*/
 
-File *File_Init(File *file, String *path, Access *access, IoCtx *ctx){
-    DebugStack_Push(path, path->type.of);
-    memset(file, 0, sizeof(File));
-    file->type.of = TYPE_FILE;
-    file->access = access;
-    file->path = path;
-    if(ctx != NULL){
-        file->abs = IoCtx_GetPath(ctx->m, ctx, file->path);
-        Table_Set(ctx->files, (Abstract *)file->path, (Abstract *)file);
-    }
-    
-    DebugStack_Pop();
-    return file;
-}
-
-File *File_Make(MemCh *m, String *path, Access *access, IoCtx *ctx){
+File *File_Make(MemCh *m, Str *path, Access *access){
     File *file = MemCh_Alloc(m, sizeof(File));
-    return File_Init(file, path, access, ctx);
+    _File_Init(m, file, path, access);
+    return file;
 }

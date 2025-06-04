@@ -159,8 +159,9 @@ static BuildSubdir xmltobj = { "lang/xmlt", {
 }};
 
 static BuildSubdir persistobj = { "persist", {
-    "auth.c",
     "file.c",
+    /*
+    "auth.c",
     "ioctx.c",
     "memlocal.c",
     "path.c",
@@ -169,6 +170,7 @@ static BuildSubdir persistobj = { "persist", {
     "spool.c",
     "tolocal",
     "user.c",
+    */
     NULL
 }};
 
@@ -244,6 +246,8 @@ static BuildSubdir *objdirs[] = {
     &parserobj,
     &testsobj,
     &fixturesobj,
+    &fmtobj,
+    &persistobj,
     /*
     &transpobj,
     &cryptoobj,
@@ -252,15 +256,11 @@ static BuildSubdir *objdirs[] = {
     &osetobj,
     &xmlobj,
     &rblshobj,
-    */
-    &fmtobj,
-    /*
     &termiofmtobj,
     &httpobj,
     &cdocobj,
     &canekaobj,
     &xmltobj,
-    &persistobj,
     &serveobj,
     */
     NULL
