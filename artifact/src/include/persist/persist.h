@@ -3,3 +3,4 @@ enum persist_flags {
 };
 
 extern char **environ;
+status Persist_Init(MemCh *m);

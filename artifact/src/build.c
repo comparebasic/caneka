@@ -159,6 +159,8 @@ static BuildSubdir xmltobj = { "lang/xmlt", {
 }};
 
 static BuildSubdir persistobj = { "persist", {
+    "persist_tos.c",
+    "persist.c",
     "file.c",
     /*
     "auth.c",
@@ -217,6 +219,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "relation_tests.c",
     "iter_tests.c",
     "binpin_tests.c",
+    "file_tests.c",
     /*
     "crypto_tests.c",
     "http_tests.c",

@@ -22,6 +22,10 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
     }
 
+    if(m->it.p == NULL){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Whaaaaat m->it.p is NULL?", NULL);
+    }
+
     if(!Guard(&m->guard, MEM_GUARD_MAX, "MemCh_Alloc", FILENAME, LINENUMBER)){
         byte _b[128];
         memset(_b, 0, 128);
@@ -48,6 +52,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     }
 
     if(sl == NULL){
+
         sl = MemPage_Make(m, level);
         Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1); 
         m->it.value = (void *)sl;

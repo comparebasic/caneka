@@ -8,3 +8,4 @@
 #include "persist/session.h"
 #include "persist/spool.h"
 #include "persist/user.h"
+#include "persist/persist_tos.h"

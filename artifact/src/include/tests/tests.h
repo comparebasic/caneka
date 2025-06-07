@@ -33,6 +33,7 @@ status Relation_Tests(MemCh *gm);
 status Iter_Tests(MemCh *gm);
 status SnipModify_Tests(MemCh *gm);
 status BinPin_Tests(MemCh *gm);
+status File_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

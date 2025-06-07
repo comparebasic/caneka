@@ -178,6 +178,12 @@ static TestSet _Tests[] = {
         "From a basic Fmt Roebling parser into the Mess data structures.",
         FEATURE_COMPLETE,
     },
+    {
+        "File Tests",
+        File_Tests,
+        "File handling tests.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",

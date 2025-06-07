@@ -1,24 +1,31 @@
 #include <external.h>
 #include <caneka.h>
 
-static status _File_Init(MemCh *m, File *file, Str *path, Access *access){
-    DebugStack_Push(path, path->type.of);
-    file->type.of = TYPE_FILE;
-    file->path = path;
-    file->access = access;
-    file->sm = File_MakeFileStream(m, Stream_Make(m), StrVec_Make(m), -1, STREAM_STRVEC|STREAM_TO_FD); 
-    DebugStack_Pop();
-    return SUCCESS;
-}
-
 static status File_MakeFileStream(MemCh *m, Stream *sm, StrVec *v, i32 fd, word flags){
-    sm->type.of = TYPE_STREAM;
-    sm->m = m;
     sm->fd = fd;
     sm->type.state |= UPPER_FLAGS & flags;
     sm->dest.curs = Cursor_Make(m, v);
     sm->func = Stream_ToStrVec;
     return SUCCESS;
+}
+
+static status _File_Init(MemCh *m, File *file, Str *path, Access *access){
+    DebugStack_Push(path, path->type.of);
+    file->type.of = TYPE_FILE;
+    file->path = path;
+    file->access = access;
+    file->sm = Stream_Make(m);
+    File_MakeFileStream(m, file->sm, StrVec_Make(m), -1, STREAM_STRVEC|STREAM_TO_FD); 
+    DebugStack_Pop();
+    return SUCCESS;
+}
+
+StrVec *File_GetVec(File *f){
+    return f->sm->dest.curs->v;
+}
+
+Cursor *File_GetCurs(File *f){
+    return f->sm->dest.curs;
 }
 
 status File_Write(File *f, i64 max){
@@ -37,7 +44,8 @@ status File_Write(File *f, i64 max){
         }
     }
     f->sm->func = Stream_ToFd;
-    if(Stream_VecTo(sm, f->sm->v, f->sm->v->total) == f->sm->v->total){
+    Cursor *curs = f->sm->dest.curs;
+    if(Stream_VecTo(f->sm, curs->v) == curs->v->total){
         f->type.state |= SUCCESS;
     }
     return f->type.state;
@@ -46,7 +54,7 @@ status File_Write(File *f, i64 max){
 status File_Read(File *f, i64 max){
     f->type.state &= ~SUCCESS;
     if(f->sm->fd == -1){
-        File_Open(f, f->type.state);
+        File_Open(f, f->sm->type.state);
         if((f->type.state & SUCCESS) == 0){
             f->type.state |= ERROR;
             Abstract *args[] = {
@@ -93,12 +101,15 @@ status File_Open(File *f, word flags){
     if((flags & (STREAM_STRVEC|STREAM_TO_FD)) == (STREAM_STRVEC|STREAM_TO_FD)){
         ioFlags = O_RDWR;
     }else if (flags & STREAM_STRVEC){
-        ioFlags = O_RONLY;
+        ioFlags = O_RDONLY;
     }else if(flags & STREAM_TO_FD){
-        ioFlags = O_WONLY;
+        ioFlags = O_WRONLY;
     }else{
-        Error(ErrStream->m, (Abstract *), FUNCNAME, FILENAME, LINENUMBER, 
-            "STRVEC or TO_FD flags required for read or write or both access to a file descriptor", NULL);
+        Abstract *args[] = {
+            (Abstract *)StreamTask_Make(ErrStream->m, NULL, (Abstract *)f, ToS_FlagLabels),
+        };
+        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+            "STRVEC or TO_FD flags required for read or write or both access to a file descriptor, have $", args);
         return ERROR;
     }
     f->sm->fd = open(Str_Cstr(f->sm->m, f->path), ioFlags);

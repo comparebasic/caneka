@@ -1,37 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-char *fmtCstr = ""
-    "= Hidy Ho\n"
-    "\n"
-    "And this is a first paragraph\n"
-    "with a second line.\n"
-    "\n"
-    ".fancy\n"
-    "Second single sentance with details _link=here@http://example.com.\n"
-    "\n"
-    "_image=Image one@image.png\n"
-    "\n"
-    "- bullet one.\n"
-    "- bullet two\nwith two lines.\n"
-    "- bullet three\n  with two lines as well.\n"
-    "- bullet four.\n"
-    "\n"
-    "== Sub\n"
-    "Section\n"
-    "\n"
-    "A paragraph in the sub section.\n"
-    "\n"
-    "= Table Title\n"
-    "\n"
-    "+Column A,Column B,Column C\n"
-    "Apple, 1, 37\n"
-    "Bannana, 2, 39\n"
-    "Cantelope, 3, 39\n"
-    "\n"
-    "And the final text here.\n"
-;
-
 Mess *make_Expected(MemCh *m){
     Mess *expected = Mess_Make(m);
     Node *nd = NULL;
@@ -42,7 +11,6 @@ Mess *make_Expected(MemCh *m){
     nd->child = (Abstract *)Span_Make(m);
     expected->root = expected->current = nd;
     prev = nd;
-    
 
     nd->child = (Abstract*)Span_Make(m);
     nd->typeOfChild = TYPE_SPAN;
@@ -235,9 +203,12 @@ status Mess_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
     Str *s = NULL; 
-    StrVec *v = StrVec_Make(m);
-    StrVec_Add(v, Str_CstrRef(m, fmtCstr));
-    Cursor *curs = Cursor_Make(m, v);
+
+    Str *path = File_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
+    File *f = File_Make(m, path, NULL);
+    File_Read(f, FILE_READ_MAX);
+
+    Cursor *curs = File_GetCurs(f);
 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);

@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+static Str **streamLabels = NULL;
+
 static i64 Bytes_debug(Stream *sm, byte *start, byte *end){
     i64 total = 0;
     byte *b = start;
@@ -145,9 +147,25 @@ i64 Stream_Print(Stream *sm, Abstract *a, cls type, word flags){
     Stream *smObj = (Stream *)as(a, TYPE_STREAM);
     if(flags & (MORE|DEBUG)){
         i64 total = 0;
-        total += Fmt(sm, "Stream<", NULL); 
-        if(sm->type.state & STREAM_STRVEC){
-            total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, type, flags);
+        Abstract *args[] = {
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)smObj, ToS_FlagLabels),
+            NULL,
+        };
+        total += Fmt(sm, "Stream<$ ", args); 
+        boolean content = FALSE;
+        if(smObj->type.state & STREAM_TO_FD){
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(sm->m, smObj->fd),
+                NULL
+            };
+            total += Fmt(sm, "fd:^D.$^d.", args);
+            content = TRUE;
+        }
+        if(smObj->type.state & STREAM_STRVEC){
+            if(content){
+                total += Stream_Bytes(sm, (byte *)" ", 1);
+            }
+            total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, 0, flags);
         }
         total += Fmt(sm, ">", NULL); 
         return total;
@@ -224,6 +242,23 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+status Str_InitLabels(MemCh *m, Lookup *lk){
+    status r = READY;
+    if(streamLabels == NULL){
+        streamLabels = (Str **)Arr_Make(m, 17);
+        streamLabels[9] = Str_CstrRef(m, "STREAM_STRVEC");
+        streamLabels[10] = Str_CstrRef(m, "STREAM_CHAIN");
+        streamLabels[11] = Str_CstrRef(m, "STREAM_FROM_FD");
+        streamLabels[12] = Str_CstrRef(m, "STREAM_TO_FD");
+        streamLabels[13] = Str_CstrRef(m, "STREAM_MESS");
+        streamLabels[14] = Str_CstrRef(m, "STREAM_SOCKET");
+        streamLabels[15] = Str_CstrRef(m, "STREAM_BUFFER");
+        Lookup_Add(m, lk, TYPE_STREAM, (void *)streamLabels);
+        r |= SUCCESS;
+    }
+    return r;
+}
+
 status Str_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
@@ -231,5 +266,6 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STREAM, (void *)Stream_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     r |= Lookup_Add(m, lk, TYPE_STRLIT, (void *)StrLit_Print);
+    r |= Str_InitLabels(m, ToSFlagLookup);
     return r;
 }

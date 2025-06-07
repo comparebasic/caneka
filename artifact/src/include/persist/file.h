@@ -1,5 +1,7 @@
 #define FILE_READ_LENGTH 1023
 
+#define FILE_READ_MAX 16777216
+
 typedef struct file {
     Type type;
     i16 guard;
@@ -18,6 +20,11 @@ enum file_status {
 
 File *File_Make(MemCh *m, Str *path, Access *access);
 File *File_Init(File *file, Str *path, Access *access);
+status File_Write(File *f, i64 max);
+status File_Read(File *f, i64 max);
+status File_Open(File *f, word flags);
+StrVec *File_GetVec(File *f);
+Cursor *File_GetCurs(File *f);
 
 /*
 status File_Persist(MemCh *m, File *file);

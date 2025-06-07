@@ -11,11 +11,11 @@ Stream *ErrStream = NULL;
 status Core_Init(MemCh *m){
     status r = READY;
     if(OutStream == NULL){
-        OutStream = Stream_MakeToFd(m, 0, NULL, 0);
+        OutStream = Stream_MakeToFd(m, 1, NULL, 0);
         r |= SUCCESS;
     }
     if(ErrStream == NULL){
-        ErrStream = Stream_MakeToFd(m, 0, NULL, 0);
+        ErrStream = Stream_MakeToFd(m, 2, NULL, 0);
         r |= SUCCESS;
     }
     return NOOP;

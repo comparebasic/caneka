@@ -5,6 +5,7 @@ status Caneka_Init(MemCh *m){
     status r = READY;
     r |= Caneka_InitBase(m);
     r |= Parser_Init(m);
+    r |= Persist_Init(m);
     /*
     r |= Clone_Init(m);
     r |= MemLocal_Init(m);

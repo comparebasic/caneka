@@ -217,7 +217,6 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
     return r;
 }
 
-
 status Navigate_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
@@ -228,4 +227,3 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
     return r;
 }
-
