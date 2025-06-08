@@ -234,6 +234,7 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
         if(r & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file", NULL);
+            return ERROR;
         }
 
         Span_ReInit(cmd);
@@ -246,6 +247,7 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
         if(re & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding object to lib", NULL);
+            return ERROR;
         }
     }else{
         Str_Reset(ctx->fields.current.action);
@@ -315,6 +317,9 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
 
         MemCh_Free(m);
         sourceCstr++;
+        if(r & ERROR){
+            return r;
+        }
     }
     ctx->fields.steps.modSrcCount->val.i = 0;
     ctx->fields.steps.modSrcTotal->val.i = 0;
@@ -350,7 +355,9 @@ static status build(BuildCtx *ctx){
         r |= buildDirToLib(ctx, libDir, lib, *dir);
         dir++;
     }
-    setupComplete(ctx);
+    if((r & ERROR) == 0){
+        setupComplete(ctx);
+    }
     CliStatus_Print(OutStream, ctx->cli);
     CliStatus_PrintFinish(OutStream, ctx->cli);
 

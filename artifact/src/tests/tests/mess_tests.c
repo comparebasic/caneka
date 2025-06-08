@@ -162,42 +162,6 @@ Mess *make_Expected(MemCh *m){
     return expected;
 }
 
-/* expected 
-
-Mess Mess<DEBUG current:N<ZERO/READY/TYPE_STRVEC captureKey(FORMATTER_PARAGRAPH) parent(Str<10/11:"_TYPE_ZERO">) atts:NULL value:_TYPE_ZERO/NULL child:TYPE_STRVEC> value:StrVec<1/24 [0: Str<24/512:"And the final text here.">]> [
-    N<ZERO/READY/TYPE_SPAN captureKey(_TYPE_ZERO) parent(NULL) atts:NULL value:_TYPE_ZERO/NULL child:TYPE_SPAN>[
-      N<ZERO/READY/TYPE_STRVEC captureKey(FORMATTER_INDENT) parent(Str<10/11:"_TYPE_ZERO">) atts:Tbl<SUCCESS 1nvalues Wi16<141>=StrVec<1/2 [0: Str<2/512:"= ">]>> value:_TYPE_ZERO/NULL child:TYPE_STRVEC>
-        StrVec<1/7 [0: Str<7/512:"Hidy Ho">]>
-      N<ZERO/READY/TYPE_STRVEC captureKey(FORMATTER_PARAGRAPH) parent(Str<10/11:"_TYPE_ZERO">) atts:NULL value:_TYPE_ZERO/NULL child:TYPE_STRVEC>
-        StrVec<3/49 [0: Str<29/512:"And this is a first paragraph">, 1: Str<1/2:" ">, 2: Str<19/512:"with a second line.">]>
-      StrVec<1/5 [0: Str<5/512:"fancy">]>
-      N<ZERO/READY/TYPE_SPAN captureKey(FORMATTER_PARAGRAPH) parent(Str<10/11:"_TYPE_ZERO">) atts:Tbl<SUCCESS 1nvalues Wi16<142>=StrVec<1/5 [0: Str<5/512:"fancy">]>> value:_TYPE_ZERO/NULL child:TYPE_SPAN>[
-        StrVec<1/36 [0: Str<36/512:"Second single sentance with details ">]>
-        N<ZERO/READY/_TYPE_ZERO captureKey(FORMATTER_TAG) parent(Str<19/20:"FORMATTER_PARAGRAPH">) atts:Tbl<SUCCESS 3nvalues Wi16<152>=StrVec<1/4 [0: Str<4/512:"link">]>, Wi16<154>=StrVec<1/4 [0: Str<4/512:"here">]>, Wi16<155>=StrVec<1/18 [0: Str<18/512:"http://example.com">]>> value:_TYPE_ZERO/NULL child:_TYPE_ZERO>
-        N<ZERO/READY/_TYPE_ZERO captureKey(FORMATTER_TAG) parent(Str<19/20:"FORMATTER_PARAGRAPH">) atts:Tbl<SUCCESS 3nvalues Wi16<152>=StrVec<1/5 [0: Str<5/512:"image">]>, Wi16<154>=StrVec<1/9 [0: Str<9/512:"Image one">]>, Wi16<155>=StrVec<1/9 [0: Str<9/512:"image.png">]>> value:_TYPE_ZERO/NULL child:_TYPE_ZERO>
-        N<ZERO/READY/TYPE_SPAN captureKey(FORMATTER_BULLET) parent(Str<19/20:"FORMATTER_PARAGRAPH">) atts:NULL value:_TYPE_ZERO/NULL child:TYPE_SPAN>[
-          StrVec<1/11 [0: Str<11/512:"bullet one.">]>
-          StrVec<3/26 [0: Str<10/512:"bullet two">, 1: Str<1/2:" ">, 2: Str<15/512:"with two lines.">]>
-          StrVec<3/38 [0: Str<12/512:"bullet three">, 1: Str<1/2:" ">, 2: Str<25/512:"  with two lines as well.">]>
-          StrVec<1/12 [0: Str<12/512:"bullet four.">]>]]
-      N<ZERO/READY/TYPE_STRVEC captureKey(FORMATTER_INDENT) parent(Str<10/11:"_TYPE_ZERO">) atts:Tbl<SUCCESS 1nvalues Wi16<141>=StrVec<1/3 [0: Str<3/512:"== ">]>> value:_TYPE_ZERO/NULL child:TYPE_STRVEC>
-        StrVec<3/11 [0: Str<3/512:"Sub">, 1: Str<1/2:" ">, 2: Str<7/512:"Section">]>
-      N<ZERO/READY/TYPE_STRVEC captureKey(FORMATTER_PARAGRAPH) parent(Str<10/11:"_TYPE_ZERO">) atts:NULL value:_TYPE_ZERO/NULL child:TYPE_STRVEC>
-        StrVec<1/31 [0: Str<31/512:"A paragraph in the sub section.">]>
-      N<ZERO/READY/TYPE_STRVEC captureKey(FORMATTER_INDENT) parent(Str<10/11:"_TYPE_ZERO">) atts:Tbl<SUCCESS 1nvalues Wi16<141>=StrVec<1/2 [0: Str<2/512:"= ">]>> value:_TYPE_ZERO/NULL child:TYPE_STRVEC>
-        StrVec<1/11 [0: Str<11/512:"Table Title">]>
-      N<ZERO/READY/TYPE_RELATION captureKey(FORMATTER_TABLE) parent(Str<10/11:"_TYPE_ZERO">) atts:NULL value:_TYPE_ZERO/NULL child:TYPE_RELATION>
-        Rel<3x3 StrVec<1/8 [0: Str<8/512:"Column A">]>,StrVec<1/8 [0: Str<8/512:"Column B">]>,StrVec<1/8 [0: Str<8/512:"Column C">]> [
-  StrVec<1/5 [0: Str<5/512:"Apple">]>,StrVec<1/2 [0: Str<2/512:" 1">]>,StrVec<1/3 [0: Str<3/512:" 37">]>,
-  StrVec<1/7 [0: Str<7/512:"Bannana">]>,StrVec<1/2 [0: Str<2/512:" 2">]>,StrVec<1/3 [0: Str<3/512:" 39">]>,
-  StrVec<1/9 [0: Str<9/512:"Cantelope">]>,StrVec<1/2 [0: Str<2/512:" 3">]>,StrVec<1/3 [0: Str<3/512:" 39">]>,
-]>
-      N<ZERO/READY/TYPE_STRVEC captureKey(FORMATTER_PARAGRAPH) parent(Str<10/11:"_TYPE_ZERO">) atts:NULL value:_TYPE_ZERO/NULL child:TYPE_STRVEC>
-        StrVec<1/24 [0: Str<24/512:"And the final text here.">]>]
-]>
-
-*/
-
 status Mess_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;

@@ -82,6 +82,7 @@ static BuildSubdir fmtobj = { "format/fmt", {
     "fmt.c",
     "fmt_roebling.c",
     "fmt_tokenize.c",
+    "fmt_html.c",
     NULL
 }};
 
@@ -220,6 +221,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "iter_tests.c",
     "binpin_tests.c",
     "file_tests.c",
+    "fmthtml_tests.c",
     /*
     "crypto_tests.c",
     "http_tests.c",

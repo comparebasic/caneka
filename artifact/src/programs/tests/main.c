@@ -184,6 +184,12 @@ static TestSet _Tests[] = {
         "File handling tests.",
         FEATURE_COMPLETE,
     },
+    {
+        "FmtHtml Tests",
+        FmtHtml_Tests,
+        "Format FMT -> HTML tests.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",
