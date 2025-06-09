@@ -87,11 +87,13 @@ void ShowError(char *func, char *file, int line, char *fmt, Abstract *args[]){
     if(_crashing){
         return Fatal(func, file, line, fmt, args);
     }
+    _crashing = TRUE;
 #ifdef CLI 
     RawMode(FALSE);
 #endif
     Stream_Bytes(ErrStream, (byte *)"\n\x1b[22;31m", 9);
     Stream_Bytes(ErrStream, (byte *)"Error:\x1b[1m", 10);
+    Stream_Bytes(ErrStream, (byte *)func, strlen(func));
     Stream_Bytes(ErrStream, (byte *)func, strlen(func));
     Stream_Bytes(ErrStream, (byte *)"\x1b[22m:", 6);
     Stream_Bytes(ErrStream, (byte *)file, strlen(file));

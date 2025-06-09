@@ -20,7 +20,8 @@ status FmtHtml_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m); 
     
     Fmt_ToHtml(sm, rbl->mess);
-    r |= Test(rbl->mess->transp->type.state & SUCCESS, "Fmt to HTML has status SUCCESS\n", NULL);
+    r |= Test(rbl->mess->transp->type.state & SUCCESS, 
+        "Fmt to HTML has status SUCCESS\n", NULL);
 
     Abstract *args[] = {
         (Abstract *)rbl->mess->transp,

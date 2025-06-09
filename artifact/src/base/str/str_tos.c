@@ -110,11 +110,12 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     if(flags & MORE){
         Abstract *args[] = {
+            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)vObj, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, vObj->p->nvalues),
             (Abstract *)I64_Wrapped(sm->m, vObj->total),
             NULL
         };
-        total += Fmt(sm, "StrVec<$/$ [", args); 
+        total += Fmt(sm, "StrVec<$ $/$ [", args); 
     }
 
     Iter it;

@@ -5,6 +5,7 @@ static Str **nodeLabels = NULL;
 
 static i64 TranspCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
     TranspCtx *tp = (TranspCtx*)as(a, TYPE_TRANSP_CTX);
+    i64 total = 0;
 
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(sm, a, type, flags);
@@ -12,11 +13,30 @@ static i64 TranspCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
 
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tp, ToS_FlagLabels),
-        (Abstract *)tp->sm,
         NULL,
     };
 
-    return Fmt(sm, "Transp<$ @>", args);
+    total += Fmt(sm, "Transp<$ ", args);
+    total += ToS(sm, (Abstract *)tp->sm, 0, MORE);
+    if(flags & DEBUG){
+        total += Stream_Bytes(sm, (byte *)"it:\n", 4);
+        Iter it;
+        Iter_Init(&it, tp->it.p);
+        while((Iter_Prev(&it) & END) == 0){
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(sm->m, it.idx),
+                (Abstract *)it.value,
+                NULL
+            };
+            char *fmt = "  $: @\n";
+            if(it.idx == tp->it.idx){
+                fmt = "  ^E.$: @^e.\n";
+            }
+            Fmt(sm, fmt,args);
+        }
+    }
+    total += Stream_Bytes(sm, (byte *)">", 1);
+    return total;
 }
 
 status Transp_ToSInit(MemCh *m, Lookup *lk){

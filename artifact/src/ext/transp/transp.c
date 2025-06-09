@@ -9,6 +9,13 @@ static status Transp_Push(TranspCtx *ctx, Abstract *a){
 
 i64 Transp(TranspCtx *ctx){
     i64 total = 0;
+    if(ctx->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)ctx,
+            NULL
+        };
+        Debug("^p.&^0.\n", args);
+    }
     if((ctx->it.type.state & END) && (ctx->type.state & (ERROR|NOOP)) == 0){
         ctx->type.state |= SUCCESS;
         return total;
@@ -36,9 +43,9 @@ i64 Transp(TranspCtx *ctx){
             a->type.state |= PROCESSING;
             if(a->type.of == TYPE_NODE){
                 Node *na = (Node *)a;
-                TranspFunc func = (TranspFunc)Lookup_Get(ctx->lk, na->captureKey);
-                if(func != NULL){
-                    total += func(ctx);
+                ctx->func = (TranspFunc)Lookup_Get(ctx->lk, na->captureKey);
+                if(ctx->func != NULL){
+                    total += ctx->func(ctx, TRANSP_OPEN);
                 }
 
                 if(na->child != NULL){
@@ -47,17 +54,24 @@ i64 Transp(TranspCtx *ctx){
                     }else if(na->child->type.of == TYPE_SPAN){
                         Transp_Push(ctx, 
                             (Abstract *)Iter_Make(ctx->m, (Span *)na->child));
+                    }else{
+                        Transp_Push(ctx, na->child);
+                        total += ctx->func(ctx, TRANSP_BODY);
                     }
-                    Transp(ctx);
                 }
             }
         }
     }
+
     if((a->type.state & PROCESSING) != 0 || 
             (a->type.of != TYPE_ITER || (a->type.state & FLAG_ITER_LAST))){
-        ctx->it.type.state = (ctx->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
-        Iter_Prev(&ctx->it);
-        ctx->it.type.state &= ~SPAN_OP_REMOVE;
+        Iter_PrevRemove(&ctx->it);
+        a = ctx->it.value;
+        if(a->type.of == TYPE_NODE && 
+                (ctx->func = (TranspFunc)Lookup_Get(ctx->lk, ((Node *)a)->captureKey))
+                != NULL){
+            total += ctx->func(ctx, TRANSP_CLOSE);
+        }
     }
     
     if(ctx->it.type.state & END){

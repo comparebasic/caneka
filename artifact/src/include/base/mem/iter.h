@@ -26,6 +26,7 @@ typedef struct iter {
 
 status Iter_Next(Iter *it);
 status Iter_Prev(Iter *it);
+status Iter_PrevRemove(Iter *it);
 status Iter_Query(Iter *it);
 status Iter_Reset(Iter *it);
 void Iter_Init(Iter *it, Span *p);

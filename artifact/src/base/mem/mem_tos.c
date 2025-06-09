@@ -161,8 +161,6 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             }
             if((it.type.state & FLAG_ITER_LAST) == 0 && (flags & MORE)){
                 total += Stream_Bytes(sm, (byte *)", ", 2);
-            }else if (flags & DEBUG){
-                total += Stream_Bytes(sm, (byte *)"\n  ", 3);
             }
         }
     }

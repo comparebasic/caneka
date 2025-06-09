@@ -54,6 +54,14 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
     return offset & _modulos[dim];
 }
 
+status Iter_PrevRemove(Iter *it){
+    word prev = it->type.state;
+    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
+    Iter_Prev(it);
+    it->type.state &= ~SPAN_OP_REMOVE;
+    return it->type.state;
+}
+
 status Iter_Prev(Iter *it){
     i8 dim = 0;
     i8 topDim = it->p->dims;
