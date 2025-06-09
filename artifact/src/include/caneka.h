@@ -3,12 +3,6 @@
 
 #include "config.h"
 #include "base.h"
-#include "types.h"
-#include "parser.h"
-#include "crypto.h"
-#include "persist.h"
-#include "navigate.h"
-#include "transp.h"
-#include "format.h"
+#include "ext.h"
 
 #endif

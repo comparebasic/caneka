@@ -27,12 +27,12 @@ static char *libs[] = {
 };
 
 /* sources */
-static BuildSubdir typesobj = { "types", {
+static BuildSubdir typesobj = { "ext/types", {
     "init.c",
     NULL
 }};
 
-static BuildSubdir navigateobj = { "navigate", {
+static BuildSubdir navigateobj = { "ext/navigate", {
     "node.c",
     "mess.c",
     "navigate_tos.c",
@@ -41,7 +41,7 @@ static BuildSubdir navigateobj = { "navigate", {
     NULL
 }};
 
-static BuildSubdir parserobj = { "parser", {
+static BuildSubdir parserobj = { "ext/parser", {
     "match.c",
     "patchar.c",
     "roebling.c",
@@ -52,33 +52,19 @@ static BuildSubdir parserobj = { "parser", {
     NULL
 }};
 
-static BuildSubdir transpobj = { "transp", {
+static BuildSubdir transpobj = { "ext/transp", {
     "transp.c",
     "transp_ctx.c",
     "transp_tos.c",
     NULL
 }};
 
-static BuildSubdir cryptoobj = { "crypto", {
-    "asymetric.c",
-    "bio.c",
-    "crypto_api.c",
-    "crypto_debug.c",
-    "digest.c",
-    "enc_pair.c",
-    "key.c",
-    "salty.c",
-    "secure.c",
-    "symetric.c",
-    NULL
-}};
-
-static BuildSubdir formatobj = { "format", {
+static BuildSubdir formatobj = { "ext/format", {
     "format.c",
     NULL
 }};
 
-static BuildSubdir fmtobj = { "format/fmt", {
+static BuildSubdir fmtobj = { "ext/format/fmt", {
     "fmt.c",
     "fmt_roebling.c",
     "fmt_tokenize.c",
@@ -86,116 +72,21 @@ static BuildSubdir fmtobj = { "format/fmt", {
     NULL
 }};
 
-static BuildSubdir xmlobj = { "format/xml", {
+static BuildSubdir xmlobj = { "ext/format/xml", {
     "tag.c",
     NULL,
 }};
 
-static BuildSubdir cashobj = { "format/cash", {
-    "cash.c",
-    "cash_rbl.c",
-    NULL,
-}};
-
-static BuildSubdir kveobj = { "format/kve", {
-    "kve_capture.c",
-    "kve_parser.c",
-    "kve_from.c",
-    "kve_to.c",
-    NULL,
-}};
-
-static BuildSubdir termiofmtobj = { "format/termio", {
-    "termio_parser.c",
-    NULL,
-}};
-
-static BuildSubdir osetobj = { "format/oset", {
-    "oset.c",
-    "oset_from.c",
-    "oset_item.c",
-    "oset_parser.c",
-    "oset_to.c",
-    NULL,
-}};
-
-static BuildSubdir rblshobj = { "format/cnkrbl", {
-    "rbl_parser_defs.c",
-    "rblsh_capture.c",
-    "rblsh_cnf.c",
-    "rblsh_items.c",
-    "rblsh_syntax.c",
-    NULL,
-}};
-
-static BuildSubdir httpobj = { "format/http", {
-    "http_parser.c",
-    NULL
-}};
-
-static BuildSubdir cdocobj = { "format/cdoc", {
-    "cdoc_capture.c",
-    "cdoc_ctx.c",
-    "cdoc_parser.c",
-    "cdoc_utils.c",
-    NULL
-}};
-
-static BuildSubdir canekaobj = { "format/caneka", {
-    "caneka.c",
-    "caneka_ctx.c",
-    "caneka_module.c",
-    "caneka_parser.c",
-    "caneka_populate.c",
-    "caneka_to.c",
-    NULL
-}};
-
-static BuildSubdir xmltobj = { "lang/xmlt", {
-    "xmlt.c",
-    "xmlt_template.c",
-    NULL
-}};
-
-static BuildSubdir persistobj = { "persist", {
+static BuildSubdir persistobj = { "ext/persist", {
     "persist_tos.c",
     "persist.c",
     "file.c",
-    /*
-    "auth.c",
-    "ioctx.c",
-    "memlocal.c",
-    "path.c",
-    "session.c",
-    "single_tolocal.c",
-    "spool.c",
-    "tolocal",
-    "user.c",
-    */
-    NULL
-}};
-
-static BuildSubdir serveobj = { "serve", {
-    "handler.c",
-    "http_proto.c",
-    "io_proto.c",
-    "sub_proto.c",
-    "linux.c",
-    "proto.c",
-    "procioset.c",
-    "req.c",
-    "serve.c",
-    "serve_debug.c",
     NULL
 }};
 
 
 static BuildSubdir fixturesobj = { "tests/fixtures", {
     "mock_109strings.c",
-    /*
-    "cycleserve_example.c",
-    "utils.c",
-    */
     NULL,
 }};
 
@@ -220,25 +111,6 @@ static BuildSubdir testsobj = { "tests/tests", {
     "binpin_tests.c",
     "file_tests.c",
     "fmthtml_tests.c",
-    /*
-    "crypto_tests.c",
-    "http_tests.c",
-    "ioctx_tests.c",
-    "iter_str_tests.c",
-    "memlocal_tests.c",
-    "nestedd_tests.c",
-    "oset_tests.c",
-    "roebling_syntax_tests.c",
-    "salty_tests.c",
-    "serve_tests.c",
-    "textfilter_tests.c",
-    "termio_format_tests.c",
-    "user_tests.c",
-    "xml_tests.c",
-    "xmlt_template_tests.c",
-    "crypto_key_tests.c",
-    "access_tests.c",
-    */
     NULL
 }};
 
@@ -254,19 +126,6 @@ static BuildSubdir *objdirs[] = {
     &persistobj,
     &transpobj,
     &xmlobj,
-    /*
-    &cryptoobj,
-    &cashobj,
-    &kveobj,
-    &osetobj,
-    &rblshobj,
-    &termiofmtobj,
-    &httpobj,
-    &cdocobj,
-    &canekaobj,
-    &xmltobj,
-    &serveobj,
-    */
     NULL
 };
 
