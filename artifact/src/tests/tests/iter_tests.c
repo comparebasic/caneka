@@ -70,7 +70,7 @@ status Iter_Tests(MemCh *gm){
     }
 
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 3);
+    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 3);
     it.value = arr2[3];
     Iter_Query(&it);
 
@@ -87,7 +87,7 @@ status Iter_Tests(MemCh *gm){
         i++;
     }
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 2);
+    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 2);
     it.value = arr3[2];
     Iter_Query(&it);
 
@@ -158,7 +158,7 @@ status Iter_Tests(MemCh *gm){
         ptr++;
     }
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 6);
+    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 6);
     it.value = arr5[6];
     Iter_Query(&it);
 
@@ -186,7 +186,7 @@ status Iter_Tests(MemCh *gm){
         Iter_Query(&it);
     }
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|CONTINUE, 177);
+    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 177);
     it.value = (void*)((i64)177);
     Iter_Query(&it);
 

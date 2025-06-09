@@ -85,7 +85,7 @@ i64 Lookup_Print(Stream *sm, Abstract *a, cls type, word flags){
                     NULL
                 };
                 total += Fmt(sm, "$/$", args);
-                if((it.type.state & FLAG_ITER_LAST) == 0){
+                if((it.type.state & LAST) == 0){
                     Stream_Bytes(sm, (byte *)", ", 2);
                 }
             }
@@ -121,7 +121,7 @@ i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
                 total += ToS(sm, h->item, 0, flags|MORE);
                 total += Stream_Bytes(sm, (byte *)"=", 1);
                 total += ToS(sm, h->value, 0, flags|MORE);
-                if((it.type.state & FLAG_ITER_LAST) == 0){
+                if((it.type.state & LAST) == 0){
                     if(flags & DEBUG){
                         total += Stream_Bytes(sm, (byte *)", ", 2);
                     }else{

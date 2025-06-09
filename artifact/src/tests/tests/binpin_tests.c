@@ -13,7 +13,7 @@ status BinPin_Tests(MemCh *gm){
     byte bp[] = {
         (BPTYPE_NODE|BINPIN_HASCHILDREN|BINPIN_HASATTR), (BPTYPE_STRING), (BPTYPE_NUMBER),'0','1','a',
             (BPTYPE_STRING|BINPIN_HASCHILDREN), (BPTYPE_NUMBER),'4','h','r','e','f',
-            (BPTYPE_STRING|BINPIN_HASCHILDREN|BINPIN_LAST), (BPTYPE_NUMBER|CONTINUE),'1','2','h','t','t','p',':','/','/','e','x','a','m','p','l','e','.','c','o','m',
+            (BPTYPE_STRING|BINPIN_HASCHILDREN|BINPIN_LAST), (BPTYPE_NUMBER|BINPIN_CONTINUED),'1','2','h','t','t','p',':','/','/','e','x','a','m','p','l','e','.','c','o','m',
             (BPTYPE_STRING|BINPIN_LAST), (BPTYPE_NUMBER),'0','A', 'c','l','i','c','k',' ','h','e','r','e',
         0,
     };

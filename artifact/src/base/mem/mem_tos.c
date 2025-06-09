@@ -106,7 +106,7 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
         Iter_Init(&it, m->it.p);
         while((Iter_Next(&it) & END) == 0){
             ToS(sm, it.value, 0, flags|MORE);
-            if((it.type.state & FLAG_ITER_LAST) == 0){
+            if((it.type.state & LAST) == 0){
                 Stream_Bytes(sm, (byte *)",", 1);
             }
         }
@@ -159,7 +159,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             }else{
                 total += ToS(sm, it.value, 0, flags);
             }
-            if((it.type.state & FLAG_ITER_LAST) == 0 && (flags & MORE)){
+            if((it.type.state & LAST) == 0 && (flags & MORE)){
                 total += Stream_Bytes(sm, (byte *)", ", 2);
             }
         }

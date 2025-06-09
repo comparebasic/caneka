@@ -64,7 +64,7 @@ i64 Transp(TranspCtx *ctx){
     }
 
     if((a->type.state & PROCESSING) != 0 || 
-            (a->type.of != TYPE_ITER || (a->type.state & FLAG_ITER_LAST))){
+            (a->type.of != TYPE_ITER || (a->type.state & LAST))){
         Iter_PrevRemove(&ctx->it);
         a = ctx->it.value;
         if(a->type.of == TYPE_NODE && 

@@ -15,7 +15,7 @@ status StreamTo_Init(MemCh *m){
         stateLabels[3] = Str_CstrRef(m, "NOOP");
         stateLabels[4] = Str_CstrRef(m, "DEBUG");
         stateLabels[5] = Str_CstrRef(m, "MORE");
-        stateLabels[6] = Str_CstrRef(m, "CONTINUE");
+        stateLabels[6] = Str_CstrRef(m, "LAST");
         stateLabels[7] = Str_CstrRef(m, "END");
         stateLabels[8] = Str_CstrRef(m, "PROCESSING");
         stateLabels[9] = Str_CstrRef(m, "CLS_FLAG_ALPHA");

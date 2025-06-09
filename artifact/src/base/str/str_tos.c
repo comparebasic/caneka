@@ -130,7 +130,7 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, word flags){
                 };
                 total += Fmt(sm, "$: ", args); 
                 total += Str_Print(sm, (Abstract *)s, type, flags);
-                if((it.type.state & FLAG_ITER_LAST) == 0){
+                if((it.type.state & LAST) == 0){
                     total += Stream_Bytes(sm, (byte *)", ", 2);
                 }
             }else{

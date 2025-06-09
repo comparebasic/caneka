@@ -23,6 +23,7 @@ static i64 headerFunc(TranspCtx *ctx, word flags){
     }
     if(flags & TRANSP_CLOSE){
         total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+        Stream_Bytes(ctx->sm, (byte *)"\n", 1);
     }
     return total;
 }
@@ -39,6 +40,7 @@ static i64 paragraphFunc(TranspCtx *ctx, word flags){
     }
     if(flags & TRANSP_CLOSE){
         total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+        Stream_Bytes(ctx->sm, (byte *)"\n", 1);
     }
     return total;
 }

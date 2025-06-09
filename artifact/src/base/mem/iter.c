@@ -41,7 +41,7 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
     if(dim > 0 && *ptr == NULL){
         word fl = (SPAN_OP_SET|SPAN_OP_RESIZE|SPAN_OP_RESERVE|SPAN_OP_ADD);
         if((it->type.state & fl) == 0){
-            it->type.state |= CONTINUE;
+            it->type.state |= FLAG_ITER_CONTINUE;
             return 0;
         }
         if(pg != NULL){
@@ -82,7 +82,7 @@ status Iter_Prev(Iter *it){
     }
 
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
-        word fl = it->type.state & ~(END|FLAG_ITER_LAST);
+        word fl = it->type.state & ~(END|LAST);
         idx = it->p->max_idx;
         Iter_Setup(it, it->p, fl, idx);
         it->type.state |= (fl|PROCESSING);
@@ -207,7 +207,7 @@ status Iter_Next(Iter *it){
     }
 
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
-        word fl = it->type.state & ~(END|FLAG_ITER_LAST);
+        word fl = it->type.state & ~(END|LAST);
         idx = 0;
         Iter_Setup(it, it->p, fl, idx);
         it->type.state |= (fl|PROCESSING);
@@ -295,7 +295,7 @@ end:
     if(idx > it->p->max_idx){
         it->type.state |= END;
     }else if(idx == it->p->max_idx){
-        it->type.state |= FLAG_ITER_LAST;
+        it->type.state |= LAST;
     }
 
     it->idx = idx;
@@ -418,7 +418,7 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
     MemCh *m = it->p->m;
 
     if(it->type.state & SPAN_OP_ADD){
-        if(it->type.state & CONTINUE){
+        if(it->type.state & FLAG_ITER_CONTINUE){
             return Iter_AddWithGaps(it, pg);
         }
         it->idx = it->p->max_idx+1;
@@ -505,9 +505,9 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
     }
 
     if(it->idx == p->max_idx){
-        it->type.state |= FLAG_ITER_LAST;
+        it->type.state |= LAST;
     }else{
-        it->type.state &= ~FLAG_ITER_LAST;
+        it->type.state &= ~LAST;
     }
 
     return it->type.state;

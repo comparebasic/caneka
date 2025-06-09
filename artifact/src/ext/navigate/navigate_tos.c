@@ -51,7 +51,7 @@ static i64 NestedD_Print(Stream *sm, Abstract *a, cls type, word flags){
         NestedState *ns = (NestedState *)Iter_Get(&it);
         printf("\x1b[%dm%s -> ", color, NestedD_opToChars(ns->flags));
         Debug_Print((void *) ns->t, 0, "", color, FALSE);
-        if((it.type.state & FLAG_ITER_LAST) == 0){
+        if((it.type.state & LAST) == 0){
             printf("\x1b[%dm,", color);
         }
     }

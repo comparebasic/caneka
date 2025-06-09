@@ -149,7 +149,7 @@ status Compare(Comp *comp){
         }
     }
     if((cr->type.state & PROCESSING) != 0 || 
-            (cr->a->type.of != TYPE_ITER || (cr->a->type.state & FLAG_ITER_LAST))){
+            (cr->a->type.of != TYPE_ITER || (cr->a->type.state & LAST))){
         comp->it.type.state = (comp->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
         Iter_Prev(&comp->it);
         comp->it.type.state &= ~SPAN_OP_REMOVE;

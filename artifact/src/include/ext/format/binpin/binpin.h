@@ -2,9 +2,6 @@
 #define BINPIN_HASCHILDREN 2
 #define BINPIN_CONTINUED 4
 #define BINPIN_LAST 8
-#define BINPIN_ 6
-
-#define BINPIN_ALLFLAGS 1
 
 #define BPTYPE_STRING 32
 #define BPTYPE_NUMBER 64

@@ -5,7 +5,7 @@ enum span_ops {
     SPAN_OP_RESERVE = 1 << 11,
     SPAN_OP_RESIZE = 1 << 12,
     SPAN_OP_ADD = 1 << 13,
-    FLAG_ITER_LAST = 1 << 14,
+    FLAG_ITER_CONTINUE = 1 << 14,
     FLAG_ITER_REVERSE = 1 << 15,
 };
 

@@ -120,7 +120,7 @@ status Cursor_NextByte(Cursor *curs){
         curs->it.idx = 0;
         Cursor_SetStr(curs);
     }else if(curs->ptr >= curs->end){
-        if(curs->it.type.state & FLAG_ITER_LAST){
+        if(curs->it.type.state & LAST){
             curs->type.state |= END;
         }else{
             curs->it.idx++;
@@ -149,7 +149,7 @@ status Cursor_Add(Cursor *curs, Str *s){
     status r =  StrVec_Add(curs->v, s);
     if(curs->type.state & END){
         curs->type.state &= ~END;
-        curs->it.type.state &= ~FLAG_ITER_LAST;
+        curs->it.type.state &= ~LAST;
     }else{
         curs->type.state &= ~END;
     }

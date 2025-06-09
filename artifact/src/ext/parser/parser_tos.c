@@ -117,7 +117,7 @@ static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, word flags){
     Iter_Init(&it, sns);
     while((Iter_Next(&it) & END) == 0){
         total += ToS(sm, it.value, 0, flags|MORE);
-        if((it.type.state & FLAG_ITER_LAST) == 0){
+        if((it.type.state & LAST) == 0){
             total += Stream_Bytes(sm, (byte *)",", 1);
         }
     }
@@ -235,15 +235,6 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
 
     if(roeblingLabels == NULL){
         roeblingLabels = (Str **)Arr_Make(m, 17);
-        roeblingLabels[0] = Str_CstrRef(m, "ZERO/READY");
-        roeblingLabels[1] = Str_CstrRef(m, "SUCCESS");
-        roeblingLabels[2] = Str_CstrRef(m, "ERROR");
-        roeblingLabels[3] = Str_CstrRef(m, "NOOP");
-        roeblingLabels[4] = Str_CstrRef(m, "DEBUG");
-        roeblingLabels[5] = Str_CstrRef(m, "MORE");
-        roeblingLabels[6] = Str_CstrRef(m, "CONTINUE");
-        roeblingLabels[7] = Str_CstrRef(m, "END");
-        roeblingLabels[8] = Str_CstrRef(m, "PROCESSING");
         roeblingLabels[9] = NULL;
         roeblingLabels[10] = NULL;
         roeblingLabels[11] = Str_CstrRef(m, "ROEBLING_NEXT");
