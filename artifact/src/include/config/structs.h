@@ -77,5 +77,5 @@ struct format_def;
 struct formatter_ctx;
 struct nested_state;
 struct nestedd;
-struct transp;
+struct transp_ctx;
 struct xmlt_ctx;

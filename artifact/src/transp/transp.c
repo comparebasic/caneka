@@ -1,116 +1,68 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Transp_onInput(MemCtx *m, String *s, Abstract *_fmt){
-    DebugStack_Push(_fmt, _fmt->type.of);
-    FmtCtx *fmt = asIfc(_fmt, TYPE_FMT_CTX);
-    if(DEBUG_LANG_TRANSP){
-        /*
-        DPrint((Abstract *)s, DEBUG_LANG_TRANSP, "Transp_onInput s:");
-        */
-    }
-    Roebling_Add(fmt->rbl, s);
-    while((Roebling_RunCycle(fmt->rbl) & (SUCCESS|END|ERROR)) == 0);
-    DebugStack_Pop();
-    return fmt->type.state;
+status Transp_Push(TranspCtx *ctx, Abstract *a){
+    Iter_Setup(&comp->it, comp->it.p, SPAN_OP_ADD, comp->it.p->max_idx);
+    comp->it.value = (Abstract *)a;
+    return Iter_Query(&comp->it);
 }
 
-static status Transp_transpile(Transp *p, FmtCtx *fmt){
-    DebugStack_Push(p->source->path, p->source->path->type.of);
-    if(fmt->Setup != NULL){
-        fmt->Setup(fmt, p);
-    }
-    Target *t = Span_GetSelected(p->targets->values);
-    if(File_CmpUpdated(p->m, p->source->path, t->path, NULL)){
-        Roebling_Reset(fmt->rbl->m, fmt->rbl, NULL);
-    
-        status r = File_Stream(p->m, &(p->source->sourceFile),
-            NULL, Transp_onInput, (Abstract *)fmt);
-
-        fprintf(stderr, "\n\x1b[%dmFinished parsing\x1b[0m\n", COLOR_BLUE);
-
-        DebugStack_Pop();
-        return r;
-    }
-    DebugStack_Pop();
-    return NOOP;
-}
-
-static status Transp_transDir(MemCtx *m, String *path, Abstract *source){
-    DIR* dir = opendir(String_ToChars(m, path));
-    if(dir){
-        closedir(dir);
-    }else if(ENOENT == errno){
-        Debug_Print((void *)path, 0, "Making Dir:", COLOR_YELLOW, TRUE);
-        printf("\n");
-        return Dir_CheckCreate(m, path);
+status Transp(TranspCtx *ctx){
+    i64 total = 0;
+    if((ctx->it.type.state & END) && (ctx->type.state & (ERROR|NOOP)) == 0){
+        ctx->type.state |= SUCCESS;
+        return ctx->type.state;
     }
 
-    return NOOP;
-}
-
-static status Transp_transFile(MemCtx *m, String *dir, String *fname, Abstract *source){
-    DebugStack_Push(fname, fname->type.of); 
-    Transp *p = asIfc(source, TYPE_TRANSP);
-    
-    Match mt;
-    String *backlog = String_Init(m, STRING_EXTEND);
-    backlog->type.state |= FLAG_STRING_CONTIGUOUS;
-    ExtMatch_Init(&mt, backlog);
-
-    String *ext = String_SubMatch(m, fname, &mt);
-    Source_Reset(m, p->source, dir, fname, ext);
-
-    Abstract *a = Table_Get(p->fmts, (Abstract *)ext);
-    if(a != NULL && Ifc_Match(a->type.of, TYPE_WRAPPED_DO)){
-        Single *sg = (Single *)a;
-        sg->val.dof(m, (Abstract *)p);
-        DebugStack_Pop();
-        return SUCCESS;
-    }else if(a != NULL){
-        FmtCtx *fmt = (FmtCtx *)a;
-        p->fmts->metrics.selected = p->fmts->metrics.get;
-        DPrint((Abstract *)p->source->path, COLOR_PURPLE, "Transpiling: ");
-        Spool_Init(&p->source->sourceFile, p->source->path, NULL, NULL);
-        status r = Transp_transpile(p, fmt);
-        DebugStack_Pop();
-
-        exit(1);
-
-        return r;
+    Abstract *a = ctx->it.value;
+    if(a == NULL){
+        ctx->type.state |= ERROR;
+        return ctx->type.state;
+    }
+    if(a->type.of == TYPE_ITER){
+        if((Iter_Next((Iter *)a) & END) == 0){
+            Transp_Push(ctx, ((Iter*)a)->value);
+            return Transp(ctx);
+        }else{
+            ctx->it.type.state = (ctx->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
+            Iter_Prev(&ctx->it);
+            ctx->it.type.state &= ~SPAN_OP_REMOVE;
+            return Transp(ctx);
+        }
     }else{
-        DPrint((Abstract *)p->source->path, COLOR_PURPLE, "Not Transpiling");
-        DebugStack_Pop();
-        return NOOP;
+        if((a->type.state & PROCESSING) != 0){
+            /* skip to bottom */
+        }else{
+            a->type.state |= PROCESSING;
+            if(a->type.of == TYPE_NODE){
+                Node *na = (Node *)a;
+                TranspFunc func = (TranspFunc)Lookup_Get(ctx->lk, na->captureKey);
+                if(func != NULL){
+                    total += func(ctx);
+                }
+
+                if(na->child != NULL){
+                    if(na->child->type.of == TYPE_NODE){
+                        Transp_Push(ctx, na->child);
+                    }else if(nb->child->type.of == TYPE_SPAN){
+                        Transp_Push(ctx, 
+                            (Abstract *)Iter_Make(ctx->m, (Span *)na->child));
+                    }
+                    Transp(ctx);
+                }
+            }
+        }
     }
-}
-
-status Transp_Copy(Transp *p){
-    Target *t = Span_GetSelected(p->targets->values);
-    if(File_CmpUpdated(p->m, p->source->path, t->path, NULL)){
-        return File_Copy(p->m, p->source->path, t->path, NULL);
+    if((a->type.state & PROCESSING) != 0 || 
+            (a->type.of != TYPE_ITER || (a->type.state & FLAG_ITER_LAST))){
+        ctx->it.type.state = (ctx->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
+        Iter_Prev(&ctx->it);
+        ctx->it.type.state &= ~SPAN_OP_REMOVE;
     }
-    return NOOP;
+    
+    if(ctx->it.type.state & END){
+        ctx->type.state |= SUCCESS;
+    }
+    return total;
 }
 
-status Transp_Out(Transp *p, String *s, word targetId){
-    Target *t = Lookup_Get(p->targets, targetId);
-    return Spool_Add(p->m, s, (Abstract *)&t->destFile);
-}
-
-status Transp_Trans(Transp *p){
-    DebugStack_Push(p, p->type.of); 
-    status r =  Dir_Climb(p->m, p->src, NULL, Transp_transFile, (Abstract *)p);
-    DebugStack_Pop();
-    return r;
-}
-
-Transp *Transp_Make(MemCtx *m){
-    Transp *t = MemCtx_Alloc(m, sizeof(Transp));
-    t->type.of = TYPE_TRANSP;
-    t->m = m;
-    t->source = Source_Make(m);
-    t->fmts = Span_Make(m);
-    t->targets = Lookup_Make(m, _APP_BOUNDRY_START, NULL, NULL);
-    return t;
-}
