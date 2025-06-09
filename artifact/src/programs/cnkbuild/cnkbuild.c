@@ -40,12 +40,14 @@ static status setupComplete(BuildCtx *ctx){
 
     ln = Span_Get(ctx->cli->lines, 1);
     ln->fmt = "";
-
     ln = Span_Get(ctx->cli->lines, 2);
+    ln->fmt = "";
+
+    ln = Span_Get(ctx->cli->lines, 3);
     ctx->fields.steps.barStart->length = ctx->cli->cols;
     ln->fmt = "^G.$^0.";
 
-    ln = Span_Get(ctx->cli->lines, 3);
+    ln = Span_Get(ctx->cli->lines, 4);
     ln->args[0] = (Abstract *)Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
 
     return SUCCESS;

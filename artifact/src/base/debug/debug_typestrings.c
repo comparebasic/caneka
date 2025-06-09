@@ -70,7 +70,7 @@ char *TypeStrings[] = {
     "TYPE_PROCDETS",
     "TYPE_ITER",
     "TYPE_SINGLE",
-    "TYPE_TRANSP",
+    "TYPE_TRANSP_CTX",
     "TYPE_TOKENIZE",
     "TYPE_DEBUG_STACK",
     "TYPE_DEBUG_STACK_ENTRY",

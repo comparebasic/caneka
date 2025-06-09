@@ -53,14 +53,9 @@ static BuildSubdir parserobj = { "parser", {
 }};
 
 static BuildSubdir transpobj = { "transp", {
-    "ext_match.c",
-    "fmt_ctx.c",
-    "fmt_def.c",
-    "fmt_item.c",
-    "fmt_resolver.c",
-    "source.c",
-    "target.c",
     "transp.c",
+    "transp_ctx.c",
+    "transp_tos.c",
     NULL
 }};
 
@@ -78,6 +73,11 @@ static BuildSubdir cryptoobj = { "crypto", {
     NULL
 }};
 
+static BuildSubdir formatobj = { "format", {
+    "format.c",
+    NULL
+}};
+
 static BuildSubdir fmtobj = { "format/fmt", {
     "fmt.c",
     "fmt_roebling.c",
@@ -86,10 +86,8 @@ static BuildSubdir fmtobj = { "format/fmt", {
     NULL
 }};
 
-
 static BuildSubdir xmlobj = { "format/xml", {
-    "xml.c",
-    "xml_parser.c",
+    "tag.c",
     NULL,
 }};
 
@@ -252,14 +250,15 @@ static BuildSubdir *objdirs[] = {
     &testsobj,
     &fixturesobj,
     &fmtobj,
+    &formatobj,
     &persistobj,
-    /*
     &transpobj,
+    &xmlobj,
+    /*
     &cryptoobj,
     &cashobj,
     &kveobj,
     &osetobj,
-    &xmlobj,
     &rblshobj,
     &termiofmtobj,
     &httpobj,

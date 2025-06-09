@@ -7,7 +7,7 @@ i64 Tag_Out(Stream *sm, Abstract *name, word flags){
         total += Stream_Bytes(sm, (byte *)"</", 2);
         total += ToS(sm, name, 0, ZERO);
         total += Stream_Bytes(sm, (byte *)">", 1);
-    }else if(flags TAG_SELFCLOSE){
+    }else if(flags & TAG_SELFCLOSE){
         total += Stream_Bytes(sm, (byte *)"<", 1);
         total += ToS(sm, name, 0, ZERO);
         total += Stream_Bytes(sm, (byte *)"/>", 2);

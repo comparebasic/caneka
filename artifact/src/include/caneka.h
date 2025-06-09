@@ -8,6 +8,7 @@
 #include "crypto.h"
 #include "persist.h"
 #include "navigate.h"
+#include "transp.h"
 #include "format.h"
 
 #endif

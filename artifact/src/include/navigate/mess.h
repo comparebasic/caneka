@@ -7,6 +7,7 @@ typedef struct mess {
     Abstract *currentValue;
     Lookup *tokenizer;
     Abstract *source;
+    struct transp_ctx *transp;
 } Mess;
 
 typedef struct mess_climber {
