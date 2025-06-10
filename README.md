@@ -39,9 +39,9 @@ Components:
   scalable arrays, a key-value lookup, and the memory manager.
 - [ext](/artifact/src/ext/): all other features are found in the extended
   sources in the folder ext. This includes the [parser](/artifact/src/ext/parser/)
-  and a few exmaple formats in the [formats](/artifact/src/ext/formats/) folder.
+  and a few exmaple formats in the [format](/artifact/src/ext/format/) folder.
 - [programs](/artifact/src/programs/): Any programs that ship with the source
-  will be in this folder, presently [cndbuild](/artifact/src/programs/cnkbuild) and
+  will be in this folder, presently [cnkbuild](/artifact/src/programs/cnkbuild) and
   [tests](artifact/src/programs/tests) are the only things that are included in
   the caneka sources.
 - [deprecated](/artifact/src/deprecated/): some features have not been moved over
