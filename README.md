@@ -38,10 +38,10 @@ Components:
 - [base](artifact/src/base/): includes virtual memory segmented strings,
   scalable arrays, a key-value lookup, and the memory manager.
 - [ext](/artifact/src/ext/): all other features are found in the extended
-  sources in the folder ext. This includes the [parser](/artifact/src/parser/)
-  and a few exmaple formats in the [formats](/artifact/src/formats/) folder.
+  sources in the folder ext. This includes the [parser](/artifact/src/ext/parser/)
+  and a few exmaple formats in the [formats](/artifact/src/ext/formats/) folder.
 - [programs](/artifact/src/programs/): Any programs that ship with the source
-  will be in this folder, presently [cndbuild](/artifact/src/cnkbuild) and
+  will be in this folder, presently [cndbuild](/artifact/src/programs/cnkbuild) and
   [tests](artifact/src/programs/tests) are the only things that are included in
   the caneka sources.
 - [deprecated](/artifact/src/deprecated/): some features have not been moved over
