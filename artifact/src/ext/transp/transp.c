@@ -34,7 +34,7 @@ i64 Transp(TranspCtx *ctx){
     if(a->type.of == TYPE_ITER){
         if((Iter_Next((Iter *)a) & END) == 0){
             Transp_Push(ctx, ((Iter*)a)->value);
-            i64 total =  Transp(ctx);
+            i64 total = Transp(ctx);
             DebugStack_Pop();
             return total;
         }else{
@@ -69,15 +69,20 @@ i64 Transp(TranspCtx *ctx){
                         }
                     }
                 }
+            }else{
+                a = ctx->it.value;
+                if(ctx->func != NULL && a->type.of != TYPE_ITER){
+                    total += ctx->func(ctx, TRANSP_BODY);
+                }
             }
         }
     }
 
+    a = ctx->it.value;
     if((i32)ctx->stackIdx == ctx->it.idx || 
             (a->type.of != TYPE_ITER || (a->type.state & LAST))){
         Iter_PrevRemove(&ctx->it);
         ctx->stackIdx = ctx->it.idx;
-        a = ctx->it.value;
         if(a != NULL && a->type.of == TYPE_NODE && 
                 (ctx->func = (TranspFunc)Lookup_Get(ctx->lk, ((Node *)a)->captureKey))
                 != NULL){

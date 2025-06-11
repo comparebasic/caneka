@@ -28,6 +28,38 @@ static i64 headerFunc(TranspCtx *ctx, word flags){
     return total;
 }
 
+static i64 linkFunc(TranspCtx *ctx, word flags){
+    i64 total = 0;
+    Node *nd = (Node *)as(ctx->it.value, TYPE_NODE);
+
+    StrVec *text = (StrVec *)Table_Get(nd->atts, 
+        (Abstract *)I16_Wrapped(ctx->m, FORMATTER_LABEL));
+    StrVec *href = (StrVec *)Table_Get(nd->atts, 
+        (Abstract *)I16_Wrapped(ctx->m, FORMATTER_URL));
+
+    Abstract *args[] = {
+        (Abstract *)href,
+        (Abstract *)text,
+    };
+    return Fmt(ctx->sm, "<A href=\"$\">$</A>", args);
+}
+
+static i64 imageFunc(TranspCtx *ctx, word flags){
+    i64 total = 0;
+    Node *nd = (Node *)as(ctx->it.value, TYPE_NODE);
+
+    StrVec *label = (StrVec *)Table_Get(nd->atts, 
+        (Abstract *)I16_Wrapped(ctx->m, FORMATTER_LABEL));
+    StrVec *src = (StrVec *)Table_Get(nd->atts, 
+        (Abstract *)I16_Wrapped(ctx->m, FORMATTER_URL));
+
+    Abstract *args[] = {
+        (Abstract *)label,
+        (Abstract *)src,
+    };
+    return Fmt(ctx->sm, "<IMG alt=\"$\" src=\"$\" />", args);
+}
+
 static i64 paragraphFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
     Abstract *a = ctx->it.value;
@@ -43,6 +75,25 @@ static i64 paragraphFunc(TranspCtx *ctx, word flags){
         Stream_Bytes(ctx->sm, (byte *)"\n", 1);
     }
     return total;
+}
+
+static i64 tagFunc(TranspCtx *ctx, word flags){
+    if((flags & TRANSP_CLOSE) == 0){
+        Abstract *args[] = {
+            (Abstract *)ctx->it.value,
+            NULL
+        };
+        Out("Received (tagFunc): &\n", args);
+        Node *nd = (Node *)as(ctx->it.value, TYPE_NODE);
+        StrVec *tag = (StrVec *)Table_Get(nd->atts, 
+            (Abstract *)I16_Wrapped(ctx->m, FORMATTER_TAG));
+        if(Equals((Abstract *)tag, (Abstract *)Str_CstrRef(ctx->m, "link"))){
+            return linkFunc(ctx, flags);
+        }else if(Equals((Abstract *)tag, (Abstract *)Str_CstrRef(ctx->m, "image"))){
+            return imageFunc(ctx, flags);
+        }
+    }
+    return 0;
 }
 
 status Fmt_ToHtml(Stream *sm, Mess *mess){
@@ -76,6 +127,7 @@ status FmtToHtml_Init(MemCh *m){
         fmtToHtmlLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_INDENT, headerFunc);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_PARAGRAPH, paragraphFunc);
+        Lookup_Add(m, fmtToHtmlLookup, FORMATTER_TAG, tagFunc);
         r = SUCCESS;
     }
     return r;
