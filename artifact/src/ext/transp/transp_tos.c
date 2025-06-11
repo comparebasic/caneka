@@ -18,8 +18,8 @@ static i64 TranspCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
 
     total += Fmt(sm, "Transp<$ ", args);
     total += ToS(sm, (Abstract *)tp->sm, 0, MORE);
-    if(flags & DEBUG){
-        total += Stream_Bytes(sm, (byte *)"it:\n", 4);
+    if(flags & DEBUG && tp->it.p->nvalues > 0){
+        total += Stream_Bytes(sm, (byte *)"stack:\n", 7);
         Iter it;
         Iter_Init(&it, tp->it.p);
         while((Iter_Prev(&it) & END) == 0){

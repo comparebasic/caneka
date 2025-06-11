@@ -2,7 +2,7 @@ typedef i64 (*TranspFunc)(struct transp_ctx *ctx, word flags);
 typedef struct transp_ctx {
     Type type;
     word status;
-    word prevStatus;
+    i16 stackIdx;
     MemCh *m;
     Stream *sm;
     Iter it;

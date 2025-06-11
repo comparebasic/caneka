@@ -4,6 +4,8 @@
 static status Transp_Push(TranspCtx *ctx, Abstract *a){
     Iter_Setup(&ctx->it, ctx->it.p, SPAN_OP_ADD, ctx->it.p->max_idx);
     ctx->it.value = (Abstract *)a;
+    ctx->stackIdx++;
+    printf("incr\n");
     return Iter_Query(&ctx->it);
 }
 
@@ -31,9 +33,9 @@ i64 Transp(TranspCtx *ctx){
             Transp_Push(ctx, ((Iter*)a)->value);
             return Transp(ctx);
         }else{
-            ctx->it.type.state = (ctx->it.type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
-            Iter_Prev(&ctx->it);
-            ctx->it.type.state &= ~SPAN_OP_REMOVE;
+            printf("remove top %d vs %d\n", (i32)ctx->stackIdx, ctx->it.idx);
+            Iter_PrevRemove(&ctx->it);
+            ctx->stackIdx--;
             return Transp(ctx);
         }
     }else{
@@ -56,7 +58,9 @@ i64 Transp(TranspCtx *ctx){
                             (Abstract *)Iter_Make(ctx->m, (Span *)na->child));
                     }else{
                         Transp_Push(ctx, na->child);
-                        total += ctx->func(ctx, TRANSP_BODY);
+                        if(ctx->func != NULL){
+                            total += ctx->func(ctx, TRANSP_BODY);
+                        }
                     }
                 }
             }
@@ -65,9 +69,11 @@ i64 Transp(TranspCtx *ctx){
 
     if((a->type.state & PROCESSING) != 0 || 
             (a->type.of != TYPE_ITER || (a->type.state & LAST))){
+        printf("remove %d vs %d\n", (i32)ctx->stackIdx, ctx->it.idx);
         Iter_PrevRemove(&ctx->it);
+        ctx->stackIdx--;
         a = ctx->it.value;
-        if(a->type.of == TYPE_NODE && 
+        if(a != NULL && a->type.of == TYPE_NODE && 
                 (ctx->func = (TranspFunc)Lookup_Get(ctx->lk, ((Node *)a)->captureKey))
                 != NULL){
             total += ctx->func(ctx, TRANSP_CLOSE);
