@@ -5,7 +5,6 @@ static status Transp_Push(TranspCtx *ctx, Abstract *a){
     Iter_Setup(&ctx->it, ctx->it.p, SPAN_OP_ADD|(ctx->it.type.state & NORMAL_FLAGS), ctx->it.p->max_idx);
     ctx->it.value = (Abstract *)a;
     status r =  Iter_Query(&ctx->it);
-    ctx->stackIdx = ctx->it.idx;
     return r;
 }
 
@@ -46,10 +45,9 @@ i64 Transp(TranspCtx *ctx){
             return total;
         }
     }else{
-        if((a->type.state & PROCESSING) != 0){
+        if((i32)ctx->stackIdx == ctx->it.idx){ 
             /* skip to bottom */
         }else{
-            a->type.state |= PROCESSING;
             if(a->type.of == TYPE_NODE){
                 Node *na = (Node *)a;
                 ctx->func = (TranspFunc)Lookup_Get(ctx->lk, na->captureKey);
@@ -60,6 +58,7 @@ i64 Transp(TranspCtx *ctx){
                 if(na->child != NULL){
                     if(na->child->type.of == TYPE_NODE){
                         Transp_Push(ctx, na->child);
+                        ctx->stackIdx = ctx->it.idx;
                     }else if(na->child->type.of == TYPE_SPAN){
                         Transp_Push(ctx, 
                             (Abstract *)Iter_Make(ctx->m, (Span *)na->child));
