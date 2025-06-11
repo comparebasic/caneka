@@ -157,7 +157,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             }else if(item != NULL && item->type.of == TYPE_MEMSLAB){
                 total += ToS(sm, it.value, 0, (flags & ~DEBUG));
             }else{
-                total += ToS(sm, it.value, 0, flags);
+                total += ToS(sm, it.value, 0, flags|MORE);
             }
             if((it.type.state & LAST) == 0 && (flags & MORE)){
                 total += Stream_Bytes(sm, (byte *)", ", 2);
@@ -227,7 +227,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, "I<$:$ of $>", args);
     }else{
-        total += ToStream_NotImpl(sm, a, type, flags);
+        total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, sm, a, type, flags);
     }
     return total;
 }

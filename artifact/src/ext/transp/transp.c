@@ -2,14 +2,15 @@
 #include <caneka.h>
 
 static status Transp_Push(TranspCtx *ctx, Abstract *a){
-    Iter_Setup(&ctx->it, ctx->it.p, SPAN_OP_ADD, ctx->it.p->max_idx);
+    Iter_Setup(&ctx->it, ctx->it.p, SPAN_OP_ADD|(ctx->it.type.state & NORMAL_FLAGS), ctx->it.p->max_idx);
     ctx->it.value = (Abstract *)a;
-    ctx->stackIdx++;
-    printf("incr\n");
-    return Iter_Query(&ctx->it);
+    status r =  Iter_Query(&ctx->it);
+    ctx->stackIdx = ctx->it.idx;
+    return r;
 }
 
 i64 Transp(TranspCtx *ctx){
+    DebugStack_Push(NULL, ZERO);
     i64 total = 0;
     if(ctx->type.state & DEBUG){
         Abstract *args[] = {
@@ -20,23 +21,29 @@ i64 Transp(TranspCtx *ctx){
     }
     if((ctx->it.type.state & END) && (ctx->type.state & (ERROR|NOOP)) == 0){
         ctx->type.state |= SUCCESS;
+        DebugStack_Pop();
         return total;
     }
 
     Abstract *a = ctx->it.value;
     if(a == NULL){
         ctx->type.state |= ERROR;
+        DebugStack_Pop();
         return total;
     }
+    DebugStack_SetRef(a, a->type.of);
     if(a->type.of == TYPE_ITER){
         if((Iter_Next((Iter *)a) & END) == 0){
             Transp_Push(ctx, ((Iter*)a)->value);
-            return Transp(ctx);
+            i64 total =  Transp(ctx);
+            DebugStack_Pop();
+            return total;
         }else{
-            printf("remove top %d vs %d\n", (i32)ctx->stackIdx, ctx->it.idx);
             Iter_PrevRemove(&ctx->it);
-            ctx->stackIdx--;
-            return Transp(ctx);
+            ctx->stackIdx = ctx->it.idx;
+            i64 total = Transp(ctx);
+            DebugStack_Pop();
+            return total;
         }
     }else{
         if((a->type.state & PROCESSING) != 0){
@@ -67,11 +74,10 @@ i64 Transp(TranspCtx *ctx){
         }
     }
 
-    if((a->type.state & PROCESSING) != 0 || 
+    if((i32)ctx->stackIdx == ctx->it.idx || 
             (a->type.of != TYPE_ITER || (a->type.state & LAST))){
-        printf("remove %d vs %d\n", (i32)ctx->stackIdx, ctx->it.idx);
         Iter_PrevRemove(&ctx->it);
-        ctx->stackIdx--;
+        ctx->stackIdx = ctx->it.idx;
         a = ctx->it.value;
         if(a != NULL && a->type.of == TYPE_NODE && 
                 (ctx->func = (TranspFunc)Lookup_Get(ctx->lk, ((Node *)a)->captureKey))
@@ -83,6 +89,7 @@ i64 Transp(TranspCtx *ctx){
     if(ctx->it.type.state & END){
         ctx->type.state |= SUCCESS;
     }
+    DebugStack_Pop();
     return total;
 }
 

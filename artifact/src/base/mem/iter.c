@@ -499,11 +499,6 @@ status _Iter_QueryPage(Iter *it, MemPage *pg){
         dim--;
     }
 
-    if(it->type.state & DEBUG){
-        Abstract *args[] = {(Abstract *)it, NULL};
-        Out("^c.Iter-Query @^0.\n", args);
-    }
-
     if(it->idx == p->max_idx){
         it->type.state |= LAST;
     }else{

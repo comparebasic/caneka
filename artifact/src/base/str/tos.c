@@ -180,15 +180,19 @@ char *ToStreamChars(word flags){
     }
 }
 
-i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
+i64 _ToStream_NotImpl(char *func, char *file, i32 line, Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[] = {
         (Abstract *)Str_CstrRef(sm->m, ToStreamChars(flags)),
         (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),
         NULL
     };
-    Error(sm->m, a, FUNCNAME, FILENAME, LINENUMBER, 
+    Error(sm->m, a, func, file, line, 
         "Does not implement $ for type $", args);
     return 0;
+}
+
+i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
+    return _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, sm, a, type, flags);
 }
 
 i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
