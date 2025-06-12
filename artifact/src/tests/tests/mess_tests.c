@@ -65,7 +65,7 @@ Mess *make_Expected(MemCh *m){
         (Abstract *)Str_CstrRef(m, "http://example.com"));
     Span_Add((Span*)nd->child, (Abstract *)cur);
 
-    cur = Node_Make(m, ZERO, nd);
+    cur = Node_Make(m, ZERO, prev);
     cur->captureKey = FORMATTER_TAG;
     cur->atts = Table_Make(m);
     Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_TAG),
@@ -74,9 +74,9 @@ Mess *make_Expected(MemCh *m){
         (Abstract *)Str_CstrRef(m, "Image one"));
     Table_Set(cur->atts, (Abstract *)I16_Wrapped(m, FORMATTER_URL),
         (Abstract *)Str_CstrRef(m, "image.png"));
-    Span_Add((Span*)nd->child, (Abstract *)cur);
+    Span_Add((Span*)prev->child, (Abstract *)cur);
 
-    cur = Node_Make(m, ZERO, nd);
+    cur = Node_Make(m, ZERO, prev);
     cur->captureKey = FORMATTER_BULLET;
     cur->typeOfChild = TYPE_SPAN;
     cur->child = (Abstract *)Span_Make(m);
@@ -92,7 +92,7 @@ Mess *make_Expected(MemCh *m){
     v = StrVec_Make(m);
     StrVec_Add(v, Str_CstrRef(m, "bullet four."));
     Span_Add((Span *)cur->child, (Abstract *)v);
-    Span_Add((Span*)nd->child, (Abstract *)cur);
+    Span_Add((Span*)prev->child, (Abstract *)cur);
 
     nd = Node_Make(m, ZERO, prev);
     nd->typeOfChild = TYPE_STRVEC;
@@ -181,8 +181,15 @@ status Mess_Tests(MemCh *gm){
 
     Mess *expected = make_Expected(m);
 
-    r |= Test((Mess_Compare(m, rbl->mess, expected) & SUCCESS) != 0,
-        "Mess has been built as expected", NULL);
+    boolean result = (Mess_Compare(m, rbl->mess, expected) & SUCCESS) != 0;
+    if(1 || !result){
+        Abstract *args[] = {
+            (Abstract *)expected,
+            (Abstract *)rbl->mess,
+        };
+        Debug("^r.Expected: &\n   vs\nrbl->mess: &^0.\n", args);
+    }
+    r |= Test(result, "Mess has been built as expected", NULL);
 
     MemCh_Free(m);
     DebugStack_Pop();

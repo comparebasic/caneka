@@ -1,6 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
+status Mess_Outdent(Mess *mess){
+    if(mess->current != NULL){
+        mess->current = mess->current->parent; 
+        mess->currentValue = mess->current->child;
+    }else{
+        mess->currentValue = NULL;
+    }
+    if(mess->current != NULL){
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 status Mess_Compare(MemCh *m, Mess *a, Mess *b){
     Comp *comp = Comp_Make(m, (Abstract *)a->root, (Abstract *)b->root);
     if(a->type.state & DEBUG){
@@ -30,9 +43,13 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
     Abstract *a = (Abstract *)v;
     Node *nd = NULL;
 
+    if(tk->type.state & TOKEN_OUTDENT){
+        printf("OUTDENT\n");
+    }
+
     if(tk->type.state & TOKEN_OUTDENT && mess->current->parent != NULL){
-        mess->current = mess->current->parent; 
-        mess->currentValue = mess->current->child;
+        printf("OUTDENT do it!\n");
+        Mess_Outdent(mess);
     }
 
     if(tk->typeOf == ZERO){
@@ -42,8 +59,10 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
             }
             Table_Set(mess->nextAtts, (Abstract *)I16_Wrapped(mess->m, tk->captureKey),
                 (Abstract *)a);
+            return mess->type.state;
         }
     }else if(tk->typeOf == TYPE_NODE || tk->typeOf == TYPE_RELATION){
+        printf("NODE OR RELATION\n");
         nd = Node_Make(mess->m, 0, mess->current);
         nd->atts = mess->nextAtts; 
         mess->nextAtts = NULL;
@@ -162,6 +181,11 @@ end:
         if(nd->typeOfChild == TYPE_RELATION){
             current = nd->child;
         }
+        /*
+        if(tk != NULL && tk->type.state & TOKEN_NO_CONTENT){
+            Mess_Outdent(mess);
+        }
+        */
     }
     if(current != NULL){
         mess->currentValue = current;

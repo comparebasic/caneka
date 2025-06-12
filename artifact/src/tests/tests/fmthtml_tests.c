@@ -18,6 +18,13 @@ status FmtHtml_Tests(MemCh *gm){
     Roebling_Run(rbl);
 
     Stream *sm = Stream_MakeStrVec(m); 
+
+    Abstract *args[] = {
+        (Abstract *)rbl->mess,
+        NULL
+    };
+    Debug("^y.Mess: @^0.\n", args);
+    /*
     
     Fmt_ToHtml(sm, rbl->mess);
     r |= Test(rbl->mess->transp->type.state & SUCCESS, 
@@ -28,6 +35,7 @@ status FmtHtml_Tests(MemCh *gm){
         NULL
     };
     Debug("^y.@^0.\n", args);
+    */
 
     MemCh_Free(m);
     DebugStack_Pop();

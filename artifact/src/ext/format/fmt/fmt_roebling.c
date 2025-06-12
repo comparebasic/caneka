@@ -166,7 +166,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         (Abstract *)tk,
         NULL
     };
-    if(rbl->type.state & DEBUG){
+    if(1 || rbl->type.state & DEBUG){
         Out("^c.Fmt After Capture $/@ -> @\n", args);
     }
     if(tk != NULL){

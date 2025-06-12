@@ -11,13 +11,6 @@ static status Transp_Push(TranspCtx *ctx, Abstract *a){
 i64 Transp(TranspCtx *ctx){
     DebugStack_Push(NULL, ZERO);
     i64 total = 0;
-    if(ctx->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)ctx,
-            NULL
-        };
-        Debug("^p.&^0.\n", args);
-    }
     if((ctx->it.type.state & END) && (ctx->type.state & (ERROR|NOOP)) == 0){
         ctx->type.state |= SUCCESS;
         DebugStack_Pop();
@@ -81,11 +74,28 @@ i64 Transp(TranspCtx *ctx){
     a = ctx->it.value;
     if((i32)ctx->stackIdx == ctx->it.idx || 
             (a->type.of != TYPE_ITER || (a->type.state & LAST))){
+        if(ctx->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)ctx,
+                (Abstract *)a,
+                NULL
+            };
+            Debug("^p.Prev from: &^0.\n^y.Closing: &\n^0", args);
+        }
         Iter_PrevRemove(&ctx->it);
         ctx->stackIdx = ctx->it.idx;
+        a = ctx->it.value;
         if(a != NULL && a->type.of == TYPE_NODE && 
                 (ctx->func = (TranspFunc)Lookup_Get(ctx->lk, ((Node *)a)->captureKey))
                 != NULL){
+            if(ctx->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)ctx,
+                    (Abstract *)a,
+                    NULL
+                };
+                Debug("^p.Prev from: &^0.\n^y.Closing: &\n^0", args);
+            }
             total += ctx->func(ctx, TRANSP_CLOSE);
         }
     }
