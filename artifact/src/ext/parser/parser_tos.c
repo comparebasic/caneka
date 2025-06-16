@@ -263,12 +263,14 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
 
     if(tokenizeLabels == NULL){
         tokenizeLabels = (Str **)Arr_Make(m, 17);
-        tokenizeLabels[9] = Str_CstrRef(m, "TOKEN_CLOSE");
-        tokenizeLabels[10] = Str_CstrRef(m, "TOKEN_CLOSE_OUTDENT");
-        tokenizeLabels[11] = Str_CstrRef(m, "TOKEN_LAST_ALUE");
-        tokenizeLabels[12] = Str_CstrRef(m, "TOKEN_LAST_SEP");
+        tokenizeLabels[9] = Str_CstrRef(m, "TOKEN_SEPERATE");
+        tokenizeLabels[10] = Str_CstrRef(m, "TOKEN_OUTDENT");
+        tokenizeLabels[11] = Str_CstrRef(m, "TOKEN_INLINE");
+        tokenizeLabels[12] = Str_CstrRef(m, "TOKEN_BY_TYPE");
         tokenizeLabels[13] = Str_CstrRef(m, "TOKEN_ATTR_KEY");
         tokenizeLabels[14] = Str_CstrRef(m, "TOKEN_ATTR_VALUE");
+        tokenizeLabels[15] = Str_CstrRef(m, "TOKEN_NO_COMBINE");
+        tokenizeLabels[16] = Str_CstrRef(m, "TOKEN_NO_CONTENT");
         Lookup_Add(m, lk, TYPE_TOKENIZE, (void *)tokenizeLabels);
         r |= SUCCESS;
     }

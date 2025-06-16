@@ -12,7 +12,7 @@ status FormatFmt_DefSpan(MemCh *m, Lookup *lk){
         Tokenize_Make(m, FORMATTER_LINE, TOKEN_SEPERATE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_BULLET,
         Tokenize_Make(m, FORMATTER_BULLET,
-            TOKEN_NO_CONTENT|TOKEN_NODE_BY_TYPE|TOKEN_NO_COMBINE, TYPE_STRVEC));
+            TOKEN_NO_CONTENT|TOKEN_BY_TYPE|TOKEN_NO_COMBINE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_END,
         Tokenize_Make(m, FORMATTER_END, TOKEN_OUTDENT, ZERO));
     r |= Lookup_Add(m, lk, FORMATTER_TABLE,
@@ -21,13 +21,13 @@ status FormatFmt_DefSpan(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, FORMATTER_TABLE_VALUE,
         Tokenize_Make(m, FORMATTER_TABLE_VALUE, TOKEN_NO_COMBINE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_LAST_TABLE_VALUE,
-        Tokenize_Make(m, FORMATTER_LAST_TABLE_VALUE, TOKEN_LAST_TYPE|TOKEN_NO_COMBINE, TYPE_STRVEC));
+        Tokenize_Make(m, FORMATTER_LAST_TABLE_VALUE, LAST|TOKEN_NO_COMBINE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_PARAGRAPH, 
-        Tokenize_Make(m, FORMATTER_PARAGRAPH, TOKEN_NODE_BY_TYPE, TYPE_STRVEC));
+        Tokenize_Make(m, FORMATTER_PARAGRAPH, TOKEN_BY_TYPE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_KEY, 
-        Tokenize_Make(m, FORMATTER_KEY, TOKEN_NODE_BY_TYPE, TYPE_STRVEC));
+        Tokenize_Make(m, FORMATTER_KEY, TOKEN_BY_TYPE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_TAG, 
-        Tokenize_Make(m, FORMATTER_TAG, TOKEN_ATTR_VALUE|TOKEN_NO_CONTENT|TOKEN_NO_COMBINE, TYPE_NODE));
+        Tokenize_Make(m, FORMATTER_TAG, TOKEN_ATTR_VALUE|TOKEN_INLINE|TOKEN_BY_TYPE, TYPE_NODE));
     r |= Lookup_Add(m, lk, FORMATTER_LABEL, 
         Tokenize_Make(m, FORMATTER_LABEL, TOKEN_ATTR_VALUE, TYPE_STRVEC));
     r |= Lookup_Add(m, lk, FORMATTER_URL, 

@@ -4,7 +4,11 @@
 status Mess_Outdent(Mess *mess){
     if(mess->current != NULL){
         mess->current = mess->current->parent; 
-        mess->currentValue = mess->current->child;
+        Abstract *child = NULL;
+        if(mess->current != NULL){
+            child = mess->current->child;
+        }
+        mess->currentValue = child;
     }else{
         mess->currentValue = NULL;
     }
@@ -43,12 +47,7 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
     Abstract *a = (Abstract *)v;
     Node *nd = NULL;
 
-    if(tk->type.state & TOKEN_OUTDENT){
-        printf("OUTDENT\n");
-    }
-
     if(tk->type.state & TOKEN_OUTDENT && mess->current->parent != NULL){
-        printf("OUTDENT do it!\n");
         Mess_Outdent(mess);
     }
 
@@ -62,8 +61,8 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
             return mess->type.state;
         }
     }else if(tk->typeOf == TYPE_NODE || tk->typeOf == TYPE_RELATION){
-        printf("NODE OR RELATION\n");
         nd = Node_Make(mess->m, 0, mess->current);
+        memcpy(&nd->tk, tk, sizeof(Tokenize));
         nd->atts = mess->nextAtts; 
         mess->nextAtts = NULL;
 
@@ -88,6 +87,10 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
 }
 
 status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
+    Abstract *current = NULL;
+    if(tk == NULL){
+        memcpy(tk, &mess->current->tk, sizeof(Tokenize));
+    }
     if(node == NULL || a == NULL){
         Abstract *args[] = {
             (Abstract *)a,
@@ -99,14 +102,15 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         return ERROR;
     }
 
-    Abstract *current = a;
     if(node->typeOfChild == TYPE_WRAPPED_PTR){
         a = (Abstract *)Ptr_Wrapped(mess->m, (Abstract *)a, tk->type.of);
     }
 
-    if(tk != NULL && tk->type.state & TOKEN_NODE_BY_TYPE){
+    current = a;
+    if(tk->type.state & TOKEN_BY_TYPE){
         if(mess->current->captureKey != tk->captureKey && tk->typeOf != TYPE_NODE){
             Node *nd = Node_Make(mess->m, 0, mess->current);
+            memcpy(&nd->tk, tk, sizeof(Tokenize));
             nd->atts = mess->nextAtts; 
             mess->nextAtts = NULL;
 
@@ -119,7 +123,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         }
     }
 
-    if(tk != NULL && tk->type.state & TOKEN_NO_CONTENT){
+    if(tk->type.state & TOKEN_NO_CONTENT){
         if(tk->typeOf == TYPE_STRVEC){
             a = (Abstract *)StrVec_Make(mess->m);
             current = a;
@@ -128,38 +132,50 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
             goto end;
         }
     }
-    if(tk != NULL && tk->type.state & TOKEN_ATTR_VALUE && 
+
+    if(mess->current != NULL && (mess->current->tk.type.state & TOKEN_INLINE)
+            && ((tk->type.state & (TOKEN_NO_CONTENT|TOKEN_ATTR_VALUE)) == 0)){
+        printf("All true, outdenting\n");
+        Mess_Outdent(mess);
+        node = mess->current;
+    }
+
+    if(tk->type.state & TOKEN_ATTR_VALUE && 
             (tk->typeOf != ZERO && tk->typeOf != TYPE_NODE && tk->typeOf != TYPE_RELATION)){
+        printf("ADDING att\n");
         Mess_AddAtt(mess, mess->current, 
             (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
     }else if(node->typeOfChild == 0){
+        printf("ADDING child\n");
         node->child = a;
         node->typeOfChild = a->type.of;
         goto end;
-    }else if((tk == NULL || ((tk->type.state & TOKEN_NO_COMBINE) == 0)) &&
+    }else if((((tk->type.state|mess->current->tk.type.state) & TOKEN_NO_COMBINE) == 0) &&
             mess->currentValue != NULL && CanCombine((Abstract *)mess->currentValue, a)){
-        if(tk != NULL && (tk->type.state & TOKEN_SEPERATE) && 
+        Abstract *args[] = {
+            (Abstract *)a,
+            (Abstract *)mess->currentValue,
+            NULL
+        };
+        Out("^y.ADDING combine @ vs @^0.\n", args);
+        if((tk->type.state & TOKEN_SEPERATE) && 
                 mess->currentValue->type.of == TYPE_STRVEC &&
                 ((StrVec *)mess->currentValue)->total > 0){
             Str *s = Str_Ref(mess->m, (byte *)" ", 1, 2, STRING_COPY);
             Combine((Abstract *)mess->currentValue, (Abstract *)s);
         }
         Combine((Abstract *)mess->currentValue, a);
-        Abstract *args[] = {
-            (Abstract *)a,
-            (Abstract *)Type_ToStr(mess->m, mess->currentValue->type.of),
-            (Abstract *)mess->currentValue,
-            NULL
-        };
         current = NULL;
         goto end;
     }else if(node->typeOfChild == TYPE_SPAN){
+        printf("ADDING to span\n");
         Span_Add((Span *)node->child, a);
         goto end;
     }else if(node->typeOfChild == TYPE_RELATION){
+        printf("ADDING to relation\n");
         Relation *rel = (Relation *)node->child;
         Relation_AddValue(rel, a);
-        if(tk->type.state & TOKEN_LAST_TYPE){
+        if(tk->type.state & LAST){
             if(rel->stride == 0){
                 Relation_HeadFromValues(rel);
             }
@@ -171,6 +187,11 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         node->typeOfChild = TYPE_SPAN;
         Span_Add((Span *)node->child, value);
         Span_Add((Span *)node->child, a);
+        Abstract *args[] = {
+            (Abstract *)node->child,
+            NULL
+        };
+        Out("^y.ADDING making span to add to: &^0.\n", args);
         goto end;
     }
 
@@ -181,16 +202,11 @@ end:
         if(nd->typeOfChild == TYPE_RELATION){
             current = nd->child;
         }
-        /*
-        if(tk != NULL && tk->type.state & TOKEN_NO_CONTENT){
-            Mess_Outdent(mess);
-        }
-        */
     }
     if(current != NULL){
         mess->currentValue = current;
     }
-    if(tk != NULL && tk->captureKey != 0){
+    if(tk->captureKey != 0){
         mess->current->latestKey = tk->captureKey;
     }
     return node->type.state;

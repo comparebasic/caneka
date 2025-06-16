@@ -1,5 +1,6 @@
 typedef struct node {
     Type type;
+    Tokenize tk;
     i16 typeOfChild;
     i16 captureKey;
     i16 latestKey;

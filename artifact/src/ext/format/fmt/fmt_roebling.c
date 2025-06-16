@@ -60,11 +60,11 @@ static PatCharDef labelDef[] = {
 };
 
 static PatCharDef urlTldDef[] = {
-    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE|PAT_OPTIONAL, '.', '.'},
+    {PAT_KO|PAT_INVERT_CAPTURE|PAT_OPTIONAL|PAT_KO_TERM, '.', '.'},
         {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '},
         {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'},
         {PAT_KO|PAT_INVERT_CAPTURE, '\r', '\r'},
-        {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+        {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '\n', '\n'},
     {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31},
     {PAT_END, 0, 0}
 };
@@ -167,7 +167,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         NULL
     };
     if(1 || rbl->type.state & DEBUG){
-        Out("^c.Fmt After Capture $/@ -> @\n", args);
+        Out("^c.Fmt After Capture ^E0.$^ec./@ -> @\n", args);
     }
     if(tk != NULL){
         if(mess->current->parent == NULL && tk->captureKey == FORMATTER_LINE){
