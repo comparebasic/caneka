@@ -53,7 +53,7 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
        return FALSE; 
     }
     i32 length = a->length;
-    if(a->length != b->total){
+    if(a->length != b->total && (a->type.state & DEBUG) == 0){
         goto miss;
     }
     util *ptrA = (util *)a->bytes;
@@ -80,13 +80,18 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     return TRUE;
 miss:
     if((a->type.state & DEBUG) || (b->type.state & DEBUG)){
+        i32 pos = a->length - length;
+        i16 hlLength = min(a->length - pos, 16);
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(ErrStream->m, (i32)a->length - length),
+            (Abstract *)I16_Wrapped(ErrStream->m, a->length),
+            (Abstract *)I64_Wrapped(ErrStream->m, b->total),
+            (Abstract *)I32_Wrapped(ErrStream->m, pos),
+            (Abstract *)Str_Ref(ErrStream->m, a->bytes+pos, hlLength, hlLength, READY),
             (Abstract *)a,
             (Abstract *)b,
             NULL
         };
-        Debug("Str_EqualsStrVec Differ at $ & vs &\n", args);
+        Debug("Str_EqualsStrVec Differ ^D.$^d.length vs ^D.$^d.length at $/^E.@^e. & vs &\n", args);
     }
     return FALSE;
 }

@@ -24,18 +24,16 @@ status FmtHtml_Tests(MemCh *gm){
         NULL
     };
     Debug("^y.Mess: @^0.\n", args);
-    /*
     
     Fmt_ToHtml(sm, rbl->mess);
     r |= Test(rbl->mess->transp->type.state & SUCCESS, 
         "Fmt to HTML has status SUCCESS\n", NULL);
 
-    Abstract *args[] = {
+    Abstract *args1[] = {
         (Abstract *)rbl->mess->transp,
         NULL
     };
-    Debug("^y.@^0.\n", args);
-    */
+    Debug("^y.@^0.\n", args1);
 
     MemCh_Free(m);
     DebugStack_Pop();

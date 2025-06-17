@@ -8,7 +8,7 @@ char *exampleCstr = ""
     "with a second line.\n"
     "\n"
     ".fancy\n"
-    "Second single sentance with details _link=here@http://example.com.\n"
+    "Second single sentance with details and a link _link=here@http://example.com.\n"
     "\n"
     "_image=Image one@image.png\n"
     "\n"
@@ -42,6 +42,8 @@ status File_Tests(MemCh *gm){
     File_Read(f, FILE_READ_MAX);
 
     Str *s = Str_CstrRef(m, exampleCstr);
+    s->type.state |= DEBUG;
+    f->sm->dest.curs->v->type.state |= DEBUG;
     r |= Test(Equals((Abstract *)s, (Abstract *)f->sm->dest.curs->v), "File has expected content", NULL);
 
     MemCh_Free(m);

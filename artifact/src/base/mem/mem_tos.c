@@ -179,11 +179,11 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, it->idx),
-            (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
+            (Abstract *)I32_Wrapped(sm->m, it->p->max_idx),
             (Abstract *)I8_Wrapped(sm->m, it->p->dims),
             NULL
         };
-        total += Fmt(sm, "I<$ $ of $/$dims\n", args);
+        total += Fmt(sm, "I<$ $ of $max/$dims\n", args);
         void *ptr = it->p->root;
         for(i8 i = it->p->dims; i >= 0; i--){
             if(it->stack[i] == NULL && (flags & (MORE|DEBUG))){

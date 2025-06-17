@@ -137,10 +137,14 @@ i64 Str_AddFlags(Str *s, word flags, char *map){
 
 i64 ToS_FlagLabels(Stream *sm, Abstract *a){
     Str **labels = Lookup_Get(ToSFlagLookup, a->type.of);
+    word flags = a->type.state;
+    return ToS_LabelsFromFlag(sm, a, flags, labels);
+}
+
+i64 ToS_LabelsFromFlag(Stream *sm, Abstract *a, word flags, Str **labels){
     Str *lbl;
     i64 total = 0;
     boolean first = TRUE;
-    word flags = a->type.state;
     if(flags == 0){
         if(labels != NULL && labels[0] != NULL){
             lbl = labels[0];
@@ -203,9 +207,7 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
         sm->m->type.range++;
     }
     if(a == NULL){
-        if(!_crashing && !_error){
-            DebugStack_Pop();
-        }
+        DebugStack_Pop();
         return Stream_Bytes(sm, (byte *)"NULL", 4);
     }
 
@@ -220,9 +222,7 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
             MemCh_Free(sm->m);
             sm->m->type.range--;
         }
-        if(!_crashing && !_error){
-            DebugStack_Pop();
-        }
+        DebugStack_Pop();
         return total;
     }else{
         Abstract *args[] = {
@@ -231,9 +231,7 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
         Fmt(sm, "$/$: unknown-debug", args);
-        if(!_crashing && !_error){
-            DebugStack_Pop();
-        }
+        DebugStack_Pop();
         return 0;
     }
 }
