@@ -7,7 +7,8 @@ static PatCharDef indentDef[] = {
 };
 
 static PatCharDef lineDef[] = {
-    {PAT_KO, '\n', '\n'}, patText,
+    {PAT_KO, '\n', '\n'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
+    {PAT_KO, '\n', '\n'},patText,
     {PAT_END, 0, 0}
 };
 

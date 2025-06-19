@@ -3,6 +3,27 @@
 
 static Lookup *fmtToHtmlLookup = NULL;
 
+static i64 bulletFunc(TranspCtx *ctx, word flags){
+    i64 total = 0;
+    Abstract *a = ctx->it.value;
+    if(flags & TRANSP_OPEN){
+        Str *s = Str_CstrRef(ctx->m, "UL");
+        total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
+    }
+    if(flags & TRANSP_BODY){
+        Str *s = Str_CstrRef(ctx->m, "LI");
+        total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
+        total += ToS(ctx->sm, a, 0, ZERO);
+        total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+    }
+    if(flags & TRANSP_CLOSE){
+        Str *s = Str_CstrRef(ctx->m, "UL");
+        total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+        Stream_Bytes(ctx->sm, (byte *)"\n", 1);
+    }
+    return total;
+}
+
 static i64 headerFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
     Abstract *a = ctx->it.value;
@@ -128,6 +149,7 @@ status FmtToHtml_Init(MemCh *m){
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_INDENT, headerFunc);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_PARAGRAPH, paragraphFunc);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_TAG, tagFunc);
+        Lookup_Add(m, fmtToHtmlLookup, FORMATTER_BULLET, bulletFunc);
         r = SUCCESS;
     }
     return r;

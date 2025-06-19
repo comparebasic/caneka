@@ -31,9 +31,10 @@ status FmtHtml_Tests(MemCh *gm){
 
     Abstract *args1[] = {
         (Abstract *)rbl->mess->transp,
+        (Abstract *)rbl->mess,
         NULL
     };
-    Debug("^y.@^0.\n", args1);
+    Debug("^y.@^0.\nfrom:\n^p.&\n^0", args1);
 
     MemCh_Free(m);
     DebugStack_Pop();

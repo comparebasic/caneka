@@ -135,23 +135,30 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
 
     if(mess->current != NULL && (mess->current->tk.type.state & TOKEN_INLINE)
             && ((tk->type.state & (TOKEN_NO_CONTENT|TOKEN_ATTR_VALUE)) == 0)){
-        printf("All true, outdenting\n");
         Mess_Outdent(mess);
         node = mess->current;
     }
 
     if(tk->type.state & TOKEN_ATTR_VALUE && 
             (tk->typeOf != ZERO && tk->typeOf != TYPE_NODE && tk->typeOf != TYPE_RELATION)){
-        printf("ADDING att\n");
         Mess_AddAtt(mess, mess->current, 
             (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
     }else if(node->typeOfChild == 0){
-        printf("ADDING child\n");
         node->child = a;
         node->typeOfChild = a->type.of;
         goto end;
-    }else if((((tk->type.state|mess->current->tk.type.state) & TOKEN_NO_COMBINE) == 0) &&
+    }else if(((tk->type.state & TOKEN_NO_COMBINE) == 0) &&
             mess->currentValue != NULL && CanCombine((Abstract *)mess->currentValue, a)){
+
+        if(1 || mess->current->captureKey == FORMATTER_BULLET){
+            Abstract *args[] = {
+                (Abstract *)mess->current,
+                (Abstract *)a,
+                NULL
+            };
+            Out("^p.COMPARE bullet current:&\nvs\nnew:&\n^0.", args);
+        }
+
         Abstract *args[] = {
             (Abstract *)a,
             (Abstract *)mess->currentValue,
@@ -168,11 +175,9 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         current = NULL;
         goto end;
     }else if(node->typeOfChild == TYPE_SPAN){
-        printf("ADDING to span\n");
         Span_Add((Span *)node->child, a);
         goto end;
     }else if(node->typeOfChild == TYPE_RELATION){
-        printf("ADDING to relation\n");
         Relation *rel = (Relation *)node->child;
         Relation_AddValue(rel, a);
         if(tk->type.state & LAST){
