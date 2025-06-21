@@ -90,11 +90,6 @@ i64 Transp(TranspCtx *ctx){
             }else{
                 a = ctx->it.value;
                 if(ctx->func != NULL && a->type.of != TYPE_ITER){
-                    Abstract *args[] = {
-                        (Abstract *)ctx,
-                        NULL,
-                    };
-                    Out("^c.&^0.\n", args);
                     total += ctx->func(ctx, TRANSP_BODY);
                 }
             }

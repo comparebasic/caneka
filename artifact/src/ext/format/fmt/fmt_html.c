@@ -149,11 +149,6 @@ static i64 paragraphFunc(TranspCtx *ctx, word flags){
 
 static i64 tagFunc(TranspCtx *ctx, word flags){
     if((flags & TRANSP_CLOSE) == 0){
-        Abstract *args[] = {
-            (Abstract *)ctx->it.value,
-            NULL
-        };
-        Out("Received (tagFunc): &\n", args);
         Node *nd = (Node *)as(ctx->it.value, TYPE_NODE);
         StrVec *tag = (StrVec *)Table_Get(nd->atts, 
             (Abstract *)I16_Wrapped(ctx->m, FORMATTER_TAG));
@@ -175,10 +170,7 @@ status Fmt_ToHtml(Stream *sm, Mess *mess){
     TranspCtx *ctx = TranspCtx_Make(sm->m, sm, fmtToHtmlLookup);
     mess->transp = ctx;
 
-    ctx->type.state |= DEBUG;
-
     Iter_Setup(&ctx->it, ctx->it.p, SPAN_OP_SET, 0);
-    ctx->it.type.state |= DEBUG;
 
     ctx->it.value = (Abstract *)mess->root;
     Iter_Query(&ctx->it);
@@ -204,4 +196,3 @@ status FmtToHtml_Init(MemCh *m){
     }
     return r;
 }
-

@@ -162,13 +162,13 @@ static status tagValue(MemCh *m, Roebling *rbl){
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mess = rbl->mess;
     Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
-    Abstract *args[] = {
-        (Abstract *)Type_ToStr(OutStream->m, captureKey),
-        (Abstract *)v,
-        (Abstract *)tk,
-        NULL
-    };
-    if(1 || rbl->type.state & DEBUG){
+    if(rbl->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)Type_ToStr(OutStream->m, captureKey),
+            (Abstract *)v,
+            (Abstract *)tk,
+            NULL
+        };
         Out("^c.Fmt After Capture ^E0.$^ec./@ -> @\n", args);
     }
     if(tk != NULL){

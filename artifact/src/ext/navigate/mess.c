@@ -150,21 +150,6 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
     }else if(((tk->type.state & TOKEN_NO_COMBINE) == 0) &&
             mess->currentValue != NULL && CanCombine((Abstract *)mess->currentValue, a)){
 
-        if(1 || mess->current->captureKey == FORMATTER_BULLET){
-            Abstract *args[] = {
-                (Abstract *)mess->current,
-                (Abstract *)a,
-                NULL
-            };
-            Out("^p.COMPARE bullet current:&\nvs\nnew:&\n^0.", args);
-        }
-
-        Abstract *args[] = {
-            (Abstract *)a,
-            (Abstract *)mess->currentValue,
-            NULL
-        };
-        Out("^y.ADDING combine @ vs @^0.\n", args);
         if((tk->type.state & TOKEN_SEPERATE) && 
                 mess->currentValue->type.of == TYPE_STRVEC &&
                 ((StrVec *)mess->currentValue)->total > 0){
@@ -192,11 +177,6 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         node->typeOfChild = TYPE_SPAN;
         Span_Add((Span *)node->child, value);
         Span_Add((Span *)node->child, a);
-        Abstract *args[] = {
-            (Abstract *)node->child,
-            NULL
-        };
-        Out("^y.ADDING making span to add to: &^0.\n", args);
         goto end;
     }
 
