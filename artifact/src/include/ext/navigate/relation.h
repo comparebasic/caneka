@@ -18,3 +18,4 @@ status Relation_Next(Relation *rel);
 status Relation_SetValue(Relation *rel, i16 row, i16 col, Abstract *value);
 status Relation_AddValue(Relation *rel, Abstract *value);
 status Relation_RowCount(Relation *rel);
+status Relation_ResetIter(Relation *rel);

@@ -13,6 +13,7 @@ static PatCharDef lineDef[] = {
 };
 
 static PatCharDef valueDef[] = {
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},{PAT_KO,',',','}, patText,
     {PAT_END, 0, 0}
 };

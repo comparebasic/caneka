@@ -47,6 +47,11 @@ status Relation_Next(Relation *rel){
     return r;
 }
 
+status Relation_ResetIter(Relation *rel){
+    Iter_Setup(&rel->it, rel->it.p, SPAN_OP_GET, 0);
+    return rel->it.type.state;
+}
+
 status Relation_SetValue(Relation *rel, i16 row, i16 col, Abstract *value){
     Iter_Setup(&rel->it, rel->it.p, SPAN_OP_SET, row * rel->stride + col);
     rel->it.value = value;

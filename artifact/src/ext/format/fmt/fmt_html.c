@@ -3,18 +3,67 @@
 
 static Lookup *fmtToHtmlLookup = NULL;
 
+static i64 tableFunc(TranspCtx *ctx, word flags){
+    i64 total = 0;
+    Abstract *a = ctx->it.value;
+    if(flags & TRANSP_OPEN){
+        Str *s = Str_CstrRef(ctx->m, "TABLE");
+        total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
+        total += Stream_Bytes(ctx->sm, (byte *)"\n", 1);
+    }
+    if(flags & TRANSP_BODY){
+        Relation *rel = (Relation *)as(a, TYPE_RELATION);
+        Relation_ResetIter(rel);
+
+        while((Relation_Next(rel) & END) == 0){
+            if(rel->type.state & RELATION_ROW_START){
+                Stream_Bytes(ctx->sm, (byte *)"  ", 2);
+                if(rel->it.idx == 0){
+                    Str *s = Str_CstrRef(ctx->m, "THEAD");
+                    total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
+                }
+                Str *s = Str_CstrRef(ctx->m, "TR");
+                total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
+            }
+            Str *s = Str_CstrRef(ctx->m, "TD");
+            total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
+            total += ToS(ctx->sm, rel->it.value, 0, ZERO);
+            total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+            if(rel->type.state & RELATION_ROW_END){
+                Str *s = Str_CstrRef(ctx->m, "TR");
+                total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+                if(rel->it.idx+1 == rel->stride){
+                    Str *s = Str_CstrRef(ctx->m, "THEAD");
+                    total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+                }
+                total += Stream_Bytes(ctx->sm, (byte *)"\n", 1);
+            }
+        }
+    }
+    if(flags & TRANSP_CLOSE){
+        Str *s = Str_CstrRef(ctx->m, "TABLE");
+        total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+        Stream_Bytes(ctx->sm, (byte *)"\n", 1);
+    }
+    return total;
+}
+
+
 static i64 bulletFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
     Abstract *a = ctx->it.value;
     if(flags & TRANSP_OPEN){
         Str *s = Str_CstrRef(ctx->m, "UL");
         total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
+        Stream_Bytes(ctx->sm, (byte *)"\n", 1);
     }
     if(flags & TRANSP_BODY){
+        Stream_Bytes(ctx->sm, (byte *)"  ", 2);
         Str *s = Str_CstrRef(ctx->m, "LI");
         total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
         total += ToS(ctx->sm, a, 0, ZERO);
         total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
+        Stream_Bytes(ctx->sm, (byte *)"\n", 1);
     }
     if(flags & TRANSP_CLOSE){
         Str *s = Str_CstrRef(ctx->m, "UL");
@@ -150,6 +199,7 @@ status FmtToHtml_Init(MemCh *m){
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_PARAGRAPH, paragraphFunc);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_TAG, tagFunc);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_BULLET, bulletFunc);
+        Lookup_Add(m, fmtToHtmlLookup, FORMATTER_TABLE, tableFunc);
         r = SUCCESS;
     }
     return r;
