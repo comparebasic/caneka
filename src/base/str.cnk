@@ -17,7 +17,7 @@ Type Str @ TEXT, CONST, BINARY, ENCODED, FMT_ANSI, COPY
             _.bytes = _m.copy(_.bytes, _.length)
         _ 
 
-    CstrRef(C.Charptr cstr)
+    CstrRef(C.char[] cstr)
         i64 len = C.strlen(cstr)
         Str.init(_, bytes, len, len+1)
         _ & CONST
@@ -52,7 +52,7 @@ add(byte b[], i64 length)
     else
         0
 
-addCstr(C.Charptr cstr)
+addCstr(C.char[] cstr)
     add(cstr, C.strlen(cstr))
 
 cstr(MemCh m)
@@ -62,7 +62,7 @@ cstr(MemCh m)
             b = _.bytes
         | 
             b = m.copy(_.bytes, _.length+1)
-        b as C.Charptr
+        b as C.char[]
     null
 
 clone(MemCh m, word alloc)
