@@ -1,5 +1,10 @@
-The problem with XML is that it's too verbose to read easily. The problem with
-JSON is that you're still reading it. 
+= BinPin Format
+
+This format is designed to use minimal space and parsing logic to communicate
+the attribute rich node format commonly found in XML.
+
+The problem with XML is that it's too verbose to read easily. It's alternative
+is commonly JSON, but the problem with JSON is that you're still reading it. 
 
 Because almost all JSON or XML is viewed through an unpacker to re-inflate it
 with whitepsace and provide expandable/collapsable navigation, let's let the
