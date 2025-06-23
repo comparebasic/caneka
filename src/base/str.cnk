@@ -3,11 +3,11 @@ Type Str @ TEXT, CONST, BINARY, ENCODED, FMT_ANSI, COPY
     word alloc
     byte bytes[]
     (word alloc)
-        _.init(_m.bytes(alloc), 0, alloc))
+        _.init(_m.bytes(alloc), 0, alloc)
         _
     
     From(byte bytes[], word length)
-        _.init(_m.copy(bytes, length), length, length))
+        _.init(_m.copy(bytes, length), length, length)
         _
 
     Ref(byte bytes[], word length, word alloc, word flags)
