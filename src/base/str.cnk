@@ -13,9 +13,8 @@ Type Str @ TEXT, CONST, BINARY, ENCODED, FMT_ANSI, COPY
     Ref(byte bytes[], word length, word alloc, word flags)
         _.init(bytes, length, alloc)
         _ & flags
-        _ @ COPY {
+        ? COPY
             _.bytes = _m.copy(_.bytes, _.length)
-        }
         _ 
 
     CstrRef(C.Charptr cstr)
@@ -25,10 +24,9 @@ Type Str @ TEXT, CONST, BINARY, ENCODED, FMT_ANSI, COPY
         _
 
 TextCharFilter(byte b[i64 length])
-    loop(b)
-        _ < 32 and _ not '\r', '\n', '\t' {
-            false
-        }
+    loop(b for length)
+        ? _ < 32 and _ not '\r', '\n', '\t'
+            return false
     true
 
 reset()
@@ -37,7 +35,7 @@ reset()
 
 wipe()
     C.memset(_.bytes, 0, _.length)    
-    SUCCESS
+    @
 
 toFd(i32 fd)
    C.write(fd, _.bytes, _.length) 
@@ -45,40 +43,35 @@ toFd(i32 fd)
 add(byte b[], i64 length)
     i64 len = length 
     i64 remaining = _.alloc - _.length
-    length > remaining {
+    ? length > remaining
         len = remaining   
         s & ERROR
-    }
-    len > 0 {
+    | len > 0
         C.memcpy(_s.bytes + _.length, b, len)
         _.length += len
-    {
+    else
         0
-    }
 
 addCstr(C.Charptr cstr)
     add(cstr, C.strlen(cstr))
 
 cstr(MemCh m)
-    TextCharFilter(_.bytes, _.length) {
+    ? TextCharFilter(_.bytes, _.length)
         byte b
-        _.alloc == _.length+1 {
+        ? _.alloc == _.length+1
             b = _.bytes
-        {
+        | 
             b = m.copy(_.bytes, _.length+1)
-        }
         b as C.Charptr
-    }
     null
 
 clone(MemCh m, word alloc)
-    Str s = M.alloc(Str)
+    Str s = m.alloc(Str)
     byte bytes[] = M.bytes(m, alloc)
     word len = _.length
-    _.length > alloc {
+    ? _.length > alloc
         s & ERROR
         len = alloc
-    }
     C.memcpy(bytes, _.bytes, len)
     Str.init(s, s, bytes, len, alloc)
     s
