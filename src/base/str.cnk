@@ -67,7 +67,7 @@ cstr(MemCh m)
 
 clone(MemCh m, word alloc)
     Str s = m.alloc(Str)
-    byte bytes[] = M.bytes(m, alloc)
+    byte bytes[] = m.bytes(alloc)
     word len = _.length
     ? _.length > alloc
         s & ERROR
