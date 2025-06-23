@@ -82,6 +82,10 @@ C, most of the actively developed source code is currently locaed in the
 [artifact src folder](./artifact/src/). This is because, over time, caneka will
 be transpiled from it's own, more convienient syntax.
 
+There is a sketch of the CanekaLang syntax for the [Str](./src/base/str.cnk) module, but it does not
+yet parser, it's what I've written as I begin to figure out what the high-level
+syntax will look like.
+
 ## Licence
 
 BSD 3 Clause: [licence file](./LICENCE)
