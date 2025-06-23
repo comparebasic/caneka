@@ -23,7 +23,7 @@ Type Str @ TEXT, CONST, BINARY, ENCODED, FMT_ANSI, COPY
         _ & CONST
         _
 
-TextCharFilter(byte b[i64 length])
+TextCharFilter(byte b[], i64 length)
     loop(b for length)
         ? _ < 32 and _ not '\r', '\n', '\t'
             return false
