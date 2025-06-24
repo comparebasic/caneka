@@ -2,10 +2,7 @@
 #include <caneka.h>
 
 static status Transp_Push(TranspCtx *ctx, Abstract *a){
-    Iter_Setup(&ctx->it, ctx->it.p, SPAN_OP_ADD|(ctx->it.type.state & NORMAL_FLAGS), ctx->it.p->max_idx);
-    ctx->it.value = (Abstract *)a;
-    status r =  Iter_Query(&ctx->it);
-    return r;
+    return Iter_Add(&ctx->it, a);
 }
 
 static i64 Transp_SetPrev(TranspCtx *ctx){

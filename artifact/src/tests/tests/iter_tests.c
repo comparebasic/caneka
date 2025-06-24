@@ -40,24 +40,14 @@ status Iter_Tests(MemCh *gm){
         NULL
     };
 
-    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
-    it.value = arr[0];
-    Iter_Query(&it);
-
-    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
-    it.value = arr[1];
-    Iter_Query(&it);
-
-    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
-    it.value = arr[2];
-    Iter_Query(&it);
-
-    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
-    it.value = arr[3];
-    Iter_Query(&it);
+    Iter_Init(&it, p);
+    Iter_Add(&it, arr[0]);
+    Iter_Add(&it, arr[1]);
+    Iter_Add(&it, arr[2]);
+    Iter_Add(&it, arr[3]);
 
     i32 i = 0;
-    Iter_Setup(&it, p, SPAN_OP_GET, 0);
+    Iter_Reset(&it);
     while((Iter_Next(&it) & END) == 0){
         Abstract *args[] = {
             (Abstract *)arr[i],
@@ -69,13 +59,10 @@ status Iter_Tests(MemCh *gm){
         i++;
     }
 
-
-    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 3);
-    it.value = arr2[3];
-    Iter_Query(&it);
+    Iter_Insert(&it, 3, arr2[3]);
 
     i = 0;
-    Iter_Setup(&it, p, SPAN_OP_GET, 0);
+    Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         Abstract *args[] = {
             (Abstract *)arr2[i],
@@ -87,12 +74,10 @@ status Iter_Tests(MemCh *gm){
         i++;
     }
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 2);
-    it.value = arr3[2];
-    Iter_Query(&it);
+    Iter_Insert(&it, 2, arr3[2]);
 
     i = 0;
-    Iter_Setup(&it, p, SPAN_OP_GET, 0);
+    Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         Abstract *args[] = {
             (Abstract *)arr3[i],
@@ -152,18 +137,14 @@ status Iter_Tests(MemCh *gm){
     p = Span_Make(m);
     Abstract **ptr = arr4;
     while(*ptr != NULL){
-        Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
-        it.value = *ptr;
-        Iter_Query(&it);
+        Iter_Add(&it, *ptr);
         ptr++;
     }
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 6);
-    it.value = arr5[6];
-    Iter_Query(&it);
+    Iter_Insert(&it, 6, arr5[6]);
 
     i = 0;
-    Iter_Setup(&it, p, SPAN_OP_GET, 0);
+    Iter_Reset(&it);
     while((Iter_Next(&it) & END) == 0){
         Abstract *args[] = {
             (Abstract *)arr5[i],
@@ -180,18 +161,15 @@ status Iter_Tests(MemCh *gm){
     i64 max = 5128;
     p = Span_Make(m);
     p->type.state |= FLAG_SPAN_RAW;
-    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
+    Iter_Init(&it, p);
     for(i64 i = 0; i < max; i++){
-        it.value = (void *)i;
-        Iter_Query(&it);
+        Iter_Add(&it, (void *)i);
     }
 
-    Iter_Setup(&it, p, SPAN_OP_ADD|FLAG_ITER_CONTINUE, 177);
-    it.value = (void*)((i64)177);
-    Iter_Query(&it);
+    Iter_Insert(&it, 177, (void*)((i64)177));
 
     i64 exp = 0;
-    Iter_Setup(&it, p, SPAN_OP_GET, 0);
+    Iter_Reset(&it);
     boolean second = FALSE;
     while((Iter_Next(&it) & END) == 0){
         if(exp != (i64)it.value){

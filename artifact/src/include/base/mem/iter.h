@@ -33,6 +33,7 @@ void Iter_Setup(Iter *it, Span *p, status op, i32 idx);
 Iter *Iter_Make(struct mem_ctx *m, Span *p);
 status Iter_Set(Iter *it, void *value);
 status Iter_Add(Iter *it, void *value);
+status Iter_Insert(Iter *it, i32 idx, void *value);
 status Iter_SetByIdx(Iter *it, i32 idx, void *value);
 void *Iter_Get(Iter *it);
 status Iter_RemoveByIdx(Iter *it, i32 idx);

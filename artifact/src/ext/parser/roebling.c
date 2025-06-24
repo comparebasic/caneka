@@ -44,8 +44,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                                 break;
                             }
                         }
-                        Iter_Setup(&rbl->matchIt, rbl->matchIt.p, SPAN_OP_GET, idx);
-                        Iter_Query(&rbl->matchIt);
+                        Iter_GetByIdx(&rbl->matchIt, idx);
                     }
                 }
 
@@ -104,9 +103,7 @@ status Roebling_RunCycle(Roebling *rbl){
         rbl->type.state &= ~ROEBLING_NEXT;
     }
 
-    Type_SetFlag((Abstract *)&rbl->parseIt, SPAN_OP_GET);
-    Iter_Query(&rbl->parseIt);
-    Single *wdof = rbl->parseIt.value;
+    Single *wdof = Iter_Get(&rbl->parseIt);
     if(wdof == NULL){
         if((rbl->type.state & ROEBLING_REPEAT) != 0){
             rbl->type.state |= ROEBLING_NEXT;
@@ -182,9 +179,7 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i16 
         }
     }
 
-    Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_ADD);
-    rbl->matchIt.value = mt;
-    return Iter_Query(&rbl->matchIt);
+    return Iter_Add(&rbl->matchIt, (Abstract *)mt);
 }
 
 i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
@@ -230,9 +225,11 @@ status Roebling_AddStep(Roebling *rbl, Abstract *step){
         return ERROR;
     }
 
-    Type_SetFlag((Abstract *)&rbl->parseIt, fl);
-    rbl->parseIt.value = step;
-    return Iter_Query(&rbl->parseIt);
+    if(fl == SPAN_OP_ADD){
+        return Iter_Add(&rbl->parseIt, step);
+    }else{
+        return Iter_Set(&rbl->parseIt, step);
+    }
 }
 
 status Roebling_Start(Roebling *rbl){

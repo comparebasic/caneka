@@ -170,10 +170,7 @@ status Fmt_ToHtml(Stream *sm, Mess *mess){
     TranspCtx *ctx = TranspCtx_Make(sm->m, sm, fmtToHtmlLookup);
     mess->transp = ctx;
 
-    Iter_Setup(&ctx->it, ctx->it.p, SPAN_OP_SET, 0);
-
-    ctx->it.value = (Abstract *)mess->root;
-    Iter_Query(&ctx->it);
+    Iter_SetByIdx(&ctx->it, 0, (Abstract *)mess->root);
     ctx->stackIdx = ctx->it.p->nvalues;
     i64 total = 0;
     while((ctx->type.state & (SUCCESS|ERROR|ERROR)) == 0){

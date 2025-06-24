@@ -1,3 +1,86 @@
+status Iter_AddWithGaps(Iter *it, MemPage *pg){
+    Abstract *value = it->value;
+    i32 idx = it->idx;
+    i8 dimP = it->p->dims+1;
+    Iter prevIt;
+    i32 prevIdx = -1;
+
+    if((it->p->max_idx & _modulos[dimP]) == _modulos[dimP]){
+        it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_RESERVE;
+        it->idx = it->p->max_idx+1;
+        it->value = NULL;
+        _Iter_QueryPage(it, pg);
+        dimP = it->p->dims+1;
+    }
+
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
+    _Iter_QueryPage(it, pg);
+    i8 dim = 0;
+    void *sl = NULL;
+    void **last = NULL;
+    void **ptr = NULL;
+    i64 openSlots = -1;
+    if(it->type.state & SUCCESS){
+        it->type.state &= ~SUCCESS;
+
+        if(it->p->dims == 0){
+            i32 localIdx = it->stackIdx[dim];
+            ptr = it->stack[dim];
+            last = ptr+((_capacity[0]-1)-localIdx);
+            openSlots = (it->p->max_idx+1) - it->idx;
+        }else{
+            while((it->type.state & SUCCESS) == 0){
+                i32 localIdx = it->stackIdx[dim];
+                ptr = it->stack[dim];
+                last = ptr+((_capacity[0]-1)-localIdx);
+                while(*last == NULL){
+                    last--;
+                    if((openSlots = last-ptr) == 0){
+                        break;
+                    }
+                }
+
+                if(openSlots > 0){
+                    break;
+                }
+                if(dim+1 > it->p->dims){
+                    break;
+                }
+                dim++;
+            }
+        }
+
+        if(openSlots >= 0){
+            memmove(ptr+1, ptr, (openSlots+1)*sizeof(void *));
+            *ptr = NULL;
+            it->p->max_idx += _increments[dim];
+            prevIdx = it->idx + _increments[dim];
+            it->type.state |= SUCCESS;
+        }
+    }
+
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
+    it->value = value;
+    it->idx = idx;
+    _Iter_QueryPage(it, pg);
+    if(prevIdx != -1){
+        Iter_Setup(&prevIt, it->p, SPAN_OP_GET, prevIdx);
+        _Iter_QueryPage(&prevIt, pg);
+        while(dim > 0 && (it->type.state & SUCCESS)){
+            sl = *((void **)prevIt.stack[dim]);
+            openSlots = it->stackIdx[dim-1];
+            if(sl != NULL && openSlots > 0){
+                void *destSl = *((void **)it->stack[dim]);
+                memcpy(destSl, sl, (openSlots)*sizeof(void *));
+                memset(sl, 0, (openSlots)*sizeof(void *));
+            }
+            dim--;
+        }
+    }
+    Iter_Setup(it, it->p, SPAN_OP_SET, it->idx);
+    return it->type.state;
+}
+
 status _Iter_QueryPage(Iter *it, MemPage *pg){
     it->type.state &= ~(SUCCESS|NOOP);
     MemCh *m = it->p->m;

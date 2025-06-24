@@ -3,9 +3,7 @@
 
 status Compare_Push(Comp *comp, Abstract *a, Abstract *b){
     CompResult *cr = CompResult_Make(comp->m, a, b);
-    Iter_Setup(&comp->it, comp->it.p, SPAN_OP_ADD, comp->it.p->max_idx);
-    comp->it.value = (Abstract *)cr;
-    return Iter_Query(&comp->it);
+    return Iter_Add(&comp->it, (Abstract *)cr);
 }
 
 status Compare(Comp *comp){
@@ -185,8 +183,6 @@ Comp *Comp_Make(MemCh *m, Abstract *a, Abstract *b){
         return comp;
     }
 
-    Iter_Setup(&comp->it, Span_Make(m), SPAN_OP_SET, 0);
-    comp->it.value = (Abstract *)cr;
-    Iter_Query(&comp->it);
+    Iter_SetByIdx(&comp->it, 0, (Abstract *)cr);
     return comp;
 }
