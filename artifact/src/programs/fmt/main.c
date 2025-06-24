@@ -30,6 +30,7 @@ i32 main(int argc, char **argv){
 
     Str *path = File_GetAbsPath(m, Str_CstrRef(m, argv[1]));
     File *f = File_Make(m, path, NULL);
+    f->sm->dest.curs->v->type.state |= DEBUG;
     File_Read(f, FILE_READ_MAX);
 
     Cursor *curs = File_GetCurs(f);
@@ -50,12 +51,13 @@ i32 main(int argc, char **argv){
     }
 
     Abstract *args[] = {
+        (Abstract *)I32_Wrapped(ErrStream->m, f->sm->dest.curs->v->p->nvalues),
         (Abstract *)f,
         (Abstract *)rbl->mess->transp,
         NULL
     };
 
-    Out("^c.File: &^0.\n^p.Mess: &^0.\n", args);
+    Out("Count: $\n^c.File: &^0.\n^p.Mess: &^0.\n", args);
 
     DebugStack_Pop();
     return 0;
