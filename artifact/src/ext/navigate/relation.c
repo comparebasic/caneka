@@ -53,15 +53,11 @@ status Relation_ResetIter(Relation *rel){
 }
 
 status Relation_SetValue(Relation *rel, i16 row, i16 col, Abstract *value){
-    Iter_Setup(&rel->it, rel->it.p, SPAN_OP_SET, row * rel->stride + col);
-    rel->it.value = value;
-    return Iter_Query(&rel->it);
+    return Iter_SetByIdx(&rel->it,  row * rel->stride + col, value);
 }
 
 status Relation_AddValue(Relation *rel, Abstract *value){
-    Iter_Setup(&rel->it, rel->it.p, SPAN_OP_ADD, rel->it.p->max_idx);
-    rel->it.value = value;
-    return Iter_Query(&rel->it);
+    return Iter_Add(&rel->it, value);
 }
 
 Relation *Relation_Make(MemCh *m, i16 stride, Abstract **headers){

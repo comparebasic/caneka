@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+#include "iter_querypage.c"
+
 i64 MemCh_MemCount(MemCh *m, i16 level){
     i64 total = 0;
     while((Iter_Next(&m->it) & END) == 0){

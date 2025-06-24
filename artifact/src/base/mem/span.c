@@ -6,11 +6,8 @@ status Span_Set(Span *p, i32 idx, Abstract *t){
         return NOOP;
     }
     Iter it;
-    memset(&it, 0, sizeof(Iter));
-    Iter_Setup(&it, p, SPAN_OP_SET, idx);
-    it.value = (void *)t;
-    status r = Iter_Query(&it);
-    return r;
+    Iter_Init(&it, p);
+    return Iter_SetByIdx(&it, idx, (void *)t);
 }
 
 void *Span_Get(Span *p, i32 idx){
@@ -18,12 +15,8 @@ void *Span_Get(Span *p, i32 idx){
         return NULL;
     }
     Iter it;
-    memset(&it, 0, sizeof(Iter));
-    Iter_Setup(&it, p, SPAN_OP_GET, idx);
-    if(Iter_Query(&it) & SUCCESS){
-        return it.value;
-    }
-    return NULL;
+    Iter_Init(&it, p);
+    return Iter_GetByIdx(&it, idx);
 }
 
 status Span_Remove(Span *p, i32 idx){
@@ -31,10 +24,8 @@ status Span_Remove(Span *p, i32 idx){
         return NOOP;
     }
     Iter it;
-    memset(&it, 0, sizeof(Iter));
-    Iter_Setup(&it, p, SPAN_OP_REMOVE, idx);
-    it.value = (void *)NULL;
-    return Iter_Query(&it);
+    Iter_Init(&it, p);
+    return Iter_RemoveByIdx(&it, idx);
 }
 
 status Span_Setup(Span *p){
