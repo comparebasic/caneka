@@ -50,7 +50,7 @@ i64 Str_AddCstr(Str *s, char *cstr){
     return Str_Add(s, (byte *)cstr, len);
 }
 
-char *Str_Cstr(Str *s, MemCh *m){
+char *Str_Cstr(MemCh *m, Str *s){
     if(TextCharFilter(s->bytes, s->length)){
         byte *b;
         if(s->alloc == s->length+1){
@@ -64,7 +64,7 @@ char *Str_Cstr(Str *s, MemCh *m){
     return NULL;
 }
 
-Str *Str_Clone(Str *s, MemCh *m, word alloc){
+Str *Str_Clone(MemCh *m, Str *s, word alloc){
     Str *ret = MemCh_Alloc(m, sizeof(Str));
     byte *_bytes = Bytes_Alloc(m, (size_t)alloc);
     memcpy(_bytes, s->bytes, min(s->length, alloc));
@@ -72,7 +72,7 @@ Str *Str_Clone(Str *s, MemCh *m, word alloc){
     return ret;
 }
 
-Str *Str__From(MemCh *m, byte *bytes, word length){
+Str *Str_From(MemCh *m, byte *bytes, word length){
     Str *s = MemCh_Alloc(m, sizeof(Str));
     byte *_bytes = Bytes_Alloc(m, length);
     memcpy(_bytes, bytes, length);
@@ -80,7 +80,7 @@ Str *Str__From(MemCh *m, byte *bytes, word length){
     return s;
 }
 
-Str *Str__Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
+Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, bytes, length, alloc);
     s->type.state = flags;
@@ -92,7 +92,7 @@ Str *Str__Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     return s;
 }
 
-Str *Str__CstrRef(MemCh *m, char *cstr){
+Str *Str_CstrRef(MemCh *m, char *cstr){
     i64 len = strlen(cstr);
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, (byte *)cstr, len, len+1);

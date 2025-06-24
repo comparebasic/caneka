@@ -32,35 +32,14 @@ PROCESSING, 1 << 7, Processing has begun
 
 The remaining 8 bits are custom to meet the needs of each object.
 
-== Example Type
+== Example Type (Str)
 
-start.codeC
-
-typedef uint16_t word;
-typedef word cls;
-typedef word status;
-
-typedef struct typehdr {
-    cls of;
-    status state;
-} Type;
-
-end.codeC
-
-==== Str type
-
-start.codeC
-
-typedef struct str {
-    Type type;
-    word length;
-    word alloc;
-    byte *bytes;
-} Str;
-
-end.codeC
-
-==== Str upper flags
+_mem-diagram+size, description, class
+    16s type.of, type value, type
+    16s type.state, stateful flags, type
+    16s length, string segment length,
+    16s alloc, length of allocated bytes,
+    64s byte pointer, pointer to content,
 
 These are the upper flags for the Str object:
 

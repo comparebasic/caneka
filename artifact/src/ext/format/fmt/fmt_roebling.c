@@ -54,6 +54,15 @@ static PatCharDef tagDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef moduleDef[] = {
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '_', '_'},
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
+    {PAT_KO|PAT_KO_TERM, '+', '+'},
+    patText,
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef labelDef[] = {
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
     {PAT_KO|PAT_KO_TERM,'@', '@'},
@@ -74,6 +83,7 @@ static PatCharDef urlTldDef[] = {
 static status start(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
+    Match *mt = NULL;
 
     r |= Roebling_SetPattern(rbl,
         nlDef, FORMATTER_NEXT, FORMATTER_START);
@@ -90,7 +100,11 @@ static status start(MemCh *m, Roebling *rbl){
         lineDef, FORMATTER_LINE, FORMATTER_START);
     r |= Roebling_SetPattern(rbl,
         tagDef, FORMATTER_TAG, FORMATTER_LABEL);
-    Match *mt = Roebling_GetMatch(rbl);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_SEARCH;
+    r |= Roebling_SetPattern(rbl,
+        moduleDef, FORMATTER_MODULE, FORMATTER_TABLE_VALUE);
+    mt = Roebling_GetMatch(rbl);
     mt->type.state |= MATCH_SEARCH;
     r |= Roebling_SetPattern(rbl,
         kvDef, FORMATTER_KEY, FORMATTER_LINE);

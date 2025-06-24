@@ -129,7 +129,7 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, word flags){
                     NULL
                 };
                 total += Fmt(sm, "$: ", args); 
-                total += Str_Print(sm, (Abstract *)s, type, flags);
+                total += Str_Print(sm, (Abstract *)s, type, flags|DEBUG);
                 if((it.type.state & LAST) == 0){
                     total += Stream_Bytes(sm, (byte *)", ", 2);
                 }
@@ -166,7 +166,7 @@ i64 Stream_Print(Stream *sm, Abstract *a, cls type, word flags){
             if(content){
                 total += Stream_Bytes(sm, (byte *)" ", 1);
             }
-            total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, 0, flags);
+            total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, 0, flags|DEBUG);
         }
         total += Fmt(sm, ">", NULL); 
         return total;

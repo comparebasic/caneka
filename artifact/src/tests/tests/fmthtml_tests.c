@@ -45,7 +45,15 @@ status FmtHtml_Tests(MemCh *gm){
         "Fmt to HTML has status SUCCESS", NULL);
 
     s = Str_CstrRef(m, expectedCstr);
-    r |= Test(Equals((Abstract *)s, (Abstract *)sm->dest.curs->v), 
+    boolean matches = Equals((Abstract *)s, (Abstract *)sm->dest.curs->v);
+    if(!matches){
+        Abstract *args[] = {
+            (Abstract *)sm->dest.curs->v,
+            NULL
+        };
+        Out("^r.Mismatch: &\n", args);
+    }
+    r |= Test(matches, 
         "Fmt to HTML has expected html content", NULL);
 
     MemCh_Free(m);
