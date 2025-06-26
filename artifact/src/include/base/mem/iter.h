@@ -38,4 +38,3 @@ status Iter_SetByIdx(Iter *it, i32 idx, void *value);
 void *Iter_Get(Iter *it);
 status Iter_RemoveByIdx(Iter *it, i32 idx);
 void *Iter_GetByIdx(Iter *it, i32 idx);
-status _Iter_QueryPage(Iter *it, struct mem_page *pg);

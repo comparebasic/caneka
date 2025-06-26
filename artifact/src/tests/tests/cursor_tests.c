@@ -21,6 +21,7 @@ status Cursor_Tests(MemCh *gm){
         Cursor_NextByte(curs);
     }
 
+    r |= Test(curs->ptr != NULL, "Ptr is not NULL", NULL);
     r |= Test(*curs->ptr == 'n', "Stops on the first 'n' for and", NULL);
     s = (Str *)Span_Get(curs->v->p, 1);
     r |= Test(curs->ptr - s->bytes == 1,

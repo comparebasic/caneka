@@ -2,18 +2,27 @@
 #include <caneka.h>
 
 static status Cursor_SetStr(Cursor *curs){
-    if(Iter_Query(&curs->it) & SUCCESS){
+    DebugStack_Push(NULL, ZERO);
+    if(curs->it.type.state & SUCCESS){
         Str *s = (Str *)curs->it.value;
         if(s != NULL){
             curs->ptr = s->bytes;
             curs->end = s->bytes+(s->length-1);
             curs->type.state |= PROCESSING;
+            DebugStack_Pop();
             return SUCCESS;
         }else{
             curs->ptr = NULL;
             curs->end = NULL;
         }
+    }else{
+        Abstract *args[] = {
+            (Abstract *)&curs->it,
+            NULL
+        };
+        Out("NOPE &\n", args);
     }
+    DebugStack_Pop();
     return NOOP;
 }
 
@@ -41,7 +50,7 @@ status Cursor_Decr(Cursor *curs, i32 length){
                 Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to proceed back, length $", args);
                 break;
             }else{
-                curs->it.idx--;
+                Iter_Prev(&curs->it);
                 Cursor_SetStr(curs);
                 byte *start = curs->ptr;
                 curs->ptr = curs->end;
@@ -87,6 +96,7 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
 status Cursor_Incr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
     if(curs->ptr == NULL){
+        Iter_Next(&curs->it);
         Cursor_SetStr(curs);
     }
     curs->type.state &= ~NOOP;
@@ -95,7 +105,7 @@ status Cursor_Incr(Cursor *curs, i32 length){
     while(length > 0){
         if(length > remaining){
             length -= remaining;
-            curs->it.idx++;
+            Iter_Next(&curs->it);
             if(Cursor_SetStr(curs) & NOOP){
                 curs->type.state |= NOOP;
                 break;
@@ -117,14 +127,13 @@ status Cursor_Incr(Cursor *curs, i32 length){
 status Cursor_NextByte(Cursor *curs){
     curs->type.state &= ~CURSOR_STR_BOUNDRY;
     if((curs->type.state & PROCESSING) == 0){
-        curs->it.idx = 0;
+        Iter_Reset(&curs->it.idx);
         Cursor_SetStr(curs);
     }else if(curs->ptr >= curs->end){
         if(curs->it.type.state & LAST){
             curs->type.state |= END;
         }else{
-            curs->it.idx++;
-            Iter_Query(&curs->it);
+            Iter_Next(&curs->it);
             curs->type.state |= CURSOR_STR_BOUNDRY;
             Cursor_SetStr(curs);
         }

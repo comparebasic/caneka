@@ -205,12 +205,17 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
         preview = min(pos-1, 0);
     }
     
-    StrVec *before = Cursor_Get(sm->m, curs, -preview, 0);
-    before->type.state |= DEBUG;
-    StrVec *focus = Cursor_Get(sm->m, curs, 1, 0);
-    focus->type.state |= DEBUG;
-    StrVec *after = Cursor_Get(sm->m, curs, min(32, endPos - pos), 1);
-    after->type.state |= DEBUG;
+    StrVec *before = NULL;
+    StrVec *focus = curs->v;
+    StrVec *after = NULL;
+    if(curs->type.state & PROCESSING){
+        StrVec *before = Cursor_Get(sm->m, curs, -preview, 0);
+        before->type.state |= DEBUG;
+        StrVec *focus = Cursor_Get(sm->m, curs, 1, 0);
+        focus->type.state |= DEBUG;
+        StrVec *after = Cursor_Get(sm->m, curs, min(32, endPos - pos), 1);
+        after->type.state |= DEBUG;
+    }
 
     if(flags & DEBUG){
 
