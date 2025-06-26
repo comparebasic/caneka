@@ -135,6 +135,7 @@ status Iter_Tests(MemCh *gm){
     };
 
     p = Span_Make(m);
+    Iter_Init(&it, p);
     Abstract **ptr = arr4;
     while(*ptr != NULL){
         Iter_Add(&it, *ptr);
