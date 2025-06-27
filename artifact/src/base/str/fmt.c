@@ -53,20 +53,24 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                             if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "NAME"))){
                                 Str *funcName = Str_CstrRef(sm->m, entry->funcName);
                                 total += Stream_Bytes(sm, funcName->bytes, funcName->length);
+                                goto varnext;
                             }else if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "FILE"))){
                                 Str *funcName = Str_CstrRef(sm->m, entry->fname);
                                 total += Stream_Bytes(sm, funcName->bytes, funcName->length);
+                                goto varnext;
                             }else if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "REF"))){
                                 total += ToS(sm, entry->ref, 0, DEBUG|MORE);
+                                goto varnext;
                             }
                         }
-                    }else{
-                        Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-                            "Variable not found", NULL);
                     }
                 }
+                Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+                    "Variable not found", NULL);
+varnext:
                 state &= ~PROCESSING;
                 start = ptr+1;
+                goto next;
             }
             goto next;
         }else if(c == '$' || c == '@' || c == '&'){
