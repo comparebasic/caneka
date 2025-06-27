@@ -17,3 +17,5 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
 void DebugStack_Pop();
 void DebugStack_SetRef(void *v, word typeOf);
 i32 DebugStack_Print(Stream *sm, word flags);
+StackEntry *DebugStack_Get();
+status DebugStack_Show(Str *style, Str *msg, word flags);

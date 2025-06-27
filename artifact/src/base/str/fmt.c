@@ -16,8 +16,58 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
         if((state & NOOP) != 0){
             state &= ~NOOP;
             goto next;
-        }else if(c == '\\'){
-            state |= NOOP;
+        }else if(c == '\\'  || c == '<' || c == '$' || c == '@' || c == '&' || c == '^'){
+            if(c == '\\'){
+                if(start < ptr){
+                    word length = (word)((ptr) - start);
+                    Stream_Bytes(sm, (byte *)start, length);
+                    total += length;
+                }
+                state |= NOOP;
+                start = ptr+1;
+                goto next;
+            }else{
+                if(start != ptr){
+                    word length = (word)(ptr - start);
+                    Stream_Bytes(sm, (byte *)start, length);
+                    total += length;
+                }
+                start = ptr+1;
+            }
+        }
+
+        if(c == '<' && ((state & NOOP) == 0)){
+            state |= PROCESSING; 
+            start = ptr+1;
+            goto next;
+        }else if(state & PROCESSING){
+            if(c == '>' && ((state & NOOP) == 0)){
+                word length = (word)(ptr - start);
+                if(length > 0){
+                    Str *token = Str_From(sm->m, (byte *)start, length); 
+                    Str *name = Str_CstrRef(sm->m, "STACK");
+                    if(Str_StartMatch(token, name, name->length)){
+                        Str_Incr(token, name->length);
+                        StackEntry *entry = DebugStack_Get(); 
+                        if(entry != NULL){
+                            if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "NAME"))){
+                                Str *funcName = Str_CstrRef(sm->m, entry->funcName);
+                                total += Stream_Bytes(sm, funcName->bytes, funcName->length);
+                            }else if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "FILE"))){
+                                Str *funcName = Str_CstrRef(sm->m, entry->fname);
+                                total += Stream_Bytes(sm, funcName->bytes, funcName->length);
+                            }else if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "REF"))){
+                                total += ToS(sm, entry->ref, 0, DEBUG|MORE);
+                            }
+                        }
+                    }else{
+                        Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+                            "Variable not found", NULL);
+                    }
+                }
+                state &= ~PROCESSING;
+                start = ptr+1;
+            }
             goto next;
         }else if(c == '$' || c == '@' || c == '&'){
             if(c == '@'){
@@ -40,13 +90,6 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     "Expecting arg, found NULL instead, '$'", args);
                 return total;
             }
-
-            if(start != ptr){
-                word length = (word)(ptr - start);
-                Stream_Bytes(sm, (byte *)start, length);
-                total += length;
-            }
-            start = ptr+1;
 
             Abstract *a = *(args++);
             if(a == NULL){
@@ -78,7 +121,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             }else if(a->type.of == TYPE_STREAM_TASK){
                 StreamTask *tsk = (StreamTask *)a;
                 total += tsk->func(sm, tsk->a); 
-                state = SUCCESS;
+                state |= SUCCESS;
                 goto next;
             }else if(a->type.of == TYPE_WRAPPED_PTR && ((Single *)a)->objType.of != 0){
                 Single *sg = (Single *)a;
@@ -86,17 +129,9 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 a = sg->val.ptr;
             }
             total += ToS(sm, a, type, (state & (MORE|DEBUG)) | stateOf);
-            state = SUCCESS;
+            state |= SUCCESS;
             goto next;
         }else if(c == '^'){
-            if(start != ptr){
-               word length = (word)(ptr - start);
-               if(length > 0){
-                    Stream_Bytes(sm, (byte *)start, length);
-                    total += length;
-               }
-            }
-
             ptr++;
             Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
             Stream_Bytes(sm, s->bytes, s->length);

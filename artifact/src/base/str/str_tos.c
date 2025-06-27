@@ -109,13 +109,17 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, word flags){
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     i64 total = 0;
     if(flags & MORE){
+        total += Stream_Bytes(sm, (byte *)"\"", 1); 
+    }
+
+    if(flags & DEBUG){
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)vObj, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, vObj->p->nvalues),
             (Abstract *)I64_Wrapped(sm->m, vObj->total),
             NULL
         };
-        total += Fmt(sm, "StrVec<$ $/$ [", args); 
+        total += Fmt(sm, "StrVec\\<$ $/$ [", args); 
     }
 
     Iter it;
@@ -133,13 +137,18 @@ i64 StrVec_Print(Stream *sm, Abstract *a, cls type, word flags){
                 if((it.type.state & LAST) == 0){
                     total += Stream_Bytes(sm, (byte *)", ", 2);
                 }
-            }else{
+            }else if(flags & DEBUG){
                 total += Str_Print(sm, (Abstract *)s, type, flags);
+            }else{
+                total += Stream_Bytes(sm, s->bytes, s->length);
             }
         }
     }
-    if(flags & MORE){
+    if(flags & DEBUG){
         total += Fmt(sm, "]>", NULL);
+    }
+    if(flags & MORE){
+        total += Stream_Bytes(sm, (byte *)"\"",1);
     }
     return total;
 }
@@ -152,7 +161,7 @@ i64 Stream_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)smObj, ToS_FlagLabels),
             NULL,
         };
-        total += Fmt(sm, "Stream<$ ", args); 
+        total += Fmt(sm, "Stream\\<$ ", args); 
         boolean content = FALSE;
         if(smObj->type.state & STREAM_TO_FD){
             Abstract *args[] = {
@@ -182,7 +191,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     if(curs->v == NULL){
-        return  Fmt(sm, "Curs<v:NULL>", NULL);
+        return  Fmt(sm, "Curs\\<v:NULL>", NULL);
     }
 
     Iter it;
@@ -230,7 +239,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)after,
             NULL
         };
-        return  Fmt(sm, "Curs<$ $..$ $of$ ^d.\":$^D.$^d.$\">", args); 
+        return  Fmt(sm, "Curs\\<$ $..$ $of$ ^d.\":$^D.$^d.$\">", args); 
     }else{
         i64 length = (i64)(curs->end - curs->ptr)+1;
 
@@ -244,7 +253,7 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
 
-        return  Fmt(sm, "Curs<$ $/$ ^DI.\"$^E.$^Ie.$\"^id.>", args);
+        return  Fmt(sm, "Curs\\<$ $/$ ^DI.\"$^E.$^Ie.$\"^id.>", args);
     }
 }
 

@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-static boolean Str_equalsStrPos(Str *a, i32 offsetA, Str *b, i32 offsetB){
+static boolean Str_equalsStrPos(Str *a, i32 offsetA, Str *b, i32 offsetB, i32 total){
     if(a == NULL || b == NULL){
        return FALSE; 
     }
 
-    i32 aLength = a->length - offsetA;
-    i32 bLength = b->length - offsetB;
+    i32 aLength = min(a->length - offsetA, total);
+    i32 bLength = min(b->length - offsetB, total);
     if(aLength < 0 || bLength < 0){
         return FALSE;
     }
@@ -38,14 +38,19 @@ static boolean Str_equalsStrPos(Str *a, i32 offsetA, Str *b, i32 offsetB){
 }
 
 boolean Str_EqualsStr(Str *a, Str *b){
-    return Str_equalsStrPos(a, 0, b, 0);
+    return Str_equalsStrPos(a, 0, b, 0, a->length);
 }
 
 boolean Str_EndMatch(Str *a, Str *b){
     if(b->length > a->length){
         return FALSE;
     }
-    return Str_equalsStrPos(a, a->length - b->length, b, 0);
+    word length = a->length - b->length;
+    return Str_equalsStrPos(a, length, b, 0, length);
+}
+
+boolean Str_StartMatch(Str *a, Str *b, i32 length){
+    return Str_equalsStrPos(a, 0, b, 0, length);
 }
 
 boolean Str_EqualsStrVec(Str *a, StrVec *b){

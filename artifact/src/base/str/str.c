@@ -45,6 +45,20 @@ i64 Str_Add(Str *s, byte *b, i64 length){
     }
 }
 
+status Str_Incr(Str *s, word length){
+    if(s->length == length){
+        s->length = 0;
+        s->type.state |= SUCCESS;
+    }else if(s->length > length){
+        s->bytes += length;
+        s->length -= length;
+    }else{
+        s->length = 0;
+        s->type.state |= ERROR;
+    }
+    return s->type.state;
+}
+
 i64 Str_AddCstr(Str *s, char *cstr){
     i64 len = strlen(cstr);
     return Str_Add(s, (byte *)cstr, len);

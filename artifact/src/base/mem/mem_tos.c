@@ -19,7 +19,7 @@ i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)I16_Wrapped(sm->m, sl->remaining),
         NULL
     };
-    total = Fmt(sm, "Page<^D.$^d.level ^D.$^d.remaining", args);
+    total = Fmt(sm, "Page\\<^D.$^d.level ^D.$^d.remaining", args);
 
     if(flags & DEBUG){
         Stream_Bytes(sm, (byte *)"[ ", 2);
@@ -101,7 +101,7 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     };
 
     if(flags & MORE){
-        total +=  Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
+        total +=  Fmt(sm, "MemCh\\<$pages ^D.$^d.used [", args);
         Iter it;
         Iter_Init(&it, m->it.p);
         while((Iter_Next(&it) & END) == 0){
@@ -113,7 +113,7 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
 
         total +=  Stream_Bytes(sm, (byte *)"]>", 2);
     }else{
-        return  Fmt(sm, "MemCh<used:$>", args);
+        return  Fmt(sm, "MemCh\\<used:$>", args);
     }
     return total;
 }
@@ -134,7 +134,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I8_Wrapped(sm->m, p->dims),
             NULL
         };
-        total += Fmt(sm, "Span<^D.$^d.values/0..$/$dims [", args);
+        total += Fmt(sm, "Span\\<^D.$^d.values/0..$/$dims [", args);
     }
     Iter it;
     Iter_Init(&it, p);
@@ -183,7 +183,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I8_Wrapped(sm->m, it->p->dims),
             NULL
         };
-        total += Fmt(sm, "I<$ $ of $max/$dims\n", args);
+        total += Fmt(sm, "I\\<$ $ of $max/$dims\n", args);
         void *ptr = it->p->root;
         for(i8 i = it->p->dims; i >= 0; i--){
             if(it->stack[i] == NULL && (flags & (MORE|DEBUG))){
@@ -225,7 +225,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
             NULL
         };
-        total += Fmt(sm, "I<$:$ of $>", args);
+        total += Fmt(sm, "I\\<$:$ of $>", args);
     }else{
         total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, sm, a, type, flags);
     }

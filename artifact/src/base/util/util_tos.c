@@ -8,7 +8,7 @@ static i64 Wrapped_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->type.of)),
             NULL
         };
-        return Fmt(sm, "Wr<$>", args);
+        return Fmt(sm, "Wr\\<$>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }
@@ -22,7 +22,7 @@ static i64 WrappedDo_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I64_Wrapped(sm->m, (util)sg->val.ptr),
             NULL
         };
-        return Fmt(sm, "Wdo<$ ^D.*$^d.>", args);
+        return Fmt(sm, "Wdo\\<$ ^D.*$^d.>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }
@@ -37,7 +37,7 @@ static i64 Wrapped_Ptr(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)a,
             NULL
         };
-        return Fmt(sm, "Wptr<$ $>", args);
+        return Fmt(sm, "Wptr\\<$ $>", args);
     }else{
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(sm->m, (util)a),
@@ -55,7 +55,7 @@ static i64 WrappedUtil_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wu<^D.@^d.>", args);
+        return Fmt(sm, "Wu\\<^D.@^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -75,7 +75,7 @@ static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wi64<^D.$^d.>", args);
+        return Fmt(sm, "Wi64\\<^D.$^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -89,7 +89,7 @@ static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wi32<^D.$^d.>", args);
+        return Fmt(sm, "Wi32\\<^D.$^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -103,7 +103,7 @@ static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wi16<^D.$^d.>", args);
+        return Fmt(sm, "Wi16\\<^D.$^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -117,7 +117,7 @@ static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wi8<^D.^d.>", args);
+        return Fmt(sm, "Wi8\\<^D.^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -132,7 +132,7 @@ static i64 WrappedTime64_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wt64<$ ^D.@^d.>", args);
+        return Fmt(sm, "Wt64\\<$ ^D.@^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -145,7 +145,7 @@ static i64 Abstract_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->type.of)),
             NULL
         };
-        return Fmt(sm, "A<$>", args);
+        return Fmt(sm, "A\\<$>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }
@@ -158,7 +158,7 @@ static i64 Single_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->type.of)),
             NULL
         };
-        return Fmt(sm, "Single<$>", args);
+        return Fmt(sm, "Single\\<$>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }

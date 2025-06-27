@@ -200,15 +200,14 @@ i64 ToStream_NotImpl(Stream *sm, Abstract *a, cls type, word flags){
 }
 
 i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
-    if(!_crashing && !_error){
-        DebugStack_Push(a, type);
-    }
+    DebugStack_Push(a, type);
     if((sm->type.state & STREAM_STRVEC) == 0){
         sm->m->type.range++;
     }
     if(a == NULL){
+        i64 total =  Stream_Bytes(sm, (byte *)"NULL", 4);
         DebugStack_Pop();
-        return Stream_Bytes(sm, (byte *)"NULL", 4);
+        return total;
     }
 
     if(type == 0){

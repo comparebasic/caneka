@@ -76,6 +76,29 @@ void DebugStack_SetRef(void *v, word typeOf){
     entry->typeOf = typeOf;
 }
 
+StackEntry *DebugStack_Get(){
+    return (StackEntry *)Span_Get(stack, stack->max_idx);
+}
+
+status DebugStack_Show(Str *style, Str *msg, word flags){
+    if(msg == NULL){
+        msg = Str_Make(OutStream->m, 0);
+    }
+    Abstract *args[] = {
+        (Abstract *)style,
+        /*
+        (Abstract *)msg
+        */
+        NULL
+    };
+    if(flags & DEBUG){
+        Out("$<STACKNAME>:<STACKFILE>: <STACKREF>^0\n", args);
+    }else{
+        Out("$<STACKNAME>: <STACKREF>^0\n", args);
+    }
+    return SUCCESS;
+}
+
 i32 DebugStack_Print(Stream *sm, word flags){
     Iter it;
     Iter_Init(&it, stack);

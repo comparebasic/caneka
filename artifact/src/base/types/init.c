@@ -17,6 +17,7 @@ status Caneka_InitBase(MemCh *m){
     r |= Ifc_Init(md);
     r |= Debug_Init(md);
     r |= StreamTo_Init(md);
+    r |= AnsiStr_Init(md);
     r |= DebugStack_Init(m);
     r |= Hash_Init(m);
     r |= Equals_Init(m);

@@ -2,7 +2,10 @@
 #include <caneka.h>
 
 static status Cursor_SetStr(Cursor *curs){
-    DebugStack_Push(NULL, ZERO);
+    DebugStack_Push(curs, curs->type.of);
+    if(curs->type.state & DEBUG){
+        DebugStack_Show(ansi_purple, NULL, ZERO);
+    }
     if(curs->it.type.state & SUCCESS){
         Str *s = (Str *)curs->it.value;
         if(s != NULL){
@@ -127,7 +130,7 @@ status Cursor_Incr(Cursor *curs, i32 length){
 status Cursor_NextByte(Cursor *curs){
     curs->type.state &= ~CURSOR_STR_BOUNDRY;
     if((curs->type.state & PROCESSING) == 0){
-        Iter_Reset(&curs->it.idx);
+        Iter_Reset(&curs->it);
         Cursor_SetStr(curs);
     }else if(curs->ptr >= curs->end){
         if(curs->it.type.state & LAST){

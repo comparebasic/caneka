@@ -1,6 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
+Str *ansi_black = NULL;
+Str *ansi_red = NULL;
+Str *ansi_yellow = NULL;
+Str *ansi_green = NULL;
+Str *ansi_purple = NULL;
+Str *ansi_blue = NULL;
+Str *ansi_cyan = NULL;
+Str *ansi_dark = NULL;
+
 Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
     char *ptr = *_ptr;
     char c;
@@ -194,3 +203,17 @@ Str *Str_AnsiCstr(MemCh *m, char *cstr){
     return Str_FromAnsi(m, &cstr, cstr+(length-1));
 }
 
+status AnsiStr_Init(MemCh *m){
+    if(ansi_black == NULL){
+        ansi_black = Str_Ref(m, (byte *)"x", 1, 2, STRING_FMT_ANSI);
+        ansi_red = Str_Ref(m, (byte *)"r", 1, 2, STRING_FMT_ANSI);
+        ansi_yellow = Str_Ref(m, (byte *)"y", 1, 2, STRING_FMT_ANSI);
+        ansi_green = Str_Ref(m, (byte *)"g", 1, 2, STRING_FMT_ANSI);
+        ansi_purple = Str_Ref(m, (byte *)"p", 1, 2, STRING_FMT_ANSI);
+        ansi_blue = Str_Ref(m, (byte *)"b", 1, 2, STRING_FMT_ANSI);
+        ansi_cyan = Str_Ref(m, (byte *)"c", 1, 2, STRING_FMT_ANSI);
+        ansi_dark = Str_Ref(m, (byte *)"k", 1, 2, STRING_FMT_ANSI);
+        return SUCCESS;
+    }
+    return NOOP;
+}

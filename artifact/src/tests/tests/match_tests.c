@@ -250,7 +250,7 @@ status MatchKo_Tests(MemCh *gm){
         (Abstract *)I32_Wrapped(m, i),
         NULL
     };
-    r |= Test(i == 9, "It took 10 counts to get to the end, have _i4", args5);
+    r |= Test(i == 9, "It took 10 counts to get to the end, have $", args5);
     i64 total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
 
     Abstract *args6[] = {
