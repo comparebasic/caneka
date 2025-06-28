@@ -207,6 +207,68 @@ status Iter_Tests(MemCh *gm){
     r |= Test(exp == endExpected,
         "177 Was added in the middle of 5k values, ended contigous values expected $, have $", args3);
 
+
+
+    Abstract *arr6[20] = {
+        (Abstract *)Str_CstrRef(m, "FancyOne"),
+        (Abstract *)Str_CstrRef(m, "FancyTwoA"),
+        (Abstract *)Str_CstrRef(m, "FancyThreeA"),
+        (Abstract *)Str_CstrRef(m, "FancyFour"),
+        (Abstract *)Str_CstrRef(m, "FancyFive"),
+        (Abstract *)Str_CstrRef(m, "FancySix"),
+        (Abstract *)Str_CstrRef(m, "FancySixTwo"),
+        (Abstract *)Str_CstrRef(m, "FancySeven"),
+        (Abstract *)Str_CstrRef(m, "FancyEight"),
+        (Abstract *)Str_CstrRef(m, "FancyNine"),
+        (Abstract *)Str_CstrRef(m, "FancyTen"),
+        (Abstract *)Str_CstrRef(m, "FancyEleven"),
+        (Abstract *)Str_CstrRef(m, "FancyTwelve"),
+        (Abstract *)Str_CstrRef(m, "FancyThirteen"),
+        (Abstract *)Str_CstrRef(m, "FancyFourteen"),
+        (Abstract *)Str_CstrRef(m, "FancyFifteen"),
+        (Abstract *)Str_CstrRef(m, "FancySixteen"),
+        (Abstract *)Str_CstrRef(m, "FancySeventeen"),
+        (Abstract *)Str_CstrRef(m, "FancyEighteen"),
+        NULL
+    };
+
+    Abstract **item = NULL;
+    p = Span_Make(m);
+    Iter_Init(&it, p);
+    ptr = arr6;
+    Abstract *first = *ptr;
+    while(*ptr != NULL){
+        item = ptr;
+        Iter_Add(&it, *item);
+        ptr++;
+    }
+
+    Iter_Reset(&it);
+
+    while((Iter_Prev(&it) & END) == 0){
+        Abstract *found = Iter_Get(&it);
+        Abstract *args[] = {
+            (Abstract *)*item,
+            (Abstract *)found,
+            NULL
+        };
+
+        r |= Test(Equals(*item, found), 
+            "Iter_Prev set of values gives expected, expected @, have @", args);
+        if((it.type.state & LAST) == 0){
+            item--;
+        }
+    }
+
+    Abstract *args[] = {
+        (Abstract *)*item,
+        (Abstract *)first,
+        NULL
+    };
+
+    r |= Test(Equals(*item, first), 
+        "Iter_Prev ends at first value, expected @, have @", args);
+
     m->type.range--;
     MemCh_Free(m);
     DebugStack_Pop();

@@ -2,10 +2,12 @@ extern i32 _stackIdx;
 extern i32 DEBUG_STACK_COLOR;
 
 typedef struct debug_stack {
+    Type type;
+    word typeOf;
+    word _;
     char *funcName;
     char *fname;
     void *ref;
-    word typeOf;
     i32 line;
     i32 pos;
 } StackEntry;

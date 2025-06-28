@@ -103,7 +103,7 @@ status Roebling_RunCycle(Roebling *rbl){
         rbl->type.state &= ~ROEBLING_NEXT;
     }
 
-    Single *wdof = Iter_Get(&rbl->parseIt);
+    Single *wdof = Iter_GetByIdx(&rbl->parseIt, rbl->parseIt.idx);
     if(wdof == NULL){
         if((rbl->type.state & ROEBLING_REPEAT) != 0){
             rbl->type.state |= ROEBLING_NEXT;
@@ -152,7 +152,6 @@ i32 Roebling_GetMatchIdx(Roebling *rbl){
 status Roebling_ResetPatterns(Roebling *rbl){
     if(rbl->m->type.range > 0){
         MemCh_Free(rbl->m);
-        Iter_Init(&rbl->matchIt, Span_Make(rbl->m));
     }
 
     Span *p = Span_Make(rbl->m);
@@ -211,7 +210,7 @@ status Roebling_AddMark(Roebling *rbl, Single *sg){
 status Roebling_AddStep(Roebling *rbl, Abstract *step){
     word fl = SPAN_OP_ADD;
     if(step->type.of == TYPE_WRAPPED_DO){
-        Single *sg = rbl->parseIt.value;
+        Single *sg = (Single *)Iter_Current(&rbl->parseIt);
         if(sg != NULL && sg->type.of == TYPE_WRAPPED_I16){
             Roebling_AddMark(rbl, sg);
             fl = SPAN_OP_SET;
@@ -228,7 +227,7 @@ status Roebling_AddStep(Roebling *rbl, Abstract *step){
     if(fl == SPAN_OP_ADD){
         return Iter_Add(&rbl->parseIt, step);
     }else{
-        return Iter_Set(&rbl->parseIt, step);
+        return Iter_SetByIdx(&rbl->parseIt, rbl->parseIt.idx, step);
     }
 }
 

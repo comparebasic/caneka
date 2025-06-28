@@ -50,6 +50,7 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
     stack->m->type.range--;
 
     StackEntry *entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
+    entry->type.of = TYPE_DEBUG_STACK_ENTRY;
     entry->funcName = cstr;
     entry->fname = fname;
     entry->ref = ref;
@@ -100,27 +101,22 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
 }
 
 i32 DebugStack_Print(Stream *sm, word flags){
+    i64 total = 0;
+
     Iter it;
     Iter_Init(&it, stack);
-    boolean first = TRUE;
+    Abstract *args[] = {
+        (Abstract *)stack,
+        (Abstract *)&it,
+        NULL
+    };
+    Iter_Prev(&it);
+    Out("Debug Stack &\n&", args);
+
+    /*
     while((Iter_Prev(&it) & END) == 0){
-        StackEntry *entry = (StackEntry*)it.value;
-        if(entry != NULL){
-            Stream_Bytes(sm, (byte *)"    \x1b[1;33m", 12);
-            Stream_Bytes(sm, (byte *)entry->funcName, strlen(entry->funcName));
-            Stream_Bytes(sm, (byte *)"\x1b[22m:", 6);
-            Stream_Bytes(sm, (byte *)entry->fname, strlen(entry->fname));
-            if(flags & MORE && entry->ref != NULL){
-                Stream_Bytes(sm, (byte *)" - \x1b[1m", 8);
-                if(entry->typeOf == TYPE_CSTR){
-                    Str *s = Str_CstrRef(sm->m, (char *)entry->ref);
-                    ToS(sm, (Abstract *)s, s->type.of, MORE);
-                }else if(entry->typeOf != 0){
-                    ToS(sm, entry->ref, entry->typeOf, MORE|DEBUG);
-                }
-            }
-            Stream_Bytes(sm, (byte *)"\x1b[0m\n", 5);
-        }
+        total += ToS(sm, it.value, 0, flags);
     }
-    return 0;
+    */
+    return total;
 }

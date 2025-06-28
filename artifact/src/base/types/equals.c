@@ -17,7 +17,7 @@ status Equals_Init(MemCh *m){
 boolean Equals(Abstract *a, Abstract *b){
     if(a == NULL || b == NULL){
         return FALSE;
-    }if( a == b){
+    }else if( a == b){
         return TRUE;
     }else if(a->type.of == TYPE_STR){
         if(a->type.of == b->type.of){

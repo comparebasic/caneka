@@ -259,17 +259,15 @@ static status _Iter_Prev(Iter *it){
         goto end;
     }
 
-    if((it->type.state & END) || !(it->type.state & PROCESSING)){
-        word fl = it->type.state & ~(END|LAST);
-        idx = it->p->max_idx;
-        Iter_Setup(it, it->p, fl, idx);
-        it->type.state |= (fl|PROCESSING);
+    if((it->type.state & END) || (it->type.state & PROCESSING) == 0){
+        idx = it->idx = it->p->max_idx;
+        it->type.state &= ~(END|LAST);
+        it->type.state |= PROCESSING;
 
         word prev = it->type.state & SPAN_OP_REMOVE;
         it->type.state &= ~SPAN_OP_REMOVE;
         Iter_Query(it);
         it->type.state |= prev;
-
         goto end;
     }else{
         if(it->idx == it->p->max_idx && (it->type.state & SPAN_OP_REMOVE)){
@@ -296,7 +294,7 @@ static status _Iter_Prev(Iter *it){
         }else{
             i32 incr = 1;
             while(it->value == NULL && dim <= topDim && 
-                    idx <= it->p->max_idx){
+                    idx >= 0){
                 if((it->stackIdx[dim] - incr) >= 0){
                     it->stackIdx[dim] -= incr;
 
@@ -308,8 +306,7 @@ static status _Iter_Prev(Iter *it){
 
                     ptr += it->stackIdx[dim];
                     it->stack[dim] = ptr;
-                    idx += _increments[dim];
-
+                    idx -= _increments[dim];
                     if(dim == 0){
                         if(ptr != NULL){
                             it->value = *ptr;
@@ -320,6 +317,7 @@ static status _Iter_Prev(Iter *it){
                             goto end;
                         }
                     }else if(*ptr != NULL){
+                        idx += _increments[dim]-1;
                         i32 offset = idx & _modulos[dim];
                         while(dim-1 >= 0){
                             dim--;
@@ -328,6 +326,8 @@ static status _Iter_Prev(Iter *it){
                             }else{
                                 ptr = *((void **)it->stack[dim+1]);
                             }
+                            it->stackIdx[dim] = (SPAN_STRIDE-1);
+                            ptr += it->stackIdx[dim];
                             it->stack[dim] = ptr;
                             if(ptr == NULL){
                                 dim++;
@@ -350,6 +350,11 @@ static status _Iter_Prev(Iter *it){
     }
 end:
     it->idx = idx;
+    if(idx == 0){
+        it->type.state |= LAST;
+    }else{
+        it->type.state &= ~LAST;
+    }
     if(((it->type.state & SPAN_OP_GET) && it->value != NULL)){
         it->type.state &= ~NOOP;
         it->type.state |= SUCCESS;
@@ -575,7 +580,7 @@ void *Iter_Get(Iter *it){
 }
 
 status Iter_Reset(Iter *it){
-    it->type.state = it->type.state & DEBUG;
+    it->type.state &= DEBUG;
     it->idx = 0;
     return SUCCESS;
 }

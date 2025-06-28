@@ -36,6 +36,7 @@ status StreamTo_Init(MemCh *m){
         Sequence_ToSInit(m, ToStreamLookup);
         Util_ToSInit(m, ToStreamLookup);
         Mem_InitLabels(m, ToSFlagLookup);
+        Debug_ToSInit(m, ToSFlagLookup);
         r |= SUCCESS;
     }
 
