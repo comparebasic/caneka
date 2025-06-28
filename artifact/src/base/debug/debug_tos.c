@@ -25,8 +25,6 @@ static i64 StackEntry_Print(Stream *sm, Abstract *a, cls type, word flags){
 
 status Debug_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
-    /*
     r |= Lookup_Add(m, lk, TYPE_DEBUG_STACK_ENTRY, (void *)StackEntry_Print);
-    */
     return r;
 }

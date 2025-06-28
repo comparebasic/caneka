@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static Span *stack = NULL;
+static Iter _it;
 static boolean _fuse = TRUE;
 static void sigH(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
@@ -34,19 +34,17 @@ static void setSigs(){
 }
 
 i32 DEBUG_STACK_COLOR = COLOR_GREEN;
-i32 _stackIdx = 0;
 
 status DebugStack_Init(MemCh *m){
-    _stackIdx = 0;
-    stack = Span_Make(m);
+    Iter_Init(&_it,Span_Make(m));
     setSigs();
-
-    i32 idx;
-    MemPage *pg = MemCh_GetPage(m, stack, &idx);
+    DebugStack_Push(NULL, ZERO);
+    Iter_PrevRemove(&_it);
     return SUCCESS;
 }
 
 void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line, i32 pos){
+    Span *stack = _it.p;
     stack->m->type.range--;
 
     StackEntry *entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
@@ -58,18 +56,17 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
     entry->line = line;
     entry->pos = pos;
 
-    Span_Set(stack, _stackIdx++, (Abstract*)entry);
-
+    Iter_Add(&_it, (Abstract*)entry);
+    _it.type.state |= PROCESSING;
     stack->m->type.range++;
 }
 
 void DebugStack_Pop(){
-    _stackIdx--;
-    stack->max_idx = _stackIdx;
+    Iter_PrevRemove(&_it);
 }
 
 void DebugStack_SetRef(void *v, word typeOf){
-    StackEntry *entry = Span_Get(stack, _stackIdx-1);
+    StackEntry *entry = Iter_Current(&_it);
     if(entry == NULL){
         return;
     }
@@ -78,7 +75,7 @@ void DebugStack_SetRef(void *v, word typeOf){
 }
 
 StackEntry *DebugStack_Get(){
-    return (StackEntry *)Span_Get(stack, stack->max_idx);
+    return (StackEntry *)Iter_Current(&_it);
 }
 
 status DebugStack_Show(Str *style, Str *msg, word flags){
@@ -102,21 +99,8 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
 
 i32 DebugStack_Print(Stream *sm, word flags){
     i64 total = 0;
-
-    Iter it;
-    Iter_Init(&it, stack);
-    Abstract *args[] = {
-        (Abstract *)stack,
-        (Abstract *)&it,
-        NULL
-    };
-    Iter_Prev(&it);
-    Out("Debug Stack &\n&", args);
-
-    /*
-    while((Iter_Prev(&it) & END) == 0){
-        total += ToS(sm, it.value, 0, flags);
+    while((Iter_Prev(&_it) & END) == 0){
+        total += ToS(sm, _it.value, 0, flags);
     }
-    */
     return total;
 }
