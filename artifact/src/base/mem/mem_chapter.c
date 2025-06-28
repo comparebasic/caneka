@@ -186,9 +186,8 @@ status MemCh_Setup(MemCh *m, MemPage *pg){
     p->m = m;
     p->max_idx = -1;
     p->root = (slab *)BytesPage_Alloc(pg, sizeof(slab));
-    Iter_Setup(&m->it, p, SPAN_OP_SET, 0);
-    m->it.value = (void *)pg;
-    status r = Iter_Query(&m->it);
+    Iter_Init(&m->it, p);
+    status r = Iter_SetByIdx(&m->it, 0, (void *)pg);
     m->it.type.state = ((m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET);
     return r;
 }

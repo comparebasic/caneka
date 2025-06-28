@@ -94,14 +94,7 @@ status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
 
     MemBook *book = MemBook_get(m);
-    Iter_Setup(&book->recycled, book->recycled.p, SPAN_OP_ADD, book->recycled.idx);
-    book->recycled.value = pg;
-    status r = Iter_Query(&book->recycled);
-
-    book->recycled.type.state &= ~SPAN_OP_ADD;
-    book->recycled.type.state |= SPAN_OP_GET;
-
-    return r;
+    return Iter_Add(&book->recycled, pg);
 }
 
 void *MemBook_GetPage(void *addr){
@@ -110,11 +103,10 @@ void *MemBook_GetPage(void *addr){
         book = MemBook_get(NULL);
     }
     i32 idx = -1;
-    Iter_Reset(&book->recycled);
     if(book->recycled.p->nvalues > 0){
-        idx = book->recycled.p->max_idx;
-        void *page = Span_Get(book->recycled.p, idx);
-        Span_Remove(book->recycled.p, idx);
+        i32 idx = book->recycled.p->max_idx;
+        void *page = Iter_GetByIdx(&book->recycled, idx);
+        Iter_RemoveByIdx(&book->recycled, idx);
         return page;
     }else{
         for(i32 i = pageIdx; i < PAGE_MAX; i++){
@@ -176,7 +168,7 @@ MemBook *MemBook_Make(MemBook *prev){
     p->m = &book->m;
     p->root = (slab *)BytesPage_Alloc(pg, sizeof(slab));
 
-    Iter_Setup(&book->recycled, p, SPAN_OP_GET, 0);
+    Iter_Init(&book->recycled, p);
 
     return book;
 }

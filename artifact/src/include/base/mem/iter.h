@@ -36,5 +36,7 @@ status Iter_Add(Iter *it, void *value);
 status Iter_Insert(Iter *it, i32 idx, void *value);
 status Iter_SetByIdx(Iter *it, i32 idx, void *value);
 void *Iter_Get(Iter *it);
+void *Iter_Current(Iter *it);
 status Iter_RemoveByIdx(Iter *it, i32 idx);
 void *Iter_GetByIdx(Iter *it, i32 idx);
+status Iter_ExpandTo(Iter *it, i32 idx);

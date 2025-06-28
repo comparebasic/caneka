@@ -92,9 +92,9 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
         NULL
     };
     if(flags & DEBUG){
-        Out("$<STACKNAME>:<STACKFILE>: <STACKREF>^0\n", args);
+        Out("$[STACKNAME]:[STACKFILE]: [STACKREF]^0\n", args);
     }else{
-        Out("$<STACKNAME>: <STACKREF>^0\n", args);
+        Out("$[STACKNAME]: [STACKREF]^0\n", args);
     }
     return SUCCESS;
 }

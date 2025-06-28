@@ -196,7 +196,7 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
         }
         if(dim == 0){
             if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE|SPAN_OP_ADD)){
-                ptr = (void **)it->stack[dim];
+                ptr = (void **)it->stack[0];
                 it->type.state |= SUCCESS;
                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                     *ptr = it->value;
@@ -363,18 +363,8 @@ end:
 
 status Iter_Set(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
-    Span *p = it->p;
-    void **ptr = (void **)it->p->root;
-    if(p->dims > 0){
-        ptr = (void **)*((void **)it->stack[1]);
-    }
-    ptr += (it->idx & _modulos[1]);
-    *ptr = value;
-    p->nvalues++;
-    if(it->idx > p->max_idx){
-        p->max_idx = it->idx;
-    }
-    return SUCCESS;
+    it->value = value;
+    return Iter_Query(it);
 }
 
 status Iter_RemoveByIdx(Iter *it, i32 idx){
@@ -528,6 +518,13 @@ status Iter_SetByIdx(Iter *it, i32 idx, void *value){
     return r;
 }
 
+status Iter_ExpandTo(Iter *it, i32 idx){
+    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_RESERVE|SPAN_OP_SET);
+    it->idx = idx;
+    it->value = NULL;
+    return Iter_Query(it);
+}
+
 status Iter_Add(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
     it->idx = it->p->max_idx;
@@ -546,6 +543,21 @@ status Iter_Insert(Iter *it, i32 idx, void *value){
     return r;
 }
 
+void *Iter_Current(Iter *it){
+    if(it->idx < 0){
+        return NULL;
+    }
+    it->type.state &= ~(SUCCESS|NOOP);
+    void **ptr = (void **)it->stack[0];
+    if(ptr != NULL){
+        it->value = *ptr;
+        it->type.state |= SUCCESS;
+    }else{
+        it->value = NULL;
+        it->type.state |= NOOP;
+    }
+    return it->value;
+}
 
 void *Iter_GetByIdx(Iter *it, i32 idx){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
@@ -563,7 +575,7 @@ void *Iter_Get(Iter *it){
 }
 
 status Iter_Reset(Iter *it){
-    it->type.state = (it->type.state & (UPPER_FLAGS|DEBUG)) | END;
+    it->type.state = it->type.state & DEBUG;
     it->idx = 0;
     return SUCCESS;
 }

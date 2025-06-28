@@ -16,7 +16,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
         if((state & NOOP) != 0){
             state &= ~NOOP;
             goto next;
-        }else if(c == '\\'  || c == '<' || c == '$' || c == '@' || c == '&' || c == '^'){
+        }else if(c == '\\'  || /*c == '[' ||*/ c == '$' || c == '@' || c == '&' || c == '^'){
             if(c == '\\'){
                 if(start < ptr){
                     word length = (word)((ptr) - start);
@@ -36,12 +36,13 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             }
         }
 
-        if(c == '<' && ((state & NOOP) == 0)){
+        /*
+        if(c == '[' && ((state & NOOP) == 0)){
             state |= PROCESSING; 
             start = ptr+1;
             goto next;
         }else if(state & PROCESSING){
-            if(c == '>' && ((state & NOOP) == 0)){
+            if(c == ']' && ((state & NOOP) == 0)){
                 word length = (word)(ptr - start);
                 if(length > 0){
                     Str *token = Str_From(sm->m, (byte *)start, length); 
@@ -74,6 +75,8 @@ varnext:
             }
             goto next;
         }else if(c == '$' || c == '@' || c == '&'){
+            */
+        if(c == '$' || c == '@' || c == '&'){
             if(c == '@'){
                 state |= MORE;
             }else{

@@ -27,10 +27,8 @@ status Span_SetRaw(Span *p, i32 idx, util *u){
     }
     p->type.state |= FLAG_SPAN_RAW;
     Iter it;
-    memset(&it, 0, sizeof(Iter));
-    Iter_Setup(&it, p, SPAN_OP_SET, idx);
-    it.value = (void *)*u;
-    return Iter_Query(&it);
+    Iter_Init(&it, p);
+    return Iter_SetByIdx(&it, idx, (void *)*u);
 }
 
 util Span_GetRaw(Span *p, i32 idx){
@@ -43,12 +41,8 @@ util Span_GetRaw(Span *p, i32 idx){
         return 0;
     }
     Iter it;
-    memset(&it, 0, sizeof(Iter));
-    Iter_Setup(&it, p, SPAN_OP_GET, idx);
-    if(Iter_Query(&it) & SUCCESS){
-        return (util)it.value;
-    }
-    return (util)0;
+    Iter_Init(&it, p);
+    return (util)Iter_GetByIdx(&it, idx);
 }
 
 status Span_Wipe(Span *p){
@@ -58,11 +52,11 @@ status Span_Wipe(Span *p){
 status Span_Cull(Span *p, i32 count){
     status r = READY;
     Iter it;
+    Iter_Init(&it, p);
     while(count-- > 0){
         i32 idx = p->max_idx;
         if(idx >= 0){
-            Iter_Setup(&it, p, SPAN_OP_REMOVE, idx);
-            r |= Iter_Query(&it);
+            r |= Iter_PrevRemove(&it);
         }
     }
 
@@ -93,11 +87,8 @@ status Span_Insert(Span *p, i32 idx, Abstract *t){
         return NOOP;
     }
     Iter it;
-    memset(&it, 0, sizeof(Iter));
-    Iter_Setup(&it, p, (SPAN_OP_ADD|FLAG_ITER_CONTINUE), idx);
-    it.value = (void *)t;
-    status r = Iter_Query(&it);
-    return r;
+    Iter_Init(&it, p);
+    return Iter_Insert(&it, idx, t);
 }
 
 status Span_Add(Span *p, Abstract *t){
@@ -105,9 +96,6 @@ status Span_Add(Span *p, Abstract *t){
         return NOOP;
     }
     Iter it;
-    memset(&it, 0, sizeof(Iter));
-    Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
-    it.value = (void *)t;
-    status r = Iter_Query(&it);
-    return r;
+    Iter_Init(&it, p);
+    return Iter_Add(&it, t);
 }

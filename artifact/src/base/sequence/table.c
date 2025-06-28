@@ -71,12 +71,11 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
             tbl->type.state |= SUCCESS;
         }
     }
+
     if(tbl->nvalues > dim_nvalue_max[tbl->dims]){
-        Iter_Setup(it, tbl, SPAN_OP_ADD, _capacity[tbl->dims]);
-        Iter_Query(it);
-        Iter_Setup(it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
-        Iter_Query(it);
-        Str *z = Str_CstrRef(tbl->m, "hi");
+        i8 dims = tbl->dims;
+        Iter_ExpandTo(it, _capacity[tbl->dims]);
+        printf("Expanding %d to %d from %d\n", _capacity[tbl->dims], (i32)tbl->dims, (i32)dims);
     }
 
     return h;
@@ -98,8 +97,7 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
     i32 count = 0;
     while((tbl->type.state & SUCCESS) == 0 &&
             (Table_HKeyVal(tbl, &hk) & END) == 0){
-        it.idx = hk.idx;
-        Iter_Query(&it);
+        Iter_GetByIdx(&it, hk.idx);
         h = Table_getOrSet(tbl, op, &it, &hk, key, value, hash);
     }
 

@@ -26,12 +26,10 @@ i64 Stream_ToStrVec(Stream *sm, byte *b, i32 length){
     Cursor *curs = sm->dest.curs;
     StrVec *v = sm->dest.curs->v;
     while(length > 0 ){
-        Str *s = curs->it.value;
+        Str *s = Iter_Current(&curs->it);
         if(s == NULL || s->length == s->alloc){
-            curs->it.type.state = 
-                (curs->it.type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
-            s = curs->it.value = Str_Make(sm->m, sz);
-            Iter_Query(&curs->it);
+            s = Str_Make(sm->m, sz);
+            Iter_Add(&curs->it, s);
         }
 
         taken = Str_Add(s, b+offset, length);
