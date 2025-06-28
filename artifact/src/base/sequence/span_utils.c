@@ -56,7 +56,8 @@ status Span_Cull(Span *p, i32 count){
     while(count-- > 0){
         i32 idx = p->max_idx;
         if(idx >= 0){
-            r |= Iter_PrevRemove(&it);
+            r |= Iter_Prev(&it);
+            Iter_RemoveByIdx(&it, it.idx);
         }
     }
 
