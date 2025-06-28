@@ -10,12 +10,14 @@ static status Cursor_SetStr(Cursor *curs){
             curs->ptr = s->bytes;
             curs->end = s->bytes+(s->length-1);
             curs->type.state |= PROCESSING;
+            DebugStack_Pop();
             return SUCCESS;
         }else{
             curs->ptr = NULL;
             curs->end = NULL;
         }
     }
+    DebugStack_Pop();
     return NOOP;
 }
 
@@ -24,6 +26,7 @@ status Cursor_Decr(Cursor *curs, i32 length){
     if((curs->type.state & PROCESSING) == 0){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Unable to decr cursor that is not in PROCESSING", NULL);
+        DebugStack_Pop();
         return ERROR;
     }
     curs->type.state &= ~NOOP;

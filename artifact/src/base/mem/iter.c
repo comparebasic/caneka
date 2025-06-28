@@ -509,8 +509,9 @@ end:
 }
 
 status Iter_PrevRemove(Iter *it){
-    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|SPAN_OP_REMOVE);
-    Iter_Prev(it);
+    it->type.state = ((it->type.state & NORMAL_FLAGS) & ~(LAST|END)) | 
+        (SPAN_OP_GET|SPAN_OP_REMOVE|FLAG_ITER_REVERSE);
+    _Iter_Prev(it);
     return it->type.state;
 }
 
@@ -528,6 +529,15 @@ status Iter_ExpandTo(Iter *it, i32 idx){
     it->idx = idx;
     it->value = NULL;
     return Iter_Query(it);
+}
+
+status Iter_Push(Iter *it, void *value){
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
+    it->idx = it->p->max_idx;
+    it->value = value;
+    status r = Iter_Query(it);
+    it->type.state |= PROCESSING;
+    return r;
 }
 
 status Iter_Add(Iter *it, void *value){
@@ -586,7 +596,7 @@ status Iter_Reset(Iter *it){
 }
 
 status Iter_Prev(Iter *it){
-    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
+    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|FLAG_ITER_REVERSE);
     return _Iter_Prev(it);
 }
 

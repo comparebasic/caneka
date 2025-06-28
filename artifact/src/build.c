@@ -111,6 +111,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "binpin_tests.c",
     "file_tests.c",
     "fmthtml_tests.c",
+    "debugstack_tests.c",
     NULL
 }};
 

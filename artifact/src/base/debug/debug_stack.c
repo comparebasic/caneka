@@ -56,12 +56,12 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
     entry->line = line;
     entry->pos = pos;
 
-    Iter_Add(&_it, (Abstract*)entry);
-    _it.type.state |= PROCESSING;
+    Iter_Push(&_it, (Abstract*)entry);
     stack->m->type.range++;
 }
 
 void DebugStack_Pop(){
+    _it.type.state |= DEBUG;
     Iter_PrevRemove(&_it);
 }
 
@@ -99,8 +99,10 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
 
 i32 DebugStack_Print(Stream *sm, word flags){
     i64 total = 0;
-    while((Iter_Prev(&_it) & END) == 0){
-        total += ToS(sm, _it.value, 0, flags);
+    Iter it;
+    Iter_Init(&it, _it.p);
+    while((Iter_Prev(&it) & END) == 0){
+        total += ToS(sm, it.value, 0, flags);
     }
     return total;
 }

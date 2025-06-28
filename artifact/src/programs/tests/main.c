@@ -71,6 +71,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "DebugStack Tests",
+        DebugStack_Tests,
+        "Testing DebugStack crash debugging system",
+        FEATURE_COMPLETE,
+    },
+    {
         "Hash",
         Hash_Tests,
         "Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.",

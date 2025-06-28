@@ -28,6 +28,7 @@ status Iter_Next(Iter *it);
 status Iter_Prev(Iter *it);
 status Iter_PrevRemove(Iter *it);
 status Iter_Reset(Iter *it);
+status Iter_Push(Iter *it, void *value);
 void Iter_Init(Iter *it, Span *p);
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx);
 Iter *Iter_Make(struct mem_ctx *m, Span *p);
