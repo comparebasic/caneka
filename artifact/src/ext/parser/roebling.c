@@ -10,9 +10,9 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         Iter_Reset(&rbl->matchIt);
         if(rbl->curs->type.state & CURSOR_STR_BOUNDRY){
             while((Iter_Next(&rbl->matchIt) & END) == 0){
-                Match *mt = rbl->matchIt.value;
+                Match *mt = Iter_Current(&rbl->matchIt);
                 if(mt->type.state & PROCESSING){
-                    Match_AddBoundrySnip(rbl->m, (Match *)rbl->matchIt.value);
+                    Match_AddBoundrySnip(rbl->m, (Match *)Iter_Current(&rbl->matchIt));
                 }
             }
             Iter_Reset(&rbl->matchIt);
@@ -21,7 +21,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         byte c = *(rbl->curs->ptr);
         i32 noopCount = 0;
         while((Iter_Next(&rbl->matchIt) & END) == 0){
-            Match *mt = (Match *)rbl->matchIt.value;
+            Match *mt = (Match *)Iter_Current(&rbl->matchIt);
             DebugStack_SetRef(mt, mt->type.of);
 
             if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
@@ -34,7 +34,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                         i32 idx = rbl->matchIt.idx;
                         Iter_Reset(&rbl->matchIt);
                         while((Iter_Next(&rbl->matchIt) & END) == 0){
-                            Match *omt = (Match *)rbl->matchIt.value;
+                            Match *omt = (Match *)Iter_Current(&rbl->matchIt);
                             if(omt != mt && (omt->type.state & MATCH_LAST_TERM)){
                                 SnipSpan_Add(omt->backlog, &omt->snip);
                                 i64 total = SnipSpan_Total(mt->backlog, ~SNIP_SKIPPED);
@@ -56,6 +56,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 }
 
                 Guard_Reset(&rbl->guard);
+    
                 DebugStack_Pop();
                 return rbl->type.state;
             }
@@ -64,6 +65,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 if(++noopCount == rbl->matchIt.p->nvalues){
                     rbl->type.state |= (NOOP|END|ERROR);
                     Guard_Reset(&rbl->guard);
+
                     DebugStack_Pop();
                     return rbl->type.state;
                 }
@@ -81,6 +83,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
 
     rbl->type.state |= (rbl->curs->type.state & END);
     Guard_Reset(&rbl->guard);
+
     DebugStack_Pop();
     return rbl->type.state;
 }
@@ -93,7 +96,7 @@ status Roebling_RunCycle(Roebling *rbl){
     }
     rbl->type.state &= ~END;
     if((rbl->type.state & ROEBLING_NEXT) != 0){
-        Match *mt = rbl->matchIt.value;
+        Match *mt = Iter_Current(&rbl->matchIt);
         rbl->tail = 0;
         if(mt != NULL && (mt->type.state & MATCH_JUMP)){
             rbl->parseIt.idx = mt->jump;
@@ -142,7 +145,7 @@ status Roebling_Run(Roebling *rbl){
 }
 
 Match *Roebling_GetMatch(Roebling *rbl){
-    return rbl->matchIt.value;
+    return Iter_Current(&rbl->matchIt);
 }
 
 i32 Roebling_GetMatchIdx(Roebling *rbl){

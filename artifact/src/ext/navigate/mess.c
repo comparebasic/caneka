@@ -19,6 +19,7 @@ status Mess_Outdent(Mess *mess){
 }
 
 status Mess_Compare(MemCh *m, Mess *a, Mess *b){
+    DebugStack_Push(a, a->type.of);
     Comp *comp = Comp_Make(m, (Abstract *)a->root, (Abstract *)b->root);
     if(a->type.state & DEBUG){
         comp->type.state |= DEBUG;
@@ -32,6 +33,7 @@ status Mess_Compare(MemCh *m, Mess *a, Mess *b){
         Debug("^p.End Compare @^0.\n", args);
     }
 
+    DebugStack_Pop();
     return Compare(comp);
 }
 
@@ -58,6 +60,7 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
             }
             Table_Set(mess->nextAtts, (Abstract *)I16_Wrapped(mess->m, tk->captureKey),
                 (Abstract *)a);
+            DebugStack_Pop();
             return mess->type.state;
         }
     }else if(tk->typeOf == TYPE_NODE || tk->typeOf == TYPE_RELATION){

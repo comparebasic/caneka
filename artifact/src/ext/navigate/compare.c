@@ -12,7 +12,7 @@ status Compare(Comp *comp){
         return comp->type.state;
     }
 
-    CompResult *cr = comp->it.value;
+    CompResult *cr = Iter_Current(&comp->it);
     if(cr == NULL){
         comp->type.state |= ERROR;
         return comp->type.state;
@@ -183,6 +183,7 @@ Comp *Comp_Make(MemCh *m, Abstract *a, Abstract *b){
         return comp;
     }
 
-    Iter_SetByIdx(&comp->it, 0, (Abstract *)cr);
+    Iter_Init(&comp->it, Span_Make(m));
+    Iter_Add(&comp->it, (Abstract *)cr);
     return comp;
 }
