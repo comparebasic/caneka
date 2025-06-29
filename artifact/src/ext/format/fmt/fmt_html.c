@@ -5,7 +5,7 @@ static Lookup *fmtToHtmlLookup = NULL;
 
 static i64 tableFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = ctx->it.value;
+    Abstract *a = Iter_Current(&ctx->it);
     if(flags & TRANSP_OPEN){
         Str *s = Str_CstrRef(ctx->m, "TABLE");
         total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
@@ -27,7 +27,7 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
             }
             Str *s = Str_CstrRef(ctx->m, "TD");
             total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
-            total += ToS(ctx->sm, rel->it.value, 0, ZERO);
+            total += ToS(ctx->sm, Iter_Current(&rel->it), 0, ZERO);
             total += Tag_Out(ctx->sm, (Abstract *)s, TAG_CLOSE);
             if(rel->type.state & RELATION_ROW_END){
                 Str *s = Str_CstrRef(ctx->m, "TR");
@@ -51,7 +51,7 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
 
 static i64 bulletFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = ctx->it.value;
+    Abstract *a = Iter_Current(&ctx->it);
     if(flags & TRANSP_OPEN){
         Str *s = Str_CstrRef(ctx->m, "UL");
         total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
@@ -75,7 +75,7 @@ static i64 bulletFunc(TranspCtx *ctx, word flags){
 
 static i64 headerFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = ctx->it.value;
+    Abstract *a = Iter_Current(&ctx->it);
     Str *s = Str_Make(ctx->m, 1+MAX_BASE10);
     if((flags & (TRANSP_OPEN|TRANSP_CLOSE)) && a->type.of == TYPE_NODE){
         Node *nd = (Node *)a;
@@ -132,7 +132,7 @@ static i64 imageFunc(TranspCtx *ctx, word flags){
 
 static i64 paragraphFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = ctx->it.value;
+    Abstract *a = Iter_Current(&ctx->it);
     Str *s = Str_CstrRef(ctx->m, "P");
     if(flags & TRANSP_OPEN){
         total += Tag_Out(ctx->sm, (Abstract *)s, ZERO);
@@ -167,7 +167,16 @@ status Fmt_ToHtml(Stream *sm, Mess *mess){
         return ERROR;
     }
 
+    if(mess->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)mess,
+            NULL
+        };
+        Out("^y.Fmt_ToHtml(&)\n", args);
+    }
+
     TranspCtx *ctx = TranspCtx_Make(sm->m, sm, fmtToHtmlLookup);
+    ctx->type.state |= (mess->type.state & DEBUG);
     mess->transp = ctx;
 
     Iter_SetByIdx(&ctx->it, 0, (Abstract *)mess->root);
