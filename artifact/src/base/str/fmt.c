@@ -106,7 +106,6 @@ varnext:
                 goto next;
             }
             cls type = a->type.of;
-            cls stateOf = a->type.state;
             if(a->type.of == TYPE_STR){
                 Str *s = (Str *)a;
                 if(s->type.state & STRING_FMT_ANSI){
@@ -118,7 +117,6 @@ varnext:
                     }else{
                         a = (Abstract *)a;
                         type = s->type.of;
-                        stateOf = a->type.state;
                     }
                 }else if(s->type.state & STRING_BINARY){
                     total += Bits_Print(sm, s->bytes, s->length, 
@@ -135,7 +133,7 @@ varnext:
                 type = sg->objType.of;
                 a = sg->val.ptr;
             }
-            total += ToS(sm, a, type, (state & (MORE|DEBUG)) | stateOf);
+            total += ToS(sm, a, type, (state & (MORE|DEBUG)));
             state |= SUCCESS;
             goto next;
         }else if(c == '^'){

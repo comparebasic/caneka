@@ -37,6 +37,7 @@ i32 main(int argc, char **argv){
 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);
+    rbl->type.state |= DEBUG;
     Roebling_Run(rbl);
 
     Stream *sm = Stream_MakeStrVec(m); 

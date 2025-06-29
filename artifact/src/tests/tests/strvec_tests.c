@@ -102,7 +102,7 @@ status StrVec_Tests(MemCh *gm){
         (Abstract *)vc,
         NULL
     };
-    Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ @ $ $ $", args3);
+    Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $", args3);
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");
 

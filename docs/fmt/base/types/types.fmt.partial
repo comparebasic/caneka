@@ -1,0 +1,5 @@
+= Types
+
+The type system for Caneka uses a 16 bit value indicating it's type follwed by
+a 16 bit field of potential stateful flags.
+

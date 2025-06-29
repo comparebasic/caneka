@@ -76,7 +76,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                     (Abstract *)rbl,
                     NULL
                 };
-                Out("^p.Matche Run(^D.$^d.): @^0.\n", args);
+                Out("^p.Match Run(^D.$^d.): @^0.\n", args);
             }
         }
     }
