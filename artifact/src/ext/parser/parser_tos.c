@@ -142,8 +142,9 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)rbl->matchIt.value, 
         NULL
     };
-    total += Fmt(sm, " @ \n", args2);
+    total += Fmt(sm, " @", args2);
     if(flags & DEBUG){
+        total += Stream_Bytes(sm, (byte *)" \n", 2);
         Abstract *args3[] = {
             (Abstract *)rbl->parseIt.p,
             NULL
@@ -160,13 +161,13 @@ i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
         };
         word prev = sm->type.state;
         total += Fmt(sm, "  matches: @\n", args4);
+        Abstract *args6[] = {
+            (Abstract *)rbl->curs, 
+            NULL
+        };
+        total += Fmt(sm, "  curs:@\n", args6);
         sm->type.state = prev;
     }
-    Abstract *args6[] = {
-        (Abstract *)rbl->curs, 
-        NULL
-    };
-    total += Fmt(sm, "  curs:@\n", args6);
     total += Fmt(sm, ">", NULL);
     return total;
 }

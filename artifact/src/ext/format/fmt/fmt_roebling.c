@@ -12,6 +12,14 @@ static PatCharDef lineDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef clsDef[] = {
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},
+    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
+    {PAT_TERM|PAT_INVERT_CAPTURE,'.','.'},
+    {PAT_MANY,'a','z'},{PAT_MANY,'A','Z'},{PAT_MANY,'0','9'},{PAT_MANY,'-','-'},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef valueDef[] = {
     {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},{PAT_KO,',',','}, patText,
@@ -33,15 +41,8 @@ static PatCharDef dashDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef plusDef[] = {
+static PatCharDef tableDef[] = {
     {PAT_ANY, ' ', ' '}, {PAT_TERM, '+', '+'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef clsDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '.', '.'},
-    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
-    patText,
     {PAT_END, 0, 0}
 };
 
@@ -50,15 +51,6 @@ static PatCharDef tagDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '_', '_'},
     {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
     {PAT_KO|PAT_KO_TERM, '=', '='},
-    patText,
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef moduleDef[] = {
-    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '_', '_'},
-    {PAT_MANY|PAT_KO|PAT_INVERT,'\\','\\'},
-    {PAT_KO|PAT_KO_TERM, '+', '+'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -95,15 +87,11 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         dashDef, FORMATTER_BULLET, FORMATTER_LINE);
     r |= Roebling_SetPattern(rbl,
-        plusDef, FORMATTER_TABLE, FORMATTER_TABLE_VALUE);
+        tableDef, FORMATTER_TABLE, FORMATTER_TABLE_VALUE);
     r |= Roebling_SetPattern(rbl,
         lineDef, FORMATTER_LINE, FORMATTER_START);
     r |= Roebling_SetPattern(rbl,
         tagDef, FORMATTER_TAG, FORMATTER_LABEL);
-    mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_SEARCH;
-    r |= Roebling_SetPattern(rbl,
-        moduleDef, FORMATTER_MODULE, FORMATTER_TABLE_VALUE);
     mt = Roebling_GetMatch(rbl);
     mt->type.state |= MATCH_SEARCH;
     r |= Roebling_SetPattern(rbl,
@@ -143,6 +131,8 @@ static status tableValue(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
+    r |= Roebling_SetPattern(rbl,
+        clsDef, FORMATTER_CLASS, FORMATTER_TABLE_VALUE);
     r |= Roebling_SetPattern(rbl,
         valueDef, FORMATTER_TABLE_VALUE, FORMATTER_TABLE_VALUE);
     r |= Roebling_SetPattern(rbl,

@@ -40,6 +40,17 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                                 i64 total = SnipSpan_Total(mt->backlog, ~SNIP_SKIPPED);
                                 SnipSpan_Set(rbl->m, omt->backlog, total, SNIP_GAP);
                                 StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
+
+                                if(rbl->type.state & DEBUG){
+                                    Abstract *args[] = {
+                                        (Abstract *)Type_ToStr(OutStream->m,
+                                            omt->captureKey),
+                                        (Abstract *)v,
+                                        NULL
+                                    };
+                                    Out("^c.RblCapture(^D.$^d.): &^0.\n", args);
+                                }
+
                                 rbl->capture(rbl, omt->captureKey, v);
                                 break;
                             }
@@ -49,6 +60,17 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 }
 
                 StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);
+
+                if(rbl->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)Type_ToStr(OutStream->m,
+                            mt->captureKey),
+                        (Abstract *)v,
+                        NULL
+                    };
+                    Out("^c.RblCapture(^D.$^d.): &^0.\n", args);
+                }
+
                 rbl->capture(rbl, mt->captureKey, v);
                 Snip *sn = Span_Get(mt->backlog, mt->backlog->max_idx);
                 if((sn->type.state & SNIP_UNCLAIMED) != 0 && sn->length > 0){

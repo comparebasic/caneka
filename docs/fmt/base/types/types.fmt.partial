@@ -3,3 +3,50 @@
 The type system for Caneka uses a 16 bit value indicating it's type follwed by
 a 16 bit field of potential stateful flags.
 
+All objects in Caneka (with the exception of byte sequences) contain these
+first 32 bits, with a few exceptions. Certain objects contain a header with a
+16 range value to indicate a level instead of the stateful bitfield. 
+
+All other values for an object follow these 32 bits, which makes it useable as
+a polymorphic identifier to determine how to handle the object. 
+
+The stateful nature of the status flag is instrumental in retaining the
+functionality of the object across function calls, and greatly cuts the number
+of variables required to write detailed software systems.
+
+== The State Bitfield
+
+The state bitfield contains 8 bits of expected state flags which are shared
+across all objects:
+
++Flag,Value,Meaning
+READY, 0, Not yet in use
+SUCCESS, 1, Complete/Success
+ERROR, 1 << 1, Error
+NOOP, 1 << 2, No action/Miss/Lookup failure
+DEBUG, 1 << 3, Output debugging for object
+MORE, 1 << 4, Expect more content
+LAST, 1 << 5, Last value of an interator
+END, 1 << 6, End of file/stream
+PROCESSING, 1 << 7, Processing has begun
+
+The remaining 8 bits are custom to meet the needs of each object.
+
+== Example Type (Str)
+
++.mem-diagram=size, description, class
+16s, type.of, type value, type
+16s, type.state, stateful flags, type
+16s, length, string segment length,
+16s, alloc, length of allocated bytes,
+64s, byte pointer, pointer to content,
+
+These are the upper flags for the Str object:
+
++Flag,Value,Meaning
+STRING_TEXT, 1 << 8, Enforce restrictions on non-visible characters
+STRING_CONST, 1 << 9, Bytes are const references
+STRING_BINARY, 1 << 10, Contains binary data
+STRING_ENCODED, 1 << 11, Encoded/Encrypted
+STRING_FMT_ANSI, 1 << 12, Output Ansi Terminal Colors/Styles
+STRING_COPY, 1 << 13, Clone the bytes instead of referencing them

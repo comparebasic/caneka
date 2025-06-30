@@ -34,12 +34,12 @@ The remaining 8 bits are custom to meet the needs of each object.
 
 == Example Type (Str)
 
-_mem-diagram+size, description, class
-    16s type.of, type value, type
-    16s type.state, stateful flags, type
-    16s length, string segment length,
-    16s alloc, length of allocated bytes,
-    64s byte pointer, pointer to content,
++.mem-diagram size, description, class
+16s, type.of, type value, type
+16s, type.state, stateful flags, type
+16s, length, string segment length,
+16s, alloc, length of allocated bytes,
+64s, byte pointer, pointer to content,
 
 These are the upper flags for the Str object:
 

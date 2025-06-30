@@ -62,6 +62,8 @@ i64 StrLit_Print(Stream *sm, Abstract *a, cls type, word flags){
 
 i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     Str *s = (Str*)as(a, TYPE_STR); 
+    flags |= s->type.state & DEBUG;
+
     if((flags & (MORE|DEBUG)) == 0){
         return Stream_Bytes(sm, s->bytes, s->length);
     }
