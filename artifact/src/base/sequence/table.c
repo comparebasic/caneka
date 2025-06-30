@@ -35,7 +35,6 @@ static inline Hashed *Table_setHValue(MemCh *m, HKey *hk, Iter *it, Abstract *ke
     h->idx = hk->idx;
     h->value = value;
     Iter_Set(it, h);
-    printf("SetHValue %d\n", it->metrics.set);
     return h;
 }
 
@@ -76,40 +75,37 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
     if(tbl->nvalues > dim_nvalue_max[tbl->dims]){
         i8 dims = tbl->dims;
         Iter_ExpandTo(it, _capacity[tbl->dims]);
-        printf("Expanding %d to %d from %d\n", _capacity[tbl->dims], (i32)tbl->dims, (i32)dims);
     }
 
     return h;
 }
 
-static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *value){
+static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *value){
+    Table *tbl = (Table *)it->p;
     tbl->type.state &= ~SUCCESS;
     if(key == NULL){
         return NULL;
     }
+
     Hashed *h = NULL;
     util hash = Get_Hash(key);
-
-    Iter it;
-    Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, 0);
 
     HKey hk;
     HKey_Init(&hk, tbl, hash);
     i32 count = 0;
     while((tbl->type.state & SUCCESS) == 0 &&
             (Table_HKeyVal(tbl, &hk) & END) == 0){
-        Iter_GetByIdx(&it, hk.idx);
-        h = Table_getOrSet(tbl, op, &it, &hk, key, value, hash);
+        Iter_GetByIdx(it, hk.idx);
+        h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
     }
 
     if(op == SPAN_OP_SET && (tbl->type.state & SUCCESS) == 0){
         HKey_Init(&hk, tbl, hash);
         hk.dim = 0;
         Table_HKeyVal(tbl, &hk);
-        Iter_Setup(&it, tbl, SPAN_OP_GET|SPAN_OP_RESERVE, hk.idx);
         while((tbl->type.state & SUCCESS) == 0 &&
-            (Iter_Next(&it) & END) == 0){
-            h = Table_getOrSet(tbl, op, &it, &hk, key, value, hash);
+            (Iter_Next(it) & END) == 0){
+            h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
         }
     }
 
@@ -117,14 +113,13 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
 }
 
 status Table_SetKey(Iter *it, Abstract *a){
-    Hashed *h = Table_GetSetHashed(it->p, SPAN_OP_SET, a, NULL);
-    printf("Table_SetKey %d\n", it->metrics.set);
+    Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);
     /* set idx here */
     return SUCCESS;
 }
 
 i32 Table_SetIdxEntry(Iter *it, Abstract *a){
-    Hashed *h = Table_GetSetHashed(it->p, SPAN_OP_SET, a, NULL);
+    Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);
     i32 value = it->metrics.set;
     Single *tag = I32_Wrapped(it->p->m, value);
     h->value = (Abstract *)tag;
@@ -142,7 +137,9 @@ Hashed *Table_SetValue(Iter *it, Abstract *a){
 }
 
 Hashed *Table_GetHashed(Table *tbl, Abstract *a){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
+    Iter it;
+    Iter_Init(&it, tbl);
+    Hashed *h = Table_GetSetHashed(&it, SPAN_OP_GET, a, NULL);
     if(h->value != NULL){
         return h;
     }
@@ -150,7 +147,9 @@ Hashed *Table_GetHashed(Table *tbl, Abstract *a){
 }
 
 Hashed *Table_SetHashed(Table *tbl, Abstract *a, Abstract *value){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
+    Iter it;
+    Iter_Init(&it, tbl);
+    Hashed *h = Table_GetSetHashed(&it, SPAN_OP_SET, a, value);
     return h;
 }
 
@@ -160,8 +159,10 @@ Abstract *Table_GetKey(Table *tbl, i32 idx){
 }
 
 Abstract *Table_Get(Table *tbl, Abstract *a){
+    Iter it;
+    Iter_Init(&it, tbl);
     if(tbl != NULL && a != NULL){
-        Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
+        Hashed *h = Table_GetSetHashed(&it, SPAN_OP_GET, a, NULL);
         if(h != NULL){
             return h->value;
         }
@@ -170,7 +171,9 @@ Abstract *Table_Get(Table *tbl, Abstract *a){
 }
 
 i32 Table_Set(Table *tbl, Abstract *a, Abstract *value){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_SET, a, value);
+    Iter it;
+    Iter_Init(&it, tbl);
+    Hashed *h = Table_GetSetHashed(&it, SPAN_OP_SET, a, value);
     return h->idx;
 }
 
@@ -183,7 +186,9 @@ Abstract *Table_FromIdx(Table *tbl, i32 idx){
 }
 
 i32 Table_GetIdx(Table *tbl, Abstract *a){
-    Hashed *h = Table_GetSetHashed(tbl, SPAN_OP_GET, a, NULL);
+    Iter it;
+    Iter_Init(&it, tbl);
+    Hashed *h = Table_GetSetHashed(&it, SPAN_OP_GET, a, NULL);
     if(tbl->type.state & SUCCESS){
         return h->idx;
     }else{

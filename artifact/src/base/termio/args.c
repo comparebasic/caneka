@@ -22,20 +22,13 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
         argv++;
         for(i32 i = 1; i < argc; i++, argv++){
             Str *s = Str_CstrRef(m, *argv);
-            if(it.metrics.set != -1){
-                 printf("Setting value upper for %s\n", s->bytes);
-                 Table_SetValue(&it, (Abstract *)s);
-                 key = NULL;
-                 r |= SUCCESS;
-            }
             if(s->bytes[0] == '-'){
-                 Str_Incr(s, 1);
-                 if(Table_Get(resolve, (Abstract *)s) != NULL){
+                it.metrics.set = -1;
+                Str_Incr(s, 1);
+                if(Table_Get(resolve, (Abstract *)s) != NULL){
                     key = s;
-                    printf("SetKey\n");
                     Table_SetKey(&it, (Abstract *)key);
-                    printf("Setting key %s %d\n", s->bytes, it.metrics.set);
-                 }else{
+                }else{
                     Abstract *args[] = {
                         (Abstract *)s,
                         NULL
@@ -43,13 +36,15 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                     Error(ErrStream->m, (Abstract *)resolve, 
                         FUNCNAME, FILENAME, LINENUMBER, "Unable to find resolve for arg @",
                         args);
-                 }
+                }
+            }else if(it.metrics.set != -1){
+                 Table_SetValue(&it, (Abstract *)s);
+                 key = NULL;
+                 r |= SUCCESS;
             }else{
                 if(it.metrics.set == -1){
-                    printf("Setting key for %s\n", s->bytes);
                     Table_SetKey(&it, (Abstract *)I32_Wrapped(m, i));
                 }
-                printf("Setting value for %s\n", s->bytes);
                 Table_SetValue(&it, (Abstract *)s);
             }
         }
