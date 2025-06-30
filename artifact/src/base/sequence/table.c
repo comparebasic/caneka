@@ -35,6 +35,7 @@ static inline Hashed *Table_setHValue(MemCh *m, HKey *hk, Iter *it, Abstract *ke
     h->idx = hk->idx;
     h->value = value;
     Iter_Set(it, h);
+    printf("SetHValue %d\n", it->metrics.set);
     return h;
 }
 
@@ -117,6 +118,7 @@ static Hashed *Table_GetSetHashed(Table *tbl, word op, Abstract *key, Abstract *
 
 status Table_SetKey(Iter *it, Abstract *a){
     Hashed *h = Table_GetSetHashed(it->p, SPAN_OP_SET, a, NULL);
+    printf("Table_SetKey %d\n", it->metrics.set);
     /* set idx here */
     return SUCCESS;
 }

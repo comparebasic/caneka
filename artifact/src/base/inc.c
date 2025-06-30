@@ -42,6 +42,7 @@
 #include "./termio/ansi_str.c"
 #include "./termio/cli_status.c"
 #include "./termio/rawmode.c"
+#include "./termio/args.c"
 #include "./suite/testsuite.c"
 #include "./types/clone.c"
 #include "./types/equals.c"

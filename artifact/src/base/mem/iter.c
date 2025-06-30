@@ -200,6 +200,7 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
                 it->type.state |= SUCCESS;
                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                     *ptr = it->value;
+                    it->metrics.set = it->idx;
                     p->nvalues++;
                     if(it->idx > p->max_idx){
                         p->max_idx = it->idx;
@@ -216,6 +217,7 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
                 if(ptr != NULL){
                     it->value = *ptr;
                     it->type.state |= SUCCESS;
+                    it->metrics.get = it->idx;
                 }else{
                     it->value = NULL;
                     it->type.state |= NOOP;
@@ -355,6 +357,7 @@ end:
     }else{
         it->type.state &= ~LAST;
     }
+
     if(((it->type.state & SPAN_OP_GET) && it->value != NULL)){
         it->type.state &= ~NOOP;
         it->type.state |= SUCCESS;

@@ -21,14 +21,28 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
-    if(argc < 2){
-        Out("fmt file.fmt\n", NULL);
-        exit(1);
-    }
 
     DebugStack_Push(NULL, 0);
 
-    Str *path = File_GetAbsPath(m, Str_CstrRef(m, argv[1]));
+    Table *argResolve = Table_Make(m);
+    Single *True = I32_Wrapped(m, TRUE);
+    Table_Set(argResolve, (Abstract *)Str_CstrRef(m, "debug"), (Abstract *)True);
+    Table_Set(argResolve,  (Abstract *)Str_CstrRef(m, "out"), (Abstract *)True);
+    Table_Set(argResolve,  (Abstract *)Str_CstrRef(m, "in"), (Abstract *)True);
+    Table *args = Table_Make(m);
+    if(CharPtr_ToTbl(m, argResolve, argc, argv, args) & (ERROR|NOOP)){
+        CharPtr_ToHelp(m, Str_CstrRef(m, "fmt"), argResolve, argc, argv);
+        exit(1);
+    }
+    Abstract *_args[] = {
+        (Abstract *)args,
+        NULL
+    };
+
+    Out("Args: &\n", _args);
+
+    Str *fname = (Str *)Table_Get(args, (Abstract *)Str_CstrRef(m, "in"));
+    Str *path = File_GetAbsPath(m, fname);
     File *f = File_Make(m, path, NULL);
     File_Read(f, FILE_READ_MAX);
 

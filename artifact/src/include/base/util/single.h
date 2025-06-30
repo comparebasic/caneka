@@ -12,6 +12,8 @@ typedef struct single  {
     } val;
 } Single;
 
+Single *True();
+Single *False();
 Single *Single_Clone(MemCh *m, Abstract *og);
 Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf);
 Single *Bool_Wrapped(MemCh *m, int n);
