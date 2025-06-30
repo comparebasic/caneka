@@ -125,6 +125,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Match Replace Tests",
+        MatchReplace_Tests,
+        "Tests for Str replaces with Match",
+        FEATURE_COMPLETE,
+    },
+    {
         "Cursor Tests",
         Cursor_Tests,
         "Cursor tests for adding and navigation the position of a StrVec",

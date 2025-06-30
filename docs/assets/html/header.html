@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Caneka - Programming Language</title>
+<link href="style.css" rel="stylesheet" />
+  <meta 
+    name="viewport"
+    content="width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no"
+  >
+</head>
+<body>
+<header>
+    <div class="section">
+        <div class="logo-blocker"></div>
+        <a class="hero" href="/">
+        <h1>caneka</h1>
+        </a>
+        <h2>The Anti-Syntax Runtime</h2>
+        <span class="menu-action" onclick="menu()">=</span>
+    </div>
+    <div class="nav-wrapper" id="nav-wrapper">
+        <div class="section">
+            <div class="logo-blocker"></div>
+            <h1>caneka</h1>
+            <h2>The Anti-Syntax Runtime</h2>
+            <span class="menu-action" onclick="menuClose()">X</span>
+        </div>
+        <section>
+        <nav>
+            <ul><a href="/" class="active">Home</a></ul>
+            <ul><span class="fo-link">Links</span>
+                <ul>
+                    <li><a href="https://github.com/comparebasic/caneka">View The Code</a></li>
+                    <li><a href="https://comparebasic.com">The Company</a></li>
+                </ul>
+            </ul>
+        </nav>
+        </section>
+    </div>
+    <script type="text/javascript">
+        const nav = document.getElementById('nav-wrapper');
+        function menu(){ nav.style.display = 'block';nav.style.height = (window.innerHeight-20)+'px';} function menuClose(){ nav.style.display = 'none';}
+    </script>
+</header>

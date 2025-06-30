@@ -6,7 +6,9 @@ static byte _buff[STR_DEFAULT];
 
 static status fnameStr(MemCh *m, Str *s, Str *path, Str *file){
     Str_Add(s, path->bytes, path->length);
-    Str_Add(s, (byte *)"/", 1);
+    if(path->length > 0 && path->bytes[path->length-1] != '/'){
+        Str_Add(s, (byte *)"/", 1);
+    }
     Str_Add(s, file->bytes, file->length);
     return SUCCESS;
 }

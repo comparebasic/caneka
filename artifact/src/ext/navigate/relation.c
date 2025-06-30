@@ -5,7 +5,7 @@ status Relation_HeadFromValues(Relation *rel){
     status r = READY;
     rel->stride = rel->it.p->nvalues;
     rel->headers = Span_ToArr(rel->it.p->m, rel->it.p);
-    if(1 || rel->type.state & DEBUG){
+    if(rel->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Ptr_Wrapped(ErrStream->m, rel->headers, TYPE_ARRAY),
             NULL

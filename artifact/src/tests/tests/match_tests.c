@@ -311,3 +311,59 @@ status MatchKo_Tests(MemCh *gm){
     MemCh_Free(m);
     return r;
 }
+
+status MatchReplace_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
+    Span *p;
+    status r = READY;
+    Match *mt = NULL;
+    Str *s;
+
+    Str *path = Str_CstrRef(m, "/happy/sad/fancy/things");
+    Str *newPath = Str_Clone(m, path, STR_DEFAULT);
+    Str *new = Str_CstrRef(m, "good");
+    s = Str_CstrRef(m, "sad");
+    Span *backlog = Span_Make(m);
+    mt = Match_Make(m, PatChar_FromStr(m, s), backlog);
+    mt->type.state |= MATCH_SEARCH;
+
+    i32 pos;
+    Match_StrReplace(m, newPath, new, mt, &pos);
+
+    Abstract *args[] = {
+        (Abstract *)mt,
+        (Abstract *)s,
+        (Abstract *)new,
+        (Abstract *)path,
+        (Abstract *)newPath,
+        NULL
+    };
+
+    r |= Test(Equals((Abstract *)newPath,
+        (Abstract *)Str_CstrRef(m, "/happy/good/fancy/things")),
+        "Match @: Replacing & with & in $ to make &\n", args);
+
+    new = Str_CstrRef(m, "it");
+    backlog = Span_Make(m);
+    mt = Match_Make(m, PatChar_FromStr(m, s), backlog);
+    mt->type.state |= MATCH_SEARCH;
+
+    newPath = Str_Clone(m, path, STR_DEFAULT);
+    Match_StrReplace(m, newPath, new, mt, &pos);
+
+    Abstract *args2[] = {
+        (Abstract *)mt,
+        (Abstract *)s,
+        (Abstract *)new,
+        (Abstract *)path,
+        (Abstract *)newPath,
+        NULL
+    };
+
+    r |= Test(Equals((Abstract *)newPath, 
+        (Abstract *)Str_CstrRef(m, "/happy/it/fancy/things")),
+        "Match @: Replacing @ with @ in $ to make &\n", args2);
+
+    MemCh_Free(m);
+    return r;
+}

@@ -43,6 +43,7 @@ static BuildSubdir navigateobj = { "ext/navigate", {
 
 static BuildSubdir parserobj = { "ext/parser", {
     "match.c",
+    "match_replace.c",
     "patchar.c",
     "roebling.c",
     "parser.c",
@@ -83,7 +84,6 @@ static BuildSubdir persistobj = { "ext/persist", {
     "file.c",
     NULL
 }};
-
 
 static BuildSubdir fixturesobj = { "tests/fixtures", {
     "mock_109strings.c",

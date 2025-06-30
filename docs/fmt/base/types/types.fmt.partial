@@ -1,8 +1,0 @@
-= Types
-
-+.mem-diagram size, description, class
-16s, type.of, type value, type
-16s, type.state, stateful flags, type
-16s, length, string segment length,
-16s, alloc, length of allocated bytes,
-64s, byte pointer, pointer to content,
