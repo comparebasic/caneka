@@ -5,6 +5,13 @@ status Relation_HeadFromValues(Relation *rel){
     status r = READY;
     rel->stride = rel->it.p->nvalues;
     rel->headers = Span_ToArr(rel->it.p->m, rel->it.p);
+    if(1 || rel->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)Ptr_Wrapped(ErrStream->m, rel->headers, TYPE_ARRAY),
+            NULL
+        };
+        Out("^p.Relation_HeadFromValues: &^0.\n", args);
+    }
     r |= Span_Wipe(rel->it.p);
     Iter_Setup(&rel->it, rel->it.p, SPAN_OP_SET, 0);
     return r;

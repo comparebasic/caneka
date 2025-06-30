@@ -15,7 +15,8 @@ static char *expectedCstr = ""
 "<P>A paragraph in the sub section.</P>\n"
 "<H1>Table Title</H1>\n"
 "<TABLE>\n"
-"  <THEAD><TR><TD>Apple</TD><TD>1</TD><TD>37</TD></TR></THEAD>\n"
+"  <THEAD><TR><TD>Column A</TD><TD>Column B</TD><TD>Column C</TD></TR></THEAD>\n"
+"  <TR><TD>Apple</TD><TD>1</TD><TD>37</TD></TR>\n"
 "  <TR><TD>Bannana</TD><TD>2</TD><TD>39</TD></TR>\n"
 "  <TR><TD>Cantelope</TD><TD>3</TD><TD>39</TD></TR>\n"
 "</TABLE>\n"
@@ -45,13 +46,15 @@ status FmtHtml_Tests(MemCh *gm){
         "Fmt to HTML has status SUCCESS", NULL);
 
     s = Str_CstrRef(m, expectedCstr);
+    s->type.state |= DEBUG;
     boolean matches = Equals((Abstract *)s, (Abstract *)sm->dest.curs->v);
     if(!matches){
         Abstract *args[] = {
+            (Abstract *)s,
             (Abstract *)sm->dest.curs->v,
             NULL
         };
-        Out("^r.Mismatch: &\n", args);
+        Out("^r.Mismatch:\n  Expected:&\n  Actual: ^E.&^0.", args);
     }
     r |= Test(matches, 
         "Fmt to HTML has expected html content", NULL);

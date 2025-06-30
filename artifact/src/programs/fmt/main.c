@@ -34,12 +34,6 @@ i32 main(int argc, char **argv){
         CharPtr_ToHelp(m, Str_CstrRef(m, "fmt"), argResolve, argc, argv);
         exit(1);
     }
-    Abstract *_args[] = {
-        (Abstract *)args,
-        NULL
-    };
-
-    Out("Args: &\n", _args);
 
     Str *fname = (Str *)Table_Get(args, (Abstract *)Str_CstrRef(m, "in"));
     Str *path = File_GetAbsPath(m, fname);
@@ -50,10 +44,23 @@ i32 main(int argc, char **argv){
 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);
+
+    Abstract *debug = Table_Get(args, (Abstract *)Str_CstrRef(m, "debug"));
+    if(debug->type.of == TYPE_WRAPPED_PTR || 
+            Equals((Abstract *)debug,  (Abstract *)Str_CstrRef(m, "roebling"))){
+        rbl->type.state |= DEBUG;
+    }
+
+    if(debug->type.of == TYPE_WRAPPED_PTR || 
+            Equals((Abstract *)debug,  (Abstract *)Str_CstrRef(m, "mess"))){
+        rbl->mess->type.state |= DEBUG;
+    }
+
     Roebling_Run(rbl);
 
     Stream *sm = OutStream; 
     
+    rbl->mess->type.state |= (rbl->type.state & DEBUG);
     Fmt_ToHtml(sm, rbl->mess);
     if((rbl->mess->transp->type.state & SUCCESS) == 0){
         Abstract *args[] = {
