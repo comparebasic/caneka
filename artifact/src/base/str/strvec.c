@@ -102,6 +102,13 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
     return -1;
 }
 
+status StrVec_Split(StrVec *v, Abstract *split){
+    /* iterate over it and set the LAST flag for each string that proceeds the sepeartor
+       and add the STRVEC_SEPERATOR to the seperator content
+    */
+    return NOOP;
+}
+
 status StrVec_Add(StrVec *v, Str *s){
     status r = Span_Add(v->p, (Abstract *)s);
     v->total += s->length;

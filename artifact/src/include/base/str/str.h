@@ -5,6 +5,7 @@ enum str_flags {
     STRING_ENCODED = 1 << 11,
     STRING_FMT_ANSI = 1 << 12,
     STRING_COPY = 1 << 13,
+    STRING_UTF8 = 1 << 14,
 };
 
 typedef struct str {

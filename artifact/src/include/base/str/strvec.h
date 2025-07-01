@@ -1,3 +1,7 @@
+enum strvec_flags {
+    STRVEC_SEPERATOR = 1 << 8,
+};
+
 typedef struct strvec {
     Type type;
     i32 _;
@@ -16,3 +20,4 @@ StrVec *StrVec_Make(MemCh *m);
 StrVec *StrVec_From(MemCh *m, Str *s);
 StrVec *StrVec_FromB64(MemCh *m, StrVec *v);
 i64 StrVec_FfIter(Iter *it, i64 offset);
+status StrVec_Split(StrVec *v, Abstract *split);
