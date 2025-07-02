@@ -50,6 +50,7 @@ static BuildSubdir parserobj = { "ext/parser", {
     "snip.c",
     "tokenize.c",
     "parser_tos.c",
+    "split.c",
     NULL
 }};
 
@@ -99,6 +100,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "stream_tests.c",
     "blank_test.c",
     "hash_tests.c",
+    "clone_tests.c",
     "table_tests.c",
     "match_tests.c",
     "patchar_tests.c",

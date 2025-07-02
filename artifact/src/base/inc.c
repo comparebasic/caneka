@@ -53,3 +53,4 @@
 #include "./util/single.c"
 #include "./util/time.c"
 #include "./util/util_tos.c"
+#include "./util/util_eq.c"

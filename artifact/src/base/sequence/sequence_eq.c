@@ -1,3 +1,5 @@
+#include <external.h>
+#include <caneka.h>
 
 boolean Table_Eq(Abstract *a, Abstract *b){
     Table *tblA = (Table *)a;

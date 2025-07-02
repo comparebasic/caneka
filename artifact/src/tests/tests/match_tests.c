@@ -320,7 +320,7 @@ status MatchReplace_Tests(MemCh *gm){
     Str *s;
 
     Str *path = Str_CstrRef(m, "/happy/sad/fancy/things");
-    Str *newPath = Str_Clone(m, path, STR_DEFAULT);
+    Str *newPath = Str_CloneAlloc(m, path, STR_DEFAULT);
     Str *new = Str_CstrRef(m, "good");
     s = Str_CstrRef(m, "sad");
     Span *backlog = Span_Make(m);
@@ -348,7 +348,7 @@ status MatchReplace_Tests(MemCh *gm){
     mt = Match_Make(m, PatChar_FromStr(m, s), backlog);
     mt->type.state |= MATCH_SEARCH;
 
-    newPath = Str_Clone(m, path, STR_DEFAULT);
+    newPath = Str_CloneAlloc(m, path, STR_DEFAULT);
     Match_StrReplace(m, newPath, new, mt, &pos);
 
     Abstract *args2[] = {

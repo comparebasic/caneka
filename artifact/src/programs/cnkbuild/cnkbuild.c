@@ -110,7 +110,7 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.barStart = Str_Make(m, width);
     memset(ctx->fields.steps.barStart->bytes, ' ', width);
     ctx->fields.steps.barStart->length = width;
-    ctx->fields.steps.barEnd = Str_Clone(m, ctx->fields.steps.barStart, width);
+    ctx->fields.steps.barEnd = Str_CloneAlloc(m, ctx->fields.steps.barStart, width);
     ctx->fields.steps.barStart->length = 0;
     
     arr = Arr_Make(m, 2);
@@ -270,7 +270,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     status r = READY;
     MemCh *m = ctx->m;
 
-    Str *dirPath = Str_Clone(m, libDir, STR_DEFAULT);
+    Str *dirPath = Str_CloneAlloc(m, libDir, STR_DEFAULT);
     Str_AddCstr(dirPath, "/");
     Str_AddCstr(dirPath, dir->name);
     DebugStack_SetRef(dirPath, dirPath->type.of);
@@ -344,7 +344,7 @@ static status build(BuildCtx *ctx){
 
     Dir_CheckCreate(m, libDir);
 
-    Str *lib = Str_Clone(m, libDir, STR_DEFAULT);
+    Str *lib = Str_CloneAlloc(m, libDir, STR_DEFAULT);
     Str_AddCstr(lib, "/");
     Str_AddCstr(lib, ctx->libtarget);
     Str_AddCstr(lib, ".a");

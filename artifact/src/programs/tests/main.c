@@ -47,15 +47,21 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Str",
+        Str_Tests,
+        "Tests for the basic string object and convienience features",
+        FEATURE_COMPLETE,
+    },
+    {
         "StrVec",
         StrVec_Tests,
         "Testing String Vectors",
         FEATURE_COMPLETE,
     },
     {
-        "Str",
-        Str_Tests,
-        "Tests for the basic string object and convienience features",
+        "StrVecSplit",
+        StrVecSplit_Tests,
+        "Testing String Vector Split function",
         FEATURE_COMPLETE,
     },
     {
@@ -92,6 +98,12 @@ static TestSet _Tests[] = {
         "TableResize",
         TableResize_Tests,
         "Resize features of the auto-scaling hash-table.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Clone",
+        Clone_Tests,
+        "Clone test of cloning basic types.",
         FEATURE_COMPLETE,
     },
     {

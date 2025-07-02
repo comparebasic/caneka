@@ -14,7 +14,7 @@ static status getHtmlDir(MemCh *m, Str *path){
 }
 
 static status dirFunc(MemCh *m, Str *path, Abstract *source){
-    Str *newPath = Str_Clone(m, path, STR_DEFAULT);
+    Str *newPath = Str_CloneAlloc(m, path, STR_DEFAULT);
     Str *replace = Str_CstrRef(m, "fmt");
     Span *backlog = Span_Make(m);
     Match *mt = Match_Make(m, PatChar_FromStr(m, replace), backlog);

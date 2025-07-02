@@ -9,6 +9,7 @@ status Equals_Init(MemCh *m){
         EqualsLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
         Mem_EqInit(m, EqualsLookup);
         Sequence_EqInit(m, EqualsLookup);
+        Util_EqInit(m, EqualsLookup);
         r |= SUCCESS;
     }
     return r;
@@ -31,26 +32,33 @@ boolean Equals(Abstract *a, Abstract *b){
         }else if(b->type.of == TYPE_STR){
             return Str_EqualsStrVec((Str *)b, (StrVec *)a);
         }
-    }else if(a->type.of == TYPE_WRAPPED_UTIL || a->type.of == TYPE_WRAPPED_I64){
-        Single *wa = (Single *)a;
-        Single *wb = (Single *)b;
-        return wa->val.value == wb->val.value;
-    }else if(a->type.of == TYPE_WRAPPED_I16 && a->type.of == b->type.of){
-        Single *wa = (Single *)a;
-        Single *wb = (Single *)b;
-        return wa->val.w == wb->val.w;
-    }else if(a->type.of == b->type.of){
-        EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, a->type.of);
-        if(func == NULL){
-            /*
+    }else if(a->type.of == TYPE_SPAN && a->type.of == b->type.of){
+        Span *pa = (Span *)a;
+        Span *pb = (Span *)b;
+        return Span_Equals(pa, pb);
+    }else{
+        cls aTypeOf = Ifc_Get(a->type.of);
+        cls bTypeOf = Ifc_Get(b->type.of);
+        if(aTypeOf != bTypeOf){
             Abstract *args[] = {
-                (Abstract *)Type_ToStr(ErrStream->m, a->type.of),
+                (Abstract *)Type_ToStr(ErrStream->m, aTypeOf),
+                (Abstract *)Type_ToStr(ErrStream->m, bTypeOf),
                 NULL
             };
-            Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, "Equals for $ not registered", args);
-            */
-        }else {
-            return func(a, b);
+            Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, 
+                "Equals type mismatche $ vs $", args);
+        }else{
+            EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, aTypeOf);
+            if(func == NULL){
+                Abstract *args[] = {
+                    (Abstract *)Type_ToStr(ErrStream->m, aTypeOf),
+                    NULL
+                };
+                Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, 
+                    "Equals for $ not registered", args);
+            }else{
+                return func(a, b);
+            }
         }
     }
     return FALSE;

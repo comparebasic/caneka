@@ -37,7 +37,7 @@ status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, Abstract *valu
     Hashed *h = Table_GetHashed(_perms, (Abstract *)grantee->owner); 
 
     MemCh_SetToBase(m);
-    Str *userKey = Str_Clone(m, grantee->owner, grantee->owner->alloc);
+    Str *userKey = Str_Clone(m, grantee->owner);
     if(h == NULL){
         userPerms = Span_Make(m);
         h = Table_SetHashed(_perms, (Abstract *)userKey, (Abstract *)userPerms); 

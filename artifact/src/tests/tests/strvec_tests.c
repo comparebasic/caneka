@@ -86,7 +86,7 @@ status StrVec_Tests(MemCh *gm){
     Str *st = Str_CstrRef(m, "time");
     Str *sa = Str_CstrRef(m, "afterwards");
     Str *sf = Str_CstrRef(m, "four");
-    Str *sf2 = Str_Clone(m, sf, sf->alloc);
+    Str *sf2 = Str_Clone(m, sf);
     sf2->type.state |= DEBUG;
     char *cstr = ", all alone";
     Stream *sm = Stream_MakeStrVec(m);
@@ -123,4 +123,27 @@ status StrVec_Tests(MemCh *gm){
     MemCh_Free(m);
 
     return r;
+}
+
+status StrVecSplit_Tests(MemCh *gm){
+    status r = READY;
+    MemCh *m = MemCh_Make();
+
+    StrVec *orig = StrVec_Make(m);
+    StrVec_Add(orig, Str_CstrRef(m, "this.that.thingy.x"));
+    StrVec *v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
+    StrVec_Split(v, (Abstract *)Str_CstrRef(m ,".")); 
+
+    v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
+    Match *mt = Match_Make(m, PatChar_FromStr(m, Str_CstrRef(m, ".")), Span_Make(m));
+    mt->type.state |= MATCH_SEARCH;
+    StrVec_Split(v, (Abstract *)mt); 
+
+    v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
+    StrVec_Split(v, (Abstract *)I8_Wrapped(m, '.')); 
+
+    MemCh_Free(m);
+
+    return r;
+    
 }

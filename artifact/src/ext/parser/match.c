@@ -77,6 +77,13 @@ static void addCount(MemCh *m, Match *mt, word flags, i32 length){
     return;
 }
 
+status Match_StartOver(Match *m){
+    match_Reset(Match *mt);
+    mt->snip.type.state = ZERO;
+    mt->snip->length = 0;
+    return Span_Wipe(mt->backlog);
+}
+
 status Match_AddBoundrySnip(MemCh *m, Match *mt){
     if(mt->snip.length > 0 || mt->backlog->nvalues > 0){
         addCount(m, mt, SNIP_STR_BOUNDRY, 0);

@@ -6,6 +6,22 @@ i32 Span_Capacity(Span *p){
     return increment * SPAN_STRIDE;
 }
 
+boolean Span_Equals(Span *a, Span *b){
+    Iter itA;
+    Iter_Init(&itA, a);
+    Iter itB;
+    Iter_Init(&itB, b);
+    while((Iter_Next(&itA) & END) == 0 && (Iter_Next(&itB) & END) == 0){
+        if(!Equals(Iter_Get(&itA), Iter_Get(&itB))){
+            return FALSE;
+        }
+    }
+    if((itB.type.state & END) != (itB.type.state & END)){
+        return FALSE;
+    }
+    return TRUE;
+}
+
 char **Span_ToCharArr(MemCh *m, Span *p){
     size_t sz = sizeof(char *)*(p->nvalues+1);
     char **arr = MemCh_Alloc(m, sz);
@@ -76,8 +92,10 @@ Span *Span_Clone(MemCh *m, Span *p){
     Span *p2 = Span_Make(m);
     int i = 0;
     while((Iter_Next(&it) & END) == 0){
-        if(it.value != NULL){
-            Span_Set(p2, it.idx, (Abstract *)it.value); 
+        Abstract *value = Iter_Get(&it);
+        if(value != NULL){
+            Abstract *item = Clone(m, value);
+            Span_Set(p2, it.idx, (Abstract *)item); 
         }
     }
     return p2;

@@ -579,6 +579,10 @@ void *Iter_Current(Iter *it){
 
 void *Iter_GetByIdx(Iter *it, i32 idx){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
+    if(idx > it->p->max_idx){
+        it->type.state & END;
+        return NULL;
+    }
     it->idx = idx;
     status r = Iter_Query(it);
     if(it->type.state & SUCCESS){

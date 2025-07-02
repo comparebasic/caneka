@@ -38,7 +38,7 @@ Str *File_GetAbsPath(MemCh *m, Str *path){
         return File_GetCwdPath(m, path);
     }
     if(path->alloc != STR_DEFAULT){
-        return Str_Clone(m, path, STR_DEFAULT);
+        return Str_CloneAlloc(m, path, STR_DEFAULT);
     }
     return path;
 }

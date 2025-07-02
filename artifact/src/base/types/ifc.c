@@ -98,6 +98,8 @@ void Type_SetFlag(Abstract *a, word flags){
 cls Ifc_Get(cls inst){
     if(inst == TYPE_SPAN || inst == TYPE_TABLE){
         return TYPE_SPAN;
+    }else if(inst >= TYPE_WRAPPED && inst <= _TYPE_WRAPPED_END){
+        return TYPE_WRAPPED;
     }
 
     return inst;

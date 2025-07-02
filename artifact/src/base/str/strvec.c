@@ -102,11 +102,12 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
     return -1;
 }
 
-status StrVec_Split(StrVec *v, Abstract *split){
-    /* iterate over it and set the LAST flag for each string that proceeds the sepeartor
-       and add the STRVEC_SEPERATOR to the seperator content
-    */
-    return NOOP;
+Abstract *StrVec_Clone(MemCh *m, Abstract *a){
+    StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
+    StrVec *new = StrVec_Make(m);
+    new->total = v->total;
+    new->p = Span_Clone(m, v->p);
+    return (Abstract *)new;
 }
 
 status StrVec_Add(StrVec *v, Str *s){

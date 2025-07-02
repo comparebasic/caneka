@@ -102,7 +102,7 @@ status Str_EndMatchTests(MemCh *gm){
     r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches successfully, had @", args2);
 
     match = ".c";
-    s = Str_Clone(m, s, s->alloc);
+    s = Str_Clone(m, s);
     Str_Trunc(s, -2);
     Abstract *args3[] = {
         (Abstract *)s,

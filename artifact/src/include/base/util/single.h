@@ -15,6 +15,7 @@ typedef struct single  {
 Single *True();
 Single *False();
 Single *Single_Clone(MemCh *m, Abstract *og);
+boolean Single_Equals(Single *a, Single *b);
 Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf);
 Single *Bool_Wrapped(MemCh *m, int n);
 Single *Do_Wrapped(MemCh *m, DoFunc dof);

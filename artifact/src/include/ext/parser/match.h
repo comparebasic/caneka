@@ -27,6 +27,7 @@ typedef struct match {
     Span *backlog;
 } Match;
 
+status Match_StartOver(Match *m);
 status Match_AddBoundrySnip(MemCh *m, Match *mt);
 Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog);
 status Match_Feed(MemCh *m, Match *mt, byte c);
