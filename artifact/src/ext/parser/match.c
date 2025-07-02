@@ -77,10 +77,11 @@ static void addCount(MemCh *m, Match *mt, word flags, i32 length){
     return;
 }
 
-status Match_StartOver(Match *m){
-    match_Reset(Match *mt);
+status Match_StartOver(Match *mt){
+    match_Reset(mt);
+    mt->type.state = mt->type.state & MATCH_SEARCH;
     mt->snip.type.state = ZERO;
-    mt->snip->length = 0;
+    mt->snip.length = 0;
     return Span_Wipe(mt->backlog);
 }
 

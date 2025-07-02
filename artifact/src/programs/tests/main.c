@@ -59,12 +59,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "StrVecSplit",
-        StrVecSplit_Tests,
-        "Testing String Vector Split function",
-        FEATURE_COMPLETE,
-    },
-    {
         "String - End Matches",
         Str_EndMatchTests,
         "Tests for Matching the end of the string",
@@ -140,6 +134,12 @@ static TestSet _Tests[] = {
         "Match Replace Tests",
         MatchReplace_Tests,
         "Tests for Str replaces with Match",
+        FEATURE_COMPLETE,
+    },
+    {
+        "StrVecSplit via Match",
+        StrVecSplit_Tests,
+        "Testing String Vector Split function",
         FEATURE_COMPLETE,
     },
     {

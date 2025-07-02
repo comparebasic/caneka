@@ -79,7 +79,7 @@ Single *I16_Wrapped(MemCh *m, word w){
 
 Single *I8_Wrapped(MemCh *m, i8 b){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
-    sgl->type.of = TYPE_WRAPPED_I16;
+    sgl->type.of = TYPE_WRAPPED_I8;
     sgl->val.b = (byte)b;
     return sgl;
 }

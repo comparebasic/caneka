@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 static Str **streamLabels = NULL;
+static Str **strLabels = NULL;
 
 static i64 Bytes_debug(Stream *sm, byte *start, byte *end){
     i64 total = 0;
@@ -77,6 +78,8 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
         total += Stream_Bytes(sm, (byte *)"Str<", 4);
+        total += ToS_FlagLabels(sm, (Abstract *)s);
+        total += Stream_Bytes(sm, (byte *)" ", 1);
         byte bstr[MAX_BASE10];
         /* lengths are manual here brcause integer wrappers use Str_Print */
         byte *b = bstr;
@@ -270,6 +273,19 @@ status Str_InitLabels(MemCh *m, Lookup *lk){
         streamLabels[14] = Str_CstrRef(m, "STREAM_SOCKET");
         streamLabels[15] = Str_CstrRef(m, "STREAM_BUFFER");
         Lookup_Add(m, lk, TYPE_STREAM, (void *)streamLabels);
+        r |= SUCCESS;
+    }
+    if(strLabels == NULL){
+        strLabels = (Str **)Arr_Make(m, 17);
+        strLabels[9] = Str_CstrRef(m, "TEXT");
+        strLabels[10] = Str_CstrRef(m, "CONST");
+        strLabels[11] = Str_CstrRef(m, "BINARY");
+        strLabels[12] = Str_CstrRef(m, "ENCODED");
+        strLabels[13] = Str_CstrRef(m, "FMT_ANSI");
+        strLabels[14] = Str_CstrRef(m, "COPY");
+        strLabels[15] = Str_CstrRef(m, "UTF8");
+        strLabels[16] = Str_CstrRef(m, "SEP");
+        Lookup_Add(m, lk, TYPE_STR, (void *)strLabels);
         r |= SUCCESS;
     }
     return r;

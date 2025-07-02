@@ -104,7 +104,7 @@ status StrVec_Tests(MemCh *gm){
     };
     Fmt(sm, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $", args3);
 
-    s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");
+    s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\x1b[1m\"afterwards\"\x1b[22m' \x1b[1m\"four\"\x1b[22m Str<DEBUG 4/5:\x1b[1m\"four\"\x1b[22m> 29 5987263 hi dude, what a wild ride!");
 
     Abstract *args4[] = {
         (Abstract *)sm->dest.curs->v,
@@ -123,27 +123,4 @@ status StrVec_Tests(MemCh *gm){
     MemCh_Free(m);
 
     return r;
-}
-
-status StrVecSplit_Tests(MemCh *gm){
-    status r = READY;
-    MemCh *m = MemCh_Make();
-
-    StrVec *orig = StrVec_Make(m);
-    StrVec_Add(orig, Str_CstrRef(m, "this.that.thingy.x"));
-    StrVec *v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
-    StrVec_Split(v, (Abstract *)Str_CstrRef(m ,".")); 
-
-    v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
-    Match *mt = Match_Make(m, PatChar_FromStr(m, Str_CstrRef(m, ".")), Span_Make(m));
-    mt->type.state |= MATCH_SEARCH;
-    StrVec_Split(v, (Abstract *)mt); 
-
-    v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
-    StrVec_Split(v, (Abstract *)I8_Wrapped(m, '.')); 
-
-    MemCh_Free(m);
-
-    return r;
-    
 }
