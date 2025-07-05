@@ -74,6 +74,13 @@ static BuildSubdir fmtobj = { "ext/format/fmt", {
     NULL
 }};
 
+static BuildSubdir cashobj = { "ext/format/cash", {
+    "cash.c",
+    "cash_roebling.c",
+    NULL
+}};
+
+
 static BuildSubdir xmlobj = { "ext/format/xml", {
     "tag.c",
     NULL,
@@ -115,6 +122,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "file_tests.c",
     "fmthtml_tests.c",
     "debugstack_tests.c",
+    "cash_tests.c",
     NULL
 }};
 
@@ -126,6 +134,7 @@ static BuildSubdir *objdirs[] = {
     &testsobj,
     &fixturesobj,
     &fmtobj,
+    &cashobj,
     &formatobj,
     &persistobj,
     &transpobj,

@@ -161,12 +161,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "BinPin Format Tests",
-        BinPin_Tests,
-        "Small example binpin format printout",
-        FEATURE_COMPLETE,
-    },
-    {
         "Roebling Init Test",
         Roebling_Tests,
         "Roebling tests for adding and running a basic parser.",
@@ -197,9 +191,21 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "BinPin Format Tests",
+        BinPin_Tests,
+        "Small example binpin format printout",
+        FEATURE_COMPLETE,
+    },
+    {
         "Mess Tests",
         Mess_Tests,
         "From a basic Fmt Roebling parser into the Mess data structures.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Cash Tests",
+        Cash_Tests,
+        "Cash tests of basic value templating.",
         FEATURE_COMPLETE,
     },
     {

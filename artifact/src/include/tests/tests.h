@@ -39,6 +39,7 @@ status BinPin_Tests(MemCh *gm);
 status File_Tests(MemCh *gm);
 status FmtHtml_Tests(MemCh *gm);
 status DebugStack_Tests(MemCh *gm);
+status Cash_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

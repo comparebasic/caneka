@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static PatCharDef textDef[] = {
-    {PAT_KO|PAT_KO_TERM,'$' ,'$'},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,'$' ,'$'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -13,14 +13,14 @@ static PatCharDef varDef[] = {
 };
 
 static PatCharDef varKeyDef[] = {
-    {PAT_TERM, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
     {PAT_KO|PAT_KO_TERM, '}', '}'},
     patText,
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varIDXDef[] = {
+static PatCharDef varIdxDef[] = {
     {PAT_TERM, '$' ,'$'},{PAT_TERM|PAT_INVERT_CAPTURE, '[', '['},
     {PAT_KO|PAT_KO_TERM, ']', ']'},
     {PAT_MANY|PAT_TERM, '0', '9'},
@@ -32,7 +32,7 @@ static status text(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        textDef, FORMAT_CASH_TEXT, FORMATTER_CASH_VAR);
+        textDef, FORMAT_CASH_TEXT, FORMAT_CASH_VAR);
 
     return r;
 }
@@ -61,7 +61,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             (Abstract *)tk,
             NULL
         };
-        Out("^c.Fmt After Capture ^E0.$^ec./@ -> @\n", args);
+        Out("^c. Cash Capture ^E0.$^ec./@ -> @^0.\n", args);
     }
     return SUCCESS;
 }
@@ -75,9 +75,8 @@ Roebling *Cash_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
-
     rbl->mess = Mess_Make(m);
-    rbl->mess->tokenizer = NULL;
+    rbl->mess->tokenizer = Lookup_Make(m, _APPS_CASH_START, NULL, NULL);
     rbl->source = source;
     return rbl;
 }

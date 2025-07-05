@@ -67,7 +67,11 @@ status File_Read(File *f, i64 max){
         }
     }
 
-    f->sm->func = Stream_ToStrVec;
+    if(f->sm->func == NULL){
+        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+            "Error no stream func defined for file", NULL);
+        return ERROR;
+    }
 
     byte b[FILE_READ_LENGTH];
     while(max > 0){
