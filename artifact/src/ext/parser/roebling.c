@@ -64,35 +64,34 @@ static inline status Roebling_RunMatches(Roebling *rbl){
     return rbl->type.state;
 }
 
-status Roebling_Finalize(Roebling *rbl, Match *mt, word flags){
-    Snip *sn = Span_Get(mt->backlog, 0);
-    if(flags == ZERO || (sn != NULL && sn->length > 0 && sn->type.state & flags)){
-        i32 idx = rbl->matchIt.idx;
-        Iter_Reset(&rbl->matchIt);
-        while((Iter_Next(&rbl->matchIt) & END) == 0){
-            Match *omt = (Match *)Iter_Current(&rbl->matchIt);
-            if(omt != mt && (omt->type.state & MATCH_LAST_TERM)){
-                SnipSpan_Add(omt->backlog, &omt->snip);
-                i64 total = SnipSpan_Total(mt->backlog, ~SNIP_SKIPPED);
+status Roebling_Finalize(Roebling *rbl, Match *mt, i64 total){
+    i32 idx = rbl->matchIt.idx;
+    Iter_Reset(&rbl->matchIt);
+    while((Iter_Next(&rbl->matchIt) & END) == 0){
+        Match *omt = (Match *)Iter_Current(&rbl->matchIt);
+        if(omt != mt && (omt->type.state & MATCH_LAST_TERM)){
+            SnipSpan_Add(omt->backlog, &omt->snip);
+            if(total > 0){
                 SnipSpan_Set(rbl->m, omt->backlog, total, SNIP_GAP);
-                StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
-
-                if(rbl->type.state & DEBUG){
-                    Abstract *args[] = {
-                        (Abstract *)Type_ToStr(OutStream->m,
-                            omt->captureKey),
-                        (Abstract *)v,
-                        NULL
-                    };
-                    Out("^c.RblCapture(^D.$^d.): &^0.\n", args);
-                }
-
-                rbl->capture(rbl, omt->captureKey, v);
-                break;
             }
+            StrVec *v = StrVec_Snip(rbl->m, omt->backlog, rbl->curs);
+
+            if(rbl->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)Type_ToStr(OutStream->m,
+                        omt->captureKey),
+                    (Abstract *)v,
+                    NULL
+                };
+                Out("^c.RblCapture(^D.$^d.): &^0.\n", args);
+            }
+
+            rbl->capture(rbl, omt->captureKey, v);
+            omt->type.state &= ~MATCH_LAST_TERM;
+            break;
         }
-        Iter_GetByIdx(&rbl->matchIt, idx);
     }
+    Iter_GetByIdx(&rbl->matchIt, idx);
     return SUCCESS;
 }
 
@@ -101,7 +100,11 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
     rbl->type.state &= ~PROCESSING;
 
     if((mt->type.state & MATCH_SEARCH)){
-        Roebling_Finalize(rbl, mt, SNIP_SKIPPED);
+        Snip *sn = Span_Get(mt->backlog, 0);
+        if(sn->length > 0 && sn->type.state & SNIP_SKIPPED){
+            i64 total = SnipSpan_Total(mt->backlog, ~SNIP_SKIPPED);
+            Roebling_Finalize(rbl, mt, total);
+        }
     }
 
     StrVec *v = StrVec_Snip(rbl->m, mt->backlog, rbl->curs);

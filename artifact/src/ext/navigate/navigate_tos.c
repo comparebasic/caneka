@@ -193,6 +193,16 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+static i64 CashKey_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Single *sg = (Single *)a;
+    Abstract *args[] = {
+        (Abstract *)sg->val.ptr,
+        NULL
+    };
+    return Fmt(sm, "Key<&>", args);
+    
+}
+
 status Navigate_InitLabels(MemCh *m, Lookup *lk){
     status r = READY;
     /*
@@ -225,5 +235,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
+    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEY, (void *)CashKey_Print);
     return r;
 }

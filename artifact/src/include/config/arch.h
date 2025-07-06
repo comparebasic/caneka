@@ -18,4 +18,5 @@
 #define GUARD_MAX 1024
 #define MEM_GUARD_MAX GUARD_MAX
 #define MAX_PTR_ARR 128
+#define NEGATIVE -1
 #endif

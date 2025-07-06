@@ -203,12 +203,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Cash Tests",
-        Cash_Tests,
-        "Cash tests of basic value templating.",
-        FEATURE_COMPLETE,
-    },
-    {
         "File Tests",
         File_Tests,
         "File handling tests.",
@@ -218,6 +212,12 @@ static TestSet _Tests[] = {
         "FmtHtml Tests",
         FmtHtml_Tests,
         "Format FMT -> HTML tests.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Cash Tests",
+        Cash_Tests,
+        "Cash tests of basic value templating.",
         FEATURE_COMPLETE,
     },
     /*

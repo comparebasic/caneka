@@ -53,15 +53,19 @@ static status var(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mess = rbl->mess;
-    Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
+    CashCtx *ctx = (CashCtx*)as(rbl->source, TYPE_CASH_CTX);
     if(rbl->mess->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
-            (Abstract *)tk,
             NULL
         };
-        Out("^c. Cash Capture ^E0.$^ec./@ -> @^0.\n", args);
+        Out("^c. Cash Capture ^E0.$^ec./@^0.\n", args);
+    }
+    if(captureKey == FORMAT_CASH_TEXT){
+        Iter_Add(&ctx->it, v);
+    }else{
+        Iter_Add(&ctx->it, Ptr_Wrapped(rbl->m, v, captureKey));
     }
     return SUCCESS;
 }

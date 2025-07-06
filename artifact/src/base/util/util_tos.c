@@ -33,11 +33,11 @@ static i64 Wrapped_Ptr(Stream *sm, Abstract *a, cls type, word flags){
     word fl = (DEBUG|MORE);
     if((flags & fl) == fl){
         Abstract *args[] = {
-            (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->type.of)),
-            (Abstract *)a,
+            (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->objType.of)),
+            (Abstract *)sg->val.ptr,
             NULL
         };
-        return Fmt(sm, "Wptr\\<$ $>", args);
+        return Fmt(sm, "Wptr\\<$ @>", args);
     }else{
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(sm->m, (util)a),

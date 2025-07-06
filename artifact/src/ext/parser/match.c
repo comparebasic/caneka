@@ -254,7 +254,6 @@ miss:
 
     if(mt->pat.curDef == mt->pat.endDef){
         if(unclaimed){
-            printf("UNCLAIMED\n");
             addCount(m, mt, SNIP_UNCLAIMED, 1);
         }
         SnipSpan_Add(mt->backlog, &mt->snip);

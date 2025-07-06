@@ -38,6 +38,7 @@ static BuildSubdir navigateobj = { "ext/navigate", {
     "navigate_tos.c",
     "relation.c",
     "compare.c",
+    "cash_ctx.c",
     NULL
 }};
 
@@ -75,7 +76,6 @@ static BuildSubdir fmtobj = { "ext/format/fmt", {
 }};
 
 static BuildSubdir cashobj = { "ext/format/cash", {
-    "cash.c",
     "cash_roebling.c",
     NULL
 }};

@@ -19,6 +19,7 @@ char *TypeStrings[] = {
     "TYPE_WRAPPED_BOOL",
     "TYPE_WRAPPED_PTR",
     "TYPE_WRAPPED_CSTR",
+    "_TYPE_WRAPPED_END",
     "TYPE_RANGE",
     "TYPE_UTIL",
     "TYPE_BOOK",
@@ -100,6 +101,7 @@ char *TypeStrings[] = {
     "TYPE_FMT_CTX",
     "TYPE_OSET_DEF",
     "TYPE_CASH",
+    "TYPE_CASH_CTX",
     "TYPE_EC_KEY",
     "TYPE_XMLT",
     "TYPE_NESTEDD",
@@ -117,6 +119,10 @@ char *TypeStrings[] = {
     "CASH_NOOP",
     "_CASH_END",
     "_APPS_CASH_START",
+    "FORMAT_CASH_TEXT",
+    "FORMAT_CASH_VAR",
+    "FORMAT_CASH_VAR_KEY",
+    "FORMAT_CASH_VAR_IDX",
     "_APPS_TYPE_START",
     "_TYPE_APPS_START",
     "TYPE_XMLCTX",
@@ -162,6 +168,7 @@ char *TypeStrings[] = {
     "FORMATTER_URL",
     "FORMATTER_NEXT",
     "FORMATTER_PARAGRAPH",
+    "FORMATTER_MODULE",
     "FORMATTER_END",
     "_FORMATTER_END",
     "TYPE_LANG_CDOC",
@@ -191,7 +198,6 @@ char *TypeStrings[] = {
     "KVE_END",
     "_KVE_END",
     "_TYPE_APPS_END",
-    NULL,
 };
 
 char *Type_ToChars(cls type){

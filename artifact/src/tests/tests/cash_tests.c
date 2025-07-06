@@ -12,21 +12,17 @@ status Cash_Tests(MemCh *gm){
     File_Read(f, FILE_READ_MAX);
 
     Cursor *curs = File_GetCurs(f);
-
-    Roebling *rbl = NULL;
-    rbl = Cash_RoeblingMake(m, curs, NULL);
-    rbl->mess->type.state |= DEBUG;
-    Roebling_Run(rbl);
-    Match *mt = (Match *)Iter_Current(&rbl->matchIt);
-    if(mt != NULL && mt->type.state & PROCESSING){
-        Roebling_Finalize(rbl, mt, SNIP_CONTENT);
-    }
+    CashCtx *ctx = CashCtx_FromCurs(m, curs, NULL);
+    
+    r |= Test(ctx->type.state & SUCCESS,
+            "Roebling finished with state SUCCESS for Cash", 
+        NULL);
 
     Abstract *args[] = {
-        (Abstract *)rbl,
+        (Abstract *)ctx->it.p,
         NULL
     };
-    Out("^p.Cash/Rbl: &^0.\n", args);
+    Out("^c.Cash Span: &^0.", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
