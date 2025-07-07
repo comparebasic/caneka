@@ -237,8 +237,10 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                     continue;
                 }
             }else if((def->flags & PAT_TERM) == 0){
-                mt->pat.curDef++;
-                continue;
+                if((def->flags & PAT_INVERT) == 0){
+                    mt->pat.curDef++;
+                    continue;
+                }
             }
 miss:
             mt->type.state &= ~(PROCESSING|MATCH_LAST_TERM);

@@ -40,6 +40,7 @@ status CashTempl_Tests(MemCh *gm){
     File_Read(f, FILE_READ_MAX);
 
     Cursor *curs = File_GetCurs(f);
+    curs->type.state |= DEBUG;
     CashCtx *ctx = CashCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,

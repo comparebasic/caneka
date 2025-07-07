@@ -215,6 +215,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "OrdTable Tests",
+        OrdTable_Tests,
+        "OrdTable tests of ordered table of add/get.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Cash Tests",
         Cash_Tests,
         "Cash tests of basic value templating.",

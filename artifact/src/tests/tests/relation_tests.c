@@ -34,7 +34,7 @@ status Relation_Tests(MemCh *gm){
     Relation_SetValue(rel, 3, 2, (Abstract *)I32_Wrapped(m, 33));
 
     Stream *sm = Stream_MakeStrVec(m);
-    i64 total = ToS(sm, (Abstract *)rel, 0, MORE);
+    i64 total = ToS(sm, (Abstract *)rel, 0, MORE|DEBUG);
 
     s = Str_CstrRef(m, "Rel<3x4 \x1b[1m\"ColumnA\"\x1b[22m,"
         "\x1b[1m\"ColumnB\"\x1b[22m,\x1b[1m\"ColumnC\"\x1b[22m [\n"

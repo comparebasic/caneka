@@ -111,10 +111,13 @@ status Span_Insert(Span *p, i32 idx, Abstract *t){
 }
 
 status Span_Add(Span *p, Abstract *t){
+    p->type.state &= ~(ERROR|SUCCESS|NOOP);
     if(t == NULL){
-        return NOOP;
+        p->type.state |= NOOP;
+        return p->type.state;
     }
     Iter it;
     Iter_Init(&it, p);
-    return Iter_Add(&it, t);
+    p->type.state |= Iter_Add(&it, t) & (ERROR|SUCCESS|NOOP);
+    return p->type.state;
 }

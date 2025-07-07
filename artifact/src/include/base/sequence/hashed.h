@@ -5,6 +5,7 @@ enum hash_flags {
 typedef struct hashed {
     Type type;
     i32 idx;
+    i32 orderIdx;
     util id;
     Abstract *item;
     Abstract *value;

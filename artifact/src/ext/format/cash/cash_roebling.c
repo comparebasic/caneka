@@ -8,7 +8,22 @@ static PatCharDef textDef[] = {
 };
 
 static PatCharDef varDef[] = {
-    {PAT_TERM, '$' ,'$'},{PAT_TERM|PAT_INVERT|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_TERM, '$' ,'$'},
+    {PAT_INVERT|PAT_INVERT_CAPTURE, '&', '&'},
+        {PAT_INVERT|PAT_INVERT_CAPTURE, '@', '@'},
+        {PAT_TERM|PAT_INVERT|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varKeyValueDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM, '&' ,'&'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varNameValueDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM, '@' ,'@'},
     {PAT_END, 0, 0}
 };
 
@@ -98,6 +113,10 @@ static status var(MemCh *m, Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         varDef, FORMAT_CASH_VAR, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varKeyValueDef, FORMAT_CASH_VAR_KEYVALUE, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varNameValueDef, FORMAT_CASH_VAR_NAMEVALUE, FORMAT_CASH_TEXT);
     r |= Roebling_SetPattern(rbl,
         varEndIfDef, FORMAT_CASH_VAR_ENDIF, FORMAT_CASH_TEXT);
     r |= Roebling_SetPattern(rbl,

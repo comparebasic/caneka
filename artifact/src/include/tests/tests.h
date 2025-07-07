@@ -41,6 +41,7 @@ status FmtHtml_Tests(MemCh *gm);
 status DebugStack_Tests(MemCh *gm);
 status Cash_Tests(MemCh *gm);
 status CashTempl_Tests(MemCh *gm);
+status OrdTable_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

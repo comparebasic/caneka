@@ -84,12 +84,18 @@ static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
 static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.i);
-    if(flags & MORE){
+    if(flags & DEBUG){
         Abstract *args[] = {
             (Abstract *)s,
             NULL
         };
         return Fmt(sm, "Wi32\\<^D.$^d.>", args);
+    }else if(flags & MORE){
+        Abstract *args[] = {
+            (Abstract *)s,
+            NULL
+        };
+        return Fmt(sm, "^D.$^d.", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
@@ -112,12 +118,18 @@ static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
 static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I8);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.b);
-    if(flags & MORE){
+    if(flags & DEBUG){
         Abstract *args[] = {
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wi8\\<^D.^d.>", args);
+        return Fmt(sm, "Wi8\\<^D.$^d.>", args);
+    }else if(flags & MORE){
+        Abstract *args[] = {
+            (Abstract *)s,
+            NULL
+        };
+        return Fmt(sm, "^D.$^d.", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }

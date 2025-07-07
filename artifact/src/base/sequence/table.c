@@ -147,9 +147,11 @@ Hashed *Table_GetHashed(Table *tbl, Abstract *a){
 }
 
 Hashed *Table_SetHashed(Table *tbl, Abstract *a, Abstract *value){
+    tbl->type.state &= ~OUTCOME_FLAGS;
     Iter it;
     Iter_Init(&it, tbl);
     Hashed *h = Table_GetSetHashed(&it, SPAN_OP_SET, a, value);
+    tbl->type.state |= it.type.state & OUTCOME_FLAGS;
     return h;
 }
 

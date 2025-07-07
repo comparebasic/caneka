@@ -40,13 +40,14 @@ i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
         wid->type.state |= FMT_TYPE_BITS;
         Single *val = Ptr_Wrapped(sm->m, h->value, 0);
         Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, h->orderIdx), 
             (Abstract *)I32_Wrapped(sm->m, h->idx), 
             (Abstract *)wid, 
             h->item, 
             (Abstract *)val, 
             NULL
         };
-        return Fmt(sm, "H<$ $/$ -> $>", args);
+        return Fmt(sm, "H<$,$ $/$ -> $>", args);
     }else if(flags & MORE){
         Single *val = Ptr_Wrapped(sm->m, h->value, 0);
         Abstract *args[] = {
