@@ -20,6 +20,61 @@ static PatCharDef varKeyDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef varEndIfDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '/' ,'/'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '?' ,'?'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varIfDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '?' ,'?'},
+    {PAT_KO|PAT_KO_TERM, '}', '}'},
+    patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varEndForDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '/' ,'/'},
+    {PAT_TERM, ':' ,':'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varForDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, ':' ,':'},
+    {PAT_KO|PAT_KO_TERM, '}', '}'},
+    patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varEndIfNotDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '/' ,'/'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '!' ,'!'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_END, 0, 0}
+};
+
+
+static PatCharDef varIfNotDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '!' ,'!'},
+    {PAT_KO|PAT_KO_TERM, '}', '}'},
+    patText,
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef varIdxDef[] = {
     {PAT_TERM, '$' ,'$'},{PAT_TERM|PAT_INVERT_CAPTURE, '[', '['},
     {PAT_KO|PAT_KO_TERM, ']', ']'},
@@ -43,6 +98,18 @@ static status var(MemCh *m, Roebling *rbl){
 
     r |= Roebling_SetPattern(rbl,
         varDef, FORMAT_CASH_VAR, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varEndIfDef, FORMAT_CASH_VAR_ENDIF, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varEndIfNotDef, FORMAT_CASH_VAR_ENDIFNOT, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varEndForDef, FORMAT_CASH_VAR_ENDFOR, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varIfDef, FORMAT_CASH_VAR_ENDFOR, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varIfNotDef, FORMAT_CASH_VAR_IFNOT, FORMAT_CASH_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        varForDef, FORMAT_CASH_VAR_FOR, FORMAT_CASH_TEXT);
     r |= Roebling_SetPattern(rbl,
         varKeyDef, FORMAT_CASH_VAR_KEY, FORMAT_CASH_TEXT);
     r |= Roebling_SetPattern(rbl,

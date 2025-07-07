@@ -11,12 +11,11 @@
     <nav>
         <ul><a href="/" class="active">Home</a></ul>
         <ul><span class="fo-link">Links</span>
-            ${for: menu-items}
             <ul>
-                <li><a href="${url}">${name}</a></li>
-                <li><a href="${url}">${name}</a></li>
+                ${:menu-items}
+                <li><a href="${&}">${@}</a></li>
+                ${/:}
             </ul>
-            ${}
         </ul>
     </nav>
     </section>

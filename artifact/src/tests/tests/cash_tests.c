@@ -15,7 +15,35 @@ status Cash_Tests(MemCh *gm){
     CashCtx *ctx = CashCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
-            "Roebling finished with state SUCCESS for Cash", 
+            "Roebling finished with state SUCCESS for Cash with keys", 
+        NULL);
+
+    Abstract *args[] = {
+        (Abstract *)ctx->it.p,
+        NULL
+    };
+    Out("^c.Cash Span: &^0.", args);
+
+    MemCh_Free(m);
+    DebugStack_Pop();
+    return r;
+}
+
+status CashTempl_Tests(MemCh *gm){
+    DebugStack_Push(NULL, 0);
+    status r = READY;
+    MemCh *m = MemCh_Make();
+    Str *s = NULL; 
+
+    Str *path = File_GetAbsPath(m, Str_CstrRef(m, "./docs/html/nav.html"));
+    File *f = File_Make(m, path, NULL);
+    File_Read(f, FILE_READ_MAX);
+
+    Cursor *curs = File_GetCurs(f);
+    CashCtx *ctx = CashCtx_FromCurs(m, curs, NULL);
+    
+    r |= Test(ctx->type.state & SUCCESS,
+            "Roebling finished with state SUCCESS for Cash with template logic", 
         NULL);
 
     Abstract *args[] = {
