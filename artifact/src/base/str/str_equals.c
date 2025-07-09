@@ -57,9 +57,14 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     if(a == NULL || b == NULL){
        return FALSE; 
     }
+    boolean failAnyway = FALSE;
     i32 length = a->length;
-    if(a->length != b->total && (a->type.state & DEBUG) == 0){
-        goto miss;
+    if(a->length != b->total){
+        if((a->type.state & DEBUG) == 0){
+            goto miss;
+        }else{
+            failAnyway = TRUE;
+        }
     }
     util *ptrA = (util *)a->bytes;
     util *ptrB = NULL;
@@ -82,7 +87,7 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
         }
     }
 
-    return TRUE;
+    return !failAnyway;
 miss:
     if((a->type.state & DEBUG) || (b->type.state & DEBUG)){
         i32 pos = a->length - length;

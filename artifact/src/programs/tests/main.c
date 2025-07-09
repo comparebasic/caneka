@@ -232,6 +232,18 @@ static TestSet _Tests[] = {
         "Cash tests of basic logic templating.",
         FEATURE_COMPLETE,
     },
+    {
+        "Templ Tests",
+        Templ_Tests,
+        "Testing templating a Cash template.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "TemplLogic Tests",
+        TemplLogic_Tests,
+        "Testing templating logic tags in a Cash template.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TablePreKey",

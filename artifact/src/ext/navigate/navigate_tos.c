@@ -39,25 +39,17 @@ static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total; 
 }
 
-static i64 NestedD_Print(Stream *sm, Abstract *a, cls type, word flags){
-    /*
-    NestedD *nd = (NestedD *)as(a, TYPE_NESTEDD);
-    printf("\x1b[%dmND<%s: ", color, State_ToChars(nd->type.state));
-    Debug_Print((void *)nd->current_tbl, 0, "", color, extended);
-    Iter it;
-    Iter_InitReverse(&it, nd->stack);
-    printf("\x1b[%dm stack/%d=(", color, nd->stack->nvalues);
-    while((Iter_Next(&it) & END) == 0){
-        NestedState *ns = (NestedState *)Iter_Get(&it);
-        printf("\x1b[%dm%s -> ", color, NestedD_opToChars(ns->flags));
-        Debug_Print((void *) ns->t, 0, "", color, FALSE);
-        if((it.type.state & LAST) == 0){
-            printf("\x1b[%dm,", color);
-        }
-    }
-    printf("\x1b[%dm)>\x1b[0m", color);
-    */
-    return 0;
+static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
+    status r = READY;
+
+    Templ *templ = (Templ *)as(a, TYPE_TEMPL);
+    Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)templ, ToS_FlagLabels),
+        (Abstract *)&templ->content,
+        (Abstract *)&templ->data,
+        NULL
+    };
+    return Fmt(sm, "Temple<$ content:@ data:@", args);
 }
 
 static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -69,10 +61,10 @@ static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)(nd->parent != NULL ?
             Type_ToStr(sm->m, nd->parent->captureKey) : NULL),
         (Abstract *)nd->atts,
-        (Abstract *)Type_ToStr(sm->m, 
+        (Abstract *)Type_ToStr(sm->m,
             (nd->value != NULL ? nd->value->type.of : _TYPE_ZERO)),
         (Abstract *)nd->value,
-        (Abstract *)Type_ToStr(sm->m, 
+        (Abstract *)Type_ToStr(sm->m,
             (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO)),
         NULL
     };
@@ -110,6 +102,7 @@ static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
             total += Stream_Bytes(sm, (byte *)",", 1);
         }
     }
+
     total += Stream_Bytes(sm, (byte *)"]>", 2);
     return total;
 }
@@ -193,14 +186,22 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 CashKey_Print(Stream *sm, Abstract *a, cls type, word flags){
-    Single *sg = (Single *)a;
+static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
+    OrdTable *otbl = (OrdTable *)as(a, TYPE_ORDTABLE);
     Abstract *args[] = {
-        (Abstract *)sg->val.ptr,
+        (Abstract *)otbl->tbl,
+        (Abstract *)otbl->order,
+        NULL
+    };
+    return Fmt(sm, "OrdTable<@, @>", args);
+}
+
+static i64 CashKey_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Abstract *args[] = {
+        (Abstract *)a,
         NULL
     };
     return Fmt(sm, "Key<&>", args);
-    
 }
 
 status Navigate_InitLabels(MemCh *m, Lookup *lk){
@@ -231,10 +232,11 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
-    r |= Lookup_Add(m, lk, TYPE_NESTEDD, (void *)NestedD_Print);
+    r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
     r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
     r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEY, (void *)CashKey_Print);
+    r |= Lookup_Add(m, lk, TYPE_ORDTABLE, (void *)OrdTable_Print);
     return r;
 }

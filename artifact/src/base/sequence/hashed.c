@@ -39,6 +39,19 @@ static util Hash_Str(Abstract *a){
     return h;
 }
 
+static util Hash_StrVec(Abstract *a){
+    StrVec *v = (StrVec *)a;
+	util h = 5381;
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        h = _Hash_Bytes(s->bytes, s->length, h);
+    }
+
+    return h;
+}
+
 static util Hash_Req(Abstract *a){
     return 0;
 }
@@ -62,6 +75,7 @@ static status populateHash(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_PatMatch);
     r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)Hash_PatCharDef);
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Hash_Str);
+    r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)Hash_StrVec);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
     r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);

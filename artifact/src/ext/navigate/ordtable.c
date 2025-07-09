@@ -26,7 +26,7 @@ Hashed *OrdTable_GetByIdx(OrdTable *tbl, i32 idx){
 
 OrdTable *OrdTable_Make(MemCh *m){
     OrdTable *otbl = (OrdTable *)MemCh_Alloc(m, sizeof(OrdTable));
-    otbl->type.state |= TYPE_ORDTABLE;
+    otbl->type.of = TYPE_ORDTABLE;
     otbl->tbl = Table_Make(m);
     otbl->order = Span_Make(m);
     return otbl;

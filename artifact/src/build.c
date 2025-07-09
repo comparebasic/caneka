@@ -29,6 +29,7 @@ static char *libs[] = {
 /* sources */
 static BuildSubdir typesobj = { "ext/types", {
     "init.c",
+    "from.c",
     NULL
 }};
 
@@ -40,6 +41,7 @@ static BuildSubdir navigateobj = { "ext/navigate", {
     "compare.c",
     "cash_ctx.c",
     "ordtable.c",
+    "templ.c",
     NULL
 }};
 
@@ -125,6 +127,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "debugstack_tests.c",
     "cash_tests.c",
     "ordtable_tests.c",
+    "templ_tests.c",
     NULL
 }};
 
