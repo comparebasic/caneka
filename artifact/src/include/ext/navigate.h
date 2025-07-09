@@ -6,3 +6,4 @@
 #include "navigate/ordtable.h"
 #include "navigate/cash_ctx.h"
 #include "navigate/templ.h"
+#include "navigate/templ_jump.h"

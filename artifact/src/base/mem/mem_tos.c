@@ -217,7 +217,7 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
                 I64_Wrapped(sm->m, (i64)it->value) : it->value),
             NULL
         };
-        total += Fmt(sm, "value=$>", args2);
+        total += Fmt(sm, "value=@>", args2);
     }else if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),

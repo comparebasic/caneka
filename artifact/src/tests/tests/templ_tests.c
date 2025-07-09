@@ -35,7 +35,6 @@ status Templ_Tests(MemCh *gm){
     i64 total = Templ_ToS(templ, sm);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
-    expected->type.state |= DEBUG;
     r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);
 
     Abstract *args[] = {
@@ -79,7 +78,6 @@ status TemplLogic_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p, data);
-    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, sm);
 
     Str *expected = Str_CstrRef(m, logicTestContent);

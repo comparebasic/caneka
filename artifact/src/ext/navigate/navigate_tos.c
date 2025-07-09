@@ -39,6 +39,20 @@ static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total; 
 }
 
+static i64 TemplJump_Print(Stream *sm, Abstract *a, cls type, word flags){
+    status r = READY;
+
+    TemplJump *jump = (TemplJump *)as(a, TYPE_TEMPL_JUMP);
+    Abstract *args[] = {
+        (Abstract *)Type_ToStr(sm->m, jump->jumpType.of),
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)jump, ToS_FlagLabels),
+        (Abstract *)I32_Wrapped(sm->m, jump->idx),
+        (Abstract *)I32_Wrapped(sm->m, jump->destIdx),
+        NULL
+    };
+    return Fmt(sm, "TemplJump:$<$ @/@>", args);
+}
+
 static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
     status r = READY;
 
@@ -49,7 +63,7 @@ static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)&templ->data,
         NULL
     };
-    return Fmt(sm, "Temple<$ content:@ data:@", args);
+    return Fmt(sm, "Templ<$ content:@ data:@", args);
 }
 
 static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -196,12 +210,13 @@ static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
     return Fmt(sm, "OrdTable<@, @>", args);
 }
 
-static i64 CashKey_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 CashItem_Print(Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[] = {
+        (Abstract *)Type_ToStr(sm->m, type),
         (Abstract *)a,
         NULL
     };
-    return Fmt(sm, "Key<&>", args);
+    return Fmt(sm, "CashItem:$<@>", args);
 }
 
 status Navigate_InitLabels(MemCh *m, Lookup *lk){
@@ -233,10 +248,16 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
+    r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMP, (void *)TemplJump_Print);
     r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
-    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEY, (void *)CashKey_Print);
     r |= Lookup_Add(m, lk, TYPE_ORDTABLE, (void *)OrdTable_Print);
+    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEY, (void *)CashItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_FOR, (void *)CashItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEYVALUE, 
+        (void *)CashItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_NAMEVALUE, 
+        (void *)CashItem_Print);
     return r;
 }

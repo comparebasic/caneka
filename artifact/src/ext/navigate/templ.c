@@ -20,30 +20,80 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     Abstract *item = Iter_Get(&templ->content);
     Abstract *data = Iter_Current(&templ->data);
 
-    if(item->type.of > _FORMAT_CASH_VAR_ENDINGS && 
-            item->type.of < _FORMAT_CASH_VAR_ENDINGS_END){
-        /* wind back */;
-    }else if(item->type.of == TYPE_ITER){
-        /* select next item */
-    }else if(item->type.of == TYPE_STRVEC){
+    if(item->type.of == TYPE_STRVEC){
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
+    }else if(item->type.of == TYPE_TEMPL_JUMP){
+        TemplJump *jump = (TemplJump*)item;
+        if(jump->jumpType.of == FORMAT_CASH_VAR_FOR){
+            Iter *it = (Iter *)as(data, TYPE_ITER); 
+            if((Iter_Next(it) & END) == 0){;
+                Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+            }else{
+                Iter_PrevRemove(&templ->data);
+            }
+        }else if(jump->jumpType.of == FORMAT_CASH_VAR_ENDFOR){
+            Iter_PrevRemove(&templ->data);
+            data = Iter_Get(&templ->data);
+            Iter *it = (Iter *)as(data, TYPE_ITER); 
+            if((Iter_Next(it) & END) == 0){
+                Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+                Iter_GetByIdx(&templ->content, jump->destIdx);
+            }
+        }else{
+            Abstract *args[] = {
+                (Abstract *)jump,
+                NULL
+            };
+            Out("^r.Jump not implemented @^0.\n", args);
+            exit(1);
+        }
     }else if(item->type.of == TYPE_WRAPPED_PTR){
         Single *sg = (Single *)item;
         if(sg->objType.of == FORMAT_CASH_VAR_FOR){
-            printf("FOR\n");
-            fflush(stdout);
-            Iter_Add(&templ->data, (Abstract *)Iter_Make(sm->m, ));
+            Iter *it = From_GetIter(sm->m, data, sg->val.ptr);
+            Iter_Add(&templ->data,
+                (Abstract *)it);
+            if((Iter_Next(it) & END) == 0){
+                Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+            }
+            Iter_Set(&templ->content,
+                TemplJump_Make(sm->m, sg->objType.of, templ->content.idx, NEGATIVE));
         }else if(sg->objType.of == FORMAT_CASH_VAR_KEYVALUE){
-            Hashed *h = FromKeyHashed(data, sg->val.ptr);
-            Abstract *value = Name((Abstract *)h);
+            Abstract *value = From_Name((Abstract *)data);
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(sg->objType.of == FORMAT_CASH_VAR_NAMEVALUE){
-            Hashed *h = FromKeyHashed(data, sg->val.ptr);
-            Abstract *value = Value((Abstract *)h);
+            Abstract *value = From_Value((Abstract *)data);
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(sg->objType.of == FORMAT_CASH_VAR_KEY){
-            Abstract *value = FromKey(data, sg->val.ptr);
+            Abstract *value = From_Key(data, sg->val.ptr);
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
+        }else if(sg->objType.of > _FORMAT_CASH_VAR_ENDINGS && 
+            item->type.of < _FORMAT_CASH_VAR_ENDINGS_END){
+            Iter _it;
+            memcpy(&_it, &templ->content, sizeof(Iter));
+            i32 idx = templ->content.idx;
+            cls lookFor = sg->objType.of - (FORMAT_CASH_VAR_ENDIF - FORMAT_CASH_VAR_IF);
+
+            TemplJump *jumpFrom = TemplJump_Make(sm->m, sg->objType.of, 
+                templ->content.idx, -1);
+            Iter_Set(&templ->content, (Abstract *)jumpFrom);
+            while((Iter_Prev(&_it) & END) == 0){
+                Abstract *prev = Iter_Get(&_it);
+                if(prev->type.of == TYPE_TEMPL_JUMP){
+                    TemplJump *jump = (TemplJump *)prev;
+                    if(jump->destIdx == NEGATIVE){
+                        jump->destIdx = idx;
+                        jumpFrom->destIdx = _it.idx;
+                        break;
+                    }
+                }
+            }
+            if(jumpFrom->destIdx == NEGATIVE){
+                Error(ErrStream->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER, 
+                    "Unable to find source of ending in Templ content\n", NULL);
+            }else{
+                Iter_Prev(&templ->content);
+            }
         }
     }
 
@@ -54,11 +104,12 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     if(templ->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)templ,
-            (Abstract *)item,
             (Abstract *)data,
+            (Abstract *)Iter_Current(&templ->data),
+            (Abstract *)item,
             NULL
         };
-        Out("^p.Templ: &\n^0.^y&\n^b.@^0\n", args);
+        Out("Templ: ^p.&^0.\nData: ^p.@^0.\nDataItem: ^p.&^0.\nItem:^y.&^0\n\n", args);
     }
 
     return total;

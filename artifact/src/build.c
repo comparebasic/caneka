@@ -42,6 +42,7 @@ static BuildSubdir navigateobj = { "ext/navigate", {
     "cash_ctx.c",
     "ordtable.c",
     "templ.c",
+    "templ_jump.c",
     NULL
 }};
 
