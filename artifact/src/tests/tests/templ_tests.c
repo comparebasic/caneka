@@ -5,7 +5,31 @@ static char *keyTestContent = ""
     "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>My Fancy Page</title>\n<link href=\"style.css\" rel=\"stylesheet\" />\n  <meta \n    name=\"viewport\"\n    content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\"\n  >\n</head>\n<body>\n<header>\n    <div class=\"section\">\n        <div class=\"logo-blocker\"></div>\n        <a class=\"hero\" href=\"/\">\n        <h1>caneka</h1>\n        </a>\n        <h2>The Anti-Syntax Runtime</h2>\n        <span class=\"menu-action\" onclick=\"menu()\">=</span>\n    </div>\n    <nav>\n  <ul>\n    <li>item one</li>\n    <li>item two</li>\n  </ul>\n</nav>\n    <script type=\"text/javascript\" src=\"menu.js\"></script>\n</header>\n"
 "";
 
-static char *logicTestContent = "";
+static char *logicTestContent = ""
+"<div class=\"nav-wrapper\" id=\"nav-wrapper\">\n"
+"    <div class=\"section\">\n"
+"        <div class=\"logo-blocker\"></div>\n"
+"        <a class=\"hero\" href=\"/\">\n"
+"        <h1>caneka</h1>\n"
+"        </a>\n"
+"        <h2>The Anti-Syntax Runtime</h2>\n"
+"        <span class=\"menu-action\" onclick=\"menuClose()\">X</span>\n"
+"    </div>\n"
+"    <section>\n"
+"    <nav>\n"
+"        <ul><a href=\"/\" class=\"active\">Home</a></ul>\n"
+"        <ul><span class=\"fo-link\">Links</span>\n"
+"            <ul>\n"
+"                <li><a href=\"base/mem\">/base/mem.html</a></li>\n"
+"                <li><a href=\"base/str\">/base/str.html</a></li>\n"
+"                <li><a href=\"base/io\">/base/io.html</a></li>\n"
+"                <li><a href=\"base/suite\">/base/suite.html</a></li>\n"
+"            </ul>\n"
+"        </ul>\n"
+"    </nav>\n"
+"    </section>\n"
+"</div>\n"
+"";
 
 status Templ_Tests(MemCh *gm){
     status r = READY;
@@ -36,12 +60,6 @@ status Templ_Tests(MemCh *gm){
 
     Str *expected = Str_CstrRef(m, keyTestContent);
     r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);
-
-    Abstract *args[] = {
-        (Abstract *)sm,
-        NULL
-    };
-    Out("^c.Stream: @^0.", args);
 
     MemCh_Free(m);
     return r;
@@ -81,14 +99,8 @@ status TemplLogic_Tests(MemCh *gm){
     i64 total = Templ_ToS(templ, sm);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
-    expected->type.state |= DEBUG;
     r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);
 
-    Abstract *args[] = {
-        (Abstract *)sm,
-        NULL
-    };
-    Out("^c.Stream: @^0.", args);
 
     MemCh_Free(m);
     return r;

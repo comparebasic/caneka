@@ -129,17 +129,21 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
             unclaimed = FALSE;
             if((def->flags & (PAT_KO|PAT_INVERT)) == (PAT_KO|PAT_INVERT)){
                 mt->type.state |= MATCH_KO_INVERT;
-            }else if((def->flags & PAT_KO) != 0){
-                if((mt->type.state & MATCH_KO_INVERT) != 0){
+            }else if((def->flags & PAT_DROPOUT) != 0){
+                mt->type.state |= NOOP;
+                return mt->type.state;
+            }else if(def->flags & PAT_KO){
+                if(mt->type.state & MATCH_KO_INVERT){
                     mt->type.state &= ~MATCH_KO_INVERT;
                     mt->pat.curDef++;
                     continue;
                 }else{
                     mt->type.state |= MATCH_KO;
-                    if((def->flags & PAT_LEAVE) != 0){
+                    if(def->flags & PAT_LEAVE){
                         mt->type.state |= MATCH_LEAVE;
                     }
-                    if((def->flags & PAT_INVERT_CAPTURE) != 0){
+                    if((def->flags & PAT_INVERT_CAPTURE) && 
+                        (def->flags & PAT_CONSUME) == 0){
                         addCount(m, mt, SNIP_UNCLAIMED, 1);
                     }else{
                         addCount(m, mt, SNIP_GAP, 1);
@@ -149,7 +153,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                     PatCharDef *nextDef = mt->pat.curDef+1;
 
                     if((nextDef->flags & PAT_KO) == 0){
-                        if((mt->type.state & MATCH_LEAVE) != 0){
+                        if(mt->type.state & MATCH_LEAVE){
                             goto miss;
                             break;
                         }
@@ -179,10 +183,10 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
             }else if( (def->flags & (PAT_INVERT_CAPTURE|PAT_INVERT)) == (PAT_INVERT_CAPTURE|PAT_INVERT)){
                 /* no increment if it's an invert and no capture */;
                 snipFlag = SNIP_UNCLAIMED;
-            }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
-                snipFlag = SNIP_UNCLAIMED;
             }else if((def->flags & PAT_CONSUME) != 0){
                 snipFlag = SNIP_GAP;
+            }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
+                snipFlag = SNIP_UNCLAIMED;
             }else{
                 snipFlag = SNIP_CONTENT;
             }

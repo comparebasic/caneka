@@ -1,6 +1,10 @@
 #define patText \
     {PAT_OPTIONAL|PAT_MANY, '\t', '\t'}, {PAT_OPTIONAL|PAT_MANY, '\r', '\r'}, {PAT_OPTIONAL|PAT_MANY, '\n', '\n'}, {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31}
 
+#define patTextChar \
+    {PAT_OPTIONAL, '\t', '\t'}, {PAT_OPTIONAL, '\r', '\r'}, {PAT_OPTIONAL, '\n', '\n'}, {PAT_INVERT|PAT_TERM, 0, 31}
+
+
 #define patAnyText \
     {PAT_OPTIONAL|PAT_ANY, '\t', '\t'}, {PAT_OPTIONAL|PAT_ANY, '\r', '\r'}, {PAT_OPTIONAL|PAT_ANY, '\n', '\n'}, {PAT_INVERT|PAT_ANY|PAT_TERM, 0, 31}
 

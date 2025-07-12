@@ -31,6 +31,8 @@ static PatCharDef varKeyDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
     {PAT_KO|PAT_KO_TERM, '}', '}'},
+    {PAT_DROPOUT, ':', ':'},{PAT_DROPOUT, '/', '/'},{PAT_DROPOUT, '?', '?'},
+        {PAT_DROPOUT, '!', '!'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -38,9 +40,9 @@ static PatCharDef varKeyDef[] = {
 static PatCharDef varEndIfDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '/' ,'/'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '?' ,'?'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_TERM, '/' ,'/'},
+    {PAT_TERM, '?' ,'?'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
     {PAT_END, 0, 0}
 };
 
@@ -58,7 +60,7 @@ static PatCharDef varEndForDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '/' ,'/'},
     {PAT_TERM, ':' ,':'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
     {PAT_END, 0, 0}
 };
 
@@ -74,9 +76,9 @@ static PatCharDef varForDef[] = {
 static PatCharDef varEndIfNotDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '/' ,'/'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '!' ,'!'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_TERM, '/' ,'/'},
+    {PAT_TERM, '!' ,'!'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
     {PAT_END, 0, 0}
 };
 

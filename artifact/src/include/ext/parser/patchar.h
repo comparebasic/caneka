@@ -11,7 +11,7 @@ enum pat_flags {
     PAT_KO_TERM = 1 << 8, /* O */
     PAT_SINGLE = 1 << 9, /* S */
     PAT_LEAVE  = 1 << 10, /* L */
-    _ = 1 << 11, /* D */
+    PAT_DROPOUT = 1 << 11, /* D */
     PAT_GO_ON_FAIL = 1 << 12, /* T */
     PAT_CONSUME = 1 << 13, /* U */
 };

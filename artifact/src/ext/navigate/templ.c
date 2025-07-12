@@ -21,6 +21,13 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     Abstract *data = Iter_Current(&templ->data);
 
     if(item->type.of == TYPE_STRVEC){
+        if(templ->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)item,
+                NULL
+            };
+            Out("^c.StrVec Out: &^0.\n", args);
+        }
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
     }else if(item->type.of == TYPE_TEMPL_JUMP){
         TemplJump *jump = (TemplJump*)item;
@@ -49,7 +56,10 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         }
     }else if(item->type.of == TYPE_WRAPPED_PTR){
         Single *sg = (Single *)item;
-        if(sg->objType.of == FORMAT_CASH_VAR_FOR){
+        if(sg->objType.of == FORMAT_CASH_INDENT){
+            templ->indent = ((StrVec *)sg->val.ptr)->total;
+            total += ToS(sm, (Abstract *)sg->val.ptr, 0, ZERO); 
+        }else if(sg->objType.of == FORMAT_CASH_VAR_FOR){
             Iter *it = From_GetIter(sm->m, data, sg->val.ptr);
             Iter_Add(&templ->data,
                 (Abstract *)it);

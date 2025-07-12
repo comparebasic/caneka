@@ -18,12 +18,6 @@ status Cash_Tests(MemCh *gm){
             "Roebling finished with state SUCCESS for Cash with keys", 
         NULL);
 
-    Abstract *args[] = {
-        (Abstract *)ctx->it.p,
-        NULL
-    };
-    Out("^c.Cash Span: &^0.", args);
-
     MemCh_Free(m);
     DebugStack_Pop();
     return r;
@@ -40,18 +34,11 @@ status CashTempl_Tests(MemCh *gm){
     File_Read(f, FILE_READ_MAX);
 
     Cursor *curs = File_GetCurs(f);
-    curs->type.state |= DEBUG;
     CashCtx *ctx = CashCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
             "Roebling finished with state SUCCESS for Cash with template logic", 
         NULL);
-
-    Abstract *args[] = {
-        (Abstract *)ctx->it.p,
-        NULL
-    };
-    Out("^c.Cash Span: &^0.", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

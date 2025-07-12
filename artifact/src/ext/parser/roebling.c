@@ -99,6 +99,14 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
     rbl->type.state |= ROEBLING_NEXT;
     rbl->type.state &= ~PROCESSING;
 
+    if(mt->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)mt,
+            NULL
+        };
+        Out("^y.Match successful &^0.\n", args);
+    }
+
     if((mt->type.state & MATCH_SEARCH)){
         Snip *sn = Span_Get(mt->backlog, 0);
         if(sn->length > 0 && sn->type.state & SNIP_SKIPPED){

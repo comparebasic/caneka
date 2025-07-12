@@ -12,6 +12,9 @@ CashCtx *CashCtx_Make(MemCh *m, Cursor *curs, Abstract *source){
 CashCtx *CashCtx_FromCurs(MemCh *m, Cursor *curs, Abstract *source){
     CashCtx *ctx = CashCtx_Make(m, curs, source);
 
+    if(curs->type.state & DEBUG){
+        ctx->rbl->type.state |= DEBUG;
+    }
     Roebling_Run(ctx->rbl);
     Roebling_Finalize(ctx->rbl, NULL, NEGATIVE);
     if((ctx->rbl->curs->type.state & END) && (ctx->rbl->type.state & ERROR) == 0){
