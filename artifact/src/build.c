@@ -43,6 +43,7 @@ static BuildSubdir navigateobj = { "ext/navigate", {
     "ordtable.c",
     "templ.c",
     "templ_jump.c",
+    "nested.c",
     NULL
 }};
 
@@ -129,6 +130,7 @@ static BuildSubdir testsobj = { "tests/tests", {
     "cash_tests.c",
     "ordtable_tests.c",
     "templ_tests.c",
+    "nested_tests.c",
     NULL
 }};
 

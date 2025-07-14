@@ -207,7 +207,7 @@ static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)otbl->order,
         NULL
     };
-    return Fmt(sm, "OrdTable<@, @>", args);
+    return Fmt(sm, "OrdTable<@/[$]>", args);
 }
 
 static i64 CashItem_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -217,6 +217,17 @@ static i64 CashItem_Print(Stream *sm, Abstract *a, cls type, word flags){
         NULL
     };
     return Fmt(sm, "CashItem:$<@>", args);
+}
+
+static i64 Nested_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Nested *nd = (Nested *)as(a, TYPE_NESTED);
+    Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
+        (Abstract *)&nd->it,
+        (Abstract *)&nd->itemIt,
+        NULL
+    };
+    return Fmt(sm, "Nested<$ @ @>", args);
 }
 
 status Navigate_InitLabels(MemCh *m, Lookup *lk){
@@ -259,5 +270,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
         (void *)CashItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_NAMEVALUE, 
         (void *)CashItem_Print);
+    r |= Lookup_Add(m, lk, TYPE_NESTED, (void *)Nested_Print);
     return r;
 }

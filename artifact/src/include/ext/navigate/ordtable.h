@@ -6,5 +6,6 @@ typedef struct ordtable {
 
 OrdTable *OrdTable_Make(MemCh *m);
 Hashed *OrdTable_Set(OrdTable *otbl, Abstract *key, Abstract *value);
-Hashed *OrdTable_Get(OrdTable *tbl, Abstract *key);
-Hashed *OrdTable_GetByIdx(OrdTable *tbl, i32 idx);
+Hashed *OrdTable_Get(OrdTable *otbl, Abstract *key);
+Hashed *OrdTable_GetByIdx(OrdTable *otbl, i32 idx);
+boolean OrdTable_IsBlank(OrdTable *otbl);

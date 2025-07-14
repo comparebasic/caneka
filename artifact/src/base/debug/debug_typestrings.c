@@ -106,7 +106,7 @@ char *TypeStrings[] = {
     "TYPE_TEMPL_JUMP",
     "TYPE_EC_KEY",
     "TYPE_XMLT",
-    "TYPE_NESTEDD",
+    "TYPE_NESTED",
     "TYPE_ENC_PAIR",
     "TYPE_FMT_HTML",
     "_IO_START",

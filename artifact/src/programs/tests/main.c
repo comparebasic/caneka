@@ -233,6 +233,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Nested Tests",
+        Nested_Tests,
+        "Testing nested component, which manages nested OrdTables and Spans.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Templ Tests",
         Templ_Tests,
         "Testing templating a Cash template.",

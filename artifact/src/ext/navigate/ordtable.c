@@ -24,6 +24,10 @@ Hashed *OrdTable_GetByIdx(OrdTable *tbl, i32 idx){
     return (Hashed *)Span_Get(tbl->order, idx);
 }
 
+boolean OrdTable_IsBlank(OrdTable *otbl){
+    return otbl->tbl->nvalues == 0;
+}
+
 OrdTable *OrdTable_Make(MemCh *m){
     OrdTable *otbl = (OrdTable *)MemCh_Alloc(m, sizeof(OrdTable));
     otbl->type.of = TYPE_ORDTABLE;
