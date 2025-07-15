@@ -15,6 +15,7 @@ status Nested_Tests(MemCh *gm){
     nd->type.state |= DEBUG;
     Nested_AddByPath(nd, path, (Abstract *)value);
 
+
     Abstract *args[] = {
         (Abstract *)path,
         (Abstract *)value,
@@ -22,6 +23,31 @@ status Nested_Tests(MemCh *gm){
         NULL
     };
     Out("^p.Path: &\nValue: &\nNested: &\n", args);
+
+    nd = Nested_Make(m);
+    Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "base"), 
+        (Abstract *)OrdTable_Make(m));
+    Nested_Indent(nd, (Abstract *)Str_CstrRef(m, "base"));
+    Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "one"), 
+        (Abstract *)I32_Wrapped(m, 101));
+    Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "two"), 
+        (Abstract *)I32_Wrapped(m, 102));
+    Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "three"), 
+        (Abstract *)I32_Wrapped(m, 103));
+    Nested_Outdent(nd);
+    Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "more"), 
+        (Abstract *)OrdTable_Make(m));
+    Nested_Indent(nd, (Abstract *)Str_CstrRef(m, "more"));
+    Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "one"), 
+        (Abstract *)I32_Wrapped(m, 301));
+    Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "two"), 
+        (Abstract *)I32_Wrapped(m, 302));
+
+    Abstract *args2[] = {
+        (Abstract *)nd,
+        NULL
+    };
+    Out("^p.Nested: &\n", args2);
 
     MemCh_Free(m);
     DebugStack_Pop();

@@ -224,10 +224,9 @@ static i64 Nested_Print(Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
         (Abstract *)&nd->it,
-        (Abstract *)&nd->itemIt,
         NULL
     };
-    return Fmt(sm, "Nested<$ @ @>", args);
+    return Fmt(sm, "Nested<$ @>", args);
 }
 
 status Navigate_InitLabels(MemCh *m, Lookup *lk){

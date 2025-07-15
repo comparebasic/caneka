@@ -2,39 +2,36 @@
 #include <caneka.h> 
 
 Abstract *Nested_Get(Nested *nd){
-    if(nd->type.state & NESTED_ORDERED){
-        return Iter_Current(&nd->itemIt);
-    }else{
-        return Iter_Current(&nd->it);
-    }
+    return Iter_Current(&nd->it);
 }
 
 Abstract *Nested_GetRoot(Nested *nd){
     return Span_Get(nd->it.p, 0);
 }
 
-Abstract *Nested_GetByKey(Nested *nd, Abstract *key){
-    if(nd->type.state & NESTED_KEY_STORE){
-        Abstract *a = Iter_Current(&nd->it);
-        Hashed *h = OrdTable_Get((OrdTable *)a, key);
-        if(h != NULL && h->value != NULL){
-            if(h->value->type.of == TYPE_SPAN){
-                Iter_Init(&nd->itemIt, (Span *)h->value);
-            }else if(h->value->type.of == TYPE_ORDTABLE){
-                Iter_Init(&nd->itemIt, ((OrdTable *)h->value)->order);
-            }
-        }
-        return h->value;
-    }
+status Nested_Outdent(Nested *nd){
+    return Iter_PrevRemove(&nd->it);
+}
 
-    Abstract *args[] = {
-        key,
-        NULL
-    };
-    Error(ErrStream->m, (Abstract *)nd, FUNCNAME, FILENAME, LINENUMBER, 
-        "Nested not on a key value object to perform key based item query, key: &",
-        args);
-    return NULL;
+status Nested_Indent(Nested *nd, Abstract *key){
+    Abstract *a = Iter_Current(&nd->it);
+    if(a != NULL && a->type.of == TYPE_ORDTABLE){
+        Hashed *h = OrdTable_Get((OrdTable*)a, key);
+        if(h != NULL && h->value != NULL && h->value->type.of == TYPE_ORDTABLE){
+            Iter_Add(&nd->it, h->value);
+        }
+    }
+    return NOOP;
+}
+
+Abstract *Nested_GetByKey(Nested *nd, Abstract *key){
+    Abstract *a = Iter_Current(&nd->it);
+    Hashed *h = OrdTable_Get((OrdTable *)a, key);
+    if(h != NULL){
+        return h->value;
+    }else{
+        return NULL;
+    }
 }
 
 status Nested_AddByKey(Nested *nd, Abstract *key, Abstract *value){
@@ -74,6 +71,9 @@ status Nested_AddByPath(Nested *nd, Span *keys, Abstract *value){
     Abstract *key = NULL;
     while((Iter_Next(&keysIt) & END) == 0){
         key = Iter_Get(&keysIt);
+        if(keysIt.type.state & LAST){
+            continue;
+        }
         if(nd->type.state & DEBUG){
             Abstract *args[] = {
                 (Abstract *)key,
@@ -84,7 +84,7 @@ status Nested_AddByPath(Nested *nd, Span *keys, Abstract *value){
         }
         OrdTable *otbl = OrdTable_Make(nd->it.p->m);
         r |= Nested_AddByKey(nd, key, (Abstract *)otbl); 
-        Iter_Add(&nd->it, otbl);
+        Nested_Indent(nd, key);
         if(r & ERROR){
             break;
         }
@@ -105,33 +105,9 @@ status Nested_AddByPath(Nested *nd, Span *keys, Abstract *value){
     return r;
 }
 
-status Nested_Add(Nested *nd, Abstract *value){
-    if(nd->itemIt.p != NULL){
-        return Iter_Add(&nd->itemIt, value);
-    }else{
-        Abstract *args[] = {
-            (Abstract *)value,
-            NULL
-        };
-        Error(ErrStream->m, (Abstract *)nd, FUNCNAME, FILENAME, LINENUMBER, 
-            "Nested item iterator is not set, value : &", 
-            args);
-        return ERROR;
-    }
-}
-
-status Nested_Next(Nested *nd){
-    if((nd->itemIt.type.state & END) == 0){
-        Iter_Next(&nd->itemIt);
-    }
-    nd->type.state |= (nd->itemIt.type.state & NORMAL_FLAGS);
-    return nd->type.state;
-}
-
 Nested *Nested_Make(MemCh *m){
     Nested *nd = MemCh_Alloc(m, sizeof(Nested));
     nd->type.of = TYPE_NESTED;
     Iter_Init(&nd->it, Span_Make(m));
-    Iter_Init(&nd->itemIt, Span_Make(m));
     return nd;
 }
