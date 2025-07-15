@@ -4,6 +4,14 @@
 static Str **nodeLabels = NULL;
 static Str **messLabels = NULL;
 
+static i64 indentStream(Stream *sm, i32 indent){
+    i64 total = 0;
+    while(--indent >= 0){
+        total += Stream_Bytes(sm, (byte *)"  ", 2);
+    }
+    return total;
+}
+
 static i64 CompResult_Print(Stream *sm, Abstract *a, cls type, word flags){
     CompResult *cr = (CompResult*)as(a, TYPE_COMPRESULT);
     Abstract *args[] = {
@@ -202,12 +210,39 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
 
 static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
     OrdTable *otbl = (OrdTable *)as(a, TYPE_ORDTABLE);
-    Abstract *args[] = {
-        (Abstract *)otbl->tbl,
-        (Abstract *)otbl->order,
-        NULL
-    };
-    return Fmt(sm, "OrdTable<@/[$]>", args);
+    if(flags & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
+            (Abstract *)otbl->tbl,
+            (Abstract *)otbl->order,
+            NULL
+        };
+        return Fmt(sm, "OrdTable<^D.$^d.nvalues @/[$]>", args);
+    }else if(flags & MORE){
+        i64 total = 0;
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
+            NULL
+        };
+        total += Fmt(sm, "OrdTable<^D.$^d.nvalues [", args);
+        Iter it;
+        Iter_Init(&it, otbl->order);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = (Hashed *)Iter_Get(&it);
+            if(h != NULL){
+                total += ToS(sm, h->item, 0, MORE);  
+                total += Stream_Bytes(sm, (byte *)" -> ", 4);
+                total += ToS(sm, h->value, 0, MORE);  
+                if((it.type.state & LAST) == 0){
+                    total += Stream_Bytes(sm, (byte *)", ", 2);
+                }
+            }
+        }
+        total += Stream_Bytes(sm, (byte *)"]>", 2);
+        return total;
+    }else{
+        return ToStream_NotImpl(sm, a, type, flags);
+    }
 }
 
 static i64 CashItem_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -219,14 +254,78 @@ static i64 CashItem_Print(Stream *sm, Abstract *a, cls type, word flags){
     return Fmt(sm, "CashItem:$<@>", args);
 }
 
+static i64 Frame_Print(Stream *sm, Abstract *a, cls type, word flags){
+    i64 total = 0;
+    Frame *fm = (Frame *)as(a, TYPE_FRAME);
+    Abstract *args[] = {
+        (Abstract *)I32_Wrapped(sm->m, fm->originIdx),
+        (Abstract *)fm->originKey,
+        (Abstract *)(fm->value != NULL ? Type_ToStr(sm->m, fm->value->type.of): NULL),
+        (Abstract *)I32_Wrapped(sm->m, fm->it.idx),
+        (Abstract *)Iter_Current(&fm->it),
+        NULL,
+    };
+    total += Fmt(sm, "Frame<from:@/@ @[@]>", args);
+    return total;
+}
+
 static i64 Nested_Print(Stream *sm, Abstract *a, cls type, word flags){
-    Nested *nd = (Nested *)as(a, TYPE_NESTED);
+    i64 total = 0;
+    i16 guard = 0;
+    Nested *_nd = (Nested *)as(a, TYPE_NESTED);
+    Nested *nd = Nested_Make(sm->m);
+    Nested_SetRoot(nd, Nested_GetRoot(_nd));
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
         (Abstract *)&nd->it,
         NULL
     };
-    return Fmt(sm, "Nested<$ @>", args);
+    total += Fmt(sm, "Nested<$ \\@@", args);
+    if(flags & DEBUG){
+        total = Stream_Bytes(sm, (byte *)"\n", 1);
+        i32 indent = _nd->it.idx + 1;
+        Iter it;
+        while(TRUE){
+            Guard_Incr(&guard, 32, FUNCNAME, FILENAME, LINENUMBER);
+            Frame *fm = Iter_Current(&nd->it);
+            while((Iter_Next(&fm->it) & END) == 0){
+                Abstract *item = Iter_Get(&fm->it);
+                if(item->type.of == TYPE_HASHED){
+                    Hashed *h = (Hashed *)item;
+                    total += indentStream(sm, indent);
+                    total += ToS(sm, h->item, 0, MORE);
+                    if(h->value->type.of == TYPE_ORDTABLE || h->value->type.of == TYPE_SPAN){
+                        Nested_IndentByIdx(nd, fm->it.idx);
+                        indent++;
+                        total += Stream_Bytes(sm, (byte *)" ->\n", 4);
+                        break;
+                    }else{
+                        total += Stream_Bytes(sm, (byte *)" -> ", 4);
+                        total += ToS(sm, (Abstract *)h->value, 0, MORE);
+                        if(fm->it.type.state & LAST){
+                            total += Stream_Bytes(sm, (byte *)"\n", 1);
+                        }else{
+                            total += Stream_Bytes(sm, (byte *)",\n", 2);
+                        }
+                    }
+                }else{
+                    total += indentStream(sm, indent);
+                    total += ToS(sm, (Abstract *)item, 0, MORE);
+                    total += Stream_Bytes(sm, (byte *)",\n", 2);
+                }
+            }
+            if(fm->it.type.state & END){
+                indent--;
+                if(nd->it.idx == 0){
+                    break;
+                }else{
+                    Iter_Pop(&nd->it); 
+                }
+            }
+        }
+    }
+    total += Stream_Bytes(sm, (byte *)">", 1);
+    return total;
 }
 
 status Navigate_InitLabels(MemCh *m, Lookup *lk){
@@ -270,5 +369,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_NAMEVALUE, 
         (void *)CashItem_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTED, (void *)Nested_Print);
+    r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
     return r;
 }

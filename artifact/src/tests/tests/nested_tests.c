@@ -12,17 +12,19 @@ status Nested_Tests(MemCh *gm){
     Span *path = StrVec_ToSpan(m, v);
 
     Str *value = Str_CstrRef(m, "TheValue");
-    nd->type.state |= DEBUG;
     Nested_AddByPath(nd, path, (Abstract *)value);
 
-
+    Abstract *expected = Nested_GetByPath(nd, path);
     Abstract *args[] = {
         (Abstract *)path,
-        (Abstract *)value,
         (Abstract *)nd,
+        (Abstract *)expected,
+        (Abstract *)value,
         NULL
     };
-    Out("^p.Path: &\nValue: &\nNested: &\n", args);
+
+    Test(Equals(expected, (Abstract *)value), 
+        "Test that a variable can be set a retrieved on the path @, from &, expected @, have @", args);
 
     nd = Nested_Make(m);
     Nested_AddByKey(nd, (Abstract *)Str_CstrRef(m, "base"), 
@@ -45,9 +47,11 @@ status Nested_Tests(MemCh *gm){
 
     Abstract *args2[] = {
         (Abstract *)nd,
+        (Abstract *)((Frame *)Nested_GetRoot(nd))->value,
         NULL
     };
-    Out("^p.Nested: &\n", args2);
+    Out("^p.Nested: &\n@\n^0.", args2);
+
 
     MemCh_Free(m);
     DebugStack_Pop();

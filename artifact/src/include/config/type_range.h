@@ -107,6 +107,7 @@ enum types {
     TYPE_EC_KEY,
     TYPE_XMLT,
     TYPE_NESTED,
+    TYPE_FRAME,
     TYPE_ENC_PAIR,
     TYPE_FMT_HTML,
     _IO_START,

@@ -511,6 +511,13 @@ end:
     return it->type.state;
 }
 
+status Iter_Pop(Iter *it){
+    it->type.state = ((it->type.state & NORMAL_FLAGS) & ~(LAST|END)) | 
+        (SPAN_OP_GET|SPAN_OP_REMOVE|FLAG_ITER_REVERSE|PROCESSING);
+    _Iter_Prev(it);
+    return it->type.state;
+}
+
 status Iter_PrevRemove(Iter *it){
     it->type.state = ((it->type.state & NORMAL_FLAGS) & ~(LAST|END)) | 
         (SPAN_OP_GET|SPAN_OP_REMOVE|FLAG_ITER_REVERSE);

@@ -10,6 +10,10 @@ status Span_Set(Span *p, i32 idx, Abstract *t){
     return Iter_SetByIdx(&it, idx, (void *)t);
 }
 
+boolean Span_IsBlank(Span *p){
+    return p->nvalues == 0;
+}
+
 void *Span_Get(Span *p, i32 idx){
     if(idx < 0){
         return NULL;

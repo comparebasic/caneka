@@ -8,3 +8,4 @@
 #include "navigate/templ.h"
 #include "navigate/templ_jump.h"
 #include "navigate/nested.h"
+#include "navigate/frame.h"

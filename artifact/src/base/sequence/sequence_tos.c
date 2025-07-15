@@ -45,18 +45,18 @@ i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)wid, 
             h->item, 
             (Abstract *)val, 
+            (Abstract *)(h->value != NULL ? Type_ToStr(sm->m, h->value->type.of) : NULL),
             NULL
         };
-        return Fmt(sm, "H<$,$ $/$ -> $>", args);
+        return Fmt(sm, "H<$,$ $/$ -> $/$>", args);
     }else if(flags & MORE){
-        Single *val = Ptr_Wrapped(sm->m, h->value, 0);
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, h->idx), 
             h->item, 
-            (Abstract *)val, 
+            (Abstract *)h->value, 
             NULL
         };
-        return Fmt(sm, "H<$ $ -> $>", args);
+        return Fmt(sm, "H<$ @ -> @>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }

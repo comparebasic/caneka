@@ -44,6 +44,7 @@ static BuildSubdir navigateobj = { "ext/navigate", {
     "templ.c",
     "templ_jump.c",
     "nested.c",
+    "frame.c",
     NULL
 }};
 
