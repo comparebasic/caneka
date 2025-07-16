@@ -1,13 +1,36 @@
 #include <caneka.h>
 #include <tests.h>
 
+static boolean argHasFlag(Hashed *h, word flag){
+    return h->value->type.of == TYPE_WRAPPED_PTR && (h->value->type.state & flag);
+}
+
 status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv){
     Abstract *args[] = {
         (Abstract *)name,
-        (Abstract *)resolve,
         NULL
     };
-    Out("$ @\n", NULL);
+    Out("$ ", args);
+    Iter it;
+    Iter_Init(&it, resolve);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            Abstract *args[] = {
+                (Abstract *)h->item,
+                NULL
+            };
+
+            if(argHasFlag(h, ARG_OPTIONAL)){
+                Out("[$] ", args);
+            }else if(argHasFlag(h, ARG_MULTIPLE)){
+                Out("[$, ...] ", args);
+            }else{
+                Out("$ ", args);
+            }
+        }
+    }
+    Out("\n", NULL);
     exit(1);
 }
 
@@ -49,6 +72,20 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                     Table_SetKey(&it, (Abstract *)I32_Wrapped(m, i));
                 }
                 Table_SetValue(&it, (Abstract *)s);
+            }
+        }
+        Iter it;
+        Iter_Init(&it, resolve);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                if(!argHasFlag(h, ARG_OPTIONAL)){
+                    if(Table_Get(dest, h->item) == NULL){
+                        Error(m, (Abstract *)h->item, FUNCNAME, FILENAME, LINENUMBER,
+                            "Required argument not found", NULL);
+                        exit(1);
+                    }
+                }
             }
         }
     }

@@ -1,13 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <tests.h>
-
-static status test(MemCh *m){
-    status r = READY;
-    Tests_Init(m);
-    r |= Test_Runner(m, "Caneka", Tests);
-    return r;
-}
+#include "include/doc.h" 
 
 static status getHtmlDir(MemCh *m, Str *path){
     return NOOP;
@@ -58,33 +51,19 @@ i32 main(int argc, char **argv){
 
     DebugStack_Push(NULL, 0);
 
-    Table *argResolve = Table_Make(m);
-    Single *True = I32_Wrapped(m, TRUE);
-    Table_Set(argResolve, (Abstract *)Str_CstrRef(m, "debug"), (Abstract *)True);
-    Table_Set(argResolve,  (Abstract *)Str_CstrRef(m, "module"), (Abstract *)True);
-    Table *args = Table_Make(m);
-    if(CharPtr_ToTbl(m, argResolve, argc, argv, args) & (ERROR|NOOP)){
-        CharPtr_ToHelp(m, Str_CstrRef(m, "fmt"), argResolve, argc, argv);
-        exit(1);
-    }
+    DocCtx *ctx = DocCtx_Make(m);
+    ctx->args = DocCtx_ArgResolve(ctx, argc, argv);
+    DocCtx_SetFmtPath(ctx, Str_CstrRef(m, "docs/fmt")); 
 
-    Str *module = (Str *)Table_Get(args, (Abstract *)Str_CstrRef(m, "module"));
-    if(module == NULL){
-        Error(m, (Abstract *)args, FUNCNAME, FILENAME, LINENUMBER, "module path not found", NULL);
-    }
-    Str *path = Str_Make(m, STR_DEFAULT);
-    Str_AddCstr(path, "docs/fmt/");
-    Str_Add(path, module->bytes, module->length);
-    path = File_GetAbsPath(m, path);
     Abstract *_args[] = {
-        (Abstract *)args,
-        (Abstract *)path,
+        (Abstract *)ctx->args,
+        (Abstract *)ctx->fmtPath,
         NULL
     };
 
     Out("^y.Args @ and module path: @^0.\n", _args);
 
-    Dir_Climb(m, path, dirFunc, fileFunc, NULL); 
+    Dir_Climb(m, ctx->fmtPath, dirFunc, fileFunc, NULL); 
 
     DebugStack_Pop();
     return 0;
