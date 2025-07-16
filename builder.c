@@ -1,4 +1,5 @@
 #include "artifact/src/include/external.h"
+#include "artifact/src/include/config/arch.h"
 
 #if defined(__clang__) 
     #define COMPILER "clang"
@@ -24,6 +25,12 @@ typedef struct proc {
     char **cmd;
     int idx;
 } Proc;
+
+typedef struct cstr {
+    char *content;
+    size_t length;
+    size_t remaining;
+} Cstr;
 
 static Proc *list[16] = {
     NULL, NULL, NULL, NULL,
@@ -56,31 +63,6 @@ static char *buildBuilderLibCmd[] = {
     NULL
 };
 
-static char *buildBuilderCmd[] = {
-    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", "./build/build",
-    "./artifact/src/build.c", "./build/libcnkbuild/libcnkbuild.a", "./build/libcnkbase/libcnkbase.a",
-    "-lm",
-    "-DINSECURE",
-    NULL
-};
-
-static char *runBuilderCmd[] = {
-    "./build/build",
-    NULL
-};
-
-static const char *testsCoreCmd[] = {
-    COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/tests/include", "-o", "./build/tests", 
-    "./artifact/src/programs/tests/main.c", "./build/libcaneka/libcaneka.a", "./build/libcnkbase/libcnkbase.a",
-    "-DINSECURE",
-    NULL
-};
-
-static char *runTestsCoreCmd[] = {
-    "./build/tests",
-    NULL
-};
-
 static void showMsg(char *name, char **sources){
     printf("%s", name);
     char **p = sources;
@@ -108,6 +90,121 @@ static void failureMsg(char *name, char **sources, int code){
     fflush(stdout);
 }
 
+static void Cstr_Init(Cstr *cstr){
+    memset(cstr, 0, sizeof(Cstr));
+    cstr->content = malloc(STR_DEFAULT);
+    if(cstr->content == NULL){
+        fprintf(stderr, "Error unable to allocate bytes for Cstr\n");
+        exit(13);
+    }
+    cstr->remaining = STR_DEFAULT;
+}
+
+static size_t Cstr_Combine(Cstr *cstr, Cstr *add){
+    if(cstr->remaining < cstr->length+1){
+        fprintf(stderr, "Error no more room left in string %s to add %s\n", 
+            cstr->content, add->content);
+        exit(13);
+    }
+    memcpy(cstr->content+cstr->length, add->content, add->length);
+    cstr->remaining -= add->length;
+    cstr->length += add->length;
+    return add->length;
+}
+
+static size_t Cstr_Add(Cstr *cstr, char *add){
+    size_t l = strlen(add);
+    if(cstr->remaining < l+1){
+        fprintf(stderr, "Error no more room left in string %s to add %s\n", 
+            cstr->content, add);
+        exit(13);
+    }
+    memcpy(cstr->content+cstr->length, add, l);
+    cstr->remaining -= l;
+    cstr->length += l;
+    return l;
+}
+
+static int Cstr_EqChars(Cstr *cstr, char *add){
+    size_t l = strlen(add);
+    if(cstr->length != l){
+        return 0;
+    }else{
+        return strncmp(cstr->content, add, l) == 0;
+    }
+}
+
+static int Cstr_EndEqChars(Cstr *cstr, char *add){
+    size_t l = strlen(add);
+    if(cstr->length < l){
+        return 0;
+    }else{
+        return strncmp(cstr->content+(cstr->length-l), add, l) == 0;
+    }
+}
+
+static int Cstr_Copy(Cstr *dest, Cstr *cstr){
+    Cstr_Init(dest);
+    memcpy(dest->content, cstr->content, cstr->length);
+    dest->length += cstr->length;
+    return dest->length;
+}
+
+static size_t Cstr_Basename(Cstr *cstr){
+    char *p = cstr->content;
+    char *last = p+cstr->length;
+    char *lastSlash = p;
+    while(p < last){
+        if(*p == '/'){
+            lastSlash = p;
+        }
+        p++;
+    }
+    cstr->content = lastSlash+1;
+    cstr->length =  last - cstr->content;
+    return cstr->length;
+}
+
+static int Cstr_Shrink(Cstr *cstr, size_t length){
+    if(cstr->length < length){
+        fprintf(stderr, "Error original '%s' is shorter than shrink request %ld\n", 
+            cstr->content, length);
+        exit(13);
+    }else{
+        memset(cstr->content+(cstr->length-length), 0, length);
+        return 1;
+    }
+}
+
+static int Cstr_Replace(Cstr *cstr, char a, char b){
+    char *p = cstr->content;
+    char *last = p+cstr->length;
+    int count = 0;
+    while(p < last){
+        if(*p == a){
+            *p = b;
+            count++;
+        }
+        p++;
+    }
+    return count;
+}
+
+static int Cstr_Incr(Cstr *cstr, size_t length){
+    if(cstr->length < length){
+        fprintf(stderr, "Error original '%s' is shorter than incr request %ld\n", 
+            cstr->content, length);
+        exit(13);
+    }
+    cstr->content += length;
+    cstr->length -= length;
+    return length;
+}
+
+static size_t Cstr_From(Cstr *cstr, char *add){
+    Cstr_Init(cstr);
+    return Cstr_Add(cstr, add);
+}
 
 static state process(Proc *pd){
     pid_t child, p;
@@ -198,13 +295,49 @@ static state run(char *name, char **sources){
 }
 
 int main(int argc, char *argv[]){
-    run("Make build dir", (char **)mkDirCmd);
-    run("Building core", (char **)coreCmd);
-    run("Make CnkBuild dir", (char **)mkDirCnkBuildLibCmd);
-    run("Build CnkBuild", (char **)buildBuilderLibCmd);
-    run("Build Builder", (char **)buildBuilderCmd);
-    run("Run Builder", (char **)runBuilderCmd);
-    run("Building tester", (char **)testsCoreCmd);
-    run("Run tests", (char **)runTestsCoreCmd);
+    if(argc < 2){
+        printf("builder build\nbuilder ./build.c\n");
+        exit(1);
+    }
+    if(strncmp(argv[1], "build", strlen("build")) == 0){
+        run("Make build dir", (char **)mkDirCmd);
+        run("Building core", (char **)coreCmd);
+        run("Make CnkBuild dir", (char **)mkDirCnkBuildLibCmd);
+        run("Build CnkBuild", (char **)buildBuilderLibCmd);
+    }else{
+        Cstr target;
+        Cstr_From(&target, argv[1]);
+        printf("target: %s\n", target.content);
+        if(Cstr_EndEqChars(&target, "build.c") == 0){
+            fprintf(stderr, "Expected build file name to end in 'build.c', have %s\n",
+                target.content);
+            exit(13);
+        }
+
+        Cstr out;
+        Cstr_From(&out, "./build/");
+        Cstr base;
+        Cstr_Copy(&base, &target);
+        Cstr_Incr(&base, strlen("artifact/src/"));
+        Cstr_Replace(&base, '/', '_');
+        Cstr_Combine(&out, &base);
+        Cstr_Shrink(&out, strlen(".c"));
+
+        char *cmd[] = {
+            COMPILER, "-g", "-I", "./artifact/src/include", "-I", "./artifact/src/programs/cnkbuild/include", "-o", out.content,
+            target.content, "./build/libcnkbuild/libcnkbuild.a", "./build/libcnkbase/libcnkbase.a",
+            "-lm",
+            "-DINSECURE",
+            NULL
+        };
+
+        Cstr msg;
+        Cstr_Init(&msg);
+        Cstr_Add(&msg, "Building ");
+        Cstr_Combine(&msg, &target);
+        Cstr_Add(&msg, " -> ");
+        Cstr_Combine(&msg, &out);
+        run(msg.content, (char **)cmd);
+    }
     exit(0);
 }

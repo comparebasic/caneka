@@ -44,6 +44,7 @@ typedef struct buildctx {
         char **inc;
         char **cflags;
         char **libs;
+        char **staticLibs;
     } args;
     BuildSubdir **objdirs;
 } BuildCtx;

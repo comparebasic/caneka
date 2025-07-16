@@ -15,6 +15,13 @@ static char *inc[] = {
     "-I./artifact/src/include/",
     NULL
 };
+
+static char *staticLibs[] = {
+    "./build/libcnkbase/libcnkbase.a",
+    "./build/libcaneka/libcaneka.a",
+    NULL
+};
+
 static char *libs[] = {
     NULL
 };
@@ -24,7 +31,6 @@ static BuildSubdir obj = { "", {
     "doc_ctx.c",
     NULL
 }};
-
 
 static BuildSubdir *objdirs[] = {
     &obj,
@@ -50,6 +56,7 @@ int main(int argc, char **argv){
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
     ctx.args.libs = libs;
+    ctx.args.staticLibs = staticLibs;
     ctx.objdirs = (BuildSubdir **)objdirs;
 
     Build(&ctx);

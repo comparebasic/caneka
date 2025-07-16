@@ -145,60 +145,73 @@ static status setupStatus(BuildCtx *ctx){
 static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
-    /*
-    MemCh *m = ctx->m;
-    Span *cmd = Span_Make(m);
-    Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.cc));
-    char **ptr = ctx->args.cflags;
-    while(*ptr != NULL){
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
-        ptr++;
-    }
-    ptr = ctx->args.inc;
-    while(*ptr != NULL){
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
-        ptr++;
-    }
-    Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-o"));
-
-    Str *dest = Str_Make(m, STR_DEFAULT);
-    Str_Add(dest, destDir->bytes, destDir->length);
-    Str_AddCstr(dest, "/");
-    Str_AddCstr(dest, target->bin);
-    if(dest->type.state & ERROR){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error building dest str");
-    }
-    Span_Add(cmd, (Abstract *)dest);
-
-    Str *source = File_GetAbsPath(m, Str_CstrRef(m, ctx->src));
-    Str_AddCstr(source, "/programs/");
+    Str *source = Str_Make(ctx->m, STR_DEFAULT);
+    Str_AddCstr(source, ctx->src);
+    Str_AddCstr(source, "/");
     Str_AddCstr(source, target->src);
 
-    Span_Add(cmd, (Abstract *)source);
-    Span_Add(cmd, (Abstract *)lib);
+    Str *dest = Str_Make(ctx->m, STR_DEFAULT);
+    Str_AddCstr(dest, ctx->dist);
+    Str_AddCstr(dest, "/");
+    Str_AddCstr(dest, target->bin);
 
+    ProcDets pd;
+    if(File_CmpUpdated(ctx->m, source, dest, NULL)){
+        Abstract *args[] = {
+            (Abstract *)source,
+            (Abstract *)dest,
+            NULL
+        };
+        Out("^c.Building Executable $ -> $^0.\n", args);
 
-    ptr = ctx->args.libs;
-    while(*ptr != NULL){
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
-        ptr++;
-    }
+        Span *cmd = Span_Make(ctx->m);
+        Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, ctx->tools.cc));
 
-    if(force || File_CmpUpdated(m, source, dest, NULL)){
-        Out("^cbuild exec: _t^0\n", dest);
-
-        DebugStack_SetRef(cmd, cmd->type.of);
-        ProcDets pd;
-        ProcDets_Init(&pd);
-        r |= SubProcess(m, cmd, &pd);
-        if(r & ERROR){
-            Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Build error for source file");
+        char **ptr = ctx->args.cflags;
+        while(*ptr != NULL){
+            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            ptr++;
         }
 
-        DebugStack_Pop();
-        return r;
+        Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-o"));
+        Span_Add(cmd, (Abstract *)dest);
+
+        ptr = ctx->args.inc;
+        while(*ptr != NULL){
+            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            ptr++;
+        }
+
+        Span_Add(cmd, (Abstract *)source);
+
+        if(lib != NULL){
+            Span_Add(cmd, (Abstract *)lib);
+        }
+        ptr = ctx->args.staticLibs;
+        while(*ptr != NULL){
+            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            ptr++;
+        }
+
+        ptr = ctx->args.libs;
+        while(*ptr != NULL){
+            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            ptr++;
+        }
+
+
+        ProcDets_Init(&pd);
+        r |= SubProcess(ctx->m, cmd, &pd);
+        if(r & ERROR){
+            DebugStack_SetRef(cmd, cmd->type.of);
+            Abstract *args[] = {
+                (Abstract *)cmd,
+                NULL
+            };
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for exec: $", args);
+            return ERROR;
+        }
     }
-    */
     DebugStack_Pop();
     return NOOP;
 }

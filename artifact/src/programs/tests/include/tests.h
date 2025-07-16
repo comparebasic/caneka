@@ -1,3 +1,4 @@
+#include "mock_109strings.h"
 
 extern char *longCstr;
 

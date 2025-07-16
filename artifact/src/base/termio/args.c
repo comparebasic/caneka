@@ -1,5 +1,5 @@
+#include <external.h>
 #include <caneka.h>
-#include <tests.h>
 
 static boolean argHasFlag(Hashed *h, word flag){
     return h->value->type.of == TYPE_WRAPPED_PTR && (h->value->type.state & flag);

@@ -1,2 +1,7 @@
 #!/bin/sh
-clang -o build/builder builder.c && ./build/builder
+clang -o build/builder builder.c && ./build/builder build && \
+clang -o build/builder builder.c && ./build/builder artifact/src/build.c  && \
+./build/build
+clang -o build/builder builder.c && ./build/builder artifact/src/programs/tests/build.c && \
+./build/programs_tests_build
+./build/tests
