@@ -6,27 +6,35 @@ static status getHtmlDir(MemCh *m, Str *path){
     return NOOP;
 }
 
-static status dirFunc(MemCh *m, Str *path, Abstract *source){
-    Str *newPath = Str_CloneAlloc(m, path, STR_DEFAULT);
-    Str *replace = Str_CstrRef(m, "fmt");
-    Span *backlog = Span_Make(m);
-    Match *mt = Match_Make(m, PatChar_FromStr(m, replace), backlog);
-    mt->type.state |= MATCH_SEARCH;
-    Str *new = Str_CstrRef(m, "html");
-    i32 pos = 0;
-    Match_StrReplace(m, newPath, new, mt, &pos);
+static status dirNavFunc(MemCh *m, Str *path, Abstract *source){
+    DocCtx *ctx = (DocCtx *)as(source, TYPE_DOC_CTX);
+    Str *out = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "out"));
+    Str *newPath = Str_Make(m, STR_DEFAULT);
+    Str_Add(newPath, out->bytes, out->length);
+    Str *localPath = Str_Clone(m, path);
+    Str_Incr(localPath, ctx->fmtPath->length+1);
+    Str_Add(newPath, localPath->bytes, localPath->length);
+    /*
+    Str_Add(newPath, out->bytes, out->length);
+    Str *localPath = Str_Clone(m, path);
+    Str_Incr(localPath, ctx->fmtPath->length);
+    Str_Add(newPath, localPath->bytes, localPath->length);
+    Str_AddCstr(newPath, ".html");
+    */
 
     Abstract *args[] = {
-        (Abstract *)mt,
         (Abstract *)path,
         (Abstract *)newPath,
         NULL
     };
-    Out("dirFunc: & @ making @\n", args);
+    Out("dirFunc: & -> &\n", args);
+    return SUCCESS;
+    /*
     return Dir_CheckCreate(m, newPath);
+    */
 }
 
-static status fileFunc(MemCh *m, Str *path, Str *file, Abstract *source){
+static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     Abstract *args[] = {
         (Abstract *)path,
         (Abstract *)file,
@@ -73,7 +81,7 @@ i32 main(int argc, char **argv){
         exit(1);
     }
 
-    Dir_Climb(m, ctx->fmtPath, dirFunc, fileFunc, NULL); 
+    Dir_Climb(m, ctx->fmtPath, dirNavFunc, fileNavFunc, (Abstract *)ctx); 
 
     DebugStack_Pop();
     return 0;
