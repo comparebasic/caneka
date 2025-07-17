@@ -11,7 +11,9 @@ Table *DocCtx_ArgResolve(DocCtx *ctx, int argc, char *argv[]){
     debugArg->type.state |= ARG_OPTIONAL;
     Table_Set(argResolve, (Abstract *)Str_CstrRef(m, "debug"), (Abstract *)debugArg);
     
-    Table_Set(argResolve,  (Abstract *)Str_CstrRef(m, "in"), (Abstract *)True);
+    Single *outArg = Ptr_Wrapped(m, NULL, TYPE_UNKNOWN);
+    outArg->type.state |= ARG_ABS_PATH;
+    Table_Set(argResolve,  (Abstract *)Str_CstrRef(m, "out"), (Abstract *)outArg);
 
     Table *args = Table_Make(m);
     if(CharPtr_ToTbl(m, argResolve, argc, argv, args) & (ERROR|NOOP)){

@@ -62,6 +62,16 @@ i32 main(int argc, char **argv){
     };
 
     Out("^y.Args @ and module path: @^0.\n", _args);
+    Str *out = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "out"));
+    if((Dir_Exists(m, out) & SUCCESS) == 0){
+        Abstract *args[] = {
+            (Abstract *)out,
+            NULL
+        };
+        Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+            "Out directory does not exist: @", args);
+        exit(1);
+    }
 
     Dir_Climb(m, ctx->fmtPath, dirFunc, fileFunc, NULL); 
 

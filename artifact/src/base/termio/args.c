@@ -37,6 +37,7 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
 status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *dest){
     status r = READY;
     Str *key = NULL;
+    Abstract *rslv = NULL;
     Iter it;
     Iter_Init(&it, dest);
     if(argc < 2){
@@ -51,8 +52,10 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                 }
                 it.metrics.set = -1;
                 Str_Incr(s, 1);
-                if(Table_Get(resolve, (Abstract *)s) != NULL){
+                Abstract *arg = Table_Get(resolve, (Abstract *)s);
+                if(arg != NULL){
                     key = s;
+                    rslv = arg;
                     Table_SetKey(&it, (Abstract *)key);
                 }else{
                     Abstract *args[] = {
@@ -64,8 +67,14 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                         args);
                 }
             }else if(it.metrics.set != -1){
+                 if(rslv != NULL/* && rslv->type.of == TYPE_WRAPPED_PTR*/){
+                     if(rslv->type.state & ARG_ABS_PATH){
+                        s = File_GetAbsPath(m, s);
+                     }
+                 }
                  Table_SetValue(&it, (Abstract *)s);
                  key = NULL;
+                 rslv = NULL;
                  r |= SUCCESS;
             }else{
                 if(it.metrics.set == -1){
@@ -81,8 +90,12 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
             if(h != NULL){
                 if(!argHasFlag(h, ARG_OPTIONAL)){
                     if(Table_Get(dest, h->item) == NULL){
+                        Abstract *args[] = {
+                            (Abstract *)h->item,
+                            NULL,
+                        };
                         Error(m, (Abstract *)h->item, FUNCNAME, FILENAME, LINENUMBER,
-                            "Required argument not found", NULL);
+                            "Required argument not found: @", args);
                         exit(1);
                     }
                 }
