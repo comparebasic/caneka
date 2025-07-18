@@ -6,6 +6,17 @@ i32 Span_Capacity(Span *p){
     return increment * SPAN_STRIDE;
 }
 
+i32 Span_Has(Span *p, Abstract *a){
+   Iter it;  
+   Iter_Init(&it, p);
+   while((Iter_Next(&it) & END) == 0){
+        if(Equals(Iter_Get(&it), a)){
+            return it.idx;
+        }
+   }
+   return -1;
+}
+
 boolean Span_Equals(Span *a, Span *b){
     Iter itA;
     Iter_Init(&itA, a);

@@ -127,7 +127,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     i64 total = 0;
-    if(flags & (MORE|DEBUG)){
+    if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, p->nvalues), 
             (Abstract *)I32_Wrapped(sm->m, p->max_idx), 
@@ -135,6 +135,8 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             NULL
         };
         total += Fmt(sm, "Span<^D.$^d.values/0..$/$dims [", args);
+    }else if(flags & MORE){
+        total += Stream_Bytes(sm, (byte *)"[", 1);
     }
     Iter it;
     Iter_Init(&it, p);
@@ -148,7 +150,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             if(flags & DEBUG){
                 total += Stream_Bytes(sm, (byte *)"\n    ", 5);
             }
-            if(flags & (MORE|DEBUG)){
+            if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
                 total += Fmt(sm, "$:", args);
             }
             Abstract *item = (Abstract *)it.value;
@@ -157,7 +159,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             }else if(item != NULL && item->type.of == TYPE_MEMSLAB){
                 total += ToS(sm, it.value, 0, (flags & ~DEBUG));
             }else{
-                total += ToS(sm, it.value, 0, flags|MORE);
+                total += ToS(sm, it.value, 0, (flags & ~MORE));
             }
             if((it.type.state & LAST) == 0 && (flags & MORE)){
                 total += Stream_Bytes(sm, (byte *)", ", 2);
@@ -165,8 +167,10 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
         }
     }
 
-    if(flags & (MORE|DEBUG)){
+    if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
         total += Stream_Bytes(sm, (byte *)"]>", 2);
+    }else if(flags & MORE){
+        total += Stream_Bytes(sm, (byte *)"]", 1);
     }
     
     return total;

@@ -10,10 +10,23 @@ Table *DocCtx_ArgResolve(DocCtx *ctx, int argc, char *argv[]){
     Single *debugArg = Ptr_Wrapped(m, NULL, TYPE_UNKNOWN);
     debugArg->type.state |= ARG_OPTIONAL;
     Table_Set(argResolve, (Abstract *)Str_CstrRef(m, "debug"), (Abstract *)debugArg);
-    
+
+    Single *cleanArg = Ptr_Wrapped(m, NULL, TYPE_UNKNOWN);
+    cleanArg->type.state |= ARG_OPTIONAL;
+    Table_Set(argResolve, (Abstract *)Str_CstrRef(m, "clean"), (Abstract *)cleanArg);
+
     Single *outArg = Ptr_Wrapped(m, NULL, TYPE_UNKNOWN);
-    outArg->type.state |= ARG_ABS_PATH;
+    outArg->type.state |= (ARG_ABS_PATH|ARG_DEFAULT);
+    outArg->val.ptr = Str_CstrRef(m, "./dist/doc/");
     Table_Set(argResolve,  (Abstract *)Str_CstrRef(m, "out"), (Abstract *)outArg);
+
+    Single *formatArg = Ptr_Wrapped(m, NULL, TYPE_UNKNOWN);
+    formatArg->type.state |= ARG_CHOICE;
+    Span *p = Span_Make(m);
+    Span_Add(p, (Abstract *)Str_CstrRef(m, "html"));
+    Span_Add(p, (Abstract *)Str_CstrRef(m, "markdown"));
+    formatArg->val.ptr = p;
+    Table_Set(argResolve,  (Abstract *)Str_CstrRef(m, "format"), (Abstract *)formatArg);
 
     Table *args = Table_Make(m);
     if(CharPtr_ToTbl(m, argResolve, argc, argv, args) & (ERROR|NOOP)){

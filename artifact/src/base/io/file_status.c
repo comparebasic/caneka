@@ -35,6 +35,9 @@ Str *File_GetCwdPath(MemCh *m, Str *path){
 
 Str *File_GetAbsPath(MemCh *m, Str *path){
     if(path != NULL && path->bytes[0] != '/'){
+        if(path->length >= 2 && path->bytes[0] == '.' && path->bytes[1] == '/'){
+            Str_Incr(path, 2);
+        }
         return File_GetCwdPath(m, path);
     }
     if(path->alloc != STR_DEFAULT){

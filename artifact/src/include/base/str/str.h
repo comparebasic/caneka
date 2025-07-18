@@ -33,3 +33,4 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags);
 Str *Str_CstrRef(MemCh *m, char *cstr);
 status Str_Init(Str *s, byte *bytes, word length, word alloc);
 Str *Str_Make(MemCh *m, word alloc);
+status Str_Decr(Str *s, word length);

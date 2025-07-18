@@ -22,11 +22,29 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
             };
 
             if(argHasFlag(h, ARG_OPTIONAL)){
-                Out("[$] ", args);
+                Out("[$]", args);
             }else if(argHasFlag(h, ARG_MULTIPLE)){
-                Out("[$, ...] ", args);
+                Out("[$, ...]", args);
+            }else if(argHasFlag(h, ARG_DEFAULT)){
+                Abstract *args[] = {
+                    (Abstract *)h->item,
+                    (Abstract *)((Single *)h->value)->val.ptr,
+                    NULL
+                };
+                Out("$(=$)", args);
+            }else if(argHasFlag(h, ARG_CHOICE)){
+                Abstract *args[] = {
+                    (Abstract *)h->item,
+                    (Abstract *)((Single *)h->value)->val.ptr,
+                    NULL
+                };
+                Out("$(@)", args);
             }else{
-                Out("$ ", args);
+                Out("$", args);
+            }
+
+            if((it.type.state & LAST) == 0){
+                Out(" ", NULL);
             }
         }
     }
@@ -67,11 +85,6 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                         args);
                 }
             }else if(it.metrics.set != -1){
-                 if(rslv != NULL/* && rslv->type.of == TYPE_WRAPPED_PTR*/){
-                     if(rslv->type.state & ARG_ABS_PATH){
-                        s = File_GetAbsPath(m, s);
-                     }
-                 }
                  Table_SetValue(&it, (Abstract *)s);
                  key = NULL;
                  rslv = NULL;
@@ -88,16 +101,47 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                if(!argHasFlag(h, ARG_OPTIONAL)){
-                    if(Table_Get(dest, h->item) == NULL){
+                Abstract *value = Table_Get(dest, h->item);
+                Single *sg = NULL;
+                if(h->value != NULL && h->value->type.of == TYPE_WRAPPED_PTR){
+                    sg = (Single *)h->value;
+                }
+
+
+                if(argHasFlag(h, ARG_DEFAULT) && value == NULL && sg != NULL){
+                    value = sg->val.ptr;
+                    Table_Set(dest, h->item, (Abstract *)sg->val.ptr);
+                }else if(!argHasFlag(h, ARG_OPTIONAL)){
+                    if(value == NULL){
                         Abstract *args[] = {
                             (Abstract *)h->item,
                             NULL,
                         };
-                        Error(m, (Abstract *)h->item, FUNCNAME, FILENAME, LINENUMBER,
+                        Error(m, (Abstract *)resolve, FUNCNAME, FILENAME, LINENUMBER,
                             "Required argument not found: @", args);
                         exit(1);
                     }
+                }
+
+                if(argHasFlag(h, ARG_CHOICE) && value != NULL && sg != NULL){
+                    Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN);
+                    if(Span_Has(p, value) == -1){
+                        Abstract *args[] = {
+                            (Abstract *)h->item,
+                            (Abstract *)p,
+                            value,
+                            NULL,
+                        };
+                        Error(m, (Abstract *)resolve, FUNCNAME, FILENAME, LINENUMBER,
+                            "Required argument @ not in expected choices: @, found @", args);
+                        exit(1);
+
+                    }
+                }
+
+                if(argHasFlag(h, ARG_ABS_PATH) && value != NULL && value->type.of == TYPE_STR){
+                     value = (Abstract *)File_GetAbsPath(m, (Str *)value);
+                     Table_Set(dest, h->item, value);
                 }
             }
         }
