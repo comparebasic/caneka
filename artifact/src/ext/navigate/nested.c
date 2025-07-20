@@ -131,6 +131,7 @@ Abstract *Nested_GetByPath(Nested *_nd, Span *keys){
 }
 
 status Nested_AddByPath(Nested *nd, Span *keys, Abstract *value){
+    DebugStack_Push(nd, nd->type.state);
     i32 idx = nd->it.idx;
     Iter_Reset(&nd->it);
     status r = READY;
@@ -170,6 +171,7 @@ status Nested_AddByPath(Nested *nd, Span *keys, Abstract *value){
 
     Iter_Reset(&nd->it);
     Iter_GetByIdx(&nd->it, idx);
+    DebugStack_Pop();
     return r;
 }
 

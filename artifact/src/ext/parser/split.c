@@ -128,6 +128,26 @@ status StrVec_Split(StrVec *v, Abstract *split){
     return r;
 }
 
+Span *Str_SplitToSpan(MemCh *m, Str *_s, Abstract *split, word flags){
+    if(_s->length < 1 || ((flags & SPLIT_SKIP_FIRST_CHAR) && _s->length == 1)){
+        return Span_Make(m);
+    }
+    StrVec *v = StrVec_Make(m);
+    Str *s = Str_Clone(m, _s);
+    if(flags & SPLIT_SKIP_FIRST_CHAR){
+        Str_Incr(s, 1);
+    }
+    StrVec_Add(v, s);
+    StrVec_Split(v, split);
+    return StrVec_ToSpan(m, v);
+}
+
+Span *StrVec_SplitToSpan(MemCh *m, StrVec *_v, Abstract *split){
+    StrVec *v = (StrVec *)StrVec_Clone(m, (Abstract *)_v);
+    StrVec_Split(v, split);
+    return StrVec_ToSpan(m, v);
+}
+
 Span *StrVec_ToSpan(MemCh *m, StrVec *v){
     Iter it;
     Iter_Init(&it, v->p);

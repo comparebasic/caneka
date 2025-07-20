@@ -53,7 +53,7 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     Str *srcPath = Str_Make(m, STR_DEFAULT);
     Str_Add(srcPath, path->bytes, path->length);
     Str_Add(srcPath, (byte *)"/", 1);
-    Str_Add(srcPath, file->bytes, path->length);
+    Str_Add(srcPath, file->bytes, file->length);
 
     Str_Add(newPath, (byte *)"/", 1);
     Str_Add(newPath, fname->bytes, fname->length);
@@ -65,6 +65,12 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     };
 
     Out("fileFunc: @ -> @\n", args);
+
+    Span *keys = Str_SplitToSpan(m, localPath, (Abstract *)I8_Wrapped(m, '/'), 
+        ZERO);
+    ctx->nav->type.state |= DEBUG;
+    Nested_AddByPath(ctx->nav, keys, (Abstract *)newPath);
+
     return SUCCESS;
 }
 
@@ -105,6 +111,12 @@ i32 main(int argc, char **argv){
     }
 
     Dir_Climb(m, ctx->fmtPath, dirNavFunc, fileNavFunc, (Abstract *)ctx); 
+
+    Abstract *args3[] = {
+        (Abstract *)ctx->nav,
+        NULL
+    };
+    Out("^y.Nav: &^0.\n", args3);
 
     DebugStack_Pop();
     return 0;

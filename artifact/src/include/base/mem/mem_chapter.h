@@ -7,8 +7,13 @@ typedef struct mem_ctx {
     MemPage *first;
 } MemCh;
 
-#define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range));
-#define MemCh_SetFromBase(m) ((m)->type.range = abs((m)->type.range));
+#define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range))
+#define MemCh_SetFromBase(m) ((m)->type.range = abs((m)->type.range))
+#define MemCh_Incr(m) ((m)->type.range++)
+#define MemCh_Decr(m) ((m)->level > 0 && (m)->type.range--)
+#define MemCh_DecrFree(m) (((m)->level > 0) && \
+    ((m)->type.range--) && \
+    MemCh_FreeTemp((m), (m)->level))
 
 i64 MemChapterTotal();
 i64 MemCh_MemCount(MemCh *m, i16 level);
