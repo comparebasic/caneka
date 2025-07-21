@@ -116,6 +116,10 @@ i64 Str_Trunc(Str *s, i64 amount){
     return amount;
 }
 
+Str *Str_BuffFromCstr(MemCh *m, char *cstr){
+    return Str_Ref(m, (byte *)cstr, strlen(cstr), STR_DEFAULT, STRING_COPY);
+}
+
 Str *Str_Prefixed(MemCh *m, Str *s, Str *prefix){
     if(s->length + prefix->length < s->alloc){
         memmove(s->bytes+prefix->length, s->bytes, s->length);

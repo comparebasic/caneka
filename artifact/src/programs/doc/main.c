@@ -6,70 +6,51 @@ static status getHtmlDir(MemCh *m, Str *path){
     return NOOP;
 }
 
-static status dirNavFunc(MemCh *m, Str *path, Abstract *source){
-    DocCtx *ctx = (DocCtx *)as(source, TYPE_DOC_CTX);
-    Str *out = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "out"));
-
-    Str *newPath = Str_Make(m, STR_DEFAULT);
-    Str_Add(newPath, out->bytes, out->length);
-    Str *localPath = Str_Clone(m, path);
-    Str_Incr(localPath, ctx->fmtPath->length+1);
-    Str_Add(newPath, localPath->bytes, localPath->length);
-
-    Abstract *args[] = {
-        (Abstract *)path,
-        (Abstract *)newPath,
-        NULL
-    };
-    Out("dirFunc: & -> &\n", args);
-    return Dir_CheckCreate(m, newPath);
-}
-
 static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     DocCtx *ctx = (DocCtx *)as(source, TYPE_DOC_CTX);
     Str *out = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "out"));
     Str *format = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "format"));
+    TranspFile* tf = TranspFile_Make(m);
 
-    Str *newPath = Str_Make(m, STR_DEFAULT);
-    Str_Add(newPath, out->bytes, out->length);
-    Str *localPath = Str_Clone(m, path);
-    Str_Incr(localPath, ctx->fmtPath->length+1);
-    Str_Add(newPath, localPath->bytes, localPath->length);
+    tf->dest = Str_Make(m, STR_DEFAULT);
+    tf->name = Str_Make(m, STR_DEFAULT);
+
+    tf->src = Str_Make(m, STR_DEFAULT);
+    Str_Add(tf->src, path->bytes, path->length);
+    Str_Add(tf->src, (byte *)"/", 1);
+    Str_Add(tf->src, file->bytes, file->length);
+
+    Str_Add(tf->dest, out->bytes, out->length);
 
     Str *fname = Str_Clone(m, file);
-
     Str *ending = Str_CstrRef(m, ".fmt");
     if(Str_EndMatch(fname, ending)){
         Str_Decr(fname, ending->length);
     }else{
         return NOOP;
     }
+    Str_Add(tf->name, fname->bytes, fname->length);
+
+    if(Equals((Abstract *)fname, (Abstract *)Str_CstrRef(m, "_"))){
+        fname = Str_BuffFromCstr(m, "index");
+        tf->type.state |= TRANSP_FILE_INDEX;
+    }
 
     if(Equals((Abstract *)format, (Abstract *)Str_CstrRef(m, "html"))){
         Str_Add(fname, (byte *)".", 1);
         Str_Add(fname, format->bytes, format->length);
     }
+    Str_Add(tf->dest, fname->bytes, fname->length);
 
-    Str *srcPath = Str_Make(m, STR_DEFAULT);
-    Str_Add(srcPath, path->bytes, path->length);
-    Str_Add(srcPath, (byte *)"/", 1);
-    Str_Add(srcPath, file->bytes, file->length);
-
-    Str_Add(newPath, (byte *)"/", 1);
-    Str_Add(newPath, fname->bytes, fname->length);
-
-    Abstract *args[] = {
-        (Abstract *)srcPath,
-        (Abstract *)newPath,
-        NULL
-    };
-
-    Out("fileFunc: @ -> @\n", args);
-
-    Span *keys = Str_SplitToSpan(m, localPath, (Abstract *)I8_Wrapped(m, '/'), 
+    Str *localPath = Str_Clone(m, path);
+    Str_Incr(localPath, ctx->fmtPath->length+1);
+    tf->keys = Str_SplitToSpan(m, localPath, (Abstract *)I8_Wrapped(m, '/'), 
         ZERO);
-    ctx->nav->type.state |= DEBUG;
-    Nested_AddByPath(ctx->nav, keys, (Abstract *)newPath);
+
+    Span *keys = Span_Clone(m, tf->keys);
+    Span_Add(keys, (Abstract *)tf->name);
+
+    Nested_AddByPath(ctx->nav, keys, (Abstract *)tf);
 
     return SUCCESS;
 }
@@ -110,7 +91,7 @@ i32 main(int argc, char **argv){
         Out("Makeing destination directory @\n", args);
     }
 
-    Dir_Climb(m, ctx->fmtPath, dirNavFunc, fileNavFunc, (Abstract *)ctx); 
+    Dir_Climb(m, ctx->fmtPath, NULL, fileNavFunc, (Abstract *)ctx); 
 
     Abstract *args3[] = {
         (Abstract *)ctx->nav,

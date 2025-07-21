@@ -81,6 +81,15 @@ Abstract *Nested_GetByKey(Nested *nd, Abstract *key){
 }
 
 status Nested_AddByKey(Nested *nd, Abstract *key, Abstract *value){
+    if(nd->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)key,
+            (Abstract *)value,
+            (Abstract *)nd,
+            NULL
+        };
+        Out("^p.Add by key @ -> @ to @ ^0.\n", args);
+    }
     Frame *fm = Iter_Current(&nd->it);
     if(fm == NULL || fm->value == NULL){
         OrdTable *store = OrdTable_Make(nd->m);
@@ -94,12 +103,12 @@ status Nested_AddByKey(Nested *nd, Abstract *key, Abstract *value){
             OrdTable_Set((OrdTable *)fm->value, key, value);
             return SUCCESS;
         }else if(value != NULL && value->type.of == TYPE_ORDTABLE
-                && OrdTable_IsBlank((OrdTable *)fm->value)){
+                && OrdTable_IsBlank((OrdTable *)value)){
             return NOOP;
         }
     }
     Abstract *args[] = {
-        (Abstract *)fm->value,
+        (Abstract *)Type_ToStr(nd->m, fm->value->type.of),
         (Abstract *)key,
         NULL
     };
@@ -132,40 +141,53 @@ Abstract *Nested_GetByPath(Nested *_nd, Span *keys){
 
 status Nested_AddByPath(Nested *nd, Span *keys, Abstract *value){
     DebugStack_Push(nd, nd->type.state);
+    if(nd->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)keys,
+            (Abstract *)value,
+            (Abstract *)nd,
+            NULL
+        };
+        Out("^p.Adding by path @ -> @ to @ ^0.\n", args);
+    }
     i32 idx = nd->it.idx;
     Iter_Reset(&nd->it);
     status r = READY;
     Iter keysIt;
     Iter_Init(&keysIt, keys);
     Abstract *key = NULL;
-    while((Iter_Next(&keysIt) & END) == 0){
-        key = Iter_Get(&keysIt);
-        if(keysIt.type.state & LAST){
-            continue;
+    if(keys->nvalues == 1){
+        r |= Nested_AddByKey(nd, key, value); 
+    }else{
+        while((Iter_Next(&keysIt) & END) == 0){
+            key = Iter_Get(&keysIt);
+            if(keysIt.type.state & LAST){
+                continue;
+            }
+            if(nd->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)key,
+                    (Abstract *)Iter_Current(&nd->it),
+                    NULL
+                };
+                Out("^c.Added key @ current to &\n", args);
+            }
+            OrdTable *otbl = OrdTable_Make(nd->it.p->m);
+            r |= Nested_AddByKey(nd, key, (Abstract *)otbl); 
+            Nested_Indent(nd, key);
+            if(r & ERROR){
+                break;
+            }
         }
-        if(nd->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)key,
-                (Abstract *)Iter_Current(&nd->it),
-                NULL
-            };
-            Out("^c.Added key @ current to &\n", args);
-        }
-        OrdTable *otbl = OrdTable_Make(nd->it.p->m);
-        r |= Nested_AddByKey(nd, key, (Abstract *)otbl); 
-        Nested_Indent(nd, key);
-        if(r & ERROR){
-            break;
-        }
-    }
 
-    Frame *fm = Iter_Current(&nd->it);
-    if((r & ERROR) == 0 && (keysIt.type.state & END) && fm->value != NULL){
-        if(fm->value->type.of != TYPE_ORDTABLE){
-            r |= ERROR;
-        }else{
-            OrdTable_Set((OrdTable *)fm->value, key, value);
-            r |= fm->value->type.state & SUCCESS;
+        Frame *fm = Iter_Current(&nd->it);
+        if((r & ERROR) == 0 && (keysIt.type.state & END) && fm->value != NULL){
+            if(fm->value->type.of != TYPE_ORDTABLE){
+                r |= ERROR;
+            }else{
+                OrdTable_Set((OrdTable *)fm->value, key, value);
+                r |= fm->value->type.state & SUCCESS;
+            }
         }
     }
 
@@ -177,7 +199,9 @@ status Nested_AddByPath(Nested *nd, Span *keys, Abstract *value){
 
 status Nested_SetRoot(Nested *nd, Abstract *root){
     Frame *fm = NULL;
-    if(root->type.of == TYPE_FRAME){
+    if(root == NULL){
+        return NOOP;
+    }else if(root->type.of == TYPE_FRAME){
         fm = (Frame *)root;
     }else if(root->type.of == TYPE_ORDTABLE){
         fm = Frame_Make(nd->m, -1, NULL, root, ((OrdTable *)root)->order); 

@@ -1,7 +1,21 @@
 #include <external.h>
 #include <caneka.h>
 
-static Str **nodeLabels = NULL;
+static Str **transpFileLabels = NULL;
+
+static i64 TranspFile_Print(Stream *sm, Abstract *a, cls type, word flags){
+    TranspFile *tfile = (TranspFile*)as(a, TYPE_TRANSP_FILE);
+    Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tfile, ToS_FlagLabels),
+        (Abstract *)tfile->name,
+        (Abstract *)tfile->keys,
+        (Abstract *)tfile->src,
+        (Abstract *)tfile->dest,
+        NULL
+    };
+    return Fmt(sm, "TranspFile<$ @/@ $ -> $>", args);
+
+}
 
 static i64 TranspCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
     TranspCtx *tp = (TranspCtx*)as(a, TYPE_TRANSP_CTX);
@@ -39,8 +53,20 @@ static i64 TranspCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
+status Transp_InitLabels(MemCh *m, Lookup *lk){
+    status r = READY;
+    if(transpFileLabels == NULL){
+        transpFileLabels = (Str **)Arr_Make(m, 17);
+        transpFileLabels[9] = Str_CstrRef(m, "TranspFileINDEX");
+        Lookup_Add(m, lk, TYPE_TRANSP_FILE, (void *)transpFileLabels);
+        r |= SUCCESS;
+    }
+    return r;
+}
+
 status Transp_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_TRANSP_CTX, (void *)TranspCtx_Print);
+    r |= Lookup_Add(m, lk, TYPE_TRANSP_FILE, (void *)TranspFile_Print);
     return r;
 }

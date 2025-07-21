@@ -72,6 +72,7 @@ char *TypeStrings[] = {
     "TYPE_ITER",
     "TYPE_SINGLE",
     "TYPE_TRANSP_CTX",
+    "TYPE_TRANSP_FILE",
     "TYPE_TOKENIZE",
     "TYPE_DEBUG_STACK",
     "TYPE_DEBUG_STACK_ENTRY",

@@ -67,6 +67,7 @@ static BuildSubdir parserobj = { "ext/parser", {
 static BuildSubdir transpobj = { "ext/transp", {
     "transp.c",
     "transp_ctx.c",
+    "transp_file.c",
     "transp_tos.c",
     NULL
 }};

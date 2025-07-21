@@ -35,6 +35,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
     while((Iter_Next(&it) & END) == 0){
         status r = READY;
         Str *s = (Str *)Iter_Get(&it);
+        i32 pos = 0;
         while((r & LAST) == 0){
             Guard_Incr(&guard, 100, FUNCNAME, FILENAME, LINENUMBER);
             r &= ~MORE;
@@ -51,7 +52,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
                     "String not found in StrVec for split @ using & on & currenlty looking at & at &^0.\n", args);
             }
 
-            i32 pos = 0;
+            pos = 0;
             while(pos < s->length && (Match_Feed(m, mt, s->bytes[pos]) & SUCCESS) == 0){
                 pos++;
             }
