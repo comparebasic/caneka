@@ -22,6 +22,8 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     Str_Add(src, file->bytes, file->length);
 
     Str_Add(dest, out->bytes, out->length);
+    Str_Add(dest, path->bytes+ctx->fmtPath->length+1, path->length-ctx->fmtPath->length-1);
+    Str_Add(dest, (byte *)"/", 1);
 
     Str *fname = Str_Clone(m, file);
     Str *ending = Str_CstrRef(m, ".fmt");
@@ -53,6 +55,14 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
 
     tf->src = File_FnameStrVec(m, src);
     tf->dest = File_FnameStrVec(m, dest);
+    Abstract *args[] = {
+        (Abstract *)src,
+        (Abstract *)tf->src,
+        (Abstract *)dest,
+        (Abstract *)tf->dest,
+        NULL
+    };
+    Out("^c.& -> &, & -> &^0.\n", args);
 
     Nested_AddByPath(ctx->nav, keys, (Abstract *)tf);
 

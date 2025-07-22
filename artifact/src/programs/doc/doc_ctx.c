@@ -17,6 +17,7 @@ status DocCtx_GenFiles(DocCtx *ctx){
         };
         Out("^y.Gen: @ -> &^b. \\@ @ dir:@^0.\n", args);
         Dir_CheckCreate(ctx->m, dir); 
+        /*
         Str *fname = StrVec_Str(ctx->m, tf->src);
         File *f = File_Make(ctx->m, fname, NULL);
         File_Read(f, FILE_READ_MAX);
@@ -31,6 +32,7 @@ status DocCtx_GenFiles(DocCtx *ctx){
         File_Open(fout, STREAM_TO_FD); 
         Fmt_ToHtml(fout->sm, rbl->mess);
         File_Close(fout);
+        */
     }
     if(ctx->nav->type.state & END){
         ctx->type.state |= SUCCESS;

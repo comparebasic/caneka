@@ -41,14 +41,14 @@ StrVec *File_FnameStrVec(MemCh *m, Str *path){
         if(*ptr == '/'){
             i16 segLength = (last-ptr);
             i16 length = path->length-segLength-1;
-            Str *s = Str_Ref(m, path->bytes, length, length+1, ZERO);
+            Str *s = Str_Ref(m, path->bytes, length, length, ZERO);
             StrVec_Add(v, s);
             length = 1;
-            s = Str_Ref(m,  path->bytes+(path->length-(last-ptr))-1, length, length+1,
+            s = Str_Ref(m,  path->bytes+(path->length-(last-ptr))-1, length, length,
                 STRING_SEPERATOR);
             StrVec_Add(v, s);
             s = Str_Ref(m, path->bytes+path->length-(last-ptr),
-                segLength, segLength+1, ZERO);
+                segLength, segLength, ZERO);
             StrVec_Add(v, s);
             break;
         }
