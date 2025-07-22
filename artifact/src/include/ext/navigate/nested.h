@@ -2,6 +2,7 @@ typedef struct nested {
     Type type;
     MemCh *m;
     Iter it;
+    Hashed *h;
 } Nested;
 
 Nested *Nested_Make(MemCh *m);
@@ -17,3 +18,4 @@ status Nested_Indent(Nested *nd, Abstract *key);
 status Nested_IndentByIdx(Nested *nd, i32 idx);
 status Nested_Outdent(Nested *nd);
 status Nested_Next(Nested *nd);
+#define Nested_GetHashed(nd) ((nd)->h)

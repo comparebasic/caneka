@@ -1,6 +1,42 @@
 #include <external.h> 
 #include <caneka.h> 
 
+status Nested_Next(Nested *nd){
+    if((nd->type.state & PROCESSING) == 0){
+        Nested_SetRoot(nd, Nested_GetRoot(nd));
+        nd->type.state |= PROCESSING;
+    }
+    i16 guard;
+    while(TRUE){
+        Guard_Incr(&guard, GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
+        Frame *fm = Iter_Current(&nd->it);
+        while((Iter_Next(&fm->it) & END) == 0){
+            Abstract *item = Iter_Get(&fm->it);
+            if(item->type.of == TYPE_HASHED){
+                Hashed *h = (Hashed *)item;
+                if(h->value->type.of == TYPE_ORDTABLE || h->value->type.of == TYPE_SPAN){
+                    Nested_IndentByIdx(nd, fm->it.idx);
+                    break;
+                }else{
+                    nd->h = h;
+                    goto end;
+                }
+            }
+        }
+        if(fm->it.type.state & END){
+            if(nd->it.idx == 0){
+                nd->type.state |= END;
+                nd->h = NULL;
+                goto end;
+            }else{
+                Iter_Pop(&nd->it); 
+            }
+        }
+    }
+end:
+    return nd->type.state;
+}
+
 Abstract *Nested_Get(Nested *nd){
     return Iter_Current(&nd->it);
 }
@@ -210,6 +246,7 @@ status Nested_SetRoot(Nested *nd, Abstract *root){
     }
 
     if(fm != NULL){
+        Span_Wipe(nd->it.p);
         Iter_Add(&nd->it, fm);
         return SUCCESS;
     }

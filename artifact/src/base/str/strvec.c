@@ -1,6 +1,28 @@
 #include <external.h>
 #include <caneka.h>
 
+Str *StrVec_Str(MemCh *m, StrVec *v){
+    if(v->total == STR_DEFAULT){
+        Abstract *args[] = {
+            (Abstract *)I64_Wrapped(m, v->total),
+            NULL,
+        };
+        Error(m, (Abstract *)v, FUNCNAME, FILENAME, LINENUMBER, 
+            "Error StrVec is longer than Cstr default of ", args);
+        return NULL;
+    }
+    Str *s = Str_Make(m, STR_DEFAULT);
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *content = Iter_Get(&it);
+        if(TextCharFilter(content->bytes, content->length)){
+            Str_Add(s, content->bytes, content->length);
+        }
+    }
+    return s;
+}
+
 i64 StrVec_ToFd(StrVec *v, i32 fd){
     Iter it;
     Iter_Init(&it, v->p);

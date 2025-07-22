@@ -12,15 +12,16 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     Str *format = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "format"));
     TranspFile* tf = TranspFile_Make(m);
 
-    tf->dest = Str_Make(m, STR_DEFAULT);
     tf->name = Str_Make(m, STR_DEFAULT);
 
-    tf->src = Str_Make(m, STR_DEFAULT);
-    Str_Add(tf->src, path->bytes, path->length);
-    Str_Add(tf->src, (byte *)"/", 1);
-    Str_Add(tf->src, file->bytes, file->length);
+    Str *src = Str_Make(m, STR_DEFAULT);
+    Str *dest = Str_Make(m, STR_DEFAULT);
 
-    Str_Add(tf->dest, out->bytes, out->length);
+    Str_Add(src, path->bytes, path->length);
+    Str_Add(src, (byte *)"/", 1);
+    Str_Add(src, file->bytes, file->length);
+
+    Str_Add(dest, out->bytes, out->length);
 
     Str *fname = Str_Clone(m, file);
     Str *ending = Str_CstrRef(m, ".fmt");
@@ -40,7 +41,7 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
         Str_Add(fname, (byte *)".", 1);
         Str_Add(fname, format->bytes, format->length);
     }
-    Str_Add(tf->dest, fname->bytes, fname->length);
+    Str_Add(dest, fname->bytes, fname->length);
 
     Str *localPath = Str_Clone(m, path);
     Str_Incr(localPath, ctx->fmtPath->length+1);
@@ -49,6 +50,9 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
 
     Span *keys = Span_Clone(m, tf->keys);
     Span_Add(keys, (Abstract *)tf->name);
+
+    tf->src = File_FnameStrVec(m, src);
+    tf->dest = File_FnameStrVec(m, dest);
 
     Nested_AddByPath(ctx->nav, keys, (Abstract *)tf);
 
@@ -98,6 +102,8 @@ i32 main(int argc, char **argv){
         NULL
     };
     Out("^y.Nav: &^0.\n", args3);
+
+    DocCtx_GenFiles(ctx);
 
     DebugStack_Pop();
     return 0;

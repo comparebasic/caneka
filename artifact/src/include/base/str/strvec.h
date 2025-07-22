@@ -18,3 +18,4 @@ StrVec *StrVec_FromB64(MemCh *m, StrVec *v);
 i64 StrVec_FfIter(Iter *it, i64 offset);
 Abstract *StrVec_Nth(MemCh *m, StrVec *v, i32 n);
 Abstract *StrVec_Clone(MemCh *m, Abstract *);
+Str *StrVec_Str(MemCh *m, StrVec *v);

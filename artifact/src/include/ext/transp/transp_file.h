@@ -6,8 +6,8 @@ typedef struct transp_file {
     Type type;
     Str *name;
     Span *keys;
-    Str *src;
-    Str *dest;
+    StrVec *src;
+    StrVec *dest;
 } TranspFile;
 
 TranspFile *TranspFile_Make(MemCh *m);

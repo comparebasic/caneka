@@ -33,6 +33,33 @@ Str *File_GetCwdPath(MemCh *m, Str *path){
     return NULL;
 }
 
+StrVec *File_FnameStrVec(MemCh *m, Str *path){
+    StrVec *v = StrVec_Make(m);
+    byte *last = path->bytes+path->length-1;
+    byte *ptr = last;
+    while(ptr >= path->bytes){
+        if(*ptr == '/'){
+            i16 segLength = (last-ptr);
+            i16 length = path->length-segLength-1;
+            Str *s = Str_Ref(m, path->bytes, length, length+1, ZERO);
+            StrVec_Add(v, s);
+            length = 1;
+            s = Str_Ref(m,  path->bytes+(path->length-(last-ptr))-1, length, length+1,
+                STRING_SEPERATOR);
+            StrVec_Add(v, s);
+            s = Str_Ref(m, path->bytes+path->length-(last-ptr),
+                segLength, segLength+1, ZERO);
+            StrVec_Add(v, s);
+            break;
+        }
+        ptr--;
+    }
+    if(v->p->nvalues != 3){
+        v->type.state |= ERROR;
+    }
+    return v;
+}
+
 Str *File_GetAbsPath(MemCh *m, Str *path){
     if(path != NULL && path->bytes[0] != '/'){
         if(path->length >= 2 && path->bytes[0] == '.' && path->bytes[1] == '/'){

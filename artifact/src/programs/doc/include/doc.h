@@ -17,3 +17,4 @@ DocCtx *DocCtx_Make(MemCh *m);
 
 Table *DocCtx_ArgResolve(DocCtx *ctx, int argc, char *argv[]);
 status DocCtx_SetFmtPath(DocCtx *ctx, Str *path);
+status DocCtx_GenFiles(DocCtx *ctx);

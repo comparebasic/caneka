@@ -25,6 +25,7 @@ status File_Read(File *f, i64 max);
 status File_Open(File *f, word flags);
 StrVec *File_GetVec(File *f);
 Cursor *File_GetCurs(File *f);
+status File_Close(File *f);
 
 /*
 status File_Persist(MemCh *m, File *file);
