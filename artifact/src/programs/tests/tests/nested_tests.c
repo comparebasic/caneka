@@ -53,6 +53,7 @@ status Nested_Tests(MemCh *gm){
     Out("^p.Nested: &\n@\n^0.", args2);
 
 
+    r |= SUCCESS;
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

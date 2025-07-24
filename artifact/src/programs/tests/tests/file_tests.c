@@ -38,8 +38,10 @@ status File_Tests(MemCh *gm){
     status r = READY;
 
     Str *path = File_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
-    File *f = File_Make(m, path, NULL);
+    File *f = File_Make(m, path, NULL, STREAM_STRVEC);
+    File_Open(f);
     File_Read(f, FILE_READ_MAX);
+    File_Close(f);
 
     Str *s = Str_CstrRef(m, exampleCstr);
     s->type.state |= DEBUG;

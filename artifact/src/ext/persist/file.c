@@ -11,19 +11,19 @@ Cursor *File_GetCurs(File *f){
 
 status File_Write(File *f, i64 max){
     f->type.state &= ~SUCCESS;
-    if(f->sm->fd == -1){
-        File_Open(f, f->type.state);
-        if((f->type.state & SUCCESS) == 0){
-            f->type.state |= ERROR;
-            Abstract *args[] = {
-                (Abstract *)f->path,
-                NULL
-            };
-            Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
-                "Unable to open file @", args);
-            return f->type.state;
-        }
+
+    if(f->sm == NULL){
+        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER,
+            "Stream not defined for file", NULL);
+        return ERROR;
     }
+
+    if((f->sm->type.state & STREAM_TO_FD) == 0){
+        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER,
+            "Stream not defined for file descriptor persistance, wrong flags?", NULL);
+        return ERROR;
+    }
+
     f->sm->func = Stream_ToFd;
     Cursor *curs = f->sm->dest.curs;
     if(Stream_VecTo(f->sm, curs->v) == curs->v->total){
@@ -43,6 +43,19 @@ status File_Read(File *f, i64 max){
     if(f->sm->func == NULL){
         Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
             "Error no stream func defined for file", NULL);
+        return ERROR;
+    }
+
+    printf("fd %d\n", f->sm->fd);
+    fflush(stdout);
+
+    if(f->sm->fd == -1){
+        Abstract *args[] = {
+            (Abstract *)f->path,
+            NULL
+        };
+        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+            "Error no file descriptor for stream path: @", args);
         return ERROR;
     }
 
@@ -73,17 +86,15 @@ status File_Read(File *f, i64 max){
     return f->type.state;
 }
 
-status File_Open(File *f, word flags){
+status File_Open(File *f){
     i32 ioFlags = 0;
-    if((flags & (STREAM_STRVEC|STREAM_TO_FD)) == (STREAM_STRVEC|STREAM_TO_FD)){
+    i32 mode = 0;
+    if((f->type.state & (STREAM_STRVEC|STREAM_TO_FD)) == (STREAM_STRVEC|STREAM_TO_FD)){
         ioFlags = O_RDWR;
-    }else if (flags & STREAM_STRVEC){
+    }else if (f->type.state & STREAM_STRVEC){
         ioFlags = O_RDONLY;
-    }else if(flags & STREAM_TO_FD){
+    }else if(f->type.state & STREAM_TO_FD){
         ioFlags = O_WRONLY;
-        if(flags & STREAM_CREATE){
-            ioFlags |= O_CREAT;
-        }
     }else{
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(ErrStream->m, NULL, (Abstract *)f, ToS_FlagLabels),
@@ -92,16 +103,23 @@ status File_Open(File *f, word flags){
             "STRVEC or TO_FD flags required for read or write or both access to a file descriptor, have $", args);
         return ERROR;
     }
-    i32 fd = open(Str_Cstr(f->m, f->path), ioFlags);
+
+    if(f->type.state & STREAM_CREATE){
+        ioFlags |= O_CREAT;
+        mode = 0644;
+    }
+
+    i32 fd = open(Str_Cstr(f->m, f->path), ioFlags, mode);
     if(fd != -1){
-        if(flags & STREAM_TO_FD){
+        if(f->type.state & STREAM_TO_FD){
             StrVec *v = NULL;
-            if(flags & STREAM_STRVEC){
+            if(f->type.state & STREAM_STRVEC){
                 v = StrVec_Make(f->m);
             }
-            f->sm = Stream_MakeToFd(f->m, fd, v, flags);
-        }else if(flags & STREAM_STRVEC){
+            f->sm = Stream_MakeToFd(f->m, fd, v, f->type.state);
+        }else if(f->type.state & STREAM_STRVEC){
             f->sm = Stream_MakeStrVec(f->m);
+            f->sm->fd = fd;
         }
         f->type.state |= SUCCESS;
     }else{
@@ -127,9 +145,10 @@ status File_Close(File *f){
     return f->type.state;
 }
 
-File *File_Make(MemCh *m, Str *path, Access *access){
+File *File_Make(MemCh *m, Str *path, Access *access, word flags){
     File *file = MemCh_Alloc(m, sizeof(File));
     file->type.of = TYPE_FILE;
+    file->type.state |= flags;
     file->path = path;
     file->access = access;
     file->m = m;

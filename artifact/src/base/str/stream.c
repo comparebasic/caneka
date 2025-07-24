@@ -83,5 +83,6 @@ Stream *Stream_Make(MemCh *m){
     Stream *sm = (Stream *)MemCh_Alloc(m, sizeof(Stream));
     sm->type.of = TYPE_STREAM;
     sm->m = m;
+    sm->fd = -1;
     return sm;
 }

@@ -11,9 +11,10 @@ status DocCtx_GenFiles(DocCtx *ctx){
         Str *dir = (Str *)Span_Get(pathSeg, 0);
         Dir_CheckCreate(ctx->m, dir); 
         Str *fname = StrVec_Str(ctx->m, tf->src);
-        File *f = File_Make(ctx->m, fname, NULL);
-        File_Open(f, STREAM_STRVEC);
+        File *f = File_Make(ctx->m, fname, NULL, STREAM_STRVEC);
+        File_Open(f);
         File_Read(f, FILE_READ_MAX);
+        File_Close(f);
 
         Cursor *curs = File_GetCurs(f);
 
@@ -21,12 +22,10 @@ status DocCtx_GenFiles(DocCtx *ctx){
         Roebling_Run(rbl);
 
         Str *destName = StrVec_Str(ctx->m, tf->dest);
-        File *fout = File_Make(ctx->m, destName, NULL);
-        File_Open(fout, STREAM_TO_FD|STREAM_CREATE); 
+        File *fout = File_Make(ctx->m, destName, NULL, STREAM_TO_FD|STREAM_CREATE);
+        File_Open(fout); 
         fout->sm->type.state |= DEBUG;
-        /*
         Fmt_ToHtml(fout->sm, rbl->mess);
-        */
 
         Abstract *args[] = {
             (Abstract *)h->item,
