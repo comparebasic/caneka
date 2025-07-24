@@ -15,10 +15,6 @@ StrVec *StrVec_FromBytes(MemCh *m, byte *b, i32 length){
 }
 
 i64 Stream_ToFd(Stream *sm, byte *b, i32 length){
-    if(sm->type.state & DEBUG){
-        printf("streaming %d\n", length);
-        fflush(stdout);
-    }
     ssize_t l = write(sm->fd, b, (size_t)length);
     if(l < 0){
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,

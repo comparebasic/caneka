@@ -9,7 +9,7 @@
 #include "./debug/debug_tos.c"
 #include "./io/access.c"
 #include "./io/dir.c"
-#include "./io/file_status.c"
+#include "./io/path.c"
 #include "./io/io_tos.c"
 #include "./io/procdets.c"
 #include "./io/subprocess.c"

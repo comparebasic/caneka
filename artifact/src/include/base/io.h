@@ -2,5 +2,5 @@
 #include "io/procdets.h"
 #include "io/subprocess.h"
 #include "io/dir.h"
-#include "io/file_status.h"
+#include "io/path.h"
 #include "io/io_tos.h"

@@ -64,12 +64,12 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
         argv++;
         for(i32 i = 1; i < argc; i++, argv++){
             Str *s = Str_CstrRef(m, *argv);
-            if(s->bytes[0] == '-'){
+            if(s->length > 1 && s->bytes[0] == '-' && s->bytes[1] == '-'){
                 if(it.metrics.set != -1){
                     Table_SetValue(&it, (Abstract *)Ptr_Wrapped(m, NULL, 0));
                 }
                 it.metrics.set = -1;
-                Str_Incr(s, 1);
+                Str_Incr(s, 2);
                 Abstract *arg = Table_Get(resolve, (Abstract *)s);
                 if(arg != NULL){
                     key = s;
