@@ -1,5 +1,5 @@
 
-#define RBL_GUARD_MAX GUARD_MAX
+#define RBL_GUARD_MAX (GUARD_MAX*2)
 
 typedef status (*RblFunc)(MemCh *m, struct roebling *rbl);
 typedef status (*RblCaptureFunc)(struct roebling *rbl, word captureKey, StrVec *v);

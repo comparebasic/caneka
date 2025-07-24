@@ -3,37 +3,45 @@
 #include "include/doc.h" 
 
 status DocCtx_GenFiles(DocCtx *ctx){
+    MemCh_Incr(ctx->m);
     while((Nested_Next(ctx->nav) & END) == 0){
         Hashed *h = Nested_GetHashed(ctx->nav);
         TranspFile *tf = (TranspFile *)h->value;
         Span *pathSeg = StrVec_ToSpan(ctx->m, tf->dest);
         Str *dir = (Str *)Span_Get(pathSeg, 0);
+        Dir_CheckCreate(ctx->m, dir); 
+        Str *fname = StrVec_Str(ctx->m, tf->src);
+        File *f = File_Make(ctx->m, fname, NULL);
+        File_Open(f, STREAM_STRVEC);
+        File_Read(f, FILE_READ_MAX);
+
+        Cursor *curs = File_GetCurs(f);
+
+        Roebling *rbl = FormatFmt_Make(ctx->m, curs, NULL);
+        Roebling_Run(rbl);
+
+        Str *destName = StrVec_Str(ctx->m, tf->dest);
+        File *fout = File_Make(ctx->m, destName, NULL);
+        File_Open(fout, STREAM_TO_FD|STREAM_CREATE); 
+        fout->sm->type.state |= DEBUG;
+        /*
+        Fmt_ToHtml(fout->sm, rbl->mess);
+        */
+
         Abstract *args[] = {
             (Abstract *)h->item,
             (Abstract *)h->value,
             (Abstract *)pathSeg,
             (Abstract *)dir,
+            (Abstract *)fout->sm,
             NULL
         };
-        Out("^y.Gen: @ -> &^b. \\@ @ dir:@^0.\n", args);
-        Dir_CheckCreate(ctx->m, dir); 
-        /*
-        Str *fname = StrVec_Str(ctx->m, tf->src);
-        File *f = File_Make(ctx->m, fname, NULL);
-        File_Read(f, FILE_READ_MAX);
+        Out("^y.Gen: @ -> &^b. \\@ @ dir:@ -> &^0.\n", args);
 
-        Cursor *curs = File_GetCurs(f);
-        Roebling *rbl = FormatFmt_Make(ctx->m, curs, NULL);
-        Roebling_Run(rbl);
-        Stream *sm = Stream_MakeStrVec(ctx->m); 
-    
-        Str *destName = StrVec_Str(ctx->m, tf->dest);
-        File *fout = File_Make(ctx->m, destName, NULL);
-        File_Open(fout, STREAM_TO_FD); 
-        Fmt_ToHtml(fout->sm, rbl->mess);
         File_Close(fout);
-        */
+
     }
+    MemCh_DecrFree(ctx->m);
     if(ctx->nav->type.state & END){
         ctx->type.state |= SUCCESS;
     }

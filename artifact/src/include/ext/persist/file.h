@@ -6,6 +6,7 @@ typedef struct file {
     Type type;
     i16 guard;
     i16 _;
+    MemCh *m;
     Str *path;
     Access *access;
     Stream *sm;

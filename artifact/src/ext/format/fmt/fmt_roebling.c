@@ -193,6 +193,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 }
 
 Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
+    DebugStack_Push(curs, curs->type.of);
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_START));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)start));
@@ -214,5 +215,6 @@ Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
     rbl->mess = Mess_Make(m);
     rbl->mess->tokenizer = FormatFmt_Defs;
     rbl->source = source;
+    DebugStack_Pop();
     return rbl;
 }

@@ -20,6 +20,16 @@ status File_Unlink(Str *path){
     return ERROR;
 }
 
+status File_AddSlash(Str *path){
+    if(path->bytes[path->length-1] != '/'){
+        Str_Add(path, (byte *)"/", 1);
+        if((path->type.state & ERROR) == 0){
+            return SUCCESS;
+        }
+    }
+    return NOOP;
+}
+
 Str *File_GetCwdPath(MemCh *m, Str *path){
     Str *s = Str_Make(m, STR_DEFAULT);
     char *cstr = getcwd((char *)s->bytes, STR_DEFAULT_MAX);

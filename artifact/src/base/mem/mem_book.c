@@ -3,6 +3,7 @@
 
 static i32 bookIdx = -1;
 static i32 pageIdx = 0;
+static i32 maxPageIdx = 0;
 static MemBook *_books[16] = {
     NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL,

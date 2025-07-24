@@ -202,13 +202,15 @@ i64 Cursor_Print(Stream *sm, Abstract *a, cls type, word flags){
     Iter it;
     Iter_Init(&it, curs->v->p);
     i64 pos = 0;
-    while((Iter_Next(&it) & END) == 0){
-        Str *s = it.value;
-        if(it.idx == curs->it.idx){
-            pos += (i64)(curs->ptr - s->bytes);
-            break;
+    if(curs->ptr != NULL){
+        while((Iter_Next(&it) & END) == 0){
+            Str *s = it.value;
+            if(it.idx == curs->it.idx){
+                pos += (i64)(curs->ptr - s->bytes);
+                break;
+            }
+            pos += (i64)s->length;
         }
-        pos += (i64)s->length;
     }
 
     i32 preview = 8;

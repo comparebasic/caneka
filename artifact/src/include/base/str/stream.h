@@ -6,6 +6,7 @@ enum stream_flags {
     STREAM_MESS = 1 << 12,
     STREAM_SOCKET = 1 << 13,
     STREAM_BUFFER = 1 << 14,
+    STREAM_CREATE = 1 << 15,
 };
 
 typedef i64 (*StreamFunc)(struct stream *sm, byte *b, i32 length);

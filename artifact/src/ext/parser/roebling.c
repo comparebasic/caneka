@@ -206,7 +206,9 @@ i32 Roebling_GetMatchIdx(Roebling *rbl){
 
 status Roebling_ResetPatterns(Roebling *rbl){
     if(rbl->m->type.range > 0){
+        /*
         MemCh_Free(rbl->m);
+        */
     }
 
     Span *p = Span_Make(rbl->m);
@@ -245,14 +247,12 @@ i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
 }
 
 status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v){
-    DebugStack_Push("Roebling_Reset", TYPE_CSTR); 
     Roebling_ResetPatterns(rbl);
     if(v != NULL){
         Cursor_Setup(rbl->curs, v);
     }
 
     rbl->type.state = (rbl->type.state & DEBUG);
-    DebugStack_Pop();
     return SUCCESS;
 }
 
@@ -318,7 +318,9 @@ Roebling *Roebling_Make(MemCh *m,
     Span *p = Span_Make(m);
     Iter_Init(&rbl->parseIt, p);
     rbl->marks = Lookup_Make(m, _TYPE_CORE_END, NULL, (Abstract *)rbl); 
-    Roebling_Reset(m, rbl, NULL);
+    if(curs != NULL){
+        Cursor_Setup(rbl->curs, curs->v);
+    }
 
     return rbl;
 }

@@ -18,6 +18,14 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 }
 
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
+    if(m == NULL){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
+        return NULL;
+    }
+    if(m->type.of != TYPE_MEMCTX){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is missing type.of", NULL);
+        return NULL;
+    }
     if(sz > MEM_SLAB_SIZE){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
     }
@@ -43,6 +51,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     word _sz = (word)sz;
 
     MemPage *sl = NULL;
+    MemCh_SetToBase(m);
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *_sl = (MemPage *)m->it.value;
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
@@ -52,9 +61,8 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     }
 
     if(sl == NULL){
-
         sl = MemPage_Make(m, level);
-        Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1); 
+        Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1);
         m->it.value = (void *)sl;
         _Iter_QueryPage(&m->it, sl);
         if(_capacity[m->it.p->dims] <= (m->it.p->max_idx+1)){
@@ -70,6 +78,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     Iter_Reset(&m->it);
 
     Guard_Reset(&m->guard);
+    MemCh_SetFromBase(m);
     return MemPage_Alloc(sl, _sz);
 }
 

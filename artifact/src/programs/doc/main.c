@@ -96,6 +96,10 @@ i32 main(int argc, char **argv){
 
     Out("^y.Args @ and module path: @^0.\n", _args);
     Str *out = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "out"));
+    Str *format = (Str *)Table_Get(ctx->args, (Abstract *)Str_CstrRef(m, "format"));
+    File_AddSlash(out);
+    Str_Add(out, format->bytes, format->length);
+    File_AddSlash(out);
     if((Dir_Exists(m, out) & SUCCESS) == 0){
         Dir_CheckCreate(m, out);
         Abstract *args[] = {
