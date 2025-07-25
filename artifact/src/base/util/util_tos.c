@@ -135,6 +135,29 @@ static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+static i64 WrappedB_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_BYTE);
+    i64 total = 0;
+    if((flags & DEBUG)){
+        total += Fmt(sm, "Wb<^D.", NULL);
+        total += Bytes_Debug(sm, &sg->val.b, &sg->val.b);
+        Str *num = Str_FromI64(sm->m, (i64)sg->val.b);
+        total += Stream_Bytes(sm, (byte *)"/", 1);
+        total += Stream_Bytes(sm, num->bytes, num->length);
+        total += Fmt(sm, "^d.>", NULL);
+    }else if(flags & MORE){
+        total += Fmt(sm, "^D.(", NULL);
+        total += Bytes_Debug(sm, &sg->val.b, &sg->val.b);
+        Str *num = Str_FromI64(sm->m, (i64)sg->val.b);
+        total += Stream_Bytes(sm, (byte *)"/", 1);
+        total += Stream_Bytes(sm, num->bytes, num->length);
+        total += Fmt(sm, "^d.)", NULL);
+    }else{
+        return ToStream_NotImpl(sm, a, type, flags);
+    }
+    return total;
+}
+
 static i64 WrappedTime64_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
     Str *s = Time64_ToStr(sm->m, sg->val.value);
@@ -185,6 +208,7 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I32, (void *)WrappedI32_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)WrappedI16_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I8, (void *)WrappedI8_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_BYTE, (void *)WrappedB_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_DO, (void *)WrappedDo_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)Wrapped_Ptr);

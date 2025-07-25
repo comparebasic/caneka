@@ -36,7 +36,7 @@ i32 main(int argc, char **argv){
     }
 
     Str *fname = (Str *)Table_Get(args, (Abstract *)Str_CstrRef(m, "in"));
-    Str *path = File_GetAbsPath(m, fname);
+    Str *path = IoUil_GetAbsPath(m, fname);
     File *f = File_Make(m, path, NULL);
     File_Read(f, FILE_READ_MAX);
 

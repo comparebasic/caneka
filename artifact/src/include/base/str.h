@@ -9,3 +9,4 @@
 #include "str/fmt.h"
 #include "str/tos.h"
 #include "str/str_tos.h"
+#include "str/coord.h"

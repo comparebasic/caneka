@@ -84,6 +84,15 @@ Single *I8_Wrapped(MemCh *m, i8 b){
     return sgl;
 }
 
+Single *B_Wrapped(MemCh *m, byte b, cls typeOf, word state){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_BYTE;
+    sgl->objType.of = typeOf;
+    sgl->objType.state = state;
+    sgl->val.b = (byte)b;
+    return sgl;
+}
+
 Range *Range_Wrapped(MemCh *m, word r){
     Range *w = (Range *)MemCh_Alloc(m, sizeof(Range));
     w->type.of = TYPE_RANGE;

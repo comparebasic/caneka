@@ -37,7 +37,7 @@ status File_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
     status r = READY;
 
-    Str *path = File_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);

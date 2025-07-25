@@ -156,7 +156,7 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
     Str_AddCstr(dest, target->bin);
 
     ProcDets pd;
-    if(File_CmpUpdated(ctx->m, source, dest, NULL)){
+    if(IoUtil_CmpUpdated(ctx->m, source, dest, NULL)){
         Abstract *args[] = {
             (Abstract *)source,
             (Abstract *)dest,
@@ -223,7 +223,7 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     Span *cmd = Span_Make(m);
     ProcDets pd;
 
-    if(File_CmpUpdated(m, source, dest, NULL)){
+    if(IoUtil_CmpUpdated(m, source, dest, NULL)){
         Str_Reset(ctx->fields.current.action);
         Str_AddCstr(ctx->fields.current.action, "build obj");
         CliStatus_Print(OutStream, ctx->cli);
@@ -291,7 +291,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
 
     Str *source = ctx->fields.current.source;
     Str_Reset(source);
-    Str *_source = File_GetAbsPath(m, Str_CstrRef(m, ctx->src));
+    Str *_source = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->src));
     Str_Add(source, _source->bytes, _source->length);
     Str_AddCstr(source, "/");
     Str_AddCstr(source, dir->name);
@@ -350,7 +350,7 @@ static status build(BuildCtx *ctx){
     DebugStack_Push(NULL, 0);
     MemCh *m = ctx->m;
     setupStatus(ctx);
-    Str *libDir = File_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
+    Str *libDir = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
 
     Str_AddCstr(libDir, "/");
     Str_AddCstr(libDir, ctx->libtarget);
@@ -376,7 +376,7 @@ static status build(BuildCtx *ctx){
     CliStatus_Print(OutStream, ctx->cli);
     CliStatus_PrintFinish(OutStream, ctx->cli);
 
-    Str *dist = File_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
+    Str *dist = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
     Executable *target = ctx->targets;
     while(target->bin != NULL){
         buildExec(ctx, ((r & SUCCESS) != 0), dist, lib, target);

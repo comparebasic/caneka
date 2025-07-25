@@ -82,7 +82,7 @@ Table *DocCtx_ArgResolve(DocCtx *ctx, int argc, char *argv[]){
 }
 
 status DocCtx_SetFmtPath(DocCtx *ctx, Str *path){
-    ctx->fmtPath = File_GetAbsPath(ctx->m, path);
+    ctx->fmtPath = IoUil_GetAbsPath(ctx->m, path);
     return ctx->fmtPath->type.state;
 }
 

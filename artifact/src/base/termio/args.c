@@ -140,7 +140,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                 }
 
                 if(argHasFlag(h, ARG_ABS_PATH) && value != NULL && value->type.of == TYPE_STR){
-                     value = (Abstract *)File_GetAbsPath(m, (Str *)value);
+                     value = (Abstract *)IoUtil_GetAbsPath(m, (Str *)value);
                      Table_Set(dest, h->item, value);
                 }
             }

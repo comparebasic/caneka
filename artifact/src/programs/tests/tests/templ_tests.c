@@ -35,7 +35,7 @@ status Templ_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Str *path = File_GetAbsPath(m, Str_CstrRef(m, "./docs/html/header.html"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/header.html"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);
@@ -71,7 +71,7 @@ status TemplLogic_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Str *path = File_GetAbsPath(m, Str_CstrRef(m, "./docs/html/nav.html"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/nav.html"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);

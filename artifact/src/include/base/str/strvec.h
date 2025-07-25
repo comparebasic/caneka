@@ -1,3 +1,7 @@
+enum strvec_flags {
+    STRVEC_PATH = 1 << 8,
+};
+
 typedef struct strvec {
     Type type;
     i32 _;

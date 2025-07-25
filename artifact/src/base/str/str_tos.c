@@ -4,7 +4,7 @@
 static Str **streamLabels = NULL;
 static Str **strLabels = NULL;
 
-static i64 Bytes_debug(Stream *sm, byte *start, byte *end){
+i64 Bytes_Debug(Stream *sm, byte *start, byte *end){
     i64 total = 0;
     byte *b = start;
     size_t sz = MAX_BASE10+3;
@@ -51,7 +51,7 @@ i64 StrLit_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & DEBUG){
         total += Stream_Bytes(sm, (byte *)" ", 1);
         byte *b = (byte *)((void *)sl)+sizeof(RangeType);
-        total += Bytes_debug(sm, b, b+sl->type.range);
+        total += Bytes_Debug(sm, b, b+sl->type.range);
     }
     if(flags & (MORE|DEBUG)){
         total += Stream_Bytes(sm, (byte *)">", 1);
@@ -96,7 +96,7 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     if(flags & DEBUG){
-        total += Bytes_debug(sm, s->bytes, s->bytes+(s->length-1));
+        total += Bytes_Debug(sm, s->bytes, s->bytes+(s->length-1));
     }else{
         total += Stream_Bytes(sm, s->bytes, s->length);
     }

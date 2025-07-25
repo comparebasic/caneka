@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 Str *StrVec_Str(MemCh *m, StrVec *v){
-    if(v->total == STR_DEFAULT){
+    if(v->total+1 > STR_DEFAULT){
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(m, v->total),
             NULL,
@@ -11,7 +11,7 @@ Str *StrVec_Str(MemCh *m, StrVec *v){
             "Error StrVec is longer than Cstr default of ", args);
         return NULL;
     }
-    Str *s = Str_Make(m, STR_DEFAULT);
+    Str *s = Str_Make(m, v->total+1);
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
