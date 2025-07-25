@@ -43,7 +43,7 @@ i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I32_Wrapped(sm->m, h->orderIdx), 
             (Abstract *)I32_Wrapped(sm->m, h->idx), 
             (Abstract *)wid, 
-            h->item, 
+            h->key, 
             (Abstract *)val, 
             (Abstract *)(h->value != NULL ? Type_ToStr(sm->m, h->value->type.of) : NULL),
             NULL
@@ -52,7 +52,7 @@ i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
     }else if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, h->idx), 
-            h->item, 
+            h->key, 
             (Abstract *)h->value, 
             NULL
         };
@@ -119,7 +119,7 @@ i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
         while((Iter_Next(&it) & END) == 0){
             if(it.value != NULL){
                 Hashed *h = (Hashed *)it.value;
-                total += ToS(sm, h->item, 0, flags|MORE);
+                total += ToS(sm, h->key, 0, flags|MORE);
                 total += Stream_Bytes(sm, (byte *)"=", 1);
                 total += ToS(sm, h->value, 0, flags|MORE);
                 if((it.type.state & LAST) == 0){

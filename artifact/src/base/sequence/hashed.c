@@ -106,7 +106,7 @@ boolean Hashed_Equals(Hashed *a, Hashed *b){
     if(a->id != b->id){
         return FALSE;
     }
-    return Equals(a->item, b->item);
+    return Equals(a->key, b->key);
 }
 
 Hashed *Hashed_Make(MemCh *m, Abstract *a){
@@ -116,16 +116,16 @@ Hashed *Hashed_Make(MemCh *m, Abstract *a){
     Hashed *v = (Hashed *)MemCh_Alloc(m, sizeof(Hashed));
     v->type.of = TYPE_HASHED;
     v->id = Get_Hash(a);
-    v->item = a;
+    v->key = a;
     return v;
 }
 
 Hashed *Hashed_Clone(MemCh *m, Hashed *oh){
     Hashed *h = MemCh_Realloc(m, sizeof(Hashed), oh, sizeof(Hashed));
-    if(h->item != NULL && ((h->item = Clone(m, h->item)) == NULL)){
+    if(h->key != NULL && ((h->key = Clone(m, h->key)) == NULL)){
         return NULL;
     }
-    if(h->value != NULL && ((h->value = Clone(m, h->item)) == NULL)){
+    if(h->value != NULL && ((h->value = Clone(m, h->key)) == NULL)){
         return NULL;
     }
     return h;

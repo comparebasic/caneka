@@ -89,7 +89,7 @@ status Nested_IndentByIdx(Nested *nd, i32 idx){
         }else if(a->type.of == TYPE_HASHED && ((Hashed *)a)->value->type.of == TYPE_ORDTABLE){
             Hashed *h = (Hashed *)a;
             Iter_Add(&nd->it, 
-                Frame_Make(nd->m, idx, h->item, h->value, ((OrdTable *)h->value)->order));
+                Frame_Make(nd->m, idx, h->key, h->value, ((OrdTable *)h->value)->order));
             return nd->it.type.state & SUCCESS;
         }
     }

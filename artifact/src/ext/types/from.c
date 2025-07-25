@@ -74,7 +74,7 @@ Abstract *From_Name(Abstract *a){
     if(a == NULL){
         return NULL;
     }else if(a->type.of == TYPE_HASHED){
-        return ((Hashed *)a)->item;
+        return ((Hashed *)a)->key;
     }
     return NULL;
 }

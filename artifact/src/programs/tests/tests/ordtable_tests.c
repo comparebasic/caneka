@@ -11,7 +11,7 @@ static status test_OrdRecord(MemCh *m, OrdTable *otbl, i32 orderIdx, Abstract *k
         (Abstract *)h,
         NULL
     };
-    return Test(h == OrdTable_Get(otbl, key) && Equals(h->item, key) && Equals(h->value, value), 
+    return Test(h == OrdTable_Get(otbl, key) && Equals(h->key, key) && Equals(h->value, value), 
         "OrdTable data lines up with expectations of ordIdx @, key @, value, @, have &", args);
 }
 

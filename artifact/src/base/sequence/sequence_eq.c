@@ -15,10 +15,10 @@ boolean Table_Eq(Abstract *a, Abstract *b){
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)it.value;
         if(h != NULL){
-            if((value = Table_Get(tblB, h->item)) == NULL){
+            if((value = Table_Get(tblB, h->key)) == NULL){
                 if(a->type.state & DEBUG){
                     Abstract *args[] = {
-                        (Abstract *)h->item,
+                        (Abstract *)h->key,
                         NULL
                     };
                     Debug("^D.Table_Eq false: missing key & ^d\n", args);
@@ -27,7 +27,7 @@ boolean Table_Eq(Abstract *a, Abstract *b){
             if(!Equals(h->value, value)){
                 if(a->type.state & DEBUG){
                     Abstract *args[] = {
-                        (Abstract *)h->item,
+                        (Abstract *)h->key,
                         (Abstract *)h->value,
                         (Abstract *)value,
                         (Abstract *)tblA,

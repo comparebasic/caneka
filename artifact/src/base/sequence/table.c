@@ -53,7 +53,7 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
     if(op & SPAN_OP_GET){
         if(it->value != NULL){
             h = it->value;
-            if(h->id == hash && Equals(key, h->item)){
+            if(h->id == hash && Equals(key, h->key)){
                 h = (Hashed *)it->value;
                 tbl->type.state |= SUCCESS;
             }
@@ -61,7 +61,7 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
     }else if(op & SPAN_OP_SET){
         if(it->value != NULL){
             h = (Hashed *)it->value;
-            if(h->id == hash && Equals(key, h->item)){
+            if(h->id == hash && Equals(key, h->key)){
                 h->idx = hk->idx;
                 h->value = value;
                 tbl->type.state |= SUCCESS;
@@ -157,7 +157,7 @@ Hashed *Table_SetHashed(Table *tbl, Abstract *a, Abstract *value){
 
 Abstract *Table_GetKey(Table *tbl, i32 idx){
     Hashed *h = Span_Get(tbl, idx);
-    return h->item;
+    return h->key;
 }
 
 Abstract *Table_Get(Table *tbl, Abstract *a){

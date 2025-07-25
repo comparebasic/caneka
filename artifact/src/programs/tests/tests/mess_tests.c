@@ -189,11 +189,7 @@ status Mess_Tests(MemCh *gm){
 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);
-    printf("running roebling\n");
-    fflush(stdout);
     Roebling_Run(rbl);
-    printf("end running roebling\n");
-    fflush(stdout);
 
     Mess *expected = make_Expected(m);
 

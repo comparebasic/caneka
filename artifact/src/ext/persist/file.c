@@ -46,9 +46,6 @@ status File_Read(File *f, i64 max){
         return ERROR;
     }
 
-    printf("fd %d\n", f->sm->fd);
-    fflush(stdout);
-
     if(f->sm->fd == -1){
         Abstract *args[] = {
             (Abstract *)f->path,

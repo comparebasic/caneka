@@ -230,7 +230,7 @@ static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = (Hashed *)Iter_Get(&it);
             if(h != NULL){
-                total += ToS(sm, h->item, 0, MORE);  
+                total += ToS(sm, h->key, 0, MORE);  
                 total += Stream_Bytes(sm, (byte *)" -> ", 4);
                 total += ToS(sm, h->value, 0, MORE);  
                 if((it.type.state & LAST) == 0){
@@ -293,7 +293,7 @@ static i64 Nested_Print(Stream *sm, Abstract *a, cls type, word flags){
                 if(item->type.of == TYPE_HASHED){
                     Hashed *h = (Hashed *)item;
                     total += indentStream(sm, indent);
-                    total += ToS(sm, h->item, 0, MORE);
+                    total += ToS(sm, h->key, 0, MORE);
                     if(h->value->type.of == TYPE_ORDTABLE || h->value->type.of == TYPE_SPAN){
                         Nested_IndentByIdx(nd, fm->it.idx);
                         indent++;

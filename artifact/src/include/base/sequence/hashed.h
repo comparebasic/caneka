@@ -7,7 +7,7 @@ typedef struct hashed {
     i32 idx;
     i32 orderIdx;
     util id;
-    Abstract *item;
+    Abstract *key;
     Abstract *value;
 } Hashed;
 

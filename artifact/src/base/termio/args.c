@@ -17,7 +17,7 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
             Abstract *args[] = {
-                (Abstract *)h->item,
+                (Abstract *)h->key,
                 NULL
             };
 
@@ -27,14 +27,14 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
                 Out("[$, ...]", args);
             }else if(argHasFlag(h, ARG_DEFAULT)){
                 Abstract *args[] = {
-                    (Abstract *)h->item,
+                    (Abstract *)h->key,
                     (Abstract *)((Single *)h->value)->val.ptr,
                     NULL
                 };
                 Out("$(=$)", args);
             }else if(argHasFlag(h, ARG_CHOICE)){
                 Abstract *args[] = {
-                    (Abstract *)h->item,
+                    (Abstract *)h->key,
                     (Abstract *)((Single *)h->value)->val.ptr,
                     NULL
                 };
@@ -101,7 +101,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                Abstract *value = Table_Get(dest, h->item);
+                Abstract *value = Table_Get(dest, h->key);
                 Single *sg = NULL;
                 if(h->value != NULL && h->value->type.of == TYPE_WRAPPED_PTR){
                     sg = (Single *)h->value;
@@ -110,11 +110,11 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
 
                 if(argHasFlag(h, ARG_DEFAULT) && value == NULL && sg != NULL){
                     value = sg->val.ptr;
-                    Table_Set(dest, h->item, (Abstract *)sg->val.ptr);
+                    Table_Set(dest, h->key, (Abstract *)sg->val.ptr);
                 }else if(!argHasFlag(h, ARG_OPTIONAL)){
                     if(value == NULL){
                         Abstract *args[] = {
-                            (Abstract *)h->item,
+                            (Abstract *)h->key,
                             NULL,
                         };
                         Error(m, (Abstract *)resolve, FUNCNAME, FILENAME, LINENUMBER,
@@ -127,7 +127,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                     Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN);
                     if(Span_Has(p, value) == -1){
                         Abstract *args[] = {
-                            (Abstract *)h->item,
+                            (Abstract *)h->key,
                             (Abstract *)p,
                             value,
                             NULL,
@@ -141,7 +141,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
 
                 if(argHasFlag(h, ARG_ABS_PATH) && value != NULL && value->type.of == TYPE_STR){
                      value = (Abstract *)IoUtil_GetAbsPath(m, (Str *)value);
-                     Table_Set(dest, h->item, value);
+                     Table_Set(dest, h->key, value);
                 }
             }
         }

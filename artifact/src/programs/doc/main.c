@@ -53,7 +53,7 @@ static status fileNavFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     Span *keys = Span_Clone(m, tf->keys);
     Span_Add(keys, (Abstract *)tf->name);
 
-    tf->src = File_FnameStrVec(m, src);
+    tf->src = IoUtil_FnameStrVec(m, src);
     tf->dest = File_FnameStrVec(m, dest);
     Abstract *args[] = {
         (Abstract *)src,
