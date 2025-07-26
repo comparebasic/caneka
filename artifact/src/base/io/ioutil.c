@@ -87,7 +87,7 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
     }
 }
 
-StrVec *IoUtil_FnameStrVec(MemCh *m, StrVec *path){
+StrVec *IoUtil_Fname(MemCh *m, StrVec *path){
     Coord cr;
     if(Path_Around(m, path, LAST, &cr) & SUCCESS){
         return StrVec_CoordCopy(m, path, &cr);

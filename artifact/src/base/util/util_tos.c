@@ -139,19 +139,21 @@ static i64 WrappedB_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_BYTE);
     i64 total = 0;
     if((flags & DEBUG)){
-        total += Fmt(sm, "Wb<^D.", NULL);
+        total += Fmt(sm, "Wb<^E.", NULL);
         total += Bytes_Debug(sm, &sg->val.b, &sg->val.b);
         Str *num = Str_FromI64(sm->m, (i64)sg->val.b);
+        total += Fmt(sm, "^e.", NULL);
         total += Stream_Bytes(sm, (byte *)"/", 1);
         total += Stream_Bytes(sm, num->bytes, num->length);
-        total += Fmt(sm, "^d.>", NULL);
+        total += Stream_Bytes(sm, (byte *)">", 1);
     }else if(flags & MORE){
-        total += Fmt(sm, "^D.(", NULL);
+        total += Fmt(sm, "(^E.", NULL);
         total += Bytes_Debug(sm, &sg->val.b, &sg->val.b);
         Str *num = Str_FromI64(sm->m, (i64)sg->val.b);
+        total += Fmt(sm, "^e.", NULL);
         total += Stream_Bytes(sm, (byte *)"/", 1);
         total += Stream_Bytes(sm, num->bytes, num->length);
-        total += Fmt(sm, "^d.)", NULL);
+        total += Stream_Bytes(sm, (byte *)")", 1);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }

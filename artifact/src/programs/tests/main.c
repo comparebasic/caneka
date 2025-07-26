@@ -233,6 +233,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Path Tests",
+        Path_Tests,
+        "Testing path functions for file and object variable paths.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Nested Tests",
         Nested_Tests,
         "Testing nested component, which manages nested OrdTables and Spans.",

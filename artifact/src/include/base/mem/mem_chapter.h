@@ -10,10 +10,9 @@ typedef struct mem_ctx {
 #define MemCh_SetToBase(m) ((m)->type.range = -((m)->type.range))
 #define MemCh_SetFromBase(m) ((m)->type.range = abs((m)->type.range))
 #define MemCh_Incr(m) ((m)->type.range++)
-#define MemCh_Decr(m) ((m)->level > 0 && (m)->type.range--)
+#define MemCh_Decr(m) ((m)->type.range > 0 && (m)->type.range--)
 #define MemCh_DecrFree(m) (((m)->type.range > 0) && \
-    (((m)->type.range--) > 0) && \
-    MemCh_FreeTemp((m), (m)->type.range))
+    MemCh_FreeTemp((m), (m)->type.range) && ((m)->type.range--))
 
 i64 MemChapterTotal();
 i64 MemCh_MemCount(MemCh *m, i16 level);

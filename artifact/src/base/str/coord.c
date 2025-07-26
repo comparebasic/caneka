@@ -15,7 +15,9 @@ StrVec *StrVec_CoordCopy(MemCh *m, StrVec *v, Coord *cr){
     Iter_GetByIdx(&it, (i32)cr->a);
     it.type.state |= PROCESSING;
     StrVec *ret = StrVec_Make(m);
-    while((Iter_Next(&it) & END) == 0 && it.idx >= (i32)cr->b){
+    Str *s = (Str *)Iter_Get(&it);
+    StrVec_Add(ret, s);
+    while((Iter_Next(&it) & END) == 0 && it.idx <= (i32)cr->b){
         Str *s = (Str *)Iter_Get(&it);
         StrVec_Add(ret, s);
     }
