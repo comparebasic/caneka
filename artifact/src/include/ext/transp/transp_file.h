@@ -4,8 +4,8 @@ enum transp_file_flags {
 
 typedef struct transp_file {
     Type type;
-    Str *name;
-    Span *keys;
+    StrVec *name;
+    StrVec *fullName;
     StrVec *src;
     StrVec *dest;
 } TranspFile;
