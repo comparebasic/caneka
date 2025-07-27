@@ -8,7 +8,7 @@ static i64 TranspFile_Print(Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tfile, ToS_FlagLabels),
         (Abstract *)tfile->name,
-        (Abstract *)tfile->keys,
+        (Abstract *)tfile->fullName,
         (Abstract *)tfile->src,
         (Abstract *)tfile->dest,
         NULL

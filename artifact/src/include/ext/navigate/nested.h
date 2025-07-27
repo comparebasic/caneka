@@ -3,6 +3,8 @@ typedef struct nested {
     MemCh *m;
     Iter it;
     Hashed *h;
+    KeyFunc func;
+    Abstract *source;
 } Nested;
 
 Nested *Nested_Make(MemCh *m);

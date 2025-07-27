@@ -239,6 +239,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "AttTable Tests",
+        AttTable_Tests,
+        "Testing hash-table attribute resolution.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Nested Tests",
         Nested_Tests,
         "Testing nested component, which manages nested OrdTables and Spans.",

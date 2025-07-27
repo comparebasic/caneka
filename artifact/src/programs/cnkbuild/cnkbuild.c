@@ -372,6 +372,8 @@ static status build(BuildCtx *ctx){
     }
     if((r & ERROR) == 0){
         setupComplete(ctx);
+    }else{
+        return r;
     }
     CliStatus_Print(OutStream, ctx->cli);
     CliStatus_PrintFinish(OutStream, ctx->cli);

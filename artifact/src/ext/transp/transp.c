@@ -128,5 +128,6 @@ i64 Transp_Init(MemCh *m){
     status r = READY;
     r |= Transp_ToSInit(m, ToStreamLookup);
     r |= Transp_InitLabels(m, ToSFlagLookup);
+    r |= Transp_AttsInit(m, AttsTableLookup); 
     return r;
 }

@@ -70,6 +70,13 @@ Single *I64_Wrapped(MemCh *m, i64 n){
     return sgl;
 }
 
+Single *Util_Wrapped(MemCh *m, util u){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_UTIL;
+    sgl->val.value = u;
+    return sgl;
+}
+
 Single *I16_Wrapped(MemCh *m, word w){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_I16;

@@ -9,7 +9,7 @@ static PatCharDef textDef[] = {
 
 static PatCharDef varDef[] = {
     {PAT_TERM, '$' ,'$'},
-    {PAT_INVERT|PAT_INVERT_CAPTURE, '&', '&'},
+    {PAT_INVERT|PAT_INVERT_CAPTURE, '_', '_'},
         {PAT_INVERT|PAT_INVERT_CAPTURE, '@', '@'},
         {PAT_TERM|PAT_INVERT|PAT_INVERT_CAPTURE, '{', '{'},
     {PAT_END, 0, 0}
@@ -17,13 +17,13 @@ static PatCharDef varDef[] = {
 
 static PatCharDef varKeyValueDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
-    {PAT_TERM, '&' ,'&'},
+    {PAT_TERM, '@' ,'@'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef varNameValueDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
-    {PAT_TERM, '@' ,'@'},
+    {PAT_TERM, '_' ,'_'},
     {PAT_END, 0, 0}
 };
 

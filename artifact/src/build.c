@@ -33,6 +33,7 @@ static char *staticLibs[] = {
 static BuildSubdir typesobj = { "ext/types", {
     "init.c",
     "from.c",
+    "atttable.c",
     NULL
 }};
 
@@ -64,11 +65,19 @@ static BuildSubdir parserobj = { "ext/parser", {
     NULL
 }};
 
+static BuildSubdir sequenceobj = { "ext/sequence", {
+    "sequence.c",
+    "sequence_atts.c",
+    NULL
+}};
+
+
 static BuildSubdir transpobj = { "ext/transp", {
     "transp.c",
     "transp_ctx.c",
     "transp_file.c",
     "transp_tos.c",
+    "transp_atts.c",
     NULL
 }};
 
@@ -106,6 +115,7 @@ static BuildSubdir persistobj = { "ext/persist", {
 static BuildSubdir *objdirs[] = {
     &typesobj,
     &navigateobj,
+    &sequenceobj,
     &parserobj,
     &fmtobj,
     &cashobj,

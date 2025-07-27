@@ -1,3 +1,7 @@
+enum single_flags {
+    SINGLE_STRVEC_TO_TYPE = 1 << 8,
+};
+
 typedef struct single  {
     Type type;
     Type objType;
@@ -23,6 +27,7 @@ Single *Maker_Wrapped(MemCh *m, Maker mk);
 Single *I32_Wrapped(MemCh *m, i32 n);
 Single *MemCount_Wrapped(MemCh *m, util u);
 Single *I64_Wrapped(MemCh *m, i64 n);
+Single *Util_Wrapped(MemCh *m, util u);
 Single *Cstr_Wrapped(MemCh *m, char *cstr);
 Single *I16_Wrapped(MemCh *m, word w);
 Single *I8_Wrapped(MemCh *m, i8 b);

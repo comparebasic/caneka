@@ -105,11 +105,20 @@ static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I16);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.w);
     if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)s,
-            NULL
-        };
-        return Fmt(sm, "Wi16\\<^D.$^d.>", args);
+        if(sg->objType.of != ZERO){
+            Abstract *args[] = {
+                (Abstract *)Type_ToStr(sm->m, sg->objType.of),
+                (Abstract *)s,
+                NULL
+            };
+            return Fmt(sm, "Wi16:$\\<^D.$^d.>", args);
+        }else{
+            Abstract *args[] = {
+                (Abstract *)s,
+                NULL
+            };
+            return Fmt(sm, "Wi16\\<^D.$^d.>", args);
+        }
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }
