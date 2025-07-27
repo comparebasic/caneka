@@ -3,6 +3,13 @@
 
 #define TIME_BUFF_LEN 64
 
+status Time_Delay(i64 sec, i64 nsec){
+    struct timespec ts = {sec, nsec};
+    struct timespec remaining;
+    nanosleep(&ts, &remaining);
+    return SUCCESS;
+}
+
 Str *Time64_ToStr(MemCh *m, time64_t t){
     Str *s = Str_Make(m, TIME_BUFF_LEN);
     struct timespec ts;

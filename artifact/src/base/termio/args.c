@@ -1,17 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static Span *Licences;
-
 static boolean argHasFlag(Hashed *h, word flag){
     return h->value->type.of == TYPE_WRAPPED_PTR && (h->value->type.state & flag);
-}
-
-status Args_AddLicence(MemCh *m, StrVec *lic){
-    if(Licences == NULL){
-        Licences = Span_Make(m);
-    }
-    return Span_Add(Licences, (Abstract *)lic);
 }
 
 status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv){

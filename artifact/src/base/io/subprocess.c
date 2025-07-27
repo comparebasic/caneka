@@ -26,6 +26,19 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             DebugStack_Pop();
             return ERROR;
         }
+    }else if(pd->type.state & PROCDETS_IN_PIPE){
+        if((pipe(p0) != 0)
+            ||
+            (
+                (fcntl(p0[0], F_SETFL, O_NONBLOCK) == -1) ||
+                (fcntl(p0[1], F_SETFL, O_NONBLOCK) == -1)
+            )
+
+        ){
+            DebugStack_Pop();
+            return ERROR;
+        }
+
     }
 
     pid_t child, p;
@@ -37,7 +50,6 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             arg++;
         }
     }
-
 
     child = fork();
     if(child == (pid_t)-1){
@@ -54,6 +66,10 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             close(p1[0]);
             dup2(p2[1], 2);
             close(p2[0]);
+        }else if(pd->type.state & PROCDETS_IN_PIPE){
+            close(0);
+            dup2(p0[0], 0);
+            close(p0[1]);
         }
         execvp(cmd[0], cmd);
         DebugStack_Pop();
@@ -67,6 +83,9 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
         pd->inFd = p0[1];
         pd->outFd = p1[0];
         pd->errFd = p2[0];
+    }else if(pd->type.state & PROCDETS_IN_PIPE){
+        close(p0[0]);
+        pd->inFd = p0[1];
     }
     pd->pid = child;
 

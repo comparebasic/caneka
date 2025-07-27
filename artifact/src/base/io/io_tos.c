@@ -10,7 +10,6 @@ i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, word flags){
         NULL
     };
     if(flags & (MORE|DEBUG)){
-
         return Fmt(sm, "ProcDets<$ $ return:$>", args); 
     }else{
         return ToStream_NotImpl(sm, a, type, flags);

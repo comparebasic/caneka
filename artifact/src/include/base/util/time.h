@@ -7,3 +7,4 @@ i64 Time64_ToMillis(time64_t tm);
 Single *Time64_Wrapped(MemCh *m, time64_t n);
 Str *Time_Today(MemCh *m);
 Str *TimeSpec_ToDayStr(MemCh *m, struct timespec *ts);
+status Time_Delay(i64 sec, i64 nsec);

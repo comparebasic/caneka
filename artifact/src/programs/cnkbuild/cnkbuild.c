@@ -295,10 +295,15 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     Str *dest = ctx->fields.current.dest;
     Str_Reset(dest);
     Str_Add(dest, dirPath->bytes, dirPath->length);
-    Str_AddCstr(dest, "licence");
-    Str_AddCstr(dest, "_");
-    Str_AddI64(dest, (i64)idx);
+
+    Str *licName = Str_Make(m, STR_DEFAULT);
+    Str_AddCstr(licName, "licence");
+    Str_AddCstr(licName, "_");
+    Str_AddI64(licName, (i64)idx);
+
+    Str_Add(dest, licName->bytes, licName->length);
     Str_AddCstr(dest, ".o");
+
 
     Str_Reset(ctx->fields.current.action);
     Str_AddCstr(ctx->fields.current.action, "build licence(s) obj");
@@ -306,21 +311,88 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
 
     ProcDets pd;
     ProcDets_Init(&pd);
-    pd.type.state |= PROCDETS_PIPES;
+    pd.type.state |= (PROCDETS_IN_PIPE|PROCDETS_ASYNC);
 
     Span *cmd = Span_Make(ctx->m);
     Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, ctx->tools.cc));
-    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-"));
+    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-x"));
+    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "c"));
     Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-c"));
+    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-"));
     Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-o"));
     Span_Add(cmd, (Abstract *)dest);
-    Abstract *args[] = {
-        (Abstract *)cmd,
-        NULL
-    };
-    Out("^p.Build licence @^0.\n\n\n\n\n\n\n\n", args);
 
-    r |= SUCCESS;
+    Str *licPath = IoUtil_GetCwdPath(m, Str_CstrRef(m, licSrc));
+    int fd = open(Str_Cstr(m, licPath), O_RDONLY, 0);
+    byte b[FILE_READ_LENGTH];
+    if(fd <= 0){
+        r |= ERROR;
+        return r;
+    }
+
+    r |= SubCall(ctx->m, cmd, &pd);
+    if(r & ERROR){
+        return r; 
+    }
+
+    Stream *sm = Stream_MakeToFd(m, pd.inFd, NULL, ZERO);
+    Str *s = Str_CstrRef(m, "#include <stdio.h>\nchar *Licences[] = {\"");
+    Stream_Bytes(sm, s->bytes, s->length);
+
+    i64 max = FILE_SLURP_MAX;
+    while(max > 0){
+        ssize_t l = read(fd, b, FILE_READ_LENGTH);
+        if(l <= 0){
+            if(l < 0){
+                return ERROR;
+            }
+            break;
+        }
+        max -= l;
+        if(max < 0){
+            r |= ERROR;
+            return r;
+        }
+        char *ptr = (char *)b;
+        char *last = ptr+l;
+        while(ptr <= last){
+            if(*ptr == '\n' || *ptr == '\r' || *ptr == '"'){
+                Stream_Bytes(sm, (byte *)"\\", 1);
+            }
+            Stream_Bytes(sm, (byte *)ptr, 1);
+            ptr++;
+        }
+    }
+    s = Str_CstrRef(m, "\",\nNULL};\n\n\n\n\n\n\n\n");
+    Stream_Bytes(sm, s->bytes, s->length);
+    close(fd);
+    close(pd.inFd);
+
+    status ret;
+    int i = 0;
+    while(((ret = SubStatus(&pd)) & (SUCCESS|ERROR)) == 0){
+        printf("delay %d %d/%d\n", i++, pd.pid, pd.code);
+        Time_Delay(0, 50000000);
+    }
+    if(ret & ERROR){
+        printf("%d\n", pd.code);
+        r |= ERROR;
+        return r;
+    }
+
+    Span_ReInit(cmd);
+    Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.ar));
+    Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-rc"));
+    Span_Add(cmd, (Abstract *)lib);
+    Span_Add(cmd, (Abstract *)dest);
+    ProcDets_Init(&pd);
+    status re = SubProcess(m, cmd, &pd);
+    if(re & ERROR){
+        DebugStack_SetRef(cmd, cmd->type.of);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding licence object to lib", NULL);
+        return ERROR;
+    }
+
     return r;
 }
 

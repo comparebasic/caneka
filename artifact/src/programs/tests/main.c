@@ -311,6 +311,18 @@ i32 main(int argc, char **argv){
 
     Caneka_Init(m);
     DebugStack_Push(NULL, 0);
+
+    printf("%s\n", Licences[0]);
+    fflush(stdout);
+    exit(1);
+    /*
+    Str *licence = Str_CstrRef(m, Licences[0]);
+    Abstract *args[] = {
+        (Abstract *)licence,
+    };
+    Out("^p.$^0.\n", args);
+    */
+
     test(m);
 
     DebugStack_Pop();

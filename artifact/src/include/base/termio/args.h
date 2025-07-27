@@ -1,3 +1,5 @@
+extern char **Licences;
+
 enum argflags {
     ARG_DEFAULT = 1 << 8,
     ARG_OPTIONAL = 1 << 9,
