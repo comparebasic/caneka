@@ -126,6 +126,11 @@ static BuildSubdir *objdirs[] = {
     NULL
 };
 
+char *licences[] = {
+    "./LICENCE",
+    NULL
+};
+
 int main(int argc, char **argv){
     if(MemBook_Make(NULL) == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to allocate Mem_Book", NULL);
@@ -146,6 +151,7 @@ int main(int argc, char **argv){
     ctx.args.inc = inc;
     ctx.args.libs = libs;
     ctx.args.staticLibs = staticLibs;
+    ctx.args.licenceFiles = licences;
     ctx.objdirs = (BuildSubdir **)objdirs;
 
     Build(&ctx);

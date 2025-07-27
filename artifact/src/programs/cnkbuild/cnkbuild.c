@@ -84,6 +84,10 @@ static status setupStatus(BuildCtx *ctx){
         dir++;
     }
 
+    if(ctx->args.licenceFiles != NULL){
+        ctx->fields.steps.modTotal->val.i++;
+    }
+
     CliStatus_SetDims(ctx->cli, 0, 0);
     i32 width = ctx->cli->cols;
     IntPair coords = {0, 0};
@@ -278,6 +282,48 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     return r;
 }
 
+
+static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, int idx){
+    status r = READY;
+    MemCh *m = ctx->m;
+
+    Str *dirPath = Str_CloneAlloc(m, libDir, STR_DEFAULT);
+    Str_AddCstr(dirPath, "/");
+    DebugStack_SetRef(dirPath, dirPath->type.of);
+    Dir_CheckCreate(m, dirPath);
+
+    Str *dest = ctx->fields.current.dest;
+    Str_Reset(dest);
+    Str_Add(dest, dirPath->bytes, dirPath->length);
+    Str_AddCstr(dest, "licence");
+    Str_AddCstr(dest, "_");
+    Str_AddI64(dest, (i64)idx);
+    Str_AddCstr(dest, ".o");
+
+    Str_Reset(ctx->fields.current.action);
+    Str_AddCstr(ctx->fields.current.action, "build licence(s) obj");
+    CliStatus_Print(OutStream, ctx->cli);
+
+    ProcDets pd;
+    ProcDets_Init(&pd);
+    pd.type.state |= PROCDETS_PIPES;
+
+    Span *cmd = Span_Make(ctx->m);
+    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, ctx->tools.cc));
+    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-"));
+    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-c"));
+    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-o"));
+    Span_Add(cmd, (Abstract *)dest);
+    Abstract *args[] = {
+        (Abstract *)cmd,
+        NULL
+    };
+    Out("^p.Build licence @^0.\n\n\n\n\n\n\n\n", args);
+
+    r |= SUCCESS;
+    return r;
+}
+
 static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *dir){
     DebugStack_Push(NULL, 0);
     status r = READY;
@@ -363,6 +409,25 @@ static status build(BuildCtx *ctx){
     Str_AddCstr(lib, ".a");
     if(lib->type.state & ERROR){
         return ERROR;
+    }
+
+    if(ctx->args.licenceFiles != NULL){
+        ctx->fields.steps.modSrcCount->val.i = 0;
+        char **lic =  ctx->args.licenceFiles;
+        while(*lic != NULL){
+            ctx->fields.steps.modSrcTotal->val.i = 0;
+            lic++;
+        }
+        lic =  ctx->args.licenceFiles;
+        int i = 0;
+        while(*lic != NULL){
+            r |= buildLicence(ctx, libDir, lib, *lic, i++);
+            if(r & ERROR){
+                return r;
+            }
+            ctx->fields.steps.modSrcCount->val.i++;
+            lic++;
+        }
     }
 
     BuildSubdir **dir = ctx->objdirs;

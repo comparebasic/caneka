@@ -96,6 +96,7 @@ int main(int argc, char **argv){
     ctx.args.inc = inc;
     ctx.args.libs = libs;
     ctx.args.staticLibs = staticLibs;
+    ctx.args.licenceFiles = NULL;
     ctx.objdirs = (BuildSubdir **)objdirs;
 
     Build(&ctx);

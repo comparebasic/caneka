@@ -45,6 +45,7 @@ typedef struct buildctx {
         char **cflags;
         char **libs;
         char **staticLibs;
+        char **licenceFiles;
     } args;
     BuildSubdir **objdirs;
 } BuildCtx;
