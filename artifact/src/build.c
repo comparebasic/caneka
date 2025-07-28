@@ -150,6 +150,7 @@ int main(int argc, char **argv){
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
     ctx.libtarget = "libcaneka";
+    ctx.version = "1.strvec-alpha";
     ctx.dist = "build";
     ctx.src = "artifact/src";
     ctx.targets = (Executable *)targets;

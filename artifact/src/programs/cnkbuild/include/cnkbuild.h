@@ -36,6 +36,7 @@ typedef struct buildctx {
     char *dist;
     char *src;
     char *libtarget;
+    char *version;
     struct {
         char *cc;
         char *ar;

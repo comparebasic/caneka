@@ -89,6 +89,7 @@ int main(int argc, char **argv){
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
     ctx.libtarget = "libcnktest";
+    ctx.version = NULL;
     ctx.dist = "build";
     ctx.src = "artifact/src/programs/tests";
     ctx.targets = (Executable *)targets;

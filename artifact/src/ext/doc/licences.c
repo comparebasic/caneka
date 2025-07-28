@@ -11,24 +11,27 @@ char *Licences[] = {
 };
 
 status Caneka_LicenceInit(MemCh *m){
-    return Add_Licence("Caneka", libcaneka_licence_0);
+    return Add_Licence("CANEKA", libcaneka_version_0, libcaneka_licence_0);
 }
 
 status Show_Licences(Stream *sm){
     DebugStack_Push(NULL, ZERO);
     char **name = Licences;
-    char **licence = name+1;
+    char **version = name+1;
+    char **licence = name+2;
     status r = READY;
     while(*name != NULL){
         Abstract *args[] = {
             (Abstract *)Str_CstrRef(sm->m, *name),
+            (Abstract *)Str_CstrRef(sm->m, *version),
             (Abstract *)Str_CstrRef(sm->m, *licence),
         };
-        Fmt(sm, "$ LICENCE\n\n$\n\n", args);
+        Fmt(sm, "$ LICENCE (Software Version $) \n\n$\n\n", args);
         r |= SUCCESS;
 
-        name += 2;
-        licence = name+1;
+        name += 3;
+        version = name+1;
+        licence = name+2;
     }
 
     if(r == READY){
@@ -38,12 +41,13 @@ status Show_Licences(Stream *sm){
     return r;
 }
 
-status Add_Licence(char *name, char *licence){
-    if(_count > LICENCE_MAX-3){
+status Add_Licence(char *name, char *version, char *licence){
+    if(_count > LICENCE_MAX-4){
         Error(ErrStream->m, NULL, FILENAME, FUNCNAME, LINENUMBER, "Max Licences Reached", NULL);
         return ERROR;
     }
     Licences[_count++] = name;
+    Licences[_count++] = version;
     Licences[_count++] = licence;
     return SUCCESS;
 }

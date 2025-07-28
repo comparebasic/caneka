@@ -303,6 +303,13 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     Str_AddCstr(licName, "_");
     Str_AddI64(licName, (i64)idx);
 
+    Str *versionName = Str_Make(m, STR_DEFAULT);
+    Str_AddCstr(versionName, ctx->libtarget);
+    Str_AddCstr(versionName, "_");
+    Str_AddCstr(versionName, "version");
+    Str_AddCstr(versionName, "_");
+    Str_AddI64(versionName, (i64)idx);
+
     Str_Add(dest, licName->bytes, licName->length);
     Str_AddCstr(dest, ".o");
 
@@ -358,7 +365,7 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
             return r;
         }
         char *ptr = (char *)b;
-        char *last = ptr+l;
+        char *last = ptr+l-1;
         while(ptr <= last){
             if(*ptr == '\n'){
                 Stream_Bytes(sm, (byte *)"\\n\\", 3);
@@ -371,6 +378,20 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     }
     s = Str_CstrRef(m, "\";\n");
     Stream_Bytes(sm, s->bytes, s->length);
+    s = Str_CstrRef(m, "char *");
+    Stream_Bytes(sm, s->bytes, s->length);
+    Stream_Bytes(sm, versionName->bytes, versionName->length);
+    Stream_Bytes(sm, (byte *)" = ", 3);
+    if(ctx->version != NULL){
+        Stream_Bytes(sm, (byte *)"\"", 1);
+        s = Str_CstrRef(m, ctx->version);
+        Stream_Bytes(sm, s->bytes, s->length);
+        s = Str_CstrRef(m, "\";\n");
+        Stream_Bytes(sm, s->bytes, s->length);
+    }else{
+        s = Str_CstrRef(m, "NULL;\n");
+        Stream_Bytes(sm, s->bytes, s->length);
+    }
     close(fd);
     close(pd.inFd);
 
@@ -393,12 +414,6 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     Span_Add(cmd, (Abstract *)dest);
     ProcDets_Init(&pd);
     status re = SubProcess(m, cmd, &pd);
-    Abstract *args[] = {
-        (Abstract *)cmd,
-        NULL
-    };
-    Out("^p.Cmd AR: &^0.\n\n\n\n\n\n\n\n\n", args);
-
     if(re & ERROR){
         DebugStack_SetRef(cmd, cmd->type.of);
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding licence object to lib", NULL);
