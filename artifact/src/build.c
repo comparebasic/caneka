@@ -37,6 +37,11 @@ static BuildSubdir typesobj = { "ext/types", {
     NULL
 }};
 
+static BuildSubdir docobj = { "ext/doc", {
+    "licences.c",
+    NULL
+}};
+
 static BuildSubdir navigateobj = { "ext/navigate", {
     "node.c",
     "mess.c",
@@ -114,6 +119,7 @@ static BuildSubdir persistobj = { "ext/persist", {
 
 static BuildSubdir *objdirs[] = {
     &typesobj,
+    &docobj,
     &navigateobj,
     &sequenceobj,
     &parserobj,

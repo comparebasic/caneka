@@ -5,3 +5,4 @@
 #include "ext/transp.h"
 #include "ext/format.h"
 #include "ext/sequence.h"
+#include "ext/doc.h"

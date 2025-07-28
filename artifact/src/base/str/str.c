@@ -122,6 +122,11 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
 
 Str *Str_CstrRef(MemCh *m, char *cstr){
     i64 len = strlen(cstr);
+    if(len > STR_MAX){
+        Error(m, NULL, FUNCNAME, FILENAME, LINENUMBER,
+            "strlen too long to make Str", NULL);
+        return NULL;
+    }
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, (byte *)cstr, len, len+1);
     s->type.state |= STRING_CONST;

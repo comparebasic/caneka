@@ -28,20 +28,6 @@ status Str_Tests(MemCh *gm){
     };
     r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of @ found @", args3);
 
-    s = Str_CstrRef(m, longCstr);
-    i32 ls_l = strlen(longCstr);
-    
-    cls typeOf = s->type.of;
-    Abstract *args4[] = {(Abstract *)Type_ToStr(m, type), (Abstract *)Type_ToStr(m, typeOf), NULL};
-    r |= Test(s->type.of == TYPE_STR, 
-        "Expect string to have chain type $ found $", args4);
-    Abstract *args5[] = {
-        (Abstract *)I32_Wrapped(m, ls_l),
-        (Abstract *)I16_Wrapped(m, s->length),
-        NULL
-    };
-    r |= Test(s->length == ls_l, "Expect string length of $ found $", args5);
-
     i64 value = 35072;
     s = Str_FromI64(m, value);
     Str *expected_is = Str_CstrRef(m, "35072");
@@ -109,12 +95,6 @@ status Str_EndMatchTests(MemCh *gm){
         NULL
     };
     r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches \".c\" after String_Trunc successfully, had @", args3);
-    /*
-
-    match = "bork!";
-    s = Str_CstrRef(m, "Super long sentance that spans more than a single chunk, but ends in a very special word and the word is so amazing it's like super duper, amazingly amazing, like the most amazing-ness waste of a long sentence that could have been short, but oh well, we have to test longs tuff sometimes so here it is: bork!");
-r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in 'bork!' matches successfully, had '_t'", s);
-*/
 
     MemCh_Free(m);
 
