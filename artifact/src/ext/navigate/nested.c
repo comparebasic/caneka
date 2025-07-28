@@ -105,9 +105,7 @@ status Nested_IndentByIdx(Nested *nd, i32 idx){
 
 Abstract *Nested_GetByKey(Nested *nd, Abstract *key){
     Frame *fm = Iter_Current(&nd->it);
-    if(nd->func != NULL){
-        return nd->func(fm->value, key, nd->source);
-    }else if(fm->value->type.of == TYPE_ORDTABLE){
+    if(fm->value->type.of == TYPE_ORDTABLE){
         Hashed *h = OrdTable_Get((OrdTable *)fm->value, key);
         if(h != NULL){
             return h->value;
