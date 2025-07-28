@@ -1,4 +1,8 @@
 #!/bin/sh
+CC="clang"
+
 ./scripts/make.sh && \
-clang -o build/builder builder.c && ./build/builder artifact/src/programs/tests/build.c && \
+echo "building Tests Config..." && \
+$CC -o build/programs_tests_build -I artifact/src/include build/libcnkbase/libcnkbase.a build/libbuilder/libbuilder.a artifact/src/programs/tests/build.c -lm && \
+echo "building Tests..." && \
 ./build/programs_tests_build && ./build/tests

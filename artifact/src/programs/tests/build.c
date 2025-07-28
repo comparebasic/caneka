@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <cnkbuild.h>
+#include <builder.h>
 
 /* parameters */
 
