@@ -1,8 +1,10 @@
+typedef Abstract *(*NestedFunc)(struct nested *nd, Abstract *key);
 typedef struct nested {
     Type type;
     MemCh *m;
     Iter it;
     Hashed *h;
+    NestedFunc func;
 } Nested;
 
 Nested *Nested_Make(MemCh *m);

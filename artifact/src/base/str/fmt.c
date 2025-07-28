@@ -182,6 +182,12 @@ FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
     return ln;
 }
 
+StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args){
+    Stream *sm = Stream_MakeStrVec(m); 
+    Fmt(sm, fmt, args); 
+    return sm->dest.curs->v;
+}
+
 FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args){
     FmtLine *ln = (FmtLine *)MemCh_Alloc(m, sizeof(FmtLine));
     ln->type.of = TYPE_FMT_LINE;

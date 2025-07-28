@@ -65,6 +65,8 @@ struct cash;
 struct rblsh_ctx;
 struct xml_ctx;
 struct xml_parser;
+/* navigate */
+struct nested;
 /* lang */
 struct caneka_statement;
 struct caneka_func_def;

@@ -57,8 +57,10 @@ status Templ_Tests(MemCh *gm){
 
     Stream *sm = Stream_MakeStrVec(m);
     
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p, data);
-    i64 total = Templ_ToS(templ, sm);
+    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    Nested *nd = Nested_Make(m);
+    Nested_SetRoot(nd, (Abstract *)data);
+    i64 total = Stream_Templ(sm, templ, nd);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
     r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);
@@ -99,8 +101,10 @@ status TemplLogic_Tests(MemCh *gm){
 
     Stream *sm = Stream_MakeStrVec(m);
     
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p, data);
-    i64 total = Templ_ToS(templ, sm);
+    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    Nested *nd = Nested_Make(m);
+    Nested_SetRoot(nd, (Abstract *)data);
+    i64 total = Stream_Templ(sm, templ, nd);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
     r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);

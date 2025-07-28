@@ -1,6 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
+static Span *pathSeps = NULL;
+
+status IoUtil_Annotate(MemCh *m, StrVec *path){
+    if(pathSeps == NULL){
+        MemCh_SetToBase(m);
+        pathSeps = Span_Make(m);
+        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
+        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'.', ZERO, LAST));
+        MemCh_SetFromBase(m);
+    }
+    return Path_Annotate(m, path, pathSeps);
+}
+
 status IoUtil_Exists(Str *path){
     struct stat st;
     int r = 0;

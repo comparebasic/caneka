@@ -287,32 +287,26 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     status r = READY;
     MemCh *m = ctx->m;
 
-    Str *dirPath = Str_CloneAlloc(m, libDir, STR_DEFAULT);
-    Str_AddCstr(dirPath, "/");
-    DebugStack_SetRef(dirPath, dirPath->type.of);
-    Dir_CheckCreate(m, dirPath);
+    StrVec *dir = StrVec_Make(m);
+    StrVec_Add(dir, Str_Clone(m, libDir));
+    IoUtil_Annotate(m, dir);
+    IoUtil_AddSlash(dir);
 
-    Str *dest = ctx->fields.current.dest;
-    Str_Reset(dest);
-    Str_Add(dest, dirPath->bytes, dirPath->length);
+    ctx->fields.current.dest = StrVec_Str(m, dir);
+    Dir_CheckCreate(m, ctx->fields.current.dest);
+    
+    Abstract *args1[] = {
+        (Abstract *)Str_CstrRef(m, ctx->libtarget),
+        (Abstract *)I64_Wrapped(m, idx),
+        NULL,
+    };
+    StrVec *licName = Fmt_ToStrVec(m, "$_licence_$", args1);
+    StrVec *versionName = Fmt_ToStrVec(m, "$_version_$", args1);
 
-    Str *licName = Str_Make(m, STR_DEFAULT);
-    Str_AddCstr(licName, ctx->libtarget);
-    Str_AddCstr(licName, "_");
-    Str_AddCstr(licName, "licence");
-    Str_AddCstr(licName, "_");
-    Str_AddI64(licName, (i64)idx);
-
-    Str *versionName = Str_Make(m, STR_DEFAULT);
-    Str_AddCstr(versionName, ctx->libtarget);
-    Str_AddCstr(versionName, "_");
-    Str_AddCstr(versionName, "version");
-    Str_AddCstr(versionName, "_");
-    Str_AddI64(versionName, (i64)idx);
-
-    Str_Add(dest, licName->bytes, licName->length);
-    Str_AddCstr(dest, ".o");
-
+    StrVec *dest = (StrVec *)StrVec_Clone(m, (Abstract *)dir);
+    StrVec_AddVec(dest, licName);
+    StrVec_Add(dest, Str_CstrRef(m, ".o"));
+    IoUtil_Annotate(m, dest);
 
     Str_Reset(ctx->fields.current.action);
     Str_AddCstr(ctx->fields.current.action, "build licence(s) obj");
@@ -329,7 +323,7 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-c"));
     Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-"));
     Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-o"));
-    Span_Add(cmd, (Abstract *)dest);
+    Span_Add(cmd, (Abstract *)StrVec_Str(m, dest));
 
     Str *licPath = IoUtil_GetCwdPath(m, Str_CstrRef(m, licSrc));
     int fd = open(Str_Cstr(m, licPath), O_RDONLY, 0);
@@ -345,10 +339,11 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     }
 
     Stream *sm = Stream_MakeToFd(m, pd.inFd, NULL, ZERO);
-    Str *s = Str_CstrRef(m, "#include <stdio.h>\nchar *");
-    Stream_Bytes(sm, s->bytes, s->length);
-    Stream_Bytes(sm, licName->bytes, licName->length);
-    Stream_Bytes(sm, (byte *)" = \"", 4);
+    Abstract *args2[] = {
+        (Abstract *)licName,
+        NULL,
+    };
+    Fmt(sm, "#include <stdio.h>\nchar *$ = \"", args2);
 
     i64 max = FILE_SLURP_MAX;
     while(max > 0){
@@ -376,33 +371,22 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
             ptr++;
         }
     }
-    s = Str_CstrRef(m, "\";\n");
-    Stream_Bytes(sm, s->bytes, s->length);
-    s = Str_CstrRef(m, "char *");
-    Stream_Bytes(sm, s->bytes, s->length);
-    Stream_Bytes(sm, versionName->bytes, versionName->length);
-    Stream_Bytes(sm, (byte *)" = ", 3);
-    if(ctx->version != NULL){
-        Stream_Bytes(sm, (byte *)"\"", 1);
-        s = Str_CstrRef(m, ctx->version);
-        Stream_Bytes(sm, s->bytes, s->length);
-        s = Str_CstrRef(m, "\";\n");
-        Stream_Bytes(sm, s->bytes, s->length);
-    }else{
-        s = Str_CstrRef(m, "NULL;\n");
-        Stream_Bytes(sm, s->bytes, s->length);
-    }
     close(fd);
+
+    Abstract *args3[] = {
+        (Abstract *)versionName,
+        (Abstract *)Str_CstrRef(m, ctx->version),
+        NULL,
+    };
+    Fmt(sm, "\";\nchar *$ = \"$\";\n", args3);
     close(pd.inFd);
 
     status ret;
     int i = 0;
     while(((ret = SubStatus(&pd)) & (SUCCESS|ERROR)) == 0){
-        printf("delay %d %d/%d\n", i++, pd.pid, pd.code);
         Time_Delay(0, 50000000);
     }
     if(ret & ERROR){
-        printf("%d\n", pd.code);
         r |= ERROR;
         return r;
     }
@@ -411,7 +395,7 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.ar));
     Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-rc"));
     Span_Add(cmd, (Abstract *)lib);
-    Span_Add(cmd, (Abstract *)dest);
+    Span_Add(cmd, (Abstract *)StrVec_Str(m, dest));
     ProcDets_Init(&pd);
     status re = SubProcess(m, cmd, &pd);
     if(re & ERROR){

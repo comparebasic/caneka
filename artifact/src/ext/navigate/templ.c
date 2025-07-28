@@ -1,18 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-Templ *Templ_Make(MemCh *m, Span *content, OrdTable *data){
+Templ *Templ_Make(MemCh *m, Span *content){
     Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
     templ->type.of = TYPE_TEMPL;
     Iter_Init(&templ->content, content);
-    Span *p = Span_Make(m);
-    Span_Add(p, (Abstract *)data);
-    Iter_Init(&templ->data, p);
-    Iter_Next(&templ->data);
     return templ;
 }
 
 i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
+    /*
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         return total;
@@ -122,15 +119,18 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         Out("Templ: ^p.&^0.\nData: ^p.@^0.\nDataItem: ^p.&^0.\nItem:^y.&^0\n\n", args);
     }
 
+    */
     return total;
 }
 
-i64 Templ_ToS(Templ *templ, Stream *sm){
+i64 Stream_Templ(Stream *sm, Templ *templ, Nested *nd){
     i64 total = 0;
+    /*
     i16 g = 0;
     while((total = Templ_ToSCycle(templ, sm, total)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(&g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }
+    */
     return total;
 }

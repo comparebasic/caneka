@@ -17,3 +17,4 @@ enum formatter_types {
 i64 Fmt(Stream *sm, char *fmt, Abstract *args[]);
 FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p);
 FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args);
+StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args);
