@@ -10,8 +10,8 @@ status Transp_AttsInit(MemCh *m, Lookup *lk){
         transpFileAtts = Table_Make(m);
         Table_Set(transpFileAtts, (Abstract *)Str_CstrRef(m, "name"),
             (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        Table_Set(transpFileAtts, (Abstract *)Str_CstrRef(m, "fullName"),
-            (Abstract *)I16_Wrapped(m, (void *)(&tp.fullName)-(void *)(&tp)));
+        Table_Set(transpFileAtts, (Abstract *)Str_CstrRef(m, "local"),
+            (Abstract *)I16_Wrapped(m, (void *)(&tp.local)-(void *)(&tp)));
         Table_Set(transpFileAtts, (Abstract *)Str_CstrRef(m, "src"),
             (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
         Table_Set(transpFileAtts, (Abstract *)Str_CstrRef(m, "dest"),

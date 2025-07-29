@@ -217,7 +217,7 @@ static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)otbl->order,
             NULL
         };
-        return Fmt(sm, "OrdTable<^D.$^d.nvalues @/[$]>", args);
+        return Fmt(sm, "OrdTable<^D.$^d.nvalues @/[@]>", args);
     }else if(flags & MORE){
         i64 total = 0;
         Abstract *args[] = {

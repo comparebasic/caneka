@@ -1,6 +1,7 @@
 typedef struct templ {
     Type type;
     i32 indent;
+    Iter it;
     Iter content;
     struct nested *data;
 } Templ;

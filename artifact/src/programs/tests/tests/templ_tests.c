@@ -58,12 +58,22 @@ status Templ_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    templ->type.state |= DEBUG;
     Nested *nd = Nested_Make(m);
     Nested_SetRoot(nd, (Abstract *)data);
     i64 total = Stream_Templ(sm, templ, nd);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
-    r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);
+    Abstract *args[] = {
+        (Abstract *)expected,
+        (Abstract *)sm->dest.curs->v,
+        NULL
+    };
+
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
+        "Temple key value test has expected content", 
+        "Temple key value test mismatched, expected content &, have instead &", 
+        args);
 
     MemCh_Free(m);
     return r;
@@ -87,28 +97,55 @@ status TemplLogic_Tests(MemCh *gm){
         NULL);
 
     OrdTable *data = OrdTable_Make(m);
-    OrdTable *menuItems = OrdTable_Make(m);
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/mem"),
-        (Abstract *)Str_CstrRef(m, "/base/mem.html"));
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
-        (Abstract *)Str_CstrRef(m, "/base/str.html"));
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/io"),
-        (Abstract *)Str_CstrRef(m, "/base/io.html"));
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/suite"),
-        (Abstract *)Str_CstrRef(m, "/base/suite.html"));
+    OrdTable *files = OrdTable_Make(m);
+    TranspFile *tp = NULL;
 
-    OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
+    tp = TranspFile_Make(m);
+    tp->name = StrVec_From(m, Str_CstrRef(m, "mem"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/"));
+    OrdTable_Set(files, (Abstract *)tp->name, (Abstract *)tp);
+
+    tp = TranspFile_Make(m);
+    tp->name = StrVec_From(m, Str_CstrRef(m, "str"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/str/"));
+    OrdTable_Set(files, (Abstract *)tp->name, (Abstract *)tp);
+
+    tp = TranspFile_Make(m);
+    tp->name = StrVec_From(m, Str_CstrRef(m, "str"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/io/"));
+    OrdTable_Set(files, (Abstract *)tp->name, (Abstract *)tp);
+
+    tp = TranspFile_Make(m);
+    tp->name = StrVec_From(m, Str_CstrRef(m, "suite"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/suite/"));
+    OrdTable_Set(files, (Abstract *)tp->name, (Abstract *)tp);
+
+    tp = TranspFile_Make(m);
+    tp->name = StrVec_From(m, Str_CstrRef(m, "termio"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/termio/"));
+    OrdTable_Set(files, (Abstract *)tp->name, (Abstract *)tp);
+
+    OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "files"), (Abstract *)files);
 
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    templ->type.state |= DEBUG;
     Nested *nd = Nested_Make(m);
     Nested_SetRoot(nd, (Abstract *)data);
     i64 total = Stream_Templ(sm, templ, nd);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
-    r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);
+    Abstract *args[] = {
+        (Abstract *)expected,
+        (Abstract *)sm->dest.curs->v,
+        NULL
+    };
 
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
+        "Temple key value test has expected content", 
+        "Temple key value test mismatched, expected content &, have instead &", 
+        NULL);
 
     MemCh_Free(m);
     return r;

@@ -5,42 +5,49 @@ Templ *Templ_Make(MemCh *m, Span *content){
     Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
     templ->type.of = TYPE_TEMPL;
     Iter_Init(&templ->content, content);
+    Iter_Init(&templ->it, Span_Make(m));
     return templ;
 }
 
 i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
-    /*
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         return total;
     }
-    Abstract *item = Iter_Get(&templ->content);
-    Abstract *data = Iter_Current(&templ->data);
+    Abstract *content = Iter_Get(&templ->content);
+    Abstract *stack = Iter_Current(&templ->it);
 
-    if(item->type.of == TYPE_STRVEC){
+    if(content->type.of == TYPE_STRVEC){
         if(templ->type.state & DEBUG){
             Abstract *args[] = {
-                (Abstract *)item,
+                (Abstract *)content,
                 NULL
             };
             Out("^c.StrVec Out: &^0.\n", args);
         }
-        total += ToS(sm, (Abstract *)item, 0, ZERO); 
-    }else if(item->type.of == TYPE_TEMPL_JUMP){
-        TemplJump *jump = (TemplJump*)item;
+        total += ToS(sm, (Abstract *)content, 0, ZERO); 
+    }else if(content->type.of == TYPE_TEMPL_JUMP){
+        if(templ->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)content,
+                NULL
+            };
+            Out("^c.Jump: &^0.\n", args);
+        }
+        TemplJump *jump = (TemplJump*)content;
         if(jump->jumpType.of == FORMAT_CASH_VAR_FOR){
-            Iter *it = (Iter *)as(data, TYPE_ITER); 
+            Iter *it = (Iter *)as(stack, TYPE_ITER); 
             if((Iter_Next(it) & END) == 0){;
-                Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+                Iter_Add(&templ->it, (Abstract *)Iter_Get(it));
             }else{
-                Iter_PrevRemove(&templ->data);
+                Iter_PrevRemove(&templ->it);
             }
         }else if(jump->jumpType.of == FORMAT_CASH_VAR_ENDFOR){
-            Iter_PrevRemove(&templ->data);
-            data = Iter_Get(&templ->data);
-            Iter *it = (Iter *)as(data, TYPE_ITER); 
+            Iter_PrevRemove(&templ->it);
+            stack = Iter_Get(&templ->it);
+            Iter *it = (Iter *)as(stack, TYPE_ITER); 
             if((Iter_Next(it) & END) == 0){
-                Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+                Iter_Add(&templ->it, (Abstract *)Iter_Get(it));
                 Iter_GetByIdx(&templ->content, jump->destIdx);
             }
         }else{
@@ -51,31 +58,66 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
             Out("^r.Jump not implemented @^0.\n", args);
             exit(1);
         }
-    }else if(item->type.of == TYPE_WRAPPED_PTR){
-        Single *sg = (Single *)item;
+    }else if(content->type.of == TYPE_WRAPPED_PTR){
+        Single *sg = (Single *)content;
         if(sg->objType.of == FORMAT_CASH_INDENT){
             templ->indent = ((StrVec *)sg->val.ptr)->total;
             total += ToS(sm, (Abstract *)sg->val.ptr, 0, ZERO); 
         }else if(sg->objType.of == FORMAT_CASH_VAR_FOR){
-            Iter *it = From_GetIter(sm->m, data, sg->val.ptr);
-            Iter_Add(&templ->data,
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.For: &^0.\n", args);
+            }
+            Iter *it = From_GetIter(sm->m, (Abstract *)templ->data, sg->val.ptr);
+            Iter_Add(&templ->it,
                 (Abstract *)it);
             if((Iter_Next(it) & END) == 0){
-                Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+                Iter_Add(&templ->it, (Abstract *)Iter_Get(it));
             }
             Iter_Set(&templ->content,
                 TemplJump_Make(sm->m, sg->objType.of, templ->content.idx, NEGATIVE));
         }else if(sg->objType.of == FORMAT_CASH_VAR_KEYVALUE){
-            Abstract *value = From_Name((Abstract *)data);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.KeyValue: &^0.\n", args);
+            }
+            Abstract *value = From_Name((Abstract *)stack);
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(sg->objType.of == FORMAT_CASH_VAR_NAMEVALUE){
-            Abstract *value = From_Value((Abstract *)data);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.NameValue: &^0.\n", args);
+            }
+            Abstract *value = From_Value((Abstract *)stack);
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(sg->objType.of == FORMAT_CASH_VAR_KEY){
-            Abstract *value = From_Key(data, sg->val.ptr);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.Key: &^0.\n", args);
+            }
+            Abstract *value = From_Key((Abstract *)templ->data, sg->val.ptr);
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(sg->objType.of > _FORMAT_CASH_VAR_ENDINGS && 
-            item->type.of < _FORMAT_CASH_VAR_ENDINGS_END){
+                content->type.of < _FORMAT_CASH_VAR_ENDINGS_END){
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.Endings: &^0.\n", args);
+            }
             Iter _it;
             memcpy(&_it, &templ->content, sizeof(Iter));
             i32 idx = templ->content.idx;
@@ -111,26 +153,24 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     if(templ->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)templ,
-            (Abstract *)data,
-            (Abstract *)Iter_Current(&templ->data),
-            (Abstract *)item,
+            (Abstract *)stack,
+            (Abstract *)Iter_Current(&templ->it),
+            (Abstract *)content,
             NULL
         };
-        Out("Templ: ^p.&^0.\nData: ^p.@^0.\nDataItem: ^p.&^0.\nItem:^y.&^0\n\n", args);
+        Out("Templ: ^p.&^0.\nStack: ^p.@^0.\nDataItem: ^p.&^0.\nContent:^y.&^0\n\n", args);
     }
 
-    */
     return total;
 }
 
 i64 Stream_Templ(Stream *sm, Templ *templ, Nested *nd){
     i64 total = 0;
-    /*
     i16 g = 0;
+    templ->data = nd;
     while((total = Templ_ToSCycle(templ, sm, total)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(&g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }
-    */
     return total;
 }

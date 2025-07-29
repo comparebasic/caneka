@@ -21,6 +21,26 @@ static char *statusCstr(word status){
     }
 }
 
+status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *args[]){
+    if(!condition){
+        Out("^r.Fail: ", NULL);
+    }else{
+        Out("^g.Pass: ", NULL);
+    }
+    if(!condition){
+        Fmt(OutStream, fmtError, args);
+        Stream_Bytes(OutStream, (byte *)"\n", 1);
+    }else{
+        /*
+        Stream_Bytes(OutStream, (byte *)"\x1b[2K\r", 5);
+        */
+        Fmt(OutStream, fmtSuccess, args);
+        Stream_Bytes(OutStream, (byte *)"\n", 1);
+    }
+    return condition ? SUCCESS : ERROR;
+}
+
+
 status Test(boolean condition, char *fmt, Abstract *args[]){
     if(!condition){
         Out("^r.Fail: ", NULL);

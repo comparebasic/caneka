@@ -5,9 +5,9 @@ enum transp_file_flags {
 typedef struct transp_file {
     Type type;
     StrVec *name;
-    StrVec *fullName;
     StrVec *src;
     StrVec *dest;
+    StrVec *local;
 } TranspFile;
 
 TranspFile *TranspFile_Make(MemCh *m);

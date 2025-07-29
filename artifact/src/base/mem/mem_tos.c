@@ -159,7 +159,7 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
             }else if(item != NULL && item->type.of == TYPE_MEMSLAB){
                 total += ToS(sm, it.value, 0, (flags & ~DEBUG));
             }else{
-                total += ToS(sm, it.value, 0, (flags & ~MORE));
+                total += ToS(sm, it.value, 0, flags);
             }
             if((it.type.state & LAST) == 0 && (flags & MORE)){
                 total += Stream_Bytes(sm, (byte *)", ", 2);

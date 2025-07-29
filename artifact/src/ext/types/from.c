@@ -13,13 +13,22 @@ Abstract *From_Key(Abstract *data, Abstract *key){
         }
     }else if(data->type.of == TYPE_TABLE){
         return Table_Get((Table *)data, key);
+    }else if(data->type.of == TYPE_NESTED){
+        Nested *nd = (Nested *)data;
+        return Nested_GetByKey(nd, key);
     }
     return NULL;
 }
 
 Iter *From_GetIter(MemCh *m, Abstract *data, Abstract *key){
+    Abstract *args[] = {
+        (Abstract *)data,
+        (Abstract *)key,
+        NULL
+    };
+    Out("^c.GetIter @ key @\n", args);
     if(data == NULL){
-        return NULL;
+        goto err;
     }
 
     if(key == NULL){
@@ -30,6 +39,8 @@ Iter *From_GetIter(MemCh *m, Abstract *data, Abstract *key){
             p = (Span *)data;
         }else if(data->type.of == TYPE_ORDTABLE){
             p = ((OrdTable *)data)->order;
+        }else if(data->type.of == TYPE_NESTED){
+            return From_GetIter(m, Nested_Get((Nested *)data), NULL);
         }
 
         if(p != NULL){
@@ -43,8 +54,13 @@ Iter *From_GetIter(MemCh *m, Abstract *data, Abstract *key){
             }
         }else if(data->type.of == TYPE_TABLE){
             return From_GetIter(m, Table_Get((Table *)data, key), NULL);
+        }else if(data->type.of == TYPE_NESTED){
+            return From_GetIter(m, Nested_GetByKey((Nested *)data, key), NULL);
         }
     }
+err:
+    Error(m, data, FUNCNAME, FILENAME, LINENUMBER,
+        "Unable to find iterator for data @ using key @\n", args);
     return NULL;
 }
 

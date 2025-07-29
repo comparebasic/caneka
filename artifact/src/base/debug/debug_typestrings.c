@@ -12,14 +12,14 @@ char *TypeStrings[] = {
     "TYPE_I16",
     "TYPE_BYTE",
     "TYPE_I8",
-    "_END_TYPE_RAW",
+    "_TYPE_RAW_END",
     "TYPE_BUILDCTX",
     "TYPE_ABSTRACT",
     "TYPE_WRAPPED",
     "TYPE_WRAPPED_FUNC",
     "TYPE_WRAPPED_DO",
-    "TYPE_WRAPPED_UTIL",
     "TYPE_WRAPPED_MEMCOUNT",
+    "TYPE_WRAPPED_UTIL",
     "TYPE_WRAPPED_I64",
     "TYPE_WRAPPED_I32",
     "TYPE_WRAPPED_I16",
@@ -138,11 +138,11 @@ char *TypeStrings[] = {
     "FORMAT_CASH_VAR",
     "FORMAT_CASH_VAR_KEY",
     "FORMAT_CASH_VAR_IDX",
+    "FORMAT_CASH_VAR_KEYVALUE",
+    "FORMAT_CASH_VAR_NAMEVALUE",
     "FORMAT_CASH_VAR_FOR",
     "FORMAT_CASH_VAR_IF",
     "FORMAT_CASH_VAR_IFNOT",
-    "FORMAT_CASH_VAR_KEYVALUE",
-    "FORMAT_CASH_VAR_NAMEVALUE",
     "_FORMAT_CASH_VAR_ENDINGS",
     "FORMAT_CASH_VAR_ENDFOR",
     "FORMAT_CASH_VAR_ENDIF",
@@ -224,6 +224,7 @@ char *TypeStrings[] = {
     "KVE_END",
     "_KVE_END",
     "_TYPE_APPS_END",
+    NULL
 };
 
 char *Type_ToChars(cls type){
