@@ -40,23 +40,6 @@ static inline Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cl
     return x;
 }
 
-static inline Abstract *_asIfcOffset(char *func, char *file, i32 line, Abstract *x, cls type, word offset){
-    if(x == NULL){
-        Fatal(func, file, line, "Cast from NULL", NULL);
-    }else{
-        if(!Ifc_Match(x->type.of-HTYPE_LOCAL, type)){
-            Abstract *args[] = {
-                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
-                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
-                NULL
-            };
-            Fatal(func, file, line, "Cast from Abstract mismatched interface with offset expecting '$', have '$'", args);
-            return NULL;
-        }
-    }
-    return x;
-}
 #define as(x, t) _as(FUNCNAME, FILENAME, LINENUMBER, (x), (t))
 #define asIfc(x, t) _asIfc(FUNCNAME, FILENAME, LINENUMBER, (x), (t))
-#define asIfcOffset(x, t) _asIfcOffset(FUNCNAME, FILENAME, LINENUMBER, (x), (t))
 #endif
