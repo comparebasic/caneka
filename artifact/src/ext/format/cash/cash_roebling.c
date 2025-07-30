@@ -67,7 +67,7 @@ static PatCharDef varEndForDef[] = {
 static PatCharDef varForDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, ':' ,':'}, 
+    {PAT_TERM|PAT_INVERT_CAPTURE, ':' ,':'},
     {PAT_KO|PAT_KO_TERM, '}', '}'},
     patText,
     {PAT_END, 0, 0}

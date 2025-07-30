@@ -11,8 +11,8 @@
     <nav>
         <ul><a href="/" class="active">Home</a></ul>
         <ul><span class="fo-link">Links</span>
-            <ul>${:files}
-                <li><a href="${.dest}">${.fullName}</a></li>${/:}
+            <ul>${:menu-items}
+                <li><a href="$@">$_</a></li>${/:}
             </ul>
         </ul>
     </nav>

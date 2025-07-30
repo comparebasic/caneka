@@ -1,10 +1,10 @@
 typedef struct templ {
     Type type;
     i32 indent;
-    Iter it;
     Iter content;
-    struct nested *data;
+    Iter data;
 } Templ;
 
-Templ *Templ_Make(MemCh *m, Span *content);
-i64 Stream_Templ(Stream *sm, Templ *templ, struct nested *data);
+Templ *Templ_Make(MemCh *m, Span *content, OrdTable *data);
+i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total);
+i64 Templ_ToS(Templ *templ, Stream *sm);
