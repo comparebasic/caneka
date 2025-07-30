@@ -141,14 +141,14 @@ static status var(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mess = rbl->mess;
-    CashCtx *ctx = (CashCtx*)as(rbl->source, TYPE_CASH_CTX);
+    TemplCtx *ctx = (TemplCtx*)as(rbl->source, TYPE_TEMPL_CTX);
     if(rbl->mess->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
             NULL
         };
-        Out("^c. Cash Capture ^E0.$^ec./@^0.\n", args);
+        Out("^c. Templ Capture ^E0.$^ec./@^0.\n", args);
     }
     if(captureKey == FORMAT_CASH_TEXT){
         Iter_Add(&ctx->it, v);
@@ -158,7 +158,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     return SUCCESS;
 }
 
-Roebling *Cash_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source){
+Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source){
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_CASH_TEXT));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)text));

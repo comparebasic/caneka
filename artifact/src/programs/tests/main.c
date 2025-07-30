@@ -221,15 +221,15 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Cash Tests",
-        Cash_Tests,
-        "Cash tests of basic value templating.",
+        "TemplCtx Tests",
+        TemplCtx_Tests,
+        "TemplCtx tests of basic value templating.",
         FEATURE_COMPLETE,
     },
     {
-        "CashTempl Tests",
-        CashTempl_Tests,
-        "Cash tests of basic logic templating.",
+        "TemplCtx Template Tests",
+        TemplCtxTempl_Tests,
+        "TemplCtx tests of basic logic templating.",
         FEATURE_COMPLETE,
     },
     {
@@ -253,13 +253,13 @@ static TestSet _Tests[] = {
     {
         "Templ Tests",
         Templ_Tests,
-        "Testing templating a Cash template.",
+        "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
     {
         "TemplLogic Tests",
         TemplLogic_Tests,
-        "Testing templating logic tags in a Cash template.",
+        "Testing templating logic tags in a few loops over variables.",
         FEATURE_COMPLETE,
     },
     /*

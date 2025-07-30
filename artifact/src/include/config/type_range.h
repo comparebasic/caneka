@@ -112,7 +112,7 @@ enum types {
     TYPE_FMT_CTX,
     TYPE_OSET_DEF,
     TYPE_CASH,
-    TYPE_CASH_CTX,
+    TYPE_TEMPL_CTX,
     TYPE_TEMPL,
     TYPE_TEMPL_JUMP,
     TYPE_EC_KEY,

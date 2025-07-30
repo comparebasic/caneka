@@ -245,13 +245,13 @@ static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 CashItem_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 TemplItem_Print(Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[] = {
         (Abstract *)Type_ToStr(sm->m, type),
         (Abstract *)a,
         NULL
     };
-    return Fmt(sm, "CashItem:$<@>", args);
+    return Fmt(sm, "TemplItem:$<@>", args);
 }
 
 static i64 Frame_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -362,12 +362,12 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
     r |= Lookup_Add(m, lk, TYPE_ORDTABLE, (void *)OrdTable_Print);
-    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEY, (void *)CashItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_FOR, (void *)CashItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEY, (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_FOR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEYVALUE, 
-        (void *)CashItem_Print);
+        (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_NAMEVALUE, 
-        (void *)CashItem_Print);
+        (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTED, (void *)Nested_Print);
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
     return r;
