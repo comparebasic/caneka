@@ -37,6 +37,13 @@ static i64 Wrapped_Ptr(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)sg->val.ptr,
             NULL
         };
+        return Fmt(sm, "Wptr\\<$ &>", args);
+    }else if(flags & MORE){
+        Abstract *args[] = {
+            (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->objType.of)),
+            (Abstract *)sg->val.ptr,
+            NULL
+        };
         return Fmt(sm, "Wptr\\<$ @>", args);
     }else{
         Abstract *args[] = {

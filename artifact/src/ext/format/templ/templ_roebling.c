@@ -8,19 +8,21 @@ static PatCharDef textDef[] = {
 };
 
 static PatCharDef varDef[] = {
-    {PAT_TERM, '$' ,'$'},
-    {PAT_TERM, '{', '{'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '$' ,'$'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '{', '{'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef varCloseDef[] = {
-    {PAT_TERM, '}', '}'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef varBodyDef[] = {
-    {PAT_KO|PAT_INVERT_CAPTURE, '/', '/'},{PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
-    {PAT_DROPOUT, '@', '@'}, {PAT_DROPOUT, '#', '#'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '}', '}'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'}, 
+    {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '?', '?'},
+    {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'}, {PAT_KO|PAT_INVERT_CAPTURE, '/', '/'},
+        {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '.', '.'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -35,42 +37,15 @@ static PatCharDef varAttSepDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varEndIfDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
-    {PAT_TERM, '/' ,'/'},
-    {PAT_TERM, '?' ,'?'},
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
-    {PAT_END, 0, 0}
-};
-
 static PatCharDef varIfDef[] = {
     {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_TERM|PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
     {PAT_TERM, '?' ,'?'},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varEndForDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '/' ,'/'},
-    {PAT_TERM, ':' ,':'},
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
-    {PAT_END, 0, 0}
-};
-
 static PatCharDef varForDef[] = {
     {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_TERM|PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, ':' ,':'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef varEndIfNotDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
-    {PAT_TERM, '/' ,'/'},
-    {PAT_TERM, '!' ,'!'},
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, ':' ,':'},
     {PAT_END, 0, 0}
 };
 
@@ -102,36 +77,44 @@ static status var(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
+    Match *mt = NULL;
     r |= Roebling_SetPattern(rbl,
         varDef, FORMAT_TEMPL_VAR, FORMAT_TEMPL_VAR_BODY);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
 
     return r;
 }
 
 static status varBody(MemCh *m, Roebling *rbl){
     status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    Match *mt = NULL;
     r |= Roebling_SetPattern(rbl,
         varCloseDef, FORMAT_TEMPL_VAR_CLOSE, FORMAT_TEMPL_TEXT);
-    r |= Roebling_SetPattern(rbl,
-        varEndIfDef, FORMAT_TEMPL_VAR_ENDIF, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varEndIfNotDef, FORMAT_TEMPL_VAR_ENDIFNOT, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varEndForDef, FORMAT_TEMPL_VAR_ENDFOR, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varIfDef, FORMAT_TEMPL_VAR_ENDFOR, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varIfNotDef, FORMAT_TEMPL_VAR_IFNOT, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varForDef, FORMAT_TEMPL_VAR_FOR, FORMAT_TEMPL_VAR_BODY);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+
     r |= Roebling_SetPattern(rbl,
         varBodyDef, FORMAT_TEMPL_VAR_BODY, FORMAT_TEMPL_VAR_BODY);
     r |= Roebling_SetPattern(rbl,
         varPathSepDef, FORMAT_TEMPL_VAR_PATH_SEP, FORMAT_TEMPL_VAR_BODY);
     r |= Roebling_SetPattern(rbl,
+        varForDef, FORMAT_TEMPL_VAR_FOR, FORMAT_TEMPL_VAR_BODY);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+    r |= Roebling_SetPattern(rbl,
         varAttSepDef, FORMAT_TEMPL_VAR_ATT_SEP, FORMAT_TEMPL_VAR_BODY);
+
+    /*
+    r |= Roebling_SetPattern(rbl,
+        varIfDef, FORMAT_TEMPL_VAR_ENDFOR, FORMAT_TEMPL_VAR_BODY);
+    r |= Roebling_SetPattern(rbl,
+        varIfNotDef, FORMAT_TEMPL_VAR_IFNOT, FORMAT_TEMPL_VAR_BODY);
     r |= Roebling_SetPattern(rbl,
         varIdxDef, FORMAT_TEMPL_VAR_IDX, FORMAT_TEMPL_VAR_BODY);
+    */
     return r;
 }
 
@@ -149,36 +132,42 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     if(captureKey == FORMAT_TEMPL_TEXT){
         Iter_Add(&ctx->it, v);
     }else{
-        if(captureKey >= FORMAT_TEMPL_VAR_BODY){
-            Abstract *current = Iter_Current(&ctx->it);
-            if(current != NULL && current->type.of == TYPE_WRAPPED_PTR){
-                Single *sg = (Single *)current;
-                if(sg->objType.of >= FORMAT_TEMPL_VAR_BODY){
-                    word flags = ZERO;
-                    if(captureKey == FORMAT_TEMPL_VAR_PATH_SEP){
-                        flags = MORE;
-                    }else if(captureKey == FORMAT_TEMPL_VAR_PATH_SEP){
-                        flags = LAST;
-                    }
-                    if(flags != ZERO){
-                        Iter it;
-                        Iter_Init(&it, v->p);
-                        while((Iter_Next(&it) & END) == 0){
-                            Str *s = (Str *)Iter_Get(&it);
-                            s->type.state |= flags;
-                        }
-                    }
-                    StrVec_AddVec((StrVec *)sg->val.ptr, v);
+        Abstract *current = Iter_Current(&ctx->it);
+        Single *sg = (Single *)current;
+
+        if(captureKey > _FORMAT_TEMPL_VAR_ENDINGS_END &&
+                captureKey < _FORMAT_TEMPL_LOGIC){
+            word flags = ZERO;
+            if(captureKey == FORMAT_TEMPL_VAR_PATH_SEP){
+                flags = MORE;
+            }else if(captureKey == FORMAT_TEMPL_VAR_ATT_SEP){
+                flags = LAST;
+            }
+            if(flags != ZERO){
+                Iter it;
+                Iter_Init(&it, v->p);
+                while((Iter_Next(&it) & END) == 0){
+                    Str *s = (Str *)Iter_Get(&it);
+                    s->type.state |= flags;
                 }
-                if(captureKey > _FORMAT_TEMPL_LOGIC){
-                    sg->objType.of = captureKey;
-                }else{
-                    sg->objType.of = FORMAT_TEMPL_VAR;
-                }
-                return SUCCESS;
             }
         }
-        Iter_Add(&ctx->it, Ptr_Wrapped(rbl->m, v, captureKey));
+
+        if(current->type.of == TYPE_WRAPPED_PTR && \
+                captureKey > _FORMAT_TEMPL_VAR_ENDINGS_END &&
+                captureKey < _FORMAT_TEMPL_LOGIC){
+            StrVec_AddVec((StrVec *)sg->val.ptr, v);
+            return SUCCESS;
+        }else if(v->total > 0 || captureKey == FORMAT_TEMPL_VAR_CLOSE){
+            sg = Ptr_Wrapped(rbl->m, v, captureKey);
+            Iter_Add(&ctx->it, (Abstract *)sg);
+        }
+
+        if(captureKey > _FORMAT_TEMPL_LOGIC){
+            sg->objType.of = captureKey;
+        }else if(sg->objType.of < _FORMAT_TEMPL_LOGIC){
+            sg->objType.of = FORMAT_TEMPL_VAR;
+        }
     }
     return SUCCESS;
 }

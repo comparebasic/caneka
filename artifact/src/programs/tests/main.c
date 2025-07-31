@@ -284,7 +284,26 @@ static TestSet _Tests[] = {
     },
 };
 
+/*
 TestSet *Tests = _Tests;
+*/
+
+TestSet _soloTest[] = { 
+    {
+        "TemplCtx Tests",
+        TemplCtx_Tests,
+        "TemplCtx tests of basic value templating.",
+        FEATURE_COMPLETE,
+    },
+    {
+        NULL,
+        NULL,
+        NULL,
+        0,
+    },
+};
+
+TestSet *Tests = _soloTest;
 
 i32 main(int argc, char **argv){
     if(argc > 1){

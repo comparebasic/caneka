@@ -37,7 +37,7 @@ status TemplCtx_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
     Str *s = NULL; 
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/header.html"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "examples/example.templ"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);
@@ -50,6 +50,12 @@ status TemplCtx_Tests(MemCh *gm){
     r |= Test(ctx->type.state & SUCCESS,
             "Roebling finished with state SUCCESS with keys", 
         NULL);
+
+    Abstract *args[] = {
+        (Abstract *)ctx->it.p,
+        NULL
+    };
+    Out("^p.&^0.\n", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

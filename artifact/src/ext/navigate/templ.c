@@ -13,6 +13,7 @@ Templ *Templ_Make(MemCh *m, Span *content, OrdTable *data){
 }
 
 i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
+    /*
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         return total;
@@ -124,6 +125,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         };
         Out("Templ: ^p.&^0.\nData: ^p.@^0.\nDataItem: ^p.&^0.\nItem:^y.&^0\n\n", args);
     }
+    */
 
     return total;
 }

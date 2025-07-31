@@ -35,7 +35,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                     Guard_Reset(&rbl->guard);
 
                     DebugStack_Pop();
-                    if(rbl->type.state & DEBUG){
+                    if(mt->type.state & DEBUG){
                         Abstract *args[] = {
                             (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
                             (Abstract *)rbl,
@@ -46,7 +46,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                     return rbl->type.state;
                 }
             }
-            if(rbl->type.state & DEBUG){
+            if(mt->type.state & DEBUG){
                 Abstract *args[] = {
                     (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
                     (Abstract *)rbl,
