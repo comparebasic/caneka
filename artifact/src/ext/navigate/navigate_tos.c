@@ -362,12 +362,8 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
     r |= Lookup_Add(m, lk, TYPE_ORDTABLE, (void *)OrdTable_Print);
-    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEY, (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_FOR, (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_KEYVALUE, 
-        (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_CASH_VAR_NAMEVALUE, 
-        (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR_FOR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTED, (void *)Nested_Print);
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
     return r;

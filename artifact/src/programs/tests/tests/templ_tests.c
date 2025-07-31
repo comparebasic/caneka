@@ -44,6 +44,7 @@ status TemplCtx_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
+    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,

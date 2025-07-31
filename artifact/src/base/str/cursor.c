@@ -163,7 +163,7 @@ status Cursor_Add(Cursor *curs, Str *s){
 
 status Cursor_Setup(Cursor *curs, StrVec *v){
     curs->type.of = TYPE_CURSOR;
-    curs->type.state = READY;
+    curs->type.state &= DEBUG;
     curs->slot = 0;
     curs->offset = 0;
     curs->v = v;

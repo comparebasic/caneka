@@ -35,13 +35,6 @@ static PatCharDef varAttSepDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varForDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
-    {PAT_TERM, ':' ,':'},
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
-    {PAT_END, 0, 0}
-};
-
 static PatCharDef varEndIfDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '$' ,'$'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
@@ -116,8 +109,9 @@ static status var(MemCh *m, Roebling *rbl){
 }
 
 static status varBody(MemCh *m, Roebling *rbl){
+    status r = READY;
     r |= Roebling_SetPattern(rbl,
-        varCloseDef, FORMAT_TEMPL_VAR_KEYVALUE, FORMAT_TEMPL_TEXT);
+        varCloseDef, FORMAT_TEMPL_VAR_CLOSE, FORMAT_TEMPL_TEXT);
     r |= Roebling_SetPattern(rbl,
         varEndIfDef, FORMAT_TEMPL_VAR_ENDIF, FORMAT_TEMPL_VAR_BODY);
     r |= Roebling_SetPattern(rbl,
@@ -138,6 +132,7 @@ static status varBody(MemCh *m, Roebling *rbl){
         varAttSepDef, FORMAT_TEMPL_VAR_ATT_SEP, FORMAT_TEMPL_VAR_BODY);
     r |= Roebling_SetPattern(rbl,
         varIdxDef, FORMAT_TEMPL_VAR_IDX, FORMAT_TEMPL_VAR_BODY);
+    return r;
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){

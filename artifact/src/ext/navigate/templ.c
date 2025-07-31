@@ -31,14 +31,14 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
     }else if(item->type.of == TYPE_TEMPL_JUMP){
         TemplJump *jump = (TemplJump*)item;
-        if(jump->jumpType.of == FORMAT_CASH_VAR_FOR){
+        if(jump->jumpType.of == FORMAT_TEMPL_VAR_FOR){
             Iter *it = (Iter *)as(data, TYPE_ITER); 
             if((Iter_Next(it) & END) == 0){;
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
             }else{
                 Iter_PrevRemove(&templ->data);
             }
-        }else if(jump->jumpType.of == FORMAT_CASH_VAR_ENDFOR){
+        }else if(jump->jumpType.of == FORMAT_TEMPL_VAR_ENDFOR){
             Iter_PrevRemove(&templ->data);
             data = Iter_Get(&templ->data);
             Iter *it = (Iter *)as(data, TYPE_ITER); 
@@ -56,10 +56,10 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         }
     }else if(item->type.of == TYPE_WRAPPED_PTR){
         Single *sg = (Single *)item;
-        if(sg->objType.of == FORMAT_CASH_INDENT){
+        if(sg->objType.of == FORMAT_TEMPL_INDENT){
             templ->indent = ((StrVec *)sg->val.ptr)->total;
             total += ToS(sm, (Abstract *)sg->val.ptr, 0, ZERO); 
-        }else if(sg->objType.of == FORMAT_CASH_VAR_FOR){
+        }else if(sg->objType.of == FORMAT_TEMPL_VAR_FOR){
             Iter *it = From_GetIter(sm->m, data, sg->val.ptr);
             Iter_Add(&templ->data,
                 (Abstract *)it);
@@ -68,21 +68,24 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
             }
             Iter_Set(&templ->content,
                 TemplJump_Make(sm->m, sg->objType.of, templ->content.idx, NEGATIVE));
-        }else if(sg->objType.of == FORMAT_CASH_VAR_KEYVALUE){
-            Abstract *value = From_Name((Abstract *)data);
-            total += ToS(sm, (Abstract *)value, 0, ZERO); 
-        }else if(sg->objType.of == FORMAT_CASH_VAR_NAMEVALUE){
-            Abstract *value = From_Value((Abstract *)data);
-            total += ToS(sm, (Abstract *)value, 0, ZERO); 
-        }else if(sg->objType.of == FORMAT_CASH_VAR_KEY){
-            Abstract *value = From_Key(data, sg->val.ptr);
-            total += ToS(sm, (Abstract *)value, 0, ZERO); 
-        }else if(sg->objType.of > _FORMAT_CASH_VAR_ENDINGS && 
-            item->type.of < _FORMAT_CASH_VAR_ENDINGS_END){
+        }else if(sg->objType.of == FORMAT_TEMPL_VAR){
+            printf("templ var\n");
+            fflush(stdout);
+        }else if(sg->objType.of == FORMAT_TEMPL_VAR_BODY){
+            printf("templ var body\n");
+            fflush(stdout);
+        }else if(sg->objType.of == FORMAT_TEMPL_VAR_PATH_SEP){
+            printf("templ var path\n");
+            fflush(stdout);
+        }else if(sg->objType.of == FORMAT_TEMPL_VAR_ATT_SEP){
+            printf("templ var att\n");
+            fflush(stdout);
+        }else if(sg->objType.of > _FORMAT_TEMPL_VAR_ENDINGS && 
+            item->type.of < _FORMAT_TEMPL_VAR_ENDINGS_END){
             Iter _it;
             memcpy(&_it, &templ->content, sizeof(Iter));
             i32 idx = templ->content.idx;
-            cls lookFor = sg->objType.of - (FORMAT_CASH_VAR_ENDIF - FORMAT_CASH_VAR_IF);
+            cls lookFor = sg->objType.of - (FORMAT_TEMPL_VAR_ENDIF - FORMAT_TEMPL_VAR_IF);
 
             TemplJump *jumpFrom = TemplJump_Make(sm->m, sg->objType.of, 
                 templ->content.idx, -1);

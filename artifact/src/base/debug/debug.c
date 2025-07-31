@@ -3,6 +3,7 @@
 
 Stream *DebugOut = NULL;
 MemCh *_debugM = NULL;
+Lookup *TypeStringRanges = NULL;
 
 status Debug_Init(MemCh *m){
     if(_debugM == NULL){
@@ -10,6 +11,9 @@ status Debug_Init(MemCh *m){
     }
     if(DebugOut == NULL){
         DebugOut = Stream_MakeToFd(m, 0, NULL, 0);
+    }
+    if(TypeStringRanges == NULL){
+        TypeStringRanges = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
     }
     m->type.range++;
     return NOOP;

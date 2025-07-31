@@ -198,7 +198,7 @@ static i64 Abstract_Print(Stream *sm, Abstract *a, cls type, word flags){
 }
 
 static i64 Single_Print(Stream *sm, Abstract *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_SINGLE);
+    Single *sg = (Single *)as(a, TYPE_WRAPPED);
     if(flags & (DEBUG|MORE)){
         Abstract *args[] = {
             (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->type.of)),
@@ -213,7 +213,7 @@ static i64 Single_Print(Stream *sm, Abstract *a, cls type, word flags){
 status Util_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);
-    r |= Lookup_Add(m, lk, TYPE_SINGLE, (void *)Single_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)WrappedI64_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I32, (void *)WrappedI32_Print);
