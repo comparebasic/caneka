@@ -12,7 +12,7 @@ boolean StrVec_ExactStrVec(StrVec *a, StrVec *b){
     Iter itA;
     Iter_Init(&itA, a->p);
     Iter itB;
-    Iter_Init(&itB, a->p);
+    Iter_Init(&itB, b->p);
     while(((Iter_Next(&itA)|Iter_Next(&itB)) & END) == 0){
         Str *sA = (Str *)Iter_Get(&itA);
         Str *sB = (Str *)Iter_Get(&itB);

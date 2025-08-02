@@ -44,18 +44,77 @@ status TemplCtx_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
-    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
             "Roebling finished with state SUCCESS with keys", 
         NULL);
 
+    Span *expected = Span_Make(m);
+    char *cstr = "<ul>\n    ";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    StrVec *v = StrVec_From(m, s);
+    Span_Add(expected, (Abstract *)v);
+
+    StrVec *var = StrVec_Make(m);
+    cstr = "items";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    StrVec_Add(var, s);
+    StrVec_Add(var, Str_Ref(m, (byte *)".", 1, 2, MORE));
+    cstr = "menu";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    StrVec_Add(var, s);
+    Single *sg = Ptr_Wrapped(m, (Abstract *)var, FORMAT_TEMPL_VAR_FOR); 
+    Span_Add(expected, (Abstract *)sg);
+
+    cstr = "\n        <li><a href=\"";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    v = StrVec_From(m, s);
+    Span_Add(expected, (Abstract *)v);
+
+    var = StrVec_Make(m);
+    StrVec_Add(var, Str_Ref(m, (byte *)"*", 1, 2, LAST));
+    cstr = "fullName";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    StrVec_Add(var, s);
+    sg = Ptr_Wrapped(m, (Abstract *)var, FORMAT_TEMPL_VAR); 
+    Span_Add(expected, (Abstract *)sg);
+
+    cstr = "\">";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    v = StrVec_From(m, s);
+    Span_Add(expected, (Abstract *)v);
+
+    var = StrVec_Make(m);
+    StrVec_Add(var, Str_Ref(m, (byte *)"*", 1, 2, LAST));
+    cstr = "name";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    StrVec_Add(var, s);
+    sg = Ptr_Wrapped(m, (Abstract *)var, FORMAT_TEMPL_VAR); 
+    Span_Add(expected, (Abstract *)sg);
+
+    cstr = "</a>\n    ";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    v = StrVec_From(m, s);
+    Span_Add(expected, (Abstract *)v);
+
+    sg = Ptr_Wrapped(m, (Abstract *)StrVec_Make(m), FORMAT_TEMPL_LOGIC_END); 
+    Span_Add(expected, (Abstract *)sg);
+
+    cstr = "\n</ul>\n";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    v = StrVec_From(m, s);
+    Span_Add(expected, (Abstract *)v);
+
     Abstract *args[] = {
+        (Abstract *)expected,
         (Abstract *)ctx->it.p,
         NULL
     };
-    Out("^p.&^0.\n", args);
+
+    r |= TestShow(Exact((Abstract *)expected, (Abstract *)ctx->it.p), 
+        "Expected content found in example templ", 
+        "Mismatch in content found in example templ, expected:\n&\nhave:\n &", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

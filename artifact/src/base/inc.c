@@ -27,6 +27,7 @@
 #include "./sequence/lookup.c"
 #include "./sequence/sequence_tos.c"
 #include "./sequence/sequence_eq.c"
+#include "./sequence/sequence_exact.c"
 #include "./sequence/table.c"
 #include "./sequence/path.c"
 #include "./str/cursor.c"
@@ -58,3 +59,4 @@
 #include "./util/time.c"
 #include "./util/util_tos.c"
 #include "./util/util_eq.c"
+#include "./util/util_exact.c"
