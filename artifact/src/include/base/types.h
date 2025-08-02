@@ -1,5 +1,6 @@
 #include "types/clone.h"
 #include "types/equals.h"
+#include "types/exact.h"
 #include "types/ifc.h"
 #include "types/init.h"
 #include "types/combine.h"

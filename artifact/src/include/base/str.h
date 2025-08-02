@@ -6,6 +6,7 @@
 #include "str/stream.h"
 #include "str/streams.h"
 #include "str/str_equals.h"
+#include "str/str_exact.h"
 #include "str/fmt.h"
 #include "str/tos.h"
 #include "str/str_tos.h"

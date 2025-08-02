@@ -21,19 +21,19 @@ static PatCharDef varCloseDef[] = {
 static PatCharDef varBodyDef[] = {
     {PAT_KO|PAT_INVERT_CAPTURE, '}', '}'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'}, 
     {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '?', '?'},
-    {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'}, {PAT_KO|PAT_INVERT_CAPTURE, '/', '/'},
-        {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '.', '.'},
+    {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
+        {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
     patText,
     {PAT_END, 0, 0}
 };
 
 static PatCharDef varPathSepDef[] = {
-    {PAT_TERM, '/' ,'/'},
+    {PAT_TERM, '.' ,'.'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef varAttSepDef[] = {
-    {PAT_TERM, '.' ,'.'},
+    {PAT_TERM, '*' ,'*'},
     {PAT_END, 0, 0}
 };
 
@@ -129,45 +129,40 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         };
         Out("^c. Templ Capture ^E0.$^ec./@^0.\n", args);
     }
-    if(captureKey == FORMAT_TEMPL_TEXT){
+    if(captureKey == FORMAT_TEMPL_TEXT || captureKey == FORMAT_TEMPL_INDENT){
         Iter_Add(&ctx->it, v);
-    }else{
-        Abstract *current = Iter_Current(&ctx->it);
-        Single *sg = (Single *)current;
-
-        if(captureKey > _FORMAT_TEMPL_VAR_ENDINGS_END &&
-                captureKey < _FORMAT_TEMPL_LOGIC){
-            word flags = ZERO;
-            if(captureKey == FORMAT_TEMPL_VAR_PATH_SEP){
-                flags = MORE;
-            }else if(captureKey == FORMAT_TEMPL_VAR_ATT_SEP){
-                flags = LAST;
+    }else if(captureKey == FORMAT_TEMPL_VAR){
+        Single *sg = Ptr_Wrapped(rbl->m, StrVec_Make(rbl->m), captureKey);
+        Iter_Add(&ctx->it, (Abstract *)sg);
+    }else if(captureKey == FORMAT_TEMPL_VAR_CLOSE){
+        Single *sg = (Single *)Iter_Current(&ctx->it);
+        StrVec *v = (StrVec *)sg->val.ptr;
+        if(v->total == 0){
+            sg->objType.of = FORMAT_TEMPL_LOGIC_END;
+        }
+    }else if(captureKey > _FORMAT_TEMPL_VAR_BODY_START &&
+            captureKey < _FORMAT_TEMPL_VAR_BODY_END){
+        word flags = ZERO;
+        if(captureKey == FORMAT_TEMPL_VAR_PATH_SEP){
+            flags = MORE;
+        }else if(captureKey == FORMAT_TEMPL_VAR_ATT_SEP){
+            flags = LAST;
+        }
+        if(flags != ZERO){
+            Iter it;
+            Iter_Init(&it, v->p);
+            while((Iter_Next(&it) & END) == 0){
+                Str *s = (Str *)Iter_Get(&it);
+                s->type.state |= flags;
             }
-            if(flags != ZERO){
-                Iter it;
-                Iter_Init(&it, v->p);
-                while((Iter_Next(&it) & END) == 0){
-                    Str *s = (Str *)Iter_Get(&it);
-                    s->type.state |= flags;
-                }
-            }
         }
 
-        if(current->type.of == TYPE_WRAPPED_PTR && \
-                captureKey > _FORMAT_TEMPL_VAR_ENDINGS_END &&
-                captureKey < _FORMAT_TEMPL_LOGIC){
-            StrVec_AddVec((StrVec *)sg->val.ptr, v);
-            return SUCCESS;
-        }else if(v->total > 0 || captureKey == FORMAT_TEMPL_VAR_CLOSE){
-            sg = Ptr_Wrapped(rbl->m, v, captureKey);
-            Iter_Add(&ctx->it, (Abstract *)sg);
-        }
-
-        if(captureKey > _FORMAT_TEMPL_LOGIC){
-            sg->objType.of = captureKey;
-        }else if(sg->objType.of < _FORMAT_TEMPL_LOGIC){
-            sg->objType.of = FORMAT_TEMPL_VAR;
-        }
+        Single *sg = (Single *)Iter_Current(&ctx->it);
+        StrVec_AddVec((StrVec *)sg->val.ptr, v);
+    }else if(captureKey > _FORMAT_TEMPL_LOGIC_START && 
+            captureKey < _FORMAT_TEMPL_LOGIC_END){
+        Single *sg = (Single *)Iter_Current(&ctx->it);
+        sg->objType.of = captureKey;
     }
     return SUCCESS;
 }
