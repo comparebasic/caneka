@@ -1,6 +1,4 @@
 build
-*.core
 tmp
-builder
-*.core
 dist
+*.core
