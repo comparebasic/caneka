@@ -20,6 +20,31 @@ Abstract *From_Key(Abstract *data, Abstract *key){
     return NULL;
 }
 
+Abstract *From_PathKey(MemCh *m, Abstract *data, StrVec *path){
+    if(data == NULL){
+        return NULL;
+    }
+
+    Iter it;
+    Iter_Init(&it, path->p);
+    word flags = ZERO;
+    while(data != NULL && (Iter_Next(&it) & END) == 0){
+        Str *key = (Str *)Iter_Get(&it);
+        if(key->type.state & (MORE|LAST)){
+            flags = key->type.state;
+        }else if(flags & LAST){
+            Abstract *value = NULL;
+            status r = AttTable_Att(m, data, (Abstract *)key, &value);
+            if(r & SUCCESS){
+                return value;
+            }
+        }else{
+            data = From_Key(data, (Abstract *)key);
+        }
+    }
+    return data;
+}
+
 Iter *From_GetIter(MemCh *m, Abstract *data, Abstract *key){
     Abstract *args[] = {
         (Abstract *)data,

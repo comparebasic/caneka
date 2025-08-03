@@ -1,18 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-Templ *Templ_Make(MemCh *m, Span *content, OrdTable *data){
-    Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
-    templ->type.of = TYPE_TEMPL;
-    Iter_Init(&templ->content, content);
-    Span *p = Span_Make(m);
-    Span_Add(p, (Abstract *)data);
-    Iter_Init(&templ->data, p);
-    Iter_Next(&templ->data);
-    return templ;
-}
-
-
 i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
@@ -31,6 +19,13 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         }
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
     }else if(item->type.of == TYPE_TEMPL_JUMP){
+        if(templ->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)item,
+                NULL
+            };
+            Out("^c.Jump: &^0.\n", args);
+        }
         TemplJump *jump = (TemplJump*)item;
         if(jump->jumpType.of == FORMAT_TEMPL_VAR_FOR){
             Iter *it = (Iter *)as(data, TYPE_ITER); 
@@ -60,9 +55,42 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     }else if(item->type.of == TYPE_WRAPPED_PTR){
         Single *sg = (Single *)item;
         if(sg->objType.of == FORMAT_TEMPL_INDENT){
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.Indent: &^0.\n", args);
+            }
             templ->indent = ((StrVec *)sg->val.ptr)->total;
             total += ToS(sm, (Abstract *)sg->val.ptr, 0, ZERO); 
+        }else if(sg->objType.of == FORMAT_TEMPL_VAR){
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.Var: &^0.\n", args);
+            }
+            Abstract *value = From_PathKey(sm->m, data, (StrVec *)sg->val.ptr);
+            if(value == NULL){
+                Abstract *args[] = {
+                    (Abstract *)sg->val.ptr,
+                    NULL,
+                };
+                Error(sm->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER,
+                    "Error finding value @\n",args);
+                return total;
+            }
+            total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(sg->objType.of == FORMAT_TEMPL_VAR_FOR){
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.For: &^0.\n", args);
+            }
             Iter *it = From_GetIter(sm->m, data, sg->val.ptr);
             Iter_Add(&templ->data,
                 (Abstract *)it);
@@ -71,19 +99,38 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
             }
             Iter_Set(&templ->content,
                 TemplJump_Make(sm->m, sg->objType.of, templ->content.idx, NEGATIVE));
-        }else if(sg->objType.of == FORMAT_TEMPL_VAR){
-            printf("templ var\n");
-            fflush(stdout);
         }else if(sg->objType.of == FORMAT_TEMPL_VAR_BODY){
-            printf("templ var body\n");
-            fflush(stdout);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.VarBody: &^0.\n", args);
+            }
         }else if(sg->objType.of == FORMAT_TEMPL_VAR_PATH_SEP){
-            printf("templ var path\n");
-            fflush(stdout);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.PathSep: &^0.\n", args);
+            }
         }else if(sg->objType.of == FORMAT_TEMPL_VAR_ATT_SEP){
-            printf("templ var att\n");
-            fflush(stdout);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.AttSep: &^0.\n", args);
+            }
         }else if(sg->objType.of > _FORMAT_TEMPL_LOGIC_END){
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)sg,
+                    NULL
+                };
+                Out("^c.Logic End: &^0.\n", args);
+            }
             Iter _it;
             memcpy(&_it, &templ->content, sizeof(Iter));
             i32 idx = templ->content.idx;
@@ -118,23 +165,31 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     if(templ->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)templ,
-            (Abstract *)data,
-            (Abstract *)Iter_Current(&templ->data),
-            (Abstract *)item,
             NULL
         };
-        Out("Templ: ^p.&^0.\nData: ^p.@^0.\nDataItem: ^p.&^0.\nItem:^y.&^0\n\n", args);
+        Out("Templ: ^p.&^0.\n", args);
     }
 
     return total;
 }
 
-i64 Templ_ToS(Templ *templ, Stream *sm){
+i64 Templ_ToS(Templ *templ, Stream *sm, OrdTable *data){
     i64 total = 0;
     i16 g = 0;
+    Span *p = Span_Make(sm->m);
+    Span_Add(p, (Abstract *)data);
+    Iter_Init(&templ->data, p);
+    Iter_Next(&templ->data);
     while((total = Templ_ToSCycle(templ, sm, total)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(&g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }
     return total;
+}
+
+Templ *Templ_Make(MemCh *m, Span *content){
+    Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
+    templ->type.of = TYPE_TEMPL;
+    Iter_Init(&templ->content, content);
+    return templ;
 }

@@ -223,14 +223,17 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, "value=@>", args2);
     }else if(flags & MORE){
+        Abstract *current = Iter_Current(it);
+        Str *type = current != NULL ? Type_ToStr(sm->m, current->type.of) : NULL;
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, it->idx),
             (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
-            (Abstract *)Iter_Current(it),
+            (Abstract *)current,
+            (Abstract *)type,
             NULL
         };
-        total += Fmt(sm, "I<$:^D.$of$^d.\\@@>", args);
+        total += Fmt(sm, "I<$:^D.$of$^d.\\@@/^D.$^d.>", args);
     }else{
         total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, sm, a, type, flags);
     }
