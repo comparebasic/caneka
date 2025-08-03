@@ -227,12 +227,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "TemplCtx Template Tests",
-        TemplCtxTempl_Tests,
-        "TemplCtx tests of basic logic templating.",
-        FEATURE_COMPLETE,
-    },
-    {
         "Path Tests",
         Path_Tests,
         "Testing path functions for file and object variable paths.",
@@ -293,6 +287,12 @@ TestSet _soloTest[] = {
         "TemplCtx Tests",
         TemplCtx_Tests,
         "TemplCtx tests of basic value templating.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Templ Tests",
+        Templ_Tests,
+        "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
     {

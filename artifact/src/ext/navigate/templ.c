@@ -12,8 +12,8 @@ Templ *Templ_Make(MemCh *m, Span *content, OrdTable *data){
     return templ;
 }
 
+
 i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
-    /*
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         return total;
@@ -39,7 +39,8 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
             }else{
                 Iter_PrevRemove(&templ->data);
             }
-        }else if(jump->jumpType.of == FORMAT_TEMPL_VAR_ENDFOR){
+        }else if(jump->jumpType.of == FORMAT_TEMPL_LOGIC_END){
+            /*
             Iter_PrevRemove(&templ->data);
             data = Iter_Get(&templ->data);
             Iter *it = (Iter *)as(data, TYPE_ITER); 
@@ -47,6 +48,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
                 Iter_GetByIdx(&templ->content, jump->destIdx);
             }
+            */
         }else{
             Abstract *args[] = {
                 (Abstract *)jump,
@@ -81,12 +83,10 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         }else if(sg->objType.of == FORMAT_TEMPL_VAR_ATT_SEP){
             printf("templ var att\n");
             fflush(stdout);
-        }else if(sg->objType.of > _FORMAT_TEMPL_VAR_ENDINGS && 
-            item->type.of < _FORMAT_TEMPL_VAR_ENDINGS_END){
+        }else if(sg->objType.of > _FORMAT_TEMPL_LOGIC_END){
             Iter _it;
             memcpy(&_it, &templ->content, sizeof(Iter));
             i32 idx = templ->content.idx;
-            cls lookFor = sg->objType.of - (FORMAT_TEMPL_VAR_ENDIF - FORMAT_TEMPL_VAR_IF);
 
             TemplJump *jumpFrom = TemplJump_Make(sm->m, sg->objType.of, 
                 templ->content.idx, -1);
@@ -125,7 +125,6 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
         };
         Out("Templ: ^p.&^0.\nData: ^p.@^0.\nDataItem: ^p.&^0.\nItem:^y.&^0\n\n", args);
     }
-    */
 
     return total;
 }

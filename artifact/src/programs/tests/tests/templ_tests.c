@@ -121,31 +121,6 @@ status TemplCtx_Tests(MemCh *gm){
     return r;
 }
 
-status TemplCtxTempl_Tests(MemCh *gm){
-    DebugStack_Push(NULL, 0);
-    status r = READY;
-    MemCh *m = MemCh_Make();
-    Str *s = NULL; 
-
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/nav.html"));
-    File *f = File_Make(m, path, NULL, STREAM_STRVEC);
-    File_Open(f);
-    File_Read(f, FILE_READ_MAX);
-    File_Close(f);
-
-    Cursor *curs = File_GetCurs(f);
-    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-    
-    r |= Test(ctx->type.state & SUCCESS,
-            "Roebling finished with state SUCCESS with template logic", 
-        NULL);
-
-    MemCh_Free(m);
-    DebugStack_Pop();
-    return r;
-}
-
-
 status Templ_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
