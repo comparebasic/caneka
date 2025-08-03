@@ -10,43 +10,14 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     Abstract *data = Iter_Current(&templ->data);
 
     if(item->type.of == TYPE_STRVEC){
-        if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)item,
-                NULL
-            };
-            Out("^c.StrVec Out: &^0.\n", args);
-        }
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
     }else if(item->type.of == TYPE_WRAPPED_PTR){
         Single *sg = (Single *)item;
         if(sg->objType.of == FORMAT_TEMPL_INDENT){
-            if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)sg,
-                    NULL
-                };
-                Out("^c.Indent: &^0.\n", args);
-            }
             templ->indent = ((StrVec *)sg->val.ptr)->total;
             total += ToS(sm, (Abstract *)sg->val.ptr, 0, ZERO); 
         }else if(sg->objType.of == FORMAT_TEMPL_VAR){
-            if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)sg,
-                    NULL
-                };
-                Out("^b.   about to Var: &^0.\n", args);
-            }
             Abstract *value = From_PathKey(sm->m, data, (StrVec *)sg->val.ptr);
-            if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)sg,
-                    (Abstract *)value,
-                    NULL
-                };
-                Out("^c.Var: & -> ^E.&^e.^0.\n", args);
-            }
             if(value == NULL){
                 Abstract *args[] = {
                     (Abstract *)sg->val.ptr,
@@ -64,16 +35,6 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
             if((Iter_Next(it) & END) == 0){
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
             }
-            if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(sm->m, templ->content.idx),
-                    (Abstract *)sg,
-                    (Abstract *)Iter_Current(&templ->data),
-                    (Abstract *)it,
-                    NULL
-                };
-                Out("^c.For#$: & @ of iter:@^0.\n", args);
-            }
         }else if(sg->objType.of == TYPE_TEMPL_JUMP){
             TemplJump *jump = (TemplJump*)sg->val.ptr;
             if(jump->jumpType.of == FORMAT_TEMPL_VAR_FOR){
@@ -83,33 +44,9 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
                     Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
                     TemplJump *jump = (TemplJump*)sg->val.ptr;
                     Iter_GetByIdx(&templ->content, jump->destIdx);
-                    if(templ->type.state & DEBUG){
-                        Abstract *args[] = {
-                            (Abstract *)sg,
-                            (Abstract *)Iter_Current(&templ->data),
-                            NULL
-                        };
-                        Out("^c.Jump Back: & -> @^0.\n", args);
-                    }
-                }else{
-                    if(templ->type.state & DEBUG){
-                        Abstract *args[] = {
-                            (Abstract *)sg,
-                            NULL
-                        };
-                        Out("^c.Jump MoveOn: &^0.\n", args);
-                    }
                 }
             }
         }else if(sg->objType.of == FORMAT_TEMPL_LOGIC_END){
-            if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)sg,
-                    NULL
-                };
-                Out("^c.Logic End: &^0.\n", args);
-            }
-
             TemplJump *jump = TemplJump_Make(sm->m, sg->objType.of, 
                 templ->content.idx, -1);
             sg->objType.of = TYPE_TEMPL_JUMP;
@@ -133,16 +70,6 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
                         item->objType.of < _FORMAT_TEMPL_LOGIC_END){
                         jump->destIdx = it.idx;
                         jump->jumpType.of = item->objType.of;
-                        if(templ->type.state & DEBUG){
-                            Abstract *args[] = {
-                                (Abstract *)I32_Wrapped(sm->m, it.idx),
-                                (Abstract *)I32_Wrapped(sm->m, targetIdx),
-                                (Abstract *)sg->val.ptr,
-                                (Abstract *)item,
-                                NULL
-                            };
-                            Out("^y.Assigning Jump \\@$/targetIdx^D.$^d. & -> ^E.&^0.\n", args);
-                        }
                         break;
                     }
                 }

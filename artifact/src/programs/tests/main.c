@@ -221,12 +221,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "TemplCtx Tests",
-        TemplCtx_Tests,
-        "TemplCtx tests of basic value templating.",
-        FEATURE_COMPLETE,
-    },
-    {
         "Path Tests",
         Path_Tests,
         "Testing path functions for file and object variable paths.",
@@ -242,6 +236,12 @@ static TestSet _Tests[] = {
         "Nested Tests",
         Nested_Tests,
         "Testing nested component, which manages nested OrdTables and Spans.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "TemplCtx Tests",
+        TemplCtx_Tests,
+        "TemplCtx tests of basic value templating.",
         FEATURE_COMPLETE,
     },
     {
@@ -278,29 +278,10 @@ static TestSet _Tests[] = {
     },
 };
 
-/*
 TestSet *Tests = _Tests;
-*/
 
+/*
 TestSet _soloTest[] = { 
-    {
-        "TemplCtx Tests",
-        TemplCtx_Tests,
-        "TemplCtx tests of basic value templating.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Templ Tests",
-        Templ_Tests,
-        "Testing templating with a few variables.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "TemplLogic Tests",
-        TemplLogic_Tests,
-        "Testing templating logic tags in a few loops over variables.",
-        FEATURE_COMPLETE,
-    },
     {
         NULL,
         NULL,
@@ -310,6 +291,7 @@ TestSet _soloTest[] = {
 };
 
 TestSet *Tests = _soloTest;
+*/
 
 i32 main(int argc, char **argv){
     if(argc > 1){
