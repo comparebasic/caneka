@@ -52,22 +52,22 @@ see [caneka.org](https://caneka.org) for more details.
 
 ## Build Instructions
 
-Canka only requires a C compile to build. A small build program is then used to
-build the rest of the runtime.
+To build and test Caneka run:
+
+    ./scripts/test.sh
+
+To only clean and build Caneka run:
 
     ./scripts/make.sh
 
-The ./scripts/build.sh script base compiles a small builder program which
-builds the remaining objects.
-
-    clang -o build/builder builder.c && ./build/builder
-
-If `gcc` is used instead of `clang` it will build the remaining objects using
-the compiler supplied to build the builder, in that case `gcc` and eventually
-`msvc` if that's what was used to build the builder.
+Canka only requires a C compile to build. A small library is built to manage
+the build configuration(s) (found in the [builder](./artifact/src/builder/)
+folder). Small files named "build.c" are found throughout the codebase which 
+build the objects and executables for the runtime.
 
 Further customization can be found in the [build.c](./artifact/src/build.c)
-file.
+file, and the "build.c" files for each program, such as the 
+[test program](./artifact/src/programs/test/build.c).
 
 ## Build Status
 
