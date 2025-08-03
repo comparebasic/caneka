@@ -74,10 +74,11 @@ char *Type_ToChars(cls type){
     char **typeStrings = NULL;
     i32 idx = 0;
     while((Iter_Next(&it) & END) == 0){
-        if((idx = it.idx) > type){
+        if(it.idx > type){
             break;
         }else{
             typeStrings = (char **)Iter_Get(&it);
+            idx = it.idx;
         }
     }
     if(typeStrings != NULL){

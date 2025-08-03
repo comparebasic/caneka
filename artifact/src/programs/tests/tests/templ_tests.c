@@ -193,7 +193,15 @@ status TemplLogic_Tests(MemCh *gm){
     i64 total = Templ_ToS(templ, sm, data);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
-    r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Temple key value test has expected content", NULL);
+    Abstract *args[] = {
+        (Abstract *)expected,
+        (Abstract *)sm->dest.curs->v,
+        NULL
+    };
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
+        "Temple key value test has expected content", 
+        "Temple key value test mismatch, expected $\nhave\n$", 
+        args);
 
 
     MemCh_Free(m);

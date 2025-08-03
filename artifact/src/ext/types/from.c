@@ -51,7 +51,6 @@ Iter *From_GetIter(MemCh *m, Abstract *data, Abstract *key){
         (Abstract *)key,
         NULL
     };
-    Out("^c.GetIter @ key @\n", args);
     if(data == NULL){
         goto err;
     }

@@ -58,7 +58,7 @@ static i64 TemplJump_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)I32_Wrapped(sm->m, jump->destIdx),
         NULL
     };
-    return Fmt(sm, "TemplJump:$<$ @/@>", args);
+    return Fmt(sm, "TemplJump:$<$ @/dest^D.@^D.>", args);
 }
 
 static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -374,6 +374,7 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_ORDTABLE, (void *)OrdTable_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR_FOR, (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_TEMPL_LOGIC_END, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, TYPE_NESTED, (void *)Nested_Print);
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
     return r;

@@ -296,6 +296,12 @@ TestSet _soloTest[] = {
         FEATURE_COMPLETE,
     },
     {
+        "TemplLogic Tests",
+        TemplLogic_Tests,
+        "Testing templating logic tags in a few loops over variables.",
+        FEATURE_COMPLETE,
+    },
+    {
         NULL,
         NULL,
         NULL,

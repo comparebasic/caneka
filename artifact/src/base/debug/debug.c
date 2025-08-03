@@ -14,6 +14,7 @@ status Debug_Init(MemCh *m){
     }
     if(TypeStringRanges == NULL){
         TypeStringRanges = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        DebugTypeStrings_Init(m);
     }
     m->type.range++;
     return NOOP;
