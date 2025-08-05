@@ -132,6 +132,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     if(captureKey == FORMAT_TEMPL_TEXT || captureKey == FORMAT_TEMPL_INDENT){
         Iter_Add(&ctx->it, v);
     }else if(captureKey == FORMAT_TEMPL_VAR){
+        Fetcher *fch = Fetcher_Make(m, 
         Single *sg = Ptr_Wrapped(rbl->m, StrVec_Make(rbl->m), captureKey);
         Iter_Add(&ctx->it, (Abstract *)sg);
     }else if(captureKey == FORMAT_TEMPL_VAR_CLOSE){
@@ -159,6 +160,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 
         Single *sg = (Single *)Iter_Current(&ctx->it);
         StrVec_AddVec((StrVec *)sg->val.ptr, v);
+        /* make this into a span of fetchers instead of a strvec */
     }else if(captureKey > _FORMAT_TEMPL_LOGIC_START && 
             captureKey < _FORMAT_TEMPL_LOGIC_END){
         Single *sg = (Single *)Iter_Current(&ctx->it);

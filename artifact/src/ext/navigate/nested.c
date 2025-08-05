@@ -116,6 +116,14 @@ Abstract *Nested_GetByKey(Nested *nd, Abstract *key){
     return NULL;
 }
 
+Hashed *Nested_GetHashedByKey(Nested *nd, Abstract *key){
+    Frame *fm = Iter_Current(&nd->it);
+    if(fm->value->type.of == TYPE_ORDTABLE){
+        return OrdTable_Get((OrdTable *)fm->value, key);
+    }
+    return NULL;
+}
+
 status Nested_AddByKey(Nested *nd, Abstract *key, Abstract *value){
     if(nd->type.state & DEBUG){
         Abstract *args[] = {

@@ -14,6 +14,7 @@ status Nested_SetRoot(Nested *nd, Abstract *root);
 Abstract *Nested_Get(Nested *nd);
 Abstract *Nested_GetRoot(Nested *nd);
 Abstract *Nested_GetByKey(Nested *nd, Abstract *key);
+Hashed *Nested_GetHashedByKey(Nested *nd, Abstract *key);
 Abstract *Nested_GetByPath(Nested *nd, Span *keys);
 Span *Nested_GetPath(Nested *nd);
 status Nested_Indent(Nested *nd, Abstract *key);
