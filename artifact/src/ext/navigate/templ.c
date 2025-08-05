@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
+i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         return total;
@@ -11,16 +11,13 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
 
     if(item->type.of == TYPE_STRVEC){
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
-    }else if(item->type.of == TYPE_WRAPPED_PTR){
-        Single *sg = (Single *)item;
-        if(sg->objType.of == FORMAT_TEMPL_INDENT){
-            templ->indent = ((StrVec *)sg->val.ptr)->total;
-            total += ToS(sm, (Abstract *)sg->val.ptr, 0, ZERO); 
-        }else if(sg->objType.of == FORMAT_TEMPL_VAR){
-            Abstract *value = From_PathKey(sm->m, data, (StrVec *)sg->val.ptr);
+    }else if(item->type.of == TYPE_FETCHER){
+        Fetcher *fch = (Fetcher *)item;
+        if(fch->objType.state == ZERO){
+            Abstract *value = Fetch_FromPath(fch, data, NULL);
             if(value == NULL){
                 Abstract *args[] = {
-                    (Abstract *)sg->val.ptr,
+                    (Abstract *)fch,
                     NULL,
                 };
                 Error(sm->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER,
@@ -28,29 +25,28 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
                 return total;
             }
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
-        }else if(sg->objType.of == FORMAT_TEMPL_VAR_FOR){
-            Iter *it = From_GetIter(sm->m, data, sg->val.ptr);
+        }else if(fch->objType.state == FETCHER_OP_FOR){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_ITER;
+            Iter *it = (Iter *)as(Fetch_FromPath(fch, data, NULL), TYPE_ITER);
             Iter_Add(&templ->data,
                 (Abstract *)it);
             if((Iter_Next(it) & END) == 0){
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
             }
-        }else if(sg->objType.of == TYPE_TEMPL_JUMP){
-            TemplJump *jump = (TemplJump*)sg->val.ptr;
-            if(jump->jumpType.of == FORMAT_TEMPL_VAR_FOR){
+        }else if(fch->objType.state == FETCHER_OP_JUMP){
+            TemplJump *jump = (TemplJump*)fch->key;
+            if(jump->type.state & FETCHER_OP_FOR){
                 Iter_PrevRemove(&templ->data);
                 Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
                 if((Iter_Next(it) & END) == 0){
                     Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
-                    TemplJump *jump = (TemplJump*)sg->val.ptr;
                     Iter_GetByIdx(&templ->content, jump->destIdx);
                 }
             }
-        }else if(sg->objType.of == FORMAT_TEMPL_LOGIC_END){
-            TemplJump *jump = TemplJump_Make(sm->m, sg->objType.of, 
-                templ->content.idx, -1);
-            sg->objType.of = TYPE_TEMPL_JUMP;
-            sg->val.ptr = jump;
+        }else if(fch->objType.state == FETCHER_OP_END){
+            TemplJump *jump = TemplJump_Make(sm->m, templ->content.idx, -1);
+            Fetcher_SetOp(fch, FETCHER_OP_JUMP);
+            fch->key = (Abstract *)jump;
 
             Iter it;
             memcpy(&it, &templ->content, sizeof(Iter));
@@ -62,14 +58,14 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
                     continue;
                 }
                 Abstract *prev = Iter_Get(&it);
-                if(prev->type.of == TYPE_WRAPPED_PTR){
-                    Single *item = (Single *)prev;
-                    if(item->objType.of == TYPE_TEMPL_JUMP){
-                       targetIdx = ((TemplJump *)item->val.ptr)->destIdx; 
-                    }else if(item->objType.of > _FORMAT_TEMPL_LOGIC_START &&
-                        item->objType.of < _FORMAT_TEMPL_LOGIC_END){
+                if(prev->type.of == TYPE_FETCHER){
+                    Fetcher *item = (Fetcher *)prev;
+                    if(item->objType.state == FETCHER_OP_JUMP){
+                       targetIdx = ((TemplJump *)item->key)->destIdx; 
+                    }else if(item->objType.state & 
+                            (FETCHER_OP_WITH|FETCHER_OP_FOR|FETCHER_OP_IF|FETCHER_OP_IFNOT)){
                         jump->destIdx = it.idx;
-                        jump->jumpType.of = item->objType.of;
+                        jump->type.state =  item->type.state & UPPER_FLAGS;
                         break;
                     }
                 }
@@ -99,14 +95,14 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total){
     return total;
 }
 
-i64 Templ_ToS(Templ *templ, Stream *sm, OrdTable *data){
+i64 Templ_ToS(Templ *templ, Stream *sm, OrdTable *data, Abstract *source){
     i64 total = 0;
     i16 g = 0;
     Span *p = Span_Make(sm->m);
     Span_Add(p, (Abstract *)data);
     Iter_Init(&templ->data, p);
     Iter_Next(&templ->data);
-    while((total = Templ_ToSCycle(templ, sm, total)) && 
+    while((total = Templ_ToSCycle(templ, sm, total, source)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(&g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }

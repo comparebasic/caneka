@@ -6,5 +6,5 @@ typedef struct templ {
 } Templ;
 
 Templ *Templ_Make(MemCh *m, Span *content);
-i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total);
-i64 Templ_ToS(Templ *templ, Stream *sm, OrdTable *data);
+i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source);
+i64 Templ_ToS(Templ *templ, Stream *sm, OrdTable *data, Abstract *source);

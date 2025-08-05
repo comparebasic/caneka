@@ -36,6 +36,7 @@ status TemplCtx_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
     Str *s = NULL; 
+    Fetcher *fch = NULL;
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "examples/example.templ"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
@@ -64,8 +65,8 @@ status TemplCtx_Tests(MemCh *gm){
     cstr = "menu";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec_Add(var, s);
-    Single *sg = Ptr_Wrapped(m, (Abstract *)var, FORMAT_TEMPL_VAR_FOR); 
-    Span_Add(expected, (Abstract *)sg);
+    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_OP_FOR);
+    Span_Add(expected, (Abstract *)fch);
 
     cstr = "\n        <li><a href=\"";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
@@ -77,8 +78,8 @@ status TemplCtx_Tests(MemCh *gm){
     cstr = "fullName";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec_Add(var, s);
-    sg = Ptr_Wrapped(m, (Abstract *)var, FORMAT_TEMPL_VAR); 
-    Span_Add(expected, (Abstract *)sg);
+    fch = Fetcher_Make(m, var, -1, NULL, ZERO, ZERO);
+    Span_Add(expected, (Abstract *)fch);
 
     cstr = "\">";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
@@ -90,16 +91,16 @@ status TemplCtx_Tests(MemCh *gm){
     cstr = "name";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec_Add(var, s);
-    sg = Ptr_Wrapped(m, (Abstract *)var, FORMAT_TEMPL_VAR); 
-    Span_Add(expected, (Abstract *)sg);
+    fch = Fetcher_Make(m, var, -1, NULL, ZERO, ZERO);
+    Span_Add(expected, (Abstract *)fch);
 
     cstr = "</a>\n    ";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
-    sg = Ptr_Wrapped(m, (Abstract *)StrVec_Make(m), FORMAT_TEMPL_LOGIC_END); 
-    Span_Add(expected, (Abstract *)sg);
+    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_OP_END);
+    Span_Add(expected, (Abstract *)fch);
 
     cstr = "\n</ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
@@ -148,10 +149,18 @@ status Templ_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    i64 total = Templ_ToS(templ, sm, data);
+    i64 total = Templ_ToS(templ, sm, data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
-    r |= Test(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), "Templ key value test has expected content", NULL);
+    Abstract *args[] = {
+        (Abstract *)expected,
+        (Abstract *)sm->dest.curs->v,
+        NULL
+    };
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
+        "Templ key value test has expected content", 
+        "Templ key value mismatch test has expected content, expected:\n$\n\nhave:\n$", 
+        args);
 
     MemCh_Free(m);
     return r;
@@ -190,7 +199,7 @@ status TemplLogic_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    i64 total = Templ_ToS(templ, sm, data);
+    i64 total = Templ_ToS(templ, sm, data, NULL);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
     Abstract *args[] = {

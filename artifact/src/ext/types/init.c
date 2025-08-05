@@ -1,7 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-
 status Caneka_Init(MemCh *m){
     status r = READY;
     r |= Caneka_InitBase(m);
@@ -13,6 +12,7 @@ status Caneka_Init(MemCh *m){
     r |= Format_Init(m);
     r |= Transp_Init(m);
     r |= Sequence_Init(m);
+    r |= ExtTypes_Init(m);
     /*
     r |= Clone_Init(m);
     r |= MemLocal_Init(m);

@@ -22,5 +22,6 @@ status Caneka_InitBase(MemCh *m){
     r |= Clone_Init(m);
     r |= Hash_Init(m);
     r |= Equals_Init(m);
+    r |= Exact_Init(m);
     return r;
 }

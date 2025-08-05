@@ -36,6 +36,7 @@ static BuildSubdir typesobj = { "ext/types", {
     "atttable.c",
     "fetcher.c",
     "types_typestrings.c",
+    "types_exact.c",
     NULL
 }};
 

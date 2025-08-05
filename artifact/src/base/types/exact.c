@@ -1,6 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
+Lookup *ExactLookup = NULL;
+
+status Exact_Init(MemCh *m){
+    status r = READY;
+    if(ExactLookup == NULL){
+        ExactLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        r |= SUCCESS;
+    }
+    return r;
+}
+
 boolean Exact(Abstract *a, Abstract *b){
     Abstract *args[] = {
         a, b, NULL
@@ -36,9 +47,16 @@ boolean Exact(Abstract *a, Abstract *b){
             goto nonexact;
         }
     }
-    Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, 
-        "Type not yet implemented with Exact", NULL);
-
+    EqualFunc func = (EqualFunc)Lookup_Get(ExactLookup, a->type.of);
+    if(func == NULL){
+        Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, 
+            "Type not yet implemented with Exact", NULL);
+            goto nonexact;
+    }else{
+        if(func(a, b)){
+            goto exact;
+        }
+    }
 exact:
     return TRUE;
 nonexact:
