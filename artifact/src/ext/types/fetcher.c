@@ -116,9 +116,9 @@ status Fetcher_SetOp(Fetcher *fch, word op){
     return SUCCESS;
 }
 
-Fetcher *Fetcher_Make(MemCh *m, StrVec *path){
+Fetcher *Fetcher_Make(MemCh *m){
     Fetcher *fch = (Fetcher *)MemCh_Alloc(m, sizeof(Fetcher));
     fch->type.of = TYPE_FETCHER;
-    fch->target.type.of = TYPE_FETCH_TARGET;
+    fch->targets = Span_Make(m);
     return fch;
 }

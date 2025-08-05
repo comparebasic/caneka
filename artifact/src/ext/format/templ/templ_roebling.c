@@ -130,50 +130,65 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         };
         Out("^c. Templ Capture ^E0.$^ec./@^0.\n", args);
     }
+
     if(captureKey == FORMAT_TEMPL_TEXT || captureKey == FORMAT_TEMPL_INDENT){
         Iter_Add(&ctx->it, v);
     }else if(captureKey == FORMAT_TEMPL_VAR){
-        Fetcher *fch = Fetcher_Make(m, StrVec_Make(m), -1, NULL, ZERO, ZERO);
+        Fetcher *fch = Fetcher_Make(m);
         Iter_Add(&ctx->it, (Abstract *)fch);
     }else if(captureKey == FORMAT_TEMPL_VAR_CLOSE){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
-        if(fch->path->total == 0){
-            fch->type.state |= FETCHER_OP_END;
+        if(fch->targets->nvalues == 0){
+            fch->type.state = (fch->type.stat & NORMAL_FLAGS) | FETCHER_OP_END;
         }
     }else if(captureKey > _FORMAT_TEMPL_VAR_BODY_START &&
             captureKey < _FORMAT_TEMPL_VAR_BODY_END){
-        word flags = ZERO;
-        if(captureKey == FORMAT_TEMPL_VAR_PATH_SEP){
-            flags = MORE;
-        }else if(captureKey == FORMAT_TEMPL_VAR_ATT_SEP){
-            flags = LAST;
-        }
-        if(flags != ZERO){
+        Str *s = NULL;
+        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
+        if(v->p->nvalues == 1){
+            s = Span_Get(v->p, 0);
+        }else{
+            s = Str_Make(m, v-total+1);
             Iter it;
             Iter_Init(&it, v->p);
             while((Iter_Next(&it) & END) == 0){
-                Str *s = (Str *)Iter_Get(&it);
-                s->type.state |= flags;
+                Str *_s = (Str *)Iter_Get(&it);
+                Str_Add(s, _s->bytes, _s->length);
             }
         }
 
-        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
-        StrVec_AddVec((StrVec *)fch->path, v);
+        if(captureKey == FORMAT_TEMPL_VAR_PATH_SEP){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_KEY;
+        }else if(captureKey == FORMAT_TEMPL_VAR_ATT_SEP){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_ATT;
+        }else if(captureKey == FORMAT_TEMPL_VAR_FUNC_SEP){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_FUNC;
+        }else if(captureKey == FORMAT_TEMPL_VAR_IDX_SEP){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_IDX;
+        }else{
+            FetchTarget *tg = NULL;
+            if(fch->type.state & FETCH_TARGET_ATT){
+                tg = FetchTarget_MakeAtt(m, s);
+            }else if(fch->type.state & FETCH_TARGET_FUNC){
+                tg = FetchTarget_MakeFunc(m, s);
+            }else if(fch->type.state & FETCH_TARGET_IDX){
+                tg = FetchTarget_MakeIdx(m, Int_FromStr(s));
+            }else{
+                tg = FetchTarget_MakeKey(m, s);
+            }
+            Span_Add(fch->targets, tg);
+        }
     }else if(captureKey > _FORMAT_TEMPL_LOGIC_START && 
             captureKey < _FORMAT_TEMPL_LOGIC_END){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
-        word op = ZERO;
         if(captureKey == FORMAT_TEMPL_VAR_FOR){
-            op = FETCHER_OP_FOR;
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_FOR;
         }else if(captureKey == FORMAT_TEMPL_VAR_IF){
-            op = FETCHER_OP_IF;
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_IF;
         }else if(captureKey == FORMAT_TEMPL_VAR_IFNOT){
-            op = FETCHER_OP_IFNOT;
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_IFNOT;
         }else if(captureKey == FORMAT_TEMPL_VAR_WITH){
-            op = FETCHER_OP_WITH;
-        }
-        if(op != ZERO){
-            Fetcher_SetOp(fch, op);
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_WITH;
         }
     }
     return SUCCESS;

@@ -7,15 +7,11 @@ enum fetcher_flags {
     FETCHER_JUMP = 1 << 13,
 };
 
-typedef Abstract *(*FetchFunc)(struct fetcher *fch, Abstract *a, Abstract *source);
-
 typedef struct fetcher {
     Type type;
-    MemCh *m;
-    StrVec *path;
-    FetchTarget target;
+    Span *targets;
 } Fetcher;
 
 Abstract *Fetch(Fetcher *fch, Abstract *a, Abstract *source);
-Fetcher *Fetcher_Make(MemCh *m, StrVec *path);
+Fetcher *Fetcher_Make(MemCh *m);
 Abstract *Fetch_FromPath(Fetcher *fch, Abstract *data, Abstract *source);

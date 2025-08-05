@@ -83,3 +83,4 @@ struct transp_ctx;
 struct xmlt_ctx;
 /* types */
 struct fetcher;
+struct fetch_target;
