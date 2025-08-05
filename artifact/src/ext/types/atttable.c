@@ -33,49 +33,40 @@ Single *AttTable_Get(Abstract *a, Abstract *key){
     return sg;
 }
 
+Abstract *Att_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf){
+    Abstract *value = NULL;
+    if(typeOf == ZERO || typeOf > _TYPE_RAW_END){
+        void **ptr = (void **)(((void *)a)+sg->val.w);
+        value = *ptr; 
+    }else{
+        if(typeOf == TYPE_UTIL){
+            util *ptr = ((void *)a)+sg->val.w;
+            value = (Abstract *)Util_Wrapped(m, *ptr); 
+        }else if(typeOf == TYPE_I32){
+            i32 *ptr = ((void *)a)+sg->val.i;
+            value = (Abstract *)I32_Wrapped(m, *ptr); 
+        }else if(typeOf == TYPE_I64){
+            i64 *ptr = ((void *)a)+sg->val.i;
+            value = (Abstract *)I64_Wrapped(m, *ptr); 
+        }else if(typeOf == TYPE_I16){
+            i16 *ptr = ((void *)a)+sg->val.w;
+            value = (Abstract *)I16_Wrapped(m, *ptr);
+        }else if(typeOf == TYPE_I8){
+            i8 *ptr = ((void *)a)+sg->val.b;
+            value = (Abstract *)I16_Wrapped(m, *ptr);
+        }else if(typeOf == TYPE_BYTE){
+            byte *ptr = ((void *)a)+sg->val.b;
+            value = (Abstract *)B_Wrapped(m, *ptr, ZERO, ZERO); 
+        }
+    }
+    return value;
+}
 status AttTable_Att(MemCh *m, Abstract *a, Abstract *key, Abstract **value, i32 *idx){
     i16 offset = 0;
     *value = NULL;
     Single *sg = AttTable_Get(a, key);
     if(sg != NULL){
-        if(sg->type.of == TYPE_WRAPPED_I16){
-            *idx = (i32)sg->val.w;
-            if(sg->objType.of == ZERO || sg->objType.of > _TYPE_RAW_END){
-                void **ptr = (void **)(((void *)a)+sg->val.w);
-                *value = *ptr; 
-                return SUCCESS;
-            }else{
-                cls type = sg->objType.of;
-                if(type == TYPE_UTIL){
-                    util *ptr = ((void *)a)+sg->val.w;
-                    *value = (Abstract *)Util_Wrapped(m, *ptr); 
-                    return SUCCESS;
-                }else if(type == TYPE_I32){
-                    i32 *ptr = ((void *)a)+sg->val.i;
-                    *value = (Abstract *)I32_Wrapped(m, *ptr); 
-                    return SUCCESS;
-                }else if(type == TYPE_I64){
-                    i64 *ptr = ((void *)a)+sg->val.i;
-                    *value = (Abstract *)I64_Wrapped(m, *ptr); 
-                    return SUCCESS;
-                }else if(type == TYPE_I16){
-                    i16 *ptr = ((void *)a)+sg->val.w;
-                    *value = (Abstract *)I16_Wrapped(m, *ptr);
-                    return SUCCESS;
-                }else if(type == TYPE_I8){
-                    i8 *ptr = ((void *)a)+sg->val.b;
-                    *value = (Abstract *)I16_Wrapped(m, *ptr);
-                    return SUCCESS;
-                }else if(type == TYPE_BYTE){
-                    byte *ptr = ((void *)a)+sg->val.b;
-                    *value = (Abstract *)B_Wrapped(m, *ptr, ZERO, ZERO); 
-                    return SUCCESS;
-                }
-            }
-        }
-        Error(m, a, FUNCNAME, FILENAME, LINENUMBER, 
-            "Att table type not yet implemented", NULL);
-        return ERROR;
+        return AttTable_FromOffset(m, a, sg->val.w, sg->objType.of);
     }
     Error(m, a, FUNCNAME, FILENAME, LINENUMBER, 
         "Att table type not found", NULL);

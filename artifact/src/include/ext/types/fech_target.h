@@ -1,17 +1,17 @@
 enum fetch_target_flags {
     FETCH_TARGET_ATT = 1 << 8,
     FETCH_TARGET_KEY = 1 << 9,
-    FETCH_TARGET_VALUE = 1 << 10,
-    FETCH_TARGET_IDX = 1 << 11,
-    FETCH_TARGET_FUNC = 1 << 14,
-    FETCH_TARGET_ITER = 1 << 13,
-    FETCH_TARGET_RESOLVED = 1 << 15,
+    FETCH_TARGET_IDX = 1 << 10,
+    FETCH_TARGET_SELF = 1 << 11,
+    FETCH_TARGET_ITER = 1 << 12,
+    FETCH_TARGET_RESOLVED = 1 << 13,
 };
 
 typedef Abstract *(*FetchFunc)(struct fetch_target *target, Abstract *data, Abstract *source);
 
 typedef struct fetch_target {
     Type type;
+    Type objType;
     union {
         i16 offset;
         i32 idx;

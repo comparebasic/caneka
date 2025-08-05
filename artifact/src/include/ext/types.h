@@ -1,3 +1,4 @@
+#include "types/types.h"
 #include "types/type_range.h"
 #include "types/types_typestrings.h"
 #include "types/init.h"
