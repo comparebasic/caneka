@@ -6,6 +6,7 @@ static char *extTypeStrings[] = {
     "TYPE_MESS",
     "TYPE_MESS_CLIMBER",
     "TYPE_NODE",
+    "TYPE_FETCHER",
     "TYPE_CRYPTO_DIGEST",
     "TYPE_FMT_LINE",
     "TYPE_SNIP",

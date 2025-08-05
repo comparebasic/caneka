@@ -33,12 +33,13 @@ Single *AttTable_Get(Abstract *a, Abstract *key){
     return sg;
 }
 
-status AttTable_Att(MemCh *m, Abstract *a, Abstract *key, Abstract **value){
+status AttTable_Att(MemCh *m, Abstract *a, Abstract *key, Abstract **value, i32 *idx){
     i16 offset = 0;
     *value = NULL;
     Single *sg = AttTable_Get(a, key);
     if(sg != NULL){
         if(sg->type.of == TYPE_WRAPPED_I16){
+            *idx = (i32)sg->val.w;
             if(sg->objType.of == ZERO || sg->objType.of > _TYPE_RAW_END){
                 void **ptr = (void **)(((void *)a)+sg->val.w);
                 *value = *ptr; 

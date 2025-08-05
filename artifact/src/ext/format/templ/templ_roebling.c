@@ -119,6 +119,7 @@ static status varBody(MemCh *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
+    MemCh *m = rbl->m;
     Mess *mess = rbl->mess;
     TemplCtx *ctx = (TemplCtx*)as(rbl->source, TYPE_TEMPL_CTX);
     if(rbl->mess->type.state & DEBUG){
@@ -132,14 +133,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     if(captureKey == FORMAT_TEMPL_TEXT || captureKey == FORMAT_TEMPL_INDENT){
         Iter_Add(&ctx->it, v);
     }else if(captureKey == FORMAT_TEMPL_VAR){
-        Fetcher *fch = Fetcher_Make(m, 
-        Single *sg = Ptr_Wrapped(rbl->m, StrVec_Make(rbl->m), captureKey);
-        Iter_Add(&ctx->it, (Abstract *)sg);
+        Fetcher *fch = Fetcher_Make(m, StrVec_Make(m), -1, NULL, ZERO, ZERO);
+        Iter_Add(&ctx->it, (Abstract *)fch);
     }else if(captureKey == FORMAT_TEMPL_VAR_CLOSE){
-        Single *sg = (Single *)Iter_Current(&ctx->it);
-        StrVec *v = (StrVec *)sg->val.ptr;
-        if(v->total == 0){
-            sg->objType.of = FORMAT_TEMPL_LOGIC_END;
+        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
+        if(fch->path->total == 0){
+            fch->type.state |= FETCHER_OP_END;
         }
     }else if(captureKey > _FORMAT_TEMPL_VAR_BODY_START &&
             captureKey < _FORMAT_TEMPL_VAR_BODY_END){
@@ -158,13 +157,24 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }
         }
 
-        Single *sg = (Single *)Iter_Current(&ctx->it);
-        StrVec_AddVec((StrVec *)sg->val.ptr, v);
-        /* make this into a span of fetchers instead of a strvec */
+        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
+        StrVec_AddVec((StrVec *)fch->path, v);
     }else if(captureKey > _FORMAT_TEMPL_LOGIC_START && 
             captureKey < _FORMAT_TEMPL_LOGIC_END){
-        Single *sg = (Single *)Iter_Current(&ctx->it);
-        sg->objType.of = captureKey;
+        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
+        word op = ZERO;
+        if(captureKey == FORMAT_TEMPL_VAR_FOR){
+            op = FETCHER_OP_FOR;
+        }else if(captureKey == FORMAT_TEMPL_VAR_IF){
+            op = FETCHER_OP_IF;
+        }else if(captureKey == FORMAT_TEMPL_VAR_IFNOT){
+            op = FETCHER_OP_IFNOT;
+        }else if(captureKey == FORMAT_TEMPL_VAR_WITH){
+            op = FETCHER_OP_WITH;
+        }
+        if(op != ZERO){
+            Fetcher_SetOp(fch, op);
+        }
     }
     return SUCCESS;
 }

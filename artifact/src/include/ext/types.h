@@ -4,3 +4,4 @@
 #include "types/equals.h"
 #include "types/from.h"
 #include "types/atttable.h"
+#include "types/fetcher.h"

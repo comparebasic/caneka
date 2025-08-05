@@ -34,7 +34,8 @@ Abstract *From_PathKey(MemCh *m, Abstract *data, StrVec *path){
             flags = key->type.state;
         }else if(flags & LAST){
             Abstract *value = NULL;
-            status r = AttTable_Att(m, data, (Abstract *)key, &value);
+            i32 idx = -1;
+            status r = AttTable_Att(m, data, (Abstract *)key, &value, &idx);
             if(r & SUCCESS){
                 return value;
             }

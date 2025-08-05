@@ -20,7 +20,8 @@ status AttTable_Tests(MemCh *gm){
 
     void *att = NULL;
     Single *sg = NULL;
-    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&sg);
+    i32 idx = -1;
+    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&sg, &idx);
     Abstract *args1[] = {
         (Abstract *)sg,
         NULL
@@ -29,7 +30,7 @@ status AttTable_Tests(MemCh *gm){
         "id attribute found, have &", args1);
 
     key = Str_CstrRef(m, "idx");
-    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&sg);
+    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&sg, &idx);
     Abstract *args2[] = {
         (Abstract *)sg,
         NULL
@@ -39,7 +40,7 @@ status AttTable_Tests(MemCh *gm){
 
     key = Str_CstrRef(m, "key");
     Str *s = NULL;
-    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&s);
+    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&s, &idx);
 
     Abstract *args3[] = {
         (Abstract *)s,
@@ -50,7 +51,7 @@ status AttTable_Tests(MemCh *gm){
         "key attribute found, have @ from @", args3);
 
     key = Str_CstrRef(m, "value");
-    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&s);
+    AttTable_Att(m, (Abstract *)h, (Abstract *)key, (Abstract **)&s, &idx);
 
     Abstract *args4[] = {
         (Abstract *)s,

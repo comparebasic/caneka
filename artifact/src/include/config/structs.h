@@ -81,3 +81,5 @@ struct nested_state;
 struct nestedd;
 struct transp_ctx;
 struct xmlt_ctx;
+/* types */
+struct fetcher;
