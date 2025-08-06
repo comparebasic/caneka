@@ -1,1 +1,1 @@
-status Transp_AttsInit(MemCh *m, Lookup *lk);
+status Transp_Init(MemCh *m);

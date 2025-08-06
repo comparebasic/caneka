@@ -65,7 +65,6 @@ static BuildSubdir testsobj = { "tests", {
     "templ_tests.c",
     "nested_tests.c",
     "path_tests.c",
-    "atttable_tests.c",
     NULL
 }};
 

@@ -32,9 +32,11 @@ static char *staticLibs[] = {
 /* sources */
 static BuildSubdir typesobj = { "types", {
     "init.c",
-    "fetcher.c",
     "types_typestrings.c",
-    "types_exact.c",
+    "classdef.c",
+    "fetcher.c",
+    "fetch_target.c",
+    "types_cls.c",
     NULL
 }};
 
@@ -82,8 +84,7 @@ static BuildSubdir transpobj = { "transp", {
     "transp.c",
     "transp_ctx.c",
     "transp_file.c",
-    "transp_tos.c",
-    "transp_atts.c",
+    "transp_cls.c",
     NULL
 }};
 

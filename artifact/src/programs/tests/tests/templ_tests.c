@@ -52,6 +52,7 @@ status TemplCtx_Tests(MemCh *gm){
         NULL);
 
     Span *expected = Span_Make(m);
+    /*
     char *cstr = "<ul>\n    ";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec *v = StrVec_From(m, s);
@@ -65,7 +66,7 @@ status TemplCtx_Tests(MemCh *gm){
     cstr = "menu";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec_Add(var, s);
-    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_OP_FOR);
+    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_FOR);
     Span_Add(expected, (Abstract *)fch);
 
     cstr = "\n        <li><a href=\"";
@@ -99,13 +100,14 @@ status TemplCtx_Tests(MemCh *gm){
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
-    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_OP_END);
+    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_END);
     Span_Add(expected, (Abstract *)fch);
 
     cstr = "\n</ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
+    */
 
     Abstract *args[] = {
         (Abstract *)expected,

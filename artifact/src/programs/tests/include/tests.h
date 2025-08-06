@@ -46,7 +46,6 @@ status TemplLogic_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
 status Nested_Tests(MemCh *gm);
 status Path_Tests(MemCh *gm);
-status AttTable_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);
