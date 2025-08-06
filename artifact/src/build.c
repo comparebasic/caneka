@@ -32,8 +32,6 @@ static char *staticLibs[] = {
 /* sources */
 static BuildSubdir typesobj = { "ext/types", {
     "init.c",
-    "from.c",
-    "atttable.c",
     "fetcher.c",
     "types_typestrings.c",
     "types_exact.c",

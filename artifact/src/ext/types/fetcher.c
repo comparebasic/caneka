@@ -1,11 +1,40 @@
 #include <external.h>
 #include <caneka.h>
 
+Abstract *Fetch_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf){
+    Abstract *value = NULL;
+    if(typeOf == ZERO || typeOf > _TYPE_RAW_END){
+        void **ptr = (void **)(((void *)a)+offset);
+        value = *ptr; 
+    }else{
+        if(typeOf == TYPE_UTIL){
+            util *ptr = ((void *)a)+offset;
+            value = (Abstract *)Util_Wrapped(m, *ptr); 
+        }else if(typeOf == TYPE_I32){
+            i32 *ptr = ((void *)a)+offset;
+            value = (Abstract *)I32_Wrapped(m, *ptr); 
+        }else if(typeOf == TYPE_I64){
+            i64 *ptr = ((void *)a)+offset;
+            value = (Abstract *)I64_Wrapped(m, *ptr); 
+        }else if(typeOf == TYPE_I16){
+            i16 *ptr = ((void *)a)+offset;
+            value = (Abstract *)I16_Wrapped(m, *ptr);
+        }else if(typeOf == TYPE_I8){
+            i8 *ptr = ((void *)a)+offset;
+            value = (Abstract *)I16_Wrapped(m, *ptr);
+        }else if(typeOf == TYPE_BYTE){
+            byte *ptr = ((void *)a)+offset;
+            value = (Abstract *)B_Wrapped(m, *ptr, ZERO, ZERO); 
+        }
+    }
+    return value;
+}
+
 Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
     if(fch->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)fch,
-            (Abstract *)a,
+            (Abstract *)data,
             NULL,
         };
         Out("^y.Fetch & from @^0.\n", args);
@@ -13,13 +42,13 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
     Iter it;
     Iter_Init(&it, fch->targets);
     Abstract *value = data;
-    while(a != NULL && (Iter_Next(&it) & END) == 0){
+    while(value != NULL && (Iter_Next(&it) & END) == 0){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
         if(tg->type.state & FETCH_TARGET_RESOLVED){
-            if(fch->target.type.state & FETCH_TARGET_ATT){
-                value = Att_FromOffset(m, value, tg->val.offset, tg->objType.of);
+            if(tg->type.state & FETCH_TARGET_ATT){
+                value = Fetch_FromOffset(m, value, tg->val.offset, tg->objType.of);
             }else{
-                value = fg->func(fg, value);
+                value = tg->val.func(tg, value, source);
             }
         }else if(tg->type.state & FETCH_TARGET_SELF){
             continue;
@@ -27,19 +56,19 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
             ClassDef *cls = Lookup_Get(ClassLookup, data->type.of);
             if(cls != NULL){
                 if(tg->type.state & FETCH_TARGET_ATT){
-                    Single *sg = Table_Get(cls->attsTbl, fg->key);
+                    Single *sg = (Single *)Table_Get(cls->attsTbl, 
+                        (Abstract *)tg->val.key);
                     if(sg != NULL){
                         tg->val.offset = sg->val.w;
-                    }else{
-                        value = Att_FromOffset(m, value, tg->offset, tg->objType.of);
+                        value = Fetch_FromOffset(m, value, tg->val.offset, tg->objType.of);
                         break;
                     }
                 }else if(tg->type.state & FETCH_TARGET_KEY){
-                    tg->func = cls->byKey;
+                    tg->val.func = cls->byKey;
                 }else if(tg->type.state & FETCH_TARGET_IDX){
-                    tg->func = cls->byIdx;
+                    tg->val.func = cls->byIdx;
                 }else if(tg->type.state & FETCH_TARGET_ITER){
-                    tg->func = cls->getIter;
+                    tg->val.func = cls->getIter;
                 }else{
                     value = NULL;
                     break;
@@ -48,16 +77,12 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
             }
         }
     }
-    if(it->type.state & END){
+
+    if(it.type.state & END){
         return value;
     }else{
         return NULL;
     }
-}
-
-status Fetcher_SetOp(Fetcher *fch, word op){
-    fch->objType.state = op;
-    return SUCCESS;
 }
 
 Fetcher *Fetcher_Make(MemCh *m){

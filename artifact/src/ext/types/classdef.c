@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-extern Lookup *ClassLookup;
+Lookup *ClassLookup = NULL;
 
 ClassDef *ClassDef_Make(MemCh *m){
     ClassDef *cls = (ClassDef*)MemCh_Alloc(m, sizeof(ClassDef));
@@ -9,4 +9,12 @@ ClassDef *ClassDef_Make(MemCh *m){
     cls->attsTbl = Table_Make(m);
     cls->methodsTbl = Table_Make(m);
     return cls;
+}
+
+status ClassDef_Init(MemCh *m){
+    if(ClassLookup == NULL){
+        ClassLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        return SUCCESS;
+    }
+    return NOOP;
 }

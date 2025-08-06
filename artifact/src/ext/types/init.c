@@ -4,9 +4,9 @@
 status Caneka_Init(MemCh *m){
     status r = READY;
     r |= Caneka_InitBase(m);
+    r |= ClassDef_Init(m);
     r |= ExtTypeStrings_Init(m);
     r |= Caneka_LicenceInit(m);
-    r |= AttTable_Init(m);
     r |= Parser_Init(m);
     r |= Persist_Init(m);
     r |= Format_Init(m);

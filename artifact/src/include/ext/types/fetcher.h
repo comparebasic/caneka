@@ -12,6 +12,7 @@ typedef struct fetcher {
     Span *targets;
 } Fetcher;
 
-Abstract *Fetch(Fetcher *fch, Abstract *a, Abstract *source);
+Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source);
 Fetcher *Fetcher_Make(MemCh *m);
 Abstract *Fetch_FromPath(Fetcher *fch, Abstract *data, Abstract *source);
+Abstract *Fetch_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf);
