@@ -25,7 +25,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 return total;
             }
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
-        }else if(fch->objType.state == FETCHER_OP_FOR){
+        }else if(fch->objType.state == FETCHER_FOR){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_ITER;
             Iter *it = (Iter *)as(Fetch_FromPath(fch, data, NULL), TYPE_ITER);
             Iter_Add(&templ->data,
@@ -33,9 +33,9 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             if((Iter_Next(it) & END) == 0){
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
             }
-        }else if(fch->objType.state == FETCHER_OP_JUMP){
+        }else if(fch->objType.state == FETCHER_JUMP){
             TemplJump *jump = (TemplJump*)fch->key;
-            if(jump->type.state & FETCHER_OP_FOR){
+            if(jump->type.state & FETCHER_FOR){
                 Iter_PrevRemove(&templ->data);
                 Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
                 if((Iter_Next(it) & END) == 0){
@@ -43,9 +43,9 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                     Iter_GetByIdx(&templ->content, jump->destIdx);
                 }
             }
-        }else if(fch->objType.state == FETCHER_OP_END){
+        }else if(fch->objType.state == FETCHER_END){
             TemplJump *jump = TemplJump_Make(sm->m, templ->content.idx, -1);
-            Fetcher_SetOp(fch, FETCHER_OP_JUMP);
+            Fetcher_SetOp(fch, FETCHER_JUMP);
             fch->key = (Abstract *)jump;
 
             Iter it;
@@ -60,10 +60,10 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 Abstract *prev = Iter_Get(&it);
                 if(prev->type.of == TYPE_FETCHER){
                     Fetcher *item = (Fetcher *)prev;
-                    if(item->objType.state == FETCHER_OP_JUMP){
+                    if(item->objType.state == FETCHER_JUMP){
                        targetIdx = ((TemplJump *)item->key)->destIdx; 
                     }else if(item->objType.state & 
-                            (FETCHER_OP_WITH|FETCHER_OP_FOR|FETCHER_OP_IF|FETCHER_OP_IFNOT)){
+                            (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
                         jump->destIdx = it.idx;
                         jump->type.state =  item->type.state & UPPER_FLAGS;
                         break;
