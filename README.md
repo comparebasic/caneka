@@ -65,7 +65,7 @@ the build configuration(s) (found in the [builder](./artifact/src/builder/)
 folder). Small files named "build.c" are found throughout the codebase which 
 build the objects and executables for the runtime.
 
-Further customization can be found in the [build.c](./artifact/src/build.c)
+Further customization can be found in the [build.c](./artifact/src/ext/build.c)
 file, and the "build.c" files for each program, such as the 
 [test program](./artifact/src/programs/test/build.c).
 

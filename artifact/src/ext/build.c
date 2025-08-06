@@ -30,7 +30,7 @@ static char *staticLibs[] = {
 };
 
 /* sources */
-static BuildSubdir typesobj = { "ext/types", {
+static BuildSubdir typesobj = { "types", {
     "init.c",
     "fetcher.c",
     "types_typestrings.c",
@@ -38,12 +38,12 @@ static BuildSubdir typesobj = { "ext/types", {
     NULL
 }};
 
-static BuildSubdir docobj = { "ext/doc", {
+static BuildSubdir docobj = { "doc", {
     "licences.c",
     NULL
 }};
 
-static BuildSubdir navigateobj = { "ext/navigate", {
+static BuildSubdir navigateobj = { "navigate", {
     "node.c",
     "mess.c",
     "navigate_tos.c",
@@ -58,7 +58,7 @@ static BuildSubdir navigateobj = { "ext/navigate", {
     NULL
 }};
 
-static BuildSubdir parserobj = { "ext/parser", {
+static BuildSubdir parserobj = { "parser", {
     "match.c",
     "match_replace.c",
     "patchar.c",
@@ -71,14 +71,14 @@ static BuildSubdir parserobj = { "ext/parser", {
     NULL
 }};
 
-static BuildSubdir sequenceobj = { "ext/sequence", {
+static BuildSubdir sequenceobj = { "sequence", {
     "sequence.c",
-    "sequence_atts.c",
+    "sequence_cls.c",
     NULL
 }};
 
 
-static BuildSubdir transpobj = { "ext/transp", {
+static BuildSubdir transpobj = { "transp", {
     "transp.c",
     "transp_ctx.c",
     "transp_file.c",
@@ -87,12 +87,12 @@ static BuildSubdir transpobj = { "ext/transp", {
     NULL
 }};
 
-static BuildSubdir formatobj = { "ext/format", {
+static BuildSubdir formatobj = { "format", {
     "format.c",
     NULL
 }};
 
-static BuildSubdir fmtobj = { "ext/format/fmt", {
+static BuildSubdir fmtobj = { "format/fmt", {
     "fmt.c",
     "fmt_roebling.c",
     "fmt_tokenize.c",
@@ -100,18 +100,18 @@ static BuildSubdir fmtobj = { "ext/format/fmt", {
     NULL
 }};
 
-static BuildSubdir cashobj = { "ext/format/templ", {
+static BuildSubdir cashobj = { "format/templ", {
     "templ_roebling.c",
     NULL
 }};
 
 
-static BuildSubdir xmlobj = { "ext/format/xml", {
+static BuildSubdir xmlobj = { "format/xml", {
     "tag.c",
     NULL,
 }};
 
-static BuildSubdir persistobj = { "ext/persist", {
+static BuildSubdir persistobj = { "persist", {
     "persist_tos.c",
     "persist.c",
     "file.c",
@@ -153,7 +153,7 @@ int main(int argc, char **argv){
     ctx.libtarget = "libcaneka";
     ctx.version = "1.strvec-alpha";
     ctx.dist = "build";
-    ctx.src = "artifact/src";
+    ctx.src = "artifact/src/ext";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

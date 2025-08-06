@@ -1,15 +1,19 @@
 enum fetcher_flags {
-    FETCHER_FOR = 1 << 8,
-    FETCHER_WITH = 1 << 9,
-    FETCHER_IF = 1 << 10,
-    FETCHER_IFNOT = 1 << 11,
-    FETCHER_END = 1 << 12,
-    FETCHER_JUMP = 1 << 13,
+    FETCHER_VAR = 1 << 8,
+    FETCHER_FOR = 1 << 9,
+    FETCHER_WITH = 1 << 10,
+    FETCHER_IF = 1 << 11,
+    FETCHER_IFNOT = 1 << 12,
+    FETCHER_END = 1 << 13,
+    FETCHER_JUMP = 1 << 14,
 };
 
 typedef struct fetcher {
     Type type;
-    Span *targets;
+    union {
+        Span *targets;
+        Abstract *jump;
+    } val;
 } Fetcher;
 
 Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source);

@@ -4,7 +4,8 @@ enum fetch_target_flags {
     FETCH_TARGET_IDX = 1 << 10,
     FETCH_TARGET_SELF = 1 << 11,
     FETCH_TARGET_ITER = 1 << 12,
-    FETCH_TARGET_RESOLVED = 1 << 13,
+    FETCH_TARGET_FUNC = 1 << 13,
+    FETCH_TARGET_RESOLVED = 1 << 14,
 };
 
 typedef Abstract *(*FetchFunc)(struct fetch_target *target, Abstract *data, Abstract *source);

@@ -40,7 +40,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
         Out("^y.Fetch & from @^0.\n", args);
     }
     Iter it;
-    Iter_Init(&it, fch->targets);
+    Iter_Init(&it, fch->val.targets);
     Abstract *value = data;
     while(value != NULL && (Iter_Next(&it) & END) == 0){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
@@ -88,6 +88,6 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
 Fetcher *Fetcher_Make(MemCh *m){
     Fetcher *fch = (Fetcher *)MemCh_Alloc(m, sizeof(Fetcher));
     fch->type.of = TYPE_FETCHER;
-    fch->targets = Span_Make(m);
+    fch->val.targets = Span_Make(m);
     return fch;
 }

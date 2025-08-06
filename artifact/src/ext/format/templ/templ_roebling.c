@@ -138,8 +138,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Iter_Add(&ctx->it, (Abstract *)fch);
     }else if(captureKey == FORMAT_TEMPL_VAR_CLOSE){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
-        if(fch->targets->nvalues == 0){
-            fch->type.state = (fch->type.stat & NORMAL_FLAGS) | FETCHER_OP_END;
+        if(fch->val.targets->nvalues == 0){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_END;
         }
     }else if(captureKey > _FORMAT_TEMPL_VAR_BODY_START &&
             captureKey < _FORMAT_TEMPL_VAR_BODY_END){
@@ -148,7 +148,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(v->p->nvalues == 1){
             s = Span_Get(v->p, 0);
         }else{
-            s = Str_Make(m, v-total+1);
+            s = Str_Make(m, v->total+1);
             Iter it;
             Iter_Init(&it, v->p);
             while((Iter_Next(&it) & END) == 0){
@@ -176,7 +176,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }else{
                 tg = FetchTarget_MakeKey(m, s);
             }
-            Span_Add(fch->targets, tg);
+            fch->type.state |= FETCHER_VAR;
+            Span_Add(fch->val.targets, (Abstract *)tg);
         }
     }else if(captureKey > _FORMAT_TEMPL_LOGIC_START && 
             captureKey < _FORMAT_TEMPL_LOGIC_END){

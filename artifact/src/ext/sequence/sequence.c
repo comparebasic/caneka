@@ -3,6 +3,6 @@
 
 i64 Sequence_Init(MemCh *m){
     status r = READY;
-    r |= Sequence_AttsInit(m, AttsTableLookup); 
+    r |= Sequence_ClassInit(m, ClassLookup); 
     return r;
 }
