@@ -13,12 +13,11 @@ typedef Abstract *(*FetchFunc)(struct fetch_target *target, Abstract *data, Abst
 typedef struct fetch_target {
     Type type;
     Type objType;
-    union {
-        i16 offset;
-        i32 idx;
-        Str *key;
-        FetchFunc func;
-    } val;
+    word _;
+    i16 offset;
+    i32 idx;
+    Str *key;
+    FetchFunc func;
 } FetchTarget;
 
 FetchTarget *FetchTarget_Make(MemCh *m);

@@ -8,6 +8,7 @@ enum ext_types {
     TYPE_NODE,
     TYPE_FETCHER,
     TYPE_FETCH_TARGET,
+    TYPE_FETCH_FUNC,
     TYPE_CLASS_DEF,
     TYPE_CRYPTO_DIGEST,
     TYPE_FMT_LINE,

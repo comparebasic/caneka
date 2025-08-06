@@ -46,9 +46,9 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
         if(tg->type.state & FETCH_TARGET_RESOLVED){
             if(tg->type.state & FETCH_TARGET_ATT){
-                value = Fetch_FromOffset(m, value, tg->val.offset, tg->objType.of);
+                value = Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
             }else{
-                value = tg->val.func(tg, value, source);
+                value = tg->func(tg, value, source);
             }
         }else if(tg->type.state & FETCH_TARGET_SELF){
             continue;
@@ -57,18 +57,18 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
             if(cls != NULL){
                 if(tg->type.state & FETCH_TARGET_ATT){
                     Single *sg = (Single *)Table_Get(cls->attsTbl, 
-                        (Abstract *)tg->val.key);
+                        (Abstract *)tg->key);
                     if(sg != NULL){
-                        tg->val.offset = sg->val.w;
-                        value = Fetch_FromOffset(m, value, tg->val.offset, tg->objType.of);
+                        tg->offset = sg->val.w;
+                        value = Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
                         break;
                     }
                 }else if(tg->type.state & FETCH_TARGET_KEY){
-                    tg->val.func = cls->byKey;
+                    tg->func = cls->byKey;
                 }else if(tg->type.state & FETCH_TARGET_IDX){
-                    tg->val.func = cls->byIdx;
+                    tg->func = cls->byIdx;
                 }else if(tg->type.state & FETCH_TARGET_ITER){
-                    tg->val.func = cls->getIter;
+                    tg->func = cls->getIter;
                 }else{
                     value = NULL;
                     break;
