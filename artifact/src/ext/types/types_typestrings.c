@@ -2,13 +2,14 @@
 #include <caneka.h>
 
 static char *extTypeStrings[] = {
-    "_TYPE_EXT_START = _TYPE_BASE_END",
+    "_TYPE_EXT_START",
     "TYPE_MESS",
     "TYPE_MESS_CLIMBER",
     "TYPE_NODE",
     "TYPE_FETCHER",
     "TYPE_FETCH_TARGET",
     "TYPE_FETCH_FUNC",
+    "TYPE_CLASS_DEF",
     "TYPE_CRYPTO_DIGEST",
     "TYPE_FMT_LINE",
     "TYPE_SNIP",
@@ -82,8 +83,9 @@ static char *extTypeStrings[] = {
     "_FORMAT_TEMPL_VAR_BODY_START",
     "FORMAT_TEMPL_VAR_BODY",
     "FORMAT_TEMPL_VAR_PATH_SEP",
+    "FORMAT_TEMPL_VAR_FUNC_SEP",
     "FORMAT_TEMPL_VAR_ATT_SEP",
-    "FORMAT_TEMPL_VAR_IDX",
+    "FORMAT_TEMPL_VAR_IDX_SEP",
     "_FORMAT_TEMPL_VAR_BODY_END",
     "_FORMAT_TEMPL_LOGIC_START",
     "FORMAT_TEMPL_VAR_FOR",

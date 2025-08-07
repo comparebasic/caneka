@@ -53,8 +53,8 @@ boolean Exact(Abstract *a, Abstract *b){
             "Type not yet implemented with Exact", NULL);
             goto nonexact;
     }else{
-        if(func(a, b)){
-            goto exact;
+        if(!func(a, b)){
+            goto nonexact;
         }
     }
 exact:

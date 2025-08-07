@@ -3,8 +3,24 @@
 
 static boolean _init = FALSE;
 
+static boolean FetchTarget_Exact(FetchTarget  *a, FetchTarget *b){
+    if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS) ||
+            a->idx != b->idx || a->offset != b->offset || 
+            !Exact((Abstract *)a->key, (Abstract *)b->key)){
+        return FALSE;
+    }
+    return TRUE;
+}
+
 static boolean Fetcher_Exact(Fetcher *a, Fetcher *b){
-    return FALSE;
+    if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS)){
+        return FALSE;
+    }
+    if(a->type.state & FETCHER_JUMP){
+        return Exact((Abstract *)a->val.jump, (Abstract *)b->val.jump);
+    }else{
+        return Exact((Abstract *)a->val.targets, (Abstract *)b->val.targets);
+    }
 }
 
 static status Fetcher_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -114,6 +130,7 @@ status Types_ClsInit(MemCh *m){
     /* exact */
     lk = ExactLookup;
     r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)Fetcher_Exact); 
+    r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)FetchTarget_Exact); 
     return r;
 }
 

@@ -37,6 +37,7 @@ status TemplCtx_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
     Str *s = NULL; 
     Fetcher *fch = NULL;
+    FetchTarget *tg = NULL;
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "examples/example.templ"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
@@ -52,21 +53,21 @@ status TemplCtx_Tests(MemCh *gm){
         NULL);
 
     Span *expected = Span_Make(m);
-    /*
     char *cstr = "<ul>\n    ";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec *v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
-    StrVec *var = StrVec_Make(m);
+    fch = Fetcher_Make(m);
+    fch->type.state |= FETCHER_FOR;
     cstr = "items";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
-    StrVec_Add(var, s);
-    StrVec_Add(var, Str_Ref(m, (byte *)".", 1, 2, MORE));
+    tg = FetchTarget_MakeKey(m, s);
+    Span_Add(fch->val.targets, (Abstract *)tg);
     cstr = "menu";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
-    StrVec_Add(var, s);
-    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_FOR);
+    tg = FetchTarget_MakeKey(m, s);
+    Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
     cstr = "\n        <li><a href=\"";
@@ -74,12 +75,12 @@ status TemplCtx_Tests(MemCh *gm){
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
-    var = StrVec_Make(m);
-    StrVec_Add(var, Str_Ref(m, (byte *)"*", 1, 2, LAST));
+    fch = Fetcher_Make(m);
+    fch->type.state = FETCHER_VAR;
     cstr = "fullName";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
-    StrVec_Add(var, s);
-    fch = Fetcher_Make(m, var, -1, NULL, ZERO, ZERO);
+    tg = FetchTarget_MakeAtt(m, s);
+    Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
     cstr = "\">";
@@ -87,12 +88,13 @@ status TemplCtx_Tests(MemCh *gm){
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
-    var = StrVec_Make(m);
-    StrVec_Add(var, Str_Ref(m, (byte *)"*", 1, 2, LAST));
+    fch = Fetcher_Make(m);
+    fch->type.state = FETCHER_VAR;
+    cstr = "fullName";
     cstr = "name";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
-    StrVec_Add(var, s);
-    fch = Fetcher_Make(m, var, -1, NULL, ZERO, ZERO);
+    tg = FetchTarget_MakeAtt(m, s);
+    Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
     cstr = "</a>\n    ";
@@ -100,14 +102,14 @@ status TemplCtx_Tests(MemCh *gm){
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
-    fch = Fetcher_Make(m, var, -1, NULL, ZERO, FETCHER_END);
+    fch = Fetcher_Make(m);
+    fch->type.state = FETCHER_END;
     Span_Add(expected, (Abstract *)fch);
 
     cstr = "\n</ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
-    */
 
     Abstract *args[] = {
         (Abstract *)expected,
