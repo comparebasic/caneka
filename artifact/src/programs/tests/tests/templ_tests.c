@@ -68,6 +68,8 @@ status TemplCtx_Tests(MemCh *gm){
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeKey(m, s);
     Span_Add(fch->val.targets, (Abstract *)tg);
+    tg = FetchTarget_MakeIter(m);
+    Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
     cstr = "\n        <li><a href=\"";

@@ -1,7 +1,6 @@
 #include "navigate/node.h"
 #include "navigate/mess.h"
 #include "navigate/relation.h"
-#include "navigate/navigate_tos.h"
 #include "navigate/compare.h"
 #include "navigate/ordtable.h"
 #include "navigate/templ.h"
@@ -9,3 +8,5 @@
 #include "navigate/templ_jump.h"
 #include "navigate/nested.h"
 #include "navigate/frame.h"
+#include "navigate/navigate_tos.h"
+#include "navigate/navigate_cls.h"

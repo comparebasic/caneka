@@ -25,3 +25,4 @@ FetchTarget *FetchTarget_MakeKey(MemCh *m, Str *key);
 FetchTarget *FetchTarget_MakeAtt(MemCh *m, Str *att);
 FetchTarget *FetchTarget_MakeFunc(MemCh *m, Str *key);
 FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx);
+FetchTarget *FetchTarget_MakeIter(MemCh *m);

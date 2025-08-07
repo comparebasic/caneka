@@ -184,6 +184,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
         if(captureKey == FORMAT_TEMPL_VAR_FOR){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_FOR;
+            FetchTarget *tg = FetchTarget_MakeIter(m);
+            Span_Add(fch->val.targets, (Abstract *)tg);
         }else if(captureKey == FORMAT_TEMPL_VAR_IF){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_IF;
         }else if(captureKey == FORMAT_TEMPL_VAR_IFNOT){

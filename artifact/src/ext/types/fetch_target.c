@@ -28,6 +28,12 @@ FetchTarget *FetchTarget_MakeFunc(MemCh *m, Str *key){
     return tg;
 }
 
+FetchTarget *FetchTarget_MakeIter(MemCh *m){
+    FetchTarget *tg = FetchTarget_Make(m);
+    tg->type.state = FETCH_TARGET_ITER|FETCH_TARGET_SELF;
+    return tg;
+}
+
 FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx){
     FetchTarget *tg = FetchTarget_Make(m);
     tg->type.state = FETCH_TARGET_IDX;

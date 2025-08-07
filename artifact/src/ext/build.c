@@ -48,7 +48,6 @@ static BuildSubdir docobj = { "doc", {
 static BuildSubdir navigateobj = { "navigate", {
     "node.c",
     "mess.c",
-    "navigate_tos.c",
     "relation.c",
     "compare.c",
     "templ_ctx.c",
@@ -57,6 +56,8 @@ static BuildSubdir navigateobj = { "navigate", {
     "templ_jump.c",
     "nested.c",
     "frame.c",
+    "navigate_tos.c",
+    "navigate_cls.c",
     NULL
 }};
 
