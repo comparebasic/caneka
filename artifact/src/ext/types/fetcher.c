@@ -30,18 +30,17 @@ Abstract *Fetch_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf){
     return value;
 }
 
-Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
+Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
     if(1 || fch->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)fch,
-            (Abstract *)data,
+            (Abstract *)value,
             NULL,
         };
         Out("^c.Fetch & from @^0.\n", args);
     }
     Iter it;
     Iter_Init(&it, fch->val.targets);
-    Abstract *value = data;
     while(value != NULL && (Iter_Next(&it) & END) == 0){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
         if(tg->type.state & FETCH_TARGET_RESOLVED){
@@ -55,7 +54,11 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
         }else if(tg->type.state & FETCH_TARGET_SELF){
             continue;
         }else{
-            ClassDef *cls = Lookup_Get(ClassLookup, data->type.of);
+            cls typeOf = value->type.of;
+            if(typeOf == TYPE_WRAPPED_PTR){
+                typeOf = ((Single *)value)->objType.of;
+            }
+            ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
             printf(">>> Fetching Cls %p\n", cls);
             fflush(stdout);
             if(cls != NULL){
@@ -90,7 +93,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source){
                 value = tg->func(tg, value, source);
             }else{
                 Abstract *args[] = {
-                    (Abstract *)Type_ToStr(m, data->type.of),
+                    (Abstract *)Type_ToStr(m, value->type.of),
                     NULL
                 };
                 Error(m, (Abstract *)fch, FUNCNAME, FILENAME, LINENUMBER,

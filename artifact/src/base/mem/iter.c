@@ -447,7 +447,12 @@ status Iter_Next(Iter *it){
                     idx += _increments[dim];
 
                     if(dim == 0){
-                        if(ptr != NULL){
+                        if(ptr != NULL && 
+                            (it->maskFlags == ZERO || 
+                                ((Abstract *)*ptr)->type.state & it->maskFlags) ||
+                            (it->filterFlags == ZERO || 
+                                (((Abstract *)*ptr)->type.state & it->filterFlags) == 0)
+                            ){
                             it->value = *ptr;
                         }
                         if(skipNull){
@@ -472,7 +477,12 @@ status Iter_Next(Iter *it){
                                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                                     *ptr = it->value;
                                     it->p->nvalues++;
-                                }else if(ptr != NULL){
+                                }else if(ptr != NULL &&
+                                    (it->maskFlags == ZERO || 
+                                        ((Abstract *)*ptr)->type.state & it->maskFlags) ||
+                                    (it->filterFlags == ZERO || 
+                                        (((Abstract *)*ptr)->type.state & it->filterFlags) == 0)
+                                ){
                                     it->value = *ptr;
                                 }else{
                                     it->value = NULL;

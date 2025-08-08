@@ -11,6 +11,8 @@ enum span_ops {
 
 typedef struct iter {
     Type type;
+    status maskFlags;
+    status filterFlags;
     i32 idx;
     struct span *p;
     void *value;
