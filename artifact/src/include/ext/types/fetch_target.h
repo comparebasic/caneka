@@ -8,7 +8,7 @@ enum fetch_target_flags {
     FETCH_TARGET_RESOLVED = 1 << 14,
 };
 
-typedef Abstract *(*FetchFunc)(struct fetch_target *target, Abstract *data, Abstract *source);
+typedef Abstract *(*FetchFunc)(MemCh *m, struct fetch_target *target, Abstract *data, Abstract *source);
 
 typedef struct fetch_target {
     Type type;

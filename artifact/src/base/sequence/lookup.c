@@ -94,15 +94,11 @@ Lookup *LookupInt_Make(MemCh *m, word offset, Abstract *arg){
     return lk;
 }
 
-Lookup *Lookup_Make(MemCh *m, word offset, LookupPopulate populate, Abstract *arg){
+Lookup *Lookup_Make(MemCh *m, word offset){
     Lookup *lk = (Lookup *)MemCh_Alloc(m, sizeof(Lookup));
     lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
     lk->values = Span_Make(m);
-    lk->arg = arg;
-    if(populate != NULL){
-        populate(m, lk);
-    }
 
     return lk;
 }
