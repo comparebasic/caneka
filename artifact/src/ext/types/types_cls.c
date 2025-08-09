@@ -48,6 +48,10 @@ static status Fetcher_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
+static status FetchTargetFunc_Print(Stream *sm, Abstract *a, cls type, word flags){
+    return Fmt(sm, "FTFunc<>", NULL);
+}
+
 static status FetchTarget_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     FetchTarget *tg = (FetchTarget *)as(a, TYPE_FETCH_TARGET);
@@ -80,7 +84,7 @@ static status FetchTarget_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
     if(tg->type.state & FETCH_TARGET_FUNC){
         Abstract *args[] = {
-            (Abstract *)Ptr_Wrapped(sm->m, tg->func, FETCH_TARGET_FUNC),
+            (Abstract *)Ptr_Wrapped(sm->m, tg->func, TYPE_FETCH_FUNC),
             NULL
         };
         total += Fmt(sm, "func/@", args);
@@ -126,11 +130,13 @@ status Types_ClsInit(MemCh *m){
     lk = ToStreamLookup;
     r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)Fetcher_Print);
     r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)FetchTarget_Print);
+    r |= Lookup_Add(m, lk, TYPE_FETCH_FUNC, (void *)FetchTargetFunc_Print);
 
     /* exact */
     lk = ExactLookup;
     r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)Fetcher_Exact); 
     r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)FetchTarget_Exact); 
+
     return r;
 }
 

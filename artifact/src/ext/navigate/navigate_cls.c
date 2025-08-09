@@ -32,7 +32,7 @@ status Navigate_ClsInit(MemCh *m){
         cls = ClassDef_Make(m);
         cls->byKey = OrdTable_ByKey;
         cls->byIdx = OrdTable_ByIdx;
-        cls->getIter = OrdTable_ByIdx;
+        cls->getIter = OrdTable_GetIter;
         OrdTable otbl;
         Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "tbl"),
             (Abstract *)I16_Wrapped(m, (void *)(&otbl.tbl)-(void *)(&otbl)));

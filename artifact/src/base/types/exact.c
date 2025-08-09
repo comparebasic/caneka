@@ -16,10 +16,10 @@ boolean Exact(Abstract *a, Abstract *b){
     Abstract *args[] = {
         a, b, NULL
     };
-    if(a == NULL || b == NULL){
-        goto nonexact;
-    }else if(a == b){
+    if(a == b){
         goto exact;
+    }else if(a == NULL || b == NULL){
+        goto nonexact;
     }else if(a->type.of != b->type.of){
         goto nonexact;
     }else if(a->type.of == TYPE_STR){
@@ -60,7 +60,7 @@ boolean Exact(Abstract *a, Abstract *b){
 exact:
     return TRUE;
 nonexact:
-    if(a->type.state & DEBUG){
+    if(a != NULL && a->type.state & DEBUG){
         Out("^r.NonExact mismatch &\nvs\n&\n^0.", args);
     }
     return FALSE;

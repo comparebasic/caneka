@@ -31,7 +31,7 @@ Abstract *Fetch_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf){
 }
 
 Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
-    if(1 || fch->type.state & DEBUG){
+    if(fch->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)fch,
             (Abstract *)value,
@@ -45,8 +45,6 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
         if(tg->type.state & FETCH_TARGET_RESOLVED){
             if(tg->type.state & FETCH_TARGET_ATT){
-                printf(">>> Assigning by resolved att\n");
-                fflush(stdout);
                 value = Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
             }else{
                 value = tg->func(m, tg, value, source);
@@ -59,12 +57,15 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
                 typeOf = ((Single *)value)->objType.of;
             }
             ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
-            printf(">>> Fetching Cls %p\n", cls);
-            fflush(stdout);
             if(cls != NULL){
                 if(tg->type.state & FETCH_TARGET_ATT){
-                    printf(">>> Assigning by att\n");
-                    fflush(stdout);
+                    if(fch->type.state & DEBUG){
+                        Abstract *args[] = {
+                            (Abstract *)tg,
+                            NULL
+                        };
+                        Out("^p.Assigning by att &^0.\n", args);
+                    }
                     Single *sg = (Single *)Table_Get(cls->atts, 
                         (Abstract *)tg->key);
                     if(sg != NULL){
@@ -74,30 +75,41 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
                         continue;
                     }
                 }else if(tg->type.state & FETCH_TARGET_KEY){
-                    printf(">>> Assigning by key\n");
-                    fflush(stdout);
                     tg->func = cls->byKey;
+                    tg->type.state |= FETCH_TARGET_FUNC;
                 }else if(tg->type.state & FETCH_TARGET_IDX){
                     tg->func = cls->byIdx;
-                    printf(">>> Assigning by Idx\n");
-                    fflush(stdout);
+                    tg->type.state |= FETCH_TARGET_FUNC;
                 }else if(tg->type.state & FETCH_TARGET_ITER){
                     tg->func = cls->getIter;
-                    printf(">>> Assigning by Iter\n");
-                    fflush(stdout);
+                    tg->type.state |= FETCH_TARGET_FUNC;
                 }else{
                     value = NULL;
                     break;
                 }
                 tg->type.state |= FETCH_TARGET_RESOLVED;
+                if(tg->func == NULL){
+                    goto err;
+                }
+                if(fch->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)tg,
+                        (Abstract *)value,
+                        (Abstract *)source,
+                        NULL
+                    };
+                    Out("^p.Fetch Class Thingy from Target & for & source: @^0.\n", args);
+                }
                 value = tg->func(m, tg, value, source);
             }else{
                 Abstract *args[] = {
                     (Abstract *)Type_ToStr(m, value->type.of),
                     NULL
                 };
+err:
                 Error(m, (Abstract *)fch, FUNCNAME, FILENAME, LINENUMBER,
                     "Error ClassDef not found for $\n", args);
+                break;
             }
         }
     }

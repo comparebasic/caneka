@@ -30,7 +30,7 @@ FetchTarget *FetchTarget_MakeFunc(MemCh *m, Str *key){
 
 FetchTarget *FetchTarget_MakeIter(MemCh *m){
     FetchTarget *tg = FetchTarget_Make(m);
-    tg->type.state = FETCH_TARGET_ITER|FETCH_TARGET_SELF;
+    tg->type.state = FETCH_TARGET_ITER;
     return tg;
 }
 

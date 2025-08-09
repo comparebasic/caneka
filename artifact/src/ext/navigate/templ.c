@@ -14,16 +14,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     }else if(item->type.of == TYPE_FETCHER){
         Fetcher *fch = (Fetcher *)item;
         if(fch->type.state & FETCHER_VAR){
-            fch->type.state |= DEBUG;
             Abstract *value = Fetch(sm->m, fch, data, NULL);
-            printf("Fetcher var\n");
-            fflush(stdout);
-            Abstract *args[] = {
-                (Abstract *)value,
-                (Abstract *)fch,
-                NULL
-            };
-            Out("^y.Fetcher Var & from &^0.\n", args);
             if(value == NULL){
                 Abstract *args[] = {
                     (Abstract *)fch,
@@ -35,8 +26,6 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             }
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(fch->type.state & FETCHER_FOR){
-            printf("Fetcher for\n");
-            fflush(stdout);
             Iter *it = (Iter *)Fetch(sm->m, fch, data, NULL);
             Iter_Add(&templ->data,
                 (Abstract *)it);
