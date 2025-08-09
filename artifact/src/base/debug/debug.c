@@ -13,7 +13,7 @@ status Debug_Init(MemCh *m){
         DebugOut = Stream_MakeToFd(m, 0, NULL, 0);
     }
     if(TypeStringRanges == NULL){
-        TypeStringRanges = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        TypeStringRanges = Lookup_Make(m, _TYPE_ZERO);
         DebugTypeStrings_Init(m);
     }
     m->type.range++;

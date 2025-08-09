@@ -40,9 +40,9 @@ word Lookup_AbsFromIdx(Lookup *lk, word idx){
     return idx+lk->offset;
 }
 
-Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config, Abstract *arg){
+Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config){
     LookupConfig *cnf = config;
-    Lookup *lk = Lookup_Make(m, cnf->key, NULL, arg);
+    Lookup *lk = Lookup_Make(m, cnf->key);
     while(cnf->key != 0){
         Lookup_Add(m, lk, cnf->key, cnf->a); 
         cnf++;
@@ -84,12 +84,11 @@ status Lookup_Concat(MemCh *m, Lookup *lk, Lookup *add){
     return r;
 }
 
-Lookup *LookupInt_Make(MemCh *m, word offset, Abstract *arg){
+Lookup *LookupInt_Make(MemCh *m, word offset){
     Lookup *lk = (Lookup *)MemCh_Alloc(m, sizeof(Lookup));
     lk->type.of = TYPE_LOOKUP;
     lk->offset = offset;
     lk->values = Span_Make(m);
-    lk->arg = arg;
 
     return lk;
 }

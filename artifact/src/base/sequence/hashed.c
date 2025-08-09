@@ -69,20 +69,6 @@ static util Hash_WI16(Abstract *a){
     return (util)sg->val.w;
 }
 
-static status populateHash(MemCh *m, Lookup *lk){
-    status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
-    r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_PatMatch);
-    r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)Hash_PatCharDef);
-    r |= Lookup_Add(m, lk, TYPE_STR, (void *)Hash_Str);
-    r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)Hash_StrVec);
-    r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
-    r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
-    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)Hash_WI16);
-    return r;
-}
-
 util Hash_Bytes(byte *bt, size_t length){
 	util h = 5381;
     return _Hash_Bytes(bt, length, h);
@@ -133,8 +119,19 @@ Hashed *Hashed_Clone(MemCh *m, Hashed *oh){
 
 status Hash_Init(MemCh *m){
     if(HashLookup == NULL){
-        HashLookup = Lookup_Make(m, _TYPE_ZERO, populateHash, NULL);
-        return SUCCESS;
+        status r = READY;
+        HashLookup = Lookup_Make(m, _TYPE_ZERO);
+        Lookup *lk = HashLookup;
+        r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
+        r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_PatMatch);
+        r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)Hash_PatCharDef);
+        r |= Lookup_Add(m, lk, TYPE_STR, (void *)Hash_Str);
+        r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)Hash_StrVec);
+        r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
+        r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
+        r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)Hash_WI16);
+        return r;
     }
     return NOOP;
 }

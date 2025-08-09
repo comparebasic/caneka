@@ -77,6 +77,7 @@ static BuildSubdir parserobj = { "parser", {
 static BuildSubdir sequenceobj = { "sequence", {
     "sequence.c",
     "sequence_cls.c",
+    "table_utils.c",
     NULL
 }};
 

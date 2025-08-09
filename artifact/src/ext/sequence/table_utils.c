@@ -29,7 +29,7 @@ status Table_Overlay(Table *a, Table *b){
         if(_h != NULL){
             Hashed *h = Table_GetHashed(a, _h->key);
             if(h != NULL){
-                h->value = __h->value;
+                h->value = _h->value;
                 r |= SUCCESS;
             }else{
                 Table_Set(a, _h->key, _h->value);

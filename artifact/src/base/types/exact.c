@@ -6,7 +6,7 @@ Lookup *ExactLookup = NULL;
 status Exact_Init(MemCh *m){
     status r = READY;
     if(ExactLookup == NULL){
-        ExactLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        ExactLookup = Lookup_Make(m, _TYPE_ZERO);
         r |= SUCCESS;
     }
     return r;

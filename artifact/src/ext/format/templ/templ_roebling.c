@@ -209,7 +209,7 @@ Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source){
 
     rbl->capture = Capture;
     rbl->mess = Mess_Make(m);
-    rbl->mess->tokenizer = Lookup_Make(m, _APPS_TEMPL_START, NULL, NULL);
+    rbl->mess->tokenizer = Lookup_Make(m, _APPS_TEMPL_START);
     rbl->source = source;
     return rbl;
 }

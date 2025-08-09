@@ -127,7 +127,7 @@ boolean Ifc_Match(cls inst, cls ifc){
 
 status Ifc_Init(MemCh *m){
     if(SizeLookup == NULL){
-        SizeLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        SizeLookup = Lookup_Make(m, _TYPE_ZERO);
         return setSizeLookup(m, SizeLookup);
     }
     return NOOP;

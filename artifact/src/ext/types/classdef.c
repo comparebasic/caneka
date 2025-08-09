@@ -28,20 +28,20 @@ status Class_Register(MemCh *m, ClassDef *cls){
         }
     }
 
-    return Lookup_Add(ClassLookup, cls->objType.of);
+    return Lookup_Add(m, ClassLookup, cls->objType.of, cls);
 }
 
 ClassDef *ClassDef_Make(MemCh *m){
     ClassDef *cls = (ClassDef*)MemCh_Alloc(m, sizeof(ClassDef));
     cls->type.of = TYPE_CLASS_DEF;
-    cls->attsTbl = Table_Make(m);
-    cls->methodsTbl = Table_Make(m);
+    cls->atts = Table_Make(m);
+    cls->methods = Table_Make(m);
     return cls;
 }
 
 status ClassDef_Init(MemCh *m){
     if(ClassLookup == NULL){
-        ClassLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        ClassLookup = Lookup_Make(m, _TYPE_ZERO);
         return SUCCESS;
     }
     return NOOP;

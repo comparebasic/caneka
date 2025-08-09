@@ -29,8 +29,8 @@ status StreamTo_Init(MemCh *m){
         r |= SUCCESS;
     }
     if(ToStreamLookup == NULL){
-        ToStreamLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
-        ToSFlagLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        ToStreamLookup = Lookup_Make(m, _TYPE_ZERO);
+        ToSFlagLookup = Lookup_Make(m, _TYPE_ZERO);
         Mem_ToSInit(m, ToStreamLookup);
         Str_ToSInit(m, ToStreamLookup);
         Sequence_ToSInit(m, ToStreamLookup);

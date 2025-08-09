@@ -3,22 +3,21 @@
 
 Lookup *CloneLookup = NULL;
 
-static status populateClone(MemCh *m, Lookup *lk){
-    status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Clone);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_Clone);
-    r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Clone);
-    r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Clone);
-    r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Clone);
-    return r;
-}
-
 status Clone_Init(MemCh *m){
+    status r = READY;
     if(CloneLookup == NULL){
-        CloneLookup = Lookup_Make(m, _TYPE_ZERO, populateClone, NULL);
-        return SUCCESS;
+        CloneLookup = Lookup_Make(m, _TYPE_ZERO);
+        Lookup *lk = CloneLookup;
+        r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Clone);
+        r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Clone);
+        r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Clone);
     }
-    return NOOP;
+    if(r == READY){
+        r |= NOOP;
+    }
+    return r;
 }
 
 Abstract *Clone(MemCh *m, Abstract *a){

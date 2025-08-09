@@ -49,7 +49,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
                 fflush(stdout);
                 value = Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
             }else{
-                value = tg->func(tg, value, source);
+                value = tg->func(m, tg, value, source);
             }
         }else if(tg->type.state & FETCH_TARGET_SELF){
             continue;
@@ -65,7 +65,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
                 if(tg->type.state & FETCH_TARGET_ATT){
                     printf(">>> Assigning by att\n");
                     fflush(stdout);
-                    Single *sg = (Single *)Table_Get(cls->attsTbl, 
+                    Single *sg = (Single *)Table_Get(cls->atts, 
                         (Abstract *)tg->key);
                     if(sg != NULL){
                         tg->offset = sg->val.w;
@@ -90,7 +90,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
                     break;
                 }
                 tg->type.state |= FETCH_TARGET_RESOLVED;
-                value = tg->func(tg, value, source);
+                value = tg->func(m, tg, value, source);
             }else{
                 Abstract *args[] = {
                     (Abstract *)Type_ToStr(m, value->type.of),

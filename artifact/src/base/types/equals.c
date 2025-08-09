@@ -6,7 +6,7 @@ Lookup *EqualsLookup = NULL;
 status Equals_Init(MemCh *m){
     status r = READY;
     if(EqualsLookup == NULL){
-        EqualsLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        EqualsLookup = Lookup_Make(m, _TYPE_ZERO);
         Mem_EqInit(m, EqualsLookup);
         Sequence_EqInit(m, EqualsLookup);
         Util_EqInit(m, EqualsLookup);

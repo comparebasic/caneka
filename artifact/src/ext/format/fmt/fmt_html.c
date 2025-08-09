@@ -198,7 +198,7 @@ status Fmt_ToHtml(Stream *sm, Mess *mess){
 status FmtToHtml_Init(MemCh *m){
     status r = READY;
     if(fmtToHtmlLookup == NULL){
-        fmtToHtmlLookup = Lookup_Make(m, _TYPE_ZERO, NULL, NULL);
+        fmtToHtmlLookup = Lookup_Make(m, _TYPE_ZERO);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_INDENT, headerFunc);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_PARAGRAPH, paragraphFunc);
         Lookup_Add(m, fmtToHtmlLookup, FORMATTER_TAG, tagFunc);

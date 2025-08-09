@@ -67,13 +67,13 @@ status Transp_Init(MemCh *m){
         /* cls */
         ClassDef *cls = ClassDef_Make(m);
         TranspFile tp;
-        Table_Set(cls->attsTbl, (Abstract *)Str_CstrRef(m, "name"),
+        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "name"),
             (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        Table_Set(cls->attsTbl, (Abstract *)Str_CstrRef(m, "local"),
+        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "local"),
             (Abstract *)I16_Wrapped(m, (void *)(&tp.local)-(void *)(&tp)));
-        Table_Set(cls->attsTbl, (Abstract *)Str_CstrRef(m, "src"),
+        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "src"),
             (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        Table_Set(cls->attsTbl, (Abstract *)Str_CstrRef(m, "dest"),
+        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "dest"),
             (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
         r |= Lookup_Add(m, lk, TYPE_TRANSP_FILE, (void *)cls);
 
