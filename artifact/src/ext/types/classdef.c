@@ -3,6 +3,17 @@
 
 Lookup *ClassLookup = NULL;
 
+Abstract *ClassDef_Undefined(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+    Abstract *args[] = {
+        (Abstract *)Type_ToStr(m, data->type.of),
+        NULL
+    };
+    Error(m, (Abstract *)source, FUNCNAME, FILENAME, LINENUMBER, 
+        "ClassDef not defined for this type $\n", args);
+    return NULL;
+}
+
+
 status Class_Register(MemCh *m, ClassDef *cls){
     if(cls->toS != NULL){
         Lookup_Add(m, ToStreamLookup, cls->objType.of, (void *)cls->toS);
@@ -36,6 +47,7 @@ ClassDef *ClassDef_Make(MemCh *m){
     cls->type.of = TYPE_CLASS_DEF;
     cls->atts = Table_Make(m);
     cls->methods = Table_Make(m);
+    cls->byKey = cls->byIdx = cls->getIter = ClassDef_Undefined;
     return cls;
 }
 

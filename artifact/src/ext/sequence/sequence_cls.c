@@ -3,11 +3,21 @@
 
 static boolean _init = FALSE;
 
+static Abstract *OrdTable_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+    OrdTable *otbl = (OrdTable *)as(data, TYPE_ORDTABLE);
+    Hashed *h = OrdTable_Get(otbl, (Abstract *)fg->key);
+    if(h != NULL){
+        return h->value;
+    }
+    return NULL;
+}
+
 status Sequence_ClassInit(MemCh *m, Lookup *lk){
     status r = READY;
 
     if(!_init){
         _init = TRUE;
+        /* hashed */
         Hashed h;
         ClassDef *cls = ClassDef_Make(m);
 
@@ -36,6 +46,24 @@ status Sequence_ClassInit(MemCh *m, Lookup *lk){
         Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "_"), (Abstract *)sg);
 
         r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)cls);
+
+        /* span */
+        Span p;
+        cls = ClassDef_Make(m);
+
+        sg = NULL;
+        sg = I16_Wrapped(m, (void *)(&p.nvalues)-(void *)(&p));
+        sg->objType.of = TYPE_I32;
+        Table_Set(cls->atts,
+            (Abstract *)Str_CstrRef(m, "count"), (Abstract *)sg);
+
+        sg = I16_Wrapped(m, (void *)(&p.max_idx)-(void *)(&p));
+        sg->objType.of = TYPE_I32;
+        Table_Set(cls->atts,
+            (Abstract *)Str_CstrRef(m, "maxIdx"), (Abstract *)sg);
+
+        r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)cls);
+
     }
 
     if(r == READY){

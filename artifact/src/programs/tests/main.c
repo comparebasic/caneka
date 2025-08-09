@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include <www.h>
 #include <tests.h>
 
 static status test(MemCh *m){
@@ -248,6 +249,12 @@ static TestSet _Tests[] = {
         "TemplLogic Tests",
         TemplLogic_Tests,
         "Testing templating logic tags in a few loops over variables.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Html Nav Tests",
+        HtmlNav_Tests,
+        "Testing Html Nav Templating.",
         FEATURE_COMPLETE,
     },
     /*

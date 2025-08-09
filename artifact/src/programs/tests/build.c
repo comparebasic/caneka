@@ -17,6 +17,7 @@ static char *cflags[] = {
 
 static char *inc[] = {
     "-I./artifact/src/include/",
+    "-I./artifact/src/www/include/",
     "-I./artifact/src/programs/tests/include/",
     NULL
 };
@@ -24,6 +25,7 @@ static char *inc[] = {
 static char *staticLibs[] = {
     "./build/libcnkbase/libcnkbase.a",
     "./build/libcaneka/libcaneka.a",
+    "./build/libcnkwww/libcnkwww.a",
     NULL
 };
 
@@ -65,6 +67,7 @@ static BuildSubdir testsobj = { "tests", {
     "templ_tests.c",
     "nested_tests.c",
     "path_tests.c",
+    "html_nav_tests.c",
     NULL
 }};
 

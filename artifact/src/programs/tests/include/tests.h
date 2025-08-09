@@ -49,3 +49,4 @@ status Path_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);
+status HtmlNav_Tests(MemCh *gm);
