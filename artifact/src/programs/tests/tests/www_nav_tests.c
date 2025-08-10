@@ -2,7 +2,7 @@
 #include <caneka.h>
 #include <www.h>
 
-status HtmlNav_Tests(MemCh *gm){
+status WwwNav_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
     TranspFile *tp = NULL;
@@ -22,10 +22,12 @@ status HtmlNav_Tests(MemCh *gm){
     tp->local = StrVec_From(m, Str_CstrRef(m, "/base/index.html"));
     Nav_Add(nav, (Abstract *)tp);
 
+    Nav *mem = Nav_Make(m);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Mem"));
     tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem.html"));
-    Nav_Add(nav, (Abstract *)tp);
+    Nav_Add(mem, (Abstract *)tp);
+    Nav_Add(nav, (Abstract *)mem);
 
     Nav *str = Nav_Make(m);
     tp = TranspFile_Make(m); 
@@ -59,6 +61,11 @@ status HtmlNav_Tests(MemCh *gm){
     Nav_Add(str, (Abstract *)tp);
 
     Nav_Add(nav, (Abstract *)str);
+    Abstract *args[] = {
+        (Abstract *)nav,
+        NULL
+    };
+    Out("^p.&\n", args);
     /*
 
     OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)nav);

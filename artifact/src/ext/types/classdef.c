@@ -36,6 +36,9 @@ status Class_Register(MemCh *m, ClassDef *cls){
             if(cls->getIter == NULL){
                 cls->getIter = parent->getIter;
             }
+            if(cls->toS == NULL){
+                cls->toS = parent->toS;
+            }
         }
     }
 

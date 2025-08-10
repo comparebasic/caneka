@@ -15,6 +15,7 @@ typedef i64 (*StreamAbsFunc)(struct stream *sm, Abstract *a);
 typedef struct stream {
     Type type;
     i32 fd;
+    i32 indent;
     MemCh *m;
     StreamFunc func;
     union {
@@ -43,3 +44,4 @@ Stream *Stream_MakeFromFd(MemCh *m, i32 fd, word flags);
 Stream *Stream_MakeToFd(MemCh *m, i32 fd, StrVec *v, word flags);
 Stream *Stream_Make(MemCh *m);
 StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func);
+i64 Stream_IndentOut(Stream *sm);

@@ -35,4 +35,4 @@ Single *B_Wrapped(MemCh *m, byte b, cls typeOf, word state);
 Range *Range_Wrapped(MemCh *m, word r);
 #define Abs_FromPtrOfType(sg, t) ((sg) != NULL && \
     (sg)->type.of == TYPE_WRAPPED_PTR \
-    && (sg)->objType.of == (t))
+    && ((Single *)sg)->objType.of == (t))

@@ -1,0 +1,14 @@
+#include <external.h>
+#include <caneka.h>
+#include <www.h>
+
+static char *strings[] = {
+    "_TYPE_WWW_START",
+    "TYPE_HTML_NAV",
+    "_TYPE_WWW_END",
+    NULL
+};
+
+status WwwStrings_Init(MemCh *m){
+    return Lookup_Add(m, TypeStringRanges, _TYPE_WWW_START, (void *)strings);
+}

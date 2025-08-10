@@ -1,6 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
+i64 Stream_IndentOut(Stream *sm){
+    i64 total = 0;
+    if(sm->indent > 0){
+        i32 indent = sm->indent;
+        while(indent--){
+            total += Stream_Bytes(sm, (byte *)"  ", 2);
+        }
+    }
+    return total;
+}
+
 StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func){
     StreamTask *tsk = (StreamTask *)MemCh_Alloc(m, sizeof(StreamTask));
     tsk->type.of = TYPE_STREAM_TASK;

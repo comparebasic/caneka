@@ -33,9 +33,15 @@ static BuildSubdir html = { "html", {
     NULL
 }};
 
+static BuildSubdir types = { "types", {
+    "init.c",
+    "strings.c",
+    NULL
+}};
 
 static BuildSubdir *objdirs[] = {
     &html,
+    &types,
     NULL
 };
 

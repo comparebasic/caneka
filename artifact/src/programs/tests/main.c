@@ -252,8 +252,8 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Html Nav Tests",
-        HtmlNav_Tests,
+        "Www Nav Tests",
+        WwwNav_Tests,
         "Testing Html Nav Templating.",
         FEATURE_COMPLETE,
     },
@@ -318,6 +318,7 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
+    Www_Init(m);
     DebugStack_Push(NULL, 0);
 
     if(argc == 2 && strncmp(argv[1], "--licence", strlen("--licence")) == 0){
