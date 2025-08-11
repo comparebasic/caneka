@@ -66,6 +66,11 @@ status WwwNav_Tests(MemCh *gm){
         NULL
     };
     Out("^p.&\n", args);
+
+    
+    tp = (TranspFile *)Fetch_ByAtt(m, (Abstract *)nav, Str_CstrRef(m, "index"), NULL);
+    Iter *it = (Iter *)Fetch_Iter(m, (Abstract *)nav, NULL);
+    
     /*
 
     OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)nav);

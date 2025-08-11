@@ -12,7 +12,7 @@ $CC -g -I ./artifact/src/include -I ./artifact/src/programs/builder/include -c \
 echo "building Caneka Build Config" && \
 $CC -o build/build_ext -I artifact/src/include build/libcnkbase/libcnkbase.a build/libbuilder/libbuilder.a artifact/src/ext/build.c -lm && \
 echo "building Caneka Ext..." && \
-./build/build_ext
+./build/build_ext && \
 $CC -o build/build_www -I artifact/src/include build/libcnkbase/libcnkbase.a build/libbuilder/libbuilder.a artifact/src/www/build.c -lm && \
 echo "building Caneka Www..." && \
 ./build/build_www
