@@ -2,7 +2,25 @@
 #include <caneka.h>
 
 static char *keyTestContent = ""
-    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>My Fancy Page</title>\n<link href=\"style.css\" rel=\"stylesheet\" />\n  <meta \n    name=\"viewport\"\n    content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\"\n  >\n</head>\n<body>\n<header>\n    <div class=\"section\">\n        <div class=\"logo-blocker\"></div>\n        <a class=\"hero\" href=\"/\">\n        <h1>caneka</h1>\n        </a>\n        <h2>The Anti-Syntax Runtime</h2>\n        <span class=\"menu-action\" onclick=\"menu()\">=</span>\n    </div>\n    <nav>\n  <ul>\n    <li>item one</li>\n    <li>item two</li>\n  </ul>\n</nav>\n    <script type=\"text/javascript\" src=\"menu.js\"></script>\n</header>\n"
+"<!DOCTYPE html>\n"
+"<html lang=\"en\">\n"
+"<head>\n"
+"<meta charset=\"utf-8\">\n"
+"<title>My Fancy Page</title>\n"
+"  <meta \n"
+"    name=\"viewport\"\n"
+"    content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\"\n"
+"  >\n"
+"</head>\n"
+"<body>\n"
+"<header>\n"
+"    <nav>\n"
+"    <ul>\n"
+"        <li>item one</li>\n"
+"        <li>item two</li>\n"
+"    </ul>\n"
+"    </nav>\n"
+"</header>\n"
 "";
 
 static char *logicTestContent = ""
@@ -121,7 +139,7 @@ status TemplCtx_Tests(MemCh *gm){
 
     r |= TestShow(Exact((Abstract *)expected, (Abstract *)ctx->it.p), 
         "Expected content found in example templ", 
-        "Mismatch in content found in example templ, expected:\n&\nhave:\n &", args);
+        "Mismatch in content found in example templ, expected:\n$\nhave:\n $", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
@@ -132,7 +150,7 @@ status Templ_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/header.html"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/header.html"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);
@@ -147,7 +165,7 @@ status Templ_Tests(MemCh *gm){
 
     OrdTable *data = OrdTable_Make(m);
     StrVec *menu = StrVec_From(m,
-        Str_CstrRef(m, "<nav>\n  <ul>\n    <li>item one</li>\n    <li>item two</li>\n  </ul>\n</nav>"));
+        Str_CstrRef(m, "<nav>\n    <ul>\n        <li>item one</li>\n        <li>item two</li>\n    </ul>\n    </nav>"));
     Str *title = Str_CstrRef(m, "My Fancy Page");
     OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "menu"), (Abstract *)menu);
     OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
@@ -163,9 +181,10 @@ status Templ_Tests(MemCh *gm){
         (Abstract *)sm->dest.curs->v,
         NULL
     };
+    expected->type.state |= DEBUG;
     r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
         "Templ key value test has expected content", 
-        "Templ key value mismatch test has expected content, expected:\n$\n\nhave:\n$", 
+        "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n&", 
         args);
 
     MemCh_Free(m);
@@ -176,7 +195,7 @@ status TemplLogic_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/nav.html"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.html"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);
@@ -215,7 +234,7 @@ status TemplLogic_Tests(MemCh *gm){
     };
     r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
         "Temple key value test has expected content", 
-        "Temple key value test mismatch, expected $\nhave\n$", 
+        "Temple key value test mismatch, expected @\nhave\n@", 
         args);
 
 
