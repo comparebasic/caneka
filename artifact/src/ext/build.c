@@ -35,6 +35,7 @@ static BuildSubdir typesobj = { "types", {
     "types_typestrings.c",
     "classdef.c",
     "fetcher.c",
+    "fetch_target.c",
     "types_cls.c",
     NULL
 }};
