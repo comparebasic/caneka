@@ -40,12 +40,14 @@ Nav *Nav_Make(MemCh *m){
 }
 
 Abstract *Nav_GetIndex(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source){
-    Span *p = (Span *)as(item, TYPE_SPAN); 
+    Single *sg = (Single *)as(item, TYPE_WRAPPED_PTR);
+    Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN); 
     return Span_Get(p, 0);
 }
 
 Abstract *Nav_PathsIter(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source){
-    Span *p = (Span *)as(item, TYPE_SPAN); 
+    Single *sg = (Single *)as(item, TYPE_WRAPPED_PTR);
+    Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN); 
     Iter *it = Iter_Make(m, p);
     Iter_Next(it);
     return (Abstract *)it;

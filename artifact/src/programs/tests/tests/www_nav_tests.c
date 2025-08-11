@@ -25,7 +25,23 @@ status WwwNav_Tests(MemCh *gm){
     Nav *mem = Nav_Make(m);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Mem"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem.html"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/index.html"));
+    Nav_Add(mem, (Abstract *)tp);
+    tp = TranspFile_Make(m); 
+    tp->name = StrVec_From(m, Str_CstrRef(m, "Iter"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/iter.html"));
+    Nav_Add(mem, (Abstract *)tp);
+    tp = TranspFile_Make(m); 
+    tp->name = StrVec_From(m, Str_CstrRef(m, "MemCh"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/memch.html"));
+    Nav_Add(mem, (Abstract *)tp);
+    tp = TranspFile_Make(m); 
+    tp->name = StrVec_From(m, Str_CstrRef(m, "MemBook"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/membook.html"));
+    Nav_Add(mem, (Abstract *)tp);
+    tp = TranspFile_Make(m); 
+    tp->name = StrVec_From(m, Str_CstrRef(m, "MemPage"));
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/mempage.html"));
     Nav_Add(mem, (Abstract *)tp);
     Nav_Add(nav, (Abstract *)mem);
 
@@ -61,37 +77,46 @@ status WwwNav_Tests(MemCh *gm){
     Nav_Add(str, (Abstract *)tp);
 
     Nav_Add(nav, (Abstract *)str);
+
     Abstract *args[] = {
         (Abstract *)nav,
         NULL
     };
     Out("^p.&\n", args);
-
     
-    tp = (TranspFile *)Fetch_ByAtt(m, (Abstract *)nav, Str_CstrRef(m, "index"), NULL);
-    Iter *it = (Iter *)Fetch_Iter(m, (Abstract *)nav, NULL);
-    
-    /*
+    tp = (TranspFile *)Fetch_Method(m, (Abstract *)nav, Str_CstrRef(m, "index"), NULL);
 
-    OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)nav);
-
-    Stream *sm = Stream_MakeStrVec(m);
-    
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    i64 total = Templ_ToS(templ, sm, data, NULL);
-
-    Str *expected = Str_CstrRef(m, logicTestContent);
-    Abstract *args[] = {
-        (Abstract *)expected,
-        (Abstract *)sm->dest.curs->v,
+    Abstract *args1[] = {
+        (Abstract *)tp,
         NULL
     };
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
-        "Temple key value test has expected content", 
-        "Temple key value test mismatch, expected $\nhave\n$", 
-        args);
+    r |= Test(tp != NULL && 
+        Equals((Abstract *)tp->local, (Abstract *)Str_CstrRef(m, "/base/index.html")),
+        "Index method returns expected first item @", args1);
 
-    */
+    Iter *it = Fetch_Iter(m, (Abstract *)nav, NULL);
+    r |= Test(it != NULL && it->type.of == TYPE_ITER, "Iter returns ITER type", NULL);
+
+    Iter_Next(it);
+    Nav *nv = (Nav *)Iter_Get(it);
+    Abstract *args2[] = {
+        (Abstract *)nv,
+        NULL
+    };
+    r |= Test(nv != NULL && nv->type.of == TYPE_WRAPPED_PTR && 
+            ((Single *)nv)->objType.of == TYPE_HTML_NAV, 
+        "first item is nav @", args2);
+
+    Str *expected = Str_CstrRef(m, "/base/mem/index.html");
+    tp = (TranspFile *)Fetch_Method(m, (Abstract *)nv, Str_CstrRef(m, "index"), NULL);
+    Abstract *args3[] = {
+        (Abstract *)expected, 
+        (Abstract *)tp, 
+        NULL
+    };
+    r |= Test(tp != NULL && 
+        Equals((Abstract *)tp->local, (Abstract *)expected),
+        "First nav index is expected @ from @", args3);
 
     MemCh_Free(m);
     return r;

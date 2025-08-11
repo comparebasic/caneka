@@ -2,20 +2,23 @@
 #include <caneka.h>
 
 Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source){
+    Abstract *args[5];
+    ClassDef *cls = NULL;
+    word typeOf = ZERO;
     if(tg->type.state & FETCH_TARGET_RESOLVED){
         if(tg->type.state & FETCH_TARGET_ATT){
-            value = Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
+            return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
         }else{
-            value = tg->func(m, tg, value, source);
+            return tg->func(m, tg, value, source);
         }
     }else if(tg->type.state & FETCH_TARGET_SELF){
         return value;
     }else{
-        cls typeOf = value->type.of;
+        typeOf = value->type.of;
         if(typeOf == TYPE_WRAPPED_PTR){
             typeOf = ((Single *)value)->objType.of;
         }
-        ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
+        cls = Lookup_Get(ClassLookup, typeOf);
         if(cls != NULL){
             if(tg->type.state & FETCH_TARGET_ATT){
                 Single *sg = (Single *)Table_Get(cls->atts, 
@@ -26,6 +29,9 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
                     tg->type.state |= FETCH_TARGET_RESOLVED;
                     return value;
                 }
+            }else if(tg->type.state & FETCH_TARGET_METHOD){
+                tg->func = (FetchFunc)Table_Get(cls->methods, (Abstract *)tg->key); 
+                tg->type.state |= FETCH_TARGET_FUNC;
             }else if(tg->type.state & FETCH_TARGET_KEY){
                 tg->func = cls->byKey;
                 tg->type.state |= FETCH_TARGET_FUNC;
@@ -38,16 +44,20 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             }else{
                 goto err;
             }
+            if(tg->func == NULL){
+                goto err;
+            }
             tg->type.state |= FETCH_TARGET_RESOLVED;
-            value = tg->func(m, tg, value, source);
+            return tg->func(m, tg, value, source);
         }else{
-            Abstract *args[] = {
-                (Abstract *)Type_ToStr(m, value->type.of),
-                NULL
-            };
 err:
+            args[0] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
+            args[1] = (Abstract *)tg;
+            args[2] = (Abstract *)Type_ToStr(m, typeOf);
+            args[3] = (Abstract *)cls;
+            args[4] = NULL;
             Error(m, (Abstract *)tg, FUNCNAME, FILENAME, LINENUMBER,
-                "Error ClassDef not found for $\n", args);
+                "Error ClassDef X or prop not found for $ using @ class $/@\n", args);
             return NULL;
         }
     }
@@ -64,9 +74,14 @@ Abstract *Fetch_ByAtt(MemCh *m, Abstract *a, Str *att, Abstract *source){
     return Fetch_Target(m, tg, a, source);
 }
 
-Abstract *Fetch_Iter(MemCh *m, Abstract *a, Abstract *source){
-    FetchTarget *tg = FetchTarget_MakeIter(m);
+Abstract *Fetch_Method(MemCh *m, Abstract *a, Str *method, Abstract *source){
+    FetchTarget *tg = FetchTarget_MakeMethod(m, method);
     return Fetch_Target(m, tg, a, source);
+}
+
+Iter *Fetch_Iter(MemCh *m, Abstract *a, Abstract *source){
+    FetchTarget *tg = FetchTarget_MakeIter(m);
+    return (Iter *)Fetch_Target(m, tg, a, source);
 }
 
 FetchTarget *FetchTarget_Make(MemCh *m){
@@ -106,5 +121,12 @@ FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx){
     FetchTarget *tg = FetchTarget_Make(m);
     tg->type.state = FETCH_TARGET_IDX;
     tg->idx = idx;
+    return tg;
+}
+
+FetchTarget *FetchTarget_MakeMethod(MemCh *m, Str *method){
+    FetchTarget *tg = FetchTarget_Make(m);
+    tg->type.state = FETCH_TARGET_METHOD;
+    tg->key = method;
     return tg;
 }

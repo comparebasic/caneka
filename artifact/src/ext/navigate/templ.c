@@ -18,10 +18,11 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             if(value == NULL){
                 Abstract *args[] = {
                     (Abstract *)fch,
+                    (Abstract *)data,
                     NULL,
                 };
                 Error(sm->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER,
-                    "Error finding value @\n",args);
+                    "Error finding value using @ in data @\n",args);
                 return total;
             }
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
