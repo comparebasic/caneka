@@ -279,65 +279,6 @@ static i64 Frame_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
-static i64 Nested_Print(Stream *sm, Abstract *a, cls type, word flags){
-    i64 total = 0;
-    i16 guard = 0;
-    Nested *_nd = (Nested *)as(a, TYPE_NESTED);
-    Nested *nd = Nested_Make(sm->m);
-    Nested_SetRoot(nd, Nested_GetRoot(_nd));
-    Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
-        (Abstract *)&nd->it,
-        NULL
-    };
-    total += Fmt(sm, "Nested<$ \\@@", args);
-    if(flags & DEBUG){
-        total = Stream_Bytes(sm, (byte *)"\n", 1);
-        i32 indent = _nd->it.idx + 1;
-        Iter it;
-        while(TRUE){
-            Guard_Incr(&guard, 32, FUNCNAME, FILENAME, LINENUMBER);
-            Frame *fm = Iter_Current(&nd->it);
-            while((Iter_Next(&fm->it) & END) == 0){
-                Abstract *item = Iter_Get(&fm->it);
-                if(item->type.of == TYPE_HASHED){
-                    Hashed *h = (Hashed *)item;
-                    total += indentStream(sm, indent);
-                    total += ToS(sm, h->key, 0, MORE);
-                    if(h->value->type.of == TYPE_ORDTABLE || h->value->type.of == TYPE_SPAN){
-                        Nested_IndentByIdx(nd, fm->it.idx);
-                        indent++;
-                        total += Stream_Bytes(sm, (byte *)" ->\n", 4);
-                        break;
-                    }else{
-                        total += Stream_Bytes(sm, (byte *)" -> ", 4);
-                        total += ToS(sm, (Abstract *)h->value, 0, MORE);
-                        if(fm->it.type.state & LAST){
-                            total += Stream_Bytes(sm, (byte *)"\n", 1);
-                        }else{
-                            total += Stream_Bytes(sm, (byte *)",\n", 2);
-                        }
-                    }
-                }else{
-                    total += indentStream(sm, indent);
-                    total += ToS(sm, (Abstract *)item, 0, MORE);
-                    total += Stream_Bytes(sm, (byte *)",\n", 2);
-                }
-            }
-            if(fm->it.type.state & END){
-                indent--;
-                if(nd->it.idx == 0){
-                    break;
-                }else{
-                    Iter_Pop(&nd->it); 
-                }
-            }
-        }
-    }
-    total += Stream_Bytes(sm, (byte *)">", 1);
-    return total;
-}
-
 status Navigate_InitLabels(MemCh *m, Lookup *lk){
     status r = READY;
     /*
@@ -375,7 +316,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR_FOR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_LOGIC_END, (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, TYPE_NESTED, (void *)Nested_Print);
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
     return r;
 }

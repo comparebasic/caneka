@@ -54,7 +54,6 @@ static BuildSubdir navigateobj = { "navigate", {
     "ordtable.c",
     "templ.c",
     "templ_jump.c",
-    "nested.c",
     "frame.c",
     "navigate_tos.c",
     "navigate_cls.c",
