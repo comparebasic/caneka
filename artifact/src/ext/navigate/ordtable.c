@@ -22,7 +22,7 @@ OrdTable *OrdTable_GetOrMake(OrdTable *otbl, Abstract *key){
     }
 }
 
-status OrdTable_AddByPath(OrdTable *otbl, StrVec *path, Str *name, Abstract *value){
+status OrdTable_AddByPath(OrdTable *otbl, StrVec *path, Abstract *value){
     DebugStack_Push(otbl, otbl->type.state);
     status r = READY;
     Iter keysIt;

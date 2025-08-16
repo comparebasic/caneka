@@ -3,15 +3,15 @@
 #include <www.h>
 
 static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
-    Span *p = (Span *)as(a, TYPE_SPAN);
+    OrdTable *ot = (OrdTable *)as(a, TYPE_ORDTABLE);
     Abstract *args[] = {
-        (Abstract *)I32_Wrapped(sm->m, p->nvalues-1),
+        (Abstract *)I32_Wrapped(sm->m, ot->order->nvalues-1),
         NULL
     };
     i8 indent = 1;
     i64 total = Fmt(sm, "Www.Nav<^D.$^d.count\n", args);
     Iter it;
-    Iter_Init(&it, p);
+    Iter_Init(&it, ot->order);
     Single *sg = I32_Wrapped(sm->m, 0);
     boolean nested = FALSE;
     sm->indent++;
@@ -35,20 +35,25 @@ static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
+status Nav_Add(Nav *nav, StrVec *path, Abstract *a){
+    OrdTable *ot = (OrdTable *)as(nav->val.ptr, TYPE_ORDTABLE); 
+    return OrdTable_AddByPath(ot, path, a);
+}
+
 Nav *Nav_Make(MemCh *m){
-    return Ptr_Wrapped(m, Span_Make(m), TYPE_HTML_NAV);
+    return Ptr_Wrapped(m, OrdTable_Make(m), TYPE_HTML_NAV);
 }
 
 Abstract *Nav_GetIndex(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source){
     Single *sg = (Single *)as(item, TYPE_WRAPPED_PTR);
-    Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN); 
-    return Span_Get(p, 0);
+    OrdTable *ot = (OrdTable *)as(sg->val.ptr, TYPE_ORDTABLE); 
+    return Span_Get(ot->order, 0);
 }
 
 Abstract *Nav_PathsIter(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source){
     Single *sg = (Single *)as(item, TYPE_WRAPPED_PTR);
-    Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN); 
-    Iter *it = Iter_Make(m, p);
+    OrdTable *ot = (OrdTable *)as(sg->val.ptr, TYPE_ORDTABLE); 
+    Iter *it = Iter_Make(m, ot->order);
     Iter_Next(it);
     return (Abstract *)it;
 }
@@ -57,7 +62,7 @@ status Nav_ClsInit(MemCh *m){
     status r = READY;
     ClassDef *cls = ClassDef_Make(m);
     cls->objType.of = TYPE_HTML_NAV;
-    cls->parentType.of = TYPE_SPAN;
+    cls->parentType.of = TYPE_ORDTABLE;
     cls->name = Str_CstrRef(m, "Nav");
     cls->getIter = Nav_PathsIter;
     cls->methods = Table_Make(m);

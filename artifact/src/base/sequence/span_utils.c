@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+Span *Span_CopyRange(MemCh *m, Span *p, Coord *cr){
+    Span *ret = Span_Make(m);
+    Iter it;
+    Iter_Init(&it, p);
+    Iter_GetByIdx(&it, (i32)cr->a);
+    while(it.idx < cr->b && (Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        Span_Add(ret, a);
+    }
+    return ret;
+}
+
 i32 Span_Capacity(Span *p){
     i32 increment = _increments[p->dims];
     return increment * SPAN_STRIDE;

@@ -173,7 +173,7 @@ status Templ_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    i64 total = Templ_ToS(templ, sm, data, NULL);
+    i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
     Abstract *args[] = {
@@ -224,7 +224,7 @@ status TemplLogic_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    i64 total = Templ_ToS(templ, sm, data, NULL);
+    i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
     Abstract *args[] = {

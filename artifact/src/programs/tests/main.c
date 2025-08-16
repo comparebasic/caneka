@@ -248,6 +248,12 @@ static TestSet _Tests[] = {
     {
         "Www Nav Tests",
         WwwNav_Tests,
+        "Testing Html Nav Features.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Www Nav Templ Tests",
+        WwwNavTempl_Tests,
         "Testing Html Nav Templating.",
         FEATURE_COMPLETE,
     },

@@ -24,6 +24,14 @@ status Path_RangeOf(MemCh *m, StrVec *path, word sep, Coord *cr){
     return r;
 }
 
+StrVec *Path_Base(MemCh *m, StrVec *path){
+    StrVec *v = StrVec_Make(m);
+    Coord *cr = Coord_Make(m, 0, 0);
+    Path_RangeOf(m, path, MORE, cr);
+    v->p = Span_CopyRange(m, path->p, cr);
+    return v;
+}
+
 status Path_Around(MemCh *m, StrVec *path, word sep, Coord *cr){
     status r = READY;
     cr->a = cr->b = -1;

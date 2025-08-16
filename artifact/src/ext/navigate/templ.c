@@ -95,11 +95,11 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     return total;
 }
 
-i64 Templ_ToS(Templ *templ, Stream *sm, OrdTable *data, Abstract *source){
+i64 Templ_ToS(Templ *templ, Stream *sm, Abstract *data, Abstract *source){
     i64 total = 0;
     i16 g = 0;
     Span *p = Span_Make(sm->m);
-    Span_Add(p, (Abstract *)data);
+    Span_Add(p, data);
     Iter_Init(&templ->data, p);
     Iter_Next(&templ->data);
     while((total = Templ_ToSCycle(templ, sm, total, source)) && 
