@@ -57,9 +57,21 @@ static PatCharDef varIfNotDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef varItemDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '@', '@'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varImpliedDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '_', '_'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef varIdxDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '#', '#'},
-    {PAT_MANY|PAT_TERM, '0', '9'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '#', '#'},
+    {PAT_ANY|PAT_TERM, '0', '9'},
     {PAT_END, 0, 0}
 };
 
@@ -106,14 +118,24 @@ static status varBody(MemCh *m, Roebling *rbl){
     mt->type.state |= MATCH_ACCEPT_EMPTY;
     r |= Roebling_SetPattern(rbl,
         varAttSepDef, FORMAT_TEMPL_VAR_ATT_SEP, FORMAT_TEMPL_VAR_BODY);
+    r |= Roebling_SetPattern(rbl,
+        varIdxDef, FORMAT_TEMPL_VAR_IDX, FORMAT_TEMPL_VAR_BODY);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+    r |= Roebling_SetPattern(rbl,
+        varItemDef, FORMAT_TEMPL_VAR_ITEM, FORMAT_TEMPL_VAR_BODY);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+    r |= Roebling_SetPattern(rbl,
+        varImpliedDef, FORMAT_TEMPL_VAR_IMPLIED, FORMAT_TEMPL_VAR_BODY);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
 
     /*
     r |= Roebling_SetPattern(rbl,
         varIfDef, FORMAT_TEMPL_VAR_ENDFOR, FORMAT_TEMPL_VAR_BODY);
     r |= Roebling_SetPattern(rbl,
         varIfNotDef, FORMAT_TEMPL_VAR_IFNOT, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varIdxDef, FORMAT_TEMPL_VAR_IDX, FORMAT_TEMPL_VAR_BODY);
     */
     return r;
 }
@@ -163,7 +185,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_ATT;
         }else if(captureKey == FORMAT_TEMPL_VAR_FUNC_SEP){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_FUNC;
-        }else if(captureKey == FORMAT_TEMPL_VAR_IDX_SEP){
+        }else if(captureKey == FORMAT_TEMPL_VAR_IDX){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_IDX;
         }else{
             FetchTarget *tg = NULL;
