@@ -3,9 +3,9 @@
 
 static boolean _init = FALSE;
 
-static Abstract *OrdTable_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
-    OrdTable *otbl = (OrdTable *)as(data, TYPE_ORDTABLE);
-    Hashed *h = OrdTable_Get(otbl, (Abstract *)fg->key);
+static Abstract *PathTable_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+    PathTable *pt = (PathTable *)as(data, TYPE_PATHTABLE);
+    Hashed *h = PathTable_Get(pt, (Abstract *)fg->key);
     if(h != NULL){
         return h->value;
     }

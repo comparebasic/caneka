@@ -1,4 +1,4 @@
-/* Nav < OrdTable */ 
+/* Nav < PathTable */ 
 
 typedef Single Nav;
 

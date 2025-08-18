@@ -3,6 +3,11 @@
 
 #include "config.h"
 #include "base.h"
-#include "ext.h"
+#ifdef CNK_EXT
+    #include "ext.h"
+#endif
+#ifdef CNK_WWW
+    #include "www.h"
+#endif
 
 #endif

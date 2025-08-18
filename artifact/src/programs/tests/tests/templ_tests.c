@@ -163,12 +163,12 @@ status Templ_Tests(MemCh *gm){
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
 
-    OrdTable *data = OrdTable_Make(m);
+    PathTable *data = PathTable_Make(m);
     StrVec *menu = StrVec_From(m,
         Str_CstrRef(m, "<nav>\n    <ul>\n        <li>item one</li>\n        <li>item two</li>\n    </ul>\n    </nav>"));
     Str *title = Str_CstrRef(m, "My Fancy Page");
-    OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "menu"), (Abstract *)menu);
-    OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
+    PathTable_Set(data, (Abstract *)Str_CstrRef(m, "menu"), (Abstract *)menu);
+    PathTable_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
 
     Stream *sm = Stream_MakeStrVec(m);
     
@@ -208,18 +208,18 @@ status TemplLogic_Tests(MemCh *gm){
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
 
-    OrdTable *data = OrdTable_Make(m);
-    OrdTable *menuItems = OrdTable_Make(m);
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/mem"),
+    PathTable *data = PathTable_Make(m);
+    PathTable *menuItems = PathTable_Make(m);
+    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/mem"),
         (Abstract *)Str_CstrRef(m, "/base/mem.html"));
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
+    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
         (Abstract *)Str_CstrRef(m, "/base/str.html"));
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/io"),
+    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/io"),
         (Abstract *)Str_CstrRef(m, "/base/io.html"));
-    OrdTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/suite"),
+    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/suite"),
         (Abstract *)Str_CstrRef(m, "/base/suite.html"));
 
-    OrdTable_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
+    PathTable_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
 
     Stream *sm = Stream_MakeStrVec(m);
     

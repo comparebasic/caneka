@@ -216,9 +216,9 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "OrdTable Tests",
-        OrdTable_Tests,
-        "OrdTable tests of ordered table of add/get.",
+        "PathTable Tests",
+        PathTable_Tests,
+        "PathTable tests of ordered table of add/get.",
         FEATURE_COMPLETE,
     },
     {

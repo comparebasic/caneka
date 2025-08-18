@@ -3,15 +3,15 @@
 #include <www.h>
 
 static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
-    OrdTable *ot = (OrdTable *)as(a, TYPE_ORDTABLE);
+    PathTable *pt = (PathTable *)as(a, TYPE_PATHTABLE);
     Abstract *args[] = {
-        (Abstract *)I32_Wrapped(sm->m, ot->order->nvalues-1),
+        (Abstract *)I32_Wrapped(sm->m, pt->order->nvalues-1),
         NULL
     };
     i8 indent = 1;
     i64 total = Fmt(sm, "Www.Nav<^D.$^d.count\n", args);
     Iter it;
-    Iter_Init(&it, ot->order);
+    Iter_Init(&it, pt->order);
     Single *sg = I32_Wrapped(sm->m, 0);
     boolean nested = FALSE;
     sm->indent++;
@@ -36,24 +36,24 @@ static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
 }
 
 status Nav_Add(Nav *nav, StrVec *path, Abstract *a){
-    OrdTable *ot = (OrdTable *)as(nav->val.ptr, TYPE_ORDTABLE); 
-    return OrdTable_AddByPath(ot, path, a);
+    PathTable *pt = (PathTable *)as(nav->val.ptr, TYPE_PATHTABLE); 
+    return PathTable_AddByPath(pt, path, a);
 }
 
 Nav *Nav_Make(MemCh *m){
-    return Ptr_Wrapped(m, OrdTable_Make(m), TYPE_HTML_NAV);
+    return Ptr_Wrapped(m, PathTable_Make(m), TYPE_HTML_NAV);
 }
 
 Abstract *Nav_GetIndex(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source){
     Single *sg = (Single *)as(item, TYPE_WRAPPED_PTR);
-    OrdTable *ot = (OrdTable *)as(sg->val.ptr, TYPE_ORDTABLE); 
-    return Span_Get(ot->order, 0);
+    PathTable *pt = (PathTable *)as(sg->val.ptr, TYPE_PATHTABLE); 
+    return Span_Get(pt->order, 0);
 }
 
 Abstract *Nav_PathsIter(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source){
     Single *sg = (Single *)as(item, TYPE_WRAPPED_PTR);
-    OrdTable *ot = (OrdTable *)as(sg->val.ptr, TYPE_ORDTABLE); 
-    Iter *it = Iter_Make(m, ot->order);
+    PathTable *pt = (PathTable *)as(sg->val.ptr, TYPE_PATHTABLE); 
+    Iter *it = Iter_Make(m, pt->order);
     Iter_Next(it);
     return (Abstract *)it;
 }
@@ -62,7 +62,7 @@ status Nav_ClsInit(MemCh *m){
     status r = READY;
     ClassDef *cls = ClassDef_Make(m);
     cls->objType.of = TYPE_HTML_NAV;
-    cls->parentType.of = TYPE_ORDTABLE;
+    cls->parentType.of = TYPE_PATHTABLE;
     cls->name = Str_CstrRef(m, "Nav");
     cls->getIter = Nav_PathsIter;
     cls->methods = Table_Make(m);

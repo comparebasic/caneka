@@ -91,8 +91,8 @@ DocCtx *DocCtx_Make(MemCh *m){
     ctx->type.of = TYPE_DOC_CTX;
     ctx->m = m;
     ctx->nav = Nested_Make(m);
-    ctx->pages = OrdTable_Make(m);
-    ctx->modules = OrdTable_Make(m);
+    ctx->pages = PathTable_Make(m);
+    ctx->modules = PathTable_Make(m);
     ctx->fmtPath = Str_Make(m, STR_DEFAULT);
     return ctx;
 }

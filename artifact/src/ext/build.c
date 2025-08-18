@@ -13,6 +13,7 @@ static Executable targets[] = {
 static char *cflags[] = {
         "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
         "-DINSECURE",
+        "-DCNK_EXT",
         NULL
 };
 static char *inc[] = {
@@ -51,7 +52,7 @@ static BuildSubdir navigateobj = { "navigate", {
     "relation.c",
     "compare.c",
     "templ_ctx.c",
-    "ordtable.c",
+    "pathtable.c",
     "templ.c",
     "templ_jump.c",
     "frame.c",

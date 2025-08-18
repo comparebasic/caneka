@@ -218,8 +218,8 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
-    OrdTable *otbl = (OrdTable *)as(a, TYPE_ORDTABLE);
+static i64 PathTable_Print(Stream *sm, Abstract *a, cls type, word flags){
+    PathTable *otbl = (PathTable *)as(a, TYPE_PATHTABLE);
     if(flags & DEBUG){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
@@ -227,14 +227,14 @@ static i64 OrdTable_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)otbl->order,
             NULL
         };
-        return Fmt(sm, "OrdTable<^D.$^d.nvalues @/[@]>", args);
+        return Fmt(sm, "PathTable<^D.$^d.nvalues @/[@]>", args);
     }else if(flags & MORE){
         i64 total = 0;
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
             NULL
         };
-        total += Fmt(sm, "OrdTable<^D.$^d.nvalues [", args);
+        total += Fmt(sm, "PathTable<^D.$^d.nvalues [", args);
         Iter it;
         Iter_Init(&it, otbl->order);
         while((Iter_Next(&it) & END) == 0){
@@ -312,7 +312,7 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
-    r |= Lookup_Add(m, lk, TYPE_ORDTABLE, (void *)OrdTable_Print);
+    r |= Lookup_Add(m, lk, TYPE_PATHTABLE, (void *)PathTable_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR_FOR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_LOGIC_END, (void *)TemplItem_Print);

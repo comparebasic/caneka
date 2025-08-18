@@ -8,8 +8,8 @@ typedef struct doc_ctx {
     MemCh *m;
     Table *args;
     Nested *nav;
-    OrdTable *pages;
-    OrdTable *modules;
+    PathTable *pages;
+    PathTable *modules;
     Str *fmtPath;
 } DocCtx;
 

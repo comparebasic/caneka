@@ -11,6 +11,8 @@ static Executable targets[] = {
 static char *cflags[] = {
         "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
         "-DINSECURE",
+        "-DCNK_EXT",
+        "-DCNK_WWW",
         NULL
 };
 static char *inc[] = {
