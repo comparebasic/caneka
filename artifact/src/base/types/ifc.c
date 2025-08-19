@@ -22,9 +22,6 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_BOOK, (util)sizeof(MemBook));
     r |= Lookup_AddRaw(m, lk, TYPE_MEMCTX, (util)sizeof(MemCh));
     r |= Lookup_AddRaw(m, lk, TYPE_MEMSLAB, (util)sizeof(MemPage));
-    r |= Lookup_AddRaw(m, lk, TYPE_MESS, (util)sizeof(Mess));
-    r |= Lookup_AddRaw(m, lk, TYPE_MESS_CLIMBER, (util)sizeof(MessClimber));
-    r |= Lookup_AddRaw(m, lk, TYPE_NODE, (util)sizeof(Node));
     r |= Lookup_AddRaw(m, lk, TYPE_STR, (util)sizeof(Str));
     r |= Lookup_AddRaw(m, lk, TYPE_STRVEC, (util)sizeof(StrVec));
     r |= Lookup_AddRaw(m, lk, TYPE_STREAM, (util)sizeof(Stream));
@@ -34,59 +31,12 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_TESTSUITE, (util)sizeof(TestSet));
     r |= Lookup_AddRaw(m, lk, TYPE_SNIP, (util)sizeof(Snip));
     r |= Lookup_AddRaw(m, lk, TYPE_SNIPSPAN, (util)sizeof(Span));
-    r |= Lookup_AddRaw(m, lk, TYPE_ROEBLING, (util)sizeof(Roebling));
-    r |= Lookup_AddRaw(m, lk, TYPE_PATMATCH, (util)sizeof(Match));
-    /*
-    r |= Lookup_AddRaw(m, lk, TYPE_IOCTX, (util)TYPE_IOCTX);
-    r |= Lookup_AddRaw(m, lk, TYPE_ACCESS, (util)TYPE_ACCESS);
-    r |= Lookup_AddRaw(m, lk, TYPE_PERMISSION, (util)TYPE_PERMISSION);
-    r |= Lookup_AddRaw(m, lk, TYPE_AUTH, (util)TYPE_AUTH);
-    */
     r |= Lookup_AddRaw(m, lk, TYPE_SPAN, (util)sizeof(Span));
     r |= Lookup_AddRaw(m, lk, TYPE_TABLE, (util)sizeof(Table));
-    r |= Lookup_AddRaw(m, lk, TYPE_RELATION, (util)sizeof(Relation));
-    /*
-    r |= Lookup_AddRaw(m, lk, TYPE_ARRAY, (util)TYPE_ARRAY);
-    */
     r |= Lookup_AddRaw(m, lk, TYPE_HKEY, (util)sizeof(HKey));
-    /*
-    r |= Lookup_AddRaw(m, lk, TYPE_ORDERED_TABLE, (util)TYPE_ORDERED_TABLE);
-    r |= Lookup_AddRaw(m, lk, TYPE_COORDS, (util)TYPE_COORDS);
-    r |= Lookup_AddRaw(m, lk, TYPE_SLAB, (util)TYPE_SLAB);
-    */
     r |= Lookup_AddRaw(m, lk, TYPE_HASHED, (util)sizeof(Hashed));
-    /*
-    r |= Lookup_AddRaw(m, lk, TYPE_MEMPAIR, (util)TYPE_MEMPAIR);
-    r |= Lookup_AddRaw(m, lk, TYPE_FILE, (util)TYPE_FILE);
-    r |= Lookup_AddRaw(m, lk, TYPE_SPOOL, (util)TYPE_SPOOL);
-    r |= Lookup_AddRaw(m, lk, TYPE_LOOKUP, (util)TYPE_LOOKUP);
-    r |= Lookup_AddRaw(m, lk, TYPE_PROCDETS, (util)TYPE_PROCDETS);
-    */
     r |= Lookup_AddRaw(m, lk, TYPE_ITER, (util)sizeof(Iter));
     r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED, (util)sizeof(Single));
-    /*
-    r |= Lookup_AddRaw(m, lk, TYPE_TRANSP, (util)TYPE_TRANSP);
-    */
-    r |= Lookup_AddRaw(m, lk, TYPE_TOKENIZE, (util)sizeof(Tokenize));
-    /*
-    r |= Lookup_AddRaw(m, lk, TYPE_DEBUG_STACK, (util)TYPE_DEBUG_STACK);
-    r |= Lookup_AddRaw(m, lk, TYPE_DEBUG_STACK_ENTRY, (util)TYPE_DEBUG_STACK_ENTRY);
-    r |= Lookup_AddRaw(m, lk, TYPE_TARGET, (util)TYPE_TARGET);
-    r |= Lookup_AddRaw(m, lk, TYPE_SOURCE, (util)TYPE_SOURCE);
-    r |= Lookup_AddRaw(m, lk, TYPE_PROC_IO_SET, (util)TYPE_PROC_IO_SET);
-    r |= Lookup_AddRaw(m, lk, TYPE_SERVECTX, (util)TYPE_SERVECTX);
-    r |= Lookup_AddRaw(m, lk, TYPE_HANDLER, (util)TYPE_HANDLER);
-    r |= Lookup_AddRaw(m, lk, TYPE_REQ, (util)TYPE_REQ);
-    r |= Lookup_AddRaw(m, lk, TYPE_PROTO, (util)TYPE_PROTO);
-    r |= Lookup_AddRaw(m, lk, TYPE_PROTODEF, (util)TYPE_PROTODEF);
-    r |= Lookup_AddRaw(m, lk, TYPE_IO_PROTO, (util)TYPE_IO_PROTO);
-    r |= Lookup_AddRaw(m, lk, TYPE_IO_PROTODEF, (util)TYPE_IO_PROTODEF);
-    r |= Lookup_AddRaw(m, lk, TYPE_SUB_PROTO, (util)TYPE_SUB_PROTO);
-    r |= Lookup_AddRaw(m, lk, TYPE_SUB_PROTODEF, (util)TYPE_SUB_PROTODEF);
-    r |= Lookup_AddRaw(m, lk, TYPE_STEP, (util)TYPE_STEP);
-    r |= Lookup_AddRaw(m, lk, TYPE_SECURE_PRIVKEY, (util)TYPE_SECURE_PRIVKEY);
-    r |= Lookup_AddRaw(m, lk, TYPE_SECURE_PUBKEY, (util)TYPE_SECURE_PUBKEY);
-    */
 
     return r;
 }

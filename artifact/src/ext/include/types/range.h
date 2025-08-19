@@ -19,7 +19,6 @@ enum ext_types {
     TYPE_PATCHAR,
     TYPE_PATCHARDEF,
     TYPE_IOCTX,
-    TYPE_ACCESS,
     TYPE_PERMISSION,
     TYPE_AUTH,
     TYPE_RELATION,

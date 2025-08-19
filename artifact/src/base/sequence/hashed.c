@@ -20,18 +20,6 @@ static util Hash_Ptr(void *ptr){
     return _Hash_Bytes((byte *)&ptr, sizeof(void *), h);
 }
 
-static util Hash_Abstract(Abstract *a){
-    return 0;
-}
-
-static util Hash_PatMatch(Abstract *a){
-    return 0;
-}
-
-static util Hash_PatCharDef(Abstract *a){
-    return 0;
-}
-
 static util Hash_Str(Abstract *a){
     Str *s = (Str *)asIfc(a, TYPE_STR);
 	util h = 5381;
@@ -123,11 +111,8 @@ status Hash_Init(MemCh *m){
         HashLookup = Lookup_Make(m, _TYPE_ZERO);
         Lookup *lk = HashLookup;
         r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
-        r |= Lookup_Add(m, lk, TYPE_PATMATCH, (void *)Hash_PatMatch);
-        r |= Lookup_Add(m, lk, TYPE_PATCHARDEF, (void *)Hash_PatCharDef);
         r |= Lookup_Add(m, lk, TYPE_STR, (void *)Hash_Str);
         r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)Hash_StrVec);
-        r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Hash_Req);
         r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
         r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
         r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)Hash_WI16);
