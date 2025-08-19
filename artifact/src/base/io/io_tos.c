@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <base.h>
 
 i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, word flags){
     ProcDets *pd = (ProcDets *)as(a, TYPE_PROCDETS);

@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <base.h>
 
 static Span *pathSeps = NULL;
 

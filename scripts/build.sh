@@ -3,7 +3,7 @@ CC="clang"
 
 mkdir -p ./build/libcnkbase/ && \
 echo "building Caneka Base" && \
-$CC -g -Wno-gnu-folding-constant -I artifact/src/include -I artifact/src/base/include -c \
+$CC -g -Wno-gnu-folding-constant -I artifact/src/base/include -I artifact/src/include -c \
     -o ./build/libcnkbase/libcnkbase.a ./artifact/src/base/inc.c -DINSECURE && \
 mkdir -p ./build/libbuilder/ && \
 echo "building Caneka Builder" && \

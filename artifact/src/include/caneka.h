@@ -2,12 +2,12 @@
 #define __CNK_HEADER
 
 #include "config.h"
-#include "base.h"
+#include <base_module.h>
 #ifdef CNK_EXT
-    #include "ext.h"
+    #include <ext_module.h>
 #endif
 #ifdef CNK_WWW
-    #include "www.h"
+    #include <www_module.h>
 #endif
 
 #endif
