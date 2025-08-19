@@ -4,6 +4,7 @@
 static Nav *makeNav(MemCh *m){
     TranspFile *tp = NULL;
     Nav *nav = Nav_Make(m);
+    Nav_SetStatus(m, (Abstract *)nav, DEBUG);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Base"));
     tp->local = StrVec_From(m, Str_CstrRef(m, "/base/index.html"));

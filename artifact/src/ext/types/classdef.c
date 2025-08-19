@@ -13,7 +13,6 @@ Abstract *ClassDef_Undefined(MemCh *m, FetchTarget *fg, Abstract *data, Abstract
     return NULL;
 }
 
-
 status Class_Register(MemCh *m, ClassDef *cls){
     if(cls->toS != NULL){
         Lookup_Add(m, ToStreamLookup, cls->objType.of, (void *)cls->toS);

@@ -34,6 +34,36 @@ static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
+status Nav_SetStatus(MemCh *m, Abstract *a, status flags){
+    status r = READY;
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
+    PathTable *pt = (PathTable *)as(sg->val.ptr, TYPE_PATHTABLE); 
+    if(flags & DEBUG){
+        sg->objType.state |= DEBUG;
+        pt->type.state |= DEBUG;
+        r |= SUCCESS;
+    }
+    if(r == READY){
+        r |= NOOP;
+    }
+    return r;
+}
+
+status Nav_UnSetStatus(MemCh *m, Abstract *a, status flags){
+    status r = READY;
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
+    PathTable *pt = (PathTable *)as(sg->val.ptr, TYPE_PATHTABLE); 
+    if((flags & DEBUG) == 0){
+        sg->objType.state &= ~DEBUG;
+        pt->type.state &= ~DEBUG;
+        r |= SUCCESS;
+    }
+    if(r == READY){
+        r |= NOOP;
+    }
+    return r;
+}
+
 status Nav_Add(Nav *nav, StrVec *path, Abstract *a){
     PathTable *pt = (PathTable *)as(nav->val.ptr, TYPE_PATHTABLE); 
     return PathTable_AddByPath(pt, path, a);
@@ -66,6 +96,8 @@ status Nav_ClsInit(MemCh *m){
     cls->getIter = Nav_PathsIter;
     cls->methods = Table_Make(m);
     cls->toS = Nav_Print;
+    cls->setStatus = Nav_SetStatus;
+    cls->unSetStatus = Nav_UnSetStatus;
     Table_Set(cls->methods, (Abstract *)Str_CstrRef(m, "index"), (void *)Nav_GetIndex);
 
     r |= Class_Register(m, cls);

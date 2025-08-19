@@ -10,6 +10,8 @@ typedef struct classdef {
     FetchFunc byKey;
     FetchFunc byIdx;
     FetchFunc getIter;
+    FlagFunc setStatus;
+    FlagFunc unSetStatus;
     ToSFunc toS;
     /*
     boolean Equals

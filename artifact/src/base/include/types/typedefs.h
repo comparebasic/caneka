@@ -4,3 +4,4 @@ typedef Abstract *(*Maker)(struct mem_ctx *m, Abstract *a); /* mk */
 typedef status (*SourceFunc)(struct mem_ctx *m, Abstract *a, Abstract *source);
 typedef Abstract *(*KeyFunc)(Abstract *a, Abstract *key, Abstract *source);
 typedef boolean (*EqFunc)(Abstract *a, Abstract *b);
+typedef status (*FlagFunc)(MemCh *m, Abstract *a, status flags);
