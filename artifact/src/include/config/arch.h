@@ -20,4 +20,6 @@
 #define MAX_PTR_ARR 128
 #define NEGATIVE -1
 #define FILE_SLURP_MAX 16777216 
+#define FILE_READ_LENGTH 1023
+#define FILE_READ_MAX 16777216
 #endif

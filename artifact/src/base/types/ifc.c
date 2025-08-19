@@ -29,8 +29,6 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_FMT_LINE, (util)sizeof(FmtLine));
     r |= Lookup_AddRaw(m, lk, TYPE_CURSOR, (util)sizeof(Cursor));
     r |= Lookup_AddRaw(m, lk, TYPE_TESTSUITE, (util)sizeof(TestSet));
-    r |= Lookup_AddRaw(m, lk, TYPE_SNIP, (util)sizeof(Snip));
-    r |= Lookup_AddRaw(m, lk, TYPE_SNIPSPAN, (util)sizeof(Span));
     r |= Lookup_AddRaw(m, lk, TYPE_SPAN, (util)sizeof(Span));
     r |= Lookup_AddRaw(m, lk, TYPE_TABLE, (util)sizeof(Table));
     r |= Lookup_AddRaw(m, lk, TYPE_HKEY, (util)sizeof(HKey));
@@ -60,10 +58,7 @@ boolean Ifc_Match(cls inst, cls ifc){
         return TRUE;
     }
 
-    if(ifc == TYPE_MEMCTX){
-        return inst == TYPE_SPAN || inst == TYPE_REQ || inst == TYPE_SERVECTX 
-            || inst == TYPE_ROEBLING;
-    }else if(ifc == TYPE_WRAPPED){
+    if(ifc == TYPE_WRAPPED){
         return (inst == TYPE_WRAPPED_DO || inst == TYPE_WRAPPED_UTIL ||
             inst == TYPE_WRAPPED_FUNC || inst == TYPE_WRAPPED_PTR ||
             inst == TYPE_WRAPPED_I64 || inst == TYPE_WRAPPED_I32 ||

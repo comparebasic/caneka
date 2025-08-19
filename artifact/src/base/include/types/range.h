@@ -62,5 +62,7 @@ enum types {
     TYPE_ACCESS,
     TYPE_DEBUG_STACK,
     TYPE_DEBUG_STACK_ENTRY,
+    TYPE_CLI_STATUS,
+    TYPE_FMT_LINE,
     _TYPE_BASE_END,
 };

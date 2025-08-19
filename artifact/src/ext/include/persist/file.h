@@ -1,8 +1,4 @@
-#define FILE_READ_LENGTH 1023
-
 /* enum flags shared with stream */
-
-#define FILE_READ_MAX 16777216
 
 typedef struct file {
     Type type;

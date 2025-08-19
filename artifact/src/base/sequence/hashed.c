@@ -110,7 +110,6 @@ status Hash_Init(MemCh *m){
         status r = READY;
         HashLookup = Lookup_Make(m, _TYPE_ZERO);
         Lookup *lk = HashLookup;
-        r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Hash_Abstract);
         r |= Lookup_Add(m, lk, TYPE_STR, (void *)Hash_Str);
         r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)Hash_StrVec);
         r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);

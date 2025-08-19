@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <www.h>
 
 static char *strings[] = {
     "_TYPE_WWW_START",

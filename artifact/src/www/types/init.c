@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <www.h>
 
 status Www_Init(MemCh *m){
     status r = READY;

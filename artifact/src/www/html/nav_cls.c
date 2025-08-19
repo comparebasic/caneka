@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <www.h>
 
 static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
     PathTable *pt = (PathTable *)as(a, TYPE_PATHTABLE);

@@ -1,4 +1,5 @@
 #include "types/range.h"
+#include "types/typedefs.h"
 #include "types/clone.h"
 #include "types/equals.h"
 #include "types/exact.h"

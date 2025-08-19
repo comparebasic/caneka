@@ -15,8 +15,11 @@ static char *cflags[] = {
         "-DCNK_WWW",
         NULL
 };
+
 static char *inc[] = {
     "-I./artifact/src/include/",
+    "-I./artifact/src/base/include/",
+    "-I./artifact/src/ext/include/",
     "-I./artifact/src/www/include/",
     NULL
 };

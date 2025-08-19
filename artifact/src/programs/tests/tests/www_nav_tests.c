@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <www.h>
 
 static Nav *makeNav(MemCh *m){
     TranspFile *tp = NULL;

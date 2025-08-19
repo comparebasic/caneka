@@ -16,8 +16,11 @@ static char *cflags[] = {
         "-DCNK_EXT",
         NULL
 };
+
 static char *inc[] = {
     "-I./artifact/src/include/",
+    "-I./artifact/src/base/include/",
+    "-I./artifact/src/ext/include/",
     NULL
 };
 
@@ -33,7 +36,7 @@ static char *staticLibs[] = {
 /* sources */
 static BuildSubdir typesobj = { "types", {
     "init.c",
-    "types_typestrings.c",
+    "strings.c",
     "classdef.c",
     "fetcher.c",
     "fetch_target.c",

@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <www.h>
 #include <tests.h>
 
 static status test(MemCh *m){
