@@ -3,65 +3,102 @@
 
 static Nav *makeNav(MemCh *m){
     TranspFile *tp = NULL;
+    StrVec *path = NULL;
     Nav *nav = Nav_Make(m);
     Nav_SetStatus(m, (Abstract *)nav, DEBUG);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Base"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/index.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/index.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(nav, tp->local, (Abstract *)tp);
 
     Nav *mem = Nav_Make(m);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Mem"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/index.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/mem/index.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(mem, tp->local, (Abstract *)tp);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Iter"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/iter.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/mem/iter.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(mem, tp->local, (Abstract *)tp);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "MemCh"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/memch.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/mem/memch.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(mem, tp->local, (Abstract *)tp);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "MemBook"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/membook.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/mem/membook.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(mem, tp->local, (Abstract *)tp);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "MemPage"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/mem/mempage.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/mem/mempage.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(mem, tp->local, (Abstract *)tp);
     Nav_Add(nav, Path_Base(m, tp->local), (Abstract *)mem);
 
     Nav *str = Nav_Make(m);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Str"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/str/index.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/str/index.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(str, tp->local, (Abstract *)tp);
 
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Str"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/str/str.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/str/str.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(str, tp->local, (Abstract *)tp);
 
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "StrVec"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/str/strvec.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/str/strvec.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(str, tp->local, (Abstract *)tp);
 
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Stream"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/str/stream.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/str/stream.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(str, tp->local, (Abstract *)tp);
 
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Fmt"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/str/fmt.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/str/fmt.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(str, tp->local, (Abstract *)tp);
 
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "ToS"));
-    tp->local = StrVec_From(m, Str_CstrRef(m, "/base/str/tos.html"));
+    path = StrVec_From(m, Str_CstrRef(m, "/base/str/tos.html"));
+    IoUtil_Annotate(Nav_MemCh(nav), path);
+    tp->local = path;
+
     Nav_Add(str, tp->local, (Abstract *)tp);
 
     Nav_Add(nav, Path_Base(m, tp->local), (Abstract *)str);

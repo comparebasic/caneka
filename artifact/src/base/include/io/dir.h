@@ -1,6 +1,8 @@
 #define IS_FILE 8
 #define IS_DIR 4
 
+extern Span *FilePathSep;
+
 typedef status (*DirFunc)(MemCh *m, Str *path, Abstract *source);
 typedef status (*FileFunc)(MemCh *m, Str *path, Str *file, Abstract *source);
 

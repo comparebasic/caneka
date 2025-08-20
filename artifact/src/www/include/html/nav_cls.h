@@ -2,6 +2,8 @@
 
 typedef Single Nav;
 
+#define Nav_MemCh(nav) (((PathTable *)(((Single *)nav)->val.ptr))->tbl->m)
+
 Nav *Nav_Make(MemCh *m);
 status Nav_Add(Nav *nav, StrVec *path, Abstract *a);
 Abstract *Nav_GetIndex(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source);

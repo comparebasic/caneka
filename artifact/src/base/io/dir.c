@@ -4,6 +4,8 @@
 static Str _globalS;
 static byte _buff[STR_DEFAULT];
 
+Span *FilePathSep = NULL;
+
 static status fnameStr(MemCh *m, Str *s, Str *path, Str *file){
     Str_Add(s, path->bytes, path->length);
     if(path->length > 0 && path->bytes[path->length-1] != '/'){
