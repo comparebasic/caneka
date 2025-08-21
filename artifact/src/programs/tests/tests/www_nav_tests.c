@@ -2,10 +2,10 @@
 #include <caneka.h>
 
 static Nav *makeNav(MemCh *m){
+    DebugStack_Push(NULL, ZERO);
     TranspFile *tp = NULL;
     StrVec *path = NULL;
     Nav *nav = Nav_Make(m);
-    Nav_SetStatus(m, (Abstract *)nav, DEBUG);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Base"));
     path = StrVec_From(m, Str_CstrRef(m, "/base/index.html"));
@@ -103,10 +103,12 @@ static Nav *makeNav(MemCh *m){
 
     Nav_Add(nav, Path_Base(m, tp->local), (Abstract *)str);
 
+    DebugStack_Pop();
     return nav;
 }
 
 status WwwNav_Tests(MemCh *gm){
+    DebugStack_Push(NULL, ZERO);
     status r = READY;
     MemCh *m = MemCh_Make();
     TranspFile *tp = NULL;
@@ -154,10 +156,12 @@ status WwwNav_Tests(MemCh *gm){
         "First nav index is expected @ from @", args3);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }
 
 status WwwNavTempl_Tests(MemCh *gm){
+    DebugStack_Push(NULL, ZERO);
     status r = READY;
     MemCh *m = MemCh_Make();
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/nav.html"));
@@ -175,5 +179,6 @@ status WwwNavTempl_Tests(MemCh *gm){
     i64 total = Templ_ToS(templ, sm, (Abstract *)nav, NULL);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }

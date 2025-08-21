@@ -30,7 +30,7 @@ status PathTable_AddByPath(PathTable *pt, StrVec *path, Abstract *value){
             (Abstract *)pt,
             NULL
         };
-        Out("^p.Adding & to &^0.\n", args);
+        Out("^c.Adding @ to @^0.\n", args);
     }
     status r = READY;
     Iter keysIt;
@@ -40,38 +40,14 @@ status PathTable_AddByPath(PathTable *pt, StrVec *path, Abstract *value){
     while((Iter_Next(&keysIt) & END) == 0){
         Str *item = (Str *)Iter_Get(&keysIt);
         if((item->type.state|keysIt.type.state) & LAST){
-            if(pt->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)current,
-                    (Abstract *)item,
-                    (Abstract *)key,
-                    (Abstract *)value,
-                    NULL
-                };
-                Out("^p.  last: @ of @/@ -> &^0.\n", args);
-            }
             PathTable_Set(current, (Abstract *)key, value);
             r |= SUCCESS;
-        }else if((item->type.state & MORE)){
-            if(pt->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)current,
-                    (Abstract *)key,
-                    NULL
-                };
-                Out("^p.  get-or-make: @ -> @^0.\n", args);
-            }
+            break;
+        }else if((item->type.state & MORE) && key != NULL){
             current = PathTable_GetOrMake(current, (Abstract *)key);
             r |= PROCESSING;
         }else{
             key = item;
-            if(pt->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)key,
-                    NULL
-                };
-                Out("^p.  set-key: @^0.\n", args);
-            }
         }
     }
 
