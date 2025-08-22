@@ -2,6 +2,64 @@
 #include <caneka.h>
 
 static boolean _init = FALSE;
+ClassDef *ObjectCls = NULL;
+
+static Abstract *Object_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+    Object *obj = (Object *)as(data, TYPE_PATHTABLE);
+    Hashed *h = Object_Get(obj, (Abstract *)fg->key);
+    if(h != NULL){
+        return h->value;
+    }
+    return NULL;
+}
+
+static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+    Object *obj = (Object *)as(data, TYPE_PATHTABLE);
+    return Span_Get(obj->order, fg->idx);
+    return NULL;
+}
+
+static Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+    Object *obj = (Object *)as(data, TYPE_PATHTABLE);
+    return (Abstract *)Iter_Make(m, obj->order);
+}
+
+static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Object *otbl = (Object *)as(a, TYPE_PATHTABLE);
+    if(flags & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
+            (Abstract *)otbl->tbl,
+            (Abstract *)otbl->order,
+            NULL
+        };
+        return Fmt(sm, "Object<^D.$^d.nvalues @/[@]>", args);
+    }else if(flags & MORE){
+        i64 total = 0;
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
+            NULL
+        };
+        total += Fmt(sm, "Object<^D.$^d.nvalues [", args);
+        Iter it;
+        Iter_Init(&it, otbl->order);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = (Hashed *)Iter_Get(&it);
+            if(h != NULL){
+                total += ToS(sm, h->key, 0, MORE);  
+                total += Stream_Bytes(sm, (byte *)" -> ", 4);
+                total += ToS(sm, h->value, 0, MORE);  
+                if((it.type.state & LAST) == 0){
+                    total += Stream_Bytes(sm, (byte *)", ", 2);
+                }
+            }
+        }
+        total += Stream_Bytes(sm, (byte *)"]>", 2);
+        return total;
+    }else{
+        return ToStream_NotImpl(sm, a, type, flags);
+    }
+}
 
 static boolean FetchTarget_Exact(FetchTarget  *a, FetchTarget *b){
     if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS) ||
@@ -136,6 +194,26 @@ status Types_ClsInit(MemCh *m){
     lk = ExactLookup;
     r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)Fetcher_Exact); 
     r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)FetchTarget_Exact); 
+
+    /* Object class def */
+    ClassDef *cls = ClassDef_Make(m);
+    cls = ClassDef_Make(m);
+    cls->api.byKey = Object_ByKey;
+    cls->api.byIdx = Object_ByIdx;
+    cls->api.getIter = Object_GetIter;
+    cls->api.toS = Object_Print;
+    cls = ObjectCls;
+
+    Object obj;
+    Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "tbl"),
+        (Abstract *)I16_Wrapped(m, (void *)(&obj.tbl)-(void *)(&obj)));
+    Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "order"),
+        (Abstract *)I16_Wrapped(m, (void *)(&obj.order)-(void *)(&obj)));
+    r |= Lookup_Add(m, ClassLookup, TYPE_OBJECT, (void *)cls);
+
+    if(r == READY){
+        r |= NOOP;
+    }
 
     return r;
 }

@@ -5,9 +5,12 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
     Abstract *args[5];
     ClassDef *cls = NULL;
     word typeOf = ZERO;
-    if(tg->type.state & FETCH_TARGET_RESOLVED){
+    if(tg->objType.of == value->type.of && tg->type.state & FETCH_TARGET_RESOLVED){
         if(tg->type.state & FETCH_TARGET_ATT){
             return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
+        if(tg->type.state & FETCH_TARGET_PROP){
+            Hashed *h = Object_GetPropByIdx(value, tg->idx);
+            return h->value;
         }else{
             return tg->func(m, tg, value, source);
         }
@@ -29,17 +32,22 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
                     tg->type.state |= FETCH_TARGET_RESOLVED;
                     return value;
                 }
-            }else if(tg->type.state & FETCH_TARGET_METHOD){
-                tg->func = (FetchFunc)Table_Get(cls->methods, (Abstract *)tg->key); 
-                tg->type.state |= FETCH_TARGET_FUNC;
+            if(tg->type.state & FETCH_TARGET_PROP){
+                tg->idx = Object_GetPropIdx(cls, tg->key);
+                Hashed *h = Object_GetPropByIdx(value, tg->idx);
+                if(h == NULL){
+                    goto err;
+                }
+                tg->type.state |= FETCH_TARGET_RESOLVED;
+                return h->value;
             }else if(tg->type.state & FETCH_TARGET_KEY){
-                tg->func = cls->byKey;
+                tg->func = cls->api.byKey;
                 tg->type.state |= FETCH_TARGET_FUNC;
             }else if(tg->type.state & FETCH_TARGET_IDX){
-                tg->func = cls->byIdx;
+                tg->func = cls->api.byIdx;
                 tg->type.state |= FETCH_TARGET_FUNC;
             }else if(tg->type.state & FETCH_TARGET_ITER){
-                tg->func = cls->getIter;
+                tg->func = cls->api.getIter;
                 tg->type.state |= FETCH_TARGET_FUNC;
             }else{
                 goto err;
@@ -47,6 +55,7 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             if(tg->func == NULL){
                 goto err;
             }
+
             tg->type.state |= FETCH_TARGET_RESOLVED;
             return tg->func(m, tg, value, source);
         }else{

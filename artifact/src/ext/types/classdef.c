@@ -14,71 +14,82 @@ Abstract *ClassDef_Undefined(MemCh *m, FetchTarget *fg, Abstract *data, Abstract
 }
 
 status Class_SetupProp(ClassDef *cls, Str *key){
+    status r = READY;
+    i32 idx = cls->props->nvalues;
     Single *sg = I32_Wrapped(cls->props->m, cls->props->nvalues);
-    return Table_Set(cls->props, (Abstract *)key, (Abstract *)sg);
+    r |= Table_Set(cls->props, (Abstract *)key, (Abstract *)sg);
+    Hashed *h = Hashed_Make(cls->propOrder->m, (Abstract *)key);
+    r |= Span_Set(cls->propOrder, idx, (Abstract *)h);
+    return r;
 }
 
-status Class_SetProp(Abstract *inst, ClassDef *cls, Str *key, Abstract *value){
-    Single *sg = Table_Get(cls, (Abstract *)key);
-    if(sg != NULL && inst->type.of == TYPE_ORDTABLE){
-        Hashed *h = Span_Get(inst->order, sg->val.i);
-        if(h = NULL){
-            h = Hashed_Make(m);
-            h->key = key;
-            h->value = value;
-            Span_Set(inst->order, sg->val.i, (Abstract *)h);
-        }else{
-            h->value = value;
-        }
+status Class_SetProp(Object *obj, ClassDef *cls, Str *key, Abstract *value){
+    status r = READY;
+    Single *sg = (Single *)Table_Get(cls->props, (Abstract *)key);
+    if(sg == NULL){
+        Abstract *args[] = {
+            (Abstract *)key,
+            (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
+            NULL
+        };
+        Error(ErrStream->m, (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
+            "Prop @ not found for $", args);
+        return ERROR;
     }
-    return NULL;
+
+    Hashed *h = Span_Get(obj->order, sg->val.i);
+    if(h == NULL){
+        h = Hashed_Make(obj->order->m, (Abstract *)key);
+        h->value = value;
+        r |= Span_Set(obj->order, sg->val.i, (Abstract *)h);
+    }else{
+        h->value = value;
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
 }
 
-Iter *Class_GetIter(Object *o){
-    if(inst->type.of == TYPE_PATHTABLE){
-        Iter *it = Iter_Make(m, o->order);
-        Iter_GoToIdx(it, o->cls->props->nvalues);
-        return (Abstract *)it;
+i32 Class_GetPropIdx(ClassDef *cls, Str *key){
+    Single *sg = (Single *)Table_Get(cls->props, (Abstract *)key);
+    if(sg != NULL){
+        return sg->val.i;
     }
-    return NULL;
-}
 
-status Class_GetProp(ClassDef *cls, Str *key){
-    Single *sg = Table_Get(cls, (Abstract *)key);
-    if(sg != NULL && inst->type.of == TYPE_ORDTABLE){
-        Hashed *h = Span_Get(inst->order, sg->val.i);
-        if(h = NULL){
-            return h->value;
-        }
-    }
-    return NULL;
+    return -1;
 }
 
 status Class_Register(MemCh *m, ClassDef *cls){
     if(cls->api.toS != NULL){
-        Lookup_Add(m, ToStreamLookup, cls->objType.of, (void *)cls->toS);
+        Lookup_Add(m, ToStreamLookup, cls->type.inst, (void *)cls->api.toS);
     }
-    if((cls->type.state & CLASS_STRUCT) == 0){
-        if(cls->originType.of != ZERO){
-            ClassDef *parent = Lookup_Get(ClassLookup, cls->originType.of);
-            if(parent != NULL){
-                if(parent->props != NULL){
-                    Table_Underlay(cls->props, parent->props);
-                }
-                if(cls->api.byKey == ClassDef_Undefined){
-                    cls->api.byKey = parent->api.byKey;
-                }
-                if(cls->api.byIdx == ClassDef_Undefined){
-                    cls->api.byIdx = parent->api.byIdx;
-                }
-                if(cls->api.getIter == ClassDef_Undefined){
-                    cls->api.getIter = parent->api.getIter;
-                }
-                if(cls->api.toS == ClassDef_Undefined){
-                    cls->api.toS = parent->api.toS;
-                }
-            }
-        }
+
+    ClassDef *parent = NULL;
+    if(cls->originType.of != ZERO){
+        parent = Lookup_Get(ClassLookup, cls->originType.of);
+    }else{
+        parent = ObjectCls;
+    }
+
+    if(parent->props != NULL){
+        Table_Underlay(cls->props, parent->props);
+    }
+
+    if(cls->api.byKey == ClassDef_Undefined){
+        cls->api.byKey = parent->api.byKey;
+    }
+    if(cls->api.byIdx == ClassDef_Undefined){
+        cls->api.byIdx = parent->api.byIdx;
+    }
+    if(cls->api.getIter == ClassDef_Undefined){
+        cls->api.getIter = parent->api.getIter;
+    }
+    if(cls->api.toS == NULL){
+        cls->api.toS = parent->api.toS;
     }
 
     return Lookup_Add(m, ClassLookup, cls->type.inst, cls);
@@ -89,7 +100,7 @@ ClassDef *ClassDef_Make(MemCh *m){
     cls->type.of = TYPE_CLASS_DEF;
     cls->props = Table_Make(m);
     cls->atts = Table_Make(m);
-    cls->api.byKey = cls->api.byIdx = cls->api.getIter = cls->api.toS = ClassDef_Undefined;
+    cls->api.byKey = cls->api.byIdx = cls->api.getIter = ClassDef_Undefined;
     return cls;
 }
 

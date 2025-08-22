@@ -1,3 +1,4 @@
+#include "types/structs.h"
 #include "types/typedefs.h"
 #include "types/range.h"
 #include "types/strings.h"
@@ -6,4 +7,5 @@
 #include "types/fetcher.h"
 #include "types/fetch_target.h"
 #include "types/classdef.h"
+#include "types/object.h"
 #include "types/types_cls.h"

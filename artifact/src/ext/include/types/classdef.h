@@ -1,7 +1,3 @@
-enum class_flags {
-    CLASS_STRUCT = 1 << 8,
-};
-
 typedef struct classdef {
     ClassType type;
     Type originType;
@@ -9,6 +5,7 @@ typedef struct classdef {
     Str *name;
     Str **states; 
     Table *props;
+    Span *propOrder;
     Table *atts;
     struct {
         FetchFunc byKey;
@@ -23,6 +20,7 @@ typedef struct classdef {
     } api;
 } ClassDef;
 
+extern ClassDef *ObjectCls;
 extern Lookup *ClassLookup;
 
 status Class_Register(MemCh *m, ClassDef *cls);
@@ -30,6 +28,5 @@ ClassDef *ClassDef_Make(MemCh *m);
 status ClassDef_Init(MemCh *m);
 Abstract *ClassDef_Undefined(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source);
 status Class_SetupProp(ClassDef *cls, Str *key);
-status Class_SetProp(Abstract *inst, ClassDef *cls, Str *key, Abstract *value);
-status Class_GetProp(ClassDef *cls, Str *key);
-Iter *Class_GetIter(Abstract *inst, ClassDef *cls);
+status Class_SetProp(struct object *obj, ClassDef *cls, Str *key, Abstract *value);
+i32 Class_GetPropIdx(ClassDef *cls, Str *key);

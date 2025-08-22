@@ -1,0 +1,2 @@
+struct classdef;
+struct object;

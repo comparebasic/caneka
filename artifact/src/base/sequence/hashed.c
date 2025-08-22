@@ -89,8 +89,10 @@ Hashed *Hashed_Make(MemCh *m, Abstract *a){
     }
     Hashed *v = (Hashed *)MemCh_Alloc(m, sizeof(Hashed));
     v->type.of = TYPE_HASHED;
-    v->id = Get_Hash(a);
-    v->key = a;
+    if(a != NULL){
+        v->id = Get_Hash(a);
+        v->key = a;
+    }
     return v;
 }
 

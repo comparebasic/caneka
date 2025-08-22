@@ -2,7 +2,6 @@
 #include "navigate/mess.h"
 #include "navigate/relation.h"
 #include "navigate/compare.h"
-#include "navigate/pathtable.h"
 #include "navigate/templ.h"
 #include "navigate/templ_ctx.h"
 #include "navigate/templ_jump.h"

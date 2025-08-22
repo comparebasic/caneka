@@ -218,43 +218,6 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 PathTable_Print(Stream *sm, Abstract *a, cls type, word flags){
-    PathTable *otbl = (PathTable *)as(a, TYPE_PATHTABLE);
-    if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
-            (Abstract *)otbl->tbl,
-            (Abstract *)otbl->order,
-            NULL
-        };
-        return Fmt(sm, "PathTable<^D.$^d.nvalues @/[@]>", args);
-    }else if(flags & MORE){
-        i64 total = 0;
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
-            NULL
-        };
-        total += Fmt(sm, "PathTable<^D.$^d.nvalues [", args);
-        Iter it;
-        Iter_Init(&it, otbl->order);
-        while((Iter_Next(&it) & END) == 0){
-            Hashed *h = (Hashed *)Iter_Get(&it);
-            if(h != NULL){
-                total += ToS(sm, h->key, 0, MORE);  
-                total += Stream_Bytes(sm, (byte *)" -> ", 4);
-                total += ToS(sm, h->value, 0, MORE);  
-                if((it.type.state & LAST) == 0){
-                    total += Stream_Bytes(sm, (byte *)", ", 2);
-                }
-            }
-        }
-        total += Stream_Bytes(sm, (byte *)"]>", 2);
-        return total;
-    }else{
-        return ToStream_NotImpl(sm, a, type, flags);
-    }
-}
-
 static i64 TemplItem_Print(Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[] = {
         (Abstract *)Type_ToStr(sm->m, type),

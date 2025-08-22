@@ -21,7 +21,7 @@ static char *extTypeStrings[] = {
     "TYPE_PERMISSION",
     "TYPE_AUTH",
     "TYPE_RELATION",
-    "TYPE_PATHTABLE",
+    "TYPE_OBJECT",
     "TYPE_MEMPAIR",
     "TYPE_FILE",
     "TYPE_SPOOL",
