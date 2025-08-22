@@ -535,6 +535,12 @@ status Iter_PrevRemove(Iter *it){
     return it->type.state;
 }
 
+status Iter_GoToIdx(Iter *it, i32 idx){
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
+    it->idx = idx;
+    return Iter_Query(it);
+}
+
 status Iter_SetByIdx(Iter *it, i32 idx, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
     it->idx = idx;

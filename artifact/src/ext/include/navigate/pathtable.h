@@ -1,8 +1,10 @@
 typedef struct ordtable {
     Type type;
+    Type instType;
+    ClassDef *cls;
     Table *tbl;
     Span *order;
-} PathTable;
+} Object;
 
 PathTable *PathTable_Make(MemCh *m);
 Hashed *PathTable_Set(PathTable *otbl, Abstract *key, Abstract *value);

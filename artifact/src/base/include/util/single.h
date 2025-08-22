@@ -1,6 +1,4 @@
-enum single_flags {
-    SINGLE_STRVEC_TO_TYPE = 1 << 8,
-};
+/* no status flags */
 
 typedef struct single  {
     Type type;
