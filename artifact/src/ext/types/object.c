@@ -1,6 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
+boolean Object_TypeMatch(Abstract *a, ObjType *ot){
+    return (a->type.of == TYPE_OBJECT && ((Object *)a)->objType.of == ot->objType.of) ||
+        (a->type.of == ot->objType.of);
+}
+
 Iter *Object_GetIter(Object *o){
     Iter *it = Iter_Make(o->order->m, o->order);
     Iter_GoToIdx(it, o->propMask);
@@ -29,17 +34,21 @@ Abstract *Object_GetProp(Object *obj, Str *key){
     return NULL;
 }
 
+Abstract *Object_Get(Object *obj, Abstract *key){
+    return Table_Get(obj->tbl, key);
+}
+
 Object *Object_GetOrMake(Object *pt, Abstract *key){
-    Hashed *h = Object_Get(pt, key);
-    if(h == NULL){
+    Abstract *a = Object_Get(pt, key);
+    if(a == NULL){
         Object *new = Object_Make(pt->tbl->m, ZERO);
         Object_Set(pt, key, (Abstract *)new);
         return new;
-    }else if(h->value->type.of == TYPE_OBJECT){
-        return (Object *)h->value;
+    }else if(a->type.of == TYPE_OBJECT){
+        return (Object *)a;
     }else{
         Abstract *args[] = {
-            (Abstract *)Type_ToStr(ErrStream->m, h->value->type.of),
+            (Abstract *)Type_ToStr(ErrStream->m, a->type.of),
             (Abstract *)key,
             NULL
         };

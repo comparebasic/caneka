@@ -5,7 +5,7 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
     Abstract *args[5];
     ClassDef *cls = NULL;
     word typeOf = ZERO;
-    if(tg->objType.of == value->type.of && tg->type.state & FETCH_TARGET_RESOLVED){
+    if((tg->type.state & FETCH_TARGET_RESOLVED) && Object_TypeMatch(value, (ObjType *)tg)){
         if(tg->type.state & FETCH_TARGET_ATT){
             return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
         if(tg->type.state & FETCH_TARGET_PROP){
