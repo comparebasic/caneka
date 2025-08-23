@@ -65,7 +65,7 @@ i32 Class_GetPropIdx(ClassDef *cls, Str *key){
 
 status Class_Register(MemCh *m, ClassDef *cls){
     if(cls->api.toS != NULL){
-        Lookup_Add(m, ToStreamLookup, cls->type.inst, (void *)cls->api.toS);
+        Lookup_Add(m, ToStreamLookup, cls->objType.of, (void *)cls->api.toS);
     }
 
     ClassDef *parent = NULL;
@@ -92,7 +92,7 @@ status Class_Register(MemCh *m, ClassDef *cls){
         cls->api.toS = parent->api.toS;
     }
 
-    return Lookup_Add(m, ClassLookup, cls->type.inst, cls);
+    return Lookup_Add(m, ClassLookup, cls->objType.of, cls);
 }
 
 ClassDef *ClassDef_Make(MemCh *m){

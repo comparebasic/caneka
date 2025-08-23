@@ -1,5 +1,10 @@
+enum class_flags {
+    CLASS_NATIVE = 1 << 8,
+};
+
 typedef struct classdef {
-    ClassType type;
+    Type type;
+    Type objType;
     Type originType;
     Maker make;
     Str *name;

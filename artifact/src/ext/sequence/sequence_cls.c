@@ -3,15 +3,6 @@
 
 static boolean _init = FALSE;
 
-static Abstract *PathTable_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
-    PathTable *pt = (PathTable *)as(data, TYPE_PATHTABLE);
-    Hashed *h = PathTable_Get(pt, (Abstract *)fg->key);
-    if(h != NULL){
-        return h->value;
-    }
-    return NULL;
-}
-
 status Sequence_ClassInit(MemCh *m, Lookup *lk){
     status r = READY;
 
@@ -20,6 +11,7 @@ status Sequence_ClassInit(MemCh *m, Lookup *lk){
         /* hashed */
         Hashed h;
         ClassDef *cls = ClassDef_Make(m);
+        cls->type.state |= CLASS_NATIVE;
 
         Single *sg = NULL;
         sg = I16_Wrapped(m, (void *)(&h.idx)-(void *)(&h));

@@ -27,10 +27,10 @@ FetchTarget *FetchTarget_MakeAtt(MemCh *m, Str *att);
 FetchTarget *FetchTarget_MakeFunc(MemCh *m, Str *key);
 FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx);
 FetchTarget *FetchTarget_MakeIter(MemCh *m);
-FetchTarget *FetchTarget_MakeMethod(MemCh *m, Str *method);
+FetchTarget *FetchTarget_MakeProp(MemCh *m, Str *method);
 
 Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source);
 Abstract *Fetch_ByKey(MemCh *m, Abstract *a, Str *key, Abstract *source);
 Abstract *Fetch_ByAtt(MemCh *m, Abstract *a, Str *att, Abstract *source);
-Abstract *Fetch_Method(MemCh *m, Abstract *a, Str *method, Abstract *source);
+Abstract *Fetch_Prop(MemCh *m, Abstract *a, Str *method, Abstract *source);
 Iter *Fetch_Iter(MemCh *m, Abstract *a, Abstract *source);

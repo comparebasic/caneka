@@ -5,44 +5,35 @@ static boolean _init = FALSE;
 ClassDef *ObjectCls = NULL;
 
 static Abstract *Object_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
-    Object *obj = (Object *)as(data, TYPE_PATHTABLE);
-    Hashed *h = Object_Get(obj, (Abstract *)fg->key);
-    if(h != NULL){
-        return h->value;
-    }
-    return NULL;
+    Object *obj = (Object *)as(data, TYPE_OBJECT);
+    return Object_Get(obj, (Abstract *)fg->key);
 }
 
 static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
-    Object *obj = (Object *)as(data, TYPE_PATHTABLE);
+    Object *obj = (Object *)as(data, TYPE_OBJECT);
     return Span_Get(obj->order, fg->idx);
     return NULL;
 }
 
-static Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
-    Object *obj = (Object *)as(data, TYPE_PATHTABLE);
-    return (Abstract *)Iter_Make(m, obj->order);
-}
-
 static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
-    Object *otbl = (Object *)as(a, TYPE_PATHTABLE);
+    Object *obj = (Object *)as(a, TYPE_OBJECT);
     if(flags & DEBUG){
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
-            (Abstract *)otbl->tbl,
-            (Abstract *)otbl->order,
+            (Abstract *)I32_Wrapped(sm->m, obj->order->nvalues),
+            (Abstract *)obj->tbl,
+            (Abstract *)obj->order,
             NULL
         };
         return Fmt(sm, "Object<^D.$^d.nvalues @/[@]>", args);
     }else if(flags & MORE){
         i64 total = 0;
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, otbl->order->nvalues),
+            (Abstract *)I32_Wrapped(sm->m, obj->order->nvalues),
             NULL
         };
         total += Fmt(sm, "Object<^D.$^d.nvalues [", args);
         Iter it;
-        Iter_Init(&it, otbl->order);
+        Iter_Init(&it, obj->order);
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = (Hashed *)Iter_Get(&it);
             if(h != NULL){

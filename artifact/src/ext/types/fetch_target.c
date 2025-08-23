@@ -5,11 +5,13 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
     Abstract *args[5];
     ClassDef *cls = NULL;
     word typeOf = ZERO;
-    if((tg->type.state & FETCH_TARGET_RESOLVED) && Object_TypeMatch(value, (ObjType *)tg)){
+    if((tg->type.state & FETCH_TARGET_RESOLVED) &&
+            Object_TypeMatch(value, tg->objType.of)){
         if(tg->type.state & FETCH_TARGET_ATT){
             return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
-        if(tg->type.state & FETCH_TARGET_PROP){
-            Hashed *h = Object_GetPropByIdx(value, tg->idx);
+        }else if(tg->type.state & FETCH_TARGET_PROP){
+            Object *obj = (Object *)as(value, TYPE_OBJECT);
+            Hashed *h = Object_GetPropByIdx(obj, tg->idx);
             return h->value;
         }else{
             return tg->func(m, tg, value, source);
@@ -32,9 +34,10 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
                     tg->type.state |= FETCH_TARGET_RESOLVED;
                     return value;
                 }
-            if(tg->type.state & FETCH_TARGET_PROP){
-                tg->idx = Object_GetPropIdx(cls, tg->key);
-                Hashed *h = Object_GetPropByIdx(value, tg->idx);
+            }else if(tg->type.state & FETCH_TARGET_PROP){
+                Object *obj = (Object *)as(value, TYPE_OBJECT);
+                tg->idx = Class_GetPropIdx(cls, tg->key);
+                Hashed *h = Object_GetPropByIdx(obj, tg->idx);
                 if(h == NULL){
                     goto err;
                 }
@@ -83,8 +86,8 @@ Abstract *Fetch_ByAtt(MemCh *m, Abstract *a, Str *att, Abstract *source){
     return Fetch_Target(m, tg, a, source);
 }
 
-Abstract *Fetch_Method(MemCh *m, Abstract *a, Str *method, Abstract *source){
-    FetchTarget *tg = FetchTarget_MakeMethod(m, method);
+Abstract *Fetch_Prop(MemCh *m, Abstract *a, Str *prop, Abstract *source){
+    FetchTarget *tg = FetchTarget_MakeProp(m, prop);
     return Fetch_Target(m, tg, a, source);
 }
 
@@ -133,9 +136,9 @@ FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx){
     return tg;
 }
 
-FetchTarget *FetchTarget_MakeMethod(MemCh *m, Str *method){
+FetchTarget *FetchTarget_MakeProp(MemCh *m, Str *prop){
     FetchTarget *tg = FetchTarget_Make(m);
-    tg->type.state = FETCH_TARGET_METHOD;
-    tg->key = method;
+    tg->type.state = FETCH_TARGET_PROP;
+    tg->key = prop;
     return tg;
 }

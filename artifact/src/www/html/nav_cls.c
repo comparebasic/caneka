@@ -2,15 +2,15 @@
 #include <caneka.h>
 
 static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
-    PathTable *pt = (PathTable *)as(a, TYPE_PATHTABLE);
+    Nav *nav = (Nav *)Object_As((Object *)a, TYPE_OBJECT);
     Abstract *args[] = {
-        (Abstract *)I32_Wrapped(sm->m, pt->order->nvalues),
+        (Abstract *)I32_Wrapped(sm->m, nav->order->nvalues),
         NULL
     };
     i8 indent = 1;
     i64 total = Fmt(sm, "Www.Nav<^D.$^d.count\n", args);
     Iter it;
-    Iter_Init(&it, pt->order);
+    Iter_Init(&it, nav->order);
     Single *sg = I32_Wrapped(sm->m, 0);
     boolean nested = FALSE;
     sm->indent++;
@@ -26,13 +26,8 @@ static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
                 NULL
             };
             total += Fmt(sm, "$: @ -> ", args);
-            if(h->value->type.of == TYPE_PATHTABLE){
-                total += Nav_Print(sm, h->value, h->value->type.of, flags);
-                Stream_Bytes(sm, (byte *)"\n", 1);
-            }else if(h->value->type.of == TYPE_WRAPPED_PTR &&
-                    ((Single *)h->value)->objType.of == TYPE_HTML_NAV){
-                Single *inst = (Single *)h->value;
-                total += Nav_Print(sm, inst->val.ptr, TYPE_HTML_NAV, flags);
+            if(Object_TypeMatch(h->value, TYPE_HTML_NAV)){
+                total += Nav_Print(sm, h->value, TYPE_HTML_NAV, flags);
                 Stream_Bytes(sm, (byte *)"\n", 1);
             }else if(flags & DEBUG){
                 Abstract *args[] = {
@@ -58,28 +53,20 @@ static i64 Nav_Print(Stream *sm, Abstract *a, cls type, word flags){
 }
 
 status Nav_Add(Nav *nav, StrVec *path, Abstract *a){
-    PathTable *pt = (PathTable *)as(nav->val.ptr, TYPE_PATHTABLE); 
-    return PathTable_AddByPath(pt, path, a);
+    Object *obj = (Object *)Object_As(nav, TYPE_HTML_NAV);
+    return Object_AddByPath(obj, path, a);
 }
 
 Nav *Nav_Make(MemCh *m){
-    PathTable *pt = PathTable_Make(m);
-    pt->cls = (ClassDef *)Lookup_Get(ClassLookup, TYPE_HTML_NAV);
-    return Ptr_Wrapped(m, (Abstract *)pt, TYPE_HTML_NAV);
-}
-
-Abstract *Nav_PathsIter(MemCh *m, FetchTarget *tg, Abstract *item, Abstract *source){
-    Object *o = (Single *)asObj(item, TYPE_HTML_NAV);
-    return Class_GetIter(o, pt->cls);
+    return Object_Make(m, TYPE_HTML_NAV);
 }
 
 status Nav_ClsInit(MemCh *m){
     status r = READY;
     ClassDef *cls = ClassDef_Make(m);
-    cls->type.inst = TYPE_HTML_NAV;
+    cls->objType.of = TYPE_HTML_NAV;
     cls->name = Str_CstrRef(m, "Nav");
-    cls->getIter = Nav_PathsIter;
-    cls->toS = Nav_Print;
+    cls->api.toS = Nav_Print;
     Class_SetupProp(cls, Str_CstrRef(m, "index"));
     r |= Class_Register(m, cls);
     return r;

@@ -1,15 +1,27 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean Object_TypeMatch(Abstract *a, ObjType *ot){
-    return (a->type.of == TYPE_OBJECT && ((Object *)a)->objType.of == ot->objType.of) ||
-        (a->type.of == ot->objType.of);
+boolean Object_TypeMatch(Abstract *a, cls typeOf){
+    return (a->type.of == TYPE_OBJECT && 
+        ((Object *)a)->objType.of == typeOf) || (a->type.of == typeOf);
 }
 
-Iter *Object_GetIter(Object *o){
-    Iter *it = Iter_Make(o->order->m, o->order);
-    Iter_GoToIdx(it, o->propMask);
-    return it;
+Object *Object_As(Object *obj, cls typeOf){
+    boolean pass = (obj->type.of == TYPE_OBJECT && 
+        ((Object *)obj)->objType.of == typeOf);
+
+    if(!pass){
+        Error(ErrStream->m, (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
+            "Error object is not of expected type", NULL);
+    }
+    return obj;
+}
+
+Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+    Object *obj = (Object *)as(data, TYPE_OBJECT);
+    Iter *it = Iter_Make(m, obj->order);
+    Iter_GoToIdx(it, obj->propMask);
+    return (Abstract *)it;
 }
 
 Abstract *Object_GetProp(Object *obj, Str *key){
@@ -124,16 +136,17 @@ boolean Object_IsBlank(Object *pt){
 }
 
 Object *Object_Make(MemCh *m, cls typeOf){
-    Object *pt = (Object *)MemCh_Alloc(m, sizeof(Object));
-    pt->type.of = TYPE_OBJECT;
-    pt->tbl = Table_Make(m);
+    Object *obj = (Object *)MemCh_Alloc(m, sizeof(Object));
+    obj->type.of = TYPE_OBJECT;
+    obj->tbl = Table_Make(m);
 
     if(typeOf != ZERO){
         ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
-        pt->order = Span_Clone(m, cls->propOrder); 
+        obj->order = Span_Clone(m, cls->propOrder); 
+        obj->propMask = obj->order->nvalues;
     }else{
-        pt->order = Span_Make(m);
+        obj->order = Span_Make(m);
     }
 
-    return pt;
+    return obj;
 }

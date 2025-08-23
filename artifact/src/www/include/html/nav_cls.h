@@ -1,8 +1,6 @@
-/* Nav < PathTable */ 
+typedef Object Nav;
 
-typedef Single Nav;
-
-#define Nav_MemCh(nav) (((PathTable *)(((Single *)nav)->val.ptr))->tbl->m)
+#define Nav_MemCh(nav) ((nav)->order->m)
 
 Nav *Nav_Make(MemCh *m);
 status Nav_Add(Nav *nav, StrVec *path, Abstract *a);
