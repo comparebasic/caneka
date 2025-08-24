@@ -100,6 +100,7 @@ ClassDef *ClassDef_Make(MemCh *m){
     cls->type.of = TYPE_CLASS_DEF;
     cls->props = Table_Make(m);
     cls->atts = Table_Make(m);
+    cls->propOrder = Span_Make(m);
     cls->api.byKey = cls->api.byIdx = cls->api.getIter = ClassDef_Undefined;
     return cls;
 }

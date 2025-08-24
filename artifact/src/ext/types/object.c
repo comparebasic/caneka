@@ -11,8 +11,14 @@ Object *Object_As(Object *obj, cls typeOf){
         ((Object *)obj)->objType.of == typeOf);
 
     if(!pass){
+        Abstract *args[] = {
+            (Abstract *)Type_ToStr(ErrStream->m, typeOf),
+            (Abstract *)Type_ToStr(ErrStream->m, obj->type.of),
+            (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
+            NULL
+        };
         Error(ErrStream->m, (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
-            "Error object is not of expected type", NULL);
+            "Error object is not of expected type $, have $/$", args);
     }
     return obj;
 }
@@ -144,6 +150,7 @@ Object *Object_Make(MemCh *m, cls typeOf){
         ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
         obj->order = Span_Clone(m, cls->propOrder); 
         obj->propMask = obj->order->nvalues;
+        obj->objType.of = typeOf;
     }else{
         obj->order = Span_Make(m);
     }

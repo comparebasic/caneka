@@ -10,6 +10,31 @@ static inline i64 wsOut(Stream *sm, i8 dim){
     return 0;
 }
 
+i64 Addr_ToS(Stream *sm, void *a, word flags){
+    i64 total = 0;
+    if(flags & DEBUG){
+        total += Fmt(sm, "^D.", NULL);
+    }
+    if(a == NULL){
+        total += Fmt(sm, "<*NULL>", NULL);
+    }else{
+        MemBook *book = MemBook_Get(a);
+        util page = (util)(a-(void*)book);
+        util local = page & PAGE_MASK; 
+        page &= ~local;
+        page = page / PAGE_SIZE;
+
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, book->idx),
+            (Abstract *)Util_Wrapped(sm->m, page),
+            (Abstract *)Util_Wrapped(sm->m, local),
+            NULL
+        };
+        total += Fmt(sm, "<*$/$/$>", args);
+    }
+    return total;
+}
+
 i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     MemPage *sl = (MemPage*)as(a, TYPE_MEMSLAB); 

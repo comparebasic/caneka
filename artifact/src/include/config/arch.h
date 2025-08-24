@@ -2,6 +2,7 @@
 #ifndef __ARCH_HEADER_amd64
 #define __ARCH_HEADER_amd64
 #define PAGE_SIZE 4096
+#define PAGE_MASK 4095
 #define PAGE_COUNT 4096
 #define PAGE_MAX 4095
 #define CHAPTER_SIZE PAGE_SIZE*PAGE_COUNT

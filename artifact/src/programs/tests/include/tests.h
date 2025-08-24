@@ -40,7 +40,7 @@ status BinPin_Tests(MemCh *gm);
 status File_Tests(MemCh *gm);
 status FmtHtml_Tests(MemCh *gm);
 status DebugStack_Tests(MemCh *gm);
-status PathTable_Tests(MemCh *gm);
+status Object_Tests(MemCh *gm);
 status Templ_Tests(MemCh *gm);
 status TemplLogic_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);

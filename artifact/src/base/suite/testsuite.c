@@ -37,6 +37,7 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *a
         Fmt(OutStream, fmtSuccess, args);
         Stream_Bytes(OutStream, (byte *)"\n", 1);
     }
+    Out("^0", NULL);
     return condition ? SUCCESS : ERROR;
 }
 
@@ -56,6 +57,7 @@ status Test(boolean condition, char *fmt, Abstract *args[]){
         */
         Stream_Bytes(OutStream, (byte *)"\n", 1);
     }
+    Out("^0", NULL);
     return condition ? SUCCESS : ERROR;
 }
 

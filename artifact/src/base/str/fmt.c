@@ -16,7 +16,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
         if((state & NOOP) != 0){
             state &= ~NOOP;
             goto next;
-        }else if(c == '\\'  || /*c == '[' ||*/ c == '$' || c == '@' || c == '&' || c == '^'){
+        }else if(c == '\\' || c == '$' || c == '@' || c == '&' || c == '^'){
             if(c == '\\'){
                 if(start < ptr){
                     word length = (word)((ptr) - start);
@@ -36,46 +36,6 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             }
         }
 
-        /*
-        if(c == '[' && ((state & NOOP) == 0)){
-            state |= PROCESSING; 
-            start = ptr+1;
-            goto next;
-        }else if(state & PROCESSING){
-            if(c == ']' && ((state & NOOP) == 0)){
-                word length = (word)(ptr - start);
-                if(length > 0){
-                    Str *token = Str_From(sm->m, (byte *)start, length); 
-                    Str *name = Str_CstrRef(sm->m, "STACK");
-                    if(Str_StartMatch(token, name, name->length)){
-                        Str_Incr(token, name->length);
-                        StackEntry *entry = DebugStack_Get(); 
-                        if(entry != NULL){
-                            if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "NAME"))){
-                                Str *funcName = Str_CstrRef(sm->m, entry->funcName);
-                                total += Stream_Bytes(sm, funcName->bytes, funcName->length);
-                                goto varnext;
-                            }else if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "FILE"))){
-                                Str *funcName = Str_CstrRef(sm->m, entry->fname);
-                                total += Stream_Bytes(sm, funcName->bytes, funcName->length);
-                                goto varnext;
-                            }else if(Equals((Abstract *)token, (Abstract *)Str_CstrRef(sm->m, "REF"))){
-                                total += ToS(sm, entry->ref, 0, DEBUG|MORE);
-                                goto varnext;
-                            }
-                        }
-                    }
-                }
-                Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-                    "Variable not found", NULL);
-varnext:
-                state &= ~PROCESSING;
-                start = ptr+1;
-                goto next;
-            }
-            goto next;
-        }else if(c == '$' || c == '@' || c == '&'){
-            */
         if(c == '$' || c == '@' || c == '&'){
             if(c == '@'){
                 state |= MORE;

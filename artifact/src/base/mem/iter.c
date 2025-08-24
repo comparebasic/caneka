@@ -536,7 +536,7 @@ status Iter_PrevRemove(Iter *it){
 }
 
 status Iter_GoToIdx(Iter *it, i32 idx){
-    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
     it->idx = idx;
     return Iter_Query(it);
 }

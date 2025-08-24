@@ -121,7 +121,7 @@ status WwwNav_Tests(MemCh *gm){
     };
     Out("^p.&\n", args);
     
-    tp = (TranspFile *)Fetch_Method(m, (Abstract *)nav, Str_CstrRef(m, "index"), NULL);
+    tp = (TranspFile *)Fetch_Prop(m, (Abstract *)nav, Str_CstrRef(m, "index"), NULL);
 
     Abstract *args1[] = {
         (Abstract *)tp,
@@ -145,7 +145,7 @@ status WwwNav_Tests(MemCh *gm){
         "first item is nav @", args2);
 
     Str *expected = Str_CstrRef(m, "/base/mem/index.html");
-    tp = (TranspFile *)Fetch_Method(m, (Abstract *)nv, Str_CstrRef(m, "index"), NULL);
+    tp = (TranspFile *)Fetch_Prop(m, (Abstract *)nv, Str_CstrRef(m, "index"), NULL);
     Abstract *args3[] = {
         (Abstract *)expected, 
         (Abstract *)tp, 

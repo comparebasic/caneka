@@ -77,10 +77,9 @@ static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)templ, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, templ->content.idx),
-            (Abstract *)&templ->data,
             NULL
         };
-        return Fmt(sm, "Templ<$ content^D.#$^d. data:@>", args);
+        return Fmt(sm, "Templ<$ content^D.#$^d.>", args);
     }
 }
 

@@ -17,15 +17,7 @@ static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstrac
 
 static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
     Object *obj = (Object *)as(a, TYPE_OBJECT);
-    if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, obj->order->nvalues),
-            (Abstract *)obj->tbl,
-            (Abstract *)obj->order,
-            NULL
-        };
-        return Fmt(sm, "Object<^D.$^d.nvalues @/[@]>", args);
-    }else if(flags & MORE){
+    if(flags & (MORE|DEBUG)){
         i64 total = 0;
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, obj->order->nvalues),
@@ -188,19 +180,19 @@ status Types_ClsInit(MemCh *m){
 
     /* Object class def */
     ClassDef *cls = ClassDef_Make(m);
-    cls = ClassDef_Make(m);
     cls->api.byKey = Object_ByKey;
     cls->api.byIdx = Object_ByIdx;
     cls->api.getIter = Object_GetIter;
     cls->api.toS = Object_Print;
-    cls = ObjectCls;
+    cls->objType.of = TYPE_OBJECT;
+    ObjectCls = cls;
 
     Object obj;
     Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "tbl"),
         (Abstract *)I16_Wrapped(m, (void *)(&obj.tbl)-(void *)(&obj)));
     Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "order"),
         (Abstract *)I16_Wrapped(m, (void *)(&obj.order)-(void *)(&obj)));
-    r |= Lookup_Add(m, ClassLookup, TYPE_OBJECT, (void *)cls);
+    r |= Class_Register(m, cls);
 
     if(r == READY){
         r |= NOOP;

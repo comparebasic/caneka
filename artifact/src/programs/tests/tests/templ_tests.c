@@ -147,6 +147,7 @@ status TemplCtx_Tests(MemCh *gm){
 }
 
 status Templ_Tests(MemCh *gm){
+    DebugStack_Push(NULL, 0);
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -163,12 +164,12 @@ status Templ_Tests(MemCh *gm){
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
 
-    PathTable *data = PathTable_Make(m);
+    Object *data = Object_Make(m, ZERO);
     StrVec *menu = StrVec_From(m,
         Str_CstrRef(m, "<nav>\n    <ul>\n        <li>item one</li>\n        <li>item two</li>\n    </ul>\n    </nav>"));
     Str *title = Str_CstrRef(m, "My Fancy Page");
-    PathTable_Set(data, (Abstract *)Str_CstrRef(m, "menu"), (Abstract *)menu);
-    PathTable_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "menu"), (Abstract *)menu);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
 
     Stream *sm = Stream_MakeStrVec(m);
     
@@ -188,10 +189,12 @@ status Templ_Tests(MemCh *gm){
         args);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }
 
 status TemplLogic_Tests(MemCh *gm){
+    DebugStack_Push(NULL, 0);
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -208,20 +211,22 @@ status TemplLogic_Tests(MemCh *gm){
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
 
-    PathTable *data = PathTable_Make(m);
-    PathTable *menuItems = PathTable_Make(m);
-    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/mem"),
+    Object *data = Object_Make(m, ZERO);
+    Object *menuItems = Object_Make(m, ZERO);
+    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/mem"),
         (Abstract *)Str_CstrRef(m, "/base/mem.html"));
-    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
+    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
         (Abstract *)Str_CstrRef(m, "/base/str.html"));
-    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/io"),
+    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/io"),
         (Abstract *)Str_CstrRef(m, "/base/io.html"));
-    PathTable_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/suite"),
+    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/suite"),
         (Abstract *)Str_CstrRef(m, "/base/suite.html"));
 
-    PathTable_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
 
     Stream *sm = Stream_MakeStrVec(m);
+
+    DebugStack_SetRef(data, data->type.of);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
@@ -239,6 +244,7 @@ status TemplLogic_Tests(MemCh *gm){
 
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }
 

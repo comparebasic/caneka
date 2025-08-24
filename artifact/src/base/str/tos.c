@@ -223,7 +223,7 @@ i64 ToS(Stream *sm, Abstract *a, cls type, word flags){
         return total;
     }else{
         Abstract *args[] = {
-            (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),
+            (Abstract *)Type_ToStr(ErrStream->m, type),
             (Abstract *)I16_Wrapped(sm->m, type),
             NULL
         };

@@ -1,6 +1,7 @@
 typedef struct mem_book {
     Type type;
     i32 size;
+    i32 idx;
     void *start;
     struct iter recycled;
     struct mem_ctx m;

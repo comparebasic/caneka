@@ -28,10 +28,17 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(fch->type.state & FETCHER_FOR){
             Iter *it = (Iter *)Fetch(sm->m, fch, data, NULL);
-            Iter_Add(&templ->data,
-                (Abstract *)it);
+            Iter_Add(&templ->data, (Abstract *)it);
             if((Iter_Next(it) & END) == 0){
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+            }
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)Iter_Get(it),
+                    (Abstract *)it,
+                    NULL,
+                };
+                Out("^y.For @ of &^y.\n", args);
             }
         }else if(fch->type.state & FETCHER_JUMP){
             TemplJump *jump = (TemplJump*)fch->val.jump;
@@ -87,9 +94,10 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     if(templ->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)templ,
+            (Abstract *)item,
             NULL
         };
-        Out("Templ: ^p.&^0.\n", args);
+        Out("Templ: ^p.@ \\@@^0.\n", args);
     }
 
     return total;

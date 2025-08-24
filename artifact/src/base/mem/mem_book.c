@@ -161,6 +161,7 @@ MemBook *MemBook_Make(MemBook *prev){
     book->start = start;
     book->type.of = TYPE_BOOK;
     _books[bookIdx] = book;
+    book->idx = bookIdx;
     
     MemCh_Setup(&book->m, pg);
 

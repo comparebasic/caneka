@@ -28,30 +28,18 @@ static i64 WrappedDo_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 Wrapped_Ptr(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedPtr_Print(Stream *sm, Abstract *a, cls type, word flags){
+    i64 total = 0;
     Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
     word fl = (DEBUG|MORE);
-    if((flags & fl) == fl){
-        Abstract *args[] = {
-            (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->objType.of)),
-            (Abstract *)sg->val.ptr,
-            NULL
-        };
-        return Fmt(sm, "Wptr\\<$ &>", args);
-    }else if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->objType.of)),
-            (Abstract *)sg->val.ptr,
-            NULL
-        };
-        return Fmt(sm, "Wptr\\<$ @>", args);
-    }else{
-        Abstract *args[] = {
-            (Abstract *)I64_Wrapped(sm->m, (util)a),
-            NULL
-        };
-        return Fmt(sm, "*$", args);
-    }
+    Abstract *args[] = {
+        (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->objType.of)),
+        NULL
+    };
+    total += Fmt(sm, "Wptr\\<$ ", args);
+    total += Addr_ToS(sm, sg->val.ptr, flags);
+    total += Stream_Bytes(sm, (byte *)">", 1);
+    return total;
 }
 
 static i64 WrappedUtil_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -229,7 +217,7 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_BYTE, (void *)WrappedB_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_DO, (void *)WrappedDo_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)Wrapped_Ptr);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_MEMCOUNT, (void *)WrappedMemCount_Print);
     return r;
 }
