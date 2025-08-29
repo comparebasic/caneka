@@ -1,5 +1,5 @@
 enum www_types {
-    _TYPE_WWW_START = _TYPE_EXT_END,
+    _TYPE_WWW_START = _TYPE_LANG_END,
     TYPE_HTML_NAV,
     _TYPE_WWW_END,
 };

@@ -2,8 +2,8 @@
 #include <caneka.h>
 
 static PatCharDef textToTemplDef[] = {
-    {PAT_KO|PAT_INVERT_CAPTURE,'\n' ,'\n'},
-    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,';',';'},
+    {PAT_KO|PAT_KO_TERM|PAT_CONSUME,'\n' ,'\n'},
+    {PAT_KO|PAT_KO_TERM|PAT_CONSUME,';',';'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -14,19 +14,25 @@ static PatCharDef textToVarDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef templEndDef[] = {
-    {PAT_OPTIONAL|PAT_TERM, '\r' ,'\r'},
-    {PAT_TERM, '\n' ,'\n'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef templBodyDef[] = {
+static PatCharDef templTokenDef[] = {
     {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_KO|PAT_INVERT_CAPTURE, '\n', '\n'}, 
     {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'},
     {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '?', '?'},
     {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
         {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
     patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef templContinueDef[] = {
+    {PAT_TERM, '\n', '\n'},
+    {PAT_TERM, ';', ';'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef templEndDef[] = {
+    {PAT_TERM, '\n', '\n'},
+    {PAT_TERM|PAT_INVERT|PAT_INVERT_CAPTURE, ';', ';'},
     {PAT_END, 0, 0}
 };
 
@@ -115,7 +121,7 @@ static PatCharDef varNumBodyDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varBodyDef[] = {
+static PatCharDef varTokenDef[] = {
     {PAT_KO, '}', '}'},
     {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
         {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
@@ -147,20 +153,40 @@ static status text(MemCh *m, Roebling *rbl){
 
 static status templ(MemCh *m, Roebling *rbl){
     status r = READY;
+    printf("templ\n");
+    fflush(stdout);
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
         wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        templTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        templContinueDef, FORMAT_TEMPL_CONTINUED, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        templEndDef, FORMAT_TEMPL_END, FORMAT_TEMPL_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        propSepDef, FORMAT_TEMPL_PROP_SEP, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        attSepDef, FORMAT_TEMPL_ATT_SEP, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        withDef, FORMAT_TEMPL_WITH, FORMAT_TEMPL_TEMPL);
 
     return r;
 }
 
 static status var(MemCh *m, Roebling *rbl){
     status r = READY;
+    printf("var\n");
+    fflush(stdout);
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
         wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
+        varTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_VAR);
 
     return r;
 }
@@ -175,9 +201,10 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             (Abstract *)v,
             NULL
         };
-        Out("^c. Templ Capture ^0.$^y./@^0.\n", args);
+        Out("^c. Templ Capture ^0.$/^y.@^0.\n", args);
     }
 
+    /*
     if(captureKey == FORMAT_TEMPL_TEXT || captureKey == FORMAT_TEMPL_INDENT){
         Iter_Add(&ctx->it, v);
     }else if(captureKey == FORMAT_TEMPL_VAR){
@@ -241,6 +268,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_WITH;
         }
     }
+    */
     return SUCCESS;
 }
 

@@ -24,7 +24,16 @@ static inline status Roebling_RunMatches(Roebling *rbl){
             Match *mt = (Match *)Iter_Current(&rbl->matchIt);
             DebugStack_SetRef(mt, mt->type.of);
 
-            if((Match_Feed(rbl->m, mt, c) & SUCCESS) != 0){
+            status success = Match_Feed(rbl->m, mt, c) & SUCCESS;
+            if(rbl->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                    (Abstract *)mt,
+                    NULL
+                };
+                Out("^p.$ - &^0.\n", args);
+            }
+            if(success){
                 DebugStack_Pop();
                 return Roebling_Dispatch(rbl, mt);
             }

@@ -32,6 +32,13 @@ static char *staticLibs[] = {
     NULL
 };
 
+static BuildSubdir typesobj = { "types", {
+    "strings.c",
+    "init.c",
+    NULL
+}};
+
+
 static BuildSubdir templobj = { "templ", {
     "templ.c",
     "templ_ctx.c",
@@ -42,6 +49,7 @@ static BuildSubdir templobj = { "templ", {
 }};
 
 static BuildSubdir *objdirs[] = {
+    &typesobj,
     &templobj,
     NULL
 };
