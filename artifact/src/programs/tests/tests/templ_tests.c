@@ -64,6 +64,7 @@ status TemplCtx_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
+    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
@@ -164,6 +165,12 @@ status Templ_Tests(MemCh *gm){
     r |= Test(ctx->type.state & SUCCESS,
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
+
+    if(r & ERROR){
+        MemCh_Free(m);
+        DebugStack_Pop();
+        return r;
+    }
 
     Object *data = Object_Make(m, ZERO);
     StrVec *menu = StrVec_From(m,

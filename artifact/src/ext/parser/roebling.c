@@ -19,6 +19,13 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         }
 
         byte c = *(rbl->curs->ptr);
+        if(rbl->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                NULL
+            };
+            Out("^pE. $ ^0.\n", args);
+        }
         i32 noopCount = 0;
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)Iter_Current(&rbl->matchIt);
@@ -215,9 +222,7 @@ i32 Roebling_GetMatchIdx(Roebling *rbl){
 
 status Roebling_ResetPatterns(Roebling *rbl){
     if(rbl->m->type.range > 0){
-        /*
         MemCh_Free(rbl->m);
-        */
     }
 
     Span *p = Span_Make(rbl->m);

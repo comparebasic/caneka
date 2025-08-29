@@ -226,6 +226,12 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                 unclaimed = TRUE;
                 mt->pat.curDef++;
                 continue;
+            }else if((def->flags & PAT_DROPOUT) != 0){
+                mt->pat.curDef++;
+                if(def->flags & PAT_TERM){
+                    addCount(m, mt, SNIP_UNCLAIMED, 1);
+                }
+                continue;
             }else if((def->flags & (PAT_MANY)) != 0){
                 unclaimed = TRUE;
                 if((def->flags & PAT_TERM) != 0){

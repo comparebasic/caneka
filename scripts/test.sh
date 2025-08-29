@@ -7,4 +7,4 @@ STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"
 echo "building Tests Config..." && \
 $CC -o build/programs_tests_build $INC $STATICS artifact/src/programs/tests/build.c -lm && \
 echo "building Tests..." && \
-./build/programs_tests_build && ./build/tests
+./build/programs_tests_build && ./build/bin/tests

@@ -59,7 +59,10 @@ static PatCharDef propSepDef[] = {
 
 static PatCharDef pathSepDef[] = {
     {PAT_TERM, '.' ,'.'},
-    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
+    {PAT_DROPOUT, ' ' ,' '},
+    {PAT_DROPOUT, '\t' ,'\t'},
+    {PAT_DROPOUT, '\n' ,'\n'},
+    {PAT_TERM|PAT_DROPOUT, '.' ,'.'},
     {PAT_END, 0, 0}
 };
 
@@ -86,13 +89,13 @@ static PatCharDef withDef[] = {
 };
 
 static PatCharDef levelDef[] = {
-    {PAT_TERM, '^' ,'^'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '^' ,'^'},
     {PAT_MANY|PAT_TERM, '0' ,'9'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef levelSpreadDef[] = {
-    {PAT_TERM, '^' ,'^'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '^' ,'^'},
     {PAT_MANY|PAT_TERM, '0' ,'9'},
     {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '.' ,'.'},
     {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '.' ,'.'},
@@ -100,16 +103,19 @@ static PatCharDef levelSpreadDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef betweenLevelsDef[] = {
+static PatCharDef betweenLevelDef[] = {
     {PAT_TERM, '.' ,'.'},
     {PAT_TERM, '.' ,'.'},
-    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
+    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_ANY|PAT_TERM|PAT_INVERT_CAPTURE, '\t', '\t'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef itemLevelDef[] = {
     {PAT_TERM, '.' ,'.'},
-    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_CONSUME, ' ', ' '},
+        {PAT_ANY|PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '\t', '\t'},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n'},
     {PAT_END, 0, 0}
 };
 
@@ -137,6 +143,14 @@ static PatCharDef varTokenDef[] = {
     {PAT_KO|PAT_INVERT_CAPTURE, '*', '*'},
         {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '}', '}'},
     patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef impliedDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '*', '*'},
+        {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '}', '}'},
+    {PAT_TERM, '_', '_'},
     {PAT_END, 0, 0}
 };
 
@@ -173,6 +187,18 @@ static status templ(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
+        levelDef, FORMAT_TEMPL_LEVEL, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        levelSpreadDef, FORMAT_TEMPL_LEVEL_SPREAD, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        itemLevelDef, FORMAT_TEMPL_LEVEL_ITEM, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        betweenLevelDef, FORMAT_TEMPL_LEVEL_BETWEEN, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        nestDef, FORMAT_TEMPL_LEVEL_NEST, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        impliedDef, FORMAT_TEMPL_IMPLIED, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
         templTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         templContinueDef, FORMAT_TEMPL_CONTINUED, FORMAT_TEMPL_TEMPL);
@@ -204,6 +230,8 @@ static status var(MemCh *m, Roebling *rbl){
         attSepDef, FORMAT_TEMPL_ATT_SEP, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
         pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
+        impliedDef, FORMAT_TEMPL_IMPLIED, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
         varTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
@@ -239,7 +267,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Fetcher *fch = Fetcher_Make(m);
         fch->type.state |= FETCHER_TEMPL;
         Iter_Add(&ctx->it, (Abstract *)fch);
-    }else if(captureKey == FORMAT_TEMPL_TEMPL_END){
+    }else if(captureKey == FORMAT_TEMPL_TEMPL_END || 
+            captureKey == FORMAT_TEMPL_CONTINUED){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
         if(fch->val.targets->nvalues == 0){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_END;

@@ -156,7 +156,8 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
 
     Str *dest = Str_Make(ctx->m, STR_DEFAULT);
     Str_AddCstr(dest, ctx->dist);
-    Str_AddCstr(dest, "/");
+    Str_AddCstr(dest, "/bin/");
+    Dir_CheckCreate(ctx->m, dest);
     Str_AddCstr(dest, target->bin);
 
     ProcDets pd;
