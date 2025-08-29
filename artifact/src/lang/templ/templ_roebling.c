@@ -2,8 +2,8 @@
 #include <caneka.h>
 
 static PatCharDef textToTemplDef[] = {
-    {PAT_KO|PAT_KO_TERM|PAT_CONSUME,'\n' ,'\n'},
-    {PAT_KO|PAT_KO_TERM|PAT_CONSUME,';',';'},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,'\n' ,'\n'},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,';',';'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -11,6 +11,12 @@ static PatCharDef textToTemplDef[] = {
 static PatCharDef textToVarDef[] = {
     {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,'{','{'},
     patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef toTemplDef[] = {
+    {PAT_TERM, '\n' ,'\n'},
+    {PAT_TERM, ';' ,';'},
     {PAT_END, 0, 0}
 };
 
@@ -59,6 +65,11 @@ static PatCharDef pathSepDef[] = {
 
 static PatCharDef varIfDef[] = {
     {PAT_TERM, '?' ,'?'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef toVarDef[] = {
+    {PAT_TERM, '{' ,'{'},
     {PAT_END, 0, 0}
 };
 
@@ -122,9 +133,9 @@ static PatCharDef varNumBodyDef[] = {
 };
 
 static PatCharDef varTokenDef[] = {
-    {PAT_KO, '}', '}'},
     {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
-        {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '*', '*'},
+        {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '}', '}'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -144,17 +155,19 @@ static status text(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        textToTemplDef, FORMAT_TEMPL_TEXT, FORMAT_TEMPL_TEMPL);
+        toVarDef, FORMAT_TEMPL_VAR, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
-        textToVarDef, FORMAT_TEMPL_TEXT, FORMAT_TEMPL_VAR);
+        toTemplDef, FORMAT_TEMPL_TEMPL, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        textToTemplDef, FORMAT_TEMPL_TEXT, FORMAT_TEMPL_TEXT);
+    r |= Roebling_SetPattern(rbl,
+        textToVarDef, FORMAT_TEMPL_TEXT, FORMAT_TEMPL_TEXT);
 
     return r;
 }
 
 static status templ(MemCh *m, Roebling *rbl){
     status r = READY;
-    printf("templ\n");
-    fflush(stdout);
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
@@ -179,14 +192,20 @@ static status templ(MemCh *m, Roebling *rbl){
 
 static status var(MemCh *m, Roebling *rbl){
     status r = READY;
-    printf("var\n");
-    fflush(stdout);
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
         wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
+        propSepDef, FORMAT_TEMPL_PROP_SEP, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
+        attSepDef, FORMAT_TEMPL_ATT_SEP, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
+        pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
         varTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
+        varEndDef, FORMAT_TEMPL_VAR_END, FORMAT_TEMPL_TEXT);
 
     return r;
 }

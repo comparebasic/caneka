@@ -143,7 +143,7 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                         mt->type.state |= MATCH_LEAVE;
                     }
                     if((def->flags & PAT_INVERT_CAPTURE) && 
-                        (def->flags & PAT_CONSUME) == 0){
+                            (def->flags & PAT_CONSUME) == 0){
                         addCount(m, mt, SNIP_UNCLAIMED, 1);
                     }else{
                         addCount(m, mt, SNIP_GAP, 1);

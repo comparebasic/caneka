@@ -92,7 +92,7 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
         total += Stream_Bytes(sm, (byte *)":", 1); 
     }
     if(flags & MORE){
-        total += Fmt(sm, "^D\"", NULL); 
+        total += Fmt(sm, "\"^D", NULL); 
     }
 
     if(flags & DEBUG){
@@ -102,9 +102,9 @@ i64 Str_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     if((flags & fl) == fl){
-        total += Fmt(sm, "\"^d.>", NULL);
+        total += Fmt(sm, "^d.\">", NULL);
     }else if(flags & MORE){
-        total += Fmt(sm, "\"^d.", NULL);
+        total += Fmt(sm, "^d.\"", NULL);
     }
 
     return total;

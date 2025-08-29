@@ -22,6 +22,7 @@ static char *langTypeStrings[] = {
     "FORMAT_TEMPL_PROP_SEP",
     "FORMAT_TEMPL_ATT_SEP",
     "FORMAT_TEMPL_WITH",
+    "FORMAT_TEMPL_VAR_END",
     NULL
 };
 
