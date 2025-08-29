@@ -13,6 +13,7 @@ static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
     "-DINSECURE",
     "-DCNK_EXT",
+    "-DCNK_LANG",
     "-DCNK_WWW",
     NULL
 };
@@ -22,13 +23,15 @@ static char *inc[] = {
     "-I./artifact/src/base/include/",
     "-I./artifact/src/ext/include/",
     "-I./artifact/src/www/include/",
+    "-I./artifact/src/lang/include/",
     "-I./artifact/src/programs/tests/include/",
     NULL
 };
 
 static char *staticLibs[] = {
-    "./build/libcnkbase/libcnkbase.a",
     "./build/libcaneka/libcaneka.a",
+    "./build/libcnkext/libcnkext.a",
+    "./build/libcnklang/libcnklang.a",
     "./build/libcnkwww/libcnkwww.a",
     NULL
 };

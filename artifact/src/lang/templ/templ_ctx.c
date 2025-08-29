@@ -6,7 +6,7 @@ TemplCtx *TemplCtx_Make(MemCh *m, Cursor *curs, Abstract *source){
     ctx->type.of = TYPE_TEMPL_CTX;
     ctx->rbl = Templ_RoeblingMake(m, curs, (Abstract *)ctx);
     if(curs->type.state & DEBUG){
-        ctx->rbl->type.state |= DEBUG;
+        ctx->rbl->mess->type.state |= DEBUG;
     }
     Iter_Setup(&ctx->it, Span_Make(m), SPAN_OP_GET, 0);
     return ctx;

@@ -47,42 +47,6 @@ static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total; 
 }
 
-static i64 TemplJump_Print(Stream *sm, Abstract *a, cls type, word flags){
-    status r = READY;
-
-    TemplJump *jump = (TemplJump *)as(a, TYPE_TEMPL_JUMP);
-    Abstract *args[] = {
-        (Abstract *)Type_ToStr(sm->m, jump->jumpType.of),
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)jump, ToS_FlagLabels),
-        (Abstract *)I32_Wrapped(sm->m, jump->idx),
-        (Abstract *)I32_Wrapped(sm->m, jump->destIdx),
-        NULL
-    };
-    return Fmt(sm, "TemplJump:$<$ @/dest^D.@^D.>", args);
-}
-
-static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
-    status r = READY;
-
-    Templ *templ = (Templ *)as(a, TYPE_TEMPL);
-    if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)templ, ToS_FlagLabels),
-            (Abstract *)&templ->content,
-            (Abstract *)&templ->data,
-            NULL
-        };
-        return Fmt(sm, "Templ<$ ^E.content^e.:@ ^E.data^e.:@>", args);
-    }else{
-        Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)templ, ToS_FlagLabels),
-            (Abstract *)I32_Wrapped(sm->m, templ->content.idx),
-            NULL
-        };
-        return Fmt(sm, "Templ<$ content^D.#$^d.>", args);
-    }
-}
-
 static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
     Node *nd = (Node*)as(a, TYPE_NODE);
     Abstract *args[] = {
@@ -217,15 +181,6 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 TemplItem_Print(Stream *sm, Abstract *a, cls type, word flags){
-    Abstract *args[] = {
-        (Abstract *)Type_ToStr(sm->m, type),
-        (Abstract *)a,
-        NULL
-    };
-    return Fmt(sm, "TemplItem:$<@>", args);
-}
-
 static i64 Frame_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Frame *fm = (Frame *)as(a, TYPE_FRAME);
@@ -269,14 +224,9 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
-    r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
-    r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMP, (void *)TemplJump_Print);
     r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
-    r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR_FOR, (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_TEMPL_LOGIC_END, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
     return r;
 }

@@ -1,7 +1,7 @@
 #define LICENCE_MAX 32
 extern char *Licences[LICENCE_MAX];
-extern char *libcaneka_licence_0;
-extern char *libcaneka_version_0;
+extern char *libcnkext_licence_0;
+extern char *libcnkext_version_0;
 
 status Add_Licence(char *name, char *version, char *licence);
 status Caneka_LicenceInit(MemCh *m);

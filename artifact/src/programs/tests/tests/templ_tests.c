@@ -151,13 +151,14 @@ status Templ_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/header.html"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.templ"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
+    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,

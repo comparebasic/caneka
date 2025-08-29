@@ -11,7 +11,7 @@ char *Licences[] = {
 };
 
 status Caneka_LicenceInit(MemCh *m){
-    return Add_Licence("CANEKA", libcaneka_version_0, libcaneka_licence_0);
+    return Add_Licence("CANEKA", libcnkext_version_0, libcnkext_licence_0);
 }
 
 status Show_Licences(Stream *sm){

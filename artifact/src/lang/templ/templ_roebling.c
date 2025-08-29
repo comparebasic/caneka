@@ -1,25 +1,28 @@
 #include <external.h>
 #include <caneka.h>
 
-static PatCharDef textDef[] = {
-    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,'$' ,'$'},
+static PatCharDef textToTemplDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE,'\n' ,'\n'},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,';',';'},
     patText,
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '$' ,'$'},
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '{', '{'},
+static PatCharDef textToVarDef[] = {
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE,'{','{'},
+    patText,
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varCloseDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '}', '}'},
+static PatCharDef templEndDef[] = {
+    {PAT_OPTIONAL|PAT_TERM, '\r' ,'\r'},
+    {PAT_TERM, '\n' ,'\n'},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varBodyDef[] = {
-    {PAT_KO|PAT_INVERT_CAPTURE, '}', '}'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'}, 
+static PatCharDef templBodyDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_KO|PAT_INVERT_CAPTURE, '\n', '\n'}, 
+    {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'},
     {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '?', '?'},
     {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
         {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
@@ -27,51 +30,106 @@ static PatCharDef varBodyDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varPathSepDef[] = {
-    {PAT_TERM, '.' ,'.'},
+static PatCharDef wsDef[] = {
+    {PAT_MANY, ' ' ,' '},{PAT_MANY|PAT_TERM, '\t' ,'\t'},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varAttSepDef[] = {
+static PatCharDef attSepDef[] = {
     {PAT_TERM, '*' ,'*'},
     {PAT_END, 0, 0}
 };
 
+static PatCharDef propSepDef[] = {
+    {PAT_TERM, '#' ,'#'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef pathSepDef[] = {
+    {PAT_TERM, '.' ,'.'},
+    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef varIfDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_TERM|PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
     {PAT_TERM, '?' ,'?'},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varForDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_TERM|PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, ':' ,':'},
+static PatCharDef iterDef[] = {
+    {PAT_TERM, '.' ,'.'},
+    {PAT_TERM, '.' ,'.'},
+    {PAT_TERM, '.' ,'.'},
     {PAT_END, 0, 0}
 };
 
+static PatCharDef withDef[] = {
+    {PAT_TERM, ':' ,':'},
+    {PAT_END, 0, 0}
+};
 
-static PatCharDef varIfNotDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, 
-        {PAT_TERM|PAT_ANY|PAT_INVERT_CAPTURE, '\t', '\t'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '?' ,'?'},
+static PatCharDef levelDef[] = {
+    {PAT_TERM, '^' ,'^'},
+    {PAT_MANY|PAT_TERM, '0' ,'9'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef levelSpreadDef[] = {
+    {PAT_TERM, '^' ,'^'},
+    {PAT_MANY|PAT_TERM, '0' ,'9'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '.' ,'.'},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '.' ,'.'},
+    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef betweenLevelsDef[] = {
+    {PAT_TERM, '.' ,'.'},
+    {PAT_TERM, '.' ,'.'},
+    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef itemLevelDef[] = {
+    {PAT_TERM, '.' ,'.'},
+    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef nestDef[] = {
+    {PAT_TERM, '-' ,'-'},
+    {PAT_TERM, '>' ,'>'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varDef[] = {
+    {PAT_TERM, '{' ,'{'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varNumBodyDef[] = {
+    {PAT_KO, '}', '}'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
+        {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
+    {PAT_MANY|PAT_TERM, '0', '9'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varBodyDef[] = {
+    {PAT_KO, '}', '}'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
+        {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
+    patText,
     {PAT_END, 0, 0}
 };
 
 static PatCharDef varItemDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '@', '@'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
+    {PAT_KO, '_', '_'},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef varImpliedDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '_', '_'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '}', '}'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef varIdxDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '#', '#'},
-    {PAT_ANY|PAT_TERM, '0', '9'},
+static PatCharDef varEndDef[] = {
+    {PAT_TERM, '}' ,'}'},
     {PAT_END, 0, 0}
 };
 
@@ -80,7 +138,19 @@ static status text(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        textDef, FORMAT_TEMPL_TEXT, FORMAT_TEMPL_VAR);
+        textToTemplDef, FORMAT_TEMPL_TEXT, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        textToVarDef, FORMAT_TEMPL_TEXT, FORMAT_TEMPL_VAR);
+
+    return r;
+}
+
+static status templ(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_TEMPL);
 
     return r;
 }
@@ -89,54 +159,9 @@ static status var(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
-    Match *mt = NULL;
     r |= Roebling_SetPattern(rbl,
-        varDef, FORMAT_TEMPL_VAR, FORMAT_TEMPL_VAR_BODY);
-    mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_ACCEPT_EMPTY;
+        wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_VAR);
 
-    return r;
-}
-
-static status varBody(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-
-    Match *mt = NULL;
-    r |= Roebling_SetPattern(rbl,
-        varCloseDef, FORMAT_TEMPL_VAR_CLOSE, FORMAT_TEMPL_TEXT);
-    mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_ACCEPT_EMPTY;
-
-    r |= Roebling_SetPattern(rbl,
-        varBodyDef, FORMAT_TEMPL_VAR_BODY, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varPathSepDef, FORMAT_TEMPL_VAR_PATH_SEP, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varForDef, FORMAT_TEMPL_VAR_FOR, FORMAT_TEMPL_VAR_BODY);
-    mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_ACCEPT_EMPTY;
-    r |= Roebling_SetPattern(rbl,
-        varAttSepDef, FORMAT_TEMPL_VAR_ATT_SEP, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varIdxDef, FORMAT_TEMPL_VAR_IDX, FORMAT_TEMPL_VAR_BODY);
-    mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_ACCEPT_EMPTY;
-    r |= Roebling_SetPattern(rbl,
-        varItemDef, FORMAT_TEMPL_VAR_ITEM, FORMAT_TEMPL_VAR_BODY);
-    mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_ACCEPT_EMPTY;
-    r |= Roebling_SetPattern(rbl,
-        varImpliedDef, FORMAT_TEMPL_VAR_IMPLIED, FORMAT_TEMPL_VAR_BODY);
-    mt = Roebling_GetMatch(rbl);
-    mt->type.state |= MATCH_ACCEPT_EMPTY;
-
-    /*
-    r |= Roebling_SetPattern(rbl,
-        varIfDef, FORMAT_TEMPL_VAR_ENDFOR, FORMAT_TEMPL_VAR_BODY);
-    r |= Roebling_SetPattern(rbl,
-        varIfNotDef, FORMAT_TEMPL_VAR_IFNOT, FORMAT_TEMPL_VAR_BODY);
-    */
     return r;
 }
 
@@ -150,7 +175,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             (Abstract *)v,
             NULL
         };
-        Out("^c. Templ Capture ^E0.$^ec./@^0.\n", args);
+        Out("^c. Templ Capture ^0.$^y./@^0.\n", args);
     }
 
     if(captureKey == FORMAT_TEMPL_TEXT || captureKey == FORMAT_TEMPL_INDENT){
@@ -223,15 +248,15 @@ Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source){
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_TEMPL_TEXT));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)text));
+    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_TEMPL_TEMPL));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)templ));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_TEMPL_VAR));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)var));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_TEMPL_VAR_BODY));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)varBody));
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
     rbl->mess = Mess_Make(m);
-    rbl->mess->tokenizer = Lookup_Make(m, _APPS_TEMPL_START);
+    rbl->mess->tokenizer = Lookup_Make(m, _TEMPL_START);
     rbl->source = source;
     return rbl;
 }

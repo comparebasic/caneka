@@ -55,9 +55,6 @@ static BuildSubdir navigateobj = { "navigate", {
     "mess.c",
     "relation.c",
     "compare.c",
-    "templ_ctx.c",
-    "templ.c",
-    "templ_jump.c",
     "frame.c",
     "navigate_tos.c",
     "navigate_cls.c",
@@ -106,12 +103,6 @@ static BuildSubdir fmtobj = { "format/fmt", {
     NULL
 }};
 
-static BuildSubdir cashobj = { "format/templ", {
-    "templ_roebling.c",
-    NULL
-}};
-
-
 static BuildSubdir xmlobj = { "format/xml", {
     "tag.c",
     NULL,
@@ -131,7 +122,6 @@ static BuildSubdir *objdirs[] = {
     &sequenceobj,
     &parserobj,
     &fmtobj,
-    &cashobj,
     &formatobj,
     &persistobj,
     &transpobj,
@@ -156,8 +146,8 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcaneka";
-    ctx.version = "1.strvec-alpha";
+    ctx.libtarget = "libcnkext";
+    ctx.version = "1.0-object-def";
     ctx.dist = "build";
     ctx.src = "artifact/src/ext";
     ctx.targets = (Executable *)targets;

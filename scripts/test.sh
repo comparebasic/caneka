@@ -1,7 +1,7 @@
 #!/bin/sh
 CC="clang"
 INC="-I ./artifact/src/include -I artifact/src/base/include"
-STATICS="build/libcnkbase/libcnkbase.a build/libbuilder/libbuilder.a"
+STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"
 
 ./scripts/make.sh && \
 echo "building Tests Config..." && \

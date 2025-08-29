@@ -1,30 +1,26 @@
 #include <external.h>
 #include <caneka.h>
-#include <cnkbuild.h>
+#include <builder.h>
+
+#define TEST_REQ 1
+
+/* parameters */
 
 static Executable targets[] = {
-    {"doc", "main.c"},
     {NULL, NULL},
 };
 
 static char *cflags[] = {
-        "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-        NULL
+    "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+    "-DCNK_EXT", "-DCNK_LANG",
+    NULL
 };
+
 static char *inc[] = {
     "-I./artifact/src/include/",
     "-I./artifact/src/base/include/",
     "-I./artifact/src/ext/include/",
-    "-I./artifact/src/www/include/",
-    "-I./artifact/src/programs/tests/include/",
-    NULL
-};
-
-static char *staticLibs[] = {
-    "./build/libcaneka/libcaneka.a",
-    "./build/libcnkext.a/libcnkext.a",
-    "./build/libcnklang.a/libcnklang.a",
-    "./build/libcnkwww/libcnkwww.a",
+    "-I./artifact/src/lang/include/",
     NULL
 };
 
@@ -32,14 +28,26 @@ static char *libs[] = {
     NULL
 };
 
-/* sources */
-static BuildSubdir obj = { "", {
-    "doc_ctx.c",
+static char *staticLibs[] = {
+    NULL
+};
+
+static BuildSubdir templobj = { "templ", {
+    "templ.c",
+    "templ_ctx.c",
+    "templ_jump.c",
+    "templ_roebling.c",
+    "templ_cls.c",
     NULL
 }};
 
 static BuildSubdir *objdirs[] = {
-    &obj,
+    &templobj,
+    NULL
+};
+
+char *licences[] = {
+    "./LICENCE",
     NULL
 };
 
@@ -55,14 +63,16 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libdoc";
+    ctx.libtarget = "libcnklang";
+    ctx.version = "1.0-templ";
     ctx.dist = "build";
-    ctx.src = "artifact/src/programs/doc";
+    ctx.src = "artifact/src/lang";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
     ctx.args.libs = libs;
     ctx.args.staticLibs = staticLibs;
+    ctx.args.licenceFiles = licences;
     ctx.objdirs = (BuildSubdir **)objdirs;
 
     Build(&ctx);
