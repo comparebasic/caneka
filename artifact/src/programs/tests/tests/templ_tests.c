@@ -64,7 +64,6 @@ status TemplCtx_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
-    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
@@ -72,7 +71,7 @@ status TemplCtx_Tests(MemCh *gm){
         NULL);
 
     Span *expected = Span_Make(m);
-    char *cstr = "<ul>\n    ";
+    char *cstr = "<ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec *v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
@@ -91,7 +90,7 @@ status TemplCtx_Tests(MemCh *gm){
     Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
-    cstr = "\n        <li><a href=\"";
+    cstr = "        <li><a href=\"";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
@@ -118,7 +117,7 @@ status TemplCtx_Tests(MemCh *gm){
     Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
-    cstr = "</a>\n    ";
+    cstr = "</a>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
@@ -127,7 +126,7 @@ status TemplCtx_Tests(MemCh *gm){
     fch->type.state = FETCHER_END;
     Span_Add(expected, (Abstract *)fch);
 
-    cstr = "\n</ul>\n";
+    cstr = "</ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);

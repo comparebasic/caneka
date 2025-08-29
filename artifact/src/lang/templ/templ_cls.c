@@ -53,7 +53,9 @@ status Templ_ClsInit(MemCh *m){
     r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMP, (void *)TemplJump_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR_FOR, (void *)TemplItem_Print);
-    r |= Lookup_Add(m, lk, FORMAT_TEMPL_LOGIC_END, (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_TEMPL_TEMPL, (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_TEMPL_FOR, (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_TEMPL_WITH, (void *)TemplItem_Print);
+    r |= Lookup_Add(m, lk, FORMAT_TEMPL_TEMPL_END, (void *)TemplItem_Print);
     return r;
 }

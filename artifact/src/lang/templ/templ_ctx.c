@@ -20,7 +20,11 @@ TemplCtx *TemplCtx_FromCurs(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_Run(ctx->rbl);
     Roebling_Finalize(ctx->rbl, NULL, NEGATIVE);
     if((ctx->rbl->curs->type.state & END) && (ctx->rbl->type.state & ERROR) == 0){
-        ctx->type.state |= SUCCESS;;
+        ctx->type.state |= SUCCESS;
+        Abstract *a = Iter_GetByIdx(&ctx->it, ctx->it.p->max_idx);
+        if(a->type.of == TYPE_STRVEC){
+            StrVec_AddBytes(m, (StrVec *)a, (byte *)"\n", 1);
+        }
     }
 
     return ctx;
