@@ -16,8 +16,6 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
         }else{
             return tg->func(m, tg, value, source);
         }
-    }else if(tg->type.state & FETCH_TARGET_SELF){
-        return value;
     }else{
         typeOf = value->type.of;
         if(typeOf == TYPE_WRAPPED_PTR){
@@ -99,6 +97,7 @@ Iter *Fetch_Iter(MemCh *m, Abstract *a, Abstract *source){
 FetchTarget *FetchTarget_Make(MemCh *m){
     FetchTarget *tg = (FetchTarget *)MemCh_Alloc(m, sizeof(FetchTarget));
     tg->type.of = TYPE_FETCH_TARGET;
+    tg->idx = -1;
     return tg;
 }
 

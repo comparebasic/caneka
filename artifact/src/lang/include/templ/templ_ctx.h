@@ -1,5 +1,6 @@
 typedef struct cash_ctx {
     Type type; 
+    Type next;
     Roebling *rbl;
     Abstract *source;
     Iter it;

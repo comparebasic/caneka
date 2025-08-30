@@ -40,20 +40,23 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 };
                 Out("^y.For @ of &^y.\n", args);
             }
-        }else if(fch->type.state & FETCHER_JUMP){
-            TemplJump *jump = (TemplJump*)fch->val.jump;
-            if(jump->type.state & FETCHER_FOR){
-                Iter_PrevRemove(&templ->data);
-                Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
-                if((Iter_Next(it) & END) == 0){
-                    Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
-                    Iter_GetByIdx(&templ->content, jump->destIdx);
+        }else if(fch->type.state & FETCHER_COMMAND){
+            Abstract *a = Span_Get(fch->val.targets, 0);
+            if(a->type.of == TYPE_TEMPL_JUMP){
+                TemplJump *jump = (TemplJump*)a;
+                if(jump->type.state & FETCHER_FOR){
+                    Iter_PrevRemove(&templ->data);
+                    Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
+                    if((Iter_Next(it) & END) == 0){
+                        Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+                        Iter_GetByIdx(&templ->content, jump->destIdx);
+                    }
                 }
             }
         }else if(fch->type.state & FETCHER_END){
             TemplJump *jump = TemplJump_Make(sm->m, templ->content.idx, -1);
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_JUMP;
-            fch->val.jump = (Abstract *)jump;
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
+            Span_Add(fch->val.targets, (Abstract *)jump);
 
             Iter it;
             memcpy(&it, &templ->content, sizeof(Iter));
@@ -67,8 +70,10 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 Abstract *prev = Iter_Get(&it);
                 if(prev->type.of == TYPE_FETCHER){
                     Fetcher *item = (Fetcher *)prev;
-                    if(item->type.state & FETCHER_JUMP){
-                       targetIdx = ((TemplJump *)item->val.jump)->destIdx; 
+                    Abstract *a = Span_Get(item->val.targets, 0);
+                    if(item->type.state & FETCHER_COMMAND &&
+                            a->type.of == TYPE_TEMPL_JUMP){
+                        targetIdx = ((TemplJump *)a)->destIdx; 
                     }else if(item->type.state & 
                             (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
                         jump->destIdx = it.idx;

@@ -2,10 +2,9 @@ enum fetch_target_flags {
     FETCH_TARGET_ATT = 1 << 8,
     FETCH_TARGET_KEY = 1 << 9,
     FETCH_TARGET_IDX = 1 << 10,
-    FETCH_TARGET_SELF = 1 << 11,
-    FETCH_TARGET_ITER = 1 << 12,
-    FETCH_TARGET_PROP = 1 << 13,
-    FETCH_TARGET_FUNC = 1 << 14,
+    FETCH_TARGET_ITER = 1 << 11,
+    FETCH_TARGET_PROP = 1 << 12,
+    FETCH_TARGET_FUNC = 1 << 13,
     FETCH_TARGET_RESOLVED = 1 << 14,
     FETCH_TARGET_COMMAND = 1 << 15,
 };

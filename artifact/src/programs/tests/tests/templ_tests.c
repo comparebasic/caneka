@@ -172,6 +172,12 @@ status Templ_Tests(MemCh *gm){
         return r;
     }
 
+    Abstract *args1[] = {
+        (Abstract *)ctx->it.p,
+        NULL
+    };
+    Out("^p.Templ Span: &^0.", args1);
+
     Object *data = Object_Make(m, ZERO);
     StrVec *menu = StrVec_From(m,
         Str_CstrRef(m, "<nav>\n    <ul>\n        <li>item one</li>\n        <li>item two</li>\n    </ul>\n    </nav>"));

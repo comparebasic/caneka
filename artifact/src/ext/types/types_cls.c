@@ -57,11 +57,7 @@ static boolean Fetcher_Exact(Fetcher *a, Fetcher *b){
     if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS)){
         return FALSE;
     }
-    if(a->type.state & FETCHER_JUMP){
-        return Exact((Abstract *)a->val.jump, (Abstract *)b->val.jump);
-    }else{
-        return Exact((Abstract *)a->val.targets, (Abstract *)b->val.targets);
-    }
+    return Exact((Abstract *)a->val.targets, (Abstract *)b->val.targets);
 }
 
 static status Fetcher_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -72,19 +68,11 @@ static status Fetcher_Print(Stream *sm, Abstract *a, cls type, word flags){
         NULL,
     };
     total += Fmt(sm, "Fetcher<$ ", args);
-    if(fch->type.state & FETCHER_JUMP){
-        Abstract *args[] = {
-            (Abstract *)fch->val.jump,
-            NULL,
-        };
-        total += Fmt(sm, "@>", args);
-    }else{
-        Abstract *args[] = {
-            (Abstract *)fch->val.targets,
-            NULL,
-        };
-        total += Fmt(sm, "@>", args);
-    }
+    Abstract *args1[] = {
+        (Abstract *)fch->val.targets,
+        NULL,
+    };
+    total += Fmt(sm, "@>", args1);
 
     return total;
 }
@@ -101,6 +89,14 @@ static status FetchTarget_Print(Stream *sm, Abstract *a, cls type, word flags){
         NULL,
     };
     total += Fmt(sm, "FT<$", args);
+    if(tg->objType.of != ZERO){
+        Abstract *args[] = {
+            (Abstract *)Type_ToStr(sm->m, tg->objType.of),
+            NULL
+        };
+        total += Fmt(sm, " $ ", args);
+
+    }
     if(tg->key != NULL){
         Abstract *args[] = {
             (Abstract *)tg->key,
@@ -108,7 +104,7 @@ static status FetchTarget_Print(Stream *sm, Abstract *a, cls type, word flags){
         };
         total += Fmt(sm, " @", args);
     }
-    if(tg->type.state & FETCH_TARGET_IDX){
+    if(tg->type.state & FETCH_TARGET_IDX || tg->idx != -1){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, tg->idx),
             NULL
@@ -154,17 +150,19 @@ status Types_ClsInit(MemCh *m){
     fetcherLabels[12] = Str_CstrRef(m, "IF");
     fetcherLabels[13] = Str_CstrRef(m, "IFNOT");
     fetcherLabels[14] = Str_CstrRef(m, "END");
-    fetcherLabels[15] = Str_CstrRef(m, "JUMP");
+    fetcherLabels[15] = Str_CstrRef(m, "TEMPL");
+    fetcherLabels[16] = Str_CstrRef(m, "COMMAND");
     r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)fetcherLabels);
 
     Str **fetchTargetLabels = (Str **)Arr_Make(m, 17);
     fetchTargetLabels[9] = Str_CstrRef(m, "ATT");
     fetchTargetLabels[10] = Str_CstrRef(m, "KEY");
     fetchTargetLabels[11] = Str_CstrRef(m, "IDX");
-    fetchTargetLabels[12] = Str_CstrRef(m, "SELF");
-    fetchTargetLabels[13] = Str_CstrRef(m, "ITER");
+    fetchTargetLabels[12] = Str_CstrRef(m, "ITER");
+    fetchTargetLabels[13] = Str_CstrRef(m, "PROP");
     fetchTargetLabels[14] = Str_CstrRef(m, "FUNC");
     fetchTargetLabels[15] = Str_CstrRef(m, "RESOLVED");
+    fetchTargetLabels[16] = Str_CstrRef(m, "COMMAND");
     r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)fetchTargetLabels);
 
     /* ToS */

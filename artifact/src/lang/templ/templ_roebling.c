@@ -255,6 +255,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 
     if(captureKey == FORMAT_TEMPL_TEXT){
         Iter_Add(&ctx->it, v);
+    }else if(captureKey == FORMAT_TEMPL_IMPLIED){
+        Fetcher *fch = (Fetcher *)as(Iter_Current(&ctx->it), TYPE_FETCHER);
+        fch->type.state |= FETCHER_COMMAND;
+        FetchTarget *tg = FetchTarget_Make(m);
+        tg->objType.of = captureKey;
+        Span_Add(fch->val.targets, (Abstract *)tg);
     }else if(captureKey == FORMAT_TEMPL_VAR){
         Fetcher *fch = Fetcher_Make(m);
         fch->type.state |= FETCHER_VAR;
@@ -269,43 +275,48 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Iter_Add(&ctx->it, (Abstract *)fch);
     }else if(captureKey == FORMAT_TEMPL_TEMPL_END || 
             captureKey == FORMAT_TEMPL_CONTINUED){
-        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
-        if(fch->val.targets->nvalues == 0){
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_END;
+        Abstract *a = Iter_Current(&ctx->it);
+        if(((Fetcher *)a)->val.targets->nvalues == 0){
+            a->type.state = (a->type.state & NORMAL_FLAGS) | FETCHER_END;
         }
+        if(captureKey == FORMAT_TEMPL_CONTINUED){
+            Fetcher *fch = Fetcher_Make(m);
+            fch->type.state |= FETCHER_TEMPL;
+            Iter_Add(&ctx->it, (Abstract *)fch);
+        }
+    }else if(captureKey > _FORMAT_TEMPL_LEVEL_START &&
+            captureKey < _FORMAT_TEMPL_LEVEL_END){
+        Fetcher *fch = (Fetcher *)as(Iter_Current(&ctx->it), TYPE_FETCHER);
+        fch->type.state |= FETCHER_COMMAND;
+        FetchTarget *tg = FetchTarget_Make(m);
+        tg->objType.of = captureKey;
+        if(captureKey == FORMAT_TEMPL_LEVEL){
+            tg->idx = Int_FromStr(StrVec_Str(m, v));
+        }
+        Span_Add(fch->val.targets, (Abstract *)tg);
     }else if(captureKey > _FORMAT_TEMPL_VAR_ANNOTE_START &&
             captureKey < _FORMAT_TEMPL_VAR_ANNOTE_END){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
 
         if(captureKey == FORMAT_TEMPL_PROP_SEP){
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_PROP;
+            ctx->next.state = FETCH_TARGET_PROP;
         }else if(captureKey == FORMAT_TEMPL_ATT_SEP){
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_ATT;
+            ctx->next.state = FETCH_TARGET_ATT;
         }else if(captureKey == FORMAT_TEMPL_PATH_SEP){
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCH_TARGET_KEY;
+            ctx->next.state = FETCH_TARGET_KEY;
         }else{
-            Str *s = NULL;
-            if(v->p->nvalues == 1){
-                s = Span_Get(v->p, 0);
-            }else{
-                s = Str_Make(m, v->total+1);
-                Iter it;
-                Iter_Init(&it, v->p);
-                while((Iter_Next(&it) & END) == 0){
-                    Str *_s = (Str *)Iter_Get(&it);
-                    Str_Add(s, _s->bytes, _s->length);
-                }
-            }
+            Str *s = StrVec_Str(m, v);
             FetchTarget *tg = NULL;
-            if(fch->type.state & FETCH_TARGET_ATT){
+            if(ctx->next.state & FETCH_TARGET_ATT){
                 tg = FetchTarget_MakeAtt(m, s);
-            }else if(fch->type.state & FETCH_TARGET_PROP){
+            }else if(ctx->next.state & FETCH_TARGET_PROP){
                 tg = FetchTarget_MakeProp(m, s);
-            }else if(fch->type.state & FETCH_TARGET_IDX){
+            }else if(ctx->next.state & FETCH_TARGET_IDX){
                 tg = FetchTarget_MakeIdx(m, Int_FromStr(s));
             }else{
                 tg = FetchTarget_MakeKey(m, s);
             }
+            ctx->type.state = ZERO;
             fch->type.state |= FETCHER_VAR;
             Span_Add(fch->val.targets, (Abstract *)tg);
         }
