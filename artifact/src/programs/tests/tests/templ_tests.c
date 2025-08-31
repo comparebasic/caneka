@@ -176,7 +176,7 @@ status Templ_Tests(MemCh *gm){
         (Abstract *)ctx->it.p,
         NULL
     };
-    Out("^p.Templ Span: &^0.", args1);
+    Out("^p.Templ Span: &\n^0.", args1);
 
     Object *data = Object_Make(m, ZERO);
     StrVec *menu = StrVec_From(m,
@@ -188,6 +188,7 @@ status Templ_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);

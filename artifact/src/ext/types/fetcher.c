@@ -31,6 +31,7 @@ Abstract *Fetch_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf){
 }
 
 Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
+    Abstract *orig = value;
     if(fch->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)fch,
@@ -48,6 +49,13 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
     if(it.type.state & END){
         return value;
     }else{
+        Abstract *args[] = {
+            (Abstract *)fch,
+            orig,
+            NULL
+        };
+        Error(m, (Abstract *)fch, FUNCNAME, FILENAME, LINENUMBER,
+            "Fetch @ value not found @\n", args);
         return NULL;
     }
 }

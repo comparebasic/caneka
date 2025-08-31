@@ -9,11 +9,19 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     Abstract *item = Iter_Get(&templ->content);
     Abstract *data = Iter_Current(&templ->data);
 
+    if(templ->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)templ,
+            NULL
+        };
+        Out("^y.Templ_ToSCycle &^0.\n", args);
+    }
+
     if(item->type.of == TYPE_STRVEC){
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
     }else if(item->type.of == TYPE_FETCHER){
         Fetcher *fch = (Fetcher *)item;
-        if(fch->type.state & FETCHER_VAR){
+        if(fch->type.state & FETCHER_FOR){
             Abstract *value = Fetch(sm->m, fch, data, NULL);
             if(value == NULL){
                 Abstract *args[] = {

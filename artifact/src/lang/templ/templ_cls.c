@@ -35,7 +35,7 @@ static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)&templ->data,
             NULL
         };
-        return Fmt(sm, "Templ<$ ^E.content^e.:@ ^E.data^e.:@>", args);
+        return Fmt(sm, "Templ<$\n  ^E.content^e.:@\n  ^E.data^e.:@>", args);
     }else{
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)templ, ToS_FlagLabels),
@@ -45,7 +45,6 @@ static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
         return Fmt(sm, "Templ<$ content^D.#$^d.>", args);
     }
 }
-
 
 status Templ_ClsInit(MemCh *m){
     status r = READY;
