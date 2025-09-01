@@ -23,7 +23,7 @@ static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)I32_Wrapped(sm->m, obj->order->nvalues),
             NULL
         };
-        total += Fmt(sm, "Object<^D.$^d.nvalues [", args);
+        total += Fmt(sm, "Object<^D.$^d.nvalues {", args);
         Iter it;
         Iter_Init(&it, obj->order);
         while((Iter_Next(&it) & END) == 0){
@@ -37,7 +37,7 @@ static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
                 }
             }
         }
-        total += Stream_Bytes(sm, (byte *)"]>", 2);
+        total += Stream_Bytes(sm, (byte *)"}>", 2);
         return total;
     }else{
         return ToStream_NotImpl(sm, a, type, flags);

@@ -72,9 +72,35 @@ status TemplCtx_Tests(MemCh *gm){
         NULL);
 
     Span *expected = Span_Make(m);
-    char *cstr = "<ul>\n";
+    char *cstr = "<h1>";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec *v = StrVec_From(m, s);
+    Span_Add(expected, (Abstract *)v);
+
+    fch = Fetcher_Make(m);
+    fch->type.state |= FETCHER_VAR;
+    cstr = "title";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    tg = FetchTarget_MakeKey(m, s);
+    Span_Add(fch->val.targets, (Abstract *)tg);
+    Span_Add(expected, (Abstract *)fch);
+
+    cstr = "</h1>\n<p>";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    v = StrVec_From(m, s);
+    Span_Add(expected, (Abstract *)v);
+
+    fch = Fetcher_Make(m);
+    fch->type.state |= FETCHER_VAR;
+    cstr = "para";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    tg = FetchTarget_MakeKey(m, s);
+    Span_Add(fch->val.targets, (Abstract *)tg);
+    Span_Add(expected, (Abstract *)fch);
+
+    cstr = "</p>\n<ul>\n";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
     fch = Fetcher_Make(m);
@@ -140,7 +166,7 @@ status TemplCtx_Tests(MemCh *gm){
 
     r |= TestShow(Exact((Abstract *)expected, (Abstract *)ctx->it.p), 
         "Expected content found in example templ", 
-        "Mismatch in content found in example templ, expected:\n$\nhave:\n $", args);
+        "Mismatch in content found in example templ, expected:\n&\nhave:\n &", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
@@ -151,8 +177,9 @@ status Templ_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
     MemCh *m = MemCh_Make();
+    TranspFile *tp = NULL;
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.templ"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.templ"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);
@@ -179,11 +206,25 @@ status Templ_Tests(MemCh *gm){
     Out("^p.Templ Span: &\n^0.", args1);
 
     Object *data = Object_Make(m, ZERO);
-    StrVec *menu = StrVec_From(m,
-        Str_CstrRef(m, "<nav>\n    <ul>\n        <li>item one</li>\n        <li>item two</li>\n    </ul>\n    </nav>"));
+    Object *menu = Object_Make(m, ZERO);
+    tp = TranspFile_Make(m);
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/things/one"));
+    tp->name = StrVec_From(m, Str_CstrRef(m, "One"));
+    Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "one")), (Abstract *)tp);
+    tp = TranspFile_Make(m);
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/things/two"));
+    tp->name = StrVec_From(m, Str_CstrRef(m, "Two"));
+    Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "two")), (Abstract *)tp);
+    tp = TranspFile_Make(m);
+    tp->local = StrVec_From(m, Str_CstrRef(m, "/things/three"));
+    tp->name = StrVec_From(m, Str_CstrRef(m, "Three"));
+    Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "three")), (Abstract *)tp);
+
     Str *title = Str_CstrRef(m, "My Fancy Page");
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "menu"), (Abstract *)menu);
+    Str *para = Str_CstrRef(m, "And here is the masterful list of menu items!");
     Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "para"), (Abstract *)para);
+    Object_AddByPath(data, StrVec_From(m, Str_CstrRef(m, "items/menu")), (Abstract *)menu);
 
     Stream *sm = Stream_MakeStrVec(m);
     

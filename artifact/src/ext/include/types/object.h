@@ -17,6 +17,8 @@ typedef struct object {
     Span *order;
 } Object;
 
+#define Object_GetMem(o) ((o)->order->m)
+
 Object *Object_Make(MemCh *m, cls typeOf);
 boolean Object_IsBlank(Object *obj);
 

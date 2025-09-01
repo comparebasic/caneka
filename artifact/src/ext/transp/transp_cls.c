@@ -15,7 +15,7 @@ static i64 TranspFile_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)tfile->dest,
         NULL
     };
-    return Fmt(sm, "TranspFile<$ @/@ $ -> $>", args);
+    return Fmt(sm, "TranspFile<$ @ @ $ -> $>", args);
 }
 
 static i64 TranspCtx_Print(Stream *sm, Abstract *a, cls type, word flags){

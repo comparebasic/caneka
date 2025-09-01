@@ -88,21 +88,37 @@ status Object_AddByPath(Object *pt, StrVec *path, Abstract *value){
         Out("^c.Adding @ to @^0.\n", args);
     }
     status r = READY;
+    if((path->type.state & STRVEC_PATH) == 0){
+       IoUtil_Annotate(Object_GetMem(pt), path); 
+    }
     Iter keysIt;
     Iter_Init(&keysIt, path->p);
     Str *key = NULL;
     Object *current = pt;
     while((Iter_Next(&keysIt) & END) == 0){
         Str *item = (Str *)Iter_Get(&keysIt);
-        if((item->type.state|keysIt.type.state) & LAST){
-            Object_Set(current, (Abstract *)key, value);
-            r |= SUCCESS;
-            break;
-        }else if((item->type.state & MORE) && key != NULL){
+        if((item->type.state & MORE) && key != NULL){
+            Abstract *args[] = {
+                (Abstract *)path,
+                (Abstract *)key,
+                NULL
+            };
+            Out("^c.More path & @\n", args);
             current = Object_GetOrMake(current, (Abstract *)key);
+            key = NULL;
             r |= PROCESSING;
         }else{
             key = item;
+            if(keysIt.type.state & LAST){
+                Abstract *args[] = {
+                    (Abstract *)path,
+                    (Abstract *)key,
+                    NULL
+                };
+                Out("^c.Setting path & @\n", args);
+                Object_Set(current, (Abstract *)key, value);
+                r |= SUCCESS;
+            }
         }
     }
 
