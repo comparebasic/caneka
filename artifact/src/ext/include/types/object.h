@@ -28,7 +28,7 @@ Object *Object_As(Object *obj, cls typeOf);
 Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value);
 Abstract *Object_Get(Object *obj, Abstract *key);
 
-Hashed *Object_SetProp(Object *obj, Str *key);
+Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value);
 Abstract *Object_GetProp(Object *obj, Str *key);
 
 Hashed *Object_SetByIdx(Object *obj, Abstract *key, Abstract *value);

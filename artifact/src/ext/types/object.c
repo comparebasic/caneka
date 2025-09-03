@@ -1,12 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Object_ToS(Stream *sm, Abstract *a, cls type, word flags){
-    i64 total = 0;
-    ;
-    return total;
-}
-
 boolean Object_TypeMatch(Abstract *a, cls typeOf){
     return (a->type.of == TYPE_OBJECT && 
         ((Object *)a)->objType.of == typeOf) || (a->type.of == typeOf);
@@ -138,6 +132,28 @@ Hashed *Object_Set(Object *pt, Abstract *key, Abstract *value){
     }
     return h;
 }
+
+Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value){
+    ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
+    if(cls != NULL){
+        Single *sg = (Single *)Table_Get(cls->props, (Abstract *)key);
+        if(sg != NULL){
+            Hashed *h = Span_Get(obj->order, sg->val.i);
+            h->value = value;
+            return h;
+        }
+    }
+
+    Abstract *args[] = {
+        (Abstract *)key,
+        (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
+        NULL
+    };
+    Error(Object_GetMem(obj), (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
+        "Unable to find prop @ on ClassDef $", args);
+    return NULL;
+}
+
 
 Hashed *Object_SetPropByIdx(Object *obj, i32 idx, Abstract *value){
     Hashed *h = Span_Get(obj->order, idx);

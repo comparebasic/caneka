@@ -246,10 +246,13 @@ status TemplLogic_Tests(MemCh *gm){
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
 
-    Object *data = Object_Make(m, ZERO);
-    Object *menuItems = Object_Make(m, ZERO);
-
     Page *pg = NULL;
+
+    Object *data = Object_Make(m, ZERO);
+    Nav *menuItems = Object_Make(m, TYPE_HTML_NAV);
+
+    FetchTarget *indexTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "index")); 
+    FetchTarget_Resolve(m, indexTarget, TYPE_HTML_NAV);
 
     FetchTarget *urlTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "url")); 
     FetchTarget_Resolve(m, urlTarget, TYPE_HTML_PAGE);
@@ -261,10 +264,20 @@ status TemplLogic_Tests(MemCh *gm){
     FetchTarget_Resolve(m, navNameTarget, TYPE_HTML_PAGE);
 
     pg = Object_Make(m, TYPE_HTML_PAGE);
+    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Docs"));
+    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "docs"));
+    Object_SetPropByIdx(pg, urlTarget->idx,
+        (Abstract *)Str_CstrRef(m, "/docs/"));
+    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
+        (Abstract *)pg);
+
+    Object_SetPropByIdx(menuItems, indexTarget->idx, (Abstract *)pg);
+
+    pg = Object_Make(m, TYPE_HTML_PAGE);
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Str"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/str"));
     Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/base/str.html"));
+        (Abstract *)Str_CstrRef(m, "/docs/base/str.html"));
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
         (Abstract *)pg);
 
@@ -272,7 +285,7 @@ status TemplLogic_Tests(MemCh *gm){
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Mem"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/mem"));
     Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/base/mem.html"));
+        (Abstract *)Str_CstrRef(m, "/docs/base/mem.html"));
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
         (Abstract *)pg);
 
@@ -280,7 +293,7 @@ status TemplLogic_Tests(MemCh *gm){
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Io"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/io"));
     Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/base/io.html"));
+        (Abstract *)Str_CstrRef(m, "/docs/base/io.html"));
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
         (Abstract *)pg);
 
@@ -288,7 +301,7 @@ status TemplLogic_Tests(MemCh *gm){
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Suite"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/suite"));
     Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/base/suite.html"));
+        (Abstract *)Str_CstrRef(m, "/docs/base/suite.html"));
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
         (Abstract *)pg);
 
@@ -305,6 +318,7 @@ status TemplLogic_Tests(MemCh *gm){
     DebugStack_SetRef(data, data->type.of);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, logicTestContent);

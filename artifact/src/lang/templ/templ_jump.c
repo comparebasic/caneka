@@ -1,10 +1,12 @@
 #include <external.h>
 #include <caneka.h>
 
-TemplJump *TemplJump_Make(MemCh *m, i32 idx, i32 destIdx){
+TemplJump *TemplJump_Make(MemCh *m, i32 idx, Fetcher *fch){
     TemplJump *jump = (TemplJump *)MemCh_Alloc(m, sizeof(TemplJump));
+    jump->level;
     jump->type.of = TYPE_TEMPL_JUMP;
     jump->idx = idx;
-    jump->destIdx = destIdx;
+    jump->destIdx = jump->nestIdx = jump->endIdx = -1;
+    jump->fch = fch;
     return jump;
 }
