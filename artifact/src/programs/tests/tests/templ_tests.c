@@ -249,27 +249,56 @@ status TemplLogic_Tests(MemCh *gm){
     Object *data = Object_Make(m, ZERO);
     Object *menuItems = Object_Make(m, ZERO);
 
-    /*
     Page *pg = NULL;
+
+    FetchTarget *urlTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "url")); 
+    FetchTarget_Resolve(m, urlTarget, TYPE_HTML_PAGE);
+
+    FetchTarget *nameTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "name")); 
+    FetchTarget_Resolve(m, nameTarget, TYPE_HTML_PAGE);
+
+    FetchTarget *navNameTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "navName")); 
+    FetchTarget_Resolve(m, navNameTarget, TYPE_HTML_PAGE);
+
     pg = Object_Make(m, TYPE_HTML_PAGE);
-    */
-
-
-
-
-    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
+    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Str"));
+    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/str"));
+    Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/base/str.html"));
+    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
+        (Abstract *)pg);
 
-    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/mem"),
+    pg = Object_Make(m, TYPE_HTML_PAGE);
+    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Mem"));
+    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/mem"));
+    Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/base/mem.html"));
-    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
-        (Abstract *)Str_CstrRef(m, "/base/str.html"));
-    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/io"),
+    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
+        (Abstract *)pg);
+
+    pg = Object_Make(m, TYPE_HTML_PAGE);
+    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Io"));
+    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/io"));
+    Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/base/io.html"));
-    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/suite"),
+    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
+        (Abstract *)pg);
+
+    pg = Object_Make(m, TYPE_HTML_PAGE);
+    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Suite"));
+    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/suite"));
+    Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/base/suite.html"));
+    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
+        (Abstract *)pg);
 
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
+
+    Abstract *_args[] = {
+        (Abstract *)data,
+        NULL
+    };
+    Out("^p.TemplLogic Data: &\n", _args);
 
     Stream *sm = Stream_MakeStrVec(m);
 

@@ -3,7 +3,8 @@
 
 static char *strings[] = {
     "_TYPE_WWW_START",
-    "TYPE_HTML_NAV",
+    "WwwNav",
+    "WwwPage",
     "_TYPE_WWW_END",
     NULL
 };

@@ -17,27 +17,58 @@ static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstrac
 
 static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
     Object *obj = (Object *)as(a, TYPE_OBJECT);
+    ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
+    Abstract *args[4];
+    i32 dataCount = obj->order->nvalues;
     if(flags & (MORE|DEBUG)){
         i64 total = 0;
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, obj->order->nvalues),
-            NULL
-        };
-        total += Fmt(sm, "Object<^D.$^d.nvalues {", args);
-        Iter it;
-        Iter_Init(&it, obj->order);
-        while((Iter_Next(&it) & END) == 0){
-            Hashed *h = (Hashed *)Iter_Get(&it);
-            if(h != NULL){
-                total += ToS(sm, h->key, 0, MORE);  
-                total += Stream_Bytes(sm, (byte *)" -> ", 4);
-                total += ToS(sm, h->value, 0, MORE);  
+        if(cls == NULL){
+            total += Fmt(sm, "Object<", args);
+        }else{
+            dataCount = min(dataCount-cls->propOrder->nvalues, 0);
+
+            args[0] = (Abstract *)cls->name;
+            args[1] = NULL;
+            total += Fmt(sm, "$<", args);
+
+            Iter it;
+            Iter_Init(&it, cls->propOrder);
+            while((Iter_Next(&it) & END) == 0){
+                Hashed *h = Span_Get(obj->order, it.idx);
+                ToS(sm, h->key, ZERO, MORE); 
+                Stream_Bytes(sm, (byte *)": ", 2);
+                ToS(sm, h->value, ZERO, flags); 
                 if((it.type.state & LAST) == 0){
-                    total += Stream_Bytes(sm, (byte *)", ", 2);
+                    Stream_Bytes(sm, (byte *)", ", 2);
                 }
             }
         }
-        total += Stream_Bytes(sm, (byte *)"}>", 2);
+
+        if(dataCount){
+            args[0] = (Abstract *)I32_Wrapped(sm->m, dataCount);
+            args[1] = NULL;
+            total += Fmt(sm, "^D.$^d.nvalues {", args);
+            Iter *it = (Iter *)as(
+                Object_GetIter(Object_GetMem(obj), NULL, (Abstract *)obj, NULL),
+                TYPE_ITER);
+            while((Iter_Next(it) & END) == 0){
+                if(flags & DEBUG){
+                    total += Stream_Bytes(sm, (byte *)"\n  ", 3);
+                }
+                Hashed *h = (Hashed *)Iter_Get(it);
+                total += ToS(sm, h->key, 0, MORE); 
+                total += Stream_Bytes(sm, (byte *)" -> ", 4);
+                total += ToS(sm, h->value, 0, flags);  
+                if((it->type.state & LAST) == 0){
+                    total += Stream_Bytes(sm, (byte *)", ", 2);
+                }
+            }
+            if(flags & DEBUG){
+                total += Stream_Bytes(sm, (byte *)"\n", 1);
+            }
+            total += Stream_Bytes(sm, (byte *)"}", 1);
+        }
+        total += Stream_Bytes(sm, (byte *)">", 1);
         return total;
     }else{
         return ToStream_NotImpl(sm, a, type, flags);

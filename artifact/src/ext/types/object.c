@@ -1,6 +1,12 @@
 #include <external.h>
 #include <caneka.h>
 
+i64 Object_ToS(Stream *sm, Abstract *a, cls type, word flags){
+    i64 total = 0;
+    ;
+    return total;
+}
+
 boolean Object_TypeMatch(Abstract *a, cls typeOf){
     return (a->type.of == TYPE_OBJECT && 
         ((Object *)a)->objType.of == typeOf) || (a->type.of == typeOf);
@@ -133,8 +139,15 @@ Hashed *Object_Set(Object *pt, Abstract *key, Abstract *value){
     return h;
 }
 
-Hashed *Object_GetPropByIdx(Object *obj, i32 idx){
-    return Span_Get(obj->order, idx);
+Hashed *Object_SetPropByIdx(Object *obj, i32 idx, Abstract *value){
+    Hashed *h = Span_Get(obj->order, idx);
+    h->value = value; 
+    return h;
+}
+
+Abstract *Object_GetPropByIdx(Object *obj, i32 idx){
+    Hashed *h = Object_GetByIdx(obj, idx);
+    return h->value;
 }
 
 Hashed *Object_GetByIdx(Object *tbl, i32 idx){
@@ -152,6 +165,16 @@ Object *Object_Make(MemCh *m, cls typeOf){
 
     if(typeOf != ZERO){
         ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
+        if(cls == NULL){
+            Abstract *args[] = {
+                (Abstract *)Type_ToStr(m, typeOf),
+                NULL
+            };
+            Error(m, NULL, FUNCNAME, FILENAME, LINENUMBER,
+                "ClassDeff $ not found", args);
+            return NULL;
+
+        }
         obj->order = Span_Clone(m, cls->propOrder); 
         obj->propMask = obj->order->nvalues;
         obj->objType.of = typeOf;

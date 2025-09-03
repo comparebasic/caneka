@@ -37,6 +37,7 @@ static char *staticLibs[] = {
 /* sources */
 static BuildSubdir html = { "html", {
     "nav_cls.c",
+    "page_cls.c",
     NULL
 }};
 

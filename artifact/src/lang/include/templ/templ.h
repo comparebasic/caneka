@@ -1,6 +1,7 @@
 typedef struct templ {
     Type type;
     i32 indent;
+    i16 level;
     Iter content;
     Iter data;
 } Templ;

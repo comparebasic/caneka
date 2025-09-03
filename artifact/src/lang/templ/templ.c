@@ -19,6 +19,22 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
 
     if(item->type.of == TYPE_STRVEC){
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
+    }else if(item->type.of > _FORMAT_TEMPL_LEVEL_START &&
+            item->type.of > _FORMAT_TEMPL_LEVEL_END){
+        if(templ->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)item,
+                NULL
+            };
+            Out("^c.Level: &^0.\n", args);
+        }
+        /*
+        if((it->type.state & END) == 0){
+            templ->level++;
+            goto nest then
+            goto for target
+        }
+        */
     }else if(item->type.of == TYPE_FETCHER){
         Fetcher *fch = (Fetcher *)item;
         if(templ->type.state & DEBUG){
@@ -49,6 +65,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             }
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(fch->type.state & FETCHER_FOR){
+            templ->level = 0;
             Iter *it = (Iter *)Fetch(sm->m, fch, data, NULL);
             Iter_Add(&templ->data, (Abstract *)it);
             if((Iter_Next(it) & END) == 0){

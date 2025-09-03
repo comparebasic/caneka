@@ -18,6 +18,9 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
             }
         }else if(tg->type.state & FETCH_TARGET_PROP){
             tg->idx = Class_GetPropIdx(cls, tg->key);
+            if(tg->idx == -1){
+                goto err;
+            }
             tg->type.state |= FETCH_TARGET_RESOLVED;
             tg->objType.of = typeOf;
             return SUCCESS;
@@ -61,11 +64,11 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
         }else if(tg->type.state & FETCH_TARGET_PROP){
             Object *obj = (Object *)as(value, TYPE_OBJECT);
-            Hashed *h = Object_GetPropByIdx(obj, tg->idx);
-            if(h == NULL){
+            Abstract *a = Object_GetPropByIdx(obj, tg->idx);
+            if(a == NULL){
                 goto err;
             }
-            return h->value;
+            return a;
         }else{
             return tg->func(m, tg, value, source);
         }
