@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Fetch_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
+status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
     ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
     Abstract *args[4];
     if(cls != NULL){
@@ -70,7 +70,7 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             return tg->func(m, tg, value, source);
         }
     }else{
-        if(Fetch_Resolve(m, tg, value->type.of) & SUCCESS){
+        if(FetchTarget_Resolve(m, tg, value->type.of) & SUCCESS){
             return Fetch_Target(m, tg, value, source);
         }else{
             goto err;

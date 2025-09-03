@@ -30,7 +30,7 @@ FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx);
 FetchTarget *FetchTarget_MakeIter(MemCh *m);
 FetchTarget *FetchTarget_MakeProp(MemCh *m, Str *method);
 
-status Fetch_Resolve(MemCh *m, FetchTarget *tg, cls typeOf);
+status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf);
 Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source);
 Abstract *Fetch_ByKey(MemCh *m, Abstract *a, Str *key, Abstract *source);
 Abstract *Fetch_ByAtt(MemCh *m, Abstract *a, Str *att, Abstract *source);
