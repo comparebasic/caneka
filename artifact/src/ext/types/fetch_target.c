@@ -1,6 +1,56 @@
 #include <external.h>
 #include <caneka.h>
 
+status Fetch_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
+    ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
+    Abstract *args[4];
+    if(cls != NULL){
+        if(tg->type.state & FETCH_TARGET_ATT){
+            Single *sg = (Single *)Table_Get(cls->atts, 
+                (Abstract *)tg->key);
+            if(sg == NULL){
+                goto err;
+            }else{
+                tg->offset = sg->val.w;
+                tg->type.state |= FETCH_TARGET_RESOLVED;
+                tg->objType.of = typeOf;
+                return SUCCESS;
+            }
+        }else if(tg->type.state & FETCH_TARGET_PROP){
+            tg->idx = Class_GetPropIdx(cls, tg->key);
+            tg->type.state |= FETCH_TARGET_RESOLVED;
+            tg->objType.of = typeOf;
+            return SUCCESS;
+        }else if(tg->type.state & FETCH_TARGET_KEY){
+            tg->func = cls->api.byKey;
+            tg->type.state |= FETCH_TARGET_FUNC;
+        }else if(tg->type.state & FETCH_TARGET_IDX){
+            tg->func = cls->api.byIdx;
+            tg->type.state |= FETCH_TARGET_FUNC;
+        }else if(tg->type.state & FETCH_TARGET_ITER){
+            tg->func = cls->api.getIter;
+            tg->type.state |= FETCH_TARGET_FUNC;
+        }else{
+            goto err;
+        }
+        if(tg->func == NULL){
+            goto err;
+        }
+
+        tg->type.state |= FETCH_TARGET_RESOLVED;
+        tg->objType.of = typeOf;
+        return SUCCESS;
+    }
+err:
+    args[0] = (Abstract *)Type_ToStr(m, typeOf);
+    args[1] = (Abstract *)tg;
+    args[2] = (Abstract *)cls;
+    args[3] = NULL;
+    Error(m, (Abstract *)tg, FUNCNAME, FILENAME, LINENUMBER,
+        "Error resolving ClassDef $ for prop or att $ using class @\n", args);
+    return ERROR;
+}
+
 Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source){
     Abstract *args[5];
     ClassDef *cls = NULL;
@@ -12,65 +62,29 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
         }else if(tg->type.state & FETCH_TARGET_PROP){
             Object *obj = (Object *)as(value, TYPE_OBJECT);
             Hashed *h = Object_GetPropByIdx(obj, tg->idx);
+            if(h == NULL){
+                goto err;
+            }
             return h->value;
         }else{
             return tg->func(m, tg, value, source);
         }
     }else{
-        typeOf = value->type.of;
-        if(typeOf == TYPE_WRAPPED_PTR){
-            typeOf = ((Single *)value)->objType.of;
-        }
-        cls = Lookup_Get(ClassLookup, typeOf);
-        if(cls != NULL){
-            if(tg->type.state & FETCH_TARGET_ATT){
-                Single *sg = (Single *)Table_Get(cls->atts, 
-                    (Abstract *)tg->key);
-                if(sg != NULL){
-                    tg->offset = sg->val.w;
-                    value = Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
-                    tg->type.state |= FETCH_TARGET_RESOLVED;
-                    return value;
-                }
-            }else if(tg->type.state & FETCH_TARGET_PROP){
-                Object *obj = (Object *)as(value, TYPE_OBJECT);
-                tg->idx = Class_GetPropIdx(cls, tg->key);
-                Hashed *h = Object_GetPropByIdx(obj, tg->idx);
-                if(h == NULL){
-                    goto err;
-                }
-                tg->type.state |= FETCH_TARGET_RESOLVED;
-                return h->value;
-            }else if(tg->type.state & FETCH_TARGET_KEY){
-                tg->func = cls->api.byKey;
-                tg->type.state |= FETCH_TARGET_FUNC;
-            }else if(tg->type.state & FETCH_TARGET_IDX){
-                tg->func = cls->api.byIdx;
-                tg->type.state |= FETCH_TARGET_FUNC;
-            }else if(tg->type.state & FETCH_TARGET_ITER){
-                tg->func = cls->api.getIter;
-                tg->type.state |= FETCH_TARGET_FUNC;
-            }else{
-                goto err;
-            }
-            if(tg->func == NULL){
-                goto err;
-            }
-
-            tg->type.state |= FETCH_TARGET_RESOLVED;
-            return tg->func(m, tg, value, source);
+        if(Fetch_Resolve(m, tg, value->type.of) & SUCCESS){
+            return Fetch_Target(m, tg, value, source);
         }else{
-err:
-            args[0] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
-            args[1] = (Abstract *)tg;
-            args[2] = (Abstract *)Type_ToStr(m, typeOf);
-            args[3] = (Abstract *)cls;
-            args[4] = NULL;
-            Error(m, (Abstract *)tg, FUNCNAME, FILENAME, LINENUMBER,
-                "Error ClassDef X or prop not found for $ using @ class $/@\n", args);
-            return NULL;
+            goto err;
         }
     }
+err:
+    cls = Lookup_Get(ClassLookup, value->type.of);
+    args[0] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
+    args[1] = (Abstract *)tg;
+    args[2] = (Abstract *)Type_ToStr(m, typeOf);
+    args[3] = (Abstract *)cls;
+    args[4] = NULL;
+    Error(m, (Abstract *)tg, FUNCNAME, FILENAME, LINENUMBER,
+        "Error ClassDef X or prop not found for $ using @ class $/@\n", args);
     return NULL;
 }
 

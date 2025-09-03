@@ -2,25 +2,13 @@
 #include <caneka.h>
 
 static char *keyTestContent = ""
-"<!DOCTYPE html>\n"
-"<html lang=\"en\">\n"
-"<head>\n"
-"<meta charset=\"utf-8\">\n"
-"<title>My Fancy Page</title>\n"
-"  <meta \n"
-"    name=\"viewport\"\n"
-"    content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\"\n"
-"  >\n"
-"</head>\n"
-"<body>\n"
-"<header>\n"
-"    <nav>\n"
-"    <ul>\n"
-"        <li>item one</li>\n"
-"        <li>item two</li>\n"
-"    </ul>\n"
-"    </nav>\n"
-"</header>\n"
+"<h1>My Fancy Page</h1>\n"
+"<p>And here is the masterful list of menu items!</p>\n"
+"<ul>\n"
+"    <li><a href=\"/things/one\">One</a></li>\n"
+"    <li><a href=\"/things/two\">Two</a></li>\n"
+"    <li><a href=\"/things/three\">Three</a></li>\n"
+"</ul>\n"
 "";
 
 static char *logicTestContent = ""
@@ -64,7 +52,6 @@ status TemplCtx_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
-    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
@@ -117,14 +104,14 @@ status TemplCtx_Tests(MemCh *gm){
     Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
-    cstr = "        <li><a href=\"";
+    cstr = "    <li><a href=\"";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_VAR;
-    cstr = "fullName";
+    cstr = "local";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeAtt(m, s);
     Span_Add(fch->val.targets, (Abstract *)tg);
@@ -137,14 +124,14 @@ status TemplCtx_Tests(MemCh *gm){
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_VAR;
-    cstr = "fullName";
+    cstr = "local";
     cstr = "name";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeAtt(m, s);
     Span_Add(fch->val.targets, (Abstract *)tg);
     Span_Add(expected, (Abstract *)fch);
 
-    cstr = "</a>\n";
+    cstr = "</a></li>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
@@ -186,7 +173,6 @@ status Templ_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
-    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
@@ -198,12 +184,6 @@ status Templ_Tests(MemCh *gm){
         DebugStack_Pop();
         return r;
     }
-
-    Abstract *args1[] = {
-        (Abstract *)ctx->it.p,
-        NULL
-    };
-    Out("^p.Templ Span: &\n^0.", args1);
 
     Object *data = Object_Make(m, ZERO);
     Object *menu = Object_Make(m, ZERO);
@@ -229,7 +209,6 @@ status Templ_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
@@ -254,7 +233,7 @@ status TemplLogic_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.html"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.templ"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
     File_Read(f, FILE_READ_MAX);
@@ -269,6 +248,18 @@ status TemplLogic_Tests(MemCh *gm){
 
     Object *data = Object_Make(m, ZERO);
     Object *menuItems = Object_Make(m, ZERO);
+
+    /*
+    Page *pg = NULL;
+    pg = Object_Make(m, TYPE_HTML_PAGE);
+    */
+
+
+
+
+    Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),
+        (Abstract *)Str_CstrRef(m, "/base/str.html"));
+
     Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/mem"),
         (Abstract *)Str_CstrRef(m, "/base/mem.html"));
     Object_Set(menuItems, (Abstract *)Str_CstrRef(m, "base/str"),

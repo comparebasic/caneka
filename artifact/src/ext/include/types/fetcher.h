@@ -5,8 +5,8 @@ enum fetcher_flags {
     FETCHER_IF = 1 << 11,
     FETCHER_IFNOT = 1 << 12,
     FETCHER_END = 1 << 13,
-    FETCHER_TEMPL = 1 << 15,
     FETCHER_COMMAND = 1 << 14,
+    FETCHER_TEMPL = 1 << 15,
 };
 
 typedef struct fetcher {

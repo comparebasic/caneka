@@ -21,7 +21,14 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
         total += ToS(sm, (Abstract *)item, 0, ZERO); 
     }else if(item->type.of == TYPE_FETCHER){
         Fetcher *fch = (Fetcher *)item;
-        if(fch->type.state & FETCHER_FOR){
+        if(templ->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)fch,
+                NULL
+            };
+            Out("^c.Fetcher: &^0.\n", args);
+        }
+        if(fch->type.state & FETCHER_VAR){
             Abstract *value = Fetch(sm->m, fch, data, NULL);
             if(value == NULL){
                 Abstract *args[] = {
@@ -32,6 +39,13 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 Error(sm->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER,
                     "Error finding value using @ in data @\n",args);
                 return total;
+            }
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)value,
+                    NULL
+                };
+                Out("^c.VarValue: &^0.\n", args);
             }
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(fch->type.state & FETCHER_FOR){
@@ -108,9 +122,10 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
         Abstract *args[] = {
             (Abstract *)templ,
             (Abstract *)item,
+            (Abstract *)sm->dest.curs->v,
             NULL
         };
-        Out("Templ: ^p.@ \\@@^0.\n", args);
+        Out("Templ: ^p.& \\@@ \n  ^E.out^e.:@^0.\n", args);
     }
 
     return total;

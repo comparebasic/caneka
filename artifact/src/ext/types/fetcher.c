@@ -43,7 +43,11 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
     Iter it;
     Iter_Init(&it, fch->val.targets);
     while(value != NULL && (Iter_Next(&it) & END) == 0){
-        value = Fetch_Target(m, (FetchTarget *)Iter_Get(&it), value, source);
+        FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
+        if(value->type.of == TYPE_HASHED && (fch->type.state & (FETCHER_COMMAND)) == 0){
+            value = ((Hashed *)value)->value;
+        }
+        value = Fetch_Target(m, tg, value, source);
     }
 
     if(it.type.state & END){

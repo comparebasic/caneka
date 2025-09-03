@@ -98,24 +98,12 @@ status Object_AddByPath(Object *pt, StrVec *path, Abstract *value){
     while((Iter_Next(&keysIt) & END) == 0){
         Str *item = (Str *)Iter_Get(&keysIt);
         if((item->type.state & MORE) && key != NULL){
-            Abstract *args[] = {
-                (Abstract *)path,
-                (Abstract *)key,
-                NULL
-            };
-            Out("^c.More path & @\n", args);
             current = Object_GetOrMake(current, (Abstract *)key);
             key = NULL;
             r |= PROCESSING;
         }else{
             key = item;
             if(keysIt.type.state & LAST){
-                Abstract *args[] = {
-                    (Abstract *)path,
-                    (Abstract *)key,
-                    NULL
-                };
-                Out("^c.Setting path & @\n", args);
                 Object_Set(current, (Abstract *)key, value);
                 r |= SUCCESS;
             }
