@@ -251,9 +251,6 @@ status TemplLogic_Tests(MemCh *gm){
     Object *data = Object_Make(m, ZERO);
     Nav *menuItems = Object_Make(m, TYPE_HTML_NAV);
 
-    printf("\n\n\nNavMask: %d\n", menuItems->propMask);
-    fflush(stdout);
-
     FetchTarget *indexTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "index")); 
     FetchTarget_Resolve(m, indexTarget, TYPE_HTML_NAV);
 
@@ -276,13 +273,18 @@ status TemplLogic_Tests(MemCh *gm){
 
     Object_SetPropByIdx(menuItems, indexTarget->idx, (Abstract *)pg);
 
+
+    Nav *nav = Object_Make(m, TYPE_HTML_NAV);
+
     pg = Object_Make(m, TYPE_HTML_PAGE);
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Str"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/str"));
     Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/docs/base/str.html"));
+
+    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)pg);
+        (Abstract *)nav);
 
     pg = Object_Make(m, TYPE_HTML_PAGE);
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Mem"));

@@ -27,12 +27,6 @@ Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *so
     Object *obj = (Object *)as(data, TYPE_OBJECT);
     Iter *it = Iter_Make(m, obj->order);
     Iter_GoToIdx(it, obj->propMask);
-    Abstract *args[] = {
-        (Abstract *)I32_Wrapped(OutStream->m, obj->propMask),
-        (Abstract *)Type_ToStr(m, obj->objType.of),
-        NULL
-    };
-    Out("\n\n\nGoing to PropMask: $ of @\n", args);
     return (Abstract *)it;
 }
 
@@ -136,17 +130,29 @@ status Object_AddByPath(Object *obj, StrVec *path, Abstract *value){
     return r;
 }
 
-Hashed *Object_Set(Object *pt, Abstract *key, Abstract *value){
-    pt->type.state &= ~OUTCOME_FLAGS;
+Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
+    obj->type.state &= ~OUTCOME_FLAGS;
 
-    Hashed *h = Table_SetHashed(pt->tbl, key, value);
-    pt->type.state |= pt->tbl->type.state & OUTCOME_FLAGS;
+    Hashed *h = Table_SetHashed(obj->tbl, key, value);
+    obj->type.state |= obj->tbl->type.state & OUTCOME_FLAGS;
     if(h != NULL){
-        Span_Add(pt->order, (Abstract *)h);
-        if(pt->order->type.state & SUCCESS){
-            h->orderIdx = pt->order->max_idx;
+        Span_Add(obj->order, (Abstract *)h);
+        if(obj->order->type.state & SUCCESS){
+            h->orderIdx = obj->order->max_idx;
         }
-        pt->type.state |= pt->order->type.state & OUTCOME_FLAGS; 
+        obj->type.state |= obj->order->type.state & OUTCOME_FLAGS; 
+    }
+
+    if(obj->type.state & DEBUG){
+        ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
+        Abstract *args[] = {
+            (Abstract *)Type_ToStr(OutStream->m, obj->objType.of),
+            (Abstract *)key,
+            (Abstract *)I32_Wrapped(OutStream->m, 
+                obj->order->nvalues -cls->propOrder->nvalues),
+            NULL,
+        };
+        Out("^p.Object_Set($ [$]/$)^0\n", args);
     }
     return h;
 }
@@ -214,6 +220,7 @@ Object *Object_Make(MemCh *m, cls typeOf){
         obj->objType.of = typeOf;
     }else{
         obj->order = Span_Make(m);
+        obj->objType.of = TYPE_OBJECT;
     }
 
     return obj;

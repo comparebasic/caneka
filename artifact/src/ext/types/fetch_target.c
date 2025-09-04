@@ -57,7 +57,10 @@ err:
 Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source){
     Abstract *args[5];
     ClassDef *cls = NULL;
-    word typeOf = ZERO;
+    word typeOf = value->type.of;
+    if(typeOf == TYPE_OBJECT){
+        typeOf = ((Object *)value)->objType.of;
+    }
     if((tg->type.state & FETCH_TARGET_RESOLVED) &&
             Object_TypeMatch(value, tg->objType.of)){
         if(tg->type.state & FETCH_TARGET_ATT){
@@ -73,7 +76,7 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             return tg->func(m, tg, value, source);
         }
     }else{
-        if(FetchTarget_Resolve(m, tg, value->type.of) & SUCCESS){
+        if(FetchTarget_Resolve(m, tg, typeOf) & SUCCESS){
             return Fetch_Target(m, tg, value, source);
         }else{
             goto err;

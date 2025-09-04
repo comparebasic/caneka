@@ -25,7 +25,7 @@ static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
         if(cls == NULL){
             total += Fmt(sm, "Object<", args);
         }else{
-            dataCount = min(dataCount-cls->propOrder->nvalues, 0);
+            dataCount = dataCount - obj->propMask;
 
             args[0] = (Abstract *)cls->name;
             args[1] = NULL;

@@ -408,7 +408,11 @@ status Iter_Next(Iter *it){
 
     if((it->type.state & END) || !(it->type.state & PROCESSING)){
         word fl = it->type.state & ~(END|LAST);
-        idx = 0;
+        if(it->type.state & END){
+            idx = 0;
+        }else if(it->idx >= 0){
+            idx = it->idx;
+        }
         Iter_Setup(it, it->p, fl, idx);
         it->type.state |= (fl|PROCESSING);
         Iter_Query(it);
