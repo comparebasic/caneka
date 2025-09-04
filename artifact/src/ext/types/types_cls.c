@@ -4,6 +4,43 @@
 static boolean _init = FALSE;
 ClassDef *ObjectCls = NULL;
 
+static i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Hashed *h = (Hashed *)as(a, TYPE_HASHED);
+    if(flags & DEBUG){
+        Single *wid = I64_Wrapped(sm->m, h->id);
+        wid->type.state |= FMT_TYPE_BITS;
+        Single *val = Ptr_Wrapped(sm->m, h->value, 0);
+        word typeOf = TYPE_UNKNOWN;
+        if(h->value != NULL){
+            typeOf = h->value->type.of;
+            if(typeOf == TYPE_OBJECT){
+                typeOf = ((Object *)h->value)->objType.of;
+            }
+        }
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, h->orderIdx), 
+            (Abstract *)I32_Wrapped(sm->m, h->idx), 
+            (Abstract *)wid, 
+            h->key, 
+            (Abstract *)val, 
+            (Abstract *)Type_ToStr(sm->m, typeOf),
+            NULL
+        };
+        return Fmt(sm, "H<$,$ $/@ -> $/$>", args);
+    }else if(flags & MORE){
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(sm->m, h->idx), 
+            h->key, 
+            (Abstract *)h->value, 
+            NULL
+        };
+        return Fmt(sm, "H<$ @ -> @>", args);
+    }else{
+        return ToStream_NotImpl(sm, a, type, flags);
+    }
+}
+
+
 static Abstract *Object_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
     Object *obj = (Object *)as(data, TYPE_OBJECT);
     return Object_Get(obj, (Abstract *)fg->key);
@@ -222,6 +259,9 @@ status Types_ClsInit(MemCh *m){
     Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "order"),
         (Abstract *)I16_Wrapped(m, (void *)(&obj.order)-(void *)(&obj)));
     r |= Class_Register(m, cls);
+
+    /* overide hashed print */
+    r |= Lookup_Add(m, ToStreamLookup, TYPE_HASHED, (void *)Hashed_Print); 
 
     if(r == READY){
         r |= NOOP;

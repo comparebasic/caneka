@@ -247,6 +247,7 @@ status TemplLogic_Tests(MemCh *gm){
         NULL);
 
     Page *pg = NULL;
+    Nav *nav = NULL;
 
     Object *data = Object_Make(m, ZERO);
     Nav *menuItems = Object_Make(m, TYPE_HTML_NAV);
@@ -268,47 +269,49 @@ status TemplLogic_Tests(MemCh *gm){
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "docs"));
     Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/docs/"));
-    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)pg);
 
     Object_SetPropByIdx(menuItems, indexTarget->idx, (Abstract *)pg);
 
 
-    Nav *nav = Object_Make(m, TYPE_HTML_NAV);
-
+    nav = Object_Make(m, TYPE_HTML_NAV);
     pg = Object_Make(m, TYPE_HTML_PAGE);
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Str"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/str"));
     Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/docs/base/str.html"));
-
     Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
         (Abstract *)nav);
 
+    nav = Object_Make(m, TYPE_HTML_NAV);
     pg = Object_Make(m, TYPE_HTML_PAGE);
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Mem"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/mem"));
     Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/docs/base/mem.html"));
+    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)pg);
+        (Abstract *)nav);
 
+    nav = Object_Make(m, TYPE_HTML_NAV);
     pg = Object_Make(m, TYPE_HTML_PAGE);
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Io"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/io"));
     Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/docs/base/io.html"));
+    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)pg);
+        (Abstract *)nav);
 
+    nav = Object_Make(m, TYPE_HTML_NAV);
     pg = Object_Make(m, TYPE_HTML_PAGE);
     Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Suite"));
     Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/suite"));
     Object_SetPropByIdx(pg, urlTarget->idx,
         (Abstract *)Str_CstrRef(m, "/docs/base/suite.html"));
+    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
     Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)pg);
+        (Abstract *)nav);
 
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
 
