@@ -251,6 +251,9 @@ status TemplLogic_Tests(MemCh *gm){
     Object *data = Object_Make(m, ZERO);
     Nav *menuItems = Object_Make(m, TYPE_HTML_NAV);
 
+    printf("\n\n\nNavMask: %d\n", menuItems->propMask);
+    fflush(stdout);
+
     FetchTarget *indexTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "index")); 
     FetchTarget_Resolve(m, indexTarget, TYPE_HTML_NAV);
 

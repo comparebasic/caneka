@@ -12,6 +12,8 @@ typedef struct objnative {
 typedef struct object {
     Type type;
     Type objType;
+    word _;
+    i16 depth;
     i32 propMask;
     Table *tbl;
     Span *order;
@@ -40,3 +42,4 @@ Object *Object_GetOrMake(Object *obj, Abstract *key);
 status Object_AddByPath(Object *obj, StrVec *path, Abstract *value);
 
 Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source);
+status Object_Depth(Abstract *a);

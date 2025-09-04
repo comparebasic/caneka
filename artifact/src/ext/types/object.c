@@ -27,6 +27,12 @@ Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *so
     Object *obj = (Object *)as(data, TYPE_OBJECT);
     Iter *it = Iter_Make(m, obj->order);
     Iter_GoToIdx(it, obj->propMask);
+    Abstract *args[] = {
+        (Abstract *)I32_Wrapped(OutStream->m, obj->propMask),
+        (Abstract *)Type_ToStr(m, obj->objType.of),
+        NULL
+    };
+    Out("\n\n\nGoing to PropMask: $ of @\n", args);
     return (Abstract *)it;
 }
 
@@ -77,24 +83,32 @@ Object *Object_GetOrMake(Object *pt, Abstract *key){
     }
 }
 
-status Object_AddByPath(Object *pt, StrVec *path, Abstract *value){
-    DebugStack_Push(pt, pt->type.state);
-    if(pt->type.state & DEBUG){
+status Object_Depth(Abstract *a){
+    if(a->type.of == TYPE_OBJECT){
+        return ((Object *)a)->depth;
+    }
+    return 1;
+}
+
+status Object_AddByPath(Object *obj, StrVec *path, Abstract *value){
+    DebugStack_Push(obj, obj->type.state);
+    if(obj->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)path,
-            (Abstract *)pt,
+            (Abstract *)obj,
             NULL
         };
         Out("^c.Adding @ to @^0.\n", args);
     }
     status r = READY;
     if((path->type.state & STRVEC_PATH) == 0){
-       IoUtil_Annotate(Object_GetMem(pt), path); 
+       IoUtil_Annotate(Object_GetMem(obj), path); 
     }
     Iter keysIt;
     Iter_Init(&keysIt, path->p);
     Str *key = NULL;
-    Object *current = pt;
+    Object *current = obj;
+    i16 depth = 1;
     while((Iter_Next(&keysIt) & END) == 0){
         Str *item = (Str *)Iter_Get(&keysIt);
         if((item->type.state & MORE) && key != NULL){
@@ -106,8 +120,12 @@ status Object_AddByPath(Object *pt, StrVec *path, Abstract *value){
             if(keysIt.type.state & LAST){
                 Object_Set(current, (Abstract *)key, value);
                 r |= SUCCESS;
+                if(depth > obj->depth){
+                    obj->depth = depth;
+                }
             }
         }
+        depth++;
     }
 
     if(r == READY){

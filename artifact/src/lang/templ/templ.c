@@ -1,14 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static TemplJump *swapJump(Templ *templ){
-    i32 idx = templ->content.idx;
-    TemplJump *jump = TemplJump_Make(sm->m, idx, fch);
-    Span_Set(templ->content, idx, (Abstract *)jump);
-    Iter_GetByIdx(&templ->content, idx);
-    return jump;
-}
-
 i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
@@ -46,36 +38,50 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
 
         Fetcher *fch = jump->fch;
         if(fch->type.state & FETCHER_END){
-            fch = Span_Get(templ->content.p, jump->destIdx);
+            TemplJump *dest = (TemplJump *)Span_Get(templ->content.p, jump->destIdx);
+            fch = dest->fch;
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)dest,
+                    NULL
+                };
+                Out("^b.Switching: &^0.\n", args);
+            }
         }
 
-        if(fch & FETCHER_FOR){
+        if(fch->type.state & FETCHER_FOR){
             Iter_PrevRemove(&templ->data);
             Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)fch,
+                    (Abstract *)it,
+                    NULL
+                };
+                Out("^c.JumpFor: & it &^0.\n", args);
+            }
             if((Iter_Next(it) & END) == 0){
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
                 Iter_GetByIdx(&templ->content, jump->destIdx);
             }
-        }else if(fch & FETCHER_COMMAND){
+        }else if(fch->type.state & FETCHER_COMMAND){
             Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
-            i32 maxDepth = Object_Depth(Iter_Current(&temp->data));
             FetchTarget *tg = Span_Get(fch->val.targets, 0);
             if(
                 (tg->idx == jump->level && tg->objType.of == FORMAT_TEMPL_LEVEL) ||
-                (tg->idx == maxDepth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
-                (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < maxDepth)
+                (tg->idx == jump->depth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
+                (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < jump->depth)
                 ){
-                   /* proceed */ 
-                }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
-                    Iter *it = (Iter *)Iter_Get(&templ->data), TYPE_ITER;
-                    if(it != NULL){
-                        Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
-                    }else{
-                        Iter_GetByIdx(&templ->content, jump->skipIdx);
-                    }
+               /* proceed */ 
+            }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
+                Iter *it = (Iter *)Iter_Get(&templ->data), TYPE_ITER;
+                if(it != NULL){
+                    Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
                 }else{
                     Iter_GetByIdx(&templ->content, jump->skipIdx);
                 }
+            }else{
+                Iter_GetByIdx(&templ->content, jump->skipIdx);
             }
         }
     }else if(item->type.of == TYPE_FETCHER){
@@ -108,45 +114,54 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             }
             total += ToS(sm, (Abstract *)value, 0, ZERO); 
         }else if(fch->type.state & (FETCHER_FOR|FETCHER_COMMAND|FETCHER_END)){
-            TemplJump *jump = swapJump(templ);
+            i32 idx = templ->content.idx;
+            TemplJump *jump = TemplJump_Make(sm->m, idx, fch);
+            Span_Set(templ->content.p, idx, (Abstract *)jump);
+            Iter_GetByIdx(&templ->content, idx);
+
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)jump,
+                    (Abstract *)fch,
+                    NULL,
+                };
+                Out("^c.Making a Jump & from &^y.\n", args);
+            }
 
             if(fch->type.state & FETCHER_FOR){
-
-                templ->level = 0;
-                Iter *it = (Iter *)Fetch(sm->m, fch, data, NULL);
+                jump->level = 0;
+                jump->depth = Object_Depth(data);
+                printf("Calling Iter\n");
+                fflush(stdout);
+                Iter *it = (Iter *)as(Fetch(sm->m, fch, data, NULL), TYPE_ITER);
                 Iter_Add(&templ->data, (Abstract *)it);
                 if((Iter_Next(it) & END) == 0){
                     Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
                 }
                 if(templ->type.state & DEBUG){
                     Abstract *args[] = {
-                        (Abstract *)Iter_Get(it),
+                        (Abstract *)fch,
+                        (Abstract *)data,
                         (Abstract *)it,
                         NULL,
                     };
-                    Out("^y.For @ of &^y.\n", args);
+                    Out("^g.For\n\nFch:@\nData:&\nIt:&^0.\n", args);
                 }
             }else if(fch->type.state & FETCHER_COMMAND){
                 Iter it;
                 memcpy(&it, &templ->content, sizeof(Iter));
 
+                i32 targetIdx = it.p->max_idx;
                 while((Iter_Next(&it) & END) == 0){
                     if(it.idx > targetIdx){
                         continue;
                     }
-                    if(prev->type.of == TYPE_TEMPL_JUMP){
-                        Abstract *a = Iter_Get(&it);
-                        if(a->type.of == TYPE_TEMPL_JUMP){
-                            Abstract *prevJump = (TemplJump *)a;
-                            }else if(item->type.state & 
-                                    (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
-                                jump->destIdx = it.idx;
-                                break;
-                            }
-                        }else if(a->type.of == TYPE_FETCHER && 
-                                (a->type.state & (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT|FETCHER_END))){
-                            jump->skipIdx = it.idx; 
-                        }
+
+                    Abstract *a = Iter_Get(&it);
+                    status fl = (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|
+                        FETCHER_IFNOT|FETCHER_END);
+                    if(a->type.of == TYPE_FETCHER && (a->type.state & fl)){
+                        jump->skipIdx = it.idx; 
                     }
                 }
 
@@ -155,7 +170,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                         "Unable to find skip ending in Templ content\n", NULL);
                 }else{
                     Iter_GetByIdx(&templ->content, idx);
-                    Iter_Prev(&templ->content;
+                    Iter_Prev(&templ->content);
                 }
             }else if(fch->type.state & FETCHER_END){
                 Iter it;
@@ -166,17 +181,25 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                     if(it.idx > targetIdx){
                         continue;
                     }
-                    if(prev->type.of == TYPE_TEMPL_JUMP){
-                        Abstract *a = Iter_Get(&it);
-                        if(a->type.of == TYPE_TEMPL_JUMP){
-                            Abstract *prevJump = (TemplJump *)a;
-                            if(prevJump->fch->type.state & FETCHER_END){
-                                targetIdx = prevJump->destIdx;
-                            }else if(item->type.state & 
-                                    (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
-                                jump->destIdx = it.idx;
-                                break;
-                            }
+                    Abstract *a = Iter_Get(&it);
+                    if(a->type.of == TYPE_TEMPL_JUMP){
+                        TemplJump *prevJump = (TemplJump *)a;
+
+                        if(templ->type.state & DEBUG){
+                            Abstract *args[] = {
+                                (Abstract *)fch,
+                                (Abstract *)prevJump,
+                                NULL,
+                            };
+                            Out("^c. Finding END @ jump &^y.\n", args);
+                        }
+
+                        if(prevJump->fch->type.state & FETCHER_END){
+                            targetIdx = prevJump->destIdx;
+                        }else if(prevJump->fch->type.state & 
+                                (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
+                            jump->destIdx = it.idx;
+                            break;
                         }
                     }
                 }
