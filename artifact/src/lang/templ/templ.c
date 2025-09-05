@@ -27,17 +27,32 @@ static i32 Templ_FindStart(Templ *templ){
 }
 
 static i32 Templ_FindEnd(Templ *templ){
+    printf("FindEnd\n");
+    fflush(stdout);
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
     i32 targetCount = 1;
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
-        if(a->type.of == TYPE_FETCHER && ((a->type.state & FETCHER_END) == 0)){
-            targetCount++;
-        }else if(--targetCount == 0){
-            return it.idx; 
+
+
+        if(a->type.of == TYPE_FETCHER){
+            if((a->type.state & FETCHER_END|FETCHER_VAR) == 0){
+                targetCount++;
+            }else if((a->type.state & FETCHER_END) && --targetCount == 0){
+                return it.idx; 
+            }
         }
+
+        Abstract *args[] = {
+            (Abstract *)a,
+            (Abstract *)I32_Wrapped(OutStream->m, targetCount),
+            (Abstract *)I32_Wrapped(OutStream->m, it.idx),
+            NULL
+        };
+
+        Out("^c.  SearchEnd @ target:$\\@$^0.\n", args);
     }
     return -1;
 }
@@ -79,27 +94,18 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
         if(fch->type.state & FETCHER_FOR){
             jump->level = 0;
             jump->depth = Object_Depth(data);
+            jump->skipIdx = Templ_FindEnd(templ);
             Iter *it = (Iter *)as(Fetch(sm->m, fch, data, NULL), TYPE_ITER);
             Iter_Add(&templ->data, (Abstract *)it);
             if((Iter_Next(it) & END) == 0){
                 Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
                 Iter_Next(&templ->content);
             }
-            /*
-            if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)fch,
-                    (Abstract *)it,
-                    NULL,
-                };
-                Out("^c.  For\n\nFch:@\nIt:&^0.\n", args);
-            }
-            */
         }else if(fch->type.state & FETCHER_WITH){
             /*continue */
         }else if((fch->type.state & (FETCHER_COMMAND|FETCHER_TEMPL)) == 
                 (FETCHER_COMMAND|FETCHER_TEMPL)){
-            jump->destIdx = Templ_FindEnd(templ);
+            jump->skipIdx = Templ_FindEnd(templ);
 
         }else if(fch->type.state & (FETCHER_END|FETCHER_COMMAND)){
             jump->destIdx = Templ_FindStart(templ); 
