@@ -218,8 +218,8 @@ status Types_ClsInit(MemCh *m){
     fetcherLabels[12] = Str_CstrRef(m, "IF");
     fetcherLabels[13] = Str_CstrRef(m, "IFNOT");
     fetcherLabels[14] = Str_CstrRef(m, "END");
-    fetcherLabels[15] = Str_CstrRef(m, "TEMPL");
-    fetcherLabels[16] = Str_CstrRef(m, "COMMAND");
+    fetcherLabels[15] = Str_CstrRef(m, "COMMAND");
+    fetcherLabels[16] = Str_CstrRef(m, "TEMPL");
     r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)fetcherLabels);
 
     Str **fetchTargetLabels = (Str **)Arr_Make(m, 17);

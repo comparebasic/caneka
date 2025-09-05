@@ -15,14 +15,13 @@ static i64 TemplJump_Print(Stream *sm, Abstract *a, cls type, word flags){
 
     TemplJump *jump = (TemplJump *)as(a, TYPE_TEMPL_JUMP);
     Abstract *args[] = {
-        (Abstract *)Type_ToStr(sm->m, jump->jumpType.of),
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)jump, ToS_FlagLabels),
         (Abstract *)I32_Wrapped(sm->m, jump->idx),
         (Abstract *)I32_Wrapped(sm->m, jump->destIdx),
         (Abstract *)jump->fch,
         NULL
     };
-    return Fmt(sm, "TemplJump:$<$ @/dest^D.@^D. &>", args);
+    return Fmt(sm, "TemplJump:<$ @/dest^D.@^D. &>", args);
 }
 
 static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
