@@ -1,6 +1,47 @@
 #include <external.h>
 #include <caneka.h>
 
+static i32 Templ_FindStart(Templ *templ){
+    Iter it;
+    memcpy(&it, &templ->content, sizeof(Iter));
+
+    i32 targetIdx = templ->content.p->max_idx;
+    while((Iter_Prev(&it) & END) == 0){
+        if(it.idx > targetIdx){
+            continue;
+        }
+
+        Abstract *a = Iter_Get(&it);
+
+        if(a->type.of == TYPE_TEMPL_JUMP){
+            TemplJump *prevJump = (TemplJump *)a;
+            if(prevJump->fch->type.state & FETCHER_END){
+                targetIdx = prevJump->destIdx;
+            }else if(prevJump->fch->type.state & 
+                    (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
+                return it.idx;
+            }
+        }
+    }
+    return -1;
+}
+
+static i32 Templ_FindEnd(Templ *templ){
+    Iter it;
+    memcpy(&it, &templ->content, sizeof(Iter));
+
+    i32 targetCount = 1;
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        if(a->type.of == TYPE_FETCHER && ((a->type.state & FETCHER_END) == 0)){
+            targetCount++;
+        }else if(--targetCount == 0){
+            return it.idx; 
+        }
+    }
+    return -1;
+}
+
 i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
@@ -56,48 +97,12 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             */
         }else if(fch->type.state & FETCHER_WITH){
             /*continue */
-        }else if(fch->type.state & FETCHER_COMMAND){
-            Iter it;
-            memcpy(&it, &templ->content, sizeof(Iter));
+        }else if((fch->type.state & (FETCHER_COMMAND|FETCHER_TEMPL)) == 
+                (FETCHER_COMMAND|FETCHER_TEMPL)){
+            jump->destIdx = Templ_FindEnd(templ);
 
-            i32 targetIdx = it.p->max_idx;
-            while((Iter_Next(&it) & END) == 0){
-                if(it.idx > targetIdx){
-                    continue;
-                }
-
-                Abstract *a = Iter_Get(&it);
-                status fl = (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|
-                    FETCHER_IFNOT|FETCHER_END);
-                if(a->type.of == TYPE_FETCHER && (a->type.state & fl)){
-                    jump->skipIdx = it.idx; 
-                }
-            }
-
-        }else if(fch->type.state & FETCHER_END){
-            Iter it;
-            memcpy(&it, &templ->content, sizeof(Iter));
-
-            i32 targetIdx = templ->content.p->max_idx;
-            while((Iter_Prev(&it) & END) == 0){
-                if(it.idx > targetIdx){
-                    continue;
-                }
-
-                Abstract *a = Iter_Get(&it);
-
-                if(a->type.of == TYPE_TEMPL_JUMP){
-                    TemplJump *prevJump = (TemplJump *)a;
-                    if(prevJump->fch->type.state & FETCHER_END){
-                        targetIdx = prevJump->destIdx;
-                    }else if(prevJump->fch->type.state & 
-                            (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
-                        jump->destIdx = it.idx;
-                        break;
-                    }
-                }
-            }
-
+        }else if(fch->type.state & (FETCHER_END|FETCHER_COMMAND)){
+            jump->destIdx = Templ_FindStart(templ); 
         }
 
         if((jump->fch->type.state & (FETCHER_FOR|FETCHER_WITH)) == 0 &&

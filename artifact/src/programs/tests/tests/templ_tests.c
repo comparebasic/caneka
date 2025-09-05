@@ -241,11 +241,18 @@ status TemplLogic_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
+    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-    
+
     r |= Test(ctx->type.state & SUCCESS,
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
+
+    Abstract *args2[] = {
+        (Abstract *)ctx->it.p,
+        NULL
+    };
+    Out("^b.TemplContent: @^0.\n", args2);
 
     Page *pg = NULL;
     Nav *nav = NULL;
@@ -327,7 +334,6 @@ status TemplLogic_Tests(MemCh *gm){
     DebugStack_SetRef(data, data->type.of);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
