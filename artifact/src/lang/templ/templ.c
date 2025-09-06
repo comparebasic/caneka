@@ -177,22 +177,24 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 };
                 Out("^c.  Command: & of &^0.\n", args);
             }
-            FetchTarget *tg = Span_Get(fch->val.targets, 0);
-            if(
-                (tg->idx == jump->level && tg->objType.of == FORMAT_TEMPL_LEVEL) ||
-                (tg->idx == jump->depth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
-                (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < jump->depth)
-                ){
-               /* proceed */ 
-            }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
-                Iter *it = (Iter *)Iter_Get(&templ->data), TYPE_ITER;
-                if(it != NULL){
-                    Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+            if(fch->val.targets->nvalues > 0){
+                FetchTarget *tg = Span_Get(fch->val.targets, 0);
+                if(
+                    (tg->idx == jump->level && tg->objType.of == FORMAT_TEMPL_LEVEL) ||
+                    (tg->idx == jump->depth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
+                    (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < jump->depth)
+                    ){
+                   /* proceed */ 
+                }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
+                    Iter *it = (Iter *)Iter_Get(&templ->data), TYPE_ITER;
+                    if(it != NULL){
+                        Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+                    }else{
+                        Iter_GetByIdx(&templ->content, jump->skipIdx);
+                    }
                 }else{
                     Iter_GetByIdx(&templ->content, jump->skipIdx);
                 }
-            }else{
-                Iter_GetByIdx(&templ->content, jump->skipIdx);
             }
         }
 
