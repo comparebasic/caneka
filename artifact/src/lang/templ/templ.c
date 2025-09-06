@@ -27,8 +27,6 @@ static i32 Templ_FindStart(Templ *templ){
 }
 
 static i32 Templ_FindEnd(Templ *templ){
-    printf("FindEnd\n");
-    fflush(stdout);
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
@@ -45,6 +43,7 @@ static i32 Templ_FindEnd(Templ *templ){
             }
         }
 
+        /*
         Abstract *args[] = {
             (Abstract *)a,
             (Abstract *)I32_Wrapped(OutStream->m, targetCount),
@@ -53,6 +52,7 @@ static i32 Templ_FindEnd(Templ *templ){
         };
 
         Out("^c.  SearchEnd @ target:$\\@$^0.\n", args);
+        */
     }
     return -1;
 }
@@ -83,14 +83,6 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
         Span_Set(templ->content.p, idx, (Abstract *)jump);
         Iter_GetByIdx(&templ->content, idx);
 
-        if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)jump,
-                NULL,
-            };
-            Out("^c.  Making a Jump &^0.\n", args);
-        }
-
         if(fch->type.state & FETCHER_FOR){
             jump->level = 0;
             jump->depth = Object_Depth(data);
@@ -106,7 +98,6 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
         }else if((fch->type.state & (FETCHER_COMMAND|FETCHER_TEMPL)) == 
                 (FETCHER_COMMAND|FETCHER_TEMPL)){
             jump->skipIdx = Templ_FindEnd(templ);
-
         }else if(fch->type.state & (FETCHER_END|FETCHER_COMMAND)){
             jump->destIdx = Templ_FindStart(templ); 
         }
@@ -117,6 +108,15 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             Error(ErrStream->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER, 
                 "Unable to find source or ending for Jump in Templ content\n", NULL);
         }
+
+        if(templ->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)jump,
+                NULL,
+            };
+            Out("^c.  Making a Jump &^0.\n", args);
+        }
+
         item = Iter_Get(&templ->content);
         data = Iter_Current(&templ->data);
     }
@@ -175,7 +175,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                     (Abstract *)fch,
                     NULL
                 };
-                Out("^c.  Command: & of &^0.\n", args);
+                Out("^c.  Command: &^0.\n", args);
             }
             if(fch->val.targets->nvalues > 0){
                 FetchTarget *tg = Span_Get(fch->val.targets, 0);
@@ -184,15 +184,39 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                     (tg->idx == jump->depth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
                     (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < jump->depth)
                     ){
-                   /* proceed */ 
+                    /* proceed */ 
+                    Abstract *args[] = {
+                        (Abstract *)tg,
+                        (Abstract *)I32_Wrapped(OutStream->m, tg->idx),
+                        (Abstract *)I32_Wrapped(OutStream->m, jump->level),
+                        (Abstract *)I32_Wrapped(OutStream->m, jump->depth),
+                        NULL
+                    };
+                    Out("^c.      Proceed: & tg$ level$ depth$^0.\n", args);
                 }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
                     Iter *it = (Iter *)Iter_Get(&templ->data), TYPE_ITER;
                     if(it != NULL){
+                        Abstract *args[] = {
+                            (Abstract *)tg,
+                            NULL
+                        };
+                        Out("^c.      Nest: &^0.\n", args);
                         Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
                     }else{
+                        Abstract *args[] = {
+                            (Abstract *)tg,
+                            NULL
+                        };
+                        Out("^c.      SkipNest: &^0.\n", args);
                         Iter_GetByIdx(&templ->content, jump->skipIdx);
                     }
                 }else{
+                    Abstract *args[] = {
+                        (Abstract *)tg,
+                        NULL
+                    };
+                    Out("^c.      Skipping: &^0.\n", args);
+
                     Iter_GetByIdx(&templ->content, jump->skipIdx);
                 }
             }

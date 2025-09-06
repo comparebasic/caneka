@@ -248,11 +248,13 @@ status TemplLogic_Tests(MemCh *gm){
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
 
+    /*
     Abstract *args2[] = {
         (Abstract *)ctx->it.p,
         NULL
     };
     Out("^b.TemplContent: @^0.\n", args2);
+    */
 
     Page *pg = NULL;
     Nav *nav = NULL;
@@ -323,17 +325,20 @@ status TemplLogic_Tests(MemCh *gm){
 
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
 
+    /*
     Abstract *_args[] = {
         (Abstract *)data,
         NULL
     };
     Out("^p.TemplLogic Data: &\n", _args);
+    */
 
     Stream *sm = Stream_MakeStrVec(m);
 
     DebugStack_SetRef(data, data->type.of);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
