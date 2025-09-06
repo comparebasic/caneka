@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static i32 Templ_FindStart(Templ *templ){
+static i32 Templ_FindStart(Templ *templ, word flags){
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
@@ -18,7 +18,8 @@ static i32 Templ_FindStart(Templ *templ){
             if(prevJump->fch->type.state & FETCHER_END){
                 targetIdx = prevJump->destIdx;
             }else if(prevJump->fch->type.state & 
-                    (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)){
+                    (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT) &&
+                    flags == ZERO || (prevJump->fch->type.state & flags)){
                 return it.idx;
             }
         }
@@ -94,12 +95,18 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 Iter_Next(&templ->content);
             }
         }else if(fch->type.state & FETCHER_WITH){
-            /*continue */
+            jump->skipIdx = Templ_FindEnd(templ); 
         }else if((fch->type.state & (FETCHER_COMMAND|FETCHER_TEMPL)) == 
                 (FETCHER_COMMAND|FETCHER_TEMPL)){
             jump->skipIdx = Templ_FindEnd(templ);
-        }else if(fch->type.state & (FETCHER_END|FETCHER_COMMAND)){
-            jump->destIdx = Templ_FindStart(templ); 
+        }else if(fch->type.state & (FETCHER_COMMAND)){
+            jump->destIdx = Templ_FindStart(templ, FETCHER_FOR); 
+            i32 idx = templ->content.idx;
+            Iter_GetByIdx(&templ->content, jump->destIdx);
+            jump->skipIdx = Templ_FindEnd(templ); 
+            Iter_GetByIdx(&templ->content, idx);
+        }else if(fch->type.state & FETCHER_END){
+            jump->destIdx = Templ_FindStart(templ, ZERO);
         }
 
         if((jump->fch->type.state & (FETCHER_FOR|FETCHER_WITH)) == 0 &&
@@ -177,7 +184,9 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 };
                 Out("^c.  Command: &^0.\n", args);
             }
-            if(fch->val.targets->nvalues > 0){
+            if(fch->val.targets->nvalues == 0){
+                Iter_GetByIdx(&templ->content, jump->destIdx);
+            }else{
                 FetchTarget *tg = Span_Get(fch->val.targets, 0);
                 if(
                     (tg->idx == jump->level && tg->objType.of == FORMAT_TEMPL_LEVEL) ||
@@ -194,8 +203,8 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                     };
                     Out("^c.      Proceed: & tg$ level$ depth$^0.\n", args);
                 }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
-                    Iter *it = (Iter *)Iter_Get(&templ->data), TYPE_ITER;
-                    if(it != NULL){
+                    Iter *it = (Iter *)Iter_Get(&templ->data);
+                    if(it != NULL && it->idx < it->p->max_idx){
                         Abstract *args[] = {
                             (Abstract *)tg,
                             NULL
