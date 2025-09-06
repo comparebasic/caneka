@@ -163,6 +163,7 @@ status TemplCtx_Tests(MemCh *gm){
 
 status Templ_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
+    Abstract *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
     TranspFile *tp = NULL;
@@ -210,14 +211,31 @@ status Templ_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    templ->type.state |= DEBUG;
+
+    status result = Templ_Prepare(templ);
+
+    args[0] = (Abstract *)templ;
+    args[1] = (Abstract *)ctx->it.p;
+    args[2] = (Abstract *)templ->content.p;
+    args[3] = (Abstract *)NULL;
+    r |= TestShow((result & PROCESSING),
+        "Templ_Prepare has result PROCESSING",
+        "Templ_Prepare did not finish properly @ & -> &", args);
+
+    if(r & ERROR){
+        MemCh_Free(m);
+        DebugStack_Pop();
+        return r;
+    }
+
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
-    Abstract *args[] = {
-        (Abstract *)expected,
-        (Abstract *)sm->dest.curs->v,
-        NULL
-    };
+    args[0] = (Abstract *)expected;
+    args[1] = (Abstract *)sm->dest.curs->v;
+    args[2] = (Abstract *)NULL;
+
     expected->type.state |= DEBUG;
     r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
         "Templ key value test has expected content", 
