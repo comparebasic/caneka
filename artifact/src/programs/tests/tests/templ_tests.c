@@ -223,6 +223,10 @@ status Templ_Tests(MemCh *gm){
         "Templ_Prepare has result PROCESSING",
         "Templ_Prepare did not finish properly @ & -> &", args);
 
+    args[0] = (Abstract *)templ->content.p;
+    args[1] = NULL;
+    Out("^p.Content &^0\n", args);
+
     if(r & ERROR){
         MemCh_Free(m);
         DebugStack_Pop();
