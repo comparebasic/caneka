@@ -52,7 +52,6 @@ status TemplCtx_Tests(MemCh *gm){
     File_Close(f);
 
     Cursor *curs = File_GetCurs(f);
-    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
@@ -211,8 +210,6 @@ status Templ_Tests(MemCh *gm){
     Stream *sm = Stream_MakeStrVec(m);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    templ->type.state |= DEBUG;
-
     status result = Templ_Prepare(templ);
 
     args[0] = (Abstract *)templ;
@@ -223,9 +220,11 @@ status Templ_Tests(MemCh *gm){
         "Templ_Prepare has result PROCESSING",
         "Templ_Prepare did not finish properly @ & -> &", args);
 
+    /*
     args[0] = (Abstract *)templ->content.p;
     args[1] = NULL;
     Out("^p.Content &^0\n", args);
+    */
 
     if(r & ERROR){
         MemCh_Free(m);
@@ -253,6 +252,7 @@ status Templ_Tests(MemCh *gm){
 
 status TemplLogic_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
+    Abstract *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -347,28 +347,23 @@ status TemplLogic_Tests(MemCh *gm){
 
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
 
-    /*
-    Abstract *_args[] = {
-        (Abstract *)data,
-        NULL
-    };
-    Out("^p.TemplLogic Data: &\n", _args);
-    */
-
     Stream *sm = Stream_MakeStrVec(m);
 
     DebugStack_SetRef(data, data->type.of);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+
+    args[0] = (Abstract *)templ->content.p;
+    args[1] = NULL;
+    Out("^p.Content &^0\n", args);
+
     templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
-    Abstract *args[] = {
-        (Abstract *)expected,
-        (Abstract *)sm->dest.curs->v,
-        NULL
-    };
+    args[0] = (Abstract *)expected;
+    args[1] = (Abstract *)sm->dest.curs->v;
+    args[2] = NULL;
     r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
         "Temple key value test has expected content", 
         "Temple key value test mismatch, expected @\nhave\n@", 

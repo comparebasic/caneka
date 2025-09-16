@@ -66,6 +66,9 @@ static status Templ_handleJump(Templ *templ){
     Fetcher *fch = jump->fch;
     i32 skipIdx = -1;
     if(fch->type.state & FETCHER_END){
+        if(templ->type.state & DEBUG){
+            printf("        END\n");
+        }
         skipIdx = templ->content.idx;
         TemplJump *dest = (TemplJump *)Span_Get(templ->content.p, jump->destIdx);
         if(dest->fch->type.state & FETCHER_WITH){
@@ -88,8 +91,14 @@ static status Templ_handleJump(Templ *templ){
     }
 
     if(fch->type.state & FETCHER_FOR){
-        Iter_PrevRemove(&templ->data);
-        Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
+        if((fch->type.state & PROCESSING) == 0){
+            Abstract *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
+            Iter_Add(&templ->data, value);
+            fch->type.state |= PROCESSING;
+        }else{
+            Iter_PrevRemove(&templ->data);
+        }
+        Iter *it = (Iter *)as(Iter_Current(&templ->data), TYPE_ITER);
         if((Iter_Next(it) & END) == 0){
             Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
         }else if(jump->skipIdx != NEGATIVE){
