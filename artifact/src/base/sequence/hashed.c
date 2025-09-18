@@ -57,6 +57,12 @@ static util Hash_WI16(Abstract *a){
     return (util)sg->val.w;
 }
 
+static util Hash_Util(Abstract *a){
+	util h = 5381;
+    Single *sg = (Single *)a;
+    return _Hash_Bytes((byte *)&sg->val.value, sizeof(util), h);
+}
+
 util Hash_Bytes(byte *bt, size_t length){
 	util h = 5381;
     return _Hash_Bytes(bt, length, h);
@@ -117,6 +123,7 @@ status Hash_Init(MemCh *m){
         r |= Lookup_Add(m, lk, TYPE_SLAB, (void *)Hash_Slab);
         r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
         r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)Hash_WI16);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)Hash_Util);
         return r;
     }
     return NOOP;

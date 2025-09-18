@@ -34,6 +34,8 @@ enum types {
     TYPE_RANGE,
     TYPE_BOOK,
     TYPE_MEMCTX,
+    TYPE_PERSIST,
+    TYPE_REF,
     TYPE_EXTERNAL_FREE,
     TYPE_MEMSLAB,
     TYPE_MAKER,

@@ -16,7 +16,7 @@ byte *StrLit_PageBytesMake(MemPage *pg, word sz){
 }
 
 StrLit *StrLit_Make(MemCh *m, i16 alloc){
-    StrLit *sl = MemCh_Alloc(m, sizeof(RangeType)+alloc);
+    StrLit *sl = MemCh_AllocOf(m, sizeof(RangeType)+alloc, TYPE_BYTE);
     sl->type.of = TYPE_STRLIT; 
     sl->type.range = alloc;
     return  sl;

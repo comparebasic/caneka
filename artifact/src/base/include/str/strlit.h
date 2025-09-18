@@ -9,7 +9,7 @@ typedef struct strlit {
     #define BytesPage_Alloc(m, alloc) StrLit_PageBytesMake((m), (alloc))
 #else
     #define BytesPage_Alloc(m, alloc) MemPage_Alloc((m), (alloc))
-    #define Bytes_Alloc(m, alloc) MemCh_Alloc((m), (alloc))
+    #define Bytes_Alloc(m, alloc) MemCh_AllocOf((m), (alloc), TYPE_BYTE)
 #endif
 
 StrLit *StrLit_Make(MemCh *m, i16 alloc);

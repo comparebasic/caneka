@@ -4,3 +4,5 @@
 #include "io/dir.h"
 #include "io/ioutil.h"
 #include "io/io_tos.h"
+#include "io/ref.h"
+#include "io/persist.h"

@@ -18,6 +18,7 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 }
 
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
+    i32 slIdx = 0;
     if(m == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
@@ -55,6 +56,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *_sl = (MemPage *)m->it.value;
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
+            slIdx = m->it.idx;
             sl = _sl;
             break;
         }
@@ -63,6 +65,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     if(sl == NULL){
         sl = MemPage_Make(m, level);
         Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1);
+        slIdx = m->it.idx;
         m->it.value = (void *)sl;
         _Iter_QueryPage(&m->it, sl);
         if(_capacity[m->it.p->dims] <= (m->it.p->max_idx+1)){
@@ -79,7 +82,11 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
     Guard_Reset(&m->guard);
     MemCh_SetFromBase(m);
-    return MemPage_Alloc(sl, _sz);
+    void *ptr =  MemPage_Alloc(sl, _sz);
+    if(m->type.of == TYPE_PERSIST && typeOf > _TYPE_RAW_END){
+        Persist_SetRef(m, slIdx, sl, ptr);
+    }
+    return ptr;
 }
 
 i64 MemCh_Used(MemCh *m, i16 level){

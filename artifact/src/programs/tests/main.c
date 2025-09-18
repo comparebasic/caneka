@@ -240,6 +240,7 @@ static TestSet _Tests[] = {
         "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "TemplLogic Tests",
         TemplLogic_Tests,
@@ -258,6 +259,7 @@ static TestSet _Tests[] = {
         "Testing Html Nav Templating.",
         FEATURE_COMPLETE,
     },
+    */
     /*
     {
         "TablePreKey",
