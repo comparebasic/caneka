@@ -1,7 +1,47 @@
 #include <external.h>
 #include <caneka.h>
 
+static boolean _initialized = FALSE;
 struct lookup *BlankerLookup = NULL;
+struct lookup *RepointerLookup = NULL;
+
+status Persist_FillRef(Table *tbl, void *ptr, Ref **ref){
+    Single sg = {
+        .type = {.of = TYPE_WRAPPED_UTIL, .state = ZERO},
+        .objType = {.of = ZERO, .state = ZERO},
+        .val.value = (util)ptr
+    };
+    *ref = Table_Get(tbl, &sg);
+    if(*ref != NULL){
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
+cls Persist_RepointAddr(MemCh *pm, void **ptr){
+    RefCoord *coord = (RefCoord *)ptr;
+    cls typeOf = coord->typeOf;
+    MemPage *pg = Span_Get(pm->it.p, coord->idx);
+    util u = (util)(pg ~ MEM_PERSIST_MASK);
+    *ptr = (void *)(u & coord->offset); 
+    return typeOf;
+}
+
+status Persist_Init(MemCh *m){
+    status r = READY;
+    if(!_initialized){
+        _initialized = TRUE;
+        BlankerLookup = Lookup_Make(m, 0);
+        RepointerLookup = Lookup_Make(m, 0);
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r = NOOP;
+    }
+
+    return r;
+}
 
 Table *Persist_GetTable(MemCh *m){
     if(m->type.of != TYPE_PERSIST_MEMCTX){
@@ -33,29 +73,38 @@ MemCh *Persist_Make(){
     return m;
 }
 
-status Persist_FlushFree(Stream *sm, MemCh *m, StrVec *path){
+status Persist_FlushFree(Stream *sm, MemCh *m){
+    status r = READY;
     Iter it;
-    Table *p = Persist_GetTable(m);
-    Iter_Init(&it, p);
+    Table *tbl = Persist_GetTable(m);
+    Iter_Init(&it, tbl);
+    SourceFunc func = NULL;
     while((Iter_Next(&it) & END) == 0){
         Ref *ref = (Ref *)Iter_Get(&it);
-        MemPage *pg = Span_Get(m->it.p, ref->coords.idx);
-        Abstract *a = (Abstract *)(((void *)pg)+ref->coords.offset);
-        ref->objType.of = a->type.of;
-        SourceFunc func = NULL;
-        if(a->type.of != TYPE_BLANKED && 
-                (func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of)) != NULL){
-            func(m, a, (Abstract *)p);
+        if(ref != NULL){
+            MemPage *pg = Span_Get(m->it.p, ref->coords.idx);
+            Abstract *a = (Abstract *)(((void *)pg)+ref->coords.offset);
+            ref->objType.of = a->type.of;
+            if(a->type.of != TYPE_BLANKED && 
+                    (func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of)) != NULL){
+                r |= func(sm->m, a, (Abstract *)p);
+            }
+            a->type.of = TYPE_BLANKED;
         }
-        a->type.of = TYPE_BLANKED;
     }
 
-    Iter_Reset(&m->it);
+    a = (Abstract *)p;
+    func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of);
+    func(m, a, (Abstract *)p);
+    a->type.of = TYPE_BLANKED;
+
     Persist persist = {
         .type = {.of = TYPE_PERSIST, .state = ZERO},
         .total = m->it.p->nvalues
     };
     Stream_Bytes(sm, (byte *)&persist, sizeof(Persist));
+
+    Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *pg = (MemPage *)Iter_Get(&it);
         if(Stream_Bytes(sm, (byte *)pg, MEM_SLAB_SIZE) != MEM_SLAB_SIZE){
@@ -66,5 +115,44 @@ status Persist_FlushFree(Stream *sm, MemCh *m, StrVec *path){
     }
 
     MemCh_Free(m);
+    return r;
+}
+
+status Persist_FromStream(MemCh *m, Stream *sm){
+    status r = READY;
+    MemCh *new = MemCh_Make();
+    Persist persist;
+    DoFunc func = NULL;
+    if(Stream_ReadToMem(sm, sizeof(persist), &persist) == sizeof(persist)){
+        return ERROR;
+    }
+    i32 i;
+    for(i = 0; i < persist.total; i++){
+        MemSlabl *sl = MemBook_GetPage(m); 
+        if(Stream_ReadToMem(sm, MEM_SLAB_SIZE, sl) != MEM_SLAB_SIZE){
+            return ERROR;
+        }
+        Span_Add(new->it.p, (Abstract *)sl);
+    }
+
+    Table *tbl = Persist_GetTable(m);
+    func = (DoFunc)Lookup_Get(BlankerLookup, a->type.of);
+    func(new, (Abstract *)tbl);
+
+    Iter_Init(&it, tbl);
+    SourceFunc func = NULL;
+    while((Iter_Next(&it) & END) == 0){
+        Ref *ref = (Ref *)Iter_Get(&it);
+        if(ref != NULL){
+            MemPage *pg = Span_Get(m->it.p, ref->coords.idx);
+            Abstract *a = (Abstract *)(((void *)pg)+ref->coords.offset);
+            ref->objType.of = a->type.of;
+            if(a->type.of == TYPE_BLANKED && 
+                    (func = (DoFunc)Lookup_Get(RepointerLookup, a->type.of)) != NULL){
+                r |= func(new, a);
+            }
+        }
+    }
+
     return SUCCESS;
 }

@@ -36,12 +36,12 @@ i64 Stream_VecTo(Stream *sm, StrVec *v){
     return total;
 }
 
-i64 Stream_Read(Stream *sm, i32 length){
+i64 Stream_ReadToMem(Stream *sm, i32 length, byte *mem){
     if(sm->type.of & STREAM_FROM_FD){
         if(sm->type.of & STREAM_SOCKET){
-            /* read using recv */
+            return recv(sm->fd, mem, length, 0);
         }else{
-            /* read using read */
+            return read(sm->fd, mem, length);
         }
     }
     return 0;
