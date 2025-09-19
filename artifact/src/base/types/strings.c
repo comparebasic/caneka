@@ -36,6 +36,10 @@ static char *baseTypeStrings[] = {
     "TYPE_RANGE",
     "TYPE_BOOK",
     "TYPE_MEMCTX",
+    "TYPE_PERSIST_MEMCTX",
+    "TYPE_PERSIST",
+    "TYPE_REF",
+    "TYPE_BLANKED",
     "TYPE_EXTERNAL_FREE",
     "TYPE_MEMSLAB",
     "TYPE_MAKER",
@@ -61,8 +65,11 @@ static char *baseTypeStrings[] = {
     "TYPE_GUARD",
     "TYPE_HKEY",
     "TYPE_PROCDETS",
+    "TYPE_ACCESS",
     "TYPE_DEBUG_STACK",
     "TYPE_DEBUG_STACK_ENTRY",
+    "TYPE_CLI_STATUS",
+    "TYPE_FMT_LINE",
     "_TYPE_BASE_END",
     NULL
 };

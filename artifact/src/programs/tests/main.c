@@ -240,6 +240,12 @@ static TestSet _Tests[] = {
         "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
+    {
+        "Persist Tests",
+        Persist_Tests,
+        "Mem Persist testing.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TemplLogic Tests",

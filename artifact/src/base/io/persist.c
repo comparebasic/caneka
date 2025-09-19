@@ -50,9 +50,9 @@ Table *Persist_GetTable(MemCh *m){
             "Mismatch of type when trying to get the span of a persist memchapter.", NULL);
         return NULL;
     }
-    void *pg = Span_Get(m->it.p, 0);
-    i64 offset = sizeof(MemCh)+sizeof(Table)+sizeof(slab);
-    return (Table *)as((pg+MEM_SLAB_SIZE)-offset-sizeof(Table), TYPE_SPAN);
+    MemPage *pg = Span_Get(m->it.p, 0);
+    void **location = pg+sizeof(MemPage);
+    return (Table *)as(*location, TYPE_TABLE);
 }
 
 status Persist_SetRef(MemCh *m, i32 slIdx, MemPage *pg, void *ptr){
@@ -65,13 +65,6 @@ status Persist_SetRef(MemCh *m, i32 slIdx, MemPage *pg, void *ptr){
         (Abstract *)Util_Wrapped(m, (util)ptr),
         (Abstract *)ref);
     return idx >= 0 ?  SUCCESS : ERROR;
-}
-
-MemCh *Persist_Make(){
-    MemCh *m = MemCh_OnPage();
-    Table_Make(m);
-    m->type.of = TYPE_PERSIST_MEMCTX;
-    return m;
 }
 
 status Persist_FlushFree(Stream *sm, MemCh *m){
@@ -136,8 +129,7 @@ status Persist_FromStream(MemCh *m, Stream *sm){
         Span_Add(new->it.p, (Abstract *)pg);
     }
 
-    Table *tbl = Persist_GetTable(m);
-    func = (DoFunc)Lookup_Get(BlankerLookup, tbl->type.of);
+    Table *tbl = Persist_GetTable(m); func = (DoFunc)Lookup_Get(BlankerLookup, tbl->type.of);
     func(new, (Abstract *)tbl);
 
     Iter it;
@@ -156,3 +148,15 @@ status Persist_FromStream(MemCh *m, Stream *sm){
 
     return SUCCESS;
 }
+
+MemCh *Persist_Make(){
+    MemCh *m = MemCh_OnPage();
+    MemPage *pg = Span_Get(m->it.p, 0);
+    Table *tbl = Table_Make(m);
+    pg->remaining -= sizeof(void *);
+    void **location = pg+sizeof(MemPage);
+    *location = (void *)tbl;
+    m->type.of = TYPE_PERSIST_MEMCTX;
+    return m;
+}
+

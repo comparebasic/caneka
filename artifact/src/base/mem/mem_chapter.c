@@ -23,7 +23,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
     }
-    if(m->type.of != TYPE_MEMCTX){
+    if(m->type.of != TYPE_MEMCTX && m->type.of != TYPE_PERSIST_MEMCTX){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is missing type.of", NULL);
         return NULL;
     }

@@ -57,6 +57,7 @@ static BuildSubdir testsobj = { "tests", {
     "hash_tests.c",
     "clone_tests.c",
     "table_tests.c",
+    "persist_tests.c",
     "match_tests.c",
     "patchar_tests.c",
     "split_tests.c",

@@ -120,17 +120,27 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     return s;
 }
 
-Str *Str_CstrRef(MemCh *m, char *cstr){
+Str *Str_FromCstr(MemCh *m, char *cstr, word flags){
     i64 len = strlen(cstr);
-    if(len > STR_MAX){
+    if((len+1) > STR_MAX){
         Error(m, NULL, FUNCNAME, FILENAME, LINENUMBER,
             "strlen too long to make Str", NULL);
         return NULL;
     }
     Str *s = MemCh_Alloc(m, sizeof(Str));
-    Str_Init(s, (byte *)cstr, len, len+1);
+    s->type.state = flags;
+    byte *bytes = (byte *)cstr;
+    if(flags & STRING_COPY){
+        bytes = Bytes_Alloc(m, len+1);
+        memcpy(bytes, cstr, len);
+    }
+    Str_Init(s, bytes, len, len+1);
     s->type.state |= STRING_CONST;
     return s;
+}
+
+Str *Str_CstrRef(MemCh *m, char *cstr){
+    return Str_FromCstr(m, cstr, ZERO);
 }
 
 status Str_Init(Str *s, byte *bytes, word length, word alloc){
