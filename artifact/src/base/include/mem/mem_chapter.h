@@ -27,3 +27,4 @@ void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx);
 status MemCh_Setup(MemCh *m, MemPage *pg);
 MemCh *MemCh_OnPage();
 MemCh *MemCh_Make();
+MemPage *MemCh_AddPage(MemCh *m, i16 level);

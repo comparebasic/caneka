@@ -13,6 +13,20 @@ i64 MemCh_MemCount(MemCh *m, i16 level){
     return total;
 }
 
+MemPage *MemCh_AddPage(MemCh *m, i16 level){
+    MemPage *pg = MemPage_Make(m, level);
+    Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1);
+    m->it.value = (void *)pg;
+    _Iter_QueryPage(&m->it, pg);
+    if(_capacity[m->it.p->dims] <= (m->it.p->max_idx+1)){
+        Iter it;
+        Iter_Setup(&it, m->it.p, SPAN_OP_RESERVE, m->it.p->max_idx+1); 
+        it.value = NULL;
+        _Iter_QueryPage(&it, pg);
+    }
+    return pg;
+}
+
 void *MemCh_Alloc(MemCh *m, size_t sz){
     return MemCh_AllocOf(m, sz, 0);
 }
@@ -63,18 +77,8 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     }
 
     if(sl == NULL){
-        sl = MemPage_Make(m, level);
-        Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1);
+        sl = MemCh_AddPage(m, level);
         slIdx = m->it.idx;
-        m->it.value = (void *)sl;
-        _Iter_QueryPage(&m->it, sl);
-        if(_capacity[m->it.p->dims] <= (m->it.p->max_idx+1)){
-            Iter it;
-            Iter_Setup(&it, m->it.p, SPAN_OP_RESERVE, m->it.p->max_idx+1); 
-            it.value = NULL;
-            _Iter_QueryPage(&it, sl);
-        }
-        Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, 0);
     }
 
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
@@ -83,7 +87,9 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     Guard_Reset(&m->guard);
     MemCh_SetFromBase(m);
     void *ptr =  MemPage_Alloc(sl, _sz);
-    if(m->type.of == TYPE_PERSIST && typeOf > _TYPE_RAW_END){
+    if(m->type.of == TYPE_PERSIST_MEMCTX && 
+            (typeOf != TYPE_REF && (typeOf == 0 || typeOf > _TYPE_RAW_END))){
+        printf("set ref type:%d ref:%d\n", (i32)typeOf, (i32)TYPE_REF);
         Persist_SetRef(m, slIdx, sl, ptr);
     }
     return ptr;

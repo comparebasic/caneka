@@ -5,21 +5,19 @@ static boolean _initialized = FALSE;
 struct lookup *BlankerLookup = NULL;
 struct lookup *RepointerLookup = NULL;
 
-status Persist_FillRef(Table *tbl, void *ptr, Ref **ref){
-    Single sg = {
-        .type = {.of = TYPE_WRAPPED_UTIL, .state = ZERO},
-        .objType = {.of = ZERO, .state = ZERO},
-        .val.value = (util)ptr
-    };
-    *ref = (Ref *)Table_Get(tbl, (Abstract *)&sg);
-    if(*ref != NULL){
-        return SUCCESS;
+status Persist_FillRef(MemCh *m, void **ptr){
+    i32 idx = 0;
+    PersistItem *item = Persist_GetArray(m);
+    while(item != NULL && idx < PERSIST_ARR_MAX){
+        if(*ptr == item->ptr){
+            memcpy(*ptr, &item->coord, sizeof(void *));
+        }
     }
     return NOOP;
 }
 
 cls Persist_RepointAddr(MemCh *pm, void **ptr){
-    RefCoord *coord = (RefCoord *)ptr;
+    PersistCoord *coord = (PersistCoord *)ptr;
     cls typeOf = coord->typeOf;
     MemPage *pg = Span_Get(pm->it.p, coord->idx);
     util u = (util)pg;
@@ -44,63 +42,79 @@ status Persist_Init(MemCh *m){
     return r;
 }
 
-Table *Persist_GetTable(MemCh *m){
+Persist *Persist_Get(MemCh *m){
     if(m->type.of != TYPE_PERSIST_MEMCTX){
         Error(ErrStream->m, (Abstract *)m, FUNCNAME, FILENAME, LINENUMBER,
             "Mismatch of type when trying to get the span of a persist memchapter.", NULL);
         return NULL;
     }
-    MemPage *pg = Span_Get(m->it.p, 0);
-    void **location = pg+sizeof(MemPage);
-    return (Table *)as(*location, TYPE_TABLE);
+    Iter it;
+    Iter_Init(&it, m->it.p);
+    void *ptr = NULL;
+    while((Iter_Next(&it) & END) == 0){
+        MemPage *pg = Iter_Get(&it);
+        if(pg->type.state & MEM_PAGE_PERSIST_ARRAY){
+            ptr = (void *)pg;
+        }
+    }
+    if(ptr == NULL){
+        Error(ErrStream->m, (Abstract *)m, FUNCNAME, FILENAME, LINENUMBER,
+            "Unable to find Persist MemPage.", NULL);
+        return NULL;
+    }
+    return (Persist *)ptr+sizeof(MemPage);
+}
+
+PersistItem *Persist_GetArray(MemCh *m){
+    Persist *pst = Persist_Get(m);
+    return ((void *)pst)+sizeof(Persist);
 }
 
 status Persist_SetRef(MemCh *m, i32 slIdx, MemPage *pg, void *ptr){
-    Ref *ref = Ref_Make(m);
-    ref->coord.idx = slIdx;
-    ref->coord.offset = (quad)(((util)ptr) & MEM_PERSIST_MASK);
-    ref->ptr = ptr;
-
-    i32 idx =  Table_Set(Persist_GetTable(m),
-        (Abstract *)Util_Wrapped(m, (util)ptr),
-        (Abstract *)ref);
-    return idx >= 0 ?  SUCCESS : ERROR;
+    printf("set ref\n");
+    PersistItem item;
+    item.ptr = ptr;
+    item.coord.typeOf = ZERO;
+    item.coord.idx = slIdx;
+    item.coord.offset= (quad)(((util)ptr) & MEM_PERSIST_MASK);
+    Persist *pt = Persist_Get(m);
+    PersistItem **arr = ((void *)pt)+sizeof(Persist);
+    if(pt->maxIdx > PERSIST_ARR_MAX){
+        Error(ErrStream->m, (Abstract *)m, FUNCNAME, FILENAME, LINENUMBER,
+            "Persist array out of space", NULL);
+        return ERROR;
+    }
+    memcpy(arr+pt->maxIdx, &item, sizeof(PersistItem));
+    pt->maxIdx++;
+    return SUCCESS;
 }
 
 status Persist_FlushFree(Stream *sm, MemCh *m){
     status r = READY;
-    Iter it;
-    Table *tbl = Persist_GetTable(m);
-    Iter_Init(&it, tbl);
     SourceFunc func = NULL;
     Abstract *a = NULL;
-    while((Iter_Next(&it) & END) == 0){
-        Ref *ref = (Ref *)Iter_Get(&it);
-        if(ref != NULL){
-            MemPage *pg = Span_Get(m->it.p, ref->coord.idx);
-            a = (Abstract *)(((void *)pg)+ref->coord.offset);
-            if(a->type.of != TYPE_BLANKED && 
-                    (func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of)) != NULL){
-                r |= func(sm->m, a, (Abstract *)tbl);
-            }
-            a->type.of = TYPE_BLANKED;
+    Persist *pt = Persist_Get(m);
+    PersistItem *item = ((void *)pt)+sizeof(Persist);
+    i32 idx = 0;
+    while(item != NULL && idx < PERSIST_ARR_MAX){
+        MemPage *pg = Span_Get(m->it.p, item->coord.idx);
+        a = (Abstract *)(((void *)pg)+item->coord.offset);
+        if(a->type.of != TYPE_BLANKED && 
+                (func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of)) != NULL){
+            r |= func(sm->m, a, (Abstract *)pt);
         }
+        a->type.of = TYPE_BLANKED;
+        item++;
+        idx++;
     }
 
-    a = (Abstract *)tbl;
-    func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of);
-    func(m, a, a);
-    a->type.of = TYPE_BLANKED;
-
-    Persist persist = {
-        .type = {.of = TYPE_PERSIST, .state = ZERO},
-        .total = m->it.p->nvalues
-    };
-    Stream_Bytes(sm, (byte *)&persist, sizeof(Persist));
+    func = (SourceFunc)Lookup_Get(BlankerLookup, pt->type.of);
+    func(m, (Abstract *)pt, (Abstract *)pt);
+    pt->type.of = TYPE_BLANKED;
 
     Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
-        MemPage *pg = (MemPage *)Iter_Get(&it);
+        MemPage *pg = (MemPage *)Iter_Get(&m->it);
         if(Stream_Bytes(sm, (byte *)pg, MEM_SLAB_SIZE) != MEM_SLAB_SIZE){
             Error(ErrStream->m, (Abstract *)m, FUNCNAME, FILENAME, LINENUMBER,
                 "Unable to stream entire page for Persist", NULL);
@@ -114,6 +128,7 @@ status Persist_FlushFree(Stream *sm, MemCh *m){
 
 status Persist_FromStream(MemCh *m, Stream *sm){
     status r = READY;
+    /*
     MemCh *new = MemCh_Make();
     Persist persist;
     DoFunc func = NULL;
@@ -146,17 +161,16 @@ status Persist_FromStream(MemCh *m, Stream *sm){
         }
     }
 
-    return SUCCESS;
+    */
+    return r;
 }
 
 MemCh *Persist_Make(){
     MemCh *m = MemCh_OnPage();
-    MemPage *pg = Span_Get(m->it.p, 0);
-    Table *tbl = Table_Make(m);
-    pg->remaining -= sizeof(void *);
-    void **location = pg+sizeof(MemPage);
-    *location = (void *)tbl;
     m->type.of = TYPE_PERSIST_MEMCTX;
+    MemPage *pg = Span_Get(m->it.p, 0);
+    Persist *pst = ((void *)pg)+sizeof(MemPage);
+    pg->remaining = 0;
+    pg->type.state |= MEM_PAGE_PERSIST_ARRAY;
     return m;
 }
-

@@ -1,3 +1,7 @@
+enum mem_page_flags {
+    MEM_PAGE_PERSIST_ARRAY = 1 << 8,
+};
+
 typedef struct mem_page {
     Type type;
     i16 level;
