@@ -11,7 +11,7 @@ status Persist_FillRef(Table *tbl, void *ptr, Ref **ref){
         .objType = {.of = ZERO, .state = ZERO},
         .val.value = (util)ptr
     };
-    *ref = Table_Get(tbl, &sg);
+    *ref = (Ref *)Table_Get(tbl, (Abstract *)&sg);
     if(*ref != NULL){
         return SUCCESS;
     }
@@ -22,7 +22,8 @@ cls Persist_RepointAddr(MemCh *pm, void **ptr){
     RefCoord *coord = (RefCoord *)ptr;
     cls typeOf = coord->typeOf;
     MemPage *pg = Span_Get(pm->it.p, coord->idx);
-    util u = (util)(pg ~ MEM_PERSIST_MASK);
+    util u = (util)pg;
+    u &= ~MEM_PERSIST_MASK;
     *ptr = (void *)(u & coord->offset); 
     return typeOf;
 }
@@ -56,8 +57,8 @@ Table *Persist_GetTable(MemCh *m){
 
 status Persist_SetRef(MemCh *m, i32 slIdx, MemPage *pg, void *ptr){
     Ref *ref = Ref_Make(m);
-    ref->coords.idx = slIdx;
-    ref->coords.offset = (quad)(((util)ptr) & MEM_PERSIST_MASK);
+    ref->coord.idx = slIdx;
+    ref->coord.offset = (quad)(((util)ptr) & MEM_PERSIST_MASK);
     ref->ptr = ptr;
 
     i32 idx =  Table_Set(Persist_GetTable(m),
@@ -79,23 +80,23 @@ status Persist_FlushFree(Stream *sm, MemCh *m){
     Table *tbl = Persist_GetTable(m);
     Iter_Init(&it, tbl);
     SourceFunc func = NULL;
+    Abstract *a = NULL;
     while((Iter_Next(&it) & END) == 0){
         Ref *ref = (Ref *)Iter_Get(&it);
         if(ref != NULL){
-            MemPage *pg = Span_Get(m->it.p, ref->coords.idx);
-            Abstract *a = (Abstract *)(((void *)pg)+ref->coords.offset);
-            ref->objType.of = a->type.of;
+            MemPage *pg = Span_Get(m->it.p, ref->coord.idx);
+            a = (Abstract *)(((void *)pg)+ref->coord.offset);
             if(a->type.of != TYPE_BLANKED && 
                     (func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of)) != NULL){
-                r |= func(sm->m, a, (Abstract *)p);
+                r |= func(sm->m, a, (Abstract *)tbl);
             }
             a->type.of = TYPE_BLANKED;
         }
     }
 
-    a = (Abstract *)p;
+    a = (Abstract *)tbl;
     func = (SourceFunc)Lookup_Get(BlankerLookup, a->type.of);
-    func(m, a, (Abstract *)p);
+    func(m, a, a);
     a->type.of = TYPE_BLANKED;
 
     Persist persist = {
@@ -123,30 +124,29 @@ status Persist_FromStream(MemCh *m, Stream *sm){
     MemCh *new = MemCh_Make();
     Persist persist;
     DoFunc func = NULL;
-    if(Stream_ReadToMem(sm, sizeof(persist), &persist) == sizeof(persist)){
+    if(Stream_ReadToMem(sm, sizeof(persist), (byte *)&persist) == sizeof(persist)){
         return ERROR;
     }
     i32 i;
     for(i = 0; i < persist.total; i++){
-        MemSlabl *sl = MemBook_GetPage(m); 
-        if(Stream_ReadToMem(sm, MEM_SLAB_SIZE, sl) != MEM_SLAB_SIZE){
+        MemPage *pg = MemBook_GetPage(m); 
+        if(Stream_ReadToMem(sm, MEM_SLAB_SIZE, (byte *)pg) != MEM_SLAB_SIZE){
             return ERROR;
         }
-        Span_Add(new->it.p, (Abstract *)sl);
+        Span_Add(new->it.p, (Abstract *)pg);
     }
 
     Table *tbl = Persist_GetTable(m);
-    func = (DoFunc)Lookup_Get(BlankerLookup, a->type.of);
+    func = (DoFunc)Lookup_Get(BlankerLookup, tbl->type.of);
     func(new, (Abstract *)tbl);
 
+    Iter it;
     Iter_Init(&it, tbl);
-    SourceFunc func = NULL;
     while((Iter_Next(&it) & END) == 0){
         Ref *ref = (Ref *)Iter_Get(&it);
         if(ref != NULL){
-            MemPage *pg = Span_Get(m->it.p, ref->coords.idx);
-            Abstract *a = (Abstract *)(((void *)pg)+ref->coords.offset);
-            ref->objType.of = a->type.of;
+            MemPage *pg = Span_Get(m->it.p, ref->coord.idx);
+            Abstract *a = (Abstract *)(((void *)pg)+ref->coord.offset);
             if(a->type.of == TYPE_BLANKED && 
                     (func = (DoFunc)Lookup_Get(RepointerLookup, a->type.of)) != NULL){
                 r |= func(new, a);

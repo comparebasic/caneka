@@ -37,6 +37,7 @@ typedef struct stream_task {
 i64 Stream_Bytes(Stream *sm, byte *b, i32 length);
 i64 Stream_VecTo(Stream *sm, StrVec *v);
 i64 Stream_Read(Stream *sm, i32 length);
+i64 Stream_ReadToMem(Stream *sm, i32 length, byte *mem);
 status Stream_SetupMakeStrVec(MemCh *m, Stream *sm, StrVec *v);
 Stream *Stream_MakeStrVec(MemCh *m);
 Stream *Stream_MakeChain(MemCh *m, Span *chain);
