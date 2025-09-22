@@ -4,13 +4,8 @@ typedef struct strlit {
 } StrLit;
 
 
-#ifdef INSECURE
-    #define Bytes_Alloc(m, alloc) StrLit_BytesMake((m), (alloc))
-    #define BytesPage_Alloc(m, alloc) StrLit_PageBytesMake((m), (alloc))
-#else
-    #define BytesPage_Alloc(m, alloc) MemPage_Alloc((m), (alloc))
-    #define Bytes_Alloc(m, alloc) MemCh_AllocOf((m), (alloc), TYPE_BYTE)
-#endif
+#define Bytes_Alloc(m, alloc) StrLit_BytesMake((m), (alloc))
+#define BytesPage_Alloc(m, alloc) StrLit_PageBytesMake((m), (alloc))
 
 StrLit *StrLit_Make(MemCh *m, i16 alloc);
 byte *StrLit_BytesMake(MemCh *m, word alloc);
