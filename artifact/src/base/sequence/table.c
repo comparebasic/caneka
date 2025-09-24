@@ -141,6 +141,14 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
         }
     }
 
+    if((tbl->type.state & SUCCESS) == 0){
+        if(tbl->type.state & DEBUG){
+           printf("\nMissed\n"); 
+           fflush(stdout);
+        }
+        return NULL;
+    }
+
     return h;
 }
 

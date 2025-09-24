@@ -60,7 +60,7 @@ static util Hash_WI16(Abstract *a){
 static util Hash_Util(Abstract *a){
 	util h = 5381;
     Single *sg = (Single *)a;
-    return _Hash_Bytes(&sg->val.value, sizeof(util), h);
+    return _Hash_Bytes((byte *)&sg->val.value, sizeof(util), h);
 }
 
 util Hash_Bytes(byte *bt, size_t length){
