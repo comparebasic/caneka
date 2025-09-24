@@ -37,7 +37,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
     }
-    if(m->type.of != TYPE_MEMCTX && m->type.of != TYPE_PERSIST_MEMCTX){
+    if(m->type.of != TYPE_MEMCTX){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is missing type.of", NULL);
         return NULL;
     }
@@ -86,13 +86,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
     Guard_Reset(&m->guard);
     MemCh_SetFromBase(m);
-    void *ptr =  MemPage_Alloc(sl, _sz);
-    if(m->type.of == TYPE_PERSIST_MEMCTX && 
-            (typeOf != TYPE_REF && (typeOf == 0 || typeOf > _TYPE_RAW_END))){
-        printf("set ref type:%d ref:%d\n", (i32)typeOf, (i32)TYPE_REF);
-        Persist_SetRef(m, slIdx, sl, ptr);
-    }
-    return ptr;
+    return MemPage_Alloc(sl, _sz);
 }
 
 i64 MemCh_Used(MemCh *m, i16 level){
@@ -207,7 +201,7 @@ status MemCh_Setup(MemCh *m, MemPage *pg){
     Span_Setup(p);
     p->m = m;
     p->max_idx = -1;
-    p->root = (slab *)BytesPage_Alloc(pg, sizeof(slab));
+    p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab));
     Iter_Init(&m->it, p);
     status r = Iter_SetByIdx(&m->it, 0, (void *)pg);
     m->it.type.state = ((m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET);

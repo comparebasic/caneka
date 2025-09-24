@@ -1,7 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-Map *Map_Make(MemCh *m, i16 length, Arr *atts, Str *keys){
+static boolean _mapsInitialized = FALSE;
+struct lookup *MapsLookup = NULL;
+
+Map *Map_Make(MemCh *m, i16 length, RangeType *atts, Str **keys){
     Map *map = MemCh_AllocOf(m, sizeof(Map), TYPE_MAP);
     map->type.of = TYPE_MAP;
     map->type.range = length;
@@ -10,5 +13,23 @@ Map *Map_Make(MemCh *m, i16 length, Arr *atts, Str *keys){
     return map;
 }
 
-Table *Map_ToTable(MemCh *m, Map *map);
-Map *Map_FromTable(MemCh *m, Table *tbl, cls typeOf);
+Table *Map_ToTable(MemCh *m, Map *map){
+    return NULL;
+}
+
+Map *Map_FromTable(MemCh *m, Table *tbl, cls typeOf){
+    return NULL;
+}
+
+status Maps_Init(MemCh *m){
+    status r = READY;
+    if(!_mapsInitialized){
+        _mapsInitialized = TRUE;
+        MapsLookup = Lookup_Make(m, ZERO);
+        r |= SUCCESS;
+    }
+    if(r == READY){
+        r |= NOOP;
+    }
+    return r;
+}

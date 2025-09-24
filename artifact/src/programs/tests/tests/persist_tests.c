@@ -9,7 +9,7 @@ status Persist_Tests(MemCh *gm){
     status r = READY;
     Str *s;
 
-    MemCh *pst = Persist_Make();
+    MemCh *pst = MemCh_Make();
     Str *one = Str_FromCstr(pst, "One", STRING_COPY);
     Str *two = Str_FromCstr(pst, "Two", STRING_COPY);
     Str *three = Str_FromCstr(pst, "Three", STRING_COPY);
@@ -18,9 +18,9 @@ status Persist_Tests(MemCh *gm){
     Span_Add(p, (Abstract *)two);
     Span_Add(p, (Abstract *)three);
 
-    args[0] = (Abstract *)Persist_GetTable(pst);
+    args[0] = (Abstract *)pst;
     args[1] = NULL;
-    Out("^p.Persist Table: &\n", args);
+    Out("^p.Persist MemCh: &\n", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

@@ -168,7 +168,7 @@ MemBook *MemBook_Make(MemBook *prev){
     Span *p = MemPage_Alloc(pg, sizeof(Span));
     Span_Setup(p);
     p->m = &book->m;
-    p->root = (slab *)BytesPage_Alloc(pg, sizeof(slab));
+    p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab));
 
     Iter_Init(&book->recycled, p);
 
