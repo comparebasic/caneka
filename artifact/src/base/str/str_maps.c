@@ -22,6 +22,6 @@ static Map *Str_Map(MemCh *m){
 
 status Str_MapsInit(MemCh *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Map);
+    r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Map(m));
     return r;
 }

@@ -20,7 +20,7 @@ static inline status Table_HKeyVal(Table *tbl, HKey *hk){
         }
     }
     hk->idx = (i32) ((hk->id >> (hk->pos*(hk->dim+1)*4)) & _modulos[hk->dim+1]);
-    if(tbl->type.state & DEBUG){
+    if(0 && tbl->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)hk,
             NULL
@@ -50,12 +50,26 @@ static status HKey_Init(HKey *hk, Table *tbl, util id){
 
 static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Abstract *key, Abstract *value, util hash){
     Hashed *h = NULL;
+    Abstract *args[5];
     if(op & SPAN_OP_GET){
         if(it->value != NULL){
             h = it->value;
             if(h->id == hash && Equals(key, h->key)){
                 h = (Hashed *)it->value;
                 tbl->type.state |= SUCCESS;
+                if(tbl->type.state & DEBUG){
+                    args[0] = (Abstract *)key;
+                    args[1] = (Abstract *)h;
+                    args[2] = NULL;
+                    Out("    -> Found ^E.$ -> @^e.\n", args);
+                }
+            }else{
+                if(tbl->type.state & DEBUG){
+                    args[0] = (Abstract *)key;
+                    args[1] = (Abstract *)h->key;
+                    args[2] = NULL;
+                    Out("    Not $ vs $\n", args);
+                }
             }
         }
     }else if(op & SPAN_OP_SET){
@@ -65,10 +79,28 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
                 h->idx = hk->idx;
                 h->value = value;
                 tbl->type.state |= SUCCESS;
+                if(tbl->type.state & DEBUG){
+                    args[0] = (Abstract *)key;
+                    args[1] = (Abstract *)it->value;
+                    args[2] = NULL;
+                    Out("    Clobber ^E.$ -> @^e.\n", args);
+                }
+            }
+            if(tbl->type.state & DEBUG){
+                args[0] = (Abstract *)key;
+                args[1] = (Abstract *)it->value;
+                args[2] = NULL;
+                Out("    Miss ^E.$ -> @^e.\n", args);
             }
         }else{
             h = Table_setHValue(tbl->m, hk, it, key, value);
             tbl->type.state |= SUCCESS;
+            if(tbl->type.state & DEBUG){
+                args[0] = (Abstract *)key;
+                args[1] = (Abstract *)h;
+                args[2] = NULL;
+                Out("    Set ^E.$ -> @^e.\n", args);
+            }
         }
     }
 

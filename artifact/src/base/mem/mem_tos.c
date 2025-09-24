@@ -127,29 +127,84 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     args[1] = (Abstract *)MemCount_Wrapped(sm->m,  MemCh_Used(m, 0));
     args[2] = NULL;
 
-    Table *lookups = Table_Make(sm->m);;
-    Lookup *counts = Lookup_Make(m, ZERO);
+    Table *tbl = Table_Make(sm->m);
+    tbl->type.state |= DEBUG;
+    Lookup *counts = Lookup_Make(sm->m, ZERO);
 
     if(flags & MORE){
         total += Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
         
         MemIter mit;
         MemIter_Init(&mit, m);
-
         i16 g = 0;
+        while((MemIter_Next(&mit) & END) == 0){
+            Guard_Incr(&g, 100, FUNCNAME, FILENAME, LINENUMBER);
+            if((mit.type.state & MORE) == 0){
+                Abstract *a = MemIter_Get(&mit);
+                Single *count = (Single *)Lookup_Get(counts, a->type.of);
+                if(count == NULL){
+                    count = I32_Wrapped(sm->m, 1);
+                    Lookup_Add(sm->m, counts, a->type.of, 
+                        (void *)count);
+                }else{
+                    count->val.i++;
+                }
+                args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
+                args[1] = (Abstract *)count;
+                args[2] = (Abstract *)Util_Wrapped(sm->m, (util)a);
+                args[3] = NULL;
+                Out("\n    Adding $ count $ \\@$\n", args);
+                Table_Set(tbl, (Abstract *)Util_Wrapped(sm->m, (util)a), 
+                    (Abstract *)I32_Wrapped(sm->m, count->val.i));
+            }
+        }
+
+        MemIter_Init(&mit, m);
+        g = 0;
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(&g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if(mit.type.state & MORE){
                 total += Fmt(sm, "\n   Page ->\n", NULL);
             }else{
+                printf("\n!!!\n");
                 Abstract *a = MemIter_Get(&mit);
-                if(a != NULL){
-                    args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
-                    args[1] = NULL;
-                    total += Fmt(sm, "$", args);
-                    if((mit.type.state & LAST) == 0){
-                        total += Stream_Bytes(sm, (byte *)", ", 2);
+                Map *map = Lookup_Get(MapsLookup, a->type.of);
+                Single *count = (Single *)Table_Get(tbl, 
+                    (Abstract *)Util_Wrapped(sm->m, (util)a));
+
+                if(map != NULL){
+                    args[0] = (Abstract *)map->keys[0];
+                    args[1] = (Abstract *)count;
+                    args[2] = NULL;
+                    total += Fmt(sm, "$#$(", args);
+                    i32 max = (i32)((RangeType *)map)->range;
+                    for(i32 i = 1; i <= max; i++){
+                        RangeType *att = map->atts+i;
+                        if(att->of > _TYPE_RAW_END){
+                            Str *key = map->keys[i];
+                            args[0] = (Abstract *)key;
+                            args[1] = NULL;
+                            total += Fmt(sm, "$", args);
+                            if(i < max-1){
+                                total += Stream_Bytes(sm, (byte *)", ", 2);
+                            }
+                        }
                     }
+                    total += Stream_Bytes(sm, (byte *)")", 1);
+                }else{
+                    if(count != NULL){
+                        args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
+                        args[1] = (Abstract *)count;
+                        args[2] = NULL;
+                        total += Fmt(sm, "$#$", args);
+                    }else{
+                        args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
+                        args[2] = NULL;
+                        total += Fmt(sm, "$", args);
+                    }
+                }
+                if((mit.type.state & LAST) == 0){
+                    total += Stream_Bytes(sm, (byte *)", ", 2);
                 }
             }
         }
