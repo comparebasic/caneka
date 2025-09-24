@@ -36,7 +36,7 @@ i64 Bytes_Debug(Stream *sm, byte *start, byte *end){
 }
 
 i64 StrLit_Print(Stream *sm, Abstract *a, cls type, word flags){
-    StrLit *sl = (StrLit*)as(a, TYPE_STRLIT); 
+    StrLit *sl = (StrLit*)as(a, TYPE_BYTES_POINTER); 
     i64 total = 0;
     if(flags & (MORE|DEBUG)){
         total += Stream_Bytes(sm, (byte *)"StrLit<", 7);
@@ -299,7 +299,7 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
     r |= Lookup_Add(m, lk, TYPE_STREAM, (void *)Stream_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
-    r |= Lookup_Add(m, lk, TYPE_STRLIT, (void *)StrLit_Print);
+    r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)StrLit_Print);
     r |= Str_InitLabels(m, ToSFlagLookup);
     r |= Str_MapsInit(m, MapsLookup); 
     return r;

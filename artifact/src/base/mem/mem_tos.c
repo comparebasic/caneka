@@ -36,6 +36,7 @@ i64 Addr_ToS(Stream *sm, void *a, word flags){
 }
 
 i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
+    /*
     i64 total = 0;
     MemPage *sl = (MemPage*)as(a, TYPE_MEMSLAB); 
 
@@ -61,7 +62,7 @@ i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
         while(pos < end){
             Abstract *a = (Abstract *)pos;
             size_t osz = 0;
-            if(a->type.of == TYPE_STRLIT){
+            if(a->type.of == TYPE_BYTES_POINTER){
                 StrLit *sl = (StrLit *)a;
                 osz = sizeof(RangeType)+sl->type.range;
             }else{
@@ -114,25 +115,42 @@ i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 
     return Stream_Bytes(sm, (byte *)">", 1);
+    */
+    return 0;
 }
 
 i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
+    Abstract *args[5];
     i64 total = 0;
-    Abstract *args[] = {
-        (Abstract *)I64_Wrapped(sm->m, m->it.p->nvalues),
-        (Abstract *)MemCount_Wrapped(sm->m,  MemCh_Used(m, 0)),
-        NULL
-    };
+    args[0] = (Abstract *)I64_Wrapped(sm->m, m->it.p->nvalues);
+    args[1] = (Abstract *)MemCount_Wrapped(sm->m,  MemCh_Used(m, 0));
+    args[2] = NULL;
+
+    Table *lookups = Table_Make(sm->m);;
+    Lookup *counts = Lookup_Make(m, ZERO);
 
     if(flags & MORE){
-        total +=  Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
-        Iter it;
-        Iter_Init(&it, m->it.p);
-        while((Iter_Next(&it) & END) == 0){
-            ToS(sm, it.value, 0, flags|MORE);
-            if((it.type.state & LAST) == 0){
-                Stream_Bytes(sm, (byte *)",", 1);
+        total += Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
+        
+        MemIter mit;
+        MemIter_Init(&mit, m);
+
+        i16 g = 0;
+        while((MemIter_Next(&mit) & END) == 0){
+            Guard_Incr(&g, 100, FUNCNAME, FILENAME, LINENUMBER);
+            if(mit.type.state & MORE){
+                total += Fmt(sm, "\n   Page ->\n", NULL);
+            }else{
+                Abstract *a = MemIter_Get(&mit);
+                if(a != NULL){
+                    args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
+                    args[1] = NULL;
+                    total += Fmt(sm, "$", args);
+                    if((mit.type.state & LAST) == 0){
+                        total += Stream_Bytes(sm, (byte *)", ", 2);
+                    }
+                }
             }
         }
 

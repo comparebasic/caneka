@@ -3,5 +3,6 @@
 #include "mem/mem_page.h"
 #include "mem/mem_chapter.h"
 #include "mem/mem_book.h"
+#include "mem/mem_iter.h"
 #include "mem/mem_tos.h"
 #include "mem/ext_free.h"
