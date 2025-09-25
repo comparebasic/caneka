@@ -98,8 +98,10 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
             if(tbl->type.state & DEBUG){
                 args[0] = (Abstract *)key;
                 args[1] = (Abstract *)h;
-                args[2] = NULL;
-                Out("    Set ^E.$ -> @^e.\n", args);
+                args[2] = (Abstract *)I32_Wrapped(tbl->m, hk->idx);
+                args[3] = (Abstract *)I32_Wrapped(tbl->m, it->idx);
+                args[4] = NULL;
+                Out("    Set ^E.$ -> @^e. hk$/it$\n", args);
             }
         }
     }
@@ -131,22 +133,23 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
         h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
     }
 
-    if(op == SPAN_OP_SET && (tbl->type.state & SUCCESS) == 0){
+    if((tbl->type.state & SUCCESS) == 0){
         HKey_Init(&hk, tbl, hash);
-        hk.dim = 0;
+        hk.pos = 3;
         Table_HKeyVal(tbl, &hk);
+        Iter_GetByIdx(it, hk.idx);
         while((tbl->type.state & SUCCESS) == 0 &&
             (Iter_Next(it) & END) == 0){
+            hk.idx = it->idx;
             h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
         }
     }
 
     if((tbl->type.state & SUCCESS) == 0){
-        if(tbl->type.state & DEBUG){
-           printf("\nMissed\n"); 
-           fflush(stdout);
-        }
-        return NULL;
+        hk.idx = it->p->max_idx+1;
+        Iter_GetByIdx(it, hk.idx);
+        printf("At the bottom\n");
+        h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
     }
 
     return h;
