@@ -149,11 +149,6 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                 }else{
                     count->val.i++;
                 }
-                args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
-                args[1] = (Abstract *)count;
-                args[2] = (Abstract *)Util_Wrapped(sm->m, (util)a);
-                args[3] = NULL;
-                Out("\n    Adding $ count $ \\@$\n", args);
                 Table_Set(tbl, (Abstract *)Util_Wrapped(sm->m, (util)a), 
                     (Abstract *)I32_Wrapped(sm->m, count->val.i));
             }

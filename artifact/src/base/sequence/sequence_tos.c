@@ -6,12 +6,11 @@ i64 HKey_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & (MORE|DEBUG)){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(sm->m, hk->idx), 
-            (Abstract *)I32_Wrapped(sm->m, hk->idx),
             (Abstract *)I8_Wrapped(sm->m, hk->dim), 
             (Abstract *)I8_Wrapped(sm->m, hk->pos),
             NULL
         };
-        return Fmt(sm, "HKey<$/$ ^D.$^d.dim ^D.$^d.pos>", args);
+        return Fmt(sm, "HKey<idx^D.$^d. ^D.$^d.dim ^D.$^d.pos>", args);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }

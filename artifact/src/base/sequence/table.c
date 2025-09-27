@@ -4,32 +4,6 @@
 static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000, 50000};
 #define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
 
-static inline status Table_HKeyVal(Table *tbl, HKey *hk){
-    if((hk->type.state & PROCESSING) == 0){
-        hk->type.state |= PROCESSING;
-    }else{
-        if(hk->pos == 3){
-            if(hk->dim == 0){
-                hk->type.state |= END;
-            }else{
-                hk->dim--;
-                hk->pos = 0;
-            }
-        }else{
-            hk->pos++;
-        }
-    }
-    hk->idx = (i32) ((hk->id >> (hk->pos*(hk->dim+1)*4)) & _modulos[hk->dim+1]);
-    if(0 && tbl->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)hk,
-            NULL
-        };
-        Debug("Table_HKeyVal &\n", args);
-    }
-    return hk->type.state;
-}
-
 static inline Hashed *Table_setHValue(MemCh *m, HKey *hk, Iter *it, Abstract *key, Abstract *value){
     Hashed *h = Hashed_Make(m, key);
     h->idx = hk->idx;
@@ -38,38 +12,14 @@ static inline Hashed *Table_setHValue(MemCh *m, HKey *hk, Iter *it, Abstract *ke
     return h;
 }
 
-static status HKey_Init(HKey *hk, Table *tbl, util id){
-    hk->type.of = TYPE_HKEY;
-    hk->type.state = 0;
-    hk->idx = 0;
-    hk->id = id;
-    hk->dim = tbl->dims;
-    hk->pos = 0;
-    return SUCCESS;
-}
-
 static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Abstract *key, Abstract *value, util hash){
     Hashed *h = NULL;
-    Abstract *args[5];
     if(op & SPAN_OP_GET){
         if(it->value != NULL){
             h = it->value;
             if(h->id == hash && Equals(key, h->key)){
                 h = (Hashed *)it->value;
                 tbl->type.state |= SUCCESS;
-                if(tbl->type.state & DEBUG){
-                    args[0] = (Abstract *)key;
-                    args[1] = (Abstract *)h;
-                    args[2] = NULL;
-                    Out("    -> Found ^E.$ -> @^e.\n", args);
-                }
-            }else{
-                if(tbl->type.state & DEBUG){
-                    args[0] = (Abstract *)key;
-                    args[1] = (Abstract *)h->key;
-                    args[2] = NULL;
-                    Out("    Not $ vs $\n", args);
-                }
             }
         }
     }else if(op & SPAN_OP_SET){
@@ -79,30 +29,10 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
                 h->idx = hk->idx;
                 h->value = value;
                 tbl->type.state |= SUCCESS;
-                if(tbl->type.state & DEBUG){
-                    args[0] = (Abstract *)key;
-                    args[1] = (Abstract *)it->value;
-                    args[2] = NULL;
-                    Out("    Clobber ^E.$ -> @^e.\n", args);
-                }
-            }
-            if(tbl->type.state & DEBUG){
-                args[0] = (Abstract *)key;
-                args[1] = (Abstract *)it->value;
-                args[2] = NULL;
-                Out("    Miss ^E.$ -> @^e.\n", args);
             }
         }else{
             h = Table_setHValue(tbl->m, hk, it, key, value);
             tbl->type.state |= SUCCESS;
-            if(tbl->type.state & DEBUG){
-                args[0] = (Abstract *)key;
-                args[1] = (Abstract *)h;
-                args[2] = (Abstract *)I32_Wrapped(tbl->m, hk->idx);
-                args[3] = (Abstract *)I32_Wrapped(tbl->m, it->idx);
-                args[4] = NULL;
-                Out("    Set ^E.$ -> @^e. hk$/it$\n", args);
-            }
         }
     }
 
@@ -116,27 +46,34 @@ static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Ab
 
 static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *value){
     Table *tbl = (Table *)it->p;
+    Abstract *args[5];
     tbl->type.state &= ~SUCCESS;
     if(key == NULL){
         return NULL;
+    }
+
+    if(tbl->type.state & DEBUG){
+        args[0] = (Abstract *)key;
+        args[1] = NULL;
+        Out("Key $\n", args);
     }
 
     Hashed *h = NULL;
     util hash = Get_Hash(key);
 
     HKey hk;
-    HKey_Init(&hk, tbl, hash);
+    Table_HKeyInit(&hk, tbl->dims, hash);
     i32 count = 0;
     while((tbl->type.state & SUCCESS) == 0 &&
-            (Table_HKeyVal(tbl, &hk) & END) == 0){
+            (Table_HKeyVal(&hk) & END) == 0){
         Iter_GetByIdx(it, hk.idx);
         h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
     }
 
     if((tbl->type.state & SUCCESS) == 0){
-        HKey_Init(&hk, tbl, hash);
+        Table_HKeyInit(&hk, tbl->dims, hash);
         hk.pos = 3;
-        Table_HKeyVal(tbl, &hk);
+        Table_HKeyVal(&hk);
         Iter_GetByIdx(it, hk.idx);
         while((tbl->type.state & SUCCESS) == 0 &&
             (Iter_Next(it) & END) == 0){
@@ -148,12 +85,43 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
     if((tbl->type.state & SUCCESS) == 0){
         hk.idx = it->p->max_idx+1;
         Iter_GetByIdx(it, hk.idx);
-        printf("At the bottom\n");
         h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
     }
 
     return h;
 }
+
+status Table_HKeyInit(HKey *hk, i8 dims, util id){
+    hk->type.of = TYPE_HKEY;
+    hk->type.state = 0;
+    hk->idx = 0;
+    hk->id = id;
+    hk->dim = dims;
+    hk->pos = 0;
+    return SUCCESS;
+}
+
+status Table_HKeyVal(HKey *hk){
+    if((hk->type.state & PROCESSING) == 0){
+        hk->type.state |= PROCESSING;
+    }else{
+        if(hk->pos == 3 && hk->dim > 0){
+            hk->dim--;
+            hk->pos = 0;
+        }else if(hk->pos < 3 && (hk->type.state & MORE) == 0){
+            hk->pos++;
+        }else{
+            hk->idx++;
+            hk->pos = 0;
+            hk->type.state |= MORE;
+            return hk->type.state;
+        }
+    }
+    hk->idx = (i32) ((hk->id >> (hk->pos*(hk->dim+1)*4)) & _modulos[hk->dim+1]);
+    return hk->type.state;
+}
+
+
 
 status Table_SetKey(Iter *it, Abstract *a){
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);

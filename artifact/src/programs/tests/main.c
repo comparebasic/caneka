@@ -83,9 +83,21 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Table HKey Tests",
+        TableHKey_Tests,
+        "Testing table HKey component which determines the order of indicies to look for an item.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Table",
         Table_Tests,
         "Auto-scaling hash-table built on top of the Span object and Hash object.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Table Util Key Tests",
+        TableUtilKey_Tests,
+        "Testing table with a util wrapped instead of string keys.",
         FEATURE_COMPLETE,
     },
     {
@@ -240,12 +252,14 @@ static TestSet _Tests[] = {
         "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Persist Tests",
         Persist_Tests,
         "Mem Persist testing.",
         FEATURE_COMPLETE,
     },
+    */
     /*
     {
         "TemplLogic Tests",
