@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+i32 dim_max_idx[TABLE_MAX_DIMS] = {15, 255, 4095, 65535, 1048575};
+
 status Span_Set(Span *p, i32 idx, Abstract *t){
     if(idx < 0){
         return NOOP;

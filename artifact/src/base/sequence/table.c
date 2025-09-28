@@ -1,94 +1,85 @@
 #include <external.h>
 #include <caneka.h>
-
 static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000, 50000};
-#define MAX_POSITIONS ((sizeof(h->id)*2) - dims);
-
-static inline Hashed *Table_setHValue(MemCh *m, HKey *hk, Iter *it, Abstract *key, Abstract *value){
-    Hashed *h = Hashed_Make(m, key);
-    h->idx = hk->idx;
-    h->value = value;
-    Iter_Set(it, h);
-    return h;
-}
-
-static inline Hashed *Table_getOrSet(Table *tbl, word op, Iter *it, HKey *hk, Abstract *key, Abstract *value, util hash){
-    Hashed *h = NULL;
-    if(op & SPAN_OP_GET){
-        if(it->value != NULL){
-            h = it->value;
-            if(h->id == hash && Equals(key, h->key)){
-                h = (Hashed *)it->value;
-                tbl->type.state |= SUCCESS;
-            }
-        }
-    }else if(op & SPAN_OP_SET){
-        if(it->value != NULL){
-            h = (Hashed *)it->value;
-            if(h->id == hash && Equals(key, h->key)){
-                h->idx = hk->idx;
-                h->value = value;
-                tbl->type.state |= SUCCESS;
-            }
-        }else{
-            h = Table_setHValue(tbl->m, hk, it, key, value);
-            tbl->type.state |= SUCCESS;
-        }
-    }
-
-    if(tbl->nvalues > dim_nvalue_max[tbl->dims]){
-        i8 dims = tbl->dims;
-        Iter_ExpandTo(it, _capacity[tbl->dims]);
-    }
-
-    return h;
-}
 
 static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *value){
     Table *tbl = (Table *)it->p;
+    tbl->type.state &= ~(SUCCESS|NOOP);
     Abstract *args[5];
-    tbl->type.state &= ~SUCCESS;
     if(key == NULL){
         return NULL;
     }
 
-    if(tbl->type.state & DEBUG){
-        args[0] = (Abstract *)key;
-        args[1] = NULL;
-        Out("Key $\n", args);
+    if(op & SPAN_OP_SET && tbl->nvalues > dim_max_idx[tbl->dims]){
+        Iter_ExpandTo(it, tbl->dims);
     }
 
-    Hashed *h = NULL;
-    util hash = Get_Hash(key);
+    Hashed *h = Hashed_Make(tbl->m, key);
+    h->value = value;
 
     HKey hk;
-    Table_HKeyInit(&hk, tbl->dims, hash);
-    i32 count = 0;
-    while((tbl->type.state & SUCCESS) == 0 &&
-            (Table_HKeyVal(&hk) & END) == 0){
-        Iter_GetByIdx(it, hk.idx);
-        h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
-    }
-
-    if((tbl->type.state & SUCCESS) == 0){
-        Table_HKeyInit(&hk, tbl->dims, hash);
-        hk.pos = 3;
+    Table_HKeyInit(&hk, tbl->dims, h->id);
+    while((tbl->type.state & SUCCESS) == 0){
         Table_HKeyVal(&hk);
         Iter_GetByIdx(it, hk.idx);
-        while((tbl->type.state & SUCCESS) == 0 &&
-            (Iter_Next(it) & END) == 0){
-            hk.idx = it->idx;
-            h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
+        if(tbl->type.state & DEBUG){
+            args[0] = (Abstract*)&hk;
+            args[1] = NULL;
+            Out("^p.Looking at &^0\n", args);
+        }
+        if(it->type.state & NOOP){
+            break;
+        }
+        Hashed *record = Iter_Get(it);
+        if(record == NULL){
+            if(tbl->type.state & DEBUG){
+                args[0] = (Abstract*)&hk;
+                args[1] = NULL;
+                Out("^p.  Looking record is null^0\n", args);
+            }
+            if(op & SPAN_OP_GET){
+                tbl->type.state |= NOOP;
+                return NULL;
+            }else if(op & SPAN_OP_SET){
+                if(tbl->type.state & DEBUG){
+                    args[0] = (Abstract*)&hk;
+                    args[1] = (Abstract*)h;
+                    args[2] = NULL;
+                    Out("^p.    Setting & -> &^0\n", args);
+                }
+                Span_Set((Span *)tbl, hk.idx, (Abstract *)h);
+                tbl->type.state |= SUCCESS;
+                return h;
+            }
+        }else if(Hashed_Equals(h, record)){
+            if(tbl->type.state & DEBUG){
+                args[0] = (Abstract*)&hk;
+                args[1] = (Abstract*)record;
+                args[2] = NULL;
+                Out("^p.  Looking record matches & -> &^0\n", args);
+            }
+            if(op & SPAN_OP_SET){
+                record->value = h->value;
+            }
+            tbl->type.state |= SUCCESS;
+            return record;
+        }else{
+            if(tbl->type.state & DEBUG){
+                args[0] = (Abstract*)&hk;
+                args[1] = (Abstract*)record;
+                args[2] = NULL;
+                Out("^p.  Record but match & -> &^0\n", args);
+            }
         }
     }
 
-    if((tbl->type.state & SUCCESS) == 0){
-        hk.idx = it->p->max_idx+1;
-        Iter_GetByIdx(it, hk.idx);
-        h = Table_getOrSet(tbl, op, it, &hk, key, value, hash);
+    if(tbl->type.state & DEBUG){
+        args[0] = (Abstract*)&hk;
+        args[2] = NULL;
+        Out("^p.  No match &^0\n", args);
     }
 
-    return h;
+    return NULL;
 }
 
 status Table_HKeyInit(HKey *hk, i8 dims, util id){
@@ -120,8 +111,6 @@ status Table_HKeyVal(HKey *hk){
     hk->idx = (i32) ((hk->id >> (hk->pos*(hk->dim+1)*4)) & _modulos[hk->dim+1]);
     return hk->type.state;
 }
-
-
 
 status Table_SetKey(Iter *it, Abstract *a){
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);

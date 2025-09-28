@@ -159,7 +159,8 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
     if(dimsNeeded > p->dims){
         if((it->type.state &
                 (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD|SPAN_OP_RESIZE)) == 0){
-            return NOOP;
+            it->type.state |= NOOP;
+            return it->type.state;
         }
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
