@@ -201,7 +201,7 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                                 I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
 
                             args[3] = NULL;
-                            total += Fmt(sm, "$/$#$", args);
+                            total += Fmt(sm, "$=$#$", args);
 
                             if(i < max-1){
                                 total += Stream_Bytes(sm, (byte *)", ", 2);
