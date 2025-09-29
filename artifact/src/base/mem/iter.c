@@ -559,7 +559,9 @@ status Iter_ExpandTo(Iter *it, i32 idx){
     it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_RESERVE|SPAN_OP_SET);
     it->idx = idx;
     it->value = NULL;
-    return Iter_Query(it);
+    status r = Iter_Query(it);
+    it->p->nvalues--;
+    return r;
 }
 
 status Iter_Push(Iter *it, void *value){

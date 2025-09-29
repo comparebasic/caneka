@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
-static i64 dim_nvalue_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000, 50000};
+
+static i64 dim_occupied_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000, 50000};
 
 static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *value){
     Table *tbl = (Table *)it->p;
@@ -9,9 +10,22 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
     if(key == NULL){
         return NULL;
     }
+    if(tbl->type.state & DEBUG){
+        args[0] = (Abstract *)I32_Wrapped(OutStream->m, tbl->nvalues);
+        args[1] = (Abstract *)key;
+        args[2] = NULL;
+        Out("^y.Adding @/\\@@^0\n", args);
+    }
 
-    if(op & SPAN_OP_SET && tbl->nvalues > dim_max_idx[tbl->dims]){
-        Iter_ExpandTo(it, tbl->dims);
+    if((op & SPAN_OP_SET) && tbl->nvalues > dim_occupied_max[tbl->dims]){
+        if(tbl->type.state & DEBUG){
+            args[0] = (Abstract *)key;
+            args[1] = (Abstract *)I32_Wrapped(OutStream->m, tbl->nvalues);
+            args[2] = (Abstract *)I8_Wrapped(OutStream->m, tbl->dims+1);
+            args[3] = NULL;
+            Out("^y.Resiing \\@@ @nvalues @dims^0\n", args);
+        }
+        Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
     }
 
     Hashed *h = Hashed_Make(tbl->m, key);
@@ -22,15 +36,28 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
     while((tbl->type.state & SUCCESS) == 0){
         Table_HKeyVal(&hk);
         Iter_GetByIdx(it, hk.idx);
+
         if(tbl->type.state & DEBUG){
             args[0] = (Abstract*)&hk;
             args[1] = NULL;
             Out("^p.Looking at &^0\n", args);
         }
-        if(it->type.state & NOOP){
-            break;
+
+        if((it->type.state & NOOP) && (op & SPAN_OP_SET)){
+            if(hk.idx > dim_max_idx[tbl->dims]){
+                Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
+                if(tbl->type.state & DEBUG){
+                    args[0] = (Abstract *)key;
+                    args[1] = (Abstract *)&hk;
+                    args[2] = (Abstract *)I8_Wrapped(OutStream->m, tbl->dims);
+                    args[3] = NULL;
+                    Out("^y.No match expanding \\@@ & @dims\n", args);
+                }
+                Table_HKeyInit(&hk, tbl->dims, h->id);
+                continue;
+            }
         }
-        Hashed *record = Iter_Get(it);
+        Hashed *record = Iter_Current(it);
         if(record == NULL){
             if(tbl->type.state & DEBUG){
                 args[0] = (Abstract*)&hk;
@@ -38,8 +65,12 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
                 Out("^p.  Looking record is null^0\n", args);
             }
             if(op & SPAN_OP_GET){
-                tbl->type.state |= NOOP;
-                return NULL;
+                if(Table_HKeyMiss(&hk) & END){
+                    tbl->type.state |= NOOP;
+                    return NULL;
+                }else{
+                    continue;
+                }
             }else if(op & SPAN_OP_SET){
                 if(tbl->type.state & DEBUG){
                     args[0] = (Abstract*)&hk;
@@ -73,12 +104,6 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
         }
     }
 
-    if(tbl->type.state & DEBUG){
-        args[0] = (Abstract*)&hk;
-        args[2] = NULL;
-        Out("^p.  No match &^0\n", args);
-    }
-
     return NULL;
 }
 
@@ -90,6 +115,17 @@ status Table_HKeyInit(HKey *hk, i8 dims, util id){
     hk->dim = dims;
     hk->pos = 0;
     return SUCCESS;
+}
+
+status Table_HKeyMiss(HKey *hk){
+    if(hk->dim > 0){
+        hk->dim--;
+        hk->idx = 0;
+        hk->pos = 0;
+        hk->type.state &= ~PROCESSING;
+        return SUCCESS;
+    }
+    return END;
 }
 
 status Table_HKeyVal(HKey *hk){

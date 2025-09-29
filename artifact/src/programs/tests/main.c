@@ -95,15 +95,15 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Table Util Key Tests",
-        TableUtilKey_Tests,
-        "Testing table with a util wrapped instead of string keys.",
-        FEATURE_COMPLETE,
-    },
-    {
         "TableResize",
         TableResize_Tests,
         "Resize features of the auto-scaling hash-table.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "TableUtilKey",
+        TableUtilKey_Tests,
+        "Testing table with a util wrapped instead of string keys.",
         FEATURE_COMPLETE,
     },
     {
@@ -252,14 +252,12 @@ static TestSet _Tests[] = {
         "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "Persist Tests",
         Persist_Tests,
         "Mem Persist testing.",
         FEATURE_COMPLETE,
     },
-    */
     /*
     {
         "TemplLogic Tests",

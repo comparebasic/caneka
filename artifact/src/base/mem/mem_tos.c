@@ -128,7 +128,6 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     args[2] = NULL;
 
     Table *tbl = Table_Make(sm->m);
-    tbl->type.state |= DEBUG;
     Lookup *counts = Lookup_Make(sm->m, ZERO);
 
     if(flags & MORE){
@@ -154,6 +153,10 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
             }
         }
 
+        args[0] = (Abstract *)tbl;
+        args[1] = NULL;
+        Out("^y.Tbl of addr &^0.\n", args);
+
         MemIter_Init(&mit, m);
         g = 0;
         while((MemIter_Next(&mit) & END) == 0){
@@ -161,7 +164,6 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
             if(mit.type.state & MORE){
                 total += Fmt(sm, "\n   Page ->\n", NULL);
             }else{
-                printf("\n!!!\n");
                 Abstract *a = MemIter_Get(&mit);
                 Map *map = Lookup_Get(MapsLookup, a->type.of);
                 Single *count = (Single *)Table_Get(tbl, 
@@ -176,10 +178,30 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                     for(i32 i = 1; i <= max; i++){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
-                            Str *key = map->keys[i];
-                            args[0] = (Abstract *)key;
-                            args[1] = NULL;
-                            total += Fmt(sm, "$", args);
+                            args[0] = (Abstract *)map->keys[i];
+                            void *ptr = ((void *)a)+att->range;
+                            if(att->of == TYPE_BYTES_POINTER){
+                                ptr -= sizeof(RangeType);
+                            }
+                            Single *attCount = (Single *)Table_Get(tbl,
+                                (Abstract *)Util_Wrapped(sm->m, (util)ptr));
+
+                            Abstract *aa = (Abstract *)ptr;
+                            Map *amap = Lookup_Get(MapsLookup, aa->type.of);
+                            if(amap != NULL){
+                                args[1] = (Abstract *)amap->keys[0];
+                            }else{
+                                /*
+                                args[1] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
+                                */
+                                args[1] = NULL;
+                            }
+                            args[2] = (Abstract *)(attCount != NULL ? 
+                                I16_Wrapped(sm->m, attCount->val.i) : I32_Wrapped(sm->m, (util)aa));
+
+                            args[3] = NULL;
+                            total += Fmt(sm, "$/$#$", args);
+
                             if(i < max-1){
                                 total += Stream_Bytes(sm, (byte *)", ", 2);
                             }

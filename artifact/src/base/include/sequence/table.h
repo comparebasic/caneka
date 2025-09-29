@@ -21,5 +21,6 @@ i32 Table_GetIdx(Span *tbl, Abstract *a);
 Table *Table_Make(MemCh *m);
 
 status Table_HKeyVal(HKey *hk);
+status Table_HKeyMiss(HKey *hk);
 status Table_HKeyInit(HKey *hk, i8 dims, util id);
 

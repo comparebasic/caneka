@@ -137,7 +137,7 @@ status TableResize_Tests(MemCh *gm){
         Table_Set(tbl, (Abstract *)s, (Abstract *)value);
     }
 
-    for(i32 i = 0; valuesResize[i] != NULL;i+= 2){
+    for(i32 i = 0; valuesResize[i] != NULL; i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
         found = (Str *)Table_Get(tbl, (Abstract *)s);
@@ -200,6 +200,7 @@ status TableUtilKey_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     Table *tbl = Table_Make(m);
+
     Single *v = NULL;
     v = Util_Wrapped(m, 34961084002);
     Table_Set(tbl, (Abstract *)v, (Abstract *)v);
@@ -227,7 +228,7 @@ status TableUtilKey_Tests(MemCh *gm){
     args[2] = NULL;
     r |= TestShow(tbl->nvalues == 10, 
         "Expected 10 items to be added", 
-        "Incorrect count, expected 10 have $ instead for &", 
+        "Incorrect count, expected 10 have $ instead for @", 
         args);
 
     MemCh_Free(m);
