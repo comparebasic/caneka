@@ -179,9 +179,13 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
                             args[0] = (Abstract *)map->keys[i];
-                            void *ptr = ((void *)a)+att->range;
-                            if(att->of == TYPE_BYTES_POINTER){
-                                ptr -= sizeof(RangeType);
+                            void **dptr = ((void *)a)+att->range;
+                            void *ptr = NULL;
+                            if(dptr != NULL){
+                                ptr = *dptr;
+                                if(att->of == TYPE_BYTES_POINTER){
+                                    ptr -= sizeof(RangeType);
+                                }
                             }
                             Single *attCount = (Single *)Table_Get(tbl,
                                 (Abstract *)Util_Wrapped(sm->m, (util)ptr));
@@ -191,13 +195,10 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                             if(amap != NULL){
                                 args[1] = (Abstract *)amap->keys[0];
                             }else{
-                                /*
                                 args[1] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
-                                */
-                                args[1] = NULL;
                             }
                             args[2] = (Abstract *)(attCount != NULL ? 
-                                I16_Wrapped(sm->m, attCount->val.i) : I32_Wrapped(sm->m, (util)aa));
+                                I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
 
                             args[3] = NULL;
                             total += Fmt(sm, "$/$#$", args);
