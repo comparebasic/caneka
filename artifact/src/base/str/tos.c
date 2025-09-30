@@ -33,6 +33,7 @@ status StreamTo_Init(MemCh *m){
         ToSFlagLookup = Lookup_Make(m, _TYPE_ZERO);
         Mem_ToSInit(m, ToStreamLookup);
         Str_ToSInit(m, ToStreamLookup);
+        IoTos_Init(m, ToStreamLookup);
         Sequence_ToSInit(m, ToStreamLookup);
         Util_ToSInit(m, ToStreamLookup);
         Mem_InitLabels(m, ToSFlagLookup);

@@ -159,7 +159,7 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                         total += Stream_Bytes(sm, (byte *)"], ", 3);
                     }
                 }
-                args[0] = I32_Wrapped(sm->m, mit.slIdx);
+                args[0] = (Abstract *)I32_Wrapped(sm->m, mit.slIdx);
                 args[1] = NULL;
                 total += Fmt(sm, "Page#$[", args);
             }else{

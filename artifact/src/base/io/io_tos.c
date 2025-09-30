@@ -1,6 +1,29 @@
 #include <external.h>
 #include <caneka.h>
 
+i64 PersistCoords_Print(Stream *sm, PersistCoord *coord, word flags){
+    Abstract *args[] = {
+        (Abstract *)Type_ToStr(sm->m, coord->typeOf),
+        (Abstract *)I32_Wrapped(sm->m, coord->idx),
+        (Abstract *)I32_Wrapped(sm->m, coord->offset),
+        NULL
+    };
+    return Fmt(sm, "$/$/$", args);
+}
+
+i64 PersistItem_Print(Stream *sm, Abstract *a, cls type, word flags){
+    i64 total = 0;
+    PersistItem *item = (PersistItem *)as(a, TYPE_PERSIST_ITEM);
+    Abstract *args[] = {
+        (Abstract *)Util_Wrapped(sm->m, (util)item->ptr),
+        NULL
+    };
+    total += Fmt(sm, "PersistItem<@ ", args);
+    total += PersistCoords_Print(sm, &item->coord, flags);
+    total += Stream_Bytes(sm, (byte *)">", 1);
+    return total;
+}
+
 i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, word flags){
     ProcDets *pd = (ProcDets *)as(a, TYPE_PROCDETS);
     Abstract *args[] = {
@@ -19,5 +42,6 @@ i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, word flags){
 status IoTos_Init(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_PROCDETS, (void *)ProcDets_Print);
+    r |= Lookup_Add(m, lk, TYPE_PERSIST_ITEM, (void *)PersistItem_Print);
     return r;
 }

@@ -30,16 +30,24 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     status r = READY;
     SourceFunc func = NULL;
     Abstract *a = NULL;
+    Abstract *args[5];
 
     MemCh *m = sm->m;
     Table *tbl = Table_Make(m);
-    Iter_Reset(&persist->it);
-    while((Iter_Next(&persist->it) & END) == 0){
-        Abstract *pg = Iter_Get(&persist->it);
-        Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)pg), 
-            (Abstract *)PersistItem_Make(m, persist->it.idx, (void *)pg, pg->type.of));
+
+    MemIter mit;
+    MemIter_Init(&mit, persist);
+    while((MemIter_Next(&mit) & END) == 0){
+        Abstract *a = MemIter_Get(&mit);
+        Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)a), 
+            (Abstract *)PersistItem_Make(m, mit.slIdx, (void *)a, a->type.of));
     }
 
+    args[0] = (Abstract *)tbl;
+    args[1] = NULL;
+    Out("^y.MemTable &\n", args);
+
+    /*
     Iter_Reset(&persist->it);
     while((Iter_Next(&persist->it) & END) == 0){
         MemPage *pg = Iter_Get(&persist->it);
@@ -49,7 +57,9 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
             Abstract *a = (Abstract *)ptr;
             Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
             if(map == NULL){
-                /* Error */
+                Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+                    "Map not found, needed for mem persist", NULL);
+                return ERROR;
             }
             for(i16 i = 1; i < map->type.range; i++){
                 RangeType *att = map->atts+i;
@@ -68,6 +78,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     }
 
     MemCh_Free(m);
+    */
     return r;
 }
 
@@ -91,18 +102,3 @@ status Persist_Init(MemCh *m){
 
     return r;
 }
-
-void PersistCoord_Fill(PersistCoord *coord, i32 slIdx, void *ptr, cls typeOf){
-    coord->typeOf = typeOf;
-    coord->idx = slIdx;
-    coord->offset = (quad)(((util)ptr) & MEM_PERSIST_MASK);
-}
-
-PersistItem *PersistItem_Make(MemCh *m, i32 slIdx, void *ptr, cls typeOf){
-    PersistItem *item = MemCh_AllocOf(m, sizeof(PersistItem), TYPE_PERSIST_ITEM);
-    item->type.of = TYPE_PERSIST_ITEM;
-    item->ptr = ptr;
-    PersistCoord_Fill(&item->coord, slIdx, ptr, typeOf);
-    return item;
-}
-

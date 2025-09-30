@@ -22,6 +22,9 @@ status Persist_Tests(MemCh *gm){
     args[1] = NULL;
     Out("^p.Persist MemCh: &^0\n", args);
 
+    Stream *sm = Stream_MakeStrVec(m);
+    status re = Persist_FlushFree(sm, pst);
+
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

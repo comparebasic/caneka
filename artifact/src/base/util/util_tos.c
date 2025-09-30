@@ -50,7 +50,13 @@ static i64 WrappedUtil_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)s,
             NULL
         };
-        return Fmt(sm, "Wu\\<^D.@^d.>", args);
+        return Fmt(sm, "^D.$^d.", args);
+    }else if(flags & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)s,
+            NULL
+        };
+        return Fmt(sm, "Wu\\<^D.$^d.>", args);
     }else{
         return ToS(sm, (Abstract *)s, 0, flags);
     }

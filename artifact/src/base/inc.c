@@ -12,6 +12,8 @@
 #include "./io/io_tos.c"
 #include "./io/procdets.c"
 #include "./io/subprocess.c"
+#include "./io/persist_coord.c"
+#include "./io/persist_item.c"
 #include "./io/persist.c"
 #include "./mem/ext_free.c"
 #include "./mem/span.c"

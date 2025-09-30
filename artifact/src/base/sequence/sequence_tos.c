@@ -109,7 +109,7 @@ i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
                 (Abstract *)I32_Wrapped(sm->m, tbl->nvalues),
                 NULL
             };
-            total += Fmt(sm, "Tbl<$ $nvalues ", args);
+            total += Fmt(sm, "Tbl<$ ^D.$^d.nvalues ", args);
         }else{
             total += Stream_Bytes(sm, (byte *)"{", 1);
         }
