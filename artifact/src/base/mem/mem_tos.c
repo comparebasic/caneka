@@ -128,41 +128,40 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     args[2] = NULL;
 
     Table *tbl = Table_Make(sm->m);
-    Lookup *counts = Lookup_Make(sm->m, ZERO);
 
     if(flags & MORE){
         total += Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
         
         MemIter mit;
         MemIter_Init(&mit, m);
+        i32 idx = 0;
         i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(&g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
                 Abstract *a = MemIter_Get(&mit);
-                Single *count = (Single *)Lookup_Get(counts, a->type.of);
-                if(count == NULL){
-                    count = I32_Wrapped(sm->m, 1);
-                    Lookup_Add(sm->m, counts, a->type.of, 
-                        (void *)count);
-                }else{
-                    count->val.i++;
-                }
                 Table_Set(tbl, (Abstract *)Util_Wrapped(sm->m, (util)a), 
-                    (Abstract *)I32_Wrapped(sm->m, count->val.i));
+                    (Abstract *)I32_Wrapped(sm->m, idx++));
+            }else{
+                idx = 0;
             }
         }
-
-        args[0] = (Abstract *)tbl;
-        args[1] = NULL;
-        Out("^y.Tbl of addr &^0.\n", args);
 
         MemIter_Init(&mit, m);
         g = 0;
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(&g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if(mit.type.state & MORE){
-                total += Fmt(sm, "\n   Page ->\n", NULL);
+                if(mit.slIdx > 0){
+                    if(mit.type.state & LAST){
+                        total += Stream_Bytes(sm, (byte *)"]", 1);
+                    }else{
+                        total += Stream_Bytes(sm, (byte *)"], ", 3);
+                    }
+                }
+                args[0] = I32_Wrapped(sm->m, mit.slIdx);
+                args[1] = NULL;
+                total += Fmt(sm, "Page#$[", args);
             }else{
                 Abstract *a = MemIter_Get(&mit);
                 Map *map = Lookup_Get(MapsLookup, a->type.of);
@@ -170,11 +169,12 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                     (Abstract *)Util_Wrapped(sm->m, (util)a));
 
                 if(map != NULL){
-                    args[0] = (Abstract *)map->keys[0];
-                    args[1] = (Abstract *)count;
+                    args[0] = (Abstract *)count;
+                    args[1] = (Abstract *)map->keys[0];
                     args[2] = NULL;
-                    total += Fmt(sm, "$#$(", args);
+                    total += Fmt(sm, "$:$", args);
                     i32 max = (i32)((RangeType *)map)->range;
+                    total += Stream_Bytes(sm, (byte *)"(", 1);
                     for(i32 i = 1; i <= max; i++){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
@@ -191,17 +191,17 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                                 (Abstract *)Util_Wrapped(sm->m, (util)ptr));
 
                             Abstract *aa = (Abstract *)ptr;
+                            args[1] = (Abstract *)(attCount != NULL ? 
+                                I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
                             Map *amap = Lookup_Get(MapsLookup, aa->type.of);
                             if(amap != NULL){
-                                args[1] = (Abstract *)amap->keys[0];
+                                args[2] = (Abstract *)amap->keys[0];
                             }else{
-                                args[1] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
+                                args[2] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
                             }
-                            args[2] = (Abstract *)(attCount != NULL ? 
-                                I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
 
                             args[3] = NULL;
-                            total += Fmt(sm, "$=$#$", args);
+                            total += Fmt(sm, "$=$:$", args);
 
                             if(i < max-1){
                                 total += Stream_Bytes(sm, (byte *)", ", 2);
@@ -211,17 +211,17 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                     total += Stream_Bytes(sm, (byte *)")", 1);
                 }else{
                     if(count != NULL){
-                        args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
-                        args[1] = (Abstract *)count;
+                        args[0] = (Abstract *)count;
+                        args[1] = (Abstract *)Type_ToStr(sm->m, a->type.of);
                         args[2] = NULL;
-                        total += Fmt(sm, "$#$", args);
+                        total += Fmt(sm, "$:$", args);
                     }else{
                         args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
-                        args[2] = NULL;
+                        args[1] = NULL;
                         total += Fmt(sm, "$", args);
                     }
                 }
-                if((mit.type.state & LAST) == 0){
+                if((mit.type.state & (MORE|LAST)) != LAST){
                     total += Stream_Bytes(sm, (byte *)", ", 2);
                 }
             }

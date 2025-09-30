@@ -59,6 +59,9 @@ status MemIter_Next(MemIter *mit){
                 mit->type.state = MORE;
                 mit->ptr = mit->end = NULL;
                 mit->slIdx++;
+                if(mit->slIdx == mit->target->it.p->max_idx){
+                    mit->type.state |= LAST;
+                }
             }else{
                 mit->type.state |= END;
             }

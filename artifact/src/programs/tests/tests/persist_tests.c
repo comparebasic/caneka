@@ -20,7 +20,7 @@ status Persist_Tests(MemCh *gm){
 
     args[0] = (Abstract *)pst;
     args[1] = NULL;
-    Out("^p.Persist MemCh: &\n", args);
+    Out("^p.Persist MemCh: &^0\n", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
