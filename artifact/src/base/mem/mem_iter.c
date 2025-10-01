@@ -5,8 +5,14 @@ static void setLastFlag(MemIter *mit){
     Abstract *a = MemIter_Get(mit);
     i64 sz = 0;
     if(a != NULL){
-        if(a->type.of == TYPE_BYTES_POINTER){
-            sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
+        if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
+            if(a->type.of == TYPE_BYTES_POINTER){
+                sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
+            }else if(a->type.of == TYPE_POINTER_ARRAY){
+                sz = (i64)(((RangeType *)a)->range*sizeof(void *))+sizeof(RangeType);
+            }else if(a->type.of == TYPE_RANGE_ARRAY){
+                sz = (i64)(((RangeType *)a)->range*sizeof(RangeType))+sizeof(RangeType);
+            }
         }else{
             sz = Lookup_GetRaw(SizeLookup, a->type.of);
         }
@@ -36,8 +42,14 @@ status MemIter_Next(MemIter *mit){
     }else{
         Abstract *a = MemIter_Get(mit);
         i64 sz = 0;
-        if(a->type.of == TYPE_BYTES_POINTER){
-            sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
+        if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
+            if(a->type.of == TYPE_BYTES_POINTER){
+                sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
+            }else if(a->type.of == TYPE_POINTER_ARRAY){
+                sz = (i64)(((RangeType *)a)->range*sizeof(void *))+sizeof(RangeType);
+            }else if(a->type.of == TYPE_RANGE_ARRAY){
+                sz = (i64)(((RangeType *)a)->range*sizeof(RangeType))+sizeof(RangeType);
+            }
         }else{
             sz = Lookup_GetRaw(SizeLookup, a->type.of);
         }

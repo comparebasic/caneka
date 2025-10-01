@@ -201,7 +201,7 @@ status MemCh_Setup(MemCh *m, MemPage *pg){
     Span_Setup(p);
     p->m = m;
     p->max_idx = -1;
-    p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab));
+    p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab), TYPE_POINTER_ARRAY);
     Iter_Init(&m->it, p);
     status r = Iter_SetByIdx(&m->it, 0, (void *)pg);
     m->it.type.state = ((m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET);

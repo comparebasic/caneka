@@ -301,6 +301,5 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)StrLit_Print);
     r |= Str_InitLabels(m, ToSFlagLookup);
-    r |= Str_MapsInit(m, MapsLookup); 
     return r;
 }

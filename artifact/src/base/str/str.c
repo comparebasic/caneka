@@ -80,7 +80,7 @@ char *Str_Cstr(MemCh *m, Str *s){
         if(s->alloc == s->length+1){
             b = s->bytes;
         }else{
-            b = Bytes_Alloc(m, s->length+1);
+            b = Bytes_Alloc(m, s->length+1, TYPE_BYTES_POINTER);
             memcpy(b, s->bytes, s->length);
         }
         return (char *)b;
@@ -94,7 +94,7 @@ Str *Str_Clone(MemCh *m, Str *s){
 
 Str *Str_CloneAlloc(MemCh *m, Str *s, word alloc){
     Str *ret = MemCh_Alloc(m, sizeof(Str));
-    byte *_bytes = Bytes_Alloc(m, (size_t)alloc);
+    byte *_bytes = Bytes_Alloc(m, (size_t)alloc, TYPE_BYTES_POINTER);
     memcpy(_bytes, s->bytes, min(s->length, alloc));
     Str_Init(ret, _bytes, s->length, alloc);
     return ret;
@@ -102,7 +102,7 @@ Str *Str_CloneAlloc(MemCh *m, Str *s, word alloc){
 
 Str *Str_From(MemCh *m, byte *bytes, word length){
     Str *s = MemCh_Alloc(m, sizeof(Str));
-    byte *_bytes = Bytes_Alloc(m, length);
+    byte *_bytes = Bytes_Alloc(m, length, TYPE_BYTES_POINTER);
     memcpy(_bytes, bytes, length);
     Str_Init(s, _bytes, length, length);
     return s;
@@ -113,7 +113,7 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     Str_Init(s, bytes, length, alloc);
     s->type.state = flags;
     if(flags & STRING_COPY){
-        byte *_bytes = Bytes_Alloc(m, alloc);
+        byte *_bytes = Bytes_Alloc(m, alloc, TYPE_BYTES_POINTER);
         memcpy(_bytes, s->bytes, s->length);
         s->bytes = _bytes;
     }
@@ -131,7 +131,7 @@ Str *Str_FromCstr(MemCh *m, char *cstr, word flags){
     s->type.state = flags;
     byte *bytes = (byte *)cstr;
     if(flags & STRING_COPY){
-        bytes = Bytes_Alloc(m, len+1);
+        bytes = Bytes_Alloc(m, len+1, TYPE_BYTES_POINTER);
         memcpy(bytes, cstr, len);
     }
     Str_Init(s, bytes, len, len+1);
@@ -153,7 +153,7 @@ status Str_Init(Str *s, byte *bytes, word length, word alloc){
 
 Str *Str_Make(MemCh *m, word alloc){
     Str *s = MemCh_Alloc(m, sizeof(Str));
-    byte *bytes = Bytes_Alloc(m, alloc);
+    byte *bytes = Bytes_Alloc(m, alloc, TYPE_BYTES_POINTER);
     Str_Init(s, bytes, 0, alloc);
     return s;
 }

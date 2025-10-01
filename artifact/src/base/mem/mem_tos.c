@@ -179,11 +179,15 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
                             args[0] = (Abstract *)map->keys[i];
+                            printf("have range type '%s' %d vs %d %d\n", 
+                                ((Str *)map->keys[i])->bytes,
+                                (i32)att->of, (i32)TYPE_I8, i);
+                            fflush(stdout);
                             void **dptr = ((void *)a)+att->range;
                             void *ptr = NULL;
                             if(dptr != NULL){
                                 ptr = *dptr;
-                                if(att->of == TYPE_BYTES_POINTER){
+                                if(att->of > _TYPE_RANGE_TYPE_START && att->of < _TYPE_RANGE_TYPE_END){
                                     ptr -= sizeof(RangeType);
                                 }
                             }

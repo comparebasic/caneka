@@ -26,6 +26,9 @@ status Maps_Init(MemCh *m){
     if(!_mapsInitialized){
         _mapsInitialized = TRUE;
         MapsLookup = Lookup_Make(m, ZERO);
+        r |= Str_MapsInit(m, MapsLookup); 
+        r |= Sequence_MapsInit(m, MapsLookup); 
+        r |= Mem_MapsInit(m, MapsLookup); 
         r |= SUCCESS;
     }
     if(r == READY){
