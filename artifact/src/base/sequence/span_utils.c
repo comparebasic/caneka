@@ -109,6 +109,17 @@ status Span_ReInit(Span *p){
     return SUCCESS;
 }
 
+Span *Span_CloneShallow(MemCh *m, Span *p){
+    Iter it;
+    Iter_Init(&it, p);
+    Span *p2 = Span_Make(m);
+    int i = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Span_Set(p2, it.idx, (Abstract *)Iter_Get(&it)); 
+    }
+    return p2;
+}
+
 Span *Span_Clone(MemCh *m, Span *p){
     Iter it;
     Iter_Init(&it, p);

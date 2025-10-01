@@ -5,6 +5,7 @@ util Span_GetRaw(Span *p, i32 idx);
 status Span_Cull(Span *p, i32 count);
 status Span_ReInit(Span *p);
 Span *Span_Clone(MemCh *m, Span *p);
+Span *Span_CloneShallow(MemCh *m, Span *p);
 status Span_Add(Span *p, Abstract *t);
 status Span_Insert(Span *p, i32, Abstract *t);
 status Span_Wipe(Span *p);

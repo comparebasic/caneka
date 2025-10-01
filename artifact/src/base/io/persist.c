@@ -19,8 +19,11 @@ status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
     util u = (util)ptr;
     u &= ~MEM_PERSIST_MASK;
 
-    PersistCoord coord;
-    PersistCoord_Fill(&coord, pageItem->coord.idx, *ptr, typeOf);
+    PersistCoord coord = {
+       .typeOf = typeOf,
+       .idx = slIdx,
+       .offset = (quad)u,
+    };
     memcpy(ptr, &coord, sizeof(void *));
     return SUCCESS;
 }
@@ -30,6 +33,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     SourceFunc func = NULL;
     Abstract *a = NULL;
     Abstract *args[5];
+    Iter it;
 
     MemCh *m = sm->m;
     Table *tbl = Table_Make(m);
@@ -47,38 +51,54 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     args[0] = (Abstract *)tbl;
     args[1] = NULL;
     Out("^y.MemTable &\n", args);
+    Span *pages = Span_CloneShallow(m, persist->it.p);
 
-    MemIter_Init(&mit, m);
+    MemIter_Init(&mit, persist);
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = MemIter_Get(&mit);
         if((mit.type.state & MORE) == 0){
-            Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
-            if(map == NULL){
-                Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
-                    "Map not found, needed for mem persist", NULL);
-                return ERROR;
-            }
-            PersistItem *item = (PersistItem *)Table_Get(tbl, Util_Wrapped(m, (util)a));
-            Persist_PackAddr(item->typeOf, slIdx, (void **)&a);
-
-            for(i16 i = 1; i < map->type.range; i++){
-                RangeType *att = map->atts+i;
-                if(att->of > _TYPE_RAW_END){
-                    Abstract *aa = ((void *)a)+att->range;
-                    item = (PersistItem *)Table_Get(tbl, Util_Wrapped(m, (util)a));
-                    Persist_PackAddr(item->typeOf, slIdx, (void **)&aa);
+            if(a->type.of > _TYPE_ABSTRACT_BEGIN){
+                if(a->type.of == TYPE_MEMCTX){
+                    continue;
+                }else if(a->type.of == TYPE_SPAN){
+                    Iter_Init(&it, (Span *)a);
+                    while((Iter_Next(&it) & END) == 0){
+                        Abstract *aa = Iter_Get(&it);
+                        Persist_PackAddr(aa->type.of, mit.slIdx, (void **)&aa);
+                    }
+                }else{
+                    Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
+                    if(map == NULL){
+                        args[0] = (Abstract *)Type_ToStr(m, a->type.of);
+                        args[1] = NULL;
+                        Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+                            "Map not found for type $, needed for mem persist", args);
+                        return ERROR;
+                    }
+                    if(a->type.of == TYPE_ITER){
+                        Iter *itp = (Iter *)a;
+                        Iter_Init(itp, itp->p);
+                    }
+                    for(i16 i = 1; i < map->type.range; i++){
+                        RangeType *att = map->atts+i;
+                        if(att->of > _TYPE_ABSTRACT_BEGIN){
+                            Abstract *aa = ((void *)a)+att->range;
+                            PersistItem *item = (PersistItem *)Table_Get(tbl, 
+                                (Abstract *)Util_Wrapped(m, (util)a));
+                            Persist_PackAddr(item->coord.typeOf, item->coord.idx, (void **)&aa);
+                        }
+                    }
                 }
             }
-            a->type.of = TYPE_BLANKED;
         }
     }
 
-    Iter_Reset(&persist->it);
-    while((Iter_Next(&persist->it) & END) == 0){
-        /* write blanked pages to stream */
+    Iter_Init(&it, pages);
+    while((Iter_Next(&it) & END) == 0){
+        /* TODO: write blanked pages to stream */
+        r |= MemBook_FreePage(m, (MemPage *)Iter_Get(&it));
     }
 
-    MemCh_Free(m);
     return r;
 }
 

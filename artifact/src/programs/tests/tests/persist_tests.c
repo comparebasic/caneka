@@ -13,10 +13,14 @@ status Persist_Tests(MemCh *gm){
     Str *one = Str_FromCstr(pst, "One", STRING_COPY);
     Str *two = Str_FromCstr(pst, "Two", STRING_COPY);
     Str *three = Str_FromCstr(pst, "Three", STRING_COPY);
+
+    StrVec *vec = StrVec_From(pst, Str_FromCstr(pst, "Halo", STRING_COPY));
+
     p = Span_Make(pst);
     Span_Add(p, (Abstract *)one);
     Span_Add(p, (Abstract *)two);
     Span_Add(p, (Abstract *)three);
+    Span_Add(p, (Abstract *)vec);
 
     args[0] = (Abstract *)pst;
     args[1] = NULL;
