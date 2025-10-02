@@ -8,4 +8,4 @@ extern struct lookup *RepointerLookup;
 status Persist_Init(MemCh *m);
 cls Persist_RepointAddr(MemCh *pm, void **ptr);
 status Persist_FlushFree(Stream *sm, MemCh *persist);
-status Persist_FromStream(Stream *sm);
+MemCh *Persist_FromStream(Stream *sm);

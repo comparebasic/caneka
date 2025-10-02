@@ -27,7 +27,13 @@ status MemIter_Next(MemIter *mit){
     mit->type.state &= ~LAST;
     Abstract *args[5];
     if(mit->ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
-        MemPage *pg = (MemPage *)Span_Get(mit->target->it.p, mit->slIdx);
+        MemPage *pg = NULL;
+        if(mit->type.state & MEM_ITER_STREAM){
+            pg = (MemPage *)mit->input.arr[mit->slIdx];
+            printf("pg %p\n", pg);
+        }else{
+            pg = (MemPage *)Span_Get(mit->input.target->it.p, mit->slIdx);
+        }
         mit->ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
         mit->end = ((void *)pg) + PAGE_SIZE-1;
         mit->type.state |= PROCESSING;
@@ -58,15 +64,17 @@ status MemIter_Next(MemIter *mit){
                 "Error: type to large to increment address is off the page by $", args);
         }
         if(mit->ptr+sz-1 == mit->end){
-            if(mit->slIdx < mit->target->it.p->max_idx){
-                mit->type.state = MORE;
+            if(mit->slIdx < mit->maxSlIdx){
+                printf("SETTING MORE %d vs %d\n", mit->slIdx, mit->maxSlIdx);
+                mit->type.state = (mit->type.state & UPPER_FLAGS) | MORE;
                 mit->ptr = mit->end = NULL;
                 mit->slIdx++;
-                if(mit->slIdx == mit->target->it.p->max_idx){
+                if(mit->slIdx == mit->maxSlIdx){
                     mit->type.state |= LAST;
                 }
             }else{
                 mit->type.state |= END;
+                printf("END\n");
             }
         }else{
             mit->ptr += sz;
@@ -78,10 +86,23 @@ status MemIter_Next(MemIter *mit){
 }
 
 void MemIter_Init(MemIter *mit, MemCh *target){
+    memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
-    mit->target = target;
+    mit->input.target = target;
     mit->slIdx = 0;
     mit->type.state = MORE;
+    mit->ptr = NULL;
+    mit->end = NULL;
+    mit->maxSlIdx = target->it.p->max_idx;
+}
+
+void MemIter_InitArr(MemIter *mit, Abstract **arr, i32 maxSlIdx){
+    memset(mit, 0, sizeof(MemIter));
+    mit->type.of = TYPE_MEM_ITER;
+    mit->input.arr = arr;
+    mit->slIdx = 0;
+    mit->maxSlIdx = maxSlIdx;
+    mit->type.state = MORE|MEM_ITER_STREAM;
     mit->ptr = NULL;
     mit->end = NULL;
 }
@@ -90,6 +111,16 @@ MemIter *MemIter_Make(MemCh *m, MemCh *target){
     MemIter *mit = (MemIter *)MemCh_AllocOf(m, sizeof(MemIter), TYPE_MEM_ITER);
     mit->type.of = TYPE_MEM_ITER;
     mit->type.state = MORE;
-    mit->target = target;
+    mit->input.target = target;
+    mit->maxSlIdx = target->it.p->max_idx;
+    return mit;
+}
+
+MemIter *MemIter_MakeFromArr(MemCh *m, Abstract **arr, i32 maxSlIdx){
+    MemIter *mit = (MemIter *)MemCh_AllocOf(m, sizeof(MemIter), TYPE_MEM_ITER);
+    mit->type.of = TYPE_MEM_ITER;
+    mit->type.state = MORE|MEM_ITER_STREAM;
+    mit->input.arr = arr;
+    mit->maxSlIdx = maxSlIdx;
     return mit;
 }

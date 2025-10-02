@@ -35,8 +35,11 @@ status Persist_Tests(MemCh *gm){
 
     fd = open(Str_Cstr(m, path), O_RDONLY);
     sm = Stream_MakeFromFd(m, fd, ZERO);
-    re = Persist_FromStream(sm);
+    MemCh *loaded = Persist_FromStream(sm);
     close(fd);
+
+    r |= Test(loaded != NULL, 
+        "Persist From Stream returns non-null", NULL);
 
     MemCh_Free(m);
     DebugStack_Pop();
