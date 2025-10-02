@@ -9,16 +9,47 @@ static cls Persist_UnpackAddr(PersistCoord *coord, Abstract **arr){
     cls typeOf = coord->typeOf;
     MemPage *pg = (MemPage *)arr[coord->idx];
     util u = (util)pg;
-    u &= ~MEM_PERSIST_MASK;
+
+    printf("idx:%d ptr:%p", coord->idx, pg);
+    fflush(stdout);
+
+    char *cstr = "\n        -> Page: ";
+    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
+    Bits_Print(OutStream, (byte *)&u, sizeof(void *), DEBUG|MORE);
+
     u |= coord->offset;
-    void *ptr = (void *)coord;
+    fflush(stdout);
+
+    cstr = "\n        -> Offset: ";
+    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
+    Bits_Print(OutStream, (byte *)&u, sizeof(void *), DEBUG|MORE);
+    cstr = "\n";
+    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
+
+    /*
+    void *ptr = (void *)&coord;
     memcpy(ptr, &u, sizeof(void *));
+    */
     return typeOf;
 }
 
 static status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
-    util u = (util)ptr;
-    u &= ~MEM_PERSIST_MASK;
+    util u = (util)*ptr;
+
+    char *cstr = "        -> Addr:  ";
+    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
+    Bits_Print(OutStream, (byte *)ptr, sizeof(void *), DEBUG|MORE);
+    cstr = "\n";
+    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
+
+    u &= MEM_PERSIST_MASK;
+
+    cstr = "        -> Maked: ";
+    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
+
+    Bits_Print(OutStream, (byte *)&u, sizeof(void *), DEBUG|MORE);
+    cstr = "\n";
+    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
 
     PersistCoord coord = {
        .typeOf = typeOf,
@@ -44,6 +75,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = MemIter_Get(&mit);
         if((mit.type.state & MORE) == 0){
+            printf("mit.slIdx %d\n", mit.slIdx);
             Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)a), 
                 (Abstract *)PersistItem_Make(m, mit.slIdx, (void *)a, a->type.of));
         }
@@ -54,7 +86,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     while((Iter_Next(&persist->it) & END) == 0){
         Abstract *a = Iter_Get(&persist->it);
         Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)a), 
-            (Abstract *)PersistItem_Make(m, it.idx, (void *)a, a->type.of));
+            (Abstract *)PersistItem_Make(m, persist->it.idx, (void *)a, a->type.of));
         Span_Add(pages, a);
     }
 
@@ -78,51 +110,60 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
                     PersistItem *item = (PersistItem *)Table_Get(tbl, 
                         (Abstract *)Util_Wrapped(m, (util)ptr));
                     if(item != NULL){
-                        printf("   item ptr\n");
+                        printf("   item ptr was %p: ", ptr);
                         fflush(stdout);
-                        Persist_PackAddr(item->coord.typeOf, item->coord.idx, (void **)dptr);
+                        Bits_Print(OutStream, ptr, sizeof(void *), DEBUG|MORE);
+                        printf("\n");
+                        fflush(stdout);
+                        Persist_PackAddr(item->coord.typeOf,
+                            item->coord.idx, (void **)dptr);
                         checksum++;
+                        printf("   item coord: ");
+                        fflush(stdout);
+                        PersistCoords_Print(OutStream, (PersistCoord *)dptr, DEBUG);
+                        printf("\n");
+                        fflush(stdout);
                     }else{
                         args[0] = (Abstract *)Util_Wrapped(m, (util)ptr);
                         args[1] = NULL;
-                        Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
-                            "Unable to find address @ in table, may be external to this MemCh", args);
+                        Error(ErrStream->m, (Abstract *)persist, 
+                            FUNCNAME, FILENAME, LINENUMBER,
+                            "Unable to find address @ in table,"
+                            " may be external to this MemCh", args);
                     }
                     dptr++;
                 }
             }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
-                if(a->type.of == TYPE_MEMCTX){
-                    printf("MemCtx handling found\n");
-                    exit(1);
-                    continue;
-                }else{
-                    Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
-                    if(map == NULL){
-                        args[0] = (Abstract *)Type_ToStr(m, a->type.of);
-                        args[1] = NULL;
-                        Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
-                            "Map not found for type $, needed for mem persist", args);
-                        return ERROR;
-                    }
-                    if(a->type.of == TYPE_ITER){
-                        Iter *itp = (Iter *)a;
-                        Iter_Init(itp, itp->p);
-                    }
-                    for(i16 i = 1; i <= map->type.range; i++){
-                        RangeType *att = map->atts+i;
-                        if(att->of > _TYPE_RANGE_TYPE_START){
-                            Abstract *aa = ((void *)a)+att->range;
-                            PersistItem *item = (PersistItem *)Table_Get(tbl, 
-                                (Abstract *)Util_Wrapped(m, (util)a));
-                            if(item != NULL){
-                                printf("   item attr\n");
-                                fflush(stdout);
-                                Persist_PackAddr(item->coord.typeOf, item->coord.idx, (void **)&aa);
-                                checksum++;
-                            }else{
-                                Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
-                                    "Unable to find address in table, may be external to this MemCh", NULL);
-                            }
+                Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
+                if(map == NULL){
+                    args[0] = (Abstract *)Type_ToStr(m, a->type.of);
+                    args[1] = NULL;
+                    Error(ErrStream->m, (Abstract *)persist, 
+                        FUNCNAME, FILENAME, LINENUMBER,
+                        "Map not found for type $, needed for mem persist", args);
+                    return ERROR;
+                }
+                if(a->type.of == TYPE_ITER){
+                    Iter *itp = (Iter *)a;
+                    Iter_Init(itp, itp->p);
+                }
+                for(i16 i = 1; i <= map->type.range; i++){
+                    RangeType *att = map->atts+i;
+                    if(att->of > _TYPE_RANGE_TYPE_START){
+                        Abstract *aa = ((void *)a)+att->range;
+                        PersistItem *item = (PersistItem *)Table_Get(tbl, 
+                            (Abstract *)Util_Wrapped(m, (util)a));
+                        if(item != NULL){
+                            printf("   item attr\n");
+                            fflush(stdout);
+                            Persist_PackAddr(item->coord.typeOf,
+                                item->coord.idx, (void **)&aa);
+                            checksum++;
+                        }else{
+                            Error(ErrStream->m, (Abstract *)persist,
+                                FUNCNAME, FILENAME, LINENUMBER,
+                                "Unable to find address in table,"
+                                " may be external to this MemCh", NULL);
                         }
                     }
                 }
@@ -227,17 +268,16 @@ MemCh *Persist_FromStream(Stream *sm){
                         if(ptr != NULL){
                             checksum++;
                             printf("   item ptr\n");
+                            printf("   item coord wasX: ");
+                            fflush(stdout);
+                            PersistCoords_Print(OutStream, (PersistCoord *)dptr, DEBUG);
+                            Persist_UnpackAddr((PersistCoord *)dptr, mit.input.arr);
+                            printf(" ptr now: %lu\n", (unsigned long)ptr);
                             fflush(stdout);
                         }
-                        Persist_UnpackAddr((PersistCoord *)&ptr, mit.input.arr);
                         dptr++;
                     }
                 }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
-                    if(a->type.of == TYPE_MEMCTX){
-                        printf("MemCtx handling found\n");
-                        exit(1);
-                        continue;
-                    }
                     Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
                     if(map == NULL){
                         args[0] = (Abstract *)Type_ToStr(m, a->type.of);
@@ -254,12 +294,17 @@ MemCh *Persist_FromStream(Stream *sm){
                     for(i16 i = 1; i <= map->type.range; i++){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RANGE_TYPE_START){
-                            void *aa = ((void *)a)+att->range;
-                            Persist_UnpackAddr((PersistCoord *)&aa, mit.input.arr);
-                            checksum++;
-                            printf("   item attr\n");
+                            printf("   item attr %s\n", map->keys[i]->bytes);
                             fflush(stdout);
+                            void *aa = ((void *)a)+att->range;
+                            Persist_UnpackAddr((PersistCoord *)aa, mit.input.arr);
+                            checksum++;
                         }
+                    }
+                    if(a->type.of == TYPE_MEMCTX){
+                        persist = (MemCh *)a; 
+                        Iter_Init(&persist->it, persist->it.p);
+                        printf("persist->it.value %p", persist->it.value);
                     }
                 }
             }
@@ -282,7 +327,7 @@ MemCh *Persist_FromStream(Stream *sm){
         return persist;
     }
     
-    return NULL;
+    return persist;
 }
 
 status Persist_Init(MemCh *m){

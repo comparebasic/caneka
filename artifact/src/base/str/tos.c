@@ -105,7 +105,7 @@ i64 Bits_Print(Stream *sm, byte *bt, size_t length, word flags){
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};
     for(int i = 0; i < length;i++){
         byte b = bt[i];
-        if(b == 0 && (flags & MORE)){
+        if(b == 0 && (flags & (MORE|DEBUG)) == MORE){
             total += Stream_Bytes(sm, (byte *)"0", 1);
         }else{
             if(flags & MORE){

@@ -41,6 +41,11 @@ status Persist_Tests(MemCh *gm){
     r |= Test(loaded != NULL, 
         "Persist From Stream returns non-null", NULL);
 
+    args[0] = (Abstract *)loaded->it.p;
+    args[1] = NULL;
+
+    Out("^p.Loaded MemCh &^0\n", args);
+
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

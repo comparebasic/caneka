@@ -148,6 +148,11 @@ MemBook *MemBook_Make(MemBook *prev){
     void *start = mmap(prev, 
         CHAPTER_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
+    if(((util)start) & MEM_PERSIST_MASK){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Mempersist requires pages aligned by the first 11 bits", NULL);
+        return NULL;
+    }
+
     if(start == MAP_FAILED){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to map memory", NULL);
         return NULL;

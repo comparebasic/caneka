@@ -11,11 +11,11 @@ enum span_ops {
 
 typedef struct iter {
     Type type;
-    status maskFlags;
-    status filterFlags;
     i32 idx;
     struct span *p;
     void *value;
+    status maskFlags;
+    status filterFlags;
     void *stack[SPAN_MAX_DIMS+1];
     i32 stackIdx[SPAN_MAX_DIMS+1];
     struct {

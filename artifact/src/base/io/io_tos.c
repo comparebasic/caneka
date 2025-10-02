@@ -2,13 +2,16 @@
 #include <caneka.h>
 
 i64 PersistCoords_Print(Stream *sm, PersistCoord *coord, word flags){
+    i64 total = 0;
     Abstract *args[] = {
         (Abstract *)Type_ToStr(sm->m, coord->typeOf),
         (Abstract *)I32_Wrapped(sm->m, coord->idx),
-        (Abstract *)I32_Wrapped(sm->m, coord->offset),
         NULL
     };
-    return Fmt(sm, "$/$/$", args);
+    total += Fmt(sm, "$/$/[", args);
+    total += Bits_Print(OutStream, (byte *)&coord->offset, sizeof(quad), DEBUG|MORE);
+    total += Stream_Bytes(sm, (byte *)"]", 1);
+    return total;
 }
 
 i64 PersistItem_Print(Stream *sm, Abstract *a, cls type, word flags){

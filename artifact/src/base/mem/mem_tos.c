@@ -183,6 +183,8 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                     total += Stream_Bytes(sm, (byte *)"(", 1);
                     boolean first = TRUE;
                     for(i32 i = 1; i <= max; i++){
+                        printf("map %d key %s\n", i, map->keys[i]->bytes);
+                        fflush(stdout);
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
                             if(!first){
@@ -192,28 +194,27 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                             args[0] = (Abstract *)map->keys[i];
                             void **dptr = ((void *)a)+att->range;
                             void *ptr = NULL;
-                            if(dptr != NULL){
+                            if(dptr != NULL && *dptr != NULL){
                                 ptr = *dptr;
                                 if(att->of > _TYPE_RANGE_TYPE_START && att->of < _TYPE_RANGE_TYPE_END){
                                     ptr -= sizeof(RangeType);
                                 }
+                                Single *attCount = (Single *)Table_Get(tbl,
+                                    (Abstract *)Util_Wrapped(sm->m, (util)ptr));
+
+                                Abstract *aa = (Abstract *)ptr;
+                                Map *amap = Lookup_Get(MapsLookup, aa->type.of);
+                                if(amap != NULL){
+                                    args[1] = (Abstract *)amap->keys[0];
+                                }else{
+                                    args[1] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
+                                }
+                                args[2] = (Abstract *)(attCount != NULL ? 
+                                    I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
+
+                                args[3] = NULL;
+                                total += Fmt(sm, "$=$:$", args);
                             }
-                            Single *attCount = (Single *)Table_Get(tbl,
-                                (Abstract *)Util_Wrapped(sm->m, (util)ptr));
-
-                            Abstract *aa = (Abstract *)ptr;
-                            Map *amap = Lookup_Get(MapsLookup, aa->type.of);
-                            if(amap != NULL){
-                                args[1] = (Abstract *)amap->keys[0];
-                            }else{
-                                args[1] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
-                            }
-                            args[2] = (Abstract *)(attCount != NULL ? 
-                                I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
-
-                            args[3] = NULL;
-                            total += Fmt(sm, "$=$:$", args);
-
                         }
                     }
                     total += Stream_Bytes(sm, (byte *)")", 1);

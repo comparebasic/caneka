@@ -3,7 +3,7 @@
 
 static Map *Span_Map(MemCh *m){
     word offset = 0;
-    #define SIZE 6
+    i64 SIZE = 6;
     RangeType *atts = (RangeType *)Bytes_Alloc(m, 
         (word)(sizeof(RangeType)*SIZE), TYPE_RANGE_ARRAY);
     atts->of = TYPE_SPAN;
@@ -37,39 +37,31 @@ static Map *Span_Map(MemCh *m){
 
 static Map *MemCh_Map(MemCh *m){
     word offset = 0;
-    #define SIZE 6
-    /*
+    i64 SIZE = 5;
     RangeType *atts = (RangeType *)Bytes_Alloc(m, 
         (word)(sizeof(RangeType)*SIZE), TYPE_RANGE_ARRAY);
-    atts->of = TYPE_SPAN;
-    atts->range = SIZE;
+    atts->of = TYPE_MEMCTX;
+    atts->range = 0/*SIZE*/;
     offset += sizeof(Type);
-    offset += sizeof(word);
-    offset += sizeof(byte);
-    (atts+1)->of = TYPE_I8;
+    offset += sizeof(i16);
+    (atts+1)->of = TYPE_I16;
     (atts+1)->range = offset;
-    offset += sizeof(i8);
-    (atts+2)->of = TYPE_POINTER_ARRAY;
-    (atts+2)->range = offset;
-    offset += sizeof(slab *);
-    (atts+3)->of = TYPE_MEMCTX;
+    offset += sizeof(i16);
+    (atts+2)->of = TYPE_SPAN;
+    (atts+2)->range = offset+sizeof(Type)+sizeof(i32)/*iter span */;
+    offset += sizeof(Iter);
+    (atts+3)->of = TYPE_ABSTRACT;
     (atts+3)->range = offset;
-    offset += sizeof(MemCh *);
-    (atts+4)->of = TYPE_I32;
+    offset += sizeof(Abstract *);
+    (atts+4)->of = TYPE_ABSTRACT;
     (atts+4)->range = offset;
-    offset += sizeof(i32);
-    (atts+5)->of = TYPE_I32;
-    (atts+5)->range = offset;
     Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE, TYPE_POINTER_ARRAY);
-    keys[0] = Str_CstrRef(m, "Span");
-    keys[1] = Str_CstrRef(m, "dims");
-    keys[2] = Str_CstrRef(m, "root");
-    keys[3] = Str_CstrRef(m, "m");
-    keys[4] = Str_CstrRef(m, "nvalues");
-    keys[5] = Str_CstrRef(m, "max_idx");
+    keys[0] = Str_CstrRef(m, "MemCh");
+    keys[1] = Str_CstrRef(m, "guard");
+    keys[2] = Str_CstrRef(m, "it.p");
+    keys[3] = Str_CstrRef(m, "owner");
+    keys[4] = Str_CstrRef(m, "values");
     return Map_Make(m, SIZE-1, atts, keys);
-    */
-    return NULL;
 }
 
 
