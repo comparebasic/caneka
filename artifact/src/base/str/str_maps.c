@@ -20,8 +20,28 @@ static Map *Str_Map(MemCh *m){
     return Map_Make(m, 3, atts, keys);
 }
 
+static Map *StrVec_Map(MemCh *m){
+    word offset = 0;
+    RangeType *atts = (RangeType *)Bytes_Alloc(m, sizeof(RangeType)*3, TYPE_RANGE_ARRAY);
+    atts->of = TYPE_STRVEC;
+    atts->range = 3;
+    offset += sizeof(Type);
+    offset += sizeof(i32);
+    (atts+1)->of = TYPE_I64;
+    (atts+1)->range = offset;
+    offset += sizeof(i64);
+    (atts+2)->of = TYPE_SPAN;
+    (atts+2)->range = offset;
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*3, TYPE_POINTER_ARRAY);
+    keys[0] = Str_CstrRef(m, "StrVec");
+    keys[1] = Str_CstrRef(m, "total");
+    keys[2] = Str_CstrRef(m, "p");
+    return Map_Make(m, 2, atts, keys);
+}
+
 status Str_MapsInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Map(m));
+    r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Map(m));
     return r;
 }

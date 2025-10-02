@@ -6,13 +6,7 @@ static void setLastFlag(MemIter *mit){
     i64 sz = 0;
     if(a != NULL){
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
-            if(a->type.of == TYPE_BYTES_POINTER){
-                sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
-            }else if(a->type.of == TYPE_POINTER_ARRAY){
-                sz = (i64)(((RangeType *)a)->range*sizeof(void *))+sizeof(RangeType);
-            }else if(a->type.of == TYPE_RANGE_ARRAY){
-                sz = (i64)(((RangeType *)a)->range*sizeof(RangeType))+sizeof(RangeType);
-            }
+            sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
         }else{
             sz = Lookup_GetRaw(SizeLookup, a->type.of);
         }
@@ -31,6 +25,7 @@ Abstract *MemIter_Get(MemIter *mit){
 
 status MemIter_Next(MemIter *mit){
     mit->type.state &= ~LAST;
+    Abstract *args[5];
     if(mit->ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
         MemPage *pg = (MemPage *)Span_Get(mit->target->it.p, mit->slIdx);
         mit->ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
@@ -43,13 +38,7 @@ status MemIter_Next(MemIter *mit){
         Abstract *a = MemIter_Get(mit);
         i64 sz = 0;
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
-            if(a->type.of == TYPE_BYTES_POINTER){
-                sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
-            }else if(a->type.of == TYPE_POINTER_ARRAY){
-                sz = (i64)(((RangeType *)a)->range*sizeof(void *))+sizeof(RangeType);
-            }else if(a->type.of == TYPE_RANGE_ARRAY){
-                sz = (i64)(((RangeType *)a)->range*sizeof(RangeType))+sizeof(RangeType);
-            }
+            sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
         }else{
             sz = Lookup_GetRaw(SizeLookup, a->type.of);
         }
@@ -63,8 +52,10 @@ status MemIter_Next(MemIter *mit){
             mit->type.state |= (ERROR|END);
         }
         if(mit->end == NULL || (void *)(mit->ptr+sz-1) > mit->end){
+            args[0] = (Abstract *)Util_Wrapped(ErrStream->m, mit->ptr+sz-1 - mit->end);
+            args[1] = NULL;
             Error(ErrStream->m, (Abstract *)mit, FUNCNAME, FILENAME, LINENUMBER,
-                "Error: type to large to increment address is off the page", NULL);
+                "Error: type to large to increment address is off the page by $", args);
         }
         if(mit->ptr+sz-1 == mit->end){
             if(mit->slIdx < mit->target->it.p->max_idx){

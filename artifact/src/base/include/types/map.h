@@ -1,5 +1,9 @@
 extern struct lookup *MapsLookup;
 
+enum blanked_types {
+    TYPE_BLANKED = (1 << 14),
+};
+
 typedef struct map {
     RangeType type;
     RangeType *atts;

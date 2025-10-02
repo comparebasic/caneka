@@ -48,24 +48,30 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
         }
     }
 
-    args[0] = (Abstract *)tbl;
-    args[1] = NULL;
-    Out("^y.MemTable &\n", args);
     Span *pages = Span_CloneShallow(m, persist->it.p);
 
     MemIter_Init(&mit, persist);
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = MemIter_Get(&mit);
         if((mit.type.state & MORE) == 0){
-            if(a->type.of > _TYPE_ABSTRACT_BEGIN){
+            if(a->type.of == TYPE_POINTER_ARRAY){
+                void *ptr = ((void *)a)+sizeof(RangeType);
+                i32 slots = ((RangeType *)a)->range / sizeof(void *);
+                void *end = ptr+slots-1;
+                while(ptr <= end){
+                    PersistItem *item = (PersistItem *)Table_Get(tbl, 
+                        (Abstract *)Util_Wrapped(m, (util)a));
+                    if(item != NULL){
+                        Persist_PackAddr(item->coord.typeOf, mit.slIdx, (void **)&ptr);
+                    }else{
+                        Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+                            "Unable to find address in table, may be external to this MemCh", NULL);
+                    }
+                    ptr++;
+                }
+            }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
                 if(a->type.of == TYPE_MEMCTX){
                     continue;
-                }else if(a->type.of == TYPE_SPAN){
-                    Iter_Init(&it, (Span *)a);
-                    while((Iter_Next(&it) & END) == 0){
-                        Abstract *aa = Iter_Get(&it);
-                        Persist_PackAddr(aa->type.of, mit.slIdx, (void **)&aa);
-                    }
                 }else{
                     Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
                     if(map == NULL){
@@ -79,13 +85,18 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
                         Iter *itp = (Iter *)a;
                         Iter_Init(itp, itp->p);
                     }
-                    for(i16 i = 1; i < map->type.range; i++){
+                    for(i16 i = 1; i <= map->type.range; i++){
                         RangeType *att = map->atts+i;
-                        if(att->of > _TYPE_ABSTRACT_BEGIN){
+                        if(att->of > _TYPE_RANGE_TYPE_START){
                             Abstract *aa = ((void *)a)+att->range;
                             PersistItem *item = (PersistItem *)Table_Get(tbl, 
                                 (Abstract *)Util_Wrapped(m, (util)a));
-                            Persist_PackAddr(item->coord.typeOf, item->coord.idx, (void **)&aa);
+                            if(item != NULL){
+                                Persist_PackAddr(item->coord.typeOf, item->coord.idx, (void **)&aa);
+                            }else{
+                                Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+                                    "Unable to find address in table, may be external to this MemCh", NULL);
+                            }
                         }
                     }
                 }

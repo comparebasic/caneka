@@ -45,7 +45,6 @@ static char *baseTypeStrings[] = {
     "TYPE_MEM_ITER",
     "TYPE_PERSIST_ITEM",
     "TYPE_MAP",
-    "TYPE_BLANKED",
     "TYPE_EXTERNAL_FREE",
     "TYPE_MEMSLAB",
     "TYPE_MAKER",

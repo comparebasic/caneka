@@ -87,6 +87,19 @@ i64 Slots_Print(Stream *sm, util *ut, i32 slots, word flags){
     return total;
 }
 
+i64 Bits_PrintArray(Stream *sm, void *arr, i64 sz, i32 count){
+    i64 total = 0;
+    void *ptr = arr;
+    for(i32 i = 0; i < count; i++){
+        total += Bits_Print(sm, (byte *)ptr, sz, DEBUG|MORE);
+        ptr += sz;
+        if(i+1 < count){
+            total += Stream_Bytes(sm, (byte *)", ", 2);
+        }
+    }
+    return total;
+}
+
 i64 Bits_Print(Stream *sm, byte *bt, size_t length, word flags){
     i64 total = 0;
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};

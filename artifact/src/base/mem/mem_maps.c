@@ -4,7 +4,8 @@
 static Map *Span_Map(MemCh *m){
     word offset = 0;
     #define SIZE 6
-    RangeType *atts = (RangeType *)Bytes_Alloc(m, sizeof(RangeType)*SIZE, TYPE_RANGE_ARRAY);
+    RangeType *atts = (RangeType *)Bytes_Alloc(m, 
+        (word)(sizeof(RangeType)*SIZE), TYPE_RANGE_ARRAY);
     atts->of = TYPE_SPAN;
     atts->range = SIZE;
     offset += sizeof(Type);
@@ -24,7 +25,7 @@ static Map *Span_Map(MemCh *m){
     offset += sizeof(i32);
     (atts+5)->of = TYPE_I32;
     (atts+5)->range = offset;
-    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*4, TYPE_POINTER_ARRAY);
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE, TYPE_POINTER_ARRAY);
     keys[0] = Str_CstrRef(m, "Span");
     keys[1] = Str_CstrRef(m, "dims");
     keys[2] = Str_CstrRef(m, "root");

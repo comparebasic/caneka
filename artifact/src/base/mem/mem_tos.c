@@ -169,20 +169,27 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                     (Abstract *)Util_Wrapped(sm->m, (util)a));
 
                 if(map != NULL){
-                    args[0] = (Abstract *)count;
-                    args[1] = (Abstract *)map->keys[0];
-                    args[2] = NULL;
-                    total += Fmt(sm, "$:$", args);
+                    if(count != NULL){
+                        args[0] = (Abstract *)count;
+                        args[1] = (Abstract *)map->keys[0];
+                        args[2] = NULL;
+                        total += Fmt(sm, "$:$", args);
+                    }else{
+                        args[0] = (Abstract *)map->keys[0];
+                        args[1] = NULL;
+                        total += Fmt(sm, "$", args);
+                    }
                     i32 max = (i32)((RangeType *)map)->range;
                     total += Stream_Bytes(sm, (byte *)"(", 1);
+                    boolean first = TRUE;
                     for(i32 i = 1; i <= max; i++){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
+                            if(!first){
+                                total += Stream_Bytes(sm, (byte *)", ", 2);
+                            }
+                            first = FALSE;
                             args[0] = (Abstract *)map->keys[i];
-                            printf("have range type '%s' %d vs %d %d\n", 
-                                ((Str *)map->keys[i])->bytes,
-                                (i32)att->of, (i32)TYPE_I8, i);
-                            fflush(stdout);
                             void **dptr = ((void *)a)+att->range;
                             void *ptr = NULL;
                             if(dptr != NULL){
@@ -195,21 +202,18 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                                 (Abstract *)Util_Wrapped(sm->m, (util)ptr));
 
                             Abstract *aa = (Abstract *)ptr;
-                            args[1] = (Abstract *)(attCount != NULL ? 
-                                I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
                             Map *amap = Lookup_Get(MapsLookup, aa->type.of);
                             if(amap != NULL){
-                                args[2] = (Abstract *)amap->keys[0];
+                                args[1] = (Abstract *)amap->keys[0];
                             }else{
-                                args[2] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
+                                args[1] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
                             }
+                            args[2] = (Abstract *)(attCount != NULL ? 
+                                I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
 
                             args[3] = NULL;
                             total += Fmt(sm, "$=$:$", args);
 
-                            if(i < max-1){
-                                total += Stream_Bytes(sm, (byte *)", ", 2);
-                            }
                         }
                     }
                     total += Stream_Bytes(sm, (byte *)")", 1);
