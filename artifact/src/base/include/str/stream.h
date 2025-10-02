@@ -3,7 +3,7 @@ enum stream_flags {
     STREAM_CHAIN = 1 << 9,
     STREAM_FROM_FD = 1 << 10,
     STREAM_TO_FD = 1 << 11,
-    STREAM_MESS = 1 << 12,
+    STREAM_ASYNC = 1 << 12,
     STREAM_SOCKET = 1 << 13,
     STREAM_BUFFER = 1 << 14,
     STREAM_CREATE = 1 << 15,

@@ -6,4 +6,5 @@
 #include "io/io_tos.h"
 #include "io/persist_coord.h"
 #include "io/persist_item.h"
+#include "io/persist_header.h"
 #include "io/persist.h"

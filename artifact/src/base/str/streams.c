@@ -17,8 +17,12 @@ StrVec *StrVec_FromBytes(MemCh *m, byte *b, i32 length){
 i64 Stream_ToFd(Stream *sm, byte *b, i32 length){
     ssize_t l = write(sm->fd, b, (size_t)length);
     if(l < 0){
+        Abstract *args[2] = {
+            (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
+            NULL
+        };
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-            "Error wrtiing to file", NULL);
+            "Error wrtiing to file: $", args);
         return 0;
     }
     return l;

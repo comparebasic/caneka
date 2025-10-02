@@ -50,6 +50,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
 
     Span *pages = Span_CloneShallow(m, persist->it.p);
 
+    i16 checksum = 0;
     MemIter_Init(&mit, persist);
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = MemIter_Get(&mit);
@@ -63,6 +64,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
                         (Abstract *)Util_Wrapped(m, (util)a));
                     if(item != NULL){
                         Persist_PackAddr(item->coord.typeOf, mit.slIdx, (void **)&ptr);
+                        checksum++;
                     }else{
                         Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
                             "Unable to find address in table, may be external to this MemCh", NULL);
@@ -93,6 +95,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
                                 (Abstract *)Util_Wrapped(m, (util)a));
                             if(item != NULL){
                                 Persist_PackAddr(item->coord.typeOf, item->coord.idx, (void **)&aa);
+                                checksum++;
                             }else{
                                 Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
                                     "Unable to find address in table, may be external to this MemCh", NULL);
@@ -104,17 +107,87 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
         }
     }
 
+    PersistHeader hdr = {
+        .pages = (i16)pages->nvalues,
+        .checksum = checksum
+    };
+    Stream_Bytes(sm, (byte *)&hdr, sizeof(PersistHeader));
+
+    args[0] = (Abstract *)I16_Wrapped(OutStream->m, hdr.pages);
+    args[1] = (Abstract *)I16_Wrapped(OutStream->m, hdr.checksum);
+    args[2] = NULL;
+    Out("^y.Wrote header ^D.$^d.pages and ^D.$^d.changes^0.\n", args);
+
     Iter_Init(&it, pages);
     while((Iter_Next(&it) & END) == 0){
-        /* TODO: write blanked pages to stream */
+        MemPage *pg = (MemPage *)Iter_Get(&it);
+        if(Stream_Bytes(sm, (byte *)pg, PAGE_SIZE) != PAGE_SIZE){
+            Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+                "Error writing page to stream for Persist", NULL);
+            r |= ERROR;
+            break;
+        }
         r |= MemBook_FreePage(m, (MemPage *)Iter_Get(&it));
     }
 
     return r;
 }
 
-status Persist_FromStream(MemCh *m, Stream *sm){
+status Persist_FromStream(Stream *sm){
     status r = READY;
+    Abstract *args[5];
+    PersistHeader hdr = {0, 0};
+    i16 count = 0;
+    MemCh *persist = NULL; 
+    Abstract **pages = NULL;
+    while((r & (SUCCESS|ERROR)) == 0 && (sm->type.state & END) == 0){
+        if((r & PROCESSING) == 0){
+            if(Stream_ReadToMem(sm, sizeof(PersistHeader), (byte *)&hdr) != sizeof(PersistHeader)){
+                r |= ERROR;
+                break;
+            }
+            r |= PROCESSING;
+            args[0] = (Abstract *)I16_Wrapped(OutStream->m, hdr.pages);
+            args[1] = (Abstract *)I16_Wrapped(OutStream->m, hdr.checksum);
+            args[2] = NULL;
+            Out("^y.Found header ^D.$^d.pages and ^D.$^d.changes^0.\n", args);
+            pages = (Abstract **)Bytes_Alloc(sm->m, hdr.pages*sizeof(void *), TYPE_POINTER_ARRAY);
+        }
+
+        if(count >= hdr.pages){
+            r |= SUCCESS;
+            args[0] = (Abstract *)I16_Wrapped(OutStream->m, hdr.pages);
+            args[1] = (Abstract *)I16_Wrapped(OutStream->m, count);
+            args[2] = NULL;
+            Out("^y.Done! have ^D.$^d.count of ^D.$^d.pages^0.\n", args);
+            break;
+        }
+
+        pages[count] = MemBook_GetPage(NULL);
+        if(pages[count] == NULL){
+            Fatal(FUNCNAME, FILENAME, LINENUMBER,
+                "Error allocating page", NULL);
+            r |= ERROR;
+        }
+
+        i64 length = Stream_ReadToMem(sm, PAGE_SIZE, (byte *)pages[count]);
+        if(length != PAGE_SIZE){
+            args[0] = (Abstract *)I64_Wrapped(ErrStream->m, length);
+            args[1] = NULL;
+            Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+                "Error reading page from stream to Persist length $", args);
+            r |= ERROR;
+        }
+        count++;
+    }
+
+    if(r & SUCCESS){
+        r &= ~SUCCESS;
+        /* do replace adder thing here */
+        MemIter mit;
+        MemIter_Init(&mit, persist);
+    }
+    
     return r;
 }
 

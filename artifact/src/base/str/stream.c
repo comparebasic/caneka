@@ -37,14 +37,20 @@ i64 Stream_VecTo(Stream *sm, StrVec *v){
 }
 
 i64 Stream_ReadToMem(Stream *sm, i32 length, byte *mem){
-    if(sm->type.of & STREAM_FROM_FD){
+    if(sm->type.state & STREAM_FROM_FD){
         if(sm->type.of & STREAM_SOCKET){
             return recv(sm->fd, mem, length, 0);
         }else{
-            return read(sm->fd, mem, length);
+            i64 total = read(sm->fd, mem, length);
+            if(total == 0 && (sm->type.state & STREAM_ASYNC) == 0){
+                sm->type.state |= END;
+                return length;
+            }else{
+                return total;
+            }
         }
     }
-    return 0;
+    return -1;
 }
 
 status Stream_SetupMakeStrVec(MemCh *m, Stream *sm, StrVec *v){
@@ -75,7 +81,7 @@ Stream *Stream_MakeFromFd(MemCh *m, i32 fd, word flags){
     sm->type.state |= (STREAM_FROM_FD|flags);
     sm->fd = fd;
     StrVec *v = StrVec_Make(m);
-    Cursor_Setup(sm->dest.curs, v);
+    sm->dest.curs = Cursor_Make(m, v);
     return sm;
 }
 

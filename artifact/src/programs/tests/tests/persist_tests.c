@@ -26,8 +26,17 @@ status Persist_Tests(MemCh *gm){
     args[1] = NULL;
     Out("^p.Persist MemCh: &^0\n", args);
 
-    Stream *sm = Stream_MakeStrVec(m);
+    Str *path = IoUtil_GetCwdPath(m, Str_CstrRef(m, "dist/test/persist.mem"));
+
+    i32 fd = open(Str_Cstr(m, path), O_WRONLY|O_CREAT, 00644);
+    Stream *sm = Stream_MakeToFd(m, fd, StrVec_Make(m), ZERO);
     status re = Persist_FlushFree(sm, pst);
+    close(fd);
+
+    fd = open(Str_Cstr(m, path), O_RDONLY);
+    sm = Stream_MakeFromFd(m, fd, ZERO);
+    re = Persist_FromStream(sm);
+    close(fd);
 
     MemCh_Free(m);
     DebugStack_Pop();
