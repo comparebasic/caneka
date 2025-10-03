@@ -183,8 +183,6 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                     total += Stream_Bytes(sm, (byte *)"(", 1);
                     boolean first = TRUE;
                     for(i32 i = 1; i <= max; i++){
-                        printf("map %d key %s\n", i, map->keys[i]->bytes);
-                        fflush(stdout);
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
                             if(!first){

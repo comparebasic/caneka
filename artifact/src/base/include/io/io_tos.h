@@ -1,2 +1,3 @@
 i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, word flags);
 status PersistDebug_Init(MemCh *m, struct lookup *lk);
+i64 PersistCoords_Print(Stream *sm, PersistCoord *coord, word flags);

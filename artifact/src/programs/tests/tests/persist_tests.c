@@ -7,7 +7,33 @@ status Persist_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
-    Str *s;
+
+    Str *s = Str_CstrRef(m, "Hi is this real");
+    void *orig = (void *)s;
+    cls typeOf = s->type.of;
+
+    i32 slIdx = m->it.p->max_idx;
+    Abstract *arr[2] = {
+        (Abstract *)Span_Get(m->it.p, m->it.p->max_idx)
+    };
+
+    Persist_PackAddr(s->type.of, slIdx, (void *)&s);
+
+    PersistCoords_Print(OutStream, (PersistCoord *)&s, DEBUG);
+
+    PersistCoord *coord = (PersistCoord *)&s;
+
+    r |= Test((void *)s != orig, "Pointer has been mutated and packed", NULL);
+    r |= Test(coord->typeOf == typeOf, "Coord has type of object", NULL);
+    r |= Test(coord->idx == slIdx, "Coord has idx sent to PackAddr", NULL);
+
+    Persist_UnpackAddr(coord, arr);
+    args[0] = (Abstract *)Str_Ref(m,
+        (byte *)&orig,sizeof(void *), sizeof(void *), STRING_BINARY);
+    args[1] = (Abstract *)Str_Ref(m,
+        (byte *)&s, sizeof(void *), sizeof(void *), STRING_BINARY);
+    args[2] = NULL;
+    r |= Test((void *)s == orig, "Coord has been restored expected &, have &", args);
 
     MemCh *pst = MemCh_Make();
     Str *one = Str_FromCstr(pst, "One", STRING_COPY);
@@ -21,6 +47,7 @@ status Persist_Tests(MemCh *gm){
     Span_Add(p, (Abstract *)two);
     Span_Add(p, (Abstract *)three);
     Span_Add(p, (Abstract *)vec);
+    pst->owner = (Abstract *)p;
 
     args[0] = (Abstract *)pst;
     args[1] = NULL;
@@ -33,18 +60,40 @@ status Persist_Tests(MemCh *gm){
     status re = Persist_FlushFree(sm, pst);
     close(fd);
 
+    MemCh *takeSpace = MemCh_Make();
+    for(util i = 0; i < 100; i++){
+        Util_Wrapped(takeSpace, i);
+    }
+
     fd = open(Str_Cstr(m, path), O_RDONLY);
     sm = Stream_MakeFromFd(m, fd, ZERO);
     MemCh *loaded = Persist_FromStream(sm);
     close(fd);
 
+    MemCh_Free(takeSpace);
+
     r |= Test(loaded != NULL, 
         "Persist From Stream returns non-null", NULL);
 
-    args[0] = (Abstract *)loaded->it.p;
-    args[1] = NULL;
 
-    Out("^p.Loaded MemCh &^0\n", args);
+    s = Span_Get((Span *)loaded->owner, 0);
+    Str *expected = Str_CstrRef(m, "One");
+    r |= Test(pst != loaded,
+        "loaded is not the original", NULL);
+    r |= Test(s != one,
+        "Str is not the original", NULL);
+
+    args[0] = (Abstract *)expected;
+    args[1] = (Abstract *)s;
+    r |= Test(Equals((Abstract *)s, (Abstract *)expected),
+        "Str has equivilent value, expected &, have &", args);
+
+    args[0] = (Abstract *)loaded;
+    args[1] = (Abstract *)loaded->owner;
+    args[2] = NULL;
+    Out("^p.Loaded MemCh & with owner &^0\n", args);
+
+
 
     MemCh_Free(m);
     DebugStack_Pop();

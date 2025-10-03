@@ -30,9 +30,14 @@ status MemIter_Next(MemIter *mit){
         MemPage *pg = NULL;
         if(mit->type.state & MEM_ITER_STREAM){
             pg = (MemPage *)mit->input.arr[mit->slIdx];
-            printf("pg %p\n", pg);
         }else{
             pg = (MemPage *)Span_Get(mit->input.target->it.p, mit->slIdx);
+        }
+        if(pg == NULL){
+            Error(ErrStream->m, (Abstract *)mit, FUNCNAME, FILENAME, LINENUMBER,
+                "Error: unable to find page", args);
+            mit->type.state |= ERROR;
+            return mit->type.state;
         }
         mit->ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
         mit->end = ((void *)pg) + PAGE_SIZE-1;
@@ -74,7 +79,6 @@ status MemIter_Next(MemIter *mit){
                 }
             }else{
                 mit->type.state |= END;
-                printf("END\n");
             }
         }else{
             mit->ptr += sz;

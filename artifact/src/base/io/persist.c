@@ -5,52 +5,23 @@ static boolean _initialized = FALSE;
 struct lookup *BlankerLookup = NULL;
 struct lookup *RepointerLookup = NULL;
 
-static cls Persist_UnpackAddr(PersistCoord *coord, Abstract **arr){
+cls Persist_UnpackAddr(PersistCoord *coord, Abstract **arr){
     cls typeOf = coord->typeOf;
     MemPage *pg = (MemPage *)arr[coord->idx];
+    if(pg == NULL){
+        Error(ErrStream->m, NULL, FUNCNAME, FILENAME, LINENUMBER,
+            "Cannot unpack address onto empty page", NULL);
+    }
     util u = (util)pg;
-
-    printf("idx:%d ptr:%p", coord->idx, pg);
-    fflush(stdout);
-
-    char *cstr = "\n        -> Page: ";
-    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
-    Bits_Print(OutStream, (byte *)&u, sizeof(void *), DEBUG|MORE);
-
     u |= coord->offset;
-    fflush(stdout);
-
-    cstr = "\n        -> Offset: ";
-    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
-    Bits_Print(OutStream, (byte *)&u, sizeof(void *), DEBUG|MORE);
-    cstr = "\n";
-    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
-
-    /*
-    void *ptr = (void *)&coord;
+    void *ptr = (void *)coord;
     memcpy(ptr, &u, sizeof(void *));
-    */
     return typeOf;
 }
 
-static status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
+status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
     util u = (util)*ptr;
-
-    char *cstr = "        -> Addr:  ";
-    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
-    Bits_Print(OutStream, (byte *)ptr, sizeof(void *), DEBUG|MORE);
-    cstr = "\n";
-    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
-
     u &= MEM_PERSIST_MASK;
-
-    cstr = "        -> Maked: ";
-    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
-
-    Bits_Print(OutStream, (byte *)&u, sizeof(void *), DEBUG|MORE);
-    cstr = "\n";
-    Stream_Bytes(OutStream, (byte *)cstr, strlen(cstr));
-
     PersistCoord coord = {
        .typeOf = typeOf,
        .idx = slIdx,
@@ -58,6 +29,111 @@ static status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
     };
     memcpy(ptr, &coord, sizeof(void *));
     return SUCCESS;
+}
+
+i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
+    boolean pack = (mit->type.state & MEM_ITER_STREAM) == 0;
+    Abstract *args[5];
+    i16 checksum = 0;
+    while((MemIter_Next(mit) & END) == 0){
+        Abstract *a = MemIter_Get(mit);
+        if((mit->type.state & MORE) == 0){
+            if(a->type.of == TYPE_POINTER_ARRAY){
+                void **dptr = (void **)(((void *)a)+sizeof(RangeType));
+                i32 slots = ((RangeType *)a)->range / sizeof(void *);
+                void **end = dptr+slots-1;
+                while(dptr <= end){
+                    void *ptr = *dptr;
+                    if(ptr == NULL){
+                        break;
+                    }
+                    if(pack){
+                        PersistItem *item = (PersistItem *)Table_Get(tbl, 
+                            (Abstract *)Util_Wrapped(m, (util)ptr));
+                        if(item != NULL){
+                            Persist_PackAddr(item->coord.typeOf,
+                                item->coord.idx, (void **)dptr);
+
+                            PersistCoord *coord = (PersistCoord *)dptr;
+                            Test(coord->idx == item->coord.idx, 
+                                "Pointer has been set to have the slIdx", NULL);
+                        }else{
+                            args[0] = (Abstract *)Util_Wrapped(m, (util)ptr);
+                            args[1] = NULL;
+                            Error(ErrStream->m, (Abstract *)mit, 
+                                FUNCNAME, FILENAME, LINENUMBER,
+                                "Unable to find address @ in table,"
+                                " may be external to this MemCh", args);
+                        }
+                    }else{
+                        PersistCoord *coord = (PersistCoord *)dptr;
+                        printf("Unpacking %d %lu\n",
+                            coord->idx, (util)mit->input.arr[coord->idx]);
+                        fflush(stdout);
+                        Persist_UnpackAddr(coord, mit->input.arr);
+                    }
+                    checksum++;
+                    dptr++;
+                }
+            }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
+                Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
+                if(map == NULL){
+                    args[0] = (Abstract *)Type_ToStr(m, a->type.of);
+                    args[1] = NULL;
+                    Error(ErrStream->m, (Abstract *)mit, 
+                        FUNCNAME, FILENAME, LINENUMBER,
+                        "Map not found for type $, needed for mem persist", args);
+                    return ERROR;
+                }
+                if(a->type.of == TYPE_ITER){
+                    Iter *itp = (Iter *)a;
+                    Iter_Init(itp, itp->p);
+                }
+                for(i16 i = 1; i <= map->type.range; i++){
+                    RangeType *att = map->atts+i;
+                    if(att->of > _TYPE_RANGE_TYPE_START){
+                        Abstract *aa = ((void *)a)+att->range;
+                        if(pack){
+                            PersistItem *item = (PersistItem *)Table_Get(tbl, 
+                                (Abstract *)Util_Wrapped(m, (util)a));
+                            if(item != NULL){
+                                printf("Att Key %s\n", map->keys[i]->bytes);
+                                fflush(stdout);
+
+                                Persist_PackAddr(item->coord.typeOf,
+                                    item->coord.idx, (void **)&aa);
+                                PersistCoord *coord = (PersistCoord *)&aa;
+                                args[0] = (Abstract *)map->keys[i];
+                                args[1] = (Abstract *)I32_Wrapped(m, coord->idx);
+                                args[2] = NULL;
+                                Test(coord->idx == item->coord.idx, 
+                                    "Att $/$ pointer has been set to have the slIdx: $", args);
+                            }else{
+                                Error(ErrStream->m, (Abstract *)mit,
+                                    FUNCNAME, FILENAME, LINENUMBER,
+                                    "Unable to find address in table,"
+                                    " may be external to this MemCh", NULL);
+                            }
+                        }else{
+                            PersistCoord *coord = (PersistCoord *)&aa;
+                            printf("Unpacking Att %d %lu %s\n",
+                                coord->idx, (util)mit->input.arr[coord->idx],
+                                map->keys[i]->bytes);
+                            fflush(stdout);
+                            Test(coord->idx < 10, "Coord is within reason", NULL);
+                            Persist_UnpackAddr(coord, mit->input.arr);
+                        }
+                        checksum++;
+                    }
+                }
+                if(!pack && a->type.of == TYPE_MEMCTX){
+                    *persist = (MemCh *)a;
+                }
+            }
+        }
+    }
+
+    return checksum;
 }
 
 status Persist_FlushFree(Stream *sm, MemCh *persist){
@@ -75,7 +151,6 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = MemIter_Get(&mit);
         if((mit.type.state & MORE) == 0){
-            printf("mit.slIdx %d\n", mit.slIdx);
             Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)a), 
                 (Abstract *)PersistItem_Make(m, mit.slIdx, (void *)a, a->type.of));
         }
@@ -90,97 +165,14 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
         Span_Add(pages, a);
     }
 
-    i16 checksum = 0;
     MemIter_Init(&mit, persist);
-    while((MemIter_Next(&mit) & END) == 0){
-        Abstract *a = MemIter_Get(&mit);
-        if((mit.type.state & MORE) == 0){
-            args[0] = (Abstract *)Type_ToStr(m, a->type.of);
-            args[1] = NULL;
-            Out("^c.Packing Item $^0.\n", args);
-            if(a->type.of == TYPE_POINTER_ARRAY){
-                void **dptr = (void **)(((void *)a)+sizeof(RangeType));
-                i32 slots = ((RangeType *)a)->range / sizeof(void *);
-                void **end = dptr+slots-1;
-                while(dptr <= end){
-                    void *ptr = *dptr;
-                    if(ptr == NULL){
-                        break;
-                    }
-                    PersistItem *item = (PersistItem *)Table_Get(tbl, 
-                        (Abstract *)Util_Wrapped(m, (util)ptr));
-                    if(item != NULL){
-                        printf("   item ptr was %p: ", ptr);
-                        fflush(stdout);
-                        Bits_Print(OutStream, ptr, sizeof(void *), DEBUG|MORE);
-                        printf("\n");
-                        fflush(stdout);
-                        Persist_PackAddr(item->coord.typeOf,
-                            item->coord.idx, (void **)dptr);
-                        checksum++;
-                        printf("   item coord: ");
-                        fflush(stdout);
-                        PersistCoords_Print(OutStream, (PersistCoord *)dptr, DEBUG);
-                        printf("\n");
-                        fflush(stdout);
-                    }else{
-                        args[0] = (Abstract *)Util_Wrapped(m, (util)ptr);
-                        args[1] = NULL;
-                        Error(ErrStream->m, (Abstract *)persist, 
-                            FUNCNAME, FILENAME, LINENUMBER,
-                            "Unable to find address @ in table,"
-                            " may be external to this MemCh", args);
-                    }
-                    dptr++;
-                }
-            }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
-                Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
-                if(map == NULL){
-                    args[0] = (Abstract *)Type_ToStr(m, a->type.of);
-                    args[1] = NULL;
-                    Error(ErrStream->m, (Abstract *)persist, 
-                        FUNCNAME, FILENAME, LINENUMBER,
-                        "Map not found for type $, needed for mem persist", args);
-                    return ERROR;
-                }
-                if(a->type.of == TYPE_ITER){
-                    Iter *itp = (Iter *)a;
-                    Iter_Init(itp, itp->p);
-                }
-                for(i16 i = 1; i <= map->type.range; i++){
-                    RangeType *att = map->atts+i;
-                    if(att->of > _TYPE_RANGE_TYPE_START){
-                        Abstract *aa = ((void *)a)+att->range;
-                        PersistItem *item = (PersistItem *)Table_Get(tbl, 
-                            (Abstract *)Util_Wrapped(m, (util)a));
-                        if(item != NULL){
-                            printf("   item attr\n");
-                            fflush(stdout);
-                            Persist_PackAddr(item->coord.typeOf,
-                                item->coord.idx, (void **)&aa);
-                            checksum++;
-                        }else{
-                            Error(ErrStream->m, (Abstract *)persist,
-                                FUNCNAME, FILENAME, LINENUMBER,
-                                "Unable to find address in table,"
-                                " may be external to this MemCh", NULL);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    i16 checksum = Persist_PackMemCh(m, &mit, tbl, NULL);
 
     PersistHeader hdr = {
         .pages = (i16)pages->nvalues,
         .checksum = checksum
     };
     Stream_Bytes(sm, (byte *)&hdr, sizeof(PersistHeader));
-
-    args[0] = (Abstract *)I16_Wrapped(OutStream->m, hdr.pages);
-    args[1] = (Abstract *)I16_Wrapped(OutStream->m, hdr.checksum);
-    args[2] = NULL;
-    Out("^y.Wrote header ^D.$^d.pages and ^D.$^d.changes^0.\n", args);
 
     Iter_Init(&it, pages);
     while((Iter_Next(&it) & END) == 0){
@@ -212,19 +204,11 @@ MemCh *Persist_FromStream(Stream *sm){
                 break;
             }
             r |= PROCESSING;
-            args[0] = (Abstract *)I16_Wrapped(OutStream->m, hdr.pages);
-            args[1] = (Abstract *)I16_Wrapped(OutStream->m, hdr.checksum);
-            args[2] = NULL;
-            Out("^y.Found header ^D.$^d.pages and ^D.$^d.changes^0.\n", args);
             pages = (Abstract **)Bytes_Alloc(sm->m, hdr.pages*sizeof(void *), TYPE_POINTER_ARRAY);
         }
 
         if(count >= hdr.pages){
             r |= SUCCESS;
-            args[0] = (Abstract *)I16_Wrapped(OutStream->m, hdr.pages);
-            args[1] = (Abstract *)I16_Wrapped(OutStream->m, count);
-            args[2] = NULL;
-            Out("^y.Done! have ^D.$^d.count of ^D.$^d.pages^0.\n", args);
             break;
         }
 
@@ -250,65 +234,9 @@ MemCh *Persist_FromStream(Stream *sm){
 
     if(r & SUCCESS){
         r &= ~SUCCESS;
-        /* do replace adder thing here */
         MemIter mit;
         MemIter_InitArr(&mit, pages, hdr.pages-1);
-        while((MemIter_Next(&mit) & END) == 0){
-            Abstract *a = MemIter_Get(&mit);
-            if((mit.type.state & MORE) == 0){
-                args[0] = (Abstract *)Type_ToStr(m, a->type.of);
-                args[1] = NULL;
-                Out("^c.Item $^0.\n", args);
-                if(a->type.of == TYPE_POINTER_ARRAY){
-                    void **dptr = (void **)(((void *)a)+sizeof(RangeType));
-                    i32 slots = ((RangeType *)a)->range / sizeof(void *);
-                    void **end = dptr+slots-1;
-                    while(dptr <= end){
-                        void *ptr = *dptr;
-                        if(ptr != NULL){
-                            checksum++;
-                            printf("   item ptr\n");
-                            printf("   item coord wasX: ");
-                            fflush(stdout);
-                            PersistCoords_Print(OutStream, (PersistCoord *)dptr, DEBUG);
-                            Persist_UnpackAddr((PersistCoord *)dptr, mit.input.arr);
-                            printf(" ptr now: %lu\n", (unsigned long)ptr);
-                            fflush(stdout);
-                        }
-                        dptr++;
-                    }
-                }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
-                    Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
-                    if(map == NULL){
-                        args[0] = (Abstract *)Type_ToStr(m, a->type.of);
-                        args[1] = NULL;
-                        Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
-                            "Map not found for type $, needed for mem persist", args);
-                        r |= ERROR;
-                        break;
-                    }
-                    if(a->type.of == TYPE_ITER){
-                        Iter *itp = (Iter *)a;
-                        Iter_Init(itp, itp->p);
-                    }
-                    for(i16 i = 1; i <= map->type.range; i++){
-                        RangeType *att = map->atts+i;
-                        if(att->of > _TYPE_RANGE_TYPE_START){
-                            printf("   item attr %s\n", map->keys[i]->bytes);
-                            fflush(stdout);
-                            void *aa = ((void *)a)+att->range;
-                            Persist_UnpackAddr((PersistCoord *)aa, mit.input.arr);
-                            checksum++;
-                        }
-                    }
-                    if(a->type.of == TYPE_MEMCTX){
-                        persist = (MemCh *)a; 
-                        Iter_Init(&persist->it, persist->it.p);
-                        printf("persist->it.value %p", persist->it.value);
-                    }
-                }
-            }
-        }
+        checksum = Persist_PackMemCh(m, &mit, NULL, &persist);
     }
 
     if(checksum != hdr.checksum){
