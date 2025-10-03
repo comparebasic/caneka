@@ -18,9 +18,6 @@ status Persist_Tests(MemCh *gm){
     };
 
     Persist_PackAddr(s->type.of, slIdx, (void *)&s);
-
-    PersistCoords_Print(OutStream, (PersistCoord *)&s, DEBUG);
-
     PersistCoord *coord = (PersistCoord *)&s;
 
     r |= Test((void *)s != orig, "Pointer has been mutated and packed", NULL);
@@ -49,10 +46,6 @@ status Persist_Tests(MemCh *gm){
     Span_Add(p, (Abstract *)vec);
     pst->owner = (Abstract *)p;
 
-    args[0] = (Abstract *)pst;
-    args[1] = NULL;
-    Out("^p.Persist MemCh: &^0\n", args);
-
     Str *path = IoUtil_GetCwdPath(m, Str_CstrRef(m, "dist/test/persist.mem"));
 
     i32 fd = open(Str_Cstr(m, path), O_WRONLY|O_CREAT, 00644);
@@ -75,7 +68,6 @@ status Persist_Tests(MemCh *gm){
     r |= Test(loaded != NULL, 
         "Persist From Stream returns non-null", NULL);
 
-
     s = Span_Get((Span *)loaded->owner, 0);
     Str *expected = Str_CstrRef(m, "One");
     r |= Test(pst != loaded,
@@ -87,13 +79,6 @@ status Persist_Tests(MemCh *gm){
     args[1] = (Abstract *)s;
     r |= Test(Equals((Abstract *)s, (Abstract *)expected),
         "Str has equivilent value, expected &, have &", args);
-
-    args[0] = (Abstract *)loaded;
-    args[1] = (Abstract *)loaded->owner;
-    args[2] = NULL;
-    Out("^p.Loaded MemCh & with owner &^0\n", args);
-
-
 
     MemCh_Free(m);
     DebugStack_Pop();

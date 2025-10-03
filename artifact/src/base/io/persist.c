@@ -33,13 +33,6 @@ status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
 
 i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
     boolean pack = (mit->type.state & MEM_ITER_STREAM) == 0;
-    if(!pack){
-        printf("Pages: %d\n", mit->maxSlIdx);
-        for(i32 i = 0; i <= mit->maxSlIdx; i++){
-            printf("  Page %d %lu\n", i, (util)mit->input.arr[i]);
-        }
-    }
-
     Abstract *args[5];
     i16 checksum = 0;
     while((MemIter_Next(mit) & END) == 0){
@@ -62,21 +55,16 @@ i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                                 item->coord.idx, (void **)dptr);
 
                             PersistCoord *coord = (PersistCoord *)dptr;
-                            Test(coord->idx == item->coord.idx, 
-                                "Pointer has been set to have the slIdx", NULL);
                         }else{
                             args[0] = (Abstract *)Util_Wrapped(m, (util)ptr);
                             args[1] = NULL;
                             Error(ErrStream->m, (Abstract *)mit, 
                                 FUNCNAME, FILENAME, LINENUMBER,
-                                "Unable to find address @ in table,"
+                                "PTR ARRAY Unable to find address @ in table,"
                                 " may be external to this MemCh", args);
                         }
                     }else{
                         PersistCoord *coord = (PersistCoord *)dptr;
-                        printf("Unpacking %d page:%lu\n",
-                            coord->idx, (util)mit->input.arr[coord->idx]);
-                        fflush(stdout);
                         Persist_UnpackAddr(coord, mit->input.arr);
                     }
                     checksum++;
@@ -99,37 +87,25 @@ i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                 for(i16 i = 1; i <= map->type.range; i++){
                     RangeType *att = map->atts+i;
                     if(att->of > _TYPE_RANGE_TYPE_START){
-
                         Abstract **aa = ((void *)a)+att->range;
-                        printf("Offset:%d typeOf:%d\n", (i32)att->range, (i32)att->of);
-                        fflush(stdout);
                         if(pack){
                             PersistItem *item = (PersistItem *)Table_Get(tbl, 
-                                (Abstract *)Util_Wrapped(m, (util)aa));
+                                (Abstract *)Util_Wrapped(m, (util)*aa));
                             if(item != NULL){
                                 Persist_PackAddr(item->coord.typeOf,
-                                    item->coord.idx, (void **)&aa);
+                                    item->coord.idx, (void **)aa);
                                 PersistCoord *coord = (PersistCoord *)aa;
-                                args[0] = (Abstract *)map->keys[i];
-                                args[1] = (Abstract *)I32_Wrapped(m, coord->idx);
-                                args[2] = NULL;
-                                Test(coord->idx == item->coord.idx, 
-                                    "Att $/$ pointer has been set to have the slIdx: $", args);
                             }else{
                                 args[0] = (Abstract *)Util_Wrapped(m, (util)aa);
-                                args[1] = NULL;
+                                args[1] = (Abstract *)map->keys[i];
+                                args[2] = NULL;
                                 Error(ErrStream->m, (Abstract *)mit,
                                     FUNCNAME, FILENAME, LINENUMBER,
-                                    "Unable to find address $ in table,"
+                                    "Att Unable to find address $ for $ in table,"
                                     " may be external to this MemCh", args);
                             }
                         }else{
                             PersistCoord *coord = (PersistCoord *)aa;
-                            printf("Unpacking Att %d page:%lu %s\n",
-                                coord->idx, (util)mit->input.arr[coord->idx],
-                                map->keys[i]->bytes);
-                            fflush(stdout);
-                            Test(coord->idx < 10, "Coord is within reason", NULL);
                             Persist_UnpackAddr(coord, mit->input.arr);
                         }
                         checksum++;
@@ -160,14 +136,14 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = MemIter_Get(&mit);
         if((mit.type.state & MORE) == 0){
-            Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)a), 
-                (Abstract *)PersistItem_Make(m, mit.slIdx, (void *)a, a->type.of));
+            void *ptr = (void *)a;
             if(a->type.of < _TYPE_RANGE_TYPE_END){
-                printf("Extra %d\n", a->type.of);
-                Abstract *head = ((void *)a)+sizeof(RangeType);
-                Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)head), 
-                    (Abstract *)PersistItem_Make(m, mit.slIdx, (void *)head, a->type.of));
+                void *orig = ptr;
+                ptr += sizeof(RangeType);
             }
+
+            Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)ptr), 
+                (Abstract *)PersistItem_Make(m, mit.slIdx, (void *)ptr, a->type.of));
         }
     }
 
