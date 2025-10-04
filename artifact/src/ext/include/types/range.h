@@ -59,6 +59,8 @@ enum ext_types {
     TYPE_FRAME,
     TYPE_ENC_PAIR,
     TYPE_FMT_HTML,
+    TYPE_QUEUE,
+    TYPE_QUEUE_CRIT,
     _IO_START,
     IO_RECV,
     IO_RUN,

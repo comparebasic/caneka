@@ -1,0 +1,27 @@
+enum queue_flags {
+    QUEUE_SINGLE_IDX = 1 << 8,
+};
+
+typedef word gobits;
+
+typedef struct queue {
+    Type type;
+    word _;
+    word go;
+    Abstract *value;
+    Iter itemsIt;
+    Span *available;
+    struct {
+        Span/*<QueueCrit>*/ *handlers;
+        Span/*<iter>*/ *data; 
+    } crit;
+} Queue;
+
+Queue *Queue_Make(MemCh *m);
+status Queue_AddHandler(Queue *q, QueueCrit *crit);
+#define *Queue_GetMem((q)) ((q)->itemsIt.p->m)
+#define Queue_Get((q)) ((q)->value)
+status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util value);
+status Queue_SetHalfCriteria(Queue *q, i32 critIdx, i32 idx, quad value);
+gobits Queue_CheckSlab(Queue *q);
+status Queue_Next(Queue *q);
