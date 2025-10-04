@@ -3,54 +3,58 @@
 
 #define TIME_BUFF_LEN 64
 
-status Time_Delay(i64 sec, i64 nsec){
-    struct timespec ts = {sec, nsec};
-    struct timespec remaining;
-    nanosleep(&ts, &remaining);
+microTime MicroTime_FromSpec(struct timespec *ts){
+    return (ts->tv_sec * 1000) + (ts->tv_nsec / 1000);
+}
+
+void MicroTime_ToSpec(struct timespec *ts, microTime tm){
+    ts->tv_sec = tm / 1000;
+    ts->tv_nsec = tm % 1000; 
+}
+
+status Time_Delay(microTime tm, microTime *remaining){
+    struct timespec ts;
+    MicroTime_ToSpec(&ts, tm);
+    struct timespec remain;
+    nanosleep(&ts, &remain);
+    if(remaining != NULL){
+        *remaining = MicroTime_FromSpec(&remain);
+    }
     return SUCCESS;
 }
 
-Str *Time64_ToStr(MemCh *m, time64_t t){
+Str *MicroTime_ToStr(MemCh *m, microTime tm){
     Str *s = Str_Make(m, TIME_BUFF_LEN);
     struct timespec ts;
-    struct tm tm;
-    Time64_ToSpec(&ts, t);
+    struct tm value;
+    MicroTime_ToSpec(&ts, tm);
 
-    gmtime_r(&ts.tv_sec, &tm);
-    strftime((char *)s->bytes, TIME_BUFF_LEN, "%Y-%m-%dT%H:%M:%S.", &tm);
+    gmtime_r(&ts.tv_sec, &value);
+    strftime((char *)s->bytes, TIME_BUFF_LEN, "%Y-%m-%dT%H:%M:%S.", &value);
     s->length = strlen((char *)s->bytes);
     Str_AddI64(s, ts.tv_nsec);
     Str_Add(s, (byte *)"+00", 3);
     return s;
 }
 
-time64_t Time64_FromSpec(struct timespec *ts){
-    return (ts->tv_sec * 1000000000) + ts->tv_nsec;  
-}
-
-time64_t Time64_Now(){
+microTime MicroTime_Now(){
     struct timespec ts;
     clock_gettime(0, &ts);
-    return Time64_FromSpec(&ts);
+    return MicroTime_FromSpec(&ts);
 }
 
-void Time64_ToSpec(struct timespec *ts, time64_t tm){
-    ts->tv_sec = tm / 1000000000;
-    ts->tv_nsec = tm % 1000000000; 
-}
-
-time64_t Time64_FromMillis(i64 millis){
+microTime MicroTime_FromMillis(i64 millis){
     return millis * 1000000;
 }
 
-i64 Time64_ToMillis(time64_t tm){
+i64 MicroTime_ToMillis(microTime tm){
     return tm / 1000000;
 }
 
-Single *Time64_Wrapped(MemCh *m, time64_t n){
+Single *MicroTime_Wrapped(MemCh *m, microTime tm){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_TIME64;
-    sgl->val.value = (util)n;
+    sgl->val.value = (util)tm;
     return sgl;
 }
 

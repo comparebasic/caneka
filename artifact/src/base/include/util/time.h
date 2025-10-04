@@ -1,10 +1,13 @@
-Str *Time64_ToStr(MemCh *m, time64_t t);
-time64_t Time64_FromSpec(struct timespec *ts);
-time64_t Time64_Now();
-void Time64_ToSpec(struct timespec *ts, time64_t tm);
-time64_t Time64_FromMillis(i64 millis);
-i64 Time64_ToMillis(time64_t tm);
-Single *Time64_Wrapped(MemCh *m, time64_t n);
+typedef i64 microTime;
+
+Str *MicroTime_ToStr(MemCh *m, microTime t);
+microTime MicroTime_Now();
+void MicroTime_ToSpec(struct timespec *ts, microTime tm);
+microTime MicroTime_FromSpec(struct timespec *ts);
+microTime MicroTime_FromMillis(i64 millis);
+i64 MicroTime_ToMillis(microTime tm);
+Single *MicroTime_Wrapped(MemCh *m, microTime n);
 Str *Time_Today(MemCh *m);
 Str *TimeSpec_ToDayStr(MemCh *m, struct timespec *ts);
-status Time_Delay(i64 sec, i64 nsec);
+microTime Time_Combine(microTime start, microTime add);
+status Time_Delay(microTime tm, microTime *remaining);

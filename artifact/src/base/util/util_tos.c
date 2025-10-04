@@ -170,9 +170,9 @@ static i64 WrappedB_Print(Stream *sm, Abstract *a, cls type, word flags){
     return total;
 }
 
-static i64 WrappedTime64_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedMicroTime_Print(Stream *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
-    Str *s = Time64_ToStr(sm->m, sg->val.value);
+    Str *s = MicroTime_ToStr(sm->m, sg->val.value);
     if(flags & (DEBUG|MORE)){
         Abstract *args[] = {
             (Abstract *)Str_CstrRef(sm->m, Type_ToChars(sg->type.of)),
@@ -221,7 +221,7 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)WrappedI16_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I8, (void *)WrappedI8_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_BYTE, (void *)WrappedB_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedTime64_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedMicroTime_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_DO, (void *)WrappedDo_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_MEMCOUNT, (void *)WrappedMemCount_Print);

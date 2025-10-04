@@ -113,6 +113,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Time",
+        Time_Tests,
+        "Time tests for converstion between unix syscalls and microTime.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Roebling Parser",
         NULL,
         NULL,

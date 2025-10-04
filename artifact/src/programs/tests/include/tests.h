@@ -49,6 +49,7 @@ status WwwNavTempl_Tests(MemCh *gm);
 status Persist_Tests(MemCh *gm);
 status TableUtilKey_Tests(MemCh *gm);
 status TableHKey_Tests(MemCh *gm);
+status Time_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

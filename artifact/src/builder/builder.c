@@ -385,7 +385,7 @@ static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, i
     status ret;
     int i = 0;
     while(((ret = SubStatus(&pd)) & (SUCCESS|ERROR)) == 0){
-        Time_Delay(0, 50000000);
+        Time_Delay(500, NULL);
     }
     if(ret & ERROR){
         r |= ERROR;
