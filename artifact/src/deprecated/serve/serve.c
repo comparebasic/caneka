@@ -114,53 +114,6 @@ status Serve_SetPollFds(Serve *sctx, Req *req){
     return SUCCESS;
 }
 
-status Serve_AcceptPoll(Serve *sctx, int delay){
-    status r = READY;
-    int new_fd = 0;
-    struct pollfd pfd = {
-        sctx->socket_fd,
-        POLLIN,
-        POLLHUP
-    };
-    int available = min(poll(&pfd, 1, delay), ACCEPT_AT_ONEC_MAX);
-    if(available == -1){
-        LogError("Error connecting to test socket %s\n", strerror(errno));
-    }
-    int accepted = 0;
-    while(available-- > 0){
-        new_fd = accept(sctx->socket_fd, (struct sockaddr*)NULL, NULL);
-        if(new_fd > 0){
-            accepted++;
-            sctx->metrics.open++;
-            fcntl(new_fd, F_SETFL, O_NONBLOCK);
-            Req *req = (Req *)sctx->def->req_mk(NULL, (Abstract *)sctx, sctx->type.state);
-            req->fd = new_fd;
-            req->handler = sctx->def->getHandler(sctx, req);
-            if(DEBUG_SERVE){
-                Debug_Print(sctx->def, 0, "Accept proto: ", DEBUG_SERVE, TRUE);
-                printf("\n");
-            }
-            if(DEBUG_SERVE){
-                Debug_Print(req, 0, "Accept req: ", DEBUG_SERVE, TRUE);
-                printf("\n");
-            }
-            req->queueIdx = Queue_Add(&(sctx->queue), (Abstract *)req); 
-            Serve_SetPollFds(sctx, req);
-            r |= req->type.state;
-        }else{
-            printf("none");
-            break;
-        }
-    }
-
-    if(DEBUG_SERVE_ACCEPT){
-        printf("\x1b[%dmAccepted %d new connections:", DEBUG_SERVE_ACCEPT, accepted);
-        Debug_Print(sctx, 0, "", DEBUG_SERVE_ACCEPT, FALSE);
-        printf("\n");
-    }
-
-    return r;
-}
 
 status Serve_ServeRound(Serve *sctx){
     DebugStack_Push("Serve_ServeRound", TYPE_CSTR); 
