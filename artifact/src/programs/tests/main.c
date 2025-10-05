@@ -264,6 +264,12 @@ static TestSet _Tests[] = {
         "Mem Persist testing.",
         FEATURE_COMPLETE,
     },
+    {
+        "Queue Tests",
+        Queue_Tests,
+        "Queue tests for file descriptors and time delays.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "TemplLogic Tests",

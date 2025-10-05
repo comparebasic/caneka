@@ -3,27 +3,24 @@
 
 static gobits Queue_CheckSlab(Queue *q);
 
-status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, void *value){
+i32 Queue_GetIdx(Queue *q){
+    return q->itemsIt.idx + q->localIdx;
+}
+
+status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     status r = READY;
     i32 slabIdx = idx / SPAN_STRIDE;
     MemCh *m = Queue_GetMem(q);
     void *slab = NULL;
-    boolean half = (q->type.state & QUEUE_CRIT_HALF) != 0; 
     if((slab = Span_Get(q->crit.data, slabIdx)) == NULL){
-        size_t sz = (half ? sizeof(word) : sizeof(util));
-        slab = (void *)Bytes_Alloc(m, sizeof(sz*SPAN_STRIDE), TYPE_BYTES_POINTER); 
+        slab = 
+            (void *)Bytes_Alloc(m, sizeof(sizeof(util)*SPAN_STRIDE), TYPE_BYTES_POINTER);
         r |= Span_Set(q->crit.data, slabIdx, (Abstract *)slab);
     } 
     i32 localIdx = idx-slabIdx*SPAN_STRIDE;
-    if(half){
-        word *hslab = (word *)slab;
-        hslab[localIdx] = *(word *)value;
-        r |= SUCCESS;
-    }else{
-        util *uslab = (util *)slab;
-        uslab[localIdx] = *(util *)value;
-        r |= SUCCESS;
-    }
+    util *uslab = (util *)slab;
+    uslab[localIdx] = *((util *)value);
+    r |= SUCCESS;
     return r;
 }
 
@@ -68,7 +65,7 @@ status Queue_Next(Queue *q){
         while((Iter_Next(&it) & END) == 0){
             QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
             void **dataSlab = Span_Get(q->crit.data, slabIdx);
-            q->go |= crit->func(crit, slab, dataSlab);
+            q->go |= crit->func(crit, slab, (util *)dataSlab);
         }
     }
 

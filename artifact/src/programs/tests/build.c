@@ -69,6 +69,7 @@ static BuildSubdir testsobj = { "tests", {
     "iter_tests.c",
     "time_tests.c",
     "binpin_tests.c",
+    "queue_tests.c",
     "file_tests.c",
     "fmthtml_tests.c",
     "debugstack_tests.c",
