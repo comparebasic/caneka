@@ -100,6 +100,31 @@ i64 Bits_PrintArray(Stream *sm, void *arr, i64 sz, i32 count){
     return total;
 }
 
+i64 Bits_PrintNum(Stream *sm, byte *bt, size_t length, word flags){
+    i64 total = 0;
+    Single sg = {{TYPE_WRAPPED_I8, 0}, 0};
+    for(int i = length-1; i <= 0; i--){
+        byte b = bt[i];
+        if(b == 0 && (flags & (MORE|DEBUG)) == MORE){
+            total += Stream_Bytes(sm, (byte *)"0", 1);
+        }else{
+            if(flags & MORE){
+                sg.val.b = b;
+                Abstract *args[] = {(Abstract *)&sg, NULL};
+                total += Fmt(sm, "$=", args);
+            }
+            for(int j = 7; j >= 0;j--){
+                total += Stream_Bytes(sm, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+            }
+        }
+        if(flags & MORE){
+            total += Stream_Bytes(sm, (byte *)" ", 1);
+        }
+    }
+    return total;
+}
+
+
 i64 Bits_Print(Stream *sm, byte *bt, size_t length, word flags){
     i64 total = 0;
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};

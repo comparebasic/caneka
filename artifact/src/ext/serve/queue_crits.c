@@ -1,17 +1,25 @@
 #include <external.h>
 #include <caneka.h>
 
-gobits QueueCrit_Fds(QueueCrit *crit, void **items, void *values){
+gobits QueueCrit_Fds(QueueCrit *crit, Abstract **items, util *values){
     word go = 0;
     i32 localIdx = 0;
-    struct pollfd *fds = (struct pollfd *)values;
-    i32 ready = poll(fds, SPAN_STRIDE, 1);
+    util *u = values;
+    for(i32 i = 0; i < SPAN_STRIDE; i++){
+        if(*u == 0){
+            ((struct pollfd *)u)->fd = -1;
+        }
+        u++;
+    }
+    struct pollfd *pfds = (struct pollfd *)values;
+    i32 ready = poll(pfds, SPAN_STRIDE, 1);
+    word base = 1;
     for(i32 i = 0; i < SPAN_STRIDE && ready > 0; i++){
-        if(poll(fds, 1, 1) > 0){
-            go |= (1 << i);
+        struct pollfd *pfd = pfds+i;
+        if(poll(pfd, 1, 1) > 0){
+            go |= (base << i);
             ready--;
         }
-        fds++;
     }
     return go;
 }

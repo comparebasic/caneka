@@ -12,10 +12,7 @@ typedef struct queue {
     Abstract *value;
     Iter itemsIt;
     Span *available;
-    struct {
-        Span/*<QueueCrit>*/ *handlers;
-        Span/*<iter>*/ *data; 
-    } crit;
+    Span/*<QueueCrit>*/ *handlers;
 } Queue;
 
 #define Queue_GetMem(q) ((q)->itemsIt.p->m)

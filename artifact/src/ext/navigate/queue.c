@@ -7,15 +7,26 @@ i32 Queue_GetIdx(Queue *q){
     return q->itemsIt.idx + q->localIdx;
 }
 
+status Queue_Set(Queue *q, i32 idx, Abstract *a){
+    status r = READY;
+    r |= Span_Set(q->itemsIt.p, idx, a);
+    if(q->itemsIt.type.state & MORE){
+        Iter_GetByIdx(&q->itemsIt, q->itemsIt.idx);
+        r |= MORE;
+    }
+    return r;
+}
+
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     status r = READY;
     i32 slabIdx = idx / SPAN_STRIDE;
     MemCh *m = Queue_GetMem(q);
     void *slab = NULL;
-    if((slab = Span_Get(q->crit.data, slabIdx)) == NULL){
+    QueueCrit *crit = Span_Get(q->handlers, critIdx);
+    if((slab = Span_Get(crit->data, slabIdx)) == NULL){
         slab = 
-            (void *)Bytes_Alloc(m, sizeof(sizeof(util)*SPAN_STRIDE), TYPE_BYTES_POINTER);
-        r |= Span_Set(q->crit.data, slabIdx, (Abstract *)slab);
+            (void *)Bytes_Alloc(m, sizeof(util)*SPAN_STRIDE, TYPE_BYTES_POINTER);
+        r |= Span_Set(crit->data, slabIdx, (Abstract *)slab);
     } 
     i32 localIdx = idx-slabIdx*SPAN_STRIDE;
     util *uslab = (util *)slab;
@@ -26,7 +37,9 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
 
 status Queue_Next(Queue *q){
     Span *p = q->itemsIt.p;
-    q->type.state &= ~(SUCCESS|NOOP);
+    Abstract *args[5];
+    MemCh *m = Queue_GetMem(q);
+    q->type.state &= ~(SUCCESS|NOOP|END);
     if(q->localIdx == SPAN_STRIDE-1){
         q->localIdx = 0;
         q->go = 0;
@@ -47,6 +60,7 @@ status Queue_Next(Queue *q){
         }
 
         while((q->itemsIt.type.state & (SUCCESS|END|ERROR)) == 0){
+            q->itemsIt.type.state |= DEBUG;
             Iter_GetByIdx(&q->itemsIt, idx);
             idx += SPAN_STRIDE;
         }
@@ -61,33 +75,36 @@ status Queue_Next(Queue *q){
         i32 slabIdx = q->itemsIt.idx / SPAN_STRIDE;
 
         Iter it;
-        Iter_Init(&it, q->crit.handlers);
+        Iter_Init(&it, q->handlers);
         while((Iter_Next(&it) & END) == 0){
             QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
-            void **dataSlab = Span_Get(q->crit.data, slabIdx);
-            q->go |= crit->func(crit, slab, (util *)dataSlab);
+            void **dataSlab = Span_Get(crit->data, slabIdx);
+            q->go |= crit->func(crit, (Abstract **)slab, (util *)dataSlab);
+        }
+
+        if(it.type.state & END && q->go == 0){
+            q->type.state |= END;
         }
     }
 
     if(q->go && (q->itemsIt.type.state & SUCCESS)){
         while(q->localIdx < SPAN_STRIDE){
             if(q->go & (1 << q->localIdx)){
-                void **slab = NULL;
+                void **ptr = NULL;;
                 if(p->dims == 0){
-                    slab = (void **)p->root; 
+                    ptr = (void **)q->itemsIt.p->root;
                 }else{
-                    slab = q->itemsIt.stack[1];
+                    ptr = *((void **)q->itemsIt.stack[1]);
                 }
 
-                void **ptr = (void **)q->itemsIt.stack[0];
                 if(ptr != NULL){
+                    ptr += q->localIdx;
                     q->value = *ptr;
                     q->type.state |= SUCCESS;
                 }else{
                     q->value = NULL;
                     q->type.state |= NOOP;
                 }
-                q->localIdx++;
                 break;
             }
             q->localIdx++;
@@ -99,9 +116,7 @@ status Queue_Next(Queue *q){
 
 status Queue_AddHandler(Queue *q, QueueCrit *crit){
     status r = READY;
-    r |= Span_Add(q->crit.handlers, (Abstract *)crit);
-    MemCh *m = Queue_GetMem(q);
-    r |= Span_Add(q->crit.data, (Abstract *)Iter_Make(m, Span_Make(m)));
+    r |= Span_Add(q->handlers, (Abstract *)crit);
     return r;
 }
 
@@ -110,7 +125,6 @@ Queue *Queue_Make(MemCh *m){
     q->type.of = TYPE_QUEUE;
     Iter_Init(&q->itemsIt, Span_Make(m));
     q->available = Span_Make(m);
-    q->crit.handlers = Span_Make(m);
-    q->crit.data = Span_Make(m);
+    q->handlers = Span_Make(m);
     return q;
 }

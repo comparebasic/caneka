@@ -5,4 +5,5 @@
 #include "transp.h"
 #include "format.h"
 #include "sequence.h"
+#include "serve.h"
 #include "doc.h"

@@ -77,10 +77,17 @@ Single *Util_Wrapped(MemCh *m, util u){
     return sgl;
 }
 
-Single *I16_Wrapped(MemCh *m, word w){
+Single *Word_Wrapped(MemCh *m, word w){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_WORD;
+    sgl->val.w = w;
+    return sgl;
+}
+
+Single *I16_Wrapped(MemCh *m, i16 w){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_I16;
-    sgl->val.w = w;
+    sgl->val.w = (word)w;
     return sgl;
 }
 

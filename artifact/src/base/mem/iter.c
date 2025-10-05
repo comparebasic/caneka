@@ -140,7 +140,7 @@ static status Iter_AddWithGaps(Iter *it, MemPage *pg){
 }
 
 static status _Iter_QueryPage(Iter *it, MemPage *pg){
-    it->type.state &= ~(SUCCESS|NOOP);
+    it->type.state &= ~(SUCCESS|NOOP|MORE);
     MemCh *m = it->p->m;
 
     if(it->type.state & SPAN_OP_ADD){
@@ -185,6 +185,7 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
         }
         void **ptr = (void **)exp_sl;
         *ptr = shelf_sl;
+        it->type.state |= MORE;
     }
 
     i8 dim = p->dims;
