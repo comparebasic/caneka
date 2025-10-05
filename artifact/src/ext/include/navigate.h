@@ -3,5 +3,7 @@
 #include "navigate/relation.h"
 #include "navigate/compare.h"
 #include "navigate/frame.h"
+#include "navigate/queue.h"
+#include "navigate/queue_crit.h"
 #include "navigate/navigate_tos.h"
 #include "navigate/navigate_cls.h"

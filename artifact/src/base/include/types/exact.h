@@ -1,3 +1,3 @@
-extern Lookup *ExactLookup;
+extern struct lookup *ExactLookup;
 boolean Exact(Abstract *a, Abstract *b);
-status Exact_Init(MemCh *m);
+status Exact_Init(struct mem_ctx *m);

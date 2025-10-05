@@ -56,6 +56,8 @@ static BuildSubdir navigateobj = { "navigate", {
     "relation.c",
     "compare.c",
     "frame.c",
+    "queue.c",
+    "queue_crit.c",
     "navigate_tos.c",
     "navigate_cls.c",
     NULL

@@ -40,6 +40,42 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     return r;
 }
 
+Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
+    if(x == NULL){
+        Fatal(func, file, line, "Cast from NULL", NULL);
+    }else {
+        if(x->type.of != type){
+            Abstract *args[] = {
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
+                NULL
+            };
+            Fatal(func, file, line, "Cast from Abstract mismatched type expecting '$', have '$'", args);
+            return NULL;
+        }
+    }
+    return x;
+}
+
+Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cls type){
+    if(x == NULL){
+        Fatal(func, file, line, "Cast from NULL", NULL);
+    }else{
+        if(!Ifc_Match(x->type.of, type)){
+            Abstract *args[] = {
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
+                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
+                NULL
+            };
+            Fatal(func, file, line, "Cast from Abstract mismatched interface, expecting '$', have '$'", args);
+            return NULL;
+        }
+    }
+    return x;
+}
+
+
+
 void Type_SetFlag(Abstract *a, word flags){
     a->type.state = (a->type.state & NORMAL_FLAGS) | flags;
 }

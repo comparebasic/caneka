@@ -7,10 +7,10 @@ enum blanked_types {
 typedef struct map {
     RangeType type;
     RangeType *atts;
-    Str **keys;
+    struct str **keys;
 } Map;
 
-Map *Map_Make(MemCh *m, i16 length, RangeType *atts, Str **keys);
-Table *Map_ToTable(MemCh *m, Map *map);
-Map *Map_FromTable(MemCh *m, Table *tbl, cls typeOf);
-status Maps_Init(MemCh *m);
+Map *Map_Make(struct mem_ctx *m, i16 length, RangeType *atts, struct str **keys);
+struct span *Map_ToTable(struct mem_ctx *m, Map *map);
+Map *Map_FromTable(struct mem_ctx *m, struct span *tbl, cls typeOf);
+status Maps_Init(struct mem_ctx *m);

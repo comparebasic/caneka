@@ -1,2 +1,2 @@
-status Clone_Init(MemCh *m);
-Abstract *Clone(MemCh *m, Abstract *a);
+status Clone_Init(struct mem_ctx *m);
+Abstract *Clone(struct mem_ctx *m, Abstract *a);
