@@ -1,10 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-status Http_RecieveMake(MemCh *m, Handler *chain, Abstract *arg, Abstract *source){
+status Http_RecieveAdd(Task *tsk){
     return NOOP;
 }
 
-status Http_RespondMake(MemCh *m, Handler *chain, Abstract *arg, Abstract *source){
+status Http_RespondAdd(Task *tsk){
     return NOOP;
 }

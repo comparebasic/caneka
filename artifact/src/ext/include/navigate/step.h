@@ -1,5 +1,4 @@
 enum step_flags {
-    STEP_QUEUE = 1 << 8,
     STEP_ADDED = 1 << 9,
 };
 

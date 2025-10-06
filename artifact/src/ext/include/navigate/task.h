@@ -4,10 +4,11 @@ typedef struct task {
     util u;
     MemCh *m;
     Abstract *data;
+    Abstract *source;
     Iter chainIt;
 } Task;
 
-Task *Task_Make(Span *chain);
+Task *Task_Make(Span *chain, Abstract *source);
 status Task_Cycle(Task *tsk);
 status Task_Tumble(Task *tsk);
 status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source);
