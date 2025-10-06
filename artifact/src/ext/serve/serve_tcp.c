@@ -173,12 +173,11 @@ status ServeTcp_Round(Serve *sctx){
     return r;
 }
 
-
 Req *ServeTcp_Make(TcpCtx *ctx){
-    Req *req = Req_Make(NULL, ctx);
+    Req *req = Req_Make(NULL, ctx, NULL);
     MemCh *m = req->m;
-    Handler *h = Handler_Make(m, ServeTcp_AcceptPoll,  (Abstract *)Queue_Make(m), (Abstract *)ctx);
-    h->type.state |= HANDLER_QUEUE;
-    h->depends = Handler_Make(m, ServeTcp_OpenTcp, NULL, (Abstract *)ctx);
+    req->chain = Handler_Make(m, ServeTcp_AcceptPoll,  (Abstract *)Queue_Make(m), (Abstract *)ctx);
+    Handler_Add(m, req->chain, ServeTcp_OpenTcp, NULL, (Abstract *)ctx);
+    req->chain->type.state |= HANDLER_QUEUE;
     return req;
 }
