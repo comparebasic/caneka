@@ -11,3 +11,10 @@ Abstract *Handler(MemCh *m, Handler *h, Req *req){
     }
     return h->func(m, (Abstract *)h, (Abstract *)req);
 }
+
+Handler *Handler_Make(MemCh *m, SourceMakerFunc func, Abstract *arg){
+    Handler *h = MemCh_AllocOf(m, sizeof(Handler), TYPE_HANDLER);
+    h->func = func;
+    h->arg = arg;
+    return h;
+}
