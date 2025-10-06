@@ -58,6 +58,8 @@ static BuildSubdir navigateobj = { "navigate", {
     "frame.c",
     "queue.c",
     "queue_crit.c",
+    "step.c",
+    "task.c",
     "navigate_tos.c",
     "navigate_cls.c",
     NULL

@@ -5,5 +5,7 @@
 #include "navigate/frame.h"
 #include "navigate/queue.h"
 #include "navigate/queue_crit.h"
+#include "navigate/step.h"
+#include "navigate/task.h"
 #include "navigate/navigate_tos.h"
 #include "navigate/navigate_cls.h"

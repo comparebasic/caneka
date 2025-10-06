@@ -50,73 +50,69 @@ static int openPortToFd(int port){
     return fd;
 }
 
-status ServeTcp_OpenTcp(Handler *chain){
-    Req *req = (Req *)as(chain->source, TYPE_TUMBLE_REQ);
-    TcpCtx *ctx = (TcpCtx *)as(req->source, TYPE_TCP_CTX);
+status ServeTcp_OpenTcp(Step *st, Task *tsk){
+    TcpCtx *ctx = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     i32 fd = openPortToFd(ctx->port);
-    struct pollfd *pfd = (struct pollfd *)&req->id;
+    struct pollfd *pfd = TskTask_GetPollFd(tsk);
     if(fd > 0){
         pfd->fd = fd;
         pfd->events = POLLIN;
         pfd->revents = 0;
-        chain->type.state |= SUCCESS;
+        step->type.state |= SUCCESS;
     }else{
-        chain->type.state |= ERROR;
+        step->type.state |= ERROR;
     }
-    return chain->type.state;
+    return step->type.state;
 }
 
-status ServeTcp_AcceptPoll(Handler *chain){
+status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     status r = READY;
     chain->type.state &= ~SUCCESS;
-    Req *req = (Req *)as(chain->source, TYPE_TUMBLE_REQ);
-    MemCh *m = req->m;
     Abstract *args[5];
     TcpCtx *ctx = (TcpCtx *)as(req->source, TYPE_TCP_CTX);
     Queue *q = (Queue *)as(req->data, TYPE_QUEUE);
-    struct pollfd *pfd = (struct pollfd *)&req->id;
+    struct pollfd *pfd = TskTask_GetPollFd(tsk);;
     i32 available = min(poll(pfd, 1, TCP_POLL_DELAY), ACCEPT_AT_ONEC_MAX);
     if(available == -1){
         args[0] = (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
-        Error(ErrStream->m, (Abstract *)ctx, 
+        Error(ErrStream->m, (Abstract *)tsk, 
             FUNCNAME, FILENAME, LINENUMBER,
             "Error connecting to test socket: $\n", args);
         chain->type.state |= ERROR;
         return chain->type.state;
     }
     i32 accepted = 0;
-    i32 new_fd = 0;
     while(available-- > 0){
-        new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
+        i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
             ctx->metrics.open++;
-            Req *child = Req_Make(NULL, NULL, (Abstract *)req);
+            Task *child = Task_Make(NULL, NULL, (Abstract *)tsk);
             
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
-            child->chain = ctx->mk(req->m, chain, 
-                (Abstract *)I32_Wrapped(req->m, new_fd), (Abstract *)req);
+            Step_Add(tsk,
+                ctx->func, (Abstract *)I32_Wrapped(req->m, new_fd), (Abstract *)tsk);
 
             child->idx = Queue_Add(q, (Abstract *)child);
-            Queue_SetCriteria(q, 0, child->idx, &child->id);
+            Queue_SetCriteria(q, 0, child->idx, &child->u);
 
             accepted++;
-            r |= req->type.state;
+            r |= tsk->type.state;
         }else{
             break;
         }
     }
 
     while((Queue_Next(q) & END) == 0){
-        Req *child = (Req *)Queue_Get(q);
-        Req_Cycle(child);
+        Task *child = (Req *)Queue_Get(q);
+        Task_Tumble(child);
     }
 
     if(q->type.state & END){
-        chain->type.state |= SUCCESS;
+        step->type.state |= SUCCESS;
     }
 
-    return chain->type.state;
+    return step->type.state;
 }
 
 

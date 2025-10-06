@@ -11,7 +11,7 @@ typedef struct tcp_ctx {
         i64 error;
         i64 served;
     } metrics;
-    HandlerMaker mk;
+    StepFunc func;
 } TcpCtx;
 
 TcpCtx *TcpCtx_Make(MemCh *m);
