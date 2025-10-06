@@ -45,9 +45,8 @@ Components:
   [ext](/artifact/src/ext/) module also contains the Class and Object system in
   it's [types](/artifact/src/ext/types) folder 
 - [programs](/artifact/src/programs/): Any programs that ship with the source
-  will be in this folder, presently [cnkbuild](/artifact/src/programs/cnkbuild)
-  and [tests](artifact/src/programs/tests) are the only things that are
-  included in the caneka sources.
+  will be in this folder, presently [tests](artifact/src/programs/tests) is the
+  only meaningful program in this folder.
 - [deprecated](/artifact/src/deprecated/): some features have not been moved
   over since the new base was written and can be found in the deprecated
   folder. All of these features will eventually move to the `ext` folder.
@@ -60,7 +59,7 @@ To build and test Caneka run:
 
     ./scripts/test.sh
 
-There are other scripts in the [/scripts/](/scripts) folder provide quick
+There are other scripts in the [/scripts/](/scripts/) folder provide quick
 commands.
 
 Each folder within the [src](/artifact/src) artifact folder, have a file in
