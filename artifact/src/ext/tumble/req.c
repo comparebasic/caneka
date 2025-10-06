@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Req_Run(Req *req){
+status Req_Cycle(Req *req){
     do {
         req->chain->arg = Handler(req->m, req->chain, req);
     }(while(

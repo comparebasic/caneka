@@ -78,9 +78,14 @@ static BuildSubdir parserobj = { "parser", {
 
 static BuildSubdir serveobj = { "serve", {
     "queue_crits.c",
+    "serve_tcp.c",
     NULL
 }};
 
+static BuildSubdir httpobj = { "serve/proto", {
+    "http.c",
+    NULL
+}};
 
 static BuildSubdir sequenceobj = { "sequence", {
     "sequence.c",
@@ -129,6 +134,7 @@ static BuildSubdir *objdirs[] = {
     &navigateobj,
     &sequenceobj,
     &serveobj,
+    &httpobj,
     &parserobj,
     &fmtobj,
     &formatobj,

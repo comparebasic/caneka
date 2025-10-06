@@ -6,4 +6,5 @@
 #include "format.h"
 #include "sequence.h"
 #include "tumble.h"
+#include "serve.h"
 #include "doc.h"

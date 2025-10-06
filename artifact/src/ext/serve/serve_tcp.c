@@ -13,78 +13,92 @@ static int openPortToFd(int port){
 	serv_addr.sin_port = htons(port);
 
     if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
-        Fatal("openPortToFd setting nonblock\n", TYPE_SERVECTX);
+        Error(ErrStream->m, NULL,
+            FUNCNAME, FILENAME, LINENUMBER,
+            "openPortToFd setting nonblock", NULL);
 		return -1;
     }
 
     int one = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0) {
-        Fatal("openPortToFd setting reuse addr\n", TYPE_SERVECTX);
+        Error(ErrStream->m, NULL,
+            FUNCNAME, FILENAME, LINENUMBER,
+            "openPortToFd setting reuse addr", NULL);
 		return -1;
 	}
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(int)) < 0) {
-        Fatal("openPortToFd setting reuse addr\n", TYPE_SERVECTX);
+        Error(ErrStream->m, NULL,
+            FUNCNAME, FILENAME, LINENUMBER,
+            "openPortToFd setting reuse addr", NULL);
 		return -1;
 	}
 
 	if(bind(fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) != 0){
-        Fatal("openPortToFd binding\n", TYPE_SERVECTX);
+        Error(ErrStream->m, NULL,
+            FUNCNAME, FILENAME, LINENUMBER,
+            "openPortToFd binding", NULL);
 		return -1;
     }
 
 	if(listen(fd, 10) != 0){
-        Fatal("openPortToFd listening\n", TYPE_SERVECTX);
+        Error(ErrStream->m, NULL,
+            FUNCNAME, FILENAME, LINENUMBER,
+            "openPortToFd listening", NULL);
 		return -1;
     };
 
     return fd;
 }
 
-Abstract *ServeTcp_OpenTcp(MemCh *m, Handler *chain, Req *req){
-    ServeTcp *ctx = as(chain->args, TYPE_SERVE_TCP_ARG);
+status ServeTcp_OpenTcp(Handler *chain){
+    Req *req = (Req *)as(chain->source, TYPE_TUMBLE_REQ);
+    TcpCtx *ctx = (TcpCtx *)as(req->source, TYPE_TCP_CTX);
     i32 fd = openPortToFd(ctx->port);
+    struct pollfd *pfd = (struct pollfd *)&req->id;
     if(fd > 0){
-        h->type.state |= SUCCESS;
+        pfd->fd = fd;
+        pfd->events = POLLIN;
+        pfd->revents = 0;
+        chain->type.state |= SUCCESS;
     }else{
-        h->type.state |= ERROR;
+        chain->type.state |= ERROR;
     }
-    return h->type.state;
+    return chain->type.state;
 }
 
-Abstract *ServeTcp_AcceptPoll(MemCh *m, Handler *chain, Req *req){
+status ServeTcp_AcceptPoll(Handler *chain){
     status r = READY;
+    chain->type.state &= ~SUCCESS;
+    Req *req = (Req *)as(chain->source, TYPE_TUMBLE_REQ);
+    MemCh *m = req->m;
     Abstract *args[5];
-    TcpCtx *ctx = as(req->source, TYPE_TCP_CTX);
-    Queue *q = as(req->arg, TYPE_QUEUE);
-    i32 new_fd = 0;
-    struct pollfd pfd = {
-        req->fd,
-        POLLIN,
-        0
-    };
-    i32 available = min(poll(&pfd, 1, delay), ACCEPT_AT_ONEC_MAX);
+    TcpCtx *ctx = (TcpCtx *)as(req->source, TYPE_TCP_CTX);
+    Queue *q = (Queue *)as(req->data, TYPE_QUEUE);
+    struct pollfd *pfd = (struct pollfd *)&req->id;
+    i32 available = min(poll(pfd, 1, TCP_POLL_DELAY), ACCEPT_AT_ONEC_MAX);
     if(available == -1){
         args[0] = (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
         Error(ErrStream->m, (Abstract *)ctx, 
             FUNCNAME, FILENAME, LINENUMBER,
             "Error connecting to test socket: $\n", args);
-        h->type.state |= ERROR;
-        return h->type.state;
+        chain->type.state |= ERROR;
+        return chain->type.state;
     }
     i32 accepted = 0;
+    i32 new_fd = 0;
     while(available-- > 0){
-        new_fd = accept(req->fd, (struct sockaddr*)NULL, NULL);
+        new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
             ctx->metrics.open++;
+            Req *child = Req_Make(NULL, NULL, (Abstract *)req);
+            
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
-            Handler *chain = ctx->mk(req->m, (Abstract *)ctx, (Abstract *)req);
-            Req *child = Req_Make(chain, (Abstract *)req);
-            child->fd = new_fd;
+            child->chain = ctx->mk(req->m, chain, 
+                (Abstract *)I32_Wrapped(req->m, new_fd), (Abstract *)req);
 
-            child->idx = Queue_Add(q, child);
-            struct pollfd pfd = { child->fd, POLLOUT|POLLIN, 0};
-            Queue_SetCriteria(q, 0, idx, &pfd);
+            child->idx = Queue_Add(q, (Abstract *)child);
+            Queue_SetCriteria(q, 0, child->idx, &child->id);
 
             accepted++;
             r |= req->type.state;
@@ -94,18 +108,22 @@ Abstract *ServeTcp_AcceptPoll(MemCh *m, Handler *chain, Req *req){
     }
 
     while((Queue_Next(q) & END) == 0){
-        Req *child = Queue_Get(q);
-        Req_Run(child);
+        Req *child = (Req *)Queue_Get(q);
+        Req_Cycle(child);
     }
 
-    return NULL;
+    if(q->type.state & END){
+        chain->type.state |= SUCCESS;
+    }
+
+    return chain->type.state;
 }
 
 
+/*
 status ServeTcp_Round(Serve *sctx){
     DebugStack_Push("Serve_ServeRound", TYPE_CSTR); 
     status r = READY;
-    /*
     Queue *q = &sctx->queue;
 
     if(q->count == 0){
@@ -168,13 +186,13 @@ status ServeTcp_Round(Serve *sctx){
 
     sctx->metrics.ticks++;
     Delay();
-    */
     DebugStack_Pop();
     return r;
 }
+*/
 
 Req *ServeTcp_Make(TcpCtx *ctx){
-    Req *req = Req_Make(NULL, ctx, NULL);
+    Req *req = Req_Make(NULL, NULL, (Abstract *)ctx);
     MemCh *m = req->m;
     req->chain = Handler_Make(m, ServeTcp_AcceptPoll,  (Abstract *)Queue_Make(m), (Abstract *)ctx);
     Handler_Add(m, req->chain, ServeTcp_OpenTcp, NULL, (Abstract *)ctx);

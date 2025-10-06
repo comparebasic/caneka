@@ -1,3 +1,5 @@
+#define TCP_POLL_DELAY 10
+#define ACCEPT_AT_ONEC_MAX 192
 typedef struct tcp_ctx {
     Type type;
     i32 port;
@@ -9,7 +11,7 @@ typedef struct tcp_ctx {
         i64 error;
         i64 served;
     } metrics;
-    SourceMakerFunc mk;
+    HandlerMaker mk;
 } TcpCtx;
 
 TcpCtx *TcpCtx_Make(MemCh *m);

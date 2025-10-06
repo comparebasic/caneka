@@ -9,4 +9,4 @@ typedef struct serve_req {
 } Req;
 
 Req *Req_Make(Handler *chain, Abstract *arg, Abstract *source);
-status Req_Run(Req *req);
+status Req_Cycle(Req *req);
