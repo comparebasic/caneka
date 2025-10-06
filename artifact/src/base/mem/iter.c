@@ -583,6 +583,15 @@ status Iter_Add(Iter *it, void *value){
     return r;
 }
 
+status Iter_AddOn(Iter *it, void *value){
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
+    it->idx = it->p->max_idx;
+    it->value = value;
+    status r = Iter_Query(it);
+    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|PROCESSING);
+    return r;
+}
+
 status Iter_Insert(Iter *it, i32 idx, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_ADD|FLAG_ITER_CONTINUE);
     it->idx = idx;
