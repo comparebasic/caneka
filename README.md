@@ -40,7 +40,7 @@ Components:
 - [ext](/artifact/src/ext/): all other features are found in the extended
   sources in the folder ext. This includes the
   [parser](/artifact/src/ext/parser/) and beginings of the
-  [server](/artifact/src/ext/server/) folder. The server heavily leverages
+  [serve](/artifact/src/ext/serve/) folder. The server heavily leverages
   components in the [navigate](/artifact/src/ext/navigate/) module.  The
   [ext](/artifact/src/ext/) module also contains the Class and Object system in
   it's [types](/artifact/src/ext/types) folder 
