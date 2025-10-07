@@ -115,6 +115,11 @@ status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     return st->type.state;
 }
 
+status ServeTcp_SetupQueue(Step *st, Task *tsk){
+    tsk->data = Queue_Make(m); 
+    st->type.state |= SUCCESS;
+    return st->type.state;
+}
 
 /*
 status ServeTcp_Round(Serve *sctx){
@@ -190,7 +195,7 @@ status ServeTcp_Round(Serve *sctx){
 Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, (Abstract *)ctx);
     Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL);
-    tsk->data = (Abstract *)Queue_Make(tsk->m);
     Task_AddStep(tsk, ServeTcp_OpenTcp, (Abstract *)ctx, NULL);
+    Task_AddStep(tsk, ServeTcp_SetupQueue, (Abstract *)ctx, NULL);
     return tsk;
 }

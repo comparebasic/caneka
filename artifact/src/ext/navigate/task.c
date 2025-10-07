@@ -8,10 +8,18 @@ status Task_Tumble(Task *tsk){
         Step *st = Iter_Current(&tsk->chainIt);
         status r = READY;
         if((st->type.state & (SUCCESS|ERROR|NOOP)) == 0){
+            r |= PROCESSING;
             r = st->func(st, tsk);
         }
-        if(((r & MORE) == 0) && st->type.state & (SUCCESS|NOOP)){
-            Iter_PrevRemove(&tsk->chainIt);
+        if(((r & MORE) == 0)){
+            if(st->type.state & SUCCESS){
+                Iter_PrevRemove(&tsk->chainIt);
+            if(st->type.state & NOOP){
+                Iter_Prev(&tsk->chainIt);
+            }
+            if((tsk->chainIt.type.state & END) == 0){
+               tsk->type.state |= MORE; 
+            }
         }
     } while(tsk->type.state & MORE);
 

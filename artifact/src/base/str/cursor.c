@@ -89,6 +89,29 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
     return v;
 }
 
+status Cursor_SetNextStr(Cursor *curs, Str *s, i32 max){
+    status r = READY;
+    if(max < 0){
+        Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
+            "Max is less than zero when requesting the next cursor str");
+        return ERROR;
+    }
+    if(curs->ptr == NULL){
+        r |= Cursor_SetStr(curs);
+    }
+    if(r & SUCCESS)
+        s->bytes = curs->ptr;
+        s->length = min(curs->end-curs->start+1, max);
+        s->alloc = s->length;
+    }else{
+        s->bytes = NULL;
+        s->length = 0
+        s->alloc = 0;
+        r |= NOOP;
+    }
+    return r;
+}
+
 status Cursor_Incr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
     if(curs->ptr == NULL){

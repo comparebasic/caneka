@@ -52,6 +52,7 @@ status TableHKey_Tests(MemCh *gm);
 status Time_Tests(MemCh *gm);
 status Queue_Tests(MemCh *gm);
 status TaskStep_Tests(MemCh *gm);
+status ServeTcp_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

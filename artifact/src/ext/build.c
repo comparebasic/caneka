@@ -79,8 +79,9 @@ static BuildSubdir parserobj = { "parser", {
 }};
 
 static BuildSubdir serveobj = { "serve", {
-    "queue_crits.c",
     "serve_tcp.c",
+    "serve_tcp_crits.c",
+    "serve_tcp_steps.c",
     NULL
 }};
 

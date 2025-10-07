@@ -273,6 +273,12 @@ static TestSet _Tests[] = {
     {
         "TaskStep Tests",
         TaskStep_Tests,
+        "Task/Step and Task_Tumble tests.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "ServeTcp Tests",
+        ServeTcp_Tests,
         "Queue tests for file descriptors and time delays.",
         FEATURE_COMPLETE,
     },
