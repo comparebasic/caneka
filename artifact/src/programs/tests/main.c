@@ -270,40 +270,12 @@ static TestSet _Tests[] = {
         "Queue tests for file descriptors and time delays.",
         FEATURE_COMPLETE,
     },
-    /*
     {
-        "TemplLogic Tests",
-        TemplLogic_Tests,
-        "Testing templating logic tags in a few loops over variables.",
+        "TaskStep Tests",
+        TaskStep_Tests,
+        "Queue tests for file descriptors and time delays.",
         FEATURE_COMPLETE,
     },
-    {
-        "Www Nav Tests",
-        WwwNav_Tests,
-        "Testing Html Nav Features.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Www Nav Templ Tests",
-        WwwNavTempl_Tests,
-        "Testing Html Nav Templating.",
-        FEATURE_COMPLETE,
-    },
-    */
-    /*
-    {
-        "TablePreKey",
-        TablePreKey_Tests,
-        "Testing the ability to add a key and value to a hash table and disperate, yet sequential, times.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "String - B64",
-        StringB64_Tests,
-        "Tests base 64 encoded strings",
-        FEATURE_COMPLETE,
-    },
-    */
     {
         NULL,
         NULL,

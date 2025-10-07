@@ -1,7 +1,3 @@
-enum step_flags {
-    STEP_ADDED = 1 << 9,
-};
-
 typedef status (*StepFunc)(struct step *st, struct task *tsk);
 
 typedef struct step {

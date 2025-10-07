@@ -181,6 +181,28 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+static i64 Step_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Step *st = (Step *)as(a, TYPE_STEP);
+    Abstract *args[5];
+    args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)st, ToS_FlagLabels);
+    args[1] = (Abstract *)Util_Wrapped(sm->m, (util)st->func);
+    args[2] = (Abstract *)st->arg;
+    args[3] = (Abstract *)st->source;
+    args[4] = NULL;
+    return Fmt(sm, "Step<$ ^D.$^d. arg:@ source:@>", args);
+}
+
+static i64 Task_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Task *tsk = (Task *)as(a, TYPE_TASK);
+    Abstract *args[5];
+    args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tsk, ToS_FlagLabels);
+    args[1] = (Abstract *)Iter_Current(&tsk->chainIt);
+    args[2] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.idx);
+    args[3] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.p->max_idx);
+    args[4] = NULL;
+    return Fmt(sm, "Task<$ @/$ of $>", args);
+}
+
 static i64 Frame_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Frame *fm = (Frame *)as(a, TYPE_FRAME);
@@ -228,5 +250,7 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
+    r |= Lookup_Add(m, lk, TYPE_TASK, (void *)Task_Print);
+    r |= Lookup_Add(m, lk, TYPE_STEP, (void *)Step_Print);
     return r;
 }
