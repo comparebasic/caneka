@@ -44,7 +44,7 @@ enum ext_types {
     TYPE_FRAME,
     TYPE_ENC_PAIR,
     TYPE_FMT_HTML,
-    _START_HTTP
+    _START_HTTP,
     HTTP_METHOD,
     HTTP_METHOD_GET,
     HTTP_METHOD_POST,
@@ -58,7 +58,7 @@ enum ext_types {
     HTTP_HEADER_VALUE,
     HTTP_HEADER_INT_VALUE,
     HTTP_HEADER_END,
-    _END_HTTP
+    _END_HTTP,
     _APPS_TYPE_START,
     _FORMATTER_START,
     FORMATTER_START,

@@ -19,7 +19,7 @@ typedef struct queue {
 #define Queue_Get(q) ((q)->value)
 i32 Queue_GetIdx(Queue *q);
 status Queue_Set(Queue *q, i32 idx, Abstract *a);
-i32 Queue_Add(Queue *q, Abstract *a);
+i32 Queue_Add(Queue *q, Abstract *a, util *crit);
 status Queue_Remove(Queue *q, i32 idx);
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value);
 status Queue_Next(Queue *q);

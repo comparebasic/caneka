@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static int openPortToFd(int port){
-    int fd = 0;
+static i32 openPortToFd(i32 port){
+    i32 fd = 0;
 	struct sockaddr_in serv_addr;
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -19,14 +19,14 @@ static int openPortToFd(int port){
 		return -1;
     }
 
-    int one = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0) {
+    i32 one = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(i32)) < 0) {
         Error(ErrStream->m, NULL,
             FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd setting reuse addr", NULL);
 		return -1;
 	}
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(int)) < 0) {
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(i32)) < 0) {
         Error(ErrStream->m, NULL,
             FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd setting reuse addr", NULL);
@@ -50,7 +50,7 @@ static int openPortToFd(int port){
     return fd;
 }
 
-status ServeTcp_OpenTcp(Step *st, Task *tsk){
+static status ServeTcp_OpenTcp(Step *st, Task *tsk){
     TcpCtx *ctx = (TcpCtx *)as(st->arg, TYPE_TCP_CTX);
     i32 fd = openPortToFd(ctx->port);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
@@ -65,7 +65,7 @@ status ServeTcp_OpenTcp(Step *st, Task *tsk){
     return st->type.state;
 }
 
-status ServeTcp_AcceptPoll(Step *st, Task *tsk){
+static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     status r = READY;
     st->type.state &= ~SUCCESS;
     Abstract *args[5];
@@ -94,8 +94,7 @@ status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             struct pollfd *pfd = TcpTask_GetPollFd(child);
             pfd->fd = new_fd;
 
-            child->idx = Queue_Add(q, (Abstract *)child);
-            Queue_SetCriteria(q, 0, child->idx, &child->u);
+            child->idx = Queue_Add(q, (Abstract *)child, &child->u);
 
             accepted++;
             r |= tsk->type.state;
@@ -116,16 +115,16 @@ status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     return st->type.state;
 }
 
-status ServeTcp_SetupQueue(Step *st, Task *tsk){
-    tsk->data = Queue_Make(m); 
+static status ServeTcp_SetupQueue(Step *st, Task *tsk){
+    tsk->data = (Abstract *)Queue_Make(tsk->m); 
     st->type.state |= SUCCESS;
     return st->type.state;
 }
 
 Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, (Abstract *)ctx);
-    Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL);
-    Task_AddStep(tsk, ServeTcp_OpenTcp, (Abstract *)ctx, NULL);
-    Task_AddStep(tsk, ServeTcp_SetupQueue, (Abstract *)ctx, NULL);
+    Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL, ZERO);
+    Task_AddStep(tsk, ServeTcp_OpenTcp, (Abstract *)ctx, NULL, ZERO);
+    Task_AddStep(tsk, ServeTcp_SetupQueue, (Abstract *)ctx, NULL, ZERO);
     return tsk;
 }

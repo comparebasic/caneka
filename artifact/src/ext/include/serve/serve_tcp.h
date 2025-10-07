@@ -4,5 +4,3 @@
 #define ACCEPT_AT_ONEC_MAX 192
 
 Task *ServeTcp_Make(TcpCtx *ctx);
-status ServeTcp_AcceptPoll(Step *st, Task *tsk);
-status ServeTcp_OpenTcp(Step *st, Task *tsk);

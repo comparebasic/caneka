@@ -1,6 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
+status Task_Free(Step *st, Task *tsk){
+    return MemCh_Free(tsk->m);
+}
+
 status Task_Tumble(Task *tsk){
     tsk->type.state &= ~SUCCESS;
     do {
@@ -14,9 +18,10 @@ status Task_Tumble(Task *tsk){
         if(((r & MORE) == 0)){
             if(st->type.state & SUCCESS){
                 Iter_PrevRemove(&tsk->chainIt);
-            if(st->type.state & NOOP){
+            }else if(st->type.state & NOOP){
                 Iter_Prev(&tsk->chainIt);
             }
+
             if((tsk->chainIt.type.state & END) == 0){
                tsk->type.state |= MORE; 
             }
@@ -38,7 +43,13 @@ status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, w
 }
 
 Task *Task_Make(Span *chain, Abstract *source){
-    MemCh *m = MemCh_Make();
+    MemCh *m = NULL;
+    if(chain == NULL){
+        m = MemCh_Make();
+        chain = Span_Make(m);
+    }else{
+        m = chain->m;
+    }
     Task *tsk = MemCh_AllocOf(m, sizeof(Task), TYPE_TASK);
     tsk->type.of = TYPE_TASK;
     tsk->m = m;

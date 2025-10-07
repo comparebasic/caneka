@@ -7,6 +7,13 @@ i32 Queue_GetIdx(Queue *q){
     return q->itemsIt.idx + q->localIdx;
 }
 
+i32 Queue_Add(Queue *q, Abstract *a, util *crit){
+    i32 idx = q->itemsIt.p->max_idx+1;
+    Queue_Set(q, idx, a);
+    Queue_SetCriteria(q, 0, idx, crit);
+    return idx;
+}
+
 status Queue_Set(Queue *q, i32 idx, Abstract *a){
     status r = READY;
     r |= Span_Set(q->itemsIt.p, idx, a);

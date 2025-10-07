@@ -19,12 +19,12 @@ static PatCharDef postDef[] = {
 };
 
 static PatCharDef uriDef[] = {
-    {PAT_KO|PAT_KO_TERM, ' ', ' '}
+    {PAT_KO|PAT_KO_TERM, ' ', ' '},
     patText,
     {PAT_END, 0, 0}
 };
 
-static PatCharDef httpDef[] = {
+static PatCharDef versionDef[] = {
     {PAT_TERM,'H' ,'H'},
     {PAT_TERM,'T' ,'T'},
     {PAT_TERM,'T' ,'T'},
@@ -37,8 +37,8 @@ static PatCharDef httpDef[] = {
 };
 
 static PatCharDef endlDef[] = {
-    {PAT_KO, '\r', '\r'}
-    {PAT_KO, '\n', '\n'}
+    {PAT_TERM, '\r', '\r'},
+    {PAT_TERM, '\n', '\n'},
     {PAT_END, 0, 0}
 };
 
@@ -49,17 +49,17 @@ static status method(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         getDef, HTTP_METHOD_GET, HTTP_PATH);
     r |= Roebling_SetPattern(rbl,
-        posttDef, HTTP_METHOD_POST, HTTP_PATH);
+        postDef, HTTP_METHOD_POST, HTTP_PATH);
 
     return r;
 }
 
-static status path(MemCh *m, Roebling *rbl){
+static status uri(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        pathDef, HTTP_PATH, HTTP_VERSION);
+        uriDef, HTTP_PATH, HTTP_VERSION);
 
     return r;
 }
@@ -86,7 +86,7 @@ Roebling *HttpRbl_Make(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_METHOD));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)method));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_PATH));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)path));
+    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)uri));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_VERSION));
     Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)version));
     Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_END));

@@ -24,7 +24,7 @@ static status funcTwo(Step *st, Task *tsk){
     r |= Test(count->type.of == TYPE_WRAPPED_I32 && count->val.i == 1,
         "Source str equals tsk->source with expected count $", args);
     count->val.i++;
-    r |= Task_AddStep(tsk, funcThree, NULL, NULL);
+    r |= Task_AddStep(tsk, funcThree, NULL, NULL, ZERO);
     st->type.state |= SUCCESS;
     return r;
 }
@@ -51,8 +51,8 @@ status TaskStep_Tests(MemCh *gm){
 
     Single *count = I32_Wrapped(m, 0);
     Task *tsk = Task_Make(Span_Make(m), (Abstract *)count);
-    Task_AddStep(tsk, funcTwo, NULL, NULL);
-    Task_AddStep(tsk, funcOne, NULL, NULL);
+    Task_AddStep(tsk, funcTwo, NULL, NULL, ZERO);
+    Task_AddStep(tsk, funcOne, NULL, NULL, ZERO);
     Task_Tumble(tsk);
 
     args[0] = (Abstract *)tsk;

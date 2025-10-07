@@ -79,14 +79,17 @@ static BuildSubdir parserobj = { "parser", {
 }};
 
 static BuildSubdir serveobj = { "serve", {
+    "proto_ctx.c",
     "serve_tcp.c",
     "serve_tcp_crits.c",
-    "serve_tcp_steps.c",
+    "tcp_ctx.c",
+    "tcp_task.c",
     NULL
 }};
 
-static BuildSubdir httpobj = { "serve/proto", {
-    "http.c",
+static BuildSubdir protoobj = { "serve/proto", {
+    "http_ctx.c",
+    "http_task.c",
     NULL
 }};
 
@@ -119,6 +122,11 @@ static BuildSubdir fmtobj = { "format/fmt", {
     NULL
 }};
 
+static BuildSubdir httpobj = { "format/http", {
+    "http_roebling.c",
+    NULL
+}};
+
 static BuildSubdir xmlobj = { "format/xml", {
     "tag.c",
     NULL,
@@ -137,6 +145,7 @@ static BuildSubdir *objdirs[] = {
     &navigateobj,
     &sequenceobj,
     &serveobj,
+    &protoobj,
     &httpobj,
     &parserobj,
     &fmtobj,

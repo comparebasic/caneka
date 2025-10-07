@@ -2,8 +2,9 @@
 #include <caneka.h>
 
 status TcpTask_ReadToRbl(Step *st, Task *tsk){
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk)
-    ProtoCtx *proto = asIfc(tsk->data, TYPE_PROTO);
+    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO);
+    Roebling *rbl = (Roebling *)as(st->arg, TYPE_ROEBLING);
 
     byte buff[SERV_READ_SIZE];
     buff[0] = '\0';
@@ -11,28 +12,28 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
     status r = NOOP;
     if(l > 0){
         Str *s = Str_From(tsk->m, buff, l);
-        Cursor_Add(proto->rbl->curs, s);
-        r |= Roebling_Run(proto->rbl);
+        Cursor_Add(rbl->curs, s);
+        r |= Roebling_Run(rbl);
     }
     
-    st->type.state |= (proto->rbl->type.state & (SUCCESS|ERROR));
+    st->type.state |= (rbl->type.state & (SUCCESS|ERROR));
     return st->type.state;
 }
 
 status TcpTask_WriteFromOut(Step *st, Task *tsk){
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk)
-    ProtoCtx *proto = asIfc(tsk->data, TYPE_PROTO);
+    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO);
 
     ssize_t l = 0;
     i32 total = 0;
     Str s;
     Str_Init(&s, NULL, 0, 0);
     while(total < SERV_READ_SIZE && (proto->out->type.state & END) == 0){
-        if(Cursor_SetNextStr(proto->out, &s, SERV_READ_SIZE-total) & NOOP){
+        if(Cursor_FillStr(proto->out, &s, SERV_READ_SIZE-total) & NOOP){
             break;
         }
-        if(s->length > 0){
-            l = write(pfd->fd, s->bytes, s->length); 
+        if(s.length > 0){
+            l = write(pfd->fd, s.bytes, s.length); 
             if(l > 0){
                 Cursor_Incr(proto->out, (i32)l);
                 total += l;
@@ -47,6 +48,6 @@ status TcpTask_WriteFromOut(Step *st, Task *tsk){
         }
     }
     
-    st->type.state |= (curs->type.state & (SUCCESS|ERROR|END));
+    st->type.state |= (proto->out->type.state & (SUCCESS|ERROR|END));
     return st->type.state;
 }

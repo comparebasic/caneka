@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status HttpTask_PrepareResponse(Step *st, Task *tsk){
-    ProtoCtx *proto = asIfc(tsk->data, TYPE_PROTO);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO);
     Str *s = Str_CstrRef(tsk->m, "HTTP/1.1 200 OK\r\nServer: caneka\r\n"
         "Content-Length: 2\r\n"
         "\r\n"
@@ -13,15 +13,16 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
 }
 
 status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source){
+    status r = READY;
     tsk->data = (Abstract *)HttpProto_Make(tsk->m);
     tsk->source = source;
-    Task_AddStep(tsk, TcpTask_WriteFromOut, NULL, NULL, STEP_IO_OUT);
-    Task_AddStep(tsk, HttpTask_PrepareResponse, NULL, NULL, ZERO);
-    return tsk;
+    r |= Task_AddStep(tsk, TcpTask_WriteFromOut, NULL, NULL, STEP_IO_OUT);
+    r |= Task_AddStep(tsk, HttpTask_PrepareResponse, NULL, NULL, ZERO);
+    return r;
 }
 
 status HttpTask_AddRecieve(Task *tsk, Abstract *arg, Abstract *source){
-    ProtoCtx *proto = as(tsk->data, TYPE_PROTO);
-    Roebling *rbl = HttpRbl_Make(m, proto->in, proto);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO);
+    Roebling *rbl = HttpRbl_Make(tsk->m, proto->in, (Abstract *)proto);
     return Task_AddStep(tsk, TcpTask_ReadToRbl, (Abstract *)rbl, source, STEP_IO_IN);
 }

@@ -1,8 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-static Task* tcpReqMake(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
-    Task *child = Task_Make(NULL, NULL);
+static Task* tcpReqMake(MemCh *_m, Task *tsk, Abstract *arg, Abstract *source){
+    MemCh *m = MemCh_Make();
+    Task *child = Task_Make(Span_Make(m), NULL);
     HttpTask_InitResponse(child, arg, source);
     /* add app stuf here */
     HttpTask_AddRecieve(child, NULL, NULL);
@@ -17,9 +18,9 @@ status ServeTcp_Tests(MemCh *gm){
     
     TcpCtx *ctx = TcpCtx_Make(m);
     ctx->port = 3000;
-    ctx->func = TcpReqMake;
+    ctx->func = tcpReqMake;
 
-    Task *tsk ServeTcp_Make(ctx);
+    Task *tsk = ServeTcp_Make(ctx);
     Task_Tumble(tsk);
 
     MemCh_Free(m);
