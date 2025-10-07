@@ -1,11 +1,12 @@
 #include <external.h>
 #include <caneka.h>
 
-Step *Step_Make(MemCh *m, StepFunc func, Abstract *arg, Abstract *source){
-    Step *h = MemCh_AllocOf(m, sizeof(Step), TYPE_STEP);
-    h->type.of = TYPE_STEP;
-    h->func = func;
-    h->arg = arg;
-    h->source = source;
-    return h;
+Step *Step_Make(MemCh *m, StepFunc func, Abstract *arg, Abstract *source, word flags){
+    Step *st = MemCh_AllocOf(m, sizeof(Step), TYPE_STEP);
+    st->type.of = TYPE_STEP;
+    st->type.state = flags;
+    st->func = func;
+    st->arg = arg;
+    st->source = source;
+    return st;
 }

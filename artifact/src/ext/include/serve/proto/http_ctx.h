@@ -9,11 +9,9 @@ enum http_status {
 
 typedef struct {
     Type type;
-    i32 status;
-    Cursor *in;
-    Cursor *out;
+    Cursor *body;
+    Table *headers;
 } HttpCtx;
 
 HttpCtx *HttpCtx_Make(MemCh *m);
-HttpCtx *HttpCtx_AddRequestSteps(Task *tsk);
-HttpCtx *HttpCtx_AddResponseSteps(Task *tsk);
+ProtoCtx *HttpProto_Make(MemCh *m);

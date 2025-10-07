@@ -4,9 +4,8 @@
 static Task* tcpReqMake(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
     Task *child = Task_Make(NULL, NULL);
     HttpTask_InitResponse(child, arg, source);
-
-    Task *child = HttpTask_AddRequestteps(child);
-
+    /* add app stuf here */
+    HttpTask_AddRecieve(child, NULL, NULL);
     return child;
 }
 

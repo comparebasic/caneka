@@ -13,4 +13,4 @@ typedef Task *(*TaskMaker)(MemCh *m, Task *task, Abstract *arg, Abstract *source
 Task *Task_Make(Span *chain, Abstract *source);
 status Task_Cycle(Task *tsk);
 status Task_Tumble(Task *tsk);
-status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source);
+status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags);

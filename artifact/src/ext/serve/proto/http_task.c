@@ -13,9 +13,15 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
 }
 
 status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source){
-    tsk->data = HttpCtx_Make(tsk->m);
+    tsk->data = (Abstract *)HttpProto_Make(tsk->m);
     tsk->source = source;
-    Task_AddStep(tsk, TcpTask_WriteFromOut, NULL, NULL);
-    Task_AddStep(tsk, HttpTask_PrepareResponse, NULL, NULL);
+    Task_AddStep(tsk, TcpTask_WriteFromOut, NULL, NULL, STEP_IO_OUT);
+    Task_AddStep(tsk, HttpTask_PrepareResponse, NULL, NULL, ZERO);
     return tsk;
+}
+
+status HttpTask_AddRecieve(Task *tsk, Abstract *arg, Abstract *source){
+    ProtoCtx *proto = as(tsk->data, TYPE_PROTO);
+    Roebling *rbl = HttpRbl_Make(m, proto->in, proto);
+    return Task_AddStep(tsk, TcpTask_ReadToRbl, (Abstract *)rbl, source, STEP_IO_IN);
 }
