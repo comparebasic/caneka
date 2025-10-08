@@ -111,7 +111,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             child->type.state |= DEBUG;
 
-            if(tsk->type.state & DEBUG){
+            if(1 || tsk->type.state & DEBUG){
                 args[0] = (Abstract *)child;
                 args[1] = NULL;
                 Out("^c.    Adding Child &^0\n", args);

@@ -39,7 +39,6 @@ status ServeTcp_Tests(MemCh *gm){
     ctx->finalize = Example_log;
 
     Task *tsk = ServeTcp_Make(ctx);
-    tsk->type.state |= DEBUG;
     Task_Tumble(tsk);
 
     MemCh_Free(m);
