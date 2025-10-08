@@ -8,6 +8,9 @@ status Queue_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
 
     Queue *q = Queue_Make(m);
+
+    q->type.state |= DEBUG;
+
     QueueCrit *crit = QueueCrit_Make(m, QueueCrit_Fds, ZERO);
     Queue_AddHandler(q, crit);
 

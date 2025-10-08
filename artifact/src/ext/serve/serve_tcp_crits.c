@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-gobits QueueCrit_Fds(QueueCrit *crit, Abstract **items, util *values){
+gobits QueueCrit_Fds(QueueCrit *crit, util *values){
     word go = 0;
     i32 localIdx = 0;
     util *u = values;

@@ -8,7 +8,7 @@ typedef struct queue {
     Type type;
     word _;
     word go;
-    i32 localIdx;
+    i32 slabIdx;
     Abstract *value;
     Iter itemsIt;
     Span *available;
