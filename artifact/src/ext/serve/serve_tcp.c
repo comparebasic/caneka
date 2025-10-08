@@ -113,6 +113,8 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
             Task *child = ctx->func(NULL, tsk, NULL, NULL);
+
+            child->type.state |= DEBUG;
             struct pollfd *pfd = TcpTask_GetPollFd(child);
             pfd->fd = new_fd;
 
@@ -129,8 +131,6 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             break;
         }
     }
-
-    q->type.state |= DEBUG;
 
     while((Queue_Next(q) & END) == 0){
         if(tsk->type.state & DEBUG){
