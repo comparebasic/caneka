@@ -4,3 +4,4 @@
 #define ACCEPT_AT_ONEC_MAX 192
 
 Task *ServeTcp_Make(TcpCtx *ctx);
+status TcpTask_ExpectRead(Step *st, Task *tsk);

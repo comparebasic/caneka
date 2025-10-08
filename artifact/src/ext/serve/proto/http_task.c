@@ -24,5 +24,7 @@ status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source){
 status HttpTask_AddRecieve(Task *tsk, Abstract *arg, Abstract *source){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     Roebling *rbl = HttpRbl_Make(tsk->m, proto->in, (Abstract *)proto);
-    return Task_AddStep(tsk, TcpTask_ReadToRbl, (Abstract *)rbl, source, STEP_IO_IN);
+    status r = Task_AddStep(tsk, TcpTask_ReadToRbl, (Abstract *)rbl, source, STEP_IO_IN);
+    r |= TcpTask_ExpectRead(NULL, tsk);
+    return r;
 }

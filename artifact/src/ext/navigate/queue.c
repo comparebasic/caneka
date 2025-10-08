@@ -86,6 +86,8 @@ status Queue_Next(Queue *q){
     }
 
     while((Iter_Next(&q->itemsIt) & END) == 0){
+        printf("%d\n", q->itemsIt.idx);
+        fflush(stdout);
         Iter it;
         if(q->itemsIt.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
             q->slabIdx++;
@@ -109,6 +111,9 @@ status Queue_Next(Queue *q){
                 Out("^p.    Found \\@$/&\n", args);
             }
             break;
+        }else{
+            printf("   nope %d\n", q->itemsIt.idx);
+            fflush(stdout);
         }
     }
 

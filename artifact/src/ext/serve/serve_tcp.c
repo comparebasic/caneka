@@ -112,7 +112,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
-            Task *child = ctx->func(NULL, tsk, NULL, NULL);
+            Task *child = ctx->func(NULL, NULL, NULL, (Abstract *)tsk);
 
             child->type.state |= DEBUG;
             struct pollfd *pfd = TcpTask_GetPollFd(child);
@@ -132,6 +132,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         }
     }
 
+    q->type.state |= DEBUG;
     while((Queue_Next(q) & END) == 0){
         if(tsk->type.state & DEBUG){
             args[0] = (Abstract *)q;
@@ -167,6 +168,22 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 
     tsk->data = (Abstract *)q;
     st->type.state |= SUCCESS;
+    return st->type.state;
+}
+
+status TcpTask_ExpectRead(Step *st, Task *tsk){
+    Task *parent = (Task *)as(tsk->source, TYPE_TASK);
+    Queue *q = (Queue *)as(parent->data, TYPE_QUEUE);
+    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+    pfd->events = POLL_IN;
+    st->type.state |= Queue_SetCriteria(q, 0, tsk->idx, (util *)pfd);
+    if(tsk->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(OutStream->m, pfd->fd),
+            (Abstract *)I32_Wrapped(OutStream->m, tsk->idx),
+        };
+        Out("^c.Setting Read on ^D.$^d.fd ^D.$^d.idx", args);
+    }
     return st->type.state;
 }
 

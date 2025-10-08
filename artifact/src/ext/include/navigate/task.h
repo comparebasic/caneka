@@ -1,3 +1,7 @@
+enum task_flags {
+    TASK_CONSTRUCT = 1 << 8,
+};
+
 typedef struct task {
     Type type;
     i32 idx;
