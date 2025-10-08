@@ -234,7 +234,7 @@ static i64 Task_Print(Stream *sm, Abstract *a, cls type, word flags){
     args[5] = NULL;
     if(flags & DEBUG){
         args[4] = tsk->data;
-        return Fmt(sm, "Task<$ $ of $ \\@& arg:@>", args);
+        return Fmt(sm, "Task<$ $ of $ \\@& data:@>", args);
     }else{
         args[1] = tsk->data;
         args[2] = NULL;

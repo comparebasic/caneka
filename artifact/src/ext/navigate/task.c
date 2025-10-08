@@ -54,17 +54,6 @@ status Task_Tumble(Task *tsk){
 }
 
 status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags){
-    if(tsk->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)tsk,
-            (Abstract *)Util_Wrapped(OutStream->m, (util)func),
-            (Abstract *)args,
-            (Abstract *)source,
-            (Abstract *)Word_Wrapped(OutStream->m, (word)flags),
-            NULL,
-        };
-        Out("^y.AddStep($, ^D.$,^d., @, @, $)^0\n", args);
-    }
     Step *st = Step_Make(tsk->m, func, arg, source, flags);
     status r = Iter_AddOn(&tsk->chainIt, (Abstract *)st);
     tsk->type.state |= MORE;

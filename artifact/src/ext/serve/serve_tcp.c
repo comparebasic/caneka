@@ -112,17 +112,19 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
-            Task *child = ctx->func(NULL, NULL, NULL, (Abstract *)tsk);
+            MemCh *tm = MemCh_Make();
+            Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
+            child->type.state |= DEBUG;
+            ctx->func(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk);
 
             child->type.state |= DEBUG;
-            struct pollfd *pfd = TcpTask_GetPollFd(child);
-            pfd->fd = new_fd;
 
             if(tsk->type.state & DEBUG){
                 args[0] = (Abstract *)child;
                 args[1] = NULL;
                 Out("^c.    Adding Child &^0\n", args);
             }
+
             child->idx = Queue_Add(q, (Abstract *)child, &child->u);
 
             accepted++;
@@ -132,8 +134,13 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         }
     }
 
+    printf("here\n");
+    fflush(stdout);
+
     q->type.state |= DEBUG;
     while((Queue_Next(q) & END) == 0){
+        printf("here II\n");
+        fflush(stdout);
         if(tsk->type.state & DEBUG){
             args[0] = (Abstract *)q;
             args[1] = NULL;
@@ -172,19 +179,18 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 }
 
 status TcpTask_ExpectRead(Step *st, Task *tsk){
-    Task *parent = (Task *)as(tsk->source, TYPE_TASK);
-    Queue *q = (Queue *)as(parent->data, TYPE_QUEUE);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    pfd->events = POLL_IN;
-    st->type.state |= Queue_SetCriteria(q, 0, tsk->idx, (util *)pfd);
     if(tsk->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(OutStream->m, pfd->fd),
             (Abstract *)I32_Wrapped(OutStream->m, tsk->idx),
         };
-        Out("^c.Setting Read on ^D.$^d.fd ^D.$^d.idx", args);
+        Out("^c.Setting Read on ^D.$^d.fd ^D.$^d.idx^0\n", args);
     }
-    return st->type.state;
+
+
+    pfd->events = POLL_IN;
+    return SUCCESS;
 }
 
 Task *ServeTcp_Make(TcpCtx *ctx){
