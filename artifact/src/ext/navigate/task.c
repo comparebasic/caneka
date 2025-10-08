@@ -26,24 +26,16 @@ status Task_Tumble(Task *tsk){
         }
         if(((r & MORE) == 0)){
             if(st->type.state & SUCCESS){
-                printf("PrevRemove\n");
-                fflush(stdout);
                 Iter_PrevRemove(&tsk->chainIt);
             }else if(st->type.state & STEP_LOOP){
                 i32 idx = tsk->chainIt.p->max_idx;
                 Step *tail = Span_Get(tsk->chainIt.p, idx);
                 if((tail->type.state & (SUCCESS|ERROR)) == 0){
-                    printf("Loop\n");
-                    fflush(stdout);
                     Iter_GetByIdx(&tsk->chainIt, idx);
                 }else{
-                    printf("Loop End\n");
-                    fflush(stdout);
                     Iter_Prev(&tsk->chainIt);
                 }
             }else if(st->type.state & NOOP){
-                printf("Prev\n");
-                fflush(stdout);
                 Iter_Prev(&tsk->chainIt);
             }
 

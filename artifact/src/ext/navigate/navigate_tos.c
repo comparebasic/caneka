@@ -28,9 +28,26 @@ static i64 CompResult_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+static i64 QueueCrit_Print(Stream *sm, Abstract *a, cls type, word flags){
+   i64 total = 0;
+   QueueCrit *crit = (QueueCrit *)as(a, TYPE_QUEUE_CRIT);
+   Abstract *args[] = {
+        NULL
+   };
+   total += Fmt(sm, "QueueCrit<>", args);
+   return total;
+}
+
 static i64 Queue_Print(Stream *sm, Abstract *a, cls type, word flags){
    i64 total = 0;
-   total += Fmt(sm, "Queue<>", NULL);
+   Queue *q = (Queue *)as(a, TYPE_QUEUE);
+   Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)q, ToS_FlagLabels),
+        (Abstract *)&q->itemsIt,
+        (Abstract *)q->handlers,
+        NULL
+   };
+   total += Fmt(sm, "Queue<$ @ criteria:@>", args);
    return total;
 }
 
@@ -284,5 +301,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_TASK, (void *)Task_Print);
     r |= Lookup_Add(m, lk, TYPE_STEP, (void *)Step_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
+    r |= Lookup_Add(m, lk, TYPE_QUEUE_CRIT, (void *)QueueCrit_Print);
     return r;
 }

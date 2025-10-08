@@ -2,11 +2,11 @@
 #include <caneka.h>
 
 static i64 HttpCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
-    HttpCtx *ctx = (HttpCtx*)as(a, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx*)as(a, TYPE_HTTP_CTX);
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
-        (Abstract *)ctx->body,
         (Abstract *)ctx->headers,
+        (Abstract *)ctx->body,
         NULL,
     };
     return Fmt(sm, "Http<$ headers:@ body:@>", args);

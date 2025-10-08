@@ -77,6 +77,7 @@ static status ServeTcp_OpenTcp(Step *st, Task *tsk){
 }
 
 static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
+    DebugStack_Push(st, st->type.of);
     status r = READY;
     st->type.state &= ~SUCCESS;
     Abstract *args[5];
@@ -115,6 +116,11 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             struct pollfd *pfd = TcpTask_GetPollFd(child);
             pfd->fd = new_fd;
 
+            if(tsk->type.state & DEBUG){
+                args[0] = (Abstract *)child;
+                args[1] = NULL;
+                Out("^c.    Adding Child &^0\n", args);
+            }
             child->idx = Queue_Add(q, (Abstract *)child, &child->u);
 
             accepted++;
@@ -124,7 +130,14 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         }
     }
 
+    q->type.state |= DEBUG;
+
     while((Queue_Next(q) & END) == 0){
+        if(tsk->type.state & DEBUG){
+            args[0] = (Abstract *)q;
+            args[1] = NULL;
+            Out("^c.    Getting next @^0\n", args);
+        }
         Task *child = (Task *)Queue_Get(q);
         if(tsk->type.state & DEBUG){
             args[0] = (Abstract *)child;
@@ -142,11 +155,17 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
     st->type.state |= NOOP;
 
+    DebugStack_Pop();
     return st->type.state;
 }
 
 static status ServeTcp_SetupQueue(Step *st, Task *tsk){
-    tsk->data = (Abstract *)Queue_Make(tsk->m); 
+    Queue *q = Queue_Make(tsk->m);
+
+    QueueCrit *crit = QueueCrit_Make(tsk->m, QueueCrit_Fds, ZERO);
+    Queue_AddHandler(q, crit);
+
+    tsk->data = (Abstract *)q;
     st->type.state |= SUCCESS;
     return st->type.state;
 }
