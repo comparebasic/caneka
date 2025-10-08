@@ -3,6 +3,7 @@
 
 static Str **nodeLabels = NULL;
 static Str **messLabels = NULL;
+static Str **stepLabels = NULL;
 
 static i64 indentStream(Stream *sm, i32 indent){
     i64 total = 0;
@@ -25,6 +26,12 @@ static i64 CompResult_Print(Stream *sm, Abstract *a, cls type, word flags){
     }else{
         return Fmt(sm, "(^D$^d.\n    $,\n    $)", args);
     }
+}
+
+static i64 Queue_Print(Stream *sm, Abstract *a, cls type, word flags){
+   i64 total = 0;
+   total += Fmt(sm, "Queue<>", NULL);
+   return total;
 }
 
 static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -186,21 +193,36 @@ static i64 Step_Print(Stream *sm, Abstract *a, cls type, word flags){
     Abstract *args[5];
     args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)st, ToS_FlagLabels);
     args[1] = (Abstract *)Util_Wrapped(sm->m, (util)st->func);
-    args[2] = (Abstract *)st->arg;
-    args[3] = (Abstract *)st->source;
     args[4] = NULL;
-    return Fmt(sm, "Step<$ ^D.$^d. arg:@ source:@>", args);
+    if(flags & DEBUG){
+        args[2] = st->arg;
+        args[3] = st->source;
+        return Fmt(sm, "Step<$ ^D.$^d.func arg:@ source:@>", args);
+    }else{
+        args[2] = (Abstract *)Type_ToStr(sm->m,
+            st->arg != NULL ? st->arg->type.of : ZERO);
+        args[3] = (Abstract *)Type_ToStr(sm->m,
+            st->source != NULL ? st->source->type.of : ZERO);
+        return Fmt(sm, "Step<$ ^D.$^d.func arg:$ source:$>", args);
+    }
 }
 
 static i64 Task_Print(Stream *sm, Abstract *a, cls type, word flags){
     Task *tsk = (Task *)as(a, TYPE_TASK);
-    Abstract *args[5];
+    Abstract *args[6];
     args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tsk, ToS_FlagLabels);
-    args[1] = (Abstract *)Iter_Current(&tsk->chainIt);
-    args[2] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.idx);
-    args[3] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.p->max_idx);
-    args[4] = NULL;
-    return Fmt(sm, "Task<$ @/$ of $>", args);
+    args[1] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.idx);
+    args[2] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.p->max_idx);
+    args[3] = (Abstract *)Iter_Current(&tsk->chainIt);
+    args[5] = NULL;
+    if(flags & DEBUG){
+        args[4] = tsk->data;
+        return Fmt(sm, "Task<$ $ of $ \\@& arg:@>", args);
+    }else{
+        args[1] = tsk->data;
+        args[2] = NULL;
+        return Fmt(sm, "Task<$ @>", args);
+    }
 }
 
 static i64 Frame_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -235,6 +257,15 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
         r |= SUCCESS;
     }
 
+    if(stepLabels == NULL){
+        stepLabels = (Str **)Arr_Make(m, 17);
+        stepLabels[9] = Str_CstrRef(m, "IO_IN");
+        stepLabels[10] = Str_CstrRef(m, "IO_OUT");
+        stepLabels[11] = Str_CstrRef(m, "LOOP");
+        Lookup_Add(m, lk, TYPE_STEP, (void *)stepLabels);
+        r |= SUCCESS;
+    }
+
     if(r == READY){
         r |= NOOP;
     }
@@ -252,5 +283,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
     r |= Lookup_Add(m, lk, TYPE_TASK, (void *)Task_Print);
     r |= Lookup_Add(m, lk, TYPE_STEP, (void *)Step_Print);
+    r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
     return r;
 }

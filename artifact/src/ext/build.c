@@ -84,6 +84,7 @@ static BuildSubdir serveobj = { "serve", {
     "serve_tcp_crits.c",
     "tcp_ctx.c",
     "tcp_task.c",
+    "serve_cls.c",
     NULL
 }};
 

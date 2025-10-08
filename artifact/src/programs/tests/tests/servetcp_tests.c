@@ -21,6 +21,7 @@ status ServeTcp_Tests(MemCh *gm){
     ctx->func = tcpReqMake;
 
     Task *tsk = ServeTcp_Make(ctx);
+    tsk->type.state |= DEBUG;
     Task_Tumble(tsk);
 
     MemCh_Free(m);

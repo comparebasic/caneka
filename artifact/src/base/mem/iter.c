@@ -21,7 +21,7 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
             NULL
         };
         Fatal(FUNCNAME, FILENAME, LINENUMBER, 
-            "Error localIdx larger than span stride _i4", args);
+            "Error localIdx larger than span stride $", args);
         return -1;
     }
 

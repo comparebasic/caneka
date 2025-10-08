@@ -3,7 +3,7 @@
 
 status TcpTask_ReadToRbl(Step *st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     Roebling *rbl = (Roebling *)as(st->arg, TYPE_ROEBLING);
 
     byte buff[SERV_READ_SIZE];
@@ -22,7 +22,7 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
 
 status TcpTask_WriteFromOut(Step *st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
 
     ssize_t l = 0;
     i32 total = 0;

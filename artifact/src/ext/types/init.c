@@ -14,6 +14,7 @@ status Caneka_Init(MemCh *m){
     r |= Sequence_Init(m);
     r |= Types_ClsInit(m);
     r |= Navigate_ClsInit(m);
+    r |= Serve_ClsInit(m);
     /*
     r |= Clone_Init(m);
     r |= MemLocal_Init(m);

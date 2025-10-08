@@ -1,6 +1,3 @@
-
-
-
 enum ext_types {
     _TYPE_EXT_START = _TYPE_BASE_END,
     TYPE_MESS,
@@ -35,7 +32,7 @@ enum ext_types {
     TYPE_TASK,
     TYPE_PROC_IO_SET,
     TYPE_TCP_CTX,
-    TYPE_PROTO,
+    TYPE_PROTO_CTX,
     TYPE_HTTP_CTX,
     _TYPE_CORE_END,
     _APP_BOUNDRY_START,
