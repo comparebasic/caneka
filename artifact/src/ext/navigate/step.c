@@ -5,14 +5,6 @@ status Step_Delay(Step *st, Task *tsk){
     st->type.state &= ~(NOOP|SUCCESS);
     Single *sg = (Single *)as(st->arg, TYPE_WRAPPED_UTIL);
     microTime remaining;
-    if(tsk->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)sg,
-            (Abstract *)tsk,
-            NULL
-        };
-        Out("^c.Delay for $ Task:&^0.\n", args);
-    }
     Time_Delay(sg->val.value, &remaining);
     if(tsk->chainIt.idx == tsk->chainIt.p->max_idx){
         st->type.state |= SUCCESS;

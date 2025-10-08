@@ -3,7 +3,8 @@ typedef struct tcp_ctx {
     i32 port;
     Str *inet4;
     Str *inet6;
-    TaskPopulate func;
+    TaskPopulate populate;
+    StepFunc finalize; 
     struct {
         microTime start;
         i64 open;

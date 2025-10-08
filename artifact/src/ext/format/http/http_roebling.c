@@ -5,7 +5,7 @@ static PatCharDef getDef[] = {
     {PAT_TERM,'G' ,'G'},
     {PAT_TERM,'E' ,'E'},
     {PAT_TERM,'T' ,'T'},
-    {PAT_TERM|PAT_INVERT_CAPTURE,' ' ,' '},
+    {PAT_TERM|PAT_MANY|PAT_INVERT_CAPTURE|PAT_CONSUME,' ' ,' '},
     {PAT_END, 0, 0}
 };
 
@@ -14,7 +14,7 @@ static PatCharDef postDef[] = {
     {PAT_TERM,'O' ,'O'},
     {PAT_TERM,'S' ,'S'},
     {PAT_TERM,'T' ,'T'},
-    {PAT_TERM|PAT_INVERT_CAPTURE,' ' ,' '},
+    {PAT_TERM|PAT_MANY|PAT_INVERT_CAPTURE|PAT_CONSUME,' ' ,' '},
     {PAT_END, 0, 0}
 };
 
@@ -69,14 +69,25 @@ static status version(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        versionDef, HTTP_PATH, HTTP_END);
-
+        versionDef, HTTP_VERSION, HTTP_END);
     return r;
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    /*
-    */
+    Abstract *args[5];
+    ProtoCtx *proto = (ProtoCtx *)as(rbl->source, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    if(rbl->curs->type.state & DEBUG){
+        args[0] = (Abstract *)Type_ToStr(OutStream->m, captureKey);
+        args[1] = (Abstract *)v;
+        args[2] = NULL;
+        Out("^y.Token: $/@^0\n", args);
+    }
+    if(captureKey == HTTP_METHOD_GET){
+        ctx->method = HTTP_METHOD_GET; 
+    }else if(captureKey == HTTP_PATH){
+        ctx->path = v;
+    }
     return SUCCESS;
 }
 

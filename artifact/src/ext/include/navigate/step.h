@@ -8,6 +8,8 @@ typedef status (*StepFunc)(struct step *st, struct task *tsk);
 
 typedef struct step {
     Type type;
+    word _;
+    i16 g;
     StepFunc func;
     Abstract *arg;
     Abstract *source;

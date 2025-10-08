@@ -1,15 +1,33 @@
 #include <external.h>
 #include <caneka.h>
 
+static boolean _httpInitialized = FALSE;
+Lookup *HttpMethods = NULL;
+
+static status HttpInit(MemCh *m){
+    if(!_httpInitialized){
+        _httpInitialized = TRUE;
+        HttpMethods = Lookup_Make(m, HTTP_METHOD);
+        Lookup_Add(m, HttpMethods, HTTP_METHOD_GET, Str_CstrRef(m, "GET"));
+        Lookup_Add(m, HttpMethods, HTTP_METHOD_POST, Str_CstrRef(m, "POST"));
+        Lookup_Add(m, HttpMethods, HTTP_METHOD_UPDATE, Str_CstrRef(m, "UPDATE"));
+        Lookup_Add(m, HttpMethods, HTTP_METHOD_DELETE, Str_CstrRef(m, "DELETE"));
+        Lookup_Add(m, HttpMethods, HTTP_METHOD_PUT, Str_CstrRef(m, "PUT"));
+        return SUCCESS;
+    }
+    return NOOP; 
+}
 static i64 HttpCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
     HttpCtx *ctx = (HttpCtx*)as(a, TYPE_HTTP_CTX);
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
+        (Abstract *)Lookup_Get(HttpMethods, ctx->method),
+        (Abstract *)ctx->path,
         (Abstract *)ctx->headers,
         (Abstract *)ctx->body,
         NULL,
     };
-    return Fmt(sm, "Http<$ headers:@ body:@>", args);
+    return Fmt(sm, "Http<$ $ $ headers:@ body:@>", args);
 }
 
 static i64 ProtoCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
@@ -50,5 +68,6 @@ status Serve_ToSInit(MemCh *m, Lookup *lk){
 }
 
 status Serve_ClsInit(MemCh *m){
+    HttpInit(m);
     return Serve_ToSInit(m, ToStreamLookup);
 }

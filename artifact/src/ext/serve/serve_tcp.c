@@ -95,15 +95,6 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         return st->type.state;
     }
 
-    if(tsk->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(OutStream->m, available);
-        args[1] = (Abstract *)I32_Wrapped(OutStream->m, pfd->fd);
-        args[2] = (Abstract *)st;
-        args[3] = (Abstract *)tsk;
-        args[4] = NULL;
-        Out("^c.Accept Found ^D$^d.available on ^D.$^d.fd. @ of @^0\n", args);
-    }
-
     i32 accepted = 0;
     while(available-- > 0){
         i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
@@ -114,8 +105,9 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             MemCh *tm = MemCh_Make();
             Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
+            child->stepGuardMax = TCP_STEP_MAX;
             child->type.state |= DEBUG;
-            ctx->func(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk);
+            ctx->populate(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk);
 
             child->type.state |= DEBUG;
 
@@ -134,13 +126,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         }
     }
 
-    printf("here\n");
-    fflush(stdout);
-
-    q->type.state |= DEBUG;
     while((Queue_Next(q) & END) == 0){
-        printf("here II\n");
-        fflush(stdout);
         if(tsk->type.state & DEBUG){
             args[0] = (Abstract *)q;
             args[1] = NULL;
@@ -153,9 +139,14 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             Out("^c.    Tumbling @^0\n", args);
         }
         Task_Tumble(child);
+        if(child->type.state & (SUCCESS|ERROR)){
+            Queue_Remove(q, child->idx);
+            ctx->finalize(NULL, child);    
+            MemCh_Free(child->m);
+        }
     }
 
-    if(q->type.state & END){
+    if((tsk->type.state & DEBUG) && q->type.state & END){
         args[0] = (Abstract *)tsk;
         args[1] = NULL;
         Out("^c.    No more Reqs @^0\n", args);
@@ -174,23 +165,10 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
     Queue_AddHandler(q, crit);
 
     tsk->data = (Abstract *)q;
+    tsk->type.state |= TASK_QUEUE;
+
     st->type.state |= SUCCESS;
     return st->type.state;
-}
-
-status TcpTask_ExpectRead(Step *st, Task *tsk){
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    if(tsk->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(OutStream->m, pfd->fd),
-            (Abstract *)I32_Wrapped(OutStream->m, tsk->idx),
-        };
-        Out("^c.Setting Read on ^D.$^d.fd ^D.$^d.idx^0\n", args);
-    }
-
-
-    pfd->events = POLL_IN;
-    return SUCCESS;
 }
 
 Task *ServeTcp_Make(TcpCtx *ctx){

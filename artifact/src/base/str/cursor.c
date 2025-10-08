@@ -123,6 +123,10 @@ status Cursor_Incr(Cursor *curs, i32 length){
     while(length > 0){
         if(length > remaining){
             length -= remaining;
+            if(curs->it.idx == curs->it.p->max_idx){
+                curs->type.state |= END;
+                break;
+            }
             curs->it.idx++;
             if(Cursor_SetStr(curs) & NOOP){
                 curs->type.state |= NOOP;

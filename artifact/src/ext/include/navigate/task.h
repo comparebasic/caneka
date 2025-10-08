@@ -1,10 +1,13 @@
 enum task_flags {
-    TASK_CONSTRUCT = 1 << 8,
+    TASK_UPDATE_CRIT = 1 << 8,
+    TASK_QUEUE = 1 << 9,
 };
 
 typedef struct task {
     Type type;
     i32 idx;
+    i16 stepGuardMax;
+    i16 g;
     util u;
     MemCh *m;
     Abstract *data;

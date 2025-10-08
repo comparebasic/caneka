@@ -201,6 +201,13 @@ status Roebling_JumpTo(Roebling *rbl, i32 mark){
 }
 
 status Roebling_Run(Roebling *rbl){
+    if(rbl->type.state & DEBUG){
+        Abstract *args[2] = {
+            (Abstract *)rbl,
+            NULL
+        };
+        Out("^p.Roebling_Run &\n", args);
+    }
     if((rbl->curs->type.state & END) != 0){
         rbl->type.state |= END;
     }

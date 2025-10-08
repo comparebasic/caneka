@@ -50,6 +50,7 @@ static char *extTypeStrings[] = {
     "HTTP_METHOD_POST",
     "HTTP_METHOD_UPDATE",
     "HTTP_METHOD_DELETE",
+    "HTTP_METHOD_PUT",
     "HTTP_PATH",
     "HTTP_VERSION",
     "HTTP_END",

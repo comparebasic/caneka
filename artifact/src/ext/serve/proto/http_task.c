@@ -8,6 +8,7 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
         "\r\n"
         "ok");
     Cursor_Add(proto->out, s);
+    tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
     st->type.state |= SUCCESS;
     return st->type.state;
 }
@@ -25,8 +26,6 @@ status HttpTask_AddRecieve(Task *tsk, Abstract *arg, Abstract *source){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     Roebling *rbl = HttpRbl_Make(tsk->m, proto->in, (Abstract *)proto);
     status r = Task_AddStep(tsk, TcpTask_ReadToRbl, (Abstract *)rbl, source, STEP_IO_IN);
-    r |= TcpTask_ExpectRead(NULL, tsk);
-    printf("after\n");
-    fflush(stdout);
+    tsk->type.state |= TcpTask_ExpectRecv(NULL, tsk);
     return r;
 }

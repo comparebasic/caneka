@@ -1,3 +1,4 @@
+extern struct lookup * HttpMethods;
 enum http_status {
     HTTP_STATUS_OK = 200,
     HTTP_STATUS_REDIRECT = 301,
@@ -9,6 +10,8 @@ enum http_status {
 
 typedef struct {
     Type type;
+    i32 method;
+    StrVec *path;
     Cursor *body;
     Table *headers;
 } HttpCtx;

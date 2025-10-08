@@ -1,15 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
-status Task_Free(Step *st, Task *tsk){
-    return MemCh_Free(tsk->m);
-}
-
 status Task_Tumble(Task *tsk){
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
     do {
-        tsk->type.state &= ~MORE;
+        if(tsk->type.state & TASK_UPDATE_CRIT){
+            if(tsk->source != NULL && tsk->source->type.of == TYPE_TASK){
+                printf("Reque\n");
+                Task *parent = (Task *)tsk->source; 
+                Queue_SetCriteria((Queue *)parent->data, 0, tsk->idx, &tsk->u);
+            }
+        }
+        tsk->type.state &= ~(MORE|TASK_UPDATE_CRIT);
+
         Step *st = Iter_Current(&tsk->chainIt);
         if(tsk->type.state & DEBUG){
             Abstract *args[] = {
@@ -22,6 +26,7 @@ status Task_Tumble(Task *tsk){
         status r = READY;
         if((st->type.state & (SUCCESS|ERROR)) == 0){
             r |= PROCESSING;
+            Guard_Incr(&st->g, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER);
             r = st->func(st, tsk);
         }
         if(((r & MORE) == 0)){

@@ -7,6 +7,14 @@ i32 Queue_GetIdx(Queue *q){
     return q->itemsIt.idx;
 }
 
+status Queue_Remove(Queue *q, i32 idx){
+    status r = READY;
+    r |= Span_Remove(q->itemsIt.p, idx);
+    util u = 0;
+    r |= Queue_SetCriteria(q, 0, idx, &u);
+    return r;
+}
+
 i32 Queue_Add(Queue *q, Abstract *a, util *crit){
     i32 idx = q->itemsIt.p->max_idx+1;
     Abstract *args[4];
@@ -86,8 +94,6 @@ status Queue_Next(Queue *q){
     }
 
     while((Iter_Next(&q->itemsIt) & END) == 0){
-        printf("%d\n", q->itemsIt.idx);
-        fflush(stdout);
         Iter it;
         if(q->itemsIt.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
             q->slabIdx++;
@@ -111,9 +117,6 @@ status Queue_Next(Queue *q){
                 Out("^p.    Found \\@$/&\n", args);
             }
             break;
-        }else{
-            printf("   nope %d\n", q->itemsIt.idx);
-            fflush(stdout);
         }
     }
 

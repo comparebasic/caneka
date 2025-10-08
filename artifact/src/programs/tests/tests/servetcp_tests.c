@@ -1,18 +1,29 @@
 #include <external.h>
 #include <caneka.h>
 
-static status tcpReqPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
+static status Example_log(Step *_st, Task *tsk){
+    Abstract *args[] = {
+        (Abstract *)tsk,
+        NULL,
+    };
+
+    if(tsk->type.state & ERROR){
+        Out("^r.Served with Error &^0\n", args);
+    }else{
+        Out("^g.Served &^0\n", args);
+    }
+
+    return SUCCESS;
+}
+
+static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
 
-    printf("init http request\n");
-    fflush(stdout);
     HttpTask_InitResponse(tsk, arg, source);
     /* add app stuf here */
     HttpTask_AddRecieve(tsk, NULL, NULL);
-    printf("Done init http request\n");
-    fflush(stdout);
     return SUCCESS;
 }
 
@@ -24,9 +35,11 @@ status ServeTcp_Tests(MemCh *gm){
     
     TcpCtx *ctx = TcpCtx_Make(m);
     ctx->port = 3000;
-    ctx->func = tcpReqPopulate;
+    ctx->populate = Example_populate;
+    ctx->finalize = Example_log;
 
     Task *tsk = ServeTcp_Make(ctx);
+    tsk->type.state |= DEBUG;
     Task_Tumble(tsk);
 
     MemCh_Free(m);

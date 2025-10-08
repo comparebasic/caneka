@@ -7,6 +7,10 @@ status Guard_Reset(i16 *g){
 }
 
 boolean Guard(i16 *g, i16 max, char *func, char *file, int line){
+    if(max == 0){
+        return TRUE;
+    }
+
     return ++(*g) <= max;
 }
 
