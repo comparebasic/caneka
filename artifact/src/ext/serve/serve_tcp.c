@@ -106,12 +106,9 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             MemCh *tm = MemCh_Make();
             Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
             child->stepGuardMax = TCP_STEP_MAX;
-            child->type.state |= DEBUG;
             ctx->populate(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk);
 
-            child->type.state |= DEBUG;
-
-            if(1 || tsk->type.state & DEBUG){
+            if(tsk->type.state & DEBUG){
                 args[0] = (Abstract *)child;
                 args[1] = NULL;
                 Out("^c.    Adding Child &^0\n", args);
@@ -173,7 +170,7 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 
 Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, (Abstract *)ctx);
-    Task_AddStep(tsk, Step_Delay, (Abstract *)Util_Wrapped(tsk->m, 1000), NULL, STEP_LOOP);
+    Task_AddStep(tsk, Step_Delay, (Abstract *)Util_Wrapped(tsk->m, 100), NULL, STEP_LOOP);
     Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_OpenTcp, (Abstract *)ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_SetupQueue, (Abstract *)ctx, NULL, ZERO);

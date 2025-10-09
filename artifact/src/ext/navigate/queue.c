@@ -79,12 +79,23 @@ static status Queue_SetGo(Queue *q){
     return q->go ? SUCCESS : NOOP;
 }
 
+status Queue_Reset(Queue *q){
+    Iter_Init(&q->itemsIt, q->itemsIt.p);
+    q->go = 0;
+    q->slabIdx = -1;
+    q->type.state = q->type.state & DEBUG;
+    return SUCCESS;
+}
+
 status Queue_Next(Queue *q){
     Abstract *args[5];
     if(q->type.state & DEBUG){
         args[0] = (Abstract *)q;
         args[1] = NULL;
         Out("^p.Queue_Next &\n", args);
+    }
+    if(q->type.state & END){
+        Queue_Reset(q);
     }
     q->type.state &= ~(SUCCESS|NOOP|END);
     q->value = NULL;

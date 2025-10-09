@@ -2,15 +2,19 @@
 #include <caneka.h>
 
 static status Example_log(Step *_st, Task *tsk){
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
     Abstract *args[] = {
-        (Abstract *)tsk,
+        (Abstract *)Lookup_Get(HttpMethods, ctx->method),
+        (Abstract *)ctx->path,
+        (Abstract *)MicroTime_ToStr(OutStream->m, MicroTime_Now()),
         NULL,
     };
 
     if(tsk->type.state & ERROR){
-        Out("^r.Served with Error &^0\n", args);
+        Out("^r.Error $ @ $^0\n", args);
     }else{
-        Out("^g.Served &^0\n", args);
+        Out("^g.Served $ @ $^0\n", args);
     }
 
     return SUCCESS;

@@ -7,7 +7,6 @@ status Task_Tumble(Task *tsk){
     do {
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->source != NULL && tsk->source->type.of == TYPE_TASK){
-                printf("Reque\n");
                 Task *parent = (Task *)tsk->source; 
                 Queue_SetCriteria((Queue *)parent->data, 0, tsk->idx, &tsk->u);
             }
