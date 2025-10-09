@@ -1,10 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Stream_ToB64(Stream *sm, byte *b, i32 length){
-    return 0;
-}
-
 StrVec *StrVec_FromBytes(MemCh *m, byte *b, i32 length){
     Stream sm;
     memset(&sm, 0, sizeof(Stream));
@@ -51,4 +47,3 @@ i64 Stream_ToStrVec(Stream *sm, byte *b, i32 length){
     }
     return total;
 }
-

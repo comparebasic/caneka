@@ -36,7 +36,6 @@ status Mess_Tests(MemCh *gm);
 status Relation_Tests(MemCh *gm);
 status Iter_Tests(MemCh *gm);
 status SnipModify_Tests(MemCh *gm);
-status BinPin_Tests(MemCh *gm);
 status File_Tests(MemCh *gm);
 status FmtHtml_Tests(MemCh *gm);
 status DebugStack_Tests(MemCh *gm);

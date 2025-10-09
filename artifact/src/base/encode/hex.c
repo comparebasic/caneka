@@ -13,20 +13,15 @@ Str *Bytes_ToHexStr(MemCh *m, byte *b, i16 length){
     s->type.state |= STRING_ENCODED;
     byte *nb = s->bytes;
     for(i32 i = 0; i < length; i++){
-        byte c1 = (b[i] & 15);
-        byte c2 = (b[i] >> 4);
-        if(c1 < 10){
-            c1 += '0';
-        }else{
-            c1 = (c1 - 10) + 'a';
-        }
-        if(c2 < 10){
-            c2 += '0';
-        }else{
-            c2 = (c1 - 10) + 'a';
-        }
-        nb[i*2] =  c1;
-        nb[i*2+1] =  c2;
+        byte c;
+        c = b[i] >> 4;
+        nb[i*2] =  c  < 10 ?
+            c + '0' : 
+            (c - 10) + 'a';
+        c = b[i] & 15;
+        nb[i*2+1] =  c  < 10 ?
+            c + '0' : 
+            (c - 10) + 'a';
     }
 
     s->length = length*2;
@@ -62,20 +57,17 @@ Str *Str_FromHex(MemCh *m, Str *s){
     Str *n = Str_Make(m, (s->length/2));
     byte *b = s->bytes;
     byte *nb = n->bytes;
+    i32 bi;
     for(i32 i = 0; i < s->length; i += 2){
-        byte c1 = b[i];
-        byte c2 = b[i+1];
-        if(c1 >= 'a' && c1 <= 'f'){
-            c1 = (c1-'a')+10;
-        }else{
-            c1 -= '0';
-        }
-        if(c2 >= 'a' && c2 <= 'f'){
-            c2 = (c2-'a')+10;
-        }else{
-            c2 -= '0';
-        }
-        nb[i/2] = (c1) + (c2 << 4);
+        bi = i/2;
+        byte c = b[i];
+        nb[bi] = c >= 'a' ?  
+            ((c - 'a') + 10) << 4:
+            (c - '0') << 4;
+        c = b[i+1];
+        nb[bi] |= c >= 'a' ?  
+            c - 'a' + 10:
+            c - '0';
     }
     n->length = s->length/2;
     return n;

@@ -5,3 +5,4 @@ struct req;
 struct handler;
 struct step;
 struct task;
+struct binseg_ctx;

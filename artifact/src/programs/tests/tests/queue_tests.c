@@ -9,8 +9,6 @@ status Queue_Tests(MemCh *gm){
 
     Queue *q = Queue_Make(m);
 
-    q->type.state |= DEBUG;
-
     QueueCrit *crit = QueueCrit_Make(m, QueueCrit_Fds, ZERO);
     Queue_AddHandler(q, crit);
 
@@ -37,23 +35,6 @@ status Queue_Tests(MemCh *gm){
     args[2] = NULL;
     r |= Test((Str *)item == one,
         "Queue item is first item, expected &, have &", args);
-    
-    /*
-    Str *s = Str_CstrRef(m, "Some action here");
-    write(fd, s, s->length);
-    close(fd);
-
-    re = Queue_Next(q);
-    r |= Test((re & (SUCCESS|ERROR|END)) == SUCCESS,
-        "Queue Next has value success with no file descriptor action.", NULL);
-
-    item = Queue_Get(q);
-    r |= Test(item == NULL,
-        "Queue item matches expected after write.", NULL);
-
-    r |= Test(Queue_GetIdx(q) == 3,
-        "Queue idx is expected", NULL);
-    */
 
     MemCh_Free(m);
     return r;
