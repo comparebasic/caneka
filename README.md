@@ -37,13 +37,14 @@ Components:
 
 - [base](artifact/src/base/): includes virtual memory segmented strings,
   scalable arrays, a key-value lookup, and the memory manager.
-- [ext](/artifact/src/ext/): all other features are found in the extended
-  sources in the folder ext. This includes the
-  [parser](/artifact/src/ext/parser/) and beginings of the
-  [serve](/artifact/src/ext/serve/) folder. The server heavily leverages
-  components in the [navigate](/artifact/src/ext/navigate/) module.  The
-  [ext](/artifact/src/ext/) module also contains the Class and Object system in
-  it's [types](/artifact/src/ext/types) folder 
+- [ext](/artifact/src/ext/): All other features, including the class system
+  found in [types](/artifact/src/ext/types), are in the extended sources in the
+  folder ext. This includes the [parser](/artifact/src/ext/parser/) and
+  beginings of the [serve](/artifact/src/ext/serve/) folder. The server heavily
+  leverages components in the [navigate](/artifact/src/ext/navigate/) module.
+  To see how a tcp/http server is componsed, view the
+  [test](/artifact/src/programs/tests/tests/servetcp_tests.c) file as a good
+  reference.
 - [programs](/artifact/src/programs/): Any programs that ship with the source
   will be in this folder, presently [tests](artifact/src/programs/tests) is the
   only meaningful program in this folder.
