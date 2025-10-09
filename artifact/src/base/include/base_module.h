@@ -1,6 +1,7 @@
 #include "types.h"
 #include "mem.h"
 #include "str.h"
+#include "encode.h"
 #include "debug.h"
 #include "core.h"
 #include "io.h"

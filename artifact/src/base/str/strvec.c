@@ -150,6 +150,20 @@ status StrVec_AddVec(StrVec *v, StrVec *v2){
     return SUCCESS;
 }
 
+StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length){
+    StrVec *v = StrVec_Make(m);
+    while(length > STR_MAX){
+        Str *s = Str_Ref(m, bytes, STR_MAX, STR_MAX, ZERO);
+        StrVec_Add(v, s);
+        length -= s->length;
+        bytes += s->length;
+    }
+
+    Str *s = Str_Ref(m, bytes, length, length, ZERO);
+    StrVec_Add(v, s);
+    return v;
+}
+
 status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length){
     Str *s = Span_Get(v->p, v->p->max_idx);
     status r = READY;

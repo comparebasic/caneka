@@ -1,19 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-char *hex_chars = "0123456789abcdef";
-static byte zeroDigit = (byte)'0';
-
-static inline byte hexCharToOrd(byte b){
-    if(b >= '0' && b <= '9'){
-        return b - '0';
-    }else if(b >= 'a' && b <= 'f'){
-        return b - 'a' + 10;
-    }else{
-        return 0;
-    }
-}
-
 Str *Str_FromI64(MemCh *m, i64 i){
     Str *s = Str_Make(m, MAX_BASE10);
     Str_AddI64(s, i);
@@ -33,7 +20,7 @@ i64 Str_I64OnBytes(byte **_b, i64 i){
     *b = '0';
     while(i > 0){
         val = i % base;
-        *(b--) = zeroDigit+val;
+        *(b--) = '0'+val;
         i -= val;
         i /= base;
     }
@@ -59,29 +46,6 @@ i64 Str_AddI64(Str *s, i64 i){
     byte *b = _b;
     i64 length = Str_I64OnBytes(&b, i);
     return Str_Add(s, b, length);
-}
-
-Str *Str_ToHex(MemCh *m, Str *s){
-    i32 _len = s->length*2;
-    if(_len > STR_MAX){
-        Abstract *args[] = { (Abstract *)I32_Wrapped(m, _len), NULL};
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Requested hex string is too long $", args);
-        return NULL;
-    }
-    Str *ret = Str_Make(m, s->length*2);
-    byte *b = s->bytes;
-    byte *end = b+s->length;
-    byte *ptr;
-    while(b < end){
-        byte c = *b;
-        byte b2[2];
-        b2[0] = hex_chars[((c & 240) >> 4)];
-        b2[1] = hex_chars[(c & 15)];
-        memcpy(ptr, b2, 2);
-        ptr += 2;
-        b++;
-    }
-    return ret;
 }
 
 Str *Str_MemCount(MemCh *m, i64 mem) {

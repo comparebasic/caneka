@@ -47,6 +47,7 @@
 #include "./str/stream.c"
 #include "./str/streams.c"
 #include "./str/tos.c"
+#include "./encode/hex.c"
 #include "./termio/ansi_str.c"
 #include "./termio/cli_status.c"
 #include "./termio/rawmode.c"

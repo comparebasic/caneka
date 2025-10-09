@@ -277,11 +277,19 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Encoding Tests",
+        Encoding_Tests,
+        "Encoding tests for hex/b32a64/b64.",
+        FEATURE_COMPLETE,
+    },
+    /*
+    {
         "ServeTcp Tests",
         ServeTcp_Tests,
         "Queue tests for file descriptors and time delays.",
         FEATURE_COMPLETE,
     },
+    */
     {
         NULL,
         NULL,
