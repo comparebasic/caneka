@@ -5,7 +5,7 @@ static boolean _initialized = FALSE;
 struct lookup *BlankerLookup = NULL;
 struct lookup *RepointerLookup = NULL;
 
-cls Persist_UnpackAddr(PersistCoord *coord, Abstract **arr){
+cls Stash_UnpackAddr(StashCoord *coord, Abstract **arr){
     cls typeOf = coord->typeOf;
     MemPage *pg = (MemPage *)arr[coord->idx];
     if(pg == NULL){
@@ -19,10 +19,10 @@ cls Persist_UnpackAddr(PersistCoord *coord, Abstract **arr){
     return typeOf;
 }
 
-status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
+status Stash_PackAddr(cls typeOf, i32 slIdx, void **ptr){
     util u = (util)*ptr;
-    u &= MEM_PERSIST_MASK;
-    PersistCoord coord = {
+    u &= MEM_STASH_MASK;
+    StashCoord coord = {
        .typeOf = typeOf,
        .idx = slIdx,
        .offset = (quad)u,
@@ -31,7 +31,7 @@ status Persist_PackAddr(cls typeOf, i32 slIdx, void **ptr){
     return SUCCESS;
 }
 
-i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
+i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
     boolean pack = (mit->type.state & MEM_ITER_STREAM) == 0;
     Abstract *args[5];
     i16 checksum = 0;
@@ -48,13 +48,13 @@ i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                         break;
                     }
                     if(pack){
-                        PersistItem *item = (PersistItem *)Table_Get(tbl, 
+                        StashItem *item = (StashItem *)Table_Get(tbl, 
                             (Abstract *)Util_Wrapped(m, (util)ptr));
                         if(item != NULL){
-                            Persist_PackAddr(item->coord.typeOf,
+                            Stash_PackAddr(item->coord.typeOf,
                                 item->coord.idx, (void **)dptr);
 
-                            PersistCoord *coord = (PersistCoord *)dptr;
+                            StashCoord *coord = (StashCoord *)dptr;
                         }else{
                             args[0] = (Abstract *)Util_Wrapped(m, (util)ptr);
                             args[1] = NULL;
@@ -64,8 +64,8 @@ i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                                 " may be external to this MemCh", args);
                         }
                     }else{
-                        PersistCoord *coord = (PersistCoord *)dptr;
-                        Persist_UnpackAddr(coord, mit->input.arr);
+                        StashCoord *coord = (StashCoord *)dptr;
+                        Stash_UnpackAddr(coord, mit->input.arr);
                     }
                     checksum++;
                     dptr++;
@@ -89,12 +89,12 @@ i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                     if(att->of > _TYPE_RANGE_TYPE_START){
                         Abstract **aa = ((void *)a)+att->range;
                         if(pack){
-                            PersistItem *item = (PersistItem *)Table_Get(tbl, 
+                            StashItem *item = (StashItem *)Table_Get(tbl, 
                                 (Abstract *)Util_Wrapped(m, (util)*aa));
                             if(item != NULL){
-                                Persist_PackAddr(item->coord.typeOf,
+                                Stash_PackAddr(item->coord.typeOf,
                                     item->coord.idx, (void **)aa);
-                                PersistCoord *coord = (PersistCoord *)aa;
+                                StashCoord *coord = (StashCoord *)aa;
                             }else{
                                 args[0] = (Abstract *)Util_Wrapped(m, (util)aa);
                                 args[1] = (Abstract *)map->keys[i];
@@ -105,8 +105,8 @@ i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                                     " may be external to this MemCh", args);
                             }
                         }else{
-                            PersistCoord *coord = (PersistCoord *)aa;
-                            Persist_UnpackAddr(coord, mit->input.arr);
+                            StashCoord *coord = (StashCoord *)aa;
+                            Stash_UnpackAddr(coord, mit->input.arr);
                         }
                         checksum++;
                     }
@@ -121,7 +121,7 @@ i16 Persist_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
     return checksum;
 }
 
-status Persist_FlushFree(Stream *sm, MemCh *persist){
+status Stash_FlushFree(Stream *sm, MemCh *persist){
     status r = READY;
     SourceFunc func = NULL;
     Abstract *a = NULL;
@@ -143,7 +143,7 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
             }
 
             Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)ptr), 
-                (Abstract *)PersistItem_Make(m, mit.slIdx, (void *)ptr, a->type.of));
+                (Abstract *)StashItem_Make(m, mit.slIdx, (void *)ptr, a->type.of));
         }
     }
 
@@ -152,25 +152,25 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     while((Iter_Next(&persist->it) & END) == 0){
         Abstract *a = Iter_Get(&persist->it);
         Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)a), 
-            (Abstract *)PersistItem_Make(m, persist->it.idx, (void *)a, a->type.of));
+            (Abstract *)StashItem_Make(m, persist->it.idx, (void *)a, a->type.of));
         Span_Add(pages, a);
     }
 
     MemIter_Init(&mit, persist);
-    i16 checksum = Persist_PackMemCh(m, &mit, tbl, NULL);
+    i16 checksum = Stash_PackMemCh(m, &mit, tbl, NULL);
 
-    PersistHeader hdr = {
+    StashHeader hdr = {
         .pages = (i16)pages->nvalues,
         .checksum = checksum
     };
-    Stream_Bytes(sm, (byte *)&hdr, sizeof(PersistHeader));
+    Stream_Bytes(sm, (byte *)&hdr, sizeof(StashHeader));
 
     Iter_Init(&it, pages);
     while((Iter_Next(&it) & END) == 0){
         MemPage *pg = (MemPage *)Iter_Get(&it);
         if(Stream_Bytes(sm, (byte *)pg, PAGE_SIZE) != PAGE_SIZE){
             Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
-                "Error writing page to stream for Persist", NULL);
+                "Error writing page to stream for Stash", NULL);
             r |= ERROR;
             break;
         }
@@ -180,17 +180,17 @@ status Persist_FlushFree(Stream *sm, MemCh *persist){
     return r;
 }
 
-MemCh *Persist_FromStream(Stream *sm){
+MemCh *Stash_FromStream(Stream *sm){
     status r = READY;
     Abstract *args[5];
-    PersistHeader hdr = {0, 0};
+    StashHeader hdr = {0, 0};
     i16 count = 0;
     MemCh *persist = NULL; 
     Abstract **pages = NULL;
     MemCh *m = sm->m;
     while((r & (SUCCESS|ERROR)) == 0 && (sm->type.state & END) == 0){
         if((r & PROCESSING) == 0){
-            if(Stream_ReadToMem(sm, sizeof(PersistHeader), (byte *)&hdr) != sizeof(PersistHeader)){
+            if(Stream_ReadToMem(sm, sizeof(StashHeader), (byte *)&hdr) != sizeof(StashHeader)){
                 r |= ERROR;
                 break;
             }
@@ -215,7 +215,7 @@ MemCh *Persist_FromStream(Stream *sm){
             args[0] = (Abstract *)I64_Wrapped(ErrStream->m, length);
             args[1] = NULL;
             Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
-                "Error reading page from stream to Persist length $", args);
+                "Error reading page from stream to Stash length $", args);
             r |= ERROR;
         }
         count++;
@@ -227,7 +227,7 @@ MemCh *Persist_FromStream(Stream *sm){
         r &= ~SUCCESS;
         MemIter mit;
         MemIter_InitArr(&mit, pages, hdr.pages-1);
-        checksum = Persist_PackMemCh(m, &mit, NULL, &persist);
+        checksum = Stash_PackMemCh(m, &mit, NULL, &persist);
     }
 
     if(checksum != hdr.checksum){
@@ -249,7 +249,7 @@ MemCh *Persist_FromStream(Stream *sm){
     return persist;
 }
 
-status Persist_Init(MemCh *m){
+status Stash_Init(MemCh *m){
     status r = READY;
     if(!_initialized){
         _initialized = TRUE;

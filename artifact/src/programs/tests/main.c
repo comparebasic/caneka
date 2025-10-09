@@ -211,12 +211,6 @@ static TestSet _Tests[] = {
     },
     */
     {
-        "BinPin Format Tests",
-        BinPin_Tests,
-        "Small example binpin format printout",
-        FEATURE_COMPLETE,
-    },
-    {
         "Mess Tests",
         Mess_Tests,
         "From a basic Fmt Roebling parser into the Mess data structures.",
@@ -259,9 +253,9 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Persist Tests",
-        Persist_Tests,
-        "Mem Persist testing.",
+        "Stash Tests",
+        Stash_Tests,
+        "Mem Stash testing.",
         FEATURE_COMPLETE,
     },
     {
@@ -280,6 +274,12 @@ static TestSet _Tests[] = {
         "Encoding Tests",
         Encoding_Tests,
         "Encoding tests for hex/b32a64/b64.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "BinSeg Tests",
+        BinSeg_Tests,
+        "Transactional format encoding capable of representing stream, node, and database content.",
         FEATURE_COMPLETE,
     },
     /*

@@ -12,6 +12,7 @@ i64 Stream_IndentOut(Stream *sm){
     return total;
 }
 
+
 StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func){
     StreamTask *tsk = (StreamTask *)MemCh_Alloc(m, sizeof(StreamTask));
     tsk->type.of = TYPE_STREAM_TASK;
@@ -19,6 +20,44 @@ StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc fun
     tsk->a = a;
     tsk->func = func;
     return tsk;
+}
+
+status Stream_Move(Stream *sm, i32 offset){
+    if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
+        Cursor_Setup(sm->dest.curs, sm->dest.curs->v);
+        if(offset == 0){
+            return NOOP;
+        }else if(offset < 0){
+            return Cursor_Decr(sm->dest.curs, abs(offset));
+        }else{
+            return Cursor_Incr(sm->dest.curs, offset);
+        }
+    }else{
+        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            "Not implemented", NULL);
+        return ERROR;
+    }
+}
+
+status Stream_Seek(Stream *sm, i32 offset){
+    if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
+        Cursor_Setup(sm->dest.curs, sm->dest.curs->v);
+        return Stream_Move(sm, offset);
+    }else{
+        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            "Not implemented", NULL);
+        return ERROR;
+    }
+}
+
+status Stream_FillStr(Stream *sm, Str *s, i32 max){
+    if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
+        return Cursor_FillStr(sm->dest.curs, s, max);
+    }else{ 
+        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            "Not implemented", NULL);
+        return ERROR;
+    }
 }
 
 i64 Stream_Bytes(Stream *sm, byte *b, i32 length){

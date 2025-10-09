@@ -45,7 +45,7 @@ status TemplLogic_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
 status Path_Tests(MemCh *gm);
 status WwwNavTempl_Tests(MemCh *gm);
-status Persist_Tests(MemCh *gm);
+status Stash_Tests(MemCh *gm);
 status TableUtilKey_Tests(MemCh *gm);
 status TableHKey_Tests(MemCh *gm);
 status Time_Tests(MemCh *gm);
@@ -53,6 +53,7 @@ status Queue_Tests(MemCh *gm);
 status TaskStep_Tests(MemCh *gm);
 status ServeTcp_Tests(MemCh *gm);
 status Encoding_Tests(MemCh *gm);
+status BinSeg_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

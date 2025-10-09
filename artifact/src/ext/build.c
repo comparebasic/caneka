@@ -137,6 +137,8 @@ static BuildSubdir persistobj = { "persist", {
     "persist_tos.c",
     "persist.c",
     "file.c",
+    "binseg.c",
+    "binseg_basic.c",
     NULL
 }};
 

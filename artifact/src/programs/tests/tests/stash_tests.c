@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Persist_Tests(MemCh *gm){
+status Stash_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     Abstract *args[5];
     MemCh *m = MemCh_Make();
@@ -17,14 +17,14 @@ status Persist_Tests(MemCh *gm){
         (Abstract *)Span_Get(m->it.p, m->it.p->max_idx)
     };
 
-    Persist_PackAddr(s->type.of, slIdx, (void *)&s);
-    PersistCoord *coord = (PersistCoord *)&s;
+    Stash_PackAddr(s->type.of, slIdx, (void *)&s);
+    StashCoord *coord = (StashCoord *)&s;
 
     r |= Test((void *)s != orig, "Pointer has been mutated and packed", NULL);
     r |= Test(coord->typeOf == typeOf, "Coord has type of object", NULL);
     r |= Test(coord->idx == slIdx, "Coord has idx sent to PackAddr", NULL);
 
-    Persist_UnpackAddr(coord, arr);
+    Stash_UnpackAddr(coord, arr);
     args[0] = (Abstract *)Str_Ref(m,
         (byte *)&orig,sizeof(void *), sizeof(void *), STRING_BINARY);
     args[1] = (Abstract *)Str_Ref(m,
@@ -50,7 +50,7 @@ status Persist_Tests(MemCh *gm){
 
     i32 fd = open(Str_Cstr(m, path), O_WRONLY|O_CREAT, 00644);
     Stream *sm = Stream_MakeToFd(m, fd, StrVec_Make(m), ZERO);
-    status re = Persist_FlushFree(sm, pst);
+    status re = Stash_FlushFree(sm, pst);
     close(fd);
 
     MemCh *takeSpace = MemCh_Make();
@@ -60,13 +60,13 @@ status Persist_Tests(MemCh *gm){
 
     fd = open(Str_Cstr(m, path), O_RDONLY);
     sm = Stream_MakeFromFd(m, fd, ZERO);
-    MemCh *loaded = Persist_FromStream(sm);
+    MemCh *loaded = Stash_FromStream(sm);
     close(fd);
 
     MemCh_Free(takeSpace);
 
     r |= Test(loaded != NULL, 
-        "Persist From Stream returns non-null", NULL);
+        "Stash From Stream returns non-null", NULL);
 
     s = Span_Get((Span *)loaded->owner, 0);
     Str *expected = Str_CstrRef(m, "One");

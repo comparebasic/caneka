@@ -100,9 +100,21 @@ status Cursor_FillStr(Cursor *curs, Str *s, i32 max){
         r |= Cursor_SetStr(curs);
     }
     if(r & SUCCESS){
-        s->bytes = curs->ptr;
-        s->length = min(curs->end - curs->ptr+1, max);
-        s->alloc = s->length;
+        i16 length = min(curs->end - curs->ptr+1, max);
+        if(s->type.state & STRING_COPY){
+            if(s->alloc < length){
+                Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
+                    "Length is less than zero when requesting the next cursor str", NULL);
+                return ERROR;
+            }
+            memcpy(s->bytes, curs->ptr, length);
+            s->length = length;
+            s->alloc = s->length;
+        }else{
+            s->bytes = curs->ptr;
+            s->length = length;
+            s->alloc = s->length;
+        }
     }else{
         s->bytes = NULL;
         s->length = 0;
