@@ -71,7 +71,8 @@ status Stream_Seek(Stream *sm, i32 offset){
 
 status Stream_RFillStr(Stream *sm, Str *s){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
-        return Cursor_RFillStr(sm->dest.curs, s);
+        sm->type.state |= (Cursor_RFillStr(sm->dest.curs, s) & (SUCCESS|ERROR|END));
+        return sm->type.state;
     }else{ 
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
             "Not implemented", NULL);

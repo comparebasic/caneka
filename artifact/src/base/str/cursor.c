@@ -112,48 +112,60 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
 status Cursor_RFillStr(Cursor *curs, Str *s){
     status r = READY;
     i16 length = s->alloc;
-    i16 offset = 0;
-    /*
+    i16 offset = s->alloc;;
+    
     if(curs->ptr == NULL){
-        if(Cursor_SetStr(curs) & NOOP){
-            curs->type.state |= NOOP;
-            return curs->type.state;
-        }
+        curs->type.state |= ERROR;
     }
 
+    Str *current = (Str *)Iter_GetByIdx(&curs->it, curs->it.idx);
     while(length > 0){
-        i16 remaining = (i16)(curs->end - curs->ptr);
+        i16 remaining = (i16)(curs->ptr - current->bytes);
         if(remaining > length){
-            memcpy(s->bytes, curs->ptr, length);
+            if(curs->type.state & END){
+                curs->ptr -= (length-1);
+                curs->type.state &= ~END;
+            }else{
+                curs->ptr -= length;
+            }
+            offset -= length;
+            memcpy(s->bytes+offset, curs->ptr, length);
+            s->length += length;
+            offset = 0;
             length = 0;
         }else{
-            memcpy(s->bytes, curs->ptr, remaining);
-            offset += remaining;
+            offset -= remaining;
+            if(curs->type.state & END){
+                curs->ptr -= (remaining-1);
+                curs->type.state &= ~END;
+            }else{
+                curs->ptr -= remaining;
+            }
+            memcpy(s->bytes+offset, current->bytes, remaining);
+            s->length += remaining;
             length -= remaining;
 
-            if(curs->it.idx == curs->it.p->max_idx){
-                curs->type.state |= END;
+            if(curs->it.idx == 0){
+                r |= END;
                 break;
             }
+
+            curs->it.idx--;
             if(Cursor_SetStr(curs) & NOOP){
                 curs->type.state |= NOOP;
                 break;
             }
-
         }
     }
 
     if(length > 0){
         curs->type.state |= ERROR;
     }
-    */
 
     return r;
 }
 
 status Cursor_FillStr(Cursor *curs, Str *s){
-    printf("fill str %d\n", (i32)s->alloc);
-    fflush(stdout);
     i16 length = s->alloc;
     i16 offset = 0;
     if(curs->ptr == NULL){
@@ -164,12 +176,12 @@ status Cursor_FillStr(Cursor *curs, Str *s){
     }
 
     while(length > 0){
-        i16 remaining = (i16)(curs->end - curs->ptr);
+        i16 remaining = (i16)(curs->end - curs->ptr)+1;
         if(remaining > length){
             memcpy(s->bytes, curs->ptr, length);
             s->length += length;
-            length = 0;
             curs->ptr += length;
+            length = 0;
         }else{
             memcpy(s->bytes, curs->ptr, remaining);
             s->length += remaining;
@@ -185,7 +197,6 @@ status Cursor_FillStr(Cursor *curs, Str *s){
                 curs->type.state |= NOOP;
                 break;
             }
-
         }
     }
 

@@ -219,7 +219,7 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
             Str *ftr = Str_Make(m, sz);
             ftr->type.state |= STRING_COPY;
             if(ctx->type.state & BINSEG_REVERSED){
-                Stream_FillStr(ctx->sm, ftr);
+                Stream_RFillStr(ctx->sm, ftr);
             }else{
                 Stream_FillStr(ctx->sm, ftr);
             }
