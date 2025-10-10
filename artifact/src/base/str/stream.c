@@ -39,6 +39,17 @@ status Stream_Move(Stream *sm, i32 offset){
     }
 }
 
+status Stream_SeekEnd(Stream *sm, i32 offset){
+    if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
+        Cursor_End(sm->dest.curs);
+        return Stream_Move(sm, -offset);
+    }else{
+        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            "Not implemented", NULL);
+        return ERROR;
+    }
+}
+
 status Stream_Seek(Stream *sm, i32 offset){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
         Cursor_Setup(sm->dest.curs, sm->dest.curs->v);

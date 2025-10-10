@@ -21,6 +21,22 @@ static status Cursor_SetStr(Cursor *curs){
     return NOOP;
 }
 
+status Cursor_End(Cursor *curs){
+    printf("Cursor End\n");
+    fflush(stdout);
+    Str *s = (Str *)Iter_GetByIdx(&curs->it, curs->it.p->max_idx);   
+    if(s != NULL){
+        curs->end = s->bytes+(s->length-1);
+        curs->ptr = curs->end;
+        curs->type.state |= (PROCESSING|END);
+    }else{
+        curs->ptr = NULL;
+        curs->end = NULL;
+        curs->type.state |= END;
+    }
+    return curs->type.state;
+}
+
 status Cursor_Decr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
     Abstract *args[3];

@@ -100,8 +100,6 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     return r;
 }
 
-
-
 Str *BinSegCtx_KindName(i8 kind){
     return Lookup_Get(BinSegNames, (i16)kind);;
 }
@@ -112,7 +110,32 @@ i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
     return sg->val.w;
 }
 
-i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a, i16 id){
+i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *footer){
+    i64 total = 0;
+    MemCh *m = ctx->sm->m;
+    if(ctx->type.state & BINSEG_VISIBLE){
+        word sz = sizeof(BinSegHeader);
+        Str *sh = Str_Ref(m, (byte *)hdr, sz, sz, ZERO);
+        sh = Str_ToHex(m, sh);
+        footer = Str_ToHex(m, footer);
+        if(ctx->type.state & BINSEG_REVERSED){
+            total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);
+            total += Stream_Bytes(ctx->sm, sh->bytes, sh->length);
+        }else{
+            total += Stream_Bytes(ctx->sm, sh->bytes, sh->length);
+            total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);
+        }
+    }else if(ctx->type.state & BINSEG_REVERSED){
+        total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);
+        total += Stream_Bytes(ctx->sm, (byte *)hdr, sizeof(BinSegHeader));
+    }else{
+        total += Stream_Bytes(ctx->sm, (byte *)hdr, sizeof(BinSegHeader));
+        total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);
+    }
+    return total;
+}
+
+i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
     Abstract *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
@@ -130,70 +153,77 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a, i16 id){
     return func(ctx, a, id);
 }
 
-i64 BinSegCtx_FooterToStream(BinSegCtx *ctx, Span *ids){
-    i64 total = 0;
-    MemCh *m = ctx->sm->m;
-
-    Iter it;
-    Iter_Init(&it, ids);
-    while((Iter_Next(&it) & END) == 0){
-        Single *sg = (Single *)Iter_Get(&it);
-        Str *idStr = Str_Ref(m, (byte *)&sg->val.w, sizeof(i16), sizeof(i16), ZERO);
-        total += Stream_Bytes(ctx->sm, (byte *)idStr->bytes, idStr->length); 
-    }
-
-    return total;
-}
-
-
 status BinSegCtx_LoadStream(BinSegCtx *ctx){
     Abstract *args[4];
     MemCh *m = ctx->sm->m;
+    ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
     if(ctx->type.state & BINSEG_REVERSED){
-        Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
-            "Not implemented", NULL);
-        ctx->type.state |= ERROR;
-        return ctx->type.state;
+        ;
     }else{
-        ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
         Stream_Seek(ctx->sm, 0);
-        while((ctx->sm->type.state & END) == 0 &&
-                (ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
-            Str *s = Str_Make(m, 0);
+    }
+    while((ctx->sm->type.state & END) == 0 &&
+            (ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
+        Str *s = Str_Make(m, 0);
 
-            i16 sz = sizeof(BinSegHeader);
+        i16 sz = sizeof(BinSegHeader);
+        if(ctx->type.state & BINSEG_VISIBLE){
+            sz *= 2;
+        }
+
+        if(ctx->type.state & BINSEG_REVERSED){
+            Stream_Move(ctx->sm, sz); 
+            Stream_FillStr(ctx->sm, s, sz);
+        }else{
             Stream_FillStr(ctx->sm, s, sz);
             Stream_Move(ctx->sm, sz); 
-            if(s->length == sz){
-                BinSegHeader *hdr = (BinSegHeader*)s->bytes;
-                if(ctx->type.state & DEBUG){
-                    args[0] = (Abstract *)Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
-                    args[1] = NULL;
-                    Out("^p.Header &^0\n", args);
-                }
+        }
 
-                if(hdr->kind == BINSEG_TYPE_BYTES){
-                    sz = hdr->total;
-                }else if(hdr->kind == BINSEG_TYPE_NUMBER){
-                    sz = sizeof(i32);
-                }else if(hdr->kind == BINSEG_TYPE_NODE){
-                    sz = sizeof(i16)*(hdr->total+2);
-                }else if(hdr->kind == BINSEG_TYPE_DICTIONARY){
-                    sz = sizeof(i16)*(hdr->total*2);
-                }else{
-                    /* Collection/BytesCollection */
-                    sz = sizeof(i16)*hdr->total;
-                }
+        if(s->length == sz){
+            if(ctx->type.state & BINSEG_VISIBLE){
+                s = Str_FromHex(m, s);
+            }
+            BinSegHeader *hdr = (BinSegHeader*)s->bytes;
+            if(ctx->type.state & DEBUG){
+                args[0] = (Abstract *)Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
+                args[1] = NULL;
+                Out("^p.Header &^0\n", args);
+            }
 
-                Str *s = Str_Make(m, sz);
-                s->type.state |= STRING_COPY;
-                Stream_FillStr(ctx->sm, s, sz);
+            if(hdr->kind == BINSEG_TYPE_BYTES){
+                sz = hdr->total;
+            }else if(hdr->kind == BINSEG_TYPE_NUMBER){
+                sz = sizeof(i32);
+            }else if(hdr->kind == BINSEG_TYPE_NODE){
+                sz = sizeof(i16)*(hdr->total+2);
+            }else if(hdr->kind == BINSEG_TYPE_DICTIONARY){
+                sz = sizeof(i16)*(hdr->total*2);
+            }else{
+                /* Collection/BytesCollection */
+                sz = sizeof(i16)*hdr->total;
+            }
+
+            if(ctx->type.state & BINSEG_VISIBLE){
+                sz *= 2;
+            }
+
+            Str *ftr = Str_Make(m, sz);
+            ftr->type.state |= STRING_COPY;
+            if(ctx->type.state & BINSEG_REVERSED){
                 Stream_Move(ctx->sm, sz); 
-                s->type.state &= ~STRING_COPY;
+                Stream_FillStr(ctx->sm, ftr, sz);
+            }else{
+                Stream_FillStr(ctx->sm, ftr, sz);
+                Stream_Move(ctx->sm, sz); 
+            }
+            ftr->type.state &= ~STRING_COPY;
 
-                if(BinSegCtx_PushLoad(ctx, hdr, s) & END){
-                    ctx->type.state |= (SUCCESS|END);
-                }
+            if(ctx->type.state & BINSEG_VISIBLE){
+                ftr = Str_FromHex(m, ftr);
+            }
+
+            if(BinSegCtx_PushLoad(ctx, hdr, ftr) & END){
+                ctx->type.state |= (SUCCESS|END);
             }
         }
     }

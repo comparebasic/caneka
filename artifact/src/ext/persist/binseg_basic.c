@@ -5,7 +5,11 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     i64 total = 0;
     MemCh *m = ctx->sm->m;
     Table *tbl = (Span *)as(a, TYPE_TABLE);
-    Span *ids = Span_Make(m);
+
+    Str *s = Str_Make(m, sizeof(i16)*tbl->nvalues*2);
+    s->length = s->alloc;
+    i16 *ip = (i16 *)s->bytes;
+    i16 i = 0;
     Iter it;
     Iter_Init(&it, tbl);
     while((Iter_Next(&it) & END) == 0){
@@ -13,10 +17,11 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
         if(h != NULL){
             i16 keyId = ctx->func(ctx, NULL);
             i16 id = ctx->func(ctx, NULL);
-            Span_Add(ids, (Abstract *)I32_Wrapped(m, keyId));
-            Span_Add(ids, (Abstract *)I32_Wrapped(m, id));
-            total += BinSegCtx_ToStream(ctx, h->key, keyId);
-            total += BinSegCtx_ToStream(ctx, h->value, id);
+            total += BinSegCtx_Send(ctx, h->key, keyId);
+            total += BinSegCtx_Send(ctx, h->value, id);
+            ip[i*2] = keyId;
+            ip[i*2+1] = id;
+            i++;
         }
     };
 
@@ -26,35 +31,26 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
        .id = id,
     };
 
-    Str *hdrStr = 
-        Str_Ref(m, (byte *)&hdr, sizeof(BinSegHeader), sizeof(BinSegHeader), ZERO);
-    if(ctx->type.state & BINSEG_VISIBLE){
-        hdrStr = Str_ToHex(m, hdrStr);
-    }
-
-    if(ctx->type.state & BINSEG_REVERSED){
-        total += BinSegCtx_FooterToStream(ctx, ids);
-        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
-    }else{
-        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
-        total += BinSegCtx_FooterToStream(ctx, ids);
-    }
-
+    total += BinSegCtx_ToStream(ctx, &hdr, s);
     return total;
 }
-
 
 static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     i64 total = 0;
     MemCh *m = ctx->sm->m;
     Span *p = (Span *)as(a, TYPE_SPAN);
-    Span *ids = Span_Make(m);
+
+    Str *s = Str_Make(m, sizeof(i16)*p->nvalues);
+    s->length = s->alloc;
+    i16 *ip = (i16 *)s->bytes;
+
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         i16 id = ctx->func(ctx, NULL);
-        Span_Add(ids, (Abstract *)I32_Wrapped(m, id));
-        total += BinSegCtx_ToStream(ctx, Iter_Get(&it), id);
+        total += BinSegCtx_Send(ctx, Iter_Get(&it), id);
+        *ip = id;
+        ip++;
     };
 
     BinSegHeader hdr = {
@@ -63,30 +59,13 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
        .id = id,
     };
 
-    Str *hdrStr = 
-        Str_Ref(m, (byte *)&hdr, sizeof(BinSegHeader), sizeof(BinSegHeader), ZERO);
-    if(ctx->type.state & BINSEG_VISIBLE){
-        hdrStr = Str_ToHex(m, hdrStr);
-    }
-
-    if(ctx->type.state & BINSEG_REVERSED){
-        total += BinSegCtx_FooterToStream(ctx, ids);
-        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
-    }else{
-        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
-        total += BinSegCtx_FooterToStream(ctx, ids);
-    }
-
+    total += BinSegCtx_ToStream(ctx, &hdr, s);
     return total;
 }
 
 static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
-    i64 total = 0;
     Str *s = (Str *)as(a, TYPE_STR);
     MemCh *m = ctx->sm->m;
-    if(ctx->type.state & BINSEG_VISIBLE && (s->type.state & STRING_ENCODED) == 0){
-        s = Str_ToHex(m, s);
-    }
 
     BinSegHeader hdr = {
        .total = s->length, 
@@ -94,20 +73,7 @@ static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
        .id = id,
     };
 
-    Str *hdrStr = 
-        Str_Ref(m, (byte *)&hdr, sizeof(BinSegHeader), sizeof(BinSegHeader), ZERO);
-    if(ctx->type.state & BINSEG_VISIBLE){
-        hdrStr = Str_ToHex(m, hdrStr);
-    }
-
-    if(ctx->type.state & BINSEG_REVERSED){
-        total += Stream_Bytes(ctx->sm, (byte *)s->bytes, s->length); 
-        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
-    }else{
-        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
-        total += Stream_Bytes(ctx->sm, (byte *)s->bytes, s->length); 
-    }
-    return total;
+    return BinSegCtx_ToStream(ctx, &hdr, s);
 }
 
 status BinSeg_BasicInit(MemCh *m, Lookup *lk){

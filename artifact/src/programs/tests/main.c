@@ -288,6 +288,18 @@ static TestSet _Tests[] = {
         "Transactional format storing and reading collection and dictionary data types.",
         FEATURE_COMPLETE,
     },
+    {
+        "BinSegV Tests",
+        BinSegV_Tests,
+        "Transactional format only encoded in visible hex format characters.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "BinSegReversedV Tests",
+        BinSegReversedV_Tests,
+        "Transactional format reversed and only encoded in visible hex format characters.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "ServeTcp Tests",
