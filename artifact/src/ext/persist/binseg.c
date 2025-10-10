@@ -121,7 +121,6 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *footer){
         if(ctx->type.state & BINSEG_REVERSED){
             total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);
             total += Stream_Bytes(ctx->sm, sh->bytes, sh->length);
-            printf("reversed %d\n", (i32)sh->length);
         }else{
             total += Stream_Bytes(ctx->sm, sh->bytes, sh->length);
             total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);

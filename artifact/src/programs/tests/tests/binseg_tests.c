@@ -9,7 +9,6 @@ status BinSeg_Tests(MemCh *gm){
     
     Stream *sm = Stream_MakeStrVec(m);
     BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL);
-    ctx->type.state |= DEBUG;
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     BinSegCtx_Send(ctx, (Abstract *)one, ctx->func(ctx, NULL));
@@ -209,9 +208,7 @@ status BinSegReversedV_Tests(MemCh *gm){
     
     Stream *sm = Stream_MakeStrVec(m);
     BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL);
-    ctx->type.state |= (BINSEG_REVERSED);
-    ctx->type.state |= DEBUG;
-
+    ctx->type.state |= (BINSEG_REVERSED|BINSEG_VISIBLE);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");
@@ -239,11 +236,6 @@ status BinSegReversedV_Tests(MemCh *gm){
     Table_Set(tbl, (Abstract *)keyD, (Abstract *)dice);
     BinSegCtx_Send(ctx, (Abstract *)tbl, tableId);
 
-    args[0] = (Abstract *)ctx;
-    args[1] = NULL;
-    Out("^p.Ctx &^0\n", args);
-
-    /*
     ctx->keys = Table_Make(m);
     Str *key1 = Str_CstrRef(m, "list");
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, spanId),
@@ -251,11 +243,9 @@ status BinSegReversedV_Tests(MemCh *gm){
     Str *key2 = Str_CstrRef(m, "dict");
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, tableId),
         (Abstract *)key2);
-    */
 
     BinSegCtx_LoadStream(ctx);
 
-    /*
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
 
@@ -284,7 +274,6 @@ status BinSegReversedV_Tests(MemCh *gm){
     args[2] = NULL;
     r |= Test(Equals((Abstract *)s, (Abstract *)dice),
         "keyD value is equal, expected @, have &", args);
-    */
 
     MemCh_Free(m);
     DebugStack_Pop();
