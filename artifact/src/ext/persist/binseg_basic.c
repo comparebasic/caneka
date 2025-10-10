@@ -11,7 +11,7 @@ static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i32 id){
 
     BinSegHeader hdr = {
        .total = s->length, 
-       .kind = BINSEG_TYPE_BINARY,
+       .kind = BINSEG_TYPE_BYTES,
        .id = id,
     };
 

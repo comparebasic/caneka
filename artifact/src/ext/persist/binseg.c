@@ -4,15 +4,15 @@
 Lookup *BinSegNames = NULL;
 Lookup *BinSegLookup = NULL;
 
-Str *BinSeg_KindName(i8 kind){
+Str *BinSegCtx_KindName(i8 kind){
     return Lookup_Get(BinSegNames, (i16)kind);;
 }
 
-i32 BinSeg_IdxCounter(BinSegCtx *ctx, Abstract *arg){
+i32 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
     return ++((Single *)ctx->source)->val.i;
 }
 
-i64 BinSeg_ToStream(BinSegCtx *ctx, Abstract *a){
+i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a){
     Abstract *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
@@ -36,36 +36,36 @@ status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Abstract *a){
     }
 
     MemCh *m = ctx->sm->m;
-    if(ctx->root == NULL){
-        ctx->root = a;
-    }else{
-        Single *id = I16_Wrapped(m, hdr->id);
-        Str *key = (Str *s)Table_Get(ctx->keys, (Abstract *)id);
-        if(key != NULL){
-            if(hdr->kind == BINSEG_TYPE_BINARY){
-                Table_Set(ctx->tbl, (Abstract *)key, a);
-            }else{
-                /* add cortex ids */
-            }
-        } else {
-            Abstract *cv = Table_Get(ctx->cortex, (Abstract *)id);
-            if(cv->type.of == TYPE_TABLE){
-                Table *tbl = (Table *)cv;
-                if(hdr->kind == BINSEG_TYPE_KEY){
-                    Table_SetKey(tbl, a);
-                }else{
-                    Table_SetValue(tbl, a);
-                }
-            }else if(cv->type.of == TYPE_SPAN){
-                Span *p = (Span *)cv;
-                Span_Add(p, a);
-            }else if(cv->type.of == TYPE_STRVEC){
-                StrVec *v = (StrVec *)cv;
-                StrVec_Add(v, (Str *)as(a, TYPE_STR));
-            }
-        }
 
+    Single *id = I16_Wrapped(m, hdr->id);
+    Str *key = (Str *)Table_Get(ctx->keys, (Abstract *)id);
+    if(key != NULL){
+        if(hdr->kind == BINSEG_TYPE_BYTES){
+            Table_Set(ctx->tblIt.p, (Abstract *)key, a);
+        }else{
+            /* add cortex ids */
+            Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+                "Not implemented", NULL);
+            return ERROR;
+        }
+    } else {
+        Abstract *cv = Table_Get(ctx->cortext, (Abstract *)id);
+        if(cv->type.of == TYPE_TABLE){
+            Table *tbl = (Table *)cv;
+            if(hdr->kind == BINSEG_TYPE_KEY){
+                Table_SetKey(&ctx->tblIt, a);
+            }else{
+                Table_SetValue(&ctx->tblIt, a);
+            }
+        }else if(cv->type.of == TYPE_SPAN){
+            Span *p = (Span *)cv;
+            Span_Add(p, a);
+        }else if(cv->type.of == TYPE_STRVEC){
+            StrVec *v = (StrVec *)cv;
+            StrVec_Add(v, (Str *)as(a, TYPE_STR));
+        }
     }
+
     return SUCCESS;
 }
 
@@ -94,7 +94,7 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
                 Stream_FillStr(ctx->sm, s, hdr->total);
                 s->type.state &= ~STRING_COPY;
 
-                BinSegCtx_PushLoad(ctx, hdr, (Abstract *)a);
+                BinSegCtx_PushLoad(ctx, hdr, (Abstract *)s);
             }
             ctx->type.state |= NOOP;
         }
@@ -110,12 +110,13 @@ BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source){
     ctx->type.of = TYPE_BINSEG_CTX;
     ctx->sm = sm;
     if(func == NULL && source == NULL){
-        ctx->func = BinSeg_IdxCounter;
+        ctx->func = BinSegCtx_IdxCounter;
         ctx->source = (Abstract *)I32_Wrapped(m, -1);
     }
 
     ctx->cortext = Table_Make(m);
     ctx->source = source;
+    Iter_Init(&ctx->tblIt, Table_Make(m));
     return ctx;
 }
 
@@ -125,16 +126,18 @@ status BinSeg_Init(MemCh *m){
         BinSegLookup = Lookup_Make(m, _TYPE_ZERO);
         r |= BinSeg_BasicInit(m, BinSegLookup);
         BinSegNames = Lookup_Make(m, _TYPE_ZERO);
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BINARY,
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BYTES,
             (void *)Str_CstrRef(m, "Binary"));
         Lookup_Add(m, BinSegNames, BINSEG_TYPE_COLLECTION,
             (void *)Str_CstrRef(m, "Collection"));
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BINARY_SEG,
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BYTES_SEG,
             (void *)Str_CstrRef(m, "BinarySeg"));
         Lookup_Add(m, BinSegNames, BINSEG_TYPE_DICTIONARY,
             (void *)Str_CstrRef(m, "Dictionary"));
         Lookup_Add(m, BinSegNames, BINSEG_TYPE_NODE,
             (void *)Str_CstrRef(m, "Node"));
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_NUMBER,
+            (void *)Str_CstrRef(m, "Number"));
         r |= SUCCESS;
     }
 

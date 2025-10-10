@@ -8,7 +8,7 @@ static i64 BinSegHeader_Print(Stream *sm, Abstract *a, cls type, word flags){
     BinSegHeader *hdr = (BinSegHeader *)a;
     Abstract *args[] = {
         (Abstract *)I8_Wrapped(sm->m, hdr->id),
-        (Abstract *)BinSeg_KindName(hdr->kind),
+        (Abstract *)BinSegCtx_KindName(hdr->kind),
         (Abstract *)I32_Wrapped(sm->m, hdr->total),
         NULL
     };
@@ -24,10 +24,11 @@ static i64 BinSegCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
         (Abstract *)ctx->cortext,
         (Abstract *)ctx->sm,
+        (Abstract *)ctx->tblIt.p,
         NULL
     };
 
-    total += Fmt(sm, "BinSegCtx<$ @ @>", args);
+    total += Fmt(sm, "BinSegCtx<$ @ @ tbl:@>", args);
     return total;
 }
 

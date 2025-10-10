@@ -16,6 +16,7 @@ Hashed *Table_SetHashed(Span *tbl, Abstract *a, Abstract *value);
 Abstract *Table_GetKey(Span *tbl, i32 idx);
 Abstract *Table_Get(Span *tbl, Abstract *a);
 i32 Table_Set(Span *tbl, Abstract *a, Abstract *value);
+i32 Table_SetByIter(Iter *it, Abstract *a, Abstract *value);
 Abstract *Table_FromIdx(Span *tbl, i32 idx);
 i32 Table_GetIdx(Span *tbl, Abstract *a);
 Table *Table_Make(MemCh *m);

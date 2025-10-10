@@ -215,6 +215,11 @@ i32 Table_Set(Table *tbl, Abstract *a, Abstract *value){
     return h->idx;
 }
 
+i32 Table_SetByIter(Iter *it, Abstract *a, Abstract *value){
+    Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, value);
+    return h->idx;
+}
+
 Abstract *Table_FromIdx(Table *tbl, i32 idx){
     Hashed *h = (Hashed *)Span_Get(tbl, idx);
     if(h != NULL){

@@ -40,17 +40,16 @@ typedef struct binseg_ctx{
     Stream *sm;
     Table *cortext;
     BinSegIdxFunc func;
-    Abstract *root;
     Table *keys;
-    Table *tbl;
+    Iter tblIt;
     Abstract *source;
 } BinSegCtx;
 
 
 extern struct lookup *BinSegLookup;
 status BinSeg_Init(MemCh *m);
-i32 BinSeg_IdxCounter(BinSegCtx *ctx, Abstract *arg);
+i32 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg);
 BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source);
-i64 BinSeg_ToStream(BinSegCtx *ctx, Abstract *a);
-status BinSeg_LoadStream(BinSegCtx *ctx);
-Str *BinSeg_KindName(i8 kind);
+i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a);
+status BinSegCtx_LoadStream(BinSegCtx *ctx);
+Str *BinSegCtx_KindName(i8 kind);
