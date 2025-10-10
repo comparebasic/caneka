@@ -1,7 +1,50 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i32 id){
+static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+    i64 total = 0;
+    MemCh *m = ctx->sm->m;
+    Table *tbl = (Span *)as(a, TYPE_TABLE);
+    Span *ids = Span_Make(m);
+    Iter it;
+    Iter_Init(&it, tbl);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            i16 keyId = ctx->func(ctx, NULL);
+            i16 id = ctx->func(ctx, NULL);
+            Span_Add(ids, (Abstract *)I32_Wrapped(m, keyId));
+            Span_Add(ids, (Abstract *)I32_Wrapped(m, id));
+            total += BinSegCtx_ToStream(ctx, h->key, keyId);
+            total += BinSegCtx_ToStream(ctx, h->value, id);
+        }
+    };
+
+    BinSegHeader hdr = {
+       .total = tbl->nvalues, 
+       .kind = BINSEG_TYPE_DICTIONARY,
+       .id = id,
+    };
+
+    Str *hdrStr = 
+        Str_Ref(m, (byte *)&hdr, sizeof(BinSegHeader), sizeof(BinSegHeader), ZERO);
+    if(ctx->type.state & BINSEG_VISIBLE){
+        hdrStr = Str_ToHex(m, hdrStr);
+    }
+
+    if(ctx->type.state & BINSEG_REVERSED){
+        total += BinSegCtx_FooterToStream(ctx, ids);
+        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
+    }else{
+        total += Stream_Bytes(ctx->sm, (byte *)hdrStr->bytes, hdrStr->length); 
+        total += BinSegCtx_FooterToStream(ctx, ids);
+    }
+
+    return total;
+}
+
+
+static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     i64 total = 0;
     MemCh *m = ctx->sm->m;
     Span *p = (Span *)as(a, TYPE_SPAN);
@@ -9,7 +52,7 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i32 id){
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
-        i32 id = ctx->func(ctx, NULL);
+        i16 id = ctx->func(ctx, NULL);
         Span_Add(ids, (Abstract *)I32_Wrapped(m, id));
         total += BinSegCtx_ToStream(ctx, Iter_Get(&it), id);
     };
@@ -37,7 +80,7 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i32 id){
     return total;
 }
 
-static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i32 id){
+static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     i64 total = 0;
     Str *s = (Str *)as(a, TYPE_STR);
     MemCh *m = ctx->sm->m;
@@ -71,5 +114,6 @@ status BinSeg_BasicInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, BinSegLookup, TYPE_STR, (void *)Str_ToBinSeg);
     r |= Lookup_Add(m, BinSegLookup, TYPE_SPAN, (void *)Span_ToBinSeg);
+    r |= Lookup_Add(m, BinSegLookup, TYPE_TABLE, (void *)Table_ToBinSeg);
     return r;
 }
