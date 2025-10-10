@@ -54,6 +54,7 @@ status TaskStep_Tests(MemCh *gm);
 status ServeTcp_Tests(MemCh *gm);
 status Encoding_Tests(MemCh *gm);
 status BinSeg_Tests(MemCh *gm);
+status BinSegCollection_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

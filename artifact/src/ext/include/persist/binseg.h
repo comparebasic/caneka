@@ -13,11 +13,11 @@ enum binseg_kinds {
 /* footprints:
    
    - Binary: Header + sizeof(byte) * hdr->total
-   - Collection: Header + sizeof(hdr) * hdr->total
+   - Collection: Header + sizeof(id) * hdr->total
         order: item,item,item...
-   - Dictionary: Header + sizeof(hdr) * hdr->total * 2
+   - Dictionary: Header + sizeof(id) * hdr->total * 2
         order: key,value,key,value,key,value...
-   - Node: Header + sizeof(hdr) * (hdr->total + 2)
+   - Node: Header + sizeof(id) * (hdr->total + 2)
         order: name,atts,child,child,child...
 */
 
@@ -53,3 +53,4 @@ BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source);
 i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a, i32 id);
 status BinSegCtx_LoadStream(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);
+i64 BinSegCtx_FooterToStream(BinSegCtx *ctx, Span *ids);

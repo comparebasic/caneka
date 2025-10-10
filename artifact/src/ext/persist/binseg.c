@@ -80,6 +80,24 @@ status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Abstract *a){
     return r;
 }
 
+i64 BinSegCtx_FooterToStream(BinSegCtx *ctx, Span *ids){
+    i64 total = 0;
+    MemCh *m = ctx->sm->m;
+
+    Iter it;
+    Iter_Init(&it, ids);
+    while((Iter_Next(&it) & END) == 0){
+        Single *sg = (Single *)Iter_Get(&it);
+        Str *idStr = Str_Ref(m, (byte *)&sg->val.i, sizeof(i32), sizeof(i32), ZERO);
+        if(ctx->type.state & BINSEG_VISIBLE){
+            idStr = Str_ToHex(m, idStr);
+        }
+        total += Stream_Bytes(ctx->sm, (byte *)idStr->bytes, idStr->length); 
+    }
+
+    return total;
+}
+
 status BinSegCtx_LoadStream(BinSegCtx *ctx){
     Abstract *args[4];
     MemCh *m = ctx->sm->m;
@@ -105,13 +123,17 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
                     args[1] = NULL;
                     Out("^p.Header &^0\n", args);
                 }
+                if(hdr->kind == BINSEG_TYPE_BYTES){
+                    sz = hdr->total;
+                }else{
+                    sz = hdr->total*sizeof(word);
+                }
                 Str *s = Str_Make(m, hdr->total);
 
                 s->type.state |= STRING_COPY;
                 Stream_FillStr(ctx->sm, s, hdr->total);
                 Stream_Move(ctx->sm, hdr->total); 
                 s->type.state &= ~STRING_COPY;
-
                 if(BinSegCtx_PushLoad(ctx, hdr, (Abstract *)s) & END){
                     ctx->type.state |= (SUCCESS|END);
                 }

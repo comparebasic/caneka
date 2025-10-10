@@ -3,7 +3,6 @@
 
 gobits QueueCrit_Fds(QueueCrit *crit, util *values){
     word go = 0;
-    i32 localIdx = 0;
     util *u = values;
     for(i32 i = 0; i < SPAN_STRIDE; i++){
         if(*u == 0){

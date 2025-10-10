@@ -282,6 +282,12 @@ static TestSet _Tests[] = {
         "Transactional format encoding capable of representing stream, node, and database content.",
         FEATURE_COMPLETE,
     },
+    {
+        "BinSegCollection Tests",
+        BinSegCollection_Tests,
+        "Transactional format storing and reading collection and dictionary data types.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "ServeTcp Tests",
