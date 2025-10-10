@@ -22,8 +22,6 @@ static status Cursor_SetStr(Cursor *curs){
 }
 
 status Cursor_End(Cursor *curs){
-    printf("Cursor End\n");
-    fflush(stdout);
     Str *s = (Str *)Iter_GetByIdx(&curs->it, curs->it.p->max_idx);   
     if(s != NULL){
         curs->end = s->bytes+(s->length-1);
@@ -111,7 +109,94 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
     return v;
 }
 
-status Cursor_FillStr(Cursor *curs, Str *s, i32 max){
+status Cursor_RFillStr(Cursor *curs, Str *s){
+    status r = READY;
+    i16 length = s->alloc;
+    i16 offset = 0;
+    /*
+    if(curs->ptr == NULL){
+        if(Cursor_SetStr(curs) & NOOP){
+            curs->type.state |= NOOP;
+            return curs->type.state;
+        }
+    }
+
+    while(length > 0){
+        i16 remaining = (i16)(curs->end - curs->ptr);
+        if(remaining > length){
+            memcpy(s->bytes, curs->ptr, length);
+            length = 0;
+        }else{
+            memcpy(s->bytes, curs->ptr, remaining);
+            offset += remaining;
+            length -= remaining;
+
+            if(curs->it.idx == curs->it.p->max_idx){
+                curs->type.state |= END;
+                break;
+            }
+            if(Cursor_SetStr(curs) & NOOP){
+                curs->type.state |= NOOP;
+                break;
+            }
+
+        }
+    }
+
+    if(length > 0){
+        curs->type.state |= ERROR;
+    }
+    */
+
+    return r;
+}
+
+status Cursor_FillStr(Cursor *curs, Str *s){
+    printf("fill str %d\n", (i32)s->alloc);
+    fflush(stdout);
+    i16 length = s->alloc;
+    i16 offset = 0;
+    if(curs->ptr == NULL){
+        if(Cursor_SetStr(curs) & NOOP){
+            curs->type.state |= NOOP;
+            return curs->type.state;
+        }
+    }
+
+    while(length > 0){
+        i16 remaining = (i16)(curs->end - curs->ptr);
+        if(remaining > length){
+            memcpy(s->bytes, curs->ptr, length);
+            s->length += length;
+            length = 0;
+            curs->ptr += length;
+        }else{
+            memcpy(s->bytes, curs->ptr, remaining);
+            s->length += remaining;
+            offset += remaining;
+            length -= remaining;
+
+            if(curs->it.idx == curs->it.p->max_idx){
+                curs->type.state |= END;
+                break;
+            }
+            curs->it.idx++;
+            if(Cursor_SetStr(curs) & NOOP){
+                curs->type.state |= NOOP;
+                break;
+            }
+
+        }
+    }
+
+    if(length > 0){
+        curs->type.state |= ERROR;
+    }
+
+    return curs->type.state;
+}
+
+status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max){
     status r = READY;
     Abstract *args[3];
     if(max < 0){

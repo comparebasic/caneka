@@ -47,5 +47,7 @@ Stream *Stream_Make(MemCh *m);
 StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func);
 i64 Stream_IndentOut(Stream *sm);
 status Stream_Seek(Stream *sm, i32 offset);
+status Stream_SeekEnd(Stream *sm, i32 offset);
 status Stream_Move(Stream *sm, i32 offset);
-status Stream_FillStr(Stream *sm, Str *s, i32 max);
+status Stream_FillStr(Stream *sm, Str *s);
+status Stream_RFillStr(Stream *sm, Str *s);

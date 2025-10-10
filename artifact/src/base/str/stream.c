@@ -27,7 +27,11 @@ status Stream_Move(Stream *sm, i32 offset){
         if(offset == 0){
             return NOOP;
         }else if(offset < 0){
-            return Cursor_Decr(sm->dest.curs, abs(offset));
+            offset = abs(offset);
+            if(sm->dest.curs->type.state & END && offset > 0){
+               offset--; 
+            }
+            return Cursor_Decr(sm->dest.curs, offset);
         }else{
             sm->type.state |=  (Cursor_Incr(sm->dest.curs, offset) & END);
             return sm->type.state;
@@ -42,7 +46,11 @@ status Stream_Move(Stream *sm, i32 offset){
 status Stream_SeekEnd(Stream *sm, i32 offset){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
         Cursor_End(sm->dest.curs);
-        return Stream_Move(sm, -offset);
+        if(offset){
+            return Stream_Move(sm, -offset);
+        }else{
+            return SUCCESS;
+        }
     }else{
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
             "Not implemented", NULL);
@@ -61,9 +69,19 @@ status Stream_Seek(Stream *sm, i32 offset){
     }
 }
 
-status Stream_FillStr(Stream *sm, Str *s, i32 length){
+status Stream_RFillStr(Stream *sm, Str *s){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
-        return Cursor_FillStr(sm->dest.curs, s, length);
+        return Cursor_RFillStr(sm->dest.curs, s);
+    }else{ 
+        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            "Not implemented", NULL);
+        return ERROR;
+    }
+}
+
+status Stream_FillStr(Stream *sm, Str *s){
+    if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
+        return Cursor_FillStr(sm->dest.curs, s);
     }else{ 
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
             "Not implemented", NULL);

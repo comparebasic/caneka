@@ -121,6 +121,7 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *footer){
         if(ctx->type.state & BINSEG_REVERSED){
             total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);
             total += Stream_Bytes(ctx->sm, sh->bytes, sh->length);
+            printf("reversed %d\n", (i32)sh->length);
         }else{
             total += Stream_Bytes(ctx->sm, sh->bytes, sh->length);
             total += Stream_Bytes(ctx->sm, footer->bytes, footer->length);
@@ -155,33 +156,41 @@ i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
 
 status BinSegCtx_LoadStream(BinSegCtx *ctx){
     Abstract *args[4];
+    if(ctx->type.state & DEBUG){
+        args[0] = (Abstract *)ctx;    
+        args[1] = NULL;
+        Out("^p.LoadStream &\n", args);
+    }
     MemCh *m = ctx->sm->m;
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
     if(ctx->type.state & BINSEG_REVERSED){
-        ;
+        Stream_SeekEnd(ctx->sm, 0);
     }else{
         Stream_Seek(ctx->sm, 0);
     }
     while((ctx->sm->type.state & END) == 0 &&
             (ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
-        Str *s = Str_Make(m, 0);
 
         i16 sz = sizeof(BinSegHeader);
         if(ctx->type.state & BINSEG_VISIBLE){
             sz *= 2;
         }
+        Str *s = Str_Make(m, sz);
 
         if(ctx->type.state & BINSEG_REVERSED){
-            Stream_Move(ctx->sm, sz); 
-            Stream_FillStr(ctx->sm, s, sz);
+            Stream_RFillStr(ctx->sm, s);
         }else{
-            Stream_FillStr(ctx->sm, s, sz);
-            Stream_Move(ctx->sm, sz); 
+            Stream_FillStr(ctx->sm, s);
         }
 
         if(s->length == sz){
             if(ctx->type.state & BINSEG_VISIBLE){
                 s = Str_FromHex(m, s);
+            }
+            if(ctx->type.state & DEBUG){
+                args[0] = (Abstract *)s;
+                args[1] = NULL;
+                Out("^p.Hdr &\n", args);
             }
             BinSegHeader *hdr = (BinSegHeader*)s->bytes;
             if(ctx->type.state & DEBUG){
@@ -210,12 +219,11 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
             Str *ftr = Str_Make(m, sz);
             ftr->type.state |= STRING_COPY;
             if(ctx->type.state & BINSEG_REVERSED){
-                Stream_Move(ctx->sm, sz); 
-                Stream_FillStr(ctx->sm, ftr, sz);
+                Stream_FillStr(ctx->sm, ftr);
             }else{
-                Stream_FillStr(ctx->sm, ftr, sz);
-                Stream_Move(ctx->sm, sz); 
+                Stream_FillStr(ctx->sm, ftr);
             }
+
             ftr->type.state &= ~STRING_COPY;
 
             if(ctx->type.state & BINSEG_VISIBLE){

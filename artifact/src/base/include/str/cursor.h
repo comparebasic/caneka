@@ -24,4 +24,6 @@ status Cursor_NextByte(Cursor *curs);
 status Cursor_Incr(Cursor *curs, i32 length);
 StrVec *Cursor_Get(MemCh *m, Cursor *curs, i32 length, i32 offset);
 status Cursor_End(Cursor *curs);
-status Cursor_FillStr(Cursor *curs, Str *s, i32 max);
+status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max);
+status Cursor_FillStr(Cursor *curs, Str *s);
+status Cursor_RFillStr(Cursor *curs, Str *s);
