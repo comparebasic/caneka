@@ -1,11 +1,13 @@
 #define BINSEG_SEG_MAX 1024
 
 enum binseg_kinds {
-    BINSEG_TYPE_BINARY = 1,
+    BINSEG_TYPE_BYTES = 1,
     BINSEG_TYPE_COLLECTION = 2,
-    BINSEG_TYPE_BINARY_SEG = 3,
+    BINSEG_TYPE_BYTES_SEG = 3,
     BINSEG_TYPE_DICTIONARY = 4,
+    BINSEG_TYPE_KEY = 5,
     BINSEG_TYPE_NODE = 6,
+    BINSEG_TYPE_NUMBER = 8,
 };
 
 /* footprints:
@@ -29,8 +31,8 @@ typedef i64 (*BinSegFunc)(struct binseg_ctx *ctx, Abstract *a);
 
 typedef struct binseg_hdr {
     quad total;
-    byte kind;
-    byte id;
+    word kind;
+    word id;
 } BinSegHeader;
 
 typedef struct binseg_ctx{
@@ -39,7 +41,8 @@ typedef struct binseg_ctx{
     Table *cortext;
     BinSegIdxFunc func;
     Abstract *root;
-    Abstract *value;
+    Table *keys;
+    Table *tbl;
     Abstract *source;
 } BinSegCtx;
 

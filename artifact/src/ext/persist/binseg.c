@@ -25,7 +25,51 @@ i64 BinSeg_ToStream(BinSegCtx *ctx, Abstract *a){
     return func(ctx, a);
 }
 
-status BinSeg_LoadStream(BinSegCtx *ctx){
+status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Abstract *a){
+    if(ctx->type.state & DEBUG){
+        Abstract *args[4];
+        args[0] = (Abstract *)Ptr_Wrapped(OutStream->m,
+            (byte *)hdr, TYPE_BINSEG_HEADER);
+        args[1] = (Abstract *)a;
+        args[2] = NULL;
+        Out("^y.Found Header @ -> &^0\n", args);
+    }
+
+    MemCh *m = ctx->sm->m;
+    if(ctx->root == NULL){
+        ctx->root = a;
+    }else{
+        Single *id = I16_Wrapped(m, hdr->id);
+        Str *key = (Str *s)Table_Get(ctx->keys, (Abstract *)id);
+        if(key != NULL){
+            if(hdr->kind == BINSEG_TYPE_BINARY){
+                Table_Set(ctx->tbl, (Abstract *)key, a);
+            }else{
+                /* add cortex ids */
+            }
+        } else {
+            Abstract *cv = Table_Get(ctx->cortex, (Abstract *)id);
+            if(cv->type.of == TYPE_TABLE){
+                Table *tbl = (Table *)cv;
+                if(hdr->kind == BINSEG_TYPE_KEY){
+                    Table_SetKey(tbl, a);
+                }else{
+                    Table_SetValue(tbl, a);
+                }
+            }else if(cv->type.of == TYPE_SPAN){
+                Span *p = (Span *)cv;
+                Span_Add(p, a);
+            }else if(cv->type.of == TYPE_STRVEC){
+                StrVec *v = (StrVec *)cv;
+                StrVec_Add(v, (Str *)as(a, TYPE_STR));
+            }
+        }
+
+    }
+    return SUCCESS;
+}
+
+status BinSegCtx_LoadStream(BinSegCtx *ctx){
     Abstract *args[4];
     MemCh *m = ctx->sm->m;
     if(ctx->type.state & BINSEG_REVERSED){
@@ -34,23 +78,23 @@ status BinSeg_LoadStream(BinSegCtx *ctx){
         return ERROR;
     }else{
         ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
+        ctx->sm->dest.curs->type.state |= DEBUG;
         while((ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
             Abstract *item = NULL;
             Stream_Seek(ctx->sm, 0);
             Str *s = Str_Make(m, 0);
-            Stream_FillStr(ctx->sm, s, sizeof(BinSegHeader));
-            if(s->length == sizeof(BinSegHeader)){
+            i32 sz = sizeof(BinSegHeader);
+            Stream_FillStr(ctx->sm, s, sz);
+            if(s->length == sz){
                 BinSegHeader *hdr = (BinSegHeader*)s->bytes;
                 Str *s = Str_Make(m, hdr->total);
+                Stream_Move(ctx->sm, sz); 
+
                 s->type.state |= STRING_COPY;
                 Stream_FillStr(ctx->sm, s, hdr->total);
                 s->type.state &= ~STRING_COPY;
 
-                args[0] = (Abstract *)Ptr_Wrapped(OutStream->m,
-                    (byte *)hdr, TYPE_BINSEG_HEADER);
-                args[1] = (Abstract *)s;
-                args[2] = NULL;
-                Out("^y.Found Header @ -> &^0\n", args);
+                BinSegCtx_PushLoad(ctx, hdr, (Abstract *)a);
             }
             ctx->type.state |= NOOP;
         }

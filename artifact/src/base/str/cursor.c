@@ -91,36 +91,46 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
 
 status Cursor_FillStr(Cursor *curs, Str *s, i32 max){
     status r = READY;
+    Abstract *args[2];
     if(max < 0){
         Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
             "Max is less than zero when requesting the next cursor str", NULL);
         return ERROR;
     }
     if(curs->ptr == NULL){
-        r |= Cursor_SetStr(curs);
+        if(Cursor_SetStr(curs) & NOOP){
+            s->bytes = NULL;
+            s->length = 0;
+            s->alloc = 0;
+            return NOOP;
+        }
     }
-    if(r & SUCCESS){
-        i16 length = min(curs->end - curs->ptr+1, max);
-        if(s->type.state & STRING_COPY){
-            if(s->alloc < length){
-                Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
-                    "Length is less than zero when requesting the next cursor str", NULL);
-                return ERROR;
-            }
-            memcpy(s->bytes, curs->ptr, length);
-            s->length = length;
-            s->alloc = s->length;
-        }else{
-            s->bytes = curs->ptr;
-            s->length = length;
-            s->alloc = s->length;
+    i16 length = min(curs->end - curs->ptr+1, max);
+    if(s->type.state & STRING_COPY){
+        if(s->alloc < length){
+            Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
+                "Length is less than zero when requesting the next cursor str", NULL);
+            return ERROR;
+        }
+        memcpy(s->bytes, curs->ptr, length);
+        s->length = length;
+        s->alloc = s->length;
+        if(curs->type.state & DEBUG){
+            args[0] = (Abstract *)I16_Wrapped(OutStream->m, length);
+            args[1] = NULL;
+            Out("^p.Cursor Copy/Filled $ bytes\n", args); 
         }
     }else{
-        s->bytes = NULL;
-        s->length = 0;
-        s->alloc = 0;
-        r |= NOOP;
+        s->bytes = curs->ptr;
+        s->length = length;
+        s->alloc = s->length;
+        if(curs->type.state & DEBUG){
+            args[0] = (Abstract *)I16_Wrapped(OutStream->m, length);
+            args[1] = NULL;
+            Out("^p.Cursor Set $ bytes\n", args); 
+        }
     }
+
     return r;
 }
 
