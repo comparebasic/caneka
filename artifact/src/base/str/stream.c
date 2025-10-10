@@ -24,13 +24,13 @@ StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc fun
 
 status Stream_Move(Stream *sm, i32 offset){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
-        Cursor_Setup(sm->dest.curs, sm->dest.curs->v);
         if(offset == 0){
             return NOOP;
         }else if(offset < 0){
             return Cursor_Decr(sm->dest.curs, abs(offset));
         }else{
-            return Cursor_Incr(sm->dest.curs, offset);
+            sm->type.state |=  (Cursor_Incr(sm->dest.curs, offset) & END);
+            return sm->type.state;
         }
     }else{
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
@@ -50,9 +50,9 @@ status Stream_Seek(Stream *sm, i32 offset){
     }
 }
 
-status Stream_FillStr(Stream *sm, Str *s, i32 max){
+status Stream_FillStr(Stream *sm, Str *s, i32 length){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
-        return Cursor_FillStr(sm->dest.curs, s, max);
+        return Cursor_FillStr(sm->dest.curs, s, length);
     }else{ 
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
             "Not implemented", NULL);

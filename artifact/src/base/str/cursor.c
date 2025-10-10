@@ -23,6 +23,12 @@ static status Cursor_SetStr(Cursor *curs){
 
 status Cursor_Decr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
+    Abstract *args[3];
+    if(curs->type.state & DEBUG){
+        args[0] = (Abstract *)I32_Wrapped(OutStream->m, length);
+        args[1] = NULL;
+        Out("^p.Cursor_Decr @^0\n", args);
+    }
     if((curs->type.state & PROCESSING) == 0){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Unable to decr cursor that is not in PROCESSING", NULL);
@@ -91,7 +97,7 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
 
 status Cursor_FillStr(Cursor *curs, Str *s, i32 max){
     status r = READY;
-    Abstract *args[2];
+    Abstract *args[3];
     if(max < 0){
         Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
             "Max is less than zero when requesting the next cursor str", NULL);
@@ -117,8 +123,9 @@ status Cursor_FillStr(Cursor *curs, Str *s, i32 max){
         s->alloc = s->length;
         if(curs->type.state & DEBUG){
             args[0] = (Abstract *)I16_Wrapped(OutStream->m, length);
-            args[1] = NULL;
-            Out("^p.Cursor Copy/Filled $ bytes\n", args); 
+            args[1] = (Abstract *)s;
+            args[2] = NULL;
+            Out("^p.Cursor Copy/Filled $ bytes -> &\n", args); 
         }
     }else{
         s->bytes = curs->ptr;
@@ -126,8 +133,9 @@ status Cursor_FillStr(Cursor *curs, Str *s, i32 max){
         s->alloc = s->length;
         if(curs->type.state & DEBUG){
             args[0] = (Abstract *)I16_Wrapped(OutStream->m, length);
-            args[1] = NULL;
-            Out("^p.Cursor Set $ bytes\n", args); 
+            args[1] = (Abstract *)s;
+            args[2] = NULL;
+            Out("^p.Cursor Set $ bytes -> &\n", args); 
         }
     }
 
@@ -136,11 +144,11 @@ status Cursor_FillStr(Cursor *curs, Str *s, i32 max){
 
 status Cursor_Incr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
+    i32 origDebug = length;
     if(curs->ptr == NULL){
         Cursor_SetStr(curs);
     }
     curs->type.state &= ~NOOP;
-    Str *s = curs->it.value;
     i32 remaining = (curs->end - curs->ptr);
     while(length > 0){
         if(length > remaining){
@@ -154,14 +162,12 @@ status Cursor_Incr(Cursor *curs, i32 length){
                 curs->type.state |= NOOP;
                 break;
             }else{
-                s = curs->it.value;
                 remaining = (curs->end - curs->ptr);
                 length -= 1;
             }
         }else{
             curs->ptr += length;
-            DebugStack_Pop();
-            return curs->type.state;
+            break;
         }
     }
     DebugStack_Pop();
@@ -211,6 +217,9 @@ status Cursor_Add(Cursor *curs, Str *s){
 }
 
 status Cursor_Setup(Cursor *curs, StrVec *v){
+    if(curs->type.state & DEBUG){
+        Out("^p.Cursor_Setup^0\n", NULL);
+    }
     curs->type.of = TYPE_CURSOR;
     curs->type.state &= DEBUG;
     curs->slot = 0;

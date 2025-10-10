@@ -7,27 +7,32 @@ status BinSeg_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Str *s = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Stream *sm = Stream_MakeStrVec(m);
     BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL);
-    BinSegCtx_ToStream(ctx, (Abstract *)s);
 
-    args[0] = (Abstract *)ctx;
-    args[1] = NULL;
-    Out("^p.Content from BinSeg &^0\n", args);
+    Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
+    BinSegCtx_ToStream(ctx, (Abstract *)one, ctx->func(ctx, NULL));
 
-    ctx->type.state |= DEBUG;
+    Str *two = Str_CstrRef(m, "And here is the description.");
+    BinSegCtx_ToStream(ctx, (Abstract *)two, ctx->func(ctx, NULL));
+
     ctx->keys = Table_Make(m);
+    Str *key1 = Str_CstrRef(m, "title");
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, 0),
-        (Abstract *)Str_CstrRef(m, "title"));
+        (Abstract *)key1);
+    Str *key2 = Str_CstrRef(m, "descr");
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, 1),
-        (Abstract *)Str_CstrRef(m, "descr"));
+        (Abstract *)key2);
      
     BinSegCtx_LoadStream(ctx);
 
-    args[0] = (Abstract *)ctx;
-    args[1] = NULL;
-    Out("^p.Content from BinSeg &^0\n", args);
+    r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
+        "Ctx finished with status SUCCESS|END", NULL);
+    Table *tbl = ctx->tblIt.p;
+    r |= Test(Equals((Abstract *)Table_Get(tbl, (Abstract *)key1), (Abstract *)one), 
+        "first value is expected", NULL);
+    r |= Test(Equals((Abstract *)Table_Get(tbl, (Abstract *)key2), (Abstract *)two), 
+        "second value is expected", NULL);
 
     MemCh_Free(m);
     DebugStack_Pop();

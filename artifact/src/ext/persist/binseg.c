@@ -9,10 +9,12 @@ Str *BinSegCtx_KindName(i8 kind){
 }
 
 i32 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
-    return ++((Single *)ctx->source)->val.i;
+    Single *sg = (Single *)as(ctx->source, TYPE_WRAPPED_I32);
+    sg->val.i++;
+    return sg->val.i;
 }
 
-i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a){
+i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a, i32 id){
     Abstract *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
@@ -22,10 +24,16 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a){
             "Unable to find BinSegFunc for type $", args);
         return 0;
     }
-    return func(ctx, a);
+    if(ctx->type.state & DEBUG){
+        args[0] = (Abstract *)a;
+        args[1] = NULL;
+        Out("^p.ToStream &^0\n", args);
+    }
+    return func(ctx, a, id);
 }
 
 status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Abstract *a){
+    status r = READY;
     if(ctx->type.state & DEBUG){
         Abstract *args[4];
         args[0] = (Abstract *)Ptr_Wrapped(OutStream->m,
@@ -41,12 +49,15 @@ status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Abstract *a){
     Str *key = (Str *)Table_Get(ctx->keys, (Abstract *)id);
     if(key != NULL){
         if(hdr->kind == BINSEG_TYPE_BYTES){
-            Table_Set(ctx->tblIt.p, (Abstract *)key, a);
+            r |= Table_Set(ctx->tblIt.p, (Abstract *)key, a);
         }else{
             /* add cortex ids */
             Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
                 "Not implemented", NULL);
             return ERROR;
+        }
+        if(ctx->keys != NULL && ctx->tblIt.p->nvalues == ctx->keys->nvalues){
+            r |= END;
         }
     } else {
         Abstract *cv = Table_Get(ctx->cortext, (Abstract *)id);
@@ -66,7 +77,7 @@ status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Abstract *a){
         }
     }
 
-    return SUCCESS;
+    return r;
 }
 
 status BinSegCtx_LoadStream(BinSegCtx *ctx){
@@ -75,33 +86,40 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
     if(ctx->type.state & BINSEG_REVERSED){
         Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
             "Not implemented", NULL);
-        return ERROR;
+        ctx->type.state |= ERROR;
+        return ctx->type.state;
     }else{
         ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
-        ctx->sm->dest.curs->type.state |= DEBUG;
-        while((ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
-            Abstract *item = NULL;
-            Stream_Seek(ctx->sm, 0);
+        Stream_Seek(ctx->sm, 0);
+        while((ctx->sm->type.state & END) == 0 &&
+                (ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
             Str *s = Str_Make(m, 0);
+
             i32 sz = sizeof(BinSegHeader);
             Stream_FillStr(ctx->sm, s, sz);
+            Stream_Move(ctx->sm, sz); 
             if(s->length == sz){
                 BinSegHeader *hdr = (BinSegHeader*)s->bytes;
+                if(ctx->type.state & DEBUG){
+                    args[0] = (Abstract *)Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
+                    args[1] = NULL;
+                    Out("^p.Header &^0\n", args);
+                }
                 Str *s = Str_Make(m, hdr->total);
-                Stream_Move(ctx->sm, sz); 
 
                 s->type.state |= STRING_COPY;
                 Stream_FillStr(ctx->sm, s, hdr->total);
+                Stream_Move(ctx->sm, hdr->total); 
                 s->type.state &= ~STRING_COPY;
 
-                BinSegCtx_PushLoad(ctx, hdr, (Abstract *)s);
+                if(BinSegCtx_PushLoad(ctx, hdr, (Abstract *)s) & END){
+                    ctx->type.state |= (SUCCESS|END);
+                }
             }
-            ctx->type.state |= NOOP;
         }
-
-        return SUCCESS;
     }
-    return NOOP;
+
+    return ctx->type.state;
 }
 
 BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source){
@@ -112,10 +130,11 @@ BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source){
     if(func == NULL && source == NULL){
         ctx->func = BinSegCtx_IdxCounter;
         ctx->source = (Abstract *)I32_Wrapped(m, -1);
+    }else{
+        ctx->source = source;
     }
 
     ctx->cortext = Table_Make(m);
-    ctx->source = source;
     Iter_Init(&ctx->tblIt, Table_Make(m));
     return ctx;
 }

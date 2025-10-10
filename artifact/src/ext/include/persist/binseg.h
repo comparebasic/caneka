@@ -27,7 +27,7 @@ enum binseg_types {
 };
 
 typedef i32 (*BinSegIdxFunc)(struct binseg_ctx *ctx, Abstract *arg);
-typedef i64 (*BinSegFunc)(struct binseg_ctx *ctx, Abstract *a);
+typedef i64 (*BinSegFunc)(struct binseg_ctx *ctx, Abstract *a, i32 id);
 
 typedef struct binseg_hdr {
     quad total;
@@ -50,6 +50,6 @@ extern struct lookup *BinSegLookup;
 status BinSeg_Init(MemCh *m);
 i32 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg);
 BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source);
-i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a);
+i64 BinSegCtx_ToStream(BinSegCtx *ctx, Abstract *a, i32 id);
 status BinSegCtx_LoadStream(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);
