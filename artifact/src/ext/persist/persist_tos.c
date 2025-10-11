@@ -24,7 +24,7 @@ static i64 BinSegCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
         (Abstract *)ctx->cortext,
         (Abstract *)ctx->sm,
-        (Abstract *)ctx->tblIt.p,
+        (Abstract *)ctx->tbl,
         NULL
     };
 

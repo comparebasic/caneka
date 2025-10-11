@@ -8,7 +8,7 @@ status BinSeg_Tests(MemCh *gm){
     Abstract *args[5];
     
     Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL);
+    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, ZERO);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     BinSegCtx_Send(ctx, (Abstract *)one, ctx->func(ctx, NULL));
@@ -28,7 +28,7 @@ status BinSeg_Tests(MemCh *gm){
 
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
-    Table *tbl = ctx->tblIt.p;
+    Table *tbl = ctx->tbl;
     r |= Test(Equals((Abstract *)Table_Get(tbl, (Abstract *)key1), (Abstract *)one), 
         "first value is expected", NULL);
     r |= Test(Equals((Abstract *)Table_Get(tbl, (Abstract *)key2), (Abstract *)two), 
@@ -87,7 +87,7 @@ status BinSegCollection_Tests(MemCh *gm){
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
 
-    Span *list = (Span *)Table_Get(ctx->tblIt.p, (Abstract *)key1);
+    Span *list = (Span *)Table_Get(ctx->tbl, (Abstract *)key1);
     Str *s = (Str *)Span_Get(list, 0);
     r |= Test(Equals((Abstract *)s, (Abstract *)one),
         "first value is expected", NULL);
@@ -98,7 +98,7 @@ status BinSegCollection_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)s, (Abstract *)three),
         "third value is expected", NULL);
 
-    Table *dict = (Span *)Table_Get(ctx->tblIt.p, (Abstract *)key2);
+    Table *dict = (Span *)Table_Get(ctx->tbl, (Abstract *)key2);
     s = (Str *)Table_Get(dict, (Abstract *)keyC);
     args[0] = (Abstract *)carrot;
     args[1] = (Abstract *)s;
@@ -126,9 +126,7 @@ status BinSegV_Tests(MemCh *gm){
     Abstract *args[5];
     
     Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL);
-
-    ctx->type.state |= BINSEG_VISIBLE;
+    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, BINSEG_VISIBLE);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");
@@ -169,7 +167,7 @@ status BinSegV_Tests(MemCh *gm){
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
 
-    Span *list = (Span *)Table_Get(ctx->tblIt.p, (Abstract *)key1);
+    Span *list = (Span *)Table_Get(ctx->tbl, (Abstract *)key1);
     Str *s = (Str *)Span_Get(list, 0);
     r |= Test(Equals((Abstract *)s, (Abstract *)one),
         "first value is expected", NULL);
@@ -180,7 +178,7 @@ status BinSegV_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)s, (Abstract *)three),
         "third value is expected", NULL);
 
-    Table *dict = (Span *)Table_Get(ctx->tblIt.p, (Abstract *)key2);
+    Table *dict = (Span *)Table_Get(ctx->tbl, (Abstract *)key2);
     s = (Str *)Table_Get(dict, (Abstract *)keyC);
     args[0] = (Abstract *)carrot;
     args[1] = (Abstract *)s;
@@ -207,8 +205,7 @@ status BinSegReversedV_Tests(MemCh *gm){
     Abstract *args[5];
     
     Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL);
-    ctx->type.state |= (BINSEG_REVERSED|BINSEG_VISIBLE);
+    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, (BINSEG_REVERSED|BINSEG_VISIBLE));
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");
@@ -249,7 +246,7 @@ status BinSegReversedV_Tests(MemCh *gm){
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
 
-    Span *list = (Span *)Table_Get(ctx->tblIt.p, (Abstract *)key1);
+    Span *list = (Span *)Table_Get(ctx->tbl, (Abstract *)key1);
     Str *s = (Str *)Span_Get(list, 0);
     r |= Test(Equals((Abstract *)s, (Abstract *)one),
         "first value is expected", NULL);
@@ -260,7 +257,7 @@ status BinSegReversedV_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)s, (Abstract *)three),
         "third value is expected", NULL);
 
-    Table *dict = (Span *)Table_Get(ctx->tblIt.p, (Abstract *)key2);
+    Table *dict = (Span *)Table_Get(ctx->tbl, (Abstract *)key2);
     s = (Str *)Table_Get(dict, (Abstract *)keyC);
     args[0] = (Abstract *)carrot;
     args[1] = (Abstract *)s;

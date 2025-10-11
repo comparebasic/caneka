@@ -81,8 +81,8 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     if(ctx->keys != NULL){
         Str *key = (Str *)Table_Get(ctx->keys, (Abstract *)id);
         if(key != NULL){
-            r |= Table_Set(ctx->tblIt.p, (Abstract *)key, a);
-            if(ctx->tblIt.p->nvalues == ctx->keys->nvalues){
+            r |= Table_Set(ctx->tbl, (Abstract *)key, a);
+            if(ctx->tbl->nvalues == ctx->keys->nvalues){
                 r |= END;
             }
         }
@@ -113,6 +113,7 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *footer){
     i64 total = 0;
     MemCh *m = ctx->sm->m;
     if(footer == NULL){
+        word sz = sizeof(BinSegHeader);
         Str *sh = Str_Ref(m, (byte *)hdr, sz, sz, ZERO);
         if(ctx->type.state & BINSEG_VISIBLE){
             sh = Str_ToHex(m, sh);
@@ -244,12 +245,14 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
 }
 
 status BinSegCtx_Finalize(BinSegCtx *ctx, i16 id){
+    MemCh *m = ctx->sm->m;
     BinSegHeader hdr = {
        .total = 0, 
        .kind = BINSEG_TYPE_INDEX,
        .id = id,
     };
-    Str *sh = Str_Ref(m, (byte *)hdr, sz, sz, ZERO);
+    i16 sz = sizeof(BinSegHeader);
+    Str *sh = Str_Ref(m, (byte *)&hdr, sz, sz, ZERO);
     if(ctx->type.state & BINSEG_VISIBLE){
         sh = Str_ToHex(m, sh);
     }
@@ -258,10 +261,27 @@ status BinSegCtx_Finalize(BinSegCtx *ctx, i16 id){
         Stream_OverWrite(ctx->sm, sh->bytes, sh->length);
         Stream_SeekEnd(ctx->sm, 0);
     }else{
-        total += Stream_Bytes(ctx->sm, sh->bytes, sh->length);
+        Stream_Bytes(ctx->sm, sh->bytes, sh->length);
     }
     ctx->latestId = id;
     return SUCCESS;
+}
+
+status BinSegCtx_Start(BinSegCtx *ctx){
+    if(ctx->type.state & BINSEG_REVERSED){
+        Stream_Seek(ctx->sm, 0);
+        Str *sh = Str_Make(sm->m, sizeof(BinSegHeader));
+        Stream_FillStr(ctx->sm, sh);
+        if(sh->length == sizeof(BinSegHeader)){
+            BinSegHeader *hdr = (BinSegHeader *)sh->bytes;
+            ctx->latestId = hdr->id;
+        }else{
+            BinSegCtx_Finalize(ctx, 0); 
+            ctx->latestId = 0;
+        }
+        return SUCCESS;
+    }
+    return NOOP;
 }
 
 BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source, word flags){
@@ -279,20 +299,7 @@ BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source, word
     }
 
     ctx->cortext = Table_Make(m);
-    Iter_Init(&ctx->tblIt, Table_Make(m));
-
-    if(ctx->type.state & BINSEG_REVERSED){
-        Stream_Seek(ctx->sm, 0);
-        Str *sh = Str_Make(sm->m, sizeof(BinSegHeader));
-        Stream_FillStr(ctx->sm, sh);
-        if(sh->length == sizeof(BinSegHeader)){
-            BinSegHeader *hdr = (BinSegHeader *)sh->bytes;
-            ctx->latestId = hdr->id;
-        }else{
-            BinSegCtx_Finalize(ctx, 0); 
-            ctx->latestId = 0;
-        }
-    }
+    ctx->tbl = Table_Make(m);
 
     return ctx;
 }
