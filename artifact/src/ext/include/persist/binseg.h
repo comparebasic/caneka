@@ -5,8 +5,9 @@ enum binseg_kinds {
     BINSEG_TYPE_BYTES_COLLECTION = 2,
     BINSEG_TYPE_COLLECTION = 3,
     BINSEG_TYPE_DICTIONARY = 4,
-    BINSEG_TYPE_NODE = 6,
-    BINSEG_TYPE_NUMBER = 7,
+    BINSEG_TYPE_NODE = 5,
+    BINSEG_TYPE_NUMBER = 6,
+    BINSEG_TYPE_INDEX = 7,
 };
 
 /* footprints:
@@ -37,6 +38,8 @@ typedef struct binseg_hdr {
 
 typedef struct binseg_ctx{
     Type type;
+    word _;
+    word latestId;
     Stream *sm;
     Table *cortext;
     BinSegIdxFunc func;

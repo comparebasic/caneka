@@ -1,0 +1,75 @@
+#include <external.h>
+#include <caneka.h>
+#include <builder.h>
+
+/* parameters */
+
+static Executable targets[] = {
+    {NULL, NULL},
+};
+
+static char *cflags[] = {
+    "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+    "-DINSECURE",
+    "-DCNK_EXT",
+    "-DTHIRD_DSQR",
+    NULL
+};
+
+static char *inc[] = {
+    "-I./artifact/src/include/",
+    "-I./artifact/src/base/include/",
+    "-I./artifact/src/ext/include/",
+    "-I./artifact/src/third/davidshim-qr/include/",
+    NULL
+};
+
+static char *staticLibs[] = {
+    "./build/libcaneka/libcaneka.a",
+    "./build/libcnkext/libcnkext.a",
+    NULL
+};
+
+static char *libs[] = {
+    NULL
+};
+
+static BuildSubdir qrobj = { "qr", {
+    "qrcode.c",
+    NULL,
+}};
+
+
+static BuildSubdir *objdirs[] = {
+    &qrobj,
+    NULL
+};
+
+int main(int argc, char **argv){
+    if(MemBook_Make(NULL) == NULL){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to allocate Mem_Book", NULL);
+        exit(1);
+    };
+    MemCh *m = MemCh_Make();
+    Caneka_InitBase(m);
+    BuildCtx ctx;
+    BuildCtx_Init(m, &ctx);
+
+    ctx.tools.cc = "clang";
+    ctx.tools.ar = "ar";
+    ctx.libtarget = "libcnkqr";
+    ctx.version = NULL;
+    ctx.dist = "build";
+    ctx.src = "artifact/src/";
+    ctx.targets = (Executable *)targets;
+    ctx.args.cflags = cflags;
+    ctx.args.inc = inc;
+    ctx.args.libs = libs;
+    ctx.args.staticLibs = staticLibs;
+    ctx.args.licenceFiles = NULL;
+    ctx.objdirs = (BuildSubdir **)objdirs;
+
+    Build(&ctx);
+
+    return 0;
+}

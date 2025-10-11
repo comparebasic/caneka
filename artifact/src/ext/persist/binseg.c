@@ -105,10 +105,9 @@ Str *BinSegCtx_KindName(i8 kind){
 }
 
 i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
-    Single *sg = (Single *)as(ctx->source, TYPE_WRAPPED_I16);
-    sg->val.w++;
-    return sg->val.w;
-}
+    ctx->latestId++;
+    return ctx->latestId;
+ }
 
 i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *footer){
     i64 total = 0;
@@ -243,11 +242,12 @@ BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source){
     BinSegCtx *ctx = (BinSegCtx *)MemCh_AllocOf(m, sizeof(BinSegCtx), TYPE_BINSEG_CTX);
     ctx->type.of = TYPE_BINSEG_CTX;
     ctx->sm = sm;
-    if(func == NULL && source == NULL){
+
+    if(func == NULL){
         ctx->func = BinSegCtx_IdxCounter;
-        ctx->source = (Abstract *)I16_Wrapped(m, -1);
+        ctx->latestId = -1;
     }else{
-        ctx->source = source;
+        ctx->func = func;
     }
 
     ctx->cortext = Table_Make(m);
