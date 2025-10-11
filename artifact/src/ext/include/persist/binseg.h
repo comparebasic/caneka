@@ -48,7 +48,6 @@ typedef struct binseg_ctx{
     Abstract *source;
 } BinSegCtx;
 
-
 extern struct lookup *BinSegLookup;
 status BinSeg_Init(MemCh *m);
 i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg);
@@ -57,3 +56,4 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *footer);
 i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id);
 status BinSegCtx_LoadStream(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);
+status BinSegCtx_Finalize(BinSegCtx *ctx, i16 id);
