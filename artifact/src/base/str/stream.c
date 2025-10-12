@@ -12,6 +12,14 @@ i64 Stream_IndentOut(Stream *sm){
     return total;
 }
 
+i64 Stream_OverWrite(Stream *sm, byte *b, i32 length){
+    if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
+        Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            "Not Implemented", NULL);
+        return 0;
+    }
+    return Stream_Bytes(sm, b, length);
+}
 
 StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func){
     StreamTask *tsk = (StreamTask *)MemCh_Alloc(m, sizeof(StreamTask));
@@ -52,6 +60,7 @@ status Stream_SeekEnd(Stream *sm, i32 offset){
             return SUCCESS;
         }
     }else{
+        return lseek(sm->fd, offset, SEEK_END) != -1 ? SUCCESS : ERROR; 
         Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
             "Not implemented", NULL);
         return ERROR;
@@ -63,9 +72,7 @@ status Stream_Seek(Stream *sm, i32 offset){
         Cursor_Setup(sm->dest.curs, sm->dest.curs->v);
         return Stream_Move(sm, offset);
     }else{
-        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-            "Not implemented", NULL);
-        return ERROR;
+        return lseek(sm->fd, offset, SEEK_SET) != -1 ? SUCCESS : ERROR; 
     }
 }
 
@@ -74,9 +81,13 @@ status Stream_RFillStr(Stream *sm, Str *s){
         sm->type.state |= (Cursor_RFillStr(sm->dest.curs, s) & (SUCCESS|ERROR|END));
         return sm->type.state;
     }else{ 
-        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-            "Not implemented", NULL);
-        return ERROR;
+        lseek(sm->fd, -s->length, SEEK_CUR); 
+        if(read(sm->fd, s->bytes, s->length) == s->length){
+            lseek(sm->fd, -s->length, SEEK_CUR); 
+            return SUCCESS;
+        }else{
+            return ERROR;
+        }
     }
 }
 
@@ -84,9 +95,11 @@ status Stream_FillStr(Stream *sm, Str *s){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
         return Cursor_FillStr(sm->dest.curs, s);
     }else{ 
-        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-            "Not implemented", NULL);
-        return ERROR;
+        if(read(sm->fd, s->bytes, s->length) == s->length){
+            return SUCCESS;
+        }else{
+            return ERROR;
+        }
     }
 }
 

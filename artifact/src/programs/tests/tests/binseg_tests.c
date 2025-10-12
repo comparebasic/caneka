@@ -46,7 +46,7 @@ status BinSegCollection_Tests(MemCh *gm){
     Abstract *args[5];
     
     Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL);
+    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, ZERO);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");

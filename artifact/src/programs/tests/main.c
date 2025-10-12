@@ -300,6 +300,12 @@ static TestSet _Tests[] = {
         "Transactional format reversed and only encoded in visible hex format characters.",
         FEATURE_COMPLETE,
     },
+    {
+        "FileD Tests",
+        FileD_Tests,
+        "FileD database built on BinSegRV tests of how to save and retrive data.",
+        FEATURE_COMPLETE,
+    },
     /*
     {
         "ServeTcp Tests",

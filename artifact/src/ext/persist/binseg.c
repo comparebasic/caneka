@@ -270,7 +270,7 @@ status BinSegCtx_Finalize(BinSegCtx *ctx, i16 id){
 status BinSegCtx_Start(BinSegCtx *ctx){
     if(ctx->type.state & BINSEG_REVERSED){
         Stream_Seek(ctx->sm, 0);
-        Str *sh = Str_Make(sm->m, sizeof(BinSegHeader));
+        Str *sh = Str_Make(ctx->sm->m, sizeof(BinSegHeader));
         Stream_FillStr(ctx->sm, sh);
         if(sh->length == sizeof(BinSegHeader)){
             BinSegHeader *hdr = (BinSegHeader *)sh->bytes;

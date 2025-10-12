@@ -57,6 +57,7 @@ status BinSeg_Tests(MemCh *gm);
 status BinSegCollection_Tests(MemCh *gm);
 status BinSegV_Tests(MemCh *gm);
 status BinSegReversedV_Tests(MemCh *gm);
+status FileD_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 Str **binSegCtxLabels = NULL;
+Str **fileLabels = NULL;
 
 static i64 BinSegHeader_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
@@ -50,6 +51,19 @@ static status persistInitLabels(MemCh *m, Lookup *lk){
         binSegCtxLabels[9] = Str_CstrRef(m, "REVERSED");
         binSegCtxLabels[10] = Str_CstrRef(m, "VISIBLE");
         Lookup_Add(m, lk, TYPE_BINSEG_CTX, (void *)binSegCtxLabels);
+        r |= SUCCESS;
+    }
+    if(fileLabels == NULL){
+        fileLabels = (Str **)Arr_Make(m, 17);
+        fileLabels[9] = Str_CstrRef(m, "STRVEC");
+        fileLabels[10] = Str_CstrRef(m, "CHAIN");
+        fileLabels[11] = Str_CstrRef(m, "FROM_FD");
+        fileLabels[12] = Str_CstrRef(m, "TO_FD");
+        fileLabels[13] = Str_CstrRef(m, "ASYNC");
+        fileLabels[14] = Str_CstrRef(m, "SOCKET");
+        fileLabels[15] = Str_CstrRef(m, "BUFFER");
+        fileLabels[16] = Str_CstrRef(m, "CREATE");
+        Lookup_Add(m, lk, TYPE_FILE, (void *)fileLabels);
         r |= SUCCESS;
     }
     return r;

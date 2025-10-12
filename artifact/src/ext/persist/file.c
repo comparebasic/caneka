@@ -118,7 +118,7 @@ status File_Open(File *f){
             f->sm = Stream_MakeStrVec(f->m);
             f->sm->fd = fd;
         }
-        f->type.state |= SUCCESS;
+        f->type.state |= PROCESSING;
     }else{
         f->type.state |= ERROR;
         Abstract *args[] = {

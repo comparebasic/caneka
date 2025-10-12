@@ -1,3 +1,3 @@
-BinSegCtx *FileD_Open(MemCh *m, File *f);
-Table *FileD_ToTbl(MemCh *ctx, StrVec *path, Table *keys);
+BinSegCtx *FileD_Open(File *f);
 status FileD_Add(BinSegCtx *ctx, i16 id, Abstract *a);
+Table *FileD_ToTbl(BinSegCtx *ctx, Table *keys);

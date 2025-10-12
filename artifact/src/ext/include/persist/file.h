@@ -10,13 +10,6 @@ typedef struct file {
     Stream *sm;
 } File;
 
-enum file_status {
-    FILE_TRACKED = 1 << 12,
-    FILE_LOADED = 1 << 13,
-    FILE_UPDATED = 1 << 14,
-    FILE_SPOOL = 1 << 15,
-};
-
 File *File_Make(MemCh *m, Str *path, Access *access, word flags);
 File *File_Init(File *file, Str *path, Access *access);
 status File_Write(File *f, i64 max);
