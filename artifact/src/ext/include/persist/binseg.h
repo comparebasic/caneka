@@ -30,12 +30,6 @@ enum binseg_types {
 typedef i16 (*BinSegIdxFunc)(struct binseg_ctx *ctx, Abstract *arg);
 typedef i64 (*BinSegFunc)(struct binseg_ctx *ctx, Abstract *a, i16 id);
 
-typedef struct binseg_hdr {
-    quad total;
-    word kind;
-    word id;
-} BinSegHeader;
-
 typedef struct binseg_ctx{
     Type type;
     word _;
@@ -49,10 +43,11 @@ typedef struct binseg_ctx{
 } BinSegCtx;
 
 extern struct lookup *BinSegLookup;
+
 status BinSeg_Init(MemCh *m);
 i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg);
 BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source, word flags);
-i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *footer);
+i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *sh);
 i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id);
 status BinSegCtx_LoadStream(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);

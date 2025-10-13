@@ -6,16 +6,16 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     MemCh *m = ctx->sm->m;
     Table *tbl = (Span *)as(a, TYPE_TABLE);
 
-    BinSegHeader hdr = {
-       .total = tbl->nvalues, 
-       .kind = BINSEG_TYPE_DICTIONARY,
-       .id = id,
-    };
+    Str *content;
+    Str *entry;
+    BinSeg *hdr = BinSegHeader_Make(ctx,
+        tbl->nvalues,
+        BINSEG_TYPE_DICTIONARY,
+        id,
+        &content,
+        &entry);
 
-    Str *s = Str_Make(m, sizeof(i16)*tbl->nvalues*2);
-    s->length = s->alloc;
-    i16 *ip = (i16 *)s->bytes;
-
+    i16 *ip = (i16 *)content->bytes;
     for(i32 i = 0; i < tbl->nvalues*2; i++){
         *ip = ctx->func(ctx, NULL);
         ip++;
@@ -25,7 +25,7 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
         total += BinSegCtx_ToStream(ctx, &hdr, s);
     }
 
-    ip = (i16 *)s->bytes;
+    ip = (i16 *)content->bytes;
     Iter it;
     Iter_Init(&it, tbl);
     while((Iter_Next(&it) & END) == 0){
@@ -48,25 +48,27 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     MemCh *m = ctx->sm->m;
     Span *p = (Span *)as(a, TYPE_SPAN);
 
-    BinSegHeader hdr = {
-       .total = p->nvalues, 
-       .kind = BINSEG_TYPE_COLLECTION,
-       .id = id,
-    };
+    Str *content;
+    Str *entry;
+    BinSeg *hdr = BinSegHeader_Make(ctx,
+        p->nvalues,
+        BINSEG_TYPE_COLLECTION,
+        id,
+        &content,
+        &entry);
 
-    Str *s = Str_Make(m, sizeof(i16)*p->nvalues);
-    s->length = s->alloc;
-    i16 *ip = (i16 *)s->bytes;
+
+    i16 *ip = (i16 *)content->bytes;
     for(i32 i = 0; i < p->nvalues; i++){
         *ip = ctx->func(ctx, NULL);
         ip++;
     }
 
     if(ctx->type.state & BINSEG_REVERSED){
-        total += BinSegCtx_ToStream(ctx, &hdr, s);
+        total += BinSegCtx_ToStream(ctx, hdr, entry);
     }
 
-    ip = (i16 *)s->bytes;
+    ip = (i16 *)content->bytes;
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
@@ -76,8 +78,9 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
 
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        total += BinSegCtx_ToStream(ctx, &hdr, s);
+        total += BinSegCtx_ToStream(ctx, hdr, entry);
     }
+
     return total;
 }
 
@@ -85,13 +88,18 @@ static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     Str *s = (Str *)as(a, TYPE_STR);
     MemCh *m = ctx->sm->m;
 
-    BinSegHeader hdr = {
-       .total = s->length, 
-       .kind = BINSEG_TYPE_BYTES,
-       .id = id,
-    };
+    Str *content;
+    Str *entry;
+    BinSeg *hdr = BinSegHeader_Make(ctx,
+        s->length,
+        BINSEG_TYPE_BYTES,
+        id,
+        content,
+        &entry);
 
-    return BinSegCtx_ToStream(ctx, &hdr, s);
+    memcpy(content->bytes, s->bytes, s->length);
+
+    return BinSegCtx_ToStream(ctx, hdr, entry);
 }
 
 status BinSeg_BasicInit(MemCh *m, Lookup *lk){
