@@ -47,7 +47,7 @@ extern struct lookup *BinSegLookup;
 status BinSeg_Init(MemCh *m);
 i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg);
 BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source, word flags);
-i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *sh);
+i64 BinSegCtx_ToStream(BinSegCtx *ctx, struct binseg_hdr *hdr, Str *sh);
 i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id);
 status BinSegCtx_LoadStream(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);

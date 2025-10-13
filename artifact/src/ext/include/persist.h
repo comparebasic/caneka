@@ -2,5 +2,6 @@
 #include "persist/file.h"
 #include "persist/persist_tos.h"
 #include "persist/binseg.h"
+#include "persist/binseg_header.h"
 #include "persist/binseg_basic.h"
 #include "persist/filed.h"

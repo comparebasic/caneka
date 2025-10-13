@@ -116,6 +116,15 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
         entry = Str_ToHex(m, entry);
     }
     total += Stream_Bytes(ctx->sm, entry->bytes, entry->length);
+    if(ctx->type.state & DEBUG){
+        Abstract *args[5];
+        args[0] = (Abstract *)StreamTask_Make(m, NULL, (Abstract *)ctx, ToS_FlagLabels),
+        args[1] = (Abstract *)Ptr_Wrapped(m, (byte *)hdr, TYPE_BINSEG_HEADER);
+        args[2] = (Abstract *)I16_Wrapped(m, entry->length);
+        args[3] = (Abstract *)ctx;
+        args[4] = NULL;
+        Out("^p.ToStream($ &)/$ -> @^0\n", args);
+    }
     return total;
 }
 
@@ -128,11 +137,6 @@ i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
         Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to find BinSegFunc for type $", args);
         return 0;
-    }
-    if(ctx->type.state & DEBUG){
-        args[0] = (Abstract *)a;
-        args[1] = NULL;
-        Out("^p.ToStream &^0\n", args);
     }
     return func(ctx, a, id);
 }
@@ -182,7 +186,7 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
                 Out("^p.Header &^0\n", args);
             }
             
-            sz = BinSegCtx_FooterSize(hdr);
+            sz = BinSegHeader_FooterSize(hdr->total, hdr->kind);
 
             if(ctx->type.state & BINSEG_VISIBLE){
                 sz *= 2;

@@ -5,6 +5,6 @@ typedef struct binseg_hdr {
     /* data */
 } BinSegHeader;
 
-i16 BinSegHeader_Size(BinSegHeader *hdr);
-BinSegHeader *BinSegHeader_Make(MemCh *m,
+i16 BinSegHeader_FooterSize(quad total, word kind);
+BinSegHeader *BinSegHeader_Make(BinSegCtx *ctx,
     quad total, word kind, word id, Str **content, Str **entry);

@@ -9,6 +9,7 @@ status BinSeg_Tests(MemCh *gm){
     
     Stream *sm = Stream_MakeStrVec(m);
     BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, ZERO);
+    ctx->type.state |= DEBUG;
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     BinSegCtx_Send(ctx, (Abstract *)one, ctx->func(ctx, NULL));

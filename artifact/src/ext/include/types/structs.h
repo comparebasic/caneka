@@ -6,3 +6,4 @@ struct handler;
 struct step;
 struct task;
 struct binseg_ctx;
+struct binseg_hdr;
