@@ -215,46 +215,6 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
     return ctx->type.state;
 }
 
-status BinSegCtx_Finalize(BinSegCtx *ctx, i16 id){
-    MemCh *m = ctx->sm->m;
-    BinSegHeader hdr = {
-       .total = 0, 
-       .kind = BINSEG_TYPE_INDEX,
-       .id = id,
-    };
-    i16 sz = sizeof(BinSegHeader);
-    Str *entry = Str_Ref(m, (byte *)&hdr, sz, sz, ZERO);
-    if(ctx->type.state & BINSEG_VISIBLE){
-        entry = Str_ToHex(m, entry);
-    }
-    if(ctx->type.state & BINSEG_REVERSED){
-        Stream_Seek(ctx->sm, 0);
-        Stream_OverWrite(ctx->sm, entry->bytes, entry->length);
-        Stream_SeekEnd(ctx->sm, 0);
-    }else{
-        Stream_Bytes(ctx->sm, entry->bytes, entry->length);
-    }
-    ctx->latestId = id;
-    return SUCCESS;
-}
-
-status BinSegCtx_Start(BinSegCtx *ctx){
-    if(ctx->type.state & BINSEG_REVERSED){
-        Stream_Seek(ctx->sm, 0);
-        Str *entry = Str_Make(ctx->sm->m, sizeof(BinSegHeader));
-        Stream_FillStr(ctx->sm, entry);
-        if(entry->length == sizeof(BinSegHeader)){
-            BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
-            ctx->latestId = hdr->id;
-        }else{
-            BinSegCtx_Finalize(ctx, 0); 
-            ctx->latestId = 0;
-        }
-        return SUCCESS;
-    }
-    return NOOP;
-}
-
 BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source, word flags){
     MemCh *m = sm->m;
     BinSegCtx *ctx = (BinSegCtx *)MemCh_AllocOf(m, sizeof(BinSegCtx), TYPE_BINSEG_CTX);

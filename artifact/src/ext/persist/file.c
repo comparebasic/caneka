@@ -90,6 +90,8 @@ status File_Open(File *f){
         ioFlags = O_RDWR;
     }else if (f->type.state & STREAM_STRVEC){
         ioFlags = O_RDONLY;
+    }else if(f->type.state & STREAM_APPEND){
+        ioFlags |= (O_WRONLY|O_APPEND);
     }else if(f->type.state & STREAM_TO_FD){
         ioFlags = O_WRONLY;
     }else{

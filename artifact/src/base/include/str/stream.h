@@ -1,6 +1,6 @@
 enum stream_flags {
     STREAM_STRVEC = 1 << 8,
-    STREAM_CHAIN = 1 << 9,
+    STREAM_APPEND = 1 << 9,
     STREAM_FROM_FD = 1 << 10,
     STREAM_TO_FD = 1 << 11,
     STREAM_ASYNC = 1 << 12,
@@ -35,13 +35,11 @@ typedef struct stream_task {
 } StreamTask;
 
 i64 Stream_Bytes(Stream *sm, byte *b, i32 length);
-i64 Stream_OverWrite(Stream *sm, byte *b, i32 length);
 i64 Stream_VecTo(Stream *sm, StrVec *v);
 i64 Stream_Read(Stream *sm, i32 length);
 i64 Stream_ReadToMem(Stream *sm, i32 length, byte *mem);
 status Stream_SetupMakeStrVec(MemCh *m, Stream *sm, StrVec *v);
 Stream *Stream_MakeStrVec(MemCh *m);
-Stream *Stream_MakeChain(MemCh *m, Span *chain);
 Stream *Stream_MakeFromFd(MemCh *m, i32 fd, word flags);
 Stream *Stream_MakeToFd(MemCh *m, i32 fd, StrVec *v, word flags);
 Stream *Stream_Make(MemCh *m);

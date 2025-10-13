@@ -56,7 +56,7 @@ static status persistInitLabels(MemCh *m, Lookup *lk){
     if(fileLabels == NULL){
         fileLabels = (Str **)Arr_Make(m, 17);
         fileLabels[9] = Str_CstrRef(m, "STRVEC");
-        fileLabels[10] = Str_CstrRef(m, "CHAIN");
+        fileLabels[10] = Str_CstrRef(m, "APPEND");
         fileLabels[11] = Str_CstrRef(m, "FROM_FD");
         fileLabels[12] = Str_CstrRef(m, "TO_FD");
         fileLabels[13] = Str_CstrRef(m, "ASYNC");

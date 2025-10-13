@@ -267,7 +267,7 @@ status Str_InitLabels(MemCh *m, Lookup *lk){
     if(streamLabels == NULL){
         streamLabels = (Str **)Arr_Make(m, 17);
         streamLabels[9] = Str_CstrRef(m, "STREAM_STRVEC");
-        streamLabels[10] = Str_CstrRef(m, "STREAM_CHAIN");
+        streamLabels[10] = Str_CstrRef(m, "STREAM_APPEND");
         streamLabels[11] = Str_CstrRef(m, "STREAM_FROM_FD");
         streamLabels[12] = Str_CstrRef(m, "STREAM_TO_FD");
         streamLabels[13] = Str_CstrRef(m, "STREAM_MESS");

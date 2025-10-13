@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status FileD_Tests(MemCh *gm){
+status FileDB_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     Abstract *args[5];
     status r = READY;
@@ -10,21 +10,32 @@ status FileD_Tests(MemCh *gm){
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/file.d"));
     unlink(Str_Cstr(m, path));
 
-    File *f = File_Make(m, path, NULL, (STREAM_CREATE|STREAM_TO_FD));
-    BinSegCtx *ctx = FileD_Open(f);
+    FileDB *fdb = FileDB_Make(m, path);
+    FileDB_Open(fdb);
+    fdb->ctx->type.state |= DEBUG;
 
+    i16 nameId = fdb->ctx->func(fdb->ctx, NULL);
     Str *name = Str_CstrRef(m, "Sam-Iam-ICan");
+    FileDB_Add(fdb, nameId, (Abstract *)name);
+    FileDB_Close(fdb);
+
+    fdb = FileDB_Make(m, path);
+    FileDB_Open(fdb);
+
+    r |= Test(fdb->ctx->latestId == 1, "Latest ID has been set for one record", NULL);
+
+    /*
     Str *pw = Str_CstrRef(m, "hI90_jfiu#ud92j$_22uj");
     Str *email = Str_CstrRef(m, "puppies@example.com");
-    i16 nameId = ctx->func(ctx, NULL);
-    i16 pwId = ctx->func(ctx, NULL);
-    i16 emailId = ctx->func(ctx, NULL);
+    i16 nameId = fdb->ctx->func(fdb->ctx, NULL);
+    i16 pwId = fdb->ctx->func(fdb->ctx, NULL);
+    i16 emailId = fdb->ctx->func(fdb->ctx, NULL);
     
-    FileD_Add(ctx, nameId, (Abstract *)name);
-    FileD_Add(ctx, pwId, (Abstract *)pw);
-    FileD_Add(ctx, emailId, (Abstract *)email);
+    FileDB_Add(fdb, nameId, (Abstract *)name);
+    FileDB_Add(fdb, pwId, (Abstract *)pw);
+    FileDB_Add(fdb, emailId, (Abstract *)email);
 
-    args[0] = (Abstract *)ctx;
+    args[0] = (Abstract *)fdb->ctx;
     args[1] = NULL;
     Out("^p.BinSegCtx &\n", args);
 
@@ -38,6 +49,7 @@ status FileD_Tests(MemCh *gm){
     Str *key3 = Str_CstrRef(m, "email");
     Table_Set(keys, (Abstract *)I16_Wrapped(m, emailId),
         (Abstract *)key3);
+    */
 
     /*
     Table *tbl = FileD_ToTbl(ctx, keys);

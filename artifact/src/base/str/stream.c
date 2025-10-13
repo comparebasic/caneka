@@ -12,15 +12,6 @@ i64 Stream_IndentOut(Stream *sm){
     return total;
 }
 
-i64 Stream_OverWrite(Stream *sm, byte *b, i32 length){
-    if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
-        Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-            "Not Implemented", NULL);
-        return 0;
-    }
-    return Stream_Bytes(sm, b, length);
-}
-
 StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func){
     StreamTask *tsk = (StreamTask *)MemCh_Alloc(m, sizeof(StreamTask));
     tsk->type.of = TYPE_STREAM_TASK;
@@ -95,9 +86,11 @@ status Stream_FillStr(Stream *sm, Str *s){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
         return Cursor_FillStr(sm->dest.curs, s);
     }else{ 
-        if(read(sm->fd, s->bytes, s->length) == s->length){
+        i64 length = read(sm->fd, s->bytes, s->length);
+        if(length == s->length){
             return SUCCESS;
         }else{
+            printf("Did not read all %ld from %d\n", length, sm->fd);
             return ERROR;
         }
     }
@@ -148,13 +141,6 @@ Stream *Stream_MakeStrVec(MemCh *m){
     Stream *sm = Stream_Make(m);
     StrVec *v = StrVec_Make(m);
     Stream_SetupMakeStrVec(m, sm, v);
-    return sm;
-}
-
-Stream *Stream_MakeChain(MemCh *m, Span *chain){
-    Stream *sm = Stream_Make(m);
-    sm->type.state |= STREAM_CHAIN;
-    sm->dest.it = Iter_Make(m, chain);
     return sm;
 }
 

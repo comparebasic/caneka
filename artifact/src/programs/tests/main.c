@@ -301,8 +301,8 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "FileD Tests",
-        FileD_Tests,
+        "FileDB Tests",
+        FileDB_Tests,
         "FileD database built on BinSegRV tests of how to save and retrive data.",
         FEATURE_COMPLETE,
     },

@@ -51,5 +51,3 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, struct binseg_hdr *hdr, Str *sh);
 i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id);
 status BinSegCtx_LoadStream(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);
-status BinSegCtx_Start(BinSegCtx *ctx);
-status BinSegCtx_Finalize(BinSegCtx *ctx, i16 id);
