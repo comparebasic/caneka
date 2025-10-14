@@ -43,6 +43,7 @@ Stream *Stream_MakeStrVec(MemCh *m);
 Stream *Stream_MakeFromFd(MemCh *m, i32 fd, word flags);
 Stream *Stream_MakeToFd(MemCh *m, i32 fd, StrVec *v, word flags);
 Stream *Stream_Make(MemCh *m);
+Stream *Stream_MakeToFile(MemCh *m, i32 fd, StrVec *v, word flags);
 StreamTask *StreamTask_Make(MemCh *m, Stream *sm, Abstract *a, StreamAbsFunc func);
 i64 Stream_IndentOut(Stream *sm);
 status Stream_Seek(Stream *sm, i32 offset);

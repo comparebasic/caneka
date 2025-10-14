@@ -170,16 +170,16 @@ i64 Stream_Print(Stream *sm, Abstract *a, cls type, word flags){
         if(smObj->type.state & STREAM_TO_FD){
             Abstract *args[] = {
                 (Abstract *)I32_Wrapped(sm->m, smObj->fd),
+                (Abstract *)I32_Wrapped(sm->m, lseek(smObj->fd, 0, SEEK_CUR)),
                 NULL
             };
-            total += Fmt(sm, "fd:^D.$^d.", args);
+            total += Fmt(sm, "fd:^D.$^d.\\@$", args);
             content = TRUE;
         }
         if(smObj->type.state & STREAM_STRVEC){
             if(content){
                 total += Stream_Bytes(sm, (byte *)" ", 1);
             }
-            total += StrVec_Print(sm, (Abstract *)smObj->dest.curs->v, 0, flags|DEBUG);
         }
         total += Fmt(sm, ">", NULL); 
         return total;

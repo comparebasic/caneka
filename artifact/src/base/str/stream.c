@@ -52,9 +52,6 @@ status Stream_SeekEnd(Stream *sm, i32 offset){
         }
     }else{
         return lseek(sm->fd, offset, SEEK_END) != -1 ? SUCCESS : ERROR; 
-        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
-            "Not implemented", NULL);
-        return ERROR;
     }
 }
 
@@ -68,15 +65,33 @@ status Stream_Seek(Stream *sm, i32 offset){
 }
 
 status Stream_RFillStr(Stream *sm, Str *s){
+    if(s->alloc <= 0){
+        Abstract *args[3] = {
+            (Abstract *)s,
+            NULL
+        };
+        Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            "Error RFillStr cannot fill of 0: &", args);
+        return ERROR;
+    }
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
         sm->type.state |= (Cursor_RFillStr(sm->dest.curs, s) & (SUCCESS|ERROR|END));
         return sm->type.state;
     }else{ 
-        lseek(sm->fd, -s->length, SEEK_CUR); 
-        if(read(sm->fd, s->bytes, s->length) == s->length){
+        lseek(sm->fd, -s->alloc, SEEK_CUR); 
+        if(read(sm->fd, s->bytes, s->alloc) == s->alloc){
+            s->length = s->alloc;
             lseek(sm->fd, -s->length, SEEK_CUR); 
             return SUCCESS;
         }else{
+            Abstract *args[3] = {
+                (Abstract *)I32_Wrapped(sm->m, sm->fd),
+                (Abstract *)Str_CstrRef(sm->m, strerror(errno)),
+                NULL
+            };
+            Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+                "Error RFillStr @fd: $", args);
+            return ERROR;
             return ERROR;
         }
     }
@@ -86,11 +101,27 @@ status Stream_FillStr(Stream *sm, Str *s){
     if((sm->type.state & STREAM_STRVEC) && (sm->type.state & STREAM_FROM_FD) == 0){
         return Cursor_FillStr(sm->dest.curs, s);
     }else{ 
-        i64 length = read(sm->fd, s->bytes, s->length);
-        if(length == s->length){
+        i64 length = read(sm->fd, s->bytes, s->alloc);
+        if(length == -1){
+            Abstract *args[3] = {
+                (Abstract *)I32_Wrapped(sm->m, sm->fd),
+                (Abstract *)Str_CstrRef(sm->m, strerror(errno)),
+                NULL
+            };
+            Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+                "Error FillStr @fd: $", args);
+            return ERROR;
+        }else if(length == s->length){
+            s->length = s->alloc;
             return SUCCESS;
         }else{
-            printf("Did not read all %ld from %d\n", length, sm->fd);
+            Abstract *args[3] = {
+                (Abstract *)I64_Wrapped(sm->m, s->length),
+                (Abstract *)I64_Wrapped(sm->m, length),
+                NULL
+            };
+            Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+                "Error FillStr: expected length of $, filled $", args);
             return ERROR;
         }
     }

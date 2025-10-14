@@ -86,9 +86,10 @@ status File_Read(File *f, i64 max){
 status File_Open(File *f){
     i32 ioFlags = 0;
     i32 mode = 0;
-    if((f->type.state & (STREAM_STRVEC|STREAM_TO_FD)) == (STREAM_STRVEC|STREAM_TO_FD)){
+    if((f->type.state & (STREAM_STRVEC|STREAM_TO_FD)) == (STREAM_STRVEC|STREAM_TO_FD) ||
+        (f->type.state & (STREAM_FROM_FD|STREAM_TO_FD)) == (STREAM_FROM_FD|STREAM_TO_FD)){
         ioFlags = O_RDWR;
-    }else if (f->type.state & STREAM_STRVEC){
+    }else if (f->type.state & (STREAM_STRVEC|STREAM_FROM_FD)){
         ioFlags = O_RDONLY;
     }else if(f->type.state & STREAM_APPEND){
         ioFlags |= (O_WRONLY|O_APPEND);
@@ -118,6 +119,9 @@ status File_Open(File *f){
             f->sm = Stream_MakeToFd(f->m, fd, v, f->type.state);
         }else if(f->type.state & STREAM_STRVEC){
             f->sm = Stream_MakeStrVec(f->m);
+            f->sm->fd = fd;
+        }else{
+            f->sm = Stream_Make(f->m);
             f->sm->fd = fd;
         }
         f->type.state |= PROCESSING;

@@ -81,7 +81,9 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     if(ctx->keys != NULL){
         Str *key = (Str *)Table_Get(ctx->keys, (Abstract *)id);
         if(key != NULL){
-            r |= Table_Set(ctx->tbl, (Abstract *)key, a);
+            if(Table_Get(ctx->tbl, (Abstract *)key) == NULL){ 
+                r |= Table_Set(ctx->tbl, (Abstract *)key, a);
+            }
             if(ctx->tbl->nvalues == ctx->keys->nvalues){
                 r |= END;
             }

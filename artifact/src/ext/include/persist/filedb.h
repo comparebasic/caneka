@@ -1,5 +1,6 @@
 typedef struct filed {
     Type type;
+    MemCh *m;
     File *f;
     BinSegCtx *ctx;
 } FileDB;
