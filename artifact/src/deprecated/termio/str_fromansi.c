@@ -1,4 +1,0 @@
-
-String *Str_FromAnsi(){
-
-}
