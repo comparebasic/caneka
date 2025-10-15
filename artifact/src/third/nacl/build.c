@@ -12,6 +12,7 @@ static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
     "-DINSECURE",
     "-DCNK_EXT",
+    "-DCNK_CRYPTO",
     "-DCNK_NACL",
     NULL
 };
@@ -20,7 +21,9 @@ static char *inc[] = {
     "-I./artifact/src/include/",
     "-I./artifact/src/base/include/",
     "-I./artifact/src/ext/include/",
+    "-I./artifact/src/third/api/include/",
     "-I./artifact/src/third/nacl/include/",
+    "-I/external/include/",
     NULL
 };
 
@@ -31,12 +34,12 @@ static char *staticLibs[] = {
 };
 
 static char *libs[] = {
-    "-lnacl",
     NULL
 };
 
 static BuildSubdir naclobj = { "nacl", {
     "crypto_nacl.c",
+    "crypto_hash-sha256-ref-hash.c",
     NULL,
 }};
 
@@ -60,7 +63,7 @@ int main(int argc, char **argv){
     ctx.libtarget = "libcnknacl";
     ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "artifact/src/";
+    ctx.src = "artifact/src/third/nacl/";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

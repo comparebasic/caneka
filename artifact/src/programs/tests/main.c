@@ -333,6 +333,18 @@ static TestSet _Tests[] = {
     },
     */
     {
+        "ThirdParty/Api",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
+        "Crypto Tests",
+        Crypto_Tests,
+        "Cryptography functionality testing.",
+        FEATURE_COMPLETE,
+    },
+    {
         NULL,
         NULL,
         NULL,
@@ -345,11 +357,18 @@ TestSet *Tests = _Tests;
 /*
 TestSet _soloTest[] = { 
     {
-        "ServeTcp Tests",
-        ServeTcp_Tests,
-        "Queue tests for file descriptors and time delays.",
+        "Stash Tests",
+        Stash_Tests,
+        "Mem Stash testing.",
         FEATURE_COMPLETE,
     },
+    {
+        NULL,
+        NULL,
+        NULL,
+        0
+    }
+
 };
 
 TestSet *Tests = _soloTest;

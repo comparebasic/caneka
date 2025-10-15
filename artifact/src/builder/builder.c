@@ -252,8 +252,11 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
         ProcDets_Init(&pd);
         r |= SubProcess(m, cmd, &pd);
         if(r & ERROR){
-            DebugStack_SetRef(cmd, cmd->type.of);
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file", NULL);
+            Abstract *args[] = {
+                (Abstract *)cmd,
+                NULL
+            };
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: $", args);
             return ERROR;
         }
 

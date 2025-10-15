@@ -15,6 +15,7 @@ static char *cflags[] = {
     "-DCNK_EXT",
     "-DCNK_LANG",
     "-DCNK_WWW",
+    "-DCNK_CRYPTO",
     NULL
 };
 
@@ -24,6 +25,7 @@ static char *inc[] = {
     "-I./artifact/src/ext/include/",
     "-I./artifact/src/www/include/",
     "-I./artifact/src/lang/include/",
+    "-I./artifact/src/third/api/include/",
     "-I./artifact/src/programs/tests/include/",
     NULL
 };
@@ -33,11 +35,12 @@ static char *staticLibs[] = {
     "./build/libcnkext/libcnkext.a",
     "./build/libcnklang/libcnklang.a",
     "./build/libcnkwww/libcnkwww.a",
+    "./build/libcnknacl/libcnknacl.a",
+    "/external/lib/libnacl.a",
     NULL
 };
 
 static char *libs[] = {
-    "-lcrypto",
     NULL
 };
 
@@ -81,6 +84,7 @@ static BuildSubdir testsobj = { "tests", {
     "servetcp_tests.c",
     "filedb_tests.c",
     "www_nav_tests.c",
+    "crypto_tests.c",
     NULL
 }};
 
