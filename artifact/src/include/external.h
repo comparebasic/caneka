@@ -23,6 +23,7 @@
 #include <time.h>
 #include <dirent.h>
 #include <netinet/in.h>
+#include <sys/random.h>
 
 #ifdef OPENSSL
     #include <openssl/evp.h>

@@ -40,6 +40,7 @@ static char *libs[] = {
 static BuildSubdir naclobj = { "nacl", {
     "crypto_nacl.c",
     "crypto_hash-sha256-ref-hash.c",
+    "crypto_sign-edwards25519sha512batch-ref-sign.c",
     NULL,
 }};
 

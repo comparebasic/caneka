@@ -98,6 +98,42 @@ status Crypto_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)digest, (Abstract *)expected), 
         "Salted StrVec Sha256 matches, expected @, have @", args);
 
+    StrVec *phrase = StrVec_From(m, Str_CstrRef(m, "My favorite book is the one "
+        "about a dog and a cat and a bannana, and a car."));
+
+    Str *public = Str_DigestAlloc(m);
+    Str *secret = Str_DigestAlloc(m);
+    SignPair_Make(m, public, secret, phrase);
+
+    Str *pubHex = Str_ToHex(m, public);
+    Str *secretHex = Str_ToHex(m, secret);
+    args[0] = (Abstract *)pubHex;
+    args[1] = (Abstract *)secretHex;
+    args[2] = NULL;
+    Out("^p.Secret: @, Public: @^0\n", args);
+
+    Str *publicB = Str_DigestAlloc(m);
+    Str *secretB = Str_DigestAlloc(m);
+    SignPair_Make(m, publicB, secretB, phrase);
+
+    r |= Test(Equals((Abstract *)publicB, (Abstract *)public),
+        "Public and public second generation are equals", NULL);
+    r |= Test(Equals((Abstract *)secretB, (Abstract *)secret),
+        "Secret and secret second generation are equals", NULL);
+
+    Str *message = Str_CstrRef(m, "I super-master person, do hereby sign some cool,"
+        " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");
+    digest = Str_ToSha256(m, message);
+    Str *sig = SignPair_Sign(m, digest, secret);
+    Str *sigHex = Str_ToHex(m, sig);
+
+    status valid = SignPair_Verify(m, digest, sig, public);
+
+    args[0] = (Abstract *)message;
+    args[1] = (Abstract *)sigHex;
+    args[2] = NULL;
+    r |= Test(valid & SUCCESS, "Message validates: @ -> sig:@", args);
+
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

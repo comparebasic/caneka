@@ -6,7 +6,21 @@
 #include <nacl/crypto_sign.h>
 #include <nacl/crypto_box.h>
 
+#ifndef crypto_uint16_h
+#define crypto_uint16_h
+typedef unsigned short crypto_uint16;
+#endif
+#ifndef crypto_uint32_h
+#define crypto_uint32_h
+typedef unsigned int crypto_uint32;
+#endif
+#ifndef crypto_uint64_h
+#define crypto_uint64_h
+typedef unsigned long long crypto_uint64;
+#endif
+
 #define DIGEST_SIZE 32
+#define SIGNATURE_SIZE 64
 struct sha256_ctx;
 
 typedef struct sha256_ctx {
@@ -20,5 +34,5 @@ int sha256_update(struct sha256_ctx *ctx,
     const unsigned char *in,unsigned long long inlen);
 int sha256_finalize(struct sha256_ctx *ctx,
     unsigned char *out,const unsigned char *in,unsigned long long inlen);
-
+int sign_keypair_sha256(unsigned char *pk, unsigned char *sk, unsigned char *digest);
 #endif

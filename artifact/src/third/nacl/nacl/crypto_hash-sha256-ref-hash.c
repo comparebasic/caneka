@@ -3,9 +3,10 @@
 D. J. Bernstein
 Public domain.
 
-Modified by Firecrow Silvernight/Compare Basic (2025) to fit with Caneka,
-modifications are also public domain, see crypto_hash-sha256-ref-hash.orig.c
-for DJB's original version.
+Modified by Firecrow Silvernight/Compare Basic to fit with Caneka
+2025-10-15
+See crypto_hash-sha256-ref-hash.orig.c for DJB's original version.
+These modifications are also public domain.
 */
 
 #include <nacl/crypto_hashblocks_sha256.h>
