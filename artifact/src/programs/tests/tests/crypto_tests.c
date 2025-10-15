@@ -77,7 +77,26 @@ status Crypto_Tests(MemCh *gm){
     args[1] = (Abstract *)digest;
     args[2] = NULL;
     r |= Test(Equals((Abstract *)digest, (Abstract *)expected), 
-        "StrVec Sha256 Matches expected @, have @", args);
+        "StrVec Sha256 matches, expected @, have @", args);
+
+    v = StrVec_Make(m);
+    StrVec_Add(v, Str_CstrRef(m, "One "));
+    StrVec_Add(v, Str_CstrRef(m, "Two "));
+    StrVec_Add(v, Str_CstrRef(m, "Three "));
+    StrVec_Add(v, Str_CstrRef(m, "Four "));
+    Str *salt = Str_CstrRef(m, "French fries, and potato chips, and curry, "
+    "and garlic break, and oceans, and taffy, and lots o things have salt!");
+
+    digest = StrVec_SaltedDigest(m, v, salt);
+    digest = Str_ToHex(m, digest);
+    expected = Str_CstrRef(m,
+        "466b336b19f46a9684b4515f43ac4b3a06e080369f99394434e4b8d4f4cbc9de");
+
+    args[0] = (Abstract *)expected;
+    args[1] = (Abstract *)digest;
+    args[2] = NULL;
+    r |= Test(Equals((Abstract *)digest, (Abstract *)expected), 
+        "Salted StrVec Sha256 matches, expected @, have @", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

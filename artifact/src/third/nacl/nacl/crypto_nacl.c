@@ -35,19 +35,33 @@ Str *StrVec_ToSha256(MemCh *m, StrVec *v){
     return NULL;
 }
 
-Str *Str_SaltedDigest(MemCh *m, Str *s, Str *salt){
-    return NULL;;
+Str *StrVec_SaltedDigest(MemCh *m, StrVec *orig, Str *salt){
+    StrVec *v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
+    StrVec_AddBytes(m, v, salt->bytes, salt->length);
+    return StrVec_ToSha256(m, v);
 }
 
-status KeyPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
+status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
     return NOOP;
 }
 
-StrVec *KeyPair_Sign(MemCh *m, Str *secret, StrVec *content){
+StrVec *SignPair_Sign(MemCh *m, Str *secret, StrVec *content){
     return NULL;
 }
 
-status KeyPair_Verify(MemCh *m, Str *public, StrVec *content){
+status SignPair_Verify(MemCh *m, Str *public, StrVec *content){
+    return NOOP;
+}
+
+status BoxPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
+    return NOOP;
+}
+
+status BoxPair_Enc(MemCh *m, Str *secret, StrVec *content){
+    return NOOP;
+}
+
+status BoxPair_Dec(MemCh *m, Str *public, StrVec *content){
     return NOOP;
 }
 
