@@ -54,7 +54,7 @@ int sha256_finalize(struct sha256_ctx *ctx, unsigned char *out,const unsigned ch
   for (i = 0;i < inlen;++i) padded[i] = in[i];
   padded[inlen] = 0x80;
 
-  if (ctx->total < 56) {
+  if (inlen < 56) {
     for (i = inlen + 1;i < 56;++i) padded[i] = 0;
     padded[56] = bits >> 56;
     padded[57] = bits >> 48;

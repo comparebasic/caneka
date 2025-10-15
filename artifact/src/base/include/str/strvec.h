@@ -1,5 +1,6 @@
 enum strvec_flags {
     STRVEC_PATH = 1 << 8,
+    STRVEC_ALIGNED = 1 << 9,
 };
 
 typedef struct strvec {

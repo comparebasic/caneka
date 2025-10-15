@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 Str *StrVec_Str(MemCh *m, StrVec *v){
-    if(v->total+1 > STR_DEFAULT){
+    if(v->total+1 > STR_MAX){
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(m, v->total),
             NULL,
@@ -49,6 +49,9 @@ i64 StrVec_FfIter(Iter *it, i64 offset){
 }
 
 StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
+    if(orig->type.state & STRVEC_ALIGNED){
+        return orig;
+    }
     StrVec *v = StrVec_Make(m);
     Iter it;
     Iter_Init(&it, orig->p);
@@ -75,6 +78,7 @@ StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
         }
     }
 
+    v->type.state |= STRVEC_ALIGNED;
     return v;
 }
 

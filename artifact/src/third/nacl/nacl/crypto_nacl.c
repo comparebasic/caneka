@@ -13,7 +13,26 @@ Str *Str_ToSha256(MemCh *m, Str *s){
 }
 
 Str *StrVec_ToSha256(MemCh *m, StrVec *v){
-    return NULL;;
+    Sha256Ctx ctx;
+    Abstract *args[3];
+    v = StrVec_ReAlign(m, v);
+    memset(&ctx, 0, sizeof(Sha256Ctx));
+    sha256_start(&ctx);
+    Str *d = Str_Make(m, DIGEST_SIZE);
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(it.type.state & LAST){
+            sha256_finalize(&ctx, d->bytes, s->bytes, s->length);
+            d->length = DIGEST_SIZE;
+            return d;
+        }else{
+            sha256_update(&ctx, s->bytes, s->length);
+        }
+    }
+    v->type.state |= ERROR;
+    return NULL;
 }
 
 Str *Str_SaltedDigest(MemCh *m, Str *s, Str *salt){
