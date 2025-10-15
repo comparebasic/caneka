@@ -71,6 +71,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Cursor Tests",
+        Cursor_Tests,
+        "Cursor tests for adding and navigation the position of a StrVec",
+        FEATURE_COMPLETE,
+    },
+    {
         "DebugStack Tests",
         DebugStack_Tests,
         "Testing DebugStack crash debugging system",
@@ -119,6 +125,66 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Object Tests",
+        Object_Tests,
+        "Object tests of ordered table of add/get.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Persistance Tests",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
+        "Path Tests",
+        Path_Tests,
+        "Testing path functions for file and object variable paths.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "File Tests",
+        File_Tests,
+        "File handling tests.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Stash Tests",
+        Stash_Tests,
+        "Mem Stash testing.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "BinSeg Tests",
+        BinSeg_Tests,
+        "Transactional format encoding capable of representing stream, node, and database content.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "BinSegCollection Tests",
+        BinSegCollection_Tests,
+        "Transactional format storing and reading collection and dictionary data types.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "BinSegV Tests",
+        BinSegV_Tests,
+        "Transactional format only encoded in visible hex format characters.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "BinSegReversedV Tests",
+        BinSegReversedV_Tests,
+        "Transactional format reversed and only encoded in visible hex format characters.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "FileDB Tests",
+        FileDB_Tests,
+        "FileD database built on BinSegRV tests of how to save and retrive data.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Roebling Parser",
         NULL,
         NULL,
@@ -158,12 +224,6 @@ static TestSet _Tests[] = {
         "StrVecSplit via Match",
         StrVecSplit_Tests,
         "Testing String Vector Split function",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Cursor Tests",
-        Cursor_Tests,
-        "Cursor tests for adding and navigation the position of a StrVec",
         FEATURE_COMPLETE,
     },
     {
@@ -211,33 +271,21 @@ static TestSet _Tests[] = {
     },
     */
     {
+        "Formats",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    {
         "Mess Tests",
         Mess_Tests,
         "From a basic Fmt Roebling parser into the Mess data structures.",
         FEATURE_COMPLETE,
     },
     {
-        "File Tests",
-        File_Tests,
-        "File handling tests.",
-        FEATURE_COMPLETE,
-    },
-    {
         "FmtHtml Tests",
         FmtHtml_Tests,
         "Format FMT -> HTML tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Object Tests",
-        Object_Tests,
-        "Object tests of ordered table of add/get.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Path Tests",
-        Path_Tests,
-        "Testing path functions for file and object variable paths.",
         FEATURE_COMPLETE,
     },
     {
@@ -253,10 +301,16 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Stash Tests",
-        Stash_Tests,
-        "Mem Stash testing.",
+        "Encoding Tests",
+        Encoding_Tests,
+        "Encoding tests for hex.",
         FEATURE_COMPLETE,
+    },
+    {
+        "Task/Serve Tests",
+        NULL,
+        NULL,
+        SECTION_LABEL,
     },
     {
         "Queue Tests",
@@ -268,42 +322,6 @@ static TestSet _Tests[] = {
         "TaskStep Tests",
         TaskStep_Tests,
         "Task/Step and Task_Tumble tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Encoding Tests",
-        Encoding_Tests,
-        "Encoding tests for hex/b32a64/b64.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSeg Tests",
-        BinSeg_Tests,
-        "Transactional format encoding capable of representing stream, node, and database content.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSegCollection Tests",
-        BinSegCollection_Tests,
-        "Transactional format storing and reading collection and dictionary data types.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSegV Tests",
-        BinSegV_Tests,
-        "Transactional format only encoded in visible hex format characters.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSegReversedV Tests",
-        BinSegReversedV_Tests,
-        "Transactional format reversed and only encoded in visible hex format characters.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "FileDB Tests",
-        FileDB_Tests,
-        "FileD database built on BinSegRV tests of how to save and retrive data.",
         FEATURE_COMPLETE,
     },
     /*
@@ -327,10 +345,10 @@ TestSet *Tests = _Tests;
 /*
 TestSet _soloTest[] = { 
     {
-        NULL,
-        NULL,
-        NULL,
-        0,
+        "ServeTcp Tests",
+        ServeTcp_Tests,
+        "Queue tests for file descriptors and time delays.",
+        FEATURE_COMPLETE,
     },
 };
 

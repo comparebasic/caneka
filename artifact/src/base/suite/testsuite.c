@@ -92,7 +92,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             NULL
         };
         if(set->status == SECTION_LABEL){
-            Out("== $\n", args3);
+            Out("^E.== $  ^e.\n", args3);
             set++;
             continue;
         }

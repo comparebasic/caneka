@@ -329,9 +329,6 @@ status Cursor_Add(Cursor *curs, Str *s){
 }
 
 status Cursor_Setup(Cursor *curs, StrVec *v){
-    if(curs->type.state & DEBUG){
-        Out("^p.Cursor_Setup^0\n", NULL);
-    }
     curs->type.of = TYPE_CURSOR;
     curs->type.state &= DEBUG;
     curs->slot = 0;

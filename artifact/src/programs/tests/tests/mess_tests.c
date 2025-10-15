@@ -172,20 +172,9 @@ status Mess_Tests(MemCh *gm){
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
     File *f = File_Make(m, path, NULL, STREAM_STRVEC);
     File_Open(f);
-    Abstract *args1[] = {
-        (Abstract *)f,
-        NULL
-    };
-    Out("^y.File &^0.\n", args1);
     File_Read(f, FILE_READ_MAX);
-    Out("^y.File after read &^0.\n", args1);
 
     Cursor *curs = File_GetCurs(f);
-    Abstract *args[] = {
-        (Abstract *)curs,
-        NULL
-    };
-    Out("^y.Curs &^0.\n", args);
 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);

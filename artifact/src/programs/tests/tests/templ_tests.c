@@ -239,7 +239,6 @@ status Templ_Tests(MemCh *gm){
     args[1] = (Abstract *)sm->dest.curs->v;
     args[2] = (Abstract *)NULL;
 
-    expected->type.state |= DEBUG;
     r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
         "Templ key value test has expected content", 
         "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n&", 

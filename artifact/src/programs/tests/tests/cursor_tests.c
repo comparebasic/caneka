@@ -11,7 +11,6 @@ status Cursor_Tests(MemCh *gm){
 
     v = StrVec_Make(m);
     curs = Cursor_Make(m, StrVec_Make(m));
-    curs->type.state |= DEBUG;
 
     Cursor_Add(curs, Str_CstrRef(m , "Rain "));
     Cursor_Add(curs, Str_CstrRef(m , "and sunshine, and clouds and sky."));
