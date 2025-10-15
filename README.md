@@ -48,9 +48,6 @@ Components:
 - [programs](/artifact/src/programs/): Any programs that ship with the source
   will be in this folder, presently [tests](artifact/src/programs/tests) is the
   only meaningful program in this folder.
-- [deprecated](/artifact/src/deprecated/): some features have not been moved
-  over since the new base was written and can be found in the deprecated
-  folder. All of these features will eventually move to the `ext` folder.
 
 see [caneka.org](https://caneka.org) for more details.
 
