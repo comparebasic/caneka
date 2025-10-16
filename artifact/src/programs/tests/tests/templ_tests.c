@@ -205,7 +205,7 @@ status Templ_Tests(MemCh *gm){
     Str *para = Str_CstrRef(m, "And here is the masterful list of menu items!");
     Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
     Object_Set(data, (Abstract *)Str_CstrRef(m, "para"), (Abstract *)para);
-    Object_AddByPath(data, StrVec_From(m, Str_CstrRef(m, "items/menu")), (Abstract *)menu);
+    Object_ByPath(data, StrVec_From(m, Str_CstrRef(m, "items/menu")), (Abstract *)menu, SPAN_OP_SET);
 
     Stream *sm = Stream_MakeStrVec(m);
     

@@ -38,8 +38,8 @@ Hashed *Object_GetByIdx(Object *obj, i32 idx);
 Hashed *Object_SetPropByIdx(Object *obj, i32 idx, Abstract *value);
 Abstract *Object_GetPropByIdx(Object *obj, i32 idx);
 
-Object *Object_GetOrMake(Object *obj, Abstract *key);
-status Object_AddByPath(Object *obj, StrVec *path, Abstract *value);
+Object *Object_GetOrMake(Object *obj, Abstract *key, word op);
+Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op);
 
 Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source);
 status Object_Depth(Abstract *a);

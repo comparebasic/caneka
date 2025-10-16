@@ -56,10 +56,13 @@ Abstract *Object_Get(Object *obj, Abstract *key){
     return Table_Get(obj->tbl, key);
 }
 
-Object *Object_GetOrMake(Object *pt, Abstract *key){
+Object *Object_GetOrMake(Object *pt, Abstract *key, word op){
     Abstract *a = Object_Get(pt, key);
     if(a == NULL){
-        Object *new = Object_Make(pt->tbl->m, ZERO);
+        if((op & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
+            return NULL;
+        }
+        Object *new = Object_Make(pt->tbl->m, pt->objType.of);
         Object_Set(pt, key, (Abstract *)new);
         return new;
     }else if(a->type.of == TYPE_OBJECT){
@@ -84,7 +87,7 @@ status Object_Depth(Abstract *a){
     return 1;
 }
 
-status Object_AddByPath(Object *obj, StrVec *path, Abstract *value){
+Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     DebugStack_Push(obj, obj->type.state);
     if(obj->type.state & DEBUG){
         Abstract *args[] = {
@@ -92,7 +95,7 @@ status Object_AddByPath(Object *obj, StrVec *path, Abstract *value){
             (Abstract *)obj,
             NULL
         };
-        Out("^c.Adding @ to @^0.\n", args);
+        Out("^c.Adding & to @^0.\n", args);
     }
     status r = READY;
     if((path->type.state & STRVEC_PATH) == 0){
@@ -106,12 +109,21 @@ status Object_AddByPath(Object *obj, StrVec *path, Abstract *value){
     while((Iter_Next(&keysIt) & END) == 0){
         Str *item = (Str *)Iter_Get(&keysIt);
         if((item->type.state & MORE) && key != NULL){
-            current = Object_GetOrMake(current, (Abstract *)key);
+            current = Object_GetOrMake(current, (Abstract *)key, op);
+            if(current == NULL){
+                return NULL;
+            }
+            if(obj->type.state & DEBUG){
+                Abstract *args[2];
+                args[0] = (Abstract *)key;
+                args[1] = NULL;
+                Out("^c.   Obj_ByPath \\@@\n", args);
+            }
             key = NULL;
             r |= PROCESSING;
         }else{
             key = item;
-            if(keysIt.type.state & LAST){
+            if((keysIt.type.state & LAST) && (op & SPAN_OP_SET)){
                 Object_Set(current, (Abstract *)key, value);
                 r |= SUCCESS;
                 if(depth > obj->depth){
@@ -122,12 +134,8 @@ status Object_AddByPath(Object *obj, StrVec *path, Abstract *value){
         depth++;
     }
 
-    if(r == READY){
-        r |= NOOP;
-    }
-
     DebugStack_Pop();
-    return r;
+    return current;
 }
 
 Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){

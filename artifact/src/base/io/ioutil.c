@@ -14,6 +14,21 @@ status IoUtil_Annotate(MemCh *m, StrVec *path){
     return Path_Annotate(m, path, pathSeps);
 }
 
+status IoUtil_RemoveSeps(MemCh *m, StrVec *path){
+    i32 idx = 0;
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if((s->type.state & (MORE|LAST)) == 0){
+            Span_Set(path->p, idx++, (Abstract *)s);
+        }
+    }
+    path->p->nvalues = idx;
+    path->p->max_idx = idx-1;
+    return SUCCESS;
+}
+
 status IoUtil_Exists(Str *path){
     struct stat st;
     int r = 0;

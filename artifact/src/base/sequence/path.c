@@ -14,6 +14,14 @@ Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg){
     return NULL;
 }
 
+status PathStr_StrAdd(Str *s, Str *seg){
+    if(s->bytes[s->length-1] != '/'){
+        Str_Add(s, (byte *)"/", 1); 
+    }
+    Str_Add(s, seg->bytes, seg->length);
+    return s->type.state;
+}
+
 status Path_RangeOf(MemCh *m, StrVec *path, word sep, Coord *cr){
     status r = READY;
     cr->a = cr->b = -1;

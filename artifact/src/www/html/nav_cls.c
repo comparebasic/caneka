@@ -3,7 +3,7 @@
 
 status Nav_Add(Nav *nav, StrVec *path, Abstract *a){
     Object *obj = (Object *)Object_As(nav, TYPE_HTML_NAV);
-    return Object_AddByPath(obj, path, a);
+    return Object_ByPath(obj, path, a, SPAN_OP_SET) != NULL ? SUCCESS : ERROR;
 }
 
 Nav *Nav_Make(MemCh *m){
