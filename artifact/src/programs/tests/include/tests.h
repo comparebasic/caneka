@@ -45,6 +45,7 @@ status TemplLogic_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
 status Path_Tests(MemCh *gm);
 status WwwNavTempl_Tests(MemCh *gm);
+status WwwRoute_Tests(MemCh *gm);
 status Stash_Tests(MemCh *gm);
 status TableUtilKey_Tests(MemCh *gm);
 status TableHKey_Tests(MemCh *gm);

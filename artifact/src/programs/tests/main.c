@@ -345,6 +345,32 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Www Tests",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
+    /*
+    {
+        "Www Nav Tests",
+        WwwNav_Tests,
+        "Testing a navigation object for composing HTML.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Www Nav Templ Tests",
+        WwwNavTempl_Tests,
+        "Testing a navigation object for templating and composing HTML.",
+        FEATURE_COMPLETE,
+    },
+    */
+    {
+        "Www Route Tests",
+        WwwRoute_Tests,
+        "Testing an object that gathers and caches routes for web servers.",
+        FEATURE_COMPLETE,
+    },
+    {
         NULL,
         NULL,
         NULL,

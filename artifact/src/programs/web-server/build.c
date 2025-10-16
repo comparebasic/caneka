@@ -5,24 +5,38 @@
 /* parameters */
 
 static Executable targets[] = {
+    {"web-server", "main.c"},
     {NULL, NULL},
 };
 
 static char *cflags[] = {
-        "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-        "-DINSECURE",
-        "-DCNK_EXT",
-        "-DCNK_LANG",
-        "-DCNK_WWW",
-        NULL
+    "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+    "-DINSECURE",
+    "-DCNK_EXT",
+    "-DCNK_LANG",
+    "-DCNK_WWW",
+    "-DCNK_CRYPTO",
+    NULL
 };
 
 static char *inc[] = {
     "-I./artifact/src/include/",
     "-I./artifact/src/base/include/",
     "-I./artifact/src/ext/include/",
-    "-I./artifact/src/lang/include/",
     "-I./artifact/src/www/include/",
+    "-I./artifact/src/lang/include/",
+    "-I./artifact/src/third/api/include/",
+    "-I./artifact/src/programs/web-server/include/",
+    NULL
+};
+
+static char *staticLibs[] = {
+    "./build/libcaneka/libcaneka.a",
+    "./build/libcnkext/libcnkext.a",
+    "./build/libcnklang/libcnklang.a",
+    "./build/libcnkwww/libcnkwww.a",
+    "./build/libcnknacl/libcnknacl.a",
+    "/external/lib/libnacl.a",
     NULL
 };
 
@@ -30,37 +44,14 @@ static char *libs[] = {
     NULL
 };
 
-static char *staticLibs[] = {
-    NULL
-};
-
-/* sources */
-static BuildSubdir html = { "html", {
-    "nav_cls.c",
-    "page_cls.c",
-    NULL
+static BuildSubdir obj = { "components", {
+    "run.c",
+    NULL,
 }};
 
-static BuildSubdir types = { "types", {
-    "init.c",
-    "strings.c",
-    NULL
-}};
-
-static BuildSubdir routes = { "route", {
-    "route.c",
-    NULL
-}};
 
 static BuildSubdir *objdirs[] = {
-    &html,
-    &types,
-    &routes,
-    NULL
-};
-
-char *licences[] = {
-    "./LICENCE",
+    &obj,
     NULL
 };
 
@@ -76,16 +67,16 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnkwww";
-    ctx.version = "1.strvec-alpha";
+    ctx.libtarget = "libcnkwebserver";
+    ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "artifact/src/www";
+    ctx.src = "artifact/src/programs/web-server/";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
     ctx.args.libs = libs;
     ctx.args.staticLibs = staticLibs;
-    ctx.args.licenceFiles = licences;
+    ctx.args.licenceFiles = NULL;
     ctx.objdirs = (BuildSubdir **)objdirs;
 
     Build(&ctx);

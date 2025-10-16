@@ -1,17 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
-Str *StrVec_Str(MemCh *m, StrVec *v){
-    if(v->total+1 > STR_MAX){
+Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
+    if(v->total+1 > STR_MAX || v->total+1 > length){
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(m, v->total),
+            (Abstract *)I16_Wrapped(m, length),
             NULL,
         };
         Error(m, (Abstract *)v, FUNCNAME, FILENAME, LINENUMBER, 
-            "Error StrVec is longer than Cstr default of ", args);
+            "Error StrVec is longer than Cstr default of $ length of $ ", args);
         return NULL;
     }
-    Str *s = Str_Make(m, v->total+1);
+    Str *s = Str_Make(m, length);
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
@@ -21,6 +22,10 @@ Str *StrVec_Str(MemCh *m, StrVec *v){
         }
     }
     return s;
+}
+
+Str *StrVec_Str(MemCh *m, StrVec *v){
+    return StrVec_ToStr(m, v, v->total+1);
 }
 
 i64 StrVec_ToFd(StrVec *v, i32 fd){

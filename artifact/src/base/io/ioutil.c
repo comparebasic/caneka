@@ -54,6 +54,24 @@ Str *IoUtil_GetCwdPath(MemCh *m, Str *path){
     return NULL;
 }
 
+StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path){
+    StrVec *v = StrVec_Make(m);
+    if(path != NULL && path->bytes[0] != '/'){
+        if(path->length >= 2 && path->bytes[0] == '.' && path->bytes[1] == '/'){
+            Str_Incr(path, 2);
+        }
+
+        Str *s = Str_Make(m, STR_DEFAULT);
+        char *cstr = getcwd((char *)s->bytes, STR_DEFAULT_MAX);
+        s->length = strlen(cstr);
+        StrVec_Add(v, s);
+        StrVec_Add(v, Str_CstrRef(m, "/"));
+        StrVec_Add(v, path);
+    }
+
+    return v;
+}
+
 Str *IoUtil_GetAbsPath(MemCh *m, Str *path){
     if(path != NULL && path->bytes[0] != '/'){
         if(path->length >= 2 && path->bytes[0] == '.' && path->bytes[1] == '/'){

@@ -47,6 +47,7 @@ static i64 TcpCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
     TcpCtx *ctx = (TcpCtx*)as(a, TYPE_TCP_CTX);
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
+        (Abstract *)ctx->path,
         (Abstract *)I32_Wrapped(sm->m, ctx->port),
         (Abstract *)ctx->inet4,
         (Abstract *)ctx->inet6,
@@ -56,7 +57,7 @@ static i64 TcpCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
         (Abstract *)Util_Wrapped(sm->m, (util)ctx->metrics.served),
         NULL,
     };
-    return Fmt(sm, "Tcp<$ u:$ inet4:$ inet6:$ maker:^D.$^d. $start $open $error $served>", args);
+    return Fmt(sm, "Tcp<$ $ ^D.$^d.port ^D.$^d.inet4 ^D.$^d.inet6 $start $open $error $served>", args);
 }
 
 status Serve_ToSInit(MemCh *m, Lookup *lk){

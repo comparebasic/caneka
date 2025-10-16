@@ -84,6 +84,7 @@ static BuildSubdir testsobj = { "tests", {
     "servetcp_tests.c",
     "filedb_tests.c",
     "www_nav_tests.c",
+    "route_tests.c",
     "crypto_tests.c",
     NULL
 }};

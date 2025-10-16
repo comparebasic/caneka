@@ -5,6 +5,7 @@ typedef struct tcp_ctx {
     Str *inet6;
     TaskPopulate populate;
     StepFunc finalize; 
+    StrVec *path;
     struct {
         microTime start;
         i64 open;

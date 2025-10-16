@@ -7,3 +7,4 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac);
 StrVec *IoUtil_Fname(MemCh *m, StrVec *path);
 StrVec *IoUtil_BasePath(MemCh *m, StrVec *path);
 status IoUtil_Annotate(MemCh *m, StrVec *path);
+StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path);

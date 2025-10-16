@@ -1,6 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
+Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg){
+    Str *s = StrVec_ToStr(m, path, STR_DEFAULT);
+    if(s->bytes[s->length-1] != '/'){
+        Str_Add(s, (byte *)"/", 1); 
+    }
+    Str_Add(s, seg->bytes, seg->length);
+    if((s->type.state & ERROR) == 0){
+        return s;
+    }
+    printf("returning null %d\n", s->type.state);
+    return NULL;
+}
+
 status Path_RangeOf(MemCh *m, StrVec *path, word sep, Coord *cr){
     status r = READY;
     cr->a = cr->b = -1;
@@ -68,6 +81,9 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = Iter_Get(&it);
+        if(s->length == 0){
+            continue;
+        }
         byte *start = s->bytes;
         byte *ptr = s->bytes;
         byte *last = s->bytes+s->length-1;

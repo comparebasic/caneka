@@ -178,7 +178,6 @@ Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value){
     return NULL;
 }
 
-
 Hashed *Object_SetPropByIdx(Object *obj, i32 idx, Abstract *value){
     Hashed *h = Span_Get(obj->order, idx);
     h->value = value; 

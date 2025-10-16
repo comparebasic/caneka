@@ -5,6 +5,7 @@ static char *strings[] = {
     "_TYPE_WWW_START",
     "WwwNav",
     "WwwPage",
+    "WwwRoute",
     "_TYPE_WWW_END",
     NULL
 };

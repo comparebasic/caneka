@@ -80,10 +80,10 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, Abstract *sour
             if(ent->d_type == IS_DIR){
                 Str *s = Str_Make(m, STR_DEFAULT);
                 fnameStr(m, s, path, e);
-                Dir_Climb(m, s, dir, file, source);
                 if(dir != NULL){
                     r |= dir(m, s, source);
                 }
+                Dir_Climb(m, s, dir, file, source);
             }else{
                 r |= file(m, path, e, source);
             }
@@ -92,6 +92,9 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, Abstract *sour
         DebugStack_Pop();
         return r|SUCCESS;
     }else{
+        Abstract *args[] = {(Abstract *)path, NULL};
+        Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
+            "Unable to open Direcotry: @", args);
         DebugStack_Pop();
         return r|ERROR;
     }
