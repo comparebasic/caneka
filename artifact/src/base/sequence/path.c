@@ -9,6 +9,25 @@ status Path_AddSlash(MemCh *m, StrVec *path){
     return s->type.state;
 }
 
+status Path_SubClone(MemCh *m, StrVec *path, i32 count){
+    Span *p = path->p;
+    Coord *cr = Coord_Make(m, count, path->p->max_idx);
+    path->p = Span_CopyRange(m, p, cr);
+    return SUCCESS;
+}
+
+status Path_Add(MemCh *m, StrVec *path, StrVec *add){
+    Str *s = Span_Get(path->p, path->p->max_idx);
+    Str *sa = Span_Get(add->p, 0);
+    if(s->bytes[s->length-1] != '/' && sa->bytes[0] != '/'){
+        StrVec_Add(path, Str_Ref((m, byte *)"/", 1, 2, MORE); 
+    }
+    if((add->type.state & STRVEC_PATH) == 0){
+        path->type.state |= ERROR;
+    }
+    return StrVec_AddVec(path, add);
+}
+
 Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg){
     Str *s = StrVec_ToStr(m, path, STR_DEFAULT);
     if(s->bytes[s->length-1] != '/'){
@@ -19,14 +38,6 @@ Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg){
         return s;
     }
     return NULL;
-}
-
-status PathStr_StrAdd(Str *s, Str *seg){
-    if(s->bytes[s->length-1] != '/'){
-        Str_Add(s, (byte *)"/", 1); 
-    }
-    Str_Add(s, seg->bytes, seg->length);
-    return s->type.state;
 }
 
 status Path_RangeOf(MemCh *m, StrVec *path, word sep, Coord *cr){
@@ -58,6 +69,61 @@ StrVec *Path_Base(MemCh *m, StrVec *path){
     Path_RangeOf(m, path, MORE, cr);
     v->p = Span_CopyRange(m, path->p, cr);
     return v;
+}
+
+StrVec *Path_Ext(MemCh *m, StrVec *path){
+    StrVec *v = StrVec_Make(m);
+    Coord *cr = Coord_Make(m, 0, path->p->max_idx);
+
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s->type.state & LAST){
+            cr->b = it.idx+1;
+            cr->type.state |= SUCCESS;
+            break;
+        }
+    }
+
+    if(cr->type.state & SUCCESS){
+        v->p = Span_CopyRange(m, path->p, cr);
+        return v;
+    }
+
+    return NULL;
+}
+
+StrVec *Path_Name(MemCh *m, StrVec *path){
+    StrVec *v = StrVec_Make(m);
+    Coord *cr = Coord_Make(m, 0, 0);
+
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s->type.state & MORE){
+            cr->type.state |= PROCESSING;
+            cr->a = it.idx+1;
+        }else if(s->type.state & LAST){
+            cr->b = it.idx-1;
+            if(cr->type.state & PROCESSING){
+                cr->type.state |= SUCCESS;
+            }
+            break;
+        }
+    }
+
+    if(cr->type.state & SUCCESS){
+        v->p = Span_CopyRange(m, path->p, cr);
+        return v;
+    }
+
+    return NULL;
+}
+
+boolean Path_ExtEquals(StrVec *path, Str *ext){
+    return Equals((Abstract *)Span_Get(path->p, path->p->max_idx), (Abstract *)ext);
 }
 
 status Path_Around(MemCh *m, StrVec *path, word sep, Coord *cr){

@@ -28,6 +28,20 @@ static i64 WrappedDo_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
+static i64 WrappedFunc_Print(Stream *sm, Abstract *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_FUNC);
+    Abstract *args[] = {
+        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)sg, ToS_FlagLabels),
+        (Abstract *)Util_Wrapped(sm->m, (util)sg->val.ptr),
+        NULL
+    };
+    if(flags & MORE){
+        return Fmt(sm, "Wfunc\\<$ ^D.$^d.>", args);
+    }else{
+        return Fmt(sm, "Wfunc\\<$ $>", args);
+    }
+}
+
 static i64 WrappedPtr_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
@@ -224,6 +238,7 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedMicroTime_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_DO, (void *)WrappedDo_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_FUNC, (void *)WrappedFunc_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_MEMCOUNT, (void *)WrappedMemCount_Print);
     return r;
 }

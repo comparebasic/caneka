@@ -6,3 +6,8 @@ StrVec *Path_Base(MemCh *m, StrVec *path);
 Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg);
 status PathStr_StrAdd(Str *s, Str *seg);
 status Path_AddSlash(MemCh *m, StrVec *path);
+StrVec *Path_Name(MemCh *m, StrVec *path);
+StrVec *Path_Ext(MemCh *m, StrVec *path);
+boolean Path_ExtEquals(StrVec *path, Str *ext);
+status Path_Add(MemCh *m, StrVec *path, StrVec *add);
+status Path_SubClone(MemCh *m, StrVec *path, i32 count);

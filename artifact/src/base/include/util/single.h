@@ -19,6 +19,7 @@ Single *False();
 Single *Single_Clone(MemCh *m, Abstract *og);
 boolean Single_Equals(Single *a, Single *b);
 Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf);
+Single *Func_Wrapped(MemCh *m, void *func);
 Single *Bool_Wrapped(MemCh *m, int n);
 Single *Do_Wrapped(MemCh *m, DoFunc dof);
 Single *Maker_Wrapped(MemCh *m, Maker mk);

@@ -10,9 +10,15 @@ Single *Single_Clone(MemCh *m, Abstract *og){
     return sg;
 }
 
+Single *Func_Wrapped(MemCh *m, void *func){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_FUNC;
+    sgl->val.ptr = func;
+    return sgl;
+}
+
 Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
-    boolean isZ = IsZeroed((byte *)sgl, sizeof(Single), FUNCNAME, FILENAME, LINENUMBER);
     sgl->type.of = TYPE_WRAPPED_PTR;
     sgl->objType.of = typeOf;
     sgl->val.ptr = ptr;

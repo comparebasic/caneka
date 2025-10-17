@@ -57,11 +57,16 @@ status Task_Tumble(Task *tsk){
     return tsk->type.state;
 }
 
-status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags){
+status Task_AddDataStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags){
     Step *st = Step_Make(tsk->m, func, arg, source, flags);
+    st->data = data;
     status r = Iter_AddOn(&tsk->chainIt, (Abstract *)st);
     tsk->type.state |= MORE;
     return r|MORE;
+}
+
+status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags){
+    return Task_AddDataStep(tsk, func, arg, NULL, source, flags);
 }
 
 Task *Task_Make(Span *chain, Abstract *source){

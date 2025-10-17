@@ -20,5 +20,6 @@ typedef status (*TaskPopulate)(MemCh *m, Task *task, Abstract *arg, Abstract *so
 Task *Task_Make(Span *chain, Abstract *source);
 status Task_Cycle(Task *tsk);
 status Task_Tumble(Task *tsk);
+status Task_AddDataStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags);
 status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags);
 status Task_Free(Step *st, Task *tsk);

@@ -5,6 +5,16 @@
 static StrVec *headerPath = NULL;
 static StrVec *footerPath = NULL;
 
+static Example_getPageData(Task *tsk, Route *rt){
+    MemCh *m = tsk->m;
+    Object *data = Object_Make(m, ZERO);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)rt);
+    Single *now = MicroTime_ToStr(tsk->m, MicroTime_Now());
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
+
+    return data;
+}
+
 static status Example_log(Step *_st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -31,8 +41,7 @@ static status Example_PageContent(Step *st, Task *tsk){
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
-    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
-    if(Route_Handle(rt, sm, (Object *)st->arg, NULL) & SUCCESS){
+    if(Route_Handle(tsk->m, ctx->content, sm, (Object *)st->arg, NULL) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;
@@ -81,15 +90,20 @@ static status Example_ServePage(Step *st, Task *tsk){
         Out("^b.Not Found @ -> &^0\n", args);
     }else{
         ctx->code = 200;
-        Object *data = Object_Make(m, ZERO);
-        Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)rt);
-        Single *now = MicroTime_ToStr(tsk->m, MicroTime_Now());
-        Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
+
+        Object *data = Example_getPageData(tsk, rt);
 
         ctx->content = StrVec_Make(tsk->m);
-        Task_AddStep(tsk, Example_FooterContent, (Abstract *)data, NULL, ZERO);
-        Task_AddStep(tsk, Example_PageContent, (Abstract *)data, NULL, ZERO);
-        Task_AddStep(tsk, Example_FooterContent, (Abstract *)data, NULL, ZERO);
+        if(rt->type.state & ROUTE_PAGE){
+            Task_AddDataStep(tsk,
+                Example_FooterContent, NULL, (Abstract *)data, NULL, ZERO);
+        }
+        Task_AddDataStep(tsk,
+            Example_PageContent, (Abstract *)rt, (Abstract *)data, NULL, ZERO);
+        if(rt->type.state & ROUTE_PAGE){
+            Task_AddDataStep(tsk,
+                Example_FooterContent, NULL, (Abstract *)data, NULL, ZERO);
+        }
         st->type.state |= SUCCESS;
     }
     return st->type.state;
