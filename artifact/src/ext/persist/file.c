@@ -121,7 +121,10 @@ status File_Open(File *f){
             f->sm = Stream_MakeStrVec(f->m);
             f->sm->fd = fd;
         }else{
-            f->sm = Stream_Make(f->m);
+            if(f->sm == NULL){
+               f->sm = Stream_Make(m); 
+            }
+            f->sm->type.state |= STREAM_FROM_FD;
             f->sm->fd = fd;
         }
         f->type.state |= PROCESSING;

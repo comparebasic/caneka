@@ -48,6 +48,61 @@ status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath){
     return SUCCESS;
 }
 
+status Route_Handle(Route *rt, Stream *sm, Object *data, Abstract *source){
+    Str *action = (Str *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_ACTION);
+    Str *html = (Str *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_HTML);
+    Str *templ = (Str *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TEAMPL);
+    Str *fmt = (Str *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FMT);
+    if(action != NULL){
+        File *f = File_Make(m, action, NULL, STREAM_STRVEC);
+        File_Open(f);
+        File_Read(f, FILE_READ_MAX);
+        File_Close(f);
+
+        Cursor *curs = File_GetCurs(f);
+        TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+
+        Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+        status result = Templ_Prepare(templ);
+        Templ_ToS(templ, sm, (Abstract *)data, source);
+        return SUCCESS;
+    }else if(templ != NULL &&
+            (html == NULL || IoUtil_CmpUpdated(sm->m, html, templ, NULL))){
+        File *f = File_Make(m, templ, NULL, STREAM_STRVEC);
+        File_Open(f);
+        File_Read(f, FILE_READ_MAX);
+        File_Close(f);
+
+        Cursor *curs = File_GetCurs(f);
+        TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+        Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+        status result = Templ_Prepare(templ);
+        return Templ_ToS(templ, sm, (Abstract *)data, source);
+        
+    }else if(fmt != NULL &&
+            (html == NULL || IoUtil_CmpUpdated(sm->m, html, fmt, NULL))){
+        File *f = File_Make(m, fmt, NULL, STREAM_STRVEC);
+        File_Open(f);
+        File_Read(f, FILE_READ_MAX);
+
+        Cursor *curs = File_GetCurs(f);
+
+        Roebling *rbl = NULL;
+        rbl = FormatFmt_Make(m, curs, NULL);
+        Roebling_Run(rbl);
+        
+        Fmt_ToHtml(sm, rbl->mess);
+    }else if(html != NULL){
+        File *f = File_Make(sm->m, html, NULL, STREAM_FROM_FD); 
+        File_Open(f);
+        if(f->type.state & PROCESSING){
+            File_Read(f, FILE_READ_MAX);
+            Stream_VecTo(sm, f->sm->dest.curs->v);
+            return SUCCESS;
+        }
+    }
+}
+
 status Route_Collect(Route *rt, StrVec *path){
     MemCh *m = Object_GetMem(rt);
     Object_SetProp(rt, Str_CstrRef(m, "path"), (Abstract *)path);

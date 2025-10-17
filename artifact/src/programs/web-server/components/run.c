@@ -2,6 +2,9 @@
 #include <caneka.h>
 #include <web-server.h>
 
+static StrVec *headerPath = NULL;
+static StrVec *footerPath = NULL;
+
 static status Example_log(Step *_st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -23,6 +26,47 @@ static status Example_log(Step *_st, Task *tsk){
     return SUCCESS;
 }
 
+static status Example_PageContent(Step *st, Task *tsk){
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
+    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
+    if(Route_Handle(rt, sm, (Object *)st->arg, NULL) & SUCCESS){
+        st->type.state |= SUCCESS;
+    }else{
+        st->type.state |= ERROR;
+    }
+
+    return st->type.state;
+}
+
+static status Example_FooterContent(Step *st, Task *tsk){
+    Route *rt = Object_ByPath(tcp->inc, headerPath, NULL, SPAN_OP_GET);
+
+    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
+    if(Route_Handle(rt, sm, (Object *)st->arg, NULL) & SUCCESS){
+        st->type.state |= SUCCESS;
+    }else{
+        st->type.state |= ERROR;
+    }
+
+    return st->type.state;
+}
+
+static status Example_HeaderContent(Step *st, Task *tsk){
+    Route *rt = Object_ByPath(tcp->inc, footerPath, NULL, SPAN_OP_GET);
+
+    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
+    if(Route_Handle(rt, sm, (Object *)st->arg, NULL) & SUCCESS){
+        st->type.state |= SUCCESS;
+    }else{
+        st->type.state |= ERROR;
+    }
+
+    return st->type.state;
+}
+
 static status Example_ServePage(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
@@ -36,14 +80,16 @@ static status Example_ServePage(Step *st, Task *tsk){
         };
         Out("^b.Not Found @ -> &^0\n", args);
     }else{
-        ctx->content = StrVec_Make(tsk->m);
-        Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
-        Abstract *args[] = {
-            (Abstract *)ctx->path,
-            NULL
-        };
-        Fmt(sm, "<section><p>Yay found Route: $</p></section>\r\n", args);
         ctx->code = 200;
+        Object *data = Object_Make(m, ZERO);
+        Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)rt);
+        Single *now = MicroTime_ToStr(tsk->m, MicroTime_Now());
+        Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
+
+        ctx->content = StrVec_Make(tsk->m);
+        Task_AddStep(tsk, Example_FooterContent, (Abstract *)data, NULL, ZERO);
+        Task_AddStep(tsk, Example_PageContent, (Abstract *)data, NULL, ZERO);
+        Task_AddStep(tsk, Example_FooterContent, (Abstract *)data, NULL, ZERO);
         st->type.state |= SUCCESS;
     }
     return st->type.state;
@@ -77,6 +123,11 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
     Route_Collect((Route *)ctx->pages, StrVec_From(m, public));
     ctx->inc = (Object *)Route_Make(m);
     Route_Collect((Route *)ctx->inc, StrVec_From(m, inc));
+
+    headerPath = StrVec_From(m, Str_CstrRef(m, "/header.action"));
+    IoUtil_Annotate(m, headerPath);
+    footerPath = StrVec_From(m, Str_CstrRef(m, "/footerPath.action"));
+    IoUtil_Annotate(m, footerPath);
 
     return r;
 }
