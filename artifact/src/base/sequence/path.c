@@ -24,6 +24,14 @@ StrVec *Path_SubClone(MemCh *m, StrVec *path, i32 count){
     return v;
 }
 
+status Path_AddStr(StrVec *path, Str *add){
+    Str *s = Span_Get(path->p, path->p->max_idx);
+    if(s == NULL || s->bytes[s->length-1] != '/'){
+        StrVec_Add(path, Str_Ref(path->p->m, (byte *)"/", 1, 2, MORE));
+    }
+    return StrVec_Add(path, add);
+}
+
 status Path_Add(MemCh *m, StrVec *path, StrVec *add){
     Str *s = Span_Get(path->p, path->p->max_idx);
     Str *sa = Span_Get(add->p, 0);

@@ -8,10 +8,6 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     Abstract *args[5];
     RouteCtx *rctx = (RouteCtx *)source;
 
-    StrVec *pathV = StrVec_From(m, path);
-    IoUtil_Annotate(m, pathV);
-    StrVec *objPath = Path_SubClone(m, pathV, rctx->path->p->max_idx+1);
-
     StrVec *abs = StrVec_From(m, path);
     Path_AddSlash(m, abs);
     StrVec_Add(abs, file);
@@ -35,10 +31,21 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
         return ERROR;
     }
 
+    StrVec *pathV = StrVec_From(m, path);
+    IoUtil_Annotate(m, pathV);
+    StrVec *objPath = Path_SubClone(m, pathV, rctx->path->p->max_idx+1);
+    objPath->type.state |= STRVEC_PATH;
+
     Str *index = Str_CstrRef(m, "index");
     if(!Equals((Abstract *)name, (Abstract *)index)){
-
-        Path_Add(m, objPath, name);
+        if(funcW->type.state & (ROUTE_DYNAMIC|ROUTE_PAGE)){
+            Path_Add(m, objPath, name);
+        }else{
+            Path_AddStr(objPath, file);
+            args[0] = (Abstract *)objPath;
+            args[1] = NULL;
+            Out("^y.Static Path &^0\n", args);
+        }
     }
 
     Route *subRt = Object_ByPath(rctx->root, objPath, NULL, SPAN_OP_RESERVE);
