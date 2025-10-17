@@ -12,6 +12,7 @@ typedef struct {
     Type type;
     i32 method;
     i32 code;
+    Str *mime;
     StrVec *path;
     Cursor *body;
     StrVec *content;

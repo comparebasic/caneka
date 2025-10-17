@@ -1,5 +1,11 @@
 typedef Object Route;
 
+typedef struct route_ctx {
+    Type type;
+    Route *root;
+    StrVec *path;
+} RouteCtx;
+
 enum route_flags {
     ROUTE_STATIC = 1 << 8,
     ROUTE_DYNAMIC = 1 << 9,

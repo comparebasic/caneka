@@ -3,5 +3,6 @@ enum www_types {
     TYPE_HTML_NAV,
     TYPE_HTML_PAGE,
     TYPE_WWW_ROUTE,
+    TYPE_ROUTE_CTX,
     _TYPE_WWW_END,
 };

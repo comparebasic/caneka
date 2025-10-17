@@ -47,6 +47,9 @@ static status Example_PageContent(Step *st, Task *tsk){
 
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, tsk->source) & SUCCESS){
         st->type.state |= SUCCESS;
+        args[0] = (Abstract *)ctx->content;
+        args[1] = NULL;
+        Out("^c.content: ^y.$^0\n", args);
     }else{
         st->type.state |= ERROR;
     }
@@ -95,6 +98,7 @@ static status Example_HeaderContent(Step *st, Task *tsk){
 
     Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, NULL) & SUCCESS){
+        ctx->mime = (Str *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_MIME);
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;

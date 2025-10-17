@@ -4,18 +4,13 @@
 struct span *RouteFuncTable = NULL;
 struct span *RouteMimeTable = NULL;
 
-static status dir(MemCh *m, Str *path, Abstract *source){
-    return NOOP;
-}
-
 static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     Abstract *args[5];
-    Route *rt = (Route *)source;
+    RouteCtx *rctx = (RouteCtx *)source;
 
     StrVec *pathV = StrVec_From(m, path);
     IoUtil_Annotate(m, pathV);
-    StrVec *rtPath = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH);
-    StrVec *objPath = Path_SubClone(m, pathV, rtPath->p->max_idx+1);
+    StrVec *objPath = Path_SubClone(m, pathV, rctx->path->p->max_idx+1);
 
     StrVec *abs = StrVec_From(m, path);
     Path_AddSlash(m, abs);
@@ -36,7 +31,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
             NULL
         };
         Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
-            "Mime not found for this file & with\n\n ext & (@)", args);
+            "Mime & not found for this file with\n\n ext & (@)", args);
         return ERROR;
     }
 
@@ -46,7 +41,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
         Path_Add(m, objPath, name);
     }
 
-    Route *subRt = Object_ByPath(rt, objPath, NULL, SPAN_OP_RESERVE);
+    Route *subRt = Object_ByPath(rctx->root, objPath, NULL, SPAN_OP_RESERVE);
 
     Object_SetPropByIdx(subRt, ROUTE_PROPIDX_PATH, (Abstract *)objPath);
     Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FILE, (Abstract *)abs);
@@ -56,6 +51,22 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     subRt->type.state |= funcW->type.state;
 
     return NOOP;
+}
+
+status Route_Collect(Route *rt, StrVec *path){
+    MemCh *m = Object_GetMem(rt);
+    IoUtil_Annotate(m, path);
+    StrVec *root = StrVec_From(m, Str_CstrRef(m, "/"));
+    IoUtil_Annotate(m, root);
+    Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)root);
+
+    RouteCtx ctx;
+    ctx.type.of = TYPE_ROUTE_CTX;
+    ctx.type.state = ZERO;
+    ctx.root = rt;
+    ctx.path = path;
+
+    return Dir_Climb(m, StrVec_Str(m, path), NULL, file, (Abstract *)&ctx);
 }
 
 static status routeFuncStatic(MemCh *m, 
@@ -116,13 +127,6 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
     }
 }
 
-status Route_Collect(Route *rt, StrVec *path){
-    MemCh *m = Object_GetMem(rt);
-    IoUtil_Annotate(m, path);
-    Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)path);
-    return Dir_Climb(m, StrVec_Str(m, path), dir, file, (Abstract *)rt);
-}
-
 Nav *Route_Make(MemCh *m){
     return Object_Make(m, TYPE_WWW_ROUTE);
 }
@@ -168,6 +172,13 @@ status Route_ClsInit(MemCh *m){
         Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
         Table_Set(RouteMimeTable,
             (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/javascript"));
+
+        key = Str_CstrRef(m, "css");
+        funcW = Func_Wrapped(m, routeFuncStatic);
+        funcW->type.state |= (ROUTE_STATIC);
+        Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
+        Table_Set(RouteMimeTable,
+            (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/css"));
 
         key = Str_CstrRef(m, "txt");
         funcW = Func_Wrapped(m, routeFuncStatic);

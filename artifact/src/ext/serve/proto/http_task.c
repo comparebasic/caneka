@@ -12,18 +12,22 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
             "not found");
         Cursor_Add(proto->out, s);
     }else{
-        Str *s = Str_CstrRef(tsk->m, 
+        Stream *sm = Stream_MakeToVec(tsk->m, proto->out->v);
+        Abstract *args[] = {
+            (Abstract *)ctx->mime,
+            (Abstract *)I64_Wrapped(tsk->m, ctx->content->total),
+            (Abstract *)ctx->content,
+            NULL
+        };
+        Fmt(sm,
             "HTTP/1.1 200 OK\r\n"
             "Server: Caneka\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: ");
-        Cursor_Add(proto->out, s);
-        s = Str_FromI64(tsk->m, ctx->content->total);
-        Cursor_Add(proto->out, s);
-        Cursor_Add(proto->out, Str_CstrRef(tsk->m, "\r\n\r\n"));
-
-        Cursor_AddVec(proto->out, ctx->content);
+            "Content-Type: $\r\n"
+            "Content-Length: $\r\n"
+            "\r\n"
+            "$", args);
     }
+
     Cursor_Setup(proto->out, StrVec_ReAlign(tsk->m, proto->out->v));
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
     st->type.state |= SUCCESS;
