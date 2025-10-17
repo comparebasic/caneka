@@ -368,7 +368,6 @@ status TemplLogic_Tests(MemCh *gm){
         "Temple key value test mismatch, expected @\nhave\n@", 
         args);
 
-
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

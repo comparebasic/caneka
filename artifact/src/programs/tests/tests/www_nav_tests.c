@@ -6,13 +6,19 @@ static Nav *makeNav(MemCh *m){
     TranspFile *tp = NULL;
     StrVec *path = NULL;
     Nav *nav = Nav_Make(m);
+
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "Base"));
     path = StrVec_From(m, Str_CstrRef(m, "/base/index.html"));
     IoUtil_Annotate(Nav_MemCh(nav), path);
     tp->local = path;
+    printf("I\n");
+    fflush(stdout);
 
-    Nav_Add(nav, tp->local, (Abstract *)tp);
+    Nav_Add(nav, Path_Base(m, tp->local), (Abstract *)tp);
+
+    printf("II\n");
+    fflush(stdout);
 
     Nav *mem = Nav_Make(m);
     tp = TranspFile_Make(m); 
@@ -28,6 +34,9 @@ static Nav *makeNav(MemCh *m){
     IoUtil_Annotate(Nav_MemCh(nav), path);
     tp->local = path;
 
+    printf("III\n");
+    fflush(stdout);
+
     Nav_Add(mem, tp->local, (Abstract *)tp);
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "MemCh"));
@@ -41,6 +50,9 @@ static Nav *makeNav(MemCh *m){
     path = StrVec_From(m, Str_CstrRef(m, "/base/mem/membook.html"));
     IoUtil_Annotate(Nav_MemCh(nav), path);
     tp->local = path;
+
+    printf("IV\n");
+    fflush(stdout);
 
     Nav_Add(mem, tp->local, (Abstract *)tp);
     tp = TranspFile_Make(m); 
@@ -69,6 +81,9 @@ static Nav *makeNav(MemCh *m){
 
     Nav_Add(str, tp->local, (Abstract *)tp);
 
+    printf("V\n");
+    fflush(stdout);
+
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "StrVec"));
     path = StrVec_From(m, Str_CstrRef(m, "/base/str/strvec.html"));
@@ -93,11 +108,17 @@ static Nav *makeNav(MemCh *m){
 
     Nav_Add(str, tp->local, (Abstract *)tp);
 
+    printf("VI\n");
+    fflush(stdout);
+
     tp = TranspFile_Make(m); 
     tp->name = StrVec_From(m, Str_CstrRef(m, "ToS"));
     path = StrVec_From(m, Str_CstrRef(m, "/base/str/tos.html"));
     IoUtil_Annotate(Nav_MemCh(nav), path);
     tp->local = path;
+
+    printf("VII\n");
+    fflush(stdout);
 
     Nav_Add(str, tp->local, (Abstract *)tp);
 

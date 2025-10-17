@@ -9,6 +9,7 @@ static status dir(MemCh *m, Str *path, Abstract *source){
 }
 
 static status file(MemCh *m, Str *path, Str *file, Abstract *source){
+    Abstract *args[5];
     Route *rt = (Route *)source;
 
     StrVec *pathV = StrVec_From(m, path);
@@ -40,22 +41,19 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     }
 
     Str *index = Str_CstrRef(m, "index");
-    if(Equals((Abstract *)name, (Abstract *)index)){
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_FILE, (Abstract *)abs);
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_FUNC, (Abstract *)funcW);
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_MIME, (Abstract *)mime);
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
-        rt->type.state |= funcW->type.state;
-    }else{
+    if(!Equals((Abstract *)name, (Abstract *)index)){
+
         Path_Add(m, objPath, name);
-        Route *subRt = Object_ByPath(rt, objPath, NULL, SPAN_OP_RESERVE);
-        Object_SetPropByIdx(subRt, ROUTE_PROPIDX_PATH, (Abstract *)objPath);
-        Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FILE, (Abstract *)abs);
-        Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FUNC, (Abstract *)funcW);
-        Object_SetPropByIdx(subRt, ROUTE_PROPIDX_MIME, (Abstract *)mime);
-        Object_SetPropByIdx(subRt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
-        subRt->type.state |= funcW->type.state;
     }
+
+    Route *subRt = Object_ByPath(rt, objPath, NULL, SPAN_OP_RESERVE);
+
+    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_PATH, (Abstract *)objPath);
+    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FILE, (Abstract *)abs);
+    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FUNC, (Abstract *)funcW);
+    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_MIME, (Abstract *)mime);
+    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
+    subRt->type.state |= funcW->type.state;
 
     return NOOP;
 }
@@ -112,9 +110,9 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
         DebugStack_Pop();
         return r;
     }else{
-        FileDes_ToVec(dest, path);
+        i64 total = FileDes_ToVec(dest, path);
         DebugStack_Pop();
-        return dest->type.state;
+        return SUCCESS;
     }
 }
 

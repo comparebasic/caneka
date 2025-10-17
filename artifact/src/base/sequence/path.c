@@ -76,9 +76,16 @@ status Path_RangeOf(MemCh *m, StrVec *path, word sep, Coord *cr){
 
 StrVec *Path_Base(MemCh *m, StrVec *path){
     StrVec *v = StrVec_Make(m);
-    Coord *cr = Coord_Make(m, 0, 0);
-    Path_RangeOf(m, path, MORE, cr);
-    v->p = Span_CopyRange(m, path->p, cr);
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s->type.state & LAST){
+            break;
+        }
+        StrVec_Add(v, s);
+    }
+
     return v;
 }
 

@@ -11,6 +11,8 @@ static Object *Example_getPageData(Task *tsk, Route *rt){
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)rt);
     Str *now = MicroTime_ToStr(tsk->m, MicroTime_Now());
     Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
+    StrVec *title = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
 
     return data;
 }
@@ -37,6 +39,7 @@ static status Example_log(Step *_st, Task *tsk){
 }
 
 static status Example_PageContent(Step *st, Task *tsk){
+    Abstract *args[5];
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -56,7 +59,7 @@ static status Example_FooterContent(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-    Route *rt = Object_ByPath(tcp->inc, headerPath, NULL, SPAN_OP_GET);
+    Route *rt = Object_ByPath(tcp->inc, footerPath, NULL, SPAN_OP_GET);
     if(rt == NULL){
         args[0] = (Abstract *)tcp->inc;
         args[1] = NULL;
@@ -76,10 +79,19 @@ static status Example_FooterContent(Step *st, Task *tsk){
 }
 
 static status Example_HeaderContent(Step *st, Task *tsk){
+    Abstract *args[3];
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-    Route *rt = Object_ByPath(tcp->inc, footerPath, NULL, SPAN_OP_GET);
+    Route *rt = Object_ByPath(tcp->inc, headerPath, NULL, SPAN_OP_GET);
+    if(rt == NULL){
+        args[0] = (Abstract *)tcp->inc;
+        args[1] = NULL;
+        Error(tsk->m, (Abstract *)st, FUNCNAME, FILENAME, LINENUMBER,
+            "Route is null for Footer: @", args);
+        st->type.state |= ERROR;
+        return st->type.state;
+    }
 
     Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, NULL) & SUCCESS){
@@ -100,18 +112,11 @@ static status Example_ServePage(Step *st, Task *tsk){
         st->type.state |= SUCCESS;
         ctx->code = 404;
         Abstract *args[] = {
-            (Abstract *)ctx->path, (Abstract *)tcp->pages, NULL
+            (Abstract *)ctx->path, NULL
         };
-        Out("^b.Not Found @ -> &^0\n", args);
+        Out("^b.Not Found $^0\n", args);
         return st->type.state;
     }else{
-        Abstract *args[5];
-        args[0] = (Abstract *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH);
-        args[1] = (Abstract *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_MIME);
-        args[2] = (Abstract *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
-        args[3] = NULL;
-        Out("^b.Page Content Setup for @ -> $\\@$\n^0", args);
-
         ctx->code = 200;
 
         Object *data = Example_getPageData(tsk, rt);
@@ -125,8 +130,9 @@ static status Example_ServePage(Step *st, Task *tsk){
             Example_PageContent, (Abstract *)rt, (Abstract *)data, NULL, ZERO);
         if(rt->type.state & ROUTE_PAGE){
             Task_AddDataStep(tsk,
-                Example_FooterContent, NULL, (Abstract *)data, NULL, ZERO);
+                Example_HeaderContent, (Abstract *)rt, (Abstract *)data, NULL, ZERO);
         }
+
         st->type.state |= SUCCESS;
         return st->type.state|MORE;
     }

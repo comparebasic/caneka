@@ -62,11 +62,15 @@ Str *IoUtil_GetCwdPath(MemCh *m, Str *path){
     i64 len = strlen(cstr);
     Str_AddCstr(s, cstr);
     Str_AddCstr(s, "/");
-    Str_Add(s, path->bytes, path->length);
-    if((s->type.state & ERROR) == 0){
-        return s;
+    if(path != NULL){
+        Str_Add(s, path->bytes, path->length);
+        if((s->type.state & ERROR) == 0){
+            return s;
+        }else{
+            return NULL;
+        }
     }
-    return NULL;
+    return s;
 }
 
 StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path){
@@ -85,6 +89,10 @@ StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path){
     }
 
     return v;
+}
+
+StrVec *IoUtil_AbsVec(MemCh *m){
+    return StrVec_From(m, IoUtil_GetCwdPath(m, NULL));
 }
 
 Str *IoUtil_GetAbsPath(MemCh *m, Str *path){

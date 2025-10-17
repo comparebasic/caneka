@@ -19,6 +19,8 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         }else if(tg->type.state & FETCH_TARGET_PROP){
             tg->idx = Class_GetPropIdx(cls, tg->key);
             if(tg->idx == -1){
+                printf("Err Here II\n");
+                fflush(stdout);
                 goto err;
             }
             tg->type.state |= FETCH_TARGET_RESOLVED;
@@ -55,7 +57,8 @@ err:
 }
 
 Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source){
-    Abstract *args[5];
+    Abstract *args[6];
+    args[0] = NULL;
     ClassDef *cls = NULL;
     word typeOf = value->type.of;
     if(typeOf == TYPE_OBJECT){
@@ -69,6 +72,7 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             Object *obj = (Object *)as(value, TYPE_OBJECT);
             Abstract *a = Object_GetPropByIdx(obj, tg->idx);
             if(a == NULL){
+                args[0] = (Abstract *)obj;
                 goto err;
             }
             return a;
@@ -79,18 +83,19 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
         if(FetchTarget_Resolve(m, tg, typeOf) & SUCCESS){
             return Fetch_Target(m, tg, value, source);
         }else{
+            args[0] = (Abstract *)tg;
             goto err;
         }
     }
 err:
     cls = Lookup_Get(ClassLookup, value->type.of);
-    args[0] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
-    args[1] = (Abstract *)tg;
-    args[2] = (Abstract *)Type_ToStr(m, typeOf);
-    args[3] = (Abstract *)cls;
-    args[4] = NULL;
+    args[1] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
+    args[2] = (Abstract *)tg;
+    args[3] = (Abstract *)Type_ToStr(m, typeOf);
+    args[4] = (Abstract *)cls;
+    args[5] = NULL;
     Error(m, (Abstract *)tg, FUNCNAME, FILENAME, LINENUMBER,
-        "Error ClassDef X or prop not found for $ using @ class $/@\n", args);
+        "Error for @ ClassDef X or prop not found for $ using @ class $/@\n", args);
     return NULL;
 }
 

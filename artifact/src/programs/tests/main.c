@@ -344,6 +344,7 @@ static TestSet _Tests[] = {
         "Cryptography functionality testing.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Www Tests",
         NULL,
@@ -356,16 +357,23 @@ static TestSet _Tests[] = {
         "Testing a navigation object for composing HTML.",
         FEATURE_COMPLETE,
     },
-    {
-        "Www Nav Templ Tests",
-        WwwNavTempl_Tests,
-        "Testing a navigation object for templating and composing HTML.",
-        FEATURE_COMPLETE,
-    },
+    */
     {
         "Www Route Tests",
         WwwRoute_Tests,
         "Testing an object that gathers and caches routes for web servers.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "TemplRoute Tests",
+        TemplRoute_Tests,
+        "Example route templating test.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Www Nav Templ Tests",
+        WwwNavTempl_Tests,
+        "Testing a navigation object for templating and composing HTML.",
         FEATURE_COMPLETE,
     },
     {

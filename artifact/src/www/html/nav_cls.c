@@ -3,6 +3,7 @@
 
 status Nav_Add(Nav *nav, StrVec *path, Abstract *a){
     Object *obj = (Object *)Object_As(nav, TYPE_HTML_NAV);
+    obj->type.state |= DEBUG;
     return Object_ByPath(obj, path, a, SPAN_OP_SET) != NULL ? SUCCESS : ERROR;
 }
 

@@ -71,10 +71,11 @@ Object *Object_GetOrMake(Object *pt, Abstract *key, word op){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(ErrStream->m, a->type.of),
             (Abstract *)key,
+            (Abstract *)a,
             NULL
         };
         Error(ErrStream->m, (Abstract *)pt, FUNCNAME, FILENAME, LINENUMBER,
-            "Trying to make an empty Object where a $ value already exists for key @",
+            "Trying to make an empty Object where a $ value already exists for key @, or is not an object @",
             args);
         return NULL;
     }
