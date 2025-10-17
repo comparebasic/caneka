@@ -15,7 +15,7 @@ static i64 StackEntry_Print(Stream *sm, Abstract *a, cls type, word flags){
             Str *s = Str_CstrRef(sm->m, (char *)se->ref);
             ToS(sm, (Abstract *)s, s->type.of, MORE);
         }else if((flags & MORE) && se->typeOf != 0){
-            ToS(sm, se->ref, se->typeOf, MORE|DEBUG);
+            ToS(sm, se->ref, se->typeOf, MORE);
         }
     }
     Stream_Bytes(sm, (byte *)"\x1b[0m\n", 5);

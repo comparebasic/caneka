@@ -5,11 +5,11 @@
 static StrVec *headerPath = NULL;
 static StrVec *footerPath = NULL;
 
-static Example_getPageData(Task *tsk, Route *rt){
+static Object *Example_getPageData(Task *tsk, Route *rt){
     MemCh *m = tsk->m;
     Object *data = Object_Make(m, ZERO);
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)rt);
-    Single *now = MicroTime_ToStr(tsk->m, MicroTime_Now());
+    Str *now = MicroTime_ToStr(tsk->m, MicroTime_Now());
     Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
 
     return data;
@@ -40,8 +40,9 @@ static status Example_PageContent(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    Route *rt = (Route *)st->arg;
 
-    if(Route_Handle(tsk->m, ctx->content, sm, (Object *)st->arg, NULL) & SUCCESS){
+    if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, tsk->source) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;
@@ -51,10 +52,21 @@ static status Example_PageContent(Step *st, Task *tsk){
 }
 
 static status Example_FooterContent(Step *st, Task *tsk){
+    Abstract *args[5];
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
     Route *rt = Object_ByPath(tcp->inc, headerPath, NULL, SPAN_OP_GET);
-
+    if(rt == NULL){
+        args[0] = (Abstract *)tcp->inc;
+        args[1] = NULL;
+        Error(tsk->m, (Abstract *)st, FUNCNAME, FILENAME, LINENUMBER,
+            "Route is null for Footer: @", args);
+        st->type.state |= ERROR;
+        return st->type.state;
+    }
     Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
-    if(Route_Handle(rt, sm, (Object *)st->arg, NULL) & SUCCESS){
+    if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, NULL) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;
@@ -64,10 +76,13 @@ static status Example_FooterContent(Step *st, Task *tsk){
 }
 
 static status Example_HeaderContent(Step *st, Task *tsk){
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
     Route *rt = Object_ByPath(tcp->inc, footerPath, NULL, SPAN_OP_GET);
 
     Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
-    if(Route_Handle(rt, sm, (Object *)st->arg, NULL) & SUCCESS){
+    if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, NULL) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;
@@ -88,7 +103,15 @@ static status Example_ServePage(Step *st, Task *tsk){
             (Abstract *)ctx->path, (Abstract *)tcp->pages, NULL
         };
         Out("^b.Not Found @ -> &^0\n", args);
+        return st->type.state;
     }else{
+        Abstract *args[5];
+        args[0] = (Abstract *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH);
+        args[1] = (Abstract *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_MIME);
+        args[2] = (Abstract *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
+        args[3] = NULL;
+        Out("^b.Page Content Setup for @ -> $\\@$\n^0", args);
+
         ctx->code = 200;
 
         Object *data = Example_getPageData(tsk, rt);
@@ -105,8 +128,8 @@ static status Example_ServePage(Step *st, Task *tsk){
                 Example_FooterContent, NULL, (Abstract *)data, NULL, ZERO);
         }
         st->type.state |= SUCCESS;
+        return st->type.state|MORE;
     }
-    return st->type.state;
 }
 
 static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
@@ -138,9 +161,9 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
     ctx->inc = (Object *)Route_Make(m);
     Route_Collect((Route *)ctx->inc, StrVec_From(m, inc));
 
-    headerPath = StrVec_From(m, Str_CstrRef(m, "/header.action"));
+    headerPath = StrVec_From(m, Str_CstrRef(m, "/header"));
     IoUtil_Annotate(m, headerPath);
-    footerPath = StrVec_From(m, Str_CstrRef(m, "/footerPath.action"));
+    footerPath = StrVec_From(m, Str_CstrRef(m, "/footer"));
     IoUtil_Annotate(m, footerPath);
 
     return r;

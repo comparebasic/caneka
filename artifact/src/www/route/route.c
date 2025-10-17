@@ -68,6 +68,7 @@ static status routeFuncStatic(MemCh *m,
 static status routeFuncTempl(MemCh *m,
         StrVec *in, StrVec *out, Object *data, Abstract *source){
 
+    DebugStack_Push(NULL, ZERO);
     Cursor *curs = Cursor_Make(m, in);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, source);
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
@@ -76,11 +77,13 @@ static status routeFuncTempl(MemCh *m,
     Stream *sm = Stream_MakeToVec(m, out);
     Templ_ToS(templ, sm, (Abstract *)data, source);
 
+    DebugStack_Pop();
     return templ->type.state;
 }
 
 static status routeFuncFmt(MemCh *m, 
         StrVec *in, StrVec *out, Object *_data, Abstract *source){
+    DebugStack_Push(NULL, ZERO);
     Cursor *curs = Cursor_Make(m, in);
     Roebling *rbl = FormatFmt_Make(m, curs, source);
     Roebling_Run(rbl);
@@ -88,10 +91,12 @@ static status routeFuncFmt(MemCh *m,
     Stream *sm = Stream_MakeToVec(m, out);
     Fmt_ToHtml(sm, rbl->mess);
 
+    DebugStack_Pop();
     return rbl->type.state;
 }
 
 status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *source){
+    DebugStack_Push(rt, rt->type.of);
     StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
     StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
     Single *funcW = (Single *)as(
@@ -103,9 +108,12 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
         StrVec *v = StrVec_Make(m);
         FileDes_ToVec(v, path);
         RouteFunc func = (RouteFunc)funcW->val.ptr;
-        return func(m, v, dest, data, source);
+        status r = func(m, v, dest, data, source);
+        DebugStack_Pop();
+        return r;
     }else{
         FileDes_ToVec(dest, path);
+        DebugStack_Pop();
         return dest->type.state;
     }
 }
