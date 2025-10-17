@@ -14,59 +14,55 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     StrVec *pathV = StrVec_From(m, path);
     IoUtil_Annotate(m, pathV);
     StrVec *rtPath = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH);
-    StrVec *objPath = Path_SubClone(m, (Abstract *)pathV, rtPath->p->max_idx+1);
+    StrVec *objPath = Path_SubClone(m, pathV, rtPath->p->max_idx+1);
 
     StrVec *abs = StrVec_From(m, path);
-    Path_AddSlash(m, pathV);
-    StrVec_Add(pathV, file);
+    Path_AddSlash(m, abs);
+    StrVec_Add(abs, file);
     IoUtil_Annotate(m, abs);
 
-    StrVec *name = Path_Name(m, pathV);
-    StrVec *ext = Path_Ext(m, pathV);
+    StrVec *name = Path_Name(m, abs);
+    StrVec *ext = Path_Ext(m, abs);
 
-    Str *mime = (Str *)Table_Get(RouteMimeTable, ext);
-    Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
+    Str *mime = (Str *)Table_Get(RouteMimeTable, (Abstract *)ext);
+    Single *funcW = (Single *)Table_Get(RouteFuncTable, (Abstract *)ext);
 
     if(mime == NULL){
         Abstract *args[] = {
-            (Abstract *)abs,
+            (Abstract *)mime,
             (Abstract *)ext,
+            (Abstract *)RouteMimeTable,
             NULL
         };
         Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
-            "Mime not found for this file $ with ext $", args);
+            "Mime not found for this file & with\n\n ext & (@)", args);
         return ERROR;
     }
 
     Str *index = Str_CstrRef(m, "index");
-    if(!Equals((Abstract *)nam, (Abstract *)index)){
-        Path_Add(objPath, name);
-    }
-
-    if(objPath == NULL || objPath->p->nvalues == 0 && 
-            Equals(
-                (Abstract *)base,
-                (Abstract *)Str_CstrRef(m, "index"))){
+    if(Equals((Abstract *)name, (Abstract *)index)){
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_FILE, (Abstract *)abs);
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_FUNC, (Abstract *)funcW);
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_MIME, (Abstract *)mime);
+        Object_SetPropByIdx(rt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
         rt->type.state |= funcW->type.state;
     }else{
+        Path_Add(m, objPath, name);
         Route *subRt = Object_ByPath(rt, objPath, NULL, SPAN_OP_RESERVE);
-        subRt->type.state |= funcW->type.state;
         Object_SetPropByIdx(subRt, ROUTE_PROPIDX_PATH, (Abstract *)objPath);
         Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FILE, (Abstract *)abs);
         Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FUNC, (Abstract *)funcW);
         Object_SetPropByIdx(subRt, ROUTE_PROPIDX_MIME, (Abstract *)mime);
+        Object_SetPropByIdx(subRt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
+        subRt->type.state |= funcW->type.state;
     }
 
     return NOOP;
 }
 
-static status routeFuncStatic(StrVec *in, StrVec *out, Object *_data, Abstract *_source){
-    StrVec_AddVec(out, in);
-    return SUCCESS;
+static status routeFuncStatic(MemCh *m, 
+        StrVec *in, StrVec *out, Object *_data, Abstract *_source){
+    return NOOP;
 }
 
 static status routeFuncTempl(MemCh *m,
@@ -83,9 +79,10 @@ static status routeFuncTempl(MemCh *m,
     return templ->type.state;
 }
 
-static status routeFuncFmt(StrVec *in, StrVec *out, Object *_data, Abstract *_source){
+static status routeFuncFmt(MemCh *m, 
+        StrVec *in, StrVec *out, Object *_data, Abstract *source){
     Cursor *curs = Cursor_Make(m, in);
-    Roebling * = FormatFmt_Make(m, curs, NULL);
+    Roebling *rbl = FormatFmt_Make(m, curs, source);
     Roebling_Run(rbl);
         
     Stream *sm = Stream_MakeToVec(m, out);
@@ -102,11 +99,11 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
         TYPE_WRAPPED_FUNC
     );
 
-    if(funcW != NULL){
+    if(funcW != NULL && funcW->type.state & ROUTE_DYNAMIC){
         StrVec *v = StrVec_Make(m);
         FileDes_ToVec(v, path);
         RouteFunc func = (RouteFunc)funcW->val.ptr;
-        return func(v, dest, data, source);
+        return func(m, v, dest, data, source);
     }else{
         FileDes_ToVec(dest, path);
         return dest->type.state;
@@ -115,11 +112,8 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
 
 status Route_Collect(Route *rt, StrVec *path){
     MemCh *m = Object_GetMem(rt);
-
-    StrVec *pathV = StrVec_From(m, path);
-    IoUtil_Annotate(m, pathV);
-
-    Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)pathV);
+    IoUtil_Annotate(m, path);
+    Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)path);
     return Dir_Climb(m, StrVec_Str(m, path), dir, file, (Abstract *)rt);
 }
 
@@ -136,6 +130,7 @@ status Route_ClsInit(MemCh *m){
     Class_SetupProp(cls, Str_CstrRef(m, "file"));
     Class_SetupProp(cls, Str_CstrRef(m, "func"));
     Class_SetupProp(cls, Str_CstrRef(m, "mime"));
+    Class_SetupProp(cls, Str_CstrRef(m, "type"));
     r |= Class_Register(m, cls);
 
     if(RouteFuncTable == NULL){

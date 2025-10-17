@@ -10,11 +10,16 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
     if(key == NULL){
         return NULL;
     }
+
     if(tbl->type.state & DEBUG){
         args[0] = (Abstract *)I32_Wrapped(OutStream->m, tbl->nvalues);
         args[1] = (Abstract *)key;
         args[2] = NULL;
-        Out("^y.Adding @/\\@@^0\n", args);
+        if(op & SPAN_OP_GET){
+            Out("^p.Get \\@@^0\n", args);
+        }else{
+            Out("^p.Set \\@@^0\n", args);
+        }
     }
 
     if((op & SPAN_OP_SET) && tbl->nvalues > dim_occupied_max[tbl->dims]){
@@ -23,7 +28,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
             args[1] = (Abstract *)I32_Wrapped(OutStream->m, tbl->nvalues);
             args[2] = (Abstract *)I8_Wrapped(OutStream->m, tbl->dims+1);
             args[3] = NULL;
-            Out("^y.Resiing \\@@ @nvalues @dims^0\n", args);
+            Out("^p.Resiing \\@@ @nvalues @dims^0\n", args);
         }
         Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
     }
@@ -66,9 +71,15 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
             }
             if(op & SPAN_OP_GET){
                 if(Table_HKeyMiss(&hk) & END){
+                    if(tbl->type.state & DEBUG){
+                        Out("^p.    Get/Miss^0\n", NULL);
+                    }
                     tbl->type.state |= NOOP;
                     return NULL;
                 }else{
+                    if(tbl->type.state & DEBUG){
+                        Out("^p.    Get/Keep looking^0\n", NULL);
+                    }
                     continue;
                 }
             }else if(op & SPAN_OP_SET){
@@ -97,9 +108,10 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
         }else{
             if(tbl->type.state & DEBUG){
                 args[0] = (Abstract*)&hk;
-                args[1] = (Abstract*)record;
-                args[2] = NULL;
-                Out("^p.  Record but match & -> &^0\n", args);
+                args[1] = (Abstract*)h;
+                args[2] = (Abstract*)record;
+                args[3] = NULL;
+                Out("^p.  Record exists but not matching & -> & vs record:&^0\n", args);
             }
         }
     }

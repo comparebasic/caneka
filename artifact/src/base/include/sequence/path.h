@@ -10,4 +10,4 @@ StrVec *Path_Name(MemCh *m, StrVec *path);
 StrVec *Path_Ext(MemCh *m, StrVec *path);
 boolean Path_ExtEquals(StrVec *path, Str *ext);
 status Path_Add(MemCh *m, StrVec *path, StrVec *add);
-status Path_SubClone(MemCh *m, StrVec *path, i32 count);
+StrVec *Path_SubClone(MemCh *m, StrVec *path, i32 count);

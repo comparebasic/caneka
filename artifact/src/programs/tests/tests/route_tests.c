@@ -15,7 +15,7 @@ status WwwRoute_Tests(MemCh *gm){
         (Abstract *)rt,
         NULL
     };
-    Out("^p.Route &^0", args);
+    Out("^p.Route @\n^0", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

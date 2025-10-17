@@ -3,18 +3,19 @@
 
 i64 FileDes_ToVec(StrVec *v, StrVec *path){
     i64 total = 0;
+    MemCh *m = v->p->m;
 
     Str *pathS = StrVec_Str(path->p->m, path);
     
-    i32 fd = open(pathS, O_RDONLY, mode);
     i32 mode = 0644;
+    i32 fd = open(Str_Cstr(path->p->m, pathS), O_RDONLY, mode);
     if(fd == -1){
         Abstract *args[] = {
             (Abstract *)pathS,
-            (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
+            (Abstract *)Str_CstrRef(m, strerror(errno)),
             NULL
         };
-        Error(ErrStream->m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
             "Error opening file $ for wrtiing to file: $", args);
         return 0;
     }
@@ -32,7 +33,7 @@ i64 FileDes_ToVec(StrVec *v, StrVec *path){
                     (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
                     NULL
                 };
-                Error(ErrStream->m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER, 
+                Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER, 
                     "Error reading file $: $", args);
                     v->type.state |= ERROR;
             }

@@ -37,6 +37,7 @@ status Span_Remove(Span *p, i32 idx){
 status Span_Setup(Span *p){
     p->type.of = TYPE_SPAN;
     p->max_idx = -1;
+    p->nvalues = 0;
     return SUCCESS;
 }
 

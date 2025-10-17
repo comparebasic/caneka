@@ -6,9 +6,12 @@ Span *Span_CopyRange(MemCh *m, Span *p, Coord *cr){
     Iter it;
     Iter_Init(&it, p);
     Iter_GetByIdx(&it, (i32)cr->a);
-    while(it.idx < cr->b && (Iter_Next(&it) & END) == 0){
+    while(it.idx < cr->b){
         Abstract *a = Iter_Get(&it);
         Span_Add(ret, a);
+        if(Iter_Next(&it) & END){
+            break;
+        }
     }
     return ret;
 }
