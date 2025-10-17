@@ -11,8 +11,10 @@ enum http_status {
 typedef struct {
     Type type;
     i32 method;
+    i32 code;
     StrVec *path;
     Cursor *body;
+    StrVec *content;
     Table *headers;
 } HttpCtx;
 

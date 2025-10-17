@@ -1,6 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
+status Path_AddSlash(MemCh *m, StrVec *path){
+    Str *s = Span_Get(path->p, path->p->max_idx);
+    if(s->bytes[s->length-1] != '/'){
+        Str_Add(s, (byte *)"/", 1); 
+    }
+    return s->type.state;
+}
+
 Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg){
     Str *s = StrVec_ToStr(m, path, STR_DEFAULT);
     if(s->bytes[s->length-1] != '/'){
@@ -10,7 +18,6 @@ Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg){
     if((s->type.state & ERROR) == 0){
         return s;
     }
-    printf("returning null %d\n", s->type.state);
     return NULL;
 }
 

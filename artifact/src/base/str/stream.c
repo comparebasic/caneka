@@ -168,6 +168,12 @@ status Stream_SetupMakeStrVec(MemCh *m, Stream *sm, StrVec *v){
     return SUCCESS;
 }
 
+Stream *Stream_MakeToVec(MemCh *m, StrVec *v){
+    Stream *sm = Stream_Make(m);
+    Stream_SetupMakeStrVec(m, sm, v);
+    return sm;
+}
+
 Stream *Stream_MakeStrVec(MemCh *m){
     Stream *sm = Stream_Make(m);
     StrVec *v = StrVec_Make(m);

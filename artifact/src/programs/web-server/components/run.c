@@ -17,8 +17,36 @@ static status Example_log(Step *_st, Task *tsk){
     }else{
         Out("^g.Served $ @ $^0\n", args);
     }
+    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+    close(pfd->fd);
 
     return SUCCESS;
+}
+
+static status Example_ServePage(Step *st, Task *tsk){
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    Route *rt = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
+    if(rt == NULL){
+        st->type.state |= SUCCESS;
+        ctx->code = 404;
+        Abstract *args[] = {
+            (Abstract *)ctx->path, (Abstract *)tcp->pages, NULL
+        };
+        Out("^b.Not Found @ -> &^0\n", args);
+    }else{
+        ctx->content = StrVec_Make(tsk->m);
+        Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
+        Abstract *args[] = {
+            (Abstract *)ctx->path,
+            NULL
+        };
+        Fmt(sm, "<section><p>Yay found Route: $</p></section>\r\n", args);
+        ctx->code = 200;
+        st->type.state |= SUCCESS;
+    }
+    return st->type.state;
 }
 
 static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
@@ -27,7 +55,9 @@ static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *sou
     pfd->fd = fdw->val.i;
 
     HttpTask_InitResponse(tsk, arg, source);
-    /* add app stuf here */
+
+    Task_AddStep(tsk, Example_ServePage, NULL, NULL, ZERO);
+
     HttpTask_AddRecieve(tsk, NULL, NULL);
     return SUCCESS;
 }
@@ -36,9 +66,18 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "sessions")));
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "users")));
-    r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/public")));
-    r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/inc")));
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/data")));
+
+    Str *public = Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/public"));
+    Str *inc = Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/inc"));
+    r |= Dir_CheckCreate(m, public);
+    r |= Dir_CheckCreate(m, inc);
+
+    ctx->pages = (Object *)Route_Make(m);
+    Route_Collect((Route *)ctx->pages, StrVec_From(m, public));
+    ctx->inc = (Object *)Route_Make(m);
+    Route_Collect((Route *)ctx->inc, StrVec_From(m, inc));
+
     return r;
 }
 

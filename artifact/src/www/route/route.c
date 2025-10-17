@@ -2,22 +2,18 @@
 #include <caneka.h>
 
 static status dir(MemCh *m, Str *path, Abstract *source){
-    Abstract *args[3];
-    args[0] = (Abstract *)path,
-    args[1] = NULL,
-    Out("^p. RouteDir->path @^0\n", args);
     return NOOP;
 }
 
 static status file(MemCh *m, Str *path, Str *file, Abstract *source){
-    Abstract *args[5];
-
     Route *rt = (Route *)source;
-    Str *rtPath = (Str *)as(Object_GetProp(rt, Str_CstrRef(m, "path")), TYPE_STR);
-    Str *local = Str_Clone(m, path);
+
+    StrVec *rtPath = (StrVec *)as(Object_GetProp(rt, Str_CstrRef(m, "path")), TYPE_STRVEC);
+    Str *local = Str_CloneAlloc(m, path, STR_DEFAULT);
 
     StrVec *v = StrVec_From(m, file);
     IoUtil_Annotate(m, v);
+
     Str *base = Span_Get(v->p, 0);
     Str *ext = Span_Get(v->p, 2);
 
@@ -25,12 +21,13 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
         PathStr_StrAdd(local, base);
         Str_Add(local, (byte *)"/", 1);
     }
-    Str_Incr(local, rtPath->length);
+
+    Str_Incr(local, rtPath->total);
 
     StrVec *objPath = StrVec_From(m, local);
     IoUtil_Annotate(m, objPath);
 
-    Str *absPath = Str_Clone(m, path);
+    Str *absPath = Str_CloneAlloc(m, path, STR_DEFAULT);
     PathStr_StrAdd(absPath, file);
     if(objPath == NULL || objPath->p->nvalues == 0 && 
             Equals(
@@ -39,14 +36,10 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
         Route_SetTargetFile(rt, ext, absPath);
     }else{
         Route *subRt = Object_ByPath(rt, objPath, NULL, SPAN_OP_RESERVE);
+        Object_SetPropByIdx(subRt, ROUTE_PROPIDX_PATH, (Abstract *)objPath);
         Route_SetTargetFile(subRt, ext, absPath);
     }
 
-    args[0] = (Abstract *)objPath,
-    args[1] = (Abstract *)ext,
-    args[2] = (Abstract *)rt,
-    args[3] = NULL,
-    Out("^p. Route->file & -> @\n    &^0\n", args);
     return NOOP;
 }
 
@@ -57,13 +50,9 @@ status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath){
 
 status Route_Collect(Route *rt, StrVec *path){
     MemCh *m = Object_GetMem(rt);
-    Str *public = Path_StrAdd(m, path, Str_CstrRef(m, "public"));
-    Object_SetProp(rt, Str_CstrRef(m, "path"), (Abstract *)public);
+    Object_SetProp(rt, Str_CstrRef(m, "path"), (Abstract *)path);
     Abstract *args[2];
-    args[0] = (Abstract *)public;
-    args[1] = NULL;
-    Out("^y.Collection & ^0\n", args);
-    return Dir_Climb(m, public, dir, file, (Abstract *)rt);
+    return Dir_Climb(m, StrVec_Str(m, path), dir, file, (Abstract *)rt);
 }
 
 Nav *Route_Make(MemCh *m){

@@ -43,6 +43,7 @@ status TcpTask_WriteFromOut(Step *st, Task *tsk){
     ssize_t l = 0;
     i32 total = 0;
     Str s;
+    memset(&s, 0, sizeof(Str));
     Str_Init(&s, NULL, 0, 0);
     while(total < SERV_READ_SIZE && (proto->out->type.state & END) == 0){
         if(Cursor_SetStrBytes(proto->out, &s, SERV_READ_SIZE-total) & NOOP){

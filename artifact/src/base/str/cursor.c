@@ -317,6 +317,18 @@ Cursor *Cursor_Copy(MemCh *m, Cursor *_curs){
     return curs;
 }
 
+status Cursor_AddVec(Cursor *curs, StrVec *v){
+    Iter it;
+    Iter_Init(&it, v->p);
+    status r = READY;
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        Cursor_Add(curs, s);
+        r |= SUCCESS;
+    }
+    return r;
+}
+
 status Cursor_Add(Cursor *curs, Str *s){
     status r =  StrVec_Add(curs->v, s);
     if(curs->type.state & END){

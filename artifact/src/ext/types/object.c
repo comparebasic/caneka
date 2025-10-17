@@ -97,7 +97,6 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
         };
         Out("^c.Adding & to @^0.\n", args);
     }
-    status r = READY;
     if((path->type.state & STRVEC_PATH) == 0){
        IoUtil_Annotate(Object_GetMem(obj), path); 
     }
@@ -113,25 +112,24 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
             if(current == NULL){
                 return NULL;
             }
-            if(obj->type.state & DEBUG){
-                Abstract *args[2];
-                args[0] = (Abstract *)key;
-                args[1] = NULL;
-                Out("^c.   Obj_ByPath \\@@\n", args);
-            }
             key = NULL;
-            r |= PROCESSING;
         }else{
             key = item;
             if((keysIt.type.state & LAST) && (op & SPAN_OP_SET)){
                 Object_Set(current, (Abstract *)key, value);
-                r |= SUCCESS;
                 if(depth > obj->depth){
                     obj->depth = depth;
                 }
             }
         }
         depth++;
+    }
+
+    if(key != NULL && (key->type.state & (LAST|MORE)) == 0){
+        current = Object_GetOrMake(current, (Abstract *)key, op);
+        if(current == NULL){
+            return NULL;
+        }
     }
 
     DebugStack_Pop();
