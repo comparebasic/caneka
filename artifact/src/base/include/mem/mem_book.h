@@ -8,6 +8,7 @@ typedef struct mem_book {
 } MemBook;
 
 MemBook *MemBook_Get(void *addr);
+MemBook *MemBook_Check(void *addr);
 i32 MemBook_GetBookIdx(void *addr);
 i32 MemBook_GetPageIdx(void *addr);
 i64 MemCount(i16 level);

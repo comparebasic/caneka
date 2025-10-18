@@ -142,6 +142,7 @@ Abstract *StrVec_Clone(MemCh *m, Abstract *a){
 }
 
 status StrVec_Add(StrVec *v, Str *s){
+    s = (Str *)asLegal((Abstract *)s, TYPE_STR);
     status r = Span_Add(v->p, (Abstract *)s);
     v->total += s->length;
     return r;

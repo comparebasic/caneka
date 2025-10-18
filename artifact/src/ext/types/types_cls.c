@@ -103,7 +103,9 @@ static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
                         total += Stream_Bytes(sm, (byte *)"  ", 2);
                     }
                 }
-                total += ToS(sm, h->key, 0, MORE); 
+                total += ToS(sm, h->key, 0, MORE|DEBUG); 
+                printf("\n%p \n", h->key);
+                fflush(stdout);
                 total += Stream_Bytes(sm, (byte *)" -> ", 4);
                 if(flags & (MORE|DEBUG)){
                     total += ToS(sm, h->value, 0, flags);  

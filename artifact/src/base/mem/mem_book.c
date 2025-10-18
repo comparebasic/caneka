@@ -11,7 +11,7 @@ static MemBook *_books[16] = {
     NULL, NULL, NULL, NULL,
 };
 
-static MemBook *MemBook_get(void *addr){
+static MemBook *MemBook_check(void *addr){
     i32 idx = bookIdx;
     if(addr == NULL){
         return _books[idx];
@@ -22,6 +22,15 @@ static MemBook *MemBook_get(void *addr){
             return mb;
         }
         idx--;
+    }
+    return NULL;
+}
+
+
+static MemBook *MemBook_get(void *addr){
+    MemBook *book = MemBook_check(addr);
+    if(book != NULL){
+        return book;
     }
     Abstract *args[] = {
         (Abstract *)Util_Wrapped(ErrStream->m, (util)addr),
@@ -34,6 +43,9 @@ static MemBook *MemBook_get(void *addr){
 #ifdef INSECURE
 MemBook *MemBook_Get(void *addr){
     return MemBook_get(addr);
+}
+MemBook *MemBook_Check(void *addr){
+    return MemBook_check(addr);
 }
 i32 MemBook_GetBookIdx(void *addr){
     return bookIdx;

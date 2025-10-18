@@ -177,7 +177,10 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     Iter_Init(&sepIt, sep);
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
-        Str *s = Iter_Get(&it);
+        Str *s = (Str *)asLegal(
+            (Abstract *)Iter_Get(&it),
+            TYPE_STR
+        );
         if(s->length == 0){
             continue;
         }
@@ -190,11 +193,23 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
                 Single *sg = (Single *)Iter_Get(&sepIt);
                 if(*ptr == sg->val.b){
                     i16 length = ptr-start;
+                    if(length < 0 || length > STR_MAX){
+                        Error(p->m, (Abstract *)p, FUNCNAME, FILENAME, LINENUMBER,
+                            "Error cannot have a negative length of a string",
+                        NULL);
+                        return ERROR;
+                    }
                     if(length > 0){
-                        Str *sn = Str_Ref(m, start, length, length, ZERO);
+                        Str *sn = (Str *)asLegal(
+                            (Abstract *)Str_Ref(m, start, length, length, ZERO),
+                            TYPE_STR
+                        );
                         StrVec_Add(v, sn);
                     }
-                    Str *sb = Str_Ref(m, ptr, 1, 1, sg->objType.state);
+                    Str *sb = (Str *)asLegal(
+                        (Abstract *)Str_Ref(m, ptr, 1, 1, sg->objType.state),
+                        TYPE_STR
+                    );
                     StrVec_Add(v, sb);
                     start = ptr;
                     if(start < last){
@@ -209,6 +224,12 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
             ptr++;
         }
         i16 length = last-start;
+        if(length < 0 || length > STR_MAX){
+            Error(p->m, (Abstract *)p, FUNCNAME, FILENAME, LINENUMBER,
+                "Error cannot have a negative length of a string at end",
+            NULL);
+            return ERROR;
+        }
         if(length > 0){
             length++;
             StrVec_Add(v, Str_Ref(m, start, length, length, ZERO));

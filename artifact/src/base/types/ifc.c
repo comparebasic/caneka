@@ -40,6 +40,12 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     return r;
 }
 
+Abstract *_asError(char *func, char *file, i32 line, Abstract *x, cls type){
+    Error(ErrStream->m, x, FUNCNAME, FILENAME, LINENUMBER,
+        "Error anonymous from _asError", NULL);
+    return x;
+}
+
 Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
     if(x == NULL){
         Fatal(func, file, line, "Cast from NULL", NULL);

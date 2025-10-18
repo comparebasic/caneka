@@ -189,9 +189,8 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
 
     args[0] = (Abstract *)ctx->pages;
     args[1] = (Abstract *)ctx->inc;
-    args[2] = (Abstract *)m;
     args[3] = NULL;
-    Out("^c.Pages: @\nInc: @^0\n  MemCh: &\n", args);
+    Out("^c.Pages: @\nInc: @^0\n", args);
 
     return r;
 }

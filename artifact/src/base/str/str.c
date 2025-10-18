@@ -109,6 +109,13 @@ Str *Str_From(MemCh *m, byte *bytes, word length){
 }
 
 Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
+    if(length < 0 || length > STR_MAX){
+        Error(m, (Abstract *)m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error cannot have a negative length of a string at end",
+        NULL);
+        return NULL;
+    }
+
     Str *s = MemCh_Alloc(m, sizeof(Str));
     Str_Init(s, bytes, length, alloc);
     s->type.state = flags;
