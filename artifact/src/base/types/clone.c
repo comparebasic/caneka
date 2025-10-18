@@ -32,6 +32,6 @@ Abstract *Clone(MemCh *m, Abstract *a){
         (Abstract *)Type_ToStr(m, a->type.of),
         NULL
     };
-    Error(m, a, FUNCNAME, FILENAME, LINENUMBER, "Unable to clone type $", args);
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, "Unable to clone type $", args);
     return NULL;
 }

@@ -35,90 +35,6 @@ i64 Addr_ToS(Stream *sm, void *a, word flags){
     return total;
 }
 
-i64 MemPage_Print(Stream *sm, Abstract *a, cls type, word flags){
-    /*
-    i64 total = 0;
-    MemPage *sl = (MemPage*)as(a, TYPE_MEMSLAB); 
-
-    Abstract *args[] = {
-        (Abstract *)I16_Wrapped(sm->m, sl->level),
-        (Abstract *)I16_Wrapped(sm->m, sl->remaining),
-        NULL
-    };
-    total = Fmt(sm, "Page<^D.$^d.level ^D.$^d.remaining", args);
-
-    if(flags & DEBUG){
-        Stream_Bytes(sm, (byte *)"[ ", 2);
-        void *pos = sl;
-        void *end = pos+PAGE_SIZE;
-        pos += sizeof(MemPage)+(util)sl->remaining;
-
-        size_t sz = MAX_BASE10+3;
-        byte _digitBytes[sz];
-        memset(_digitBytes, 0, sz);
-        Str digit_s;
-        Str_Init(&digit_s, _digitBytes, 0, sz);
-
-        while(pos < end){
-            Abstract *a = (Abstract *)pos;
-            size_t osz = 0;
-            if(a->type.of == TYPE_BYTES_POINTER){
-                StrLit *sl = (StrLit *)a;
-                osz = sizeof(RangeType)+sl->type.range;
-            }else{
-                i64 _n =  Lookup_GetRaw(SizeLookup, a->type.of);
-                if(_n > 0){
-                    osz = _n;
-                }else{
-                    Abstract *args[] = {
-                        (Abstract *)Type_ToStr(sm->m, a->type.of),
-                        NULL
-                    };
-                    Fatal(FUNCNAME, FILENAME, LINENUMBER,
-                        "Unable to find size of type $", args);
-                    return 0;
-                }
-            }
-
-
-            Stream_Bytes(sm, (byte *)"\x1b[1m*", 5);
-            Str_AddI64(&digit_s, (i64)sl);
-            total += Stream_Bytes(sm, digit_s.bytes, digit_s.length);
-            Stream_Bytes(sm, (byte *)"\x1b[22m/", 6);
-            digit_s.length = 0;
-            memset(_digitBytes, 0, sz);
-
-            Str_AddI64(&digit_s, (i64)sz);
-            total += Stream_Bytes(sm, digit_s.bytes, digit_s.length);
-            Stream_Bytes(sm, (byte *)"bytes:", 6);
-            digit_s.length = 0;
-            memset(_digitBytes, 0, sz);
-
-            if(a->type.of == TYPE_MEMSLAB){
-                Stream_Bytes(sm, (byte *)"<self>", 6);
-            }else if(a->type.of == TYPE_MEMCTX){
-                Stream_Bytes(sm, (byte *)"<ctx>", 5);
-            }else{
-                total += ToS(sm, a, 0, flags);
-            }
-
-            if(osz < 0){
-                break;
-            }
-            pos += osz;
-
-            if(pos < end){
-                Stream_Bytes(sm, (byte *)", ", 2);
-            }
-        }
-        Stream_Bytes(sm, (byte *)"]", 1);
-    }
-
-    return Stream_Bytes(sm, (byte *)">", 1);
-    */
-    return 0;
-}
-
 i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
     Abstract *args[5];
@@ -151,7 +67,7 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
         i32 idx = 0;
         i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
-            Guard_Incr(&g, 100, FUNCNAME, FILENAME, LINENUMBER);
+            Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
                 Abstract *a = MemIter_Get(&mit);
                 Table_Set(tbl, (Abstract *)Util_Wrapped(sm->m, (util)a), 
@@ -164,7 +80,7 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
         MemIter_Init(&mit, m);
         g = 0;
         while((MemIter_Next(&mit) & END) == 0){
-            Guard_Incr(&g, 100, FUNCNAME, FILENAME, LINENUMBER);
+            Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if(mit.type.state & MORE){
                 if(mit.slIdx > 0){
                     if(mit.type.state & LAST){
@@ -399,7 +315,6 @@ status Mem_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
-    r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemPage_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
     return r;

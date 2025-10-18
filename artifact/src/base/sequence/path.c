@@ -194,7 +194,7 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
                 if(*ptr == sg->val.b){
                     i16 length = ptr-start;
                     if(length < 0 || length > STR_MAX){
-                        Error(p->m, (Abstract *)p, FUNCNAME, FILENAME, LINENUMBER,
+                        Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
                             "Error cannot have a negative length of a string",
                         NULL);
                         return ERROR;
@@ -225,7 +225,7 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
         }
         i16 length = last-start;
         if(length < 0 || length > STR_MAX){
-            Error(p->m, (Abstract *)p, FUNCNAME, FILENAME, LINENUMBER,
+            Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error cannot have a negative length of a string at end",
             NULL);
             return ERROR;

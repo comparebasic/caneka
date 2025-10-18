@@ -53,7 +53,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     (Abstract *)Str_CstrRef(m, fmt),
                     NULL
                 };
-                Fatal(FUNCNAME, FILENAME, LINENUMBER,
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Expecting arg, found NULL instead, '$'", args);
                 return total;
             }

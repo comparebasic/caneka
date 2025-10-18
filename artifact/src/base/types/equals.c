@@ -45,7 +45,7 @@ boolean Equals(Abstract *a, Abstract *b){
                 (Abstract *)Type_ToStr(ErrStream->m, bTypeOf),
                 NULL
             };
-            Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, 
+            Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Equals type mismatche $ vs $", args);
         }else{
             EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, aTypeOf);
@@ -54,7 +54,7 @@ boolean Equals(Abstract *a, Abstract *b){
                     (Abstract *)Type_ToStr(ErrStream->m, aTypeOf),
                     NULL
                 };
-                Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, 
+                Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
                     "Equals for $ not registered", args);
             }else{
                 return func(a, b);

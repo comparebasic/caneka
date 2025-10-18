@@ -36,7 +36,7 @@ status Stream_Move(Stream *sm, i32 offset){
             return sm->type.state;
         }
     }else{
-        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+        Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
             "Not implemented", NULL);
         return ERROR;
     }
@@ -70,7 +70,7 @@ status Stream_RFillStr(Stream *sm, Str *s){
             (Abstract *)s,
             NULL
         };
-        Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+        Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error RFillStr cannot fill of 0: &", args);
         return ERROR;
     }
@@ -89,7 +89,7 @@ status Stream_RFillStr(Stream *sm, Str *s){
                 (Abstract *)Str_CstrRef(sm->m, strerror(errno)),
                 NULL
             };
-            Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error RFillStr @fd: $", args);
             return ERROR;
             return ERROR;
@@ -108,7 +108,7 @@ status Stream_FillStr(Stream *sm, Str *s){
                 (Abstract *)Str_CstrRef(sm->m, strerror(errno)),
                 NULL
             };
-            Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error FillStr @fd: $", args);
             return ERROR;
         }else if(length == s->length){
@@ -120,7 +120,7 @@ status Stream_FillStr(Stream *sm, Str *s){
                 (Abstract *)I64_Wrapped(sm->m, length),
                 NULL
             };
-            Error(sm->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error FillStr: expected length of $, filled $", args);
             return ERROR;
         }

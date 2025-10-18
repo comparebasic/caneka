@@ -79,7 +79,7 @@ util Span_GetRaw(Span *p, i32 idx){
         return 0;
     }
     if((p->type.state & FLAG_SPAN_RAW) == 0){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Error(p->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Tried to get raw value from non raw span", NULL);
         return 0;
     }

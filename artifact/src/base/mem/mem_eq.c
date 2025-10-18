@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 boolean Iter_Eq(Abstract *a, Abstract *b){
-    Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER,
+    Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
         "Iter_Eq Not Implemented", NULL);
     return FALSE;
 }

@@ -14,7 +14,7 @@ boolean Guard(i16 *g, i16 max, char *func, char *file, int line){
     return ++(*g) <= max;
 }
 
-status Guard_Incr(i16 *g, i16 max, char *func, char *file, int line){
+status Guard_Incr(MemCh *m, i16 *g, i16 max, char *func, char *file, int line){
     if(Guard(g, max, func, file, line)){
         return SUCCESS;
     }
@@ -25,6 +25,6 @@ status Guard_Incr(i16 *g, i16 max, char *func, char *file, int line){
         (Abstract *)&max_sg,
         NULL
     };
-    Error(ErrStream->m, NULL, func, file, line, "Guard Error $/$", args);
+    Error(m, func, file, line, "Guard Error $/$", args);
     return ERROR;
 }

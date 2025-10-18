@@ -18,14 +18,15 @@ status Task_Tumble(Task *tsk){
     tsk->type.state &= ~SUCCESS;
     do {
         if(tsk->type.state & TASK_UPDATE_CRIT){
-            if(tsk->source != NULL && tsk->source->type.of == TYPE_TASK){
-                Task *parent = (Task *)tsk->source; 
-                Queue_SetCriteria((Queue *)parent->data, 0, tsk->idx, &tsk->u);
+            if(tsk->parent != NULL){
+                Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
+                tsk->type.state &= ~TASK_UPDATE_CRIT;
             }
         }
-        tsk->type.state &= ~(MORE|TASK_UPDATE_CRIT);
+        tsk->type.state &= ~MORE;
 
         Step *st = Iter_Current(&tsk->chainIt);
+
         if(tsk->type.state & DEBUG){
             Abstract *args[] = {
                 (Abstract *)Util_Wrapped(OutStream->m, (util)st->func),
@@ -34,10 +35,11 @@ status Task_Tumble(Task *tsk){
             };
             Out("^y.Tumble -> ^D.$,^d. of &^0\n", args);
         }
+
         status r = READY;
         if((st->type.state & (SUCCESS|ERROR)) == 0){
             r |= PROCESSING;
-            Guard_Incr(&st->g, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER);
+            Guard_Incr(tsk->m, &st->g, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER);
             r = st->func(st, tsk);
         }
         if(((r & MORE) == 0)){
@@ -59,7 +61,7 @@ status Task_Tumble(Task *tsk){
                tsk->type.state |= MORE; 
             }
         }
-    } while(tsk->type.state & MORE);
+    } while((tsk->type.state & (MORE|ERROR)) == MORE);
 
     if((tsk->chainIt.type.state & END) && tsk->chainIt.p->nvalues == 0){
         tsk->type.state |= SUCCESS;

@@ -8,7 +8,7 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
             (Abstract *)I16_Wrapped(m, length),
             NULL,
         };
-        Error(m, (Abstract *)v, FUNCNAME, FILENAME, LINENUMBER, 
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Error StrVec is longer than Cstr default of $ length of $ ", args);
         return NULL;
     }

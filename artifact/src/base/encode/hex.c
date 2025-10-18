@@ -3,7 +3,7 @@
 
 Str *Bytes_ToHexStr(MemCh *m, byte *b, i16 length){
     if(length > STR_MAX*2){
-        Error(ErrStream->m, NULL, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error str length doubled would be beyond a single str and no "
             "length provided to indicate truncation", NULL);
         return NULL;

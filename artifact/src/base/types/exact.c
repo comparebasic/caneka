@@ -49,7 +49,7 @@ boolean Exact(Abstract *a, Abstract *b){
     }
     EqualFunc func = (EqualFunc)Lookup_Get(ExactLookup, a->type.of);
     if(func == NULL){
-        Error(ErrStream->m, a, FUNCNAME, FILENAME, LINENUMBER, 
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Type not yet implemented with Exact", NULL);
             goto nonexact;
     }else{

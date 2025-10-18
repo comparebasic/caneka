@@ -57,7 +57,7 @@ status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
             (Abstract *)I16_Wrapped(m, type),
             NULL,
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below offset of $, have $ ", args);
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below offset of $, have $ ", args);
         return ERROR;
     }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) & SUCCESS){
         return SUCCESS;

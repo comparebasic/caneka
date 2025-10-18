@@ -8,7 +8,7 @@ Abstract **Span_ToArr(MemCh *m, Span *p){
             (Abstract *)I32_Wrapped(m, p->nvalues),
             NULL
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Too many values to make into a static array of pointers, max is $, have $", 
             args
         );
@@ -39,7 +39,7 @@ Abstract **Arr_Make(MemCh *m, i32 nvalues){
             (Abstract *)I32_Wrapped(m, nvalues),
             NULL
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Too many values to make into a static array of pointers, max is $, have $", 
             args
         );

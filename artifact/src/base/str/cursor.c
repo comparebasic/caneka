@@ -38,13 +38,14 @@ status Cursor_End(Cursor *curs){
 status Cursor_Decr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
     Abstract *args[3];
+    MemCh *m = curs->v->p->m;
     if(curs->type.state & DEBUG){
         args[0] = (Abstract *)I32_Wrapped(OutStream->m, length);
         args[1] = NULL;
         Out("^p.Cursor_Decr @^0\n", args);
     }
     if((curs->type.state & PROCESSING) == 0){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to decr cursor that is not in PROCESSING", NULL);
         DebugStack_Pop();
         return ERROR;
@@ -63,7 +64,8 @@ status Cursor_Decr(Cursor *curs, i32 length){
                     (Abstract *)I32_Wrapped(ErrStream->m,length),
                     NULL,
                 };
-                Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to proceed back, length $", args);
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Unable to proceed back, length $", args);
                 break;
             }else{
                 curs->it.idx--;
@@ -210,8 +212,9 @@ status Cursor_FillStr(Cursor *curs, Str *s){
 status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max){
     status r = READY;
     Abstract *args[3];
+    MemCh *m = curs->v->p->m;
     if(max < 0){
-        Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Max is less than zero when requesting the next cursor str", NULL);
         return ERROR;
     }
@@ -226,7 +229,7 @@ status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max){
     i16 length = min(curs->end - curs->ptr+1, max);
     if(s->type.state & STRING_COPY){
         if(s->alloc < length){
-            Error(ErrStream->m, (Abstract *)curs, FUNCNAME, FILENAME, LINENUMBER, 
+            Error(m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Length is less than zero when requesting the next cursor str", NULL);
             return ERROR;
         }

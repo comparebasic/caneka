@@ -167,7 +167,7 @@ i64 FlagStr(word flag, char *dest, char *map){
 
 i64 Str_AddFlags(Str *s, word flags, char *map){
     if(s->alloc - (s->length+FLAG_DEBUG_MAX) < 0){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
         return 0;
     }
     i64 total = FlagStr(flags, (char *)s->bytes+s->length, map);
@@ -230,7 +230,7 @@ i64 _ToStream_NotImpl(char *func, char *file, i32 line, Stream *sm, Abstract *a,
         (Abstract *)Str_CstrRef(sm->m, Type_ToChars(type)),
         NULL
     };
-    Error(sm->m, a, func, file, line, 
+    Error(sm->m, func, file, line, 
         "Does not implement $ for type $", args);
     return 0;
 }

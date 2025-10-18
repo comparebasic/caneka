@@ -5,12 +5,13 @@ static boolean _initialized = FALSE;
 struct lookup *BlankerLookup = NULL;
 struct lookup *RepointerLookup = NULL;
 
-cls Stash_UnpackAddr(StashCoord *coord, Abstract **arr){
+cls Stash_UnpackAddr(MemCh *m, StashCoord *coord, Abstract **arr){
     cls typeOf = coord->typeOf;
     MemPage *pg = (MemPage *)arr[coord->idx];
     if(pg == NULL){
-        Error(ErrStream->m, NULL, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Cannot unpack address onto empty page", NULL);
+        return ZERO;
     }
     util u = (util)pg;
     u |= coord->offset;
@@ -58,14 +59,13 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                         }else{
                             args[0] = (Abstract *)Util_Wrapped(m, (util)ptr);
                             args[1] = NULL;
-                            Error(ErrStream->m, (Abstract *)mit, 
-                                FUNCNAME, FILENAME, LINENUMBER,
+                            Error(m, FUNCNAME, FILENAME, LINENUMBER,
                                 "PTR ARRAY Unable to find address @ in table,"
                                 " may be external to this MemCh", args);
                         }
                     }else{
                         StashCoord *coord = (StashCoord *)dptr;
-                        Stash_UnpackAddr(coord, mit->input.arr);
+                        Stash_UnpackAddr(m, coord, mit->input.arr);
                     }
                     checksum++;
                     dptr++;
@@ -75,8 +75,7 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                 if(map == NULL){
                     args[0] = (Abstract *)Type_ToStr(m, a->type.of);
                     args[1] = NULL;
-                    Error(ErrStream->m, (Abstract *)mit, 
-                        FUNCNAME, FILENAME, LINENUMBER,
+                    Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Map not found for type $, needed for mem persist", args);
                     return ERROR;
                 }
@@ -99,14 +98,13 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                                 args[0] = (Abstract *)Util_Wrapped(m, (util)aa);
                                 args[1] = (Abstract *)map->keys[i];
                                 args[2] = NULL;
-                                Error(ErrStream->m, (Abstract *)mit,
-                                    FUNCNAME, FILENAME, LINENUMBER,
+                                Error(m, FUNCNAME, FILENAME, LINENUMBER,
                                     "Att Unable to find address $ for $ in table,"
                                     " may be external to this MemCh", args);
                             }
                         }else{
                             StashCoord *coord = (StashCoord *)aa;
-                            Stash_UnpackAddr(coord, mit->input.arr);
+                            Stash_UnpackAddr(m, coord, mit->input.arr);
                         }
                         checksum++;
                     }
@@ -169,7 +167,7 @@ status Stash_FlushFree(Stream *sm, MemCh *persist){
     while((Iter_Next(&it) & END) == 0){
         MemPage *pg = (MemPage *)Iter_Get(&it);
         if(Stream_Bytes(sm, (byte *)pg, PAGE_SIZE) != PAGE_SIZE){
-            Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error writing page to stream for Stash", NULL);
             r |= ERROR;
             break;
@@ -205,16 +203,17 @@ MemCh *Stash_FromStream(Stream *sm){
 
         pages[count] = MemBook_GetPage(NULL);
         if(pages[count] == NULL){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER,
+            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error allocating page", NULL);
             r |= ERROR;
+            return NULL;
         }
 
         i64 length = Stream_ReadToMem(sm, PAGE_SIZE, (byte *)pages[count]);
         if(length != PAGE_SIZE){
             args[0] = (Abstract *)I64_Wrapped(ErrStream->m, length);
             args[1] = NULL;
-            Error(ErrStream->m, (Abstract *)persist, FUNCNAME, FILENAME, LINENUMBER,
+            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error reading page from stream to Stash length $", args);
             r |= ERROR;
         }
@@ -234,7 +233,7 @@ MemCh *Stash_FromStream(Stream *sm){
         args[0] = (Abstract *)I16_Wrapped(sm->m, hdr.checksum);
         args[1] = (Abstract *)I16_Wrapped(sm->m, checksum);
         args[2] = NULL;
-        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error checksum of number of changes does not match for resurecting persisting"             " expected $, have $",
             args);
         r |= ERROR;

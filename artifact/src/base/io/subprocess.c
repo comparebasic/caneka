@@ -109,15 +109,16 @@ status SubStatus(ProcDets *pd){
 
     if(p != pd->pid){
         if(!wait){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER,
+            Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "subProcess wait failed for SubProcess", NULL); 
+            return ERROR;
         }
         DebugStack_Pop();
         return NOOP;
     }
 
     if(!WIFEXITED(r)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
             "subProcess failed for SubProcess process did not exit propery", NULL);
         DebugStack_Pop();
         return ERROR;

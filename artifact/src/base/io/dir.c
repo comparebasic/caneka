@@ -93,7 +93,7 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, Abstract *sour
         return r|SUCCESS;
     }else{
         Abstract *args[] = {(Abstract *)path, NULL};
-        Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to open Direcotry: @", args);
         DebugStack_Pop();
         return r|ERROR;

@@ -17,7 +17,7 @@ i64 Stream_ToFd(Stream *sm, byte *b, i32 length){
             (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
             NULL
         };
-        Error(ErrStream->m, (Abstract *)sm, FUNCNAME, FILENAME, LINENUMBER,
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error wrtiing to file: $", args);
         return 0;
     }

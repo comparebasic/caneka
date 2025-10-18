@@ -110,7 +110,7 @@ Str *Str_From(MemCh *m, byte *bytes, word length){
 
 Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
     if(length < 0 || length > STR_MAX){
-        Error(m, (Abstract *)m, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error cannot have a negative length of a string at end",
         NULL);
         return NULL;
@@ -130,7 +130,7 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
 Str *Str_FromCstr(MemCh *m, char *cstr, word flags){
     i64 len = strlen(cstr);
     if((len+1) > STR_MAX){
-        Error(m, NULL, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "strlen too long to make Str", NULL);
         return NULL;
     }

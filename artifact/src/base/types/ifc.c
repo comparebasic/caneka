@@ -41,14 +41,14 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
 }
 
 Abstract *_asError(char *func, char *file, i32 line, Abstract *x, cls type){
-    Error(ErrStream->m, x, FUNCNAME, FILENAME, LINENUMBER,
+    Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
         "Error anonymous from _asError", NULL);
     return x;
 }
 
 Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
     if(x == NULL){
-        Fatal(func, file, line, "Cast from NULL", NULL);
+        Error(ErrStream->m, func, file, line, "Cast from NULL", NULL);
     }else {
         if(x->type.of != type){
             Abstract *args[] = {
@@ -56,7 +56,7 @@ Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
                 (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
                 NULL
             };
-            Fatal(func, file, line, "Cast from Abstract mismatched type expecting '$', have '$'", args);
+            Error(ErrStream->m, func, file, line, "Cast from Abstract mismatched type expecting '$', have '$'", args);
             return NULL;
         }
     }
@@ -65,7 +65,7 @@ Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
 
 Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cls type){
     if(x == NULL){
-        Fatal(func, file, line, "Cast from NULL", NULL);
+        Error(ErrStream->m, func, file, line, "Cast from NULL", NULL);
     }else{
         if(!Ifc_Match(x->type.of, type)){
             Abstract *args[] = {
@@ -73,14 +73,12 @@ Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cls type){
                 (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
                 NULL
             };
-            Fatal(func, file, line, "Cast from Abstract mismatched interface, expecting '$', have '$'", args);
+            Error(ErrStream->m, func, file, line, "Cast from Abstract mismatched interface, expecting '$', have '$'", args);
             return NULL;
         }
     }
     return x;
 }
-
-
 
 void Type_SetFlag(Abstract *a, word flags){
     a->type.state = (a->type.state & NORMAL_FLAGS) | flags;

@@ -2,46 +2,6 @@
 #include <caneka.h>
 
 static Iter _it;
-static boolean _fuse = TRUE;
-static void sigH(i32 sig, siginfo_t *info, void *ptr){
-    if(_fuse){
-        _fuse = FALSE;
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
-    }else{
-        write(0, "Double SigH\n", strlen("Double SigH\n"));
-    }
-    exit(1);
-}
-
-static void sigI(i32 sig, siginfo_t *info, void *ptr){
-    char *cstr = "SigI - exiting\n";
-    write(0, cstr, strlen(cstr));
-    exit(1);
-}
-
-static void setSigs(){
-    struct sigaction a;
-    struct sigaction b;
-    memset(&a, 0, sizeof(struct sigaction));
-    a.sa_flags = SA_NODEFER;
-    a.sa_sigaction = sigH;
-    sigaction(SIGSEGV, &a, NULL);
-
-    memset(&b, 0, sizeof(struct sigaction));
-    b.sa_flags = SA_NODEFER;
-    b.sa_sigaction = sigI;
-    sigaction(SIGINT, &b, NULL);
-}
-
-i32 DEBUG_STACK_COLOR = COLOR_GREEN;
-
-status DebugStack_Init(MemCh *m){
-    Iter_Init(&_it,Span_Make(m));
-    setSigs();
-    DebugStack_Push(NULL, ZERO);
-    Iter_PrevRemove(&_it);
-    return SUCCESS;
-}
 
 void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line, i32 pos){
     Span *stack = _it.p;
@@ -105,4 +65,11 @@ i32 DebugStack_Print(Stream *sm, word flags){
         total += ToS(sm, it.value, 0, flags);
     }
     return total;
+}
+
+status DebugStack_Init(MemCh *m){
+    Iter_Init(&_it,Span_Make(m));
+    DebugStack_Push(NULL, ZERO);
+    Iter_PrevRemove(&_it);
+    return SUCCESS;
 }

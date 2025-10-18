@@ -80,9 +80,8 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                         (Abstract *)s,
                         NULL
                     };
-                    Error(ErrStream->m, (Abstract *)resolve, 
-                        FUNCNAME, FILENAME, LINENUMBER, "Unable to find resolve for arg @",
-                        args);
+                    Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                        "Unable to find resolve for arg @", args);
                 }
             }else if(it.metrics.set != -1){
                  Table_SetValue(&it, (Abstract *)s);
@@ -117,7 +116,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                             (Abstract *)h->key,
                             NULL,
                         };
-                        Error(m, (Abstract *)resolve, FUNCNAME, FILENAME, LINENUMBER,
+                        Error(m, FUNCNAME, FILENAME, LINENUMBER,
                             "Required argument not found: @", args);
                         exit(1);
                     }
@@ -132,7 +131,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                             value,
                             NULL,
                         };
-                        Error(m, (Abstract *)resolve, FUNCNAME, FILENAME, LINENUMBER,
+                        Error(m, FUNCNAME, FILENAME, LINENUMBER,
                             "Required argument @ not in expected choices: @, found @", args);
                         exit(1);
 

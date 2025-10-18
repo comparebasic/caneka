@@ -253,7 +253,7 @@ static status _Iter_Prev(Iter *it){
     void **ptr = NULL;
 
     if((it->type.state & SPAN_OP_GET) == 0){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Error(it->p->m, FUNCNAME, FILENAME, LINENUMBER,
             "Iter_Prev can only use Get not Set or Add", NULL);
         return ERROR;
     }

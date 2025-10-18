@@ -123,7 +123,7 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
             (Abstract *)a,
             NULL
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Source not found @", args);
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, "Source not found @", args);
         exit(1);
     }
     r = stat(Str_Cstr(m, b), &build_stat);

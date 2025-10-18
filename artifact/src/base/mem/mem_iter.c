@@ -34,7 +34,7 @@ status MemIter_Next(MemIter *mit){
             pg = (MemPage *)Span_Get(mit->input.target->it.p, mit->slIdx);
         }
         if(pg == NULL){
-            Error(ErrStream->m, (Abstract *)mit, FUNCNAME, FILENAME, LINENUMBER,
+            Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: unable to find page", args);
             mit->type.state |= ERROR;
             return mit->type.state;
@@ -58,14 +58,14 @@ status MemIter_Next(MemIter *mit){
                 (Abstract *)Type_ToStr(ErrStream->m, a->type.of),
                 NULL
             };
-            Error(ErrStream->m, (Abstract *)mit, FUNCNAME, FILENAME, LINENUMBER,
+            Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: type $ of object does not have a registered size", args);
             mit->type.state |= (ERROR|END);
         }
         if(mit->end == NULL || (void *)(mit->ptr+sz-1) > mit->end){
             args[0] = (Abstract *)Util_Wrapped(ErrStream->m, mit->ptr+sz-1 - mit->end);
             args[1] = NULL;
-            Error(ErrStream->m, (Abstract *)mit, FUNCNAME, FILENAME, LINENUMBER,
+            Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: type to large to increment address is off the page by $", args);
         }
         if(mit->ptr+sz-1 == mit->end){
