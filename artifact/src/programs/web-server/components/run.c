@@ -164,9 +164,12 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
         Span_Add(_sepSpan, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
     }
 
-    r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "sessions")));
+    Str *sp = Path_StrAdd(m, ctx->path, Str_CstrRef(m, "sessions"));
+    sp->type.state |= DEBUG;
+    r |= Dir_CheckCreate(m, sp);
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "users")));
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/data")));
+
 
     Str *public = Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/public"));
     Str *inc = Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/inc"));
@@ -186,8 +189,9 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
 
     args[0] = (Abstract *)ctx->pages;
     args[1] = (Abstract *)ctx->inc;
-    args[2] = NULL;
-    Out("^c.Pages: @\nInc: @^0\n", args);
+    args[2] = (Abstract *)m;
+    args[3] = NULL;
+    Out("^c.Pages: @\nInc: @^0\n  MemCh: &\n", args);
 
     return r;
 }

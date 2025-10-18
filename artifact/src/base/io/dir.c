@@ -111,8 +111,12 @@ status Dir_CheckCreate(MemCh *m, Str *path){
     Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1, 0));
     Span_Add(cmd, (Abstract *)path);
 
+
     ProcDets pd;
     ProcDets_Init(&pd);
+    if(path->type.state & DEBUG){
+        cmd->type.state |= DEBUG;
+    }
     status r = SubProcess(m, cmd, &pd);
     DebugStack_Pop();
     return r;

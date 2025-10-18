@@ -50,7 +50,8 @@ boolean Span_Equals(Span *a, Span *b){
 
 char **Span_ToCharArr(MemCh *m, Span *p){
     size_t sz = sizeof(char *)*(p->nvalues+1);
-    char **arr = MemCh_Alloc(m, sz);
+    char **arr = (char **)Bytes_Alloc(m, sz, TYPE_POINTER_ARRAY);
+
     Iter it;
     Iter_Init(&it, p);
     int i = 0;
