@@ -42,9 +42,6 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
             Path_Add(m, objPath, name);
         }else{
             Path_AddStr(objPath, file);
-            args[0] = (Abstract *)objPath;
-            args[1] = NULL;
-            Out("^y.Static Path &^0\n", args);
         }
     }
 

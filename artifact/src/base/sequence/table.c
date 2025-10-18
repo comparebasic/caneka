@@ -87,8 +87,9 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *va
                     args[0] = (Abstract*)&hk;
                     args[1] = (Abstract*)h;
                     args[2] = NULL;
-                    Out("^p.    Setting & -> &^0\n", args);
+                    Out("^y.    Setting & -> &", args);
                 }
+
                 Span_Set((Span *)tbl, hk.idx, (Abstract *)h);
                 tbl->type.state |= SUCCESS;
                 return h;

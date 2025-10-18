@@ -93,7 +93,11 @@ char *Type_ToChars(cls type){
         }
     }
     if(typeStrings != NULL){
-        return typeStrings[type-idx];
+        if(type < 2000){
+            return typeStrings[type-idx];
+        }else{
+            return "TooBigTypeNumber";
+        }
     }
     return "TYPE_unknown";
 }

@@ -4,6 +4,7 @@
 
 static StrVec *headerPath = NULL;
 static StrVec *footerPath = NULL;
+static Span *_sepSpan = NULL;
 
 static Object *Example_getPageData(Task *tsk, Route *rt){
     MemCh *m = tsk->m;
@@ -47,9 +48,6 @@ static status Example_PageContent(Step *st, Task *tsk){
 
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, tsk->source) & SUCCESS){
         st->type.state |= SUCCESS;
-        args[0] = (Abstract *)ctx->content;
-        args[1] = NULL;
-        Out("^c.content: ^y.$^0\n", args);
     }else{
         st->type.state |= ERROR;
     }
@@ -111,6 +109,8 @@ static status Example_ServePage(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
+    Path_Annotate(tsk->m, ctx->path, _sepSpan);
     Route *rt = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
     if(rt == NULL){
         st->type.state |= SUCCESS;
@@ -118,7 +118,7 @@ static status Example_ServePage(Step *st, Task *tsk){
         Abstract *args[] = {
             (Abstract *)ctx->path, NULL
         };
-        Out("^b.Not Found $^0\n", args);
+        Out("^b.Not Found &^0\n", args);
         return st->type.state;
     }else{
         ctx->code = 200;
@@ -157,6 +157,13 @@ static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *sou
 
 static status serveInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
+    Abstract *args[5];
+
+    if(_sepSpan == NULL){
+        _sepSpan = Span_Make(m);
+        Span_Add(_sepSpan, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
+    }
+
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "sessions")));
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "users")));
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/data")));
@@ -168,6 +175,7 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
 
     ctx->pages = (Object *)Route_Make(m);
     Route_Collect((Route *)ctx->pages, StrVec_From(m, public));
+
     ctx->inc = (Object *)Route_Make(m);
     Route_Collect((Route *)ctx->inc, StrVec_From(m, inc));
 
@@ -176,14 +184,20 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
     footerPath = StrVec_From(m, Str_CstrRef(m, "/footer"));
     IoUtil_Annotate(m, footerPath);
 
+    args[0] = (Abstract *)ctx->pages;
+    args[1] = (Abstract *)ctx->inc;
+    args[2] = NULL;
+    Out("^c.Pages: @\nInc: @^0\n", args);
+
     return r;
 }
 
-status WebServer_Run(MemCh *m){
+status WebServer_Run(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
     Abstract *args[2];
     
+    MemCh *m = MemCh_Make();
     TcpCtx *ctx = TcpCtx_Make(m);
     ctx->port = 3000;
     ctx->populate = Example_populate;
@@ -199,6 +213,7 @@ status WebServer_Run(MemCh *m){
     Task_Tumble(tsk);
 
     MemCh_Free(m);
+    MemCh_Free(gm);
     DebugStack_Pop();
     return r;
 }

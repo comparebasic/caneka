@@ -52,6 +52,8 @@ static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstrac
     return NULL;
 }
 
+static i32 _objIndent = 0;
+
 static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
     Object *obj = (Object *)as(a, TYPE_OBJECT);
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
@@ -93,9 +95,28 @@ static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
                     total += Stream_Bytes(sm, (byte *)"\n  ", 3);
                 }
                 Hashed *h = (Hashed *)Iter_Get(it);
+                if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
+                    _objIndent++;
+                    i32 i = _objIndent;
+                    total += Stream_Bytes(sm, (byte *)"\n", 1);
+                    while(i--){
+                        total += Stream_Bytes(sm, (byte *)"  ", 2);
+                    }
+                }
                 total += ToS(sm, h->key, 0, MORE); 
                 total += Stream_Bytes(sm, (byte *)" -> ", 4);
-                total += ToS(sm, h->value, 0, flags);  
+                if(flags & (MORE|DEBUG)){
+                    total += ToS(sm, h->value, 0, flags);  
+                }else{
+                    Str *typeStr = NULL;
+                    if(h->value != NULL){
+                        typeStr = Type_ToStr(sm->m, h->value->type.of);
+                    }
+                    total += ToS(sm, (Abstract *)typeStr, 0, MORE);
+                }
+                if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
+                    _objIndent--;
+                }
                 if((it->type.state & LAST) == 0){
                     total += Stream_Bytes(sm, (byte *)", ", 2);
                 }

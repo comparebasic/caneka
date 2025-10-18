@@ -23,7 +23,11 @@ static MemBook *MemBook_get(void *addr){
         }
         idx--;
     }
-    Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook not found", NULL);
+    Abstract *args[] = {
+        (Abstract *)Util_Wrapped(ErrStream->m, (util)addr),
+        NULL
+    };
+    Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook not found for \\@@", args);
     return NULL;
 }
 

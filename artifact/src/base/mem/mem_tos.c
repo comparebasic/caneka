@@ -127,10 +127,24 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
     args[1] = (Abstract *)MemCount_Wrapped(sm->m,  MemCh_Used(m, 0));
     args[2] = NULL;
 
+
     Table *tbl = Table_Make(sm->m);
 
     if(flags & MORE){
         total += Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
+
+        Iter it;
+        Iter_Init(&it, m->it.p);
+        while((Iter_Next(&it) & END) == 0){
+            MemPage *sl = (MemPage *)Iter_Get(&it);
+            args[0] = (Abstract *)I32_Wrapped(sm->m, it.idx);
+            args[1] = (Abstract *)I16_Wrapped(sm->m, sl->remaining);
+            args[2] = NULL;
+            total += Fmt(sm, "Page#$/@remaining", args);
+            if((it.type.state & LAST) == 0){
+                total += Stream_Bytes(sm, (byte *)", ", 2);
+            }
+        }
         
         MemIter mit;
         MemIter_Init(&mit, m);

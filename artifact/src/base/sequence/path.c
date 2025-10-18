@@ -191,10 +191,11 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
                 if(*ptr == sg->val.b){
                     i16 length = ptr-start;
                     if(length > 0){
-                        Str *s = Str_Ref(m, start, length, length, ZERO);
-                        StrVec_Add(v, s);
+                        Str *sn = Str_Ref(m, start, length, length, ZERO);
+                        StrVec_Add(v, sn);
                     }
-                    StrVec_Add(v, Str_Ref(m, ptr, 1, 1, sg->objType.state));
+                    Str *sb = Str_Ref(m, ptr, 1, 1, sg->objType.state);
+                    StrVec_Add(v, sb);
                     start = ptr;
                     if(start < last){
                         start++; 

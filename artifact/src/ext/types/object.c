@@ -96,7 +96,7 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
             (Abstract *)obj,
             NULL
         };
-        Out("^c.Adding & to @^0.\n", args);
+        Out("^p.Adding & to @^0.\n", args);
     }
     if((path->type.state & STRVEC_PATH) == 0){
        IoUtil_Annotate(Object_GetMem(obj), path); 
@@ -140,7 +140,17 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
 Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
     obj->type.state &= ~OUTCOME_FLAGS;
 
+    if(obj->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)key,
+            (Abstract *)value,
+            NULL
+        };
+        Out("^b.>>> Setting: @ -> @^0\n", args);
+    }
+
     Hashed *h = Table_SetHashed(obj->tbl, key, value);
+
     obj->type.state |= obj->tbl->type.state & OUTCOME_FLAGS;
     if(h != NULL){
         Span_Add(obj->order, (Abstract *)h);
@@ -156,7 +166,7 @@ Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
             (Abstract *)Type_ToStr(OutStream->m, obj->objType.of),
             (Abstract *)key,
             (Abstract *)I32_Wrapped(OutStream->m, 
-                obj->order->nvalues -cls->propOrder->nvalues),
+                obj->order->nvalues - cls->propOrder->nvalues),
             NULL,
         };
         Out("^p.Object_Set($ [$]/$)^0\n", args);
