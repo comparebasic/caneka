@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Table *ErrorHandlerTable = NULL;
+Lookup *ErrorHandlers = NULL;
 boolean _crashing = FALSE;
 boolean _error = FALSE;
 
@@ -71,14 +71,16 @@ err:
 
 void Error(MemCh *m, Abstract *a, char *func, char *file, int line, char *fmt, Abstract *args[]){
     _error = TRUE;
-    if(ErrorHandlerTable != NULL){
-        Maker mk = (Maker)Table_Get(ErrorHandlerTable, a);
-        if(mk != NULL){
-            mk(m, a);
-            return;
+    status r = READY;
+    if(a != NULL){
+        DoFunc func = (DoFunc)Lookup_Get(ErrorHandlers, a->type.of);
+        if(func != NULL){
+           r |= func(m, a); 
         }
     }
-    ShowError(func, file, line, fmt, args);
+    if((r & (SUCCESS|ERROR)) != 0){
+        ShowError(func, file, line, fmt, args);
+    }
     _error = FALSE;
     return;
 }
@@ -108,4 +110,13 @@ void ShowError(char *func, char *file, int line, char *fmt, Abstract *args[]){
     Stream_Bytes(ErrStream, (byte *)"\n", 1);
     DebugStack_Print(ErrStream, MORE);
     exit(1);
+}
+
+status Error_Init(MemCh *m){
+    status r = READY;
+    if(ErrorHandlers == NULL){
+        ErrorHandlers = Lookup_Make(m, _TYPE_ZERO);
+        r |= SUCCESS;
+    }
+    return r;
 }

@@ -12,8 +12,11 @@ typedef struct task {
     MemCh *m;
     Abstract *data;
     Abstract *source;
+    struct task *parent;
     Iter chainIt;
 } Task;
+
+extern Table *TaskErrorHandlers;
 
 typedef status (*TaskPopulate)(MemCh *m, Task *task, Abstract *arg, Abstract *source);
 
@@ -23,3 +26,5 @@ status Task_Tumble(Task *tsk);
 status Task_AddDataStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags);
 status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags);
 status Task_Free(Step *st, Task *tsk);
+
+status Task_Init(MemCh *m);

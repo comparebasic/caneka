@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+Table *TaskErrorHandlers = NULL;
+
+static status _taskErrorHandler(MemCh *m, Abstract *_tsk){
+    Abstract *args[5];
+    Task *tsk = (Task *)as(_tsk, TYPE_TASK);
+    tsk->type.state |= ERROR;
+    args[0] = (Abstract *)tsk;
+    args[1] = NULL;
+    Out("^r.Error Handling @^0\n", args);
+    return NOOP;
+}
+
 status Task_Tumble(Task *tsk){
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
@@ -83,4 +95,14 @@ Task *Task_Make(Span *chain, Abstract *source){
     Iter_Init(&tsk->chainIt, chain);
     tsk->source = source;
     return tsk;
+}
+
+status Task_Init(MemCh *m){
+    status r = READY;
+    if(TaskErrorHandlers == NULL){
+        TaskErrorHandlers = Table_Make(m);
+        r |= SUCCESS;
+    }
+    r |= Lookup_Add(m, ErrorHandlers, TYPE_TASK, (void *)_taskErrorHandler);
+    return r;
 }

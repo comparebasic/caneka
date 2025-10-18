@@ -120,6 +120,14 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
     if(funcW != NULL && funcW->type.state & ROUTE_DYNAMIC){
         StrVec *v = StrVec_Make(m);
         FileDes_ToVec(v, path);
+        if(v->total == 0){
+            Abstract *args[3];
+            args[0] = (Abstract *)path;
+            args[1] = NULL;
+            Error(m, source, FUNCNAME, FILENAME, LINENUMBER,
+                "No content found for path: @", args);
+            return ERROR;
+        }
         RouteFunc func = (RouteFunc)funcW->val.ptr;
         status r = func(m, v, dest, data, source);
         DebugStack_Pop();

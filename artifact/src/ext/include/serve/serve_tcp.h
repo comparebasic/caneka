@@ -1,4 +1,4 @@
-#define TCP_STEP_MAX 16
+#define TCP_STEP_MAX 512
 #define SERV_READ_SIZE 1024
 #define SERV_SEND_SIZE 1024
 #define TCP_POLL_DELAY 10

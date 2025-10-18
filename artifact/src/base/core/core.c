@@ -19,6 +19,7 @@ status Core_Init(MemCh *m){
         ErrStream = Stream_MakeToFd(m, 2, NULL, 0);
         r |= SUCCESS;
     }
+    r |= Error_Init(m);
     return NOOP;
 }
 

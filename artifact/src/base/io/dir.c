@@ -76,7 +76,7 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, Abstract *sour
                 continue;
             }
             i64 len = strlen(ent->d_name);
-            Str *e = Str_Ref(m, (byte *)ent->d_name, len, len+1, 0);
+            Str *e = Str_Ref(m, (byte *)ent->d_name, len, len+1, STRING_COPY);
             if(ent->d_type == IS_DIR){
                 Str *s = Str_Make(m, STR_DEFAULT);
                 fnameStr(m, s, path, e);

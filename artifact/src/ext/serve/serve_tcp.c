@@ -135,6 +135,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             args[1] = NULL;
             Out("^c.    Tumbling @^0\n", args);
         }
+        child->parent = tsk;
         Task_Tumble(child);
         if(child->type.state & (SUCCESS|ERROR)){
             Queue_Remove(q, child->idx);

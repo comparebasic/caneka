@@ -15,6 +15,7 @@ status Caneka_Init(MemCh *m){
     r |= Types_ClsInit(m);
     r |= Navigate_ClsInit(m);
     r |= BinSeg_Init(m);
+    r |= Task_Init(m);
     r |= Serve_ClsInit(m);
     /*
     r |= Clone_Init(m);

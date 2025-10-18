@@ -46,7 +46,7 @@ static status Example_PageContent(Step *st, Task *tsk){
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
     Route *rt = (Route *)st->arg;
 
-    if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, tsk->source) & SUCCESS){
+    if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, (Abstract *)tsk) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;
@@ -128,13 +128,13 @@ static status Example_ServePage(Step *st, Task *tsk){
         ctx->content = StrVec_Make(tsk->m);
         if(rt->type.state & ROUTE_PAGE){
             Task_AddDataStep(tsk,
-                Example_FooterContent, NULL, (Abstract *)data, NULL, ZERO);
+                Example_FooterContent, NULL, (Abstract *)data, (Abstract *)tsk, ZERO);
         }
         Task_AddDataStep(tsk,
-            Example_PageContent, (Abstract *)rt, (Abstract *)data, NULL, ZERO);
+            Example_PageContent, (Abstract *)rt, (Abstract *)data, (Abstract *)tsk, ZERO);
         if(rt->type.state & ROUTE_PAGE){
             Task_AddDataStep(tsk,
-                Example_HeaderContent, (Abstract *)rt, (Abstract *)data, NULL, ZERO);
+                Example_HeaderContent, (Abstract *)rt, (Abstract *)data, (Abstract *)tsk, ZERO);
         }
 
         st->type.state |= SUCCESS;
@@ -186,11 +186,6 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
     IoUtil_Annotate(m, headerPath);
     footerPath = StrVec_From(m, Str_CstrRef(m, "/footer"));
     IoUtil_Annotate(m, footerPath);
-
-    args[0] = (Abstract *)ctx->pages;
-    args[1] = (Abstract *)ctx->inc;
-    args[3] = NULL;
-    Out("^c.Pages: @\nInc: @^0\n", args);
 
     return r;
 }
