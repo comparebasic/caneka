@@ -43,7 +43,7 @@ status Show_Licences(Stream *sm){
 
 status Add_Licence(char *name, char *version, char *licence){
     if(_count > LICENCE_MAX-4){
-        Error(ErrStream->m, NULL, FILENAME, FUNCNAME, LINENUMBER, "Max Licences Reached", NULL);
+        Error(ErrStream->m, FILENAME, FUNCNAME, LINENUMBER, "Max Licences Reached", NULL);
         return ERROR;
     }
     Licences[_count++] = name;

@@ -30,8 +30,10 @@ static status Example_log(Step *_st, Task *tsk){
 
     if(tsk->type.state & ERROR){
         Out("^r.Error $ @ $^0\n", args);
-    }else{
+    }else if(ctx->code == 200){
         Out("^g.Served $ @ $^0\n", args);
+    }else{
+        Out("^c.Responded $ @ $^0\n", args);
     }
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     close(pfd->fd);
@@ -64,7 +66,7 @@ static status Example_FooterContent(Step *st, Task *tsk){
     if(rt == NULL){
         args[0] = (Abstract *)tcp->inc;
         args[1] = NULL;
-        Error(tsk->m, (Abstract *)st, FUNCNAME, FILENAME, LINENUMBER,
+        Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
             "Route is null for Footer: @", args);
         st->type.state |= ERROR;
         return st->type.state;
@@ -88,7 +90,7 @@ static status Example_HeaderContent(Step *st, Task *tsk){
     if(rt == NULL){
         args[0] = (Abstract *)tcp->inc;
         args[1] = NULL;
-        Error(tsk->m, (Abstract *)st, FUNCNAME, FILENAME, LINENUMBER,
+        Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
             "Route is null for Footer: @", args);
         st->type.state |= ERROR;
         return st->type.state;
@@ -118,7 +120,8 @@ static status Example_ServePage(Step *st, Task *tsk){
         Abstract *args[] = {
             (Abstract *)ctx->path, NULL
         };
-        Out("^b.Not Found &^0\n", args);
+        ctx->content = StrVec_Make(tsk->m);
+        StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "Page Not Found"));
         return st->type.state;
     }else{
         ctx->code = 200;
@@ -140,6 +143,28 @@ static status Example_ServePage(Step *st, Task *tsk){
         st->type.state |= SUCCESS;
         return st->type.state|MORE;
     }
+}
+
+static status Example_ServeError(Step *st, Task *tsk){
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    ctx->code = 500;
+    ctx->mime = Str_CstrRef(tsk->m, "text/html");
+    ctx->content = StrVec_Make(tsk->m);
+    StrVec_Add(ctx->content, Str_CstrRef(tsk->m,
+        "<!DOCTYPE html><html lang=\"en\"><body>"
+        "<h1>Server Error</h1>\r\n    <p>"));
+    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
+    ErrorMsg *msg = (ErrorMsg *)as(st->arg, TYPE_ERROR_MSG);
+    ErrorMsg_ToStream(sm, msg);
+    StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "</p>\r\n</body>\r\n</html>\r\n"));
+    st->type.state |= SUCCESS;
+    return st->type.state;
+}
+
+static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
+    Task_AddStep(tsk, Example_ServeError, NULL, NULL, ZERO);
+    return NOOP;
 }
 
 static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
@@ -208,6 +233,9 @@ status WebServer_Run(MemCh *gm){
     args[0] = (Abstract *)ctx;
     args[1] = NULL;
     Out("^y.Serving &\n", args);
+    Single *sg = Util_Wrapped(m, (util)tsk);
+    Single *funcW = Func_Wrapped(m, Example_errorPopulate);
+    Table_Set(TaskErrorHandlers, (Abstract *)sg, (Abstract *)funcW);
     Task_Tumble(tsk);
 
     MemCh_Free(m);

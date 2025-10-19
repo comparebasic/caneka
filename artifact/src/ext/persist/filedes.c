@@ -15,7 +15,7 @@ i64 FileDes_ToVec(StrVec *v, StrVec *path){
             (Abstract *)Str_CstrRef(m, strerror(errno)),
             NULL
         };
-        Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error opening file $ for wrtiing to file: $", args);
         return 0;
     }
@@ -33,7 +33,7 @@ i64 FileDes_ToVec(StrVec *v, StrVec *path){
                     (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
                     NULL
                 };
-                Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER, 
+                Error(m, FUNCNAME, FILENAME, LINENUMBER, 
                     "Error reading file $: $", args);
                     v->type.state |= ERROR;
             }

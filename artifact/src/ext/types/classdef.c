@@ -8,7 +8,7 @@ Abstract *ClassDef_Undefined(MemCh *m, FetchTarget *fg, Abstract *data, Abstract
         (Abstract *)Type_ToStr(m, data->type.of),
         NULL
     };
-    Error(m, (Abstract *)source, FUNCNAME, FILENAME, LINENUMBER, 
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, 
         "ClassDef not defined for this type $\n", args);
     return NULL;
 }
@@ -32,7 +32,7 @@ status Class_SetProp(Object *obj, ClassDef *cls, Str *key, Abstract *value){
             (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
             NULL
         };
-        Error(ErrStream->m, (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
+        Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
             "Prop @ not found for $", args);
         return ERROR;
     }

@@ -26,7 +26,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
             (Abstract *)RouteMimeTable,
             NULL
         };
-        Error(m, (Abstract *)path, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Mime & not found for this file with\n\n ext & (@)", args);
         return ERROR;
     }
@@ -124,7 +124,7 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
             Abstract *args[3];
             args[0] = (Abstract *)path;
             args[1] = NULL;
-            Error(m, source, FUNCNAME, FILENAME, LINENUMBER,
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "No content found for path: @", args);
             return ERROR;
         }

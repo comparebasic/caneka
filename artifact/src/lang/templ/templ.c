@@ -224,7 +224,7 @@ static status Templ_PrepareCycle(Templ *templ){
         if((jump->fch->type.state & (FETCHER_FOR|FETCHER_WITH)) == 0 &&
                 jump->destIdx == NEGATIVE && jump->skipIdx == NEGATIVE &&
                 jump->tempIdx == NEGATIVE){
-            Error(ErrStream->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER, 
+            Error(m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Unable to find source or ending for Jump in Templ content\n", NULL);
 
             templ->type.state |= ERROR;
@@ -287,7 +287,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 (Abstract *)data,
                 NULL,
             };
-            Error(sm->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER,
+            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error finding value using @ in data @\n",args);
             return total;
         }
@@ -321,14 +321,14 @@ status Templ_Prepare(Templ *templ){
         i16 g = 0;
         templ->type.state &= ~(ERROR|SUCCESS);
         while((Templ_PrepareCycle(templ) & (ERROR|PROCESSING)) == 0){
-            Guard_Incr(&g, 64, FUNCNAME, FILENAME, LINENUMBER);
+            Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);
         }
         if((templ->type.state & PROCESSING) == 0){
             Abstract *args[] = {
                 (Abstract *)templ,
                 NULL
             };
-            Error(ErrStream->m, (Abstract *)templ, FUNCNAME, FILENAME, LINENUMBER,
+            Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing Templ, &", args);
             return ERROR;
         }
@@ -351,7 +351,7 @@ i64 Templ_ToS(Templ *templ, Stream *sm, Abstract *data, Abstract *source){
     Iter_Next(&templ->data);
     while((total = Templ_ToSCycle(templ, sm, total, source)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
-        Guard_Incr(&g, 64, FUNCNAME, FILENAME, LINENUMBER);
+        Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }
     return total;
 }

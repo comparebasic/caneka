@@ -17,7 +17,7 @@ Object *Object_As(Object *obj, cls typeOf){
             (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
             NULL
         };
-        Error(ErrStream->m, (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
+        Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
             "Error object is not of expected type $, have $/$", args);
     }
     return obj;
@@ -39,7 +39,7 @@ Abstract *Object_GetProp(Object *obj, Str *key){
             (Abstract *)Type_ToStr(obj->order->m, obj->objType.of),
             NULL
         };
-        Error(obj->order->m, (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
+        Error(obj->order->m, FUNCNAME, FILENAME, LINENUMBER,
             "Prop @ not found on object of $\n", args);
         return NULL;
     }
@@ -74,7 +74,7 @@ Object *Object_GetOrMake(Object *pt, Abstract *key, word op){
             (Abstract *)a,
             NULL
         };
-        Error(ErrStream->m, (Abstract *)pt, FUNCNAME, FILENAME, LINENUMBER,
+        Error(Object_GetMem(pt), FUNCNAME, FILENAME, LINENUMBER,
             "Trying to make an empty Object where a $ value already exists for key @, or is not an object @",
             args);
         return NULL;
@@ -190,7 +190,7 @@ Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value){
         (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
         NULL
     };
-    Error(Object_GetMem(obj), (Abstract *)obj, FUNCNAME, FILENAME, LINENUMBER,
+    Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
         "Unable to find prop @ on ClassDef $", args);
     return NULL;
 }
@@ -226,7 +226,7 @@ Object *Object_Make(MemCh *m, cls typeOf){
                 (Abstract *)Type_ToStr(m, typeOf),
                 NULL
             };
-            Error(m, NULL, FUNCNAME, FILENAME, LINENUMBER,
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "ClassDeff $ not found", args);
             return NULL;
 

@@ -13,13 +13,13 @@ status File_Write(File *f, i64 max){
     f->type.state &= ~SUCCESS;
 
     if(f->sm == NULL){
-        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER,
+        Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER,
             "Stream not defined for file", NULL);
         return ERROR;
     }
 
     if((f->sm->type.state & STREAM_TO_FD) == 0){
-        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER,
+        Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER,
             "Stream not defined for file descriptor persistance, wrong flags?", NULL);
         return ERROR;
     }
@@ -35,13 +35,13 @@ status File_Write(File *f, i64 max){
 status File_Read(File *f, i64 max){
     f->type.state &= ~SUCCESS;
     if(f->sm == NULL){
-        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER,
+        Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER,
             "Stream not defined for file", NULL);
         return ERROR;
     }
 
     if(f->sm->func == NULL){
-        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+        Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Error no stream func defined for file", NULL);
         return ERROR;
     }
@@ -51,7 +51,7 @@ status File_Read(File *f, i64 max){
             (Abstract *)f->path,
             NULL
         };
-        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+        Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Error no file descriptor for stream path: @", args);
         return ERROR;
     }
@@ -65,7 +65,7 @@ status File_Read(File *f, i64 max){
                     (Abstract *)f->path,
                     NULL
                 };
-                Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+                Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER, 
                     "Error reading file @", args);
                     f->type.state |= ERROR;
             }
@@ -99,7 +99,7 @@ status File_Open(File *f){
         Abstract *args[] = {
             (Abstract *)StreamTask_Make(ErrStream->m, NULL, (Abstract *)f, ToS_FlagLabels),
         };
-        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+        Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER, 
             "STRVEC or TO_FD flags required for read or write or both access to a file descriptor, have $", args);
         return ERROR;
     }
@@ -131,7 +131,7 @@ status File_Open(File *f){
             (Abstract *)f,
             NULL
         };
-        Error(ErrStream->m, (Abstract *)f, FUNCNAME, FILENAME, LINENUMBER, 
+        Error(f->sm->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Unable to open file $", args);
     }
     return f->type.state;

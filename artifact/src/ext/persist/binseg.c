@@ -23,8 +23,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
             sg->val.w = idp[i];
             Abstract *item = Table_Get(ctx->cortext, (Abstract *)sg);
             if(item == NULL){
-                
-                Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "StrVec child item not found", NULL);
                 return ERROR;
             }else{
@@ -43,7 +42,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
                 args[0] = (Abstract *)sg;
                 args[1] = (Abstract *)ctx->cortext;
                 args[2] = NULL;
-                Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Span child item not found at $ @", args);
                 return ERROR;
             }else{
@@ -62,7 +61,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
             Abstract *key = Table_Get(ctx->cortext, (Abstract *)keySg);
             Abstract *item = Table_Get(ctx->cortext, (Abstract *)sg);
             if(key == NULL || item == NULL){
-                Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Table child item(s) not found", NULL);
                 return ERROR;
             }else{
@@ -71,7 +70,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
         }
         a = (Abstract *)tbl;
     }else if(hdr->kind == BINSEG_TYPE_NODE){
-        Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Node binseg not yet implemented ", NULL);
         return ERROR;
     }
@@ -136,7 +135,7 @@ i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
     if(func == NULL){
         args[0] = (Abstract *)Type_ToStr(ctx->sm->m, a->type.of);
         args[1] = NULL;
-        Error(ErrStream->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+        Error(ctx->sm->m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to find BinSegFunc for type $", args);
         return 0;
     }

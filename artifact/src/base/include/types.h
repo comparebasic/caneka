@@ -1,5 +1,6 @@
 #include "types/structs.h"
 #include "types/error.h"
+#include "types/error_msg.h"
 #include "types/guard.h"
 #include "types/range.h"
 #include "types/typedefs.h"

@@ -185,7 +185,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             (Abstract *)Type_ToStr(rbl->m, captureKey),
             NULL
         };
-        Error(rbl->m, (Abstract *)rbl, FUNCNAME, FILENAME, LINENUMBER,
+        Error(rbl->m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to find Tokenize for this captureKey: $", args);
         return ERROR;
     }

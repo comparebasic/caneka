@@ -4,7 +4,7 @@
 static inline status Roebling_RunMatches(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
     while((Cursor_NextByte(rbl->curs) & END) == 0){
-        Guard_Incr(&rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
+        Guard_Incr(rbl->m, &rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
         Iter_Reset(&rbl->matchIt);

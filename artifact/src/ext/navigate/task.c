@@ -1,16 +1,23 @@
 #include <external.h>
 #include <caneka.h>
 
-Table *TaskErrorHandlers = NULL;
+Table *TaskErrorHandlers = NULL; /* TaskPopulate */
 
-static status _taskErrorHandler(MemCh *m, Abstract *_tsk){
+static status _taskErrorHandler(MemCh *m, Abstract *_tsk, Abstract *msg){
     Abstract *args[5];
     Task *tsk = (Task *)as(_tsk, TYPE_TASK);
     tsk->type.state |= ERROR;
-    args[0] = (Abstract *)tsk;
+    args[0] = (Abstract *)tsk->source;
     args[1] = NULL;
     Out("^r.Error Handling @^0\n", args);
-    return NOOP;
+    Single *key = Util_Wrapped(m, (util)tsk->source);
+    Single *funcW = (Single *)Table_Get(TaskErrorHandlers, (Abstract *)key);
+    if(funcW != NULL){
+        TaskPopulate func = (TaskPopulate)funcW->val.ptr;
+        func(m, tsk, msg, tsk->source);
+        return NOOP;
+    }
+    return ERROR;
 }
 
 status Task_Tumble(Task *tsk){

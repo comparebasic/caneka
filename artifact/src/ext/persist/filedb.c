@@ -85,7 +85,7 @@ status FileDB_Add(FileDB *fdb, i16 id, Abstract *a){
         DebugStack_Pop();
         return ctx->type.state;
     }else{
-        Error(ctx->sm->m, (Abstract *)ctx, FUNCNAME, FILENAME, LINENUMBER,
+        Error(ctx->sm->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error FileDB_Add does not have the PROCESSING flag to indicate an open FileDB",
             NULL);
         DebugStack_Pop();

@@ -58,7 +58,7 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     if(crit == NULL){
         args[0] = (Abstract *)I32_Wrapped(ErrStream->m, critIdx);
         args[1] = NULL;
-        Error(ErrStream->m, (Abstract *)q, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Criteria object is null when adding criteria of critIdx $", args);
         return ERROR;
     }

@@ -13,36 +13,31 @@ static i32 openPortToFd(i32 port){
 	serv_addr.sin_port = htons(port);
 
     if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
-        Error(ErrStream->m, NULL,
-            FUNCNAME, FILENAME, LINENUMBER,
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd setting nonblock", NULL);
 		return -1;
     }
 
     i32 one = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(i32)) < 0) {
-        Error(ErrStream->m, NULL,
-            FUNCNAME, FILENAME, LINENUMBER,
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd setting reuse addr", NULL);
 		return -1;
 	}
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(i32)) < 0) {
-        Error(ErrStream->m, NULL,
-            FUNCNAME, FILENAME, LINENUMBER,
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd setting reuse addr", NULL);
 		return -1;
 	}
 
 	if(bind(fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) != 0){
-        Error(ErrStream->m, NULL,
-            FUNCNAME, FILENAME, LINENUMBER,
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd binding", NULL);
 		return -1;
     }
 
 	if(listen(fd, 10) != 0){
-        Error(ErrStream->m, NULL,
-            FUNCNAME, FILENAME, LINENUMBER,
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd listening", NULL);
 		return -1;
     };
@@ -88,8 +83,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     if(available == -1){
         args[0] = (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
-        Error(ErrStream->m, (Abstract *)tsk, 
-            FUNCNAME, FILENAME, LINENUMBER,
+        Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error connecting to test socket: $\n", args);
         st->type.state |= ERROR;
         return st->type.state;
@@ -106,6 +100,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             MemCh *tm = MemCh_Make();
             Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
             child->stepGuardMax = TCP_STEP_MAX;
+            tm->owner = (Abstract *)child;
             ctx->populate(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk->source);
 
             if(tsk->type.state & DEBUG){

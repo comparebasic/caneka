@@ -54,6 +54,7 @@
 #include "./termio/args.c"
 #include "./suite/testsuite.c"
 #include "./types/error.c"
+#include "./types/error_msg.c"
 #include "./types/guard.c"
 #include "./types/strings.c"
 #include "./types/map.c"

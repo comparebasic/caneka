@@ -115,7 +115,10 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, Abstract *args
     _error = TRUE;
     status r = READY;
     Abstract *a = NULL;
+    printf("Error finding superowner\n");
+    i16 g = 0;
     while(m != NULL && m->owner != NULL){
+        Guard_Incr(ErrStream->m, &g, 6, FUNCNAME, FILENAME, LINENUMBER);
         a = m->owner;
         if(a->type.of == TYPE_MEMCTX){
             m = (MemCh *)a;
@@ -124,15 +127,20 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, Abstract *args
         }
     }
     if(a != NULL){
-        DoFunc func = (DoFunc)Lookup_Get(ErrorHandlers, a->type.of);
-        if(func != NULL){
-           r |= func(m, a);
+        SourceFunc errFunc = (SourceFunc)Lookup_Get(ErrorHandlers, a->type.of);
+        if(errFunc != NULL){
+            ErrorMsg msg = {
+                .type = {TYPE_ERROR_MSG, ZERO},
+                func, file, line, fmt, args
+            };
+            r |= errFunc(m, a, (Abstract *)&msg);
         }
     }
     if((r & (SUCCESS|ERROR)) != 0){
         Fatal(func, file, line, fmt, args);
         return;
     }
+    printf("End Error\n");
     _error = FALSE;
     return;
 }

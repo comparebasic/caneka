@@ -51,7 +51,7 @@ err:
     args[1] = (Abstract *)tg;
     args[2] = (Abstract *)cls;
     args[3] = NULL;
-    Error(m, (Abstract *)tg, FUNCNAME, FILENAME, LINENUMBER,
+    Error(m, FUNCNAME, FILENAME, LINENUMBER,
         "Error resolving ClassDef $ for prop or att $ using class @\n", args);
     return ERROR;
 }
@@ -94,7 +94,7 @@ err:
     args[3] = (Abstract *)Type_ToStr(m, typeOf);
     args[4] = (Abstract *)cls;
     args[5] = NULL;
-    Error(m, (Abstract *)tg, FUNCNAME, FILENAME, LINENUMBER,
+    Error(m, FUNCNAME, FILENAME, LINENUMBER,
         "Error for @ ClassDef X or prop not found for $ using @ class $/@\n", args);
     return NULL;
 }

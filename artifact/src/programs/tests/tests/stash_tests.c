@@ -24,7 +24,7 @@ status Stash_Tests(MemCh *gm){
     r |= Test(coord->typeOf == typeOf, "Coord has type of object", NULL);
     r |= Test(coord->idx == slIdx, "Coord has idx sent to PackAddr", NULL);
 
-    Stash_UnpackAddr(coord, arr);
+    Stash_UnpackAddr(m, coord, arr);
     args[0] = (Abstract *)Str_Ref(m,
         (byte *)&orig,sizeof(void *), sizeof(void *), STRING_BINARY);
     args[1] = (Abstract *)Str_Ref(m,

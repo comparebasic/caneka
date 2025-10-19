@@ -38,6 +38,7 @@ static char *baseTypeStrings[] = {
     "_TYPE_RANGE_TYPE_END",
     "_TYPE_ABSTRACT_BEGIN",
     "TYPE_ABSTRACT",
+    "TYPE_ERROR_MSG",
     "TYPE_BUILDCTX",
     "TYPE_RANGE",
     "TYPE_BOOK",

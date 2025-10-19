@@ -25,7 +25,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
             (Abstract *)Type_ToStr(ErrStream->m, split->type.of),
             NULL
         };
-        Error(ErrStream->m, (Abstract *)v, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to split StrVec with type $", args);
     }
 
@@ -37,7 +37,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
         Str *s = (Str *)Iter_Get(&it);
         i32 pos = 0;
         while((r & LAST) == 0){
-            Guard_Incr(&guard, 100, FUNCNAME, FILENAME, LINENUMBER);
+            Guard_Incr(m, &guard, 100, FUNCNAME, FILENAME, LINENUMBER);
             r &= ~MORE;
             if(s == NULL){
                 Abstract *args[] = {
@@ -48,7 +48,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
                     (Abstract *)&it,
                     NULL
                 };
-                Error(ErrStream->m, (Abstract *)v, FUNCNAME, FILENAME, LINENUMBER, 
+                Error(m, FUNCNAME, FILENAME, LINENUMBER, 
                     "String not found in StrVec for split @ using & on & currenlty looking at & at &^0.\n", args);
             }
 
@@ -75,7 +75,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
                         (Abstract *)split,
                         NULL
                     };
-                    Error(ErrStream->m, (Abstract *)v, FUNCNAME, FILENAME, LINENUMBER, "Match is longer than a single string, not yet supported &", args);
+                    Error(m, FUNCNAME, FILENAME, LINENUMBER, "Match is longer than a single string, not yet supported &", args);
                     return ERROR;
                 }
                 Iter backlogIt; 

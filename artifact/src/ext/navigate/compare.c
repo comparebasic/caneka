@@ -41,7 +41,7 @@ status Compare(Comp *comp){
                         (Abstract *)cr->b,
                         NULL
                     };
-                    Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                    Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
                         "iter END mismatch & -^E. @ vs @^e.", args);
                 }
                 return comp->type.state;
@@ -63,7 +63,7 @@ status Compare(Comp *comp){
                                 (Abstract *)comp,
                                 NULL
                             };
-                            Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                            Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
                                 "typeOfChild mismatch $ vs $ &", args);
                         }
                         return comp->type.state;
@@ -76,7 +76,7 @@ status Compare(Comp *comp){
                                     (Abstract *)comp,
                                     NULL
                                 };
-                                Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                                Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
                                     "value mismatch &", args);
                             }
                             return comp->type.state;
@@ -90,7 +90,7 @@ status Compare(Comp *comp){
                                     (Abstract *)comp,
                                     NULL
                                 };
-                                Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                                Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
                                     "atts mismatch &", args);
                             }
                             return comp->type.state;
@@ -101,7 +101,7 @@ status Compare(Comp *comp){
                                 (Abstract *)comp,
                                 NULL
                             };
-                            Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                            Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
                                 "atts of B mismatch &", args);
                         }
                         comp->type.state |= NOOP;
@@ -137,7 +137,7 @@ status Compare(Comp *comp){
                                 (Abstract *)b,
                                 NULL
                             };
-                            Error(comp->m, (Abstract *)comp, FILENAME, FUNCNAME, LINENUMBER,
+                            Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
                                 "mismatch & - ^p.&^r. vs ^p.&^r.", args);
                         }
                         comp->type.state |= NOOP;

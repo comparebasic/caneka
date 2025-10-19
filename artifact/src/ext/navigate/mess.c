@@ -100,7 +100,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
             (Abstract *)mess,
             NULL
         };
-        Error(mess->m, (Abstract *)mess, FUNCNAME, FILENAME, LINENUMBER,
+        Error(mess->m, FUNCNAME, FILENAME, LINENUMBER,
             "Node is NULL for abstract @, and mess @", args);
         return ERROR;
     }

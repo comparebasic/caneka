@@ -52,7 +52,7 @@ Str *Str_DigestAlloc(MemCh *m){
 status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
     if(public->alloc != secret->alloc && public->alloc != DIGEST_SIZE ||
         phrase == NULL || phrase->total == 0 ){
-        Error(m, (Abstract *)NULL, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error public and secret Str objects must be exactly DIGEST_SIZE allocations, and the phrase must have content",
             NULL);
         return ERROR;
