@@ -26,5 +26,6 @@ status Task_Tumble(Task *tsk);
 status Task_AddDataStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags);
 status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags);
 status Task_Free(Step *st, Task *tsk);
+status Task_ResetChain(Task *tsk);
 
 status Task_Init(MemCh *m);

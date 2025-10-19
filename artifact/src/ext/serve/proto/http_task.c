@@ -13,14 +13,21 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
         Cursor_Add(proto->out, s);
     }else{
         Stream *sm = Stream_MakeToVec(tsk->m, proto->out->v);
+
+        Str *statLine = Str_CstrRef(tsk->m, "200 OK");
+        if(ctx->code != 200){
+            statLine = Str_CstrRef(tsk->m, "500 Server Error");
+        }
+
         Abstract *args[] = {
+            (Abstract *)statLine,
             (Abstract *)ctx->mime,
             (Abstract *)I64_Wrapped(tsk->m, ctx->content->total),
             (Abstract *)ctx->content,
             NULL
         };
-        Fmt(sm,
-            "HTTP/1.1 200 OK\r\n"
+
+        Fmt(sm, "HTTP/1.1 $\r\n"
             "Server: Caneka\r\n"
             "Content-Type: $\r\n"
             "Content-Length: $\r\n"
@@ -36,7 +43,9 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
 
 status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source){
     status r = READY;
-    tsk->data = (Abstract *)HttpProto_Make(tsk->m);
+    if(tsk->data == NULL){
+        tsk->data = (Abstract *)HttpProto_Make(tsk->m);
+    }
     tsk->source = source;
     r |= Task_AddStep(tsk, TcpTask_WriteFromOut, NULL, NULL, STEP_IO_OUT);
     r |= Task_AddStep(tsk, HttpTask_PrepareResponse, NULL, NULL, ZERO);

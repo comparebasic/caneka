@@ -46,5 +46,5 @@ Abstract **Arr_Make(MemCh *m, i32 nvalues){
         return NULL;
     }
     size_t sz = sizeof(Abstract *)*(nvalues+1);
-    return (Abstract **)MemCh_Alloc(m, sz);
+    return (Abstract **)Bytes_Alloc((m), sz, TYPE_POINTER_ARRAY);
 }

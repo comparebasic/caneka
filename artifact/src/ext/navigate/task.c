@@ -6,11 +6,7 @@ Table *TaskErrorHandlers = NULL; /* TaskPopulate */
 static status _taskErrorHandler(MemCh *m, Abstract *_tsk, Abstract *msg){
     Abstract *args[5];
     Task *tsk = (Task *)as(_tsk, TYPE_TASK);
-    tsk->type.state |= ERROR;
-    args[0] = (Abstract *)tsk->source;
-    args[1] = NULL;
-    Out("^r.Error Handling @^0\n", args);
-    Single *key = Util_Wrapped(m, (util)tsk->source);
+    Single *key = Util_Wrapped(m, (util)tsk->parent);
     Single *funcW = (Single *)Table_Get(TaskErrorHandlers, (Abstract *)key);
     if(funcW != NULL){
         TaskPopulate func = (TaskPopulate)funcW->val.ptr;
@@ -76,6 +72,11 @@ status Task_Tumble(Task *tsk){
 
     DebugStack_Pop();
     return tsk->type.state;
+}
+
+status Task_ResetChain(Task *tsk){
+    Iter_Init(&tsk->chainIt, Span_Make(tsk->m));
+    return SUCCESS;
 }
 
 status Task_AddDataStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags){

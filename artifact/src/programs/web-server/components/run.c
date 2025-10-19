@@ -21,19 +21,22 @@ static Object *Example_getPageData(Task *tsk, Route *rt){
 static status Example_log(Step *_st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-    Abstract *args[] = {
-        (Abstract *)Lookup_Get(HttpMethods, ctx->method),
-        (Abstract *)ctx->path,
-        (Abstract *)MicroTime_ToStr(OutStream->m, MicroTime_Now()),
-        NULL,
-    };
 
-    if(tsk->type.state & ERROR){
-        Out("^r.Error $ @ $^0\n", args);
+    Abstract *args[6];
+    args[0] = (Abstract *)Lookup_Get(HttpMethods, ctx->method);
+    args[1] = (Abstract *)I32_Wrapped(tsk->m, ctx->code);
+    args[2] = (Abstract *)ctx->path;
+    args[3] = (Abstract *)MicroTime_ToStr(OutStream->m, MicroTime_Now());
+    args[4] = NULL;
+
+    if(ctx->type.state & ERROR){
+        args[4] = (Abstract *)ctx->errors;
+        args[5] = NULL;
+        Out("^r.Error $/$ @ $ @^0\n", args);
     }else if(ctx->code == 200){
-        Out("^g.Served $ @ $^0\n", args);
+        Out("^g.Served $/$ @ $^0\n", args);
     }else{
-        Out("^c.Responded $ @ $^0\n", args);
+        Out("^c.Responded $/$ @ $^0\n", args);
     }
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     close(pfd->fd);
@@ -91,7 +94,7 @@ static status Example_HeaderContent(Step *st, Task *tsk){
         args[0] = (Abstract *)tcp->inc;
         args[1] = NULL;
         Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Route is null for Footer: @", args);
+            "Route is null for Header: @", args);
         st->type.state |= ERROR;
         return st->type.state;
     }
@@ -148,23 +151,50 @@ static status Example_ServePage(Step *st, Task *tsk){
 static status Example_ServeError(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
     ctx->code = 500;
+    ctx->type.state |= ERROR;
     ctx->mime = Str_CstrRef(tsk->m, "text/html");
-    ctx->content = StrVec_Make(tsk->m);
+
+    if(ctx->content == NULL){
+        ctx->content = StrVec_Make(tsk->m);
+    }
     StrVec_Add(ctx->content, Str_CstrRef(tsk->m,
-        "<!DOCTYPE html><html lang=\"en\"><body>"
         "<h1>Server Error</h1>\r\n    <p>"));
     Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
+
     ErrorMsg *msg = (ErrorMsg *)as(st->arg, TYPE_ERROR_MSG);
-    ErrorMsg_ToStream(sm, msg);
-    StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "</p>\r\n</body>\r\n</html>\r\n"));
+    if(ctx->errors == NULL){
+        ctx->errors = Span_Make(tsk->m);
+    }
+
+    Span_Add(ctx->errors, (Abstract *)msg);
+    ToS(sm, (Abstract *)msg, msg->type.of, ZERO);
+
+    StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "</p>\r\n"));
     st->type.state |= SUCCESS;
     return st->type.state;
 }
 
 static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
-    Task_AddStep(tsk, Example_ServeError, NULL, NULL, ZERO);
-    return NOOP;
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
+    Route *rt = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
+    Object *data = Example_getPageData(tsk, rt);
+
+    Task_ResetChain(tsk);
+    HttpTask_InitResponse(tsk, NULL, source);
+    Task_AddDataStep(tsk,
+        Example_FooterContent, NULL, (Abstract *)data, (Abstract *)tsk, ZERO);
+    Task_AddStep(tsk, Example_ServeError, arg, source, ZERO);
+    Task_AddDataStep(tsk,
+        Example_HeaderContent, (Abstract *)rt, (Abstract *)data, (Abstract *)tsk, ZERO);
+
+    tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
+
+    return SUCCESS;
 }
 
 static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
@@ -233,9 +263,11 @@ status WebServer_Run(MemCh *gm){
     args[0] = (Abstract *)ctx;
     args[1] = NULL;
     Out("^y.Serving &\n", args);
-    Single *sg = Util_Wrapped(m, (util)tsk);
+
     Single *funcW = Func_Wrapped(m, Example_errorPopulate);
-    Table_Set(TaskErrorHandlers, (Abstract *)sg, (Abstract *)funcW);
+    Single *key = Util_Wrapped(ErrStream->m, (util)tsk);
+    Table_Set(TaskErrorHandlers, (Abstract *)key, (Abstract *)funcW);
+
     Task_Tumble(tsk);
 
     MemCh_Free(m);

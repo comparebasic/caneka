@@ -99,6 +99,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             MemCh *tm = MemCh_Make();
             Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
+            child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
             tm->owner = (Abstract *)child;
             ctx->populate(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk->source);

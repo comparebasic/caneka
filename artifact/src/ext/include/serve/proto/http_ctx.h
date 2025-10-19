@@ -17,6 +17,7 @@ typedef struct {
     Cursor *body;
     StrVec *content;
     Table *headers;
+    Span *errors;
 } HttpCtx;
 
 HttpCtx *HttpCtx_Make(MemCh *m);
