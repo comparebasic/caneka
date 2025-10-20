@@ -9,7 +9,9 @@ status Crypto_Tests(MemCh *gm){
     Abstract *args[5];
 
     Str *s = Str_CstrRef(m, "Yay test string!");
-    Str *digest = Str_ToSha256(m, s);
+    Str *digest = Str_Make(m, DIGEST_SIZE);
+    digest->length = DIGEST_SIZE;
+    Str_ToSha256(m, digest->bytes);
     digest = Str_ToHex(m, digest);
 
     Str *expected = Str_CstrRef(m,
@@ -28,7 +30,7 @@ status Crypto_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)s, (Abstract *)v), 
         "StrVec and Str text are identical: & vs &", args);
 
-    digest = StrVec_ToSha256(m, v);
+    StrVec_ToSha256(m, v, digest->bytes);
     digest = Str_ToHex(m, digest);
 
     args[0] = (Abstract *)s;
@@ -125,6 +127,12 @@ status Crypto_Tests(MemCh *gm){
         " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");
     digest = Str_ToSha256(m, message);
     Str *sig = SignPair_Sign(m, digest, secret);
+
+    args[0] = (Abstract *)sig;
+    args[1] = (Abstract *)digest;
+    args[2] = NULL;
+    Out("^p.sig sign:& digest:&^0\n", args);
+
     Str *sigHex = Str_ToHex(m, sig);
 
     status valid = SignPair_Verify(m, digest, sig, public);

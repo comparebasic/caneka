@@ -19,8 +19,6 @@ typedef unsigned int crypto_uint32;
 typedef unsigned long long crypto_uint64;
 #endif
 
-#define DIGEST_SIZE 32
-#define SIGNATURE_SIZE 64
 struct sha256_ctx;
 
 typedef struct sha256_ctx {

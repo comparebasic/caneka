@@ -7,3 +7,5 @@ struct step;
 struct task;
 struct binseg_ctx;
 struct binseg_hdr;
+struct auth_cred;
+struct auth_target;

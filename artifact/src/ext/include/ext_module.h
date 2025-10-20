@@ -4,6 +4,7 @@
 #include "navigate.h"
 #include "transp.h"
 #include "format.h"
+#include "auth.h"
 #include "sequence.h"
 #include "serve.h"
 #include "doc.h"

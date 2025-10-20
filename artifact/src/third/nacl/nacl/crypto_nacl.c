@@ -6,43 +6,41 @@ void randombytes(byte *b, i64 length){
     getrandom(b, length, 0);
 }
 
-Str *Str_ToSha256(MemCh *m, Str *s){
+status Str_ToSha256(MemCh *m, Str *s, digest *hash){
     Sha256Ctx ctx;
     memset(&ctx, 0, sizeof(Sha256Ctx));
-    sha256_start(&ctx);
-    Str *d = Str_Make(m, DIGEST_SIZE);
-    sha256_finalize(&ctx, d->bytes, s->bytes, s->length);
-    d->length = DIGEST_SIZE;
-    return d;
+    memset(hash, 0, DIGEST_SIZE);
+    if(!sha256_start(&ctx) && !sha256_finalize(&ctx, hash, s->bytes, s->length)){
+        return SUCCESS;
+    }
+    return ERROR;
 }
 
-Str *StrVec_ToSha256(MemCh *m, StrVec *v){
+status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
     Sha256Ctx ctx;
     Abstract *args[3];
     v = StrVec_ReAlign(m, v);
     memset(&ctx, 0, sizeof(Sha256Ctx));
     sha256_start(&ctx);
-    Str *d = Str_Make(m, DIGEST_SIZE);
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
         if(it.type.state & LAST){
-            sha256_finalize(&ctx, d->bytes, s->bytes, s->length);
+            sha256_finalize(&ctx, hash, s->bytes, s->length);
             d->length = DIGEST_SIZE;
-            return d;
+            return SUCCESS;
         }else{
             sha256_update(&ctx, s->bytes, s->length);
         }
     }
-    v->type.state |= ERROR;
-    return NULL;
+    return ERROR;
 }
 
-Str *StrVec_SaltedDigest(MemCh *m, StrVec *orig, Str *salt){
+status StrVec_SaltedDigest(MemCh *m, StrVec *orig, Str *salt, digest *hash){
     StrVec *v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
     StrVec_AddBytes(m, v, salt->bytes, salt->length);
-    return StrVec_ToSha256(m, v);
+    return StrVec_ToSha256(m, v, hash);
 }
 
 Str *Str_DigestAlloc(MemCh *m){
@@ -65,7 +63,7 @@ status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
 }
 
 Str *SignPair_Sign(MemCh *m, Str *content, Str *secret){
-    Str *sig = Str_Make(m, content->length+SIGNATURE_SIZE); 
+    Str *sig = Str_Make(m, content->length+SIG_FOOTER_SIZE); 
     crypto_uint64 length = 0;
     crypto_sign(sig->bytes, &length, content->bytes, content->length, secret->bytes);
     sig->length = length;

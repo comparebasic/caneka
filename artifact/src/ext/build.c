@@ -21,6 +21,7 @@ static char *inc[] = {
     "-I./artifact/src/include/",
     "-I./artifact/src/base/include/",
     "-I./artifact/src/ext/include/",
+    "-I./build/include/",
     NULL
 };
 
@@ -28,6 +29,16 @@ static char *libs[] = {
     "-lcrypto",
     NULL
 };
+
+static gensalt[] = {
+    "salt.h"
+    NULL
+}
+
+static generate[] = {
+    &gensalt;
+    NULL;
+}
 
 static char *staticLibs[] = {
     NULL
@@ -190,6 +201,7 @@ int main(int argc, char **argv){
     ctx.args.staticLibs = staticLibs;
     ctx.args.licenceFiles = licences;
     ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.generate = generate;
 
     Build(&ctx);
 

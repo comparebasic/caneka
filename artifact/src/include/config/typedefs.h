@@ -6,6 +6,8 @@ typedef int32_t i32;
 typedef uint32_t quad;
 typedef int64_t i64;
 typedef uint64_t util;
+typedef util u128[2];
+typedef byte digest[32];
 
 typedef word cls;
 typedef word status;
