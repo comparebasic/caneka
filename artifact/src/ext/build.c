@@ -30,13 +30,9 @@ static char *libs[] = {
     NULL
 };
 
-static gensalt[] = {
-    "salt.h"
-    NULL
-}
 
 static generate[] = {
-    &gensalt;
+    "salt.h", 
     NULL;
 }
 
