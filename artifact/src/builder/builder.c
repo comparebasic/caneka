@@ -498,6 +498,41 @@ static status build(BuildCtx *ctx){
         return ERROR;
     }
 
+    if(ctx->genConfigs != NULL){
+        GenConfig *config = ctx->genConfigs;
+        i32 len = strlen(ctx->src);
+        Str *s = Str_Make(m, STR_DEFAULT);
+        Str_AddCstr(s, ctx->src);
+        Str_AddCstr(s, "/gen/");
+        Str *genSrc = IoUtil_GetAbsPath(m, s);
+
+        s = Str_Make(m, STR_DEFAULT);
+        Str_AddCstr(s, ctx->dist);
+        Str_AddCstr(s, "/");
+        Str_AddCstr(s, ctx->libtarget);
+        Str_AddCstr(s, "/include/");
+        Str *genDest = IoUtil_GetAbsPath(m, s);
+
+        i16 genSrcL = genSrc->length;
+        i16 genDestL = genDest->length;
+        while(config->file != NULL){
+
+            Str_AddCstr(genSrc, config->file);
+            Str_AddCstr(genDest, config->file);
+
+            if((genSrc->type.state|genSrc->type.state) & ERROR){
+                return ERROR;
+            }
+
+            printf("GENCONFIGS! %s -> %s\n", genSrc->bytes, genDest->bytes);
+            fflush(stdout);
+
+            Str_Trunc(genSrc, genSrcL);
+            Str_Trunc(genDest, genDestL);
+            config++;
+        }
+    }
+
     if(ctx->args.licenceFiles != NULL){
         ctx->fields.steps.modSrcCount->val.i = 0;
         char **lic =  ctx->args.licenceFiles;

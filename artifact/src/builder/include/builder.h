@@ -32,6 +32,12 @@ typedef struct build_cli_fields {
     } current;
 } BuildCliFields;
 
+typedef struct gen_config {
+    char *file;
+    char *key;
+    char **args;
+} GenConfig;
+
 typedef struct buildctx {
     Type type;
     MemCh *m;
@@ -54,10 +60,7 @@ typedef struct buildctx {
         char **licenceFiles;
     } args;
     BuildSubdir **objdirs;
-    struct {
-        char **templates;
-        char *sourcedir;
-    } generate;
+    GenConfig *genConfigs;
 } BuildCtx;
 
 status BuildCtx_Init(MemCh *m, BuildCtx *ctx);

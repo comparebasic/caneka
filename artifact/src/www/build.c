@@ -87,6 +87,7 @@ int main(int argc, char **argv){
     ctx.args.staticLibs = staticLibs;
     ctx.args.licenceFiles = licences;
     ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.genConfigs = NULL;
 
     Build(&ctx);
 

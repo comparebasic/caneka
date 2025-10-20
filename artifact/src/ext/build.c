@@ -31,9 +31,18 @@ static char *libs[] = {
 };
 
 
-static char *generate[] = {
-    "salt.h", 
-    NULL
+static char *saltGenSources[] = {"/basic/gensource/salt512", NULL};
+static GenConfig genConfigs[] = {
+    {
+        "salt.h", 
+        "_#_",
+        saltGenSources,
+    },
+    {
+        NULL,
+        NULL,
+        NULL
+    }
 };
 
 static char *staticLibs[] = {
@@ -197,8 +206,7 @@ int main(int argc, char **argv){
     ctx.args.staticLibs = staticLibs;
     ctx.args.licenceFiles = licences;
     ctx.objdirs = (BuildSubdir **)objdirs;
-    ctx.generate.templates = generate;
-    ctx.generate.sourcedir = "/basic/gensource/";
+    ctx.genConfigs = genConfigs;
 
     Build(&ctx);
 
