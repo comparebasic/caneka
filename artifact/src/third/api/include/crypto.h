@@ -1,6 +1,3 @@
-#define DIGEST_SIZE 32
-#define SIG_FOOTER_SIZE 64
-#define SIGNATURE_SIZE 96
 status Str_ToSha256(MemCh *m, Str *s, digest *hash);
 status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash);
 status StrVec_SaltedDigest(MemCh *m, StrVec *v, Str *salt, digest *hash);

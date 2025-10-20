@@ -1,38 +1,49 @@
 #include <external.h>
+#include <caneka.h>
+#include <builder.h>
 
 enum states {
-    TEXT = 0;
-    MATCH_START = 1;
-    IN_MATCH = 2;
-    MATCH_ENDING = 3;
-}
+    TEXT = 1 << 8,
+    MATCH_START = 1 << 9,
+    IN_MATCH = 1 << 10,
+    MATCH_ENDING = 1 << 11,
+};
 
-int main(int argc, char *argv[]){
-    if(argc < 4){
-        printf("generate gentempl filesdir outdir - the template will such up files of the variable names\n");
-        exit(1);
-    }
+status Generate(MemCh *m, Str *path, Str* filedir, Str *outdir){
 
-    short state = TEXT;
-
-    char *path = argv[1];
-    char *filedir = argv[2];
-    char *outdir = argv[3];
+    status state = TEXT;
 
     /* open file */
-    while(<file read>){
-        char *start = argv[1];
+    i32 fd = open(Str_Cstr(m, path), O_RDONLY);
+    if(fd < 0){
+        Abstract *args[] = {
+            (Abstract *)path,
+            NULL
+        };
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            "Generate unable to open template path: $", args);
+        return ERROR;
+    }
+
+    char in[BUILDER_READ_SIZE];
+    ssize_t length = 0;
+    ssize_t seglen = 0;
+    do {
+        length = read(fd, in, BUILDER_READ_SIZE);
+
+        char *start = in;
         int length = strlen(start);
         char *end = start+length-1;
         char *ptr = start;
 
-        char buff[512];
+        char buff[BUILDER_READ_SIZE];
         char *b = buff;
-        char *bend = buff+(512-1);
+        char *bend = buff+(BUILDER_READ_SIZE-1);
 
-        char key[512];
+        char key[BUILDER_READ_SIZE];
         char *k = buff;
-        char *kend = buff+(512-1);
+        char *kend = buff+(BUILDER_READ_SIZE-1);
+
         while(ptr <= end){
             char c = *ptr;
             if(state == TEXT){
@@ -40,7 +51,10 @@ int main(int argc, char *argv[]){
                     state = IN_MATCH;
                 }else{
                     if(b == bend){
-                        /* write out */
+                        seglen = end - ptr;
+                        write(1, "text: ", strlen("text: "));
+                        write(1, b, seglen);
+                        write(1, "\n\n", 2);
                         b = buff;
                     }
                     *b++ = c;
@@ -62,8 +76,23 @@ int main(int argc, char *argv[]){
                 if(c == '_'){
                     *k++ = '\0';
                     /* write buff out */
+                    seglen = end - ptr;
+                    if(seglen > 0){
+                        write(1, "text: ", strlen("text: "));
+                        write(1, b, seglen);
+                        write(1, "\n\n", 2);
+                    }
                     b = buff;
+
+                    seglen = kend - k;
+                    if(seglen > 0){
+                        write(1, "filename: ", strlen("filename: "));
+                        write(1, k, seglen);
+                        write(1, "\n\n", 2);
+                    }
+
                     /* read file */
+
                     /* write file */
                     k = key;
                     state = TEXT;
@@ -74,7 +103,18 @@ int main(int argc, char *argv[]){
             }
             ptr++;
         }
+    }while(length > 0);
+    if(length < 0){
+        Abstract *args[] = {
+            (Abstract *)path,
+            (Abstract *)Str_CstrRef(m,  strerror(errno)),
+            NULL
+        };
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            "Generate read error on file $: $", args);
+        return ERROR;
     }
-    printf("generated %s\n", args[1]);
-    exit(0);
+
+    state |= SUCCESS;
+    return state;
 }

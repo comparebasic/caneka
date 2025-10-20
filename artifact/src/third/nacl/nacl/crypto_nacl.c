@@ -9,11 +9,10 @@ void randombytes(byte *b, i64 length){
 status Str_ToSha256(MemCh *m, Str *s, digest *hash){
     Sha256Ctx ctx;
     memset(&ctx, 0, sizeof(Sha256Ctx));
+    sha256_start(&ctx);
     memset(hash, 0, DIGEST_SIZE);
-    if(!sha256_start(&ctx) && !sha256_finalize(&ctx, hash, s->bytes, s->length)){
-        return SUCCESS;
-    }
-    return ERROR;
+    sha256_finalize(&ctx, (byte *)hash, s->bytes, s->length);
+    return SUCCESS;
 }
 
 status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
@@ -27,8 +26,7 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
         if(it.type.state & LAST){
-            sha256_finalize(&ctx, hash, s->bytes, s->length);
-            d->length = DIGEST_SIZE;
+            sha256_finalize(&ctx, (byte *)hash, s->bytes, s->length);
             return SUCCESS;
         }else{
             sha256_update(&ctx, s->bytes, s->length);
@@ -55,8 +53,9 @@ status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
             NULL);
         return ERROR;
     }
-    Str *digest = StrVec_ToSha256(m, phrase);
-    sign_keypair_sha256(public->bytes, secret->bytes, digest->bytes);
+    Str *hash = Str_Make(m, DIGEST_SIZE);
+    StrVec_ToSha256(m, phrase, (digest *)hash->bytes);
+    sign_keypair_sha256(public->bytes, secret->bytes, hash->bytes);
     public->length = DIGEST_SIZE;
     secret->length = DIGEST_SIZE;
     return SUCCESS;

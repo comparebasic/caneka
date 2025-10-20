@@ -1,3 +1,8 @@
+#ifndef BUILDER_H
+#define BUILDER_H
+
+#define BUILDER_READ_SIZE 512
+
 typedef struct executable {
     char *bin;
     char *src;
@@ -49,7 +54,13 @@ typedef struct buildctx {
         char **licenceFiles;
     } args;
     BuildSubdir **objdirs;
+    struct {
+        char **templates;
+        char *sourcedir;
+    } generate;
 } BuildCtx;
 
 status BuildCtx_Init(MemCh *m, BuildCtx *ctx);
 status Build(BuildCtx *ctx);
+status Generate(MemCh *m, Str *path, Str *filedir, Str *outdir);
+#endif

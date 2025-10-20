@@ -1,23 +1,20 @@
 enum auth_flags {
-    AUTH_FD = 1 << 8,
-    AUTH_PATH = 1 << 9,
-    AUTH_ASYM_KEY, 1 << 10,
-    AUTH_SYM_KEY = 1 << 11,
-    AUTH_IP4 = 1 << 11,
-    AUTH_IP6 = 1 << 12,
-    AUTH_SIG = 1 << 13,
-    AUTH_HASH = 1 << 13,
-    AUTH_TEXT = 1 << 14,
-}
+    AUTH_I = 1 << 8,
+    AUTH_U = 1 << 9,
+    AUTH_IP4 = 1 << 10,
+    AUTH_IP6 = 1 << 11,
+    AUTH_SIG = 1 << 12,
+    AUTH_TEXT = 1 << 13,
+};
 
 typedef struct auth_target {
     Type type;
     union {
         i32 i;
         util u;
-        u128;
+        util u128[2];
         StrVec *text;
-    } bin.
+    } bin;
     Span *groups;
 } AuthTarget;
 

@@ -3,11 +3,16 @@ typedef unsigned char byte;
 typedef int16_t i16;
 typedef uint16_t word;
 typedef int32_t i32;
+
 typedef uint32_t quad;
 typedef int64_t i64;
 typedef uint64_t util;
-typedef util u128[2];
-typedef byte digest[32];
+
+#define DIGEST_SIZE 32
+#define SIG_FOOTER_SIZE 64
+#define SIGNATURE_SIZE 96
+
+typedef byte digest[DIGEST_SIZE];
 
 typedef word cls;
 typedef word status;

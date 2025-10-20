@@ -1,6 +1,6 @@
 #!/bin/sh
 CC="clang"
-INC="-I ./artifact/src/include -I artifact/src/base/include"
+INC="-I ./artifact/src/include -I ./artifact/src/base/include -I ./artifact/src/builder/include"
 STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"
 
 mkdir -p ./build/libcaneka/ && \
@@ -9,7 +9,7 @@ $CC -g -Wno-gnu-folding-constant $INC -c -o ./build/libcaneka/libcaneka.a ./arti
 
 mkdir -p ./build/libbuilder/ && \
 echo "building Caneka Builder" && \
-$CC -g $INC -I ./artifact/src/programs/builder/include -c -o ./build/libbuilder/libbuilder.a ./artifact/src/builder/builder.c -DINSECURE;
+$CC -g $INC -c -o ./build/libbuilder/libbuilder.a ./artifact/src/builder/inc.c -DINSECURE;
 
 echo "building Caneka Build Config" && \
 $CC -o build/build_ext $INC $STATICS artifact/src/ext/build.c -lm;
