@@ -1,5 +1,7 @@
+#define SALT_LENGTH 512
 typedef struct salt {
     Type type;
-    i32 start;
-    byte salt512[512];
+    i32 fact;
+    i32 length;
+    byte *salt512;
 } Salt;

@@ -18,7 +18,7 @@ typedef struct auth_target {
     Span *groups;
 } AuthTarget;
 
-AuthTarget *AuthTarget_Make(MemCh *m);
+AuthTarget *AuthTarget_Make(MemCh *m, word flags);
 
 status AuthFuncI(MemCh *m, AuthTarget *target, digest *hash);
 status AuthFuncU(MemCh *m, AuthTarget *target, digest *hash);

@@ -1,4 +1,8 @@
+#ifndef EXT_SALT_H
+#define EXT_SALT_H
 static Salt _salt = {
-    .start = 1789,
-    .salt512 = (byte *)"_#_",
+    .fact = 1789,
+    .length = SALT_LENGTH,
+    .salt512 = (byte *)"_#_"
 };
+#endif

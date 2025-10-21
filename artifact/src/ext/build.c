@@ -14,6 +14,7 @@ static char *cflags[] = {
         "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
         "-DINSECURE",
         "-DCNK_EXT",
+        "-DCNK_CRYPTO",
         NULL
 };
 
@@ -21,6 +22,7 @@ static char *inc[] = {
     "-I./artifact/src/include/",
     "-I./artifact/src/base/include/",
     "-I./artifact/src/ext/include/",
+    "-I./artifact/src/third/api/include/",
     "-I./build/include/",
     NULL
 };
@@ -78,6 +80,12 @@ static BuildSubdir navigateobj = { "navigate", {
     "task.c",
     "navigate_tos.c",
     "navigate_cls.c",
+    NULL
+}};
+
+static BuildSubdir authobj = { "auth", {
+    "auth_target.c",
+    "auth_cred.c",
     NULL
 }};
 
@@ -165,6 +173,7 @@ static BuildSubdir *objdirs[] = {
     &typesobj,
     &docobj,
     &navigateobj,
+    &authobj,
     &sequenceobj,
     &serveobj,
     &protoobj,
@@ -208,7 +217,5 @@ int main(int argc, char **argv){
     ctx.objdirs = (BuildSubdir **)objdirs;
     ctx.genConfigs = genConfigs;
 
-    Build(&ctx);
-
-    return 0;
+    return (Build(&ctx) & ERROR) ? 2 : 0;
 }

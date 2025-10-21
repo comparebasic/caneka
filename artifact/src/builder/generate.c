@@ -2,108 +2,135 @@
 #include <caneka.h>
 #include <builder.h>
 
-enum states {
-    TEXT = 1 << 8,
-    MATCH_START = 1 << 9,
-    IN_MATCH = 1 << 10,
-    MATCH_ENDING = 1 << 11,
-};
+static status out(i32 fd, char *buff, char **b){
+    if(*b != buff){
+        write(fd, buff, *b - buff);
+        *b = buff;
+        return SUCCESS;
+    }
+    return NOOP;
+}
 
-status Generate(MemCh *m, Str *path, Str* filedir, Str *outdir){
+static status outfile(i32 ofd, char *vpath){
+    i32 fd = open(vpath, O_RDONLY);
+    Abstract *args[2];
+    if(fd < 0){
+        args[0] = (Abstract *)Str_CstrRef(OutStream->m, vpath);
+        args[1] = NULL;
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            "Generate unable to open variable path: $", args);
+        return ERROR;
+    }
 
-    status state = TEXT;
+    char in[BUILDER_READ_SIZE];
+    ssize_t length = 0;
+
+    do {
+        length = read(fd, in, BUILDER_READ_SIZE);
+        if(length <= 0){
+            break;
+        }
+        write(ofd, in, length);
+    }while(length > 0);
+
+    if(length < 0){
+        args[0] = (Abstract *)Str_CstrRef(OutStream->m, vpath);
+        args[1] = NULL;
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            "Generate writing to open variable path: $", args);
+        return ERROR;
+    }
+
+    return SUCCESS;
+}
+
+status Generate(MemCh *m, Str *path, Str *key, char* varpaths[], Str *outpath){
+    status state = READY;
 
     /* open file */
     i32 fd = open(Str_Cstr(m, path), O_RDONLY);
-    if(fd < 0){
+    i32 mode = 0644;
+    i32 ofd = open(Str_Cstr(m, outpath), O_WRONLY|O_CREAT, mode);
+
+    if(fd < 0 || ofd < 0){
         Abstract *args[] = {
             (Abstract *)path,
+            (Abstract *)outpath,
+            (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
             NULL
         };
         Fatal(FUNCNAME, FILENAME, LINENUMBER, 
-            "Generate unable to open template path: $", args);
+            "Generate unable to open template path $ -> $: $", args);
         return ERROR;
     }
 
     char in[BUILDER_READ_SIZE];
     ssize_t length = 0;
     ssize_t seglen = 0;
+    char buff[BUILDER_READ_SIZE];
+    char *b = buff;
+    char *bend = buff+(BUILDER_READ_SIZE-1);
+    char shelf[BUILDER_READ_SIZE];
+    char *sh = shelf;
+    char *shend = shelf+(BUILDER_READ_SIZE-1);
+
+    i32 varIdx = 0;
+    i16 keyIdx = 0;
     do {
         length = read(fd, in, BUILDER_READ_SIZE);
 
+        if(length <= 0){
+            break;
+        }
+
         char *start = in;
-        int length = strlen(start);
         char *end = start+length-1;
         char *ptr = start;
 
-        char buff[BUILDER_READ_SIZE];
-        char *b = buff;
-        char *bend = buff+(BUILDER_READ_SIZE-1);
-
-        char key[BUILDER_READ_SIZE];
-        char *k = buff;
-        char *kend = buff+(BUILDER_READ_SIZE-1);
-
         while(ptr <= end){
             char c = *ptr;
-            if(state == TEXT){
-                if(c == '_'){
-                    state = IN_MATCH;
-                }else{
-                    if(b == bend){
-                        seglen = end - ptr;
-                        write(1, "text: ", strlen("text: "));
-                        write(1, b, seglen);
-                        write(1, "\n\n", 2);
-                        b = buff;
+            char k = key->bytes[keyIdx];
+            if(c == k){
+                keyIdx++;
+                *sh++ = c;
+                if(keyIdx == key->length){
+                    out(ofd, buff, &b);
+                    char *vpath = varpaths[varIdx];
+                    if(vpath == NULL || (outfile(ofd, vpath) & ERROR)){
+                        Abstract *args[] = {
+                            (Abstract *)Str_CstrRef(ErrStream->m, vpath),
+                            (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
+                            NULL
+                        };
+                        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+                            "Generate unable to read variable file $: $", args);
+                        return ERROR;
                     }
-                    *b++ = c;
-                }
-            }else if(state == MATCH_START){
-                if(c == '_'){
-                    state = IN_MATCH;
+                    varIdx++;
+                    sh = shelf;
+                    keyIdx = 0;
                 }else{
-                    state = TEXT;
-                    continue;
-                }
-            }else if(state == IN_MATCH){
-                if(c == '_'){
-                    state = MATCH_ENDING;
-                }else{
-                    *k++ = c;
-                }
-            }else if(state == MATCH_ENDING){
-                if(c == '_'){
-                    *k++ = '\0';
-                    /* write buff out */
-                    seglen = end - ptr;
-                    if(seglen > 0){
-                        write(1, "text: ", strlen("text: "));
-                        write(1, b, seglen);
-                        write(1, "\n\n", 2);
+                    if(sh == shend){
+                        out(ofd, shelf, &sh);
                     }
-                    b = buff;
-
-                    seglen = kend - k;
-                    if(seglen > 0){
-                        write(1, "filename: ", strlen("filename: "));
-                        write(1, k, seglen);
-                        write(1, "\n\n", 2);
-                    }
-
-                    /* read file */
-
-                    /* write file */
-                    k = key;
-                    state = TEXT;
-                }else{
-                    printf("error match var needs to end in __");
-                    exit(13);
                 }
+            }else{
+                keyIdx = 0;
+                if(sh != shelf){
+                    out(ofd, buff, &b);
+                    out(ofd, shelf, &sh);
+                }else if(b == bend){
+                    out(ofd, buff, &b);
+                }
+                *b++ = c;
             }
             ptr++;
         }
-    }while(length > 0);
+
+    } while(length > 0);
+
+    out(ofd, buff, &b);
+
     if(length < 0){
         Abstract *args[] = {
             (Abstract *)path,
@@ -115,6 +142,8 @@ status Generate(MemCh *m, Str *path, Str* filedir, Str *outdir){
         return ERROR;
     }
 
-    state |= SUCCESS;
+    state |= (close(fd) == 0) ? SUCCESS : ERROR;
+    state |= (close(ofd) == 0) ? SUCCESS : ERROR;
+
     return state;
 }

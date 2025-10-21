@@ -65,5 +65,5 @@ typedef struct buildctx {
 
 status BuildCtx_Init(MemCh *m, BuildCtx *ctx);
 status Build(BuildCtx *ctx);
-status Generate(MemCh *m, Str *path, Str *filedir, Str *outdir);
+status Generate(MemCh *m, Str *path, Str *key, char *varpaths[], Str *outpath);
 #endif

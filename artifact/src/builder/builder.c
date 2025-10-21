@@ -244,6 +244,22 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
             Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
             ptr++;
         }
+
+        if(ctx->genConfigs != NULL){
+            Str *s = Str_Make(m, STR_DEFAULT);
+            Str_AddCstr(s, ctx->dist);
+            Str_AddCstr(s, "/");
+            Str_AddCstr(s, ctx->libtarget);
+            Str_AddCstr(s, "/include/");
+            Str *genDest = IoUtil_GetAbsPath(m, s);
+
+            s = Str_Make(m, STR_DEFAULT);
+            Str_AddCstr(s, "-I");
+            Str_Add(s, genDest->bytes, genDest->length);
+
+            Span_Add(cmd, (Abstract *)s);
+        }
+
         Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-c"));
         Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-o"));
         Span_Add(cmd, (Abstract *)dest);
@@ -453,6 +469,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     sourceCstr = dir->sources;
     ctx->fields.steps.modCount->val.i++;
     while(*sourceCstr != NULL){
+        m->type.range++;
         Str_Trunc(source, sourceL);
         Str_AddCstr(source, *sourceCstr);
         Str_Trunc(dest, destL);
@@ -464,6 +481,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         ctx->fields.steps.modSrcCount->val.i++;
 
         MemCh_Free(m);
+        m->type.range--;
         sourceCstr++;
         if(r & ERROR){
             return r;
@@ -481,6 +499,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
 static status build(BuildCtx *ctx){
     status r = READY;
     DebugStack_Push(NULL, 0);
+    Abstract *args[5];
     MemCh *m = ctx->m;
     setupStatus(ctx);
     Str *libDir = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
@@ -510,8 +529,10 @@ static status build(BuildCtx *ctx){
         Str_AddCstr(s, ctx->dist);
         Str_AddCstr(s, "/");
         Str_AddCstr(s, ctx->libtarget);
-        Str_AddCstr(s, "/include/");
+        Str_AddCstr(s, "/include/gen/");
         Str *genDest = IoUtil_GetAbsPath(m, s);
+
+        Dir_CheckCreate(m, genDest);
 
         i16 genSrcL = genSrc->length;
         i16 genDestL = genDest->length;
@@ -519,13 +540,20 @@ static status build(BuildCtx *ctx){
 
             Str_AddCstr(genSrc, config->file);
             Str_AddCstr(genDest, config->file);
+            Str *key = Str_CstrRef(m, config->key);
 
             if((genSrc->type.state|genSrc->type.state) & ERROR){
                 return ERROR;
             }
 
-            printf("GENCONFIGS! %s -> %s\n", genSrc->bytes, genDest->bytes);
-            fflush(stdout);
+            r |= Generate(m, genSrc, key, config->args, genDest);
+            if(r & ERROR){
+                args[0] = (Abstract *)genSrc;
+                args[1] = (Abstract *)genDest;
+                args[2] = NULL;
+                Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error generating static file: $ -> $", args);
+                return ERROR;
+            }
 
             Str_Trunc(genSrc, genSrcL);
             Str_Trunc(genDest, genDestL);

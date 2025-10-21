@@ -121,7 +121,5 @@ int main(int argc, char **argv){
     ctx.objdirs = (BuildSubdir **)objdirs;
     ctx.genConfigs = NULL;
 
-    Build(&ctx);
-
-    return 0;
+    return (Build(&ctx) & ERROR) ? 2 : 0;
 }
