@@ -1,15 +1,19 @@
 enum send_recv_flags {
-    SEND_RECV_ASYNC = 1 << 8,
-    SEND_RECV_FD = 1 << 9,
-    SEND_RECV_SOCKET = 1 << 10,
-    SEND_RECV_STRVEC = 1 << 11,
-    SEND_RECV_FLUSH = 1 << 12,
+    BUFF_OUT = 1 << 8,
+    BUFF_IN = 1 << 9,
+    BUFF_ASYNC = 1 << 10,
+    BUFF_FD = 1 << 11,
+    BUFF_SOCKET = 1 << 11,
+    BUFF_STRVEC = 1 << 13,
+    BUFF_FLUSH = 1 << 14,
+    BUFF_UNBUFFERED = 1 << 15,
 };
 
-typedef struct send {
+typedef struct buff {
     Type type;
     i32 fd;
-    StrVec *buff;
+    MemCh *m;
+    StrVec *v;
     struct {
         Str *s;
         i32 idx;
@@ -22,3 +26,4 @@ typedef struct send {
 } Buff;
 
 status Buff_AddBytes(SendRecv *sr, byte *bytes, word length);
+Buff *Buff_Make(MemCh *m, word flags);

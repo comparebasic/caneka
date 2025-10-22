@@ -57,6 +57,7 @@ static char *baseTypeStrings[] = {
     "TYPE_STRVEC",
     "TYPE_STREAM",
     "TYPE_STREAM_TASK",
+    "TYPE_BUFF",
     "TYPE_CURSOR",
     "TYPE_TESTSUITE",
     "TYPE_SPAN",
