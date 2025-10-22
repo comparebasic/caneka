@@ -35,6 +35,19 @@ status Send_Send(SendRecv *sr){
                 sr->type.state |= MORE;
             }else{
                 sr->type.state |= SUCCESS;
+                if(sr->type.state & SEND_RECV_FLUSH){
+                    Iter it;                    
+                    Iter_Init(&it, sr->buff.p);
+                    while((Iter_Next(&it) & END) == 0){
+                        if(it.idx == 0){
+                            sr->tail.idx = 0;
+                            sr->tail = (Str *)Iter_Get(&it);
+                        }
+                        Str_Wipe(Iter_Get(&it));
+                    }
+                    sr->unsent.idx = 0;
+                    sr->unsent.s = sr->tail.s;
+                }
             }
         }else > 0{
             Str_Incr(sr->unsent.s, sent);
@@ -74,5 +87,6 @@ SendRecv *Send_Make(m, i32 fd, StrVec *v, word flags){
         v = StrVec_Make(m);
     }
     sr->v = v;
+    sr->tail.idx = -1;
     return sr;
 }

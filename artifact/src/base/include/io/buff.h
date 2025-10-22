@@ -3,6 +3,7 @@ enum send_recv_flags {
     SEND_RECV_FD = 1 << 9,
     SEND_RECV_SOCKET = 1 << 10,
     SEND_RECV_STRVEC = 1 << 11,
+    SEND_RECV_FLUSH = 1 << 12,
 };
 
 typedef struct send {
@@ -10,14 +11,14 @@ typedef struct send {
     i32 fd;
     StrVec *buff;
     struct {
-        Str *tail;
-        i16 remaining;
+        Str *s;
+        i32 idx;
     } tail;
     struct {
         Str *s;
         i64 total;
         i32 idx;
     } unsent;
-} SendRecv;
+} Buff;
 
-status SendRecv_AddBytes(SendRecv *sr, byte *bytes, word length);
+status Buff_AddBytes(SendRecv *sr, byte *bytes, word length);

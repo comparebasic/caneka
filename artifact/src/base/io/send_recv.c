@@ -3,23 +3,25 @@
 
 status SendRecv_AddBytes(SendRecv *sr, byte *bytes, word length){
     status r = READY;
-    if(sr->tail == NULL){
-        sr->tail = Str_Make(m, STR_DEFAULT);
-        sr->remaining = STR_DEFAULT;
+    if(sr->tail.idx == -1){
+        sr->tail.s = Str_Make(m, STR_DEFAULT);
+        sr->tail.idx++;
     }
     while(length > 0){
-        if(length > sr->remaining){
-            Str_Add(sr->tail, bytes, sr->remaining);
-            bytes += sr->remaining;
-            length -= sr->remaining;
-
-            sr->tail = Str_Make(m, STR_DEFAULT);
-            sr->remaining = STR_DEFAULT;
+        word remaining = sr->tail.s->alloc = s->tail.s.length;
+        if(length > remaining){
+            Str_Add(sr->tail, bytes, remaining);
+            bytes += remaining;
+            length -= remaining;
+            if(sr->tail.idx >= sr->buff.p->max_idx){
+                sr->tail = Str_Make(m, STR_DEFAULT);
+                Span_Add(sr->buff.p);
+                sr->tail.idx = sr->buff.p->max_idx;
+            }
         }else{
-            Str_Add(sr->tail, bytes, length);
-            sr->remaining -= length;
+            Str_Add(sr->tail.s, bytes, length);
+            r |= SUCCESS;
         }
-        r |= SUCCESS;
     }
     if(r == READY){
         r |= NOOP;
