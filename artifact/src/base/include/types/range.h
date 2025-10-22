@@ -55,6 +55,8 @@ enum types {
     TYPE_STRVEC,
     TYPE_STREAM,
     TYPE_STREAM_TASK,
+    TYPE_SEND,
+    TYPE_RECV,
     TYPE_CURSOR,
     TYPE_TESTSUITE,
     TYPE_SPAN,
