@@ -61,6 +61,9 @@ status BinSegReversedV_Tests(MemCh *gm);
 status FileDB_Tests(MemCh *gm);
 status Crypto_Tests(MemCh *gm);
 status TemplRoute_Tests(MemCh *gm);
+status Buff_Tests(MemCh *gm);
+status BuffSendRecv_Tests(MemCh *gm);
+status BuffIo_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

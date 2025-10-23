@@ -131,6 +131,8 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, Abstract *args
             ErrorMsg *msg = ErrorMsg_Make(m, func, file, line, fmt, args);
             r |= errFunc(m, a, (Abstract *)msg);
         }
+    }else{
+        r |= ERROR;
     }
     if(r & ERROR){
         Fatal(func, file, line, fmt, args);

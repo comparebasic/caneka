@@ -65,6 +65,24 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Buff Tests",
+        Buff_Tests,
+        "Testing the buffer add functionality.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Buff Send/Recv Tests",
+        BuffSendRecv_Tests,
+        "Testing the buffer send and recv components.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Buff IO Tests",
+        BuffIo_Tests,
+        "Testing the buffer send and recv to disk/socket components.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Stream Tests",
         Stream_Tests,
         "Testing setting up and running multiple stream types and stream chains",

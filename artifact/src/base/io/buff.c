@@ -5,12 +5,14 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
     status r = READY;
     if(bf->tail.idx == -1){
         bf->tail.s = Str_Make(bf->m, STR_DEFAULT);
-        bf->tail.idx++;
+        Span_Add(bf->v->p, (Abstract *)bf->tail.s);
+        bf->tail.idx = bf->v->p->max_idx;
     }
-    word remaining = bf->tail.s->alloc;
+    word remaining = bf->tail.s->alloc - bf->tail.s->length;
     while(length > 0){
         if(length > remaining){
             Str_Add(bf->tail.s, bytes, remaining);
+            bf->v->total += remaining;
             bytes += remaining;
             length -= remaining;
             if(bf->tail.idx >= bf->v->p->max_idx){
@@ -20,6 +22,8 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
             }
         }else{
             Str_Add(bf->tail.s, bytes, length);
+            bf->v->total += length;
+            length -= length;
             r |= SUCCESS;
         }
     }
