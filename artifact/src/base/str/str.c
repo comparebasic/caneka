@@ -92,6 +92,12 @@ Str *Str_Clone(MemCh *m, Str *s){
     return Str_CloneAlloc(m, s, s->alloc);
 }
 
+Str *Str_Rec(MemCh *m, Str *s){
+    Str *dup = (Str *)MemCh_AllocOf(m, sizeof(Str), TYPE_STR);
+    memcpy(dup, s, sizeof(Str));
+    return dup;
+}
+
 Str *Str_CloneAlloc(MemCh *m, Str *s, word alloc){
     Str *ret = MemCh_Alloc(m, sizeof(Str));
     byte *_bytes = Bytes_Alloc(m, (size_t)alloc, TYPE_BYTES_POINTER);

@@ -35,3 +35,4 @@ Str *Str_FromCstr(MemCh *m, char *cstr, word flags);
 status Str_Init(Str *s, byte *bytes, word length, word alloc);
 Str *Str_Make(MemCh *m, word alloc);
 status Str_Decr(Str *s, word length);
+Str *Str_Rec(MemCh *m, Str *s);

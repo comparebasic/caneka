@@ -12,6 +12,7 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
     while(length > 0){
         if(length > remaining){
             Str_Add(bf->tail.s, bytes, remaining);
+            bf->unsent.total += remaining;
             bf->v->total += remaining;
             bytes += remaining;
             length -= remaining;
@@ -22,6 +23,7 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
             }
         }else{
             Str_Add(bf->tail.s, bytes, length);
+            bf->unsent.total += length;
             bf->v->total += length;
             length -= length;
             r |= SUCCESS;

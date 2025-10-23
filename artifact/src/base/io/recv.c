@@ -2,18 +2,22 @@
 #include <caneka.h>
 
 status Recv_Get(Buff *bf, Str *s){
+    Abstract *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING);
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
-            bf->unsent.s = Span_Get(bf->v->p, 0);
+            bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, 0));
         }
+        i16 g = 0;
+        word remaining = s->alloc - s->length;
         while((bf->type.state & (MORE|SUCCESS|ERROR)) == 0 &&
-                bf->unsent.s != NULL && bf->unsent.s->length > 0){
-            if(bf->unsent.s->length > s->length){
-                Str_Add(s, bf->unsent.s->bytes, s->length);
-                Str_Incr(bf->unsent.s, s->length);
-                bf->type.state |= MORE;
-                bf->unsent.total -= s->length;
+                bf->unsent.total > 0 && remaining > 0){
+            Guard_Incr(bf->m, &g, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
+            if(bf->unsent.s->length > remaining){
+                Str_Add(s, bf->unsent.s->bytes, remaining);
+                Str_Incr(bf->unsent.s, remaining);
+                bf->unsent.total -= remaining;
+                remaining = 0;
             }else{
                 Str_Add(s, bf->unsent.s->bytes, bf->unsent.s->length);
                 bf->unsent.total -= bf->unsent.s->length;
@@ -22,17 +26,26 @@ status Recv_Get(Buff *bf, Str *s){
                     bf->unsent.s = NULL;
                 }else{
                     bf->unsent.idx++;
-                    bf->unsent.s = Span_Get(bf->v->p, bf->unsent.idx);
+                    bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, bf->unsent.idx));
+                    bf->type.state |= MORE;
                 }
             }
         }
     }else{
-        bf->type.state |= NOOP;
+        bf->type.state |= (SUCCESS|END);
     }
 
     if(bf->unsent.total == 0){
-        bf->type.state |= SUCCESS;
+        bf->type.state |= LAST;
     }
+
+    if(bf->type.state & DEBUG){
+        args[0] = (Abstract *)s;
+        args[1] = (Abstract *)bf;
+        args[2] = NULL;
+        Out("^p.Recv_Get copied:@ from:@^0\n", args);
+    }
+
     return bf->type.state;
 }
 

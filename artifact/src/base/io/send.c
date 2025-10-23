@@ -3,7 +3,6 @@
 
 status Send_Add(Buff *bf, Str *s){
     Buff_AddBytes(bf, s->bytes, s->length);
-    bf->unsent.total += s->length;
     return bf->type.state;
 }
 

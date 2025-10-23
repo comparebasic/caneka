@@ -1,3 +1,5 @@
+#define BUFF_CYCLE_MAX 4
+
 enum send_recv_flags {
     BUFF_OUT = 1 << 8,
     BUFF_IN = 1 << 9,
