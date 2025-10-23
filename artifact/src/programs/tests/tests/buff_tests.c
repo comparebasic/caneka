@@ -151,9 +151,11 @@ status BuffIo_Tests(MemCh *gm){
     IoUtil_Add(m, path, fname);
 
     args[0] = (Abstract *)path;
-    args[1] = (Abstract *)path;
+    args[1] = (Abstract *)I32_Wrapped(m, fd);
     args[2] = NULL;
-    Out("^p. Path for example tests path:@ path:&^0\n", args);
+    mode = 0644;
+    i32 fd = open(Str_Cstr(StrVec_Str(m, path)), (O_CREAT|O_WRONLY|O_TRUNC), mode);
+    r |= Test(fd > 0, "File opened successfully have ^D.$^d.fd for @", 
 
     MemCh_Free(m);
     DebugStack_Pop();
