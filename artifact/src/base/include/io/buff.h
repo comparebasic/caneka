@@ -25,5 +25,5 @@ typedef struct buff {
     } unsent;
 } Buff;
 
-status Buff_AddBytes(SendRecv *sr, byte *bytes, word length);
+status Buff_AddBytes(Buff *bf, byte *bytes, word length);
 Buff *Buff_Make(MemCh *m, word flags);

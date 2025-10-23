@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 status Send_Add(Buff *bf, Str *s){
-    Buff_AddStr(bf, s);
+    Buff_AddBytes(bf, s->bytes, s->length);
     bf->unsent.total += s->length;
     return bf->type.state;
 }
@@ -11,29 +11,18 @@ status Send_AddVec(Buff *bf, StrVec *v){
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
-        Buff_AddStr(bf, Iter_Get(&it));
+        Str *s = Iter_Get(&it);
+        Buff_AddBytes(bf, s->bytes, s->length);
     }
     return bf->type.state;
 }
 
 status Send_Unbuff(Buff *bf, byte *bytes, word length){
-    if(bf->type.state & BUFF_SOCKET){
-        sent = send(bf->fd, s->bytes, s->length, 0);
-    }else if(bf->type.state & BUFF_FD){
-        sent = write(bf->fd, s->bytes, s->length);
-    }else{
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
-            "Buff Send_Unbuff requires the BUFF_SOCKET or BUFF_FD flag", NULL);
-        bf->type.state |= ERROR;
-        return bf->type.state;
-    }
-
-    Str *s = bf->unsent.s;
     ssize_t sent = 0;
     if(bf->type.state & BUFF_SOCKET){
-        sent = send(bf->fd, s->bytes, s->length, 0);
+        sent = send(bf->fd, bytes, length, 0);
     }else if(bf->type.state & BUFF_FD){
-        sent = write(bf->fd, s->bytes, s->length);
+        sent = write(bf->fd, bytes, length);
     }else{
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
@@ -42,13 +31,13 @@ status Send_Unbuff(Buff *bf, byte *bytes, word length){
     }
 
     if(sent < 0){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error sending str", NULL);
         bf->type.state |= ERROR;
-    }else if(sent == s->length){
+    }else if(sent == length){
         bf->type.state |= SUCCESS;
     }else{
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error sending did not send all bytes", NULL);
         bf->type.state |= ERROR;
     }
@@ -87,23 +76,23 @@ status Send_Send(Buff *bf){
             return bf->type.state;
         }
         if(sent < 0){
-            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error sending str", NULL);
             bf->type.state |= ERROR;
         }else if(sent == s->length){
             if(bf->unsent.idx < bf->v->p->max_idx){
                 bf->unsent.idx++;
-                bf->unset.s = Span_Get(bf->v->p, bf->unsent.idx);
+                bf->unsent.s = Span_Get(bf->v->p, bf->unsent.idx);
                 bf->type.state |= MORE;
             }else{
                 bf->type.state |= SUCCESS;
                 if(bf->type.state & BUFF_FLUSH){
                     Iter it;                    
-                    Iter_Init(&it, bf->v.p);
+                    Iter_Init(&it, bf->v->p);
                     while((Iter_Next(&it) & END) == 0){
                         if(it.idx == 0){
                             bf->tail.idx = 0;
-                            bf->tail = (Str *)Iter_Get(&it);
+                            bf->tail.s = (Str *)Iter_Get(&it);
                         }
                         Str_Wipe(Iter_Get(&it));
                     }
@@ -122,7 +111,7 @@ status Send_Send(Buff *bf){
 }
 
 status Send_AddSend(Buff *bf, Str *s){
-    Send_Add(m, bf, s);
+    Send_Add(bf, s);
     return Send_Send(bf);
 }
 
