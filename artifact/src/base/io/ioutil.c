@@ -14,6 +14,42 @@ status IoUtil_Annotate(MemCh *m, StrVec *path){
     return Path_Annotate(m, path, pathSeps);
 }
 
+StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v){
+    Str *first = (Str *)Span_Get(v->p, 0);
+    if(v != NULL){
+        if(first != NULL && first->bytes[0] == '/'){
+            return StrVec_Copy(m, v);
+        }
+
+        if(first->length >= 2 && first->bytes[0] == '.' && first->bytes[1] == '/'){
+            first = Str_Clone(m, first);
+            Str_Incr(first, 2);
+            v->total -= 2;
+        }
+    }
+
+    StrVec *path = StrVec_Make(m);
+    Str *s = Str_Make(m, STR_DEFAULT);
+    char *cstr = getcwd((char *)s->bytes, STR_DEFAULT);
+    s->length = strlen(cstr);
+    StrVec_Add(path, s);
+    if(s->length > 0 && s->bytes[s->length-1] != '/' &&
+            first->length > 0 && first->bytes[0] != '/'){
+        StrVec_Add(path, Str_Ref(m, (byte *)"/", 1, 2, MORE));
+    }
+    StrVec_AddVec(path, v);
+    
+    IoUtil_Annotate(m, path);
+    return path;
+}
+
+status IoUtil_Add(MemCh *m, StrVec *path, StrVec *v){
+    IoUtil_Annotate(m, v);
+    return StrVec_AddVec(path, v);
+}
+
+
+
 status IoUtil_RemoveSeps(MemCh *m, StrVec *path){
     i32 idx = 0;
     Iter it;
@@ -89,10 +125,6 @@ StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path){
     }
 
     return v;
-}
-
-StrVec *IoUtil_AbsVec(MemCh *m){
-    return StrVec_From(m, IoUtil_GetCwdPath(m, NULL));
 }
 
 Str *IoUtil_GetAbsPath(MemCh *m, Str *path){

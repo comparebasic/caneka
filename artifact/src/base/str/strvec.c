@@ -133,6 +133,18 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
     return -1;
 }
 
+StrVec *StrVec_Copy(MemCh *m, StrVec *_v){
+    StrVec *v = (StrVec *)as((Abstract *)_v, TYPE_STRVEC);
+    StrVec *new = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Str_Clone(m, (Str *)Iter_Get(&it));
+        StrVec_Add(new, s);
+    }
+    return new;
+}
+
 Abstract *StrVec_Clone(MemCh *m, Abstract *a){
     StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
     StrVec *new = StrVec_Make(m);

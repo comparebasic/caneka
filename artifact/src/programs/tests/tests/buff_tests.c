@@ -139,7 +139,21 @@ status BuffIo_Tests(MemCh *gm){
     Abstract *args[5];
     MemCh *m = MemCh_Make();
 
+    StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, Str_CstrRef(m, "examples/test/")));
+    Dir_CheckCreate(m, StrVec_Str(m, path));
 
+    args[0] = (Abstract *)path;
+    args[1] = NULL;
+    Out("^p. Path for example tests dir:@ ^0\n", args);
+
+
+    StrVec *fname = StrVec_From(m, Str_CstrRef(m, "buffio.txt"));
+    IoUtil_Add(m, path, fname);
+
+    args[0] = (Abstract *)path;
+    args[1] = (Abstract *)path;
+    args[2] = NULL;
+    Out("^p. Path for example tests path:@ path:&^0\n", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

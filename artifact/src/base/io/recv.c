@@ -3,7 +3,7 @@
 
 status Recv_Get(Buff *bf, Str *s){
     Abstract *args[5];
-    bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING);
+    bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
             bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, 0));
@@ -50,8 +50,16 @@ status Recv_Get(Buff *bf, Str *s){
 }
 
 status Recv_GetToVec(Buff *bf, StrVec *v){
-    word offset = 0;
-    while((Recv_Get(bf, Str_Make(bf->m, STR_DEFAULT)) & (MORE|SUCCESS|NOOP|ERROR)) == MORE){}
+    Str *shelf = Str_Make(bf->m, STR_DEFAULT);
+    i16 g = 0;
+    while((Recv_Get(bf, shelf) & END) == 0){
+        Guard_Incr(bf->m, &g, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
+        StrVec_Add(v, shelf);
+        if((bf->type.state & LAST) == 0){
+            shelf = Str_Make(bf->m, STR_DEFAULT);
+        }
+    }
+
     return bf->type.state;
 }
 
