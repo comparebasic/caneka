@@ -2,8 +2,6 @@
 #include "io/procdets.h"
 #include "io/subprocess.h"
 #include "io/buff.h"
-#include "io/send.h"
-#include "io/recv.h"
 #include "io/dir.h"
 #include "io/ioutil.h"
 #include "io/stash_coord.h"

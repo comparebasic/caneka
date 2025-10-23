@@ -84,7 +84,7 @@ status BuffSendRecv_Tests(MemCh *gm){
         "dandilions.");
 
     Buff *bf = Buff_Make(m, BUFF_STRVEC);
-    Send_Add(bf, s);
+    Buff_Add(bf, s);
 
     Str *expected = s;
     args[0] = (Abstract *)s;
@@ -98,7 +98,7 @@ status BuffSendRecv_Tests(MemCh *gm){
     StrVec_Add(v, Str_CstrRef(m, " Scattered to the far reaches of the hills."));
     StrVec_Add(v, Str_CstrRef(m, "and difficult to make sense of."));
 
-    Send_AddVec(bf, v);
+    Buff_AddVec(bf, v);
 
     StrVec *expectedVec = StrVec_From(m, s);
     StrVec_AddVec(expectedVec, v);
@@ -112,7 +112,7 @@ status BuffSendRecv_Tests(MemCh *gm){
     StrVec *content = StrVec_Make(m);
     Str *shelf = Str_Make(m, 128);
     i16 g = 0;
-    while((Recv_Get(bf, shelf) & END) == 0){
+    while((Buff_GetStr(bf, shelf) & END) == 0){
         Guard_Incr(bf->m, &g, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
         StrVec_Add(content, shelf);
         if((bf->type.state & LAST) == 0){
@@ -125,7 +125,7 @@ status BuffSendRecv_Tests(MemCh *gm){
     args[1] = (Abstract *)content;
     args[2] = NULL;
     r |= Test(Equals((Abstract *)bf->v, (Abstract *)expectedVec),
-        "Recv_Get has populated an equal StrVec, buff &, content &", args);
+        "Buff_GetStr has populated an equal StrVec, buff &, content &", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
@@ -142,24 +142,102 @@ status BuffIo_Tests(MemCh *gm){
     StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, Str_CstrRef(m, "examples/test/")));
     Dir_CheckCreate(m, StrVec_Str(m, path));
 
-    args[0] = (Abstract *)path;
-    args[1] = NULL;
-    Out("^p. Path for example tests dir:@ ^0\n", args);
-
+    StrVec *pathOne = StrVec_Copy(m, path);
 
     StrVec *fname = StrVec_From(m, Str_CstrRef(m, "buffio.txt"));
-    IoUtil_Add(m, path, fname);
+    IoUtil_Add(m, pathOne, fname);
 
-    args[0] = (Abstract *)path;
-    args[1] = (Abstract *)I32_Wrapped(m, fd);
+    i32 fd = open(Str_Cstr(m, StrVec_Str(m, pathOne)), (O_CREAT|O_WRONLY|O_TRUNC), 0644);
+    args[0] = (Abstract *)I32_Wrapped(m, fd);
+    args[1] = (Abstract *)pathOne;
     args[2] = NULL;
-    mode = 0644;
-    i32 fd = open(Str_Cstr(StrVec_Str(m, path)), (O_CREAT|O_WRONLY|O_TRUNC), mode);
-    r |= Test(fd > 0, "File opened successfully have ^D.$^d.fd for @", 
+    r |= Test(fd > 0,
+        "File opened successfully to create and write have ^D.$^d.fd for @", args);
+
+    Buff *out = Buff_Make(m, BUFF_UNBUFFERED);
+    Buff_SetFd(out, fd);
+
+    char *content = "Hidy Ho, my friend, this is a nice place to be. where"
+    " things are peachy and wonderous. Yay woundersous is as good a word as"
+    " walrus. If you're reading this, then something is probably " "broken, and"
+    " your looking at the test. I'm so sorry it's broken. But we believe you can"
+    " fix it. Yay.";
+    i64 offset = 0;
+    Buff_Unbuff(out, (byte *)content, strlen(content), &offset);
+    close(fd);
+    Buff_UnsetFd(out);
+
+    args[0] = (Abstract *)out;
+    args[1] = NULL;
+    r |= Test(out->v->total == 0, "Buff total is still 0 after sending content "
+        "through it unbuffered: @", args);
+
+    r |= Test(offset == strlen(content), "total offset matches content length ", args);
+
+    i32 ifd = open(Str_Cstr(m, StrVec_Str(m, pathOne)), O_RDONLY);
+    Buff *chain = Buff_Make(m, ZERO);
+    Buff_SetFd(chain, ifd);
+    args[0] = (Abstract *)I32_Wrapped(m, fd);
+    args[1] = (Abstract *)pathOne;
+    args[2] = NULL;
+    r |= Test(fd > 0,
+        "File opened successfully to after write, have ^D.$^d.fd for @", args);
+
+    StrVec *pathTwo = StrVec_Copy(m, path);
+    fname = StrVec_From(m, Str_CstrRef(m, "buffio-compare.txt"));
+    IoUtil_Add(m, pathTwo, fname);
+
+
+    i32 ofd = open(Str_Cstr(m, StrVec_Str(m, pathTwo)), (O_CREAT|O_WRONLY|O_TRUNC), 0644);
+    args[0] = (Abstract *)I32_Wrapped(m, ofd);
+    args[1] = (Abstract *)pathTwo;
+    args[2] = NULL;
+    r |= Test(ofd > 0,
+        "Second file opened successfully to create and write have ^D.$^d.fd for @", args);
+
+    Buff_Read(chain);
+    Buff_SendToFd(chain, ofd);
+    close(ifd);
+    Buff_UnsetFd(chain);
+    close(ofd);
+
+    Buff *compare = Buff_Make(m, ZERO);
+    i32 rfd = open(Str_Cstr(m, StrVec_Str(m, pathTwo)), O_RDONLY);
+    args[0] = (Abstract *)I32_Wrapped(m, rfd);
+    args[1] = (Abstract *)pathTwo;
+    args[2] = NULL;
+    r |= Test(rfd > 0,
+        "Second file opened successfully to create for reading have ^D.$^d.fd for @", args);
+    Buff_SetFd(compare, rfd);
+    Buff_Read(compare);
+    close(rfd);
+
+    args[0] = (Abstract *)I32_Wrapped(m, fd);
+    args[1] = (Abstract *)pathTwo;
+    args[2] = NULL;
+    r |= Test(fd > 0,
+        "File opened successfully to after write, have ^D.$^d.fd for @", args);
+
+    Str *expected = Str_CstrRef(m, content);
+    args[0] = (Abstract *)expected;
+    args[1] = (Abstract *)compare->v;
+    args[2] = NULL;
+    r |= Test(Equals((Abstract *)compare->v, (Abstract *)expected),
+        "After writing, reading, writing somewhere else, and then reading it again, "
+        "it all equals, expected @, have @", args);
+
+    args[0] = (Abstract *)pathOne;
+    args[1] = NULL;
+    r |= Test(IoUtil_Unlink(StrVec_Str(m, pathOne)) & SUCCESS, 
+        "Remove file @", args);
+
+    args[0] = (Abstract *)pathTwo;
+    args[1] = NULL;
+    r |= Test(IoUtil_Unlink(StrVec_Str(m, pathTwo)) & SUCCESS, 
+        "Remove file @", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
 
-    r |= ERROR;
     return r;
 }

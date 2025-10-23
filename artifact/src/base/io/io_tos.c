@@ -21,11 +21,12 @@ i64 Buff_Print(Stream *sm, Abstract *a, cls type, word flags){
     Buff *bf = (Buff *)as(a, TYPE_BUFF);
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)bf, ToS_FlagLabels),
+        (Abstract *)I32_Wrapped(sm->m, bf->fd),
         (Abstract *)I64_Wrapped(sm->m, bf->unsent.total),
         (Abstract *)I64_Wrapped(sm->m, bf->v->total),
         NULL
     };
-    total += Fmt(sm, "Buff<$ unsent/total=$/$>", args);
+    total += Fmt(sm, "Buff<$ $fd unsent/total=$/$>", args);
     return total;
 }
 
@@ -61,14 +62,13 @@ status Io_InitLabels(MemCh *m, Lookup *lk){
     status r = READY;
     if(buffLabels == NULL){
         buffLabels = (Str **)Arr_Make(m, 17);
-        buffLabels[9] = Str_CstrRef(m, "OUT");
-        buffLabels[10] = Str_CstrRef(m, "IN");
-        buffLabels[11] = Str_CstrRef(m, "ASYNC");
-        buffLabels[12] = Str_CstrRef(m, "FD");
-        buffLabels[13] = Str_CstrRef(m, "SOCKET");
-        buffLabels[14] = Str_CstrRef(m, "STRVEC");
-        buffLabels[15] = Str_CstrRef(m, "FLUSH");
-        buffLabels[15] = Str_CstrRef(m, "UNBUFFERED");
+        buffLabels[9] = Str_CstrRef(m, "ASYNC");
+        buffLabels[10] = Str_CstrRef(m, "FD");
+        buffLabels[11] = Str_CstrRef(m, "SOCKET");
+        buffLabels[12] = Str_CstrRef(m, "STRVEC");
+        buffLabels[13] = Str_CstrRef(m, "FLUSH");
+        buffLabels[14] = Str_CstrRef(m, "UNBUFFERED");
+        buffLabels[15] = Str_CstrRef(m, "SLURP");
         Lookup_Add(m, lk, TYPE_BUFF, (void *)buffLabels);
         r |= SUCCESS;
     }
