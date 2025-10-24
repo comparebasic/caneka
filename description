@@ -1,0 +1,9 @@
+The Anti-Syntax Runtime
+
+Caneka was born from the idea that customized syntaxes can unlock the true
+potential of humans using computers.
+
+Caneka has three main components including a parser with no prefered syntax, a
+network server, and a memory manager for data storage and data structures.
+
+see README.md for details
