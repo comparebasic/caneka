@@ -3,7 +3,7 @@
 
 static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     i64 total = 0;
-    MemCh *m = ctx->sm->m;
+    MemCh *m = ctx->bf->m;
     Table *tbl = (Span *)as(a, TYPE_TABLE);
 
     Str *content;
@@ -22,7 +22,7 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     }
 
     if(ctx->type.state & BINSEG_REVERSED){
-        total += BinSegCtx_ToStream(ctx, hdr, entry);
+        total += BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
     ip = (i16 *)content->bytes;
@@ -37,7 +37,7 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        total += BinSegCtx_ToStream(ctx, hdr, entry);
+        total += BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
     return total;
@@ -45,7 +45,7 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
 
 static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     i64 total = 0;
-    MemCh *m = ctx->sm->m;
+    MemCh *m = ctx->bf->m;
     Span *p = (Span *)as(a, TYPE_SPAN);
 
     Str *content;
@@ -65,7 +65,7 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     }
 
     if(ctx->type.state & BINSEG_REVERSED){
-        total += BinSegCtx_ToStream(ctx, hdr, entry);
+        total += BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
     ip = (i16 *)content->bytes;
@@ -78,7 +78,7 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
 
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        total += BinSegCtx_ToStream(ctx, hdr, entry);
+        total += BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
     return total;
@@ -86,7 +86,7 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
 
 static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     Str *s = (Str *)as(a, TYPE_STR);
-    MemCh *m = ctx->sm->m;
+    MemCh *m = ctx->bf->m;
 
     Str *content;
     Str *entry;
@@ -99,7 +99,7 @@ static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
 
     memcpy(content->bytes, s->bytes, s->length);
 
-    return BinSegCtx_ToStream(ctx, hdr, entry);
+    return BinSegCtx_ToBuff(ctx, hdr, entry);
 }
 
 status BinSeg_BasicInit(MemCh *m, Lookup *lk){

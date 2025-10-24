@@ -6,8 +6,7 @@ Lookup *BinSegLookup = NULL;
 
 static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     status r = READY;
-    /*
-    MemCh *m = ctx->sm->m;
+    MemCh *m = ctx->bf->m;
     Abstract *args[3];
     
     Abstract *a = NULL;
@@ -99,7 +98,6 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
         Out("^y.Found Header @ -> &^0\n", args);
     }
 
-    */
     return r;
 }
 
@@ -112,14 +110,15 @@ i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
     return ctx->latestId;
  }
 
-i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
+i64 BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     i64 total = 0;
-    /*
-    MemCh *m = ctx->sm->m;
+    MemCh *m = ctx->bf->m;
     if(ctx->type.state & BINSEG_VISIBLE){
         entry = Str_ToHex(m, entry);
     }
-    total += Stream_Bytes(ctx->sm, entry->bytes, entry->length);
+    if(Buff_AddSend(ctx->bf, entry) & SUCCESS){
+        total += entry->length;
+    }
     if(ctx->type.state & DEBUG){
         Abstract *args[5];
         args[0] = (Abstract *)StreamTask_Make(m, NULL, (Abstract *)ctx, ToS_FlagLabels),
@@ -127,9 +126,8 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
         args[2] = (Abstract *)I16_Wrapped(m, entry->length);
         args[3] = (Abstract *)ctx;
         args[4] = NULL;
-        Out("^p.ToStream($ &)/$ -> @^0\n", args);
+        Out("^p.ToBuff($ &)/$ -> @^0\n", args);
     }
-    */
     return total;
 }
 
@@ -137,31 +135,30 @@ i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
     Abstract *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
-        args[0] = (Abstract *)Type_ToStr(ctx->sm->m, a->type.of);
+        args[0] = (Abstract *)Type_ToStr(ctx->bf->m, a->type.of);
         args[1] = NULL;
-        Error(ctx->sm->m, FUNCNAME, FILENAME, LINENUMBER,
+        Error(ctx->bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to find BinSegFunc for type $", args);
         return 0;
     }
     return func(ctx, a, id);
 }
 
-status BinSegCtx_LoadStream(BinSegCtx *ctx){
+status BinSegCtx_Load(BinSegCtx *ctx){
     Abstract *args[4];
-    /*
     if(ctx->type.state & DEBUG){
         args[0] = (Abstract *)ctx;    
         args[1] = NULL;
-        Out("^p.LoadStream &\n", args);
+        Out("^p.Load &\n", args);
     }
-    MemCh *m = ctx->sm->m;
+    MemCh *m = ctx->bf->m;
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
     if(ctx->type.state & BINSEG_REVERSED){
-        Stream_SeekEnd(ctx->sm, 0);
+        Buff_PosEnd(ctx->bf);
     }else{
-        Stream_Seek(ctx->sm, 0);
+        Buff_PosAbs(ctx->bf, 0);
     }
-    while((ctx->sm->type.state & END) == 0 &&
+    while((ctx->bf->type.state & END) == 0 &&
             (ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
 
         i16 sz = sizeof(BinSegHeader);
@@ -171,9 +168,9 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
         Str *s = Str_Make(m, sz);
 
         if(ctx->type.state & BINSEG_REVERSED){
-            Stream_RFillStr(ctx->sm, s);
+            Buff_RevGetStr(ctx->bf, s);
         }else{
-            Stream_FillStr(ctx->sm, s);
+            Buff_GetStr(ctx->bf, s);
         }
 
         if(s->length == sz){
@@ -201,9 +198,9 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
             Str *ftr = Str_Make(m, sz);
             ftr->type.state |= STRING_COPY;
             if(ctx->type.state & BINSEG_REVERSED){
-                Stream_RFillStr(ctx->sm, ftr);
+                Buff_RevGetStr(ctx->bf, ftr);
             }else{
-                Stream_FillStr(ctx->sm, ftr);
+                Buff_GetStr(ctx->bf, ftr);
             }
 
             ftr->type.state &= ~STRING_COPY;
@@ -217,17 +214,16 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
             }
         }
     }
-    */
 
     return ctx->type.state;
 }
 
-BinSegCtx *BinSegCtx_Make(Stream *sm, BinSegIdxFunc func, Abstract *source, word flags){
-    MemCh *m = sm->m;
+BinSegCtx *BinSegCtx_Make(Buff *bf, BinSegIdxFunc func, Abstract *source, word flags){
+    MemCh *m = bf->m;
     BinSegCtx *ctx = (BinSegCtx *)MemCh_AllocOf(m, sizeof(BinSegCtx), TYPE_BINSEG_CTX);
     ctx->type.of = TYPE_BINSEG_CTX;
     ctx->type.state = flags;
-    ctx->sm = sm;
+    ctx->bf = bf;
 
     if(func == NULL){
         ctx->func = BinSegCtx_IdxCounter;

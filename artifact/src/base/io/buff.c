@@ -1,6 +1,31 @@
 #include <external.h>
 #include <caneka.h>
 
+static status Buff_posFrom(Buff *bf, i32 offset, i32 whence){
+    Abstract *args[4];
+    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
+        bf->type.state &= ~(BUFF_FD|BUFF_SOCKET);
+    }else{
+        args[0] = (Abstract *)bf;
+        args[1] = NULL;
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error cannot seek on a Buff that  does not have a BUFF_SOCKET or "
+            "BUFF_FD flag @", args);
+        return ERROR;
+    }
+
+    i32 pos = lseek(bf->fd, whence, offset);
+    if(pos < 0){
+        args[0] = (Abstract *)bf;
+        args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
+        args[3] = NULL;
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error seek failed on a Buff for offset $", args);
+        return ERROR;
+    }
+    return SUCCESS;
+}
+
 status Buff_SetFd(Buff *bf, i32 fd){
     bf->fd = fd;
     bf->type.state |= BUFF_FD;
@@ -23,6 +48,22 @@ status Buff_SetSocket(Buff *bf, i32 fd){
     bf->fd = fd;
     bf->type.state |= BUFF_SOCKET;
     return SUCCESS;
+}
+
+status Buff_PosEnd(Buff *bf){
+    return Buff_posFrom(bf, 0, SEEK_END);
+}
+
+status Buff_PosAbs(Buff *bf, i32 position){
+    if(position < 0){
+        return Buff_posFrom(bf, abs(position), SEEK_END);
+    }else{
+        return Buff_posFrom(bf, position, SEEK_SET);
+    }
+}
+
+status Buff_Pos(Buff *bf, i32 position){
+    return Buff_posFrom(bf, position, SEEK_CUR);
 }
 
 status Buff_AddBytes(Buff *bf, byte *bytes, word length){
@@ -59,15 +100,25 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
     return r;
 }
 
+status Buff_RevGetStr(Buff *bf, Str *s){
+    word remaining = s->alloc - s->length;
+    if(Buff_Pos(bf, -(remaining)) & ERROR){
+        return ERROR;
+    }
+    status r = Buff_GetStr(bf, s);
+    Buff_Pos(bf, -(remaining));
+    return r;
+}
+
 status Buff_GetStr(Buff *bf, Str *s){
     Abstract *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
+    word remaining = s->alloc - s->length;
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
             bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, 0));
         }
         i16 g = 0;
-        word remaining = s->alloc - s->length;
         while((bf->type.state & (MORE|SUCCESS|ERROR)) == 0 &&
                 bf->unsent.total > 0 && remaining > 0){
             Guard_Incr(bf->m, &g, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
@@ -90,6 +141,9 @@ status Buff_GetStr(Buff *bf, Str *s){
             }
         }
     }else{
+        if(bf->type.state & (BUFF_FD|BUFF_SOCKET) && remaining > 0){
+            Buff_ReadToStr(bf, s); 
+        }
         bf->type.state |= (SUCCESS|END);
     }
 
@@ -210,7 +264,7 @@ status Buff_SendToFd(Buff *bf, i32 fd){
                 bf->unsent.s = Span_Get(bf->v->p, bf->unsent.idx);
                 bf->type.state |= MORE;
             }else{
-                bf->type.state |= SUCCESS;
+                bf->type.state |= PROCESSING;
                 if(bf->type.state & BUFF_FLUSH){
                     Iter it;                    
                     Iter_Init(&it, bf->v->p);
@@ -231,13 +285,16 @@ status Buff_SendToFd(Buff *bf, i32 fd){
         }else{
             bf->type.state |= NOOP;
         }
+    }else{
+        bf->type.state |= (SUCCESS|END);
     }
     return bf->type.state;
 }
 
 status Buff_AddSend(Buff *bf, Str *s){
     Buff_Add(bf, s);
-    return Buff_Send(bf);
+    while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
+    return bf->type.state;
 }
 
 status Buff_SendAll(Buff *bf, StrVec *v){
@@ -245,7 +302,7 @@ status Buff_SendAll(Buff *bf, StrVec *v){
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
-        while((Buff_AddSend(bf, s) & (SUCCESS|ERROR|NOOP)) == 0){}
+        while((Buff_AddSend(bf, s) & (SUCCESS|ERROR|END)) == 0){}
         if(bf->type.state & ERROR){
             break;
         }
@@ -255,6 +312,46 @@ status Buff_SendAll(Buff *bf, StrVec *v){
 
 status Buff_Read(Buff *bf){
     return Buff_ReadAmount(bf, IO_SEND_MAX);
+}
+
+status Buff_ReadToStr(Buff *bf, Str *s){
+    bf->type.state &= ~(SUCCESS|PROCESSING);
+    i16 amount = s->alloc - s->length;
+    byte *bytes = s->bytes+s->length;
+    while(amount > 0){
+        ssize_t recieved = 0;
+        if(bf->type.state & BUFF_SOCKET){
+            recieved = recv(bf->fd, bytes, amount, 0);
+        }else if(bf->type.state & BUFF_FD){
+            recieved = read(bf->fd, s->bytes, amount);
+        }else{
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+                "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
+            bf->type.state |= ERROR;
+            return bf->type.state;
+        }
+
+        if(recieved < 0){
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(bf->m, bf->fd),
+                (Abstract *)Str_CstrRef(bf->m, strerror(errno)),
+                NULL
+            };
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error reading from ^D.$^d.fd: $", args);
+            bf->type.state |= ERROR;
+            break;
+        }else{
+            s->length += recieved;
+            amount -= recieved;
+            bf->type.state |= PROCESSING;
+            if(recieved == 0 || amount == 0){
+                bf->type.state |= SUCCESS;
+                break;
+            }
+        }
+    }
+    return bf->type.state;
 }
 
 status Buff_ReadAmount(Buff *bf, i64 amount){
@@ -269,7 +366,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
 
     while(amount > 0){
         ssize_t recieved = 0;
-        Str *s = Str_Make(bf->m, IO_BLOCK_SIZE);
+        Str *s = Str_Make(bf->m, min(amount, IO_BLOCK_SIZE));
         if(bf->type.state & BUFF_SOCKET){
             recieved = recv(bf->fd, s->bytes, s->alloc, 0);
         }else if(bf->type.state & BUFF_FD){
@@ -292,14 +389,11 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
             bf->type.state |= ERROR;
             break;
         }else{
-            s->length = recieved;
+            s->length += recieved;
             Buff_Add(bf, s);
-            amount -= s->length;
+            amount -= recieved;
             bf->type.state |= PROCESSING;
-            if(recieved == 0){
-                if(amount == 0 || (bf->type.state & BUFF_SLURP)){
-                    bf->type.state &= ~PROCESSING;
-                }
+            if(recieved == 0 || amount == 0){
                 bf->type.state |= SUCCESS;
                 break;
             }

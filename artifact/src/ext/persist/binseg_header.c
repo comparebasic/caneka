@@ -19,7 +19,7 @@ i16 BinSegHeader_FooterSize(quad total, word kind){
 }
 
 BinSegHeader *BinSegHeader_Make(BinSegCtx *ctx, quad total, word kind, word id, Str **content, Str **entry){
-    MemCh *m = ctx->sm->m;
+    MemCh *m = ctx->bf->m;
     BinSegHeader *hdr;
     Str *e;
 

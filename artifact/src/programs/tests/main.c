@@ -160,14 +160,6 @@ static TestSet _Tests[] = {
         "Testing path functions for file and object variable paths.",
         FEATURE_COMPLETE,
     },
-    /*
-    {
-        "File Tests",
-        File_Tests,
-        "File handling tests.",
-        FEATURE_COMPLETE,
-    },
-    */
     {
         "Stash Tests",
         Stash_Tests,

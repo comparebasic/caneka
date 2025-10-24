@@ -35,6 +35,7 @@ status Buff_UnsetSocket(Buff *bf);
 
 status Buff_GetStr(Buff *bf, Str *s);
 status Buff_GetToVec(Buff *bf, StrVec *v);
+status Buff_RevGetStr(Buff *bf, Str *s);
 
 status Buff_Add(Buff *bf, Str *s);
 status Buff_AddVec(Buff *bf, StrVec *v);
@@ -46,3 +47,8 @@ status Buff_AddSend(Buff *bf, Str *s);
 status Buff_SendAll(Buff *bf, StrVec *v);
 status Buff_ReadAmount(Buff *bf, i64 amount);
 status Buff_Read(Buff *bf);
+status Buff_ReadToStr(Buff *bf, Str *s);
+
+status Buff_PosAbs(Buff *bf, i32 position);
+status Buff_Pos(Buff *bf, i32 position);
+status Buff_PosEnd(Buff *bf);
