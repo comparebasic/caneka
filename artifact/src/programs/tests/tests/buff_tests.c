@@ -187,7 +187,6 @@ status BuffIo_Tests(MemCh *gm){
     fname = StrVec_From(m, Str_CstrRef(m, "buffio-compare.txt"));
     IoUtil_Add(m, pathTwo, fname);
 
-
     i32 ofd = open(Str_Cstr(m, StrVec_Str(m, pathTwo)), (O_CREAT|O_WRONLY|O_TRUNC), 0644);
     args[0] = (Abstract *)I32_Wrapped(m, ofd);
     args[1] = (Abstract *)pathTwo;

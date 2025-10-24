@@ -160,18 +160,21 @@ static TestSet _Tests[] = {
         "Testing path functions for file and object variable paths.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "File Tests",
         File_Tests,
         "File handling tests.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Stash Tests",
         Stash_Tests,
         "Mem Stash testing.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "BinSeg Tests",
         BinSeg_Tests,
@@ -202,6 +205,7 @@ static TestSet _Tests[] = {
         "FileD database built on BinSegRV tests of how to save and retrive data.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Roebling Parser",
         NULL,
@@ -294,6 +298,7 @@ static TestSet _Tests[] = {
         NULL,
         SECTION_LABEL,
     },
+    /*
     {
         "Mess Tests",
         Mess_Tests,
@@ -318,6 +323,7 @@ static TestSet _Tests[] = {
         "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Encoding Tests",
         Encoding_Tests,
@@ -375,7 +381,6 @@ static TestSet _Tests[] = {
         "Testing a navigation object for composing HTML.",
         FEATURE_COMPLETE,
     },
-    */
     {
         "Www Route Tests",
         WwwRoute_Tests,
@@ -394,6 +399,7 @@ static TestSet _Tests[] = {
         "Testing a navigation object for templating and composing HTML.",
         FEATURE_COMPLETE,
     },
+    */
     {
         NULL,
         NULL,

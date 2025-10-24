@@ -8,6 +8,7 @@
 #include "./io/dir.c"
 #include "./io/ioutil.c"
 #include "./io/buff.c"
+#include "./io/file.c"
 #include "./io/io_tos.c"
 #include "./io/procdets.c"
 #include "./io/subprocess.c"

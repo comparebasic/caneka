@@ -3,10 +3,11 @@
 
 status FileDB_Open(FileDB *fdb){
     DebugStack_Push(NULL, 0);
+    /*
     MemCh *m = fdb->m;
 
     fdb->f->type.state |= STREAM_FROM_FD;
-    File_Open(fdb->f);
+    File_Open(fdb->bf, fdb->path, O_CREAT|O_WRONLY);
 
     Str *entry = Str_Make(m, sizeof(BinSegHeader)*2);
     i16 latestId = 0;
@@ -25,7 +26,7 @@ status FileDB_Open(FileDB *fdb){
         latestId = hdr->id;
     }
 
-    File_Close(fdb->f);
+    File_Close(fdb->bf);
     fdb->f->type.state &= ~STREAM_FROM_FD;
 
     fdb->f->type.state |= STREAM_APPEND;
@@ -40,12 +41,14 @@ status FileDB_Open(FileDB *fdb){
     fdb->ctx->type.state |= PROCESSING;
     fdb->type.state |= PROCESSING;
 
+    */
     DebugStack_Pop();
     return fdb->type.state;
 }
 
 status FileDB_Close(FileDB *fdb){
     status r = READY;
+    /*
     MemCh *m = fdb->m;
     File_Close(fdb->f);
     fdb->f->type.state &= ~STREAM_APPEND;
@@ -68,10 +71,13 @@ status FileDB_Close(FileDB *fdb){
     }
 
     File_Close(fdb->f);
+    */
     return r;
 }
 
 status FileDB_Add(FileDB *fdb, i16 id, Abstract *a){
+    return NOOP;
+    /*
     DebugStack_Push(NULL, 0);
     BinSegCtx *ctx = fdb->ctx;
     if(ctx->type.state & PROCESSING){ 
@@ -91,9 +97,11 @@ status FileDB_Add(FileDB *fdb, i16 id, Abstract *a){
         DebugStack_Pop();
         return ERROR;
     }
+    */
 }
 
 Table *FileDB_ToTbl(FileDB *fdb, Table *keys){
+    /*
     File_Close(fdb->f);
     fdb->f->type.state &= ~(STREAM_APPEND|STREAM_TO_FD|STREAM_CREATE|STREAM_STRVEC);
     fdb->f->type.state |= STREAM_FROM_FD;
@@ -101,13 +109,15 @@ Table *FileDB_ToTbl(FileDB *fdb, Table *keys){
     fdb->ctx->sm = fdb->f->sm;
     fdb->ctx->keys = keys;
     BinSegCtx_LoadStream(fdb->ctx);
+    */
     return fdb->ctx->tbl;
 }
 
-FileDB *FileDB_Make(MemCh *m, Str *path){
+FileDB *FileDB_Make(MemCh *m, Str *fpath){
     FileDB *fdb = (FileDB *)MemCh_AllocOf(m, sizeof(FileDB), TYPE_FILEDB);
     fdb->type.of = TYPE_FILEDB;
     fdb->m = m;
-    fdb->f = File_Make(m, path, NULL, (STREAM_CREATE|STREAM_TO_FD));
+    fdb->bf = Buff_Make(m, ZERO);
+    fdb->fpath = fpath;
     return fdb;
 }

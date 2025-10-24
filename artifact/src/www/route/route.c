@@ -109,6 +109,8 @@ static status routeFuncFmt(MemCh *m,
 }
 
 status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *source){
+    return NOOP;
+    /*
     DebugStack_Push(rt, rt->type.of);
     StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
     StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
@@ -137,6 +139,7 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
         DebugStack_Pop();
         return SUCCESS;
     }
+    */
 }
 
 Nav *Route_Make(MemCh *m){

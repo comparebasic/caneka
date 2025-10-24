@@ -160,8 +160,6 @@ static BuildSubdir xmlobj = { "format/xml", {
 static BuildSubdir persistobj = { "persist", {
     "persist_tos.c",
     "persist.c",
-    "file.c",
-    "filedes.c",
     "binseg.c",
     "binseg_header.c",
     "binseg_basic.c",

@@ -6,6 +6,7 @@ Lookup *BinSegLookup = NULL;
 
 static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     status r = READY;
+    /*
     MemCh *m = ctx->sm->m;
     Abstract *args[3];
     
@@ -98,6 +99,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
         Out("^y.Found Header @ -> &^0\n", args);
     }
 
+    */
     return r;
 }
 
@@ -112,6 +114,7 @@ i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
 
 i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     i64 total = 0;
+    /*
     MemCh *m = ctx->sm->m;
     if(ctx->type.state & BINSEG_VISIBLE){
         entry = Str_ToHex(m, entry);
@@ -126,6 +129,7 @@ i64 BinSegCtx_ToStream(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
         args[4] = NULL;
         Out("^p.ToStream($ &)/$ -> @^0\n", args);
     }
+    */
     return total;
 }
 
@@ -144,6 +148,7 @@ i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
 
 status BinSegCtx_LoadStream(BinSegCtx *ctx){
     Abstract *args[4];
+    /*
     if(ctx->type.state & DEBUG){
         args[0] = (Abstract *)ctx;    
         args[1] = NULL;
@@ -212,6 +217,7 @@ status BinSegCtx_LoadStream(BinSegCtx *ctx){
             }
         }
     }
+    */
 
     return ctx->type.state;
 }

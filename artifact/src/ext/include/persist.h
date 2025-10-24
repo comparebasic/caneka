@@ -1,6 +1,4 @@
 #include "persist/persist.h"
-#include "persist/file.h"
-#include "persist/filedes.h"
 #include "persist/persist_tos.h"
 #include "persist/binseg.h"
 #include "persist/binseg_header.h"
