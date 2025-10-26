@@ -22,7 +22,6 @@ boolean TextCharFilter(byte *b, i64 length);
 status Str_Reset(Str *s);
 status Str_Wipe(Str *s);
 status Str_Incr(Str *s, word length);
-i64 Str_ToFd(Str *s, int fd);
 i64 Str_Add(Str *s, byte *b, i64 length);
 i64 Str_AddCstr(Str *s, char *cstr);
 char *Str_Cstr(MemCh *m, Str *s);

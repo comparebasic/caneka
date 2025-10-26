@@ -5,9 +5,9 @@ i32 _increments[SPAN_MAX_DIMS+1] = {1, 16, 256, 4096, 65536, 1048576};
 i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535, 1048575};
 i32 _capacity[SPAN_MAX_DIMS+1] = {16, 256, 4096, 65536, 1048576, 16777216};
 
-static status _Iter_QueryPage(Iter *it, MemPage *pg);
+static status Iter_Query(Iter *it);
 
-static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 offset){
+static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
     Span *p = it->p; 
     void **ptr = NULL;
     void *debug = NULL;
@@ -46,8 +46,8 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
             it->type.state |= FLAG_ITER_CONTINUE;
             return 0;
         }
-        if(pg != NULL){
-            *ptr = (slab *)Bytes_AllocOnPage(pg, sizeof(slab), TYPE_POINTER_ARRAY);
+        if(m->type.state & MEMCH_ADD_PAGE){
+            *ptr = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
         }else{
             *ptr = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
         }
@@ -56,7 +56,7 @@ static inline i32 Iter_SetStack(MemCh *m, MemPage *pg, Iter *it, i8 dim, i32 off
     return offset & _modulos[dim];
 }
 
-static status Iter_AddWithGaps(Iter *it, MemPage *pg){
+static status Iter_AddWithGaps(Iter *it){
     Abstract *value = it->value;
     i32 idx = it->idx;
     i8 dimP = it->p->dims+1;
@@ -67,12 +67,12 @@ static status Iter_AddWithGaps(Iter *it, MemPage *pg){
         it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_RESERVE;
         it->idx = it->p->max_idx+1;
         it->value = NULL;
-        _Iter_QueryPage(it, pg);
+        Iter_Query(it);
         dimP = it->p->dims+1;
     }
 
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
-    _Iter_QueryPage(it, pg);
+    Iter_Query(it);
     i8 dim = 0;
     void *sl = NULL;
     void **last = NULL;
@@ -120,10 +120,10 @@ static status Iter_AddWithGaps(Iter *it, MemPage *pg){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
     it->value = value;
     it->idx = idx;
-    _Iter_QueryPage(it, pg);
+    Iter_Query(it);
     if(prevIdx != -1){
         Iter_Setup(&prevIt, it->p, SPAN_OP_GET, prevIdx);
-        _Iter_QueryPage(&prevIt, pg);
+        Iter_Query(&prevIt);
         while(dim > 0 && (it->type.state & SUCCESS)){
             sl = *((void **)prevIt.stack[dim]);
             openSlots = it->stackIdx[dim-1];
@@ -139,13 +139,13 @@ static status Iter_AddWithGaps(Iter *it, MemPage *pg){
     return it->type.state;
 }
 
-static status _Iter_QueryPage(Iter *it, MemPage *pg){
+static status Iter_Query(Iter *it){
     it->type.state &= ~(SUCCESS|NOOP|MORE);
     MemCh *m = it->p->m;
 
     if(it->type.state & SPAN_OP_ADD){
         if(it->type.state & FLAG_ITER_CONTINUE){
-            return Iter_AddWithGaps(it, pg);
+            return Iter_AddWithGaps(it);
         }
         it->idx = it->p->max_idx+1;
     }
@@ -164,11 +164,22 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
         }
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
+        util u = ((util)p);
+        u &= ~MEM_STASH_MASK;
+        if(p->nvalues > 0 && u == (util)p->m->first){
+            m->type.state |= MEMCH_ADD_PAGE;
+        }
         while(p->dims < dimsNeeded){
             slab *new_sl = NULL;
-            if(pg != NULL){
-                new_sl = (slab *)Bytes_AllocOnPage(pg, sizeof(slab), TYPE_POINTER_ARRAY);
+            if(m->type.state & MEMCH_ADD_PAGE){
+                printf("Mem Alloc SPan p->nvalues:%d\n", p->nvalues);
+                fflush(stdout);
+                new_sl = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
             }else{
+                if(m->type.state & DEBUG){
+                    printf("Normal alloc\n");
+                    fflush(stdout);
+                }
                 new_sl = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
             }
 
@@ -192,7 +203,7 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
     i32 offset = it->idx;
     void **ptr = NULL;
     while(dim >= 0){
-        offset = Iter_SetStack(p->m, pg, it, dim, offset);
+        offset = Iter_SetStack(p->m, it, dim, offset);
         if(it->type.state & NOOP){
             break;
         }
@@ -229,6 +240,8 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
         dim--;
     }
 
+    m->type.state &= ~MEMCH_ADD_PAGE;
+
     if(it->idx == p->max_idx){
         it->type.state |= LAST;
     }else{
@@ -236,11 +249,6 @@ static status _Iter_QueryPage(Iter *it, MemPage *pg){
     }
 
     return it->type.state;
-}
-
-
-static status Iter_Query(Iter *it){
-    return _Iter_QueryPage(it, NULL);
 }
 
 static status _Iter_Prev(Iter *it){

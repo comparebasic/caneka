@@ -1,3 +1,9 @@
+enum memch_flags {
+    MEMCH_BASE = 1 << 8,
+    MEMCH_ADD_PAGE = 1 << 9,
+    MEMCH_STASHED = 1 << 10,
+};
+
 typedef struct mem_ctx {
     Type type;
     i16 level;
@@ -7,8 +13,8 @@ typedef struct mem_ctx {
     MemPage *first;
 } MemCh;
 
-#define MemCh_SetToBase(m) ((m)->level = -((m)->level))
-#define MemCh_SetFromBase(m) ((m)->level = abs((m)->level))
+#define MemCh_SetToBase(m) ((m)->type.state |= MEMCH_BASE)
+#define MemCh_SetFromBase(m) ((m)->type.state &= ~MEMCH_BASE)
 #define MemCh_Incr(m) ((m)->level++)
 #define MemCh_Decr(m) ((m)->level > 0 && (m)->level--)
 #define MemCh_DecrFree(m) (((m)->level > 0) && \

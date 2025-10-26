@@ -14,16 +14,12 @@ i64 MemCh_MemCount(MemCh *m, i16 level){
 }
 
 MemPage *MemCh_AddPage(MemCh *m, i16 level){
+    m->type.state |= DEBUG;
     MemPage *pg = MemPage_Make(m, level);
     Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1);
     m->it.value = (void *)pg;
-    _Iter_QueryPage(&m->it, pg);
-    if(_capacity[m->it.p->dims] <= (m->it.p->max_idx+1)){
-        Iter it;
-        Iter_Setup(&it, m->it.p, SPAN_OP_RESERVE, m->it.p->max_idx+1); 
-        it.value = NULL;
-        _Iter_QueryPage(&it, pg);
-    }
+    Iter_Query(&m->it);
+    m->type.state &= ~DEBUG;
     return pg;
 }
 
@@ -32,7 +28,6 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 }
 
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
-    i32 slIdx = 0;
     if(m == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
@@ -57,12 +52,18 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         s.bytes = _b;
         s.alloc = 128;
         Str_AddCstr(&s, "Guard Error allocating ");
+        printf("%d\n", (i32)m->guard);
+        fflush(stdout);
         Str_AddCstr(&s, Type_ToChars(typeOf));
         Fatal(FUNCNAME, FILENAME, LINENUMBER, (char *)s.bytes, NULL);
         return NULL;
     }
 
-    i16 level = max(m->level, 0);
+    i16 level = 0;
+    if((m->type.state & MEMCH_BASE) == 0){
+        level = m->level;
+    }
+
     word _sz = (word)sz;
 
     MemPage *sl = NULL;
@@ -70,7 +71,6 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *_sl = (MemPage *)m->it.value;
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
-            slIdx = m->it.idx;
             sl = _sl;
             break;
         }
@@ -78,7 +78,6 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
     if(sl == NULL){
         sl = MemCh_AddPage(m, level);
-        slIdx = m->it.idx;
     }
 
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
