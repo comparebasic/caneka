@@ -228,7 +228,7 @@ i32 Roebling_GetMatchIdx(Roebling *rbl){
 }
 
 status Roebling_ResetPatterns(Roebling *rbl){
-    if(rbl->m->type.range > 0){
+    if(rbl->m->level > 0){
         MemCh_Free(rbl->m);
     }
 

@@ -9,7 +9,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
     status state = SUCCESS;
     i64 total = 0;
     if((sm->type.state & STREAM_STRVEC) == 0){
-        sm->m->type.range++;
+        sm->m->level++;
     }
     while(ptr <= end){
         char c = *ptr;
@@ -128,7 +128,7 @@ next:
     }
 
     if((sm->type.state & STREAM_STRVEC) == 0){
-        sm->m->type.range--;
+        sm->m->level--;
     }
 
     return total; 

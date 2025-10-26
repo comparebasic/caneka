@@ -453,7 +453,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     Str_AddCstr(dest, "/");
     i64 destL = dest->length;
 
-    m->type.range++;
+    m->level++;
 
     ctx->fields.steps.modSrcCount->val.i = 0;
     ctx->fields.steps.modSrcTotal->val.i = 0;
@@ -469,7 +469,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     sourceCstr = dir->sources;
     ctx->fields.steps.modCount->val.i++;
     while(*sourceCstr != NULL){
-        m->type.range++;
+        m->level++;
         Str_Trunc(source, sourceL);
         Str_AddCstr(source, *sourceCstr);
         Str_Trunc(dest, destL);
@@ -481,7 +481,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         ctx->fields.steps.modSrcCount->val.i++;
 
         MemCh_Free(m);
-        m->type.range--;
+        m->level--;
         sourceCstr++;
         if(r & ERROR){
             return r;
@@ -490,7 +490,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     ctx->fields.steps.modSrcCount->val.i = 0;
     ctx->fields.steps.modSrcTotal->val.i = 0;
     CliStatus_Print(OutStream, ctx->cli);
-    m->type.range--;
+    m->level--;
 
     DebugStack_Pop();
     return r;

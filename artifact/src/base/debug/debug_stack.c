@@ -5,7 +5,7 @@ static Iter _it;
 
 void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line, i32 pos){
     Span *stack = _it.p;
-    stack->m->type.range--;
+    stack->m->level--;
 
     StackEntry *entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
     entry->type.of = TYPE_DEBUG_STACK_ENTRY;
@@ -17,7 +17,7 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
     entry->pos = pos;
 
     Iter_Push(&_it, (Abstract*)entry);
-    stack->m->type.range++;
+    stack->m->level++;
 }
 
 void DebugStack_Pop(){

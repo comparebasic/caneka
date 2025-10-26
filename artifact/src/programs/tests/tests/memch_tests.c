@@ -23,7 +23,7 @@ status MemCh_Tests(MemCh *gm){
         memcpy(p, &i, sizeof(i64));
     }
 
-    m->type.range++;
+    m->level++;
     for(i64 i = 0; i < max; i++){
         i64 *p = MemCh_Alloc(m, sizeof(i64));
         memcpy(p, &i, sizeof(i64));
@@ -36,7 +36,7 @@ status MemCh_Tests(MemCh *gm){
     r |= Test(m->it.p->nvalues == 6, "Six slabs registered, have $", args1);
 
     MemCh_Free(m);
-    m->type.range--;
+    m->level--;
     Abstract *args2[] = {
         (Abstract *)I32_Wrapped(m, m->it.p->nvalues),
         NULL
@@ -51,7 +51,7 @@ status MemCh_Tests(MemCh *gm){
         r |= Test(cp->recycled.p->nvalues == recycled+3,
             "Two additional slabs registered in chapter $recycled, have $", args3);
     }
-    m->type.range++;
+    m->level++;
 
 #ifdef INSECURE
     pageIdx = MemBook_GetPageIdx(m);
@@ -85,7 +85,7 @@ status MemCh_Tests(MemCh *gm){
             "pageIdx has not changed, indicating old memslabs have been reused, have $", args6);
     }
 
-    m->type.range--;
+    m->level--;
     MemCh_Free(m);
     if(cp != NULL){
         Single sg;

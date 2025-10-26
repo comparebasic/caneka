@@ -62,7 +62,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         return NULL;
     }
 
-    i16 level = max(m->type.range, 0);
+    i16 level = max(m->level, 0);
     word _sz = (word)sz;
 
     MemPage *sl = NULL;
@@ -167,8 +167,8 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
 }
 
 status MemCh_Free(MemCh *m){
-    status r = MemCh_FreeTemp(m, m->type.range);
-    if(m->type.range == 0){
+    status r = MemCh_FreeTemp(m, m->level);
+    if(m->level == 0){
         return MemBook_FreePage(m, m->first);
     }
     return r;

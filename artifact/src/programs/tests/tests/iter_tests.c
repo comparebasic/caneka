@@ -9,7 +9,7 @@ status Iter_Tests(MemCh *gm){
     status r = READY;
     Iter it;
 
-    m->type.range++;
+    m->level++;
 
     p = Span_Make(m);
 
@@ -269,7 +269,7 @@ status Iter_Tests(MemCh *gm){
     r |= Test(Equals(*item, first), 
         "Iter_Prev ends at first value, expected @, have @", args);
 
-    m->type.range--;
+    m->level--;
     MemCh_Free(m);
     DebugStack_Pop();
 

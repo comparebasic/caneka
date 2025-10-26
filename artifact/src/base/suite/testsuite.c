@@ -69,7 +69,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i32 pass = 0;
     i32 fail = 0;
 
-    word baseStackLevel = m->type.range;
+    word baseStackLevel = m->level;
     StrVec *v = StrVec_Make(m);
     i64 baseMem = MemCount(0);
     i64 rollingBaseMem = baseMem;
@@ -102,16 +102,16 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
         if(set->func != NULL){
-            m->type.range++;
-            _debugM->type.range++;
+            m->level++;
+            _debugM->level++;
             r = set->func(m);
             MemCh_Free(m);
             MemCh_Free(_debugM);
-            _debugM->type.range--;
-            m->type.range--;
+            _debugM->level--;
+            m->level--;
 
-            word stackLevel = m->type.range-baseStackLevel;
-            m->type.range++;
+            word stackLevel = m->level-baseStackLevel;
+            m->level++;
             i64 memUsed = MemCount(0)-baseMem;
             i64 overRollingUsed = MemCount(0)-rollingBaseMem;
             rollingBaseMem = MemCount(0);
@@ -139,7 +139,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             Out("$Mem: $ ($ chapters/$ available/$ total+stack)^0\n", args4);
 
             MemCh_Free(m);
-            m->type.range--;
+            m->level--;
             if((r & ERROR) != 0 || (r & SUCCESS) == 0){
                 fail++;
                 break;

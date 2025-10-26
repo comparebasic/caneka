@@ -5,7 +5,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
     i16 guard;
     status r = READY;
     MemCh *m = v->p->m;
-    m->type.range++;
+    m->level++;
     Match *mt = NULL;
     if(split->type.of == TYPE_WRAPPED_I8){
         Single *sg = (Single *)split;
@@ -88,18 +88,18 @@ status StrVec_Split(StrVec *v, Abstract *split){
                             length -= taken->length;
                             taken = NULL;
                         }
-                        m->type.range--;
+                        m->level--;
                         Str *sep = Str_Ref(m, s->bytes+start+1, length, length, STRING_SEPERATOR);
                         r |= Iter_Insert(&it, it.idx+1, (Abstract *)sep);
-                        m->type.range++;
+                        m->level++;
                         i16 sLength = s->length;
                         s->length = (i16)start+1;
                         if(r & MORE && length > 0){
                             i16 newLength = sLength-(start+length+1);
-                            m->type.range--;
+                            m->level--;
                             s = Str_Ref(m, s->bytes+start+1+length, newLength, newLength, ZERO);
                             r |= Iter_Insert(&it, it.idx+1, (Abstract *)s);
-                            m->type.range++;
+                            m->level++;
                         }
                         break;
                     }else{
@@ -110,10 +110,10 @@ status StrVec_Split(StrVec *v, Abstract *split){
             }else if((r & LAST) && mt->type.state & PROCESSING && (mt->snip.type.state & SNIP_CONTENT) != 0){
                 i32 start = pos - SnipSpan_Total(mt->backlog, ZERO);
                 s->length = start;
-                m->type.range--;
+                m->level--;
                 taken = Str_Ref(m, s->bytes+start, mt->snip.length, mt->snip.length, STRING_SEPERATOR);
                 Iter_Insert(&it, it.idx+1, (Abstract *)taken);
-                m->type.range++;
+                m->level++;
             }
         }
     }
@@ -122,9 +122,9 @@ status StrVec_Split(StrVec *v, Abstract *split){
         r |= NOOP;
     }
 
-    m->type.range++;
+    m->level++;
     MemCh_Free(m);
-    m->type.range--;
+    m->level--;
 
     return r;
 }
