@@ -271,3 +271,23 @@ status SpanClone_Tests(MemCh *gm){
     MemCh_Free(m);
     return r;
 }
+
+status SpanMax_Tests(MemCh *gm){
+    MemCh *m = MemCh_Make();
+    status r = READY;
+
+    Span *p = Span_Make(m);
+
+    i8 dim = 0;
+    for(i64 i = 0; p->dims < SPAN_MAX_DIMS; i++){
+        if(p->dims > dim){
+            printf("dim %d/m->it.p->nvalues:%d\n", (i32)m->it.p->dims, m->it.p->nvalues);
+            dim++;
+        }
+        Span_Add(p, (Abstract *)I64_Wrapped(m, i));
+    }
+
+    MemCh_Free(m);
+    return r;
+}
+

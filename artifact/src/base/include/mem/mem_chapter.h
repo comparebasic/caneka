@@ -1,7 +1,6 @@
 enum memch_flags {
     MEMCH_BASE = 1 << 8,
-    MEMCH_ADD_PAGE = 1 << 9,
-    MEMCH_STASHED = 1 << 10,
+    MEMCH_STASHED = 1 << 9,
 };
 
 typedef struct mem_ctx {

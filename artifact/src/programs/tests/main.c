@@ -41,6 +41,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Span Max Tests",
+        SpanMax_Tests,
+        "Populate a span with the maximum amount of values to stress test it and the memory system.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Iter",
         Iter_Tests,
         "Iter tests for iteration and insertion.",

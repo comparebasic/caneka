@@ -9,6 +9,7 @@ status Tests_Init(MemCh *m);
 /* tests */
 status MemCh_Tests(MemCh *gm);
 status Span_Tests(MemCh *gm);
+status SpanMax_Tests(MemCh *gm);
 status Core_Tests(MemCh *gm);
 status Str_Tests(MemCh *gm);
 status StrB64_Tests(MemCh *gm);

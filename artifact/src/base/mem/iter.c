@@ -46,9 +46,13 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
             it->type.state |= FLAG_ITER_CONTINUE;
             return 0;
         }
-        if(m->type.state & MEMCH_ADD_PAGE){
+        if(p->nvalues > 0 && p->m->it.p == p){
             *ptr = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
         }else{
+            if(m->type.state & DEBUG){
+                printf("Allocating on debug mem\n");
+                fflush(stdout);
+            }
             *ptr = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
         }
     }
@@ -135,7 +139,7 @@ static status Iter_AddWithGaps(Iter *it){
             dim--;
         }
     }
-    it->type.state = (it->type.state & PROCESSING|SPAN_OP_SET);
+    it->type.state = (it->type.state & (PROCESSING|SPAN_OP_SET));
     return it->type.state;
 }
 
@@ -164,14 +168,9 @@ static status Iter_Query(Iter *it){
         }
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
-        util u = ((util)p);
-        u &= ~MEM_STASH_MASK;
-        if(p->nvalues > 0 && u == (util)p->m->first){
-            m->type.state |= MEMCH_ADD_PAGE;
-        }
         while(p->dims < dimsNeeded){
             slab *new_sl = NULL;
-            if(m->type.state & MEMCH_ADD_PAGE){
+            if(p->nvalues > 0 && p->m->it.p == p){
                 printf("Mem Alloc SPan p->nvalues:%d\n", p->nvalues);
                 fflush(stdout);
                 new_sl = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
@@ -239,8 +238,6 @@ static status Iter_Query(Iter *it){
         }
         dim--;
     }
-
-    m->type.state &= ~MEMCH_ADD_PAGE;
 
     if(it->idx == p->max_idx){
         it->type.state |= LAST;
