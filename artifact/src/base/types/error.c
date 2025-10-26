@@ -144,7 +144,9 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, Abstract *args
 
 status Error_Init(MemCh *m){
     status r = READY;
+    /*
     setSigs();
+    */
     if(ErrorHandlers == NULL){
         ErrorHandlers = Lookup_Make(m, _TYPE_ZERO);
         r |= SUCCESS;

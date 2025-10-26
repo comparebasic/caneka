@@ -14,12 +14,8 @@ i64 MemCh_MemCount(MemCh *m, i16 level){
 }
 
 MemPage *MemCh_AddPage(MemCh *m, i16 level){
-    m->type.state |= DEBUG;
     MemPage *pg = MemPage_Make(m, level);
-    Iter_Setup(&m->it, m->it.p, SPAN_OP_SET, m->it.p->max_idx+1);
-    m->it.value = (void *)pg;
-    Iter_Query(&m->it);
-    m->type.state &= ~DEBUG;
+    Iter_Add(&m->it, (void *)pg);
     return pg;
 }
 
@@ -28,6 +24,7 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 }
 
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
+    Abstract *args[3];
     if(m == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
@@ -52,8 +49,6 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         s.bytes = _b;
         s.alloc = 128;
         Str_AddCstr(&s, "Guard Error allocating ");
-        printf("%d\n", (i32)m->guard);
-        fflush(stdout);
         Str_AddCstr(&s, Type_ToChars(typeOf));
         Fatal(FUNCNAME, FILENAME, LINENUMBER, (char *)s.bytes, NULL);
         return NULL;
@@ -77,7 +72,23 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     }
 
     if(sl == NULL){
+        if(m->type.state & DEBUG){
+            args[0] = (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->nvalues+1);
+            args[1] = (Abstract *)I8_Wrapped(ErrStream->m, m->it.p->dims);
+            args[2] = NULL;
+            Out("^p.MemCh adding pages $/^D.$^d.dims currently^0\n", args);
+            if(m->it.p->nvalues == 255){
+                m->it.p->type.state |= DEBUG;
+            }
+        }
+
         sl = MemCh_AddPage(m, level);
+        if(m->type.state & DEBUG){
+            args[0] = (Abstract *)I32_Wrapped(ErrStream->m, MemBook_GetPageIdx(sl));
+            args[1] = (Abstract *)I8_Wrapped(ErrStream->m, m->it.p->dims);
+            args[2] = (Abstract *)NULL;
+            Out("^p.    MemCh added page $/^D.$^d.dims currently^0\n", args);
+        }
     }
 
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
@@ -142,9 +153,26 @@ status MemCh_WipeTemp(MemCh *m, i16 level){
 status MemCh_FreeTemp(MemCh *m, i16 level){
     status r = READY;
     level = max(level, 0);
+    if(m->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->nvalues),
+            (Abstract *)I16_Wrapped(ErrStream->m, level),
+            NULL
+        };
+        Out("^p.MemCh_FreeTemp ^D.$^d.nvalues ^D.$^d.level^0\n", args);
+    }
 
     m->it.type.state |= FLAG_ITER_REVERSE;
     while((Iter_Next(&m->it) & END) == 0){
+        if(m->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(ErrStream->m, m->it.idx),
+                (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->max_idx),
+                (Abstract *)I16_Wrapped(ErrStream->m, level),
+                NULL
+            };
+            Out("^p.    MemCh_FreeTemp \\@$of$/^D.$^d.level\n", args);
+        }
         if(m->it.idx == 0){
             continue;
         }
@@ -154,6 +182,14 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
                 r |= Span_Remove(m->it.p, m->it.idx);
             }
             r |= MemBook_FreePage(m, pg);
+        }
+        if(m->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(ErrStream->m, m->it.idx),
+            (Abstract *)I16_Wrapped(ErrStream->m, level),
+                NULL
+            };
+            Out("^p.    done -MemCh_FreeTemp \\@$/^D.$^d.level\n", args);
         }
     }
 

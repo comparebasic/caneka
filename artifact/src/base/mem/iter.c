@@ -1,9 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-i32 _increments[SPAN_MAX_DIMS+1] = {1, 16, 256, 4096, 65536, 1048576};
-i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535, 1048575};
-i32 _capacity[SPAN_MAX_DIMS+1] = {16, 256, 4096, 65536, 1048576, 16777216};
+i32 _increments[SPAN_MAX_DIMS+2] = {1, 16, 256, 4096, 65536, 1048576};
+i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535};
+i32 _capacity[SPAN_MAX_DIMS+1] = {16, 256, 4096, 65536, 1048576};
 
 static status Iter_Query(Iter *it);
 
@@ -47,12 +47,10 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
             return 0;
         }
         if(p->nvalues > 0 && p->m->it.p == p){
+            MemPage *pg = (MemPage *)it->value;
+            pg->level = 0;
             *ptr = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
         }else{
-            if(m->type.state & DEBUG){
-                printf("Allocating on debug mem\n");
-                fflush(stdout);
-            }
             *ptr = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
         }
     }
@@ -156,7 +154,13 @@ static status Iter_Query(Iter *it){
 
     i8 dimsNeeded = 0;
     while(_increments[dimsNeeded+1] <= it->idx){
-        dimsNeeded++;
+        if(++dimsNeeded > SPAN_MAX_DIMS){
+            Abstract *args[] = {(Abstract *)I32_Wrapped(m, it->idx), NULL};
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "idx too large $", args);
+            it->type.state |= ERROR;
+            return it->type.state;
+        }
     }
 
     Span *p = it->p;
@@ -171,14 +175,10 @@ static status Iter_Query(Iter *it){
         while(p->dims < dimsNeeded){
             slab *new_sl = NULL;
             if(p->nvalues > 0 && p->m->it.p == p){
-                printf("Mem Alloc SPan p->nvalues:%d\n", p->nvalues);
-                fflush(stdout);
+                MemPage *pg = it->value;
+                pg->level = 0;
                 new_sl = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
             }else{
-                if(m->type.state & DEBUG){
-                    printf("Normal alloc\n");
-                    fflush(stdout);
-                }
                 new_sl = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
             }
 
@@ -197,6 +197,7 @@ static status Iter_Query(Iter *it){
         *ptr = shelf_sl;
         it->type.state |= MORE;
     }
+
 
     i8 dim = p->dims;
     i32 offset = it->idx;
@@ -442,7 +443,7 @@ status Iter_Next(Iter *it){
             i32 incr = 1;
             while(it->value == NULL && dim <= topDim && 
                     idx <= it->p->max_idx){
-                if((it->stackIdx[dim]+ incr) < SPAN_STRIDE){
+                if((it->stackIdx[dim] + incr) < SPAN_STRIDE){
                     it->stackIdx[dim] += incr;
 
                     if(dim >= topDim){
@@ -513,7 +514,7 @@ status Iter_Next(Iter *it){
         }
     }
 end:
-    if(idx > it->p->max_idx){
+    if(idx > it->p->max_idx || dim > topDim){
         it->type.state |= END;
     }else if(idx == it->p->max_idx){
         it->type.state |= LAST;
@@ -581,7 +582,6 @@ status Iter_Push(Iter *it, void *value){
 
 status Iter_Add(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
-    it->idx = it->p->max_idx;
     it->value = value;
     status r = Iter_Query(it);
     it->value = NULL;

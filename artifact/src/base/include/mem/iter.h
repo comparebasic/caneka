@@ -9,6 +9,10 @@ enum span_ops {
     FLAG_ITER_REVERSE = 1 << 15,
 };
 
+extern i32 _increments[SPAN_MAX_DIMS+2];
+extern i32 _capacity[SPAN_MAX_DIMS+1];
+extern i32 _modulos[SPAN_MAX_DIMS+1];
+
 typedef struct iter {
     Type type;
     i32 idx;

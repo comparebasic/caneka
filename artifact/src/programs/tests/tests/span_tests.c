@@ -1,12 +1,38 @@
 #include <external.h>
 #include <caneka.h>
 
+static status testDims(MemCh *m, i32 idx, i8 expectedDim){
+    i8 dimsNeeded = 0;
+    while(_increments[dimsNeeded+1] <= idx){
+        ++dimsNeeded;
+    }
+    Abstract *args[] = {
+        (Abstract *)I32_Wrapped(m, idx),
+        (Abstract *)I8_Wrapped(m, expectedDim),
+        (Abstract *)I8_Wrapped(m, dimsNeeded),
+        NULL
+    };
+
+    return Test(dimsNeeded == expectedDim, "0 Dims needed for value of $, expected $, have $", 
+        args);
+}
+
 status Span_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
     Str *s;
+
+    r |= testDims(m, 10, 0);
+    r |= testDims(m, 16, 1);
+    r |= testDims(m, 34, 1);
+    r |= testDims(m, 244, 1);
+    r |= testDims(m, 257, 2);
+    r |= testDims(m, 3078, 2);
+    r |= testDims(m, 5000, 3);
+    r |= testDims(m, 64000, 3);
+    r |= testDims(m, 66000, 4);
 
     /* set and retrieve numbers beyond stride */
     p = Span_Make(m);
@@ -272,22 +298,52 @@ status SpanClone_Tests(MemCh *gm){
     return r;
 }
 
-status SpanMax_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+static status makeAndCompareItems(MemCh *m, i64 max){
+    Abstract *args[2];
     status r = READY;
-
+    m->level++;
     Span *p = Span_Make(m);
-
-    i8 dim = 0;
-    for(i64 i = 0; p->dims < SPAN_MAX_DIMS; i++){
-        if(p->dims > dim){
-            printf("dim %d/m->it.p->nvalues:%d\n", (i32)m->it.p->dims, m->it.p->nvalues);
-            dim++;
-        }
-        Span_Add(p, (Abstract *)I64_Wrapped(m, i));
+    for(i64 i = 0; i < max; i++){
+        Span_Set(p, i, (Abstract *)I64_Wrapped(m, i));
     }
 
+    for(i64 i = 0; i < max; i++){
+        Single *sg = Span_Get(p, i);
+        if(sg->val.i != i){
+            r |= ERROR;
+            break;
+        }
+    }
+
+    args[0] = (Abstract *)I64_Wrapped(m, max);
+    args[1] = NULL;
+    r |= Test((r & ERROR) == 0, "Adding and comparing $ items", args);
+    MemCh_Free(m);
+    m->level--;
+    return r; 
+}
+
+status SpanMax_Tests(MemCh *gm){
+    status r = READY;
+    MemCh *m = MemCh_Make();
+    Abstract *args[5];
+
+    r |= makeAndCompareItems(m, 18);
+    r |= makeAndCompareItems(m, 72);
+    r |= makeAndCompareItems(m, 300);
+    r |= makeAndCompareItems(m, 5000);
+    r |= makeAndCompareItems(m, 63000);
+    /*
+    r |= makeAndCompareItems(m, 1000000);
+    */
+
+    r |= ERROR;
+
+    m->level = 0;
+    args[0] = (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->nvalues);
+    args[1] = (Abstract *)I8_Wrapped(ErrStream->m, m->it.p->dims);
+    args[2] = NULL;
+    Out("^p.MemCh nvalues $/$dims^0\n", args);
     MemCh_Free(m);
     return r;
 }
-

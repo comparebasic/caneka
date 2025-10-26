@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 dim_occupied_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000, 50000};
+static i64 dim_occupied_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000};
 
 static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *value){
     Table *tbl = (Table *)it->p;

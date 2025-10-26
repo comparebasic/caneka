@@ -5,9 +5,9 @@
 #define PAGE_MASK 4095
 #define PAGE_COUNT 4096
 #define PAGE_MAX 4095
-#define CHAPTER_SIZE PAGE_SIZE*PAGE_COUNT
-#define CHAPTER_MAX 16
-#define SPAN_MAX_DIMS 5 /* 1,048,576 total items @ 16 slots */
+#define BOOK_SIZE PAGE_SIZE*PAGE_COUNT
+#define BOOK_MAX 16
+#define SPAN_MAX_DIMS 4 /* 1,048,576 total items @ 16 slots */
 #define SPAN_STRIDE 16
 #define SPAN_LOCAL_MAX (SPAN_STRIDE-1)
 #define TABLE_MAX_DIMS SPAN_MAX_DIMS

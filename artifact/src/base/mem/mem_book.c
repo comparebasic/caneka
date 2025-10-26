@@ -18,7 +18,7 @@ static MemBook *MemBook_check(void *addr){
     }
     while(idx >= 0){
         MemBook *mb = _books[idx];
-        if(addr >= mb->start && addr <= mb->start+CHAPTER_SIZE){
+        if(addr >= mb->start && addr <= mb->start+BOOK_SIZE){
             return mb;
         }
         idx--;
@@ -51,7 +51,12 @@ i32 MemBook_GetBookIdx(void *addr){
     return bookIdx;
 }
 i32 MemBook_GetPageIdx(void *addr){
-    return bookIdx;
+    void *bptr = ((void *)_books[bookIdx]);
+    if(addr > bptr+BOOK_SIZE){
+        return -1;
+    }
+
+    return (addr - bptr) / PAGE_SIZE;
 }
 #else
 void _insecureMemError(void *addr){
@@ -151,8 +156,8 @@ void *MemBook_GetPage(void *addr){
 
 MemBook *MemBook_Make(MemBook *prev){
     bookIdx++;
-    if(bookIdx >= CHAPTER_MAX){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
+    if(bookIdx >= BOOK_MAX){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Book idx greater than book max", NULL);
         return NULL;
     }
     MemBook *mb = _books[bookIdx];
@@ -162,7 +167,7 @@ MemBook *MemBook_Make(MemBook *prev){
     }
 
     void *start = mmap(prev, 
-        CHAPTER_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+        BOOK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
     if(((util)start) & MEM_STASH_MASK){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Mempersist requires pages aligned by the first 11 bits", NULL);
