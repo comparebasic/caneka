@@ -134,19 +134,21 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
 static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~PROCESSING;
-    Abstract *args[4];
+    Abstract *args[7];
     if((bf->type.state & (BUFF_FD|BUFF_SOCKET)) == 0){
         return Buff_vecPosFrom(bf, offset, whence);
     }
 
-    i64 pos = lseek(bf->fd, whence, offset);
+    i64 pos = lseek(bf->fd, offset, whence);
     if(pos < 0){
+        Buff_Stat(bf);
         args[0] = (Abstract *)I64_Wrapped(bf->m, pos);
         args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
         args[2] = (Abstract *)bf;
-        args[3] = NULL;
+        args[3] = (Abstract *)Str_CstrRef(bf->m, Buff_WhenceChars(whence));
+        args[6] = NULL;
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error seek failed with $ for offset $ on @", args);
+            "Error seek failed with pos $ for offset $ on @ whence $", args);
         DebugStack_Pop();
         return ERROR;
     }else if(pos > 0){
@@ -157,13 +159,22 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     return bf->type.state;
 }
 
+status Buff_Stat(Buff *bf){
+    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
+        if(fstat(bf->fd, &bf->st)){
+            bf->type.state |= ERROR;
+        }
+    } else{
+        bf->type.state |= ERROR;
+    }
+    return bf->type.state;
+}
+
 boolean Buff_Empty(Buff *bf){
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
-        struct stat st;
-        if(!fstat(bf->fd, &st)){
-            return st.st_size == 0;
+        if((Buff_Stat(bf) & ERROR) == 0){
+            return bf->st.st_size == 0;
         }else{
-            bf->type.state |= ERROR;
             return FALSE;
         }
     }else{
@@ -448,6 +459,7 @@ status Buff_SendToFd(Buff *bf, i32 fd){
                     }
                     bf->unsent.idx = 0;
                     bf->unsent.s = bf->tail.s;
+                    bf->unsent.total = 0;
                 }
             }
         }else if(send > 0){
@@ -464,7 +476,14 @@ status Buff_SendToFd(Buff *bf, i32 fd){
 }
 
 status Buff_AddSend(Buff *bf, Str *s){
-    Buff_Add(bf, s);
+    if((bf->type.state & BUFF_UNBUFFERED) == 0){
+        Buff_Add(bf, s);
+    }else{
+        i64 offset = 0;
+        while(offset < s->alloc && (bf->type.state & ERROR) == 0){
+            Buff_Unbuff(bf, s->bytes+offset, s->length-offset, &offset);
+        }
+    }
     if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
         while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
     }

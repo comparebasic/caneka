@@ -37,42 +37,46 @@ status FileDB_Open(FileDB *fdb){
     fdb->ctx->type.state |= PROCESSING;
     fdb->type.state |= PROCESSING;
 
+    fdb->ctx->type.state |= fdb->type.state & DEBUG;
+
     DebugStack_Pop();
     return fdb->type.state;
 }
 
 status FileDB_Close(FileDB *fdb){
     status r = READY;
-    /*
+    Abstract *args[5];
     MemCh *m = fdb->m;
-    File_Close(fdb->f);
-    fdb->f->type.state &= ~STREAM_APPEND;
-    fdb->f->type.state |= ~STREAM_FROM_FD;
-    File_Open(fdb->f);
-    lseek(fdb->f->sm->fd, 0, SEEK_SET);
+    File_Close(fdb->bf);
+    File_Open(fdb->bf, fdb->fpath, O_RDWR);
 
-    Str *entry = Str_Make(m, sizeof(BinSegHeader)*2);
-    entry->length = entry->alloc;
-    if(Stream_FillStr(fdb->ctx->sm, entry) & SUCCESS){;
-        lseek(fdb->f->sm->fd, 0, SEEK_SET);
-        entry = Str_FromHex(m, entry);
-        BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
-        hdr->id = fdb->ctx->latestId;
-        entry = Str_ToHex(m, entry);
-        Stream_Bytes(fdb->f->sm, entry->bytes, entry->length);
-        r |= SUCCESS;
-    }else{
-        r |= ERROR;
+    if(!Buff_Empty(fdb->bf)){
+        Str *entry = Str_Make(m, sizeof(BinSegHeader)*2);
+        Buff_PosEnd(fdb->bf);
+        Buff_RevGetStr(fdb->bf, entry);
+        if(entry->length == entry->alloc){;
+            Buff_PosAbs(fdb->bf, 0);
+            entry = Str_FromHex(m, entry);
+            BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
+            hdr->id = fdb->ctx->latestId;
+            entry = Str_ToHex(m, entry);
+            Buff_AddSend(fdb->bf, entry);
+            if(fdb->type.state & DEBUG){
+                args[0] = (Abstract *)Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
+                args[1] = NULL;
+                Out("^y.Close hdr &^0\n", args);
+            }
+            r |= SUCCESS;
+        }else{
+            r |= ERROR;
+        }
     }
 
-    File_Close(fdb->f);
-    */
+    File_Close(fdb->bf);
     return r;
 }
 
 status FileDB_Add(FileDB *fdb, i16 id, Abstract *a){
-    return NOOP;
-    /*
     DebugStack_Push(NULL, 0);
     BinSegCtx *ctx = fdb->ctx;
     if(ctx->type.state & PROCESSING){ 
@@ -86,25 +90,22 @@ status FileDB_Add(FileDB *fdb, i16 id, Abstract *a){
         DebugStack_Pop();
         return ctx->type.state;
     }else{
-        Error(ctx->sm->m, FUNCNAME, FILENAME, LINENUMBER,
+        Error(fdb->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error FileDB_Add does not have the PROCESSING flag to indicate an open FileDB",
             NULL);
         DebugStack_Pop();
         return ERROR;
     }
-    */
 }
 
 Table *FileDB_ToTbl(FileDB *fdb, Table *keys){
-    /*
-    File_Close(fdb->f);
-    fdb->f->type.state &= ~(STREAM_APPEND|STREAM_TO_FD|STREAM_CREATE|STREAM_STRVEC);
-    fdb->f->type.state |= STREAM_FROM_FD;
-    File_Open(fdb->f);
-    fdb->ctx->sm = fdb->f->sm;
+    if(fdb->bf != NULL && fdb->bf->type.state & (BUFF_FD|BUFF_SOCKET)){
+        File_Close(fdb->bf);
+    }
+    File_Open(fdb->bf, fdb->fpath, O_RDONLY);
+    fdb->ctx->bf = fdb->bf;
     fdb->ctx->keys = keys;
-    BinSegCtx_LoadStream(fdb->ctx);
-    */
+    BinSegCtx_Load(fdb->ctx);
     return fdb->ctx->tbl;
 }
 
@@ -112,7 +113,7 @@ FileDB *FileDB_Make(MemCh *m, Str *fpath){
     FileDB *fdb = (FileDB *)MemCh_AllocOf(m, sizeof(FileDB), TYPE_FILEDB);
     fdb->type.of = TYPE_FILEDB;
     fdb->m = m;
-    fdb->bf = Buff_Make(m, ZERO);
+    fdb->bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_FLUSH);
     fdb->fpath = fpath;
     return fdb;
 }

@@ -3,6 +3,18 @@
 
 static Str **buffLabels = NULL;
 
+char *Buff_WhenceChars(i64 whence){
+    if(whence == SEEK_SET){
+        return "SEEK_SET";
+    }else if(whence == SEEK_END){
+        return "SEEK_END";
+    }else if(whence == SEEK_CUR){
+        return "SEEK_CUR";
+    }else{
+        return "SEEK_unknown";
+    }
+}
+
 i64 StashCoords_Print(Stream *sm, StashCoord *coord, word flags){
     i64 total = 0;
     Abstract *args[] = {
@@ -19,16 +31,24 @@ i64 StashCoords_Print(Stream *sm, StashCoord *coord, word flags){
 i64 Buff_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Buff *bf = (Buff *)as(a, TYPE_BUFF);
-    Abstract *args[6];
+
+    Abstract *args[8];
     args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)bf, ToS_FlagLabels);
     args[1] = (Abstract *)I32_Wrapped(sm->m, bf->fd);
     args[2] = (Abstract *)I64_Wrapped(sm->m, bf->unsent.total);
     args[3] = (Abstract *)I64_Wrapped(sm->m, bf->v->total);
     args[4] = NULL;
     if(flags & DEBUG){
-        args[4] = (bf->unsent.s == NULL ? (Abstract *)bf->v : (Abstract *)bf->unsent.s);
-        args[5] = NULL;
-        total += Fmt(sm, "Buff<$ $fd unsent/total=$/$ &>", args);
+        Buff_Stat(bf);
+        args[4] = args[2];
+        args[5] = args[3];
+
+        args[2] = (Abstract *)I32_Wrapped(bf->m, bf->st.st_size);
+        args[3] = (Abstract *)I32_Wrapped(bf->m, lseek(bf->fd, 0, SEEK_CUR));
+
+        args[6] = (bf->unsent.s == NULL ? (Abstract *)bf->v : (Abstract *)bf->unsent.s);
+        args[7] = NULL;
+        total += Fmt(sm, "Buff<$ $fd/$bytes\\@@ unsent/total=$/$ &>", args);
     }else{
         total += Fmt(sm, "Buff<$ $fd unsent/total=$/$>", args);
     }

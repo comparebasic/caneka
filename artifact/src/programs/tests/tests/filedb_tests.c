@@ -21,7 +21,6 @@ status FileDB_Tests(MemCh *gm){
     FileDB_Open(fdb);
 
     r |= Test(fdb->ctx->latestId == 1, "Latest ID has been set for one record", NULL);
-    /*
 
     Table *keys = Table_Make(m);
     Str *key1 = Str_CstrRef(m, "name");
@@ -34,7 +33,7 @@ status FileDB_Tests(MemCh *gm){
     args[1] = (Abstract *)s;
     args[2] = NULL;
     r |= Test(Equals((Abstract *)s, (Abstract *)name), 
-        "Found name from table, exected, have", args);
+        "Found name from table, exected @, have @", args);
     FileDB_Close(fdb);
 
     FileDB_Open(fdb);
@@ -64,21 +63,21 @@ status FileDB_Tests(MemCh *gm){
     args[1] = (Abstract *)s;
     args[2] = NULL;
     r |= Test(Equals((Abstract *)s, (Abstract *)name), 
-        "Found name from table, exected $, have $", args);
+        "Found name from table, exected @, have @", args);
 
     s = (Str *)Table_Get(tbl, (Abstract *)key2);
     args[0] = (Abstract *)pw;
     args[1] = (Abstract *)s;
     args[2] = NULL;
     r |= Test(Equals((Abstract *)s, (Abstract *)pw),
-        "Found pw from table, exected $, have $", args);
+        "Found pw from table, exected @, have @", args);
 
     s = (Str *)Table_Get(tbl, (Abstract *)key3);
     args[0] = (Abstract *)email;
     args[1] = (Abstract *)s;
     args[2] = NULL;
     r |= Test(Equals((Abstract *)s, (Abstract *)email),
-        "Found email from table, exected $, have $", args);
+        "Found email from table, exected @, have @", args);
 
     FileDB_Close(fdb);
 
@@ -91,9 +90,8 @@ status FileDB_Tests(MemCh *gm){
     args[1] = (Abstract *)s;
     args[2] = NULL;
     r |= Test(Equals((Abstract *)s, (Abstract *)pw),
-        "Found new pw from table, exected $, have $", args);
+        "Found new pw from table, exected @, have @", args);
     FileDB_Close(fdb);
-    */
 
     MemCh_Free(m);
     DebugStack_Pop();

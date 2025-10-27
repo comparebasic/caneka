@@ -25,6 +25,7 @@ typedef struct buff {
         i32 idx;
         word offset;
     } unsent;
+    struct stat st;
 } Buff;
 
 status Buff_AddBytes(Buff *bf, byte *bytes, word length);
@@ -54,3 +55,4 @@ status Buff_PosAbs(Buff *bf, i64 position);
 status Buff_Pos(Buff *bf, i64 position);
 status Buff_PosEnd(Buff *bf);
 boolean Buff_Empty(Buff *bf);
+status Buff_Stat(Buff *bf);
