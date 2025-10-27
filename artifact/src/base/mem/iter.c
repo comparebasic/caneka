@@ -550,7 +550,8 @@ status Iter_Pop(Iter *it){
 }
 
 status Iter_PrevRemove(Iter *it){
-    it->type.state = ((it->type.state & NORMAL_FLAGS) & ~(LAST|END)) | 
+    it->type.state &= ~(LAST|END);
+    it->type.state = (it->type.state & NORMAL_FLAGS) |
         (SPAN_OP_GET|SPAN_OP_REMOVE|FLAG_ITER_REVERSE);
     _Iter_Prev(it);
     return it->type.state;
