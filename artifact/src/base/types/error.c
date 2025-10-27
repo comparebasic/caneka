@@ -16,24 +16,60 @@ static void sigH(i32 sig, siginfo_t *info, void *ptr){
     exit(1);
 }
 
-static void sigI(i32 sig, siginfo_t *info, void *ptr){
-    char *cstr = "SigI - exiting\n";
-    write(0, cstr, strlen(cstr));
+static void sigQuit(i32 sig, siginfo_t *info, void *ptr){
+    if(_fuse){
+        _fuse = FALSE;
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Quit", NULL);
+    }else{
+        write(0, "Double SigH\n", strlen("Double SigH\n"));
+    }
     exit(1);
 }
 
-static void setSigs(){
-    struct sigaction a;
-    struct sigaction b;
-    memset(&a, 0, sizeof(struct sigaction));
-    a.sa_flags = SA_NODEFER;
-    a.sa_sigaction = sigH;
-    sigaction(SIGSEGV, &a, NULL);
+static void sigHup(i32 sig, siginfo_t *info, void *ptr){
+    if(_fuse){
+        _fuse = FALSE;
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Hup", NULL);
+    }else{
+        write(0, "Double SigH\n", strlen("Double SigH\n"));
+    }
+    exit(1);
+}
 
-    memset(&b, 0, sizeof(struct sigaction));
-    b.sa_flags = SA_NODEFER;
-    b.sa_sigaction = sigI;
-    sigaction(SIGINT, &b, NULL);
+static void sigI(i32 sig, siginfo_t *info, void *ptr){
+    if(_fuse){
+        _fuse = FALSE;
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Int", NULL);
+    }else{
+        write(0, "Double SigH\n", strlen("Double SigH\n"));
+    }
+    exit(1);
+}
+
+static struct sigaction _a;
+static struct sigaction _b;
+static struct sigaction _c;
+static struct sigaction _d;
+static void setSigs(){
+    memset(&_a, 0, sizeof(struct sigaction));
+    _a.sa_flags = SA_NODEFER;
+    _a.sa_sigaction = sigH;
+    sigaction(SIGSEGV, &_a, NULL);
+
+    memset(&_b, 0, sizeof(struct sigaction));
+    _b.sa_flags = SA_NODEFER;
+    _b.sa_sigaction = sigI;
+    sigaction(SIGINT, &_b, NULL);
+
+    memset(&_c, 0, sizeof(struct sigaction));
+    _c.sa_flags = SA_NODEFER;
+    _c.sa_sigaction = sigQuit;
+    sigaction(SIGTERM, &_c, NULL);
+
+    memset(&_d, 0, sizeof(struct sigaction));
+    _d.sa_flags = SA_NODEFER;
+    _d.sa_sigaction = sigHup;
+    sigaction(SIGHUP, &_d, NULL);
 }
 
 void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
@@ -51,7 +87,6 @@ void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
 #endif
     Stream_Bytes(ErrStream, (byte *)"\n\x1b[22;31m", 9);
     Stream_Bytes(ErrStream, (byte *)"Error:\x1b[1m", 10);
-    Stream_Bytes(ErrStream, (byte *)func, strlen(func));
     Stream_Bytes(ErrStream, (byte *)func, strlen(func));
     Stream_Bytes(ErrStream, (byte *)"\x1b[22m:", 6);
     Stream_Bytes(ErrStream, (byte *)file, strlen(file));
@@ -144,9 +179,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, Abstract *args
 
 status Error_Init(MemCh *m){
     status r = READY;
-    /*
     setSigs();
-    */
     if(ErrorHandlers == NULL){
         ErrorHandlers = Lookup_Make(m, _TYPE_ZERO);
         r |= SUCCESS;

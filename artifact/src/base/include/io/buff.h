@@ -23,6 +23,7 @@ typedef struct buff {
         Str *s;
         i64 total;
         i32 idx;
+        word offset;
     } unsent;
 } Buff;
 

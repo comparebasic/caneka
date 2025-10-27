@@ -1,12 +1,6 @@
-#ifdef LINUX
-    #define FUNCNAME __func__
-    #define FILENAME __FILE__
-    #define LINENUMBER __LINE__
-#else
-    #define FUNCNAME "function"
-    #define FILENAME __FILE__
-    #define LINENUMBER __LINE__
-#endif
+#define FUNCNAME ((char *)__func__)
+#define FILENAME __FILE__
+#define LINENUMBER __LINE__
 
 extern struct lookup *ErrorHandlers;
 extern boolean _crashing;

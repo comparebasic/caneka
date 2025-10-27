@@ -240,3 +240,38 @@ status BuffIo_Tests(MemCh *gm){
 
     return r;
 }
+
+status BuffPos_Tests(MemCh *gm){
+    DebugStack_Push(NULL, 0);
+    status r = READY;
+    Abstract *args[5];
+    MemCh *m = MemCh_Make();
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+
+    Buff_Add(bf, Str_CstrRef(m, "Once upon a time..."));
+    Buff_Add(bf, Str_CstrRef(m, "There was a prince, a queen, a frog, and"));
+    Buff_Add(bf, Str_CstrRef(m, " a book."));
+
+    args[0] = (Abstract *)bf;
+    args[1] = NULL;
+    r |= Test(bf->unsent.total == 67, "Buff: Expected position and unset $", args);
+
+    Buff_Pos(bf, 10);
+    r |= Test(bf->unsent.total == 57, "Buff +10: Expected position and unset $", args);
+
+    Buff_PosAbs(bf, -10);
+    r |= Test(bf->unsent.total == 10, "Buff -10(abs): Expected position and unset $", args);
+
+    Buff_Pos(bf, -20);
+    r |= Test(bf->unsent.total == 30, "Buff -20: Expected position and unset $", args);
+
+    Buff_Pos(bf, 3);
+    r |= Test(bf->unsent.total == 27, "Buff +3: Expected position and unset $", args);
+
+    Buff_PosAbs(bf, 7);
+    r |= Test(bf->unsent.total == 60, "Buff 7(abs): Expected position and unset $", args);
+
+    MemCh_Free(m);
+    DebugStack_Pop();
+    return r;
+}

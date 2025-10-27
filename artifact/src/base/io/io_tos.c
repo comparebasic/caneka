@@ -19,14 +19,19 @@ i64 StashCoords_Print(Stream *sm, StashCoord *coord, word flags){
 i64 Buff_Print(Stream *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Buff *bf = (Buff *)as(a, TYPE_BUFF);
-    Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)bf, ToS_FlagLabels),
-        (Abstract *)I32_Wrapped(sm->m, bf->fd),
-        (Abstract *)I64_Wrapped(sm->m, bf->unsent.total),
-        (Abstract *)I64_Wrapped(sm->m, bf->v->total),
-        NULL
-    };
-    total += Fmt(sm, "Buff<$ $fd unsent/total=$/$>", args);
+    Abstract *args[6];
+    args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)bf, ToS_FlagLabels);
+    args[1] = (Abstract *)I32_Wrapped(sm->m, bf->fd);
+    args[2] = (Abstract *)I64_Wrapped(sm->m, bf->unsent.total);
+    args[3] = (Abstract *)I64_Wrapped(sm->m, bf->v->total);
+    args[4] = NULL;
+    if(flags & DEBUG){
+        args[4] = (bf->unsent.s == NULL ? (Abstract *)bf->v : (Abstract *)bf->unsent.s);
+        args[5] = NULL;
+        total += Fmt(sm, "Buff<$ $fd unsent/total=$/$ @>", args);
+    }else{
+        total += Fmt(sm, "Buff<$ $fd unsent/total=$/$>", args);
+    }
     return total;
 }
 

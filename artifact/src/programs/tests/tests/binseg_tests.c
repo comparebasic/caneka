@@ -7,8 +7,8 @@ status BinSeg_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, ZERO);
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, ZERO);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     BinSegCtx_Send(ctx, (Abstract *)one, ctx->func(ctx, NULL));
@@ -24,7 +24,7 @@ status BinSeg_Tests(MemCh *gm){
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, 1),
         (Abstract *)key2);
      
-    BinSegCtx_LoadStream(ctx);
+    BinSegCtx_Load(ctx);
 
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
@@ -45,8 +45,8 @@ status BinSegCollection_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, ZERO);
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, ZERO);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");
@@ -82,7 +82,7 @@ status BinSegCollection_Tests(MemCh *gm){
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, tableId),
         (Abstract *)key2);
      
-    BinSegCtx_LoadStream(ctx);
+    BinSegCtx_Load(ctx);
 
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
@@ -125,8 +125,8 @@ status BinSegV_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, BINSEG_VISIBLE);
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, BINSEG_VISIBLE);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");
@@ -162,7 +162,7 @@ status BinSegV_Tests(MemCh *gm){
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, tableId),
         (Abstract *)key2);
 
-    BinSegCtx_LoadStream(ctx);
+    BinSegCtx_Load(ctx);
 
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);
@@ -204,8 +204,8 @@ status BinSegReversedV_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Stream *sm = Stream_MakeStrVec(m);
-    BinSegCtx *ctx = BinSegCtx_Make(sm, NULL, NULL, (BINSEG_REVERSED|BINSEG_VISIBLE));
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, (BINSEG_REVERSED|BINSEG_VISIBLE));
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");
@@ -241,7 +241,7 @@ status BinSegReversedV_Tests(MemCh *gm){
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, tableId),
         (Abstract *)key2);
 
-    BinSegCtx_LoadStream(ctx);
+    BinSegCtx_Load(ctx);
 
     r |= Test((ctx->type.state & (SUCCESS|END)) == (SUCCESS|END), 
         "Ctx finished with status SUCCESS|END", NULL);

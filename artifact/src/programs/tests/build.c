@@ -31,12 +31,12 @@ static char *inc[] = {
 };
 
 static char *staticLibs[] = {
-    "./build/libcaneka/libcaneka.a",
-    "./build/libcnkext/libcnkext.a",
-    "./build/libcnklang/libcnklang.a",
     "./build/libcnkwww/libcnkwww.a",
     "./build/libcnknacl/libcnknacl.a",
     "/external/lib/libnacl.a",
+    "./build/libcnklang/libcnklang.a",
+    "./build/libcnkext/libcnkext.a",
+    "./build/libcaneka/libcaneka.a",
     NULL
 };
 
@@ -86,13 +86,11 @@ static BuildSubdir testsobj = { "tests", {
     "templ_route_tests.c",
     */
     "path_tests.c",
-    /*
     "binseg_tests.c",
-    */
     "taskstep_tests.c",
     "servetcp_tests.c",
-    /*
     "filedb_tests.c",
+    /*
     "www_nav_tests.c",
     "route_tests.c",
     */

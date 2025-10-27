@@ -103,6 +103,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Buff Position Tests",
+        BuffPos_Tests,
+        "Testing the buffer position features of seeking and moving around it.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Stream Tests",
         Stream_Tests,
         "Testing setting up and running multiple stream types and stream chains",
@@ -186,7 +192,6 @@ static TestSet _Tests[] = {
         "Mem Stash testing.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "BinSeg Tests",
         BinSeg_Tests,
@@ -217,7 +222,6 @@ static TestSet _Tests[] = {
         "FileD database built on BinSegRV tests of how to save and retrive data.",
         FEATURE_COMPLETE,
     },
-    */
     {
         "Roebling Parser",
         NULL,

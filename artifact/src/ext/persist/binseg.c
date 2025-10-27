@@ -5,6 +5,7 @@ Lookup *BinSegNames = NULL;
 Lookup *BinSegLookup = NULL;
 
 static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
+    DebugStack_Push(ctx, ctx->type.of);
     status r = READY;
     MemCh *m = ctx->bf->m;
     Abstract *args[3];
@@ -25,6 +26,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
             if(item == NULL){
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "StrVec child item not found", NULL);
+                DebugStack_Pop();
                 return ERROR;
             }else{
                 StrVec_Add(v, (Str *)as(item, TYPE_STR));
@@ -44,6 +46,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
                 args[2] = NULL;
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Span child item not found at $ @", args);
+                DebugStack_Pop();
                 return ERROR;
             }else{
                 Span_Add(p, item);
@@ -63,6 +66,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
             if(key == NULL || item == NULL){
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Table child item(s) not found", NULL);
+                DebugStack_Pop();
                 return ERROR;
             }else{
                 Table_Set(tbl, key, item);
@@ -72,6 +76,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     }else if(hdr->kind == BINSEG_TYPE_NODE){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Node binseg not yet implemented ", NULL);
+        DebugStack_Pop();
         return ERROR;
     }
 
@@ -98,6 +103,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
         Out("^y.Found Header @ -> &^0\n", args);
     }
 
+    DebugStack_Pop();
     return r;
 }
 
@@ -111,6 +117,7 @@ i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
  }
 
 i64 BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
+    DebugStack_Push(ctx, ctx->type.of);
     i64 total = 0;
     MemCh *m = ctx->bf->m;
     if(ctx->type.state & BINSEG_VISIBLE){
@@ -128,10 +135,12 @@ i64 BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
         args[4] = NULL;
         Out("^p.ToBuff($ &)/$ -> @^0\n", args);
     }
+    DebugStack_Pop();
     return total;
 }
 
 i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
+    DebugStack_Push(ctx, ctx->type.of);
     Abstract *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
@@ -139,12 +148,15 @@ i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
         args[1] = NULL;
         Error(ctx->bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to find BinSegFunc for type $", args);
+        DebugStack_Pop();
         return 0;
     }
+    DebugStack_Pop();
     return func(ctx, a, id);
 }
 
 status BinSegCtx_Load(BinSegCtx *ctx){
+    DebugStack_Push(ctx, ctx->type.of);
     Abstract *args[4];
     if(ctx->type.state & DEBUG){
         args[0] = (Abstract *)ctx;    
@@ -215,6 +227,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
         }
     }
 
+    DebugStack_Pop();
     return ctx->type.state;
 }
 

@@ -1,17 +1,129 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Buff_posFrom(Buff *bf, i32 offset, i32 whence){
-    Abstract *args[4];
-    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
-        bf->type.state &= ~(BUFF_FD|BUFF_SOCKET);
+static void Buff_setUnsentStr(Buff *bf){
+    Str *s = (Str *)Span_Get(bf->v->p, bf->unsent.idx);
+    if(s != NULL){
+        s = Str_Rec(bf->m, s);
+    }
+    bf->unsent.s = s; 
+    bf->unsent.offset = 0;
+}
+
+static void Buff_setUnsentIncr(Buff *bf, word length){
+    Str_Incr(bf->unsent.s, length);
+    bf->unsent.offset += length;
+}
+
+static status Buff_vecPosFrom(Buff *bf, i32 offset, i32 whence){
+
+    if(whence == SEEK_END){
+        if(offset < 0){
+            Abstract *args[] = {
+                (Abstract *)bf, (Abstract *)I32_Wrapped(bf->m, offset), NULL
+            };
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Offset cannot be zero if seeking from the end $: $", args);
+            bf->type.state |= ERROR;
+            DebugStack_Pop();
+            return bf->type.state;
+        }
+        bf->unsent.idx = bf->v->p->max_idx;
+        if(offset == 0){
+            bf->type.state |= END;
+            bf->unsent.s = NULL;
+            DebugStack_Pop();
+            return bf->type.state;
+        }else{
+            Buff_setUnsentStr(bf);
+        }
+        bf->unsent.total = 0;
+        offset = -offset;
     }else{
-        args[0] = (Abstract *)bf;
-        args[1] = NULL;
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error cannot seek on a Buff that  does not have a BUFF_SOCKET or "
-            "BUFF_FD flag @", args);
-        return ERROR;
+        if(bf->unsent.s == NULL){
+            bf->unsent.idx = 0;
+            Buff_setUnsentStr(bf);
+            bf->unsent.total = bf->v->total;
+        }
+
+        if(whence == SEEK_SET){
+            offset += bf->unsent.total - bf->v->total;
+        }
+    }
+
+    if(offset > 0){
+        while(bf->unsent.s->length < offset){
+            offset -= bf->unsent.s->length;
+            bf->unsent.total -= bf->unsent.s->length;
+            bf->unsent.idx++;
+            Buff_setUnsentStr(bf);
+            if(bf->unsent.s == NULL){
+                break;
+            }
+        }
+
+        if(bf->unsent.s == NULL && offset > 0){
+            bf->type.state |= ERROR;
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Reached end of vec without using all of offset", NULL); 
+            DebugStack_Pop();
+            return bf->type.state;
+        }
+
+        if(offset > 0){
+            Buff_setUnsentIncr(bf, offset);
+            bf->unsent.total -= offset;
+        }
+
+    }else{
+        offset = abs(offset);
+        if(bf->unsent.offset > 0){
+            word length = bf->unsent.offset;
+            if(bf->unsent.offset > offset){
+                length = offset;
+            }
+            bf->unsent.s->bytes -= length;
+            bf->unsent.s->length += length;
+            bf->unsent.s->alloc += length;
+            bf->unsent.offset -= length;
+            offset -= length;
+            bf->unsent.total += length;
+        }
+
+        while(bf->unsent.s->length < offset){
+            offset -= bf->unsent.s->length;
+            bf->unsent.total += bf->unsent.s->length;
+            bf->unsent.idx--;
+            Buff_setUnsentStr(bf);
+            if(bf->unsent.s == NULL){
+                break;
+            }
+        }
+
+        if(bf->unsent.s == NULL && offset > 0){
+            bf->type.state |= ERROR;
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Reached end of vec without using all of offset", NULL); 
+            DebugStack_Pop();
+            return bf->type.state;
+        }
+
+        if(offset > 0){
+            bf->unsent.total += offset;
+            word start = bf->unsent.s->length - offset;
+            Buff_setUnsentIncr(bf, start);
+        }
+    }
+
+    DebugStack_Pop();
+    return bf->type.state;
+}
+
+static status Buff_posFrom(Buff *bf, i32 offset, i32 whence){
+    DebugStack_Push(bf, bf->type.of);
+    Abstract *args[4];
+    if((bf->type.state & (BUFF_FD|BUFF_SOCKET)) == 0){
+        return Buff_vecPosFrom(bf, offset, whence);
     }
 
     i32 pos = lseek(bf->fd, whence, offset);
@@ -21,8 +133,10 @@ static status Buff_posFrom(Buff *bf, i32 offset, i32 whence){
         args[3] = NULL;
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error seek failed on a Buff for offset $", args);
+        DebugStack_Pop();
         return ERROR;
     }
+    DebugStack_Pop();
     return SUCCESS;
 }
 
@@ -67,6 +181,7 @@ status Buff_Pos(Buff *bf, i32 position){
 }
 
 status Buff_AddBytes(Buff *bf, byte *bytes, word length){
+    DebugStack_Push(bf, bf->type.of);
     status r = READY;
     if(bf->tail.idx == -1){
         bf->tail.s = Str_Make(bf->m, STR_DEFAULT);
@@ -97,26 +212,32 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
     if(r == READY){
         r |= NOOP;
     }
+    DebugStack_Pop();
     return r;
 }
 
 status Buff_RevGetStr(Buff *bf, Str *s){
+    DebugStack_Push(bf, bf->type.of);
     word remaining = s->alloc - s->length;
     if(Buff_Pos(bf, -(remaining)) & ERROR){
+        DebugStack_Pop();
         return ERROR;
     }
     status r = Buff_GetStr(bf, s);
     Buff_Pos(bf, -(remaining));
+    DebugStack_Pop();
     return r;
 }
 
 status Buff_GetStr(Buff *bf, Str *s){
+    DebugStack_Push(bf, bf->type.of);
     Abstract *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
     word remaining = s->alloc - s->length;
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
-            bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, 0));
+            bf->unsent.idx = 0;
+            Buff_setUnsentStr(bf);
         }
         i16 g = 0;
         while((bf->type.state & (MORE|SUCCESS|ERROR)) == 0 &&
@@ -124,7 +245,7 @@ status Buff_GetStr(Buff *bf, Str *s){
             Guard_Incr(bf->m, &g, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
             if(bf->unsent.s->length > remaining){
                 Str_Add(s, bf->unsent.s->bytes, remaining);
-                Str_Incr(bf->unsent.s, remaining);
+                Buff_setUnsentIncr(bf, remaining);
                 bf->unsent.total -= remaining;
                 remaining = 0;
             }else{
@@ -133,9 +254,10 @@ status Buff_GetStr(Buff *bf, Str *s){
                 if(bf->unsent.idx == bf->v->p->max_idx){
                     bf->type.state |= PROCESSING;
                     bf->unsent.s = NULL;
+                    bf->unsent.offset = 0;
                 }else{
                     bf->unsent.idx++;
-                    bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, bf->unsent.idx));
+                    Buff_setUnsentStr(bf);
                     bf->type.state |= MORE;
                 }
             }
@@ -158,10 +280,12 @@ status Buff_GetStr(Buff *bf, Str *s){
         Out("^p.Buff_GetStr copied:@ from:@^0\n", args);
     }
 
+    DebugStack_Pop();
     return bf->type.state;
 }
 
 status Buff_GetToVec(Buff *bf, StrVec *v){
+    DebugStack_Push(bf, bf->type.of);
     Str *shelf = Str_Make(bf->m, STR_DEFAULT);
     i16 g = 0;
     while((Buff_GetStr(bf, shelf) & END) == 0){
@@ -172,6 +296,7 @@ status Buff_GetToVec(Buff *bf, StrVec *v){
         }
     }
 
+    DebugStack_Pop();
     return bf->type.state;
 }
 
@@ -181,12 +306,14 @@ status Buff_Add(Buff *bf, Str *s){
 }
 
 status Buff_AddVec(Buff *bf, StrVec *v){
+    DebugStack_Push(bf, bf->type.of);
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = Iter_Get(&it);
         Buff_AddBytes(bf, s->bytes, s->length);
     }
+    DebugStack_Pop();
     return bf->type.state;
 }
 
@@ -199,6 +326,7 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "length of send unbuff is larger than IO_SEND_MAX or less than 0", NULL);
         flags |= ERROR;
+        DebugStack_Pop();
         return flags;
     }
 
@@ -211,6 +339,7 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
         Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
         flags |= ERROR;
+        DebugStack_Pop();
         return flags;
     }
 
@@ -224,18 +353,26 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
     }else{
         flags |= PROCESSING;
     }
+    DebugStack_Pop();
     return flags;
 }
 
 status Buff_Send(Buff *bf){
+    DebugStack_Push(bf, bf->type.of);
+    status r = READY;
     if(bf->type.state & (ERROR)){
+        DebugStack_Pop();
         return bf->type.state;
     }
 
-    return Buff_SendToFd(bf, bf->fd);    
+    r |=  Buff_SendToFd(bf, bf->fd);    
+
+    DebugStack_Pop();
+    return r;
 }
 
 status Buff_SendToFd(Buff *bf, i32 fd){
+    DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~(MORE|SUCCESS|NOOP);
 
     if(bf->unsent.total > 0){
@@ -252,6 +389,7 @@ status Buff_SendToFd(Buff *bf, i32 fd){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
             bf->type.state |= ERROR;
+            DebugStack_Pop();
             return bf->type.state;
         }
         if(sent < 0){
@@ -280,7 +418,7 @@ status Buff_SendToFd(Buff *bf, i32 fd){
                 }
             }
         }else if(send > 0){
-            Str_Incr(bf->unsent.s, sent);
+            Buff_setUnsentIncr(bf, sent);
             bf->type.state |= MORE;
         }else{
             bf->type.state |= NOOP;
@@ -288,12 +426,15 @@ status Buff_SendToFd(Buff *bf, i32 fd){
     }else{
         bf->type.state |= (SUCCESS|END);
     }
+    DebugStack_Pop();
     return bf->type.state;
 }
 
 status Buff_AddSend(Buff *bf, Str *s){
     Buff_Add(bf, s);
-    while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
+    if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
+        while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
+    }
     return bf->type.state;
 }
 
@@ -315,6 +456,7 @@ status Buff_Read(Buff *bf){
 }
 
 status Buff_ReadToStr(Buff *bf, Str *s){
+    DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~(SUCCESS|PROCESSING);
     i16 amount = s->alloc - s->length;
     byte *bytes = s->bytes+s->length;
@@ -328,6 +470,7 @@ status Buff_ReadToStr(Buff *bf, Str *s){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
             bf->type.state |= ERROR;
+            DebugStack_Pop();
             return bf->type.state;
         }
 
@@ -351,6 +494,7 @@ status Buff_ReadToStr(Buff *bf, Str *s){
             }
         }
     }
+    DebugStack_Pop();
     return bf->type.state;
 }
 
