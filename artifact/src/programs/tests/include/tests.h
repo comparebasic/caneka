@@ -36,6 +36,8 @@ status RoeblingStartStop_Tests(MemCh *gm);
 status Mess_Tests(MemCh *gm);
 status Relation_Tests(MemCh *gm);
 status Iter_Tests(MemCh *gm);
+status IterMax_Tests(MemCh *gm);
+status IterPrevRemove_Tests(MemCh *gm);
 status SnipModify_Tests(MemCh *gm);
 status File_Tests(MemCh *gm);
 status FmtHtml_Tests(MemCh *gm);

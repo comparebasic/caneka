@@ -1,6 +1,65 @@
 #include <external.h>
 #include <caneka.h>
 
+static status makeAndIterItems(MemCh *m, i64 max){
+    Abstract *args[2];
+    status r = READY;
+    m->level++;
+    Span *p = Span_Make(m);
+    for(i64 i = 0; i < max; i++){
+        Span_Set(p, i, (Abstract *)I64_Wrapped(m, i));
+    }
+
+    Iter it;
+    Iter_Init(&it, p);
+    i32 i = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Single *sg = (Single *)Iter_Get(&it);
+        if(sg->val.i != i){
+            r |= ERROR;
+            break;
+        }
+        i++;
+    }
+
+    args[0] = (Abstract *)I64_Wrapped(m, max);
+    args[1] = NULL;
+    r |= Test((r & ERROR) == 0, "Adding and Iter_Next over $ items", args);
+    MemCh_Free(m);
+    m->level--;
+    return r; 
+}
+
+static status makeAndIterPrevRemoveItems(MemCh *m, i64 max){
+    Abstract *args[2];
+    status r = READY;
+    m->level++;
+    Span *p = Span_Make(m);
+    for(i64 i = 0; i < max; i++){
+        Span_Set(p, i, (Abstract *)I64_Wrapped(m, i));
+    }
+
+    Iter it;
+    Iter_Init(&it, p);
+    i32 maxIdx = p->max_idx;
+    while((Iter_PrevRemove(&it) & END) == 0){
+        Single *sg = (Single *)Iter_Get(&it);
+        if(sg->val.i != maxIdx || p->nvalues != (maxIdx+1)){
+            r |= ERROR;
+            break;
+        }
+        maxIdx--;
+    }
+
+    args[0] = (Abstract *)I64_Wrapped(m, max);
+    args[1] = NULL;
+    r |= Test((r & ERROR) == 0, "Adding and Iter_Next over $ items", args);
+    MemCh_Free(m);
+    m->level--;
+    return r; 
+}
+
+
 status Iter_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
@@ -273,5 +332,27 @@ status Iter_Tests(MemCh *gm){
     MemCh_Free(m);
     DebugStack_Pop();
 
+    return r;
+}
+
+status IterMax_Tests(MemCh *gm){
+    status r = READY;
+    MemCh *m = MemCh_Make();
+    r |= makeAndIterItems(m, 10);
+    r |= makeAndIterItems(m, 300);
+    r |= makeAndIterItems(m, 5000);
+    r |= makeAndIterItems(m, 63000);
+    MemCh_Free(m);
+    return r;
+}
+
+status IterPrevRemove_Tests(MemCh *gm){
+    status r = READY;
+    MemCh *m = MemCh_Make();
+    r |= makeAndIterPrevRemoveItems(m, 10);
+    r |= makeAndIterPrevRemoveItems(m, 300);
+    r |= makeAndIterPrevRemoveItems(m, 5000);
+    r |= makeAndIterPrevRemoveItems(m, 63000);
+    MemCh_Free(m);
     return r;
 }
