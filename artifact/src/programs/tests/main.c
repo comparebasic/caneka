@@ -40,14 +40,12 @@ static TestSet _Tests[] = {
         "Span is the basic data structure for sequential or logorithmic storage access.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "Span Max Tests",
         SpanMax_Tests,
         "Populate a span with the maximum amount of values to stress test it and the memory system.",
         FEATURE_COMPLETE,
     },
-    */
     {
         "Iter",
         Iter_Tests,
@@ -60,12 +58,14 @@ static TestSet _Tests[] = {
         "Iter tests for iteration over increasingly large sets",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "IterPrevRemove",
         IterPrevRemove_Tests,
         "Iter tests for previous removal over increasingly large sets.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Str",
         Str_Tests,

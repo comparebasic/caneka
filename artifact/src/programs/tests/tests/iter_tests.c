@@ -43,7 +43,7 @@ static status makeAndIterPrevRemoveItems(MemCh *m, i64 max){
     Iter_Init(&it, p);
     i32 maxIdx = p->max_idx;
     while((Iter_PrevRemove(&it) & END) == 0){
-        Single *sg = (Single *)Iter_Get(&it);
+        Single *sg = (Single *)Iter_Current(&it);
         if(sg->val.i != maxIdx || p->nvalues != (maxIdx+1)){
             r |= ERROR;
             break;
@@ -365,7 +365,6 @@ status IterMax_Tests(MemCh *gm){
     args[1] = NULL;
     r |= Test(p->nvalues == 17, "Span has 17 values to start, have $", args);
 
-
     Iter_PrevRemove(&it);
     args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);;
     args[1] = (Abstract *)Iter_Get(&it);
@@ -454,51 +453,55 @@ status IterMax_Tests(MemCh *gm){
     args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);;
     args[1] = (Abstract *)Iter_Get(&it);
     args[2] = NULL;
-    r |= Test(p->nvalues == 0 && Iter_Get(&it) == NULL && (it.type.state & END) != 0, "Span is empty and has END flag, have $, item: $", args);
-
+    r |= Test(p->nvalues == 0 && Iter_Get(&it) == NULL && (it.type.state & END) != 0, "Span is empty and has END flag, have $, item: &", args);
 
     p = Span_Make(m);
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "one"));
     Iter_Init(&it, p);
+
+    it.type.state |= DEBUG;
+
+    r |= Test(p->nvalues == 0, "Fresh Span has 0 nvalues", NULL);
+    Iter_Add(&it, (Abstract *)Str_CstrRef(m, "one"));
+    args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);
+    args[1] = (Abstract *)Iter_Current(&it);
+    args[2] = NULL;
+    r |= Test(p->nvalues == 1 && 
+        Equals(Iter_Get(&it), (Abstract *)Str_CstrRef(m, "one")), 
+        "Span has 1 values to after add, have $, item: &", args);
+
     Iter_PrevRemove(&it);
-    args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);;
-    args[1] = (Abstract *)Iter_Get(&it);
+    args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);
+    args[1] = (Abstract *)Iter_Current(&it);
     args[2] = NULL;
-    r |= Test(p->nvalues == 1 && Equals(Iter_Get(&it), (Abstract *)Str_CstrRef(m, "one")), "Span has 1 values to start, have $, item: $", args);
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "two"));
-    args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);;
-    args[1] = (Abstract *)Iter_Get(&it);
+
+    r |= Test(p->nvalues == 1 && 
+        Equals(Iter_Current(&it), (Abstract *)Str_CstrRef(m, "one")), 
+        "Span has 1 values to after first remove, have $, item: &", args);
+
+    Iter_PrevRemove(&it);
+    Iter_Add(&it, (Abstract *)Str_CstrRef(m, "two"));
+    args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);
+    args[1] = (Abstract *)Iter_Current(&it);
     args[2] = NULL;
-    r |= Test(p->nvalues == 1 && Equals(Iter_Get(&it), (Abstract *)Str_CstrRef(m, "two")), "Span has 1 values to start, have $, item: $", args);
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "three"));
-    args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);;
-    args[1] = (Abstract *)Iter_Get(&it);
+    r |= Test(p->nvalues == 1 &&
+        Equals(Iter_Current(&it), (Abstract *)Str_CstrRef(m, "two")), 
+        "Span has 1 values to after PrevRemove/Add, have $, item: &", args);
+
+    Iter_PrevRemove(&it);
+    Iter_Add(&it, (Abstract *)Str_CstrRef(m, "three"));
+    args[0] = (Abstract *)I32_Wrapped(m, p->nvalues);
+    args[1] = (Abstract *)Iter_Current(&it);
     args[2] = NULL;
-    r |= Test(p->nvalues == 1 && Equals(Iter_Get(&it), (Abstract *)Str_CstrRef(m, "three")), "Span has 1 values to start, have $, item: $", args);
+    r |= Test(p->nvalues == 1 &&
+        Equals(Iter_Current(&it), (Abstract *)Str_CstrRef(m, "three")), 
+        "Span has 1 values to after PrevRemove/Add, have $, item: &", args);
 
     /*
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "four"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "five"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "six"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "seven"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "eight"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "nine"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "ten"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "eleven"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "twelve"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "thirteen"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "fourteen"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "fifteen"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "sixteen"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "seventeen"));
-    */
-
-    return ERROR;
-
     r |= makeAndIterItems(m, 10);
     r |= makeAndIterItems(m, 300);
     r |= makeAndIterItems(m, 5000);
     r |= makeAndIterItems(m, 63000);
+    */
     MemCh_Free(m);
     return r;
 }
