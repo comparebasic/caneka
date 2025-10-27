@@ -91,6 +91,10 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         }
     }
 
+    if(sl->level != level){
+        sl = MemCh_AddPage(m, level);
+    }
+
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
     Iter_Reset(&m->it);
 

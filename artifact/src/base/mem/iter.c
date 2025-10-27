@@ -144,6 +144,7 @@ static status Iter_AddWithGaps(Iter *it){
 static status Iter_Query(Iter *it){
     it->type.state &= ~(SUCCESS|NOOP|MORE);
     MemCh *m = it->p->m;
+    i16 guard = 0;
 
     if(it->type.state & SPAN_OP_ADD){
         if(it->type.state & FLAG_ITER_CONTINUE){
@@ -173,11 +174,13 @@ static status Iter_Query(Iter *it){
         slab *exp_sl = NULL;
         slab *shelf_sl = NULL;
         while(p->dims < dimsNeeded){
+            Guard_Incr(it->p->m, &guard, ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
             slab *new_sl = NULL;
             if(p->nvalues > 0 && p->m->it.p == p){
                 MemPage *pg = it->value;
                 pg->level = 0;
-                new_sl = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
+                new_sl = (slab *)Bytes_AllocOnPage(it->value,
+                    sizeof(slab), TYPE_POINTER_ARRAY);
             }else{
                 new_sl = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
             }
@@ -202,7 +205,9 @@ static status Iter_Query(Iter *it){
     i8 dim = p->dims;
     i32 offset = it->idx;
     void **ptr = NULL;
+    guard = 0;
     while(dim >= 0){
+        Guard_Incr(it->p->m, &guard, ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
         offset = Iter_SetStack(p->m, it, dim, offset);
         if(it->type.state & NOOP){
             break;
@@ -303,8 +308,10 @@ static status _Iter_Prev(Iter *it){
             it->value = *((void **)it->stack[dim]);
         }else{
             i32 incr = 1;
+            i16 guard = 0;
             while(it->value == NULL && dim <= topDim && 
                     idx >= 0){
+                Guard_Incr(it->p->m, &guard, ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
                 if((it->stackIdx[dim] - incr) >= 0){
                     it->stackIdx[dim] -= incr;
 
@@ -441,8 +448,10 @@ status Iter_Next(Iter *it){
             }
         }else{
             i32 incr = 1;
+            i16 guard = 0;
             while(it->value == NULL && dim <= topDim && 
                     idx <= it->p->max_idx){
+                Guard_Incr(it->p->m, &guard, ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
                 if((it->stackIdx[dim] + incr) < SPAN_STRIDE){
                     it->stackIdx[dim] += incr;
 
@@ -460,10 +469,10 @@ status Iter_Next(Iter *it){
 
                     if(dim == 0){
                         if(ptr != NULL && 
-                            (it->maskFlags == ZERO || 
+                            ((it->maskFlags == ZERO || 
                                 ((Abstract *)*ptr)->type.state & it->maskFlags) ||
-                            (it->filterFlags == ZERO || 
-                                (((Abstract *)*ptr)->type.state & it->filterFlags) == 0)
+                                (it->filterFlags == ZERO || 
+                                    (((Abstract *)*ptr)->type.state & it->filterFlags) == 0))
                             ){
                             it->value = *ptr;
                         }
@@ -472,7 +481,7 @@ status Iter_Next(Iter *it){
                         }else{
                             goto end;
                         }
-                    }else if(*ptr != NULL){
+                    }else if(ptr != NULL && *ptr != NULL){
                         i32 offset = idx & _modulos[dim];
                         while(dim-1 >= 0){
                             dim--;

@@ -307,11 +307,19 @@ static status makeAndCompareItems(MemCh *m, i64 max){
         Span_Set(p, i, (Abstract *)I64_Wrapped(m, i));
     }
 
+    i64 report = 4095;
+
     for(i64 i = 0; i < max; i++){
         Single *sg = Span_Get(p, i);
         if(sg->val.i != i){
             r |= ERROR;
             break;
+        }
+        if(i > report){
+            if((i & report) == 0){
+                printf("i = %ld\n", i);
+                fflush(stdout);
+            }
         }
     }
 
@@ -333,9 +341,8 @@ status SpanMax_Tests(MemCh *gm){
     r |= makeAndCompareItems(m, 300);
     r |= makeAndCompareItems(m, 5000);
     r |= makeAndCompareItems(m, 63000);
-    /*
+    m->type.state |= DEBUG;
     r |= makeAndCompareItems(m, 1000000);
-    */
 
     r |= ERROR;
 
