@@ -159,20 +159,25 @@ status BinSegCtx_Load(BinSegCtx *ctx){
     DebugStack_Push(ctx, ctx->type.of);
     Abstract *args[4];
     if(ctx->type.state & DEBUG){
-        args[0] = (Abstract *)ctx;    
-        args[1] = NULL;
-        Out("^p.Load &\n", args);
+        args[0] = (Abstract *)ctx;
+        args[1] = (Abstract *)ctx->bf;
+        args[2] = NULL;
+        Out("^p.Load & &\n", args);
     }
     MemCh *m = ctx->bf->m;
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
     if(ctx->type.state & BINSEG_REVERSED){
         Buff_PosEnd(ctx->bf);
+        if(ctx->type.state & DEBUG){
+            args[0] = (Abstract *)ctx->bf;
+            args[1] = NULL;
+            Out("^p.Positioning @\n", args);
+        }
     }else{
         Buff_PosAbs(ctx->bf, 0);
     }
-    while((ctx->bf->type.state & END) == 0 &&
-            (ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
 
+    while((ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
         i16 sz = sizeof(BinSegHeader);
         if(ctx->type.state & BINSEG_VISIBLE){
             sz *= 2;

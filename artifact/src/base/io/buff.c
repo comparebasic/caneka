@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static void Buff_setUnsentStr(Buff *bf){
-    Str *s = (Str *)Span_Get(bf->v->p, bf->unsent.idx);
+    Str *s = (Str *)Str_Rec(bf->m, Span_Get(bf->v->p, bf->unsent.idx));
     if(s != NULL){
         s = Str_Rec(bf->m, s);
     }
@@ -15,13 +15,13 @@ static void Buff_setUnsentIncr(Buff *bf, word length){
     bf->unsent.offset += length;
 }
 
-static status Buff_vecPosFrom(Buff *bf, i32 offset, i32 whence){
-
+static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
+    Abstract *args[5];
     if(whence == SEEK_END){
         if(offset < 0){
-            Abstract *args[] = {
-                (Abstract *)bf, (Abstract *)I32_Wrapped(bf->m, offset), NULL
-            };
+            args[0] = (Abstract *)bf;
+            args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
+            args[2] = NULL;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Offset cannot be zero if seeking from the end $: $", args);
             bf->type.state |= ERROR;
@@ -32,13 +32,14 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i32 whence){
         if(offset == 0){
             bf->type.state |= END;
             bf->unsent.s = NULL;
+            bf->unsent.total = 0;
             DebugStack_Pop();
             return bf->type.state;
         }else{
+            bf->unsent.total = 0;
+            offset = -offset;
             Buff_setUnsentStr(bf);
         }
-        bf->unsent.total = 0;
-        offset = -offset;
     }else{
         if(bf->unsent.s == NULL){
             bf->unsent.idx = 0;
@@ -47,6 +48,17 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i32 whence){
         }
 
         if(whence == SEEK_SET){
+            if(offset + bf->unsent.total > bf->v->total ||
+                    offset + bf->unsent.total < 0){
+                args[0] = (Abstract *)bf;
+                args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
+                args[2] = (Abstract *)I32_Wrapped(bf->m, bf->v->total);
+                args[3] = NULL;
+                Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Offset + unsent.total cannot be greater than buff->v->total $: $ + $",
+                    args);
+
+            }
             offset += bf->unsent.total - bf->v->total;
         }
     }
@@ -119,25 +131,44 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i32 whence){
     return bf->type.state;
 }
 
-static status Buff_posFrom(Buff *bf, i32 offset, i32 whence){
+static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     DebugStack_Push(bf, bf->type.of);
+    bf->type.state &= ~PROCESSING;
     Abstract *args[4];
     if((bf->type.state & (BUFF_FD|BUFF_SOCKET)) == 0){
         return Buff_vecPosFrom(bf, offset, whence);
     }
 
-    i32 pos = lseek(bf->fd, whence, offset);
+    i64 pos = lseek(bf->fd, whence, offset);
     if(pos < 0){
-        args[0] = (Abstract *)bf;
+        args[0] = (Abstract *)I64_Wrapped(bf->m, pos);
         args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
+        args[2] = (Abstract *)bf;
         args[3] = NULL;
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error seek failed on a Buff for offset $", args);
+            "Error seek failed with $ for offset $ on @", args);
         DebugStack_Pop();
         return ERROR;
+    }else if(pos > 0){
+        bf->type.state |= PROCESSING;
     }
+
     DebugStack_Pop();
-    return SUCCESS;
+    return bf->type.state;
+}
+
+boolean Buff_Empty(Buff *bf){
+    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
+        struct stat st;
+        if(!fstat(bf->fd, &st)){
+            return st.st_size == 0;
+        }else{
+            bf->type.state |= ERROR;
+            return FALSE;
+        }
+    }else{
+        return bf->v->total == 0;
+    }
 }
 
 status Buff_SetFd(Buff *bf, i32 fd){
@@ -168,15 +199,15 @@ status Buff_PosEnd(Buff *bf){
     return Buff_posFrom(bf, 0, SEEK_END);
 }
 
-status Buff_PosAbs(Buff *bf, i32 position){
+status Buff_PosAbs(Buff *bf, i64 position){
     if(position < 0){
-        return Buff_posFrom(bf, abs(position), SEEK_END);
+        return Buff_posFrom(bf, labs(position), SEEK_END);
     }else{
         return Buff_posFrom(bf, position, SEEK_SET);
     }
 }
 
-status Buff_Pos(Buff *bf, i32 position){
+status Buff_Pos(Buff *bf, i64 position){
     return Buff_posFrom(bf, position, SEEK_CUR);
 }
 
@@ -234,12 +265,14 @@ status Buff_GetStr(Buff *bf, Str *s){
     Abstract *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
     word remaining = s->alloc - s->length;
+
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
             bf->unsent.idx = 0;
             Buff_setUnsentStr(bf);
         }
         i16 g = 0;
+
         while((bf->type.state & (MORE|SUCCESS|ERROR)) == 0 &&
                 bf->unsent.total > 0 && remaining > 0){
             Guard_Incr(bf->m, &g, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
@@ -251,6 +284,8 @@ status Buff_GetStr(Buff *bf, Str *s){
             }else{
                 Str_Add(s, bf->unsent.s->bytes, bf->unsent.s->length);
                 bf->unsent.total -= bf->unsent.s->length;
+                remaining -= bf->unsent.s->length;
+
                 if(bf->unsent.idx == bf->v->p->max_idx){
                     bf->type.state |= PROCESSING;
                     bf->unsent.s = NULL;
@@ -271,13 +306,6 @@ status Buff_GetStr(Buff *bf, Str *s){
 
     if(bf->unsent.total == 0){
         bf->type.state |= LAST;
-    }
-
-    if(bf->type.state & DEBUG){
-        args[0] = (Abstract *)s;
-        args[1] = (Abstract *)bf;
-        args[2] = NULL;
-        Out("^p.Buff_GetStr copied:@ from:@^0\n", args);
     }
 
     DebugStack_Pop();
@@ -392,6 +420,7 @@ status Buff_SendToFd(Buff *bf, i32 fd){
             DebugStack_Pop();
             return bf->type.state;
         }
+
         if(sent < 0){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error sending str", NULL);
@@ -403,6 +432,10 @@ status Buff_SendToFd(Buff *bf, i32 fd){
                 bf->type.state |= MORE;
             }else{
                 bf->type.state |= PROCESSING;
+                bf->unsent.idx = -1;
+                bf->unsent.s = NULL;
+                bf->unsent.offset = 0;
+                bf->unsent.total -= sent;
                 if(bf->type.state & BUFF_FLUSH){
                     Iter it;                    
                     Iter_Init(&it, bf->v->p);

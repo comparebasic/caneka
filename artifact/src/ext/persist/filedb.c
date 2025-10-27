@@ -3,45 +3,40 @@
 
 status FileDB_Open(FileDB *fdb){
     DebugStack_Push(NULL, 0);
-    /*
+
     MemCh *m = fdb->m;
 
-    fdb->f->type.state |= STREAM_FROM_FD;
-    File_Open(fdb->bf, fdb->path, O_CREAT|O_WRONLY);
+    File_Open(fdb->bf, fdb->fpath, O_CREAT|O_RDWR);
 
     Str *entry = Str_Make(m, sizeof(BinSegHeader)*2);
     i16 latestId = 0;
-    if(lseek(fdb->f->sm->fd, 0, SEEK_END) == 0){
+    if(Buff_Empty(fdb->bf)){
         BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
         hdr->kind = BINSEG_TYPE_INDEX;
         entry->length = sizeof(BinSegHeader);
         entry = Str_ToHex(m, entry);
-        Stream_Bytes(fdb->f->sm, entry->bytes, entry->length);
+        Buff_AddSend(fdb->bf, entry);
+    }else if(fdb->bf->type.state & ERROR){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error checking FileDb Buff size", NULL);
+        return ERROR;
     }else{
-        lseek(fdb->f->sm->fd, 0, SEEK_SET);
-        entry->length = entry->alloc;
-        Stream_FillStr(fdb->f->sm, entry);
+        Buff_Pos(fdb->bf, 0);
+        Buff_GetStr(fdb->bf, entry);
         entry = Str_FromHex(m, entry);
         BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
         latestId = hdr->id;
     }
 
-    File_Close(fdb->bf);
-    fdb->f->type.state &= ~STREAM_FROM_FD;
+    Buff_PosEnd(fdb->bf);
 
-    fdb->f->type.state |= STREAM_APPEND;
-    File_Open(fdb->f);
-    lseek(fdb->f->sm->fd, 0, SEEK_END);
-
-    fdb->ctx = BinSegCtx_Make(fdb->f->sm,
+    fdb->ctx = BinSegCtx_Make(fdb->bf,
         NULL, NULL, (BINSEG_VISIBLE|BINSEG_REVERSED));
     fdb->ctx->latestId = latestId;
-    fdb->ctx->sm = fdb->f->sm;
 
     fdb->ctx->type.state |= PROCESSING;
     fdb->type.state |= PROCESSING;
 
-    */
     DebugStack_Pop();
     return fdb->type.state;
 }

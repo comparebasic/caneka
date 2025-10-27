@@ -28,7 +28,7 @@ i64 Buff_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & DEBUG){
         args[4] = (bf->unsent.s == NULL ? (Abstract *)bf->v : (Abstract *)bf->unsent.s);
         args[5] = NULL;
-        total += Fmt(sm, "Buff<$ $fd unsent/total=$/$ @>", args);
+        total += Fmt(sm, "Buff<$ $fd unsent/total=$/$ &>", args);
     }else{
         total += Fmt(sm, "Buff<$ $fd unsent/total=$/$>", args);
     }

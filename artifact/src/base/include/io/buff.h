@@ -50,6 +50,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount);
 status Buff_Read(Buff *bf);
 status Buff_ReadToStr(Buff *bf, Str *s);
 
-status Buff_PosAbs(Buff *bf, i32 position);
-status Buff_Pos(Buff *bf, i32 position);
+status Buff_PosAbs(Buff *bf, i64 position);
+status Buff_Pos(Buff *bf, i64 position);
 status Buff_PosEnd(Buff *bf);
+boolean Buff_Empty(Buff *bf);

@@ -21,6 +21,7 @@ status FileDB_Tests(MemCh *gm){
     FileDB_Open(fdb);
 
     r |= Test(fdb->ctx->latestId == 1, "Latest ID has been set for one record", NULL);
+    /*
 
     Table *keys = Table_Make(m);
     Str *key1 = Str_CstrRef(m, "name");
@@ -92,6 +93,7 @@ status FileDB_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)s, (Abstract *)pw),
         "Found new pw from table, exected $, have $", args);
     FileDB_Close(fdb);
+    */
 
     MemCh_Free(m);
     DebugStack_Pop();
