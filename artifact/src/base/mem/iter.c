@@ -452,9 +452,7 @@ status Iter_PrevRemove(Iter *it){
     it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|FLAG_ITER_REVERSE);
     _Iter_Prev(it);
 
-    if(it->value == NULL){
-        it->type.state |= NOOP;
-    }else{
+    if((it->type.state & END) == 0){
         void **ptr = (void **)it->stack[0];
         *ptr = NULL;
         it->p->nvalues--;

@@ -120,10 +120,33 @@ status Iter_Tests(MemCh *gm){
 
     MemCh_Free(m);
 
+    Abstract *arr6[20] = {
+        (Abstract *)Str_CstrRef(m, "FancyOne"),
+        (Abstract *)Str_CstrRef(m, "FancyTwoA"),
+        (Abstract *)Str_CstrRef(m, "FancyThreeA"),
+        (Abstract *)Str_CstrRef(m, "FancyFour"),
+        (Abstract *)Str_CstrRef(m, "FancyFive"),
+        (Abstract *)Str_CstrRef(m, "FancySix"),
+        (Abstract *)Str_CstrRef(m, "FancySixTwo"),
+        (Abstract *)Str_CstrRef(m, "FancySeven"),
+        (Abstract *)Str_CstrRef(m, "FancyEight"),
+        (Abstract *)Str_CstrRef(m, "FancyNine"),
+        (Abstract *)Str_CstrRef(m, "FancyTen"),
+        (Abstract *)Str_CstrRef(m, "FancyEleven"),
+        (Abstract *)Str_CstrRef(m, "FancyTwelve"),
+        (Abstract *)Str_CstrRef(m, "FancyThirteen"),
+        (Abstract *)Str_CstrRef(m, "FancyFourteen"),
+        (Abstract *)Str_CstrRef(m, "FancyFifteen"),
+        (Abstract *)Str_CstrRef(m, "FancySixteen"),
+        (Abstract *)Str_CstrRef(m, "FancySeventeen"),
+        (Abstract *)Str_CstrRef(m, "FancyEighteen"),
+        NULL
+    };
+
     Abstract **item = NULL;
     p = Span_Make(m);
     Iter_Init(&it, p);
-    ptr = arr6;
+    Abstract **ptr = arr6;
     Abstract *first = *ptr;
     while(*ptr != NULL){
         item = ptr;

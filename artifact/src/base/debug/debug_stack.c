@@ -58,6 +58,7 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
 }
 
 i32 DebugStack_Print(Stream *sm, word flags){
+    return 0;
     i64 total = 0;
     Iter it;
     Iter_Init(&it, _it.p);
