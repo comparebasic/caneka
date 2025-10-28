@@ -126,7 +126,7 @@ void *MemBook_GetPage(void *addr){
     }
     i32 idx = -1;
     if((Iter_PrevRemove(&book->recycled) & END) == 0){
-        void *page = Iter_Current(&book->recycled);
+        void *page = Iter_Get(&book->recycled);
         if(page == NULL){
             printf("Error page retrieved from recycled was null %dnvalues idx:%d\n",
                 book->recycled.p->nvalues, idx);

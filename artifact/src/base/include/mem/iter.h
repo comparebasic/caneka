@@ -1,10 +1,10 @@
 enum span_ops {
     SPAN_OP_GET = 1 << 8,
     SPAN_OP_SET = 1 << 9,
-    SPAN_OP_REMOVE = 1 << 10,
-    SPAN_OP_RESERVE = 1 << 11,
-    SPAN_OP_RESIZE = 1 << 12,
-    SPAN_OP_ADD = 1 << 13,
+    SPAN_OP_RESERVE = 1 << 10,
+    SPAN_OP_RESIZE = 1 << 11,
+    SPAN_OP_ADD = 1 << 12,
+    SPAN_OP_REMOVE = 1 << 13,
     FLAG_ITER_CONTINUE = 1 << 14,
     FLAG_ITER_REVERSE = 1 << 15,
 };
