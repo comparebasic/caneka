@@ -2,10 +2,7 @@
 #include <caneka.h>
 
 static i32 bookIdx = -1;
-static i32 pageIdx = 0;
 static i32 maxPageIdx = 0;
-static i32 consolidate = 0;
-static i32 cadence = 16;
 static MemBook *_books[16] = {
     NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL,
@@ -90,7 +87,7 @@ i64 MemCount(i16 level){
     Iter it;
     for(i32 i = 0; i <= bookIdx; i++){
         MemBook *book = _books[i];
-        for(i32 j = 0; j < pageIdx && j < PAGE_MAX; j++){
+        for(i32 j = 0; j < book->idx && j < PAGE_MAX; j++){
             void *page = book->start+(j*PAGE_SIZE);
             MemPage *sl = (MemPage *)page;
             if(sl->type.of == TYPE_MEMSLAB){
@@ -102,12 +99,12 @@ i64 MemCount(i16 level){
 }
 
 i64 MemChapterCount(){
-    i32 available = _books[0]->recycled.p->nvalues;
-    return pageIdx - available;
+    MemBook *book = _books[0];
+    return book->idx - book->recycled.p->nvalues;
 }
 
 i64 MemChapterTotal(){
-    return pageIdx;
+    return _books[0]->idx;
 }
 
 i64 MemAvailableChapterCount(){
@@ -118,22 +115,6 @@ status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
     MemBook *book = MemBook_get(m);
     status r =  Iter_Add(&book->recycled, pg);
-    if(++consolidate % cadence == 0){
-        consolidate = 0;
-        void *startPage = book->start+((pageIdx-1)*PAGE_SIZE);
-        if(pg == startPage){
-            pageIdx--;
-            for(i32 i = pageIdx; i >= 0; i--){
-                void *page = book->start+(i*PAGE_SIZE);
-                MemPage *sl = (MemPage *)page;
-                if(sl->type.of == 0){
-                    pageIdx--;
-                }else{
-                    break;
-                }
-            }
-        }
-    }
     return r;
 }
 
@@ -154,23 +135,8 @@ void *MemBook_GetPage(void *addr){
         }
         return page;
     }else{
-        for(i32 i = pageIdx; i < PAGE_MAX; i++){
-            void *page = book->start+(i*PAGE_SIZE);
-            MemPage *sl = (MemPage *)page;
-            if(sl->type.of == 0){
-                if(i >= pageIdx){
-                    pageIdx = i+1;
-                }
-                if(page == NULL){
-                    Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemPage is null", NULL);
-                }
-                /*
-                printf("New Nvalues:%d max_idx:%d END%d %p\n",
-                    book->recycled.p->nvalues, book->recycled.p->max_idx,
-                    book->recycled.type.state & END, page);
-                    */
-                return page;
-            }
+        if(++book->idx <= PAGE_MAX){
+            return book->start+(book->idx*PAGE_SIZE);
         }
     }
 

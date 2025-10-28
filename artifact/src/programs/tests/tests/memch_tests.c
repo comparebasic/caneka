@@ -102,3 +102,24 @@ status MemCh_Tests(MemCh *gm){
     DebugStack_Pop();
     return r;
 }
+
+status MemChLevel_Tests(MemCh *gm){
+    status r = READY;
+    MemCh *m = MemCh_Make();
+    Abstract *args[5];
+
+    MemBook *cp = NULL;
+    i32 pageIdx = 0;
+#ifdef INSECURE
+    cp = MemBook_Get(m);
+#endif
+    
+    if(cp != NULL){
+        args[0] = (Abstract *)&cp->recycled;
+        Out("^p.Recycled @^0\n", args);
+    }
+
+    r |= ERROR;
+    DebugStack_Pop();
+    return r;
+}

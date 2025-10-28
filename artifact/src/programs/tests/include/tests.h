@@ -8,6 +8,7 @@ status Tests_Init(MemCh *m);
 
 /* tests */
 status MemCh_Tests(MemCh *gm);
+status MemChLevel_Tests(MemCh *gm);
 status Span_Tests(MemCh *gm);
 status SpanMax_Tests(MemCh *gm);
 status Core_Tests(MemCh *gm);

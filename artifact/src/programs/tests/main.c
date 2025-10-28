@@ -35,6 +35,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "MemCh Level Tests",
+        MemChLevel_Tests,
+        "Testing adding a remove memory on levels of a Memory Chapter",
+        FEATURE_COMPLETE,
+    },
+    {
         "Span",
         Span_Tests,
         "Span is the basic data structure for sequential or logorithmic storage access.",
