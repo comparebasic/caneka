@@ -23,7 +23,5 @@ if [ $r -ne 0 ]; then
     exit $r;
 fi 
 
-exit 1
-
 echo "running Tests..."
 ./build/bin/tests

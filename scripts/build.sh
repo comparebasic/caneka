@@ -38,6 +38,7 @@ if [ $r -ne 0 ]; then
     exit $r;
 fi
 
+
 echo "building Caneka Lang..."
 ./build/build_lang && $CC -o build/build_www $INC $STATICS artifact/src/www/build.c -lm;
 

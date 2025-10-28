@@ -139,6 +139,15 @@ Span *Span_Clone(MemCh *m, Span *p){
     return p2;
 }
 
+status Span_Insert(Span *p, i32 idx, Abstract *t){
+    if(t == NULL){
+        return NOOP;
+    }
+    Iter it;
+    Iter_Init(&it, p);
+    return Iter_Insert(&it, idx, t);
+}
+
 status Span_Add(Span *p, Abstract *t){
     p->type.state &= ~(ERROR|SUCCESS|NOOP);
     if(t == NULL){

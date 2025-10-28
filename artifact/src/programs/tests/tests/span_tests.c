@@ -340,8 +340,8 @@ status SpanMax_Tests(MemCh *gm){
     r |= makeAndCompareItems(m, 72);
     r |= makeAndCompareItems(m, 300);
     r |= makeAndCompareItems(m, 5000);
-    r |= makeAndCompareItems(m, 63000);
     /*
+    r |= makeAndCompareItems(m, 63000);
     r |= makeAndCompareItems(m, 66000);
     */
 

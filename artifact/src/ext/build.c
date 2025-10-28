@@ -98,6 +98,7 @@ static BuildSubdir parserobj = { "parser", {
     "snip.c",
     "tokenize.c",
     "parser_tos.c",
+    "split.c",
     NULL
 }};
 

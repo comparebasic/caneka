@@ -42,6 +42,10 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
     it->stackIdx[dim] = localIdx;
     if(dim > 0 && *ptr == NULL){
         word fl = (SPAN_OP_SET|SPAN_OP_RESIZE|SPAN_OP_RESERVE|SPAN_OP_ADD);
+        if((it->type.state & fl) == 0){
+            it->type.state |= FLAG_ITER_CONTINUE;
+            return 0;
+        }
         if(p->nvalues > 0 && p->m->it.p == p){
             MemPage *pg = (MemPage *)it->value;
             pg->level = 0;
@@ -54,12 +58,98 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
     return offset & _modulos[dim];
 }
 
+static status Iter_AddWithGaps(Iter *it){
+    Abstract *value = it->value;
+    i32 idx = it->idx;
+    i8 dimP = it->p->dims+1;
+    Iter prevIt;
+    i32 prevIdx = -1;
+
+    if((it->p->max_idx & _modulos[dimP]) == _modulos[dimP]){
+        it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_RESERVE;
+        it->idx = it->p->max_idx+1;
+        it->value = NULL;
+        Iter_Query(it);
+        dimP = it->p->dims+1;
+    }
+
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
+    Iter_Query(it);
+    i8 dim = 0;
+    void *sl = NULL;
+    void **last = NULL;
+    void **ptr = NULL;
+    i64 openSlots = -1;
+    if(it->type.state & SUCCESS){
+        it->type.state &= ~SUCCESS;
+
+        if(it->p->dims == 0){
+            i32 localIdx = it->stackIdx[dim];
+            ptr = it->stack[dim];
+            last = ptr+((_capacity[0]-1)-localIdx);
+            openSlots = (it->p->max_idx+1) - it->idx;
+        }else{
+            while((it->type.state & SUCCESS) == 0){
+                i32 localIdx = it->stackIdx[dim];
+                ptr = it->stack[dim];
+                last = ptr+((_capacity[0]-1)-localIdx);
+                while(*last == NULL){
+                    last--;
+                    if((openSlots = last-ptr) == 0){
+                        break;
+                    }
+                }
+
+                if(openSlots > 0){
+                    break;
+                }
+                if(dim+1 > it->p->dims){
+                    break;
+                }
+                dim++;
+            }
+        }
+
+        if(openSlots >= 0){
+            memmove(ptr+1, ptr, (openSlots+1)*sizeof(void *));
+            *ptr = NULL;
+            it->p->max_idx += _increments[dim];
+            prevIdx = it->idx + _increments[dim];
+            it->type.state |= SUCCESS;
+        }
+    }
+
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
+    it->value = value;
+    it->idx = idx;
+    Iter_Query(it);
+    if(prevIdx != -1){
+        Iter_Setup(&prevIt, it->p, SPAN_OP_GET, prevIdx);
+        Iter_Query(&prevIt);
+        while(dim > 0 && (it->type.state & SUCCESS)){
+            sl = *((void **)prevIt.stack[dim]);
+            openSlots = it->stackIdx[dim-1];
+            if(sl != NULL && openSlots > 0){
+                void *destSl = *((void **)it->stack[dim]);
+                memcpy(destSl, sl, (openSlots)*sizeof(void *));
+                memset(sl, 0, (openSlots)*sizeof(void *));
+            }
+            dim--;
+        }
+    }
+    it->type.state = (it->type.state & (PROCESSING|SPAN_OP_SET));
+    return it->type.state;
+}
+
 static status Iter_Query(Iter *it){
     it->type.state &= ~(SUCCESS|NOOP|MORE);
     MemCh *m = it->p->m;
     i16 guard = 0;
 
     if(it->type.state & SPAN_OP_ADD){
+        if(it->type.state & FLAG_ITER_CONTINUE){
+            return Iter_AddWithGaps(it);
+        }
         it->idx = it->p->max_idx+1;
     }
 
@@ -512,6 +602,15 @@ status Iter_AddOn(Iter *it, void *value){
     return r;
 }
 
+status Iter_Insert(Iter *it, i32 idx, void *value){
+    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_ADD|FLAG_ITER_CONTINUE);
+    it->idx = idx;
+    it->value = value;
+    status r = Iter_Query(it);
+    it->value = NULL;
+    return r;
+}
+
 void *Iter_Current(Iter *it){
     if(it->idx < 0){
         return NULL;
@@ -550,6 +649,12 @@ status Iter_Reset(Iter *it){
 
 status Iter_Prev(Iter *it){
     it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|FLAG_ITER_REVERSE);
+    if(it->idx == 0 && it->type.state & PROCESSING){
+        it->type.state |= END;
+        return it->type.state;
+    }else{
+        it->type.state &= ~END;
+    }
     return _Iter_Prev(it);
 }
 

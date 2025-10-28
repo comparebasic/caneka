@@ -4,6 +4,8 @@
 static i32 bookIdx = -1;
 static i32 pageIdx = 0;
 static i32 maxPageIdx = 0;
+static i32 consolidate = 0;
+static i32 cadence = 16;
 static MemBook *_books[16] = {
     NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL,
@@ -116,11 +118,22 @@ status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
     MemBook *book = MemBook_get(m);
     status r =  Iter_Add(&book->recycled, pg);
-    /*
-    printf("Free Page Nvalues:%d max_idx:%d END%d %p\n",
-        book->recycled.p->nvalues, book->recycled.p->max_idx,
-        book->recycled.type.state & END, pg);
-        */
+    if(++consolidate % cadence == 0){
+        consolidate = 0;
+        void *startPage = book->start+((pageIdx-1)*PAGE_SIZE);
+        if(pg == startPage){
+            pageIdx--;
+            for(i32 i = pageIdx; i >= 0; i--){
+                void *page = book->start+(i*PAGE_SIZE);
+                MemPage *sl = (MemPage *)page;
+                if(sl->type.of == 0){
+                    pageIdx--;
+                }else{
+                    break;
+                }
+            }
+        }
+    }
     return r;
 }
 
