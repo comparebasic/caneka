@@ -109,17 +109,66 @@ status MemChLevel_Tests(MemCh *gm){
     Abstract *args[5];
 
     MemBook *cp = NULL;
-    i32 pageIdx = 0;
+    i32 recycleCount = 0;
+    i32 count = 0;
 #ifdef INSECURE
     cp = MemBook_Get(m);
 #endif
+
+    MemCh *x = MemCh_Make();
     
     if(cp != NULL){
         args[0] = (Abstract *)&cp->recycled;
+        args[1] = NULL;
         Out("^p.Recycled @^0\n", args);
     }
 
+#ifdef INSECURE
+    cp->type.state |= DEBUG;
+#endif
+
+    i32 slabs = m->it.p->nvalues;
+    if(cp != NULL){
+        recycleCount = cp->recycled.p->nvalues;
+    }
+    m->level++;
+    Str_Make(x, STR_MAX);
+    Str_Make(x, STR_MAX);
+    Str_Make(x, STR_MAX);
+    Str_Make(x, STR_MAX);
+    Str_Make(x, STR_MAX);
+    Str_Make(x, STR_MAX);
+    Str_Make(x, STR_MAX);
+    /*
+    if(cp != NULL){
+        count = cp->recycled.p->nvalues;
+        args[0] = (Abstract *)I32_Wrapped(m, recycleCount);
+        args[1] = (Abstract *)I32_Wrapped(m, count);
+        args[2] = (Abstract *)I32_Wrapped(m, x->it.p->nvalues);
+        args[3] = NULL;
+        Out("^p.RecycledStart @, recycleCurrent @ -> MemCh.pages @^0\n", args);
+    }
+    */
+    MemCh_Free(x);
+#ifdef INSECURE
+    cp->type.state &= ~DEBUG;
+#endif
+    /*
+    if(cp != NULL){
+        count = cp->recycled.p->nvalues;
+        args[0] = (Abstract *)I32_Wrapped(m, recycleCount);
+        args[1] = (Abstract *)I32_Wrapped(m, count);
+        args[2] = (Abstract *)I32_Wrapped(m, x->it.p->nvalues);
+        args[3] = NULL;
+        Out("^p.RecycledStart @, recycleCurrent @ -> MemCh.pages @^0\n", args);
+    }
+    */
+    m->level--;
+
     r |= ERROR;
+    x->level = 0;
+    MemCh_Free(x);
+    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

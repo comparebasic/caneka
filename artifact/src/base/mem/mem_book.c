@@ -2,7 +2,6 @@
 #include <caneka.h>
 
 static i32 bookIdx = -1;
-static i32 maxPageIdx = 0;
 static MemBook *_books[16] = {
     NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL,
@@ -114,7 +113,15 @@ i64 MemAvailableChapterCount(){
 status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
     MemBook *book = MemBook_get(m);
-    status r =  Iter_Add(&book->recycled, pg);
+    status r = Iter_Add(&book->recycled, pg);
+    if(book->type.state & DEBUG){
+        i32 idx = ((void *)pg - book->start) / PAGE_SIZE;
+        printf("\x1b[32mFree Page\x1b[0m %d Recycled Nvalues:%d max_idx:%d END%d %p\n",
+            idx,
+            book->recycled.p->nvalues, book->recycled.p->max_idx,
+            book->recycled.type.state & END, pg);
+        fflush(stdout);
+    }
     return r;
 }
 
@@ -125,18 +132,27 @@ void *MemBook_GetPage(void *addr){
     }
     if((Iter_PrevRemove(&book->recycled) & (END|NOOP)) == 0){
         void *page = Iter_Get(&book->recycled);
-        /*
-        printf("From Recycled Nvalues:%d max_idx:%d END%d %p\n",
-            book->recycled.p->nvalues, book->recycled.p->max_idx,
-            book->recycled.type.state & END, page);
-            */
+        if(book->type.state & DEBUG){
+            printf("\x1b[32mFrom Recycled\x1b[0m Nvalues:%d max_idx:%d END%d %p\n",
+                book->recycled.p->nvalues, book->recycled.p->max_idx,
+                book->recycled.type.state & END, page);
+            fflush(stdout);
+        }
         if(page == NULL){
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemPage from recycled is null", NULL);
         }
         return page;
     }else{
         if(++book->idx <= PAGE_MAX){
-            return book->start+(book->idx*PAGE_SIZE);
+            void *page = book->start+(book->idx*PAGE_SIZE);
+            if(book->type.state & DEBUG){
+                printf("\x1b[36mFrom New\x1b[0m %d Nvalues:%d max_idx:%d END%d %p\n",
+                    book->idx,
+                    book->recycled.p->nvalues, book->recycled.p->max_idx,
+                    book->recycled.type.state & END, page);
+                fflush(stdout);
+            }
+            return page;
         }
     }
 

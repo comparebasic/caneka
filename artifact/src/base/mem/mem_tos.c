@@ -282,11 +282,12 @@ i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),
             (Abstract *)I32_Wrapped(sm->m, it->idx),
             (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
+            (Abstract *)I32_Wrapped(sm->m, it->p->max_idx),
             (Abstract *)current,
             (Abstract *)type,
             NULL
         };
-        total += Fmt(sm, "I<$:^D.$of$^d.\\@@/^D.$^d.>", args);
+        total += Fmt(sm, "I<$: idx-nvalues/max_idx=^D.$of$/$^d.\\@@/^D.$^d.>", args);
     }else{
         total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, sm, a, type, flags);
     }
