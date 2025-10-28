@@ -286,10 +286,15 @@ static status _Iter_Prev(Iter *it){
 
         goto end;
     }else{
+
         if(it->idx == 0){
+            printf("idx %d\n", it->idx);
+            fflush(stdout);
+
             it->type.state |= END;
             goto end;
         }
+
         if(topDim == 0){
             if((it->stackIdx[dim]-1) >= 0){
                 it->stackIdx[dim]--;
@@ -546,11 +551,21 @@ status Iter_PrevRemove(Iter *it){
     it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|FLAG_ITER_REVERSE);
     _Iter_Prev(it);
 
+    if(it->value != NULL){
+        printf("Values not null %p\n", it->value);
+        fflush(stdout);
+    }else{
+        printf("Value is null %p\n", it->value);
+        fflush(stdout);
+    }
+
     if(it->stack[0] != NULL){
         void **ptr = (void **)it->stack[0];
         *ptr = NULL;
         it->p->nvalues--;
         it->p->max_idx--;
+        printf("Nvalues %d/%d:max_idx after\n", it->p->nvalues, it->p->max_idx);
+        fflush(stdout);
     }
 
     return it->type.state;
@@ -592,7 +607,11 @@ status Iter_Push(Iter *it, void *value){
 status Iter_Add(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
     it->value = value;
+    printf("Idx before %d/%d %p\n", it->idx, it->p->max_idx, value);
+    fflush(stdout);
     status r = Iter_Query(it);
+    printf("Idx after %d/%d %p\n", it->idx, it->p->max_idx, value);
+    fflush(stdout);
     it->value = NULL;
     return r;
 }

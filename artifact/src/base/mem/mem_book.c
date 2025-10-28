@@ -116,7 +116,19 @@ status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
 
     MemBook *book = MemBook_get(m);
-    return Iter_Add(&book->recycled, pg);
+    status r = Iter_Add(&book->recycled, pg);
+
+    printf("Free page nvalues:%d idx:%d\n",
+        book->recycled.p->nvalues, book->recycled.idx);
+    fflush(stdout);
+
+    Abstract *args[5];
+    args[0] = (Abstract *)&book->recycled.p;
+    args[1] = NULL;
+    Out("^y.Recycled: &^0\n", args);
+
+    return r;
+
 }
 
 void *MemBook_GetPage(void *addr){
@@ -125,11 +137,11 @@ void *MemBook_GetPage(void *addr){
         book = MemBook_get(NULL);
     }
     i32 idx = -1;
-    if((Iter_PrevRemove(&book->recycled) & END) == 0){
+    if(book->recycled.p->nvalues > 0 /*(Iter_PrevRemove(&book->recycled) & END) == 0*/){
         void *page = Iter_Get(&book->recycled);
         if(page == NULL){
-            printf("Error page retrieved from recycled was null %dnvalues idx:%d\n",
-                book->recycled.p->nvalues, idx);
+            printf("Error page retrieved from recycled was null nvalues:%d idx:%d\n",
+                book->recycled.p->nvalues, book->recycled.idx);
             fflush(stdout);
         }
         return page;

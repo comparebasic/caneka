@@ -40,13 +40,17 @@ status CliStatus_Print(Stream *sm, CliStatus *cli){
                 (Abstract *)I32_Wrapped(sm->m, cli->lines->nvalues),
                 NULL
             };
+            /*
             Fmt(sm, "\r\x1b[$A", args);
+            */
         }
         if(count > 0){
             cli->type.state |= PROCESSING;
         }
         while((Iter_Next(&it) & END) == 0){
+            /*
             Stream_Bytes(sm, (byte *)"\r\x1b[0K", 5);
+            */
             if(it.value != NULL){
                 FmtLine *line = (FmtLine *)it.value;
                 Fmt(sm, line->fmt, line->args);
@@ -62,9 +66,11 @@ status CliStatus_PrintFinish(Stream *sm, CliStatus *cli){
     Iter it;
     Iter_Init(&it, cli->lines);
     int count = cli->lines->nvalues;
+    /*
     while((Iter_Next(&it) & END) == 0){
         Stream_Bytes(sm, (byte *)"\x1b[2K\r", 5);
     }
+    */
     Stream_Bytes(sm, (byte *)"\n", 1);
     cli->type.state &= ~PROCESSING;
     return SUCCESS;
