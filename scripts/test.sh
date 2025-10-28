@@ -17,8 +17,13 @@ if [ $r -ne 0 ]; then
     exit $r;
 fi
 
-echo "building Tests..." && ./build/programs_tests_build && ./build/bin/tests
+echo "building Tests..." && ./build/programs_tests_build
 
 if [ $r -ne 0 ]; then
     exit $r;
-fi
+fi 
+
+exit 1
+
+echo "running Tests..."
+./build/bin/tests

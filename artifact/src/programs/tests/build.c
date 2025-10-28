@@ -69,32 +69,26 @@ static BuildSubdir testsobj = { "tests", {
     "roebling_tests.c",
     "snip_tests.c",
     "cursor_tests.c",
-    /*
-    "mess_tests.c",
-    */
     "relation_tests.c",
     "iter_tests.c",
     "time_tests.c",
     "queue_tests.c",
-    /*
-    "fmthtml_tests.c",
-    */
     "debugstack_tests.c",
     "object_tests.c",
-    /*
-    "templ_tests.c",
-    "templ_route_tests.c",
-    */
     "path_tests.c",
     "binseg_tests.c",
     "taskstep_tests.c",
     "servetcp_tests.c",
     "filedb_tests.c",
+    "crypto_tests.c",
     /*
+    "mess_tests.c",
+    "fmthtml_tests.c",
+    "templ_tests.c",
+    "templ_route_tests.c",
     "www_nav_tests.c",
     "route_tests.c",
     */
-    "crypto_tests.c",
     NULL
 }};
 

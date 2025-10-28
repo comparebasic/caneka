@@ -42,7 +42,6 @@ Iter *Iter_Make(struct mem_ctx *m, Span *p);
 status Iter_Set(Iter *it, void *value);
 status Iter_Add(Iter *it, void *value);
 status Iter_AddOn(Iter *it, void *value);
-status Iter_Insert(Iter *it, i32 idx, void *value);
 status Iter_SetByIdx(Iter *it, i32 idx, void *value);
 void *Iter_Get(Iter *it);
 void *Iter_Current(Iter *it);

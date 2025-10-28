@@ -114,21 +114,14 @@ i64 MemAvailableChapterCount(){
 
 status MemBook_FreePage(MemCh *m, MemPage *pg){
     memset(pg, 0, PAGE_SIZE);
-
     MemBook *book = MemBook_get(m);
-    status r = Iter_Add(&book->recycled, pg);
-
-    printf("Free page nvalues:%d idx:%d\n",
-        book->recycled.p->nvalues, book->recycled.idx);
-    fflush(stdout);
-
-    Abstract *args[5];
-    args[0] = (Abstract *)&book->recycled.p;
-    args[1] = NULL;
-    Out("^y.Recycled: &^0\n", args);
-
+    status r =  Iter_Add(&book->recycled, pg);
+    /*
+    printf("Free Page Nvalues:%d max_idx:%d END%d %p\n",
+        book->recycled.p->nvalues, book->recycled.p->max_idx,
+        book->recycled.type.state & END, pg);
+        */
     return r;
-
 }
 
 void *MemBook_GetPage(void *addr){
@@ -136,13 +129,15 @@ void *MemBook_GetPage(void *addr){
     if(book == NULL){
         book = MemBook_get(NULL);
     }
-    i32 idx = -1;
-    if(book->recycled.p->nvalues > 0 /*(Iter_PrevRemove(&book->recycled) & END) == 0*/){
+    if((Iter_PrevRemove(&book->recycled) & (END|NOOP)) == 0){
         void *page = Iter_Get(&book->recycled);
+        /*
+        printf("From Recycled Nvalues:%d max_idx:%d END%d %p\n",
+            book->recycled.p->nvalues, book->recycled.p->max_idx,
+            book->recycled.type.state & END, page);
+            */
         if(page == NULL){
-            printf("Error page retrieved from recycled was null nvalues:%d idx:%d\n",
-                book->recycled.p->nvalues, book->recycled.idx);
-            fflush(stdout);
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemPage from recycled is null", NULL);
         }
         return page;
     }else{
@@ -154,9 +149,13 @@ void *MemBook_GetPage(void *addr){
                     pageIdx = i+1;
                 }
                 if(page == NULL){
-                    printf("Error new page is null\n");
-                    fflush(stdout);
+                    Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemPage is null", NULL);
                 }
+                /*
+                printf("New Nvalues:%d max_idx:%d END%d %p\n",
+                    book->recycled.p->nvalues, book->recycled.p->max_idx,
+                    book->recycled.type.state & END, page);
+                    */
                 return page;
             }
         }
