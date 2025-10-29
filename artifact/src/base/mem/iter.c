@@ -51,7 +51,10 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
             pg->level = 0;
             *ptr = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
         }else{
+            i16 level = m->level;
+            m->level = p->memLevel;
             *ptr = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
+            m->level = level;
         }
     }
 
@@ -182,7 +185,10 @@ static status Iter_Query(Iter *it){
                 new_sl = (slab *)Bytes_AllocOnPage(it->value,
                     sizeof(slab), TYPE_POINTER_ARRAY);
             }else{
+                i16 level = m->level;
+                m->level = p->memLevel;
                 new_sl = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
+                m->level = level;
             }
 
             if(exp_sl == NULL){
@@ -590,6 +596,7 @@ status Iter_Add(Iter *it, void *value){
     it->value = value;
     status r = Iter_Query(it);
     it->value = NULL;
+    it->type.state &= ~PROCESSING;
     return r;
 }
 

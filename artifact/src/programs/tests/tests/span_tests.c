@@ -10,7 +10,7 @@ static status makeAndCompareItems(MemCh *m, i64 max){
         Span_Set(p, i, (Abstract *)I64_Wrapped(m, i));
     }
 
-    i64 report = 4095;
+    i64 report = 10000;
 
     for(i64 i = 0; i < max; i++){
         Single *sg = Span_Get(p, i);
@@ -340,10 +340,8 @@ status SpanMax_Tests(MemCh *gm){
     r |= makeAndCompareItems(m, 72);
     r |= makeAndCompareItems(m, 300);
     r |= makeAndCompareItems(m, 5000);
-    /*
     r |= makeAndCompareItems(m, 63000);
-    r |= makeAndCompareItems(m, 66000);
-    */
+    r |= makeAndCompareItems(m, 100000);
 
     m->level = 0;
     args[0] = (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->nvalues);

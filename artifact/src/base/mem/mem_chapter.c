@@ -197,6 +197,8 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
         }
     }
 
+    MemBook_WipePages(m);
+
     if(r == READY){
         r |= NOOP;
     }
@@ -208,8 +210,9 @@ status MemCh_FreeTemp(MemCh *m, i16 level){
 status MemCh_Free(MemCh *m){
     status r = MemCh_FreeTemp(m, m->level);
     if(m->level == 0){
-        return MemBook_FreePage(m, m->first);
+        r |= MemBook_FreePage(m, m->first);
     }
+    MemBook_WipePages(m);
     return r;
 }
 

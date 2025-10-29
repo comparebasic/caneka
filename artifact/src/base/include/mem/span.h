@@ -12,7 +12,7 @@ extern i32 dim_max_idx[SPAN_MAX_DIMS+1];
 typedef struct span {
     Type type;
     word _;
-    byte _1;
+    byte memLevel;
     i8 dims;
     slab *root;
     struct mem_ctx *m;

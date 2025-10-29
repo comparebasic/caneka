@@ -40,6 +40,7 @@ enum types {
     TYPE_BUILDCTX,
     TYPE_RANGE,
     TYPE_BOOK,
+    TYPE_BOOK_STATS,
     TYPE_MEMCTX,
     TYPE_MEM_ITER,
     TYPE_STASH_ITEM,

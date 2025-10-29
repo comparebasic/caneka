@@ -24,7 +24,6 @@ static MemBook *MemBook_check(void *addr){
     return NULL;
 }
 
-
 static MemBook *MemBook_get(void *addr){
     MemBook *book = MemBook_check(addr);
     if(book != NULL){
@@ -110,16 +109,42 @@ i64 MemAvailableChapterCount(){
     return _books[0]->recycled.p->nvalues;
 }
 
+status MemBook_WipePages(void *addr){
+    status r = READY;
+    MemBook *book = MemBook_get(addr);
+    if(book == NULL){
+        book = MemBook_get(NULL);
+    }
+    while((Iter_PrevRemove(&book->retired) & (END|NOOP)) == 0){
+        void *page = Iter_Get(&book->retired);
+        memset(page, 0, PAGE_SIZE);
+        r |= Iter_Add(&book->recycled, page);
+        i32 idx = ((void *)page - book->start) / PAGE_SIZE;
+        if(book->type.state & DEBUG){
+            printf("\x1b[36m%d To Recycled\x1b[0m Retired Nvalues:%d max_idx:%d END%d|NOOP%d %p\n",
+                idx,
+                book->retired.p->nvalues,
+                book->retired.p->max_idx,
+                book->retired.type.state & END,
+                book->retired.type.state & NOOP,
+                page
+            );
+            fflush(stdout);
+        }
+    }
+    return r;
+}
+
 status MemBook_FreePage(MemCh *m, MemPage *pg){
-    memset(pg, 0, PAGE_SIZE);
     MemBook *book = MemBook_get(m);
-    status r = Iter_Add(&book->recycled, pg);
+    status r = Iter_Add(&book->retired, pg);
     if(book->type.state & DEBUG){
         i32 idx = ((void *)pg - book->start) / PAGE_SIZE;
-        printf("\x1b[32mFree Page\x1b[0m %d Recycled Nvalues:%d max_idx:%d END%d %p\n",
+        printf("\x1b[33m%d Retired Page level:%d\x1b[0m Retired Nvalues:%d max_idx:%d END%d %p\n",
             idx,
-            book->recycled.p->nvalues, book->recycled.p->max_idx,
-            book->recycled.type.state & END, pg);
+            (i32)m->level,
+            book->retired.p->nvalues, book->retired.p->max_idx,
+            book->retired.type.state & END, pg);
         fflush(stdout);
     }
     return r;
@@ -132,8 +157,10 @@ void *MemBook_GetPage(void *addr){
     }
     if((Iter_PrevRemove(&book->recycled) & (END|NOOP)) == 0){
         void *page = Iter_Get(&book->recycled);
+        i32 idx = ((void *)page - book->start) / PAGE_SIZE;
         if(book->type.state & DEBUG){
-            printf("\x1b[32mFrom Recycled\x1b[0m Nvalues:%d max_idx:%d END%d %p\n",
+            printf("\x1b[32m%d From Recycled\x1b[0m Nvalues:%d max_idx:%d END%d %p\n",
+                idx,
                 book->recycled.p->nvalues, book->recycled.p->max_idx,
                 book->recycled.type.state & END, page);
             fflush(stdout);
@@ -145,11 +172,9 @@ void *MemBook_GetPage(void *addr){
     }else{
         if(++book->idx <= PAGE_MAX){
             void *page = book->start+(book->idx*PAGE_SIZE);
+            i32 idx = ((void *)page - book->start) / PAGE_SIZE;
             if(book->type.state & DEBUG){
-                printf("\x1b[36mFrom New\x1b[0m %d Nvalues:%d max_idx:%d END%d %p\n",
-                    book->idx,
-                    book->recycled.p->nvalues, book->recycled.p->max_idx,
-                    book->recycled.type.state & END, page);
+                printf("\x1b[32m%d From New\x1b[0m %p\n", idx, page);
                 fflush(stdout);
             }
             return page;
@@ -165,6 +190,18 @@ void *MemBook_GetPage(void *addr){
 
     Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook", NULL);
     return NULL;
+}
+
+status MemBook_GetStats(void *addr, MemBookStats *st){
+    MemBook *book = _books[bookIdx];
+    st->type.of = TYPE_BOOK_STATS;
+    st->type.state = ZERO;
+    st->bookIdx = 0;
+    st->pageIdx = book->idx;
+    st->recycled = book->recycled.p->nvalues;
+    st->total = st->pageIdx - st->recycled;
+    st->type.state |= SUCCESS;
+    return st->type.state;
 }
 
 MemBook *MemBook_Make(MemBook *prev){
@@ -208,7 +245,12 @@ MemBook *MemBook_Make(MemBook *prev){
     Span_Setup(p);
     p->m = &book->m;
     p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab), TYPE_POINTER_ARRAY);
+    Iter_Init(&book->retired, p);
 
+    p = MemPage_Alloc(pg, sizeof(Span));
+    Span_Setup(p);
+    p->m = &book->m;
+    p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab), TYPE_POINTER_ARRAY);
     Iter_Init(&book->recycled, p);
 
     return book;

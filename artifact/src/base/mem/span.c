@@ -44,6 +44,7 @@ status Span_Setup(Span *p){
 Span *Span_Make(MemCh *m){
     Span *p = MemCh_AllocOf(m, sizeof(Span), TYPE_SPAN);
     p->type.of = TYPE_SPAN;
+    p->memLevel = m->level;
     p->max_idx = -1;
     p->m = m;
     p->root = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);

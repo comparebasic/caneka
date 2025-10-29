@@ -41,7 +41,6 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *a
     return condition ? SUCCESS : ERROR;
 }
 
-
 status Test(boolean condition, char *fmt, Abstract *args[]){
     if(!condition){
         Out("^r.Fail: ", NULL);
@@ -71,20 +70,21 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
     word baseStackLevel = m->level;
     StrVec *v = StrVec_Make(m);
-    i64 baseMem = MemCount(0);
-    i64 rollingBaseMem = baseMem;
 
-    i64 chapters = MemChapterCount();
+    MemBookStats st;
+    MemBook_GetStats(gm, &st);
+    i32 baseMem = st.total;
+    i32 rollingBaseMem = baseMem;
+
     Abstract *args1[] = { (Abstract *)Str_CstrRef(gm, suiteName), NULL };
     Out("= Test Suite: _c\n", args1);
-    i64 chap = chapters*PAGE_SIZE;
     Abstract *args2[] = {
-        (Abstract *)Str_MemCount(m, baseMem),
-        (Abstract *)I64_Wrapped(gm, chap),
-        (Abstract *)I64_Wrapped(gm, chapters),
+        (Abstract *)Str_MemCount(m, st.total * PAGE_SIZE),
+        (Abstract *)I64_Wrapped(gm, st.total),
+        (Abstract *)I64_Wrapped(gm, st.pageIdx),
         NULL
     };
-    Out("Starting Mem at $ ($ chapters/$ total+stack)\n", args2);
+    Out("Starting Mem at $ total/maxIdx=^D.$/$^d.\n", args2);
 
     while(set->name != NULL){
         Abstract *args3[] = {
@@ -112,9 +112,11 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
             word stackLevel = m->level-baseStackLevel;
             m->level++;
-            i64 memUsed = MemCount(0)-baseMem;
-            i64 overRollingUsed = MemCount(0)-rollingBaseMem;
-            rollingBaseMem = MemCount(0);
+
+            MemBook_GetStats(gm, &st);
+            i64 memUsed = st.total - baseMem;
+            i64 overRollingUsed = st.total-rollingBaseMem;
+            rollingBaseMem = st.total;
 
             char *htmlCls = "";
             Str *color = Str_CstrRef(m, "");
@@ -126,17 +128,15 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
                 color = Str_AnsiCstr(m, "c.");
             }
 
-            i64 chapters = MemChapterCount();
-            i64 availableCh = MemAvailableChapterCount();
-            Abstract *args4[] = {
+            Abstract *args2[] = {
                 (Abstract *)color,
-                (Abstract *)Str_MemCount(gm, overRollingUsed),
-                (Abstract *)I64_Wrapped(gm, chapters),
-                (Abstract *)I64_Wrapped(gm, availableCh),
-                (Abstract *)Str_MemCount(m, chapters*PAGE_SIZE),
+                (Abstract *)I64_Wrapped(m, st.total * PAGE_SIZE),
+                (Abstract *)I64_Wrapped(gm, st.total),
+                (Abstract *)I64_Wrapped(gm, st.pageIdx),
                 NULL
-            }; 
-            Out("$Mem: $ ($ chapters/$ available/$ total+stack)^0\n", args4);
+            };
+            Out("$Mem: $ total/maxIdx=^D.$/$^d.^0\n", args2);
+
 
             MemCh_Free(m);
             m->level--;
