@@ -196,7 +196,7 @@ MemCh *Stash_FromStream(Buff *bf){
         if((r & PROCESSING) == 0){
             s.alloc = sizeof(StashHeader);
             s.length = 0;
-            s.bytes = (byte *)*StashHeader;
+            s.bytes = (byte *)&hdr;
             if((Buff_GetStr(bf, &s) & SUCCESS) == 0){
                 r |= ERROR;
                 break;
@@ -222,7 +222,7 @@ MemCh *Stash_FromStream(Buff *bf){
         s.length = 0;
         s.bytes = (byte *)pages[count];
         if((Buff_GetStr(bf, &s) & SUCCESS) == 0){
-            args[0] = (Abstract *)I64_Wrapped(ErrStream->m, length);
+            args[0] = (Abstract *)I16_Wrapped(ErrStream->m, s.length);
             args[1] = NULL;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error reading page from stream to Stash length $", args);

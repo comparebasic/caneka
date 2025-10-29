@@ -33,7 +33,7 @@ i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
     Buff *bfObj = (Buff *)as(a, TYPE_BUFF);
 
     Abstract *args[8];
-    args[0] = (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)bfObj, ToS_FlagLabels);
+    args[0] = (Abstract *)Type_StateVec(bf->m, bfObj->type.of, bf->type.state);
     args[1] = (Abstract *)I32_Wrapped(bf->m, bfObj->fd);
     args[2] = (Abstract *)I64_Wrapped(bf->m, bfObj->unsent.total);
     args[3] = (Abstract *)I64_Wrapped(bf->m, bfObj->v->total);
@@ -48,9 +48,9 @@ i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
 
         args[6] = (bf->unsent.s == NULL ? (Abstract *)bfObj->v : (Abstract *)bfObj->unsent.s);
         args[7] = NULL;
-        total += Fmt(bf, "Buff<$ $fd/$bytes\\@@ unsent/total=$/$ &>", args);
+        total += Fmt(bf, "Buff<@ $fd/$bytes\\@@ unsent/total=$/$ &>", args);
     }else{
-        total += Fmt(bf, "Buff<$ $fd unsent/total=$/$>", args);
+        total += Fmt(bf, "Buff<@ $fd unsent/total=$/$>", args);
     }
     return total;
 }

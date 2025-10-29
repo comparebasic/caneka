@@ -150,69 +150,6 @@ i64 Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
     return total;
 }
 
-i64 FlagStr(word flag, char *dest, char *map){
-    i64 p = 0;
-    i32 i = 0;
-    if(flag == 0){
-        dest[p++] = map[0];
-    }else{
-        for(i32 i = 0; i < 16; i++){ 
-           if((flag & (1 << i)) != 0){
-                dest[p++] = map[i+1];
-           }
-        }
-    }
-    dest[p] = '\0';
-    return p;
-}
-
-i64 Str_AddFlags(Str *s, word flags, char *map){
-    if(s->alloc - (s->length+FLAG_DEBUG_MAX) < 0){
-        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
-        return 0;
-    }
-    i64 total = FlagStr(flags, (char *)s->bytes+s->length, map);
-    s->length += (word)total;
-    return total;
-}
-
-i64 ToS_FlagLabels(Buff *bf, Abstract *a){
-    Str **labels = Lookup_Get(ToSFlagLookup, a->type.of);
-    word flags = a->type.state;
-    return ToS_LabelsFromFlag(bf, a, flags, labels);
-}
-
-i64 ToS_LabelsFromFlag(Buff *bf, Abstract *a, word flags, Str **labels){
-    Str *lbl;
-    i64 total = 0;
-    boolean first = TRUE;
-    if(flags == 0){
-        if(labels != NULL && labels[0] != NULL){
-            lbl = labels[0];
-        }else{
-            lbl = stateLabels[0];
-        }
-        total += Buff_Bytes(bf, lbl->bytes, lbl->length);
-    }else{
-        for(i32 i = 0; i < 16; i++){ 
-           if((flags & (1 << i)) != 0){
-                if(first){
-                    first = FALSE;
-                }else{
-                    total += Buff_Bytes(bf, (byte *)"|", 1);
-                }
-                if(labels != NULL && labels[i+1] != NULL){
-                    lbl = labels[i+1];
-                }else{
-                    lbl = stateLabels[i+1];
-                }
-                total += Buff_Bytes(bf, lbl->bytes, lbl->length);
-           }
-        }
-    }
-    return total;
-}
-
 char *ToStreamChars(word flags){
     if(flags & DEBUG & MORE){
         return "debug-verbose";
