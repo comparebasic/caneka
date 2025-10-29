@@ -130,7 +130,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
             Abstract *args2[] = {
                 (Abstract *)color,
-                (Abstract *)I64_Wrapped(m, st.total * PAGE_SIZE),
+                (Abstract *)Str_MemCount(m, st.total * PAGE_SIZE),
                 (Abstract *)I64_Wrapped(gm, st.total),
                 (Abstract *)I64_Wrapped(gm, st.pageIdx),
                 NULL
