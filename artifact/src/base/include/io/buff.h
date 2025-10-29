@@ -56,3 +56,5 @@ status Buff_Pos(Buff *bf, i64 position);
 status Buff_PosEnd(Buff *bf);
 boolean Buff_Empty(Buff *bf);
 status Buff_Stat(Buff *bf);
+
+i64 Buff_Bytes(Buff *bf, byte *bytes, word length);

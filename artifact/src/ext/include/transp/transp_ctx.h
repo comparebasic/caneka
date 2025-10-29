@@ -4,7 +4,7 @@ typedef struct transp_ctx {
     word status;
     i16 stackIdx;
     MemCh *m;
-    Stream *sm;
+    Buff *bf;
     Iter it;
     Lookup *lk;
     TranspFunc func;

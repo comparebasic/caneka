@@ -46,12 +46,9 @@ status TemplCtx_Tests(MemCh *gm){
     FetchTarget *tg = NULL;
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "examples/example.templ"));
-    File *f = File_Make(m, path, NULL, STREAM_STRVEC);
-    File_Open(f);
-    File_Read(f, FILE_READ_MAX);
-    File_Close(f);
+    StrVec *content = File_ToVec(m, path);
 
-    Cursor *curs = File_GetCurs(f);
+    Cursor *curs = Cursor_Make(m, content);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
@@ -168,12 +165,8 @@ status Templ_Tests(MemCh *gm){
     TranspFile *tp = NULL;
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.templ"));
-    File *f = File_Make(m, path, NULL, STREAM_STRVEC);
-    File_Open(f);
-    File_Read(f, FILE_READ_MAX);
-    File_Close(f);
-
-    Cursor *curs = File_GetCurs(f);
+    StrVec *content = File_ToVec(m, path);
+    Cursor *curs = Cursor_Make(m, content);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
@@ -256,13 +249,8 @@ status TemplLogic_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.templ"));
-    File *f = File_Make(m, path, NULL, STREAM_STRVEC);
-    File_Open(f);
-    File_Read(f, FILE_READ_MAX);
-    File_Close(f);
-
-    Cursor *curs = File_GetCurs(f);
-    curs->type.state |= DEBUG;
+    StrVec *content = File_ToVec(m, path);
+    Cursor *curs = Cursor_Make(m, content);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
 
     r |= Test(ctx->type.state & SUCCESS,

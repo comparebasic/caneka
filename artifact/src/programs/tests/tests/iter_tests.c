@@ -43,8 +43,8 @@ static status makeAndIterPrevRemoveItems(MemCh *m, i64 max){
     Iter_Init(&it, p);
     i32 maxIdx = p->max_idx;
     while((Iter_PrevRemove(&it) & END) == 0){
-        Single *sg = (Single *)Iter_Current(&it);
-        if(sg->val.i != maxIdx || p->nvalues != (maxIdx+1)){
+        Single *sg = (Single *)Iter_Get(&it);
+        if(sg->val.i != maxIdx || p->nvalues != maxIdx){
             r |= ERROR;
             break;
         }

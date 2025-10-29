@@ -2,6 +2,10 @@
 #include <caneka.h>
 #include <tests.h>
 
+#ifdef MEMTEST
+    #define MEM_MAX_TESTS
+#endif
+
 static status test(MemCh *m){
     status r = READY;
     Tests_Init(m);
@@ -46,21 +50,21 @@ static TestSet _Tests[] = {
         "Span is the basic data structure for sequential or logorithmic storage access.",
         FEATURE_COMPLETE,
     },
-    /*
+#ifdef MEM_MAX_TESTS
     {
         "Span Max Tests",
         SpanMax_Tests,
         "Populate a span with the maximum amount of values to stress test it and the memory system.",
         FEATURE_COMPLETE,
     },
-    */
+#endif
     {
         "Iter",
         Iter_Tests,
         "Iter tests for iteration and insertion.",
         FEATURE_COMPLETE,
     },
-    /*
+#ifdef MEM_MAX_TESTS
     {
         "IterMax",
         IterMax_Tests,
@@ -73,7 +77,7 @@ static TestSet _Tests[] = {
         "Iter tests for previous removal over increasingly large sets.",
         FEATURE_COMPLETE,
     },
-    */
+#endif
     {
         "Str",
         Str_Tests,
@@ -322,7 +326,6 @@ static TestSet _Tests[] = {
         NULL,
         SECTION_LABEL,
     },
-    /*
     {
         "Mess Tests",
         Mess_Tests,
@@ -347,7 +350,6 @@ static TestSet _Tests[] = {
         "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
-    */
     {
         "Encoding Tests",
         Encoding_Tests,

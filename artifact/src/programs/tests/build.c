@@ -16,6 +16,9 @@ static char *cflags[] = {
     "-DCNK_LANG",
     "-DCNK_WWW",
     "-DCNK_CRYPTO",
+    /*
+    "-DMEMTEST",
+    */
     NULL
 };
 
@@ -81,14 +84,12 @@ static BuildSubdir testsobj = { "tests", {
     "servetcp_tests.c",
     "filedb_tests.c",
     "crypto_tests.c",
-    /*
     "mess_tests.c",
     "fmthtml_tests.c",
     "templ_tests.c",
     "templ_route_tests.c",
     "www_nav_tests.c",
     "route_tests.c",
-    */
     NULL
 }};
 

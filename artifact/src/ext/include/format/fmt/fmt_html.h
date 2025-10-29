@@ -1,2 +1,2 @@
-status Fmt_ToHtml(Stream *sm, Mess *mess);
+status Fmt_ToHtml(Buff *bf, Mess *mess);
 status FmtToHtml_Init(MemCh *m);

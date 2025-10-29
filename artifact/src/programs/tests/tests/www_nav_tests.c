@@ -186,12 +186,8 @@ status WwwNavTempl_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./docs/html/nav.html"));
-    File *f = File_Make(m, path, NULL, STREAM_STRVEC);
-    File_Open(f);
-    File_Read(f, FILE_READ_MAX);
-    File_Close(f);
-
-    Cursor *curs = File_GetCurs(f);
+    StrVec *content = File_ToVec(m, path);
+    Cursor *curs = Cursor_Make(m, content);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
 
     Nav *nav = makeNav(m);

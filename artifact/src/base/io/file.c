@@ -41,3 +41,15 @@ status File_Close(Buff *bf){
     }
     return SUCCESS;
 }
+
+StrVec *File_ToVec(MemCh *m, Str *path){
+    Buff *bf = Buff_Make(m, BUFF_SLURP);
+    File_Open(bf, path, O_RDONLY);
+    Buff_Read(bf);
+    if(path->type.state & DEBUG){
+        Abstract *args[] = { (Abstract *)path, (Abstract *)bf, NULL };
+        Out("^p.Reading @ to vec: &^0\n", args);
+    }
+    File_Close(bf);
+    return bf->v;
+}

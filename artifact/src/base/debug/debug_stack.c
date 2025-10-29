@@ -42,13 +42,9 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
     if(msg == NULL){
         msg = Str_Make(OutStream->m, 0);
     }
-    Abstract *args[] = {
-        (Abstract *)style,
-        /*
-        (Abstract *)msg
-        */
-        NULL
-    };
+    Abstract *args[3];
+    args[0] = (Abstract *)style;
+    args[1] = NULL;
     if(flags & DEBUG){
         Out("$[STACKNAME]:[STACKFILE]: [STACKREF]^0\n", args);
     }else{
@@ -57,12 +53,12 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
     return SUCCESS;
 }
 
-i32 DebugStack_Print(Stream *sm, word flags){
+i32 DebugStack_Print(Buff *bf, word flags){
     i64 total = 0;
     Iter it;
     Iter_Init(&it, _it.p);
     while((Iter_Prev(&it) & END) == 0){
-        total += ToS(sm, it.value, 0, flags);
+        total += ToS(bf, it.value, 0, flags);
     }
     return total;
 }

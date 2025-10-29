@@ -159,6 +159,19 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     return bf->type.state;
 }
 
+i64 Buff_Bytes(Buff *bf, byte *bytes, word length){
+    if(bf->type.state & BUFF_UNBUFFERED){
+        i64 offset = 0;
+        while(offset < length && (bf->type.state & ERROR) == 0){
+            Buff_Unbuff(bf, bytes+offset, length-offset, &offset);
+        }
+        return length - (length - offset);
+    }else if(Buff_AddBytes(bf, bytes, length) & SUCCESS){
+        return length;
+    }
+    return 0;
+}
+
 status Buff_Stat(Buff *bf){
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
         if(fstat(bf->fd, &bf->st)){
@@ -478,14 +491,14 @@ status Buff_SendToFd(Buff *bf, i32 fd){
 status Buff_AddSend(Buff *bf, Str *s){
     if((bf->type.state & BUFF_UNBUFFERED) == 0){
         Buff_Add(bf, s);
+        if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
+            while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
+        }
     }else{
         i64 offset = 0;
         while(offset < s->alloc && (bf->type.state & ERROR) == 0){
             Buff_Unbuff(bf, s->bytes+offset, s->length-offset, &offset);
         }
-    }
-    if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-        while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
     }
     return bf->type.state;
 }

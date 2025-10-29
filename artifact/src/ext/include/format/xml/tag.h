@@ -3,4 +3,4 @@ enum tag_atts {
     TAG_SELFCLOSE = 1 << 8,
 };
 
-i64 Tag_Out(Stream *sm, Abstract *name, word flags);
+i64 Tag_Out(Buff *bf, Abstract *name, word flags);

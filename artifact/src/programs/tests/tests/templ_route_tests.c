@@ -33,8 +33,7 @@ status TemplRoute_Tests(MemCh *gm){
     args[2] = NULL;
     Out("^y.Transpiling @ with data:@^0.\n", args);
 
-    StrVec *v = StrVec_Make(m);
-    FileDes_ToVec(v, abs);
+    StrVec *v = File_ToVec(m, StrVec_Str(m, abs));
 
     Cursor *curs = Cursor_Make(m, v);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
