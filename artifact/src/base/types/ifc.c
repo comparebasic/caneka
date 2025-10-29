@@ -24,7 +24,6 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_MEMSLAB, (i64)sizeof(MemPage));
     r |= Lookup_AddRaw(m, lk, TYPE_STR, (i64)sizeof(Str));
     r |= Lookup_AddRaw(m, lk, TYPE_STRVEC, (i64)sizeof(StrVec));
-    r |= Lookup_AddRaw(m, lk, TYPE_STREAM, (i64)sizeof(Stream));
     r |= Lookup_AddRaw(m, lk, TYPE_STREAM_TASK, (i64)sizeof(StreamTask));
     r |= Lookup_AddRaw(m, lk, TYPE_FMT_LINE, (i64)sizeof(FmtLine));
     r |= Lookup_AddRaw(m, lk, TYPE_CURSOR, (i64)sizeof(Cursor));

@@ -1,15 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
-    MemCh *m = sm->m;
+i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
+    MemCh *m = bf->m;
     char *ptr = fmt;
     char *end = fmt+(strlen(fmt)-1);
     char *start = fmt;
     status state = SUCCESS;
     i64 total = 0;
-    if((sm->type.state & STREAM_STRVEC) == 0){
-        sm->m->level++;
+    if((bf->type.state & STREAM_STRVEC) == 0){
+        bf->m->level++;
     }
     while(ptr <= end){
         char c = *ptr;
@@ -20,7 +20,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             if(c == '\\'){
                 if(start < ptr){
                     word length = (word)((ptr) - start);
-                    Stream_Bytes(sm, (byte *)start, length);
+                    Buff_Bytes(bf, (byte *)start, length);
                     total += length;
                 }
                 state |= NOOP;
@@ -29,7 +29,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             }else{
                 if(start != ptr){
                     word length = (word)(ptr - start);
-                    Stream_Bytes(sm, (byte *)start, length);
+                    Buff_Bytes(bf, (byte *)start, length);
                     total += length;
                 }
                 start = ptr+1;
@@ -61,7 +61,7 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
             Abstract *a = *(args++);
             if(a == NULL){
                 if(state & (DEBUG|MORE)){
-                    total += Stream_Bytes(sm, (byte *)"NULL", 4);
+                    total += Buff_Bytes(bf, (byte *)"NULL", 4);
                 }
                 goto next;
             }
@@ -72,25 +72,25 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                     char *cstr_end = (char *)s->bytes+(s->length-1);
                     s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
                     if((state & (DEBUG|MORE)) != (DEBUG|MORE)){
-                        total += Stream_Bytes(sm, s->bytes, s->length);
+                        total += Buff_Bytes(bf, s->bytes, s->length);
                         goto next;
                     }else{
                         a = (Abstract *)a;
                         type = s->type.of;
                     }
                 }else if(s->type.state & STRING_BINARY){
-                    total += Bits_Print(sm, s->bytes, s->length, 
-                        ((s->type.state|sm->type.state) & DEBUG));
+                    total += Bits_Print(bf, s->bytes, s->length, 
+                        ((s->type.state|bf->type.state) & DEBUG));
                     goto next;
                 }
             }else if(a->type.of == TYPE_STREAM_TASK){
                 StreamTask *tsk = (StreamTask *)a;
-                total += tsk->func(sm, tsk->a); 
+                total += tsk->func(bf, tsk->a); 
                 state |= SUCCESS;
                 goto next;
             }else if(a->type.of == TYPE_ARRAY){
                 StreamTask *tsk = (StreamTask *)a;
-                total += tsk->func(sm, tsk->a); 
+                total += tsk->func(bf, tsk->a); 
                 state |= SUCCESS;
                 goto next;
             }else if(a->type.of == TYPE_WRAPPED_PTR && ((Single *)a)->objType.of != 0){
@@ -98,22 +98,22 @@ i64 Fmt(Stream *sm, char *fmt, Abstract *args[]){
                 type = sg->objType.of;
                 a = sg->val.ptr;
             }
-            total += ToS(sm, a, type, (state & (MORE|DEBUG)));
+            total += ToS(bf, a, type, (state & (MORE|DEBUG)));
             state |= SUCCESS;
             goto next;
         }else if(c == '^'){
             ptr++;
             Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
-            Stream_Bytes(sm, s->bytes, s->length);
+            Buff_Bytes(bf, s->bytes, s->length);
             total += s->length;
             start = ptr+1;
-            if((sm->type.state & STREAM_STRVEC) == 0){
-                MemCh_Free(sm->m);
+            if((bf->type.state & STREAM_STRVEC) == 0){
+                MemCh_Free(bf->m);
             }
         }else{
 next:
-            if((sm->type.state & STREAM_STRVEC) == 0){
-                MemCh_Free(sm->m);
+            if((bf->type.state & STREAM_STRVEC) == 0){
+                MemCh_Free(bf->m);
             }
             ptr++;
         }
@@ -122,13 +122,13 @@ next:
     if(start < ptr){
         word length = (word)(ptr - start);
         if(length > 0){
-            Stream_Bytes(sm, (byte *)start, length);
+            Buff_Bytes(bf, (byte *)start, length);
             total += length;
         }
     }
 
-    if((sm->type.state & STREAM_STRVEC) == 0){
-        sm->m->level--;
+    if((bf->type.state & STREAM_STRVEC) == 0){
+        bf->m->level--;
     }
 
     return total; 
@@ -143,9 +143,9 @@ FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
 }
 
 StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args){
-    Stream *sm = Stream_MakeStrVec(m); 
-    Fmt(sm, fmt, args); 
-    return sm->dest.curs->v;
+    Buff *bf = Buff_Make(m, BUFF_STRVEC); 
+    Fmt(bf, fmt, args); 
+    return bf->dest.curs->v;
 }
 
 FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args){

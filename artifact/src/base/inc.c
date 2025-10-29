@@ -46,8 +46,6 @@
 #include "./str/strvec.c"
 #include "./str/coord.c"
 #include "./str/fmt.c"
-#include "./str/stream.c"
-#include "./str/streams.c"
 #include "./str/tos.c"
 #include "./encode/hex.c"
 #include "./termio/ansi_str.c"

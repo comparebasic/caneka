@@ -3,20 +3,20 @@
 
 static Str **iterLabels = NULL;
 
-static inline i64 wsOut(Stream *sm, i8 dim){
+static inline i64 wsOut(Buff *bf, i8 dim){
     while(dim-- > 0){
-        return Stream_Bytes(sm, (byte *)"    ", 4); 
+        return Buff_Bytes(bf, (byte *)"    ", 4); 
     }
     return 0;
 }
 
-i64 Addr_ToS(Stream *sm, void *a, word flags){
+i64 Addr_ToS(Buff *bf, void *a, word flags){
     i64 total = 0;
     if(flags & DEBUG){
-        total += Fmt(sm, "^D.", NULL);
+        total += Fmt(bf, "^D.", NULL);
     }
     if(a == NULL){
-        total += Fmt(sm, "<*NULL>", NULL);
+        total += Fmt(bf, "<*NULL>", NULL);
     }else{
         MemBook *book = MemBook_Get(a);
         util page = (util)(a-(void*)book);
@@ -25,40 +25,40 @@ i64 Addr_ToS(Stream *sm, void *a, word flags){
         page = page / PAGE_SIZE;
 
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, book->idx),
-            (Abstract *)Util_Wrapped(sm->m, page),
-            (Abstract *)Util_Wrapped(sm->m, local),
+            (Abstract *)I32_Wrapped(bf->m, book->idx),
+            (Abstract *)Util_Wrapped(bf->m, page),
+            (Abstract *)Util_Wrapped(bf->m, local),
             NULL
         };
-        total += Fmt(sm, "<*$/$/$>", args);
+        total += Fmt(bf, "<*$/$/$>", args);
     }
     return total;
 }
 
-i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
     Abstract *args[5];
     i64 total = 0;
-    args[0] = (Abstract *)I64_Wrapped(sm->m, m->it.p->nvalues);
-    args[1] = (Abstract *)MemCount_Wrapped(sm->m,  MemCh_Used(m, 0));
+    args[0] = (Abstract *)I64_Wrapped(bf->m, m->it.p->nvalues);
+    args[1] = (Abstract *)MemCount_Wrapped(bf->m,  MemCh_Used(m, 0));
     args[2] = NULL;
 
 
-    Table *tbl = Table_Make(sm->m);
+    Table *tbl = Table_Make(bf->m);
 
     if(flags & MORE){
-        total += Fmt(sm, "MemCh<$pages ^D.$^d.used [", args);
+        total += Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
 
         Iter it;
         Iter_Init(&it, m->it.p);
         while((Iter_Next(&it) & END) == 0){
             MemPage *sl = (MemPage *)Iter_Get(&it);
-            args[0] = (Abstract *)I32_Wrapped(sm->m, it.idx);
-            args[1] = (Abstract *)I16_Wrapped(sm->m, sl->remaining);
+            args[0] = (Abstract *)I32_Wrapped(bf->m, it.idx);
+            args[1] = (Abstract *)I16_Wrapped(bf->m, sl->remaining);
             args[2] = NULL;
-            total += Fmt(sm, "Page#$/@remaining", args);
+            total += Fmt(bf, "Page#$/@remaining", args);
             if((it.type.state & LAST) == 0){
-                total += Stream_Bytes(sm, (byte *)", ", 2);
+                total += Buff_Bytes(bf, (byte *)", ", 2);
             }
         }
         
@@ -70,8 +70,8 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
                 Abstract *a = MemIter_Get(&mit);
-                Table_Set(tbl, (Abstract *)Util_Wrapped(sm->m, (util)a), 
-                    (Abstract *)I32_Wrapped(sm->m, idx++));
+                Table_Set(tbl, (Abstract *)Util_Wrapped(bf->m, (util)a), 
+                    (Abstract *)I32_Wrapped(bf->m, idx++));
             }else{
                 idx = 0;
             }
@@ -84,39 +84,39 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
             if(mit.type.state & MORE){
                 if(mit.slIdx > 0){
                     if(mit.type.state & LAST){
-                        total += Stream_Bytes(sm, (byte *)"]", 1);
+                        total += Buff_Bytes(bf, (byte *)"]", 1);
                     }else{
-                        total += Stream_Bytes(sm, (byte *)"], ", 3);
+                        total += Buff_Bytes(bf, (byte *)"], ", 3);
                     }
                 }
-                args[0] = (Abstract *)I32_Wrapped(sm->m, mit.slIdx);
+                args[0] = (Abstract *)I32_Wrapped(bf->m, mit.slIdx);
                 args[1] = NULL;
-                total += Fmt(sm, "Page#$[", args);
+                total += Fmt(bf, "Page#$[", args);
             }else{
                 Abstract *a = MemIter_Get(&mit);
                 Map *map = Lookup_Get(MapsLookup, a->type.of);
                 Single *count = (Single *)Table_Get(tbl, 
-                    (Abstract *)Util_Wrapped(sm->m, (util)a));
+                    (Abstract *)Util_Wrapped(bf->m, (util)a));
 
                 if(map != NULL){
                     if(count != NULL){
                         args[0] = (Abstract *)count;
                         args[1] = (Abstract *)map->keys[0];
                         args[2] = NULL;
-                        total += Fmt(sm, "$:$", args);
+                        total += Fmt(bf, "$:$", args);
                     }else{
                         args[0] = (Abstract *)map->keys[0];
                         args[1] = NULL;
-                        total += Fmt(sm, "$", args);
+                        total += Fmt(bf, "$", args);
                     }
                     i32 max = (i32)((RangeType *)map)->range;
-                    total += Stream_Bytes(sm, (byte *)"(", 1);
+                    total += Buff_Bytes(bf, (byte *)"(", 1);
                     boolean first = TRUE;
                     for(i32 i = 1; i <= max; i++){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
                             if(!first){
-                                total += Stream_Bytes(sm, (byte *)", ", 2);
+                                total += Buff_Bytes(bf, (byte *)", ", 2);
                             }
                             first = FALSE;
                             args[0] = (Abstract *)map->keys[i];
@@ -128,68 +128,68 @@ i64 MemCh_Print(Stream *sm, Abstract *a, cls type, word flags){
                                     ptr -= sizeof(RangeType);
                                 }
                                 Single *attCount = (Single *)Table_Get(tbl,
-                                    (Abstract *)Util_Wrapped(sm->m, (util)ptr));
+                                    (Abstract *)Util_Wrapped(bf->m, (util)ptr));
 
                                 Abstract *aa = (Abstract *)ptr;
                                 Map *amap = Lookup_Get(MapsLookup, aa->type.of);
                                 if(amap != NULL){
                                     args[1] = (Abstract *)amap->keys[0];
                                 }else{
-                                    args[1] = (Abstract *)Type_ToStr(sm->m, aa->type.of);
+                                    args[1] = (Abstract *)Type_ToStr(bf->m, aa->type.of);
                                 }
                                 args[2] = (Abstract *)(attCount != NULL ? 
-                                    I16_Wrapped(sm->m, attCount->val.i) : Util_Wrapped(sm->m, (util)aa));
+                                    I16_Wrapped(bf->m, attCount->val.i) : Util_Wrapped(bf->m, (util)aa));
 
                                 args[3] = NULL;
-                                total += Fmt(sm, "$=$:$", args);
+                                total += Fmt(bf, "$=$:$", args);
                             }
                         }
                     }
-                    total += Stream_Bytes(sm, (byte *)")", 1);
+                    total += Buff_Bytes(bf, (byte *)")", 1);
                 }else{
                     if(count != NULL){
                         args[0] = (Abstract *)count;
-                        args[1] = (Abstract *)Type_ToStr(sm->m, a->type.of);
+                        args[1] = (Abstract *)Type_ToStr(bf->m, a->type.of);
                         args[2] = NULL;
-                        total += Fmt(sm, "$:$", args);
+                        total += Fmt(bf, "$:$", args);
                     }else{
-                        args[0] = (Abstract *)Type_ToStr(sm->m, a->type.of);
+                        args[0] = (Abstract *)Type_ToStr(bf->m, a->type.of);
                         args[1] = NULL;
-                        total += Fmt(sm, "$", args);
+                        total += Fmt(bf, "$", args);
                     }
                 }
                 if((mit.type.state & (MORE|LAST)) != LAST){
-                    total += Stream_Bytes(sm, (byte *)", ", 2);
+                    total += Buff_Bytes(bf, (byte *)", ", 2);
                 }
             }
         }
 
-        total +=  Stream_Bytes(sm, (byte *)"]>", 2);
+        total +=  Buff_Bytes(bf, (byte *)"]>", 2);
     }else{
-        return  Fmt(sm, "MemCh<used:$>", args);
+        return  Fmt(bf, "MemCh<used:$>", args);
     }
     return total;
 }
 
-i64 MemBook_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 MemBook_Print(Buff *bf, Abstract *a, cls type, word flags){
     MemBook *cp = (MemBook*)as(a, TYPE_BOOK); 
     return 0;
 }
 
-i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
+i64 Span_Print(struct stream *bf, Abstract *a, cls type, word flags){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     i64 total = 0;
     if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, p->nvalues), 
-            (Abstract *)I32_Wrapped(sm->m, p->max_idx), 
-            (Abstract *)I8_Wrapped(sm->m, p->dims),
+            (Abstract *)I32_Wrapped(bf->m, p->nvalues), 
+            (Abstract *)I32_Wrapped(bf->m, p->max_idx), 
+            (Abstract *)I8_Wrapped(bf->m, p->dims),
             NULL
         };
-        total += Fmt(sm, "Span<^D.$^d.values/0..$/$dims [", args);
+        total += Fmt(bf, "Span<^D.$^d.values/0..$/$dims [", args);
     }else if(flags & MORE){
-        total += Stream_Bytes(sm, (byte *)"[", 1);
+        total += Buff_Bytes(bf, (byte *)"[", 1);
     }
     Iter it;
     Iter_Init(&it, p);
@@ -197,99 +197,99 @@ i64 Span_Print(struct stream *sm, Abstract *a, cls type, word flags){
         Abstract *a = it.value;
         if(a != NULL){
             Abstract *args[] = {
-                (Abstract *)I32_Wrapped(sm->m, it.idx),
+                (Abstract *)I32_Wrapped(bf->m, it.idx),
                 NULL
             };
             if(flags & DEBUG){
-                total += Stream_Bytes(sm, (byte *)"\n    ", 5);
+                total += Buff_Bytes(bf, (byte *)"\n    ", 5);
             }
             if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
-                total += Fmt(sm, "$:", args);
+                total += Fmt(bf, "$:", args);
             }
             Abstract *item = (Abstract *)it.value;
             if(p->type.state & FLAG_SPAN_RAW){
-                total += Bits_Print(sm, (byte *)&(it.value), sizeof(void *), MORE);
+                total += Bits_Print(bf, (byte *)&(it.value), sizeof(void *), MORE);
             }else if(item != NULL && item->type.of == TYPE_MEMSLAB){
-                total += ToS(sm, it.value, 0, (flags & ~DEBUG));
+                total += ToS(bf, it.value, 0, (flags & ~DEBUG));
             }else{
-                total += ToS(sm, it.value, 0, flags);
+                total += ToS(bf, it.value, 0, flags);
             }
             if((it.type.state & LAST) == 0 && (flags & MORE)){
-                total += Stream_Bytes(sm, (byte *)", ", 2);
+                total += Buff_Bytes(bf, (byte *)", ", 2);
             }
         }
     }
 
     if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
-        total += Stream_Bytes(sm, (byte *)"]>", 2);
+        total += Buff_Bytes(bf, (byte *)"]>", 2);
     }else if(flags & MORE){
-        total += Stream_Bytes(sm, (byte *)"]", 1);
+        total += Buff_Bytes(bf, (byte *)"]", 1);
     }
     
     return total;
 }
 
-i64 Iter_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
     Iter *it = (Iter *)as(a, TYPE_ITER);
     i64 total = 0;
     if(flags & DEBUG){
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),
-            (Abstract *)I32_Wrapped(sm->m, it->idx),
-            (Abstract *)I32_Wrapped(sm->m, it->p->max_idx),
-            (Abstract *)I8_Wrapped(sm->m, it->p->dims),
+            (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)it, ToS_FlagLabels),
+            (Abstract *)I32_Wrapped(bf->m, it->idx),
+            (Abstract *)I32_Wrapped(bf->m, it->p->max_idx),
+            (Abstract *)I8_Wrapped(bf->m, it->p->dims),
             NULL
         };
-        total += Fmt(sm, "I<$ $ of $max/$dims stack:\n", args);
+        total += Fmt(bf, "I<$ $ of $max/$dims stack:\n", args);
         void *ptr = it->p->root;
         for(i8 i = it->p->dims; i >= 0; i--){
             if(it->stack[i] == NULL && (flags & (MORE|DEBUG))){
                 Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(sm->m, i),
+                    (Abstract *)I32_Wrapped(bf->m, i),
                     NULL
                 };
-                total += Fmt(sm, "  $: NULL\n", args);
+                total += Fmt(bf, "  $: NULL\n", args);
             }else{
                 i64 delta = 0;
                 if(i > 0 && it->stack[i] != NULL){
                     delta = (it->stack[i] - ptr) / sizeof(void *);
                 }
                 Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(sm->m, i),
-                    (Abstract *)Ptr_Wrapped(sm->m, ptr, 0),
-                    (Abstract *)I32_Wrapped(sm->m, delta),
-                    (Abstract *)I32_Wrapped(sm->m, it->stackIdx[i]),
-                    (Abstract *)Ptr_Wrapped(sm->m, it->stack[i], 0), 
+                    (Abstract *)I32_Wrapped(bf->m, i),
+                    (Abstract *)Ptr_Wrapped(bf->m, ptr, 0),
+                    (Abstract *)I32_Wrapped(bf->m, delta),
+                    (Abstract *)I32_Wrapped(bf->m, it->stackIdx[i]),
+                    (Abstract *)Ptr_Wrapped(bf->m, it->stack[i], 0), 
                     NULL
                 };
-                total += Fmt(sm, "  $: $+$/$ = @\n", args);
+                total += Fmt(bf, "  $: $+$/$ = @\n", args);
             }
             if(i > 0 && it->stack[i] != NULL){
                 ptr = *((void **)it->stack[i]);
             }
         }
-        word previous = sm->type.state;
+        word previous = bf->type.state;
         Abstract *args2[] = {
             (Abstract *)((it->p->type.state & FLAG_SPAN_RAW) ?
-                I64_Wrapped(sm->m, (i64)it->value) : it->value),
+                I64_Wrapped(bf->m, (i64)it->value) : it->value),
             NULL
         };
-        total += Fmt(sm, "value=@>", args2);
+        total += Fmt(bf, "value=@>", args2);
     }else if(flags & MORE){
         Abstract *current = Iter_Current(it);
-        Str *type = current != NULL ? Type_ToStr(sm->m, current->type.of) : NULL;
+        Str *type = current != NULL ? Type_ToStr(bf->m, current->type.of) : NULL;
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)it, ToS_FlagLabels),
-            (Abstract *)I32_Wrapped(sm->m, it->idx),
-            (Abstract *)I32_Wrapped(sm->m, it->p->nvalues),
-            (Abstract *)I32_Wrapped(sm->m, it->p->max_idx),
+            (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)it, ToS_FlagLabels),
+            (Abstract *)I32_Wrapped(bf->m, it->idx),
+            (Abstract *)I32_Wrapped(bf->m, it->p->nvalues),
+            (Abstract *)I32_Wrapped(bf->m, it->p->max_idx),
             (Abstract *)current,
             (Abstract *)type,
             NULL
         };
-        total += Fmt(sm, "I<$: idx-nvalues/max_idx=^D.$of$/$^d.\\@@/^D.$^d.>", args);
+        total += Fmt(bf, "I<$: idx-nvalues/max_idx=^D.$of$/$^d.\\@@/^D.$^d.>", args);
     }else{
-        total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, sm, a, type, flags);
+        total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
     }
     return total;
 }

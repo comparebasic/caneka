@@ -6,17 +6,19 @@ word NORMAL_FLAGS = 0b0000000011111111;
 word UPPER_FLAGS = 0b1111111100000000;
 word OUTCOME_FLAGS = (SUCCESS|NOOP|ERROR);
 
-Stream *OutStream = NULL;
-Stream *ErrStream = NULL;
+Buff *OutStream = NULL;
+Buff *ErrStream = NULL;
 
 status Core_Init(MemCh *m){
     status r = READY;
     if(OutStream == NULL){
-        OutStream = Stream_MakeToFd(m, 1, NULL, 0);
+        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+        Buff_SetFd(bf, 1);
         r |= SUCCESS;
     }
     if(ErrStream == NULL){
-        ErrStream = Stream_MakeToFd(m, 2, NULL, 0);
+        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+        Buff_SetFd(bf, BUFF_UNBUFFERED);
         r |= SUCCESS;
     }
     r |= Error_Init(m);

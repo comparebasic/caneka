@@ -1,22 +1,22 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 HKey_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 HKey_Print(Buff *bf, Abstract *a, cls type, word flags){
     HKey *hk = (HKey *)as(a, TYPE_HKEY);
     if(flags & (MORE|DEBUG)){
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, hk->idx), 
-            (Abstract *)I8_Wrapped(sm->m, hk->dim), 
-            (Abstract *)I8_Wrapped(sm->m, hk->pos),
+            (Abstract *)I32_Wrapped(bf->m, hk->idx), 
+            (Abstract *)I8_Wrapped(bf->m, hk->dim), 
+            (Abstract *)I8_Wrapped(bf->m, hk->pos),
             NULL
         };
-        return Fmt(sm, "HKey<idx^D.$^d. ^D.$^d.dim ^D.$^d.pos>", args);
+        return Fmt(bf, "HKey<idx^D.$^d. ^D.$^d.dim ^D.$^d.pos>", args);
     }else{
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
 }
 
-i64 Array_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Array_Print(Buff *bf, Abstract *a, cls type, word flags){
     Abstract **arr = (Abstract **)a;
     i64 total = 0;
     boolean first = TRUE;
@@ -24,116 +24,116 @@ i64 Array_Print(Stream *sm, Abstract *a, cls type, word flags){
         if(first){
             first = FALSE;
         }else if(flags & MORE){
-            total += Stream_Bytes(sm, (byte *)",", 1);
+            total += Buff_Bytes(bf, (byte *)",", 1);
         }
-        total += ToS(sm, *arr, 0, flags);
+        total += ToS(bf, *arr, 0, flags);
         arr++;
     }
     return total;
 }
 
-i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Hashed_Print(Buff *bf, Abstract *a, cls type, word flags){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(flags & DEBUG){
-        Single *wid = I64_Wrapped(sm->m, h->id);
+        Single *wid = I64_Wrapped(bf->m, h->id);
         wid->type.state |= FMT_TYPE_BITS;
-        Single *val = Ptr_Wrapped(sm->m, h->value, 0);
+        Single *val = Ptr_Wrapped(bf->m, h->value, 0);
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, h->orderIdx), 
-            (Abstract *)I32_Wrapped(sm->m, h->idx), 
+            (Abstract *)I32_Wrapped(bf->m, h->orderIdx), 
+            (Abstract *)I32_Wrapped(bf->m, h->idx), 
             (Abstract *)wid, 
             h->key, 
             (Abstract *)val, 
-            (Abstract *)(h->value != NULL ? Type_ToStr(sm->m, h->value->type.of) : NULL),
+            (Abstract *)(h->value != NULL ? Type_ToStr(bf->m, h->value->type.of) : NULL),
             NULL
         };
-        return Fmt(sm, "H<$,$ $/@ -> $/$>", args);
+        return Fmt(bf, "H<$,$ $/@ -> $/$>", args);
     }else if(flags & MORE){
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, h->idx), 
+            (Abstract *)I32_Wrapped(bf->m, h->idx), 
             h->key, 
             (Abstract *)h->value, 
             NULL
         };
-        return Fmt(sm, "H<$ @ -> @>", args);
+        return Fmt(bf, "H<$ @ -> @>", args);
     }else{
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
 }
 
-i64 Lookup_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Lookup_Print(Buff *bf, Abstract *a, cls type, word flags){
     Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
     i64 total = 0;
     if(flags & (MORE|DEBUG)){
         i64 total = 0;
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, lk->offset),
+            (Abstract *)I32_Wrapped(bf->m, lk->offset),
             NULL,
         };
-        total += Fmt(sm, "Lk<^D.$^d.offset values[", args);
+        total += Fmt(bf, "Lk<^D.$^d.offset values[", args);
         Iter it;
         Iter_Init(&it, lk->values);
         while((Iter_Next(&it) & END) == 0){
             if(it.value != NULL){
                 /*
-                Single *val = Ptr_Wrapped(sm->m, it.value, 0);
+                Single *val = Ptr_Wrapped(bf->m, it.value, 0);
                 val->type.state |= DEBUG;
                 */
                 Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(sm->m, it.idx+lk->offset),
-                    (Abstract *)Type_ToStr(sm->m, it.idx+lk->offset),
+                    (Abstract *)I32_Wrapped(bf->m, it.idx+lk->offset),
+                    (Abstract *)Type_ToStr(bf->m, it.idx+lk->offset),
                     NULL
                 };
-                total += Fmt(sm, "$/$", args);
+                total += Fmt(bf, "$/$", args);
                 if((it.type.state & LAST) == 0){
-                    Stream_Bytes(sm, (byte *)", ", 2);
+                    Buff_Bytes(bf, (byte *)", ", 2);
                 }
             }
         }
-        total += Fmt(sm, "]>", NULL);
+        total += Fmt(bf, "]>", NULL);
     }else{
-        total += ToStream_NotImpl(sm, a, type, flags);
+        total += ToStream_NotImpl(bf, a, type, flags);
     }
     return total;
 }
 
-i64 Table_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Table_Print(Buff *bf, Abstract *a, cls type, word flags){
     Table *tbl = (Table *)a;
     if((flags & (DEBUG|MORE)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }else{
         i64 total = 0;
         if(flags & DEBUG){
             Abstract *args[] = {
-                (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tbl, ToS_FlagLabels),
-                (Abstract *)I32_Wrapped(sm->m, tbl->nvalues),
+                (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)tbl, ToS_FlagLabels),
+                (Abstract *)I32_Wrapped(bf->m, tbl->nvalues),
                 NULL
             };
-            total += Fmt(sm, "Tbl<$ ^D.$^d.nvalues ", args);
+            total += Fmt(bf, "Tbl<$ ^D.$^d.nvalues ", args);
         }else{
-            total += Stream_Bytes(sm, (byte *)"{", 1);
+            total += Buff_Bytes(bf, (byte *)"{", 1);
         }
         Iter it;
         Iter_Init(&it, tbl);
         while((Iter_Next(&it) & END) == 0){
             if(it.value != NULL){
                 Hashed *h = (Hashed *)it.value;
-                total += ToS(sm, h->key, 0, flags|MORE);
-                total += Stream_Bytes(sm, (byte *)"=", 1);
-                total += ToS(sm, h->value, 0, flags|MORE);
+                total += ToS(bf, h->key, 0, flags|MORE);
+                total += Buff_Bytes(bf, (byte *)"=", 1);
+                total += ToS(bf, h->value, 0, flags|MORE);
                 if((it.type.state & LAST) == 0){
                     if(flags & DEBUG){
-                        total += Stream_Bytes(sm, (byte *)", ", 2);
+                        total += Buff_Bytes(bf, (byte *)", ", 2);
                     }else{
-                        total += Stream_Bytes(sm, (byte *)",", 1);
+                        total += Buff_Bytes(bf, (byte *)",", 1);
                     }
                 }
             }
         }
         if(flags & DEBUG){
-            total += Stream_Bytes(sm, (byte *)">", 1);
+            total += Buff_Bytes(bf, (byte *)">", 1);
         }else{
-            total += Stream_Bytes(sm, (byte *)"}", 1);
+            total += Buff_Bytes(bf, (byte *)"}", 1);
         }
         return total;
     }

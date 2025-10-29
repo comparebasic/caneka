@@ -192,21 +192,21 @@ i64 ToS_LabelsFromFlag(Buff *bf, Abstract *a, word flags, Str **labels){
         }else{
             lbl = stateLabels[0];
         }
-        total += Stream_Bytes(bf, lbl->bytes, lbl->length);
+        total += Buff_Bytes(bf, lbl->bytes, lbl->length);
     }else{
         for(i32 i = 0; i < 16; i++){ 
            if((flags & (1 << i)) != 0){
                 if(first){
                     first = FALSE;
                 }else{
-                    total += Stream_Bytes(bf, (byte *)"|", 1);
+                    total += Buff_Bytes(bf, (byte *)"|", 1);
                 }
                 if(labels != NULL && labels[i+1] != NULL){
                     lbl = labels[i+1];
                 }else{
                     lbl = stateLabels[i+1];
                 }
-                total += Stream_Bytes(bf, lbl->bytes, lbl->length);
+                total += Buff_Bytes(bf, lbl->bytes, lbl->length);
            }
         }
     }

@@ -119,14 +119,14 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
     return checksum;
 }
 
-status Stash_FlushFree(Stream *sm, MemCh *persist){
+status Stash_FlushFree(Buff *bf, MemCh *persist){
     status r = READY;
     SourceFunc func = NULL;
     Abstract *a = NULL;
     Abstract *args[5];
     Iter it;
 
-    MemCh *m = sm->m;
+    MemCh *m = bf->m;
     Table *tbl = Table_Make(m);
 
     MemIter mit;
@@ -161,12 +161,12 @@ status Stash_FlushFree(Stream *sm, MemCh *persist){
         .pages = (i16)pages->nvalues,
         .checksum = checksum
     };
-    Stream_Bytes(sm, (byte *)&hdr, sizeof(StashHeader));
+    Buff_Bytes(bf, (byte *)&hdr, sizeof(StashHeader));
 
     Iter_Init(&it, pages);
     while((Iter_Next(&it) & END) == 0){
         MemPage *pg = (MemPage *)Iter_Get(&it);
-        if(Stream_Bytes(sm, (byte *)pg, PAGE_SIZE) != PAGE_SIZE){
+        if(Buff_Bytes(bf, (byte *)pg, PAGE_SIZE) != PAGE_SIZE){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error writing page to stream for Stash", NULL);
             r |= ERROR;
@@ -178,22 +178,31 @@ status Stash_FlushFree(Stream *sm, MemCh *persist){
     return r;
 }
 
-MemCh *Stash_FromStream(Stream *sm){
+MemCh *Stash_FromStream(Buff *bf){
     status r = READY;
     Abstract *args[5];
     StashHeader hdr = {0, 0};
     i16 count = 0;
     MemCh *persist = NULL; 
     Abstract **pages = NULL;
-    MemCh *m = sm->m;
-    while((r & (SUCCESS|ERROR)) == 0 && (sm->type.state & END) == 0){
+    MemCh *m = bf->m;
+    Str s = {
+        .type = {TYPE_STR, ZERO},
+        .length = 0,
+        .alloc = 0,
+        .bytes = NULL,
+    };
+    while((r & (SUCCESS|ERROR)) == 0 && (bf->type.state & END) == 0){
         if((r & PROCESSING) == 0){
-            if(Stream_ReadToMem(sm, sizeof(StashHeader), (byte *)&hdr) != sizeof(StashHeader)){
+            s.alloc = sizeof(StashHeader);
+            s.length = 0;
+            s.bytes = (byte *)*StashHeader;
+            if((Buff_GetStr(bf, &s) & SUCCESS) == 0){
                 r |= ERROR;
                 break;
             }
             r |= PROCESSING;
-            pages = (Abstract **)Bytes_Alloc(sm->m, hdr.pages*sizeof(void *), TYPE_POINTER_ARRAY);
+            pages = (Abstract **)Bytes_Alloc(bf->m, hdr.pages*sizeof(void *), TYPE_POINTER_ARRAY);
         }
 
         if(count >= hdr.pages){
@@ -203,17 +212,19 @@ MemCh *Stash_FromStream(Stream *sm){
 
         pages[count] = MemBook_GetPage(NULL);
         if(pages[count] == NULL){
-            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error allocating page", NULL);
             r |= ERROR;
             return NULL;
         }
 
-        i64 length = Stream_ReadToMem(sm, PAGE_SIZE, (byte *)pages[count]);
-        if(length != PAGE_SIZE){
+        s.alloc = PAGE_SIZE;
+        s.length = 0;
+        s.bytes = (byte *)pages[count];
+        if((Buff_GetStr(bf, &s) & SUCCESS) == 0){
             args[0] = (Abstract *)I64_Wrapped(ErrStream->m, length);
             args[1] = NULL;
-            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error reading page from stream to Stash length $", args);
             r |= ERROR;
         }
@@ -230,8 +241,8 @@ MemCh *Stash_FromStream(Stream *sm){
     }
 
     if(checksum != hdr.checksum){
-        args[0] = (Abstract *)I16_Wrapped(sm->m, hdr.checksum);
-        args[1] = (Abstract *)I16_Wrapped(sm->m, checksum);
+        args[0] = (Abstract *)I16_Wrapped(bf->m, hdr.checksum);
+        args[1] = (Abstract *)I16_Wrapped(bf->m, checksum);
         args[2] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error checksum of number of changes does not match for resurecting persisting"             " expected $, have $",

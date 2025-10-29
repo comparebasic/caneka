@@ -15,71 +15,71 @@ char *Buff_WhenceChars(i64 whence){
     }
 }
 
-i64 StashCoords_Print(Stream *sm, StashCoord *coord, word flags){
+i64 StashCoords_Print(Buff *bf, StashCoord *coord, word flags){
     i64 total = 0;
     Abstract *args[] = {
-        (Abstract *)Type_ToStr(sm->m, coord->typeOf),
-        (Abstract *)I32_Wrapped(sm->m, coord->idx),
+        (Abstract *)Type_ToStr(bf->m, coord->typeOf),
+        (Abstract *)I32_Wrapped(bf->m, coord->idx),
         NULL
     };
-    total += Fmt(sm, "$/$/[", args);
+    total += Fmt(bf, "$/$/[", args);
     total += Bits_Print(OutStream, (byte *)&coord->offset, sizeof(quad), DEBUG|MORE);
-    total += Stream_Bytes(sm, (byte *)"]", 1);
+    total += Buff_Bytes(bf, (byte *)"]", 1);
     return total;
 }
 
-i64 Buff_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
-    Buff *bf = (Buff *)as(a, TYPE_BUFF);
+    Buff *bfObj = (Buff *)as(a, TYPE_BUFF);
 
     Abstract *args[8];
-    args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)bf, ToS_FlagLabels);
-    args[1] = (Abstract *)I32_Wrapped(sm->m, bf->fd);
-    args[2] = (Abstract *)I64_Wrapped(sm->m, bf->unsent.total);
-    args[3] = (Abstract *)I64_Wrapped(sm->m, bf->v->total);
+    args[0] = (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)bfObj, ToS_FlagLabels);
+    args[1] = (Abstract *)I32_Wrapped(bf->m, bfObj->fd);
+    args[2] = (Abstract *)I64_Wrapped(bf->m, bfObj->unsent.total);
+    args[3] = (Abstract *)I64_Wrapped(bf->m, bfObj->v->total);
     args[4] = NULL;
     if(flags & DEBUG){
         Buff_Stat(bf);
         args[4] = args[2];
         args[5] = args[3];
 
-        args[2] = (Abstract *)I32_Wrapped(bf->m, bf->st.st_size);
-        args[3] = (Abstract *)I32_Wrapped(bf->m, lseek(bf->fd, 0, SEEK_CUR));
+        args[2] = (Abstract *)I32_Wrapped(bf->m, bfObj->st.st_size);
+        args[3] = (Abstract *)I32_Wrapped(bf->m, lseek(bfObj->fd, 0, SEEK_CUR));
 
-        args[6] = (bf->unsent.s == NULL ? (Abstract *)bf->v : (Abstract *)bf->unsent.s);
+        args[6] = (bf->unsent.s == NULL ? (Abstract *)bfObj->v : (Abstract *)bfObj->unsent.s);
         args[7] = NULL;
-        total += Fmt(sm, "Buff<$ $fd/$bytes\\@@ unsent/total=$/$ &>", args);
+        total += Fmt(bf, "Buff<$ $fd/$bytes\\@@ unsent/total=$/$ &>", args);
     }else{
-        total += Fmt(sm, "Buff<$ $fd unsent/total=$/$>", args);
+        total += Fmt(bf, "Buff<$ $fd unsent/total=$/$>", args);
     }
     return total;
 }
 
-i64 StashItem_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 StashItem_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     StashItem *item = (StashItem *)as(a, TYPE_STASH_ITEM);
     Abstract *args[] = {
-        (Abstract *)Util_Wrapped(sm->m, (util)item->ptr),
+        (Abstract *)Util_Wrapped(bf->m, (util)item->ptr),
         NULL
     };
-    total += Fmt(sm, "StashItem<@ ", args);
-    total += StashCoords_Print(sm, &item->coord, flags);
-    total += Stream_Bytes(sm, (byte *)">", 1);
+    total += Fmt(bf, "StashItem<@ ", args);
+    total += StashCoords_Print(bf, &item->coord, flags);
+    total += Buff_Bytes(bf, (byte *)">", 1);
     return total;
 }
 
-i64 ProcDets_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 ProcDets_Print(Buff *bf, Abstract *a, cls type, word flags){
     ProcDets *pd = (ProcDets *)as(a, TYPE_PROCDETS);
     Abstract *args[] = {
-        (Abstract *)State_ToStr(sm->m, pd->type.state),
-        (Abstract *)I32_Wrapped(sm->m, pd->pid), 
-        (Abstract *)I32_Wrapped(sm->m, pd->code),
+        (Abstract *)State_ToStr(bf->m, pd->type.state),
+        (Abstract *)I32_Wrapped(bf->m, pd->pid), 
+        (Abstract *)I32_Wrapped(bf->m, pd->code),
         NULL
     };
     if(flags & (MORE|DEBUG)){
-        return Fmt(sm, "ProcDets<$ $ return:$>", args); 
+        return Fmt(bf, "ProcDets<$ $ return:$>", args); 
     }else{
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
 }
 

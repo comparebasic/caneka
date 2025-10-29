@@ -11,7 +11,7 @@ typedef struct cli_status {
 status CliStatus_SetKey(MemCh *m, CliStatus *cli, Str *key, IntPair *pair);
 status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Abstract *a);
 Abstract *CliStatus_GetByKey(MemCh *m, CliStatus *cli, Str *key);
-status CliStatus_Print(Stream *sm, CliStatus *cli);
-status CliStatus_PrintFinish(Stream *sm, CliStatus *cli);
+status CliStatus_Print(Buff *bf, CliStatus *cli);
+status CliStatus_PrintFinish(Buff *bf, CliStatus *cli);
 status CliStatus_SetDims(CliStatus *cli, i32 cols, i32 rows);
 CliStatus *CliStatus_Make(MemCh *m, DoFunc render, Abstract *source);

@@ -30,7 +30,7 @@ Abstract *CliStatus_GetByKey(MemCh *m, CliStatus *cli, Str *key){
     return NULL;
 }
 
-status CliStatus_Print(Stream *sm, CliStatus *cli){
+status CliStatus_Print(Buff *sm, CliStatus *cli){
     if((cli->render(sm->m, (Abstract *)cli) & NOOP) == 0){
         Iter it;
         Iter_Init(&it, cli->lines);
@@ -46,26 +46,26 @@ status CliStatus_Print(Stream *sm, CliStatus *cli){
             cli->type.state |= PROCESSING;
         }
         while((Iter_Next(&it) & END) == 0){
-            Stream_Bytes(sm, (byte *)"\r\x1b[0K", 5);
+            Buff_Bytes(sm, (byte *)"\r\x1b[0K", 5);
             if(it.value != NULL){
                 FmtLine *line = (FmtLine *)it.value;
                 Fmt(sm, line->fmt, line->args);
             }
-            Stream_Bytes(sm, (byte *)"\n", 1);
+            Buff_Bytes(sm, (byte *)"\n", 1);
         }
         return SUCCESS;
     }
     return NOOP;
 }
 
-status CliStatus_PrintFinish(Stream *sm, CliStatus *cli){
+status CliStatus_PrintFinish(Buff *sm, CliStatus *cli){
     Iter it;
     Iter_Init(&it, cli->lines);
     int count = cli->lines->nvalues;
     while((Iter_Next(&it) & END) == 0){
-        Stream_Bytes(sm, (byte *)"\x1b[2K\r", 5);
+        Buff_Bytes(sm, (byte *)"\x1b[2K\r", 5);
     }
-    Stream_Bytes(sm, (byte *)"\n", 1);
+    Buff_Bytes(sm, (byte *)"\n", 1);
     cli->type.state &= ~PROCESSING;
     return SUCCESS;
 }

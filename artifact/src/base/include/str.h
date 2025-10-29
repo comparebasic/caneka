@@ -3,8 +3,6 @@
 #include "str/str_makers.h"
 #include "str/strvec.h"
 #include "str/cursor.h"
-#include "str/stream.h"
-#include "str/streams.h"
 #include "str/str_equals.h"
 #include "str/str_exact.h"
 #include "str/fmt.h"

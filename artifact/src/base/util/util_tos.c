@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 Wrapped_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Wrapped_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)asIfc(a, TYPE_WRAPPED);
     if(flags & (MORE|DEBUG)){
         Abstract *args[] = {
@@ -14,7 +14,7 @@ static i64 Wrapped_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedDo_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedDo_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_DO);
     if(flags & (DEBUG|MORE)){
         Abstract *args[] = {
@@ -28,7 +28,7 @@ static i64 WrappedDo_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedFunc_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedFunc_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_FUNC);
     Abstract *args[] = {
         (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)sg, ToS_FlagLabels),
@@ -42,7 +42,7 @@ static i64 WrappedFunc_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedPtr_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedPtr_Print(Buff *sm, Abstract *a, cls type, word flags){
     i64 total = 0;
     Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
     word fl = (DEBUG|MORE);
@@ -52,11 +52,11 @@ static i64 WrappedPtr_Print(Stream *sm, Abstract *a, cls type, word flags){
     };
     total += Fmt(sm, "Wptr\\<$ ", args);
     total += Addr_ToS(sm, sg->val.ptr, flags);
-    total += Stream_Bytes(sm, (byte *)">", 1);
+    total += Buff_Bytes(sm, (byte *)">", 1);
     return total;
 }
 
-static i64 WrappedUtil_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedUtil_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     Str *s = Str_FromI64(sm->m, sg->val.value);
     if(flags & MORE){
@@ -76,13 +76,13 @@ static i64 WrappedUtil_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedMemCount_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedMemCount_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_MEMCOUNT);
     Str *s = Str_MemCount(sm->m, sg->val.value);
-    return Stream_Bytes(sm, s->bytes, s->length);
+    return Buff_Bytes(sm, s->bytes, s->length);
 }
 
-static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedI64_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
     Str *s = Str_FromI64(sm->m, sg->val.value);
     if(flags & MORE){
@@ -96,7 +96,7 @@ static i64 WrappedI64_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedI32_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.i);
     if(flags & DEBUG){
@@ -116,7 +116,7 @@ static i64 WrappedI32_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedI16_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I16);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.w);
     if(flags & MORE){
@@ -139,7 +139,7 @@ static i64 WrappedI16_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedI8_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I8);
     Str *s = Str_FromI64(sm->m, (i64)sg->val.b);
     if(flags & DEBUG){
@@ -159,7 +159,7 @@ static i64 WrappedI8_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 WrappedB_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedB_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_BYTE);
     i64 total = 0;
     if((flags & DEBUG)){
@@ -167,24 +167,24 @@ static i64 WrappedB_Print(Stream *sm, Abstract *a, cls type, word flags){
         total += Bytes_Debug(sm, &sg->val.b, &sg->val.b);
         Str *num = Str_FromI64(sm->m, (i64)sg->val.b);
         total += Fmt(sm, "^e.", NULL);
-        total += Stream_Bytes(sm, (byte *)"/", 1);
-        total += Stream_Bytes(sm, num->bytes, num->length);
-        total += Stream_Bytes(sm, (byte *)">", 1);
+        total += Buff_Bytes(sm, (byte *)"/", 1);
+        total += Buff_Bytes(sm, num->bytes, num->length);
+        total += Buff_Bytes(sm, (byte *)">", 1);
     }else if(flags & MORE){
         total += Fmt(sm, "(^E.", NULL);
         total += Bytes_Debug(sm, &sg->val.b, &sg->val.b);
         Str *num = Str_FromI64(sm->m, (i64)sg->val.b);
         total += Fmt(sm, "^e.", NULL);
-        total += Stream_Bytes(sm, (byte *)"/", 1);
-        total += Stream_Bytes(sm, num->bytes, num->length);
-        total += Stream_Bytes(sm, (byte *)")", 1);
+        total += Buff_Bytes(sm, (byte *)"/", 1);
+        total += Buff_Bytes(sm, num->bytes, num->length);
+        total += Buff_Bytes(sm, (byte *)")", 1);
     }else{
         return ToStream_NotImpl(sm, a, type, flags);
     }
     return total;
 }
 
-static i64 WrappedMicroTime_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 WrappedMicroTime_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
     Str *s = MicroTime_ToStr(sm->m, sg->val.value);
     if(flags & (DEBUG|MORE)){
@@ -199,7 +199,7 @@ static i64 WrappedMicroTime_Print(Stream *sm, Abstract *a, cls type, word flags)
     }
 }
 
-static i64 Abstract_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Abstract_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     if(flags & (DEBUG|MORE)){
         Abstract *args[] = {
@@ -212,7 +212,7 @@ static i64 Abstract_Print(Stream *sm, Abstract *a, cls type, word flags){
     }
 }
 
-static i64 Single_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Single_Print(Buff *sm, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED);
     if(flags & (DEBUG|MORE)){
         Abstract *args[] = {

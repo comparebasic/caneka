@@ -14,7 +14,7 @@ enum formatter_types {
     FMT_TYPE_EXTRA_ARG = 1 << 14,
     FMT_TYPE_ANSI = 1 << 15,
 };
-i64 Fmt(Stream *sm, char *fmt, Abstract *args[]);
+i64 Fmt(struct buff *bf, char *fmt, Abstract *args[]);
 FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p);
 FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args);
 StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args);

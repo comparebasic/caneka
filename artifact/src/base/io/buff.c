@@ -333,7 +333,7 @@ status Buff_GetStr(Buff *bf, Str *s){
     }
 
     DebugStack_Pop();
-    return bf->type.state;
+    return bf->type.state | (s->length == s->alloc ? SUCCESS : ZERO);
 }
 
 status Buff_GetToVec(Buff *bf, StrVec *v){
