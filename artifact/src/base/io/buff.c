@@ -159,10 +159,17 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     return bf->type.state;
 }
 
-i64 Buff_Bytes(Buff *bf, byte *bytes, word length){
+i64 Buff_Bytes(Buff *bf, byte *bytes, i64 length){
+    if(length > IO_SEND_MAX){
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error trying to send too many bytes at once", NULL);
+        return 0;
+    }
     if(bf->type.state & BUFF_UNBUFFERED){
         i64 offset = 0;
+        i16 guard = 0;
         while(offset < length && (bf->type.state & ERROR) == 0){
+            Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
             Buff_Unbuff(bf, bytes+offset, length-offset, &offset);
         }
         return length - (length - offset);
@@ -235,7 +242,7 @@ status Buff_Pos(Buff *bf, i64 position){
     return Buff_posFrom(bf, position, SEEK_CUR);
 }
 
-status Buff_AddBytes(Buff *bf, byte *bytes, word length){
+status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
     DebugStack_Push(bf, bf->type.of);
     status r = READY;
     if(bf->tail.idx == -1){
@@ -244,7 +251,9 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
         bf->tail.idx = bf->v->p->max_idx;
     }
     word remaining = bf->tail.s->alloc - bf->tail.s->length;
+    i16 guard = 0;
     while(length > 0){
+        Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
         if(length > remaining){
             Str_Add(bf->tail.s, bytes, remaining);
             bf->unsent.total += remaining;
@@ -262,6 +271,14 @@ status Buff_AddBytes(Buff *bf, byte *bytes, word length){
             bf->v->total += length;
             length -= length;
             r |= SUCCESS;
+        }
+
+        if(remaining == 0 && length > 0){
+            Str *s = Str_Make(bf->m, STR_DEFAULT);
+            Span_Add(bf->v->p, (Abstract *)s);
+            bf->tail.idx = bf->v->p->max_idx;
+            bf->tail.s = s;
+            remaining = bf->tail.s->alloc;
         }
     }
     if(r == READY){

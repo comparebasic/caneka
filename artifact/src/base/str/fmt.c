@@ -2,12 +2,6 @@
 #include <caneka.h>
 
 i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
-
-    MemBook *cp = MemBook_Get(NULL);
-    if(cp->type.state & DEBUG){
-        printf("debug book fmt I\n");
-    }
-
     MemCh *m = bf->m;
     char *ptr = fmt;
     char *end = fmt+(strlen(fmt)-1);
@@ -102,12 +96,6 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
             state |= SUCCESS;
             goto next;
         }else if(c == '^'){
-
-            if(cp->type.state & DEBUG){
-                printf("debug book fmt II\n");
-                exit(1);
-            }
-
             ptr++;
             Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
             Buff_Bytes(bf, s->bytes, s->length);
@@ -130,11 +118,6 @@ next:
     }
 
     bf->m->level--;
-    if(cp->type.state & DEBUG){
-        printf("debug book fmt - end\n");
-        exit(1);
-    }
-
     return total; 
 }
 

@@ -28,7 +28,7 @@ typedef struct buff {
     struct stat st;
 } Buff;
 
-status Buff_AddBytes(Buff *bf, byte *bytes, word length);
+status Buff_AddBytes(Buff *bf, byte *bytes, i64 length);
 Buff *Buff_Make(MemCh *m, word flags);
 Buff *Buff_From(MemCh *m, StrVec *v, word flags);
 
@@ -58,4 +58,4 @@ status Buff_PosEnd(Buff *bf);
 boolean Buff_Empty(Buff *bf);
 status Buff_Stat(Buff *bf);
 
-i64 Buff_Bytes(Buff *bf, byte *bytes, word length);
+i64 Buff_Bytes(Buff *bf, byte *bytes, i64 length);

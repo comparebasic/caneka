@@ -65,7 +65,6 @@ status StrVec_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    printf("I\n");
     StrVec *vc = StrVec_Make(m);
     StrVec_Add(vc, Str_CstrRef(m, "hi dude"));
     StrVec_Add(vc, Str_CstrRef(m, ", what a wild ride!"));
@@ -83,9 +82,6 @@ status StrVec_Tests(MemCh *gm){
         NULL
     };
     r |= Test(Equals((Abstract *)vr, (Abstract *)s), "Testing ReAligned StrVec and Str '$' vs '$'", args2);
-
-    printf("II\n");
-    fflush(stdout);
 
     Str *st = Str_CstrRef(m, "time");
     Str *sa = Str_CstrRef(m, "afterwards");
@@ -106,16 +102,8 @@ status StrVec_Tests(MemCh *gm){
         (Abstract *)vc,
         NULL
     };
-    printf("III\n");
-    fflush(stdout);
-
-    MemBook *cp = MemBook_Get(m);
-    cp->type.state |= DEBUG;
     
     Fmt(bf, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $", args3);
-    printf("IV\n");
-    fflush(stdout);
-
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\"\x1b[1mafterwards\x1b[22m\"' \"\x1b[1mfour\x1b[22m\" Str<DEBUG 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!");
 
@@ -126,9 +114,6 @@ status StrVec_Tests(MemCh *gm){
     };
     r |= Test(Equals((Abstract *)bf->v, (Abstract *)s),
         "Testing StrVec and StrVec from Fmt via Buff \n@\nvs\n@", args4);
-
-    printf("VI\n");
-    fflush(stdout);
 
     /*
     StrVec_Add(vc, Str_CstrRef(m, "\n\n"));
