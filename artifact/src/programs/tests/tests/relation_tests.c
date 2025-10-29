@@ -33,8 +33,8 @@ status Relation_Tests(MemCh *gm){
     Relation_SetValue(rel, 3, 1, (Abstract *)I32_Wrapped(m, 32));
     Relation_SetValue(rel, 3, 2, (Abstract *)I32_Wrapped(m, 33));
 
-    Stream *sm = Stream_MakeStrVec(m);
-    i64 total = ToS(sm, (Abstract *)rel, 0, MORE|DEBUG);
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    i64 total = ToS(bf, (Abstract *)rel, 0, MORE|DEBUG);
 
     s = Str_CstrRef(m, "Rel<3x4 \x1b[1m\"ColumnA\"\x1b[22m,"
         "\x1b[1m\"ColumnB\"\x1b[22m,\x1b[1m\"ColumnC\"\x1b[22m [\n"
@@ -46,12 +46,12 @@ status Relation_Tests(MemCh *gm){
     );
 
     Abstract *args[] = {
-        (Abstract *)sm->dest.curs->v,
+        (Abstract *)bf->v,
         NULL
     };
 
     s->type.state |= DEBUG;
-    r |= Test(Equals((Abstract *)s, (Abstract *)sm->dest.curs->v) == TRUE, "Expect relation ToS output to match, have @", args);
+    r |= Test(Equals((Abstract *)s, (Abstract *)bf->v) == TRUE, "Expect relation ToS output to match, have @", args);
 
     MemCh_Free(m);
     return r;

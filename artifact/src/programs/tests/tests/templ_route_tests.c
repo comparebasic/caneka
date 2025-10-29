@@ -41,8 +41,8 @@ status TemplRoute_Tests(MemCh *gm){
     Templ_Prepare(templ);
 
     StrVec *out = StrVec_Make(m);
-    Stream *sm = Stream_MakeToVec(m, out);
-    Templ_ToS(templ, sm, (Abstract *)data, NULL);
+    Buff *bf = Buff_From(m, out, BUFF_STRVEC);
+    Templ_ToS(templ, bf, (Abstract *)data, NULL);
 
     args[0] = (Abstract *)out;
     args[1] = NULL;

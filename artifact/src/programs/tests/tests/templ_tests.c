@@ -200,7 +200,7 @@ status Templ_Tests(MemCh *gm){
     Object_Set(data, (Abstract *)Str_CstrRef(m, "para"), (Abstract *)para);
     Object_ByPath(data, StrVec_From(m, Str_CstrRef(m, "items/menu")), (Abstract *)menu, SPAN_OP_SET);
 
-    Stream *sm = Stream_MakeStrVec(m);
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     status result = Templ_Prepare(templ);
@@ -225,14 +225,14 @@ status Templ_Tests(MemCh *gm){
         return r;
     }
 
-    i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
+    i64 total = Templ_ToS(templ, bf, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
     args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)sm->dest.curs->v;
+    args[1] = (Abstract *)bf->v;
     args[2] = (Abstract *)NULL;
 
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v), 
         "Templ key value test has expected content", 
         "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n&", 
         args);
@@ -334,7 +334,7 @@ status TemplLogic_Tests(MemCh *gm){
 
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
 
-    Stream *sm = Stream_MakeStrVec(m);
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
 
     DebugStack_SetRef(data, data->type.of);
     
@@ -345,13 +345,13 @@ status TemplLogic_Tests(MemCh *gm){
     Out("^p.Content &^0\n", args);
 
     templ->type.state |= DEBUG;
-    i64 total = Templ_ToS(templ, sm, (Abstract *)data, NULL);
+    i64 total = Templ_ToS(templ, bf, (Abstract *)data, NULL);
 
     Str *expected = Str_CstrRef(m, logicTestContent);
     args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)sm->dest.curs->v;
+    args[1] = (Abstract *)bf->v;
     args[2] = NULL;
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)sm->dest.curs->v), 
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v), 
         "Temple key value test has expected content", 
         "Temple key value test mismatch, expected @\nhave\n@", 
         args);

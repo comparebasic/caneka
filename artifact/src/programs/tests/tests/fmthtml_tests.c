@@ -39,19 +39,19 @@ status FmtHtml_Tests(MemCh *gm){
     rbl = FormatFmt_Make(m, curs, NULL);
     Roebling_Run(rbl);
 
-    Stream *sm = Stream_MakeStrVec(m); 
+    Buff *bf = Buff_Make(m, BUFF_STRVEC); 
     
-    Fmt_ToHtml(sm, rbl->mess);
+    Fmt_ToHtml(bf, rbl->mess);
     r |= Test(rbl->mess->transp->type.state & SUCCESS, 
         "Fmt to HTML has status SUCCESS", NULL);
 
     s = Str_CstrRef(m, expectedCstr);
     s->type.state |= DEBUG;
-    boolean matches = Equals((Abstract *)s, (Abstract *)sm->dest.curs->v);
+    boolean matches = Equals((Abstract *)s, (Abstract *)bf->v);
     if(!matches){
         Abstract *args[] = {
             (Abstract *)s,
-            (Abstract *)sm->dest.curs->v,
+            (Abstract *)bf->v,
             NULL
         };
         Out("^r.Mismatch:\n  Expected:&\n  Actual: ^E.&^0.", args);

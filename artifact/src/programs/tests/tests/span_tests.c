@@ -344,8 +344,8 @@ status SpanMax_Tests(MemCh *gm){
     r |= makeAndCompareItems(m, 100000);
 
     m->level = 0;
-    args[0] = (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->nvalues);
-    args[1] = (Abstract *)I8_Wrapped(ErrStream->m, m->it.p->dims);
+    args[0] = (Abstract *)I32_Wrapped(m, m->it.p->nvalues);
+    args[1] = (Abstract *)I8_Wrapped(m, m->it.p->dims);
     args[2] = NULL;
     Out("^p.MemCh nvalues $/$dims^0\n", args);
     MemCh_Free(m);

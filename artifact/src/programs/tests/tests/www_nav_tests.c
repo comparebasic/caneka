@@ -191,9 +191,9 @@ status WwwNavTempl_Tests(MemCh *gm){
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
 
     Nav *nav = makeNav(m);
-    Stream *sm = Stream_MakeStrVec(m);
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    i64 total = Templ_ToS(templ, sm, (Abstract *)nav, NULL);
+    i64 total = Templ_ToS(templ, bf, (Abstract *)nav, NULL);
 
     MemCh_Free(m);
     DebugStack_Pop();

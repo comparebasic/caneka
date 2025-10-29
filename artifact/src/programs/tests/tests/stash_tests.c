@@ -49,8 +49,10 @@ status Stash_Tests(MemCh *gm){
     Str *path = IoUtil_GetCwdPath(m, Str_CstrRef(m, "dist/test/persist.mem"));
 
     i32 fd = open(Str_Cstr(m, path), O_WRONLY|O_CREAT, 00644);
-    Stream *sm = Stream_MakeToFd(m, fd, StrVec_Make(m), ZERO);
-    status re = Stash_FlushFree(sm, pst);
+    Buff *bf = Buff_Make(m, ZERO);
+    Buff_SetFd(bf, fd);
+
+    status re = Stash_FlushFree(bf, pst);
     close(fd);
 
     MemCh *takeSpace = MemCh_Make();
@@ -59,8 +61,9 @@ status Stash_Tests(MemCh *gm){
     }
 
     fd = open(Str_Cstr(m, path), O_RDONLY);
-    sm = Stream_MakeFromFd(m, fd, ZERO);
-    MemCh *loaded = Stash_FromStream(sm);
+    bf = Buff_Make(m, ZERO);
+    Buff_SetFd(bf, fd);
+    MemCh *loaded = Stash_FromStream(bf);
     close(fd);
 
     MemCh_Free(takeSpace);

@@ -2,6 +2,12 @@
 #include <caneka.h>
 
 i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
+
+    MemBook *cp = MemBook_Get(NULL);
+    if(cp->type.state & DEBUG){
+        printf("debug book fmt I\n");
+    }
+
     MemCh *m = bf->m;
     char *ptr = fmt;
     char *end = fmt+(strlen(fmt)-1);
@@ -63,6 +69,7 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
                 }
                 goto next;
             }
+
             cls type = a->type.of;
             if(a->type.of == TYPE_STR){
                 Str *s = (Str *)a;
@@ -81,15 +88,26 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
                         ((s->type.state|bf->type.state) & DEBUG));
                     goto next;
                 }
+            }else if(a->type.of == TYPE_ARRAY){
+                state |= SUCCESS;
+                goto next;
             }else if(a->type.of == TYPE_WRAPPED_PTR && ((Single *)a)->objType.of != 0){
                 Single *sg = (Single *)a;
                 type = sg->objType.of;
                 a = sg->val.ptr;
             }
+
+
             total += ToS(bf, a, type, (state & (MORE|DEBUG)));
             state |= SUCCESS;
             goto next;
         }else if(c == '^'){
+
+            if(cp->type.state & DEBUG){
+                printf("debug book fmt II\n");
+                exit(1);
+            }
+
             ptr++;
             Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
             Buff_Bytes(bf, s->bytes, s->length);
@@ -112,6 +130,10 @@ next:
     }
 
     bf->m->level--;
+    if(cp->type.state & DEBUG){
+        printf("debug book fmt - end\n");
+        exit(1);
+    }
 
     return total; 
 }

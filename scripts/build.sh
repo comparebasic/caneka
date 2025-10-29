@@ -13,7 +13,6 @@ if [ $r -ne 0 ]; then
     exit $?;
 fi
 
-exit 1
 
 mkdir -p ./build/libbuilder/
 echo "building Caneka Builder"
@@ -23,6 +22,7 @@ r=$?
 if [ $r -ne 0 ]; then
     exit $r;
 fi
+
 
 echo "building Caneka Build Config"
 $CC -o build/build_ext $INC $STATICS artifact/src/ext/build.c -lm;
@@ -39,7 +39,6 @@ r=$?
 if [ $r -ne 0 ]; then
     exit $r;
 fi
-
 
 echo "building Caneka Lang..."
 ./build/build_lang && $CC -o build/build_www $INC $STATICS artifact/src/www/build.c -lm;
