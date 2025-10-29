@@ -121,7 +121,7 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Stream Tests",
+        "Buff Stream Tests",
         Stream_Tests,
         "Testing setting up and running multiple stream types and stream chains",
         FEATURE_COMPLETE,

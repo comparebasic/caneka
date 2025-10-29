@@ -67,7 +67,7 @@ status TcpTask_WriteFromOut(Step *st, Task *tsk){
 
     if(tsk->type.state & DEBUG){
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(OutStream->m, NULL, (Abstract *)proto->out, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(OutStream->m, proto->out->type.of, proto->out->type.state),
             (Abstract *)proto->out->v,
             NULL,
         };

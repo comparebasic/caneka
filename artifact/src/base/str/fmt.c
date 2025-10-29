@@ -8,9 +8,7 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
     char *start = fmt;
     status state = SUCCESS;
     i64 total = 0;
-    if((bf->type.state & STREAM_STRVEC) == 0){
-        bf->m->level++;
-    }
+    bf->m->level++;
     while(ptr <= end){
         char c = *ptr;
         if((state & NOOP) != 0){
@@ -83,16 +81,6 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
                         ((s->type.state|bf->type.state) & DEBUG));
                     goto next;
                 }
-            }else if(a->type.of == TYPE_STREAM_TASK){
-                StreamTask *tsk = (StreamTask *)a;
-                total += tsk->func(bf, tsk->a); 
-                state |= SUCCESS;
-                goto next;
-            }else if(a->type.of == TYPE_ARRAY){
-                StreamTask *tsk = (StreamTask *)a;
-                total += tsk->func(bf, tsk->a); 
-                state |= SUCCESS;
-                goto next;
             }else if(a->type.of == TYPE_WRAPPED_PTR && ((Single *)a)->objType.of != 0){
                 Single *sg = (Single *)a;
                 type = sg->objType.of;
@@ -107,14 +95,10 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
             Buff_Bytes(bf, s->bytes, s->length);
             total += s->length;
             start = ptr+1;
-            if((bf->type.state & STREAM_STRVEC) == 0){
-                MemCh_Free(bf->m);
-            }
+            MemCh_FreeTemp(bf->m);
         }else{
 next:
-            if((bf->type.state & STREAM_STRVEC) == 0){
-                MemCh_Free(bf->m);
-            }
+            MemCh_FreeTemp(bf->m);
             ptr++;
         }
     }
@@ -127,9 +111,7 @@ next:
         }
     }
 
-    if((bf->type.state & STREAM_STRVEC) == 0){
-        bf->m->level--;
-    }
+    bf->m->level--;
 
     return total; 
 }
@@ -145,7 +127,7 @@ FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
 StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args){
     Buff *bf = Buff_Make(m, BUFF_STRVEC); 
     Fmt(bf, fmt, args); 
-    return bf->dest.curs->v;
+    return bf->v;
 }
 
 FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args){

@@ -47,8 +47,8 @@ static i32 Templ_FindEnd(Templ *templ){
         /*
         Abstract *args[] = {
             (Abstract *)a,
-            (Abstract *)I32_Wrapped(OutStream->m, targetCount),
-            (Abstract *)I32_Wrapped(OutStream->m, it.idx),
+            (Abstract *)I32_Wrapped(templ->m, targetCount),
+            (Abstract *)I32_Wrapped(templ->m, it.idx),
             NULL
         };
 
@@ -140,9 +140,9 @@ static status Templ_handleJump(Templ *templ){
                 /* proceed */ 
                 Abstract *args[] = {
                     (Abstract *)tg,
-                    (Abstract *)I32_Wrapped(OutStream->m, tg->idx),
-                    (Abstract *)I32_Wrapped(OutStream->m, jump->level),
-                    (Abstract *)I32_Wrapped(OutStream->m, jump->depth),
+                    (Abstract *)I32_Wrapped(templ->m, tg->idx),
+                    (Abstract *)I32_Wrapped(templ->m, jump->level),
+                    (Abstract *)I32_Wrapped(templ->m, jump->depth),
                     NULL
                 };
                 Out("^c.      Proceed: & tg$ level$ depth$^0.\n", args);
@@ -252,7 +252,7 @@ static status Templ_PrepareCycle(Templ *templ){
     return templ->type.state;
 }
 
-i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
+i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         return total;
@@ -269,7 +269,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
     Abstract *data = Iter_Current(&templ->data);
 
     if(item->type.of == TYPE_STRVEC){
-        total += ToS(sm, (Abstract *)item, 0, ZERO); 
+        total += ToS(bf, (Abstract *)item, 0, ZERO); 
     }else if(item->type.of == TYPE_FETCHER && item->type.state & FETCHER_VAR){
         Fetcher *fch = (Fetcher *)item;
         if(templ->type.state & DEBUG){
@@ -287,7 +287,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
                 (Abstract *)data,
                 NULL,
             };
-            Error(sm->m, FUNCNAME, FILENAME, LINENUMBER,
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error finding value using @ in data @\n",args);
             return total;
         }
@@ -298,7 +298,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
             };
             Out("^c.  VarValue: &^0.\n", args);
         }
-        total += ToS(sm, (Abstract *)value, 0, ZERO); 
+        total += ToS(bf, (Abstract *)value, 0, ZERO); 
     }
 
     if(templ->content.type.state & END){
@@ -307,7 +307,7 @@ i64 Templ_ToSCycle(Templ *templ, Stream *sm, i64 total, Abstract *source){
 
     if(templ->type.state & DEBUG){
         Abstract *args[] = {
-            (Abstract *)sm->dest.curs->v,
+            (Abstract *)bf->v,
             NULL
         };
         Out("^gE.>> Out:^e. @^0.\n", args);
@@ -337,7 +337,7 @@ status Templ_Prepare(Templ *templ){
     return NOOP;
 }
 
-i64 Templ_ToS(Templ *templ, Stream *sm, Abstract *data, Abstract *source){
+i64 Templ_ToS(Templ *templ, Buff *bf, Abstract *data, Abstract *source){
     i64 total = 0;
     i16 g = 0;
 
@@ -345,11 +345,11 @@ i64 Templ_ToS(Templ *templ, Stream *sm, Abstract *data, Abstract *source){
         return 0;
     }
 
-    Span *p = Span_Make(sm->m);
+    Span *p = Span_Make(bf->m);
     Span_Add(p, data);
     Iter_Init(&templ->data, p);
     Iter_Next(&templ->data);
-    while((total = Templ_ToSCycle(templ, sm, total, source)) && 
+    while((total = Templ_ToSCycle(templ, bf, total, source)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }

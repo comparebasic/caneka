@@ -128,7 +128,7 @@ i64 BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     }
     if(ctx->type.state & DEBUG){
         Abstract *args[5];
-        args[0] = (Abstract *)StreamTask_Make(m, NULL, (Abstract *)ctx, ToS_FlagLabels),
+        args[0] = (Abstract *)Type_StateVec(m, ctx->type.of, ctx->type.state),
         args[1] = (Abstract *)Ptr_Wrapped(m, (byte *)hdr, TYPE_BINSEG_HEADER);
         args[2] = (Abstract *)I16_Wrapped(m, entry->length);
         args[3] = (Abstract *)ctx;

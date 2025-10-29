@@ -17,7 +17,7 @@ typedef struct mem_ctx {
 #define MemCh_Incr(m) ((m)->level++)
 #define MemCh_Decr(m) ((m)->level > 0 && (m)->level--)
 #define MemCh_DecrFree(m) (((m)->level > 0) && \
-    MemCh_FreeTemp((m), (m)->level) && ((m)->level--))
+    MemCh_FreeTemp((m)) && ((m)->level--))
 
 i64 MemChapterTotal();
 i64 MemCh_MemCount(MemCh *m, i16 level);
@@ -26,7 +26,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf);
 i64 MemCh_Used(MemCh *m, i16 level);
 i64 MemCh_Total(MemCh *m, i16 level);
 status MemCh_WipeTemp(MemCh *m, i16 level);
-status MemCh_FreeTemp(MemCh *m, i16 level);
+status MemCh_FreeTemp(MemCh *m);
 status MemCh_Free(MemCh *m);
 void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx);
 status MemCh_Setup(MemCh *m, MemPage *pg);

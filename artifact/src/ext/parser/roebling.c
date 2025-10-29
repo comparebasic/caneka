@@ -21,7 +21,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         byte c = *(rbl->curs->ptr);
         if(rbl->type.state & DEBUG){
             Abstract *args[] = {
-                (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                (Abstract *)Str_Ref(rbl->m, &c, 1, 1, DEBUG),
                 NULL
             };
             Out("^pE. $ ^0.\n", args);
@@ -34,7 +34,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
             status success = Match_Feed(rbl->m, mt, c) & SUCCESS;
             if(rbl->type.state & DEBUG){
                 Abstract *args[] = {
-                    (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                    (Abstract *)Str_Ref(rbl->m, &c, 1, 1, DEBUG),
                     (Abstract *)mt,
                     NULL
                 };
@@ -53,7 +53,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                     DebugStack_Pop();
                     if(mt->type.state & DEBUG){
                         Abstract *args[] = {
-                            (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                            (Abstract *)Str_Ref(rbl->m, &c, 1, 1, DEBUG),
                             (Abstract *)rbl,
                             NULL
                         };
@@ -64,7 +64,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
             }
             if(mt->type.state & DEBUG){
                 Abstract *args[] = {
-                    (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
+                    (Abstract *)Str_Ref(rbl->m, &c, 1, 1, DEBUG),
                     (Abstract *)rbl,
                     NULL
                 };
@@ -94,7 +94,7 @@ status Roebling_Finalize(Roebling *rbl, Match *mt, i64 total){
 
             if(rbl->type.state & DEBUG){
                 Abstract *args[] = {
-                    (Abstract *)Type_ToStr(OutStream->m,
+                    (Abstract *)Type_ToStr(rbl->m,
                         omt->captureKey),
                     (Abstract *)v,
                     NULL
@@ -135,8 +135,8 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
     if(rbl->type.state & DEBUG){
         byte c = *(rbl->curs->ptr);
         Abstract *args[] = {
-            (Abstract *)Str_Ref(OutStream->m, &c, 1, 1, DEBUG),
-            (Abstract *)Type_ToStr(OutStream->m,
+            (Abstract *)Str_Ref(rbl->m, &c, 1, 1, DEBUG),
+            (Abstract *)Type_ToStr(rbl->m,
                 mt->captureKey),
             (Abstract *)v,
             (Abstract *)mt,

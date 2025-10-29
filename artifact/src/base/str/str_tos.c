@@ -61,6 +61,7 @@ i64 StrLit_Print(Buff *bf, Abstract *a, cls type, word flags){
 
 
 i64 Str_Print(Buff *bf, Abstract *a, cls type, word flags){
+    Abstract *args[5];
     Str *s = (Str*)as(a, TYPE_STR); 
     flags |= s->type.state & DEBUG;
 
@@ -69,28 +70,14 @@ i64 Str_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 
     i64 total = 0;
-    word fl = (DEBUG|MORE);
-    if((flags & fl) == fl){
-        Abstract *args[] = {
-            (Abstract *)I16_Wrapped(bf->m, s->length),
-            (Abstract *)I16_Wrapped(bf->m, s->alloc),
-            NULL
-        };
-        total += Buff_Bytes(bf, (byte *)"Str<", 4);
-        total += ToS_FlagLabels(bf, (Abstract *)s);
-        total += Buff_Bytes(bf, (byte *)" ", 1);
-        byte bstr[MAX_BASE10];
-        /* lengths are manual here brcause integer wrappers use Str_Print */
-        byte *b = bstr;
-        i64 len = Str_I64OnBytes(&b, (i64)s->length);
-        total += Buff_Bytes(bf, b, len); 
-        total += Buff_Bytes(bf, (byte *)"/", 1); 
-        b = bstr;
-        len = Str_I64OnBytes(&b, (i64)s->alloc);
-        total += Buff_Bytes(bf, b, len); 
-        total += Buff_Bytes(bf, (byte *)":", 1); 
-    }
-    if(flags & MORE){
+    args[0] = (Abstract *)Type_StateVec(bf->m, s->type.of, s->type.state);
+    args[1] = (Abstract *)I16_Wrapped(bf->m, s->length);
+    args[2] = (Abstract *)I16_Wrapped(bf->m, s->alloc);
+    args[3] = NULL;
+
+    if(flags & DEBUG){
+        total += Fmt(bf, "Str<@ $/$:^D\"", args);
+    }else{
         total += Fmt(bf, "\"^D", NULL); 
     }
 
@@ -100,11 +87,7 @@ i64 Str_Print(Buff *bf, Abstract *a, cls type, word flags){
         total += Buff_Bytes(bf, s->bytes, s->length);
     }
 
-    if((flags & fl) == fl){
-        total += Fmt(bf, "^d.\">", NULL);
-    }else if(flags & MORE){
-        total += Fmt(bf, "^d.\"", NULL);
-    }
+    total += Fmt(bf, "^d.\">", NULL);
 
     return total;
 }
@@ -118,7 +101,7 @@ i64 StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
 
     if(flags & DEBUG){
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)vObj, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(bf->m, vObj->type.of, vObj->type.state),
             (Abstract *)I32_Wrapped(bf->m, vObj->p->nvalues),
             (Abstract *)I64_Wrapped(bf->m, vObj->total),
             NULL
@@ -200,7 +183,7 @@ i64 Cursor_Print(Buff *bf, Abstract *a, cls type, word flags){
 
     if(flags & DEBUG){
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)curs, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(bf->m, curs->type.of, curs->type.state),
             (Abstract *)I64_Wrapped(bf->m, pos),
             (Abstract *)I64_Wrapped(bf->m, endPos),
             (Abstract *)I64_Wrapped(bf->m, length),
@@ -215,7 +198,7 @@ i64 Cursor_Print(Buff *bf, Abstract *a, cls type, word flags){
         i64 length = (i64)(curs->end - curs->ptr)+1;
 
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)curs, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(bf->m, curs->type.of, curs->type.state),
             (Abstract *)I64_Wrapped(bf->m, pos),
             (Abstract *)I64_Wrapped(bf->m, curs->v->total),
             (Abstract *)((pos >= 8) ? Str_CstrRef(bf->m, "...") : Str_CstrRef(bf->m, "")),

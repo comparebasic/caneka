@@ -105,7 +105,7 @@ i64 Table_Print(Buff *bf, Abstract *a, cls type, word flags){
         i64 total = 0;
         if(flags & DEBUG){
             Abstract *args[] = {
-                (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)tbl, ToS_FlagLabels),
+                (Abstract *)Type_StateVec(bf->m, tbl->type.of, tbl->type.state),
                 (Abstract *)I32_Wrapped(bf->m, tbl->nvalues),
                 NULL
             };

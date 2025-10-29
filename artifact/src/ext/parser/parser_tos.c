@@ -10,10 +10,10 @@ static Str **roeblingLabels = NULL;
 static Str **matchLabels = NULL;
 static Str **tokenizeLabels = NULL;
 
-static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 _PatChar_print(Buff *bf, Abstract *a, cls type, word flags){
     PatCharDef *pat = (PatCharDef *)a;
     if((flags & (MORE|DEBUG)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
 
     char ending[2] = {0, 0};
@@ -24,172 +24,172 @@ static i64 _PatChar_print(Stream *sm, Abstract *a, cls type, word flags){
         ending[0] = ',';
     }
 
-    Str *fl = Str_Make(sm->m, FLAG_DEBUG_MAX+1);
+    Str *fl = Str_Make(bf->m, FLAG_DEBUG_MAX+1);
     Str_AddFlags(fl, pat->flags, matchFlagChars);
     if(pat->flags == PAT_END){
-        total += Stream_Bytes(sm, fl->bytes, fl->length);
+        total += Buff_Bytes(bf, fl->bytes, fl->length);
     } else if(pat->to == pat->from){
-        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
+        Str *from = Str_Ref(bf->m, (byte *)&pat->from, 1, 1, DEBUG);
         Abstract *args[] = {
             (Abstract *)fl,
             (Abstract *)from,
-            (Abstract *)Str_CstrRef(sm->m, ending),
+            (Abstract *)Str_CstrRef(bf->m, ending),
             NULL
         };
-        total += Fmt(sm, "$^D.$^d.$", args);
+        total += Fmt(bf, "$^D.$^d.$", args);
     }else{
-        Str *from = Str_Ref(sm->m, (byte *)&pat->from, 1, 1, DEBUG);
-        Str *to = Str_Ref(sm->m, (byte *)&pat->to, 1, 1, DEBUG);
+        Str *from = Str_Ref(bf->m, (byte *)&pat->from, 1, 1, DEBUG);
+        Str *to = Str_Ref(bf->m, (byte *)&pat->to, 1, 1, DEBUG);
         Abstract *args[] = {
             (Abstract *)fl,
             (Abstract *)from,
             (Abstract *)to,
-            (Abstract *)Str_CstrRef(sm->m, ending),
+            (Abstract *)Str_CstrRef(bf->m, ending),
             NULL
         };
-        total += Fmt(sm, "$^D.$-$^d.$", args);
+        total += Fmt(bf, "$^D.$-$^d.$", args);
     }
 
     return total;
 }
 
-static i64 PatChar_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 PatChar_Print(Buff *bf, Abstract *a, cls type, word flags){
     PatCharDef *pat = (PatCharDef *)a;
     if((flags & (MORE|DEBUG)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
     i64 total = 0;
     if(flags & DEBUG){
-        total += Fmt(sm, "P<", NULL);
+        total += Fmt(bf, "P<", NULL);
     }
-    total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
+    total += _PatChar_print(bf, (Abstract *)pat, TYPE_PATCHARDEF, flags);
     if(flags & DEBUG){
-        total += Fmt(sm, ">", NULL);
+        total += Fmt(bf, ">", NULL);
     }
     return total;
 }
 
-static i64 PatCharDef_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 PatCharDef_Print(Buff *bf, Abstract *a, cls type, word flags){
     PatCharDef *pat = (PatCharDef *)a;
     if((flags & (MORE|DEBUG)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
     i64 total = 0;
-    total += Fmt(sm, "Pat<", NULL);
+    total += Fmt(bf, "Pat<", NULL);
     while(pat->flags != PAT_END){
-        total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
+        total += _PatChar_print(bf, (Abstract *)pat, TYPE_PATCHARDEF, flags);
         pat++;
     }
-    total += _PatChar_print(sm, (Abstract *)pat, TYPE_PATCHARDEF, flags);
-    total += Fmt(sm, ">", NULL);
+    total += _PatChar_print(bf, (Abstract *)pat, TYPE_PATCHARDEF, flags);
+    total += Fmt(bf, ">", NULL);
     return total;
 }
 
-static i64 Snip_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Snip_Print(Buff *bf, Abstract *a, cls type, word flags){
     Snip *sn = (Snip *)as(a, TYPE_SNIP);
     if((flags & (MORE|DEBUG)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
     i64 total = 0;
     if(flags & DEBUG){
-        total += Fmt(sm, "Sn<", NULL);
+        total += Fmt(bf, "Sn<", NULL);
     }
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)sn, ToS_FlagLabels),
-        (Abstract *)I32_Wrapped(sm->m, sn->length), 
+        (Abstract *)Type_StateVec(bf->m, sn->type.of, sn->type.state),
+        (Abstract *)I32_Wrapped(bf->m, sn->length), 
         NULL
     };
-    total += Fmt(sm, "$/$", args);
+    total += Fmt(bf, "$/$", args);
     if(flags & DEBUG){
-        total += Stream_Bytes(sm, (byte *)">", 1);
+        total += Buff_Bytes(bf, (byte *)">", 1);
     }
     return total;
 }
 
-static i64 SnipSpan_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 SnipSpan_Print(Buff *bf, Abstract *a, cls type, word flags){
     Span *sns = (Span *)as(a, TYPE_SPAN);
     if((flags & (MORE|DEBUG)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
     i64 total = 0;
-    total += Fmt(sm, "Sns<", NULL);
+    total += Fmt(bf, "Sns<", NULL);
     Iter it;
     Iter_Init(&it, sns);
     while((Iter_Next(&it) & END) == 0){
-        total += ToS(sm, it.value, 0, flags|MORE);
+        total += ToS(bf, it.value, 0, flags|MORE);
         if((it.type.state & LAST) == 0){
-            total += Stream_Bytes(sm, (byte *)",", 1);
+            total += Buff_Bytes(bf, (byte *)",", 1);
         }
     }
-    total += Stream_Bytes(sm, (byte *)">", 1);
+    total += Buff_Bytes(bf, (byte *)">", 1);
     return total;
 }
 
-i64 Roebling_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Roebling_Print(Buff *bf, Abstract *a, cls type, word flags){
     Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
     if((flags & (MORE|DEBUG)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
     i64 total = 0;
     Abstract *args1[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)rbl, ToS_FlagLabels),
-        (Abstract *)I32_Wrapped(sm->m, rbl->parseIt.idx),
+        (Abstract *)Type_StateVec(bf->m, rbl->type.of, rbl->type.state),
+        (Abstract *)I32_Wrapped(bf->m, rbl->parseIt.idx),
         (Abstract *)rbl->parseIt.value,
         NULL
     };
-    total += Fmt(sm, "Rbl<$ idx:$/@ ", args1);
+    total += Fmt(bf, "Rbl<$ idx:$/@ ", args1);
     Abstract *args2[] = {
         (Abstract *)rbl->matchIt.value, 
         NULL
     };
-    total += Fmt(sm, " @", args2);
+    total += Fmt(bf, " @", args2);
     if(flags & DEBUG){
-        total += Stream_Bytes(sm, (byte *)" \n", 2);
+        total += Buff_Bytes(bf, (byte *)" \n", 2);
         Abstract *args3[] = {
             (Abstract *)rbl->parseIt.p,
             NULL
         };
-        total += Fmt(sm, "  parsers: @\n", args3);
+        total += Fmt(bf, "  parsers: @\n", args3);
         Abstract *args5[] = {
             (Abstract *)rbl->marks,
             NULL
         };
-        total += Fmt(sm, "  marks: @\n", args5);
+        total += Fmt(bf, "  marks: @\n", args5);
         Abstract *args4[] = {
             (Abstract *)rbl->matchIt.p,
             NULL
         };
-        word prev = sm->type.state;
-        total += Fmt(sm, "  matches: @\n", args4);
+        word prev = bf->type.state;
+        total += Fmt(bf, "  matches: @\n", args4);
         Abstract *args6[] = {
             (Abstract *)rbl->curs, 
             NULL
         };
-        total += Fmt(sm, "  curs:@\n", args6);
-        sm->type.state = prev;
+        total += Fmt(bf, "  curs:@\n", args6);
+        bf->type.state = prev;
     }
-    total += Fmt(sm, ">", NULL);
+    total += Fmt(bf, ">", NULL);
     return total;
 }
 
-i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
+i64 Match_Print(Buff *bf, Abstract *a, cls type, word flags){
     Match *mt = (Match *)as(a, TYPE_PATMATCH);
     if((flags & (MORE|DEBUG)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
     i64 total = 0;
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)mt, ToS_FlagLabels),
-        (Abstract *)I32_Wrapped(sm->m, mt->jump),
+        (Abstract *)Type_StateVec(bf->m, mt->type.of, mt->type.state),
+        (Abstract *)I32_Wrapped(bf->m, mt->jump),
         NULL
     };
-    total += Fmt(sm, "Mt<$ ", args);
+    total += Fmt(bf, "Mt<$ ", args);
     if(mt->type.state & MATCH_JUMP){
         Abstract *args[] = {
-            (Abstract *)I16_Wrapped(sm->m, mt->jump),
+            (Abstract *)I16_Wrapped(bf->m, mt->jump),
             NULL
         };
-        total += Fmt(sm, " $jump ", args);
+        total += Fmt(bf, " $jump ", args);
     }
 
     if(flags & (DEBUG|MORE)){
@@ -197,27 +197,27 @@ i64 Match_Print(Stream *sm, Abstract *a, cls type, word flags){
         while(pd <= mt->pat.endDef){
             char *_color = "E.";
             if(pd == mt->pat.curDef){
-                Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
-                total += Stream_Bytes(sm, color->bytes, color->length); 
+                Str *color = Str_FromAnsi(bf->m, &_color, _color+1);
+                total += Buff_Bytes(bf, color->bytes, color->length); 
             }
-            total += ToS(sm, (Abstract *)pd, TYPE_PATCHAR, MORE); 
+            total += ToS(bf, (Abstract *)pd, TYPE_PATCHAR, MORE); 
             _color = "e.";
             if(pd == mt->pat.curDef){
-                Str *color = Str_FromAnsi(sm->m, &_color, _color+1);
-                total += Stream_Bytes(sm, color->bytes, color->length); 
+                Str *color = Str_FromAnsi(bf->m, &_color, _color+1);
+                total += Buff_Bytes(bf, color->bytes, color->length); 
             }
             pd++;
         }
         if(flags & MORE){
-            total += Stream_Bytes(sm, (byte *)" ", 1); 
-            total += ToS(sm, (Abstract *)mt->backlog, TYPE_SNIPSPAN, MORE);
-            total += Stream_Bytes(sm, (byte *)" ", 1); 
-            total += ToS(sm, (Abstract *)&mt->snip, TYPE_SNIP, MORE);
+            total += Buff_Bytes(bf, (byte *)" ", 1); 
+            total += ToS(bf, (Abstract *)mt->backlog, TYPE_SNIPSPAN, MORE);
+            total += Buff_Bytes(bf, (byte *)" ", 1); 
+            total += ToS(bf, (Abstract *)&mt->snip, TYPE_SNIP, MORE);
         }
-        total += Fmt(sm, "^d", NULL);
+        total += Fmt(bf, "^d", NULL);
     }
 
-    total += Fmt(sm, ">", NULL);
+    total += Fmt(bf, ">", NULL);
     return total;
 }
 
@@ -283,18 +283,18 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
     return r;
 }
 
-static i64 Tokenize_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Tokenize_Print(Buff *bf, Abstract *a, cls type, word flags){
     Tokenize *tk = (Tokenize *)as(a, TYPE_TOKENIZE); 
     if((flags & (DEBUG|MORE)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }else{
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tk, ToS_FlagLabels),
-            (Abstract *)Type_ToStr(sm->m, tk->captureKey),
-            (Abstract *)Type_ToStr(sm->m, tk->typeOf),
+            (Abstract *)Type_StateVec(bf->m, tk->type.of, tk->type.state),
+            (Abstract *)Type_ToStr(bf->m, tk->captureKey),
+            (Abstract *)Type_ToStr(bf->m, tk->typeOf),
             NULL
         };
-        return Fmt(sm, "Tk<$ ^D.$^d./$>", args);
+        return Fmt(bf, "Tk<$ ^D.$^d./$>", args);
     }
 }
 

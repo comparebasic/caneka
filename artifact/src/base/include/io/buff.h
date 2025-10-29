@@ -30,6 +30,7 @@ typedef struct buff {
 
 status Buff_AddBytes(Buff *bf, byte *bytes, word length);
 Buff *Buff_Make(MemCh *m, word flags);
+Buff *Buff_From(MemCh *m, StrVec *v, word flags);
 
 status Buff_SetFd(Buff *bf, i32 fd);
 status Buff_UnsetFd(Buff *bf);

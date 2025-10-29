@@ -176,7 +176,7 @@ i64 MemBook_Print(Buff *bf, Abstract *a, cls type, word flags){
     return 0;
 }
 
-i64 Span_Print(struct stream *bf, Abstract *a, cls type, word flags){
+i64 Span_Print(Buff *bf, Abstract *a, cls type, word flags){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     i64 total = 0;
@@ -234,7 +234,7 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     if(flags & DEBUG){
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)it, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(bf->m, it->type.of, it->type.state),
             (Abstract *)I32_Wrapped(bf->m, it->idx),
             (Abstract *)I32_Wrapped(bf->m, it->p->max_idx),
             (Abstract *)I8_Wrapped(bf->m, it->p->dims),
@@ -279,7 +279,7 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
         Abstract *current = Iter_Current(it);
         Str *type = current != NULL ? Type_ToStr(bf->m, current->type.of) : NULL;
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(bf->m, NULL, (Abstract *)it, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(bf->m, it->type.of, it->type.state),
             (Abstract *)I32_Wrapped(bf->m, it->idx),
             (Abstract *)I32_Wrapped(bf->m, it->p->nvalues),
             (Abstract *)I32_Wrapped(bf->m, it->p->max_idx),

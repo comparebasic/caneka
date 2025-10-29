@@ -27,7 +27,7 @@ static status renderStatus(MemCh *m, Abstract *a){
     sg = (Single *)as(CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
     sg->val.value = MemChapterTotal();
-     
+
     return SUCCESS;
 }
 
@@ -302,131 +302,6 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     return r;
 }
 
-
-static status buildLicence(BuildCtx *ctx, Str *libDir, Str *lib, char *licSrc, int idx){
-    status r = READY;
-    MemCh *m = ctx->m;
-
-    StrVec *dir = StrVec_Make(m);
-    StrVec_Add(dir, Str_Clone(m, libDir));
-    IoUtil_Annotate(m, dir);
-    IoUtil_AddSlash(dir);
-
-    ctx->fields.current.dest = StrVec_Str(m, dir);
-    Dir_CheckCreate(m, ctx->fields.current.dest);
-    
-    Abstract *args1[] = {
-        (Abstract *)Str_CstrRef(m, ctx->libtarget),
-        (Abstract *)I64_Wrapped(m, idx),
-        NULL,
-    };
-    StrVec *licName = Fmt_ToStrVec(m, "$_licence_$", args1);
-    StrVec *versionName = Fmt_ToStrVec(m, "$_version_$", args1);
-
-    StrVec *dest = (StrVec *)StrVec_Clone(m, (Abstract *)dir);
-    StrVec_AddVec(dest, licName);
-    StrVec_Add(dest, Str_CstrRef(m, ".o"));
-    IoUtil_Annotate(m, dest);
-
-    Str_Reset(ctx->fields.current.action);
-    Str_AddCstr(ctx->fields.current.action, "build licence(s) obj");
-    CliStatus_Print(OutStream, ctx->cli);
-
-    ProcDets pd;
-    ProcDets_Init(&pd);
-    pd.type.state |= (PROCDETS_IN_PIPE|PROCDETS_ASYNC);
-
-    Span *cmd = Span_Make(ctx->m);
-    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, ctx->tools.cc));
-    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-x"));
-    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "c"));
-    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-c"));
-    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-"));
-    Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-o"));
-    Span_Add(cmd, (Abstract *)StrVec_Str(m, dest));
-
-    Str *licPath = IoUtil_GetCwdPath(m, Str_CstrRef(m, licSrc));
-    int fd = open(Str_Cstr(m, licPath), O_RDONLY, 0);
-    byte b[FILE_READ_LENGTH];
-    if(fd <= 0){
-        r |= ERROR;
-        return r;
-    }
-
-    r |= SubCall(ctx->m, cmd, &pd);
-    if(r & ERROR){
-        return r; 
-    }
-
-    Stream *sm = Stream_MakeToFd(m, pd.inFd, NULL, ZERO);
-    Abstract *args2[] = {
-        (Abstract *)licName,
-        NULL,
-    };
-    Fmt(sm, "#include <stdio.h>\nchar *$ = \"", args2);
-
-    i64 max = FILE_SLURP_MAX;
-    while(max > 0){
-        ssize_t l = read(fd, b, FILE_READ_LENGTH);
-        if(l <= 0){
-            if(l < 0){
-                return ERROR;
-            }
-            break;
-        }
-        max -= l;
-        if(max < 0){
-            r |= ERROR;
-            return r;
-        }
-        char *ptr = (char *)b;
-        char *last = ptr+l-1;
-        while(ptr <= last){
-            if(*ptr == '\n'){
-                Stream_Bytes(sm, (byte *)"\\n\\", 3);
-            }else if(*ptr == '\r' || *ptr == '"'){
-                Stream_Bytes(sm, (byte *)"\\", 1);
-            }
-            Stream_Bytes(sm, (byte *)ptr, 1);
-            ptr++;
-        }
-    }
-    close(fd);
-
-    Abstract *args3[] = {
-        (Abstract *)versionName,
-        (Abstract *)Str_CstrRef(m, ctx->version),
-        NULL,
-    };
-    Fmt(sm, "\";\nchar *$ = \"$\";\n", args3);
-    close(pd.inFd);
-
-    status ret;
-    int i = 0;
-    while(((ret = SubStatus(&pd)) & (SUCCESS|ERROR)) == 0){
-        Time_Delay(500, NULL);
-    }
-    if(ret & ERROR){
-        r |= ERROR;
-        return r;
-    }
-
-    Span_ReInit(cmd);
-    Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.ar));
-    Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-rc"));
-    Span_Add(cmd, (Abstract *)lib);
-    Span_Add(cmd, (Abstract *)StrVec_Str(m, dest));
-    ProcDets_Init(&pd);
-    status re = SubProcess(m, cmd, &pd);
-    if(re & ERROR){
-        DebugStack_SetRef(cmd, cmd->type.of);
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding licence object to lib", NULL);
-        return ERROR;
-    }
-
-    return r;
-}
-
 static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *dir){
     DebugStack_Push(NULL, 0);
     status r = READY;
@@ -558,25 +433,6 @@ static status build(BuildCtx *ctx){
             Str_Trunc(genSrc, genSrcL);
             Str_Trunc(genDest, genDestL);
             config++;
-        }
-    }
-
-    if(ctx->args.licenceFiles != NULL){
-        ctx->fields.steps.modSrcCount->val.i = 0;
-        char **lic =  ctx->args.licenceFiles;
-        while(*lic != NULL){
-            ctx->fields.steps.modSrcTotal->val.i = 0;
-            lic++;
-        }
-        lic =  ctx->args.licenceFiles;
-        int i = 0;
-        while(*lic != NULL){
-            r |= buildLicence(ctx, libDir, lib, *lic, i++);
-            if(r & ERROR){
-                return r;
-            }
-            ctx->fields.steps.modSrcCount->val.i++;
-            lic++;
         }
     }
 

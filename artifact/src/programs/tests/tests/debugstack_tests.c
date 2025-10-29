@@ -5,19 +5,20 @@ status DebugStack_Tests(MemCh *gm){
     status r = READY;
 
     MemCh *m = MemCh_Make();
-    Stream *sm = Stream_MakeStrVec(m);
-    Stream *smAfter = Stream_MakeStrVec(m);
+
+    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bfAfter = Buff_Make(m, BUFF_STRVEC);
 
     DebugStack_Push(NULL, 0);
-    DebugStack_Print(sm, 0);
+    DebugStack_Print(bf, 0);
     DebugStack_Pop();
-    DebugStack_Print(smAfter, 0);
+    DebugStack_Print(bfAfter, 0);
 
-    i64 total = sm->dest.curs->v->total;
-    i64 totalAfter = smAfter->dest.curs->v->total;
+    i64 total = bf->v->total;
+    i64 totalAfter = bfAfter->v->total;
     Abstract *args[] = {
-        (Abstract *)sm->dest.curs->v,
-        (Abstract *)smAfter->dest.curs->v,
+        (Abstract *)bf->v,
+        (Abstract *)bfAfter->v,
         NULL
     };
     r |= Test(total > totalAfter, 

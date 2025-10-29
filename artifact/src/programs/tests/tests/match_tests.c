@@ -33,7 +33,7 @@ status Match_Tests(MemCh *gm){
         Match_Feed(m, mt, s->bytes[i]);
     }
     Abstract *args2[] = {
-        (Abstract *)StreamTask_Make(m, OutStream, (Abstract *)mt, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(m, mt->type.of, mt->type.state),
         NULL
     };
     r |= Test(mt->type.state == SUCCESS, "Matching string has successful state found @", args2); 

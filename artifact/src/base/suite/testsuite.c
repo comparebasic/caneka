@@ -29,13 +29,13 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *a
     }
     if(!condition){
         Fmt(OutStream, fmtError, args);
-        Stream_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_Bytes(OutStream, (byte *)"\n", 1);
     }else{
         /*
-        Stream_Bytes(OutStream, (byte *)"\x1b[2K\r", 5);
+        Buff_Bytes(OutStream, (byte *)"\x1b[2K\r", 5);
         */
         Fmt(OutStream, fmtSuccess, args);
-        Stream_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_Bytes(OutStream, (byte *)"\n", 1);
     }
     Out("^0", NULL);
     return condition ? SUCCESS : ERROR;
@@ -49,12 +49,12 @@ status Test(boolean condition, char *fmt, Abstract *args[]){
     }
     Fmt(OutStream, fmt, args);
     if(!condition){
-        Stream_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_Bytes(OutStream, (byte *)"\n", 1);
     }else{
         /*
-        Stream_Bytes(OutStream, (byte *)"\x1b[2K\r", 5);
+        Buff_Bytes(OutStream, (byte *)"\x1b[2K\r", 5);
         */
-        Stream_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_Bytes(OutStream, (byte *)"\n", 1);
     }
     Out("^0", NULL);
     return condition ? SUCCESS : ERROR;
@@ -103,11 +103,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
         DebugStack_SetRef(set->name, TYPE_CSTR);
         if(set->func != NULL){
             m->level++;
-            _debugM->level++;
             r = set->func(m);
-            MemCh_Free(m);
-            MemCh_Free(_debugM);
-            _debugM->level--;
             m->level--;
 
             word stackLevel = m->level-baseStackLevel;

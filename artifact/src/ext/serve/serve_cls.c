@@ -17,47 +17,47 @@ static status HttpInit(MemCh *m){
     }
     return NOOP; 
 }
-static i64 HttpCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 HttpCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
     HttpCtx *ctx = (HttpCtx*)as(a, TYPE_HTTP_CTX);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         (Abstract *)Lookup_Get(HttpMethods, ctx->method),
         (Abstract *)ctx->path,
         (Abstract *)ctx->headers,
         (Abstract *)ctx->body,
         NULL,
     };
-    return Fmt(sm, "Http<$ $ $ headers:@ body:@>", args);
+    return Fmt(bf, "Http<$ $ $ headers:@ body:@>", args);
 }
 
-static i64 ProtoCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 ProtoCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
     ProtoCtx *ctx = (ProtoCtx*)as(a, TYPE_PROTO_CTX);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
-        (Abstract *)Util_Wrapped(sm->m, ctx->u),
+        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
+        (Abstract *)Util_Wrapped(bf->m, ctx->u),
         (Abstract *)ctx->in,
         (Abstract *)ctx->out,
         (Abstract *)ctx->data,
         NULL,
     };
-    return Fmt(sm, "Proto<$ u:$ in:@ out:@ data:@>", args);
+    return Fmt(bf, "Proto<$ u:$ in:@ out:@ data:@>", args);
 }
 
-static i64 TcpCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 TcpCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
     TcpCtx *ctx = (TcpCtx*)as(a, TYPE_TCP_CTX);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         (Abstract *)ctx->path,
-        (Abstract *)I32_Wrapped(sm->m, ctx->port),
+        (Abstract *)I32_Wrapped(bf->m, ctx->port),
         (Abstract *)ctx->inet4,
         (Abstract *)ctx->inet6,
-        (Abstract *)Util_Wrapped(sm->m, (util)ctx->metrics.start),
-        (Abstract *)Util_Wrapped(sm->m, (util)ctx->metrics.open),
-        (Abstract *)Util_Wrapped(sm->m, (util)ctx->metrics.error),
-        (Abstract *)Util_Wrapped(sm->m, (util)ctx->metrics.served),
+        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.start),
+        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.open),
+        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.error),
+        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.served),
         NULL,
     };
-    return Fmt(sm, "Tcp<$ $ ^D.$^d.port ^D.$^d.inet4 ^D.$^d.inet6 $start $open $error $served>", args);
+    return Fmt(bf, "Tcp<$ $ ^D.$^d.port ^D.$^d.inet4 ^D.$^d.inet6 $start $open $error $served>", args);
 }
 
 status Serve_ToSInit(MemCh *m, Lookup *lk){

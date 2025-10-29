@@ -1,50 +1,50 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 TemplItem_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 TemplItem_Print(Buff *bf, Abstract *a, cls type, word flags){
     Abstract *args[] = {
-        (Abstract *)Type_ToStr(sm->m, type),
+        (Abstract *)Type_ToStr(bf->m, type),
         (Abstract *)a,
         NULL
     };
-    return Fmt(sm, "TemplItem:$<@>", args);
+    return Fmt(bf, "TemplItem:$<@>", args);
 }
 
-static i64 TemplJump_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 TemplJump_Print(Buff *bf, Abstract *a, cls type, word flags){
     status r = READY;
 
     TemplJump *jump = (TemplJump *)as(a, TYPE_TEMPL_JUMP);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)jump, ToS_FlagLabels),
-        (Abstract *)I32_Wrapped(sm->m, jump->idx),
-        (Abstract *)I32_Wrapped(sm->m, jump->destIdx),
-        (Abstract *)I32_Wrapped(sm->m, jump->skipIdx),
-        (Abstract *)I32_Wrapped(sm->m, jump->tempIdx),
+        (Abstract *)Type_StateVec(bf->m, jump->type.of, jump->type.state),
+        (Abstract *)I32_Wrapped(bf->m, jump->idx),
+        (Abstract *)I32_Wrapped(bf->m, jump->destIdx),
+        (Abstract *)I32_Wrapped(bf->m, jump->skipIdx),
+        (Abstract *)I32_Wrapped(bf->m, jump->tempIdx),
         (Abstract *)jump->fch,
         NULL
     };
-    return Fmt(sm, "TemplJump:<$ @/dest^D.@^d./skip^D@^d./temp^D@^d. &>", args);
+    return Fmt(bf, "TemplJump:<$ @/dest^D.@^d./skip^D@^d./temp^D@^d. &>", args);
 }
 
-static i64 Templ_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Templ_Print(Buff *bf, Abstract *a, cls type, word flags){
     status r = READY;
 
     Templ *templ = (Templ *)as(a, TYPE_TEMPL);
     if(flags & DEBUG){
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)templ, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(bf->m, templ->type.of, templ->type.state),
             (Abstract *)&templ->content,
             (Abstract *)&templ->data,
             NULL
         };
-        return Fmt(sm, "Templ<$\n  ^E.content^e.:@\n  ^E.data^e.:@>", args);
+        return Fmt(bf, "Templ<$\n  ^E.content^e.:@\n  ^E.data^e.:@>", args);
     }else{
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)templ, ToS_FlagLabels),
-            (Abstract *)I32_Wrapped(sm->m, templ->content.idx),
+            (Abstract *)Type_StateVec(bf->m, templ->type.of, templ->type.state),
+            (Abstract *)I32_Wrapped(bf->m, templ->content.idx),
             NULL
         };
-        return Fmt(sm, "Templ<$ content^D.#$^d.>", args);
+        return Fmt(bf, "Templ<$ content^D.#$^d.>", args);
     }
 }
 

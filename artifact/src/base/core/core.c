@@ -15,11 +15,13 @@ status Core_Init(MemCh *m){
         Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
         Buff_SetFd(bf, 1);
         r |= SUCCESS;
+        OutStream = bf;
     }
     if(ErrStream == NULL){
         Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-        Buff_SetFd(bf, BUFF_UNBUFFERED);
+        Buff_SetFd(bf, 2);
         r |= SUCCESS;
+        ErrStream = bf;
     }
     r |= Error_Init(m);
     return NOOP;

@@ -64,7 +64,7 @@ static BuildSubdir typesobj = { "types", {
 }};
 
 static BuildSubdir docobj = { "doc", {
-    "licences.c",
+    "licence.c",
     NULL
 }};
 

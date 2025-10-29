@@ -5,165 +5,165 @@ static Str **nodeLabels = NULL;
 static Str **messLabels = NULL;
 static Str **stepLabels = NULL;
 
-static i64 indentStream(Stream *sm, i32 indent){
+static i64 indentStream(Buff *bf, i32 indent){
     i64 total = 0;
     while(--indent >= 0){
-        total += Stream_Bytes(sm, (byte *)"  ", 2);
+        total += Buff_Bytes(bf, (byte *)"  ", 2);
     }
     return total;
 }
 
-static i64 CompResult_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 CompResult_Print(Buff *bf, Abstract *a, cls type, word flags){
     CompResult *cr = (CompResult*)as(a, TYPE_COMPRESULT);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)cr, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, cr->type.of, cr->type.state),
         cr->a,
         cr->b,
         NULL,
     };
     if(flags & DEBUG){
-        return Fmt(sm, "(^D$^d.\n    ^D.A^d.&,\n    ^D.B^d.&)", args);
+        return Fmt(bf, "(^D$^d.\n    ^D.A^d.&,\n    ^D.B^d.&)", args);
     }else{
-        return Fmt(sm, "(^D$^d.\n    $,\n    $)", args);
+        return Fmt(bf, "(^D$^d.\n    $,\n    $)", args);
     }
 }
 
-static i64 QueueCrit_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 QueueCrit_Print(Buff *bf, Abstract *a, cls type, word flags){
    i64 total = 0;
    QueueCrit *crit = (QueueCrit *)as(a, TYPE_QUEUE_CRIT);
    Abstract *args[] = {
         NULL
    };
-   total += Fmt(sm, "QueueCrit<>", args);
+   total += Fmt(bf, "QueueCrit<>", args);
    return total;
 }
 
-static i64 Queue_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Queue_Print(Buff *bf, Abstract *a, cls type, word flags){
    i64 total = 0;
    Queue *q = (Queue *)as(a, TYPE_QUEUE);
    Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)q, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, q->type.of, q->type.state),
         (Abstract *)&q->itemsIt,
         (Abstract *)q->handlers,
         NULL
    };
-   total += Fmt(sm, "Queue<$ @ criteria:@>", args);
+   total += Fmt(bf, "Queue<$ @ criteria:@>", args);
    return total;
 }
 
-static i64 Comp_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Comp_Print(Buff *bf, Abstract *a, cls type, word flags){
     Comp *comp = (Comp*)as(a, TYPE_COMP);
     i64 total = 0;
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)comp, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, comp->type.of, comp->type.state),
         (Abstract *)&comp->it,
         NULL
     };
-    total += Fmt(sm, "Comp<$/It(@)\n", args);
+    total += Fmt(bf, "Comp<$/It(@)\n", args);
     Iter it;
     Iter_Init(&it, comp->it.p);
     while((Iter_Prev(&it) & END) == 0){
-        total += Stream_Bytes(sm, (byte *)"  ", 2);
-        total += ToS(sm, it.value, 0, DEBUG|flags);
-        total += Stream_Bytes(sm, (byte *)"\n", 1);
+        total += Buff_Bytes(bf, (byte *)"  ", 2);
+        total += ToS(bf, it.value, 0, DEBUG|flags);
+        total += Buff_Bytes(bf, (byte *)"\n", 1);
     }
-    total += Stream_Bytes(sm, (byte *)">", 1);
+    total += Buff_Bytes(bf, (byte *)">", 1);
     return total; 
 }
 
-static i64 Node_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Node_Print(Buff *bf, Abstract *a, cls type, word flags){
     Node *nd = (Node*)as(a, TYPE_NODE);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)nd, ToS_FlagLabels),
-        (Abstract *)Type_ToStr(sm->m, nd->typeOfChild),
-        (Abstract *)Type_ToStr(sm->m, nd->captureKey),
+        (Abstract *)Type_StateVec(bf->m, nd->type.of, nd->type.state),
+        (Abstract *)Type_ToStr(bf->m, nd->typeOfChild),
+        (Abstract *)Type_ToStr(bf->m, nd->captureKey),
         (Abstract *)(nd->parent != NULL ?
-            Type_ToStr(sm->m, nd->parent->captureKey) : NULL),
+            Type_ToStr(bf->m, nd->parent->captureKey) : NULL),
         (Abstract *)nd->atts,
-        (Abstract *)Type_ToStr(sm->m,
+        (Abstract *)Type_ToStr(bf->m,
             (nd->value != NULL ? nd->value->type.of : _TYPE_ZERO)),
         (Abstract *)nd->value,
-        (Abstract *)Type_ToStr(sm->m,
+        (Abstract *)Type_ToStr(bf->m,
             (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO)),
         NULL
     };
     if(flags & DEBUG){
-        return Fmt(sm, "N<$/$ captureKey($) parent(@) atts:& valueTypeOf:$/@ childTypeOf:$>", args);
+        return Fmt(bf, "N<$/$ captureKey($) parent(@) atts:& valueTypeOf:$/@ childTypeOf:$>", args);
     }else{
-        return Fmt(sm, "N<$/$ captureKey($) parent(@) atts:@ value:$/@ childTypeOf:$>", args);
+        return Fmt(bf, "N<$/$ captureKey($) parent(@) atts:@ value:$/@ childTypeOf:$>", args);
     }
 }
 
-static i64 Relation_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Relation_Print(Buff *bf, Abstract *a, cls type, word flags){
     status r = READY;
     i64 total = 0;
     Relation *rel = (Relation*)as(a, TYPE_RELATION);
     Abstract *args[] = {
-        (Abstract *)I16_Wrapped(sm->m, rel->stride),
-        (Abstract *)I32_Wrapped(sm->m, Relation_RowCount(rel)),
+        (Abstract *)I16_Wrapped(bf->m, rel->stride),
+        (Abstract *)I32_Wrapped(bf->m, Relation_RowCount(rel)),
         (Abstract *)(rel->headers != NULL ?
-            Ptr_Wrapped(sm->m, rel->headers, TYPE_ARRAY): NULL),
+            Ptr_Wrapped(bf->m, rel->headers, TYPE_ARRAY): NULL),
         NULL
     };
-    total +=  Fmt(sm, "Rel<$x$ @ [", args);
+    total +=  Fmt(bf, "Rel<$x$ @ [", args);
     if(rel->it.p->max_idx >= 0){
-        total += Stream_Bytes(sm, (byte *)"\n", 1);
+        total += Buff_Bytes(bf, (byte *)"\n", 1);
     }
 
     while((Relation_Next(rel) & END) == 0){
         if(rel->type.state & RELATION_ROW_START){
-            total += Stream_Bytes(sm, (byte *)"  ", 2);
+            total += Buff_Bytes(bf, (byte *)"  ", 2);
         }
-        total += ToS(sm, rel->it.value, 0, flags);
+        total += ToS(bf, rel->it.value, 0, flags);
         if(rel->type.state & RELATION_ROW_END){
-            total += Stream_Bytes(sm, (byte *)",\n", 2);
+            total += Buff_Bytes(bf, (byte *)",\n", 2);
         }else{
-            total += Stream_Bytes(sm, (byte *)",", 1);
+            total += Buff_Bytes(bf, (byte *)",", 1);
         }
     }
 
-    total += Stream_Bytes(sm, (byte *)"]>", 2);
+    total += Buff_Bytes(bf, (byte *)"]>", 2);
     return total;
 }
 
-static i64 MessClimber_PrintItems(Stream *sm, MessClimber *climber, word flags, i64 total){
+static i64 MessClimber_PrintItems(Buff *bf, MessClimber *climber, word flags, i64 total){
     i32 nested = ++climber->nested;
     if(climber->current != NULL){
         Abstract *current = climber->current;
-        total += Stream_Bytes(sm, (byte *)"\n", 1);
+        total += Buff_Bytes(bf, (byte *)"\n", 1);
         while(nested--){
-            total += Stream_Bytes(sm, (byte *)"  ", 2);
+            total += Buff_Bytes(bf, (byte *)"  ", 2);
         }
         if(current->type.of == TYPE_NODE){
             Node *nd = (Node *)climber->current;
-            total += ToS(sm, (Abstract *)nd, 0, flags);
+            total += ToS(bf, (Abstract *)nd, 0, flags);
             if(nd->typeOfChild == TYPE_SPAN){
-                total += Stream_Bytes(sm, (byte *)"[", 1);
+                total += Buff_Bytes(bf, (byte *)"[", 1);
                 Iter it;
                 Iter_Init(&it, (Span *)nd->child);
                 while((Iter_Next(&it) & END) == 0){
                     climber->current = it.value;
-                    total += MessClimber_PrintItems(sm, climber, flags, total);
+                    total += MessClimber_PrintItems(bf, climber, flags, total);
                 }
-                total += Stream_Bytes(sm, (byte *)"]", 1);
+                total += Buff_Bytes(bf, (byte *)"]", 1);
             }else if(nd->typeOfChild == TYPE_NODE){
                 climber->current = nd->child;
-                total += Stream_Bytes(sm, (byte *)"<", 2);
-                total += MessClimber_PrintItems(sm, climber, flags, total);
-                total += Stream_Bytes(sm, (byte *)">", 1);
+                total += Buff_Bytes(bf, (byte *)"<", 2);
+                total += MessClimber_PrintItems(bf, climber, flags, total);
+                total += Buff_Bytes(bf, (byte *)">", 1);
             }else{
                 climber->current = nd->child;
-                total += MessClimber_PrintItems(sm, climber, flags, total);
+                total += MessClimber_PrintItems(bf, climber, flags, total);
             }
         }else if(current->type.of == TYPE_SPAN){
             Iter it;
             Iter_Init(&it, (Span *)current);
             while((Iter_Next(&it) & END) == 0){
                 climber->current = it.value;
-                total += MessClimber_PrintItems(sm, climber, flags, total);
+                total += MessClimber_PrintItems(bf, climber, flags, total);
             }
         }else{
-            total += ToS(sm, current, 0, MORE|DEBUG);
+            total += ToS(bf, current, 0, MORE|DEBUG);
         }
         climber->current = current;
     }
@@ -172,26 +172,26 @@ static i64 MessClimber_PrintItems(Stream *sm, MessClimber *climber, word flags, 
     return total;
 }
 
-static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Mess_Print(Buff *bf, Abstract *a, cls type, word flags){
     Mess *ms = (Mess *)as(a, TYPE_MESS);
     if((flags & (DEBUG|MORE)) == 0){
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }else{
         i64 total = 0;
         Abstract *args[] = {
-            (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ms, ToS_FlagLabels),
+            (Abstract *)Type_StateVec(bf->m, ms->type.of, ms->type.state),
             NULL
         };
-        total += Fmt(sm, "Mess<$", args);
+        total += Fmt(bf, "Mess<$", args);
         if(flags & DEBUG){
             Abstract *args[] = {
                 (Abstract *)ms->current,
                 (Abstract *)ms->currentValue,
                 NULL
             };
-            total += Fmt(sm, " current:$ value:@ [", args);
+            total += Fmt(bf, " current:$ value:@ [", args);
         }else{
-            total += Stream_Bytes(sm, (byte *)" [", 2);
+            total += Buff_Bytes(bf, (byte *)" [", 2);
         }
         MessClimber climber = {
             .type = {TYPE_MESS_CLIMBER, 0},
@@ -199,61 +199,61 @@ static i64 Mess_Print(Stream *sm, Abstract *a, cls type, word flags){
             .mess = ms,
             .current = (Abstract *)ms->root,
         };
-        total += MessClimber_PrintItems(sm, &climber, flags|DEBUG, 0);
-        total += Stream_Bytes(sm, (byte *)"\n]>", 3);
+        total += MessClimber_PrintItems(bf, &climber, flags|DEBUG, 0);
+        total += Buff_Bytes(bf, (byte *)"\n]>", 3);
         return total;
     }
 }
 
-static i64 Step_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Step_Print(Buff *bf, Abstract *a, cls type, word flags){
     Step *st = (Step *)as(a, TYPE_STEP);
     Abstract *args[5];
-    args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)st, ToS_FlagLabels);
-    args[1] = (Abstract *)Util_Wrapped(sm->m, (util)st->func);
+    args[0] = (Abstract *)Type_StateVec(bf->m, st->type.of, st->type.state);
+    args[1] = (Abstract *)Util_Wrapped(bf->m, (util)st->func);
     args[4] = NULL;
     if(flags & DEBUG){
         args[2] = st->arg;
         args[3] = st->source;
-        return Fmt(sm, "Step<$ ^D.$^d.func arg:@ source:@>", args);
+        return Fmt(bf, "Step<$ ^D.$^d.func arg:@ source:@>", args);
     }else{
-        args[2] = (Abstract *)Type_ToStr(sm->m,
+        args[2] = (Abstract *)Type_ToStr(bf->m,
             st->arg != NULL ? st->arg->type.of : ZERO);
-        args[3] = (Abstract *)Type_ToStr(sm->m,
+        args[3] = (Abstract *)Type_ToStr(bf->m,
             st->source != NULL ? st->source->type.of : ZERO);
-        return Fmt(sm, "Step<$ ^D.$^d.func arg:$ source:$>", args);
+        return Fmt(bf, "Step<$ ^D.$^d.func arg:$ source:$>", args);
     }
 }
 
-static i64 Task_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Task_Print(Buff *bf, Abstract *a, cls type, word flags){
     Task *tsk = (Task *)as(a, TYPE_TASK);
     Abstract *args[6];
-    args[0] = (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tsk, ToS_FlagLabels);
-    args[1] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.idx);
-    args[2] = (Abstract *)I32_Wrapped(sm->m, tsk->chainIt.p->max_idx);
+    args[0] = (Abstract *)Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
+    args[1] = (Abstract *)I32_Wrapped(bf->m, tsk->chainIt.idx);
+    args[2] = (Abstract *)I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
     args[3] = (Abstract *)Iter_Current(&tsk->chainIt);
     args[5] = NULL;
     if(flags & DEBUG){
         args[4] = tsk->data;
-        return Fmt(sm, "Task<$ $ of $ \\@& data:@>", args);
+        return Fmt(bf, "Task<$ $ of $ \\@& data:@>", args);
     }else{
         args[1] = tsk->data;
         args[2] = NULL;
-        return Fmt(sm, "Task<$ @>", args);
+        return Fmt(bf, "Task<$ @>", args);
     }
 }
 
-static i64 Frame_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Frame_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     Frame *fm = (Frame *)as(a, TYPE_FRAME);
     Abstract *args[] = {
-        (Abstract *)I32_Wrapped(sm->m, fm->originIdx),
+        (Abstract *)I32_Wrapped(bf->m, fm->originIdx),
         (Abstract *)fm->originKey,
-        (Abstract *)(fm->value != NULL ? Type_ToStr(sm->m, fm->value->type.of): NULL),
-        (Abstract *)I32_Wrapped(sm->m, fm->it.idx),
+        (Abstract *)(fm->value != NULL ? Type_ToStr(bf->m, fm->value->type.of): NULL),
+        (Abstract *)I32_Wrapped(bf->m, fm->it.idx),
         (Abstract *)Iter_Current(&fm->it),
         NULL,
     };
-    total += Fmt(sm, "Frame<from:@/@ @[@]>", args);
+    total += Fmt(bf, "Frame<from:@/@ @[@]>", args);
     return total;
 }
 

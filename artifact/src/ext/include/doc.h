@@ -1,1 +1,1 @@
-#include "doc/licences.h"
+#include "doc/licence.h"

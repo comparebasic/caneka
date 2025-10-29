@@ -150,6 +150,32 @@ i64 Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
     return total;
 }
 
+
+i64 FlagStr(word flag, char *dest, char *map){
+    i64 p = 0;
+    i32 i = 0;
+    if(flag == 0){
+        dest[p++] = map[0];
+    }else{
+        for(i32 i = 0; i < 16; i++){ 
+           if((flag & (1 << i)) != 0){
+                dest[p++] = map[i+1];
+           }
+        }
+    }
+    dest[p] = '\0';
+    return p;
+}
+i64 Str_AddFlags(Str *s, word flags, char *map){
+    if(s->alloc - (s->length+FLAG_DEBUG_MAX) < 0){
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
+        return 0;
+    }
+    i64 total = FlagStr(flags, (char *)s->bytes+s->length, map);
+    s->length += (word)total;
+    return total;
+}
+
 char *ToStreamChars(word flags){
     if(flags & DEBUG & MORE){
         return "debug-verbose";

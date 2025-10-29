@@ -4,32 +4,32 @@
 Str **binSegCtxLabels = NULL;
 Str **fileLabels = NULL;
 
-static i64 BinSegHeader_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 BinSegHeader_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     BinSegHeader *hdr = (BinSegHeader *)a;
     Abstract *args[] = {
-        (Abstract *)I8_Wrapped(sm->m, hdr->id),
+        (Abstract *)I8_Wrapped(bf->m, hdr->id),
         (Abstract *)BinSegCtx_KindName(hdr->kind),
-        (Abstract *)I32_Wrapped(sm->m, hdr->total),
+        (Abstract *)I32_Wrapped(bf->m, hdr->total),
         NULL
     };
 
-    total += Fmt(sm, "BinSegHdr#${$ $total}", args);
+    total += Fmt(bf, "BinSegHdr#${$ $total}", args);
     return total;
 }
 
-static i64 BinSegCtx_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 BinSegCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     BinSegCtx *ctx = (BinSegCtx *)as(a, TYPE_BINSEG_CTX);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)ctx, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         (Abstract *)ctx->cortext,
         (Abstract *)ctx->bf,
         (Abstract *)ctx->tbl,
         NULL
     };
 
-    total += Fmt(sm, "BinSegCtx<$ @ @ tbl:@>", args);
+    total += Fmt(bf, "BinSegCtx<$ @ @ tbl:@>", args);
     return total;
 }
 

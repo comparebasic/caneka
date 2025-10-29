@@ -1,6 +1,61 @@
 #include <external.h>
 #include <caneka.h>
 
+static status MemCh_freeLevel(MemCh *m, i16 level){
+    status r = READY;
+    level = max(level, 0);
+    if(m->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->nvalues),
+            (Abstract *)I16_Wrapped(ErrStream->m, level),
+            NULL
+        };
+        Out("^p.MemCh_FreeTemp ^D.$^d.nvalues ^D.$^d.level^0\n", args);
+    }
+
+    m->it.type.state |= FLAG_ITER_REVERSE;
+    while((Iter_Next(&m->it) & END) == 0){
+        if(m->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(ErrStream->m, m->it.idx),
+                (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->max_idx),
+                (Abstract *)I16_Wrapped(ErrStream->m, level),
+                NULL
+            };
+            Out("^p.    MemCh_FreeTemp \\@$of$/^D.$^d.level\n", args);
+        }
+        if(m->it.idx == 0){
+            continue;
+        }
+        MemPage *pg = (MemPage *)m->it.value;
+        if(pg != NULL && (level == 0 || pg->level >= level)){
+            if(m->it.idx > 0){
+                r |= Span_Remove(m->it.p, m->it.idx);
+            }
+            r |= MemBook_FreePage(m, pg);
+        }
+        if(m->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)I32_Wrapped(ErrStream->m, m->it.idx),
+            (Abstract *)I16_Wrapped(ErrStream->m, level),
+                NULL
+            };
+            Out("^p.    done -MemCh_FreeTemp \\@$/^D.$^d.level\n", args);
+        }
+    }
+
+    MemBook_WipePages(m);
+
+    if(r == READY){
+        r |= NOOP;
+    }
+    Iter_Reset(&m->it);
+
+    return r;
+}
+
+
+
 i64 MemCh_MemCount(MemCh *m, i16 level){
     i64 total = 0;
     while((Iter_Next(&m->it) & END) == 0){
@@ -154,61 +209,15 @@ status MemCh_WipeTemp(MemCh *m, i16 level){
     return r;
 }
 
-status MemCh_FreeTemp(MemCh *m, i16 level){
-    status r = READY;
-    level = max(level, 0);
-    if(m->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->nvalues),
-            (Abstract *)I16_Wrapped(ErrStream->m, level),
-            NULL
-        };
-        Out("^p.MemCh_FreeTemp ^D.$^d.nvalues ^D.$^d.level^0\n", args);
+status MemCh_FreeTemp(MemCh *m){
+    if(m->level > 0){
+        return MemCh_freeLevel(m, m->level);
     }
-
-    m->it.type.state |= FLAG_ITER_REVERSE;
-    while((Iter_Next(&m->it) & END) == 0){
-        if(m->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(ErrStream->m, m->it.idx),
-                (Abstract *)I32_Wrapped(ErrStream->m, m->it.p->max_idx),
-                (Abstract *)I16_Wrapped(ErrStream->m, level),
-                NULL
-            };
-            Out("^p.    MemCh_FreeTemp \\@$of$/^D.$^d.level\n", args);
-        }
-        if(m->it.idx == 0){
-            continue;
-        }
-        MemPage *pg = (MemPage *)m->it.value;
-        if(pg != NULL && (level == 0 || pg->level >= level)){
-            if(m->it.idx > 0){
-                r |= Span_Remove(m->it.p, m->it.idx);
-            }
-            r |= MemBook_FreePage(m, pg);
-        }
-        if(m->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(ErrStream->m, m->it.idx),
-            (Abstract *)I16_Wrapped(ErrStream->m, level),
-                NULL
-            };
-            Out("^p.    done -MemCh_FreeTemp \\@$/^D.$^d.level\n", args);
-        }
-    }
-
-    MemBook_WipePages(m);
-
-    if(r == READY){
-        r |= NOOP;
-    }
-    Iter_Reset(&m->it);
-
-    return r;
+    return NOOP;
 }
 
 status MemCh_Free(MemCh *m){
-    status r = MemCh_FreeTemp(m, m->level);
+    status r = MemCh_freeLevel(m, m->level);
     if(m->level == 0){
         r |= MemBook_FreePage(m, m->first);
     }

@@ -10,4 +10,4 @@ typedef struct transp_ctx {
     TranspFunc func;
 } TranspCtx;
 
-TranspCtx *TranspCtx_Make(MemCh *m, Stream *sm, Lookup *lk);
+TranspCtx *TranspCtx_Make(MemCh *m, Buff *bf, Lookup *lk);

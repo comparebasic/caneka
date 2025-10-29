@@ -30,42 +30,43 @@ Abstract *CliStatus_GetByKey(MemCh *m, CliStatus *cli, Str *key){
     return NULL;
 }
 
-status CliStatus_Print(Buff *sm, CliStatus *cli){
-    if((cli->render(sm->m, (Abstract *)cli) & NOOP) == 0){
+status CliStatus_Print(Buff *bf, CliStatus *cli){
+    if((cli->render(bf->m, (Abstract *)cli) & NOOP) == 0){
         Iter it;
         Iter_Init(&it, cli->lines);
         int count = cli->lines->nvalues;
         if((cli->type.state & PROCESSING) != 0){
             Abstract *args[] = {
-                (Abstract *)I32_Wrapped(sm->m, cli->lines->nvalues),
+                (Abstract *)I32_Wrapped(bf->m, cli->lines->nvalues),
                 NULL
             };
-            Fmt(sm, "\r\x1b[$A", args);
+            Fmt(bf, "\r\x1b[$A", args);
         }
         if(count > 0){
             cli->type.state |= PROCESSING;
         }
         while((Iter_Next(&it) & END) == 0){
-            Buff_Bytes(sm, (byte *)"\r\x1b[0K", 5);
+            Buff_Bytes(bf, (byte *)"\r\x1b[0K", 5);
             if(it.value != NULL){
                 FmtLine *line = (FmtLine *)it.value;
-                Fmt(sm, line->fmt, line->args);
+                Fmt(bf, line->fmt, line->args);
             }
-            Buff_Bytes(sm, (byte *)"\n", 1);
+            Buff_Bytes(bf, (byte *)"\n", 1);
         }
         return SUCCESS;
     }
+
     return NOOP;
 }
 
-status CliStatus_PrintFinish(Buff *sm, CliStatus *cli){
+status CliStatus_PrintFinish(Buff *bf, CliStatus *cli){
     Iter it;
     Iter_Init(&it, cli->lines);
     int count = cli->lines->nvalues;
     while((Iter_Next(&it) & END) == 0){
-        Buff_Bytes(sm, (byte *)"\x1b[2K\r", 5);
+        Buff_Bytes(bf, (byte *)"\x1b[2K\r", 5);
     }
-    Buff_Bytes(sm, (byte *)"\n", 1);
+    Buff_Bytes(bf, (byte *)"\n", 1);
     cli->type.state &= ~PROCESSING;
     return SUCCESS;
 }

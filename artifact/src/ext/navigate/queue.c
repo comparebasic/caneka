@@ -18,8 +18,9 @@ status Queue_Remove(Queue *q, i32 idx){
 i32 Queue_Add(Queue *q, Abstract *a, util *crit){
     i32 idx = q->itemsIt.p->max_idx+1;
     Abstract *args[4];
+    MemCh *m = q->itemsIt.p->m;
     if(q->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(OutStream->m, idx);
+        args[0] = (Abstract *)I32_Wrapped(m, idx);
         args[1] = (Abstract *)a;
         args[2] = (Abstract *)q;
         args[3] = NULL;
@@ -43,16 +44,16 @@ status Queue_Set(Queue *q, i32 idx, Abstract *a){
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     status r = READY;
     Abstract *args[4];
+    MemCh *m = q->itemsIt.p->m;
     if(q->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(OutStream->m, idx);
-        args[1] = (Abstract *)Str_Ref(OutStream->m, 
+        args[0] = (Abstract *)I32_Wrapped(m, idx);
+        args[1] = (Abstract *)Str_Ref(m, 
             (byte *)value, sizeof(util), sizeof(util), STRING_BINARY);
         args[2] = (Abstract *)q;
         args[3] = NULL;
         Out("^p.Queue_SetCriteria \\@$/& &\n", args);
     }
     i32 slabIdx = idx / CRIT_SLAB_STRIDE;
-    MemCh *m = Queue_GetMem(q);
     void *slab = NULL;
     QueueCrit *crit = Span_Get(q->handlers, critIdx);
     if(crit == NULL){
@@ -97,6 +98,7 @@ status Queue_Next(Queue *q){
     if(q->type.state & END){
         Queue_Reset(q);
     }
+    MemCh *m = q->itemsIt.p->m;
     q->type.state &= ~(SUCCESS|NOOP|END);
     q->value = NULL;
     if(q->itemsIt.p->nvalues == 0){
@@ -122,7 +124,7 @@ status Queue_Next(Queue *q){
             q->type.state |= SUCCESS;
             q->value = Iter_Get(&q->itemsIt);
             if(q->type.state & DEBUG){
-                args[0] = (Abstract *)I32_Wrapped(OutStream->m, q->itemsIt.idx);
+                args[0] = (Abstract *)I32_Wrapped(m, q->itemsIt.idx);
                 args[1] = (Abstract *)q->value;
                 args[2] = NULL;
                 Out("^p.    Found \\@$/&\n", args);

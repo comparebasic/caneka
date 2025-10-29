@@ -4,12 +4,12 @@
 static boolean _init = FALSE;
 ClassDef *ObjectCls = NULL;
 
-static i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Hashed_Print(Buff *bf, Abstract *a, cls type, word flags){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(flags & DEBUG){
-        Single *wid = I64_Wrapped(sm->m, h->id);
+        Single *wid = I64_Wrapped(bf->m, h->id);
         wid->type.state |= FMT_TYPE_BITS;
-        Single *val = Ptr_Wrapped(sm->m, h->value, 0);
+        Single *val = Ptr_Wrapped(bf->m, h->value, 0);
         word typeOf = TYPE_UNKNOWN;
         if(h->value != NULL){
             typeOf = h->value->type.of;
@@ -18,25 +18,25 @@ static i64 Hashed_Print(Stream *sm, Abstract *a, cls type, word flags){
             }
         }
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, h->orderIdx), 
-            (Abstract *)I32_Wrapped(sm->m, h->idx), 
+            (Abstract *)I32_Wrapped(bf->m, h->orderIdx), 
+            (Abstract *)I32_Wrapped(bf->m, h->idx), 
             (Abstract *)wid, 
             h->key, 
             (Abstract *)val, 
-            (Abstract *)Type_ToStr(sm->m, typeOf),
+            (Abstract *)Type_ToStr(bf->m, typeOf),
             NULL
         };
-        return Fmt(sm, "H<$,$ $/@ -> $/$>", args);
+        return Fmt(bf, "H<$,$ $/@ -> $/$>", args);
     }else if(flags & MORE){
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, h->idx), 
+            (Abstract *)I32_Wrapped(bf->m, h->idx), 
             h->key, 
             (Abstract *)h->value, 
             NULL
         };
-        return Fmt(sm, "H<$ @ -> @>", args);
+        return Fmt(bf, "H<$ @ -> @>", args);
     }else{
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
 }
 
@@ -54,7 +54,7 @@ static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstrac
 
 static i32 _objIndent = 0;
 
-static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
+static i64 Object_Print(Buff *bf, Abstract *a, cls type, word flags){
     Object *obj = (Object *)as(a, TYPE_OBJECT);
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
     Abstract *args[4];
@@ -62,76 +62,76 @@ static i64 Object_Print(Stream *sm, Abstract *a, cls type, word flags){
     if(flags & (MORE|DEBUG)){
         i64 total = 0;
         if(cls == NULL){
-            total += Fmt(sm, "Object<", args);
+            total += Fmt(bf, "Object<", args);
         }else{
             dataCount = dataCount - obj->propMask;
 
             args[0] = (Abstract *)cls->name;
             args[1] = NULL;
-            total += Fmt(sm, "$<", args);
+            total += Fmt(bf, "$<", args);
 
             Iter it;
             Iter_Init(&it, cls->propOrder);
             while((Iter_Next(&it) & END) == 0){
                 Hashed *h = Span_Get(obj->order, it.idx);
-                ToS(sm, h->key, ZERO, MORE); 
-                Stream_Bytes(sm, (byte *)": ", 2);
-                ToS(sm, h->value, ZERO, flags); 
+                ToS(bf, h->key, ZERO, MORE); 
+                Buff_Bytes(bf, (byte *)": ", 2);
+                ToS(bf, h->value, ZERO, flags); 
                 if((it.type.state & LAST) == 0){
-                    Stream_Bytes(sm, (byte *)", ", 2);
+                    Buff_Bytes(bf, (byte *)", ", 2);
                 }
             }
         }
 
         if(dataCount){
-            args[0] = (Abstract *)I32_Wrapped(sm->m, dataCount);
+            args[0] = (Abstract *)I32_Wrapped(bf->m, dataCount);
             args[1] = NULL;
-            total += Fmt(sm, "^D.$^d.nvalues {", args);
+            total += Fmt(bf, "^D.$^d.nvalues {", args);
             Iter *it = (Iter *)as(
                 Object_GetIter(Object_GetMem(obj), NULL, (Abstract *)obj, NULL),
                 TYPE_ITER);
             while((Iter_Next(it) & END) == 0){
                 if(flags & DEBUG){
-                    total += Stream_Bytes(sm, (byte *)"\n  ", 3);
+                    total += Buff_Bytes(bf, (byte *)"\n  ", 3);
                 }
                 Hashed *h = (Hashed *)Iter_Get(it);
                 if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
                     _objIndent++;
                     i32 i = _objIndent;
-                    total += Stream_Bytes(sm, (byte *)"\n", 1);
+                    total += Buff_Bytes(bf, (byte *)"\n", 1);
                     while(i--){
-                        total += Stream_Bytes(sm, (byte *)"  ", 2);
+                        total += Buff_Bytes(bf, (byte *)"  ", 2);
                     }
                 }
-                total += ToS(sm, h->key, 0, MORE|DEBUG); 
+                total += ToS(bf, h->key, 0, MORE|DEBUG); 
                 printf("\n%p \n", h->key);
                 fflush(stdout);
-                total += Stream_Bytes(sm, (byte *)" -> ", 4);
+                total += Buff_Bytes(bf, (byte *)" -> ", 4);
                 if(flags & (MORE|DEBUG)){
-                    total += ToS(sm, h->value, 0, flags);  
+                    total += ToS(bf, h->value, 0, flags);  
                 }else{
                     Str *typeStr = NULL;
                     if(h->value != NULL){
-                        typeStr = Type_ToStr(sm->m, h->value->type.of);
+                        typeStr = Type_ToStr(bf->m, h->value->type.of);
                     }
-                    total += ToS(sm, (Abstract *)typeStr, 0, MORE);
+                    total += ToS(bf, (Abstract *)typeStr, 0, MORE);
                 }
                 if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
                     _objIndent--;
                 }
                 if((it->type.state & LAST) == 0){
-                    total += Stream_Bytes(sm, (byte *)", ", 2);
+                    total += Buff_Bytes(bf, (byte *)", ", 2);
                 }
             }
             if(flags & DEBUG){
-                total += Stream_Bytes(sm, (byte *)"\n", 1);
+                total += Buff_Bytes(bf, (byte *)"\n", 1);
             }
-            total += Stream_Bytes(sm, (byte *)"}", 1);
+            total += Buff_Bytes(bf, (byte *)"}", 1);
         }
-        total += Stream_Bytes(sm, (byte *)">", 1);
+        total += Buff_Bytes(bf, (byte *)">", 1);
         return total;
     }else{
-        return ToStream_NotImpl(sm, a, type, flags);
+        return ToStream_NotImpl(bf, a, type, flags);
     }
 }
 
@@ -151,41 +151,41 @@ static boolean Fetcher_Exact(Fetcher *a, Fetcher *b){
     return Exact((Abstract *)a->val.targets, (Abstract *)b->val.targets);
 }
 
-static status Fetcher_Print(Stream *sm, Abstract *a, cls type, word flags){
+static status Fetcher_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     Fetcher *fch = (Fetcher *)as(a, TYPE_FETCHER);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)fch, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, fch->type.of, fch->type.state),
         NULL,
     };
-    total += Fmt(sm, "Fetcher<$ ", args);
+    total += Fmt(bf, "Fetcher<$ ", args);
     Abstract *args1[] = {
         (Abstract *)fch->val.targets,
         NULL,
     };
-    total += Fmt(sm, "@>", args1);
+    total += Fmt(bf, "@>", args1);
 
     return total;
 }
 
-static status FetchTargetFunc_Print(Stream *sm, Abstract *a, cls type, word flags){
-    return Fmt(sm, "FTFunc<>", NULL);
+static status FetchTargetFunc_Print(Buff *bf, Abstract *a, cls type, word flags){
+    return Fmt(bf, "FTFunc<>", NULL);
 }
 
-static status FetchTarget_Print(Stream *sm, Abstract *a, cls type, word flags){
+static status FetchTarget_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     FetchTarget *tg = (FetchTarget *)as(a, TYPE_FETCH_TARGET);
     Abstract *args[] = {
-        (Abstract *)StreamTask_Make(sm->m, NULL, (Abstract *)tg, ToS_FlagLabels),
+        (Abstract *)Type_StateVec(bf->m, tg->type.of, tg->type.state),
         NULL,
     };
-    total += Fmt(sm, "FT<$", args);
+    total += Fmt(bf, "FT<$", args);
     if(tg->objType.of != ZERO){
         Abstract *args[] = {
-            (Abstract *)Type_ToStr(sm->m, tg->objType.of),
+            (Abstract *)Type_ToStr(bf->m, tg->objType.of),
             NULL
         };
-        total += Fmt(sm, " $ ", args);
+        total += Fmt(bf, " $ ", args);
 
     }
     if(tg->key != NULL){
@@ -193,31 +193,31 @@ static status FetchTarget_Print(Stream *sm, Abstract *a, cls type, word flags){
             (Abstract *)tg->key,
             NULL
         };
-        total += Fmt(sm, " @", args);
+        total += Fmt(bf, " @", args);
     }
     if(tg->type.state & FETCH_TARGET_IDX || tg->idx != -1){
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(sm->m, tg->idx),
+            (Abstract *)I32_Wrapped(bf->m, tg->idx),
             NULL
         };
-        total += Fmt(sm, " idx^D.$^d.", args);
+        total += Fmt(bf, " idx^D.$^d.", args);
     }
     if(tg->type.state & FETCH_TARGET_RESOLVED){
         Abstract *args[] = {
-            (Abstract *)Type_ToStr(sm->m, tg->objType.of),
-            (Abstract *)I16_Wrapped(sm->m, tg->offset),
+            (Abstract *)Type_ToStr(bf->m, tg->objType.of),
+            (Abstract *)I16_Wrapped(bf->m, tg->offset),
             NULL
         };
-        total += Fmt(sm, " -> $/offset^D.$^d.>", args);
+        total += Fmt(bf, " -> $/offset^D.$^d.>", args);
     }
     if(tg->type.state & FETCH_TARGET_FUNC){
         Abstract *args[] = {
-            (Abstract *)Ptr_Wrapped(sm->m, tg->func, TYPE_FETCH_FUNC),
+            (Abstract *)Ptr_Wrapped(bf->m, tg->func, TYPE_FETCH_FUNC),
             NULL
         };
-        total += Fmt(sm, "func/@", args);
+        total += Fmt(bf, "func/@", args);
     }
-    total += Stream_Bytes(sm, (byte *)">", 1);
+    total += Buff_Bytes(bf, (byte *)">", 1);
 
     return total;
 }

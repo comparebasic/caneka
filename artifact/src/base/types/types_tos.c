@@ -18,13 +18,14 @@ static i64 ErrorMsg_Print(Buff *bf, Abstract *a, cls type, word flags){
 StrVec *Type_StateVec(MemCh *m, cls typeOf, word flags){
     Str **labels = Lookup_Get(ToSFlagLookup, typeOf);
     StrVec *v = StrVec_Make(m);
+    Str *lbl = NULL;
     if(flags == 0){
         if(labels != NULL && labels[0] != NULL){
             lbl = labels[0];
         }else{
             lbl = stateLabels[0];
         }
-        StrVec_Add(v, Str_CstrRef(m, lbl);
+        StrVec_Add(v, lbl);
     }else{
         for(i32 i = 0; i < 16; i++){ 
            if((flags & (1 << i)) != 0){
@@ -33,7 +34,7 @@ StrVec *Type_StateVec(MemCh *m, cls typeOf, word flags){
                 }else{
                     lbl = stateLabels[i+1];
                 }
-                StrVec_Add(v, Str_CstrRef(m, lbl);
+                StrVec_Add(v, lbl);
            }
         }
     }

@@ -397,6 +397,9 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
 
     *offset = sent;
     if(sent < 0){
+        printf("Error sending str %d\n", fd);
+        exit(1);
+
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error sending str", NULL);
         flags |= ERROR;
@@ -612,13 +615,17 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
     return bf->type.state;
 }
 
-Buff *Buff_Make(MemCh *m, word flags){
+Buff *Buff_From(MemCh *m, StrVec *v, word flags){
     Buff *bf = (Buff *)MemCh_AllocOf(m, sizeof(Buff), TYPE_BUFF);
     bf->type.of = TYPE_BUFF;
     bf->type.state = flags;
     bf->m = m;
     bf->fd = -1;
-    bf->v = StrVec_Make(m);
+    bf->v = v;
     bf->tail.idx = -1;
     return bf;
+}
+
+Buff *Buff_Make(MemCh *m, word flags){
+    return Buff_From(m, StrVec_Make(m), flags);
 }

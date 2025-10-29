@@ -24,7 +24,6 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_MEMSLAB, (i64)sizeof(MemPage));
     r |= Lookup_AddRaw(m, lk, TYPE_STR, (i64)sizeof(Str));
     r |= Lookup_AddRaw(m, lk, TYPE_STRVEC, (i64)sizeof(StrVec));
-    r |= Lookup_AddRaw(m, lk, TYPE_STREAM_TASK, (i64)sizeof(StreamTask));
     r |= Lookup_AddRaw(m, lk, TYPE_FMT_LINE, (i64)sizeof(FmtLine));
     r |= Lookup_AddRaw(m, lk, TYPE_CURSOR, (i64)sizeof(Cursor));
     r |= Lookup_AddRaw(m, lk, TYPE_TESTSUITE, (i64)sizeof(TestSet));
@@ -51,8 +50,8 @@ Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
     }else {
         if(x->type.of != type){
             Abstract *args[] = {
-                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
-                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
+                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(type)),
+                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(x->type.of)),
                 NULL
             };
             Error(ErrStream->m, func, file, line, "Cast from Abstract mismatched type expecting '$', have '$'", args);
@@ -68,8 +67,8 @@ Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cls type){
     }else{
         if(!Ifc_Match(x->type.of, type)){
             Abstract *args[] = {
-                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(type)),
-                (Abstract *)Str_CstrRef(_debugM, Type_ToChars(x->type.of)),
+                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(type)),
+                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(x->type.of)),
                 NULL
             };
             Error(ErrStream->m, func, file, line, "Cast from Abstract mismatched interface, expecting '$', have '$'", args);

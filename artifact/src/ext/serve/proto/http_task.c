@@ -12,7 +12,7 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
             "not found");
         Cursor_Add(proto->out, s);
     }else{
-        Stream *sm = Stream_MakeToVec(tsk->m, proto->out->v);
+        Buff *bf = Buff_From(tsk->m, proto->out->v, BUFF_STRVEC);
 
         Str *statLine = Str_CstrRef(tsk->m, "200 OK");
         if(ctx->code != 200){
@@ -27,7 +27,7 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
             NULL
         };
 
-        Fmt(sm, "HTTP/1.1 $\r\n"
+        Fmt(bf, "HTTP/1.1 $\r\n"
             "Server: Caneka\r\n"
             "Content-Type: $\r\n"
             "Content-Length: $\r\n"

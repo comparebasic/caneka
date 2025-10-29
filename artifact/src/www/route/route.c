@@ -87,8 +87,8 @@ static status routeFuncTempl(MemCh *m,
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     Templ_Prepare(templ);
 
-    Stream *sm = Stream_MakeToVec(m, out);
-    Templ_ToS(templ, sm, (Abstract *)data, source);
+    Buff *bf = Buff_From(m, out, BUFF_STRVEC);
+    Templ_ToS(templ, bf, (Abstract *)data, source);
 
     DebugStack_Pop();
     return templ->type.state;
@@ -101,8 +101,8 @@ static status routeFuncFmt(MemCh *m,
     Roebling *rbl = FormatFmt_Make(m, curs, source);
     Roebling_Run(rbl);
         
-    Stream *sm = Stream_MakeToVec(m, out);
-    Fmt_ToHtml(sm, rbl->mess);
+    Buff *bf = Buff_From(m, out, BUFF_STRVEC);
+    Fmt_ToHtml(bf, rbl->mess);
 
     DebugStack_Pop();
     return rbl->type.state;
