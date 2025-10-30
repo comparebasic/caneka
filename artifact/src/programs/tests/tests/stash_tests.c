@@ -48,28 +48,31 @@ status Stash_Tests(MemCh *gm){
 
     Str *path = IoUtil_GetCwdPath(m, Str_CstrRef(m, "dist/test/persist.mem"));
 
-    i32 fd = open(Str_Cstr(m, path), O_WRONLY|O_CREAT, 00644);
+    File_Unlink(m, path);
     Buff *bf = Buff_Make(m, ZERO);
-    bf->type.state |= DEBUG;
-    Buff_SetFd(bf, fd);
-
-    args[0] = (Abstract *)bf;
-    args[1] = NULL;
-    Out("^p.Buff &^0\n", args);
+    File_Open(bf, path, O_WRONLY|O_CREAT|O_TRUNC);
 
     status re = Stash_FlushFree(bf, pst);
-    close(fd);
+
+    Buff_Stat(bf);
+    args[0] = (Abstract *)I64_Wrapped(m, PAGE_SIZE+sizeof(StashHeader));
+    args[1] = (Abstract *)I64_Wrapped(m, bf->st.st_size);
+    args[2] = (Abstract *)bf;
+    args[3] = NULL;
+    r |= Test(bf->st.st_size == PAGE_SIZE+sizeof(StashHeader),
+        "Bytes written equals 1 page + StashHeader, expected $, have $ - @", args);
+
+    File_Close(bf);
 
     MemCh *takeSpace = MemCh_Make();
-    for(util i = 0; i < 100; i++){
+    for(util i = 0; i < 1000; i++){
         Util_Wrapped(takeSpace, i);
     }
 
-    fd = open(Str_Cstr(m, path), O_RDONLY);
     bf = Buff_Make(m, ZERO);
-    Buff_SetFd(bf, fd);
+    File_Open(bf, path, O_RDONLY);
     MemCh *loaded = Stash_FromStream(bf);
-    close(fd);
+    File_Close(bf);
 
     MemCh_Free(takeSpace);
 

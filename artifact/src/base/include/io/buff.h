@@ -8,6 +8,7 @@ enum send_recv_flags {
     BUFF_FLUSH = 1 << 12,
     BUFF_UNBUFFERED = 1 << 13,
     BUFF_SLURP = 1 << 14,
+    BUFF_CLOBBER = 1 << 15,
 };
 
 typedef struct buff {

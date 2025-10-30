@@ -126,6 +126,8 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     Abstract *args[5];
     Iter it;
 
+    bf->type.state |= DEBUG;
+
     MemCh *m = bf->m;
     Table *tbl = Table_Make(m);
 
@@ -174,7 +176,6 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
             break;
         }
         Buff_Flush(bf);
-        printf("Flushing \n");
         r |= MemBook_FreePage(m, (MemPage *)Iter_Get(&it));
     }
 
@@ -183,6 +184,9 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
 
 MemCh *Stash_FromStream(Buff *bf){
     status r = READY;
+
+    bf->type.state |= DEBUG;
+
     Abstract *args[5];
     StashHeader hdr = {0, 0};
     i16 count = 0;
@@ -204,6 +208,7 @@ MemCh *Stash_FromStream(Buff *bf){
                 r |= ERROR;
                 break;
             }
+
             r |= PROCESSING;
             pages = (Abstract **)Bytes_Alloc(bf->m, hdr.pages*sizeof(void *), TYPE_POINTER_ARRAY);
         }
@@ -224,13 +229,15 @@ MemCh *Stash_FromStream(Buff *bf){
         s.alloc = PAGE_SIZE;
         s.length = 0;
         s.bytes = (byte *)pages[count];
-        if((Buff_GetStr(bf, &s) & SUCCESS) == 0){
+        r |= (Buff_GetStr(bf, &s) & SUCCESS);
+        if((r & SUCCESS) == 0){
             args[0] = (Abstract *)I16_Wrapped(ErrStream->m, s.length);
             args[1] = NULL;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error reading page from stream to Stash length $", args);
             r |= ERROR;
         }
+
         count++;
     }
 

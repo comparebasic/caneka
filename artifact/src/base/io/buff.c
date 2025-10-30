@@ -252,6 +252,11 @@ status Buff_Pos(Buff *bf, i64 position){
 status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
     DebugStack_Push(bf, bf->type.of);
     status r = READY;
+    if(length <= 0){
+        return NOOP;
+    }
+
+    bf->type.state &= ~END;
 
     if(bf->tail.idx == -1){
         Buff_addTail(bf);
@@ -416,9 +421,6 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
 
     *offset = sent;
     if(sent < 0){
-        printf("Error sending str %d\n", fd);
-        exit(1);
-
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error sending str", NULL);
         flags |= ERROR;
@@ -448,15 +450,11 @@ status Buff_Send(Buff *bf){
 status Buff_SendToFd(Buff *bf, i32 fd){
     DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~(MORE|SUCCESS|NOOP);
-
-    if(bf->type.state & DEBUG){
-        printf("SendToFd fd:%d unsentTotal:%ld\n", fd, bf->unsent.total);
-        fflush(stdout);
-    }
-
+    Abstract *args[5];
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
-            bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, 0));
+            bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, max(0, bf->unsent.idx)));
+            Str_Incr(bf->unsent.s, bf->unsent.offset);
         }
         Str *s = bf->unsent.s;
         ssize_t sent = 0;
@@ -477,29 +475,31 @@ status Buff_SendToFd(Buff *bf, i32 fd){
                 "Error sending str", NULL);
             bf->type.state |= ERROR;
         }else if(sent == s->length){
-            if(bf->unsent.idx < bf->v->p->max_idx){
-                bf->unsent.idx++;
-                bf->unsent.s = Span_Get(bf->v->p, bf->unsent.idx);
-                bf->type.state |= MORE;
-            }else{
-                bf->type.state |= PROCESSING;
-                bf->unsent.idx = -1;
-                bf->unsent.s = NULL;
-                bf->unsent.offset = 0;
-                bf->unsent.total -= sent;
-                if(bf->type.state & BUFF_FLUSH){
-                    Iter it;                    
-                    Iter_Init(&it, bf->v->p);
-                    while((Iter_Next(&it) & END) == 0){
-                        if(it.idx == 0){
-                            bf->tail.idx = 0;
-                            bf->tail.s = (Str *)Iter_Get(&it);
+            Buff_setUnsentIncr(bf, sent);
+            if(bf->unsent.s->length == 0){
+                if(bf->unsent.idx < bf->v->p->max_idx){
+                    bf->unsent.idx++;
+                    bf->unsent.s = Span_Get(bf->v->p, bf->unsent.idx);
+                    bf->type.state |= MORE;
+                    bf->unsent.total -= sent;
+                }else{
+                    bf->type.state |= PROCESSING;
+                    bf->unsent.s = NULL;
+                    bf->unsent.total -= sent;
+                    if(bf->type.state & BUFF_FLUSH){
+                        Iter it;                    
+                        Iter_Init(&it, bf->v->p);
+                        while((Iter_Next(&it) & END) == 0){
+                            if(it.idx == 0){
+                                bf->tail.idx = 0;
+                                bf->tail.s = (Str *)Iter_Get(&it);
+                            }
+                            Str_Wipe(Iter_Get(&it));
                         }
-                        Str_Wipe(Iter_Get(&it));
+                        bf->unsent.idx = 0;
+                        bf->unsent.s = bf->tail.s;
+                        bf->unsent.total = 0;
                     }
-                    bf->unsent.idx = 0;
-                    bf->unsent.s = bf->tail.s;
-                    bf->unsent.total = 0;
                 }
             }
         }else if(send > 0){
@@ -562,7 +562,7 @@ status Buff_ReadToStr(Buff *bf, Str *s){
         if(bf->type.state & BUFF_SOCKET){
             recieved = recv(bf->fd, bytes, amount, 0);
         }else if(bf->type.state & BUFF_FD){
-            recieved = read(bf->fd, s->bytes, amount);
+            recieved = read(bf->fd, bytes, amount);
         }else{
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
@@ -584,6 +584,7 @@ status Buff_ReadToStr(Buff *bf, Str *s){
         }else{
             s->length += recieved;
             amount -= recieved;
+            bytes += recieved;
             bf->type.state |= PROCESSING;
             if(recieved == 0 || amount == 0){
                 bf->type.state |= SUCCESS;
