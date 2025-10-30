@@ -101,7 +101,7 @@ miss:
             (Abstract *)b,
             NULL
         };
-        Debug("Str_EqualsStrVec Differ ^D.$^d.length vs ^D.$^d.length at $/^E.@^e. & vs &\n", args);
+        Debug("Str_EqualsStrVec Differ ^D.$^d.length vs ^D.$^d.length at $/^E.&^e. & vs &\n", args);
     }
     return FALSE;
 }

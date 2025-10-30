@@ -64,6 +64,7 @@ static char *ponyTailTwoCstr = ""
 status StrVec_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
+    Abstract *args[5];
 
     StrVec *vc = StrVec_Make(m);
     StrVec_Add(vc, Str_CstrRef(m, "hi dude"));
@@ -90,6 +91,7 @@ status StrVec_Tests(MemCh *gm){
     sf2->type.state |= DEBUG;
     char *cstr = ", all alone";
     Buff *bf = Buff_Make(m, BUFF_STRVEC);
+
     i32 twentyNine = 29;
     i64 fiveK = 5987263;
     Abstract *args3[] = {
@@ -102,18 +104,18 @@ status StrVec_Tests(MemCh *gm){
         (Abstract *)vc,
         NULL
     };
+
     
     Fmt(bf, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $", args3);
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\"\x1b[1mafterwards\x1b[22m\"' \"\x1b[1mfour\x1b[22m\" Str<DEBUG 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!");
 
-    Abstract *args4[] = {
-        (Abstract *)bf->v,
-        (Abstract *)s,
-        NULL,
-    };
+    args[0] = (Abstract *)s;
+    args[1] = (Abstract *)bf->v;
+    args[2] = NULL;
+    s->type.state |= DEBUG;
     r |= Test(Equals((Abstract *)bf->v, (Abstract *)s),
-        "Testing StrVec and StrVec from Fmt via Buff \n@\nvs\n@", args4);
+        "Testing StrVec and StrVec from Fmt via Buff expected:\n$\nhave:\n$", args);
 
     /*
     StrVec_Add(vc, Str_CstrRef(m, "\n\n"));

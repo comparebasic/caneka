@@ -63,7 +63,6 @@ i64 StrLit_Print(Buff *bf, Abstract *a, cls type, word flags){
 i64 Str_Print(Buff *bf, Abstract *a, cls type, word flags){
     Abstract *args[5];
     Str *s = (Str*)as(a, TYPE_STR); 
-    flags |= s->type.state & DEBUG;
 
     if((flags & (MORE|DEBUG)) == 0){
         return Buff_Bytes(bf, s->bytes, s->length);
@@ -76,18 +75,18 @@ i64 Str_Print(Buff *bf, Abstract *a, cls type, word flags){
     args[3] = NULL;
 
     if(flags & DEBUG){
-        total += Fmt(bf, "Str<@ $/$:^D\"", args);
+        total += Fmt(bf, "Str<$ $/$:\"^D", args);
     }else{
         total += Fmt(bf, "\"^D", NULL); 
     }
 
     if(flags & DEBUG){
         total += Bytes_Debug(bf, s->bytes, s->bytes+(s->length-1));
+        total += Fmt(bf, "^d.\">", NULL);
     }else{
         total += Buff_Bytes(bf, s->bytes, s->length);
+        total += Fmt(bf, "^d.\"", NULL);
     }
-
-    total += Fmt(bf, "^d.\">", NULL);
 
     return total;
 }

@@ -1,6 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
+static void Buff_addTail(Buff *bf){
+    Str *s = Str_Make(bf->m, STR_DEFAULT);
+    Span_Add(bf->v->p, (Abstract *)s);
+    bf->tail.idx = bf->v->p->max_idx;
+    bf->tail.s = s;
+}
+
 static void Buff_setUnsentStr(Buff *bf){
     Str *s = (Str *)Str_Rec(bf->m, Span_Get(bf->v->p, bf->unsent.idx));
     if(s != NULL){
@@ -245,15 +252,15 @@ status Buff_Pos(Buff *bf, i64 position){
 status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
     DebugStack_Push(bf, bf->type.of);
     status r = READY;
+
     if(bf->tail.idx == -1){
-        bf->tail.s = Str_Make(bf->m, STR_DEFAULT);
-        Span_Add(bf->v->p, (Abstract *)bf->tail.s);
-        bf->tail.idx = bf->v->p->max_idx;
+        Buff_addTail(bf);
     }
-    word remaining = bf->tail.s->alloc - bf->tail.s->length;
+
     i16 guard = 0;
     while(length > 0){
         Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
+        word remaining = bf->tail.s->alloc - bf->tail.s->length;
         if(length > remaining){
             Str_Add(bf->tail.s, bytes, remaining);
             bf->unsent.total += remaining;
@@ -261,9 +268,7 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
             bytes += remaining;
             length -= remaining;
             if(bf->tail.idx >= bf->v->p->max_idx){
-                bf->tail.s = Str_Make(bf->m, STR_DEFAULT);
-                Span_Add(bf->v->p, (Abstract *)bf->tail.s);
-                bf->tail.idx = bf->v->p->max_idx;
+                Buff_addTail(bf);
             }
         }else{
             Str_Add(bf->tail.s, bytes, length);
@@ -274,16 +279,13 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
         }
 
         if(remaining == 0 && length > 0){
-            Str *s = Str_Make(bf->m, STR_DEFAULT);
-            Span_Add(bf->v->p, (Abstract *)s);
-            bf->tail.idx = bf->v->p->max_idx;
-            bf->tail.s = s;
-            remaining = bf->tail.s->alloc;
+            Buff_addTail(bf);
         }
     }
     if(r == READY){
         r |= NOOP;
     }
+
     DebugStack_Pop();
     return r;
 }

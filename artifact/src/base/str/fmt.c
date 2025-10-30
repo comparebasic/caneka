@@ -8,7 +8,6 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
     char *start = fmt;
     status state = SUCCESS;
     i64 total = 0;
-    bf->m->level++;
     while(ptr <= end){
         char c = *ptr;
         if((state & NOOP) != 0){
@@ -101,10 +100,8 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
             Buff_Bytes(bf, s->bytes, s->length);
             total += s->length;
             start = ptr+1;
-            MemCh_FreeTemp(bf->m);
         }else{
 next:
-            MemCh_FreeTemp(bf->m);
             ptr++;
         }
     }
@@ -117,7 +114,6 @@ next:
         }
     }
 
-    bf->m->level--;
     return total; 
 }
 
