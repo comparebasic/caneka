@@ -50,7 +50,12 @@ status Stash_Tests(MemCh *gm){
 
     i32 fd = open(Str_Cstr(m, path), O_WRONLY|O_CREAT, 00644);
     Buff *bf = Buff_Make(m, ZERO);
+    bf->type.state |= DEBUG;
     Buff_SetFd(bf, fd);
+
+    args[0] = (Abstract *)bf;
+    args[1] = NULL;
+    Out("^p.Buff &^0\n", args);
 
     status re = Stash_FlushFree(bf, pst);
     close(fd);

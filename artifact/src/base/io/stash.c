@@ -162,6 +162,7 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
         .checksum = checksum
     };
     Buff_Bytes(bf, (byte *)&hdr, sizeof(StashHeader));
+    Buff_Flush(bf);
 
     Iter_Init(&it, pages);
     while((Iter_Next(&it) & END) == 0){
@@ -172,6 +173,8 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
             r |= ERROR;
             break;
         }
+        Buff_Flush(bf);
+        printf("Flushing \n");
         r |= MemBook_FreePage(m, (MemPage *)Iter_Get(&it));
     }
 

@@ -449,6 +449,11 @@ status Buff_SendToFd(Buff *bf, i32 fd){
     DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~(MORE|SUCCESS|NOOP);
 
+    if(bf->type.state & DEBUG){
+        printf("SendToFd fd:%d unsentTotal:%ld\n", fd, bf->unsent.total);
+        fflush(stdout);
+    }
+
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
             bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, 0));
@@ -510,12 +515,17 @@ status Buff_SendToFd(Buff *bf, i32 fd){
     return bf->type.state;
 }
 
+status Buff_Flush(Buff *bf){
+    if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
+        while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
+    }
+    return bf->type.state;
+}
+
 status Buff_AddSend(Buff *bf, Str *s){
     if((bf->type.state & BUFF_UNBUFFERED) == 0){
         Buff_Add(bf, s);
-        if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-            while((Buff_Send(bf) & (SUCCESS|ERROR|END)) == 0){}
-        }
+        Buff_Flush(bf);
     }else{
         i64 offset = 0;
         while(offset < s->alloc && (bf->type.state & ERROR) == 0){

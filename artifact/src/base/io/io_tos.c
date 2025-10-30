@@ -33,7 +33,7 @@ i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
     Buff *bfObj = (Buff *)as(a, TYPE_BUFF);
 
     Abstract *args[8];
-    args[0] = (Abstract *)Type_StateVec(bf->m, bfObj->type.of, bf->type.state);
+    args[0] = (Abstract *)Type_StateVec(bf->m, bfObj->type.of, bfObj->type.state);
     args[1] = (Abstract *)I32_Wrapped(bf->m, bfObj->fd);
     args[2] = (Abstract *)I64_Wrapped(bf->m, bfObj->unsent.total);
     args[3] = (Abstract *)I64_Wrapped(bf->m, bfObj->v->total);
