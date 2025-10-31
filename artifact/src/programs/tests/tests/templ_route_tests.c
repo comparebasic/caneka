@@ -9,7 +9,7 @@ status TemplRoute_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
 
     StrVec *path = StrVec_From(m, Str_CstrRef(m,
-        "examples/web-server/pages/inc/header.templ"));
+        "./examples/web-server/pages/inc/header.templ"));
     StrVec *abs = IoUtil_AbsVec(m, path);
 
     Route *rt = (Object *)Route_Make(m);
@@ -17,7 +17,7 @@ status TemplRoute_Tests(MemCh *gm){
     Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)home);
 
     StrVec *navPath = StrVec_From(m, Str_CstrRef(m,
-        "examples/web-server/pages/public"));
+        "./examples/web-server/pages/public"));
     StrVec *navAbs = IoUtil_AbsVec(m, navPath);
     Route_Collect(rt, navAbs);
 

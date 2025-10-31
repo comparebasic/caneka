@@ -200,16 +200,10 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
                         return ERROR;
                     }
                     if(length > 0){
-                        Str *sn = (Str *)asLegal(
-                            (Abstract *)Str_Ref(m, start, length, length, ZERO),
-                            TYPE_STR
-                        );
+                        Str *sn = Str_Ref(m, start, length, length, ZERO);
                         StrVec_Add(v, sn);
                     }
-                    Str *sb = (Str *)asLegal(
-                        (Abstract *)Str_Ref(m, ptr, 1, 1, sg->objType.state),
-                        TYPE_STR
-                    );
+                    Str *sb = Str_Ref(m, ptr, 1, 1, sg->objType.state);
                     StrVec_Add(v, sb);
                     start = ptr;
                     if(start < last){

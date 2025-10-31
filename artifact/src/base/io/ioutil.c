@@ -119,8 +119,8 @@ StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path){
         Str *s = Str_Make(m, STR_DEFAULT);
         char *cstr = getcwd((char *)s->bytes, STR_DEFAULT_MAX);
         s->length = strlen(cstr);
+        Str_Add(s, (byte *)"/", 1);
         StrVec_Add(v, s);
-        StrVec_Add(v, Str_CstrRef(m, "/"));
         StrVec_Add(v, path);
     }
 

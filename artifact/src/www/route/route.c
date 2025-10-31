@@ -24,10 +24,11 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
             (Abstract *)mime,
             (Abstract *)ext,
             (Abstract *)RouteMimeTable,
+            (Abstract *)path,
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Mime & not found for this file with\n\n ext & (@)", args);
+            "Mime & not found for this file with\n\n ext & (@) path:&", args);
         return ERROR;
     }
 
@@ -60,6 +61,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
 status Route_Collect(Route *rt, StrVec *path){
     MemCh *m = Object_GetMem(rt);
     IoUtil_Annotate(m, path);
+
     StrVec *root = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, root);
     Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)root);

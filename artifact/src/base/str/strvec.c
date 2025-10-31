@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
+    Abstract *args[2];
     if(v->total+1 > STR_MAX || v->total+1 > length){
         Abstract *args[] = {
             (Abstract *)I64_Wrapped(m, v->total),
@@ -19,6 +20,12 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
         Str *content = Iter_Get(&it);
         if(TextCharFilter(content->bytes, content->length)){
             Str_Add(s, content->bytes, content->length);
+        }else{
+            args[0] = (Abstract *)content;
+            args[1] = NULL;
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Failed text char filter &", args);
+            return NULL;
         }
     }
     return s;
