@@ -2,16 +2,22 @@
 #include <caneka.h>
 
 static status Transp_Push(TranspCtx *ctx, Abstract *a){
+    Abstract *args[2];
     if(ctx->type.state & DEBUG){
-        Abstract *args[2];
-        args[0] = (Abstract *)a;
+        args[0] = (Abstract *)Type_ToStr(ctx->m, a->type.of);
         args[1] = NULL;
-        Out("^y.  Transp_Push(a:&)^0\n", args);
+        Out("^c.  Transp_Push(a->type.of:@)^0\n", args);
     }
     return Iter_Add(&ctx->it, a);
 }
 
 static i64 Transp_SetPrev(TranspCtx *ctx){
+    Abstract *args[2];
+    if(ctx->type.state & DEBUG){
+        args[0] = (Abstract *)ctx;
+        args[1] = NULL;
+        Out("^c.  Transp_SetPrev^0\n", args);
+    }
     Iter it;
     ctx->stackIdx = ctx->it.idx;
     Abstract *a = Iter_Get(&ctx->it);
@@ -19,6 +25,9 @@ static i64 Transp_SetPrev(TranspCtx *ctx){
         Node *nd = (Node *)a;
         TranspFunc func = (TranspFunc)Lookup_Get(ctx->lk, nd->captureKey);
         if(func != NULL){
+            if(ctx->type.state & DEBUG){
+                Out("^c.     func(close)^0\n", NULL);
+            }
             return func(ctx, TRANSP_CLOSE);
         }
     }
@@ -39,24 +48,27 @@ static i64 Transp_SetPrev(TranspCtx *ctx){
 }
 
 i64 Transp(TranspCtx *ctx){
-    Abstract *args[5];
+    Abstract *args[6];
     DebugStack_Push(NULL, ZERO);
+    MemCh *m = ctx->m;
 
     if(ctx->type.state & DEBUG){
-        args[0] = (Abstract *)ctx;
+        args[0] = (Abstract *)&ctx->it;
         args[1] = NULL;
-        Out("^y.>>> Transp(ctx:@)\n", args);
+        Out("^c.Transp(ctx->it:@)^0\n", args);
     }
 
     i64 total = 0;
     if((ctx->it.type.state & END) && (ctx->type.state & (ERROR|NOOP)) == 0){
         ctx->type.state |= SUCCESS;
+        if(ctx->type.state & DEBUG){
+            args[0] = (Abstract *)ctx;
+            args[1] = NULL;
+            Out("^y.   END|NOOP Transp(ctx:@)^0\n", args);
+        }
         DebugStack_Pop();
         return total;
     }
-
-    printf("Transp I\n");
-    fflush(stdout);
 
     Abstract *a = Iter_Get(&ctx->it);
     if(a == NULL){
@@ -69,79 +81,106 @@ i64 Transp(TranspCtx *ctx){
         return total;
     }
 
-    printf("Transp II\n");
-    fflush(stdout);
-
     DebugStack_SetRef(a, a->type.of);
     if(a->type.of == TYPE_ITER){
         if((Iter_Next((Iter *)a) & END) == 0){
-            printf("Push Iter\n");
-            fflush(stdout);
             Transp_Push(ctx, ((Iter*)a)->value);
+
+            if(ctx->type.state & DEBUG){
+                args[0] = (Abstract *)a;
+                args[1] = NULL;
+                Out("^y.   Iter/Push(a:@)^0\n", args);
+            }
+
             i64 total = Transp(ctx);
             DebugStack_Pop();
             return total;
         }else{
-            printf("Prev\n");
-            fflush(stdout);
-
-            Iter_Prev(&ctx->it);
+            Iter_PrevRemove(&ctx->it);
             total += Transp_SetPrev(ctx);
+
+            if(ctx->type.state & DEBUG){
+                args[0] = (Abstract *)a;
+                args[1] = NULL;
+                Out("^y.   Iter/END(a:@)^0\n", args);
+            }
+
             i64 total = Transp(ctx);
             DebugStack_Pop();
             return total;
         }
     }else{
-        printf("Transp non-iter III\n");
-        fflush(stdout);
         if((i32)ctx->stackIdx == ctx->it.idx){ 
             /* skip to bottom */
-            printf("Transp skip to bottom IV\n");
-            fflush(stdout);
+            if(ctx->type.state & DEBUG){
+                args[0] = (Abstract *)ctx;
+                args[1] = NULL;
+                Out("^y.   skip / stackIdx == it.idx^0\n", args);
+            }
         }else{
-            printf("Transp content V\n");
-            fflush(stdout);
             if(a->type.of == TYPE_NODE){
                 if(ctx->type.state & DEBUG){
                     args[0] = (Abstract *)a;
                     args[1] = NULL;
-                    Out("^y.Transp[a=TYPE_NODE](@)\n", args);
+                    Out("^y.    a=TYPE_NODE](@)\n", args);
                 }
                 Node *na = (Node *)a;
                 ctx->func = (TranspFunc)Lookup_Get(ctx->lk, na->captureKey);
                 if(ctx->func != NULL){
+                    if(ctx->type.state & DEBUG){
+                        Out("^p.        func(open)\n^0", NULL);
+                    }
                     total += ctx->func(ctx, TRANSP_OPEN);
                 }
 
                 if(na->child != NULL){
                     if(na->child->type.of == TYPE_NODE){
-                        printf("  push node\n");
-                        fflush(stdout);
+                        if(ctx->type.state & DEBUG){
+                            args[0] = (Abstract *)na;
+                            args[1] = NULL;
+                            Out("^y.      type:Node(na:@)^0\n", args);
+                        }
                         Transp_Push(ctx, na->child);
                         ctx->stackIdx = ctx->it.idx;
                     }else if(na->child->type.of == TYPE_SPAN){
-                        printf("  push span\n");
-                        fflush(stdout);
                         Iter *it = Iter_Make(ctx->m, (Span *)na->child);
                         Iter_Next(it);
+
+                        if(ctx->type.state & DEBUG){
+                            args[0] = (Abstract *)it;
+                            args[1] = NULL;
+                            Out("^y.      type:span(it:@)^0\n", args);
+                        }
+
                         Transp_Push(ctx, (Abstract *)it);
                     }else{
-                        printf("  push other\n");
-                        fflush(stdout);
+                        if(ctx->type.state & DEBUG){
+                            args[0] = (Abstract *)na->child;
+                            args[1] = NULL;
+                            Out("^y.      type:/else(na->child:@)^0\n", args);
+                        }
+
                         Transp_Push(ctx, na->child);
                         if(ctx->func != NULL){
+                            if(ctx->type.state & DEBUG){
+                                Out("^p.        func(body)\n^0", NULL);
+                            }
+
                             total += ctx->func(ctx, TRANSP_BODY);
                         }
                     }
                 }
             }else{
+                a = Iter_Get(&ctx->it);
                 if(ctx->type.state & DEBUG){
                     args[0] = (Abstract *)a;
                     args[1] = NULL;
-                    Out("^y.Transp[else a](@)\n", args);
+                    Out("^y.    else/non-node (a:@)\n", args);
                 }
-                a = Iter_Get(&ctx->it);
                 if(ctx->func != NULL && a->type.of != TYPE_ITER){
+                    if(ctx->type.state & DEBUG){
+                        Out("^p.        func/below(body)\n^0", NULL);
+                    }
                     total += ctx->func(ctx, TRANSP_BODY);
                 }
             }
@@ -149,24 +188,21 @@ i64 Transp(TranspCtx *ctx){
     }
 
     a = Iter_Get(&ctx->it);
-    if((i32)ctx->stackIdx == ctx->it.idx || 
-            (a->type.of != TYPE_ITER || (a->type.state & LAST))){
+    if((i32)ctx->stackIdx < ctx->it.idx || (a->type.of != TYPE_ITER || (a->type.state & LAST))){
         Iter_PrevRemove(&ctx->it);
+        args[0] = (Abstract *)I32_Wrapped(m, ctx->stackIdx);
+        args[1] = (Abstract *)I32_Wrapped(m, ctx->it.idx);
+        args[2] = (Abstract *)Type_ToStr(m, a->type.of);
+        args[3] = (Abstract *)Type_StateVec(m, a->type.of, a->type.state);
+        args[4] = NULL;
+        Out("^c. Transp PrevRemove at bottom(stackIdx:$ vs ctx->it.idx $ / a->type.of:$ / a->type.state: @)\n", args);
         total += Transp_SetPrev(ctx);
-        args[0] = (Abstract *)ctx;
-        args[1] = NULL;
-        Out("^y.  Transp PrevRemove at bottom(ctx:@)\n", args);
     }
     
     if(ctx->it.type.state & END){
         ctx->type.state |= SUCCESS;
     }
 
-    if(ctx->type.state & DEBUG){
-        args[0] = (Abstract *)&ctx->it;
-        args[1] = NULL;
-        Out("^y.Transp it\\@Transp: @\n", args);
-    }
     DebugStack_Pop();
     return total;
 }

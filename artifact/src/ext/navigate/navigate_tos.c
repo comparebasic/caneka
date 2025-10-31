@@ -73,24 +73,26 @@ static i64 Comp_Print(Buff *bf, Abstract *a, cls type, word flags){
 
 static i64 Node_Print(Buff *bf, Abstract *a, cls type, word flags){
     Node *nd = (Node*)as(a, TYPE_NODE);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, nd->type.of, nd->type.state),
-        (Abstract *)Type_ToStr(bf->m, nd->typeOfChild),
-        (Abstract *)Type_ToStr(bf->m, nd->captureKey),
-        (Abstract *)(nd->parent != NULL ?
-            Type_ToStr(bf->m, nd->parent->captureKey) : NULL),
-        (Abstract *)nd->atts,
-        (Abstract *)Type_ToStr(bf->m,
-            (nd->value != NULL ? nd->value->type.of : _TYPE_ZERO)),
-        (Abstract *)nd->value,
-        (Abstract *)Type_ToStr(bf->m,
-            (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO)),
-        NULL
-    };
+    Abstract *args[9];
+    args[0] = (Abstract *)Type_StateVec(bf->m, nd->type.of, nd->type.state);
+    args[1] = (Abstract *)Type_ToStr(bf->m, nd->typeOfChild);
+    args[2] = (Abstract *)Type_ToStr(bf->m, nd->captureKey);
+    args[3] = (Abstract *)(nd->parent != NULL ?
+                  Type_ToStr(bf->m, nd->parent->captureKey) : NULL);
+    args[4] = (Abstract *)nd->atts;
+    args[5] = (Abstract *)Type_ToStr(bf->m,
+                 (nd->value != NULL ? nd->value->type.of : _TYPE_ZERO));
+    args[6] = (Abstract *)nd->value;
+    args[7] = (Abstract *)Type_ToStr(bf->m,
+                 (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO));
+    args[8] =  NULL;
     if(flags & DEBUG){
         return Fmt(bf, "N<$/$ captureKey($) parent(@) atts:& valueTypeOf:$/@ childTypeOf:$>", args);
     }else{
-        return Fmt(bf, "N<$/$ captureKey($) parent(@) atts:@ value:$/@ childTypeOf:$>", args);
+        args[4] = args[5];
+        args[5] = nd->value;
+        args[6] = NULL;
+        return Fmt(bf, "N<$/$ captureKey($) parent(@) value:$/@>", args);
     }
 }
 

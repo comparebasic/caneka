@@ -95,7 +95,7 @@ i64 StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     i64 total = 0;
     if(flags & MORE){
-        total += Buff_Bytes(bf, (byte *)"\"", 1); 
+        total += Buff_Bytes(bf, (byte *)"[", 1); 
     }
 
     if(flags & DEBUG){
@@ -113,28 +113,30 @@ i64 StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)it.value;
         if(s != NULL){
-            if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
+            if(flags & DEBUG){
                 Abstract *args[] = {
                     (Abstract *)I32_Wrapped(bf->m, it.idx),
                     NULL
                 };
                 total += Fmt(bf, "$: ", args); 
                 total += Str_Print(bf, (Abstract *)s, type, flags|DEBUG);
-                if((it.type.state & LAST) == 0){
-                    total += Buff_Bytes(bf, (byte *)", ", 2);
-                }
-            }else if(flags & DEBUG){
-                total += Str_Print(bf, (Abstract *)s, type, flags);
             }else{
                 total += Buff_Bytes(bf, s->bytes, s->length);
             }
+
+            if(flags & (MORE|DEBUG)){
+                if((it.type.state & LAST) == 0){
+                    total += Buff_Bytes(bf, (byte *)", ", 2);
+                }
+            }
+
         }
     }
     if(flags & DEBUG){
         total += Fmt(bf, "]>", NULL);
     }
     if(flags & MORE){
-        total += Buff_Bytes(bf, (byte *)"\"",1);
+        total += Buff_Bytes(bf, (byte *)"]",1);
     }
     return total;
 }
