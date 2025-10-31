@@ -47,7 +47,8 @@ status Task_Tumble(Task *tsk){
         }
         if(((r & MORE) == 0)){
             if(st->type.state & SUCCESS){
-                Iter_PrevRemove(&tsk->chainIt);
+                Iter_Remove(&tsk->chainIt);
+                Iter_Prev(&tsk->chainIt);
             }else if(st->type.state & STEP_LOOP){
                 i32 idx = tsk->chainIt.p->max_idx;
                 Step *tail = Span_Get(tsk->chainIt.p, idx);

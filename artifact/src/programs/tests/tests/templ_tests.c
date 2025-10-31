@@ -166,16 +166,8 @@ status Templ_Tests(MemCh *gm){
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.templ"));
     StrVec *content = File_ToVec(m, path);
 
-    args[0] = (Abstract *)content;
-    args[1] = NULL;
-    Out("^p.content: $\n", args);
-
     Cursor *curs = Cursor_Make(m, content);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-
-    args[0] = (Abstract *)ctx;
-    args[1] = NULL;
-    Out("^y.ctx: $\n", args);
     
     r |= Test(ctx->type.state & SUCCESS,
             "Templ: Roebling finished with state SUCCESS with keys", 
@@ -215,20 +207,11 @@ status Templ_Tests(MemCh *gm){
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "items/menu", STRING_COPY));
     Path_Annotate(m, key, seps);
 
-    args[0] = (Abstract *)key;
-    args[1] = NULL;
-    Out("^p.keys: &^0\n", args);
-
     Object_ByPath(data, key, (Abstract *)menu, SPAN_OP_SET);
 
     Buff *bf = Buff_Make(m, BUFF_STRVEC);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    templ->type.state |= DEBUG;
-    args[0] = (Abstract *)templ;
-    args[1] = NULL;
-    Out("^p.templ: &^0\n", args);
-
     status result = Templ_Prepare(templ);
 
     args[0] = (Abstract *)templ;
@@ -238,12 +221,6 @@ status Templ_Tests(MemCh *gm){
     r |= TestShow((result & PROCESSING),
         "Templ_Prepare has result PROCESSING",
         "Templ_Prepare did not finish properly @ & -> &", args);
-
-    /*
-    args[0] = (Abstract *)templ->content.p;
-    args[1] = NULL;
-    Out("^p.Content &^0\n", args);
-    */
 
     if(r & ERROR){
         MemCh_Free(m);

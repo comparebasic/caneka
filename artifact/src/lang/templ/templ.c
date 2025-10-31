@@ -83,7 +83,7 @@ static status Templ_handleJump(Templ *templ){
             (Abstract *)fch,
             NULL
         };
-        Out("^b.  Jump: & of &^0.\n", args);
+        Out("^b.  Jump: & \n  of &^0.\n", args);
     }
 
     if(fch->type.state & FETCHER_FOR){
@@ -92,9 +92,10 @@ static status Templ_handleJump(Templ *templ){
             Iter_Add(&templ->data, value);
             fch->type.state |= PROCESSING;
         }else{
-            Iter_PrevRemove(&templ->data);
+            Iter_Remove(&templ->data);
+            Iter_Prev(&templ->data);
         }
-        Iter *it = (Iter *)as(Iter_Current(&templ->data), TYPE_ITER);
+        Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
         if((Iter_Next(it) & END) == 0){
             Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
         }else if(jump->skipIdx != NEGATIVE){
@@ -318,7 +319,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
             (Abstract *)bf->v,
             NULL
         };
-        Out("^gE.>> Out:^e. @^0.\n", args);
+        Out("^yE.>> Out:^e. @^0.\n", args);
     }
 
     DebugStack_Pop();
