@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 static i32 Templ_FindStart(Templ *templ, word flags){
+    DebugStack_Push(templ, templ->type.of);
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
@@ -20,14 +21,17 @@ static i32 Templ_FindStart(Templ *templ, word flags){
             }else if(prevJump->fch->type.state & 
                     (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT) &&
                     flags == ZERO || (prevJump->fch->type.state & flags)){
+                DebugStack_Pop();
                 return it.idx;
             }
         }
     }
+    DebugStack_Pop();
     return -1;
 }
 
 static i32 Templ_FindEnd(Templ *templ){
+    DebugStack_Push(templ, templ->type.of);
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
@@ -40,25 +44,17 @@ static i32 Templ_FindEnd(Templ *templ){
             if((a->type.state & FETCHER_END|FETCHER_VAR) == 0){
                 targetCount++;
             }else if((a->type.state & FETCHER_END) && --targetCount == 0){
+                DebugStack_Pop();
                 return it.idx; 
             }
         }
-
-        /*
-        Abstract *args[] = {
-            (Abstract *)a,
-            (Abstract *)I32_Wrapped(templ->m, targetCount),
-            (Abstract *)I32_Wrapped(templ->m, it.idx),
-            NULL
-        };
-
-        Out("^c.  SearchEnd @ target:$\\@$^0.\n", args);
-        */
     }
+    DebugStack_Pop();
     return -1;
 }
 
 static status Templ_handleJump(Templ *templ){
+    DebugStack_Push(templ, templ->type.of);
     status r = READY;
     TemplJump *jump = (TemplJump *)Iter_Current(&templ->content);
     Abstract *data = Iter_Current(&templ->data);
@@ -137,7 +133,6 @@ static status Templ_handleJump(Templ *templ){
                 (tg->idx == jump->depth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
                 (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < jump->depth)
                 ){
-                /* proceed */ 
                 Abstract *args[] = {
                     (Abstract *)tg,
                     (Abstract *)I32_Wrapped(templ->m, tg->idx),
@@ -182,13 +177,22 @@ static status Templ_handleJump(Templ *templ){
         r |= NOOP;
     }
 
+    DebugStack_Pop();
     return r;
 }
 
 static status Templ_PrepareCycle(Templ *templ){
+    DebugStack_Push(templ, templ->type.of);
+    Abstract *args[5];
+    if(templ->type.state & DEBUG){
+        args[0] = (Abstract *)templ;
+        args[1] = NULL;
+        Out("^y.Prepare: &^0\n", args);
+    }
     MemCh *m = templ->m;
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= PROCESSING;
+        DebugStack_Pop();
         return templ->type.state;
     }
 
@@ -228,6 +232,7 @@ static status Templ_PrepareCycle(Templ *templ){
                 "Unable to find source or ending for Jump in Templ content\n", NULL);
 
             templ->type.state |= ERROR;
+            DebugStack_Pop();
             return templ->type.state;
         }
 
@@ -240,21 +245,23 @@ static status Templ_PrepareCycle(Templ *templ){
         }
     }
 
-
     if(templ->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Iter_Current(&templ->content),
             NULL
         };
-        Out("^y.Templ_Prepare\n  ^E.content:^e.&^0.\n", args);
+        Out("^y.Templ_Prepare end\n  ^E.content:^e.&^0.\n", args);
     }
 
+    DebugStack_Pop();
     return templ->type.state;
 }
 
 i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
+    DebugStack_Push(templ, templ->type.of);
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
+        DebugStack_Pop();
         return total;
     }
 
@@ -289,6 +296,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
             };
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error finding value using @ in data @\n",args);
+            DebugStack_Pop();
             return total;
         }
         if(templ->type.state & DEBUG){
@@ -313,10 +321,12 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
         Out("^gE.>> Out:^e. @^0.\n", args);
     }
 
+    DebugStack_Pop();
     return total;
 }
 
 status Templ_Prepare(Templ *templ){
+    DebugStack_Push(templ, templ->type.of);
     if((templ->type.state & PROCESSING) == 0){
         i16 g = 0;
         templ->type.state &= ~(ERROR|SUCCESS);
@@ -330,18 +340,23 @@ status Templ_Prepare(Templ *templ){
             };
             Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing Templ, &", args);
+            DebugStack_Pop();
             return ERROR;
         }
+        DebugStack_Pop();
         return (templ->type.state|SUCCESS);
     }
+    DebugStack_Pop();
     return NOOP;
 }
 
 i64 Templ_ToS(Templ *templ, Buff *bf, Abstract *data, Abstract *source){
+    DebugStack_Push(templ, templ->type.of);
     i64 total = 0;
     i16 g = 0;
 
     if(Templ_Prepare(templ) & ERROR){
+        DebugStack_Pop();
         return 0;
     }
 
@@ -353,6 +368,7 @@ i64 Templ_ToS(Templ *templ, Buff *bf, Abstract *data, Abstract *source){
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }
+    DebugStack_Pop();
     return total;
 }
 

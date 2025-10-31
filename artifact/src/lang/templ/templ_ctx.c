@@ -17,6 +17,7 @@ TemplCtx *TemplCtx_Make(MemCh *m, Cursor *curs, Abstract *source){
 
 TemplCtx *TemplCtx_FromCurs(MemCh *m, Cursor *curs, Abstract *source){
     TemplCtx *ctx = TemplCtx_Make(m, curs, source);
+    ctx->type.state |= (curs->type.state & DEBUG);
     Roebling_Run(ctx->rbl);
     Roebling_Finalize(ctx->rbl, NULL, NEGATIVE);
     if((ctx->rbl->curs->type.state & END) && (ctx->rbl->type.state & ERROR) == 0){

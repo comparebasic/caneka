@@ -103,9 +103,7 @@ static i64 Object_Print(Buff *bf, Abstract *a, cls type, word flags){
                         total += Buff_Bytes(bf, (byte *)"  ", 2);
                     }
                 }
-                total += ToS(bf, h->key, 0, MORE|DEBUG); 
-                printf("\n%p \n", h->key);
-                fflush(stdout);
+                total += ToS(bf, h->key, 0, MORE); 
                 total += Buff_Bytes(bf, (byte *)" -> ", 4);
                 if(flags & (MORE|DEBUG)){
                     total += ToS(bf, h->value, 0, flags);  
@@ -158,7 +156,7 @@ static status Fetcher_Print(Buff *bf, Abstract *a, cls type, word flags){
         (Abstract *)Type_StateVec(bf->m, fch->type.of, fch->type.state),
         NULL,
     };
-    total += Fmt(bf, "Fetcher<$ ", args);
+    total += Fmt(bf, "Fetcher<@ ", args);
     Abstract *args1[] = {
         (Abstract *)fch->val.targets,
         NULL,
@@ -179,7 +177,7 @@ static status FetchTarget_Print(Buff *bf, Abstract *a, cls type, word flags){
         (Abstract *)Type_StateVec(bf->m, tg->type.of, tg->type.state),
         NULL,
     };
-    total += Fmt(bf, "FT<$", args);
+    total += Fmt(bf, "FT<@", args);
     if(tg->objType.of != ZERO){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(bf->m, tg->objType.of),
@@ -274,12 +272,13 @@ status Types_ClsInit(MemCh *m){
     cls->api.getIter = Object_GetIter;
     cls->api.toS = Object_Print;
     cls->objType.of = TYPE_OBJECT;
+    cls->name = Str_FromCstr(m, "Object", STRING_COPY);
     ObjectCls = cls;
 
     Object obj;
-    Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "tbl"),
+    Table_Set(cls->atts, (Abstract *)Str_FromCstr(m, "tbl", STRING_COPY),
         (Abstract *)I16_Wrapped(m, (void *)(&obj.tbl)-(void *)(&obj)));
-    Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "order"),
+    Table_Set(cls->atts, (Abstract *)Str_FromCstr(m, "order", STRING_COPY),
         (Abstract *)I16_Wrapped(m, (void *)(&obj.order)-(void *)(&obj)));
     r |= Class_Register(m, cls);
 

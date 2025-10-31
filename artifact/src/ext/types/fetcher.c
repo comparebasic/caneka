@@ -59,7 +59,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Fetch @ value not found @\n", args);
+            "Fetch @ value not found on @\n", args);
         return NULL;
     }
 }

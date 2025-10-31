@@ -39,6 +39,7 @@ static char *logicTestContent = ""
 
 status TemplCtx_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
+    Abstract *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
     Str *s = NULL; 
@@ -142,11 +143,9 @@ status TemplCtx_Tests(MemCh *gm){
     v = StrVec_From(m, s);
     Span_Add(expected, (Abstract *)v);
 
-    Abstract *args[] = {
-        (Abstract *)expected,
-        (Abstract *)ctx->it.p,
-        NULL
-    };
+    args[0] = (Abstract *)expected,
+    args[1] = (Abstract *)ctx->it.p,
+    args[2] = NULL;
 
     r |= TestShow(Exact((Abstract *)expected, (Abstract *)ctx->it.p), 
         "Expected content found in example templ", 
@@ -166,8 +165,17 @@ status Templ_Tests(MemCh *gm){
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.templ"));
     StrVec *content = File_ToVec(m, path);
+
+    args[0] = (Abstract *)content;
+    args[1] = NULL;
+    Out("^p.content: $\n", args);
+
     Cursor *curs = Cursor_Make(m, content);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+
+    args[0] = (Abstract *)ctx;
+    args[1] = NULL;
+    Out("^y.ctx: $\n", args);
     
     r |= Test(ctx->type.state & SUCCESS,
             "Templ: Roebling finished with state SUCCESS with keys", 
@@ -179,6 +187,9 @@ status Templ_Tests(MemCh *gm){
         return r;
     }
 
+    Span *seps = Span_Make(m);
+    Span_Add(seps, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
+
     Object *data = Object_Make(m, ZERO);
     Object *menu = Object_Make(m, ZERO);
     tp = TranspFile_Make(m);
@@ -186,10 +197,12 @@ status Templ_Tests(MemCh *gm){
     tp->name = StrVec_From(m, Str_CstrRef(m, "One"));
     Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "one")), (Abstract *)tp);
     tp = TranspFile_Make(m);
+
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/two"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "Two"));
     Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "two")), (Abstract *)tp);
     tp = TranspFile_Make(m);
+    
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/three"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "Three"));
     Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "three")), (Abstract *)tp);
@@ -198,11 +211,24 @@ status Templ_Tests(MemCh *gm){
     Str *para = Str_CstrRef(m, "And here is the masterful list of menu items!");
     Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
     Object_Set(data, (Abstract *)Str_CstrRef(m, "para"), (Abstract *)para);
-    Object_ByPath(data, StrVec_From(m, Str_CstrRef(m, "items/menu")), (Abstract *)menu, SPAN_OP_SET);
+
+    StrVec *key = StrVec_From(m, Str_FromCstr(m, "items/menu", STRING_COPY));
+    Path_Annotate(m, key, seps);
+
+    args[0] = (Abstract *)key;
+    args[1] = NULL;
+    Out("^p.keys: &^0\n", args);
+
+    Object_ByPath(data, key, (Abstract *)menu, SPAN_OP_SET);
 
     Buff *bf = Buff_Make(m, BUFF_STRVEC);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    templ->type.state |= DEBUG;
+    args[0] = (Abstract *)templ;
+    args[1] = NULL;
+    Out("^p.templ: &^0\n", args);
+
     status result = Templ_Prepare(templ);
 
     args[0] = (Abstract *)templ;
@@ -250,12 +276,22 @@ status TemplLogic_Tests(MemCh *gm){
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.templ"));
     StrVec *content = File_ToVec(m, path);
+
+    args[0] = (Abstract *)content;
+    args[1] = NULL;
+    Out("^p.content: $\n", args);
+
     Cursor *curs = Cursor_Make(m, content);
+    curs->type.state |= DEBUG;
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
 
     r |= Test(ctx->type.state & SUCCESS,
             "Templ: Roebling finished with state SUCCESS with keys", 
         NULL);
+
+    args[0] = (Abstract *)ctx;
+    args[1] = NULL;
+    Out("^p.ctx: $\n", args);
 
     /*
     Abstract *args2[] = {

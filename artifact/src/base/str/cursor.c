@@ -39,11 +39,6 @@ status Cursor_Decr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
     Abstract *args[3];
     MemCh *m = curs->v->p->m;
-    if(curs->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(OutStream->m, length);
-        args[1] = NULL;
-        Out("^p.Cursor_Decr @^0\n", args);
-    }
     if((curs->type.state & PROCESSING) == 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to decr cursor that is not in PROCESSING", NULL);
@@ -236,22 +231,10 @@ status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max){
         memcpy(s->bytes, curs->ptr, length);
         s->length = length;
         s->alloc = s->length;
-        if(curs->type.state & DEBUG){
-            args[0] = (Abstract *)I16_Wrapped(OutStream->m, length);
-            args[1] = (Abstract *)s;
-            args[2] = NULL;
-            Out("^p.Cursor Copy/Filled $ bytes -> &\n", args); 
-        }
     }else{
         s->bytes = curs->ptr;
         s->length = length;
         s->alloc = s->length;
-        if(curs->type.state & DEBUG){
-            args[0] = (Abstract *)I16_Wrapped(OutStream->m, length);
-            args[1] = (Abstract *)s;
-            args[2] = NULL;
-            Out("^p.Cursor Set $ bytes -> &\n", args); 
-        }
     }
 
     return r;
