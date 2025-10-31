@@ -2,23 +2,35 @@
 #include <caneka.h>
 
 static status Transp_Push(TranspCtx *ctx, Abstract *a){
-    Abstract *args[2];
+    DebugStack_Push(a, a->type.of);
+    Abstract *args[3];
     if(ctx->type.state & DEBUG){
-        args[0] = (Abstract *)Type_ToStr(ctx->m, a->type.of);
-        args[1] = NULL;
-        Out("^c.  Transp_Push(a->type.of:@)^0\n", args);
+        if(a->type.of == TYPE_ITER){
+            args[0] = (Abstract *)Type_ToStr(ctx->m, a->type.of);
+            args[1] = (Abstract *)I32_Wrapped(ctx->m, ((Iter *)a)->p->nvalues);
+            args[2] = NULL;
+            Out("^c.  Transp_Push(a->type.of:@/$nvalues)^0\n", args);
+        }else{
+            args[0] = (Abstract *)Type_ToStr(ctx->m, a->type.of);
+            args[1] = NULL;
+            Out("^c.  Transp_Push(a->type.of:@)^0\n", args);
+        }
     }
+    ctx->stackIdx = ctx->it.idx;
+    DebugStack_Pop();
     return Iter_Add(&ctx->it, a);
 }
 
 static i64 Transp_SetPrev(TranspCtx *ctx){
-    Abstract *args[2];
+    DebugStack_Push(ctx, ctx->type.of);
+    Abstract *args[3];
+    Iter_Remove(&ctx->it);
+    Iter_Prev(&ctx->it);
     if(ctx->type.state & DEBUG){
-        args[0] = (Abstract *)ctx;
+        args[0] = (Abstract *)I32_Wrapped(ctx->m, ctx->it.idx) ;
         args[1] = NULL;
-        Out("^c.  Transp_SetPrev^0\n", args);
+        Out("^c.  Transp_SetPrev $^0\n", args);
     }
-    Iter it;
     ctx->stackIdx = ctx->it.idx;
     Abstract *a = Iter_Get(&ctx->it);
     if(a != NULL && a->type.of == TYPE_NODE){
@@ -28,9 +40,11 @@ static i64 Transp_SetPrev(TranspCtx *ctx){
             if(ctx->type.state & DEBUG){
                 Out("^c.     func(close)^0\n", NULL);
             }
+            DebugStack_Pop();
             return func(ctx, TRANSP_CLOSE);
         }
     }
+    Iter it;
     memcpy(&it, &ctx->it, sizeof(Iter));
     Abstract *current = Iter_Get(&it);
     if(current != NULL && current->type.of != TYPE_NODE){
@@ -44,18 +58,20 @@ static i64 Transp_SetPrev(TranspCtx *ctx){
             }
         }
     }
+    DebugStack_Pop();
     return 0;
 }
 
 i64 Transp(TranspCtx *ctx){
+    DebugStack_Push(ctx, ctx->type.of);
     Abstract *args[6];
-    DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
 
     if(ctx->type.state & DEBUG){
         args[0] = (Abstract *)&ctx->it;
-        args[1] = NULL;
-        Out("^c.Transp(ctx->it:@)^0\n", args);
+        args[1] = (Abstract *)I32_Wrapped(m, ctx->stackIdx);
+        args[2] = NULL;
+        Out("^c.Transp(ctx->it:@/^D.$^d.stackIdx)^0\n", args);
     }
 
     i64 total = 0;
@@ -87,22 +103,21 @@ i64 Transp(TranspCtx *ctx){
             Transp_Push(ctx, ((Iter*)a)->value);
 
             if(ctx->type.state & DEBUG){
-                args[0] = (Abstract *)a;
+                args[0] = (Abstract *)((Iter *)a)->value;
                 args[1] = NULL;
-                Out("^y.   Iter/Push(a:@)^0\n", args);
+                Out("^y.   < Iter/Push(a:@)^0\n", args);
             }
 
             i64 total = Transp(ctx);
             DebugStack_Pop();
             return total;
         }else{
-            Iter_PrevRemove(&ctx->it);
             total += Transp_SetPrev(ctx);
 
             if(ctx->type.state & DEBUG){
                 args[0] = (Abstract *)a;
                 args[1] = NULL;
-                Out("^y.   Iter/END(a:@)^0\n", args);
+                Out("^y.   < Iter/END(a:@)^0\n", args);
             }
 
             i64 total = Transp(ctx);
@@ -110,12 +125,17 @@ i64 Transp(TranspCtx *ctx){
             return total;
         }
     }else{
+        if(ctx->type.state & DEBUG){
+            args[0] = (Abstract *)a;
+            args[1] = NULL;
+            Out("^y.   > Non-iter(a:&)^0\n", args);
+        }
         if((i32)ctx->stackIdx == ctx->it.idx){ 
             /* skip to bottom */
             if(ctx->type.state & DEBUG){
                 args[0] = (Abstract *)ctx;
                 args[1] = NULL;
-                Out("^y.   skip / stackIdx == it.idx^0\n", args);
+                Out("^y.   skip / stackIdx == it.idx: @^0\n", args);
             }
         }else{
             if(a->type.of == TYPE_NODE){
@@ -144,8 +164,6 @@ i64 Transp(TranspCtx *ctx){
                         ctx->stackIdx = ctx->it.idx;
                     }else if(na->child->type.of == TYPE_SPAN){
                         Iter *it = Iter_Make(ctx->m, (Span *)na->child);
-                        Iter_Next(it);
-
                         if(ctx->type.state & DEBUG){
                             args[0] = (Abstract *)it;
                             args[1] = NULL;
@@ -188,14 +206,14 @@ i64 Transp(TranspCtx *ctx){
     }
 
     a = Iter_Get(&ctx->it);
-    if((i32)ctx->stackIdx < ctx->it.idx || (a->type.of != TYPE_ITER || (a->type.state & LAST))){
-        Iter_PrevRemove(&ctx->it);
-        args[0] = (Abstract *)I32_Wrapped(m, ctx->stackIdx);
-        args[1] = (Abstract *)I32_Wrapped(m, ctx->it.idx);
-        args[2] = (Abstract *)Type_ToStr(m, a->type.of);
-        args[3] = (Abstract *)Type_StateVec(m, a->type.of, a->type.state);
-        args[4] = NULL;
-        Out("^c. Transp PrevRemove at bottom(stackIdx:$ vs ctx->it.idx $ / a->type.of:$ / a->type.state: @)\n", args);
+    if((i32)ctx->stackIdx == ctx->it.idx || (a->type.of != TYPE_ITER || (a->type.state & LAST))){
+        if(ctx->type.of & DEBUG){
+            args[0] = (Abstract *)I32_Wrapped(m, ctx->stackIdx);
+            args[1] = (Abstract *)I32_Wrapped(m, ctx->it.idx);
+            args[2] = (Abstract *)a;
+            args[3] = NULL;
+            Out("^c. Transp remove at bottom(^D.$^d./^D.$^d. ctx->it->value: @)\n", args);
+        }
         total += Transp_SetPrev(ctx);
     }
     

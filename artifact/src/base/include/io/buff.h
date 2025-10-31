@@ -22,9 +22,10 @@ typedef struct buff {
     } tail;
     struct {
         Str *s;
-        i64 total;
-        i32 idx;
+        word _;
         word offset;
+        i32 idx;
+        i64 total;
     } unsent;
     struct stat st;
 } Buff;

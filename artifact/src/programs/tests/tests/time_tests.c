@@ -23,5 +23,6 @@ status Time_Tests(MemCh *gm){
         args);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }

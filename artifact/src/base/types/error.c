@@ -100,8 +100,6 @@ void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
     Buff_Bytes(ErrStream, (byte *)" \x1b[1m", 5);
     Fmt(ErrStream, fmt, args);
     Buff_Bytes(ErrStream, (byte *)"\x1b[0m", 4);
-    Buff_Bytes(ErrStream, (byte *)"\n", 1);
-    DebugStack_Print(ErrStream, MORE);
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();

@@ -32,7 +32,7 @@ i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     Buff *bfObj = (Buff *)as(a, TYPE_BUFF);
 
-    Abstract *args[8];
+    Abstract *args[9];
     args[0] = (Abstract *)Type_StateVec(bf->m, bfObj->type.of, bfObj->type.state);
     args[1] = (Abstract *)I32_Wrapped(bf->m, bfObj->fd);
     args[2] = (Abstract *)I64_Wrapped(bf->m, bfObj->unsent.total);
@@ -46,9 +46,10 @@ i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
         args[2] = (Abstract *)I32_Wrapped(bf->m, bfObj->st.st_size);
         args[3] = (Abstract *)I32_Wrapped(bf->m, lseek(bfObj->fd, 0, SEEK_CUR));
 
-        args[6] = (bf->unsent.s == NULL ? (Abstract *)bfObj->v : (Abstract *)bfObj->unsent.s);
-        args[7] = NULL;
-        total += Fmt(bf, "Buff<@ $fd/$bytes\\@@ unsent/total=$/$ &>", args);
+        args[6] = (Abstract *)I32_Wrapped(bf->m, bfObj->tail.idx);
+        args[7] = (bf->unsent.s == NULL ? (Abstract *)bfObj->v : (Abstract *)bfObj->unsent.s);
+        args[8] = NULL;
+        total += Fmt(bf, "Buff<@ $fd/$bytes\\@@ unsent/total=$/$ $tailIdx &>", args);
     }else{
         total += Fmt(bf, "Buff<@ $fd unsent/total=$/$>", args);
     }

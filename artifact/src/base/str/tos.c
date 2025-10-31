@@ -204,7 +204,6 @@ i64 ToStream_NotImpl(Buff *bf, Abstract *a, cls type, word flags){
 }
 
 i64 ToS(Buff *bf, Abstract *a, cls type, word flags){
-    bf->m->level++;
     if(a == NULL){
         i64 total =  Buff_Bytes(bf, (byte *)"NULL", 4);
         return total;
@@ -217,8 +216,6 @@ i64 ToS(Buff *bf, Abstract *a, cls type, word flags){
     ToSFunc func = (ToSFunc)Lookup_Get(ToStreamLookup, type);
     if(func != NULL){
         i64 total = func(bf, a, type, flags);
-        MemCh_Free(bf->m);
-        bf->m->level--;
         return total;
     }else{
         Abstract *args[] = {

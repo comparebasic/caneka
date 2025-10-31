@@ -5,7 +5,9 @@ static Iter _it;
 
 void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line, i32 pos){
     Span *stack = _it.p;
-    stack->m->level--;
+
+    word fl = stack->m->type.state;
+    stack->m->type.state |= MEMCH_BASE;
 
     StackEntry *entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
     entry->type.of = TYPE_DEBUG_STACK_ENTRY;
@@ -16,12 +18,11 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
     entry->line = line;
     entry->pos = pos;
 
-    Iter_Push(&_it, (Abstract*)entry);
-    stack->m->level++;
+    Iter_Add(&_it, (Abstract*)entry);
+    stack->m->type.state = fl;
 }
 
 void DebugStack_Pop(){
-    _it.type.state |= DEBUG;
     Iter_PrevRemove(&_it);
 }
 
@@ -64,8 +65,6 @@ i32 DebugStack_Print(Buff *bf, word flags){
 }
 
 status DebugStack_Init(MemCh *m){
-    Iter_Init(&_it,Span_Make(m));
-    DebugStack_Push(NULL, ZERO);
-    Iter_PrevRemove(&_it);
+    Iter_Init(&_it, Span_Make(m));
     return SUCCESS;
 }

@@ -6,6 +6,10 @@ static void Buff_addTail(Buff *bf){
     Span_Add(bf->v->p, (Abstract *)s);
     bf->tail.idx = bf->v->p->max_idx;
     bf->tail.s = s;
+    if(bf->type.state & DEBUG){
+        printf("      adding tailIdx %d %d/%d\n", 
+            bf->tail.idx, (i32)bf->tail.s->length, (i32)bf->tail.s->alloc);
+    }
 }
 
 static void Buff_setUnsentStr(Buff *bf){
@@ -32,7 +36,6 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Offset cannot be zero if seeking from the end $: $", args);
             bf->type.state |= ERROR;
-            DebugStack_Pop();
             return bf->type.state;
         }
         bf->unsent.idx = bf->v->p->max_idx;
@@ -40,7 +43,6 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
             bf->type.state |= END;
             bf->unsent.s = NULL;
             bf->unsent.total = 0;
-            DebugStack_Pop();
             return bf->type.state;
         }else{
             bf->unsent.total = 0;
@@ -85,7 +87,6 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
             bf->type.state |= ERROR;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Reached end of vec without using all of offset", NULL); 
-            DebugStack_Pop();
             return bf->type.state;
         }
 
@@ -123,7 +124,6 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
             bf->type.state |= ERROR;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Reached end of vec without using all of offset", NULL); 
-            DebugStack_Pop();
             return bf->type.state;
         }
 
@@ -134,12 +134,10 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
         }
     }
 
-    DebugStack_Pop();
     return bf->type.state;
 }
 
 static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
-    DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~PROCESSING;
     Abstract *args[7];
     if((bf->type.state & (BUFF_FD|BUFF_SOCKET)) == 0){
@@ -156,13 +154,11 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
         args[6] = NULL;
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error seek failed with pos $ for offset $ on @ whence $", args);
-        DebugStack_Pop();
         return ERROR;
     }else if(pos > 0){
         bf->type.state |= PROCESSING;
     }
 
-    DebugStack_Pop();
     return bf->type.state;
 }
 
@@ -257,7 +253,6 @@ status Buff_Pos(Buff *bf, i64 position){
 }
 
 status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
-    DebugStack_Push(bf, bf->type.of);
     status r = READY;
     if(length <= 0){
         return NOOP;
@@ -273,50 +268,42 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
     while(length > 0){
         Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
         word remaining = bf->tail.s->alloc - bf->tail.s->length;
-        if(length > remaining){
-            Str_Add(bf->tail.s, bytes, remaining);
-            bf->unsent.total += remaining;
-            bf->v->total += remaining;
-            bytes += remaining;
-            length -= remaining;
-            if(bf->tail.idx >= bf->v->p->max_idx){
-                Buff_addTail(bf);
-            }
-        }else{
+        if(remaining == 0){
+            Buff_addTail(bf);
+        }else if(length <= remaining){
             Str_Add(bf->tail.s, bytes, length);
             bf->unsent.total += length;
             bf->v->total += length;
             length -= length;
             r |= SUCCESS;
-        }
-
-        if(remaining == 0 && length > 0){
+        }else{
+            Str_Add(bf->tail.s, bytes, remaining);
+            bf->unsent.total += remaining;
+            bf->v->total += remaining;
+            bytes += remaining;
+            length -= remaining;
             Buff_addTail(bf);
         }
+
     }
     if(r == READY){
         r |= NOOP;
     }
 
-    DebugStack_Pop();
     return r;
 }
 
 status Buff_RevGetStr(Buff *bf, Str *s){
-    DebugStack_Push(bf, bf->type.of);
     word remaining = s->alloc - s->length;
     if(Buff_Pos(bf, -(remaining)) & ERROR){
-        DebugStack_Pop();
         return ERROR;
     }
     status r = Buff_GetStr(bf, s);
     Buff_Pos(bf, -(remaining));
-    DebugStack_Pop();
     return r;
 }
 
 status Buff_GetStr(Buff *bf, Str *s){
-    DebugStack_Push(bf, bf->type.of);
     Abstract *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
     word remaining = s->alloc - s->length;
@@ -363,12 +350,10 @@ status Buff_GetStr(Buff *bf, Str *s){
         bf->type.state |= LAST;
     }
 
-    DebugStack_Pop();
     return bf->type.state | (s->length == s->alloc ? SUCCESS : ZERO);
 }
 
 status Buff_GetToVec(Buff *bf, StrVec *v){
-    DebugStack_Push(bf, bf->type.of);
     Str *shelf = Str_Make(bf->m, STR_DEFAULT);
     i16 g = 0;
     while((Buff_GetStr(bf, shelf) & END) == 0){
@@ -379,7 +364,6 @@ status Buff_GetToVec(Buff *bf, StrVec *v){
         }
     }
 
-    DebugStack_Pop();
     return bf->type.state;
 }
 
@@ -389,14 +373,12 @@ status Buff_Add(Buff *bf, Str *s){
 }
 
 status Buff_AddVec(Buff *bf, StrVec *v){
-    DebugStack_Push(bf, bf->type.of);
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = Iter_Get(&it);
         Buff_AddBytes(bf, s->bytes, s->length);
     }
-    DebugStack_Pop();
     return bf->type.state;
 }
 
@@ -409,7 +391,6 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "length of send unbuff is larger than IO_SEND_MAX or less than 0", NULL);
         flags |= ERROR;
-        DebugStack_Pop();
         return flags;
     }
 
@@ -422,7 +403,6 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
         Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
         flags |= ERROR;
-        DebugStack_Pop();
         return flags;
     }
 
@@ -436,26 +416,21 @@ status Buff_UnbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 
     }else{
         flags |= PROCESSING;
     }
-    DebugStack_Pop();
     return flags;
 }
 
 status Buff_Send(Buff *bf){
-    DebugStack_Push(bf, bf->type.of);
     status r = READY;
     if(bf->type.state & (ERROR)){
-        DebugStack_Pop();
         return bf->type.state;
     }
 
     r |=  Buff_SendToFd(bf, bf->fd);    
 
-    DebugStack_Pop();
     return r;
 }
 
 status Buff_SendToFd(Buff *bf, i32 fd){
-    DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~(MORE|SUCCESS|NOOP);
     Abstract *args[5];
     if(bf->unsent.total > 0){
@@ -473,7 +448,6 @@ status Buff_SendToFd(Buff *bf, i32 fd){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
             bf->type.state |= ERROR;
-            DebugStack_Pop();
             return bf->type.state;
         }
 
@@ -518,7 +492,6 @@ status Buff_SendToFd(Buff *bf, i32 fd){
     }else{
         bf->type.state |= (SUCCESS|END);
     }
-    DebugStack_Pop();
     return bf->type.state;
 }
 
@@ -560,7 +533,6 @@ status Buff_Read(Buff *bf){
 }
 
 status Buff_ReadToStr(Buff *bf, Str *s){
-    DebugStack_Push(bf, bf->type.of);
     bf->type.state &= ~(SUCCESS|PROCESSING);
     i16 amount = s->alloc - s->length;
     byte *bytes = s->bytes+s->length;
@@ -574,7 +546,6 @@ status Buff_ReadToStr(Buff *bf, Str *s){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
             bf->type.state |= ERROR;
-            DebugStack_Pop();
             return bf->type.state;
         }
 
@@ -599,7 +570,6 @@ status Buff_ReadToStr(Buff *bf, Str *s){
             }
         }
     }
-    DebugStack_Pop();
     return bf->type.state;
 }
 

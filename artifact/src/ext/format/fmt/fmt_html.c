@@ -5,7 +5,7 @@ static Lookup *fmtToHtmlLookup = NULL;
 
 static i64 tableFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = Iter_Current(&ctx->it);
+    Abstract *a = Iter_Get(&ctx->it);
     Str *table = Str_CstrRef(ctx->m, "TABLE");
     if(flags & TRANSP_OPEN){
         total += Tag_Out(ctx->bf, (Abstract *)table, ZERO);
@@ -39,7 +39,7 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
                 total += Tag_Out(ctx->bf, (Abstract *)tr, ZERO);
             }
             total += Tag_Out(ctx->bf, (Abstract *)td, ZERO);
-            total += ToS(ctx->bf, Iter_Current(&rel->it), 0, ZERO);
+            total += ToS(ctx->bf, Iter_Get(&rel->it), 0, ZERO);
             total += Tag_Out(ctx->bf, (Abstract *)td, TAG_CLOSE);
             if(rel->type.state & RELATION_ROW_END){
                 total += Tag_Out(ctx->bf, (Abstract *)tr, TAG_CLOSE);
@@ -57,7 +57,7 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
 
 static i64 bulletFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = Iter_Current(&ctx->it);
+    Abstract *a = Iter_Get(&ctx->it);
     if(flags & TRANSP_OPEN){
         Str *s = Str_CstrRef(ctx->m, "UL");
         total += Tag_Out(ctx->bf, (Abstract *)s, ZERO);
@@ -81,7 +81,7 @@ static i64 bulletFunc(TranspCtx *ctx, word flags){
 
 static i64 headerFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = Iter_Current(&ctx->it);
+    Abstract *a = Iter_Get(&ctx->it);
     Str *s = Str_Make(ctx->m, 1+MAX_BASE10);
     if((flags & (TRANSP_OPEN|TRANSP_CLOSE)) && a->type.of == TYPE_NODE){
         Node *nd = (Node *)a;
@@ -138,7 +138,7 @@ static i64 imageFunc(TranspCtx *ctx, word flags){
 
 static i64 paragraphFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Abstract *a = Iter_Current(&ctx->it);
+    Abstract *a = Iter_Get(&ctx->it);
     Str *s = Str_CstrRef(ctx->m, "P");
     if(flags & TRANSP_OPEN){
         total += Tag_Out(ctx->bf, (Abstract *)s, ZERO);
@@ -168,9 +168,11 @@ static i64 tagFunc(TranspCtx *ctx, word flags){
 }
 
 status Fmt_ToHtml(Buff *bf, Mess *mess){
+    DebugStack_Push(mess, mess->type.of);
     MemCh *m = bf->m;
     if(fmtToHtmlLookup == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "FmtToHtml no initialized", NULL);
+        DebugStack_Pop();
         return ERROR;
     }
 
@@ -187,7 +189,6 @@ status Fmt_ToHtml(Buff *bf, Mess *mess){
     mess->transp = ctx;
 
     Iter_SetByIdx(&ctx->it, 0, (Abstract *)mess->root);
-    ctx->stackIdx = ctx->it.p->nvalues;
     i64 total = 0;
     while((ctx->type.state & (SUCCESS|ERROR|ERROR)) == 0){
         total += Transp(ctx);
@@ -201,6 +202,7 @@ status Fmt_ToHtml(Buff *bf, Mess *mess){
         Out("^y.Fmt_ToHtml(ctx:&)\n", args);
     }
 
+    DebugStack_Pop();
     return total;
 }
 

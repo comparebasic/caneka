@@ -228,6 +228,10 @@ static status Iter_Query(Iter *it){
                     p->nvalues++;
                     if(it->idx > p->max_idx){
                         p->max_idx = it->idx;
+                        if(it->type.state & DEBUG){
+                            printf("Added/Set\n");
+                            fflush(stdout);
+                        }
                     }
                 }else if(it->type.state & SPAN_OP_REMOVE){
                     *ptr = NULL;
@@ -381,6 +385,12 @@ end:
 status Iter_Set(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
     it->value = value;
+    return Iter_Query(it);
+}
+
+status Iter_Remove(Iter *it){
+    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_REMOVE;
+    it->value = (void *)NULL;
     return Iter_Query(it);
 }
 

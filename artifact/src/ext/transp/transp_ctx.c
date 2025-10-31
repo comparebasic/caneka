@@ -7,6 +7,7 @@ TranspCtx *TranspCtx_Make(MemCh *m, Buff *bf, Lookup *lk){
     ctx->m = m;
     ctx->bf = bf;
     ctx->lk = lk;
+    ctx->stackIdx = -1;
     Iter_Init(&ctx->it, Span_Make(m));
     return ctx;
 }
