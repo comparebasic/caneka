@@ -126,8 +126,6 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     Abstract *args[5];
     Iter it;
 
-    bf->type.state |= DEBUG;
-
     MemCh *m = bf->m;
     Table *tbl = Table_Make(m);
 
@@ -184,8 +182,6 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
 
 MemCh *Stash_FromStream(Buff *bf){
     status r = READY;
-
-    bf->type.state |= DEBUG;
 
     Abstract *args[5];
     StashHeader hdr = {0, 0};

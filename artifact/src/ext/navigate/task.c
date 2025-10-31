@@ -82,7 +82,7 @@ status Task_ResetChain(Task *tsk){
 status Task_AddDataStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags){
     Step *st = Step_Make(tsk->m, func, arg, source, flags);
     st->data = data;
-    status r = Iter_AddOn(&tsk->chainIt, (Abstract *)st);
+    status r = Iter_Add(&tsk->chainIt, (Abstract *)st);
     tsk->type.state |= MORE;
     return r|MORE;
 }

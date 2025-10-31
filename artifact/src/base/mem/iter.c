@@ -569,7 +569,6 @@ status Iter_SetByIdx(Iter *it, i32 idx, void *value){
     it->idx = idx;
     it->value = value;
     status r = Iter_Query(it);
-    it->value = NULL;
     return r;
 }
 
@@ -595,17 +594,7 @@ status Iter_Add(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
     it->value = value;
     status r = Iter_Query(it);
-    it->value = NULL;
     it->type.state &= ~PROCESSING;
-    return r;
-}
-
-status Iter_AddOn(Iter *it, void *value){
-    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
-    it->idx = it->p->max_idx;
-    it->value = value;
-    status r = Iter_Query(it);
-    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|PROCESSING);
     return r;
 }
 

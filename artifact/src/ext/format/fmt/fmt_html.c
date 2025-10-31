@@ -179,7 +179,7 @@ status Fmt_ToHtml(Buff *bf, Mess *mess){
             (Abstract *)mess,
             NULL
         };
-        Out("^y.Fmt_ToHtml(&)\n", args);
+        Out("^b.Fmt_ToHtml(&)\n", args);
     }
 
     TranspCtx *ctx = TranspCtx_Make(m, bf, fmtToHtmlLookup);
@@ -191,6 +191,14 @@ status Fmt_ToHtml(Buff *bf, Mess *mess){
     i64 total = 0;
     while((ctx->type.state & (SUCCESS|ERROR|ERROR)) == 0){
         total += Transp(ctx);
+    }
+
+    if(ctx->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)ctx,
+            NULL
+        };
+        Out("^y.Fmt_ToHtml(ctx:&)\n", args);
     }
 
     return total;

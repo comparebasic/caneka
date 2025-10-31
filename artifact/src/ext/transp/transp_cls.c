@@ -49,6 +49,9 @@ static i64 TranspCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
             }
             Fmt(bf, fmt,args);
         }
+    }else if(flags & MORE){
+        Abstract *args[] = {(Abstract *)&tp->it, NULL};
+        total += Fmt(bf, " @", args);
     }
     total += Buff_Bytes(bf, (byte *)">", 1);
     return total;

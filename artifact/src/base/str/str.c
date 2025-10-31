@@ -115,7 +115,7 @@ Str *Str_From(MemCh *m, byte *bytes, word length){
 }
 
 Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
-    if(length < 0 || length > STR_MAX){
+    if(length < 0 || length > PAGE_SIZE){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error cannot have a negative length of a string at end",
         NULL);

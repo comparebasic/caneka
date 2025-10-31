@@ -276,18 +276,15 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
         };
         total += Fmt(bf, "value=@>", args2);
     }else if(flags & MORE){
-        Abstract *current = Iter_Current(it);
-        Str *type = current != NULL ? Type_ToStr(bf->m, current->type.of) : NULL;
         Abstract *args[] = {
             (Abstract *)Type_StateVec(bf->m, it->type.of, it->type.state),
             (Abstract *)I32_Wrapped(bf->m, it->idx),
             (Abstract *)I32_Wrapped(bf->m, it->p->nvalues),
             (Abstract *)I32_Wrapped(bf->m, it->p->max_idx),
-            (Abstract *)current,
-            (Abstract *)type,
+            (Abstract *)it->value,
             NULL
         };
-        total += Fmt(bf, "I<$: idx-nvalues/max_idx=^D.$of$/$^d.\\@@/^D.$^d.>", args);
+        total += Fmt(bf, "I<$: idx-nvalues/max_idx=^D.$of$/$^d.\\@@>", args);
     }else{
         total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
     }

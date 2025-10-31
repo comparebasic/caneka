@@ -167,6 +167,13 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
 }
 
 i64 Buff_Bytes(Buff *bf, byte *bytes, i64 length){
+    if(bf->type.state & DEBUG){
+        Str *s = Str_Ref(bf->m, bytes, length, length, ZERO); 
+        Abstract *args[2];
+        args[0] = (Abstract *)s;
+        args[1] = NULL;
+        Out("^p.Buff_Bytes(&)^0\n", args);
+    }
     if(length > IO_SEND_MAX){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error trying to send too many bytes at once", NULL);
