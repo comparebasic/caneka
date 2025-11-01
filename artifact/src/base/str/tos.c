@@ -49,15 +49,8 @@ status StreamTo_Init(MemCh *m){
     return r;
 }
 
-void indent_Print(int indent){
-    while(indent--){
-        printf("  ");
-    }
-}
-
-i64 Slots_Print(Buff *bf, util *ut, i32 slots, word flags){
+status Slots_Print(Buff *bf, util *ut, i32 slots, word flags){
     i64 length = slots;
-    i64 total = 0;
     Single sg = {{TYPE_WRAPPED_I64, 0}, 0};
     if(ut == NULL){
         return Buff_AddBytes(bf, (byte *)"NULL", 4);
@@ -65,89 +58,86 @@ i64 Slots_Print(Buff *bf, util *ut, i32 slots, word flags){
     for(int i = 0; i < length;i++){
         util u = ut[i];
         if(u == 0 && (flags & MORE)){
-            total += Buff_AddBytes(bf, (byte *)"0", 1);
+            Buff_AddBytes(bf, (byte *)"0", 1);
         }else{
             if(flags & MORE){
                 sg.val.value = u;
                 Abstract *args[] = {(Abstract *)&sg, NULL};
-                total += Fmt(bf, "$", args);
+                Fmt(bf, "$", args);
             }
             if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
-                total += Buff_AddBytes(bf, (byte *)"=", 1);
+                Buff_AddBytes(bf, (byte *)"=", 1);
             }
             if(flags & DEBUG){
                 for(int j = 65; j >= 0;j--){
-                    total += Buff_AddBytes(bf, (byte *)((u & (1 << j)) ? "1" : "0"), 1);
+                    Buff_AddBytes(bf, (byte *)((u & (1 << j)) ? "1" : "0"), 1);
                 }
             }
         }
         if(flags & MORE){
-            total += Buff_AddBytes(bf, (byte *)" ", 1);
+            Buff_AddBytes(bf, (byte *)" ", 1);
         }
     }
-    return total;
+    return SUCCESS;
 }
 
-i64 Bits_PrintArray(Buff *bf, void *arr, i64 sz, i32 count){
-    i64 total = 0;
+status Bits_PrintArray(Buff *bf, void *arr, i64 sz, i32 count){
     void *ptr = arr;
     for(i32 i = 0; i < count; i++){
-        total += Bits_Print(bf, (byte *)ptr, sz, DEBUG|MORE);
+        Bits_Print(bf, (byte *)ptr, sz, DEBUG|MORE);
         ptr += sz;
         if(i+1 < count){
-            total += Buff_AddBytes(bf, (byte *)", ", 2);
+            Buff_AddBytes(bf, (byte *)", ", 2);
         }
     }
-    return total;
+    return SUCCESS;
 }
 
-i64 Bits_PrintNum(Buff *bf, byte *bt, size_t length, word flags){
-    i64 total = 0;
+status Bits_PrintNum(Buff *bf, byte *bt, size_t length, word flags){
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};
     for(int i = length-1; i <= 0; i--){
         byte b = bt[i];
         if(b == 0 && (flags & (MORE|DEBUG)) == MORE){
-            total += Buff_AddBytes(bf, (byte *)"0", 1);
+            Buff_AddBytes(bf, (byte *)"0", 1);
         }else{
             if(flags & MORE){
                 sg.val.b = b;
                 Abstract *args[] = {(Abstract *)&sg, NULL};
-                total += Fmt(bf, "$=", args);
+                Fmt(bf, "$=", args);
             }
             for(int j = 7; j >= 0;j--){
-                total += Buff_AddBytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+                Buff_AddBytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
             }
         }
         if(flags & MORE){
-            total += Buff_AddBytes(bf, (byte *)" ", 1);
+            Buff_AddBytes(bf, (byte *)" ", 1);
         }
     }
-    return total;
+    return SUCCESS;
 }
 
 
-i64 Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
-    i64 total = 0;
+status Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};
     for(int i = 0; i < length;i++){
         byte b = bt[i];
         if(b == 0 && (flags & (MORE|DEBUG)) == MORE){
-            total += Buff_AddBytes(bf, (byte *)"0", 1);
+            Buff_AddBytes(bf, (byte *)"0", 1);
         }else{
             if(flags & MORE){
                 sg.val.b = b;
                 Abstract *args[] = {(Abstract *)&sg, NULL};
-                total += Fmt(bf, "$=", args);
+                Fmt(bf, "$=", args);
             }
             for(int j = 7; j >= 0;j--){
-                total += Buff_AddBytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+                Buff_AddBytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
             }
         }
         if(flags & MORE){
-            total += Buff_AddBytes(bf, (byte *)" ", 1);
+            Buff_AddBytes(bf, (byte *)" ", 1);
         }
     }
-    return total;
+    return SUCCESS;
 }
 
 
@@ -166,14 +156,15 @@ i64 FlagStr(word flag, char *dest, char *map){
     dest[p] = '\0';
     return p;
 }
-i64 Str_AddFlags(Str *s, word flags, char *map){
+
+status Str_AddFlags(Str *s, word flags, char *map){
     if(s->alloc - (s->length+FLAG_DEBUG_MAX) < 0){
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Not enough room in str", NULL);
         return 0;
     }
     i64 total = FlagStr(flags, (char *)s->bytes+s->length, map);
     s->length += (word)total;
-    return total;
+    return total > 0 ? SUCCESS : NOOP;
 }
 
 char *ToStreamChars(word flags){
@@ -188,7 +179,7 @@ char *ToStreamChars(word flags){
     }
 }
 
-i64 _ToStream_NotImpl(char *func, char *file, i32 line, Buff *bf, Abstract *a, cls type, word flags){
+status _ToStream_NotImpl(char *func, char *file, i32 line, Buff *bf, Abstract *a, cls type, word flags){
     Abstract *args[] = {
         (Abstract *)Str_CstrRef(bf->m, ToStreamChars(flags)),
         (Abstract *)Str_CstrRef(bf->m, Type_ToChars(type)),
@@ -199,14 +190,13 @@ i64 _ToStream_NotImpl(char *func, char *file, i32 line, Buff *bf, Abstract *a, c
     return 0;
 }
 
-i64 ToStream_NotImpl(Buff *bf, Abstract *a, cls type, word flags){
+status ToStream_NotImpl(Buff *bf, Abstract *a, cls type, word flags){
     return _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
 }
 
-i64 ToS(Buff *bf, Abstract *a, cls type, word flags){
+status ToS(Buff *bf, Abstract *a, cls type, word flags){
     if(a == NULL){
-        i64 total =  Buff_AddBytes(bf, (byte *)"NULL", 4);
-        return total;
+        return Buff_AddBytes(bf, (byte *)"NULL", 4);
     }
 
     if(type == 0){
@@ -215,8 +205,7 @@ i64 ToS(Buff *bf, Abstract *a, cls type, word flags){
 
     ToSFunc func = (ToSFunc)Lookup_Get(ToStreamLookup, type);
     if(func != NULL){
-        i64 total = func(bf, a, type, flags);
-        return total;
+        return func(bf, a, type, flags);
     }else{
         Abstract *args[] = {
             (Abstract *)Type_ToStr(bf->m, type),
@@ -224,6 +213,6 @@ i64 ToS(Buff *bf, Abstract *a, cls type, word flags){
             NULL
         };
         Fmt(bf, "$/$: unknown-debug", args);
-        return 0;
+        return ERROR;
     }
 }

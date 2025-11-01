@@ -6,10 +6,6 @@ static void Buff_addTail(Buff *bf){
     Span_Add(bf->v->p, (Abstract *)s);
     bf->tail.idx = bf->v->p->max_idx;
     bf->tail.s = s;
-    if(bf->type.state & DEBUG){
-        printf("      adding tailIdx %d %d/%d\n", 
-            bf->tail.idx, (i32)bf->tail.s->length, (i32)bf->tail.s->alloc);
-    }
 }
 
 static void Buff_setUnsentStr(Buff *bf){

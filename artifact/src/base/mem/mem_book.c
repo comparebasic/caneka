@@ -119,18 +119,6 @@ status MemBook_WipePages(void *addr){
         void *page = Iter_Get(&book->retired);
         memset(page, 0, PAGE_SIZE);
         r |= Iter_Add(&book->recycled, page);
-        i32 idx = ((void *)page - book->start) / PAGE_SIZE;
-        if(book->type.state & DEBUG){
-            printf("\x1b[36m%d To Recycled\x1b[0m Retired Nvalues:%d max_idx:%d END%d|NOOP%d %p\n",
-                idx,
-                book->retired.p->nvalues,
-                book->retired.p->max_idx,
-                book->retired.type.state & END,
-                book->retired.type.state & NOOP,
-                page
-            );
-            fflush(stdout);
-        }
     }
     return r;
 }
@@ -138,15 +126,6 @@ status MemBook_WipePages(void *addr){
 status MemBook_FreePage(MemCh *m, MemPage *pg){
     MemBook *book = MemBook_get(m);
     status r = Iter_Add(&book->retired, pg);
-    if(book->type.state & DEBUG){
-        i32 idx = ((void *)pg - book->start) / PAGE_SIZE;
-        printf("\x1b[33m%d Retired Page level:%d\x1b[0m Retired Nvalues:%d max_idx:%d END%d %p\n",
-            idx,
-            (i32)m->level,
-            book->retired.p->nvalues, book->retired.p->max_idx,
-            book->retired.type.state & END, pg);
-        fflush(stdout);
-    }
     return r;
 }
 
@@ -158,13 +137,6 @@ void *MemBook_GetPage(void *addr){
     if((Iter_PrevRemove(&book->recycled) & (END|NOOP)) == 0){
         void *page = Iter_Get(&book->recycled);
         i32 idx = ((void *)page - book->start) / PAGE_SIZE;
-        if(book->type.state & DEBUG){
-            printf("\x1b[32m%d From Recycled\x1b[0m Nvalues:%d max_idx:%d END%d %p\n",
-                idx,
-                book->recycled.p->nvalues, book->recycled.p->max_idx,
-                book->recycled.type.state & END, page);
-            fflush(stdout);
-        }
         if(page == NULL){
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemPage from recycled is null", NULL);
         }
@@ -173,10 +145,6 @@ void *MemBook_GetPage(void *addr){
         if(++book->idx <= PAGE_MAX){
             void *page = book->start+(book->idx*PAGE_SIZE);
             i32 idx = ((void *)page - book->start) / PAGE_SIZE;
-            if(book->type.state & DEBUG){
-                printf("\x1b[32m%d From New\x1b[0m %p\n", idx, page);
-                fflush(stdout);
-            }
             return page;
         }
     }

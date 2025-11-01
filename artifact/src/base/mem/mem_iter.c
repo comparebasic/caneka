@@ -70,7 +70,6 @@ status MemIter_Next(MemIter *mit){
         }
         if(mit->ptr+sz-1 == mit->end){
             if(mit->slIdx < mit->maxSlIdx){
-                printf("SETTING MORE %d vs %d\n", mit->slIdx, mit->maxSlIdx);
                 mit->type.state = (mit->type.state & UPPER_FLAGS) | MORE;
                 mit->ptr = mit->end = NULL;
                 mit->slIdx++;

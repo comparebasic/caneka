@@ -62,9 +62,6 @@ static status Templ_handleJump(Templ *templ){
     Fetcher *fch = jump->fch;
     i32 skipIdx = -1;
     if(fch->type.state & FETCHER_END){
-        if(templ->type.state & DEBUG){
-            printf("        END\n");
-        }
         skipIdx = templ->content.idx;
         TemplJump *dest = (TemplJump *)Span_Get(templ->content.p, jump->destIdx);
         if(dest->fch->type.state & FETCHER_WITH){

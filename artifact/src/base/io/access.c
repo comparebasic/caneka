@@ -71,13 +71,11 @@ Str *GetAccess(Access *access, Str *s){
     DebugStack_Push(access->owner, access->owner->type.of);
     Hashed *h = Table_GetHashed(_perms, (Abstract *)access->owner);
     if(h == NULL){
-        printf("eI\n");
         DebugStack_Pop();
         return NULL;
     }
     word fl = (access->type.state & UPPER_FLAGS);
     if((fl & h->type.state) != fl){
-        printf("eII\n");
         DebugStack_Pop();
         return NULL;
     }

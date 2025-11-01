@@ -183,7 +183,6 @@ Span *StrVec_ToSpan(MemCh *m, StrVec *v){
             if(s != NULL){
                 Span_Add(p, (Abstract *)s);
             }else if(shelf != NULL){
-                printf("shelf != NULL\n");
                 StrVec_Add(shelf, item);
                 Span_Add(p, (Abstract *)shelf);
             }

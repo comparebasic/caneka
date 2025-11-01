@@ -241,10 +241,6 @@ status Iter_Tests(MemCh *gm){
                 NULL
             };
             r |= Test(FALSE, "at $: expected $ found $", args);
-        }else{
-            /*
-            printf("\x1b[32m%d: %ld vs %ld\x1b[0m,", it.idx, exp, (i64)it.value); 
-            */
         }
         if(exp == 177){
             if(second){

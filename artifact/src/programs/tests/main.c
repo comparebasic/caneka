@@ -374,14 +374,6 @@ static TestSet _Tests[] = {
         "Task/Step and Task_Tumble tests.",
         FEATURE_COMPLETE,
     },
-    /*
-    {
-        "ServeTcp Tests",
-        ServeTcp_Tests,
-        "Queue tests for file descriptors and time delays.",
-        FEATURE_COMPLETE,
-    },
-    */
     {
         "ThirdParty/Api",
         NULL,
@@ -394,26 +386,12 @@ static TestSet _Tests[] = {
         "Cryptography functionality testing.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "Www Tests",
         NULL,
         NULL,
         SECTION_LABEL,
     },
-    {
-        "Www Nav Tests",
-        WwwNav_Tests,
-        "Testing a navigation object for composing HTML.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Www Nav Templ Tests",
-        WwwNavTempl_Tests,
-        "Testing a navigation object for templating and composing HTML.",
-        FEATURE_COMPLETE,
-    },
-    */
     {
         "Www Route Tests",
         WwwRoute_Tests,
@@ -426,6 +404,14 @@ static TestSet _Tests[] = {
         "Example route templating test.",
         FEATURE_COMPLETE,
     },
+    /*
+    {
+        "ServeTcp Tests",
+        ServeTcp_Tests,
+        "Queue tests for file descriptors and time delays.",
+        FEATURE_COMPLETE,
+    },
+    */
     {
         NULL,
         NULL,

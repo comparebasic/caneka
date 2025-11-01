@@ -19,8 +19,6 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         }else if(tg->type.state & FETCH_TARGET_PROP){
             tg->idx = Class_GetPropIdx(cls, tg->key);
             if(tg->idx == -1){
-                printf("Err Here II\n");
-                fflush(stdout);
                 goto err;
             }
             tg->type.state |= FETCH_TARGET_RESOLVED;
