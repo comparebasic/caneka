@@ -82,9 +82,10 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
         (Abstract *)Str_MemCount(m, st.total * PAGE_SIZE),
         (Abstract *)I64_Wrapped(gm, st.total),
         (Abstract *)I64_Wrapped(gm, st.pageIdx),
+        (Abstract *)I64_Wrapped(gm, PAGE_SIZE),
         NULL
     };
-    Out("Starting Mem at $ total/maxIdx=^D.$/$^d.\n", args2);
+    Out("Starting Mem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args2);
 
     while(set->name != NULL){
         Abstract *args3[] = {
@@ -129,9 +130,10 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
                 (Abstract *)Str_MemCount(m, st.total * PAGE_SIZE),
                 (Abstract *)I64_Wrapped(gm, st.total),
                 (Abstract *)I64_Wrapped(gm, st.pageIdx),
+                (Abstract *)I64_Wrapped(gm, PAGE_SIZE),
                 NULL
             };
-            Out("$Mem: $ total/maxIdx=^D.$/$^d.^0\n", args2);
+            Out("$Mem: $ total/maxIdx=^D.$/$^d. page-size=$b^0\n", args2);
 
 
             MemCh_Free(m);

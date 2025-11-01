@@ -17,16 +17,19 @@ static status renderStatus(MemCh *m, Abstract *a){
     float modSrcTotal = count + (float)(ctx->fields.steps.modSrcTotal->val.i-ctx->fields.steps.modSrcCount->val.i);
     ctx->fields.steps.barEnd->length = (i32)ceil(((modSrcTotal)/total) * colsFloat) - progress;
 
+    MemBookStats st;
+    MemBook_GetStats(m, &st);
+
     CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memTotal"),
         (Abstract *)Str_MemCount(ctx->m, MemChapterTotal()*PAGE_SIZE));
-    CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memUsed"),
-        (Abstract *)Str_MemCount(ctx->m, MemCount(0)));
+
     Single *sg = (Single *)as(CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chapters")), TYPE_WRAPPED_I64);
-    sg->val.value = MemChapterCount();
+    sg->val.value = st.total;
+
     sg = (Single *)as(CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
-    sg->val.value = MemChapterTotal();
+    sg->val.value = st.pageIdx;
 
     return SUCCESS;
 }
@@ -124,24 +127,22 @@ static status setupStatus(BuildCtx *ctx){
         (Abstract *)FmtLine_Make(m, "^B.$^0.^Y.$^0", arr));
 
     arr = Arr_Make(m, 5);
-    arr[0] = (Abstract *)Str_Ref(m, (byte *)"c.", 2, 3, STRING_FMT_ANSI);
-    arr[1] = NULL;
+    arr[0] = NULL;
+    arr[1] = (Abstract *)I64_Wrapped(m, 0);
     arr[2] = (Abstract *)I64_Wrapped(m, 0);
-    arr[3] = (Abstract *)I64_Wrapped(m, 0);
+    arr[3] = (Abstract *)I64_Wrapped(m, PAGE_SIZE);
     arr[4] = NULL;
     Span_Add(ctx->cli->lines,
         (Abstract *)FmtLine_Make(m,
-            "$Memory $ ($ of $ chapters) ^D.$^d.used^0", arr));
+            "^c.Memory $ total/maxIdx=^D.$/$^d. page-size=$b^0", arr));
 
     coords.a = ctx->cli->lines->max_idx;
-    coords.b = 1;
+    coords.b = 0;
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "memTotal"), &coords);
-    coords.b = 2;
+    coords.b = 1;
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chapters"), &coords);
-    coords.b = 3;
+    coords.b = 2;
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chaptersTotal"), &coords);
-    coords.b = 4;
-    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "memUsed"), &coords);
 
     return SUCCESS;
 }
