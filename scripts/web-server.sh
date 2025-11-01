@@ -1,6 +1,6 @@
 #!/bin/sh
 CC="clang"
-INC="-I ./artifact/src/include -I artifact/src/base/include"
+INC="-I ./artifact/src/include -I artifact/src/base/include -I artifact/src/builder/include"
 STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"
 
 ./scripts/make.sh && \

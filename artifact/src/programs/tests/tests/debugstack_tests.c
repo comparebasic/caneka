@@ -6,8 +6,8 @@ status DebugStack_Tests(MemCh *gm){
 
     MemCh *m = MemCh_Make();
 
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
-    Buff *bfAfter = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
+    Buff *bfAfter = Buff_Make(m, ZERO);
 
     DebugStack_Push(NULL, 0);
     DebugStack_Print(bf, 0);

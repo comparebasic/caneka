@@ -75,7 +75,7 @@ status TemplRoute_Tests(MemCh *gm){
     Templ_Prepare(templ);
 
     StrVec *out = StrVec_Make(m);
-    Buff *bf = Buff_From(m, out, BUFF_STRVEC);
+    Buff *bf = Buff_From(m, out);
     Templ_ToS(templ, bf, (Abstract *)data, NULL);
 
     out->type.state |= DEBUG;

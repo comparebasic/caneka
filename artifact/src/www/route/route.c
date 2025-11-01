@@ -91,7 +91,7 @@ static status routeFuncTempl(MemCh *m,
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     Templ_Prepare(templ);
 
-    Buff *bf = Buff_From(m, out, BUFF_STRVEC);
+    Buff *bf = Buff_From(m, out);
     Templ_ToS(templ, bf, (Abstract *)data, source);
 
     DebugStack_Pop();
@@ -105,7 +105,7 @@ static status routeFuncFmt(MemCh *m,
     Roebling *rbl = FormatFmt_Make(m, curs, source);
     Roebling_Run(rbl);
         
-    Buff *bf = Buff_From(m, out, BUFF_STRVEC);
+    Buff *bf = Buff_From(m, out);
     Fmt_ToHtml(bf, rbl->mess);
 
     DebugStack_Pop();

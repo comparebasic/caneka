@@ -90,7 +90,7 @@ status StrVec_Tests(MemCh *gm){
     Str *sf2 = Str_Clone(m, sf);
     sf2->type.state |= DEBUG;
     char *cstr = ", all alone";
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
 
     i32 twentyNine = 29;
     i64 fiveK = 5987263;

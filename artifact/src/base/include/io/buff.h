@@ -4,7 +4,6 @@ enum send_recv_flags {
     BUFF_ASYNC = 1 << 8,
     BUFF_FD = 1 << 9,
     BUFF_SOCKET = 1 << 10,
-    BUFF_STRVEC = 1 << 11,
     BUFF_FLUSH = 1 << 12,
     BUFF_UNBUFFERED = 1 << 13,
     BUFF_SLURP = 1 << 14,
@@ -31,7 +30,7 @@ typedef struct buff {
 } Buff;
 
 Buff *Buff_Make(MemCh *m, word flags);
-Buff *Buff_From(MemCh *m, StrVec *v, word flags);
+Buff *Buff_From(MemCh *m, StrVec *v);
 
 status Buff_GetStr(Buff *bf, Str *s);
 status Buff_GetToVec(Buff *bf, StrVec *v);

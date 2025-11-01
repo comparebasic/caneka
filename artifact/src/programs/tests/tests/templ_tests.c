@@ -209,7 +209,7 @@ status Templ_Tests(MemCh *gm){
 
     Object_ByPath(data, key, (Abstract *)menu, SPAN_OP_SET);
 
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     status result = Templ_Prepare(templ);
@@ -347,7 +347,7 @@ status TemplLogic_Tests(MemCh *gm){
 
     Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
 
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
 
     DebugStack_SetRef(data, data->type.of);
     
@@ -373,4 +373,3 @@ status TemplLogic_Tests(MemCh *gm){
     DebugStack_Pop();
     return r;
 }
-

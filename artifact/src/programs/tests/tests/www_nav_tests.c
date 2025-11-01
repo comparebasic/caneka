@@ -191,7 +191,7 @@ status WwwNavTempl_Tests(MemCh *gm){
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
 
     Nav *nav = makeNav(m);
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     i64 total = Templ_ToS(templ, bf, (Abstract *)nav, NULL);
 

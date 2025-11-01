@@ -39,7 +39,7 @@ status FmtHtml_Tests(MemCh *gm){
     rbl = FormatFmt_Make(m, curs, NULL);
     Roebling_Run(rbl);
 
-    Buff *bf = Buff_Make(m, BUFF_STRVEC); 
+    Buff *bf = Buff_Make(m, ZERO); 
     
     Fmt_ToHtml(bf, rbl->mess);
     r |= Test(rbl->mess->transp->type.state & SUCCESS, 

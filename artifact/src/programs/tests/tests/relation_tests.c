@@ -33,7 +33,7 @@ status Relation_Tests(MemCh *gm){
     Relation_SetValue(rel, 3, 1, (Abstract *)I32_Wrapped(m, 32));
     Relation_SetValue(rel, 3, 2, (Abstract *)I32_Wrapped(m, 33));
 
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     i64 total = ToS(bf, (Abstract *)rel, 0, MORE|DEBUG);
 
     s = Str_CstrRef(m, "Rel<3x4 \x1b[1m\"ColumnA\"\x1b[22m,"

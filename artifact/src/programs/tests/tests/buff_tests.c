@@ -7,7 +7,7 @@ status Buff_Tests(MemCh *gm){
     Abstract *args[5];
     MemCh *m = MemCh_Make();
 
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
 
     char *cstr = "Hi, hows the weather";
     Buff_AddBytes(bf, (byte *)cstr, strlen(cstr)); 
@@ -83,7 +83,7 @@ status BuffSendRecv_Tests(MemCh *gm){
     Str *s = Str_CstrRef(m, "All of the things you want to know are kindof like "
         "dandilions.");
 
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     Buff_Add(bf, s);
 
     Str *expected = s;
@@ -244,7 +244,7 @@ status BuffPos_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     MemCh *m = MemCh_Make();
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
 
     Buff_Add(bf, Str_CstrRef(m, "Once upon a time..."));
     Buff_Add(bf, Str_CstrRef(m, "There was a prince, a queen, a frog, and"));

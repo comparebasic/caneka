@@ -121,7 +121,7 @@ FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
 }
 
 StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args){
-    Buff *bf = Buff_Make(m, BUFF_STRVEC); 
+    Buff *bf = Buff_Make(m, ZERO);
     Fmt(bf, fmt, args); 
     return bf->v;
 }

@@ -12,7 +12,7 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
             "not found");
         Buff_Add(proto->out, s);
     }else{
-        Buff *bf = Buff_From(tsk->m, proto->out->v, BUFF_STRVEC);
+        Buff *bf = Buff_From(tsk->m, proto->out->v);
 
         Str *statLine = Str_CstrRef(tsk->m, "200 OK");
         if(ctx->code != 200){

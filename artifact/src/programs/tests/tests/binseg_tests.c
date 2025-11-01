@@ -7,7 +7,7 @@ status BinSeg_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, ZERO);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
@@ -45,7 +45,7 @@ status BinSegCollection_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, ZERO);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
@@ -125,7 +125,7 @@ status BinSegV_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, BINSEG_VISIBLE);
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
@@ -204,7 +204,7 @@ status BinSegReversedV_Tests(MemCh *gm){
     status r = READY;
     Abstract *args[5];
     
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, (BINSEG_REVERSED|BINSEG_VISIBLE));
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");

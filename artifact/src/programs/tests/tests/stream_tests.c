@@ -4,7 +4,7 @@
 status Stream_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
-    Buff *bf = Buff_Make(m, BUFF_STRVEC);
+    Buff *bf = Buff_Make(m, ZERO);
     Str *s = Str_CstrRef(m, "Hello");
     Buff_AddBytes(bf, s->bytes, s->length);
 

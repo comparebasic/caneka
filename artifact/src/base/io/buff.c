@@ -588,10 +588,9 @@ status Buff_SetSocket(Buff *bf, i32 fd){
     return SUCCESS;
 }
 
-Buff *Buff_From(MemCh *m, StrVec *v, word flags){
+Buff *Buff_From(MemCh *m, StrVec *v){
     Buff *bf = (Buff *)MemCh_AllocOf(m, sizeof(Buff), TYPE_BUFF);
     bf->type.of = TYPE_BUFF;
-    bf->type.state = flags;
     bf->m = m;
     bf->fd = -1;
     bf->v = v;
@@ -603,5 +602,7 @@ Buff *Buff_From(MemCh *m, StrVec *v, word flags){
 }
 
 Buff *Buff_Make(MemCh *m, word flags){
-    return Buff_From(m, StrVec_Make(m), flags);
+    Buff *bf = Buff_From(m, StrVec_Make(m));
+    bf->type.state = flags;
+    return bf;
 }

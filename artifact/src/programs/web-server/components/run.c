@@ -74,7 +74,6 @@ static status Example_FooterContent(Step *st, Task *tsk){
         st->type.state |= ERROR;
         return st->type.state;
     }
-    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, NULL) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
@@ -99,7 +98,6 @@ static status Example_HeaderContent(Step *st, Task *tsk){
         return st->type.state;
     }
 
-    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, NULL) & SUCCESS){
         ctx->mime = (Str *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_MIME);
         st->type.state |= SUCCESS;
@@ -161,7 +159,8 @@ static status Example_ServeError(Step *st, Task *tsk){
     }
     StrVec_Add(ctx->content, Str_CstrRef(tsk->m,
         "<h1>Server Error</h1>\r\n    <p>"));
-    Stream *sm = Stream_MakeToVec(tsk->m, ctx->content);
+
+    Buff *bf = Buff_From(tsk->m, ctx->content);
 
     ErrorMsg *msg = (ErrorMsg *)as(st->arg, TYPE_ERROR_MSG);
     if(ctx->errors == NULL){
@@ -169,7 +168,7 @@ static status Example_ServeError(Step *st, Task *tsk){
     }
 
     Span_Add(ctx->errors, (Abstract *)msg);
-    ToS(sm, (Abstract *)msg, msg->type.of, ZERO);
+    ToS(bf, (Abstract *)msg, msg->type.of, ZERO);
 
     StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "</p>\r\n"));
     st->type.state |= SUCCESS;
