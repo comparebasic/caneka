@@ -4,21 +4,56 @@
 static gobits Queue_CheckSlab(Queue *q);
 
 i32 Queue_GetIdx(Queue *q){
-    return q->itemsIt.idx;
+    return q->it.idx;
 }
 
 status Queue_Remove(Queue *q, i32 idx){
     status r = READY;
-    r |= Span_Remove(q->itemsIt.p, idx);
+    Iter it;
+    Iter_Init(&it, q->it.p);
+    Iter_RemoveByIdx(&it, idx);
+    q->type.state |= (it.type.state & (FLAG_ITER_REVERSE|END));
+    MemCh *m = q->it.p->m;
+
     util u = 0;
-    r |= Queue_SetCriteria(q, 0, idx, &u);
-    return r;
+    Iter_Init(&it, q->handlers);
+    while((Iter_Next(&it) & END) == 0){
+        r |= Queue_SetCriteria(q, it.idx, idx, &u);
+    }
+
+    Single *sg = NULL;
+    if(q->availableIt.metrics.selected == -1 || 
+            q->availableIt.metrics.selected == q->availableIt.p->max_idx){
+        q->availableIt.metrics.selected++;
+        printf("making new I32W %d\n", q->availableIt.metrics.selected);
+        fflush(stdout);
+        sg = I32_Wrapped(m, idx);
+        Iter_SetByIdx(&q->availableIt,
+            q->availableIt.metrics.selected, (Abstract *)sg);
+    }else{
+        printf("recycling I32W %d\n", q->availableIt.metrics.selected);
+        fflush(stdout);
+        sg = Iter_GetByIdx(&q->availableIt, q->availableIt.metrics.selected);
+        q->availableIt.metrics.selected--;
+    }
+    sg->val.i = idx;
+
+    return q->type.state;
 }
 
-i32 Queue_Add(Queue *q, Abstract *a, util *crit){
-    i32 idx = q->itemsIt.p->max_idx+1;
+i32 Queue_Add(Queue *q, Abstract *a){
+    i32 idx = 0;
+    if(q->availableIt.metrics.selected >= 0){
+        Single *sg = (Single *)Iter_GetByIdx(&q->availableIt, 
+            q->availableIt.metrics.selected);
+        q->availableIt.metrics.selected--;
+        idx = sg->val.i;
+    }else{
+        idx = q->it.p->max_idx+1;
+    }
+
     Abstract *args[4];
-    MemCh *m = q->itemsIt.p->m;
+    MemCh *m = q->it.p->m;
     if(q->type.state & DEBUG){
         args[0] = (Abstract *)I32_Wrapped(m, idx);
         args[1] = (Abstract *)a;
@@ -27,24 +62,24 @@ i32 Queue_Add(Queue *q, Abstract *a, util *crit){
         Out("^p.Queue_Add \\@$/@ &\n", args);
     }
     Queue_Set(q, idx, a);
-    Queue_SetCriteria(q, 0, idx, crit);
     return idx;
 }
 
 status Queue_Set(Queue *q, i32 idx, Abstract *a){
+    q->type.state &= ~(FLAG_ITER_REVERSE|END);
+
     status r = READY;
-    r |= Span_Set(q->itemsIt.p, idx, a);
-    if(q->itemsIt.type.state & MORE){
-        Iter_GetByIdx(&q->itemsIt, q->itemsIt.idx);
-        r |= MORE;
-    }
+    Iter it;
+    Iter_Init(&it, q->it.p);
+    r |= Iter_SetByIdx(&it, idx, a);
+
     return r;
 }
 
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     status r = READY;
     Abstract *args[4];
-    MemCh *m = q->itemsIt.p->m;
+    MemCh *m = q->it.p->m;
     if(q->type.state & DEBUG){
         args[0] = (Abstract *)I32_Wrapped(m, idx);
         args[1] = (Abstract *)Str_Ref(m, 
@@ -81,7 +116,7 @@ static status Queue_SetGo(Queue *q){
 }
 
 status Queue_Reset(Queue *q){
-    Iter_Init(&q->itemsIt, q->itemsIt.p);
+    Iter_Init(&q->it, q->it.p);
     q->go = 0;
     q->slabIdx = -1;
     q->type.state = q->type.state & DEBUG;
@@ -98,17 +133,17 @@ status Queue_Next(Queue *q){
     if(q->type.state & END){
         Queue_Reset(q);
     }
-    MemCh *m = q->itemsIt.p->m;
+    MemCh *m = q->it.p->m;
     q->type.state &= ~(SUCCESS|NOOP|END);
     q->value = NULL;
-    if(q->itemsIt.p->nvalues == 0){
+    if(q->it.p->nvalues == 0){
         q->type.state |= END;
         return q->type.state;
     }
 
-    while((Iter_Next(&q->itemsIt) & END) == 0){
+    while((Iter_Next(&q->it) & END) == 0){
         Iter it;
-        if(q->itemsIt.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
+        if(q->it.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
             q->slabIdx++;
             q->go = 0;
             Iter_Init(&it, q->handlers);
@@ -119,12 +154,12 @@ status Queue_Next(Queue *q){
             }
         }
 
-        i32 localIdx = (q->itemsIt.idx & CRIT_SLAB_MASK); 
+        i32 localIdx = (q->it.idx & CRIT_SLAB_MASK); 
         if(q->go & (1 << localIdx)){
             q->type.state |= SUCCESS;
-            q->value = Iter_Get(&q->itemsIt);
+            q->value = Iter_Get(&q->it);
             if(q->type.state & DEBUG){
-                args[0] = (Abstract *)I32_Wrapped(m, q->itemsIt.idx);
+                args[0] = (Abstract *)I32_Wrapped(m, q->it.idx);
                 args[1] = (Abstract *)q->value;
                 args[2] = NULL;
                 Out("^p.    Found \\@$/&\n", args);
@@ -133,7 +168,7 @@ status Queue_Next(Queue *q){
         }
     }
 
-    q->type.state |= (q->itemsIt.type.state & END);
+    q->type.state |= (q->it.type.state & END);
     return q->type.state;
 }
 
@@ -146,8 +181,8 @@ status Queue_AddHandler(Queue *q, QueueCrit *crit){
 Queue *Queue_Make(MemCh *m){
     Queue *q = MemCh_AllocOf(m, sizeof(Queue), TYPE_QUEUE);
     q->type.of = TYPE_QUEUE;
-    Iter_Init(&q->itemsIt, Span_Make(m));
-    q->available = Span_Make(m);
+    Iter_Init(&q->it, Span_Make(m));
+    Iter_Init(&q->availableIt, Span_Make(m));
     q->handlers = Span_Make(m);
     q->slabIdx = -1;
     return q;

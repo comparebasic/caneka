@@ -279,7 +279,7 @@ status Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
             (Abstract *)it->value,
             NULL
         };
-        Fmt(bf, "I<@ idx-nvalues/max_idx=^D.$of$^d.\\@@>", args);
+        Fmt(bf, "I<@ idx/max_idx=^D.$of$^d.\\@@>", args);
     }else{
         _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
     }

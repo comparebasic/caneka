@@ -365,7 +365,13 @@ static TestSet _Tests[] = {
     {
         "Queue Tests",
         Queue_Tests,
-        "Queue tests for file descriptors and time delays.",
+        "Queue tests for file descriptors.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Queue Add Remove Tests",
+        QueueAddRemove_Tests,
+        "Queue tests for adding and removing items.",
         FEATURE_COMPLETE,
     },
     {

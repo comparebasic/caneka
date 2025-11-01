@@ -10,3 +10,4 @@ status Span_Add(Span *p, Abstract *t);
 status Span_Insert(Span *p, i32, Abstract *t);
 status Span_Wipe(Span *p);
 i32 Span_Has(Span *p, Abstract *a);
+status Span_AddRaw(Span *p, util *u);

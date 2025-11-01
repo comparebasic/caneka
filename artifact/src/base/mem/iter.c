@@ -391,10 +391,18 @@ status Iter_Remove(Iter *it){
 }
 
 status Iter_RemoveByIdx(Iter *it, i32 idx){
+    it->type.state &= ~END;
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_REMOVE;
     it->value = (void *)NULL;
     it->idx = idx;
-    return Iter_Query(it);
+    status r = Iter_Query(it);
+    if(it->idx >= it->p->max_idx){
+        it->type.state |= END;
+        if(it->idx == 0){
+            it->type.state |= FLAG_ITER_REVERSE;
+        }
+    }
+    return r;
 }
 
 status Iter_Next(Iter *it){

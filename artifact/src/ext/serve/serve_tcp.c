@@ -111,7 +111,8 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
                 Out("^c.    Adding Child &^0\n", args);
             }
 
-            child->idx = Queue_Add(q, (Abstract *)child, &child->u);
+            child->idx = Queue_Add(q, (Abstract *)child);
+            Queue_SetCriteria(q, 0, child->idx, &child->u);
 
             accepted++;
             r |= tsk->type.state;

@@ -148,6 +148,26 @@ status Span_Insert(Span *p, i32 idx, Abstract *t){
     return Iter_Insert(&it, idx, t);
 }
 
+status Span_AddRaw(Span *p, util *u){
+    if((p->type.state & FLAG_SPAN_RAW) == 0){
+        Abstract *args[2];
+        args[0] = (Abstract *)Str_FuncName(p->m);
+        args[1] = NULL;
+        Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "$ requires RAW flag for span", args);
+        return ERROR;
+    }
+    p->type.state &= ~(ERROR|SUCCESS|NOOP);
+    if(u == NULL){
+        p->type.state |= NOOP;
+        return p->type.state;
+    }
+    Iter it;
+    Iter_Init(&it, p);
+    p->type.state |= Iter_Add(&it, (void *)*u) & (ERROR|SUCCESS|NOOP);
+    return p->type.state;
+}
+
 status Span_Add(Span *p, Abstract *t){
     p->type.state &= ~(ERROR|SUCCESS|NOOP);
     if(t == NULL){

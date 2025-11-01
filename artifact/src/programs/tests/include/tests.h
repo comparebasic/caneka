@@ -55,6 +55,7 @@ status TableUtilKey_Tests(MemCh *gm);
 status TableHKey_Tests(MemCh *gm);
 status Time_Tests(MemCh *gm);
 status Queue_Tests(MemCh *gm);
+status QueueAddRemove_Tests(MemCh *gm);
 status TaskStep_Tests(MemCh *gm);
 status ServeTcp_Tests(MemCh *gm);
 status Encoding_Tests(MemCh *gm);
