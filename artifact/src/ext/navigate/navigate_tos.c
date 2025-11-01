@@ -4,6 +4,7 @@
 static Str **nodeLabels = NULL;
 static Str **messLabels = NULL;
 static Str **stepLabels = NULL;
+static Str **taskLabels = NULL;
 
 static status indentStream(Buff *bf, i32 indent){
     while(--indent >= 0){
@@ -225,11 +226,11 @@ static status Task_Print(Buff *bf, Abstract *a, cls type, word flags){
     args[5] = NULL;
     if(flags & DEBUG){
         args[4] = tsk->data;
-        return Fmt(bf, "Task<$ $ of $ \\@& data:@>", args);
+        return Fmt(bf, "Task<@ $ of $ \\@& data:@>", args);
     }else{
         args[1] = tsk->data;
         args[2] = NULL;
-        return Fmt(bf, "Task<$ @>", args);
+        return Fmt(bf, "Task<@ @>", args);
     }
 }
 
@@ -269,6 +270,14 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
         stepLabels[10] = Str_CstrRef(m, "IO_OUT");
         stepLabels[11] = Str_CstrRef(m, "LOOP");
         Lookup_Add(m, lk, TYPE_STEP, (void *)stepLabels);
+        r |= SUCCESS;
+    }
+
+    if(taskLabels == NULL){
+        taskLabels = (Str **)Arr_Make(m, 17);
+        taskLabels[9] = Str_CstrRef(m, "UPDATE_CRIT");
+        taskLabels[10] = Str_CstrRef(m, "QUEUE");
+        Lookup_Add(m, lk, TYPE_TASK, (void *)taskLabels);
         r |= SUCCESS;
     }
 

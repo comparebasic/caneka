@@ -1,6 +1,9 @@
+#define TASK_TUMPLE_MAX 6
+
 enum task_flags {
     TASK_UPDATE_CRIT = 1 << 8,
     TASK_QUEUE = 1 << 9,
+    TASK_CHILD = 1 << 10,
 };
 
 typedef struct task {

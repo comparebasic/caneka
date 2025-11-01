@@ -23,7 +23,8 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
 }
 
 void DebugStack_Pop(){
-    Iter_PrevRemove(&_it);
+    Iter_Remove(&_it);
+    Iter_Prev(&_it);
 }
 
 void DebugStack_SetRef(void *v, word typeOf){
@@ -36,7 +37,7 @@ void DebugStack_SetRef(void *v, word typeOf){
 }
 
 StackEntry *DebugStack_Get(){
-    return (StackEntry *)Iter_Current(&_it);
+    return (StackEntry *)Iter_Get(&_it);
 }
 
 status DebugStack_Show(Str *style, Str *msg, word flags){
@@ -59,7 +60,11 @@ i32 DebugStack_Print(Buff *bf, word flags){
     Iter it;
     Iter_Init(&it, _it.p);
     while((Iter_Prev(&it) & END) == 0){
-        total += ToS(bf, it.value, 0, flags);
+        word fl = flags;
+        if(it.idx == it.p->max_idx){
+            fl |= MORE;
+        }
+        total += ToS(bf, it.value, 0, fl);
     }
     return total;
 }

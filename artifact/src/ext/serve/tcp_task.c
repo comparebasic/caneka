@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 status TcpTask_ReadToRbl(Step *st, Task *tsk){
+    DebugStack_Push(st, st->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     Roebling *rbl = (Roebling *)as(st->arg, TYPE_ROEBLING);
@@ -21,7 +22,7 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
             (Abstract *)rbl->curs->v,
             NULL,
         };
-        Out("^0.ReadToRbl -> ^g.&^0\n", args);
+        Out("^0.ReadToRbl -> ^c.&^0\n", args);
     }
     
     st->type.state |= (rbl->type.state & (SUCCESS|ERROR));
@@ -30,13 +31,15 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
             (Abstract *)tsk->data,
             NULL,
         };
-        Out("^0.Parsed Tcp Initial Request -> ^g.&/^p@^0\n", args);
+        Out("^0.Parsed Tcp Initial Request -> ^c.&/@^0\n", args);
     }
 
+    DebugStack_Pop();
     return st->type.state;
 }
 
 status TcpTask_WriteFromOut(Step *st, Task *tsk){
+    DebugStack_Push(st, st->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
 
@@ -62,6 +65,7 @@ status TcpTask_WriteFromOut(Step *st, Task *tsk){
         Out("Sent($): ^g.&^0\n", args);
     }
     
+    DebugStack_Pop();
     return st->type.state;
 }
 

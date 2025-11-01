@@ -12,3 +12,5 @@ boolean Path_ExtEquals(StrVec *path, Str *ext);
 status Path_Add(MemCh *m, StrVec *path, StrVec *add);
 status Path_AddStr(StrVec *path, Str *add);
 StrVec *Path_SubClone(MemCh *m, StrVec *path, i32 count);
+status Path_Init(MemCh *m);
+status Path_DotAnnotate(MemCh *m, StrVec *v);

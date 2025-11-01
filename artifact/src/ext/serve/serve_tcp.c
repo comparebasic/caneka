@@ -99,6 +99,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             MemCh *tm = MemCh_Make();
             Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
+            child->type.state |= TASK_CHILD;
             child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
             tm->owner = (Abstract *)child;
@@ -167,6 +168,7 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 
 Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, (Abstract *)ctx);
+    tsk->stepGuardMax = 16;
     Task_AddStep(tsk, Step_Delay, (Abstract *)Util_Wrapped(tsk->m, 100), NULL, STEP_LOOP);
     Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_OpenTcp, (Abstract *)ctx, NULL, ZERO);

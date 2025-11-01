@@ -19,6 +19,7 @@ static Object *Example_getPageData(Task *tsk, Route *rt){
 }
 
 static status Example_log(Step *_st, Task *tsk){
+    DebugStack_Push(_st, _st->type.of);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
@@ -26,7 +27,7 @@ static status Example_log(Step *_st, Task *tsk){
     args[0] = (Abstract *)Lookup_Get(HttpMethods, ctx->method);
     args[1] = (Abstract *)I32_Wrapped(tsk->m, ctx->code);
     args[2] = (Abstract *)ctx->path;
-    args[3] = (Abstract *)MicroTime_ToStr(OutStream->m, MicroTime_Now());
+    args[3] = NULL;
     args[4] = NULL;
 
     if(ctx->type.state & ERROR){
@@ -36,31 +37,42 @@ static status Example_log(Step *_st, Task *tsk){
     }else if(ctx->code == 200){
         Out("^g.Served $/$ @ $^0\n", args);
     }else{
-        Out("^c.Responded $/$ @ $^0\n", args);
+        Out("^c.Responded $/$ @ ^{TIME.human}^0\n", args);
     }
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     close(pfd->fd);
 
+    DebugStack_Pop();
     return SUCCESS;
 }
 
 static status Example_PageContent(Step *st, Task *tsk){
-    Abstract *args[5];
+    DebugStack_Push(st, st->type.of);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
     Route *rt = (Route *)st->arg;
+
+    Abstract *args[5];
+    args[0] = NULL;
+    args[1] = NULL;
+    args[2] = NULL;
+    args[3] = (Abstract *)tsk;
+    args[4] = NULL;
+    Out("^p.^{STACK.name} ^{@STACK.ref} - ^{TIME.human} $^0\n", args);
+    exit(1);
 
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, (Abstract *)tsk) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;
     }
-
+    DebugStack_Pop();
     return st->type.state;
 }
 
 static status Example_FooterContent(Step *st, Task *tsk){
+    DebugStack_Push(st, st->type.of);
     Abstract *args[5];
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
@@ -72,6 +84,7 @@ static status Example_FooterContent(Step *st, Task *tsk){
         Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
             "Route is null for Footer: @", args);
         st->type.state |= ERROR;
+        DebugStack_Pop();
         return st->type.state;
     }
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, NULL) & SUCCESS){
@@ -80,11 +93,13 @@ static status Example_FooterContent(Step *st, Task *tsk){
         st->type.state |= ERROR;
     }
 
+    DebugStack_Pop();
     return st->type.state;
 }
 
 static status Example_HeaderContent(Step *st, Task *tsk){
-    Abstract *args[3];
+    DebugStack_Push(st, st->type.of);
+    Abstract *args[5];
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -95,6 +110,7 @@ static status Example_HeaderContent(Step *st, Task *tsk){
         Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
             "Route is null for Header: @", args);
         st->type.state |= ERROR;
+        DebugStack_Pop();
         return st->type.state;
     }
 
@@ -105,10 +121,12 @@ static status Example_HeaderContent(Step *st, Task *tsk){
         st->type.state |= ERROR;
     }
 
+    DebugStack_Pop();
     return st->type.state;
 }
 
 static status Example_ServePage(Step *st, Task *tsk){
+    DebugStack_Push(st, st->type.of);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -123,6 +141,7 @@ static status Example_ServePage(Step *st, Task *tsk){
         };
         ctx->content = StrVec_Make(tsk->m);
         StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "Page Not Found"));
+        DebugStack_Pop();
         return st->type.state;
     }else{
         ctx->code = 200;
@@ -142,11 +161,13 @@ static status Example_ServePage(Step *st, Task *tsk){
         }
 
         st->type.state |= SUCCESS;
+        DebugStack_Pop();
         return st->type.state|MORE;
     }
 }
 
 static status Example_ServeError(Step *st, Task *tsk){
+    DebugStack_Push(st, st->type.of);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
@@ -172,10 +193,12 @@ static status Example_ServeError(Step *st, Task *tsk){
 
     StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "</p>\r\n"));
     st->type.state |= SUCCESS;
+    DebugStack_Pop();
     return st->type.state;
 }
 
 static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
+    DebugStack_Push(tsk, tsk->type.of);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -193,19 +216,25 @@ static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract
 
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
 
+    DebugStack_Pop();
     return SUCCESS;
 }
 
 static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
+    DebugStack_Push(tsk, tsk->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
+
+    tsk->type.state |= DEBUG;
 
     HttpTask_InitResponse(tsk, arg, source);
 
     Task_AddStep(tsk, Example_ServePage, NULL, NULL, ZERO);
 
     HttpTask_AddRecieve(tsk, NULL, NULL);
+
+    DebugStack_Pop();
     return SUCCESS;
 }
 

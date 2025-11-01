@@ -23,6 +23,7 @@ status Caneka_InitBase(MemCh *m){
     r |= Clone_Init(m);
     r |= Hash_Init(m);
     r |= Equals_Init(m);
+    r |= Path_Init(md);
     r |= IoUtils_Init(m);
     r |= Exact_Init(m);
     r |= Stash_Init(m);

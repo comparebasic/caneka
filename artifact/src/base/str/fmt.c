@@ -1,6 +1,41 @@
 #include <external.h>
 #include <caneka.h>
 
+Abstract *FmtVar_Get(MemCh *m, Str *key, Abstract *arg){
+    StrVec *path = StrVec_From(m, key);
+    Path_DotAnnotate(m, path);
+    Abstract *a = NULL;
+    Str *k = Span_Get(path->p, 0);
+    if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "STACK", ZERO))){
+        a = (Abstract *)DebugStack_Get();
+        if(path->p->nvalues > 1){
+            k = Span_Get(path->p, 2);
+            StackEntry *entry = (StackEntry *)as(a, TYPE_DEBUG_STACK_ENTRY);
+            if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "name", ZERO))){
+                a = (Abstract *)Str_FromCstr(m, entry->funcName, STRING_COPY);
+            }else if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "ref", ZERO))){
+                a = (Abstract *)entry->ref;
+            }else{
+                a = NULL;
+            }
+        }
+    }else if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "TIME", ZERO))){
+        if(path->p->nvalues > 1){
+            k = Span_Get(path->p, 2);
+            if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "human", ZERO))){
+                a = (Abstract *)MicroTime_ToStr(m, MicroTime_Now());  
+            }else{
+                a = NULL;
+            }
+        }else{
+            a = (Abstract *)Str_FromI64(m, MicroTime_Now());  
+        }
+    }else if(arg != NULL && arg->type.of == TYPE_TABLE){
+        return Table_Get((Table *)arg, (Abstract *)key);
+    }
+    return a;
+}
+
 status Fmt(Buff *bf, char *fmt, Abstract *args[]){
     MemCh *m = bf->m;
     char *ptr = fmt;
@@ -93,8 +128,32 @@ status Fmt(Buff *bf, char *fmt, Abstract *args[]){
             goto next;
         }else if(c == '^'){
             ptr++;
-            Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
-            Buff_AddBytes(bf, s->bytes, s->length);
+            if(*ptr == '{' && ptr < end){
+                char c = *(ptr+1);
+                word flags = ZERO;
+                if(c == '@'){
+                    flags |= MORE;
+                    ptr++;
+                }else if(c == '&'){
+                    flags |= (MORE|DEBUG);
+                    ptr++;
+                }
+                ptr++;
+                char *keyStart = ptr;
+                word keyLen = 0;
+                while(*ptr != '}' && ptr <= end){ keyLen++; ptr++; };
+                Str *key = Str_Ref(bf->m, (byte *)keyStart, keyLen, keyLen, STRING_CONST);
+                Abstract *var = FmtVar_Get(m, key, *args);
+                if(var != NULL){
+                    ToS(bf, var, 0, flags);
+                }else{
+                    Buff_AddBytes(bf, (byte *)"NULL", 4);
+                }
+                args++;
+            }else{
+                Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
+                Buff_AddBytes(bf, s->bytes, s->length);
+            }
             start = ptr+1;
         }else{
 next:

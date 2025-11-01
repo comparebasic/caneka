@@ -19,7 +19,12 @@ static status _taskErrorHandler(MemCh *m, Abstract *_tsk, Abstract *msg){
 status Task_Tumble(Task *tsk){
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
+    i16 guard;
     do {
+        if(Guard_Incr(tsk->m, &guard, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER)
+                & ERROR){
+            break;
+        }
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->parent != NULL){
                 Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
@@ -104,6 +109,7 @@ Task *Task_Make(Span *chain, Abstract *source){
     tsk->type.of = TYPE_TASK;
     tsk->m = m;
     Iter_Init(&tsk->chainIt, chain);
+    tsk->stepGuardMax = TASK_TUMPLE_MAX;
     tsk->source = source;
     return tsk;
 }
