@@ -1,16 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
-    i64 total = 0;
+static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     StackEntry *se = (StackEntry*)as(a, TYPE_DEBUG_STACK_ENTRY); 
 
-    Buff_Bytes(bf, (byte *)"    \x1b[1;33m", 12);
-    Buff_Bytes(bf, (byte *)se->funcName, strlen(se->funcName));
-    Buff_Bytes(bf, (byte *)"\x1b[22m:", 6);
-    Buff_Bytes(bf, (byte *)se->fname, strlen(se->fname));
+    Buff_AddBytes(bf, (byte *)"    \x1b[1;33m", 12);
+    Buff_AddBytes(bf, (byte *)se->funcName, strlen(se->funcName));
+    Buff_AddBytes(bf, (byte *)"\x1b[22m:", 6);
+    Buff_AddBytes(bf, (byte *)se->fname, strlen(se->fname));
     if(flags & MORE && se->ref != NULL){
-        Buff_Bytes(bf, (byte *)" - \x1b[1m", 8);
+        Buff_AddBytes(bf, (byte *)" - \x1b[1m", 8);
         if(se->typeOf == TYPE_CSTR){
             Str *s = Str_CstrRef(bf->m, (char *)se->ref);
             ToS(bf, (Abstract *)s, s->type.of, MORE);
@@ -18,9 +17,8 @@ static i64 StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
             ToS(bf, se->ref, se->typeOf, MORE);
         }
     }
-    Buff_Bytes(bf, (byte *)"\x1b[0m\n", 5);
 
-    return total;
+    return Buff_AddBytes(bf, (byte *)"\x1b[0m\n", 5);
 }
 
 status Debug_ToSInit(MemCh *m, Lookup *lk){

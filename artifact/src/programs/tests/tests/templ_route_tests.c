@@ -1,6 +1,45 @@
-
 #include <external.h>
 #include <caneka.h>
+
+char *cstr = ""
+    "<!DOCTYPE html>\n"
+    "<html lang=\"en\">\n"
+    "<head>\n"
+    "<meta charset=\"utf-8\">\n"
+    "<title>Compare Basic - The Title of the Master Page</title>\n"
+    "<meta property=\"og:title\" content=\"The Title of the Master Page - Compare Basic\" />\n"
+    "<meta property=\"og:description\" content=\"The proximity you have to the things you value defines your quality of life.\"/>\n"
+    "<meta property=\"og:image\" content=\"/triangle-diagram.png\" />\n"
+    "<script src=\"/dom.js\" type=\"text/javascript\"></script>\n"
+    "<link rel=\"stylesheet\" href=\"/style.css\" />\n"
+    "  <meta \n"
+    "    name=\"viewport\"\n"
+    "    content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\"\n"
+    "  >\n"
+    "</head>\n"
+    "<body>\n"
+    "<header>\n"
+    "    <div class=\"inner\">\n"
+    "        <div class=\"bread-crumbs\">\n"
+    "        <ul>\n"
+    "            <li>\n"
+    "                <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
+    "            </li>\n"
+    "            <li>\n"
+    "                <a href=\"/dom.js\">/dom.js</a>\n"
+    "            </li>\n"
+    "            <li>\n"
+    "                <a href=\"/account/\">/account/</a>\n"
+    "            </li>\n"
+    "            <li>\n"
+    "                <a href=\"/style.css\">/style.css</a>\n"
+    "            </li>\n"
+    "        </ul>\n"
+    "        <div style=\"clear\"></div>\n"
+    "        </div>\n"
+    "    </div>\n"
+    "</header>\n"
+;
 
 status TemplRoute_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
@@ -28,11 +67,6 @@ status TemplRoute_Tests(MemCh *gm){
     StrVec *title = StrVec_From(m, Str_CstrRef(m, "The Title of the Master Page"));
     Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
 
-    args[0] = (Abstract *)abs;
-    args[1] = (Abstract *)data;
-    args[2] = NULL;
-    Out("^y.Transpiling @ with data:@^0.\n", args);
-
     StrVec *v = File_ToVec(m, StrVec_Str(m, abs));
 
     Cursor *curs = Cursor_Make(m, v);
@@ -44,9 +78,9 @@ status TemplRoute_Tests(MemCh *gm){
     Buff *bf = Buff_From(m, out, BUFF_STRVEC);
     Templ_ToS(templ, bf, (Abstract *)data, NULL);
 
-    args[0] = (Abstract *)out;
-    args[1] = NULL;
-    Out("^y.Output of template &^0.\n", args);
+    out->type.state |= DEBUG;
+    r |= Test(Equals((Abstract *)out, (Abstract *)Str_FromCstr(m, cstr, ZERO)),
+        "Templ from Route has expected output", NULL);
 
     MemCh_Free(m);
     DebugStack_Pop();

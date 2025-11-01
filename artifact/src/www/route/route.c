@@ -11,6 +11,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     StrVec *abs = StrVec_From(m, path);
     Path_AddSlash(m, abs);
     StrVec_Add(abs, file);
+    abs->type.state |= DEBUG;
     IoUtil_Annotate(m, abs);
 
     StrVec *name = Path_Name(m, abs);
@@ -23,12 +24,13 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
         Abstract *args[] = {
             (Abstract *)mime,
             (Abstract *)ext,
-            (Abstract *)RouteMimeTable,
             (Abstract *)path,
+            (Abstract *)file,
+            (Abstract *)RouteMimeTable,
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Mime & not found for this file with\n\n ext & (@) path:&", args);
+            "Mime & not found for this file with ext:@ path:@ file:@ mimeTable:@", args);
         return ERROR;
     }
 

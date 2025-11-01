@@ -15,21 +15,18 @@ char *Buff_WhenceChars(i64 whence){
     }
 }
 
-i64 StashCoords_Print(Buff *bf, StashCoord *coord, word flags){
-    i64 total = 0;
+status StashCoords_Print(Buff *bf, StashCoord *coord, word flags){
     Abstract *args[] = {
         (Abstract *)Type_ToStr(bf->m, coord->typeOf),
         (Abstract *)I32_Wrapped(bf->m, coord->idx),
         NULL
     };
-    total += Fmt(bf, "$/$/[", args);
-    total += Bits_Print(OutStream, (byte *)&coord->offset, sizeof(quad), DEBUG|MORE);
-    total += Buff_Bytes(bf, (byte *)"]", 1);
-    return total;
+    Fmt(bf, "$/$/[", args);
+    Bits_Print(OutStream, (byte *)&coord->offset, sizeof(quad), DEBUG|MORE);
+    return Buff_AddBytes(bf, (byte *)"]", 1);
 }
 
-i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
-    i64 total = 0;
+status Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
     Buff *bfObj = (Buff *)as(a, TYPE_BUFF);
 
     Abstract *args[9];
@@ -49,27 +46,24 @@ i64 Buff_Print(Buff *bf, Abstract *a, cls type, word flags){
         args[6] = (Abstract *)I32_Wrapped(bf->m, bfObj->tail.idx);
         args[7] = (bf->unsent.s == NULL ? (Abstract *)bfObj->v : (Abstract *)bfObj->unsent.s);
         args[8] = NULL;
-        total += Fmt(bf, "Buff<@ $fd/$bytes\\@@ unsent/total=$/$ $tailIdx &>", args);
+        return Fmt(bf, "Buff<@ $fd/$bytes\\@@ unsent/total=$/$ $tailIdx &>", args);
     }else{
-        total += Fmt(bf, "Buff<@ $fd unsent/total=$/$>", args);
+        return Fmt(bf, "Buff<@ $fd unsent/total=$/$>", args);
     }
-    return total;
 }
 
-i64 StashItem_Print(Buff *bf, Abstract *a, cls type, word flags){
-    i64 total = 0;
+status StashItem_Print(Buff *bf, Abstract *a, cls type, word flags){
     StashItem *item = (StashItem *)as(a, TYPE_STASH_ITEM);
     Abstract *args[] = {
         (Abstract *)Util_Wrapped(bf->m, (util)item->ptr),
         NULL
     };
-    total += Fmt(bf, "StashItem<@ ", args);
-    total += StashCoords_Print(bf, &item->coord, flags);
-    total += Buff_Bytes(bf, (byte *)">", 1);
-    return total;
+    Fmt(bf, "StashItem<@ ", args);
+    StashCoords_Print(bf, &item->coord, flags);
+    return Buff_AddBytes(bf, (byte *)">", 1);
 }
 
-i64 ProcDets_Print(Buff *bf, Abstract *a, cls type, word flags){
+status ProcDets_Print(Buff *bf, Abstract *a, cls type, word flags){
     ProcDets *pd = (ProcDets *)as(a, TYPE_PROCDETS);
     Abstract *args[] = {
         (Abstract *)State_ToStr(bf->m, pd->type.state),

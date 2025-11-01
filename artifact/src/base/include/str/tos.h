@@ -2,7 +2,7 @@ extern struct lookup *ToStreamLookup;
 extern struct lookup *ToSFlagLookup;
 extern Str **stateLabels;
 
-typedef i64 (*ToSFunc)(struct buff *bf, Abstract *a, cls type, word flags);
+typedef status (*ToSFunc)(struct buff *bf, Abstract *a, cls type, word flags);
 
 status StreamTo_Init(MemCh *m);
 void indent_Print(int indent);

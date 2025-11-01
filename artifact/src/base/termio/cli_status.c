@@ -46,12 +46,12 @@ status CliStatus_Print(Buff *bf, CliStatus *cli){
             cli->type.state |= PROCESSING;
         }
         while((Iter_Next(&it) & END) == 0){
-            Buff_Bytes(bf, (byte *)"\r\x1b[0K", 5);
+            Buff_AddBytes(bf, (byte *)"\r\x1b[0K", 5);
             if(it.value != NULL){
                 FmtLine *line = (FmtLine *)it.value;
                 Fmt(bf, line->fmt, line->args);
             }
-            Buff_Bytes(bf, (byte *)"\n", 1);
+            Buff_AddBytes(bf, (byte *)"\n", 1);
         }
         return SUCCESS;
     }
@@ -64,9 +64,9 @@ status CliStatus_PrintFinish(Buff *bf, CliStatus *cli){
     Iter_Init(&it, cli->lines);
     int count = cli->lines->nvalues;
     while((Iter_Next(&it) & END) == 0){
-        Buff_Bytes(bf, (byte *)"\x1b[2K\r", 5);
+        Buff_AddBytes(bf, (byte *)"\x1b[2K\r", 5);
     }
-    Buff_Bytes(bf, (byte *)"\n", 1);
+    Buff_AddBytes(bf, (byte *)"\n", 1);
     cli->type.state &= ~PROCESSING;
     return SUCCESS;
 }

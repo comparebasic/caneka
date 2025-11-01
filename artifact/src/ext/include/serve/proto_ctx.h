@@ -1,8 +1,8 @@
 typedef struct proto {
     Type type;
     util u;
-    Cursor *in;
-    Cursor *out;
+    Buff *in;
+    Buff *out;
     Abstract *data;
 } ProtoCtx;
 

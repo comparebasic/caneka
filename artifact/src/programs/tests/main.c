@@ -407,6 +407,12 @@ static TestSet _Tests[] = {
         "Testing a navigation object for composing HTML.",
         FEATURE_COMPLETE,
     },
+    {
+        "Www Nav Templ Tests",
+        WwwNavTempl_Tests,
+        "Testing a navigation object for templating and composing HTML.",
+        FEATURE_COMPLETE,
+    },
     */
     {
         "Www Route Tests",
@@ -418,12 +424,6 @@ static TestSet _Tests[] = {
         "TemplRoute Tests",
         TemplRoute_Tests,
         "Example route templating test.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Www Nav Templ Tests",
-        WwwNavTempl_Tests,
-        "Testing a navigation object for templating and composing HTML.",
         FEATURE_COMPLETE,
     },
     {

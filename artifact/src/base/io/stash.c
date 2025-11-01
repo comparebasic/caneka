@@ -161,13 +161,13 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
         .pages = (i16)pages->nvalues,
         .checksum = checksum
     };
-    Buff_Bytes(bf, (byte *)&hdr, sizeof(StashHeader));
+    Buff_AddBytes(bf, (byte *)&hdr, sizeof(StashHeader));
     Buff_Flush(bf);
 
     Iter_Init(&it, pages);
     while((Iter_Next(&it) & END) == 0){
         MemPage *pg = (MemPage *)Iter_Get(&it);
-        if(Buff_Bytes(bf, (byte *)pg, PAGE_SIZE) != PAGE_SIZE){
+        if(Buff_AddBytes(bf, (byte *)pg, PAGE_SIZE) != PAGE_SIZE){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error writing page to stream for Stash", NULL);
             r |= ERROR;

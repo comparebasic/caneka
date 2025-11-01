@@ -60,12 +60,12 @@ i64 Slots_Print(Buff *bf, util *ut, i32 slots, word flags){
     i64 total = 0;
     Single sg = {{TYPE_WRAPPED_I64, 0}, 0};
     if(ut == NULL){
-        return Buff_Bytes(bf, (byte *)"NULL", 4);
+        return Buff_AddBytes(bf, (byte *)"NULL", 4);
     }
     for(int i = 0; i < length;i++){
         util u = ut[i];
         if(u == 0 && (flags & MORE)){
-            total += Buff_Bytes(bf, (byte *)"0", 1);
+            total += Buff_AddBytes(bf, (byte *)"0", 1);
         }else{
             if(flags & MORE){
                 sg.val.value = u;
@@ -73,16 +73,16 @@ i64 Slots_Print(Buff *bf, util *ut, i32 slots, word flags){
                 total += Fmt(bf, "$", args);
             }
             if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
-                total += Buff_Bytes(bf, (byte *)"=", 1);
+                total += Buff_AddBytes(bf, (byte *)"=", 1);
             }
             if(flags & DEBUG){
                 for(int j = 65; j >= 0;j--){
-                    total += Buff_Bytes(bf, (byte *)((u & (1 << j)) ? "1" : "0"), 1);
+                    total += Buff_AddBytes(bf, (byte *)((u & (1 << j)) ? "1" : "0"), 1);
                 }
             }
         }
         if(flags & MORE){
-            total += Buff_Bytes(bf, (byte *)" ", 1);
+            total += Buff_AddBytes(bf, (byte *)" ", 1);
         }
     }
     return total;
@@ -95,7 +95,7 @@ i64 Bits_PrintArray(Buff *bf, void *arr, i64 sz, i32 count){
         total += Bits_Print(bf, (byte *)ptr, sz, DEBUG|MORE);
         ptr += sz;
         if(i+1 < count){
-            total += Buff_Bytes(bf, (byte *)", ", 2);
+            total += Buff_AddBytes(bf, (byte *)", ", 2);
         }
     }
     return total;
@@ -107,7 +107,7 @@ i64 Bits_PrintNum(Buff *bf, byte *bt, size_t length, word flags){
     for(int i = length-1; i <= 0; i--){
         byte b = bt[i];
         if(b == 0 && (flags & (MORE|DEBUG)) == MORE){
-            total += Buff_Bytes(bf, (byte *)"0", 1);
+            total += Buff_AddBytes(bf, (byte *)"0", 1);
         }else{
             if(flags & MORE){
                 sg.val.b = b;
@@ -115,11 +115,11 @@ i64 Bits_PrintNum(Buff *bf, byte *bt, size_t length, word flags){
                 total += Fmt(bf, "$=", args);
             }
             for(int j = 7; j >= 0;j--){
-                total += Buff_Bytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+                total += Buff_AddBytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
             }
         }
         if(flags & MORE){
-            total += Buff_Bytes(bf, (byte *)" ", 1);
+            total += Buff_AddBytes(bf, (byte *)" ", 1);
         }
     }
     return total;
@@ -132,7 +132,7 @@ i64 Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
     for(int i = 0; i < length;i++){
         byte b = bt[i];
         if(b == 0 && (flags & (MORE|DEBUG)) == MORE){
-            total += Buff_Bytes(bf, (byte *)"0", 1);
+            total += Buff_AddBytes(bf, (byte *)"0", 1);
         }else{
             if(flags & MORE){
                 sg.val.b = b;
@@ -140,11 +140,11 @@ i64 Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
                 total += Fmt(bf, "$=", args);
             }
             for(int j = 7; j >= 0;j--){
-                total += Buff_Bytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+                total += Buff_AddBytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
             }
         }
         if(flags & MORE){
-            total += Buff_Bytes(bf, (byte *)" ", 1);
+            total += Buff_AddBytes(bf, (byte *)" ", 1);
         }
     }
     return total;
@@ -205,7 +205,7 @@ i64 ToStream_NotImpl(Buff *bf, Abstract *a, cls type, word flags){
 
 i64 ToS(Buff *bf, Abstract *a, cls type, word flags){
     if(a == NULL){
-        i64 total =  Buff_Bytes(bf, (byte *)"NULL", 4);
+        i64 total =  Buff_AddBytes(bf, (byte *)"NULL", 4);
         return total;
     }
 

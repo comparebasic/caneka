@@ -1,13 +1,12 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
+status Fmt(Buff *bf, char *fmt, Abstract *args[]){
     MemCh *m = bf->m;
     char *ptr = fmt;
     char *end = fmt+(strlen(fmt)-1);
     char *start = fmt;
     status state = SUCCESS;
-    i64 total = 0;
     while(ptr <= end){
         char c = *ptr;
         if((state & NOOP) != 0){
@@ -17,8 +16,7 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
             if(c == '\\'){
                 if(start < ptr){
                     word length = (word)((ptr) - start);
-                    Buff_Bytes(bf, (byte *)start, length);
-                    total += length;
+                    Buff_AddBytes(bf, (byte *)start, length);
                 }
                 state |= NOOP;
                 start = ptr+1;
@@ -26,8 +24,7 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
             }else{
                 if(start != ptr){
                     word length = (word)(ptr - start);
-                    Buff_Bytes(bf, (byte *)start, length);
-                    total += length;
+                    Buff_AddBytes(bf, (byte *)start, length);
                 }
                 start = ptr+1;
             }
@@ -58,7 +55,7 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
             Abstract *a = *(args++);
             if(a == NULL){
                 if(state & (DEBUG|MORE)){
-                    total += Buff_Bytes(bf, (byte *)"NULL", 4);
+                    Buff_AddBytes(bf, (byte *)"NULL", 4);
                 }
                 goto next;
             }
@@ -70,14 +67,14 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
                     char *cstr_end = (char *)s->bytes+(s->length-1);
                     s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
                     if((state & (DEBUG|MORE)) != (DEBUG|MORE)){
-                        total += Buff_Bytes(bf, s->bytes, s->length);
+                        Buff_AddBytes(bf, s->bytes, s->length);
                         goto next;
                     }else{
                         a = (Abstract *)a;
                         type = s->type.of;
                     }
                 }else if(s->type.state & STRING_BINARY){
-                    total += Bits_Print(bf, s->bytes, s->length, 
+                    Bits_Print(bf, s->bytes, s->length, 
                         ((s->type.state|bf->type.state) & DEBUG));
                     goto next;
                 }
@@ -91,14 +88,13 @@ i64 Fmt(Buff *bf, char *fmt, Abstract *args[]){
             }
 
 
-            total += ToS(bf, a, type, (state & (MORE|DEBUG)));
+            ToS(bf, a, type, (state & (MORE|DEBUG)));
             state |= SUCCESS;
             goto next;
         }else if(c == '^'){
             ptr++;
             Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
-            Buff_Bytes(bf, s->bytes, s->length);
-            total += s->length;
+            Buff_AddBytes(bf, s->bytes, s->length);
             start = ptr+1;
         }else{
 next:
@@ -109,12 +105,11 @@ next:
     if(start < ptr){
         word length = (word)(ptr - start);
         if(length > 0){
-            Buff_Bytes(bf, (byte *)start, length);
-            total += length;
+            Buff_AddBytes(bf, (byte *)start, length);
         }
     }
 
-    return total; 
+    return SUCCESS; 
 }
 
 FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){

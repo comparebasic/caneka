@@ -4,7 +4,7 @@
 Str **binSegCtxLabels = NULL;
 Str **fileLabels = NULL;
 
-static i64 BinSegHeader_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status BinSegHeader_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 total = 0;
     BinSegHeader *hdr = (BinSegHeader *)a;
     Abstract *args[] = {
@@ -18,8 +18,7 @@ static i64 BinSegHeader_Print(Buff *bf, Abstract *a, cls type, word flags){
     return total;
 }
 
-static i64 BinSegCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
-    i64 total = 0;
+static status BinSegCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
     BinSegCtx *ctx = (BinSegCtx *)as(a, TYPE_BINSEG_CTX);
     Abstract *args[] = {
         (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
@@ -29,8 +28,7 @@ static i64 BinSegCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
         NULL
     };
 
-    total += Fmt(bf, "BinSegCtx<$ @ @ tbl:@>", args);
-    return total;
+    return Fmt(bf, "BinSegCtx<$ @ @ tbl:@>", args);
 }
 
 static status persistInitLabels(MemCh *m, Lookup *lk){

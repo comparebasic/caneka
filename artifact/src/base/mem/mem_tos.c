@@ -3,20 +3,19 @@
 
 static Str **iterLabels = NULL;
 
-static inline i64 wsOut(Buff *bf, i8 dim){
+static inline status wsOut(Buff *bf, i8 dim){
     while(dim-- > 0){
-        return Buff_Bytes(bf, (byte *)"    ", 4); 
+        return Buff_AddBytes(bf, (byte *)"    ", 4); 
     }
-    return 0;
+    return SUCCESS;
 }
 
-i64 Addr_ToS(Buff *bf, void *a, word flags){
-    i64 total = 0;
+status Addr_ToS(Buff *bf, void *a, word flags){
     if(flags & DEBUG){
-        total += Fmt(bf, "^D.", NULL);
+        Fmt(bf, "^D.", NULL);
     }
     if(a == NULL){
-        total += Fmt(bf, "<*NULL>", NULL);
+        Fmt(bf, "<*NULL>", NULL);
     }else{
         MemBook *book = MemBook_Get(a);
         util page = (util)(a-(void*)book);
@@ -30,15 +29,14 @@ i64 Addr_ToS(Buff *bf, void *a, word flags){
             (Abstract *)Util_Wrapped(bf->m, local),
             NULL
         };
-        total += Fmt(bf, "<*$/$/$>", args);
+        Fmt(bf, "<*$/$/$>", args);
     }
-    return total;
+    return SUCCESS;
 }
 
-i64 MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
+status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
     Abstract *args[5];
-    i64 total = 0;
     args[0] = (Abstract *)I64_Wrapped(bf->m, m->it.p->nvalues);
     args[1] = (Abstract *)MemCount_Wrapped(bf->m,  MemCh_Used(m, 0));
     args[2] = NULL;
@@ -47,7 +45,7 @@ i64 MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
     Table *tbl = Table_Make(bf->m);
 
     if(flags & MORE){
-        total += Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
+        Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
 
         Iter it;
         Iter_Init(&it, m->it.p);
@@ -56,9 +54,9 @@ i64 MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
             args[0] = (Abstract *)I32_Wrapped(bf->m, it.idx);
             args[1] = (Abstract *)I16_Wrapped(bf->m, sl->remaining);
             args[2] = NULL;
-            total += Fmt(bf, "Page#$/@remaining", args);
+            Fmt(bf, "Page#$/@remaining", args);
             if((it.type.state & LAST) == 0){
-                total += Buff_Bytes(bf, (byte *)", ", 2);
+                Buff_AddBytes(bf, (byte *)", ", 2);
             }
         }
         
@@ -84,14 +82,14 @@ i64 MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
             if(mit.type.state & MORE){
                 if(mit.slIdx > 0){
                     if(mit.type.state & LAST){
-                        total += Buff_Bytes(bf, (byte *)"]", 1);
+                        Buff_AddBytes(bf, (byte *)"]", 1);
                     }else{
-                        total += Buff_Bytes(bf, (byte *)"], ", 3);
+                        Buff_AddBytes(bf, (byte *)"], ", 3);
                     }
                 }
                 args[0] = (Abstract *)I32_Wrapped(bf->m, mit.slIdx);
                 args[1] = NULL;
-                total += Fmt(bf, "Page#$[", args);
+                Fmt(bf, "Page#$[", args);
             }else{
                 Abstract *a = MemIter_Get(&mit);
                 Map *map = Lookup_Get(MapsLookup, a->type.of);
@@ -103,20 +101,20 @@ i64 MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
                         args[0] = (Abstract *)count;
                         args[1] = (Abstract *)map->keys[0];
                         args[2] = NULL;
-                        total += Fmt(bf, "$:$", args);
+                        Fmt(bf, "$:$", args);
                     }else{
                         args[0] = (Abstract *)map->keys[0];
                         args[1] = NULL;
-                        total += Fmt(bf, "$", args);
+                        Fmt(bf, "$", args);
                     }
                     i32 max = (i32)((RangeType *)map)->range;
-                    total += Buff_Bytes(bf, (byte *)"(", 1);
+                    Buff_AddBytes(bf, (byte *)"(", 1);
                     boolean first = TRUE;
                     for(i32 i = 1; i <= max; i++){
                         RangeType *att = map->atts+i;
                         if(att->of > _TYPE_RAW_END){
                             if(!first){
-                                total += Buff_Bytes(bf, (byte *)", ", 2);
+                                Buff_AddBytes(bf, (byte *)", ", 2);
                             }
                             first = FALSE;
                             args[0] = (Abstract *)map->keys[i];
@@ -141,45 +139,44 @@ i64 MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
                                     I16_Wrapped(bf->m, attCount->val.i) : Util_Wrapped(bf->m, (util)aa));
 
                                 args[3] = NULL;
-                                total += Fmt(bf, "$=$:$", args);
+                                Fmt(bf, "$=$:$", args);
                             }
                         }
                     }
-                    total += Buff_Bytes(bf, (byte *)")", 1);
+                    Buff_AddBytes(bf, (byte *)")", 1);
                 }else{
                     if(count != NULL){
                         args[0] = (Abstract *)count;
                         args[1] = (Abstract *)Type_ToStr(bf->m, a->type.of);
                         args[2] = NULL;
-                        total += Fmt(bf, "$:$", args);
+                        Fmt(bf, "$:$", args);
                     }else{
                         args[0] = (Abstract *)Type_ToStr(bf->m, a->type.of);
                         args[1] = NULL;
-                        total += Fmt(bf, "$", args);
+                        Fmt(bf, "$", args);
                     }
                 }
                 if((mit.type.state & (MORE|LAST)) != LAST){
-                    total += Buff_Bytes(bf, (byte *)", ", 2);
+                    Buff_AddBytes(bf, (byte *)", ", 2);
                 }
             }
         }
 
-        total +=  Buff_Bytes(bf, (byte *)"]>", 2);
+         Buff_AddBytes(bf, (byte *)"]>", 2);
     }else{
         return  Fmt(bf, "MemCh<used:$>", args);
     }
-    return total;
+    return SUCCESS;
 }
 
-i64 MemBook_Print(Buff *bf, Abstract *a, cls type, word flags){
+status MemBook_Print(Buff *bf, Abstract *a, cls type, word flags){
     MemBook *cp = (MemBook*)as(a, TYPE_BOOK); 
     return 0;
 }
 
-i64 Span_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Span_Print(Buff *bf, Abstract *a, cls type, word flags){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
-    i64 total = 0;
     if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(bf->m, p->nvalues), 
@@ -187,9 +184,9 @@ i64 Span_Print(Buff *bf, Abstract *a, cls type, word flags){
             (Abstract *)I8_Wrapped(bf->m, p->dims),
             NULL
         };
-        total += Fmt(bf, "Span<^D.$^d.values/0..$/$dims [", args);
+        Fmt(bf, "Span<^D.$^d.values/0..$/$dims [", args);
     }else if(flags & MORE){
-        total += Buff_Bytes(bf, (byte *)"[", 1);
+        Buff_AddBytes(bf, (byte *)"[", 1);
     }
     Iter it;
     Iter_Init(&it, p);
@@ -201,37 +198,36 @@ i64 Span_Print(Buff *bf, Abstract *a, cls type, word flags){
                 NULL
             };
             if(flags & DEBUG){
-                total += Buff_Bytes(bf, (byte *)"\n    ", 5);
+                Buff_AddBytes(bf, (byte *)"\n    ", 5);
             }
             if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
-                total += Fmt(bf, "$:", args);
+                Fmt(bf, "$:", args);
             }
             Abstract *item = (Abstract *)it.value;
             if(p->type.state & FLAG_SPAN_RAW){
-                total += Bits_Print(bf, (byte *)&(it.value), sizeof(void *), MORE);
+                Bits_Print(bf, (byte *)&(it.value), sizeof(void *), MORE);
             }else if(item != NULL && item->type.of == TYPE_MEMSLAB){
-                total += ToS(bf, it.value, 0, (flags & ~DEBUG));
+                ToS(bf, it.value, 0, (flags & ~DEBUG));
             }else{
-                total += ToS(bf, it.value, 0, flags);
+                ToS(bf, it.value, 0, flags);
             }
             if((it.type.state & LAST) == 0 && (flags & MORE)){
-                total += Buff_Bytes(bf, (byte *)", ", 2);
+                Buff_AddBytes(bf, (byte *)", ", 2);
             }
         }
     }
 
     if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
-        total += Buff_Bytes(bf, (byte *)"]>", 2);
+        Buff_AddBytes(bf, (byte *)"]>", 2);
     }else if(flags & MORE){
-        total += Buff_Bytes(bf, (byte *)"]", 1);
+        Buff_AddBytes(bf, (byte *)"]", 1);
     }
     
-    return total;
+    return SUCCESS;
 }
 
-i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
     Iter *it = (Iter *)as(a, TYPE_ITER);
-    i64 total = 0;
     if(flags & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_StateVec(bf->m, it->type.of, it->type.state),
@@ -240,7 +236,7 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
             (Abstract *)I8_Wrapped(bf->m, it->p->dims),
             NULL
         };
-        total += Fmt(bf, "I<@ $ of $max/$dims stack:\n", args);
+        Fmt(bf, "I<@ $ of $max/$dims stack:\n", args);
         void *ptr = it->p->root;
         for(i8 i = it->p->dims; i >= 0; i--){
             if(it->stack[i] == NULL && (flags & (MORE|DEBUG))){
@@ -248,7 +244,7 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
                     (Abstract *)I32_Wrapped(bf->m, i),
                     NULL
                 };
-                total += Fmt(bf, "  $: NULL\n", args);
+                Fmt(bf, "  $: NULL\n", args);
             }else{
                 i64 delta = 0;
                 if(i > 0 && it->stack[i] != NULL){
@@ -262,7 +258,7 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
                     (Abstract *)Ptr_Wrapped(bf->m, it->stack[i], 0), 
                     NULL
                 };
-                total += Fmt(bf, "  $: $+$/$ = @\n", args);
+                Fmt(bf, "  $: $+$/$ = @\n", args);
             }
             if(i > 0 && it->stack[i] != NULL){
                 ptr = *((void **)it->stack[i]);
@@ -274,7 +270,7 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
                 I64_Wrapped(bf->m, (i64)it->value) : it->value),
             NULL
         };
-        total += Fmt(bf, "value=@>", args2);
+        Fmt(bf, "value=@>", args2);
     }else if(flags & MORE){
         Abstract *args[] = {
             (Abstract *)Type_StateVec(bf->m, it->type.of, it->type.state),
@@ -283,11 +279,12 @@ i64 Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
             (Abstract *)it->value,
             NULL
         };
-        total += Fmt(bf, "I<@ idx-nvalues/max_idx=^D.$of$^d.\\@@>", args);
+        Fmt(bf, "I<@ idx-nvalues/max_idx=^D.$of$^d.\\@@>", args);
     }else{
-        total += _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
+        _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
     }
-    return total;
+
+    return SUCCESS;
 }
 
 status Mem_InitLabels(MemCh *m, Lookup *lk){

@@ -4,13 +4,6 @@
 static Span *pathSeps = NULL;
 
 status IoUtil_Annotate(MemCh *m, StrVec *path){
-    if(pathSeps == NULL){
-        MemCh_SetToBase(m);
-        pathSeps = Span_Make(m);
-        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
-        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'.', ZERO, LAST));
-        MemCh_SetFromBase(m);
-    }
     return Path_Annotate(m, path, pathSeps);
 }
 
@@ -187,4 +180,16 @@ StrVec *IoUtil_BasePath(MemCh *m, StrVec *path){
         return StrVec_CoordCopy(m, path, &cr);
     }
     return NULL;
+}
+
+status IoUtils_Init(MemCh *m){
+    if(pathSeps == NULL){
+        MemCh_SetToBase(m);
+        pathSeps = Span_Make(m);
+        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
+        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'.', ZERO, LAST));
+        MemCh_SetFromBase(m);
+        return SUCCESS;
+    }
+    return NOOP;
 }

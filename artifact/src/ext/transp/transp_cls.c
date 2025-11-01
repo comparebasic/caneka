@@ -34,7 +34,7 @@ static i64 TranspCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
     total += Fmt(bf, "Transp<$ ", args);
     total += ToS(bf, (Abstract *)tp->bf, 0, MORE);
     if(flags & DEBUG && tp->it.p->nvalues > 0){
-        total += Buff_Bytes(bf, (byte *)"stack:\n", 7);
+        total += Buff_AddBytes(bf, (byte *)"stack:\n", 7);
         Iter it;
         Iter_Init(&it, tp->it.p);
         while((Iter_Prev(&it) & END) == 0){
@@ -53,7 +53,7 @@ static i64 TranspCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
         Abstract *args[] = {(Abstract *)&tp->it, NULL};
         total += Fmt(bf, " @", args);
     }
-    total += Buff_Bytes(bf, (byte *)">", 1);
+    total += Buff_AddBytes(bf, (byte *)">", 1);
     return total;
 }
 

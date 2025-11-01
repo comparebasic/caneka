@@ -29,13 +29,13 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *a
     }
     if(!condition){
         Fmt(OutStream, fmtError, args);
-        Buff_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }else{
         /*
-        Buff_Bytes(OutStream, (byte *)"\x1b[2K\r", 5);
+        Buff_AddBytes(OutStream, (byte *)"\x1b[2K\r", 5);
         */
         Fmt(OutStream, fmtSuccess, args);
-        Buff_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }
     Out("^0", NULL);
     return condition ? SUCCESS : ERROR;
@@ -49,12 +49,12 @@ status Test(boolean condition, char *fmt, Abstract *args[]){
     }
     Fmt(OutStream, fmt, args);
     if(!condition){
-        Buff_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }else{
         /*
-        Buff_Bytes(OutStream, (byte *)"\x1b[2K\r", 5);
+        Buff_AddBytes(OutStream, (byte *)"\x1b[2K\r", 5);
         */
-        Buff_Bytes(OutStream, (byte *)"\n", 1);
+        Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }
     Out("^0", NULL);
     return condition ? SUCCESS : ERROR;

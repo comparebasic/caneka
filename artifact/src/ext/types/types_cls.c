@@ -75,10 +75,10 @@ static i64 Object_Print(Buff *bf, Abstract *a, cls type, word flags){
             while((Iter_Next(&it) & END) == 0){
                 Hashed *h = Span_Get(obj->order, it.idx);
                 ToS(bf, h->key, ZERO, MORE); 
-                Buff_Bytes(bf, (byte *)": ", 2);
+                Buff_AddBytes(bf, (byte *)": ", 2);
                 ToS(bf, h->value, ZERO, flags); 
                 if((it.type.state & LAST) == 0){
-                    Buff_Bytes(bf, (byte *)", ", 2);
+                    Buff_AddBytes(bf, (byte *)", ", 2);
                 }
             }
         }
@@ -86,25 +86,25 @@ static i64 Object_Print(Buff *bf, Abstract *a, cls type, word flags){
         if(dataCount){
             args[0] = (Abstract *)I32_Wrapped(bf->m, dataCount);
             args[1] = NULL;
-            total += Fmt(bf, "^D.$^d.nvalues {", args);
+            total += Fmt(bf, " ^D.$^d.nvalues {", args);
             Iter *it = (Iter *)as(
                 Object_GetIter(Object_GetMem(obj), NULL, (Abstract *)obj, NULL),
                 TYPE_ITER);
             while((Iter_Next(it) & END) == 0){
                 if(flags & DEBUG){
-                    total += Buff_Bytes(bf, (byte *)"\n  ", 3);
+                    total += Buff_AddBytes(bf, (byte *)"\n  ", 3);
                 }
                 Hashed *h = (Hashed *)Iter_Get(it);
                 if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
                     _objIndent++;
                     i32 i = _objIndent;
-                    total += Buff_Bytes(bf, (byte *)"\n", 1);
+                    total += Buff_AddBytes(bf, (byte *)"\n", 1);
                     while(i--){
-                        total += Buff_Bytes(bf, (byte *)"  ", 2);
+                        total += Buff_AddBytes(bf, (byte *)"  ", 2);
                     }
                 }
                 total += ToS(bf, h->key, 0, MORE); 
-                total += Buff_Bytes(bf, (byte *)" -> ", 4);
+                total += Buff_AddBytes(bf, (byte *)" -> ", 4);
                 if(flags & (MORE|DEBUG)){
                     total += ToS(bf, h->value, 0, flags);  
                 }else{
@@ -118,15 +118,15 @@ static i64 Object_Print(Buff *bf, Abstract *a, cls type, word flags){
                     _objIndent--;
                 }
                 if((it->type.state & LAST) == 0){
-                    total += Buff_Bytes(bf, (byte *)", ", 2);
+                    total += Buff_AddBytes(bf, (byte *)", ", 2);
                 }
             }
             if(flags & DEBUG){
-                total += Buff_Bytes(bf, (byte *)"\n", 1);
+                total += Buff_AddBytes(bf, (byte *)"\n", 1);
             }
-            total += Buff_Bytes(bf, (byte *)"}", 1);
+            total += Buff_AddBytes(bf, (byte *)"}", 1);
         }
-        total += Buff_Bytes(bf, (byte *)">", 1);
+        total += Buff_AddBytes(bf, (byte *)">", 1);
         return total;
     }else{
         return ToStream_NotImpl(bf, a, type, flags);
@@ -215,7 +215,7 @@ static status FetchTarget_Print(Buff *bf, Abstract *a, cls type, word flags){
         };
         total += Fmt(bf, "func/@", args);
     }
-    total += Buff_Bytes(bf, (byte *)">", 1);
+    total += Buff_AddBytes(bf, (byte *)">", 1);
 
     return total;
 }

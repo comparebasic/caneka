@@ -1,3 +1,4 @@
+status IoUtils_Init(MemCh *m);
 status IoUtil_Exists(Str *path);
 status IoUtil_Unlink(Str *path);
 status IoUtil_AddSlash(StrVec *path);

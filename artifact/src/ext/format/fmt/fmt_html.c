@@ -9,7 +9,7 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
     Str *table = Str_CstrRef(ctx->m, "TABLE");
     if(flags & TRANSP_OPEN){
         total += Tag_Out(ctx->bf, (Abstract *)table, ZERO);
-        total += Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        total += Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
     }
     if(flags & TRANSP_BODY){
         Str *thead = Str_CstrRef(ctx->m, "THEAD");
@@ -18,7 +18,7 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
         Relation *rel = (Relation *)as(a, TYPE_RELATION);
         Relation_ResetIter(rel);
 
-        Buff_Bytes(ctx->bf, (byte *)"  ", 2);
+        Buff_AddBytes(ctx->bf, (byte *)"  ", 2);
         if(rel->it.idx == 0){
             total += Tag_Out(ctx->bf, (Abstract *)thead, ZERO);
             total += Tag_Out(ctx->bf, (Abstract *)tr, ZERO);
@@ -31,11 +31,11 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
         }
         total += Tag_Out(ctx->bf, (Abstract *)tr, TAG_CLOSE);
         total += Tag_Out(ctx->bf, (Abstract *)thead, TAG_CLOSE);
-        Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
 
         while((Relation_Next(rel) & END) == 0){
             if(rel->type.state & RELATION_ROW_START){
-                Buff_Bytes(ctx->bf, (byte *)"  ", 2);
+                Buff_AddBytes(ctx->bf, (byte *)"  ", 2);
                 total += Tag_Out(ctx->bf, (Abstract *)tr, ZERO);
             }
             total += Tag_Out(ctx->bf, (Abstract *)td, ZERO);
@@ -43,13 +43,13 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
             total += Tag_Out(ctx->bf, (Abstract *)td, TAG_CLOSE);
             if(rel->type.state & RELATION_ROW_END){
                 total += Tag_Out(ctx->bf, (Abstract *)tr, TAG_CLOSE);
-                total += Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+                total += Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
             }
         }
     }
     if(flags & TRANSP_CLOSE){
         total += Tag_Out(ctx->bf, (Abstract *)table, TAG_CLOSE);
-        Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
     }
     return total;
 }
@@ -61,20 +61,20 @@ static i64 bulletFunc(TranspCtx *ctx, word flags){
     if(flags & TRANSP_OPEN){
         Str *s = Str_CstrRef(ctx->m, "UL");
         total += Tag_Out(ctx->bf, (Abstract *)s, ZERO);
-        Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
     }
     if(flags & TRANSP_BODY){
-        Buff_Bytes(ctx->bf, (byte *)"  ", 2);
+        Buff_AddBytes(ctx->bf, (byte *)"  ", 2);
         Str *s = Str_CstrRef(ctx->m, "LI");
         total += Tag_Out(ctx->bf, (Abstract *)s, ZERO);
         total += ToS(ctx->bf, a, 0, ZERO);
         total += Tag_Out(ctx->bf, (Abstract *)s, TAG_CLOSE);
-        Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
     }
     if(flags & TRANSP_CLOSE){
         Str *s = Str_CstrRef(ctx->m, "UL");
         total += Tag_Out(ctx->bf, (Abstract *)s, TAG_CLOSE);
-        Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
     }
     return total;
 }
@@ -99,7 +99,7 @@ static i64 headerFunc(TranspCtx *ctx, word flags){
     }
     if(flags & TRANSP_CLOSE){
         total += Tag_Out(ctx->bf, (Abstract *)s, TAG_CLOSE);
-        Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
     }
     return total;
 }
@@ -148,7 +148,7 @@ static i64 paragraphFunc(TranspCtx *ctx, word flags){
     }
     if(flags & TRANSP_CLOSE){
         total += Tag_Out(ctx->bf, (Abstract *)s, TAG_CLOSE);
-        Buff_Bytes(ctx->bf, (byte *)"\n", 1);
+        Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
     }
     return total;
 }
