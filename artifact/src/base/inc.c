@@ -29,6 +29,7 @@
 #include "./sequence/span_utils.c"
 #include "./sequence/hashed.c"
 #include "./sequence/lookup.c"
+#include "./sequence/shelf.c"
 #include "./sequence/sequence_tos.c"
 #include "./sequence/sequence_eq.c"
 #include "./sequence/sequence_exact.c"

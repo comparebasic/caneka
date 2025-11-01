@@ -9,22 +9,26 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
     word fl = stack->m->type.state;
     stack->m->type.state |= MEMCH_BASE;
 
-    StackEntry *entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
-    entry->type.of = TYPE_DEBUG_STACK_ENTRY;
+    StackEntry *entry = (StackEntry *)Iter_GetByIdx(&_it, _it.idx+1);
+    if(entry == NULL){
+        entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
+        entry->type.of = TYPE_DEBUG_STACK_ENTRY;
+        Iter_Add(&_it, (Abstract *)entry);
+    }
+
     entry->funcName = cstr;
     entry->fname = fname;
     entry->ref = ref;
     entry->typeOf = typeOf;
     entry->line = line;
     entry->pos = pos;
-
-    Iter_Add(&_it, (Abstract*)entry);
     stack->m->type.state = fl;
 }
 
 void DebugStack_Pop(){
-    Iter_Remove(&_it);
-    Iter_Prev(&_it);
+    if(_it.idx > 0){
+        Iter_GetByIdx(&_it, _it.idx-1);
+    }
 }
 
 void DebugStack_SetRef(void *v, word typeOf){
@@ -58,12 +62,11 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
 i32 DebugStack_Print(Buff *bf, word flags){
     i64 total = 0;
     Iter it;
-    Iter_Init(&it, _it.p);
+    memcpy(&it, &_it, sizeof(Iter));
+    Iter_GetByIdx(&it, it.idx+1);
+    it.type.state |= PROCESSING;
     while((Iter_Prev(&it) & END) == 0){
         word fl = flags;
-        if(it.idx == it.p->max_idx){
-            fl |= MORE;
-        }
         total += ToS(bf, it.value, 0, fl);
     }
     return total;

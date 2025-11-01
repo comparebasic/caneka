@@ -22,19 +22,11 @@ status Queue_Remove(Queue *q, i32 idx){
     }
 
     Single *sg = NULL;
-    if(q->availableIt.metrics.selected == -1 || 
-            q->availableIt.metrics.selected == q->availableIt.p->max_idx){
-        q->availableIt.metrics.selected++;
-        printf("making new I32W %d\n", q->availableIt.metrics.selected);
-        fflush(stdout);
-        sg = I32_Wrapped(m, idx);
-        Iter_SetByIdx(&q->availableIt,
-            q->availableIt.metrics.selected, (Abstract *)sg);
+    if(Shelf_Available(&q->availableIt)){
+        sg = (Single *)Shelf_Get(&q->availableIt);
     }else{
-        printf("recycling I32W %d\n", q->availableIt.metrics.selected);
-        fflush(stdout);
-        sg = Iter_GetByIdx(&q->availableIt, q->availableIt.metrics.selected);
-        q->availableIt.metrics.selected--;
+        sg = I32_Wrapped(m, idx);
+        Shelf_Add(&q->availableIt, (Abstract *)sg);
     }
     sg->val.i = idx;
 
@@ -43,10 +35,8 @@ status Queue_Remove(Queue *q, i32 idx){
 
 i32 Queue_Add(Queue *q, Abstract *a){
     i32 idx = 0;
-    if(q->availableIt.metrics.selected >= 0){
-        Single *sg = (Single *)Iter_GetByIdx(&q->availableIt, 
-            q->availableIt.metrics.selected);
-        q->availableIt.metrics.selected--;
+    Single *sg = NULL;
+    if((sg = (Single *)Shelf_Get(&q->availableIt)) != NULL){
         idx = sg->val.i;
     }else{
         idx = q->it.p->max_idx+1;

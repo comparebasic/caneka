@@ -11,6 +11,7 @@ status DebugStack_Tests(MemCh *gm){
 
     DebugStack_Push(NULL, 0);
     DebugStack_Print(bf, 0);
+
     DebugStack_Pop();
     DebugStack_Print(bfAfter, 0);
 
@@ -24,7 +25,6 @@ status DebugStack_Tests(MemCh *gm){
     r |= Test(total > totalAfter, 
         "Stack printout has less characters than before, stack: @\nstackAfter: @\n", args); 
     MemCh_Free(m);
-
     DebugStack_Pop();
     return r;
 }

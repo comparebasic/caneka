@@ -375,6 +375,18 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Queue Iter Tests",
+        QueueIter_Tests,
+        "Queue tests for iterating around a queue with additions and removals.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Queue Criteria Tests",
+        QueueCriteria_Tests,
+        "Queue tests for multi-critiria items (time/file descriptor).",
+        FEATURE_COMPLETE,
+    },
+    {
         "TaskStep Tests",
         TaskStep_Tests,
         "Task/Step and Task_Tumble tests.",
