@@ -10,7 +10,7 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
             "Content-Length: 9\r\n"
             "\r\n"
             "not found");
-        Cursor_Add(proto->out, s);
+        Buff_Add(proto->out, s);
     }else{
         Buff *bf = Buff_From(tsk->m, proto->out->v, BUFF_STRVEC);
 
@@ -35,7 +35,6 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
             "$", args);
     }
 
-    Cursor_Setup(proto->out, StrVec_ReAlign(tsk->m, proto->out->v));
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
     st->type.state |= SUCCESS;
     return st->type.state;
@@ -54,7 +53,8 @@ status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source){
 
 status HttpTask_AddRecieve(Task *tsk, Abstract *arg, Abstract *source){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    Roebling *rbl = HttpRbl_Make(tsk->m, proto->in, (Abstract *)proto);
+    Cursor *curs = Cursor_Make(tsk->m, proto->in->v);
+    Roebling *rbl = HttpRbl_Make(tsk->m, curs, (Abstract *)proto);
     status r = Task_AddStep(tsk, TcpTask_ReadToRbl, (Abstract *)rbl, source, STEP_IO_IN);
     tsk->type.state |= TcpTask_ExpectRecv(NULL, tsk);
     return r;

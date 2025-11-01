@@ -15,7 +15,8 @@ status FileDB_Open(FileDB *fdb){
         hdr->kind = BINSEG_TYPE_INDEX;
         entry->length = sizeof(BinSegHeader);
         entry = Str_ToHex(m, entry);
-        Buff_AddSend(fdb->bf, entry);
+        Buff_Add(fdb->bf, entry);
+        Buff_Flush(fdb->bf);
     }else if(fdb->bf->type.state & ERROR){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error checking FileDb Buff size", NULL);
@@ -60,7 +61,8 @@ status FileDB_Close(FileDB *fdb){
             BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
             hdr->id = fdb->ctx->latestId;
             entry = Str_ToHex(m, entry);
-            Buff_AddSend(fdb->bf, entry);
+            Buff_Add(fdb->bf, entry);
+            Buff_Flush(fdb->bf);
             if(fdb->type.state & DEBUG){
                 args[0] = (Abstract *)Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
                 args[1] = NULL;

@@ -116,16 +116,13 @@ i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
     return ctx->latestId;
  }
 
-i64 BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
+status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     DebugStack_Push(ctx, ctx->type.of);
-    i64 total = 0;
     MemCh *m = ctx->bf->m;
     if(ctx->type.state & BINSEG_VISIBLE){
         entry = Str_ToHex(m, entry);
     }
-    if(Buff_AddSend(ctx->bf, entry) & SUCCESS){
-        total += entry->length;
-    }
+    status r = Buff_Add(ctx->bf, entry);
     if(ctx->type.state & DEBUG){
         Abstract *args[5];
         args[0] = (Abstract *)Type_StateVec(m, ctx->type.of, ctx->type.state),
@@ -136,10 +133,10 @@ i64 BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
         Out("^p.ToBuff($ &)/$ -> @^0\n", args);
     }
     DebugStack_Pop();
-    return total;
+    return r;
 }
 
-i64 BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
+status BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
     DebugStack_Push(ctx, ctx->type.of);
     Abstract *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);

@@ -14,8 +14,8 @@ typedef struct {
     i32 code;
     Str *mime;
     StrVec *path;
-    Buff *content;
-    Buff *body;
+    StrVec *content;
+    StrVec *body;
     Table *headers;
     Span *errors;
 } HttpCtx;

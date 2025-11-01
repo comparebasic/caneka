@@ -54,21 +54,20 @@ static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstrac
 
 static i32 _objIndent = 0;
 
-static i64 Object_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
     Object *obj = (Object *)as(a, TYPE_OBJECT);
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
     Abstract *args[4];
     i32 dataCount = obj->order->nvalues;
     if(flags & (MORE|DEBUG)){
-        i64 total = 0;
         if(cls == NULL){
-            total += Fmt(bf, "Object<", args);
+            Fmt(bf, "Object<", args);
         }else{
             dataCount = dataCount - obj->propMask;
 
             args[0] = (Abstract *)cls->name;
             args[1] = NULL;
-            total += Fmt(bf, "$<", args);
+            Fmt(bf, "$<", args);
 
             Iter it;
             Iter_Init(&it, cls->propOrder);
@@ -86,48 +85,47 @@ static i64 Object_Print(Buff *bf, Abstract *a, cls type, word flags){
         if(dataCount){
             args[0] = (Abstract *)I32_Wrapped(bf->m, dataCount);
             args[1] = NULL;
-            total += Fmt(bf, " ^D.$^d.nvalues {", args);
+            Fmt(bf, " ^D.$^d.nvalues {", args);
             Iter *it = (Iter *)as(
                 Object_GetIter(Object_GetMem(obj), NULL, (Abstract *)obj, NULL),
                 TYPE_ITER);
             while((Iter_Next(it) & END) == 0){
                 if(flags & DEBUG){
-                    total += Buff_AddBytes(bf, (byte *)"\n  ", 3);
+                    Buff_AddBytes(bf, (byte *)"\n  ", 3);
                 }
                 Hashed *h = (Hashed *)Iter_Get(it);
                 if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
                     _objIndent++;
                     i32 i = _objIndent;
-                    total += Buff_AddBytes(bf, (byte *)"\n", 1);
+                    Buff_AddBytes(bf, (byte *)"\n", 1);
                     while(i--){
-                        total += Buff_AddBytes(bf, (byte *)"  ", 2);
+                        Buff_AddBytes(bf, (byte *)"  ", 2);
                     }
                 }
-                total += ToS(bf, h->key, 0, MORE); 
-                total += Buff_AddBytes(bf, (byte *)" -> ", 4);
+                ToS(bf, h->key, 0, MORE); 
+                Buff_AddBytes(bf, (byte *)" -> ", 4);
                 if(flags & (MORE|DEBUG)){
-                    total += ToS(bf, h->value, 0, flags);  
+                    ToS(bf, h->value, 0, flags);  
                 }else{
                     Str *typeStr = NULL;
                     if(h->value != NULL){
                         typeStr = Type_ToStr(bf->m, h->value->type.of);
                     }
-                    total += ToS(bf, (Abstract *)typeStr, 0, MORE);
+                    ToS(bf, (Abstract *)typeStr, 0, MORE);
                 }
                 if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
                     _objIndent--;
                 }
                 if((it->type.state & LAST) == 0){
-                    total += Buff_AddBytes(bf, (byte *)", ", 2);
+                    Buff_AddBytes(bf, (byte *)", ", 2);
                 }
             }
             if(flags & DEBUG){
-                total += Buff_AddBytes(bf, (byte *)"\n", 1);
+                Buff_AddBytes(bf, (byte *)"\n", 1);
             }
-            total += Buff_AddBytes(bf, (byte *)"}", 1);
+            Buff_AddBytes(bf, (byte *)"}", 1);
         }
-        total += Buff_AddBytes(bf, (byte *)">", 1);
-        return total;
+        return Buff_AddBytes(bf, (byte *)">", 1);
     }else{
         return ToStream_NotImpl(bf, a, type, flags);
     }
@@ -150,20 +148,17 @@ static boolean Fetcher_Exact(Fetcher *a, Fetcher *b){
 }
 
 static status Fetcher_Print(Buff *bf, Abstract *a, cls type, word flags){
-    i64 total = 0;
     Fetcher *fch = (Fetcher *)as(a, TYPE_FETCHER);
     Abstract *args[] = {
         (Abstract *)Type_StateVec(bf->m, fch->type.of, fch->type.state),
         NULL,
     };
-    total += Fmt(bf, "Fetcher<@ ", args);
+    Fmt(bf, "Fetcher<@ ", args);
     Abstract *args1[] = {
         (Abstract *)fch->val.targets,
         NULL,
     };
-    total += Fmt(bf, "@>", args1);
-
-    return total;
+    return Fmt(bf, "@>", args1);
 }
 
 static status FetchTargetFunc_Print(Buff *bf, Abstract *a, cls type, word flags){
@@ -171,19 +166,18 @@ static status FetchTargetFunc_Print(Buff *bf, Abstract *a, cls type, word flags)
 }
 
 static status FetchTarget_Print(Buff *bf, Abstract *a, cls type, word flags){
-    i64 total = 0;
     FetchTarget *tg = (FetchTarget *)as(a, TYPE_FETCH_TARGET);
     Abstract *args[] = {
         (Abstract *)Type_StateVec(bf->m, tg->type.of, tg->type.state),
         NULL,
     };
-    total += Fmt(bf, "FT<@", args);
+    Fmt(bf, "FT<@", args);
     if(tg->objType.of != ZERO){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(bf->m, tg->objType.of),
             NULL
         };
-        total += Fmt(bf, " $ ", args);
+        Fmt(bf, " $ ", args);
 
     }
     if(tg->key != NULL){
@@ -191,14 +185,14 @@ static status FetchTarget_Print(Buff *bf, Abstract *a, cls type, word flags){
             (Abstract *)tg->key,
             NULL
         };
-        total += Fmt(bf, " @", args);
+        Fmt(bf, " @", args);
     }
     if(tg->type.state & FETCH_TARGET_IDX || tg->idx != -1){
         Abstract *args[] = {
             (Abstract *)I32_Wrapped(bf->m, tg->idx),
             NULL
         };
-        total += Fmt(bf, " idx^D.$^d.", args);
+        Fmt(bf, " idx^D.$^d.", args);
     }
     if(tg->type.state & FETCH_TARGET_RESOLVED){
         Abstract *args[] = {
@@ -206,18 +200,16 @@ static status FetchTarget_Print(Buff *bf, Abstract *a, cls type, word flags){
             (Abstract *)I16_Wrapped(bf->m, tg->offset),
             NULL
         };
-        total += Fmt(bf, " -> $/offset^D.$^d.>", args);
+        Fmt(bf, " -> $/offset^D.$^d.>", args);
     }
     if(tg->type.state & FETCH_TARGET_FUNC){
         Abstract *args[] = {
             (Abstract *)Ptr_Wrapped(bf->m, tg->func, TYPE_FETCH_FUNC),
             NULL
         };
-        total += Fmt(bf, "func/@", args);
+        Fmt(bf, "func/@", args);
     }
-    total += Buff_AddBytes(bf, (byte *)">", 1);
-
-    return total;
+    return Buff_AddBytes(bf, (byte *)">", 1);
 }
 
 status Types_ClsInit(MemCh *m){

@@ -1,10 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
-    i64 total = 0;
+static status Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     MemCh *m = ctx->bf->m;
     Table *tbl = (Span *)as(a, TYPE_TABLE);
+    status r = READY;
 
     Str *content;
     Str *entry;
@@ -22,7 +22,7 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     }
 
     if(ctx->type.state & BINSEG_REVERSED){
-        total += BinSegCtx_ToBuff(ctx, hdr, entry);
+        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
     ip = (i16 *)content->bytes;
@@ -31,22 +31,22 @@ static i64 Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
-            total += BinSegCtx_Send(ctx, h->key, *(ip++));
-            total += BinSegCtx_Send(ctx, h->value, *(ip++));
+            r |= BinSegCtx_Send(ctx, h->key, *(ip++));
+            r |= BinSegCtx_Send(ctx, h->value, *(ip++));
         }
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        total += BinSegCtx_ToBuff(ctx, hdr, entry);
+        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
-    return total;
+    return r;
 }
 
-static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
-    i64 total = 0;
+static status Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     MemCh *m = ctx->bf->m;
     Span *p = (Span *)as(a, TYPE_SPAN);
+    status r = READY;
 
     Str *content;
     Str *entry;
@@ -65,26 +65,26 @@ static i64 Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     }
 
     if(ctx->type.state & BINSEG_REVERSED){
-        total += BinSegCtx_ToBuff(ctx, hdr, entry);
+        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
     ip = (i16 *)content->bytes;
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
-        total += BinSegCtx_Send(ctx, Iter_Get(&it), *ip);
+        r |= BinSegCtx_Send(ctx, Iter_Get(&it), *ip);
         ip++;
     };
 
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        total += BinSegCtx_ToBuff(ctx, hdr, entry);
+        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
-    return total;
+    return r;
 }
 
-static i64 Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     Str *s = (Str *)as(a, TYPE_STR);
     MemCh *m = ctx->bf->m;
 

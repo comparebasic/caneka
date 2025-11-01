@@ -45,24 +45,12 @@ status TcpTask_WriteFromOut(Step *st, Task *tsk){
     Str s;
     memset(&s, 0, sizeof(Str));
     Str_Init(&s, NULL, 0, 0);
-    while(total < SERV_READ_SIZE && (proto->out->type.state & END) == 0){
-        if(Cursor_SetStrBytes(proto->out, &s, SERV_READ_SIZE-total) & NOOP){
-            break;
-        }
-        if(s.length > 0){
-            l = write(pfd->fd, s.bytes, s.length); 
-            if(l > 0){
-                Cursor_Incr(proto->out, (i32)l);
-                total += l;
-            }else{
-                if(l < 0){
-                    tsk->type.state |= ERROR;
-                } 
-                break;
-            }
-        }else{
-            break;
-        }
+    Buff_SetFd(proto->out, pfd->fd);
+    Buff_Flush(proto->out);
+
+    st->type.state |= (proto->out->type.state & ERROR);
+    if((proto->out->type.state & NOOP) == 0){
+        st->type.state |= SUCCESS;
     }
 
     if(tsk->type.state & DEBUG){
@@ -73,12 +61,6 @@ status TcpTask_WriteFromOut(Step *st, Task *tsk){
         };
         Out("Sent($): ^g.&^0\n", args);
     }
-
-    if(proto->out->type.state & END){
-        st->type.state |= SUCCESS;
-    }
-
-    st->type.state |= (proto->out->type.state & ERROR);
     
     return st->type.state;
 }

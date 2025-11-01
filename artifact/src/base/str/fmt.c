@@ -49,7 +49,7 @@ status Fmt(Buff *bf, char *fmt, Abstract *args[]){
                 };
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Expecting arg, found NULL instead, '$'", args);
-                return total;
+                return ERROR;
             }
 
             Abstract *a = *(args++);

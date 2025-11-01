@@ -162,8 +162,7 @@ status BuffIo_Tests(MemCh *gm){
     " walrus. If you're reading this, then something is probably " "broken, and"
     " your looking at the test. I'm so sorry it's broken. But we believe you can"
     " fix it. Yay.";
-    i64 offset = 0;
-    Buff_Unbuff(out, (byte *)content, strlen(content), &offset);
+    Buff_AddBytes(out, (byte *)content, strlen(content));
     close(fd);
     Buff_UnsetFd(out);
 
@@ -171,8 +170,6 @@ status BuffIo_Tests(MemCh *gm){
     args[1] = NULL;
     r |= Test(out->v->total == 0, "Buff total is still 0 after sending content "
         "through it unbuffered: @", args);
-
-    r |= Test(offset == strlen(content), "total offset matches content length ", args);
 
     i32 ifd = open(Str_Cstr(m, StrVec_Str(m, pathOne)), O_RDONLY);
     Buff *chain = Buff_Make(m, ZERO);
@@ -195,7 +192,8 @@ status BuffIo_Tests(MemCh *gm){
         "Second file opened successfully to create and write have ^D.$^d.fd for @", args);
 
     Buff_Read(chain);
-    Buff_SendToFd(chain, ofd);
+    Buff_SetFd(chain, ofd);
+    Buff_Flush(chain);
     close(ifd);
     Buff_UnsetFd(chain);
     close(ofd);

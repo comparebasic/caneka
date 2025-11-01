@@ -227,11 +227,55 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
     return bf->type.state;
 }
 
+static status Buff_unbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 *offset){
+    if(length > IO_SEND_MAX || length < 0){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "length of send unbuff is larger than IO_SEND_MAX or less than 0", NULL);
+        flags |= ERROR;
+        return flags;
+    }
+
+    ssize_t sent = 0;
+    if(flags & BUFF_SOCKET){
+        sent = send(fd, bytes, min(length, IO_BLOCK_SIZE), 0);
+    }else if(flags & BUFF_FD){
+        sent = write(fd, bytes, min(length, IO_BLOCK_SIZE));
+    }else{
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+            "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
+        flags |= ERROR;
+        return flags;
+    }
+
+    *offset = sent;
+    if(sent < 0){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error sending str", NULL);
+        flags |= ERROR;
+    }else if(sent == length){
+        flags |= SUCCESS;
+    }else{
+        flags |= PROCESSING;
+    }
+    return flags;
+}
+
 status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
     status r = READY;
     if(length <= 0){
         return NOOP;
     }
+
+    if(bf->type.state & ERROR){
+        Abstract *args[2];
+        args[0] = (Abstract *)bf;
+        args[1] = NULL;
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error error flags set on buffer", args);
+        return bf->type.state;
+    }
+
+    bf->type.state &= ~SUCCESS|NOOP;
 
     if(length > IO_SEND_MAX){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -244,11 +288,18 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
             (bf->type.state & (BUFF_SOCKET|BUFF_FD))){
         Str s = {
             .type = {TYPE_STR, ZERO},
-            .alloc = alloc,
+            .alloc = length,
             .length = length,
             .bytes = bytes,
         };
-        return Buff_sendToFd(bf, bf->fd);
+
+        i64 offset = 0;
+        while(offset < length && (bf->type.state & (ERROR|NOOP|SUCCESS)) == 0){
+            Buff_unbuffFd(bf->m,
+                bf->fd, bytes+offset, length-offset, bf->type.state, &offset);
+        }
+
+        return bf->type.state;
     }
 
     if(bf->tail.idx == -1){
@@ -373,56 +424,9 @@ status Buff_AddVec(Buff *bf, StrVec *v){
     return bf->type.state;
 }
 
-static status Buff_unbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 *offset){
-    if(length > IO_SEND_MAX || length < 0){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "length of send unbuff is larger than IO_SEND_MAX or less than 0", NULL);
-        flags |= ERROR;
-        return flags;
-    }
-
-    ssize_t sent = 0;
-    if(flags & BUFF_SOCKET){
-        sent = send(fd, bytes, min(length, IO_BLOCK_SIZE), 0);
-    }else if(flags & BUFF_FD){
-        sent = write(fd, bytes, min(length, IO_BLOCK_SIZE));
-    }else{
-        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-            "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
-        flags |= ERROR;
-        return flags;
-    }
-
-    *offset = sent;
-    if(sent < 0){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error sending str", NULL);
-        flags |= ERROR;
-    }else if(sent == length){
-        flags |= SUCCESS;
-    }else{
-        flags |= PROCESSING;
-    }
-    return flags;
-}
-
 status Buff_Flush(Buff *bf){
     if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-        while((Buff_send(bf, bf->fd) & (SUCCESS|ERROR|END)) == 0){}
-    }
-    return bf->type.state;
-}
-
-status Buff_AddSend(Buff *bf, Str *s){
-    if((bf->type.state & BUFF_UNBUFFERED) == 0){
-        Buff_Add(bf, s);
-        Buff_Flush(bf);
-    }else{
-        i64 offset = 0;
-        while(offset < s->alloc && (bf->type.state & ERROR) == 0){
-            Buff_unbuffFd(bf->m,
-                bf->fd, s->bytes+offset, s->length-offset, bf->type.state, &offset);
-        }
+        while((Buff_sendToFd(bf, bf->fd) & (SUCCESS|ERROR|END)) == 0){}
     }
     return bf->type.state;
 }
