@@ -34,6 +34,8 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
         Out("^0.Parsed Tcp Initial Request -> ^c.&/@^0\n", args);
     }
 
+    Out("^b.ReadToRbl^0\n", NULL);
+
     DebugStack_Pop();
     return st->type.state;
 }
@@ -48,6 +50,12 @@ status TcpTask_WriteFromOut(Step *st, Task *tsk){
     Str s;
     memset(&s, 0, sizeof(Str));
     Str_Init(&s, NULL, 0, 0);
+
+    Abstract *args[2];
+    args[0] = (Abstract *)proto->out->v;
+    args[1] = NULL;
+    Out("^p.WriteFromOut: &^0\n", args);
+
     Buff_SetFd(proto->out, pfd->fd);
     Buff_Flush(proto->out);
 

@@ -113,8 +113,6 @@ static status routeFuncFmt(MemCh *m,
 }
 
 status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *source){
-    return NOOP;
-    /*
     DebugStack_Push(rt, rt->type.of);
     StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
     StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
@@ -123,9 +121,16 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
         TYPE_WRAPPED_FUNC
     );
 
+    Abstract *args[5];
+    args[0] = NULL;
+    args[1] = (Abstract *)path;
+    args[2] = (Abstract *)type;
+    args[3] = (Abstract *)NULL;
+    args[4] = NULL;
+    Out("^c.^{STACK.name}: path=@ type=@ data=@^0\n", args);
+
     if(funcW != NULL && funcW->type.state & ROUTE_DYNAMIC){
-        StrVec *v = StrVec_Make(m);
-        FileDes_ToVec(v, path);
+        StrVec *v = File_ToVec(m, StrVec_Str(m, path));
         if(v->total == 0){
             Abstract *args[3];
             args[0] = (Abstract *)path;
@@ -139,11 +144,16 @@ status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *s
         DebugStack_Pop();
         return r;
     }else{
-        i64 total = FileDes_ToVec(dest, path);
+        StrVec *v = File_ToVec(m, StrVec_Str(m, path));
+
+        args[0] = (Abstract *)v;
+        args[1] = NULL;
+        Out("^y.route dest v:@^0\n", args);
+
+        StrVec_AddVec(v, dest);
         DebugStack_Pop();
         return SUCCESS;
     }
-    */
 }
 
 Nav *Route_Make(MemCh *m){

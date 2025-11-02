@@ -15,6 +15,8 @@ static Object *Example_getPageData(Task *tsk, Route *rt){
     StrVec *title = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH);
     Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
 
+    Out("^b.getPageData^0\n", NULL);
+
     return data;
 }
 
@@ -42,6 +44,8 @@ static status Example_log(Step *_st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     close(pfd->fd);
 
+    Out("^b.log^0\n", NULL);
+
     DebugStack_Pop();
     return SUCCESS;
 }
@@ -60,13 +64,15 @@ static status Example_PageContent(Step *st, Task *tsk){
     args[3] = (Abstract *)tsk;
     args[4] = NULL;
     Out("^p.^{STACK.name} ^{@STACK.ref} - ^{TIME.human} $^0\n", args);
-    exit(1);
 
     if(Route_Handle(tsk->m, rt, ctx->content, (Object *)st->data, (Abstract *)tsk) & SUCCESS){
         st->type.state |= SUCCESS;
     }else{
         st->type.state |= ERROR;
     }
+
+    Out("^b.PageContent^0\n", NULL);
+
     DebugStack_Pop();
     return st->type.state;
 }
@@ -92,6 +98,11 @@ static status Example_FooterContent(Step *st, Task *tsk){
     }else{
         st->type.state |= ERROR;
     }
+
+    args[0] = (Abstract *)ctx->content;
+    args[1] = (Abstract *)st->data;
+    args[1] = NULL;
+    Out("^b.FooterContent: content=&^0\n", args);
 
     DebugStack_Pop();
     return st->type.state;
@@ -121,6 +132,8 @@ static status Example_HeaderContent(Step *st, Task *tsk){
         st->type.state |= ERROR;
     }
 
+    Out("^b.HeaderContent^0\n", NULL);
+
     DebugStack_Pop();
     return st->type.state;
 }
@@ -130,6 +143,8 @@ static status Example_ServePage(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
+    Out("^b.ServePage^0\n", NULL);
 
     Path_Annotate(tsk->m, ctx->path, _sepSpan);
     Route *rt = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
@@ -193,6 +208,9 @@ static status Example_ServeError(Step *st, Task *tsk){
 
     StrVec_Add(ctx->content, Str_CstrRef(tsk->m, "</p>\r\n"));
     st->type.state |= SUCCESS;
+
+    Out("^b.ServeError^0\n", NULL);
+
     DebugStack_Pop();
     return st->type.state;
 }
@@ -216,6 +234,8 @@ static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract
 
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
 
+    Out("^b.errorPopulate^0\n", NULL);
+
     DebugStack_Pop();
     return SUCCESS;
 }
@@ -226,13 +246,13 @@ static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *sou
     Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
 
-    tsk->type.state |= DEBUG;
-
     HttpTask_InitResponse(tsk, arg, source);
 
     Task_AddStep(tsk, Example_ServePage, NULL, NULL, ZERO);
 
     HttpTask_AddRecieve(tsk, NULL, NULL);
+
+    Out("^b.populate^0\n", NULL);
 
     DebugStack_Pop();
     return SUCCESS;
@@ -248,7 +268,6 @@ static status serveInit(MemCh *m, TcpCtx *ctx){
     }
 
     Str *sp = Path_StrAdd(m, ctx->path, Str_CstrRef(m, "sessions"));
-    sp->type.state |= DEBUG;
     r |= Dir_CheckCreate(m, sp);
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "users")));
     r |= Dir_CheckCreate(m, Path_StrAdd(m, ctx->path, Str_CstrRef(m, "pages/data")));

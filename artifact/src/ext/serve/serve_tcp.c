@@ -169,8 +169,9 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 
 Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, (Abstract *)ctx);
-    tsk->stepGuardMax = 16;
-    Task_AddStep(tsk, Step_Delay, (Abstract *)Util_Wrapped(tsk->m, 100), NULL, STEP_LOOP);
+    tsk->stepGuardMax = -1;
+    Task_AddStep(tsk,
+        Step_Delay, (Abstract *)Util_Wrapped(tsk->m, TIME_SEC), NULL, STEP_LOOP);
     Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_OpenTcp, (Abstract *)ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_SetupQueue, (Abstract *)ctx, NULL, ZERO);

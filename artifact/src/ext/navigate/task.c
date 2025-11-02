@@ -19,12 +19,8 @@ static status _taskErrorHandler(MemCh *m, Abstract *_tsk, Abstract *msg){
 status Task_Tumble(Task *tsk){
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
-    i16 guard;
+    i16 guard = 0;
     do {
-        if(Guard_Incr(tsk->m, &guard, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER)
-                & ERROR){
-            break;
-        }
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->parent != NULL){
                 Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
@@ -34,6 +30,10 @@ status Task_Tumble(Task *tsk){
         tsk->type.state &= ~MORE;
 
         Step *st = Iter_Current(&tsk->chainIt);
+        if(st->type.state & ERROR){
+            printf("Error break!\n");
+            break;
+        }
 
         if(tsk->type.state & DEBUG){
             Abstract *args[] = {
