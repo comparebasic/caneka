@@ -228,6 +228,8 @@ status QueueCriteria_Tests(MemCh *gm){
 
     QueueCrit *crit = QueueCrit_Make(m, QueueCrit_Time, ZERO);
     i32 hIdx = Queue_AddHandler(q, crit);
+    QueueCrit *critFds = QueueCrit_Make(m, QueueCrit_Fds, ZERO);
+    i32 fdIdx = Queue_AddHandler(q, critFds);
 
     microTime start = MicroTime_Now();
     crit->u = (util)start;
@@ -273,7 +275,109 @@ status QueueCriteria_Tests(MemCh *gm){
     args[2] = NULL;
     r |= Test(i == 1, "Only one item was available to run, i is $, at $ seconds from start", args);
 
-    r |= ERROR;
+
+    crit->u = (util)start+(TIME_MIN*15);
+
+    expected[0] = (Abstract *)Str_FromCstr(m, "Three Seconds", ZERO);
+    expected[1] = (Abstract *)Str_FromCstr(m, "Ten Minutes", ZERO);
+    expected[2] = NULL;
+    i = 0;
+
+    while((Queue_Next(q) & END) == 0){
+        args[0] = expected[i];
+        args[1] = Queue_Get(q);
+        args[2] = NULL;
+        r |= Test(args[0] == NULL && args[1] == NULL || Equals((Abstract *)args[1], (Abstract *)expected[i]),
+            "Queue item matches, expected @, have @", args);
+        i++;
+    };
+
+    args[0] = (Abstract *)I32_Wrapped(m, i);
+    args[1] = (Abstract *)I64_Wrapped(m, ((microTime)crit->u - start) / TIME_MIN);
+    args[2] = NULL;
+    r |= Test(i == 2, "Only one item was available to run, i is $, at $ minutes from start", args);
+
+
+    crit->u = (util)start+(TIME_DAY*3);
+
+    expected[0] = (Abstract *)Str_FromCstr(m, "Two Days", ZERO);
+    expected[1] = (Abstract *)Str_FromCstr(m, "Three Seconds", ZERO);
+    expected[2] = (Abstract *)Str_FromCstr(m, "Ten Minutes", ZERO);
+    expected[3] = NULL;
+    i = 0;
+
+    while((Queue_Next(q) & END) == 0){
+        args[0] = expected[i];
+        args[1] = Queue_Get(q);
+        args[2] = NULL;
+        r |= Test(args[0] == NULL && args[1] == NULL || Equals((Abstract *)args[1], (Abstract *)expected[i]),
+            "Queue item matches, expected @, have @", args);
+        i++;
+    };
+
+    args[0] = (Abstract *)I32_Wrapped(m, i);
+    args[1] = (Abstract *)I64_Wrapped(m, ((microTime)crit->u - start) / TIME_DAY);
+    args[2] = NULL;
+    r |= Test(i == 3, "Only one item was available to run, i is $, at $ days from start", args);
+
+    Queue_Remove(q, 0);
+
+    s = Str_FromCstr(m, "File Descriptor", ZERO);
+
+    Buff *bf = Buff_Make(m, ZERO);
+    Str *path = IoUtil_GetCwdPath(m, Str_CstrRef(m, "dist/test/queue.test"));
+    File_Open(bf, path, O_RDONLY);
+
+    idx = Queue_Add(q, (Abstract *)s);
+    struct pollfd pfd = { bf->fd, POLLOUT, 0};
+    Queue_SetCriteria(q, fdIdx, idx, (util *)&pfd);
+
+    Queue_Reset(q);
+
+    crit->u = (util)start+(TIME_SEC*10);
+
+    expected[0] = (Abstract *)Str_FromCstr(m, "File Descriptor", ZERO);
+    expected[1] = (Abstract *)Str_FromCstr(m, "Three Seconds", ZERO);
+    expected[2] = NULL;
+    i = 0;
+
+    while((Queue_Next(q) & END) == 0){
+        args[0] = expected[i];
+        args[1] = Queue_Get(q);
+        args[2] = NULL;
+        r |= Test(args[0] == NULL && args[1] == NULL || Equals((Abstract *)args[1], (Abstract *)expected[i]),
+            "Queue item matches, expected @, have @", args);
+        i++;
+    };
+
+    args[0] = (Abstract *)I32_Wrapped(m, i);
+    args[1] = (Abstract *)I64_Wrapped(m, ((microTime)crit->u - start) / TIME_SEC);
+    args[2] = NULL;
+    r |= Test(i == 2, "PollFd set to Read: two item was available to run, i is $, at $ seconds from start", args);
+
+    struct pollfd pfd2 = { bf->fd, ZERO, 0};
+    Queue_SetCriteria(q, fdIdx, 0, (util *)&pfd2);
+
+    expected[0] = (Abstract *)Str_FromCstr(m, "Three Seconds", ZERO);
+    expected[1] = NULL;
+    i = 0;
+
+    while((Queue_Next(q) & END) == 0){
+        args[0] = expected[i];
+        args[1] = Queue_Get(q);
+        args[2] = NULL;
+        r |= Test(args[0] == NULL && args[1] == NULL || Equals((Abstract *)args[1], (Abstract *)expected[i]),
+            "Queue item matches, expected @, have @", args);
+        i++;
+    };
+
+    args[0] = (Abstract *)I32_Wrapped(m, i);
+    args[1] = (Abstract *)I64_Wrapped(m, ((microTime)crit->u - start) / TIME_SEC);
+    args[2] = NULL;
+    r |= Test(i == 1, "No direction set on pollfd: Only one item was available to run, i is $, at $ seconds from start", args);
+
+    File_Close(bf);
+
     MemCh_Free(m);
     return r;
 }
