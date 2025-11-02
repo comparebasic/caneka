@@ -15,10 +15,10 @@ status Queue_Remove(Queue *q, i32 idx){
     q->type.state |= (it.type.state & (FLAG_ITER_REVERSE|END));
     MemCh *m = q->it.p->m;
 
-    util u = 0;
+    i64 n = -1;
     Iter_Init(&it, q->handlers);
     while((Iter_Next(&it) & END) == 0){
-        r |= Queue_SetCriteria(q, it.idx, idx, &u);
+        r |= Queue_SetCriteria(q, it.idx, idx, (util *)&n);
     }
 
     Single *sg = NULL;
@@ -115,14 +115,16 @@ status Queue_Reset(Queue *q){
 
 status Queue_Next(Queue *q){
     Abstract *args[5];
+    if(q->type.state & END){
+        Queue_Reset(q);
+    }
+
     if(q->type.state & DEBUG){
         args[0] = (Abstract *)q;
         args[1] = NULL;
         Out("^p.Queue_Next &\n", args);
     }
-    if(q->type.state & END){
-        Queue_Reset(q);
-    }
+
     MemCh *m = q->it.p->m;
     q->type.state &= ~(SUCCESS|NOOP|END);
     q->value = NULL;
@@ -132,28 +134,33 @@ status Queue_Next(Queue *q){
     }
 
     while((Iter_Next(&q->it) & END) == 0){
-        Iter it;
-        if(q->it.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
-            q->slabIdx++;
-            q->go = 0;
-            Iter_Init(&it, q->handlers);
-            while((Iter_Next(&it) & END) == 0){
-                QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
-                util *slab = (util *)Span_Get(crit->data, q->slabIdx);
-                q->go |= crit->func(crit, slab);
+        if(q->handlers->nvalues > 0){
+            Iter it;
+            if(q->it.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
+                q->slabIdx++;
+                q->go = 0;
+                Iter_Init(&it, q->handlers);
+                while((Iter_Next(&it) & END) == 0){
+                    QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
+                    util *slab = (util *)Span_Get(crit->data, q->slabIdx);
+                    q->go |= crit->func(crit, slab);
+                }
             }
-        }
 
-        i32 localIdx = (q->it.idx & CRIT_SLAB_MASK); 
-        if(q->go & (1 << localIdx)){
-            q->type.state |= SUCCESS;
-            q->value = Iter_Get(&q->it);
-            if(q->type.state & DEBUG){
-                args[0] = (Abstract *)I32_Wrapped(m, q->it.idx);
-                args[1] = (Abstract *)q->value;
-                args[2] = NULL;
-                Out("^p.    Found \\@$/&\n", args);
+            i32 localIdx = (q->it.idx & CRIT_SLAB_MASK); 
+            if(q->go & (1 << localIdx)){
+                q->type.state |= SUCCESS;
+                q->value = Iter_Get(&q->it);
+                if(q->type.state & DEBUG){
+                    args[0] = (Abstract *)I32_Wrapped(m, q->it.idx);
+                    args[1] = (Abstract *)q->value;
+                    args[2] = NULL;
+                    Out("^p.    Found \\@$/&\n", args);
+                }
+                break;
             }
+        }else{
+            q->value = Iter_Get(&q->it);
             break;
         }
     }
@@ -162,10 +169,9 @@ status Queue_Next(Queue *q){
     return q->type.state;
 }
 
-status Queue_AddHandler(Queue *q, QueueCrit *crit){
-    status r = READY;
-    r |= Span_Add(q->handlers, (Abstract *)crit);
-    return r;
+i32 Queue_AddHandler(Queue *q, QueueCrit *crit){
+    Span_Add(q->handlers, (Abstract *)crit);
+    return q->handlers->max_idx;
 }
 
 Queue *Queue_Make(MemCh *m){

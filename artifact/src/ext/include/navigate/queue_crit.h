@@ -11,6 +11,7 @@ typedef gobits (*QueueFunc)(struct queue_crit *crit, util *values);
 
 typedef struct queue_crit {
     Type type;
+    util u;
     QueueFunc func;
     Span *data;
 } QueueCrit;

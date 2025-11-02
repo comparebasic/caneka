@@ -1,5 +1,10 @@
 typedef i64 microTime;
 
+#define TIME_SEC 1000000l
+#define TIME_MIN TIME_SEC*60
+#define TIME_HOUR TIME_MIN*60
+#define TIME_DAY TIME_HOUR*24
+
 Str *MicroTime_ToStr(MemCh *m, microTime t);
 microTime MicroTime_Now();
 void MicroTime_ToSpec(struct timespec *ts, microTime tm);
