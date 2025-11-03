@@ -7,13 +7,19 @@ static PatCharDef leadDef[] = {
 };
 
 static PatCharDef indentDef[] = {
-    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},{PAT_MANY|PAT_TERM, '=', '='},{PAT_ANY|PAT_TERM|PAT_CONSUME,' ' ,' '},
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},{PAT_TERM, '{', '{'},{PAT_ANY|PAT_TERM|PAT_CONSUME,' ' ,' '},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef outdentDef[] = {
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM,' ' ,' '},{PAT_TERM, '}', '}'},{PAT_ANY|PAT_TERM|PAT_CONSUME,' ' ,' '},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef lineDef[] = {
-    {PAT_KO, '\n', '\n'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
-    {PAT_KO, '\n', '\n'},patText,
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
+    {PAT_KO|PAT_INVERT_CAPTURE, '{', '{'},{PAT_KO|PAT_INVERT_CAPTURE, '}', '}'}, {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    patText,
     {PAT_END, 0, 0}
 };
 
@@ -49,6 +55,8 @@ static status line(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         numberDef, CONFIG_NUMBER, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
+        indentDef, CONFIG_INDENT, CONFIG_START);
+    r |= Roebling_SetPattern(rbl,
         lineDef, CONFIG_LINE, CONFIG_START);
     return r;
 }
@@ -65,6 +73,10 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         numberDef, CONFIG_NUMBER, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
+        indentDef, CONFIG_INDENT, CONFIG_START);
+    r |= Roebling_SetPattern(rbl,
+        outdentDef, CONFIG_OUTDENT, CONFIG_START);
+    r |= Roebling_SetPattern(rbl,
         lineDef, CONFIG_LINE, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
         nlDef, CONFIG_NL, CONFIG_START);
@@ -75,15 +87,13 @@ static status start(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mess = rbl->mess;
-    Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
     if(rbl->mess->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
-            (Abstract *)tk,
             NULL
         };
-        Out("^c.Config Capture ^E0.$^ec./@ -> @\n", args);
+        Out("^c.Config Capture ^E0.$^ec./$\n", args);
     }
     /*
     if(tk != NULL){

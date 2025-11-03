@@ -93,6 +93,7 @@ static char *extTypeStrings[] = {
     "CONFIG_START",
     "CONFIG_LEAD",
     "CONFIG_INDENT",
+    "CONFIG_OUTDENT",
     "CONFIG_LINE",
     "CONFIG_NUMBER",
     "CONFIG_ITEM",
