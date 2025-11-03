@@ -174,7 +174,9 @@ status BinSegCtx_Load(BinSegCtx *ctx){
         Buff_PosAbs(ctx->bf, 0);
     }
 
+    i16 guard = 0;
     while((ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
+        Guard_Incr(m, &guard, BINSEG_SEG_MAX, FUNCNAME, FILENAME, LINENUMBER);
         i16 sz = sizeof(BinSegHeader);
         if(ctx->type.state & BINSEG_VISIBLE){
             sz *= 2;

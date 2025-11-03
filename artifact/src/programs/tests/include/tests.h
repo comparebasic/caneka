@@ -73,6 +73,7 @@ status Buff_Tests(MemCh *gm);
 status BuffSendRecv_Tests(MemCh *gm);
 status BuffIo_Tests(MemCh *gm);
 status BuffPos_Tests(MemCh *gm);
+status Config_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);

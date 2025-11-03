@@ -147,6 +147,11 @@ static BuildSubdir fmtobj = { "format/fmt", {
     NULL
 }};
 
+static BuildSubdir configobj = { "format/config", {
+    "config_roebling.c",
+    NULL
+}};
+
 static BuildSubdir httpobj = { "format/http", {
     "http_roebling.c",
     NULL
@@ -178,6 +183,7 @@ static BuildSubdir *objdirs[] = {
     &httpobj,
     &parserobj,
     &fmtobj,
+    &configobj,
     &formatobj,
     &persistobj,
     &transpobj,

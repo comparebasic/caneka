@@ -339,6 +339,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Config Tests",
+        Config_Tests,
+        "Config tests that turn a basic configuration format into an object",
+        FEATURE_COMPLETE,
+    },
+    {
         "TemplCtx Tests",
         TemplCtx_Tests,
         "TemplCtx tests of basic value templating.",

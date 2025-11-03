@@ -3,3 +3,4 @@
 #include "format/fmt/fmt_html.h"
 #include "format/xml/tag.h"
 #include "format/http/http.h"
+#include "format/config.h"

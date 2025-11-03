@@ -74,6 +74,33 @@ status BinSegCollection_Tests(MemCh *gm){
     Table_Set(tbl, (Abstract *)keyD, (Abstract *)dice);
     BinSegCtx_Send(ctx, (Abstract *)tbl, tableId);
 
+    i16 vecId = ctx->func(ctx, NULL);
+    StrVec *v = StrVec_From(m, Str_FromCstr(m, "one", ZERO));
+    StrVec_Add(v, Str_FromCstr(m, "+", ZERO)); 
+    StrVec_Add(v, Str_FromCstr(m, "two", ZERO));
+    StrVec_Add(v, Str_FromCstr(m, "+", ZERO));
+    StrVec_Add(v, Str_FromCstr(m, "three", ZERO));
+    StrVec_Add(v, Str_FromCstr(m, "+", ZERO));
+    StrVec_Add(v, Str_FromCstr(m, "four", ZERO));
+    BinSegCtx_Send(ctx, (Abstract *)v, vecId);
+
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/object.config"));
+    StrVec *content = File_ToVec(m, path);
+    Cursor *curs = Cursor_Make(m, content); 
+    Roebling *rbl = NULL;
+    rbl = FormatFmt_Make(m, curs, NULL);
+    rbl->mess->type.state |= DEBUG;
+    Roebling_Run(rbl);
+
+    args[0] = (Abstract *)rbl;
+    args[1] = NULL;
+    r |= Test((rbl->type.state & ERROR) == 0,
+        "Object Fmt parsed with status without ERROR @", args);
+
+    args[0] = (Abstract *)rbl->mess;
+    args[1] = NULL;
+    Out("^y.Mess @^0\n", args);
+
     ctx->keys = Table_Make(m);
     Str *key1 = Str_CstrRef(m, "list");
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, spanId),
@@ -81,6 +108,9 @@ status BinSegCollection_Tests(MemCh *gm){
     Str *key2 = Str_CstrRef(m, "dict");
     Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, tableId),
         (Abstract *)key2);
+    Str *key3 = Str_CstrRef(m, "vec");
+    Table_Set(ctx->keys, (Abstract *)I16_Wrapped(m, vecId),
+        (Abstract *)key3);
      
     BinSegCtx_Load(ctx);
 
@@ -113,6 +143,11 @@ status BinSegCollection_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)s, (Abstract *)dice),
         "keyD value is equal, expected @, have &", args);
 
+    args[0] = (Abstract *)StrVec_From(m, Str_FromCstr(m, "one+two+three+four", ZERO));
+    args[1] = (Abstract *)Table_Get(ctx->tbl, (Abstract *)key3);
+    args[2] = NULL;
+    r |= Test(Equals((Abstract *)args[1], (Abstract *)args[0]),
+        "key3 StrVec value is equal, expected @, have @", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

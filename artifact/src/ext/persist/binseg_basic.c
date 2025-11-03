@@ -116,7 +116,6 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
         &content,
         &entry);
 
-
     i16 *ip = (i16 *)content->bytes;
     for(i32 i = 0; i < v->p->nvalues; i++){
         *ip = ctx->func(ctx, NULL);
@@ -147,5 +146,6 @@ status BinSeg_BasicInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, BinSegLookup, TYPE_STR, (void *)Str_ToBinSeg);
     r |= Lookup_Add(m, BinSegLookup, TYPE_SPAN, (void *)Span_ToBinSeg);
     r |= Lookup_Add(m, BinSegLookup, TYPE_TABLE, (void *)Table_ToBinSeg);
+    r |= Lookup_Add(m, BinSegLookup, TYPE_STRVEC, (void *)StrVec_ToBinSeg);
     return r;
 }
