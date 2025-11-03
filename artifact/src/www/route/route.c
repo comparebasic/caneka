@@ -57,7 +57,108 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     Object_SetPropByIdx(subRt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
     subRt->type.state |= funcW->type.state;
 
+    Route_Prepare(subRt);
+
     return NOOP;
+}
+
+static status routeFuncStatic(Buff *bf, Abstract *action, Object *_data, Abstract *_source){
+    Str *pathS = StrVec_Str(bf->m, (StrVec *)as(action, TYPE_STRVEC));
+    if(File_Open(bf, pathS, O_RDONLY) & ERROR){
+        return ERROR;
+    }
+    return Buff_Read(bf);
+}
+
+static status routeFuncTempl(Buff *bf, Abstract *action, Object *data, Abstract *source){
+    Templ *templ = (Templ *)as(action, TYPE_TEMPL);
+    return Templ_ToS(templ, bf, (Abstract *)data, source);
+}
+
+static status routeFuncFmt(Buff *bf, Abstract *action, Object *_data, Abstract *source){
+    return Fmt_ToHtml(bf, (Mess *)as(action, TYPE_MESS));
+}
+
+static status routeFuncFileDb(Buff *bf, Abstract *action, Object *data, Abstract *source){
+    StrVec *path = StrVec_From(bf->m, Str_FromCstr(bf->m, "filedb.keys", ZERO));
+    Path_DotAnnotate(bf->m, path);
+    Table *keys = (Table *)Object_ByPath(data, path, NULL, SPAN_OP_GET);
+
+    FileDB *fdb = (FileDB *)as(action, TYPE_FILEDB);
+    Table *tbl = FileDB_ToTbl(fdb, keys);
+
+    /* tbl to json */
+    return NOOP;
+}
+
+status Route_Prepare(Route *rt){
+    MemCh *m = Object_GetMem(rt);
+    Abstract *args[2];
+
+    StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
+    StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
+    Single *funcW = (Single *)as(
+        Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
+        TYPE_WRAPPED_FUNC
+    );
+
+    if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
+        return NOOP;
+    }
+
+    Str *pathS = StrVec_Str(m, path);
+    if(funcW->type.state & ROUTE_FMT){
+        StrVec *content = File_ToVec(m, pathS);
+        Cursor *curs = Cursor_Make(m, content); 
+        Roebling *rbl = FormatFmt_Make(m, curs, NULL);
+        Roebling_Run(rbl);
+        if((rbl->type.state & SUCCESS) == 0){
+            args[0] = (Abstract *)path;
+            args[1] = NULL;
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error preparing template for $", args);
+            rt->type.state |= ERROR;
+            return rt->type.state;
+        }
+
+        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, (Abstract *)rbl->mess);
+        return SUCCESS;
+    }else if(funcW->type.state & ROUTE_DYNAMIC){
+        StrVec *content = File_ToVec(m, pathS);
+
+        Cursor *curs = Cursor_Make(m, content);
+        TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+
+        Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+        if((Templ_Prepare(templ) & PROCESSING) == 0){
+            args[0] = (Abstract *)path;
+            args[1] = NULL;
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error preparing template for $", args);
+            rt->type.state |= ERROR;
+            return rt->type.state;
+        }
+
+        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, (Abstract *)templ);
+        return SUCCESS;
+    }else if(funcW->type.state & ROUTE_FILEDB){
+        FileDB *fdb = FileDB_Make(m, pathS);
+        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, (Abstract *)fdb);
+        return SUCCESS;
+    }
+
+    return NOOP;
+}
+
+status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
+    DebugStack_Push(rt, rt->type.of);
+    Abstract *action = Object_GetPropByIdx(rt, ROUTE_PROPIDX_ACTION);
+    Single *funcW = (Single *)as(
+        Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
+        TYPE_WRAPPED_FUNC
+    );
+    RouteFunc func = (RouteFunc)funcW->val.ptr;
+    return func(bf, action, data, source);
 }
 
 status Route_Collect(Route *rt, StrVec *path){
@@ -75,85 +176,6 @@ status Route_Collect(Route *rt, StrVec *path){
     ctx.path = path;
 
     return Dir_Climb(m, StrVec_Str(m, path), NULL, file, (Abstract *)&ctx);
-}
-
-static status routeFuncStatic(MemCh *m, 
-        StrVec *in, StrVec *out, Object *_data, Abstract *_source){
-    return NOOP;
-}
-
-static status routeFuncTempl(MemCh *m,
-        StrVec *in, StrVec *out, Object *data, Abstract *source){
-
-    DebugStack_Push(NULL, ZERO);
-    Cursor *curs = Cursor_Make(m, in);
-    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, source);
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    Templ_Prepare(templ);
-
-    Buff *bf = Buff_From(m, out);
-    Templ_ToS(templ, bf, (Abstract *)data, source);
-
-    DebugStack_Pop();
-    return templ->type.state;
-}
-
-static status routeFuncFmt(MemCh *m, 
-        StrVec *in, StrVec *out, Object *_data, Abstract *source){
-    DebugStack_Push(NULL, ZERO);
-    Cursor *curs = Cursor_Make(m, in);
-    Roebling *rbl = FormatFmt_Make(m, curs, source);
-    Roebling_Run(rbl);
-        
-    Buff *bf = Buff_From(m, out);
-    Fmt_ToHtml(bf, rbl->mess);
-
-    DebugStack_Pop();
-    return rbl->type.state;
-}
-
-status Route_Handle(MemCh *m, Route *rt, StrVec *dest, Object *data, Abstract *source){
-    DebugStack_Push(rt, rt->type.of);
-    StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
-    StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
-    Single *funcW = (Single *)as(
-        Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
-        TYPE_WRAPPED_FUNC
-    );
-
-    Abstract *args[5];
-    args[0] = NULL;
-    args[1] = (Abstract *)path;
-    args[2] = (Abstract *)type;
-    args[3] = (Abstract *)NULL;
-    args[4] = NULL;
-    Out("^c.^{STACK.name}: path=@ type=@ data=@^0\n", args);
-
-    if(funcW != NULL && funcW->type.state & ROUTE_DYNAMIC){
-        StrVec *v = File_ToVec(m, StrVec_Str(m, path));
-        if(v->total == 0){
-            Abstract *args[3];
-            args[0] = (Abstract *)path;
-            args[1] = NULL;
-            Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "No content found for path: @", args);
-            return ERROR;
-        }
-        RouteFunc func = (RouteFunc)funcW->val.ptr;
-        status r = func(m, v, dest, data, source);
-        DebugStack_Pop();
-        return r;
-    }else{
-        StrVec *v = File_ToVec(m, StrVec_Str(m, path));
-
-        args[0] = (Abstract *)v;
-        args[1] = NULL;
-        Out("^y.route dest v:@^0\n", args);
-
-        StrVec_AddVec(v, dest);
-        DebugStack_Pop();
-        return SUCCESS;
-    }
 }
 
 Nav *Route_Make(MemCh *m){
@@ -218,10 +240,17 @@ status Route_ClsInit(MemCh *m){
 
         key = Str_CstrRef(m, "fmt");
         funcW = Func_Wrapped(m, routeFuncFmt);
-        funcW->type.state |= ROUTE_DYNAMIC;
+        funcW->type.state |= ROUTE_FMT;
         Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
         Table_Set(RouteMimeTable,
             (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/html"));
+
+        key = Str_CstrRef(m, "d");
+        funcW = Func_Wrapped(m, routeFuncFileDb);
+        funcW->type.state |= ROUTE_FILEDB;
+        Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
+        Table_Set(RouteMimeTable,
+            (Abstract *)key, (Abstract *)Str_CstrRef(m, "application/json"));
 
         key = Str_CstrRef(m, "templ");
         funcW = Func_Wrapped(m, routeFuncTempl);

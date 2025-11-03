@@ -417,9 +417,15 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "TemplRoute Tests",
-        TemplRoute_Tests,
+        "Www Route Template Tests",
+        WwwRouteTempl_Tests,
         "Example route templating test.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Www Route Mime Tests",
+        WwwRouteMime_Tests,
+        "Example route mime handling tests using Route_Handle.",
         FEATURE_COMPLETE,
     },
     /*
