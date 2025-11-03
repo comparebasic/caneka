@@ -102,6 +102,10 @@ static status Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     return BinSegCtx_ToBuff(ctx, hdr, entry);
 }
 
+static status StrVec_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+    return NOOP;
+}
+
 status BinSeg_BasicInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, BinSegLookup, TYPE_STR, (void *)Str_ToBinSeg);

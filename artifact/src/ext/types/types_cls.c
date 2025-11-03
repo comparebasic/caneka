@@ -131,6 +131,10 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
+static status Object_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+    return NOOP;
+}
+
 static boolean FetchTarget_Exact(FetchTarget  *a, FetchTarget *b){
     if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS) ||
             a->idx != b->idx || a->offset != b->offset || 

@@ -15,55 +15,13 @@ static status indentStream(Buff *bf, i32 indent){
     return SUCCESS;
 }
 
-status Navigate_InitLabels(MemCh *m, Lookup *lk){
-    status r = READY;
-    /*
-    if(messLabels == NULL){
-        messLabels = (Str **)Arr_Make(m, 17);
-        Lookup_Add(m, lk, TYPE_PATMATCH, (void *)messLabels);
-        r |= SUCCESS;
-    }
-    */
-    if(nodeLabels == NULL){
-        nodeLabels = (Str **)Arr_Make(m, 17);
-        nodeLabels[9] = Str_CstrRef(m, "FLAG_CHILDREN");
-        nodeLabels[10] = Str_CstrRef(m, "FLAG_CHILD");
-        Lookup_Add(m, lk, TYPE_NODE, (void *)nodeLabels);
-        r |= SUCCESS;
-    }
-
-    if(stepLabels == NULL){
-        stepLabels = (Str **)Arr_Make(m, 17);
-        stepLabels[9] = Str_CstrRef(m, "IO_IN");
-        stepLabels[10] = Str_CstrRef(m, "IO_OUT");
-        stepLabels[11] = Str_CstrRef(m, "LOOP");
-        Lookup_Add(m, lk, TYPE_STEP, (void *)stepLabels);
-        r |= SUCCESS;
-    }
-
-    if(taskLabels == NULL){
-        taskLabels = (Str **)Arr_Make(m, 17);
-        taskLabels[9] = Str_CstrRef(m, "UPDATE_CRIT");
-        taskLabels[10] = Str_CstrRef(m, "QUEUE");
-        Lookup_Add(m, lk, TYPE_TASK, (void *)taskLabels);
-        r |= SUCCESS;
-    }
-
-    if(queueLabels == NULL){
-        queueLabels = (Str **)Arr_Make(m, 17);
-        queueLabels[9] = Str_CstrRef(m, "SINGLE_IDX");
-        queueLabels[16] = Str_CstrRef(m, "REVERSE");
-        Lookup_Add(m, lk, TYPE_QUEUE, (void *)queueLabels);
-        r |= SUCCESS;
-    }
-
-    if(r == READY){
-        r |= NOOP;
-    }
-
-    return r;
+static status Mess_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+    return NOOP;
 }
 
+static status Node_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+    return NOOP;
+}
 
 static status CompResult_Print(Buff *bf, Abstract *a, cls type, word flags){
     CompResult *cr = (CompResult*)as(a, TYPE_COMPRESULT);
@@ -304,6 +262,55 @@ static status Frame_Print(Buff *bf, Abstract *a, cls type, word flags){
         NULL,
     };
     return Fmt(bf, "Frame<from:@/@ @[@]>", args);
+}
+
+status Navigate_InitLabels(MemCh *m, Lookup *lk){
+    status r = READY;
+    /*
+    if(messLabels == NULL){
+        messLabels = (Str **)Arr_Make(m, 17);
+        Lookup_Add(m, lk, TYPE_PATMATCH, (void *)messLabels);
+        r |= SUCCESS;
+    }
+    */
+    if(nodeLabels == NULL){
+        nodeLabels = (Str **)Arr_Make(m, 17);
+        nodeLabels[9] = Str_CstrRef(m, "FLAG_CHILDREN");
+        nodeLabels[10] = Str_CstrRef(m, "FLAG_CHILD");
+        Lookup_Add(m, lk, TYPE_NODE, (void *)nodeLabels);
+        r |= SUCCESS;
+    }
+
+    if(stepLabels == NULL){
+        stepLabels = (Str **)Arr_Make(m, 17);
+        stepLabels[9] = Str_CstrRef(m, "IO_IN");
+        stepLabels[10] = Str_CstrRef(m, "IO_OUT");
+        stepLabels[11] = Str_CstrRef(m, "LOOP");
+        Lookup_Add(m, lk, TYPE_STEP, (void *)stepLabels);
+        r |= SUCCESS;
+    }
+
+    if(taskLabels == NULL){
+        taskLabels = (Str **)Arr_Make(m, 17);
+        taskLabels[9] = Str_CstrRef(m, "UPDATE_CRIT");
+        taskLabels[10] = Str_CstrRef(m, "QUEUE");
+        Lookup_Add(m, lk, TYPE_TASK, (void *)taskLabels);
+        r |= SUCCESS;
+    }
+
+    if(queueLabels == NULL){
+        queueLabels = (Str **)Arr_Make(m, 17);
+        queueLabels[9] = Str_CstrRef(m, "SINGLE_IDX");
+        queueLabels[16] = Str_CstrRef(m, "REVERSE");
+        Lookup_Add(m, lk, TYPE_QUEUE, (void *)queueLabels);
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
 }
 
 status Navigate_ToSInit(MemCh *m, Lookup *lk){
