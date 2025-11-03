@@ -152,8 +152,6 @@ status WwwRouteMime_Tests(MemCh *gm){
     r |= Test(Equals((Abstract *)dest->v, (Abstract *)expected), "Content from Buff piped from route matches reading file directly", NULL);
 
     MemCh_Free(m);
-    r |= ERROR;
-
     DebugStack_Pop();
     return r;
 }

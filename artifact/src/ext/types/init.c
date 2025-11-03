@@ -13,8 +13,8 @@ status Caneka_Init(MemCh *m){
     r |= Transp_Init(m);
     r |= Sequence_Init(m);
     r |= Types_ClsInit(m);
-    r |= Navigate_ClsInit(m);
     r |= BinSeg_Init(m);
+    r |= Navigate_ClsInit(m);
     r |= Task_Init(m);
     r |= Serve_ClsInit(m);
     /*

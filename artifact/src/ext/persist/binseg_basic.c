@@ -103,7 +103,43 @@ static status Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
 }
 
 static status StrVec_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
-    return NOOP;
+    StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
+    MemCh *m = ctx->bf->m;
+    status r = READY;
+
+    Str *content;
+    Str *entry;
+    BinSegHeader *hdr = BinSegHeader_Make(ctx,
+        v->p->nvalues,
+        BINSEG_TYPE_BYTES_COLLECTION,
+        id,
+        &content,
+        &entry);
+
+
+    i16 *ip = (i16 *)content->bytes;
+    for(i32 i = 0; i < v->p->nvalues; i++){
+        *ip = ctx->func(ctx, NULL);
+        ip++;
+    }
+
+    if(ctx->type.state & BINSEG_REVERSED){
+        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
+    }
+
+    ip = (i16 *)content->bytes;
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        r |= BinSegCtx_Send(ctx, Iter_Get(&it), *ip);
+        ip++;
+    };
+
+    if((ctx->type.state & BINSEG_REVERSED) == 0){
+        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
+    }
+
+    return r;
 }
 
 status BinSeg_BasicInit(MemCh *m, Lookup *lk){
