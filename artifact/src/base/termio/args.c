@@ -5,6 +5,18 @@ static boolean argHasFlag(Hashed *h, word flag){
     return h->value->type.of == TYPE_WRAPPED_PTR && (h->value->type.state & flag);
 }
 
+status Args_Add(Table *resolve, Str *key, Abstract *value, word flags){
+    if(value == NULL){
+        value = (Abstract *)Ptr_Wrapped(resolve->m, NULL, ZERO);
+    }
+    if(flags & ARG_CHOICE){
+        value = (Abstract *)Ptr_Wrapped(resolve->m, as(value, TYPE_SPAN), TYPE_SPAN); 
+    }
+    value->type.state |= flags;
+    Hashed *h = Table_SetHashed(resolve, (Abstract *)key, value);
+    return SUCCESS;
+}
+
 status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv){
     Abstract *args[] = {
         (Abstract *)name,
@@ -25,6 +37,24 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
                 Out("[$]", args);
             }else if(argHasFlag(h, ARG_MULTIPLE)){
                 Out("[$, ...]", args);
+            }else if(argHasFlag(h, ARG_CHOICE)){
+                if(argHasFlag(h, ARG_DEFAULT)){
+                    Span *p = ((Single *)h->value)->val.ptr;
+                    Abstract *args[] = {
+                        (Abstract *)h->key,
+                        (Abstract *)p,
+                        (Abstract *)Span_Get(p, 0),
+                        NULL
+                    };
+                    Out("$(@=$)", args);
+                }else{
+                    Abstract *args[] = {
+                        (Abstract *)h->key,
+                        (Abstract *)((Single *)h->value)->val.ptr,
+                        NULL
+                    };
+                    Out("$(@)", args);
+                }
             }else if(argHasFlag(h, ARG_DEFAULT)){
                 Abstract *args[] = {
                     (Abstract *)h->key,
@@ -32,13 +62,6 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
                     NULL
                 };
                 Out("$(=$)", args);
-            }else if(argHasFlag(h, ARG_CHOICE)){
-                Abstract *args[] = {
-                    (Abstract *)h->key,
-                    (Abstract *)((Single *)h->value)->val.ptr,
-                    NULL
-                };
-                Out("$(@)", args);
             }else{
                 Out("$", args);
             }
@@ -58,7 +81,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
     Abstract *rslv = NULL;
     Iter it;
     Iter_Init(&it, dest);
-    if(argc < 2){
+    if(argc < 1){
         return NOOP;
     }else{
         argv++;
@@ -106,7 +129,6 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                     sg = (Single *)h->value;
                 }
 
-
                 if(argHasFlag(h, ARG_DEFAULT) && value == NULL && sg != NULL){
                     value = sg->val.ptr;
                     Table_Set(dest, h->key, (Abstract *)sg->val.ptr);
@@ -125,16 +147,20 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                 if(argHasFlag(h, ARG_CHOICE) && value != NULL && sg != NULL){
                     Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN);
                     if(Span_Has(p, value) == -1){
-                        Abstract *args[] = {
-                            (Abstract *)h->key,
-                            (Abstract *)p,
-                            value,
-                            NULL,
-                        };
-                        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                            "Required argument @ not in expected choices: @, found @", args);
-                        exit(1);
-
+                        if(argHasFlag(h, ARG_DEFAULT)){
+                             Table_Set(dest, h->key, Span_Get(p, 0));
+                        }else{
+                            Abstract *args[] = {
+                                (Abstract *)h->key,
+                                (Abstract *)p,
+                                value,
+                                NULL,
+                            };
+                            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                                "Required argument @ not in expected choices: @, found @",
+                                    args);
+                            exit(1);
+                        }
                     }
                 }
 

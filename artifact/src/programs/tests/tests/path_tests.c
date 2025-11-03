@@ -52,7 +52,7 @@ status Path_Tests(MemCh *gm){
             "Expected flags to equal expected for &", args);
     }
 
-    StrVec *fname = IoUtil_Fname(m, v);
+    Str *fname = IoUtil_FnameStr(m, v);
     StrVec *bname = IoUtil_BasePath(m, v);
 
     r |= Test(Equals((Abstract *)bname, (Abstract *)Str_CstrRef(m, "/fancy/path/thing/")), 

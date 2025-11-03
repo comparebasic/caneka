@@ -164,12 +164,26 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
     }
 }
 
-StrVec *IoUtil_Fname(MemCh *m, StrVec *path){
-    Coord cr;
-    if(Path_Around(m, path, LAST, &cr) & SUCCESS){
-        return StrVec_CoordCopy(m, path, &cr);
+Str *IoUtil_FnameStr(MemCh *m, StrVec *path){
+    Str *s = Str_Make(m, min(path->total, STR_DEFAULT));
+    Iter it;
+    Iter_Init(&it, path->p);
+    word max = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *_s = Iter_Get(&it);
+        if(_s->type.state & MORE){
+           s->length = 0;  
+           continue;
+        }
+        Str_Add(s, _s->bytes, _s->length);
+        if(s->length > max){
+            max = s->length;
+        }
     }
-    return NULL;
+    if(s->length < max){
+        memset(s->bytes+s->length, 0, max - s->length);
+    }
+    return s;
 }
 
 StrVec *IoUtil_BasePath(MemCh *m, StrVec *path){

@@ -189,7 +189,7 @@ Hashed *Table_GetHashed(Table *tbl, Abstract *a){
     Iter it;
     Iter_Init(&it, tbl);
     Hashed *h = Table_GetSetHashed(&it, SPAN_OP_GET, a, NULL);
-    if(h != NULL && h->value != NULL){
+    if(h != NULL){
         return h;
     }
     return NULL;
