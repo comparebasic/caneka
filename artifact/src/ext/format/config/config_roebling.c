@@ -41,7 +41,6 @@ static PatCharDef bulletDef[] = {
     {PAT_END, 0, 0}
 };
 
-
 static PatCharDef nlDef[] = {
     {PAT_TERM, '\n', '\n'},
     {PAT_END, 0, 0}
@@ -87,14 +86,110 @@ static status start(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
+    Abstract *args[4];
+    MemCh *m = rbl->m;
+
     if(it->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(OutStream->m, captureKey),
-            (Abstract *)v,
-            NULL
-        };
-        Out("^c.Config Capture ^E0.$^ec./$\n", args);
+        args[0] = (Abstract *)Type_ToStr(OutStream->m, captureKey);
+        args[1] = (Abstract *)v;
+        args[2] = (Abstract *)it->p;
+        args[3] = NULL;
+        Out("^c.Config Capture ^E0.$^ec. -> @ ^y.\\@@\n", args);
     }
+
+    Abstract *prev = Iter_Get(it);
+    if(prev == NULL && it->p->nvalues == 0){
+        NodeObj *obj = Object_Make(rbl->m, TYPE_NODEOBJ);
+        Iter_Add(it, obj);
+        prev =(Abstract *)obj; 
+    }
+
+    Single *token = NULL;
+    StrVec *value = NULL;
+    i32 idx = it->idx;
+    if(prev != NULL && prev->type.of == TYPE_WRAPPED_PTR){
+        token = (Single *)prev;
+    }
+
+    if(token != NULL && token->type.of == TYPE_WRAPPED_PTR){
+        value = (StrVec *)token->val.ptr;
+    }
+
+    Iter_GetByIdx(it, idx);
+
+    NodeObj *current = (NodeObj *)prev;
+    while(current->type.of != TYPE_OBJECT && (Iter_Prev(it) & END) == 0){
+        current = Iter_Get(it);
+    }
+    Iter_GetByIdx(it, idx);
+
+    if(captureKey == CONFIG_LEAD){
+        return rbl->type.state;
+    }else if(captureKey == CONFIG_INDENT){
+        NodeObj *obj = Object_Make(rbl->m, TYPE_NODEOBJ);
+        if(value != NULL){
+            Object_SetPropByIdx(obj, NODEOBJ_PROPIDX_NAME, (Abstract *)value);
+
+            args[0] = (Abstract *)value;
+            args[1] = NULL;
+            Out("^p.add sub obj @\n", args);
+
+            Object_ByPath(current, value, (Abstract *)obj, SPAN_OP_SET);  
+        }
+        /*
+        Iter_Remove(it);
+        Iter_Prev(it);
+        */
+        Iter_Add(it, obj);
+        return rbl->type.state;
+    }else if(captureKey == CONFIG_OUTDENT){
+        /*
+        Iter_Remove(it);
+        Iter_Prev(it);
+        */
+        return rbl->type.state;
+    }else if(captureKey == CONFIG_NL){
+        StrVec *body = (StrVec *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_VALUE);
+        if(body != NULL){
+            Str *s = Span_Get(body->p, body->p->max_idx);
+            if(s != NULL){
+                s->type.state |= LAST;
+            }
+        }
+        return rbl->type.state;
+    }else if(captureKey == CONFIG_LINE){
+        printf("line\n");
+        fflush(stdout);
+        if(value != NULL && token != NULL && token->objType.of == CONFIG_KEY){
+            Table *atts = (Table *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS);
+            if(atts == NULL){
+                atts = Table_Make(m);
+                Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
+            }
+            Table_Set(atts, (Abstract *)value, (Abstract *)v);
+            return rbl->type.state;
+        }else{
+            /*
+            StrVec *body = (StrVec *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_VALUE);
+            if(body != NULL){
+                Str *s = Span_Get(body->p, body->p->max_idx);
+                if(s != NULL && s->type.state & MORE){
+                    StrVec_Add(body, Str_FromCstr(m, "\n\n", STRING_COPY));
+                }else if(body->p->nvalues > 0){
+                    StrVec_Add(body, Str_FromCstr(m, " ", STRING_COPY));
+                }
+            }else{
+                body = StrVec_Make(m);
+                Object_SetPropByIdx(current, NODEOBJ_PROPIDX_VALUE, (Abstract *)body);
+            }
+            StrVec_AddVec(body, v);
+            return rbl->type.state;
+            */
+        }
+    }
+
+    Iter_Add(it, (Abstract *)Ptr_Wrapped(rbl->m, v, captureKey));
+
     return SUCCESS;
 }
 

@@ -9,6 +9,7 @@ static char *extTypeStrings[] = {
     "TYPE_MESS",
     "TYPE_MESS_CLIMBER",
     "TYPE_NODE",
+    "TYPE_NODEOBJ",
     "TYPE_FETCHER",
     "TYPE_FETCH_TARGET",
     "TYPE_FETCH_FUNC",
@@ -126,7 +127,6 @@ static char *extTypeStrings[] = {
     "KVE_CONTENT",
     "KVE_END",
     "_KVE_END",
-    "_TYPE_EXT_END",
     NULL
 };
 

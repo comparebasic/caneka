@@ -90,14 +90,6 @@ status Object_Depth(Abstract *a){
 
 Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     DebugStack_Push(obj, obj->type.state);
-    if(obj->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)path,
-            (Abstract *)obj,
-            NULL
-        };
-        Out("^p.Adding & to @^0.\n", args);
-    }
     if((path->type.state & STRVEC_PATH) == 0){
        IoUtil_Annotate(Object_GetMem(obj), path); 
     }
