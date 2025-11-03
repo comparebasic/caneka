@@ -64,10 +64,8 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
 
 static status routeFuncStatic(Buff *bf, Abstract *action, Object *_data, Abstract *_source){
     Str *pathS = StrVec_Str(bf->m, (StrVec *)as(action, TYPE_STRVEC));
-    if(File_Open(bf, pathS, O_RDONLY) & ERROR){
-        return ERROR;
-    }
-    return Buff_Read(bf);
+    bf->type.state |= BUFF_UNBUFFERED;
+    return File_Open(bf, pathS, O_RDONLY);
 }
 
 static status routeFuncTempl(Buff *bf, Abstract *action, Object *data, Abstract *source){
@@ -93,7 +91,7 @@ static status routeFuncFileDb(Buff *bf, Abstract *action, Object *data, Abstract
 
 status Route_Prepare(Route *rt){
     MemCh *m = Object_GetMem(rt);
-    Abstract *args[2];
+    Abstract *args[3];
 
     StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
     StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
@@ -103,7 +101,7 @@ status Route_Prepare(Route *rt){
     );
 
     if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
-        return NOOP;
+        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, (Abstract *)path);
     }
 
     Str *pathS = StrVec_Str(m, path);
@@ -125,6 +123,16 @@ status Route_Prepare(Route *rt){
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_DYNAMIC){
         StrVec *content = File_ToVec(m, pathS);
+
+        if(content == NULL || content->total == 0){
+            args[0] = (Abstract *)path;
+            args[1] = (Abstract *)content;
+            args[2] = NULL;
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error path for Templ has no content for: $ -> @", args);
+            rt->type.state |= ERROR;
+            return rt->type.state;
+        }
 
         Cursor *curs = Cursor_Make(m, content);
         TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
@@ -192,6 +200,7 @@ status Route_ClsInit(MemCh *m){
     Class_SetupProp(cls, Str_CstrRef(m, "func"));
     Class_SetupProp(cls, Str_CstrRef(m, "mime"));
     Class_SetupProp(cls, Str_CstrRef(m, "type"));
+    Class_SetupProp(cls, Str_CstrRef(m, "action"));
     r |= Class_Register(m, cls);
 
     if(RouteFuncTable == NULL){

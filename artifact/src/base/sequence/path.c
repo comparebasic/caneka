@@ -84,6 +84,48 @@ status Path_RangeOf(MemCh *m, StrVec *path, word sep, Coord *cr){
     return r;
 }
 
+status Path_JoinBase(MemCh *m, StrVec *path){
+    Iter it;
+    Iter_Init(&it, path->p);
+    status r = READY;
+    i32 idx = 0;
+    Str *prev = NULL;
+    boolean last = FALSE;
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s->type.state & LAST){
+            last = TRUE;
+            idx = it.idx;
+        }
+        if(last){
+            if(prev->bytes+prev->length == s->bytes){
+                prev->length += s->length;
+                prev->alloc += s->length;
+                idx = it.idx;
+            }else{
+                path->type.state |= ERROR;
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Error tyring to join non-contiguous bytes", NULL);
+                path->type.state |= ERROR;
+                return path->type.state;
+            }
+        }else{
+            prev = s;
+        }
+    }
+
+    while(it.idx >= idx){
+        Iter_PrevRemove(&it);
+        r |= SUCCESS;
+    }
+
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
+
 StrVec *Path_Base(MemCh *m, StrVec *path){
     StrVec *v = StrVec_Make(m);
     Iter it;
@@ -177,6 +219,7 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
 
     Span *p = Span_Clone(m, v->p);
     Span_Wipe(v->p);
+    v->total = 0;
 
     Iter it;
     Iter sepIt;
@@ -211,6 +254,7 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
                     }
                     Str *sb = Str_Ref(m, ptr, 1, 1, sg->objType.state);
                     StrVec_Add(v, sb);
+
                     start = ptr;
                     if(start < last){
                         start++; 

@@ -125,7 +125,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
 status WwwRouteMime_Tests(MemCh *gm){
     DebugStack_Push(NULL, ZERO);
-    Abstract *args[5];
+    Abstract *args[6];
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -134,10 +134,22 @@ status WwwRouteMime_Tests(MemCh *gm){
     StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./examples/web-server/pages/public"));
     Route_Collect(rt, path);
 
-    args[0] = (Abstract *)rt;
-    args[1] = (Abstract *)rt;
-    args[2] = NULL;
-    Out("^p.^{STACK.name} @^0\n", args);
+    StrVec *key = StrVec_From(m, Str_FromCstr(m, "/style.css", STRING_COPY));
+    IoUtil_Annotate(m, key);
+    Path_JoinBase(m, key);
+
+    Route *subRt = Object_ByPath(rt, key, NULL, SPAN_OP_GET);
+    Buff *bf = Buff_Make(m, ZERO);
+    Route_Handle(subRt, bf, NULL, NULL);
+
+    Buff *dest = Buff_Make(m, ZERO);
+    Buff_Pipe(dest, bf);
+
+    Str *pathS = IoUtil_GetAbsPath(m,
+        Str_FromCstr(m, "./examples/web-server/pages/public/style.css", ZERO));
+    StrVec *expected = File_ToVec(m, pathS);
+
+    r |= Test(Equals((Abstract *)dest->v, (Abstract *)expected), "Content from Buff piped from route matches reading file directly", NULL);
 
     MemCh_Free(m);
     r |= ERROR;

@@ -56,3 +56,4 @@ status Buff_SetFd(Buff *bf, i32 fd);
 status Buff_SetSocket(Buff *bf, i32 fd);
 status Buff_UnsetFd(Buff *bf);
 status Buff_UnsetSocket(Buff *bf);
+status Buff_Pipe(Buff *to, Buff *from);

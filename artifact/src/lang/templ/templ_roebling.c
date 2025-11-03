@@ -24,7 +24,8 @@ static PatCharDef templTokenDef[] = {
     {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_KO|PAT_INVERT_CAPTURE, '\n', '\n'}, 
     {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'},
     {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '?', '?'},
-    {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '|', '|'}, {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
         {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
     patText,
     {PAT_END, 0, 0}
@@ -68,6 +69,11 @@ static PatCharDef pathSepDef[] = {
 
 static PatCharDef varIfDef[] = {
     {PAT_TERM, '?' ,'?'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef varElseDef[] = {
+    {PAT_TERM, '|' ,'|'},
     {PAT_END, 0, 0}
 };
 
@@ -212,6 +218,10 @@ static status templ(MemCh *m, Roebling *rbl){
         pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         iterDef, FORMAT_TEMPL_FOR, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        varIfDef, FORMAT_TEMPL_IF, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        varIfDef, FORMAT_TEMPL_ELSE, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         withDef, FORMAT_TEMPL_WITH, FORMAT_TEMPL_TEMPL);
 

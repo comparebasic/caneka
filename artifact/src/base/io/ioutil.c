@@ -41,8 +41,6 @@ status IoUtil_Add(MemCh *m, StrVec *path, StrVec *v){
     return StrVec_AddVec(path, v);
 }
 
-
-
 status IoUtil_RemoveSeps(MemCh *m, StrVec *path){
     i32 idx = 0;
     Iter it;

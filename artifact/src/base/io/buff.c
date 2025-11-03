@@ -380,8 +380,9 @@ status Buff_GetStr(Buff *bf, Str *s){
     }else{
         if(bf->type.state & (BUFF_FD|BUFF_SOCKET) && remaining > 0){
             Buff_ReadToStr(bf, s); 
+        }else{
+            bf->type.state |= (SUCCESS|END);
         }
-        bf->type.state |= (SUCCESS|END);
     }
 
     if(bf->unsent.total == 0){
@@ -429,6 +430,17 @@ status Buff_Flush(Buff *bf){
 
 status Buff_Read(Buff *bf){
     return Buff_ReadAmount(bf, IO_SEND_MAX);
+}
+
+status Buff_Pipe(Buff *to, Buff *from){
+    Str *s = Str_Make(to->m, IO_BLOCK_SIZE);
+    status r = READY;
+    while((from->type.state & (END|ERROR)) == 0){
+        Buff_GetStr(from, s);
+        r |= Buff_AddBytes(to, s->bytes, s->length);
+        s->length = 0;
+    }
+    return r;
 }
 
 status Buff_ReadAmount(Buff *bf, i64 amount){
@@ -512,10 +524,13 @@ status Buff_ReadToStr(Buff *bf, Str *s){
             amount -= recieved;
             bytes += recieved;
             bf->type.state |= PROCESSING;
-            if(recieved == 0 || amount == 0){
-                bf->type.state |= SUCCESS;
-                break;
+            if(recieved == 0){
+                bf->type.state |= END;
             }
+            if(amount == 0){
+                bf->type.state |= SUCCESS;
+            }
+            break;
         }
     }
     return bf->type.state;
