@@ -179,12 +179,12 @@ status Mess_Tests(MemCh *gm){
 
     Mess *expected = make_Expected(m);
 
-    boolean result = (Mess_Compare(m, rbl->mess, expected) & SUCCESS) != 0;
+    boolean result = (Mess_Compare(m, (Mess *)rbl->dest, expected) & SUCCESS) != 0;
     if(!result){
         Abstract *args[] = {
-            (Abstract *)rbl->mess,
+            (Abstract *)rbl->dest,
         };
-        Debug("^r.\nrbl->mess: &^0.\n", args);
+        Debug("^r.\nrbl->dest: &^0.\n", args);
     }
     r |= Test(result, "Mess has been built as expected", NULL);
 

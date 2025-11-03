@@ -252,9 +252,9 @@ static status var(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
-    Mess *mess = rbl->mess;
+    Mess *mess = (Mess *)as(rbl->dest, TYPE_MESS);
     TemplCtx *ctx = (TemplCtx*)as(rbl->source, TYPE_TEMPL_CTX);
-    if(rbl->mess->type.state & DEBUG){
+    if(mess->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
@@ -364,8 +364,9 @@ Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
-    rbl->mess = Mess_Make(m);
-    rbl->mess->tokenizer = Lookup_Make(m, _TEMPL_START);
+    Mess *mess = Mess_Make(m);
+    mess->tokenizer = Lookup_Make(m, _TEMPL_START);
+    rbl->dest = (Abstract *)mess;
     rbl->source = source;
     return rbl;
 }

@@ -41,8 +41,8 @@ status FmtHtml_Tests(MemCh *gm){
 
     Buff *bf = Buff_Make(m, ZERO); 
     
-    Fmt_ToHtml(bf, rbl->mess);
-    r |= Test(rbl->mess->transp->type.state & SUCCESS, 
+    Fmt_ToHtml(bf, (Mess *)rbl->dest);
+    r |= Test(((Mess *)rbl->dest)->transp->type.state & SUCCESS, 
         "Fmt to HTML has status SUCCESS", NULL);
 
     s = Str_CstrRef(m, expectedCstr);

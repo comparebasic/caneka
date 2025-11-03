@@ -89,7 +89,7 @@ status BinSegCollection_Tests(MemCh *gm){
     Cursor *curs = Cursor_Make(m, content); 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);
-    rbl->mess->type.state |= DEBUG;
+    rbl->dest->type.state |= DEBUG;
     Roebling_Run(rbl);
 
     args[0] = (Abstract *)rbl;
@@ -97,7 +97,7 @@ status BinSegCollection_Tests(MemCh *gm){
     r |= Test((rbl->type.state & ERROR) == 0,
         "Object Fmt parsed with status without ERROR @", args);
 
-    args[0] = (Abstract *)rbl->mess;
+    args[0] = (Abstract *)rbl->dest;
     args[1] = NULL;
     Out("^y.Mess @^0\n", args);
 

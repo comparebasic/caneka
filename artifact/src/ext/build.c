@@ -70,6 +70,7 @@ static BuildSubdir docobj = { "doc", {
 
 static BuildSubdir navigateobj = { "navigate", {
     "node.c",
+    "nodeobj.c",
     "mess.c",
     "relation.c",
     "compare.c",

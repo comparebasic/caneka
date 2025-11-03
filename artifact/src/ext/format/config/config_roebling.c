@@ -86,8 +86,8 @@ static status start(MemCh *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    Mess *mess = rbl->mess;
-    if(rbl->mess->type.state & DEBUG){
+    Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
+    if(it->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
@@ -95,22 +95,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         };
         Out("^c.Config Capture ^E0.$^ec./$\n", args);
     }
-    /*
-    if(tk != NULL){
-        if(mess->current->parent == NULL && tk->captureKey == FORMATTER_LINE){
-            tk = Lookup_Get(mess->tokenizer, FORMATTER_PARAGRAPH);
-        }
-        Mess_Tokenize(mess, tk, v);
-    }else{
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(rbl->m, captureKey),
-            NULL
-        };
-        Error(rbl->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to find Tokenize for this captureKey: $", args);
-        return ERROR;
-    }
-    */
     return SUCCESS;
 }
 
@@ -125,10 +109,9 @@ Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, Abstract *source){
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
-
-    rbl->mess = Mess_Make(m);
-    rbl->mess->tokenizer = FormatFmt_Defs;
     rbl->source = source;
+    rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
+
     DebugStack_Pop();
     return rbl;
 }

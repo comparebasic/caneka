@@ -164,9 +164,9 @@ static status tagValue(MemCh *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    Mess *mess = rbl->mess;
+    Mess *mess = (Mess *)as(rbl->dest, TYPE_MESS);
     Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
-    if(rbl->mess->type.state & DEBUG){
+    if(mess->type.state & DEBUG){
         Abstract *args[] = {
             (Abstract *)Type_ToStr(OutStream->m, captureKey),
             (Abstract *)v,
@@ -212,8 +212,9 @@ Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
 
     rbl->capture = Capture;
 
-    rbl->mess = Mess_Make(m);
-    rbl->mess->tokenizer = FormatFmt_Defs;
+    Mess *mess = Mess_Make(m);
+    mess->tokenizer = FormatFmt_Defs;
+    rbl->dest = (Abstract *)mess;
     rbl->source = source;
     DebugStack_Pop();
     return rbl;

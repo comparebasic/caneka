@@ -119,7 +119,7 @@ status Route_Prepare(Route *rt){
             return rt->type.state;
         }
 
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, (Abstract *)rbl->mess);
+        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, rbl->dest);
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_DYNAMIC){
         StrVec *content = File_ToVec(m, pathS);

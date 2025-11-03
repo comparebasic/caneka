@@ -6,6 +6,7 @@ enum ext_types {
     TYPE_MESS,
     TYPE_MESS_CLIMBER,
     TYPE_NODE,
+    TYPE_NODEOBJ,
     TYPE_FETCHER,
     TYPE_FETCH_TARGET,
     TYPE_FETCH_FUNC,

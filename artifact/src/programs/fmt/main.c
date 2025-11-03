@@ -53,16 +53,17 @@ i32 main(int argc, char **argv){
 
     if(debug->type.of == TYPE_WRAPPED_PTR || 
             Equals((Abstract *)debug,  (Abstract *)Str_CstrRef(m, "mess"))){
-        rbl->mess->type.state |= DEBUG;
+        rbl->dest->type.state |= DEBUG;
     }
 
     Roebling_Run(rbl);
 
     Stream *sm = OutStream; 
     
-    rbl->mess->type.state |= (rbl->type.state & DEBUG);
-    Fmt_ToHtml(sm, rbl->mess);
-    if((rbl->mess->transp->type.state & SUCCESS) == 0){
+    rbl->dest->type.state |= (rbl->type.state & DEBUG);
+    Fmt_ToHtml(sm, (Mess *)rbl->dest);
+    Mess *mess = (Mess *)rbl->mess;
+    if((mess->transp->type.state & SUCCESS) == 0){
         Abstract *args[] = {
             (Abstract *)path,
             NULL

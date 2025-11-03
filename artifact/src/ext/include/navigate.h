@@ -10,3 +10,4 @@
 #include "navigate/task.h"
 #include "navigate/navigate_tos.h"
 #include "navigate/navigate_cls.h"
+#include "navigate/nodeobj.h"
