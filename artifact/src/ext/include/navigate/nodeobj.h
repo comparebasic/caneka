@@ -2,6 +2,7 @@ typedef Object NodeObj;
 
 enum nodeobj_flags {
     NODEOBJ_CHILD_SPAN = 1 << 8,
+    NODEOBJ_ATTS = 1 << 9,
 };
 
 enum nodeobj_prop_idx {

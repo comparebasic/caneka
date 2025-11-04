@@ -129,6 +129,13 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     return current;
 }
 
+i32 Object_Add(Object *obj, Abstract *value){
+    Hashed *h = Hashed_Make(Object_GetMem(obj), NULL);
+    h->value = value;
+    Span_Add(obj->order, (Abstract *)h);
+    return obj->order->max_idx;
+}
+
 Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
     obj->type.state &= ~OUTCOME_FLAGS;
 

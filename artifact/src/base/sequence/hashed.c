@@ -90,7 +90,7 @@ boolean Hashed_Equals(Hashed *a, Hashed *b){
 }
 
 Hashed *Hashed_Make(MemCh *m, Abstract *a){
-    if(a->type.of == TYPE_HASHED){
+    if(a != NULL && a->type.of == TYPE_HASHED){
         return (Hashed *)a;
     }
     Hashed *v = (Hashed *)MemCh_Alloc(m, sizeof(Hashed));

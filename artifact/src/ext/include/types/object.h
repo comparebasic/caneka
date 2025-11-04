@@ -43,3 +43,4 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op);
 
 Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source);
 status Object_Depth(Abstract *a);
+i32 Object_Add(Object *obj, Abstract *value);

@@ -59,15 +59,18 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
     Abstract *args[4];
     i32 dataCount = obj->order->nvalues;
+    MemCh *m = Object_GetMem(obj);
     if(flags & (MORE|DEBUG)){
         if(cls == NULL){
-            Fmt(bf, "Object<", args);
+            args[0] = (Abstract *)Type_StateVec(m, obj->objType.of, obj->objType.state);
+            Fmt(bf, "Object<@", args);
         }else{
             dataCount = dataCount - obj->propMask;
 
             args[0] = (Abstract *)cls->name;
-            args[1] = NULL;
-            Fmt(bf, "$<", args);
+            args[1] = (Abstract *)Type_StateVec(m, obj->objType.of, obj->objType.state);
+            args[2] = NULL;
+            Fmt(bf, "$<@", args);
 
             Iter it;
             Iter_Init(&it, cls->propOrder);

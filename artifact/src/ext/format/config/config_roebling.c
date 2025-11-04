@@ -126,6 +126,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     if(captureKey == CONFIG_LEAD){
         return rbl->type.state;
     }else if(captureKey == CONFIG_INDENT){
+        if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
+            current->objType.state |= NODEOBJ_ATTS;
+        }
         NodeObj *obj = Object_Make(rbl->m, TYPE_NODEOBJ);
         if(value != NULL){
             Object_SetPropByIdx(obj, NODEOBJ_PROPIDX_NAME, (Abstract *)value);
@@ -142,13 +145,30 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         */
         Iter_Add(it, obj);
         return rbl->type.state;
+    }else if(captureKey == CONFIG_KEY){
+        if(current->objType.state & NODEOBJ_ATTS){ 
+            if(prev->type.of == TYPE_ITER && ((Iter *)prev)->p->type.of == TYPE_TABLE){
+                Table_SetKey((Iter *)prev, (Abstract *)StrVec_Str(m, v));
+            }else{
+                Table *tbl = Table_Make(m);
+                Iter *it = Iter_Make(m, tbl);
+                Table_SetKey((Iter *)it, (Abstract *)StrVec_Str(m, v));
+                Object_Add(current, (Abstract *)tbl);
+            }
+        }
     }else if(captureKey == CONFIG_OUTDENT){
+        if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
+            current->objType.state |= NODEOBJ_ATTS;
+        }
         /*
         Iter_Remove(it);
         Iter_Prev(it);
         */
         return rbl->type.state;
     }else if(captureKey == CONFIG_NL){
+        if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
+            current->objType.state |= NODEOBJ_ATTS;
+        }
         StrVec *body = (StrVec *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_VALUE);
         if(body != NULL){
             Str *s = Span_Get(body->p, body->p->max_idx);
@@ -157,10 +177,21 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }
         }
         return rbl->type.state;
+    }else if(captureKey == CONFIG_NUMBER){
+        if((current->objType.state & NODEOBJ_ATTS) == 0 &&
+                value != NULL && token != NULL && token->objType.of == CONFIG_KEY){
+            Table *atts = (Table *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS);
+            if(atts == NULL){
+                atts = Table_Make(m);
+                Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
+            }
+            Single *nsg = I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v)));
+            Table_Set(atts, (Abstract *)value, (Abstract *)nsg);
+            return rbl->type.state;
+        }
     }else if(captureKey == CONFIG_LINE){
-        printf("line\n");
-        fflush(stdout);
-        if(value != NULL && token != NULL && token->objType.of == CONFIG_KEY){
+        if((current->objType.state & NODEOBJ_ATTS) == 0 &&
+                value != NULL && token != NULL && token->objType.of == CONFIG_KEY){
             Table *atts = (Table *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS);
             if(atts == NULL){
                 atts = Table_Make(m);
@@ -168,8 +199,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }
             Table_Set(atts, (Abstract *)value, (Abstract *)v);
             return rbl->type.state;
-        }else{
-            /*
+        }else if(prev != NULL && prev->type.of != TYPE_OBJECT ){
+            if(prev->type.of == TYPE_ITER && ((Iter *)prev)->p->type.of == TYPE_TABLE){
+                Table_SetValue((Iter *)prev, (Abstract *)v);
+                return rbl->type.state;
+            }
+            
             StrVec *body = (StrVec *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_VALUE);
             if(body != NULL){
                 Str *s = Span_Get(body->p, body->p->max_idx);
@@ -184,7 +219,10 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }
             StrVec_AddVec(body, v);
             return rbl->type.state;
-            */
+        }else{
+            args[0] = (Abstract *)v;
+            args[1] = NULL;
+            Out("^b.Line obj @^0\n", args);
         }
     }
 
