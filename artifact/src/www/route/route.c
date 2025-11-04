@@ -114,7 +114,7 @@ status Route_Prepare(Route *rt){
         Cursor *curs = Cursor_Make(m, content); 
         Roebling *rbl = FormatFmt_Make(m, curs, NULL);
         Roebling_Run(rbl);
-        if((rbl->type.state & SUCCESS) == 0){
+        if(rbl->type.state & ERROR){
             args[0] = (Abstract *)path;
             args[1] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER,

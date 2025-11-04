@@ -10,7 +10,7 @@ status FileDB_Open(FileDB *fdb){
 
     Str *entry = Str_Make(m, sizeof(BinSegHeader)*2);
     i16 latestId = 0;
-    if(Buff_Empty(fdb->bf)){
+    if(Buff_IsEmpty(fdb->bf)){
         BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
         hdr->kind = BINSEG_TYPE_INDEX;
         entry->length = sizeof(BinSegHeader);
@@ -51,7 +51,7 @@ status FileDB_Close(FileDB *fdb){
     File_Close(fdb->bf);
     File_Open(fdb->bf, fdb->fpath, O_RDWR);
 
-    if(!Buff_Empty(fdb->bf)){
+    if(!Buff_IsEmpty(fdb->bf)){
         Str *entry = Str_Make(m, sizeof(BinSegHeader)*2);
         Buff_PosEnd(fdb->bf);
         Buff_RevGetStr(fdb->bf, entry);

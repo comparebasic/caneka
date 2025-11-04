@@ -158,8 +158,40 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     return bf->type.state;
 }
 
+static status Buff_bytesToFd(Buff *bf, i32 fd, byte *bytes, i64 length, i64 *offset){
+    MemCh *m = bf->m;
+    bf->type.state &= ~(SUCCESS|MORE|PROCESSING);
+    if(length > IO_SEND_MAX || length < 0){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "length of send unbuff is larger than IO_SEND_MAX or less than 0", NULL);
+        bf->type.state |= ERROR;
+        return bf->type.state;
+    }
+
+    ssize_t sent = 0;
+    if(bf->type.state & BUFF_SOCKET){
+        sent = send(fd, bytes, min(length, IO_BLOCK_SIZE), 0);
+    }else{
+        sent = write(fd, bytes, min(length, IO_BLOCK_SIZE));
+    }
+
+    *offset = *offset+sent;
+    if(sent < 0){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error sending str", NULL);
+        bf->type.state |= ERROR;
+    }else if(sent == length){
+        bf->type.state |= SUCCESS;
+    }else if(sent == 0 && length > 0){
+        bf->type.state |= MORE;
+    }else{
+        bf->type.state |= PROCESSING;
+    }
+    return bf->type.state;
+}
+
 static status Buff_sendToFd(Buff *bf, i32 fd){
-    bf->type.state &= ~(MORE|SUCCESS|NOOP);
+    bf->type.state &= ~(MORE|SUCCESS|NOOP|PROCESSING);
     Abstract *args[5];
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
@@ -167,34 +199,34 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
             Str_Incr(bf->unsent.s, bf->unsent.offset);
         }
         Str *s = bf->unsent.s;
-        ssize_t sent = 0;
-        if(bf->type.state & BUFF_SOCKET){
-            sent = send(fd, s->bytes, s->length, 0);
-        }else if(bf->type.state & BUFF_FD){
-            sent = write(fd, s->bytes, s->length);
-        }else{
-            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
-            bf->type.state |= ERROR;
+
+        byte *bytes = s->bytes;
+        i64 length = s->length;
+        i64 offset = 0;
+        i16 guard = 0;
+        while((bf->type.state & (SUCCESS|ERROR|MORE)) == 0){
+            Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
+            Buff_bytesToFd(bf, fd, bytes+offset, length-offset, &offset);
+        }
+
+        bf->type.state &= ~(SUCCESS|MORE);
+
+        if(bf->type.state & ERROR){
             return bf->type.state;
         }
 
-        if(sent < 0){
-            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error sending str", NULL);
-            bf->type.state |= ERROR;
-        }else if(sent == s->length){
-            Buff_setUnsentIncr(bf, sent);
+        if(offset == s->length){
+            Buff_setUnsentIncr(bf, offset);
             if(bf->unsent.s->length == 0){
                 if(bf->unsent.idx < bf->v->p->max_idx){
                     bf->unsent.idx++;
                     bf->unsent.s = Span_Get(bf->v->p, bf->unsent.idx);
                     bf->type.state |= MORE;
-                    bf->unsent.total -= sent;
+                    bf->unsent.total -= offset;
                 }else{
                     bf->type.state |= PROCESSING;
                     bf->unsent.s = NULL;
-                    bf->unsent.total -= sent;
+                    bf->unsent.total -= offset;
                     if(bf->type.state & BUFF_FLUSH){
                         Iter it;                    
                         Iter_Init(&it, bf->v->p);
@@ -211,8 +243,8 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
                     }
                 }
             }
-        }else if(send > 0){
-            Buff_setUnsentIncr(bf, sent);
+        }else if(offset > 0){
+            Buff_setUnsentIncr(bf, offset);
             bf->type.state |= MORE;
         }else{
             bf->type.state |= NOOP;
@@ -223,123 +255,53 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
     return bf->type.state;
 }
 
-static status Buff_unbuffFd(MemCh *m, i32 fd, byte *bytes, i64 length, word flags, i64 *offset){
-    if(length > IO_SEND_MAX || length < 0){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "length of send unbuff is larger than IO_SEND_MAX or less than 0", NULL);
-        flags |= ERROR;
-        return flags;
-    }
-
-    ssize_t sent = 0;
-    if(flags & BUFF_SOCKET){
-        sent = send(fd, bytes, min(length, IO_BLOCK_SIZE), 0);
-    }else if(flags & BUFF_FD){
-        sent = write(fd, bytes, min(length, IO_BLOCK_SIZE));
-    }else{
-        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-            "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
-        flags |= ERROR;
-        return flags;
-    }
-
-    *offset = sent;
-    if(sent < 0){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error sending str", NULL);
-        flags |= ERROR;
-    }else if(sent == length){
-        flags |= SUCCESS;
-    }else{
-        flags |= PROCESSING;
-    }
-    return flags;
+status Buff_SetFd(Buff *bf, i32 fd){
+    bf->fd = fd;
+    bf->type.state |= BUFF_FD;
+    return SUCCESS;
 }
 
-status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
-    status r = READY;
-    if(length <= 0){
-        return NOOP;
-    }
+status Buff_SetSocket(Buff *bf, i32 fd){
+    bf->fd = fd;
+    bf->type.state |= BUFF_SOCKET;
+    return SUCCESS;
+}
 
-    if(bf->type.state & ERROR){
-        Abstract *args[2];
-        args[0] = (Abstract *)bf;
-        args[1] = NULL;
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error error flags set on buffer", args);
-        return bf->type.state;
-    }
+status Buff_UnsetFd(Buff *bf){
+    bf->fd = -1;
+    bf->type.state &= ~BUFF_SOCKET;
+    return SUCCESS;
+}
 
-    bf->type.state &= ~SUCCESS|NOOP;
+status Buff_UnsetSocket(Buff *bf){
+    bf->fd = -1;
+    bf->type.state &= ~BUFF_SOCKET;
+    return SUCCESS;
+}
 
-    if(length > IO_SEND_MAX){
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error trying to send too many bytes at once", NULL);
-        return 0;
-    }
-
-    bf->type.state &= ~END;
-    if((bf->type.state & BUFF_UNBUFFERED) && 
-            (bf->type.state & (BUFF_SOCKET|BUFF_FD))){
-        Str s = {
-            .type = {TYPE_STR, ZERO},
-            .alloc = length,
-            .length = length,
-            .bytes = bytes,
-        };
-
-        i64 offset = 0;
-        while(offset < length && (bf->type.state & (ERROR|NOOP|SUCCESS)) == 0){
-            Buff_unbuffFd(bf->m,
-                bf->fd, bytes+offset, length-offset, bf->type.state, &offset);
-        }
-
-        return bf->type.state;
-    }
-
-    if(bf->tail.idx == -1){
-        Buff_addTail(bf);
-    }
-
-    i16 guard = 0;
-    while(length > 0){
-        Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
-        word remaining = bf->tail.s->alloc - bf->tail.s->length;
-        if(remaining == 0){
-            Buff_addTail(bf);
-        }else if(length <= remaining){
-            Str_Add(bf->tail.s, bytes, length);
-            bf->unsent.total += length;
-            bf->v->total += length;
-            length -= length;
-            r |= SUCCESS;
+boolean Buff_IsEmpty(Buff *bf){
+    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
+        if((Buff_Stat(bf) & ERROR) == 0){
+            return bf->st.st_size == 0;
         }else{
-            Str_Add(bf->tail.s, bytes, remaining);
-            bf->unsent.total += remaining;
-            bf->v->total += remaining;
-            bytes += remaining;
-            length -= remaining;
-            Buff_addTail(bf);
+            return FALSE;
         }
-
+    }else{
+        return bf->v->total == 0;
     }
-    if(r == READY){
-        r |= NOOP;
-    }
-
-    return r;
 }
 
-status Buff_RevGetStr(Buff *bf, Str *s){
-    word remaining = s->alloc - s->length;
-    if(Buff_Pos(bf, -(remaining)) & ERROR){
-        return ERROR;
+status Buff_Stat(Buff *bf){
+    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
+        if(fstat(bf->fd, &bf->st)){
+            bf->type.state |= ERROR;
+        }
+    } else{
+        bf->type.state |= ERROR;
     }
-    status r = Buff_GetStr(bf, s);
-    Buff_Pos(bf, -(remaining));
-    return r;
+    return bf->type.state;
 }
+
 
 status Buff_GetStr(Buff *bf, Str *s){
     Abstract *args[5];
@@ -392,6 +354,16 @@ status Buff_GetStr(Buff *bf, Str *s){
     return bf->type.state | (s->length == s->alloc ? SUCCESS : ZERO);
 }
 
+status Buff_RevGetStr(Buff *bf, Str *s){
+    word remaining = s->alloc - s->length;
+    if(Buff_Pos(bf, -(remaining)) & ERROR){
+        return ERROR;
+    }
+    status r = Buff_GetStr(bf, s);
+    Buff_Pos(bf, -(remaining));
+    return r;
+}
+
 status Buff_GetToVec(Buff *bf, StrVec *v){
     Str *shelf = Str_Make(bf->m, STR_DEFAULT);
     i16 g = 0;
@@ -421,26 +393,118 @@ status Buff_AddVec(Buff *bf, StrVec *v){
     return bf->type.state;
 }
 
+status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
+    status r = READY;
+    if(length <= 0){
+        return NOOP;
+    }
+
+    if(bf->type.state & ERROR){
+        Abstract *args[2];
+        args[0] = (Abstract *)bf;
+        args[1] = NULL;
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error error flags set on buffer", args);
+        return bf->type.state;
+    }
+
+    bf->type.state &= ~SUCCESS|NOOP;
+
+    if(length > IO_SEND_MAX){
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error trying to send too many bytes at once", NULL);
+        return 0;
+    }
+
+    bf->type.state &= ~END;
+    if(bf->type.state & BUFF_UNBUFFERED){
+        if((bf->type.state & (BUFF_SOCKET|BUFF_FD)) == 0){
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error need a socket or fd for an unuffered buff", NULL);
+            bf->type.state |= ERROR;
+            return bf->type.state;
+        }
+
+        Str s = {
+            .type = {TYPE_STR, ZERO},
+            .alloc = length,
+            .length = length,
+            .bytes = bytes,
+        };
+
+        i16 guard = 0;
+        i64 offset = 0;
+        while((bf->type.state & (SUCCESS|ERROR|MORE)) == 0){
+            Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
+            Buff_bytesToFd(bf,
+                bf->fd, bytes+offset, length-offset, &offset);
+        }
+
+        return bf->type.state;
+    }
+
+    if(bf->tail.idx == -1){
+        Buff_addTail(bf);
+    }
+
+    i16 guard = 0;
+    while(length > 0){
+        Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
+        word remaining = bf->tail.s->alloc - bf->tail.s->length;
+        if(remaining == 0){
+            Buff_addTail(bf);
+        }else if(length <= remaining){
+            Str_Add(bf->tail.s, bytes, length);
+            bf->unsent.total += length;
+            bf->v->total += length;
+            length -= length;
+            r |= SUCCESS;
+        }else{
+            Str_Add(bf->tail.s, bytes, remaining);
+            bf->unsent.total += remaining;
+            bf->v->total += remaining;
+            bytes += remaining;
+            length -= remaining;
+            Buff_addTail(bf);
+        }
+
+    }
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
+
 status Buff_Flush(Buff *bf){
+    if(bf->type.state & DEBUG){
+        Abstract *args[2];
+        args[0] = (Abstract *)bf;
+        args[1] = NULL;
+        Out("^pFlushing @\n", args);
+    }
     if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-        while((Buff_sendToFd(bf, bf->fd) & (SUCCESS|ERROR|END)) == 0){}
+        while((Buff_sendToFd(bf, bf->fd) & (SUCCESS|ERROR|NOOP|END)) == 0){
+            if(bf->type.state & DEBUG){
+                Abstract *args[2];
+                args[0] = (Abstract *)bf;
+                args[1] = NULL;
+                Out("^p   cycle - Flushing @\n", args);
+            }
+        }
+    }
+
+    if(bf->type.state & DEBUG){
+        Abstract *args[2];
+        args[0] = (Abstract *)bf;
+        args[1] = NULL;
+        Out("^p    flushed - Flushing @\n", args);
     }
     return bf->type.state;
 }
 
 status Buff_Read(Buff *bf){
     return Buff_ReadAmount(bf, IO_SEND_MAX);
-}
-
-status Buff_Pipe(Buff *to, Buff *from){
-    Str *s = Str_Make(to->m, IO_BLOCK_SIZE);
-    status r = READY;
-    while((from->type.state & (END|ERROR)) == 0){
-        Buff_GetStr(from, s);
-        r |= Buff_AddBytes(to, s->bytes, s->length);
-        s->length = 0;
-    }
-    return r;
 }
 
 status Buff_ReadAmount(Buff *bf, i64 amount){
@@ -536,15 +600,15 @@ status Buff_ReadToStr(Buff *bf, Str *s){
     return bf->type.state;
 }
 
-status Buff_Stat(Buff *bf){
-    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
-        if(fstat(bf->fd, &bf->st)){
-            bf->type.state |= ERROR;
-        }
-    } else{
-        bf->type.state |= ERROR;
+status Buff_Pipe(Buff *to, Buff *from){
+    Str *s = Str_Make(to->m, IO_BLOCK_SIZE);
+    status r = READY;
+    while((from->type.state & (END|ERROR)) == 0){
+        Buff_GetStr(from, s);
+        r |= Buff_AddBytes(to, s->bytes, s->length);
+        s->length = 0;
     }
-    return bf->type.state;
+    return r;
 }
 
 status Buff_PosAbs(Buff *bf, i64 position){
@@ -561,42 +625,6 @@ status Buff_Pos(Buff *bf, i64 position){
 
 status Buff_PosEnd(Buff *bf){
     return Buff_posFrom(bf, 0, SEEK_END);
-}
-
-boolean Buff_Empty(Buff *bf){
-    if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
-        if((Buff_Stat(bf) & ERROR) == 0){
-            return bf->st.st_size == 0;
-        }else{
-            return FALSE;
-        }
-    }else{
-        return bf->v->total == 0;
-    }
-}
-
-status Buff_SetFd(Buff *bf, i32 fd){
-    bf->fd = fd;
-    bf->type.state |= BUFF_FD;
-    return SUCCESS;
-}
-
-status Buff_UnsetFd(Buff *bf){
-    bf->fd = -1;
-    bf->type.state &= ~BUFF_SOCKET;
-    return SUCCESS;
-}
-
-status Buff_UnsetSocket(Buff *bf){
-    bf->fd = -1;
-    bf->type.state &= ~BUFF_SOCKET;
-    return SUCCESS;
-}
-
-status Buff_SetSocket(Buff *bf, i32 fd){
-    bf->fd = fd;
-    bf->type.state |= BUFF_SOCKET;
-    return SUCCESS;
 }
 
 Buff *Buff_From(MemCh *m, StrVec *v){

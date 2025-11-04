@@ -114,10 +114,17 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Buff *bf = Buff_From(m, out);
     Templ_ToS(templ, bf, (Abstract *)data, NULL);
 
+    Str *expected = Str_FromCstr(m, cstr, ZERO);
+    args[0] = (Abstract *)expected;
+    args[1] = (Abstract *)I64_Wrapped(m, out->total);
+    args[2] = NULL;
+    Out("^p.expected\n$\n\nout\n$^0", args);
+
     out->type.state |= DEBUG;
-    r |= Test(Equals((Abstract *)out, (Abstract *)Str_FromCstr(m, cstr, ZERO)),
+    r |= Test(Equals((Abstract *)out, (Abstract *)expected),
         "Templ from Route has expected output", NULL);
 
+    r |= ERROR;
     MemCh_Free(m);
     DebugStack_Pop();
     return r;
@@ -151,6 +158,7 @@ status WwwRouteMime_Tests(MemCh *gm){
 
     r |= Test(Equals((Abstract *)dest->v, (Abstract *)expected), "Content from Buff piped from route matches reading file directly", NULL);
 
+    r |= ERROR;
     MemCh_Free(m);
     DebugStack_Pop();
     return r;
