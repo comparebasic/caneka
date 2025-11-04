@@ -139,10 +139,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 
             Object_ByPath(current, value, (Abstract *)obj, SPAN_OP_SET);  
         }
-        /*
-        Iter_Remove(it);
-        Iter_Prev(it);
-        */
         Iter_Add(it, obj);
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
@@ -160,10 +156,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
             current->objType.state |= NODEOBJ_ATTS;
         }
-        /*
-        Iter_Remove(it);
-        Iter_Prev(it);
-        */
         return rbl->type.state;
     }else if(captureKey == CONFIG_NL){
         if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
@@ -219,10 +211,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }
             StrVec_AddVec(body, v);
             return rbl->type.state;
-        }else{
-            args[0] = (Abstract *)v;
-            args[1] = NULL;
-            Out("^b.Line obj @^0\n", args);
         }
     }
 

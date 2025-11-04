@@ -12,12 +12,18 @@ status Config_Tests(MemCh *gm){
 
     args[0] = (Abstract *)content;
     args[1] = NULL;
-    Out("^y.content: @^0\n", args);
+    Out("^p.content: @^0\n", args);
 
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = FormatConfig_Make(m, curs, NULL);
     rbl->dest->type.state |= DEBUG;
     Roebling_Run(rbl);
+
+
+    Object *root = Span_Get(((Iter *)rbl->dest)->p, 0);
+    args[0] = (Abstract *)root;
+    args[1] = NULL;
+    Out("^p.root: @^0\n", args);
 
     r |= ERROR;
     MemCh_Free(m);
