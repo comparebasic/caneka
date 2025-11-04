@@ -92,6 +92,7 @@ enum ext_types {
     CONFIG_LEAD,
     CONFIG_INDENT,
     CONFIG_OUTDENT,
+    CONFIG_TOKEN,
     CONFIG_LINE,
     CONFIG_NUMBER,
     CONFIG_ITEM,

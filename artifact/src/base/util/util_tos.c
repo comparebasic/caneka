@@ -49,8 +49,12 @@ static status WrappedPtr_Print(Buff *bf, Abstract *a, cls type, word flags){
         (Abstract *)Str_CstrRef(bf->m, Type_ToChars(sg->objType.of)),
         NULL
     };
-    Fmt(bf, "Wptr\\<$ ", args);
-    Addr_ToS(bf, sg->val.ptr, flags);
+    Fmt(bf, "Wptr<$ ", args);
+    if(sg->objType.of > _TYPE_ABSTRACT_BEGIN){
+        ToS(bf, (Abstract *)sg->val.ptr, 0, MORE);
+    }else{
+        Addr_ToS(bf, sg->val.ptr, flags);
+    }
     Buff_AddBytes(bf, (byte *)">", 1);
     return SUCCESS;
 }

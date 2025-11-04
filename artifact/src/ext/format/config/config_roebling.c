@@ -16,6 +16,17 @@ static PatCharDef outdentDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef tokenDef[] = {
+    {PAT_MANY, 'a', 'z'},
+    {PAT_MANY, 'Z', 'Z'},
+    {PAT_MANY, '-', '-'},
+    {PAT_MANY, '_', '_'},
+    {PAT_MANY|PAT_TERM, '0', '9'},
+    {PAT_ANY|PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, ' ', ' '},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '{', '{'},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef lineDef[] = {
     {PAT_KO|PAT_KO_TERM, '\n', '\n'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
     {PAT_KO|PAT_INVERT_CAPTURE, '{', '{'},{PAT_KO|PAT_INVERT_CAPTURE, '}', '}'}, {PAT_KO|PAT_KO_TERM, '\n', '\n'},
@@ -54,6 +65,8 @@ static status line(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         numberDef, CONFIG_NUMBER, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
+        tokenDef, CONFIG_TOKEN, CONFIG_START);
+    r |= Roebling_SetPattern(rbl,
         indentDef, CONFIG_INDENT, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
         lineDef, CONFIG_LINE, CONFIG_START);
@@ -71,6 +84,8 @@ static status start(MemCh *m, Roebling *rbl){
         bulletDef, CONFIG_ITEM, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
         numberDef, CONFIG_NUMBER, CONFIG_START);
+    r |= Roebling_SetPattern(rbl,
+        tokenDef, CONFIG_TOKEN, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
         indentDef, CONFIG_INDENT, CONFIG_START);
     r |= Roebling_SetPattern(rbl,
@@ -158,7 +173,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         return rbl->type.state;
     }else if(captureKey == CONFIG_INDENT){
         if(data != NULL){
-            removeObj(it, dataIdx);
+            removeObj(it, currentIdx+1);
             data = NULL;
         }
         NodeObj *obj = Object_Make(rbl->m, TYPE_NODEOBJ);
@@ -187,12 +202,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             Table_SetKey(data, (Abstract *)StrVec_Str(m, v));
         }
     }else if(captureKey == CONFIG_OUTDENT){
-        removeObj(it, currentIdx-1);
+        removeObj(it, currentIdx);
         return rbl->type.state;
     }else if(captureKey == CONFIG_NL){
         if(data != NULL && 
                 (data->p->type.of != TYPE_TABLE || data->metrics.selected == -1)){
-            removeObj(it, dataIdx);
+            removeObj(it, currentIdx+1);
             data = NULL;
         }
         return rbl->type.state;
@@ -221,7 +236,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
                 Iter_Add(data, (Abstract *)n); 
             }
         }
-    }else if(captureKey == CONFIG_LINE){
+    }else if(captureKey == CONFIG_LINE || captureKey == CONFIG_TOKEN){
         if(data != NULL){
             if(data->p->type.of == TYPE_TABLE){
                 Table_SetValue(data, (Abstract *)v);

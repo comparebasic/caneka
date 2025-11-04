@@ -36,6 +36,39 @@ boolean Equals(Abstract *a, Abstract *b){
         Span *pa = (Span *)a;
         Span *pb = (Span *)b;
         return Span_Equals(pa, pb);
+    }else if(
+            (a->type.of > _TYPE_WRAPPED_START && 
+                a->type.of < _TYPE_WRAPPED_END) &&
+            (b->type.of > _TYPE_WRAPPED_START && 
+                b->type.of < _TYPE_WRAPPED_END)
+        ){
+        Single *sga = (Single *)a;
+        Single *sgb = (Single *)b;
+
+        util au;
+        util bu;
+
+        if(a->type.of == TYPE_WRAPPED_I64 || a->type.of == TYPE_WRAPPED_UTIL){
+            au = sga->val.value;
+        }else if((a->type.of == TYPE_WRAPPED_I32 || a->type.of == TYPE_WRAPPED_U32)){
+            au = sga->val.i;
+        }else if((a->type.of == TYPE_WRAPPED_I16 || a->type.of == TYPE_WRAPPED_WORD)){
+            au = sga->val.w;
+        }else if((a->type.of == TYPE_WRAPPED_I8 || a->type.of == TYPE_WRAPPED_BYTE)){
+            au = sga->val.b;
+        }
+
+        if(b->type.of == TYPE_WRAPPED_I64 || b->type.of == TYPE_WRAPPED_UTIL){
+            bu = sgb->val.value;
+        }else if((b->type.of == TYPE_WRAPPED_I32 || b->type.of == TYPE_WRAPPED_U32)){
+            bu = sgb->val.i;
+        }else if((b->type.of == TYPE_WRAPPED_I16 || b->type.of == TYPE_WRAPPED_WORD)){
+            bu = sgb->val.w;
+        }else if((b->type.of == TYPE_WRAPPED_I8 || b->type.of == TYPE_WRAPPED_BYTE)){
+            bu = sgb->val.b;
+        }
+
+        return au == bu;
     }else{
         cls aTypeOf = Ifc_Get(a->type.of);
         cls bTypeOf = Ifc_Get(b->type.of);

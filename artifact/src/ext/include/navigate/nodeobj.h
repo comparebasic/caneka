@@ -11,3 +11,4 @@ enum nodeobj_prop_idx {
 };
 
 status NodeObj_ClsInit(MemCh *m);
+Abstract *NodeObj_Att(NodeObj *nobj, Abstract *key);

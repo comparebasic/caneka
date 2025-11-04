@@ -20,7 +20,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     Str *mime = (Str *)Table_Get(RouteMimeTable, (Abstract *)ext);
     Single *funcW = (Single *)Table_Get(RouteFuncTable, (Abstract *)ext);
 
-    if(mime == NULL){
+    if(mime == NULL || funcW == NULL){
         Abstract *args[] = {
             (Abstract *)mime,
             (Abstract *)ext,
@@ -32,6 +32,10 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Mime & not found for this file with ext:@ path:@ file:@ mimeTable:@", args);
         return ERROR;
+    }
+
+    if(funcW->type.state & ROUTE_FORBIDDEN){
+        return NOOP;
     }
 
     StrVec *pathV = StrVec_From(m, path);
@@ -59,7 +63,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
 
     Route_Prepare(subRt);
 
-    return NOOP;
+    return SUCCESS;
 }
 
 static status routeFuncStatic(Buff *bf, Abstract *action, Object *_data, Abstract *_source){
@@ -267,6 +271,13 @@ status Route_ClsInit(MemCh *m){
         Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
         Table_Set(RouteMimeTable,
             (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/html"));
+
+        key = Str_CstrRef(m, "config");
+        funcW = Func_Wrapped(m, NULL);
+        funcW->type.state |= ROUTE_FORBIDDEN;
+        Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
+        Table_Set(RouteMimeTable,
+            (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/plain"));
     }
 
     return r;

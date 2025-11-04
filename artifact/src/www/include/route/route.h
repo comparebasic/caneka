@@ -14,6 +14,7 @@ enum route_flags {
     ROUTE_ASSET = 1 << 12,
     ROUTE_PAGE = 1 << 13,
     ROUTE_SCRIPT = 1 << 14,
+    ROUTE_FORBIDDEN = 1 << 15,
 };
 
 enum route_prop_idx {

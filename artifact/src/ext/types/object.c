@@ -95,6 +95,16 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     }
     Iter keysIt;
     Iter_Init(&keysIt, path->p);
+
+    if(obj->type.state & DEBUG){
+        Abstract *args[4];
+        args[0] = NULL;
+        args[1] = (Abstract *)path->p;
+        args[2] = (Abstract *)obj->tbl;
+        args[3] = NULL;
+        Out("^c.^{STACK.name} keys->p:@ from @^0\n", args);
+    }
+
     Str *key = NULL;
     Object *current = obj;
     i16 depth = 1;

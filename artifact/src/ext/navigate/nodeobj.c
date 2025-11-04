@@ -1,6 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
+Abstract *NodeObj_Att(NodeObj *nobj, Abstract *key){
+    Table *tbl = (Table *)Object_GetPropByIdx(nobj, NODEOBJ_PROPIDX_ATTS);
+    if(tbl != NULL){
+        return Table_Get(tbl, key);
+    }
+    return NULL;
+}
+
 status NodeObj_ClsInit(MemCh *m){
     status r = READY;
     ClassDef *cls = ClassDef_Make(m);
