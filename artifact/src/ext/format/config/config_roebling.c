@@ -35,7 +35,7 @@ static PatCharDef keyDef[] = {
 };
 
 static PatCharDef bulletDef[] = {
-    {PAT_TERM, '-', '-'}, {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
+    {PAT_TERM|PAT_INVERT_CAPTURE, '-', '-'}, {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
     {PAT_KO, '\n', '\n'},
     patText,
     {PAT_END, 0, 0}
@@ -84,139 +84,160 @@ static status start(MemCh *m, Roebling *rbl){
     return r;
 }
 
+static Abstract *findRecentOf(Iter *_it, cls typeOf, Abstract *before, i32 *idx){
+    Iter it;
+    memcpy(&it, _it, sizeof(Iter));
+    Abstract *prev = Iter_Get(&it);
+    while(prev == NULL || (prev->type.of != typeOf && (Iter_Prev(&it) & END) == 0)){
+        if(prev == before){
+            break;
+        }
+        prev = Iter_Get(&it);
+    }
+    if(prev != NULL && prev->type.of == typeOf){
+        *idx = it.idx;
+        return prev;
+    }
+    return NULL;
+}
+
+static status removeObj(Iter *it, i32 idx){
+    while(it->idx >= idx){
+        if(it->idx == 0){
+            it->type.state |= SUCCESS;
+            break;
+        }
+        Iter_Remove(it);
+        Iter_Prev(it);
+    }
+    return it->type.state;
+}
+
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
-    Abstract *args[4];
+    Abstract *args[7];
     MemCh *m = rbl->m;
 
-    if(it->type.state & DEBUG){
-        args[0] = (Abstract *)Type_ToStr(OutStream->m, captureKey);
-        args[1] = (Abstract *)v;
-        args[2] = (Abstract *)it->p;
-        args[3] = NULL;
-        Out("^c.Config Capture ^E0.$^ec. -> @ ^y.\\@@\n", args);
+    Abstract *prev = Iter_Get(it);
+    i32 zero = 0;
+    i32 currentIdx = 0;
+    NodeObj *current = (NodeObj *)findRecentOf(it,
+        TYPE_OBJECT, NULL, &currentIdx);
+
+    i32 dataIdx = 0;
+    Iter *data = (Iter *)findRecentOf(it,
+        TYPE_ITER, (Abstract *)current, &dataIdx);
+
+    i32 singleIdx = 0;
+    Single *single = (Single *)findRecentOf(it,
+        TYPE_WRAPPED_PTR, (Abstract *)data, &singleIdx);
+
+    StrVec *token = NULL;
+    if(single != NULL){
+        token = (StrVec *)single->val.ptr;
     }
 
-    Abstract *prev = Iter_Get(it);
     if(prev == NULL && it->p->nvalues == 0){
         NodeObj *obj = Object_Make(rbl->m, TYPE_NODEOBJ);
         Iter_Add(it, obj);
-        prev =(Abstract *)obj; 
+        current = obj;
     }
 
-    Single *token = NULL;
-    StrVec *value = NULL;
-    i32 idx = it->idx;
-    if(prev != NULL && prev->type.of == TYPE_WRAPPED_PTR){
-        token = (Single *)prev;
+    if(it->type.state & DEBUG){
+        args[0] = (Abstract *)Type_ToStr(OutStream->m, captureKey);
+        args[1] = (Abstract *)v,
+        args[2] = (Abstract *)NULL;
+        args[3] = (Abstract *)data;
+        args[4] = (Abstract *)NULL;
+        args[5] = (Abstract *)it->p;
+        args[6] = NULL;
+        Out("^c.Config Capture ^E0.$^ec. -> ^0y.   @\n   @\n   @\n   @\n   ^b.&^0\n", args);
     }
-
-    if(token != NULL && token->type.of == TYPE_WRAPPED_PTR){
-        value = (StrVec *)token->val.ptr;
-    }
-
-    Iter_GetByIdx(it, idx);
-
-    NodeObj *current = (NodeObj *)prev;
-    while(current->type.of != TYPE_OBJECT && (Iter_Prev(it) & END) == 0){
-        current = Iter_Get(it);
-    }
-    Iter_GetByIdx(it, idx);
 
     if(captureKey == CONFIG_LEAD){
         return rbl->type.state;
     }else if(captureKey == CONFIG_INDENT){
-        if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
-            current->objType.state |= NODEOBJ_ATTS;
+        if(data != NULL){
+            removeObj(it, dataIdx);
+            data = NULL;
         }
         NodeObj *obj = Object_Make(rbl->m, TYPE_NODEOBJ);
-        if(value != NULL){
-            Object_SetPropByIdx(obj, NODEOBJ_PROPIDX_NAME, (Abstract *)value);
-
-            args[0] = (Abstract *)value;
-            args[1] = NULL;
-            Out("^p.add sub obj @\n", args);
-
-            Object_ByPath(current, value, (Abstract *)obj, SPAN_OP_SET);  
+        if(token != NULL){
+            Object_SetPropByIdx(obj, NODEOBJ_PROPIDX_NAME, (Abstract *)token);
+            Object_ByPath(current, token, (Abstract *)obj, SPAN_OP_SET);  
+            Iter_Remove(it);
+            Iter_Prev(it);
         }
         Iter_Add(it, obj);
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
-        if(current->objType.state & NODEOBJ_ATTS){ 
-            if(prev->type.of == TYPE_ITER && ((Iter *)prev)->p->type.of == TYPE_TABLE){
-                Table_SetKey((Iter *)prev, (Abstract *)StrVec_Str(m, v));
-            }else{
-                Table *tbl = Table_Make(m);
-                Iter *it = Iter_Make(m, tbl);
-                Table_SetKey((Iter *)it, (Abstract *)StrVec_Str(m, v));
-                Object_Add(current, (Abstract *)tbl);
-            }
+        if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) == NULL){
+            Table *tbl = Table_Make(m);
+            Iter *itn = Iter_Make(m, tbl);
+            Table_SetKey((Iter *)itn, (Abstract *)StrVec_Str(m, v));
+            Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, (Abstract *)tbl);
+            Iter_Add(it, itn);
+        }else if(data == NULL){
+            Table *tbl = Table_Make(m);
+            Iter *itn = Iter_Make(m, tbl);
+            Table_SetKey((Iter *)itn, (Abstract *)StrVec_Str(m, v));
+            Object_Add(current, (Abstract *)tbl);
+            Iter_Add(it, itn);
+        }else if(data->p->type.of == TYPE_TABLE){
+            Table_SetKey(data, (Abstract *)StrVec_Str(m, v));
         }
     }else if(captureKey == CONFIG_OUTDENT){
-        if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
-            current->objType.state |= NODEOBJ_ATTS;
-        }
+        removeObj(it, currentIdx-1);
         return rbl->type.state;
     }else if(captureKey == CONFIG_NL){
-        if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) != NULL){
-            current->objType.state |= NODEOBJ_ATTS;
-        }
-        StrVec *body = (StrVec *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_VALUE);
-        if(body != NULL){
-            Str *s = Span_Get(body->p, body->p->max_idx);
-            if(s != NULL){
-                s->type.state |= LAST;
-            }
+        if(data != NULL && 
+                (data->p->type.of != TYPE_TABLE || data->metrics.selected == -1)){
+            removeObj(it, dataIdx);
+            data = NULL;
         }
         return rbl->type.state;
+    }else if(captureKey == CONFIG_ITEM){
+        if(data == NULL){
+            Span *p = Span_Make(m);
+            Iter *itn = Iter_Make(m, p);
+            Span_Add(p, (Abstract *)v);
+            Object_Add(current, (Abstract *)p);
+            Iter_Add(it, itn);
+        }else if(data->p->type.of == TYPE_SPAN){
+            Iter_Add(data, (Abstract *)v);
+        }else if(data->p->type.of == TYPE_TABLE){
+            Span *p = Span_Make(m);
+            Iter *itn = Iter_Make(m, p);
+            Span_Add(p, (Abstract *)v);
+            Table_SetValue(data, (Abstract *)p);
+            Iter_Add(it, itn);
+        }
     }else if(captureKey == CONFIG_NUMBER){
-        if((current->objType.state & NODEOBJ_ATTS) == 0 &&
-                value != NULL && token != NULL && token->objType.of == CONFIG_KEY){
-            Table *atts = (Table *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS);
-            if(atts == NULL){
-                atts = Table_Make(m);
-                Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
+        Single *n = I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v)));
+        if(data != NULL){
+            if(data->p->type.of == TYPE_TABLE){
+                Table_SetValue(data, (Abstract *)n);
+            }else if(data->p->type.of == TYPE_SPAN){
+                Iter_Add(data, (Abstract *)n); 
             }
-            Single *nsg = I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v)));
-            Table_Set(atts, (Abstract *)value, (Abstract *)nsg);
-            return rbl->type.state;
         }
     }else if(captureKey == CONFIG_LINE){
-        if((current->objType.state & NODEOBJ_ATTS) == 0 &&
-                value != NULL && token != NULL && token->objType.of == CONFIG_KEY){
-            Table *atts = (Table *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS);
-            if(atts == NULL){
-                atts = Table_Make(m);
-                Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
+        if(data != NULL){
+            if(data->p->type.of == TYPE_TABLE){
+                Table_SetValue(data, (Abstract *)v);
+            }else if(data->p->type.of == TYPE_SPAN){
+                Iter_Add(data, (Abstract *)v);
             }
-            Table_Set(atts, (Abstract *)value, (Abstract *)v);
-            return rbl->type.state;
-        }else if(prev != NULL && prev->type.of != TYPE_OBJECT ){
-            if(prev->type.of == TYPE_ITER && ((Iter *)prev)->p->type.of == TYPE_TABLE){
-                Table_SetValue((Iter *)prev, (Abstract *)v);
-                return rbl->type.state;
-            }
-            
-            StrVec *body = (StrVec *)Object_GetPropByIdx(current, NODEOBJ_PROPIDX_VALUE);
-            if(body != NULL){
-                Str *s = Span_Get(body->p, body->p->max_idx);
-                if(s != NULL && s->type.state & MORE){
-                    StrVec_Add(body, Str_FromCstr(m, "\n\n", STRING_COPY));
-                }else if(body->p->nvalues > 0){
-                    StrVec_Add(body, Str_FromCstr(m, " ", STRING_COPY));
-                }
-            }else{
-                body = StrVec_Make(m);
-                Object_SetPropByIdx(current, NODEOBJ_PROPIDX_VALUE, (Abstract *)body);
-            }
-            StrVec_AddVec(body, v);
-            return rbl->type.state;
+        }else{
+            Iter_Add(it, (Abstract *)Ptr_Wrapped(rbl->m, v, captureKey));
         }
     }
 
-    Iter_Add(it, (Abstract *)Ptr_Wrapped(rbl->m, v, captureKey));
-
     return SUCCESS;
+}
+
+NodeObj *FormatConfig_GetRoot(Roebling *rbl){
+    return Span_Get(((Iter *)rbl->dest)->p, 0);
 }
 
 Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, Abstract *source){

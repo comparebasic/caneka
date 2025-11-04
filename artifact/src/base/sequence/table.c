@@ -163,6 +163,7 @@ status Table_HKeyVal(HKey *hk){
 
 status Table_SetKey(Iter *it, Abstract *a){
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);
+    it->metrics.selected = it->idx;
     /* set idx here */
     return SUCCESS;
 }
@@ -176,11 +177,13 @@ i32 Table_SetIdxEntry(Iter *it, Abstract *a){
 }
 
 Hashed *Table_SetValue(Iter *it, Abstract *a){
-    Hashed *h = Span_Get(it->p, it->metrics.set);
-    if(h != NULL){
-        h->value = a;
-        it->metrics.set = -1;
-        return h;
+    if(it->metrics.selected > -1){
+        Hashed *h = Span_Get(it->p, it->metrics.selected);
+        if(h != NULL){
+            h->value = a;
+            it->metrics.selected = -1;
+            return h;
+        }
     }
     return NULL;
 }
