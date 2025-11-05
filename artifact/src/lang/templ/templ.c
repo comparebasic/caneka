@@ -6,23 +6,20 @@ static i32 Templ_FindStart(Templ *templ, word flags){
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
-    i32 targetIdx = templ->content.p->max_idx;
+    i32 targetCount = 1;
     while((Iter_Prev(&it) & END) == 0){
-        if(it.idx > targetIdx){
-            continue;
-        }
-
         Abstract *a = Iter_Get(&it);
 
         if(a->type.of == TYPE_TEMPL_JUMP){
             TemplJump *prevJump = (TemplJump *)a;
             if(prevJump->fch->type.state & FETCHER_END){
-                targetIdx = prevJump->destIdx;
-            }else if((prevJump->fch->type.state & 
+                targetCount++;
+            }else if(((prevJump->fch->type.state & 
                         (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)) &&
-                    flags == ZERO ||
-                    (prevJump->fch->type.state & flags))
-                {
+                        flags == ZERO ||
+                        (prevJump->fch->type.state & flags)) &&
+                    --targetCount == 0
+                ){
                 DebugStack_Pop();
                 return it.idx;
             }
@@ -40,7 +37,6 @@ static i32 Templ_FindEnd(Templ *templ){
     i32 targetCount = 1;
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
-
 
         if(a->type.of == TYPE_FETCHER){
             if((a->type.state & FETCHER_END|FETCHER_VAR) == 0){
@@ -250,10 +246,18 @@ static status Templ_PrepareCycle(Templ *templ){
             jump->skipIdx = Templ_FindEnd(templ); 
             Iter_GetByIdx(&templ->content, idx);
         }else if(fch->type.state & FETCHER_END){
-            jump->destIdx = Templ_FindStart(templ, ZERO);
+            i32 destIdx = Templ_FindStart(templ, ZERO);
+            if(destIdx > -1){
+                TemplJump *dest = Span_Get(templ->content.p, destIdx);
+                if(dest != NULL && (dest->fch->type.state & FETCHER_WITH|FETCHER_FOR)){
+                    jump->destIdx = destIdx;
+                }else{
+                    jump->fch->type.state |= NOOP;
+                }
+            }
         }
 
-        if((jump->fch->type.state & (FETCHER_FOR|FETCHER_WITH)) == 0 &&
+        if((jump->fch->type.state & (NOOP|FETCHER_FOR|FETCHER_WITH)) == 0 &&
                 jump->destIdx == NEGATIVE && jump->skipIdx == NEGATIVE &&
                 jump->tempIdx == NEGATIVE){
             args[0] = (Abstract *)jump;

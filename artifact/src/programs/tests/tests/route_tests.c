@@ -6,46 +6,36 @@ static char *cstr = ""
     "<html lang=\"en\">\n"
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
-    "<title>Compare Basic - The Title of the Master Page</title>\n"
-    "<meta property=\"og:title\" content=\"The Title of the Master Page - Compare Basic\" />\n"
-    "<meta property=\"og:description\" content=\"The proximity you have to the things you value defines your quality of life.\"/>\n"
-    "<meta property=\"og:image\" content=\"/triangle-diagram.png\" />\n"
-    "<script src=\"/dom.js\" type=\"text/javascript\"></script>\n"
-    "<link rel=\"stylesheet\" href=\"/style.css\" />\n"
-    "  <meta \n"
-    "    name=\"viewport\"\n"
-    "    content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\"\n"
-    "  >\n"
+    "<title>Example Title</title>\n"
+    "  <link rel=\"stylesheet\" href=\"/style.css\" />\n"
+    "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
     "<body>\n"
     "<header>\n"
-    "    <div class=\"inner\">\n"
-    "        <div class=\"bread-crumbs\">\n"
-    "        <ul>\n"
-    "            <li>\n"
-    "                <a href=\"/login\">/login</a>\n"
-    "            </li>\n"
-    "            <li>\n"
-    "                <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
-    "            </li>\n"
-    "            <li>\n"
-    "                <a href=\"/dom.js\">/dom.js</a>\n"
-    "            </li>\n"
-    "            <li>\n"
-    "                <a href=\"/account/\">/account/</a>\n"
-    "            </li>\n"
-    "            <li>\n"
-    "                <a href=\"/style.css\">/style.css</a>\n"
-    "            </li>\n"
-    "        </ul>\n"
-    "        <div style=\"clear\"></div>\n"
-    "        </div>\n"
-    "    </div>\n"
+    "    <nav class=\"bread-crumbs\">\n"
+    "    <ul>\n"
+    "        <li>\n"
+    "            <a href=\"/login\">/login</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/dom.js\">/dom.js</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/account/\">/account/</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/style.css\">/style.css</a>\n"
+    "        </li>\n"
+    "    </ul>\n"
+    "    </nav>\n"
     "</header>\n"
 ;
 
 static char *loginCstr  = ""
-    "<h1>Compare Basic - Login</h1>\n"
+    "<h1>Caneka Example - Login</h1>\n"
     "<p>Login to the example site.</p>\n"
     "<div>\n"
     "    <span>Logged in as Fancy Pantsy</span>\n"
@@ -59,7 +49,7 @@ static char *loginCstr  = ""
     ;
 
 static char *loginNoUserCstr  = ""
-    "<h1>Compare Basic - Login</h1>\n"
+    "<h1>Caneka Example - Login</h1>\n"
     "<p>Login to the example site.</p>\n"
     "<div>\n"
     "    <form>\n"
@@ -80,7 +70,7 @@ status WwwRoute_Tests(MemCh *gm){
     Route *rt = Route_Make(m);
     StrVec *path = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/public"));
-    Route_Collect(rt, path);
+    Route_Collect(rt, path, NULL);
 
     path = StrVec_From(m, Str_FromCstr(m, "/account/", ZERO));
     IoUtil_Annotate(m, path);
@@ -122,10 +112,27 @@ status WwwRouteTempl_Tests(MemCh *gm){
     StrVec *navPath = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/public"));
     StrVec *navAbs = IoUtil_AbsVec(m, navPath);
-    Route_Collect(rt, navAbs);
+    StrVec *incPath = IoUtil_GetAbsVec(m,
+        Str_CstrRef(m, "./examples/web-server/pages/inc"));
+    StrVec *incAbs = IoUtil_AbsVec(m, incPath);
+    Route_Collect(rt, navAbs, incPath);
 
     Object *data = Object_Make(m, ZERO);
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)rt);
+
+    Table *atts = Table_Make(m);
+    Table_Set(atts,
+        (Abstract *)Str_FromCstr(m, "title", ZERO), 
+        (Abstract *)Str_FromCstr(m, "Example Title", ZERO));
+    NodeObj *page = Object_Make(m, TYPE_NODEOBJ);
+    Object_SetPropByIdx(page, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
+    Object *config = Object_Make(m, ZERO);
+    Object_Set(config, (Abstract *)Str_CstrRef(m, "page"), (Abstract *)page);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "config"), (Abstract *)config);
+    
+    Object *nav = Object_Make(m, ZERO);
+    Object_Set(nav, (Abstract *)Str_CstrRef(m, "pages"), (Abstract *)rt);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "nav"), (Abstract *)nav);
+
     Str *now = MicroTime_ToStr(m, MicroTime_Now());
     Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
     StrVec *title = StrVec_From(m, Str_CstrRef(m, "The Title of the Master Page"));
@@ -139,6 +146,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, v);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     Templ_Prepare(templ);
 
@@ -150,6 +158,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = (Abstract *)out;
     args[1] = (Abstract *)data;
     args[2] = NULL;
+    out->type.state |= DEBUG;
     r |= TestShow(Equals((Abstract *)out, (Abstract *)expected),
         "Templ from Route has expected output",
         "Templ output does not match @", args);
@@ -206,7 +215,7 @@ status WwwRouteMime_Tests(MemCh *gm){
     Route *rt = Route_Make(m);
 
     StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./examples/web-server/pages/public"));
-    Route_Collect(rt, path);
+    Route_Collect(rt, path, NULL);
 
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "/style.css", STRING_COPY));
     IoUtil_Annotate(m, key);

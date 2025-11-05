@@ -4,7 +4,7 @@
 struct span *RouteFuncTable = NULL;
 struct span *RouteMimeTable = NULL;
 
-static status file(MemCh *m, Str *path, Str *file, Abstract *source){
+static status fileFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     Abstract *args[5];
     RouteCtx *rctx = (RouteCtx *)source;
 
@@ -206,7 +206,7 @@ status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
     return func(bf, action, data, source);
 }
 
-status Route_Collect(Route *rt, StrVec *path){
+status Route_Collect(Route *rt, StrVec *path, StrVec *incPath){
     MemCh *m = Object_GetMem(rt);
     IoUtil_Annotate(m, path);
 
@@ -220,7 +220,23 @@ status Route_Collect(Route *rt, StrVec *path){
     ctx.root = rt;
     ctx.path = path;
 
-    return Dir_Climb(m, StrVec_Str(m, path), NULL, file, (Abstract *)&ctx);
+    status r = Dir_Climb(m, StrVec_Str(m, path), NULL, fileFunc, (Abstract *)&ctx);
+    if(incPath != NULL){
+        StrVec *incRoot = StrVec_From(m, Str_CstrRef(m, "/"));
+        IoUtil_Annotate(m, incRoot);
+        Route *inc = Route_Make(Object_GetMem(rt));
+        Object_SetPropByIdx(inc, ROUTE_PROPIDX_PATH, (Abstract *)incRoot);
+
+        /* TODO: solve this inc/root more elegantly */
+        ctx.path = incPath;
+        ctx.root = inc;
+        r |= Dir_Climb(m, StrVec_Str(m, incPath), NULL, fileFunc, (Abstract *)&ctx);
+        ctx.path = path;
+        ctx.root = rt;
+        ctx.inc = inc;
+    }
+
+    return r;
 }
 
 Route *Route_Make(MemCh *m){
@@ -239,6 +255,8 @@ status Route_ClsInit(MemCh *m){
     Class_SetupProp(cls, Str_CstrRef(m, "type"));
     Class_SetupProp(cls, Str_CstrRef(m, "action"));
     Class_SetupProp(cls, Str_CstrRef(m, "data"));
+    Class_SetupProp(cls, Str_CstrRef(m, "header"));
+    Class_SetupProp(cls, Str_CstrRef(m, "footer"));
     r |= Class_Register(m, cls);
 
     if(RouteFuncTable == NULL){
