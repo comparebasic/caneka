@@ -150,6 +150,7 @@ static BuildSubdir fmtobj = { "format/fmt", {
 
 static BuildSubdir configobj = { "format/config", {
     "config_roebling.c",
+    "config.c",
     NULL
 }};
 

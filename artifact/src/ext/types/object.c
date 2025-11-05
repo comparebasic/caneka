@@ -78,6 +78,10 @@ Abstract *Object_Get(Object *obj, Abstract *key){
     return Table_Get(obj->tbl, key);
 }
 
+Hashed *Object_GetHashed(Object *obj, Abstract *key){
+    return Table_GetHashed(obj->tbl, key);
+}
+
 Object *Object_GetOrMake(Object *pt, Abstract *key, word op){
     Abstract *a = Object_Get(pt, key);
     if(a == NULL){

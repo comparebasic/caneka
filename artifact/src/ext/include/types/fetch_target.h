@@ -6,7 +6,7 @@ enum fetch_target_flags {
     FETCH_TARGET_PROP = 1 << 12,
     FETCH_TARGET_FUNC = 1 << 13,
     FETCH_TARGET_RESOLVED = 1 << 14,
-    FETCH_TARGET_COMMAND = 1 << 15,
+    FETCH_TARGET_HASH = 1 << 15,
 };
 
 typedef Abstract *(*FetchFunc)(MemCh *m, struct fetch_target *target, Abstract *data, Abstract *source);
@@ -14,9 +14,10 @@ typedef Abstract *(*FetchFunc)(MemCh *m, struct fetch_target *target, Abstract *
 typedef struct fetch_target {
     Type type;
     Type objType;
-    word _;
+    word location;
     i16 offset;
     i32 idx;
+    util id;
     Str *key;
     FetchFunc func;
 } FetchTarget;

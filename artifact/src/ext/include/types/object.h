@@ -28,6 +28,7 @@ boolean Object_TypeMatch(Abstract *a, cls typeOf);
 Object *Object_As(Object *obj, cls typeOf);
 
 Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value);
+Hashed *Object_GetHashed(Object *obj, Abstract *key);
 Abstract *Object_Get(Object *obj, Abstract *key);
 
 Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value);

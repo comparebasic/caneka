@@ -45,7 +45,7 @@ static char *cstr = ""
 ;
 
 static char *loginCstr  = ""
-    "<h1>Login</h1>\n"
+    "<h1>Compare Basic - Login</h1>\n"
     "<p>Login to the example site.</p>\n"
     "<div>\n"
     "    <span>Logged in as Fancy Pantsy</span>\n"
@@ -59,7 +59,7 @@ static char *loginCstr  = ""
     ;
 
 static char *loginNoUserCstr  = ""
-    "<h1>Login</h1>\n"
+    "<h1>Compare Basic - Login</h1>\n"
     "<p>Login to the example site.</p>\n"
     "<div>\n"
     "    <form>\n"
@@ -173,15 +173,23 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Route_Handle(handler, bf, data, NULL);
     
     expected = Str_FromCstr(m, loginCstr, ZERO);
-    r |= Test(Equals((Abstract *)expected, (Abstract *)bf->v),
-        "Expected template value with user name", NULL);
+    args[0] = (Abstract *)bf->v;
+    args[1] = NULL;
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v),
+        "Expected template value with user name", 
+        "Expected template value with user name: $", 
+    args);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(handler, bf, Object_Make(m, ZERO), NULL);
 
     expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
-    r |= Test(Equals((Abstract *)expected, (Abstract *)bf->v), 
-        "Expected template value with no user object", NULL);
+    args[0] = (Abstract *)bf->v;
+    args[1] = NULL;
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v), 
+        "Expected template value with no user object",
+        "Expected template value with no user object: $", 
+    args);
 
     r |= ERROR;
     MemCh_Free(m);

@@ -13,7 +13,6 @@ status Config_Tests(MemCh *gm){
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = FormatConfig_Make(m, curs, NULL);
     Roebling_Run(rbl);
-
     Object *root = FormatConfig_GetRoot(rbl);;
 
     StrVec *docKey = StrVec_From(m, Str_FromCstr(m, "doc", ZERO));

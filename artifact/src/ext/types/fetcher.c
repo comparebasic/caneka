@@ -47,6 +47,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
         if(value->type.of == TYPE_HASHED && (fch->type.state & (FETCHER_COMMAND)) == 0){
             value = ((Hashed *)value)->value;
         }
+        tg->type.state |= (fch->type.state & PROCESSING);
         value = Fetch_Target(m, tg, value, source);
     }
 

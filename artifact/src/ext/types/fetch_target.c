@@ -4,10 +4,17 @@
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
     ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
     Abstract *args[4];
-    if(cls != NULL){
+    if(cls == NULL && (
+            typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP))){
+        tg->type.state &= ~FETCH_TARGET_PROP;
+        tg->type.state |= FETCH_TARGET_HASH;
+        tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
+        tg->type.state |= FETCH_TARGET_RESOLVED;
+        tg->objType.of = typeOf;
+        return SUCCESS;
+    } else {
         if(tg->type.state & FETCH_TARGET_ATT){
-            Single *sg = (Single *)Table_Get(cls->atts, 
-                (Abstract *)tg->key);
+            Single *sg = (Single *)Table_Get(cls->atts, (Abstract *)tg->key);
             if(sg == NULL){
                 goto err;
             }else{
@@ -19,7 +26,9 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         }else if(tg->type.state & FETCH_TARGET_PROP){
             tg->idx = Class_GetPropIdx(cls, tg->key);
             if(tg->idx == -1){
-                goto err;
+                tg->type.state &= ~FETCH_TARGET_PROP;
+                tg->type.state |= FETCH_TARGET_HASH;
+                tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
             }
             tg->type.state |= FETCH_TARGET_RESOLVED;
             tg->objType.of = typeOf;
@@ -70,10 +79,24 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             Object *obj = (Object *)as(value, TYPE_OBJECT);
             Abstract *a = Object_GetPropByIdx(obj, tg->idx);
             if(a == NULL){
-                args[0] = (Abstract *)obj;
+                args[0] = value;
                 goto err;
             }
             return a;
+        }else if(tg->type.state & FETCH_TARGET_HASH){
+            Abstract *a = NULL; 
+            if(value->type.of == TYPE_OBJECT){
+                Object *obj = (Object *)as(value, TYPE_OBJECT);
+                a = Object_Get(obj, (Abstract *)tg->key);
+            }else if(value->type.of == TYPE_TABLE){
+                a = Table_Get((Table *)value, (Abstract *)tg->key);
+            }
+            if(a == NULL){
+                args[0] = value;
+                goto err;
+            }
+            return a;
+
         }else{
             return tg->func(m, tg, value, source);
         }
@@ -86,14 +109,16 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
         }
     }
 err:
-    cls = Lookup_Get(ClassLookup, value->type.of);
-    args[1] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
-    args[2] = (Abstract *)tg;
-    args[3] = (Abstract *)Type_ToStr(m, typeOf);
-    args[4] = (Abstract *)cls;
-    args[5] = NULL;
-    Error(m, FUNCNAME, FILENAME, LINENUMBER,
-        "Error for @ ClassDef X or prop not found for $ using @ class $/@\n", args);
+    if((tg->type.state & PROCESSING) == 0){
+        cls = Lookup_Get(ClassLookup, value->type.of);
+        args[1] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
+        args[2] = (Abstract *)tg;
+        args[3] = (Abstract *)Type_ToStr(m, typeOf);
+        args[4] = (Abstract *)cls;
+        args[5] = NULL;
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error for @ ClassDef X or prop not found for $ using @ class $/@\n", args);
+    }
     return NULL;
 }
 

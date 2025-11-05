@@ -35,6 +35,56 @@ Str *StrVec_Str(MemCh *m, StrVec *v){
     return StrVec_ToStr(m, v, v->total+1);
 }
 
+Str *StrVec_StrCombo(MemCh *m, Abstract *a, Abstract *b){
+    word tailLength = 0;
+    StrVec *v = NULL;
+    if(a->type.of == TYPE_STR){
+        v = StrVec_From(m, (Str *)a);
+    }else if(a->type.of == TYPE_STRVEC){
+        v = (StrVec *)a;
+    }else{
+        Abstract *args[] = {a, b, NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error combo requires Str or StrVec arguments only: @, @", args);
+        return NULL;
+    }
+
+    if(b->type.of == TYPE_STR){
+        tailLength = ((Str *)b)->length;
+    }else if(b->type.of == TYPE_STRVEC){
+        tailLength =  ((StrVec *)b)->total;
+    }else{
+        Abstract *args[] = {a, b, NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error combo requires Str or StrVec arguments only: @, @", args);
+        return NULL;
+    }
+
+    Str *s = Str_Make(m, v->total + tailLength + 1);
+    if(s == NULL){
+        return s;
+    }
+
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((s->type.state & ERROR) == 0 && (Iter_Next(&it) & END) == 0){
+        Str *_s = (Str *)Iter_Get(&it);
+        Str_Add(s, _s->bytes, _s->length);
+    }
+
+    if(b->type.of == TYPE_STR){
+        Str_Add(s, ((Str *)b)->bytes, ((Str *)b)->length);
+    }else if(b->type.of == TYPE_STRVEC){
+        Iter_Init(&it, ((StrVec *)b)->p);
+        while((s->type.state & ERROR) == 0 && (Iter_Next(&it) & END) == 0){
+            Str *_s = (Str *)Iter_Get(&it);
+            Str_Add(s, _s->bytes, _s->length);
+        }
+    }
+
+    return s;
+}
+
 i64 StrVec_ToFd(StrVec *v, i32 fd){
     Iter it;
     Iter_Init(&it, v->p);

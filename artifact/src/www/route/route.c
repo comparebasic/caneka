@@ -60,7 +60,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     Object_SetPropByIdx(subRt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
     subRt->type.state |= funcW->type.state;
 
-    Route_Prepare(subRt);
+    Route_Prepare(subRt, rctx);
 
     return SUCCESS;
 }
@@ -100,7 +100,7 @@ Route *Route_GetNav(Route *rt){
     return nav;
 }
 
-status Route_Prepare(Route *rt){
+status Route_Prepare(Route *rt, RouteCtx *ctx){
     DebugStack_Push(rt, rt->type.of);
     MemCh *m = Object_GetMem(rt);
     Abstract *args[3];
@@ -149,11 +149,18 @@ status Route_Prepare(Route *rt){
             return rt->type.state;
         }
 
+        StrVec *config = StrVec_Make(m);
+        StrVec_AddVec(config, ctx->path);
+        StrVec_AddVec(config, (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH));
 
-        /* digest config object 
-        args[0] =
-        StrVec *content = File_ToVec(m, pathS);
-        */
+        Str *configS = StrVec_StrCombo(m,
+            (Abstract *)config, (Abstract *)Str_FromCstr(m, ".config", ZERO));
+
+        Buff *bf = Buff_Make(m, ZERO);
+        Object *data = Config_FromPath(m, configS);
+        if(data != NULL){
+            Object_SetPropByIdx(rt, ROUTE_PROPIDX_DATA, (Abstract *)data);
+        }
 
         Cursor *curs = Cursor_Make(m, content);
         TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
@@ -186,6 +193,11 @@ status Route_Prepare(Route *rt){
 status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
     DebugStack_Push(rt, rt->type.of);
     Abstract *action = Object_GetPropByIdx(rt, ROUTE_PROPIDX_ACTION);
+    Abstract *config = Object_GetPropByIdx(rt, ROUTE_PROPIDX_DATA);
+    if(config != NULL){
+        Object_Set(data, (Abstract *)Str_FromCstr(bf->m, "config", STRING_COPY), config);
+    }
+
     Single *funcW = (Single *)as(
         Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
         TYPE_WRAPPED_FUNC

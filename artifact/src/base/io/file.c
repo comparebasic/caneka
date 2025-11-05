@@ -62,6 +62,10 @@ status File_Close(Buff *bf){
     return SUCCESS;
 }
 
+boolean File_Exists(Buff *bf, Str *path){
+    return stat(Str_Cstr(bf->m, path), &bf->st) == 0 ? TRUE : FALSE;
+}
+
 StrVec *File_ToVec(MemCh *m, Str *path){
     Buff *bf = Buff_Make(m, BUFF_SLURP);
     File_Open(bf, path, O_RDONLY);

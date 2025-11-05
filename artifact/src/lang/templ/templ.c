@@ -112,6 +112,7 @@ static status Templ_handleJump(Templ *templ){
             };
             Out("^c.  If: & of @^0.\n", args);
         }
+        fch->type.state |= PROCESSING;
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
             if(templ->type.state & DEBUG){
