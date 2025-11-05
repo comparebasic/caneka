@@ -214,6 +214,19 @@ status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length){
     return r;
 }
 
+StrVec *StrVec_StrVec(MemCh *m, Abstract *a){
+    if(a->type.of == TYPE_STRVEC){
+        return (StrVec *)a;
+    }else if(a->type.of == TYPE_STR){
+        return StrVec_From(m, (Str *)a);
+    }else{
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,    
+            "StrVec_From only possible from Str or StrVec", NULL);
+        return NULL;
+    }
+}
+
+
 StrVec *StrVec_From(MemCh *m, Str *s){
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, s);

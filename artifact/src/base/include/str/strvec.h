@@ -27,3 +27,4 @@ Str *StrVec_Str(MemCh *m, StrVec *v);
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length);
 StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length);
 StrVec *StrVec_Copy(MemCh *m, StrVec *v);
+StrVec *StrVec_StrVec(MemCh *m, Abstract *a);

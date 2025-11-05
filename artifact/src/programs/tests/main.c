@@ -187,6 +187,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Object Filter Tests",
+        ObjectFilter_Tests,
+        "Object filter tests.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Persistance Tests",
         NULL,
         NULL,

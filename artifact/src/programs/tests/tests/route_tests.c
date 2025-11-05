@@ -23,6 +23,9 @@ static char *cstr = ""
     "        <div class=\"bread-crumbs\">\n"
     "        <ul>\n"
     "            <li>\n"
+    "                <a href=\"/index.fmt\">/index.fmt</a>\n"
+    "            </li>\n"
+    "            <li>\n"
     "                <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
     "            </li>\n"
     "            <li>\n"
@@ -83,10 +86,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    StrVec *path = StrVec_From(m, Str_CstrRef(m,
-        "./examples/web-server/pages/inc/header.templ"));
-    StrVec *abs = IoUtil_AbsVec(m, path);
-
     Route *rt = (Object *)Route_Make(m);
     StrVec *home = StrVec_From(m, Str_CstrRef(m, "/"));
     Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)home);
@@ -103,6 +102,10 @@ status WwwRouteTempl_Tests(MemCh *gm){
     StrVec *title = StrVec_From(m, Str_CstrRef(m, "The Title of the Master Page"));
     Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
 
+    StrVec *path = StrVec_From(m, Str_CstrRef(m,
+        "./examples/web-server/pages/inc/header.templ"));
+    StrVec *abs = IoUtil_AbsVec(m, path);
+
     StrVec *v = File_ToVec(m, StrVec_Str(m, abs));
 
     Cursor *curs = Cursor_Make(m, v);
@@ -112,15 +115,18 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     StrVec *out = StrVec_Make(m);
     Buff *bf = Buff_From(m, out);
+
+    Route *handler = Object_ByPath(rt, );
+    
+
     Templ_ToS(templ, bf, (Abstract *)data, NULL);
 
-    Str *expected = Str_FromCstr(m, cstr, ZERO);
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)I64_Wrapped(m, out->total);
+    args[0] = (Abstract *)abs;
+    args[1] = (Abstract *)bf->v;
     args[2] = NULL;
-    Out("^p.expected\n$\n\nout\n$^0", args);
+    Out("^p.Templ Content for $:\n^0$^0\n", args);
 
-    out->type.state |= DEBUG;
+    Str *expected = Str_FromCstr(m, cstr, ZERO);
     r |= Test(Equals((Abstract *)out, (Abstract *)expected),
         "Templ from Route has expected output", NULL);
 

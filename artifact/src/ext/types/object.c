@@ -23,6 +23,28 @@ Object *Object_As(Object *obj, cls typeOf){
     return obj;
 }
 
+Object *Object_Filter(Object *obj, SourceFunc func, Abstract *source){
+    MemCh *m = Object_GetMem(obj);
+    /*
+    Iter it;
+    Iter_Init(&it, obj->tbl);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL && h->value != NULL && h->value->type.of == TYPE_OBJECT){
+            Abstract *args[] = {
+                (Abstract *)h->key, NULL
+            };
+            Out("^y.Filtering @^0\n", args);
+            if(func(m, (Abstract *)h->value, source)){
+                Object_Filter((Object *)h->value, func, source);
+            }
+        }
+    }
+    */
+
+    return obj;
+}
+
 Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
     Object *obj = (Object *)as(data, TYPE_OBJECT);
     Iter *it = Iter_Make(m, obj->order);

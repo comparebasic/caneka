@@ -93,6 +93,12 @@ static status routeFuncFileDb(Buff *bf, Abstract *action, Object *data, Abstract
     return NOOP;
 }
 
+Route *Route_GetNav(Route *rt){
+    MemCh *m = Object_GetMem(rt);
+    Route *nav = Route_Make(m);
+    return nav;
+}
+
 status Route_Prepare(Route *rt){
     MemCh *m = Object_GetMem(rt);
     Abstract *args[3];
@@ -190,7 +196,7 @@ status Route_Collect(Route *rt, StrVec *path){
     return Dir_Climb(m, StrVec_Str(m, path), NULL, file, (Abstract *)&ctx);
 }
 
-Nav *Route_Make(MemCh *m){
+Route *Route_Make(MemCh *m){
     return Object_Make(m, TYPE_WWW_ROUTE);
 }
 

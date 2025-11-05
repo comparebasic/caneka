@@ -60,7 +60,7 @@ boolean Str_EqualsStrVec(Str *a, StrVec *b){
     boolean failAnyway = FALSE;
     i32 length = a->length;
     if(a->length != b->total){
-        if((a->type.state & DEBUG) == 0){
+        if(((a->type.state|b->type.state) & DEBUG) == 0){
             goto miss;
         }else{
             failAnyway = TRUE;
@@ -92,16 +92,19 @@ miss:
     if((a->type.state & DEBUG) || (b->type.state & DEBUG)){
         i32 pos = a->length - length;
         i16 hlLength = min(a->length - pos, 16);
+        MemCh *m = ErrStream->m;
         Abstract *args[] = {
-            (Abstract *)I16_Wrapped(ErrStream->m, a->length),
-            (Abstract *)I64_Wrapped(ErrStream->m, b->total),
-            (Abstract *)I32_Wrapped(ErrStream->m, pos),
-            (Abstract *)Str_Ref(ErrStream->m, a->bytes+pos, hlLength, hlLength, READY),
-            (Abstract *)a,
-            (Abstract *)b,
+            (Abstract *)I16_Wrapped(m, a->length),
+            (Abstract *)I64_Wrapped(m, b->total),
+            (Abstract *)I32_Wrapped(m, pos),
+            (Abstract *)Str_Ref(m, a->bytes+pos, hlLength, hlLength, READY),
+            (Abstract *)Str_Ref(m,
+                (byte *)&curs.slot, sizeof(util), sizeof(util), STRING_CONST),
             NULL
         };
-        Debug("Str_EqualsStrVec Differ ^D.$^d.length vs ^D.$^d.length at $/^E.&^e. & vs &\n", args);
+        Debug("Str_EqualsStrVec Differ ^D.$^d.length vs "
+            "^D.$^d.length at $ / ^E.&^e. vs ^E.&^e.\n",
+        args);
     }
     return FALSE;
 }
