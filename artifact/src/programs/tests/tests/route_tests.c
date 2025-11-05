@@ -70,7 +70,7 @@ status WwwRoute_Tests(MemCh *gm){
     Route *rt = Route_Make(m);
     StrVec *path = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/public"));
-    Route_Collect(rt, path, NULL);
+    Route_Collect(rt, path);
 
     path = StrVec_From(m, Str_FromCstr(m, "/account/", ZERO));
     IoUtil_Annotate(m, path);
@@ -112,10 +112,17 @@ status WwwRouteTempl_Tests(MemCh *gm){
     StrVec *navPath = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/public"));
     StrVec *navAbs = IoUtil_AbsVec(m, navPath);
+    Route_Collect(rt, navAbs);
+
+    Route *inc = Route_Make(m);
     StrVec *incPath = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/inc"));
     StrVec *incAbs = IoUtil_AbsVec(m, incPath);
-    Route_Collect(rt, navAbs, incPath);
+    Route_Collect(inc, incAbs);
+
+    args[0] = (Abstract *)inc;
+    args[1] = NULL;
+    Out("^p.Include Routes @^0\n", args);
 
     Object *data = Object_Make(m, ZERO);
 
@@ -173,13 +180,18 @@ status WwwRouteTempl_Tests(MemCh *gm){
         (Abstract *)Str_FromCstr(m, "name", ZERO),
         (Abstract *)Str_FromCstr(m, "Fancy Pantsy", ZERO));
 
+
     data = Object_Make(m, ZERO);
+    nav = Object_Make(m, ZERO);
+    Object_Set(nav, (Abstract *)Str_CstrRef(m, "pages"), (Abstract *)rt);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "nav"), (Abstract *)nav);
+
     Object_Set(data,
        (Abstract *) Str_FromCstr(m, "user", ZERO),
        (Abstract *)user);
 
     bf = Buff_Make(m, ZERO);
-    Route_Handle(handler, bf, data, NULL);
+    Route_Handle(handler, bf, data, NULL, NULL);
     
     expected = Str_FromCstr(m, loginCstr, ZERO);
     args[0] = (Abstract *)bf->v;
@@ -190,7 +202,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args);
 
     bf = Buff_Make(m, ZERO);
-    Route_Handle(handler, bf, Object_Make(m, ZERO), NULL);
+    Route_Handle(handler, bf, Object_Make(m, ZERO), inc, NULL);
 
     expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
     args[0] = (Abstract *)bf->v;
@@ -200,7 +212,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Expected template value with no user object: $", 
     args);
 
-    r |= ERROR;
+    r &= ~ERROR;
+
     MemCh_Free(m);
     DebugStack_Pop();
     return r;
@@ -215,7 +228,7 @@ status WwwRouteMime_Tests(MemCh *gm){
     Route *rt = Route_Make(m);
 
     StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./examples/web-server/pages/public"));
-    Route_Collect(rt, path, NULL);
+    Route_Collect(rt, path);
 
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "/style.css", STRING_COPY));
     IoUtil_Annotate(m, key);
@@ -223,7 +236,7 @@ status WwwRouteMime_Tests(MemCh *gm){
 
     Route *subRt = Object_ByPath(rt, key, NULL, SPAN_OP_GET);
     Buff *bf = Buff_Make(m, ZERO);
-    Route_Handle(subRt, bf, NULL, NULL);
+    Route_Handle(subRt, bf, NULL, NULL, NULL);
 
     Buff *dest = Buff_Make(m, ZERO);
     Buff_Pipe(dest, bf);

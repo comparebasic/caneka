@@ -4,7 +4,6 @@ typedef struct route_ctx {
     Type type;
     MemCh *m;
     Route *root;
-    Route *inc;
     StrVec *path;
 } RouteCtx;
 
@@ -27,8 +26,6 @@ enum route_prop_idx {
     ROUTE_PROPIDX_TYPE = 4,
     ROUTE_PROPIDX_ACTION = 5,
     ROUTE_PROPIDX_DATA = 6,
-    ROUTE_PROPIDX_HEADER = 7,
-    ROUTE_PROPIDX_FOOTER = 8,
 };
 
 extern struct span *RouteFuncTable;
@@ -37,9 +34,9 @@ extern struct span *RouteMimeTable;
 typedef status (*RouteFunc)(Buff *bf, Abstract *action, Object *data, Abstract *source);
 
 Route *Route_Make(MemCh *m);
-status Route_Collect(Route *rt, StrVec *path, StrVec *incPath);
+status Route_Collect(Route *rt, StrVec *path);
 status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
-status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source);
+status Route_Handle(Route *rt, Buff *bf, Object *data, Route *inc, Abstract *source);
 status Route_Prepare(Route *rt, RouteCtx *ctx);
 
 status Route_ClsInit(MemCh *m);

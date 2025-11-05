@@ -190,7 +190,7 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
     return NOOP;
 }
 
-status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
+status Route_Handle(Route *rt, Buff *bf, Object *data, Route *inc, Abstract *source){
     DebugStack_Push(rt, rt->type.of);
     Abstract *action = Object_GetPropByIdx(rt, ROUTE_PROPIDX_ACTION);
     Abstract *config = Object_GetPropByIdx(rt, ROUTE_PROPIDX_DATA);
@@ -198,15 +198,36 @@ status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
         Object_Set(data, (Abstract *)Str_FromCstr(bf->m, "config", STRING_COPY), config);
     }
 
+    if(inc != NULL){
+        Route *header = Object_ByPath(inc,
+            StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)),
+                NULL, SPAN_OP_GET);
+        if(header != NULL){
+            Route_Handle(header, bf, data, NULL, source);
+        }
+    }
+
     Single *funcW = (Single *)as(
         Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
         TYPE_WRAPPED_FUNC
     );
+
     RouteFunc func = (RouteFunc)funcW->val.ptr;
-    return func(bf, action, data, source);
+    status r = func(bf, action, data, source);
+
+    if(inc != NULL){
+        Route *header = Object_ByPath(inc,
+            StrVec_From(bf->m, Str_FromCstr(bf->m, "footer", ZERO)),
+                NULL, SPAN_OP_GET);
+        if(header != NULL){
+            Route_Handle(header, bf, data, NULL, source);
+        }
+    }
+
+    return r;
 }
 
-status Route_Collect(Route *rt, StrVec *path, StrVec *incPath){
+status Route_Collect(Route *rt, StrVec *path){
     MemCh *m = Object_GetMem(rt);
     IoUtil_Annotate(m, path);
 
@@ -220,23 +241,7 @@ status Route_Collect(Route *rt, StrVec *path, StrVec *incPath){
     ctx.root = rt;
     ctx.path = path;
 
-    status r = Dir_Climb(m, StrVec_Str(m, path), NULL, fileFunc, (Abstract *)&ctx);
-    if(incPath != NULL){
-        StrVec *incRoot = StrVec_From(m, Str_CstrRef(m, "/"));
-        IoUtil_Annotate(m, incRoot);
-        Route *inc = Route_Make(Object_GetMem(rt));
-        Object_SetPropByIdx(inc, ROUTE_PROPIDX_PATH, (Abstract *)incRoot);
-
-        /* TODO: solve this inc/root more elegantly */
-        ctx.path = incPath;
-        ctx.root = inc;
-        r |= Dir_Climb(m, StrVec_Str(m, incPath), NULL, fileFunc, (Abstract *)&ctx);
-        ctx.path = path;
-        ctx.root = rt;
-        ctx.inc = inc;
-    }
-
-    return r;
+    return Dir_Climb(m, StrVec_Str(m, path), NULL, fileFunc, (Abstract *)&ctx);
 }
 
 Route *Route_Make(MemCh *m){
@@ -255,8 +260,6 @@ status Route_ClsInit(MemCh *m){
     Class_SetupProp(cls, Str_CstrRef(m, "type"));
     Class_SetupProp(cls, Str_CstrRef(m, "action"));
     Class_SetupProp(cls, Str_CstrRef(m, "data"));
-    Class_SetupProp(cls, Str_CstrRef(m, "header"));
-    Class_SetupProp(cls, Str_CstrRef(m, "footer"));
     r |= Class_Register(m, cls);
 
     if(RouteFuncTable == NULL){
