@@ -9,5 +9,6 @@ typedef struct templ {
 
 Templ *Templ_Make(MemCh *m, Span *content);
 status Templ_Prepare(Templ *templ);
+status Templ_Reset(Templ *templ);
 i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source);
 i64 Templ_ToS(Templ *templ, Buff *bf, Abstract *data, Abstract *source);

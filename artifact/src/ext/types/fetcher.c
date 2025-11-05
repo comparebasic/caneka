@@ -50,9 +50,18 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
         value = Fetch_Target(m, tg, value, source);
     }
 
+    if(fch->type.state & DEBUG){
+        Abstract *args[] = {
+            (Abstract *)fch,
+            (Abstract *)value,
+            NULL,
+        };
+        Out("^c.after Fetch & from @^0.\n", args);
+    }
+
     if(it.type.state & END){
         return value;
-    }else{
+    }else if((fch->type.state & FETCHER_IF) == 0){
         Abstract *args[] = {
             (Abstract *)fch,
             orig,
@@ -62,6 +71,7 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
             "Fetch @ value not found on @\n", args);
         return NULL;
     }
+    return NULL;
 }
 
 Fetcher *Fetcher_Make(MemCh *m){

@@ -1,7 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-
 static i64 TemplCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
     TemplCtx *ctx = (TemplCtx *)as(a, TYPE_TEMPL_CTX);
     Abstract *args[] = {

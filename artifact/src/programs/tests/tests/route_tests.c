@@ -23,7 +23,7 @@ static char *cstr = ""
     "        <div class=\"bread-crumbs\">\n"
     "        <ul>\n"
     "            <li>\n"
-    "                <a href=\"/index.fmt\">/index.fmt</a>\n"
+    "                <a href=\"/login\">/login</a>\n"
     "            </li>\n"
     "            <li>\n"
     "                <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
@@ -44,6 +44,33 @@ static char *cstr = ""
     "</header>\n"
 ;
 
+static char *loginCstr  = ""
+    "<h1>Login</h1>\n"
+    "<p>Login to the example site.</p>\n"
+    "<div>\n"
+    "    <span>Logged in as Fancy Pantsy</span>\n"
+    "    <form>\n"
+    "        <label name=\"name>\n"
+    "            <input type=\"text\" size=\"120\" />\n"
+    "        </label>\n"
+    "        <button type=\"submit\">Login</button>\n"
+    "    </form>\n"
+    "</div>\n"
+    ;
+
+static char *loginNoUserCstr  = ""
+    "<h1>Login</h1>\n"
+    "<p>Login to the example site.</p>\n"
+    "<div>\n"
+    "    <form>\n"
+    "        <label name=\"name>\n"
+    "            <input type=\"text\" size=\"120\" />\n"
+    "        </label>\n"
+    "        <button type=\"submit\">Login</button>\n"
+    "    </form>\n"
+    "</div>\n"
+    ;
+
 status WwwRoute_Tests(MemCh *gm){
     DebugStack_Push(NULL, ZERO);
     Abstract *args[5];
@@ -51,19 +78,24 @@ status WwwRoute_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
 
     Route *rt = Route_Make(m);
-
-    StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./examples/web-server/pages/public"));
+    StrVec *path = IoUtil_GetAbsVec(m,
+        Str_CstrRef(m, "./examples/web-server/pages/public"));
     Route_Collect(rt, path);
 
     path = StrVec_From(m, Str_FromCstr(m, "/account/", ZERO));
     IoUtil_Annotate(m, path);
     Route *account = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
+
     Hashed *h = Object_GetByIdx(account, ROUTE_PROPIDX_MIME);
+    args[0] = h->value;
+    args[1] = NULL;
     r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "text/html", ZERO)), 
-        "account index page is mime type text/html", NULL);
+        "account index page is mime type text/html, have $", args);
     h = Object_GetByIdx(account, ROUTE_PROPIDX_TYPE);
+    args[0] = h->value;
+    args[1] = NULL;
     r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "html", ZERO)), 
-        "account index page is type html", NULL);
+        "account index page is type html, have $", args);
 
     path = StrVec_From(m, Str_FromCstr(m, "/account/profile", ZERO));
     IoUtil_Annotate(m, path);
@@ -86,12 +118,9 @@ status WwwRouteTempl_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Route *rt = (Object *)Route_Make(m);
-    StrVec *home = StrVec_From(m, Str_CstrRef(m, "/"));
-    Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, (Abstract *)home);
-
-    StrVec *navPath = StrVec_From(m, Str_CstrRef(m,
-        "./examples/web-server/pages/public"));
+    Route *rt = Route_Make(m);
+    StrVec *navPath = IoUtil_GetAbsVec(m,
+        Str_CstrRef(m, "./examples/web-server/pages/public"));
     StrVec *navAbs = IoUtil_AbsVec(m, navPath);
     Route_Collect(rt, navAbs);
 
@@ -116,19 +145,43 @@ status WwwRouteTempl_Tests(MemCh *gm){
     StrVec *out = StrVec_Make(m);
     Buff *bf = Buff_From(m, out);
 
-    Route *handler = Object_ByPath(rt, );
-    
-
     Templ_ToS(templ, bf, (Abstract *)data, NULL);
-
-    args[0] = (Abstract *)abs;
-    args[1] = (Abstract *)bf->v;
-    args[2] = NULL;
-    Out("^p.Templ Content for $:\n^0$^0\n", args);
-
     Str *expected = Str_FromCstr(m, cstr, ZERO);
-    r |= Test(Equals((Abstract *)out, (Abstract *)expected),
-        "Templ from Route has expected output", NULL);
+    args[0] = (Abstract *)out;
+    args[1] = (Abstract *)data;
+    args[2] = NULL;
+    r |= TestShow(Equals((Abstract *)out, (Abstract *)expected),
+        "Templ from Route has expected output",
+        "Templ output does not match @", args);
+
+    path = StrVec_From(m, Str_CstrRef(m,
+        "/login"));
+    IoUtil_Annotate(m, path);
+    Route *handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
+
+    Object *user = Object_Make(m, ZERO);
+    Object_Set(user,
+        (Abstract *)Str_FromCstr(m, "name", ZERO),
+        (Abstract *)Str_FromCstr(m, "Fancy Pantsy", ZERO));
+
+    data = Object_Make(m, ZERO);
+    Object_Set(data,
+       (Abstract *) Str_FromCstr(m, "user", ZERO),
+       (Abstract *)user);
+
+    bf = Buff_Make(m, ZERO);
+    Route_Handle(handler, bf, data, NULL);
+    
+    expected = Str_FromCstr(m, loginCstr, ZERO);
+    r |= Test(Equals((Abstract *)expected, (Abstract *)bf->v),
+        "Expected template value with user name", NULL);
+
+    bf = Buff_Make(m, ZERO);
+    Route_Handle(handler, bf, Object_Make(m, ZERO), NULL);
+
+    expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
+    r |= Test(Equals((Abstract *)expected, (Abstract *)bf->v), 
+        "Expected template value with no user object", NULL);
 
     r |= ERROR;
     MemCh_Free(m);

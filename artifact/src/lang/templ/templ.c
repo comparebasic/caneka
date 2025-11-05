@@ -18,9 +18,11 @@ static i32 Templ_FindStart(Templ *templ, word flags){
             TemplJump *prevJump = (TemplJump *)a;
             if(prevJump->fch->type.state & FETCHER_END){
                 targetIdx = prevJump->destIdx;
-            }else if(prevJump->fch->type.state & 
-                    (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT) &&
-                    flags == ZERO || (prevJump->fch->type.state & flags)){
+            }else if((prevJump->fch->type.state & 
+                        (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)) &&
+                    flags == ZERO ||
+                    (prevJump->fch->type.state & flags))
+                {
                 DebugStack_Pop();
                 return it.idx;
             }
@@ -99,6 +101,31 @@ static status Templ_handleJump(Templ *templ){
             Iter_GetByIdx(&templ->content, jump->skipIdx);
         }else if(skipIdx != NEGATIVE){
             Iter_GetByIdx(&templ->content, skipIdx);
+        }
+        r |= PROCESSING;
+    }else if(fch->type.state & FETCHER_IF){
+        if(templ->type.state & DEBUG){
+            Abstract *args[] = {
+                (Abstract *)fch,
+                (Abstract *)data,
+                NULL
+            };
+            Out("^c.  If: & of @^0.\n", args);
+        }
+        Abstract *value = Fetch(templ->m, fch, data, NULL);
+        if(value == NULL){
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)fch,
+                    (Abstract *)data,
+                    NULL
+                };
+                Out("^c.  If is null: & of @^0.\n", args);
+            }
+            Iter_GetByIdx(&templ->content, jump->skipIdx);
+            r |= PROCESSING;
+        }else{
+            Iter_Add(&templ->data, (Abstract *)value);
         }
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_WITH){
@@ -182,11 +209,6 @@ static status Templ_handleJump(Templ *templ){
 static status Templ_PrepareCycle(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
     Abstract *args[5];
-    if(templ->type.state & DEBUG){
-        args[0] = (Abstract *)templ;
-        args[1] = NULL;
-        Out("^y.Prepare: &^0\n", args);
-    }
     MemCh *m = templ->m;
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= PROCESSING;
@@ -195,8 +217,15 @@ static status Templ_PrepareCycle(Templ *templ){
     }
 
     Abstract *item = Iter_Get(&templ->content);
+    if(templ->type.state & DEBUG){
+        args[0] = NULL;
+        args[1] = (Abstract *)templ;
+        args[2] = (Abstract *)item;
+        args[3] = NULL;
+        Out("^c.^{STACK.name}: Templ:&\n    item:&^0\n", args);
+    }
 
-    word unregJumpFl = (FETCHER_FOR|FETCHER_COMMAND|FETCHER_END|FETCHER_WITH);
+    word unregJumpFl = (FETCHER_FOR|FETCHER_COMMAND|FETCHER_END|FETCHER_WITH|FETCHER_IF);
     if(item->type.of == TYPE_FETCHER && (((Fetcher *)item)->type.state & unregJumpFl)){
         Fetcher *fch = (Fetcher*)item;
 
@@ -208,7 +237,7 @@ static status Templ_PrepareCycle(Templ *templ){
         if(fch->type.state & FETCHER_FOR){
             jump->level = 0;
             jump->skipIdx = Templ_FindEnd(templ);
-        }else if(fch->type.state & FETCHER_WITH){
+        }else if(fch->type.state & (FETCHER_WITH|FETCHER_IF)){
             jump->skipIdx = Templ_FindEnd(templ); 
         }else if((fch->type.state & (FETCHER_COMMAND|FETCHER_TEMPL)) == 
                 (FETCHER_COMMAND|FETCHER_TEMPL)){
@@ -226,8 +255,10 @@ static status Templ_PrepareCycle(Templ *templ){
         if((jump->fch->type.state & (FETCHER_FOR|FETCHER_WITH)) == 0 &&
                 jump->destIdx == NEGATIVE && jump->skipIdx == NEGATIVE &&
                 jump->tempIdx == NEGATIVE){
+            args[0] = (Abstract *)jump;
+            args[1] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Unable to find source or ending for Jump in Templ content\n", NULL);
+                "Unable to find source or ending for Jump in Templ content: @", args);
 
             templ->type.state |= ERROR;
             DebugStack_Pop();
@@ -264,6 +295,15 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
     }
 
     Abstract *item = Iter_Get(&templ->content);
+
+    if(templ->type.state & DEBUG){
+        Abstract *args[] = {
+            NULL,
+            (Abstract *)item,
+            NULL
+        };
+        Out("^yE.^{STACK.name}^e.(item:@)^0.\n", args);
+    }
 
     if(item->type.of == TYPE_TEMPL_JUMP){
         if(Templ_handleJump(templ) & (PROCESSING|SUCCESS)){
@@ -368,6 +408,14 @@ i64 Templ_ToS(Templ *templ, Buff *bf, Abstract *data, Abstract *source){
     }
     DebugStack_Pop();
     return total;
+}
+
+status Templ_Reset(Templ *templ){
+    templ->level = 0;
+    templ->indent = 0;
+    templ->type.state &= DEBUG;
+    Iter_Init(&templ->content, templ->content.p);
+    return SUCCESS;
 }
 
 Templ *Templ_Make(MemCh *m, Span *content){

@@ -24,6 +24,7 @@ enum route_prop_idx {
     ROUTE_PROPIDX_MIME = 3,
     ROUTE_PROPIDX_TYPE = 4,
     ROUTE_PROPIDX_ACTION = 5,
+    ROUTE_PROPIDX_DATA = 6,
 };
 
 extern struct span *RouteFuncTable;

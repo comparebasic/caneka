@@ -11,7 +11,6 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     StrVec *abs = StrVec_From(m, path);
     Path_AddSlash(m, abs);
     StrVec_Add(abs, file);
-    abs->type.state |= DEBUG;
     IoUtil_Annotate(m, abs);
 
     StrVec *name = Path_Name(m, abs);
@@ -43,7 +42,7 @@ static status file(MemCh *m, Str *path, Str *file, Abstract *source){
     StrVec *objPath = Path_SubClone(m, pathV, rctx->path->p->max_idx+1);
     objPath->type.state |= STRVEC_PATH;
 
-    Str *index = Str_CstrRef(m, "index");
+    Str *index = Str_FromCstr(m, "index", ZERO);
     if(!Equals((Abstract *)name, (Abstract *)index)){
         if(funcW->type.state & (ROUTE_DYNAMIC|ROUTE_PAGE)){
             Path_Add(m, objPath, name);
@@ -74,7 +73,9 @@ static status routeFuncStatic(Buff *bf, Abstract *action, Object *_data, Abstrac
 
 static status routeFuncTempl(Buff *bf, Abstract *action, Object *data, Abstract *source){
     Templ *templ = (Templ *)as(action, TYPE_TEMPL);
-    return Templ_ToS(templ, bf, (Abstract *)data, source);
+    status r = Templ_ToS(templ, bf, (Abstract *)data, source);
+    Templ_Reset(templ);
+    return r;
 }
 
 static status routeFuncFmt(Buff *bf, Abstract *action, Object *_data, Abstract *source){
@@ -100,6 +101,7 @@ Route *Route_GetNav(Route *rt){
 }
 
 status Route_Prepare(Route *rt){
+    DebugStack_Push(rt, rt->type.of);
     MemCh *m = Object_GetMem(rt);
     Abstract *args[3];
 
@@ -126,10 +128,12 @@ status Route_Prepare(Route *rt){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing template for $", args);
             rt->type.state |= ERROR;
+            DebugStack_Pop();
             return rt->type.state;
         }
 
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, rbl->dest);
+        DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_DYNAMIC){
         StrVec *content = File_ToVec(m, pathS);
@@ -141,8 +145,15 @@ status Route_Prepare(Route *rt){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error path for Templ has no content for: $ -> @", args);
             rt->type.state |= ERROR;
+            DebugStack_Pop();
             return rt->type.state;
         }
+
+
+        /* digest config object 
+        args[0] =
+        StrVec *content = File_ToVec(m, pathS);
+        */
 
         Cursor *curs = Cursor_Make(m, content);
         TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
@@ -154,17 +165,21 @@ status Route_Prepare(Route *rt){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing template for $", args);
             rt->type.state |= ERROR;
+            DebugStack_Pop();
             return rt->type.state;
         }
 
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, (Abstract *)templ);
+        DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_FILEDB){
         FileDB *fdb = FileDB_Make(m, pathS);
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, (Abstract *)fdb);
+        DebugStack_Pop();
         return SUCCESS;
     }
 
+    DebugStack_Pop();
     return NOOP;
 }
 
@@ -211,6 +226,7 @@ status Route_ClsInit(MemCh *m){
     Class_SetupProp(cls, Str_CstrRef(m, "mime"));
     Class_SetupProp(cls, Str_CstrRef(m, "type"));
     Class_SetupProp(cls, Str_CstrRef(m, "action"));
+    Class_SetupProp(cls, Str_CstrRef(m, "data"));
     r |= Class_Register(m, cls);
 
     if(RouteFuncTable == NULL){
