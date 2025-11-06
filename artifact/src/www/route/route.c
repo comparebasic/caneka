@@ -73,6 +73,12 @@ static status routeFuncStatic(Buff *bf, Abstract *action, Object *_data, Abstrac
 
 static status routeFuncTempl(Buff *bf, Abstract *action, Object *data, Abstract *source){
     Templ *templ = (Templ *)as(action, TYPE_TEMPL);
+
+    Templ_Reset(templ);
+    Abstract *args[] = { (Abstract *)templ->content.p, (Abstract *)&templ->content, NULL};
+    Out("^g.&\n&^0\n", args);
+
+    templ->type.state |= bf->type.state;
     status r = Templ_ToS(templ, bf, (Abstract *)data, source);
     Templ_Reset(templ);
     return r;
@@ -172,6 +178,7 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing template for $", args);
             rt->type.state |= ERROR;
+            Templ_Reset(templ);
             DebugStack_Pop();
             return rt->type.state;
         }
@@ -190,21 +197,12 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
     return NOOP;
 }
 
-status Route_Handle(Route *rt, Buff *bf, Object *data, Route *inc, Abstract *source){
+status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
     DebugStack_Push(rt, rt->type.of);
     Abstract *action = Object_GetPropByIdx(rt, ROUTE_PROPIDX_ACTION);
     Abstract *config = Object_GetPropByIdx(rt, ROUTE_PROPIDX_DATA);
     if(config != NULL){
         Object_Set(data, (Abstract *)Str_FromCstr(bf->m, "config", STRING_COPY), config);
-    }
-
-    if(inc != NULL){
-        Route *header = Object_ByPath(inc,
-            StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)),
-                NULL, SPAN_OP_GET);
-        if(header != NULL){
-            Route_Handle(header, bf, data, NULL, source);
-        }
     }
 
     Single *funcW = (Single *)as(
@@ -214,21 +212,6 @@ status Route_Handle(Route *rt, Buff *bf, Object *data, Route *inc, Abstract *sou
 
     RouteFunc func = (RouteFunc)funcW->val.ptr;
     status r = func(bf, action, data, source);
-
-    if(inc != NULL){
-        Route *footer = Object_ByPath(inc,
-            StrVec_From(bf->m, Str_FromCstr(bf->m, "footer", ZERO)),
-                NULL, SPAN_OP_GET);
-        if(footer != NULL){
-            Route_Handle(footer, bf, data, NULL, source);
-        }else{
-            Abstract *args[] = {
-                (Abstract *)inc,
-                NULL
-            };
-            Out("^y.footer not found inc:@^0\n", args);
-        }
-    }
 
     return r;
 }

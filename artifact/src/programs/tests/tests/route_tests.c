@@ -170,7 +170,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = (Abstract *)out;
     args[1] = (Abstract *)data;
     args[2] = NULL;
-    out->type.state |= DEBUG;
     r |= TestShow(Equals((Abstract *)out, (Abstract *)expected),
         "Templ from Route has expected output",
         "Templ output does not match @", args);
@@ -181,19 +180,22 @@ status WwwRouteTempl_Tests(MemCh *gm){
     IoUtil_Annotate(m, path);
     Route *handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
 
+
+    data = getGenericData(m, rt);
     Object *user = Object_Make(m, ZERO);
     Object_Set(user,
         (Abstract *)Str_FromCstr(m, "name", ZERO),
         (Abstract *)Str_FromCstr(m, "Fancy Pantsy", ZERO));
-
-    data = getGenericData(m, rt);
-
     Object_Set(data,
        (Abstract *) Str_FromCstr(m, "user", ZERO),
        (Abstract *)user);
 
+    Route *header = Object_ByPath(inc,
+        StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)),
+            NULL, SPAN_OP_GET);
+
     bf = Buff_Make(m, ZERO);
-    Route_Handle(handler, bf, data, NULL, NULL);
+    Route_Handle(handler, bf, data, NULL);
     
     expected = Str_FromCstr(m, loginCstr, ZERO);
     args[0] = (Abstract *)bf->v;
@@ -203,10 +205,25 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Expected template value with no header and a user name: $", 
     args);
 
-    /* login.templ no user with header */
+    Route *footer = Object_ByPath(inc,
+        StrVec_From(bf->m, Str_FromCstr(bf->m, "footer", ZERO)),
+            NULL, SPAN_OP_GET);
+
+    /* login.templ no user with header and footer */
+
+    args[0] = (Abstract *)data;
+    args[1] = NULL;
+    Out("^p.Header with data: @^0\n", args);
+
     bf = Buff_Make(m, ZERO);
-    Route_Handle(handler, bf, Object_Make(m, ZERO), inc, NULL);
+    Route_Handle(header, bf, data, NULL);
+
+    Route_Handle(handler, bf, Object_Make(m, ZERO), NULL);
     Buff *dest = Buff_Make(m, ZERO);
+    Buff_Pipe(dest, bf);
+
+    bf = Buff_Make(m, ZERO);
+    Route_Handle(footer, bf, data, NULL);
     Buff_Pipe(dest, bf);
 
     expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
@@ -218,15 +235,36 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args);
 
     /* index.fmt with header */
+    data = getGenericData(m, rt);
+    user = Object_Make(m, ZERO);
+    Object_Set(user,
+        (Abstract *)Str_FromCstr(m, "name", ZERO),
+        (Abstract *)Str_FromCstr(m, "Fancy Pantsy", ZERO));
+    Object_Set(data,
+       (Abstract *) Str_FromCstr(m, "user", ZERO),
+       (Abstract *)user);
+
+    args[0] = (Abstract *)data;
+    args[1] = NULL;
+    Out("^p.Header with data: @^0\n", args);
+
+    bf = Buff_Make(m, ZERO);
+    Route_Handle(header, bf, data, NULL);
+
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
     handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
 
-    data = getGenericData(m, rt);
+    args[0] = (Abstract *)data;
+    args[1] = NULL;
+    Out("^p.Fmt with data: @^0\n", args);
+
+    Route_Handle(handler, bf, data, NULL);
+    dest = Buff_Make(m, ZERO);
+    Buff_Pipe(dest, bf);
 
     bf = Buff_Make(m, ZERO);
-    Route_Handle(handler, bf, data, inc, NULL);
-    dest = Buff_Make(m, ZERO);
+    Route_Handle(footer, bf, data, NULL);
     Buff_Pipe(dest, bf);
     
     expected = Str_FromCstr(m, "", ZERO);
@@ -261,7 +299,7 @@ status WwwRouteMime_Tests(MemCh *gm){
 
     Route *subRt = Object_ByPath(rt, key, NULL, SPAN_OP_GET);
     Buff *bf = Buff_Make(m, ZERO);
-    Route_Handle(subRt, bf, NULL, NULL, NULL);
+    Route_Handle(subRt, bf, NULL, NULL);
 
     Buff *dest = Buff_Make(m, ZERO);
     Buff_Pipe(dest, bf);

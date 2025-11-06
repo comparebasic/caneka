@@ -71,7 +71,6 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
             args[1] = (Abstract *)Type_StateVec(m, obj->objType.of, obj->objType.state);
             args[2] = NULL;
             Fmt(bf, "$<@", args);
-
             Iter it;
             Iter_Init(&it, cls->propOrder);
             while((Iter_Next(&it) & END) == 0){

@@ -54,8 +54,8 @@ static i32 Templ_FindEnd(Templ *templ){
 static status Templ_handleJump(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
     status r = READY;
-    TemplJump *jump = (TemplJump *)Iter_Current(&templ->content);
-    Abstract *data = Iter_Current(&templ->data);
+    TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
+    Abstract *data = Iter_Get(&templ->data);
 
     Fetcher *fch = jump->fch;
     i32 skipIdx = -1;
@@ -90,7 +90,16 @@ static status Templ_handleJump(Templ *templ){
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
         }
-        Iter *it = (Iter *)as(Iter_Get(&templ->data), TYPE_ITER);
+        Iter *it = (Iter *)Iter_Get(&templ->data);
+        if(it->type.of != TYPE_ITER){
+            Abstract *args[] = { NULL, (Abstract *)it, Iter_Get(&templ->data), NULL };
+            Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error ^{STACK.name}, expected Iter have @ from Iter_Get(@) instead^0\n", 
+            args);
+            templ->type.state |= ERROR;
+            return templ->type.state;
+        }
+
         if((Iter_Next(it) & END) == 0){
             Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
         }else if(jump->skipIdx != NEGATIVE){
@@ -281,7 +290,7 @@ static status Templ_PrepareCycle(Templ *templ){
 
     if(templ->type.state & DEBUG){
         Abstract *args[] = {
-            (Abstract *)Iter_Current(&templ->content),
+            (Abstract *)Iter_Get(&templ->content),
             NULL
         };
         Out("^y.Templ_Prepare end\n  ^E.content:^e.&^0.\n", args);
@@ -316,7 +325,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
         }
     }
 
-    Abstract *data = Iter_Current(&templ->data);
+    Abstract *data = Iter_Get(&templ->data);
 
     if(item->type.of == TYPE_STRVEC){
         total += ToS(bf, (Abstract *)item, 0, ZERO); 

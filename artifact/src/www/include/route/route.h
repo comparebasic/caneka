@@ -36,7 +36,7 @@ typedef status (*RouteFunc)(Buff *bf, Abstract *action, Object *data, Abstract *
 Route *Route_Make(MemCh *m);
 status Route_Collect(Route *rt, StrVec *path);
 status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
-status Route_Handle(Route *rt, Buff *bf, Object *data, Route *inc, Abstract *source);
+status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source);
 status Route_Prepare(Route *rt, RouteCtx *ctx);
 
 status Route_ClsInit(MemCh *m);

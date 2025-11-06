@@ -24,7 +24,7 @@ status Addr_ToS(Buff *bf, void *a, word flags){
         page = page / PAGE_SIZE;
 
         Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, book->idx),
+            (Abstract *)I32_Wrapped(bf->m, 0),
             (Abstract *)Util_Wrapped(bf->m, page),
             (Abstract *)Util_Wrapped(bf->m, local),
             NULL
