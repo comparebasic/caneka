@@ -43,12 +43,15 @@ static status fileFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     objPath->type.state |= STRVEC_PATH;
 
     Str *index = Str_FromCstr(m, "index", ZERO);
+    word flags = ZERO;
     if(!Equals((Abstract *)name, (Abstract *)index)){
-        if(funcW->type.state & (ROUTE_DYNAMIC|ROUTE_PAGE)){
+        if((funcW->type.state & ROUTE_ASSET) == 0){
             Path_Add(m, objPath, name);
         }else{
             Path_AddStr(objPath, file);
         }
+    }else{
+        flags |= ROUTE_INDEX;
     }
 
     Route *subRt = Object_ByPath(rctx->root, objPath, NULL, SPAN_OP_RESERVE);
@@ -58,7 +61,7 @@ static status fileFunc(MemCh *m, Str *path, Str *file, Abstract *source){
     Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FUNC, (Abstract *)funcW);
     Object_SetPropByIdx(subRt, ROUTE_PROPIDX_MIME, (Abstract *)mime);
     Object_SetPropByIdx(subRt, ROUTE_PROPIDX_TYPE, (Abstract *)ext);
-    subRt->type.state |= funcW->type.state;
+    subRt->type.state |= (funcW->type.state|flags);
 
     Route_Prepare(subRt, rctx);
 
@@ -96,6 +99,24 @@ static status routeFuncFileDb(Buff *bf, Abstract *action, Object *data, Abstract
     return NOOP;
 }
 
+static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
+    MemCh *m = Object_GetMem(rt);
+    Abstract *args[3];
+    StrVec *config = StrVec_Make(m);
+    StrVec_AddVec(config, ctx->path);
+    StrVec_AddVec(config, (StrVec *)token);
+
+    Str *configS = StrVec_StrCombo(m,
+        (Abstract *)config, (Abstract *)Str_FromCstr(m, ".config", ZERO));
+
+    Object *data = Config_FromPath(m, configS);
+    if(data != NULL){
+        Object_SetPropByIdx(rt, ROUTE_PROPIDX_DATA, (Abstract *)data);
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 Route *Route_GetNav(Route *rt){
     MemCh *m = Object_GetMem(rt);
     Route *nav = Route_Make(m);
@@ -109,6 +130,11 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
 
     StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
     StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
+    StrVec *token = StrVec_Make(m);
+    StrVec_AddVec(token, (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH));
+    if(rt->type.state & ROUTE_INDEX){
+        StrVec_Add(token, Str_FromCstr(m, "index", ZERO));
+    }
     Single *funcW = (Single *)as(
         Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
         TYPE_WRAPPED_FUNC
@@ -135,6 +161,8 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         }
 
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, rbl->dest);
+        Route_addConfigData(ctx, rt, token);
+
         DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_DYNAMIC){
@@ -151,18 +179,9 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
             return rt->type.state;
         }
 
-        StrVec *config = StrVec_Make(m);
-        StrVec_AddVec(config, ctx->path);
-        StrVec_AddVec(config, (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH));
-
-        Str *configS = StrVec_StrCombo(m,
-            (Abstract *)config, (Abstract *)Str_FromCstr(m, ".config", ZERO));
-
         Buff *bf = Buff_Make(m, ZERO);
-        Object *data = Config_FromPath(m, configS);
-        if(data != NULL){
-            Object_SetPropByIdx(rt, ROUTE_PROPIDX_DATA, (Abstract *)data);
-        }
+
+        Route_addConfigData(ctx, rt, token);
 
         Cursor *curs = Cursor_Make(m, content);
         TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
@@ -260,7 +279,7 @@ status Route_ClsInit(MemCh *m){
 
         Str *key = Str_CstrRef(m, "html");
         Single *funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_PAGE|ROUTE_STATIC);
+        funcW->type.state |= (ROUTE_STATIC);
         Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
         Table_Set(RouteMimeTable,
             (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/html"));

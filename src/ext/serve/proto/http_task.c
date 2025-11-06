@@ -6,7 +6,11 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
-    HttpCtx_WriteHeaders(proto->out, ctx);
+    Buff *bf = Buff_Make(tsk->m, ZERO);
+    HttpCtx_WriteHeaders(bf, ctx);
+    Buff_Stat(bf);
+    Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
+    proto->out = Buff_Make(tsk->m, BUFF_UNBUFFERED);
 
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
     st->type.state |= SUCCESS;
@@ -16,7 +20,6 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
     DebugStack_Pop();
     return st->type.state;
 }
-
 status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source){
     DebugStack_Push(tsk, tsk->type.of);
     status r = READY;
@@ -24,8 +27,6 @@ status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source){
         tsk->data = (Abstract *)HttpProto_Make(tsk->m);
     }
     tsk->source = source;
-    r |= Task_AddStep(tsk, TcpTask_WriteFromOut, NULL, NULL, STEP_IO_OUT);
-    r |= Task_AddStep(tsk, HttpTask_PrepareResponse, NULL, NULL, ZERO);
 
     Out("^b.Init Response^0\n", NULL);
 

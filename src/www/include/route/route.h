@@ -11,7 +11,7 @@ enum route_flags {
     ROUTE_STATIC = 1 << 8,
     ROUTE_DYNAMIC = 1 << 9,
     ROUTE_FMT = 1 << 10,
-    ROUTE_PAGE = 1 << 13,
+    ROUTE_INDEX = 1 << 13,
     ROUTE_FILEDB = 1 << 11,
     ROUTE_ASSET = 1 << 12,
     ROUTE_SCRIPT = 1 << 14,

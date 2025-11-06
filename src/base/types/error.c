@@ -51,12 +51,10 @@ static struct sigaction _b;
 static struct sigaction _c;
 static struct sigaction _d;
 static void setSigs(){
-    /*
     memset(&_a, 0, sizeof(struct sigaction));
     _a.sa_flags = SA_NODEFER;
     _a.sa_sigaction = sigH;
     sigaction(SIGSEGV, &_a, NULL);
-    */
 
     memset(&_b, 0, sizeof(struct sigaction));
     _b.sa_flags = SA_NODEFER;
@@ -76,7 +74,8 @@ static void setSigs(){
 
 void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
     if(_crashing){
-        Buff_AddBytes(ErrStream, (byte *)"\n\x1b[1;31mFatal called after crashing\x1b[0m", 39);
+        char *cstr = "\n\x1b[1;31mFatal called after crashing\x1b[0m\n";
+        Buff_AddBytes(ErrStream, (byte *)cstr, strlen(cstr));
         exit(9);
         return;
     }

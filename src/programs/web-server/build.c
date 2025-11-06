@@ -71,7 +71,7 @@ int main(int argc, char **argv){
     ctx.libtarget = "libcnkwebserver";
     ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "src/programs/web-server/";
+    ctx.src = "src/programs/web-server";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

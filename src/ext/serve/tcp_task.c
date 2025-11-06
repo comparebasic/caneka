@@ -40,6 +40,29 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
     return st->type.state;
 }
 
+status TcpTask_WriteStep(Step *st, Task *tsk){
+    DebugStack_Push(st, st->type.of);
+    Abstract *args[3];
+    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+
+    Buff *bf = (Buff *)as(st->data, TYPE_BUFF);
+    Buff_SetFd(proto->out, pfd->fd);
+    Buff_Pipe(proto->out, bf);
+
+    if(bf->type.state & (SUCCESS|ERROR)){
+        st->type.state |= SUCCESS;
+    }
+
+    args[0] = NULL;
+    args[1] = (Abstract *)I64_Wrapped(tsk->m, bf->st.st_size);
+    args[2] = NULL;
+    Out("^c.^{STACK.name} sent:@^0\n", args);
+    
+    DebugStack_Pop();
+    return st->type.state;
+}
+
 status TcpTask_WriteFromOut(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
