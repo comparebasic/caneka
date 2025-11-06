@@ -19,26 +19,29 @@ HttpCtx *HttpCtx_Make(MemCh *m){
 }
 
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
+    status r = READY;
     Str *status = Lookup_Get(statusCodeStrings, ctx->code);
-    if(s == NULL){
+    if(status == NULL){
         status = Lookup_Get(statusCodeStrings, 500);
+        r |= ERROR;
     }
 
     Abstract *args[] = {
         (Abstract *)status,
         (Abstract *)ctx->mime,
-        (Abstract *)I64_Wrapped(m, ctx->contentLength),
+        (Abstract *)I64_Wrapped(bf->m, ctx->contentLength),
         NULL
     };
 
-    return Fmt(proto->out, "HTTP/1.1 $\r\n"
+    r |= Fmt(bf, "HTTP/1.1 $\r\n"
         "Server: Caneka\r\n"
         "Content-Type: $\r\n"
         "Content-Length: $\r\n"
         "\r\n" , args);
+    return r;
 }
 
-HttpCtx *HttpCtx_Init(MemCh *m){
+status HttpCtx_Init(MemCh *m){
     status r = READY;
     if(statusCodeStrings == NULL){
         statusCodeStrings = Lookup_Make(m, 200);

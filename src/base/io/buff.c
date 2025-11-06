@@ -292,13 +292,13 @@ boolean Buff_IsEmpty(Buff *bf){
 }
 
 status Buff_Stat(Buff *bf){
+    memset(&bf->st, 0, sizeof(struct stat));
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
         if(fstat(bf->fd, &bf->st)){
             bf->type.state |= ERROR;
         }
     } else{
-        memset(&bf->st, 0, sizeof(struct stat));
-        bf->st.sz_total = bf->unsent.total;
+        bf->st.st_size = bf->v->total;
     }
     return bf->type.state;
 }

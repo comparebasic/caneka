@@ -6,6 +6,10 @@ static StrVec *headerPath = NULL;
 static StrVec *footerPath = NULL;
 static Span *_sepSpan = NULL;
 
+static  Object *Example_getPageData(Task *tsk, Route *rt){
+    return Object_Make(tsk->m, ZERO);
+}
+
 static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
     DebugStack_Push(tsk, tsk->type.of);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
@@ -17,11 +21,7 @@ static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract
 
     Task_ResetChain(tsk);
     HttpTask_InitResponse(tsk, NULL, source);
-    Task_AddDataStep(tsk,
-        Example_FooterContent, NULL, (Abstract *)data, (Abstract *)tsk, ZERO);
     Task_AddStep(tsk, Example_ServeError, arg, source, ZERO);
-    Task_AddDataStep(tsk,
-        Example_HeaderContent, (Abstract *)rt, (Abstract *)data, (Abstract *)tsk, ZERO);
 
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
 
@@ -82,20 +82,20 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
 
     StrVec *path = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/public"));
-    StrVec *abs = IoUtil_AbsVec(m, public);
+    StrVec *abs = IoUtil_AbsVec(m, path);
     ctx->pages = (Object *)Route_Make(m);
     r |= Route_Collect(ctx->pages, abs);
 
     path = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/inc"));
-    abs = IoUtil_AbsVec(m, public);
+    abs = IoUtil_AbsVec(m, path);
     ctx->inc = (Object *)Route_Make(m);
     r |= Route_Collect(ctx->inc, abs);
 
     return r;
 }
 
-static status setErrorHandler(Memch *m){
+static status setErrorHandler(MemCh *m, Task *tsk){
     Single *funcW = Func_Wrapped(m, Example_errorPopulate);
     Single *key = Util_Wrapped(ErrStream->m, (util)tsk);
     return Table_Set(TaskErrorHandlers, (Abstract *)key, (Abstract *)funcW);
@@ -120,9 +120,10 @@ status WebServer_Run(MemCh *gm){
     StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "examples/web-server"));
     util ip6[2] = {0, 0};
 
-    TcpCtx *ctx = tcpCtx_Make(m, path, 3000, 0, &ip6);
+    TcpCtx *ctx = tcpCtx_Make(m, path, 3000, 0, ip6);
     routeInit(m, ctx);
     Task *tsk = ServeTcp_Make(ctx);
+    setErrorHandler(m, tsk);
 
     args[0] = (Abstract *)ctx;
     args[1] = NULL;
