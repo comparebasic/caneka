@@ -302,7 +302,6 @@ status Buff_Stat(Buff *bf){
     return bf->type.state;
 }
 
-
 status Buff_GetStr(Buff *bf, Str *s){
     Abstract *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);

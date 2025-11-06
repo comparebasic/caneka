@@ -61,6 +61,25 @@ static char *loginNoUserCstr  = ""
     "</div>\n"
     ;
 
+static Object *getGenericData(MemCh *m, Route *rt){
+    Object *data = Object_Make(m, ZERO);
+
+    Table *atts = Table_Make(m);
+    Table_Set(atts,
+        (Abstract *)Str_FromCstr(m, "title", ZERO), 
+        (Abstract *)Str_FromCstr(m, "Example Title", ZERO));
+    NodeObj *page = Object_Make(m, TYPE_NODEOBJ);
+    Object_SetPropByIdx(page, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
+    Object *config = Object_Make(m, ZERO);
+    Object_Set(config, (Abstract *)Str_CstrRef(m, "page"), (Abstract *)page);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "config"), (Abstract *)config);
+    
+    Object *nav = Object_Make(m, ZERO);
+    Object_Set(nav, (Abstract *)Str_CstrRef(m, "pages"), (Abstract *)rt);
+    Object_Set(data, (Abstract *)Str_CstrRef(m, "nav"), (Abstract *)nav);
+    return data;
+}
+
 status WwwRoute_Tests(MemCh *gm){
     DebugStack_Push(NULL, ZERO);
     Abstract *args[5];
@@ -124,21 +143,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[1] = NULL;
     Out("^p.Include Routes @^0\n", args);
 
-    Object *data = Object_Make(m, ZERO);
-
-    Table *atts = Table_Make(m);
-    Table_Set(atts,
-        (Abstract *)Str_FromCstr(m, "title", ZERO), 
-        (Abstract *)Str_FromCstr(m, "Example Title", ZERO));
-    NodeObj *page = Object_Make(m, TYPE_NODEOBJ);
-    Object_SetPropByIdx(page, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
-    Object *config = Object_Make(m, ZERO);
-    Object_Set(config, (Abstract *)Str_CstrRef(m, "page"), (Abstract *)page);
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "config"), (Abstract *)config);
-    
-    Object *nav = Object_Make(m, ZERO);
-    Object_Set(nav, (Abstract *)Str_CstrRef(m, "pages"), (Abstract *)rt);
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "nav"), (Abstract *)nav);
+    Object *data = getGenericData(m, rt);
 
     Str *now = MicroTime_ToStr(m, MicroTime_Now());
     Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
@@ -170,6 +175,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Templ from Route has expected output",
         "Templ output does not match @", args);
 
+    /* login.templ no header with user */
     path = StrVec_From(m, Str_CstrRef(m,
         "/login"));
     IoUtil_Annotate(m, path);
@@ -180,11 +186,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
         (Abstract *)Str_FromCstr(m, "name", ZERO),
         (Abstract *)Str_FromCstr(m, "Fancy Pantsy", ZERO));
 
-
-    data = Object_Make(m, ZERO);
-    nav = Object_Make(m, ZERO);
-    Object_Set(nav, (Abstract *)Str_CstrRef(m, "pages"), (Abstract *)rt);
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "nav"), (Abstract *)nav);
+    data = getGenericData(m, rt);
 
     Object_Set(data,
        (Abstract *) Str_FromCstr(m, "user", ZERO),
@@ -197,19 +199,42 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = (Abstract *)bf->v;
     args[1] = NULL;
     r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v),
-        "Expected template value with user name", 
-        "Expected template value with user name: $", 
+        "Expected template value with no header and a user name", 
+        "Expected template value with no header and a user name: $", 
     args);
 
+    /* login.templ no user with header */
     bf = Buff_Make(m, ZERO);
     Route_Handle(handler, bf, Object_Make(m, ZERO), inc, NULL);
+    Buff *dest = Buff_Make(m, ZERO);
+    Buff_Pipe(dest, bf);
 
     expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
-    args[0] = (Abstract *)bf->v;
+    args[0] = (Abstract *)dest->v;
     args[1] = NULL;
     r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v), 
-        "Expected template value with no user object",
-        "Expected template value with no user object: $", 
+        "Expected template value with no user object and a header",
+        "Expected template value with no user object and a header: $", 
+    args);
+
+    /* index.fmt with header */
+    path = StrVec_From(m, Str_CstrRef(m, "/"));
+    IoUtil_Annotate(m, path);
+    handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
+
+    data = getGenericData(m, rt);
+
+    bf = Buff_Make(m, ZERO);
+    Route_Handle(handler, bf, data, inc, NULL);
+    dest = Buff_Make(m, ZERO);
+    Buff_Pipe(dest, bf);
+    
+    expected = Str_FromCstr(m, "", ZERO);
+    args[0] = (Abstract *)dest->v;
+    args[1] = NULL;
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v),
+        "Expected fmt value with user name", 
+        "Expected fmt value with user name: $", 
     args);
 
     r &= ~ERROR;

@@ -216,11 +216,17 @@ status Route_Handle(Route *rt, Buff *bf, Object *data, Route *inc, Abstract *sou
     status r = func(bf, action, data, source);
 
     if(inc != NULL){
-        Route *header = Object_ByPath(inc,
+        Route *footer = Object_ByPath(inc,
             StrVec_From(bf->m, Str_FromCstr(bf->m, "footer", ZERO)),
                 NULL, SPAN_OP_GET);
-        if(header != NULL){
-            Route_Handle(header, bf, data, NULL, source);
+        if(footer != NULL){
+            Route_Handle(footer, bf, data, NULL, source);
+        }else{
+            Abstract *args[] = {
+                (Abstract *)inc,
+                NULL
+            };
+            Out("^y.footer not found inc:@^0\n", args);
         }
     }
 
