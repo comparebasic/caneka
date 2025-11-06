@@ -297,7 +297,8 @@ status Buff_Stat(Buff *bf){
             bf->type.state |= ERROR;
         }
     } else{
-        bf->type.state |= ERROR;
+        memset(&bf->st, 0, sizeof(struct stat));
+        bf->st.sz_total = bf->unsent.total;
     }
     return bf->type.state;
 }

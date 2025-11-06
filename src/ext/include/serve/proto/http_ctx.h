@@ -12,9 +12,9 @@ typedef struct {
     Type type;
     i32 method;
     i32 code;
+    i64 contentLength;
     Str *mime;
     StrVec *path;
-    StrVec *content;
     StrVec *body;
     Table *headers;
     Span *errors;
@@ -22,3 +22,4 @@ typedef struct {
 
 HttpCtx *HttpCtx_Make(MemCh *m);
 ProtoCtx *HttpProto_Make(MemCh *m);
+status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx);

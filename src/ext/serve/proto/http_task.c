@@ -6,34 +6,7 @@ status HttpTask_PrepareResponse(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
-    if(ctx->code == 404 || ctx->content == NULL || ctx->content->total == 0){
-        Str *s = Str_CstrRef(tsk->m, "HTTP/1.1 404 Not Found\r\n"
-            "Server: caneka\r\n"
-            "Content-Length: 9\r\n"
-            "\r\n"
-            "not found");
-        Buff_Add(proto->out, s);
-    }else{
-        Str *statLine = Str_CstrRef(tsk->m, "200 OK");
-        if(ctx->code != 200){
-            statLine = Str_CstrRef(tsk->m, "500 Server Error");
-        }
-
-        Abstract *args[] = {
-            (Abstract *)statLine,
-            (Abstract *)ctx->mime,
-            (Abstract *)I64_Wrapped(tsk->m, ctx->content->total),
-            (Abstract *)ctx->content,
-            NULL
-        };
-
-        Fmt(proto->out, "HTTP/1.1 $\r\n"
-            "Server: Caneka\r\n"
-            "Content-Type: $\r\n"
-            "Content-Length: $\r\n"
-            "\r\n"
-            "$", args);
-    }
+    HttpCtx_WriteHeaders(proto->out, ctx);
 
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
     st->type.state |= SUCCESS;

@@ -272,21 +272,21 @@ status Route_ClsInit(MemCh *m){
 
         key = Str_CstrRef(m, "js");
         funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_SCRIPT|ROUTE_STATIC);
+        funcW->type.state |= (ROUTE_SCRIPT|ROUTE_STATIC|ROUTE_ASSET);
         Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
         Table_Set(RouteMimeTable,
             (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/javascript"));
 
         key = Str_CstrRef(m, "css");
         funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_STATIC);
+        funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
         Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
         Table_Set(RouteMimeTable,
             (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/css"));
 
         key = Str_CstrRef(m, "txt");
         funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= ROUTE_STATIC;
+        funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
         Table_Set(RouteFuncTable, (Abstract *)key, (Abstract *)funcW);
         Table_Set(RouteMimeTable,
             (Abstract *)key, (Abstract *)Str_CstrRef(m, "text/plain"));

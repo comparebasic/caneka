@@ -18,14 +18,6 @@ status Caneka_Init(MemCh *m){
     r |= Task_Init(m);
     r |= Serve_ClsInit(m);
     r |= NodeObj_ClsInit(m);
-    /*
-    r |= Clone_Init(m);
-    r |= MemLocal_Init(m);
-    r |= Oset_Init(m);
-    r |= Enc_Init(m);
-    r |= Steps_Init(m);
-    r |= Access_Init(m);
-    r |= KeyInit(m);
-    */
+    r |= HttpCtx_Init(m);
     return r;
 }

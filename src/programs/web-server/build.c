@@ -44,8 +44,9 @@ static char *libs[] = {
     NULL
 };
 
-static BuildSubdir obj = { "components", {
+static BuildSubdir obj = { "obj", {
     "run.c",
+    "task.c",
     NULL,
 }};
 
