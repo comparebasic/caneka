@@ -2,8 +2,6 @@
 #include <caneka.h>
 #include <builder.h>
 
-#define TEST_REQ 1
-
 /* parameters */
 
 static Executable targets[] = {
@@ -11,16 +9,20 @@ static Executable targets[] = {
 };
 
 static char *cflags[] = {
-    "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-    "-DCNK_EXT", "-DCNK_LANG",
-    NULL
+        "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
+        "-DINSECURE",
+        "-DCNK_EXT",
+        "-DCNK_LANG",
+        "-DCNK_WWW",
+        NULL
 };
 
 static char *inc[] = {
-    "-I./artifact/src/include/",
-    "-I./artifact/src/base/include/",
-    "-I./artifact/src/ext/include/",
-    "-I./artifact/src/lang/include/",
+    "-I./src/include/",
+    "-I./src/base/include/",
+    "-I./src/ext/include/",
+    "-I./src/lang/include/",
+    "-I./src/www/include/",
     NULL
 };
 
@@ -32,25 +34,28 @@ static char *staticLibs[] = {
     NULL
 };
 
-static BuildSubdir typesobj = { "types", {
-    "strings.c",
-    "init.c",
+/* sources */
+static BuildSubdir html = { "html", {
+    "nav_cls.c",
+    "page_cls.c",
     NULL
 }};
 
+static BuildSubdir types = { "types", {
+    "init.c",
+    "strings.c",
+    NULL
+}};
 
-static BuildSubdir templobj = { "templ", {
-    "templ.c",
-    "templ_ctx.c",
-    "templ_jump.c",
-    "templ_roebling.c",
-    "templ_cls.c",
+static BuildSubdir routes = { "route", {
+    "route.c",
     NULL
 }};
 
 static BuildSubdir *objdirs[] = {
-    &typesobj,
-    &templobj,
+    &html,
+    &types,
+    &routes,
     NULL
 };
 
@@ -71,10 +76,10 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnklang";
-    ctx.version = "1.0-templ";
+    ctx.libtarget = "libcnkwww";
+    ctx.version = "1.strvec-alpha";
     ctx.dist = "build";
-    ctx.src = "artifact/src/lang";
+    ctx.src = "src/www";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

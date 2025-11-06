@@ -23,13 +23,13 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./artifact/src/include/",
-    "-I./artifact/src/base/include/",
-    "-I./artifact/src/ext/include/",
-    "-I./artifact/src/www/include/",
-    "-I./artifact/src/lang/include/",
-    "-I./artifact/src/third/api/include/",
-    "-I./artifact/src/programs/tests/include/",
+    "-I./src/include/",
+    "-I./src/base/include/",
+    "-I./src/ext/include/",
+    "-I./src/www/include/",
+    "-I./src/lang/include/",
+    "-I./src/third/api/include/",
+    "-I./src/programs/tests/include/",
     NULL
 };
 
@@ -113,7 +113,7 @@ int main(int argc, char **argv){
     ctx.libtarget = "libcnktest";
     ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "artifact/src/programs/tests";
+    ctx.src = "src/programs/tests";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

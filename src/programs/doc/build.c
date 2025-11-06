@@ -1,28 +1,30 @@
 #include <external.h>
 #include <caneka.h>
-#include <builder.h>
-
-/* parameters */
+#include <cnkbuild.h>
 
 static Executable targets[] = {
+    {"doc", "main.c"},
     {NULL, NULL},
 };
 
 static char *cflags[] = {
         "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-        "-DINSECURE",
-        "-DCNK_EXT",
-        "-DCNK_LANG",
-        "-DCNK_WWW",
         NULL
 };
-
 static char *inc[] = {
-    "-I./artifact/src/include/",
-    "-I./artifact/src/base/include/",
-    "-I./artifact/src/ext/include/",
-    "-I./artifact/src/lang/include/",
-    "-I./artifact/src/www/include/",
+    "-I./src/include/",
+    "-I./src/base/include/",
+    "-I./src/ext/include/",
+    "-I./src/www/include/",
+    "-I./src/programs/tests/include/",
+    NULL
+};
+
+static char *staticLibs[] = {
+    "./build/libcaneka/libcaneka.a",
+    "./build/libcnkext.a/libcnkext.a",
+    "./build/libcnklang.a/libcnklang.a",
+    "./build/libcnkwww/libcnkwww.a",
     NULL
 };
 
@@ -30,37 +32,14 @@ static char *libs[] = {
     NULL
 };
 
-static char *staticLibs[] = {
-    NULL
-};
-
 /* sources */
-static BuildSubdir html = { "html", {
-    "nav_cls.c",
-    "page_cls.c",
-    NULL
-}};
-
-static BuildSubdir types = { "types", {
-    "init.c",
-    "strings.c",
-    NULL
-}};
-
-static BuildSubdir routes = { "route", {
-    "route.c",
+static BuildSubdir obj = { "", {
+    "doc_ctx.c",
     NULL
 }};
 
 static BuildSubdir *objdirs[] = {
-    &html,
-    &types,
-    &routes,
-    NULL
-};
-
-char *licences[] = {
-    "./LICENCE",
+    &obj,
     NULL
 };
 
@@ -76,18 +55,17 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnkwww";
-    ctx.version = "1.strvec-alpha";
+    ctx.libtarget = "libdoc";
     ctx.dist = "build";
-    ctx.src = "artifact/src/www";
+    ctx.src = "src/programs/doc";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
     ctx.args.libs = libs;
     ctx.args.staticLibs = staticLibs;
-    ctx.args.licenceFiles = licences;
     ctx.objdirs = (BuildSubdir **)objdirs;
-    ctx.genConfigs = NULL;
 
-    return (Build(&ctx) & ERROR) ? 2 : 0;
+    Build(&ctx);
+
+    return 0;
 }

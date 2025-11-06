@@ -18,11 +18,11 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./artifact/src/include/",
-    "-I./artifact/src/base/include/",
-    "-I./artifact/src/ext/include/",
-    "-I./artifact/src/third/api/include/",
-    "-I./artifact/src/third/nacl/include/",
+    "-I./src/include/",
+    "-I./src/base/include/",
+    "-I./src/ext/include/",
+    "-I./src/third/api/include/",
+    "-I./src/third/nacl/include/",
     "-I/external/include/",
     NULL
 };
@@ -64,7 +64,7 @@ int main(int argc, char **argv){
     ctx.libtarget = "libcnknacl";
     ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "artifact/src/third/nacl/";
+    ctx.src = "src/third/nacl/";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

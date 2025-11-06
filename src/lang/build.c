@@ -2,41 +2,25 @@
 #include <caneka.h>
 #include <builder.h>
 
+#define TEST_REQ 1
+
 /* parameters */
 
 static Executable targets[] = {
-    {"web-server", "main.c"},
     {NULL, NULL},
 };
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-    "-DINSECURE",
-    "-DCNK_EXT",
-    "-DCNK_LANG",
-    "-DCNK_WWW",
-    "-DCNK_CRYPTO",
+    "-DCNK_EXT", "-DCNK_LANG",
     NULL
 };
 
 static char *inc[] = {
-    "-I./artifact/src/include/",
-    "-I./artifact/src/base/include/",
-    "-I./artifact/src/ext/include/",
-    "-I./artifact/src/www/include/",
-    "-I./artifact/src/lang/include/",
-    "-I./artifact/src/third/api/include/",
-    "-I./artifact/src/programs/web-server/include/",
-    NULL
-};
-
-static char *staticLibs[] = {
-    "./build/libcaneka/libcaneka.a",
-    "./build/libcnkext/libcnkext.a",
-    "./build/libcnklang/libcnklang.a",
-    "./build/libcnkwww/libcnkwww.a",
-    "./build/libcnknacl/libcnknacl.a",
-    "/external/lib/libnacl.a",
+    "-I./src/include/",
+    "-I./src/base/include/",
+    "-I./src/ext/include/",
+    "-I./src/lang/include/",
     NULL
 };
 
@@ -44,14 +28,34 @@ static char *libs[] = {
     NULL
 };
 
-static BuildSubdir obj = { "components", {
-    "run.c",
-    NULL,
+static char *staticLibs[] = {
+    NULL
+};
+
+static BuildSubdir typesobj = { "types", {
+    "strings.c",
+    "init.c",
+    NULL
 }};
 
 
+static BuildSubdir templobj = { "templ", {
+    "templ.c",
+    "templ_ctx.c",
+    "templ_jump.c",
+    "templ_roebling.c",
+    "templ_cls.c",
+    NULL
+}};
+
 static BuildSubdir *objdirs[] = {
-    &obj,
+    &typesobj,
+    &templobj,
+    NULL
+};
+
+char *licences[] = {
+    "./LICENCE",
     NULL
 };
 
@@ -67,20 +71,18 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnkwebserver";
-    ctx.version = NULL;
+    ctx.libtarget = "libcnklang";
+    ctx.version = "1.0-templ";
     ctx.dist = "build";
-    ctx.src = "artifact/src/programs/web-server/";
+    ctx.src = "src/lang";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
     ctx.args.libs = libs;
     ctx.args.staticLibs = staticLibs;
-    ctx.args.licenceFiles = NULL;
+    ctx.args.licenceFiles = licences;
     ctx.objdirs = (BuildSubdir **)objdirs;
     ctx.genConfigs = NULL;
 
-    Build(&ctx);
-
-    return 0;
+    return (Build(&ctx) & ERROR) ? 2 : 0;
 }

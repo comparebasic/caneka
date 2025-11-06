@@ -19,13 +19,13 @@ static char *cflags[] = {
 };
 
 static char *inc[] = {
-    "-I./artifact/src/include/",
-    "-I./artifact/src/base/include/",
-    "-I./artifact/src/ext/include/",
-    "-I./artifact/src/www/include/",
-    "-I./artifact/src/lang/include/",
-    "-I./artifact/src/third/api/include/",
-    "-I./artifact/src/programs/binseg-cli/include/",
+    "-I./src/include/",
+    "-I./src/base/include/",
+    "-I./src/ext/include/",
+    "-I./src/www/include/",
+    "-I./src/lang/include/",
+    "-I./src/third/api/include/",
+    "-I./src/programs/binseg-cli/include/",
     NULL
 };
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv){
     ctx.libtarget = "libcnkbsgcli";
     ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "artifact/src/programs/binseg-cli/";
+    ctx.src = "src/programs/binseg-cli/";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

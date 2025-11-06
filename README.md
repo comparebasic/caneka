@@ -35,18 +35,18 @@ network server, and a memory manager for data storage and data structures.
 
 Components:
 
-- [base](artifact/src/base/): includes virtual memory segmented strings,
+- [base](src/base/): includes virtual memory segmented strings,
   scalable arrays, a key-value lookup, and the memory manager.
-- [ext](/artifact/src/ext/): All other features, including the class system
-  found in [types](/artifact/src/ext/types), are in the extended sources in the
-  folder ext. This includes the [parser](/artifact/src/ext/parser/) and
-  beginings of the [serve](/artifact/src/ext/serve/) folder. The server heavily
-  leverages components in the [navigate](/artifact/src/ext/navigate/) module.
+- [ext](/src/ext/): All other features, including the class system
+  found in [types](/src/ext/types), are in the extended sources in the
+  folder ext. This includes the [parser](/src/ext/parser/) and
+  beginings of the [serve](/src/ext/serve/) folder. The server heavily
+  leverages components in the [navigate](/src/ext/navigate/) module.
   To see how a tcp/http server is componsed, view the
-  [test](/artifact/src/programs/tests/tests/servetcp_tests.c) file as a good
+  [test](/src/programs/tests/tests/servetcp_tests.c) file as a good
   reference.
-- [programs](/artifact/src/programs/): Any programs that ship with the source
-  will be in this folder, presently [tests](artifact/src/programs/tests) is the
+- [programs](/src/programs/): Any programs that ship with the source
+  will be in this folder, presently [tests](src/programs/tests) is the
   only meaningful program in this folder.
 
 see [caneka.org](https://caneka.org) for more details.
@@ -60,22 +60,22 @@ To build and test Caneka run:
 There are other scripts in the [/scripts/](/scripts/) folder provide quick
 commands.
 
-Each folder within the [src](/artifact/src) artifact folder, have a file in
+Each folder within the [src](/src) artifact folder, have a file in
 them which controls how they are built. Either as one include file such as (in
-the case of [base/inc.c](/artifact/src/base/inc.c) or with a more eleborate
+the case of [base/inc.c](/src/base/inc.c) or with a more eleborate
 "build.c" file. Every module after the "base" is built using the "build.c"
 file, which is used by "cnkbuild" builder.
 
 ### CnkBuild - source builder
 
 Canka only requires a C compile to build. A small library is built to manage
-the build configuration(s) (found in the [builder](./artifact/src/builder/)
+the build configuration(s) (found in the [builder](./src/builder/)
 folder). Small files named "build.c" are found throughout the codebase which 
 build the objects and executables for the runtime.
 
-Further customization can be found in the [build.c](./artifact/src/ext/build.c)
+Further customization can be found in the [build.c](./src/ext/build.c)
 file, and the "build.c" files for each program, such as the 
-[test program](./artifact/src/programs/tests/build.c).
+[test program](./src/programs/tests/build.c).
 
 ## Build Status
 
@@ -84,11 +84,6 @@ have worked in prototype form at one time or another, but it's currently a
 shit-show.
 
 ## Folder Layout
-
-Because Caneka is intended to be written in another syntax and transpiled into
-C, most of the actively developed source code is currently locaed in the
-[artifact src folder](./artifact/src/). This is because, over time, caneka will
-be transpiled from it's own, more convienient syntax.
 
 There is a sketch of the CanekaLang syntax for the [Str](./src/base/str.cnk)
 module, but it does not yet parser, it's what I've written as I begin to figure

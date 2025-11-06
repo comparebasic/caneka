@@ -5,6 +5,7 @@
 /* parameters */
 
 static Executable targets[] = {
+    {"web-server", "main.c"},
     {NULL, NULL},
 };
 
@@ -12,21 +13,30 @@ static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
     "-DINSECURE",
     "-DCNK_EXT",
-    "-DTHIRD_DSQR",
+    "-DCNK_LANG",
+    "-DCNK_WWW",
+    "-DCNK_CRYPTO",
     NULL
 };
 
 static char *inc[] = {
-    "-I./artifact/src/include/",
-    "-I./artifact/src/base/include/",
-    "-I./artifact/src/ext/include/",
-    "-I./artifact/src/third/davidshim-qr/include/",
+    "-I./src/include/",
+    "-I./src/base/include/",
+    "-I./src/ext/include/",
+    "-I./src/www/include/",
+    "-I./src/lang/include/",
+    "-I./src/third/api/include/",
+    "-I./src/programs/web-server/include/",
     NULL
 };
 
 static char *staticLibs[] = {
     "./build/libcaneka/libcaneka.a",
     "./build/libcnkext/libcnkext.a",
+    "./build/libcnklang/libcnklang.a",
+    "./build/libcnkwww/libcnkwww.a",
+    "./build/libcnknacl/libcnknacl.a",
+    "/external/lib/libnacl.a",
     NULL
 };
 
@@ -34,14 +44,14 @@ static char *libs[] = {
     NULL
 };
 
-static BuildSubdir qrobj = { "qr", {
-    "qrcode.c",
+static BuildSubdir obj = { "components", {
+    "run.c",
     NULL,
 }};
 
 
 static BuildSubdir *objdirs[] = {
-    &qrobj,
+    &obj,
     NULL
 };
 
@@ -57,10 +67,10 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnkqr";
+    ctx.libtarget = "libcnkwebserver";
     ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "artifact/src/";
+    ctx.src = "src/programs/web-server/";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
@@ -68,6 +78,7 @@ int main(int argc, char **argv){
     ctx.args.staticLibs = staticLibs;
     ctx.args.licenceFiles = NULL;
     ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.genConfigs = NULL;
 
     Build(&ctx);
 
