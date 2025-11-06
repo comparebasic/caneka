@@ -27,6 +27,11 @@ status Example_ServePage(Step *st, Task *tsk){
     DebugStack_SetRef(ctx->path, ctx->path->type.of);
     Route *handler = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
 
+    args[0] = NULL;
+    args[1] = (Abstract *)ctx->path;
+    args[2] = NULL;
+    Out("^b.^{STACK.name} @^0\n", args);
+
     Object *data = Object_Make(m, ZERO);
     Object *nav = Object_Make(m, ZERO);
     Object_Set(nav, (Abstract *)Str_FromCstr(m, "pages", STRING_COPY), (Abstract *)tcp->pages);

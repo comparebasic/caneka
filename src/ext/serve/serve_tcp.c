@@ -100,18 +100,24 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             MemCh *tm = MemCh_Make();
             Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
             child->type.state |= TASK_CHILD;
+
+            child->type.state |= DEBUG;
+
             child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
             tm->owner = (Abstract *)child;
             ctx->populate(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk->source);
 
             if(tsk->type.state & DEBUG){
+                struct pollfd *pfd = TcpTask_GetPollFd(child);
                 args[0] = (Abstract *)child;
-                args[1] = NULL;
-                Out("^c.    Adding Child &^0\n", args);
+                args[1] = (Abstract *) I32_Wrapped(child->m, pfd->fd);
+                args[2] = NULL;
+                Out("^c.    Adding Child & fd$^0\n", args);
             }
 
             child->idx = Queue_Add(q, (Abstract *)child);
+            q->type.state |= DEBUG;
             Queue_SetCriteria(q, 0, child->idx, &child->u);
 
             accepted++;
@@ -170,6 +176,9 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, (Abstract *)ctx);
     tsk->stepGuardMax = -1;
+
+    tsk->type.state |= DEBUG;
+
     Task_AddStep(tsk,
         Step_Delay, (Abstract *)Util_Wrapped(tsk->m, TIME_SEC), NULL, STEP_LOOP);
     Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL, ZERO);

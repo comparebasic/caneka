@@ -113,20 +113,25 @@ static status QueueCrit_Print(Buff *bf, Abstract *a, cls type, word flags){
 
 static status Queue_Print(Buff *bf, Abstract *a, cls type, word flags){
     Queue *q = (Queue *)as(a, TYPE_QUEUE);
+    status r = READY;
     Abstract *args[6];
     args[0] = (Abstract *)Type_StateVec(bf->m, q->type.of, q->type.state);
-    args[1] = (Abstract *)&q->it;
-    args[2] = (Abstract *)q->handlers;
-    args[3] = NULL;
+    args[1] = NULL;
+    r |= Fmt(bf, "Queue<@ ", args);
+    r |= Bits_Print(bf, (byte *)&q->go, sizeof(word), ZERO);
     if(flags & DEBUG){
-        args[3] = args[2];
-        args[2] = (Abstract *)q->it.p;
-        args[4] = (Abstract *)q->availableIt.p;
-        args[5] = NULL;
-        return Fmt(bf, "Queue<@ @ & criteria:@ available:&>", args);
+        args[0] = (Abstract *)&q->it;
+        args[1] = (Abstract *)q->handlers;
+        args[2] = (Abstract *)&q->availableIt;
+        args[3] = NULL;
+        r |= Fmt(bf, " @ criteria:@ available:p>", args);
     }else{
-        return Fmt(bf, "Queue<@ @ criteria:@>", args);
+        args[0] = (Abstract *)I32_Wrapped(bf->m, q->it.p->nvalues);
+        args[1] = NULL;
+        r |= Fmt(bf, " @nvalues>", args);
     }
+
+    return r;
 }
 
 static status Comp_Print(Buff *bf, Abstract *a, cls type, word flags){

@@ -17,12 +17,18 @@ static status _taskErrorHandler(MemCh *m, Abstract *_tsk, Abstract *msg){
 }
 
 status Task_Tumble(Task *tsk){
+
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
     i16 guard = 0;
     do {
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->parent != NULL){
+                Abstract *args[] = {
+                    (Abstract *)tsk,
+                    NULL,
+                };
+                Out("^y.Tumble Update Crit @^0\n", args);
                 Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
                 tsk->type.state &= ~TASK_UPDATE_CRIT;
             }

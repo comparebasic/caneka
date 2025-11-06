@@ -102,7 +102,6 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
 }
 
 static status Queue_SetGo(Queue *q){
-
     return q->go ? SUCCESS : NOOP;
 }
 
