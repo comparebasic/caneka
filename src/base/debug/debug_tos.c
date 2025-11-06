@@ -10,12 +10,7 @@ static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     Buff_AddBytes(bf, (byte *)se->fname, strlen(se->fname));
     if(flags & MORE && se->ref != NULL){
         Buff_AddBytes(bf, (byte *)" - \x1b[1m", 8);
-        if(se->typeOf == TYPE_CSTR){
-            Str *s = Str_CstrRef(bf->m, (char *)se->ref);
-            ToS(bf, (Abstract *)s, s->type.of, MORE);
-        }else if((flags & MORE) && se->typeOf != 0){
-            ToS(bf, se->ref, se->typeOf, MORE);
-        }
+        ToS(bf, se->ref, se->typeOf, MORE);
     }
 
     return Buff_AddBytes(bf, (byte *)"\x1b[0m\n", 5);

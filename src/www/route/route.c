@@ -195,6 +195,13 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
 
 status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
     DebugStack_Push(rt, rt->type.of);
+    StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
+
+    word fl = bf->m->type.state;
+    bf->m->type.state |= MEMCH_BASE;
+    DebugStack_SetRef(StrVec_Str(bf->m, path), TYPE_STR);
+    bf->m->type.state = fl;
+
     Abstract *action = Object_GetPropByIdx(rt, ROUTE_PROPIDX_ACTION);
     Abstract *config = Object_GetPropByIdx(rt, ROUTE_PROPIDX_DATA);
     if(config != NULL){

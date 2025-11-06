@@ -18,7 +18,7 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
 
     entry->funcName = cstr;
     entry->fname = fname;
-    entry->ref = ref;
+    entry->ref = NULL; /* TODO: when I can ensure the ref is copied to safe memory we can use this again */
     entry->typeOf = typeOf;
     entry->line = line;
     entry->pos = pos;

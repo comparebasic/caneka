@@ -113,7 +113,7 @@ void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
     }
 #endif
     Buff_AddBytes(ErrStream, (byte *)"\n", 1);
-    DebugStack_Print(ErrStream, 0);
+    DebugStack_Print(ErrStream, MORE);
     exit(13);
 }
 

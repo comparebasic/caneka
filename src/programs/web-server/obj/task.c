@@ -22,6 +22,8 @@ status Example_ServePage(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
+    DebugStack_SetRef(ctx->path, ctx->path->type.of);
     
     Route *handler = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
 
