@@ -170,8 +170,6 @@ status Table_SetKey(Iter *it, Abstract *a){
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
         Equals((Abstract *)a, 
             (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
-        printf("Setting key in SetKey %d vs %d\n", h->idx, it->idx);
-        fflush(stdout);
     }
 
     /* set idx here */
@@ -219,8 +217,6 @@ Hashed *Table_SetHashed(Table *tbl, Abstract *a, Abstract *value){
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
         Equals((Abstract *)a, 
             (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
-        printf("Setting key in SetHashed %d\n", h->idx);
-        fflush(stdout);
     }
 
 
@@ -254,8 +250,6 @@ i32 Table_Set(Table *tbl, Abstract *a, Abstract *value){
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
         Equals((Abstract *)a, 
             (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
-        printf("Setting key in Set %d\n", h->idx);
-        fflush(stdout);
     }
 
     return h->idx;
@@ -266,8 +260,6 @@ i32 Table_SetByIter(Iter *it, Abstract *a, Abstract *value){
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
         Equals((Abstract *)a, 
             (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
-        printf("Setting key in SetByIter\n");
-        fflush(stdout);
     }
 
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, value);

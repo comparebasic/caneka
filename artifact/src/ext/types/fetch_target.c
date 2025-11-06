@@ -6,7 +6,6 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
     Abstract *args[4];
     if(cls == NULL && (
             typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP))){
-        tg->type.state &= ~FETCH_TARGET_PROP;
         tg->type.state |= FETCH_TARGET_HASH;
         tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
         tg->type.state |= FETCH_TARGET_RESOLVED;
@@ -26,7 +25,6 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         }else if(tg->type.state & FETCH_TARGET_PROP){
             tg->idx = Class_GetPropIdx(cls, tg->key);
             if(tg->idx == -1){
-                tg->type.state &= ~FETCH_TARGET_PROP;
                 tg->type.state |= FETCH_TARGET_HASH;
                 tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
             }
@@ -75,14 +73,6 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
             Object_TypeMatch(value, tg->objType.of)){
         if(tg->type.state & FETCH_TARGET_ATT){
             return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
-        }else if(tg->type.state & FETCH_TARGET_PROP){
-            Object *obj = (Object *)as(value, TYPE_OBJECT);
-            Abstract *a = Object_GetPropByIdx(obj, tg->idx);
-            if(a == NULL){
-                args[0] = value;
-                goto err;
-            }
-            return a;
         }else if(tg->type.state & FETCH_TARGET_HASH){
             Abstract *a = NULL; 
             if(value->type.of == TYPE_OBJECT){
@@ -96,7 +86,14 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
                 goto err;
             }
             return a;
-
+        }else if(tg->type.state & FETCH_TARGET_PROP){
+            Object *obj = (Object *)as(value, TYPE_OBJECT);
+            Abstract *a = Object_GetPropByIdx(obj, tg->idx);
+            if(a == NULL){
+                args[0] = value;
+                goto err;
+            }
+            return a;
         }else{
             return tg->func(m, tg, value, source);
         }

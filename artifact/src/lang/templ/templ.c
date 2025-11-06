@@ -54,6 +54,7 @@ static i32 Templ_FindEnd(Templ *templ){
 static status Templ_handleJump(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
     status r = READY;
+    Abstract *args[5];
     TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
 
@@ -63,7 +64,8 @@ static status Templ_handleJump(Templ *templ){
         skipIdx = templ->content.idx;
         TemplJump *dest = (TemplJump *)Span_Get(templ->content.p, jump->destIdx);
         if(dest->fch->type.state & FETCHER_WITH){
-            Iter_PrevRemove(&templ->data);
+            Iter_Remove(&templ->data);
+            Iter_Prev(&templ->data);
         }
         if(dest->fch->type.state & FETCHER_FOR){
             Iter_GetByIdx(&templ->content, jump->destIdx);
@@ -132,6 +134,14 @@ static status Templ_handleJump(Templ *templ){
             r |= PROCESSING;
         }else{
             Iter_Add(&templ->data, (Abstract *)value);
+            if(templ->type.state & DEBUG){
+                Abstract *args[] = {
+                    (Abstract *)fch,
+                    (Abstract *)Iter_Get(&templ->data),
+                    NULL
+                };
+                Out("^c.  If nesting/found: & of @^0.\n", args);
+            }
         }
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_WITH){
@@ -428,6 +438,19 @@ status Templ_Reset(Templ *templ){
     templ->level = 0;
     templ->indent = 0;
     templ->type.state &= DEBUG;
+    templ->content.type.state |= END;
+    while((Iter_Next(&templ->content) & END) == 0){
+        Fetcher *fch = NULL;
+        Abstract *a = Iter_Get(&templ->content);
+        if(a->type.of == TYPE_TEMPL_JUMP){
+            fch = ((TemplJump *)a)->fch;
+        }else if (a->type.of == TYPE_FETCHER){
+            fch = (Fetcher *)fch;
+        }
+        if(fch != NULL){
+            fch->type.state &= ~PROCESSING;
+        }
+    }
     Iter_Init(&templ->content, templ->content.p);
     return SUCCESS;
 }

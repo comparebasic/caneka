@@ -249,7 +249,7 @@ status Types_ClsInit(MemCh *m){
     fetchTargetLabels[13] = Str_CstrRef(m, "PROP");
     fetchTargetLabels[14] = Str_CstrRef(m, "FUNC");
     fetchTargetLabels[15] = Str_CstrRef(m, "RESOLVED");
-    fetchTargetLabels[16] = Str_CstrRef(m, "COMMAND");
+    fetchTargetLabels[16] = Str_CstrRef(m, "HASH");
     r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)fetchTargetLabels);
 
     /* ToS */

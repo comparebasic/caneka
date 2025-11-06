@@ -49,6 +49,36 @@ static char *loginCstr  = ""
     ;
 
 static char *loginNoUserCstr  = ""
+    "<!DOCTYPE html>\n"
+    "<html lang=\"en\">\n"
+    "<head>\n"
+    "<meta charset=\"utf-8\">\n"
+    "<title>Caneka Example - Login</title>\n"
+    "  <link rel=\"stylesheet\" href=\"/style.css\" />\n"
+    "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
+    "</head>\n"
+    "<body>\n"
+    "<header>\n"
+    "    <nav class=\"bread-crumbs\">\n"
+    "    <ul>\n"
+    "        <li>\n"
+    "            <a href=\"/login\">/login</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/dom.js\">/dom.js</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/account/\">/account/</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/style.css\">/style.css</a>\n"
+    "        </li>\n"
+    "    </ul>\n"
+    "    </nav>\n"
+    "</header>\n"
     "<h1>Caneka Example - Login</h1>\n"
     "<p>Login to the example site.</p>\n"
     "<div>\n"
@@ -59,6 +89,51 @@ static char *loginNoUserCstr  = ""
     "        <button type=\"submit\">Login</button>\n"
     "    </form>\n"
     "</div>\n"
+    "<footer>\n"
+    "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
+    "</footer>\n"
+    "</body>\n"
+    "</html>\n"
+    ;
+
+static char *homeCstr = ""
+    "<!DOCTYPE html>\n"
+    "<html lang=\"en\">\n"
+    "<head>\n"
+    "<meta charset=\"utf-8\">\n"
+    "<title>Example Title</title>\n"
+    "  <link rel=\"stylesheet\" href=\"/style.css\" />\n"
+    "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
+    "</head>\n"
+    "<body>\n"
+    "<header>\n"
+    "    <nav class=\"bread-crumbs\">\n"
+    "    <ul>\n"
+    "        <li>\n"
+    "            <a href=\"/login\">/login</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/dom.js\">/dom.js</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/account/\">/account/</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/style.css\">/style.css</a>\n"
+    "        </li>\n"
+    "    </ul>\n"
+    "    </nav>\n"
+    "</header>\n"
+    "<H1>Home</H1>\n"
+    "<P>Yay, homepage loads</P>\n"
+    "<footer>\n"
+    "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
+    "</footer>\n"
+    "</body>\n"
+    "</html>\n"
     ;
 
 static Object *getGenericData(MemCh *m, Route *rt){
@@ -139,10 +214,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
     StrVec *incAbs = IoUtil_AbsVec(m, incPath);
     Route_Collect(inc, incAbs);
 
-    args[0] = (Abstract *)inc;
-    args[1] = NULL;
-    Out("^p.Include Routes @^0\n", args);
-
     Object *data = getGenericData(m, rt);
 
     Str *now = MicroTime_ToStr(m, MicroTime_Now());
@@ -211,10 +282,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     /* login.templ no user with header and footer */
 
-    args[0] = (Abstract *)data;
-    args[1] = NULL;
-    Out("^p.Header with data: @^0\n", args);
-
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
 
@@ -227,9 +294,10 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Buff_Pipe(dest, bf);
 
     expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
+expected->type.state |= DEBUG;
     args[0] = (Abstract *)dest->v;
     args[1] = NULL;
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v), 
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)dest->v), 
         "Expected template value with no user object and a header",
         "Expected template value with no user object and a header: $", 
     args);
@@ -244,20 +312,12 @@ status WwwRouteTempl_Tests(MemCh *gm){
        (Abstract *) Str_FromCstr(m, "user", ZERO),
        (Abstract *)user);
 
-    args[0] = (Abstract *)data;
-    args[1] = NULL;
-    Out("^p.Header with data: @^0\n", args);
-
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
 
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
     handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
-
-    args[0] = (Abstract *)data;
-    args[1] = NULL;
-    Out("^p.Fmt with data: @^0\n", args);
 
     Route_Handle(handler, bf, data, NULL);
     dest = Buff_Make(m, ZERO);
@@ -267,10 +327,10 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Route_Handle(footer, bf, data, NULL);
     Buff_Pipe(dest, bf);
     
-    expected = Str_FromCstr(m, "", ZERO);
+    expected = Str_FromCstr(m, homeCstr, ZERO);
     args[0] = (Abstract *)dest->v;
     args[1] = NULL;
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v),
+    r |= TestShow(Equals((Abstract *)expected, (Abstract *)dest->v),
         "Expected fmt value with user name", 
         "Expected fmt value with user name: $", 
     args);
@@ -310,7 +370,6 @@ status WwwRouteMime_Tests(MemCh *gm){
 
     r |= Test(Equals((Abstract *)dest->v, (Abstract *)expected), "Content from Buff piped from route matches reading file directly", NULL);
 
-    r |= ERROR;
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

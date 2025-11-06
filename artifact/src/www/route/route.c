@@ -75,12 +75,8 @@ static status routeFuncTempl(Buff *bf, Abstract *action, Object *data, Abstract 
     Templ *templ = (Templ *)as(action, TYPE_TEMPL);
 
     Templ_Reset(templ);
-    Abstract *args[] = { (Abstract *)templ->content.p, (Abstract *)&templ->content, NULL};
-    Out("^g.&\n&^0\n", args);
-
     templ->type.state |= bf->type.state;
     status r = Templ_ToS(templ, bf, (Abstract *)data, source);
-    Templ_Reset(templ);
     return r;
 }
 
