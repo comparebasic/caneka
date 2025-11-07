@@ -6,7 +6,7 @@ static Lookup *statusCodeStrings = NULL;
 ProtoCtx *HttpProto_Make(MemCh *m){
     ProtoCtx *ctx = ProtoCtx_Make(m);
     ctx->in = Buff_Make(m, ZERO);
-    ctx->out = Buff_Make(m, ZERO);
+    ctx->out = Buff_Make(m, BUFF_UNBUFFERED);
     ctx->data = (Abstract *)HttpCtx_Make(m); 
     return ctx;
 }

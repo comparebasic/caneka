@@ -508,7 +508,7 @@ status Buff_Read(Buff *bf){
 }
 
 status Buff_ReadAmount(Buff *bf, i64 amount){
-    bf->type.state &= ~(SUCCESS|PROCESSING);
+    bf->type.state &= ~(SUCCESS|PROCESSING|MORE);
 
     if(amount > IO_SEND_MAX){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -522,6 +522,8 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
         Str *s = Str_Make(bf->m, min(amount, IO_BLOCK_SIZE));
         if(bf->type.state & BUFF_SOCKET){
             recieved = recv(bf->fd, s->bytes, s->alloc, 0);
+            printf("reading socket %d length %d found %ld\n",
+                bf->fd, s->alloc, recieved);
         }else if(bf->type.state & BUFF_FD){
             recieved = read(bf->fd, s->bytes, s->alloc);
         }else{
@@ -532,14 +534,16 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
         }
 
         if(recieved < 0){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(bf->m, bf->fd),
-                (Abstract *)Str_CstrRef(bf->m, strerror(errno)),
-                NULL
-            };
-            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error reading from ^D.$^d.fd: $", args);
-            bf->type.state |= ERROR;
+            if(bf->type.state & BUFF_FD){
+                Abstract *args[] = {
+                    (Abstract *)I32_Wrapped(bf->m, bf->fd),
+                    (Abstract *)Str_CstrRef(bf->m, strerror(errno)),
+                    NULL
+                };
+                Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Error reading from ^D.$^d.fd: $", args);
+                bf->type.state |= ERROR;
+            }
             break;
         }else{
             s->length += recieved;
@@ -551,6 +555,10 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
                 break;
             }
         }
+    }
+
+    if(amount > 0){
+        bf->type.state |= MORE;
     }
 
     return bf->type.state;

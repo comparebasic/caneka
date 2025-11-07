@@ -135,7 +135,9 @@ status WebServer_Run(MemCh *gm){
     TcpCtx *ctx = tcpCtx_Make(m, path, 3000, 0, ip6);
     routeInit(m, ctx);
     Task *tsk = ServeTcp_Make(ctx);
+    /*
     setErrorHandler(m, tsk);
+    */
 
     args[0] = (Abstract *)ctx;
     args[1] = NULL;

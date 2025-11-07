@@ -106,13 +106,15 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
             tm->owner = (Abstract *)child;
-            ctx->populate(tm, child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk->source);
+            ctx->populate(tm,
+                child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk->source);
 
             if(tsk->type.state & DEBUG){
-                struct pollfd *pfd = TcpTask_GetPollFd(child);
                 args[0] = (Abstract *)child;
-                args[1] = (Abstract *) I32_Wrapped(child->m, pfd->fd);
+                args[1] = (Abstract *)I32_Wrapped(child->m, pfd->fd);
                 args[2] = NULL;
+
+
                 Out("^c.    Adding Child & fd$^0\n", args);
             }
 
