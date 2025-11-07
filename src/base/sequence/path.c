@@ -142,6 +142,75 @@ StrVec *Path_Base(MemCh *m, StrVec *path){
     return v;
 }
 
+StrVec *Path_ReJoinExt(m, StrVec *v){
+    StrVec *v = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, path->p);
+    word flags = ZERO;
+    i32 fnameStart = path->p->max_idx;
+    word length = 0;
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        flags |= s->type.state & MORE;
+        if(flags){
+            break;
+        }
+        fnameStart--;
+        length += s->length;
+    }
+
+    Str *s = Str_Make(m, length+1);
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *_s = (Str *)Iter_Get(&it);
+        if(it.idx < fnameStart){
+            StrVec_Add(v, _s);
+        }else{
+            Str_Add(s, _s->bytes, s->length);
+        }
+        if(it.type.state & LAST){
+            StrVec_Add(v, _s);
+        }
+    }
+
+    return v;
+}
+
+
+StrVec *Path_ReJoinExt(m, StrVec *v){
+    StrVec *v = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, path->p);
+    word flags = ZERO;
+    i32 fnameStart = path->p->max_idx;
+    word length = 0;
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        flags |= s->type.state & MORE;
+        if(flags){
+            break;
+        }
+        fnameStart--;
+        length += s->length;
+    }
+
+    Str *s = Str_Make(m, length+1);
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *_s = (Str *)Iter_Get(&it);
+        if(it.idx < fnameStart){
+            StrVec_Add(v, _s);
+        }else{
+            Str_Add(s, _s->bytes, s->length);
+        }
+        if(it.type.state & LAST){
+            StrVec_Add(v, _s);
+        }
+    }
+
+    return v;
+}
+
 StrVec *Path_Ext(MemCh *m, StrVec *path){
     StrVec *v = StrVec_Make(m);
 
