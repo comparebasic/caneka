@@ -142,7 +142,7 @@ StrVec *Path_Base(MemCh *m, StrVec *path){
     return v;
 }
 
-StrVec *Path_ReJoinExt(m, StrVec *v){
+StrVec *Path_ReJoinExt(MemCh *m, StrVec *path){
     StrVec *v = StrVec_Make(m);
     Iter it;
     Iter_Init(&it, path->p);
@@ -159,24 +159,29 @@ StrVec *Path_ReJoinExt(m, StrVec *v){
         length += s->length;
     }
 
-    Str *s = Str_Make(m, length+1);
+    Str *fname = Str_Make(m, length+1);
     Iter_Init(&it, path->p);
     while((Iter_Next(&it) & END) == 0){
-        Str *_s = (Str *)Iter_Get(&it);
-        if(it.idx < fnameStart){
-            StrVec_Add(v, _s);
+        Str *s = (Str *)Iter_Get(&it);
+        if(it.idx <= fnameStart){
+            StrVec_Add(v, s);
         }else{
-            Str_Add(s, _s->bytes, s->length);
-        }
-        if(it.type.state & LAST){
-            StrVec_Add(v, _s);
+            Str_Add(fname, s->bytes, s->length);
         }
     }
+
+    StrVec_Add(v, fname);
+
+    Abstract *args[3];
+    args[0] = (Abstract *)path;
+    args[1] = (Abstract *)v;
+    args[2] = NULL;
+    Out("^y.RejoinExt @ -> @^0\n", args);
 
     return v;
 }
 
-StrVec *Path_WithoutExt(m, path){
+StrVec *Path_WithoutExt(MemCh *m, StrVec *path){
     StrVec *v = StrVec_Make(m);
     Iter it;
     Iter_Init(&it, path->p);
@@ -191,7 +196,7 @@ StrVec *Path_WithoutExt(m, path){
             }
             continue;
         }else{
-            Span_Set(v->p, s, it.idx);
+            Span_Set(v->p, it.idx, (Abstract *)s);
         }
     }
     v->total = total;

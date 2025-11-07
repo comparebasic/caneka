@@ -21,8 +21,6 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
         Out("^0.Parsed Tcp Initial Request -> ^c.&/@^0\n", args);
     }
 
-    Out("^b.ReadToRbl^0\n", NULL);
-
     DebugStack_Pop();
     return st->type.state;
 }

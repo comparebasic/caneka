@@ -15,5 +15,5 @@ StrVec *Path_SubClone(MemCh *m, StrVec *path, i32 count);
 status Path_Init(MemCh *m);
 status Path_DotAnnotate(MemCh *m, StrVec *v);
 status Path_JoinBase(MemCh *m, StrVec *path);
-StrVec *Path_ReJoinExt(m, StrVec *v);
-StrVec *Path_WithoutExt(m, path);
+StrVec *Path_ReJoinExt(MemCh *m, StrVec *v);
+StrVec *Path_WithoutExt(MemCh *m, StrVec *path);
