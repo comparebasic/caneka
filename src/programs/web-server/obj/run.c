@@ -25,9 +25,6 @@ static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract
 
     tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
 
-    Abstract *args[2];
-    Out("^b.^{STACK.name}^0\n", args);
-
     DebugStack_Pop();
     return SUCCESS;
 }
@@ -68,22 +65,10 @@ static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *sou
     Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
 
-    Abstract *args[3] = {NULL, (Abstract *)tsk, NULL};
-    Out("^b.^{STACK.name} @^0\n", args);
-
     pfd = TcpTask_GetPollFd(tsk);
-    printf("I %d\n", pfd->fd);
-    fflush(stdout);
     HttpTask_InitResponse(tsk, arg, source);
-    printf("II\n");
-    fflush(stdout);
     Task_AddStep(tsk, Example_ServePage, NULL, NULL, ZERO);
-    printf("III\n");
-    fflush(stdout);
     HttpTask_AddRecieve(tsk, NULL, NULL);
-    printf("IV\n");
-    fflush(stdout);
-
 
     DebugStack_Pop();
     return SUCCESS;

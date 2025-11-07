@@ -11,13 +11,6 @@ ProtoCtx *HttpProto_Make(MemCh *m){
     return ctx;
 }
 
-HttpCtx *HttpCtx_Make(MemCh *m){
-    HttpCtx *ctx = (HttpCtx *)MemCh_AllocOf(m, sizeof(HttpCtx), TYPE_HTTP_CTX);
-    ctx->type.of = TYPE_HTTP_CTX;
-    ctx->headers = Table_Make(m);
-    return ctx;
-}
-
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     status r = READY;
     Str *status = Lookup_Get(statusCodeStrings, ctx->code);
@@ -39,6 +32,28 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
         "Content-Length: $\r\n"
         "\r\n" , args);
     return r;
+}
+
+status HttpCtx_PrepareResponse(HttpCtx *ctx, Task *tsk){
+    DebugStack_Push(NULL, ZERO);
+
+    Buff *bf = Buff_Make(tsk->m, ZERO);
+    HttpCtx_WriteHeaders(bf, ctx);
+    Buff_Stat(bf);
+
+    status r = Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
+
+    TcpTask_ExpectSend(NULL, tsk);
+
+    DebugStack_Pop();
+    return r;
+}
+
+HttpCtx *HttpCtx_Make(MemCh *m){
+    HttpCtx *ctx = (HttpCtx *)MemCh_AllocOf(m, sizeof(HttpCtx), TYPE_HTTP_CTX);
+    ctx->type.of = TYPE_HTTP_CTX;
+    ctx->headers = Table_Make(m);
+    return ctx;
 }
 
 status HttpCtx_Init(MemCh *m){

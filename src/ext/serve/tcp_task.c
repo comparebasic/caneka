@@ -10,11 +10,7 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
 
     Buff_SetSocket(proto->in, pfd->fd);
     Buff_ReadAmount(proto->in, SERV_READ_SIZE);
-
-    args[0] = NULL;
-    args[1] = (Abstract *)proto->in->v;
     Roebling_Run(rbl);
-    Out("^c.^{STACK.name}^0 @\n", args);
     
     st->type.state |= (rbl->type.state & (SUCCESS|ERROR));
     if(st->type.state & SUCCESS && (tsk->type.state & DEBUG)){
@@ -40,6 +36,10 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
     Buff *bf = (Buff *)as(st->data, TYPE_BUFF);
     Buff_SetFd(proto->out, pfd->fd);
     Buff_Pipe(proto->out, bf);
+    if(bf->type.state & BUFF_FD){
+        close(bf->fd);
+        Buff_UnsetFd(bf);
+    }
 
     if(bf->type.state & (SUCCESS|ERROR|END)){
         st->type.state |= SUCCESS;
@@ -48,9 +48,8 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
     args[0] = NULL;
     args[1] = (Abstract *)I64_Wrapped(tsk->m, bf->st.st_size);
     args[2] = (Abstract *)bf;
-    args[3] = (Abstract *)bf->v;
-    args[4] = NULL;
-    Out("^c.^{STACK.name} sent:@ / @ / @^0\n", args);
+    args[3] = NULL;
+    Out("^c.^{STACK.name} sent:@ / @^0\n", args);
     
     DebugStack_Pop();
     return st->type.state;
@@ -59,13 +58,11 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
 status TcpTask_ExpectRecv(Step *st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     pfd->events = POLLIN;
-    printf("Expect Recv for %d\n", pfd->fd);
     return TASK_UPDATE_CRIT;
 }
 
 status TcpTask_ExpectSend(Step *st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     pfd->events = POLLOUT;
-    printf("Expect Send %d\n", pfd->fd);
     return TASK_UPDATE_CRIT;
 }

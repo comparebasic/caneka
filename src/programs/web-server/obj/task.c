@@ -27,11 +27,6 @@ status Example_ServePage(Step *st, Task *tsk){
     DebugStack_SetRef(ctx->path, ctx->path->type.of);
     Route *handler = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
 
-    args[0] = NULL;
-    args[1] = (Abstract *)ctx->path;
-    args[2] = NULL;
-    Out("^b.^{STACK.name} @^0\n", args);
-
     Object *data = Object_Make(m, ZERO);
     Object *nav = Object_Make(m, ZERO);
     Object_Set(nav, (Abstract *)Str_FromCstr(m, "pages", STRING_COPY), (Abstract *)tcp->pages);
@@ -47,24 +42,16 @@ status Example_ServePage(Step *st, Task *tsk){
         Buff *bf = Buff_Make(m, ZERO);
         Buff_AddBytes(bf, s->bytes, s->length);
         Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
-        Task_AddDataStep(tsk, HttpTask_PrepareResponse, NULL, NULL, NULL, ZERO);
+        HttpCtx_PrepareResponse(ctx, tsk);
 
-        printf("404 not found\n");
-        fflush(stdout);
+        st->type.state |= MORE;
+
     }else{
-
-        args[0] = NULL;
-        args[1] = (Abstract *)Object_GetPropByIdx(handler, ROUTE_PROPIDX_PATH);
-        args[2] = NULL;
-        Out("^p.^{STACK.name} Handler @^0\n", args);
 
         Object *config = (Object *)Object_GetPropByIdx(handler, ROUTE_PROPIDX_DATA);
         if(config != NULL){
             Object_Set(data,
                 (Abstract *)Str_FromCstr(m, "config", STRING_COPY), (Abstract *)config);
-        }else{
-            printf("Config is NULL\n");
-            fflush(stdout);
         }
 
         ctx->mime = (Str *)Object_GetPropByIdx(handler, ROUTE_PROPIDX_MIME);
@@ -100,10 +87,17 @@ status Example_ServePage(Step *st, Task *tsk){
 
         }
 
-        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)footerBf, NULL, ZERO);
+        ctx->code = 200;
+
+        if(footerBf != NULL){
+            Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)footerBf, NULL, ZERO);
+        }
         Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
-        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)headBf, NULL, ZERO);
-        Task_AddDataStep(tsk, HttpTask_PrepareResponse, NULL, NULL, NULL, ZERO);
+        if(headBf != NULL){
+            Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)headBf, NULL, ZERO);
+        }
+        HttpCtx_PrepareResponse(ctx, tsk);
+        st->type.state |= MORE;
     }
 
     st->type.state |= SUCCESS;

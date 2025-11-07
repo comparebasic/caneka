@@ -24,3 +24,4 @@ HttpCtx *HttpCtx_Make(MemCh *m);
 ProtoCtx *HttpProto_Make(MemCh *m);
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx);
 status HttpCtx_Init(MemCh *m);
+status HttpCtx_PrepareResponse(HttpCtx *ctx, Task *tsk);

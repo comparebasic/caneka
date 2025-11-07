@@ -35,9 +35,8 @@ status Task_Tumble(Task *tsk){
         }
         tsk->type.state &= ~MORE;
 
-        Step *st = Iter_Current(&tsk->chainIt);
+        Step *st = Iter_Get(&tsk->chainIt);
         if(st->type.state & ERROR){
-            printf("Error break!\n");
             break;
         }
 

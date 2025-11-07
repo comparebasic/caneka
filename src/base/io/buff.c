@@ -522,8 +522,6 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
         Str *s = Str_Make(bf->m, min(amount, IO_BLOCK_SIZE));
         if(bf->type.state & BUFF_SOCKET){
             recieved = recv(bf->fd, s->bytes, s->alloc, 0);
-            printf("reading socket %d length %d found %ld\n",
-                bf->fd, s->alloc, recieved);
         }else if(bf->type.state & BUFF_FD){
             recieved = read(bf->fd, s->bytes, s->alloc);
         }else{
