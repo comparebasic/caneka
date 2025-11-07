@@ -212,6 +212,18 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
     return NOOP;
 }
 
+status Route_GetHandler(Route *rt, StrVec *path){
+    Str *ext = Span_Get(path->p, path->p->max_idx);
+    MemCh *m = Object_GetMem(rt);
+    Single *funcW = (Single *)Table_Get(RouteFuncTable, (Abstract *)ext);
+    if(funcW->type.state & ROUTE_ASSET){
+        path = Path_ReJoinExt(m, path);
+    }else{
+        path = Path_WithoutExt(m, path);
+    }
+    return Object_ByPath(tcp->pages, path, NULL, SPAN_OP_GET);
+}
+
 status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source){
     DebugStack_Push(rt, rt->type.of);
     StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);

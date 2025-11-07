@@ -49,6 +49,7 @@ status Path_Add(MemCh *m, StrVec *path, StrVec *add){
     return StrVec_AddVec(path, add);
 }
 
+
 Str *Path_StrAdd(MemCh *m, StrVec *path, Str *seg){
     Str *s = StrVec_ToStr(m, path, STR_DEFAULT);
     if(s->bytes[s->length-1] != '/'){
