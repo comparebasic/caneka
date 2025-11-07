@@ -16,3 +16,4 @@ status Path_Init(MemCh *m);
 status Path_DotAnnotate(MemCh *m, StrVec *v);
 status Path_JoinBase(MemCh *m, StrVec *path);
 StrVec *Path_ReJoinExt(m, StrVec *v);
+StrVec *Path_WithoutExt(m, path);

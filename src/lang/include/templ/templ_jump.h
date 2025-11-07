@@ -3,6 +3,7 @@
 typedef struct templ_jump {
     Type type;
     Fetcher *fch;
+    Filter *filter;
     i16 depth;
     i16 level;
     i32 idx;

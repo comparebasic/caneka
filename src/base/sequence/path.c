@@ -176,38 +176,25 @@ StrVec *Path_ReJoinExt(m, StrVec *v){
     return v;
 }
 
-
-StrVec *Path_ReJoinExt(m, StrVec *v){
+StrVec *Path_WithoutExt(m, path){
     StrVec *v = StrVec_Make(m);
     Iter it;
     Iter_Init(&it, path->p);
     word flags = ZERO;
-    i32 fnameStart = path->p->max_idx;
-    word length = 0;
+    i64 total = path->total;
     while((Iter_Prev(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
-        flags |= s->type.state & MORE;
-        if(flags){
-            break;
-        }
-        fnameStart--;
-        length += s->length;
-    }
-
-    Str *s = Str_Make(m, length+1);
-    Iter_Init(&it, path->p);
-    while((Iter_Next(&it) & END) == 0){
-        Str *_s = (Str *)Iter_Get(&it);
-        if(it.idx < fnameStart){
-            StrVec_Add(v, _s);
+        if((flags & MORE) == 0){
+            total -= s->length;
+            if(s->type.state & MORE){
+                flags |= s->type.state & MORE;
+            }
+            continue;
         }else{
-            Str_Add(s, _s->bytes, s->length);
-        }
-        if(it.type.state & LAST){
-            StrVec_Add(v, _s);
+            Span_Set(v->p, s, it.idx);
         }
     }
-
+    v->total = total;
     return v;
 }
 
