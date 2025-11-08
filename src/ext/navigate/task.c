@@ -17,7 +17,6 @@ static status _taskErrorHandler(MemCh *m, Abstract *_tsk, Abstract *msg){
 }
 
 status Task_Tumble(Task *tsk){
-
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
     i16 guard = 0;

@@ -10,26 +10,7 @@ static  Object *Example_getPageData(Task *tsk, Route *rt){
     return Object_Make(tsk->m, ZERO);
 }
 
-static status Example_errorPopulate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
-    DebugStack_Push(tsk, tsk->type.of);
-    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-
-    Route *rt = Object_ByPath(tcp->pages, ctx->path, NULL, SPAN_OP_GET);
-    Object *data = Example_getPageData(tsk, rt);
-
-    Task_ResetChain(tsk);
-    HttpTask_InitResponse(tsk, NULL, source);
-    Task_AddStep(tsk, Example_ServeError, arg, source, ZERO);
-
-    tsk->type.state |= TcpTask_ExpectSend(NULL, tsk);
-
-    DebugStack_Pop();
-    return SUCCESS;
-}
-
-static status Example_log(Step *_st, Task *tsk){
+static status Example_logAndClose(Step *_st, Task *tsk){
     DebugStack_Push(_st, _st->type.of);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -62,6 +43,43 @@ static status Example_log(Step *_st, Task *tsk){
     return SUCCESS;
 }
 
+static status Example_errorPopulate(MemCh *_m, Task *tsk, Abstract *arg, Abstract *source){
+    DebugStack_Push(tsk, tsk->type.of);
+
+    printf("Error Populate\n");
+    fflush(stdout);
+
+    MemCh *m = tsk->m; 
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
+    ErrorMsg *msg = (ErrorMsg *)as(arg, TYPE_ERROR_MSG);
+
+    Object *data = Object_Make(m, TYPE_OBJECT);
+    Object *error = Object_Make(m, TYPE_OBJECT);
+    Object_Set(error,
+        (Abstract *)Str_FromCstr(m, "name", STRING_COPY),
+        (Abstract *)msg->lineInfo[0]);
+
+    Buff *bf = Buff_Make(m, ZERO);
+    Fmt(bf, (char *)msg->fmt->bytes, msg->args);
+    Object_Set(data,
+        (Abstract *)Str_FromCstr(m, "details", STRING_COPY), 
+        (Abstract *)bf->v);
+
+    StrVec *path = StrVec_From(m, Str_FromCstr(m, "/error.templ", STRING_COPY));
+    IoUtil_Annotate(m, path);
+    ctx->path = path;
+    ctx->code = 500;
+
+    Task_ResetChain(tsk);
+    HttpTask_InitResponse(tsk, NULL, source);
+    Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)data, NULL, ZERO);
+
+    DebugStack_Pop();
+    return SUCCESS;
+}
+
 static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
     DebugStack_Push(tsk, tsk->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
@@ -69,7 +87,7 @@ static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *sou
     pfd->fd = fdw->val.i;
 
     pfd = TcpTask_GetPollFd(tsk);
-    HttpTask_InitResponse(tsk, arg, source);
+    HttpTask_InitResponse(tsk, NULL, source);
     Task_AddStep(tsk, Example_ServePage, NULL, NULL, ZERO);
     HttpTask_AddRecieve(tsk, NULL, NULL);
 
@@ -105,7 +123,7 @@ static TcpCtx *tcpCtx_Make(MemCh *m, StrVec *path, i32 port, quad ip4, util ip6[
     TcpCtx *ctx = TcpCtx_Make(m);
     ctx->port = 3000;
     ctx->populate = Example_populate;
-    ctx->finalize = Example_log;
+    ctx->finalize = Example_logAndClose;
     ctx->path = path;
     return ctx;
 }
@@ -123,9 +141,7 @@ status WebServer_Run(MemCh *gm){
     TcpCtx *ctx = tcpCtx_Make(m, path, 3000, 0, ip6);
     routeInit(m, ctx);
     Task *tsk = ServeTcp_Make(ctx);
-    /*
     setErrorHandler(m, tsk);
-    */
 
     args[0] = (Abstract *)ctx;
     args[1] = NULL;

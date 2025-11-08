@@ -2,18 +2,6 @@
 #include <caneka.h>
 #include <web-server.h>
 
-status Example_ServeError(Step *st, Task *tsk){
-    DebugStack_Push(st, st->type.of);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-
-    Out("^b.ServeError^0\n", NULL);
-    st->type.state |= SUCCESS;
-
-    DebugStack_Pop();
-    return st->type.state;
-}
-
 status Example_ServePage(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     Abstract *args[5];
@@ -28,11 +16,16 @@ status Example_ServePage(Step *st, Task *tsk){
     IoUtil_Annotate(tsk->m, ctx->path);
     Route *handler = Route_GetHandler(tcp->pages, ctx->path);
 
+    Object *data = (Object *)st->data;
+    if(data == NULL){
+        data = Object_Make(m, ZERO);
+    } 
 
-    Object *data = Object_Make(m, ZERO);
     Object *nav = Object_Make(m, ZERO);
-    Object_Set(nav, (Abstract *)Str_FromCstr(m, "pages", STRING_COPY), (Abstract *)tcp->pages);
-    Object_Set(data, (Abstract *)Str_FromCstr(m, "nav", STRING_COPY), (Abstract *)nav);
+    Object_Set(nav,
+        (Abstract *)Str_FromCstr(m, "pages", STRING_COPY), (Abstract *)tcp->pages);
+    Object_Set(data,
+        (Abstract *)Str_FromCstr(m, "nav", STRING_COPY), (Abstract *)nav);
 
     if(handler == NULL){
         Str *s = Str_FromCstr(m, "not found", STRING_COPY);
