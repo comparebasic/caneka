@@ -171,13 +171,7 @@ StrVec *Path_ReJoinExt(MemCh *m, StrVec *path){
     }
 
     StrVec_Add(v, fname);
-
-    Abstract *args[3];
-    args[0] = (Abstract *)path;
-    args[1] = (Abstract *)v;
-    args[2] = NULL;
-    Out("^y.RejoinExt @ -> @^0\n", args);
-
+    v->type.state |= (path->type.state & STRVEC_PATH);
     return v;
 }
 

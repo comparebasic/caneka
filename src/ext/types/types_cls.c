@@ -52,15 +52,15 @@ static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstrac
     return NULL;
 }
 
-static i32 _objIndent = 0;
 
 static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
+    static i32 _objIndent = 0;
     Object *obj = (Object *)as(a, TYPE_OBJECT);
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
     Abstract *args[4];
     i32 dataCount = obj->order->nvalues;
     MemCh *m = Object_GetMem(obj);
-    if(flags & (MORE|DEBUG)){
+    if(flags & MORE){
         if(cls == NULL){
             args[0] = (Abstract *)Type_StateVec(m, obj->objType.of, obj->objType.state);
             Fmt(bf, "Object<@", args);
@@ -75,7 +75,7 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
             Iter_Init(&it, cls->propOrder);
             while((Iter_Next(&it) & END) == 0){
                 Hashed *h = Span_Get(obj->order, it.idx);
-                ToS(bf, h->key, ZERO, MORE); 
+                ToS(bf, h->key, ZERO, flags); 
                 Buff_AddBytes(bf, (byte *)": ", 2);
                 ToS(bf, h->value, ZERO, flags); 
                 if((it.type.state & LAST) == 0){
@@ -104,7 +104,7 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
                         Buff_AddBytes(bf, (byte *)"  ", 2);
                     }
                 }
-                ToS(bf, h->key, 0, MORE); 
+                ToS(bf, h->key, 0, flags); 
                 Buff_AddBytes(bf, (byte *)" -> ", 4);
                 if(flags & (MORE|DEBUG)){
                     ToS(bf, h->value, 0, flags);  
@@ -113,7 +113,7 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
                     if(h->value != NULL){
                         typeStr = Type_ToStr(bf->m, h->value->type.of);
                     }
-                    ToS(bf, (Abstract *)typeStr, 0, MORE);
+                    ToS(bf, (Abstract *)typeStr, 0, flags);
                 }
                 if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
                     _objIndent--;

@@ -122,7 +122,7 @@ status StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
 
             if(flags & (MORE|DEBUG)){
                 if((it.type.state & LAST) == 0){
-                    Buff_AddBytes(bf, (byte *)", ", 2);
+                    Buff_AddBytes(bf, (byte *)",", 1);
                 }
             }
 

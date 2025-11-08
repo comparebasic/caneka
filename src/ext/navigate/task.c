@@ -24,11 +24,13 @@ status Task_Tumble(Task *tsk){
     do {
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->parent != NULL){
-                Abstract *args[] = {
-                    (Abstract *)tsk,
-                    NULL,
-                };
-                Out("^y.Tumble Update Crit @^0\n", args);
+                if(tsk->type.state & DEBUG){
+                    Abstract *args[] = {
+                        (Abstract *)tsk,
+                        NULL,
+                    };
+                    Out("^y.Tumble Update Crit @^0\n", args);
+                }
                 Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
                 tsk->type.state &= ~TASK_UPDATE_CRIT;
             }

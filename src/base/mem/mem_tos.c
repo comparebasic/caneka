@@ -212,7 +212,7 @@ status Span_Print(Buff *bf, Abstract *a, cls type, word flags){
                 ToS(bf, it.value, 0, flags);
             }
             if((it.type.state & LAST) == 0 && (flags & MORE)){
-                Buff_AddBytes(bf, (byte *)", ", 2);
+                Buff_AddBytes(bf, (byte *)",", 1);
             }
         }
     }

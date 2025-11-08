@@ -34,26 +34,29 @@ static status Example_log(Step *_st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
-    Abstract *args[6];
+    MemBookStats st;
+    MemBook_GetStats(tsk->m, &st);
+    Abstract *args[8];
     args[0] = (Abstract *)Lookup_Get(HttpMethods, ctx->method);
     args[1] = (Abstract *)I32_Wrapped(tsk->m, ctx->code);
     args[2] = (Abstract *)ctx->path;
-    args[3] = NULL;
-    args[4] = NULL;
+    args[3] = (Abstract *)Str_MemCount(tsk->m, st.total * PAGE_SIZE),
+    args[4] = (Abstract *)I64_Wrapped(tsk->m, st.total),
+    args[5] = (Abstract *)I64_Wrapped(tsk->m, st.pageIdx),
+    args[6] = NULL;
+    args[7] = NULL;
 
     if(ctx->type.state & ERROR){
         args[4] = (Abstract *)ctx->errors;
         args[5] = NULL;
-        Out("^r.Error $/$ @ $ @^0\n", args);
+        Out("^r.Error $/$ @ $ @ $ $/$ ^{TIME.human}^0\n", args);
     }else if(ctx->code == 200){
-        Out("^g.Served $/$ @ $^0\n", args);
+        Out("^g.Served $/$ @ $ $/$ ^{TIME.human}^0\n", args);
     }else{
-        Out("^c.Responded $/$ @ ^{TIME.human}^0\n", args);
+        Out("^c.Responded $/$ @ $ $/$ ^{TIME.human}^0\n", args);
     }
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     close(pfd->fd);
-
-    Out("^b.log^0\n", NULL);
 
     DebugStack_Pop();
     return SUCCESS;

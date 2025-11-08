@@ -27,7 +27,6 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
 
 status TcpTask_WriteStep(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
-    Abstract *args[5];
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
 
@@ -42,12 +41,6 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
     if(bf->type.state & (SUCCESS|ERROR|END)){
         st->type.state |= SUCCESS;
     }
-
-    args[0] = NULL;
-    args[1] = (Abstract *)I64_Wrapped(tsk->m, bf->st.st_size);
-    args[2] = (Abstract *)bf;
-    args[3] = NULL;
-    Out("^c.^{STACK.name} sent:@ / @^0\n", args);
     
     DebugStack_Pop();
     return st->type.state;
