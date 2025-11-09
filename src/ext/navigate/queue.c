@@ -26,14 +26,14 @@ status Queue_Remove(Queue *q, i32 idx){
         sg = (Single *)Shelf_Get(&q->availableIt);
     }else{
         sg = I32_Wrapped(m, idx);
-        Shelf_Add(&q->availableIt, (Abstract *)sg);
+        Shelf_Add(&q->availableIt, sg);
     }
     sg->val.i = idx;
 
     return q->type.state;
 }
 
-i32 Queue_Add(Queue *q, Abstract *a){
+i32 Queue_Add(Queue *q, void *a){
     i32 idx = 0;
     Single *sg = NULL;
     if((sg = (Single *)Shelf_Get(&q->availableIt)) != NULL){
@@ -42,12 +42,12 @@ i32 Queue_Add(Queue *q, Abstract *a){
         idx = q->it.p->max_idx+1;
     }
 
-    Abstract *args[4];
+    void *args[4];
     MemCh *m = q->it.p->m;
     if(q->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(m, idx);
-        args[1] = (Abstract *)a;
-        args[2] = (Abstract *)q;
+        args[0] = I32_Wrapped(m, idx);
+        args[1] = a;
+        args[2] = q;
         args[3] = NULL;
         Out("^p.Queue_Add \\@$/@ @\n", args);
     }
@@ -55,7 +55,7 @@ i32 Queue_Add(Queue *q, Abstract *a){
     return idx;
 }
 
-status Queue_Set(Queue *q, i32 idx, Abstract *a){
+status Queue_Set(Queue *q, i32 idx, void *a){
     q->type.state &= ~(FLAG_ITER_REVERSE|END);
 
     status r = READY;
@@ -69,13 +69,13 @@ status Queue_Set(Queue *q, i32 idx, Abstract *a){
 
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     status r = READY;
-    Abstract *args[4];
+    void *args[4];
     MemCh *m = q->it.p->m;
     if(q->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(m, idx);
-        args[1] = (Abstract *)Str_Ref(m, 
+        args[0] = I32_Wrapped(m, idx);
+        args[1] = Str_Ref(m, 
             (byte *)value, sizeof(util), sizeof(util), STRING_BINARY);
-        args[2] = (Abstract *)q;
+        args[2] = q;
         args[3] = NULL;
         Out("^p.Queue_SetCriteria \\@$/@ @\n", args);
     }
@@ -83,7 +83,7 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     void *slab = NULL;
     QueueCrit *crit = Span_Get(q->handlers, critIdx);
     if(crit == NULL){
-        args[0] = (Abstract *)I32_Wrapped(ErrStream->m, critIdx);
+        args[0] = I32_Wrapped(ErrStream->m, critIdx);
         args[1] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Criteria object is null when adding criteria of critIdx $", args);
@@ -92,7 +92,7 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     if((slab = Span_Get(crit->data, slabIdx)) == NULL){
         slab = 
             (void *)Bytes_Alloc(m, sizeof(util)*CRIT_SLAB_STRIDE, TYPE_BYTES_POINTER);
-        r |= Span_Set(crit->data, slabIdx, (Abstract *)slab);
+        r |= Span_Set(crit->data, slabIdx, slab);
     } 
     i32 localIdx = idx-(slabIdx*CRIT_SLAB_STRIDE);
     util *uslab = (util *)slab;
@@ -114,13 +114,13 @@ status Queue_Reset(Queue *q){
 }
 
 status Queue_Next(Queue *q){
-    Abstract *args[5];
+    void *args[5];
     if(q->type.state & END){
         Queue_Reset(q);
     }
 
     if(q->type.state & DEBUG){
-        args[0] = (Abstract *)q;
+        args[0] = q;
         args[1] = NULL;
         Out("^p.Queue_Next @\n", args);
     }
@@ -135,7 +135,7 @@ status Queue_Next(Queue *q){
 
     while((Iter_Next(&q->it) & END) == 0){
         if(q->type.state & DEBUG){
-            args[0] = (Abstract *)I32_Wrapped(m, q->it.idx);
+            args[0] = I32_Wrapped(m, q->it.idx);
             args[1] = NULL;
             Out("^b.    Queue Iter_Next idx$^0\n", args);
         }
@@ -152,9 +152,9 @@ status Queue_Next(Queue *q){
                     if(slab != NULL){
                         q->go |= crit->func(crit, slab);
                         if(q->type.state & DEBUG){
-                            args[0] = (Abstract *)Str_Ref(m,
+                            args[0] = Str_Ref(m,
                                 (byte *)&q->go, sizeof(word), sizeof(word), STRING_BINARY);
-                            args[1] = (Abstract *)I32_Wrapped(m, it.idx);
+                            args[1] = I32_Wrapped(m, it.idx);
                             args[2] = NULL;
                             Out("^b.    go is now @ after handler $^0\n", args);
                         }
@@ -166,7 +166,7 @@ status Queue_Next(Queue *q){
         }
 
         if(q->type.state & DEBUG){
-            args[0] = (Abstract *)Str_Ref(m,
+            args[0] = Str_Ref(m,
                 (byte *)&q->go, sizeof(word), sizeof(word), STRING_BINARY);
             args[1] = NULL;
             Out("^b.    Queue go @\n", args);
@@ -177,8 +177,8 @@ status Queue_Next(Queue *q){
             q->type.state |= SUCCESS;
             q->value = Iter_Get(&q->it);
             if(q->type.state & DEBUG){
-                args[0] = (Abstract *)I32_Wrapped(m, q->it.idx);
-                args[1] = (Abstract *)q->value;
+                args[0] = I32_Wrapped(m, q->it.idx);
+                args[1] = q->value;
                 args[2] = NULL;
                 Out("^p.    Found \\@$/&\n", args);
             }
@@ -191,7 +191,7 @@ status Queue_Next(Queue *q){
 }
 
 i32 Queue_AddHandler(Queue *q, QueueCrit *crit){
-    Span_Add(q->handlers, (Abstract *)crit);
+    Span_Add(q->handlers, crit);
     return q->handlers->max_idx;
 }
 

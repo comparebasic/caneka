@@ -6,8 +6,8 @@ status Relation_HeadFromValues(Relation *rel){
     rel->stride = rel->it.p->nvalues;
     rel->headers = Span_ToArr(rel->it.p->m, rel->it.p);
     if(rel->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Ptr_Wrapped(ErrStream->m, rel->headers, TYPE_ARRAY),
+        void *args[] = {
+            Ptr_Wrapped(ErrStream->m, rel->headers, TYPE_ARRAY),
             NULL
         };
         Out("^p.Relation_HeadFromValues: &^0.\n", args);
@@ -59,15 +59,15 @@ status Relation_ResetIter(Relation *rel){
     return rel->it.type.state;
 }
 
-status Relation_SetValue(Relation *rel, i16 row, i16 col, Abstract *value){
+status Relation_SetValue(Relation *rel, i16 row, i16 col, void *value){
     return Iter_SetByIdx(&rel->it,  row * rel->stride + col, value);
 }
 
-status Relation_AddValue(Relation *rel, Abstract *value){
+status Relation_AddValue(Relation *rel, void *value){
     return Iter_Add(&rel->it, value);
 }
 
-Relation *Relation_Make(MemCh *m, i16 stride, Abstract **headers){
+Relation *Relation_Make(MemCh *m, i16 stride, void **headers){
     Relation *rel = (Relation *)MemCh_Alloc(m, sizeof(Relation));
     rel->type.of = TYPE_RELATION;
     rel->stride = stride;

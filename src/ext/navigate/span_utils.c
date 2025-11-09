@@ -1,10 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-int Span_AddOrdered(Span *p, Abstract *t){
+int Span_AddOrdered(Span *p, void *t){
     int idx = p->max_idx+1;
     int bIdx = p->max_idx;
-    Abstract *b = Span_Get(p, bIdx);
+    void *b = Span_Get(p, bIdx);
     while(Abs_Cmp(t, b) > 0){
         Span_Set(p, idx, b);
         idx = bIdx;
@@ -20,7 +20,7 @@ void *Span_ReserveNext(Span *p){
     Reserve rsv;
     memset(&rsv, 0, sizeof(Reserve));
     rsv.type.of = TYPE_RESERVE;
-    return Span_Set(p, Span_NextIdx(p), (Abstract *)&rsv);
+    return Span_Set(p, Span_NextIdx(p), &rsv);
 }
 
 status Span_Concat(Span *p, Span *add){
@@ -28,7 +28,7 @@ status Span_Concat(Span *p, Span *add){
     Iter it;
     Iter_Init(&it, add);
     while((Iter_Next(&it) & END) == 0){
-        Abstract *a = Iter_Get(&it);
+        void *a = Iter_Get(&it);
         if(a != NULL){
             r |= Span_Add(p, a);
         }
@@ -47,7 +47,7 @@ status Span_Move(Span *p, int fromIdx, int toIdx){
 
 Span *Span_From(MemCtx *m, int count, ...){
     Span *p = Span_Make(m);
-    Abstract *v = NULL;
+    void *v = NULL;
 	va_list arg;
     va_start(arg, count);
     for(int i = 0; i < count; i++){

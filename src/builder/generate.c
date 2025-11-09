@@ -13,9 +13,9 @@ static status out(i32 fd, char *buff, char **b){
 
 static status outfile(i32 ofd, char *vpath){
     i32 fd = open(vpath, O_RDONLY);
-    Abstract *args[2];
+    void *args[2];
     if(fd < 0){
-        args[0] = (Abstract *)Str_CstrRef(OutStream->m, vpath);
+        args[0] = Str_CstrRef(OutStream->m, vpath);
         args[1] = NULL;
         Fatal(FUNCNAME, FILENAME, LINENUMBER, 
             "Generate unable to open variable path: $", args);
@@ -34,7 +34,7 @@ static status outfile(i32 ofd, char *vpath){
     }while(length > 0);
 
     if(length < 0){
-        args[0] = (Abstract *)Str_CstrRef(OutStream->m, vpath);
+        args[0] = Str_CstrRef(OutStream->m, vpath);
         args[1] = NULL;
         Fatal(FUNCNAME, FILENAME, LINENUMBER, 
             "Generate writing to open variable path: $", args);
@@ -53,10 +53,10 @@ status Generate(MemCh *m, Str *path, Str *key, char* varpaths[], Str *outpath){
     i32 ofd = open(Str_Cstr(m, outpath), O_WRONLY|O_CREAT, mode);
 
     if(fd < 0 || ofd < 0){
-        Abstract *args[] = {
-            (Abstract *)path,
-            (Abstract *)outpath,
-            (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
+        void *args[] = {
+            path,
+            outpath,
+            Str_CstrRef(ErrStream->m, strerror(errno)),
             NULL
         };
         Fatal(FUNCNAME, FILENAME, LINENUMBER, 
@@ -97,9 +97,9 @@ status Generate(MemCh *m, Str *path, Str *key, char* varpaths[], Str *outpath){
                     out(ofd, buff, &b);
                     char *vpath = varpaths[varIdx];
                     if(vpath == NULL || (outfile(ofd, vpath) & ERROR)){
-                        Abstract *args[] = {
-                            (Abstract *)Str_CstrRef(ErrStream->m, vpath),
-                            (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno)),
+                        void *args[] = {
+                            Str_CstrRef(ErrStream->m, vpath),
+                            Str_CstrRef(ErrStream->m, strerror(errno)),
                             NULL
                         };
                         Fatal(FUNCNAME, FILENAME, LINENUMBER, 
@@ -132,9 +132,9 @@ status Generate(MemCh *m, Str *path, Str *key, char* varpaths[], Str *outpath){
     out(ofd, buff, &b);
 
     if(length < 0){
-        Abstract *args[] = {
-            (Abstract *)path,
-            (Abstract *)Str_CstrRef(m,  strerror(errno)),
+        void *args[] = {
+            path,
+            Str_CstrRef(m,  strerror(errno)),
             NULL
         };
         Fatal(FUNCNAME, FILENAME, LINENUMBER, 

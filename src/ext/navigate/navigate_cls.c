@@ -15,7 +15,7 @@ static status indentStream(Buff *bf, i32 indent){
     return SUCCESS;
 }
 
-static status Node_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status Node_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     Node *nd = (Node *)as(a, TYPE_NODE);
     MemCh *m = ctx->bf->m;
     status r = READY;
@@ -51,7 +51,7 @@ static status Node_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
         *ip = 0;
     }else{
         *ip = ctx->func(ctx, NULL);
-        r |= BinSegCtx_Send(ctx, (Abstract *)nd->atts, *ip);
+        r |= BinSegCtx_Send(ctx, nd->atts, *ip);
     }
     ip++;
 
@@ -83,15 +83,15 @@ static status Node_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     return r;
 }
 
-static status Mess_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status Mess_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     Mess *mess = (Mess *)as(a, TYPE_MESS);
     return Node_ToBinSeg(ctx, a, id);
 }
 
-static status CompResult_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
     CompResult *cr = (CompResult*)as(a, TYPE_COMPRESULT);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, cr->type.of, cr->type.state),
+    void *args[] = {
+        Type_StateVec(bf->m, cr->type.of, cr->type.state),
         cr->a,
         cr->b,
         NULL,
@@ -103,30 +103,30 @@ static status CompResult_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status QueueCrit_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
    QueueCrit *crit = (QueueCrit *)as(a, TYPE_QUEUE_CRIT);
-   Abstract *args[] = {
+   void *args[] = {
         NULL
    };
    return Fmt(bf, "QueueCrit<>", args);
 }
 
-static status Queue_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Queue_Print(Buff *bf, void *a, cls type, word flags){
     Queue *q = (Queue *)as(a, TYPE_QUEUE);
     status r = READY;
-    Abstract *args[6];
-    args[0] = (Abstract *)Type_StateVec(bf->m, q->type.of, q->type.state);
+    void *args[6];
+    args[0] = Type_StateVec(bf->m, q->type.of, q->type.state);
     args[1] = NULL;
     r |= Fmt(bf, "Queue<@ ", args);
     r |= Bits_Print(bf, (byte *)&q->go, sizeof(word), ZERO);
     if(flags & DEBUG){
-        args[0] = (Abstract *)&q->it;
-        args[1] = (Abstract *)q->handlers;
-        args[2] = (Abstract *)&q->availableIt;
+        args[0] = &q->it;
+        args[1] = q->handlers;
+        args[2] = &q->availableIt;
         args[3] = NULL;
         r |= Fmt(bf, " @ criteria:@ available:p>", args);
     }else{
-        args[0] = (Abstract *)I32_Wrapped(bf->m, q->it.p->nvalues);
+        args[0] = I32_Wrapped(bf->m, q->it.p->nvalues);
         args[1] = NULL;
         r |= Fmt(bf, " @nvalues>", args);
     }
@@ -134,11 +134,11 @@ static status Queue_Print(Buff *bf, Abstract *a, cls type, word flags){
     return r;
 }
 
-static status Comp_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Comp_Print(Buff *bf, void *a, cls type, word flags){
     Comp *comp = (Comp*)as(a, TYPE_COMP);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, comp->type.of, comp->type.state),
-        (Abstract *)&comp->it,
+    void *args[] = {
+        Type_StateVec(bf->m, comp->type.of, comp->type.state),
+        &comp->it,
         NULL
     };
     Fmt(bf, "Comp<$/It(@)\n", args);
@@ -152,19 +152,19 @@ static status Comp_Print(Buff *bf, Abstract *a, cls type, word flags){
     return Buff_AddBytes(bf, (byte *)">", 1);
 }
 
-static status Node_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Node_Print(Buff *bf, void *a, cls type, word flags){
     Node *nd = (Node*)as(a, TYPE_NODE);
-    Abstract *args[9];
-    args[0] = (Abstract *)Type_StateVec(bf->m, nd->type.of, nd->type.state);
-    args[1] = (Abstract *)Type_ToStr(bf->m, nd->typeOfChild);
-    args[2] = (Abstract *)Type_ToStr(bf->m, nd->captureKey);
-    args[3] = (Abstract *)(nd->parent != NULL ?
+    void *args[9];
+    args[0] = Type_StateVec(bf->m, nd->type.of, nd->type.state);
+    args[1] = Type_ToStr(bf->m, nd->typeOfChild);
+    args[2] = Type_ToStr(bf->m, nd->captureKey);
+    args[3] = (nd->parent != NULL ?
                   Type_ToStr(bf->m, nd->parent->captureKey) : NULL);
-    args[4] = (Abstract *)nd->atts;
-    args[5] = (Abstract *)Type_ToStr(bf->m,
+    args[4] = nd->atts;
+    args[5] = Type_ToStr(bf->m,
                  (nd->value != NULL ? nd->value->type.of : _TYPE_ZERO));
-    args[6] = (Abstract *)nd->value;
-    args[7] = (Abstract *)Type_ToStr(bf->m,
+    args[6] = nd->value;
+    args[7] = Type_ToStr(bf->m,
                  (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO));
     args[8] =  NULL;
     if(flags & DEBUG){
@@ -177,13 +177,13 @@ static status Node_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status Relation_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Relation_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
     Relation *rel = (Relation*)as(a, TYPE_RELATION);
-    Abstract *args[] = {
-        (Abstract *)I16_Wrapped(bf->m, rel->stride),
-        (Abstract *)I32_Wrapped(bf->m, Relation_RowCount(rel)),
-        (Abstract *)(rel->headers != NULL ?
+    void *args[] = {
+        I16_Wrapped(bf->m, rel->stride),
+        I32_Wrapped(bf->m, Relation_RowCount(rel)),
+        (rel->headers != NULL ?
             Ptr_Wrapped(bf->m, rel->headers, TYPE_ARRAY): NULL),
         NULL
     };
@@ -210,14 +210,14 @@ static status Relation_Print(Buff *bf, Abstract *a, cls type, word flags){
 static status MessClimber_PrintItems(Buff *bf, MessClimber *climber, word flags){
     i32 nested = ++climber->nested;
     if(climber->current != NULL){
-        Abstract *current = climber->current;
+        void *current = climber->current;
         Buff_AddBytes(bf, (byte *)"\n", 1);
         while(nested--){
             Buff_AddBytes(bf, (byte *)"  ", 2);
         }
         if(current->type.of == TYPE_NODE){
             Node *nd = (Node *)climber->current;
-            ToS(bf, (Abstract *)nd, 0, flags);
+            ToS(bf, nd, 0, flags);
             if(nd->typeOfChild == TYPE_SPAN){
                 Buff_AddBytes(bf, (byte *)"[", 1);
                 Iter it;
@@ -253,20 +253,20 @@ static status MessClimber_PrintItems(Buff *bf, MessClimber *climber, word flags)
     return SUCCESS;
 }
 
-static status Mess_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Mess_Print(Buff *bf, void *a, cls type, word flags){
     Mess *ms = (Mess *)as(a, TYPE_MESS);
     if((flags & (DEBUG|MORE)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }else{
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, ms->type.of, ms->type.state),
+        void *args[] = {
+            Type_StateVec(bf->m, ms->type.of, ms->type.state),
             NULL
         };
         Fmt(bf, "Mess<$", args);
         if(flags & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)ms->current,
-                (Abstract *)ms->currentValue,
+            void *args[] = {
+                ms->current,
+                ms->currentValue,
                 NULL
             };
             Fmt(bf, " current:$ value:@ [", args);
@@ -277,39 +277,39 @@ static status Mess_Print(Buff *bf, Abstract *a, cls type, word flags){
             .type = {TYPE_MESS_CLIMBER, 0},
             .nested = 1,
             .mess = ms,
-            .current = (Abstract *)ms->root,
+            .current = ms->root,
         };
         MessClimber_PrintItems(bf, &climber, flags|DEBUG);
         return Buff_AddBytes(bf, (byte *)"\n]>", 3);
     }
 }
 
-static status Step_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Step_Print(Buff *bf, void *a, cls type, word flags){
     Step *st = (Step *)as(a, TYPE_STEP);
-    Abstract *args[5];
-    args[0] = (Abstract *)Type_StateVec(bf->m, st->type.of, st->type.state);
-    args[1] = (Abstract *)Util_Wrapped(bf->m, (util)st->func);
+    void *args[5];
+    args[0] = Type_StateVec(bf->m, st->type.of, st->type.state);
+    args[1] = Util_Wrapped(bf->m, (util)st->func);
     args[4] = NULL;
     if(flags & DEBUG){
         args[2] = st->arg;
         args[3] = st->source;
         return Fmt(bf, "Step<$ ^D.$^d.func arg:@ source:@>", args);
     }else{
-        args[2] = (Abstract *)Type_ToStr(bf->m,
+        args[2] = Type_ToStr(bf->m,
             st->arg != NULL ? st->arg->type.of : ZERO);
-        args[3] = (Abstract *)Type_ToStr(bf->m,
+        args[3] = Type_ToStr(bf->m,
             st->source != NULL ? st->source->type.of : ZERO);
         return Fmt(bf, "Step<$ ^D.$^d.func arg:$ source:$>", args);
     }
 }
 
-static status Task_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Task_Print(Buff *bf, void *a, cls type, word flags){
     Task *tsk = (Task *)as(a, TYPE_TASK);
-    Abstract *args[6];
-    args[0] = (Abstract *)Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
-    args[1] = (Abstract *)I32_Wrapped(bf->m, tsk->chainIt.idx);
-    args[2] = (Abstract *)I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
-    args[3] = (Abstract *)Iter_Current(&tsk->chainIt);
+    void *args[6];
+    args[0] = Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
+    args[1] = I32_Wrapped(bf->m, tsk->chainIt.idx);
+    args[2] = I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
+    args[3] = Iter_Current(&tsk->chainIt);
     args[5] = NULL;
     if(flags & DEBUG){
         args[4] = tsk->data;
@@ -321,14 +321,14 @@ static status Task_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status Frame_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Frame_Print(Buff *bf, void *a, cls type, word flags){
     Frame *fm = (Frame *)as(a, TYPE_FRAME);
-    Abstract *args[] = {
-        (Abstract *)I32_Wrapped(bf->m, fm->originIdx),
-        (Abstract *)fm->originKey,
-        (Abstract *)(fm->value != NULL ? Type_ToStr(bf->m, fm->value->type.of): NULL),
-        (Abstract *)I32_Wrapped(bf->m, fm->it.idx),
-        (Abstract *)Iter_Current(&fm->it),
+    void *args[] = {
+        I32_Wrapped(bf->m, fm->originIdx),
+        fm->originKey,
+        (fm->value != NULL ? Type_ToStr(bf->m, fm->value->type.of): NULL),
+        I32_Wrapped(bf->m, fm->it.idx),
+        Iter_Current(&fm->it),
         NULL,
     };
     return Fmt(bf, "Frame<from:@/@ @[@]>", args);

@@ -20,14 +20,14 @@ status Mess_Outdent(Mess *mess){
 
 status Mess_Compare(MemCh *m, Mess *a, Mess *b){
     DebugStack_Push(a, a->type.of);
-    Comp *comp = Comp_Make(m, (Abstract *)a->root, (Abstract *)b->root);
+    Comp *comp = Comp_Make(m, a->root, b->root);
     if(a->type.state & DEBUG){
         comp->type.state |= DEBUG;
     }
     while((Compare(comp) & (SUCCESS|ERROR|NOOP)) == 0){}
     if(comp->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)comp,
+        void *args[] = {
+            comp,
             NULL
         };
         Out("^p.End Compare @^0.\n", args);
@@ -40,8 +40,8 @@ status Mess_Compare(MemCh *m, Mess *a, Mess *b){
 status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
     DebugStack_Push(NULL, 0);
     if(tk->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)tk,
+        void *args[] = {
+            tk,
             NULL
         };
         Out("Mess_Token: @\n", args);
@@ -58,8 +58,8 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
             if(mess->nextAtts == NULL){
                 mess->nextAtts = Table_Make(mess->m);
             }
-            Table_Set(mess->nextAtts, (Abstract *)I16_Wrapped(mess->m, tk->captureKey),
-                (Abstract *)a);
+            Table_Set(mess->nextAtts, I16_Wrapped(mess->m, tk->captureKey),
+                a);
             DebugStack_Pop();
             return mess->type.state;
         }
@@ -72,16 +72,16 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
         nd->captureKey = tk->captureKey;
         if(tk->typeOf == TYPE_RELATION){
             nd->typeOfChild = TYPE_RELATION;
-            nd->child = (Abstract *)Relation_Make(mess->m, 0, NULL);
+            nd->child = Relation_Make(mess->m, 0, NULL);
         }else{
             if(tk->type.state & TOKEN_ATTR_VALUE){
                 Mess_AddAtt(mess, nd, 
-                    (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
+                    I16_Wrapped(mess->m, tk->captureKey), a);
             }
         }
-        a = (Abstract *)nd;
+        a = nd;
     }else if(tk->typeOf == TYPE_SPAN){
-        a = (Abstract *)Span_Make(mess->m);
+        a = Span_Make(mess->m);
     }
 
     Mess_GetOrSet(mess, mess->current, a, tk);
@@ -89,15 +89,15 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
     return mess->type.state;
 }
 
-status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
+status Mess_GetOrSet(Mess *mess, Node *node, void *a, Tokenize *tk){
     Abstract *current = NULL;
     if(tk == NULL){
         memcpy(tk, &mess->current->tk, sizeof(Tokenize));
     }
     if(node == NULL || a == NULL){
-        Abstract *args[] = {
-            (Abstract *)a,
-            (Abstract *)mess,
+        void *args[] = {
+            a,
+            mess,
             NULL
         };
         Error(mess->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -106,7 +106,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
     }
 
     if(node->typeOfChild == TYPE_WRAPPED_PTR){
-        a = (Abstract *)Ptr_Wrapped(mess->m, (Abstract *)a, tk->type.of);
+        a = Ptr_Wrapped(mess->m, a, tk->type.of);
     }
 
     current = a;
@@ -121,14 +121,14 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
             Tokenize _tk;
             memset(&_tk, 0, sizeof(Tokenize));
             _tk.type.of = TYPE_TOKENIZE;
-            Mess_GetOrSet(mess, node, (Abstract *)nd, &_tk);
+            Mess_GetOrSet(mess, node, nd, &_tk);
             return Mess_GetOrSet(mess, mess->current, a, tk);
         }
     }
 
     if(tk->type.state & TOKEN_NO_CONTENT){
         if(tk->typeOf == TYPE_STRVEC){
-            a = (Abstract *)StrVec_Make(mess->m);
+            a = StrVec_Make(mess->m);
             current = a;
         }else{
             current = NULL;
@@ -145,21 +145,21 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
     if(tk->type.state & TOKEN_ATTR_VALUE && 
             (tk->typeOf != ZERO && tk->typeOf != TYPE_NODE && tk->typeOf != TYPE_RELATION)){
         Mess_AddAtt(mess, mess->current, 
-            (Abstract *)I16_Wrapped(mess->m, tk->captureKey), (Abstract *)a);
+            I16_Wrapped(mess->m, tk->captureKey), a);
     }else if(node->typeOfChild == 0){
         node->child = a;
         node->typeOfChild = a->type.of;
         goto end;
     }else if(((tk->type.state & TOKEN_NO_COMBINE) == 0) &&
-            mess->currentValue != NULL && CanCombine((Abstract *)mess->currentValue, a)){
+            mess->currentValue != NULL && CanCombine(mess->currentValue, a)){
 
         if((tk->type.state & TOKEN_SEPERATE) && 
                 mess->currentValue->type.of == TYPE_STRVEC &&
                 ((StrVec *)mess->currentValue)->total > 0){
             Str *s = Str_Ref(mess->m, (byte *)" ", 1, 2, STRING_COPY);
-            Combine((Abstract *)mess->currentValue, (Abstract *)s);
+            Combine(mess->currentValue, s);
         }
-        Combine((Abstract *)mess->currentValue, a);
+        Combine(mess->currentValue, a);
         current = NULL;
         goto end;
     }else if(node->typeOfChild == TYPE_SPAN){
@@ -176,7 +176,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk){
         goto end;
     }else{
         Abstract *value = node->child;
-        node->child = (Abstract *)Span_Make(mess->m);
+        node->child = Span_Make(mess->m);
         node->typeOfChild = TYPE_SPAN;
         Span_Add((Span *)node->child, value);
         Span_Add((Span *)node->child, a);
@@ -200,7 +200,8 @@ end:
     return node->type.state;
 }
 
-status Mess_Append(Mess *mess, Node *node, Abstract *a){
+status Mess_Append(Mess *mess, Node *node, void *_a){
+    Abstract *a = (Abstract *)_a;
     if(a->type.of == TYPE_MESS){
         Node *child = (Node *)a;
         child->parent = node;
@@ -208,7 +209,7 @@ status Mess_Append(Mess *mess, Node *node, Abstract *a){
     return Mess_GetOrSet(mess, node, a, NULL);
 }
 
-status Mess_AddAtt(Mess *mess, Node *node, Abstract *key, Abstract *value){
+status Mess_AddAtt(Mess *mess, Node *node, void *key, void *value){
     if(node->atts == NULL){
         node->atts = Table_Make(mess->m); 
     } 

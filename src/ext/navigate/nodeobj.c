@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Abstract *NodeObj_Att(NodeObj *nobj, Abstract *key){
+void *NodeObj_Att(NodeObj *nobj, void *key){
     Table *tbl = (Table *)Object_GetPropByIdx(nobj, NODEOBJ_PROPIDX_ATTS);
     if(tbl != NULL){
         return Table_Get(tbl, key);

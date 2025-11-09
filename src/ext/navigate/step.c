@@ -14,7 +14,7 @@ status Step_Delay(Step *st, Task *tsk){
     return st->type.state;
 }
 
-Step *Step_Make(MemCh *m, StepFunc func, Abstract *arg, Abstract *source, word flags){
+Step *Step_Make(MemCh *m, StepFunc func, void *arg, void *source, word flags){
     Step *st = MemCh_AllocOf(m, sizeof(Step), TYPE_STEP);
     st->type.of = TYPE_STEP;
     st->type.state = flags;

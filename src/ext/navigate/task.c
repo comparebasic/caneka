@@ -3,11 +3,11 @@
 
 Table *TaskErrorHandlers = NULL; /* TaskPopulate */
 
-static status _taskErrorHandler(MemCh *m, Abstract *_tsk, Abstract *msg){
-    Abstract *args[5];
+static status _taskErrorHandler(MemCh *m, void *_tsk, void *msg){
+    void *args[5];
     Task *tsk = (Task *)as(_tsk, TYPE_TASK);
     Single *key = Util_Wrapped(m, (util)tsk->parent);
-    Single *funcW = (Single *)Table_Get(TaskErrorHandlers, (Abstract *)key);
+    Single *funcW = (Single *)Table_Get(TaskErrorHandlers, key);
     if(funcW != NULL){
         TaskPopulate func = (TaskPopulate)funcW->val.ptr;
         func(m, tsk, msg, tsk->source);
@@ -24,8 +24,8 @@ status Task_Tumble(Task *tsk){
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->parent != NULL){
                 if(tsk->type.state & DEBUG){
-                    Abstract *args[] = {
-                        (Abstract *)tsk,
+                    void *args[] = {
+                        tsk,
                         NULL,
                     };
                     Out("^y.Tumble Update Crit @^0\n", args);
@@ -42,9 +42,9 @@ status Task_Tumble(Task *tsk){
         }
 
         if(tsk->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)Util_Wrapped(OutStream->m, (util)st->func),
-                (Abstract *)tsk,
+            void *args[] = {
+                Util_Wrapped(OutStream->m, (util)st->func),
+                tsk,
                 NULL,
             };
             Out("^y.Tumble -> ^D.$,^d. of &^0\n", args);
@@ -91,19 +91,19 @@ status Task_ResetChain(Task *tsk){
     return SUCCESS;
 }
 
-status Task_AddDataStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags){
+status Task_AddDataStep(Task *tsk, StepFunc func, void *arg, void *data, void *source, word flags){
     Step *st = Step_Make(tsk->m, func, arg, source, flags);
     st->data = data;
-    status r = Iter_Add(&tsk->chainIt, (Abstract *)st);
+    status r = Iter_Add(&tsk->chainIt, st);
     tsk->type.state |= MORE;
     return r|MORE;
 }
 
-status Task_AddStep(Task *tsk, StepFunc func, Abstract *arg, Abstract *source, word flags){
+status Task_AddStep(Task *tsk, StepFunc func, void *arg, void *source, word flags){
     return Task_AddDataStep(tsk, func, arg, NULL, source, flags);
 }
 
-Task *Task_Make(Span *chain, Abstract *source){
+Task *Task_Make(Span *chain, void *source){
     MemCh *m = NULL;
     if(chain == NULL){
         m = MemCh_Make();

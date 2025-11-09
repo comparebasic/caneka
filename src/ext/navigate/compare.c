@@ -1,9 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-status Compare_Push(Comp *comp, Abstract *a, Abstract *b){
+status Compare_Push(Comp *comp, void *a, void *b){
     CompResult *cr = CompResult_Make(comp->m, a, b);
-    return Iter_Add(&comp->it, (Abstract *)cr);
+    return Iter_Add(&comp->it, cr);
 }
 
 status Compare(Comp *comp){
@@ -20,8 +20,8 @@ status Compare(Comp *comp){
     if(cr->a == NULL || cr->b == NULL || cr->a->type.of != cr->b->type.of){
         comp->type.state |= NOOP;
     }else{
-        Abstract *a = cr->a;
-        Abstract *b = cr->b;
+        Abstract *a = (Abstract *)cr->a;
+        Abstract *b = (Abstract *)cr->b;
         if(a->type.of == TYPE_ITER){
             if(((Iter_Next((Iter *)cr->a) & END) | (Iter_Next((Iter *)cr->b) & END))
                     == 0){
@@ -36,9 +36,9 @@ status Compare(Comp *comp){
                 comp->type.state |= NOOP;
                 if(comp->type.state & DEBUG){
                     Abstract *args[] = {
-                        (Abstract *)comp,
-                        (Abstract *)cr->a,
-                        (Abstract *)cr->b,
+                        comp,
+                        cr->a,
+                        cr->b,
                         NULL
                     };
                     Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
@@ -58,9 +58,9 @@ status Compare(Comp *comp){
                         comp->type.state |= NOOP;
                         if(comp->type.state & DEBUG){
                             Abstract *args[] = {
-                                (Abstract *)Type_ToStr(comp->m, na->typeOfChild),
-                                (Abstract *)Type_ToStr(comp->m, nb->typeOfChild),
-                                (Abstract *)comp,
+                                Type_ToStr(comp->m, na->typeOfChild),
+                                Type_ToStr(comp->m, nb->typeOfChild),
+                                comp,
                                 NULL
                             };
                             Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
@@ -73,7 +73,7 @@ status Compare(Comp *comp){
                         if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
                             if(comp->type.state & DEBUG){
                                 Abstract *args[] = {
-                                    (Abstract *)comp,
+                                    comp,
                                     NULL
                                 };
                                 Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
@@ -83,11 +83,11 @@ status Compare(Comp *comp){
                         }
                     }
                     if(na->atts != NULL && na->atts != nb->atts){
-                        Compare_Push(comp, (Abstract *)na->atts, (Abstract *)nb->atts);
+                        Compare_Push(comp, na->atts, nb->atts);
                         if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
                             if(comp->type.state & DEBUG){
                                 Abstract *args[] = {
-                                    (Abstract *)comp,
+                                    comp,
                                     NULL
                                 };
                                 Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
@@ -98,7 +98,7 @@ status Compare(Comp *comp){
                     }else if(nb->atts != NULL){
                         if(comp->type.state & DEBUG){
                             Abstract *args[] = {
-                                (Abstract *)comp,
+                                comp,
                                 NULL
                             };
                             Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
@@ -114,16 +114,16 @@ status Compare(Comp *comp){
                             Iter_Setup(&ra->it, ra->it.p, SPAN_OP_GET, 0);
                             Iter_Setup(&rb->it, rb->it.p, SPAN_OP_GET, 0);
                             Compare_Push(comp,
-                                (Abstract *)&ra->it, 
-                                (Abstract *)&rb->it);
+                                &ra->it, 
+                                &rb->it);
                         }else if(nb->child->type.of == TYPE_SPAN){
                             Compare_Push(comp,
-                                (Abstract *)Iter_Make(comp->m, (Span *)na->child), 
-                                (Abstract *)Iter_Make(comp->m, (Span *)na->child));
+                                Iter_Make(comp->m, (Span *)na->child), 
+                                Iter_Make(comp->m, (Span *)na->child));
                         }else{
                             Compare_Push(comp,
-                                (Abstract *)na->child, 
-                                (Abstract *)nb->child);
+                                na->child, 
+                                nb->child);
                         }
                         Compare(comp);
                     }
@@ -132,9 +132,9 @@ status Compare(Comp *comp){
                     if(!Equals(a, b)){
                         if(comp->type.state & DEBUG){
                             Abstract *args[] = {
-                                (Abstract *)comp,
-                                (Abstract *)a,
-                                (Abstract *)b,
+                                comp,
+                                a,
+                                b,
                                 NULL
                             };
                             Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
@@ -184,6 +184,6 @@ Comp *Comp_Make(MemCh *m, Abstract *a, Abstract *b){
     }
 
     Iter_Init(&comp->it, Span_Make(m));
-    Iter_Add(&comp->it, (Abstract *)cr);
+    Iter_Add(&comp->it, cr);
     return comp;
 }

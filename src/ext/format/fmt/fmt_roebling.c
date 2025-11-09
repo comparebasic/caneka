@@ -167,10 +167,10 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mess = (Mess *)as(rbl->dest, TYPE_MESS);
     Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
     if(mess->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(OutStream->m, captureKey),
-            (Abstract *)v,
-            (Abstract *)tk,
+        void *args[] = {
+            Type_ToStr(OutStream->m, captureKey),
+            v,
+            tk,
             NULL
         };
         Out("^c.Fmt After Capture ^E0.$^ec./@ -> @\n", args);
@@ -181,8 +181,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         }
         Mess_Tokenize(mess, tk, v);
     }else{
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(rbl->m, captureKey),
+        void *args[] = {
+            Type_ToStr(rbl->m, captureKey),
             NULL
         };
         Error(rbl->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -192,29 +192,29 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     return SUCCESS;
 }
 
-Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, Abstract *source){
+Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, void *source){
     DebugStack_Push(curs, curs->type.of);
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_START));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)start));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_LINE));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)line));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_VALUE));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)value));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_TABLE_VALUE));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)tableValue));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_LABEL));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)label));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_TAG_VALUE));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)tagValue));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMATTER_END));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMATTER_START));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMATTER_LINE));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)line));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMATTER_VALUE));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)value));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMATTER_TABLE_VALUE));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)tableValue));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMATTER_LABEL));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)label));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMATTER_TAG_VALUE));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)tagValue));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMATTER_END));
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
 
     Mess *mess = Mess_Make(m);
     mess->tokenizer = FormatFmt_Defs;
-    rbl->dest = (Abstract *)mess;
+    rbl->dest = mess;
     rbl->source = source;
     DebugStack_Pop();
     return rbl;

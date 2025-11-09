@@ -1,3 +1,5 @@
+#include <external.h> 
+#include <caneka.h> 
 
 static Table *ordTableFuncs = NULL;
 

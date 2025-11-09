@@ -2,7 +2,7 @@
 #include <caneka.h>
 #include <builder.h>
 
-static status renderStatus(MemCh *m, Abstract *a){
+static status renderStatus(MemCh *m, void *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
 
@@ -21,7 +21,7 @@ static status renderStatus(MemCh *m, Abstract *a){
     MemBook_GetStats(m, &st);
 
     CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memTotal"),
-        (Abstract *)Str_MemCount(ctx->m, MemChapterTotal()*PAGE_SIZE));
+        Str_MemCount(ctx->m, MemChapterTotal()*PAGE_SIZE));
 
     Single *sg = (Single *)as(CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chapters")), TYPE_WRAPPED_I64);
@@ -38,8 +38,8 @@ static status setupComplete(BuildCtx *ctx){
     FmtLine *ln = Span_Get(ctx->cli->lines, 0);
     ln->fmt = "^g.Complete - ^D.$^d.sources/^D.$^d.modules^0.";
     ln->args = Arr_Make(ctx->m, 2);
-    ln->args[0] = (Abstract *)ctx->fields.steps.total;
-    ln->args[1] = (Abstract *)ctx->fields.steps.modTotal;
+    ln->args[0] = ctx->fields.steps.total;
+    ln->args[1] = ctx->fields.steps.modTotal;
 
     ln = Span_Get(ctx->cli->lines, 1);
     ln->fmt = "";
@@ -51,7 +51,7 @@ static status setupComplete(BuildCtx *ctx){
     ln->fmt = "^G.$^0.";
 
     ln = Span_Get(ctx->cli->lines, 4);
-    ln->args[0] = (Abstract *)Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
+    ln->args[0] = Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
 
     return SUCCESS;
 }
@@ -95,24 +95,24 @@ static status setupStatus(BuildCtx *ctx){
     i32 width = ctx->cli->cols;
     IntPair coords = {0, 0};
 
-    Abstract **arr = Arr_Make(m, 3);
-    arr[0] = (Abstract *)ctx->fields.steps.modCount;
-    arr[1] = (Abstract *)ctx->fields.steps.modTotal;
-    arr[2] = (Abstract *)ctx->fields.steps.name;
+    void **arr = Arr_Make(m, 3);
+    arr[0] = ctx->fields.steps.modCount;
+    arr[1] = ctx->fields.steps.modTotal;
+    arr[2] = ctx->fields.steps.name;
     Span_Add(ctx->cli->lines, 
-        (Abstract *)FmtLine_Make(m, "^y.module $ of $: ^D.$^0", arr));
+        FmtLine_Make(m, "^y.module $ of $: ^D.$^0", arr));
 
     arr = Arr_Make(m, 3);
-    arr[0] = (Abstract *)ctx->fields.current.action;
-    arr[1] = (Abstract *)ctx->fields.current.source;
+    arr[0] = ctx->fields.current.action;
+    arr[1] = ctx->fields.current.source;
 
     Span_Add(ctx->cli->lines, 
-        (Abstract *)FmtLine_Make(m, "^b.$: $", arr));
+        FmtLine_Make(m, "^b.$: $", arr));
 
     arr = Arr_Make(m, 1);
-    arr[0] = (Abstract *)ctx->fields.current.dest;
+    arr[0] = ctx->fields.current.dest;
     Span_Add(ctx->cli->lines, 
-        (Abstract *)FmtLine_Make(m, "    -> ^D.$^0", arr));
+        FmtLine_Make(m, "    -> ^D.$^0", arr));
 
     ctx->fields.steps.barStart = Str_Make(m, width);
     memset(ctx->fields.steps.barStart->bytes, ' ', width);
@@ -121,19 +121,19 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.steps.barStart->length = 0;
     
     arr = Arr_Make(m, 2);
-    arr[0] = (Abstract *)ctx->fields.steps.barStart; 
-    arr[1] = (Abstract *)ctx->fields.steps.barEnd;
+    arr[0] = ctx->fields.steps.barStart; 
+    arr[1] = ctx->fields.steps.barEnd;
     Span_Add(ctx->cli->lines,
-        (Abstract *)FmtLine_Make(m, "^B.$^0.^Y.$^0", arr));
+        FmtLine_Make(m, "^B.$^0.^Y.$^0", arr));
 
     arr = Arr_Make(m, 5);
     arr[0] = NULL;
-    arr[1] = (Abstract *)I64_Wrapped(m, 0);
-    arr[2] = (Abstract *)I64_Wrapped(m, 0);
-    arr[3] = (Abstract *)I64_Wrapped(m, PAGE_SIZE);
+    arr[1] = I64_Wrapped(m, 0);
+    arr[2] = I64_Wrapped(m, 0);
+    arr[3] = I64_Wrapped(m, PAGE_SIZE);
     arr[4] = NULL;
     Span_Add(ctx->cli->lines,
-        (Abstract *)FmtLine_Make(m,
+        FmtLine_Make(m,
             "^c.Memory $ total/maxIdx=^D.$/$^d. page-size=$b^0", arr));
 
     coords.a = ctx->cli->lines->max_idx;
@@ -162,46 +162,46 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
     Str_AddCstr(dest, target->bin);
 
     ProcDets pd;
-    if(IoUtil_CmpUpdated(ctx->m, source, dest, NULL)){
-        Abstract *args[] = {
-            (Abstract *)source,
-            (Abstract *)dest,
+    if(IoUtil_CmpUpdated(ctx->m, source, dest)){
+        void *args[] = {
+            source,
+            dest,
             NULL
         };
         Out("^c.Building Executable $ -> $^0.\n", args);
 
         Span *cmd = Span_Make(ctx->m);
-        Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, ctx->tools.cc));
+        Span_Add(cmd, Str_CstrRef(ctx->m, ctx->tools.cc));
 
         char **ptr = ctx->args.cflags;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            Span_Add(cmd, Str_CstrRef(ctx->m, *ptr));
             ptr++;
         }
 
-        Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, "-o"));
-        Span_Add(cmd, (Abstract *)dest);
+        Span_Add(cmd, Str_CstrRef(ctx->m, "-o"));
+        Span_Add(cmd, dest);
 
         ptr = ctx->args.inc;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            Span_Add(cmd, Str_CstrRef(ctx->m, *ptr));
             ptr++;
         }
 
-        Span_Add(cmd, (Abstract *)source);
+        Span_Add(cmd, source);
 
         if(lib != NULL){
-            Span_Add(cmd, (Abstract *)lib);
+            Span_Add(cmd, lib);
         }
         ptr = ctx->args.staticLibs;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            Span_Add(cmd, Str_CstrRef(ctx->m, *ptr));
             ptr++;
         }
 
         ptr = ctx->args.libs;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)Str_CstrRef(ctx->m, *ptr));
+            Span_Add(cmd, Str_CstrRef(ctx->m, *ptr));
             ptr++;
         }
 
@@ -210,8 +210,8 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
         r |= SubProcess(ctx->m, cmd, &pd);
         if(r & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
-            Abstract *args[] = {
-                (Abstract *)cmd,
+            void *args[] = {
+                cmd,
                 NULL
             };
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for exec: $", args);
@@ -229,20 +229,20 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     Span *cmd = Span_Make(m);
     ProcDets pd;
 
-    if(IoUtil_CmpUpdated(m, source, dest, NULL)){
+    if(IoUtil_CmpUpdated(m, source, dest)){
         Str_Reset(ctx->fields.current.action);
         Str_AddCstr(ctx->fields.current.action, "build obj");
         CliStatus_Print(OutStream, ctx->cli);
 
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.cc));
+        Span_Add(cmd, Str_CstrRef(m, ctx->tools.cc));
         char **ptr = ctx->args.cflags;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
+            Span_Add(cmd, Str_CstrRef(m, *ptr));
             ptr++;
         }
         ptr = ctx->args.inc;
         while(*ptr != NULL){
-            Span_Add(cmd, (Abstract *)Str_CstrRef(m, *ptr));
+            Span_Add(cmd, Str_CstrRef(m, *ptr));
             ptr++;
         }
 
@@ -258,19 +258,19 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
             Str_AddCstr(s, "-I");
             Str_Add(s, genDest->bytes, genDest->length);
 
-            Span_Add(cmd, (Abstract *)s);
+            Span_Add(cmd, s);
         }
 
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-c"));
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-o"));
-        Span_Add(cmd, (Abstract *)dest);
-        Span_Add(cmd, (Abstract *)source);
+        Span_Add(cmd, Str_CstrRef(m, "-c"));
+        Span_Add(cmd, Str_CstrRef(m, "-o"));
+        Span_Add(cmd, dest);
+        Span_Add(cmd, source);
 
         ProcDets_Init(&pd);
         r |= SubProcess(m, cmd, &pd);
         if(r & ERROR){
-            Abstract *args[] = {
-                (Abstract *)cmd,
+            void *args[] = {
+                cmd,
                 NULL
             };
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: $", args);
@@ -278,10 +278,10 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
         }
 
         Span_ReInit(cmd);
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, ctx->tools.ar));
-        Span_Add(cmd, (Abstract *)Str_CstrRef(m, "-rc"));
-        Span_Add(cmd, (Abstract *)lib);
-        Span_Add(cmd, (Abstract *)dest);
+        Span_Add(cmd, Str_CstrRef(m, ctx->tools.ar));
+        Span_Add(cmd, Str_CstrRef(m, "-rc"));
+        Span_Add(cmd, lib);
+        Span_Add(cmd, dest);
         ProcDets_Init(&pd);
         status re = SubProcess(m, cmd, &pd);
         if(re & ERROR){
@@ -375,7 +375,7 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
 static status build(BuildCtx *ctx){
     status r = READY;
     DebugStack_Push(NULL, 0);
-    Abstract *args[5];
+    void *args[5];
     MemCh *m = ctx->m;
     setupStatus(ctx);
     Str *libDir = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
@@ -424,8 +424,8 @@ static status build(BuildCtx *ctx){
 
             r |= Generate(m, genSrc, key, config->args, genDest);
             if(r & ERROR){
-                args[0] = (Abstract *)genSrc;
-                args[1] = (Abstract *)genDest;
+                args[0] = genSrc;
+                args[1] = genDest;
                 args[2] = NULL;
                 Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error generating static file: $ -> $", args);
                 return ERROR;
@@ -472,7 +472,7 @@ status BuildCtx_Init(MemCh *m, BuildCtx *ctx){
     memset(ctx, 0, sizeof(BuildCtx));
     ctx->type.of = TYPE_BUILDCTX;
     ctx->m = MemCh_Make();
-    ctx->cli = CliStatus_Make(m, renderStatus, (Abstract *)ctx);
+    ctx->cli = CliStatus_Make(m, renderStatus, ctx);
     return SUCCESS;
 }
 

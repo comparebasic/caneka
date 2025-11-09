@@ -99,15 +99,15 @@ static status start(MemCh *m, Roebling *rbl){
     return r;
 }
 
-static Abstract *findRecentOf(Iter *_it, cls typeOf, Abstract *before, i32 *idx){
+static void *findRecentOf(Iter *_it, cls typeOf, void *before, i32 *idx){
     Iter it;
     memcpy(&it, _it, sizeof(Iter));
-    Abstract *prev = Iter_Get(&it);
+    Abstract *prev = (Abstract *)Iter_Get(&it);
     while(prev == NULL || (prev->type.of != typeOf && (Iter_Prev(&it) & END) == 0)){
         if(prev == before){
             break;
         }
-        prev = Iter_Get(&it);
+        prev = (Abstract *)Iter_Get(&it);
     }
     if(prev != NULL && prev->type.of == typeOf){
         *idx = it.idx;
@@ -130,10 +130,10 @@ static status removeObj(Iter *it, i32 idx){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
-    Abstract *args[7];
+    void *args[7];
     MemCh *m = rbl->m;
 
-    Abstract *prev = Iter_Get(it);
+    void *prev = Iter_Get(it);
     i32 zero = 0;
     i32 currentIdx = 0;
     NodeObj *current = (NodeObj *)findRecentOf(it,
@@ -141,11 +141,11 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 
     i32 dataIdx = 0;
     Iter *data = (Iter *)findRecentOf(it,
-        TYPE_ITER, (Abstract *)current, &dataIdx);
+        TYPE_ITER, current, &dataIdx);
 
     i32 singleIdx = 0;
     Single *single = (Single *)findRecentOf(it,
-        TYPE_WRAPPED_PTR, (Abstract *)data, &singleIdx);
+        TYPE_WRAPPED_PTR, data, &singleIdx);
 
     StrVec *token = NULL;
     if(single != NULL){
@@ -159,12 +159,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }
 
     if(it->type.state & DEBUG){
-        args[0] = (Abstract *)Type_ToStr(OutStream->m, captureKey);
-        args[1] = (Abstract *)v,
-        args[2] = (Abstract *)NULL;
-        args[3] = (Abstract *)data;
-        args[4] = (Abstract *)NULL;
-        args[5] = (Abstract *)it->p;
+        args[0] = Type_ToStr(OutStream->m, captureKey);
+        args[1] = v,
+        args[2] = NULL;
+        args[3] = data;
+        args[4] = NULL;
+        args[5] = it->p;
         args[6] = NULL;
         Out("^c.Config Capture ^E0.$^ec. -> ^0y.   @\n   @\n   @\n   @\n   ^b.&^0\n", args);
     }
@@ -178,8 +178,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         }
         NodeObj *obj = Object_Make(rbl->m, TYPE_NODEOBJ);
         if(token != NULL){
-            Object_SetPropByIdx(obj, NODEOBJ_PROPIDX_NAME, (Abstract *)token);
-            Object_ByPath(current, token, (Abstract *)obj, SPAN_OP_SET);  
+            Object_SetPropByIdx(obj, NODEOBJ_PROPIDX_NAME, token);
+            Object_ByPath(current, token, obj, SPAN_OP_SET);  
             Iter_Remove(it);
             Iter_Prev(it);
         }
@@ -189,17 +189,17 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) == NULL){
             Table *tbl = Table_Make(m);
             Iter *itn = Iter_Make(m, tbl);
-            Table_SetKey((Iter *)itn, (Abstract *)StrVec_Str(m, v));
-            Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, (Abstract *)tbl);
+            Table_SetKey((Iter *)itn, StrVec_Str(m, v));
+            Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, tbl);
             Iter_Add(it, itn);
         }else if(data == NULL){
             Table *tbl = Table_Make(m);
             Iter *itn = Iter_Make(m, tbl);
-            Table_SetKey((Iter *)itn, (Abstract *)StrVec_Str(m, v));
-            Object_Add(current, (Abstract *)tbl);
+            Table_SetKey((Iter *)itn, StrVec_Str(m, v));
+            Object_Add(current, tbl);
             Iter_Add(it, itn);
         }else if(data->p->type.of == TYPE_TABLE){
-            Table_SetKey(data, (Abstract *)StrVec_Str(m, v));
+            Table_SetKey(data, StrVec_Str(m, v));
         }
     }else if(captureKey == CONFIG_OUTDENT){
         removeObj(it, currentIdx);
@@ -215,36 +215,36 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(data == NULL){
             Span *p = Span_Make(m);
             Iter *itn = Iter_Make(m, p);
-            Span_Add(p, (Abstract *)v);
-            Object_Add(current, (Abstract *)p);
+            Span_Add(p, v);
+            Object_Add(current, p);
             Iter_Add(it, itn);
         }else if(data->p->type.of == TYPE_SPAN){
-            Iter_Add(data, (Abstract *)v);
+            Iter_Add(data, v);
         }else if(data->p->type.of == TYPE_TABLE){
             Span *p = Span_Make(m);
             Iter *itn = Iter_Make(m, p);
-            Span_Add(p, (Abstract *)v);
-            Table_SetValue(data, (Abstract *)p);
+            Span_Add(p, v);
+            Table_SetValue(data, p);
             Iter_Add(it, itn);
         }
     }else if(captureKey == CONFIG_NUMBER){
         Single *n = I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v)));
         if(data != NULL){
             if(data->p->type.of == TYPE_TABLE){
-                Table_SetValue(data, (Abstract *)n);
+                Table_SetValue(data, n);
             }else if(data->p->type.of == TYPE_SPAN){
-                Iter_Add(data, (Abstract *)n); 
+                Iter_Add(data, n); 
             }
         }
     }else if(captureKey == CONFIG_LINE || captureKey == CONFIG_TOKEN){
         if(data != NULL){
             if(data->p->type.of == TYPE_TABLE){
-                Table_SetValue(data, (Abstract *)v);
+                Table_SetValue(data, v);
             }else if(data->p->type.of == TYPE_SPAN){
-                Iter_Add(data, (Abstract *)v);
+                Iter_Add(data, v);
             }
         }else{
-            Iter_Add(it, (Abstract *)Ptr_Wrapped(rbl->m, v, captureKey));
+            Iter_Add(it, Ptr_Wrapped(rbl->m, v, captureKey));
         }
     }
 
@@ -255,19 +255,19 @@ NodeObj *FormatConfig_GetRoot(Roebling *rbl){
     return Span_Get(((Iter *)rbl->dest)->p, 0);
 }
 
-Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, Abstract *source){
+Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, void *source){
     DebugStack_Push(curs, curs->type.of);
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, CONFIG_START));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)start));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, CONFIG_LINE));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)line));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, CONFIG_END));
+    Roebling_AddStep(rbl, I16_Wrapped(m, CONFIG_START));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
+    Roebling_AddStep(rbl, I16_Wrapped(m, CONFIG_LINE));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)line));
+    Roebling_AddStep(rbl, I16_Wrapped(m, CONFIG_END));
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
     rbl->source = source;
-    rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
+    rbl->dest = Iter_Make(m, Span_Make(m));
 
     DebugStack_Pop();
     return rbl;
