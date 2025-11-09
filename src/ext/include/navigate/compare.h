@@ -11,6 +11,6 @@ typedef struct comparator {
     Iter it;
 } Comp;
 
-Comp *Comp_Make(MemCh *m, Abstract *a, Abstract *b);
-CompResult *CompResult_Make(MemCh *m, Abstract *a, Abstract *b);
+Comp *Comp_Make(MemCh *m, void *a, void *b);
+CompResult *CompResult_Make(MemCh *m, void *a, void *b);
 status Compare(Comp *comp);

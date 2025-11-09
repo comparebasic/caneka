@@ -21,15 +21,15 @@ typedef struct task {
 
 extern Table *TaskErrorHandlers;
 
-typedef status (*TaskPopulate)(MemCh *m, Task *task, Abstract *arg, Abstract *source);
+typedef status (*TaskPopulate)(MemCh *m, Task *task, void *arg, void *source);
 
-Task *Task_Make(Span *chain, Abstract *source);
+Task *Task_Make(Span *chain, void *source);
 status Task_Cycle(Task *tsk);
 status Task_Tumble(Task *tsk);
 status Task_AddDataStep(Task *tsk,
-    StepFunc func, Abstract *arg, Abstract *data, Abstract *source, word flags);
+    StepFunc func, void *arg, void *data, void *source, word flags);
 status Task_AddStep(Task *tsk,
-    StepFunc func, Abstract *arg, Abstract *source, word flags);
+    StepFunc func, void *arg, void *source, word flags);
 status Task_Free(Step *st, Task *tsk);
 status Task_ResetChain(Task *tsk);
 

@@ -6,4 +6,4 @@ typedef struct nested_frame {
     Iter it;
 } Frame;
 
-Frame *Frame_Make(MemCh *m, i32 originIdx, Abstract *originKey, Abstract *value, Span *p);
+Frame *Frame_Make(MemCh *m, i32 originIdx, void *originKey, void *value, Span *p);

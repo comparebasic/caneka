@@ -3,6 +3,4 @@
 #include "serve/tcp_task.h"
 #include "serve/serve_tcp.h"
 #include "serve/serve_tcp_crits.h"
-#include "serve/proto/http_ctx.h"
-#include "serve/proto/http_task.h"
 #include "serve/serve_cls.h"

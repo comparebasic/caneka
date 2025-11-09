@@ -72,16 +72,16 @@ status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v){
         nd->captureKey = tk->captureKey;
         if(tk->typeOf == TYPE_RELATION){
             nd->typeOfChild = TYPE_RELATION;
-            nd->child = Relation_Make(mess->m, 0, NULL);
+            nd->child = (Abstract *)Relation_Make(mess->m, 0, NULL);
         }else{
             if(tk->type.state & TOKEN_ATTR_VALUE){
                 Mess_AddAtt(mess, nd, 
                     I16_Wrapped(mess->m, tk->captureKey), a);
             }
         }
-        a = nd;
+        a = (Abstract *)nd;
     }else if(tk->typeOf == TYPE_SPAN){
-        a = Span_Make(mess->m);
+        a = (Abstract *)Span_Make(mess->m);
     }
 
     Mess_GetOrSet(mess, mess->current, a, tk);
@@ -129,7 +129,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, void *a, Tokenize *tk){
     if(tk->type.state & TOKEN_NO_CONTENT){
         if(tk->typeOf == TYPE_STRVEC){
             a = StrVec_Make(mess->m);
-            current = a;
+            current = (Abstract *)a;
         }else{
             current = NULL;
             goto end;
@@ -147,14 +147,14 @@ status Mess_GetOrSet(Mess *mess, Node *node, void *a, Tokenize *tk){
         Mess_AddAtt(mess, mess->current, 
             I16_Wrapped(mess->m, tk->captureKey), a);
     }else if(node->typeOfChild == 0){
-        node->child = a;
-        node->typeOfChild = a->type.of;
+        node->child = (Abstract *)a;
+        node->typeOfChild = ((Abstract *)a)->type.of;
         goto end;
     }else if(((tk->type.state & TOKEN_NO_COMBINE) == 0) &&
             mess->currentValue != NULL && CanCombine(mess->currentValue, a)){
 
         if((tk->type.state & TOKEN_SEPERATE) && 
-                mess->currentValue->type.of == TYPE_STRVEC &&
+                ((Abstract *)mess->currentValue)->type.of == TYPE_STRVEC &&
                 ((StrVec *)mess->currentValue)->total > 0){
             Str *s = Str_Ref(mess->m, (byte *)" ", 1, 2, STRING_COPY);
             Combine(mess->currentValue, s);
@@ -176,7 +176,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, void *a, Tokenize *tk){
         goto end;
     }else{
         Abstract *value = node->child;
-        node->child = Span_Make(mess->m);
+        node->child = (Abstract *)Span_Make(mess->m);
         node->typeOfChild = TYPE_SPAN;
         Span_Add((Span *)node->child, value);
         Span_Add((Span *)node->child, a);
@@ -184,7 +184,7 @@ status Mess_GetOrSet(Mess *mess, Node *node, void *a, Tokenize *tk){
     }
 
 end:
-    if(a->type.of == TYPE_NODE){
+    if(((Abstract *)a)->type.of == TYPE_NODE){
         Node *nd = (Node *)a;
         mess->current = nd;
         if(nd->typeOfChild == TYPE_RELATION){

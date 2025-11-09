@@ -3,7 +3,7 @@ typedef struct proto {
     util u;
     Buff *in;
     Buff *out;
-    Abstract *data;
+    void *data;
 } ProtoCtx;
 
 ProtoCtx *ProtoCtx_Make(MemCh *m);

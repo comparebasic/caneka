@@ -12,7 +12,7 @@ static i64 Hashed_Print(Buff *bf, void *a, cls type, word flags){
         Single *val = Ptr_Wrapped(bf->m, h->value, 0);
         word typeOf = TYPE_UNKNOWN;
         if(h->value != NULL){
-            typeOf = h->value->type.of;
+            typeOf = ((Abstract *)h->value)->type.of;
             if(typeOf == TYPE_OBJECT){
                 typeOf = ((Object *)h->value)->objType.of;
             }
@@ -96,7 +96,7 @@ static status Object_Print(Buff *bf, void *a, cls type, word flags){
                     Buff_AddBytes(bf, (byte *)"\n  ", 3);
                 }
                 Hashed *h = (Hashed *)Iter_Get(it);
-                if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
+                if(h->value != NULL && ((Abstract *)h->value)->type.of == TYPE_OBJECT){
                     _objIndent++;
                     i32 i = _objIndent;
                     Buff_AddBytes(bf, (byte *)"\n", 1);
@@ -111,11 +111,11 @@ static status Object_Print(Buff *bf, void *a, cls type, word flags){
                 }else{
                     Str *typeStr = NULL;
                     if(h->value != NULL){
-                        typeStr = Type_ToStr(bf->m, h->value->type.of);
+                        typeStr = Type_ToStr(bf->m, ((Abstract *)h->value)->type.of);
                     }
                     ToS(bf, typeStr, 0, flags);
                 }
-                if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
+                if(h->value != NULL && ((Abstract *)h->value)->type.of == TYPE_OBJECT){
                     _objIndent--;
                 }
                 if((it->type.state & LAST) == 0){

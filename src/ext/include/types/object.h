@@ -6,7 +6,7 @@ typedef struct objtype {
 typedef struct objnative {
     Type type;
     Type objType;
-    Abstract *a;
+    void *a;
 } ObjNative;
 
 typedef struct object {
@@ -24,26 +24,26 @@ typedef struct object {
 Object *Object_Make(MemCh *m, cls typeOf);
 boolean Object_IsBlank(Object *obj);
 
-boolean Object_TypeMatch(Abstract *a, cls typeOf);
+boolean Object_TypeMatch(void *a, cls typeOf);
 Object *Object_As(Object *obj, cls typeOf);
 
-Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value);
-Hashed *Object_GetHashed(Object *obj, Abstract *key);
-Abstract *Object_Get(Object *obj, Abstract *key);
+Hashed *Object_Set(Object *obj, void *key, void *value);
+Hashed *Object_GetHashed(Object *obj, void *key);
+void *Object_Get(Object *obj, void *key);
 
-Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value);
-Abstract *Object_GetProp(Object *obj, Str *key);
+Hashed *Object_SetProp(Object *obj, Str *key, void *value);
+void *Object_GetProp(Object *obj, Str *key);
 
-Hashed *Object_SetByIdx(Object *obj, Abstract *key, Abstract *value);
+Hashed *Object_SetByIdx(Object *obj, void *key, void *value);
 Hashed *Object_GetByIdx(Object *obj, i32 idx);
-Hashed *Object_SetPropByIdx(Object *obj, i32 idx, Abstract *value);
-Abstract *Object_GetPropByIdx(Object *obj, i32 idx);
+Hashed *Object_SetPropByIdx(Object *obj, i32 idx, void *value);
+void *Object_GetPropByIdx(Object *obj, i32 idx);
 
-Object *Object_GetOrMake(Object *obj, Abstract *key, word op);
-Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op);
+Object *Object_GetOrMake(Object *obj, void *key, word op);
+Object *Object_ByPath(Object *obj, StrVec *path, void *value, word op);
 
-Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source);
-status Object_Depth(Abstract *a);
-i32 Object_Add(Object *obj, Abstract *value);
+void *Object_GetIter(MemCh *m, FetchTarget *fg, void *data, void *source);
+status Object_Depth(void *a);
+i32 Object_Add(Object *obj, void *value);
 
-Object *Object_Filter(Object *obj, SourceFunc func, Abstract *source);
+Object *Object_Filter(Object *obj, SourceFunc func, void *source);

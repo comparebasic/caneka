@@ -16,8 +16,8 @@ typedef struct step {
     Abstract *data;
 } Step;
 
-Step *Step_Make(MemCh *m, StepFunc func, Abstract *arg, Abstract *source, word flags);
+Step *Step_Make(MemCh *m, StepFunc func, void *arg, void *source, word flags);
 status Step_Add(MemCh *m, 
-    struct task *tsk, StepFunc func, Abstract *arg, Abstract *source);
+    struct task *tsk, StepFunc func, void *arg, void *source);
 
 status Step_Delay(Step *st, struct task *tsk);

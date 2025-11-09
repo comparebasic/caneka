@@ -8,6 +8,6 @@ typedef struct filed {
 
 status FileDB_Open(FileDB *fdb);
 status FileDB_Close(FileDB *fdb);
-status FileDB_Add(FileDB *fdb, i16 id, Abstract *a);
+status FileDB_Add(FileDB *fdb, i16 id, void *a);
 Table *FileDB_ToTbl(FileDB *fdb, Table *keys);
 FileDB *FileDB_Make(MemCh *m, Str *fpath);

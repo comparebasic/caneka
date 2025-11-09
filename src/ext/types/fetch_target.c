@@ -61,7 +61,8 @@ err:
     return ERROR;
 }
 
-void *Fetch_Target(MemCh *m, FetchTarget *tg, void *value, void *source){
+void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
+    Abstract *value = (Abstract *)_value;
     void *args[6];
     args[0] = NULL;
     ClassDef *cls = NULL;

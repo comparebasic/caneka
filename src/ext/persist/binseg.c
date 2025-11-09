@@ -136,7 +136,8 @@ status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     return r;
 }
 
-status BinSegCtx_Send(BinSegCtx *ctx, void *a, i16 id){
+status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id){
+    Abstract *a = (Abstract *)_a;
     DebugStack_Push(ctx, ctx->type.of);
     void *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);

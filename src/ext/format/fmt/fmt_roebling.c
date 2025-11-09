@@ -214,7 +214,7 @@ Roebling *FormatFmt_Make(MemCh *m, Cursor *curs, void *source){
 
     Mess *mess = Mess_Make(m);
     mess->tokenizer = FormatFmt_Defs;
-    rbl->dest = mess;
+    rbl->dest = (Abstract *)mess;
     rbl->source = source;
     DebugStack_Pop();
     return rbl;

@@ -267,7 +267,7 @@ Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, void *source){
 
     rbl->capture = Capture;
     rbl->source = source;
-    rbl->dest = Iter_Make(m, Span_Make(m));
+    rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
 
     DebugStack_Pop();
     return rbl;

@@ -3,7 +3,8 @@
 
 Lookup *ClassLookup = NULL;
 
-void *ClassDef_Undefined(MemCh *m, FetchTarget *fg, void *data, void *source){
+void *ClassDef_Undefined(MemCh *m, FetchTarget *fg, void *_data, void *source){
+    Abstract *data = (Abstract *)_data;
     void *args[] = {
         Type_ToStr(m, data->type.of),
         NULL

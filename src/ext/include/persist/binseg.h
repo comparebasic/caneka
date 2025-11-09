@@ -27,8 +27,8 @@ enum binseg_types {
     BINSEG_VISIBLE = 1 << 9,
 };
 
-typedef i16 (*BinSegIdxFunc)(struct binseg_ctx *ctx, Abstract *arg);
-typedef status (*BinSegFunc)(struct binseg_ctx *ctx, Abstract *a, i16 id);
+typedef i16 (*BinSegIdxFunc)(struct binseg_ctx *ctx, void *arg);
+typedef status (*BinSegFunc)(struct binseg_ctx *ctx, void *a, i16 id);
 
 typedef struct binseg_ctx{
     Type type;
@@ -39,15 +39,15 @@ typedef struct binseg_ctx{
     BinSegIdxFunc func;
     Table *keys;
     Table *tbl;
-    Abstract *source;
+    void *source;
 } BinSegCtx;
 
 extern struct lookup *BinSegLookup;
 
 status BinSeg_Init(MemCh *m);
-i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg);
-BinSegCtx *BinSegCtx_Make(Buff *bf, BinSegIdxFunc func, Abstract *source, word flags);
+i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, void *arg);
+BinSegCtx *BinSegCtx_Make(Buff *bf, BinSegIdxFunc func, void *source, word flags);
 status BinSegCtx_ToBuff(BinSegCtx *ctx, struct binseg_hdr *hdr, Str *sh);
-status BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id);
+status BinSegCtx_Send(BinSegCtx *ctx, void *a, i16 id);
 status BinSegCtx_Load(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);

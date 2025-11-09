@@ -1,7 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean Object_TypeMatch(void *a, cls typeOf){
+boolean Object_TypeMatch(void *_a, cls typeOf){
+    Abstract *a = (Abstract *)_a;
     return (a->type.of == TYPE_OBJECT && 
         ((Object *)a)->objType.of == typeOf) || (a->type.of == typeOf);
 }
@@ -83,7 +84,7 @@ Hashed *Object_GetHashed(Object *obj, void *key){
 }
 
 Object *Object_GetOrMake(Object *pt, void *key, word op){
-    void *a = Object_Get(pt, key);
+    Abstract *a = (Abstract *)Object_Get(pt, key);
     if(a == NULL){
         if((op & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NULL;
@@ -107,7 +108,8 @@ Object *Object_GetOrMake(Object *pt, void *key, word op){
     }
 }
 
-status Object_Depth(void *a){
+status Object_Depth(void *_a){
+    Abstract *a = (Abstract *)_a;
     if(a->type.of == TYPE_OBJECT){
         return ((Object *)a)->depth;
     }

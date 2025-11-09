@@ -30,8 +30,9 @@ void *Fetch_FromOffset(MemCh *m, void *a, i16 offset, cls typeOf){
     return value;
 }
 
-void *Fetch(MemCh *m, Fetcher *fch, void *value, void *source){
-    Abstract *orig = (Abstract *)value;
+void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
+    Abstract *value = (Abstract *)_value;
+    Abstract *orig = value;
     if(fch->type.state & DEBUG){
         void *args[] = {
             fch,

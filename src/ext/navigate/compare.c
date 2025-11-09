@@ -20,8 +20,8 @@ status Compare(Comp *comp){
     if(cr->a == NULL || cr->b == NULL || cr->a->type.of != cr->b->type.of){
         comp->type.state |= NOOP;
     }else{
-        Abstract *a = (Abstract *)cr->a;
-        Abstract *b = (Abstract *)cr->b;
+        Abstract *a = cr->a;
+        Abstract *b = cr->b;
         if(a->type.of == TYPE_ITER){
             if(((Iter_Next((Iter *)cr->a) & END) | (Iter_Next((Iter *)cr->b) & END))
                     == 0){
@@ -35,7 +35,7 @@ status Compare(Comp *comp){
             }else{
                 comp->type.state |= NOOP;
                 if(comp->type.state & DEBUG){
-                    Abstract *args[] = {
+                    void *args[] = {
                         comp,
                         cr->a,
                         cr->b,
@@ -57,7 +57,7 @@ status Compare(Comp *comp){
                     if(na->typeOfChild != nb->typeOfChild){
                         comp->type.state |= NOOP;
                         if(comp->type.state & DEBUG){
-                            Abstract *args[] = {
+                            void *args[] = {
                                 Type_ToStr(comp->m, na->typeOfChild),
                                 Type_ToStr(comp->m, nb->typeOfChild),
                                 comp,
@@ -72,7 +72,7 @@ status Compare(Comp *comp){
                         Compare_Push(comp, na->value, nb->value);
                         if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
                             if(comp->type.state & DEBUG){
-                                Abstract *args[] = {
+                                void *args[] = {
                                     comp,
                                     NULL
                                 };
@@ -86,7 +86,7 @@ status Compare(Comp *comp){
                         Compare_Push(comp, na->atts, nb->atts);
                         if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
                             if(comp->type.state & DEBUG){
-                                Abstract *args[] = {
+                                void *args[] = {
                                     comp,
                                     NULL
                                 };
@@ -97,7 +97,7 @@ status Compare(Comp *comp){
                         }
                     }else if(nb->atts != NULL){
                         if(comp->type.state & DEBUG){
-                            Abstract *args[] = {
+                            void *args[] = {
                                 comp,
                                 NULL
                             };
@@ -131,7 +131,7 @@ status Compare(Comp *comp){
                     a->type.state |= DEBUG;
                     if(!Equals(a, b)){
                         if(comp->type.state & DEBUG){
-                            Abstract *args[] = {
+                            void *args[] = {
                                 comp,
                                 a,
                                 b,
@@ -158,7 +158,7 @@ status Compare(Comp *comp){
     return comp->type.state;
 }
 
-CompResult *CompResult_Make(MemCh *m, Abstract *a, Abstract *b){
+CompResult *CompResult_Make(MemCh *m, void *a, void *b){
     CompResult *cr = (CompResult *)MemCh_Alloc(m, sizeof(CompResult));
     cr->type.of = TYPE_COMPRESULT;
     if(a == NULL && a == b){
@@ -167,13 +167,13 @@ CompResult *CompResult_Make(MemCh *m, Abstract *a, Abstract *b){
         if(a == NULL || b == NULL){
             cr->type.state |= ERROR;
         }
-        cr->a = a;
-        cr->b = b;
+        cr->a = (Abstract *)a;
+        cr->b = (Abstract *)b;
     }
     return cr;
 }
 
-Comp *Comp_Make(MemCh *m, Abstract *a, Abstract *b){
+Comp *Comp_Make(MemCh *m, void *a, void *b){
     Comp *comp = (Comp *)MemCh_Alloc(m, sizeof(Comp));
     comp->type.of = TYPE_COMP;
     comp->m = m;

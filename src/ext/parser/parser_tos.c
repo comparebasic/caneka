@@ -125,7 +125,6 @@ status Roebling_Print(Buff *bf, void *a, cls type, word flags){
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }
-    void *args1[] = {
     args[0] = Type_StateVec(bf->m, rbl->type.of, rbl->type.state);
     args[1] = I32_Wrapped(bf->m, rbl->parseIt.idx);
     args[2] = rbl->parseIt.value;
@@ -151,7 +150,7 @@ status Roebling_Print(Buff *bf, void *a, cls type, word flags){
         word prev = bf->type.state;
         args[0] =  rbl->curs;
         args[1] = NULL;
-        Fmt(bf, "  curs:@\n", args6);
+        Fmt(bf, "  curs:@\n", args);
         bf->type.state = prev;
     }
     return Fmt(bf, ">", NULL);

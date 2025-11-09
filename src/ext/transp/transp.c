@@ -1,7 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Transp_Push(TranspCtx *ctx, void *a){
+static status Transp_Push(TranspCtx *ctx, void *_a){
+    Abstract *a = (Abstract *)_a;
     DebugStack_Push(a, a->type.of);
     void *args[3];
     if(ctx->type.state & DEBUG){
@@ -32,7 +33,7 @@ static i64 Transp_SetPrev(TranspCtx *ctx){
         Out("^c.  Transp_SetPrev $^0\n", args);
     }
     ctx->stackIdx = ctx->it.idx;
-    void *a = Iter_Get(&ctx->it);
+    Abstract *a = (Abstract *)Iter_Get(&ctx->it);
     if(a != NULL && a->type.of == TYPE_NODE){
         Node *nd = (Node *)a;
         TranspFunc func = (TranspFunc)Lookup_Get(ctx->lk, nd->captureKey);
@@ -46,7 +47,7 @@ static i64 Transp_SetPrev(TranspCtx *ctx){
     }
     Iter it;
     memcpy(&it, &ctx->it, sizeof(Iter));
-    void *current = Iter_Get(&it);
+    Abstract *current = (Abstract *)Iter_Get(&it);
     if(current != NULL && current->type.of != TYPE_NODE){
         it.type.state = (it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
         while((Iter_Prev(&it) & END) == 0){

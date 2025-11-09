@@ -210,7 +210,7 @@ static status Relation_Print(Buff *bf, void *a, cls type, word flags){
 static status MessClimber_PrintItems(Buff *bf, MessClimber *climber, word flags){
     i32 nested = ++climber->nested;
     if(climber->current != NULL){
-        void *current = climber->current;
+        Abstract *current = climber->current;
         Buff_AddBytes(bf, (byte *)"\n", 1);
         while(nested--){
             Buff_AddBytes(bf, (byte *)"  ", 2);

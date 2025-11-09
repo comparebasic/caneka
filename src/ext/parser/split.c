@@ -1,7 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status StrVec_Split(StrVec *v, void *split){
+status StrVec_Split(StrVec *v, void *_split){
+    Abstract *split = (Abstract *)_split;
     i16 guard;
     status r = READY;
     MemCh *m = v->p->m;

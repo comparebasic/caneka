@@ -9,7 +9,7 @@ enum fetch_target_flags {
     FETCH_TARGET_HASH = 1 << 15,
 };
 
-typedef Abstract *(*FetchFunc)(MemCh *m, struct fetch_target *target, Abstract *data, Abstract *source);
+typedef void *(*FetchFunc)(MemCh *m, struct fetch_target *target, void *data, void *source);
 
 typedef struct fetch_target {
     Type type;
@@ -32,8 +32,8 @@ FetchTarget *FetchTarget_MakeIter(MemCh *m);
 FetchTarget *FetchTarget_MakeProp(MemCh *m, Str *method);
 
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf);
-Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source);
-Abstract *Fetch_ByKey(MemCh *m, Abstract *a, Str *key, Abstract *source);
-Abstract *Fetch_ByAtt(MemCh *m, Abstract *a, Str *att, Abstract *source);
-Abstract *Fetch_Prop(MemCh *m, Abstract *a, Str *method, Abstract *source);
-Iter *Fetch_Iter(MemCh *m, Abstract *a, Abstract *source);
+void *Fetch_Target(MemCh *m, FetchTarget *tg, void *value, void *source);
+void *Fetch_ByKey(MemCh *m, void *a, Str *key, void *source);
+void *Fetch_ByAtt(MemCh *m, void *a, Str *att, void *source);
+void *Fetch_Prop(MemCh *m, void *a, Str *method, void *source);
+Iter *Fetch_Iter(MemCh *m, void *a, void *source);

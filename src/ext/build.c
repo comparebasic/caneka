@@ -170,7 +170,6 @@ static BuildSubdir *objdirs[] = {
     &authobj,
     &sequenceobj,
     &serveobj,
-    &httpobj,
     &parserobj,
     &fmtobj,
     &configobj,

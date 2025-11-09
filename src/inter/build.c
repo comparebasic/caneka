@@ -64,6 +64,7 @@ static BuildSubdir httpobj = { "http", {
     "http_ctx.c",
     "http_task.c",
     "http_roebling.c",
+    "http_cls.c",
     NULL
 }};
 

@@ -16,7 +16,7 @@ typedef struct fetcher {
     } val;
 } Fetcher;
 
-Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *data, Abstract *source);
+void *Fetch(MemCh *m, Fetcher *fch, void *data, void *source);
 Fetcher *Fetcher_Make(MemCh *m);
-Abstract *Fetch_FromPath(Fetcher *fch, Abstract *data, Abstract *source);
-Abstract *Fetch_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf);
+void *Fetch_FromPath(Fetcher *fch, void *data, void *source);
+void *Fetch_FromOffset(MemCh *m, void *a, i16 offset, cls typeOf);

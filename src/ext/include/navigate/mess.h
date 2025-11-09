@@ -4,9 +4,9 @@ typedef struct mess {
     Node *root;
     Node *current;
     Table *nextAtts;
-    Abstract *currentValue;
+    void *currentValue;
     Lookup *tokenizer;
-    Abstract *source;
+    void *source;
     struct transp_ctx *transp;
 } Mess;
 
@@ -14,14 +14,14 @@ typedef struct mess_climber {
     Type type;
     i32 nested;
     Mess *mess;
-    Abstract *current;
-    Abstract *currentChild;
+    void *current;
+    void *currentChild;
     Table *nextAtts;
 } MessClimber;
 
 status Mess_Tokenize(Mess *mess, Tokenize *tk, StrVec *v);
-status Mess_Append(Mess *set, Node *node, Abstract *a);
-status Mess_AddAtt(Mess *set, Node *node, Abstract *key, Abstract *value);
-status Mess_GetOrSet(Mess *mess, Node *node, Abstract *a, Tokenize *tk);
+status Mess_Append(Mess *set, Node *node, void *a);
+status Mess_AddAtt(Mess *set, Node *node, void *key, void *value);
+status Mess_GetOrSet(Mess *mess, Node *node, void *a, Tokenize *tk);
 status Mess_Compare(MemCh *m, Mess *a, Mess *b);
 Mess *Mess_Make(MemCh *m);

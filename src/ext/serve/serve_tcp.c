@@ -164,7 +164,7 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
     QueueCrit *crit = QueueCrit_Make(tsk->m, QueueCrit_Fds, ZERO);
     Queue_AddHandler(q, crit);
 
-    tsk->data = q;
+    tsk->data = (Abstract *)q;
     tsk->type.state |= TASK_QUEUE;
 
     st->type.state |= SUCCESS;
