@@ -8,6 +8,10 @@ status Stash_Tests(MemCh *gm){
     Span *p;
     status r = READY;
 
+    StrVec *dir = IoUtil_AbsVec(m,
+        StrVec_From(m, Str_FromCstr(m, "./dist/test/", ZERO)));
+    Dir_CheckCreate(m, StrVec_Str(m, dir));
+
     Str *s = Str_CstrRef(m, "Hi is this real");
     void *orig = (void *)s;
     cls typeOf = s->type.of;
