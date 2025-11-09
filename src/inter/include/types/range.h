@@ -1,5 +1,5 @@
 enum lang_range {
-    _TYPE_INTER_START = _TYPE_EXT_END
+    _TYPE_INTER_START = _TYPE_EXT_END,
     _TYPE_WWW_START,
     TYPE_HTML_NAV,
     TYPE_HTML_PAGE,

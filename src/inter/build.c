@@ -49,13 +49,9 @@ static BuildSubdir templobj = { "templ", {
     NULL
 }};
 
-static BuildSubdir html = { "www/html", {
+static BuildSubdir wwwobj = { "www", {
     "nav_cls.c",
     "page_cls.c",
-    NULL
-}};
-
-static BuildSubdir routes = { "www/route", {
     "route.c",
     NULL
 }};
@@ -72,8 +68,7 @@ static BuildSubdir *objdirs[] = {
     &typesobj,
     &templobj,
     &httpobj,
-    &html,
-    &routes,
+    &wwwobj,
     NULL
 };
 
@@ -97,7 +92,7 @@ int main(int argc, char **argv){
     ctx.libtarget = "libcnkinter";
     ctx.version = "1.0-inter";
     ctx.dist = "build";
-    ctx.src = "src/lang";
+    ctx.src = "src/inter";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

@@ -255,9 +255,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Mess *mess = (Mess *)as(rbl->dest, TYPE_MESS);
     TemplCtx *ctx = (TemplCtx*)as(rbl->source, TYPE_TEMPL_CTX);
     if(mess->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(OutStream->m, captureKey),
-            (Abstract *)v,
+        void *args[] = {
+            Type_ToStr(OutStream->m, captureKey),
+            v,
             NULL
         };
         Out("^c. Templ Capture ^0.$/^y.@^0.\n", args);
@@ -270,11 +270,11 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         fch->type.state |= FETCHER_COMMAND;
         FetchTarget *tg = FetchTarget_Make(m);
         tg->objType.of = captureKey;
-        Span_Add(fch->val.targets, (Abstract *)tg);
+        Span_Add(fch->val.targets, tg);
     }else if(captureKey == FORMAT_TEMPL_VAR){
         Fetcher *fch = Fetcher_Make(m);
         fch->type.state |= FETCHER_VAR;
-        Iter_Add(&ctx->it, (Abstract *)fch);
+        Iter_Add(&ctx->it, fch);
     }else if(captureKey == FORMAT_TEMPL_VAR_END){
         Abstract *a = Iter_Current(&ctx->it);
         if(((Fetcher *)a)->val.targets->nvalues == 0){
@@ -287,7 +287,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         }
         Fetcher *fch = Fetcher_Make(m);
         fch->type.state |= FETCHER_TEMPL;
-        Iter_Add(&ctx->it, (Abstract *)fch);
+        Iter_Add(&ctx->it, fch);
     }else if(captureKey == FORMAT_TEMPL_TEMPL_END || 
             captureKey == FORMAT_TEMPL_CONTINUED){
         Abstract *a = Iter_Current(&ctx->it);
@@ -297,7 +297,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(captureKey == FORMAT_TEMPL_CONTINUED){
             Fetcher *fch = Fetcher_Make(m);
             fch->type.state |= FETCHER_TEMPL;
-            Iter_Add(&ctx->it, (Abstract *)fch);
+            Iter_Add(&ctx->it, fch);
         }
     }else if(captureKey > _FORMAT_TEMPL_LEVEL_START &&
             captureKey < _FORMAT_TEMPL_LEVEL_END){
@@ -308,7 +308,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(captureKey == FORMAT_TEMPL_LEVEL){
             tg->idx = Int_FromStr(StrVec_Str(m, v));
         }
-        Span_Add(fch->val.targets, (Abstract *)tg);
+        Span_Add(fch->val.targets, tg);
     }else if(captureKey > _FORMAT_TEMPL_VAR_ANNOTE_START &&
             captureKey < _FORMAT_TEMPL_VAR_ANNOTE_END){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
@@ -333,7 +333,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }
             ctx->type.state = ZERO;
             fch->type.state |= FETCHER_VAR;
-            Span_Add(fch->val.targets, (Abstract *)tg);
+            Span_Add(fch->val.targets, tg);
         }
     }else if(captureKey > _FORMAT_TEMPL_LOGIC_START && 
             captureKey < _FORMAT_TEMPL_LOGIC_END){
@@ -341,7 +341,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(captureKey == FORMAT_TEMPL_FOR){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_FOR;
             FetchTarget *tg = FetchTarget_MakeIter(m);
-            Span_Add(fch->val.targets, (Abstract *)tg);
+            Span_Add(fch->val.targets, tg);
         }else if(captureKey == FORMAT_TEMPL_IF){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_IF;
         }else if(captureKey == FORMAT_TEMPL_IFNOT){
@@ -353,14 +353,14 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     return SUCCESS;
 }
 
-Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source){
+Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, void *source){
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_TEMPL_TEXT));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)text));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_TEMPL_TEMPL));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)templ));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, FORMAT_TEMPL_VAR));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)var));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMAT_TEMPL_TEXT));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)text));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMAT_TEMPL_TEMPL));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)templ));
+    Roebling_AddStep(rbl, I16_Wrapped(m, FORMAT_TEMPL_VAR));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)var));
     Roebling_Start(rbl);
 
     rbl->capture = Capture;

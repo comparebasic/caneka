@@ -1,57 +1,57 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 TemplCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 TemplCtx_Print(Buff *bf, void *a, cls type, word flags){
     TemplCtx *ctx = (TemplCtx *)as(a, TYPE_TEMPL_CTX);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        (Abstract *)ctx->it.p,
+    void *args[] = {
+        Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
+        ctx->it.p,
         NULL
     };
     return Fmt(bf, "TemplCtx:<@ @>", args);
 }
 
-static i64 TemplItem_Print(Buff *bf, Abstract *a, cls type, word flags){
-    Abstract *args[] = {
-        (Abstract *)Type_ToStr(bf->m, type),
-        (Abstract *)a,
+static i64 TemplItem_Print(Buff *bf, void *a, cls type, word flags){
+    void *args[] = {
+        Type_ToStr(bf->m, type),
+        a,
         NULL
     };
     return Fmt(bf, "TemplItem:$<@>", args);
 }
 
-static i64 TemplJump_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 TemplJump_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
 
     TemplJump *jump = (TemplJump *)as(a, TYPE_TEMPL_JUMP);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, jump->type.of, jump->type.state),
-        (Abstract *)I32_Wrapped(bf->m, jump->idx),
-        (Abstract *)I32_Wrapped(bf->m, jump->destIdx),
-        (Abstract *)I32_Wrapped(bf->m, jump->skipIdx),
-        (Abstract *)I32_Wrapped(bf->m, jump->tempIdx),
-        (Abstract *)jump->fch,
+    void *args[] = {
+        Type_StateVec(bf->m, jump->type.of, jump->type.state),
+        I32_Wrapped(bf->m, jump->idx),
+        I32_Wrapped(bf->m, jump->destIdx),
+        I32_Wrapped(bf->m, jump->skipIdx),
+        I32_Wrapped(bf->m, jump->tempIdx),
+        jump->fch,
         NULL
     };
     return Fmt(bf, "TemplJump:<@ @/dest^D.@^d./skip^D@^d./temp^D@^d. &>", args);
 }
 
-static i64 Templ_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
 
     Templ *templ = (Templ *)as(a, TYPE_TEMPL);
     if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, templ->type.of, templ->type.state),
-            (Abstract *)&templ->content,
-            (Abstract *)&templ->data,
+        void *args[] = {
+            Type_StateVec(bf->m, templ->type.of, templ->type.state),
+            &templ->content,
+            &templ->data,
             NULL
         };
         return Fmt(bf, "Templ<@\n  ^E.content^e.:@\n  ^E.data^e.:@>", args);
     }else{
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, templ->type.of, templ->type.state),
-            (Abstract *)I32_Wrapped(bf->m, templ->content.idx),
+        void *args[] = {
+            Type_StateVec(bf->m, templ->type.of, templ->type.state),
+            I32_Wrapped(bf->m, templ->content.idx),
             NULL
         };
         return Fmt(bf, "Templ<@ content^D.#$^d.>", args);

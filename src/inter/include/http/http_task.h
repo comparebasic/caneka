@@ -1,2 +1,2 @@
-status HttpTask_InitResponse(Task *tsk, Abstract *arg, Abstract *source);
-status HttpTask_AddRecieve(Task *tsk, Abstract *arg, Abstract *source);
+status HttpTask_InitResponse(Task *tsk, void *arg, void *source);
+status HttpTask_AddRecieve(Task *tsk, void *arg, void *source);

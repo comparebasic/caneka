@@ -19,10 +19,10 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
         r |= ERROR;
     }
 
-    Abstract *args[] = {
-        (Abstract *)status,
-        (Abstract *)ctx->mime,
-        (Abstract *)I64_Wrapped(bf->m, ctx->contentLength),
+    void *args[] = {
+        status,
+        ctx->mime,
+        I64_Wrapped(bf->m, ctx->contentLength),
         NULL
     };
 
@@ -41,7 +41,7 @@ status HttpCtx_PrepareResponse(HttpCtx *ctx, Task *tsk){
     HttpCtx_WriteHeaders(bf, ctx);
     Buff_Stat(bf);
 
-    status r = Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
+    status r = Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, bf, NULL, ZERO);
 
     TcpTask_ExpectSend(NULL, tsk);
 

@@ -31,12 +31,12 @@ enum route_prop_idx {
 extern struct span *RouteFuncTable;
 extern struct span *RouteMimeTable;
 
-typedef status (*RouteFunc)(Buff *bf, Abstract *action, Object *data, Abstract *source);
+typedef status (*RouteFunc)(Buff *bf, void *action, Object *data, void *source);
 
 Route *Route_Make(MemCh *m);
 status Route_Collect(Route *rt, StrVec *path);
 status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
-status Route_Handle(Route *rt, Buff *bf, Object *data, Abstract *source);
+status Route_Handle(Route *rt, Buff *bf, Object *data, void *source);
 status Route_Prepare(Route *rt, RouteCtx *ctx);
 Route *Route_GetHandler(Route *rt, StrVec *path);
 

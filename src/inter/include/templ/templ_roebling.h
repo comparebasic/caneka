@@ -1,1 +1,1 @@
-Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, Abstract *source);
+Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, void *source);

@@ -74,12 +74,12 @@ static status version(MemCh *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    Abstract *args[5];
+    void *args[5];
     ProtoCtx *proto = (ProtoCtx *)as(rbl->source, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
     if(rbl->curs->type.state & DEBUG){
-        args[0] = (Abstract *)Type_ToStr(OutStream->m, captureKey);
-        args[1] = (Abstract *)v;
+        args[0] = Type_ToStr(OutStream->m, captureKey);
+        args[1] = v;
         args[2] = NULL;
         Out("^y.Token: $/@^0\n", args);
     }
@@ -91,16 +91,16 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     return SUCCESS;
 }
 
-Roebling *HttpRbl_Make(MemCh *m, Cursor *curs, Abstract *source){
+Roebling *HttpRbl_Make(MemCh *m, Cursor *curs, void *source){
     DebugStack_Push(curs, curs->type.of);
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_METHOD));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)method));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_PATH));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)uri));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_VERSION));
-    Roebling_AddStep(rbl, (Abstract *)Do_Wrapped(m, (DoFunc)version));
-    Roebling_AddStep(rbl, (Abstract *)I16_Wrapped(m, HTTP_END));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_METHOD));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)method));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_PATH));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)uri));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_VERSION));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)version));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_END));
     Roebling_Start(rbl);
 
     rbl->capture = Capture;

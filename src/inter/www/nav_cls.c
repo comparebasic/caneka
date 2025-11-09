@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Nav_Add(Nav *nav, StrVec *path, Abstract *a){
+status Nav_Add(Nav *nav, StrVec *path, void *a){
     Object *obj = (Object *)Object_As(nav, TYPE_HTML_NAV);
     obj->type.state |= DEBUG;
     return Object_ByPath(obj, path, a, SPAN_OP_SET) != NULL ? SUCCESS : ERROR;

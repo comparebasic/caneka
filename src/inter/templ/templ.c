@@ -54,7 +54,7 @@ static i32 Templ_FindEnd(Templ *templ){
 static status Templ_handleJump(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
 
@@ -75,9 +75,9 @@ static status Templ_handleJump(Templ *templ){
     }
 
     if(templ->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)jump,
-            (Abstract *)fch,
+        void *args[] = {
+            jump,
+            fch,
             NULL
         };
         Out("^b.  Jump: & \n  of &^0.\n", args);
@@ -85,7 +85,7 @@ static status Templ_handleJump(Templ *templ){
 
     if(fch->type.state & FETCHER_FOR){
         if((fch->type.state & PROCESSING) == 0){
-            Abstract *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
+            void *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
             Iter_Add(&templ->data, value);
             fch->type.state |= PROCESSING;
         }else{
@@ -94,7 +94,7 @@ static status Templ_handleJump(Templ *templ){
         }
         Iter *it = (Iter *)Iter_Get(&templ->data);
         if(it->type.of != TYPE_ITER){
-            Abstract *args[] = { NULL, (Abstract *)it, Iter_Get(&templ->data), NULL };
+            void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
             Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error ^{STACK.name}, expected Iter have @ from Iter_Get(@) instead^0\n", 
             args);
@@ -103,7 +103,7 @@ static status Templ_handleJump(Templ *templ){
         }
 
         if((Iter_Next(it) & END) == 0){
-            Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+            Iter_Add(&templ->data, Iter_Get(it));
         }else if(jump->skipIdx != NEGATIVE){
             Iter_GetByIdx(&templ->content, jump->skipIdx);
         }else if(skipIdx != NEGATIVE){
@@ -112,9 +112,9 @@ static status Templ_handleJump(Templ *templ){
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_IF){
         if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)fch,
-                (Abstract *)data,
+            void *args[] = {
+                fch,
+                data,
                 NULL
             };
             Out("^c.  If: & of @^0.\n", args);
@@ -123,9 +123,9 @@ static status Templ_handleJump(Templ *templ){
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
             if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)fch,
-                    (Abstract *)data,
+                void *args[] = {
+                    fch,
+                    data,
                     NULL
                 };
                 Out("^c.  If is null: & of @^0.\n", args);
@@ -133,11 +133,11 @@ static status Templ_handleJump(Templ *templ){
             Iter_GetByIdx(&templ->content, jump->skipIdx);
             r |= PROCESSING;
         }else{
-            Iter_Add(&templ->data, (Abstract *)value);
+            Iter_Add(&templ->data, value);
             if(templ->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)fch,
-                    (Abstract *)Iter_Get(&templ->data),
+                void *args[] = {
+                    fch,
+                    Iter_Get(&templ->data),
                     NULL
                 };
                 Out("^c.  If nesting/found: & of @^0.\n", args);
@@ -146,20 +146,20 @@ static status Templ_handleJump(Templ *templ){
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_WITH){
         if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)fch,
-                (Abstract *)data,
+            void *args[] = {
+                fch,
+                data,
                 NULL
             };
             Out("^c.  With: & of @^0.\n", args);
         }
         Abstract *value = Fetch(templ->m, fch, data, NULL);
-        Iter_Add(&templ->data, (Abstract *)value);
+        Iter_Add(&templ->data, value);
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_COMMAND){
         if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)fch,
+            void *args[] = {
+                fch,
                 NULL
             };
             Out("^c.  Command: &^0.\n", args);
@@ -174,27 +174,27 @@ static status Templ_handleJump(Templ *templ){
                 (tg->idx == jump->depth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
                 (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < jump->depth)
                 ){
-                Abstract *args[] = {
-                    (Abstract *)tg,
-                    (Abstract *)I32_Wrapped(templ->m, tg->idx),
-                    (Abstract *)I32_Wrapped(templ->m, jump->level),
-                    (Abstract *)I32_Wrapped(templ->m, jump->depth),
+                void *args[] = {
+                    tg,
+                    I32_Wrapped(templ->m, tg->idx),
+                    I32_Wrapped(templ->m, jump->level),
+                    I32_Wrapped(templ->m, jump->depth),
                     NULL
                 };
                 Out("^c.      Proceed: & tg$ level$ depth$^0.\n", args);
             }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
                 Iter *it = (Iter *)Iter_Get(&templ->data);
                 if(it != NULL && it->idx < it->p->max_idx){
-                    Abstract *args[] = {
-                        (Abstract *)tg,
+                    void *args[] = {
+                        tg,
                         NULL
                     };
                     Out("^c.      Nest: &^0.\n", args);
-                    Iter_Add(&templ->data, (Abstract *)Iter_Get(it));
+                    Iter_Add(&templ->data, Iter_Get(it));
                     r |= PROCESSING;
                 }else{
-                    Abstract *args[] = {
-                        (Abstract *)tg,
+                    void *args[] = {
+                        tg,
                         NULL
                     };
                     Out("^c.      SkipNest: &^0.\n", args);
@@ -202,8 +202,8 @@ static status Templ_handleJump(Templ *templ){
                     r |= PROCESSING;
                 }
             }else{
-                Abstract *args[] = {
-                    (Abstract *)tg,
+                void *args[] = {
+                    tg,
                     NULL
                 };
                 Out("^c.      Skipping: &^0.\n", args);
@@ -224,7 +224,7 @@ static status Templ_handleJump(Templ *templ){
 
 static status Templ_PrepareCycle(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
-    Abstract *args[5];
+    void *args[5];
     MemCh *m = templ->m;
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= PROCESSING;
@@ -235,8 +235,8 @@ static status Templ_PrepareCycle(Templ *templ){
     Abstract *item = Iter_Get(&templ->content);
     if(templ->type.state & DEBUG){
         args[0] = NULL;
-        args[1] = (Abstract *)templ;
-        args[2] = (Abstract *)item;
+        args[1] = templ;
+        args[2] = item;
         args[3] = NULL;
         Out("^c.^{STACK.name}: Templ:&\n    item:&^0\n", args);
     }
@@ -247,7 +247,7 @@ static status Templ_PrepareCycle(Templ *templ){
 
         i32 idx = templ->content.idx;
         TemplJump *jump = TemplJump_Make(m, idx, fch);
-        Span_Set(templ->content.p, idx, (Abstract *)jump);
+        Span_Set(templ->content.p, idx, jump);
         Iter_GetByIdx(&templ->content, idx);
 
         if(fch->type.state & FETCHER_FOR){
@@ -279,7 +279,7 @@ static status Templ_PrepareCycle(Templ *templ){
         if((jump->fch->type.state & (NOOP|FETCHER_FOR|FETCHER_WITH)) == 0 &&
                 jump->destIdx == NEGATIVE && jump->skipIdx == NEGATIVE &&
                 jump->tempIdx == NEGATIVE){
-            args[0] = (Abstract *)jump;
+            args[0] = jump;
             args[1] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Unable to find source or ending for Jump in Templ content: @", args);
@@ -290,8 +290,8 @@ static status Templ_PrepareCycle(Templ *templ){
         }
 
         if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)jump,
+            void *args[] = {
+                jump,
                 NULL,
             };
             Out("^c.  Making a Jump &^0.\n", args);
@@ -299,8 +299,8 @@ static status Templ_PrepareCycle(Templ *templ){
     }
 
     if(templ->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Iter_Get(&templ->content),
+        void *args[] = {
+            Iter_Get(&templ->content),
             NULL
         };
         Out("^y.Templ_Prepare end\n  ^E.content:^e.&^0.\n", args);
@@ -310,7 +310,7 @@ static status Templ_PrepareCycle(Templ *templ){
     return templ->type.state;
 }
 
-i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
+i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     DebugStack_Push(templ, templ->type.of);
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
@@ -321,9 +321,9 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
     Abstract *item = Iter_Get(&templ->content);
 
     if(templ->type.state & DEBUG){
-        Abstract *args[] = {
+        void *args[] = {
             NULL,
-            (Abstract *)item,
+            item,
             NULL
         };
         Out("^yE.^{STACK.name}^e.(item:@)^0.\n", args);
@@ -338,12 +338,12 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
     Abstract *data = Iter_Get(&templ->data);
 
     if(item->type.of == TYPE_STRVEC){
-        total += ToS(bf, (Abstract *)item, 0, ZERO); 
+        total += ToS(bf, item, 0, ZERO); 
     }else if(item->type.of == TYPE_FETCHER && item->type.state & FETCHER_VAR){
         Fetcher *fch = (Fetcher *)item;
         if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)fch,
+            void *args[] = {
+                fch,
                 NULL
             };
             Out("^c.  Fetcher: &^0.\n", args);
@@ -351,9 +351,9 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
 
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
-            Abstract *args[] = {
-                (Abstract *)fch,
-                (Abstract *)data,
+            void *args[] = {
+                fch,
+                data,
                 NULL,
             };
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -362,13 +362,13 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
             return total;
         }
         if(templ->type.state & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)value,
+            void *args[] = {
+                value,
                 NULL
             };
             Out("^c.  VarValue: &^0.\n", args);
         }
-        total += ToS(bf, (Abstract *)value, 0, ZERO); 
+        total += ToS(bf, value, 0, ZERO); 
     }
 
     if(templ->content.type.state & END){
@@ -376,8 +376,8 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, Abstract *source){
     }
 
     if(templ->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)bf->v,
+        void *args[] = {
+            bf->v,
             NULL
         };
         Out("^yE.>> Out:^e. @^0.\n", args);
@@ -396,8 +396,8 @@ status Templ_Prepare(Templ *templ){
             Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);
         }
         if((templ->type.state & PROCESSING) == 0){
-            Abstract *args[] = {
-                (Abstract *)templ,
+            void *args[] = {
+                templ,
                 NULL
             };
             Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -412,7 +412,7 @@ status Templ_Prepare(Templ *templ){
     return NOOP;
 }
 
-i64 Templ_ToS(Templ *templ, Buff *bf, Abstract *data, Abstract *source){
+i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     DebugStack_Push(templ, templ->type.of);
     i64 total = 0;
     i16 g = 0;
