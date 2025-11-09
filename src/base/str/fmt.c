@@ -6,23 +6,23 @@ void *FmtVar_Get(MemCh *m, Str *key, void *arg){
     Path_DotAnnotate(m, path);
     Abstract *a = NULL;
     Str *k = Span_Get(path->p, 0);
-    if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "STACK", ZERO))){
+    if(Equals(k, Str_FromCstr(m, "STACK", ZERO))){
         a = (Abstract *)DebugStack_Get();
         if(path->p->nvalues > 1){
             k = Span_Get(path->p, 2);
             StackEntry *entry = (StackEntry *)as(a, TYPE_DEBUG_STACK_ENTRY);
-            if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "name", ZERO))){
+            if(Equals(k, Str_FromCstr(m, "name", ZERO))){
                 a = (Abstract *)Str_FromCstr(m, entry->funcName, STRING_COPY);
-            }else if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "ref", ZERO))){
+            }else if(Equals(k, Str_FromCstr(m, "ref", ZERO))){
                 a = (Abstract *)entry->ref;
             }else{
                 a = NULL;
             }
         }
-    }else if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "TIME", ZERO))){
+    }else if(Equals(k, Str_FromCstr(m, "TIME", ZERO))){
         if(path->p->nvalues > 1){
             k = Span_Get(path->p, 2);
-            if(Equals((Abstract *)k, (Abstract *)Str_FromCstr(m, "human", ZERO))){
+            if(Equals(k, Str_FromCstr(m, "human", ZERO))){
                 a = (Abstract *)MicroTime_ToStr(m, MicroTime_Now());  
             }else{
                 a = NULL;
@@ -30,8 +30,8 @@ void *FmtVar_Get(MemCh *m, Str *key, void *arg){
         }else{
             a = (Abstract *)Str_FromI64(m, MicroTime_Now());  
         }
-    }else if(arg != NULL && arg->type.of == TYPE_TABLE){
-        return Table_Get((Table *)arg, (Abstract *)key);
+    }else if(arg != NULL && ((Abstract *)arg)->type.of == TYPE_TABLE){
+        return Table_Get((Table *)arg, key);
     }
     return a;
 }
@@ -78,8 +78,8 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
             }
 
             if(args == NULL){
-                Abstract *args[] = {
-                    (Abstract *)Str_CstrRef(m, fmt),
+                void *args[] = {
+                    Str_CstrRef(m, fmt),
                     NULL
                 };
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,

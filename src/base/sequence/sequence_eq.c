@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean Table_Eq(Abstract *a, Abstract *b){
+boolean Table_Eq(void *a, void *b){
     Table *tblA = (Table *)a;
     Table *tblB = (Table *)b;
 
@@ -11,30 +11,30 @@ boolean Table_Eq(Abstract *a, Abstract *b){
 
     Iter it;
     Iter_Init(&it, tblA);
-    Abstract *value = NULL;
+    void *value = NULL;
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)it.value;
         if(h != NULL){
             if((value = Table_Get(tblB, h->key)) == NULL){
-                if(a->type.state & DEBUG){
-                    Abstract *args[] = {
-                        (Abstract *)h->key,
+                if(tblA->type.state & DEBUG){
+                    void *args[] = {
+                        h->key,
                         NULL
                     };
-                    Debug("^D.Table_Eq false: missing key & ^d\n", args);
+                    Out("^D.Table_Eq false: missing key & ^d\n", args);
                 }
             }
             if(!Equals(h->value, value)){
-                if(a->type.state & DEBUG){
-                    Abstract *args[] = {
-                        (Abstract *)h->key,
-                        (Abstract *)h->value,
-                        (Abstract *)value,
-                        (Abstract *)tblA,
-                        (Abstract *)tblB,
+                if(tblA->type.state & DEBUG){
+                    void *args[] = {
+                        h->key,
+                        h->value,
+                        value,
+                        tblA,
+                        tblB,
                         NULL
                     };
-                    Debug("^D.Table_Eq false:value mismatch for key $ -> & vs &\n for &\n&^0.\n", args);
+                    Out("^D.Table_Eq false:value mismatch for key $ -> & vs &\n for &\n&^0.\n", args);
                 }
                 return FALSE;
             }

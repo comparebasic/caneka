@@ -2,24 +2,24 @@
 #include <caneka.h>
 
 status CliStatus_SetKey(MemCh *m, CliStatus *cli, Str *key, IntPair *pair){
-    return Table_Set(cli->tbl, (Abstract *)key, (Abstract *)I64_Wrapped(m, *((util *)pair)));
+    return Table_Set(cli->tbl, key, I64_Wrapped(m, *((util *)pair)));
 }
 
-status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, Abstract *a){
-    Single *sg = (Single *)Table_Get(cli->tbl, (Abstract *)key);
+status CliStatus_SetByKey(MemCh *m, CliStatus *cli, Str *key, void *a){
+    Single *sg = (Single *)Table_Get(cli->tbl, key);
     if(sg != NULL){
         IntPair *pair = (IntPair *)&sg->val.value;
         if(cli->tbl->type.state & SUCCESS){
             FmtLine *line = (FmtLine *)Span_Get(cli->lines, pair->a);
-            line->args[pair->b] = (Abstract *)a;
+            line->args[pair->b] = a;
             return SUCCESS;
         }
     }
     return NOOP;
 }
 
-Abstract *CliStatus_GetByKey(MemCh *m, CliStatus *cli, Str *key){
-    Single *sg = (Single *)Table_Get(cli->tbl, (Abstract *)key);
+void *CliStatus_GetByKey(MemCh *m, CliStatus *cli, Str *key){
+    Single *sg = (Single *)Table_Get(cli->tbl, key);
     if(sg != NULL){
         IntPair *pair = (IntPair *)&sg->val.value;
         if(cli->tbl->type.state & SUCCESS){
@@ -31,13 +31,13 @@ Abstract *CliStatus_GetByKey(MemCh *m, CliStatus *cli, Str *key){
 }
 
 status CliStatus_Print(Buff *bf, CliStatus *cli){
-    if((cli->render(bf->m, (Abstract *)cli) & NOOP) == 0){
+    if((cli->render(bf->m, cli) & NOOP) == 0){
         Iter it;
         Iter_Init(&it, cli->lines);
         int count = cli->lines->nvalues;
         if((cli->type.state & PROCESSING) != 0){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(bf->m, cli->lines->nvalues),
+            void *args[] = {
+                I32_Wrapped(bf->m, cli->lines->nvalues),
                 NULL
             };
             Fmt(bf, "\r\x1b[$A", args);
@@ -85,7 +85,7 @@ status CliStatus_SetDims(CliStatus *cli, i32 cols, i32 rows){
     return SUCCESS;
 }
 
-CliStatus *CliStatus_Make(MemCh *m, DoFunc render, Abstract *source){
+CliStatus *CliStatus_Make(MemCh *m, DoFunc render, void *source){
     CliStatus *st = (CliStatus *)MemCh_Alloc(m, sizeof(CliStatus));
     st->type.of = TYPE_CLI_STATUS;
     st->lines = Span_Make(m);

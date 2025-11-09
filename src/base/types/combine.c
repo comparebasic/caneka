@@ -1,7 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean CanCombine(Abstract *a, Abstract *b){
+boolean CanCombine(void *_a, void *_b){
+    Abstract *a = (Abstract *)_a;
+    Abstract *b = (Abstract *)_b;
     if(a->type.of == TYPE_STR && a->type.of == b->type.of){
         return TRUE;
     }else if(a->type.of == TYPE_STRVEC){
@@ -18,7 +20,9 @@ boolean CanCombine(Abstract *a, Abstract *b){
     return FALSE;
 }
 
-boolean Combine(Abstract *a, Abstract *b){
+boolean Combine(void *_a, void *_b){
+    Abstract *a = (Abstract *)_a;
+    Abstract *b = (Abstract *)_b;
     if(a->type.of == TYPE_STR && a->type.of == b->type.of){
         Str *s = (Str *)b;
         return Str_Add((Str *)a, s->bytes, s->length) == s->length;

@@ -10,14 +10,14 @@ boolean Shelf_Available(Iter *shelf){
     }
 }
 
-status Shelf_Add(Iter *shelf, Abstract *a){
+status Shelf_Add(Iter *shelf, void *a){
     shelf->metrics.selected++;
     return Iter_SetByIdx(shelf, shelf->metrics.selected, a);
 }
 
-Abstract * Shelf_Get(Iter *shelf){
+void * Shelf_Get(Iter *shelf){
     if(shelf->metrics.selected >= 0){
-        Abstract *a = Iter_GetByIdx(shelf, shelf->metrics.selected);
+        void *a = Iter_GetByIdx(shelf, shelf->metrics.selected);
         shelf->metrics.selected--;
         return a;
     }else{

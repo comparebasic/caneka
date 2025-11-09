@@ -1,2 +1,2 @@
-boolean Combine(Abstract *a, Abstract *b);
-boolean CanCombine(Abstract *a, Abstract *b);
+boolean Combine(void *a, void *b);
+boolean CanCombine(void *a, void *b);

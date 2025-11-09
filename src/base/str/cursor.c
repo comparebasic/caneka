@@ -37,7 +37,7 @@ status Cursor_End(Cursor *curs){
 
 status Cursor_Decr(Cursor *curs, i32 length){
     DebugStack_Push(curs, curs->type.of);
-    Abstract *args[3];
+    void *args[3];
     MemCh *m = curs->v->p->m;
     if((curs->type.state & PROCESSING) == 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -55,8 +55,8 @@ status Cursor_Decr(Cursor *curs, i32 length){
         if(length > remaining){
             length -= remaining;
             if(curs->it.idx == 0 && length > 0){
-                Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(ErrStream->m,length),
+                void *args[] = {
+                    I32_Wrapped(ErrStream->m,length),
                     NULL,
                 };
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -206,7 +206,7 @@ status Cursor_FillStr(Cursor *curs, Str *s){
 
 status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max){
     status r = READY;
-    Abstract *args[3];
+    void *args[3];
     MemCh *m = curs->v->p->m;
     if(max < 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER, 

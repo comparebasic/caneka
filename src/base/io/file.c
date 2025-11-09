@@ -6,12 +6,12 @@ status File_Unlink(MemCh *m, Str *path){
 }
 
 status File_Open(Buff *bf, Str *fpath, word ioFlags){
-    Abstract *args[3];
+    void *args[3];
     char *cstr = Str_Cstr(bf->m, fpath);
     if((ioFlags & (O_TRUNC|O_RDONLY)) || (ioFlags & O_CREAT) == 0){
         i32 ri = stat(cstr, &bf->st); 
-        args[0] = (Abstract *)bf;
-        args[1] = (Abstract *)fpath;
+        args[0] = bf;
+        args[1] = fpath;
         args[2] = NULL;
         if(ri != -1 && (ioFlags & O_TRUNC) && (bf->type.state & BUFF_CLOBBER) == 0){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -32,8 +32,8 @@ status File_Open(Buff *bf, Str *fpath, word ioFlags){
         fd = open(cstr, ioFlags);
     }
     if(fd <= 0){
-        args[0] = (Abstract *)fpath;
-        args[1] = (Abstract *)Str_CstrRef(bf->m, strerror(errno));
+        args[0] = fpath;
+        args[1] = Str_CstrRef(bf->m, strerror(errno));
         args[2] = NULL;
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error opening file @: $", args);
@@ -46,8 +46,8 @@ status File_Close(Buff *bf){
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
         bf->type.state &= ~(BUFF_FD|BUFF_SOCKET);
     }else{
-        Abstract *args[] = {
-            (Abstract *)bf,
+        void *args[] = {
+            bf,
             NULL
         };
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -71,7 +71,7 @@ StrVec *File_ToVec(MemCh *m, Str *path){
     File_Open(bf, path, O_RDONLY);
     Buff_Read(bf);
     if(path->type.state & DEBUG){
-        Abstract *args[] = { (Abstract *)path, (Abstract *)bf, NULL };
+        void *args[] = { path, bf, NULL };
         Out("^p.Reading @ to vec: &^0\n", args);
     }
     File_Close(bf);

@@ -20,7 +20,8 @@ status Clone_Init(MemCh *m){
     return r;
 }
 
-Abstract *Clone(MemCh *m, Abstract *a){
+void *Clone(MemCh *m, void *_a){
+    Abstract *a = (Abstract *)_a;
     if(a == NULL){
         return NULL;
     }
@@ -28,8 +29,8 @@ Abstract *Clone(MemCh *m, Abstract *a){
     if(mk != NULL){
        return mk(m, a);
     }
-    Abstract *args[] = {
-        (Abstract *)Type_ToStr(m, a->type.of),
+    void *args[] = {
+        Type_ToStr(m, a->type.of),
         NULL
     };
     Error(m, FUNCNAME, FILENAME, LINENUMBER, "Unable to clone type $", args);

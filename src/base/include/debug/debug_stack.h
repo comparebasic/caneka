@@ -12,7 +12,7 @@ typedef struct debug_stack {
     i32 pos;
 } StackEntry;
 
-#define DebugStack_Push(ref, typeOf) _DebugStack_Push((char *)__func__,__FILE__,((Abstract *)(ref)),((ref) != NULL ? typeOf : 0),__LINE__,0)
+#define DebugStack_Push(ref, typeOf) _DebugStack_Push((char *)__func__,__FILE__,(ref),((ref) != NULL ? typeOf : 0),__LINE__,0)
 
 status DebugStack_Init(MemCh *m);
 void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line, i32 pos);

@@ -8,7 +8,7 @@ typedef struct mem_ctx {
     i16 level;
     i16 guard;
     Iter it;
-    Abstract *owner;
+    void *owner;
     MemPage *first;
 } MemCh;
 

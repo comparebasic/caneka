@@ -7,7 +7,7 @@ typedef struct lookup {
 
 typedef struct lookup_config {
     i32 key;
-    Abstract *a;
+    void *a;
 } LookupConfig;
 
 typedef status (*LookupPopulate)(MemCh *m, Lookup *lk);

@@ -56,7 +56,7 @@ Str *Str_MemCount(MemCh *m, i64 mem) {
 
 i64 Str_Trunc(Str *s, i64 amount){
     if(s->type.state & STRING_CONST){
-        Abstract *args[] = {(Abstract *)s ,NULL};
+        void *args[] = {s ,NULL};
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Str_Trunc cannot modify a const char * '$'", args);
     }
     if(amount == 0){

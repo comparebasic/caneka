@@ -1,7 +1,7 @@
 typedef struct pair {
     Type type;
-    Abstract *a;
-    Abstract *b;
+    void *a;
+    void *b;
 } Pair;
 
 Pair *Pair_Make(MemCh *m);

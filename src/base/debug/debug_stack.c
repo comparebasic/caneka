@@ -13,7 +13,7 @@ void _DebugStack_Push(char *cstr, char *fname, void *ref, word typeOf, i32 line,
     if(entry == NULL){
         entry = MemCh_Alloc(stack->m, sizeof(StackEntry));
         entry->type.of = TYPE_DEBUG_STACK_ENTRY;
-        Iter_Add(&_it, (Abstract *)entry);
+        Iter_Add(&_it, entry);
     }
 
     entry->funcName = cstr;
@@ -48,8 +48,8 @@ status DebugStack_Show(Str *style, Str *msg, word flags){
     if(msg == NULL){
         msg = Str_Make(OutStream->m, 0);
     }
-    Abstract *args[3];
-    args[0] = (Abstract *)style;
+    void *args[2];
+    args[0] = style;
     args[1] = NULL;
     if(flags & DEBUG){
         Out("$[STACKNAME]:[STACKFILE]: [STACKREF]^0\n", args);

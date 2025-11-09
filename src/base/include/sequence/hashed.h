@@ -7,16 +7,16 @@ typedef struct hashed {
     i32 idx;
     i32 orderIdx;
     util id;
-    Abstract *key;
-    Abstract *value;
+    void *key;
+    void *value;
 } Hashed;
 
 extern struct lookup *HashLookup;
-typedef util (*HashFunc)(Abstract *a);
+typedef util (*HashFunc)(void *a);
 
 util Hash_Bytes(byte *bt, size_t length);
-util Get_Hash(Abstract *a);
+util Get_Hash(void *a);
 boolean Hashed_Equals(Hashed *a, Hashed *b);
-Hashed *Hashed_Make(MemCh *m, Abstract *a);
+Hashed *Hashed_Make(MemCh *m, void *a);
 Hashed *Hashed_Clone(MemCh *m, Hashed *oh);
 status Hash_Init(MemCh *m);

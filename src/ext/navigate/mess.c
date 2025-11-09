@@ -30,7 +30,7 @@ status Mess_Compare(MemCh *m, Mess *a, Mess *b){
             (Abstract *)comp,
             NULL
         };
-        Debug("^p.End Compare @^0.\n", args);
+        Out("^p.End Compare @^0.\n", args);
     }
 
     DebugStack_Pop();

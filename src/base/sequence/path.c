@@ -190,7 +190,7 @@ StrVec *Path_WithoutExt(MemCh *m, StrVec *path){
             }
             continue;
         }else{
-            Span_Set(v->p, it.idx, (Abstract *)s);
+            Span_Set(v->p, it.idx, s);
         }
     }
     v->total = total;
@@ -239,7 +239,7 @@ StrVec *Path_Name(MemCh *m, StrVec *path){
 }
 
 boolean Path_ExtEquals(StrVec *path, Str *ext){
-    return Equals((Abstract *)Span_Get(path->p, path->p->max_idx), (Abstract *)ext);
+    return Equals(Span_Get(path->p, path->p->max_idx), ext);
 }
 
 status Path_Around(MemCh *m, StrVec *path, word sep, Coord *cr){
@@ -283,7 +283,7 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)asLegal(
-            (Abstract *)Iter_Get(&it),
+            Iter_Get(&it),
             TYPE_STR
         );
         if(s->length == 0){
@@ -349,7 +349,7 @@ status Path_Init(MemCh *m){
     if(dotPathSeps == NULL){
         MemCh_SetToBase(m);
         dotPathSeps = Span_Make(m);
-        Span_Add(dotPathSeps, (Abstract *)B_Wrapped(m, (byte)'.', ZERO, MORE));
+        Span_Add(dotPathSeps, B_Wrapped(m, (byte)'.', ZERO, MORE));
         MemCh_SetFromBase(m);
         return SUCCESS;
     }

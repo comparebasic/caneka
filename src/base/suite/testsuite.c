@@ -21,7 +21,7 @@ static char *statusCstr(word status){
     }
 }
 
-status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *args[]){
+status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]){
     if(!condition){
         Out("^r.Fail: ", NULL);
     }else{
@@ -31,9 +31,6 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *a
         Fmt(OutStream, fmtError, args);
         Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }else{
-        /*
-        Buff_AddBytes(OutStream, (byte *)"\x1b[2K\r", 5);
-        */
         Fmt(OutStream, fmtSuccess, args);
         Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }
@@ -41,7 +38,7 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *a
     return condition ? SUCCESS : ERROR;
 }
 
-status Test(boolean condition, char *fmt, Abstract *args[]){
+status Test(boolean condition, char *fmt, void *args[]){
     if(!condition){
         Out("^r.Fail: ", NULL);
     }else{
@@ -51,9 +48,6 @@ status Test(boolean condition, char *fmt, Abstract *args[]){
     if(!condition){
         Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }else{
-        /*
-        Buff_AddBytes(OutStream, (byte *)"\x1b[2K\r", 5);
-        */
         Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }
     Out("^0", NULL);
@@ -68,6 +62,8 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i32 pass = 0;
     i32 fail = 0;
 
+    void *args[8];
+
     word baseStackLevel = m->level;
     StrVec *v = StrVec_Make(m);
 
@@ -76,29 +72,27 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     i32 baseMem = st.total;
     i32 rollingBaseMem = baseMem;
 
-    Abstract *args1[] = { (Abstract *)Str_CstrRef(gm, suiteName), NULL };
-    Out("= Test Suite: _c\n", args1);
-    Abstract *args2[] = {
-        (Abstract *)Str_MemCount(m, st.total * PAGE_SIZE),
-        (Abstract *)I64_Wrapped(gm, st.total),
-        (Abstract *)I64_Wrapped(gm, st.pageIdx),
-        (Abstract *)I64_Wrapped(gm, PAGE_SIZE),
-        NULL
-    };
-    Out("Starting Mem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args2);
+    args[0] = Str_CstrRef(gm, suiteName);
+    args[1] = NULL;
+    Out("= Test Suite: _c\n", args);
+
+    args[0] = Str_MemCount(m, st.total * PAGE_SIZE);
+    args[1] = I64_Wrapped(gm, st.total);
+    args[2] = I64_Wrapped(gm, st.pageIdx);
+    args[3] = I64_Wrapped(gm, PAGE_SIZE);
+    args[4] = NULL;
+
+    Out("Starting Mem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args);
 
     while(set->name != NULL){
-        Abstract *args3[] = {
-            (Abstract *)Str_CstrRef(gm, set->name),
-            NULL
-        };
+        args[0] = Str_CstrRef(gm, set->name);
         if(set->status == SECTION_LABEL){
-            Out("^E.== $  ^e.\n", args3);
+            Out("^E.== $  ^e.\n", args);
             set++;
             continue;
         }
 
-        Out("=== Testing: $\n", args3);
+        Out("=== Testing: $\n", args);
 
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
@@ -125,16 +119,13 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
                 color = Str_AnsiCstr(m, "c.");
             }
 
-            Abstract *args2[] = {
-                (Abstract *)color,
-                (Abstract *)Str_MemCount(m, st.total * PAGE_SIZE),
-                (Abstract *)I64_Wrapped(gm, st.total),
-                (Abstract *)I64_Wrapped(gm, st.pageIdx),
-                (Abstract *)I64_Wrapped(gm, PAGE_SIZE),
-                NULL
-            };
-            Out("$Mem: $ total/maxIdx=^D.$/$^d. page-size=$b^0\n", args2);
-
+            args[0] = color,
+            args[1] = Str_MemCount(m, st.total * PAGE_SIZE),
+            args[2] = I64_Wrapped(gm, st.total),
+            args[3] = I64_Wrapped(gm, st.pageIdx),
+            args[4] = I64_Wrapped(gm, PAGE_SIZE),
+            args[5] = NULL;
+            Out("$Mem: $ total/maxIdx=^D.$/$^d. page-size=$b^0\n", args);
 
             MemCh_Free(m);
             m->level--;
@@ -148,18 +139,17 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
 
         set++;
     }
-    Abstract *args5[] = {
-        (Abstract *)Str_CstrRef(gm, suiteName),
-        (Abstract *)I32_Wrapped(gm, pass),
-        (Abstract *)I32_Wrapped(gm, fail),
-        NULL,
-    };
+
+    args[0] = Str_CstrRef(gm, suiteName),
+    args[1] = I32_Wrapped(gm, pass),
+    args[2] = I32_Wrapped(gm, fail),
+    args[3] = NULL;
     if(!fail){
         Out("^g", NULL);
     }else{
         Out("^r", NULL);
     }
-    Out("Suite $ pass:$ fail:$^0\n", args5);
+    Out("Suite $ pass:$ fail:$^0\n", args);
 
     DebugStack_Pop();
     return !fail ? SUCCESS : ERROR;

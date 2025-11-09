@@ -93,16 +93,16 @@ miss:
         i32 pos = a->length - length;
         i16 hlLength = min(a->length - pos, 16);
         MemCh *m = ErrStream->m;
-        Abstract *args[] = {
-            (Abstract *)I16_Wrapped(m, a->length),
-            (Abstract *)I64_Wrapped(m, b->total),
-            (Abstract *)I32_Wrapped(m, pos),
-            (Abstract *)Str_Ref(m, a->bytes+pos, hlLength, hlLength, READY),
-            (Abstract *)Str_Ref(m,
+        void *args[] = {
+            I16_Wrapped(m, a->length),
+            I64_Wrapped(m, b->total),
+            I32_Wrapped(m, pos),
+            Str_Ref(m, a->bytes+pos, hlLength, hlLength, READY),
+            Str_Ref(m,
                 (byte *)&curs.slot, sizeof(util), sizeof(util), STRING_CONST),
             NULL
         };
-        Debug("Str_EqualsStrVec Differ ^D.$^d.length vs "
+        Out("Str_EqualsStrVec Differ ^D.$^d.length vs "
             "^D.$^d.length at $ / ^E.&^e. vs ^E.&^e.\n",
         args);
     }
@@ -110,16 +110,16 @@ miss:
 }
 
 boolean StrVec_EqualsStrVec(StrVec *a, StrVec *b){
-    Abstract *args[5];
+    void *args[5];
     boolean debug = ((a->type.state|b->type.state) & DEBUG) != 0;
     if(a == NULL || b == NULL){
        return FALSE; 
     }
     if(a->total != b->total){
         if(debug){
-            args[0] = (Abstract *)Str_CstrRef(ErrStream->m, "mismatch length");
-            args[1] = (Abstract *)I64_Wrapped(ErrStream->m, a->total);
-            args[2] = (Abstract *)I64_Wrapped(ErrStream->m, b->total);
+            args[0] = Str_CstrRef(ErrStream->m, "mismatch length");
+            args[1] = I64_Wrapped(ErrStream->m, a->total);
+            args[2] = I64_Wrapped(ErrStream->m, b->total);
             args[3] = NULL;
         }
         goto miss;
@@ -133,12 +133,12 @@ boolean StrVec_EqualsStrVec(StrVec *a, StrVec *b){
             (StrVec_NextSlot(b, &cursB) & END) == 0){
         if(cursA.slot != cursB.slot){
             if(debug){
-                args[0] = (Abstract *)Str_CstrRef(ErrStream->m, "mismatch slot:");
-                args[1] = (Abstract *)Str_Ref(ErrStream->m,
+                args[0] = Str_CstrRef(ErrStream->m, "mismatch slot:");
+                args[1] = Str_Ref(ErrStream->m,
                     (byte *)&cursA.slot, 8, 8, STRING_CONST);
-                args[2] = (Abstract *)Str_Ref(ErrStream->m,
+                args[2] = Str_Ref(ErrStream->m,
                     (byte *)&cursB.slot, 8, 8, STRING_CONST);
-                args[3] = (Abstract *)I64_Wrapped(ErrStream->m, a->total - length);
+                args[3] = I64_Wrapped(ErrStream->m, a->total - length);
                 args[4] = NULL;
             }
             goto miss;
@@ -151,12 +151,12 @@ boolean StrVec_EqualsStrVec(StrVec *a, StrVec *b){
             (StrVec_NextSlot(b, &cursB) & END) == 0){
         if(cursA.slot != cursB.slot){
             if(debug){
-                args[0] = (Abstract *)Str_CstrRef(ErrStream->m, "mismatch end:");
-                args[1] = (Abstract *)Str_Ref(ErrStream->m,
+                args[0] = Str_CstrRef(ErrStream->m, "mismatch end:");
+                args[1] = Str_Ref(ErrStream->m,
                     (byte *)&cursA.slot, 8, 8, STRING_CONST);
-                args[2] = (Abstract *)Str_Ref(ErrStream->m,
+                args[2] = Str_Ref(ErrStream->m,
                     (byte *)&cursB.slot, 8, 8, STRING_CONST);
-                args[3] = (Abstract *)I64_Wrapped(ErrStream->m, a->total - length);
+                args[3] = I64_Wrapped(ErrStream->m, a->total - length);
                 args[4] = NULL;
             }
             goto miss;
@@ -167,9 +167,9 @@ boolean StrVec_EqualsStrVec(StrVec *a, StrVec *b){
 miss:
     if(debug){
         if(args[3] != NULL){
-            Debug("StrVec_EqualsStrVec differ/$ ^D.@^d. vs ^D.@ \\@$^d.\n", args);
+            Out("StrVec_EqualsStrVec differ/$ ^D.@^d. vs ^D.@ \\@$^d.\n", args);
         }else{
-            Debug("StrVec_EqualsStrVec differ/$ $ vs $ length\n", args);
+            Out("StrVec_EqualsStrVec differ/$ $ vs $ length\n", args);
         }
     }
     return FALSE;

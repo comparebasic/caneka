@@ -1,5 +1,4 @@
 #include "str/str.h"
-#include "str/strlit.h"
 #include "str/str_makers.h"
 #include "str/strvec.h"
 #include "str/cursor.h"

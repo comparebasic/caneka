@@ -13,7 +13,6 @@ if [ $r -ne 0 ]; then
     exit $?;
 fi
 
-
 mkdir -p ./build/libbuilder/
 echo "building Caneka Builder"
 $CC -g $INC -c -o ./build/libbuilder/libbuilder.a ./src/builder/inc.c -DINSECURE;
@@ -22,6 +21,8 @@ r=$?
 if [ $r -ne 0 ]; then
     exit $r;
 fi
+
+exit
 
 
 echo "building Caneka Build Config"

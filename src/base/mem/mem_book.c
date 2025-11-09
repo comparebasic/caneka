@@ -29,8 +29,8 @@ static MemBook *MemBook_get(void *addr){
     if(book != NULL){
         return book;
     }
-    Abstract *args[] = {
-        (Abstract *)Util_Wrapped(ErrStream->m, (util)addr),
+    void *args[] = {
+        Util_Wrapped(ErrStream->m, (util)addr),
         NULL
     };
     Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook not found for \\@@", args);
@@ -57,8 +57,8 @@ i32 MemBook_GetPageIdx(void *addr){
 }
 #else
 void _insecureMemError(void *addr){
-    Abstract *args[] = {
-        (Abstract *)Ptr_Wrapped(ErrStream->m, addr, 0),
+    void *args[] = {
+        Ptr_Wrapped(ErrStream->m, addr, 0),
         NULL
     };
     Fatal(FUNCNAME, FILENAME, LINENUMBER, 

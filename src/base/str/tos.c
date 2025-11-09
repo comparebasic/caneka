@@ -62,7 +62,7 @@ status Slots_Print(Buff *bf, util *ut, i32 slots, word flags){
         }else{
             if(flags & MORE){
                 sg.val.value = u;
-                Abstract *args[] = {(Abstract *)&sg, NULL};
+                void *args[] = {&sg, NULL};
                 Fmt(bf, "$", args);
             }
             if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
@@ -102,7 +102,7 @@ status Bits_PrintNum(Buff *bf, byte *bt, size_t length, word flags){
         }else{
             if(flags & MORE){
                 sg.val.b = b;
-                Abstract *args[] = {(Abstract *)&sg, NULL};
+                void *args[] = {&sg, NULL};
                 Fmt(bf, "$=", args);
             }
             for(int j = 7; j >= 0;j--){
@@ -126,7 +126,7 @@ status Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
         }else{
             if(flags & MORE){
                 sg.val.b = b;
-                Abstract *args[] = {(Abstract *)&sg, NULL};
+                void *args[] = {&sg, NULL};
                 Fmt(bf, "$=", args);
             }
             for(int j = 7; j >= 0;j--){
@@ -179,10 +179,10 @@ char *ToStreamChars(word flags){
     }
 }
 
-status _ToStream_NotImpl(char *func, char *file, i32 line, Buff *bf, Abstract *a, cls type, word flags){
-    Abstract *args[] = {
-        (Abstract *)Str_CstrRef(bf->m, ToStreamChars(flags)),
-        (Abstract *)Str_CstrRef(bf->m, Type_ToChars(type)),
+status _ToStream_NotImpl(char *func, char *file, i32 line, Buff *bf, void *a, cls type, word flags){
+    void *args[] = {
+        Str_CstrRef(bf->m, ToStreamChars(flags)),
+        Str_CstrRef(bf->m, Type_ToChars(type)),
         NULL
     };
     Error(bf->m, func, file, line, 
@@ -190,7 +190,7 @@ status _ToStream_NotImpl(char *func, char *file, i32 line, Buff *bf, Abstract *a
     return 0;
 }
 
-status ToStream_NotImpl(Buff *bf, Abstract *a, cls type, word flags){
+status ToStream_NotImpl(Buff *bf, void *a, cls type, word flags){
     return _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
 }
 
@@ -208,9 +208,9 @@ status ToS(Buff *bf, void *_a, cls type, word flags){
     if(func != NULL){
         return func(bf, a, type, flags);
     }else{
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(bf->m, type),
-            (Abstract *)I16_Wrapped(bf->m, type),
+        void *args[] = {
+            Type_ToStr(bf->m, type),
+            I16_Wrapped(bf->m, type),
             NULL
         };
         Fmt(bf, "$/$: unknown-debug", args);

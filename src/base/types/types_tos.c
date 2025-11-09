@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status ErrorMsg_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status ErrorMsg_Print(Buff *bf, void *a, cls type, word flags){
     if(a == NULL){
         Str *s = Str_CstrRef(bf->m, "Error");
         return Buff_AddBytes(bf, s->bytes, s->length);

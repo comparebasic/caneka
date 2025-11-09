@@ -132,7 +132,7 @@ Span *Span_Clone(MemCh *m, Span *p){
     while((Iter_Next(&it) & END) == 0){
         void *value = Iter_Get(&it);
         if(value != NULL){
-            Abstract *item = Clone(m, value);
+            void *item = Clone(m, value);
             Span_Set(p2, it.idx, item); 
         }
     }
@@ -150,8 +150,8 @@ status Span_Insert(Span *p, i32 idx, void *t){
 
 status Span_AddRaw(Span *p, util *u){
     if((p->type.state & FLAG_SPAN_RAW) == 0){
-        Abstract *args[2];
-        args[0] = (Abstract *)Str_FuncName(p->m);
+        void *args[2];
+        args[0] = Str_FuncName(p->m);
         args[1] = NULL;
         Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
             "$ requires RAW flag for span", args);

@@ -1,2 +1,2 @@
-boolean Equals(Abstract *a, Abstract *b);
-boolean Caneka_Truthy(Abstract *a);
+boolean Equals(void *a, void *b);
+boolean Caneka_Truthy(void *a);

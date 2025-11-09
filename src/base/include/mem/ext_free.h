@@ -1,4 +1,4 @@
-typedef Abstract *(*ExtFreeFunc)(struct mem_ctx *m, void *v);
+typedef void *(*ExtFreeFunc)(struct mem_ctx *m, void *v);
 typedef struct external_free {
     Type type;
     ExtFreeFunc func;

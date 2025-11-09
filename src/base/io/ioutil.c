@@ -142,8 +142,8 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
     char *path_cstr = Str_Cstr(m, a);
     r = stat(path_cstr, &source_stat);
     if(r != 0){
-        Abstract *args[] = {
-            (Abstract *)a,
+        void *args[] = {
+            a,
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, "Source not found @", args);

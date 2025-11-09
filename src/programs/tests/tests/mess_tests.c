@@ -184,7 +184,7 @@ status Mess_Tests(MemCh *gm){
         Abstract *args[] = {
             (Abstract *)rbl->dest,
         };
-        Debug("^r.\nrbl->dest: &^0.\n", args);
+        Out("^r.\nrbl->dest: &^0.\n", args);
     }
     r |= Test(result, "Mess has been built as expected", NULL);
 

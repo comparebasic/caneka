@@ -1,6 +1,6 @@
 #define MEM_STASH_MASK 4095
 
-typedef status (*StashFunc)(Buff *bf, byte[MEM_SLAB_SIZE], Abstract *source);
+typedef status (*StashFunc)(Buff *bf, byte[MEM_SLAB_SIZE], void *source);
 
 extern struct lookup *BlankerLookup;
 extern struct lookup *RepointerLookup;
@@ -10,4 +10,4 @@ cls Stash_RepointAddr(MemCh *pm, void **ptr);
 status Stash_FlushFree(Buff *bf, MemCh *persist);
 MemCh *Stash_FromStream(Buff *bf);
 status Stash_PackAddr(cls typeOf, i32 slIdx, void **ptr);
-cls Stash_UnpackAddr(MemCh *m, StashCoord *coord, Abstract **arr);
+cls Stash_UnpackAddr(MemCh *m, StashCoord *coord, void **arr);

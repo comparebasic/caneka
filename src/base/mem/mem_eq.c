@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean Iter_Eq(Abstract *a, Abstract *b){
+boolean Iter_Eq(void *a, void *b){
     Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
         "Iter_Eq Not Implemented", NULL);
     return FALSE;
 }
 
-boolean Span_Eq(Abstract *a, Abstract *b){
+boolean Span_Eq(void *a, void *b){
     Span *pA = (Span *)a;
     Span *pB = (Span *)b;
 
@@ -21,13 +21,13 @@ boolean Span_Eq(Abstract *a, Abstract *b){
     Iter_Init(&itB, pB);
     while(((Iter_Next(&itA)|Iter_Next(&itB)) & END) == 0){
         if(!Equals(itA.value, itB.value)){
-            if(a->type.state & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)itA.value,
-                    (Abstract *)itB.value,
+            if(pA->type.state & DEBUG){
+                void *args[] = {
+                    itA.value,
+                    itB.value,
                     NULL
                 };
-                Debug("^E.Span_Eq false:\n  & vs\n  &^0.\n", args);
+                Out("^E.Span_Eq false:\n  & vs\n  &^0.\n", args);
             }
             return FALSE;
         }

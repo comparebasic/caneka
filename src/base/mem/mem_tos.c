@@ -23,10 +23,10 @@ status Addr_ToS(Buff *bf, void *a, word flags){
         page &= ~local;
         page = page / PAGE_SIZE;
 
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, 0),
-            (Abstract *)Util_Wrapped(bf->m, page),
-            (Abstract *)Util_Wrapped(bf->m, local),
+        void *args[] = {
+            I32_Wrapped(bf->m, 0),
+            Util_Wrapped(bf->m, page),
+            Util_Wrapped(bf->m, local),
             NULL
         };
         Fmt(bf, "<*$/$/$>", args);
@@ -34,11 +34,11 @@ status Addr_ToS(Buff *bf, void *a, word flags){
     return SUCCESS;
 }
 
-status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
+status MemCh_Print(Buff *bf, void *a, cls type, word flags){
     MemCh *m = (MemCh*)as(a, TYPE_MEMCTX); 
-    Abstract *args[5];
-    args[0] = (Abstract *)I64_Wrapped(bf->m, m->it.p->nvalues);
-    args[1] = (Abstract *)MemCount_Wrapped(bf->m,  MemCh_Used(m, 0));
+    void *args[5];
+    args[0] = I64_Wrapped(bf->m, m->it.p->nvalues);
+    args[1] = MemCount_Wrapped(bf->m,  MemCh_Used(m, 0));
     args[2] = NULL;
 
 
@@ -51,8 +51,8 @@ status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
         Iter_Init(&it, m->it.p);
         while((Iter_Next(&it) & END) == 0){
             MemPage *sl = (MemPage *)Iter_Get(&it);
-            args[0] = (Abstract *)I32_Wrapped(bf->m, it.idx);
-            args[1] = (Abstract *)I16_Wrapped(bf->m, sl->remaining);
+            args[0] = I32_Wrapped(bf->m, it.idx);
+            args[1] = I16_Wrapped(bf->m, sl->remaining);
             args[2] = NULL;
             Fmt(bf, "Page#$/@remaining", args);
             if((it.type.state & LAST) == 0){
@@ -67,9 +67,9 @@ status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
-                Abstract *a = MemIter_Get(&mit);
-                Table_Set(tbl, (Abstract *)Util_Wrapped(bf->m, (util)a), 
-                    (Abstract *)I32_Wrapped(bf->m, idx++));
+                Abstract *a = (Abstract *)MemIter_Get(&mit);
+                Table_Set(tbl, Util_Wrapped(bf->m, (util)a), 
+                    I32_Wrapped(bf->m, idx++));
             }else{
                 idx = 0;
             }
@@ -87,23 +87,23 @@ status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
                         Buff_AddBytes(bf, (byte *)"], ", 3);
                     }
                 }
-                args[0] = (Abstract *)I32_Wrapped(bf->m, mit.slIdx);
+                args[0] = I32_Wrapped(bf->m, mit.slIdx);
                 args[1] = NULL;
                 Fmt(bf, "Page#$[", args);
             }else{
-                Abstract *a = MemIter_Get(&mit);
+                Abstract *a = (Abstract *)MemIter_Get(&mit);
                 Map *map = Lookup_Get(MapsLookup, a->type.of);
                 Single *count = (Single *)Table_Get(tbl, 
-                    (Abstract *)Util_Wrapped(bf->m, (util)a));
+                    Util_Wrapped(bf->m, (util)a));
 
                 if(map != NULL){
                     if(count != NULL){
-                        args[0] = (Abstract *)count;
-                        args[1] = (Abstract *)map->keys[0];
+                        args[0] = count;
+                        args[1] = map->keys[0];
                         args[2] = NULL;
                         Fmt(bf, "$:$", args);
                     }else{
-                        args[0] = (Abstract *)map->keys[0];
+                        args[0] = map->keys[0];
                         args[1] = NULL;
                         Fmt(bf, "$", args);
                     }
@@ -117,7 +117,7 @@ status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
                                 Buff_AddBytes(bf, (byte *)", ", 2);
                             }
                             first = FALSE;
-                            args[0] = (Abstract *)map->keys[i];
+                            args[0] = map->keys[i];
                             void **dptr = ((void *)a)+att->range;
                             void *ptr = NULL;
                             if(dptr != NULL && *dptr != NULL){
@@ -126,16 +126,16 @@ status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
                                     ptr -= sizeof(RangeType);
                                 }
                                 Single *attCount = (Single *)Table_Get(tbl,
-                                    (Abstract *)Util_Wrapped(bf->m, (util)ptr));
+                                    Util_Wrapped(bf->m, (util)ptr));
 
                                 Abstract *aa = (Abstract *)ptr;
                                 Map *amap = Lookup_Get(MapsLookup, aa->type.of);
                                 if(amap != NULL){
-                                    args[1] = (Abstract *)amap->keys[0];
+                                    args[1] = amap->keys[0];
                                 }else{
-                                    args[1] = (Abstract *)Type_ToStr(bf->m, aa->type.of);
+                                    args[1] = Type_ToStr(bf->m, aa->type.of);
                                 }
-                                args[2] = (Abstract *)(attCount != NULL ? 
+                                args[2] = (attCount != NULL ? 
                                     I16_Wrapped(bf->m, attCount->val.i) : Util_Wrapped(bf->m, (util)aa));
 
                                 args[3] = NULL;
@@ -146,12 +146,12 @@ status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
                     Buff_AddBytes(bf, (byte *)")", 1);
                 }else{
                     if(count != NULL){
-                        args[0] = (Abstract *)count;
-                        args[1] = (Abstract *)Type_ToStr(bf->m, a->type.of);
+                        args[0] = count;
+                        args[1] = Type_ToStr(bf->m, a->type.of);
                         args[2] = NULL;
                         Fmt(bf, "$:$", args);
                     }else{
-                        args[0] = (Abstract *)Type_ToStr(bf->m, a->type.of);
+                        args[0] = Type_ToStr(bf->m, a->type.of);
                         args[1] = NULL;
                         Fmt(bf, "$", args);
                     }
@@ -169,19 +169,19 @@ status MemCh_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-status MemBook_Print(Buff *bf, Abstract *a, cls type, word flags){
+status MemBook_Print(Buff *bf, void *a, cls type, word flags){
     MemBook *cp = (MemBook*)as(a, TYPE_BOOK); 
     return 0;
 }
 
-status Span_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Span_Print(Buff *bf, void *a, cls type, word flags){
     Span *p = (Span*)as(a, TYPE_SPAN); 
 
     if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, p->nvalues), 
-            (Abstract *)I32_Wrapped(bf->m, p->max_idx), 
-            (Abstract *)I8_Wrapped(bf->m, p->dims),
+        void *args[] = {
+            I32_Wrapped(bf->m, p->nvalues), 
+            I32_Wrapped(bf->m, p->max_idx), 
+            I8_Wrapped(bf->m, p->dims),
             NULL
         };
         Fmt(bf, "Span<^D.$^d.values/0..$/$dims [", args);
@@ -193,8 +193,8 @@ status Span_Print(Buff *bf, Abstract *a, cls type, word flags){
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = it.value;
         if(a != NULL){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(bf->m, it.idx),
+            void *args[] = {
+                I32_Wrapped(bf->m, it.idx),
                 NULL
             };
             if(flags & DEBUG){
@@ -226,22 +226,22 @@ status Span_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-status Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Iter_Print(Buff *bf, void *a, cls type, word flags){
     Iter *it = (Iter *)as(a, TYPE_ITER);
     if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, it->type.of, it->type.state),
-            (Abstract *)I32_Wrapped(bf->m, it->idx),
-            (Abstract *)I32_Wrapped(bf->m, it->p->max_idx),
-            (Abstract *)I8_Wrapped(bf->m, it->p->dims),
+        void *args[] = {
+            Type_StateVec(bf->m, it->type.of, it->type.state),
+            I32_Wrapped(bf->m, it->idx),
+            I32_Wrapped(bf->m, it->p->max_idx),
+            I8_Wrapped(bf->m, it->p->dims),
             NULL
         };
         Fmt(bf, "I<@ $ of $max/$dims stack:\n", args);
         void *ptr = it->p->root;
         for(i8 i = it->p->dims; i >= 0; i--){
             if(it->stack[i] == NULL && (flags & (MORE|DEBUG))){
-                Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(bf->m, i),
+                void *args[] = {
+                    I32_Wrapped(bf->m, i),
                     NULL
                 };
                 Fmt(bf, "  $: NULL\n", args);
@@ -250,12 +250,12 @@ status Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
                 if(i > 0 && it->stack[i] != NULL){
                     delta = (it->stack[i] - ptr) / sizeof(void *);
                 }
-                Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(bf->m, i),
-                    (Abstract *)Ptr_Wrapped(bf->m, ptr, 0),
-                    (Abstract *)I32_Wrapped(bf->m, delta),
-                    (Abstract *)I32_Wrapped(bf->m, it->stackIdx[i]),
-                    (Abstract *)Ptr_Wrapped(bf->m, it->stack[i], 0), 
+                void *args[] = {
+                    I32_Wrapped(bf->m, i),
+                    Ptr_Wrapped(bf->m, ptr, 0),
+                    I32_Wrapped(bf->m, delta),
+                    I32_Wrapped(bf->m, it->stackIdx[i]),
+                    Ptr_Wrapped(bf->m, it->stack[i], 0), 
                     NULL
                 };
                 Fmt(bf, "  $: $+$/$ = @\n", args);
@@ -265,18 +265,18 @@ status Iter_Print(Buff *bf, Abstract *a, cls type, word flags){
             }
         }
         word previous = bf->type.state;
-        Abstract *args2[] = {
-            (Abstract *)((it->p->type.state & FLAG_SPAN_RAW) ?
+        void *args2[] = {
+            ((it->p->type.state & FLAG_SPAN_RAW) ?
                 I64_Wrapped(bf->m, (i64)it->value) : it->value),
             NULL
         };
         Fmt(bf, "value=@>", args2);
     }else if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, it->type.of, it->type.state),
-            (Abstract *)I32_Wrapped(bf->m, it->idx),
-            (Abstract *)I32_Wrapped(bf->m, it->p->max_idx),
-            (Abstract *)it->value,
+        void *args[] = {
+            Type_StateVec(bf->m, it->type.of, it->type.state),
+            I32_Wrapped(bf->m, it->idx),
+            I32_Wrapped(bf->m, it->p->max_idx),
+            it->value,
             NULL
         };
         Fmt(bf, "I<@ idx/max_idx=^D.$of$^d.\\@@>", args);

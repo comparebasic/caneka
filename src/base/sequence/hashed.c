@@ -14,20 +14,19 @@ static util _Hash_Bytes(byte *bt, size_t length, util h){
     return h;
 }
 
-
 static util Hash_Ptr(void *ptr){
 	util h = 5381;
     return _Hash_Bytes((byte *)&ptr, sizeof(void *), h);
 }
 
-static util Hash_Str(Abstract *a){
+static util Hash_Str(void *a){
     Str *s = (Str *)asIfc(a, TYPE_STR);
 	util h = 5381;
     h = _Hash_Bytes(s->bytes, s->length, h);
     return h;
 }
 
-static util Hash_StrVec(Abstract *a){
+static util Hash_StrVec(void *a){
     StrVec *v = (StrVec *)a;
 	util h = 5381;
     Iter it;
@@ -40,24 +39,24 @@ static util Hash_StrVec(Abstract *a){
     return h;
 }
 
-static util Hash_Req(Abstract *a){
+static util Hash_Req(void *a){
     return 0;
 }
 
-static util Hash_Slab(Abstract *a){
+static util Hash_Slab(void *a){
     return 0;
 }
 
-static util Hash_Span(Abstract *a){
+static util Hash_Span(void *a){
     return 0;
 }
 
-static util Hash_WI16(Abstract *a){
+static util Hash_WI16(void *a){
     Single *sg = (Single *)a;
     return (util)sg->val.w;
 }
 
-static util Hash_Util(Abstract *a){
+static util Hash_Util(void *a){
 	util h = 5381;
     Single *sg = (Single *)a;
     return _Hash_Bytes((byte *)&sg->val.value, sizeof(util), h);
@@ -68,7 +67,8 @@ util Hash_Bytes(byte *bt, size_t length){
     return _Hash_Bytes(bt, length, h);
 }
 
-util Get_Hash(Abstract *a){
+util Get_Hash(void *_a){
+    Abstract *a = (Abstract *)_a;
     if(a->type.of == TYPE_HASHED){
         Hashed *h = (Hashed *)a;
         return h->id;
@@ -89,7 +89,8 @@ boolean Hashed_Equals(Hashed *a, Hashed *b){
     return Equals(a->key, b->key);
 }
 
-Hashed *Hashed_Make(MemCh *m, Abstract *a){
+Hashed *Hashed_Make(MemCh *m, void *_a){
+    Abstract *a = (Abstract *)_a;
     if(a != NULL && a->type.of == TYPE_HASHED){
         return (Hashed *)a;
     }

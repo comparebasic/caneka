@@ -2,11 +2,11 @@
 #include <caneka.h>
 
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
-    Abstract *args[2];
+    void *args[2];
     if(v->total+1 > STR_MAX || v->total+1 > length){
-        Abstract *args[] = {
-            (Abstract *)I64_Wrapped(m, v->total),
-            (Abstract *)I16_Wrapped(m, length),
+        void *args[] = {
+            I64_Wrapped(m, v->total),
+            I16_Wrapped(m, length),
             NULL,
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -21,7 +21,7 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
         if(TextCharFilter(content->bytes, content->length)){
             Str_Add(s, content->bytes, content->length);
         }else{
-            args[0] = (Abstract *)content;
+            args[0] = content;
             args[1] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Failed text char filter &", args);
@@ -35,7 +35,9 @@ Str *StrVec_Str(MemCh *m, StrVec *v){
     return StrVec_ToStr(m, v, v->total+1);
 }
 
-Str *StrVec_StrCombo(MemCh *m, Abstract *a, Abstract *b){
+Str *StrVec_StrCombo(MemCh *m, void *_a, void *_b){
+    Abstract *a = (Abstract *)_a;
+    Abstract *b = (Abstract *)_b;
     word tailLength = 0;
     StrVec *v = NULL;
     if(a->type.of == TYPE_STR){
@@ -43,7 +45,7 @@ Str *StrVec_StrCombo(MemCh *m, Abstract *a, Abstract *b){
     }else if(a->type.of == TYPE_STRVEC){
         v = (StrVec *)a;
     }else{
-        Abstract *args[] = {a, b, NULL};
+        void *args[] = {a, b, NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error combo requires Str or StrVec arguments only: @, @", args);
         return NULL;
@@ -54,7 +56,7 @@ Str *StrVec_StrCombo(MemCh *m, Abstract *a, Abstract *b){
     }else if(b->type.of == TYPE_STRVEC){
         tailLength =  ((StrVec *)b)->total;
     }else{
-        Abstract *args[] = {a, b, NULL};
+        void *args[] = {a, b, NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error combo requires Str or StrVec arguments only: @, @", args);
         return NULL;
@@ -191,7 +193,7 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
 }
 
 StrVec *StrVec_Copy(MemCh *m, StrVec *_v){
-    StrVec *v = (StrVec *)as((Abstract *)_v, TYPE_STRVEC);
+    StrVec *v = (StrVec *)as(_v, TYPE_STRVEC);
     StrVec *new = StrVec_Make(m);
     Iter it;
     Iter_Init(&it, v->p);
@@ -202,17 +204,17 @@ StrVec *StrVec_Copy(MemCh *m, StrVec *_v){
     return new;
 }
 
-Abstract *StrVec_Clone(MemCh *m, Abstract *a){
+void *StrVec_Clone(MemCh *m, void *a){
     StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
     StrVec *new = StrVec_Make(m);
     new->total = v->total;
     new->p = Span_Clone(m, v->p);
-    return (Abstract *)new;
+    return new;
 }
 
 status StrVec_Add(StrVec *v, Str *s){
-    s = (Str *)as((Abstract *)s, TYPE_STR);
-    status r = Span_Add(v->p, (Abstract *)s);
+    s = (Str *)as(s, TYPE_STR);
+    status r = Span_Add(v->p, s);
     v->total += s->length;
     return r;
 }
@@ -264,7 +266,8 @@ status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length){
     return r;
 }
 
-StrVec *StrVec_StrVec(MemCh *m, Abstract *a){
+StrVec *StrVec_StrVec(MemCh *m, void *_a){
+    Abstract * a = (Abstract *)_a;
     if(a->type.of == TYPE_STRVEC){
         return (StrVec *)a;
     }else if(a->type.of == TYPE_STR){

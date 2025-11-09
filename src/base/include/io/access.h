@@ -27,7 +27,7 @@ typedef struct access {
     ((access)->type.state = (((access)->type.state & NORMAL_FLAGS) | fl))
 
 status Access_Init(MemCh *m);
-status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, Abstract *value, Access *access);
+status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, void *value, Access *access);
 Str *GetGroupAccess(Access *access, Str *s);
 Str *GetAccess(Access *access, Str *s);
 Access *Access_Make(MemCh *m, Str *owner, Span *groups);

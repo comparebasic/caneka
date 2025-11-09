@@ -15,12 +15,12 @@ static status fnameStr(MemCh *m, Str *s, Str *path, Str *file){
     return SUCCESS;
 }
 
-static status rmDir(MemCh *m, Str *path, Abstract *source){
+static status rmDir(MemCh *m, Str *path, void *source){
     char *dirPath = Str_Cstr(m, path);
     return rmdir(dirPath) == 0 ? SUCCESS : ERROR;
 }
 
-static status rmFile(MemCh *m, Str *path, Str *file, Abstract *source){
+static status rmFile(MemCh *m, Str *path, Str *file, void *source){
     Str *s = &_globalS;
     Str_Init(s, _buff, STR_DEFAULT, STR_DEFAULT);
     fnameStr(m, s, path, file);
@@ -28,18 +28,18 @@ static status rmFile(MemCh *m, Str *path, Str *file, Abstract *source){
     return unlink(rmPath) == 0 ? SUCCESS : ERROR;
 }
 
-static status gatherDir(MemCh *m, Str *path, Abstract *source){
+static status gatherDir(MemCh *m, Str *path, void *source){
     Span *p = (Span *)asIfc(source, TYPE_SPAN);
-    return Span_Add(p, (Abstract *)path);
+    return Span_Add(p, path);
 }
 
-static status gatherFile(MemCh *m, Str *path, Str *file, Abstract *source){
+static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
     Span *p = (Span *)asIfc(source, TYPE_SPAN);
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, path);
     StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1, 0));
     StrVec_Add(v, file);
-    return Span_Add(p, (Abstract *)v);
+    return Span_Add(p, v);
 }
 
 status Dir_Destroy(MemCh *m, Str *path, Access *access){
@@ -50,7 +50,7 @@ status Dir_Destroy(MemCh *m, Str *path, Access *access){
 }
 
 status Dir_Gather(MemCh *m, Str *path, Span *sp){
-    return Dir_Climb(m, path, gatherDir, gatherFile, (Abstract *)sp);
+    return Dir_Climb(m, path, gatherDir, gatherFile, sp);
 }
 
 status Dir_Exists(MemCh *m, Str *path){
@@ -65,7 +65,7 @@ status Dir_Exists(MemCh *m, Str *path){
     return ERROR;
 }
 
-status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, Abstract *source){
+status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
     DebugStack_Push(path, path->type.of); 
     status r = READY;
     struct dirent *ent;
@@ -92,7 +92,7 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, Abstract *sour
         DebugStack_Pop();
         return r|SUCCESS;
     }else{
-        Abstract *args[] = {(Abstract *)path, NULL};
+        void *args[] = {path, NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to open Direcotry: @", args);
         DebugStack_Pop();
@@ -105,11 +105,11 @@ status Dir_CheckCreate(MemCh *m, Str *path){
     Span *cmd = Span_Make(m);
     char *cstr = "mkdir";
     i64 len = strlen(cstr);
-    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1, 0));
+    Span_Add(cmd, Str_Ref(m, (byte *)cstr, len, len+1, 0));
     cstr = "-p";
     len = strlen(cstr);
-    Span_Add(cmd, (Abstract *)Str_Ref(m, (byte *)cstr, len, len+1, 0));
-    Span_Add(cmd, (Abstract *)path);
+    Span_Add(cmd, Str_Ref(m, (byte *)cstr, len, len+1, 0));
+    Span_Add(cmd, path);
 
 
     ProcDets pd;

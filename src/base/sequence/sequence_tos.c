@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-status HKey_Print(Buff *bf, Abstract *a, cls type, word flags){
+status HKey_Print(Buff *bf, void *a, cls type, word flags){
     HKey *hk = (HKey *)as(a, TYPE_HKEY);
     if(flags & (MORE|DEBUG)){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, hk->idx), 
-            (Abstract *)I8_Wrapped(bf->m, hk->dim), 
-            (Abstract *)I8_Wrapped(bf->m, hk->pos),
+        void *args[] = {
+            I32_Wrapped(bf->m, hk->idx), 
+            I8_Wrapped(bf->m, hk->dim), 
+            I8_Wrapped(bf->m, hk->pos),
             NULL
         };
         return Fmt(bf, "HKey<idx^D.$^d. ^D.$^d.dim ^D.$^d.pos>", args);
@@ -16,8 +16,8 @@ status HKey_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-status Array_Print(Buff *bf, Abstract *a, cls type, word flags){
-    Abstract **arr = (Abstract **)a;
+status Array_Print(Buff *bf, void *a, cls type, word flags){
+    void **arr = (void **)a;
     boolean first = TRUE;
     while(*arr != NULL){
         if(first){
@@ -31,27 +31,27 @@ status Array_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-status Hashed_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Hashed_Print(Buff *bf, void *a, cls type, word flags){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(flags & DEBUG){
         Single *wid = I64_Wrapped(bf->m, h->id);
         wid->type.state |= FMT_TYPE_BITS;
         Single *val = Ptr_Wrapped(bf->m, h->value, 0);
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, h->orderIdx), 
-            (Abstract *)I32_Wrapped(bf->m, h->idx), 
-            (Abstract *)wid, 
+        void *args[] = {
+            I32_Wrapped(bf->m, h->orderIdx), 
+            I32_Wrapped(bf->m, h->idx), 
+            wid, 
             h->key, 
-            (Abstract *)val, 
-            (Abstract *)(h->value != NULL ? Type_ToStr(bf->m, h->value->type.of) : NULL),
+            val, 
+            (h->value != NULL ? Type_ToStr(bf->m, ((Abstract *)h->value)->type.of) : NULL),
             NULL
         };
         return Fmt(bf, "H<$,$ $/@ -> $/$>", args);
     }else if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, h->idx), 
+        void *args[] = {
+            I32_Wrapped(bf->m, h->idx), 
             h->key, 
-            (Abstract *)h->value, 
+            h->value, 
             NULL
         };
         return Fmt(bf, "H<$ @ -> @>", args);
@@ -60,11 +60,11 @@ status Hashed_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-status Lookup_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Lookup_Print(Buff *bf, void *a, cls type, word flags){
     Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
     if(flags & (MORE|DEBUG)){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, lk->offset),
+        void *args[] = {
+            I32_Wrapped(bf->m, lk->offset),
             NULL,
         };
         Fmt(bf, "Lk<^D.$^d.offset values[", args);
@@ -72,13 +72,9 @@ status Lookup_Print(Buff *bf, Abstract *a, cls type, word flags){
         Iter_Init(&it, lk->values);
         while((Iter_Next(&it) & END) == 0){
             if(it.value != NULL){
-                /*
-                Single *val = Ptr_Wrapped(bf->m, it.value, 0);
-                val->type.state |= DEBUG;
-                */
-                Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(bf->m, it.idx+lk->offset),
-                    (Abstract *)Type_ToStr(bf->m, it.idx+lk->offset),
+                void *args[] = {
+                    I32_Wrapped(bf->m, it.idx+lk->offset),
+                    Type_ToStr(bf->m, it.idx+lk->offset),
                     NULL
                 };
                 Fmt(bf, "$/$", args);
@@ -94,15 +90,15 @@ status Lookup_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-status Table_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Table_Print(Buff *bf, void *a, cls type, word flags){
     Table *tbl = (Table *)a;
     if((flags & (DEBUG|MORE)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }else{
         if(flags & DEBUG){
-            Abstract *args[] = {
-                (Abstract *)Type_StateVec(bf->m, tbl->type.of, tbl->type.state),
-                (Abstract *)I32_Wrapped(bf->m, tbl->nvalues),
+            void *args[] = {
+                Type_StateVec(bf->m, tbl->type.of, tbl->type.state),
+                I32_Wrapped(bf->m, tbl->nvalues),
                 NULL
             };
             Fmt(bf, "Tbl<$ ^D.$^d.nvalues ", args);

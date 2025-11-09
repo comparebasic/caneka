@@ -1,12 +1,12 @@
-void Type_SetFlag(Abstract *a, word flags);
+void Type_SetFlag(void *a, word flags);
 cls Ifc_Get(cls inst);
 boolean Ifc_Match(cls inst, cls ifc);
 status Ifc_Init(struct mem_ctx *m);
 extern struct lookup *SizeLookup;
 
-Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type);
-Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cls type);
-Abstract *_asError(char *func, char *file, i32 line, Abstract *x, cls type);
+void *_as(char *func, char *file, i32 line, void *x, cls type);
+void *_asIfc(char *func, char *file, i32 line, void *x, cls type);
+void *_asError(char *func, char *file, i32 line, void *x, cls type);
 
 #ifndef __IFC_HEADER_FUNCS
 #define __IFC_HEADER_FUNCS

@@ -9,12 +9,12 @@ status Access_Init(MemCh *m){
 
         Span *tbl = Span_Make(m);
         Str *key = Str_CstrRef(m, "grant");
-        Hashed *h = Table_SetHashed(tbl, (Abstract *)key, (Abstract *)Range_Wrapped(m, SUCCESS));
+        Hashed *h = Table_SetHashed(tbl, key, Range_Wrapped(m, SUCCESS));
         h->type.state |= UPPER_FLAGS;
 
         key = Str_CstrRef(m, "system");
         _perms = Span_Make(m);
-        h = Table_SetHashed(_perms, (Abstract *)key, (Abstract *)tbl);
+        h = Table_SetHashed(_perms, key, tbl);
         h->type.state |= UPPER_FLAGS;
 
 
@@ -25,7 +25,7 @@ status Access_Init(MemCh *m){
     return NOOP;
 }
 
-status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, Abstract *value, Access *access){
+status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, void *value, Access *access){
     DebugStack_Push(grantee->owner, grantee->owner->type.of);
     Access_SetFl(access, (fl|ACCESS_GRANT));
     if(GetAccess(access, Str_CstrRef(m, "grant")) == NULL){
@@ -34,19 +34,19 @@ status Access_Grant(MemCh *m, Access *grantee, word fl, Str *key, Abstract *valu
     }
 
     Span *userPerms = NULL;
-    Hashed *h = Table_GetHashed(_perms, (Abstract *)grantee->owner); 
+    Hashed *h = Table_GetHashed(_perms, grantee->owner); 
 
     MemCh_SetToBase(m);
     Str *userKey = Str_Clone(m, grantee->owner);
     if(h == NULL){
         userPerms = Span_Make(m);
-        h = Table_SetHashed(_perms, (Abstract *)userKey, (Abstract *)userPerms); 
+        h = Table_SetHashed(_perms, userKey, userPerms); 
     }else{
         userPerms = (Span *)h->value;
     }
     h->type.state |= fl;
 
-    h = Table_SetHashed(userPerms, (Abstract *)key, (Abstract *)value); 
+    h = Table_SetHashed(userPerms, key, value); 
     h->type.state |= fl;
 
     MemCh_SetFromBase(m);
@@ -69,7 +69,7 @@ Str *GetGroupAccess(Access *access, Str *s){
 
 Str *GetAccess(Access *access, Str *s){
     DebugStack_Push(access->owner, access->owner->type.of);
-    Hashed *h = Table_GetHashed(_perms, (Abstract *)access->owner);
+    Hashed *h = Table_GetHashed(_perms, access->owner);
     if(h == NULL){
         DebugStack_Pop();
         return NULL;
@@ -81,7 +81,7 @@ Str *GetAccess(Access *access, Str *s){
     }
     
     Table *tbl = (Table *)as(h->value, TYPE_TABLE);
-    h = Table_GetHashed(tbl, (Abstract *)s);
+    h = Table_GetHashed(tbl, s);
     if(h == NULL || (fl & h->type.state) != fl){
         DebugStack_Pop();
         return NULL;

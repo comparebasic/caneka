@@ -5,7 +5,7 @@ static boolean _initialized = FALSE;
 struct lookup *BlankerLookup = NULL;
 struct lookup *RepointerLookup = NULL;
 
-cls Stash_UnpackAddr(MemCh *m, StashCoord *coord, Abstract **arr){
+cls Stash_UnpackAddr(MemCh *m, StashCoord *coord, void **arr){
     cls typeOf = coord->typeOf;
     MemPage *pg = (MemPage *)arr[coord->idx];
     if(pg == NULL){
@@ -34,10 +34,10 @@ status Stash_PackAddr(cls typeOf, i32 slIdx, void **ptr){
 
 i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
     boolean pack = (mit->type.state & MEM_ITER_STREAM) == 0;
-    Abstract *args[5];
+    void *args[5];
     i16 checksum = 0;
     while((MemIter_Next(mit) & END) == 0){
-        Abstract *a = MemIter_Get(mit);
+        Abstract *a = (Abstract *)MemIter_Get(mit);
         if((mit->type.state & MORE) == 0){
             if(a->type.of == TYPE_POINTER_ARRAY){
                 void **dptr = (void **)(((void *)a)+sizeof(RangeType));
@@ -50,14 +50,14 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                     }
                     if(pack){
                         StashItem *item = (StashItem *)Table_Get(tbl, 
-                            (Abstract *)Util_Wrapped(m, (util)ptr));
+                            Util_Wrapped(m, (util)ptr));
                         if(item != NULL){
                             Stash_PackAddr(item->coord.typeOf,
                                 item->coord.idx, (void **)dptr);
 
                             StashCoord *coord = (StashCoord *)dptr;
                         }else{
-                            args[0] = (Abstract *)Util_Wrapped(m, (util)ptr);
+                            args[0] = Util_Wrapped(m, (util)ptr);
                             args[1] = NULL;
                             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                                 "PTR ARRAY Unable to find address @ in table,"
@@ -73,7 +73,7 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
             }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
                 Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
                 if(map == NULL){
-                    args[0] = (Abstract *)Type_ToStr(m, a->type.of);
+                    args[0] = Type_ToStr(m, a->type.of);
                     args[1] = NULL;
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Map not found for type $, needed for mem persist", args);
@@ -86,17 +86,17 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                 for(i16 i = 1; i <= map->type.range; i++){
                     RangeType *att = map->atts+i;
                     if(att->of > _TYPE_RANGE_TYPE_START){
-                        Abstract **aa = ((void *)a)+att->range;
+                        void **aa = ((void *)a)+att->range;
                         if(pack){
                             StashItem *item = (StashItem *)Table_Get(tbl, 
-                                (Abstract *)Util_Wrapped(m, (util)*aa));
+                                Util_Wrapped(m, (util)*aa));
                             if(item != NULL){
                                 Stash_PackAddr(item->coord.typeOf,
                                     item->coord.idx, (void **)aa);
                                 StashCoord *coord = (StashCoord *)aa;
                             }else{
-                                args[0] = (Abstract *)Util_Wrapped(m, (util)aa);
-                                args[1] = (Abstract *)map->keys[i];
+                                args[0] = Util_Wrapped(m, (util)aa);
+                                args[1] = map->keys[i];
                                 args[2] = NULL;
                                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                                     "Att Unable to find address $ for $ in table,"
@@ -122,8 +122,8 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
 status Stash_FlushFree(Buff *bf, MemCh *persist){
     status r = READY;
     SourceFunc func = NULL;
-    Abstract *a = NULL;
-    Abstract *args[5];
+    void *a = NULL;
+    void *args[5];
     Iter it;
 
     MemCh *m = bf->m;
@@ -132,7 +132,7 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     MemIter mit;
     MemIter_Init(&mit, persist);
     while((MemIter_Next(&mit) & END) == 0){
-        Abstract *a = MemIter_Get(&mit);
+        Abstract *a = (Abstract *)MemIter_Get(&mit);
         if((mit.type.state & MORE) == 0){
             void *ptr = (void *)a;
             if(a->type.of < _TYPE_RANGE_TYPE_END){
@@ -140,17 +140,17 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
                 ptr += sizeof(RangeType);
             }
 
-            Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)ptr), 
-                (Abstract *)StashItem_Make(m, mit.slIdx, (void *)ptr, a->type.of));
+            Table_Set(tbl, Util_Wrapped(m, (util)ptr), 
+                StashItem_Make(m, mit.slIdx, (void *)ptr, a->type.of));
         }
     }
 
     Span *pages = Span_Make(m);
     Iter_Reset(&persist->it);
     while((Iter_Next(&persist->it) & END) == 0){
-        Abstract *a = Iter_Get(&persist->it);
-        Table_Set(tbl, (Abstract *)Util_Wrapped(m, (util)a), 
-            (Abstract *)StashItem_Make(m, persist->it.idx, (void *)a, a->type.of));
+        Abstract *a = (Abstract *)Iter_Get(&persist->it);
+        Table_Set(tbl, Util_Wrapped(m, (util)a), 
+            StashItem_Make(m, persist->it.idx, (void *)a, a->type.of));
         Span_Add(pages, a);
     }
 
@@ -183,11 +183,11 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
 MemCh *Stash_FromStream(Buff *bf){
     status r = READY;
 
-    Abstract *args[5];
+    void *args[5];
     StashHeader hdr = {0, 0};
     i16 count = 0;
     MemCh *persist = NULL; 
-    Abstract **pages = NULL;
+    void **pages = NULL;
     MemCh *m = bf->m;
     Str s = {
         .type = {TYPE_STR, ZERO},
@@ -206,7 +206,7 @@ MemCh *Stash_FromStream(Buff *bf){
             }
 
             r |= PROCESSING;
-            pages = (Abstract **)Bytes_Alloc(bf->m, hdr.pages*sizeof(void *), TYPE_POINTER_ARRAY);
+            pages = (void **)Bytes_Alloc(bf->m, hdr.pages*sizeof(void *), TYPE_POINTER_ARRAY);
         }
 
         if(count >= hdr.pages){
@@ -227,7 +227,7 @@ MemCh *Stash_FromStream(Buff *bf){
         s.bytes = (byte *)pages[count];
         r |= (Buff_GetStr(bf, &s) & SUCCESS);
         if((r & SUCCESS) == 0){
-            args[0] = (Abstract *)I16_Wrapped(ErrStream->m, s.length);
+            args[0] = I16_Wrapped(ErrStream->m, s.length);
             args[1] = NULL;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error reading page from stream to Stash length $", args);
@@ -247,8 +247,8 @@ MemCh *Stash_FromStream(Buff *bf){
     }
 
     if(checksum != hdr.checksum){
-        args[0] = (Abstract *)I16_Wrapped(bf->m, hdr.checksum);
-        args[1] = (Abstract *)I16_Wrapped(bf->m, checksum);
+        args[0] = I16_Wrapped(bf->m, hdr.checksum);
+        args[1] = I16_Wrapped(bf->m, checksum);
         args[2] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error checksum of number of changes does not match for resurecting persisting"             " expected $, have $",

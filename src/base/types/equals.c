@@ -15,7 +15,9 @@ status Equals_Init(MemCh *m){
     return r;
 }
 
-boolean Equals(Abstract *a, Abstract *b){
+boolean Equals(void *_a, void *_b){
+    Abstract *a = (Abstract *)_a;
+    Abstract *b = (Abstract *)_b;
     if(a == NULL || b == NULL){
         return FALSE;
     }else if( a == b){
@@ -73,9 +75,9 @@ boolean Equals(Abstract *a, Abstract *b){
         cls aTypeOf = Ifc_Get(a->type.of);
         cls bTypeOf = Ifc_Get(b->type.of);
         if(aTypeOf != bTypeOf){
-            Abstract *args[] = {
-                (Abstract *)Type_ToStr(ErrStream->m, aTypeOf),
-                (Abstract *)Type_ToStr(ErrStream->m, bTypeOf),
+            void *args[] = {
+                Type_ToStr(ErrStream->m, aTypeOf),
+                Type_ToStr(ErrStream->m, bTypeOf),
                 NULL
             };
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -83,8 +85,8 @@ boolean Equals(Abstract *a, Abstract *b){
         }else{
             EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, aTypeOf);
             if(func == NULL){
-                Abstract *args[] = {
-                    (Abstract *)Type_ToStr(ErrStream->m, aTypeOf),
+                void *args[] = {
+                    Type_ToStr(ErrStream->m, aTypeOf),
                     NULL
                 };
                 Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -97,7 +99,8 @@ boolean Equals(Abstract *a, Abstract *b){
     return FALSE;
 }
 
-boolean Caneka_Truthy(Abstract *a){
+boolean Caneka_Truthy(void *_a){
+    Abstract *a = (Abstract *)_a;
     if(a == NULL){
         return FALSE;
     }else if(Ifc_Match(a->type.of, TYPE_WRAPPED_I64)){

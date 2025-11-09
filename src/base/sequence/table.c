@@ -8,14 +8,14 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
     Abstract *value = (Abstract *)_value;
     Table *tbl = (Table *)it->p;
     tbl->type.state &= ~(SUCCESS|NOOP);
-    Abstract *args[5];
+    void *args[5];
     if(key == NULL){
         return NULL;
     }
 
     if(tbl->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(OutStream->m, tbl->nvalues);
-        args[1] = (Abstract *)key;
+        args[0] = I32_Wrapped(OutStream->m, tbl->nvalues);
+        args[1] = key;
         args[2] = NULL;
         if(op & SPAN_OP_GET){
             Out("^p.Get \\@@^0\n", args);
@@ -26,9 +26,9 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
 
     if((op & SPAN_OP_SET) && tbl->nvalues > dim_occupied_max[tbl->dims]){
         if(tbl->type.state & DEBUG){
-            args[0] = (Abstract *)key;
-            args[1] = (Abstract *)I32_Wrapped(OutStream->m, tbl->nvalues);
-            args[2] = (Abstract *)I8_Wrapped(OutStream->m, tbl->dims+1);
+            args[0] = key;
+            args[1] = I32_Wrapped(OutStream->m, tbl->nvalues);
+            args[2] = I8_Wrapped(OutStream->m, tbl->dims+1);
             args[3] = NULL;
             Out("^p.Resiing \\@@ @nvalues @dims^0\n", args);
         }
@@ -54,9 +54,9 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
             if(hk.idx > dim_max_idx[tbl->dims]){
                 Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
                 if(tbl->type.state & DEBUG){
-                    args[0] = (Abstract *)key;
-                    args[1] = (Abstract *)&hk;
-                    args[2] = (Abstract *)I8_Wrapped(OutStream->m, tbl->dims);
+                    args[0] = key;
+                    args[1] = &hk;
+                    args[2] = I8_Wrapped(OutStream->m, tbl->dims);
                     args[3] = NULL;
                     Out("^y.No match expanding \\@@ & @dims\n", args);
                 }
@@ -93,14 +93,14 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                 }
 
                 h->idx = hk.idx;
-                Span_Set((Span *)tbl, hk.idx, (Abstract *)h);
+                Span_Set((Span *)tbl, hk.idx, h);
                 tbl->type.state |= SUCCESS;
                 return h;
             }
         }else if(Hashed_Equals(h, record)){
             if(tbl->type.state & DEBUG){
-                args[0] = (Abstract*)&hk;
-                args[1] = (Abstract*)record;
+                args[0] = &hk;
+                args[1] = record;
                 args[2] = NULL;
                 Out("^p.  Looking record matches & -> &^0\n", args);
             }
@@ -111,9 +111,9 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
             return record;
         }else{
             if(tbl->type.state & DEBUG){
-                args[0] = (Abstract*)&hk;
-                args[1] = (Abstract*)h;
-                args[2] = (Abstract*)record;
+                args[0] = &hk;
+                args[1] = h;
+                args[2] = record;
                 args[3] = NULL;
                 Out("^p.  Record exists but not matching & -> & vs record:&^0\n", args);
             }
@@ -171,8 +171,7 @@ status Table_SetKey(Iter *it, void *_a){
     it->metrics.selected = h->idx;
 
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
-        Equals((Abstract *)a, 
-            (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
+        Equals(a, Str_FromCstr(ErrStream->m, "config",ZERO))){
     }
 
     /* set idx here */
@@ -185,7 +184,7 @@ i32 Table_SetIdxEntry(Iter *it, void *_a){
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);
     i32 value = it->metrics.set;
     Single *tag = I32_Wrapped(it->p->m, value);
-    h->value = (Abstract *)tag;
+    h->value = tag;
     return (i32)value;
 }
 
@@ -226,8 +225,7 @@ Hashed *Table_SetHashed(Table *tbl, void *_a, void *_value){
     tbl->type.state |= it.type.state & OUTCOME_FLAGS;
 
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
-        Equals((Abstract *)a, 
-            (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
+        Equals(a, Str_FromCstr(ErrStream->m, "config",ZERO))){
     }
 
 
@@ -262,8 +260,7 @@ i32 Table_Set(Table *tbl, void *_a, void *_value){
     Hashed *h = Table_GetSetHashed(&it, SPAN_OP_SET, a, value);
 
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
-        Equals((Abstract *)a, 
-            (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
+        Equals(a, Str_FromCstr(ErrStream->m, "config",ZERO))){
     }
 
     return h->idx;
@@ -274,8 +271,7 @@ i32 Table_SetByIter(Iter *it, void *_a, void *_value){
     Abstract *value = (Abstract *)_value;
 
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
-        Equals((Abstract *)a, 
-            (Abstract *)Str_FromCstr(ErrStream->m, "config",ZERO))){
+        Equals(a, Str_FromCstr(ErrStream->m, "config",ZERO))){
     }
 
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, value);

@@ -12,8 +12,10 @@ status Exact_Init(MemCh *m){
     return r;
 }
 
-boolean Exact(Abstract *a, Abstract *b){
-    Abstract *args[] = {
+boolean Exact(void *_a, void *_b){
+    Abstract *a = (Abstract *)_a;
+    Abstract *b = (Abstract *)_b;
+    void *args[] = {
         a, b, NULL
     };
     if(a == b){

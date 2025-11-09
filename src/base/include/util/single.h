@@ -8,7 +8,7 @@ typedef struct single  {
         i16 w;
         i32 i;
         util value;
-        Abstract *a;
+        void *a;
         void *ptr;
         DoFunc dof;
     } val;
@@ -16,7 +16,7 @@ typedef struct single  {
 
 Single *True();
 Single *False();
-Single *Single_Clone(MemCh *m, Abstract *og);
+Single *Single_Clone(MemCh *m, void *og);
 boolean Single_Equals(Single *a, Single *b);
 Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf);
 Single *Func_Wrapped(MemCh *m, void *func);

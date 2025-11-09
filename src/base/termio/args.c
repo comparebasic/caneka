@@ -2,10 +2,12 @@
 #include <caneka.h>
 
 static boolean argHasFlag(Hashed *h, word flag){
-    return h->value->type.of == TYPE_WRAPPED_PTR && (h->value->type.state & flag);
+    return ((Abstract *)h->value)->type.of == TYPE_WRAPPED_PTR &&
+        (((Abstract *)h->value)->type.state & flag);
 }
 
-status Args_Add(Table *resolve, Str *key, Abstract *value, word flags){
+status Args_Add(Table *resolve, Str *key, void *_value, word flags){
+    Abstract *value = (Abstract *)_value;
     if(value == NULL){
         value = (Abstract *)Ptr_Wrapped(resolve->m, NULL, ZERO);
     }
@@ -13,13 +15,13 @@ status Args_Add(Table *resolve, Str *key, Abstract *value, word flags){
         value = (Abstract *)Ptr_Wrapped(resolve->m, as(value, TYPE_SPAN), TYPE_SPAN); 
     }
     value->type.state |= flags;
-    Hashed *h = Table_SetHashed(resolve, (Abstract *)key, value);
+    Hashed *h = Table_SetHashed(resolve, key, value);
     return SUCCESS;
 }
 
 status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv){
-    Abstract *args[] = {
-        (Abstract *)name,
+    void *args[] = {
+        name,
         NULL
     };
     Out("$ ", args);
@@ -28,8 +30,8 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
-            Abstract *args[] = {
-                (Abstract *)h->key,
+            void *args[] = {
+                h->key,
                 NULL
             };
 
@@ -40,25 +42,25 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
             }else if(argHasFlag(h, ARG_CHOICE)){
                 if(argHasFlag(h, ARG_DEFAULT)){
                     Span *p = ((Single *)h->value)->val.ptr;
-                    Abstract *args[] = {
-                        (Abstract *)h->key,
-                        (Abstract *)p,
-                        (Abstract *)Span_Get(p, 0),
+                    void *args[] = {
+                        h->key,
+                        p,
+                        Span_Get(p, 0),
                         NULL
                     };
                     Out("$(@=$)", args);
                 }else{
-                    Abstract *args[] = {
-                        (Abstract *)h->key,
-                        (Abstract *)((Single *)h->value)->val.ptr,
+                    void *args[] = {
+                        h->key,
+                        ((Single *)h->value)->val.ptr,
                         NULL
                     };
                     Out("$(@)", args);
                 }
             }else if(argHasFlag(h, ARG_DEFAULT)){
-                Abstract *args[] = {
-                    (Abstract *)h->key,
-                    (Abstract *)((Single *)h->value)->val.ptr,
+                void *args[] = {
+                    h->key,
+                    ((Single *)h->value)->val.ptr,
                     NULL
                 };
                 Out("$(=$)", args);
@@ -78,7 +80,7 @@ status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv
 status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *dest){
     status r = READY;
     Str *key = NULL;
-    Abstract *rslv = NULL;
+    void *rslv = NULL;
     Iter it;
     Iter_Init(&it, dest);
     if(argc < 1){
@@ -89,33 +91,33 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
             Str *s = Str_CstrRef(m, *argv);
             if(s->length > 1 && s->bytes[0] == '-' && s->bytes[1] == '-'){
                 if(it.metrics.set != -1){
-                    Table_SetValue(&it, (Abstract *)Ptr_Wrapped(m, NULL, 0));
+                    Table_SetValue(&it, Ptr_Wrapped(m, NULL, 0));
                 }
                 it.metrics.set = -1;
                 Str_Incr(s, 2);
-                Abstract *arg = Table_Get(resolve, (Abstract *)s);
+                void *arg = Table_Get(resolve, s);
                 if(arg != NULL){
                     key = s;
                     rslv = arg;
-                    Table_SetKey(&it, (Abstract *)key);
+                    Table_SetKey(&it, key);
                 }else{
-                    Abstract *args[] = {
-                        (Abstract *)s,
+                    void *args[] = {
+                        s,
                         NULL
                     };
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Unable to find resolve for arg @", args);
                 }
             }else if(it.metrics.set != -1){
-                 Table_SetValue(&it, (Abstract *)s);
+                 Table_SetValue(&it, s);
                  key = NULL;
                  rslv = NULL;
                  r |= SUCCESS;
             }else{
                 if(it.metrics.set == -1){
-                    Table_SetKey(&it, (Abstract *)I32_Wrapped(m, i));
+                    Table_SetKey(&it, I32_Wrapped(m, i));
                 }
-                Table_SetValue(&it, (Abstract *)s);
+                Table_SetValue(&it, s);
             }
         }
         Iter it;
@@ -123,19 +125,20 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                Abstract *value = Table_Get(dest, h->key);
+                void *value = Table_Get(dest, h->key);
                 Single *sg = NULL;
-                if(h->value != NULL && h->value->type.of == TYPE_WRAPPED_PTR){
+                if(h->value != NULL && 
+                        ((Abstract *)h->value)->type.of == TYPE_WRAPPED_PTR){
                     sg = (Single *)h->value;
                 }
 
                 if(argHasFlag(h, ARG_DEFAULT) && value == NULL && sg != NULL){
                     value = sg->val.ptr;
-                    Table_Set(dest, h->key, (Abstract *)sg->val.ptr);
+                    Table_Set(dest, h->key, sg->val.ptr);
                 }else if(!argHasFlag(h, ARG_OPTIONAL)){
                     if(value == NULL){
-                        Abstract *args[] = {
-                            (Abstract *)h->key,
+                        void *args[] = {
+                            h->key,
                             NULL,
                         };
                         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -150,9 +153,9 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                         if(argHasFlag(h, ARG_DEFAULT)){
                              Table_Set(dest, h->key, Span_Get(p, 0));
                         }else{
-                            Abstract *args[] = {
-                                (Abstract *)h->key,
-                                (Abstract *)p,
+                            void *args[] = {
+                                h->key,
+                                p,
                                 value,
                                 NULL,
                             };
@@ -164,9 +167,10 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                     }
                 }
 
-                if(argHasFlag(h, ARG_ABS_PATH) && value != NULL && value->type.of == TYPE_STR){
-                     value = (Abstract *)IoUtil_GetAbsPath(m, (Str *)value);
-                     Table_Set(dest, h->key, value);
+                if(argHasFlag(h, ARG_ABS_PATH) && value != NULL &&
+                        ((Abstract *)value)->type.of == TYPE_STR){
+                    value = IoUtil_GetAbsPath(m, (Str *)value);
+                    Table_Set(dest, h->key, value);
                 }
             }
         }

@@ -35,6 +35,6 @@ typedef struct test_set {
 #define TEST_SERVE_END -1 
 #define TEST_DELAY_ONLY 0 
 
-status Test(boolean condition, char *fmt, Abstract *args[]);
-status TestShow(boolean condition, char *fmtSuccess, char *fmtError, Abstract *args[]);
+status Test(boolean condition, char *fmt, void *args[]);
+status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]);
 status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests);

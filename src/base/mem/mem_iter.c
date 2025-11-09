@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static void setLastFlag(MemIter *mit){
-    Abstract *a = MemIter_Get(mit);
+    Abstract *a = (Abstract *)MemIter_Get(mit);
     i64 sz = 0;
     if(a != NULL){
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
@@ -16,16 +16,16 @@ static void setLastFlag(MemIter *mit){
     }
 }
 
-Abstract *MemIter_Get(MemIter *mit){
+void *MemIter_Get(MemIter *mit){
     if(mit->end != NULL && mit->ptr != NULL){
-        return (Abstract *)mit->ptr;
+        return mit->ptr;
     }
     return NULL;
 }
 
 status MemIter_Next(MemIter *mit){
     mit->type.state &= ~LAST;
-    Abstract *args[5];
+    void *args[5];
     if(mit->ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
         MemPage *pg = NULL;
         if(mit->type.state & MEM_ITER_STREAM){
@@ -46,7 +46,7 @@ status MemIter_Next(MemIter *mit){
     }else if((mit->type.state & (MORE|PROCESSING)) == (MORE|PROCESSING)){
         mit->type.state &= ~MORE;
     }else{
-        Abstract *a = MemIter_Get(mit);
+        Abstract *a = (Abstract *)MemIter_Get(mit);
         i64 sz = 0;
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
             sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
@@ -54,8 +54,8 @@ status MemIter_Next(MemIter *mit){
             sz = Lookup_GetRaw(SizeLookup, a->type.of);
         }
         if(sz <= 0){
-            Abstract *args[] = {
-                (Abstract *)Type_ToStr(ErrStream->m, a->type.of),
+            void *args[] = {
+                Type_ToStr(ErrStream->m, a->type.of),
                 NULL
             };
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -63,7 +63,7 @@ status MemIter_Next(MemIter *mit){
             mit->type.state |= (ERROR|END);
         }
         if(mit->end == NULL || (void *)(mit->ptr+sz-1) > mit->end){
-            args[0] = (Abstract *)Util_Wrapped(ErrStream->m, mit->ptr+sz-1 - mit->end);
+            args[0] = Util_Wrapped(ErrStream->m, mit->ptr+sz-1 - mit->end);
             args[1] = NULL;
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: type to large to increment address is off the page by $", args);
@@ -99,7 +99,7 @@ void MemIter_Init(MemIter *mit, MemCh *target){
     mit->maxSlIdx = target->it.p->max_idx;
 }
 
-void MemIter_InitArr(MemIter *mit, Abstract **arr, i32 maxSlIdx){
+void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx){
     memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
     mit->input.arr = arr;
@@ -119,7 +119,7 @@ MemIter *MemIter_Make(MemCh *m, MemCh *target){
     return mit;
 }
 
-MemIter *MemIter_MakeFromArr(MemCh *m, Abstract **arr, i32 maxSlIdx){
+MemIter *MemIter_MakeFromArr(MemCh *m, void **arr, i32 maxSlIdx){
     MemIter *mit = (MemIter *)MemCh_AllocOf(m, sizeof(MemIter), TYPE_MEM_ITER);
     mit->type.of = TYPE_MEM_ITER;
     mit->type.state = MORE|MEM_ITER_STREAM;

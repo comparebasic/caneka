@@ -3,7 +3,7 @@
 
 static void Buff_addTail(Buff *bf){
     Str *s = Str_Make(bf->m, STR_DEFAULT);
-    Span_Add(bf->v->p, (Abstract *)s);
+    Span_Add(bf->v->p, s);
     bf->tail.idx = bf->v->p->max_idx;
     bf->tail.s = s;
 }
@@ -23,11 +23,11 @@ static void Buff_setUnsentIncr(Buff *bf, word length){
 }
 
 static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
-    Abstract *args[5];
+    void *args[5];
     if(whence == SEEK_END){
         if(offset < 0){
-            args[0] = (Abstract *)bf;
-            args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
+            args[0] = bf;
+            args[1] = I32_Wrapped(bf->m, offset);
             args[2] = NULL;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Offset cannot be zero if seeking from the end $: $", args);
@@ -55,9 +55,9 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
         if(whence == SEEK_SET){
             if(offset + bf->unsent.total > bf->v->total ||
                     offset + bf->unsent.total < 0){
-                args[0] = (Abstract *)bf;
-                args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
-                args[2] = (Abstract *)I32_Wrapped(bf->m, bf->v->total);
+                args[0] = bf;
+                args[1] = I32_Wrapped(bf->m, offset);
+                args[2] = I32_Wrapped(bf->m, bf->v->total);
                 args[3] = NULL;
                 Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                     "Offset + unsent.total cannot be greater than buff->v->total $: $ + $",
@@ -135,7 +135,7 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
 
 static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     bf->type.state &= ~PROCESSING;
-    Abstract *args[7];
+    void *args[7];
     if((bf->type.state & (BUFF_FD|BUFF_SOCKET)) == 0){
         return Buff_vecPosFrom(bf, offset, whence);
     }
@@ -143,10 +143,10 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     i64 pos = lseek(bf->fd, offset, whence);
     if(pos < 0){
         Buff_Stat(bf);
-        args[0] = (Abstract *)I64_Wrapped(bf->m, pos);
-        args[1] = (Abstract *)I32_Wrapped(bf->m, offset);
-        args[2] = (Abstract *)bf;
-        args[3] = (Abstract *)Str_CstrRef(bf->m, Buff_WhenceChars(whence));
+        args[0] = I64_Wrapped(bf->m, pos);
+        args[1] = I32_Wrapped(bf->m, offset);
+        args[2] = bf;
+        args[3] = Str_CstrRef(bf->m, Buff_WhenceChars(whence));
         args[6] = NULL;
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error seek failed with pos $ for offset $ on @ whence $", args);
@@ -192,7 +192,7 @@ static status Buff_bytesToFd(Buff *bf, i32 fd, byte *bytes, i64 length, i64 *off
 
 static status Buff_sendToFd(Buff *bf, i32 fd){
     bf->type.state &= ~(MORE|SUCCESS|NOOP|PROCESSING);
-    Abstract *args[5];
+    void *args[5];
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
             bf->unsent.s = Str_Rec(bf->m, Span_Get(bf->v->p, max(0, bf->unsent.idx)));
@@ -304,7 +304,7 @@ status Buff_Stat(Buff *bf){
 }
 
 status Buff_GetStr(Buff *bf, Str *s){
-    Abstract *args[5];
+    void *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
     word remaining = s->alloc - s->length;
 
@@ -400,8 +400,8 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
     }
 
     if(bf->type.state & ERROR){
-        Abstract *args[2];
-        args[0] = (Abstract *)bf;
+        void *args[2];
+        args[0] = bf;
         args[1] = NULL;
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error error flags set on buffer", args);
@@ -478,16 +478,16 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
 
 status Buff_Flush(Buff *bf){
     if(bf->type.state & DEBUG){
-        Abstract *args[2];
-        args[0] = (Abstract *)bf;
+        void *args[2];
+        args[0] = bf;
         args[1] = NULL;
         Out("^pFlushing @\n", args);
     }
     if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
         while((Buff_sendToFd(bf, bf->fd) & (SUCCESS|ERROR|NOOP|END)) == 0){
             if(bf->type.state & DEBUG){
-                Abstract *args[2];
-                args[0] = (Abstract *)bf;
+                void *args[2];
+                args[0] = bf;
                 args[1] = NULL;
                 Out("^p   cycle - Flushing @\n", args);
             }
@@ -495,8 +495,8 @@ status Buff_Flush(Buff *bf){
     }
 
     if(bf->type.state & DEBUG){
-        Abstract *args[2];
-        args[0] = (Abstract *)bf;
+        void *args[2];
+        args[0] = bf;
         args[1] = NULL;
         Out("^p    flushed - Flushing @\n", args);
     }
@@ -533,9 +533,9 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
 
         if(recieved < 0){
             if(bf->type.state & BUFF_FD){
-                Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(bf->m, bf->fd),
-                    (Abstract *)Str_CstrRef(bf->m, strerror(errno)),
+                void *args[] = {
+                    I32_Wrapped(bf->m, bf->fd),
+                    Str_CstrRef(bf->m, strerror(errno)),
                     NULL
                 };
                 Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -580,9 +580,9 @@ status Buff_ReadToStr(Buff *bf, Str *s){
         }
 
         if(recieved < 0){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(bf->m, bf->fd),
-                (Abstract *)Str_CstrRef(bf->m, strerror(errno)),
+            void *args[] = {
+                I32_Wrapped(bf->m, bf->fd),
+                Str_CstrRef(bf->m, strerror(errno)),
                 NULL
             };
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,

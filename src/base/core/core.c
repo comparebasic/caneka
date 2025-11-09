@@ -27,11 +27,6 @@ status Core_Init(MemCh *m){
     return NOOP;
 }
 
-i64 Out(char *fmt, Abstract *args[]){
+i64 Out(char *fmt, void *args[]){
     return Fmt(OutStream, fmt, args);
-}
-
-i64 Debug(char *fmt, Abstract *args[]){
-    i64 total = Fmt(OutStream, fmt, args);
-    return total;
 }

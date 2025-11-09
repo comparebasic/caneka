@@ -20,9 +20,9 @@ status Guard_Incr(MemCh *m, i16 *g, i16 max, char *func, char *file, int line){
     }
     Single sg = {.type = {TYPE_WRAPPED_I16, 0}, .val.w = *g};
     Single max_sg = {.type = {TYPE_WRAPPED_I16, 0}, .val.w = max};
-    Abstract *args[] = {
-        (Abstract *)&sg,
-        (Abstract *)&max_sg,
+    void *args[] = {
+        &sg,
+        &max_sg,
         NULL
     };
     Error(m, func, file, line, "Guard Error $/$", args);

@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Wrapped_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Wrapped_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)asIfc(a, TYPE_WRAPPED);
     if(flags & (MORE|DEBUG)){
         void *args[] = {
@@ -14,7 +14,7 @@ static status Wrapped_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedDo_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedDo_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_DO);
     if(flags & (DEBUG|MORE)){
         void *args[] = {
@@ -28,7 +28,7 @@ static status WrappedDo_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedFunc_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedFunc_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_FUNC);
     void *args[] = {
         Type_StateVec(bf->m, sg->type.of, sg->type.state),
@@ -42,7 +42,7 @@ static status WrappedFunc_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedPtr_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedPtr_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
     word fl = (DEBUG|MORE);
     void *args[] = {
@@ -59,7 +59,7 @@ static status WrappedPtr_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-static status WrappedUtil_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedUtil_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     Str *s = Str_FromI64(bf->m, sg->val.value);
     if(flags & MORE){
@@ -79,13 +79,13 @@ static status WrappedUtil_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedMemCount_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedMemCount_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_MEMCOUNT);
     Str *s = Str_MemCount(bf->m, sg->val.value);
     return Buff_AddBytes(bf, s->bytes, s->length);
 }
 
-static status WrappedI64_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedI64_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
     Str *s = Str_FromI64(bf->m, sg->val.value);
     if(flags & MORE){
@@ -99,7 +99,7 @@ static status WrappedI64_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedI32_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedI32_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.i);
     if(flags & DEBUG){
@@ -119,7 +119,7 @@ static status WrappedI32_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedI16_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedI16_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I16);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.w);
     if(flags & MORE){
@@ -142,7 +142,7 @@ static status WrappedI16_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedI8_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedI8_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I8);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.b);
     if(flags & DEBUG){
@@ -162,7 +162,7 @@ static status WrappedI8_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status WrappedB_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedB_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_BYTE);
     if((flags & DEBUG)){
         Fmt(bf, "Wb<^E.", NULL);
@@ -186,7 +186,7 @@ static status WrappedB_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-static status WrappedMicroTime_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status WrappedMicroTime_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
     Str *s = MicroTime_ToStr(bf->m, sg->val.value);
     if(flags & (DEBUG|MORE)){
@@ -201,7 +201,7 @@ static status WrappedMicroTime_Print(Buff *bf, Abstract *a, cls type, word flags
     }
 }
 
-static status Abstract_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Abstract_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     if(flags & (DEBUG|MORE)){
         void *args[] = {
@@ -214,7 +214,7 @@ static status Abstract_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status Single_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Single_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED);
     if(flags & (DEBUG|MORE)){
         void *args[] = {

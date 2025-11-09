@@ -6,7 +6,7 @@ typedef struct mem_iter {
     Type type;
     struct {
         MemCh *target;
-        Abstract **arr;
+        void **arr;
     } input;
     i32 slIdx;
     i32 maxSlIdx;
@@ -15,8 +15,8 @@ typedef struct mem_iter {
 } MemIter;
 
 MemIter *MemIter_Make(MemCh *m, MemCh *target);
-MemIter *MemIter_MakeFromArr(MemCh *m, Abstract **arr, i32 maxSlIdx);
+MemIter *MemIter_MakeFromArr(MemCh *m, void **arr, i32 maxSlIdx);
 void MemIter_Init(MemIter *mit, MemCh *target);
-void MemIter_InitArr(MemIter *mit, Abstract **arr, i32 maxSlIdx);
+void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx);
 status MemIter_Next(MemIter *mit);
-Abstract *MemIter_Get(MemIter *mit);
+void *MemIter_Get(MemIter *mit);

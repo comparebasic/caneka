@@ -10,7 +10,18 @@ Str *ansi_blue = NULL;
 Str *ansi_cyan = NULL;
 Str *ansi_dark = NULL;
 
+static boolean _AnsiSkip = FALSE;
+
+status Ansi_SetColor(boolean yesno){
+    _AnsiSkip = yesno;
+    return SUCCESS;
+}
+
 Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
+    if(_AnsiSkip){
+        *_ptr = end;
+        return Str_Make(m, 0);
+    }
     char *ptr = *_ptr;
     char c;
     Str *s = Str_Make(m, ANSI_ESCAPE_MAX);

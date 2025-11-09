@@ -12,7 +12,7 @@ MemPage *MemPage_Attach(MemCh *m, i16 level){
     MemPage *pg = MemPage_Make(m, level);
     i32 idx = m->it.p->max_idx+1;
 
-    Span_Set(m->it.p, idx, (Abstract *)pg);
+    Span_Set(m->it.p, idx, pg);
     return pg;
 }
 

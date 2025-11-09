@@ -16,7 +16,7 @@ typedef struct str {
     byte *bytes;
 } Str;
 
-typedef status (*StrRslvFunc)(MemCh *m, i32 idx, Str *arg, Abstract *source);
+typedef status (*StrRslvFunc)(MemCh *m, i32 idx, Str *arg, void *source);
 
 boolean TextCharFilter(byte *b, i64 length);
 status Str_Reset(Str *s);

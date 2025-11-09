@@ -38,20 +38,21 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     return r;
 }
 
-Abstract *_asError(char *func, char *file, i32 line, Abstract *x, cls type){
+void *_asError(char *func, char *file, i32 line, void *x, cls type){
     Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
         "Error anonymous from _asError", NULL);
     return x;
 }
 
-Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
+void *_as(char *func, char *file, i32 line, void *_x, cls type){
+    Abstract *x = (Abstract *)_x;
     if(x == NULL){
         Error(ErrStream->m, func, file, line, "Cast from NULL", NULL);
     }else {
         if(x->type.of != type){
-            Abstract *args[] = {
-                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(type)),
-                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(x->type.of)),
+            void *args[] = {
+                Str_CstrRef(ErrStream->m, Type_ToChars(type)),
+                Str_CstrRef(ErrStream->m, Type_ToChars(x->type.of)),
                 NULL
             };
             Error(ErrStream->m, func, file, line, "Cast from Abstract mismatched type expecting '$', have '$'", args);
@@ -61,14 +62,15 @@ Abstract *_as(char *func, char *file, i32 line, Abstract *x, cls type){
     return x;
 }
 
-Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cls type){
+void *_asIfc(char *func, char *file, i32 line, void *_x, cls type){
+    Abstract *x = (Abstract *)_x;
     if(x == NULL){
         Error(ErrStream->m, func, file, line, "Cast from NULL", NULL);
     }else{
         if(!Ifc_Match(x->type.of, type)){
-            Abstract *args[] = {
-                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(type)),
-                (Abstract *)Str_CstrRef(ErrStream->m, Type_ToChars(x->type.of)),
+            void *args[] = {
+                Str_CstrRef(ErrStream->m, Type_ToChars(type)),
+                Str_CstrRef(ErrStream->m, Type_ToChars(x->type.of)),
                 NULL
             };
             Error(ErrStream->m, func, file, line, "Cast from Abstract mismatched interface, expecting '$', have '$'", args);
@@ -78,7 +80,8 @@ Abstract *_asIfc(char *func, char *file, i32 line, Abstract *x, cls type){
     return x;
 }
 
-void Type_SetFlag(Abstract *a, word flags){
+void Type_SetFlag(void *_a, word flags){
+    Abstract *a = (Abstract *)_a;
     a->type.state = (a->type.state & NORMAL_FLAGS) | flags;
 }
 

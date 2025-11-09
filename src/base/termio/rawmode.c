@@ -19,11 +19,6 @@ status RawMode(boolean enable){
        int r = tcgetattr(STDIN_FILENO, &current_tios);
        if(r != -1){
            current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
-           /*
-           current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
-           current_tios.c_cflag |= (CS8);
-           current_tios.c_oflag &= ~(OPOST);
-           */
            current_tios.c_cc[VMIN] = 1;
            current_tios.c_cc[VTIME] = 0;
        }

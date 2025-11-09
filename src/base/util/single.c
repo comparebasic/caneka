@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Single *Single_Clone(MemCh *m, Abstract *og){
+Single *Single_Clone(MemCh *m, void *og){
     Single *sg = MemCh_Realloc(m, sizeof(Single), og, sizeof(Single));
     if(sg->type.of == TYPE_WRAPPED_PTR &&
             (sg->val.ptr != NULL && ((sg->val.ptr = Clone(m, sg->val.ptr)) == NULL))){

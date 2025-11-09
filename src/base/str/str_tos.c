@@ -33,14 +33,14 @@ status Bytes_Debug(Buff *bf, byte *start, byte *end){
     return SUCCESS;
 }
 
-status StrLit_Print(Buff *bf, Abstract *a, cls type, word flags){
-    StrLit *sl = (StrLit*)as(a, TYPE_BYTES_POINTER); 
+status BytesLit_Print(Buff *bf, void *a, cls type, word flags){
+    BytesLit *sl = (BytesLit*)as(a, TYPE_BYTES_POINTER); 
     if(flags & (MORE|DEBUG)){
-        Buff_AddBytes(bf, (byte *)"StrLit<", 7);
+        Buff_AddBytes(bf, (byte *)"BytesLit<", 7);
     }
     if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)I16_Wrapped(bf->m, sl->type.range),
+        void *args[] = {
+            I16_Wrapped(bf->m, sl->type.range),
             NULL
         };
         Fmt(bf, "x/$", args);
@@ -58,7 +58,7 @@ status StrLit_Print(Buff *bf, Abstract *a, cls type, word flags){
 }
 
 
-status Str_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Str_Print(Buff *bf, void *a, cls type, word flags){
     void *args[5];
     Str *s = (Str*)as(a, TYPE_STR); 
 
@@ -88,7 +88,7 @@ status Str_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-status StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
+status StrVec_Print(Buff *bf, void *a, cls type, word flags){
     StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
     if(flags & MORE){
         Buff_AddBytes(bf, (byte *)"[", 1); 
@@ -115,7 +115,7 @@ status StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
                     NULL
                 };
                 Fmt(bf, "$: ", args); 
-                Str_Print(bf, (Abstract *)s, type, flags|DEBUG);
+                Str_Print(bf, s, type, flags|DEBUG);
             }else{
                 Buff_AddBytes(bf, s->bytes, s->length);
             }
@@ -137,7 +137,7 @@ status StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
     return SUCCESS;
 }
 
-status Cursor_Print(Buff *bf, Abstract *a, cls type, word flags){
+status Cursor_Print(Buff *bf, void *a, cls type, word flags){
     Cursor *curs = (Cursor *)as(a, TYPE_CURSOR);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
@@ -246,7 +246,7 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
-    r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)StrLit_Print);
+    r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)BytesLit_Print);
     r |= Str_InitLabels(m, ToSFlagLookup);
     return r;
 }

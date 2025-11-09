@@ -52,14 +52,14 @@ Lookup *Lookup_FromConfig(MemCh *m, LookupConfig *config){
 
 status Lookup_Add(MemCh *m, Lookup *lk, word type, void *value){
     if(type < lk->offset){
-        Abstract *args[] = {
-            (Abstract *)I16_Wrapped(m, lk->offset),
-            (Abstract *)I16_Wrapped(m, type),
+        void *args[] = {
+            I16_Wrapped(m, lk->offset),
+            I16_Wrapped(m, type),
             NULL,
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, "Adding lookup value below offset of $, have $ ", args);
         return ERROR;
-    }else if(Span_Set(lk->values, (int)(type-lk->offset), (Abstract *)value) & SUCCESS){
+    }else if(Span_Set(lk->values, (int)(type-lk->offset), value) & SUCCESS){
         return SUCCESS;
     }
 

@@ -72,7 +72,7 @@ static void setSigs(){
     sigaction(SIGHUP, &_d, NULL);
 }
 
-void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
+void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     if(_crashing){
         char *cstr = "\n\x1b[1;31mFatal called after crashing\x1b[0m\n";
         Buff_AddBytes(ErrStream, (byte *)cstr, strlen(cstr));
@@ -104,8 +104,8 @@ void Fatal(char *func, char *file, int line, char *fmt, Abstract *args[]){
     unsigned long e = ERR_get_error();
     if(e != 0){
         char *openssl_err = ERR_error_string(e, _buff);
-        Abstract *args2[] = {
-            (Abstract *)Str_CstrRef(ErrStream->m, openssl_err),
+        void *args2[] = {
+            Str_CstrRef(ErrStream->m, openssl_err),
             NULL
         };
         Fmt(ErrStream, "^rD^$^0", args2);
@@ -140,7 +140,7 @@ err:
     return FALSE;
 }
 
-void Error(MemCh *m, char *func, char *file, int line, char *fmt, Abstract *args[]){
+void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
     if(_error){
         _crashing = TRUE;
         Fatal(func, file, line, fmt, args);
@@ -163,7 +163,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, Abstract *args
         SourceFunc errFunc = (SourceFunc)Lookup_Get(ErrorHandlers, a->type.of);
         if(errFunc != NULL){
             ErrorMsg *msg = ErrorMsg_Make(m, func, file, line, fmt, args);
-            r |= errFunc(m, a, (Abstract *)msg);
+            r |= errFunc(m, a, msg);
         }
     }else{
         r |= ERROR;

@@ -136,8 +136,8 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
 Str *Str_FromCstr(MemCh *m, char *cstr, word flags){
     i64 len = strlen(cstr);
     if((len+1) > STR_MAX){
-        Abstract *args[] = {
-            (Abstract *)I64_Wrapped(m, len),
+        void *args[] = {
+            I64_Wrapped(m, len),
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER,

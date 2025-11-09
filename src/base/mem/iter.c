@@ -16,8 +16,8 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
     localIdx = (offset / increment);
 
     if(localIdx > SPAN_STRIDE){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(m, localIdx), 
+        void *args[] = {
+            I32_Wrapped(m, localIdx), 
             NULL
         };
         Fatal(FUNCNAME, FILENAME, LINENUMBER, 
@@ -62,7 +62,7 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
 }
 
 static status Iter_AddWithGaps(Iter *it){
-    Abstract *value = it->value;
+    void *value = it->value;
     i32 idx = it->idx;
     i8 dimP = it->p->dims+1;
     Iter prevIt;
@@ -159,7 +159,7 @@ static status Iter_Query(Iter *it){
     i8 dimsNeeded = 0;
     while(_increments[dimsNeeded+1] <= it->idx){
         if(++dimsNeeded > SPAN_MAX_DIMS){
-            Abstract *args[] = {(Abstract *)I32_Wrapped(m, it->idx), NULL};
+            void *args[] = {I32_Wrapped(m, it->idx), NULL};
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "idx too large $", args);
             it->type.state |= ERROR;
@@ -476,12 +476,7 @@ status Iter_Next(Iter *it){
                     idx += _increments[dim];
 
                     if(dim == 0){
-                        if(ptr != NULL && 
-                            ((it->maskFlags == ZERO || 
-                                ((Abstract *)*ptr)->type.state & it->maskFlags) ||
-                                (it->filterFlags == ZERO || 
-                                    (((Abstract *)*ptr)->type.state & it->filterFlags) == 0))
-                            ){
+                        if(ptr != NULL){
                             it->value = *ptr;
                         }
                         if(skipNull){
@@ -506,12 +501,7 @@ status Iter_Next(Iter *it){
                                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                                     *ptr = it->value;
                                     it->p->nvalues++;
-                                }else if(ptr != NULL &&
-                                    (it->maskFlags == ZERO || 
-                                        ((Abstract *)*ptr)->type.state & it->maskFlags) ||
-                                    (it->filterFlags == ZERO || 
-                                        (((Abstract *)*ptr)->type.state & it->filterFlags) == 0)
-                                ){
+                                }else if(ptr != NULL){
                                     it->value = *ptr;
                                 }else{
                                     it->value = NULL;
