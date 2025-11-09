@@ -42,7 +42,7 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
     return Span_Add(p, v);
 }
 
-status Dir_Destroy(MemCh *m, Str *path, Access *access){
+status Dir_Destroy(MemCh *m, Str *path){
     status r = READY;
     r |= Dir_Climb(m, path, rmDir, rmFile, NULL);
     r |= rmDir(m, path, NULL);

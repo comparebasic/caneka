@@ -4,7 +4,7 @@ status IoUtil_Unlink(Str *path);
 status IoUtil_AddSlash(StrVec *path);
 Str *IoUtil_GetCwdPath(MemCh *m, Str *path);
 Str *IoUtil_GetAbsPath(MemCh *m, Str *path);
-boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac);
+boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b);
 Str *IoUtil_FnameStr(MemCh *m, StrVec *path);
 StrVec *IoUtil_BasePath(MemCh *m, StrVec *path);
 status IoUtil_Annotate(MemCh *m, StrVec *path);

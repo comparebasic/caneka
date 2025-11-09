@@ -133,7 +133,7 @@ Str *IoUtil_GetAbsPath(MemCh *m, Str *path){
     return path;
 }
 
-boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b, Access *ac){
+boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b){
     DebugStack_Push(a, a->type.of);
     struct stat source_stat;
     struct stat build_stat;
