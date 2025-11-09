@@ -8,4 +8,4 @@ typedef struct auth_cred {
 } AuthCred;
 
 AuthCred *AuthCred_Make(MemCh *m);
-status AuthCred_Resolve(MemCh *m, AuthCred *cred, AuthCred *target, Abstract *authentee);
+status AuthCred_Resolve(MemCh *m, AuthCred *cred, AuthCred *target, void *authentee);

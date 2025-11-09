@@ -17,44 +17,44 @@ static status HttpInit(MemCh *m){
     }
     return NOOP; 
 }
-static i64 HttpCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 HttpCtx_Print(Buff *bf, void *a, cls type, word flags){
     HttpCtx *ctx = (HttpCtx*)as(a, TYPE_HTTP_CTX);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        (Abstract *)Lookup_Get(HttpMethods, ctx->method),
-        (Abstract *)ctx->path,
-        (Abstract *)ctx->headers,
-        (Abstract *)ctx->body,
+    void *args[] = {
+        Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
+        Lookup_Get(HttpMethods, ctx->method),
+        ctx->path,
+        ctx->headers,
+        ctx->body,
         NULL,
     };
     return Fmt(bf, "Http<$ $ $ headers:@ body:@>", args);
 }
 
-static i64 ProtoCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 ProtoCtx_Print(Buff *bf, void *a, cls type, word flags){
     ProtoCtx *ctx = (ProtoCtx*)as(a, TYPE_PROTO_CTX);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        (Abstract *)Util_Wrapped(bf->m, ctx->u),
-        (Abstract *)ctx->in,
-        (Abstract *)ctx->out,
-        (Abstract *)ctx->data,
+    void *args[] = {
+        Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
+        Util_Wrapped(bf->m, ctx->u),
+        ctx->in,
+        ctx->out,
+        ctx->data,
         NULL,
     };
     return Fmt(bf, "Proto<$ u:$ in:@ out:@ data:@>", args);
 }
 
-static i64 TcpCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 TcpCtx_Print(Buff *bf, void *a, cls type, word flags){
     TcpCtx *ctx = (TcpCtx*)as(a, TYPE_TCP_CTX);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        (Abstract *)ctx->path,
-        (Abstract *)I32_Wrapped(bf->m, ctx->port),
-        (Abstract *)ctx->inet4,
-        (Abstract *)ctx->inet6,
-        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.start),
-        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.open),
-        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.error),
-        (Abstract *)Util_Wrapped(bf->m, (util)ctx->metrics.served),
+    void *args[] = {
+        Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
+        ctx->path,
+        I32_Wrapped(bf->m, ctx->port),
+        ctx->inet4,
+        ctx->inet6,
+        Util_Wrapped(bf->m, (util)ctx->metrics.start),
+        Util_Wrapped(bf->m, (util)ctx->metrics.open),
+        Util_Wrapped(bf->m, (util)ctx->metrics.error),
+        Util_Wrapped(bf->m, (util)ctx->metrics.served),
         NULL,
     };
     return Fmt(bf, "Tcp<$ $ ^D.$^d.port ^D.$^d.inet4 ^D.$^d.inet6 $start $open $error $served>", args);

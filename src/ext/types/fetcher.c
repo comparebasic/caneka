@@ -1,41 +1,41 @@
 #include <external.h>
 #include <caneka.h>
 
-Abstract *Fetch_FromOffset(MemCh *m, Abstract *a, i16 offset, cls typeOf){
-    Abstract *value = NULL;
+void *Fetch_FromOffset(MemCh *m, void *a, i16 offset, cls typeOf){
+    void *value = NULL;
     if(typeOf == ZERO || typeOf > _TYPE_RAW_END){
         void **ptr = (void **)(((void *)a)+offset);
         value = *ptr; 
     }else{
         if(typeOf == TYPE_UTIL){
             util *ptr = ((void *)a)+offset;
-            value = (Abstract *)Util_Wrapped(m, *ptr); 
+            value = Util_Wrapped(m, *ptr); 
         }else if(typeOf == TYPE_I32){
             i32 *ptr = ((void *)a)+offset;
-            value = (Abstract *)I32_Wrapped(m, *ptr); 
+            value = I32_Wrapped(m, *ptr); 
         }else if(typeOf == TYPE_I64){
             i64 *ptr = ((void *)a)+offset;
-            value = (Abstract *)I64_Wrapped(m, *ptr); 
+            value = I64_Wrapped(m, *ptr); 
         }else if(typeOf == TYPE_I16){
             i16 *ptr = ((void *)a)+offset;
-            value = (Abstract *)I16_Wrapped(m, *ptr);
+            value = I16_Wrapped(m, *ptr);
         }else if(typeOf == TYPE_I8){
             i8 *ptr = ((void *)a)+offset;
-            value = (Abstract *)I16_Wrapped(m, *ptr);
+            value = I16_Wrapped(m, *ptr);
         }else if(typeOf == TYPE_BYTE){
             byte *ptr = ((void *)a)+offset;
-            value = (Abstract *)B_Wrapped(m, *ptr, ZERO, ZERO); 
+            value = B_Wrapped(m, *ptr, ZERO, ZERO); 
         }
     }
     return value;
 }
 
-Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
-    Abstract *orig = value;
+void *Fetch(MemCh *m, Fetcher *fch, void *value, void *source){
+    Abstract *orig = (Abstract *)value;
     if(fch->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)fch,
-            (Abstract *)value,
+        void *args[] = {
+            fch,
+            value,
             NULL,
         };
         Out("^c.Fetch & from @^0.\n", args);
@@ -52,9 +52,9 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
     }
 
     if(fch->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)fch,
-            (Abstract *)value,
+        void *args[] = {
+            fch,
+            value,
             NULL,
         };
         Out("^c.after Fetch & from @^0.\n", args);
@@ -63,8 +63,8 @@ Abstract *Fetch(MemCh *m, Fetcher *fch, Abstract *value, Abstract *source){
     if(it.type.state & END){
         return value;
     }else if((fch->type.state & FETCHER_IF) == 0){
-        Abstract *args[] = {
-            (Abstract *)fch,
+        void *args[] = {
+            fch,
             orig,
             NULL
         };

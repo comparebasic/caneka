@@ -48,7 +48,7 @@ static i32 openPortToFd(i32 port){
 static status ServeTcp_OpenTcp(Step *st, Task *tsk){
     TcpCtx *ctx = (TcpCtx *)as(st->arg, TYPE_TCP_CTX);
     i32 fd = openPortToFd(ctx->port);
-    Abstract *args[4];
+    void *args[4];
 
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     if(fd > 0){
@@ -61,9 +61,9 @@ static status ServeTcp_OpenTcp(Step *st, Task *tsk){
     }
 
     if(tsk->type.state & DEBUG){
-        args[0] = (Abstract *)I32_Wrapped(OutStream->m, fd);
-        args[1] = (Abstract *)st;
-        args[2] = (Abstract *)tsk;
+        args[0] = I32_Wrapped(OutStream->m, fd);
+        args[1] = st;
+        args[2] = tsk;
         args[3] = NULL;
         Out("^c.Opened Socket ^D.$^d.fd for @ of @^0\n", args);
     }
@@ -75,13 +75,13 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     status r = READY;
     st->type.state &= ~SUCCESS;
-    Abstract *args[5];
+    void *args[5];
     TcpCtx *ctx = (TcpCtx *)as(st->arg, TYPE_TCP_CTX);
     Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);;
     i32 available = poll(pfd, 1, TCP_POLL_DELAY);
     if(available == -1){
-        args[0] = (Abstract *)Str_CstrRef(ErrStream->m, strerror(errno));
+        args[0] = Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
         Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
             "Error connecting to test socket: $\n", args);
@@ -98,24 +98,24 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
             MemCh *tm = MemCh_Make();
-            Task *child = Task_Make(Span_Make(tm), (Abstract *)tsk);
+            Task *child = Task_Make(Span_Make(tm), tsk);
             child->type.state |= TASK_CHILD;
             child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
-            tm->owner = (Abstract *)child;
+            tm->owner = child;
             ctx->populate(tm,
-                child, (Abstract *)I32_Wrapped(tm, new_fd), (Abstract *)tsk->source);
+                child, I32_Wrapped(tm, new_fd), tsk->source);
 
             if(tsk->type.state & DEBUG){
-                args[0] = (Abstract *)child;
-                args[1] = (Abstract *)I32_Wrapped(child->m, pfd->fd);
+                args[0] = child;
+                args[1] = I32_Wrapped(child->m, pfd->fd);
                 args[2] = NULL;
 
 
                 Out("^c.    Adding Child & fd$^0\n", args);
             }
 
-            child->idx = Queue_Add(q, (Abstract *)child);
+            child->idx = Queue_Add(q, child);
             Queue_SetCriteria(q, 0, child->idx, &child->u);
 
             accepted++;
@@ -127,13 +127,13 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
     while((Queue_Next(q) & END) == 0){
         if(tsk->type.state & DEBUG){
-            args[0] = (Abstract *)q;
+            args[0] = q;
             args[1] = NULL;
             Out("^c.    Getting next @^0\n", args);
         }
         Task *child = (Task *)Queue_Get(q);
         if(tsk->type.state & DEBUG){
-            args[0] = (Abstract *)child;
+            args[0] = child;
             args[1] = NULL;
             Out("^c.    Tumbling @^0\n", args);
         }
@@ -147,7 +147,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     }
 
     if((tsk->type.state & DEBUG) && q->type.state & END){
-        args[0] = (Abstract *)tsk;
+        args[0] = tsk;
         args[1] = NULL;
         Out("^c.    No more Reqs @^0\n", args);
     }
@@ -164,7 +164,7 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
     QueueCrit *crit = QueueCrit_Make(tsk->m, QueueCrit_Fds, ZERO);
     Queue_AddHandler(q, crit);
 
-    tsk->data = (Abstract *)q;
+    tsk->data = q;
     tsk->type.state |= TASK_QUEUE;
 
     st->type.state |= SUCCESS;
@@ -172,12 +172,12 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 }
 
 Task *ServeTcp_Make(TcpCtx *ctx){
-    Task *tsk = Task_Make(NULL, (Abstract *)ctx);
+    Task *tsk = Task_Make(NULL, ctx);
     tsk->stepGuardMax = -1;
     Task_AddStep(tsk,
-        Step_Delay, (Abstract *)Util_Wrapped(tsk->m, 100), NULL, STEP_LOOP);
-    Task_AddStep(tsk, ServeTcp_AcceptPoll, (Abstract *)ctx, NULL, ZERO);
-    Task_AddStep(tsk, ServeTcp_OpenTcp, (Abstract *)ctx, NULL, ZERO);
-    Task_AddStep(tsk, ServeTcp_SetupQueue, (Abstract *)ctx, NULL, ZERO);
+        Step_Delay, Util_Wrapped(tsk->m, 100), NULL, STEP_LOOP);
+    Task_AddStep(tsk, ServeTcp_AcceptPoll, ctx, NULL, ZERO);
+    Task_AddStep(tsk, ServeTcp_OpenTcp, ctx, NULL, ZERO);
+    Task_AddStep(tsk, ServeTcp_SetupQueue, ctx, NULL, ZERO);
     return tsk;
 }

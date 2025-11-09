@@ -3,7 +3,6 @@
 
 status TcpTask_ReadToRbl(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
-    Abstract *args[5];
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     Roebling *rbl = (Roebling *)as(st->arg, TYPE_ROEBLING);
@@ -14,8 +13,8 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
     
     st->type.state |= (rbl->type.state & (SUCCESS|ERROR));
     if(st->type.state & SUCCESS && (tsk->type.state & DEBUG)){
-        Abstract *args[] = {
-            (Abstract *)tsk->data,
+        void *args[] = {
+            tsk->data,
             NULL,
         };
         Out("^0.Parsed Tcp Initial Request -> ^c.&/@^0\n", args);

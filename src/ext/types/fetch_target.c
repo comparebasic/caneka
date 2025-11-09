@@ -3,7 +3,7 @@
 
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
     ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
-    Abstract *args[4];
+    void *args[4];
     if(cls == NULL && (
             typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP))){
         tg->type.state |= FETCH_TARGET_HASH;
@@ -13,7 +13,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         return SUCCESS;
     } else {
         if(tg->type.state & FETCH_TARGET_ATT){
-            Single *sg = (Single *)Table_Get(cls->atts, (Abstract *)tg->key);
+            Single *sg = (Single *)Table_Get(cls->atts, tg->key);
             if(sg == NULL){
                 goto err;
             }else{
@@ -52,17 +52,17 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         return SUCCESS;
     }
 err:
-    args[0] = (Abstract *)Type_ToStr(m, typeOf);
-    args[1] = (Abstract *)tg;
-    args[2] = (Abstract *)cls;
+    args[0] = Type_ToStr(m, typeOf);
+    args[1] = tg;
+    args[2] = cls;
     args[3] = NULL;
     Error(m, FUNCNAME, FILENAME, LINENUMBER,
         "Error resolving ClassDef $ for prop or att $ using class @\n", args);
     return ERROR;
 }
 
-Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *source){
-    Abstract *args[6];
+void *Fetch_Target(MemCh *m, FetchTarget *tg, void *value, void *source){
+    void *args[6];
     args[0] = NULL;
     ClassDef *cls = NULL;
     word typeOf = value->type.of;
@@ -74,12 +74,12 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
         if(tg->type.state & FETCH_TARGET_ATT){
             return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
         }else if(tg->type.state & FETCH_TARGET_HASH){
-            Abstract *a = NULL; 
+            void *a = NULL; 
             if(value->type.of == TYPE_OBJECT){
                 Object *obj = (Object *)as(value, TYPE_OBJECT);
-                a = Object_Get(obj, (Abstract *)tg->key);
+                a = Object_Get(obj, tg->key);
             }else if(value->type.of == TYPE_TABLE){
-                a = Table_Get((Table *)value, (Abstract *)tg->key);
+                a = Table_Get((Table *)value, tg->key);
             }
             if(a == NULL){
                 args[0] = value;
@@ -101,17 +101,17 @@ Abstract *Fetch_Target(MemCh *m, FetchTarget *tg, Abstract *value, Abstract *sou
         if(FetchTarget_Resolve(m, tg, typeOf) & SUCCESS){
             return Fetch_Target(m, tg, value, source);
         }else{
-            args[0] = (Abstract *)tg;
+            args[0] = tg;
             goto err;
         }
     }
 err:
     if((tg->type.state & PROCESSING) == 0){
         cls = Lookup_Get(ClassLookup, value->type.of);
-        args[1] = (Abstract *)(value != NULL ? Type_ToStr(m, value->type.of) : NULL);
-        args[2] = (Abstract *)tg;
-        args[3] = (Abstract *)Type_ToStr(m, typeOf);
-        args[4] = (Abstract *)cls;
+        args[1] = (value != NULL ? Type_ToStr(m, value->type.of) : NULL);
+        args[2] = tg;
+        args[3] = Type_ToStr(m, typeOf);
+        args[4] = cls;
         args[5] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error for @ ClassDef X or prop not found for $ using @ class $/@\n", args);
@@ -119,22 +119,22 @@ err:
     return NULL;
 }
 
-Abstract *Fetch_ByKey(MemCh *m, Abstract *a, Str *key, Abstract *source){
+void *Fetch_ByKey(MemCh *m, void *a, Str *key, void *source){
     FetchTarget *tg = FetchTarget_MakeKey(m, key);
     return Fetch_Target(m, tg, a, source);
 }
 
-Abstract *Fetch_ByAtt(MemCh *m, Abstract *a, Str *att, Abstract *source){
+void *Fetch_ByAtt(MemCh *m, void *a, Str *att, void *source){
     FetchTarget *tg = FetchTarget_MakeAtt(m, att);
     return Fetch_Target(m, tg, a, source);
 }
 
-Abstract *Fetch_Prop(MemCh *m, Abstract *a, Str *prop, Abstract *source){
+void *Fetch_Prop(MemCh *m, void *a, Str *prop, void *source){
     FetchTarget *tg = FetchTarget_MakeProp(m, prop);
     return Fetch_Target(m, tg, a, source);
 }
 
-Iter *Fetch_Iter(MemCh *m, Abstract *a, Abstract *source){
+Iter *Fetch_Iter(MemCh *m, void *a, void *source){
     FetchTarget *tg = FetchTarget_MakeIter(m);
     return (Iter *)Fetch_Target(m, tg, a, source);
 }

@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     MemCh *m = ctx->bf->m;
     Table *tbl = (Span *)as(a, TYPE_TABLE);
     status r = READY;
@@ -43,7 +43,7 @@ static status Table_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     return r;
 }
 
-static status Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     MemCh *m = ctx->bf->m;
     Span *p = (Span *)as(a, TYPE_SPAN);
     status r = READY;
@@ -84,7 +84,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     return r;
 }
 
-static status Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     Str *s = (Str *)as(a, TYPE_STR);
     MemCh *m = ctx->bf->m;
 
@@ -102,7 +102,7 @@ static status Str_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
     return BinSegCtx_ToBuff(ctx, hdr, entry);
 }
 
-static status StrVec_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
     MemCh *m = ctx->bf->m;
     status r = READY;

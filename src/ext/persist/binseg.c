@@ -8,7 +8,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     DebugStack_Push(ctx, ctx->type.of);
     status r = READY;
     MemCh *m = ctx->bf->m;
-    Abstract *args[3];
+    void *args[3];
     
     Abstract *a = NULL;
     if(hdr->kind == BINSEG_TYPE_BYTES){
@@ -22,7 +22,7 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
         Single *sg = I16_Wrapped(m, 0);
         for(i32 i = 0; i < hdr->total; i++){
             sg->val.w = idp[i];
-            Abstract *item = Table_Get(ctx->cortext, (Abstract *)sg);
+            Abstract *item = Table_Get(ctx->cortext, sg);
             if(item == NULL){
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "StrVec child item not found", NULL);
@@ -39,10 +39,10 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
         Single *sg = I16_Wrapped(m, 0);
         for(i32 i = 0; i < hdr->total; i++){
             sg->val.w = idp[i];
-            Abstract *item = Table_Get(ctx->cortext, (Abstract *)sg);
+            Abstract *item = Table_Get(ctx->cortext, sg);
             if(item == NULL){
-                args[0] = (Abstract *)sg;
-                args[1] = (Abstract *)ctx->cortext;
+                args[0] = sg;
+                args[1] = ctx->cortext;
                 args[2] = NULL;
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Span child item not found at $ @", args);
@@ -61,8 +61,8 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
         for(i32 i = 0; i < hdr->total; i++){
             keySg->val.w = idp[i*2];
             sg->val.w = idp[i*2+1];
-            Abstract *key = Table_Get(ctx->cortext, (Abstract *)keySg);
-            Abstract *item = Table_Get(ctx->cortext, (Abstract *)sg);
+            Abstract *key = Table_Get(ctx->cortext, keySg);
+            Abstract *item = Table_Get(ctx->cortext, sg);
             if(key == NULL || item == NULL){
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Table child item(s) not found", NULL);
@@ -81,12 +81,12 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     }
 
     Single *id = I16_Wrapped(m, hdr->id);
-    Table_Set(ctx->cortext, (Abstract *)id, a);
+    Table_Set(ctx->cortext, id, a);
     if(ctx->keys != NULL){
-        Str *key = (Str *)Table_Get(ctx->keys, (Abstract *)id);
+        Str *key = (Str *)Table_Get(ctx->keys, id);
         if(key != NULL){
-            if(Table_Get(ctx->tbl, (Abstract *)key) == NULL){ 
-                r |= Table_Set(ctx->tbl, (Abstract *)key, a);
+            if(Table_Get(ctx->tbl, key) == NULL){ 
+                r |= Table_Set(ctx->tbl, key, a);
             }
             if(ctx->tbl->nvalues == ctx->keys->nvalues){
                 r |= END;
@@ -95,8 +95,8 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
     }
 
     if(ctx->type.state & DEBUG){
-        Abstract *args[4];
-        args[0] = (Abstract *)Ptr_Wrapped(OutStream->m,
+        void *args[4];
+        args[0] = Ptr_Wrapped(OutStream->m,
             (byte *)hdr, TYPE_BINSEG_HEADER);
         args[1] = a;
         args[2] = NULL;
@@ -111,7 +111,7 @@ Str *BinSegCtx_KindName(i8 kind){
     return Lookup_Get(BinSegNames, (i16)kind);;
 }
 
-i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, Abstract *arg){
+i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, void *arg){
     ctx->latestId++;
     return ctx->latestId;
  }
@@ -124,11 +124,11 @@ status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     }
     status r = Buff_Add(ctx->bf, entry);
     if(ctx->type.state & DEBUG){
-        Abstract *args[5];
-        args[0] = (Abstract *)Type_StateVec(m, ctx->type.of, ctx->type.state),
-        args[1] = (Abstract *)Ptr_Wrapped(m, (byte *)hdr, TYPE_BINSEG_HEADER);
-        args[2] = (Abstract *)I16_Wrapped(m, entry->length);
-        args[3] = (Abstract *)ctx;
+        void *args[5];
+        args[0] = Type_StateVec(m, ctx->type.of, ctx->type.state),
+        args[1] = Ptr_Wrapped(m, (byte *)hdr, TYPE_BINSEG_HEADER);
+        args[2] = I16_Wrapped(m, entry->length);
+        args[3] = ctx;
         args[4] = NULL;
         Out("^p.ToBuff($ &)/$ -> @^0\n", args);
     }
@@ -136,12 +136,12 @@ status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     return r;
 }
 
-status BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
+status BinSegCtx_Send(BinSegCtx *ctx, void *a, i16 id){
     DebugStack_Push(ctx, ctx->type.of);
-    Abstract *args[2];
+    void *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
-        args[0] = (Abstract *)Type_ToStr(ctx->bf->m, a->type.of);
+        args[0] = Type_ToStr(ctx->bf->m, a->type.of);
         args[1] = NULL;
         Error(ctx->bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to find BinSegFunc for type $", args);
@@ -154,10 +154,10 @@ status BinSegCtx_Send(BinSegCtx *ctx, Abstract *a, i16 id){
 
 status BinSegCtx_Load(BinSegCtx *ctx){
     DebugStack_Push(ctx, ctx->type.of);
-    Abstract *args[4];
+    void *args[4];
     if(ctx->type.state & DEBUG){
-        args[0] = (Abstract *)ctx;
-        args[1] = (Abstract *)ctx->bf;
+        args[0] = ctx;
+        args[1] = ctx->bf;
         args[2] = NULL;
         Out("^p.Load & &\n", args);
     }
@@ -166,7 +166,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
     if(ctx->type.state & BINSEG_REVERSED){
         Buff_PosEnd(ctx->bf);
         if(ctx->type.state & DEBUG){
-            args[0] = (Abstract *)ctx->bf;
+            args[0] = ctx->bf;
             args[1] = NULL;
             Out("^p.Positioning @\n", args);
         }
@@ -194,13 +194,13 @@ status BinSegCtx_Load(BinSegCtx *ctx){
                 s = Str_FromHex(m, s);
             }
             if(ctx->type.state & DEBUG){
-                args[0] = (Abstract *)s;
+                args[0] = s;
                 args[1] = NULL;
                 Out("^p.Hdr &\n", args);
             }
             BinSegHeader *hdr = (BinSegHeader*)s->bytes;
             if(ctx->type.state & DEBUG){
-                args[0] = (Abstract *)Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
+                args[0] = Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
                 args[1] = NULL;
                 Out("^p.Header &^0\n", args);
             }
@@ -235,7 +235,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
     return ctx->type.state;
 }
 
-BinSegCtx *BinSegCtx_Make(Buff *bf, BinSegIdxFunc func, Abstract *source, word flags){
+BinSegCtx *BinSegCtx_Make(Buff *bf, BinSegIdxFunc func, void *source, word flags){
     MemCh *m = bf->m;
     BinSegCtx *ctx = (BinSegCtx *)MemCh_AllocOf(m, sizeof(BinSegCtx), TYPE_BINSEG_CTX);
     ctx->type.of = TYPE_BINSEG_CTX;

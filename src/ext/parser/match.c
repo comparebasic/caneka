@@ -115,11 +115,11 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
             Str *yncolor = Str_Ref(m, (byte *)(matched ? "DE.":"de."), 3, 4,
                 STRING_FMT_ANSI);
             Str *cs = Str_Ref(m, (byte *)&c, 1, 1, DEBUG);
-            Abstract *args[] = {
-                (Abstract *)yncolor,
-                (Abstract *)yn, 
-                (Abstract *)cs,
-                (Abstract *)mt,
+            void *args[] = {
+                yncolor,
+                yn, 
+                cs,
+                mt,
                 NULL
             };
             Out("^p.Match-Feed $$/^D.$^de. @^0\n", args);
@@ -280,9 +280,9 @@ miss:
 
     if(mt->type.state & DEBUG){
         Str *cs = Str_Ref(m, (byte *)&c, 1, 1, DEBUG);
-        Abstract *args[] = {
-            (Abstract *)cs,
-            (Abstract *)mt,
+        void *args[] = {
+            cs,
+            mt,
             NULL
         };
         Out("^c.Match-Feed ^D.$^d. @^0\n", args);

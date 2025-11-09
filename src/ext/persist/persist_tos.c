@@ -4,13 +4,13 @@
 Str **binSegCtxLabels = NULL;
 Str **fileLabels = NULL;
 
-static status BinSegHeader_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status BinSegHeader_Print(Buff *bf, void *a, cls type, word flags){
     i64 total = 0;
     BinSegHeader *hdr = (BinSegHeader *)a;
-    Abstract *args[] = {
-        (Abstract *)I8_Wrapped(bf->m, hdr->id),
-        (Abstract *)BinSegCtx_KindName(hdr->kind),
-        (Abstract *)I32_Wrapped(bf->m, hdr->total),
+    void *args[] = {
+        I8_Wrapped(bf->m, hdr->id),
+        BinSegCtx_KindName(hdr->kind),
+        I32_Wrapped(bf->m, hdr->total),
         NULL
     };
 
@@ -18,13 +18,13 @@ static status BinSegHeader_Print(Buff *bf, Abstract *a, cls type, word flags){
     return total;
 }
 
-static status BinSegCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status BinSegCtx_Print(Buff *bf, void *a, cls type, word flags){
     BinSegCtx *ctx = (BinSegCtx *)as(a, TYPE_BINSEG_CTX);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        (Abstract *)ctx->cortext,
-        (Abstract *)ctx->bf,
-        (Abstract *)ctx->tbl,
+    void *args[] = {
+        Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
+        ctx->cortext,
+        ctx->bf,
+        ctx->tbl,
         NULL
     };
 

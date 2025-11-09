@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean Object_TypeMatch(Abstract *a, cls typeOf){
+boolean Object_TypeMatch(void *a, cls typeOf){
     return (a->type.of == TYPE_OBJECT && 
         ((Object *)a)->objType.of == typeOf) || (a->type.of == typeOf);
 }
@@ -11,10 +11,10 @@ Object *Object_As(Object *obj, cls typeOf){
         ((Object *)obj)->objType.of == typeOf);
 
     if(!pass){
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(ErrStream->m, typeOf),
-            (Abstract *)Type_ToStr(ErrStream->m, obj->type.of),
-            (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
+        void *args[] = {
+            Type_ToStr(ErrStream->m, typeOf),
+            Type_ToStr(ErrStream->m, obj->type.of),
+            Type_ToStr(ErrStream->m, obj->objType.of),
             NULL
         };
         Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
@@ -23,7 +23,7 @@ Object *Object_As(Object *obj, cls typeOf){
     return obj;
 }
 
-Object *Object_Filter(Object *obj, SourceFunc func, Abstract *source){
+Object *Object_Filter(Object *obj, SourceFunc func, void *source){
     MemCh *m = Object_GetMem(obj);
     /*
     Iter it;
@@ -31,11 +31,11 @@ Object *Object_Filter(Object *obj, SourceFunc func, Abstract *source){
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL && h->value != NULL && h->value->type.of == TYPE_OBJECT){
-            Abstract *args[] = {
-                (Abstract *)h->key, NULL
+            void *args[] = {
+                h->key, NULL
             };
             Out("^y.Filtering @^0\n", args);
-            if(func(m, (Abstract *)h->value, source)){
+            if(func(m, h->value, source)){
                 Object_Filter((Object *)h->value, func, source);
             }
         }
@@ -45,20 +45,20 @@ Object *Object_Filter(Object *obj, SourceFunc func, Abstract *source){
     return obj;
 }
 
-Abstract *Object_GetIter(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+void *Object_GetIter(MemCh *m, FetchTarget *fg, void *data, void *source){
     Object *obj = (Object *)as(data, TYPE_OBJECT);
     Iter *it = Iter_Make(m, obj->order);
     Iter_GoToIdx(it, obj->propMask);
-    return (Abstract *)it;
+    return it;
 }
 
-Abstract *Object_GetProp(Object *obj, Str *key){
+void *Object_GetProp(Object *obj, Str *key){
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
     i32 idx = Class_GetPropIdx(cls, key);
     if(idx == -1){
-        Abstract *args[] = {
-            (Abstract *)key,
-            (Abstract *)Type_ToStr(obj->order->m, obj->objType.of),
+        void *args[] = {
+            key,
+            Type_ToStr(obj->order->m, obj->objType.of),
             NULL
         };
         Error(obj->order->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -74,30 +74,30 @@ Abstract *Object_GetProp(Object *obj, Str *key){
     return NULL;
 }
 
-Abstract *Object_Get(Object *obj, Abstract *key){
+void *Object_Get(Object *obj, void *key){
     return Table_Get(obj->tbl, key);
 }
 
-Hashed *Object_GetHashed(Object *obj, Abstract *key){
+Hashed *Object_GetHashed(Object *obj, void *key){
     return Table_GetHashed(obj->tbl, key);
 }
 
-Object *Object_GetOrMake(Object *pt, Abstract *key, word op){
-    Abstract *a = Object_Get(pt, key);
+Object *Object_GetOrMake(Object *pt, void *key, word op){
+    void *a = Object_Get(pt, key);
     if(a == NULL){
         if((op & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NULL;
         }
         Object *new = Object_Make(pt->tbl->m, pt->objType.of);
-        Object_Set(pt, key, (Abstract *)new);
+        Object_Set(pt, key, new);
         return new;
     }else if(a->type.of == TYPE_OBJECT){
         return (Object *)a;
     }else{
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(ErrStream->m, a->type.of),
-            (Abstract *)key,
-            (Abstract *)a,
+        void *args[] = {
+            Type_ToStr(ErrStream->m, a->type.of),
+            key,
+            a,
             NULL
         };
         Error(Object_GetMem(pt), FUNCNAME, FILENAME, LINENUMBER,
@@ -107,14 +107,14 @@ Object *Object_GetOrMake(Object *pt, Abstract *key, word op){
     }
 }
 
-status Object_Depth(Abstract *a){
+status Object_Depth(void *a){
     if(a->type.of == TYPE_OBJECT){
         return ((Object *)a)->depth;
     }
     return 1;
 }
 
-Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
+Object *Object_ByPath(Object *obj, StrVec *path, void *value, word op){
     DebugStack_Push(obj, obj->type.state);
     if((path->type.state & STRVEC_PATH) == 0){
        IoUtil_Annotate(Object_GetMem(obj), path); 
@@ -123,10 +123,10 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     Iter_Init(&keysIt, path->p);
 
     if(obj->type.state & DEBUG){
-        Abstract *args[4];
+        void *args[4];
         args[0] = NULL;
-        args[1] = (Abstract *)path->p;
-        args[2] = (Abstract *)obj->tbl;
+        args[1] = path->p;
+        args[2] = obj->tbl;
         args[3] = NULL;
         Out("^c.^{STACK.name} keys->p:@ from @^0\n", args);
     }
@@ -137,7 +137,7 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     while((Iter_Next(&keysIt) & END) == 0){
         Str *item = (Str *)Iter_Get(&keysIt);
         if((item->type.state & MORE) && key != NULL){
-            current = Object_GetOrMake(current, (Abstract *)key, op);
+            current = Object_GetOrMake(current, key, op);
             if(current == NULL){
                 return NULL;
             }
@@ -145,7 +145,7 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
         }else{
             key = item;
             if((keysIt.type.state & LAST) && (op & SPAN_OP_SET)){
-                Object_Set(current, (Abstract *)key, value);
+                Object_Set(current, key, value);
                 if(depth > obj->depth){
                     obj->depth = depth;
                 }
@@ -155,7 +155,7 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     }
 
     if(key != NULL && (key->type.state & (LAST|MORE)) == 0){
-        current = Object_GetOrMake(current, (Abstract *)key, op);
+        current = Object_GetOrMake(current, key, op);
         if(current == NULL){
             return NULL;
         }
@@ -165,20 +165,20 @@ Object *Object_ByPath(Object *obj, StrVec *path, Abstract *value, word op){
     return current;
 }
 
-i32 Object_Add(Object *obj, Abstract *value){
+i32 Object_Add(Object *obj, void *value){
     Hashed *h = Hashed_Make(Object_GetMem(obj), NULL);
     h->value = value;
-    Span_Add(obj->order, (Abstract *)h);
+    Span_Add(obj->order, h);
     return obj->order->max_idx;
 }
 
-Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
+Hashed *Object_Set(Object *obj, void *key, void *value){
     obj->type.state &= ~OUTCOME_FLAGS;
 
     if(obj->type.state & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)key,
-            (Abstract *)value,
+        void *args[] = {
+            key,
+            value,
             NULL
         };
         Out("^b.>>> Setting: @ -> @^0\n", args);
@@ -188,7 +188,7 @@ Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
 
     obj->type.state |= obj->tbl->type.state & OUTCOME_FLAGS;
     if(h != NULL){
-        Span_Add(obj->order, (Abstract *)h);
+        Span_Add(obj->order, h);
         if(obj->order->type.state & SUCCESS){
             h->orderIdx = obj->order->max_idx;
         }
@@ -197,10 +197,10 @@ Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
 
     if(obj->type.state & DEBUG){
         ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(OutStream->m, obj->objType.of),
-            (Abstract *)key,
-            (Abstract *)I32_Wrapped(OutStream->m, 
+        void *args[] = {
+            Type_ToStr(OutStream->m, obj->objType.of),
+            key,
+            I32_Wrapped(OutStream->m, 
                 obj->order->nvalues - cls->propOrder->nvalues),
             NULL,
         };
@@ -209,10 +209,10 @@ Hashed *Object_Set(Object *obj, Abstract *key, Abstract *value){
     return h;
 }
 
-Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value){
+Hashed *Object_SetProp(Object *obj, Str *key, void *value){
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
     if(cls != NULL){
-        Single *sg = (Single *)Table_Get(cls->props, (Abstract *)key);
+        Single *sg = (Single *)Table_Get(cls->props, key);
         if(sg != NULL){
             Hashed *h = Span_Get(obj->order, sg->val.i);
             h->value = value;
@@ -220,9 +220,9 @@ Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value){
         }
     }
 
-    Abstract *args[] = {
-        (Abstract *)key,
-        (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
+    void *args[] = {
+        key,
+        Type_ToStr(ErrStream->m, obj->objType.of),
         NULL
     };
     Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
@@ -230,13 +230,13 @@ Hashed *Object_SetProp(Object *obj, Str *key, Abstract *value){
     return NULL;
 }
 
-Hashed *Object_SetPropByIdx(Object *obj, i32 idx, Abstract *value){
+Hashed *Object_SetPropByIdx(Object *obj, i32 idx, void *value){
     Hashed *h = Span_Get(obj->order, idx);
     h->value = value; 
     return h;
 }
 
-Abstract *Object_GetPropByIdx(Object *obj, i32 idx){
+void *Object_GetPropByIdx(Object *obj, i32 idx){
     Hashed *h = Object_GetByIdx(obj, idx);
     return h->value;
 }
@@ -257,8 +257,8 @@ Object *Object_Make(MemCh *m, cls typeOf){
     if(typeOf != ZERO){
         ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
         if(cls == NULL){
-            Abstract *args[] = {
-                (Abstract *)Type_ToStr(m, typeOf),
+            void *args[] = {
+                Type_ToStr(m, typeOf),
                 NULL
             };
             Error(m, FUNCNAME, FILENAME, LINENUMBER,

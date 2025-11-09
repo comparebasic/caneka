@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status StrVec_Split(StrVec *v, Abstract *split){
+status StrVec_Split(StrVec *v, void *split){
     i16 guard;
     status r = READY;
     MemCh *m = v->p->m;
@@ -21,8 +21,8 @@ status StrVec_Split(StrVec *v, Abstract *split){
     }
 
     if(mt == NULL){
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(ErrStream->m, split->type.of),
+        void *args[] = {
+            Type_ToStr(ErrStream->m, split->type.of),
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -40,12 +40,12 @@ status StrVec_Split(StrVec *v, Abstract *split){
             Guard_Incr(m, &guard, 100, FUNCNAME, FILENAME, LINENUMBER);
             r &= ~MORE;
             if(s == NULL){
-                Abstract *args[] = {
-                    (Abstract *)split,
-                    (Abstract *)mt,
-                    (Abstract *)v,
-                    (Abstract *)s,
-                    (Abstract *)&it,
+                void *args[] = {
+                    split,
+                    mt,
+                    v,
+                    s,
+                    &it,
                     NULL
                 };
                 Error(m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -71,8 +71,8 @@ status StrVec_Split(StrVec *v, Abstract *split){
                     takeTotal += taken->length;
                 }
                 if(takeTotal > STR_DEFAULT){
-                    Abstract *args[] = {
-                        (Abstract *)split,
+                    void *args[] = {
+                        split,
                         NULL
                     };
                     Error(m, FUNCNAME, FILENAME, LINENUMBER, "Match is longer than a single string, not yet supported &", args);
@@ -90,7 +90,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
                         }
                         m->level--;
                         Str *sep = Str_Ref(m, s->bytes+start+1, length, length, STRING_SEPERATOR);
-                        r |= Iter_Insert(&it, it.idx+1, (Abstract *)sep);
+                        r |= Iter_Insert(&it, it.idx+1, sep);
                         m->level++;
                         i16 sLength = s->length;
                         s->length = (i16)start+1;
@@ -98,7 +98,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
                             i16 newLength = sLength-(start+length+1);
                             m->level--;
                             s = Str_Ref(m, s->bytes+start+1+length, newLength, newLength, ZERO);
-                            r |= Iter_Insert(&it, it.idx+1, (Abstract *)s);
+                            r |= Iter_Insert(&it, it.idx+1, s);
                             m->level++;
                         }
                         break;
@@ -112,7 +112,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
                 s->length = start;
                 m->level--;
                 taken = Str_Ref(m, s->bytes+start, mt->snip.length, mt->snip.length, STRING_SEPERATOR);
-                Iter_Insert(&it, it.idx+1, (Abstract *)taken);
+                Iter_Insert(&it, it.idx+1, taken);
                 m->level++;
             }
         }
@@ -129,7 +129,7 @@ status StrVec_Split(StrVec *v, Abstract *split){
     return r;
 }
 
-Span *Str_SplitToSpan(MemCh *m, Str *_s, Abstract *split, word flags){
+Span *Str_SplitToSpan(MemCh *m, Str *_s, void *split, word flags){
     if(_s->length < 1 || ((flags & SPLIT_SKIP_FIRST_CHAR) && _s->length == 1)){
         return Span_Make(m);
     }
@@ -143,8 +143,8 @@ Span *Str_SplitToSpan(MemCh *m, Str *_s, Abstract *split, word flags){
     return StrVec_ToSpan(m, v);
 }
 
-Span *StrVec_SplitToSpan(MemCh *m, StrVec *_v, Abstract *split){
-    StrVec *v = (StrVec *)StrVec_Clone(m, (Abstract *)_v);
+Span *StrVec_SplitToSpan(MemCh *m, StrVec *_v, void *split){
+    StrVec *v = (StrVec *)StrVec_Clone(m, _v);
     StrVec_Split(v, split);
     return StrVec_ToSpan(m, v);
 }
@@ -160,10 +160,10 @@ Span *StrVec_ToSpan(MemCh *m, StrVec *v){
         Str *item = (Str *)Iter_Get(&it);
         if(item->type.state & STRING_SEPERATOR){
             if(shelf != NULL){
-                Span_Add(p, (Abstract *)shelf);
+                Span_Add(p, shelf);
                 shelf = NULL;
             }else if(s != NULL){
-                Span_Add(p, (Abstract *)s);
+                Span_Add(p, s);
                 s = NULL;
             }
         }else{
@@ -181,10 +181,10 @@ Span *StrVec_ToSpan(MemCh *m, StrVec *v){
 
         if((it.type.state & LAST) && (item->type.state & STRING_SEPERATOR) == 0){
             if(s != NULL){
-                Span_Add(p, (Abstract *)s);
+                Span_Add(p, s);
             }else if(shelf != NULL){
                 StrVec_Add(shelf, item);
-                Span_Add(p, (Abstract *)shelf);
+                Span_Add(p, shelf);
             }
         }
     }

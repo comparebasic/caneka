@@ -3,9 +3,9 @@
 
 Lookup *ClassLookup = NULL;
 
-Abstract *ClassDef_Undefined(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
-    Abstract *args[] = {
-        (Abstract *)Type_ToStr(m, data->type.of),
+void *ClassDef_Undefined(MemCh *m, FetchTarget *fg, void *data, void *source){
+    void *args[] = {
+        Type_ToStr(m, data->type.of),
         NULL
     };
     Error(m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -17,19 +17,19 @@ status Class_SetupProp(ClassDef *cls, Str *key){
     status r = READY;
     i32 idx = cls->props->nvalues;
     Single *sg = I32_Wrapped(cls->props->m, cls->props->nvalues);
-    r |= Table_Set(cls->props, (Abstract *)key, (Abstract *)sg);
-    Hashed *h = Hashed_Make(cls->propOrder->m, (Abstract *)key);
-    r |= Span_Set(cls->propOrder, idx, (Abstract *)h);
+    r |= Table_Set(cls->props, key, sg);
+    Hashed *h = Hashed_Make(cls->propOrder->m, key);
+    r |= Span_Set(cls->propOrder, idx, h);
     return r;
 }
 
-status Class_SetProp(Object *obj, ClassDef *cls, Str *key, Abstract *value){
+status Class_SetProp(Object *obj, ClassDef *cls, Str *key, void *value){
     status r = READY;
-    Single *sg = (Single *)Table_Get(cls->props, (Abstract *)key);
+    Single *sg = (Single *)Table_Get(cls->props, key);
     if(sg == NULL){
-        Abstract *args[] = {
-            (Abstract *)key,
-            (Abstract *)Type_ToStr(ErrStream->m, obj->objType.of),
+        void *args[] = {
+            key,
+            Type_ToStr(ErrStream->m, obj->objType.of),
             NULL
         };
         Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
@@ -39,9 +39,9 @@ status Class_SetProp(Object *obj, ClassDef *cls, Str *key, Abstract *value){
 
     Hashed *h = Span_Get(obj->order, sg->val.i);
     if(h == NULL){
-        h = Hashed_Make(obj->order->m, (Abstract *)key);
+        h = Hashed_Make(obj->order->m, key);
         h->value = value;
-        r |= Span_Set(obj->order, sg->val.i, (Abstract *)h);
+        r |= Span_Set(obj->order, sg->val.i, h);
     }else{
         h->value = value;
         r |= SUCCESS;
@@ -55,7 +55,7 @@ status Class_SetProp(Object *obj, ClassDef *cls, Str *key, Abstract *value){
 }
 
 i32 Class_GetPropIdx(ClassDef *cls, Str *key){
-    Single *sg = (Single *)Table_Get(cls->props, (Abstract *)key);
+    Single *sg = (Single *)Table_Get(cls->props, key);
     if(sg != NULL){
         return sg->val.i;
     }

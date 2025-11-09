@@ -46,7 +46,7 @@ status FileDB_Open(FileDB *fdb){
 
 status FileDB_Close(FileDB *fdb){
     status r = READY;
-    Abstract *args[5];
+    void *args[2];
     MemCh *m = fdb->m;
     File_Close(fdb->bf);
     File_Open(fdb->bf, fdb->fpath, O_RDWR);
@@ -64,7 +64,7 @@ status FileDB_Close(FileDB *fdb){
             Buff_Add(fdb->bf, entry);
             Buff_Flush(fdb->bf);
             if(fdb->type.state & DEBUG){
-                args[0] = (Abstract *)Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
+                args[0] = Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
                 args[1] = NULL;
                 Out("^y.Close hdr &^0\n", args);
             }
@@ -78,14 +78,14 @@ status FileDB_Close(FileDB *fdb){
     return r;
 }
 
-status FileDB_Add(FileDB *fdb, i16 id, Abstract *a){
+status FileDB_Add(FileDB *fdb, i16 id, void *a){
     DebugStack_Push(NULL, 0);
     BinSegCtx *ctx = fdb->ctx;
     if(ctx->type.state & PROCESSING){ 
         BinSegCtx_Send(ctx, a, id);
         if(ctx->type.state & DEBUG){
-            Abstract *args[3];
-            args[0] = (Abstract *)ctx;
+            void *args[2];
+            args[0] = ctx;
             args[1] = NULL;
             Out("^y.FileDB_Add &^0.\n", args);
         }

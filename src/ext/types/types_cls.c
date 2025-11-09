@@ -4,7 +4,7 @@
 static boolean _init = FALSE;
 ClassDef *ObjectCls = NULL;
 
-static i64 Hashed_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 Hashed_Print(Buff *bf, void *a, cls type, word flags){
     Hashed *h = (Hashed *)as(a, TYPE_HASHED);
     if(flags & DEBUG){
         Single *wid = I64_Wrapped(bf->m, h->id);
@@ -17,21 +17,21 @@ static i64 Hashed_Print(Buff *bf, Abstract *a, cls type, word flags){
                 typeOf = ((Object *)h->value)->objType.of;
             }
         }
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, h->orderIdx), 
-            (Abstract *)I32_Wrapped(bf->m, h->idx), 
-            (Abstract *)wid, 
+        void *args[] = {
+            I32_Wrapped(bf->m, h->orderIdx), 
+            I32_Wrapped(bf->m, h->idx), 
+            wid, 
             h->key, 
-            (Abstract *)val, 
-            (Abstract *)Type_ToStr(bf->m, typeOf),
+            val, 
+            Type_ToStr(bf->m, typeOf),
             NULL
         };
         return Fmt(bf, "H<$,$ $/@ -> $/$>", args);
     }else if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, h->idx), 
+        void *args[] = {
+            I32_Wrapped(bf->m, h->idx), 
             h->key, 
-            (Abstract *)h->value, 
+            h->value, 
             NULL
         };
         return Fmt(bf, "H<$ @ -> @>", args);
@@ -41,34 +41,34 @@ static i64 Hashed_Print(Buff *bf, Abstract *a, cls type, word flags){
 }
 
 
-static Abstract *Object_ByKey(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+static void *Object_ByKey(MemCh *m, FetchTarget *fg, void *data, void *source){
     Object *obj = (Object *)as(data, TYPE_OBJECT);
-    return Object_Get(obj, (Abstract *)fg->key);
+    return Object_Get(obj, fg->key);
 }
 
-static Abstract *Object_ByIdx(MemCh *m, FetchTarget *fg, Abstract *data, Abstract *source){
+static void *Object_ByIdx(MemCh *m, FetchTarget *fg, void *data, void *source){
     Object *obj = (Object *)as(data, TYPE_OBJECT);
     return Span_Get(obj->order, fg->idx);
     return NULL;
 }
 
 
-static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Object_Print(Buff *bf, void *a, cls type, word flags){
     static i32 _objIndent = 0;
     Object *obj = (Object *)as(a, TYPE_OBJECT);
     ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
-    Abstract *args[4];
+    void *args[4];
     i32 dataCount = obj->order->nvalues;
     MemCh *m = Object_GetMem(obj);
     if(flags & MORE){
         if(cls == NULL){
-            args[0] = (Abstract *)Type_StateVec(m, obj->objType.of, obj->objType.state);
+            args[0] = Type_StateVec(m, obj->objType.of, obj->objType.state);
             Fmt(bf, "Object<@", args);
         }else{
             dataCount = dataCount - obj->propMask;
 
-            args[0] = (Abstract *)cls->name;
-            args[1] = (Abstract *)Type_StateVec(m, obj->objType.of, obj->objType.state);
+            args[0] = cls->name;
+            args[1] = Type_StateVec(m, obj->objType.of, obj->objType.state);
             args[2] = NULL;
             Fmt(bf, "$<@", args);
             Iter it;
@@ -85,11 +85,11 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
         }
 
         if(dataCount){
-            args[0] = (Abstract *)I32_Wrapped(bf->m, dataCount);
+            args[0] = I32_Wrapped(bf->m, dataCount);
             args[1] = NULL;
             Fmt(bf, " ^D.$^d.nvalues {", args);
             Iter *it = (Iter *)as(
-                Object_GetIter(Object_GetMem(obj), NULL, (Abstract *)obj, NULL),
+                Object_GetIter(Object_GetMem(obj), NULL, obj, NULL),
                 TYPE_ITER);
             while((Iter_Next(it) & END) == 0){
                 if(flags & DEBUG){
@@ -113,7 +113,7 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
                     if(h->value != NULL){
                         typeStr = Type_ToStr(bf->m, h->value->type.of);
                     }
-                    ToS(bf, (Abstract *)typeStr, 0, flags);
+                    ToS(bf, typeStr, 0, flags);
                 }
                 if(h->value != NULL && h->value->type.of == TYPE_OBJECT){
                     _objIndent--;
@@ -133,14 +133,14 @@ static status Object_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 }
 
-static status Object_ToBinSeg(BinSegCtx *ctx, Abstract *a, i16 id){
+static status Object_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     return NOOP;
 }
 
 static boolean FetchTarget_Exact(FetchTarget  *a, FetchTarget *b){
     if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS) ||
             a->idx != b->idx || a->offset != b->offset || 
-            !Exact((Abstract *)a->key, (Abstract *)b->key)){
+            !Exact(a->key, b->key)){
         return FALSE;
     }
     return TRUE;
@@ -150,67 +150,67 @@ static boolean Fetcher_Exact(Fetcher *a, Fetcher *b){
     if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS)){
         return FALSE;
     }
-    return Exact((Abstract *)a->val.targets, (Abstract *)b->val.targets);
+    return Exact(a->val.targets, b->val.targets);
 }
 
-static status Fetcher_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status Fetcher_Print(Buff *bf, void *a, cls type, word flags){
     Fetcher *fch = (Fetcher *)as(a, TYPE_FETCHER);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, fch->type.of, fch->type.state),
+    void *args[] = {
+        Type_StateVec(bf->m, fch->type.of, fch->type.state),
         NULL,
     };
     Fmt(bf, "Fetcher<@ ", args);
-    Abstract *args1[] = {
-        (Abstract *)fch->val.targets,
+    void *args1[] = {
+        fch->val.targets,
         NULL,
     };
     return Fmt(bf, "@>", args1);
 }
 
-static status FetchTargetFunc_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status FetchTargetFunc_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "FTFunc<>", NULL);
 }
 
-static status FetchTarget_Print(Buff *bf, Abstract *a, cls type, word flags){
+static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
     FetchTarget *tg = (FetchTarget *)as(a, TYPE_FETCH_TARGET);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, tg->type.of, tg->type.state),
+    void *args[] = {
+        Type_StateVec(bf->m, tg->type.of, tg->type.state),
         NULL,
     };
     Fmt(bf, "FT<@", args);
     if(tg->objType.of != ZERO){
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(bf->m, tg->objType.of),
+        void *args[] = {
+            Type_ToStr(bf->m, tg->objType.of),
             NULL
         };
         Fmt(bf, " $ ", args);
 
     }
     if(tg->key != NULL){
-        Abstract *args[] = {
-            (Abstract *)tg->key,
+        void *args[] = {
+            tg->key,
             NULL
         };
         Fmt(bf, " @", args);
     }
     if(tg->type.state & FETCH_TARGET_IDX || tg->idx != -1){
-        Abstract *args[] = {
-            (Abstract *)I32_Wrapped(bf->m, tg->idx),
+        void *args[] = {
+            I32_Wrapped(bf->m, tg->idx),
             NULL
         };
         Fmt(bf, " idx^D.$^d.", args);
     }
     if(tg->type.state & FETCH_TARGET_RESOLVED){
-        Abstract *args[] = {
-            (Abstract *)Type_ToStr(bf->m, tg->objType.of),
-            (Abstract *)I16_Wrapped(bf->m, tg->offset),
+        void *args[] = {
+            Type_ToStr(bf->m, tg->objType.of),
+            I16_Wrapped(bf->m, tg->offset),
             NULL
         };
         Fmt(bf, " -> $/offset^D.$^d.>", args);
     }
     if(tg->type.state & FETCH_TARGET_FUNC){
-        Abstract *args[] = {
-            (Abstract *)Ptr_Wrapped(bf->m, tg->func, TYPE_FETCH_FUNC),
+        void *args[] = {
+            Ptr_Wrapped(bf->m, tg->func, TYPE_FETCH_FUNC),
             NULL
         };
         Fmt(bf, "func/@", args);
@@ -274,10 +274,10 @@ status Types_ClsInit(MemCh *m){
     ObjectCls = cls;
 
     Object obj;
-    Table_Set(cls->atts, (Abstract *)Str_FromCstr(m, "tbl", STRING_COPY),
-        (Abstract *)I16_Wrapped(m, (void *)(&obj.tbl)-(void *)(&obj)));
-    Table_Set(cls->atts, (Abstract *)Str_FromCstr(m, "order", STRING_COPY),
-        (Abstract *)I16_Wrapped(m, (void *)(&obj.order)-(void *)(&obj)));
+    Table_Set(cls->atts, Str_FromCstr(m, "tbl", STRING_COPY),
+        I16_Wrapped(m, (void *)(&obj.tbl)-(void *)(&obj)));
+    Table_Set(cls->atts, Str_FromCstr(m, "order", STRING_COPY),
+        I16_Wrapped(m, (void *)(&obj.order)-(void *)(&obj)));
     r |= Class_Register(m, cls);
 
     /* overide hashed print */

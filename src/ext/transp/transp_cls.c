@@ -5,20 +5,20 @@ static boolean _init = FALSE;
 
 static Str **transpFileLabels = NULL;
 
-static i64 TranspFile_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 TranspFile_Print(Buff *bf, void *a, cls type, word flags){
     TranspFile *tfile = (TranspFile*)as(a, TYPE_TRANSP_FILE);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, tfile->type.of, tfile->type.state),
-        (Abstract *)tfile->name,
-        (Abstract *)tfile->local,
-        (Abstract *)tfile->src,
-        (Abstract *)tfile->dest,
+    void *args[] = {
+        Type_StateVec(bf->m, tfile->type.of, tfile->type.state),
+        tfile->name,
+        tfile->local,
+        tfile->src,
+        tfile->dest,
         NULL
     };
     return Fmt(bf, "TranspFile<$ @ @ $ -> $>", args);
 }
 
-static i64 TranspCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
+static i64 TranspCtx_Print(Buff *bf, void *a, cls type, word flags){
     TranspCtx *tp = (TranspCtx*)as(a, TYPE_TRANSP_CTX);
     i64 total = 0;
 
@@ -26,21 +26,21 @@ static i64 TranspCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
         return ToStream_NotImpl(bf, a, type, flags);
     }
 
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, tp->type.of, tp->type.state),
+    void *args[] = {
+        Type_StateVec(bf->m, tp->type.of, tp->type.state),
         NULL,
     };
 
     total += Fmt(bf, "Transp<$ ", args);
-    total += ToS(bf, (Abstract *)tp->bf, 0, MORE);
+    total += ToS(bf, tp->bf, 0, MORE);
     if(flags & DEBUG && tp->it.p->nvalues > 0){
         total += Buff_AddBytes(bf, (byte *)"stack:\n", 7);
         Iter it;
         Iter_Init(&it, tp->it.p);
         while((Iter_Prev(&it) & END) == 0){
-            Abstract *args[] = {
-                (Abstract *)I32_Wrapped(bf->m, it.idx),
-                (Abstract *)it.value,
+            void *args[] = {
+                I32_Wrapped(bf->m, it.idx),
+                it.value,
                 NULL
             };
             char *fmt = "  $: @\n";
@@ -50,7 +50,7 @@ static i64 TranspCtx_Print(Buff *bf, Abstract *a, cls type, word flags){
             Fmt(bf, fmt,args);
         }
     }else if(flags & MORE){
-        Abstract *args[] = {(Abstract *)&tp->it, NULL};
+        void *args[] = {&tp->it, NULL};
         total += Fmt(bf, " @", args);
     }
     total += Buff_AddBytes(bf, (byte *)">", 1);
@@ -70,14 +70,14 @@ status Transp_Init(MemCh *m){
         /* cls */
         ClassDef *cls = ClassDef_Make(m);
         TranspFile tp;
-        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "name"),
-            (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "local"),
-            (Abstract *)I16_Wrapped(m, (void *)(&tp.local)-(void *)(&tp)));
-        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "src"),
-            (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        Table_Set(cls->atts, (Abstract *)Str_CstrRef(m, "dest"),
-            (Abstract *)I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
+        Table_Set(cls->atts, Str_CstrRef(m, "name"),
+            I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
+        Table_Set(cls->atts, Str_CstrRef(m, "local"),
+            I16_Wrapped(m, (void *)(&tp.local)-(void *)(&tp)));
+        Table_Set(cls->atts, Str_CstrRef(m, "src"),
+            I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
+        Table_Set(cls->atts, Str_CstrRef(m, "dest"),
+            I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
         r |= Lookup_Add(m, lk, TYPE_TRANSP_FILE, (void *)cls);
 
         /* ToS */

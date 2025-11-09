@@ -8,9 +8,9 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
     Cursor *curs = Cursor_Copy(m, _curs);
     i64 total = SnipSpan_Total(sns, 0)-1;
     Cursor_Decr(curs, total);
-    Abstract *args[] = {
-        (Abstract *)I64_Wrapped(m, total),
-        (Abstract *)curs,
+    void *args[] = {
+        I64_Wrapped(m, total),
+        curs,
         NULL
     };
 
@@ -21,8 +21,8 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
         if(sn->type.state & SNIP_STR_BOUNDRY){
             continue;
         }else if(sn->type.state & SNIP_CONTENT){
-            Abstract *args[] = {
-                (Abstract *)Str_Ref(m, curs->ptr, sn->length, sn->length+1, 0),
+            void *args[] = {
+                Str_Ref(m, curs->ptr, sn->length, sn->length+1, 0),
                 NULL,
             };
             StrVec_AddBytes(m, v, curs->ptr, sn->length);
@@ -42,7 +42,7 @@ status SnipSpan_SetAll(Span *sns, word flags){
     Snip *sn = Snip_Make(sns->m);
     sn->length = total;
     sn->type.state = flags;
-    return Span_Add(sns, (Abstract *)sn);
+    return Span_Add(sns, sn);
 }
 
 status SnipSpan_Set(MemCh *m, Span *sns, i32 length, word flags){
@@ -62,7 +62,7 @@ status SnipSpan_Set(MemCh *m, Span *sns, i32 length, word flags){
             Snip *sn = Snip_Make(m);
             sn->length = amount;
             sn->type.state = flags;
-            Span_Insert(sns, it.idx+1, (Abstract *)sn);
+            Span_Insert(sns, it.idx+1, sn);
             length -= amount;
         }
     }
@@ -72,11 +72,11 @@ status SnipSpan_Set(MemCh *m, Span *sns, i32 length, word flags){
 
 status SnipSpan_AddFrom(Span *sns, i32 length, word flags){
     Snip _sn = {.type = {TYPE_SNIP, flags}, length};
-    return Span_Add(sns, (Abstract *)Snip_From(sns->m, &_sn));
+    return Span_Add(sns, Snip_From(sns->m, &_sn));
 }
 
 status SnipSpan_Add(Span *sns, Snip *sn){
-    return Span_Add(sns, (Abstract *)Snip_From(sns->m, sn));
+    return Span_Add(sns, Snip_From(sns->m, sn));
 }
 
 status SnipSpan_Remove(Span *sns, i32 length){
