@@ -3,7 +3,9 @@
 
 static i64 dim_occupied_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000};
 
-static Hashed *Table_GetSetHashed(Iter *it, word op, Abstract *key, Abstract *value){
+static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
+    Abstract *key = (Abstract *)_key;
+    Abstract *value = (Abstract *)_value;
     Table *tbl = (Table *)it->p;
     tbl->type.state &= ~(SUCCESS|NOOP);
     Abstract *args[5];
@@ -162,7 +164,8 @@ status Table_HKeyVal(HKey *hk){
     return hk->type.state;
 }
 
-status Table_SetKey(Iter *it, Abstract *a){
+status Table_SetKey(Iter *it, void *_a){
+    Abstract *a = (Abstract *)_a;
 
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);
     it->metrics.selected = h->idx;
@@ -176,7 +179,9 @@ status Table_SetKey(Iter *it, Abstract *a){
     return SUCCESS;
 }
 
-i32 Table_SetIdxEntry(Iter *it, Abstract *a){
+i32 Table_SetIdxEntry(Iter *it, void *_a){
+    Abstract *a = (Abstract *)_a;
+
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);
     i32 value = it->metrics.set;
     Single *tag = I32_Wrapped(it->p->m, value);
@@ -184,7 +189,9 @@ i32 Table_SetIdxEntry(Iter *it, Abstract *a){
     return (i32)value;
 }
 
-Hashed *Table_SetValue(Iter *it, Abstract *a){
+Hashed *Table_SetValue(Iter *it, void *_a){
+    Abstract *a = (Abstract *)_a;
+
     if(it->metrics.selected > -1){
         Hashed *h = Span_Get(it->p, it->metrics.selected);
         if(h != NULL){
@@ -196,7 +203,9 @@ Hashed *Table_SetValue(Iter *it, Abstract *a){
     return NULL;
 }
 
-Hashed *Table_GetHashed(Table *tbl, Abstract *a){
+Hashed *Table_GetHashed(Table *tbl, void *_a){
+    Abstract *a = (Abstract *)_a;
+
     Iter it;
     Iter_Init(&it, tbl);
     Hashed *h = Table_GetSetHashed(&it, SPAN_OP_GET, a, NULL);
@@ -206,7 +215,9 @@ Hashed *Table_GetHashed(Table *tbl, Abstract *a){
     return NULL;
 }
 
-Hashed *Table_SetHashed(Table *tbl, Abstract *a, Abstract *value){
+Hashed *Table_SetHashed(Table *tbl, void *_a, void *_value){
+    Abstract *a = (Abstract *)_a;
+    Abstract *value = (Abstract *)_value;
 
     tbl->type.state &= ~OUTCOME_FLAGS;
     Iter it;
@@ -223,12 +234,14 @@ Hashed *Table_SetHashed(Table *tbl, Abstract *a, Abstract *value){
     return h;
 }
 
-Abstract *Table_GetKey(Table *tbl, i32 idx){
+void *Table_GetKey(Table *tbl, i32 idx){
     Hashed *h = Span_Get(tbl, idx);
     return h->key;
 }
 
-Abstract *Table_Get(Table *tbl, Abstract *a){
+void *Table_Get(Table *tbl, void *_a){
+    Abstract *a = (Abstract *)_a;
+
     Iter it;
     Iter_Init(&it, tbl);
     if(tbl != NULL && a != NULL){
@@ -240,8 +253,9 @@ Abstract *Table_Get(Table *tbl, Abstract *a){
     return NULL;
 }
 
-i32 Table_Set(Table *tbl, Abstract *a, Abstract *value){
-
+i32 Table_Set(Table *tbl, void *_a, void *_value){
+    Abstract *a = (Abstract *)_a;
+    Abstract *value = (Abstract *)_value;
 
     Iter it;
     Iter_Init(&it, tbl);
@@ -255,7 +269,9 @@ i32 Table_Set(Table *tbl, Abstract *a, Abstract *value){
     return h->idx;
 }
 
-i32 Table_SetByIter(Iter *it, Abstract *a, Abstract *value){
+i32 Table_SetByIter(Iter *it, void *_a, void *_value){
+    Abstract *a = (Abstract *)_a;
+    Abstract *value = (Abstract *)_value;
 
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
         Equals((Abstract *)a, 
@@ -266,7 +282,7 @@ i32 Table_SetByIter(Iter *it, Abstract *a, Abstract *value){
     return h->idx;
 }
 
-Abstract *Table_FromIdx(Table *tbl, i32 idx){
+void *Table_FromIdx(Table *tbl, i32 idx){
     Hashed *h = (Hashed *)Span_Get(tbl, idx);
     if(h != NULL){
         return h->value;
@@ -274,7 +290,7 @@ Abstract *Table_FromIdx(Table *tbl, i32 idx){
     return NULL;
 }
 
-i32 Table_GetIdx(Table *tbl, Abstract *a){
+i32 Table_GetIdx(Table *tbl, void *a){
     Iter it;
     Iter_Init(&it, tbl);
     Hashed *h = Table_GetSetHashed(&it, SPAN_OP_GET, a, NULL);

@@ -12,6 +12,6 @@ status Bits_PrintArray(struct buff *bf, void *arr, i64 sz, i32 count);
 status Bits_Print(struct buff *bf, byte *bt, size_t length, word flags);
 status Bits_PrintNum(struct buff *bf, byte *bt, size_t length, word flags);
 status Slots_Print(struct buff *bf, util *ut, i32 slots, word flags);
-status ToS(struct buff *bf, Abstract *t, cls type, word flags);
+status ToS(struct buff *bf, void *t, cls type, word flags);
 status Str_AddFlags(Str *s, word flags, char *map);
 i64 FlagStr(word flag, char *dest, char *map);

@@ -166,20 +166,33 @@ status WwwRoute_Tests(MemCh *gm){
         Str_CstrRef(m, "./examples/web-server/pages/public"));
     Route_Collect(rt, path);
 
+    args[0] = (Abstract *)rt;
+    args[1] = NULL;
+    Out("^p.Route @^0\n", args);
+
     path = StrVec_From(m, Str_FromCstr(m, "/account/", ZERO));
     IoUtil_Annotate(m, path);
+
+    args[0] = (Abstract *)path;
+    args[1] = NULL;
+    Out("^p.Path @^0\n", args);
+
     Route *account = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
+
+    args[0] = (Abstract *)account;
+    args[1] = NULL;
+    Out("^p.Account @^0\n", args);
 
     Hashed *h = Object_GetByIdx(account, ROUTE_PROPIDX_MIME);
     args[0] = h->value;
     args[1] = NULL;
     r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "text/html", ZERO)), 
-        "account index page is mime type text/html, have $", args);
+        "account index page is mime type text/html, have @", args);
     h = Object_GetByIdx(account, ROUTE_PROPIDX_TYPE);
     args[0] = h->value;
     args[1] = NULL;
     r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "html", ZERO)), 
-        "account index page is type html, have $", args);
+        "account index page is type html, have @", args);
 
     path = StrVec_From(m, Str_FromCstr(m, "/account/profile", ZERO));
     IoUtil_Annotate(m, path);

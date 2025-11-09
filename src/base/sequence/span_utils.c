@@ -7,7 +7,7 @@ Span *Span_CopyRange(MemCh *m, Span *p, Coord *cr){
     Iter_Init(&it, p);
     Iter_GetByIdx(&it, (i32)cr->a);
     while(it.idx < cr->b){
-        Abstract *a = Iter_Get(&it);
+        void *a = Iter_Get(&it);
         Span_Add(ret, a);
         if(Iter_Next(&it) & END){
             break;
@@ -21,7 +21,7 @@ i32 Span_Capacity(Span *p){
     return increment * SPAN_STRIDE;
 }
 
-i32 Span_Has(Span *p, Abstract *a){
+i32 Span_Has(Span *p, void *a){
    Iter it;  
    Iter_Init(&it, p);
    while((Iter_Next(&it) & END) == 0){
@@ -119,7 +119,7 @@ Span *Span_CloneShallow(MemCh *m, Span *p){
     Span *p2 = Span_Make(m);
     int i = 0;
     while((Iter_Next(&it) & END) == 0){
-        Span_Set(p2, it.idx, (Abstract *)Iter_Get(&it)); 
+        Span_Set(p2, it.idx, Iter_Get(&it)); 
     }
     return p2;
 }
@@ -130,16 +130,16 @@ Span *Span_Clone(MemCh *m, Span *p){
     Span *p2 = Span_Make(m);
     int i = 0;
     while((Iter_Next(&it) & END) == 0){
-        Abstract *value = Iter_Get(&it);
+        void *value = Iter_Get(&it);
         if(value != NULL){
             Abstract *item = Clone(m, value);
-            Span_Set(p2, it.idx, (Abstract *)item); 
+            Span_Set(p2, it.idx, item); 
         }
     }
     return p2;
 }
 
-status Span_Insert(Span *p, i32 idx, Abstract *t){
+status Span_Insert(Span *p, i32 idx, void *t){
     if(t == NULL){
         return NOOP;
     }
@@ -168,7 +168,7 @@ status Span_AddRaw(Span *p, util *u){
     return p->type.state;
 }
 
-status Span_Add(Span *p, Abstract *t){
+status Span_Add(Span *p, void *t){
     p->type.state &= ~(ERROR|SUCCESS|NOOP);
     if(t == NULL){
         p->type.state |= NOOP;

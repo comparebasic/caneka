@@ -194,7 +194,8 @@ status ToStream_NotImpl(Buff *bf, Abstract *a, cls type, word flags){
     return _ToStream_NotImpl(FUNCNAME, FILENAME, LINENUMBER, bf, a, type, flags);
 }
 
-status ToS(Buff *bf, Abstract *a, cls type, word flags){
+status ToS(Buff *bf, void *_a, cls type, word flags){
+    Abstract *a = (Abstract *)_a;
     if(a == NULL){
         return Buff_AddBytes(bf, (byte *)"NULL", 4);
     }

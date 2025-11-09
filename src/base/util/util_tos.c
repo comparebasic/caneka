@@ -4,8 +4,8 @@
 static status Wrapped_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)asIfc(a, TYPE_WRAPPED);
     if(flags & (MORE|DEBUG)){
-        Abstract *args[] = {
-            (Abstract *)Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
+        void *args[] = {
+            Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
             NULL
         };
         return Fmt(bf, "Wr\\<$>", args);
@@ -17,9 +17,9 @@ static status Wrapped_Print(Buff *bf, Abstract *a, cls type, word flags){
 static status WrappedDo_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_DO);
     if(flags & (DEBUG|MORE)){
-        Abstract *args[] = {
-            (Abstract *)Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
-            (Abstract *)I64_Wrapped(bf->m, (util)sg->val.ptr),
+        void *args[] = {
+            Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
+            I64_Wrapped(bf->m, (util)sg->val.ptr),
             NULL
         };
         return Fmt(bf, "Wdo\\<$ ^D.*$^d.>", args);
@@ -30,9 +30,9 @@ static status WrappedDo_Print(Buff *bf, Abstract *a, cls type, word flags){
 
 static status WrappedFunc_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_FUNC);
-    Abstract *args[] = {
-        (Abstract *)Type_StateVec(bf->m, sg->type.of, sg->type.state),
-        (Abstract *)Util_Wrapped(bf->m, (util)sg->val.ptr),
+    void *args[] = {
+        Type_StateVec(bf->m, sg->type.of, sg->type.state),
+        Util_Wrapped(bf->m, (util)sg->val.ptr),
         NULL
     };
     if(flags & MORE){
@@ -45,13 +45,13 @@ static status WrappedFunc_Print(Buff *bf, Abstract *a, cls type, word flags){
 static status WrappedPtr_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
     word fl = (DEBUG|MORE);
-    Abstract *args[] = {
-        (Abstract *)Str_CstrRef(bf->m, Type_ToChars(sg->objType.of)),
+    void *args[] = {
+        Str_CstrRef(bf->m, Type_ToChars(sg->objType.of)),
         NULL
     };
     Fmt(bf, "Wptr<$ ", args);
     if(sg->objType.of > _TYPE_ABSTRACT_BEGIN){
-        ToS(bf, (Abstract *)sg->val.ptr, 0, MORE);
+        ToS(bf, sg->val.ptr, 0, MORE);
     }else{
         Addr_ToS(bf, sg->val.ptr, flags);
     }
@@ -63,19 +63,19 @@ static status WrappedUtil_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     Str *s = Str_FromI64(bf->m, sg->val.value);
     if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL
         };
         return Fmt(bf, "^D.$^d.", args);
     }else if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL
         };
         return Fmt(bf, "Wu\\<^D.$^d.>", args);
     }else{
-        return ToS(bf, (Abstract *)s, 0, flags);
+        return ToS(bf, s, 0, flags);
     }
 }
 
@@ -89,13 +89,13 @@ static status WrappedI64_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
     Str *s = Str_FromI64(bf->m, sg->val.value);
     if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL
         };
         return Fmt(bf, "Wi64\\<^D.$^d.>", args);
     }else{
-        return ToS(bf, (Abstract *)s, 0, flags);
+        return ToS(bf, s, 0, flags);
     }
 }
 
@@ -103,19 +103,19 @@ static status WrappedI32_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.i);
     if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL
         };
         return Fmt(bf, "Wi32\\<^D.$^d.>", args);
     }else if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL
         };
         return Fmt(bf, "^D.$^d.", args);
     }else{
-        return ToS(bf, (Abstract *)s, 0, flags);
+        return ToS(bf, s, 0, flags);
     }
 }
 
@@ -124,21 +124,21 @@ static status WrappedI16_Print(Buff *bf, Abstract *a, cls type, word flags){
     Str *s = Str_FromI64(bf->m, (i64)sg->val.w);
     if(flags & MORE){
         if(sg->objType.of != ZERO){
-            Abstract *args[] = {
-                (Abstract *)Type_ToStr(bf->m, sg->objType.of),
-                (Abstract *)s,
+            void *args[] = {
+                Type_ToStr(bf->m, sg->objType.of),
+                s,
                 NULL
             };
             return Fmt(bf, "Wi16:$\\<^D.$^d.>", args);
         }else{
-            Abstract *args[] = {
-                (Abstract *)s,
+            void *args[] = {
+                s,
                 NULL
             };
             return Fmt(bf, "Wi16\\<^D.$^d.>", args);
         }
     }else{
-        return ToS(bf, (Abstract *)s, 0, flags);
+        return ToS(bf, s, 0, flags);
     }
 }
 
@@ -146,19 +146,19 @@ static status WrappedI8_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I8);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.b);
     if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL
         };
         return Fmt(bf, "Wi8\\<^D.$^d.>", args);
     }else if(flags & MORE){
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL
         };
         return Fmt(bf, "^D.$^d.", args);
     }else{
-        return ToS(bf, (Abstract *)s, 0, flags);
+        return ToS(bf, s, 0, flags);
     }
 }
 
@@ -190,22 +190,22 @@ static status WrappedMicroTime_Print(Buff *bf, Abstract *a, cls type, word flags
     Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
     Str *s = MicroTime_ToStr(bf->m, sg->val.value);
     if(flags & (DEBUG|MORE)){
-        Abstract *args[] = {
-            (Abstract *)Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
-            (Abstract *)s,
+        void *args[] = {
+            Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
+            s,
             NULL
         };
         return Fmt(bf, "Wt64\\<$ ^D.@^d.>", args);
     }else{
-        return ToS(bf, (Abstract *)s, 0, flags);
+        return ToS(bf, s, 0, flags);
     }
 }
 
 static status Abstract_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     if(flags & (DEBUG|MORE)){
-        Abstract *args[] = {
-            (Abstract *)Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
+        void *args[] = {
+            Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
             NULL
         };
         return Fmt(bf, "A\\<$>", args);
@@ -217,8 +217,8 @@ static status Abstract_Print(Buff *bf, Abstract *a, cls type, word flags){
 static status Single_Print(Buff *bf, Abstract *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED);
     if(flags & (DEBUG|MORE)){
-        Abstract *args[] = {
-            (Abstract *)Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
+        void *args[] = {
+            Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
             NULL
         };
         return Fmt(bf, "Single\\<$>", args);

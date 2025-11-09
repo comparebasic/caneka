@@ -48,7 +48,7 @@ status IoUtil_RemoveSeps(MemCh *m, StrVec *path){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
         if((s->type.state & (MORE|LAST)) == 0){
-            Span_Set(path->p, idx++, (Abstract *)s);
+            Span_Set(path->p, idx++, s);
         }
     }
     path->p->nvalues = idx;
@@ -198,8 +198,8 @@ status IoUtils_Init(MemCh *m){
     if(pathSeps == NULL){
         MemCh_SetToBase(m);
         pathSeps = Span_Make(m);
-        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
-        Span_Add(pathSeps, (Abstract *)B_Wrapped(m, (byte)'.', ZERO, LAST));
+        Span_Add(pathSeps, B_Wrapped(m, (byte)'/', ZERO, MORE));
+        Span_Add(pathSeps, B_Wrapped(m, (byte)'.', ZERO, LAST));
         MemCh_SetFromBase(m);
         return SUCCESS;
     }

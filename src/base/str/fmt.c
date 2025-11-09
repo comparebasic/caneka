@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Abstract *FmtVar_Get(MemCh *m, Str *key, Abstract *arg){
+void *FmtVar_Get(MemCh *m, Str *key, void *arg){
     StrVec *path = StrVec_From(m, key);
     Path_DotAnnotate(m, path);
     Abstract *a = NULL;
@@ -36,7 +36,7 @@ Abstract *FmtVar_Get(MemCh *m, Str *key, Abstract *arg){
     return a;
 }
 
-status Fmt(Buff *bf, char *fmt, Abstract *args[]){
+status Fmt(Buff *bf, char *fmt, void *args[]){
     MemCh *m = bf->m;
     char *ptr = fmt;
     char *end = fmt+(strlen(fmt)-1);
@@ -179,13 +179,13 @@ FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
     return ln;
 }
 
-StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args){
+StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, void **args){
     Buff *bf = Buff_Make(m, ZERO);
     Fmt(bf, fmt, args); 
     return bf->v;
 }
 
-FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args){
+FmtLine *FmtLine_Make(MemCh *m, char *fmt, void **args){
     FmtLine *ln = (FmtLine *)MemCh_Alloc(m, sizeof(FmtLine));
     ln->type.of = TYPE_FMT_LINE;
     ln->fmt = fmt;

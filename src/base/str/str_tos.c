@@ -59,16 +59,16 @@ status StrLit_Print(Buff *bf, Abstract *a, cls type, word flags){
 
 
 status Str_Print(Buff *bf, Abstract *a, cls type, word flags){
-    Abstract *args[5];
+    void *args[5];
     Str *s = (Str*)as(a, TYPE_STR); 
 
     if((flags & (MORE|DEBUG)) == 0){
         return Buff_AddBytes(bf, s->bytes, s->length);
     }
 
-    args[0] = (Abstract *)Type_StateVec(bf->m, s->type.of, s->type.state);
-    args[1] = (Abstract *)I16_Wrapped(bf->m, s->length);
-    args[2] = (Abstract *)I16_Wrapped(bf->m, s->alloc);
+    args[0] = Type_StateVec(bf->m, s->type.of, s->type.state);
+    args[1] = I16_Wrapped(bf->m, s->length);
+    args[2] = I16_Wrapped(bf->m, s->alloc);
     args[3] = NULL;
 
     if(flags & DEBUG){
@@ -95,10 +95,10 @@ status StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 
     if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, vObj->type.of, vObj->type.state),
-            (Abstract *)I32_Wrapped(bf->m, vObj->p->nvalues),
-            (Abstract *)I64_Wrapped(bf->m, vObj->total),
+        void *args[] = {
+            Type_StateVec(bf->m, vObj->type.of, vObj->type.state),
+            I32_Wrapped(bf->m, vObj->p->nvalues),
+            I64_Wrapped(bf->m, vObj->total),
             NULL
         };
         Fmt(bf, "StrVec<$ $/$ [", args); 
@@ -110,8 +110,8 @@ status StrVec_Print(Buff *bf, Abstract *a, cls type, word flags){
         Str *s = (Str *)it.value;
         if(s != NULL){
             if(flags & DEBUG){
-                Abstract *args[] = {
-                    (Abstract *)I32_Wrapped(bf->m, it.idx),
+                void *args[] = {
+                    I32_Wrapped(bf->m, it.idx),
                     NULL
                 };
                 Fmt(bf, "$: ", args); 
@@ -179,30 +179,30 @@ status Cursor_Print(Buff *bf, Abstract *a, cls type, word flags){
     }
 
     if(flags & DEBUG){
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, curs->type.of, curs->type.state),
-            (Abstract *)I64_Wrapped(bf->m, pos),
-            (Abstract *)I64_Wrapped(bf->m, endPos),
-            (Abstract *)I64_Wrapped(bf->m, length),
-            (Abstract *)I64_Wrapped(bf->m, curs->v->total),
-            (Abstract *)before,
-            (Abstract *)focus,
-            (Abstract *)after,
+        void *args[] = {
+            Type_StateVec(bf->m, curs->type.of, curs->type.state),
+            I64_Wrapped(bf->m, pos),
+            I64_Wrapped(bf->m, endPos),
+            I64_Wrapped(bf->m, length),
+            I64_Wrapped(bf->m, curs->v->total),
+            before,
+            focus,
+            after,
             NULL
         };
         return  Fmt(bf, "Curs<$ $..$ $of$ ^d.: \"$^D.$^d.$\">", args); 
     }else{
         i64 length = (i64)(curs->end - curs->ptr)+1;
 
-        Abstract *args[] = {
-            (Abstract *)Type_StateVec(bf->m, curs->type.of, curs->type.state),
-            (Abstract *)I64_Wrapped(bf->m, pos),
-            (Abstract *)I64_Wrapped(bf->m, curs->v->total),
-            (Abstract *)((pos >= 8) ? Str_CstrRef(bf->m, "...") : Str_CstrRef(bf->m, "")),
-            (Abstract *)before,
-            (Abstract *)focus,
-            (Abstract *)after,
-            (Abstract *)((endPos < curs->v->total) ? Str_CstrRef(bf->m, "...") 
+        void *args[] = {
+            Type_StateVec(bf->m, curs->type.of, curs->type.state),
+            I64_Wrapped(bf->m, pos),
+            I64_Wrapped(bf->m, curs->v->total),
+            ((pos >= 8) ? Str_CstrRef(bf->m, "...") : Str_CstrRef(bf->m, "")),
+            before,
+            focus,
+            after,
+            ((endPos < curs->v->total) ? Str_CstrRef(bf->m, "...") 
                 : Str_CstrRef(bf->m, "")),
             NULL
         };

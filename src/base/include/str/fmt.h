@@ -1,7 +1,7 @@
 typedef struct fmt_line {
     Type type;
     char *fmt;
-    Abstract **args;
+    void **args;
 } FmtLine;
 
 enum formatter_types {
@@ -14,8 +14,8 @@ enum formatter_types {
     FMT_TYPE_EXTRA_ARG = 1 << 14,
     FMT_TYPE_ANSI = 1 << 15,
 };
-status Fmt(struct buff *bf, char *fmt, Abstract *args[]);
+status Fmt(struct buff *bf, char *fmt, void *args[]);
 FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p);
-FmtLine *FmtLine_Make(MemCh *m, char *fmt, Abstract **args);
-StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, Abstract **args);
-Abstract *FmtVar_Get(MemCh *m, Str *key, Abstract *arg);
+FmtLine *FmtLine_Make(MemCh *m, char *fmt, void **args);
+StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, void **args);
+void *FmtVar_Get(MemCh *m, Str *key, void *arg);

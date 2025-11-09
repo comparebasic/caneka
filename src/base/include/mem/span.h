@@ -20,7 +20,7 @@ typedef struct span {
     i32 max_idx;
 } Span;
 
-status Span_Set(Span *p, i32 idx, Abstract *t);
+status Span_Set(Span *p, i32 idx, void *t);
 void *Span_Get(Span *p, i32 idx);
 status Span_Remove(Span *p, i32 idx);
 status Span_Setup(Span *p);
