@@ -6,7 +6,7 @@ status Crypto_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
     MemCh *m = MemCh_Make();
-    Abstract *args[5];
+    void *args[5];
 
     Str *s = Str_CstrRef(m, "Yay test string!");
     Str *hash = Str_Make(m, DIGEST_SIZE);
@@ -17,27 +17,27 @@ status Crypto_Tests(MemCh *gm){
     Str *expected = Str_CstrRef(m,
         "8a87db5fb3a1e4491a04644396437064375c00bdaf7fea33bd4645ba138539b5");
 
-    args[0] = (Abstract *)s;
-    args[1] = (Abstract *)expected;
-    args[2] = (Abstract *)hex;
+    args[0] = s;
+    args[1] = expected;
+    args[2] = hex;
     args[3] = NULL;
-    r |= Test(Equals((Abstract *)hex, (Abstract *)expected), 
+    r |= Test(Equals(hex, expected), 
         "Str Sha256 Matches, expected @ -> $, have $", args);
 
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, Str_CstrRef(m, "Yay "));
     StrVec_Add(v, Str_CstrRef(m, "test string!"));
 
-    r |= Test(Equals((Abstract *)s, (Abstract *)v), 
+    r |= Test(Equals(s, v), 
         "StrVec and Str text are identical: & vs &", args);
 
     StrVec_ToSha256(m, v, (digest *)hash->bytes);
     hex = Str_ToHex(m, hash);
 
-    args[0] = (Abstract *)s;
-    args[1] = (Abstract *)hex;
+    args[0] = s;
+    args[1] = hex;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)hex, (Abstract *)expected), 
+    r |= Test(Equals(hex, expected), 
         "StrVec Sha256 Matches & -> @", args);
 
     StrVec_Add(v, Str_CstrRef(m, "And now we add a whole bunch of random stuff"
@@ -65,10 +65,10 @@ status Crypto_Tests(MemCh *gm){
     expected = Str_CstrRef(m,
         "da43c4b3c5e3667dcaf17f184880241908c2ab1f9e8d2f5bbf62825df6303ab6");
 
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)hex;
+    args[0] = expected;
+    args[1] = hex;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)hex, (Abstract *)expected), 
+    r |= Test(Equals(hex, expected), 
         "longstr Str Sha256 matches, expected @, have @", args);
 
     StrVec_ToSha256(m, v, (digest *)hash->bytes);
@@ -76,10 +76,10 @@ status Crypto_Tests(MemCh *gm){
     expected = Str_CstrRef(m,
         "da43c4b3c5e3667dcaf17f184880241908c2ab1f9e8d2f5bbf62825df6303ab6");
 
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)hex;
+    args[0] = expected;
+    args[1] = hex;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)hex, (Abstract *)expected), 
+    r |= Test(Equals(hex, expected), 
         "StrVec Sha256 matches, expected @, have @", args);
 
     v = StrVec_Make(m);
@@ -95,10 +95,10 @@ status Crypto_Tests(MemCh *gm){
     expected = Str_CstrRef(m,
         "466b336b19f46a9684b4515f43ac4b3a06e080369f99394434e4b8d4f4cbc9de");
 
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)hex;
+    args[0] = expected;
+    args[1] = hex;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)hex, (Abstract *)expected), 
+    r |= Test(Equals(hex, expected), 
         "Salted StrVec Sha256 matches, expected @, have @", args);
 
     StrVec *phrase = StrVec_From(m, Str_CstrRef(m, "My favorite book is the one "
@@ -110,8 +110,8 @@ status Crypto_Tests(MemCh *gm){
 
     Str *pubHex = Str_ToHex(m, public);
     Str *secretHex = Str_ToHex(m, secret);
-    args[0] = (Abstract *)pubHex;
-    args[1] = (Abstract *)secretHex;
+    args[0] = pubHex;
+    args[1] = secretHex;
     args[2] = NULL;
     Out("^p.Secret: @, Public: @^0\n", args);
 
@@ -119,9 +119,9 @@ status Crypto_Tests(MemCh *gm){
     Str *secretB = Str_DigestAlloc(m);
     SignPair_Make(m, publicB, secretB, phrase);
 
-    r |= Test(Equals((Abstract *)publicB, (Abstract *)public),
+    r |= Test(Equals(publicB, public),
         "Public and public second generation are equals", NULL);
-    r |= Test(Equals((Abstract *)secretB, (Abstract *)secret),
+    r |= Test(Equals(secretB, secret),
         "Secret and secret second generation are equals", NULL);
 
     Str *message = Str_CstrRef(m, "I super-master person, do hereby sign some cool,"
@@ -129,8 +129,8 @@ status Crypto_Tests(MemCh *gm){
     Str_ToSha256(m, message, (digest *)hash->bytes);
     Str *sig = SignPair_Sign(m, hash, secret);
 
-    args[0] = (Abstract *)sig;
-    args[1] = (Abstract *)hash;
+    args[0] = sig;
+    args[1] = hash;
     args[2] = NULL;
     Out("^p.sig sign:& digest:&^0\n", args);
 
@@ -138,8 +138,8 @@ status Crypto_Tests(MemCh *gm){
 
     status valid = SignPair_Verify(m, hash, sig, public);
 
-    args[0] = (Abstract *)message;
-    args[1] = (Abstract *)sigHex;
+    args[0] = message;
+    args[1] = sigHex;
     args[2] = NULL;
     r |= Test(valid & SUCCESS, "Message validates: @ -> sig:@", args);
 

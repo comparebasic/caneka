@@ -8,7 +8,7 @@ status Clone_Tests(MemCh *gm){
     Abstract *b = NULL;
 
     MemCh *m = MemCh_Make();
-    Abstract **args = Arr_Make(m, 3);
+    void **args = Arr_Make(m, 3);
     a = (Abstract *)Str_CstrRef(m, "fancy things");
     b =  Clone(m, a);
     args[0] = a;
@@ -16,12 +16,12 @@ status Clone_Tests(MemCh *gm){
     r |= Test(Equals(a, b), "Str clone is equal, expected @ have @", args);
 
     Span *p = Span_Make(m);
-    Span_Add(p, (Abstract *)I32_Wrapped(m, 31));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "boo bah bing bang!"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "hi"));
-    Span_Add(p, (Abstract *)Str_CstrRef(m, "there"));
-    Span_Add(p, (Abstract *)I32_Wrapped(m, 13));
-    Span_Add(p, (Abstract *)I8_Wrapped(m, 27));
+    Span_Add(p, I32_Wrapped(m, 31));
+    Span_Add(p, Str_CstrRef(m, "boo bah bing bang!"));
+    Span_Add(p, Str_CstrRef(m, "hi"));
+    Span_Add(p, Str_CstrRef(m, "there"));
+    Span_Add(p, I32_Wrapped(m, 13));
+    Span_Add(p, I8_Wrapped(m, 27));
     a = (Abstract *)p;
     b =  Clone(m, a);
     args[0] = a;

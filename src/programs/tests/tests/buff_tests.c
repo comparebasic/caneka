@@ -4,7 +4,7 @@
 status Buff_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     MemCh *m = MemCh_Make();
 
     Buff *bf = Buff_Make(m, ZERO);
@@ -21,10 +21,10 @@ status Buff_Tests(MemCh *gm){
     Str *expected = Str_CstrRef(m, "Hi, hows the weather, is it cold?"
         " and StOrMy, Mwahahahahaha!");
 
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)bf->v;
+    args[0] = expected;
+    args[1] = bf->v;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)bf->v, (Abstract *)expected),
+    r |= Test(Equals(bf->v, expected),
         "Content is expected in StrVec of Buff, expected @, have @", args);
 
     char *longStr = "\nThe weather is under my control now... MY CONTROL. "
@@ -62,10 +62,10 @@ status Buff_Tests(MemCh *gm){
     StrVec *expectedVec = StrVec_From(m, expected);
     StrVec_Add(expectedVec, Str_CstrRef(m, longStr));
 
-    args[0] = (Abstract *)expectedVec;
-    args[1] = (Abstract *)bf->v;
+    args[0] = expectedVec;
+    args[1] = bf->v;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)bf->v, (Abstract *)expectedVec),
+    r |= Test(Equals(bf->v, expectedVec),
         "Content with a long additional is expected in StrVec of Buff, expected &, have &", args);
 
     MemCh_Free(m);
@@ -77,7 +77,7 @@ status Buff_Tests(MemCh *gm){
 status BuffSendRecv_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     MemCh *m = MemCh_Make();
 
     Str *s = Str_CstrRef(m, "All of the things you want to know are kindof like "
@@ -87,10 +87,10 @@ status BuffSendRecv_Tests(MemCh *gm){
     Buff_Add(bf, s);
 
     Str *expected = s;
-    args[0] = (Abstract *)s;
-    args[1] = (Abstract *)bf->v;
+    args[0] = s;
+    args[1] = bf->v;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)bf->v, (Abstract *)expected),
+    r |= Test(Equals(bf->v, expected),
         "Content is expected in StrVec of Buff, expected @, have @", args);
 
     StrVec *v = StrVec_From(m, Str_CstrRef(m, " They make sense until the wind blows"));
@@ -103,10 +103,10 @@ status BuffSendRecv_Tests(MemCh *gm){
     StrVec *expectedVec = StrVec_From(m, s);
     StrVec_AddVec(expectedVec, v);
 
-    args[0] = (Abstract *)expectedVec;
-    args[1] = (Abstract *)bf->v;
+    args[0] = expectedVec;
+    args[1] = bf->v;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)bf->v, (Abstract *)expectedVec),
+    r |= Test(Equals(bf->v, expectedVec),
         "Content with a long additional is expected in StrVec of Buff, expected &, have &", args);
 
     StrVec *content = StrVec_Make(m);
@@ -121,10 +121,10 @@ status BuffSendRecv_Tests(MemCh *gm){
     }
 
     bf->v->type.state |= DEBUG;
-    args[0] = (Abstract *)bf->v;
-    args[1] = (Abstract *)content;
+    args[0] = bf->v;
+    args[1] = content;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)bf->v, (Abstract *)expectedVec),
+    r |= Test(Equals(bf->v, expectedVec),
         "Buff_GetStr has populated an equal StrVec, buff &, content &", args);
 
     MemCh_Free(m);
@@ -136,7 +136,7 @@ status BuffSendRecv_Tests(MemCh *gm){
 status BuffIo_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     MemCh *m = MemCh_Make();
 
     StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, Str_CstrRef(m, "examples/test/")));
@@ -148,8 +148,8 @@ status BuffIo_Tests(MemCh *gm){
     IoUtil_Add(m, pathOne, fname);
 
     i32 fd = open(Str_Cstr(m, StrVec_Str(m, pathOne)), (O_CREAT|O_WRONLY|O_TRUNC), 0644);
-    args[0] = (Abstract *)I32_Wrapped(m, fd);
-    args[1] = (Abstract *)pathOne;
+    args[0] = I32_Wrapped(m, fd);
+    args[1] = pathOne;
     args[2] = NULL;
     r |= Test(fd > 0,
         "File opened successfully to create and write have ^D.$^d.fd for @", args);
@@ -166,7 +166,7 @@ status BuffIo_Tests(MemCh *gm){
     close(fd);
     Buff_UnsetFd(out);
 
-    args[0] = (Abstract *)out;
+    args[0] = out;
     args[1] = NULL;
     r |= Test(out->v->total == 0, "Buff total is still 0 after sending content "
         "through it unbuffered: @", args);
@@ -174,8 +174,8 @@ status BuffIo_Tests(MemCh *gm){
     i32 ifd = open(Str_Cstr(m, StrVec_Str(m, pathOne)), O_RDONLY);
     Buff *chain = Buff_Make(m, ZERO);
     Buff_SetFd(chain, ifd);
-    args[0] = (Abstract *)I32_Wrapped(m, fd);
-    args[1] = (Abstract *)pathOne;
+    args[0] = I32_Wrapped(m, fd);
+    args[1] = pathOne;
     args[2] = NULL;
     r |= Test(fd > 0,
         "File opened successfully to after write, have ^D.$^d.fd for @", args);
@@ -185,8 +185,8 @@ status BuffIo_Tests(MemCh *gm){
     IoUtil_Add(m, pathTwo, fname);
 
     i32 ofd = open(Str_Cstr(m, StrVec_Str(m, pathTwo)), (O_CREAT|O_WRONLY|O_TRUNC), 0644);
-    args[0] = (Abstract *)I32_Wrapped(m, ofd);
-    args[1] = (Abstract *)pathTwo;
+    args[0] = I32_Wrapped(m, ofd);
+    args[1] = pathTwo;
     args[2] = NULL;
     r |= Test(ofd > 0,
         "Second file opened successfully to create and write have ^D.$^d.fd for @", args);
@@ -200,8 +200,8 @@ status BuffIo_Tests(MemCh *gm){
 
     Buff *compare = Buff_Make(m, ZERO);
     i32 rfd = open(Str_Cstr(m, StrVec_Str(m, pathTwo)), O_RDONLY);
-    args[0] = (Abstract *)I32_Wrapped(m, rfd);
-    args[1] = (Abstract *)pathTwo;
+    args[0] = I32_Wrapped(m, rfd);
+    args[1] = pathTwo;
     args[2] = NULL;
     r |= Test(rfd > 0,
         "Second file opened successfully to create for reading have ^D.$^d.fd for @", args);
@@ -209,26 +209,26 @@ status BuffIo_Tests(MemCh *gm){
     Buff_Read(compare);
     close(rfd);
 
-    args[0] = (Abstract *)I32_Wrapped(m, fd);
-    args[1] = (Abstract *)pathTwo;
+    args[0] = I32_Wrapped(m, fd);
+    args[1] = pathTwo;
     args[2] = NULL;
     r |= Test(fd > 0,
         "File opened successfully to after write, have ^D.$^d.fd for @", args);
 
     Str *expected = Str_CstrRef(m, content);
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)compare->v;
+    args[0] = expected;
+    args[1] = compare->v;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)compare->v, (Abstract *)expected),
+    r |= Test(Equals(compare->v, expected),
         "After writing, reading, writing somewhere else, and then reading it again, "
         "it all equals, expected @, have @", args);
 
-    args[0] = (Abstract *)pathOne;
+    args[0] = pathOne;
     args[1] = NULL;
     r |= Test(IoUtil_Unlink(StrVec_Str(m, pathOne)) & SUCCESS, 
         "Remove file @", args);
 
-    args[0] = (Abstract *)pathTwo;
+    args[0] = pathTwo;
     args[1] = NULL;
     r |= Test(IoUtil_Unlink(StrVec_Str(m, pathTwo)) & SUCCESS, 
         "Remove file @", args);
@@ -242,7 +242,7 @@ status BuffIo_Tests(MemCh *gm){
 status BuffPos_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     MemCh *m = MemCh_Make();
     Buff *bf = Buff_Make(m, ZERO);
 
@@ -250,7 +250,7 @@ status BuffPos_Tests(MemCh *gm){
     Buff_Add(bf, Str_CstrRef(m, "There was a prince, a queen, a frog, and"));
     Buff_Add(bf, Str_CstrRef(m, " a book."));
 
-    args[0] = (Abstract *)bf;
+    args[0] = bf;
     args[1] = NULL;
     r |= Test(bf->unsent.total == 67, "Buff: Expected position and unset $", args);
 

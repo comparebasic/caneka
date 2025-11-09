@@ -7,11 +7,28 @@ extern TestSet *Tests;
 status Tests_Init(MemCh *m);
 
 /* tests */
+status BinSeg_Tests(MemCh *gm);
+status BinSegCollection_Tests(MemCh *gm);
+status BinSegV_Tests(MemCh *gm);
+status BinSegReversedV_Tests(MemCh *gm);
+status Buff_Tests(MemCh *gm);
+status BuffSendRecv_Tests(MemCh *gm);
+status BuffIo_Tests(MemCh *gm);
+status BuffPos_Tests(MemCh *gm);
+status Clone_Tests(MemCh *gm);
+status Config_Tests(MemCh *gm);
+status Core_Tests(MemCh *gm);
+status Crypto_Tests(MemCh *gm);
+status Cursor_Tests(MemCh *gm);
+status DebugStack_Tests(MemCh *gm);
+status FileDB_Tests(MemCh *gm);
+
+
+
 status MemCh_Tests(MemCh *gm);
 status MemChLevel_Tests(MemCh *gm);
 status Span_Tests(MemCh *gm);
 status SpanMax_Tests(MemCh *gm);
-status Core_Tests(MemCh *gm);
 status Str_Tests(MemCh *gm);
 status StrB64_Tests(MemCh *gm);
 status Str_EndMatchTests(MemCh *gm);
@@ -19,11 +36,9 @@ status StrVec_Tests(MemCh *gm);
 status StrVecSplit_Tests(MemCh *gm);
 status SpanInline_Tests(MemCh *gm);
 status Hash_Tests(MemCh *gm);
-status Clone_Tests(MemCh *gm);
 status Table_Tests(MemCh *gm);
 status TableResize_Tests(MemCh *gm);
 status Stream_Tests(MemCh *gm);
-status Cursor_Tests(MemCh *gm);
 status PatChar_Tests(MemCh *gm);
 status Match_Tests(MemCh *gm);
 status MatchElastic_Tests(MemCh *gm);
@@ -42,7 +57,6 @@ status IterPrevRemove_Tests(MemCh *gm);
 status SnipModify_Tests(MemCh *gm);
 status File_Tests(MemCh *gm);
 status FmtHtml_Tests(MemCh *gm);
-status DebugStack_Tests(MemCh *gm);
 status Object_Tests(MemCh *gm);
 status Templ_Tests(MemCh *gm);
 status TemplLogic_Tests(MemCh *gm);
@@ -62,18 +76,7 @@ status QueueCriteria_Tests(MemCh *gm);
 status TaskStep_Tests(MemCh *gm);
 status ServeTcp_Tests(MemCh *gm);
 status Encoding_Tests(MemCh *gm);
-status BinSeg_Tests(MemCh *gm);
-status BinSegCollection_Tests(MemCh *gm);
-status BinSegV_Tests(MemCh *gm);
-status BinSegReversedV_Tests(MemCh *gm);
-status FileDB_Tests(MemCh *gm);
-status Crypto_Tests(MemCh *gm);
 status TemplRoute_Tests(MemCh *gm);
-status Buff_Tests(MemCh *gm);
-status BuffSendRecv_Tests(MemCh *gm);
-status BuffIo_Tests(MemCh *gm);
-status BuffPos_Tests(MemCh *gm);
-status Config_Tests(MemCh *gm);
 status ObjectFilter_Tests(MemCh *gm);
 
 status TablePreKey_Tests(MemCh *gm);

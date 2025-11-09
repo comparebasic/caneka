@@ -31,8 +31,8 @@ status Cursor_Tests(MemCh *gm){
 
     r |= Test(*curs->ptr == 'y', "Stops on the 'y' for sky", NULL);
     i64 delta = curs->ptr - s->bytes;
-    Abstract *args[] = {
-        (Abstract *)I64_Wrapped(m, delta),
+    void *args[] = {
+        I64_Wrapped(m, delta),
         NULL
     };
     r |= Test(delta == 31,
@@ -42,8 +42,8 @@ status Cursor_Tests(MemCh *gm){
     r |= Test(*curs->ptr == 'F', "Stops on the 'F' for For", NULL);
     s = (Str *)Span_Get(curs->v->p, 2);
     delta = curs->ptr - s->bytes;
-    Abstract *args2[] = {
-        (Abstract *)I64_Wrapped(m, delta),
+    void *args2[] = {
+        I64_Wrapped(m, delta),
         NULL
     };
     r |= Test(delta == 1,
@@ -53,8 +53,8 @@ status Cursor_Tests(MemCh *gm){
     r |= Test(*curs->ptr == 's', "Stops on the 's' for sky", NULL);
     s = (Str *)Span_Get(curs->v->p, 1);
     delta = curs->ptr - s->bytes;
-    Abstract *args3[] = {
-        (Abstract *)I64_Wrapped(m, delta),
+    void *args3[] = {
+        I64_Wrapped(m, delta),
         NULL
     };
     r |= Test(delta == 29,

@@ -3,7 +3,7 @@
 
 status FileDB_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
-    Abstract *args[5];
+    void *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -14,7 +14,7 @@ status FileDB_Tests(MemCh *gm){
     FileDB_Open(fdb);
     i16 nameId = fdb->ctx->func(fdb->ctx, NULL);
     Str *name = Str_CstrRef(m, "Sam-Iam-ICan");
-    FileDB_Add(fdb, nameId, (Abstract *)name);
+    FileDB_Add(fdb, nameId, name);
     FileDB_Close(fdb);
 
     fdb = FileDB_Make(m, path);
@@ -24,15 +24,15 @@ status FileDB_Tests(MemCh *gm){
 
     Table *keys = Table_Make(m);
     Str *key1 = Str_CstrRef(m, "name");
-    Table_Set(keys, (Abstract *)I16_Wrapped(m, nameId), (Abstract *)key1);
+    Table_Set(keys, I16_Wrapped(m, nameId), key1);
 
     Table *tbl = FileDB_ToTbl(fdb, keys);
-    Str *s = (Str *)Table_Get(tbl, (Abstract *)key1);
+    Str *s = (Str *)Table_Get(tbl, key1);
 
-    args[0] = (Abstract *)name;
-    args[1] = (Abstract *)s;
+    args[0] = name;
+    args[1] = s;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)s, (Abstract *)name), 
+    r |= Test(Equals(s, name), 
         "Found name from table, exected @, have @", args);
     FileDB_Close(fdb);
 
@@ -42,54 +42,52 @@ status FileDB_Tests(MemCh *gm){
     i16 pwId = fdb->ctx->func(fdb->ctx, NULL);
     i16 emailId = fdb->ctx->func(fdb->ctx, NULL);
     
-    FileDB_Add(fdb, pwId, (Abstract *)pw);
-    FileDB_Add(fdb, emailId, (Abstract *)email);
+    FileDB_Add(fdb, pwId, pw);
+    FileDB_Add(fdb, emailId, email);
     FileDB_Close(fdb);
 
     keys = Table_Make(m);
     key1 = Str_CstrRef(m, "name");
     Str *key2 = Str_CstrRef(m, "pw");
     Str *key3 = Str_CstrRef(m, "email");
-    Table_Set(keys, (Abstract *)I16_Wrapped(m, nameId), (Abstract *)key1);
-    Table_Set(keys, (Abstract *)I16_Wrapped(m, pwId),
-        (Abstract *)key2);
-    Table_Set(keys, (Abstract *)I16_Wrapped(m, emailId),
-        (Abstract *)key3);
+    Table_Set(keys, I16_Wrapped(m, nameId), key1);
+    Table_Set(keys, I16_Wrapped(m, pwId), key2);
+    Table_Set(keys, I16_Wrapped(m, emailId), key3);
 
     tbl = FileDB_ToTbl(fdb, keys);
 
-    s = (Str *)Table_Get(tbl, (Abstract *)key1);
-    args[0] = (Abstract *)name;
-    args[1] = (Abstract *)s;
+    s = (Str *)Table_Get(tbl, key1);
+    args[0] = name;
+    args[1] = s;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)s, (Abstract *)name), 
+    r |= Test(Equals(s, name), 
         "Found name from table, exected @, have @", args);
 
-    s = (Str *)Table_Get(tbl, (Abstract *)key2);
-    args[0] = (Abstract *)pw;
-    args[1] = (Abstract *)s;
+    s = (Str *)Table_Get(tbl, key2);
+    args[0] = pw;
+    args[1] = s;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)s, (Abstract *)pw),
+    r |= Test(Equals(s, pw),
         "Found pw from table, exected @, have @", args);
 
-    s = (Str *)Table_Get(tbl, (Abstract *)key3);
-    args[0] = (Abstract *)email;
-    args[1] = (Abstract *)s;
+    s = (Str *)Table_Get(tbl, key3);
+    args[0] = email;
+    args[1] = s;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)s, (Abstract *)email),
+    r |= Test(Equals(s, email),
         "Found email from table, exected @, have @", args);
 
     FileDB_Close(fdb);
 
     FileDB_Open(fdb);
     pw = Str_CstrRef(m, "ruiwoiuer878923jkolwer_#2j");
-    FileDB_Add(fdb, pwId, (Abstract *)pw);
+    FileDB_Add(fdb, pwId, pw);
     tbl = FileDB_ToTbl(fdb, keys);
-    s = (Str *)Table_Get(tbl, (Abstract *)key2);
-    args[0] = (Abstract *)pw;
-    args[1] = (Abstract *)s;
+    s = (Str *)Table_Get(tbl, key2);
+    args[0] = pw;
+    args[1] = s;
     args[2] = NULL;
-    r |= Test(Equals((Abstract *)s, (Abstract *)pw),
+    r |= Test(Equals(s, pw),
         "Found new pw from table, exected @, have @", args);
     FileDB_Close(fdb);
 

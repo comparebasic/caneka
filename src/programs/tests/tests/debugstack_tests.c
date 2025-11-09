@@ -17,9 +17,9 @@ status DebugStack_Tests(MemCh *gm){
 
     i64 total = bf->v->total;
     i64 totalAfter = bfAfter->v->total;
-    Abstract *args[] = {
-        (Abstract *)bf->v,
-        (Abstract *)bfAfter->v,
+    void *args[] = {
+        bf->v,
+        bfAfter->v,
         NULL
     };
     r |= Test(total > totalAfter, 
