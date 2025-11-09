@@ -6,11 +6,8 @@
 #ifdef CNK_EXT
     #include <ext_module.h>
 #endif
-#ifdef CNK_LANG
-    #include <lang_module.h>
-#endif
-#ifdef CNK_WWW
-    #include <www_module.h>
+#ifdef CNK_INTER
+    #include <inter_module.h>
 #endif
 #ifdef CNK_CRYPTO
     #include <crypto.h>

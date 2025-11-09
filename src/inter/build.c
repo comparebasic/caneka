@@ -12,7 +12,7 @@ static Executable targets[] = {
 
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
-    "-DCNK_EXT", "-DCNK_LANG",
+    "-DCNK_EXT", "-DCNK_INTER",
     NULL
 };
 
@@ -20,7 +20,8 @@ static char *inc[] = {
     "-I./src/include/",
     "-I./src/base/include/",
     "-I./src/ext/include/",
-    "-I./src/lang/include/",
+    "-I./src/inter/include/",
+    "-I./build/include/",
     NULL
 };
 
@@ -48,9 +49,30 @@ static BuildSubdir templobj = { "templ", {
     NULL
 }};
 
+static BuildSubdir html = { "www/html", {
+    "nav_cls.c",
+    "page_cls.c",
+    NULL
+}};
+
+static BuildSubdir routes = { "www/route", {
+    "route.c",
+    NULL
+}};
+
+static BuildSubdir httpobj = { "http", {
+    "http_ctx.c",
+    "http_task.c",
+    "http_roebling.c",
+    NULL
+}};
+
 static BuildSubdir *objdirs[] = {
     &typesobj,
     &templobj,
+    &httpobj,
+    &html,
+    &routes,
     NULL
 };
 
@@ -71,8 +93,8 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnklang";
-    ctx.version = "1.0-templ";
+    ctx.libtarget = "libcnkinter";
+    ctx.version = "1.0-inter";
     ctx.dist = "build";
     ctx.src = "src/lang";
     ctx.targets = (Executable *)targets;

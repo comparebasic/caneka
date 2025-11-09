@@ -2,6 +2,13 @@
 #include <caneka.h>
 
 static char *langTypeStrings[] = {
+    "_TYPE_INTER_START",
+    "_TYPE_WWW_START",
+    "TYPE_HTML_NAV",
+    "TYPE_HTML_PAGE",
+    "TYPE_WWW_ROUTE",
+    "TYPE_ROUTE_CTX",
+    "_TYPE_WWW_END",
     "_TYPE_LANG_START",
     "TYPE_TEMPL",
     "TYPE_TEMPL_CTX",
@@ -36,9 +43,10 @@ static char *langTypeStrings[] = {
     "FORMAT_TEMPL_WITH",
     "FORMAT_TEMPL_FOR",
     "FORMAT_TEMPL_IF",
+    "FORMAT_TEMPL_ELSE",
     "FORMAT_TEMPL_IFNOT",
     "_FORMAT_TEMPL_LOGIC_END",
-    "_TYPE_LANG_END",
+    "_TYPE_INTER_END",
     NULL
 };
 

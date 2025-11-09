@@ -6,63 +6,19 @@ STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"
 
 mkdir -p ./build/libcaneka/
 echo "building Caneka Base" 
-$CC -g -Wno-gnu-folding-constant $INC -c -o ./build/libcaneka/libcaneka.a ./src/base/inc.c -DINSECURE;
-
-r=$?
-if [ $r -ne 0 ]; then
-    exit $?;
-fi
+$CC -g -Wno-gnu-folding-constant $INC -c -o ./build/libcaneka/libcaneka.a ./src/base/inc.c -DINSECURE || exit 1;
 
 mkdir -p ./build/libbuilder/
 echo "building Caneka Builder"
-$CC -g $INC -c -o ./build/libbuilder/libbuilder.a ./src/builder/inc.c -DINSECURE;
+$CC -g $INC -c -o ./build/libbuilder/libbuilder.a ./build/libcaneka/libcaneka.a -DINSECURE || exit 1;
 
-r=$?
-if [ $r -ne 0 ]; then
-    exit $r;
-fi
+echo "building Caneka Ext"
+$CC -o build/build_ext $INC $STATICS src/ext/build.c -lm && ./build/build_ext  || exit 1;
 
-exit
-
-
-echo "building Caneka Build Config"
-$CC -o build/build_ext $INC $STATICS src/ext/build.c -lm;
-
-r=$?
-if [ $r -ne 0 ]; then
-    exit $r;
-fi
-
-echo "building Caneka Ext..."
-./build/build_ext && $CC -o build/build_lang $INC $STATICS src/lang/build.c -lm;
-
-r=$?
-if [ $r -ne 0 ]; then
-    exit $r;
-fi
-
-echo "building Caneka Lang..."
-./build/build_lang && $CC -o build/build_www $INC $STATICS src/www/build.c -lm;
-
-r=$?
-if [ $r -ne 0 ]; then
-    exit $r;
-fi
-
-echo "building Caneka Www..."
-./build/build_www && $CC -o build/build_nacl $INC $STATICS src/third/nacl/build.c -lm;
-
-r=$?
-if [ $r -ne 0 ]; then
-    exit $r;
-fi
+echo "building Caneka Inter..."
+$CC -o build/build_inter $INC $STATICS src/inter/build.c -lm && ./build/build_inter || exit 1;
 
 echo "building Caneka Nacl..."
-./build/build_nacl
-
-r=$?
-if [ $r -ne 0 ]; then
-    exit $r;
-fi
+$CC -o build/build_nacl $INC $STATICS src/third/nacl/build.c -lm && ./build/build_nacl || exit 1;
 
 echo "Core modules built successfully"

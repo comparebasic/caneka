@@ -13,8 +13,7 @@ static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
     "-DINSECURE",
     "-DCNK_EXT",
-    "-DCNK_LANG",
-    "-DCNK_WWW",
+    "-DCNK_INTER",
     "-DCNK_CRYPTO",
     /*
     "-DMEMTEST",
@@ -26,18 +25,16 @@ static char *inc[] = {
     "-I./src/include/",
     "-I./src/base/include/",
     "-I./src/ext/include/",
-    "-I./src/www/include/",
-    "-I./src/lang/include/",
+    "-I./src/inter/include/",
     "-I./src/third/api/include/",
     "-I./src/programs/tests/include/",
     NULL
 };
 
 static char *staticLibs[] = {
-    "./build/libcnkwww/libcnkwww.a",
+    "./build/libcnkinter/libcnkinter.a",
     "./build/libcnknacl/libcnknacl.a",
     "/external/lib/libnacl.a",
-    "./build/libcnklang/libcnklang.a",
     "./build/libcnkext/libcnkext.a",
     "./build/libcaneka/libcaneka.a",
     NULL

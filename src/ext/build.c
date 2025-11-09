@@ -113,12 +113,6 @@ static BuildSubdir serveobj = { "serve", {
     NULL
 }};
 
-static BuildSubdir protoobj = { "serve/proto", {
-    "http_ctx.c",
-    "http_task.c",
-    NULL
-}};
-
 static BuildSubdir sequenceobj = { "sequence", {
     "sequence.c",
     "sequence_cls.c",
@@ -154,11 +148,6 @@ static BuildSubdir configobj = { "format/config", {
     NULL
 }};
 
-static BuildSubdir httpobj = { "format/http", {
-    "http_roebling.c",
-    NULL
-}};
-
 static BuildSubdir xmlobj = { "format/xml", {
     "tag.c",
     NULL,
@@ -181,7 +170,6 @@ static BuildSubdir *objdirs[] = {
     &authobj,
     &sequenceobj,
     &serveobj,
-    &protoobj,
     &httpobj,
     &parserobj,
     &fmtobj,

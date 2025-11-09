@@ -12,8 +12,7 @@ static Executable targets[] = {
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
     "-DCNK_EXT",
-    "-DCNK_LANG",
-    "-DCNK_WWW",
+    "-DCNK_INTER",
     "-DCNK_CRYPTO",
     NULL
 };
@@ -22,20 +21,18 @@ static char *inc[] = {
     "-I./src/include/",
     "-I./src/base/include/",
     "-I./src/ext/include/",
-    "-I./src/www/include/",
-    "-I./src/lang/include/",
+    "-I./src/inter/include/",
     "-I./src/third/api/include/",
     "-I./src/programs/binseg-cli/include/",
     NULL
 };
 
 static char *staticLibs[] = {
-    "./build/libcaneka/libcaneka.a",
-    "./build/libcnkext/libcnkext.a",
-    "./build/libcnklang/libcnklang.a",
-    "./build/libcnkwww/libcnkwww.a",
+    "./build/libcnkinter/libcnkinter.a",
     "./build/libcnknacl/libcnknacl.a",
     "/external/lib/libnacl.a",
+    "./build/libcnkext/libcnkext.a",
+    "./build/libcaneka/libcaneka.a",
     NULL
 };
 

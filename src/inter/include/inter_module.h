@@ -1,4 +1,5 @@
 #include "types.h"
+#include "templ.h"
 #include "init.h"
 #include "html.h"
 #include "route.h"
