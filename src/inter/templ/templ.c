@@ -39,7 +39,7 @@ static i32 Templ_FindEnd(Templ *templ){
         Abstract *a = Iter_Get(&it);
 
         if(a->type.of == TYPE_FETCHER){
-            if((a->type.state & FETCHER_END|FETCHER_VAR) == 0){
+            if((a->type.state & (FETCHER_END|FETCHER_VAR)) == 0){
                 targetCount++;
             }else if((a->type.state & FETCHER_END) && --targetCount == 0){
                 DebugStack_Pop();

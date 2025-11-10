@@ -29,21 +29,12 @@ static char *cstr = ""
     "<section class=\"main\">\n"
     ;
 
-static char *loginCstr  = ""
-    "<h1>Caneka Example - Login</h1>\n"
-    "<p>Login to the example site.</p>\n"
-    "<div>\n"
-    "    <span>Logged in as Fancy Pantsy</span>\n"
-    "    <form>\n"
-    "        <label name=\"name>\n"
-    "            <input type=\"text\" size=\"120\" />\n"
-    "        </label>\n"
-    "        <button type=\"submit\">Login</button>\n"
-    "    </form>\n"
-    "</div>\n"
+static char *noMemCstr  = ""
+    "<h1>Statistics of the Example</h1>\n"
+    "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
     ;
 
-static char *loginNoUserCstr  = ""
+static char *noMemWHeaderCstr  = ""
     "<!DOCTYPE html>\n"
     "<html lang=\"en\">\n"
     "<head>\n"
@@ -70,8 +61,7 @@ static char *loginNoUserCstr  = ""
     "</header>\n"
     "<section class=\"main\">\n"
     "<h1>Statistics of the Example</h1>\n"
-    "<p>Server running since 2025-11-10T22:42:48.43+00</p>\n"
-    "</ul>\n"
+    "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
     "</section>\n"
     "<footer>\n"
     "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
@@ -87,7 +77,7 @@ static char *homeCstr = ""
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
     "<title>Example Title</title>\n"
-    "  <link rel=\"stylesheet\" href=\"/style.css\" />\n"
+    "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
     "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
     "<body>\n"
@@ -95,27 +85,24 @@ static char *homeCstr = ""
     "    <nav class=\"bread-crumbs\">\n"
     "    <ul>\n"
     "        <li>\n"
-    "            <a href=\"/login\">/login</a>\n"
+    "            <a href=\"/stats\">Stats</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
+    "            <a href=\"/\">About</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/dom.js\">/dom.js</a>\n"
-    "        </li>\n"
-    "        <li>\n"
-    "            <a href=\"/account/\">/account/</a>\n"
-    "        </li>\n"
-    "        <li>\n"
-    "            <a href=\"/style.css\">/style.css</a>\n"
+    "            <a href=\"/tests\">Unit Tests</a>\n"
     "        </li>\n"
     "    </ul>\n"
     "    </nav>\n"
     "</header>\n"
+    "<section class=\"main\">\n"
     "<H1>Home</H1>\n"
     "<P>Yay, homepage loads</P>\n"
+    "</section>\n"
     "<footer>\n"
     "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
+    "    <img alt=\"logo\" src=\"/static/logo-transparent.png\" class=\"logo\" />\n"
     "</footer>\n"
     "</body>\n"
     "</html>\n"
@@ -233,30 +220,30 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Templ from Route has expected output",
         "Templ output does not match @", args);
 
-    /* login.templ no header with user */
+    /* login.templ no mem details */
     path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
     Route *handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
 
-    /* login.templ no user with header and footer */
     MemBookStats st;
     MemBook_GetStats(m, &st);
 
     data = getGenericData(m, rt);
     Object *stats = Object_Make(m, ZERO);
     Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
-        MicroTime_ToStr(m, MicroTime_Now()));
+        MicroTime_ToStr(m, 1762817053127));
     Object_Set(data, Str_FromCstr(m, "stats", ZERO), stats);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(handler, bf, data, NULL);
     
-    expected = Str_FromCstr(m, loginCstr, ZERO);
+    expected = Str_FromCstr(m, noMemCstr, ZERO);
     args[0] = bf->v;
     args[1] = NULL;
+    expected->type.state |= DEBUG;
     r |= TestShow(Equals(expected, bf->v),
-        "Handler: Expected template value with no header and a user name", 
-        "Handler: Expected template value with no header and a user name: $", args);
+        "Handler: Expected template value with no header and a mem details", 
+        "Handler: Expected template value with no header and a mem: $", args);
 
     Route *header = Object_ByPath(inc,
         StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)), NULL, SPAN_OP_GET);
@@ -278,7 +265,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Route_Handle(footer, bf, data, NULL);
     Buff_Pipe(dest, bf);
 
-    expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
+    expected = Str_FromCstr(m, noMemWHeaderCstr, ZERO);
     args[0] = dest->v;
     args[1] = NULL;
     r |= TestShow(Equals(expected, dest->v), 
@@ -286,7 +273,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Footer: Expected template value with no mem object and a header: $", 
     args);
 
-    /* index.fmt with header */
     data = getGenericData(m, rt);
     stats = Object_Make(m, ZERO);
     Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
