@@ -103,19 +103,25 @@ static void *findRecentOf(Iter *_it, cls typeOf, void *before, i32 *idx){
     Iter it;
     memcpy(&it, _it, sizeof(Iter));
     Abstract *prev = (Abstract *)Iter_Get(&it);
-    while(prev == NULL || (prev->type.of != typeOf && (Iter_Prev(&it) & END) == 0)){
+    while(prev == NULL || (
+            ((prev->type.of == TYPE_OBJECT && ((Object *)prev)->objType.of != typeOf)
+                || (prev->type.of != TYPE_OBJECT && prev->type.of != typeOf))
+                && (Iter_Prev(&it) & END) == 0)
+        ){
         if(prev == before){
             break;
         }
         prev = (Abstract *)Iter_Get(&it);
     }
+
     if(prev != NULL && (
-            (prev->type.of == TYPE_OBJECT && (typeOf == TYPE_OBJECT || ((Object *)prev)->objType.of == typeOf))
+            (prev->type.of == TYPE_OBJECT && ((Object *)prev)->objType.of == typeOf)
             || (prev->type.of != TYPE_OBJECT && prev->type.of == typeOf))
         ){
         *idx = it.idx;
         return prev;
     }
+
     return NULL;
 }
 
@@ -142,8 +148,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     NodeObj *current = (NodeObj *)findRecentOf(it,
         TYPE_NODEOBJ, NULL, &currentIdx);
 
+    i32 tableObjIdx = 0;
     Object *tableObj = (NodeObj *)findRecentOf(it,
-        TYPE_OBJECT, NULL, &currentIdx);
+        TYPE_OBJECT, current, &tableObjIdx);
 
     i32 dataIdx = 0;
     Iter *data = (Iter *)findRecentOf(it,

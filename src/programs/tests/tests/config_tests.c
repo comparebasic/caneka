@@ -27,8 +27,9 @@ status Config_Tests(MemCh *gm){
     NodeObj *footer = Object_ByPath(root, footerKey, NULL, SPAN_OP_GET);
 
     args[0] = docKey;
-    args[1] = NULL;
-    r |= Test(doc != NULL, "Doc node is not NULL: @", args);
+    args[1] = doc;
+    args[2] = NULL;
+    r |= Test(doc != NULL, "Doc node is not NULL: @ -> @", args);
 
     void *arr[10];
     
