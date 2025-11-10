@@ -47,3 +47,6 @@ status Object_Depth(void *a);
 i32 Object_Add(Object *obj, void *value);
 
 Object *Object_Filter(Object *obj, SourceFunc func, void *source);
+
+status Object_Merge(Object *dest, Object *src, cls typeOf);
+status Object_Lay(Object *dest, Object *src, cls typeOf, boolean overlay);

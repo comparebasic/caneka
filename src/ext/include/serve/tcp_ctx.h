@@ -8,6 +8,7 @@ typedef struct tcp_ctx {
     StrVec *path;
     Object *pages;
     Object *inc;
+    Object *nav;
     struct {
         microTime start;
         i64 open;

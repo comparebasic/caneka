@@ -24,6 +24,37 @@ Object *Object_As(Object *obj, cls typeOf){
     return obj;
 }
 
+status Object_Lay(Object *dest, Object *src, cls typeOf, boolean overlay){
+    status r = READY;
+    ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
+    Iter it;
+    if(cls != NULL){
+        Iter_Init(&it, src->order);
+        while((Iter_Next(&it) & END) == 0){
+            if(it.idx > cls->props->max_idx){
+                r |= Span_Add(dest->order, Iter_Get(&it));
+            }else if(overlay){
+                r |= Span_Set(dest->order, it.idx, Iter_Get(&it));
+            }
+        }
+    }
+
+    Iter_Init(&it, src->tbl);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed*)Iter_Get(&it);
+        if(h != NULL){
+            if(overlay || (Table_Get(dest->tbl, h->key) == NULL)){
+                r |= Table_Set(dest->tbl, h->key, h->value);
+            }
+        }
+    }
+    return r;
+}
+
+status Object_Merge(Object *dest, Object *src, cls typeOf){
+    return Object_Lay(dest, src, typeOf, TRUE);
+}
+
 Object *Object_Filter(Object *obj, SourceFunc func, void *source){
     MemCh *m = Object_GetMem(obj);
     /*

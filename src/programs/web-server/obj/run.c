@@ -67,7 +67,7 @@ static status Example_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sourc
         Str_FromCstr(m, "details", STRING_COPY), 
         bf->v);
 
-    StrVec *path = StrVec_From(m, Str_FromCstr(m, "/error.templ", STRING_COPY));
+    StrVec *path = StrVec_From(m, Str_FromCstr(m, "/system/error", STRING_COPY));
     IoUtil_Annotate(m, path);
     ctx->path = path;
     ctx->code = 500;
@@ -95,20 +95,45 @@ static status Example_populate(MemCh *m, Task *tsk, void *arg, void *source){
     return SUCCESS;
 }
 
+static status addRoute(MemCh *m, Route *pages, Str *dir, Str *_path){
+    status r = READY;
+    Route *rt = (Object *)Route_Make(m);
+    StrVec *abs = IoUtil_AbsVec(m, StrVec_From(m, dir));
+    r |= Route_Collect(rt, abs);
+
+    StrVec *path = StrVec_From(m, _path);
+    IoUtil_Annotate(m, path);
+    Object_ByPath(pages, path, rt, SPAN_OP_SET);
+    return r;
+}
+
 static status routeInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
 
-    StrVec *path = IoUtil_GetAbsVec(m,
-        Str_CstrRef(m, "./examples/web-server/pages/public"));
+    StrVec *path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/public"));
     StrVec *abs = IoUtil_AbsVec(m, path);
-    ctx->pages = (Object *)Route_Make(m);
-    r |= Route_Collect(ctx->pages, abs);
+    ctx->nav = (Object *)Route_Make(m);
+    r |= Route_Collect(ctx->nav, abs);
 
-    path = IoUtil_GetAbsVec(m,
-        Str_CstrRef(m, "./examples/web-server/pages/inc"));
+    ctx->pages = (Object *)Route_Make(m);
+    Object_Merge(ctx->pages, ctx->nav, ctx->nav->objType.of);
+
+    path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/inc"));
     abs = IoUtil_AbsVec(m, path);
     ctx->inc = (Object *)Route_Make(m);
     r |= Route_Collect(ctx->inc, abs);
+
+    addRoute(m,
+        ctx->pages,
+        Str_FromCstr(m, "examples/web-server/pages/static", STRING_COPY),
+        Str_FromCstr(m, "/static", STRING_COPY)
+    );
+
+    addRoute(m,
+        ctx->pages,
+        Str_FromCstr(m, "examples/web-server/pages/system", STRING_COPY),
+        Str_FromCstr(m, "/system", STRING_COPY)
+    );
 
     return r;
 }
