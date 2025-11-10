@@ -3,6 +3,11 @@
 
 static boolean _init = FALSE;
 
+void *hashedReturnKey(MemCh *m, struct fetch_target *target, void *data, void *source){
+    Hashed *h = data;
+    return h->key;
+}
+
 status Sequence_ClassInit(MemCh *m, Lookup *lk){
     status r = READY;
 
@@ -12,6 +17,7 @@ status Sequence_ClassInit(MemCh *m, Lookup *lk){
         Hashed h;
         ClassDef *cls = ClassDef_Make(m);
         cls->type.state |= CLASS_NATIVE;
+        cls->api.byKey = hashedReturnKey;
 
         Single *sg = NULL;
         sg = I16_Wrapped(m, (void *)(&h.idx)-(void *)(&h));

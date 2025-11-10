@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static char *langTypeStrings[] = {
+static char *interTypeStrings[] = {
     "_TYPE_INTER_START",
     "_TYPE_WWW_START",
     "TYPE_HTML_NAV",
@@ -50,6 +50,7 @@ static char *langTypeStrings[] = {
     NULL
 };
 
-status LangTypeStrings_Init(MemCh *m){
-    return Lookup_Add(m, TypeStringRanges, _TYPE_LANG_START, (void *)langTypeStrings);
+status InterTypeStrings_Init(MemCh *m){
+    printf("End %d\n", _TYPE_INTER_END);
+    return Lookup_Add(m, TypeStringRanges, _TYPE_INTER_START, (void *)interTypeStrings);
 }

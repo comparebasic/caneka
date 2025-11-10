@@ -25,7 +25,7 @@ static PatCharDef templTokenDef[] = {
     {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'},
     {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '?', '?'},
     {PAT_KO|PAT_INVERT_CAPTURE, '|', '|'}, {PAT_KO|PAT_INVERT_CAPTURE, ':', ':'},
-    {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'}, {PAT_KO|PAT_INVERT_CAPTURE, '@', '@'},
         {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '*', '*'},
     patText,
     {PAT_END, 0, 0}
@@ -48,6 +48,11 @@ static PatCharDef wsDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef keyDef[] = {
+    {PAT_TERM, '@' ,'@'},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef attSepDef[] = {
     {PAT_TERM, '*' ,'*'},
     {PAT_END, 0, 0}
@@ -59,6 +64,7 @@ static PatCharDef propSepDef[] = {
 };
 
 static PatCharDef pathSepDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE, '}', '}'},
     {PAT_TERM, '.' ,'.'},
     {PAT_DROPOUT, ' ' ,' '},
     {PAT_DROPOUT, '\t' ,'\t'},
@@ -215,6 +221,8 @@ static status templ(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         attSepDef, FORMAT_TEMPL_ATT_SEP, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
+        keyDef, FORMAT_TEMPL_KEY_SEP, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
         pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         iterDef, FORMAT_TEMPL_FOR, FORMAT_TEMPL_TEMPL);
@@ -238,6 +246,8 @@ static status var(MemCh *m, Roebling *rbl){
         propSepDef, FORMAT_TEMPL_PROP_SEP, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
         attSepDef, FORMAT_TEMPL_ATT_SEP, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
+        keyDef, FORMAT_TEMPL_KEY_SEP, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
         pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
@@ -317,6 +327,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             ctx->next.state = FETCH_TARGET_PROP;
         }else if(captureKey == FORMAT_TEMPL_ATT_SEP){
             ctx->next.state = FETCH_TARGET_ATT;
+        }else if(captureKey == FORMAT_TEMPL_KEY_SEP){
+            ctx->next.state = FETCH_TARGET_KEY;
         }else if(captureKey == FORMAT_TEMPL_PATH_SEP){
             ctx->next.state = FETCH_TARGET_KEY;
         }else{

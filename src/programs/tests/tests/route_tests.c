@@ -7,7 +7,7 @@ static char *cstr = ""
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
     "<title>Example Title</title>\n"
-    "  <link rel=\"stylesheet\" href=\"/style.css\" />\n"
+    "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
     "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
     "<body>\n"
@@ -15,24 +15,19 @@ static char *cstr = ""
     "    <nav class=\"bread-crumbs\">\n"
     "    <ul>\n"
     "        <li>\n"
-    "            <a href=\"/login\">/login</a>\n"
+    "            <a href=\"/stats\">Stats</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
+    "            <a href=\"/\">About</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/dom.js\">/dom.js</a>\n"
-    "        </li>\n"
-    "        <li>\n"
-    "            <a href=\"/account/\">/account/</a>\n"
-    "        </li>\n"
-    "        <li>\n"
-    "            <a href=\"/style.css\">/style.css</a>\n"
+    "            <a href=\"/tests\">Unit Tests</a>\n"
     "        </li>\n"
     "    </ul>\n"
     "    </nav>\n"
     "</header>\n"
-;
+    "<section class=\"main\">\n"
+    ;
 
 static char *loginCstr  = ""
     "<h1>Caneka Example - Login</h1>\n"
@@ -53,8 +48,8 @@ static char *loginNoUserCstr  = ""
     "<html lang=\"en\">\n"
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
-    "<title>Caneka Example - Login</title>\n"
-    "  <link rel=\"stylesheet\" href=\"/style.css\" />\n"
+    "<title>Caneka Example - Stats </title>\n"
+    "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
     "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
     "<body>\n"
@@ -62,35 +57,25 @@ static char *loginNoUserCstr  = ""
     "    <nav class=\"bread-crumbs\">\n"
     "    <ul>\n"
     "        <li>\n"
-    "            <a href=\"/login\">/login</a>\n"
+    "            <a href=\"/stats\">Stats</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/logo-transparent.png\">/logo-transparent.png</a>\n"
+    "            <a href=\"/\">About</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/dom.js\">/dom.js</a>\n"
-    "        </li>\n"
-    "        <li>\n"
-    "            <a href=\"/account/\">/account/</a>\n"
-    "        </li>\n"
-    "        <li>\n"
-    "            <a href=\"/style.css\">/style.css</a>\n"
+    "            <a href=\"/tests\">Unit Tests</a>\n"
     "        </li>\n"
     "    </ul>\n"
     "    </nav>\n"
     "</header>\n"
-    "<h1>Caneka Example - Login</h1>\n"
-    "<p>Login to the example site.</p>\n"
-    "<div>\n"
-    "    <form>\n"
-    "        <label name=\"name>\n"
-    "            <input type=\"text\" size=\"120\" />\n"
-    "        </label>\n"
-    "        <button type=\"submit\">Login</button>\n"
-    "    </form>\n"
-    "</div>\n"
+    "<section class=\"main\">\n"
+    "<h1>Statistics of the Example</h1>\n"
+    "<p>Server running since 2025-11-10T22:42:48.43+00</p>\n"
+    "</ul>\n"
+    "</section>\n"
     "<footer>\n"
     "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
+    "    <img alt=\"logo\" src=\"/static/logo-transparent.png\" class=\"logo\" />\n"
     "</footer>\n"
     "</body>\n"
     "</html>\n"
@@ -166,20 +151,22 @@ status WwwRoute_Tests(MemCh *gm){
         Str_FromCstr(m, "./examples/web-server/pages/public", ZERO));
     Route *rt = Route_From(m, path);
 
+
     path = StrVec_From(m, Str_FromCstr(m, "/tests", ZERO));
     IoUtil_Annotate(m, path);
-    Route *account = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *tests = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
 
-    Hashed *h = Object_GetByIdx(account, ROUTE_PROPIDX_MIME);
+    Hashed *h = Object_GetByIdx(tests, ROUTE_PROPIDX_MIME);
     args[0] = h->value;
     args[1] = NULL;
     r |= Test(Equals(h->value, Str_FromCstr(m, "text/html", ZERO)), 
         "account index page is mime type text/html, have @", args);
-    h = Object_GetByIdx(account, ROUTE_PROPIDX_TYPE);
+    h = Object_GetByIdx(tests, ROUTE_PROPIDX_TYPE);
     args[0] = h->value;
     args[1] = NULL;
     r |= Test(Equals(h->value, Str_FromCstr(m, "body", ZERO)), 
         "account index page is type html, have @", args);
+
 
     path = StrVec_From(m, Str_FromCstr(m, "/stats", ZERO));
     IoUtil_Annotate(m, path);
@@ -216,11 +203,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Route_Collect(inc, incAbs);
 
     Object *data = getGenericData(m, rt);
-
-    args[0] = data;
-    args[1] = NULL;
-    Out("^y.data @^0\n", args);
-    exit(1);
 
     Str *now = MicroTime_ToStr(m, MicroTime_Now());
     Object_Set(data, Str_CstrRef(m, "now"), now);
@@ -300,8 +282,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = dest->v;
     args[1] = NULL;
     r |= TestShow(Equals(expected, dest->v), 
-        "Footer: Expected template value with no user object and a header",
-        "Footer: Expected template value with no user object and a header: $", 
+        "Footer: Expected template value with no mem object and a header",
+        "Footer: Expected template value with no mem object and a header: $", 
     args);
 
     /* index.fmt with header */

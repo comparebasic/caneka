@@ -1,1 +1,1 @@
-status LangTypeStrings_Init(MemCh *m);
+status InterTypeStrings_Init(MemCh *m);

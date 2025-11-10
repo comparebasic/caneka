@@ -13,14 +13,29 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         return SUCCESS;
     } else {
         if(tg->type.state & FETCH_TARGET_ATT){
-            Single *sg = (Single *)Table_Get(cls->atts, tg->key);
-            if(sg == NULL){
-                goto err;
+            if(cls == NULL){
+               Map *map = Map_Get(typeOf); 
+               if(map == NULL){
+                    goto err;
+               }else{
+                    RangeType *att = Table_Get(map->tbl, tg->key); 
+                    tg->offset = att->range;
+                    tg->type.state |= FETCH_TARGET_RESOLVED;
+                    tg->objType.of = typeOf;
+                    return SUCCESS;
+               }
             }else{
-                tg->offset = sg->val.w;
-                tg->type.state |= FETCH_TARGET_RESOLVED;
-                tg->objType.of = typeOf;
-                return SUCCESS;
+                Single *sg = (Single *)Table_Get(cls->atts, tg->key);
+                if(sg == NULL){
+                    printf("Sg not found %d\n", typeOf);
+                    fflush(stdout);
+                    goto err;
+                }else{
+                    tg->offset = sg->val.w;
+                    tg->type.state |= FETCH_TARGET_RESOLVED;
+                    tg->objType.of = typeOf;
+                    return SUCCESS;
+                }
             }
         }else if(tg->type.state & FETCH_TARGET_PROP){
             tg->idx = Class_GetPropIdx(cls, tg->key);
@@ -32,6 +47,9 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
             tg->objType.of = typeOf;
             return SUCCESS;
         }else if(tg->type.state & FETCH_TARGET_KEY){
+            if(cls == NULL){
+                goto err;
+            }
             tg->func = cls->api.byKey;
             tg->type.state |= FETCH_TARGET_FUNC;
         }else if(tg->type.state & FETCH_TARGET_IDX){
@@ -64,7 +82,7 @@ err:
 void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
     Abstract *value = (Abstract *)_value;
     void *args[6];
-    args[0] = NULL;
+    args[1] = NULL;
     ClassDef *cls = NULL;
     word typeOf = value->type.of;
     if(typeOf == TYPE_OBJECT){
@@ -83,7 +101,7 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
                 a = Table_Get((Table *)value, tg->key);
             }
             if(a == NULL){
-                args[0] = value;
+                args[1] = value;
                 goto err;
             }
             return a;
@@ -91,7 +109,7 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
             Object *obj = (Object *)as(value, TYPE_OBJECT);
             Abstract *a = Object_GetPropByIdx(obj, tg->idx);
             if(a == NULL){
-                args[0] = value;
+                args[1] = value;
                 goto err;
             }
             return a;
@@ -102,20 +120,21 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
         if(FetchTarget_Resolve(m, tg, typeOf) & SUCCESS){
             return Fetch_Target(m, tg, value, source);
         }else{
-            args[0] = tg;
+            args[1] = tg;
             goto err;
         }
     }
 err:
     if((tg->type.state & PROCESSING) == 0){
         cls = Lookup_Get(ClassLookup, value->type.of);
+        args[0] = tg;
+
         args[1] = (value != NULL ? Type_ToStr(m, value->type.of) : NULL);
-        args[2] = tg;
         args[3] = Type_ToStr(m, typeOf);
         args[4] = cls;
         args[5] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error for @ ClassDef X or prop not found for $ using @ class $/@\n", args);
+            "Error for @/$ ClassDef X or prop not found, using @ class $/@\n", args);
     }
     return NULL;
 }

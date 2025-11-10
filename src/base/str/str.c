@@ -149,7 +149,9 @@ Str *Str_FromCstr(MemCh *m, char *cstr, word flags){
     byte *bytes = (byte *)cstr;
     if(flags & STRING_COPY){
         bytes = Bytes_Alloc(m, len+1, TYPE_BYTES_POINTER);
-        memcpy(bytes, cstr, len);
+        if(len > 0){
+            memcpy(bytes, cstr, len);
+        }
     }
     Str_Init(s, bytes, len, len+1);
     s->type.state |= STRING_CONST;

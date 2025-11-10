@@ -15,13 +15,13 @@ status Caneka_InitBase(MemCh *m){
     MemCh *md = MemCh_Make();
     r |= Core_Init(md);
     r |= Ifc_Init(md);
+    r |= Hash_Init(m);
     r |= Maps_Init(md);
     r |= Debug_Init(md);
     r |= StreamTo_Init(md);
     r |= AnsiStr_Init(md);
     r |= DebugStack_Init(m);
     r |= Clone_Init(m);
-    r |= Hash_Init(m);
     r |= Equals_Init(m);
     r |= Path_Init(md);
     r |= IoUtils_Init(m);

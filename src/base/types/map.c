@@ -10,7 +10,22 @@ Map *Map_Make(MemCh *m, i16 length, RangeType *atts, Str **keys){
     map->type.range = length;
     map->atts = atts;
     map->keys = keys;
+    Map_MakeTbl(m, map);
     return map;
+}
+
+status Map_MakeTbl(MemCh *m, Map *map){
+    map->tbl = Table_Make(m); 
+    for(i16 i = 0; i < map->type.range; i++){
+        RangeType *att = map->atts+i;
+        Str *s = map->keys[i];
+        Table_Set(map->tbl, s, att);
+    }
+    return SUCCESS;
+}
+
+Map *Map_Get(cls typeOf){
+    return Lookup_Get(MapsLookup, typeOf);
 }
 
 Table *Map_ToTable(MemCh *m, void *_a){
