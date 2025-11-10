@@ -51,6 +51,7 @@ static BuildSubdir templobj = { "templ", {
 
 static BuildSubdir wwwobj = { "www", {
     "route.c",
+    "webserver.c",
     NULL
 }};
 

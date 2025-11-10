@@ -95,10 +95,6 @@ status BinSegCollection_Tests(MemCh *gm){
     r |= Test((rbl->type.state & ERROR) == 0,
         "Object Fmt parsed with status without ERROR @", args);
 
-    args[0] = rbl->dest;
-    args[1] = NULL;
-    Out("^y.Mess @^0\n", args);
-
     ctx->keys = Table_Make(m);
     Str *key1 = Str_CstrRef(m, "list");
     Table_Set(ctx->keys, I16_Wrapped(m, spanId), key1);

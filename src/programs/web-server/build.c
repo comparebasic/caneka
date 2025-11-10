@@ -41,18 +41,6 @@ static char *libs[] = {
     NULL
 };
 
-static BuildSubdir obj = { "obj", {
-    "run.c",
-    "task.c",
-    NULL,
-}};
-
-
-static BuildSubdir *objdirs[] = {
-    &obj,
-    NULL
-};
-
 int main(int argc, char **argv){
     if(MemBook_Make(NULL) == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to allocate Mem_Book", NULL);
@@ -65,7 +53,7 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnkwebserver";
+    ctx.libtarget = NULL;
     ctx.version = NULL;
     ctx.dist = "build";
     ctx.src = "src/programs/web-server";
@@ -75,7 +63,7 @@ int main(int argc, char **argv){
     ctx.args.libs = libs;
     ctx.args.staticLibs = staticLibs;
     ctx.args.licenceFiles = NULL;
-    ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.objdirs = NULL;
     ctx.genConfigs = NULL;
 
     Build(&ctx);

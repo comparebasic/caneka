@@ -280,6 +280,12 @@ Route *Route_Make(MemCh *m){
     return Object_Make(m, TYPE_WWW_ROUTE);
 }
 
+Route *Route_From(MemCh *m, StrVec *dir){
+    Route *rt = (Object *)Route_Make(m);
+    Route_Collect(rt, dir);
+    return rt;
+}
+
 status Route_ClsInit(MemCh *m){
     status r = READY;
     ClassDef *cls = ClassDef_Make(m);

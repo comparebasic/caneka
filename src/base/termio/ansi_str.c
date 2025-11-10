@@ -13,15 +13,11 @@ Str *ansi_dark = NULL;
 static boolean _AnsiSkip = FALSE;
 
 status Ansi_SetColor(boolean yesno){
-    _AnsiSkip = yesno;
+    _AnsiSkip = !yesno;
     return SUCCESS;
 }
 
 Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
-    if(_AnsiSkip){
-        *_ptr = end;
-        return Str_Make(m, 0);
-    }
     char *ptr = *_ptr;
     char c;
     Str *s = Str_Make(m, ANSI_ESCAPE_MAX);
@@ -198,10 +194,15 @@ Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
         ptr++;
     }
     *(b++) = 'm';
-    s->length = (word)(b - s->bytes);
+
+    if(!_AnsiSkip){
+        s->length = (word)(b - s->bytes);
+    }
+
     if(consume){
         *_ptr = ptr;
     }
+
     return s;
 }
 

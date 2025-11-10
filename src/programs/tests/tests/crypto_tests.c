@@ -110,10 +110,6 @@ status Crypto_Tests(MemCh *gm){
 
     Str *pubHex = Str_ToHex(m, public);
     Str *secretHex = Str_ToHex(m, secret);
-    args[0] = pubHex;
-    args[1] = secretHex;
-    args[2] = NULL;
-    Out("^p.Secret: @, Public: @^0\n", args);
 
     Str *publicB = Str_DigestAlloc(m);
     Str *secretB = Str_DigestAlloc(m);
@@ -128,11 +124,6 @@ status Crypto_Tests(MemCh *gm){
         " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");
     Str_ToSha256(m, message, (digest *)hash->bytes);
     Str *sig = SignPair_Sign(m, hash, secret);
-
-    args[0] = sig;
-    args[1] = hash;
-    args[2] = NULL;
-    Out("^p.sig sign:& digest:&^0\n", args);
 
     Str *sigHex = Str_ToHex(m, sig);
 

@@ -72,7 +72,7 @@ static status setupStatus(BuildCtx *ctx){
     ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
 
     BuildSubdir **dir = ctx->objdirs;
-    while(*dir != NULL){
+    while(dir != NULL && *dir != NULL){
         char **sourceCstr = (*dir)->sources;
         while(*sourceCstr != NULL){
             ctx->fields.steps.total->val.i++;
@@ -82,7 +82,7 @@ static status setupStatus(BuildCtx *ctx){
     }
 
     dir = ctx->objdirs;
-    while(*dir != NULL){
+    while(dir == NULL && *dir != NULL){
         ctx->fields.steps.modTotal->val.i++;
         dir++;
     }
@@ -438,7 +438,7 @@ static status build(BuildCtx *ctx){
     }
 
     BuildSubdir **dir = ctx->objdirs;
-    while(*dir != NULL){
+    while(dir != NULL && *dir != NULL){
         r |= buildDirToLib(ctx, libDir, lib, *dir);
         dir++;
     }

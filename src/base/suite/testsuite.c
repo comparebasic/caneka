@@ -23,9 +23,9 @@ static char *statusCstr(word status){
 
 status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]){
     if(!condition){
-        Out("^r.Fail: ", NULL);
+        Out("^r.- FAIL ", NULL);
     }else{
-        Out("^g.Pass: ", NULL);
+        Out("^g.- PASS ", NULL);
     }
     if(!condition){
         Fmt(OutStream, fmtError, args);
@@ -40,9 +40,9 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[
 
 status Test(boolean condition, char *fmt, void *args[]){
     if(!condition){
-        Out("^r.Fail: ", NULL);
+        Out("^r.- FAIL ", NULL);
     }else{
-        Out("^g.Pass: ", NULL);
+        Out("^g.- PASS ", NULL);
     }
     Fmt(OutStream, fmt, args);
     if(!condition){
@@ -82,7 +82,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     args[3] = I64_Wrapped(gm, PAGE_SIZE);
     args[4] = NULL;
 
-    Out("Starting Mem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args);
+    Out("\nStarting Mem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args);
 
     while(set->name != NULL){
         args[0] = Str_CstrRef(gm, set->name);
@@ -92,7 +92,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             continue;
         }
 
-        Out("=== Testing: $\n", args);
+        Out("=== Testing: $\n\n", args);
 
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
@@ -125,7 +125,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             args[3] = I64_Wrapped(gm, st.pageIdx),
             args[4] = I64_Wrapped(gm, PAGE_SIZE),
             args[5] = NULL;
-            Out("$Mem: $ total/maxIdx=^D.$/$^d. page-size=$b^0\n", args);
+            Out("$\nMem $ total/maxIdx=^D.$/$^d. page-size=$b^0\n\n", args);
 
             MemCh_Free(m);
             m->level--;

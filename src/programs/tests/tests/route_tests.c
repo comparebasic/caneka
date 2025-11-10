@@ -160,10 +160,9 @@ status WwwRoute_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    Route *rt = Route_Make(m);
     StrVec *path = IoUtil_GetAbsVec(m,
-        Str_CstrRef(m, "./examples/web-server/pages/public"));
-    Route_Collect(rt, path);
+        Str_FromCstr(m, "./examples/web-server/pages/public", ZERO));
+    Route *rt = Route_From(m, path);
 
     args[0] = rt;
     args[1] = NULL;

@@ -505,10 +505,30 @@ i32 main(int argc, char **argv){
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
 
-    if(argc == 2 && strncmp(argv[1], "--licence", strlen("--licence")) == 0){
-        Show_Licences(OutStream);
-        DebugStack_Pop();
-        return 0;
+    Str *help = Str_FromCstr(m, "help", STRING_COPY);
+    Str *noColor = Str_FromCstr(m, "no-color", STRING_COPY);
+
+    Table *resolveArgs = Table_Make(m);
+    Args_Add(resolveArgs, help, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, noColor, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs,
+        Str_FromCstr(m, "licence", STRING_COPY), NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs,
+        Str_FromCstr(m, "version", STRING_COPY), NULL, ARG_OPTIONAL);
+
+    StrVec *name = StrVec_From(m, Str_FromCstr(m, argv[0], STRING_COPY));
+    IoUtil_Annotate(m, name);
+    Str *fname = IoUtil_FnameStr(m, name);
+
+    Table *cliArgs = Table_Make(m);
+    CharPtr_ToTbl(m, resolveArgs, argc, argv, cliArgs);
+    if(Table_GetHashed(cliArgs, help) != NULL){
+        CharPtr_ToHelp(m, fname, resolveArgs, argc, argv);
+        return 1;
+    }
+
+    if(Table_GetHashed(cliArgs, noColor) != NULL){
+        Ansi_SetColor(FALSE);
     }
 
     test(m);
