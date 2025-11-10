@@ -29,11 +29,11 @@ static char *inc[] = {
 };
 
 static char *staticLibs[] = {
-    "./build/libcaneka/libcaneka.a",
-    "./build/libcnkext/libcnkext.a",
-    "./build/libcnkinter/libcnkinter.a",
     "./build/libcnknacl/libcnknacl.a",
     "/external/lib/libnacl.a",
+    "./build/libcnkext/libcnkext.a",
+    "./build/libcnkinter/libcnkinter.a",
+    "./build/libcaneka/libcaneka.a",
     NULL
 };
 
