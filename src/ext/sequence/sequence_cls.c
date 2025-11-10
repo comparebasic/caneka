@@ -62,6 +62,17 @@ status Sequence_ClassInit(MemCh *m, Lookup *lk){
 
         r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)cls);
 
+        /* table */
+        Table tbl;
+        cls = ClassDef_Make(m);
+
+        sg = NULL;
+        sg = I16_Wrapped(m, (void *)(&tbl.nvalues)-(void *)(&tbl));
+        sg->objType.of = TYPE_I32;
+        Table_Set(cls->atts,
+            Str_CstrRef(m, "count"), sg);
+
+        r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)cls);
     }
 
     if(r == READY){

@@ -71,6 +71,44 @@ static char *noMemWHeaderCstr  = ""
     "</html>\n"
     ;
 
+static char *memWHeaderCstr  = ""
+    "<!DOCTYPE html>\n"
+    "<html lang=\"en\">\n"
+    "<head>\n"
+    "<meta charset=\"utf-8\">\n"
+    "<title>Caneka Example - Stats </title>\n"
+    "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
+    "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
+    "</head>\n"
+    "<body>\n"
+    "<header>\n"
+    "    <nav class=\"bread-crumbs\">\n"
+    "    <ul>\n"
+    "        <li>\n"
+    "            <a href=\"/stats\">Stats</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/\">About</a>\n"
+    "        </li>\n"
+    "        <li>\n"
+    "            <a href=\"/tests\">Unit Tests</a>\n"
+    "        </li>\n"
+    "    </ul>\n"
+    "    </nav>\n"
+    "</header>\n"
+    "<section class=\"main\">\n"
+    "<h1>Statistics of the Example</h1>\n"
+    "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
+    "mem stuff\n"
+    "</section>\n"
+    "<footer>\n"
+    "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
+    "    <img alt=\"logo\" src=\"/static/logo-transparent.png\" class=\"logo\" />\n"
+    "</footer>\n"
+    "</body>\n"
+    "</html>\n"
+    ;
+
 static char *homeCstr = ""
     "<!DOCTYPE html>\n"
     "<html lang=\"en\">\n"
@@ -138,7 +176,6 @@ status WwwRoute_Tests(MemCh *gm){
         Str_FromCstr(m, "./examples/web-server/pages/public", ZERO));
     Route *rt = Route_From(m, path);
 
-
     path = StrVec_From(m, Str_FromCstr(m, "/tests", ZERO));
     IoUtil_Annotate(m, path);
     Route *tests = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
@@ -153,7 +190,6 @@ status WwwRoute_Tests(MemCh *gm){
     args[1] = NULL;
     r |= Test(Equals(h->value, Str_FromCstr(m, "body", ZERO)), 
         "account index page is type html, have @", args);
-
 
     path = StrVec_From(m, Str_FromCstr(m, "/stats", ZERO));
     IoUtil_Annotate(m, path);
@@ -288,6 +324,26 @@ status WwwRouteTempl_Tests(MemCh *gm){
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
 
+    path = StrVec_From(m, Str_CstrRef(m, "/stats"));
+    IoUtil_Annotate(m, path);
+    handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
+
+    Route_Handle(handler, bf, data, NULL);
+    dest = Buff_Make(m, ZERO);
+    Buff_Pipe(dest, bf);
+
+    expected = Str_FromCstr(m, memWHeaderCstr, ZERO);
+    args[0] = dest->v;
+    args[1] = NULL;
+    r |= TestShow(Equals(expected, dest->v),
+        "Expected mem details in template", 
+        "Expected mem details in template $", args);
+
+
+    data = getGenericData(m, rt);
+    bf = Buff_Make(m, ZERO);
+    Route_Handle(header, bf, data, NULL);
+
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
     handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
@@ -304,11 +360,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = dest->v;
     args[1] = NULL;
     r |= TestShow(Equals(expected, dest->v),
-        "Expected fmt value with user name", 
-        "Expected fmt value with user name: $", 
-    args);
-
-    r &= ~ERROR;
+        "Expected fmt value", 
+        "Expected fmt value $", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
