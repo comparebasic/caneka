@@ -9,6 +9,7 @@ typedef struct tcp_ctx {
     Object *pages;
     Object *inc;
     Object *nav;
+    Object *pageBase;
     struct {
         microTime start;
         i64 open;

@@ -64,10 +64,38 @@ static Map *MemCh_Map(MemCh *m){
     return Map_Make(m, SIZE-1, atts, keys);
 }
 
+static Map *MemBookStats_Map(MemCh *m){
+    word offset = 0;
+    i64 SIZE = 4;
+    RangeType *atts = (RangeType *)Bytes_Alloc(m, 
+        (word)(sizeof(RangeType)*SIZE), TYPE_RANGE_ARRAY);
+    atts->of = TYPE_BOOK_STATS;
+    atts->range = SIZE;
+    offset += sizeof(Type);
+    offset += sizeof(i16);
+    (atts+1)->of = TYPE_I32;
+    (atts+1)->range = offset;
+    offset += sizeof(i32);
+    (atts+2)->of = TYPE_I32;
+    (atts+2)->range = offset;
+    offset += sizeof(i32);
+    (atts+3)->of = TYPE_I32;
+    (atts+3)->range = offset;
+    offset += sizeof(i32);
+    (atts+4)->of = TYPE_I32;
+    (atts+4)->range = offset;
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE, TYPE_POINTER_ARRAY);
+    keys[0] = Str_CstrRef(m, "bookIdx");
+    keys[1] = Str_CstrRef(m, "pageIdx");
+    keys[2] = Str_CstrRef(m, "recycled");
+    keys[3] = Str_CstrRef(m, "total");
+    return Map_Make(m, SIZE-1, atts, keys);
+}
 
 status Mem_MapsInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Map(m));
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Map(m));
+    r |= Lookup_Add(m, lk, TYPE_BOOK_STATS, (void *)MemBookStats_Map(m));
     return r;
 }

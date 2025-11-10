@@ -109,7 +109,10 @@ static void *findRecentOf(Iter *_it, cls typeOf, void *before, i32 *idx){
         }
         prev = (Abstract *)Iter_Get(&it);
     }
-    if(prev != NULL && prev->type.of == typeOf){
+    if(prev != NULL && (
+            (prev->type.of == TYPE_OBJECT && (typeOf == TYPE_OBJECT || ((Object *)prev)->objType.of == typeOf))
+            || (prev->type.of != TYPE_OBJECT && prev->type.of == typeOf))
+        ){
         *idx = it.idx;
         return prev;
     }
@@ -137,6 +140,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     i32 zero = 0;
     i32 currentIdx = 0;
     NodeObj *current = (NodeObj *)findRecentOf(it,
+        TYPE_NODEOBJ, NULL, &currentIdx);
+
+    Object *tableObj = (NodeObj *)findRecentOf(it,
         TYPE_OBJECT, NULL, &currentIdx);
 
     i32 dataIdx = 0;
@@ -187,19 +193,21 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
         if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) == NULL){
-            Table *tbl = Table_Make(m);
-            Iter *itn = Iter_Make(m, tbl);
-            Table_SetKey((Iter *)itn, StrVec_Str(m, v));
-            Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, tbl);
+            Object *attObj = Object_Make(m, ZERO);
+            Iter *itn = Iter_Make(m, NULL);
+            Object_SetKey((Iter *)itn, attObj, StrVec_Str(m, v));
+            Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, attObj);
+            Iter_Add(it, attObj);
             Iter_Add(it, itn);
         }else if(data == NULL){
-            Table *tbl = Table_Make(m);
-            Iter *itn = Iter_Make(m, tbl);
-            Table_SetKey((Iter *)itn, StrVec_Str(m, v));
-            Object_Add(current, tbl);
+            Object *kvObj = Object_Make(m, ZERO);
+            Iter *itn = Iter_Make(m, NULL);
+            Object_SetKey((Iter *)itn, kvObj, StrVec_Str(m, v));
+            Object_Add(current, kvObj);
+            Iter_Add(it, kvObj);
             Iter_Add(it, itn);
         }else if(data->p->type.of == TYPE_TABLE){
-            Table_SetKey(data, StrVec_Str(m, v));
+            Object_SetKey(data, tableObj, StrVec_Str(m, v));
         }
     }else if(captureKey == CONFIG_OUTDENT){
         removeObj(it, currentIdx);
@@ -224,14 +232,14 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             Span *p = Span_Make(m);
             Iter *itn = Iter_Make(m, p);
             Span_Add(p, v);
-            Table_SetValue(data, p);
+            Object_SetValue(data, tableObj, p);
             Iter_Add(it, itn);
         }
     }else if(captureKey == CONFIG_NUMBER){
         Single *n = I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v)));
         if(data != NULL){
             if(data->p->type.of == TYPE_TABLE){
-                Table_SetValue(data, n);
+                Object_SetValue(data, tableObj, n);
             }else if(data->p->type.of == TYPE_SPAN){
                 Iter_Add(data, n); 
             }
@@ -239,7 +247,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }else if(captureKey == CONFIG_LINE || captureKey == CONFIG_TOKEN){
         if(data != NULL){
             if(data->p->type.of == TYPE_TABLE){
-                Table_SetValue(data, v);
+                Object_SetValue(data, tableObj, v);
             }else if(data->p->type.of == TYPE_SPAN){
                 Iter_Add(data, v);
             }

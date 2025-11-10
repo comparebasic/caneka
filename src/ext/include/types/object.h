@@ -50,3 +50,5 @@ Object *Object_Filter(Object *obj, SourceFunc func, void *source);
 
 status Object_Merge(Object *dest, Object *src, cls typeOf);
 status Object_Lay(Object *dest, Object *src, cls typeOf, boolean overlay);
+status Object_SetKey(Iter *it, Object *obj, void *key);
+Hashed *Object_SetValue(Iter *it, Object *obj, void *a);

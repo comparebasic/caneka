@@ -682,6 +682,8 @@ void Iter_Setup(Iter *it, Span *p, status op, i32 idx){
 
 Iter *Iter_Make(MemCh *m, Span *p){
     Iter *it = MemCh_Alloc(m, sizeof(Iter));
-    Iter_Setup(it, p, SPAN_OP_GET, 0);
+    if(p != NULL){
+        Iter_Setup(it, p, SPAN_OP_GET, 0);
+    }
     return it;
 }

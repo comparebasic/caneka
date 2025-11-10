@@ -28,8 +28,7 @@ status Config_Tests(MemCh *gm){
 
     args[0] = docKey;
     args[1] = NULL;
-    r |= Test(doc != NULL,
-        "Doc node is not NULL: @", args);
+    r |= Test(doc != NULL, "Doc node is not NULL: @", args);
 
     void *arr[10];
     
@@ -53,14 +52,14 @@ status Config_Tests(MemCh *gm){
         args[2] = expected;
         args[3] = value;
         args[4] = NULL;
+        Out("^y.Comparing @/@/@/@^0\n", args);
         r |= Test(Equals(expected, value),
             "NodeObj @ att @ has expected value @: @", args);
     }
 
     args[0] = tagKey;
     args[1] = NULL;
-    r |= Test(tag != NULL,
-        "Tag node is not NULL: @", args);
+    r |= Test(tag != NULL, "Tag node is not NULL: @", args);
 
     arr[0] = Str_FromCstr(m, "att-one", ZERO);
     arr[1] = Str_FromCstr(m, "one", ZERO);

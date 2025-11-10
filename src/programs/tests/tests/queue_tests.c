@@ -38,6 +38,7 @@ status Queue_Tests(MemCh *gm){
         "Queue item is first item, expected &, have &", args);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }
 
@@ -107,6 +108,7 @@ status QueueAddRemove_Tests(MemCh *gm){
     r |= Test(Equals(args[0], args[1]) && Equals(args[2], args[3]) && Equals(args[4], args[5]), "Expected @ = @, @ = @, @ = @", args);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }
 
@@ -214,6 +216,7 @@ status QueueIter_Tests(MemCh *gm){
     r |= Test(i == 5, "Queue runs for the number of items in it, have $, for @", args);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }
 
@@ -379,6 +382,7 @@ status QueueCriteria_Tests(MemCh *gm){
     File_Close(bf);
 
     MemCh_Free(m);
+    DebugStack_Pop();
     return r;
 }
 

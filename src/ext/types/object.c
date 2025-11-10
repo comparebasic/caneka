@@ -55,6 +55,23 @@ status Object_Merge(Object *dest, Object *src, cls typeOf){
     return Object_Lay(dest, src, typeOf, TRUE);
 }
 
+status Object_SetKey(Iter *it, Object *obj, void *key){
+    if(it->p == NULL){
+        Iter_Init(it, obj->tbl);
+    }
+    return Table_SetKey(it, key);
+}
+
+Hashed *Object_SetValue(Iter *it, Object *obj, void *a){
+    Hashed *h = Table_SetValue(it, a);
+    if(h != NULL){
+        Span_Add(obj->order, h);
+        return h;
+    }
+
+    return NULL;
+}
+
 Object *Object_Filter(Object *obj, SourceFunc func, void *source){
     MemCh *m = Object_GetMem(obj);
     /*

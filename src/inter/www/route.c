@@ -256,6 +256,7 @@ status Route_Handle(Route *rt, Buff *bf, Object *data, void *source){
     RouteFunc func = (RouteFunc)funcW->val.ptr;
     status r = func(bf, action, data, source);
 
+    DebugStack_Pop();
     return r;
 }
 
@@ -336,6 +337,13 @@ status Route_ClsInit(MemCh *m){
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
             key, Str_CstrRef(m, "text/css"));
+
+        key = Str_CstrRef(m, "body");
+        funcW = Func_Wrapped(m, routeFuncStatic);
+        funcW->type.state |= (ROUTE_STATIC);
+        Table_Set(RouteFuncTable, key, funcW);
+        Table_Set(RouteMimeTable,
+            key, Str_CstrRef(m, "text/html"));
 
         key = Str_CstrRef(m, "txt");
         funcW = Func_Wrapped(m, routeFuncStatic);

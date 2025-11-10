@@ -147,9 +147,11 @@ static Object *getGenericData(MemCh *m, Route *rt){
     Object *config = Object_Make(m, ZERO);
     Object_Set(config, Str_CstrRef(m, "page"), page);
     Object_Set(data, Str_CstrRef(m, "config"), config);
-    
-    Object *nav = Object_Make(m, ZERO);
-    Object_Set(nav, Str_CstrRef(m, "pages"), rt);
+
+    StrVec *navPath = IoUtil_GetAbsVec(m,
+        Str_FromCstr(m, "./examples/web-server/pages/nav.config", ZERO));
+
+    Object *nav = Nav_TableFromPath(m, rt, navPath);
     Object_Set(data, Str_CstrRef(m, "nav"), nav);
     return data;
 }
@@ -164,22 +166,9 @@ status WwwRoute_Tests(MemCh *gm){
         Str_FromCstr(m, "./examples/web-server/pages/public", ZERO));
     Route *rt = Route_From(m, path);
 
-    args[0] = rt;
-    args[1] = NULL;
-    Out("^p.Route @^0\n", args);
-
-    path = StrVec_From(m, Str_FromCstr(m, "/account/", ZERO));
+    path = StrVec_From(m, Str_FromCstr(m, "/tests", ZERO));
     IoUtil_Annotate(m, path);
-
-    args[0] = path;
-    args[1] = NULL;
-    Out("^p.Path @^0\n", args);
-
     Route *account = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
-
-    args[0] = account;
-    args[1] = NULL;
-    Out("^p.Account @^0\n", args);
 
     Hashed *h = Object_GetByIdx(account, ROUTE_PROPIDX_MIME);
     args[0] = h->value;
@@ -189,15 +178,16 @@ status WwwRoute_Tests(MemCh *gm){
     h = Object_GetByIdx(account, ROUTE_PROPIDX_TYPE);
     args[0] = h->value;
     args[1] = NULL;
-    r |= Test(Equals(h->value, Str_FromCstr(m, "html", ZERO)), 
+    r |= Test(Equals(h->value, Str_FromCstr(m, "body", ZERO)), 
         "account index page is type html, have @", args);
 
-    path = StrVec_From(m, Str_FromCstr(m, "/account/profile", ZERO));
+    path = StrVec_From(m, Str_FromCstr(m, "/stats", ZERO));
     IoUtil_Annotate(m, path);
     Route *profile = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
     h = Object_GetByIdx(profile, ROUTE_PROPIDX_MIME);
     r |= Test(Equals(h->value, Str_FromCstr(m, "text/html", ZERO)),
         "profile index page is mime type text/html", NULL);
+
     h = Object_GetByIdx(profile, ROUTE_PROPIDX_TYPE);
     r |= Test(Equals(h->value, Str_FromCstr(m, "templ", ZERO)),
         "profile index page is mime type templ", NULL);
@@ -214,10 +204,10 @@ status WwwRouteTempl_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
 
     Route *rt = Route_Make(m);
-    StrVec *navPath = IoUtil_GetAbsVec(m,
+    StrVec *pagesPath = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/public"));
-    StrVec *navAbs = IoUtil_AbsVec(m, navPath);
-    Route_Collect(rt, navAbs);
+    StrVec *pageAbs = IoUtil_AbsVec(m, pagesPath);
+    Route_Collect(rt, pageAbs);
 
     Route *inc = Route_Make(m);
     StrVec *incPath = IoUtil_GetAbsVec(m,
@@ -226,6 +216,11 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Route_Collect(inc, incAbs);
 
     Object *data = getGenericData(m, rt);
+
+    args[0] = data;
+    args[1] = NULL;
+    Out("^y.data @^0\n", args);
+    exit(1);
 
     Str *now = MicroTime_ToStr(m, MicroTime_Now());
     Object_Set(data, Str_CstrRef(m, "now"), now);
@@ -257,20 +252,19 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Templ output does not match @", args);
 
     /* login.templ no header with user */
-    path = StrVec_From(m, Str_CstrRef(m,
-        "/login"));
+    path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
     Route *handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
 
+    /* login.templ no user with header and footer */
+    MemBookStats st;
+    MemBook_GetStats(m, &st);
 
     data = getGenericData(m, rt);
-    Object *user = Object_Make(m, ZERO);
-    Object_Set(user, Str_FromCstr(m, "name", ZERO),
-        Str_FromCstr(m, "Fancy Pantsy", ZERO));
-    Object_Set(data, Str_FromCstr(m, "user", ZERO), user);
-
-    Route *header = Object_ByPath(inc,
-        StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)), NULL, SPAN_OP_GET);
+    Object *stats = Object_Make(m, ZERO);
+    Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
+        MicroTime_ToStr(m, MicroTime_Now()));
+    Object_Set(data, Str_FromCstr(m, "stats", ZERO), stats);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(handler, bf, data, NULL);
@@ -279,21 +273,23 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = bf->v;
     args[1] = NULL;
     r |= TestShow(Equals(expected, bf->v),
-        "Expected template value with no header and a user name", 
-        "Expected template value with no header and a user name: $", 
-    args);
+        "Handler: Expected template value with no header and a user name", 
+        "Handler: Expected template value with no header and a user name: $", args);
 
+    Route *header = Object_ByPath(inc,
+        StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)), NULL, SPAN_OP_GET);
     Route *footer = Object_ByPath(inc,
         StrVec_From(bf->m, Str_FromCstr(bf->m, "footer", ZERO)),
             NULL, SPAN_OP_GET);
 
-    /* login.templ no user with header and footer */
+    Buff *dest = Buff_Make(m, ZERO);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
+    Buff_Pipe(dest, bf);
 
-    Route_Handle(handler, bf, Object_Make(m, ZERO), NULL);
-    Buff *dest = Buff_Make(m, ZERO);
+    bf = Buff_Make(m, ZERO);
+    Route_Handle(handler, bf, data, NULL);
     Buff_Pipe(dest, bf);
 
     bf = Buff_Make(m, ZERO);
@@ -304,16 +300,22 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = dest->v;
     args[1] = NULL;
     r |= TestShow(Equals(expected, dest->v), 
-        "Expected template value with no user object and a header",
-        "Expected template value with no user object and a header: $", 
+        "Footer: Expected template value with no user object and a header",
+        "Footer: Expected template value with no user object and a header: $", 
     args);
 
     /* index.fmt with header */
     data = getGenericData(m, rt);
-    user = Object_Make(m, ZERO);
-    Object_Set(user, Str_FromCstr(m, "name", ZERO),
-        Str_FromCstr(m, "Fancy Pantsy", ZERO));
-    Object_Set(data, Str_FromCstr(m, "user", ZERO), user);
+    stats = Object_Make(m, ZERO);
+    Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
+        MicroTime_ToStr(m, MicroTime_Now()));
+
+    Object *mem = Object_Make(m, ZERO);
+    Object_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
+        Str_MemCount(m, st.pageIdx * PAGE_SIZE));
+    Object_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &st));
+    Object_Set(stats, Str_FromCstr(m, "mem", ZERO), mem);
+    Object_Set(data, Str_FromCstr(m, "stats", ZERO), stats);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);

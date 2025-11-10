@@ -100,12 +100,14 @@ static status setErrorHandler(MemCh *m, Task *tsk){
     return Table_Set(TaskErrorHandlers, key, funcW);
 }
 
-static TcpCtx *tcpCtx_Make(MemCh *m, StrVec *path, i32 port, quad ip4, util ip6[2]){
+static TcpCtx *tcpCtx_Make(MemCh *m,
+        StrVec *path, Object *pageBase, i32 port, quad ip4, util ip6[2]){
     TcpCtx *ctx = TcpCtx_Make(m);
     ctx->port = port;
     ctx->populate = WebServer_populate;
     ctx->finalize = WebServer_logAndClose;
     ctx->path = path;
+    ctx->pageBase = pageBase;
     return ctx;
 }
 
@@ -221,12 +223,12 @@ status WebServer_AddRoute(MemCh *m, Route *pages, StrVec *dir, StrVec *path){
     return r;
 }
 
-Task *WebServer_Make(StrVec *path, i32 port, quad ip4, util *ip6){
+Task *WebServer_Make(StrVec *path, Object *pageBase, i32 port, quad ip4, util *ip6){
     DebugStack_Push(NULL, 0);
     status r = READY;
 
     Task *tsk = ServeTcp_Make(NULL);
-    tsk->source = (Abstract *)tcpCtx_Make(tsk->m, path, port, ip4, ip6);
+    tsk->source = (Abstract *)tcpCtx_Make(tsk->m, path, pageBase, port, ip4, ip6);
     setErrorHandler(tsk->m, tsk);
 
     DebugStack_Pop();
