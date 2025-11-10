@@ -2,5 +2,4 @@
 #include "init.h"
 #include "templ.h"
 #include "http.h"
-#include "html.h"
 #include "route.h"

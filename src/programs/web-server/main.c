@@ -14,8 +14,7 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
-    Lang_Init(m);
-    Www_Init(m);
+    Inter_Init(m);
     DebugStack_Push(NULL, 0);
 
     if(argc == 2 && strncmp(argv[1], "--licence", strlen("--licence")) == 0){

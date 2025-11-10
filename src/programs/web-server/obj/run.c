@@ -17,18 +17,18 @@ static status Example_logAndClose(Step *_st, Task *tsk){
 
     MemBookStats st;
     MemBook_GetStats(tsk->m, &st);
-    Abstract *args[8];
-    args[0] = (Abstract *)Lookup_Get(HttpMethods, ctx->method);
-    args[1] = (Abstract *)I32_Wrapped(tsk->m, ctx->code);
-    args[2] = (Abstract *)ctx->path;
-    args[3] = (Abstract *)Str_MemCount(tsk->m, st.total * PAGE_SIZE),
-    args[4] = (Abstract *)I64_Wrapped(tsk->m, st.total),
-    args[5] = (Abstract *)I64_Wrapped(tsk->m, st.pageIdx),
+    void *args[8];
+    args[0] = Lookup_Get(HttpMethods, ctx->method);
+    args[1] = I32_Wrapped(tsk->m, ctx->code);
+    args[2] = ctx->path;
+    args[3] = Str_MemCount(tsk->m, st.total * PAGE_SIZE),
+    args[4] = I64_Wrapped(tsk->m, st.total),
+    args[5] = I64_Wrapped(tsk->m, st.pageIdx),
     args[6] = NULL;
     args[7] = NULL;
 
     if(ctx->type.state & ERROR){
-        args[4] = (Abstract *)ctx->errors;
+        args[4] = ctx->errors;
         args[5] = NULL;
         Out("^r.Error $/$ @ $ @ $ $/$ ^{TIME.human}^0\n", args);
     }else if(ctx->code == 200){
@@ -43,7 +43,7 @@ static status Example_logAndClose(Step *_st, Task *tsk){
     return SUCCESS;
 }
 
-static status Example_errorPopulate(MemCh *_m, Task *tsk, Abstract *arg, Abstract *source){
+static status Example_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
 
     printf("Error Populate\n");
@@ -58,14 +58,14 @@ static status Example_errorPopulate(MemCh *_m, Task *tsk, Abstract *arg, Abstrac
     Object *data = Object_Make(m, TYPE_OBJECT);
     Object *error = Object_Make(m, TYPE_OBJECT);
     Object_Set(error,
-        (Abstract *)Str_FromCstr(m, "name", STRING_COPY),
-        (Abstract *)msg->lineInfo[0]);
+        Str_FromCstr(m, "name", STRING_COPY),
+        msg->lineInfo[0]);
 
     Buff *bf = Buff_Make(m, ZERO);
     Fmt(bf, (char *)msg->fmt->bytes, msg->args);
     Object_Set(data,
-        (Abstract *)Str_FromCstr(m, "details", STRING_COPY), 
-        (Abstract *)bf->v);
+        Str_FromCstr(m, "details", STRING_COPY), 
+        bf->v);
 
     StrVec *path = StrVec_From(m, Str_FromCstr(m, "/error.templ", STRING_COPY));
     IoUtil_Annotate(m, path);
@@ -74,13 +74,13 @@ static status Example_errorPopulate(MemCh *_m, Task *tsk, Abstract *arg, Abstrac
 
     Task_ResetChain(tsk);
     HttpTask_InitResponse(tsk, NULL, source);
-    Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)data, NULL, ZERO);
+    Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, data, NULL, ZERO);
 
     DebugStack_Pop();
     return SUCCESS;
 }
 
-static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
+static status Example_populate(MemCh *m, Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
@@ -116,7 +116,7 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
 static status setErrorHandler(MemCh *m, Task *tsk){
     Single *funcW = Func_Wrapped(m, Example_errorPopulate);
     Single *key = Util_Wrapped(ErrStream->m, (util)tsk);
-    return Table_Set(TaskErrorHandlers, (Abstract *)key, (Abstract *)funcW);
+    return Table_Set(TaskErrorHandlers, key, funcW);
 }
 
 static TcpCtx *tcpCtx_Make(MemCh *m, StrVec *path, i32 port, quad ip4, util ip6[2]){
@@ -131,7 +131,7 @@ static TcpCtx *tcpCtx_Make(MemCh *m, StrVec *path, i32 port, quad ip4, util ip6[
 status WebServer_Run(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    Abstract *args[2];
+    void *args[2];
     
     MemCh *m = MemCh_Make();
 
@@ -143,7 +143,7 @@ status WebServer_Run(MemCh *gm){
     Task *tsk = ServeTcp_Make(ctx);
     setErrorHandler(m, tsk);
 
-    args[0] = (Abstract *)ctx;
+    args[0] = ctx;
     args[1] = NULL;
     Out("^y.Serving &\n", args);
 

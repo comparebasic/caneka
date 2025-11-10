@@ -19,21 +19,21 @@ status MemCh_Tests(MemCh *gm){
     MemCh *x = MemCh_Make();
     Span *p = Span_Make(x);
     for(i32 i = 0; i < 1000; i++){
-        Span_Add(p, (Abstract *)I32_Wrapped(x, i));
+        Span_Add(p, I32_Wrapped(x, i));
     }
     MemCh_Free(x);
 
     x = MemCh_Make();
     p = Span_Make(x);
     for(i32 i = 0; i < 500; i++){
-        Span_Add(p, (Abstract *)I32_Wrapped(x, i));
+        Span_Add(p, I32_Wrapped(x, i));
     }
     MemCh_Free(x);
 
     x = MemCh_Make();
     p = Span_Make(x);
     for(i32 i = 0; i < 2000; i++){
-        Span_Add(p, (Abstract *)I32_Wrapped(x, i));
+        Span_Add(p, I32_Wrapped(x, i));
     }
     MemCh_Free(x);
 
@@ -69,13 +69,13 @@ status MemChLevel_Tests(MemCh *gm){
     x->level++;
     Span *p = Span_Make(x);
     for(i32 i = 0; i < 700; i++){
-        Span_Add(p, (Abstract *)I32_Wrapped(x, i));
+        Span_Add(p, I32_Wrapped(x, i));
     }
 
     x->level++;
     p = Span_Make(x);
     for(i32 i = 0; i < 1000; i++){
-        Span_Add(p, (Abstract *)I32_Wrapped(x, i));
+        Span_Add(p, I32_Wrapped(x, i));
     }
     MemCh_Free(x);
     x->level--;
@@ -84,7 +84,7 @@ status MemChLevel_Tests(MemCh *gm){
 
     p = Span_Make(x);
     for(i32 i = 0; i < 2000; i++){
-        Span_Add(p, (Abstract *)I32_Wrapped(x, i));
+        Span_Add(p, I32_Wrapped(x, i));
     }
     MemCh_Free(x);
 

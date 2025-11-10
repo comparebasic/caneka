@@ -5,7 +5,7 @@ status BinSeg_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     
     Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, ZERO);
@@ -41,7 +41,7 @@ status BinSegCollection_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     
     Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, ZERO);
@@ -150,7 +150,7 @@ status BinSegV_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     
     Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, BINSEG_VISIBLE);
@@ -222,7 +222,7 @@ status BinSegReversedV_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     
     Buff *bf = Buff_Make(m, ZERO);
     BinSegCtx *ctx = BinSegCtx_Make(bf, NULL, NULL, (BINSEG_REVERSED|BINSEG_VISIBLE));

@@ -1,1 +1,1 @@
-status Lang_Init(MemCh *m);
+status Inter_Init(MemCh *m);

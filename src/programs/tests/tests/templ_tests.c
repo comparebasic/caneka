@@ -39,7 +39,7 @@ static char *logicTestContent = ""
 
 status TemplCtx_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
-    Abstract *args[5];
+    void *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
     Str *s = NULL; 
@@ -53,72 +53,71 @@ status TemplCtx_Tests(MemCh *gm){
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     
     r |= Test(ctx->type.state & SUCCESS,
-            "Roebling finished with state SUCCESS with keys", 
-        NULL);
+            "Roebling finished with state SUCCESS with keys", NULL);
 
     Span *expected = Span_Make(m);
     char *cstr = "<h1>";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     StrVec *v = StrVec_From(m, s);
-    Span_Add(expected, (Abstract *)v);
+    Span_Add(expected, v);
 
     fch = Fetcher_Make(m);
     fch->type.state |= FETCHER_VAR;
     cstr = "title";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeKey(m, s);
-    Span_Add(fch->val.targets, (Abstract *)tg);
-    Span_Add(expected, (Abstract *)fch);
+    Span_Add(fch->val.targets, tg);
+    Span_Add(expected, fch);
 
     cstr = "</h1>\n<p>";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
-    Span_Add(expected, (Abstract *)v);
+    Span_Add(expected, v);
 
     fch = Fetcher_Make(m);
     fch->type.state |= FETCHER_VAR;
     cstr = "para";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeKey(m, s);
-    Span_Add(fch->val.targets, (Abstract *)tg);
-    Span_Add(expected, (Abstract *)fch);
+    Span_Add(fch->val.targets, tg);
+    Span_Add(expected, fch);
 
     cstr = "</p>\n<ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
-    Span_Add(expected, (Abstract *)v);
+    Span_Add(expected, v);
 
     fch = Fetcher_Make(m);
     fch->type.state |= FETCHER_FOR;
     cstr = "items";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeKey(m, s);
-    Span_Add(fch->val.targets, (Abstract *)tg);
+    Span_Add(fch->val.targets, tg);
     cstr = "menu";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeKey(m, s);
-    Span_Add(fch->val.targets, (Abstract *)tg);
+    Span_Add(fch->val.targets, tg);
     tg = FetchTarget_MakeIter(m);
-    Span_Add(fch->val.targets, (Abstract *)tg);
-    Span_Add(expected, (Abstract *)fch);
+    Span_Add(fch->val.targets, tg);
+    Span_Add(expected, fch);
 
     cstr = "    <li><a href=\"";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
-    Span_Add(expected, (Abstract *)v);
+    Span_Add(expected, v);
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_VAR;
     cstr = "local";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeAtt(m, s);
-    Span_Add(fch->val.targets, (Abstract *)tg);
-    Span_Add(expected, (Abstract *)fch);
+    Span_Add(fch->val.targets, tg);
+    Span_Add(expected, fch);
 
     cstr = "\">";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
-    Span_Add(expected, (Abstract *)v);
+    Span_Add(expected, v);
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_VAR;
@@ -126,28 +125,28 @@ status TemplCtx_Tests(MemCh *gm){
     cstr = "name";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeAtt(m, s);
-    Span_Add(fch->val.targets, (Abstract *)tg);
-    Span_Add(expected, (Abstract *)fch);
+    Span_Add(fch->val.targets, tg);
+    Span_Add(expected, fch);
 
     cstr = "</a></li>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
-    Span_Add(expected, (Abstract *)v);
+    Span_Add(expected, v);
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_END;
-    Span_Add(expected, (Abstract *)fch);
+    Span_Add(expected, fch);
 
     cstr = "</ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
-    Span_Add(expected, (Abstract *)v);
+    Span_Add(expected, v);
 
-    args[0] = (Abstract *)expected,
-    args[1] = (Abstract *)ctx->it.p,
+    args[0] = expected,
+    args[1] = ctx->it.p,
     args[2] = NULL;
 
-    r |= TestShow(Exact((Abstract *)expected, (Abstract *)ctx->it.p), 
+    r |= TestShow(Exact(expected, ctx->it.p), 
         "Expected content found in example templ", 
         "Mismatch in content found in example templ, expected:\n&\nhave:\n &", args);
 
@@ -158,7 +157,7 @@ status TemplCtx_Tests(MemCh *gm){
 
 status Templ_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
-    Abstract *args[5];
+    void *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
     TranspFile *tp = NULL;
@@ -180,44 +179,44 @@ status Templ_Tests(MemCh *gm){
     }
 
     Span *seps = Span_Make(m);
-    Span_Add(seps, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
+    Span_Add(seps, B_Wrapped(m, (byte)'/', ZERO, MORE));
 
     Object *data = Object_Make(m, ZERO);
     Object *menu = Object_Make(m, ZERO);
     tp = TranspFile_Make(m);
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/one"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "One"));
-    Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "one")), (Abstract *)tp);
+    Object_Set(menu, StrVec_From(m, Str_CstrRef(m, "one")), tp);
     tp = TranspFile_Make(m);
 
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/two"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "Two"));
-    Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "two")), (Abstract *)tp);
+    Object_Set(menu, StrVec_From(m, Str_CstrRef(m, "two")), tp);
     tp = TranspFile_Make(m);
     
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/three"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "Three"));
-    Object_Set(menu, (Abstract *)StrVec_From(m, Str_CstrRef(m, "three")), (Abstract *)tp);
+    Object_Set(menu, StrVec_From(m, Str_CstrRef(m, "three")), tp);
 
     Str *title = Str_CstrRef(m, "My Fancy Page");
     Str *para = Str_CstrRef(m, "And here is the masterful list of menu items!");
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "para"), (Abstract *)para);
+    Object_Set(data, Str_CstrRef(m, "title"), title);
+    Object_Set(data, Str_CstrRef(m, "para"), para);
 
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "items/menu", STRING_COPY));
     Path_Annotate(m, key, seps);
 
-    Object_ByPath(data, key, (Abstract *)menu, SPAN_OP_SET);
+    Object_ByPath(data, key, menu, SPAN_OP_SET);
 
     Buff *bf = Buff_Make(m, ZERO);
     
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
     status result = Templ_Prepare(templ);
 
-    args[0] = (Abstract *)templ;
-    args[1] = (Abstract *)ctx->it.p;
-    args[2] = (Abstract *)templ->content.p;
-    args[3] = (Abstract *)NULL;
+    args[0] = templ;
+    args[1] = ctx->it.p;
+    args[2] = templ->content.p;
+    args[3] = NULL;
     r |= TestShow((result & PROCESSING),
         "Templ_Prepare has result PROCESSING",
         "Templ_Prepare did not finish properly @ & -> &", args);
@@ -228,145 +227,16 @@ status Templ_Tests(MemCh *gm){
         return r;
     }
 
-    i64 total = Templ_ToS(templ, bf, (Abstract *)data, NULL);
+    i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)bf->v;
-    args[2] = (Abstract *)NULL;
+    args[0] = expected;
+    args[1] = bf->v;
+    args[2] = NULL;
 
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v), 
+    r |= TestShow(Equals(expected, bf->v), 
         "Templ key value test has expected content", 
         "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n&", 
-        args);
-
-    MemCh_Free(m);
-    DebugStack_Pop();
-    return r;
-}
-
-status TemplLogic_Tests(MemCh *gm){
-    DebugStack_Push(NULL, 0);
-    Abstract *args[5];
-    status r = READY;
-    MemCh *m = MemCh_Make();
-
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/nav.templ"));
-    StrVec *content = File_ToVec(m, path);
-
-    args[0] = (Abstract *)content;
-    args[1] = NULL;
-    Out("^p.content: $\n", args);
-
-    Cursor *curs = Cursor_Make(m, content);
-    curs->type.state |= DEBUG;
-    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-
-    r |= Test(ctx->type.state & SUCCESS,
-            "Templ: Roebling finished with state SUCCESS with keys", 
-        NULL);
-
-    args[0] = (Abstract *)ctx;
-    args[1] = NULL;
-    Out("^p.ctx: $\n", args);
-
-    /*
-    Abstract *args2[] = {
-        (Abstract *)ctx->it.p,
-        NULL
-    };
-    Out("^b.TemplContent: @^0.\n", args2);
-    */
-
-    Page *pg = NULL;
-    Nav *nav = NULL;
-
-    Object *data = Object_Make(m, ZERO);
-    Nav *menuItems = Object_Make(m, TYPE_HTML_NAV);
-
-    FetchTarget *indexTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "index")); 
-    FetchTarget_Resolve(m, indexTarget, TYPE_HTML_NAV);
-
-    FetchTarget *urlTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "url")); 
-    FetchTarget_Resolve(m, urlTarget, TYPE_HTML_PAGE);
-
-    FetchTarget *nameTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "name")); 
-    FetchTarget_Resolve(m, nameTarget, TYPE_HTML_PAGE);
-
-    FetchTarget *navNameTarget = FetchTarget_MakeProp(m, Str_CstrRef(m, "navName")); 
-    FetchTarget_Resolve(m, navNameTarget, TYPE_HTML_PAGE);
-
-    pg = Object_Make(m, TYPE_HTML_PAGE);
-    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Docs"));
-    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "docs"));
-    Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/docs/"));
-
-    Object_SetPropByIdx(menuItems, indexTarget->idx, (Abstract *)pg);
-
-
-    nav = Object_Make(m, TYPE_HTML_NAV);
-    pg = Object_Make(m, TYPE_HTML_PAGE);
-    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Str"));
-    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/str"));
-    Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/docs/base/str.html"));
-    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
-    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)nav);
-
-    nav = Object_Make(m, TYPE_HTML_NAV);
-    pg = Object_Make(m, TYPE_HTML_PAGE);
-    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Mem"));
-    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/mem"));
-    Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/docs/base/mem.html"));
-    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
-    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)nav);
-
-    nav = Object_Make(m, TYPE_HTML_NAV);
-    pg = Object_Make(m, TYPE_HTML_PAGE);
-    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Io"));
-    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/io"));
-    Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/docs/base/io.html"));
-    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
-    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)nav);
-
-    nav = Object_Make(m, TYPE_HTML_NAV);
-    pg = Object_Make(m, TYPE_HTML_PAGE);
-    Object_SetPropByIdx(pg, nameTarget->idx, (Abstract *)Str_CstrRef(m, "Suite"));
-    Object_SetPropByIdx(pg, navNameTarget->idx, (Abstract *)Str_CstrRef(m, "base/suite"));
-    Object_SetPropByIdx(pg, urlTarget->idx,
-        (Abstract *)Str_CstrRef(m, "/docs/base/suite.html"));
-    Object_SetPropByIdx(nav, indexTarget->idx, (Abstract *)pg);
-    Object_Set(menuItems, Object_GetPropByIdx(pg, nameTarget->idx), 
-        (Abstract *)nav);
-
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "menu-items"), (Abstract *)menuItems);
-
-    Buff *bf = Buff_Make(m, ZERO);
-
-    DebugStack_SetRef(data, data->type.of);
-    
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-
-    args[0] = (Abstract *)templ->content.p;
-    args[1] = NULL;
-    Out("^p.Content &^0\n", args);
-
-    templ->type.state |= DEBUG;
-    i64 total = Templ_ToS(templ, bf, (Abstract *)data, NULL);
-
-    Str *expected = Str_CstrRef(m, logicTestContent);
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)bf->v;
-    args[2] = NULL;
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v), 
-        "Temple key value test has expected content", 
-        "Temple key value test mismatch, expected @\nhave\n@", 
         args);
 
     MemCh_Free(m);

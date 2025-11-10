@@ -11,13 +11,13 @@ status Hash_Tests(MemCh *gm){
     util expected;
     util h;
 
-    h = Get_Hash((Abstract *)s);
+    h = Get_Hash(s);
     expected = 4291084750259606489;
-    Abstract *args1[] = {
-        (Abstract *)Str_Ref(m, (byte *)&expected, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
-        (Abstract *)I64_Wrapped(m, expected),
-        (Abstract *)Str_Ref(m, (byte *)&h, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
-        (Abstract *)I64_Wrapped(m, h),
+    void *args1[] = {
+        Str_Ref(m, (byte *)&expected, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
+        I64_Wrapped(m, expected),
+        Str_Ref(m, (byte *)&h, sizeof(util), sizeof(util), DEBUG|STRING_BINARY),
+        I64_Wrapped(m, h),
         NULL
     };
     r = Test(h == expected, "Expected hash to equal @/$, found: @/$", args1);

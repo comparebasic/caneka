@@ -48,9 +48,9 @@ char *values2[] = {
 status TableHKey_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
-    Abstract *args[5]; 
+    void *args[5]; 
     Str *s = Str_CstrRef(m, "Hello there old friends!");
-    Hashed *h = Hashed_Make(m, (Abstract *)s);
+    Hashed *h = Hashed_Make(m, s);
     HKey hk;
     Table_HKeyInit(&hk, 1, h->id);
     i32 expected[12];
@@ -68,9 +68,9 @@ status TableHKey_Tests(MemCh *gm){
     expected[11] = 6;
     for(i32 i = 0; i < 12; i++){
         Table_HKeyVal(&hk);
-        args[0] = (Abstract *)I32_Wrapped(m, expected[i]);
-        args[1] = (Abstract *)I32_Wrapped(m, hk.idx);
-        args[2] = (Abstract *)&hk;
+        args[0] = I32_Wrapped(m, expected[i]);
+        args[1] = I32_Wrapped(m, hk.idx);
+        args[2] = &hk;
         args[3] = NULL;
         r |= Test(hk.idx == expected[i],
             "Test idx mismatch for expected $, have $, of &",
@@ -93,7 +93,7 @@ status Table_Tests(MemCh *gm){
         }
         s = Str_CstrRef(m, values[i]);
         value = Str_CstrRef(m, values[i+1]);
-        Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+        Table_Set(tbl, s, value);
     }
 
 
@@ -103,19 +103,19 @@ status Table_Tests(MemCh *gm){
         }
         s = Str_CstrRef(m, values[i]);
         value = Str_CstrRef(m, values[i+1]);
-        found = (Str *)Table_Get(tbl, (Abstract *)s);
-        Abstract *args1[] = {
-            (Abstract *)s, NULL
+        found = (Str *)Table_Get(tbl, s);
+        void *args1[] = {
+            s, NULL
         };
         r |= Test(found != NULL, 
             "Expect strings to not be NULL from key:@", args1);
-        Abstract *args2[] = {
-            (Abstract *)value,
-            (Abstract *)s, 
-            (Abstract *)found,
+        void *args2[] = {
+            value,
+            s, 
+            found,
             NULL
         };
-        r |= Test(Equals((Abstract *)value, (Abstract *)found), 
+        r |= Test(Equals(value, found), 
             "Expect strings to equal @ from key:@ found @", args2);
     }
 
@@ -134,62 +134,27 @@ status TableResize_Tests(MemCh *gm){
     for(i32 i = 0; valuesResize[i] != NULL; i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
-        Table_Set(tbl, (Abstract *)s, (Abstract *)value);
+        Table_Set(tbl, s, value);
     }
 
     for(i32 i = 0; valuesResize[i] != NULL; i+= 2){
         s = Str_CstrRef(m, valuesResize[i]);
         value = Str_CstrRef(m, valuesResize[i+1]);
-        found = (Str *)Table_Get(tbl, (Abstract *)s);
-        Abstract *args1[] = {
-            (Abstract *)s,
+        found = (Str *)Table_Get(tbl, s);
+        void *args1[] = {
+            s,
             NULL
         };
         r |= Test(found != NULL, "Expect strings to not be NULL from key:$", args1);
-        Abstract *args2[] = {
-            (Abstract *)value,
-            (Abstract *)s,
-            (Abstract *)found,
+        void *args2[] = {
+            value,
+            s,
+            found,
             NULL
         };
-        r |= Test(Equals((Abstract *)value, (Abstract *)found), 
+        r |= Test(Equals(value, found), 
             "Expect strings to equal $ from key:@ found @", args2);
     }
-
-    MemCh_Free(m);
-    return r;
-}
-
-status TablePreKey_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
-    Span *tbl = Span_Make(m);
-    status r = READY;
-    /*
-    Str *s;
-    Str *value;
-    Str *found;
-
-    s = Str_CstrRef(m, "PreKey");
-    value = Str_CstrRef(m, "After Value");
-    Table_SetKey(tbl, (Abstract *)s);
-    Table_SetValue(tbl, (Abstract *)value);
-    found = (Str *)Table_Get(tbl, (Abstract *)s);
-    r |= Test(found != NULL, 
-        "Expect SetKey and SetValue to effect the same entry: strings to not be NULL from key:'_t", s);
-    r |= Test(Equals((Abstract *)value, (Abstract *)found), 
-        "Expect SetKey and SetValue to effect the same entry: strings to equal '_t' from key:'_t' found '_t'", value, s, found);
-
-
-    tbl = Span_Make(m);
-    for(int i = 0; ; i+= 2){
-        if(values2[i] == NULL){
-            break;
-        }
-        s = Str_CstrRef(m, values2[i]);
-        value = Str_CstrRef(m, values2[i+1]);
-        Table_Set(tbl, (Abstract *)s, (Abstract *)value);
-    }
-    */
 
     MemCh_Free(m);
     return r;
@@ -198,33 +163,33 @@ status TablePreKey_Tests(MemCh *gm){
 status TableUtilKey_Tests(MemCh *gm){
     MemCh *m = MemCh_Make();
     status r = READY;
-    Abstract *args[5];
+    void *args[5];
     Table *tbl = Table_Make(m);
 
     Single *v = NULL;
     v = Util_Wrapped(m, 34961084002);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084034);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084044);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084060);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084068);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084084);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084092);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084108);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084240);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
     v = Util_Wrapped(m, 34961084272);
-    Table_Set(tbl, (Abstract *)v, (Abstract *)v);
+    Table_Set(tbl, v, v);
 
-    args[0] = (Abstract *)Util_Wrapped(m, tbl->nvalues);
-    args[1] = (Abstract *)tbl;
+    args[0] = Util_Wrapped(m, tbl->nvalues);
+    args[1] = tbl;
     args[2] = NULL;
     r |= TestShow(tbl->nvalues == 10, 
         "Expected 10 items to be added", 

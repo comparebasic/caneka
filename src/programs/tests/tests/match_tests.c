@@ -20,8 +20,8 @@ status Match_Tests(MemCh *gm){
         Match_Feed(m, mt, s->bytes[i]);
     }
 
-    Abstract *args1[] = {
-        (Abstract *)State_ToStr(m, mt->type.state),
+    void *args1[] = {
+        State_ToStr(m, mt->type.state),
         NULL
     };
     r |= Test(mt->type.state != SUCCESS, "Non match has unsuccessful state found @", args1);
@@ -32,8 +32,8 @@ status Match_Tests(MemCh *gm){
     for(int i = 0; i < s->length; i++){
         Match_Feed(m, mt, s->bytes[i]);
     }
-    Abstract *args2[] = {
-        (Abstract *)Type_StateVec(m, mt->type.of, mt->type.state),
+    void *args2[] = {
+        Type_StateVec(m, mt->type.of, mt->type.state),
         NULL
     };
     r |= Test(mt->type.state == SUCCESS, "Matching string has successful state found @", args2); 
@@ -53,9 +53,9 @@ status Match_Tests(MemCh *gm){
 
     word len = s->length-1;
     i64 total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
-    Abstract *args3[] = {
-        (Abstract *)I16_Wrapped(m, len), 
-        (Abstract *)I64_Wrapped(m, total), 
+    void *args3[] = {
+        I16_Wrapped(m, len), 
+        I64_Wrapped(m, total), 
         NULL
     };
     r |= Test(total == s->length-1, "Matched length of string, less termMatching, expected $ have $", args3);
@@ -84,14 +84,14 @@ status MatchElastic_Tests(MemCh *gm){
     i32 i = 0;
     Match_Feed(m, mt, s->bytes[i]);
     i++;
-    Abstract *args1[] = {
-        (Abstract *)State_ToStr(m, mt->type.state),
+    void *args1[] = {
+        State_ToStr(m, mt->type.state),
         NULL
     };
     r |= Test((mt->type.state & PROCESSING) != 0, "Has PROCESSING status $", args1);
     i64 delta = mt->pat.curDef - mt->pat.startDef;
-    Abstract *args2[] = {
-        (Abstract *) I64_Wrapped(m, delta),
+    void *args2[] = {
+         I64_Wrapped(m, delta),
         NULL
     };
     r |= Test(mt->pat.curDef == (mt->pat.startDef+1) , "On second pos, position is $", args2);
@@ -109,8 +109,8 @@ status MatchElastic_Tests(MemCh *gm){
 
     r |= Test(i ==  4, "Tag -Stopped on the fourth character", NULL);
     r |= Test(count == 3, "Tag -Found three chars", NULL);
-    Abstract *args3[] = {
-        (Abstract *)State_ToStr(m, mt->type.state),
+    void *args3[] = {
+        State_ToStr(m, mt->type.state),
         NULL
     };
     r |= Test((mt->type.state & SUCCESS) != 0, "Tag- Found SUCCESS have @", args3);
@@ -131,8 +131,8 @@ status MatchElastic_Tests(MemCh *gm){
     }
 
     i64 total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
-    Abstract *args4[] = {
-        (Abstract *)I64_Wrapped(m, total),
+    void *args4[] = {
+        I64_Wrapped(m, total),
         NULL
     };
     r |= Test(total == 4, "Att - Found 4 chars, count is @", args4);
@@ -166,8 +166,8 @@ status MatchKo_Tests(MemCh *gm){
             break;
         }
     }
-    Abstract *args1[] = {
-        (Abstract *)I32_Wrapped(m, i),
+    void *args1[] = {
+        I32_Wrapped(m, i),
         NULL
     };
     r |= Test(i == s->length, "Length matches for string that has no escape or closing quote @", args1);
@@ -184,9 +184,9 @@ status MatchKo_Tests(MemCh *gm){
         }
     }
     i16 subLen = s->length-2;
-    Abstract *args2[] = {
-        (Abstract *)I16_Wrapped(m, subLen), 
-        (Abstract *)I32_Wrapped(m, i),
+    void *args2[] = {
+        I16_Wrapped(m, subLen), 
+        I32_Wrapped(m, i),
         NULL
     };
     r |= Test(i == s->length, "Length matches for string minus escape cahrs that has two escapes in it, expecting $, have $", args2);
@@ -203,8 +203,8 @@ status MatchKo_Tests(MemCh *gm){
         }
     }
 
-    Abstract *args3[] = {
-        (Abstract *)I32_Wrapped(m, i),
+    void *args3[] = {
+        I32_Wrapped(m, i),
         NULL
     };
     r |= Test(i == s->length-6, "Length matches for string that has a terminator quote in it, have $", args3);
@@ -220,8 +220,8 @@ status MatchKo_Tests(MemCh *gm){
             break;
         }
     }
-    Abstract *args4[] = {
-        (Abstract *)I32_Wrapped(m, i),
+    void *args4[] = {
+        I32_Wrapped(m, i),
         NULL
     };
     r |= Test(i == s->length, "Length matches for string that has a escaped terminator quote in it, have $", args4);
@@ -246,15 +246,15 @@ status MatchKo_Tests(MemCh *gm){
         }
     }
     
-    Abstract *args5[] = {
-        (Abstract *)I32_Wrapped(m, i),
+    void *args5[] = {
+        I32_Wrapped(m, i),
         NULL
     };
     r |= Test(i == 9, "It took 10 counts to get to the end, have $", args5);
     i64 total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
 
-    Abstract *args6[] = {
-        (Abstract *)I32_Wrapped(m, total),
+    void *args6[] = {
+        I32_Wrapped(m, total),
         NULL
     };
     r |= Test(total == 7, "Terminator 'end' is omited from the count expecting 7, have $", args6);
@@ -272,9 +272,9 @@ status MatchKo_Tests(MemCh *gm){
     }
     subLen = s->length-4;
     total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
-    Abstract *args7[] = {
-        (Abstract *)I16_Wrapped(m, subLen),
-        (Abstract *)I64_Wrapped(m, total),
+    void *args7[] = {
+        I16_Wrapped(m, subLen),
+        I64_Wrapped(m, total),
         NULL
     };
     r |= Test(total == s->length-4, "terminator 'end' is omited and last punctuation as well, from the count, expecting $, have $", args7);
@@ -302,8 +302,8 @@ status MatchKo_Tests(MemCh *gm){
     }
 
     total = SnipSpan_Total(mt->backlog, SNIP_CONTENT);
-    Abstract *args8[] = {
-        (Abstract *)I64_Wrapped(m, total),
+    void *args8[] = {
+        I64_Wrapped(m, total),
         NULL
     };
     r |= Test(total == 1, "counted first letter only, have $", args8);
@@ -330,17 +330,17 @@ status MatchReplace_Tests(MemCh *gm){
     i32 pos;
     Match_StrReplace(m, newPath, new, mt, &pos);
 
-    Abstract *args[] = {
-        (Abstract *)mt,
-        (Abstract *)s,
-        (Abstract *)new,
-        (Abstract *)path,
-        (Abstract *)newPath,
+    void *args[] = {
+        mt,
+        s,
+        new,
+        path,
+        newPath,
         NULL
     };
 
-    r |= Test(Equals((Abstract *)newPath,
-        (Abstract *)Str_CstrRef(m, "/happy/good/fancy/things")),
+    r |= Test(Equals(newPath,
+        Str_CstrRef(m, "/happy/good/fancy/things")),
         "Match @: Replacing & with & in $ to make &\n", args);
 
     new = Str_CstrRef(m, "it");
@@ -351,17 +351,17 @@ status MatchReplace_Tests(MemCh *gm){
     newPath = Str_CloneAlloc(m, path, STR_DEFAULT);
     Match_StrReplace(m, newPath, new, mt, &pos);
 
-    Abstract *args2[] = {
-        (Abstract *)mt,
-        (Abstract *)s,
-        (Abstract *)new,
-        (Abstract *)path,
-        (Abstract *)newPath,
+    void *args2[] = {
+        mt,
+        s,
+        new,
+        path,
+        newPath,
         NULL
     };
 
-    r |= Test(Equals((Abstract *)newPath, 
-        (Abstract *)Str_CstrRef(m, "/happy/it/fancy/things")),
+    r |= Test(Equals(newPath, 
+        Str_CstrRef(m, "/happy/it/fancy/things")),
         "Match @: Replacing @ with @ in $ to make &\n", args2);
 
     MemCh_Free(m);

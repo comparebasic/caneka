@@ -4,10 +4,10 @@
 static status Example_log(Step *_st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-    Abstract *args[] = {
-        (Abstract *)Lookup_Get(HttpMethods, ctx->method),
-        (Abstract *)ctx->path,
-        (Abstract *)MicroTime_ToStr(OutStream->m, MicroTime_Now()),
+    void *args[] = {
+        Lookup_Get(HttpMethods, ctx->method),
+        ctx->path,
+        MicroTime_ToStr(OutStream->m, MicroTime_Now()),
         NULL,
     };
 
@@ -20,7 +20,7 @@ static status Example_log(Step *_st, Task *tsk){
     return SUCCESS;
 }
 
-static status Example_populate(MemCh *m, Task *tsk, Abstract *arg, Abstract *source){
+static status Example_populate(MemCh *m, Task *tsk, void *arg, void *source){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
@@ -35,7 +35,6 @@ status ServeTcp_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
     status r = READY;
-    Abstract *args[2];
     
     TcpCtx *ctx = TcpCtx_Make(m);
     ctx->port = 3000;

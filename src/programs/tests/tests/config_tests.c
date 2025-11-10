@@ -44,7 +44,7 @@ status Config_Tests(MemCh *gm){
     arr[8] = NULL;
     arr[9] = NULL;
 
-    for(Abstract **ap = arr; *ap != NULL; ap += 2){
+    for(Abstract **ap = (Abstract **)arr; *ap != NULL; ap += 2){
         Abstract *key = *ap;
         Abstract *expected = *(ap+1);
         Abstract *value = NodeObj_Att(doc, key);
@@ -69,7 +69,7 @@ status Config_Tests(MemCh *gm){
     arr[4] = NULL;
     arr[5] = NULL;
 
-    for(Abstract **ap = arr; *ap != NULL; ap += 2){
+    for(Abstract **ap = (Abstract **)arr; *ap != NULL; ap += 2){
         Abstract *key = *ap;
         Abstract *expected = *(ap+1);
         Abstract *value = NodeObj_Att(tag, key);
@@ -92,7 +92,7 @@ status Config_Tests(MemCh *gm){
     arr[2] = NULL;
     arr[3] = NULL;
 
-    for(Abstract **ap = arr; *ap != NULL; ap += 2){
+    for(Abstract **ap = (Abstract **)arr; *ap != NULL; ap += 2){
         Abstract *key = *ap;
         Abstract *expected = *(ap+1);
         Abstract *value = NodeObj_Att(footer, key);

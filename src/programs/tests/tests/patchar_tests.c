@@ -18,16 +18,16 @@ static status comparePat(MemCh *m, Str *label, PatCharDef *pat, PatCharDef *expe
         e++;
     }
 
-    Abstract *args[] = {
-        (Abstract *)label,
-        (Abstract *)Ptr_Wrapped(m, pat, TYPE_PATCHARDEF),
-        (Abstract *)Ptr_Wrapped(m, expected, TYPE_PATCHARDEF),
+    void *args[] = {
+        label,
+        Ptr_Wrapped(m, pat, TYPE_PATCHARDEF),
+        Ptr_Wrapped(m, expected, TYPE_PATCHARDEF),
         NULL
     };
     r |= Test(matches, "PatChar $ matches @ vs @", args);
     if(e->flags != PAT_END){
-        Abstract *args[] = {
-            (Abstract *)label,
+        void *args[] = {
+            label,
             NULL
         };
         r |= Test((e->flags == PAT_END),

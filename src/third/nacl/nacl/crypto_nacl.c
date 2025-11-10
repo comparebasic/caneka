@@ -17,7 +17,6 @@ status Str_ToSha256(MemCh *m, Str *s, digest *hash){
 
 status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
     Sha256Ctx ctx;
-    Abstract *args[3];
     v = StrVec_ReAlign(m, v);
     memset(&ctx, 0, sizeof(Sha256Ctx));
     sha256_start(&ctx);
@@ -36,7 +35,7 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
 }
 
 status StrVec_SaltedDigest(MemCh *m, StrVec *orig, Str *salt, digest *hash){
-    StrVec *v = (StrVec *)StrVec_Clone(m, (Abstract *)orig);
+    StrVec *v = (StrVec *)StrVec_Clone(m, orig);
     StrVec_AddBytes(m, v, salt->bytes, salt->length);
     return StrVec_ToSha256(m, v, hash);
 }

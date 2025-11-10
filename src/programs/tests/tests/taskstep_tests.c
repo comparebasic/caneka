@@ -3,9 +3,9 @@
 
 static status funcThree(Step *st, Task *tsk){
     status r = READY;
-    Abstract *args[2];
+    void *args[2];
     Single *count = (Single *)tsk->source;
-    args[0] = (Abstract *)count;
+    args[0] = count;
     args[1] = NULL;
     r |= Test(count->type.of == TYPE_WRAPPED_I32 && count->val.i == 2,
         "Source str equals tsk->source with expected count $", args);
@@ -17,9 +17,9 @@ static status funcThree(Step *st, Task *tsk){
 
 static status funcTwo(Step *st, Task *tsk){
     status r = READY;
-    Abstract *args[2];
+    void *args[2];
     Single *count = (Single *)tsk->source;
-    args[0] = (Abstract *)count;
+    args[0] = count;
     args[1] = NULL;
     r |= Test(count->type.of == TYPE_WRAPPED_I32 && count->val.i == 1,
         "Source str equals tsk->source with expected count $", args);
@@ -31,9 +31,9 @@ static status funcTwo(Step *st, Task *tsk){
 
 static status funcOne(Step *st, Task *tsk){
     status r = READY;
-    Abstract *args[2];
+    void *args[2];
     Single *count = (Single *)tsk->source;
-    args[0] = (Abstract *)count;
+    args[0] = count;
     args[1] = NULL;
     r |= Test(count->type.of == TYPE_WRAPPED_I32 && count->val.i == 0,
         "Source str equals tsk->source with expected count $", args);
@@ -47,15 +47,15 @@ status TaskStep_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     MemCh *m = MemCh_Make();
     status r = READY;
-    Abstract *args[2];
+    void *args[2];
 
     Single *count = I32_Wrapped(m, 0);
-    Task *tsk = Task_Make(Span_Make(m), (Abstract *)count);
+    Task *tsk = Task_Make(Span_Make(m), count);
     Task_AddStep(tsk, funcTwo, NULL, NULL, ZERO);
     Task_AddStep(tsk, funcOne, NULL, NULL, ZERO);
     Task_Tumble(tsk);
 
-    args[0] = (Abstract *)tsk;
+    args[0] = tsk;
     args[1] = NULL;
     r |= Test(tsk->type.state & SUCCESS, "Task finishes successfully", args);
 

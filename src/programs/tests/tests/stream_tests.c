@@ -23,7 +23,7 @@ status Stream_Tests(MemCh *gm){
         "I'm bringing restaurant supply sourced dehydrated hashbrowns, and a sour-dough starter to make bread and breakfast in the mountains. All we need is cooking gas and stream water to eat like champtions on the wilderness :)";
 
     StrVec *vo = StrVec_From(m, Str_CstrRef(m, cstr));
-    r |= Test(Equals((Abstract *)vo,(Abstract *)bf->v), 
+    r |= Test(Equals(vo, bf->v), 
         "Comparing StrVec built up slowly, and one built all at once ", NULL);
 
     MemCh_Free(m);

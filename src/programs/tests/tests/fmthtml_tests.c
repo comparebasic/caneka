@@ -25,7 +25,7 @@ static char *expectedCstr = ""
 
 status FmtHtml_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
-    Abstract *args[5];
+    void *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
     Str *s = NULL; 
@@ -47,11 +47,11 @@ status FmtHtml_Tests(MemCh *gm){
 
     s = Str_CstrRef(m, expectedCstr);
     s->type.state |= DEBUG;
-    boolean matches = Equals((Abstract *)s, (Abstract *)bf->v);
+    boolean matches = Equals(s, bf->v);
     if(!matches){
-        Abstract *args[] = {
-            (Abstract *)s,
-            (Abstract *)bf->v,
+        void *args[] = {
+            s,
+            bf->v,
             NULL
         };
         Out("^r.Mismatch:\n  Expected:&\n  Actual: ^E.&^0.", args);

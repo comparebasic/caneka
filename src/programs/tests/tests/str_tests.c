@@ -8,41 +8,44 @@ status Str_Tests(MemCh *gm){
     s = Str_CstrRef(m, "Hi");
     status r = READY;
     cls type = TYPE_STR;
-    Abstract *args1[] = {
-        (Abstract *)Type_ToStr(m, type),
-        (Abstract *)s,
+    void *args1[] = {
+        Type_ToStr(m, type),
+        s,
         NULL
     };
     r |= Test(s->type.of == TYPE_STR, "Expect string to have fixed type $ found @", args1);
     i32 two = 2;
-    Abstract *args2[] = {
-        (Abstract *)I32_Wrapped(m, two),
-        (Abstract *)I32_Wrapped(m, s->length),
+    void *args2[] = {
+        I32_Wrapped(m, two),
+        I32_Wrapped(m, s->length),
         NULL
     };
     r |= Test(s->length == 2, "Expect string length of @ found @", args2);
-    Abstract *args3[] = {
-        (Abstract *)Str_CstrRef(m, "Hi"),
-        (Abstract *)s,
+    void *args3[] = {
+        Str_CstrRef(m, "Hi"),
+        s,
         NULL
     };
-    r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0, "Expect string match of @ found @", args3);
+    r |= Test(strncmp((char *)s->bytes, "Hi\0", 3) == 0,
+        "Expect string match of @ found @", args3);
 
     i64 value = 35072;
     s = Str_FromI64(m, value);
     Str *expected_is = Str_CstrRef(m, "35072");
-    Abstract *args6[] = {
-        (Abstract *)I32_Wrapped(m, value), 
-        (Abstract *)I16_Wrapped(m, expected_is->length), 
-        (Abstract *)I16_Wrapped(m, s->length),
+    void *args6[] = {
+        I32_Wrapped(m, value), 
+        I16_Wrapped(m, expected_is->length), 
+        I16_Wrapped(m, s->length),
         NULL
     };
-    r |= Test(s->length == expected_is->length, "Expect for i32 value $ length of $ found $", args6);
-    Abstract *args7[] = {
-        (Abstract *)I32_Wrapped(m, value), 
+    r |= Test(s->length == expected_is->length, 
+        "Expect for i32 value $ length of $ found $", args6);
+    void *args7[] = {
+        I32_Wrapped(m, value), 
         NULL
     };
-    r |= Test(Equals((Abstract *)s, (Abstract *)expected_is) == TRUE, "Expect string match of i32 of $ to string", args7);
+    r |= Test(Equals(s, expected_is) == TRUE, 
+        "Expect string match of i32 of $ to string", args7);
 
     char *cstr = "GET /path.html HTTP/1.1\r\n"
     "Host: localhost\r\n"
@@ -53,9 +56,9 @@ status Str_Tests(MemCh *gm){
 
     s = Str_CstrRef(m, cstr);
     i64 len = strlen(cstr);
-    Abstract *args8[] = {
-        (Abstract *)I64_Wrapped(m, len),
-        (Abstract *)I16_Wrapped(m, s->length),
+    void *args8[] = {
+        I64_Wrapped(m, len),
+        I16_Wrapped(m, s->length),
         NULL
     };
     r |= Test(s->length == strlen(cstr), "Expect length $, have $", args8);
@@ -73,25 +76,27 @@ status Str_EndMatchTests(MemCh *gm){
 
     match = ".c";
     s = Str_CstrRef(m, "file1.c");
-    Abstract *args1[] = {
-        (Abstract *)s,
+    void *args1[] = {
+        s,
         NULL
     };
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.c' matches successfully, had @", args1);
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), 
+        "file ending in '.c' matches successfully, had @", args1);
 
     match = ".cnk";
     s = Str_CstrRef(m, "file1.cnk");
-    Abstract *args2[] = {
-        (Abstract *)s,
+    void *args2[] = {
+        s,
         NULL
     };
-    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches successfully, had @", args2);
+    r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), 
+        "file ending in '.cnk' matches successfully, had @", args2);
 
     match = ".c";
     s = Str_Clone(m, s);
     Str_Trunc(s, -2);
-    Abstract *args3[] = {
-        (Abstract *)s,
+    void *args3[] = {
+        s,
         NULL
     };
     r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches \".c\" after String_Trunc successfully, had @", args3);

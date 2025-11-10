@@ -140,24 +140,23 @@ static Object *getGenericData(MemCh *m, Route *rt){
     Object *data = Object_Make(m, ZERO);
 
     Table *atts = Table_Make(m);
-    Table_Set(atts,
-        (Abstract *)Str_FromCstr(m, "title", ZERO), 
-        (Abstract *)Str_FromCstr(m, "Example Title", ZERO));
+    Table_Set(atts, Str_FromCstr(m, "title", ZERO), 
+        Str_FromCstr(m, "Example Title", ZERO));
     NodeObj *page = Object_Make(m, TYPE_NODEOBJ);
-    Object_SetPropByIdx(page, NODEOBJ_PROPIDX_ATTS, (Abstract *)atts);
+    Object_SetPropByIdx(page, NODEOBJ_PROPIDX_ATTS, atts);
     Object *config = Object_Make(m, ZERO);
-    Object_Set(config, (Abstract *)Str_CstrRef(m, "page"), (Abstract *)page);
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "config"), (Abstract *)config);
+    Object_Set(config, Str_CstrRef(m, "page"), page);
+    Object_Set(data, Str_CstrRef(m, "config"), config);
     
     Object *nav = Object_Make(m, ZERO);
-    Object_Set(nav, (Abstract *)Str_CstrRef(m, "pages"), (Abstract *)rt);
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "nav"), (Abstract *)nav);
+    Object_Set(nav, Str_CstrRef(m, "pages"), rt);
+    Object_Set(data, Str_CstrRef(m, "nav"), nav);
     return data;
 }
 
 status WwwRoute_Tests(MemCh *gm){
     DebugStack_Push(NULL, ZERO);
-    Abstract *args[5];
+    void *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -166,42 +165,42 @@ status WwwRoute_Tests(MemCh *gm){
         Str_CstrRef(m, "./examples/web-server/pages/public"));
     Route_Collect(rt, path);
 
-    args[0] = (Abstract *)rt;
+    args[0] = rt;
     args[1] = NULL;
     Out("^p.Route @^0\n", args);
 
     path = StrVec_From(m, Str_FromCstr(m, "/account/", ZERO));
     IoUtil_Annotate(m, path);
 
-    args[0] = (Abstract *)path;
+    args[0] = path;
     args[1] = NULL;
     Out("^p.Path @^0\n", args);
 
     Route *account = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
 
-    args[0] = (Abstract *)account;
+    args[0] = account;
     args[1] = NULL;
     Out("^p.Account @^0\n", args);
 
     Hashed *h = Object_GetByIdx(account, ROUTE_PROPIDX_MIME);
     args[0] = h->value;
     args[1] = NULL;
-    r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "text/html", ZERO)), 
+    r |= Test(Equals(h->value, Str_FromCstr(m, "text/html", ZERO)), 
         "account index page is mime type text/html, have @", args);
     h = Object_GetByIdx(account, ROUTE_PROPIDX_TYPE);
     args[0] = h->value;
     args[1] = NULL;
-    r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "html", ZERO)), 
+    r |= Test(Equals(h->value, Str_FromCstr(m, "html", ZERO)), 
         "account index page is type html, have @", args);
 
     path = StrVec_From(m, Str_FromCstr(m, "/account/profile", ZERO));
     IoUtil_Annotate(m, path);
     Route *profile = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
     h = Object_GetByIdx(profile, ROUTE_PROPIDX_MIME);
-    r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "text/html", ZERO)),
+    r |= Test(Equals(h->value, Str_FromCstr(m, "text/html", ZERO)),
         "profile index page is mime type text/html", NULL);
     h = Object_GetByIdx(profile, ROUTE_PROPIDX_TYPE);
-    r |= Test(Equals((Abstract *)h->value, (Abstract *)Str_FromCstr(m, "templ", ZERO)),
+    r |= Test(Equals(h->value, Str_FromCstr(m, "templ", ZERO)),
         "profile index page is mime type templ", NULL);
 
     MemCh_Free(m);
@@ -211,7 +210,7 @@ status WwwRoute_Tests(MemCh *gm){
 
 status WwwRouteTempl_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
-    Abstract *args[5];
+    void *args[5];
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -230,9 +229,9 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Object *data = getGenericData(m, rt);
 
     Str *now = MicroTime_ToStr(m, MicroTime_Now());
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "now"), (Abstract *)now);
+    Object_Set(data, Str_CstrRef(m, "now"), now);
     StrVec *title = StrVec_From(m, Str_CstrRef(m, "The Title of the Master Page"));
-    Object_Set(data, (Abstract *)Str_CstrRef(m, "title"), (Abstract *)title);
+    Object_Set(data, Str_CstrRef(m, "title"), title);
 
     StrVec *path = StrVec_From(m, Str_CstrRef(m,
         "./examples/web-server/pages/inc/header.templ"));
@@ -249,12 +248,12 @@ status WwwRouteTempl_Tests(MemCh *gm){
     StrVec *out = StrVec_Make(m);
     Buff *bf = Buff_From(m, out);
 
-    Templ_ToS(templ, bf, (Abstract *)data, NULL);
+    Templ_ToS(templ, bf, data, NULL);
     Str *expected = Str_FromCstr(m, cstr, ZERO);
-    args[0] = (Abstract *)out;
-    args[1] = (Abstract *)data;
+    args[0] = out;
+    args[1] = data;
     args[2] = NULL;
-    r |= TestShow(Equals((Abstract *)out, (Abstract *)expected),
+    r |= TestShow(Equals(out, expected),
         "Templ from Route has expected output",
         "Templ output does not match @", args);
 
@@ -267,24 +266,20 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     data = getGenericData(m, rt);
     Object *user = Object_Make(m, ZERO);
-    Object_Set(user,
-        (Abstract *)Str_FromCstr(m, "name", ZERO),
-        (Abstract *)Str_FromCstr(m, "Fancy Pantsy", ZERO));
-    Object_Set(data,
-       (Abstract *) Str_FromCstr(m, "user", ZERO),
-       (Abstract *)user);
+    Object_Set(user, Str_FromCstr(m, "name", ZERO),
+        Str_FromCstr(m, "Fancy Pantsy", ZERO));
+    Object_Set(data, Str_FromCstr(m, "user", ZERO), user);
 
     Route *header = Object_ByPath(inc,
-        StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)),
-            NULL, SPAN_OP_GET);
+        StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)), NULL, SPAN_OP_GET);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(handler, bf, data, NULL);
     
     expected = Str_FromCstr(m, loginCstr, ZERO);
-    args[0] = (Abstract *)bf->v;
+    args[0] = bf->v;
     args[1] = NULL;
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)bf->v),
+    r |= TestShow(Equals(expected, bf->v),
         "Expected template value with no header and a user name", 
         "Expected template value with no header and a user name: $", 
     args);
@@ -307,10 +302,9 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Buff_Pipe(dest, bf);
 
     expected = Str_FromCstr(m, loginNoUserCstr, ZERO);
-expected->type.state |= DEBUG;
-    args[0] = (Abstract *)dest->v;
+    args[0] = dest->v;
     args[1] = NULL;
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)dest->v), 
+    r |= TestShow(Equals(expected, dest->v), 
         "Expected template value with no user object and a header",
         "Expected template value with no user object and a header: $", 
     args);
@@ -318,12 +312,9 @@ expected->type.state |= DEBUG;
     /* index.fmt with header */
     data = getGenericData(m, rt);
     user = Object_Make(m, ZERO);
-    Object_Set(user,
-        (Abstract *)Str_FromCstr(m, "name", ZERO),
-        (Abstract *)Str_FromCstr(m, "Fancy Pantsy", ZERO));
-    Object_Set(data,
-       (Abstract *) Str_FromCstr(m, "user", ZERO),
-       (Abstract *)user);
+    Object_Set(user, Str_FromCstr(m, "name", ZERO),
+        Str_FromCstr(m, "Fancy Pantsy", ZERO));
+    Object_Set(data, Str_FromCstr(m, "user", ZERO), user);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
@@ -341,9 +332,9 @@ expected->type.state |= DEBUG;
     Buff_Pipe(dest, bf);
     
     expected = Str_FromCstr(m, homeCstr, ZERO);
-    args[0] = (Abstract *)dest->v;
+    args[0] = dest->v;
     args[1] = NULL;
-    r |= TestShow(Equals((Abstract *)expected, (Abstract *)dest->v),
+    r |= TestShow(Equals(expected, dest->v),
         "Expected fmt value with user name", 
         "Expected fmt value with user name: $", 
     args);
@@ -357,7 +348,7 @@ expected->type.state |= DEBUG;
 
 status WwwRouteMime_Tests(MemCh *gm){
     DebugStack_Push(NULL, ZERO);
-    Abstract *args[6];
+    void *args[6];
     status r = READY;
     MemCh *m = MemCh_Make();
 
@@ -381,7 +372,7 @@ status WwwRouteMime_Tests(MemCh *gm){
         Str_FromCstr(m, "./examples/web-server/pages/public/style.css", ZERO));
     StrVec *expected = File_ToVec(m, pathS);
 
-    r |= Test(Equals((Abstract *)dest->v, (Abstract *)expected), "Content from Buff piped from route matches reading file directly", NULL);
+    r |= Test(Equals(dest->v, expected), "Content from Buff piped from route matches reading file directly", NULL);
 
     MemCh_Free(m);
     DebugStack_Pop();

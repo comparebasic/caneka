@@ -18,8 +18,6 @@ $CC -o build/build_ext $INC $STATICS src/ext/build.c -lm && ./build/build_ext  |
 echo "building Caneka Inter..."
 $CC -o build/build_inter $INC $STATICS src/inter/build.c -lm && ./build/build_inter || exit 1;
 
-exit 1
-
 echo "building Caneka Nacl..."
 $CC -o build/build_nacl $INC $STATICS src/third/nacl/build.c -lm && ./build/build_nacl || exit 1;
 

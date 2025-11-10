@@ -32,16 +32,16 @@ status Path_Tests(MemCh *gm){
     StrVec_Add(v, s);
 
     Span *p = Span_Make(m);
-    Span_Add(p, (Abstract *)B_Wrapped(m, (byte)'/', ZERO, MORE));
-    Span_Add(p, (Abstract *)B_Wrapped(m, (byte)'.', ZERO, LAST));
+    Span_Add(p, B_Wrapped(m, (byte)'/', ZERO, MORE));
+    Span_Add(p, B_Wrapped(m, (byte)'.', ZERO, LAST));
     Path_Annotate(m, v, p);
 
     i32 i;
     TestExp *exp = expected;
     for(i = 0; exp->bytes != NULL; i++, exp++){
         Str *s = (Str *)Span_Get(v->p, i);
-        Abstract *args[] = {
-            (Abstract *)s,
+        void *args[] = {
+            s,
             NULL,
         };
         r |= Test(exp->length ==  s->length, "Expected length to equal expected for &",
@@ -55,9 +55,9 @@ status Path_Tests(MemCh *gm){
     Str *fname = IoUtil_FnameStr(m, v);
     StrVec *bname = IoUtil_BasePath(m, v);
 
-    r |= Test(Equals((Abstract *)bname, (Abstract *)Str_CstrRef(m, "/fancy/path/thing/")), 
+    r |= Test(Equals(bname, Str_CstrRef(m, "/fancy/path/thing/")), 
         "base path is extracted properly", NULL);
-    r |= Test(Equals((Abstract *)fname, (Abstract *)Str_CstrRef(m, "file.ext")), 
+    r |= Test(Equals(fname, Str_CstrRef(m, "file.ext")), 
         "file name is extracted properly", NULL);
 
     MemCh_Free(m);

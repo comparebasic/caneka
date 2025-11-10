@@ -26,22 +26,22 @@ status Snip_Tests(MemCh *gm){
     SnipSpan_Add(sns, sn);
 
     Cursor_Incr(curs, (9 + 8)-1);
-    Abstract *args2[] = {
-        (Abstract *)curs,
+    void *args2[] = {
+        curs,
         NULL
     };
 
     v = StrVec_Snip(m, sns, curs);
 
     s = Str_CstrRef(m, "sunshine");
-    Abstract *args1[] = {
-        (Abstract *)s,
-        (Abstract *)v,
-        (Abstract *)Ptr_Wrapped(m, sns, TYPE_SNIPSPAN),
-        (Abstract *)curs->v,
+    void *args1[] = {
+        s,
+        v,
+        Ptr_Wrapped(m, sns, TYPE_SNIPSPAN),
+        curs->v,
         NULL
     };
-    r |= Test(Equals((Abstract *)v, (Abstract *)s),
+    r |= Test(Equals(v, s),
         "Found expected keyword @, have @ from @ of @", args1);
 
     MemCh_Free(m);
@@ -86,18 +86,18 @@ status SnipModify_Tests(MemCh *gm){
 
     s = Str_CstrRef(m, "Start with some text, that has a ");
     v = StrVec_Snip(m, sns, curs);
-    Abstract *args1[] = {
-        (Abstract *)v,
-        (Abstract *)s,
+    void *args1[] = {
+        v,
+        s,
         NULL
     };
-    r |= Test(Equals((Abstract *)v, (Abstract *)s), 
+    r |= Test(Equals(v, s), 
         "Start of line matches, expected &, have &", args1);
     
     SnipSpan_SetAll(sns, SNIP_GAP);
     sn = (Snip *)Span_Get(sns, 0);
-    Abstract *args2[] = {
-        (Abstract *)Ptr_Wrapped(OutStream->m, sns, TYPE_SNIPSPAN),
+    void *args2[] = {
+        Ptr_Wrapped(OutStream->m, sns, TYPE_SNIPSPAN),
         NULL
     };
     r |= Test((sn->length == 38 && sns->nvalues == 1), 

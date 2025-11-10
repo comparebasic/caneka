@@ -3,7 +3,7 @@
 
 status Stash_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
-    Abstract *args[5];
+    void *args[5];
     MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
@@ -17,8 +17,8 @@ status Stash_Tests(MemCh *gm){
     cls typeOf = s->type.of;
 
     i32 slIdx = m->it.p->max_idx;
-    Abstract *arr[2] = {
-        (Abstract *)Span_Get(m->it.p, m->it.p->max_idx)
+    void *arr[2] = {
+        Span_Get(m->it.p, m->it.p->max_idx)
     };
 
     Stash_PackAddr(s->type.of, slIdx, (void *)&s);
@@ -29,10 +29,8 @@ status Stash_Tests(MemCh *gm){
     r |= Test(coord->idx == slIdx, "Coord has idx sent to PackAddr", NULL);
 
     Stash_UnpackAddr(m, coord, arr);
-    args[0] = (Abstract *)Str_Ref(m,
-        (byte *)&orig,sizeof(void *), sizeof(void *), STRING_BINARY);
-    args[1] = (Abstract *)Str_Ref(m,
-        (byte *)&s, sizeof(void *), sizeof(void *), STRING_BINARY);
+    args[0] = Str_Ref(m, (byte *)&orig,sizeof(void *), sizeof(void *), STRING_BINARY);
+    args[1] = Str_Ref(m, (byte *)&s, sizeof(void *), sizeof(void *), STRING_BINARY);
     args[2] = NULL;
     r |= Test((void *)s == orig, "Coord has been restored expected &, have &", args);
 
@@ -44,11 +42,11 @@ status Stash_Tests(MemCh *gm){
     StrVec *vec = StrVec_From(pst, Str_FromCstr(pst, "Halo", STRING_COPY));
 
     p = Span_Make(pst);
-    Span_Add(p, (Abstract *)one);
-    Span_Add(p, (Abstract *)two);
-    Span_Add(p, (Abstract *)three);
-    Span_Add(p, (Abstract *)vec);
-    pst->owner = (Abstract *)p;
+    Span_Add(p, one);
+    Span_Add(p, two);
+    Span_Add(p, three);
+    Span_Add(p, vec);
+    pst->owner = p;
 
     Str *path = IoUtil_GetCwdPath(m, Str_CstrRef(m, "dist/test/persist.mem"));
 
@@ -60,9 +58,9 @@ status Stash_Tests(MemCh *gm){
     status re = Stash_FlushFree(bf, pst);
 
     Buff_Stat(bf);
-    args[0] = (Abstract *)I64_Wrapped(m, PAGE_SIZE+sizeof(StashHeader));
-    args[1] = (Abstract *)I64_Wrapped(m, bf->st.st_size);
-    args[2] = (Abstract *)bf;
+    args[0] = I64_Wrapped(m, PAGE_SIZE+sizeof(StashHeader));
+    args[1] = I64_Wrapped(m, bf->st.st_size);
+    args[2] = bf;
     args[3] = NULL;
     r |= Test(bf->st.st_size == PAGE_SIZE+sizeof(StashHeader),
         "Bytes written equals 1 page + StashHeader, expected $, have $ - @", args);
@@ -86,15 +84,12 @@ status Stash_Tests(MemCh *gm){
 
     s = Span_Get((Span *)loaded->owner, 0);
     Str *expected = Str_CstrRef(m, "One");
-    r |= Test(pst != loaded,
-        "loaded is not the original", NULL);
-    r |= Test(s != one,
-        "Str is not the original", NULL);
+    r |= Test(pst != loaded, "loaded is not the original", NULL);
+    r |= Test(s != one, "Str is not the original", NULL);
 
-    args[0] = (Abstract *)expected;
-    args[1] = (Abstract *)s;
-    r |= Test(Equals((Abstract *)s, (Abstract *)expected),
-        "Str has equivilent value, expected &, have &", args);
+    args[0] = expected;
+    args[1] = s;
+    r |= Test(Equals(s, expected), "Str has equivilent value, expected &, have &", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

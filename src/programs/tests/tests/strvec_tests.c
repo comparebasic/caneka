@@ -64,25 +64,25 @@ static char *ponyTailTwoCstr = ""
 status StrVec_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
-    Abstract *args[5];
+    void *args[5];
 
     StrVec *vc = StrVec_Make(m);
     StrVec_Add(vc, Str_CstrRef(m, "hi dude"));
     StrVec_Add(vc, Str_CstrRef(m, ", what a wild ride!"));
     Str *s = Str_CstrRef(m, "hi dude, what a wild ride!");
-    Abstract *args1[] = {
-        (Abstract *)vc,
-        (Abstract *)s,
+    void *args1[] = {
+        vc,
+        s,
         NULL
     };
-    r |= Test(Equals((Abstract *)vc, (Abstract *)s), "Testing StrVec and Str '$' vs '$'", args1);
+    r |= Test(Equals(vc, s), "Testing StrVec and Str '$' vs '$'", args1);
     StrVec *vr = StrVec_ReAlign(m, vc);
-    Abstract *args2[] = {
-        (Abstract *)vr,
-        (Abstract *)s,
+    void *args2[] = {
+        vr,
+        s,
         NULL
     };
-    r |= Test(Equals((Abstract *)vr, (Abstract *)s), "Testing ReAligned StrVec and Str '$' vs '$'", args2);
+    r |= Test(Equals(vr, s), "Testing ReAligned StrVec and Str '$' vs '$'", args2);
 
     Str *st = Str_CstrRef(m, "time");
     Str *sa = Str_CstrRef(m, "afterwards");
@@ -94,14 +94,14 @@ status StrVec_Tests(MemCh *gm){
 
     i32 twentyNine = 29;
     i64 fiveK = 5987263;
-    Abstract *args3[] = {
-        (Abstract *)st,
-        (Abstract *)sa,
-        (Abstract *)sf,
-        (Abstract *)sf2,
-        (Abstract *)I32_Wrapped(m, twentyNine),
-        (Abstract *)I64_Wrapped(m, fiveK),
-        (Abstract *)vc,
+    void *args3[] = {
+        st,
+        sa,
+        sf,
+        sf2,
+        I32_Wrapped(m, twentyNine),
+        I64_Wrapped(m, fiveK),
+        vc,
         NULL
     };
 
@@ -110,18 +110,12 @@ status StrVec_Tests(MemCh *gm){
 
     s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\"\x1b[1mafterwards\x1b[22m\"' \"\x1b[1mfour\x1b[22m\" Str<DEBUG 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!");
 
-    args[0] = (Abstract *)s;
-    args[1] = (Abstract *)bf->v;
+    args[0] = s;
+    args[1] = bf->v;
     args[2] = NULL;
     s->type.state |= DEBUG;
-    r |= Test(Equals((Abstract *)bf->v, (Abstract *)s),
+    r |= Test(Equals(bf->v, s),
         "Testing StrVec and StrVec from Fmt via Buff expected:\n$\nhave:\n$", args);
-
-    /*
-    StrVec_Add(vc, Str_CstrRef(m, "\n\n"));
-    StrVec_Add(vc, Str_CstrRef(m, ponyTailCstr));
-    StrVec_Add(vc, Str_CstrRef(m, ponyTailTwoCstr));
-    */
 
     MemCh_Free(m);
 
