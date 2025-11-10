@@ -6,7 +6,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
     while((Cursor_NextByte(rbl->curs) & END) == 0){
         Guard_Incr(rbl->m, &rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
-        Type_SetFlag(&rbl->matchIt, SPAN_OP_GET);
+        Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
         Iter_Reset(&rbl->matchIt);
         if(rbl->curs->type.state & CURSOR_STR_BOUNDRY){
             while((Iter_Next(&rbl->matchIt) & END) == 0){
@@ -325,11 +325,7 @@ status Roebling_Start(Roebling *rbl){
     return SUCCESS;
 }
 
-Roebling *Roebling_Make(MemCh *m,
-        Cursor *curs,
-        RblCaptureFunc capture,
-        void *source
-    ){
+Roebling *Roebling_Make(MemCh *m, Cursor *curs, RblCaptureFunc capture, void *source){
 
     Roebling *rbl = (Roebling *)MemCh_Alloc(m, sizeof(Roebling));
     rbl->type.of = TYPE_ROEBLING;

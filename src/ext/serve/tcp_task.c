@@ -8,8 +8,9 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
     Roebling *rbl = (Roebling *)as(st->arg, TYPE_ROEBLING);
 
     Buff_SetSocket(proto->in, pfd->fd);
-    Buff_ReadAmount(proto->in, SERV_READ_SIZE);
-    Roebling_Run(rbl);
+    if((Buff_ReadAmount(proto->in, SERV_READ_SIZE) & NOOP) == 0){
+        Roebling_Run(rbl);
+    }
     
     st->type.state |= (rbl->type.state & (SUCCESS|ERROR));
     if(st->type.state & SUCCESS && (tsk->type.state & DEBUG)){

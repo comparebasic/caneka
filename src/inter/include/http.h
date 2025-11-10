@@ -2,3 +2,4 @@
 #include "http/http_ctx.h"
 #include "http/http_roebling.h"
 #include "http/http_task.h"
+#include "http/http_cls.h"

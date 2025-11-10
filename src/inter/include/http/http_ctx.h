@@ -1,4 +1,3 @@
-extern struct lookup * HttpMethods;
 enum http_status {
     HTTP_STATUS_OK = 200,
     HTTP_STATUS_REDIRECT = 301,

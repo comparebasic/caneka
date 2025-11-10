@@ -508,7 +508,7 @@ status Buff_Read(Buff *bf){
 }
 
 status Buff_ReadAmount(Buff *bf, i64 amount){
-    bf->type.state &= ~(SUCCESS|PROCESSING|MORE);
+    bf->type.state &= ~(SUCCESS|PROCESSING|MORE|NOOP);
 
     if(amount > IO_SEND_MAX){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -517,6 +517,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
         return bf->type.state;
     }
 
+    i64 orig = amount;
     while(amount > 0){
         ssize_t recieved = 0;
         Str *s = Str_Make(bf->m, min(amount, IO_BLOCK_SIZE));
@@ -553,6 +554,9 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
                 break;
             }
         }
+    }
+    if(amount == orig){
+        bf->type.state |= NOOP;
     }
 
     if(amount > 0){
