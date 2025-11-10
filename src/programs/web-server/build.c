@@ -31,8 +31,8 @@ static char *inc[] = {
 static char *staticLibs[] = {
     "./build/libcnknacl/libcnknacl.a",
     "/external/lib/libnacl.a",
-    "./build/libcnkext/libcnkext.a",
     "./build/libcnkinter/libcnkinter.a",
+    "./build/libcnkext/libcnkext.a",
     "./build/libcaneka/libcaneka.a",
     NULL
 };
