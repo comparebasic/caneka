@@ -126,6 +126,7 @@ static char *extTypeStrings[] = {
     "KVE_CONTENT",
     "KVE_END",
     "_KVE_END",
+    "_TYPE_EXT_END",
     NULL
 };
 

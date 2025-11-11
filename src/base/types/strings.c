@@ -96,7 +96,7 @@ char *Type_ToChars(cls type){
         }
     }
     if(typeStrings != NULL){
-        if(type < 3000){
+        if(type < 1 << 15){
             return typeStrings[type-idx];
         }else{
             return "TooBigTypeNumber";
