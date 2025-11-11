@@ -1,9 +1,6 @@
-enum lang_range {
+enum inter_range {
     _TYPE_INTER_START = _TYPE_EXT_END,
     _TYPE_WWW_START,
-    TYPE_HTML_NAV,
-    TYPE_HTML_PAGE,
-    TYPE_WWW_ROUTE,
     TYPE_ROUTE_CTX,
     _TYPE_WWW_END,
     _TYPE_LANG_START,
@@ -45,4 +42,12 @@ enum lang_range {
     FORMAT_TEMPL_IFNOT,
     _FORMAT_TEMPL_LOGIC_END,
     _TYPE_INTER_END,
+};
+
+enum inter_obj_range {
+    _TYPE_INTER_OBJ_START = _EXT_OBJECT_END,
+    TYPE_HTML_NAV,
+    TYPE_HTML_PAGE,
+    TYPE_WWW_ROUTE,
+    _TYPE_INTER_OBJ_END,
 };

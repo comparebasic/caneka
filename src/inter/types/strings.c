@@ -4,9 +4,6 @@
 static char *interTypeStrings[] = {
     "_TYPE_INTER_START",
     "_TYPE_WWW_START",
-    "TYPE_HTML_NAV",
-    "TYPE_HTML_PAGE",
-    "TYPE_WWW_ROUTE",
     "TYPE_ROUTE_CTX",
     "_TYPE_WWW_END",
     "_TYPE_LANG_START",
@@ -50,7 +47,18 @@ static char *interTypeStrings[] = {
     NULL
 };
 
+static char *interTypeObjectStrings[] = {
+    "_TYPE_INTER_OBJ_START",
+    "TYPE_HTML_NAV",
+    "TYPE_HTML_PAGE",
+    "TYPE_WWW_ROUTE",
+    "_TYPE_INTER_OBJ_END",
+    NULL
+};
+
 status InterTypeStrings_Init(MemCh *m){
-    printf("End %d\n", _TYPE_INTER_END);
-    return Lookup_Add(m, TypeStringRanges, _TYPE_INTER_START, (void *)interTypeStrings);
+    status r = READY;
+    r |= Lookup_Add(m, TypeStringRanges, _TYPE_INTER_START, (void *)interTypeStrings);
+    r |= Lookup_Add(m, TypeStringRanges, _TYPE_INTER_START, (void *)interTypeObjectStrings);
+    return r;
 }

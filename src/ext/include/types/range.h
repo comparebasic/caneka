@@ -21,7 +21,6 @@ enum ext_types {
     TYPE_PERMISSION,
     TYPE_AUTH,
     TYPE_RELATION,
-    TYPE_OBJECT,
     TYPE_MEMPAIR,
     TYPE_FILE,
     TYPE_SPOOL,
@@ -126,4 +125,6 @@ enum ext_types {
     KVE_END,
     _KVE_END,
     _TYPE_EXT_END,
+    TYPE_OBJECT = 1 << 14,
+    _EXT_OBJECT_END,
 };

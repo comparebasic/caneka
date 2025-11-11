@@ -24,7 +24,6 @@ static char *extTypeStrings[] = {
     "TYPE_PERMISSION",
     "TYPE_AUTH",
     "TYPE_RELATION",
-    "TYPE_OBJECT",
     "TYPE_MEMPAIR",
     "TYPE_FILE",
     "TYPE_SPOOL",
@@ -131,6 +130,15 @@ static char *extTypeStrings[] = {
     NULL
 };
 
+static char *extTypeObjectStrings[] = {
+    "TYPE_OBJECT",
+    "_EXT_OBJECT_END",
+    NULL
+};
+
 status ExtTypeStrings_Init(MemCh *m){
-    return Lookup_Add(m, TypeStringRanges, _TYPE_EXT_START, (void *)extTypeStrings);
+    status r = READY;
+    r |=  Lookup_Add(m, TypeStringRanges, _TYPE_EXT_START, (void *)extTypeStrings);
+    r |=  Lookup_Add(m, TypeStringRanges, TYPE_OBJECT, (void *)extTypeObjectStrings);
+    return r;
 }
