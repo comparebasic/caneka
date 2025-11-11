@@ -11,7 +11,6 @@ typedef struct objnative {
 
 typedef struct object {
     Type type;
-    Type objType;
     word _;
     i16 depth;
     i32 propMask;

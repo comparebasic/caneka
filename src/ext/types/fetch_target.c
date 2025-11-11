@@ -9,7 +9,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         tg->type.state |= FETCH_TARGET_HASH;
         tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
         tg->type.state |= FETCH_TARGET_RESOLVED;
-        tg->objType.of = typeOf;
+        tg->type.of = typeOf;
         return SUCCESS;
     } else {
         if(tg->type.state & FETCH_TARGET_ATT){
@@ -21,7 +21,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                     RangeType *att = Table_Get(map->tbl, tg->key); 
                     tg->offset = att->range;
                     tg->type.state |= FETCH_TARGET_RESOLVED;
-                    tg->objType.of = typeOf;
+                    tg->type.of = typeOf;
                     return SUCCESS;
                }
             }else{
@@ -33,7 +33,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                 }else{
                     tg->offset = sg->val.w;
                     tg->type.state |= FETCH_TARGET_RESOLVED;
-                    tg->objType.of = typeOf;
+                    tg->type.of = typeOf;
                     return SUCCESS;
                 }
             }
@@ -44,7 +44,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                 tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
             }
             tg->type.state |= FETCH_TARGET_RESOLVED;
-            tg->objType.of = typeOf;
+            tg->type.of = typeOf;
             return SUCCESS;
         }else if(tg->type.state & FETCH_TARGET_KEY){
             if(cls == NULL){
@@ -66,7 +66,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         }
 
         tg->type.state |= FETCH_TARGET_RESOLVED;
-        tg->objType.of = typeOf;
+        tg->type.of = typeOf;
         return SUCCESS;
     }
 err:
@@ -86,12 +86,12 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
     ClassDef *cls = NULL;
     word typeOf = value->type.of;
     if(typeOf == TYPE_OBJECT){
-        typeOf = ((Object *)value)->objType.of;
+        typeOf = ((Object *)value)->type.of;
     }
     if((tg->type.state & FETCH_TARGET_RESOLVED) &&
-            Object_TypeMatch(value, tg->objType.of)){
+            Object_TypeMatch(value, tg->type.of)){
         if(tg->type.state & FETCH_TARGET_ATT){
-            return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
+            return Fetch_FromOffset(m, value, tg->offset, tg->type.of);
         }else if(tg->type.state & FETCH_TARGET_HASH){
             void *a = NULL; 
             if(value->type.of == TYPE_OBJECT){

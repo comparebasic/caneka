@@ -30,7 +30,7 @@ status Class_SetProp(Object *obj, ClassDef *cls, Str *key, void *value){
     if(sg == NULL){
         void *args[] = {
             key,
-            Type_ToStr(ErrStream->m, obj->objType.of),
+            Type_ToStr(ErrStream->m, obj->type.of),
             NULL
         };
         Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
@@ -66,7 +66,7 @@ i32 Class_GetPropIdx(ClassDef *cls, Str *key){
 
 status Class_Register(MemCh *m, ClassDef *cls){
     if(cls->api.toS != NULL){
-        Lookup_Add(m, ToStreamLookup, cls->objType.of, (void *)cls->api.toS);
+        Lookup_Add(m, ToStreamLookup, cls->type.of, (void *)cls->api.toS);
     }
 
     ClassDef *parent = NULL;
@@ -93,7 +93,7 @@ status Class_Register(MemCh *m, ClassDef *cls){
         cls->api.toS = parent->api.toS;
     }
 
-    return Lookup_Add(m, ClassLookup, cls->objType.of, cls);
+    return Lookup_Add(m, ClassLookup, cls->type.of, cls);
 }
 
 ClassDef *ClassDef_Make(MemCh *m){
