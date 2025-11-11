@@ -290,7 +290,7 @@ Route *Route_From(MemCh *m, StrVec *dir){
 status Route_ClsInit(MemCh *m){
     status r = READY;
     ClassDef *cls = ClassDef_Make(m);
-    cls->objType.of = TYPE_WWW_ROUTE;
+    cls->type.of = TYPE_WWW_ROUTE;
     cls->name = Str_CstrRef(m, "Route");
     Class_SetupProp(cls, Str_CstrRef(m, "path"));
     Class_SetupProp(cls, Str_CstrRef(m, "file"));

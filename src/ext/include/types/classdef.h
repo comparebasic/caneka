@@ -4,7 +4,6 @@ enum class_flags {
 
 typedef struct classdef {
     Type type;
-    Type objType;
     Type originType;
     Maker make;
     Str *name;

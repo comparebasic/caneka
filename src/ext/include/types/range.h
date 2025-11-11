@@ -6,7 +6,6 @@ enum ext_types {
     TYPE_MESS,
     TYPE_MESS_CLIMBER,
     TYPE_NODE,
-    TYPE_NODEOBJ,
     TYPE_FETCHER,
     TYPE_FETCH_TARGET,
     TYPE_FETCH_FUNC,
@@ -126,5 +125,6 @@ enum ext_types {
     _KVE_END,
     _TYPE_EXT_END,
     TYPE_OBJECT = 1 << 14,
+    TYPE_NODEOBJ,
     _EXT_OBJECT_END,
 };

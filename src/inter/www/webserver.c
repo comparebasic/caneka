@@ -213,7 +213,7 @@ status WebServer_LayRoute(MemCh *m, Route *pages, StrVec *dir, StrVec *path, boo
     Route *rt = Route_From(m, dir);
     Route *rel = Route_Make(m);
     Object_ByPath(rel, path, rt, SPAN_OP_SET);
-    return Object_Lay(pages, rel, pages->objType.of, overlay);
+    return Object_Lay(pages, rel, pages->type.of, overlay);
 }
 
 status WebServer_AddRoute(MemCh *m, Route *pages, StrVec *dir, StrVec *path){

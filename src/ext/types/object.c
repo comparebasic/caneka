@@ -3,23 +3,20 @@
 
 boolean Object_TypeMatch(void *_a, cls typeOf){
     Abstract *a = (Abstract *)_a;
-    return (a->type.of == TYPE_OBJECT && 
-        ((Object *)a)->objType.of == typeOf) || (a->type.of == typeOf);
+    return (a->type.of & TYPE_OBJECT && a->type.of == typeOf);
 }
 
 Object *Object_As(Object *obj, cls typeOf){
-    boolean pass = (obj->type.of == TYPE_OBJECT && 
-        ((Object *)obj)->objType.of == typeOf);
+    boolean pass = (obj->type.of == typeOf);
 
     if(!pass){
         void *args[] = {
             Type_ToStr(ErrStream->m, typeOf),
             Type_ToStr(ErrStream->m, obj->type.of),
-            Type_ToStr(ErrStream->m, obj->objType.of),
             NULL
         };
         Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
-            "Error object is not of expected type $, have $/$", args);
+            "Error object is not of expected type $, have $", args);
     }
     return obj;
 }
@@ -102,12 +99,12 @@ void *Object_GetIter(MemCh *m, FetchTarget *fg, void *data, void *source){
 }
 
 void *Object_GetProp(Object *obj, Str *key){
-    ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
+    ClassDef *cls = Lookup_Get(ClassLookup, obj->type.of);
     i32 idx = Class_GetPropIdx(cls, key);
     if(idx == -1){
         void *args[] = {
             key,
-            Type_ToStr(obj->order->m, obj->objType.of),
+            Type_ToStr(obj->order->m, obj->type.of),
             NULL
         };
         Error(obj->order->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -137,10 +134,10 @@ Object *Object_GetOrMake(Object *pt, void *key, word op){
         if((op & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
             return NULL;
         }
-        Object *new = Object_Make(pt->tbl->m, pt->objType.of);
+        Object *new = Object_Make(pt->tbl->m, pt->type.of);
         Object_Set(pt, key, new);
         return new;
-    }else if(a->type.of == TYPE_OBJECT){
+    }else if(a->type.of & TYPE_OBJECT){
         return (Object *)a;
     }else{
         void *args[] = {
@@ -158,7 +155,7 @@ Object *Object_GetOrMake(Object *pt, void *key, word op){
 
 status Object_Depth(void *_a){
     Abstract *a = (Abstract *)_a;
-    if(a->type.of == TYPE_OBJECT){
+    if(a->type.of & TYPE_OBJECT){
         return ((Object *)a)->depth;
     }
     return 1;
@@ -246,9 +243,9 @@ Hashed *Object_Set(Object *obj, void *key, void *value){
     }
 
     if(obj->type.state & DEBUG){
-        ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
+        ClassDef *cls = Lookup_Get(ClassLookup, obj->type.of);
         void *args[] = {
-            Type_ToStr(OutStream->m, obj->objType.of),
+            Type_ToStr(OutStream->m, obj->type.of),
             key,
             I32_Wrapped(OutStream->m, 
                 obj->order->nvalues - cls->propOrder->nvalues),
@@ -260,7 +257,7 @@ Hashed *Object_Set(Object *obj, void *key, void *value){
 }
 
 Hashed *Object_SetProp(Object *obj, Str *key, void *value){
-    ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
+    ClassDef *cls = Lookup_Get(ClassLookup, obj->type.of);
     if(cls != NULL){
         Single *sg = (Single *)Table_Get(cls->props, key);
         if(sg != NULL){
@@ -272,7 +269,7 @@ Hashed *Object_SetProp(Object *obj, Str *key, void *value){
 
     void *args[] = {
         key,
-        Type_ToStr(ErrStream->m, obj->objType.of),
+        Type_ToStr(ErrStream->m, obj->type.of),
         NULL
     };
     Error(Object_GetMem(obj), FUNCNAME, FILENAME, LINENUMBER,
@@ -318,10 +315,10 @@ Object *Object_Make(MemCh *m, cls typeOf){
         }
         obj->order = Span_Clone(m, cls->propOrder); 
         obj->propMask = obj->order->nvalues;
-        obj->objType.of = typeOf;
+        obj->type.of = typeOf;
     }else{
         obj->order = Span_Make(m);
-        obj->objType.of = TYPE_OBJECT;
+        obj->type.of = TYPE_OBJECT;
     }
 
     return obj;

@@ -104,9 +104,7 @@ static void *findRecentOf(Iter *_it, cls typeOf, void *before, i32 *idx){
     memcpy(&it, _it, sizeof(Iter));
     Abstract *prev = (Abstract *)Iter_Get(&it);
     while(prev == NULL || (
-            ((prev->type.of == TYPE_OBJECT && ((Object *)prev)->objType.of != typeOf)
-                || (prev->type.of != TYPE_OBJECT && prev->type.of != typeOf))
-                && (Iter_Prev(&it) & END) == 0)
+            (prev->type.of != typeOf) && (Iter_Prev(&it) & END) == 0)
         ){
         if(prev == before){
             break;
@@ -114,10 +112,7 @@ static void *findRecentOf(Iter *_it, cls typeOf, void *before, i32 *idx){
         prev = (Abstract *)Iter_Get(&it);
     }
 
-    if(prev != NULL && (
-            (prev->type.of == TYPE_OBJECT && ((Object *)prev)->objType.of == typeOf)
-            || (prev->type.of != TYPE_OBJECT && prev->type.of == typeOf))
-        ){
+    if(prev != NULL &&  (prev->type.of == typeOf)){
         *idx = it.idx;
         return prev;
     }

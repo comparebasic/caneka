@@ -13,9 +13,6 @@ static i64 Hashed_Print(Buff *bf, void *a, cls type, word flags){
         word typeOf = TYPE_UNKNOWN;
         if(h->value != NULL){
             typeOf = ((Abstract *)h->value)->type.of;
-            if(typeOf == TYPE_OBJECT){
-                typeOf = ((Object *)h->value)->objType.of;
-            }
         }
         void *args[] = {
             I32_Wrapped(bf->m, h->orderIdx), 
@@ -56,19 +53,19 @@ static void *Object_ByIdx(MemCh *m, FetchTarget *fg, void *data, void *source){
 static status Object_Print(Buff *bf, void *a, cls type, word flags){
     static i32 _objIndent = 0;
     Object *obj = (Object *)as(a, TYPE_OBJECT);
-    ClassDef *cls = Lookup_Get(ClassLookup, obj->objType.of);
+    ClassDef *cls = Lookup_Get(ClassLookup, obj->type.of);
     void *args[4];
     i32 dataCount = obj->order->nvalues;
     MemCh *m = Object_GetMem(obj);
     if(flags & MORE){
         if(cls == NULL){
-            args[0] = Type_StateVec(m, obj->objType.of, obj->objType.state);
+            args[0] = Type_StateVec(m, obj->type.of, obj->type.state);
             Fmt(bf, "Object<@", args);
         }else{
             dataCount = dataCount - obj->propMask;
 
             args[0] = cls->name;
-            args[1] = Type_StateVec(m, obj->objType.of, obj->objType.state);
+            args[1] = Type_StateVec(m, obj->type.of, obj->type.state);
             args[2] = NULL;
             Fmt(bf, "$<@", args);
             Iter it;
@@ -178,9 +175,9 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
         NULL,
     };
     Fmt(bf, "FT<@", args);
-    if(tg->objType.of != ZERO){
+    if(tg->type.of != ZERO){
         void *args[] = {
-            Type_ToStr(bf->m, tg->objType.of),
+            Type_ToStr(bf->m, tg->type.of),
             NULL
         };
         Fmt(bf, " $ ", args);
@@ -202,7 +199,7 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
     }
     if(tg->type.state & FETCH_TARGET_RESOLVED){
         void *args[] = {
-            Type_ToStr(bf->m, tg->objType.of),
+            Type_ToStr(bf->m, tg->type.of),
             I16_Wrapped(bf->m, tg->offset),
             NULL
         };
@@ -269,7 +266,7 @@ status Types_ClsInit(MemCh *m){
     cls->api.byIdx = Object_ByIdx;
     cls->api.getIter = Object_GetIter;
     cls->api.toS = Object_Print;
-    cls->objType.of = TYPE_OBJECT;
+    cls->type.of = TYPE_OBJECT;
     cls->name = Str_FromCstr(m, "Object", STRING_COPY);
     ObjectCls = cls;
 
