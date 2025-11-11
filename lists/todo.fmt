@@ -1,0 +1,121 @@
+= Proc/Server Impl/Crypto
+
+== Serve w Route + Buff Task/Step
+
++ web-server
++ run on code.comparebasic.com 
++ static as seperate route
++ page data w nav routes
+- nav by page name
+    -- consolidate object/objType
+    -- consolidate success/end -> complete
+    -- hashed Map atts
+- page errors
+    + prepare templ w header/footer
+    - re-write and pre/populate minimal error page
+    - link errors into template
+    - trace and fix potential error states
+        - common
+            - Span/Iter/Table/Str/StrVec/Buff
+        - obscure
+            - Roebling/Templ/Transp/Formats
+
+- intro w task list on homepage
+- test fmt output page
+- supervise program
+
+== Logging FileDB
+
++ delay based serve criteria
+- load avg
+    - freebsd
+    - linux
+- mem usage
+- FileDB log digester
+- binseg query types
+    - latest
+    - earliest
+    - collection makes spans at the value level
+- binseg listener for commands
+    - BinSegV non-reversed
+
+== Generate Types
+
++ generate types in the build process
+- move to lookup w typed functions
+    - key from phrase
+    - fromHex
+- put licence system on generate
+- build var on generate
+
+== Templ Filters
+
+- custom key functions in Templ
+- full filter syntax [#key=one,two] & [*att]
+
+== BinSegCli
+
+== Map for all types
+
+== FileDBEnc
+
+- hmac encrypt
+- hmac decrypt
+
+== Aut/User/Login
+
+- Auth
+- User
+
+== Email Send
+
+== BinSegJS
+
+= Investor Portal
+
+== Email Based Login
+
+== Questionaire
+
+== CertSinging
+
+== Svg for Stock
+
+= Email Server
+
+== SASL Dgram
+
+== Smtp/Imap/Email
+
+- SMTP protocol
+- XML Parsing
+- XML Generation
+- DMARC/DNS Setup
+- B64
+
+== CalDav/CardDav Server
+
+= Publish/Web Features
+
+== 2D Barcode
+
+== JsObf
+
+== SVGGen
+
+== PDF - monospace
+
+== PDF variable width
+
+= Docs
+
+= BubbleView/SDL
+
+= Cnk Parser
+
+= Stats for Serve
+
+
+
+
+

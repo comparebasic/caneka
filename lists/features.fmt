@@ -1,0 +1,44 @@
+= Initial Serve Demo
+
+Release Date: Nov 15 2025
+
+- Intro Homepage
+- Schedule page (this file!)
+- Stats page
+    - Memory usage
+- Tests Output
+
+= FileDB Serve Logging
+
+Release Date: Dec 1 2025
+
+- Log to FileDB
+- Digest to viewable page
+- UI filtering/sorting/querying
+
+= Fmt Interactive Demo
+
+Release Date: Dec 1 2025
+
+= PhraseKey Signing Demo
+
+Estimated: Dec 1 2025
+
+= Echo
+
+Estimated: Dec 15th 2025
+
+- Format email send/recieve
+- User edit/configure interface
+- Payment gateway and checkout page
+
+= Email2Site
+
+Estimated: Jan 1st 2026
+
+- Website Composer Interface
+    - Page Layout
+    - Undo/Redo 
+    - Asset Library
+    - Domain Purchase UI
+    - Publish to server interface
