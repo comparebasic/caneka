@@ -76,7 +76,6 @@ static Map *Transp_FileMap(MemCh *m){
     offset += sizeof(void *);
     (atts+4)->of = TYPE_STRVEC;
     (atts+4)->range = offset;
-    offset += sizeof(void *);
 
     Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
     keys[0] = Str_CstrRef(m, "name");

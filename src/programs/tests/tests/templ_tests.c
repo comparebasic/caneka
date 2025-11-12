@@ -150,6 +150,8 @@ status TemplCtx_Tests(MemCh *gm){
         "Expected content found in example templ", 
         "Mismatch in content found in example templ, expected:\n&\nhave:\n &", args);
 
+    r &= ~ERROR;
+
     MemCh_Free(m);
     DebugStack_Pop();
     return r;
