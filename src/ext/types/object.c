@@ -298,7 +298,7 @@ boolean Object_IsBlank(Object *pt){
 
 Object *Object_Make(MemCh *m, cls typeOf){
     Object *obj = (Object *)MemCh_Alloc(m, sizeof(Object));
-    obj->type.of = TYPE_OBJECT;
+    obj->type.of = typeOf;
     obj->tbl = Table_Make(m);
 
     if(typeOf != ZERO){
@@ -315,10 +315,8 @@ Object *Object_Make(MemCh *m, cls typeOf){
         }
         obj->order = Span_Clone(m, cls->propOrder); 
         obj->propMask = obj->order->nvalues;
-        obj->type.of = typeOf;
     }else{
         obj->order = Span_Make(m);
-        obj->type.of = TYPE_OBJECT;
     }
 
     return obj;
