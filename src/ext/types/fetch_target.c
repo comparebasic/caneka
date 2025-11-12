@@ -2,12 +2,11 @@
 #include <caneka.h>
 
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
-    ClassDef *cls = NULL;
     void *args[4];
     Str s = {.type = {TYPE_STR, STRING_CONST}, .length = 0, .alloc = 0, .bytes = NULL};
     args[0] = &s;
     if(typeOf & TYPE_OBJECT){
-        Lookup_Get(ClassLookup, typeOf);
+        ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
         if(cls == NULL){
             char *cstr = "cls is NULL";
             i16 len = strlen(cstr);
@@ -68,6 +67,12 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                 goto err;
            }else{
                 RangeType *att = Table_Get(map->tbl, tg->key); 
+                if(att == NULL){
+                    char *cstr = "att is NULL";
+                    i16 len = strlen(cstr);
+                    Str_Init(&s, (byte *)cstr, len, len+1); 
+                    goto err;
+                }
                 tg->offset = att->range;
                 return SUCCESS;
            }

@@ -49,87 +49,6 @@ static void *Object_ByIdx(MemCh *m, FetchTarget *fg, void *data, void *source){
     return NULL;
 }
 
-
-static status Object_Print(Buff *bf, void *a, cls type, word flags){
-    static i32 _objIndent = 0;
-    Object *obj = (Object *)as(a, TYPE_OBJECT);
-    ClassDef *cls = Lookup_Get(ClassLookup, obj->type.of);
-    void *args[4];
-    i32 dataCount = obj->order->nvalues;
-    MemCh *m = Object_GetMem(obj);
-    if(flags & MORE){
-        if(cls == NULL){
-            args[0] = Type_StateVec(m, obj->type.of, obj->type.state);
-            Fmt(bf, "Object<@", args);
-        }else{
-            dataCount = dataCount - obj->propMask;
-
-            args[0] = cls->name;
-            args[1] = Type_StateVec(m, obj->type.of, obj->type.state);
-            args[2] = NULL;
-            Fmt(bf, "$<@", args);
-            Iter it;
-            Iter_Init(&it, cls->propOrder);
-            while((Iter_Next(&it) & END) == 0){
-                Hashed *h = Span_Get(obj->order, it.idx);
-                ToS(bf, h->key, ZERO, flags); 
-                Buff_AddBytes(bf, (byte *)": ", 2);
-                ToS(bf, h->value, ZERO, flags); 
-                if((it.type.state & LAST) == 0){
-                    Buff_AddBytes(bf, (byte *)", ", 2);
-                }
-            }
-        }
-
-        if(dataCount){
-            args[0] = I32_Wrapped(bf->m, dataCount);
-            args[1] = NULL;
-            Fmt(bf, " ^D.$^d.nvalues {", args);
-            Iter *it = (Iter *)as(
-                Object_GetIter(Object_GetMem(obj), NULL, obj, NULL),
-                TYPE_ITER);
-            while((Iter_Next(it) & END) == 0){
-                if(flags & DEBUG){
-                    Buff_AddBytes(bf, (byte *)"\n  ", 3);
-                }
-                Hashed *h = (Hashed *)Iter_Get(it);
-                if(h->value != NULL && ((Abstract *)h->value)->type.of == TYPE_OBJECT){
-                    _objIndent++;
-                    i32 i = _objIndent;
-                    Buff_AddBytes(bf, (byte *)"\n", 1);
-                    while(i--){
-                        Buff_AddBytes(bf, (byte *)"  ", 2);
-                    }
-                }
-                ToS(bf, h->key, 0, flags); 
-                Buff_AddBytes(bf, (byte *)" -> ", 4);
-                if(flags & (MORE|DEBUG)){
-                    ToS(bf, h->value, 0, flags);  
-                }else{
-                    Str *typeStr = NULL;
-                    if(h->value != NULL){
-                        typeStr = Type_ToStr(bf->m, ((Abstract *)h->value)->type.of);
-                    }
-                    ToS(bf, typeStr, 0, flags);
-                }
-                if(h->value != NULL && ((Abstract *)h->value)->type.of == TYPE_OBJECT){
-                    _objIndent--;
-                }
-                if((it->type.state & LAST) == 0){
-                    Buff_AddBytes(bf, (byte *)", ", 2);
-                }
-            }
-            if(flags & DEBUG){
-                Buff_AddBytes(bf, (byte *)"\n", 1);
-            }
-            Buff_AddBytes(bf, (byte *)"}", 1);
-        }
-        return Buff_AddBytes(bf, (byte *)">", 1);
-    }else{
-        return ToStream_NotImpl(bf, a, type, flags);
-    }
-}
-
 static status Object_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     return NOOP;
 }
@@ -213,6 +132,91 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
         Fmt(bf, "func/@", args);
     }
     return Buff_AddBytes(bf, (byte *)">", 1);
+}
+
+status Object_Print(Buff *bf, void *a, cls type, word flags){
+    static i32 _objIndent = 0;
+    Object *obj = NULL;
+    if(((Abstract *)a)->type.of & TYPE_OBJECT){
+        obj = (Object *)a;
+    }else{
+        as(a, TYPE_OBJECT);
+    }
+    ClassDef *cls = Lookup_Get(ClassLookup, obj->type.of);
+    void *args[4];
+    i32 dataCount = obj->order->nvalues;
+    MemCh *m = Object_GetMem(obj);
+    if(flags & MORE){
+        if(cls == NULL){
+            args[0] = Type_StateVec(m, obj->type.of, obj->type.state);
+            Fmt(bf, "Object<@", args);
+        }else{
+            dataCount = dataCount - obj->propMask;
+
+            args[0] = cls->name;
+            args[1] = Type_StateVec(m, obj->type.of, obj->type.state);
+            args[2] = NULL;
+            Fmt(bf, "$<@", args);
+            Iter it;
+            Iter_Init(&it, cls->propOrder);
+            while((Iter_Next(&it) & END) == 0){
+                Hashed *h = Span_Get(obj->order, it.idx);
+                ToS(bf, h->key, ZERO, flags); 
+                Buff_AddBytes(bf, (byte *)": ", 2);
+                ToS(bf, h->value, ZERO, flags); 
+                if((it.type.state & LAST) == 0){
+                    Buff_AddBytes(bf, (byte *)", ", 2);
+                }
+            }
+        }
+
+        if(dataCount){
+            args[0] = I32_Wrapped(bf->m, dataCount);
+            args[1] = NULL;
+            Fmt(bf, " ^D.$^d.nvalues {", args);
+            Iter *it = (Iter *)as(
+                Object_GetIter(Object_GetMem(obj), NULL, obj, NULL),
+                TYPE_ITER);
+            while((Iter_Next(it) & END) == 0){
+                if(flags & DEBUG){
+                    Buff_AddBytes(bf, (byte *)"\n  ", 3);
+                }
+                Hashed *h = (Hashed *)Iter_Get(it);
+                if(h->value != NULL && ((Abstract *)h->value)->type.of == TYPE_OBJECT){
+                    _objIndent++;
+                    i32 i = _objIndent;
+                    Buff_AddBytes(bf, (byte *)"\n", 1);
+                    while(i--){
+                        Buff_AddBytes(bf, (byte *)"  ", 2);
+                    }
+                }
+                ToS(bf, h->key, 0, flags); 
+                Buff_AddBytes(bf, (byte *)" -> ", 4);
+                if(flags & (MORE|DEBUG)){
+                    ToS(bf, h->value, 0, flags);  
+                }else{
+                    Str *typeStr = NULL;
+                    if(h->value != NULL){
+                        typeStr = Type_ToStr(bf->m, ((Abstract *)h->value)->type.of);
+                    }
+                    ToS(bf, typeStr, 0, flags);
+                }
+                if(h->value != NULL && ((Abstract *)h->value)->type.of == TYPE_OBJECT){
+                    _objIndent--;
+                }
+                if((it->type.state & LAST) == 0){
+                    Buff_AddBytes(bf, (byte *)", ", 2);
+                }
+            }
+            if(flags & DEBUG){
+                Buff_AddBytes(bf, (byte *)"\n", 1);
+            }
+            Buff_AddBytes(bf, (byte *)"}", 1);
+        }
+        return Buff_AddBytes(bf, (byte *)">", 1);
+    }else{
+        return ToStream_NotImpl(bf, a, type, flags);
+    }
 }
 
 status Types_ClsInit(MemCh *m){

@@ -12,6 +12,7 @@ status Config_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = FormatConfig_Make(m, curs, NULL);
+    rbl->dest->type.state |= DEBUG;
     Roebling_Run(rbl);
     Object *root = FormatConfig_GetRoot(rbl);;
 

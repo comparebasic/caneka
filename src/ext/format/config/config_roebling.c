@@ -169,12 +169,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     if(it->type.state & DEBUG){
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v,
-        args[2] = NULL;
-        args[3] = data;
-        args[4] = NULL;
+        args[2] = current;
+        args[3] = tableObj;
+        args[4] = data;
         args[5] = it->p;
         args[6] = NULL;
-        Out("^c.Config Capture ^E0.$^ec. -> ^0y.   @\n   @\n   @\n   @\n   ^b.&^0\n", args);
+        Out("^c.Config Capture ^E0.$^ec. -> ^0y.@\n   current: @\n   tableObj:@\n   data:@\n   Iter:^b.&^0\n", args);
     }
 
     if(captureKey == CONFIG_LEAD){
@@ -195,14 +195,16 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
         if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) == NULL){
-            Object *attObj = Object_Make(m, ZERO);
+            printf("Making atts Obj\n");
+            fflush(stdout);
+            Object *attObj = Object_Make(m, TYPE_OBJECT);
             Iter *itn = Iter_Make(m, NULL);
             Object_SetKey((Iter *)itn, attObj, StrVec_Str(m, v));
             Object_SetPropByIdx(current, NODEOBJ_PROPIDX_ATTS, attObj);
             Iter_Add(it, attObj);
             Iter_Add(it, itn);
         }else if(data == NULL){
-            Object *kvObj = Object_Make(m, ZERO);
+            Object *kvObj = Object_Make(m, TYPE_OBJECT);
             Iter *itn = Iter_Make(m, NULL);
             Object_SetKey((Iter *)itn, kvObj, StrVec_Str(m, v));
             Object_Add(current, kvObj);

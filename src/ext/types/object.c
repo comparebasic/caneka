@@ -92,7 +92,12 @@ Object *Object_Filter(Object *obj, SourceFunc func, void *source){
 }
 
 void *Object_GetIter(MemCh *m, FetchTarget *fg, void *data, void *source){
-    Object *obj = (Object *)as(data, TYPE_OBJECT);
+    if((((Abstract *)data)->type.of & TYPE_OBJECT) == 0){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Expected object to get iter from", NULL);
+        return NULL;
+    }
+    Object *obj = (Object *)data;
     Iter *it = Iter_Make(m, obj->order);
     Iter_GoToIdx(it, obj->propMask);
     return it;
@@ -297,11 +302,20 @@ boolean Object_IsBlank(Object *pt){
 }
 
 Object *Object_Make(MemCh *m, cls typeOf){
+    if(typeOf == ZERO){
+        typeOf = TYPE_OBJECT;
+    }else if((typeOf & TYPE_OBJECT) == 0){
+        void *args[] = {Type_ToStr(m, typeOf), NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Object_Make can only be made from a typeOf that contains TYPE_OBJECT, have $",
+        args);
+        return NULL;
+    }
     Object *obj = (Object *)MemCh_Alloc(m, sizeof(Object));
     obj->type.of = typeOf;
     obj->tbl = Table_Make(m);
 
-    if(typeOf != ZERO){
+    if(typeOf != TYPE_OBJECT){
         ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
         if(cls == NULL){
             void *args[] = {
