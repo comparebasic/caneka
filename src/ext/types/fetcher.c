@@ -23,12 +23,6 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
 
         tg->type.state |= (fch->type.state & PROCESSING);
         value = Fetch_Target(m, tg, value, source);
-
-        void *args[3];
-        args[0] = tg;
-        args[1] = value;
-        args[2] = NULL;
-        Out("^c.Fetch_Target calling @ ->\n    @^0\n", args);
     }
 
     if(fch->type.state & DEBUG){

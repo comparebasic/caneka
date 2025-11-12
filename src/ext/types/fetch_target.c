@@ -76,8 +76,6 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                     goto err;
                 }
                 tg->offset = att->range;
-                printf("NonObject %s\n", tg->key->bytes);
-                fflush(stdout);
            }
         /*}else if(typeOf == TYPE_TABLE && tg->type.state & FETCH_TARGET_ITER){*/
 
