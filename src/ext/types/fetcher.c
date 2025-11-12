@@ -16,22 +16,21 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
     Iter_Init(&it, fch->val.targets);
     while(value != NULL && (Iter_Next(&it) & END) == 0){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
-        if(value->type.of == TYPE_HASHED && ((fch->type.state & FETCHER_COMMAND) == 0)){
+        if((it.type.state & LAST) == 0 && value->type.of == TYPE_HASHED){
             value = ((Hashed *)value)->value;
         }
-
 
         tg->type.state |= (fch->type.state & PROCESSING);
         value = Fetch_Target(m, tg, value, source);
     }
 
-    if(fch->type.state & DEBUG){
+    if(1 || fch->type.state & DEBUG){
         void *args[] = {
             fch,
             value,
             NULL,
         };
-        Out("^c.after Fetch & from @^0.\n", args);
+        Out("^c.after Fetch & value = ^y.@^0.\n", args);
     }
 
     if(it.type.state & END){

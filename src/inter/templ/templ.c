@@ -103,12 +103,20 @@ static status Templ_handleJump(Templ *templ){
             return templ->type.state;
         }
 
-        if((Iter_Next(it) & END) == 0){
-            Iter_Add(&templ->data, Iter_Get(it));
-        }else if(jump->skipIdx != NEGATIVE){
-            Iter_GetByIdx(&templ->content, jump->skipIdx);
-        }else if(skipIdx != NEGATIVE){
-            Iter_GetByIdx(&templ->content, skipIdx);
+        while((Iter_Next(it) & END) == 0){
+            void *a = Iter_Get(it);
+            if(a != NULL){
+                Iter_Add(&templ->data, a);
+                break;
+            }
+        }
+
+        if(it->type.state & END){
+            if(jump->skipIdx != NEGATIVE){
+                Iter_GetByIdx(&templ->content, jump->skipIdx);
+            }else if(skipIdx != NEGATIVE){
+                Iter_GetByIdx(&templ->content, skipIdx);
+            }
         }
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_IF){

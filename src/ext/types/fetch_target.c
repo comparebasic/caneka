@@ -77,8 +77,8 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                 }
                 tg->offset = att->range;
            }
-        /*}else if(typeOf == TYPE_TABLE && tg->type.state & FETCH_TARGET_ITER){*/
-
+        }else if(typeOf == TYPE_TABLE && tg->type.state & FETCH_TARGET_ITER){
+            tg->func = FetchFunc_SpanGetIter;
         }else{
             char *cstr = "non cls is NULL";
             i16 len = strlen(cstr);
@@ -182,6 +182,27 @@ void *Fetch_Prop(MemCh *m, void *a, Str *prop, void *source){
 Iter *Fetch_Iter(MemCh *m, void *a, void *source){
     FetchTarget *tg = FetchTarget_MakeIter(m);
     return (Iter *)Fetch_Target(m, tg, a, source);
+}
+
+void *FetchFunc_SpanGetIter(MemCh *m,
+        struct fetch_target *target, void *data, void *source){
+    Iter *it = Iter_Make(m, data);
+    void *args[] = {
+        data,
+        it,
+        NULL
+    };
+    Out("^p.GetIter from @ -> @^0\n", args);
+    Iter _it;
+    Iter_Init(&_it, (Span *)data);
+    while((Iter_Next(&_it) & END) == 0){
+        void *args[] = {
+            Iter_Get(&_it),
+            NULL
+        };
+        Out("^p.    -> @^0\n", args);
+    }
+    return it;
 }
 
 FetchTarget *FetchTarget_Make(MemCh *m){

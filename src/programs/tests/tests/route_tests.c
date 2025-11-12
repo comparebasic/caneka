@@ -258,8 +258,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Templ from Route has expected output",
         "Templ output does not match @", args);
 
-    /* login.templ no mem details */
-    DebugStack_SetRef("login.templ no mem details", TYPE_CSTR);
+    /* stats.templ no mem details */
+    DebugStack_SetRef("stats.templ no mem details", TYPE_CSTR);
 
     path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
@@ -282,7 +282,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Handler: Expected template value with no header and a mem details", 
         "Handler: Expected template value with no header and a mem: $", args);
 
-    DebugStack_SetRef("login.templ no mem details + header", TYPE_CSTR);
+    DebugStack_SetRef("stats.templ no mem details + header", TYPE_CSTR);
 
     Route *header = Object_ByPath(inc,
         StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)), NULL, SPAN_OP_GET);
@@ -312,7 +312,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Footer: Expected template value with no mem object and a header: $", 
     args);
 
-    DebugStack_SetRef("login.templ mem details", TYPE_CSTR);
+    DebugStack_SetRef("stats.templ mem details", TYPE_CSTR);
 
     MemBookStats st;
     MemBook_GetStats(m, &st);

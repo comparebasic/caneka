@@ -5,6 +5,13 @@ static boolean _mapsInitialized = FALSE;
 struct lookup *MapsLookup = NULL;
 
 void *Map_FromOffset(MemCh *m, void *a, i16 offset, cls typeOf){
+    void *args[] = {
+        a,
+        I16_Wrapped(m, offset),
+        NULL
+    };
+    Out("^p.Map_FromOffset @ + $^0\n", args);
+
     void *value = NULL;
     if(typeOf == ZERO || typeOf > _TYPE_RAW_END){
         void **ptr = (void **)(((void *)a)+offset);
