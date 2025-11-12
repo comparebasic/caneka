@@ -186,23 +186,7 @@ Iter *Fetch_Iter(MemCh *m, void *a, void *source){
 
 void *FetchFunc_SpanGetIter(MemCh *m,
         struct fetch_target *target, void *data, void *source){
-    Iter *it = Iter_Make(m, data);
-    void *args[] = {
-        data,
-        it,
-        NULL
-    };
-    Out("^p.GetIter from @ -> @^0\n", args);
-    Iter _it;
-    Iter_Init(&_it, (Span *)data);
-    while((Iter_Next(&_it) & END) == 0){
-        void *args[] = {
-            Iter_Get(&_it),
-            NULL
-        };
-        Out("^p.    -> @^0\n", args);
-    }
-    return it;
+    return Iter_Make(m, data);
 }
 
 FetchTarget *FetchTarget_Make(MemCh *m){

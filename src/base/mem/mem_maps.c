@@ -73,7 +73,7 @@ static Map *MemBookStats_Map(MemCh *m){
     atts->of = TYPE_BOOK_STATS;
     atts->range = SIZE;
 
-    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE, TYPE_POINTER_ARRAY);
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE+1, TYPE_POINTER_ARRAY);
 
     keys[0] = Str_CstrRef(m, "bookIdx");
     (atts+1)->of = TYPE_I32;
@@ -91,7 +91,7 @@ static Map *MemBookStats_Map(MemCh *m){
     (atts+4)->of = TYPE_I32;
     (atts+4)->range = (void *)&st.total - (void *)&st;
 
-    return Map_Make(m, SIZE-1, atts, keys);
+    return Map_Make(m, SIZE, atts, keys);
 }
 
 status Mem_MapsInit(MemCh *m, Lookup *lk){

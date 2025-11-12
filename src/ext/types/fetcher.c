@@ -24,7 +24,7 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
         value = Fetch_Target(m, tg, value, source);
     }
 
-    if(1 || fch->type.state & DEBUG){
+    if(fch->type.state & DEBUG){
         void *args[] = {
             fch,
             value,

@@ -101,6 +101,14 @@ status TemplCtx_Tests(MemCh *gm){
     Span_Add(fch->val.targets, tg);
     Span_Add(expected, fch);
 
+    fch = Fetcher_Make(m);
+    fch->type.state |= FETCHER_WITH;
+    cstr = "value";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    tg = FetchTarget_MakeAtt(m, s);
+    Span_Add(fch->val.targets, tg);
+    Span_Add(expected, fch);
+
     cstr = "    <li><a href=\"";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
@@ -132,6 +140,10 @@ status TemplCtx_Tests(MemCh *gm){
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, v);
+
+    fch = Fetcher_Make(m);
+    fch->type.state = FETCHER_END;
+    Span_Add(expected, fch);
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_END;

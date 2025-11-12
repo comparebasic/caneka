@@ -76,7 +76,7 @@ static char *memWHeaderCstr  = ""
     "<html lang=\"en\">\n"
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
-    "<title>Caneka Example - Stats </title>\n"
+    "<title>Example Title</title>\n"
     "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
     "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
@@ -99,14 +99,21 @@ static char *memWHeaderCstr  = ""
     "<section class=\"main\">\n"
     "<h1>Statistics of the Example</h1>\n"
     "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
-    "mem stuff\n"
-    "</section>\n"
-    "<footer>\n"
-    "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
-    "    <img alt=\"logo\" src=\"/static/logo-transparent.png\" class=\"logo\" />\n"
-    "</footer>\n"
-    "</body>\n"
-    "</html>\n"
+    "<h2>Memory Heap <b>904k</b> of 16m</p>\n"
+    "<ul>\n"
+    "    <li>\n"
+    "        <p><b>total</b>: 222</p>\n"
+    "    </li>\n"
+    "    <li>\n"
+    "        <p><b>pageIdx</b>: 226</p>\n"
+    "    </li>\n"
+    "    <li>\n"
+    "        <p><b>recycled</b>: 4</p>\n"
+    "    </li>\n"
+    "    <li>\n"
+    "        <p><b>bookIdx</b>: 0</p>\n"
+    "    </li>\n"
+    "</ul>\n"
     ;
 
 static char *homeCstr = ""
@@ -314,17 +321,26 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     DebugStack_SetRef("stats.templ mem details", TYPE_CSTR);
 
-    MemBookStats st;
-    MemBook_GetStats(m, &st);
+    MemBookStats st = {
+        .type = {TYPE_BOOK_STATS, ZERO},
+        .bookIdx = 0,
+        .pageIdx = 226,
+        .recycled = 4,
+        .total = 222,
+    };
 
     data = getGenericData(m, rt);
     stats = Object_Make(m, ZERO);
     Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
-        MicroTime_ToStr(m, MicroTime_Now()));
+        MicroTime_ToStr(m, 1762817053127));
 
     Object *mem = Object_Make(m, ZERO);
-    Object_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
+    Object_Set(mem, Str_FromCstr(m, "mem-used", ZERO),
         Str_MemCount(m, st.pageIdx * PAGE_SIZE));
+    Object_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
+        Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
+
+
     Object_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &st));
     Object_Set(stats, Str_FromCstr(m, "mem", ZERO), mem);
     Object_Set(data, Str_FromCstr(m, "stats", ZERO), stats);
@@ -343,6 +359,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     expected = Str_FromCstr(m, memWHeaderCstr, ZERO);
     args[0] = dest->v;
     args[1] = NULL;
+    expected->type.state |= DEBUG;
     r |= TestShow(Equals(expected, dest->v),
         "Expected mem details in template", 
         "Expected mem details in template $", args);
@@ -385,7 +402,7 @@ status WwwRouteMime_Tests(MemCh *gm){
 
     Route *rt = Route_Make(m);
 
-    StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./examples/web-server/pages/public"));
+    StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./examples/web-server/pages/static"));
     Route_Collect(rt, path);
 
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "/style.css", STRING_COPY));
@@ -400,7 +417,7 @@ status WwwRouteMime_Tests(MemCh *gm){
     Buff_Pipe(dest, bf);
 
     Str *pathS = IoUtil_GetAbsPath(m,
-        Str_FromCstr(m, "./examples/web-server/pages/public/style.css", ZERO));
+        Str_FromCstr(m, "./examples/web-server/pages/static/style.css", ZERO));
     StrVec *expected = File_ToVec(m, pathS);
 
     r |= Test(Equals(dest->v, expected), "Content from Buff piped from route matches reading file directly", NULL);
