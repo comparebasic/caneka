@@ -107,7 +107,7 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
             tg->key,
             NULL
         };
-        Fmt(bf, " @", args);
+        Fmt(bf, " key=@", args);
     }
     if(tg->type.state & FETCH_TARGET_IDX || tg->idx != -1){
         void *args[] = {

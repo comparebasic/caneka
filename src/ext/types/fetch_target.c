@@ -31,23 +31,26 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
             if(tg->idx == -1){
                 tg->type.state |= FETCH_TARGET_HASH;
                 tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);
+                tg->func = cls->api.byIdx;
             }
-        }else if(tg->type.state & FETCH_TARGET_KEY){
-            tg->func = cls->api.byKey;
-            tg->type.state |= FETCH_TARGET_FUNC;
-        }else if(tg->type.state & FETCH_TARGET_IDX){
-            tg->func = cls->api.byIdx;
-            tg->type.state |= FETCH_TARGET_FUNC;
-        }else if(tg->type.state & FETCH_TARGET_ITER){
-            tg->func = cls->api.getIter;
-            tg->type.state |= FETCH_TARGET_FUNC;
-        }
+        }else{
+            if(tg->type.state & FETCH_TARGET_KEY){
+                tg->func = cls->api.byKey;
+                tg->type.state |= FETCH_TARGET_FUNC;
+            }else if(tg->type.state & FETCH_TARGET_IDX){
+                tg->func = cls->api.byIdx;
+                tg->type.state |= FETCH_TARGET_FUNC;
+            }else if(tg->type.state & FETCH_TARGET_ITER){
+                tg->func = cls->api.getIter;
+                tg->type.state |= FETCH_TARGET_FUNC;
+            }
 
-        if(tg->func == NULL){
-            char *cstr = "func is NULL";
-            i16 len = strlen(cstr);
-            Str_Init(&s, (byte *)cstr, len, len+1); 
-            goto err;
+            if(tg->func == NULL){
+                char *cstr = "cls func is NULL";
+                i16 len = strlen(cstr);
+                Str_Init(&s, (byte *)cstr, len, len+1); 
+                goto err;
+            }
         }
 
         tg->type.state |= FETCH_TARGET_RESOLVED;
@@ -57,8 +60,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP)){
             tg->type.state |= FETCH_TARGET_HASH;
             tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
-        }
-        if(tg->type.state & FETCH_TARGET_ATT){
+        }else if(tg->type.state & FETCH_TARGET_ATT){
            Map *map = Map_Get(typeOf);
            if(map == NULL){
                 char *cstr = "Map is NULL";
@@ -132,7 +134,11 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
             }
             return a;
         }else if(tg->type.state & FETCH_TARGET_PROP){
-            Object *obj = (Object *)as(value, TYPE_OBJECT);
+            Object *obj = (Object *)value;
+            if(obj == NULL || (obj->type.of & TYPE_OBJECT) == 0){
+                args[1] = value;
+                goto err;
+            }
             Abstract *a = Object_GetPropByIdx(obj, tg->idx);
             if(a == NULL){
                 args[1] = value;

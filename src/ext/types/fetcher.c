@@ -46,18 +46,18 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
     while(value != NULL && (Iter_Next(&it) & END) == 0){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
         if(value->type.of == TYPE_HASHED && ((fch->type.state & FETCHER_COMMAND) == 0)){
-            printf("value finagle\n");
-            fflush(stdout);
             value = ((Hashed *)value)->value;
         }
 
-        void *args[2];
-        args[0] = Type_StateVec(m, tg->type.of, tg->type.state);
-        args[1] = NULL;
-        Out("^c.Fetch_Target calling @^0\n", args);
 
         tg->type.state |= (fch->type.state & PROCESSING);
         value = Fetch_Target(m, tg, value, source);
+
+        void *args[3];
+        args[0] = tg;
+        args[1] = value;
+        args[2] = NULL;
+        Out("^c.Fetch_Target calling @ ->\n    @^0\n", args);
     }
 
     if(fch->type.state & DEBUG){

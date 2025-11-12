@@ -58,30 +58,26 @@ static i64 TranspCtx_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static Map *Transp_FileMap(MemCh *m){
+    TranspFile tp;
     i16 size = 4;
     RangeType *atts = (RangeType *)Bytes_Alloc(m,
         sizeof(RangeType)*(size+1), TYPE_RANGE_ARRAY);
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
     atts->of = TYPE_TRANSP_FILE;
     atts->range = size;
-    i16 offset = 0;
-    offset += sizeof(Type);
-    (atts+1)->of = TYPE_STRVEC;
-    (atts+1)->range = offset;
-    offset += sizeof(void *);
-    (atts+2)->of = TYPE_STRVEC;
-    (atts+2)->range = offset;
-    offset += sizeof(void *);
-    (atts+3)->of = TYPE_STRVEC;
-    (atts+3)->range = offset;
-    offset += sizeof(void *);
-    (atts+4)->of = TYPE_STRVEC;
-    (atts+4)->range = offset;
-
-    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
     keys[0] = Str_CstrRef(m, "name");
+    (atts+1)->of = TYPE_STRVEC;
+    (atts+1)->range = (i16)((void *)&tp.name - (void *)&tp);
     keys[1] = Str_CstrRef(m, "src");
+    (atts+2)->of = TYPE_STRVEC;
+    (atts+2)->range = (i16)((void *)&tp.src - (void *)&tp);
     keys[2] = Str_CstrRef(m, "dest");
+    (atts+3)->of = TYPE_STRVEC;
+    (atts+3)->range = (i16)((void *)&tp.dest - (void *)&tp);
     keys[3] = Str_CstrRef(m, "local");
+    (atts+4)->of = TYPE_STRVEC;
+    (atts+4)->range = (i16)((void *)&tp.local - (void *)&tp);
+
     return Map_Make(m, size, atts, keys);
 }
 

@@ -195,8 +195,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
         if(Object_GetPropByIdx(current, NODEOBJ_PROPIDX_ATTS) == NULL){
-            printf("Making atts Obj\n");
-            fflush(stdout);
             Object *attObj = Object_Make(m, TYPE_OBJECT);
             Iter *itn = Iter_Make(m, NULL);
             Object_SetKey((Iter *)itn, attObj, StrVec_Str(m, v));
