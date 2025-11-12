@@ -7,8 +7,7 @@
 + static as seperate route
 + page data w nav routes
 - nav by page name
-    -- consolidate object/objType
-    -- consolidate success/end -> complete
+    + consolidate object/objType
     -- hashed Map atts
 - page errors
     + prepare templ w header/footer
