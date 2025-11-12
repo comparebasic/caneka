@@ -227,7 +227,6 @@ status Templ_Tests(MemCh *gm){
         return r;
     }
 
-    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);

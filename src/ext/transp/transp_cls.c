@@ -57,6 +57,35 @@ static i64 TranspCtx_Print(Buff *bf, void *a, cls type, word flags){
     return total;
 }
 
+static Map *Transp_FileMap(MemCh *m){
+    i16 size = 4;
+    RangeType *atts = (RangeType *)Bytes_Alloc(m,
+        sizeof(RangeType)*(size+1), TYPE_RANGE_ARRAY);
+    atts->of = TYPE_TRANSP_FILE;
+    atts->range = size;
+    i16 offset = 0;
+    offset += sizeof(Type);
+    (atts+1)->of = TYPE_STRVEC;
+    (atts+1)->range = offset;
+    offset += sizeof(void *);
+    (atts+2)->of = TYPE_STRVEC;
+    (atts+2)->range = offset;
+    offset += sizeof(void *);
+    (atts+3)->of = TYPE_STRVEC;
+    (atts+3)->range = offset;
+    offset += sizeof(void *);
+    (atts+4)->of = TYPE_STRVEC;
+    (atts+4)->range = offset;
+    offset += sizeof(void *);
+
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
+    keys[0] = Str_CstrRef(m, "name");
+    keys[1] = Str_CstrRef(m, "src");
+    keys[2] = Str_CstrRef(m, "dest");
+    keys[3] = Str_CstrRef(m, "local");
+    return Map_Make(m, size, atts, keys);
+}
+
 status Transp_InitLabels(MemCh *m, Lookup *lk){
     status r = READY;
     return r;
@@ -67,18 +96,9 @@ status Transp_Init(MemCh *m){
     if(!_init){
         _init = TRUE;
         Lookup *lk = ClassLookup;
-        /* cls */
-        ClassDef *cls = ClassDef_Make(m);
-        TranspFile tp;
-        Table_Set(cls->atts, Str_CstrRef(m, "name"),
-            I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        Table_Set(cls->atts, Str_CstrRef(m, "local"),
-            I16_Wrapped(m, (void *)(&tp.local)-(void *)(&tp)));
-        Table_Set(cls->atts, Str_CstrRef(m, "src"),
-            I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        Table_Set(cls->atts, Str_CstrRef(m, "dest"),
-            I16_Wrapped(m, (void *)(&tp.name)-(void *)(&tp)));
-        r |= Lookup_Add(m, lk, TYPE_TRANSP_FILE, (void *)cls);
+
+        /* map */
+        r |= Lookup_Add(m, MapsLookup, TYPE_TRANSP_FILE, (void *)Transp_FileMap(m));
 
         /* ToS */
         lk = ToStreamLookup;

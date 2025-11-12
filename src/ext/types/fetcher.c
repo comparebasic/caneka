@@ -45,9 +45,7 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
     Iter_Init(&it, fch->val.targets);
     while(value != NULL && (Iter_Next(&it) & END) == 0){
         FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
-        if(value->type.of == TYPE_HASHED && (
-                (fch->type.state & (FETCHER_COMMAND)|
-                    (tg->type.state & (FETCH_TARGET_KEY|FETCH_TARGET_ATT))) == 0)){
+        if(value->type.of == TYPE_HASHED && ((fch->type.state & FETCHER_COMMAND) == 0)){
             value = ((Hashed *)value)->value;
         }
 
