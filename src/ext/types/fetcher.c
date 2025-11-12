@@ -1,35 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-void *Fetch_FromOffset(MemCh *m, void *a, i16 offset, cls typeOf){
-    void *value = NULL;
-    if(typeOf == ZERO || typeOf > _TYPE_RAW_END){
-        void **ptr = (void **)(((void *)a)+offset);
-        value = *ptr; 
-    }else{
-        if(typeOf == TYPE_UTIL){
-            util *ptr = ((void *)a)+offset;
-            value = Util_Wrapped(m, *ptr); 
-        }else if(typeOf == TYPE_I32){
-            i32 *ptr = ((void *)a)+offset;
-            value = I32_Wrapped(m, *ptr); 
-        }else if(typeOf == TYPE_I64){
-            i64 *ptr = ((void *)a)+offset;
-            value = I64_Wrapped(m, *ptr); 
-        }else if(typeOf == TYPE_I16){
-            i16 *ptr = ((void *)a)+offset;
-            value = I16_Wrapped(m, *ptr);
-        }else if(typeOf == TYPE_I8){
-            i8 *ptr = ((void *)a)+offset;
-            value = I16_Wrapped(m, *ptr);
-        }else if(typeOf == TYPE_BYTE){
-            byte *ptr = ((void *)a)+offset;
-            value = B_Wrapped(m, *ptr, ZERO, ZERO); 
-        }
-    }
-    return value;
-}
-
 void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
     Abstract *value = (Abstract *)_value;
     Abstract *orig = value;

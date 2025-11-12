@@ -79,6 +79,8 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                 printf("NonObject %s\n", tg->key->bytes);
                 fflush(stdout);
            }
+        /*}else if(typeOf == TYPE_TABLE && tg->type.state & FETCH_TARGET_ITER){*/
+
         }else{
             char *cstr = "non cls is NULL";
             i16 len = strlen(cstr);
@@ -119,7 +121,7 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
         }
     }else{
         if(tg->type.state & FETCH_TARGET_ATT){
-            return Fetch_FromOffset(m, value, tg->offset, tg->objType.of);
+            return Map_FromOffset(m, value, tg->offset, tg->objType.of);
         }else if(tg->type.state & FETCH_TARGET_HASH){
             void *a = NULL; 
             if(value->type.of & TYPE_OBJECT){

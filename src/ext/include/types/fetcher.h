@@ -19,4 +19,3 @@ typedef struct fetcher {
 void *Fetch(MemCh *m, Fetcher *fch, void *data, void *source);
 Fetcher *Fetcher_Make(MemCh *m);
 void *Fetch_FromPath(Fetcher *fch, void *data, void *source);
-void *Fetch_FromOffset(MemCh *m, void *a, i16 offset, cls typeOf);

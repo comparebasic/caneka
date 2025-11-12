@@ -37,9 +37,11 @@ static i64 Hashed_Print(Buff *bf, void *a, cls type, word flags){
     }
 }
 
-
 static void *Object_ByKey(MemCh *m, FetchTarget *fg, void *data, void *source){
-    Object *obj = (Object *)as(data, TYPE_OBJECT);
+    Object *obj = (Object *)data;
+    if((obj->type.of & TYPE_OBJECT) == 0){
+        return NULL;
+    }
     return Object_Get(obj, fg->key);
 }
 
@@ -135,8 +137,6 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Object_Print(Buff *bf, void *a, cls type, word flags){
-    printf("\nOP\n");
-    fflush(stdout);
     static i32 _objIndent = 0;
     Object *obj = NULL;
     if(((Abstract *)a)->type.of & TYPE_OBJECT){
@@ -195,10 +195,6 @@ status Object_Print(Buff *bf, void *a, cls type, word flags){
                 ToS(bf, h->key, 0, flags); 
                 Buff_AddBytes(bf, (byte *)" -> ", 4);
                 if(flags & (MORE|DEBUG)){
-                    printf("\nhere %p\n", h);
-                    fflush(stdout);
-                    printf("\nhere II %p\n", h->value);
-                    fflush(stdout);
                     ToS(bf, h->value, 0, flags);  
                 }else{
                     Str *typeStr = NULL;

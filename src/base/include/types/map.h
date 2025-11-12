@@ -17,3 +17,4 @@ status Maps_Init(struct mem_ctx *m);
 struct span *Map_ToTable(struct mem_ctx *m, void *_a);
 Map *Map_Get(cls typeOf);
 status Map_MakeTbl(struct mem_ctx *m, Map *map);
+void *Map_FromOffset(struct mem_ctx *m, void *a, i16 offset, cls typeOf);

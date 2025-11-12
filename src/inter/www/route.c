@@ -292,6 +292,7 @@ status Route_ClsInit(MemCh *m){
     ClassDef *cls = ClassDef_Make(m);
     cls->type.of = TYPE_WWW_ROUTE;
     cls->name = Str_CstrRef(m, "Route");
+    cls->api.toS = Object_Print;
     Class_SetupProp(cls, Str_CstrRef(m, "path"));
     Class_SetupProp(cls, Str_CstrRef(m, "file"));
     Class_SetupProp(cls, Str_CstrRef(m, "func"));

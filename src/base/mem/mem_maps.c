@@ -65,30 +65,32 @@ static Map *MemCh_Map(MemCh *m){
 }
 
 static Map *MemBookStats_Map(MemCh *m){
+    MemBookStats st;
     word offset = 0;
     i64 SIZE = 4;
     RangeType *atts = (RangeType *)Bytes_Alloc(m, 
-        (word)(sizeof(RangeType)*SIZE), TYPE_RANGE_ARRAY);
+        (word)(sizeof(RangeType)*SIZE+1), TYPE_RANGE_ARRAY);
     atts->of = TYPE_BOOK_STATS;
     atts->range = SIZE;
-    offset += sizeof(Type);
-    offset += sizeof(i16);
-    (atts+1)->of = TYPE_I32;
-    (atts+1)->range = offset;
-    offset += sizeof(i32);
-    (atts+2)->of = TYPE_I32;
-    (atts+2)->range = offset;
-    offset += sizeof(i32);
-    (atts+3)->of = TYPE_I32;
-    (atts+3)->range = offset;
-    offset += sizeof(i32);
-    (atts+4)->of = TYPE_I32;
-    (atts+4)->range = offset;
+
     Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE, TYPE_POINTER_ARRAY);
+
     keys[0] = Str_CstrRef(m, "bookIdx");
+    (atts+1)->of = TYPE_I32;
+    (atts+1)->range = (void *)&st.bookIdx - (void *)&st;
+
     keys[1] = Str_CstrRef(m, "pageIdx");
+    (atts+2)->of = TYPE_I32;
+    (atts+2)->range = (void *)&st.pageIdx - (void *)&st;
+
     keys[2] = Str_CstrRef(m, "recycled");
+    (atts+3)->of = TYPE_I32;
+    (atts+3)->range = (void *)&st.recycled - (void *)&st;
+
     keys[3] = Str_CstrRef(m, "total");
+    (atts+4)->of = TYPE_I32;
+    (atts+4)->range = (void *)&st.total - (void *)&st;
+
     return Map_Make(m, SIZE-1, atts, keys);
 }
 

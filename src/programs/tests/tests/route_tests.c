@@ -265,9 +265,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
     IoUtil_Annotate(m, path);
     Route *handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
 
-    MemBookStats st;
-    MemBook_GetStats(m, &st);
-
     data = getGenericData(m, rt);
     Object *stats = Object_Make(m, ZERO);
     Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
@@ -316,6 +313,9 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args);
 
     DebugStack_SetRef("login.templ mem details", TYPE_CSTR);
+
+    MemBookStats st;
+    MemBook_GetStats(m, &st);
 
     data = getGenericData(m, rt);
     stats = Object_Make(m, ZERO);
