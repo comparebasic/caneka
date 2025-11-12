@@ -191,6 +191,7 @@ Object *Object_ByPath(Object *obj, StrVec *path, void *value, word op){
         if((item->type.state & MORE) && key != NULL){
             current = Object_GetOrMake(current, key, op);
             if(current == NULL){
+                DebugStack_Pop();
                 return NULL;
             }
             key = NULL;
@@ -209,6 +210,7 @@ Object *Object_ByPath(Object *obj, StrVec *path, void *value, word op){
     if(key != NULL && (key->type.state & (LAST|MORE)) == 0){
         current = Object_GetOrMake(current, key, op);
         if(current == NULL){
+            DebugStack_Pop();
             return NULL;
         }
     }

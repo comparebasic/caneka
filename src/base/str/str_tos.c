@@ -57,6 +57,14 @@ status BytesLit_Print(Buff *bf, void *a, cls type, word flags){
     return SUCCESS;
 }
 
+status Cstr_Print(Buff *bf, void *a, cls type, word flags){
+    if(a == NULL){
+        return SUCCESS;
+    }
+
+    Buff_AddBytes(bf, (byte *)a, strlen((char *)a));
+    return SUCCESS;
+}
 
 status Str_Print(Buff *bf, void *a, cls type, word flags){
     void *args[5];
@@ -244,6 +252,7 @@ status Str_InitLabels(MemCh *m, Lookup *lk){
 status Str_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
+    r |= Lookup_Add(m, lk, TYPE_CSTR, (void *)Cstr_Print);
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)BytesLit_Print);

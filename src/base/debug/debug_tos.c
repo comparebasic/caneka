@@ -4,12 +4,12 @@
 static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     StackEntry *se = (StackEntry*)as(a, TYPE_DEBUG_STACK_ENTRY); 
 
-    Buff_AddBytes(bf, (byte *)"    \x1b[1;33m", 12);
+    Buff_AddBytes(bf, (byte *)"    \x1b[1;33m", 11);
     Buff_AddBytes(bf, (byte *)se->funcName, strlen(se->funcName));
     Buff_AddBytes(bf, (byte *)"\x1b[22m:", 6);
     Buff_AddBytes(bf, (byte *)se->fname, strlen(se->fname));
     if(flags & MORE && se->ref != NULL){
-        Buff_AddBytes(bf, (byte *)" - \x1b[1m", 8);
+        Buff_AddBytes(bf, (byte *)" - \x1b[0;1m", 9);
         ToS(bf, se->ref, se->typeOf, MORE);
     }
 

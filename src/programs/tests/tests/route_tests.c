@@ -213,6 +213,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
+    DebugStack_SetRef("header.templ", TYPE_CSTR);
+
     Route *rt = Route_Make(m);
     StrVec *pagesPath = IoUtil_GetAbsVec(m,
         Str_CstrRef(m, "./examples/web-server/pages/public"));
@@ -257,6 +259,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Templ output does not match @", args);
 
     /* login.templ no mem details */
+    DebugStack_SetRef("login.templ no mem details", TYPE_CSTR);
+
     path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
     Route *handler = Object_ByPath(rt, path, NULL, SPAN_OP_GET);
@@ -280,6 +284,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
     r |= TestShow(Equals(expected, bf->v),
         "Handler: Expected template value with no header and a mem details", 
         "Handler: Expected template value with no header and a mem: $", args);
+
+    DebugStack_SetRef("login.templ no mem details + header", TYPE_CSTR);
 
     Route *header = Object_ByPath(inc,
         StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)), NULL, SPAN_OP_GET);
@@ -308,6 +314,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Footer: Expected template value with no mem object and a header",
         "Footer: Expected template value with no mem object and a header: $", 
     args);
+
+    DebugStack_SetRef("login.templ mem details", TYPE_CSTR);
 
     data = getGenericData(m, rt);
     stats = Object_Make(m, ZERO);
@@ -339,6 +347,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Expected mem details in template", 
         "Expected mem details in template $", args);
 
+    DebugStack_SetRef("fmt value", TYPE_CSTR);
 
     data = getGenericData(m, rt);
     bf = Buff_Make(m, ZERO);

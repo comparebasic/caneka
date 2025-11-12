@@ -85,6 +85,7 @@ static status Templ_handleJump(Templ *templ){
 
     if(fch->type.state & FETCHER_FOR){
         if((fch->type.state & PROCESSING) == 0){
+            DebugStack_SetRef(fch, fch->type.of);
             void *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
             Iter_Add(&templ->data, value);
             fch->type.state |= PROCESSING;
@@ -120,6 +121,7 @@ static status Templ_handleJump(Templ *templ){
             Out("^c.  If: & of @^0.\n", args);
         }
         fch->type.state |= PROCESSING;
+        DebugStack_SetRef(fch, fch->type.of);
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
             if(templ->type.state & DEBUG){
@@ -153,6 +155,7 @@ static status Templ_handleJump(Templ *templ){
             };
             Out("^c.  With: & of @^0.\n", args);
         }
+        DebugStack_SetRef(fch, fch->type.of);
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         Iter_Add(&templ->data, value);
         r |= PROCESSING;
@@ -319,6 +322,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     }
 
     Abstract *item = Iter_Get(&templ->content);
+    DebugStack_SetRef(item, item->type.of);
 
     if(templ->type.state & DEBUG){
         void *args[] = {
@@ -349,6 +353,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
             Out("^c.  Fetcher: &^0.\n", args);
         }
 
+        DebugStack_SetRef(fch, fch->type.of);
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
             void *args[] = {

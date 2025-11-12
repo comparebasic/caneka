@@ -19,8 +19,6 @@ status Map_MakeTbl(MemCh *m, Map *map){
     for(i16 i = 0; i < map->type.range; i++){
         RangeType *att = map->atts+(i+1);
         Str *s = map->keys[i];
-        printf("%d/%s %d\n", i, s->bytes, att->range);
-        fflush(stdout);
         Table_Set(map->tbl, s, att);
     }
     return SUCCESS;
