@@ -8,5 +8,5 @@
 #include "types/fetch_target.h"
 #include "types/classdef.h"
 #include "types/types_cls.h"
-#include "types/seal.h"
+#include "types/seel.h"
 #include "types/inst.h"

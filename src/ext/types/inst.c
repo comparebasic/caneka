@@ -1,16 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
-i32 Inst_Set(Span *inst, Table *seal, void *key, void *value){
+i32 Inst_Set(Span *inst, Table *seel, void *key, void *value){
     if((inst->type.state & TABLE_SEALED) == 0){
-        Error(seal->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error unable to map values from an unsealed Table", NULL);
+        Error(seel->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error unable to map values from an unseeled Table", NULL);
         return -1;
     }
-    i32 orderIdx = Seal_GetIdx(seal, key);
+    i32 orderIdx = Seel_GetIdx(seel, key);
     if(orderIdx < 0){
         Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error unable to map values from an unsealed Table", NULL);
+            "Error unable to map values from an unseeled Table", NULL);
         return -1;
     }
     Span_Set(inst, orderIdx, value);
@@ -18,17 +18,17 @@ i32 Inst_Set(Span *inst, Table *seal, void *key, void *value){
 }
 
 Span *Inst_Make(MemCh *m, cls typeOf){
-    Table *seal = Lookup_Get(SealLookup, typeOf);
-    if(seal == NULL){
+    Table *seel = Lookup_Get(SeelLookup, typeOf);
+    if(seel == NULL){
         void *args[] = {Type_ToStr(m, typeOf), NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error Seal not found $", args);
+            "Error Seel not found $", args);
         return NULL;
 
     }
     Span *inst = Span_Make(m);
     Iter it;
-    Iter_Init(&it, seal);
+    Iter_Init(&it, seel);
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL){

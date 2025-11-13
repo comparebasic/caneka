@@ -6,16 +6,14 @@ enum fetch_target_flags {
     FETCH_TARGET_PROP = 1 << 12,
     FETCH_TARGET_FUNC = 1 << 13,
     FETCH_TARGET_RESOLVED = 1 << 14,
-    FETCH_TARGET_HASH = 1 << 15,
 };
 
-typedef void *(*FetchFunc)(MemCh *m, struct fetch_target *target, void *data, void *source);
+typedef void *(*FetchFunc)(MemCh *m, struct fetch_target *target, void *data);
 
 typedef struct fetch_target {
     Type type;
     Type objType;
-    word location;
-    i16 offset;
+    RangeType *offsetType;
     i32 idx;
     util id;
     Str *key;

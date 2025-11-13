@@ -1,56 +1,42 @@
 #include <external.h>
 #include <caneka.h>
 
+static void *Fetch_byIdx(MemCh *m, FetchTarget *tg, void *data){
+    return Span_Get((Span *)data, tg->idx);
+}
+
+static void *Fetch_byKey(MemCh *m, FetchTarget *tg, void *data){
+    return Table_Get((Table *)data, tg->key);
+}
+
+static void *Fetch_getIter(MemCh *m, FetchTarget *tg, void *data){
+    return Iter_Make(m, data);
+}
+
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
     void *args[4];
     Str s = {.type = {TYPE_STR, STRING_CONST}, .length = 0, .alloc = 0, .bytes = NULL};
     args[0] = &s;
-    if(typeOf & TYPE_OBJECT){
-        ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
-        if(cls == NULL){
-            char *cstr = "cls is NULL";
+    if(typeOf & TYPE_INSTANCE){
+        Table *seel = Lookup_Get(SeelLookup, typeOf);
+        if(seel == NULL){
+            char *cstr = "seel is NULL";
             i16 len = strlen(cstr);
             Str_Init(&s, (byte *)cstr, len, len+1); 
             goto err;
         }
-        if(tg->type.state & FETCH_TARGET_ATT){
-            Single *sg = (Single *)Table_Get(cls->atts, tg->key);
-            if(sg == NULL){
-                char *cstr = "Single for cls->atts is NULL";
-                i16 len = strlen(cstr);
-                Str_Init(&s, (byte *)cstr, len, len+1); 
-                goto err;
-            }else{
-                tg->offset = sg->val.w;
-                tg->type.state |= FETCH_TARGET_RESOLVED;
-                tg->objType.of = typeOf;
-                return SUCCESS;
-            }
-        }else if(tg->type.state & FETCH_TARGET_PROP){
-            tg->idx = Class_GetPropIdx(cls, tg->key);
-            if(tg->idx == -1){
-                tg->type.state |= FETCH_TARGET_HASH;
-                tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);
-                tg->func = cls->api.byIdx;
-            }
-        }else{
-            if(tg->type.state & FETCH_TARGET_KEY){
-                tg->func = cls->api.byKey;
-                tg->type.state |= FETCH_TARGET_FUNC;
-            }else if(tg->type.state & FETCH_TARGET_IDX){
-                tg->func = cls->api.byIdx;
-                tg->type.state |= FETCH_TARGET_FUNC;
-            }else if(tg->type.state & FETCH_TARGET_ITER){
-                tg->func = cls->api.getIter;
-                tg->type.state |= FETCH_TARGET_FUNC;
-            }
 
-            if(tg->func == NULL){
-                char *cstr = "cls func is NULL";
-                i16 len = strlen(cstr);
-                Str_Init(&s, (byte *)cstr, len, len+1); 
-                goto err;
-            }
+        if((tg->type.state & FETCH_TARGET_PROP) &&
+            ((tg->idx = Seel_GetIdx(seel, tg->key)) != -1)
+        ){
+            /* all set */
+        }else if(tg->type.state & FETCH_TARGET_ITER){
+            tg->func = Fetch_getIter;
+        }else{
+            char *cstr = "seel prop not found";
+            i16 len = strlen(cstr);
+            Str_Init(&s, (byte *)cstr, len, len+1); 
+            goto err;
         }
 
         tg->type.state |= FETCH_TARGET_RESOLVED;
@@ -58,8 +44,8 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         return SUCCESS;
     } else {
         if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP)){
-            tg->type.state |= FETCH_TARGET_HASH;
             tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
+            tg->func = Fetch_byKey;
         }else if(tg->type.state & FETCH_TARGET_ATT){
            Map *map = Map_Get(typeOf);
            if(map == NULL){
@@ -75,12 +61,14 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                     Str_Init(&s, (byte *)cstr, len, len+1); 
                     goto err;
                 }
-                tg->offset = att->range;
+                tg->offsetType = att;
            }
-        }else if(typeOf == TYPE_TABLE && tg->type.state & FETCH_TARGET_ITER){
-            tg->func = FetchFunc_SpanGetIter;
+        }else if(tg->type.state & FETCH_TARGET_ITER && 
+            (typeOf == TYPE_TABLE || typeOf == TYPE_SPAN)
+        ){
+            tg->func = Fetch_getIter;
         }else{
-            char *cstr = "non cls is NULL";
+            char *cstr = "non seel is NULL";
             i16 len = strlen(cstr);
             Str_Init(&s, (byte *)cstr, len, len+1); 
             goto err;
@@ -104,11 +92,8 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
     void *args[6];
 
     args[3] = NULL;
-    ClassDef *cls = NULL;
+    Table *seel = NULL;
     word typeOf = value->type.of;
-    if(typeOf & TYPE_OBJECT){
-        typeOf = ((Object *)value)->type.of;
-    }
 
     if(value->type.of != tg->objType.of || (tg->type.state & FETCH_TARGET_RESOLVED) == 0){
         if(FetchTarget_Resolve(m, tg, typeOf) & SUCCESS){
@@ -119,74 +104,36 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
         }
     }else{
         if(tg->type.state & FETCH_TARGET_ATT){
-            return Map_FromOffset(m, value, tg->offset, tg->objType.of);
-        }else if(tg->type.state & FETCH_TARGET_HASH){
-            void *a = NULL; 
-            if(value->type.of & TYPE_OBJECT){
-                Object *obj = (Object *)as(value, TYPE_OBJECT);
-                a = Object_Get(obj, tg->key);
-            }else if(value->type.of == TYPE_TABLE){
-                a = Table_Get((Table *)value, tg->key);
-            }
-            if(a == NULL){
-                args[1] = value;
-                goto err;
-            }
-            return a;
+            return Map_FromOffset(m, value, tg->offsetType->range, tg->offsetType->of);
         }else if(tg->type.state & FETCH_TARGET_PROP){
-            Object *obj = (Object *)value;
-            if(obj == NULL || (obj->type.of & TYPE_OBJECT) == 0){
+            Inst *obj = (Inst *)value;
+            if(obj == NULL || (obj->type.of & TYPE_INSTANCE) == 0){
                 args[1] = value;
                 goto err;
             }
-            Abstract *a = Object_GetPropByIdx(obj, tg->idx);
+            void *a = Span_Get(obj, tg->idx);
             if(a == NULL){
                 args[1] = value;
                 goto err;
             }
             return a;
         }else{
-            return tg->func(m, tg, value, source);
+            return tg->func(m, tg, value);
         }
     }
 err:
     if((tg->type.state & PROCESSING) == 0){
-        cls = Lookup_Get(ClassLookup, value->type.of);
+        seel = Lookup_Get(SeelLookup, value->type.of);
         args[0] = tg;
 
         args[1] = (value != NULL ? Type_ToStr(m, value->type.of) : NULL);
         args[3] = Type_ToStr(m, typeOf);
-        args[4] = cls;
+        args[4] = seel;
         args[5] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error for @/$ ClassDef X or prop not found, using @ class $/@\n", args);
+            "Error for @/$ not found, using @ seel $/@\n", args);
     }
     return NULL;
-}
-
-void *Fetch_ByKey(MemCh *m, void *a, Str *key, void *source){
-    FetchTarget *tg = FetchTarget_MakeKey(m, key);
-    return Fetch_Target(m, tg, a, source);
-}
-
-void *Fetch_ByAtt(MemCh *m, void *a, Str *att, void *source){
-    FetchTarget *tg = FetchTarget_MakeAtt(m, att);
-    return Fetch_Target(m, tg, a, source);
-}
-
-void *Fetch_Prop(MemCh *m, void *a, Str *prop, void *source){
-    FetchTarget *tg = FetchTarget_MakeProp(m, prop);
-    return Fetch_Target(m, tg, a, source);
-}
-
-Iter *Fetch_Iter(MemCh *m, void *a, void *source){
-    FetchTarget *tg = FetchTarget_MakeIter(m);
-    return (Iter *)Fetch_Target(m, tg, a, source);
-}
-
-void *FetchFunc_SpanGetIter(MemCh *m,
-        struct fetch_target *target, void *data, void *source){
-    return Iter_Make(m, data);
 }
 
 FetchTarget *FetchTarget_Make(MemCh *m){

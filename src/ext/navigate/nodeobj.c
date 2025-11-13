@@ -18,7 +18,7 @@ status NodeObj_ClsInit(MemCh *m){
     Table_Set(tbl, Str_FromCstr(m, "value"), STRING_COPY, I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(tbl, Str_FromCstr(m, "children"), STRING_COPY, I16_Wrapped(m, TYPE_TABLE));
 
-    r |= Seal_Seal(m, tbl, Str_FromCstr(m, "NodeObj", STRING_COPY ), TYPE_NODEOBJ);
+    r |= Seel_Seel(m, tbl, Str_FromCstr(m, "NodeObj", STRING_COPY ), TYPE_NODEOBJ);
 
     return r;
 }
