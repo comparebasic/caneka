@@ -59,7 +59,6 @@ static BuildSubdir typesobj = { "types", {
     "seel.c",
     "fetcher.c",
     "fetch_target.c",
-    "types_cls.c",
     NULL
 }};
 
@@ -113,13 +112,6 @@ static BuildSubdir serveobj = { "serve", {
     NULL
 }};
 
-static BuildSubdir sequenceobj = { "sequence", {
-    "sequence.c",
-    "sequence_cls.c",
-    NULL
-}};
-
-
 static BuildSubdir transpobj = { "transp", {
     "transp.c",
     "transp_ctx.c",
@@ -167,7 +159,6 @@ static BuildSubdir *objdirs[] = {
     &docobj,
     &navigateobj,
     &authobj,
-    &sequenceobj,
     &serveobj,
     &parserobj,
     &fmtobj,

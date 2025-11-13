@@ -16,6 +16,7 @@ status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf){
     seel->type.state |= TABLE_SEALED;
     Lookup_Add(m, SeelLookup, typeOf, seel);
     Lookup_Add(m, SeelNameLookup, typeOf, name);
+    Lookup_Add(m, ToStreamLookup, typeOf, Inst_Print);
     return seel->type.state;
 }
 
