@@ -14,7 +14,7 @@ status NodeObj_ClsInit(MemCh *m){
     Table *tbl = Table_Make(m);
 
     Table_Set(tbl, Str_FromCstr(m, "name", STRING_COPY), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(tbl, Str_FromCstr(m, "atts", STRING_COPY), I16_Wrapped(m, TYPE_INSTANCE));
+    Table_Set(tbl, Str_FromCstr(m, "atts", STRING_COPY), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(tbl, Str_FromCstr(m, "value", STRING_COPY), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(tbl, Str_FromCstr(m, "children", STRING_COPY), I16_Wrapped(m, TYPE_TABLE));
 

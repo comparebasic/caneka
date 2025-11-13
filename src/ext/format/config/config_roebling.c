@@ -181,8 +181,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         }
         Inst *obj = Inst_Make(rbl->m, TYPE_NODEOBJ);
         if(token != NULL){
+            printf("Token Exists\n");
+            fflush(stdout);
             Span_Set(obj, NODEOBJ_PROPIDX_NAME, token);
             Table_ByPath(Span_Get(current, NODEOBJ_PROPIDX_CHILDREN), token, obj, SPAN_OP_SET);  
+            printf("Token Set\n");
+            fflush(stdout);
             Iter_Remove(it);
             Iter_Prev(it);
         }
@@ -190,18 +194,24 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
         if(Span_Get(current, NODEOBJ_PROPIDX_ATTS) == NULL){
+            printf("make atts\n");
+            fflush(stdout);
             Table *attObj = Table_Make(m);
             Iter *itn = Iter_Make(m, attObj);
             Table_SetKey(itn, StrVec_Str(m, v));
             Span_Set(current, NODEOBJ_PROPIDX_ATTS, attObj);
             Iter_Add(it, itn);
         }else if(data == NULL){
+            printf("make new\n");
+            fflush(stdout);
             Table *tbl = Table_Make(m);
             Iter *itn = Iter_Make(m, tbl);
             Table_SetKey(itn, StrVec_Str(m, v));
             Span_Add(Span_Get(current, NODEOBJ_PROPIDX_CHILDREN), tbl);
             Iter_Add(it, itn);
         }else if(data->p->type.of == TYPE_TABLE){
+            printf("existing table\n");
+            fflush(stdout);
             Table_SetKey(data, StrVec_Str(m, v));
         }
     }else if(captureKey == CONFIG_OUTDENT){
@@ -241,13 +251,19 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             }
         }
     }else if(captureKey == CONFIG_LINE || captureKey == CONFIG_TOKEN){
+        printf("Token/Line\n");
+        fflush(stdout);
         if(data != NULL){
+            printf("Token/Line top\n");
+            fflush(stdout);
             if(data->p->type.of == TYPE_TABLE){
                 Table_SetValue(data, v);
             }else if(data->p->type.of == TYPE_SPAN){
                 Iter_Add(data, v);
             }
         }else{
+            printf("Token/Line bottom\n");
+            fflush(stdout);
             Iter_Add(it, Ptr_Wrapped(rbl->m, v, captureKey));
         }
     }

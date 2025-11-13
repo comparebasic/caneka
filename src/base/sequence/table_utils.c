@@ -92,6 +92,11 @@ status Table_Merge(Table *dest, Table *src){
 }
 
 Table *Table_GetOrMake(Table *tbl, void *key, word op){
+    void *args[] = {
+        tbl, key, NULL,
+    };
+    Out("^p.Table_GetOrMake @[@]^0\n", args);
+
     Abstract *a = (Abstract *)Table_Get(tbl, key);
     if(a == NULL){
         if((op & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
@@ -119,6 +124,12 @@ Table *Table_GetOrMake(Table *tbl, void *key, word op){
 void *Table_ByPath(Table *tbl, StrVec *path, void *value, word op){
     DebugStack_Push(tbl, tbl->type.state);
 
+    void *args[] = {
+        tbl, path, NULL,
+    };
+    Out("^p.Table_ByPath @[@]^0\n", args);
+
+
     Iter keysIt;
     Iter_Init(&keysIt, path->p);
 
@@ -141,7 +152,7 @@ void *Table_ByPath(Table *tbl, StrVec *path, void *value, word op){
         }
     }
 
-    if(key != NULL && (key->type.state & (LAST|MORE)) == 0){
+    if(key != NULL && path->p->nvalues > 1 && (key->type.state & (LAST|MORE)) == 0){
         current = Table_GetOrMake(current, key, op);
         if(current == NULL){
             DebugStack_Pop();
