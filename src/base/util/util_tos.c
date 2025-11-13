@@ -50,10 +50,12 @@ static status WrappedPtr_Print(Buff *bf, void *a, cls type, word flags){
         NULL
     };
     Fmt(bf, "Wptr<$ ", args);
-    if(sg->objType.of > _TYPE_ABSTRACT_BEGIN){
-        ToS(bf, sg->val.ptr, 0, MORE);
-    }else{
+    if(Lookup_Get(ToStreamLookup, sg->objType.of) != NULL){
+        ToS(bf, sg->val.ptr, sg->objType.of, MORE);
+    }else if(MemBook_Check(sg->val.ptr)){
         Addr_ToS(bf, sg->val.ptr, flags);
+    }else{
+        ToS(bf, Util_Wrapped(bf->m, (util)sg->val.ptr), TYPE_WRAPPED_UTIL, ZERO);
     }
     Buff_AddBytes(bf, (byte *)">", 1);
     return SUCCESS;

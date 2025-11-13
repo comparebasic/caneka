@@ -82,7 +82,7 @@ static status setupStatus(BuildCtx *ctx){
     }
 
     dir = ctx->objdirs;
-    while(dir == NULL && *dir != NULL){
+    while(dir != NULL && *dir != NULL){
         ctx->fields.steps.modTotal->val.i++;
         dir++;
     }
@@ -437,10 +437,12 @@ static status build(BuildCtx *ctx){
         }
     }
 
+    i32 libCount = 0;
     BuildSubdir **dir = ctx->objdirs;
     while(dir != NULL && *dir != NULL){
         r |= buildDirToLib(ctx, libDir, lib, *dir);
         dir++;
+        libCount++;
     }
     if((r & ERROR) == 0){
         setupComplete(ctx);
@@ -453,6 +455,9 @@ static status build(BuildCtx *ctx){
     Str *dist = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
     Executable *target = ctx->targets;
     while(target->bin != NULL){
+        if(libCount == 0){
+            lib = NULL;
+        }
         buildExec(ctx, ((r & SUCCESS) != 0), dist, lib, target);
         target++;
     }

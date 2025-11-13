@@ -53,7 +53,7 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = NULL;
+    ctx.libtarget = "libcnkwebserver";
     ctx.version = NULL;
     ctx.dist = "build";
     ctx.src = "src/programs/web-server";

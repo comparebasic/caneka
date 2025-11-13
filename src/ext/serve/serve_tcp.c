@@ -46,7 +46,7 @@ static i32 openPortToFd(i32 port){
 }
 
 static status ServeTcp_OpenTcp(Step *st, Task *tsk){
-    TcpCtx *ctx = (TcpCtx *)as(st->arg, TYPE_TCP_CTX);
+    TcpCtx *ctx = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     i32 fd = openPortToFd(ctx->port);
     void *args[4];
 
@@ -76,7 +76,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     status r = READY;
     st->type.state &= ~SUCCESS;
     void *args[5];
-    TcpCtx *ctx = (TcpCtx *)as(st->arg, TYPE_TCP_CTX);
+    TcpCtx *ctx = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);;
     i32 available = poll(pfd, 1, TCP_POLL_DELAY);

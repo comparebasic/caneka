@@ -28,12 +28,7 @@ static Map *Hashed_Map(MemCh *m){
     keys[4] = Str_CstrRef(m, "value");
     (atts+5)->of = TYPE_ABSTRACT;
     (atts+5)->range = (word)((void *)&h.value-(void *)&h);
-    Map *map = Map_Make(m, size, atts, keys);
-    
-    printf("Map Hashed nvalues: %d\n", map->tbl->nvalues);
-    fflush(stdout);
-
-    return map;
+    return Map_Make(m, size, atts, keys);
 }
 
 status Sequence_MapsInit(MemCh *m, Lookup *lk){

@@ -6,18 +6,23 @@ static status Load_stats(Task *tsk, Step *st){
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
-    MemBookStats st;
-    MemBook_GetStats(&st);
+    printf("Load Stats\n");
+    fflush(stdout);
+
+    MemCh *m = tsk->m;
+
+    MemBookStats mst;
+    MemBook_GetStats(m, &mst);
 
     Object *stats = Object_Make(m, ZERO);
     Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
-        MicroTime_ToStr(m, ctx->metrics.start));
+        MicroTime_ToStr(m, tcp->metrics.start));
     Object *mem = Object_Make(m, ZERO);
     Object_Set(mem, Str_FromCstr(m, "mem-used", ZERO),
-        Str_MemCount(m, st.pageIdx * PAGE_SIZE));
+        Str_MemCount(m, mst.pageIdx * PAGE_SIZE));
     Object_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
         Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
-    Object_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &st));
+    Object_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &mst));
     Object_Set(stats, Str_FromCstr(m, "mem", ZERO), mem);
 
     Object_Set(ctx->data, Str_FromCstr(m, "stats", ZERO), stats);
@@ -29,12 +34,15 @@ static status Load_stats(Task *tsk, Step *st){
 static status routeInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
 
+    printf("Route init\n");
+    fflush(stdout);
+
     StrVec *path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/public"));
     StrVec *abs = IoUtil_AbsVec(m, path);
     ctx->pages = (Object *)Route_Make(m);
     r |= Route_Collect(ctx->pages, abs);
 
-    StrVec *name = StrVec_From(m, Str_FromCstr(m, "/stats"));
+    StrVec *name = StrVec_From(m, Str_FromCstr(m, "/stats", STRING_COPY));
     IoUtil_Annotate(m, name);
 
     Route *statHandler = Object_ByPath(ctx->pages, name, NULL, SPAN_OP_GET);
@@ -50,16 +58,16 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
     ctx->inc = (Object *)Route_Make(m);
     r |= Route_Collect(ctx->inc, abs);
 
-    addRoute(m,
+    WebServer_AddRoute(m,
         ctx->pages,
-        Str_FromCstr(m, "examples/web-server/pages/static", STRING_COPY),
-        Str_FromCstr(m, "/static", STRING_COPY)
+        StrVec_From(m, Str_FromCstr(m, "examples/web-server/pages/static", STRING_COPY)),
+        StrVec_From(m, Str_FromCstr(m, "/static", STRING_COPY))
     );
 
-    addRoute(m,
+    WebServer_AddRoute(m,
         ctx->pages,
-        Str_FromCstr(m, "examples/web-server/pages/system", STRING_COPY),
-        Str_FromCstr(m, "/system", STRING_COPY)
+        StrVec_From(m, Str_FromCstr(m, "examples/web-server/pages/system", STRING_COPY)),
+        StrVec_From(m, Str_FromCstr(m, "/system", STRING_COPY))
     );
 
     return r;
@@ -87,12 +95,11 @@ i32 main(int argc, char **argv){
     }
 
     util ip6[2] = {0, 0};
-    StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "examples/web-server"));
 
-    Task *srv = WebServer_Make(path, 3000, 0, ip6);
+    Task *srv = WebServer_Make(3000, 0, ip6);
     routeInit(m, (TcpCtx *)srv->source);
 
-    Task_Tumble(tsk);
+    Task_Tumble(srv);
 
     DebugStack_Pop();
     return 0;
