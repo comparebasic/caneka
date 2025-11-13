@@ -45,13 +45,22 @@ static status WebServer_logAndClose(Step *_st, Task *tsk){
 static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
 
+    printf("Populating Error\n");
+    fflush(stdout);
+
     MemCh *m = tsk->m; 
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
     ErrorMsg *msg = (ErrorMsg *)as(arg, TYPE_ERROR_MSG);
 
-    Object *data = Object_Make(m, TYPE_OBJECT);
+    if(ctx->data == NULL){
+        ctx->data = Object_Make(m, TYPE_OBJECT);
+    }
+
+    Object_Set(ctx->data, Str_FromCstr(m, "nav", STRING_COPY), tcp->nav);
+
     Object *error = Object_Make(m, TYPE_OBJECT);
     Object_Set(error,
         Str_FromCstr(m, "name", STRING_COPY),
@@ -59,9 +68,11 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
 
     Buff *bf = Buff_Make(m, ZERO);
     Fmt(bf, (char *)msg->fmt->bytes, msg->args);
-    Object_Set(data,
+    Object_Set(error,
         Str_FromCstr(m, "details", STRING_COPY), 
         bf->v);
+
+    Object_Set(ctx->data, Str_FromCstr(m, "error", STRING_COPY), error);
 
     StrVec *path = StrVec_From(m, Str_FromCstr(m, "/system/error", STRING_COPY));
     IoUtil_Annotate(m, path);
@@ -70,7 +81,7 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
 
     Task_ResetChain(tsk);
     HttpTask_InitResponse(tsk, NULL, source);
-    Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, data, NULL, ZERO);
+    Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
 
     DebugStack_Pop();
     return SUCCESS;
@@ -82,7 +93,6 @@ static status WebServer_populate(MemCh *m, Task *tsk, void *arg, void *source){
     Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
 
-    pfd = TcpTask_GetPollFd(tsk);
     HttpTask_InitResponse(tsk, NULL, source);
     Task_AddStep(tsk, WebServer_GatherPage, NULL, NULL, ZERO);
     HttpTask_AddRecieve(tsk, NULL, NULL);
@@ -120,35 +130,44 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
     IoUtil_Annotate(tsk->m, ctx->path);
     Route *route = Route_GetHandler(tcp->pages, ctx->path);
+    ctx->route = route;
+
+    if(ctx->data == NULL){
+        ctx->data = Object_Make(m, TYPE_OBJECT);
+    }
+    Object_Set(ctx->data, Str_FromCstr(m, "nav", STRING_COPY), tcp->nav);
 
     if(route == NULL){
-        Str *s = Str_FromCstr(m, "not found", STRING_COPY);
+        printf("Populating 404\n");
+        fflush(stdout);
 
-        ctx->data = Object_Make(m, TYPE_OBJECT);
-        ctx->path = StrVec_From(m, Str_FromCstr(m,  "/system/error", STRING_COPY));
-        IoUtil_Annotate(m, ctx->path);
-        Object_Set(ctx->data, Str_FromCstr(m, "nav", STRING_COPY), tcp->nav);
-
-        ctx->contentLength = s->length;
+        StrVec *path = ctx->path;
+        ctx->path = StrVec_From(m, Str_FromCstr(m,  "/system/not-found", STRING_COPY));
+        IoUtil_Annotate(tsk->m, ctx->path);
+        Route *route = Route_GetHandler(tcp->pages, ctx->path);
+        ctx->route = route;
         ctx->code = 404;
         ctx->mime = Str_FromCstr(m, "text/plain", STRING_COPY);
 
+        Object *error = Object_Make(m, TYPE_OBJECT);
+        Object_Set(error, Str_FromCstr(m, "name", STRING_COPY),
+            Str_FromCstr(m, "Page not found", STRING_COPY));
+        Object_Set(error, Str_FromCstr(m, "details", STRING_COPY), path);
+
+        Object_Set(ctx->data, Str_FromCstr(m, "error", STRING_COPY), error);
+
+
+        Str *s = Str_FromCstr(m, "not found", STRING_COPY);
+        ctx->contentLength = s->length;
         Buff *bf = Buff_Make(m, ZERO);
         Buff_AddBytes(bf, s->bytes, s->length);
-        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
-        HttpCtx_PrepareResponse(ctx, tsk);
+        Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
 
         st->type.state |= MORE;
         DebugStack_Pop();
         return st->type.state;
     }
 
-    ctx->route = route;
-    if(ctx->data == NULL){
-        ctx->data = Object_Make(m, TYPE_OBJECT);
-    }
-
-    Object_Set(ctx->data, Str_FromCstr(m, "nav", STRING_COPY), tcp->nav);
     Object *routeData = Object_GetPropByIdx(route, ROUTE_PROPIDX_DATA);
     Object_Lay(ctx->data, routeData, ctx->data->type.of, TRUE);
 
@@ -212,7 +231,9 @@ status WebServer_ServePage(Step *st, Task *tsk){
         ctx->contentLength += footerBf->st.st_size;
     }
 
-    ctx->code = 200;
+    if(ctx->code == 0){
+        ctx->code = 200;
+    }
 
     if(footerBf != NULL){
         Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)footerBf, NULL, ZERO);

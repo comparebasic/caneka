@@ -5,7 +5,7 @@
 /* parameters */
 
 static Executable targets[] = {
-    {"binseg-cli", "main.c"},
+    {"cnk_cli", "main.c"},
     {NULL, NULL},
 };
 
@@ -23,7 +23,7 @@ static char *inc[] = {
     "-I./src/ext/include/",
     "-I./src/inter/include/",
     "-I./src/third/api/include/",
-    "-I./src/programs/binseg-cli/include/",
+    "-I./src/programs/cnkcli/include/",
     NULL
 };
 
@@ -65,10 +65,10 @@ int main(int argc, char **argv){
 
     ctx.tools.cc = "clang";
     ctx.tools.ar = "ar";
-    ctx.libtarget = "libcnkbsgcli";
+    ctx.libtarget = "libcnkcli";
     ctx.version = NULL;
     ctx.dist = "build";
-    ctx.src = "src/programs/binseg-cli/";
+    ctx.src = "src/programs/cnkcli/";
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;

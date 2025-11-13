@@ -1,10 +1,10 @@
 #include <external.h>
 #include <caneka.h>
-#include <binseg-cli.h>
+#include <cnkcli.h>
 
 Buff *BinSegCli_UnlogBuff(MemCh *m, Str *path){
     Buff *bf = Buff_Make(m, ZERO);
-    if(Equals((Abstract *)path, (Abstract *)Str_FromCstr(m, "-", ZERO))){
+    if(Equals(path, Str_FromCstr(m, "-", ZERO))){
         struct pollfd pfd = {0, POLLIN, 0};
         if(poll(&pfd, 1, 1) == 0){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -16,8 +16,8 @@ Buff *BinSegCli_UnlogBuff(MemCh *m, Str *path){
     }
     if(bf->type.state & ERROR){
 
-        Abstract *args[2];
-        args[0] = (Abstract *)bf;
+        void *args[2];
+        args[0] = bf;
         args[1] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error opening UnlogBuff", args);
