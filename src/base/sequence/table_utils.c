@@ -8,8 +8,6 @@ Span *Table_Ordered(MemCh *m, Table *tbl){
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = (Hashed *)Iter_Get(&it);
         if(h != NULL){
-            printf("Adding %d\n", h->orderIdx);
-            fflush(stdout);
             Span_Set(p, h->orderIdx, h);
         }
     }

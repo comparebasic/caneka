@@ -1,4 +1,4 @@
-typedef Inst NodeObj;
+typedef Table NodeObj;
 
 enum nodeobj_flags {
     NODEOBJ_CHILD_SPAN = 1 << 8,
@@ -13,3 +13,4 @@ enum nodeobj_prop_idx {
 
 status NodeObj_ClsInit(MemCh *m);
 void *NodeObj_Att(Inst *nobj, void *key);
+Table *NodeTable_Make(MemCh *m);

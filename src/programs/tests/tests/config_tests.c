@@ -12,9 +12,12 @@ status Config_Tests(MemCh *gm){
 
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = FormatConfig_Make(m, curs, NULL);
-    rbl->dest->type.state |= DEBUG;
     Roebling_Run(rbl);
     Inst *root = FormatConfig_GetRoot(rbl);;
+
+    args[0] = root;
+    args[1] = NULL;
+    Out("^p.Inst @^0\n", args);
 
     StrVec *docKey = StrVec_From(m, Str_FromCstr(m, "doc", ZERO));
     Path_DotAnnotate(m, docKey);
@@ -23,12 +26,21 @@ status Config_Tests(MemCh *gm){
     StrVec *footerKey = StrVec_From(m, Str_FromCstr(m, "doc.footer", ZERO));
     Path_DotAnnotate(m, footerKey);
 
-    NodeObj *doc = Table_ByPath(Span_Get(root, NODEOBJ_PROPIDX_CHILDREN),
-        docKey, NULL, SPAN_OP_GET);
-    NodeObj *tag = Table_ByPath(Span_Get(root, NODEOBJ_PROPIDX_CHILDREN),
-        tagKey, NULL, SPAN_OP_GET);
-    NodeObj *footer = Table_ByPath(Span_Get(root, NODEOBJ_PROPIDX_CHILDREN),
-        footerKey, NULL, SPAN_OP_GET);
+
+    NodeObj *doc = Seel_ByPath(root, NODEOBJ_PROPIDX_CHILDREN, docKey, NULL, SPAN_OP_GET);
+
+    printf("CONFIG DONE II\n");
+    fflush(stdout);
+
+    NodeObj *tag = Seel_ByPath(root, NODEOBJ_PROPIDX_CHILDREN, tagKey, NULL, SPAN_OP_GET);
+
+    printf("CONFIG DONE III\n");
+    fflush(stdout);
+
+    NodeObj *footer = Seel_ByPath(root, NODEOBJ_PROPIDX_CHILDREN, footerKey, NULL, SPAN_OP_GET);
+
+    printf("CONFIG DONE IV\n");
+    fflush(stdout);
 
     args[0] = docKey;
     args[1] = doc;
