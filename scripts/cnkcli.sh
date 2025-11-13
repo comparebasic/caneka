@@ -5,6 +5,6 @@ STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"
 
 ./scripts/make.sh && \
 echo "building BinSegCli Config..." && \
-$CC -o build/programs_binseg-cli_build $INC $STATICS src/programs/binseg-cli/build.c -lm && \
+$CC -o build/programs_cnkcli_build $INC $STATICS src/programs/cnkcli/build.c -lm && \
 echo "building Tests..." && \
-./build/programs_binseg-cli_build
+./build/programs_cnkcli_build

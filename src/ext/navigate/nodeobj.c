@@ -1,22 +1,24 @@
 #include <external.h>
 #include <caneka.h>
 
-void *NodeObj_Att(NodeObj *nobj, void *key){
-    Object *obj = (Object *)Object_GetPropByIdx(nobj, NODEOBJ_PROPIDX_ATTS);
+void *NodeObj_Att(Inst *nobj, void *key){
+    Table *obj = (Table *)Span_Get(nobj, NODEOBJ_PROPIDX_ATTS);
     if(obj != NULL){
-        return Object_Get(obj, key);
+        return Table_Get(obj, key);
     }
     return NULL;
 }
 
 status NodeObj_ClsInit(MemCh *m){
     status r = READY;
-    ClassDef *cls = ClassDef_Make(m);
-    cls->type.of = TYPE_NODEOBJ;
-    cls->name = Str_CstrRef(m, "NodeObj");
-    Class_SetupProp(cls, Str_CstrRef(m, "name")); /* StrVec */
-    Class_SetupProp(cls, Str_CstrRef(m, "atts")); /* Object */
-    Class_SetupProp(cls, Str_CstrRef(m, "value")); /* StrVec body, or Number */
-    r |= Class_Register(m, cls);
+    Table *tbl = Table_Make(m);
+
+    Table_Set(tbl, Str_FromCstr(m, "name"), STRING_COPY, I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(tbl, Str_FromCstr(m, "atts"), STRING_COPY, I16_Wrapped(m, TYPE_INSTANCE));
+    Table_Set(tbl, Str_FromCstr(m, "value"), STRING_COPY, I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(tbl, Str_FromCstr(m, "children"), STRING_COPY, I16_Wrapped(m, TYPE_TABLE));
+
+    r |= Seal_Seal(m, tbl, Str_FromCstr(m, "NodeObj", STRING_COPY ), TYPE_NODEOBJ);
+
     return r;
 }

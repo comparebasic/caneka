@@ -1,5 +1,6 @@
 enum ext_types {
     _TYPE_EXT_START = _TYPE_BASE_END,
+    TYPE_SEAL,
     TYPE_AUTH_CRED,
     TYPE_AUTH_TARGET,
     TYPE_SALT,
@@ -125,7 +126,7 @@ enum ext_types {
     KVE_END,
     _KVE_END,
     _TYPE_EXT_END,
-    TYPE_OBJECT = 1 << 14,
+    TYPE_INSTANCE = 1 << 14,
     TYPE_NODEOBJ,
     _EXT_OBJECT_END,
 };

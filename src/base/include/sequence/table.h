@@ -1,5 +1,9 @@
 typedef Span Table;
 
+enum table_flags {
+    TABLE_SEALED = 1 << 8,
+};
+
 typedef struct hkey {
    Type type; 
    i32 idx;

@@ -131,8 +131,8 @@ static char *extTypeStrings[] = {
     NULL
 };
 
-static char *extTypeObjectStrings[] = {
-    "TYPE_OBJECT",
+static char *extTypeInstectStrings[] = {
+    "TYPE_INSTANCE",
     "TYPE_NODEOBJ",
     "_EXT_OBJECT_END",
     NULL
@@ -141,6 +141,6 @@ static char *extTypeObjectStrings[] = {
 status ExtTypeStrings_Init(MemCh *m){
     status r = READY;
     r |=  Lookup_Add(m, TypeStringRanges, _TYPE_EXT_START, (void *)extTypeStrings);
-    r |=  Lookup_Add(m, TypeStringRanges, TYPE_OBJECT, (void *)extTypeObjectStrings);
+    r |=  Lookup_Add(m, TypeStringRanges, TYPE_INSTANCE, (void *)extTypeInstectStrings);
     return r;
 }

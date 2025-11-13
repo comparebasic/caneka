@@ -35,6 +35,7 @@
 #include "./sequence/sequence_exact.c"
 #include "./sequence/sequence_maps.c"
 #include "./sequence/table.c"
+#include "./sequence/table_utils.c"
 #include "./sequence/path.c"
 #include "./str/cursor.c"
 #include "./str/str.c"

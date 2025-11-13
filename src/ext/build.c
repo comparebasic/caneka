@@ -53,10 +53,10 @@ static char *staticLibs[] = {
 
 /* sources */
 static BuildSubdir typesobj = { "types", {
-    "init.c",
     "strings.c",
-    "classdef.c",
-    "object.c",
+    "init.c",
+    "inst.c",
+    "seal.c",
     "fetcher.c",
     "fetch_target.c",
     "types_cls.c",
@@ -116,7 +116,6 @@ static BuildSubdir serveobj = { "serve", {
 static BuildSubdir sequenceobj = { "sequence", {
     "sequence.c",
     "sequence_cls.c",
-    "table_utils.c",
     NULL
 }};
 

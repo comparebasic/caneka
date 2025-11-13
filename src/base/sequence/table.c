@@ -93,6 +93,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                 }
 
                 h->idx = hk.idx;
+                h->orderIdx = tbl->nvalues;
                 Span_Set((Span *)tbl, hk.idx, h);
                 tbl->type.state |= SUCCESS;
                 return h;
@@ -227,7 +228,6 @@ Hashed *Table_SetHashed(Table *tbl, void *_a, void *_value){
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
         Equals(a, Str_FromCstr(ErrStream->m, "config",ZERO))){
     }
-
 
     return h;
 }

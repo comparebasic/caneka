@@ -1,1 +1,3 @@
-tests
+<h1>Tests</h1>
+
+<p>Run &quot;./build/bin/tests --no-color >> dist/test/tests.fmt&quot; to see test results here</p>

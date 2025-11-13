@@ -2,6 +2,7 @@
 #include "sequence/lookup.h"
 #include "sequence/span_utils.h"
 #include "sequence/table.h"
+#include "sequence/table_utils.h"
 #include "sequence/sequence_tos.h"
 #include "sequence/arr.h"
 #include "sequence/path.h"
