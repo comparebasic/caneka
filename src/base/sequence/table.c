@@ -25,13 +25,6 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
     }
 
     if((op & SPAN_OP_SET) && tbl->nvalues > dim_occupied_max[tbl->dims]){
-        if(tbl->type.state & DEBUG){
-            args[0] = key;
-            args[1] = I32_Wrapped(OutStream->m, tbl->nvalues);
-            args[2] = I8_Wrapped(OutStream->m, tbl->dims+1);
-            args[3] = NULL;
-            Out("^p.Resiing \\@@ @nvalues @dims^0\n", args);
-        }
         Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
     }
 
@@ -44,54 +37,23 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
         Table_HKeyVal(&hk);
         Iter_GetByIdx(it, hk.idx);
 
-        if(tbl->type.state & DEBUG){
-            args[0] = (Abstract*)&hk;
-            args[1] = NULL;
-            Out("^p.Looking at &^0\n", args);
-        }
-
         if((it->type.state & NOOP) && (op & SPAN_OP_SET)){
             if(hk.idx > dim_max_idx[tbl->dims]){
                 Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
-                if(tbl->type.state & DEBUG){
-                    args[0] = key;
-                    args[1] = &hk;
-                    args[2] = I8_Wrapped(OutStream->m, tbl->dims);
-                    args[3] = NULL;
-                    Out("^y.No match expanding \\@@ & @dims\n", args);
-                }
                 Table_HKeyInit(&hk, tbl->dims, h->id);
                 continue;
             }
         }
         Hashed *record = Iter_Current(it);
         if(record == NULL){
-            if(tbl->type.state & DEBUG){
-                args[0] = (Abstract*)&hk;
-                args[1] = NULL;
-                Out("^p.  Looking record is null^0\n", args);
-            }
             if(op & SPAN_OP_GET){
                 if(Table_HKeyMiss(&hk) & END){
-                    if(tbl->type.state & DEBUG){
-                        Out("^p.    Get/Miss^0\n", NULL);
-                    }
                     tbl->type.state |= NOOP;
                     return NULL;
                 }else{
-                    if(tbl->type.state & DEBUG){
-                        Out("^p.    Get/Keep looking^0\n", NULL);
-                    }
                     continue;
                 }
             }else if(op & SPAN_OP_SET){
-                if(tbl->type.state & DEBUG){
-                    args[0] = (Abstract*)&hk;
-                    args[1] = (Abstract*)h;
-                    args[2] = NULL;
-                    Out("^y.    Setting & -> &", args);
-                }
-
                 h->idx = hk.idx;
                 h->orderIdx = tbl->nvalues;
                 Span_Set((Span *)tbl, hk.idx, h);
@@ -99,25 +61,11 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                 return h;
             }
         }else if(Hashed_Equals(h, record)){
-            if(tbl->type.state & DEBUG){
-                args[0] = &hk;
-                args[1] = record;
-                args[2] = NULL;
-                Out("^p.  Looking record matches & -> &^0\n", args);
-            }
             if(op & SPAN_OP_SET){
                 record->value = h->value;
             }
             tbl->type.state |= SUCCESS;
             return record;
-        }else{
-            if(tbl->type.state & DEBUG){
-                args[0] = &hk;
-                args[1] = h;
-                args[2] = record;
-                args[3] = NULL;
-                Out("^p.  Record exists but not matching & -> & vs record:&^0\n", args);
-            }
         }
     }
 

@@ -220,7 +220,7 @@ status Templ_Tests(MemCh *gm){
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "items/menu", STRING_COPY));
     Path_Annotate(m, key, seps);
 
-    Table_ByPath(data, key, menu, SPAN_OP_SET);
+    Table_ByPath(data, key, Table_Ordered(m, menu), SPAN_OP_SET);
 
     Buff *bf = Buff_Make(m, ZERO);
     

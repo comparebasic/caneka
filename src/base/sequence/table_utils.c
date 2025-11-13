@@ -14,6 +14,19 @@ Span *Table_Ordered(MemCh *m, Table *tbl){
     return p;
 }
 
+Span *Table_OrdValues(MemCh *m, Table *tbl){
+    Span *p = Span_Make(m);
+    Iter it;
+    Iter_Init(&it, tbl);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            Span_Set(p, h->orderIdx, h->value);
+        }
+    }
+    return p;
+}
+
 status Table_Underlay(Table *a, Table *b){
     status r = READY;
     Iter it;
@@ -90,11 +103,6 @@ status Table_Merge(Table *dest, Table *src){
 }
 
 Table *Table_GetOrMake(Table *tbl, void *key, word op){
-    void *args[] = {
-        tbl, key, NULL,
-    };
-    Out("^p.Table_GetOrMake @[@]^0\n", args);
-
     Abstract *a = (Abstract *)Table_Get(tbl, key);
     if(a == NULL){
         if((op & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
@@ -121,12 +129,6 @@ Table *Table_GetOrMake(Table *tbl, void *key, word op){
 
 void *Table_ByPath(Table *tbl, StrVec *path, void *value, word op){
     DebugStack_Push(tbl, tbl->type.state);
-
-    void *args[] = {
-        tbl, path, NULL,
-    };
-    Out("^p.Table_ByPath @[@]^0\n", args);
-
 
     Iter keysIt;
     Iter_Init(&keysIt, path->p);

@@ -46,6 +46,9 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP)){
             tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
             tg->func = Fetch_byKey;
+        }else if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_KEY)){
+            tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
+            tg->func = Fetch_byKey;
         }else if(tg->type.state & FETCH_TARGET_ATT){
            Map *map = Map_Get(typeOf);
            if(map == NULL){
