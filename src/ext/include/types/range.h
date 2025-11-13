@@ -34,6 +34,7 @@ enum ext_types {
     TYPE_QUEUE,
     TYPE_QUEUE_CRIT,
     TYPE_STEP,
+    TYPE_STEP_FUNC,
     TYPE_TASK,
     TYPE_PROC_IO_SET,
     TYPE_TCP_CTX,

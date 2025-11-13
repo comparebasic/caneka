@@ -300,6 +300,7 @@ status Route_ClsInit(MemCh *m){
     Class_SetupProp(cls, Str_CstrRef(m, "type"));
     Class_SetupProp(cls, Str_CstrRef(m, "action"));
     Class_SetupProp(cls, Str_CstrRef(m, "data"));
+    Class_SetupProp(cls, Str_CstrRef(m, "addStep"));
     r |= Class_Register(m, cls);
 
     if(RouteFuncTable == NULL){

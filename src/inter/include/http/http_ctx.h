@@ -15,6 +15,8 @@ typedef struct {
     Str *mime;
     StrVec *path;
     StrVec *body;
+    Route *route;
+    Object *data;
     Table *headers;
     Span *errors;
 } HttpCtx;

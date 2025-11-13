@@ -23,6 +23,9 @@ Object *Object_As(Object *obj, cls typeOf){
 
 status Object_Lay(Object *dest, Object *src, cls typeOf, boolean overlay){
     status r = READY;
+    if(src == NULL){
+        return r;
+    }
     ClassDef *cls = Lookup_Get(ClassLookup, typeOf);
     Iter it;
     if(cls != NULL){

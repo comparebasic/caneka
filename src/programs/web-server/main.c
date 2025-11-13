@@ -1,16 +1,49 @@
 #include <external.h>
 #include <caneka.h>
 
+static status Load_stats(Task *tsk, Step *st){
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+
+    MemBookStats st;
+    MemBook_GetStats(&st);
+
+    Object *stats = Object_Make(m, ZERO);
+    Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
+        MicroTime_ToStr(m, ctx->metrics.start));
+    Object *mem = Object_Make(m, ZERO);
+    Object_Set(mem, Str_FromCstr(m, "mem-used", ZERO),
+        Str_MemCount(m, st.pageIdx * PAGE_SIZE));
+    Object_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
+        Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
+    Object_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &st));
+    Object_Set(stats, Str_FromCstr(m, "mem", ZERO), mem);
+
+    Object_Set(ctx->data, Str_FromCstr(m, "stats", ZERO), stats);
+
+    st->type.state |= SUCCESS;
+    return st->type.state;
+}
+
 static status routeInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
 
     StrVec *path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/public"));
     StrVec *abs = IoUtil_AbsVec(m, path);
-    ctx->nav = (Object *)Route_Make(m);
-    r |= Route_Collect(ctx->nav, abs);
-
     ctx->pages = (Object *)Route_Make(m);
-    Object_Merge(ctx->pages, ctx->nav, ctx->nav->objType.of);
+    r |= Route_Collect(ctx->pages, abs);
+
+    StrVec *name = StrVec_From(m, Str_FromCstr(m, "/stats"));
+    IoUtil_Annotate(m, name);
+
+    Route *statHandler = Object_ByPath(ctx->pages, name, NULL, SPAN_OP_GET);
+    Single *funcW = Ptr_Wrapped(m, Load_stats, TYPE_STEP_FUNC);
+    Object_SetPropByIdx(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
+
+    StrVec *navPath = IoUtil_GetAbsVec(m,
+        Str_FromCstr(m, "./examples/web-server/pages/nav.config", ZERO));
+    ctx->nav = Nav_TableFromPath(m, ctx->pages, navPath);
 
     path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/inc"));
     abs = IoUtil_AbsVec(m, path);
@@ -31,7 +64,6 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
 
     return r;
 }
-
 
 i32 main(int argc, char **argv){
     MemBook *cp = MemBook_Make(NULL);
