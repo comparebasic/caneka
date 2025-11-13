@@ -1,13 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Load_stats(Task *tsk, Step *st){
+static status Load_stats(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-
-    printf("Load Stats\n");
-    fflush(stdout);
 
     MemCh *m = tsk->m;
 
@@ -33,9 +30,6 @@ static status Load_stats(Task *tsk, Step *st){
 
 static status routeInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
-
-    printf("Route init\n");
-    fflush(stdout);
 
     StrVec *path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/public"));
     StrVec *abs = IoUtil_AbsVec(m, path);

@@ -12,8 +12,7 @@ Object *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
     Iter it;
     NodeObj *atts = Object_GetPropByIdx(navObj, NODEOBJ_PROPIDX_ATTS);
 
-
-    Iter_Init(&it, atts->tbl); 
+    Iter_Init(&it, atts->order); 
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
@@ -30,6 +29,10 @@ Object *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
                 Object_Set(entry, Str_FromCstr(m, "key", STRING_COPY), key);
                 Object_Set(entry, Str_FromCstr(m, "route", STRING_COPY), rt);
                 Object_ByPath(obj, key, entry, SPAN_OP_SET);
+            }else{
+                void *args[] = {value, NULL};
+                Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+                    "Route not found @\n", args);
             }
         }
     }

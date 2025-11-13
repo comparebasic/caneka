@@ -144,6 +144,8 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, path);
     }
 
+    Route_addConfigData(ctx, rt, token);
+
     Str *pathS = StrVec_Str(m, path);
     if(funcW->type.state & ROUTE_FMT){
         StrVec *content = File_ToVec(m, pathS);
@@ -161,7 +163,6 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         }
 
         Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, rbl->dest);
-        Route_addConfigData(ctx, rt, token);
 
         DebugStack_Pop();
         return SUCCESS;
@@ -180,8 +181,6 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         }
 
         Buff *bf = Buff_Make(m, ZERO);
-
-        Route_addConfigData(ctx, rt, token);
 
         Cursor *curs = Cursor_Make(m, content);
         TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);

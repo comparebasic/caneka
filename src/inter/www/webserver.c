@@ -45,9 +45,6 @@ static status WebServer_logAndClose(Step *_st, Task *tsk){
 static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
 
-    printf("Error Populate\n");
-    fflush(stdout);
-
     MemCh *m = tsk->m; 
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
@@ -113,9 +110,7 @@ static TcpCtx *tcpCtx_Make(MemCh *m,
 
 status WebServer_GatherPage(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
-
-    printf("Gather Page\n");
-    fflush(stdout);
+    void *args[5];
 
     MemCh *m = tsk->m;
 
@@ -160,7 +155,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
 
     Single *gatherFunc = Object_GetPropByIdx(route, ROUTE_PROPIDX_ADD_STEP);
-    if(gatherFunc != NULL && gatherFunc->type.of == TYPE_WRAPPED_FUNC){
+    if(gatherFunc != NULL && gatherFunc->type.of == TYPE_WRAPPED_PTR){
         Task_AddStep(tsk, gatherFunc->val.ptr, NULL, NULL, ZERO);
     }
 
@@ -178,11 +173,6 @@ status WebServer_ServePage(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
-
-    args[0] = ctx->path;
-    args[1] = ctx->data;
-    args[2] = NULL;
-    Out("^p.Serve Page @ from @^0\n", args);
 
     Object *config = (Object *)Object_GetPropByIdx(ctx->route, ROUTE_PROPIDX_DATA);
     if(config != NULL){
@@ -220,7 +210,6 @@ status WebServer_ServePage(Step *st, Task *tsk){
         r |= Route_Handle(header, footerBf, ctx->data, NULL);
         Buff_Stat(footerBf);
         ctx->contentLength += footerBf->st.st_size;
-
     }
 
     ctx->code = 200;
