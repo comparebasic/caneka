@@ -188,7 +188,9 @@ Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
         }else if(c == '.'){
             break;
         }else{
-            ptr--;
+            if(ptr != *_ptr){
+                ptr--;
+            }
             break;
         }
         ptr++;
