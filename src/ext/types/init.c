@@ -160,9 +160,9 @@ status Caneka_Init(MemCh *m){
     }
     _init = TRUE;
 
-    /* labels */
-    lk = ToSFlagLookup;
+    r |= Caneka_InitBase(m);
 
+    /* labels */
     Str **fetcherLabels = (Str **)Arr_Make(m, 17);
     fetcherLabels[9] = Str_CstrRef(m, "VAR");
     fetcherLabels[10] = Str_CstrRef(m, "FOR");
@@ -172,7 +172,7 @@ status Caneka_Init(MemCh *m){
     fetcherLabels[14] = Str_CstrRef(m, "END");
     fetcherLabels[15] = Str_CstrRef(m, "COMMAND");
     fetcherLabels[16] = Str_CstrRef(m, "TEMPL");
-    r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)fetcherLabels);
+    r |= Lookup_Add(m, ToSFlagLookup, TYPE_FETCHER, (void *)fetcherLabels);
 
     Str **fetchTargetLabels = (Str **)Arr_Make(m, 17);
     fetchTargetLabels[9] = Str_CstrRef(m, "ATT");
@@ -183,7 +183,7 @@ status Caneka_Init(MemCh *m){
     fetchTargetLabels[14] = Str_CstrRef(m, "FUNC");
     fetchTargetLabels[15] = Str_CstrRef(m, "RESOLVED");
     fetchTargetLabels[16] = Str_CstrRef(m, "HASH");
-    r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)fetchTargetLabels);
+    r |= Lookup_Add(m, ToSFlagLookup, TYPE_FETCH_TARGET, (void *)fetchTargetLabels);
 
     /* ToS */
     lk = ToStreamLookup;
@@ -199,14 +199,13 @@ status Caneka_Init(MemCh *m){
     /* overide hashed print */
     r |= Lookup_Add(m, ToStreamLookup, TYPE_HASHED, (void *)Hashed_Print); 
 
-    r |= Caneka_InitBase(m);
+    r |= Seel_Init(m);
     r |= ExtTypeStrings_Init(m);
     r |= Caneka_LicenceInit(m);
     r |= Parser_Init(m);
     r |= Persist_Init(m);
     r |= Format_Init(m);
     r |= Transp_Init(m);
-    r |= Sequence_Init(m);
     r |= BinSeg_Init(m);
     r |= Navigate_ClsInit(m);
     r |= Task_Init(m);

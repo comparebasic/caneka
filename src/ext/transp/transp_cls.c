@@ -90,21 +90,18 @@ status Transp_Init(MemCh *m){
     status r = READY;
     if(!_init){
         _init = TRUE;
-        Lookup *lk = ClassLookup;
 
         /* map */
         r |= Lookup_Add(m, MapsLookup, TYPE_TRANSP_FILE, (void *)Transp_FileMap(m));
 
         /* ToS */
-        lk = ToStreamLookup;
-        r |= Lookup_Add(m, lk, TYPE_TRANSP_CTX, (void *)TranspCtx_Print);
-        r |= Lookup_Add(m, lk, TYPE_TRANSP_FILE, (void *)TranspFile_Print);
+        r |= Lookup_Add(m, ToStreamLookup, TYPE_TRANSP_CTX, (void *)TranspCtx_Print);
+        r |= Lookup_Add(m, ToStreamLookup, TYPE_TRANSP_FILE, (void *)TranspFile_Print);
 
         /* labels */
-        lk = ToSFlagLookup;
         transpFileLabels = (Str **)Arr_Make(m, 17);
         transpFileLabels[9] = Str_CstrRef(m, "TranspFileINDEX");
-        Lookup_Add(m, lk, TYPE_TRANSP_FILE, (void *)transpFileLabels);
+        Lookup_Add(m, ToSFlagLookup, TYPE_TRANSP_FILE, (void *)transpFileLabels);
         r |= SUCCESS;
 
     }

@@ -1,4 +1,4 @@
-typedef Object Route;
+typedef Inst Route;
 
 typedef struct route_ctx {
     Type type;
@@ -27,18 +27,19 @@ enum route_prop_idx {
     ROUTE_PROPIDX_ACTION = 5,
     ROUTE_PROPIDX_DATA = 6,
     ROUTE_PROPIDX_ADD_STEP = 7,
+    ROUTE_PROPIDX_CHILDREN = 8,
 };
 
 extern struct span *RouteFuncTable;
 extern struct span *RouteMimeTable;
 
-typedef status (*RouteFunc)(Buff *bf, void *action, Object *data, void *source);
+typedef status (*RouteFunc)(Buff *bf, void *action, Inst *data, void *source);
 
 Route *Route_Make(MemCh *m);
 Route *Route_From(MemCh *m, StrVec *dir);
 status Route_Collect(Route *rt, StrVec *path);
 status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
-status Route_Handle(Route *rt, Buff *bf, Object *data, void *source);
+status Route_Handle(Route *rt, Buff *bf, Inst *data, void *source);
 status Route_Prepare(Route *rt, RouteCtx *ctx);
 Route *Route_GetHandler(Route *rt, StrVec *path);
 

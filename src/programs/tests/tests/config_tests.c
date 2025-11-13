@@ -13,7 +13,7 @@ status Config_Tests(MemCh *gm){
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = FormatConfig_Make(m, curs, NULL);
     Roebling_Run(rbl);
-    Object *root = FormatConfig_GetRoot(rbl);;
+    Inst *root = FormatConfig_GetRoot(rbl);;
 
     StrVec *docKey = StrVec_From(m, Str_FromCstr(m, "doc", ZERO));
     Path_DotAnnotate(m, docKey);
@@ -22,9 +22,12 @@ status Config_Tests(MemCh *gm){
     StrVec *footerKey = StrVec_From(m, Str_FromCstr(m, "doc.footer", ZERO));
     Path_DotAnnotate(m, footerKey);
 
-    NodeObj *doc = Object_ByPath(root, docKey, NULL, SPAN_OP_GET);
-    NodeObj *tag = Object_ByPath(root, tagKey, NULL, SPAN_OP_GET);
-    NodeObj *footer = Object_ByPath(root, footerKey, NULL, SPAN_OP_GET);
+    NodeObj *doc = Table_ByPath(Span_Get(root, NODEOBJ_PROPIDX_CHILDREN),
+        docKey, NULL, SPAN_OP_GET);
+    NodeObj *tag = Table_ByPath(Span_Get(root, NODEOBJ_PROPIDX_CHILDREN),
+        tagKey, NULL, SPAN_OP_GET);
+    NodeObj *footer = Table_ByPath(Span_Get(root, NODEOBJ_PROPIDX_CHILDREN),
+        footerKey, NULL, SPAN_OP_GET);
 
     args[0] = docKey;
     args[1] = doc;

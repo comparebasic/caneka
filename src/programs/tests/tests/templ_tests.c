@@ -195,32 +195,32 @@ status Templ_Tests(MemCh *gm){
     Span *seps = Span_Make(m);
     Span_Add(seps, B_Wrapped(m, (byte)'/', ZERO, MORE));
 
-    Object *data = Object_Make(m, ZERO);
-    Object *menu = Object_Make(m, ZERO);
+    Table *data = Table_Make(m);
+    Table *menu = Table_Make(m);
     tp = TranspFile_Make(m);
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/one"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "One"));
-    Object_Set(menu, StrVec_From(m, Str_CstrRef(m, "one")), tp);
+    Table_Set(menu, StrVec_From(m, Str_CstrRef(m, "one")), tp);
     tp = TranspFile_Make(m);
 
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/two"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "Two"));
-    Object_Set(menu, StrVec_From(m, Str_CstrRef(m, "two")), tp);
+    Table_Set(menu, StrVec_From(m, Str_CstrRef(m, "two")), tp);
     tp = TranspFile_Make(m);
     
     tp->local = StrVec_From(m, Str_CstrRef(m, "/things/three"));
     tp->name = StrVec_From(m, Str_CstrRef(m, "Three"));
-    Object_Set(menu, StrVec_From(m, Str_CstrRef(m, "three")), tp);
+    Table_Set(menu, StrVec_From(m, Str_CstrRef(m, "three")), tp);
 
     Str *title = Str_CstrRef(m, "My Fancy Page");
     Str *para = Str_CstrRef(m, "And here is the masterful list of menu items!");
-    Object_Set(data, Str_CstrRef(m, "title"), title);
-    Object_Set(data, Str_CstrRef(m, "para"), para);
+    Table_Set(data, Str_CstrRef(m, "title"), title);
+    Table_Set(data, Str_CstrRef(m, "para"), para);
 
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "items/menu", STRING_COPY));
     Path_Annotate(m, key, seps);
 
-    Object_ByPath(data, key, menu, SPAN_OP_SET);
+    Table_ByPath(data, key, menu, SPAN_OP_SET);
 
     Buff *bf = Buff_Make(m, ZERO);
     

@@ -1,3 +1,5 @@
+typedef Inst NodeObj;
+
 enum nodeobj_flags {
     NODEOBJ_CHILD_SPAN = 1 << 8,
 };

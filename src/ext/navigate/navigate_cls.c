@@ -387,7 +387,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
     r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
-    r |= Lookup_Add(m, lk, TYPE_NODEOBJ, (void *)Object_Print);
     r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);

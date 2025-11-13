@@ -54,13 +54,14 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
         flags |= ROUTE_INDEX;
     }
 
-    Route *subRt = Object_ByPath(rctx->root, objPath, NULL, SPAN_OP_RESERVE);
+    Route *subRt = Table_ByPath(Span_Get(rctx->root, ROUTE_PROPIDX_CHILDREN),
+        objPath, NULL, SPAN_OP_RESERVE);
 
-    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_PATH, objPath);
-    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FILE, abs);
-    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_FUNC, funcW);
-    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_MIME, mime);
-    Object_SetPropByIdx(subRt, ROUTE_PROPIDX_TYPE, ext);
+    Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
+    Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
+    Span_Set(subRt, ROUTE_PROPIDX_FUNC, funcW);
+    Span_Set(subRt, ROUTE_PROPIDX_MIME, mime);
+    Span_Set(subRt, ROUTE_PROPIDX_TYPE, ext);
     subRt->type.state |= (funcW->type.state|flags);
 
     Route_Prepare(subRt, rctx);
@@ -68,13 +69,13 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
     return SUCCESS;
 }
 
-static status routeFuncStatic(Buff *bf, void *action, Object *_data, void *_source){
+static status routeFuncStatic(Buff *bf, void *action, Table *_data, void *_source){
     Str *pathS = StrVec_Str(bf->m, (StrVec *)as(action, TYPE_STRVEC));
     bf->type.state |= BUFF_UNBUFFERED;
     return File_Open(bf, pathS, O_RDONLY);
 }
 
-static status routeFuncTempl(Buff *bf, void *action, Object *data, void *source){
+static status routeFuncTempl(Buff *bf, void *action, Table *data, void *source){
     Templ *templ = (Templ *)as(action, TYPE_TEMPL);
 
     Templ_Reset(templ);
@@ -83,14 +84,14 @@ static status routeFuncTempl(Buff *bf, void *action, Object *data, void *source)
     return r;
 }
 
-static status routeFuncFmt(Buff *bf, void *action, Object *_data, void *source){
+static status routeFuncFmt(Buff *bf, void *action, Table *_data, void *source){
     return Fmt_ToHtml(bf, (Mess *)as(action, TYPE_MESS));
 }
 
-static status routeFuncFileDb(Buff *bf, void *action, Object *data, void *source){
+static status routeFuncFileDb(Buff *bf, void *action, Table *data, void *source){
     StrVec *path = StrVec_From(bf->m, Str_FromCstr(bf->m, "filedb.keys", ZERO));
     Path_DotAnnotate(bf->m, path);
-    Table *keys = (Table *)Object_ByPath(data, path, NULL, SPAN_OP_GET);
+    Table *keys = (Table *)Table_ByPath(data, path, NULL, SPAN_OP_GET);
 
     FileDB *fdb = (FileDB *)as(action, TYPE_FILEDB);
     Table *tbl = FileDB_ToTbl(fdb, keys);
@@ -100,7 +101,7 @@ static status routeFuncFileDb(Buff *bf, void *action, Object *data, void *source
 }
 
 static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
-    MemCh *m = Object_GetMem(rt);
+    MemCh *m = rt->m;
     void *args[3];
     StrVec *config = StrVec_Make(m);
     StrVec_AddVec(config, ctx->path);
@@ -109,39 +110,39 @@ static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
     Str *configS = StrVec_StrCombo(m,
         config, Str_FromCstr(m, ".config", ZERO));
 
-    Object *data = Config_FromPath(m, configS);
+    Inst *data = Config_FromPath(m, configS);
     if(data != NULL){
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_DATA, data);
+        Span_Set(rt, ROUTE_PROPIDX_DATA, data);
         return SUCCESS;
     }
     return NOOP;
 }
 
 Route *Route_GetNav(Route *rt){
-    MemCh *m = Object_GetMem(rt);
+    MemCh *m = rt->m;
     Route *nav = Route_Make(m);
     return nav;
 }
 
 status Route_Prepare(Route *rt, RouteCtx *ctx){
     DebugStack_Push(rt, rt->type.of);
-    MemCh *m = Object_GetMem(rt);
+    MemCh *m = rt->m;
     void *args[3];
 
-    StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
-    StrVec *type = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_TYPE);
+    StrVec *path = (StrVec *)Span_Get(rt, ROUTE_PROPIDX_FILE);
+    StrVec *type = (StrVec *)Span_Get(rt, ROUTE_PROPIDX_TYPE);
     StrVec *token = StrVec_Make(m);
-    StrVec_AddVec(token, (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_PATH));
+    StrVec_AddVec(token, (StrVec *)Span_Get(rt, ROUTE_PROPIDX_PATH));
     if(rt->type.state & ROUTE_INDEX){
         StrVec_Add(token, Str_FromCstr(m, "index", ZERO));
     }
     Single *funcW = (Single *)as(
-        Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
+        Span_Get(rt, ROUTE_PROPIDX_FUNC),
         TYPE_WRAPPED_FUNC
     );
 
     if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, path);
+        Span_Set(rt, ROUTE_PROPIDX_ACTION, path);
     }
 
     Route_addConfigData(ctx, rt, token);
@@ -162,8 +163,7 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
             return rt->type.state;
         }
 
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, rbl->dest);
-
+        Span_Set(rt, ROUTE_PROPIDX_ACTION, rbl->dest);
         DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_DYNAMIC){
@@ -197,12 +197,12 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
             return rt->type.state;
         }
 
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, templ);
+        Span_Set(rt, ROUTE_PROPIDX_ACTION, templ);
         DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_FILEDB){
         FileDB *fdb = FileDB_Make(m, pathS);
-        Object_SetPropByIdx(rt, ROUTE_PROPIDX_ACTION, fdb);
+        Span_Set(rt, ROUTE_PROPIDX_ACTION, fdb);
         DebugStack_Pop();
         return SUCCESS;
     }
@@ -212,7 +212,7 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
 }
 
 Route *Route_GetHandler(Route *rt, StrVec *_path){
-    MemCh *m = Object_GetMem(rt);
+    MemCh *m = rt->m;
     StrVec *ext = Path_Ext(m, _path);
     Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
 
@@ -227,28 +227,29 @@ Route *Route_GetHandler(Route *rt, StrVec *_path){
         path = _path;
     }
 
-    Route *handler = (Route *)Object_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *handler = (Route *)Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN),
+        path, NULL, SPAN_OP_GET);
 
     return handler;
 }
 
-status Route_Handle(Route *rt, Buff *bf, Object *data, void *source){
+status Route_Handle(Route *rt, Buff *bf, Table *data, void *source){
     DebugStack_Push(rt, rt->type.of);
-    StrVec *path = (StrVec *)Object_GetPropByIdx(rt, ROUTE_PROPIDX_FILE);
+    StrVec *path = (StrVec *)Span_Get(rt, ROUTE_PROPIDX_FILE);
 
     word fl = bf->m->type.state;
     bf->m->type.state |= MEMCH_BASE;
     DebugStack_SetRef(StrVec_Str(bf->m, path), TYPE_STR);
     bf->m->type.state = fl;
 
-    Abstract *action = Object_GetPropByIdx(rt, ROUTE_PROPIDX_ACTION);
-    Abstract *config = Object_GetPropByIdx(rt, ROUTE_PROPIDX_DATA);
+    Abstract *action = Span_Get(rt, ROUTE_PROPIDX_ACTION);
+    Abstract *config = Span_Get(rt, ROUTE_PROPIDX_DATA);
     if(config != NULL){
-        Object_Set(data, Str_FromCstr(bf->m, "config", STRING_COPY), config);
+        Table_Set(data, Str_FromCstr(bf->m, "config", STRING_COPY), config);
     }
 
     Single *funcW = (Single *)as(
-        Object_GetPropByIdx(rt, ROUTE_PROPIDX_FUNC),
+        Span_Get(rt, ROUTE_PROPIDX_FUNC),
         TYPE_WRAPPED_FUNC
     );
 
@@ -260,12 +261,12 @@ status Route_Handle(Route *rt, Buff *bf, Object *data, void *source){
 }
 
 status Route_Collect(Route *rt, StrVec *path){
-    MemCh *m = Object_GetMem(rt);
+    MemCh *m = rt->m;
     IoUtil_Annotate(m, path);
 
     StrVec *root = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, root);
-    Object_SetPropByIdx(rt, ROUTE_PROPIDX_PATH, root);
+    Span_Set(rt, ROUTE_PROPIDX_PATH, root);
 
     RouteCtx ctx;
     ctx.type.of = TYPE_ROUTE_CTX;
@@ -277,30 +278,29 @@ status Route_Collect(Route *rt, StrVec *path){
 }
 
 Route *Route_Make(MemCh *m){
-    return Object_Make(m, TYPE_WWW_ROUTE);
+    return Inst_Make(m, TYPE_WWW_ROUTE);
 }
 
 Route *Route_From(MemCh *m, StrVec *dir){
-    Route *rt = (Object *)Route_Make(m);
+    Route *rt = (Route *)Route_Make(m);
     Route_Collect(rt, dir);
     return rt;
 }
 
 status Route_ClsInit(MemCh *m){
     status r = READY;
-    ClassDef *cls = ClassDef_Make(m);
-    cls->type.of = TYPE_WWW_ROUTE;
-    cls->name = Str_CstrRef(m, "Route");
-    cls->api.toS = Object_Print;
-    Class_SetupProp(cls, Str_CstrRef(m, "path"));
-    Class_SetupProp(cls, Str_CstrRef(m, "file"));
-    Class_SetupProp(cls, Str_CstrRef(m, "func"));
-    Class_SetupProp(cls, Str_CstrRef(m, "mime"));
-    Class_SetupProp(cls, Str_CstrRef(m, "type"));
-    Class_SetupProp(cls, Str_CstrRef(m, "action"));
-    Class_SetupProp(cls, Str_CstrRef(m, "data"));
-    Class_SetupProp(cls, Str_CstrRef(m, "addStep"));
-    r |= Class_Register(m, cls);
+
+    Table *seel = Table_Make(m);
+    Table_Set(seel, Str_CstrRef(m, "path"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, Str_CstrRef(m, "file"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, Str_CstrRef(m, "func"), I16_Wrapped(m, TYPE_WRAPPED_FUNC));
+    Table_Set(seel, Str_CstrRef(m, "mime"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, Str_CstrRef(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, Str_CstrRef(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
+    Table_Set(seel, Str_CstrRef(m, "data"), I16_Wrapped(m, TYPE_TABLE));
+    Table_Set(seel, Str_CstrRef(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));
+    Table_Set(seel, Str_CstrRef(m, "children"), I16_Wrapped(m, TYPE_TABLE));
+    r |= Seel_Seel(m, seel, Str_FromCstr(m, "Route", STRING_COPY ), TYPE_WWW_ROUTE);
 
     if(RouteFuncTable == NULL){
         RouteFuncTable = Table_Make(m);

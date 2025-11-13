@@ -1,18 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
-Object *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
+Span *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
     NodeObj *navObj = Config_FromPath(m, StrVec_Str(m, path));
     if(navObj == NULL){
         return NULL;
     }
 
-    Object *obj = Object_Make(m, ZERO);
+    Table *tbl = Table_Make(m);
 
     Iter it;
-    NodeObj *atts = Object_GetPropByIdx(navObj, NODEOBJ_PROPIDX_ATTS);
+    NodeObj *atts = Span_Get(navObj, NODEOBJ_PROPIDX_ATTS);
 
-    Iter_Init(&it, atts->order); 
+    Iter_Init(&it, atts); 
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
@@ -22,13 +22,13 @@ Object *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
 
             StrVec *value = (StrVec *)as(h->value, TYPE_STRVEC);
             IoUtil_Annotate(m, value);
-            Route *rt = Object_ByPath(pages, value, NULL, SPAN_OP_GET);
+            Route *rt = Table_ByPath(pages, value, NULL, SPAN_OP_GET);
 
             if(rt != NULL){
-                Object *entry = Object_Make(m, ZERO);
-                Object_Set(entry, Str_FromCstr(m, "key", STRING_COPY), key);
-                Object_Set(entry, Str_FromCstr(m, "route", STRING_COPY), rt);
-                Object_ByPath(obj, key, entry, SPAN_OP_SET);
+                Table *entry = Table_Make(m);
+                Table_Set(entry, Str_FromCstr(m, "key", STRING_COPY), key);
+                Table_Set(entry, Str_FromCstr(m, "route", STRING_COPY), rt);
+                Table_ByPath(tbl, key, entry, SPAN_OP_SET);
             }else{
                 void *args[] = {value, NULL};
                 Error(m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -37,5 +37,5 @@ Object *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
         }
     }
 
-    return obj;
+    return Table_Ordered(m, tbl);
 }
