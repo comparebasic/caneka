@@ -51,12 +51,10 @@ static struct sigaction _b;
 static struct sigaction _c;
 static struct sigaction _d;
 static void setSigs(){
-    /*
     memset(&_a, 0, sizeof(struct sigaction));
     _a.sa_flags = SA_NODEFER;
     _a.sa_sigaction = sigH;
     sigaction(SIGSEGV, &_a, NULL);
-    */
 
     memset(&_b, 0, sizeof(struct sigaction));
     _b.sa_flags = SA_NODEFER;
