@@ -171,10 +171,10 @@ static Table *getGenericData(MemCh *m, Route *rt){
     Table *atts = Table_Make(m);
     Table_Set(atts, Str_FromCstr(m, "title", ZERO), 
         Str_FromCstr(m, "Example Title", ZERO));
-    NodeObj *page = Inst_Make(m, TYPE_NODEOBJ);
-    Span_Set(page, NODEOBJ_PROPIDX_ATTS, atts);
-    Table *config = Table_Make(m);
-    Table_Set(config, Str_CstrRef(m, "page"), page);
+
+    Str *path = IoUtil_GetAbsPath(m,
+        Str_CstrRef(m, "./examples/web-server/pages/public/stats.config"));
+    Inst *config = Config_FromPath(m, path);
     Table_Set(data, Str_CstrRef(m, "config"), config);
 
     StrVec *navPath = IoUtil_GetAbsVec(m,
@@ -296,8 +296,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[1] = NULL;
     expected->type.state |= DEBUG;
     r |= TestShow(Equals(expected, bf->v),
-        "Handler: Expected template value with no header and a mem details", 
-        "Handler: Expected template value with no header and a mem: $", args);
+        "Handler: Expected template value with no header and mem details", 
+        "Handler: Expected template value with no header and mem: $", args);
 
     DebugStack_SetRef("stats.templ no mem details + header", TYPE_CSTR);
 
@@ -382,6 +382,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
     handler = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
+
+    r |= Test(handler != NULL, "Default / handler is not null", args);
 
     Route_Handle(handler, bf, data, NULL);
     dest = Buff_Make(m, ZERO);

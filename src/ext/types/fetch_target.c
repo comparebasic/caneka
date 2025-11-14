@@ -44,7 +44,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
         return SUCCESS;
     } else {
         if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP)){
-            tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
+            tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);
             tg->func = Fetch_byKey;
         }else if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_KEY)){
             tg->id = Hash_Bytes(tg->key->bytes, tg->key->length);;
@@ -93,8 +93,8 @@ err:
 void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
     Abstract *value = (Abstract *)_value;
     void *args[6];
+    args[4] = NULL;
 
-    args[3] = NULL;
     Table *seel = NULL;
     word typeOf = value->type.of;
 
@@ -102,24 +102,26 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
         if(FetchTarget_Resolve(m, tg, typeOf) & SUCCESS){
             return Fetch_Target(m, tg, value, source);
         }else{
-            args[1] = tg;
+            args[4] = tg;
             goto err;
         }
     }else{
-        if(tg->type.state & FETCH_TARGET_ATT){
-            return Map_FromOffset(m, value, tg->offsetType->range, tg->offsetType->of);
+        if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP)){
+            return tg->func(m, tg, value);
         }else if(tg->type.state & FETCH_TARGET_PROP){
             Inst *obj = (Inst *)value;
             if(obj == NULL || (obj->type.of & TYPE_INSTANCE) == 0){
-                args[1] = value;
+                args[4] = value;
                 goto err;
             }
             void *a = Span_Get(obj, tg->idx);
             if(a == NULL){
-                args[1] = value;
+                args[4] = value;
                 goto err;
             }
             return a;
+        }else if(tg->type.state & FETCH_TARGET_ATT){
+            return Map_FromOffset(m, value, tg->offsetType->range, tg->offsetType->of);
         }else{
             return tg->func(m, tg, value);
         }
@@ -130,8 +132,8 @@ err:
         args[0] = tg;
 
         args[1] = (value != NULL ? Type_ToStr(m, value->type.of) : NULL);
-        args[3] = Type_ToStr(m, typeOf);
-        args[4] = seel;
+        args[2] = Type_ToStr(m, typeOf);
+        args[3] = seel;
         args[5] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error for @/$ not found, using @ seel $/@\n", args);

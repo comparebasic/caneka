@@ -102,7 +102,8 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
     if(tg->type.state & FETCH_TARGET_RESOLVED){
         void *args[] = {
             Type_ToStr(bf->m, tg->type.of),
-            I16_Wrapped(bf->m, tg->offsetType->of),
+            tg->offsetType == NULL ? NULL :
+                I16_Wrapped(bf->m, tg->offsetType->of),
             NULL
         };
         Fmt(bf, " -> $/offset^D.$^d.>", args);
@@ -139,6 +140,7 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);;
             if(h != NULL){
+                Buff_AddBytes(bf, (byte *)"#", 1);
                 ToS(bf, h->key, ZERO, flags); 
                 Buff_AddBytes(bf, (byte *)": ", 2);
                 ToS(bf, Span_Get(obj, h->orderIdx), ZERO, flags); 

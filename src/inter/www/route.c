@@ -246,8 +246,8 @@ status Route_Handle(Route *rt, Buff *bf, Table *data, void *source){
     bf->m->type.state = fl;
 
     Abstract *action = Span_Get(rt, ROUTE_PROPIDX_ACTION);
-    Abstract *config = Span_Get(rt, ROUTE_PROPIDX_DATA);
-    if(config != NULL){
+    Table *config = Span_Get(rt, ROUTE_PROPIDX_DATA);
+    if(config != NULL && config->nvalues > 0){
         Table_Set(data, Str_FromCstr(bf->m, "config", STRING_COPY), config);
     }
 

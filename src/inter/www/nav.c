@@ -11,8 +11,9 @@ Span *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
 
     Iter it;
     NodeObj *atts = Span_Get(navObj, NODEOBJ_PROPIDX_ATTS);
+    Span *p = Table_Ordered(m, atts);
 
-    Iter_Init(&it, atts); 
+    Iter_Init(&it, p); 
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
