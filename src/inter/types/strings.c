@@ -60,6 +60,6 @@ static char *interTypeObjectStrings[] = {
 status InterTypeStrings_Init(MemCh *m){
     status r = READY;
     r |= Lookup_Add(m, TypeStringRanges, _TYPE_INTER_START, (void *)interTypeStrings);
-    r |= Lookup_Add(m, TypeStringRanges, _TYPE_INTER_START, (void *)interTypeObjectStrings);
+    r |= Lookup_Add(m, TypeStringRanges, _TYPE_INTER_OBJ_START, (void *)interTypeObjectStrings);
     return r;
 }

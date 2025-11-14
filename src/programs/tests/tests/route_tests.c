@@ -6,7 +6,7 @@ static char *cstr = ""
     "<html lang=\"en\">\n"
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
-    "<title>Example Title</title>\n"
+    "<title>Caneka Example - Stats </title>\n"
     "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
     "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
@@ -82,7 +82,7 @@ static char *memWHeaderCstr  = ""
     "<html lang=\"en\">\n"
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
-    "<title>Example Title</title>\n"
+    "<title>Caneka Example - Stats </title>\n"
     "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
     "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
@@ -130,7 +130,7 @@ static char *homeCstr = ""
     "<html lang=\"en\">\n"
     "<head>\n"
     "<meta charset=\"utf-8\">\n"
-    "<title>Example Title</title>\n"
+    "<title>Caneka Example - Stats </title>\n"
     "  <link rel=\"stylesheet\" href=\"/static/style.css\" />\n"
     "  <meta name=\"viewport\" content=\"width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no\">\n"
     "</head>\n"
@@ -195,7 +195,7 @@ status WwwRoute_Tests(MemCh *gm){
     Route *rt = Route_From(m, path);
 
     path = IoPath(m, "/tests");
-    Route *tests = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
+    Route *tests = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     args[0] = path;
     args[1] = NULL;
@@ -214,7 +214,7 @@ status WwwRoute_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_FromCstr(m, "/stats", ZERO));
     IoUtil_Annotate(m, path);
-    Route *profile = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
+    Route *profile = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
     mime = Span_Get(profile, ROUTE_PROPIDX_MIME);
     r |= Test(Equals(mime, Str_FromCstr(m, "text/html", ZERO)),
         "profile index page is mime type text/html", NULL);
@@ -272,6 +272,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     args[0] = out;
     args[1] = data;
     args[2] = NULL;
+    expected->type.state |= DEBUG;
     r |= TestShow(Equals(out, expected),
         "Templ from Route has expected output",
         "Templ output does not match @", args);
@@ -280,7 +281,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     DebugStack_SetRef("stats.templ no mem details", TYPE_CSTR);
 
     path = IoPath(m, "/stats");
-    Route *handler = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
+    Route *handler = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     data = getGenericData(m, rt);
     Table *stats = Table_Make(m);
@@ -302,9 +303,9 @@ status WwwRouteTempl_Tests(MemCh *gm){
     DebugStack_SetRef("stats.templ no mem details + header", TYPE_CSTR);
 
     StrVec *hv = IoPath(bf->m, "header");
-    Route *header = Inst_ByPath(inc, ROUTE_PROPIDX_CHILDREN, hv, NULL, SPAN_OP_GET);
+    Route *header = NodeObj_ByPath(inc, hv, NULL, SPAN_OP_GET);
     StrVec *fv = IoPath(bf->m, "footer");
-    Route *footer = Inst_ByPath(inc, ROUTE_PROPIDX_CHILDREN, fv, NULL, SPAN_OP_GET);
+    Route *footer = NodeObj_ByPath(inc, fv, NULL, SPAN_OP_GET);
 
     Buff *dest = Buff_Make(m, ZERO);
 
@@ -359,7 +360,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
-    handler = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
+    handler = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     Route_Handle(handler, bf, data, NULL);
     dest = Buff_Make(m, ZERO);
@@ -381,7 +382,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
-    handler = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
+    handler = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     r |= Test(handler != NULL, "Default / handler is not null", args);
 
@@ -421,6 +422,9 @@ status WwwRouteMime_Tests(MemCh *gm){
     Path_JoinBase(m, key);
 
     Route *subRt = Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN), key, NULL, SPAN_OP_GET);
+
+    r |= Test(subRt != NULL, "Static route is not null", NULL);
+
     Buff *bf = Buff_Make(m, ZERO);
     Route_Handle(subRt, bf, NULL, NULL);
 

@@ -23,8 +23,7 @@ Span *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
 
             StrVec *value = (StrVec *)as(h->value, TYPE_STRVEC);
             IoUtil_Annotate(m, value);
-            Route *rt = Inst_ByPath(pages, 
-                ROUTE_PROPIDX_CHILDREN, value, NULL, SPAN_OP_GET);
+            Route *rt = NodeObj_ByPath(pages, value, NULL, SPAN_OP_GET);
 
             if(rt != NULL){
                 Table *entry = Table_Make(m);

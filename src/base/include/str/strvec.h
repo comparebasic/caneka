@@ -31,3 +31,4 @@ StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length);
 StrVec *StrVec_Copy(MemCh *m, StrVec *v);
 StrVec *StrVec_StrVec(MemCh *m, void *a);
 Str *StrVec_StrCombo(MemCh *m, void *a, void *b);
+status Str_AddVec(Str *s, StrVec *v);

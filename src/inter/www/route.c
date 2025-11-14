@@ -35,30 +35,35 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
     if(funcW->type.state & ROUTE_FORBIDDEN){
         return NOOP;
     }
-
     
     StrVec *objPath = IoPath_From(m, path);
     IoUtil_Add(m, objPath, IoPath(m, "/"));
     IoUtil_Add(m, objPath, StrVec_From(m, file));
 
     StrVec_Incr(objPath, rctx->path->total);
-    StrVec_Decr(objPath, ext->total+1);
 
     Str *index = Str_FromCstr(m, "index", ZERO);
     word flags = ZERO;
+    Route *subRt = NULL;
     if(!Equals(name, index)){
         if(funcW->type.state & ROUTE_ASSET){
-            Path_AddStr(objPath, Str_FromCstr(m, ".", STRING_COPY));
-            Path_AddStr(objPath, Span_Get(ext->p, 0));
+            Path_JoinBase(m, objPath);
+        }else{
+            StrVec_Decr(objPath, ext->total+1);
         }
+        subRt = Inst_Make(m, TYPE_WWW_ROUTE);
+        NodeObj_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
     }else{
         flags |= ROUTE_INDEX;
+        StrVec_Decr(objPath, ext->total+1);
         StrVec_Decr(objPath, index->length);
+        subRt = NodeObj_ByPath(rctx->root, objPath, NULL, SPAN_OP_GET);
+        if(subRt == NULL){
+            subRt = Inst_Make(m, TYPE_WWW_ROUTE);
+            NodeObj_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
+        }
     }
 
-    Route *subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-    Inst_ByPath(rctx->root, ROUTE_PROPIDX_CHILDREN,
-        objPath, subRt, SPAN_OP_SET);
 
     Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
     Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
@@ -240,6 +245,11 @@ status Route_Handle(Route *rt, Buff *bf, Table *data, void *source){
     DebugStack_Push(rt, rt->type.of);
     StrVec *path = (StrVec *)Span_Get(rt, ROUTE_PROPIDX_FILE);
 
+    if(path == NULL){
+        printf("PATH IS NULL\n");
+        fflush(stdout);
+    }
+
     word fl = bf->m->type.state;
     bf->m->type.state |= MEMCH_BASE;
     DebugStack_SetRef(StrVec_Str(bf->m, path), TYPE_STR);
@@ -295,14 +305,15 @@ status Route_ClsInit(MemCh *m){
 
     Table *seel = Table_Make(m);
     Table_Set(seel, Str_CstrRef(m, "path"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, Str_CstrRef(m, "data"), I16_Wrapped(m, TYPE_TABLE));
+    Table_Set(seel, Str_CstrRef(m, "children"), I16_Wrapped(m, TYPE_TABLE));
+    /* Node End */
     Table_Set(seel, Str_CstrRef(m, "file"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, Str_CstrRef(m, "func"), I16_Wrapped(m, TYPE_WRAPPED_FUNC));
     Table_Set(seel, Str_CstrRef(m, "mime"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, Str_CstrRef(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, Str_CstrRef(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
-    Table_Set(seel, Str_CstrRef(m, "data"), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(seel, Str_CstrRef(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));
-    Table_Set(seel, Str_CstrRef(m, "children"), I16_Wrapped(m, TYPE_TABLE));
     r |= Seel_Seel(m, seel, Str_FromCstr(m, "Route", STRING_COPY ), TYPE_WWW_ROUTE);
 
     if(RouteFuncTable == NULL){

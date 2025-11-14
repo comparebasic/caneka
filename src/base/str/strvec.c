@@ -24,6 +24,18 @@ status StrVec_Decr(StrVec *v, i64 amount){
     return SUCCESS;
 }
 
+status Str_AddVec(Str *s, StrVec *v){
+    status r = READY;
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *_s = Iter_Get(&it);
+        Str_Add(s, _s->bytes, _s->length);
+        r |= (SUCCESS |(s->type.state & ERROR));
+    }
+    return r;
+}
+
 status StrVec_Incr(StrVec *v, i64 amount){
     Span *p = Span_Make(v->p->m);
     if(amount > v->total){
@@ -79,6 +91,9 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
 }
 
 Str *StrVec_Str(MemCh *m, StrVec *v){
+    if(v == NULL){
+        return NULL;
+    }
     return StrVec_ToStr(m, v, v->total+1);
 }
 

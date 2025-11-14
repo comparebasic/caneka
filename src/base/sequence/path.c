@@ -74,7 +74,7 @@ status Path_JoinBase(MemCh *m, StrVec *path){
     Iter it;
     Iter_Init(&it, path->p);
     status r = READY;
-    i32 idx = 0;
+    i32 idx = path->p->max_idx;
     Str *prev = NULL;
     boolean last = FALSE;
     while((Iter_Next(&it) & END) == 0){
