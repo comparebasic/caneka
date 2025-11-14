@@ -163,22 +163,21 @@ StrVec *Path_ReJoinExt(MemCh *m, StrVec *path){
 StrVec *Path_WithoutExt(MemCh *m, StrVec *path){
     StrVec *v = StrVec_Make(m);
     Iter it;
-    Iter_Init(&it, path->p);
     word flags = ZERO;
     i64 total = path->total;
+    Iter_Init(&it, path->p);
     while((Iter_Prev(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
-        if((flags & MORE) == 0){
+        if((flags & LAST) == 0){
             total -= s->length;
-            if(s->type.state & MORE){
-                flags |= s->type.state & MORE;
-            }
+            flags |= (s->type.state & LAST);
             continue;
         }else{
             Span_Set(v->p, it.idx, s);
         }
     }
     v->total = total;
+    v->type.state |= (path->type.state & STRVEC_PATH);
     return v;
 }
 

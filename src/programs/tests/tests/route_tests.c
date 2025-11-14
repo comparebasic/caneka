@@ -108,7 +108,8 @@ static char *memWHeaderCstr  = ""
     "<section class=\"main\">\n"
     "<h1>Statistics of the Example</h1>\n"
     "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
-    "<h2>Memory Heap <b>904k</b> of 16m</p>\n"
+    "<h2>Memory Heap</h2>\n"
+    "<p>Total Heap Size: <b>904k</b> of 16m</p>\n"
     "<ul>\n"
     "    <li>\n"
     "        <p><b>total</b>: 222</p>\n"
@@ -195,7 +196,7 @@ status WwwRoute_Tests(MemCh *gm){
     Route *rt = Route_From(m, path);
 
     path = IoPath(m, "/tests");
-    Route *tests = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *tests = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     args[0] = path;
     args[1] = NULL;
@@ -214,7 +215,7 @@ status WwwRoute_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_FromCstr(m, "/stats", ZERO));
     IoUtil_Annotate(m, path);
-    Route *profile = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *profile = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
     mime = Span_Get(profile, ROUTE_PROPIDX_MIME);
     r |= Test(Equals(mime, Str_FromCstr(m, "text/html", ZERO)),
         "profile index page is mime type text/html", NULL);
@@ -281,7 +282,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     DebugStack_SetRef("stats.templ no mem details", TYPE_CSTR);
 
     path = IoPath(m, "/stats");
-    Route *handler = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     data = getGenericData(m, rt);
     Table *stats = Table_Make(m);
@@ -303,9 +304,9 @@ status WwwRouteTempl_Tests(MemCh *gm){
     DebugStack_SetRef("stats.templ no mem details + header", TYPE_CSTR);
 
     StrVec *hv = IoPath(bf->m, "header");
-    Route *header = NodeObj_ByPath(inc, hv, NULL, SPAN_OP_GET);
+    Route *header = Inst_ByPath(inc, hv, NULL, SPAN_OP_GET);
     StrVec *fv = IoPath(bf->m, "footer");
-    Route *footer = NodeObj_ByPath(inc, fv, NULL, SPAN_OP_GET);
+    Route *footer = Inst_ByPath(inc, fv, NULL, SPAN_OP_GET);
 
     Buff *dest = Buff_Make(m, ZERO);
 
@@ -360,7 +361,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
-    handler = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
+    handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     Route_Handle(handler, bf, data, NULL);
     dest = Buff_Make(m, ZERO);
@@ -382,7 +383,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
-    handler = NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
+    handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     r |= Test(handler != NULL, "Default / handler is not null", args);
 
@@ -424,7 +425,7 @@ status WwwPath_Tests(MemCh *gm){
 
     StrVec *name = IoPath(m, "/stats");
 
-    Route *statHandler = NodeObj_ByPath(pages, name, NULL, SPAN_OP_GET);
+    Route *statHandler = Inst_ByPath(pages, name, NULL, SPAN_OP_GET);
     Single *funcW = Ptr_Wrapped(m, fakeStep, TYPE_STEP_FUNC);
     Span_Set(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
 
@@ -435,13 +436,10 @@ status WwwPath_Tests(MemCh *gm){
     r |= Route_Collect(inc, IoAbsPath(m, "examples/web-server/pages/inc"));
 
     Route *stat = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
-    args[0] = stat;
-    args[1] = NULL;
-    Out("^p.stat @^0\n", args);
-    NodeObj_ByPath(pages, IoPath(m, "/static/"), stat, SPAN_OP_SET);
+    Inst_ByPath(pages, IoPath(m, "/static/"), stat, SPAN_OP_SET);
 
-    Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
-    NodeObj_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
+    Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/system"));
+    Inst_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
 
     Route *route = Route_GetHandler(pages, IoPath(m, "/static/logo-transparent.png")); 
     args[0] = IoAbsPath(m, "examples/web-server/pages/static/logo-transparent.png");
@@ -457,7 +455,12 @@ status WwwPath_Tests(MemCh *gm){
     r |= Test(route != NULL && Equals(args[1], args[0]), 
         "Route has expected file expected @, found @", args);
 
-    r |= ERROR;
+    route = Route_GetHandler(pages, IoPath(m, "/system/not-found")); 
+    args[0] = IoAbsPath(m, "examples/web-server/pages/system/not-found.templ");
+    args[1] = Seel_Get(route, S(m, "file"));
+    args[2] = NULL;
+    r |= Test(route != NULL && Equals(args[1], args[0]), 
+        "Route has expected file expected @, found @", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

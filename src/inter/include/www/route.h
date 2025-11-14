@@ -42,5 +42,6 @@ status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
 status Route_Handle(Route *rt, Buff *bf, Inst *data, void *source);
 status Route_Prepare(Route *rt, RouteCtx *ctx);
 Route *Route_GetHandler(Route *rt, StrVec *path);
+Single *Route_MimeFunc(StrVec *path);
 
 status Route_ClsInit(MemCh *m);

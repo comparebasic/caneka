@@ -49,10 +49,10 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
         flags |= ROUTE_INDEX;
         StrVec_Decr(objPath, ext->total+1);
         StrVec_Decr(objPath, index->length);
-        subRt = NodeObj_ByPath(rctx->root, objPath, NULL, SPAN_OP_GET);
+        subRt = Inst_ByPath(rctx->root, objPath, NULL, SPAN_OP_GET);
         if(subRt == NULL){
             subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-            NodeObj_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
+            Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
         }
     }else{
         if(funcW->type.state & ROUTE_ASSET){
@@ -61,7 +61,7 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
             StrVec_Decr(objPath, ext->total+1);
         }
         subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-        NodeObj_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
+        Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
     }
 
     Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
@@ -125,6 +125,11 @@ static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
         return SUCCESS;
     }
     return NOOP;
+}
+
+Single *Route_MimeFunc(StrVec *path){
+    StrVec *ext = Path_Ext(path->p->m, path);
+    return (Single *)Table_Get(RouteFuncTable, ext);
 }
 
 Route *Route_GetNav(Route *rt){
@@ -230,18 +235,14 @@ Route *Route_GetHandler(Route *rt, StrVec *_path){
         if(funcW->type.state & ROUTE_ASSET){
             path = Path_ReJoinExt(m, _path);
         }else{
+            void *args[2];
             path = Path_WithoutExt(m, _path);
         }
     }else{
         path = _path;
     }
 
-    void *args[2];
-    args[0] = path;
-    args[1] = NULL;
-    Out("^p.Path @^0\n", args);
-
-    Route *handler = (Route *)NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *handler = (Route *)Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     return handler;
 }

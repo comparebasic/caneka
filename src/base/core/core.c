@@ -9,21 +9,20 @@ word OUTCOME_FLAGS = (SUCCESS|NOOP|ERROR);
 Buff *OutStream = NULL;
 Buff *ErrStream = NULL;
 
-status Core_Init(MemCh *m){
+status Stream_Init(MemCh *m, i32 out, i32 err){
     status r = READY;
     if(OutStream == NULL){
         Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-        Buff_SetFd(bf, 1);
+        Buff_SetFd(bf, out);
         r |= SUCCESS;
         OutStream = bf;
     }
     if(ErrStream == NULL){
         Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-        Buff_SetFd(bf, 2);
+        Buff_SetFd(bf, err);
         r |= SUCCESS;
         ErrStream = bf;
     }
-    r |= Error_Init(m);
     return NOOP;
 }
 

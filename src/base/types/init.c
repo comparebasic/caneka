@@ -13,7 +13,7 @@ status Caneka_InitBase(MemCh *m){
     status r = READY;
     r |= archChecks();
     MemCh *md = MemCh_Make();
-    r |= Core_Init(md);
+    r |= Error_Init(m);
     r |= Ifc_Init(md);
     r |= Hash_Init(m);
     r |= Maps_Init(md);

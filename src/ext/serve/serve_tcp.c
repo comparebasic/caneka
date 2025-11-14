@@ -60,13 +60,11 @@ static status ServeTcp_OpenTcp(Step *st, Task *tsk){
         st->type.state |= ERROR;
     }
 
-    if(tsk->type.state & DEBUG){
-        args[0] = I32_Wrapped(OutStream->m, fd);
-        args[1] = st;
-        args[2] = tsk;
-        args[3] = NULL;
-        Out("^c.Opened Socket ^D.$^d.fd for @ of @^0\n", args);
-    }
+    args[0] = I32_Wrapped(OutStream->m, fd);
+    args[1] = st;
+    args[2] = tsk;
+    args[3] = NULL;
+    Out("^c.Opened Socket ^D.$^d.fd for @ of @ Ready to Serve^0\n", args);
 
     return st->type.state;
 }

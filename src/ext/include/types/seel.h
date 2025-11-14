@@ -1,5 +1,6 @@
 extern struct lookup *SeelLookup;
 extern struct lookup *SeelNameLookup;
+extern struct lookup *SeelChildrenPropLookup;
 
 i32 Seel_GetIdx(Table *seel, void *key);
 status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx);

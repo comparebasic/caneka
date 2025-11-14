@@ -60,7 +60,11 @@ void *Seel_Get(Span *inst, void *key){
     if(sg->val.w == TYPE_ABSTRACT){
         return Span_Get(inst, h->orderIdx);
     }else{
-        return as(Span_Get(inst, h->orderIdx), sg->val.w);
+        Abstract *value = Span_Get(inst, h->orderIdx);
+        if(value != NULL){
+            as(value, sg->val.w);
+        }
+        return value;
     }
 }
 

@@ -514,6 +514,7 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
+    Stream_Init(m, 1, 2);
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
 
