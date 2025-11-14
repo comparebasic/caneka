@@ -11,18 +11,14 @@ static status Load_stats(Step *st, Task *tsk){
     MemBookStats mst;
     MemBook_GetStats(m, &mst);
 
-    Object *stats = Object_Make(m, ZERO);
-    Object_Set(stats, Str_FromCstr(m, "uptime", ZERO),
-        MicroTime_ToStr(m, tcp->metrics.start));
-    Object *mem = Object_Make(m, ZERO);
-    Object_Set(mem, Str_FromCstr(m, "mem-used", ZERO),
-        Str_MemCount(m, mst.pageIdx * PAGE_SIZE));
-    Object_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
-        Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
-    Object_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &mst));
-    Object_Set(stats, Str_FromCstr(m, "mem", ZERO), mem);
-
-    Object_Set(ctx->data, Str_FromCstr(m, "stats", ZERO), stats);
+    Table *stats = Table_Make(m);
+    Table_SetByCstr(stats, "uptime", MicroTime_ToStr(m, tcp->metrics.start));
+    Table *mem = Table_Make(m);
+    Table_SetByCstr(mem, "mem-used", Str_MemCount(m, mst.pageIdx * PAGE_SIZE));
+    Table_Set(mem,  "mem-total", Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
+    Table_Set(mem,  "mem-details", Map_ToTable(m, &mst));
+    Table_Set(stats, "mem", mem);
+    Table_Set(ctx->data, "stats", stats);
 
     st->type.state |= SUCCESS;
     return st->type.state;
@@ -31,37 +27,33 @@ static status Load_stats(Step *st, Task *tsk){
 static status routeInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
 
-    StrVec *path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/public"));
-    StrVec *abs = IoUtil_AbsVec(m, path);
-    ctx->pages = (Object *)Route_Make(m);
-    r |= Route_Collect(ctx->pages, abs);
+    ctx->pages = Route_Make(m);
+    r |= Route_Collect(ctx->pages, IoAbsPath(m, "examples/web-server/pages/public"));
 
-    StrVec *name = StrVec_From(m, Str_FromCstr(m, "/stats", STRING_COPY));
-    IoUtil_Annotate(m, name);
+    StrVec *name = IoPath(m, "/stats");
 
-    Route *statHandler = Object_ByPath(ctx->pages, name, NULL, SPAN_OP_GET);
+    Route *statHandler = NodeObj_ByPath(ctx->pages, name, NULL, SPAN_OP_GET);
     Single *funcW = Ptr_Wrapped(m, Load_stats, TYPE_STEP_FUNC);
-    Object_SetPropByIdx(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
+    Span_Set(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
 
-    StrVec *navPath = IoUtil_GetAbsVec(m,
-        Str_FromCstr(m, "./examples/web-server/pages/nav.config", ZERO));
+    /*
+    StrVec *navPath = IoAbsPath(m,"examples/web-server/pages/nav.config");
     ctx->nav = Nav_TableFromPath(m, ctx->pages, navPath);
+    */
 
-    path = StrVec_From(m, Str_CstrRef(m, "examples/web-server/pages/inc"));
-    abs = IoUtil_AbsVec(m, path);
-    ctx->inc = (Object *)Route_Make(m);
-    r |= Route_Collect(ctx->inc, abs);
+    ctx->inc = Route_Make(m);
+    r |= Route_Collect(ctx->inc, IoAbsPath(m, "examples/web-server/pages/inc"));
 
     WebServer_AddRoute(m,
         ctx->pages,
-        StrVec_From(m, Str_FromCstr(m, "examples/web-server/pages/static", STRING_COPY)),
-        StrVec_From(m, Str_FromCstr(m, "/static", STRING_COPY))
+        IoAbsPath(m, "examples/web-server/pages/static"),
+        IoPath(m, "/static")
     );
 
     WebServer_AddRoute(m,
         ctx->pages,
-        StrVec_From(m, Str_FromCstr(m, "examples/web-server/pages/system", STRING_COPY)),
-        StrVec_From(m, Str_FromCstr(m, "/system", STRING_COPY))
+        IoAbsPath(m, "examples/web-server/pages/system"),
+        IoPath(m, "/system")
     );
 
     return r;

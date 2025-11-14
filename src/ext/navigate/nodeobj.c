@@ -51,10 +51,11 @@ void *NodeObj_ByPath(Span *inst, StrVec *path, void *value, word op){
     DebugStack_Push(inst, inst->type.state);
     if(inst->type.state & DEBUG){
         void *args[] = {
+            NULL,
             path,
             NULL
         };
-        Out("^p.ByPath @^0\n", args);
+        Out("^p.^{STACK.name} called path:@^0\n", args);
     }
 
     Iter keysIt;
@@ -72,14 +73,6 @@ void *NodeObj_ByPath(Span *inst, StrVec *path, void *value, word op){
                 DebugStack_Pop();
                 return NULL;
             }
-            if(inst->type.state & DEBUG){
-                void *args[] = {
-                    current,
-                    key,
-                    NULL
-                };
-                Out("^p.    While @[@]^0\n", args);
-            }
             key = NULL;
         }else{
             key = item;
@@ -90,15 +83,6 @@ void *NodeObj_ByPath(Span *inst, StrVec *path, void *value, word op){
     }
 
     if(key != NULL && (key->type.state & (LAST|MORE)) == 0){
-        if(inst->type.state & DEBUG){
-            void *args[] = {
-                current,
-                key,
-                NULL
-            };
-            Out("^p.    BelowLast @[@]^0\n", args);
-        }
-
         current = Table_Get(Span_Get(current, NODEOBJ_PROPIDX_CHILDREN), key);
         if(current == NULL){
             if(SPAN_OP_SET){
@@ -112,10 +96,11 @@ void *NodeObj_ByPath(Span *inst, StrVec *path, void *value, word op){
 
     if(inst->type.state & DEBUG){
         void *args[] = {
+            NULL,
             current,
             NULL
         };
-        Out("^c.   Returning @^0\n", args);
+        Out("^c.   ^{STACK.name} Returning @^0\n", args);
     }
 
     DebugStack_Pop();

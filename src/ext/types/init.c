@@ -128,7 +128,7 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
     }
     Table *seel = Lookup_Get(SeelLookup, obj->type.of);
     Str *name = Lookup_Get(SeelNameLookup, obj->type.of);
-    if(flags & MORE){
+    if(flags & DEBUG){
         void *args[] = {
             name,
             Type_StateVec(bf->m, obj->type.of, obj->type.state),
@@ -144,6 +144,31 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
                 ToS(bf, h->key, ZERO, flags); 
                 Buff_AddBytes(bf, (byte *)": ", 2);
                 ToS(bf, Span_Get(obj, h->orderIdx), ZERO, flags); 
+                if((it.type.state & LAST) == 0){
+                    Buff_AddBytes(bf, (byte *)", ", 2);
+                }
+            }
+        }
+        Fmt(bf, ">", NULL);
+        return SUCCESS;
+    }else if(flags & MORE){
+        void *args[] = {
+            name,
+            Type_StateVec(bf->m, obj->type.of, obj->type.state),
+            NULL,
+        };
+        Fmt(bf, "$<@", args);
+        Iter it;
+        Iter_Init(&it, seel);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);;
+            if(h != NULL){
+                Buff_AddBytes(bf, (byte *)"#", 1);
+                ToS(bf, h->key, ZERO, flags); 
+                Buff_AddBytes(bf, (byte *)": ", 2);
+                Abstract *value = Span_Get(obj, h->orderIdx);
+                Str *type = value == NULL ? NULL : Type_ToStr(bf->m, value->type.of);
+                ToS(bf, type, ZERO, flags); 
                 if((it.type.state & LAST) == 0){
                     Buff_AddBytes(bf, (byte *)", ", 2);
                 }

@@ -18,6 +18,8 @@ typedef struct str {
 
 typedef status (*StrRslvFunc)(MemCh *m, i32 idx, Str *arg, void *source);
 
+#define S(m, x) Str_FromCstr((m), (x), STRING_COPY)
+
 boolean TextCharFilter(byte *b, i64 length);
 status Str_Reset(Str *s);
 status Str_Wipe(Str *s);

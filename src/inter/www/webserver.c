@@ -157,8 +157,10 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         return st->type.state;
     }
 
-    Table *routeData = Span_Get(route, ROUTE_PROPIDX_DATA);
-    Table_Lay(ctx->data, routeData, TRUE);
+    Table *routeData = (Table *)as(Span_Get(ctx->route, ROUTE_PROPIDX_DATA), TYPE_TABLE);
+    if(routeData != NULL){
+        Table_SetByCstr(ctx->data, "config", routeData);
+    }
 
     Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
 
@@ -244,7 +246,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
 status WebServer_AddRoute(MemCh *m, Route *pages, StrVec *dir, StrVec *path){
     status r = READY;
     Route *rt = Route_From(m, dir);
-    Table_ByPath(Span_Get(pages, ROUTE_PROPIDX_CHILDREN), path, rt, SPAN_OP_SET);
+    NodeObj_ByPath(pages, path, rt, SPAN_OP_SET);
     return r;
 }
 

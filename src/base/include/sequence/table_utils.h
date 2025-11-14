@@ -7,3 +7,4 @@ Span *Table_Ordered(MemCh *m, Table *tbl);
 Span *Table_OrdValues(MemCh *m, Table *tbl);
 Table *Table_GetOrMake(Table *tbl, void *key, word op);
 void *Table_ByPath(Table *tbl, StrVec *path, void *value, word op);
+i32 Table_SetByCstr(Table *tbl, char *cstr, void *value);

@@ -45,15 +45,7 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
     Str *index = Str_FromCstr(m, "index", ZERO);
     word flags = ZERO;
     Route *subRt = NULL;
-    if(!Equals(name, index)){
-        if(funcW->type.state & ROUTE_ASSET){
-            Path_JoinBase(m, objPath);
-        }else{
-            StrVec_Decr(objPath, ext->total+1);
-        }
-        subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-        NodeObj_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
-    }else{
+    if(Equals(name, index)){
         flags |= ROUTE_INDEX;
         StrVec_Decr(objPath, ext->total+1);
         StrVec_Decr(objPath, index->length);
@@ -62,8 +54,15 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
             subRt = Inst_Make(m, TYPE_WWW_ROUTE);
             NodeObj_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
         }
+    }else{
+        if(funcW->type.state & ROUTE_ASSET){
+            Path_JoinBase(m, objPath);
+        }else{
+            StrVec_Decr(objPath, ext->total+1);
+        }
+        subRt = Inst_Make(m, TYPE_WWW_ROUTE);
+        NodeObj_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
     }
-
 
     Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
     Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
@@ -111,16 +110,18 @@ static status routeFuncFileDb(Buff *bf, void *action, Table *data, void *source)
 static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
     MemCh *m = rt->m;
     void *args[3];
-    StrVec *config = StrVec_Make(m);
-    StrVec_AddVec(config, ctx->path);
-    StrVec_AddVec(config, (StrVec *)token);
 
-    Str *configS = StrVec_StrCombo(m,
-        config, Str_FromCstr(m, ".config", ZERO));
+    StrVec *path = StrVec_Make(m);
+    StrVec_AddVec(path, ctx->path);
+    StrVec_AddVec(path, (StrVec *)token);
 
-    Inst *data = Config_FromPath(m, configS);
-    if(data != NULL){
-        Span_Set(rt, ROUTE_PROPIDX_DATA, data);
+    Str *pathS = StrVec_StrCombo(m,
+        path, Str_FromCstr(m, ".config", ZERO));
+
+    NodeObj *config = Config_FromPath(m, pathS);
+    if(config != NULL && config->nvalues > 0){
+        Table *tbl = Seel_Get(rt, S(m, "data"));
+        Table_SetByCstr(tbl, "config", config);
         return SUCCESS;
     }
     return NOOP;
@@ -137,15 +138,15 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
     MemCh *m = rt->m;
     void *args[3];
 
-    StrVec *path = (StrVec *)Span_Get(rt, ROUTE_PROPIDX_FILE);
-    StrVec *type = (StrVec *)Span_Get(rt, ROUTE_PROPIDX_TYPE);
+    StrVec *path = (StrVec *)Seel_Get(rt, S(m, "file"));
+    StrVec *type = (StrVec *)Seel_Get(rt, S(m, "type"));
     StrVec *token = StrVec_Make(m);
-    StrVec_AddVec(token, (StrVec *)Span_Get(rt, ROUTE_PROPIDX_PATH));
+    StrVec_AddVec(token, (StrVec *)Seel_Get(rt, S(m, "path")));
     if(rt->type.state & ROUTE_INDEX){
         StrVec_Add(token, Str_FromCstr(m, "index", ZERO));
     }
     Single *funcW = (Single *)as(
-        Span_Get(rt, ROUTE_PROPIDX_FUNC),
+        Seel_Get(rt, S(m, "func")),
         TYPE_WRAPPED_FUNC
     );
 
@@ -235,36 +236,28 @@ Route *Route_GetHandler(Route *rt, StrVec *_path){
         path = _path;
     }
 
-    Route *handler = (Route *)Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN),
-        path, NULL, SPAN_OP_GET);
+    Route *handler = (Route *)NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     return handler;
 }
 
 status Route_Handle(Route *rt, Buff *bf, Table *data, void *source){
     DebugStack_Push(rt, rt->type.of);
-    StrVec *path = (StrVec *)Span_Get(rt, ROUTE_PROPIDX_FILE);
-
-    if(path == NULL){
-        printf("PATH IS NULL\n");
-        fflush(stdout);
-    }
+    StrVec *path = (StrVec *)Seel_Get(rt, S(bf->m, "file"));
+    MemCh *m = bf->m;
 
     word fl = bf->m->type.state;
     bf->m->type.state |= MEMCH_BASE;
     DebugStack_SetRef(StrVec_Str(bf->m, path), TYPE_STR);
     bf->m->type.state = fl;
 
-    Abstract *action = Span_Get(rt, ROUTE_PROPIDX_ACTION);
-    Table *config = Span_Get(rt, ROUTE_PROPIDX_DATA);
-    if(config != NULL && config->nvalues > 0){
-        Table_Set(data, Str_FromCstr(bf->m, "config", STRING_COPY), config);
+    Abstract *action = Seel_Get(rt, S(m, "action"));
+    Table *routeData = Seel_Get(rt, S(m, "data"));
+    if(routeData != NULL && routeData->nvalues > 0){
+        Table_Merge(data, routeData);
     }
 
-    Single *funcW = (Single *)as(
-        Span_Get(rt, ROUTE_PROPIDX_FUNC),
-        TYPE_WRAPPED_FUNC
-    );
+    Single *funcW = (Single *)as(Seel_Get(rt, S(m, "func")), TYPE_WRAPPED_FUNC);
 
     RouteFunc func = (RouteFunc)funcW->val.ptr;
     status r = func(bf, action, data, source);
