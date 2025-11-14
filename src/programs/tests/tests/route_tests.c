@@ -191,34 +191,36 @@ status WwwRoute_Tests(MemCh *gm){
     status r = READY;
     MemCh *m = MemCh_Make();
 
-    StrVec *path = IoUtil_GetAbsVec(m,
-        Str_FromCstr(m, "./examples/web-server/pages/public", ZERO));
+    StrVec *path = IoPath(m, "examples/web-server/pages/public");
     Route *rt = Route_From(m, path);
 
-    path = StrVec_From(m, Str_FromCstr(m, "/tests", ZERO));
-    IoUtil_Annotate(m, path);
-    Route *tests = Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN), path, NULL, SPAN_OP_GET);
+    path = IoPath(m, "/tests");
+    Route *tests = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
 
-    Hashed *h = Span_Get(tests, ROUTE_PROPIDX_MIME);
-    args[0] = h->value;
+    args[0] = path;
     args[1] = NULL;
-    r |= Test(Equals(h->value, Str_FromCstr(m, "text/html", ZERO)), 
+    r |= Test(tests != NULL, "Route for @ is not NULL", args);
+
+    Str *mime = Span_Get(tests, ROUTE_PROPIDX_MIME);
+    args[0] = mime;
+    args[1] = NULL;
+    r |= Test(Equals(mime, Str_FromCstr(m, "text/html", ZERO)), 
         "account index page is mime type text/html, have @", args);
-    h = Span_Get(tests, ROUTE_PROPIDX_TYPE);
-    args[0] = h->value;
+    Str *type = Span_Get(tests, ROUTE_PROPIDX_TYPE);
+    args[0] = type;
     args[1] = NULL;
-    r |= Test(Equals(h->value, Str_FromCstr(m, "body", ZERO)), 
+    r |= Test(Equals(type, Str_FromCstr(m, "body", ZERO)), 
         "account index page is type html, have @", args);
 
     path = StrVec_From(m, Str_FromCstr(m, "/stats", ZERO));
     IoUtil_Annotate(m, path);
-    Route *profile = Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN), path, NULL, SPAN_OP_GET);
-    h = Span_Get(profile, ROUTE_PROPIDX_MIME);
-    r |= Test(Equals(h->value, Str_FromCstr(m, "text/html", ZERO)),
+    Route *profile = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
+    mime = Span_Get(profile, ROUTE_PROPIDX_MIME);
+    r |= Test(Equals(mime, Str_FromCstr(m, "text/html", ZERO)),
         "profile index page is mime type text/html", NULL);
 
-    h = Span_Get(profile, ROUTE_PROPIDX_TYPE);
-    r |= Test(Equals(h->value, Str_FromCstr(m, "templ", ZERO)),
+    type = Span_Get(profile, ROUTE_PROPIDX_TYPE);
+    r |= Test(Equals(type, Str_FromCstr(m, "templ", ZERO)),
         "profile index page is mime type templ", NULL);
 
     MemCh_Free(m);
@@ -234,11 +236,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     DebugStack_SetRef("header.templ", TYPE_CSTR);
 
-    Route *rt = Route_Make(m);
-    StrVec *pagesPath = IoUtil_GetAbsVec(m,
-        Str_CstrRef(m, "./examples/web-server/pages/public"));
-    StrVec *pageAbs = IoUtil_AbsVec(m, pagesPath);
-    Route_Collect(rt, pageAbs);
+    StrVec *path = IoPath(m, "examples/web-server/pages/public");
+    Route *rt = Route_From(m, path);
 
     Route *inc = Route_Make(m);
     StrVec *incPath = IoUtil_GetAbsVec(m,
@@ -253,7 +252,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     StrVec *title = StrVec_From(m, Str_CstrRef(m, "The Title of the Master Page"));
     Table_Set(data, Str_CstrRef(m, "title"), title);
 
-    StrVec *path = StrVec_From(m, Str_CstrRef(m,
+    path = StrVec_From(m, Str_CstrRef(m,
         "./examples/web-server/pages/inc/header.templ"));
     StrVec *abs = IoUtil_AbsVec(m, path);
 
@@ -280,9 +279,8 @@ status WwwRouteTempl_Tests(MemCh *gm){
     /* stats.templ no mem details */
     DebugStack_SetRef("stats.templ no mem details", TYPE_CSTR);
 
-    path = StrVec_From(m, Str_CstrRef(m, "/stats"));
-    IoUtil_Annotate(m, path);
-    Route *handler = Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN), path, NULL, SPAN_OP_GET);
+    path = IoPath(m, "/stats");
+    Route *handler = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
 
     data = getGenericData(m, rt);
     Table *stats = Table_Make(m);
@@ -303,11 +301,10 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     DebugStack_SetRef("stats.templ no mem details + header", TYPE_CSTR);
 
-    Route *header = Table_ByPath(Span_Get(inc, ROUTE_PROPIDX_CHILDREN),
-        StrVec_From(bf->m, Str_FromCstr(bf->m, "header", ZERO)), NULL, SPAN_OP_GET);
-    Route *footer = Table_ByPath(Span_Get(inc, ROUTE_PROPIDX_CHILDREN),
-        StrVec_From(bf->m, Str_FromCstr(bf->m, "footer", ZERO)),
-            NULL, SPAN_OP_GET);
+    StrVec *hv = IoPath(bf->m, "header");
+    Route *header = Inst_ByPath(inc, ROUTE_PROPIDX_CHILDREN, hv, NULL, SPAN_OP_GET);
+    StrVec *fv = IoPath(bf->m, "footer");
+    Route *footer = Inst_ByPath(inc, ROUTE_PROPIDX_CHILDREN, fv, NULL, SPAN_OP_GET);
 
     Buff *dest = Buff_Make(m, ZERO);
 
@@ -362,7 +359,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
-    handler = Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN), path, NULL, SPAN_OP_GET);
+    handler = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
 
     Route_Handle(handler, bf, data, NULL);
     dest = Buff_Make(m, ZERO);
@@ -384,7 +381,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
 
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
-    handler = Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN), path, NULL, SPAN_OP_GET);
+    handler = Inst_ByPath(rt, ROUTE_PROPIDX_CHILDREN, path, NULL, SPAN_OP_GET);
 
     Route_Handle(handler, bf, data, NULL);
     dest = Buff_Make(m, ZERO);

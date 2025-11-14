@@ -1,6 +1,53 @@
 #include <external.h>
 #include <caneka.h>
 
+status StrVec_Decr(StrVec *v, i64 amount){
+    if(amount > v->total){
+        return ERROR;
+    }
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s->length > amount){
+            s->length -= amount;
+            amount = 0;
+            v->total -= amount;
+        }else if(amount > 0){
+            Iter_Remove(&it);
+            v->total -= s->length;
+            amount -= s->length;
+        }else{
+            break;
+        }
+    }
+    return SUCCESS;
+}
+
+status StrVec_Incr(StrVec *v, i64 amount){
+    Span *p = Span_Make(v->p->m);
+    if(amount > v->total){
+        return ERROR;
+    }
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s->length > amount){
+            Str_Incr(s, amount);
+            Span_Add(p, s);
+            amount = 0;
+        }else if(amount == 0){
+            Span_Add(p, s);
+        }else{
+            amount -= s->length;
+        }
+    }
+    v->p = p;
+    v->total = v->total - amount;
+    return SUCCESS;
+}
+
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
     void *args[2];
     if(v->total+1 > STR_MAX || v->total+1 > length){

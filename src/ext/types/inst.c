@@ -111,8 +111,12 @@ void *Inst_ByPath(Span *inst, i32 childrenIdx, StrVec *path, void *value, word o
 
         current = Table_Get(Span_Get(current, childrenIdx), key);
         if(current == NULL){
-            DebugStack_Pop();
-            return NULL;
+            if(SPAN_OP_SET){
+                Table_Set(Span_Get(current, childrenIdx), key, value);
+            }else{
+                DebugStack_Pop();
+                return NULL;
+            }
         }
     }
 
@@ -163,11 +167,11 @@ Span *Inst_Make(MemCh *m, cls typeOf){
         if(h != NULL){
             Single *sg = (Single *)h->value;
             if(sg->val.w == TYPE_SPAN){
-                Span_Set(inst, it.idx, Span_Make(m));
+                Span_Set(inst, h->orderIdx, Span_Make(m));
             }else if(sg->val.w == TYPE_TABLE){
-                Span_Set(inst, it.idx, Table_Make(m));
+                Span_Set(inst, h->orderIdx, Table_Make(m));
             }else if(sg->val.w & TYPE_INSTANCE){
-                Span_Set(inst, it.idx, Inst_Make(m, sg->val.w));
+                Span_Set(inst, h->orderIdx, Inst_Make(m, sg->val.w));
             }
         }
     }

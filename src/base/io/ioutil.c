@@ -3,6 +3,20 @@
 
 static Span *pathSeps = NULL;
 
+StrVec *IoPath(MemCh *m, char *cstr){
+    return IoPath_From(m, Str_FromCstr(m, cstr, STRING_COPY));
+}
+
+StrVec *IoPath_From(MemCh *m, Str *s){
+    StrVec *v = StrVec_From(m, s);
+    IoUtil_Annotate(m, v);
+    return v;
+}
+
+StrVec *IoAbsPath(MemCh *m, char *cstr){
+    return IoUtil_AbsVec(m, StrVec_From(m, Str_FromCstr(m, cstr, STRING_COPY)));
+}
+
 status IoUtil_Annotate(MemCh *m, StrVec *path){
     return Path_Annotate(m, path, pathSeps);
 }

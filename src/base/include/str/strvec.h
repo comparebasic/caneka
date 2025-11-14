@@ -19,6 +19,8 @@ status StrVec_AddVec(StrVec *v, StrVec *v2);
 status StrVec_AddBytes(MemCh *m, StrVec *v, byte *ptr, i64 length);
 StrVec *StrVec_Make(MemCh *m);
 StrVec *StrVec_From(MemCh *m, Str *s);
+status StrVec_Incr(StrVec *v, i64 amount);
+status StrVec_Decr(StrVec *v, i64 amount);
 StrVec *StrVec_FromB64(MemCh *m, StrVec *v);
 i64 StrVec_FfIter(Iter *it, i64 offset);
 void *StrVec_Nth(MemCh *m, StrVec *v, i32 n);

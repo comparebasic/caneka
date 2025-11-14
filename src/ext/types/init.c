@@ -147,6 +147,7 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
                 }
             }
         }
+        Fmt(bf, ">", NULL);
         return SUCCESS;
     }else{
         return ToStream_NotImpl(bf, a, type, flags);

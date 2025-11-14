@@ -11,21 +11,6 @@ status Path_AddSlash(MemCh *m, StrVec *path){
     return s->type.state;
 }
 
-StrVec *Path_SubClone(MemCh *m, StrVec *path, i32 count){
-    StrVec *v = StrVec_Make(m);
-
-    Iter it;
-    Iter_Init(&it, path->p);
-    while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)Iter_Get(&it);
-        if(it.idx >= count){
-            StrVec_Add(v, s);
-        }
-    }
-
-    return v;
-}
-
 status Path_AddStr(StrVec *path, Str *add){
     Str *s = Span_Get(path->p, path->p->max_idx);
     if(s == NULL || s->bytes[s->length-1] != '/'){

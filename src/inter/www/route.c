@@ -8,10 +8,9 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
     void *args[5];
     RouteCtx *rctx = (RouteCtx *)source;
 
-    StrVec *abs = StrVec_From(m, path);
-    Path_AddSlash(m, abs);
-    StrVec_Add(abs, file);
-    IoUtil_Annotate(m, abs);
+    StrVec *abs = IoUtil_AbsVec(m, StrVec_From(m, path));
+    IoUtil_Add(m, abs, IoPath(m, "/"));
+    IoUtil_Add(m, abs, StrVec_From(m, file));
 
     StrVec *name = Path_Name(m, abs);
     StrVec *ext = Path_Ext(m, abs);
@@ -37,25 +36,29 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
         return NOOP;
     }
 
-    StrVec *pathV = StrVec_From(m, path);
-    IoUtil_Annotate(m, pathV);
-    StrVec *objPath = Path_SubClone(m, pathV, rctx->path->p->max_idx+1);
-    objPath->type.state |= STRVEC_PATH;
+    
+    StrVec *objPath = IoPath_From(m, path);
+    IoUtil_Add(m, objPath, IoPath(m, "/"));
+    IoUtil_Add(m, objPath, StrVec_From(m, file));
+
+    StrVec_Incr(objPath, rctx->path->total);
+    StrVec_Decr(objPath, ext->total+1);
 
     Str *index = Str_FromCstr(m, "index", ZERO);
     word flags = ZERO;
     if(!Equals(name, index)){
-        if((funcW->type.state & ROUTE_ASSET) == 0){
-            Path_Add(m, objPath, name);
-        }else{
-            Path_AddStr(objPath, file);
+        if(funcW->type.state & ROUTE_ASSET){
+            Path_AddStr(objPath, Str_FromCstr(m, ".", STRING_COPY));
+            Path_AddStr(objPath, Span_Get(ext->p, 0));
         }
     }else{
         flags |= ROUTE_INDEX;
+        StrVec_Decr(objPath, index->length);
     }
 
-    Route *subRt = Table_ByPath(Span_Get(rctx->root, ROUTE_PROPIDX_CHILDREN),
-        objPath, NULL, SPAN_OP_RESERVE);
+    Route *subRt = Inst_Make(m, TYPE_WWW_ROUTE);
+    Inst_ByPath(rctx->root, ROUTE_PROPIDX_CHILDREN,
+        objPath, subRt, SPAN_OP_SET);
 
     Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
     Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);

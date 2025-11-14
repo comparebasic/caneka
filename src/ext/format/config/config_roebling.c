@@ -189,7 +189,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Iter_Add(it, obj);
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
-        if(Span_Get(current, NODEOBJ_PROPIDX_ATTS) == NULL){
+        Table *atts = Span_Get(current, NODEOBJ_PROPIDX_ATTS);
+        if(atts == NULL || atts->nvalues == 0){
             Table *attObj = Table_Make(m);
             Iter *itn = Iter_Make(m, attObj);
             Table_SetKey(itn, StrVec_Str(m, v));
