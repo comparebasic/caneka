@@ -111,6 +111,8 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     void *args[5];
 
+    printf("Gather Page\n");
+
     MemCh *m = tsk->m;
 
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
@@ -120,6 +122,8 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     IoUtil_Annotate(tsk->m, ctx->path);
     Route *route = Route_GetHandler(tcp->pages, ctx->path);
     ctx->route = route;
+
+    printf("Gather Page II\n");
 
     if(ctx->data == NULL){
         ctx->data = Table_Make(m);
@@ -145,7 +149,6 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
         Table_Set(ctx->data, Str_FromCstr(m, "error", STRING_COPY), error);
 
-
         Str *s = Str_FromCstr(m, "not found", STRING_COPY);
         ctx->contentLength = s->length;
         Buff *bf = Buff_Make(m, ZERO);
@@ -157,9 +160,9 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         return st->type.state;
     }
 
-    Table *routeData = (Table *)as(Span_Get(ctx->route, ROUTE_PROPIDX_DATA), TYPE_TABLE);
-    if(routeData != NULL){
-        Table_SetByCstr(ctx->data, "config", routeData);
+    Table *routeData = Seel_Get(ctx->route, S(m, "data"));
+    if(routeData != NULL && routeData->nvalues > 0){
+        Table_Merge(ctx->data, routeData);
     }
 
     Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
@@ -184,13 +187,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
-    Inst *config = Span_Get(ctx->route, ROUTE_PROPIDX_DATA);
-    if(config != NULL){
-        Table_Set(ctx->data, 
-            Str_FromCstr(m, "config", STRING_COPY), (Abstract *)config);
-    }
-
-    ctx->mime = (Str *)Span_Get(ctx->route, ROUTE_PROPIDX_MIME);
+    ctx->mime = (Str *)Seel_Get(ctx->route, S(m, "mime"));
     Single *funcW = (Single *)as(
         Span_Get(ctx->route, ROUTE_PROPIDX_FUNC),
         TYPE_WRAPPED_FUNC
@@ -199,8 +196,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
     Buff *headBf = NULL;
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = StrVec_From(m, Str_FromCstr(m, "header", ZERO));
-        Route *header = Table_ByPath(Span_Get(tcp->inc, ROUTE_PROPIDX_CHILDREN),
-            path, NULL, SPAN_OP_GET);
+        Route *header = NodeObj_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
         headBf = Buff_Make(m, ZERO);
         r |= Route_Handle(header, headBf, ctx->data, NULL);
         Buff_Stat(headBf);
@@ -215,8 +211,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
     Buff *footerBf = NULL;
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = StrVec_From(m, Str_FromCstr(m, "footer", ZERO));
-        Route *header = Table_ByPath(Span_Get(tcp->inc, ROUTE_PROPIDX_CHILDREN),
-            path, NULL, SPAN_OP_GET);
+        Route *header = NodeObj_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
 
         footerBf = Buff_Make(m, ZERO);
         r |= Route_Handle(header, footerBf, ctx->data, NULL);

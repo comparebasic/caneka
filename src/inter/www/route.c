@@ -236,6 +236,11 @@ Route *Route_GetHandler(Route *rt, StrVec *_path){
         path = _path;
     }
 
+    void *args[2];
+    args[0] = path;
+    args[1] = NULL;
+    Out("^p.Path @^0\n", args);
+
     Route *handler = (Route *)NodeObj_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     return handler;
@@ -252,11 +257,6 @@ status Route_Handle(Route *rt, Buff *bf, Table *data, void *source){
     bf->m->type.state = fl;
 
     Abstract *action = Seel_Get(rt, S(m, "action"));
-    Table *routeData = Seel_Get(rt, S(m, "data"));
-    if(routeData != NULL && routeData->nvalues > 0){
-        Table_Merge(data, routeData);
-    }
-
     Single *funcW = (Single *)as(Seel_Get(rt, S(m, "func")), TYPE_WRAPPED_FUNC);
 
     RouteFunc func = (RouteFunc)funcW->val.ptr;
@@ -303,7 +303,7 @@ status Route_ClsInit(MemCh *m){
     /* Node End */
     Table_Set(seel, Str_CstrRef(m, "file"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, Str_CstrRef(m, "func"), I16_Wrapped(m, TYPE_WRAPPED_FUNC));
-    Table_Set(seel, Str_CstrRef(m, "mime"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, Str_CstrRef(m, "mime"), I16_Wrapped(m, TYPE_STR));
     Table_Set(seel, Str_CstrRef(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, Str_CstrRef(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
     Table_Set(seel, Str_CstrRef(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));

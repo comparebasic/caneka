@@ -36,10 +36,8 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
     Single *funcW = Ptr_Wrapped(m, Load_stats, TYPE_STEP_FUNC);
     Span_Set(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
 
-    /*
     StrVec *navPath = IoAbsPath(m,"examples/web-server/pages/nav.config");
     ctx->nav = Nav_TableFromPath(m, ctx->pages, navPath);
-    */
 
     ctx->inc = Route_Make(m);
     r |= Route_Collect(ctx->inc, IoAbsPath(m, "examples/web-server/pages/inc"));
