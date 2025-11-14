@@ -68,17 +68,20 @@ i32 main(int argc, char **argv){
 
     Caneka_Init(m);
     Inter_Init(m);
+    Stream_Init(m, 1, 2);
     DebugStack_Push(NULL, 0);
 
     Str *help = S(m, "help");
     Str *noColor = S(m, "no-color");
     Str *log = S(m, "log");
+    Str *foreground = S(m, "foreground");
 
     Table *resolveArgs = Table_Make(m);
     Args_Add(resolveArgs, help, NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, noColor, NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, S(m, "licence"), NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, S(m, "version"), NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, foreground, NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, log, NULL, ARG_OPTIONAL);
 
     StrVec *name = StrVec_From(m, S(m, argv[0]));
@@ -92,52 +95,99 @@ i32 main(int argc, char **argv){
         return 1;
     }
 
-    Str *logValue = Table_GetHashed(cliArgs, log);
+    microTime now = MicroTime_Now();
+
+    Str *logValue = Table_Get(cliArgs, log);
     if(logValue != NULL){
         Ansi_SetColor(FALSE);
 
-        StrVec *path = IoAbsPath(m, logValue);
-        StrVec *add = Sv(m, "-");
-        StrVec_Add(add, Str_FromI64(m, MicroTime_Now()));
+        StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, logValue));
+        StrVec *add = StrVec_Make(m);
+        StrVec_Add(add, S(m, "_"));
+        StrVec_Add(add, Str_FromI64(m, now));
         StrVec_Add(add, S(m, ".access"));
-        IoUtils_Add(m, path, add);
+        IoUtil_Add(m, path, add);
 
-        StrVec *errPath = IoAbsPath(m, logValue);
-        StrVec *errAdd = Sv(m, "-");
-        StrVec_Add(errAdd, Str_FromI64(m, MicroTime_Now()));
+        StrVec *errPath = IoUtil_AbsVec(m, StrVec_From(m, logValue));
+        StrVec *errAdd = StrVec_Make(m);
+        StrVec_Add(errAdd, S(m, "_"));
+        StrVec_Add(errAdd, Str_FromI64(m, now));
         StrVec_Add(errAdd, S(m, ".error"));
-        IoUtils_Add(m, errPath, errAdd);
+        IoUtil_Add(m, errPath, errAdd);
 
-        Buff *bf = Buff_Make(m);
-        File_Open(bf, StrVec_Str(m, path));
+        Buff *bf = Buff_Make(m, ZERO);
+        File_Open(bf, StrVec_Str(m, path), O_WRONLY|O_CREAT|O_APPEND);
         i32 outFd = 1;
         if(bf->fd > 0){
             outFd = bf->fd;
         }
 
-        Buff *ebf = Buff_Make(m);
-        File_Open(ebf, StrVec_Str(m, errPath));
+        Buff *ebf = Buff_Make(m, ZERO);
+        File_Open(ebf, StrVec_Str(m, errPath), O_WRONLY|O_CREAT|O_APPEND);
         i32 errFd = 1;
         if(ebf->fd > 0){
             errFd = bf->fd;
         }
-        Stream_Init(m, outFd, errFd);
 
         Buff *out = Buff_Make(m, BUFF_UNBUFFERED);
         Buff_SetFd(out, 2);
         void *args[] = {path, errPath};
-        Fmt(m, "Redirectin all output to @ and @", args);
+        Fmt(out, "Redirecting all output to $ and $\n", args);
+
+        Buff_SetFd(OutStream, outFd);
+        Buff_SetFd(ErrStream, errFd);
+
     }else if(Table_GetHashed(cliArgs, noColor) != NULL){
         Ansi_SetColor(FALSE);
     }
+
+    void *args[] = {
+        cliArgs, NULL
+    };
+    Out("^p.Args @\n", args);
+
 
     util ip6[2] = {0, 0};
 
     Task *srv = WebServer_Make(3000, 0, ip6);
     routeInit(m, (TcpCtx *)srv->source);
 
-    Task_Tumble(srv);
+    if(Table_GetHashed(cliArgs, foreground) == NULL && Table_GetHashed(cliArgs, log) != NULL){
+        i32 child = fork();
+        if(child == (pid_t)-1){
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error spawning webserver", NULL);
+            exit(13);
+            return 13;
+        }else if(!child){
+            exit(0);;
+            return 0;
+        }
+
+        StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, logValue));
+        StrVec *add = StrVec_Make(m);
+        StrVec_Add(add, S(m, "_"));
+        StrVec_Add(add, Str_FromI64(m, now));
+        StrVec_Add(add, S(m, ".pid"));
+        IoUtil_Add(m, path, add);
+
+        Buff *pbf = Buff_Make(m, BUFF_UNBUFFERED);
+        File_Open(pbf, StrVec_Str(m, path), O_WRONLY|O_CREAT);
+        Single *pidW = I32_Wrapped(m, child);
+        ToS(pbf, pidW, 0, ZERO);
+        File_Close(pbf);
+
+        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+        Buff_SetFd(bf, 2);
+        void *args[] = {pidW, MicroTime_ToStr(m, now), NULL};
+        Fmt(bf, "^y.Spawned WebServer with pid $ at @^0\n", args);
+    }else{
+        Task_Tumble(srv);
+    }
 
     DebugStack_Pop();
+    close(2);
+    close(1);
+    exit(0);
     return 0;
 }
