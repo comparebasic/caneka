@@ -5,3 +5,4 @@ i32 Seel_GetIdx(Table *seel, void *key);
 status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf);
 status Seel_Init(MemCh *m);
 void *Seel_Get(Span *inst, void *key);
+status Seel_Set(Span *inst, void *key, void *value);

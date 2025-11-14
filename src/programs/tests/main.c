@@ -345,6 +345,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "NodeObj Tests",
+        NodeObj_Tests,
+        "Node Object nested path tests.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Config Tests",
         Config_Tests,
         "Config tests that turn a basic configuration format into an object",

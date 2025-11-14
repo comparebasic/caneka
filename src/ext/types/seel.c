@@ -12,6 +12,28 @@ i32 Seel_GetIdx(Table *seel, void *key){
     return -1;
 }
 
+status Seel_Set(Span *inst, void *key, void *value){
+    Table *seel = Lookup_Get(SeelLookup, inst->type.of);
+    void *args[2];
+    if(seel == NULL){
+        args[0] = Type_ToStr(inst->m, inst->type.of);
+        args[1] = NULL;
+        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Seel not found for type $", args);
+        return ERROR;
+    }
+    Hashed *h = Table_GetHashed(seel, key);
+    if(h == NULL){
+        args[0] = key;
+        args[1] = NULL;
+        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Seel prop not found key: @", args);
+        return ERROR;
+    }
+
+    return Span_Set(inst, h->orderIdx, value);
+}
+
 void *Seel_Get(Span *inst, void *key){
     Table *seel = Lookup_Get(SeelLookup, inst->type.of);
     void *args[2];
