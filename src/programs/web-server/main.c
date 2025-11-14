@@ -160,7 +160,9 @@ i32 main(int argc, char **argv){
             exit(13);
             return 13;
         }else if(!child){
-            exit(0);;
+            setsid();
+            Task_Tumble(srv);
+            exit(0);
             return 0;
         }
 
