@@ -111,19 +111,21 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     void *args[5];
 
-    printf("Gather Page\n");
-
     MemCh *m = tsk->m;
 
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
     IoUtil_Annotate(tsk->m, ctx->path);
+
+    args[0] = NULL;
+    args[1] = ctx;
+    args[2] = NULL;
+    Out("^c.^{STACK.name} path:@^0\n", args);
+
     Route *route = Route_GetHandler(tcp->pages, ctx->path);
     ctx->route = route;
-
-    printf("Gather Page II\n");
 
     if(ctx->data == NULL){
         ctx->data = Table_Make(m);
@@ -236,13 +238,6 @@ status WebServer_ServePage(Step *st, Task *tsk){
     st->type.state |= (MORE|SUCCESS);
     DebugStack_Pop();
     return st->type.state;
-}
-
-status WebServer_AddRoute(MemCh *m, Route *pages, StrVec *dir, StrVec *path){
-    status r = READY;
-    Route *rt = Route_From(m, dir);
-    NodeObj_ByPath(pages, path, rt, SPAN_OP_SET);
-    return r;
 }
 
 Task *WebServer_Make(i32 port, quad ip4, util *ip6){

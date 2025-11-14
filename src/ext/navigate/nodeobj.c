@@ -9,100 +9,71 @@ void *NodeObj_Att(Inst *nobj, void *key){
     return NULL;
 }
 
-status NodeObj_ClsInit(MemCh *m){
-    status r = READY;
-    Table *tbl = Table_Make(m);
-
-    Table_Set(tbl, Str_FromCstr(m, "name", STRING_COPY), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(tbl, Str_FromCstr(m, "atts", STRING_COPY), I16_Wrapped(m, TYPE_TABLE));
-    Table_Set(tbl, Str_FromCstr(m, "children", STRING_COPY), I16_Wrapped(m, TYPE_TABLE));
-
-    r |= Seel_Seel(m, tbl, Str_FromCstr(m, "NodeObj", STRING_COPY ), TYPE_NODEOBJ);
-
-    return r;
-}
-
-Table *NodeObj_GetOrMake(Table *tbl, void *key, word op){
-    Abstract *a = (Abstract *)Table_Get(tbl, key);
-    if(a == NULL){
-        if((op & (SPAN_OP_SET|SPAN_OP_RESERVE)) == 0){
-            return NULL;
-        }
-        Inst *new = Inst_Make(tbl->m, TYPE_NODEOBJ);
-        Table_Set(tbl, key, new);
-        return new;
-    }else if(a->type.of == TYPE_NODEOBJ){
-        return (Inst *)a;
-    }else{
-        void *args[] = {
-            Type_ToStr(tbl->m, a->type.of),
-            key,
-            a,
-            NULL
-        };
-        Error(tbl->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Trying to make an empty Table where a $ value already exists for"
-            " key @, or is not an object @", args);
-        return NULL;
-    }
-}
-
 void *NodeObj_ByPath(Span *inst, StrVec *path, void *value, word op){
     DebugStack_Push(inst, inst->type.state);
-    if(inst->type.state & DEBUG){
-        void *args[] = {
-            NULL,
-            path,
-            NULL
-        };
-        Out("^p.^{STACK.name} called path:@^0\n", args);
+
+    if((path->type.state & STRVEC_PATH) == 0 && path->p->nvalues > 1){
+        void *args[] = {inst, NULL};
+        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error NodeObj_ByPath requires a strvec path", args);
+        return NULL;
     }
 
-    Iter keysIt;
-    Iter_Init(&keysIt, path->p);
-
-    Str *key = NULL;
     Inst *current = inst;
-    Table *tbl = Span_Get(inst, NODEOBJ_PROPIDX_CHILDREN);
-    while((Iter_Next(&keysIt) & END) == 0){
-        Str *item = (Str *)Iter_Get(&keysIt);
-        if((item->type.state & MORE) && key != NULL){
-            current = NodeObj_GetOrMake(Span_Get(current, NODEOBJ_PROPIDX_CHILDREN),
-                key, op);
-            if(current == NULL){
-                DebugStack_Pop();
-                return NULL;
-            }
-            key = NULL;
-        }else{
-            key = item;
-            if((keysIt.type.state & LAST) && (op & SPAN_OP_SET)){
-                Table_Set(Span_Get(current, NODEOBJ_PROPIDX_CHILDREN), key, value);
-            }
-        }
-    }
+    Abstract *prev = NULL;
 
-    if(key != NULL && (key->type.state & (LAST|MORE)) == 0){
-        current = Table_Get(Span_Get(current, NODEOBJ_PROPIDX_CHILDREN), key);
-        if(current == NULL){
-            if(SPAN_OP_SET){
-                Table_Set(Span_Get(current, NODEOBJ_PROPIDX_CHILDREN), key, value);
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *token = Iter_Get(&it);
+        if(it.type.state & LAST){
+            Abstract *key = (token->type.state & MORE) ? prev : token;
+            Table *children = Span_Get(current, NODEOBJ_PROPIDX_CHILDREN);
+            Abstract *child = Table_Get(children, key);
+
+            void *args[] = {key, child, Type_StateVec(inst->m, TYPE_ITER, op), NULL};
+            Out("^p.last key:@ child:@ @^0\n", args);
+
+            if(child == NULL && op == SPAN_OP_SET){
+                Table_Set(children, key, value); 
+                void *args[] = {key, value, NULL};
+                Out("^p.   setting: @/@^0\n", args);
+                DebugStack_Pop();
+                return value;
             }else{
                 DebugStack_Pop();
-                return NULL;
+                return child;
+            }
+        }else if(token->type.state & MORE){
+            if(prev){
+                Table *children = Span_Get(current, NODEOBJ_PROPIDX_CHILDREN);
+                Abstract *child = Table_Get(children, prev);
+                if(child == NULL && op == SPAN_OP_SET){
+                    Inst *new = Inst_Make(inst->m, TYPE_NODEOBJ);
+                    Table_Set(children, prev, new); 
+                    current = new;
+                }else if(child->type.of == TYPE_NODEOBJ){
+                    DebugStack_Pop();
+                    return NULL;
+                }
             }
         }
-    }
-
-    if(inst->type.state & DEBUG){
-        void *args[] = {
-            NULL,
-            current,
-            NULL
-        };
-        Out("^c.   ^{STACK.name} Returning @^0\n", args);
+        prev = token;
     }
 
     DebugStack_Pop();
     return current;
+}
+
+status NodeObj_ClsInit(MemCh *m){
+    status r = READY;
+    Table *tbl = Table_Make(m);
+
+    Table_Set(tbl, S(m, "name"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(tbl, S(m, "atts"), I16_Wrapped(m, TYPE_TABLE));
+    Hashed *h = Table_SetHashed(tbl, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
+
+    r |= Seel_Seel(m, tbl, S(m, "NodeObj"), TYPE_NODEOBJ, h->orderIdx);
+
+    return r;
 }

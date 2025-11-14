@@ -297,17 +297,17 @@ status Route_ClsInit(MemCh *m){
     status r = READY;
 
     Table *seel = Table_Make(m);
-    Table_Set(seel, Str_CstrRef(m, "path"), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(seel, Str_CstrRef(m, "data"), I16_Wrapped(m, TYPE_TABLE));
-    Table_Set(seel, Str_CstrRef(m, "children"), I16_Wrapped(m, TYPE_TABLE));
+    Table_Set(seel, S(m, "path"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, S(m, "data"), I16_Wrapped(m, TYPE_TABLE));
+    Hashed *h = Table_SetHashed(seel, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
     /* Node End */
-    Table_Set(seel, Str_CstrRef(m, "file"), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(seel, Str_CstrRef(m, "func"), I16_Wrapped(m, TYPE_WRAPPED_FUNC));
-    Table_Set(seel, Str_CstrRef(m, "mime"), I16_Wrapped(m, TYPE_STR));
-    Table_Set(seel, Str_CstrRef(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(seel, Str_CstrRef(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
-    Table_Set(seel, Str_CstrRef(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));
-    r |= Seel_Seel(m, seel, Str_FromCstr(m, "Route", STRING_COPY ), TYPE_WWW_ROUTE);
+    Table_Set(seel, S(m, "file"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, S(m, "func"), I16_Wrapped(m, TYPE_WRAPPED_FUNC));
+    Table_Set(seel, S(m, "mime"), I16_Wrapped(m, TYPE_STR));
+    Table_Set(seel, S(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(seel, S(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
+    Table_Set(seel, S(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));
+    r |= Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE, h->orderIdx);
 
     if(RouteFuncTable == NULL){
         RouteFuncTable = Table_Make(m);

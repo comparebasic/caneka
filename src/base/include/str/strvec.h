@@ -10,6 +10,8 @@ typedef struct strvec {
     Span *p;
 } StrVec;
 
+#define Sv(m, x) StrVec_From((m), Str_FromCstr((m), (x), STRING_COPY))
+
 i64 StrVec_ToFd(StrVec *v, int fd);
 StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig);
 status StrVec_NextSlot(StrVec *v, struct cursor *curs);

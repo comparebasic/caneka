@@ -174,7 +174,7 @@ Hashed *Table_SetHashed(Table *tbl, void *_a, void *_value){
     tbl->type.state |= it.type.state & OUTCOME_FLAGS;
 
     if(a->type.of == TYPE_STR || a->type.of == TYPE_STRVEC &&
-        Equals(a, Str_FromCstr(ErrStream->m, "config",ZERO))){
+        Equals(a, Str_FromCstr(ErrStream->m, "config", ZERO))){
     }
 
     return h;

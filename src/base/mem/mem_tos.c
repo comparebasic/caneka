@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 static Str **iterLabels = NULL;
+static Str **spanLabels = NULL;
 
 static inline status wsOut(Buff *bf, i8 dim){
     while(dim-- > 0){

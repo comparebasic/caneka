@@ -4,9 +4,7 @@
 status HttpTask_InitResponse(Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
     status r = READY;
-    if(tsk->data == NULL){
-        tsk->data = (Abstract *)HttpProto_Make(tsk->m);
-    }
+    tsk->data = (Abstract *)HttpProto_Make(tsk->m);
     tsk->source = source;
 
     DebugStack_Pop();

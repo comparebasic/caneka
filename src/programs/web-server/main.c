@@ -15,8 +15,8 @@ static status Load_stats(Step *st, Task *tsk){
     Table_SetByCstr(stats, "uptime", MicroTime_ToStr(m, tcp->metrics.start));
     Table *mem = Table_Make(m);
     Table_SetByCstr(mem, "mem-used", Str_MemCount(m, mst.pageIdx * PAGE_SIZE));
-    Table_Set(mem,  "mem-total", Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
-    Table_Set(mem,  "mem-details", Map_ToTable(m, &mst));
+    Table_Set(mem, "mem-total", Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
+    Table_Set(mem, "mem-details", Map_ToTable(m, &mst));
     Table_Set(stats, "mem", mem);
     Table_Set(ctx->data, "stats", stats);
 
@@ -42,17 +42,11 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
     ctx->inc = Route_Make(m);
     r |= Route_Collect(ctx->inc, IoAbsPath(m, "examples/web-server/pages/inc"));
 
-    WebServer_AddRoute(m,
-        ctx->pages,
-        IoAbsPath(m, "examples/web-server/pages/static"),
-        IoPath(m, "/static")
-    );
+    Route *stat = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
+    NodeObj_ByPath(ctx->pages, IoPath(m, "/static"), stat, SPAN_OP_SET);
 
-    WebServer_AddRoute(m,
-        ctx->pages,
-        IoAbsPath(m, "examples/web-server/pages/system"),
-        IoPath(m, "/system")
-    );
+    Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
+    NodeObj_ByPath(ctx->pages, IoPath(m, "/system"), sys, SPAN_OP_SET);
 
     return r;
 }

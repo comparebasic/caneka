@@ -406,6 +406,64 @@ status WwwRouteTempl_Tests(MemCh *gm){
     return r;
 }
 
+static boolean _fired = FALSE;
+
+static status fakeStep(Step *st, Task *tsk){
+    _fired = TRUE;
+    return NOOP;
+}
+
+status WwwPath_Tests(MemCh *gm){
+    DebugStack_Push(NULL, ZERO);
+    void *args[6];
+    status r = READY;
+    MemCh *m = MemCh_Make();
+
+    Route *pages = Route_Make(m);
+    r |= Route_Collect(pages, IoAbsPath(m, "examples/web-server/pages/public"));
+
+    StrVec *name = IoPath(m, "/stats");
+
+    Route *statHandler = NodeObj_ByPath(pages, name, NULL, SPAN_OP_GET);
+    Single *funcW = Ptr_Wrapped(m, fakeStep, TYPE_STEP_FUNC);
+    Span_Set(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
+
+    StrVec *navPath = IoAbsPath(m,"examples/web-server/pages/nav.config");
+    Span *nav = Nav_TableFromPath(m, pages, navPath);
+
+    Route *inc = Route_Make(m);
+    r |= Route_Collect(inc, IoAbsPath(m, "examples/web-server/pages/inc"));
+
+    Route *stat = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
+    args[0] = stat;
+    args[1] = NULL;
+    Out("^p.stat @^0\n", args);
+    NodeObj_ByPath(pages, IoPath(m, "/static/"), stat, SPAN_OP_SET);
+
+    Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
+    NodeObj_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
+
+    Route *route = Route_GetHandler(pages, IoPath(m, "/static/logo-transparent.png")); 
+    args[0] = IoAbsPath(m, "examples/web-server/pages/static/logo-transparent.png");
+    args[1] = Seel_Get(route, S(m, "file"));
+    args[2] = NULL;
+    r |= Test(route != NULL && Equals(args[1], args[0]), 
+        "Route has expected file expected @, found @", args);
+
+    route = Route_GetHandler(pages, IoPath(m, "/")); 
+    args[0] = IoAbsPath(m, "examples/web-server/pages/public/index.fmt");
+    args[1] = Seel_Get(route, S(m, "file"));
+    args[2] = NULL;
+    r |= Test(route != NULL && Equals(args[1], args[0]), 
+        "Route has expected file expected @, found @", args);
+
+    r |= ERROR;
+
+    MemCh_Free(m);
+    DebugStack_Pop();
+    return r;
+}
+
 status WwwRouteMime_Tests(MemCh *gm){
     DebugStack_Push(NULL, ZERO);
     void *args[6];
