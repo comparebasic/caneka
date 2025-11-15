@@ -1,5 +1,12 @@
-status Daemonize_StdToFiles(MemCh *m, StrVec *outPath, StrVec *errPath);
-status Daemonize(MemCh *m,
-        SourceFunc func, void *arg, void *source, StrVec *pidPath, i32 *pid,
-        char **fmt,
-        void **args);
+typedef struct deamon {
+    Type type;
+    MemCh *m;
+    struct {
+        Str *err;
+        Str *log;
+        Str *pid;
+    } paths;
+} ProcIo;
+
+Daemon *Daemon_Make(MemCh *m);
+status Daemonize(MemCh *m, Daemon *dm);

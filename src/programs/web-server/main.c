@@ -76,6 +76,9 @@ i32 main(int argc, char **argv){
     Caneka_Init(m);
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
+    Core_Direct(m, 1, 2);
+
+    microTime now = MicroTime_Now();
 
     Str *help = S(m, "help");
     Str *noColor = S(m, "no-color");
@@ -101,80 +104,62 @@ i32 main(int argc, char **argv){
         return 1;
     }
 
-    microTime now = MicroTime_Now();
-
-    Str *logValue = Table_Get(cliArgs, log);
-    if(logValue != NULL){
+    if(Table_GetHashed(cliArgs, noColor) != NULL){
         Ansi_SetColor(FALSE);
-
-        StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, logValue));
-        StrVec *add = StrVec_Make(m);
-        StrVec_Add(add, S(m, "_"));
-        StrVec_Add(add, Str_FromI64(m, now));
-        StrVec_Add(add, S(m, ".access"));
-        IoUtil_Add(m, path, add);
-
-        StrVec *errPath = IoUtil_AbsVec(m, StrVec_From(m, logValue));
-        StrVec *errAdd = StrVec_Make(m);
-        StrVec_Add(errAdd, S(m, "_"));
-        StrVec_Add(errAdd, Str_FromI64(m, now));
-        StrVec_Add(errAdd, S(m, ".error"));
-        IoUtil_Add(m, errPath, errAdd);
-
-        if(Daemonize_StdToFiles(m, path, errPath) & ERROR){
-            Buff *out = Buff_Make(m, BUFF_UNBUFFERED);
-            Buff_SetFd(out, 2);
-            Fmt(out, "^r.Error opeing log files^0\n", NULL);
-            exit(1);
-        }
-
-        Buff *out = Buff_Make(m, BUFF_UNBUFFERED);
-        Buff_SetFd(out, 2);
-        void *args[] = {path, errPath};
-        Fmt(out, "Redirecting all output to $ and $\n", args);
-
-    }else if(Table_GetHashed(cliArgs, noColor) != NULL){
-        Ansi_SetColor(FALSE);
-        Core_Direct(m, 1, 2);
-    }else{
-        Core_Direct(m, 1, 2);
     }
-
-    util ip6[2] = {0, 0};
-
-    Task *srv = WebServer_Make(3000, 0, ip6);
-    routeInit(m, (TcpCtx *)srv->source);
 
     if(Table_GetHashed(cliArgs, foreground) == NULL &&
             Table_GetHashed(cliArgs, log) != NULL){
 
-        StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, logValue));
-        StrVec *add = StrVec_Make(m);
-        StrVec_Add(add, S(m, ".pid"));
-        IoUtil_Add(m, path, add);
+        Str *logValue = Table_Get(cliArgs, log);
 
-        Single *pid = I32_Wrapped(m, 0);
-        char *fmt = NULL;
-        status r = Daemonize(m, run, srv, NULL, path, &pid->val.i, &fmt, args);
+        Str *build = Str_Make(m, STR_DEFAULT);
+        args[0] = logValue;
+        args[1] = S(m, "_");
+        args[2] = Str_FromI64(m, now);
+        args[3] = S(m, ".out");
+        args[4] = NULL;
+        Str_AddChain(m, build, args);
 
-        Core_Direct(m, 1, 2);
-        if(r & ERROR){
-            if(fmt != NULL){
-                Out(fmt, args);
-            }
-            args[0] = pid;
-            args[1] = MicroTime_ToStr(m, now);
-            args[2] = NULL;
-            Out("^y.Error Spawning WebServer does pid $ already exist? at @^0\n", args);
-        }else{
-            args[0] = pid;
-            args[1] = MicroTime_ToStr(m, now);
-            args[2] = NULL;
-            Out("^y.Spawned WebServer with pid $ at @^0\n", args);
+        Str *logPath = IoUtil_GetAbsPath(m, build);
+        Buff *bf = Buff_Make(m, ZERO);
+        File_Open(bf, logPath, O_WRONLY|O_CREAT|O_APPEND);
+        i32 outFd = 1;
+        if(bf->fd > 0){
+            outFd = bf->fd;
         }
-    }else{
-        Task_Tumble(srv);
+
+        build = Str_Make(m, STR_DEFAULT);
+        args[0] = logValue;
+        args[1] = S(m, "_");
+        args[2] = Str_FromI64(m, now);
+        args[3] = S(m, ".err");
+        args[4] = NULL;
+        Str_AddChain(m, build, args);
+
+        Str *errPath = IoUtil_GetAbsPath(m, build);
+        bf = Buff_Make(m, ZERO);
+        File_Open(bf, errPath, O_WRONLY|O_CREAT|O_APPEND);
+        i32 errFd = 1;
+        if(bf->fd > 0){
+            errFd = bf->fd;
+        }
+
+        args[0] = logPath;
+        args[1] = errPath;
+        args[2] = NULL;
+        Out("^p.Redirecting all output to $ and $^0\n", args);
+
+        Ansi_SetColor(FALSE);
+        Core_Direct(m, outFd, errFd);
+    }else if(Table_GetHashed(cliArgs, noColor) != NULL){
+        Ansi_SetColor(FALSE);
     }
+
+    util ip6[2] = {0, 0};
+    Task *srv = WebServer_Make(3000, 0, ip6);
+    routeInit(m, (TcpCtx *)srv->source);
+    Task_Tumble(srv);
 
     DebugStack_Pop();
     close(2);

@@ -1,6 +1,28 @@
 #include <external.h>
 #include <caneka.h>
 
+status Str_AddChain(MemCh *m, Str *s, void *args[]){
+    status r = READY;
+    Abstract **ptr = (Abstract **)args;
+    while(*ptr != NULL && (s->type.state & ERROR) == 0){
+        Abstract *a = (Abstract *)*ptr;
+        if(a->type.of == TYPE_STRVEC){
+            Str_AddVec(s, (StrVec *)a);
+            r |= SUCCESS;
+        }else if(a->type.of == TYPE_STR){
+            Str_Add(s, ((Str *)a)->bytes, ((Str *)a)->length); 
+            r |= SUCCESS;
+        }
+        ptr++;
+    }
+    
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r|s->type.state;
+}
+
 Str *Str_FromI64(MemCh *m, i64 i){
     Str *s = Str_Make(m, MAX_BASE10);
     Str_AddI64(s, i);

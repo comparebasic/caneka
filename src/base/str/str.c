@@ -22,6 +22,7 @@ status Str_Reset(Str *s){
 
 status Str_Wipe(Str *s){
     memset(s->bytes, 0, s->length);
+    s->length = 0;
     return SUCCESS;
 }
 

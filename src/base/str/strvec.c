@@ -3,14 +3,15 @@
 
 status StrVec_AddChain(StrVec *v, void *args[]){
     status r = READY;
-    Abstract *a = *args;
+    Abstract **ptr = (Abstract **)args;
     MemCh *m = v->p->m;
-    while(a != NULL){
+    while(*ptr != NULL){
+        Abstract *a = (Abstract *)*ptr;
         if(a->type.of == TYPE_STRVEC){
             StrVec_AddVec(v, (StrVec *)a);
         }else if(a->type.of == TYPE_STR){
             Str *s = (Str *)a;
-            if(s->type.state & STRING_COPY){
+            if(s->type.state & STRING_COPY && v->p->nvalues > 0){
                 Str *last = Span_Get(v->p, v->p->max_idx);
                 if(last->length + s->length < last->alloc){
                     Str_Add(last, s->bytes, s->length);
@@ -25,10 +26,10 @@ status StrVec_AddChain(StrVec *v, void *args[]){
                 }
             }else{
                 StrVec_Add(v, (Str *)a);
-                    r |= SUCCESS;
+                r |= SUCCESS;
             }
         }
-        a++;
+        ptr++;
     }
     
     if(r == READY){

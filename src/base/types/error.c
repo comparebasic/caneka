@@ -11,7 +11,9 @@ static void sigH(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
     }else{
-        write(0, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->fd > 0){
+            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        }
     }
     exit(1);
 }
@@ -21,7 +23,9 @@ static void sigQuit(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Quit", NULL);
     }else{
-        write(0, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->fd > 0){
+            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        }
     }
     exit(1);
 }
@@ -31,7 +35,9 @@ static void sigHup(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Hup", NULL);
     }else{
-        write(0, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->fd > 0){
+            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        }
     }
     exit(1);
 }
@@ -41,7 +47,9 @@ static void sigI(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Int", NULL);
     }else{
-        write(0, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->fd > 0){
+            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        }
     }
     exit(1);
 }
@@ -74,7 +82,7 @@ static void setSigs(){
 
 void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     if(_crashing){
-        char *cstr = "\n\x1b[1;31mFatal called after crashing\x1b[0m\n";
+        char *cstr = "\nFatal called after crashing\n";
         Buff_AddBytes(ErrStream, (byte *)cstr, strlen(cstr));
         exit(9);
         return;
@@ -86,19 +94,17 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
 #ifdef CLI 
     RawMode(FALSE);
 #endif
-    Buff_AddBytes(ErrStream, (byte *)"\n\x1b[22;31m", 9);
-    Buff_AddBytes(ErrStream, (byte *)"Error:\x1b[1m", 10);
+    Buff_AddBytes(ErrStream, (byte *)"Error:", 6);
     Buff_AddBytes(ErrStream, (byte *)func, strlen(func));
-    Buff_AddBytes(ErrStream, (byte *)"\x1b[22m:", 6);
+    Buff_AddBytes(ErrStream, (byte *)":", 1);
     Buff_AddBytes(ErrStream, (byte *)file, strlen(file));
     Buff_AddBytes(ErrStream, (byte *)":", 1);
     byte lineNo[MAX_BASE10+1];
     byte *b = lineNo;
     i64 length = Str_I64OnBytes(&b, line);
     Buff_AddBytes(ErrStream, (byte *)b, length);
-    Buff_AddBytes(ErrStream, (byte *)" \x1b[1m", 5);
+    Buff_AddBytes(ErrStream, (byte *)" ", 1);
     Fmt(ErrStream, fmt, args);
-    Buff_AddBytes(ErrStream, (byte *)"\x1b[0m", 4);
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();

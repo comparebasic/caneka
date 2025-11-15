@@ -12,7 +12,6 @@
 #include "./io/io_tos.c"
 #include "./io/procdets.c"
 #include "./io/subprocess.c"
-#include "./io/daemonize.c"
 #include "./io/stash_coord.c"
 #include "./io/stash_item.c"
 #include "./io/stash.c"

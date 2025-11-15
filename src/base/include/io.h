@@ -1,6 +1,5 @@
 #include "io/procdets.h"
 #include "io/subprocess.h"
-#include "io/daemonize.h"
 #include "io/buff.h"
 #include "io/file.h"
 #include "io/sock.h"
