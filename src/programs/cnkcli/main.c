@@ -16,6 +16,7 @@ i32 main(int argc, char **argv){
 
     Caneka_Init(m);
     Inter_Init(m);
+    Core_Direct(m, 1, 2);
     DebugStack_Push(NULL, 0);
 
     Table *resolveArgs = Table_Make(m);
@@ -30,6 +31,7 @@ i32 main(int argc, char **argv){
 
     Args_Add(resolveArgs, S(m, "out-file"), NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, S(m, "in-file"), NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, S(m, "no-color"), NULL, ARG_OPTIONAL);
 
     Args_Add(resolveArgs, S(m, "config"), NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, S(m, "reversed"), NULL, ARG_OPTIONAL);
@@ -55,15 +57,56 @@ i32 main(int argc, char **argv){
         return 1;
     }
 
+    if(Table_GetHashed(cliArgs, S(m, "no-color")) != NULL){
+        Ansi_SetColor(FALSE);
+    }
+
+    i32 code = 0;
+
     Str *config = Table_Get(cliArgs, K(m, "config"));
     if(config != NULL){
-        StrVec *path = IoAbsPath(m, config);
+        Str *path = IoUtil_GetAbsPath(m, config);
         NodeObj *config = Config_FromPath(m, path);
-        args[0] = config;
-        args[1] = NULL;
-        Out("^p.config @^0\n");
+
+        NodeObj *forever = Inst_ByPath(config, IoPath(m, "forever"), NULL, SPAN_OP_GET);
+        if(forever != NULL){
+            Table *atts = Seel_Get(forever, K(m, "atts"));
+            StrVec *logdir = Table_Get(atts, K(m, "logdir"));
+            StrVec *cmd = Table_Get(atts, K(m, "cmd"));
+            Path_SpaceAnnotate(m, cmd);
+
+            Span *cmdArgs = cmd->p;
+            Str *bin = IoUtil_GetAbsPath(m, Span_Get(cmd->p, 0));
+            StrVec *absBin = StrVec_From(m, bin);
+            IoUtil_Annotate(m, absBin);
+            Span_Set(cmdArgs, 0, StrVec_Str(m, absBin));
+
+            ProcDets pd;
+            args[0] = logdir;
+            args[1] = cmdArgs;
+            args[2] = NULL;
+            args[3] = NULL;
+            microTime last = MicroTime_Now();
+            boolean run = TRUE;
+            while(run){
+                args[2] = MicroTime_ToStr(m, MicroTime_Now());
+                Out("^c.Spawn: logdir=$ cmd=& time=$^0\n", args);
+                ProcDets_Init(&pd);
+                status r = SubProcess(m, cmdArgs, &pd);
+                if(r & ERROR){
+                    Out("^r.SubProcess returned error: logdir=$ cmd=@ time=$^0\n", args);
+                }
+
+                if((last - MicroTime_Now()) < (TIME_SEC / 2)){
+                    Out("^y.ReSpawn within throttle window, delaying:"
+                        " logdir=$ cmd=@ time=$^0\n", args);
+                    microTime remaining;
+                    Time_Delay(TIME_SEC, &remaining);
+                }
+            }
+        }
     }
 
     DebugStack_Pop();
-    return 0;
+    return code;
 }

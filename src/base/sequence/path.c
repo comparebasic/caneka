@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 static Span *dotPathSeps = NULL;
+static Span *spacePathSeps = NULL;
 
 status Path_AddSlash(MemCh *m, StrVec *path){
     Str *s = Span_Get(path->p, path->p->max_idx);
@@ -254,6 +255,10 @@ status Path_DotAnnotate(MemCh *m, StrVec *v){
     return Path_Annotate(m, v, dotPathSeps);
 }
 
+status Path_SpaceAnnotate(MemCh *m, StrVec *v){
+    return Path_Annotate(m, v, spacePathSeps);
+}
+
 status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     status r = READY;
 
@@ -334,6 +339,13 @@ status Path_Init(MemCh *m){
         MemCh_SetToBase(m);
         dotPathSeps = Span_Make(m);
         Span_Add(dotPathSeps, B_Wrapped(m, (byte)'.', ZERO, MORE));
+        MemCh_SetFromBase(m);
+        return SUCCESS;
+    }
+    if(spacePathSeps == NULL){
+        MemCh_SetToBase(m);
+        spacePathSeps = Span_Make(m);
+        Span_Add(spacePathSeps, B_Wrapped(m, (byte)' ', ZERO, MORE));
         MemCh_SetFromBase(m);
         return SUCCESS;
     }
