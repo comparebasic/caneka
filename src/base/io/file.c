@@ -5,7 +5,19 @@ status File_Unlink(MemCh *m, Str *path){
     return unlink(Str_Cstr(m, path)) == 0 ? SUCCESS : ERROR;
 }
 
-status File_Open(Buff *bf, Str *fpath, word ioFlags){
+status File_Open(Buff *bf, void *_fpath, word ioFlags){
+
+    Str *fpath = NULL;
+    if(((Abstract *)_fpath)->type.of == TYPE_STR){
+        fpath = (Str *)_fpath;
+    }else if(((Abstract *)_fpath)->type.of == TYPE_STRVEC){
+        fpath = (Str *)StrVec_Str(bf->m, (StrVec *)_fpath);
+    }
+
+    if(fpath == NULL){
+        return ERROR;
+    }
+
     void *args[3];
     char *cstr = Str_Cstr(bf->m, fpath);
     if((ioFlags & (O_TRUNC|O_RDONLY)) || (ioFlags & O_CREAT) == 0){
@@ -68,6 +80,9 @@ boolean File_Exists(Buff *bf, Str *path){
 
 StrVec *File_ToVec(MemCh *m, Str *path){
     Buff *bf = Buff_Make(m, BUFF_SLURP);
+    if(!File_Exists(bf, path)){
+        return NULL;
+    }
     File_Open(bf, path, O_RDONLY);
     Buff_Read(bf);
     if(path->type.state & DEBUG){

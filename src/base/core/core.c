@@ -9,17 +9,26 @@ word OUTCOME_FLAGS = (SUCCESS|NOOP|ERROR);
 Buff *OutStream = NULL;
 Buff *ErrStream = NULL;
 
-status Stream_Init(MemCh *m, i32 out, i32 err){
+status Core_Direct(MemCh *m, i32 out, i32 err){
+    status r = READY;
+    r |= Buff_SetFd(ErrStream, err);
+    r |= Buff_SetFd(OutStream, out);
+    ErrStream->type.state |= BUFF_UNBUFFERED;
+    OutStream->type.state |= BUFF_UNBUFFERED;
+    r |= Buff_Flush(ErrStream);
+    r |= Buff_Flush(OutStream);
+    return r;
+}
+
+status Core_Init(MemCh *m){
     status r = READY;
     if(OutStream == NULL){
-        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-        Buff_SetFd(bf, out);
+        Buff *bf = Buff_Make(m, ZERO);
         r |= SUCCESS;
         OutStream = bf;
     }
     if(ErrStream == NULL){
-        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-        Buff_SetFd(bf, err);
+        Buff *bf = Buff_Make(m, ZERO);
         r |= SUCCESS;
         ErrStream = bf;
     }

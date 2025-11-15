@@ -1,6 +1,43 @@
 #include <external.h>
 #include <caneka.h>
 
+status StrVec_AddChain(StrVec *v, void *args[]){
+    status r = READY;
+    Abstract *a = *args;
+    MemCh *m = v->p->m;
+    while(a != NULL){
+        if(a->type.of == TYPE_STRVEC){
+            StrVec_AddVec(v, (StrVec *)a);
+        }else if(a->type.of == TYPE_STR){
+            Str *s = (Str *)a;
+            if(s->type.state & STRING_COPY){
+                Str *last = Span_Get(v->p, v->p->max_idx);
+                if(last->length + s->length < last->alloc){
+                    Str_Add(last, s->bytes, s->length);
+                    r |= SUCCESS;
+                }else{
+                    Str *new = Str_Make(m, last->length+s->length+1);
+                    Str_Add(new, last->bytes, last->length);
+                    Str_Add(new, s->bytes, s->length);
+                    Span_Set(v->p, v->p->max_idx, new);
+                    v->total += s->length;
+                    r |= SUCCESS;
+                }
+            }else{
+                StrVec_Add(v, (Str *)a);
+                    r |= SUCCESS;
+            }
+        }
+        a++;
+    }
+    
+    if(r == READY){
+        r |= NOOP;
+    }
+
+    return r;
+}
+
 status StrVec_Decr(StrVec *v, i64 amount){
     if(amount > v->total){
         return ERROR;

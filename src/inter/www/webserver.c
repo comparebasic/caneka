@@ -159,9 +159,6 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
         HttpCtx_PrepareResponse(ctx, tsk);
 
-        printf("service 404.txt");
-        fflush(stdout);
-
         st->type.state |= (MORE|SUCCESS);
         DebugStack_Pop();
         return st->type.state;

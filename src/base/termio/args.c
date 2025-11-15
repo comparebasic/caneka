@@ -97,7 +97,6 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                 Str_Incr(s, 2);
                 void *arg = Table_Get(resolve, s);
                 if(arg != NULL){
-                    printf("arg found %s\n", s->bytes);
                     key = s;
                     rslv = arg;
                     Table_SetKey(&it, key);
@@ -110,13 +109,11 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                         "Unable to find resolve for arg @", args);
                 }
             }else if(it.metrics.selected != -1){
-                 printf("setting value %s\n", s->bytes);
                  Table_SetValue(&it, s);
                  key = NULL;
                  rslv = NULL;
                  r |= SUCCESS;
             }else{
-                printf("setting numbered %s\n", s->bytes);
                 if(it.metrics.selected == -1){
                     Table_SetKey(&it, I32_Wrapped(m, i));
                 }

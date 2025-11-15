@@ -10,10 +10,11 @@ static status InetExample_finalize(Step *_st, Task *tsk){
 static status InetExample_send(Step *st, Task *tsk){
     Buff *content = as(st->data, TYPE_BUFF);
     StrVec *expected = as(st->arg, TYPE_STRVEC);
+    MemCh *m = tsk->m;
 
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Buff *out = Buff_Make(m, BUFF_UNBUFFERED);
-    Buff_SetSocket(bf, pfd->fd);
+    Buff_SetSocket(out, pfd->fd);
     Buff_Pipe(out, content);
     if(content->unsent.total == 0){
         st->type.state |= SUCCESS;
@@ -25,10 +26,11 @@ static status InetExample_read(Step *st, Task *tsk){
     Buff *in = as(st->data, TYPE_BUFF);
     StrVec *expected = as(st->arg, TYPE_STRVEC);
     Buff_ReadAmount(in, 1024);
+    MemCh *m = tsk->m;
 
     if(Equals(in->v, expected)){
         Task_AddDataStep(tsk,
-            InetExample_send, Sv(m, "Ho!"), Buff_Make(m, BUFF_UNBUFFERED), NULL, ZERO);
+            InetExample_send, S(m, "Ho!"), Buff_Make(m, BUFF_UNBUFFERED), NULL, ZERO);
         TcpTask_ExpectSend(NULL, tsk);
         st->type.state |= SUCCESS;
     }
@@ -47,7 +49,7 @@ static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source)
     HttpTask_AddRecieve(tsk, NULL, NULL);
 
     Buff *bf = Buff_Make(m, ZERO);
-    Buff_Add(bf, Sv(m, "Hidy!"));
+    Buff_Add(bf, S(m, "Hidy!"));
 
     Task_AddDataStep(tsk, InetExample_read, Sv(m, "Hidy!"), bf, NULL, ZERO);
 
@@ -94,10 +96,11 @@ status Inet_Tests(MemCh *gm){
 
     util ip6[2] = {0, 0};
     TcpCtx *ctx = TcpCtx_Make(m);
-    ctx->port = port;
+    Task *srv = ServeTcp_Make(NULL);
+    ctx->port = 4000;
     ctx->populate = InetExample_populate;
     ctx->finalize = InetExample_finalize;
-    tsk->source = (Abstract *)ctx;
+    srv->source = (Abstract *)ctx;
     Task_Tumble(srv);
 
     /* add spawn tasks to spawn processes to hit the network server */

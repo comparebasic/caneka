@@ -508,6 +508,7 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
+    Core_Direct(m, 1, 2);
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
 
