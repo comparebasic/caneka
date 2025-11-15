@@ -6,6 +6,7 @@
 
 static Executable targets[] = {
     {"tests", "main.c"},
+    {"content-fetch", "conten-fetch.c"},
     {NULL, NULL},
 };
 
@@ -86,6 +87,7 @@ static BuildSubdir testsobj = { "tests", {
     "templ_tests.c",
     "time_tests.c",
     "nodeobj_tests.c",
+    "inet_tests.c",
     NULL
 }};
 

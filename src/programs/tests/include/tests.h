@@ -73,3 +73,4 @@ status TemplCtx_Tests(MemCh *gm);
 status Time_Tests(MemCh *gm);
 status StrVecSplit_Tests(MemCh *gm);
 status NodeObj_Tests(MemCh *gm);
+status Inet_Tests(MemCh *gm);

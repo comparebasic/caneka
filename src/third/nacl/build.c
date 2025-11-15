@@ -56,7 +56,6 @@ int main(int argc, char **argv){
     };
     MemCh *m = MemCh_Make();
     Caneka_InitBase(m);
-    Stream_Init(m, 1, 2);
     BuildCtx ctx;
     BuildCtx_Init(m, &ctx);
 

@@ -2,6 +2,7 @@
 #include "io/subprocess.h"
 #include "io/buff.h"
 #include "io/file.h"
+#include "io/sock.h"
 #include "io/dir.h"
 #include "io/ioutil.h"
 #include "io/stash_coord.h"

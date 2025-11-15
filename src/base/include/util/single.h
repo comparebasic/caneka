@@ -32,6 +32,7 @@ Single *I16_Wrapped(MemCh *m, i16 w);
 Single *Word_Wrapped(MemCh *m, word w);
 Single *I8_Wrapped(MemCh *m, i8 b);
 Single *B_Wrapped(MemCh *m, byte b, cls typeOf, word state);
+Single *U32_Wrapped(MemCh *m, quad n);
 Range *Range_Wrapped(MemCh *m, word r);
 #define Abs_FromPtrOfType(sg, t) ((sg) != NULL && \
     (sg)->type.of == TYPE_WRAPPED_PTR \

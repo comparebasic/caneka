@@ -69,6 +69,13 @@ Single *I32_Wrapped(MemCh *m, i32 n){
     return sgl;
 }
 
+Single *U32_Wrapped(MemCh *m, quad n){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_U32;
+    sgl->val.i = n;
+    return sgl;
+}
+
 Single *I64_Wrapped(MemCh *m, i64 n){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_I64;

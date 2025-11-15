@@ -101,6 +101,26 @@ static status WrappedI64_Print(Buff *bf, void *a, cls type, word flags){
     }
 }
 
+static status WrappedU32_Print(Buff *bf, void *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_U32);
+    Str *s = Str_FromI64(bf->m, (i64)sg->val.i);
+    if(flags & DEBUG){
+        void *args[] = {
+            s,
+            NULL
+        };
+        return Fmt(bf, "Wu32\\<^D.$^d.>", args);
+    }else if(flags & MORE){
+        void *args[] = {
+            s,
+            NULL
+        };
+        return Fmt(bf, "^D.$^d.", args);
+    }else{
+        return ToS(bf, s, 0, flags);
+    }
+}
+
 static status WrappedI32_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.i);
@@ -236,6 +256,7 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)WrappedI64_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I32, (void *)WrappedI32_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_U32, (void *)WrappedU32_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)WrappedI16_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I8, (void *)WrappedI8_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_BYTE, (void *)WrappedB_Print);

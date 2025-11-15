@@ -35,6 +35,21 @@ i64 Str_I64OnBytes(byte **_b, i64 i){
     return end - b;
 }
 
+i64 Str_AddIByte(Str *s, byte i){
+    byte _b[MAX_BASE10];
+    if(s->alloc < s->length+4){
+        s->type.state |= ERROR;
+        return 0;
+
+    }
+
+    byte *b = _b;
+    i64 n = i;
+    i64 length = Str_I64OnBytes(&b, n);
+    return Str_Add(s, b, length);
+}
+
+
 i64 Str_AddI64(Str *s, i64 i){
     byte _b[MAX_BASE10];
     if(s->alloc < s->length+MAX_BASE10){

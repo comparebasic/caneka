@@ -423,6 +423,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Inet Tests",
+        Inet_Tests,
+        "Inet address translation tests.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Www Tests",
         NULL,
         NULL,
@@ -491,18 +497,6 @@ TestSet *Tests = _soloTest;
 */
 
 i32 main(int argc, char **argv){
-    if(argc > 1){
-        for(int i = 1; i < argc; i++){
-            char *arg = argv[i];
-            if(strncmp(arg, "no-color", strlen("no-color")) == 0){
-                GLOBAL_flags |= NO_COLOR;
-            }
-            if(strncmp(arg, "html", strlen("html")) == 0){
-                GLOBAL_flags |= HTML_OUTPUT;
-            }
-        }
-    }
-
     MemBook *cp = MemBook_Make(NULL);
     if(cp == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
@@ -514,7 +508,6 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
-    Stream_Init(m, 1, 2);
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
 

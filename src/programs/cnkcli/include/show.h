@@ -1,1 +1,1 @@
-status BinSegCli_Show(MemCh *m, Object *data);
+status BinSegCli_Show(MemCh *m, Table *data);

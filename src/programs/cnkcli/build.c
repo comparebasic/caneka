@@ -5,7 +5,7 @@
 /* parameters */
 
 static Executable targets[] = {
-    {"cnk_cli", "main.c"},
+    {"cnkcli", "main.c"},
     {NULL, NULL},
 };
 
