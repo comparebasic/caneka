@@ -92,8 +92,7 @@
     border-radius: 8px;
     background: white;
     height: 80px;
-    position: absolute;
-    top: 30px;
-    right: 0;
+    display: block;
+    margin: 10px auto;
   }
 
