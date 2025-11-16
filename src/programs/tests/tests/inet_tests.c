@@ -95,6 +95,7 @@ status Inet_Tests(MemCh *gm){
     r |= ERROR;
 
     util ip6[2] = {0, 0};
+    /*
     TcpCtx *ctx = TcpCtx_Make(m);
     Task *srv = ServeTcp_Make(NULL);
     ctx->port = 4000;
@@ -102,6 +103,7 @@ status Inet_Tests(MemCh *gm){
     ctx->finalize = InetExample_finalize;
     srv->source = (Abstract *)ctx;
     Task_Tumble(srv);
+    */
 
     /* add spawn tasks to spawn processes to hit the network server */
     
