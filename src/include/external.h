@@ -13,6 +13,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/select.h>
 #include <poll.h>
 #include <unistd.h>
 #include <termios.h>

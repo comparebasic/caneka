@@ -36,7 +36,7 @@ static i32 openPortToFd(i32 port){
 		return -1;
     }
 
-	if(listen(fd, 10) != 0){
+	if(listen(fd, TCP_LISTEN_BACKLOG) != 0){
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd listening", NULL);
 		return -1;
@@ -77,7 +77,13 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     TcpCtx *ctx = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);;
-    i32 available = poll(pfd, 1, TCP_POLL_DELAY);
+
+    microTime timeout = 0;
+    if(q->it.p->nvalues == 0){
+        timeout = TCP_ZERO_REQ_DELAY;
+    }
+
+    i32 available = poll(pfd, 1, timeout);
     if(available == -1){
         args[0] = Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
@@ -172,9 +178,7 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
 Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, ctx);
     tsk->stepGuardMax = -1;
-    Task_AddStep(tsk,
-        Step_Delay, Util_Wrapped(tsk->m, 25), NULL, STEP_LOOP);
-    Task_AddStep(tsk, ServeTcp_AcceptPoll, ctx, NULL, ZERO);
+    Task_AddStep(tsk, ServeTcp_AcceptPoll, ctx, NULL, STEP_LOOP);
     Task_AddStep(tsk, ServeTcp_OpenTcp, ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_SetupQueue, ctx, NULL, ZERO);
     return tsk;

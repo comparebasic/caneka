@@ -11,13 +11,13 @@ gobits QueueCrit_Fds(QueueCrit *crit, util *values){
         u++;
     }
     struct pollfd *pfds = (struct pollfd *)values;
-    i32 ready = poll(pfds, SPAN_STRIDE, 1);
+    i32 ready = poll(pfds, SPAN_STRIDE, 0);
 
     word base = 1;
     for(i32 i = 0; i < SPAN_STRIDE && ready > 0; i++){
         struct pollfd *pfd = pfds+i;
 
-        if(poll(pfd, 1, 1) > 0){
+        if(poll(pfd, 1, 0) > 0){
             go |= (base << i);
             ready--;
         }

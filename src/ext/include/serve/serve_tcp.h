@@ -4,4 +4,7 @@
 #define TCP_POLL_DELAY 10
 #define ACCEPT_AT_ONEC_MAX 192
 
+#define TCP_LISTEN_BACKLOG 64
+#define TCP_ZERO_REQ_DELAY (60*TIME_SEC)
+
 Task *ServeTcp_Make(TcpCtx *ctx);
