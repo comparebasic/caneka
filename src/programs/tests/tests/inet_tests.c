@@ -92,10 +92,9 @@ status Inet_Tests(MemCh *gm){
     r |= Test(returnedIp4 == ip4,
         "From four sepeate bytes to quad matches, expected &, have &", args);
 
-    r |= ERROR;
 
-    util ip6[2] = {0, 0};
     /*
+    util ip6[2] = {0, 0};
     TcpCtx *ctx = TcpCtx_Make(m);
     Task *srv = ServeTcp_Make(NULL);
     ctx->port = 4000;
