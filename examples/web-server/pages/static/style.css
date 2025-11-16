@@ -7,8 +7,8 @@
     padding: 0 2rem;
     font-family: sans-serif;
     font-size: 1.2rem;
-    background: black;
-    color: rgb(255,230,230);
+    background: rgb(20, 0, 140);
+    color: rgb(255,255,230);
   }
 
   .clear {
@@ -46,7 +46,7 @@
   }
 
   a {
-    color: rgb(180,0,255);
+    color: rgb(200,230,0);
   }
 
   header a {
@@ -62,7 +62,8 @@
   nav li {
       list-style: none;
       display: inline-block;
-      margin-right: 3rem;
+      margin-right: 1.4rem;
+      font-size: 1rem;
   }
 
   nav li:hover {
@@ -70,20 +71,24 @@
   }
 
   section {
-     background: rgb(20,20,20);
      padding: 2rem;
      margin: 2rem 0;
      border-radius: 1rem;
+     border: 1px solid rgb(255,255,230);
   }
 
   footer {
     position: relative;
+    text-align: center;
   }
 
   footer img.logo {
+    padding: 8px;
+    border-radius: 8px;
+    background: white;
     height: 80px;
     position: absolute;
-    top: 0;
+    top: 30px;
     right: 0;
   }
 
