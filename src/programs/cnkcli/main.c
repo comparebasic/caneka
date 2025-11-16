@@ -72,29 +72,30 @@ i32 main(int argc, char **argv){
         if(forever != NULL){
             Table *atts = Seel_Get(forever, K(m, "atts"));
             StrVec *logdir = Table_Get(atts, K(m, "logdir"));
-            StrVec *cmd = Table_Get(atts, K(m, "cmd"));
-            Path_SpaceAnnotate(m, cmd);
 
-            Span *cmdArgs = cmd->p;
-            Str *bin = IoUtil_GetAbsPath(m, Span_Get(cmd->p, 0));
-            StrVec *absBin = StrVec_From(m, bin);
-            IoUtil_Annotate(m, absBin);
-            Span_Set(cmdArgs, 0, StrVec_Str(m, absBin));
+            StrVec *cmdV = Table_Get(atts, K(m, "cmd"));
+            Path_SpaceAnnotate(m, cmdV);
+            Span *cmd = IoUtil_AbsCmdArr(m, cmdV);
 
+            Single *codeSg = I32_Wrapped(m, 0);
             ProcDets pd;
             args[0] = logdir;
-            args[1] = cmdArgs;
-            args[2] = NULL;
-            args[3] = NULL;
-            microTime last = MicroTime_Now();
+            args[1] = cmd;
+            args[2] = MicroTime_ToStr(m, MicroTime_Now());
+            args[3] = codeSg;
+            args[4] = NULL;
+            Out("^c.Forever: logdir=$ cmd=@ time=$^0\n", args);
+
             boolean run = TRUE;
             while(run){
-                args[2] = MicroTime_ToStr(m, MicroTime_Now());
-                Out("^c.Spawn: logdir=$ cmd=& time=$^0\n", args);
+                microTime last = MicroTime_Now();
+                args[2] = MicroTime_ToStr(m, last);
+                Out("^c.Spawn: logdir=$ cmd=@ time=$^0\n", args);
                 ProcDets_Init(&pd);
-                status r = SubProcess(m, cmdArgs, &pd);
+                status r = SubProcess(m, cmd, &pd);
                 if(r & ERROR){
-                    Out("^r.SubProcess returned error: logdir=$ cmd=@ time=$^0\n", args);
+                    codeSg->val.i = pd.code;
+                    Out("^r.SubProcess returned error: logdir=$ cmd=@ time=$ return-code:$^0\n", args);
                 }
 
                 if((last - MicroTime_Now()) < (TIME_SEC / 2)){

@@ -15,3 +15,4 @@ status IoUtil_Add(MemCh *m, StrVec *path, StrVec *v);
 StrVec *IoAbsPath(MemCh *m, char *cstr);
 StrVec *IoPath(MemCh *m, char *cstr);
 StrVec *IoPath_From(MemCh *m, Str *s);
+Span *IoUtil_AbsCmdArr(MemCh *m, StrVec *v);

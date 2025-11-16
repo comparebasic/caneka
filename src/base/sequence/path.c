@@ -335,19 +335,24 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
 }
 
 status Path_Init(MemCh *m){
+    status r = READY;
     if(dotPathSeps == NULL){
         MemCh_SetToBase(m);
         dotPathSeps = Span_Make(m);
         Span_Add(dotPathSeps, B_Wrapped(m, (byte)'.', ZERO, MORE));
         MemCh_SetFromBase(m);
-        return SUCCESS;
+        r |= SUCCESS;
     }
     if(spacePathSeps == NULL){
         MemCh_SetToBase(m);
         spacePathSeps = Span_Make(m);
         Span_Add(spacePathSeps, B_Wrapped(m, (byte)' ', ZERO, MORE));
         MemCh_SetFromBase(m);
-        return SUCCESS;
+        r |= SUCCESS;
     }
-    return NOOP;
+
+    if(r == READY){
+        r |= NOOP;
+    }
+    return r;
 }

@@ -3,6 +3,24 @@
 
 static Span *pathSeps = NULL;
 
+Span *IoUtil_AbsCmdArr(MemCh *m, StrVec *v){
+    Span *p = Span_Make(m);
+
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if((s->type.state & (MORE|LAST)) == 0){
+            if(it.idx == 0){
+                Span_Add(p, IoUtil_GetAbsPath(m, s));
+            }else{
+                Span_Add(p, s);
+            }
+        }
+    }
+    return p;
+}
+
 StrVec *IoPath(MemCh *m, char *cstr){
     return IoPath_From(m, Str_FromCstr(m, cstr, STRING_COPY));
 }
