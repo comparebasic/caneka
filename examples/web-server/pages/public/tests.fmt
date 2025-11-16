@@ -1,0 +1,4 @@
+= Unit Tests
+
+run
+./build/bin/tests --dist && cp dist/output/tests.fmt examples/web-server/pages/public/tests.fmt
