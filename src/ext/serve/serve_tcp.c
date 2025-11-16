@@ -173,7 +173,7 @@ Task *ServeTcp_Make(TcpCtx *ctx){
     Task *tsk = Task_Make(NULL, ctx);
     tsk->stepGuardMax = -1;
     Task_AddStep(tsk,
-        Step_Delay, Util_Wrapped(tsk->m, 100), NULL, STEP_LOOP);
+        Step_Delay, Util_Wrapped(tsk->m, 25), NULL, STEP_LOOP);
     Task_AddStep(tsk, ServeTcp_AcceptPoll, ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_OpenTcp, ctx, NULL, ZERO);
     Task_AddStep(tsk, ServeTcp_SetupQueue, ctx, NULL, ZERO);
