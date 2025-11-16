@@ -6,7 +6,7 @@
 
 static Executable targets[] = {
     {"tests", "main.c"},
-    {"content-fetch", "conten-fetch.c"},
+    {"content-fetch", "content-fetch.c"},
     {NULL, NULL},
 };
 

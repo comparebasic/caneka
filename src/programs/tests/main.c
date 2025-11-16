@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 #include <tests.h>
+#include <tests_list.c>
 
 #ifdef MEMTEST
     #define MEM_MAX_TESTS
@@ -19,485 +20,10 @@ status Tests_Init(MemCh *m){
    return r;
 }
 
-static TestSet _Tests[] = {
-    {
-        "Basic Features",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
-        "Core",
-        Core_Tests,
-        "Initializing core system tests",
-        FEATURE_COMPLETE,
-    },
-    {
-        "MemCh Tests",
-        MemCh_Tests,
-        "Testing the underlying memory manager to ensure leaks have not occured in specific cases..",
-        FEATURE_COMPLETE,
-    },
-    {
-        "MemCh Level Tests",
-        MemChLevel_Tests,
-        "Testing adding a remove memory on levels of a Memory Chapter",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Span",
-        Span_Tests,
-        "Span is the basic data structure for sequential or logorithmic storage access.",
-        FEATURE_COMPLETE,
-    },
-#ifdef MEM_MAX_TESTS
-    {
-        "Span Max Tests",
-        SpanMax_Tests,
-        "Populate a span with the maximum amount of values to stress test it and the memory system.",
-        FEATURE_COMPLETE,
-    },
-#endif
-    {
-        "Iter",
-        Iter_Tests,
-        "Iter tests for iteration and insertion.",
-        FEATURE_COMPLETE,
-    },
-#ifdef MEM_MAX_TESTS
-    {
-        "IterMax",
-        IterMax_Tests,
-        "Iter tests for iteration over increasingly large sets",
-        FEATURE_COMPLETE,
-    },
-    {
-        "IterPrevRemove",
-        IterPrevRemove_Tests,
-        "Iter tests for previous removal over increasingly large sets.",
-        FEATURE_COMPLETE,
-    },
-#endif
-    {
-        "Str",
-        Str_Tests,
-        "Tests for the basic string object and convienience features",
-        FEATURE_COMPLETE,
-    },
-    {
-        "StrVec",
-        StrVec_Tests,
-        "Testing String Vectors",
-        FEATURE_COMPLETE,
-    },
-    {
-        "String - End Matches",
-        Str_EndMatchTests,
-        "Tests for Matching the end of the string",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Buff Tests",
-        Buff_Tests,
-        "Testing the buffer add functionality.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Buff Send/Recv Tests",
-        BuffSendRecv_Tests,
-        "Testing the buffer send and recv components.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Buff IO Tests",
-        BuffIo_Tests,
-        "Testing the buffer send and recv to disk/socket components.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Buff Position Tests",
-        BuffPos_Tests,
-        "Testing the buffer position features of seeking and moving around it.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Buff Stream Tests",
-        Stream_Tests,
-        "Testing setting up and running multiple stream types and stream chains",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Cursor Tests",
-        Cursor_Tests,
-        "Cursor tests for adding and navigation the position of a StrVec",
-        FEATURE_COMPLETE,
-    },
-    {
-        "DebugStack Tests",
-        DebugStack_Tests,
-        "Testing DebugStack crash debugging system",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Hash",
-        Hash_Tests,
-        "Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Table HKey Tests",
-        TableHKey_Tests,
-        "Testing table HKey component which determines the order of indicies to look for an item.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Table",
-        Table_Tests,
-        "Auto-scaling hash-table built on top of the Span object and Hash object.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "TableResize",
-        TableResize_Tests,
-        "Resize features of the auto-scaling hash-table.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "TableUtilKey",
-        TableUtilKey_Tests,
-        "Testing table with a util wrapped instead of string keys.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Clone",
-        Clone_Tests,
-        "Clone test of cloning basic types.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Time",
-        Time_Tests,
-        "Time tests for converstion between unix syscalls and microTime.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Object Tests",
-        Object_Tests,
-        "Object tests of ordered table of add/get.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Object Filter Tests",
-        ObjectFilter_Tests,
-        "Object filter tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Persistance Tests",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
-        "Path Tests",
-        Path_Tests,
-        "Testing path functions for file and object variable paths.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Stash Tests",
-        Stash_Tests,
-        "Mem Stash testing.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSeg Tests",
-        BinSeg_Tests,
-        "Transactional format encoding capable of representing stream, node, and database content.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSegCollection Tests",
-        BinSegCollection_Tests,
-        "Transactional format storing and reading collection and dictionary data types.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSegV Tests",
-        BinSegV_Tests,
-        "Transactional format only encoded in visible hex format characters.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSegReversedV Tests",
-        BinSegReversedV_Tests,
-        "Transactional format reversed and only encoded in visible hex format characters.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "FileDB Tests",
-        FileDB_Tests,
-        "FileD database built on BinSegRV tests of how to save and retrive data.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Roebling Parser",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
-        "Patter Character Tests",
-        PatChar_Tests,
-        "Making patterns from strings.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Match Tests",
-        Match_Tests,
-        "Matching various patterns.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Match Elastic Tests",
-        MatchElastic_Tests,
-        "Testing matches on ranges that have variable or elastic lengths.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Match Knockout Tests",
-        MatchKo_Tests,
-        "Testing knockout patterns in match definitions.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Match Replace Tests",
-        MatchReplace_Tests,
-        "Tests for Str replaces with Match",
-        FEATURE_COMPLETE,
-    },
-    {
-        "StrVecSplit via Match",
-        StrVecSplit_Tests,
-        "Testing String Vector Split function",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Snip Tests",
-        Snip_Tests,
-        "Snip tests for capturing a segment of a cursor",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Snip Modify Tests",
-        SnipModify_Tests,
-        "Snip tests for modifying an existing captur in progress",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Roebling Init Test",
-        Roebling_Tests,
-        "Roebling tests for adding and running a basic parser.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Roebling Run Tests",
-        RoeblingRun_Tests,
-        "Roebling basic run tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Roebling Mark Tests",
-        RoeblingMark_Tests,
-        "Roebling mark tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Roebling Start Stop Tests",
-        RoeblingStartStop_Tests,
-        "Roebling start and stop in the middle of recieving input tests.",
-        FEATURE_COMPLETE,
-    },
-    /*
-    {
-        "Relation Tests",
-        Relation_Tests,
-        "Tests for the relation structure.",
-        FEATURE_COMPLETE,
-    },
-    */
-    {
-        "Formats",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
-        "Mess Tests",
-        Mess_Tests,
-        "From a basic Fmt Roebling parser into the Mess data structures.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "FmtHtml Tests",
-        FmtHtml_Tests,
-        "Format FMT -> HTML tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "NodeObj Tests",
-        NodeObj_Tests,
-        "Node Object nested path tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Config Tests",
-        Config_Tests,
-        "Config tests that turn a basic configuration format into an object",
-        FEATURE_COMPLETE,
-    },
-    {
-        "TemplCtx Tests",
-        TemplCtx_Tests,
-        "TemplCtx tests of basic value templating.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Templ Tests",
-        Templ_Tests,
-        "Testing templating with a few variables.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Encoding Tests",
-        Encoding_Tests,
-        "Encoding tests for hex.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Task/Serve Tests",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
-        "Queue Tests",
-        Queue_Tests,
-        "Queue tests for file descriptors.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Queue Add Remove Tests",
-        QueueAddRemove_Tests,
-        "Queue tests for adding and removing items.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Queue Iter Tests",
-        QueueIter_Tests,
-        "Queue tests for iterating around a queue with additions and removals.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Queue Criteria Tests",
-        QueueCriteria_Tests,
-        "Queue tests for multi-critiria items (time/file descriptor).",
-        FEATURE_COMPLETE,
-    },
-    {
-        "TaskStep Tests",
-        TaskStep_Tests,
-        "Task/Step and Task_Tumble tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "ThirdParty/Api",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
-        "Crypto Tests",
-        Crypto_Tests,
-        "Cryptography functionality testing.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Inet Tests",
-        Inet_Tests,
-        "Inet address translation tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Www Tests",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
-        "Www Route Tests",
-        WwwRoute_Tests,
-        "Testing an object that gathers and caches routes for web servers.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Www Route Template Tests",
-        WwwRouteTempl_Tests,
-        "Example route templating test.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Www Path Tests",
-        WwwPath_Tests,
-        "Example route path templating test.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Www Route Mime Tests",
-        WwwRouteMime_Tests,
-        "Example route mime handling tests using Route_Handle.",
-        FEATURE_COMPLETE,
-    },
-    /*
-    {
-        "ServeTcp Tests",
-        ServeTcp_Tests,
-        "Queue tests for file descriptors and time delays.",
-        FEATURE_COMPLETE,
-    },
-    */
-    {
-        NULL,
-        NULL,
-        NULL,
-        0,
-    },
-};
-
-TestSet *Tests = _Tests;
-
-/*
-TestSet _soloTest[] = { 
-    {
-        "Stash Tests",
-        Stash_Tests,
-        "Mem Stash testing.",
-        FEATURE_COMPLETE,
-    },
-    {
-        NULL,
-        NULL,
-        NULL,
-        0
-    }
-
-};
-
-TestSet *Tests = _soloTest;
-*/
 
 i32 main(int argc, char **argv){
     MemBook *cp = MemBook_Make(NULL);
+    void *args[5];
     if(cp == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
     }
@@ -512,12 +38,14 @@ i32 main(int argc, char **argv){
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
 
-    Str *help = Str_FromCstr(m, "help", STRING_COPY);
-    Str *noColor = Str_FromCstr(m, "no-color", STRING_COPY);
+    Str *help = K(m, "help");
+    Str *noColor = K(m, "no-color");
+    Str *dist = K(m, "dist");
 
     Table *resolveArgs = Table_Make(m);
     Args_Add(resolveArgs, help, NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, noColor, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, dist, NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs,
         Str_FromCstr(m, "licence", STRING_COPY), NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs,
@@ -538,7 +66,36 @@ i32 main(int argc, char **argv){
         Ansi_SetColor(FALSE);
     }
 
+    Buff *bf = Buff_Make(m, ZERO);
+    Str *path = Str_Make(m, STR_DEFAULT);
+    if(Table_GetHashed(cliArgs, dist) != NULL){
+        Ansi_SetColor(FALSE);
+        Str *dir = IoUtil_GetAbsPath(m, S(m, "dist/output"));
+        Dir_CheckCreate(m, dir);
+
+        args[0] = dir;
+        args[1] = S(m, "/tests.fmt");
+        args[2] = NULL;
+        Str_AddChain(m, path, args);
+
+        bf->type.state |= BUFF_CLOBBER;
+        File_Open(bf, path, O_WRONLY|O_CREAT|O_TRUNC);
+        i32 outFd = 1;
+        if(bf->fd > 0){
+            outFd = bf->fd;
+        }
+        Core_Direct(m, outFd, 2);
+    }
+
     test(m);
+
+    if(Table_GetHashed(cliArgs, dist) != NULL){
+        File_Close(bf);
+        Core_Direct(m, 1, 2);
+        args[0] = path;
+        args[1] = NULL;
+        Out("Tests run and output to $\n", args);
+    }
 
     DebugStack_Pop();
     return 0;

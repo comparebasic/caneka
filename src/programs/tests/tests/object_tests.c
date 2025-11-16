@@ -24,10 +24,8 @@ static status filterFunc(MemCh *m, void *obj, void *crit){
     Single *sg = (Single *)Table_Get((Table *)obj, crit);
     void *args[] = {sg, NULL};
     if(sg != NULL && sg->val.i > 5){
-        Out("^c.filter YES: crit:@^0\n", args);
         return SUCCESS;
     }
-    Out("^c.filter NO: crit:@^0\n", args);
     return NOOP; 
 }
 
@@ -83,10 +81,6 @@ status ObjectFilter_Tests(MemCh *gm){
     suObj = Table_Make(m);
     Table_Set(suObj, key, I32_Wrapped(m, 9));
     Table_ByPath(obj, path, suObj, SPAN_OP_SET);
-
-    args[0] = obj;
-    args[1] = NULL;
-    Out("^p.Object &^0\n", args);
 
     r |= SUCCESS;
 

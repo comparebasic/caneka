@@ -87,13 +87,10 @@ status BinSegCollection_Tests(MemCh *gm){
     Cursor *curs = Cursor_Make(m, content); 
     Roebling *rbl = NULL;
     rbl = FormatFmt_Make(m, curs, NULL);
-    rbl->dest->type.state |= DEBUG;
     Roebling_Run(rbl);
 
-    args[0] = rbl;
-    args[1] = NULL;
     r |= Test((rbl->type.state & ERROR) == 0,
-        "Object Fmt parsed with status without ERROR @", args);
+        "Object Fmt parsed with status without ERROR", NULL);
 
     ctx->keys = Table_Make(m);
     Str *key1 = Str_CstrRef(m, "list");

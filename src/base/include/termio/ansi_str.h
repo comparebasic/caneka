@@ -12,3 +12,4 @@ Str *Str_AnsiCstr(MemCh *m, char *cstr);
 Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume);
 status AnsiStr_Init(MemCh *m);
 status Ansi_SetColor(boolean yesno);
+boolean Ansi_HasColor();

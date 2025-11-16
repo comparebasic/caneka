@@ -26,20 +26,20 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
-    Stream_Init(m, 1, 2);
+    Core_Direct(m, 1, 2);
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
 
-    Str *helpKey = S(m, "help");
-    Str *noColorKey = S(m, "no-color");
-    Str *sha256Key = S(m, "Sha256");
-    Str *urlKey = S(m, "Sha256");
+    Str *helpKey = K(m, "help");
+    Str *noColorKey = K(m, "no-color");
+    Str *sha256Key = K(m, "Sha256");
+    Str *urlKey = K(m, "Sha256");
 
     Table *resolveArgs = Table_Make(m);
     Args_Add(resolveArgs, helpKey, NULL, ARG_OPTIONAL);
     Args_Add(resolveArgs, noColorKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, sha256Key, ARG_OPTIONAL);
-    Args_Add(resolveArgs, sha256Key, ARG_OPTIONAL);
+    Args_Add(resolveArgs, sha256Key, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, sha256Key, NULL, ARG_OPTIONAL);
 
     StrVec *name = StrVec_From(m, S(m, argv[0]));
     IoUtil_Annotate(m, name);
@@ -47,12 +47,12 @@ i32 main(int argc, char **argv){
 
     Table *cliArgs = Table_Make(m);
     CharPtr_ToTbl(m, resolveArgs, argc, argv, cliArgs);
-    if(Table_GetHashed(cliArgs, help) != NULL){
+    if(Table_GetHashed(cliArgs, helpKey) != NULL){
         CharPtr_ToHelp(m, fname, resolveArgs, argc, argv);
         return 1;
     }
 
-    if(Table_GetHashed(cliArgs, noColor) != NULL){
+    if(Table_GetHashed(cliArgs, noColorKey) != NULL){
         Ansi_SetColor(FALSE);
     }
 

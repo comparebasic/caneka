@@ -21,11 +21,8 @@ status Buff_Tests(MemCh *gm){
     Str *expected = Str_CstrRef(m, "Hi, hows the weather, is it cold?"
         " and StOrMy, Mwahahahahaha!");
 
-    args[0] = expected;
-    args[1] = bf->v;
-    args[2] = NULL;
     r |= Test(Equals(bf->v, expected),
-        "Content is expected in StrVec of Buff, expected @, have @", args);
+        "Content is expected in StrVec of Buff", NULL);
 
     char *longStr = "\nThe weather is under my control now... MY CONTROL. "
     "and just to make it super clear what that means I'm going to repeat myself"
@@ -62,11 +59,8 @@ status Buff_Tests(MemCh *gm){
     StrVec *expectedVec = StrVec_From(m, expected);
     StrVec_Add(expectedVec, Str_CstrRef(m, longStr));
 
-    args[0] = expectedVec;
-    args[1] = bf->v;
-    args[2] = NULL;
     r |= Test(Equals(bf->v, expectedVec),
-        "Content with a long additional is expected in StrVec of Buff, expected &, have &", args);
+        "Content with a long additional is expected in StrVec of Buff", NULL);
 
     MemCh_Free(m);
     DebugStack_Pop();
@@ -103,11 +97,8 @@ status BuffSendRecv_Tests(MemCh *gm){
     StrVec *expectedVec = StrVec_From(m, s);
     StrVec_AddVec(expectedVec, v);
 
-    args[0] = expectedVec;
-    args[1] = bf->v;
-    args[2] = NULL;
     r |= Test(Equals(bf->v, expectedVec),
-        "Content with a long additional is expected in StrVec of Buff, expected &, have &", args);
+        "Content with a long additional is expected in StrVec of Buff", args);
 
     StrVec *content = StrVec_Make(m);
     Str *shelf = Str_Make(m, 128);
@@ -120,12 +111,8 @@ status BuffSendRecv_Tests(MemCh *gm){
         }
     }
 
-    bf->v->type.state |= DEBUG;
-    args[0] = bf->v;
-    args[1] = content;
-    args[2] = NULL;
     r |= Test(Equals(bf->v, expectedVec),
-        "Buff_GetStr has populated an equal StrVec, buff &, content &", args);
+        "Buff_GetStr has populated an equal StrVec", args);
 
     MemCh_Free(m);
     DebugStack_Pop();

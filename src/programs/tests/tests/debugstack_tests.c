@@ -17,13 +17,7 @@ status DebugStack_Tests(MemCh *gm){
 
     i64 total = bf->v->total;
     i64 totalAfter = bfAfter->v->total;
-    void *args[] = {
-        bf->v,
-        bfAfter->v,
-        NULL
-    };
-    r |= Test(total > totalAfter, 
-        "Stack printout has less characters than before, stack: @\nstackAfter: @\n", args); 
+    r |= Test(total > totalAfter, "Stack printout has less characters than before", NULL); 
     MemCh_Free(m);
     DebugStack_Pop();
     return r;

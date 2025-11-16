@@ -11,12 +11,6 @@ static status Example_log(Step *_st, Task *tsk){
         NULL,
     };
 
-    if(tsk->type.state & ERROR){
-        Out("^r.Error $ @ $^0\n", args);
-    }else{
-        Out("^g.Served $ @ $^0\n", args);
-    }
-
     return SUCCESS;
 }
 

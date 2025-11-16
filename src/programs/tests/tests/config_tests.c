@@ -50,12 +50,11 @@ status Config_Tests(MemCh *gm){
         Abstract *key = *ap;
         Abstract *expected = *(ap+1);
         Abstract *value = NodeObj_Att(doc, key);
-        args[0] = docKey;
+        args[0] = doc;
         args[1] = key;
         args[2] = expected;
         args[3] = value;
         args[4] = NULL;
-        Out("^y.Comparing @/@/@/@^0\n", args);
         r |= Test(Equals(expected, value),
             "NodeObj @ att @ has expected value @: @", args);
     }

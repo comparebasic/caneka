@@ -149,7 +149,7 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     }else{
         Out("^r", NULL);
     }
-    Out("Suite $ pass:$ fail:$^0\n", args);
+    Out("Suite $ pass($) fail($)^0\n", args);
 
     DebugStack_Pop();
     return !fail ? SUCCESS : ERROR;

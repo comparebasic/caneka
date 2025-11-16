@@ -48,14 +48,6 @@ status FmtHtml_Tests(MemCh *gm){
     s = Str_CstrRef(m, expectedCstr);
     s->type.state |= DEBUG;
     boolean matches = Equals(s, bf->v);
-    if(!matches){
-        void *args[] = {
-            s,
-            bf->v,
-            NULL
-        };
-        Out("^r.Mismatch:\n  Expected:&\n  Actual: ^E.&^0.", args);
-    }
     r |= Test(matches, 
         "Fmt to HTML has expected html content", NULL);
 

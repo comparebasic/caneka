@@ -82,8 +82,14 @@ static void setSigs(){
 
 void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     if(_crashing){
+        if(Ansi_HasColor()){
+            Buff_AddBytes(ErrStream, (byte *)"\x1b[2;31m", 5);
+        }
         char *cstr = "\nFatal called after crashing\n";
         Buff_AddBytes(ErrStream, (byte *)cstr, strlen(cstr));
+        if(Ansi_HasColor()){
+            Buff_AddBytes(ErrStream, (byte *)"\x1b[0m", 4);
+        }
         exit(9);
         return;
     }
@@ -94,7 +100,11 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
 #ifdef CLI 
     RawMode(FALSE);
 #endif
-    Buff_AddBytes(ErrStream, (byte *)"Error:", 6);
+    Buff_AddBytes(ErrStream, (byte *)"Error", 5);
+    if(Ansi_HasColor()){
+        Buff_AddBytes(ErrStream, (byte *)"\x1b[22m", 5);
+    }
+    Buff_AddBytes(ErrStream, (byte *)":", 1);
     Buff_AddBytes(ErrStream, (byte *)func, strlen(func));
     Buff_AddBytes(ErrStream, (byte *)":", 1);
     Buff_AddBytes(ErrStream, (byte *)file, strlen(file));
@@ -118,6 +128,9 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     }
 #endif
     Buff_AddBytes(ErrStream, (byte *)"\n", 1);
+    if(Ansi_HasColor()){
+        Buff_AddBytes(ErrStream, (byte *)"\x1b[0m", 4);
+    }
     DebugStack_Print(ErrStream, MORE);
     exit(13);
 }

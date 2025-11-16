@@ -108,14 +108,19 @@ status StrVec_Tests(MemCh *gm){
     
     Fmt(bf, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $", args3);
 
-    s = Str_CstrRef(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time' '\"\x1b[1mafterwards\x1b[22m\"' \"\x1b[1mfour\x1b[22m\" Str<DEBUG 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!");
+    if(Ansi_HasColor()){
+        s = Str_FromCstr(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time'"
+            " '\"\x1b[1mafterwards\x1b[22m\"' \"\x1b[1mfour\x1b[22m\" Str<DEBUG"
+            " 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!",
+            ZERO);
 
-    args[0] = s;
-    args[1] = bf->v;
-    args[2] = NULL;
-    s->type.state |= DEBUG;
-    r |= Test(Equals(bf->v, s),
-        "Testing StrVec and StrVec from Fmt via Buff expected:\n$\nhave:\n$", args);
+        s->type.state |= DEBUG;
+        void *args[] = {
+            s, bf->v, NULL
+        };
+        r |= Test(Equals(bf->v, s),
+            "Testing StrVec and StrVec from Fmt via Buff expected:$, have:$", args);
+    }
 
     MemCh_Free(m);
 

@@ -17,6 +17,10 @@ status Ansi_SetColor(boolean yesno){
     return SUCCESS;
 }
 
+boolean Ansi_HasColor(){
+    return !_AnsiSkip;
+}
+
 Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
     char *ptr = *_ptr;
     char c;
