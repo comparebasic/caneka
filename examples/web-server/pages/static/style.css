@@ -59,6 +59,10 @@
     color: rgb(220,0,255);
   }
 
+  nav {
+    padding: 10px 0;
+  }
+
   nav ul {
     margin: 0;
     padding: 0;
