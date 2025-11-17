@@ -110,8 +110,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
             tm->owner = child;
-            ctx->populate(tm,
-                child, I32_Wrapped(tm, new_fd), tsk->source);
+            ctx->populate(tm, child, I32_Wrapped(tm, new_fd), tsk->source);
 
             if(tsk->type.state & DEBUG){
                 args[0] = child;
@@ -121,7 +120,21 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             }
 
             child->idx = Queue_Add(q, child);
-            Queue_SetCriteria(q, 0, child->idx, &child->u);
+            if(child->type.state & TASK_UPDATE_CRIT){
+                Queue_SetCriteria(q, 0, child->idx, &child->u);
+                child->type.state &= ~TASK_UPDATE_CRIT;
+            }else{
+                printf("no update requiested");
+                fflush(stdout);
+                exit(1);
+            }
+
+            struct pollfd *pfd = (struct pollfd *)Queue_GetCriteria(q, 0, tsk->idx);
+            if(pfd->fd == -1){
+                printf("negavie -1 in criteria\n");
+                fflush(stdout);
+                exit(1);
+            }
 
             accepted++;
             r |= tsk->type.state;

@@ -23,6 +23,7 @@ status Queue_Set(Queue *q, i32 idx, void *a);
 i32 Queue_Add(Queue *q, void *a);
 status Queue_Remove(Queue *q, i32 idx);
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value);
+util Queue_GetCriteria(Queue *q, i32 critIdx, i32 idx);
 status Queue_Next(Queue *q);
 i32 Queue_AddHandler(Queue *q, struct queue_crit *crit);
 Queue *Queue_Make(MemCh *m);

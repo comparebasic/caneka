@@ -67,6 +67,17 @@ status Queue_Set(Queue *q, i32 idx, void *a){
     return r;
 }
 
+util Queue_GetCriteria(Queue *q, i32 critIdx, i32 idx){
+    Iter it;
+    Iter_Init(&it, q->handlers);
+    i32 slabIdx = idx / CRIT_SLAB_STRIDE;
+    QueueCrit *crit = (QueueCrit *)Span_Get(q->handlers, critIdx);
+    util *slab = (util *)Span_Get(crit->data, slabIdx);
+    i32 localIdx = idx-(slabIdx*CRIT_SLAB_STRIDE);
+    printf("local idx %d\n", localIdx);
+    return slab[localIdx];
+}
+
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     status r = READY;
     void *args[4];

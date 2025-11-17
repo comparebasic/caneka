@@ -107,20 +107,20 @@ static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
     QueueCrit *crit = (QueueCrit *)as(a, TYPE_QUEUE_CRIT);
     void *args[2];
     if(flags & MORE){
-        Span *p = Span_Make(bf->m);
+        Table *tbl = Table_Make(bf->m);
         Iter it;   
         Iter_Init(&it, crit->data);
         while((Iter_Next(&it) & END) == 0){
             util *slab = (util *)Iter_Get(&it);
-            for(i32 i = 0; i < SPAN_STRIDE; i++){
+            for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
                if(slab[i] != -1 && slab[i] != 0){
                     struct pollfd *pfd = (struct pollfd *)slab+i;
-                    Span_Add(p, I64_Wrapped(bf->m, pfd->fd));
+                    Table_Set(tbl, I64_Wrapped(bf->m, it.idx *CRIT_SLAB_STRIDE + i), I64_Wrapped(bf->m, pfd->fd));
                }
             }
         }
         
-        args[0] = p;
+        args[0] = Table_Ordered(bf->m, tbl);
         args[1] = NULL;
         return Fmt(bf, "QueueCrit<@>", args);
     }else{
@@ -140,9 +140,10 @@ static status Queue_Print(Buff *bf, void *a, cls type, word flags){
     if(flags & DEBUG){
         args[0] = &q->it;
         args[1] = q->handlers;
-        args[2] = &q->availableIt;
+        args[2] = q->it.p;
+        args[3] = &q->availableIt;
         args[3] = NULL;
-        r |= Fmt(bf, " @ criteria:@ available:p>", args);
+        r |= Fmt(bf, " @ criteria:@ items:& available:@>", args);
     }else{
         args[0] = I32_Wrapped(bf->m, q->it.p->nvalues);
         args[1] = NULL;

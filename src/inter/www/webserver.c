@@ -240,7 +240,9 @@ Task *WebServer_Make(i32 port, quad ip4, util *ip6){
 
     Task *tsk = ServeTcp_Make(NULL);
     tsk->source = (Abstract *)tcpCtx_Make(tsk->m, port, ip4, ip6);
+    /*
     setErrorHandler(tsk->m, tsk);
+    */
 
     DebugStack_Pop();
     return tsk;

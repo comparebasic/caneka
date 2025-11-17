@@ -60,6 +60,15 @@ status Task_Tumble(Task *tsk){
             ran = TRUE;
         }
 
+        if(tsk->type.state & TASK_UPDATE_CRIT){
+            if(tsk->parent != NULL){
+                printf("updating crit for %d\n", tsk->idx);
+                fflush(stdout);
+                Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
+            }
+            tsk->type.state &= ~TASK_UPDATE_CRIT;
+        }
+
         if(((r & MORE) == 0)){
             if(st->type.state & SUCCESS){
                 Iter_Remove(&tsk->chainIt);
@@ -81,12 +90,6 @@ status Task_Tumble(Task *tsk){
             }
         }
 
-        if(tsk->type.state & TASK_UPDATE_CRIT){
-            if(tsk->parent != NULL){
-                Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
-            }
-            tsk->type.state &= ~TASK_UPDATE_CRIT;
-        }
 
         if((tsk->type.state & (MORE|TASK_CHILD)) == MORE){
             Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);

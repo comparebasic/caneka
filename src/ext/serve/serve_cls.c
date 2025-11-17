@@ -32,7 +32,7 @@ static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
     Task *tsk = (Task *)as(a, TYPE_TCP_TASK);
     void *args[8];
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    args[0] = Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
+    args[0] = Type_StateVec(bf->m, TYPE_TASK, tsk->type.state);
     args[1] = I32_Wrapped(bf->m, pfd->fd);
     args[2] = getPollFlagVec(bf->m, pfd);
     args[3] = I32_Wrapped(bf->m, tsk->chainIt.idx);
@@ -42,7 +42,7 @@ static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
     args[7] = NULL;
     if(flags & DEBUG){
         args[5] = tsk->data;
-        return Fmt(bf, "TcpTask<@ fd$ @ $ of $ \\@& data:@>", args);
+        return Fmt(bf, "TcpTask<@ fd$ @ $of$ \\@& data:@>", args);
     }else{
         args[3] = tsk->data;
         args[4] = NULL;
