@@ -1,6 +1,20 @@
 #include <external.h>
 #include <caneka.h>
 
+static StrVec *getPollFlagVec(MemCh *m, struct pollfd *pfd){
+    StrVec *v = StrVec_Make(m);
+    if(pfd->events & POLLIN){
+        StrVec_Add(v, S(m, "IN"));
+    }
+    if(pfd->events & POLLOUT){
+        StrVec_Add(v, S(m, "OUT"));
+    }
+    if(poll(pfd, 1, 0)){
+        StrVec_Add(v, S(m, "ACTIVE"));
+    }
+    return v;
+}
+
 static i64 ProtoCtx_Print(Buff *bf, void *a, cls type, word flags){
     ProtoCtx *ctx = (ProtoCtx*)as(a, TYPE_PROTO_CTX);
     void *args[] = {
@@ -20,7 +34,7 @@ static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     args[0] = Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
     args[1] = I32_Wrapped(bf->m, pfd->fd);
-    args[2] = I32_Wrapped(bf->m, poll(pfd, 1, 0));
+    args[2] = getPollFlagVec(bf->m, pfd);
     args[3] = I32_Wrapped(bf->m, tsk->chainIt.idx);
     args[4] = I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
     args[5] = Iter_Get(&tsk->chainIt);
@@ -28,11 +42,11 @@ static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
     args[7] = NULL;
     if(flags & DEBUG){
         args[5] = tsk->data;
-        return Fmt(bf, "TcpTask<@ fd$ poll$ $ of $ \\@& data:@>", args);
+        return Fmt(bf, "TcpTask<@ fd$ @ $ of $ \\@& data:@>", args);
     }else{
         args[3] = tsk->data;
         args[4] = NULL;
-        return Fmt(bf, "TcpTask<@ fd$ poll$ @>", args);
+        return Fmt(bf, "TcpTask<@ fd$ @ @>", args);
     }
 }
 

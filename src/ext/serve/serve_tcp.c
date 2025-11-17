@@ -130,9 +130,9 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         }
     }
 
-    tsk->type.state |= NOOP;
+    tsk->type.state |= (NOOP|PROCESSING);
     while((Queue_Next(q) & END) == 0){
-        tsk->type.state &= ~NOOP;
+        tsk->type.state &= ~(NOOP|PROCESSING);
         if(tsk->type.state & DEBUG){
             args[0] = q;
             args[1] = NULL;

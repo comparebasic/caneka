@@ -160,6 +160,9 @@ status Queue_Next(Queue *q){
                         }
                     }
                 }
+                if(q->go == 0){
+                    printf("looked for go %d slabIdx %d\n", q->go, q->slabIdx);
+                }
             }
         }else{
             q->go = 65535; 

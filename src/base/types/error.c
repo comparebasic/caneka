@@ -62,7 +62,7 @@ static void sigI(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         if(ErrA != NULL){
             void *args[] = {ErrA, NULL};
-            Fmt(ErrStream, "^r.ErrA: @^0\n", args);
+            Fmt(ErrStream, "^r.ErrA: &^0\n", args);
         }
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Int", NULL);
     }else{

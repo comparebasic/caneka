@@ -104,11 +104,29 @@ static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
-   QueueCrit *crit = (QueueCrit *)as(a, TYPE_QUEUE_CRIT);
-   void *args[] = {
-        NULL
-   };
-   return Fmt(bf, "QueueCrit<>", args);
+    QueueCrit *crit = (QueueCrit *)as(a, TYPE_QUEUE_CRIT);
+    void *args[2];
+    if(flags & MORE){
+        Span *p = Span_Make(bf->m);
+        Iter it;   
+        Iter_Init(&it, crit->data);
+        while((Iter_Next(&it) & END) == 0){
+            util *slab = (util *)Iter_Get(&it);
+            for(i32 i = 0; i < SPAN_STRIDE; i++){
+               if(slab[i] != -1 && slab[i] != 0){
+                    struct pollfd *pfd = (struct pollfd *)slab+i;
+                    Span_Add(p, I64_Wrapped(bf->m, pfd->fd));
+               }
+            }
+        }
+        
+        args[0] = p;
+        args[1] = NULL;
+        return Fmt(bf, "QueueCrit<@>", args);
+    }else{
+        args[0] = NULL;
+        return Fmt(bf, "QueueCrit<>", args);
+    }
 }
 
 static status Queue_Print(Buff *bf, void *a, cls type, word flags){
