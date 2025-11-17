@@ -40,7 +40,7 @@ static status WebServer_logAndClose(Step *_st, Task *tsk){
 
 static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
-
+    
     MemCh *m = tsk->m; 
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);

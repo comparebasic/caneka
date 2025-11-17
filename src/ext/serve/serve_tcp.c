@@ -121,6 +121,12 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             child->idx = Queue_Add(q, child);
             if(child->type.state & TASK_UPDATE_CRIT){
+                
+                struct pollfd *pfd = (struct pollfd *)&child->u;
+                
+                printf("setting criteria for %d\n", pfd->fd);
+                fflush(stdout);
+
                 Queue_SetCriteria(q, 0, child->idx, &child->u);
                 child->type.state &= ~TASK_UPDATE_CRIT;
             }else{
@@ -129,9 +135,10 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
                 exit(1);
             }
 
-            struct pollfd *pfd = (struct pollfd *)Queue_GetCriteria(q, 0, tsk->idx);
+            util upfd = Queue_GetCriteria(q, 0, child->idx);
+            struct pollfd *pfd = (struct pollfd *)&upfd;
             if(pfd->fd == -1){
-                printf("negavie -1 in criteria\n");
+                printf("pfd negative or negavie -1 in criteria\n");
                 fflush(stdout);
                 exit(1);
             }

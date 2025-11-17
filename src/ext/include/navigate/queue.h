@@ -3,12 +3,12 @@ enum queue_flags {
     QUEUE_REVERSE = 1 << 15, /* FLAG_ITER_REVERSE */
 };
 
-typedef word gobits;
+typedef util gobits;
 
 typedef struct queue {
     Type type;
     word _;
-    word go;
+    gobits go;
     i32 slabIdx;
     Abstract *value;
     Iter it;

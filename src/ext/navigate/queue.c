@@ -57,7 +57,6 @@ i32 Queue_Add(Queue *q, void *a){
 
 status Queue_Set(Queue *q, i32 idx, void *a){
     q->type.state &= ~(FLAG_ITER_REVERSE|END);
-
     status r = READY;
     Iter it;
     Iter_Init(&it, q->it.p);
@@ -73,8 +72,8 @@ util Queue_GetCriteria(Queue *q, i32 critIdx, i32 idx){
     i32 slabIdx = idx / CRIT_SLAB_STRIDE;
     QueueCrit *crit = (QueueCrit *)Span_Get(q->handlers, critIdx);
     util *slab = (util *)Span_Get(crit->data, slabIdx);
-    i32 localIdx = idx-(slabIdx*CRIT_SLAB_STRIDE);
-    printf("local idx %d\n", localIdx);
+    i32 localIdx = idx & CRIT_SLAB_MASK;
+    printf("Get criteria to slabIdx%d localIdx %d\n", slabIdx, localIdx);
     return slab[localIdx];
 }
 
@@ -82,16 +81,8 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
     status r = READY;
     void *args[4];
     MemCh *m = q->it.p->m;
-    if(q->type.state & DEBUG){
-        args[0] = I32_Wrapped(m, idx);
-        args[1] = Str_Ref(m, 
-            (byte *)value, sizeof(util), sizeof(util), STRING_BINARY);
-        args[2] = q;
-        args[3] = NULL;
-        Out("^p.Queue_SetCriteria \\@$/@ @\n", args);
-    }
     i32 slabIdx = idx / CRIT_SLAB_STRIDE;
-    void *slab = NULL;
+    util *slab = NULL;
     QueueCrit *crit = Span_Get(q->handlers, critIdx);
     if(crit == NULL){
         args[0] = I32_Wrapped(ErrStream->m, critIdx);
@@ -101,13 +92,13 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
         return ERROR;
     }
     if((slab = Span_Get(crit->data, slabIdx)) == NULL){
-        slab = 
-            (void *)Bytes_Alloc(m, sizeof(util)*CRIT_SLAB_STRIDE, TYPE_BYTES_POINTER);
+        slab = (util *)Bytes_Alloc(m,
+            sizeof(util)*CRIT_SLAB_STRIDE, TYPE_BYTES_POINTER);
         r |= Span_Set(crit->data, slabIdx, slab);
     } 
-    i32 localIdx = idx-(slabIdx*CRIT_SLAB_STRIDE);
-    util *uslab = (util *)slab;
-    uslab[localIdx] = *((util *)value);
+    i32 localIdx = idx & CRIT_SLAB_MASK;
+    printf("Set criteria to slabIdx%d localIdx %d\n", slabIdx, localIdx);
+    slab[localIdx] = *((util *)value);
     r |= SUCCESS;
     return r;
 }
@@ -172,7 +163,7 @@ status Queue_Next(Queue *q){
                     }
                 }
                 if(q->go == 0){
-                    printf("looked for go %d slabIdx %d\n", q->go, q->slabIdx);
+                    printf("looked for go %ld slabIdx %d\n", q->go, q->slabIdx);
                 }
             }
         }else{
