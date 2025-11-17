@@ -5,6 +5,8 @@ Lookup *ErrorHandlers = NULL;
 boolean _crashing = FALSE;
 boolean _error = FALSE;
 
+Abstract *ErrA = NULL;
+
 static boolean _fuse = TRUE;
 static void sigH(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
@@ -58,6 +60,10 @@ static void sigHup(i32 sig, siginfo_t *info, void *ptr){
 static void sigI(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
         _fuse = FALSE;
+        if(ErrA != NULL){
+            void *args[] = {ErrA, NULL};
+            Fmt(ErrStream, "^r.ErrA: @^0\n", args);
+        }
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Int", NULL);
     }else{
         if(ErrStream->fd > 0){
@@ -202,6 +208,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
         if(errFunc != NULL){
             ErrorMsg *msg = ErrorMsg_Make(m, func, file, line, fmt, args);
             r |= errFunc(m, a, msg);
+            Fmt(ErrStream, fmt, args);
         }
     }else{
         r |= ERROR;

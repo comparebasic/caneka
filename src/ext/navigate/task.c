@@ -6,8 +6,6 @@ static MemCh *_currentTask_m = NULL;
 Table *TaskErrorHandlers = NULL; /* TaskPopulate */
 
 static status _taskErrorHandler(MemCh *m, void *_tsk, void *msg){
-    printf("Task Error Handler Called\n");
-    fflush(stdout);
     void *args[5];
     Task *tsk = (Task *)as(_tsk, TYPE_TASK);
     Single *key = Util_Wrapped(m, (util)tsk->parent);
@@ -24,28 +22,20 @@ status Task_Tumble(Task *tsk){
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
     i16 guard = 0;
+    microTime start = MicroTime_Now();
     do {
+        if(tsk->type.state & TASK_CHECK_ELAPSED
+            && MicroTime_Now() - tsk->metrics.start > tsk->timeout){
+                Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER, 
+                    "Task timed out", NULL);
+            break;
+        }
         if(!Guard(&guard, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER)){
-            printf("GUARD MAX REACHED\n");
-            fflush(stdout);
             Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Guard max exceeded for task", NULL);
             break;
         }
-        if(tsk->type.state & TASK_UPDATE_CRIT){
-            if(tsk->parent != NULL){
-                if(tsk->type.state & DEBUG){
-                    void *args[] = {
-                        tsk,
-                        NULL,
-                    };
-                    Out("^y.Tumble Update Crit @^0\n", args);
-                }
-                Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
-                tsk->type.state &= ~TASK_UPDATE_CRIT;
-            }
-        }
-        tsk->type.state &= ~MORE;
+        tsk->type.state &= ~(MORE|NOOP);
 
         Step *st = Iter_Get(&tsk->chainIt);
         if(st->type.state & ERROR){
@@ -62,11 +52,14 @@ status Task_Tumble(Task *tsk){
         }
 
         status r = READY;
+        boolean ran = FALSE;
         if((st->type.state & (SUCCESS|ERROR)) == 0){
             r |= PROCESSING;
             Guard_Incr(tsk->m, &st->g, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER);
             r = st->func(st, tsk);
+            ran = TRUE;
         }
+
         if(((r & MORE) == 0)){
             if(st->type.state & SUCCESS){
                 Iter_Remove(&tsk->chainIt);
@@ -88,9 +81,17 @@ status Task_Tumble(Task *tsk){
             }
         }
 
-        if((tsk->type.state & (MORE|ERROR)) == MORE){
-            printf("MORE %d\n", (i32)guard);
-            fflush(stdout);
+        if(tsk->type.state & TASK_UPDATE_CRIT){
+            if(tsk->parent != NULL){
+                Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
+            }
+            tsk->type.state &= ~TASK_UPDATE_CRIT;
+        }
+
+        if((tsk->type.state & (MORE|TASK_CHILD)) == MORE){
+            Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);
+            printf("MORE %d noop?%d q->nvalues:%d\n", tsk->type.state, tsk->type.state & NOOP, q->it.p->nvalues);
+            ErrA = (Abstract *)q->it.p;
         }
 
     } while((tsk->type.state & (MORE|ERROR)) == MORE);
@@ -99,6 +100,7 @@ status Task_Tumble(Task *tsk){
         tsk->type.state |= SUCCESS;
     }
 
+    tsk->metrics.consumed = MicroTime_Now() - start;
     DebugStack_Pop();
     return tsk->type.state;
 }
@@ -134,6 +136,7 @@ Task *Task_Make(Span *chain, void *source){
     Iter_Init(&tsk->chainIt, chain);
     tsk->stepGuardMax = TASK_TUMPLE_MAX;
     tsk->source = source;
+    tsk->metrics.start = MicroTime_Now();
     return tsk;
 }
 

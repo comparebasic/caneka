@@ -5,6 +5,7 @@
 extern struct lookup *ErrorHandlers;
 extern boolean _crashing;
 extern boolean _error;
+extern Abstract *ErrA;
 
 status Error_Init(struct mem_ctx *m);
 void Fatal(char *func, char *file, int line, char *fmt, void *args[]);

@@ -12,24 +12,24 @@ static status WebServer_logAndClose(Step *_st, Task *tsk){
 
     MemBookStats st;
     MemBook_GetStats(tsk->m, &st);
-    void *args[8];
+    void *args[9];
     args[0] = Lookup_Get(HttpMethods, ctx->method);
     args[1] = I32_Wrapped(tsk->m, ctx->code);
     args[2] = ctx->path;
-    args[3] = Str_MemCount(tsk->m, st.total * PAGE_SIZE),
-    args[4] = I64_Wrapped(tsk->m, st.total),
-    args[5] = I64_Wrapped(tsk->m, st.pageIdx),
-    args[6] = NULL;
+    args[3] = I64_Wrapped(tsk->m, tsk->metrics.consumed),
+    args[4] = Str_MemCount(tsk->m, st.total * PAGE_SIZE),
+    args[5] = I64_Wrapped(tsk->m, st.total),
+    args[6] = I64_Wrapped(tsk->m, st.pageIdx),
     args[7] = NULL;
+    args[8] = NULL;
 
     if(ctx->type.state & ERROR){
-        args[4] = ctx->errors;
-        args[5] = NULL;
-        Out("^r.Error $/$ @ $ @ $ $/$ ^{TIME.human}^0\n", args);
+        args[7] = ctx->errors;
+        Out("^r.Error $/$ @ time-used:$ $ @ $ $/$ ^{TIME.human}^0\n", args);
     }else if(ctx->code == 200){
-        Out("^g.Served $/$ @ $ $/$ ^{TIME.human}^0\n", args);
+        Out("^g.Served $/$ @ time-used:$ $ $/$ ^{TIME.human}^0\n", args);
     }else{
-        Out("^c.Responded $/$ @ $ $/$ ^{TIME.human}^0\n", args);
+        Out("^c.Responded $/$ @ time-used:$ $ $/$ ^{TIME.human}^0\n", args);
     }
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     close(pfd->fd);
@@ -60,7 +60,6 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
         Table_Set(error, S(m, "details"), bf->v);
     }
     Table_Set(ctx->data, S(m, "error"), error);
-
 
     Task_ResetChain(tsk);
     HttpTask_InitResponse(tsk, NULL, source);
@@ -112,17 +111,12 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     ctx->route = Route_GetHandler(tcp->pages, ctx->path);
 
     if(ctx->route == NULL){
-        printf("Route is NULL\n");
-        fflush(stdout);
         ctx->code = 404;
 
         StrVec *path = ctx->path;
         Single *funcW = Route_MimeFunc(ctx->path);
 
         if(funcW != NULL && (funcW->type.state & ROUTE_ASSET) == 0){
-            printf("Fancy error page!\n");
-            fflush(stdout);
-
             ctx->route = Route_GetHandler(tcp->pages, IoPath(m, "/system/not-found"));
             if(ctx->route != NULL){
 

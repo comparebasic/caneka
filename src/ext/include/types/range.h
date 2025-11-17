@@ -39,6 +39,7 @@ enum ext_types {
     TYPE_TASK,
     TYPE_PROC_IO_SET,
     TYPE_TCP_CTX,
+    TYPE_TCP_TASK,
     TYPE_PROTO_CTX,
     TYPE_HTTP_CTX,
     _TYPE_CORE_END,

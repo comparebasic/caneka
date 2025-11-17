@@ -364,6 +364,8 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
         taskLabels = (Str **)Arr_Make(m, 17);
         taskLabels[9] = Str_CstrRef(m, "UPDATE_CRIT");
         taskLabels[10] = Str_CstrRef(m, "QUEUE");
+        taskLabels[11] = Str_CstrRef(m, "CHILD");
+        taskLabels[12] = Str_CstrRef(m, "CHECK_ELAPSED");
         Lookup_Add(m, lk, TYPE_TASK, (void *)taskLabels);
         r |= SUCCESS;
     }

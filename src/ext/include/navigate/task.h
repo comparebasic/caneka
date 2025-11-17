@@ -4,6 +4,7 @@ enum task_flags {
     TASK_UPDATE_CRIT = 1 << 8,
     TASK_QUEUE = 1 << 9,
     TASK_CHILD = 1 << 10,
+    TASK_CHECK_ELAPSED = 1 << 11,
 };
 
 typedef struct task {
@@ -17,6 +18,12 @@ typedef struct task {
     Abstract *source;
     struct task *parent;
     Iter chainIt;
+    struct {
+        microTime start;
+        microTime consumed;
+        microTime end;
+    } metrics;
+    microTime timeout;
 } Task;
 
 extern Table *TaskErrorHandlers;

@@ -29,7 +29,7 @@ status HttpTask_AddRecieve(Task *tsk, void *arg, void *source){
     Roebling *rbl = HttpRbl_Make(tsk->m, curs, proto);
     status r = Task_AddStep(tsk, TcpTask_ReadToRbl, rbl, source, STEP_IO_IN);
 
-    tsk->type.state |= TcpTask_ExpectRecv(NULL, tsk);
+    TcpTask_ExpectRecv(NULL, tsk);
 
     DebugStack_Pop();
     return r;

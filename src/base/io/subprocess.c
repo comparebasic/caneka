@@ -73,7 +73,6 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
         }
         execvp(cmd[0], cmd);
         DebugStack_Pop();
-        printf("ERROR SPAWN\n");
         exit(1);
         return ERROR;
     }

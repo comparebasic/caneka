@@ -48,12 +48,14 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
 
 status TcpTask_ExpectRecv(Step *st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    pfd->events = POLLIN;
-    return TASK_UPDATE_CRIT;
+    pfd->events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
+    tsk->type.state |= TASK_UPDATE_CRIT;
+    return tsk->type.state;
 }
 
 status TcpTask_ExpectSend(Step *st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    pfd->events = POLLOUT;
-    return TASK_UPDATE_CRIT;
+    pfd->events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
+    tsk->type.state |= TASK_UPDATE_CRIT;
+    return tsk->type.state;
 }

@@ -14,6 +14,28 @@ static i64 ProtoCtx_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "Proto<$ u:$ in:@ out:@ data:@>", args);
 }
 
+static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
+    Task *tsk = (Task *)as(a, TYPE_TCP_TASK);
+    void *args[8];
+    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+    args[0] = Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
+    args[1] = I32_Wrapped(bf->m, pfd->fd);
+    args[2] = I32_Wrapped(bf->m, poll(pfd, 1, 0));
+    args[3] = I32_Wrapped(bf->m, tsk->chainIt.idx);
+    args[4] = I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
+    args[5] = Iter_Get(&tsk->chainIt);
+    args[6] = NULL;
+    args[7] = NULL;
+    if(flags & DEBUG){
+        args[5] = tsk->data;
+        return Fmt(bf, "TcpTask<@ fd$ poll$ $ of $ \\@& data:@>", args);
+    }else{
+        args[3] = tsk->data;
+        args[4] = NULL;
+        return Fmt(bf, "TcpTask<@ fd$ poll$ @>", args);
+    }
+}
+
 static i64 TcpCtx_Print(Buff *bf, void *a, cls type, word flags){
     TcpCtx *ctx = (TcpCtx*)as(a, TYPE_TCP_CTX);
     void *args[] = {
@@ -34,6 +56,7 @@ static i64 TcpCtx_Print(Buff *bf, void *a, cls type, word flags){
 status Serve_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_TCP_CTX, (void *)TcpCtx_Print);
+    r |= Lookup_Add(m, lk, TYPE_TCP_TASK, (void *)TcpTask_Print);
     r |= Lookup_Add(m, lk, TYPE_PROTO_CTX, (void *)ProtoCtx_Print);
     return r;
 }

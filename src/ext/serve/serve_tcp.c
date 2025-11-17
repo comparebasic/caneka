@@ -104,7 +104,9 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
 
             MemCh *tm = MemCh_Make();
             Task *child = Task_Make(Span_Make(tm), tsk);
+            child->type.of = TYPE_TCP_TASK;
             child->type.state |= TASK_CHILD;
+            child->timeout = TCP_TIMEOUT;
             child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
             tm->owner = child;
@@ -115,8 +117,6 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
                 args[0] = child;
                 args[1] = I32_Wrapped(child->m, pfd->fd);
                 args[2] = NULL;
-
-
                 Out("^c.    Adding Child & fd$^0\n", args);
             }
 
@@ -130,7 +130,9 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         }
     }
 
+    tsk->type.state |= NOOP;
     while((Queue_Next(q) & END) == 0){
+        tsk->type.state &= ~NOOP;
         if(tsk->type.state & DEBUG){
             args[0] = q;
             args[1] = NULL;
@@ -156,8 +158,6 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         args[1] = NULL;
         Out("^c.    No more Reqs @^0\n", args);
     }
-
-    st->type.state |= NOOP;
 
     DebugStack_Pop();
     return st->type.state;
