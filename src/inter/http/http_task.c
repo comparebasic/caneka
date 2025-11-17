@@ -4,8 +4,19 @@
 status HttpTask_InitResponse(Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
     status r = READY;
-    tsk->data = (Abstract *)HttpProto_Make(tsk->m);
-    tsk->source = source;
+
+    ProtoCtx *proto = HttpProto_Make(tsk->m);
+
+    TcpCtx *tcp = (TcpCtx *)as(source, TYPE_TCP_CTX);
+    if(tcp->defaultData != NULL){
+        HttpCtx *http = (HttpCtx*)proto->data;
+        SourceFunc func = (SourceFunc)tcp->defaultData;
+        func(tsk->m, http->data, tcp);
+    }
+
+    tsk->data = (Abstract *)proto;
+    tsk->source = (Abstract *)tcp;
+
 
     DebugStack_Pop();
     return r;

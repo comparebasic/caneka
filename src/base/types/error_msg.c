@@ -13,8 +13,12 @@ ErrorMsg *ErrorMsg_Make(MemCh *m, char *func, char *file, int line, char *fmt, v
     msg->fmt = Str_FromCstr(m, fmt, STRING_COPY);
 
     i32 total = 0;
-    while(args[total++] != NULL){}
-    msg->args = Arr_Make(m, total);
+    if(args != NULL){
+        while(args[total++] != NULL){}
+        msg->args = Arr_Make(m, total);
+    }else{
+        msg->args = Arr_Make(m, 1);
+    }
 
     for(i32 i = 0; i < total; i++){
         msg->args[i] = args[i];

@@ -46,31 +46,25 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
 
-    ErrorMsg *msg = (ErrorMsg *)as(arg, TYPE_ERROR_MSG);
-
-    if(ctx->data == NULL){
-        ctx->data = Table_Make(m);
-    }
-
-    Table_Set(ctx->data, S(m, "nav"), tcp->nav);
-
-    Table *error = Table_Make(m);
-    Table_Set(error, S(m, "name"), msg->lineInfo[0]);
-
-    Buff *bf = Buff_Make(m, ZERO);
-    Fmt(bf, (char *)msg->fmt->bytes, msg->args);
-    Table_Set(error, S(m, "details"), bf->v);
-
-    Table_Set(ctx->data, S(m, "error"), error);
-
     StrVec *path = Sv(m, "/system/error");
     IoUtil_Annotate(m, path);
     ctx->path = path;
     ctx->code = 500;
 
+    Table *error = Table_Get(ctx->data, K(m, "error"));
+    if(arg != NULL && ((Abstract *)arg)->type.of == TYPE_ERROR_MSG){
+        ErrorMsg *msg = (ErrorMsg *)as(arg, TYPE_ERROR_MSG);
+        Table_Set(error, S(m, "name"), msg->lineInfo[0]);
+        Buff *bf = Buff_Make(m, ZERO);
+        Fmt(bf, (char *)msg->fmt->bytes, msg->args);
+        Table_Set(error, S(m, "details"), bf->v);
+    }
+    Table_Set(ctx->data, S(m, "error"), error);
+
+
     Task_ResetChain(tsk);
     HttpTask_InitResponse(tsk, NULL, source);
-    Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
+    Task_AddStep(tsk, WebServer_GatherPage, NULL, NULL, ZERO);
 
     DebugStack_Pop();
     return SUCCESS;
@@ -117,16 +111,18 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     IoUtil_Annotate(tsk->m, ctx->path);
     ctx->route = Route_GetHandler(tcp->pages, ctx->path);
 
-    ctx->data = Table_Make(m);
-    Table_Set(ctx->data, S(m, "nav"), tcp->nav);
-
     if(ctx->route == NULL){
+        printf("Route is NULL\n");
+        fflush(stdout);
         ctx->code = 404;
 
         StrVec *path = ctx->path;
         Single *funcW = Route_MimeFunc(ctx->path);
 
         if(funcW != NULL && (funcW->type.state & ROUTE_ASSET) == 0){
+            printf("Fancy error page!\n");
+            fflush(stdout);
+
             ctx->route = Route_GetHandler(tcp->pages, IoPath(m, "/system/not-found"));
             if(ctx->route != NULL){
 

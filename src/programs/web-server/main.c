@@ -1,6 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
+static status getDefaultData(MemCh *m, void *a, void *source){
+    Table *data = (Table *)as(a, TYPE_TABLE);
+    TcpCtx *tcp = (TcpCtx *)as(source, TYPE_TCP_CTX);
+    Table *error = Table_Make(m);
+    Table_Set(data, S(m, "nav"), tcp->nav);
+    Table_Set(error, S(m, "name"), S(m, "None"));
+    Table_Set(error, S(m, "details"), S(m, "None"));
+    Table_Set(data, S(m, "error"), error);
+    return SUCCESS;
+}
+
 static status Load_stats(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
@@ -28,6 +39,8 @@ static status Load_stats(Step *st, Task *tsk){
 
 static status routeInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
+
+    ctx->defaultData = getDefaultData;
 
     ctx->pages = Route_Make(m);
     r |= Route_Collect(ctx->pages, IoAbsPath(m, "examples/web-server/pages/public"));

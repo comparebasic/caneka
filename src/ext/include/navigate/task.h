@@ -1,4 +1,4 @@
-#define TASK_TUMPLE_MAX 6
+#define TASK_TUMPLE_MAX 1024
 
 enum task_flags {
     TASK_UPDATE_CRIT = 1 << 8,

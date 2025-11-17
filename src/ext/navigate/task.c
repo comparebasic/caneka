@@ -6,6 +6,8 @@ static MemCh *_currentTask_m = NULL;
 Table *TaskErrorHandlers = NULL; /* TaskPopulate */
 
 static status _taskErrorHandler(MemCh *m, void *_tsk, void *msg){
+    printf("Task Error Handler Called\n");
+    fflush(stdout);
     void *args[5];
     Task *tsk = (Task *)as(_tsk, TYPE_TASK);
     Single *key = Util_Wrapped(m, (util)tsk->parent);
@@ -23,6 +25,13 @@ status Task_Tumble(Task *tsk){
     tsk->type.state &= ~SUCCESS;
     i16 guard = 0;
     do {
+        if(!Guard(&guard, tsk->stepGuardMax, FUNCNAME, FILENAME, LINENUMBER)){
+            printf("GUARD MAX REACHED\n");
+            fflush(stdout);
+            Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Guard max exceeded for task", NULL);
+            break;
+        }
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->parent != NULL){
                 if(tsk->type.state & DEBUG){
@@ -78,6 +87,12 @@ status Task_Tumble(Task *tsk){
                tsk->type.state |= MORE; 
             }
         }
+
+        if((tsk->type.state & (MORE|ERROR)) == MORE){
+            printf("MORE %d\n", (i32)guard);
+            fflush(stdout);
+        }
+
     } while((tsk->type.state & (MORE|ERROR)) == MORE);
 
     if((tsk->chainIt.type.state & END) && tsk->chainIt.p->nvalues == 0){

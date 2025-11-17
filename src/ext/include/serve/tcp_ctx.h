@@ -5,6 +5,7 @@ typedef struct tcp_ctx {
     Str *inet6;
     TaskPopulate populate;
     StepFunc finalize; 
+    SourceFunc defaultData;
     StrVec *path;
     Inst *pages;
     Inst *inc;
