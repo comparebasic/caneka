@@ -1,6 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
+static MemCh *_currentTask_m = NULL;
+
 Table *TaskErrorHandlers = NULL; /* TaskPopulate */
 
 static status _taskErrorHandler(MemCh *m, void *_tsk, void *msg){

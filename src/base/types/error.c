@@ -30,6 +30,19 @@ static void sigQuit(i32 sig, siginfo_t *info, void *ptr){
     exit(1);
 }
 
+static void sigPipe(i32 sig, siginfo_t *info, void *ptr){
+    if(_fuse){
+        _fuse = FALSE;
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Pipe", NULL);
+    }else{
+        if(ErrStream->fd > 0){
+            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        }
+    }
+    exit(1);
+}
+
+
 static void sigHup(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
         _fuse = FALSE;
@@ -58,6 +71,7 @@ static struct sigaction _a;
 static struct sigaction _b;
 static struct sigaction _c;
 static struct sigaction _d;
+static struct sigaction _e;
 static void setSigs(){
     memset(&_a, 0, sizeof(struct sigaction));
     _a.sa_flags = SA_NODEFER;
@@ -78,6 +92,11 @@ static void setSigs(){
     _d.sa_flags = SA_NODEFER;
     _d.sa_sigaction = sigHup;
     sigaction(SIGHUP, &_d, NULL);
+
+    memset(&_c, 0, sizeof(struct sigaction));
+    _c.sa_flags = SA_NODEFER;
+    _c.sa_sigaction = sigPipe;
+    sigaction(SIGPIPE, &_c, NULL);
 }
 
 void Fatal(char *func, char *file, int line, char *fmt, void *args[]){

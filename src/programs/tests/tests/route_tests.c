@@ -21,7 +21,7 @@ static char *cstr = ""
     "            <a href=\"/stats\">Stats</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/tests\">Unit Tests</a>\n"
+    "            <a href=\"/tests\">Tests</a>\n"
     "        </li>\n"
     "        <li>\n"
     "            <a href=\"/schedule\">Features</a>\n"
@@ -57,7 +57,7 @@ static char *noMemWHeaderCstr  = ""
     "            <a href=\"/stats\">Stats</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/tests\">Unit Tests</a>\n"
+    "            <a href=\"/tests\">Tests</a>\n"
     "        </li>\n"
     "        <li>\n"
     "            <a href=\"/schedule\">Features</a>\n"
@@ -97,7 +97,7 @@ static char *memWHeaderCstr  = ""
     "            <a href=\"/stats\">Stats</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/tests\">Unit Tests</a>\n"
+    "            <a href=\"/tests\">Tests</a>\n"
     "        </li>\n"
     "        <li>\n"
     "            <a href=\"/schedule\">Features</a>\n"
@@ -146,7 +146,7 @@ static char *homeCstr = ""
     "            <a href=\"/stats\">Stats</a>\n"
     "        </li>\n"
     "        <li>\n"
-    "            <a href=\"/tests\">Unit Tests</a>\n"
+    "            <a href=\"/tests\">Tests</a>\n"
     "        </li>\n"
     "        <li>\n"
     "            <a href=\"/schedule\">Features</a>\n"
@@ -202,27 +202,30 @@ status WwwRoute_Tests(MemCh *gm){
     args[1] = NULL;
     r |= Test(tests != NULL, "Route for @ is not NULL", args);
 
-    Str *mime = Span_Get(tests, ROUTE_PROPIDX_MIME);
+    Str *mime = Seel_Get(tests, K(m, "mime"));
     args[0] = mime;
     args[1] = NULL;
-    r |= Test(Equals(mime, Str_FromCstr(m, "text/html", ZERO)), 
-        "account index page is mime type text/html, have @", args);
-    Str *type = Span_Get(tests, ROUTE_PROPIDX_TYPE);
+    r |= Test(Equals(mime, K(m, "text/html")), 
+        "account tests page is mime type html, have @", args);
+
+    Str *type = Seel_Get(tests, K(m, "type"));
     args[0] = type;
     args[1] = NULL;
-    r |= Test(Equals(type, Str_FromCstr(m, "body", ZERO)), 
-        "account index page is type html, have @", args);
+    r |= Test(Equals(type, K(m, "fmt")), 
+        "account tests page is type fmt, have @", args);
 
-    path = StrVec_From(m, Str_FromCstr(m, "/stats", ZERO));
+    path = StrVec_From(m, K(m, "/stats"));
     IoUtil_Annotate(m, path);
     Route *profile = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
-    mime = Span_Get(profile, ROUTE_PROPIDX_MIME);
-    r |= Test(Equals(mime, Str_FromCstr(m, "text/html", ZERO)),
-        "profile index page is mime type text/html", NULL);
+    mime = Seel_Get(profile, K(m, "mime"));
+    r |= Test(Equals(mime, K(m, "text/html")),
+        "profile stat page is mime type text/html", NULL);
 
-    type = Span_Get(profile, ROUTE_PROPIDX_TYPE);
-    r |= Test(Equals(type, Str_FromCstr(m, "templ", ZERO)),
-        "profile index page is mime type templ", NULL);
+    type = Seel_Get(profile, K(m, "mime"));
+    args[0] = type;
+    args[1] = NULL;
+    r |= Test(Equals(type, K(m, "text/html")),
+        "profile stat page is mime type templ, have @", args);
 
     MemCh_Free(m);
     DebugStack_Pop();
