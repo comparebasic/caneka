@@ -6,6 +6,7 @@
 #include "navigate/queue.h"
 #include "navigate/queue_crit.h"
 #include "navigate/queue_crit_time.h"
+#include "navigate/queue_crit_fds.h"
 #include "navigate/step.h"
 #include "navigate/task.h"
 #include "navigate/navigate_tos.h"

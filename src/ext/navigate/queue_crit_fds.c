@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 gobits QueueCrit_Fds(QueueCrit *crit, util *values){
-    word go = 0;
+    gobits go = 0;
     util *u = values;
     for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
         if(*u == 0){
@@ -13,7 +13,7 @@ gobits QueueCrit_Fds(QueueCrit *crit, util *values){
     struct pollfd *pfds = (struct pollfd *)values;
     i32 ready = poll(pfds, CRIT_SLAB_STRIDE, 0);
 
-    word base = 1;
+    util base = 1;
     for(i32 i = 0; i < CRIT_SLAB_STRIDE && ready > 0; i++){
         struct pollfd *pfd = pfds+i;
 

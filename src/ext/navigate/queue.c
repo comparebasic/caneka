@@ -141,19 +141,25 @@ status Queue_Next(Queue *q){
         }
         if(q->handlers->nvalues > 0){
             /* if first in slab set the go values */
-            if(q->handlers->nvalues > 0 && q->it.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
+            if(q->it.idx >= (q->slabIdx+1)*CRIT_SLAB_STRIDE){
                 q->slabIdx++;
+                printf("Getting q->go bits from %u-%u\n",
+                    q->slabIdx *CRIT_SLAB_STRIDE,
+                    (i32)(((q->slabIdx+1)*CRIT_SLAB_STRIDE)-1));
+                fflush(stdout);
                 q->go = 0;
                 Iter it;
                 Iter_Init(&it, q->handlers);
                 while((Iter_Next(&it) & END) == 0){
                     QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
                     util *slab = (util *)Span_Get(crit->data, q->slabIdx);
+                    printf("getting bits for slabIdx %d\n", q->slabIdx);
+                    fflush(stdout);
                     if(slab != NULL){
                         q->go |= crit->func(crit, slab);
-                        if(q->type.state & DEBUG){
+                        if(1 || (q->type.state & DEBUG)){
                             args[0] = Str_Ref(m,
-                                (byte *)&q->go, sizeof(word), sizeof(word), STRING_BINARY);
+                                (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
                             args[1] = I32_Wrapped(m, it.idx);
                             args[2] = NULL;
                             Out("^b.    go is now @ after handler $^0\n", args);
@@ -172,8 +178,9 @@ status Queue_Next(Queue *q){
             Out("^b.    Queue go @\n", args);
         }
 
+        util base = 1;
         i32 localIdx = (q->it.idx & CRIT_SLAB_MASK); 
-        if(q->go & (1 << localIdx)){
+        if(q->go & (base << localIdx)){
             q->type.state |= SUCCESS;
             q->value = Iter_Get(&q->it);
             if(q->type.state & DEBUG){

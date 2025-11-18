@@ -150,7 +150,7 @@ static status Queue_Print(Buff *bf, void *a, cls type, word flags){
         args[2] = q->it.p;
         args[3] = &q->availableIt;
         args[3] = NULL;
-        r |= Fmt(bf, " @ criteria:@ items:& available:@>", args);
+        r |= Fmt(bf, " it:@ criteria:@ items:& available:@>", args);
     }else{
         args[0] = I32_Wrapped(bf->m, q->it.p->nvalues);
         args[1] = NULL;

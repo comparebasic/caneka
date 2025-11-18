@@ -119,6 +119,7 @@ status Bits_PrintNum(Buff *bf, byte *bt, size_t length, word flags){
 
 status Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
     Single sg = {{TYPE_WRAPPED_I8, 0}, 0};
+    int base = 1;
     for(int i = 0; i < length;i++){
         byte b = bt[i];
         if(b == 0 && (flags & (MORE|DEBUG)) == MORE){
@@ -129,8 +130,9 @@ status Bits_Print(Buff *bf, byte *bt, size_t length, word flags){
                 void *args[] = {&sg, NULL};
                 Fmt(bf, "$=", args);
             }
-            for(int j = 7; j >= 0;j--){
-                Buff_AddBytes(bf, (byte *)((b & (1 << j)) ? "1" : "0"), 1);
+            for(int j = 0; j < 8;j++){
+                int cmp = b;
+                Buff_AddBytes(bf, (byte *)((cmp & (base << j)) ? "1" : "0"), 1);
             }
         }
         if(flags & MORE){

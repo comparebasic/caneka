@@ -78,6 +78,7 @@ static BuildSubdir navigateobj = { "navigate", {
     "queue.c",
     "queue_crit.c",
     "queue_crit_time.c",
+    "queue_crit_fds.c",
     "step.c",
     "task.c",
     "navigate_cls.c",
@@ -106,7 +107,6 @@ static BuildSubdir parserobj = { "parser", {
 static BuildSubdir serveobj = { "serve", {
     "proto_ctx.c",
     "serve_tcp.c",
-    "serve_tcp_crits.c",
     "tcp_ctx.c",
     "tcp_task.c",
     "serve_cls.c",
