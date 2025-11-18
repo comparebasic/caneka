@@ -123,23 +123,15 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             if(child->type.state & TASK_UPDATE_CRIT){
                 
                 struct pollfd *pfd = (struct pollfd *)&child->u;
-                
-                printf("setting criteria for %d\n", pfd->fd);
-                fflush(stdout);
-
                 Queue_SetCriteria(q, 0, child->idx, &child->u);
                 child->type.state &= ~TASK_UPDATE_CRIT;
             }else{
-                printf("no update requiested");
-                fflush(stdout);
                 exit(1);
             }
 
             util upfd = Queue_GetCriteria(q, 0, child->idx);
             struct pollfd *pfd = (struct pollfd *)&upfd;
             if(pfd->fd == -1){
-                printf("pfd negative or negavie -1 in criteria\n");
-                fflush(stdout);
                 exit(1);
             }
 

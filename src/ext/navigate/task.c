@@ -62,8 +62,6 @@ status Task_Tumble(Task *tsk){
 
         if(tsk->type.state & TASK_UPDATE_CRIT){
             if(tsk->parent != NULL){
-                printf("updating crit for %d\n", tsk->idx);
-                fflush(stdout);
                 Queue_SetCriteria((Queue *)tsk->parent->data, 0, tsk->idx, &tsk->u);
             }
             tsk->type.state &= ~TASK_UPDATE_CRIT;
@@ -89,15 +87,6 @@ status Task_Tumble(Task *tsk){
                tsk->type.state |= MORE; 
             }
         }
-
-        /*
-        if((tsk->type.state & (MORE|TASK_CHILD)) == MORE){
-            Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);
-            printf("MORE %d noop?%d q->nvalues:%d/%d\n",
-                tsk->type.state, tsk->type.state & (NOOP|PROCESSING), q->it.p->nvalues, q->it.p->max_idx);
-            ErrA = (Abstract *)q;
-        }
-        */
 
     } while((tsk->type.state & (MORE|ERROR)) == MORE);
 
