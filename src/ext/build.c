@@ -126,6 +126,13 @@ static BuildSubdir formatobj = { "format", {
     NULL
 }};
 
+
+static BuildSubdir htmlobj = { "format/html", {
+    "html_escape_roebling.c",
+    NULL
+}};
+
+
 static BuildSubdir fmtobj = { "format/fmt", {
     "fmt.c",
     "fmt_roebling.c",
@@ -168,6 +175,7 @@ static BuildSubdir *objdirs[] = {
     &persistobj,
     &transpobj,
     &xmlobj,
+    &htmlobj,
     NULL
 };
 

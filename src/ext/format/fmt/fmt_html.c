@@ -67,6 +67,10 @@ static i64 bulletFunc(TranspCtx *ctx, word flags){
         Buff_AddBytes(ctx->bf, (byte *)"  ", 2);
         Str *s = Str_CstrRef(ctx->m, "LI");
         total += Tag_Out(ctx->bf, s, ZERO);
+        if(a->type.of == TYPE_STRVEC){
+            HtmlEnt_IntoVec(ctx->m, ctx->htmlEntRbl, (StrVec *)a);
+            a = ctx->htmlEntRbl->dest;
+        }
         total += ToS(ctx->bf, a, 0, ZERO);
         total += Tag_Out(ctx->bf, s, TAG_CLOSE);
         Buff_AddBytes(ctx->bf, (byte *)"\n", 1);
@@ -95,6 +99,10 @@ static i64 headerFunc(TranspCtx *ctx, word flags){
         total += Tag_Out(ctx->bf, s, ZERO);
     }
     if(flags & TRANSP_BODY){
+        if(a->type.of == TYPE_STRVEC){
+            HtmlEnt_IntoVec(ctx->m, ctx->htmlEntRbl, (StrVec *)a);
+            a = ctx->htmlEntRbl->dest;
+        }
         total += ToS(ctx->bf, a, 0, ZERO);
     }
     if(flags & TRANSP_CLOSE){
@@ -144,6 +152,11 @@ static i64 paragraphFunc(TranspCtx *ctx, word flags){
         total += Tag_Out(ctx->bf, s, ZERO);
     }
     if(flags & TRANSP_BODY){
+        if(a->type.of == TYPE_STRVEC){
+            HtmlEnt_IntoVec(ctx->m, ctx->htmlEntRbl, (StrVec *)a);
+            a = ctx->htmlEntRbl->dest;
+
+        }
         total += ToS(ctx->bf, a, 0, ZERO);
     }
     if(flags & TRANSP_CLOSE){

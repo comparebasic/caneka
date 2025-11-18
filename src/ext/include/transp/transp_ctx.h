@@ -8,6 +8,7 @@ typedef struct transp_ctx {
     Iter it;
     Lookup *lk;
     TranspFunc func;
+    Roebling *htmlEntRbl;
 } TranspCtx;
 
 TranspCtx *TranspCtx_Make(MemCh *m, Buff *bf, Lookup *lk);

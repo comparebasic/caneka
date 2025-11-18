@@ -8,6 +8,7 @@ TranspCtx *TranspCtx_Make(MemCh *m, Buff *bf, Lookup *lk){
     ctx->bf = bf;
     ctx->lk = lk;
     ctx->stackIdx = -1;
+    ctx->htmlEntRbl = HtmlEntRbl_Make(m, NULL, NULL);
     Iter_Init(&ctx->it, Span_Make(m));
     return ctx;
 }
