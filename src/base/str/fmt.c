@@ -112,6 +112,9 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
                     Bits_Print(bf, s->bytes, s->length, 
                         ((s->type.state|bf->type.state) & DEBUG));
                     goto next;
+                }else if(s->type.state & DEBUG){
+                    Bytes_Debug(bf, s->bytes, s->bytes+s->length-1);
+                    goto next;
                 }
             }else if(a->type.of == TYPE_ARRAY){
                 state |= SUCCESS;

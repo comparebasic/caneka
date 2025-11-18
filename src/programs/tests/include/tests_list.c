@@ -227,7 +227,7 @@ static TestSet _Tests[] = {
         SECTION_LABEL,
     },
     {
-        "Patter Character Tests",
+        "Pattern Character Tests",
         PatChar_Tests,
         "Making patterns from strings.",
         FEATURE_COMPLETE,
