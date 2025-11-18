@@ -43,6 +43,7 @@ status Queue_Tests(MemCh *gm);
 status QueueAddRemove_Tests(MemCh *gm);
 status QueueIter_Tests(MemCh *gm);
 status QueueCriteria_Tests(MemCh *gm);
+status QueueScale_Tests(MemCh *gm);
 status Relation_Tests(MemCh *gm);
 status Roebling_Tests(MemCh *gm);
 status RoeblingRun_Tests(MemCh *gm);

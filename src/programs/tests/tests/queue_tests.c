@@ -1,6 +1,70 @@
 #include <external.h>
 #include <caneka.h>
 
+static status queueScaleTest(MemCh *m, i32 max){
+    status r = READY;
+    void *args[5];
+
+    Queue *q = Queue_Make(m);
+
+    QueueCrit *crit = QueueCrit_Make(m, QueueCrit_Time, ZERO);
+    crit->type.state |= QUEUE_CRIT_UTIL;
+    i32 hIdx = Queue_AddHandler(q, crit);
+
+    i32 patCount = 4;
+    i32 patIdx = 0;
+    util pattern[4] = { 3, 2, 1, 7};
+    util increase = 4;
+    i32 increaseCadance = max / 4;
+    microTime now = 1;
+    microTime timeIncr = max / 5;
+
+    for(i32 i = 0; i < max; i++){
+        util time = now + (pattern[patIdx] * increase);
+        Queue_Add(q, I32_Wrapped(m, i)); 
+        Queue_SetCriteria(q, 0, i, &time);
+
+        if(++patIdx == patCount){
+            patIdx = 0;
+        }
+        if(i > 0 && i % increaseCadance == 0){
+            increase += increase;
+        }
+    }
+
+    i16 guard = 0;
+    while(q->it.p->nvalues > 0){
+        if(!Guard(&guard, 1024, FUNCNAME, FILENAME, LINENUMBER)){
+            args[0] = I32_Wrapped(m, max);
+            args[1] = I16_Wrapped(m, guard);
+            args[2] = q;
+            args[3] = NULL;
+            r |= Test(FALSE, "All $ Queue items were handled, too many rounds, round=$ q=@", args);
+            return r;
+        }
+        crit->u += timeIncr;
+        while((Queue_Next(q) & END) == 0){
+            args[0] = Queue_Get(q);
+            args[1] = I32_Wrapped(m, q->it.idx);
+            args[2] = I32_Wrapped(m, crit->u);
+            args[3] = I16_Wrapped(m, guard);
+            args[4] = NULL;
+            if(args[0] == NULL){
+                r |= ERROR;
+                break;
+            }
+            Queue_Remove(q, q->it.idx);
+        }
+        microTime _remaining;
+        Time_Delay(10, &_remaining);
+    }
+
+    args[0] = I32_Wrapped(m, max);
+    args[1] = NULL;
+    r |= Test(q->it.p->nvalues == 0, "All $ Queue items were handled", args);
+    return r;
+}
+
 status Queue_Tests(MemCh *gm){
     DebugStack_Push(NULL, 0);
     status r = READY;
@@ -386,3 +450,26 @@ status QueueCriteria_Tests(MemCh *gm){
     return r;
 }
 
+status QueueScale_Tests(MemCh *gm){
+    DebugStack_Push(NULL, 0);
+    status r = READY;
+    void *args[3];
+
+    MemCh *m = MemCh_Make();
+
+    r |= Test((queueScaleTest(m, 10) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 10 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 57) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 57 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 432) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 432 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 777) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 777 scale tests finish with SUCCESS", NULL);
+
+    MemCh_Free(m);
+    DebugStack_Pop();
+    return r;
+}

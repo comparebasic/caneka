@@ -33,21 +33,22 @@ static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
     void *args[8];
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     args[0] = Type_StateVec(bf->m, TYPE_TASK, tsk->type.state);
-    args[1] = I32_Wrapped(bf->m, pfd->fd);
-    args[2] = getPollFlagVec(bf->m, pfd);
-    args[3] = I32_Wrapped(bf->m, tsk->chainIt.idx);
-    args[4] = I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
-    args[5] = Iter_Get(&tsk->chainIt);
-    args[6] = NULL;
-    args[7] = NULL;
+    args[1] = I32_Wrapped(bf->m, tsk->idx);
+    args[2] = I32_Wrapped(bf->m, pfd->fd);
+    args[3] = getPollFlagVec(bf->m, pfd);
+    args[4] = NULL;
+
+    Fmt(bf, "TcpTask<@ ^D.@^d.idx ^D$^d.fd @", args);
     if(flags & DEBUG){
-        args[5] = tsk->data;
-        return Fmt(bf, "TcpTask<@ fd$ @ $of$ \\@& data:@>", args);
+        args[0] = I32_Wrapped(bf->m, tsk->chainIt.idx);
+        args[1] = I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
+        args[2] = Iter_Get(&tsk->chainIt);
+        args[3] = NULL;
+        Fmt(bf, "$of$ \\@@>", args);
     }else{
-        args[3] = tsk->data;
-        args[4] = NULL;
-        return Fmt(bf, "TcpTask<@ fd$ @ @>", args);
+        Buff_AddBytes(bf, (byte *)">", 1);
     }
+    return SUCCESS;
 }
 
 static i64 TcpCtx_Print(Buff *bf, void *a, cls type, word flags){

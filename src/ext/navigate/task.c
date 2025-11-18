@@ -90,12 +90,14 @@ status Task_Tumble(Task *tsk){
             }
         }
 
+        /*
         if((tsk->type.state & (MORE|TASK_CHILD)) == MORE){
             Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);
-            printf("MORE %d noop?%d q->nvalues:%d\n",
-                tsk->type.state, tsk->type.state & (NOOP|PROCESSING), q->it.p->nvalues);
+            printf("MORE %d noop?%d q->nvalues:%d/%d\n",
+                tsk->type.state, tsk->type.state & (NOOP|PROCESSING), q->it.p->nvalues, q->it.p->max_idx);
             ErrA = (Abstract *)q;
         }
+        */
 
     } while((tsk->type.state & (MORE|ERROR)) == MORE);
 

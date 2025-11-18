@@ -385,6 +385,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Queue Scale Tests",
+        QueueScale_Tests,
+        "Queue testing adding and removing Queue items over time.",
+        FEATURE_COMPLETE,
+    },
+    {
         "TaskStep Tests",
         TaskStep_Tests,
         "Task/Step and Task_Tumble tests.",

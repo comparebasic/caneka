@@ -114,9 +114,16 @@ static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
             util *slab = (util *)Iter_Get(&it);
             for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
                if(slab[i] != -1 && slab[i] != 0){
-                    struct pollfd *pfd = (struct pollfd *)slab+i;
-                    Table_Set(tbl, I64_Wrapped(bf->m, it.idx *CRIT_SLAB_STRIDE + i), I64_Wrapped(bf->m, pfd->fd));
-               }
+                   Single *key = I64_Wrapped(bf->m, it.idx *CRIT_SLAB_STRIDE + i);
+                   Single *value = NULL;
+                   if(crit->type.state & QUEUE_CRIT_PFD){
+                        struct pollfd *pfd = (struct pollfd *)slab+i;
+                        value = I64_Wrapped(bf->m, pfd->fd);
+                   }else{
+                        value = I64_Wrapped(bf->m, slab[i]);
+                   }
+                   Table_Set(tbl, key, value);
+                }
             }
         }
         

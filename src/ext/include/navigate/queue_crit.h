@@ -5,6 +5,8 @@
 
 enum queue_crit_flags {
     QUEUE_CRIT_REQUIRED = 1 << 11,
+    QUEUE_CRIT_UTIL = 1 << 12,
+    QUEUE_CRIT_PFD = 1 << 13,
 };
 
 typedef gobits (*QueueFunc)(struct queue_crit *crit, util *values);

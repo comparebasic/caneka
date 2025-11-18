@@ -73,7 +73,6 @@ util Queue_GetCriteria(Queue *q, i32 critIdx, i32 idx){
     QueueCrit *crit = (QueueCrit *)Span_Get(q->handlers, critIdx);
     util *slab = (util *)Span_Get(crit->data, slabIdx);
     i32 localIdx = idx & CRIT_SLAB_MASK;
-    printf("Get criteria to slabIdx%d localIdx %d\n", slabIdx, localIdx);
     return slab[localIdx];
 }
 
@@ -97,7 +96,6 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
         r |= Span_Set(crit->data, slabIdx, slab);
     } 
     i32 localIdx = idx & CRIT_SLAB_MASK;
-    printf("Set criteria to slabIdx%d localIdx %d\n", slabIdx, localIdx);
     slab[localIdx] = *((util *)value);
     r |= SUCCESS;
     return r;
@@ -161,9 +159,6 @@ status Queue_Next(Queue *q){
                             Out("^b.    go is now @ after handler $^0\n", args);
                         }
                     }
-                }
-                if(q->go == 0){
-                    printf("looked for go %ld slabIdx %d\n", q->go, q->slabIdx);
                 }
             }
         }else{
