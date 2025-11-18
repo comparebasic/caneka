@@ -139,18 +139,20 @@ static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
 static status Queue_Print(Buff *bf, void *a, cls type, word flags){
     Queue *q = (Queue *)as(a, TYPE_QUEUE);
     status r = READY;
-    void *args[6];
+    void *args[7];
     args[0] = Type_StateVec(bf->m, q->type.of, q->type.state);
     args[1] = NULL;
     r |= Fmt(bf, "Queue<@ ", args);
-    r |= Bits_Print(bf, (byte *)&q->go, sizeof(word), ZERO);
+    r |= Bits_Print(bf, (byte *)&q->go, sizeof(util), ZERO);
     if(flags & DEBUG){
-        args[0] = &q->it;
-        args[1] = q->handlers;
-        args[2] = q->it.p;
-        args[3] = &q->availableIt;
-        args[3] = NULL;
-        r |= Fmt(bf, " it:@ criteria:@ items:& available:@>", args);
+        args[0] = I32_Wrapped(bf->m, q->slabIdx*CRIT_SLAB_STRIDE);
+        args[1] = I32_Wrapped(bf->m, ((q->slabIdx+1)*CRIT_SLAB_STRIDE)-1);
+        args[2] = &q->it;
+        args[3] = q->handlers;
+        args[4] = q->it.p;
+        args[5] = &q->availableIt;
+        args[6] = NULL;
+        r |= Fmt(bf, " $to$ it:@ criteria:@ items:& available:@>", args);
     }else{
         args[0] = I32_Wrapped(bf->m, q->it.p->nvalues);
         args[1] = NULL;

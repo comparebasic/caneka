@@ -34,12 +34,14 @@ static status queueScaleTest(MemCh *m, i32 max){
 
     i16 guard = 0;
     while(q->it.p->nvalues > 0){
-        if(!Guard(&guard, 1024, FUNCNAME, FILENAME, LINENUMBER)){
+        if(!Guard(&guard, 120, FUNCNAME, FILENAME, LINENUMBER)){
             args[0] = I32_Wrapped(m, max);
             args[1] = I16_Wrapped(m, guard);
             args[2] = q;
-            args[3] = NULL;
-            r |= Test(FALSE, "All $ Queue items were handled, too many rounds, round=$ q=@", args);
+            args[3] = Util_Wrapped(m, crit->u);
+            args[4] = NULL;
+            r |= Test(FALSE, "All $ Queue items were handled, too many rounds,"
+                " round=$ q=& \\@$", args);
             return r;
         }
         crit->u += timeIncr;
@@ -506,7 +508,7 @@ status QueueScale_Tests(MemCh *gm){
     args[1] = q;
     args[2] = NULL;
     r |= Test(Equals(args[0], S(m, "Not Cool...")),
-        "Expected value above first slab found, have @, in &", args);
+        "Expected value above first slab found, have @, in @", args);
 
     compare = (u << idx);
     args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
@@ -523,60 +525,61 @@ status QueueScale_Tests(MemCh *gm){
     args[1] = q;
     args[2] = NULL;
     r |= Test(Equals(args[0], S(m, "Hidy Ho!")),
-        "Expected value above first slab found, have @, in &", args);
+        "Expected value above first slab found, have @, in @", args);
 
     args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
     args[1] = I32_Wrapped(m, idx);
     args[2] = NULL;
-    r |= Test(q->go & compare,
+    r |= Test((q->go & compare) != 0,
         "Expected q->go to be set to binary $ of 1 << @", args);
 
     Queue_Next(q);
     idx = 63;
+    compare = (1 << idx);
 
     args[0] = Queue_Get(q);
     args[1] = q;
     args[2] = NULL;
     r |= Test(Equals(args[0], S(m, "Livin on the Edge!")),
-        "Expected value above first slab found, have @, in &", args);
+        "Expected value above first slab found, have @, in @", args);
 
     args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
     args[1] = I32_Wrapped(m, idx);
     args[2] = NULL;
-    r |= Test(q->go & (1 << idx),
+    r |= Test((q->go & compare) != 0,
         "Expected q->go to be set to binary $ of 1 << @", args);
 
     Queue_Next(q);
     idx = 64;
+    compare = (u << 0);
 
     args[0] = Queue_Get(q);
     args[1] = q;
     args[2] = NULL;
     r |= Test(Equals(args[0], S(m, "XjfoaiwuerZduio")),
-        "Expected value above first slab found, have @, in &", args);
+        "Expected value above first slab found, have @, in @", args);
 
     args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
     args[1] = I32_Wrapped(m, idx);
     args[2] = NULL;
-    r |= Test(q->go & (u << 0),
+    r |= Test((q->go & compare) != 0,
         "Expected q->go to be set to binary $ of 1 << @", args);
 
     Queue_Next(q);
     idx = 65;
+    compare = (u << 1);
 
     args[0] = Queue_Get(q);
     args[1] = q;
     args[2] = NULL;
     r |= Test(Equals(args[0],  S(m, "SixyFivey")),
-        "Expected value above first slab found, have @, in &", args);
+        "Expected value above first slab found, have @, in @", args);
 
     args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
     args[1] = I32_Wrapped(m, idx);
     args[2] = NULL;
-    r |= Test(q->go == (u << 1),
+    r |= Test((q->go & compare) != 0,
         "Expected q->go to be set to binary $ of 1 << @", args);
-
-    return r;
 
     r |= Test((queueScaleTest(m, 10) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 10 scale tests finish with SUCCESS", NULL);
@@ -592,8 +595,6 @@ status QueueScale_Tests(MemCh *gm){
 
     r |= Test((queueScaleTest(m, 777) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 777 scale tests finish with SUCCESS", NULL);
-
-    r |= ERROR;
 
     MemCh_Free(m);
     DebugStack_Pop();
