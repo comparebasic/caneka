@@ -12,6 +12,7 @@ static char *cstr = ""
     "</head>\n"
     "<body>\n"
     "<header>\n"
+    "    <span class=\"logo\">Caneka Demo Site</span>\n"
     "    <nav class=\"bread-crumbs\">\n"
     "    <ul>\n"
     "        <li>\n"
@@ -48,6 +49,7 @@ static char *noMemWHeaderCstr  = ""
     "</head>\n"
     "<body>\n"
     "<header>\n"
+    "    <span class=\"logo\">Caneka Demo Site</span>\n"
     "    <nav class=\"bread-crumbs\">\n"
     "    <ul>\n"
     "        <li>\n"
@@ -70,8 +72,17 @@ static char *noMemWHeaderCstr  = ""
     "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
     "</section>\n"
     "<footer>\n"
-    "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
-    "    <img alt=\"logo\" src=\"/static/logo-transparent.png\" class=\"logo\" />\n"
+    "    <img alt=\"logo\" src=\"/static/logo-transparent-white_256.png\" class=\"Compare Basic logo\" />\n"
+    "    <div>\n"
+    "    <p>\n"
+    "    Caneka is a runtime from <a href=\"https://comparebasic.com\">Compare Basic</a> and \n"
+    "    is available for use under a \n"
+    "        <a href=\"https://github.com/comparebasic/caneka/blob/main/LICENCE\">3-Clause BSD Licence</a>.\n"
+    "    </p>\n"
+    "    <p>\n"
+    "        More details at <a href=\"https://caneka.org\">caneka.org</a>.\n"
+    "    </p>\n"
+    "    </div>\n"
     "</footer>\n"
     "</body>\n"
     "</html>\n"
@@ -88,6 +99,7 @@ static char *memWHeaderCstr  = ""
     "</head>\n"
     "<body>\n"
     "<header>\n"
+    "    <span class=\"logo\">Caneka Demo Site</span>\n"
     "    <nav class=\"bread-crumbs\">\n"
     "    <ul>\n"
     "        <li>\n"
@@ -137,6 +149,7 @@ static char *homeCstr = ""
     "</head>\n"
     "<body>\n"
     "<header>\n"
+    "    <span class=\"logo\">Caneka Demo Site</span>\n"
     "    <nav class=\"bread-crumbs\">\n"
     "    <ul>\n"
     "        <li>\n"
@@ -155,12 +168,21 @@ static char *homeCstr = ""
     "    </nav>\n"
     "</header>\n"
     "<section class=\"main\">\n"
-    "<H1>Home</H1>\n"
+    "<H1>About </H1>\n"
     "<P>Yay, homepage loads</P>\n"
     "</section>\n"
     "<footer>\n"
-    "    Caneka example site - <a href=\"https://caneka.org\">view caneka.org</a>\n"
-    "    <img alt=\"logo\" src=\"/static/logo-transparent.png\" class=\"logo\" />\n"
+    "    <img alt=\"logo\" src=\"/static/logo-transparent-white_256.png\" class=\"Compare Basic logo\" />\n"
+    "    <div>\n"
+    "    <p>\n"
+    "    Caneka is a runtime from <a href=\"https://comparebasic.com\">Compare Basic</a> and \n"
+    "    is available for use under a \n"
+    "        <a href=\"https://github.com/comparebasic/caneka/blob/main/LICENCE\">3-Clause BSD Licence</a>.\n"
+    "    </p>\n"
+    "    <p>\n"
+    "        More details at <a href=\"https://caneka.org\">caneka.org</a>.\n"
+    "    </p>\n"
+    "    </div>\n"
     "</footer>\n"
     "</body>\n"
     "</html>\n"
@@ -326,11 +348,13 @@ status WwwRouteTempl_Tests(MemCh *gm){
     Buff_Pipe(dest, bf);
 
     expected = Str_FromCstr(m, noMemWHeaderCstr, ZERO);
-    args[0] = dest->v;
-    args[1] = NULL;
-    r |= TestShow(Equals(expected, dest->v), 
+    args[0] = expected;
+    args[1] = dest->v;
+    args[2] = NULL;
+    expected->type.state |= DEBUG;
+    r |= TestShow(Equals(dest->v, expected), 
         "Footer: Expected template value with no mem object and a header",
-        "Footer: Expected template value with no mem object and a header: $", 
+        "Footer: Expected template value with no mem object and a header: expected:$\nhave:$", 
     args);
 
     DebugStack_SetRef("stats.templ mem details", TYPE_CSTR);
@@ -401,6 +425,7 @@ status WwwRouteTempl_Tests(MemCh *gm){
     expected = Str_FromCstr(m, homeCstr, ZERO);
     args[0] = dest->v;
     args[1] = NULL;
+    expected->type.state |= DEBUG;
     r |= TestShow(Equals(expected, dest->v),
         "Expected fmt value", 
         "Expected fmt value $", args);
@@ -444,8 +469,8 @@ status WwwPath_Tests(MemCh *gm){
     Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/system"));
     Inst_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
 
-    Route *route = Route_GetHandler(pages, IoPath(m, "/static/logo-transparent.png")); 
-    args[0] = IoAbsPath(m, "examples/web-server/pages/static/logo-transparent.png");
+    Route *route = Route_GetHandler(pages, IoPath(m, "/static/logo-transparent-white_256.png")); 
+    args[0] = IoAbsPath(m, "examples/web-server/pages/static/logo-transparent-white_256.png");
     args[1] = Seel_Get(route, S(m, "file"));
     args[2] = NULL;
     r |= Test(route != NULL && Equals(args[1], args[0]), 
