@@ -125,7 +125,7 @@ static i64 linkFunc(TranspCtx *ctx, word flags){
         href,
         text,
     };
-    return Fmt(ctx->bf, "<A href=\"$\">$</A>", args);
+    return Fmt(ctx->bf, "<A href=\"$\">$</A> ", args);
 }
 
 static i64 imageFunc(TranspCtx *ctx, word flags){

@@ -1,0 +1,31 @@
+= About
+
+This is a demo of the _link=Caneka@https://caneka.org  components working together.
+
+== What Is Caneka?
+
+Caneka is a collection of runtime software tools. This
+collection includes most of what is found in a common software stack. All in
+one place, built from simplistic components that can be analysed and
+understook.
+
+== Components In This Demo
+
+- Memory Manager.
+- Type System.
+- String, String Vector, and Buffer.
+- Pattern Matching and Parsing.
+- Network Server.
+- "Pencil" document transpiler.
+- Web Template Engine
+- Seel object property caching.
+
+The file that generated this page can be viewed _link=here@/static/about-fmt.txt.
+
+The command used to generate the _link=tests@/tests output was `./build/bin/tests --dist`.
+
+== This is Just The Beginning
+
+There's more to come, checkout the _link=Features@/schedule page for a list of
+planned improvements and demos from _link=Compare Basic@https://comparebasic.com.
+
