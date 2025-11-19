@@ -30,8 +30,7 @@ This page uses a  _link=Pencil file@/static/about-fmt.txt.
 The Stats page page uses a _link=Templ file@/static/stats-templ.txt. 
 The navigtaion is configured using this _link=Config@/static/nav-config.txt file.
 
-And the Tests page command is: `./build/bin/tests --dist`
-which outputs _link=this file@/static/tests-fmt.txt.
+And the Tests page command is `./build/bin/tests --dist` which outputs _link=this file@/static/tests-fmt.txt.
 
 All of these use a collection of
 the _link=Roebling@https://github.com/comparebasic/caneka/tree/main/src/ext/parser parser
