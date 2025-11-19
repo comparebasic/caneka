@@ -135,3 +135,13 @@ footer img.logo {
   display: block;
   margin: 10px auto;
 }
+
+input[type="checkbox"] + p + ul,
+input[type="checkbox"] + p + ul + p {
+    display:none;
+}
+
+input[type="checkbox"]:checked + p + ul,
+input[type="checkbox"]:checked + p + ul + p {
+    display:block;
+}
