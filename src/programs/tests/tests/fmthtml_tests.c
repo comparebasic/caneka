@@ -4,7 +4,7 @@
 static char *expectedCstr = ""
 "<H1>Hidy Ho</H1>\n"
 "<P>And this is a first paragraph with a second line.</P>\n"
-"<P>Second single sentance with details and a link <A href=\"http://example.com\">here</A>. </P>\n"
+"<P>Second single sentance with details and a link <A href=\"http://example.com\">here</A> .</P>\n"
 "<IMG alt=\"Image one\" src=\"image.png\" /><UL>\n"
 "  <LI>bullet one.</LI>\n"
 "  <LI>bullet two with two lines.</LI>\n"
