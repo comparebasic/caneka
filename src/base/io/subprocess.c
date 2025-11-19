@@ -51,7 +51,7 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
         }
     }
 
-    child = fork();
+    child = vfork();
     if(child == (pid_t)-1){
         DebugStack_Pop();
         return ERROR;
