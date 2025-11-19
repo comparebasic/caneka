@@ -31,19 +31,16 @@ h2 {
   font-size: 1.4rem;
 	margin-bottom: 2rem;
   margin: 2rem 0 0 0;
-  color: rgb(246,246,246);
   font-style: normal;
 }
 
 h3 {
-  color: rgb(180, 200, 0);
   font-style:italic;
   font-size: 1.4rem;
   margin: 2rem 0 0 0;
 }
 
 h4 {
-  color: rgb(80, 80, 80);
   text-decoration: italic;
   font-style:italic;
   font-size: 1.1rem;
