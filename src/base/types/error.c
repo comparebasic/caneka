@@ -8,6 +8,7 @@ boolean _error = FALSE;
 Abstract *ErrA = NULL;
 
 static boolean _fuse = TRUE;
+#ifdef SIGH_CATCH
 static void sigH(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
         _fuse = FALSE;
@@ -19,6 +20,7 @@ static void sigH(i32 sig, siginfo_t *info, void *ptr){
     }
     exit(1);
 }
+#endif
 
 static void sigQuit(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
@@ -79,10 +81,12 @@ static struct sigaction _c;
 static struct sigaction _d;
 static struct sigaction _e;
 static void setSigs(){
+#ifdef SIGH_CATCH
     memset(&_a, 0, sizeof(struct sigaction));
     _a.sa_flags = SA_NODEFER;
     _a.sa_sigaction = sigH;
     sigaction(SIGSEGV, &_a, NULL);
+#endif
 
     memset(&_b, 0, sizeof(struct sigaction));
     _b.sa_flags = SA_NODEFER;

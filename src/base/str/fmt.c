@@ -112,7 +112,7 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
                     Bits_Print(bf, s->bytes, s->length, 
                         ((s->type.state|bf->type.state) & DEBUG));
                     goto next;
-                }else if(s->type.state & DEBUG){
+                }else if((s->type.state & DEBUG) && (state & DEBUG) == 0){
                     Bytes_Debug(bf, s->bytes, s->bytes+s->length-1);
                     goto next;
                 }
@@ -124,7 +124,6 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
                 type = sg->objType.of;
                 a = sg->val.ptr;
             }
-
 
             ToS(bf, a, type, (state & (MORE|DEBUG)));
             state |= SUCCESS;

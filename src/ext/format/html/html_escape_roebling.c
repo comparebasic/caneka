@@ -48,6 +48,8 @@ static status start(MemCh *m, Roebling *rbl){
         quoteDef, HTML_ENT_QUOTE, HTML_ENT_CONTENT);
     r |= Roebling_SetPattern(rbl,
         squoteDef, HTML_ENT_SQUOTE, HTML_ENT_CONTENT);
+    r |= Roebling_SetPattern(rbl,
+        contentDef, HTML_ENT_CONTENT, HTML_ENT_CONTENT);
 
     return r;
 }
@@ -80,7 +82,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 status HtmlEnt_IntoVec(MemCh *m, Roebling *rbl, StrVec *v){
     rbl->dest = (Abstract *)StrVec_Make(m);
     Roebling_Reset(m, rbl, v);
-    return Roebling_Run(rbl);
+    Roebling_Run(rbl);
+    Roebling_Finalize(rbl, NULL, NEGATIVE);
+    return rbl->type.state;
 }
 
 Roebling *HtmlEntRbl_Make(MemCh *m, Cursor *curs, void *source){

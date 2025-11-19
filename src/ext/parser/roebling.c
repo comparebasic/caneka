@@ -270,9 +270,12 @@ i64 Roebling_GetMarkIdx(Roebling *rbl, i32 mark){
 status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v){
     Roebling_ResetPatterns(rbl);
     if(v != NULL){
-        Cursor_Setup(rbl->curs, v);
+        if(rbl->curs == NULL){
+            rbl->curs = Cursor_Make(m, v);
+        }else{
+            Cursor_Setup(rbl->curs, v);
+        }
     }
-
     rbl->type.state = (rbl->type.state & DEBUG);
     return SUCCESS;
 }

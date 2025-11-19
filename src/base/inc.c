@@ -38,7 +38,7 @@
 #include "./sequence/table.c"
 #include "./sequence/table_utils.c"
 #include "./sequence/path.c"
-#include "./str/cursor.c"
+#include "./str/cursor.deprecated.c"
 #include "./str/str.c"
 #include "./str/str_tos.c"
 #include "./str/str_maps.c"

@@ -113,7 +113,7 @@ static BuildSubdir serveobj = { "serve", {
     NULL
 }};
 
-static BuildSubdir transpobj = { "transp", {
+static BuildSubdir transpobj = { "transp.deprecated", {
     "transp.c",
     "transp_ctx.c",
     "transp_file.c",
