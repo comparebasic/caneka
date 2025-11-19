@@ -92,7 +92,11 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             continue;
         }
 
-        Out("=== Testing: $\n\n", args);
+        Out("=== Testing: $\n", args);
+
+        args[0] = K(m, set->description);
+        args[2] = NULL;
+        Out("\n$\n\n", args);
 
         status r = READY;
         DebugStack_SetRef(set->name, TYPE_CSTR);
