@@ -20,7 +20,7 @@ static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
         }else{
             Buff_AddBytes(bf, (byte *)" - ", 3);
         }
-        ToS(bf, se->ref, se->typeOf, MORE);
+        ToS(bf, se->ref, se->typeOf, DEBUG|MORE);
     }
 
     if(Ansi_HasColor()){

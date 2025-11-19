@@ -112,10 +112,11 @@ static status Templ_handleJump(Templ *templ){
         }
 
         if(it->type.state & END){
-            if(jump->skipIdx != NEGATIVE){
-                Iter_GetByIdx(&templ->content, jump->skipIdx);
-            }else if(skipIdx != NEGATIVE){
-                Iter_GetByIdx(&templ->content, skipIdx);
+            i32 idx = jump->skipIdx != NEGATIVE ? jump->skipIdx : skipIdx;
+            if(idx != NEGATIVE){
+                Iter_GetByIdx(&templ->content, idx);
+                Iter_Remove(&templ->data);
+                Iter_Prev(&templ->data);
             }
         }
         r |= PROCESSING;
