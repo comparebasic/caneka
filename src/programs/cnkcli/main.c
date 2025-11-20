@@ -3,7 +3,8 @@
 #include <cnkcli.h>
 
 i32 main(int argc, char **argv){
-    void *args[5];
+    void *args[16];
+    status r = READY;
     MemBook *cp = MemBook_Make(NULL);
     if(cp == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
@@ -58,11 +59,13 @@ i32 main(int argc, char **argv){
     i32 code = 0;
 
     Str *config = Table_Get(cliArgs, configKey);
+    NodeObj *configNode = NULL;
     if(config != NULL){
         Str *path = IoUtil_GetAbsPath(m, config);
-        NodeObj *config = Config_FromPath(m, path);
+        configNode = Config_FromPath(m, path);
 
-        NodeObj *forever = Inst_ByPath(config, IoPath(m, "forever"), NULL, SPAN_OP_GET);
+        NodeObj *forever = Inst_ByPath(configNode,
+            IoPath(m, "forever"), NULL, SPAN_OP_GET);
         if(forever != NULL){
             Table *atts = Seel_Get(forever, K(m, "atts"));
             StrVec *logdir = Table_Get(atts, K(m, "logdir"));
@@ -99,22 +102,87 @@ i32 main(int argc, char **argv){
                     Time_Delay(TIME_SEC, &remaining);
                 }
             }
+            if(r == READY){
+                r |= NOOP;
+            }
         }
-    }else{
+    }
+
+    if((r & (SUCCESS|ERROR|NOOP)) == 0){
         Str *inFileArg = Table_Get(cliArgs, inFileKey);
         Str *outFileArg = Table_Get(cliArgs, outFileKey);
-        if(inFileKey != NULL || outFileKey != NULL){
+        if(inFileArg != NULL || outFileArg != NULL){
 
-            StrVec *inPath = IoUtil_AbsVec(m, StrVec_From(m, inFileKey));
-            StrVec *outPath = IoUtil_AbsVec(m, StrVec_From(m, outFileKey));
+            StrVec *headerPath = NULL;
+            StrVec *footerPath = NULL;
+
+            if(configNode != NULL){
+                args[0] = configNode;
+                args[1] = NULL;
+                Out("^y.config @^0\n", args);
+
+                NodeObj *html = Inst_ByPath(configNode, IoPath(m, "html"),
+                    NULL, SPAN_OP_GET);
+                if(html != NULL){
+                    Table *atts = Seel_Get(html, K(m, "atts"));
+                    headerPath = Table_Get(atts, K(m, "header"));
+                    footerPath = Table_Get(atts, K(m, "footer"));
+                }
+            }
+
+            StrVec *inPath = IoPath_From(m, inFileArg);
+            StrVec *outPath = IoPath_From(m, outFileArg);
             StrVec *inExt = Path_Ext(m, inPath);
             StrVec *outExt = Path_Ext(m, outPath);
 
             args[0] = cliArgs;
-            args[1] = inExt;
-            args[2] = outExt;
-            args[3] = NULL;
-            Out("^p.Args Found @\n  ^y.in:@ out:@^0\n", args);
+            args[1] = NULL;
+            Out("^p.Args Found &^0\n", args);
+
+            if(Equals(inExt, K(m, "fmt")) && Equals(outExt, K(m, "html"))){
+                args[0] = inFileArg;
+                args[1] = outFileArg;
+                args[2] = NULL;
+                Out("^c.Transpiling Pencil Fmt -> HTML: @/@^0\n", args);
+
+                StrVec *content = File_ToVec(m, inFileArg);
+                Cursor *curs = Cursor_Make(m, content); 
+                Roebling *rbl = FormatFmt_Make(m, curs, NULL);
+                r |= Roebling_Run(rbl);
+                if(r & ERROR){
+                    args[0] = inFileArg;
+                    args[1] = NULL;
+                    Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                        "Error preparing template for $", args);
+                    code = 7;
+                }else{
+                    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
+                    r |= File_Open(bf, outFileArg, O_CREAT|O_WRONLY|O_TRUNC);
+                    if((r & ERROR) == 0 && headerPath != NULL){
+                        Buff *_bf = Buff_Make(m, BUFF_UNBUFFERED);
+                        r |= File_Open(_bf, StrVec_Str(m, headerPath), O_RDONLY);
+                        r |= Buff_Pipe(bf, _bf);
+                    }
+
+                    if((r & ERROR) == 0){
+                        r |= Fmt_ToHtml(bf, (Mess *)as(rbl->dest, TYPE_MESS));
+                    }
+
+                    if((r & ERROR) == 0 && footerPath != NULL){
+                        Buff *_bf = Buff_Make(m, BUFF_UNBUFFERED);
+                        r |= File_Open(_bf, StrVec_Str(m, footerPath), O_RDONLY);
+                        r |= Buff_Pipe(bf, _bf);
+                    }
+                    r |= File_Close(bf);
+
+                    if((r & (SUCCESS|ERROR)) != SUCCESS){
+                        args[0] = bf;
+                        args[1] = NULL;
+                        Out("^r.Error of some kind @^0\n", args);
+                        code = 7; 
+                    }
+                }
+            }
         }
     }
 

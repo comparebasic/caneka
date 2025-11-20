@@ -261,6 +261,9 @@ status Path_SpaceAnnotate(MemCh *m, StrVec *v){
 
 status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     status r = READY;
+    if(v == NULL){
+        return NOOP;
+    }
 
     Span *p = Span_Clone(m, v->p);
     Span_Wipe(v->p);
