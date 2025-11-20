@@ -19,51 +19,45 @@ i32 main(int argc, char **argv){
     Core_Direct(m, 1, 2);
     DebugStack_Push(NULL, 0);
 
+    Str *helpKey = K(m, "help");
+    Str *noColorKey = K(m, "no-color");
+    Str *inFileKey = K(m, "in");
+    Str *outFileKey = K(m, "out");
+    Str *configKey = K(m, "config");
+    Str *secretKeyKey = K(m, "secret");
+    Str *publicKeyKey = K(m, "public");
+    Str *licenceKey = K(m, "licence");
+    Str *versionKey = K(m, "version");
+
     Table *resolveArgs = Table_Make(m);
-    Args_Add(resolveArgs,
-        S(m, "help"), NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, helpKey, NULL, ARG_OPTIONAL);
 
-    Span *actions = Span_Make(m);
-        Span_Add(actions, S(m, "pencil"));
-        Span_Add(actions, S(m, "binseg"));
-        Span_Add(actions, S(m, "templ"));
-    Args_Add(resolveArgs, S(m, "action"), actions, (ARG_CHOICE|ARG_DEFAULT));
+    Args_Add(resolveArgs, noColorKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, inFileKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, outFileKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, configKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, configKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, secretKeyKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, publicKeyKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, licenceKey, NULL, ARG_OPTIONAL);
+    Args_Add(resolveArgs, versionKey, NULL, ARG_OPTIONAL);
 
-    Args_Add(resolveArgs, S(m, "out-file"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "in-file"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "no-color"), NULL, ARG_OPTIONAL);
-
-    Args_Add(resolveArgs, S(m, "config"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "reversed"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "secret-key"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "public-key"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "licence"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "version"), NULL, ARG_OPTIONAL);
-    Span *transOptions = Span_Make(m); Span_Add(transOptions, S(m, "terminal"));
-        Span_Add(transOptions, S(m, "json"));
-        Span_Add(transOptions, S(m, "pencil"));
-        Span_Add(transOptions, S(m, "binseg"));
-        Span_Add(transOptions, S(m, "binseg-r"));
-    Args_Add(resolveArgs, S(m, "trans"), transOptions, (ARG_CHOICE|ARG_DEFAULT));
-
-    StrVec *name = StrVec_From(m, S(m, argv[0]));
-    IoUtil_Annotate(m, name);
-    Str *fname = IoUtil_FnameStr(m, name);
+    Str *fname = S(m, argv[0]);
 
     Table *cliArgs = Table_Make(m);
     CharPtr_ToTbl(m, resolveArgs, argc, argv, cliArgs);
-    if(Table_GetHashed(cliArgs, S(m, "help")) != NULL){
+    if(Table_GetHashed(cliArgs, helpKey) != NULL){
         CharPtr_ToHelp(m, fname, resolveArgs, argc, argv);
         return 1;
     }
 
-    if(Table_GetHashed(cliArgs, S(m, "no-color")) != NULL){
+    if(Table_GetHashed(cliArgs, noColorKey) != NULL){
         Ansi_SetColor(FALSE);
     }
 
     i32 code = 0;
 
-    Str *config = Table_Get(cliArgs, K(m, "config"));
+    Str *config = Table_Get(cliArgs, configKey);
     if(config != NULL){
         Str *path = IoUtil_GetAbsPath(m, config);
         NodeObj *config = Config_FromPath(m, path);
@@ -105,6 +99,22 @@ i32 main(int argc, char **argv){
                     Time_Delay(TIME_SEC, &remaining);
                 }
             }
+        }
+    }else{
+        Str *inFileArg = Table_Get(cliArgs, inFileKey);
+        Str *outFileArg = Table_Get(cliArgs, outFileKey);
+        if(inFileKey != NULL || outFileKey != NULL){
+
+            StrVec *inPath = IoUtil_AbsVec(m, StrVec_From(m, inFileKey));
+            StrVec *outPath = IoUtil_AbsVec(m, StrVec_From(m, outFileKey));
+            StrVec *inExt = Path_Ext(m, inPath);
+            StrVec *outExt = Path_Ext(m, outPath);
+
+            args[0] = cliArgs;
+            args[1] = inExt;
+            args[2] = outExt;
+            args[3] = NULL;
+            Out("^p.Args Found @\n  ^y.in:@ out:@^0\n", args);
         }
     }
 
