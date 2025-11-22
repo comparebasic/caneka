@@ -186,6 +186,10 @@ i32 main(int argc, char **argv){
         }
     }
 
+    args[0] = cliArgs;
+    args[1] = NULL;
+    Out("^p.Args @^0\n", args);
+
     DebugStack_Pop();
     return code;
 }
