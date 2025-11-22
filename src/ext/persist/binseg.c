@@ -122,7 +122,9 @@ status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     if(ctx->type.state & BINSEG_VISIBLE){
         entry = Str_ToHex(m, entry);
     }
+    m->level--;
     status r = Buff_Add(ctx->bf, entry);
+    m->level++;
     if(ctx->type.state & DEBUG){
         void *args[5];
         args[0] = Type_StateVec(m, ctx->type.of, ctx->type.state),
@@ -137,6 +139,7 @@ status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
 }
 
 status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id){
+    status r = READY;
     Abstract *a = (Abstract *)_a;
     DebugStack_Push(ctx, ctx->type.of);
     void *args[2];
@@ -150,7 +153,9 @@ status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id){
         return 0;
     }
     DebugStack_Pop();
-    return func(ctx, a, id);
+    r = func(ctx, a, id);
+    MemCh_FreeTemp(ctx->bf->m);
+    return r;
 }
 
 status BinSegCtx_Load(BinSegCtx *ctx){

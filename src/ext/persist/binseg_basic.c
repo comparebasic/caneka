@@ -3,6 +3,7 @@
 
 static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     MemCh *m = ctx->bf->m;
+    m->level++;
     Table *tbl = (Span *)as(a, TYPE_TABLE);
     status r = READY;
 
@@ -40,11 +41,13 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
         r |= BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
+    m->level--;
     return r;
 }
 
 static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     MemCh *m = ctx->bf->m;
+    m->level++;
     Span *p = (Span *)as(a, TYPE_SPAN);
     status r = READY;
 
@@ -81,6 +84,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
         r |= BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
+    m->level--;
     return r;
 }
 
@@ -105,6 +109,7 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
 static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
     MemCh *m = ctx->bf->m;
+    m->level++;
     status r = READY;
 
     Str *content;
@@ -138,6 +143,7 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
         r |= BinSegCtx_ToBuff(ctx, hdr, entry);
     }
 
+    m->level--;
     return r;
 }
 

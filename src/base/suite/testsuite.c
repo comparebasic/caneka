@@ -76,6 +76,8 @@ status Test_Runner(MemCh *m, char *suiteName, TestSet *tests){
     MemBookStats st;
     MemBook_GetStats(m, &st);
     i32 baseMem = st.total;
+    i32 threashold = 2;
+    i32 maxCeiling = TEST_MEM_MAX_CEILING;
 
     args[0] = Str_CstrRef(m, suiteName);
     args[1] = NULL;
@@ -113,16 +115,33 @@ status Test_Runner(MemCh *m, char *suiteName, TestSet *tests){
             MemBook_GetStats(m, &st);
             i64 memUsed = st.total - baseMem;
 
+            if(tm->metrics.totalCeiling > maxCeiling){
+                args[0] = I64_Wrapped(m, maxCeiling);
+                args[1] = I64_Wrapped(m, tm->metrics.totalCeiling);
+                args[2] = NULL;
+                Out("\n^r.Ceiling for test memory too high max=$ ceiling=$^0\n", args);
+                r |= ERROR;
+            }
+
             args[0] = Str_MemCount(m, tm->metrics.totalCeiling * PAGE_SIZE),
             args[1] = I32_Wrapped(m, tm->metrics.totalCeiling);
             args[2] = I64_Wrapped(m, st.total),
             args[3] = I64_Wrapped(m, st.pageIdx),
             args[4] = I64_Wrapped(m, PAGE_SIZE),
             args[5] = NULL;
-            Out("^c.\nMem ceiling='$' ceiling/global/max=^D.$/$/$^d. page-size=$b^0\n\n",
+            Out("\n^c.Mem ceiling='$' ceiling/global/max=^D.$/$/$^d. page-size=$b^0\n\n",
                 args);
 
             MemCh_Free(tm);
+
+            MemBook_GetStats(m, &st);
+            if(st.total > (baseMem+threashold)){
+                args[0] = I64_Wrapped(m, st.total);
+                args[1] = I64_Wrapped(m, baseMem);
+                Out("\n^r.MemLeak total-after-free=$ baseMem=$^0\n", args);
+                r |= ERROR;
+            }
+            baseMem = st.total;
 
             m->level--;
             MemCh_FreeTemp(m);

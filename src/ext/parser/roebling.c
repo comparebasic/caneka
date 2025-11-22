@@ -228,9 +228,7 @@ i32 Roebling_GetMatchIdx(Roebling *rbl){
 }
 
 status Roebling_ResetPatterns(Roebling *rbl){
-    if(rbl->m->level > 0){
-        MemCh_Free(rbl->m);
-    }
+    MemCh_FreeTemp(rbl->m);
 
     Span *p = Span_Make(rbl->m);
     Iter_Init(&rbl->matchIt, p);
