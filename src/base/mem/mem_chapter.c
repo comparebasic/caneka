@@ -1,51 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-static status MemCh_freeLevel(MemCh *m, i16 level){
-    status r = READY;
-
-    Iter_Reset(&m->it);
-    while((Iter_Next(&m->it) & END) == 0){
-        if(m->it.idx == 0){
-            continue;
-        }
-        MemPage *pg = (MemPage *)m->it.value;
-        if(pg != NULL && pg->level >= level){
-            r |= MemBook_FreePage(m, pg);
-            r |= Iter_Remove(&m->it);
-        }
-    }
-
-    MemBook_WipePages(m);
-
-    if(r == READY){
-        r |= NOOP;
-    }
-
-    return r;
-}
-
 static MemPage *MemCh_AddPage(MemCh *m, i16 level){
     MemPage *pg = MemPage_Make(m, level);
     Iter_Add(&m->it, (void *)pg);
     return pg;
-}
-
-status MemCh_FreeTemp(MemCh *m){
-    status r = READY;
-    i16 level = m->level+1;
-
-    Iter_Reset(&m->it);
-    while((Iter_Next(&m->it) & END) == 0){
-        MemPage *pg = (MemPage *)m->it.value;
-        if(pg != NULL && pg->level >= level){
-            r |= MemBook_FreePage(m, pg);
-            r |= Iter_Remove(&m->it);
-        }
-    }
-
-    MemBook_WipePages(m);
-    return r;
 }
 
 void *MemCh_Alloc(MemCh *m, size_t sz){
@@ -126,10 +85,31 @@ void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
     return p; 
 }
 
+status MemCh_FreeTemp(MemCh *m){
+    status r = READY;
+    i16 level = m->level+1;
+
+    Iter_Reset(&m->it);
+    while((Iter_Next(&m->it) & END) == 0){
+        MemPage *pg = (MemPage *)m->it.value;
+        if(pg != NULL && pg->level >= level){
+            r |= MemBook_FreePage(m, pg);
+            r |= Iter_Remove(&m->it);
+        }
+    }
+
+    MemBook_WipePages(m);
+    return r;
+}
+
 status MemCh_Free(MemCh *m){
-    status r = MemCh_freeLevel(m, m->level);
-    if(m->level == 0){
-        r |= MemBook_FreePage(m, Span_Get(m->it.p, 0));
+    status r = READY;
+    Iter_Reset(&m->it);
+    while((Iter_Next(&m->it) & END) == 0){
+        MemPage *pg = (MemPage *)m->it.value;
+        if(pg != NULL){
+            r |= MemBook_FreePage(m, pg);
+        }
     }
     MemBook_WipePages(m);
     return r;

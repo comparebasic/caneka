@@ -131,8 +131,8 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
             args[5] = NULL;
             Out("$\nMem $ total/maxIdx=^D.$/$^d. page-size=$b^0\n\n", args);
 
-            MemCh_Free(m);
             m->level--;
+            MemCh_FreeTemp(m);
             if((r & ERROR) != 0 || (r & SUCCESS) == 0){
                 fail++;
                 break;

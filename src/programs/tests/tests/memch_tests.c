@@ -77,15 +77,16 @@ status MemChLevel_Tests(MemCh *gm){
     for(i32 i = 0; i < 1000; i++){
         Span_Add(p, I32_Wrapped(x, i));
     }
-    MemCh_Free(x);
     x->level--;
-    MemCh_Free(x);
-    x->level--;
+    MemCh_FreeTemp(x);
 
     p = Span_Make(x);
     for(i32 i = 0; i < 2000; i++){
         Span_Add(p, I32_Wrapped(x, i));
     }
+    x->level--;
+    MemBook_GetStats(gm, &st);
+    MemCh_FreeTemp(x);
     MemCh_Free(x);
 
 #ifdef INSECURE

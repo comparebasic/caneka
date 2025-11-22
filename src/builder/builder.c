@@ -356,8 +356,8 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
         ctx->fields.steps.count->val.i++;
         ctx->fields.steps.modSrcCount->val.i++;
 
-        MemCh_Free(m);
         m->level--;
+        MemCh_FreeTemp(m);
         sourceCstr++;
         if(r & ERROR){
             return r;
