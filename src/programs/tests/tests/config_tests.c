@@ -1,11 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-status Config_Tests(MemCh *gm){
+status Config_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/object.config"));
     StrVec *content = File_ToVec(m, path);
@@ -106,7 +105,6 @@ status Config_Tests(MemCh *gm){
             "NodeObj @ att @ has expected value @: @", args);
     }
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

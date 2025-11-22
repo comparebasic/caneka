@@ -1,11 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-status MemCh_Tests(MemCh *gm){
+status MemCh_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
 
-    MemCh *m = MemCh_Make();
     MemBook *cp = NULL;
 #ifdef INSECURE
     cp = MemBook_Get(m);
@@ -13,7 +12,7 @@ status MemCh_Tests(MemCh *gm){
 #endif
 
     MemBookStats st;
-    MemBook_GetStats(gm, &st);
+    MemBook_GetStats(m, &st);
     i32 start = st.total;
 
     MemCh *x = MemCh_Make();
@@ -42,19 +41,17 @@ status MemCh_Tests(MemCh *gm){
     cp->type.state &= ~DEBUG;
 #endif
 
-    MemBook_GetStats(gm, &st);
+    MemBook_GetStats(m, &st);
     r |= Test(st.total == start, "MemBook chapters match the start level", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status MemChLevel_Tests(MemCh *gm){
+status MemChLevel_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
 
-    MemCh *m = MemCh_Make();
     MemBook *cp = NULL;
 #ifdef INSECURE
     cp = MemBook_Get(m);
@@ -62,7 +59,7 @@ status MemChLevel_Tests(MemCh *gm){
 #endif
 
     MemBookStats st;
-    MemBook_GetStats(gm, &st);
+    MemBook_GetStats(m, &st);
     i32 start = st.total;
 
     MemCh *x = MemCh_Make();
@@ -85,7 +82,7 @@ status MemChLevel_Tests(MemCh *gm){
         Span_Add(p, I32_Wrapped(x, i));
     }
     x->level--;
-    MemBook_GetStats(gm, &st);
+    MemBook_GetStats(m, &st);
     MemCh_FreeTemp(x);
     MemCh_Free(x);
 
@@ -94,10 +91,9 @@ status MemChLevel_Tests(MemCh *gm){
     cp->type.state &= ~DEBUG;
 #endif
 
-    MemBook_GetStats(gm, &st);
+    MemBook_GetStats(m, &st);
     r |= Test(st.total == start, "MemBook chapters match the start level", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

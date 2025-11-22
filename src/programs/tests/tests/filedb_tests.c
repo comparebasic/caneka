@@ -1,11 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-status FileDB_Tests(MemCh *gm){
+status FileDB_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/file.d"));
     unlink(Str_Cstr(m, path));
@@ -91,7 +90,6 @@ status FileDB_Tests(MemCh *gm){
         "Found new pw from table, exected @, have @", args);
     FileDB_Close(fdb);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

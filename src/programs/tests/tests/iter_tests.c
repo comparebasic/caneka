@@ -60,9 +60,8 @@ static status makeAndIterPrevRemoveItems(MemCh *m, i64 max){
 }
 
 
-status Iter_Tests(MemCh *gm){
+status Iter_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     Span *p;
     Str *s;
     status r = READY;
@@ -327,13 +326,11 @@ status Iter_Tests(MemCh *gm){
     m->level--;
     MemCh_FreeTemp(m);
     DebugStack_Pop();
-
     return r;
 }
 
-status IterMax_Tests(MemCh *gm){
+status IterMax_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     void *args[5];
 
     Span *p = Span_Make(m);
@@ -498,17 +495,14 @@ status IterMax_Tests(MemCh *gm){
     r |= makeAndIterItems(m, 63000);
     r |= makeAndIterItems(m, 72000);
 
-    MemCh_Free(m);
     return r;
 }
 
-status IterPrevRemove_Tests(MemCh *gm){
+status IterPrevRemove_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     r |= makeAndIterPrevRemoveItems(m, 10);
     r |= makeAndIterPrevRemoveItems(m, 300);
     r |= makeAndIterPrevRemoveItems(m, 5000);
     r |= makeAndIterPrevRemoveItems(m, 63000);
-    MemCh_Free(m);
     return r;
 }

@@ -22,6 +22,7 @@ static char *statusCstr(word status){
 }
 
 status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]){
+    OutStream->m->level++;
     if(!condition){
         Out("^r.- FAIL ", NULL);
     }else{
@@ -35,10 +36,13 @@ status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[
         Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }
     Out("^0", NULL);
+    OutStream->m->level--;
+    MemCh_FreeTemp(OutStream->m);
     return condition ? SUCCESS : ERROR;
 }
 
 status Test(boolean condition, char *fmt, void *args[]){
+    OutStream->m->level++;
     if(!condition){
         Out("^r.- FAIL ", NULL);
     }else{
@@ -51,12 +55,14 @@ status Test(boolean condition, char *fmt, void *args[]){
         Buff_AddBytes(OutStream, (byte *)"\n", 1);
     }
     Out("^0", NULL);
+    OutStream->m->level--;
+    MemCh_FreeTemp(OutStream->m);
     return condition ? SUCCESS : ERROR;
 }
 
-status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
-    MemCh *m = MemCh_Make();
+status Test_Runner(MemCh *m, char *suiteName, TestSet *tests){
     DebugStack_Push(suiteName, TYPE_CSTR); 
+    m->level++;
     TestSet *set = tests;
     char *name = NULL;
     i32 pass = 0;
@@ -68,24 +74,23 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     StrVec *v = StrVec_Make(m);
 
     MemBookStats st;
-    MemBook_GetStats(gm, &st);
+    MemBook_GetStats(m, &st);
     i32 baseMem = st.total;
-    i32 rollingBaseMem = baseMem;
 
-    args[0] = Str_CstrRef(gm, suiteName);
+    args[0] = Str_CstrRef(m, suiteName);
     args[1] = NULL;
     Out("= Test Suite: _c\n", args);
 
     args[0] = Str_MemCount(m, st.total * PAGE_SIZE);
-    args[1] = I64_Wrapped(gm, st.total);
-    args[2] = I64_Wrapped(gm, st.pageIdx);
-    args[3] = I64_Wrapped(gm, PAGE_SIZE);
+    args[1] = I64_Wrapped(m, st.total);
+    args[2] = I64_Wrapped(m, st.pageIdx);
+    args[3] = I64_Wrapped(m, PAGE_SIZE);
     args[4] = NULL;
 
     Out("\nStarting Mem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args);
 
     while(set->name != NULL){
-        args[0] = Str_CstrRef(gm, set->name);
+        args[0] = Str_CstrRef(m, set->name);
         if(set->status == SECTION_LABEL){
             Out("^E.== $  ^e.\n", args);
             set++;
@@ -102,37 +107,26 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
         DebugStack_SetRef(set->name, TYPE_CSTR);
         if(set->func != NULL){
             m->level++;
-            r = set->func(m);
-            m->level--;
+            MemCh *tm = MemCh_Make();
+            r = set->func(tm);
 
-            word stackLevel = m->level-baseStackLevel;
-            m->level++;
-
-            MemBook_GetStats(gm, &st);
+            MemBook_GetStats(m, &st);
             i64 memUsed = st.total - baseMem;
-            i64 overRollingUsed = st.total-rollingBaseMem;
-            rollingBaseMem = st.total;
 
-            char *htmlCls = "";
-            Str *color = Str_CstrRef(m, "");
-            if(overRollingUsed > 0 || stackLevel > 0){
-                color = Str_AnsiCstr(m, "b.");
-            }else if(memUsed > 0){
-                color = Str_AnsiCstr(m, "c.");
-            }else{
-                color = Str_AnsiCstr(m, "c.");
-            }
-
-            args[0] = color,
-            args[1] = Str_MemCount(m, st.total * PAGE_SIZE),
-            args[2] = I64_Wrapped(gm, st.total),
-            args[3] = I64_Wrapped(gm, st.pageIdx),
-            args[4] = I64_Wrapped(gm, PAGE_SIZE),
+            args[0] = Str_MemCount(m, tm->metrics.totalCeiling * PAGE_SIZE),
+            args[1] = I32_Wrapped(m, tm->metrics.totalCeiling);
+            args[2] = I64_Wrapped(m, st.total),
+            args[3] = I64_Wrapped(m, st.pageIdx),
+            args[4] = I64_Wrapped(m, PAGE_SIZE),
             args[5] = NULL;
-            Out("$\nMem $ total/maxIdx=^D.$/$^d. page-size=$b^0\n\n", args);
+            Out("^c.\nMem ceiling='$' ceiling/global/max=^D.$/$/$^d. page-size=$b^0\n\n",
+                args);
+
+            MemCh_Free(tm);
 
             m->level--;
             MemCh_FreeTemp(m);
+            Buff_Flush(OutStream);
             if((r & ERROR) != 0 || (r & SUCCESS) == 0){
                 fail++;
                 break;
@@ -144,9 +138,9 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
         set++;
     }
 
-    args[0] = Str_CstrRef(gm, suiteName),
-    args[1] = I32_Wrapped(gm, pass),
-    args[2] = I32_Wrapped(gm, fail),
+    args[0] = Str_CstrRef(m, suiteName),
+    args[1] = I32_Wrapped(m, pass),
+    args[2] = I32_Wrapped(m, fail),
     args[3] = NULL;
     if(!fail){
         Out("^g", NULL);
@@ -155,6 +149,8 @@ status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests){
     }
     Out("Suite $ pass($) fail($)^0\n", args);
 
+    m->level--;
+    MemCh_FreeTemp(m);
     DebugStack_Pop();
     return !fail ? SUCCESS : ERROR;
 }

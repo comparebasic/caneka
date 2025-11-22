@@ -1,13 +1,12 @@
 #include <external.h>
 #include <caneka.h>
 
-status Clone_Tests(MemCh *gm){
+status Clone_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     Abstract *a = NULL;
     Abstract *b = NULL;
 
-    MemCh *m = MemCh_Make();
     void **args = Arr_Make(m, 3);
     a = (Abstract *)Str_CstrRef(m, "fancy things");
     b =  Clone(m, a);
@@ -37,7 +36,5 @@ status Clone_Tests(MemCh *gm){
     args[1] = b;
     r |= Test(Equals(a, b), "StrVec clone is equal, expected @ have @", args);
 
-
-    DebugStack_Pop();
     return r;
 }

@@ -500,6 +500,7 @@ status Buff_Flush(Buff *bf){
         args[1] = NULL;
         Out("^p    flushed - Flushing @\n", args);
     }
+
     return bf->type.state;
 }
 

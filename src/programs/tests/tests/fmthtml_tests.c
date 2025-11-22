@@ -23,11 +23,10 @@ static char *expectedCstr = ""
 "<P>And the final text here.</P>\n"
 ;
 
-status FmtHtml_Tests(MemCh *gm){
+status FmtHtml_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s = NULL; 
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
@@ -51,7 +50,6 @@ status FmtHtml_Tests(MemCh *gm){
     r |= Test(matches, 
         "Fmt to HTML has expected html content", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

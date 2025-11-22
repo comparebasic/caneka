@@ -2,10 +2,9 @@
 #include <caneka.h>
 #include <tests.h>
 
-status Crypto_Tests(MemCh *gm){
+status Crypto_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    MemCh *m = MemCh_Make();
     void *args[5];
 
     Str *s = Str_CstrRef(m, "Yay test string!");
@@ -134,7 +133,6 @@ status Crypto_Tests(MemCh *gm){
     args[2] = NULL;
     r |= Test(valid & SUCCESS, "Message validates: @ -> sig:@", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

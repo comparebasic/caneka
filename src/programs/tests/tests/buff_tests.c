@@ -1,11 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-status Buff_Tests(MemCh *gm){
+status Buff_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
-    MemCh *m = MemCh_Make();
 
     Buff *bf = Buff_Make(m, ZERO);
 
@@ -62,17 +61,15 @@ status Buff_Tests(MemCh *gm){
     r |= Test(Equals(bf->v, expectedVec),
         "Content with a long additional is expected in StrVec of Buff", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
 
     return r;
 }
 
-status BuffSendRecv_Tests(MemCh *gm){
+status BuffSendRecv_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
-    MemCh *m = MemCh_Make();
 
     Str *s = Str_CstrRef(m, "All of the things you want to know are kindof like "
         "dandilions.");
@@ -114,17 +111,14 @@ status BuffSendRecv_Tests(MemCh *gm){
     r |= Test(Equals(bf->v, expectedVec),
         "Buff_GetStr has populated an equal StrVec", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
-
     return r;
 }
 
-status BuffIo_Tests(MemCh *gm){
+status BuffIo_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
-    MemCh *m = MemCh_Make();
 
     StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, Str_CstrRef(m, "examples/test/")));
     Dir_CheckCreate(m, StrVec_Str(m, path));
@@ -220,17 +214,15 @@ status BuffIo_Tests(MemCh *gm){
     r |= Test(IoUtil_Unlink(StrVec_Str(m, pathTwo)) & SUCCESS, 
         "Remove file @", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
 
     return r;
 }
 
-status BuffPos_Tests(MemCh *gm){
+status BuffPos_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
-    MemCh *m = MemCh_Make();
     Buff *bf = Buff_Make(m, ZERO);
 
     Buff_Add(bf, Str_CstrRef(m, "Once upon a time..."));
@@ -256,7 +248,6 @@ status BuffPos_Tests(MemCh *gm){
     Buff_PosAbs(bf, 7);
     r |= Test(bf->unsent.total == 60, "Buff 7(abs): Expected position and unset $", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

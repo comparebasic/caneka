@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Match_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status Match_Tests(MemCh *m){
     Span *p;
     status r = READY;
 
@@ -62,12 +61,10 @@ status Match_Tests(MemCh *gm){
 
     void *args4[] = {s, mt->backlog, (void *)((i64)TYPE_SNIPSPAN), NULL};
 
-    MemCh_Free(m);
     return r;
 }
 
-status MatchElastic_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status MatchElastic_Tests(MemCh *m){
     status r = READY;
 
     Match *mt = NULL;
@@ -137,12 +134,10 @@ status MatchElastic_Tests(MemCh *gm){
     };
     r |= Test(total == 4, "Att - Found 4 chars, count is @", args4);
 
-    MemCh_Free(m);
     return r;
 }
 
-status MatchKo_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status MatchKo_Tests(MemCh *m){
     Span *p;
     status r = READY;
 
@@ -308,12 +303,10 @@ status MatchKo_Tests(MemCh *gm){
     };
     r |= Test(total == 1, "counted first letter only, have $", args8);
 
-    MemCh_Free(m);
     return r;
 }
 
-status MatchReplace_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status MatchReplace_Tests(MemCh *m){
     Span *p;
     status r = READY;
     Match *mt = NULL;
@@ -364,6 +357,5 @@ status MatchReplace_Tests(MemCh *gm){
         Str_CstrRef(m, "/happy/it/fancy/things")),
         "Match @: Replacing @ with @ in $ to make &\n", args2);
 
-    MemCh_Free(m);
     return r;
 }

@@ -1,9 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status BinSeg_Tests(MemCh *gm){
+status BinSeg_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     status r = READY;
     void *args[5];
     
@@ -32,14 +31,12 @@ status BinSeg_Tests(MemCh *gm){
     r |= Test(Equals(Table_Get(tbl, key2), two), 
         "second value is expected", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status BinSegCollection_Tests(MemCh *gm){
+status BinSegCollection_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     status r = READY;
     void *args[5];
     
@@ -134,14 +131,12 @@ status BinSegCollection_Tests(MemCh *gm){
     r |= Test(Equals(args[1], args[0]),
         "key3 StrVec value is equal, expected @, have @", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status BinSegV_Tests(MemCh *gm){
+status BinSegV_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     status r = READY;
     void *args[5];
     
@@ -206,14 +201,12 @@ status BinSegV_Tests(MemCh *gm){
     args[2] = NULL;
     r |= Test(Equals(s, dice), "keyD value is equal, expected @, have &", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status BinSegReversedV_Tests(MemCh *gm){
+status BinSegReversedV_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     status r = READY;
     void *args[5];
     
@@ -279,7 +272,6 @@ status BinSegReversedV_Tests(MemCh *gm){
     r |= Test(Equals(s, dice),
         "keyD value is equal, expected @, have &", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

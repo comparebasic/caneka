@@ -1,10 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status DebugStack_Tests(MemCh *gm){
+status DebugStack_Tests(MemCh *m){
     status r = READY;
-
-    MemCh *m = MemCh_Make();
 
     Buff *bf = Buff_Make(m, ZERO);
     Buff *bfAfter = Buff_Make(m, ZERO);
@@ -18,7 +16,7 @@ status DebugStack_Tests(MemCh *gm){
     i64 total = bf->v->total;
     i64 totalAfter = bfAfter->v->total;
     r |= Test(total > totalAfter, "Stack printout has less characters than before", NULL); 
-    MemCh_Free(m);
+
     DebugStack_Pop();
     return r;
 }

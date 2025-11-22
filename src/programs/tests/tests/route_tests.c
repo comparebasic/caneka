@@ -216,11 +216,10 @@ static Table *getGenericData(MemCh *m, Route *rt){
     return data;
 }
 
-status WwwRoute_Tests(MemCh *gm){
+status WwwRoute_Tests(MemCh *m){
     DebugStack_Push(NULL, ZERO);
     void *args[5];
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     StrVec *path = IoPath(m, "examples/web-server/pages/public");
     Route *rt = Route_From(m, path);
@@ -257,16 +256,14 @@ status WwwRoute_Tests(MemCh *gm){
     r |= Test(Equals(type, K(m, "text/html")),
         "profile stat page is mime type templ, have @", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status WwwRouteTempl_Tests(MemCh *gm){
+status WwwRouteTempl_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     DebugStack_SetRef("header.templ", TYPE_CSTR);
 
@@ -438,7 +435,6 @@ status WwwRouteTempl_Tests(MemCh *gm){
         "Expected fmt value", 
         "Expected fmt value $", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
@@ -450,11 +446,10 @@ static status fakeStep(Step *st, Task *tsk){
     return NOOP;
 }
 
-status WwwPath_Tests(MemCh *gm){
+status WwwPath_Tests(MemCh *m){
     DebugStack_Push(NULL, ZERO);
     void *args[6];
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Route *pages = Route_Make(m);
     r |= Route_Collect(pages, IoAbsPath(m, "examples/web-server/pages/public"));
@@ -498,16 +493,14 @@ status WwwPath_Tests(MemCh *gm){
     r |= Test(route != NULL && Equals(args[1], args[0]), 
         "Route has expected file expected @, found @", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status WwwRouteMime_Tests(MemCh *gm){
+status WwwRouteMime_Tests(MemCh *m){
     DebugStack_Push(NULL, ZERO);
     void *args[6];
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Route *rt = Route_Make(m);
 
@@ -534,7 +527,6 @@ status WwwRouteMime_Tests(MemCh *gm){
 
     r |= Test(Equals(dest->v, expected), "Content from Buff piped from route matches reading file directly", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

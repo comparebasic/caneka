@@ -2,9 +2,8 @@
 #include <caneka.h>
 #include <tests.h>
 
-status Cursor_Tests(MemCh *gm){
+status Cursor_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s;
     StrVec *v;
     Cursor *curs;
@@ -60,6 +59,5 @@ status Cursor_Tests(MemCh *gm){
     r |= Test(delta == 29,
         "Stops on the 29th character of the third Cursor's StrVec, have $", args3);
 
-    MemCh_Free(m);
     return r;
 }

@@ -9,6 +9,9 @@ typedef struct mem_ctx {
     i16 guard;
     Iter it;
     void *owner;
+    struct {
+        i32 totalCeiling;
+    } metrics;
 } MemCh;
 
 void *MemCh_Alloc(MemCh *m, size_t sz);

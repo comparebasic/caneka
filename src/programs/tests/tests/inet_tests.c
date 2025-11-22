@@ -57,11 +57,10 @@ static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source)
     return SUCCESS;
 }
 
-status Inet_Tests(MemCh *gm){
+status Inet_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
-    MemCh *m = MemCh_Make();
 
     Str *s = S(m, "10.1.255.7");
     quad ip4 = 0;
@@ -106,7 +105,6 @@ status Inet_Tests(MemCh *gm){
 
     /* add spawn tasks to spawn processes to hit the network server */
     
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

@@ -4,6 +4,9 @@
 static MemPage *MemCh_AddPage(MemCh *m, i16 level){
     MemPage *pg = MemPage_Make(m, level);
     Iter_Add(&m->it, (void *)pg);
+    if(m->it.p->nvalues > m->metrics.totalCeiling){
+        m->metrics.totalCeiling = m->it.p->nvalues;
+    }
     return pg;
 }
 

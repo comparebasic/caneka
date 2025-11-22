@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status Hash_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status Hash_Tests(MemCh *m){
     Str *s;
     status r = SUCCESS;
 
@@ -22,6 +21,5 @@ status Hash_Tests(MemCh *gm){
     };
     r = Test(h == expected, "Expected hash to equal @/$, found: @/$", args1);
 
-    MemCh_Free(m);
     return r;
 }
