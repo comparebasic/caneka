@@ -61,9 +61,8 @@ static char *ponyTailTwoCstr = ""
     "digital representation of hair and hair movement.[8]"
     ;
 
-status StrVec_Tests(MemCh *gm){
+status StrVec_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     void *args[5];
 
     StrVec *vc = StrVec_Make(m);
@@ -121,8 +120,6 @@ status StrVec_Tests(MemCh *gm){
         r |= Test(Equals(bf->v, s),
             "Testing StrVec and StrVec from Fmt via Buff expected:$, have:$", args);
     }
-
-    MemCh_Free(m);
 
     return r;
 }

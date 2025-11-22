@@ -163,10 +163,9 @@ Mess *make_Expected(MemCh *m){
     return expected;
 }
 
-status Mess_Tests(MemCh *gm){
+status Mess_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s = NULL; 
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
@@ -182,7 +181,6 @@ status Mess_Tests(MemCh *gm){
     boolean result = (Mess_Compare(m, (Mess *)rbl->dest, expected) & SUCCESS) != 0;
     r |= Test(result, "Mess has been built as expected", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

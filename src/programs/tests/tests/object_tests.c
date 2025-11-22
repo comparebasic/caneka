@@ -29,10 +29,9 @@ static status filterFunc(MemCh *m, void *obj, void *crit){
     return NOOP; 
 }
 
-status Object_Tests(MemCh *gm){
+status Object_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Table *pt = Table_Make(m);
     Abstract *h;
@@ -50,15 +49,13 @@ status Object_Tests(MemCh *gm){
     r |= test_ObjKeyAndOrder(m, pt, ord, 1, Str_CstrRef(m, "Two"), I8_Wrapped(m, 2));
     r |= test_ObjKeyAndOrder(m, pt, ord, 2, Str_CstrRef(m, "Three"), I8_Wrapped(m, 3));
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status ObjectFilter_Tests(MemCh *gm){
+status ObjectFilter_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    MemCh *m = MemCh_Make();
     void *args[5];
 
     Table *obj = Table_Make(m);
@@ -84,7 +81,6 @@ status ObjectFilter_Tests(MemCh *gm){
 
     r |= SUCCESS;
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

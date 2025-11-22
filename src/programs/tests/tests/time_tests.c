@@ -1,9 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status Time_Tests(MemCh *gm){
+status Time_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     status r = READY;
     void *args[5];
 
@@ -22,7 +21,6 @@ status Time_Tests(MemCh *gm){
         "Time equates to four hours and 2k microseconds after January 1st 1970, have $", 
         args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

@@ -2,9 +2,8 @@
 #include <caneka.h>
 #include <tests.h>
 
-status Snip_Tests(MemCh *gm){
+status Snip_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s;
     StrVec *v;
     Cursor *curs;
@@ -44,13 +43,11 @@ status Snip_Tests(MemCh *gm){
     r |= Test(Equals(v, s),
         "Found expected keyword @, have @ from @ of @", args1);
 
-    MemCh_Free(m);
     return r;
 }
 
-status SnipModify_Tests(MemCh *gm){
+status SnipModify_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s;
     StrVec *v;
     Cursor *curs;
@@ -103,6 +100,5 @@ status SnipModify_Tests(MemCh *gm){
     r |= Test((sn->length == 38 && sns->nvalues == 1), 
         "SnipSpan now has single value which is a gap that spans the total length, have &\n", args2);
 
-    MemCh_Free(m);
     return r;
 }

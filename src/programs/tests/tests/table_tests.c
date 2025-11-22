@@ -45,9 +45,8 @@ char *values2[] = {
     NULL, NULL,
 };
 
-status TableHKey_Tests(MemCh *gm){
+status TableHKey_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     void *args[5]; 
     Str *s = Str_CstrRef(m, "Hello there old friends!");
     Hashed *h = Hashed_Make(m, s);
@@ -79,8 +78,7 @@ status TableHKey_Tests(MemCh *gm){
     return r;
 }
 
-status Table_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status Table_Tests(MemCh *m){
     Span *tbl = Span_Make(m);
     status r = READY;
     Str *s;
@@ -119,12 +117,10 @@ status Table_Tests(MemCh *gm){
             "Expect strings to equal @ from key:@ found @", args2);
     }
 
-    MemCh_Free(m);
     return r;
 }
 
-status TableResize_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status TableResize_Tests(MemCh *m){
     Span *tbl = Span_Make(m);
     status r = READY;
     Str *s;
@@ -156,12 +152,10 @@ status TableResize_Tests(MemCh *gm){
             "Expect strings to equal $ from key:@ found @", args2);
     }
 
-    MemCh_Free(m);
     return r;
 }
 
-status TableUtilKey_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status TableUtilKey_Tests(MemCh *m){
     status r = READY;
     void *args[5];
     Table *tbl = Table_Make(m);
@@ -196,6 +190,5 @@ status TableUtilKey_Tests(MemCh *gm){
         "Incorrect count, expected 10 have $ instead for @", 
         args);
 
-    MemCh_Free(m);
     return r;
 }

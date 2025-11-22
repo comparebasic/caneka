@@ -42,9 +42,8 @@ static status testDims(MemCh *m, i32 idx, i8 expectedDim){
         args);
 }
 
-status Span_Tests(MemCh *gm){
+status Span_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
     Str *s;
@@ -282,13 +281,11 @@ status Span_Tests(MemCh *gm){
     };
     r |= Test(Equals(s513, s), "String 513 equals @ found @", args27);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status SpanClone_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status SpanClone_Tests(MemCh *m){
     Span *p;
     status r = READY;
 
@@ -300,13 +297,11 @@ status SpanClone_Tests(MemCh *gm){
     Span_Set(p, 5, Str_CstrRef(m, "Five"));
     Span_Set(p, 17, Str_CstrRef(m, "Seventeen"));
 
-    MemCh_Free(m);
     return r;
 }
 
-status SpanMax_Tests(MemCh *gm){
+status SpanMax_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     void *args[5];
 
     r |= testDims(m, 10, 0);
@@ -331,6 +326,5 @@ status SpanMax_Tests(MemCh *gm){
     args[1] = I8_Wrapped(m, m->it.p->dims);
     args[2] = NULL;
     Out("^p.MemCh nvalues $/$dims^0\n", args);
-    MemCh_Free(m);
     return r;
 }

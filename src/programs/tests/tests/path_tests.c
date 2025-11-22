@@ -21,11 +21,9 @@ TestExp expected[] = {
     {NULL, 0, ZERO},
 };
 
-status Path_Tests(MemCh *gm){
+status Path_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
-
-    MemCh *m = MemCh_Make();
 
     StrVec *v = StrVec_Make(m);
     Str *s = Str_CstrRef(m, "/fancy/path/thing/file.ext");
@@ -60,7 +58,6 @@ status Path_Tests(MemCh *gm){
     r |= Test(Equals(fname, Str_CstrRef(m, "file.ext")), 
         "file name is extracted properly", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

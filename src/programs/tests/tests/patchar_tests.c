@@ -36,9 +36,8 @@ static status comparePat(MemCh *m, Str *label, PatCharDef *pat, PatCharDef *expe
     return r;
 }
 
-status PatChar_Tests(MemCh *gm){
+status PatChar_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     status r = READY;
 
     PatCharDef *pat = PatChar_FromStr(m, Str_CstrRef(m, "GET"));
@@ -78,7 +77,6 @@ status PatChar_Tests(MemCh *gm){
     };
     r |= comparePat(m, Str_CstrRef(m, "long vec pattern"), longPat, longExpected);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

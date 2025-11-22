@@ -2,8 +2,7 @@
 #include <caneka.h>
 #include <tests.h>
 
-status Str_Tests(MemCh *gm){
-    MemCh *m = MemCh_Make();
+status Str_Tests(MemCh *m){
     Str *s;
     s = Str_CstrRef(m, "Hi");
     status r = READY;
@@ -63,13 +62,11 @@ status Str_Tests(MemCh *gm){
     };
     r |= Test(s->length == strlen(cstr), "Expect length $, have $", args8);
 
-    MemCh_Free(m);
     return r;
 }
 
-status Str_EndMatchTests(MemCh *gm){
+status Str_EndMatchTests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s;
     Str *s2;
     char *match;
@@ -100,8 +97,6 @@ status Str_EndMatchTests(MemCh *gm){
         NULL
     };
     r |= Test(Str_EndMatch(s, Str_CstrRef(m, match)), "file ending in '.cnk' matches \".c\" after String_Trunc successfully, had @", args3);
-
-    MemCh_Free(m);
 
     return r;
 }

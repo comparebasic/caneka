@@ -25,9 +25,8 @@ static status Example_populate(MemCh *m, Task *tsk, void *arg, void *source){
     return SUCCESS;
 }
 
-status ServeTcp_Tests(MemCh *gm){
+status ServeTcp_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    MemCh *m = MemCh_Make();
     status r = READY;
     
     TcpCtx *ctx = TcpCtx_Make(m);
@@ -38,7 +37,6 @@ status ServeTcp_Tests(MemCh *gm){
     Task *tsk = ServeTcp_Make(ctx);
     Task_Tumble(tsk);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

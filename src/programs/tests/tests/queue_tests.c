@@ -67,11 +67,10 @@ static status queueScaleTest(MemCh *m, i32 max){
     return r;
 }
 
-status Queue_Tests(MemCh *gm){
+status Queue_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
-    MemCh *m = MemCh_Make();
 
     Queue *q = Queue_Make(m);
     i32 idx = 0;
@@ -104,16 +103,14 @@ status Queue_Tests(MemCh *gm){
     r |= Test((Str *)item == one,
         "Queue item is first item, expected &, have &", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status QueueAddRemove_Tests(MemCh *gm){
+status QueueAddRemove_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[8];
-    MemCh *m = MemCh_Make();
 
     Queue *q = Queue_Make(m);
     i32 idx = Queue_Add(q, Str_FromCstr(m, "Temporary", ZERO));
@@ -174,16 +171,14 @@ status QueueAddRemove_Tests(MemCh *gm){
 
     r |= Test(Equals(args[0], args[1]) && Equals(args[2], args[3]) && Equals(args[4], args[5]), "Expected @ = @, @ = @, @ = @", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status QueueIter_Tests(MemCh *gm){
+status QueueIter_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[8];
-    MemCh *m = MemCh_Make();
 
     Queue *q = Queue_Make(m);
 
@@ -282,16 +277,14 @@ status QueueIter_Tests(MemCh *gm){
     args[2] = NULL;
     r |= Test(i == 5, "Queue runs for the number of items in it, have $, for @", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status QueueCriteria_Tests(MemCh *gm){
+status QueueCriteria_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[8];
-    MemCh *m = MemCh_Make();
     i32 i = 0;
 
     Queue *q = Queue_Make(m);
@@ -448,17 +441,14 @@ status QueueCriteria_Tests(MemCh *gm){
 
     File_Close(bf);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status QueueScale_Tests(MemCh *gm){
+status QueueScale_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[6];
-
-    MemCh *m = MemCh_Make();
 
     Queue *q = Queue_Make(m);
 
@@ -596,7 +586,6 @@ status QueueScale_Tests(MemCh *gm){
     r |= Test((queueScaleTest(m, 777) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 777 scale tests finish with SUCCESS", NULL);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

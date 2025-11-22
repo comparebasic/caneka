@@ -1,9 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status StrVecSplit_Tests(MemCh *gm){
+status StrVecSplit_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Span *p = NULL;
     void *split = NULL;
@@ -58,6 +57,5 @@ status StrVecSplit_Tests(MemCh *gm){
     r |= Test(Equals(expected, p),
         "Split by & @ becomes @.\n", args3);
 
-    MemCh_Free(m);
     return r;
 }

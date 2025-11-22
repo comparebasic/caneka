@@ -37,11 +37,10 @@ static char *logicTestContent = ""
 "</div>\n"
 "";
 
-status TemplCtx_Tests(MemCh *gm){
+status TemplCtx_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s = NULL; 
     Fetcher *fch = NULL;
     FetchTarget *tg = NULL;
@@ -164,16 +163,14 @@ status TemplCtx_Tests(MemCh *gm){
 
     r &= ~ERROR;
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }
 
-status Templ_Tests(MemCh *gm){
+status Templ_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    MemCh *m = MemCh_Make();
     TranspFile *tp = NULL;
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.templ"));
@@ -187,7 +184,6 @@ status Templ_Tests(MemCh *gm){
         NULL);
 
     if(r & ERROR){
-        MemCh_Free(m);
         DebugStack_Pop();
         return r;
     }
@@ -236,7 +232,6 @@ status Templ_Tests(MemCh *gm){
         "Templ_Prepare did not finish properly @ & -> &", args);
 
     if(r & ERROR){
-        MemCh_Free(m);
         DebugStack_Pop();
         return r;
     }
@@ -253,7 +248,6 @@ status Templ_Tests(MemCh *gm){
         "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n&", 
         args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

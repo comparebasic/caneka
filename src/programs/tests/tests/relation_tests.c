@@ -1,9 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status Relation_Tests(MemCh *gm){
+status Relation_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Str *s = Str_CstrRef(m, "Hi There\n");
     Str *s2 = Str_CstrRef(m, "Number Two\n");
@@ -53,6 +52,5 @@ status Relation_Tests(MemCh *gm){
     s->type.state |= DEBUG;
     r |= Test(Equals(s, bf->v) == TRUE, "Expect relation ToS output to match, have @", args);
 
-    MemCh_Free(m);
     return r;
 }

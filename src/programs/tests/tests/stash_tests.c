@@ -1,10 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-status Stash_Tests(MemCh *gm){
+status Stash_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
-    MemCh *m = MemCh_Make();
     Span *p;
     status r = READY;
 
@@ -90,7 +89,6 @@ status Stash_Tests(MemCh *gm){
     args[1] = s;
     r |= Test(Equals(s, expected), "Str has equivilent value, expected &, have &", args);
 
-    MemCh_Free(m);
     DebugStack_Pop();
     return r;
 }

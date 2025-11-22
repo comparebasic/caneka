@@ -1,11 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
-status NodeObj_Tests(MemCh *gm){
+status NodeObj_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[4];
-    MemCh *m = MemCh_Make();
 
     NodeObj *root = Inst_Make(m, TYPE_NODEOBJ);
 
@@ -115,6 +114,5 @@ status NodeObj_Tests(MemCh *gm){
     returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET);
     r |= Test(returned == NULL, "Missing path should be NULL", args);
 
-    MemCh_Free(m);
     return r;
 }

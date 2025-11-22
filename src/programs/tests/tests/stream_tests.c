@@ -1,9 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status Stream_Tests(MemCh *gm){
+status Stream_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Buff *bf = Buff_Make(m, ZERO);
     Str *s = Str_CstrRef(m, "Hello");
     Buff_AddBytes(bf, s->bytes, s->length);
@@ -26,6 +25,5 @@ status Stream_Tests(MemCh *gm){
     r |= Test(Equals(vo, bf->v), 
         "Comparing StrVec built up slowly, and one built all at once ", NULL);
 
-    MemCh_Free(m);
     return r;
 }

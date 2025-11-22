@@ -72,9 +72,8 @@ status SetWord2(MemCh *m, Roebling *rbl){
     return r; 
 }
 
-status Roebling_Tests(MemCh *gm){
+status Roebling_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s = NULL; 
     StrVec *v = StrVec_Make(m);
     Cursor *curs = Cursor_Make(m, v);
@@ -97,14 +96,12 @@ status Roebling_Tests(MemCh *gm){
     };
     r |= Test(rbl->matchIt.p->nvalues == 4, "Roebling has four match values loaded up, have $", args);
 
-    MemCh_Free(m);
     return r;
 }
 
-status RoeblingRun_Tests(MemCh *gm){
+status RoeblingRun_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
-    MemCh *m = MemCh_Make();
 
     Str *s = NULL; 
     StrVec *v = NULL;
@@ -159,13 +156,11 @@ status RoeblingRun_Tests(MemCh *gm){
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
 
     DebugStack_Pop();
-    MemCh_Free(m);
     return r;
 }
 
-status RoeblingMark_Tests(MemCh *gm){
+status RoeblingMark_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s = NULL;
     StrVec *v = NULL;
     Match *mt = NULL;
@@ -255,13 +250,11 @@ status RoeblingMark_Tests(MemCh *gm){
     };
     r |= Test((rbl->type.state & SUCCESS) != 0, "Roebling has state SUCCESS, have $", args7);
 
-    MemCh_Free(m);
     return r;
 }
 
-status RoeblingStartStop_Tests(MemCh *gm){
+status RoeblingStartStop_Tests(MemCh *m){
     status r = READY;
-    MemCh *m = MemCh_Make();
     Str *s = NULL;
     StrVec *v = NULL;
     Match *mt = NULL;
@@ -297,6 +290,5 @@ status RoeblingStartStop_Tests(MemCh *gm){
     };
     r |= Test(Equals(v, Str_CstrRef(m, "Hi how are you today?")), "String equals 'Hi how are you today?', have '@' for @", args);
 
-    MemCh_Free(m);
     return r;
 }
