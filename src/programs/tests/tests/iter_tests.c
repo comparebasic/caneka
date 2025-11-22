@@ -25,8 +25,8 @@ static status makeAndIterItems(MemCh *m, i64 max){
     args[0] = I64_Wrapped(m, max);
     args[1] = NULL;
     r |= Test((r & ERROR) == 0, "Adding and Iter_Next over $ items", args);
-    MemCh_Free(m);
     m->level--;
+    MemCh_FreeTemp(m);
     return r; 
 }
 
@@ -54,8 +54,8 @@ static status makeAndIterPrevRemoveItems(MemCh *m, i64 max){
     args[0] = I64_Wrapped(m, max);
     args[1] = NULL;
     r |= Test((r & ERROR) == 0, "Adding and Iter_Next over $ items", args);
-    MemCh_Free(m);
     m->level--;
+    MemCh_FreeTemp(m);
     return r; 
 }
 
@@ -216,7 +216,7 @@ status Iter_Tests(MemCh *gm){
         i++;
     }
 
-    MemCh_Free(m);
+    MemCh_FreeTemp(m);
 
     i64 max = 5128;
     p = Span_Make(m);
@@ -325,7 +325,7 @@ status Iter_Tests(MemCh *gm){
         "Iter_Prev ends at first value, expected @, have @", args);
 
     m->level--;
-    MemCh_Free(m);
+    MemCh_FreeTemp(m);
     DebugStack_Pop();
 
     return r;

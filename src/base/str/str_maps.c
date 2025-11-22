@@ -21,22 +21,22 @@ static Map *Str_Map(MemCh *m){
 }
 
 static Map *StrVec_Map(MemCh *m){
+    StrVec v;
     word offset = 0;
-    RangeType *atts = (RangeType *)Bytes_Alloc(m, sizeof(RangeType)*3, TYPE_RANGE_ARRAY);
-    atts->of = TYPE_STRVEC;
-    atts->range = 3;
-    offset += sizeof(Type);
-    offset += sizeof(i32);
-    (atts+1)->of = TYPE_I64;
-    (atts+1)->range = offset;
-    offset += sizeof(i64);
-    (atts+2)->of = TYPE_SPAN;
-    (atts+2)->range = offset;
-    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*3, TYPE_POINTER_ARRAY);
+    i16 size = 2;
+    RangeType *atts = (RangeType *)Bytes_Alloc(m,
+        sizeof(RangeType)*(size+1), TYPE_RANGE_ARRAY);
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
     keys[0] = Str_CstrRef(m, "StrVec");
+    atts->of = TYPE_STRVEC;
+    atts->range = size+1;
     keys[1] = Str_CstrRef(m, "total");
+    (atts+1)->of = TYPE_I64;
+    (atts+1)->range = (word)((void *)&v.total-(void *)&v);
+    (atts+2)->of = TYPE_SPAN;
     keys[2] = Str_CstrRef(m, "p");
-    return Map_Make(m, 2, atts, keys);
+    (atts+2)->range = (word)((void *)&v.p-(void *)&v);;
+    return Map_Make(m, size, atts, keys);
 }
 
 status Str_MapsInit(MemCh *m, Lookup *lk){

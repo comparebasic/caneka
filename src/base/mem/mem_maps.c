@@ -2,66 +2,56 @@
 #include <caneka.h>
 
 static Map *Span_Map(MemCh *m){
-    word offset = 0;
-    i64 SIZE = 6;
+    Span p;
+    i32 size = 6;
     RangeType *atts = (RangeType *)Bytes_Alloc(m, 
-        (word)(sizeof(RangeType)*SIZE), TYPE_RANGE_ARRAY);
-    atts->of = TYPE_SPAN;
-    atts->range = SIZE;
-    offset += sizeof(Type);
-    offset += sizeof(word);
-    offset += sizeof(byte);
-    (atts+1)->of = TYPE_I8;
-    (atts+1)->range = offset;
-    offset += sizeof(i8);
-    (atts+2)->of = TYPE_POINTER_ARRAY;
-    (atts+2)->range = offset;
-    offset += sizeof(slab *);
-    (atts+3)->of = TYPE_MEMCTX;
-    (atts+3)->range = offset;
-    offset += sizeof(MemCh *);
-    (atts+4)->of = TYPE_I32;
-    (atts+4)->range = offset;
-    offset += sizeof(i32);
-    (atts+5)->of = TYPE_I32;
-    (atts+5)->range = offset;
-    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE, TYPE_POINTER_ARRAY);
+        (word)(sizeof(RangeType)*(size+1)), TYPE_RANGE_ARRAY);
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
     keys[0] = Str_CstrRef(m, "Span");
+    atts->of = TYPE_SPAN;
+    atts->range = size+1;
+
     keys[1] = Str_CstrRef(m, "dims");
-    keys[2] = Str_CstrRef(m, "root");
+    (atts+1)->of = TYPE_I8;
+    (atts+1)->range = (word)((void *)&p.dims - (void *)&p);
+    keys[2] = Str_CstrRef(m, "memLevel");
+    (atts+2)->of = TYPE_I16;
+    (atts+2)->range =  (word)((void *)&p.dims - (void *)&p);
     keys[3] = Str_CstrRef(m, "m");
-    keys[4] = Str_CstrRef(m, "nvalues");
-    keys[5] = Str_CstrRef(m, "max_idx");
-    return Map_Make(m, SIZE-1, atts, keys);
+    (atts+3)->of = TYPE_MEMCTX;
+    (atts+3)->range = (word)((void *)&p.m - (void *)&p);
+    keys[4] = Str_CstrRef(m, "root");
+    (atts+4)->of = TYPE_POINTER_ARRAY;
+    (atts+4)->range = (word)((void *)&p.root - (void *)&p);
+    keys[5] = Str_CstrRef(m, "nvalues");
+    (atts+5)->of = TYPE_I32;
+    (atts+5)->range = (word)((void *)&p.nvalues - (void *)&p);
+    keys[6] = Str_CstrRef(m, "max_idx");
+    (atts+6)->of = TYPE_I32;
+    (atts+6)->range = (word)((void *)&p.nvalues - (void *)&p);
+    return Map_Make(m, size-1, atts, keys);
 }
 
 static Map *MemCh_Map(MemCh *m){
+    MemCh _m;
     word offset = 0;
-    i64 SIZE = 5;
+    i32 size = 5;
     RangeType *atts = (RangeType *)Bytes_Alloc(m, 
-        (word)(sizeof(RangeType)*SIZE), TYPE_RANGE_ARRAY);
-    atts->of = TYPE_MEMCTX;
-    atts->range = 0/*SIZE*/;
-    offset += sizeof(Type);
-    offset += sizeof(i16);
-    (atts+1)->of = TYPE_I16;
-    (atts+1)->range = offset;
-    offset += sizeof(i16);
-    (atts+2)->of = TYPE_SPAN;
-    (atts+2)->range = offset+sizeof(Type)+sizeof(i32)/*iter span */;
-    offset += sizeof(Iter);
-    (atts+3)->of = TYPE_ABSTRACT;
-    (atts+3)->range = offset;
-    offset += sizeof(Abstract *);
-    (atts+4)->of = TYPE_ABSTRACT;
-    (atts+4)->range = offset;
-    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*SIZE, TYPE_POINTER_ARRAY);
+        (word)(sizeof(RangeType)*(size+1)), TYPE_RANGE_ARRAY);
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
     keys[0] = Str_CstrRef(m, "MemCh");
+    atts->of = TYPE_MEMCTX;
+    atts->range = size+1;
     keys[1] = Str_CstrRef(m, "guard");
-    keys[2] = Str_CstrRef(m, "it.p");
+    (atts+1)->of = TYPE_I16;
+    (atts+1)->range = (word)((void *)&_m.guard - (void *)&_m);
+    keys[2] = Str_CstrRef(m, "itp");
+    (atts+2)->of = TYPE_SPAN;
+    (atts+2)->range = (word)((void *)&_m.it.p - (void *)&_m);
     keys[3] = Str_CstrRef(m, "owner");
-    keys[4] = Str_CstrRef(m, "values");
-    return Map_Make(m, SIZE-1, atts, keys);
+    (atts+3)->of = TYPE_ABSTRACT;
+    (atts+3)->range = (word)((void *)&_m.owner - (void *)&_m);
+    return Map_Make(m, size-1, atts, keys);
 }
 
 static Map *MemBookStats_Map(MemCh *m){

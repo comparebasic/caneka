@@ -5,7 +5,6 @@ enum strvec_flags {
 
 typedef struct strvec {
     Type type;
-    i32 _;
     i64 total;
     Span *p;
 } StrVec;

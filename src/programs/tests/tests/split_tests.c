@@ -58,9 +58,6 @@ status StrVecSplit_Tests(MemCh *gm){
     r |= Test(Equals(expected, p),
         "Split by & @ becomes @.\n", args3);
 
-
     MemCh_Free(m);
-
     return r;
-    
 }

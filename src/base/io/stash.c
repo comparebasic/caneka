@@ -36,6 +36,7 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
     boolean pack = (mit->type.state & MEM_ITER_STREAM) == 0;
     void *args[5];
     i16 checksum = 0;
+    i32 count = 0;
     while((MemIter_Next(mit) & END) == 0){
         Abstract *a = (Abstract *)MemIter_Get(mit);
         if((mit->type.state & MORE) == 0){
@@ -120,6 +121,7 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
 }
 
 status Stash_FlushFree(Buff *bf, MemCh *persist){
+    DebugStack_Push(persist, persist->type.of);
     status r = READY;
     SourceFunc func = NULL;
     void *a = NULL;
@@ -131,6 +133,7 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
 
     MemIter mit;
     MemIter_Init(&mit, persist);
+    i32 count = 0;
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = (Abstract *)MemIter_Get(&mit);
         if((mit.type.state & MORE) == 0){
@@ -177,10 +180,12 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
         r |= MemBook_FreePage(m, (MemPage *)Iter_Get(&it));
     }
 
+    DebugStack_Pop();
     return r;
 }
 
 MemCh *Stash_FromStream(Buff *bf){
+    DebugStack_Push(bf, bf->type.of);
     status r = READY;
 
     void *args[5];
@@ -219,6 +224,7 @@ MemCh *Stash_FromStream(Buff *bf){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error allocating page", NULL);
             r |= ERROR;
+            DebugStack_Pop();
             return NULL;
         }
 
@@ -259,9 +265,11 @@ MemCh *Stash_FromStream(Buff *bf){
     }
 
     if((r & (SUCCESS|ERROR)) == SUCCESS){
+        DebugStack_Pop();
         return persist;
     }
     
+    DebugStack_Pop();
     return persist;
 }
 

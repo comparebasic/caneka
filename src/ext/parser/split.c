@@ -123,10 +123,7 @@ status StrVec_Split(StrVec *v, void *_split){
         r |= NOOP;
     }
 
-    m->level++;
-    MemCh_Free(m);
-    m->level--;
-
+    MemCh_FreeTemp(m);
     return r;
 }
 
