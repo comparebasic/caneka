@@ -22,6 +22,7 @@
 #include "./mem/mem_page.c"
 #include "./mem/mem_book.c"
 #include "./mem/mem_chapter.c"
+#include "./mem/mem_chapter_utils.c"
 #include "./mem/mem_tos.c"
 #include "./mem/mem_maps.c"
 #include "./mem/mem_eq.c"

@@ -228,11 +228,11 @@ StrVec *IoUtil_BasePath(MemCh *m, StrVec *path){
 
 status IoUtils_Init(MemCh *m){
     if(pathSeps == NULL){
-        MemCh_SetToBase(m);
+        m->type.state |= MEMCH_BASE;
         pathSeps = Span_Make(m);
         Span_Add(pathSeps, B_Wrapped(m, (byte)'/', ZERO, MORE));
         Span_Add(pathSeps, B_Wrapped(m, (byte)'.', ZERO, LAST));
-        MemCh_SetFromBase(m);
+        m->type.state &= ~MEMCH_BASE;
         return SUCCESS;
     }
     return NOOP;

@@ -340,17 +340,17 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
 status Path_Init(MemCh *m){
     status r = READY;
     if(dotPathSeps == NULL){
-        MemCh_SetToBase(m);
+        m->type.state |= MEMCH_BASE;
         dotPathSeps = Span_Make(m);
         Span_Add(dotPathSeps, B_Wrapped(m, (byte)'.', ZERO, MORE));
-        MemCh_SetFromBase(m);
+        m->type.state &= ~MEMCH_BASE;
         r |= SUCCESS;
     }
     if(spacePathSeps == NULL){
-        MemCh_SetToBase(m);
+        m->type.state |= MEMCH_BASE;
         spacePathSeps = Span_Make(m);
         Span_Add(spacePathSeps, B_Wrapped(m, (byte)' ', ZERO, MORE));
-        MemCh_SetFromBase(m);
+        m->type.state &= ~MEMCH_BASE;
         r |= SUCCESS;
     }
 

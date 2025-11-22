@@ -3,44 +3,16 @@
 
 static status MemCh_freeLevel(MemCh *m, i16 level){
     status r = READY;
-    level = max(level, 0);
-    if(m->type.state & DEBUG){
-        void *args[] = {
-            I32_Wrapped(ErrStream->m, m->it.p->nvalues),
-            I16_Wrapped(ErrStream->m, level),
-            NULL
-        };
-        Out("^p.MemCh_FreeTemp ^D.$^d.nvalues ^D.$^d.level^0\n", args);
-    }
 
-    m->it.type.state |= FLAG_ITER_REVERSE;
+    Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
-        if(m->type.state & DEBUG){
-            void *args[] = {
-                I32_Wrapped(ErrStream->m, m->it.idx),
-                I32_Wrapped(ErrStream->m, m->it.p->max_idx),
-                I16_Wrapped(ErrStream->m, level),
-                NULL
-            };
-            Out("^p.    MemCh_FreeTemp \\@$of$/^D.$^d.level\n", args);
-        }
         if(m->it.idx == 0){
             continue;
         }
         MemPage *pg = (MemPage *)m->it.value;
-        if(pg != NULL && (level == 0 || pg->level >= level)){
-            if(m->it.idx > 0){
-                r |= Span_Remove(m->it.p, m->it.idx);
-            }
+        if(pg != NULL && pg->level >= level){
             r |= MemBook_FreePage(m, pg);
-        }
-        if(m->type.state & DEBUG){
-            void *args[] = {
-                I32_Wrapped(ErrStream->m, m->it.idx),
-            I16_Wrapped(ErrStream->m, level),
-                NULL
-            };
-            Out("^p.    done -MemCh_FreeTemp \\@$/^D.$^d.level\n", args);
+            r |= Iter_Remove(&m->it);
         }
     }
 
@@ -49,29 +21,31 @@ static status MemCh_freeLevel(MemCh *m, i16 level){
     if(r == READY){
         r |= NOOP;
     }
-    Iter_Reset(&m->it);
 
     return r;
 }
 
-
-
-i64 MemCh_MemCount(MemCh *m, i16 level){
-    i64 total = 0;
-    while((Iter_Next(&m->it) & END) == 0){
-        MemPage *sl = (MemPage *)m->it.value;
-        if(sl != NULL && (level == 0 || sl->level == level)){
-            total += MEM_SLAB_SIZE;
-        }
-    }
-
-    return total;
-}
-
-MemPage *MemCh_AddPage(MemCh *m, i16 level){
+static MemPage *MemCh_AddPage(MemCh *m, i16 level){
     MemPage *pg = MemPage_Make(m, level);
     Iter_Add(&m->it, (void *)pg);
     return pg;
+}
+
+status MemCh_FreeTemp(MemCh *m){
+    status r = READY;
+    i16 level = m->level+1;
+
+    Iter_Reset(&m->it);
+    while((Iter_Next(&m->it) & END) == 0){
+        MemPage *pg = (MemPage *)m->it.value;
+        if(pg != NULL && pg->level >= level){
+            r |= MemBook_FreePage(m, pg);
+            r |= Iter_Remove(&m->it);
+        }
+    }
+
+    MemBook_WipePages(m);
+    return r;
 }
 
 void *MemCh_Alloc(MemCh *m, size_t sz){
@@ -79,7 +53,6 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 }
 
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
-    void *args[3];
     if(m == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
@@ -117,7 +90,8 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     word _sz = (word)sz;
 
     MemPage *sl = NULL;
-    MemCh_SetToBase(m);
+    word prev = m->type.state;
+    m->type.state |= MEMCH_BASE;
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *_sl = (MemPage *)m->it.value;
         if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
@@ -127,23 +101,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     }
 
     if(sl == NULL){
-        if(m->type.state & DEBUG){
-            args[0] = I32_Wrapped(ErrStream->m, m->it.p->nvalues+1);
-            args[1] = I8_Wrapped(ErrStream->m, m->it.p->dims);
-            args[2] = NULL;
-            Out("^p.MemCh adding pages $/^D.$^d.dims currently^0\n", args);
-            if(m->it.p->nvalues == 255){
-                m->it.p->type.state |= DEBUG;
-            }
-        }
-
         sl = MemCh_AddPage(m, level);
-        if(m->type.state & DEBUG){
-            args[0] = I32_Wrapped(ErrStream->m, MemBook_GetPageIdx(sl));
-            args[1] = I8_Wrapped(ErrStream->m, m->it.p->dims);
-            args[2] = NULL;
-            Out("^p.    MemCh added page $/^D.$^d.dims currently^0\n", args);
-        }
     }
 
     if(sl->level != level){
@@ -154,20 +112,8 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     Iter_Reset(&m->it);
 
     Guard_Reset(&m->guard);
-    MemCh_SetFromBase(m);
+    m->type.state = prev;
     return MemPage_Alloc(sl, _sz);
-}
-
-i64 MemCh_Used(MemCh *m, i16 level){
-    i64 total = 0;
-    while((Iter_Next(&m->it) & END) == 0){
-        MemPage *sl = (MemPage *)m->it.value;
-        if(sl != NULL && (level == 0 || sl->level == level)){
-            total += MEM_SLAB_SIZE - sl->remaining;
-        }
-    }
-
-    return total;
 }
 
 void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
@@ -180,74 +126,17 @@ void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
     return p; 
 }
 
-i64 MemCh_Total(MemCh *m, i16 level){
-    return MemCh_MemCount(m, level);
-}
-
-status MemCh_WipeTemp(MemCh *m, i16 level){
-    status r = READY;
-
-    while((Iter_Next(&m->it) & END) == 0){
-        MemPage *pg = (MemPage *)m->it.value;
-        if(pg != NULL && (level == 0 || pg->level >= level) && pg->remaining < MEM_SLAB_SIZE){
-            size_t sz = MemPage_Taken(pg); 
-            void *ptr = pg;
-            ptr += sizeof(MemPage);
-            ptr += pg->remaining;
-            memset(ptr, 0, sz);
-            pg->remaining = MEM_SLAB_SIZE;
-            r = SUCCESS;
-        }
-    }
-
-    if(r == READY){
-        r |= NOOP;
-    }
-
-    Iter_Reset(&m->it);
-
-    return r;
-}
-
-status MemCh_FreeTemp(MemCh *m){
-    if(m->level > 0){
-        return MemCh_freeLevel(m, m->level);
-    }
-    return NOOP;
-}
-
 status MemCh_Free(MemCh *m){
     status r = MemCh_freeLevel(m, m->level);
     if(m->level == 0){
-        r |= MemBook_FreePage(m, m->first);
+        r |= MemBook_FreePage(m, Span_Get(m->it.p, 0));
     }
     MemBook_WipePages(m);
     return r;
 }
 
-void *MemCh_GetPage(MemCh *m, void *addr, i32 *idx){
-    Iter_Reset(&m->it);
-    while((Iter_Next(&m->it) & END) == 0){
-        MemPage *pg = (MemPage *)m->it.value;
-        if(pg != NULL){
-            void *start = (void *)pg;
-            void *end = (void *)pg;
-            end += sizeof(MemPage)+MEM_SLAB_SIZE;
-            if(addr >= start && addr <= end){
-                *idx = m->it.idx;
-                return pg;
-            }
-        }
-    }
-
-    Iter_Reset(&m->it);
-    *idx = -1;
-    return NULL;
-}
-
 status MemCh_Setup(MemCh *m, MemPage *pg){
     m->type.of = TYPE_MEMCTX;
-    m->first = pg;
     Span *p = MemPage_Alloc(pg, sizeof(Span));
     Span_Setup(p);
     p->m = m;

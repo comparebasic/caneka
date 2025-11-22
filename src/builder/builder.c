@@ -21,7 +21,7 @@ static status renderStatus(MemCh *m, void *a){
     MemBook_GetStats(m, &st);
 
     CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memTotal"),
-        Str_MemCount(ctx->m, MemChapterTotal()*PAGE_SIZE));
+        Str_MemCount(ctx->m, st.total*PAGE_SIZE));
 
     Single *sg = (Single *)as(CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chapters")), TYPE_WRAPPED_I64);
