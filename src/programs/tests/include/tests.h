@@ -51,6 +51,7 @@ status RoeblingMark_Tests(MemCh *gm);
 status RoeblingStartStop_Tests(MemCh *gm);
 status WwwRoute_Tests(MemCh *gm);
 status WwwRouteTempl_Tests(MemCh *gm);
+status WwwRouteFmt_Tests(MemCh *m);
 status WwwRouteMime_Tests(MemCh *gm);
 status WwwPath_Tests(MemCh *gm);
 status ServeTcp_Tests(MemCh *gm);

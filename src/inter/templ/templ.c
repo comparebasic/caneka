@@ -351,7 +351,9 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     Abstract *data = Iter_Get(&templ->data);
 
     if(item->type.of == TYPE_STRVEC){
+        templ->m->level--;
         total += ToS(bf, item, 0, ZERO); 
+        templ->m->level++;
     }else if(item->type.of == TYPE_FETCHER && item->type.state & FETCHER_VAR){
         Fetcher *fch = (Fetcher *)item;
         if(templ->type.state & DEBUG){
@@ -382,7 +384,9 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
             };
             Out("^c.  VarValue: &^0.\n", args);
         }
+        templ->m->level--;
         total += ToS(bf, value, 0, ZERO); 
+        templ->m->level++;
     }
 
     if(templ->content.type.state & END){
@@ -427,6 +431,7 @@ status Templ_Prepare(Templ *templ){
 }
 
 i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
+    templ->m->level++; 
     DebugStack_Push(templ, templ->type.of);
     i64 total = 0;
     i16 g = 0;
@@ -445,7 +450,10 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
         Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);
     }
     DebugStack_Pop();
+    templ->m->level--; 
+    Templ_Reset(templ);
     return total;
+
 }
 
 status Templ_Reset(Templ *templ){
@@ -453,6 +461,7 @@ status Templ_Reset(Templ *templ){
     templ->indent = 0;
     templ->type.state &= DEBUG;
     templ->content.type.state |= END;
+    MemCh_FreeTemp(templ->m);
     while((Iter_Next(&templ->content) & END) == 0){
         Fetcher *fch = NULL;
         Abstract *a = Iter_Get(&templ->content);

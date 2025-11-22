@@ -383,7 +383,6 @@ status WwwRouteTempl_Tests(MemCh *m){
     Table_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
         Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
 
-
     Table_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &st));
     Table_Set(stats, Str_FromCstr(m, "mem", ZERO), mem);
     Table_Set(data, Str_FromCstr(m, "stats", ZERO), stats);
@@ -407,27 +406,49 @@ status WwwRouteTempl_Tests(MemCh *m){
         "Expected mem details in template", 
         "Expected mem details in template $", args);
 
+    DebugStack_Pop();
+    return r;
+}
+
+status WwwRouteFmt_Tests(MemCh *m){
+    DebugStack_Push(NULL, 0);
+    void *args[5];
+    status r = READY;
     DebugStack_SetRef("fmt value", TYPE_CSTR);
 
-    data = getGenericData(m, rt);
-    bf = Buff_Make(m, ZERO);
+    StrVec *path = IoPath(m, "examples/web-server/pages/public");
+    Route *rt = Route_From(m, path);
+
+    Route *inc = Route_Make(m);
+    StrVec *incPath = IoUtil_GetAbsVec(m,
+        Str_CstrRef(m, "./examples/web-server/pages/inc"));
+    StrVec *incAbs = IoUtil_AbsVec(m, incPath);
+    Route_Collect(inc, incAbs);
+
+    StrVec *hv = IoPath(m, "header");
+    Route *header = Inst_ByPath(inc, hv, NULL, SPAN_OP_GET);
+    StrVec *fv = IoPath(m, "footer");
+    Route *footer = Inst_ByPath(inc, fv, NULL, SPAN_OP_GET);
+
+    Table *data = getGenericData(m, rt);
+    Buff *bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
 
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
-    handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
 
     r |= Test(handler != NULL, "Default / handler is not null", args);
 
     Route_Handle(handler, bf, data, NULL);
-    dest = Buff_Make(m, ZERO);
+    Buff *dest = Buff_Make(m, ZERO);
     Buff_Pipe(dest, bf);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(footer, bf, data, NULL);
     Buff_Pipe(dest, bf);
     
-    expected = Str_FromCstr(m, homeCstr, ZERO);
+    Str *expected = Str_FromCstr(m, homeCstr, ZERO);
     args[0] = dest->v;
     args[1] = NULL;
     expected->type.state |= DEBUG;
