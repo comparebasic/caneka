@@ -78,3 +78,4 @@ status NodeObj_Tests(MemCh *gm);
 status Inet_Tests(MemCh *gm);
 status Http_Tests(MemCh *m);
 status Parity_Tests(MemCh *m);
+status Session_Tests(MemCh *m);

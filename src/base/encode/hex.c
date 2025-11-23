@@ -53,10 +53,8 @@ StrVec *StrVec_ToHex(MemCh *m, StrVec *v){
     return n;
 }
 
-Str *Str_FromHex(MemCh *m, Str *s){
-    Str *n = Str_Make(m, (s->length/2));
+status Bytes_FromHex(MemCh *m, Str *s, byte *nb){
     byte *b = s->bytes;
-    byte *nb = n->bytes;
     i32 bi;
     for(i32 i = 0; i < s->length; i += 2){
         bi = i/2;
@@ -69,10 +67,23 @@ Str *Str_FromHex(MemCh *m, Str *s){
             c - 'a' + 10:
             c - '0';
     }
+    return ZERO;
+}
+
+Str *Str_FromHex(MemCh *m, Str *s){
+    Str *n = Str_Make(m, (s->length/2));
+    Bytes_FromHex(m, s, n->bytes);
     n->length = s->length/2;
     return n;
 }
 
+status Raw_FromHex(MemCh *m, Str *s, void *b, i64 sz){
+    if(sz != s->length/2){
+        return ERROR;
+    }
+    Bytes_FromHex(m, s, (byte *)b);
+    return ZERO;
+}
 
 StrVec *StrVec_FromHex(MemCh *m, StrVec *v){
     StrVec *n = StrVec_Make(m);

@@ -462,6 +462,18 @@ static TestSet _Tests[] = {
         "Example route mime handling tests using Route_Handle.",
         FEATURE_COMPLETE,
     },
+    {
+        "Session Tests",
+        Session_Tests,
+        "Sesssion open/close and save/retrive basic data tests",
+        FEATURE_COMPLETE,
+    },
+    {
+        NULL,
+        NULL,
+        NULL,
+        0,
+    }
     /*
     {
         "ServeTcp Tests",
@@ -470,12 +482,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     */
-    {
-        NULL,
-        NULL,
-        NULL,
-        0,
-    },
 };
 
 TestSet *Tests = _Tests;

@@ -5,6 +5,10 @@ status File_Unlink(MemCh *m, Str *path){
     return unlink(Str_Cstr(m, path)) == 0 ? SUCCESS : ERROR;
 }
 
+status File_Rename(MemCh *m, Str *to, Str *from){
+    return rename(Str_Cstr(m, from), Str_Cstr(m, to)) == 0 ? SUCCESS : ERROR;
+}
+
 status File_Open(Buff *bf, void *_fpath, word ioFlags){
 
     Str *fpath = NULL;
@@ -85,10 +89,6 @@ StrVec *File_ToVec(MemCh *m, Str *path){
     }
     File_Open(bf, path, O_RDONLY);
     Buff_Read(bf);
-    if(path->type.state & DEBUG){
-        void *args[] = { path, bf, NULL };
-        Out("^p.Reading @ to vec: &^0\n", args);
-    }
     File_Close(bf);
     return bf->v;
 }

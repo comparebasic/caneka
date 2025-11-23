@@ -38,6 +38,7 @@ enum ext_types {
     TYPE_STEP_FUNC,
     TYPE_TASK,
     TYPE_PROC_IO_SET,
+    TYPE_SSID_CTX,
     TYPE_TCP_CTX,
     TYPE_TCP_TASK,
     TYPE_PROTO_CTX,

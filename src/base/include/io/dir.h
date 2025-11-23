@@ -11,3 +11,5 @@ status Dir_Gather(MemCh *m, Str *path, Span *sp);
 status Dir_Exists(MemCh *m, Str *path);
 status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source);
 status Dir_CheckCreate(MemCh *m, Str *path);
+status Dir_Mk(MemCh *m, Str *path);
+status Dir_Rm(MemCh *m, Str *path);

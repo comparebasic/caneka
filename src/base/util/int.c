@@ -1,6 +1,92 @@
 #include <external.h>
 #include <caneka.h>
 
+Str *Str_FromI64Pad(MemCh *m, i64 n, i32 pad){
+    if(pad > MAX_BASE10){
+        return NULL;
+    }
+    Str *s = Str_Make(m, MAX_BASE10);
+    byte *b = s->bytes;
+    i64 length = Str_I64OnBytes(&b, n);
+    if(length < pad){
+        word diff = pad-length;
+        while(--diff){
+            *(--b) = '0';
+            s->length++;
+            s->alloc++;
+            s->bytes = b;
+        }
+        s->length++;
+        s->alloc++;
+    }
+
+    return s;
+}
+
+Str *Str_FromI64(MemCh *m, i64 i){
+    Str *s = Str_Make(m, MAX_BASE10);
+    Str_AddI64(s, i);
+    return s;
+}
+
+i64 Str_I64OnBytes(byte **_b, i64 i){
+    byte *end = (*_b)+(MAX_BASE10-1);
+    byte *b = end;
+
+    i64 base = 10;
+    i64 val;
+    boolean negative = i < 0;
+    if(negative){
+        i = labs(i);
+    }
+    *b = '0';
+    while(i > 0){
+        val = i % base;
+        *(b--) = '0'+val;
+        i -= val;
+        i /= base;
+    }
+
+    if(negative){
+        *(b--) = '-';
+    }else if(b == end){
+        *(b--) = '0';
+    }
+
+    *_b = b+1;
+    return end - b;
+}
+
+i64 Str_AddIByte(Str *s, byte i){
+    byte _b[MAX_BASE10];
+    if(s->alloc < s->length+4){
+        s->type.state |= ERROR;
+        return 0;
+
+    }
+
+    byte *b = _b;
+    i64 n = i;
+    i64 length = Str_I64OnBytes(&b, n);
+    return Str_Add(s, b, length);
+}
+
+
+i64 Str_AddI64(Str *s, i64 i){
+    byte _b[MAX_BASE10];
+    if(s->alloc < s->length+MAX_BASE10){
+        s->type.state |= ERROR;
+        return 0;
+
+    }
+
+    byte *b = _b;
+    i64 length = Str_I64OnBytes(&b, i);
+    return Str_Add(s, b, length);
+}
+
+
+
 i32 Int_FromStr(Str *s){
     i64 n = I64_FromStr(s);
     if(n <= INT_MAX){

@@ -8,7 +8,7 @@ status Time_Tests(MemCh *m){
 
     struct timespec tm = {
         60*60*4,
-        2000000 
+        2000 
     };
 
     microTime mt = MicroTime_FromSpec(&tm);

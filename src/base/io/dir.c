@@ -42,6 +42,11 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
     return Span_Add(p, v);
 }
 
+status Dir_Rm(MemCh *m, Str *path){
+    char *dirPath = Str_Cstr(m, path);
+    return rmdir(dirPath) == 0 ? SUCCESS : ERROR;
+}
+
 status Dir_Destroy(MemCh *m, Str *path){
     status r = READY;
     r |= Dir_Climb(m, path, rmDir, rmFile, NULL);
@@ -100,6 +105,14 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
     }
 }
 
+status Dir_Mk(MemCh *m, Str *path){
+    if(mkdir(Str_Cstr(m, path), 0766) == 0){
+        return SUCCESS;
+    }else{
+        return ERROR;
+    }
+}
+
 status Dir_CheckCreate(MemCh *m, Str *path){
     DebugStack_Push(path, path->type.of);
     Span *cmd = Span_Make(m);
@@ -110,7 +123,6 @@ status Dir_CheckCreate(MemCh *m, Str *path){
     len = strlen(cstr);
     Span_Add(cmd, Str_Ref(m, (byte *)cstr, len, len+1, 0));
     Span_Add(cmd, path);
-
 
     ProcDets pd;
     ProcDets_Init(&pd);
