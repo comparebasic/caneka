@@ -415,6 +415,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Http Tests",
+        Http_Tests,
+        "Http Protocol and header parsing tests.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Www Tests",
         NULL,
         NULL,

@@ -52,10 +52,10 @@ status HttpCtx_PrepareResponse(HttpCtx *ctx, Task *tsk){
 HttpCtx *HttpCtx_Make(MemCh *m){
     HttpCtx *ctx = (HttpCtx *)MemCh_AllocOf(m, sizeof(HttpCtx), TYPE_HTTP_CTX);
     ctx->type.of = TYPE_HTTP_CTX;
-    ctx->headers = Table_Make(m);
     ctx->path = StrVec_Make(m);
     ctx->mime = S(m, "text/plain");
     ctx->data = Table_Make(m);
+    Iter_Init(&ctx->headersIt, Table_Make(m));
     return ctx;
 }
 

@@ -13,12 +13,13 @@ typedef struct {
     i32 code;
     i64 contentLength;
     Str *mime;
+    StrVec *httpVersion;
     StrVec *path;
     StrVec *body;
     Route *route;
     Table *data;
-    Table *headers;
     Span *errors;
+    Iter headersIt;
 } HttpCtx;
 
 HttpCtx *HttpCtx_Make(MemCh *m);

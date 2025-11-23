@@ -23,7 +23,7 @@ static i64 HttpCtx_Print(Buff *bf, void *a, cls type, word flags){
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         Lookup_Get(HttpMethods, ctx->method),
         ctx->path,
-        ctx->headers,
+        ctx->headersIt.p,
         ctx->body,
         NULL,
     };

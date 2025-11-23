@@ -76,3 +76,4 @@ status Time_Tests(MemCh *gm);
 status StrVecSplit_Tests(MemCh *gm);
 status NodeObj_Tests(MemCh *gm);
 status Inet_Tests(MemCh *gm);
+status Http_Tests(MemCh *m);
