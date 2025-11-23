@@ -48,8 +48,6 @@ status Session_Tests(MemCh *m){
     r |= Test(Ssid_Close(ctx, newSsid, ua) & SUCCESS,
         "Succsesfully closed session", NULL);
 
-    r |= ERROR;
-
     DebugStack_Pop();
     return r;
 }
