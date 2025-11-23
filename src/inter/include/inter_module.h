@@ -3,3 +3,4 @@
 #include "templ.h"
 #include "www.h"
 #include "http.h"
+#include "session.h"

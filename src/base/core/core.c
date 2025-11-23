@@ -8,6 +8,7 @@ word OUTCOME_FLAGS = (SUCCESS|NOOP|ERROR);
 
 Buff *OutStream = NULL;
 Buff *ErrStream = NULL;
+Buff *RandStream = NULL;
 
 status Core_Direct(MemCh *m, i32 out, i32 err){
     status r = READY;
@@ -31,6 +32,12 @@ status Core_Init(MemCh *m){
         Buff *bf = Buff_Make(m, ZERO);
         r |= SUCCESS;
         ErrStream = bf;
+    }
+    if(RandStream == NULL){
+        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+        r |= SUCCESS;
+        RandStream = bf;
+        File_Open(bf, S(m, "/dev/random"), O_RDONLY);
     }
     return NOOP;
 }

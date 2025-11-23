@@ -110,7 +110,7 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
                     }
                 }else if(s->type.state & STRING_BINARY){
                     Bits_Print(bf, s->bytes, s->length, 
-                        ((s->type.state|bf->type.state) & DEBUG));
+                        ((s->type.state|bf->type.state) & (MORE|DEBUG)));
                     goto next;
                 }else if((s->type.state & DEBUG) && (state & DEBUG) == 0){
                     Bytes_Debug(bf, s->bytes, s->bytes+s->length-1);

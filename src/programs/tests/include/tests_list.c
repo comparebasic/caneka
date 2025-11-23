@@ -409,6 +409,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Parity Tests",
+        Parity_Tests,
+        "A simple 4 byte sum + 7-bit content length check utility tests.",
+        FEATURE_COMPLETE,
+    },
+    {
         "Inet Tests",
         Inet_Tests,
         "Inet address translation tests.",

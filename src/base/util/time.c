@@ -4,12 +4,12 @@
 #define TIME_BUFF_LEN 64
 
 microTime MicroTime_FromSpec(struct timespec *ts){
-    return (ts->tv_sec * 1000) + (ts->tv_nsec / 1000);
+    return (ts->tv_sec * 1000000l) + (ts->tv_nsec / 1000000l);
 }
 
 void MicroTime_ToSpec(struct timespec *ts, microTime tm){
-    ts->tv_sec = tm / 1000;
-    ts->tv_nsec = tm % 1000; 
+    ts->tv_sec = tm / 1000000;
+    ts->tv_nsec = tm % 1000000; 
 }
 
 status Time_Delay(microTime tm, microTime *remaining){

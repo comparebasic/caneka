@@ -64,10 +64,16 @@ static BuildSubdir httpobj = { "http", {
     NULL
 }};
 
+static BuildSubdir sessionobj = { "session", {
+    "ssid.c",
+    NULL
+}};
+
 static BuildSubdir *objdirs[] = {
     &typesobj,
     &templobj,
     &httpobj,
+    &sessionobj,
     &wwwobj,
     NULL
 };
