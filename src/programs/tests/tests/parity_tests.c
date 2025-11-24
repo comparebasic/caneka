@@ -106,7 +106,6 @@ status Parity_Tests(MemCh *m){
     args[3] = NULL;
     r |= Test(new == parity, "Str Parity matches for, @, $ vs $", args);
 
-
     DebugStack_Pop();
     return r;
 }

@@ -1,6 +1,24 @@
 #include <external.h>
 #include <caneka.h>
 
+static status hKeyExpected(MemCh *m, HKey *hk, i32 expected[]){
+    status r = READY;
+    void *args[5];
+    for(i32 i = 0; i < 12; i++){
+        Table_HKeyVal(hk);
+        args[0] = I8_Wrapped(m, hk->dim);
+        args[1] = I32_Wrapped(m, expected[i]);
+        args[2] = I32_Wrapped(m, hk->idx);
+        args[3] = hk;
+        args[4] = NULL;
+        r |= Test(hk->idx == expected[i],
+            "Test idx mismatch for dim $ expected $, have $, of &",
+            args);
+    }
+
+    return r;
+}
+
 char *values[] = {
     "Alpha", "Apples",
     "Bravo", "Bandits",
@@ -47,38 +65,52 @@ char *values2[] = {
 
 status TableHKey_Tests(MemCh *m){
     status r = READY;
-    /*
     void *args[5]; 
-    Str *s = Str_CstrRef(m, "Hello there old friends!");
-    Hashed *h = Hashed_Make(m, s);
+
+    Str *k = K(m, "small");
+    util parity = Parity_From(k);
+
     HKey hk;
-    Table_HKeyInit(&hk, 1, h->id);
-    i32 expected[12];
-    expected[0] = 13;
-    expected[1] = 41;
-    expected[2] = 87;
-    expected[3] = 112;
-    expected[4] = 13;
-    expected[5] = 0;
-    expected[6] = 9;
-    expected[7] = 2;
-    expected[8] = 3;
-    expected[9] = 4;
-    expected[10] = 5;
-    expected[11] = 6;
-    for(i32 i = 0; i < 12; i++){
-        Table_HKeyVal(&hk);
-        args[0] = I32_Wrapped(m, expected[i]);
-        args[1] = I32_Wrapped(m, hk.idx);
-        args[2] = &hk;
-        args[3] = NULL;
-        r |= Test(hk.idx == expected[i],
-            "Test idx mismatch for expected $, have $, of &",
-            args);
-    }
+    Table_HKeyInit(&hk, 1, parity);
+    i32 expected[] = {117,109,97,108,5,7,13,6,7,8,9,10};
+    r |= hKeyExpected(m, &hk, expected);
+
+    args[0] = k;
+    args[1] = Str_Ref(m,
+        (byte *)&parity, sizeof(util), sizeof(util), STRING_BINARY|MORE|DEBUG);
+    args[2] = NULL;
+    r |= Test((r & (SUCCESS|ERROR)) == SUCCESS, 
+        "Small key  $, had expected hkeys, bits @^0\n", args);
+
+    k = K(m, "tiny");
+    parity = Parity_From(k);
+
+    Table_HKeyInit(&hk, 1, parity);
+    i32 expected2[] = {116,105,110,121,4,7,9,6,7,8,9,10};
+    r |= hKeyExpected(m, &hk, expected2);
+
+    args[0] = k;
+    args[1] = Str_Ref(m,
+        (byte *)&parity, sizeof(util), sizeof(util), STRING_BINARY|MORE|DEBUG);
+    args[2] = NULL;
+    r |= Test((r & (SUCCESS|ERROR)) == SUCCESS, 
+        "Small key  $, had expected hkeys, bits @^0\n", args);
+
+    k = K(m, "strange");
+    parity = Parity_From(k);
+
+    Table_HKeyInit(&hk, 1, parity);
+    i32 expected3[] = {119,116,114,97,7,7,4,7,8,9,10,11};
+    r |= hKeyExpected(m, &hk, expected3);
+
+    args[0] = k;
+    args[1] = Str_Ref(m,
+        (byte *)&parity, sizeof(util), sizeof(util), STRING_BINARY|MORE|DEBUG);
+    args[2] = NULL;
+    r |= Test((r & (SUCCESS|ERROR)) == SUCCESS, 
+        "Small key  $, had expected hkeys, bits @^0\n", args);
+
     return r;
-    */
-    return SUCCESS;
 }
 
 status Table_Tests(MemCh *m){
