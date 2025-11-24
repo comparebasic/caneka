@@ -6,23 +6,18 @@ StrVec *Ssid_From(SsidCtx *ctx, StrVec *ua, microTime time){
     quad parity = Parity_FromVec(ua);
     StrVec *v = StrVec_Make(m);
 
-    StrVec_Add(v,
-        Str_ToHex(m,
-            Str_Ref(m, (byte *)&parity, sizeof(parity), sizeof(parity), STRING_BINARY)));
+    ctx->metrics.count++;
+    StrVec_Add(v, Str_UniRandom(m, ctx->metrics.count, 8));
 
-    StrVec_Add(v, S(m, "-"));
+    StrVec_Add(v, Str_FromCstr(m, "-", STRING_COPY|MORE));
     StrVec_Add(v,
         Str_ToHex(m,
             Str_Ref(m, (byte *)&time, sizeof(time), sizeof(time), STRING_BINARY)));
 
-    StrVec_Add(v, S(m, "-"));
-    Str *rand = Str_Make(m, 8);
-    Buff_GetStr(RandStream, rand);
-    StrVec_Add(v, Str_ToHex(m, rand));
-
-    ctx->metrics.count++;
-    StrVec_Add(v, S(m, "-"));
-    StrVec_Add(v, Str_FromI64Pad(m, ctx->metrics.count, 10));
+    StrVec_Add(v, Str_FromCstr(m, "-", STRING_COPY|MORE));
+    StrVec_Add(v,
+        Str_ToHex(m,
+            Str_Ref(m, (byte *)&parity, sizeof(parity), sizeof(parity), STRING_BINARY)));
 
     return v;
 }
@@ -31,7 +26,7 @@ status Ssid_Open(SsidCtx *ctx, StrVec *ssid, StrVec *ua){
     StrVec *pathV = StrVec_From(ctx->m, ctx->path);
     MemCh *m = ctx->m;
 
-    Str *parityHex = Span_Get(ssid->p, 0);
+    Str *parityHex = Span_Get(ssid->p, 4);
     quad parity = 0;
     Raw_FromHex(m, parityHex, &parity, sizeof(parity));
     if(!Parity_Compare(parity, ua)){
@@ -144,7 +139,7 @@ status Ssid_Close(SsidCtx *ctx, StrVec *ssid, StrVec *ua){
     StrVec *pathV = StrVec_From(ctx->m, ctx->path);
     MemCh *m = ctx->m;
 
-    Str *parityHex = Span_Get(ssid->p, 0);
+    Str *parityHex = Span_Get(ssid->p, 4);
     quad parity = 0;
     Raw_FromHex(m, parityHex, &parity, sizeof(parity));
     if(!Parity_Compare(parity, ua)){

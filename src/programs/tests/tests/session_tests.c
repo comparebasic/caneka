@@ -18,12 +18,12 @@ status Session_Tests(MemCh *m){
     StrVec *ssid = Ssid_From(ctx, ua, time);
     args[0] = ssid;
     args[1] = NULL;
-    r |= Test(ssid->total == 52, "Ssid has length of 34, have @", args);
+    r |= Test(ssid->total == 34, "Ssid has length of 34, have @", args);
     quad parity = Parity_FromVec(ua);
     args[0] = Str_ToHex(m, Str_Ref(m, (byte *)&parity, sizeof(quad), sizeof(quad), STRING_BINARY));
-    args[1] = Span_Get(ssid->p, 0);
+    args[1] = Span_Get(ssid->p, 4);
     args[2] = NULL;
-    r |= Test(Equals(args[0], args[1]), "Ssid first seg is parity of User-Agent, expected @, have @", args);
+    r |= Test(Equals(args[0], args[1]), "Ssid third seg is parity of User-Agent, expected @, have @", args);
     args[0] = Str_ToHex(m, Str_Ref(m, (byte *)&time, sizeof(microTime), sizeof(microTime), STRING_BINARY));
     args[1] = Span_Get(ssid->p, 2);
     args[2] = NULL;

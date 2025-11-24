@@ -1,14 +1,34 @@
 #include <external.h>
 #include <caneka.h>
 
+Str *Str_UniRandom(MemCh *m, i64 n, word digits){
+    Str *s = Str_Make(m, digits+1);
+    byte *b = s->bytes;
+    i64 length = Str_I64OnBytes(&b, b+digits, n);
+    if(length != -1 && length < digits){
+        Str *rand = Str_Make(m, sizeof(i64));
+        Buff_GetStr(RandStream, rand);
+        i64 *n = (i64 *)rand->bytes;
+        *n = labs(*n);
+        word remaining = digits - length;
+        s->bytes[remaining] = 'u';
+        remaining--;
+        Str_I64OnBytes(&s->bytes, s->bytes+remaining, *n);
+        s->length = digits;
+    }
+
+    return s;
+}
+
 Str *Str_FromI64Pad(MemCh *m, i64 n, i32 pad){
     if(pad > MAX_BASE10){
         return NULL;
     }
+
     Str *s = Str_Make(m, MAX_BASE10);
     byte *b = s->bytes;
-    i64 length = Str_I64OnBytes(&b, n);
-    if(length < pad){
+    i64 length = Str_I64OnBytes(&b, b+MAX_BASE10-1, n);
+    if(length != -1 && length < pad){
         word diff = pad-length;
         while(--diff){
             *(--b) = '0';
@@ -29,9 +49,9 @@ Str *Str_FromI64(MemCh *m, i64 i){
     return s;
 }
 
-i64 Str_I64OnBytes(byte **_b, i64 i){
-    byte *end = (*_b)+(MAX_BASE10-1);
+i64 Str_I64OnBytes(byte **_b, byte *end, i64 i){
     byte *b = end;
+    byte *start = *_b;
 
     i64 base = 10;
     i64 val;
@@ -40,7 +60,7 @@ i64 Str_I64OnBytes(byte **_b, i64 i){
         i = labs(i);
     }
     *b = '0';
-    while(i > 0){
+    while(i > 0 && b > start){
         val = i % base;
         *(b--) = '0'+val;
         i -= val;
@@ -67,7 +87,7 @@ i64 Str_AddIByte(Str *s, byte i){
 
     byte *b = _b;
     i64 n = i;
-    i64 length = Str_I64OnBytes(&b, n);
+    i64 length = Str_I64OnBytes(&b, b+MAX_BASE10-1, n);
     return Str_Add(s, b, length);
 }
 
@@ -81,11 +101,9 @@ i64 Str_AddI64(Str *s, i64 i){
     }
 
     byte *b = _b;
-    i64 length = Str_I64OnBytes(&b, i);
+    i64 length = Str_I64OnBytes(&b, b+MAX_BASE10-1, i);
     return Str_Add(s, b, length);
 }
-
-
 
 i32 Int_FromStr(Str *s){
     i64 n = I64_FromStr(s);

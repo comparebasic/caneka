@@ -140,7 +140,8 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     Buff_AddBytes(ErrStream, (byte *)":", 1);
     byte lineNo[MAX_BASE10+1];
     byte *b = lineNo;
-    i64 length = Str_I64OnBytes(&b, line);
+    byte *end = b+MAX_BASE10;
+    i64 length = Str_I64OnBytes(&b, end, line);
     Buff_AddBytes(ErrStream, (byte *)b, length);
     Buff_AddBytes(ErrStream, (byte *)" ", 1);
     Fmt(ErrStream, fmt, args);
