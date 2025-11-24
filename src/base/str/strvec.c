@@ -337,7 +337,7 @@ status StrVec_Pop(StrVec *v){
     }
     Iter it;
     Iter_Init(&it, v->p);
-    Str *s =  Iter_GetByIdx(&it, it->p->max_idx);
+    Str *s =  Iter_GetByIdx(&it, it.p->max_idx);
     Iter_Remove(&it);
     v->total -= s->length;
     return SUCCESS;

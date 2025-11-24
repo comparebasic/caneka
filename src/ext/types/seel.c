@@ -16,7 +16,7 @@ i32 Seel_GetIdx(Table *seel, void *key){
 status Seel_SetKv(Span *inst, Str *prop, void *key, void *value){
     Table *tbl = Seel_Get(inst, prop);
     if(tbl != NULL && tbl->type.of == TYPE_TABLE){
-        return Table_Set(key, value);
+        return Table_Set(tbl, key, value);
     }
     return NOOP;
 }
