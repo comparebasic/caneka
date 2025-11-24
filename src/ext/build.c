@@ -88,7 +88,6 @@ static BuildSubdir navigateobj = { "navigate", {
 static BuildSubdir authobj = { "auth", {
     "auth_target.c",
     "auth_cred.c",
-    "parity.c",
     NULL
 }};
 

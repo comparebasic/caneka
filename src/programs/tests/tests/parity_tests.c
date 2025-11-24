@@ -46,6 +46,17 @@ status Parity_Tests(MemCh *m){
     args[3] = NULL;
     r |= Test(new == parity, "Parity matches for, @, $ vs $", args);
 
+    Str *d = S(m, "Once upon a time. There was a handsome pot of coffee."
+        " Who met a voluptous creamer. Who had a spicy sidekick.");
+
+    new = Parity_From(d);
+    args[0] = c;
+    args[1] = U32_Wrapped(m, parity);
+    args[2] = U32_Wrapped(m, new);
+    args[3] = NULL;
+    r |= Test(new == parity, "Str Parity matches for, @, $ vs $", args);
+
+
     DebugStack_Pop();
     return r;
 }

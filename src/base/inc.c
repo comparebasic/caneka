@@ -27,6 +27,7 @@
 #include "./mem/mem_maps.c"
 #include "./mem/mem_eq.c"
 #include "./mem/mem_iter.c"
+#include "./sequence/parity.c"
 #include "./sequence/arr.c"
 #include "./sequence/span_utils.c"
 #include "./sequence/hashed.c"

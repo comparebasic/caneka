@@ -1,3 +1,4 @@
+#include "sequence/parity.h"
 #include "sequence/hashed.h"
 #include "sequence/lookup.h"
 #include "sequence/span_utils.h"

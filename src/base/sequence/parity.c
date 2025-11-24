@@ -9,6 +9,35 @@ boolean Parity_Compare(quad par, StrVec *v){
     }
 }
 
+quad Parity_From(Str *s){
+    quad parity = 0;
+    quad slot = 0;
+    word pos = 0;
+    quad size = sizeof(quad);
+    quad mod = size-1;
+    word remaining = s->length;
+    byte *ptr = s->bytes;
+
+    while(remaining >= size){
+        memcpy(((byte *)&slot), ptr, size);
+        parity += slot;
+        remaining -= size;
+        ptr += size;
+    }
+
+    word tail = remaining & mod;
+    if(tail){
+        slot = 0;
+        memcpy(&slot, ptr, tail);
+        parity += slot;
+    }
+
+    parity &= ~7;
+    parity |= (s->length & 7);
+
+    return parity;
+}
+
 quad Parity_FromVec(StrVec *v){
     Iter it;
     Iter_Init(&it, v->p);
