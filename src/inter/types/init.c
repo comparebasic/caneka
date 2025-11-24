@@ -8,5 +8,6 @@ status Inter_Init(MemCh *m){
     r |= Http_ClsInit(m);
     r |= HttpCtx_Init(m);
     r |= Route_ClsInit(m);
+    r |= Login_Init(m);
     return r;
 }

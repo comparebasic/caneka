@@ -69,5 +69,6 @@ enum inter_obj_range {
     TYPE_HTML_NAV,
     TYPE_HTML_PAGE,
     TYPE_WWW_ROUTE,
+    TYPE_LOGIN,
     _TYPE_INTER_OBJ_END,
 };

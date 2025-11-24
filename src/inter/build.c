@@ -66,6 +66,7 @@ static BuildSubdir httpobj = { "http", {
 
 static BuildSubdir sessionobj = { "session", {
     "ssid.c",
+    "login.c",
     NULL
 }};
 
