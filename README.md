@@ -55,7 +55,7 @@ see [caneka.org](https://caneka.org) for more details.
 
 To build and test Caneka run:
 
-    ./scripts/test.sh
+    ./scripts/make.sh && ./scripts/test.sh && ./build/bin/tests
 
 There are other scripts in the [/scripts/](/scripts/) folder provide quick
 commands.
