@@ -28,22 +28,10 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
         Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
     }
 
-    Single sg = {
-        .type = {TYPE_WRAPPED_UTIL, ZERO},
-        .objType = {ZERO, ZERO},
-        .val.value = 0 
-    };
-    Hashed *h = NULL;
-    if(op != SPAN_OP_GET || (key->type.of != TYPE_STR && key->type.of != TYPE_STRVEC)){
-        h = Hashed_Make(tbl->m, key);
-        h->value = value;
-        sg.val.value = h->id;
-    }else{
-        sg.val.value = Get_Hash(key);
-    }
+    util parity = Get_Hash(key);
 
     HKey hk;
-    Table_HKeyInit(&hk, tbl->dims, sg.val.value);
+    Table_HKeyInit(&hk, tbl->dims, parity);
     while((tbl->type.state & SUCCESS) == 0){
         Table_HKeyVal(&hk);
         Iter_GetByIdx(it, hk.idx);
@@ -51,7 +39,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
         if((it->type.state & NOOP) && (op & SPAN_OP_SET)){
             if(hk.idx > dim_max_idx[tbl->dims]){
                 Iter_ExpandTo(it, dim_max_idx[tbl->dims]+1);
-                Table_HKeyInit(&hk, tbl->dims, sg.val.value);
+                Table_HKeyInit(&hk, tbl->dims, parity);
                 continue;
             }
         }
@@ -65,13 +53,16 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                     continue;
                 }
             }else if(op & SPAN_OP_SET){
+                Hashed *h = Hashed_Make(tbl->m, key);
+                h->value = value;
+                h->id = parity;
                 h->idx = hk.idx;
                 h->orderIdx = tbl->nvalues;
                 Span_Set((Span *)tbl, hk.idx, h);
                 tbl->type.state |= SUCCESS;
                 return h;
             }
-        }else if(Hashed_Equals(record, &sg)){
+        }else if(record->id == parity &&  Equals(record->key, key)){
             if(op & SPAN_OP_SET){
                 record->value = value;
             }
