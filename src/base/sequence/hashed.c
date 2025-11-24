@@ -4,14 +4,13 @@
 Lookup *HashLookup = NULL;
 
 static util _Hash_Bytes(byte *bt, size_t length, util h){
-	util i = 0;
-	byte c;
-	while (i++ < length) {
-		c = *bt;
-		h = (h << 5) + h + (h << 9) + h + (h << 31) + h + (h << 49) + h + c;
-        bt++;
-	}
-    return h;
+    Str s = {.type = {TYPE_STR, STRING_CONST},
+        .length = length,
+        .alloc = length,
+        .bytes = bt
+    };
+
+    return Parity_From(&s);
 }
 
 static util Hash_Ptr(void *ptr){
@@ -62,6 +61,12 @@ util Get_Hash(void *_a){
     if(a->type.of == TYPE_HASHED){
         Hashed *h = (Hashed *)a;
         return h->id;
+    }else if(a->type.of == TYPE_WRAPPED_UTIL){
+        return ((Single *)a)->val.value;
+    }else if(a->type.of == TYPE_STR){
+        return Hash_Str(a);
+    }else if(a->type.of == TYPE_STRVEC){
+        return Hash_StrVec(a);
     }
 
     HashFunc func = (HashFunc)Lookup_Get(HashLookup, a->type.of);
@@ -72,11 +77,17 @@ util Get_Hash(void *_a){
     }
 }
 
-boolean Hashed_Equals(Hashed *a, Hashed *b){
-    if(a->id != b->id){
+boolean Hashed_Equals(Hashed *a, void *_b){
+    util bid = Get_Hash(_b);
+    if(a->id != bid){
         return FALSE;
     }
-    return Equals(a->key, b->key);
+    Abstract *b = (Abstract *)_b;
+    if(b->type.of == TYPE_HASHED){
+        return Equals(a->key, ((Hashed *)b)->key);
+    }else{
+        return Equals(a->key, b);
+    }
 }
 
 Hashed *Hashed_Make(MemCh *m, void *_a){
