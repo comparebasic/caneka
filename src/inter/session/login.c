@@ -35,7 +35,7 @@ status Login_Refresh(MemCh *m, Login *lg){
     StrVec_Add(loginPathV, K(m, "auth/"));
     Str *loginPath = StrVec_Str(m, loginPathV);
     Span *authFiles = Span_Make(m);
-    if(!Dir_Exists(m, loginPath)){
+    if(Dir_Exists(m, loginPath) & NOOP){
         Dir_Gather(m, loginPath, authFiles);
     }
 
@@ -61,7 +61,7 @@ Login *Login_Open(MemCh *m, Str *path, StrVec *uid, StrVec *ssid, AuthCred *cred
     StrVec_AddVec(loginPathV, uid);
 
     Str *loginPath = StrVec_Str(m, loginPathV);
-    if(!Dir_Exists(m, loginPath)){
+    if(Dir_Exists(m, loginPath) & NOOP){
         Seel_SetKv(lg, K(m, "errors"), S(m, "not-found"), S(m, "Login not found")); 
         lg->type.state |= ERROR;
         return lg;
@@ -72,7 +72,7 @@ Login *Login_Open(MemCh *m, Str *path, StrVec *uid, StrVec *ssid, AuthCred *cred
     return lg;
 }
 
-Login *Login_Create(MemCh *m, Str *path, StrVec *uid,  StrVec *ssid, AuthCred *cred){
+Login *Login_Create(MemCh *m, Str *path, StrVec *uid, StrVec *ssid, AuthCred *cred){
     Login *lg = Inst_Make(m, TYPE_LOGIN);
     Seel_Set(lg, K(m, "path"), path); 
     Seel_Set(lg, K(m, "uid"), uid); 
@@ -83,24 +83,66 @@ Login *Login_Create(MemCh *m, Str *path, StrVec *uid,  StrVec *ssid, AuthCred *c
     StrVec_AddVec(loginPathV, uid);
 
     Str *loginPath = StrVec_Str(m, loginPathV);
-    if(Dir_Exists(m, loginPath)){
-        Seel_SetKv(lg,
-            K(m, "errors"),
-            S(m, "already-exists"),
-            S(m, "Existing user directory found")
-        );
+    if(Dir_Exists(m, loginPath) & SUCCESS){
+        StrVec *msg = StrVec_Make(m);
+        StrVec_Add(msg, S(m, "Existing user directory found:"));
+        StrVec_Add(msg, loginPath);
+        Seel_SetKv(lg, K(m, "errors"), S(m, "already-exists"), msg);
         lg->type.state |= ERROR;
         return lg;
     }
 
-    StrVec_Add(loginPathV, S(m, "/"));
+    Dir_Mk(m, loginPath);
 
-    StrVec_Add(loginPathV, K(m, "auth/"));
+    StrVec_Add(loginPathV, K(m, "/auth/"));
     loginPath = StrVec_Str(m, loginPathV);
     Dir_Mk(m, loginPath);
 
     lg->type.state |= Login_Refresh(m, lg);
     return lg;
+}
+
+status Login_Destroy(MemCh *m, Login *lg){
+    Str *path = Seel_Get(lg, K(m, "path")); 
+    StrVec *uid = Seel_Get(lg, K(m, "uid")); 
+
+    StrVec *loginPathV = StrVec_Make(m);
+    StrVec_Add(loginPathV, path);
+    StrVec_AddVec(loginPathV, uid);
+
+    StrVec_Add(loginPathV, S(m, "/"));
+    Table *seel = Lookup_Get(SeelLookup, lg->type.of);
+    Iter it;
+    Iter_Init(&it, seel);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            Single *prop = h->value;
+            if(prop->val.w == TYPE_STRVEC || prop->val.w == TYPE_STR){
+                StrVec_Add(loginPathV, h->key);
+                File_Unlink(m, StrVec_Str(m, loginPathV));
+                StrVec_Pop(loginPathV);
+            }
+        }
+    }
+
+    StrVec_Add(loginPathV, K(m, "auth/"));
+    Str *loginPath = StrVec_Str(m, loginPathV);
+    Span *authFiles = Span_Make(m);
+    if(Dir_Exists(m, loginPath) & NOOP){
+        Dir_Gather(m, loginPath, authFiles);
+    }
+
+    if(authFiles->nvalues > 0){
+        /* handle auth files here */ 
+    }
+
+    Dir_Rm(m, loginPath);
+    StrVec_Pop(loginPathV);
+    loginPath = StrVec_Str(m, loginPathV);
+    Dir_Rm(m, loginPath);
+
+    return SUCCESS;
 }
 
 status Login_Persist(MemCh *m, Login *lg){
@@ -112,7 +154,7 @@ status Login_Persist(MemCh *m, Login *lg){
     StrVec_AddVec(loginPathV, uid);
 
     Str *loginPath = StrVec_Str(m, loginPathV);
-    if(!Dir_Exists(m, loginPath)){
+    if(Dir_Exists(m, loginPath) & NOOP){
         Seel_SetKv(lg,
             K(m, "errors"),
             S(m, "not-found"),

@@ -463,9 +463,9 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Session Tests",
-        Session_Tests,
-        "Sesssion open/close and save/retrive basic data tests",
+        "Login Tests",
+        Login_Tests,
+        "User login tests.",
         FEATURE_COMPLETE,
     },
     {

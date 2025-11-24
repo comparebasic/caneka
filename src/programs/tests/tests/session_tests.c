@@ -12,7 +12,6 @@ status Session_Tests(MemCh *m){
     StrVec *absPath = IoAbsPath(m, "examples/session/open/");
     Str *path = StrVec_Str(m, absPath);
     SsidCtx *ctx = SsidCtx_Make(m, path);
-
     Dir_CheckCreate(m, path);
 
     StrVec *ssid = Ssid_From(ctx, ua, time);
