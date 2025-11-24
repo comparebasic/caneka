@@ -3,7 +3,7 @@
 
 StrVec *Ssid_From(SsidCtx *ctx, StrVec *ua, microTime time){
     MemCh *m = ctx->m;
-    quad parity = Parity_FromVec(ua);
+    quad parity = HalfParity_FromVec(ua);
     StrVec *v = StrVec_Make(m);
 
     ctx->metrics.count++;
@@ -29,7 +29,7 @@ status Ssid_Open(SsidCtx *ctx, StrVec *ssid, StrVec *ua){
     Str *parityHex = Span_Get(ssid->p, 4);
     quad parity = 0;
     Raw_FromHex(m, parityHex, &parity, sizeof(parity));
-    if(!Parity_Compare(parity, ua)){
+    if(!HalfParity_Compare(parity, ua)){
         ssid->type.state |= (NOOP|LAST);
         return ssid->type.state;
     }
@@ -142,7 +142,7 @@ status Ssid_Close(SsidCtx *ctx, StrVec *ssid, StrVec *ua){
     Str *parityHex = Span_Get(ssid->p, 4);
     quad parity = 0;
     Raw_FromHex(m, parityHex, &parity, sizeof(parity));
-    if(!Parity_Compare(parity, ua)){
+    if(!HalfParity_Compare(parity, ua)){
         ssid->type.state |= (NOOP|LAST);
         return ssid->type.state;
     }

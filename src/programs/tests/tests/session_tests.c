@@ -19,7 +19,7 @@ status Session_Tests(MemCh *m){
     args[0] = ssid;
     args[1] = NULL;
     r |= Test(ssid->total == 34, "Ssid has length of 34, have @", args);
-    quad parity = Parity_FromVec(ua);
+    quad parity = HalfParity_FromVec(ua);
     args[0] = Str_ToHex(m, Str_Ref(m, (byte *)&parity, sizeof(quad), sizeof(quad), STRING_BINARY));
     args[1] = Span_Get(ssid->p, 4);
     args[2] = NULL;

@@ -21,22 +21,12 @@ static util Hash_Ptr(void *ptr){
 
 static util Hash_Str(void *a){
     Str *s = (Str *)asIfc(a, TYPE_STR);
-	util h = 5381;
-    h = _Hash_Bytes(s->bytes, s->length, h);
-    return h;
+    return Parity_From(s);
 }
 
 static util Hash_StrVec(void *a){
     StrVec *v = (StrVec *)a;
-	util h = 5381;
-    Iter it;
-    Iter_Init(&it, v->p);
-    while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)Iter_Get(&it);
-        h = _Hash_Bytes(s->bytes, s->length, h);
-    }
-
-    return h;
+    return Parity_FromVec(v);
 }
 
 static util Hash_Req(void *a){
