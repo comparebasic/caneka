@@ -34,3 +34,4 @@ StrVec *StrVec_StrVec(MemCh *m, void *a);
 Str *StrVec_StrCombo(MemCh *m, void *a, void *b);
 status Str_AddVec(Str *s, StrVec *v);
 status StrVec_AddChain(StrVec *v, void *args[]);
+status StrVec_Pop(StrVec *v);

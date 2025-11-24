@@ -13,6 +13,14 @@ i32 Seel_GetIdx(Table *seel, void *key){
     return -1;
 }
 
+status Seel_SetKv(Span *inst, Str *prop, void *key, void *value){
+    Table *tbl = Seel_Get(inst, prop);
+    if(tbl != NULL && tbl->type.of == TYPE_TABLE){
+        return Table_Set(key, value);
+    }
+    return NOOP;
+}
+
 status Seel_Set(Span *inst, void *key, void *value){
     Table *seel = Lookup_Get(SeelLookup, inst->type.of);
     void *args[2];

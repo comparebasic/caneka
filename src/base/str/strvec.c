@@ -331,6 +331,18 @@ status StrVec_AddVec(StrVec *v, StrVec *v2){
     return SUCCESS;
 }
 
+status StrVec_Pop(StrVec *v){
+    if(v->total == 0){
+        return NOOP;
+    }
+    Iter it;
+    Iter_Init(&it, v->p);
+    Str *s =  Iter_GetByIdx(&it, it->p->max_idx);
+    Iter_Remove(&it);
+    v->total -= s->length;
+    return SUCCESS;
+}
+
 StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length){
     StrVec *v = StrVec_Make(m);
     while(length > STR_MAX){
@@ -378,7 +390,6 @@ StrVec *StrVec_StrVec(MemCh *m, void *_a){
         return NULL;
     }
 }
-
 
 StrVec *StrVec_From(MemCh *m, Str *s){
     StrVec *v = StrVec_Make(m);

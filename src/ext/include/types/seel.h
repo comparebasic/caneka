@@ -7,3 +7,4 @@ status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx);
 status Seel_Init(MemCh *m);
 void *Seel_Get(Span *inst, void *key);
 status Seel_Set(Span *inst, void *key, void *value);
+status Seel_SetKv(Span *inst, Str *prop, void *key, void *value);

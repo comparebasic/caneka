@@ -10,7 +10,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
     tbl->type.state &= ~(SUCCESS|NOOP);
     void *args[5];
     if(key == NULL){
-        return NULL;
+        key = (Abstract *)I32_Wrapped(tbl->m, tbl->nvalues);
     }
 
     if(tbl->type.state & DEBUG){
