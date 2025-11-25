@@ -71,6 +71,12 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
+        "Histo Tests",
+        Histo_Tests,
+        "Text content histogram testing, to prevent code or sql injection.",
+        FEATURE_COMPLETE,
+    },
+    {
         "String - End Matches",
         Str_EndMatchTests,
         "Tests for Matching the end of the string",

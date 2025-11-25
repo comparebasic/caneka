@@ -9,3 +9,4 @@
 #include "str/str_tos.h"
 #include "str/str_maps.h"
 #include "str/coord.h"
+#include "str/histo.h"

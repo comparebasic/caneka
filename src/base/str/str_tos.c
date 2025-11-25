@@ -3,6 +3,8 @@
 
 static Str **streamLabels = NULL;
 static Str **strLabels = NULL;
+static Str **histoLabels = NULL;
+
 status Bytes_Debug(Buff *bf, byte *start, byte *end){
     byte *b = start;
     size_t sz = MAX_BASE10+3;
@@ -145,6 +147,24 @@ status StrVec_Print(Buff *bf, void *a, cls type, word flags){
     return SUCCESS;
 }
 
+status Histo_Print(Buff *bf, void *a, cls type, word flags){
+    Histo *hst = (Histo *)as(a, TYPE_HISTO);
+    MemCh *m = bf->m;
+    void *args[] = {
+        Type_StateVec(m, hst->type.of, hst->type.state),
+        I64_Wrapped(m, hst->total),
+        I64_Wrapped(m, (i64)(hst->ratio * 100)),
+        I64_Wrapped(m, hst->alpha),
+        I64_Wrapped(m, hst->num),
+        I64_Wrapped(m, hst->whitespace),
+        I64_Wrapped(m, hst->punctuation),
+        I64_Wrapped(m, hst->control),
+        I64_Wrapped(m, hst->upper),
+        NULL
+    };
+    return Fmt(bf, "Histo<@ $ $% /a$,n$,w$,p$,c$,u$>", args);
+}
+
 status Cursor_Print(Buff *bf, void *a, cls type, word flags){
     Cursor *curs = (Cursor *)as(a, TYPE_CURSOR);
     if((flags & (MORE|DEBUG)) == 0){
@@ -246,6 +266,17 @@ status Str_InitLabels(MemCh *m, Lookup *lk){
         Lookup_Add(m, lk, TYPE_STR, (void *)strLabels);
         r |= SUCCESS;
     }
+
+    if(histoLabels == NULL){
+        histoLabels = (Str **)Arr_Make(m, 17);
+        histoLabels[9] = Str_CstrRef(m, "ENFORCE");
+        histoLabels[10] = Str_CstrRef(m, "CODE");
+        histoLabels[11] = Str_CstrRef(m, "CONTROL");
+        histoLabels[12] = Str_CstrRef(m, "UNICODE");
+        Lookup_Add(m, lk, TYPE_HISTO, (void *)histoLabels);
+        r |= SUCCESS;
+    }
+
     return r;
 }
 
@@ -256,6 +287,7 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Print);
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)BytesLit_Print);
+    r |= Lookup_Add(m, lk, TYPE_HISTO, (void *)Histo_Print);
     r |= Str_InitLabels(m, ToSFlagLookup);
     return r;
 }

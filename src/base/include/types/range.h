@@ -52,6 +52,7 @@ enum types {
     TYPE_COMP,
     TYPE_CSTR,
     TYPE_STR,
+    TYPE_HISTO,
     TYPE_COORD,
     TYPE_STRVEC,
     TYPE_STREAM,

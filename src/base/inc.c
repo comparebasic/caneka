@@ -51,6 +51,7 @@
 #include "./str/coord.c"
 #include "./str/fmt.c"
 #include "./str/tos.c"
+#include "./str/histo.c"
 #include "./encode/hex.c"
 #include "./termio/ansi_str.c"
 #include "./termio/cli_status.c"
