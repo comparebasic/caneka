@@ -42,8 +42,8 @@ Components:
   folder ext. This includes the [parser](/src/ext/parser/) and
   beginings of the [serve](/src/ext/serve/) folder. The server heavily
   leverages components in the [navigate](/src/ext/navigate/) module.
-  To see how a tcp/http server is componsed, view the
-  [test](/src/programs/tests/tests/servetcp_tests.c) file as a good
+  To see how a session is componsed, view the
+  [test](/src/programs/tests/tests/session_tests.c) file as a good
   reference.
 - [programs](/src/programs/): Any programs that ship with the source
   will be in this folder, presently [tests](src/programs/tests) is the
