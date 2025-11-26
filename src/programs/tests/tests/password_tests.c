@@ -14,7 +14,7 @@ status Password_Tests(MemCh *m){
     Password_OnStr(m, hash, pw, salt);
     Str *digest = Str_ToHex(m, hash);
     Str *expected = S(m,
-        "201246817fa75057c8c6ea1dea13649a8d2d843b94a365f5c93ae9f8d90007f3");
+        "4e732bfa69b00e0dfc60ff488786b723f27d640f72598ba3b8b1adb579cfdf69");
     args[0] = expected;
     args[1] = digest;
     args[2] = NULL;
@@ -27,7 +27,7 @@ status Password_Tests(MemCh *m){
     Password_OnStr(m, hash, pw, salt);
     digest = Str_ToHex(m, hash);
     expected = S(m,
-        "35d92737d6efcf8d70f881ba485cc9252f0e12be3c966747df774e268cc1a424");
+        "b32465d79219a499a6abc69060d63fc03262354727cf7ad16df667185247eeff");
     args[0] = expected;
     args[1] = digest;
     args[2] = NULL;

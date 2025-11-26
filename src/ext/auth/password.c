@@ -13,7 +13,7 @@ status Password_OnStr(MemCh *m, Str *dest, Str *pw, Str *salt){
         return ERROR;
     }
 
-    byte slate[PASSWORD_UNIT_LENGTH];
+    byte slate[PASSWORD_UNIT_LENGTH*2];
     Str s = {
         .type = {TYPE_STR, STRING_CONST},
         .length = 0,
@@ -51,7 +51,9 @@ status Password_OnStr(MemCh *m, Str *dest, Str *pw, Str *salt){
         memcpy(slate+offset, salt->bytes, length);
     }
 
-    s.length = PASSWORD_UNIT_LENGTH;
+    memcpy(slate+PASSWORD_UNIT_LENGTH, slate, PASSWORD_UNIT_LENGTH-pos);
+
+    s.length = PASSWORD_UNIT_LENGTH+(PASSWORD_UNIT_LENGTH-pos);
 
     if(Str_ToSha256(m, &s, (digest *)dest->bytes) & SUCCESS){
         dest->length = DIGEST_SIZE;
