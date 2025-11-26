@@ -19,14 +19,22 @@ status Session_Tests(MemCh *m){
     args[1] = NULL;
     r |= Test(ssid->total == 34, "Ssid has length of 34, have @", args);
     quad parity = HalfParity_FromVec(ua);
-    args[0] = Str_ToHex(m, Str_Ref(m, (byte *)&parity, sizeof(quad), sizeof(quad), STRING_BINARY));
+    args[0] = Str_ToHex(m, 
+        Str_Ref(m, (byte *)&parity, sizeof(quad), sizeof(quad), STRING_BINARY));
     args[1] = Span_Get(ssid->p, 4);
     args[2] = NULL;
-    r |= Test(Equals(args[0], args[1]), "Ssid third seg is parity of User-Agent, expected @, have @", args);
-    args[0] = Str_ToHex(m, Str_Ref(m, (byte *)&time, sizeof(microTime), sizeof(microTime), STRING_BINARY));
-    args[1] = Span_Get(ssid->p, 2);
-    args[2] = NULL;
-    r |= Test(Equals(args[0], args[1]), "Ssid second seg is time, expected @, have @", args);
+    r |= Test(Equals(args[0], args[1]),
+        "Ssid third seg is parity of User-Agent, expected @, have @", args);
+
+    Str *timeS = Span_Get(ssid->p, 2);
+    microTime *timeVal = (microTime *)Str_FromHex(m, timeS)->bytes;
+    args[0] = Str_ToHex(m,
+        Str_Ref(m, (byte *)&time, sizeof(microTime), sizeof(microTime), STRING_BINARY));
+    args[1] = timeS;
+    args[2] = MicroTime_ToStr(m, *timeVal);
+    args[3] = NULL;
+    r |= Test(Equals(args[0], args[1]), "Ssid second seg is time, expected @, have @ ($)", 
+        args);
 
     ssid = Ssid_Start(ctx, ua, time);
     
