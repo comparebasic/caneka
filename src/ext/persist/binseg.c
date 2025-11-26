@@ -1,7 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-Lookup *BinSegNames = NULL;
 Lookup *BinSegLookup = NULL;
 
 static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
@@ -139,11 +138,6 @@ status BinSegCtx_Load(BinSegCtx *ctx){
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
     if(ctx->type.state & BINSEG_REVERSED){
         Buff_PosEnd(ctx->bf);
-        if(ctx->type.state & DEBUG){
-            args[0] = ctx->bf;
-            args[1] = NULL;
-            Out("^p.Positioning @\n", args);
-        }
     }else{
         Buff_PosAbs(ctx->bf, 0);
     }
@@ -167,17 +161,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
             if(ctx->type.state & BINSEG_VISIBLE){
                 s = Str_FromHex(m, s);
             }
-            if(ctx->type.state & DEBUG){
-                args[0] = s;
-                args[1] = NULL;
-                Out("^p.Hdr &\n", args);
-            }
             BinSegHeader *hdr = (BinSegHeader*)s->bytes;
-            if(ctx->type.state & DEBUG){
-                args[0] = Ptr_Wrapped(m, hdr, TYPE_BINSEG_HEADER);
-                args[1] = NULL;
-                Out("^p.Header &^0\n", args);
-            }
             
             sz = BinSegHeader_FooterSize(hdr->total, hdr->kind);
 
@@ -209,17 +193,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
     return ctx->type.state;
 }
 
-Str *BinSegCtx_KindName(i8 kind){
-    return Lookup_Get(BinSegNames, (i16)kind);;
-}
-
-i16 BinSegCtx_IdxCounter(BinSegCtx *ctx, void *arg){
-    ctx->latestId++;
-    return ctx->latestId;
- }
-
-status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
-    DebugStack_Push(ctx, ctx->type.of);
+status BinSegCtx_SendEntry(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     MemCh *m = ctx->bf->m;
     if(ctx->type.state & BINSEG_VISIBLE){
         entry = Str_ToHex(m, entry);
@@ -236,49 +210,43 @@ status BinSegCtx_ToBuff(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
         args[4] = NULL;
         Out("^p.ToBuff($ &)/$ -> @^0\n", args);
     }
-    DebugStack_Pop();
     return r;
 }
 
 status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id){
-    status r = READY;
     Abstract *a = (Abstract *)_a;
-    DebugStack_Push(ctx, ctx->type.of);
-    void *args[2];
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
-        args[0] = Type_ToStr(ctx->bf->m, a->type.of);
-        args[1] = NULL;
+        void *args[] = {
+            Type_ToStr(ctx->bf->m, a->type.of),
+            NULL,
+        };
         Error(ctx->bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to find BinSegFunc for type $", args);
-        DebugStack_Pop();
         return 0;
     }
-    DebugStack_Pop();
-    r = func(ctx, a, id);
+    status r = func(ctx, a, id);
     MemCh_FreeTemp(ctx->bf->m);
     return r;
 }
 
-BinSegCtx *BinSegCtx_Make(Buff *bf, BinSegIdxFunc func, void *source, word flags){
+BinSegCtx *BinSegCtx_Make(Buff *bf, word flags, Span *insts){
     MemCh *m = bf->m;
     BinSegCtx *ctx = (BinSegCtx *)MemCh_AllocOf(m, sizeof(BinSegCtx), TYPE_BINSEG_CTX);
     ctx->type.of = TYPE_BINSEG_CTX;
     ctx->type.state = flags;
     bf->type.state |= BUFF_DATASYNC;
     ctx->bf = bf;
+    ctx->schema.insts = insts;
+    Iter_Init(&ctx->schema.ords, Span_Make(m));
 
-    if(func == NULL){
-        ctx->func = BinSegCtx_IdxCounter;
-        ctx->latestId = -1;
-    }else{
-        ctx->func = func;
+    Iter it;
+    Iter_Init(&it, insts);
+    while((Iter_Next(&it) & END) == 0){
+        Single *sg = Iter_Get(&it); 
+        Span *ord = Seel_GetSeel(sg->val.w);
+        Iter_SetByIdx(&ctx->schema.ords, it.idx, ord);
     }
-
-    ctx->cortext = Table_Make(m);
-    ctx->unresolved = Table_Make(m);
-    ctx->dest = (Abstract *)Iter_Make(m, Span_Make(m));
-    ctx->target = (Abstract *)Table_Ordered(seel);
 
     return ZERO;
 }
@@ -288,21 +256,6 @@ status BinSeg_Init(MemCh *m){
     if(BinSegLookup == NULL){
         BinSegLookup = Lookup_Make(m, _TYPE_ZERO);
         r |= BinSeg_BasicInit(m, BinSegLookup);
-        BinSegNames = Lookup_Make(m, _TYPE_ZERO);
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BYTES,
-            (void *)Str_CstrRef(m, "Binary"));
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_COLLECTION,
-            (void *)Str_CstrRef(m, "Collection"));
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BYTES_COLLECTION,
-            (void *)Str_CstrRef(m, "BinarySegCollection"));
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_DICTIONARY,
-            (void *)Str_CstrRef(m, "Dictionary"));
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_NODE,
-            (void *)Str_CstrRef(m, "Node"));
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_NUMBER,
-            (void *)Str_CstrRef(m, "Number"));
-        r |= SUCCESS;
     }
-
     return r;
 }

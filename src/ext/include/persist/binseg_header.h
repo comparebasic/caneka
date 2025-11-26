@@ -1,7 +1,7 @@
 typedef struct binseg_hdr {
     word total;
-    word flags;
     word kind;
+    word idx;
     word id;
     /* data */
 } BinSegHeader;

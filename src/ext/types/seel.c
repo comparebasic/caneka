@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 Lookup *SeelLookup = NULL;
+Lookup *SeelOrdLookup = NULL;
 Lookup *SeelNameLookup = NULL;
 Lookup *SeelChildrenPropLookup = NULL;
 
@@ -79,6 +80,7 @@ void *Seel_Get(Span *inst, void *key){
 status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx){
     seel->type.state |= TABLE_SEALED;
     Lookup_Add(m, SeelLookup, typeOf, seel);
+    Lookup_Add(m, SeelLookup, typeOf, Table_Orderd(m, seel));
     Lookup_Add(m, SeelNameLookup, typeOf, name);
     if(childrenIdx >= 0){
         Lookup_Add(m, SeelChildrenPropLookup, typeOf, I32_Wrapped(m, childrenIdx));
@@ -87,8 +89,28 @@ status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx){
     return seel->type.state;
 }
 
-Span *Seel_OrdSeel(MemCh *m, Table *seel){
-    return Table_Ordered(m, seel);
+Table *Seel_GetSeel(cls instType){
+    Table *seel = Lookup_Get(SeelLookup, inst->type.of);
+    if(seel == NULL){
+        args[0] = Type_ToStr(inst->m, inst->type.of);
+        args[1] = NULL;
+        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Seel not found for type $", args);
+        return NULL;
+    }
+    return sesl;
+}
+
+Span *Seel_OrdSeel(MemCh *m, seelType instOf){
+    Span *ord = Lookup_Get(SeelOrdLookup, instOf);
+    if(ord == NULL){
+        args[0] = Type_ToStr(m, instOf);
+        args[1] = NULL;
+        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Seel not found for type $", args);
+        return NULL;
+    }
+    return ord;
 }
 
 status Seel_Init(MemCh *m){
@@ -96,6 +118,7 @@ status Seel_Init(MemCh *m){
     if(SeelLookup == NULL){
         SeelLookup = Lookup_Make(m, TYPE_INSTANCE);
         SeelNameLookup = Lookup_Make(m, TYPE_INSTANCE);
+        SeelOrdLookup = Lookup_Make(m, TYPE_INSTANCE);
         SeelChildrenPropLookup = Lookup_Make(m, TYPE_INSTANCE);
         r |= SUCCESS;
     }

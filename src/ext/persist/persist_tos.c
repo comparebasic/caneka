@@ -3,6 +3,11 @@
 
 Str **binSegCtxLabels = NULL;
 Str **fileLabels = NULL;
+Lookup *BinSegNames = NULL;
+
+Str *BinSegCtx_KindName(i8 kind){
+    return Lookup_Get(BinSegNames, (i16)kind);;
+}
 
 static status BinSegHeader_Print(Buff *bf, void *a, cls type, word flags){
     i64 total = 0;
@@ -61,5 +66,23 @@ status Persist_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_BINSEG_CTX, (void *)BinSegCtx_Print);
     r |= Lookup_Add(m, lk, TYPE_BINSEG_HEADER, (void *)BinSegHeader_Print);
     r |= persistInitLabels(m, ToSFlagLookup);
+
+    if(BinSegLookup == NULL){
+        BinSegNames = Lookup_Make(m, _TYPE_ZERO);
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BYTES,
+            (void *)Str_CstrRef(m, "Binary"));
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_COLLECTION,
+            (void *)Str_CstrRef(m, "Collection"));
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_BYTES_COLLECTION,
+            (void *)Str_CstrRef(m, "BinarySegCollection"));
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_DICTIONARY,
+            (void *)Str_CstrRef(m, "Dictionary"));
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_NODE,
+            (void *)Str_CstrRef(m, "Node"));
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_NUMBER,
+            (void *)Str_CstrRef(m, "Number"));
+        r |= SUCCESS;
+    }
+
     return r;
 }

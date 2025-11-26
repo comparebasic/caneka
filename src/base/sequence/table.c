@@ -44,7 +44,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
             }
         }
         Hashed *record = Iter_Current(it);
-        if(record == NULL){
+        if(record == NULL || record->orderIdx == -1){
             if(op & SPAN_OP_GET){
                 if(Table_HKeyMiss(&hk) & END){
                     tbl->type.state |= NOOP;
@@ -53,7 +53,10 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                     continue;
                 }
             }else if(op & SPAN_OP_SET){
-                Hashed *h = Hashed_Make(tbl->m, key);
+                Hashed *h = record;
+                if(h == NULL){
+                    h = Hashed_Make(tbl->m, key);
+                }
                 h->value = value;
                 h->id = parity;
                 h->idx = hk.idx;
@@ -199,6 +202,18 @@ void *Table_Get(Table *tbl, void *_a){
         }
     }
     return NULL;
+}
+
+i32 Table_UnSet(Table *tbl, void *a){
+    Hashed *h = Table_GetHashed(tbl, a);
+    if(h != NULL){
+        i32 orderIdx = h->orderIdx;
+        h->value = NULL;
+        h->id = 0;
+        h->orderIdx = -1;
+        return orderIdx;
+    }
+    return -1;
 }
 
 i32 Table_Set(Table *tbl, void *_a, void *_value){
