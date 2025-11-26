@@ -40,3 +40,5 @@ typedef struct test_set {
 status Test(boolean condition, char *fmt, void *args[]);
 status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]);
 status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests);
+
+Str *Test_GetStr512(MemCh *m);

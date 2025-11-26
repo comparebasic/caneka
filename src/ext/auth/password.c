@@ -1,8 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
+#include <gen/salt.h>
+#include <gen/funny.h>
+
 status Password_OnStr(MemCh *m, Str *dest, Str *pw, Str *salt){
-    byte slate[PASSWORD_UNIT_LENGTH];
     if(pw->length < 2 || pw->length > PASSWORD_UNIT_LENGTH ||
             dest->alloc != DIGEST_SIZE ||
             salt->length != PASSWORD_UNIT_LENGTH){ 
@@ -11,40 +13,45 @@ status Password_OnStr(MemCh *m, Str *dest, Str *pw, Str *salt){
         return ERROR;
     }
 
-    word *firstTwo = (word *)pw->bytes;
-    i16 shift = (i16)(*firstTwo & (PASSWORD_UNIT_LENGTH-1));
-    i16 pos = (shift+pw->length)-PASSWORD_UNIT_LENGTH;
+    byte slate[PASSWORD_UNIT_LENGTH];
+    Str s = {
+        .type = {TYPE_STR, STRING_CONST},
+        .length = 0,
+        .alloc = PASSWORD_UNIT_LENGTH,
+        .bytes = slate
+    };
+    i16 funny = _funny & (PASSWORD_UNIT_LENGTH-1);
 
-    if(pos < 0){
-        i16 length = abs((i32)pos);
+    word firstTwo = *((word *)pw->bytes);
+    i16 pos = (i16)((firstTwo+funny) & (PASSWORD_UNIT_LENGTH-1));
+
+    if((pos+pw->length) > PASSWORD_UNIT_LENGTH){
+        i16 length = (pos+pw->length)-PASSWORD_UNIT_LENGTH;
         i16 offset = pw->length - length;
         memcpy(slate, pw->bytes+offset, length);
 
+        i16 taken = offset;
         offset = length;
-        i16 gapend = PASSWORD_UNIT_LENGTH-(pw->length-offset);
-        length = gapend - offset;
-        memcpy(slate+offset, salt->bytes, length);
+        length = PASSWORD_UNIT_LENGTH-(pw->length);
+        memcpy(slate+offset, salt->bytes+taken, length);
 
-        length = PASSWORD_UNIT_LENGTH-gapend;
-        offset = gapend;
-        memcpy(slate+offset, pw->bytes, length);
+        offset += length;
+        memcpy(slate+offset, pw->bytes, taken);
     }else{
-        memcpy(slate, salt->bytes, pos);
+        i16 offset = PASSWORD_UNIT_LENGTH-pos;
+        if(pos > 0){
+            memcpy(slate, salt->bytes+offset, pos);
+        }
 
-        i16 offset = pos;
+        offset = pos;
         memcpy(slate+offset, pw->bytes, pw->length);
         offset += pw->length;
 
         i16 length = PASSWORD_UNIT_LENGTH-offset;
-        memcpy(slate, salt->bytes+pos, length);
+        memcpy(slate+offset, salt->bytes, length);
     }
 
-    Str s = {
-        .type = {TYPE_STR, STRING_CONST},
-        .length = PASSWORD_UNIT_LENGTH,
-        .alloc = PASSWORD_UNIT_LENGTH,
-        .bytes = slate
-    };
+    s.length = PASSWORD_UNIT_LENGTH;
 
     if(Str_ToSha256(m, &s, (digest *)dest->bytes) & SUCCESS){
         dest->length = DIGEST_SIZE;

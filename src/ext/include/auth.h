@@ -1,4 +1,5 @@
 #include "auth/auth_cred.h"
 #include "auth/auth_target.h"
 #include "auth/salt.h"
+#include "auth/funny.h"
 #include "auth/password.h"

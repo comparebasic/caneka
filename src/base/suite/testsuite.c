@@ -21,6 +21,19 @@ static char *statusCstr(word status){
     }
 }
 
+Str *Test_GetStr512(MemCh *m){
+    return S(m, 
+        "0102030405060708091011121314151617181920212223242526272829303132"
+        "3334353637383940414243444546474849505152535455565758596061626364"
+        "6566676869707172737475767778798081828384858687888990919293949596"
+        "979899a1a2a3a4a5a6a7a8a9a0b1b1b2b3b4b5b6b7b8b9b0c1c2c3c4c5c6c7c8"
+        "c9c0d1d2d3d4d5d6d7d8d9d0e1e2e3e4e5e6e7e8e9e0f1f2f3f4f5f6f7f8f9f0"
+        "g1g2g3g4g5g6g7g8g9g0h1h2h3h4h5h6h7h8h9h0i1i2i3i4i5i6i7i8i9i0j1j2"
+        "j3j4j5j6j7j8j9j0k1k2k3k4k5k6k7k8k9k0l1l2l3l4l5l6l7l8l9l0m1m2m3m4"
+        "m5m6m7m8m9m0n1n2n3n4n5n6n7n8n9n0o1o2o3o4o5o6o7o8o9o0p1p2p3p4p5p6"
+    );
+}
+
 status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]){
     OutStream->m->level++;
     if(!condition){

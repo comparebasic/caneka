@@ -81,3 +81,4 @@ status Parity_Tests(MemCh *m);
 status Session_Tests(MemCh *m);
 status Login_Tests(MemCh *m);
 status Histo_Tests(MemCh *m);
+status Password_Tests(MemCh *m);

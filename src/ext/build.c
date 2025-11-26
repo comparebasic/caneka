@@ -34,11 +34,17 @@ static char *libs[] = {
 
 
 static char *saltGenSources[] = {"./examples/gensource/salt512", NULL};
+static char *funnyGenSources[] = {"./examples/gensource/funny", NULL};
 static GenConfig genConfigs[] = {
     {
         "salt.h", 
         "_#_",
         saltGenSources,
+    },
+    {
+        "funny.h", 
+        "_#_",
+        funnyGenSources,
     },
     {
         NULL,
