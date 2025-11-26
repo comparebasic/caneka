@@ -42,7 +42,7 @@ status Login_Tests(MemCh *m){
     r |= Test(Dir_Exists(m, loginPath) & SUCCESS, "User dir exists @", args);
 
     Login_Destroy(m, lg);
-    Ssid_Close(ctx, ssid, ua);
+    Ssid_Destroy(ctx, ssid, ua);
 
     DebugStack_Pop();
     return r;

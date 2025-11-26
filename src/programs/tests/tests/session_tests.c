@@ -28,23 +28,34 @@ status Session_Tests(MemCh *m){
     args[2] = NULL;
     r |= Test(Equals(args[0], args[1]), "Ssid second seg is time, expected @, have @", args);
 
-    Ssid_Open(ctx, ssid, ua);
+    ssid = Ssid_Start(ctx, ua, time);
+    
+    r |= Test(ssid != NULL, "Session ssid is not null after Start", NULL);
 
-    StrVec *key = Sv(m, "username");
-    Str *value = S(m, "fredieeee");
-    Ssid_Set(ctx, ssid, key, value);
+    Table *stashTbl = Ssid_Open(ctx, ssid, ua);
+
+    args[0] = stashTbl;
+    args[1] = NULL;
+    r |= Test(stashTbl != NULL, "Session data is not NULL @", args);
+
+    Str *origSsid = Table_Get(stashTbl, K(m, "orig-ssid")); 
+    r |= Test(Equals(origSsid, ssid), "Orig Ssid from stash equals ssid", NULL);
+
+    StrVec *key = Sv(stashTbl->m, "username");
+    Str *value = S(stashTbl->m, "fredieeee");
+    Table_Set(stashTbl, key, value);
+    Ssid_Close(ctx, ssid, ua, stashTbl);
+
     StrVec *newSsid = Ssid_Update(ctx, ssid, ua, MicroTime_Now());
+    Table *newTbl = Ssid_Open(ctx, newSsid, ua);
 
-    StrVec *v = Ssid_Get(ctx, newSsid, key);
+    args[0] = S(m, "fredieeee");
+    args[1] = Table_Get(newTbl, S(m, "username"));
+    args[2] = NULL;
+    r |= Test(Equals(args[0], args[1]), "Username from updated session equals @, have @", 
+        args);
 
-    args[0] = value;
-    args[1] = v;
-    r |= Test(Equals(value,v), "Value after update is a match @ @", args);
-
-    r |= Test(Ssid_UnSet(ctx, newSsid, key) & SUCCESS,
-        "Succsesfully removed username", NULL);
-
-    r |= Test(Ssid_Close(ctx, newSsid, ua) & SUCCESS,
+    r |= Test(Ssid_Destroy(ctx, newSsid, ua) & SUCCESS,
         "Succsesfully closed session", NULL);
 
     DebugStack_Pop();

@@ -1,10 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static Map *Table_Map(MemCh *m){
-    return Lookup_Get(MapsLookup, TYPE_SPAN);
-}
-
 static Map *Hashed_Map(MemCh *m){
     Hashed h;
     i16 size = 5;
@@ -33,7 +29,7 @@ static Map *Hashed_Map(MemCh *m){
 
 status Sequence_MapsInit(MemCh *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Table_Map(m));
+    r |= Lookup_Add(m, lk, TYPE_TABLE, (void *)Lookup_Get(MapsLookup, TYPE_SPAN));
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Map(m));
     return r;
 }
