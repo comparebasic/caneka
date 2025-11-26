@@ -25,6 +25,8 @@ enum binseg_kinds {
 enum binseg_types {
     BINSEG_REVERSED = 1 << 8,
     BINSEG_VISIBLE = 1 << 9,
+    BINSEG_RECORDS = 1 << 10,
+    BINSEG_SEEL 1 << 11,
 };
 
 typedef i16 (*BinSegIdxFunc)(struct binseg_ctx *ctx, void *arg);
@@ -36,9 +38,10 @@ typedef struct binseg_ctx{
     word latestId;
     Buff *bf;
     Table *cortext;
+    Table *unresolved;
     BinSegIdxFunc func;
-    Table *keys;
-    Table *tbl;
+    Abstract *target;
+    Abstract *dest;
     void *source;
 } BinSegCtx;
 
@@ -51,3 +54,5 @@ status BinSegCtx_ToBuff(BinSegCtx *ctx, struct binseg_hdr *hdr, Str *sh);
 status BinSegCtx_Send(BinSegCtx *ctx, void *a, i16 id);
 status BinSegCtx_Load(BinSegCtx *ctx);
 Str *BinSegCtx_KindName(i8 kind);
+status BinSegCtx_SetSeel(BinSegCtx *ctx, Table *seel);
+status BinSegCtx_SetRecords(BinSegCtx *ctx, Table *seel);

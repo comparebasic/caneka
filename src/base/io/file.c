@@ -60,7 +60,10 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
 
 status File_Close(Buff *bf){
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
-        bf->type.state &= ~(BUFF_FD|BUFF_SOCKET);
+        if(bf->type.state & BUFF_DATASYNC){
+            fdatasync(bf->fd);    
+        }
+        bf->type.state &= ~(BUFF_FD|BUFF_SOCKET|BUFF_DATASYNC);
     }else{
         void *args[] = {
             bf,

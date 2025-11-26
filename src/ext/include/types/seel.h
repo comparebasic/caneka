@@ -4,6 +4,7 @@ extern struct lookup *SeelChildrenPropLookup;
 
 i32 Seel_GetIdx(Table *seel, void *key);
 status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx);
+Span *Seel_OrdSeel(MemCh *m, Table *seel);
 status Seel_Init(MemCh *m);
 void *Seel_Get(Span *inst, void *key);
 status Seel_Set(Span *inst, void *key, void *value);

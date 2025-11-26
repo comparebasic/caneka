@@ -87,6 +87,10 @@ status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx){
     return seel->type.state;
 }
 
+Span *Seel_OrdSeel(MemCh *m, Table *seel){
+    return Table_Ordered(m, seel);
+}
+
 status Seel_Init(MemCh *m){
     status r = READY;
     if(SeelLookup == NULL){
