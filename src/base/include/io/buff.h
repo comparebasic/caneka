@@ -41,6 +41,7 @@ status Buff_Stat(Buff *bf);
 status Buff_GetStr(Buff *bf, Str *s);
 status Buff_RevGetStr(Buff *bf, Str *s);
 status Buff_GetToVec(Buff *bf, StrVec *v);
+status Buff_CompareToVec(Buff *bf, StrVec *v);
 
 status Buff_Add(Buff *bf, Str *s);
 status Buff_AddVec(Buff *bf, StrVec *v);

@@ -296,6 +296,8 @@ status Buff_Stat(Buff *bf){
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
         if(fstat(bf->fd, &bf->st)){
             bf->type.state |= ERROR;
+        }else if(lseek(bf->fd, 0, SEEK_CUR) == bf->st.st_size){
+            bf->type.state |= END;
         }
     } else{
         bf->st.st_size = bf->v->total;
@@ -508,6 +510,40 @@ status Buff_Read(Buff *bf){
     return Buff_ReadAmount(bf, IO_SEND_MAX);
 }
 
+status Buff_CompareToVec(Buff *bf, StrVec *v){
+    byte slate[STR_DEFAULT];
+    Str cmp = {
+        .type = {TYPE_STR, STRING_CONST},
+        .length = 0,
+        .alloc = STR_DEFAULT,
+        .bytes = slate
+    };
+   
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if(s->alloc > STR_DEFAULT){
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Buff_CompareToVec can only copy a vec with standrad sized strings",
+                NULL);
+            return ERROR|NOOP;
+        }
+        cmp.alloc = s->alloc;
+        Buff_GetStr(bf, &cmp);
+        if(!Equals(s, &cmp)){
+            return NOOP;
+        }
+    }
+
+    Buff_Stat(bf);
+    if((it.type.state & END) && (bf->type.state & END)){
+        return SUCCESS;
+    }
+
+    return NOOP;
+}
+
 status Buff_ReadAmount(Buff *bf, i64 amount){
     bf->type.state &= ~(SUCCESS|PROCESSING|MORE|NOOP);
 
@@ -600,7 +636,7 @@ status Buff_ReadToStr(Buff *bf, Str *s){
             bytes += recieved;
             bf->type.state |= PROCESSING;
             if(recieved == 0){
-                bf->type.state |= END;
+                Buff_Stat(bf);
             }
             if(amount == 0){
                 bf->type.state |= SUCCESS;
