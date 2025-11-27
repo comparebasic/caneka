@@ -88,24 +88,6 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     return r;
 }
 
-static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
-    Str *s = (Str *)as(a, TYPE_STR);
-    MemCh *m = ctx->bf->m;
-
-    Str *content;
-    Str *entry;
-    BinSegHeader *hdr = BinSegHeader_Make(ctx,
-        s->length,
-        BINSEG_TYPE_BYTES,
-        id,
-        &content,
-        &entry);
-
-    memcpy(content->bytes, s->bytes, s->length);
-
-    return BinSegCtx_ToBuff(ctx, hdr, entry);
-}
-
 static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
     MemCh *m = ctx->bf->m;
@@ -147,11 +129,25 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
     return r;
 }
 
+static status Str_ToBinSeg(BinSegCtx *ctx, void *a, word id, word idx){
+    Str *entry = (Str *)as(a, TYPE_STR);
+    MemCh *m = ctx->bf->m;
+
+    hdr = (BinSegHeader *)MemCh_AllocOf(m, sizeof(BinSegHeader), TYPE_BINSEG_HEADER);
+    hdr->total = s->length;
+    hdr->kind = BINSEG_TYPE_BYTES;
+    hdr->id = id;
+    hdr->idx = idx;
+
+    return BinSegCtx_SendEntry(ctx, hdr, entry);
+}
+
 status BinSeg_BasicInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, BinSegLookup, TYPE_STR, (void *)Str_ToBinSeg);
     r |= Lookup_Add(m, BinSegLookup, TYPE_SPAN, (void *)Span_ToBinSeg);
     r |= Lookup_Add(m, BinSegLookup, TYPE_TABLE, (void *)Table_ToBinSeg);
     r |= Lookup_Add(m, BinSegLookup, TYPE_STRVEC, (void *)StrVec_ToBinSeg);
+    r |= Lookup_Add(m, BinSegLookup, TYPE_INSTANCE, (void *)Inst_ToBinSeg);
     return r;
 }

@@ -5,8 +5,8 @@ typedef struct single  {
     Type objType;
     union {
         byte b;
-        i16 w;
-        i32 i;
+        word w;
+        quad i;
         util value;
         void *a;
         void *ptr;

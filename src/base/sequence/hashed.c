@@ -59,8 +59,10 @@ util Get_Hash(void *_a){
     if(a->type.of == TYPE_HASHED){
         Hashed *h = (Hashed *)a;
         return h->id;
-    }else if(a->type.of == TYPE_WRAPPED_UTIL){
+    }else if(a->type.of == TYPE_WRAPPED_UTIL || a->type.of == TYPE_WRAPPED_I64){
         return ((Single *)a)->val.value;
+    }else if(a->type.of == TYPE_WRAPPED_U32 || a->type.of TYPE_WRAPPED_I32){
+        return (util)((Single *)a)->val.i;
     }else if(a->type.of == TYPE_STR){
         return Hash_Str(a);
     }else if(a->type.of == TYPE_STRVEC){

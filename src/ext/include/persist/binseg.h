@@ -2,12 +2,12 @@
 
 enum binseg_kinds {
     BINSEG_TYPE_BYTES = 1,
-    BINSEG_TYPE_BYTES_COLLECTION = 2,
+    BINSEG_TYPE_NUMBER = 2,
     BINSEG_TYPE_COLLECTION = 3,
-    BINSEG_TYPE_DICTIONARY = 4,
-    BINSEG_TYPE_NODE = 5,
-    BINSEG_TYPE_NUMBER = 6,
-    BINSEG_TYPE_INDEX = 7,
+    BINSEG_TYPE_BYTES_COLLECTION = 4,
+    BINSEG_TYPE_DICTIONARY = 5,
+    BINSEG_TYPE_INST = 6,
+    BINSEG_TYPE_INST_TYPE = 7,
 };
 
 /* footprints:
@@ -18,8 +18,8 @@ enum binseg_kinds {
         order: item,item,item...
    - Dictionary: Header + sizeof(id) * hdr->total * 2
         order: key,value,key,value,key,value...
-   - Node: Header + sizeof(id) * (hdr->total + 2)
-        order: name,atts,child,child,child...
+   - Inst: Header + sizeof(id) * (hdr->total + 2)
+        order: type, id,id,...
 */
 
 enum binseg_types {
@@ -34,13 +34,25 @@ typedef status (*BinSegFunc)(struct binseg_ctx *ctx, void *a, i16 id);
 typedef struct binseg_ctx {
     Type type;
     Buff *bf;
-    Table *cortext;
+    Span *shelves;
     Span *records;
     struct {
         Span *insts;
         Iter ords;
     } schema;
+    Iter it;
 } BinSegCtx;
+
+typedef binseg_ident {
+    word idx;
+    word id;
+} BinSegIdent;
+
+typedef struct binseg_hdr {
+    word total;
+    word kind;
+    BinSegIdent ident;
+} BinSegHeader;
 
 extern struct lookup *BinSegLookup;
 

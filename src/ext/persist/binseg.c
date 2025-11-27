@@ -3,122 +3,75 @@
 
 Lookup *BinSegLookup = NULL;
 
-static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
+static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
     DebugStack_Push(ctx, ctx->type.of);
     MemCh *m = ctx->bf->m;
-    void *args[3];
     
+    Iter it;
+    Span *shelf = Span_Get(ctx->shelves, hdr->id);
     Abstract *a = NULL;
-    Single *id = I16_Wrapped(m, hdr->id);
     if(hdr->kind == BINSEG_TYPE_BYTES){
         a = (Abstract *)s;
-        Table_Set(ctx->cortext, id, a);
     }else if(hdr->kind == BINSEG_TYPE_NUMBER){
-        i32 *ip = (i32 *)s->bytes;
-        a = (Abstract *)I32_Wrapped(m, *ip);
-        Table_Set(ctx->cortext, id, a);
+        i64 *ip = (i64 *)s->bytes;
+        a = (Abstract *)I64_Wrapped(m, *ip);
+    }else if(hdr->kind == BINSEG_TYPE_COLLECTION){
+        Span *p = (Abstract *)Span_Make(m);
+        if(shelf != NULL){
+            Iter_Init(&it, shelf);
+            while((Iter_Next(&it) & END) == 0){
+                Span_Add(p, Iter_Get(&it));
+            }
+        }
+        a = (Abstract *)p;
     }else if(hdr->kind == BINSEG_TYPE_BYTES_COLLECTION){
         StrVec *v = StrVec_Make(m);
+        if(shelf != NULL){
+            Iter_Init(&it, shelf);
+            while((Iter_Next(&it) & END) == 0){
+                StrVec_Add(v, Iter_Get(&it));
+            }
+        }
         a = (Abstract *)v;
-        Table_Set(ctx->cortext, id, a);
-        i16 *idp = (i16 *)s->bytes;
-        Single *sg = I16_Wrapped(m, 0);
-        for(i32 i = 0; i < hdr->total; i++){
-            sg->val.w = idp[i];
-            Abstract *item = Table_Get(ctx->cortext, sg);
-            if(item == NULL){
-                Table_Set(ctx->unresolved, sg, a);
-            }else{
-                StrVec_Add(v, (Str *)as(item, TYPE_STR));
-            }
-        }
-    }else if(hdr->kind == BINSEG_TYPE_COLLECTION){
-        Span *p = Span_Make(m);
-        a = (Abstract *)p;
-        Table_Set(ctx->cortext, id, a);
-        i16 *idp = (i16 *)s->bytes;
-        Single *sg = I16_Wrapped(m, 0);
-        for(i32 i = 0; i < hdr->total; i++){
-            sg->val.w = idp[i];
-            Abstract *item = Table_Get(ctx->cortext, sg);
-            if(item == NULL){
-                args[0] = sg;
-                args[1] = ctx->cortext;
-                args[2] = NULL;
-                Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                    "Span child item not found at $ @", args);
-                DebugStack_Pop();
-                return ERROR;
-            }else{
-                Span_Add(p, item);
-            }
-        }
     }else if(hdr->kind == BINSEG_TYPE_DICTIONARY){
         Table *tbl = Table_Make(m);
+        if(shelf != NULL){
+            Iter_Init(&it, shelf);
+            Abstract *key = NULL;
+            while((Iter_Next(&it) & END) == 0){
+                Abstract *a = Iter_Get(&it);
+                if(it.idx & 1){
+                    key = a;
+                }else{
+                    Table_Set(tbl, key, a);
+                }
+            }
+        }
         a = (Abstract *)tbl;
-        Table_Set(ctx->cortext, id, a);
-        i16 *idp = (i16 *)s->bytes;
-        Single *keySg = I16_Wrapped(m, 0);
-        Single *sg = I16_Wrapped(m, 0);
-        for(i32 i = 0; i < hdr->total; i++){
-            keySg->val.w = idp[i*2];
-            sg->val.w = idp[i*2+1];
-            Abstract *key = Table_Get(ctx->cortext, keySg);
-            Abstract *item = Table_Get(ctx->cortext, sg);
-            if(key == NULL || item == NULL){
-                Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                    "Table child item(s) not found", NULL);
-                DebugStack_Pop();
-                return ERROR;
-            }else{
-                Table_Set(tbl, key, item);
-            }
-        }
-    }else if(hdr->kind == BINSEG_TYPE_NODE){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Node binseg not yet implemented ", NULL);
-        DebugStack_Pop();
-        return ERROR;
+    }else if(hdr->kind == BINSEG_TYPE_INST){
+        word *wp = (w *)s->bytes;
+        a = (Abstract *)Inst_Make(m, *wp);
+    }else if(hdr->kind == BINSEG_TYPE_INST_TYPE){
+        word *wp = (w *)s->bytes;
+        a = (Abstract *)Word_Wrapped(m, *wp);
     }
 
-    if(ctx->dest != NULL){
-        if(ctx->type.state & BINSEG_SEEL){
-            Span *ord = (Span *)ctx->target;
-            Table *tbl = NULL;
-            if(ctx->type.state & BINSEG_RECORDS){
-                tbl = Iter_GetByIdx((Iter *)ctx->dest, ((Iter *)ctx->dest)->p->max_idx);
-            }else{
-                tbl = (Table *)ctx->dest;
-            }
-            if(id->val.w == 0){
-                Iter_Add((Iter *)ctx->dest, a);
-            }
-            Hashed *h = (Str *)Span_Get(ord, id->val.w);
-            if(h != NULL){
-                if(Table_Get(tbl, h->key) == NULL){ 
-                    Table_Set(ctx->tbl, h->key, a);
-                }
-
-                if(ctx->tbl->nvalues == ord->nvalues){
-                    if(ctx->type.state & BINSEG_RECORDS){
-                        Iter_Add((Iter *)ctx->dest, Table_Make(m));
-                    }else{
-                        ctx->type.state |= END;
-                    }
-                }
-            }
+    if(hdr->id == 0){
+        Span_Add(ctx->records, a);
+        ctx->bf->m++;
+        ctx->shelves = Span_Make(m);
+        ctx->bf->m--;
+        Mem_WipeTemp(ctx->bf->m);
+    }else {
+        word parentId = hdr->id-1;
+        shelf = Span_Get(ctx->shelves, parentId);
+        if(shelf == NULL){
+            ctx->bf->m++;
+            shelf = Span_Make(m);
+            Span_Set(ctx->shelves, shelf);
+            ctx->bf->m--;
         }
-    }else{
-        ctx->type.state |= END;
-    }
-
-    if(ctx->type.state & DEBUG){
-        void *args[4];
-        args[0] = Ptr_Wrapped(OutStream->m,
-            (byte *)hdr, TYPE_BINSEG_HEADER);
-        args[1] = a;
-        args[2] = NULL;
-        Out("^y.Found Header @ -> &^0\n", args);
+        Span_Set(shelf, hdr->idx, a);
     }
 
     DebugStack_Pop();
@@ -128,12 +81,6 @@ static status BinSegCtx_PushLoad(BinSegCtx *ctx, BinSegHeader *hdr, Str *s){
 status BinSegCtx_Load(BinSegCtx *ctx){
     DebugStack_Push(ctx, ctx->type.of);
     void *args[4];
-    if(ctx->type.state & DEBUG){
-        args[0] = ctx;
-        args[1] = ctx->bf;
-        args[2] = NULL;
-        Out("^p.Load & &\n", args);
-    }
     MemCh *m = ctx->bf->m;
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
     if(ctx->type.state & BINSEG_REVERSED){
@@ -183,7 +130,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
                 ftr = Str_FromHex(m, ftr);
             }
 
-            if(BinSegCtx_PushLoad(ctx, hdr, ftr) & END){
+            if(BinSegCtx_buildKind(ctx, hdr, ftr) & END){
                 ctx->type.state |= (SUCCESS|END);
             }
         }
@@ -194,23 +141,13 @@ status BinSegCtx_Load(BinSegCtx *ctx){
 }
 
 status BinSegCtx_SendEntry(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
-    MemCh *m = ctx->bf->m;
     if(ctx->type.state & BINSEG_VISIBLE){
         entry = Str_ToHex(m, entry);
     }
-    m->level--;
-    status r = Buff_Add(ctx->bf, entry);
-    m->level++;
-    if(ctx->type.state & DEBUG){
-        void *args[5];
-        args[0] = Type_StateVec(m, ctx->type.of, ctx->type.state),
-        args[1] = Ptr_Wrapped(m, (byte *)hdr, TYPE_BINSEG_HEADER);
-        args[2] = I16_Wrapped(m, entry->length);
-        args[3] = ctx;
-        args[4] = NULL;
-        Out("^p.ToBuff($ &)/$ -> @^0\n", args);
+    if(entry != NULL){
+        return Buff_Add(ctx->bf, entry);
     }
-    return r;
+    return ZERO;
 }
 
 status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id){
@@ -225,9 +162,7 @@ status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id){
             "Unable to find BinSegFunc for type $", args);
         return 0;
     }
-    status r = func(ctx, a, id);
-    MemCh_FreeTemp(ctx->bf->m);
-    return r;
+    return func(ctx, a, id);
 }
 
 BinSegCtx *BinSegCtx_Make(Buff *bf, word flags, Span *insts){
@@ -238,7 +173,9 @@ BinSegCtx *BinSegCtx_Make(Buff *bf, word flags, Span *insts){
     bf->type.state |= BUFF_DATASYNC;
     ctx->bf = bf;
     ctx->schema.insts = insts;
+    ctx->shelves = Span_Make(m);
     Iter_Init(&ctx->schema.ords, Span_Make(m));
+    Iter_Init(&ctx->it, Span_Make(m));
 
     Iter it;
     Iter_Init(&it, insts);

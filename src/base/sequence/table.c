@@ -211,6 +211,7 @@ i32 Table_UnSet(Table *tbl, void *a){
         h->value = NULL;
         h->id = 0;
         h->orderIdx = -1;
+        tbl->nvalues--;
         return orderIdx;
     }
     return -1;
