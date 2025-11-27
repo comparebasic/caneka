@@ -87,7 +87,7 @@ int main(int argc, char **argv){
     ctx.args.inc = inc;
     ctx.args.libs = NULL;
     ctx.args.staticLibs = NULL;
-    ctx.source = sources;
+    ctx.sources = sources;
     ctx.genConfigs = genConfigs;
 
     return (Build(&ctx) & ERROR) ? 2 : 0;

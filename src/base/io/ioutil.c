@@ -37,9 +37,9 @@ StrVec *IoAbsPath(MemCh *m, char *cstr){
 
 StrVec *IoUtil_AbsPathBuilder(MemCh *m, char *args[]){
     StrVec *v = StrVec_Make(m);
-    char *cptr = args;
+    char **cptr = args;
     while(*cptr != 0){
-        StrVec_Add(m, S(m, *cptr));
+        StrVec_Add(v, S(m, *cptr));
     }
 
     return IoUtil_AbsVec(m, v);

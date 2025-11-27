@@ -1,2 +1,2 @@
-#include "builder.deprecated.c"
+#include "builder.c"
 #include "generate.c"

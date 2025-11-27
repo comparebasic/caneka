@@ -16,14 +16,10 @@ typedef struct build_cli_fields {
         Single *modSrcCount;
         Single *modSrcTotal;
         Single *modCount;
-        Single *modTotal;
         Str *barStart; 
         Str *barEnd; 
     } steps;
     struct {
-        Str *lib;
-        Str *libPath;
-        Str *libFileName
         Str *source; 
         Str *dest; 
         Str *action; 
@@ -56,7 +52,7 @@ typedef struct buildctx {
         char **libs;
         char **staticLibs;
     } args;
-    char *sources[];
+    char **sources;
     GenConfig *genConfigs;
 } BuildCtx;
 
