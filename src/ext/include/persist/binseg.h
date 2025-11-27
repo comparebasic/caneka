@@ -32,8 +32,8 @@ typedef struct binseg_ctx {
 } BinSegCtx;
 
 typedef struct binseg_ident {
-    word idx;
-    word id;
+    i16 idx;
+    i16 id;
 } BinSegIdent;
 
 typedef struct binseg_hdr {
