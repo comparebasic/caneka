@@ -345,6 +345,13 @@ static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *d
     sourceCstr = dir->sources;
     ctx->fields.steps.modCount->val.i++;
     while(*sourceCstr != NULL){
+        i64 len = strlen(sourceCstr);
+
+        if(sourceCstr[len-1] == '/'){
+            Out("^r.It's a Directory^0\n", NULL);
+            exit(1);
+        }
+
         m->level++;
         Str_Trunc(source, sourceL);
         Str_AddCstr(source, *sourceCstr);

@@ -51,49 +51,43 @@ static BuildSubdir fixturesobj = { "fixtures", {
 }};
 
 static BuildSubdir testsobj = { "tests", {
+    "base/tests/",
+#ifdef EXT
+    "ext/tests/",
+#endif
+#ifdef CRYPTO_NACL 
+    "third/nacl/tests/",
+#endif
+#ifdef INTER 
+    "inter/tests/",
+#endif
+    /*
     "binseg_tests.c",
-    "buff_tests.c",
     "clone_tests.c",
     "config_tests.c",
-    "core_tests.c",
     "crypto_tests.c",
-    "cursor_tests.c",
-    "debugstack_tests.c",
-    "encoding_tests.c",
     "filedb_tests.c",
     "fmthtml_tests.c",
-    "hash_tests.c",
-    "iter_tests.c",
     "match_tests.c",
-    "memch_tests.c",
     "mess_tests.c",
     "object_tests.c",
     "patchar_tests.c",
-    "path_tests.c",
     "queue_tests.c",
     "relation_tests.c",
     "roebling_tests.c",
     "route_tests.c",
     "servetcp_tests.c",
     "snip_tests.c",
-    "span_tests.c",
     "split_tests.c",
-    "stash_tests.c",
-    "str_tests.c",
-    "stream_tests.c",
-    "strvec_tests.c",
-    "table_tests.c",
     "taskstep_tests.c",
     "templ_tests.c",
-    "time_tests.c",
     "nodeobj_tests.c",
     "inet_tests.c",
-    "parity_tests.c",
     "http_tests.c",
     "session_tests.c",
     "login_tests.c",
-    "histo_tests.c",
     "password_tests.c",
+    */
     NULL
 }};
 

@@ -14,7 +14,9 @@ static char *cflags[] = {
         "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
         "-DINSECURE",
         "-DCNK_EXT",
+#ifdef CRYPTO
         "-DCNK_CRYPTO",
+#endif
         NULL
 };
 
@@ -22,13 +24,14 @@ static char *inc[] = {
     "-I./src/include/",
     "-I./src/base/include/",
     "-I./src/ext/include/",
+#ifdef CRYPTO
     "-I./src/third/api/include/",
+#endif
     "-I./build/include/",
     NULL
 };
 
 static char *libs[] = {
-    "-lcrypto",
     NULL
 };
 
@@ -91,12 +94,14 @@ static BuildSubdir navigateobj = { "navigate", {
     NULL
 }};
 
+#ifdef CRYPTO
 static BuildSubdir authobj = { "auth", {
     "auth_target.c",
     "auth_cred.c",
     "password.c",
     NULL
 }};
+#endif
 
 static BuildSubdir parserobj = { "parser", {
     "match.c",
@@ -170,7 +175,9 @@ static BuildSubdir *objdirs[] = {
     &typesobj,
     &docobj,
     &navigateobj,
+#ifdef CRYPTO
     &authobj,
+#endif
     &serveobj,
     &parserobj,
     &fmtobj,
