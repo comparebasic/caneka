@@ -57,6 +57,12 @@ typedef struct buildctx {
 } BuildCtx;
 
 status BuildCtx_Init(MemCh *m, BuildCtx *ctx);
-status Build(BuildCtx *ctx);
+status Build(BuildCtx *ctx, i32 argc, char *argv[]);
 status Generate(MemCh *m, Str *path, Str *key, char *varpaths[], Str *outpath);
+status LogOut(BuildCtx *ctx);
+
+status BuildCli_RenderStatus(MemCh *m, void *a);
+status BuildCli_SetupComplete(BuildCtx *ctx);
+status BuildCli_SetupStatus(BuildCtx *ctx);
+
 #endif

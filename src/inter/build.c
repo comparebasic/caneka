@@ -50,7 +50,7 @@ int main(int argc, char **argv){
     ctx.version = "1.0-inter";
     ctx.dist = "build";
     ctx.src = "src/inter";
-    ctx.targets = (Executable *)targets;
+    ctx.targets = NULL;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
     ctx.args.libs = NULL;
@@ -58,5 +58,5 @@ int main(int argc, char **argv){
     ctx.sources = sources;
     ctx.genConfigs = NULL;
 
-    return (Build(&ctx) & ERROR) ? 2 : 0;
+    return (Build(&ctx, argc, argv) & ERROR) ? 2 : 0;
 }

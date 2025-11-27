@@ -30,7 +30,9 @@ static status rmFile(MemCh *m, Str *path, Str *file, void *source){
 
 static status gatherDir(MemCh *m, Str *path, void *source){
     Span *p = (Span *)asIfc(source, TYPE_SPAN);
-    return Span_Add(p, path);
+    StrVec *v = StrVec_From(m, path);
+    v->type.state |= MORE;
+    return Span_Add(p, v);
 }
 
 static status gatherFile(MemCh *m, Str *path, Str *file, void *source){

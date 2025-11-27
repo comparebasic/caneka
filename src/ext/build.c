@@ -58,9 +58,6 @@ char *sources[] = {
     "serve/",
     "transp.deprecated/",    
     "format/",
-    "format/html/",
-    "format/config/",
-    "format/xml/",
     "persist/",
     NULL
 };
@@ -90,5 +87,5 @@ int main(int argc, char **argv){
     ctx.sources = sources;
     ctx.genConfigs = genConfigs;
 
-    return (Build(&ctx) & ERROR) ? 2 : 0;
+    return (Build(&ctx, argc, argv) & ERROR) ? 2 : 0;
 }

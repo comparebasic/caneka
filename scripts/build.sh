@@ -16,7 +16,7 @@ $CC -g $INC -c -o ./build/libbuilder/libbuilder.a ./src/builder/inc.c -DINSECURE
 
 echo "building Caneka Ext"
 $CC -o build/build_ext $INC $STATICS -DCRYPTO src/ext/build.c -lm \
-    && ./build/build_ext  || exit 1;
+    && ./build/build_ext --quiet || exit 1;
 
 echo "building Caneka Inter..."
 $CC -o build/build_inter $INC $STATICS src/inter/build.c -lm \

@@ -2,107 +2,7 @@
 #include <caneka.h>
 #include <builder.h>
 
-static status renderStatus(MemCh *m, void *a){
-    CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
-    BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
-
-    i32 width = ctx->cli->cols;
-    float total = (float)ctx->fields.steps.total->val.i;
-    float count = (float)ctx->fields.steps.count->val.i;
-    float colsFloat = (float)width;
-
-    float progress = ceil((count/total) * colsFloat);
-    ctx->fields.steps.barStart->length = (i32)progress;
-    ctx->fields.steps.barEnd->length = width-(i32)progress;
-
-    MemBookStats st;
-    MemBook_GetStats(m, &st);
-
-    CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memTotal"),
-        Str_MemCount(ctx->m, st.total*PAGE_SIZE));
-
-    Single *sg = (Single *)as(CliStatus_GetByKey(m, 
-        cli, Str_CstrRef(m, "chapters")), TYPE_WRAPPED_I64);
-    sg->val.value = st.total;
-
-    sg = (Single *)as(CliStatus_GetByKey(m, 
-        cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
-    sg->val.value = st.pageIdx;
-
-    return SUCCESS;
-}
-
-static status setupComplete(BuildCtx *ctx){
-    FmtLine *ln = Span_Get(ctx->cli->lines, 0);
-    ln->fmt = "^g.Complete - ^D.$^d.sources/^D.$^d.modules^0.";
-    ln->args = Arr_Make(ctx->m, 2);
-    ln->args[0] = ctx->fields.steps.total;
-
-    ln = Span_Get(ctx->cli->lines, 1);
-    ln->fmt = "";
-    ln = Span_Get(ctx->cli->lines, 2);
-    ln->fmt = "";
-
-    ln = Span_Get(ctx->cli->lines, 3);
-    ctx->fields.steps.barStart->length = ctx->cli->cols;
-    ln->fmt = "^G.$^0.";
-
-    ln = Span_Get(ctx->cli->lines, 4);
-    ln->args[0] = Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
-
-    return SUCCESS;
-}
-
-static status setupStatus(BuildCtx *ctx){
-    Span *lines = ctx->cli->lines;
-    MemCh *m = ctx->m;
-    memset(&ctx->fields, 0, sizeof(ctx->fields));
-    ctx->fields.steps.total = I32_Wrapped(m, 0);
-    ctx->fields.steps.count = I32_Wrapped(m, 0);
-    ctx->fields.steps.name = Str_Make(m, STR_DEFAULT);
-
-    CliStatus_SetDims(ctx->cli, 0, 0);
-    i32 width = ctx->cli->cols;
-    IntPair coords = {0, 0};
-
-    void **arr = NULL;
-
-    ctx->fields.current[4] = NULL;
-    Span_Add(ctx->cli->lines, 
-        FmtLine_Make(m, "^y.Building $ $ $", ctx->fields.current));
-
-    ctx->fields.steps.barStart = Str_Make(m, width);
-    memset(ctx->fields.steps.barStart->bytes, ' ', width);
-    ctx->fields.steps.barStart->length = width;
-    ctx->fields.steps.barEnd = Str_CloneAlloc(m, ctx->fields.steps.barStart, width);
-    ctx->fields.steps.barStart->length = 0;
-    
-    arr = Arr_Make(m, 2);
-    arr[0] = ctx->fields.steps.barStart; 
-    arr[1] = ctx->fields.steps.barEnd;
-    Span_Add(ctx->cli->lines,
-        FmtLine_Make(m, "^B.$^0.^Y.$^0", arr));
-
-    arr = Arr_Make(m, 5);
-    arr[0] = NULL;
-    arr[1] = I64_Wrapped(m, 0);
-    arr[2] = I64_Wrapped(m, 0);
-    arr[3] = I64_Wrapped(m, PAGE_SIZE);
-    arr[4] = NULL;
-    Span_Add(ctx->cli->lines,
-        FmtLine_Make(m,
-            "^c.Memory $ total/maxIdx=^D.$/$^d. page-size=$b^0", arr));
-
-    coords.a = ctx->cli->lines->max_idx;
-    coords.b = 0;
-    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "memTotal"), &coords);
-    coords.b = 1;
-    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chapters"), &coords);
-    coords.b = 2;
-    CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chaptersTotal"), &coords);
-
-    return SUCCESS;
-}
+static boolean _quiet = FALSE;
 
 static status buildExec(BuildCtx *ctx,
         boolean force, Str *destDir, Str *lib, Executable *target){
@@ -189,6 +89,7 @@ static status buildObject(BuildCtx *ctx,
         Str *dest,
         Str *source
     ){
+    ctx->type.state &= ~NOOP;
     DebugStack_Push(source, source->type.of);
     status r = READY;
     char *args[5];
@@ -196,12 +97,12 @@ static status buildObject(BuildCtx *ctx,
     Span *cmd = Span_Make(m);
     ProcDets pd;
 
+    ctx->fields.current[BUILIDER_CLI_ACTION] = S(m, "build obj");
+    ctx->fields.current[BUILIDER_CLI_SOURCE] = source;
+    ctx->fields.current[BUILIDER_CLI_DEST] = dest;
     if(IoUtil_CmpUpdated(m, source, dest)){
         m->level--;
-        ctx->fields.current[BUILIDER_CLI_ACTION] = S(m, "build obj");
-        ctx->fields.current[BUILIDER_CLI_SOURCE] = source;
-        ctx->fields.current[BUILIDER_CLI_DEST] = dest;
-        CliStatus_Print(OutStream, ctx->cli);
+        LogOut(ctx);
         m->level++;
 
         Span_Add(cmd, S(m, ctx->tools.cc));
@@ -247,7 +148,8 @@ static status buildObject(BuildCtx *ctx,
             return ERROR;
         }
     }else{
-        ctx->fields.current[BUILIDER_CLI_ACTION] = S(m, "link obj");
+        ctx->type.state |= NOOP;
+        LogOut(ctx);
     }
 
     Span_ReInit(cmd);
@@ -264,14 +166,86 @@ static status buildObject(BuildCtx *ctx,
         return ERROR;
     }
 
-    CliStatus_Print(OutStream, ctx->cli);
-
     if(r == READY){
         r = NOOP;
     }
 
     DebugStack_Pop();
     return r;
+}
+
+static status buildDir(BuildCtx *ctx,
+        Str *path, Str *libFileName, StrVec *src, StrVec *libDir){
+
+    status r = READY;
+    MemCh *m = ctx->m;
+
+    StrVec_Add(src, path);
+    StrVec_Add(libDir, path);
+
+    Str *dir = StrVec_Str(m, libDir);
+    Dir_CheckCreate(m, dir);
+
+    Span *p = Span_Make(m);
+    Dir_Gather(m, StrVec_Str(m, src), p);
+
+    Iter it;
+    Iter_Init(&it, p);
+    while((Iter_Next(&it) & END) == 0){
+
+        StrVec *v = Iter_Get(&it);
+        Str *sourceSrc = StrVec_Str(m, v);
+        Str *fname = Span_Get(v->p, v->p->max_idx);
+
+        if(v->type.state & MORE){
+            StrVec_Pop(src);
+            StrVec_Pop(libDir);
+
+            Str *dirPath = Str_Clone(m, fname);
+            Str_Incr(dirPath, src->total);    
+            if(dirPath->bytes[dirPath->length-1] != '/'){
+                Str_Add(dirPath, (byte *)"/", 1);
+            }
+            buildDir(ctx, dirPath, libFileName, src, libDir);
+            StrVec_Add(src, path);
+            StrVec_Add(libDir, path);
+            continue;
+        }
+
+        StrVec_Add(libDir, fname);
+        Str *dest = StrVec_Str(m, libDir);
+        dest->bytes[dest->length-1] = 'o';
+
+        r |= buildObject(ctx, libFileName, dest, sourceSrc);
+        ctx->fields.steps.count->val.i++;
+
+        StrVec_Pop(libDir);
+    }
+
+    StrVec_Pop(libDir);
+    StrVec_Pop(src);
+    return r;
+}
+
+static status gatherTotal(BuildCtx *ctx, StrVec *src, StrVec *libDir){
+    status r = READY;
+    MemCh *m = ctx->m;
+    ctx->fields.steps.total->val.i = 0;
+    char **sourcePtr = ctx->sources;
+    while(sourcePtr != NULL && *sourcePtr != NULL){
+        Str *source = S(m, *sourcePtr);
+        if(source->bytes[source->length-1] == '/'){
+            StrVec_Add(src, source);
+            Span *p = Span_Make(m);
+            Dir_Gather(m, StrVec_Str(m, src), p);
+            ctx->fields.steps.total->val.i += p->nvalues;
+            StrVec_Pop(src);
+        }else{
+            ctx->fields.steps.total->val.i++;
+        }
+        sourcePtr++;
+    }
+    return ZERO;
 }
 
 static status build(BuildCtx *ctx){
@@ -281,7 +255,7 @@ static status build(BuildCtx *ctx){
     void *out[4];
     MemCh *m = ctx->m;
 
-    setupStatus(ctx);
+    BuildCli_SetupStatus(ctx);
 
     args[0] = ctx->src;
     args[1] = "/";
@@ -352,57 +326,15 @@ static status build(BuildCtx *ctx){
         }
     }
     
-    ctx->fields.steps.total->val.i = 0;
+    gatherTotal(ctx, src, libDir);
+
+    i32 libCount = 0;
     char **sourcePtr = ctx->sources;
     while(sourcePtr != NULL && *sourcePtr != NULL){
         m->level++;
         Str *source = S(m, *sourcePtr);
         if(source->bytes[source->length-1] == '/'){
-            StrVec_Add(src, source);
-            Span *p = Span_Make(m);
-            Dir_Gather(m, StrVec_Str(m, src), p);
-            ctx->fields.steps.total->val.i += p->nvalues;
-            StrVec_Pop(src);
-        }else{
-            ctx->fields.steps.total->val.i++;
-        }
-        sourcePtr++;
-    }
-
-    i32 libCount = 0;
-    sourcePtr = ctx->sources;
-    while(sourcePtr != NULL && *sourcePtr != NULL){
-        m->level++;
-        Str *source = S(m, *sourcePtr);
-        if(source->bytes[source->length-1] == '/'){
-            StrVec_Add(src, source);
-            StrVec_Add(libDir, source);
-            Str *dir = StrVec_Str(m, libDir);
-            Dir_CheckCreate(m, dir);
-
-            Span *p = Span_Make(m);
-            Dir_Gather(m, StrVec_Str(m, src), p);
-            Iter it;
-            Iter_Init(&it, p);
-            while((Iter_Next(&it) & END) == 0){
-
-                StrVec *v = Iter_Get(&it);
-                Str *sourceSrc = StrVec_Str(m, v);
-
-                Str *fname = Span_Get(v->p, v->p->max_idx);
-
-                StrVec_Add(libDir, fname);
-                Str *dest = StrVec_Str(m, libDir);
-                dest->bytes[dest->length-1] = 'o';
-
-                r |= buildObject(ctx, libFileName, dest, sourceSrc);
-                ctx->fields.steps.count->val.i++;
-
-                StrVec_Pop(libDir);
-            }
-
-            StrVec_Pop(libDir);
-            StrVec_Pop(src);
+            r |= buildDir(ctx, source, libFileName, src, libDir);
         }else{
             Str *s = source;
             StrVec_Add(libDir, s);
@@ -411,7 +343,6 @@ static status build(BuildCtx *ctx){
             Str *sourceSrc = StrVec_Str(m, src);
             Str *dest = StrVec_Str(m, libDir);
             dest->bytes[dest->length-1] = 'o';
-
             r |= buildObject(ctx, libFileName, dest, sourceSrc);
             ctx->fields.steps.count->val.i++;
 
@@ -425,25 +356,25 @@ static status build(BuildCtx *ctx){
         MemCh_FreeTemp(m);
     }
 
-    CliStatus_Print(OutStream, ctx->cli);
-
     if((r & ERROR) == 0){
-        setupComplete(ctx);
+        ctx->type.state |= SUCCESS;
     }else{
+        ctx->type.state |= ERROR;
         return r;
     }
 
-    CliStatus_Print(OutStream, ctx->cli);
-    CliStatus_PrintFinish(OutStream, ctx->cli);
+    LogOut(ctx);
 
     Str *dist = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
-    Executable *target = ctx->targets;
-    while(target->bin != NULL){
-        if(libCount == 0){
-            lib = NULL;
+    if(ctx->targets != NULL){
+        Executable *target = ctx->targets;
+        while(target->bin != NULL){
+            if(libCount == 0){
+                lib = NULL;
+            }
+            buildExec(ctx, ((r & SUCCESS) != 0), dist, lib, target);
+            target++;
         }
-        buildExec(ctx, ((r & SUCCESS) != 0), dist, lib, target);
-        target++;
     }
     DebugStack_Pop();
     return r;
@@ -461,12 +392,54 @@ status BuildCtx_Init(MemCh *m, BuildCtx *ctx){
     memset(ctx, 0, sizeof(BuildCtx));
     ctx->type.of = TYPE_BUILDCTX;
     ctx->m = MemCh_Make();
-    ctx->cli = CliStatus_Make(m, renderStatus, ctx);
+    ctx->cli = CliStatus_Make(m, BuildCli_RenderStatus, ctx);
     return SUCCESS;
 }
 
-status Build(BuildCtx *ctx){
+status LogOut(BuildCtx *ctx){
+    if(_quiet){
+        void *args[3];
+        args[0] = ctx->fields.steps.count,
+        args[1] = ctx->fields.steps.total,
+        args[2] = NULL;
+
+        if(ctx->type.state & SUCCESS){
+            args[0] = ctx->fields.current[BUILIDER_CLI_LIBFILENAME];
+            args[1] = NULL;
+            Out("Static Library Complete $\n", args);
+        }else if(ctx->type.state & ERROR){
+            args[0] = ctx->fields.current[BUILIDER_CLI_LIBFILENAME];
+            args[1] = NULL;
+            args[1] = NULL;
+            Out("Error Building Static Library $\n", args);
+        }else{
+            if(ctx->type.state & NOOP){
+                Out("Linking $ of $ ", ctx->fields.current);
+                void *_args[] = {ctx->fields.current[0], ctx->fields.current[2], NULL};
+                Out("for $ $ $\n", _args);
+            }else{
+                Out("Building $ of $ ", args);
+                Out("for $ $ $ -> $\n", ctx->fields.current);
+            }
+        }
+    }else{
+        if(ctx->type.state & SUCCESS){
+            BuildCli_SetupComplete(ctx);
+            CliStatus_PrintFinish(OutStream, ctx->cli);
+        }else if(ctx->type.state & ERROR){
+            CliStatus_PrintFinish(OutStream, ctx->cli);
+        }else{
+            CliStatus_Print(OutStream, ctx->cli);
+        }
+    }
+    return ZERO;
+}
+
+status Build(BuildCtx *ctx, i32 argc, char *argv[]){
     DebugStack_Push(ctx, ctx->type.of);
+    if(argc >= 2 && Equals(K(ctx->m, argv[1]), K(ctx->m, "--quiet"))){
+        _quiet = TRUE;
+    }
     status r = READY;
     r |= build(ctx);
     DebugStack_Pop();
