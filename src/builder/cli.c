@@ -34,20 +34,18 @@ status BuildCli_RenderStatus(MemCh *m, void *a){
 
 status BuildCli_SetupComplete(BuildCtx *ctx){
     FmtLine *ln = Span_Get(ctx->cli->lines, 0);
-    ln->fmt = "^g.Complete - ^D.$^d.sources/^D.$^d.modules^0.";
+    ln->fmt = "^g.Completed ^D.$^d. sources^0.";
     ln->args = Arr_Make(ctx->m, 2);
     ln->args[0] = ctx->fields.steps.total;
 
     ln = Span_Get(ctx->cli->lines, 1);
-    ln->fmt = "";
-    ln = Span_Get(ctx->cli->lines, 2);
-    ln->fmt = "";
+    ln->fmt = "^g.Static Library ^D.$^d.^0.";
 
-    ln = Span_Get(ctx->cli->lines, 3);
+    ln = Span_Get(ctx->cli->lines, 2);
     ctx->fields.steps.barStart->length = ctx->cli->cols;
     ln->fmt = "^G.$^0.";
 
-    ln = Span_Get(ctx->cli->lines, 4);
+    ln = Span_Get(ctx->cli->lines, 3);
     ln->args[0] = Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
 
     return SUCCESS;
@@ -66,6 +64,12 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     IntPair coords = {0, 0};
 
     void **arr = NULL;
+
+    arr = Arr_Make(m, 2);
+    arr[0] = ctx->fields.steps.count;
+    arr[1] = ctx->fields.steps.total;
+    Span_Add(ctx->cli->lines, 
+        FmtLine_Make(m, "^y.Source $ of $^0", arr));
 
     ctx->fields.current[4] = NULL;
     Span_Add(ctx->cli->lines, 

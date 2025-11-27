@@ -2,8 +2,6 @@
 #include <caneka.h>
 #include <builder.h>
 
-/* parameters */
-
 static Executable targets[] = {
     {"tests", "main.c"},
     {"content-fetch", "content-fetch.c"},
@@ -47,24 +45,20 @@ static char *staticLibs[] = {
     NULL
 };
 
-static char *libs[] = {
-    NULL
-};
-
-static BuildSubdir testsobj = { "tests", {
-    "fixtures/mock_109strings.c",
+static char *sources[] = {
+    "fixtures/",
     "base/tests/",
 #ifdef EXT
     "ext/tests/",
 #endif
 #ifdef CRYPTO_NACL 
-    "third/nacl/tests/",
+    "third/crypto/tests/",
 #endif
 #ifdef INTER 
     "inter/tests/",
 #endif
     NULL
-}};
+};
 
 int main(int argc, char **argv){
     if(MemBook_Make(NULL) == NULL){
@@ -86,11 +80,10 @@ int main(int argc, char **argv){
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
-    ctx.args.libs = libs;
+    ctx.args.libs = NULL;
     ctx.args.staticLibs = staticLibs;
-    ctx.args.licenceFiles = NULL;
-    ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.sources = sources;
     ctx.genConfigs = NULL;
 
-    return (Build(&ctx) & ERROR) ? 2 : 0;
+    return (Build(&ctx, argc, argv) & ERROR) ? 2 : 0;
 }

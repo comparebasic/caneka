@@ -2,12 +2,6 @@
 #include <caneka.h>
 #include <builder.h>
 
-/* parameters */
-
-static Executable targets[] = {
-    {NULL, NULL},
-};
-
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
     "-DINSECURE",
@@ -33,20 +27,11 @@ static char *staticLibs[] = {
     NULL
 };
 
-static char *libs[] = {
-    NULL
-};
-
-static BuildSubdir naclobj = { "nacl", {
+static char *sources[] = {
     "crypto_nacl.c",
     "crypto_hash-sha256-ref-hash.c",
     "crypto_sign-edwards25519sha512batch-ref-sign.c",
     NULL,
-}};
-
-static BuildSubdir *objdirs[] = {
-    &naclobj,
-    NULL
 };
 
 int main(int argc, char **argv){
@@ -66,15 +51,14 @@ int main(int argc, char **argv){
     ctx.version = NULL;
     ctx.dist = "build";
     ctx.src = "src/third/nacl/";
-    ctx.targets = (Executable *)targets;
+    ctx.targets = NULL;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
-    ctx.args.libs = libs;
+    ctx.args.libs = NULL;
     ctx.args.staticLibs = staticLibs;
-    ctx.args.licenceFiles = NULL;
-    ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.sources = sources;
 
-    Build(&ctx);
+    Build(&ctx, argc, argv);
 
     return 0;
 }

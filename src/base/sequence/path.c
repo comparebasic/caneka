@@ -261,6 +261,7 @@ status Path_SpaceAnnotate(MemCh *m, StrVec *v){
 
 status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     status r = READY;
+    i64 total = v->total;
     if(v == NULL){
         return NOOP;
     }
@@ -304,9 +305,7 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
                     StrVec_Add(v, sb);
 
                     start = ptr;
-                    if(start < last){
-                        start++; 
-                    }
+                    start++; 
                     r |= SUCCESS;
                 }
             }
@@ -315,15 +314,8 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
             }
             ptr++;
         }
-        i16 length = last-start;
-        if(length < 0 || length > STR_MAX){
-            Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error cannot have a negative length of a string at end",
-            NULL);
-            return ERROR;
-        }
-        if(length > 0){
-            length++;
+        if(start <= last){
+            i16 length = last-start+1;
             StrVec_Add(v, Str_Ref(m, start, length, length, ZERO));
         }
     }
@@ -332,6 +324,13 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
         r |= NOOP;
     }else{
         v->type.state |= STRVEC_PATH;
+    }
+
+    if(v->total != total){
+        Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Annotate somehow adjusted the total which was expected to be equivilent",
+             NULL);
+        r |= ERROR;
     }
 
     return r;

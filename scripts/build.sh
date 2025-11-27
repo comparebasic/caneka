@@ -15,14 +15,17 @@ $CC -g $INC -c -o ./build/libbuilder/libbuilder.a ./src/builder/inc.c -DINSECURE
     || exit 1;
 
 echo "building Caneka Ext"
+rm -f ./build/build_ext
 $CC -o build/build_ext $INC $STATICS -DCRYPTO src/ext/build.c -lm \
-    && ./build/build_ext --quiet || exit 1;
+    && ./build/build_ext || exit 1;
 
 echo "building Caneka Inter..."
+rm -f ./build/build_inter
 $CC -o build/build_inter $INC $STATICS src/inter/build.c -lm \
     && ./build/build_inter || exit 1;
 
-cho "building Caneka Nacl..."
+echo "building Caneka Nacl..."
+rm -f ./build/build_nacl
 $CC -o build/build_nacl $INC $STATICS src/third/nacl/build.c -lm && \
     ./build/build_nacl || exit 1;
 
