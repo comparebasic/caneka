@@ -15,79 +15,6 @@ static status indentStream(Buff *bf, i32 indent){
     return SUCCESS;
 }
 
-static status Node_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
-    Node *nd = (Node *)as(a, TYPE_NODE);
-    MemCh *m = ctx->bf->m;
-    status r = READY;
-
-    i32 childCount = 1;
-    if(nd->typeOfChild == TYPE_SPAN){
-        childCount = ((Span *)nd->child)->nvalues;
-    }
-
-    Str *content;
-    Str *entry;
-    BinSegHeader *hdr = BinSegHeader_Make(ctx,
-        childCount,
-        BINSEG_TYPE_NODE,
-        id,
-        &content,
-        &entry);
-
-    if(ctx->type.state & BINSEG_REVERSED){
-        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
-    }
-
-    i16 *ip = (i16 *)content->bytes;
-    if(nd->value == NULL){
-        *ip = 0;
-    }else{
-        *ip = ctx->func(ctx, NULL);
-        r |= BinSegCtx_Send(ctx, nd->value, *ip);
-    }
-
-    ip++;
-    if(nd->atts == NULL){
-        *ip = 0;
-    }else{
-        *ip = ctx->func(ctx, NULL);
-        r |= BinSegCtx_Send(ctx, nd->atts, *ip);
-    }
-    ip++;
-
-    if(nd->typeOfChild == TYPE_SPAN){
-        Span *p = (Span *)nd->child;
-        for(i32 i = 0; i < p->nvalues; i++){
-            *ip = ctx->func(ctx, NULL);
-            ip++;
-        }
-    
-        i16 *ip = (i16 *)content->bytes;
-        ip += 2;
-
-        Iter it;
-        Iter_Init(&it, p);
-        while((Iter_Next(&it) & END) == 0){
-            r |= BinSegCtx_Send(ctx, Iter_Get(&it), *ip);
-            ip++;
-        };
-    }else{
-        *ip = ctx->func(ctx, NULL);
-        r |= BinSegCtx_Send(ctx, nd->child, *ip);
-    }
-
-    if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= BinSegCtx_ToBuff(ctx, hdr, entry);
-    }
-
-    return r;
-}
-
-static status Mess_ToBinSeg(BinSegCtx *ctx, void *a, i16 id){
-    Mess *mess = (Mess *)as(a, TYPE_MESS);
-    return Node_ToBinSeg(ctx, a, id);
-}
-
 static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
     CompResult *cr = (CompResult*)as(a, TYPE_COMPRESULT);
     void *args[] = {
@@ -428,17 +355,9 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     return r;
 }
 
-status Navigate_BinSegInit(MemCh *m, Lookup *lk){
-    status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_ToBinSeg);
-    r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_ToBinSeg);
-    return r;
-}
-
 status Navigate_ClsInit(MemCh *m){
     status r = READY;
     r |= Navigate_ToSInit(m, ToStreamLookup);
     r |= Navigate_InitLabels(m, ToSFlagLookup);
-    r |= Navigate_BinSegInit(m, BinSegLookup);
     return r;
 }

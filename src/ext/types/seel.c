@@ -80,7 +80,7 @@ void *Seel_Get(Span *inst, void *key){
 status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx){
     seel->type.state |= TABLE_SEALED;
     Lookup_Add(m, SeelLookup, typeOf, seel);
-    Lookup_Add(m, SeelLookup, typeOf, Table_Orderd(m, seel));
+    Lookup_Add(m, SeelLookup, typeOf, Table_Ordered(m, seel));
     Lookup_Add(m, SeelNameLookup, typeOf, name);
     if(childrenIdx >= 0){
         Lookup_Add(m, SeelChildrenPropLookup, typeOf, I32_Wrapped(m, childrenIdx));
@@ -89,24 +89,28 @@ status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx){
     return seel->type.state;
 }
 
-Table *Seel_GetSeel(cls instType){
-    Table *seel = Lookup_Get(SeelLookup, inst->type.of);
+Table *Seel_GetSeel(MemCh *m, cls instOf){
+    Table *seel = Lookup_Get(SeelLookup, instOf);
     if(seel == NULL){
-        args[0] = Type_ToStr(inst->m, inst->type.of);
-        args[1] = NULL;
-        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+        void *args[] = {
+            Type_ToStr(m, instOf),
+            NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Seel not found for type $", args);
         return NULL;
     }
-    return sesl;
+    return seel;
 }
 
 Span *Seel_OrdSeel(MemCh *m, seelType instOf){
     Span *ord = Lookup_Get(SeelOrdLookup, instOf);
     if(ord == NULL){
-        args[0] = Type_ToStr(m, instOf);
-        args[1] = NULL;
-        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+        void *args[] = {
+            Type_ToStr(m, instOf),
+            NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Seel not found for type $", args);
         return NULL;
     }

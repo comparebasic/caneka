@@ -7,7 +7,7 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     MemCh *m = ctx->bf->m;
     status r = READY;
     Inst *inst = asInst(m, a);
-    Span *ord = Seel_OrdSeel(inst->type.of);
+    Span *ord = Seel_OrdSeel(m, inst->type.of);
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_INST, 0);
 
@@ -27,12 +27,12 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     hdr->total = ord->nvalues;
     hdr->kind = BINSEG_TYPE_INST;
-    hdr->id = id;
-    hdr->idx = idx;
+    hdr->ident.id = id;
+    hdr->ident.idx = idx;
     *ptr = inst->type.of;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= BinSegCtx_SendEntry(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     Iter it;
@@ -42,7 +42,7 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= BinSegCtx_SendEntry(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     return r;
@@ -63,11 +63,11 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     hdr->total = tbl->nvalues;
     hdr->kind = BINSEG_TYPE_DICTIONARY;
-    hdr->id = id;
-    hdr->idx = idx;
+    hdr->ident.id = id;
+    hdr->ident.idx = idx;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= BinSegCtx_ToBuff(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     Iter it;
@@ -81,7 +81,7 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= BinSegCtx_ToBuff(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     return r;
@@ -102,22 +102,21 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
     hdr->total = p->max_idx;
     hdr->kind = BINSEG_TYPE_COLLECTION;
-    hdr->id = id;
-    hdr->idx = idx;
+    hdr->ident.id = id;
+    hdr->ident.idx = idx;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= BinSegCtx_SendEntry(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
         r |= BinSegCtx_Send(ctx, Iter_Get(&it), id+1, it.idx);
-        ip++;
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= BinSegCtx_SendEntry(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     return r;
@@ -138,21 +137,21 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     hdr->total = v->p->max_idx;
     hdr->kind = BINSEG_TYPE_BYTES_COLLECTION;
-    hdr->id = id;
-    hdr->idx = idx;
+    hdr->ident.id = id;
+    hdr->ident.idx = idx;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= BinSegCtx_SendEntry(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
-        r |= Str_ToBinSeg(ctx, Iter_Get(&it), id+1, it.idx);
+        r |= BinSegCtx_Send(ctx, Iter_Get(&it), id+1, it.idx);
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= BinSegCtx_SendEntry(ctx, entry);
+        r |= Buff_Add(ctx->bf, entry);
     }
 
     return r;
@@ -180,18 +179,18 @@ static status I64_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     hdr->total = 0;
     hdr->kind = BINSEG_TYPE_NUMBER;
-    hdr->id = id;
-    hdr->idx = idx;
+    hdr->ident.id = id;
+    hdr->ident.idx = idx;
     *ptr = sg->val.value;
 
-    return BinSegCtx_SendEntry(ctx, entry);
+    return Buff_Add(ctx->bf, entry);
 }
 
 static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    Str *entry = (Str *)as(a, TYPE_STR);
+    Str *s = (Str *)as(a, TYPE_STR);
     MemCh *m = ctx->bf->m;
 
-    word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_STRING, s->length);
+    word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_BYTES, s->length);
 
     m->level++;
     Str *entry = Str_Make(m, sz);
@@ -200,36 +199,36 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     BinSegHeader *hdr = NULL;
     byte *ptr = NULL;
     if(ctx->type.state & BINSEG_REVERSED){
-        ptr = (i64 *)entry->bytes;
+        ptr = entry->bytes;
         hdr = (BinSegHeader *)entry->bytes+s->length;
     }else{
         hdr = (BinSegHeader *)entry->bytes;
-        ptr = (i64 *)(entry->bytes+sizeof(BinSegCtx));
+        ptr = (entry->bytes+sizeof(BinSegCtx));
     }
 
     hdr->total = s->length;
     hdr->kind = BINSEG_TYPE_BYTES;
-    hdr->id = id;
-    hdr->idx = idx;
+    hdr->ident.id = id;
+    hdr->ident.idx = idx;
     memcpy(ptr, s->bytes, s->length);
 
-    return BinSegCtx_SendEntry(ctx, hdr, entry);
+    return Buff_Add(ctx->bf, entry);
 }
 
-static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry){
+static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
     DebugStack_Push(ctx, ctx->type.of);
     MemCh *m = ctx->bf->m;
     
     Iter it;
-    Span *shelf = Span_Get(ctx->shelves, hdr->id);
+    Span *shelf = Span_Get(ctx->shelves, hdr->ident.id);
     Abstract *a = NULL;
     if(hdr->kind == BINSEG_TYPE_BYTES){
-        a = (Abstract *)s;
+        a = (Abstract *)ftr;
     }else if(hdr->kind == BINSEG_TYPE_NUMBER){
-        i64 *ip = (i64 *)s->bytes;
+        i64 *ip = (i64 *)ftr->bytes;
         a = (Abstract *)I64_Wrapped(m, *ip);
     }else if(hdr->kind == BINSEG_TYPE_COLLECTION){
-        Span *p = (Abstract *)Span_Make(m);
+        Span *p = Span_Make(m);
         if(shelf != NULL){
             Iter_Init(&it, shelf);
             while((Iter_Next(&it) & END) == 0){
@@ -262,29 +261,26 @@ static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *entry)
         }
         a = (Abstract *)tbl;
     }else if(hdr->kind == BINSEG_TYPE_INST){
-        word *wp = (w *)s->bytes;
+        word *wp = (word *)ftr->bytes;
         a = (Abstract *)Inst_Make(m, *wp);
-    }else if(hdr->kind == BINSEG_TYPE_INST_TYPE){
-        word *wp = (w *)s->bytes;
-        a = (Abstract *)Word_Wrapped(m, *wp);
     }
 
-    if(hdr->id == 0){
+    if(hdr->ident.id == 0){
         Span_Add(ctx->records, a);
+        MemCh_FreeTemp(ctx->bf->m);
         ctx->bf->m++;
         ctx->shelves = Span_Make(m);
         ctx->bf->m--;
-        Mem_WipeTemp(ctx->bf->m);
     }else {
-        word parentId = hdr->id-1;
+        word parentId = hdr->ident.id-1;
         shelf = Span_Get(ctx->shelves, parentId);
         if(shelf == NULL){
             ctx->bf->m++;
             shelf = Span_Make(m);
-            Span_Set(ctx->shelves, shelf);
             ctx->bf->m--;
+            Span_Set(ctx->shelves, parentId, shelf);
         }
-        Span_Set(shelf, hdr->idx, a);
+        Span_Set(shelf, hdr->ident.idx, a);
     }
 
     DebugStack_Pop();
@@ -303,49 +299,42 @@ status BinSegCtx_Load(BinSegCtx *ctx){
     }
 
     i16 guard = 0;
+    byte _hdrBytes[sizeof(BinSegHeader)];
+    Str hdrS = {
+        .type = {TYPE_STR, STRING_CONST},
+        .length = 0,
+        .alloc = sizeof(BinSegHeader),
+        .bytes = _hdrBytes
+    };
     while((ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
         Guard_Incr(m, &guard, BINSEG_SEG_MAX, FUNCNAME, FILENAME, LINENUMBER);
-        i16 sz = sizeof(BinSegHeader);
-        if(ctx->type.state & BINSEG_VISIBLE){
-            sz *= 2;
-        }
-        Str *s = Str_Make(m, sz);
 
+        hdrS.length = 0;
         if(ctx->type.state & BINSEG_REVERSED){
-            Buff_RevGetStr(ctx->bf, s);
+            Buff_RevGetStr(ctx->bf, &hdrS);
         }else{
-            Buff_GetStr(ctx->bf, s);
+            Buff_GetStr(ctx->bf, &hdrS);
         }
 
-        if(s->length == sz){
-            if(ctx->type.state & BINSEG_VISIBLE){
-                s = Str_FromHex(m, s);
-            }
-            BinSegHeader *hdr = (BinSegHeader*)s->bytes;
-            
-            sz = BinSegHeader_FooterSize(hdr->total, hdr->kind);
+        if(hdrS.length != sizeof(BinSegHeader)){
+            ctx->type.state |= ERROR;
+            break;
+        }
 
-            if(ctx->type.state & BINSEG_VISIBLE){
-                sz *= 2;
-            }
-
-            Str *ftr = Str_Make(m, sz);
-            ftr->type.state |= STRING_COPY;
+        BinSegHeader *hdr = (BinSegHeader*)hdrS.bytes;
+        i16 sz = BinSegCtx_HeaderSize(hdr->kind, hdr->total) - sizeof(BinSegHeader);
+        Str *ftr = NULL;
+        if(sz > 0){
+            ftr = Str_Make(m, sz);
             if(ctx->type.state & BINSEG_REVERSED){
                 Buff_RevGetStr(ctx->bf, ftr);
             }else{
                 Buff_GetStr(ctx->bf, ftr);
             }
+        }
 
-            ftr->type.state &= ~STRING_COPY;
-
-            if(ctx->type.state & BINSEG_VISIBLE){
-                ftr = Str_FromHex(m, ftr);
-            }
-
-            if(BinSegCtx_buildKind(ctx, hdr, ftr) & END){
-                ctx->type.state |= (SUCCESS|END);
-            }
+        if(BinSegCtx_buildKind(ctx, hdr, ftr) & END){
+            ctx->type.state |= (SUCCESS|END);
         }
     }
 
@@ -365,14 +354,10 @@ word BinSegCtx_HeaderSize(word kind, word length){
     return sz;
 }
 
-status BinSegCtx_SendEntry(BinSegCtx *ctx, Str *entry){
-    if(ctx->type.state & BINSEG_VISIBLE){
-        entry = Str_ToHex(m, entry);
-    }
-    return Buff_Add(ctx->bf, entry);
-}
-
 status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
+    if(_a == NULL){
+        return NOOP;
+    }
     Abstract *a = (Abstract *)_a;
     BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
     if(func == NULL){
@@ -387,26 +372,16 @@ status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
     return func(ctx, a, id, idx);
 }
 
-BinSegCtx *BinSegCtx_Make(Buff *bf, word flags, Span *insts){
+BinSegCtx *BinSegCtx_Make(Buff *bf, word flags){
     MemCh *m = bf->m;
     BinSegCtx *ctx = (BinSegCtx *)MemCh_AllocOf(m, sizeof(BinSegCtx), TYPE_BINSEG_CTX);
     ctx->type.of = TYPE_BINSEG_CTX;
     ctx->type.state = flags;
     bf->type.state |= BUFF_DATASYNC;
     ctx->bf = bf;
-    ctx->schema.insts = insts;
+    ctx->bf->m++;
     ctx->shelves = Span_Make(m);
-    Iter_Init(&ctx->schema.ords, Span_Make(m));
-    Iter_Init(&ctx->it, Span_Make(m));
-
-    Iter it;
-    Iter_Init(&it, insts);
-    while((Iter_Next(&it) & END) == 0){
-        Single *sg = Iter_Get(&it); 
-        Span *ord = Seel_GetSeel(sg->val.w);
-        Iter_SetByIdx(&ctx->schema.ords, it.idx, ord);
-    }
-
+    ctx->bf->m--;
     return ZERO;
 }
 
@@ -414,7 +389,6 @@ status BinSeg_Init(MemCh *m){
     status r = READY;
     if(BinSegLookup == NULL){
         BinSegLookup = Lookup_Make(m, _TYPE_ZERO);
-        r |= BinSeg_BasicInit(m, BinSegLookup);
         r |= Lookup_Add(m, BinSegLookup, TYPE_STR, (void *)Str_ToBinSeg);
         r |= Lookup_Add(m, BinSegLookup, TYPE_SPAN, (void *)Span_ToBinSeg);
         r |= Lookup_Add(m, BinSegLookup, TYPE_TABLE, (void *)Table_ToBinSeg);

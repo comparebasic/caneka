@@ -3,8 +3,8 @@
 
 Inst *asInst(MemCh *m, void *a){
     if(a == NULL){
-        return ERROR;
-    }else if(((Abstract *)a)->type.of & TYPE_INSTANCE) == 0){
+        return NULL;
+    }else if((((Abstract *)a)->type.of & TYPE_INSTANCE) == 0){
         void *args[] = {Type_ToStr(m, ((Abstract *)a)->type.of), NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Type is not an Inst $", args);

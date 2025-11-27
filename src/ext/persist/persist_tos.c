@@ -13,13 +13,14 @@ static status BinSegHeader_Print(Buff *bf, void *a, cls type, word flags){
     i64 total = 0;
     BinSegHeader *hdr = (BinSegHeader *)a;
     void *args[] = {
-        I8_Wrapped(bf->m, hdr->id),
         BinSegCtx_KindName(hdr->kind),
+        I16_Wrapped(bf->m, hdr->ident.id),
+        I16_Wrapped(bf->m, hdr->ident.idx),
         I32_Wrapped(bf->m, hdr->total),
         NULL
     };
 
-    total += Fmt(bf, "BinSegHdr#${$ $total}", args);
+    total += Fmt(bf, "BinSegHdr#${$/prop$ $total}", args);
     return total;
 }
 
@@ -27,13 +28,17 @@ static status BinSegCtx_Print(Buff *bf, void *a, cls type, word flags){
     BinSegCtx *ctx = (BinSegCtx *)as(a, TYPE_BINSEG_CTX);
     void *args[] = {
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        ctx->cortext,
+        ctx->records,
+        ctx->shelves,
         ctx->bf,
-        ctx->tbl,
         NULL
     };
 
-    return Fmt(bf, "BinSegCtx<$ @ @ tbl:@>", args);
+    if(flags & DEBUG){
+        return Fmt(bf, "BinSegCtx<@ @ @ @>", args);
+    }else{
+        return Fmt(bf, "BinSegCtx<@ @>", args);
+    }
 }
 
 static status persistInitLabels(MemCh *m, Lookup *lk){
@@ -77,8 +82,8 @@ status Persist_ToSInit(MemCh *m, Lookup *lk){
             (void *)Str_CstrRef(m, "BinarySegCollection"));
         Lookup_Add(m, BinSegNames, BINSEG_TYPE_DICTIONARY,
             (void *)Str_CstrRef(m, "Dictionary"));
-        Lookup_Add(m, BinSegNames, BINSEG_TYPE_NODE,
-            (void *)Str_CstrRef(m, "Node"));
+        Lookup_Add(m, BinSegNames, BINSEG_TYPE_INST,
+            (void *)Str_CstrRef(m, "Inst"));
         Lookup_Add(m, BinSegNames, BINSEG_TYPE_NUMBER,
             (void *)Str_CstrRef(m, "Number"));
         r |= SUCCESS;

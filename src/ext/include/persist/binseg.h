@@ -11,12 +11,9 @@ enum binseg_kinds {
 
 enum binseg_types {
     BINSEG_REVERSED = 1 << 8,
-    BINSEG_VISIBLE = 1 << 9,
-    BINSEG_RECORDS = 1 << 10,
-    BINSEG_SEEL 1 << 11,
 };
 
-typedef status (*BinSegFunc)(struct binseg_ctx *ctx, void *a, i16 id);
+typedef status (*BinSegFunc)(struct binseg_ctx *ctx, void *a, i16 id, i16 idx);
 
 /* 
  * serialized as {Header}[{Entry}]
@@ -32,15 +29,9 @@ typedef struct binseg_ctx {
     Buff *bf;
     Span *shelves;
     Span *records;
-    word nextId;
-    struct {
-        Span *insts;
-        Iter ords;
-    } schema;
-    Iter it;
 } BinSegCtx;
 
-typedef binseg_ident {
+typedef struct binseg_ident {
     word idx;
     word id;
 } BinSegIdent;
@@ -53,9 +44,8 @@ typedef struct binseg_hdr {
 
 extern struct lookup *BinSegLookup;
 
-BinSegCtx *BinSegCtx_Make(Buff *bf, word flags, Span *seels);
-status BinSegCtx_Send(BinSegCtx *ctx, void *a, i16 id);
-status BinSegCtx_SendEntry(BinSegCtx *ctx, Str *entry);
+BinSegCtx *BinSegCtx_Make(Buff *bf, word flags);
+status BinSegCtx_Send(BinSegCtx *ctx, void *a, i16 id, i16 idx);
 status BinSegCtx_Load(BinSegCtx *ctx);
 word BinSegCtx_HeaderSize(word kind, word length);
 

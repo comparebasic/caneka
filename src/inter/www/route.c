@@ -100,8 +100,10 @@ static status routeFuncFileDb(Buff *bf, void *action, Table *data, void *source)
     Path_DotAnnotate(bf->m, path);
     Table *keys = (Table *)Table_ByPath(data, path, NULL, SPAN_OP_GET);
 
-    FileDB *fdb = (FileDB *)as(action, TYPE_FILEDB);
+    Buff *fdb = (Buff *)as(action, TYPE_FILEDB);
+    /*
     Table *tbl = FileDB_ToTbl(fdb, keys);
+    */
 
     /* tbl to json */
     return NOOP;
@@ -215,8 +217,9 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_FILEDB){
-        FileDB *fdb = FileDB_Make(m, pathS);
-        Span_Set(rt, ROUTE_PROPIDX_ACTION, fdb);
+        Buff *bf = Buff_Make(m, ZERO); 
+        File_Open(bf, pathS, O_RDONLY);
+        Span_Set(rt, ROUTE_PROPIDX_ACTION, bf);
         DebugStack_Pop();
         return SUCCESS;
     }
