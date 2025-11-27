@@ -8,11 +8,6 @@ typedef struct executable {
     char *src;
 } Executable;
 
-typedef struct build_subdir {
-    char *name;
-    char *sources[];
-} BuildSubdir;
-
 typedef struct build_cli_fields {
     struct {
         Str *name; 
@@ -26,6 +21,9 @@ typedef struct build_cli_fields {
         Str *barEnd; 
     } steps;
     struct {
+        Str *lib;
+        Str *libPath;
+        Str *libFileName
         Str *source; 
         Str *dest; 
         Str *action; 
@@ -57,9 +55,8 @@ typedef struct buildctx {
         char **cflags;
         char **libs;
         char **staticLibs;
-        char **licenceFiles;
     } args;
-    BuildSubdir **objdirs;
+    char *sources[];
     GenConfig *genConfigs;
 } BuildCtx;
 

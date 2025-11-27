@@ -150,19 +150,22 @@ static status setupStatus(BuildCtx *ctx){
 static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
-    Str *source = Str_Make(ctx->m, STR_DEFAULT);
-    Str_AddCstr(source, ctx->src);
-    Str_AddCstr(source, "/");
-    Str_AddCstr(source, target->src);
+    MemCh *m = ctx->m;
+    void *args[12];
 
-    Str *dest = Str_Make(ctx->m, STR_DEFAULT);
-    Str_AddCstr(dest, ctx->dist);
-    Str_AddCstr(dest, "/bin/");
-    Dir_CheckCreate(ctx->m, dest);
-    Str_AddCstr(dest, target->bin);
+    args[0] = ctx->source;
+    args[1] = "/";
+    args[2] = target->src;
+    Str *souce = StrVec_Str(m, IoUtil_AbsPathBuilder(m, args));
+
+    args[0] = ctx->dist;
+    args[1] = "/bin/";
+    args[2] = dest;
+    args[2] = target->bin;
+    Str *dest = StrVec_Str(m, IoUtil_AbsPathBuilder(m, args));
 
     ProcDets pd;
-    if(IoUtil_CmpUpdated(ctx->m, source, dest)){
+    if(1 || IoUtil_CmpUpdated(ctx->m, source, dest)){
         void *args[] = {
             source,
             dest,
@@ -222,39 +225,46 @@ static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Ex
     return NOOP;
 }
 
-static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, Str *source){
+static status buildObject(BuildCtx *ctx,
+        Str *libFileName,
+        Str *dest,
+        Str *source
+    ){
     DebugStack_Push(source, source->type.of);
     status r = READY;
+    void args[12];
     MemCh *m = ctx->m;
     Span *cmd = Span_Make(m);
     ProcDets pd;
 
     if(IoUtil_CmpUpdated(m, source, dest)){
+        m->level--;
         Str_Reset(ctx->fields.current.action);
         Str_AddCstr(ctx->fields.current.action, "build obj");
         CliStatus_Print(OutStream, ctx->cli);
+        m->level++;
 
-        Span_Add(cmd, Str_CstrRef(m, ctx->tools.cc));
+        Span_Add(cmd, S(m, ctx->tools.cc));
         char **ptr = ctx->args.cflags;
         while(*ptr != NULL){
-            Span_Add(cmd, Str_CstrRef(m, *ptr));
+            Span_Add(cmd, S(m, *ptr));
             ptr++;
         }
         ptr = ctx->args.inc;
         while(*ptr != NULL){
-            Span_Add(cmd, Str_CstrRef(m, *ptr));
+            Span_Add(cmd, S(m, *ptr));
             ptr++;
         }
 
         if(ctx->genConfigs != NULL){
-            Str *s = Str_Make(m, STR_DEFAULT);
-            Str_AddCstr(s, ctx->dist);
-            Str_AddCstr(s, "/");
-            Str_AddCstr(s, ctx->libtarget);
-            Str_AddCstr(s, "/include/");
-            Str *genDest = IoUtil_GetAbsPath(m, s);
+            args[0] = ctx->dist;
+            args[1] = "/";
+            args[2] = ctx->libtarget;
+            args[3] = "/include/";
+            args[4] = NULL;
+            Str *genDest = IoUtil_AbsPathBuilder(m, args);
 
-            s = Str_Make(m, STR_DEFAULT);
+            s = Str_Make(m, genDest->total+2);
             Str_AddCstr(s, "-I");
             Str_Add(s, genDest->bytes, genDest->length);
 
@@ -276,24 +286,26 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: $", args);
             return ERROR;
         }
-
-        Span_ReInit(cmd);
-        Span_Add(cmd, Str_CstrRef(m, ctx->tools.ar));
-        Span_Add(cmd, Str_CstrRef(m, "-rc"));
-        Span_Add(cmd, lib);
-        Span_Add(cmd, dest);
-        ProcDets_Init(&pd);
-        status re = SubProcess(m, cmd, &pd);
-        if(re & ERROR){
-            DebugStack_SetRef(cmd, cmd->type.of);
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding object to lib", NULL);
-            return ERROR;
-        }
     }else{
         Str_Reset(ctx->fields.current.action);
         Str_AddCstr(ctx->fields.current.action, " link obj");
-        CliStatus_Print(OutStream, ctx->cli);
     }
+
+    Span_ReInit(cmd);
+    Span_Add(cmd, Str_CstrRef(m, ctx->tools.ar));
+    Span_Add(cmd, Str_CstrRef(m, "-rc"));
+    Span_Add(cmd, libFileName);
+    Span_Add(cmd, dest);
+
+    ProcDets_Init(&pd);
+    status re = SubProcess(m, cmd, &pd);
+    if(re & ERROR){
+        DebugStack_SetRef(cmd, cmd->type.of);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding object to lib", NULL);
+        return ERROR;
+    }
+
+    CliStatus_Print(OutStream, ctx->cli);
 
     if(r == READY){
         r = NOOP;
@@ -303,154 +315,144 @@ static status buildSourceToLib(BuildCtx *ctx, Str *libDir, Str *lib,Str *dest, S
     return r;
 }
 
-static status buildDirToLib(BuildCtx *ctx, Str *libDir, Str *lib, BuildSubdir *dir){
-    DebugStack_Push(NULL, 0);
-    status r = READY;
-    MemCh *m = ctx->m;
-
-    Str *dirPath = Str_CloneAlloc(m, libDir, STR_DEFAULT);
-    Str_AddCstr(dirPath, "/");
-    Str_AddCstr(dirPath, dir->name);
-    DebugStack_SetRef(dirPath, dirPath->type.of);
-    Dir_CheckCreate(m, dirPath);
-
-    Str *source = ctx->fields.current.source;
-    Str_Reset(source);
-    Str *_source = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->src));
-    Str_Add(source, _source->bytes, _source->length);
-    Str_AddCstr(source, "/");
-    Str_AddCstr(source, dir->name);
-    Str_AddCstr(source, "/");
-    i64 sourceL = source->length;
-
-    Str *dest = ctx->fields.current.dest;
-    Str_Reset(dest);
-    Str_Add(dest, dirPath->bytes, dirPath->length);
-    Str_AddCstr(dest, "/");
-    i64 destL = dest->length;
-
-    m->level++;
-
-    ctx->fields.steps.modSrcCount->val.i = 0;
-    ctx->fields.steps.modSrcTotal->val.i = 0;
-    char **sourceCstr = dir->sources;
-    while(*sourceCstr != NULL){
-        ctx->fields.steps.modSrcTotal->val.i++;
-        sourceCstr++;
-    }
-
-    Str_Reset(ctx->fields.steps.name);
-    Str_AddCstr(ctx->fields.steps.name, dir->name);
-
-    sourceCstr = dir->sources;
-    ctx->fields.steps.modCount->val.i++;
-    while(*sourceCstr != NULL){
-        i64 len = strlen(sourceCstr);
-
-        if(sourceCstr[len-1] == '/'){
-            Out("^r.It's a Directory^0\n", NULL);
-            exit(1);
-        }
-
-        m->level++;
-        Str_Trunc(source, sourceL);
-        Str_AddCstr(source, *sourceCstr);
-        Str_Trunc(dest, destL);
-        Str_AddCstr(dest, *sourceCstr);
-        Str_Trunc(dest, -1);
-        Str_AddCstr(dest, "o");
-        r |= buildSourceToLib(ctx, libDir, lib, dest, source);
-        ctx->fields.steps.count->val.i++;
-        ctx->fields.steps.modSrcCount->val.i++;
-
-        m->level--;
-        MemCh_FreeTemp(m);
-        sourceCstr++;
-        if(r & ERROR){
-            return r;
-        }
-    }
-    ctx->fields.steps.modSrcCount->val.i = 0;
-    ctx->fields.steps.modSrcTotal->val.i = 0;
-    CliStatus_Print(OutStream, ctx->cli);
-    m->level--;
-
-    DebugStack_Pop();
-    return r;
-}
-
 static status build(BuildCtx *ctx){
     status r = READY;
     DebugStack_Push(NULL, 0);
-    void *args[5];
+    void *args[12];
     MemCh *m = ctx->m;
-    setupStatus(ctx);
-    Str *libDir = IoUtil_GetAbsPath(m, Str_CstrRef(m, ctx->dist));
 
+    setupStatus(ctx);
+
+    args[0] = ctx->src;
+    args[1] = "/"
+    args[2] = NULL;
+    StrVec *src = IoUtil_AbsPathBuilder(m, args);;
+
+    lib = S(m, ctx->libtarget);
+
+    StrVec *libDir = IoAbsPath(m, ctx->dist);
     Str_AddCstr(libDir, "/");
     Str_AddCstr(libDir, ctx->libtarget);
+    StrVec_Add(m, S(m, "/"));
 
-    Dir_CheckCreate(m, libDir);
+    Str *libPath = StrVec_Str(m, libDir);
 
-    Str *lib = Str_CloneAlloc(m, libDir, STR_DEFAULT);
-    Str_AddCstr(lib, "/");
-    Str_AddCstr(lib, ctx->libtarget);
-    Str_AddCstr(lib, ".a");
-    if(lib->type.state & ERROR){
-        return ERROR;
-    }
+    Dir_CheckCreate(m, libPath);
+
+    Str *targetName = Str_Make(m, strlen(ctx->libtarget)+3);
+    Str_AddCstr(m, ctx->libtarget);
+    Str_AddCstr(m, ".a");
+    StrVec_Add(libDir, targetName);
+    Str *libFileName = StrVec_Str(m, libDir);
+    StrVec_Pop(libDir);
+
+    File_Unlink(m, libFileName);
 
     if(ctx->genConfigs != NULL){
         GenConfig *config = ctx->genConfigs;
-        i32 len = strlen(ctx->src);
-        Str *s = Str_Make(m, STR_DEFAULT);
-        Str_AddCstr(s, ctx->src);
-        Str_AddCstr(s, "/gen/");
-        Str *genSrc = IoUtil_GetAbsPath(m, s);
 
-        s = Str_Make(m, STR_DEFAULT);
-        Str_AddCstr(s, ctx->dist);
-        Str_AddCstr(s, "/");
-        Str_AddCstr(s, ctx->libtarget);
-        Str_AddCstr(s, "/include/gen/");
-        Str *genDest = IoUtil_GetAbsPath(m, s);
+        args[0] = ctx->src;
+        args[1] = "/gen/"
+        args[2] = NULL;
+        StrVec *genSrc = IoUtil_AbsPathBuilder(m, args);
+
+        args[0] = ctx->dist;
+        args[1] = "/"
+        args[2] = ctx->libtarget; 
+        args[3] = "/include/gen/"; 
+        args[4] = NULL;
+        StrVec *genDest = IoUtil_AbsPathBuilder(m, args);
 
         Dir_CheckCreate(m, genDest);
 
-        i16 genSrcL = genSrc->length;
-        i16 genDestL = genDest->length;
         while(config->file != NULL){
 
-            Str_AddCstr(genSrc, config->file);
-            Str_AddCstr(genDest, config->file);
-            Str *key = Str_CstrRef(m, config->key);
+            StrVec_Add(genSrc, S(m, config->file));
+            StrVec_Add(genDest, S(m, config->file));
+            Str *key = S(m, config->key);
 
-            if((genSrc->type.state|genSrc->type.state) & ERROR){
-                return ERROR;
-            }
-
-            r |= Generate(m, genSrc, key, config->args, genDest);
+            r |= Generate(m,
+                StrVec_Str(m, genSrc), key, config->args, StrVec_Str(m, genDest));
             if(r & ERROR){
                 args[0] = genSrc;
                 args[1] = genDest;
                 args[2] = NULL;
-                Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error generating static file: $ -> $", args);
+                Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+                    "Error generating static file: $ -> $", args);
                 return ERROR;
             }
 
-            Str_Trunc(genSrc, genSrcL);
-            Str_Trunc(genDest, genDestL);
+            StrVec_Pop(genSrc);
+            StrVec_Pop(genDest);
             config++;
         }
     }
 
-    i32 libCount = 0;
-    BuildSubdir **dir = ctx->objdirs;
-    while(dir != NULL && *dir != NULL){
-        r |= buildDirToLib(ctx, libDir, lib, *dir);
-        dir++;
-        libCount++;
+    ctx->fields.steps.modSrcCount->val.i = 0;
+    ctx->fields.steps.modSrcTotal->val.i = 0;
+    char **sourcePtr = ctx->sources;
+    while(sourcePtr != NULL && *sourcePtr != NULL){
+        ctx->fields.steps.modSrcTotal->val.i++;
+        sourcePtr++;
     }
+
+    i32 libCount = 0;
+    char **sourcePtr = ctx->sources;
+    while(sourcePtr != NULL && *sourcePtr != NULL){
+        m->level++;
+        Str *source = S(m, *sourcePtr);
+        if(source->bytes[s->length-1] == '/'){
+            StrVec_Add(src, source);
+            StrVec_Add(libDir, source);
+            Str *dir = StrVec_Str(m, libDir);
+
+            Span *p = Span_Make(m);
+            Dir_Gather(m, StrVec_Str(m, src), p);
+
+            Iter it;
+            Iter_Init(&it, p);
+            while((Iter_Next(&it, p) & END) == 0){
+                Str *s = Iter_Get(&it);
+                StrVec_Add(libDir, s);
+                StrVec_Add(src, s);
+
+                Str *sourceSrc = StrVec_Str(m, dest);
+                Str *dest = StrVec_Str(m, libDir);
+                dest->bytes[dest->length-1] = 'o';
+                r |= buildObject(ctx, libFileName, dest, src);
+
+                StrVec_Pop(libDir);
+                StrVec_Pop(src);
+            }
+
+            StrVec_Pop(libDir);
+            StrVec_Pop(src);
+        }else{
+            Str *s = source;
+            StrVec_Add(libDir, s);
+            StrVec_Add(src, s);
+
+            Str *sourceSrc = StrVec_Str(m, dest);
+            Str *dest = StrVec_Str(m, libDir);
+            dest->bytes[dest->length-1] = 'o';
+            r |= buildObject(ctx, libFileName, dest, src);
+
+            StrVec_Pop(libDir);
+            StrVec_Pop(src);
+        }
+
+        sourcePtr++;
+        libCount++;
+        ctx->fields.steps.count->val.i++;
+        ctx->fields.steps.modSrcCount->val.i++;
+        m->level--;
+        MemCh_FreeTemp(m);
+    }
+
+    ctx->fields.steps.modSrcCount->val.i = 0;
+    ctx->fields.steps.modSrcTotal->val.i = 0;
+    CliStatus_Print(OutStream, ctx->cli);
+
     if((r & ERROR) == 0){
         setupComplete(ctx);
     }else{

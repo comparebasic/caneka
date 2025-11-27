@@ -33,10 +33,16 @@ static char *inc[] = {
 };
 
 static char *staticLibs[] = {
+#ifdef INTER 
     "./build/libcnkinter/libcnkinter.a",
+#endif
+#ifdef CRYPTO_NACL 
     "./build/libcnknacl/libcnknacl.a",
     "/external/lib/libnacl.a",
+#endif
+#ifdef EXT
     "./build/libcnkext/libcnkext.a",
+#endif
     "./build/libcaneka/libcaneka.a",
     NULL
 };
@@ -45,12 +51,8 @@ static char *libs[] = {
     NULL
 };
 
-static BuildSubdir fixturesobj = { "fixtures", {
-    "mock_109strings.c",
-    NULL,
-}};
-
 static BuildSubdir testsobj = { "tests", {
+    "fixtures/mock_109strings.c",
     "base/tests/",
 #ifdef EXT
     "ext/tests/",
@@ -61,41 +63,8 @@ static BuildSubdir testsobj = { "tests", {
 #ifdef INTER 
     "inter/tests/",
 #endif
-    /*
-    "binseg_tests.c",
-    "clone_tests.c",
-    "config_tests.c",
-    "crypto_tests.c",
-    "filedb_tests.c",
-    "fmthtml_tests.c",
-    "match_tests.c",
-    "mess_tests.c",
-    "object_tests.c",
-    "patchar_tests.c",
-    "queue_tests.c",
-    "relation_tests.c",
-    "roebling_tests.c",
-    "route_tests.c",
-    "servetcp_tests.c",
-    "snip_tests.c",
-    "split_tests.c",
-    "taskstep_tests.c",
-    "templ_tests.c",
-    "nodeobj_tests.c",
-    "inet_tests.c",
-    "http_tests.c",
-    "session_tests.c",
-    "login_tests.c",
-    "password_tests.c",
-    */
     NULL
 }};
-
-static BuildSubdir *objdirs[] = {
-    &testsobj,
-    &fixturesobj,
-    NULL
-};
 
 int main(int argc, char **argv){
     if(MemBook_Make(NULL) == NULL){

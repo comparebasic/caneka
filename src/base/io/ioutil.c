@@ -35,6 +35,16 @@ StrVec *IoAbsPath(MemCh *m, char *cstr){
     return IoUtil_AbsVec(m, StrVec_From(m, Str_FromCstr(m, cstr, STRING_COPY)));
 }
 
+StrVec *IoUtil_AbsPathBuilder(MemCh *m, char *args[]){
+    StrVec *v = StrVec_Make(m);
+    char *cptr = args;
+    while(*cptr != 0){
+        StrVec_Add(m, S(m, *cptr));
+    }
+
+    return IoUtil_AbsVec(m, v);
+}
+
 status IoUtil_Annotate(MemCh *m, StrVec *path){
     return Path_Annotate(m, path, pathSeps);
 }

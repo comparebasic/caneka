@@ -2,14 +2,6 @@
 #include <caneka.h>
 #include <builder.h>
 
-#define TEST_REQ 1
-
-/* parameters */
-
-static Executable targets[] = {
-    {NULL, NULL},
-};
-
 static char *cflags[] = {
     "-g", "-Werror", "-Wno-incompatible-pointer-types-discards-qualifiers",
     "-DCNK_EXT", "-DCNK_INTER",
@@ -25,64 +17,21 @@ static char *inc[] = {
     NULL
 };
 
-static char *libs[] = {
+char *sources[] = {
+    "session/",
+    "http/",
+    "www/",
+    "templ/",
+    "types/",
     NULL
 };
 
-static char *staticLibs[] = {
-    NULL
-};
-
-static BuildSubdir typesobj = { "types", {
-    "strings.c",
-    "init.c",
-    NULL
-}};
-
-
-static BuildSubdir templobj = { "templ", {
-    "templ.c",
-    "templ_ctx.c",
-    "templ_jump.c",
-    "templ_roebling.c",
-    "templ_cls.c",
-    NULL
-}};
-
-static BuildSubdir wwwobj = { "www", {
-    "route.c",
-    "webserver.c",
-    "nav.c",
-    NULL
-}};
-
-static BuildSubdir httpobj = { "http", {
-    "http_ctx.c",
-    "http_task.c",
-    "http_roebling.c",
-    "http_cls.c",
-    NULL
-}};
-
-static BuildSubdir sessionobj = { "session", {
-    "ssid.c",
-    "login.c",
-    NULL
-}};
-
-static BuildSubdir *objdirs[] = {
-    &typesobj,
-    &templobj,
-    &httpobj,
-    &sessionobj,
-    &wwwobj,
-    NULL
-};
-
-char *licences[] = {
+/*
+char *genConfigs[] = {
     "./LICENCE",
     NULL
 };
+*/
 
 int main(int argc, char **argv){
     if(MemBook_Make(NULL) == NULL){
@@ -104,10 +53,9 @@ int main(int argc, char **argv){
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
-    ctx.args.libs = libs;
-    ctx.args.staticLibs = staticLibs;
-    ctx.args.licenceFiles = licences;
-    ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.args.libs = NULL;
+    ctx.args.staticLibs = NULL;
+    ctx.sources = sources;
     ctx.genConfigs = NULL;
 
     return (Build(&ctx) & ERROR) ? 2 : 0;

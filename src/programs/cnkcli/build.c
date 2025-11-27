@@ -2,8 +2,6 @@
 #include <caneka.h>
 #include <builder.h>
 
-/* parameters */
-
 static Executable targets[] = {
     {"cnkcli", "main.c"},
     {NULL, NULL},
@@ -36,21 +34,11 @@ static char *staticLibs[] = {
     NULL
 };
 
-static char *libs[] = {
-    NULL
-};
-
-static BuildSubdir obj = { "components", {
+static char *sources[] = {
     "unlog.c",
     "translate.c",
     "show.c",
     NULL,
-}};
-
-
-static BuildSubdir *objdirs[] = {
-    &obj,
-    NULL
 };
 
 int main(int argc, char **argv){
@@ -72,10 +60,9 @@ int main(int argc, char **argv){
     ctx.targets = (Executable *)targets;
     ctx.args.cflags = cflags;
     ctx.args.inc = inc;
-    ctx.args.libs = libs;
+    ctx.args.libs = NULL;
     ctx.args.staticLibs = staticLibs;
-    ctx.args.licenceFiles = NULL;
-    ctx.objdirs = (BuildSubdir **)objdirs;
+    ctx.sources = sources;
     ctx.genConfigs = NULL;
 
     Build(&ctx);
