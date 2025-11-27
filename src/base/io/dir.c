@@ -37,7 +37,9 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
     Span *p = (Span *)asIfc(source, TYPE_SPAN);
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, path);
-    StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1, 0));
+    if(path->bytes[path->length-1] != '/'){
+        StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1, 0));
+    }
     StrVec_Add(v, file);
     return Span_Add(p, v);
 }

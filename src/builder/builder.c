@@ -13,9 +13,7 @@ static status renderStatus(MemCh *m, void *a){
 
     float progress = ceil((count/total) * colsFloat);
     ctx->fields.steps.barStart->length = (i32)progress;
-
-    float modSrcTotal = count + (float)(ctx->fields.steps.modSrcTotal->val.i-ctx->fields.steps.modSrcCount->val.i);
-    ctx->fields.steps.barEnd->length = (i32)ceil(((modSrcTotal)/total) * colsFloat) - progress;
+    ctx->fields.steps.barEnd->length = width-(i32)progress;
 
     MemBookStats st;
     MemBook_GetStats(m, &st);
@@ -61,41 +59,17 @@ static status setupStatus(BuildCtx *ctx){
     memset(&ctx->fields, 0, sizeof(ctx->fields));
     ctx->fields.steps.total = I32_Wrapped(m, 0);
     ctx->fields.steps.count = I32_Wrapped(m, 0);
-    ctx->fields.steps.modSrcCount = I32_Wrapped(m, 0);
-    ctx->fields.steps.modSrcTotal = I32_Wrapped(m, 0);
-    ctx->fields.steps.modCount = I32_Wrapped(m, 0);
     ctx->fields.steps.name = Str_Make(m, STR_DEFAULT);
-    ctx->fields.current.source = Str_Make(m, STR_DEFAULT);
-    ctx->fields.current.dest = Str_Make(m, STR_DEFAULT);
-    ctx->fields.current.action = Str_Make(m, STR_DEFAULT);
-
-    char **sourcePtr = ctx->sources;
-    while(sourcePtr != NULL && *sourcePtr != NULL){
-        ctx->fields.steps.total->val.i++;
-        sourcePtr++;
-    }
 
     CliStatus_SetDims(ctx->cli, 0, 0);
     i32 width = ctx->cli->cols;
     IntPair coords = {0, 0};
 
-    void **arr = Arr_Make(m, 2);
-    arr[0] = ctx->fields.steps.modCount;
-    arr[1] = ctx->fields.steps.name;
-    Span_Add(ctx->cli->lines, 
-        FmtLine_Make(m, "^y.module $ of $: ^D.$^0", arr));
+    void **arr = NULL;
 
-    arr = Arr_Make(m, 3);
-    arr[0] = ctx->fields.current.action;
-    arr[1] = ctx->fields.current.source;
-
+    ctx->fields.current[4] = NULL;
     Span_Add(ctx->cli->lines, 
-        FmtLine_Make(m, "^b.$: $", arr));
-
-    arr = Arr_Make(m, 1);
-    arr[0] = ctx->fields.current.dest;
-    Span_Add(ctx->cli->lines, 
-        FmtLine_Make(m, "    -> ^D.$^0", arr));
+        FmtLine_Make(m, "^y.Building $ $ $", ctx->fields.current));
 
     ctx->fields.steps.barStart = Str_Make(m, width);
     memset(ctx->fields.steps.barStart->bytes, ' ', width);
@@ -130,7 +104,8 @@ static status setupStatus(BuildCtx *ctx){
     return SUCCESS;
 }
 
-static status buildExec(BuildCtx *ctx, boolean force, Str *destDir, Str *lib, Executable *target){
+static status buildExec(BuildCtx *ctx,
+        boolean force, Str *destDir, Str *lib, Executable *target){
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
     MemCh *m = ctx->m;
@@ -223,8 +198,9 @@ static status buildObject(BuildCtx *ctx,
 
     if(IoUtil_CmpUpdated(m, source, dest)){
         m->level--;
-        Str_Reset(ctx->fields.current.action);
-        Str_AddCstr(ctx->fields.current.action, "build obj");
+        ctx->fields.current[BUILIDER_CLI_ACTION] = S(m, "build obj");
+        ctx->fields.current[BUILIDER_CLI_SOURCE] = source;
+        ctx->fields.current[BUILIDER_CLI_DEST] = dest;
         CliStatus_Print(OutStream, ctx->cli);
         m->level++;
 
@@ -271,8 +247,7 @@ static status buildObject(BuildCtx *ctx,
             return ERROR;
         }
     }else{
-        Str_Reset(ctx->fields.current.action);
-        Str_AddCstr(ctx->fields.current.action, " link obj");
+        ctx->fields.current[BUILIDER_CLI_ACTION] = S(m, "link obj");
     }
 
     Span_ReInit(cmd);
@@ -303,6 +278,7 @@ static status build(BuildCtx *ctx){
     status r = READY;
     DebugStack_Push(NULL, 0);
     char *args[5];
+    void *out[4];
     MemCh *m = ctx->m;
 
     setupStatus(ctx);
@@ -330,6 +306,7 @@ static status build(BuildCtx *ctx){
     StrVec_Add(libDir, targetName);
     Str *libFileName = StrVec_Str(m, libDir);
     StrVec_Pop(libDir);
+    ctx->fields.current[BUILIDER_CLI_LIBFILENAME] = targetName;
 
     File_Unlink(m, libFileName);
 
@@ -374,12 +351,21 @@ static status build(BuildCtx *ctx){
             config++;
         }
     }
-
-    ctx->fields.steps.modSrcCount->val.i = 0;
-    ctx->fields.steps.modSrcTotal->val.i = 0;
+    
+    ctx->fields.steps.total->val.i = 0;
     char **sourcePtr = ctx->sources;
     while(sourcePtr != NULL && *sourcePtr != NULL){
-        ctx->fields.steps.modSrcTotal->val.i++;
+        m->level++;
+        Str *source = S(m, *sourcePtr);
+        if(source->bytes[source->length-1] == '/'){
+            StrVec_Add(src, source);
+            Span *p = Span_Make(m);
+            Dir_Gather(m, StrVec_Str(m, src), p);
+            ctx->fields.steps.total->val.i += p->nvalues;
+            StrVec_Pop(src);
+        }else{
+            ctx->fields.steps.total->val.i++;
+        }
         sourcePtr++;
     }
 
@@ -392,24 +378,27 @@ static status build(BuildCtx *ctx){
             StrVec_Add(src, source);
             StrVec_Add(libDir, source);
             Str *dir = StrVec_Str(m, libDir);
+            Dir_CheckCreate(m, dir);
 
             Span *p = Span_Make(m);
             Dir_Gather(m, StrVec_Str(m, src), p);
-
             Iter it;
             Iter_Init(&it, p);
             while((Iter_Next(&it) & END) == 0){
-                Str *s = Iter_Get(&it);
-                StrVec_Add(libDir, s);
-                StrVec_Add(src, s);
 
-                Str *sourceSrc = StrVec_Str(m, src);
+                StrVec *v = Iter_Get(&it);
+                Str *sourceSrc = StrVec_Str(m, v);
+
+                Str *fname = Span_Get(v->p, v->p->max_idx);
+
+                StrVec_Add(libDir, fname);
                 Str *dest = StrVec_Str(m, libDir);
                 dest->bytes[dest->length-1] = 'o';
+
                 r |= buildObject(ctx, libFileName, dest, sourceSrc);
+                ctx->fields.steps.count->val.i++;
 
                 StrVec_Pop(libDir);
-                StrVec_Pop(src);
             }
 
             StrVec_Pop(libDir);
@@ -422,7 +411,9 @@ static status build(BuildCtx *ctx){
             Str *sourceSrc = StrVec_Str(m, src);
             Str *dest = StrVec_Str(m, libDir);
             dest->bytes[dest->length-1] = 'o';
+
             r |= buildObject(ctx, libFileName, dest, sourceSrc);
+            ctx->fields.steps.count->val.i++;
 
             StrVec_Pop(libDir);
             StrVec_Pop(src);
@@ -430,14 +421,10 @@ static status build(BuildCtx *ctx){
 
         sourcePtr++;
         libCount++;
-        ctx->fields.steps.count->val.i++;
-        ctx->fields.steps.modSrcCount->val.i++;
         m->level--;
         MemCh_FreeTemp(m);
     }
 
-    ctx->fields.steps.modSrcCount->val.i = 0;
-    ctx->fields.steps.modSrcTotal->val.i = 0;
     CliStatus_Print(OutStream, ctx->cli);
 
     if((r & ERROR) == 0){
@@ -445,6 +432,7 @@ static status build(BuildCtx *ctx){
     }else{
         return r;
     }
+
     CliStatus_Print(OutStream, ctx->cli);
     CliStatus_PrintFinish(OutStream, ctx->cli);
 

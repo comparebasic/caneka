@@ -8,22 +8,22 @@ typedef struct executable {
     char *src;
 } Executable;
 
+enum current_idx {
+    BUILIDER_CLI_LIBFILENAME = 0,
+    BUILIDER_CLI_ACTION,
+    BUILIDER_CLI_SOURCE,
+    BUILIDER_CLI_DEST,
+};
+
 typedef struct build_cli_fields {
     struct {
         Str *name; 
         Single *count;
         Single *total;
-        Single *modSrcCount;
-        Single *modSrcTotal;
-        Single *modCount;
         Str *barStart; 
         Str *barEnd; 
     } steps;
-    struct {
-        Str *source; 
-        Str *dest; 
-        Str *action; 
-    } current;
+    void *current[5];
 } BuildCliFields;
 
 typedef struct gen_config {
