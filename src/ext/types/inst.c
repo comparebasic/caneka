@@ -1,6 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
+Inst *asInst(MemCh *m, void *a){
+    if(a == NULL){
+        return ERROR;
+    }else if(((Abstract *)a)->type.of & TYPE_INSTANCE) == 0){
+        void *args[] = {Type_ToStr(m, ((Abstract *)a)->type.of), NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Type is not an Inst $", args);
+    }
+    return (Inst *)a;
+}
+
 void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
     DebugStack_Push(inst, inst->type.state);
     void *args[5];
