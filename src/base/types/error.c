@@ -112,14 +112,7 @@ static void setSigs(){
 
 void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     if(_crashing){
-        if(Ansi_HasColor()){
-            Buff_AddBytes(ErrStream, (byte *)"\x1b[2;31m", 5);
-        }
-        char *cstr = "\nFatal called after crashing\n";
-        Buff_AddBytes(ErrStream, (byte *)cstr, strlen(cstr));
-        if(Ansi_HasColor()){
-            Buff_AddBytes(ErrStream, (byte *)"\x1b[0m", 4);
-        }
+        Fmt(ErrStream, "\n^r.Fatal called after crashing^0.\n", NULL);
         exit(9);
         return;
     }
@@ -130,38 +123,62 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
 #ifdef CLI 
     RawMode(FALSE);
 #endif
-    Buff_AddBytes(ErrStream, (byte *)"Error", 5);
-    if(Ansi_HasColor()){
-        Buff_AddBytes(ErrStream, (byte *)"\x1b[22m", 5);
+    Str s = {
+        .type = {TYPE_STR, STRING_CONST},
+        .length = 0,
+        .alloc = 0,
+        .bytes = NULL
+    };
+
+    Fmt(ErrStream, "\n^r.FatalError: ", NULL);
+
+    if(func != NULL){
+        s.alloc = s.length = strlen(func);
+        s.bytes = (byte *)func;
+        ToS(ErrStream, &s, s.type.of, ZERO);
     }
-    Buff_AddBytes(ErrStream, (byte *)":", 1);
-    Buff_AddBytes(ErrStream, (byte *)func, strlen(func));
-    Buff_AddBytes(ErrStream, (byte *)":", 1);
-    Buff_AddBytes(ErrStream, (byte *)file, strlen(file));
-    Buff_AddBytes(ErrStream, (byte *)":", 1);
-    byte lineNo[MAX_BASE10+1];
-    byte *b = lineNo;
-    byte *end = b+MAX_BASE10;
-    i64 length = Str_I64OnBytes(&b, end, line);
-    Buff_AddBytes(ErrStream, (byte *)b, length);
-    Buff_AddBytes(ErrStream, (byte *)" ", 1);
+    if(file != NULL){
+        s.alloc = s.length = strlen(file);
+        s.bytes = (byte *)file;
+        Buff_AddBytes(ErrStream, (byte *)" ", 1);
+        ToS(ErrStream, &s, s.type.of, ZERO);
+    }
+    if(line > 0){
+        byte lineNo[MAX_BASE10+1];
+        byte *b = lineNo;
+        byte *end = b+MAX_BASE10;
+        i64 length = Str_I64OnBytes(&b, end, line);
+        s.alloc = s.length = length;
+        s.bytes = b;
+        Buff_AddBytes(ErrStream, (byte *)" line ", 6);
+        ToS(ErrStream, &s, s.type.of, ZERO);
+    }
+
+    Buff_AddBytes(ErrStream, (byte *)" - ", 3);
     Fmt(ErrStream, fmt, args);
+
+    if(errno != 0){
+        void *args[] = {
+            S(ErrStream->m, strerror(errno)),
+            NULL
+        };
+        Fmt(ErrStream, "IoError: ^D.$^d.", args);
+    }
+
 #ifdef OPENSSL
     char _buff[256];
     unsigned long e = ERR_get_error();
     if(e != 0){
         char *openssl_err = ERR_error_string(e, _buff);
-        void *args2[] = {
+        void *args[] = {
             Str_CstrRef(ErrStream->m, openssl_err),
             NULL
         };
-        Fmt(ErrStream, "^rD^$^0", args2);
+        Fmt(ErrStream, " OpenSslError: ^rD.$^0", args);
     }
 #endif
-    Buff_AddBytes(ErrStream, (byte *)"\n", 1);
-    if(Ansi_HasColor()){
-        Buff_AddBytes(ErrStream, (byte *)"\x1b[0m", 4);
-    }
+
+    Fmt(ErrStream, "^0.\n", NULL);
     DebugStack_Print(ErrStream, MORE);
     exit(13);
 }
@@ -214,15 +231,24 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
         if(errFunc != NULL){
             ErrorMsg *msg = ErrorMsg_Make(m, func, file, line, fmt, args);
             r |= errFunc(m, a, msg);
-            Fmt(ErrStream, fmt, args);
         }
     }else{
         r |= ERROR;
     }
 
     if(r & ERROR){
-        Fatal(func, file, line, fmt, args);
-        return;
+        if(r & NOOP){
+            Fmt(ErrStream, fmt, args);
+            if(errno != 0){
+                void *args[] = {
+                    S(m, strerror(errno)),
+                    NULL
+                };
+                Fmt(ErrStream, "\nIoError: ^D.$^d.", args);
+            }
+        }else{
+            Fatal(func, file, line, fmt, args);
+        }
     }
 
     _error = FALSE;

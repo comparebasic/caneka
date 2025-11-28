@@ -4,30 +4,44 @@
 
 static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     StackEntry *se = (StackEntry*)as(a, TYPE_DEBUG_STACK_ENTRY); 
+    void *args[2];
+    Str s = {
+        .type = {TYPE_STR, STRING_CONST},
+        .length = 0,
+        .alloc = 0,
+        .bytes = NULL
+    };
 
-    if(Ansi_HasColor()){
-        Buff_AddBytes(bf, (byte *)"    \x1b[1;33m", 11);
-    }else{
-        Buff_AddBytes(bf, (byte *)"    ", 4);
-    }
-    Buff_AddBytes(bf, (byte *)se->funcName, strlen(se->funcName));
-    if(Ansi_HasColor()){
-        Buff_AddBytes(bf, (byte *)"\x1b[22m:", 6);
-    }
+    s.length = s.alloc = strlen(se->funcName);
+    s.bytes = (byte *)se->funcName;
+    args[0] = &s;
+    args[1] = NULL;
+    Fmt(bf, "    ^y.$", args);
+
+    s.length = s.alloc = strlen(se->fname);
+    s.bytes = (byte *)se->fname;
+    args[0] = &s;
+    args[1] = NULL;
+    Fmt(bf, " $", args);
+
+    byte lineNo[MAX_BASE10+1];
+    byte *b = lineNo;
+    byte *end = b+MAX_BASE10;
+    i64 length = Str_I64OnBytes(&b, end, se->line);
+    s.alloc = s.length = length;
+    s.bytes = b;
+    Buff_AddBytes(ErrStream, (byte *)" line ", 6);
+    ToS(ErrStream, &s, s.type.of, ZERO);
+
+
     Buff_AddBytes(bf, (byte *)se->fname, strlen(se->fname));
     if(flags & MORE && se->ref != NULL){
-        if(Ansi_HasColor()){
-            Buff_AddBytes(bf, (byte *)" - \x1b[0;1m", 9);
-        }else{
-            Buff_AddBytes(bf, (byte *)" - ", 3);
-        }
-        ToS(bf, se->ref, se->typeOf, DEBUG|MORE);
+        args[0] = se->ref;
+        args[1] = NULL;
+        Fmt(bf, " - @\n", args);
     }
 
-    if(Ansi_HasColor()){
-        Buff_AddBytes(bf, (byte *)"\x1b[0m\n", 5);
-    }
-    return SUCCESS;
+    return Fmt(bf, "^0.\n", NULL);
 }
 
 status Debug_ToSInit(MemCh *m, Lookup *lk){

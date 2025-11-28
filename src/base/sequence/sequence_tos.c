@@ -17,6 +17,29 @@ status HKey_Print(Buff *bf, void *a, cls type, word flags){
     }
 }
 
+status CstrArray_Print(Buff *bf, void *a, cls type, word flags){
+    byte **arr = (byte **)a;
+    boolean first = TRUE;
+    Str s = {
+        .type = {TYPE_STR, STRING_CONST},
+        .length = 0,
+        .alloc = 0,
+        .bytes = NULL,
+    };
+    while(*arr != NULL){
+        if(first){
+            first = FALSE;
+        }else if(flags & MORE){
+            Buff_AddBytes(bf, (byte *)", ", 2);
+        }
+        s.bytes = *arr;
+        s.length = s.alloc = strlen((char *)*arr);
+        Buff_Add(bf, &s);
+        arr++;
+    }
+    return ZERO;
+}
+
 status Array_Print(Buff *bf, void *a, cls type, word flags){
     void **arr = (void **)a;
     boolean first = TRUE;
@@ -139,5 +162,6 @@ status Sequence_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_HKEY, (void *)HKey_Print);
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     r |= Lookup_Add(m, lk, TYPE_ARRAY, (void *)Array_Print);
+    r |= Lookup_Add(m, lk, TYPE_CSTR_ARRAY, (void *)CstrArray_Print);
     return r;
 }

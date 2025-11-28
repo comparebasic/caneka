@@ -63,6 +63,7 @@ enum types {
     TYPE_SPAN,
     TYPE_TABLE,
     TYPE_ARRAY,
+    TYPE_CSTR_ARRAY,
     TYPE_COORDS,
     TYPE_SLAB,
     TYPE_HASHED,

@@ -492,7 +492,7 @@ i32 main(int argc, char **argv){
     Caneka_InitBase(m);
     DebugStack_Push(NULL, 0);
 
-    CliArgs *cli = CliArgs_Make(m, argc, argv);
+    CliArgs *cli = CliArgs_Make(argc, argv);
 
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
@@ -504,6 +504,9 @@ i32 main(int argc, char **argv){
     Str *typeKey = K(m, "type");
     Str *outKey = K(m, "out");
 
+    Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, Sv(m, "Show this help message."));
+    Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Skip ansi color sequences in outpu."));
     Args_Add(cli, outKey, NULL, ZERO,
         Sv(m, "Name of binary (or static library) to build from sources."));
     Span *types = Span_Make(m);
@@ -516,27 +519,18 @@ i32 main(int argc, char **argv){
         Sv(m, "Source code files or directories to build."));
     Args_Add(cli, runKey, NULL, ARG_OPTIONAL,
         Sv(m, "Run the binary after it is built."));
-    Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, NULL);
-    Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL, NULL);
     Args_Add(cli, licenceKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show build program intellectual property licence."));
     Args_Add(cli, versionKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show build program version."));
 
-    m->owner = cli;
-    CharPtr_ToTbl(m, cli->resolve, argc, argv, cli->args);
-    if(Table_GetHashed(cli->args, helpKey) != NULL){
-        CharPtr_ToHelp(m, cli->name, cli->resolve);
-        return 1;
-    }
-
-    if(Table_GetHashed(cli->args, noColorKey) != NULL){
-        Ansi_SetColor(FALSE);
-    }
+    CliArgs_Parse(cli);
 
     args[0] = cli->args;
     args[1] = NULL;
     Out("^p.Args recieved @^0\n", args);
+
+    CliArgs_Free(cli);
 
     DebugStack_Pop();
     return 0;

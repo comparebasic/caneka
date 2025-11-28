@@ -17,9 +17,10 @@ typedef struct cli_args {
     Span *explain;
 } CliArgs;
 
-status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *dest);
-status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve);
-CliArgs *CliArgs_Make(MemCh *m, i32 argc, char *argv[]);
+status CharPtr_ToHelp(CliArgs *cli);
+CliArgs *CliArgs_Make(i32 argc, char *argv[]);
+status CliArgs_Parse(CliArgs *cli);
+void CliArgs_Free(CliArgs *cli);
 
 status Args_Add(CliArgs *cli, Str *key, void *value, word flags, StrVec *explain);
 status Args_Init(MemCh *m);

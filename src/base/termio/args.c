@@ -7,96 +7,7 @@ static boolean argHasFlag(Hashed *h, word flag){
         (((Abstract *)h->value)->type.state & flag);
 }
 
-status Args_ErrorFunc(MemCh *m, void *_cliArgs, void *_msg){
-    CliArgs *cli = _cliArgs;
-    ErrorMsg *msg = _msg;
-    Fmt(ErrStream, (char *)msg->fmt->bytes, msg->args);
-    Buff_Add(ErrStream, S(m, "\nhelp:\n  "));
-    CharPtr_ToHelp(m, cli->name, cli->resolve);
-    return ERROR;
-}
-
-status Args_Add(CliArgs *cli, Str *key, void *_value, word flags, StrVec *explain){
-    Abstract *value = (Abstract *)_value;
-    if(value == NULL){
-        value = (Abstract *)Ptr_Wrapped(cli->m, NULL, ZERO);
-    }
-    if(flags & ARG_CHOICE){
-        value = (Abstract *)Ptr_Wrapped(cli->m, as(value, TYPE_SPAN), TYPE_SPAN); 
-    }
-    value->type.state |= flags;
-    Hashed *h = Table_SetHashed(cli->resolve, key, value);
-    if(explain != NULL){
-        Span_Set(cli->explain, h->orderIdx, explain);
-    }
-    return SUCCESS;
-}
-
-status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve){
-    void *args[] = {
-        name,
-        NULL
-    };
-    Out("$ ", args);
-    Iter it;
-    Iter_Init(&it, Table_Ordered(m, resolve));
-    while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        if(h != NULL){
-            void *args[] = {
-                h->key,
-                NULL
-            };
-
-            if(argHasFlag(h, ARG_OPTIONAL)){
-                if(argHasFlag(h, ARG_MULTIPLE)){
-                    Out("[--$ ...]", args);
-                }else{
-                    Out("[--$]", args);
-                }
-            }else if(argHasFlag(h, ARG_CHOICE)){
-                if(argHasFlag(h, ARG_DEFAULT)){
-                    Span *p = ((Single *)h->value)->val.ptr;
-                    void *args[] = {
-                        h->key,
-                        p,
-                        Span_Get(p, 0),
-                        NULL
-                    };
-                    Out("--$(@=$)", args);
-                }else{
-                    void *args[] = {
-                        h->key,
-                        ((Single *)h->value)->val.ptr,
-                        NULL
-                    };
-                    Out("--$(@)", args);
-                }
-            }else if(argHasFlag(h, ARG_DEFAULT)){
-                void *args[] = {
-                    h->key,
-                    ((Single *)h->value)->val.ptr,
-                    NULL
-                };
-                Out("--$(=$)", args);
-            }else{
-                if(argHasFlag(h, ARG_MULTIPLE)){
-                    Out("--$ ...", args);
-                }else{
-                    Out("--$", args);
-                }
-            }
-
-            if((it.type.state & LAST) == 0){
-                Out(" ", NULL);
-            }
-        }
-    }
-    Out("\n", NULL);
-    exit(1);
-}
-
-status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *dest){
+static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Table *dest){
     status r = READY;
     Str *key = NULL;
     void *rslv = NULL;
@@ -105,9 +16,9 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
     if(argc < 1){
         return NOOP;
     }else{
-        argv++;
+        /* build args pass */
         for(i32 i = 1; i < argc; i++, argv++){
-            Str *s = Str_CstrRef(m, *argv);
+            Str *s = S(m, argv[i]);
             if(s->length > 1 && s->bytes[0] == '-' && s->bytes[1] == '-'){
                 if(it.metrics.selected != -1){
                     Table_SetValue(&it, Ptr_Wrapped(m, NULL, 0));
@@ -139,8 +50,9 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                 Table_SetValue(&it, s);
             }
         }
+        /* process args pass */
         Iter it;
-        Iter_Init(&it, resolve);
+        Iter_Init(&it, Table_Ordered(m, resolve));
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
@@ -162,7 +74,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                         };
                         Error(m, FUNCNAME, FILENAME, LINENUMBER,
                             "Required argument not found: @", args);
-                        exit(1);
+                        return ERROR;
                     }
                 }
 
@@ -181,7 +93,7 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
                             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                                 "Required argument @ not in expected choices: @, found @",
                                     args);
-                            exit(1);
+                            return ERROR;
                         }
                     }
                 }
@@ -197,20 +109,144 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
     return r;
 }
 
-CliArgs *CliArgs_Make(MemCh *m, i32 argc, char *argv[]){
-    CliArgs *args = (CliArgs *)MemCh_AllocOf(m, sizeof(CliArgs), TYPE_CLI_ARGS);
-    args->type.of = TYPE_CLI_ARGS;
-    args->m = m;
-    args->resolve = Table_Make(m);
-    args->args = Table_Make(m);
-    args->explain = Span_Make(m);
-    args->argc = argc;
-    if(argv != NULL){
-        args->name = IoUtil_FnameStr(m, IoPath(m, argv[0]));
+status Args_ErrorFunc(MemCh *m, void *_cliArgs, void *_msg){
+    CliArgs *cli = _cliArgs;
+    ErrorMsg *msg = _msg;
+    Buff_Add(ErrStream, S(m, "help:\n\n"));
+    CharPtr_ToHelp(cli);
+
+    void *args[] = {
+        Ptr_Wrapped(m, cli->argv, TYPE_CSTR_ARRAY),
+        cli->args,
+        NULL
+    };
+
+    Out("^p.Command line arguments recieved: @, gathered: @^0\n", args);
+
+    return ERROR;
+}
+
+status Args_Add(CliArgs *cli, Str *key, void *_value, word flags, StrVec *explain){
+    Abstract *value = (Abstract *)_value;
+    if(value == NULL){
+        value = (Abstract *)Ptr_Wrapped(cli->m, NULL, ZERO);
+    }
+    if(flags & ARG_CHOICE){
+        value = (Abstract *)Ptr_Wrapped(cli->m, as(value, TYPE_SPAN), TYPE_SPAN); 
+    }
+    value->type.state |= flags;
+    Hashed *h = Table_SetHashed(cli->resolve, key, value);
+    if(explain != NULL){
+        Span_Set(cli->explain, h->orderIdx, explain);
+    }
+    return SUCCESS;
+}
+
+status CharPtr_ToHelp(CliArgs *cli){
+    MemCh *m = cli->m;
+    void *args[] = {
+        cli->name,
+        NULL
+    };
+
+    Str *noColorKey = K(m, "no-color");
+    if(Table_GetHashed(cli->args, noColorKey) != NULL){
+        Ansi_SetColor(FALSE);
     }
 
-    args->argv = argv;
-    return args;
+    Out("^c.$^0.\n\n", args);
+    Iter it;
+    Iter_Init(&it, Table_Ordered(m, cli->resolve));
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            void *args[] = {
+                h->key,
+                Span_Get(cli->explain, h->orderIdx),
+                NULL
+            };
+
+            if(argHasFlag(h, ARG_OPTIONAL)){
+                if(argHasFlag(h, ARG_MULTIPLE)){
+                    Out(" [^y.--$^0. ...]\n $\n", args);
+                }else{
+                    Out(" [^y.--$^0.]\n $\n", args);
+                }
+            }else if(argHasFlag(h, ARG_CHOICE)){
+                if(argHasFlag(h, ARG_DEFAULT)){
+                    Span *p = ((Single *)h->value)->val.ptr;
+                    void *args[] = {
+                        h->key,
+                        p,
+                        Span_Get(p, 0),
+                        Span_Get(cli->explain, h->orderIdx),
+                        NULL
+                    };
+                    Out("^y. --$^0.(@=$)\n $\n", args);
+                }else{
+                    void *args[] = {
+                        h->key,
+                        ((Single *)h->value)->val.ptr,
+                        Span_Get(cli->explain, h->orderIdx),
+                        NULL
+                    };
+                    Out(" ^y.--$^0.(@)\n $\n", args);
+                }
+            }else if(argHasFlag(h, ARG_DEFAULT)){
+                void *args[] = {
+                    h->key,
+                    ((Single *)h->value)->val.ptr,
+                    Span_Get(cli->explain, h->orderIdx),
+                    NULL
+                };
+                Out(" ^y.--$^0.(=$)\n $\n", args);
+            }else{
+                if(argHasFlag(h, ARG_MULTIPLE)){
+                    Out(" ^y.--$^0. ...\n $\n", args);
+                }else{
+                    Out(" ^y.--$^0.\n $\n", args);
+                }
+            }
+
+            if((it.type.state & LAST) == 0){
+                Out("\n", NULL);
+            }
+        }
+    }
+    Out("\n", NULL);
+    return ZERO;
+}
+
+void CliArgs_Free(CliArgs *cli){
+    MemCh_Free(cli->m);
+}
+
+status CliArgs_Parse(CliArgs *cli){
+    status r = CharPtr_ToTbl(cli->m, cli->resolve, cli->argc, cli->argv, cli->args);
+    Str *helpKey = K(cli->m, "help");
+    if(Table_GetHashed(cli->args, helpKey) != NULL){
+        CharPtr_ToHelp(cli);
+        return NOOP;
+    }
+    return r;
+}
+
+CliArgs *CliArgs_Make(i32 argc, char *argv[]){
+    MemCh *m = MemCh_Make();
+    CliArgs *cli = (CliArgs *)MemCh_AllocOf(m, sizeof(CliArgs), TYPE_CLI_ARGS);
+    cli->type.of = TYPE_CLI_ARGS;
+    cli->m = m;
+    cli->resolve = Table_Make(m);
+    cli->args = Table_Make(m);
+    cli->explain = Span_Make(m);
+    cli->argc = argc;
+    if(argv != NULL){
+        cli->name = IoUtil_FnameStr(m, IoPath(m, argv[0]));
+    }
+
+    cli->argv = argv;
+    m->owner = cli;
+    return cli;
 }
 
 status Args_Init(MemCh *m){

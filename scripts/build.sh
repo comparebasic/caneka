@@ -1,12 +1,15 @@
 #!/bin/sh
 
-mkdir -p ./build/libcaneka/
-echo "building Caneka Base" 
-clang -I ./src -c -o ./build/libcaneka/libcaneka.a ./src/base/inc.c
-echo "building Caneka Builder" 
-mkdir ./build/bin/
-echo "clang -I ./src -o ./build/bin/cnkbuilder.c ./src/builder/inc.c"
-clang -I ./src -o ./build/bin/cnkbuild ./src/builder/inc.c ./build/libcaneka/libcaneka.a -lm
+CC="clang"
+cmd="mkdir -p ./build && mkdir -p ./build/libcaneka && $CC -I ./src -c -o ./build/libcaneka/libcaneka.a ./src/base/inc.c"
+echo "Building Caneka Base: $cmd";
+eval $cmd
+cmd="mkdir -p ./build/bin && clang -I ./src -o ./build/bin/cnkbuild ./src/builder/inc.c ./build/libcaneka/libcaneka.a -lm"
+echo "Building Caneka Builder $cmd";
+eval $cmd
+cmd="./build/bin/cnkbuild"
+echo "Running Builder $cmd";
+eval $cmd
 
 exit 1;
 
