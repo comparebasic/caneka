@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 i32 Table_SetByCstr(Table *tbl, char *cstr, void *value){
     return Table_Set(tbl, Str_FromCstr(tbl->m, cstr, STRING_COPY), value);

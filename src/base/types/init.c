@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static status archChecks(){
     size_t sec = sizeof(i64);
@@ -22,11 +23,13 @@ status Caneka_InitBase(MemCh *m){
     r |= StreamTo_Init(md);
     r |= AnsiStr_Init(md);
     r |= DebugStack_Init(m);
+    r |= Args_Init(m);
     r |= Clone_Init(m);
     r |= Equals_Init(m);
     r |= Path_Init(md);
     r |= IoUtils_Init(m);
     r |= Exact_Init(m);
     r |= Stash_Init(m);
+    Core_Direct(m, 1, 2);
     return r;
 }

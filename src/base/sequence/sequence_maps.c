@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static Map *Hashed_Map(MemCh *m){
     Hashed h;

@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 boolean Shelf_Available(Iter *shelf){
     if(shelf->metrics.selected == -1 || 

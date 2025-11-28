@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     StackEntry *se = (StackEntry*)as(a, TYPE_DEBUG_STACK_ENTRY); 

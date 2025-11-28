@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 Lookup *SizeLookup = NULL;
 
@@ -26,7 +27,6 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_STRVEC, (i64)sizeof(StrVec));
     r |= Lookup_AddRaw(m, lk, TYPE_FMT_LINE, (i64)sizeof(FmtLine));
     r |= Lookup_AddRaw(m, lk, TYPE_CURSOR, (i64)sizeof(Cursor));
-    r |= Lookup_AddRaw(m, lk, TYPE_TESTSUITE, (i64)sizeof(TestSet));
     r |= Lookup_AddRaw(m, lk, TYPE_SPAN, (i64)sizeof(Span));
     r |= Lookup_AddRaw(m, lk, TYPE_TABLE, (i64)sizeof(Table));
     r |= Lookup_AddRaw(m, lk, TYPE_LOOKUP, (i64)sizeof(Lookup));

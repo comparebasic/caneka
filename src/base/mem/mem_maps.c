@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static Map *Span_Map(MemCh *m){
     Span p;

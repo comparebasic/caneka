@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 i64 Lookup_GetRaw(Lookup *lk, word type){
     void *ptr = Lookup_Get(lk, type);

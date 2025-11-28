@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 i64 MemCh_Used(MemCh *m, i16 level){
     i64 total = 0;

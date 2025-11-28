@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Push(pd, pd->type.of);
@@ -43,13 +44,6 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
 
     pid_t child, p;
     int r;
-
-    if(DEBUG_SUBPROCESS){
-        char **arg = &(cmd[1]);
-        while (*arg != NULL){
-            arg++;
-        }
-    }
 
     child = vfork();
     if(child == (pid_t)-1){

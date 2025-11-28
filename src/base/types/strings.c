@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static char *baseTypeStrings[] = {
     "_TYPE_ZERO",
@@ -78,6 +79,7 @@ static char *baseTypeStrings[] = {
     "TYPE_DEBUG_STACK",
     "TYPE_DEBUG_STACK_ENTRY",
     "TYPE_CLI_STATUS",
+    "TYPE_CLI_ARGS",
     "TYPE_FMT_LINE",
     "_TYPE_BASE_END",
     NULL

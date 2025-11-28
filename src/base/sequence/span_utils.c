@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 Span *Span_CopyRange(MemCh *m, Span *p, Coord *cr){
     Span *ret = Span_Make(m);

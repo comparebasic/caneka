@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static boolean _mapsInitialized = FALSE;
 struct lookup *MapsLookup = NULL;

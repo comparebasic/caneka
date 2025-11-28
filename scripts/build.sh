@@ -1,5 +1,15 @@
 #!/bin/sh
 
+mkdir -p ./build/libcaneka/
+echo "building Caneka Base" 
+clang -I ./src -c -o ./build/libcaneka/libcaneka.a ./src/base/inc.c
+echo "building Caneka Builder" 
+mkdir ./build/bin/
+echo "clang -I ./src -o ./build/bin/cnkbuilder.c ./src/builder/inc.c"
+clang -I ./src -o ./build/bin/cnkbuild ./src/builder/inc.c ./build/libcaneka/libcaneka.a -lm
+
+exit 1;
+
 CC="clang"
 INC="-I ./src/include -I ./src/base/include -I ./src/builder/include"
 STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"

@@ -52,8 +52,10 @@ static status WrappedPtr_Print(Buff *bf, void *a, cls type, word flags){
     Fmt(bf, "Wptr<$ ", args);
     if(Lookup_Get(ToStreamLookup, sg->objType.of) != NULL){
         ToS(bf, sg->val.ptr, sg->objType.of, MORE);
+#ifdef INSECURE
     }else if(MemBook_Check(sg->val.ptr)){
         Addr_ToS(bf, sg->val.ptr, flags);
+#endif
     }else{
         ToS(bf, Util_Wrapped(bf->m, (util)sg->val.ptr), TYPE_WRAPPED_UTIL, ZERO);
     }

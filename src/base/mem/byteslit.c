@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 BytesLit *BytesLit_Make(MemCh *m, i16 alloc, cls typeOf){
     BytesLit *sl = MemCh_AllocOf(m, sizeof(RangeType)+alloc, TYPE_BYTE);

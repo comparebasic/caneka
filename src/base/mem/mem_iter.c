@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static void setLastFlag(MemIter *mit){
     Abstract *a = (Abstract *)MemIter_Get(mit);

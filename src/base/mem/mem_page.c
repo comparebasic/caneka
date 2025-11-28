@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 void *MemPage_Alloc(MemPage *pg, word sz){
     void *ptr = pg;

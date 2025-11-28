@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 i32 dim_max_idx[SPAN_MAX_DIMS+1] = {15, 255, 4095, 65535, 1048575};
 

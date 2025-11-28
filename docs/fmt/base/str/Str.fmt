@@ -1,6 +1,0 @@
-Str_From: copy bytes into a new string 
-Str_Ref: make a string that points to bytes 
-Str_Init: setup an existing string struct 
-Str_Make: make a blank allocated string 
-Str_ToFd: write to a file descriptor 
-Str_Add: Add bytes, returns the amount not copied

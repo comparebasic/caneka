@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 boolean Span_Exact(Span *a, Span *b){
     if(a->nvalues != b->nvalues){

@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <builder.h>
+#include "module.h"
 
 static boolean _quiet = FALSE;
 
@@ -476,3 +476,56 @@ status Build(BuildCtx *ctx, i32 argc, char *argv[]){
     DebugStack_Pop();
     return r;
 }
+
+i32 main(int argc, char **argv){
+    MemBook *cp = MemBook_Make(NULL);
+    void *args[5];
+    if(cp == NULL){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
+    }
+
+    MemCh *m = MemCh_Make();
+    if(m == NULL){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully", NULL);
+    }
+
+    Caneka_InitBase(m);
+    DebugStack_Push(NULL, 0);
+
+    CliArgs *cli = CliArgs_Make(m, argc, argv);
+
+    Str *helpKey = K(m, "help");
+    Str *noColorKey = K(m, "no-color");
+    Str *runKey = K(m, "run");
+    Str *modulesKey = K(m, "module");
+    Str *licenceKey = K(m, "licence");
+    Str *versionKey = K(m, "version");
+    Str *dirKey = K(m, "dir");
+
+    Args_Add(cli->resolve, helpKey, NULL, ARG_OPTIONAL);
+    Args_Add(cli->resolve, noColorKey, NULL, ARG_OPTIONAL);
+    Args_Add(cli->resolve, runKey, NULL, ARG_OPTIONAL);
+    Args_Add(cli->resolve, licenceKey, NULL, ARG_OPTIONAL);
+    Args_Add(cli->resolve, versionKey, NULL, ARG_OPTIONAL);
+    Args_Add(cli->resolve, dirKey, NULL, ARG_MULTIPLE);
+
+    m->owner = cli;
+    CharPtr_ToTbl(m, cli->resolve, argc, argv, cli->args);
+    if(Table_GetHashed(cli->args, helpKey) != NULL){
+        CharPtr_ToHelp(m, cli->name, cli->resolve);
+        return 1;
+    }
+
+    if(Table_GetHashed(cli->args, noColorKey) != NULL){
+        Ansi_SetColor(FALSE);
+    }
+
+    args[0] = cli->args;
+    args[1] = NULL;
+    Out("^p.Args recieved @^0\n", args);
+
+    DebugStack_Pop();
+    return 0;
+}
+
+

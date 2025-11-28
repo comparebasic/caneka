@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static Str **iterLabels = NULL;
 static Str **spanLabels = NULL;

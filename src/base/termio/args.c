@@ -1,9 +1,19 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static boolean argHasFlag(Hashed *h, word flag){
     return ((Abstract *)h->value)->type.of == TYPE_WRAPPED_PTR &&
         (((Abstract *)h->value)->type.state & flag);
+}
+
+status Args_ErrorFunc(MemCh *m, void *_cliArgs, void *_msg){
+    CliArgs *cli = _cliArgs;
+    ErrorMsg *msg = _msg;
+    Fmt(ErrStream, (char *)msg->fmt->bytes, msg->args);
+    Buff_Add(ErrStream, S(m, "\nhelp:\n  "));
+    CharPtr_ToHelp(m, cli->name, cli->resolve);
+    return ERROR;
 }
 
 status Args_Add(Table *resolve, Str *key, void *_value, word flags){
@@ -19,7 +29,7 @@ status Args_Add(Table *resolve, Str *key, void *_value, word flags){
     return SUCCESS;
 }
 
-status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve, int argc, char **argv){
+status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve){
     void *args[] = {
         name,
         NULL
@@ -175,5 +185,25 @@ status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *des
             }
         }
     }
+    return r;
+}
+
+CliArgs *CliArgs_Make(MemCh *m, i32 argc, char *argv[]){
+    CliArgs *args = (CliArgs *)MemCh_AllocOf(m, sizeof(CliArgs), TYPE_CLI_ARGS);
+    args->type.of = TYPE_CLI_ARGS;
+    args->resolve = Table_Make(m);
+    args->args = Table_Make(m);
+    args->argc = argc;
+    if(argv != NULL){
+        args->name = IoUtil_FnameStr(m, IoPath(m, argv[0]));
+    }
+
+    args->argv = argv;
+    return args;
+}
+
+status Args_Init(MemCh *m){
+    status r = READY;
+    Lookup_Add(m, ErrorHandlers, TYPE_CLI_ARGS, (void *)Args_ErrorFunc);
     return r;
 }

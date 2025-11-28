@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 boolean Table_Eq(void *a, void *b){
     Table *tblA = (Table *)a;

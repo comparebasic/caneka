@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static i32 bookIdx = -1;
 static MemBook *_books[16] = {

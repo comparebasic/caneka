@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 Str *ansi_black = NULL;
 Str *ansi_red = NULL;

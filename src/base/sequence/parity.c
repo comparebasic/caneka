@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 boolean HalfParity_Compare(quad par, StrVec *v){
     if((v->total & 7) != (par & 7)){

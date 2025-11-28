@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 static void Buff_addTail(Buff *bf){
     Str *s = Str_Make(bf->m, STR_DEFAULT);

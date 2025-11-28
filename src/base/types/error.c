@@ -1,5 +1,6 @@
 #include <external.h>
 #include <caneka.h>
+#include "../module.h"
 
 Lookup *ErrorHandlers = NULL;
 boolean _crashing = FALSE;
@@ -218,10 +219,12 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
     }else{
         r |= ERROR;
     }
+
     if(r & ERROR){
         Fatal(func, file, line, fmt, args);
         return;
     }
+
     _error = FALSE;
     return;
 }
