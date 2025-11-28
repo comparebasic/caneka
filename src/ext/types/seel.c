@@ -24,7 +24,7 @@ status Seel_SetKv(Span *inst, Str *prop, void *key, void *value){
 
 status Seel_Set(Span *inst, void *key, void *value){
     Table *seel = Lookup_Get(SeelLookup, inst->type.of);
-    void *args[2];
+    void *args[3];
     if(seel == NULL){
         args[0] = Type_ToStr(inst->m, inst->type.of);
         args[1] = NULL;
@@ -35,9 +35,10 @@ status Seel_Set(Span *inst, void *key, void *value){
     Hashed *h = Table_GetHashed(seel, key);
     if(h == NULL){
         args[0] = key;
-        args[1] = NULL;
+        args[1] = seel;
+        args[2] = NULL;
         Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Seel prop not found key: @", args);
+            "Seel prop not found key: @ for @", args);
         return ERROR;
     }
 
@@ -80,7 +81,7 @@ void *Seel_Get(Span *inst, void *key){
 status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx){
     seel->type.state |= TABLE_SEALED;
     Lookup_Add(m, SeelLookup, typeOf, seel);
-    Lookup_Add(m, SeelLookup, typeOf, Table_Ordered(m, seel));
+    Lookup_Add(m, SeelOrdLookup, typeOf, Table_Ordered(m, seel));
     Lookup_Add(m, SeelNameLookup, typeOf, name);
     if(childrenIdx >= 0){
         Lookup_Add(m, SeelChildrenPropLookup, typeOf, I32_Wrapped(m, childrenIdx));

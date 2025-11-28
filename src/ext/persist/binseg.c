@@ -13,16 +13,17 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     m->level++;
     Str *entry = Str_Make(m, sz);
+    entry->length = entry->alloc;
     m->level--;
 
     BinSegHeader *hdr = NULL;
-    i64 *ptr = NULL;
+    word *ptr = NULL;
     if(ctx->type.state & BINSEG_REVERSED){
-        ptr = (i64 *)entry->bytes;
+        ptr = (word *)entry->bytes;
         hdr = (BinSegHeader *)entry->bytes+sizeof(word);
     }else{
         hdr = (BinSegHeader *)entry->bytes;
-        ptr = (i64 *)(entry->bytes+sizeof(BinSegHeader));
+        ptr = (word *)(entry->bytes+sizeof(BinSegHeader));
     }
 
     hdr->total = ord->nvalues;
@@ -162,9 +163,14 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     return r;
 }
 
-static status I64_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
+static status I64_ToBinSeg(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
     MemCh *m = ctx->bf->m;
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
+    Abstract *a = (Abstract *)_a;
+    if(a->type.of <= _TYPE_WRAPPED_START || a->type.of >= _TYPE_WRAPPED_END){
+       return ERROR;
+    }
+
+    Single *sg = (Single *)a;
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_NUMBER, 0);
 
@@ -186,7 +192,7 @@ static status I64_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     hdr->kind = BINSEG_TYPE_NUMBER;
     hdr->ident.id = id;
     hdr->ident.idx = idx;
-    *ptr = sg->val.value;
+    *ptr = Single_ToUtil(sg);
 
     return Buff_Add(ctx->bf, entry);
 }
@@ -224,6 +230,8 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
     DebugStack_Push(ctx, ctx->type.of);
     MemCh *m = ctx->bf->m;
+
+    void *args[] = {BinSegCtx_KindName(hdr->kind), NULL};
     
     Iter it;
     Span *shelf = Span_Get(ctx->shelves, hdr->ident.id);
@@ -268,7 +276,18 @@ static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
         a = (Abstract *)tbl;
     }else if(hdr->kind == BINSEG_TYPE_INST){
         word *wp = (word *)ftr->bytes;
-        a = (Abstract *)Inst_Make(m, *wp);
+        Inst *inst = Inst_Make(m, *wp);
+        if(shelf != NULL){
+            Iter_Init(&it, shelf);
+            Abstract *key = NULL;
+            while((Iter_Next(&it) & END) == 0){
+                Abstract *a = Iter_Get(&it);
+                if(a != NULL){
+                    Span_Set(inst, it.idx, a);
+                }
+            }
+        }
+        a = (Abstract *)inst;
     }
 
     if(hdr->ident.id == 0){
@@ -366,15 +385,20 @@ status BinSegCtx_SendByIdent(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
         return NOOP;
     }
     Abstract *a = (Abstract *)_a;
-    BinSegFunc func = Lookup_Get(BinSegLookup, a->type.of);
-    if(func == NULL){
-        void *args[] = {
-            Type_ToStr(ctx->bf->m, a->type.of),
-            NULL,
-        };
-        Error(ctx->bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to find BinSegFunc for type $", args);
-        return 0;
+    BinSegFunc func = NULL;
+    if(a->type.of & TYPE_INSTANCE){
+        func = Inst_ToBinSeg;
+    }else{
+        func = Lookup_Get(BinSegLookup, a->type.of);
+        if(func == NULL){
+            void *args[] = {
+                Type_ToStr(ctx->bf->m, a->type.of),
+                NULL,
+            };
+            Error(ctx->bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Unable to find BinSegFunc for type $", args);
+            return 0;
+        }
     }
     return func(ctx, a, id, idx);
 }
@@ -402,7 +426,12 @@ status BinSeg_Init(MemCh *m){
         r |= Lookup_Add(m, BinSegLookup, TYPE_TABLE, (void *)Table_ToBinSeg);
         r |= Lookup_Add(m, BinSegLookup, TYPE_STRVEC, (void *)StrVec_ToBinSeg);
         r |= Lookup_Add(m, BinSegLookup, TYPE_INSTANCE, (void *)Inst_ToBinSeg);
+        r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_UTIL, (void *)I64_ToBinSeg);
         r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_I64, (void *)I64_ToBinSeg);
+        r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_U32, (void *)I64_ToBinSeg);
+        r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_I32, (void *)I64_ToBinSeg);
+        r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_WORD, (void *)I64_ToBinSeg);
+        r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_I16, (void *)I64_ToBinSeg);
     }
     return r;
 }

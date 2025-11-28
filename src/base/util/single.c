@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+util Single_ToUtil(Single *sg){
+    util u = 0;
+    if(sg->type.of == TYPE_WRAPPED_I16 || sg->type.of == TYPE_WRAPPED_WORD){
+        u = (util)sg->val.w;
+    }else if(sg->type.of == TYPE_WRAPPED_I32 || sg->type.of == TYPE_WRAPPED_U32){
+        u = (util)sg->val.i;
+    }else if(sg->type.of == TYPE_WRAPPED_I64 || sg->type.of == TYPE_WRAPPED_UTIL){
+        u = (util)sg->val.value;
+    }
+    return u;
+}
+
 Single *Single_Clone(MemCh *m, void *og){
     Single *sg = MemCh_Realloc(m, sizeof(Single), og, sizeof(Single));
     if(sg->type.of == TYPE_WRAPPED_PTR &&

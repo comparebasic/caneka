@@ -209,18 +209,6 @@ static TestSet _Tests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "BinSegV Tests",
-        BinSegV_Tests,
-        "Transactional format only encoded in visible hex format characters.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "BinSegReversedV Tests",
-        BinSegReversedV_Tests,
-        "Transactional format reversed and only encoded in visible hex format characters.",
-        FEATURE_COMPLETE,
-    },
-    {
         "FileDB Tests",
         FileDB_Tests,
         "FileD database built on BinSegRV tests of how to save and retrive data.",

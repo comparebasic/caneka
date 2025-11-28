@@ -18,9 +18,9 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
         args[1] = key;
         args[2] = NULL;
         if(op & SPAN_OP_GET){
-            Out("^p.Get \\@@^0\n", args);
+            Out("^p.Get \\@@ @^0\n", args);
         }else{
-            Out("^p.Set \\@@^0\n", args);
+            Out("^p.Set \\@@ @^0\n", args);
         }
     }
 
@@ -34,7 +34,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
     Table_HKeyInit(&hk, tbl->dims, parity);
     while((tbl->type.state & SUCCESS) == 0){
         Table_HKeyVal(&hk);
-        Iter_GetByIdx(it, hk.idx);
+        Hashed *record = Iter_GetByIdx(it, (i32)hk.idx);
 
         if((it->type.state & NOOP) && (op & SPAN_OP_SET)){
             if(hk.idx > dim_max_idx[tbl->dims]){
@@ -43,7 +43,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                 continue;
             }
         }
-        Hashed *record = Iter_Current(it);
+
         if(record == NULL || record->orderIdx == -1){
             if(op & SPAN_OP_GET){
                 if(Table_HKeyMiss(&hk) & END){
