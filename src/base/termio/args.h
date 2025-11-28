@@ -8,16 +8,18 @@ enum argflags {
 
 typedef struct cli_args {
     Type type;
+    MemCh *m;
     i32 argc;
     char **argv;
     Str *name;
     Table *resolve;
     Table *args;
+    Span *explain;
 } CliArgs;
 
 status CharPtr_ToTbl(MemCh *m, Table *resolve, int argc, char **argv, Table *dest);
 status CharPtr_ToHelp(MemCh *m, Str *name, Table *resolve);
 CliArgs *CliArgs_Make(MemCh *m, i32 argc, char *argv[]);
 
-status Args_Add(Table *resolve, Str *key, void *value, word flags);
+status Args_Add(CliArgs *cli, Str *key, void *value, word flags, StrVec *explain);
 status Args_Init(MemCh *m);

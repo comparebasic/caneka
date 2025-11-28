@@ -500,14 +500,28 @@ i32 main(int argc, char **argv){
     Str *modulesKey = K(m, "module");
     Str *licenceKey = K(m, "licence");
     Str *versionKey = K(m, "version");
-    Str *dirKey = K(m, "dir");
+    Str *srcKey = K(m, "src");
+    Str *typeKey = K(m, "type");
+    Str *outKey = K(m, "out");
 
-    Args_Add(cli->resolve, helpKey, NULL, ARG_OPTIONAL);
-    Args_Add(cli->resolve, noColorKey, NULL, ARG_OPTIONAL);
-    Args_Add(cli->resolve, runKey, NULL, ARG_OPTIONAL);
-    Args_Add(cli->resolve, licenceKey, NULL, ARG_OPTIONAL);
-    Args_Add(cli->resolve, versionKey, NULL, ARG_OPTIONAL);
-    Args_Add(cli->resolve, dirKey, NULL, ARG_MULTIPLE);
+    Args_Add(cli, outKey, NULL, ZERO,
+        Sv(m, "Name of binary (or static library) to build from sources."));
+    Span *types = Span_Make(m);
+    Span_Add(types, S(m, "static"));
+    Span_Add(types, S(m, "exec"));
+    Args_Add(cli, typeKey, types, ARG_CHOICE,
+        Sv(m, "Type of binary asset to create, static builds a static library,"
+        " exec builds and executable."));
+    Args_Add(cli, srcKey, NULL, ARG_MULTIPLE,
+        Sv(m, "Source code files or directories to build."));
+    Args_Add(cli, runKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Run the binary after it is built."));
+    Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, NULL);
+    Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL, NULL);
+    Args_Add(cli, licenceKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Show build program intellectual property licence."));
+    Args_Add(cli, versionKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Show build program version."));
 
     m->owner = cli;
     CharPtr_ToTbl(m, cli->resolve, argc, argv, cli->args);
