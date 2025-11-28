@@ -22,7 +22,7 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
         hdr = (BinSegHeader *)entry->bytes+sizeof(word);
     }else{
         hdr = (BinSegHeader *)entry->bytes;
-        ptr = (i64 *)(entry->bytes+sizeof(BinSegCtx));
+        ptr = (i64 *)(entry->bytes+sizeof(BinSegHeader));
     }
 
     hdr->total = ord->nvalues;
@@ -38,7 +38,7 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     Iter it;
     Iter_Init(&it, inst);
     while((Iter_Next(&it) & END) == 0){
-        r |= BinSegCtx_Send(ctx, Iter_Get(&it), id+1, it.idx);
+        r |= BinSegCtx_SendByIdent(ctx, Iter_Get(&it), id+1, it.idx);
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
@@ -57,6 +57,7 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     m->level++;
     Str *entry = Str_Make(m, sz);
+    entry->length = entry->alloc;
     m->level--;
 
     BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
@@ -72,11 +73,13 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     Iter it;
     Iter_Init(&it, tbl);
+    i32 count = 0;
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
-            r |= BinSegCtx_Send(ctx, h->key, id+1, it.idx*2);
-            r |= BinSegCtx_Send(ctx, h->value, id+1, (it.idx*2)+1);
+            r |= BinSegCtx_SendByIdent(ctx, h->key, id+1, count*2);
+            r |= BinSegCtx_SendByIdent(ctx, h->value, id+1, (count*2)+1);
+            count++;
         }
     };
 
@@ -97,6 +100,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     m->level++;
     Str *entry = Str_Make(m, sz);
+    entry->length = entry->alloc;
     m->level--;
 
     BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
@@ -112,7 +116,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
-        r |= BinSegCtx_Send(ctx, Iter_Get(&it), id+1, it.idx);
+        r |= BinSegCtx_SendByIdent(ctx, Iter_Get(&it), id+1, it.idx);
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
@@ -131,6 +135,7 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     m->level++;
     Str *entry = Str_Make(m, sz);
+    entry->length = entry->alloc;
     m->level--;
 
     BinSegHeader *hdr = (BinSegHeader *)entry->bytes;
@@ -147,7 +152,7 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
-        r |= BinSegCtx_Send(ctx, Iter_Get(&it), id+1, it.idx);
+        r |= BinSegCtx_SendByIdent(ctx, Iter_Get(&it), id+1, it.idx);
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
@@ -174,7 +179,7 @@ static status I64_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
         hdr = (BinSegHeader *)entry->bytes+sizeof(i64);
     }else{
         hdr = (BinSegHeader *)entry->bytes;
-        ptr = (i64 *)(entry->bytes+sizeof(BinSegCtx));
+        ptr = (i64 *)(entry->bytes+sizeof(BinSegHeader));
     }
 
     hdr->total = 0;
@@ -194,6 +199,7 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
     m->level++;
     Str *entry = Str_Make(m, sz);
+    entry->length = entry->alloc;
     m->level--;
 
     BinSegHeader *hdr = NULL;
@@ -203,7 +209,7 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
         hdr = (BinSegHeader *)entry->bytes+s->length;
     }else{
         hdr = (BinSegHeader *)entry->bytes;
-        ptr = (entry->bytes+sizeof(BinSegCtx));
+        ptr = (entry->bytes+sizeof(BinSegHeader));
     }
 
     hdr->total = s->length;
@@ -252,7 +258,7 @@ static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
             Abstract *key = NULL;
             while((Iter_Next(&it) & END) == 0){
                 Abstract *a = Iter_Get(&it);
-                if(it.idx & 1){
+                if((it.idx & 1) == 0){
                     key = a;
                 }else{
                     Table_Set(tbl, key, a);
@@ -291,7 +297,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
     DebugStack_Push(ctx, ctx->type.of);
     void *args[4];
     MemCh *m = ctx->bf->m;
-    ctx->type.state &= ~(SUCCESS|ERROR|NOOP);
+    ctx->type.state &= ~(SUCCESS|ERROR|NOOP|END);
     if(ctx->type.state & BINSEG_REVERSED){
         Buff_PosEnd(ctx->bf);
     }else{
@@ -306,7 +312,8 @@ status BinSegCtx_Load(BinSegCtx *ctx){
         .alloc = sizeof(BinSegHeader),
         .bytes = _hdrBytes
     };
-    while((ctx->type.state & (SUCCESS|ERROR|NOOP)) == 0){
+
+    while(((ctx->bf->type.state|ctx->type.state) & (SUCCESS|ERROR|NOOP|END)) == 0){
         Guard_Incr(m, &guard, BINSEG_SEG_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         hdrS.length = 0;
@@ -333,17 +340,17 @@ status BinSegCtx_Load(BinSegCtx *ctx){
             }
         }
 
-        if(BinSegCtx_buildKind(ctx, hdr, ftr) & END){
-            ctx->type.state |= (SUCCESS|END);
-        }
+        BinSegCtx_buildKind(ctx, hdr, ftr);
     }
+
+    ctx->type.state |= (ctx->bf->type.state & (ERROR|END));
 
     DebugStack_Pop();
     return ctx->type.state;
 }
 
 word BinSegCtx_HeaderSize(word kind, word length){
-    word sz = sizeof(BinSegHeader);
+    word sz = (word)sizeof(BinSegHeader);
     if(kind == BINSEG_TYPE_INST){
         sz += sizeof(word);
     }else if(kind == BINSEG_TYPE_NUMBER){
@@ -354,7 +361,7 @@ word BinSegCtx_HeaderSize(word kind, word length){
     return sz;
 }
 
-status BinSegCtx_Send(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
+status BinSegCtx_SendByIdent(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
     if(_a == NULL){
         return NOOP;
     }
@@ -381,8 +388,9 @@ BinSegCtx *BinSegCtx_Make(Buff *bf, word flags){
     ctx->bf = bf;
     ctx->bf->m++;
     ctx->shelves = Span_Make(m);
+    ctx->records = Span_Make(m);
     ctx->bf->m--;
-    return ZERO;
+    return ctx;
 }
 
 status BinSeg_Init(MemCh *m){

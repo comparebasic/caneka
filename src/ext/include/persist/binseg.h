@@ -45,8 +45,10 @@ typedef struct binseg_hdr {
 extern struct lookup *BinSegLookup;
 
 BinSegCtx *BinSegCtx_Make(Buff *bf, word flags);
-status BinSegCtx_Send(BinSegCtx *ctx, void *a, i16 id, i16 idx);
+status BinSegCtx_SendByIdent(BinSegCtx *ctx, void *_a, i16 id, i16 idx);
 status BinSegCtx_Load(BinSegCtx *ctx);
 word BinSegCtx_HeaderSize(word kind, word length);
+
+#define BinSegCtx_Send(ctx, a) BinSegCtx_SendByIdent((ctx), (a), 0, 0)
 
 status BinSeg_Init(MemCh *m);

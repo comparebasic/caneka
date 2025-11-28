@@ -397,6 +397,11 @@ static status build(BuildCtx *ctx){
             if(libCount == 0){
                 lib = NULL;
             }
+            /*
+             * ToDo: detect any updated lib to only rebuild the binary
+             * If a child library has been updated
+             */
+            ctx->type.state |= PROCESSING;
             buildExec(ctx, ((r & SUCCESS) != 0), dist, libFileName, target);
             target++;
         }
