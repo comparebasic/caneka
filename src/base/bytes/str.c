@@ -131,6 +131,7 @@ Str *Str_Ref(MemCh *m, byte *bytes, word length, word alloc, word flags){
         byte *_bytes = Bytes_Alloc(m, alloc, TYPE_BYTES_POINTER);
         memcpy(_bytes, s->bytes, s->length);
         s->bytes = _bytes;
+        s->type.state &= ~STRING_COPY;
     }
     return s;
 }

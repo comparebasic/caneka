@@ -4,12 +4,78 @@
 
 static boolean _quiet = FALSE;
 
-static Span *parseDependencies(BuildCtx *ctx, StrVec *path){
+static status parseDependencies(BuildCtx *ctx, StrVec *path){
     void *args[5];
+    MemCh *m = ctx->m;
+    i32 idx = StrVec_AddVecAfter(   
+        ctx->current.source,
+        path,
+        ctx->input.srcPrefix->p->nvalues);
+
+    StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
+
+    Str *pathS = StrVec_Str(m, path);
+    if(Dir_Exists(m, pathS) & SUCCESS){
+        DirSelector *self = DirSelector_Make(m,
+            Str(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL);
+        Dir_Gather(m, pathS, sel);
+        Table_Set(ctx->input.dependencies, path, sel->dest);
+    }else{
+        args[0] = path;
+        args[1] = ctx;
+        args[2] = NULL;
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Dependency not found @ for @", args);
+        return ERROR;
+    }
+
+    StrVec_Add(ctx->current.source, K(m, "dependencies.txt"));
+
+    args[0] = ctx->current.source;
+    args[1] = path;
+    args[2] = NULL;
+    Out("^c.Gathering @ from @^0\n", args);
+
+    Buff *bf = Buff_Make(m, ZERO|BUFF_SLURP);
+    bf->type.state |= NOOP;
+    File_Open(bf, StrVec_Str(m, ctx->current.source), O_RDONLY);
+    if(bf->type.state & ERROR){
+       return NOOP; 
+    }
+    Buff_Read(bf);
+    File_Close(bf);
+
+    StrVec_PopTo(ctx->current.source, idx);
+
+    Str *shelf = Str_Make(m, STR_DEFAULT);
+    Cursor *curs = Cursor_Make(m, bf->v);
+    while((Cursor_NextByte(curs) & END) == 0){
+        if(*curs->ptr == '\n'){
+            StrVec *v = StrVec_From(m, shelf);
+            IoUtil_Annotate(ctx->m, v);
+
+            path = StrVec_Copy(m, ctx->input.srcPrefix);
+            StrVec_Add(path, IoUtil_PathSep(m));
+            StrVec_Add(path, shelf);
+
+            args[0] = ctx->current.source;
+            args[1] = NULL;
+            Out("^c.About to find sub-dep @^0\n", args);
+
+            parseDependencies(ctx, path);
+            shelf = Str_Make(m, STR_DEFAULT);
+        }else{
+            Str_Add(shelf, curs->ptr, 1);
+        }
+    }
+
     args[0] = path;
-    args[1] = NULL;
-    Out("^c.Gather Dependencies For @^0\n", args);
-    return NULL;
+    args[1] = ctx->input.dependencies;
+    args[2] = ctx->current.source;
+    args[3] = NULL;
+
+    Out("^c.Gathered Dependencies For @\n^y@^c.source:@^0\n", args);
+    return ZERO;
 }
 
 static status buildExec(BuildCtx *ctx,
@@ -507,6 +573,7 @@ BuildCtx *BuildCtx_Make(MemCh *m){
     ctx->input.sources = Span_Make(m);
     ctx->input.objects = Span_Make(m);
     ctx->input.gens = Span_Make(m);
+    ctx->input.dependencies = Table_Make(m);
 
     ctx->tools.cc = S(m, _gen_CC);
     ctx->tools.ccVersion = Str_FromI64(m, (i64)_gen_CC_VERSION);
@@ -535,6 +602,7 @@ i32 main(int argc, char **argv){
 
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
+    Str *quietKey = K(m, "quiet");
     Str *runKey = K(m, "run");
     Str *modulesKey = K(m, "module");
     Str *licenceKey = K(m, "licence");
@@ -559,6 +627,8 @@ i32 main(int argc, char **argv){
     Args_Add(cli, typeKey, types, ARG_CHOICE|ARG_DEFAULT,
         Sv(m, "Type of binary asset to create, static builds a static library,"
         " exec builds and executable."));
+    Args_Add(cli, quietKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Output a list of compiled targets instead of the progress bar."));
     Args_Add(cli, runKey, NULL, ARG_OPTIONAL,
         Sv(m, "Run the binary after it is built."));
     Args_Add(cli, licenceKey, NULL, ARG_OPTIONAL,
@@ -568,12 +638,24 @@ i32 main(int argc, char **argv){
 
     CliArgs_Parse(cli);
 
+    if(CliArgs_Get(cli, quietKey)){
+        _quiet = TRUE;
+    }
+
     Iter it;
     BuildCtx *ctx = BuildCtx_Make(m);
-    ctx->input.srcPrefix = CliArgs_GetAbsPath(cli, srcPrefixKey);
-    Iter_Init(&it, CliArgs_Get(cli, srcKey));
+
+    StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
+    IoUtil_Annotate(m, prefix);
+    ctx->input.srcPrefix = prefix;
+    ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
+    ctx->input.sources = CliArgs_Get(cli, srcKey);
+
+    Iter_Init(&it, ctx->input.sources);
     while((Iter_Next(&it) & END) == 0){
-        parseDependencies(ctx, StrVec_From(m, Iter_Get(&it)));
+        StrVec *v = StrVec_From(m, Iter_Get(&it));
+        IoUtil_Annotate(m, v);
+        parseDependencies(ctx, v);
     }
 
     args[0] = cli->args;

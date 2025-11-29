@@ -247,11 +247,25 @@ status CliArgs_Parse(CliArgs *cli){
 }
 
 void *CliArgs_Get(CliArgs *cli, void *key){
-    return Table_Get(cli->args, key);
+    Hashed *h = Table_GetHashed(cli->args, key);
+    void *args[] = {
+        h, NULL
+    };
+    Out("^g.@^0\n", args);
+    if(h != NULL){
+        if(h->value == NULL){
+            return I64_Wrapped(cli->m, 1);
+        }else{
+            return h->value;
+        }
+    }
+    return NULL;
 }
 
 StrVec *CliArgs_GetAbsPath(CliArgs *cli, void *key){
-    return IoUtil_AbsVec(cli->m, StrVec_From(cli->m, CliArgs_Get(cli, key)));
+    Str *path = (Str *)as(CliArgs_Get(cli, key), TYPE_STR);
+    printf("path %s\n", path->bytes);
+    return IoUtil_AbsVec(cli->m, StrVec_From(cli->m, path));
 }
 
 CliArgs *CliArgs_Make(i32 argc, char *argv[]){

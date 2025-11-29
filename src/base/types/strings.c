@@ -76,6 +76,7 @@ static char *baseTypeStrings[] = {
     "TYPE_HKEY",
     "TYPE_PROCDETS",
     "TYPE_DAEMON",
+    "TYPE_DIR_SELECTOR",
     "TYPE_ACCESS",
     "TYPE_DEBUG_STACK",
     "TYPE_DEBUG_STACK_ENTRY",

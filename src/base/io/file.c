@@ -36,8 +36,10 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
             bf->type.state |= ERROR;
             return bf->type.state;
         }else if(ri == -1 && (ioFlags & O_RDONLY)){
-            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-                "File not found for @ @", args);
+            if((bf->type.state & NOOP) == 0){
+                Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                    "File not found for @ @", args);
+            }
             bf->type.state |= ERROR;
             return bf->type.state;
         }
@@ -49,11 +51,14 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
         fd = open(cstr, ioFlags);
     }
     if(fd <= 0){
-        args[0] = fpath;
-        args[1] = Str_CstrRef(bf->m, strerror(errno));
-        args[2] = NULL;
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error opening file @: $", args);
+        if((bf->type.state & NOOP) == 0){
+            args[0] = fpath;
+            args[1] = Str_CstrRef(bf->m, strerror(errno));
+            args[2] = NULL;
+            Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error opening file @: $", args);
+        }
+        bf->type.state |= ERROR;
         return ERROR;
     }
     return Buff_SetFd(bf, fd);

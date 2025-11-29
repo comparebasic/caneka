@@ -63,6 +63,7 @@ typedef struct buildctx {
         Span *objects;
         Span *gens;
         StrVec *srcPrefix;
+        Table *dependencies;
     } input;
     struct {
         Str *cc;

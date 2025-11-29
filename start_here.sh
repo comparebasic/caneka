@@ -48,7 +48,7 @@ echo "Building Caneka Builder $cmd"
 eval $cmd
 
 if [ ! -z "$runCmd" ]; then
-    cmd="./build/bin/cnkbuild --src src/programs/test"
+    cmd="./build/bin/cnkbuild --quiet --src src/programs/test/"
     echo "Running Builder $cmd";
     eval $cmd
 fi

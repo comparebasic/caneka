@@ -4,6 +4,10 @@
 
 static Span *pathSeps = NULL;
 
+Str *IoUtil_PathSep(MemCh *m){
+    return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
+}
+
 Span *IoUtil_AbsCmdArr(MemCh *m, StrVec *v){
     Span *p = Span_Make(m);
 

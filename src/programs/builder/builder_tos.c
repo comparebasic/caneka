@@ -24,6 +24,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->input.objects,
             ctx->input.gens,
             ctx->input.srcPrefix,
+            Table_Ordered(bf->m, ctx->input.dependencies),
             NULL
         };
         return Fmt(bf, "BuildCtx<@\n"
@@ -31,6 +32,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             "  tools: cc:$/$ ar:$\n"
             "  target: @ name:@ source:@ dest:@\n"
             "  input: inc:@ cflags:@ libs:@ sources:@ objects:@ gens:@, srcPrefix:@\n"
+            "    dependencies: @\n"
             ">", args);
     }else{
         void *args[] = {

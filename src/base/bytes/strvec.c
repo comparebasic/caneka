@@ -320,7 +320,8 @@ status StrVec_Add(StrVec *v, Str *s){
     return r;
 }
 
-status StrVec_AddVec(StrVec *v, StrVec *v2){
+i32 StrVec_AddVec(StrVec *v, StrVec *v2){
+    i32 idx = v->p->max_idx;
     Iter it;
     Iter_Init(&it, v2->p);
     while((Iter_Next(&it) & END) == 0){
@@ -329,7 +330,22 @@ status StrVec_AddVec(StrVec *v, StrVec *v2){
             StrVec_Add(v, s);
         }
     }
-    return SUCCESS;
+    return idx;
+}
+
+i32 StrVec_AddVecAfter(StrVec *v, StrVec *v2, i32 idx){
+    i32 start = v->p->max_idx;
+    Iter it;
+    Iter_Init(&it, v2->p);
+    while((Iter_Next(&it) & END) == 0){
+        if(it.idx >= idx){
+            Str *s = (Str *)it.value;
+            if(s != NULL){
+                StrVec_Add(v, s);
+            }
+        }
+    }
+    return start;
 }
 
 status StrVec_Pop(StrVec *v){
@@ -341,6 +357,20 @@ status StrVec_Pop(StrVec *v){
     Str *s =  Iter_GetByIdx(&it, it.p->max_idx);
     Iter_Remove(&it);
     v->total -= s->length;
+    return SUCCESS;
+}
+
+status StrVec_PopTo(StrVec *v, i32 idx){
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = Iter_Get(&it); 
+        if(it.idx <= idx){
+            break;
+        }
+        v->total -= s->length;
+        Iter_Remove(&it);
+    }
     return SUCCESS;
 }
 

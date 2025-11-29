@@ -29,7 +29,13 @@ static status rmFile(MemCh *m, Str *path, Str *file, void *source){
     return unlink(rmPath) == 0 ? SUCCESS : ERROR;
 }
 
-static status gatherDir(MemCh *m, Str *path, void *source){
+static status gatherDir(MemCh *m, Str *path, void *_source){
+    Abstract *source = (Abstract *)_source;
+    Span *p = NULL;
+    DirSelector *sel = NULL;
+    if(source->type.of == TYPE_DIR_SELECTOR){
+        
+    }
     Span *p = (Span *)asIfc(source, TYPE_SPAN);
     StrVec *v = StrVec_From(m, path);
     v->type.state |= MORE;
@@ -116,6 +122,17 @@ status Dir_Mk(MemCh *m, Str *path){
     }else{
         return ERROR;
     }
+}
+
+DirSelector *DirSelector_Make(MemCh *m, Str *ext, Span *dest, word flags){
+    DirSelector *sel = MemCh_AllocOf(m, sizeof(DirSelector), TYPE);
+    sel->type.of = TYPE_DIR_SELECTOR;
+    if(dest == NULL){
+        dest = Span_Make(m);
+    }
+    sel->ext = ext;
+    sel->dest = dest;
+    return sel;
 }
 
 status Dir_CheckCreate(MemCh *m, Str *path){
