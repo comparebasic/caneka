@@ -7,8 +7,9 @@
 #include <nacl/randombytes.h>
 #include <nacl/crypto_verify_32.h>
 
-#include <cnk_nacl_crypto.h>
 #include <external.h>
+#include "module.h" 
+#include "../crypto/module.h" 
 
 #include "ge25519.h"
 

@@ -313,11 +313,12 @@ void *StrVec_Clone(MemCh *m, void *a){
     return new;
 }
 
-status StrVec_Add(StrVec *v, Str *s){
+i32 StrVec_Add(StrVec *v, Str *s){
+    i32 anchor = v->p->max_idx;
     s = (Str *)as(s, TYPE_STR);
     status r = Span_Add(v->p, s);
     v->total += s->length;
-    return r;
+    return anchor;
 }
 
 i32 StrVec_AddVec(StrVec *v, StrVec *v2){

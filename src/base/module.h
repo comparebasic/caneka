@@ -1,6 +1,8 @@
 #ifndef BASE_MODULE_H
 #define BASE_MODULE_H
 
+#include "config.h"
+
 #include "types/types.h"
 #include "mem/mem.h"
 #include "bytes/bytes.h"

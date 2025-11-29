@@ -11,7 +11,7 @@ typedef struct dir_selector {
     Type type;
     Str *ext;
     Span *dest;
-    Span *exclude;
+    Span *meta; /* Table */
     struct timespec tm;
 } DirSelector;
 

@@ -35,19 +35,19 @@ status DirSelector_Print(Buff *bf, void *a, cls type, word flags){
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
             MicroTime_ToStr(bf->m, modified),
             sel->dest,
-            sel->exclude,
+            sel->meta,
             NULL
         };
-        return Fmt(bf, "DirSel<@ @ @ exclude:@>", args);
+        return Fmt(bf, "DirSel<@ @ @ meta:@>", args);
     }else{
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
             MicroTime_ToStr(bf->m, modified),
             I32_Wrapped(bf->m, sel->dest->nvalues),
-            sel->exclude,
+            sel->meta,
             NULL
         };
-        return Fmt(bf, "DirSel<@ @ ^D.$^d.files exclude:@>", args);
+        return Fmt(bf, "DirSel<@ @ ^D.$^d.files meta:@>", args);
     }
 }
 

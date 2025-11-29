@@ -4,9 +4,10 @@
 
 static boolean _quiet = FALSE;
 
-static status parseDependencies(BuildCtx *ctx, StrVec *path){
+static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     void *args[5];
     MemCh *m = ctx->m;
+
     i32 idx = StrVec_AddVecAfter(   
         ctx->current.source,
         path,
@@ -20,7 +21,20 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
         sel = DirSelector_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
         Dir_GatherSel(m, pathS, sel);
-        Table_Set(ctx->input.dependencies, path, sel);
+        StrVec *name = StrVec_Make(m);
+        StrVec_AddVecAfter(name, path, ctx->input.srcPrefix->p->nvalues+1);
+        Table_Set(ctx->input.dependencies, name, sel);
+        ctx->input.totalSources->val.value += sel->dest->nvalues;
+        if(!Equals(key, path)){
+            Span *p = NULL;
+            Str *meta = S(m, "choice");
+            if((p = Table_Get(sel->meta, meta)) == NULL){
+                p = Span_Make(m);
+                Table_Set(sel->meta, meta, p);
+            }
+            key->type.state |= BUILD_CHOICE;
+            Span_Add(p, name);
+        }
     }else{
         args[0] = path;
         args[1] = ctx;
@@ -46,31 +60,57 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
     Str *shelf = Str_Make(m, STR_DEFAULT);
     Cursor *curs = Cursor_Make(m, bf->v);
     Str *label = NULL;
+    Str *name = NULL;
     while((Cursor_NextByte(curs) & END) == 0){
         if(*curs->ptr == '\n'){
-            if(label != NULL && label->length > 0){
-                if(Equals(label, K(m, "exec"))){
-                    shelf->type.state |= BUILD_EXEC; 
-                }else if(Equals(label, K(m, "static"))){
-                    shelf->type.state |= BUILD_STATIC; 
-                }else if(Equals(label, K(m, "link"))){
-                    shelf->type.state |= BUILD_LINK; 
-                }else if(Equals(label, K(m, "skip"))){
-                    shelf->type.state |= BUILD_SKIP; 
+            if(label != NULL && label->length > 0 ||
+                    name != NULL && name->length > 0){
+                if(Equals(label, K(m, "choice"))){
+                    if(name != NULL && name->length > 0){
+                        key = StrVec_From(m, Str_Clone(m, name));
+                    }
+                }else{
+                    Str *meta = label;
+                    if(Equals(label, K(m, "exec"))){
+                        meta->type.state |= BUILD_EXEC; 
+                    }else if(Equals(label, K(m, "static"))){
+                        meta->type.state |= BUILD_STATIC; 
+                    }else if(Equals(label, K(m, "link"))){
+                        meta->type.state |= BUILD_LINK; 
+                    }else if(Equals(label, K(m, "skip"))){
+                        meta->type.state |= BUILD_SKIP; 
+                    }else if(Equals(label, K(m, "include"))){
+                        meta->type.state |= BUILD_INCLUDE; 
+                    }
+                    Span *p = NULL;
+                    if((p = Table_Get(sel->meta, meta)) == NULL){
+                        p = Span_Make(m);
+                        Table_Set(sel->meta, meta, p);
+                    }
+                    Span_Add(p, StrVec_From(m, shelf));
+                    label = NULL;
+                    name = NULL;
+                    shelf = Str_Make(m, STR_DEFAULT);
+                    continue;
                 }
-                Span_Add(sel->exclude, shelf);
-                label = NULL;
-                shelf = Str_Make(m, STR_DEFAULT);
-                continue;
+            }else{
+                key = NULL;
             }
-            StrVec *v = StrVec_From(m, shelf);
-            IoUtil_Annotate(ctx->m, v);
 
             path = StrVec_Copy(m, ctx->input.srcPrefix);
             StrVec_Add(path, IoUtil_PathSep(m));
             StrVec_Add(path, shelf);
+            IoUtil_Annotate(ctx->m, path);
+            if(key == NULL){
+                key = path;
+            }
 
-            parseDependencies(ctx, path);
+            parseDependencies(ctx, key, path);
+            label = NULL;
+            name = NULL;
+            shelf = Str_Make(m, STR_DEFAULT);
+        }else if(*curs->ptr == '@'){
+            name = shelf;
             shelf = Str_Make(m, STR_DEFAULT);
         }else if(*curs->ptr == '='){
             label = shelf;
@@ -80,6 +120,54 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
         }
     }
 
+    return ZERO;
+}
+
+static status genInclude(BuildCtx *ctx){
+    void *args[5];
+    MemCh *m = ctx->m;
+
+    i32 anchor = StrVec_Add(ctx->current.dest, IoUtil_PathSep(m));
+    StrVec_Add(ctx->current.dest, S(m, "include"));
+    StrVec_Add(ctx->current.dest, IoUtil_PathSep(m));
+    Dir_CheckCreate(m, StrVec_Str(m, ctx->current.dest));
+    StrVec_Add(ctx->current.dest, S(m, "caneka.h"));
+
+    Str *fname = StrVec_Str(m, ctx->current.dest);
+    StrVec *absSrc = IoUtil_AbsVec(m, ctx->input.srcPrefix);
+    Buff *bf = Buff_Make(m, BUFF_CLOBBER|BUFF_UNBUFFERED);
+    File_Open(bf, fname, O_CREAT|O_WRONLY);
+
+    i32 srcAnchor = StrVec_Add(absSrc, IoUtil_PathSep(m));
+    StrVec_Add(absSrc, S(m, "external.h"));
+    args[0] = absSrc;
+    args[1] = NULL;
+    Fmt(bf, "/* This file generated by cnkbuild */\n\n#include \"$\"\n", args);
+    StrVec_PopTo(absSrc, srcAnchor);
+
+    Iter it;
+    Iter_Init(&it, ctx->input.dependencies);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            args[0] = h->key; 
+            args[1] = ctx->current.dest;
+            Out("^p.Building include @ -> @^0", args);
+
+            i32 srcAnchor = StrVec_Add(absSrc, IoUtil_PathSep(m));
+            StrVec_AddVec(absSrc, h->key);
+            StrVec_Add(absSrc, IoUtil_PathSep(m));
+            StrVec_Add(absSrc, S(m, "module.h"));
+            args[0] = h->key;
+            args[1] = absSrc;
+            args[2] = NULL;
+            Fmt(bf, "\n/* module $ */\n#include \"$\"\n", args);
+            StrVec_PopTo(absSrc, srcAnchor);
+        }
+    }
+
+    File_Close(bf);
+    StrVec_PopTo(ctx->current.dest, anchor);
     return ZERO;
 }
 
@@ -501,44 +589,45 @@ static status build(BuildCtx *ctx){
 
 
 status LogOut(BuildCtx *ctx){
-    /*
     if(_quiet){
         void *args[3];
-        args[0] = ctx->fields.steps.count,
-        args[1] = ctx->fields.steps.total,
+        args[0] = ctx->input.totalSources,
+        args[1] = ctx->input.countSources,
         args[2] = NULL;
 
         if(ctx->type.state & SUCCESS){
-            args[0] = ctx->fields.current[BUILIDER_CLI_LIBFILENAME];
+            args[0] = ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME];
             args[1] = NULL;
             Out("Static Library Complete $\n", args);
         }else if(ctx->type.state & ERROR){
-            args[0] = ctx->fields.current[BUILIDER_CLI_LIBFILENAME];
-            args[1] = NULL;
+            args[0] = ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME];
             args[1] = NULL;
             Out("Error Building Static Library $\n", args);
         }else{
             if(ctx->type.state & NOOP){
                 Out("Linking $ of $ ", args);
-                void *_args[] = {ctx->fields.current[0], ctx->fields.current[2], NULL};
+                void *_args[] = {
+                    ctx->cli.fields.current[0],
+                    ctx->cli.fields.current[2],
+                    NULL
+                };
                 Out("for $ $ $\n", _args);
             }else{
                 Out("Building $ of $ ", args);
-                Out("for $ $ $ -> $\n", ctx->fields.current);
+                Out("for $ $ $ -> $\n", ctx->cli.fields.current);
             }
         }
     }else{
         if(ctx->type.state & SUCCESS){
             BuildCli_SetupComplete(ctx);
-            CliStatus_Print(OutStream, ctx->cli);
-            CliStatus_PrintFinish(OutStream, ctx->cli);
+            CliStatus_Print(OutStream, ctx->cli.cli);
+            CliStatus_PrintFinish(OutStream, ctx->cli.cli);
         }else if(ctx->type.state & ERROR){
-            CliStatus_PrintFinish(OutStream, ctx->cli);
+            CliStatus_PrintFinish(OutStream, ctx->cli.cli);
         }else{
-            CliStatus_Print(OutStream, ctx->cli);
+            CliStatus_Print(OutStream, ctx->cli.cli);
         }
     }
-    */
     return ZERO;
 }
 
@@ -652,16 +741,23 @@ i32 main(int argc, char **argv){
 
     StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
     IoUtil_Annotate(m, prefix);
-    ctx->input.srcPrefix = prefix;
+    ctx->current.dest = CliArgs_GetAbsPath(cli, dirKey);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->input.sources = CliArgs_Get(cli, srcKey);
+    ctx->input.srcPrefix = prefix;
+    ctx->input.totalSources = I64_Wrapped(m, 0);
+    ctx->input.countSources = I64_Wrapped(m, 0);
 
     Iter_Init(&it, ctx->input.sources);
     while((Iter_Next(&it) & END) == 0){
         StrVec *v = StrVec_From(m, Iter_Get(&it));
         IoUtil_Annotate(m, v);
-        parseDependencies(ctx, v);
+        StrVec *key = StrVec_Make(m);
+        StrVec_AddVecAfter(key, v, ctx->input.srcPrefix->p->nvalues+1);
+        parseDependencies(ctx, key, v);
     }
+
+    genInclude(ctx);
 
     args[0] = cli->args;
     args[1] = ctx;
@@ -673,5 +769,3 @@ i32 main(int argc, char **argv){
     DebugStack_Pop();
     return 0;
 }
-
-

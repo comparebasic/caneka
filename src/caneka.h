@@ -1,7 +1,6 @@
 #ifndef __CNK_HEADER
 #define __CNK_HEADER
 
-#include "config.h"
 #include "base/module.h"
 #ifdef CNK_EXT
     #include <ext/module.h>

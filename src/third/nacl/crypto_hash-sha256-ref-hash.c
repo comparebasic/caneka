@@ -11,7 +11,8 @@ These modifications are also public domain.
 
 #include <nacl/crypto_hashblocks_sha256.h>
 #include <nacl/crypto_hash.h>
-#include <cnk_nacl_crypto.h>
+#include "module.h"
+#include "../crypto/module.h"
 
 #define blocks crypto_hashblocks_sha256
 

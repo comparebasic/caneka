@@ -1,6 +1,8 @@
 #ifndef BUILDER_H
 #define BUILDER_H
 
+#include "../../base/module.h"
+
 #define BUILDER_READ_SIZE 512
 
 #if defined(__clang__)
@@ -19,11 +21,20 @@
 
 #define _gen_AR "ar"
 
+enum cli_name_idx {
+    BUILIDER_CLI_LIBFILENAME = 0,
+    BUILIDER_CLI_ACTION,
+    BUILIDER_CLI_SOURCE,
+    BUILIDER_CLI_DEST,
+};
+
 enum build_types {
     BUILD_EXEC = 1 << 8,
     BUILD_STATIC = 1 << 9,
     BUILD_LINK = 1 << 10,
     BUILD_SKIP = 1 << 11,
+    BUILD_CHOICE = 1 << 12,
+    BUILD_INCLUDE = 1 << 13,
 };
 
 typedef struct executable {
@@ -71,6 +82,8 @@ typedef struct buildctx {
         Span *gens;
         StrVec *srcPrefix;
         Table *dependencies;
+        Single *totalSources;
+        Single *countSources;
     } input;
     struct {
         Str *cc;

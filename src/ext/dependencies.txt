@@ -1,2 +1,2 @@
-third/nacl
+choice=crypto@third/nacl
 base
