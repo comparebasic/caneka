@@ -1,10 +1,10 @@
 #!/bin/sh
 
 CC="clang"
-cmd="mkdir -p ./build && mkdir -p ./build/libcaneka && $CC -I ./src -c -o ./build/libcaneka/libcaneka.a ./src/base/inc.c"
+cmd="mkdir -p ./build && mkdir -p ./build/libcnkbase && $CC -I ./src -c -o ./build/libcnkbase/libcnkbase.a ./src/base/inc.c"
 echo "Building Caneka Base: $cmd";
 eval $cmd
-cmd="mkdir -p ./build/bin && clang -I ./src -o ./build/bin/cnkbuild ./src/builder/inc.c ./build/libcaneka/libcaneka.a -lm"
+cmd="mkdir -p ./build/bin && clang -I ./src -o ./build/bin/cnkbuild ./src/programs/builder/inc.c ./build/libcnkbase/libcnkbase.a -lm"
 echo "Building Caneka Builder $cmd";
 eval $cmd
 cmd="./build/bin/cnkbuild"

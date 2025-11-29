@@ -503,20 +503,23 @@ i32 main(int argc, char **argv){
     Str *srcKey = K(m, "src");
     Str *typeKey = K(m, "type");
     Str *outKey = K(m, "out");
+    Str *srcPrefixKey = K(m, "src-prefix");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, Sv(m, "Show this help message."));
     Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
-        Sv(m, "Skip ansi color sequences in outpu."));
+        Sv(m, "Skip ansi color sequences in output."));
+    Args_Add(cli, srcKey, NULL, ARG_MULTIPLE,
+        Sv(m, "Source code files or directories to build."));
+    Args_Add(cli, srcPrefixKey, S(m, "src"), ARG_DEFAULT,
+        Sv(m, "Source code files prefix. The path before the module names."));
     Args_Add(cli, outKey, NULL, ZERO,
         Sv(m, "Name of binary (or static library) to build from sources."));
     Span *types = Span_Make(m);
-    Span_Add(types, S(m, "static"));
     Span_Add(types, S(m, "exec"));
-    Args_Add(cli, typeKey, types, ARG_CHOICE,
+    Span_Add(types, S(m, "static"));
+    Args_Add(cli, typeKey, types, ARG_CHOICE|ARG_DEFAULT,
         Sv(m, "Type of binary asset to create, static builds a static library,"
         " exec builds and executable."));
-    Args_Add(cli, srcKey, NULL, ARG_MULTIPLE,
-        Sv(m, "Source code files or directories to build."));
     Args_Add(cli, runKey, NULL, ARG_OPTIONAL,
         Sv(m, "Run the binary after it is built."));
     Args_Add(cli, licenceKey, NULL, ARG_OPTIONAL,

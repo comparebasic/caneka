@@ -3,8 +3,8 @@
 #include "../module.h"
 
 static boolean argHasFlag(Hashed *h, word flag){
-    return ((Abstract *)h->value)->type.of == TYPE_WRAPPED_PTR &&
-        (((Abstract *)h->value)->type.state & flag);
+    Abstract *value = h->value;
+    return h->value != NULL && (value->type.state & flag);
 }
 
 static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Table *dest){
@@ -130,9 +130,11 @@ status Args_Add(CliArgs *cli, Str *key, void *_value, word flags, StrVec *explai
     Abstract *value = (Abstract *)_value;
     if(value == NULL){
         value = (Abstract *)Ptr_Wrapped(cli->m, NULL, ZERO);
-    }
-    if(flags & ARG_CHOICE){
-        value = (Abstract *)Ptr_Wrapped(cli->m, as(value, TYPE_SPAN), TYPE_SPAN); 
+    }else{
+        if(flags & ARG_CHOICE){
+            as(value, TYPE_SPAN); 
+        }
+        value = (Abstract *)Ptr_Wrapped(cli->m, value, value->type.of); 
     }
     value->type.state |= flags;
     Hashed *h = Table_SetHashed(cli->resolve, key, value);
@@ -168,9 +170,9 @@ status CharPtr_ToHelp(CliArgs *cli){
 
             if(argHasFlag(h, ARG_OPTIONAL)){
                 if(argHasFlag(h, ARG_MULTIPLE)){
-                    Out(" [^y.--$^0. ...]\n $\n", args);
+                    Out(" [ ^y.--$^0. ... ]\n $\n", args);
                 }else{
-                    Out(" [^y.--$^0.]\n $\n", args);
+                    Out(" [ ^y.--$^0. ]\n $\n", args);
                 }
             }else if(argHasFlag(h, ARG_CHOICE)){
                 if(argHasFlag(h, ARG_DEFAULT)){
@@ -182,7 +184,7 @@ status CharPtr_ToHelp(CliArgs *cli){
                         Span_Get(cli->explain, h->orderIdx),
                         NULL
                     };
-                    Out("^y. --$^0.(@=$)\n $\n", args);
+                    Out(" [^y. --$^0.(@=@) ]\n $\n", args);
                 }else{
                     void *args[] = {
                         h->key,
@@ -199,7 +201,7 @@ status CharPtr_ToHelp(CliArgs *cli){
                     Span_Get(cli->explain, h->orderIdx),
                     NULL
                 };
-                Out(" ^y.--$^0.(=$)\n $\n", args);
+                Out(" [ ^y.--$^0.(=@) ]\n $\n", args);
             }else{
                 if(argHasFlag(h, ARG_MULTIPLE)){
                     Out(" ^y.--$^0. ...\n $\n", args);
