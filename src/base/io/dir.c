@@ -193,6 +193,7 @@ DirSelector *DirSelector_Make(MemCh *m, Str *ext, Span *dest, word flags){
     if(dest == NULL){
         dest = Span_Make(m);
     }
+    sel->exclude = Span_Make(m);
     sel->ext = ext;
     sel->dest = dest;
     return sel;

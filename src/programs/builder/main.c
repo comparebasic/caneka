@@ -15,8 +15,9 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
     StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
 
     Str *pathS = StrVec_Str(m, path);
+    DirSelector *sel = NULL;
     if(Dir_Exists(m, pathS) & SUCCESS){
-        DirSelector *sel = DirSelector_Make(m,
+        sel = DirSelector_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
         Dir_GatherSel(m, pathS, sel);
         Table_Set(ctx->input.dependencies, path, sel);
@@ -44,8 +45,26 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
 
     Str *shelf = Str_Make(m, STR_DEFAULT);
     Cursor *curs = Cursor_Make(m, bf->v);
+    Str *label = NULL;
     while((Cursor_NextByte(curs) & END) == 0){
         if(*curs->ptr == '\n'){
+            if(label != NULL && label->length > 0){
+                args[0] = label;
+                args[1] = shelf;
+                args[2] = NULL;
+                Out("^c.Found labeled source $=$^... ignoring\n", args);
+                label = NULL;
+                shelf = Str_Make(m, STR_DEFAULT);
+                if(Equals(label, K(m, "exec"))){
+                    shelf->type.state |= BUILD_EXEC; 
+                }else if(Equals(label, K(m, "static"))){
+                    shelf->type.state |= BUILD_STATIC; 
+                }else if(Equals(label, K(m, "link"))){
+                    shelf->type.state |= BUILD_LINK; 
+                }
+                Span_Add(sel->exclude, shelf);
+                continue;
+            }
             StrVec *v = StrVec_From(m, shelf);
             IoUtil_Annotate(ctx->m, v);
 
@@ -54,6 +73,9 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
             StrVec_Add(path, shelf);
 
             parseDependencies(ctx, path);
+            shelf = Str_Make(m, STR_DEFAULT);
+        }else if(*curs->ptr == '='){
+            label = shelf;
             shelf = Str_Make(m, STR_DEFAULT);
         }else{
             Str_Add(shelf, curs->ptr, 1);

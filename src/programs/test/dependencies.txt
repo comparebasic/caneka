@@ -1,1 +1,3 @@
+exec=main.c
+exec=content-fetch.c
 inter

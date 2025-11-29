@@ -19,6 +19,12 @@
 
 #define _gen_AR "ar"
 
+enum build_types {
+    BUILD_EXEC = 1 << 8,
+    BUILD_STATIC = 1 << 9,
+    BUILD_LINK = 1 << 10,
+};
+
 typedef struct executable {
     char *bin;
     char *src;
