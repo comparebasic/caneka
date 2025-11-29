@@ -8,6 +8,31 @@ Str *IoUtil_PathSep(MemCh *m){
     return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
 }
 
+StrVec *IoUtil_SwapExt(MemCh *m, StrVec *v, Str *old, Str *new){
+    if(v->total >= old->length || old->length != new->length){
+        StrVec *copy = StrVec_Copy(m, v);
+        i32 max_idx = copy->p->max_idx;
+        word remaining = old->length;
+        while(remaining > 0 && max_idx >= 0){
+            Str *s = Span_Get(copy->p, max_idx);
+            if(s->length >= remaining){
+                Str_Decr(s, old->length);
+                Str_Add(s, new->bytes, new->length);
+                copy->total -= old->length;
+                remaining = 0;
+            }else{
+                word offset = old->length - s->length;
+                memcpy(s->bytes, new->bytes+offset, s->length);
+                remaining -= s->length;
+            }
+            max_idx--;
+        }
+        return copy;
+    }else{
+        return NULL;
+    }
+}
+
 Span *IoUtil_AbsCmdArr(MemCh *m, StrVec *v){
     Span *p = Span_Make(m);
 

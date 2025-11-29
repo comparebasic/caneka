@@ -81,19 +81,15 @@ static status gatherFileSel(MemCh *m, Str *path, Str *file, void *source){
     if(extMatches || (sel->type.state & DIR_SELECTOR_MTIME_ALL)){
         struct stat st;
         File_Stat(m, StrVec_Str(m, v), &st);
+        microTime modified = MicroTime_FromSpec(&st.st_mtimespec);
         if((sel->type.state & DIR_SELECTOR_MTIME_LOWEST)){
-            if(sel->tm.tv_sec == 0 && sel->tm.tv_nsec == 0 ||
-                    MicroTime_TimeSpecGreater(&sel->tm, &st.st_mtimespec)){
-                sel->tm.tv_sec = st.st_mtimespec.tv_sec; 
-                sel->tm.tv_nsec = st.st_mtimespec.tv_nsec; 
+            if(sel->time == 0 || modified < sel->time){
+                sel->time = modified;
                 r |= PROCESSING;
             }
         }else{
-            microTime modified = MicroTime_FromSpec(&st.st_mtimespec);
-            microTime old = MicroTime_FromSpec(&sel->tm);
-            if(!MicroTime_TimeSpecGreater(&sel->tm, &st.st_mtimespec)){
-                sel->tm.tv_sec = st.st_mtimespec.tv_sec; 
-                sel->tm.tv_nsec = st.st_mtimespec.tv_nsec; 
+            if(sel->time == 0 || sel->time < modified){
+                sel->time = modified;
                 r |= PROCESSING;
             }
         }

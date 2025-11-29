@@ -29,11 +29,10 @@ status StashCoords_Print(Buff *bf, StashCoord *coord, word flags){
 
 status DirSelector_Print(Buff *bf, void *a, cls type, word flags){
     DirSelector *sel = (DirSelector *)as(a, TYPE_DIR_SELECTOR);
-    microTime modified = MicroTime_FromSpec(&sel->tm);
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
-            MicroTime_ToStr(bf->m, modified),
+            MicroTime_ToStr(bf->m, sel->time),
             sel->dest,
             sel->meta,
             NULL
@@ -42,7 +41,7 @@ status DirSelector_Print(Buff *bf, void *a, cls type, word flags){
     }else{
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
-            MicroTime_ToStr(bf->m, modified),
+            MicroTime_ToStr(bf->m, sel->time),
             I32_Wrapped(bf->m, sel->dest->nvalues),
             sel->meta,
             NULL

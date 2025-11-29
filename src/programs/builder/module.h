@@ -71,6 +71,7 @@ typedef struct buildctx {
         StrVec *version;
         StrVec *source;
         StrVec *dest;
+        Hashed *depKv;
     } current;
     struct {
         Span *inc;
@@ -82,8 +83,13 @@ typedef struct buildctx {
         Span *gens;
         StrVec *srcPrefix;
         Table *dependencies;
+        Span *libDirs;
         Single *totalSources;
         Single *countSources;
+        Single *totalModules;
+        Single *countModules;
+        Single *totalModuleSources;
+        Single *countModuleSources;
     } input;
     struct {
         Str *cc;

@@ -90,6 +90,14 @@ boolean File_Exists(Buff *bf, Str *path){
     return stat(Str_Cstr(bf->m, path), &bf->st) == 0 ? TRUE : FALSE;
 }
 
+microTime File_ModTime(MemCh *m, Str *path){
+    struct stat st;
+    if(stat(Str_Cstr(m, path), &st) == 0){
+        return MicroTime_FromSpec(&st.st_mtimespec);
+    }
+    return 0;
+}
+
 status File_Stat(MemCh *m, Str *path, struct stat *st){
     if(stat(Str_Cstr(m, path), st)){
         return ERROR;

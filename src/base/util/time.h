@@ -1,5 +1,3 @@
-typedef i64 microTime;
-
 #define TIME_SEC 1000000l
 #define TIME_MIN (TIME_SEC*60)
 #define TIME_HOUR (TIME_MIN*60)
