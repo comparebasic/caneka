@@ -11,7 +11,6 @@ status File_Rename(MemCh *m, Str *to, Str *from){
 }
 
 status File_Open(Buff *bf, void *_fpath, word ioFlags){
-
     Str *fpath = NULL;
     if(((Abstract *)_fpath)->type.of == TYPE_STR){
         fpath = (Str *)_fpath;
@@ -89,6 +88,13 @@ status File_Close(Buff *bf){
 
 boolean File_Exists(Buff *bf, Str *path){
     return stat(Str_Cstr(bf->m, path), &bf->st) == 0 ? TRUE : FALSE;
+}
+
+status File_Stat(MemCh *m, Str *path, struct stat *st){
+    if(stat(Str_Cstr(m, path), st)){
+        return ERROR;
+    }
+    return SUCCESS;
 }
 
 StrVec *File_ToVec(MemCh *m, Str *path){

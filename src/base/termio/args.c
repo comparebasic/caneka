@@ -248,10 +248,6 @@ status CliArgs_Parse(CliArgs *cli){
 
 void *CliArgs_Get(CliArgs *cli, void *key){
     Hashed *h = Table_GetHashed(cli->args, key);
-    void *args[] = {
-        h, NULL
-    };
-    Out("^g.@^0\n", args);
     if(h != NULL){
         if(h->value == NULL){
             return I64_Wrapped(cli->m, 1);
@@ -264,7 +260,6 @@ void *CliArgs_Get(CliArgs *cli, void *key){
 
 StrVec *CliArgs_GetAbsPath(CliArgs *cli, void *key){
     Str *path = (Str *)as(CliArgs_Get(cli, key), TYPE_STR);
-    printf("path %s\n", path->bytes);
     return IoUtil_AbsVec(cli->m, StrVec_From(cli->m, path));
 }
 

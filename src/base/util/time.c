@@ -3,6 +3,14 @@
 
 #define TIME_BUFF_LEN 64
 
+boolean MicroTime_TimeSpecGreater(struct timespec *a, struct timespec *b){
+    if(a->tv_sec > b->tv_sec || (a->tv_sec == b->tv_sec && a->tv_nsec > b->tv_nsec)){
+        return TRUE;
+    }else{
+        return FALSE;
+    }
+}
+
 microTime MicroTime_FromSpec(struct timespec *ts){
     return (ts->tv_sec * 1000l) + (ts->tv_nsec / 1000l);
 }

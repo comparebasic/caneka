@@ -16,3 +16,4 @@ Str *Time_Today(MemCh *m);
 Str *TimeSpec_ToDayStr(MemCh *m, struct timespec *ts);
 microTime Time_Combine(microTime start, microTime add);
 status Time_Delay(microTime tm, microTime *remaining);
+boolean MicroTime_TimeSpecGreater(struct timespec *a, struct timespec *b);

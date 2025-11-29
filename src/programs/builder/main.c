@@ -16,10 +16,10 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
 
     Str *pathS = StrVec_Str(m, path);
     if(Dir_Exists(m, pathS) & SUCCESS){
-        DirSelector *self = DirSelector_Make(m,
-            Str(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL);
-        Dir_Gather(m, pathS, sel);
-        Table_Set(ctx->input.dependencies, path, sel->dest);
+        DirSelector *sel = DirSelector_Make(m,
+            S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
+        Dir_GatherSel(m, pathS, sel);
+        Table_Set(ctx->input.dependencies, path, sel);
     }else{
         args[0] = path;
         args[1] = ctx;
@@ -30,11 +30,6 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
     }
 
     StrVec_Add(ctx->current.source, K(m, "dependencies.txt"));
-
-    args[0] = ctx->current.source;
-    args[1] = path;
-    args[2] = NULL;
-    Out("^c.Gathering @ from @^0\n", args);
 
     Buff *bf = Buff_Make(m, ZERO|BUFF_SLURP);
     bf->type.state |= NOOP;
@@ -58,10 +53,6 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
             StrVec_Add(path, IoUtil_PathSep(m));
             StrVec_Add(path, shelf);
 
-            args[0] = ctx->current.source;
-            args[1] = NULL;
-            Out("^c.About to find sub-dep @^0\n", args);
-
             parseDependencies(ctx, path);
             shelf = Str_Make(m, STR_DEFAULT);
         }else{
@@ -69,12 +60,6 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
         }
     }
 
-    args[0] = path;
-    args[1] = ctx->input.dependencies;
-    args[2] = ctx->current.source;
-    args[3] = NULL;
-
-    Out("^c.Gathered Dependencies For @\n^y@^c.source:@^0\n", args);
     return ZERO;
 }
 
