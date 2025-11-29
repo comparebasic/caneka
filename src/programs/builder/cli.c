@@ -4,6 +4,7 @@
 
 status BuildCli_RenderStatus(MemCh *m, void *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
+    /*
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
 
     i32 width = ctx->cli->cols;
@@ -28,11 +29,13 @@ status BuildCli_RenderStatus(MemCh *m, void *a){
     sg = (Single *)as(CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
     sg->val.value = st.pageIdx;
+    */
 
     return SUCCESS;
 }
 
 status BuildCli_SetupComplete(BuildCtx *ctx){
+    /*
     FmtLine *ln = Span_Get(ctx->cli->lines, 0);
     ln->fmt = "^g.Completed ^D.$^d. sources^0.";
     ln->args = Arr_Make(ctx->m, 2);
@@ -47,13 +50,15 @@ status BuildCli_SetupComplete(BuildCtx *ctx){
 
     ln = Span_Get(ctx->cli->lines, 3);
     ln->args[0] = Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
+    */
 
     return SUCCESS;
 }
 
 status BuildCli_SetupStatus(BuildCtx *ctx){
-    Span *lines = ctx->cli->lines;
     MemCh *m = ctx->m;
+    /*
+    Span *lines = ctx->cli->lines;
     memset(&ctx->fields, 0, sizeof(ctx->fields));
     ctx->fields.steps.total = I32_Wrapped(m, 0);
     ctx->fields.steps.count = I32_Wrapped(m, 0);
@@ -104,6 +109,7 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chapters"), &coords);
     coords.b = 2;
     CliStatus_SetKey(m, ctx->cli, Str_CstrRef(m, "chaptersTotal"), &coords);
+    */
 
     return SUCCESS;
 }

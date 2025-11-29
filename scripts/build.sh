@@ -1,45 +1,28 @@
 #!/bin/sh
 
-CC="clang"
-cmd="mkdir -p ./build && mkdir -p ./build/libcnkbase && $CC -I ./src -c -o ./build/libcnkbase/libcnkbase.a ./src/base/inc.c"
+if [ $(which clang) ]; then
+    CC="clang"
+elif [ $(which gcc) ]; then
+    CC="gcc"
+else
+    echo "No compiler found look for clang and gcc, set CC in ./scripts/build.sh manually if you'd like";
+    exit 1;
+fi;
+
+echo "Making directories...";
+mkdir -p ./build/libcnkbase && \
+mkdir -p ./build/bin && \
+
+cmd="$CC -g -I ./src -c -o ./build/libcnkbase/libcnkbase.a ./src/base/inc.c"
 echo "Building Caneka Base: $cmd";
 eval $cmd
-cmd="mkdir -p ./build/bin && clang -I ./src -o ./build/bin/cnkbuild ./src/programs/builder/inc.c ./build/libcnkbase/libcnkbase.a -lm"
+
+cmd="$CC -g -I ./src -o ./build/bin/cnkbuild ./src/programs/builder/inc.c ./build/libcnkbase/libcnkbase.a -lm"
 echo "Building Caneka Builder $cmd";
 eval $cmd
-cmd="./build/bin/cnkbuild"
+
+cmd="./build/bin/cnkbuild --src src/programs/test"
 echo "Running Builder $cmd";
 eval $cmd
 
 exit 1;
-
-CC="clang"
-INC="-I ./src/include -I ./src/base/include -I ./src/builder/include"
-STATICS="build/libcaneka/libcaneka.a build/libbuilder/libbuilder.a"
-
-mkdir -p ./build/libcaneka/
-echo "building Caneka Base" 
-$CC -g -Wno-gnu-folding-constant $INC \
-    -c -o ./build/libcaneka/libcaneka.a ./src/base/inc.c -DINSECURE || exit 1;
-
-mkdir -p ./build/libbuilder/
-echo "building Caneka Builder"
-$CC -g $INC -c -o ./build/libbuilder/libbuilder.a ./src/builder/inc.c -DINSECURE \
-    || exit 1;
-
-echo "building Caneka Ext"
-rm -f ./build/build_ext
-$CC -o build/build_ext $INC $STATICS -DCRYPTO src/ext/build.c -lm \
-    && ./build/build_ext || exit 1;
-
-echo "building Caneka Inter..."
-rm -f ./build/build_inter
-$CC -o build/build_inter $INC $STATICS src/inter/build.c -lm \
-    && ./build/build_inter || exit 1;
-
-echo "building Caneka Nacl..."
-rm -f ./build/build_nacl
-$CC -o build/build_nacl $INC $STATICS src/third/nacl/build.c -lm && \
-    ./build/build_nacl || exit 1;
-
-echo "Core modules built successfully"

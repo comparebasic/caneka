@@ -4,8 +4,13 @@
 
 static boolean _quiet = FALSE;
 
+static Span *parseDependencies(BuildCtx *ctx, StrVec *path){
+    return NULL;
+}
+
 static status buildExec(BuildCtx *ctx,
         boolean force, Str *destDir, Str *lib, Executable *target){
+    /*
     DebugStack_Push(target->bin, TYPE_CSTR);
     status r = READY;
     MemCh *m = ctx->m;
@@ -89,6 +94,7 @@ static status buildExec(BuildCtx *ctx,
         }
     }
     DebugStack_Pop();
+    */
     return NOOP;
 }
 
@@ -97,9 +103,10 @@ static status buildObject(BuildCtx *ctx,
         Str *dest,
         Str *source
     ){
+    status r = READY;
+    /*
     ctx->type.state &= ~NOOP;
     DebugStack_Push(source, source->type.of);
-    status r = READY;
     char *args[5];
     MemCh *m = ctx->m;
     Span *cmd = Span_Make(m);
@@ -180,6 +187,7 @@ static status buildObject(BuildCtx *ctx,
     }
 
     DebugStack_Pop();
+    */
     return r;
 }
 
@@ -188,6 +196,7 @@ static status buildDir(BuildCtx *ctx,
 
     status r = READY;
     MemCh *m = ctx->m;
+    /*
 
     StrVec_Add(src, path);
     StrVec_Add(libDir, path);
@@ -233,12 +242,14 @@ static status buildDir(BuildCtx *ctx,
 
     StrVec_Pop(libDir);
     StrVec_Pop(src);
+    */
     return r;
 }
 
 static status gatherTotal(BuildCtx *ctx, Str *source){
     status r = READY;
     MemCh *m = ctx->m;
+    /*
 
     if(source->bytes[source->length-1] == '/'){
         Span *p = Span_Make(m);
@@ -262,6 +273,7 @@ static status gatherTotal(BuildCtx *ctx, Str *source){
     }else{
         ctx->fields.steps.total->val.i++;
     }
+    */
 
     return ZERO;
 }
@@ -269,6 +281,7 @@ static status gatherTotal(BuildCtx *ctx, Str *source){
 static status build(BuildCtx *ctx){
     status r = READY;
     DebugStack_Push(NULL, 0);
+    /*
     char *args[5];
     void *out[4];
     MemCh *m = ctx->m;
@@ -397,36 +410,23 @@ static status build(BuildCtx *ctx){
             if(libCount == 0){
                 lib = NULL;
             }
-            /*
+            / *
              * ToDo: detect any updated lib to only rebuild the binary
              * If a child library has been updated
-             */
+             * /
             ctx->type.state |= PROCESSING;
             buildExec(ctx, ((r & SUCCESS) != 0), dist, libFileName, target);
             target++;
         }
     }
+    */
     DebugStack_Pop();
     return r;
 }
 
-status Init(MemCh *m){
-    status r = READY;
-    r |= Debug_Init(m);
-    r |= DebugStack_Init(m);
-    return r;
-}
-
-status BuildCtx_Init(MemCh *m, BuildCtx *ctx){
-    Init(m);
-    memset(ctx, 0, sizeof(BuildCtx));
-    ctx->type.of = TYPE_BUILDCTX;
-    ctx->m = MemCh_Make();
-    ctx->cli = CliStatus_Make(m, BuildCli_RenderStatus, ctx);
-    return SUCCESS;
-}
 
 status LogOut(BuildCtx *ctx){
+    /*
     if(_quiet){
         void *args[3];
         args[0] = ctx->fields.steps.count,
@@ -463,18 +463,52 @@ status LogOut(BuildCtx *ctx){
             CliStatus_Print(OutStream, ctx->cli);
         }
     }
+    */
     return ZERO;
 }
 
 status Build(BuildCtx *ctx, i32 argc, char *argv[]){
     DebugStack_Push(ctx, ctx->type.of);
+    status r = READY;
+    /*
     if(argc >= 2 && Equals(K(ctx->m, argv[1]), K(ctx->m, "--quiet"))){
         _quiet = TRUE;
     }
     status r = READY;
     r |= build(ctx);
+    */
     DebugStack_Pop();
     return r;
+}
+
+BuildCtx *BuildCtx_Make(MemCh *m){
+    BuildCtx *ctx = MemCh_AllocOf(m, sizeof(BuildCtx), TYPE_BUILDCTX);
+    ctx->type.of = TYPE_BUILDCTX;
+    ctx->m = MemCh_Make();
+    ctx->cli.cli = CliStatus_Make(m, BuildCli_RenderStatus, ctx);
+
+    ctx->dir = StrVec_Make(m);
+    ctx->src = StrVec_Make(m);
+
+    ctx->current.target = StrVec_Make(m);
+    ctx->current.targetName = StrVec_Make(m);
+    ctx->current.version = StrVec_Make(m);
+    ctx->current.source = StrVec_Make(m);
+    ctx->current.dest = StrVec_Make(m);
+
+    ctx->input.inc = Span_Make(m);
+    ctx->input.cflags = Span_Make(m);
+    ctx->input.libs = Span_Make(m);
+    ctx->input.staticLibs = Span_Make(m);
+    ctx->input.sources = Span_Make(m);
+    ctx->input.objects = Span_Make(m);
+    ctx->input.gens = Span_Make(m);
+
+    ctx->tools.cc = S(m, _gen_CC);
+    ctx->tools.ccVersion = Str_FromI64(m, (i64)_gen_CC_VERSION);
+    ctx->tools.ar = S(m, _gen_AR);
+
+    return ctx;
 }
 
 i32 main(int argc, char **argv){
@@ -490,6 +524,7 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_InitBase(m);
+    BuildCtx_ToSInit(m);
     DebugStack_Push(NULL, 0);
 
     CliArgs *cli = CliArgs_Make(argc, argv);
@@ -502,7 +537,7 @@ i32 main(int argc, char **argv){
     Str *versionKey = K(m, "version");
     Str *srcKey = K(m, "src");
     Str *typeKey = K(m, "type");
-    Str *outKey = K(m, "out");
+    Str *dirKey = K(m, "dir");
     Str *srcPrefixKey = K(m, "src-prefix");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, Sv(m, "Show this help message."));
@@ -512,8 +547,8 @@ i32 main(int argc, char **argv){
         Sv(m, "Source code files or directories to build."));
     Args_Add(cli, srcPrefixKey, S(m, "src"), ARG_DEFAULT,
         Sv(m, "Source code files prefix. The path before the module names."));
-    Args_Add(cli, outKey, NULL, ZERO,
-        Sv(m, "Name of binary (or static library) to build from sources."));
+    Args_Add(cli, dirKey, S(m, "./build"), ARG_DEFAULT,
+        Sv(m, "Build directory to use for objects and binary assets/executables."));
     Span *types = Span_Make(m);
     Span_Add(types, S(m, "exec"));
     Span_Add(types, S(m, "static"));
@@ -529,9 +564,12 @@ i32 main(int argc, char **argv){
 
     CliArgs_Parse(cli);
 
+    BuildCtx *ctx = BuildCtx_Make(m);
+
     args[0] = cli->args;
-    args[1] = NULL;
-    Out("^p.Args recieved @^0\n", args);
+    args[1] = ctx;
+    args[2] = NULL;
+    Out("^p.Args @\nCtx @^0\n", args);
 
     CliArgs_Free(cli);
 

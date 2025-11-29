@@ -17,7 +17,7 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
         return NOOP;
     }else{
         /* build args pass */
-        for(i32 i = 1; i < argc; i++, argv++){
+        for(i32 i = 1; i < argc; i++){
             Str *s = S(m, argv[i]);
             if(s->length > 1 && s->bytes[0] == '-' && s->bytes[1] == '-'){
                 if(it.metrics.selected != -1){
