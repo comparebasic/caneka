@@ -5,6 +5,10 @@
 static boolean _quiet = FALSE;
 
 static Span *parseDependencies(BuildCtx *ctx, StrVec *path){
+    void *args[5];
+    args[0] = path;
+    args[1] = NULL;
+    Out("^c.Gather Dependencies For @^0\n", args);
     return NULL;
 }
 
@@ -564,12 +568,18 @@ i32 main(int argc, char **argv){
 
     CliArgs_Parse(cli);
 
+    Iter it;
     BuildCtx *ctx = BuildCtx_Make(m);
+    ctx->input.srcPrefix = CliArgs_GetAbsPath(cli, srcPrefixKey);
+    Iter_Init(&it, CliArgs_Get(cli, srcKey));
+    while((Iter_Next(&it) & END) == 0){
+        parseDependencies(ctx, StrVec_From(m, Iter_Get(&it)));
+    }
 
     args[0] = cli->args;
     args[1] = ctx;
     args[2] = NULL;
-    Out("^p.Args @\nCtx @^0\n", args);
+    Out("^p.Args @\nCtx &^0\n", args);
 
     CliArgs_Free(cli);
 

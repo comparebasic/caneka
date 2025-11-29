@@ -638,6 +638,10 @@ void *Iter_GetByIdx(Iter *it, i32 idx){
     return NULL;
 }
 
+void *Iter_GetSelected(Iter *it){
+    return Iter_GetByIdx(it, it->metrics.selected);
+}
+
 void *Iter_Get(Iter *it){
     return it->value;
 }

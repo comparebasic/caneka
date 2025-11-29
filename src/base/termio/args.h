@@ -20,6 +20,8 @@ typedef struct cli_args {
 status CharPtr_ToHelp(CliArgs *cli);
 CliArgs *CliArgs_Make(i32 argc, char *argv[]);
 status CliArgs_Parse(CliArgs *cli);
+void *CliArgs_Get(CliArgs *cli, void *key);
+StrVec *CliArgs_GetAbsPath(CliArgs *cli, void *key);
 void CliArgs_Free(CliArgs *cli);
 
 status Args_Add(CliArgs *cli, Str *key, void *value, word flags, StrVec *explain);

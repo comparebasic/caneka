@@ -23,13 +23,14 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->input.sources,
             ctx->input.objects,
             ctx->input.gens,
+            ctx->input.srcPrefix,
             NULL
         };
         return Fmt(bf, "BuildCtx<@\n"
             "  dir:@\nsrc:@\n"
             "  tools: cc:$/$ ar:$\n"
             "  target: @ name:@ source:@ dest:@\n"
-            "  input: inc:@ cflags:@ libs:@ sources:@ objects:@ gens:@\n"
+            "  input: inc:@ cflags:@ libs:@ sources:@ objects:@ gens:@, srcPrefix:@\n"
             ">", args);
     }else{
         void *args[] = {

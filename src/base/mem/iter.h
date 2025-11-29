@@ -46,6 +46,7 @@ void *Iter_Current(Iter *it);
 status Iter_Remove(Iter *it);
 status Iter_RemoveByIdx(Iter *it, i32 idx);
 void *Iter_GetByIdx(Iter *it, i32 idx);
+void *Iter_GetSelected(Iter *it);
 status Iter_GoToIdx(Iter *it, i32 idx);
 status Iter_ExpandTo(Iter *it, i32 idx);
 

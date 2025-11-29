@@ -10,26 +10,31 @@ static boolean argHasFlag(Hashed *h, word flag){
 static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Table *dest){
     status r = READY;
     Str *key = NULL;
-    void *rslv = NULL;
     Iter it;
     Iter_Init(&it, dest);
     if(argc < 1){
         return NOOP;
     }else{
         /* build args pass */
+        Single *current = NULL;
         for(i32 i = 1; i < argc; i++){
             Str *s = S(m, argv[i]);
             if(s->length > 1 && s->bytes[0] == '-' && s->bytes[1] == '-'){
                 if(it.metrics.selected != -1){
                     Table_SetValue(&it, Ptr_Wrapped(m, NULL, 0));
+                    current = NULL;
                 }
                 it.metrics.selected = -1;
                 Str_Incr(s, 2);
-                void *arg = Table_Get(resolve, s);
-                if(arg != NULL){
+                current = Table_Get(resolve, s);
+                if(current != NULL){
                     key = s;
-                    rslv = arg;
                     Table_SetKey(&it, key);
+                    if(current->type.state & ARG_MULTIPLE){
+                        i32 selected = it.metrics.selected;
+                        Table_SetValue(&it, Span_Make(m));
+                        it.metrics.selected = selected;
+                    }
                 }else{
                     void *args[] = {
                         s,
@@ -39,18 +44,26 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
                         "Unable to find resolve for arg @", args);
                 }
             }else if(it.metrics.selected != -1){
-                 Table_SetValue(&it, s);
-                 key = NULL;
-                 rslv = NULL;
-                 r |= SUCCESS;
+                if(current != NULL && current->type.state & ARG_MULTIPLE){
+                    Hashed *h = Iter_GetSelected(&it);
+                    Span *p = h->value;
+                    Span_Add(p, s);
+                }else{
+                    Table_SetValue(&it, s);
+                }
+
+                key = NULL;
+                current = NULL;
+                r |= SUCCESS;
             }else{
                 if(it.metrics.selected == -1){
                     Table_SetKey(&it, I32_Wrapped(m, i));
                 }
                 Table_SetValue(&it, s);
+                current = NULL;
             }
         }
-        /* process args pass */
+        /* verify completeness  */
         Iter it;
         Iter_Init(&it, Table_Ordered(m, resolve));
         while((Iter_Next(&it) & END) == 0){
@@ -231,6 +244,14 @@ status CliArgs_Parse(CliArgs *cli){
         return NOOP;
     }
     return r;
+}
+
+void *CliArgs_Get(CliArgs *cli, void *key){
+    return Table_Get(cli->args, key);
+}
+
+StrVec *CliArgs_GetAbsPath(CliArgs *cli, void *key){
+    return IoUtil_AbsVec(cli->m, StrVec_From(cli->m, CliArgs_Get(cli, key)));
 }
 
 CliArgs *CliArgs_Make(i32 argc, char *argv[]){
