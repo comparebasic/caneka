@@ -1,2 +1,2 @@
-third/crypto
+third/nacl
 base

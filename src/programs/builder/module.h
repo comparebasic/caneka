@@ -23,6 +23,7 @@ enum build_types {
     BUILD_EXEC = 1 << 8,
     BUILD_STATIC = 1 << 9,
     BUILD_LINK = 1 << 10,
+    BUILD_SKIP = 1 << 11,
 };
 
 typedef struct executable {

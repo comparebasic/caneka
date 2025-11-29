@@ -49,20 +49,18 @@ static status parseDependencies(BuildCtx *ctx, StrVec *path){
     while((Cursor_NextByte(curs) & END) == 0){
         if(*curs->ptr == '\n'){
             if(label != NULL && label->length > 0){
-                args[0] = label;
-                args[1] = shelf;
-                args[2] = NULL;
-                Out("^c.Found labeled source $=$^... ignoring\n", args);
-                label = NULL;
-                shelf = Str_Make(m, STR_DEFAULT);
                 if(Equals(label, K(m, "exec"))){
                     shelf->type.state |= BUILD_EXEC; 
                 }else if(Equals(label, K(m, "static"))){
                     shelf->type.state |= BUILD_STATIC; 
                 }else if(Equals(label, K(m, "link"))){
                     shelf->type.state |= BUILD_LINK; 
+                }else if(Equals(label, K(m, "skip"))){
+                    shelf->type.state |= BUILD_SKIP; 
                 }
                 Span_Add(sel->exclude, shelf);
+                label = NULL;
+                shelf = Str_Make(m, STR_DEFAULT);
                 continue;
             }
             StrVec *v = StrVec_From(m, shelf);
