@@ -350,6 +350,7 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     Str_Add(buildInc, localInc->bytes, localInc->length);
     Span_Add(cmd, buildInc);
 
+    printf("I\n");
     anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
     StrVec_AddVec(ctx->input.buildDir, ctx->current.targetName);
 
@@ -370,7 +371,7 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
                 if(IoUtil_IsStrAbs(h->key)){
                     path = StrVec_From(m, h->key);
                 }else{
-                    StrVec_AddVec(ctx->input.buildDir, (Str *)name);
+                    StrVec_AddVec(ctx->input.buildDir, name);
                     StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
                     StrVec_Add(ctx->input.buildDir, h->key);
                     path = ctx->input.buildDir;
@@ -392,10 +393,8 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     Span_Add(cmd, StrVec_Str(m, ctx->current.source));
     Span_AddSpan(cmd, ctx->input.libs);
 
-    /*
     void *ar[] = {cmd, NULL};
     Out("^c. Build cmd &^\n", ar);
-    */
 
     ProcDets pd;
     ProcDets_Init(&pd);
