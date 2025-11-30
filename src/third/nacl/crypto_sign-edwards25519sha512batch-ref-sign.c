@@ -9,7 +9,6 @@
 
 #include <external.h>
 #include "module.h" 
-#include "../crypto/module.h" 
 
 #include "ge25519.h"
 

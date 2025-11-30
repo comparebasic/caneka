@@ -157,13 +157,15 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     Buff_AddBytes(ErrStream, (byte *)" - ", 3);
     Fmt(ErrStream, fmt, args);
 
+    /*
     if(errno != 0){
         void *args[] = {
             S(ErrStream->m, strerror(errno)),
             NULL
         };
-        Fmt(ErrStream, "IoError: ^D.$^d.", args);
+        Fmt(ErrStream, "\n  IoError: ^D.$^d.", args);
     }
+    */
 
 #ifdef OPENSSL
     char _buff[256];
@@ -174,7 +176,7 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
             Str_CstrRef(ErrStream->m, openssl_err),
             NULL
         };
-        Fmt(ErrStream, " OpenSslError: ^rD.$^0", args);
+        Fmt(ErrStream, "  OpenSslError: ^rD.$^0", args);
     }
 #endif
 
@@ -239,6 +241,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
     if(r & ERROR){
         if(r & NOOP){
             Fmt(ErrStream, fmt, args);
+            /*
             if(errno != 0){
                 void *args[] = {
                     S(m, strerror(errno)),
@@ -246,6 +249,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
                 };
                 Fmt(ErrStream, "\nIoError: ^D.$^d.", args);
             }
+            */
         }else{
             Fatal(func, file, line, fmt, args);
         }

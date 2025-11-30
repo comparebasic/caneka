@@ -19,3 +19,6 @@ Span *IoUtil_AbsCmdArr(MemCh *m, StrVec *v);
 StrVec *IoUtil_AbsPathBuilder(MemCh *m, char *args[]);
 Str *IoUtil_PathSep(MemCh *m);
 StrVec *IoUtil_SwapExt(MemCh *m, StrVec *v, Str *old, Str *new);
+boolean IoUtil_IsAbs(StrVec *v);
+boolean IoUtil_IsStrAbs(Str *s);
+i32 IoUtil_BasePathAnchor(StrVec *path);

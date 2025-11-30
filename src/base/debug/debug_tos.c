@@ -33,12 +33,10 @@ static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     Buff_AddBytes(ErrStream, (byte *)" line ", 6);
     ToS(ErrStream, &s, s.type.of, ZERO);
 
-
-    Buff_AddBytes(bf, (byte *)se->fname, strlen(se->fname));
     if(flags & MORE && se->ref != NULL){
         args[0] = se->ref;
         args[1] = NULL;
-        Fmt(bf, " - @\n", args);
+        Fmt(bf, " - ^0@", args);
     }
 
     return Fmt(bf, "^0.\n", NULL);

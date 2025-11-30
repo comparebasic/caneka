@@ -29,6 +29,7 @@ i64 StrVec_FfIter(Iter *it, i64 offset);
 void *StrVec_Nth(MemCh *m, StrVec *v, i32 n);
 void *StrVec_Clone(MemCh *m, void *);
 Str *StrVec_Str(MemCh *m, StrVec *v);
+Str *StrVec_StrTo(MemCh *m, StrVec *v, i32 anchor);
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length);
 StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length);
 StrVec *StrVec_Copy(MemCh *m, StrVec *v);

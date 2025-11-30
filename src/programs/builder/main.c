@@ -81,12 +81,6 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                     if(Equals(label, K(m, "exec"))){
                         meta->type.state |= BUILD_EXEC; 
                         ctx->input.totalSources->val.value--;
-                        Single *sg = NULL;
-                        if((sg = Table_Get(sel->meta, K(m, "skip-count"))) == NULL){
-                            sg = I64_Wrapped(m, 0);
-                            Table_Set(sel->meta, K(m, "skip-count"), sg);
-                        }
-                        sg->val.value++;
                     }else if(Equals(label, K(m, "static"))){
                         meta->type.state |= BUILD_STATIC; 
                     }else if(Equals(label, K(m, "link"))){
@@ -94,21 +88,17 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                     }else if(Equals(label, K(m, "skip"))){
                         meta->type.state |= BUILD_SKIP; 
                         ctx->input.totalSources->val.value--;
-                        Single *sg = NULL;
-                        if((sg = Table_Get(sel->meta, K(m, "skip-count"))) == NULL){
-                            sg = I64_Wrapped(m, 0);
-                            Table_Set(sel->meta, K(m, "skip-count"), sg);
-                        }
-                        sg->val.value++;
                     }else if(Equals(label, K(m, "include"))){
                         meta->type.state |= BUILD_INCLUDE; 
                     }
-                    Span *p = NULL;
-                    if((p = Table_Get(sel->meta, meta)) == NULL){
-                        p = Span_Make(m);
-                        Table_Set(sel->meta, meta, p);
+
+                    Table *tbl = NULL;
+                    if((tbl = Table_Get(sel->meta, meta)) == NULL){
+                        tbl = Table_Make(m);
+                        Table_Set(sel->meta, meta, tbl);
                     }
-                    Span_Add(p, StrVec_From(m, shelf));
+                    Table_Set(tbl, shelf, shelf);
+
                     label = NULL;
                     name = NULL;
                     shelf = Str_Make(m, STR_DEFAULT);
@@ -292,89 +282,131 @@ static status buildExec(BuildCtx *ctx,
     return NOOP;
 }
 
-static status buildObject(BuildCtx *ctx){
+static status linkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
-    status r = READY;
-    ctx->type.state &= ~NOOP;
-    char *args[5];
+    DebugStack_SetRef(ctx->current.dest, ctx->current.dest->type.of);
     MemCh *m = ctx->m;
-    Span *cmd = Span_Make(m);
-    ProcDets pd;
 
-    ctx->cli.fields.current[BUILIDER_CLI_ACTION] = S(m, "build obj");
+    ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Link Object");
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
-    /*
-    if(IoUtil_CmpUpdated(m, source, dest)){
-        ctx->type.state |= PROCESSING;
-        m->level--;
-        LogOut(ctx);
-        m->level++;
+    LogOut(ctx);
 
-        Span_Add(cmd, S(m, ctx->tools.cc));
-        char **ptr = ctx->args.cflags;
-        while(*ptr != NULL){
-            Span_Add(cmd, S(m, *ptr));
-            ptr++;
-        }
-        ptr = ctx->args.inc;
-        while(*ptr != NULL){
-            Span_Add(cmd, S(m, *ptr));
-            ptr++;
-        }
+    ProcDets pd;
+    ProcDets_Init(&pd);
 
-        if(ctx->genConfigs != NULL){
-            args[0] = ctx->dist;
-            args[1] = "/";
-            args[2] = ctx->libtarget;
-            args[3] = "/include/";
-            args[4] = NULL;
-            Str *genDest = StrVec_Str(m, IoUtil_AbsPathBuilder(m, args));
-
-            Str *s = Str_Make(m, genDest->length+2);
-            Str_AddCstr(s, "-I");
-            Str_Add(s, genDest->bytes, genDest->length);
-
-            Span_Add(cmd, s);
-        }
-
-        Span_Add(cmd, Str_CstrRef(m, "-c"));
-        Span_Add(cmd, Str_CstrRef(m, "-o"));
-        Span_Add(cmd, dest);
-        Span_Add(cmd, source);
-
-        ProcDets_Init(&pd);
-        r |= SubProcess(m, cmd, &pd);
-        if(r & ERROR){
-            void *args[] = {
-                cmd,
-                NULL
-            };
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: $", args);
-            return ERROR;
-        }
-    }else{
-        ctx->type.state |= NOOP;
-        LogOut(ctx);
-    }
-
-    Span_ReInit(cmd);
-    Span_Add(cmd, Str_CstrRef(m, ctx->tools.ar));
+    Span *cmd = Span_Make(m);
+    Span_Add(cmd, ctx->tools.ar);
     Span_Add(cmd, Str_CstrRef(m, "-rc"));
-    Span_Add(cmd, libFileName);
-    Span_Add(cmd, dest);
+    Span_Add(cmd, StrVec_Str(m, ctx->current.target));
+    Span_Add(cmd, StrVec_Str(m, ctx->current.dest));
 
     ProcDets_Init(&pd);
     status re = SubProcess(m, cmd, &pd);
     if(re & ERROR){
         DebugStack_SetRef(cmd, cmd->type.of);
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for adding object to lib", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            "Build error for adding object to lib", NULL);
+        DebugStack_Pop();
         return ERROR;
     }
+
+    DebugStack_Pop();
+    return ZERO;
+}
+
+static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
+    DebugStack_Push(NULL, ZERO);
+    status r = READY;
+    MemCh *m = ctx->m;
+
+    DebugStack_SetRef(ctx->current.source, ctx->current.source->type.of);
+
+    ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Build Object");
+    ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
+    ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
+    LogOut(ctx);
+
+    Span *cmd = Span_Make(m);
+
+    Span_Add(cmd, ctx->tools.cc);
+    Span_AddSpan(cmd, ctx->input.cflags);
+    Span_AddSpan(cmd, ctx->input.inc);
+
+    i32 anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+    StrVec_Add(ctx->input.buildDir, S(m, "include"));
+    StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+
+    Str *buildInc = Str_Make(m, ctx->input.buildDir->total+2);
+    Str_Add(buildInc, (byte *)"-I", 2);
+    Str_AddVec(buildInc, ctx->input.buildDir);
+    Span_Add(cmd, buildInc);
+    StrVec_PopTo(ctx->input.buildDir, anchor);
+
+    Str *localInc = StrVec_StrTo(m,
+        ctx->current.source, IoUtil_BasePathAnchor(ctx->current.source));
+    buildInc = Str_Make(m, localInc->length+2);
+    Str_Add(buildInc, (byte *)"-I", 2);
+    Str_Add(buildInc, localInc->bytes, localInc->length);
+    Span_Add(cmd, buildInc);
+
+    anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+    StrVec_AddVec(ctx->input.buildDir, ctx->current.targetName);
+
+    StrVec_PopTo(ctx->input.buildDir, anchor);
+
+    Table *inc = Table_Get(sel->meta, S(m, "include"));
+    if(inc != NULL){
+        i32 anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+        StrVec_PopTo(ctx->input.buildDir, anchor);
+        StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+        Iter it;
+        Iter_Init(&it, inc);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                i32 anchor = ctx->input.buildDir->p->max_idx;
+                StrVec *path = NULL;
+                if(IoUtil_IsStrAbs(h->key)){
+                    path = StrVec_From(m, h->key);
+                }else{
+                    StrVec_AddVec(ctx->input.buildDir, (Str *)name);
+                    StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+                    StrVec_Add(ctx->input.buildDir, h->key);
+                    path = ctx->input.buildDir;
+                }
+                Str *buildInc = Str_Make(m, path->total+2);
+                Str_Add(buildInc, (byte *)"-I", 2);
+                Str_AddVec(buildInc, path);
+                Span_Add(cmd, buildInc);
+
+                StrVec_PopTo(ctx->input.buildDir, anchor);
+            }
+        }
+        StrVec_PopTo(ctx->input.buildDir, anchor);
+    }
+
+    Span_Add(cmd, Str_CstrRef(m, "-c"));
+    Span_Add(cmd, Str_CstrRef(m, "-o"));
+    Span_Add(cmd, StrVec_Str(m, ctx->current.dest));
+    Span_Add(cmd, StrVec_Str(m, ctx->current.source));
+    Span_AddSpan(cmd, ctx->input.libs);
+
+    /*
+    void *ar[] = {cmd, NULL};
+    Out("^c. Build cmd &^\n", ar);
     */
 
-    if(r == READY){
-        r = NOOP;
+    ProcDets pd;
+    ProcDets_Init(&pd);
+    r |= SubProcess(m, cmd, &pd);
+    if(r & ERROR){
+        void *args[] = {
+            cmd,
+            NULL
+        };
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: $", args);
+        return ERROR;
     }
 
     DebugStack_Pop();
@@ -389,11 +421,8 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     StrVec *key = h->key;
     DirSelector *sel = h->value;
-    /*
-    args[0] = key;
-    args[1] = sel;
-    Out("^c.Building module @ ^0\n", args);
-    */
+
+    DebugStack_SetRef(key, key->type.of);
 
     Str *fname = IoUtil_FnameStr(m, key);
     Str *targetName = Str_Make(m, fname->length+6);
@@ -404,6 +433,9 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     Str *target = Str_Make(m, targetName->length+2);
     Str_Add(target, targetName->bytes, targetName->length);
     Str_Add(target, (byte *)".a", 2);
+    ctx->current.target = StrVec_Copy(m, ctx->input.buildDir);
+    StrVec_Add(ctx->current.target, IoUtil_PathSep(m));
+    StrVec_Add(ctx->current.target, target);
 
     i32 anchor = StrVec_Add(ctx->current.dest, IoUtil_PathSep(m));
     StrVec_Add(ctx->current.dest, targetName);
@@ -418,12 +450,13 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
 
     microTime modified = File_ModTime(m, StrVec_Str(m, ctx->current.dest));
+    StrVec_PopTo(ctx->current.dest, destAnchor);
 
     ctx->input.totalModuleSources->val.value = sel->dest->nvalues;
     ctx->input.countModuleSources->val.value = 0;
-    Single *skipCount = Table_Get(sel->meta, K(m, "skip-count"));
-    if(skipCount != NULL){
-        ctx->input.totalModuleSources->val.value -= skipCount->val.value;
+    Table *skip = Table_Get(sel->meta, K(m, "skip"));
+    if(skip != NULL){
+        ctx->input.totalModuleSources->val.value -= skip->nvalues;
     }
 
     ctx->type.state |= PROCESSING;
@@ -433,6 +466,7 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
         LogOut(ctx);
         ctx->input.countSources->val.value += ctx->input.totalModuleSources->val.value;
         StrVec_PopTo(ctx->current.dest, anchor);
+        DebugStack_Pop();
         return ZERO;
     }
 
@@ -450,81 +484,30 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
         IoUtil_Annotate(m, v);
         StrVec *source = StrVec_Make(m);
         StrVec_AddVecAfter(source, v, ctx->input.srcPrefix->p->nvalues+1);
+        StrVec_AddVec(ctx->current.source, source);
 
         StrVec *object = IoUtil_SwapExt(m, source, K(m, ".c"), K(m, ".o")); 
-        StrVec_AddVec(ctx->current.source, source);
-        StrVec_AddVec(ctx->current.dest, object);
+        i32 dirAnchor = StrVec_AddVec(ctx->current.dest, object);
+        IoUtil_Annotate(m, ctx->current.dest);
 
-        ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Build object");
-        ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
-        ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
+        Dir_CheckCreate(m, StrVec_StrTo(m, ctx->current.dest, IoUtil_BasePathAnchor(ctx->current.dest)));
 
         if(File_ModTime(m, StrVec_Str(m, ctx->current.dest)) < modified){
-            ctx->cli.fields.current[BUILIDER_CLI_ACTION] = \
-                K(m, "Source is recent, link only");
             LogOut(ctx);
+            linkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
             StrVec_PopTo(ctx->current.dest, destAnchor);
             StrVec_PopTo(ctx->current.source, sourceAnchor);
             continue;
         }
 
-        LogOut(ctx);
+        buildObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
+        linkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
         StrVec_PopTo(ctx->current.dest, destAnchor);
         StrVec_PopTo(ctx->current.source, sourceAnchor);
     }
 
     StrVec_PopTo(ctx->current.dest, anchor);
 
-    /* gen */
-
-    /* build sources */
-
-    /*
-    StrVec_Add(src, path);
-    StrVec_Add(libDir, path);
-
-    Str *dir = StrVec_Str(m, libDir);
-    Dir_CheckCreate(m, dir);
-
-    Span *p = Span_Make(m);
-    Dir_Gather(m, StrVec_Str(m, src), p);
-
-    Iter it;
-    Iter_Init(&it, p);
-    while((Iter_Next(&it) & END) == 0){
-
-        StrVec *v = Iter_Get(&it);
-        Str *sourceSrc = StrVec_Str(m, v);
-        Str *fname = Span_Get(v->p, v->p->max_idx);
-
-        if(v->type.state & MORE){
-            StrVec_Pop(src);
-            StrVec_Pop(libDir);
-
-            Str *dirPath = Str_Clone(m, fname);
-            Str_Incr(dirPath, src->total);    
-            if(dirPath->bytes[dirPath->length-1] != '/'){
-                Str_Add(dirPath, (byte *)"/", 1);
-            }
-            buildDir(ctx, dirPath, libFileName, src, libDir);
-            StrVec_Add(src, path);
-            StrVec_Add(libDir, path);
-            continue;
-        }
-
-        StrVec_Add(libDir, fname);
-        Str *dest = StrVec_Str(m, libDir);
-        dest->bytes[dest->length-1] = 'o';
-
-        ctx->fields.steps.count->val.i++;
-        r |= buildObject(ctx, libFileName, dest, sourceSrc);
-
-        StrVec_Pop(libDir);
-    }
-
-    StrVec_Pop(libDir);
-    StrVec_Pop(src);
-    */
     DebugStack_Pop();
     return r;
 }
@@ -783,7 +766,8 @@ i32 main(int argc, char **argv){
 
     StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
     IoUtil_Annotate(m, prefix);
-    ctx->current.dest = CliArgs_GetAbsPath(cli, dirKey);
+    ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
+    ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->input.sources = CliArgs_Get(cli, srcKey);
     ctx->input.srcPrefix = prefix;

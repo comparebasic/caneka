@@ -136,6 +136,24 @@ Str *StrVec_Str(MemCh *m, StrVec *v){
     return StrVec_ToStr(m, v, v->total+1);
 }
 
+Str *StrVec_StrTo(MemCh *m, StrVec *v, i32 anchor){
+    i64 total = v->total;
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Prev(&it) & END) == 0 && it.idx >= anchor){
+        Str *s = Iter_Get(&it); 
+        total -= s->length;
+    }
+    Str *s = Str_Make(m, total+1);
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0 && it.idx <= anchor){
+        Str *_s = Iter_Get(&it); 
+        Str_Add(s, _s->bytes, _s->length);
+    }
+    return s;
+}
+
+
 Str *StrVec_StrCombo(MemCh *m, void *_a, void *_b){
     Abstract *a = (Abstract *)_a;
     Abstract *b = (Abstract *)_b;

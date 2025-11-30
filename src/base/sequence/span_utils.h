@@ -7,6 +7,7 @@ status Span_ReInit(Span *p);
 Span *Span_Clone(MemCh *m, Span *p);
 Span *Span_CloneShallow(MemCh *m, Span *p);
 status Span_Add(Span *p, void *t);
+status Span_AddSpan(Span *p, Span *add);
 status Span_Insert(Span *p, i32, void *t);
 status Span_Wipe(Span *p);
 i32 Span_Has(Span *p, void *a);
