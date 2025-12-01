@@ -2,7 +2,22 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <time.h>
+#include <string.h>
 #include "src/programs/cnkbuild/include/detect.h"
+
+static char *NORMAL_COLOR = "\x1b[0m";
+static char *GREEN = "\x1b[32m";
+static char *YELLOW = "\x1b[33m";
+static char *RED = "\x1b[31m";
+
+static void setNoColor(){
+    NORMAL_COLOR = GREEN = YELLOW = RED = "";
+}
+
+static int compareCstr(const char *choice, char *content){
+    return strncmp(choice, content, strlen(choice)) == 0;
+}
 
 pid_t run(char *msg, char *args[]){
     printf("Subprocess - %s: ", msg);
@@ -56,6 +71,59 @@ pid_t run(char *msg, char *args[]){
 
 int main(int argc, char *argv[]){
     char *cmd[12];
+    char *runcmd[4];
+
+    int choice = 0;
+    for(int i = 1; i < argc; i++){
+        if(compareCstr("--quiet", argv[i])){
+            setNoColor();
+            choice = -1;
+        }
+    }
+
+    if(choice >= 0){
+        printf("%s%s%s", YELLOW,"\n  Hello, and welcome to the Caneka Build Helper\n", NORMAL_COLOR);
+        printf("  What would you like to do?\n"
+        "    [1] Build and RUN Caneka and it's tests\n"
+        "     2  Build Caneka only\n"
+        "     3  Clean the ./build directory\n"
+        "     4  Build the CnkCli tools\n"
+        "     5  Build the example WebServer\n"
+        "     6  Build and RUN the example WebServer\n"
+        "     7  Read some Documentation for Caneka\n"
+        "     8  Oops, Wrong Command\n"
+        "\n"
+        "  Type a number or press Enter (default is 1)\n"
+        "\n");
+
+        char buff[2];
+        read(0, buff, 2);
+        
+        if(compareCstr("1", buff)){
+            runcmd[0] = "./build/bin/tests";
+            runcmd[1] = NULL;
+        }else if(compareCstr("2", buff)){
+            runcmd[0] = NULL;
+        }else if(compareCstr("3", buff)){
+            printf("  Not yet implemented\n");
+            exit(1);
+        }else if(compareCstr("4", buff)){
+            printf("  Not yet implemented\n");
+            exit(1);
+        }else if(compareCstr("5", buff)){
+            printf("  Not yet implemented\n");
+            exit(1);
+        }else if(compareCstr("6", buff)){
+            printf("  Not yet implemented\n");
+            exit(1);
+        }else if(compareCstr("7", buff)){
+            printf("  Documentation can be found at https://caneka.org\n");
+            exit(1);
+        }else if(compareCstr("8", buff)){
+            printf("%s%s%s", GREEN, "  Ok, See you next time!\n", NORMAL_COLOR);
+            exit(1);
+        }
+    }
 
     cmd[0] = "mkdir";
     cmd[1] = "-p";
