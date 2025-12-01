@@ -314,7 +314,9 @@ StrVec *StrVec_Copy(MemCh *m, StrVec *_v){
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
-        Str *s = Str_Clone(m, (Str *)Iter_Get(&it));
+        Str *_s = (Str *)Iter_Get(&it);
+        Str *s = Str_Clone(m, _s);
+        s->type.state = _s->type.state;
         StrVec_Add(new, s);
     }
     return new;
@@ -374,6 +376,42 @@ status StrVec_Pop(StrVec *v){
     Iter_Remove(&it);
     v->total -= s->length;
     return SUCCESS;
+}
+
+i32 StrVec_RestoreAnchor(StrVec *v, i32 anchor){
+    StrVec_PopTo(v, anchor);
+    return StrVec_Anchor(v);
+}
+
+i32 StrVec_StashAnchor(StrVec *v){
+    if(v->anchor == -1){
+        return v->p->max_idx;
+    }
+    i32 anchor = v->anchor;
+    v->anchor = -1;
+    return anchor;
+}
+
+status StrVec_Anchor(StrVec *v){
+    if(v->anchor == -1){
+        v->anchor = v->p->max_idx;
+        return ZERO;
+    }else{
+        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec already anchored @ at $", args);
+        return ERROR;
+    }
+}
+
+status StrVec_ReturnToAnchor(StrVec *v){
+    return StrVec_PopTo(v, v->anchor);
+}
+
+status StrVec_PopToAnchor(StrVec *v){
+    status r = StrVec_PopTo(v, v->anchor);
+    v->anchor = -1;
+    return r;
 }
 
 status StrVec_PopTo(StrVec *v, i32 idx){
@@ -448,5 +486,6 @@ StrVec *StrVec_Make(MemCh *m){
     StrVec *v = MemCh_Alloc(m, sizeof(StrVec));
     v->type.of = TYPE_STRVEC;
     v->p = Span_Make(m);
+    v->anchor = -1;
     return v;
 }

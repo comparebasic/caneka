@@ -30,7 +30,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
         return Fmt(bf, "BuildCtx<@ $\n"
             "  dir:@\nsrc:@\n"
             "  tools: cc:$/$ ar:$\n"
-            "  target: @ name:@ source:@ dest:@\n"
+            "  target: @\n      name:@\n      source:@\n      dest:@\n"
             "  input: inc:@ cflags:@ libs:@ sources:@ objects:@ gens:@, srcPrefix:@\n"
             "    dependencies: @\n"
             ">", args);
@@ -47,12 +47,14 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->current.targetName,
             ctx->current.source,
             ctx->current.dest,
+            ctx->input.buildDir,
             NULL
         };
         return Fmt(bf, "BuildCtx<@ $\n"
             "  dir:@\nsrc:@\n"
             "  tools: cc:@/$ ar:@\n"
             "  target: @ name:@ source:@ dest:@\n"
+            "  buildDir: @\n"
             ">", args);
     }
 }
