@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 static i64 dim_occupied_max[TABLE_MAX_DIMS] = {8, 128, 2048, 3000};
 

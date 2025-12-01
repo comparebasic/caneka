@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 status HKey_Print(Buff *bf, void *a, cls type, word flags){
     HKey *hk = (HKey *)as(a, TYPE_HKEY);

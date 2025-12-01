@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 boolean Iter_Eq(void *a, void *b){
     Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,

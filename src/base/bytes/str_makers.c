@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 status Str_AddChain(MemCh *m, Str *s, void *args[]){
     status r = READY;

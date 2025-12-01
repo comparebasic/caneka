@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Push(pd, pd->type.of);

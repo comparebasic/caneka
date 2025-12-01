@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 Str *Bytes_ToHexStr(MemCh *m, byte *b, i16 length){
     if(length > STR_MAX*2){

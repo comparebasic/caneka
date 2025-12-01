@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "module.h"
+#include "cnkbuild_module.h"
 
 status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
     BuildCtx *ctx = (BuildCtx *)as(a, TYPE_BUILDCTX);

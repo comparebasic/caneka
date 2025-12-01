@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 void **Span_ToArr(MemCh *m, Span *p){
     if((p->nvalues+1) > MAX_PTR_ARR){

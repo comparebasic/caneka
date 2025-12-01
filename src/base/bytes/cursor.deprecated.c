@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 static status Cursor_SetStr(Cursor *curs){
     DebugStack_Push(curs, curs->type.of);

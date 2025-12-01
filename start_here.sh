@@ -39,11 +39,11 @@ echo "Making directories..."
 mkdir -p ./build/libcnkbase && \
 mkdir -p ./build/bin && \
 
-cmd="$CC -g -I ./src -c -o ./build/libcnkbase/libcnkbase.a ./src/base/inc.c"
+cmd="$CC -g -I src/third/include -c -o ./build/libcnkbase/libcnkbase.a ./src/base/inc.c"
 echo "Building Caneka Base: $cmd"
 eval $cmd
 
-cmd="$CC -g -I ./src -o ./build/bin/cnkbuild ./src/programs/builder/inc.c ./build/libcnkbase/libcnkbase.a -lm"
+cmd="$CC -g -I src/third/include -o ./build/bin/cnkbuild ./src/programs/cnkbuild/inc.c ./build/libcnkbase/libcnkbase.a -lm"
 echo "Building Caneka Builder $cmd"
 eval $cmd
 

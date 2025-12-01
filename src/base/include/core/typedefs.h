@@ -1,4 +1,4 @@
-typedef char i8;
+typedef signed char i8;
 typedef unsigned char byte;
 typedef int16_t i16;
 typedef uint16_t word;

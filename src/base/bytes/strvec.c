@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 status StrVec_AddChain(StrVec *v, void *args[]){
     status r = READY;

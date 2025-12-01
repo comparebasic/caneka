@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 void *FmtVar_Get(MemCh *m, Str *key, void *arg){
     StrVec *path = StrVec_From(m, key);

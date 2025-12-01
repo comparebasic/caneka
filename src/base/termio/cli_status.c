@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 status CliStatus_SetKey(MemCh *m, CliStatus *cli, Str *key, IntPair *pair){
     return Table_Set(cli->tbl, key, I64_Wrapped(m, *((util *)pair)));

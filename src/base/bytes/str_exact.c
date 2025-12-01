@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 boolean Str_ExactStr(Str *a, Str *b){
     return a->type.state == b->type.state && Str_EqualsStr((Str *)a, (Str *)b);

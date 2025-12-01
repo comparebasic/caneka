@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 word GLOBAL_flags = 0;
 word NORMAL_FLAGS = 0b0000000011111111;

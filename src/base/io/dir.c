@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 static Str _globalS;
 static byte _buff[STR_DEFAULT];

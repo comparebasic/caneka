@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 static MemPage *MemCh_AddPage(MemCh *m, i16 level){
     MemPage *pg = MemPage_Make(m, level);

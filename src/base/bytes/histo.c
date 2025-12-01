@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 status Histo_FeedVec(Histo *hst, StrVec *v){
     Iter it;

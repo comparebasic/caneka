@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "module.h"
+#include "cnkbuild_module.h"
 
 static status out(i32 fd, char *buff, char **b){
     if(*b != buff){

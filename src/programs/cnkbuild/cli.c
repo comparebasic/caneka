@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "module.h"
+#include "cnkbuild_module.h"
 
 status BuildCli_RenderStatus(MemCh *m, void *a){
     CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);

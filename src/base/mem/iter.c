@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 i32 _increments[SPAN_MAX_DIMS+2] = {1, 16, 256, 4096, 65536, 1048576};
 i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535};

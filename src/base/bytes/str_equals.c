@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 static boolean Str_equalsStrPos(Str *a, i32 offsetA, Str *b, i32 offsetB, i32 total){
     if(a == NULL || b == NULL){

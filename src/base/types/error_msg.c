@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 ErrorMsg *ErrorMsg_Make(MemCh *m, char *func, char *file, int line, char *fmt, void **args){
     ErrorMsg *msg = MemCh_AllocOf(m, sizeof(ErrorMsg), TYPE_ERROR_MSG);

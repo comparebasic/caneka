@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 boolean TextCharFilter(byte *b, i64 length){
     byte *end = b+(length-1);

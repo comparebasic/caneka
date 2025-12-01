@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 Coord *Coord_Make(MemCh *m, word a, word b){
     Coord *cr = (Coord *)MemCh_Alloc(m, sizeof(Coord));

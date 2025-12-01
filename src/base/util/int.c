@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 Str *Str_UniRandom(MemCh *m, i64 n, word digits){
     Str *s = Str_Make(m, digits+1);

@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 static char *baseTypeStrings[] = {
     "_TYPE_ZERO",

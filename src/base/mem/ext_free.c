@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 ExtFree *ExtFree_Make(MemCh *m, ExtFreeFunc func, void *arg){
     ExtFree *ex = MemCh_Alloc(m, sizeof(ExtFree));

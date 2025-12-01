@@ -1,6 +1,5 @@
 #include <external.h>
-#include <caneka.h>
-#include "../module.h"
+#include "base_module.h"
 
 static boolean _initialized = FALSE;
 struct lookup *BlankerLookup = NULL;
