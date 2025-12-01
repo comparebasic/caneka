@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include "module.h" 
+#include <nacl_module.h>
 
 void randombytes(byte *b, i64 length){
     getrandom(b, length, 0);

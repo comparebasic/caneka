@@ -12,7 +12,7 @@ These modifications are also public domain.
 #include <nacl/crypto_hashblocks_sha256.h>
 #include <nacl/crypto_hash.h>
 #include <caneka.h>
-#include "../crypto/module.h"
+#include <nacl_module.h>
 
 #define blocks crypto_hashblocks_sha256
 

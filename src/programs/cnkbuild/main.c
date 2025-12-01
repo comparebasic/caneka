@@ -501,6 +501,8 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     i32 sourceAnchor = ctx->current.source->p->max_idx;
 
+    Table *skips = Table_Get(sel->meta, K(m, "skip"));
+
     Iter it;
     Iter_Init(&it, sel->dest);
     while((Iter_Next(&it) & END) == 0){
@@ -508,6 +510,15 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
         ctx->input.countModuleSources->val.value++;
 
         StrVec *v = Iter_Get(&it);
+        Str *fname = Span_Get(v->p, v->p->max_idx);
+        if(Table_Get(skips, fname) != NULL){
+            ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Skipping Object");
+            ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = v;
+            ctx->cli.fields.current[BUILIDER_CLI_DEST] = NULL;
+            LogOut(ctx);
+            continue;
+        }
+
         IoUtil_Annotate(m, v);
         StrVec *source = StrVec_Make(m);
         StrVec_AddVecAfter(source, v, ctx->input.srcPrefix->p->nvalues+1);
@@ -517,11 +528,11 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
         i32 dirAnchor = StrVec_AddVec(ctx->current.dest, object);
         IoUtil_Annotate(m, ctx->current.dest);
 
-        Dir_CheckCreate(m, StrVec_StrTo(m, ctx->current.dest, IoUtil_BasePathAnchor(ctx->current.dest)));
+        Dir_CheckCreate(m,
+            StrVec_StrTo(m, ctx->current.dest, IoUtil_BasePathAnchor(ctx->current.dest)));
 
         Str *dest = StrVec_Str(m, ctx->current.dest);
         if(File_PathExists(m, dest) && File_ModTime(m, dest) > modified){
-            LogOut(ctx);
             linkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
             StrVec_PopTo(ctx->current.dest, destAnchor);
             StrVec_PopTo(ctx->current.source, sourceAnchor);
