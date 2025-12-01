@@ -57,6 +57,7 @@ typedef struct buildctx {
         StrVec *source;
         StrVec *dest;
         Hashed *depKv;
+        Span *inc;
     } current;
     struct {
         StrVec *buildDir;

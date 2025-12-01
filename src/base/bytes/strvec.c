@@ -1,8 +1,8 @@
 #include <external.h>
 #include "base_module.h"
 
-status StrVec_AddChain(StrVec *v, void *args[]){
-    status r = READY;
+i32 StrVec_AddChain(StrVec *v, void *args[]){
+    i32 anchor = v->p->max_idx;
     Abstract **ptr = (Abstract **)args;
     MemCh *m = v->p->m;
     while(*ptr != NULL){
@@ -15,28 +15,21 @@ status StrVec_AddChain(StrVec *v, void *args[]){
                 Str *last = Span_Get(v->p, v->p->max_idx);
                 if(last->length + s->length < last->alloc){
                     Str_Add(last, s->bytes, s->length);
-                    r |= SUCCESS;
                 }else{
                     Str *new = Str_Make(m, last->length+s->length+1);
                     Str_Add(new, last->bytes, last->length);
                     Str_Add(new, s->bytes, s->length);
                     Span_Set(v->p, v->p->max_idx, new);
                     v->total += s->length;
-                    r |= SUCCESS;
                 }
             }else{
                 StrVec_Add(v, (Str *)a);
-                r |= SUCCESS;
             }
         }
         ptr++;
     }
-    
-    if(r == READY){
-        r |= NOOP;
-    }
 
-    return r;
+    return anchor;
 }
 
 status StrVec_Decr(StrVec *v, i64 amount){
@@ -128,11 +121,29 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
     return s;
 }
 
-Str *StrVec_Str(MemCh *m, StrVec *v){
-    if(v == NULL){
+Str *StrVec_Str(MemCh *m, void *_a){
+    if(_a == NULL){
         return NULL;
     }
-    return StrVec_ToStr(m, v, v->total+1);
+    Abstract *a = (Abstract *)_a;
+    if(a->type.of == TYPE_STR){
+        return (Str *)a;
+    }else if(a->type.of == TYPE_STRVEC){
+        StrVec *v = (StrVec *)a;
+        return StrVec_ToStr(m, v, v->total+1);
+    }else{
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Expected Str or StrVec", NULL);
+        return NULL;
+    }
+}
+
+Str *StrVec_StrPrefixed(MemCh *m, void *prefix, StrVec *v){
+    Str *pre = StrVec_Str(m, prefix);
+    Str *build = Str_Make(m, v->total+pre->length);
+    Str_Add(build, pre->bytes, pre->length);
+    Str_AddVec(build, v);
+    return build;
 }
 
 Str *StrVec_StrTo(MemCh *m, StrVec *v, i32 anchor){
@@ -203,19 +214,6 @@ Str *StrVec_StrCombo(MemCh *m, void *_a, void *_b){
     }
 
     return s;
-}
-
-i64 StrVec_ToFd(StrVec *v, i32 fd){
-    Iter it;
-    Iter_Init(&it, v->p);
-    i64 total = 0;
-    while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)it.value;
-        if(s != NULL){
-            total += Str_ToFd(s, fd);
-        }
-    }
-    return total;
 }
 
 i64 StrVec_FfIter(Iter *it, i64 offset){

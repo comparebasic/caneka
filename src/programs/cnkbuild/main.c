@@ -3,6 +3,33 @@
 
 static boolean _quiet = FALSE;
 
+static status genAllIncSpan(BuildCtx *ctx){
+    MemCh *m = ctx->m;
+    void *args[5];
+    Span *p = Span_Make(m);
+    args[0] = IoUtil_PathSep(m);
+    args[1] = S(m, "include");
+    args[2] = IoUtil_PathSep(m);
+    args[3] = NULL;
+    i32 anchor = StrVec_AddChain(ctx->input.buildDir, args);
+
+    Span_Add(p, StrVec_StrPrefixed(m, S(m, "-I"), ctx->input.buildDir));
+    StrVec_PopTo(ctx->input.buildDir, anchor);
+
+    StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
+    args[0] = IoUtil_PathSep(m);
+    args[1] = S(m, "third");
+    args[2] = IoUtil_PathSep(m);
+    args[3] = S(m, "include");
+    args[4] = NULL;
+    i32 srcAnchor = StrVec_AddChain(srcIncPath, args);
+
+    Span_Add(p, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
+    StrVec_PopTo(srcIncPath, srcAnchor);
+    ctx->input.inc = p;
+    return ZERO;
+}
+
 static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     void *args[5];
     MemCh *m = ctx->m;
@@ -74,6 +101,8 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                 if(Equals(label, K(m, "choice"))){
                     if(name != NULL && name->length > 0){
                         key = StrVec_From(m, Str_Clone(m, name));
+
+                        Table_SetInTable(sel->meta, S(m, "dep"), key, key);
                     }
                 }else{
                     Str *meta = label;
@@ -91,12 +120,7 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                         meta->type.state |= BUILD_INCLUDE; 
                     }
 
-                    Table *tbl = NULL;
-                    if((tbl = Table_Get(sel->meta, meta)) == NULL){
-                        tbl = Table_Make(m);
-                        Table_Set(sel->meta, meta, tbl);
-                    }
-                    Table_Set(tbl, shelf, shelf);
+                    Table_SetInTable(sel->meta, meta, shelf, shelf);
 
                     label = NULL;
                     name = NULL;
@@ -106,6 +130,8 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             }else{
                 key = NULL;
             }
+
+            Table_SetInTable(sel->meta, S(m, "dep"), shelf, shelf);
 
             path = StrVec_Copy(m, ctx->input.srcPrefix);
             StrVec_Add(path, IoUtil_PathSep(m));
@@ -323,9 +349,7 @@ static status linkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
 
 static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
-
-    printf("buildObject hi\n");
-    fflush(stdout);
+    void *args[8];
 
     status r = READY;
     MemCh *m = ctx->m;
@@ -343,40 +367,36 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     Span_AddSpan(cmd, ctx->input.cflags);
     Span_AddSpan(cmd, ctx->input.inc);
 
-    i32 anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
-    StrVec_Add(ctx->input.buildDir, S(m, "include"));
-    StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+    args[0] = IoUtil_PathSep(m);
+    args[1] = S(m, "include");
+    args[2] = IoUtil_PathSep(m);
+    args[3] = NULL;
+    i32 anchor = StrVec_AddChain(ctx->input.buildDir, args);
 
-    Str *buildInc = Str_Make(m, ctx->input.buildDir->total+2);
-    Str_Add(buildInc, (byte *)"-I", 2);
-    Str_AddVec(buildInc, ctx->input.buildDir);
-    Span_Add(cmd, buildInc);
+    Span_Add(cmd, StrVec_StrPrefixed(m, S(m, "-I"), ctx->input.buildDir));
     StrVec_PopTo(ctx->input.buildDir, anchor);
 
-    StrVec *thirdIncPath = StrVec_Copy(m, ctx->src);
-    StrVec_Add(thirdIncPath, IoUtil_PathSep(m));
-    StrVec_Add(thirdIncPath, S(m, "third"));
-    StrVec_Add(thirdIncPath, IoUtil_PathSep(m));
-    StrVec_Add(thirdIncPath, S(m, "include"));
-    Str *thirdInc = StrVec_Str(m, thirdIncPath);
-    buildInc = Str_Make(m, thirdInc->length+2);
-    Str_Add(buildInc, (byte *)"-I", 2);
-    Str_Add(buildInc, thirdInc->bytes, thirdInc->length);
-    Span_Add(cmd, buildInc);
+    StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
+    args[0] = IoUtil_PathSep(m);
+    args[1] = S(m, "third");
+    args[2] = IoUtil_PathSep(m);
+    args[3] = S(m, "include");
+    i32 srcAnchor = StrVec_AddChain(srcIncPath, args);
 
-    StrVec *localIncPath = StrVec_Copy(m, ctx->src);
-    StrVec_Add(localIncPath, IoUtil_PathSep(m));
-    StrVec_AddVec(localIncPath, name);
-    StrVec_Add(localIncPath, IoUtil_PathSep(m));
-    StrVec_Add(localIncPath, S(m, "include"));
-    Str *localInc = StrVec_Str(m, localIncPath);
-    buildInc = Str_Make(m, localInc->length+2);
-    Str_Add(buildInc, (byte *)"-I", 2);
-    Str_Add(buildInc, localInc->bytes, localInc->length);
-    Span_Add(cmd, buildInc);
+    Span_Add(cmd, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
+    StrVec_PopTo(srcIncPath, srcAnchor);
+
+    args[0] = IoUtil_PathSep(m);
+    args[1] = name;
+    args[2] = IoUtil_PathSep(m);
+    args[3] = S(m, "include");
+    srcAnchor = StrVec_AddChain(srcIncPath, args);
+    Span_Add(cmd, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
+    StrVec_PopTo(srcIncPath, srcAnchor);
 
     anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
     StrVec_AddVec(ctx->input.buildDir, ctx->current.targetName);
+
 
     StrVec_PopTo(ctx->input.buildDir, anchor);
 
@@ -469,6 +489,57 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = h->key;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
     LogOut(ctx);
+
+    Span *inc = Span_CloneShallow(m, ctx->input.inc);
+    Span *moduleInc = Span_Make(m);
+
+    StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
+    args[0] = IoUtil_PathSep(m);
+    args[1] = key;
+    args[2] = IoUtil_PathSep(m);
+    args[3] = S(m, "include");
+    args[4] = NULL;
+    i32 srcAnchor = StrVec_AddChain(srcIncPath, args);
+    Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
+    StrVec_PopTo(srcIncPath, srcAnchor);
+
+    anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+    StrVec_AddVec(ctx->input.buildDir, ctx->current.targetName);
+
+    Table *incMeta = Table_Get(sel->meta, S(m, "include"));
+    if(incMeta != NULL){
+        i32 anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+        Iter it;
+        Iter_Init(&it, incMeta);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                i32 anchor = ctx->input.buildDir->p->max_idx;
+                StrVec *path = NULL;
+                if(IoUtil_IsStrAbs(h->key)){
+                    path = StrVec_From(m, h->key);
+                }else{
+                    StrVec_AddVec(ctx->input.buildDir, key);
+                    StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+                    StrVec_Add(ctx->input.buildDir, h->key);
+
+                    path = ctx->input.buildDir;
+                }
+                Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), path));
+                StrVec_PopTo(ctx->input.buildDir, anchor);
+            }
+        }
+        StrVec_PopTo(ctx->input.buildDir, anchor);
+    }
+
+    Table_Set(sel->meta, S(m, "inc"), moduleInc);
+
+    /* gather deps */ 
+    /* make current.inc [all, moduleInc, depModuleInc...] */
+    /* use current.inc for build object */
+
+    void *ar[] = {key, inc, moduleInc, NULL};
+    Out("^p.Includes for ^D.$^d.  @ / @^0\n", ar);
 
     Str *libPathStr = StrVec_Str(m , ctx->current.dest);
     if(File_PathExists(m, libPathStr) && File_ModTime(m, libPathStr) > sel->time){
@@ -603,6 +674,8 @@ static status build(BuildCtx *ctx){
     status r = READY;
     MemCh *m = ctx->m;
     void *args[5];
+
+    genAllIncSpan(ctx);
 
     /* build dependencies */
     Iter it;

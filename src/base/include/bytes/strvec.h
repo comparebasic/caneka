@@ -12,7 +12,6 @@ typedef struct strvec {
 
 #define Sv(m, x) StrVec_From((m), Str_FromCstr((m), (x), STRING_COPY))
 
-i64 StrVec_ToFd(StrVec *v, int fd);
 StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig);
 status StrVec_NextSlot(StrVec *v, struct cursor *curs);
 i32 StrVec_GetIdx(StrVec *v, Str *s);
@@ -28,7 +27,8 @@ StrVec *StrVec_FromB64(MemCh *m, StrVec *v);
 i64 StrVec_FfIter(Iter *it, i64 offset);
 void *StrVec_Nth(MemCh *m, StrVec *v, i32 n);
 void *StrVec_Clone(MemCh *m, void *);
-Str *StrVec_Str(MemCh *m, StrVec *v);
+Str *StrVec_Str(MemCh *m, void *a);
+Str *StrVec_StrPrefixed(MemCh *m, void *prefix, StrVec *v);
 Str *StrVec_StrTo(MemCh *m, StrVec *v, i32 anchor);
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length);
 StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length);
@@ -36,6 +36,6 @@ StrVec *StrVec_Copy(MemCh *m, StrVec *v);
 StrVec *StrVec_StrVec(MemCh *m, void *a);
 Str *StrVec_StrCombo(MemCh *m, void *a, void *b);
 status Str_AddVec(Str *s, StrVec *v);
-status StrVec_AddChain(StrVec *v, void *args[]);
+i32 StrVec_AddChain(StrVec *v, void *args[]);
 status StrVec_Pop(StrVec *v);
 status StrVec_PopTo(StrVec *v, i32 idx);

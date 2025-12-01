@@ -102,6 +102,21 @@ status Table_Lay(Span *dest, Span *src, boolean overlay){
     return r;
 }
 
+status Table_SetInTable(Table *orig, void *tblKey, void *key, void *value){
+    Table *tbl = NULL;
+    if((tbl = Table_Get(orig, tblKey)) == NULL){
+        tbl = Table_Make(orig->m);
+        Table_Set(orig, tblKey, tbl);
+    }
+    if(tbl == NULL || tbl->type.of != TYPE_TABLE){
+        void *args[] = {tblKey, tbl, NULL};
+        Error(orig->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Expected a nested table or NULL tblKey @ found @", args);
+        return ERROR;
+    }
+    return Table_Set(tbl, key, value);
+}
+
 status Table_Merge(Table *dest, Table *src){
     return Table_Lay(dest, src, TRUE);
 }
