@@ -1,3 +1,6 @@
+#ifndef EXT_MODULE_H
+#define EXT_MODULE_H
+
 #include "types.h"
 #include "parser.h"
 #include "persist.h"
@@ -7,3 +10,5 @@
 #include "auth.h"
 #include "serve.h"
 #include "doc.h"
+
+#endif

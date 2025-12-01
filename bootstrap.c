@@ -10,6 +10,30 @@
 #define TRUE 1
 #define FALSE 0
 
+char *menuKeys[] = {
+    "run-tests",
+    "build-only",
+    "clean",
+    "build-cli",
+    "build-webserver",
+    "build-run-webserver",
+    "read-documentation",
+    "oops",
+    NULL
+};
+
+char *menuOptions[] = {
+    "Build and RUN Caneka and it's tests",
+    "Build Caneka only",
+    "Clean the ./build directory",
+    "Build the CnkCli tools",
+    "Build the example WebServer",
+    "Build and RUN the example WebServer",
+    "Read some Documentation for Caneka",
+    "Oops, Wrong Command",
+    NULL
+};
+
 static char *NORMAL_COLOR = "\x1b[0m";
 static char *GREEN = "\x1b[32m";
 static char *YELLOW = "\x1b[33m";
@@ -118,73 +142,88 @@ pid_t run(char *msg, char *args[]){
     return -1;
 }
 
+char *menu(){
+    printf("%s%s%s", YELLOW,"\n  Hello, and welcome to the Caneka Build Helper\n", NORMAL_COLOR);
+    printf("  What would you like to do?\n\n");
+
+    int i = 1;
+    char **opt = menuOptions;
+    while(*opt != NULL){
+        printf("    %d %s\n", i, *opt);
+        opt++; 
+        i++;
+    }
+
+    printf("  Type a number or press Enter (default is 1)\n\n");
+
+    char buff[2];
+    read(0, buff, 2);
+    int choice = atoi(buff);
+    if(choice > 0 && choice < i-1){
+        return menuKeys[choice-1];
+    }
+    return NULL;
+}
+
 int main(int argc, char *argv[]){
     char *cmd[12];
     char *runcmd[4];
 
-    int choice = 0;
-    for(int i = 1; i < argc; i++){
-        if(compareCstr("--quiet", argv[i])){
-            setNoColor();
-            choice = -1;
+    char *choice = menuKeys[0];
+    if(argc < 2){
+        choice = menu();
+        if(choice == NULL){
+            choice = menuKeys[0];
+        }
+    }else{
+        for(int i = 1; i < argc; i++){
+            if(compareCstr("--clean", argv[i])){
+                setNoColor();
+                choice = "clean";
+            }
         }
     }
 
-    if(choice >= 0){
-        printf("%s%s%s", YELLOW,"\n  Hello, and welcome to the Caneka Build Helper\n", NORMAL_COLOR);
-        printf("  What would you like to do?\n"
-        "    [1] Build and RUN Caneka and it's tests\n"
-        "     2  Build Caneka only\n"
-        "     3  Clean the ./build directory\n"
-        "     4  Build the CnkCli tools\n"
-        "     5  Build the example WebServer\n"
-        "     6  Build and RUN the example WebServer\n"
-        "     7  Read some Documentation for Caneka\n"
-        "     8  Oops, Wrong Command\n"
-        "\n"
-        "  Type a number or press Enter (default is 1)\n"
-        "\n");
-
-        char buff[2];
-        read(0, buff, 2);
-        
-        if(compareCstr("1", buff)){
-            runcmd[0] = "./build/bin/tests";
-            runcmd[1] = NULL;
-        }else if(compareCstr("2", buff)){
-            runcmd[0] = NULL;
-        }else if(compareCstr("3", buff)){
-            char buff[512];
-            memset(buff, 0, 512);
-            char *cstr = getcwd((char *)buff, 512);
-            char *dirname = "build";
-            ssize_t length = strlen(cstr);
-            ssize_t dirlength = strlen(dirname);
-            if(length + dirlength + 1 <  512 ){
-                memcpy(buff+length, "/", 1);
-                memcpy(buff+length+1, dirname, dirlength);
-            }
-            printf("%sRemoving build dir %s%s\n",YELLOW, buff, NORMAL_COLOR);
-            if(!cleanDir(buff)){
-                printf("%sError Removing build dir %s%s\n", RED, buff, NORMAL_COLOR);
-            }
-            exit(1);
-        }else if(compareCstr("4", buff)){
-            printf("  Not yet implemented\n");
-            exit(1);
-        }else if(compareCstr("5", buff)){
-            printf("  Not yet implemented\n");
-            exit(1);
-        }else if(compareCstr("6", buff)){
-            printf("  Not yet implemented\n");
-            exit(1);
-        }else if(compareCstr("7", buff)){
-            printf("  Documentation can be found at https://caneka.org\n");
-            exit(1);
-        }else if(compareCstr("8", buff)){
-            printf("%s%s%s", GREEN, "  Ok, See you next time!\n", NORMAL_COLOR);
+    if(compareCstr("run-tests", choice)){
+        runcmd[0] = "./build/bin/tests";
+        runcmd[1] = NULL;
+    }else if(compareCstr("build-only", choice)){
+        runcmd[0] = NULL;
+    }else if(compareCstr("clean", choice)){
+        char buff[512];
+        memset(buff, 0, 512);
+        char *cstr = getcwd((char *)buff, 512);
+        char *dirname = "build";
+        ssize_t length = strlen(cstr);
+        ssize_t dirlength = strlen(dirname);
+        if(length + dirlength + 1 <  512 ){
+            memcpy(buff+length, "/", 1);
+            memcpy(buff+length+1, dirname, dirlength);
+        }
+        printf("%sRemoving build dir %s%s\n",YELLOW, buff, NORMAL_COLOR);
+        if(!cleanDir(buff)){
+            printf("%sError Removing build dir %s%s\n", RED, buff, NORMAL_COLOR);
             exit(1);
         }
+        exit(0);
+    }else if(compareCstr("build-cli", choice)){
+        printf("  Not yet implemented\n");
+        exit(1);
+    }else if(compareCstr("build-webserver", choice)){
+        printf("  Not yet implemented\n");
+        exit(1);
+    }else if(compareCstr("build-run-webserver", choice)){
+        printf("  Not yet implemented\n");
+        exit(1);
+    }else if(compareCstr("read-documentation", choice)){
+        printf("  Documentation can be found at https://caneka.org\n");
+        exit(1);
+    }else if(compareCstr("oops", choice)){
+        printf("%s%s%s", GREEN, "  Ok, See you next time!\n", NORMAL_COLOR);
+        exit(1);
+    }else{
+        printf("%s%s%s", RED, "  Unexpected choice.\n", NORMAL_COLOR);
+        exit(1);
     }
 
     cmd[0] = "mkdir";

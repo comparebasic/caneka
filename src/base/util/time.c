@@ -12,12 +12,12 @@ boolean MicroTime_TimeSpecGreater(struct timespec *a, struct timespec *b){
 }
 
 microTime MicroTime_FromSpec(struct timespec *ts){
-    return (ts->tv_sec ) + (ts->tv_nsec );
+    return (ts->tv_sec * 1000l) + (ts->tv_nsec / 1000l);
 }
 
 void MicroTime_ToSpec(struct timespec *ts, microTime tm){
-    ts->tv_sec = tm;
-    ts->tv_nsec = tm; 
+    ts->tv_sec = tm / 1000;
+    ts->tv_nsec = tm % 1000; 
 }
 
 status Time_Delay(microTime tm, microTime *remaining){

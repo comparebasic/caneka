@@ -152,6 +152,10 @@ static status genInclude(BuildCtx *ctx){
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = fname;
 
     i32 srcAnchor = StrVec_Add(absSrc, IoUtil_PathSep(m));
+    StrVec_Add(absSrc, S(m, "third"));
+    StrVec_Add(absSrc, IoUtil_PathSep(m));
+    StrVec_Add(absSrc, S(m, "include"));
+    StrVec_Add(absSrc, IoUtil_PathSep(m));
     StrVec_Add(absSrc, S(m, "external.h"));
     args[0] = absSrc;
     args[1] = NULL;
@@ -170,7 +174,10 @@ static status genInclude(BuildCtx *ctx){
             i32 srcAnchor = StrVec_Add(absSrc, IoUtil_PathSep(m));
             StrVec_AddVec(absSrc, h->key);
             StrVec_Add(absSrc, IoUtil_PathSep(m));
-            StrVec_Add(absSrc, S(m, "module.h"));
+            StrVec_Add(absSrc, S(m, "include"));
+            StrVec_Add(absSrc, IoUtil_PathSep(m));
+            StrVec_AddVecAfter(absSrc, h->key, IoUtil_BasePathAnchor(h->key));
+            StrVec_Add(absSrc, S(m, "_module.h"));
 
             ctx->input.countModules->val.value = it.p->nvalues - it.idx;
             ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Writing include");
@@ -316,6 +323,10 @@ static status linkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
 
 static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
+
+    printf("buildObject hi\n");
+    fflush(stdout);
+
     status r = READY;
     MemCh *m = ctx->m;
 
@@ -342,14 +353,28 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     Span_Add(cmd, buildInc);
     StrVec_PopTo(ctx->input.buildDir, anchor);
 
-    Str *localInc = StrVec_StrTo(m,
-        ctx->current.source, IoUtil_BasePathAnchor(ctx->current.source));
+    StrVec *thirdIncPath = StrVec_Copy(m, ctx->src);
+    StrVec_Add(thirdIncPath, IoUtil_PathSep(m));
+    StrVec_Add(thirdIncPath, S(m, "third"));
+    StrVec_Add(thirdIncPath, IoUtil_PathSep(m));
+    StrVec_Add(thirdIncPath, S(m, "include"));
+    Str *thirdInc = StrVec_Str(m, thirdIncPath);
+    buildInc = Str_Make(m, thirdInc->length+2);
+    Str_Add(buildInc, (byte *)"-I", 2);
+    Str_Add(buildInc, thirdInc->bytes, thirdInc->length);
+    Span_Add(cmd, buildInc);
+
+    StrVec *localIncPath = StrVec_Copy(m, ctx->src);
+    StrVec_Add(localIncPath, IoUtil_PathSep(m));
+    StrVec_AddVec(localIncPath, name);
+    StrVec_Add(localIncPath, IoUtil_PathSep(m));
+    StrVec_Add(localIncPath, S(m, "include"));
+    Str *localInc = StrVec_Str(m, localIncPath);
     buildInc = Str_Make(m, localInc->length+2);
     Str_Add(buildInc, (byte *)"-I", 2);
     Str_Add(buildInc, localInc->bytes, localInc->length);
     Span_Add(cmd, buildInc);
 
-    printf("I\n");
     anchor = StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
     StrVec_AddVec(ctx->input.buildDir, ctx->current.targetName);
 
@@ -391,9 +416,6 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     Span_Add(cmd, StrVec_Str(m, ctx->current.dest));
     Span_Add(cmd, StrVec_Str(m, ctx->current.source));
     Span_AddSpan(cmd, ctx->input.libs);
-
-    void *ar[] = {cmd, NULL};
-    Out("^c. Build cmd &^\n", ar);
 
     ProcDets pd;
     ProcDets_Init(&pd);
@@ -446,8 +468,18 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME] = ctx->current.targetName;
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = h->key;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
+    LogOut(ctx);
 
-    microTime modified = File_ModTime(m, StrVec_Str(m, ctx->current.dest));
+    Str *libPathStr = StrVec_Str(m , ctx->current.dest);
+    if(File_PathExists(m, libPathStr) && File_ModTime(m, libPathStr) > sel->time){
+        ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library is recent, skipping");
+        LogOut(ctx);
+        ctx->input.countSources->val.value += ctx->input.totalModuleSources->val.value;
+        StrVec_PopTo(ctx->current.dest, anchor);
+        DebugStack_Pop();
+        return ZERO;
+    }
+
     StrVec_PopTo(ctx->current.dest, destAnchor);
 
     ctx->input.totalModuleSources->val.value = sel->dest->nvalues;
@@ -459,16 +491,13 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     ctx->type.state |= PROCESSING;
 
-    if(modified > sel->time){
-        ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library is recent, skipping");
-        LogOut(ctx);
-        ctx->input.countSources->val.value += ctx->input.totalModuleSources->val.value;
-        StrVec_PopTo(ctx->current.dest, anchor);
-        DebugStack_Pop();
-        return ZERO;
-    }
+    microTime modified = File_ModTime(m, libPathStr);
 
-    LogOut(ctx);
+    args[0] = MicroTime_ToStr(m, modified);
+    args[1] = MicroTime_ToStr(m, sel->time);
+    args[2] = libPathStr;
+    args[3] = NULL;
+    Out("^c.EXISTS BUILDING!!! $ latest change $ for $^0\n", args);
 
     i32 sourceAnchor = ctx->current.source->p->max_idx;
 
@@ -490,7 +519,8 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
         Dir_CheckCreate(m, StrVec_StrTo(m, ctx->current.dest, IoUtil_BasePathAnchor(ctx->current.dest)));
 
-        if(File_ModTime(m, StrVec_Str(m, ctx->current.dest)) < modified){
+        Str *dest = StrVec_Str(m, ctx->current.dest);
+        if(File_PathExists(m, dest) && File_ModTime(m, dest) > modified){
             LogOut(ctx);
             linkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
             StrVec_PopTo(ctx->current.dest, destAnchor);
@@ -631,7 +661,7 @@ status LogOut(BuildCtx *ctx){
                 args[4] = ctx->input.countSources;
                 args[5] = ctx->input.totalSources;
                 args[6] = NULL;
-                Out("Building $/$ of module $/$ total $/$", args);
+                Out("$/$ of module $/$ total $/$", args);
                 Out(" for $\n    $ $ -> $\n", ctx->cli.fields.current);
             }
         }else{
@@ -766,6 +796,8 @@ i32 main(int argc, char **argv){
     IoUtil_Annotate(m, prefix);
     ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
+    ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
+    ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->input.sources = CliArgs_Get(cli, srcKey);
     ctx->input.srcPrefix = prefix;

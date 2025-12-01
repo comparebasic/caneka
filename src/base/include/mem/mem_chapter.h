@@ -16,6 +16,7 @@ typedef struct mem_ctx {
 
 void *MemCh_Alloc(MemCh *m, size_t sz);
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf);
+void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize);
 status MemCh_Free(MemCh *m);
 status MemCh_FreeTemp(MemCh *m);
 MemCh *MemCh_OnPage();
