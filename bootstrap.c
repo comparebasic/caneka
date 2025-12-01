@@ -1,10 +1,14 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <string.h>
+#include <dirent.h>
 #include "src/programs/cnkbuild/include/detect.h"
+
+#define TRUE 1
+#define FALSE 0
 
 static char *NORMAL_COLOR = "\x1b[0m";
 static char *GREEN = "\x1b[32m";
@@ -17,6 +21,51 @@ static void setNoColor(){
 
 static int compareCstr(const char *choice, char *content){
     return strncmp(choice, content, strlen(choice)) == 0;
+}
+
+int cleanDir(char *path){
+    struct dirent *ent;
+    DIR *d = opendir(path);
+    char buff[512];
+    ssize_t pos = strlen(path);
+    memset(buff, 0, 512);
+    memcpy(buff, path, pos);
+    if(d != NULL){
+        char *dir = NULL;
+        while((ent = readdir(d)) != NULL){
+            if(ent->d_name[0] == '.' && (ent->d_name[0] == '.' || ent->d_name[0] == '0')){
+                continue;
+            }
+            ssize_t len = strlen(ent->d_name);
+            ssize_t length = strlen(ent->d_name);
+            if(pos+length+1 > 512){
+                return 1;
+            }
+            memcpy(buff+pos, "/", 1);
+            memcpy(buff+pos+1, ent->d_name, length);
+            if(ent->d_type == DT_DIR){
+                if(!cleanDir(buff)){
+                    return FALSE;
+                }
+                if(buff[0] != '\0'){
+                    printf("rmdir %s\n", buff);
+                    if(rmdir(buff) != 0){
+                        return FALSE;
+                    }
+                }
+            }else{
+                printf("unlink %s\n", buff);
+                if(unlink(buff) != 0){
+                    return FALSE;
+                }
+            }
+            memset(buff+pos, 0, length+1);
+        }
+        closedir(d);
+        return TRUE;
+    }else{
+        return FALSE;
+    }
 }
 
 pid_t run(char *msg, char *args[]){
@@ -105,7 +154,20 @@ int main(int argc, char *argv[]){
         }else if(compareCstr("2", buff)){
             runcmd[0] = NULL;
         }else if(compareCstr("3", buff)){
-            printf("  Not yet implemented\n");
+            char buff[512];
+            memset(buff, 0, 512);
+            char *cstr = getcwd((char *)buff, 512);
+            char *dirname = "build";
+            ssize_t length = strlen(cstr);
+            ssize_t dirlength = strlen(dirname);
+            if(length + dirlength + 1 <  512 ){
+                memcpy(buff+length, "/", 1);
+                memcpy(buff+length+1, dirname, dirlength);
+            }
+            printf("%sRemoving build dir %s%s\n",YELLOW, buff, NORMAL_COLOR);
+            if(!cleanDir(buff)){
+                printf("%sError Removing build dir %s%s\n", RED, buff, NORMAL_COLOR);
+            }
             exit(1);
         }else if(compareCstr("4", buff)){
             printf("  Not yet implemented\n");
