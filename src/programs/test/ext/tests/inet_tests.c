@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <test.h>
+#include <test_module.h>
 #include "tests.h"
 
 static status InetExample_finalize(Step *_st, Task *tsk){

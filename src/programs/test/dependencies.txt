@@ -1,3 +1,6 @@
 exec=main.c
 exec=content-fetch.c
 inter
+ext
+choice=crypto@third/nacl
+base

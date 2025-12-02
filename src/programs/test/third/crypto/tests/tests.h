@@ -1,3 +1,4 @@
+status Crypto_Tests(MemCh *m);
 static TestSet InterTests[] = {
     {
         "ThirdParty/Api",

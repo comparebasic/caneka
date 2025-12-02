@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <test.h>
+#include <test_module.h>
 #include "tests.h"
 
 static status test_ObjKeyAndOrder(MemCh *m, 

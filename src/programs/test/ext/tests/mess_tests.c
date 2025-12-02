@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <test.h>
+#include <test_module.h>
 #include "tests.h"
 
 Mess *make_Expected(MemCh *m){

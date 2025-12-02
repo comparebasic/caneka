@@ -1,3 +1,38 @@
+status BinSeg_Tests(MemCh *gm);
+status BinSegCollection_Tests(MemCh *gm);
+status BinSegV_Tests(MemCh *gm);
+status BinSegReversedV_Tests(MemCh *gm);
+status Config_Tests(MemCh *gm);
+status TaskStep_Tests(MemCh *gm);
+status Templ_Tests(MemCh *gm);
+status TemplCtx_Tests(MemCh *gm);
+status NodeObj_Tests(MemCh *gm);
+status StrVecSplit_Tests(MemCh *gm);
+status ServeTcp_Tests(MemCh *gm);
+status Snip_Tests(MemCh *gm);
+status SnipModify_Tests(MemCh *gm);
+status Inet_Tests(MemCh *gm);
+status Password_Tests(MemCh *m);
+status QueueIter_Tests(MemCh *gm);
+status QueueCriteria_Tests(MemCh *gm);
+status QueueScale_Tests(MemCh *gm);
+status Queue_Tests(MemCh *gm);
+status QueueAddRemove_Tests(MemCh *gm);
+status Relation_Tests(MemCh *gm);
+status Object_Tests(MemCh *gm);
+status ObjectFilter_Tests(MemCh *gm);
+status Mess_Tests(MemCh *gm);
+status PatChar_Tests(MemCh *gm);
+status Roebling_Tests(MemCh *gm);
+status RoeblingRun_Tests(MemCh *gm);
+status RoeblingMark_Tests(MemCh *gm);
+status RoeblingStartStop_Tests(MemCh *gm);
+status Match_Tests(MemCh *gm);
+status MatchElastic_Tests(MemCh *gm);
+status MatchKo_Tests(MemCh *gm);
+status MatchReplace_Tests(MemCh *gm);
+status FmtHtml_Tests(MemCh *gm);
+
 static TestSet ExtTests[] = {
     {
         "Object Tests",
@@ -212,38 +247,3 @@ static TestSet ExtTests[] = {
         FEATURE_COMPLETE,
     },
 };
-
-status BinSeg_Tests(MemCh *gm);
-status BinSegCollection_Tests(MemCh *gm);
-status BinSegV_Tests(MemCh *gm);
-status BinSegReversedV_Tests(MemCh *gm);
-status Config_Tests(MemCh *gm);
-status TaskStep_Tests(MemCh *gm);
-status Templ_Tests(MemCh *gm);
-status TemplCtx_Tests(MemCh *gm);
-status NodeObj_Tests(MemCh *gm);
-status StrVecSplit_Tests(MemCh *gm);
-status ServeTcp_Tests(MemCh *gm);
-status Snip_Tests(MemCh *gm);
-status SnipModify_Tests(MemCh *gm);
-status Inet_Tests(MemCh *gm);
-status Password_Tests(MemCh *m);
-status QueueIter_Tests(MemCh *gm);
-status QueueCriteria_Tests(MemCh *gm);
-status QueueScale_Tests(MemCh *gm);
-status Queue_Tests(MemCh *gm);
-status QueueAddRemove_Tests(MemCh *gm);
-status Relation_Tests(MemCh *gm);
-status Object_Tests(MemCh *gm);
-status ObjectFilter_Tests(MemCh *gm);
-status Mess_Tests(MemCh *gm);
-status PatChar_Tests(MemCh *gm);
-status Roebling_Tests(MemCh *gm);
-status RoeblingRun_Tests(MemCh *gm);
-status RoeblingMark_Tests(MemCh *gm);
-status RoeblingStartStop_Tests(MemCh *gm);
-status Match_Tests(MemCh *gm);
-status MatchElastic_Tests(MemCh *gm);
-status MatchKo_Tests(MemCh *gm);
-status MatchReplace_Tests(MemCh *gm);
-status FmtHtml_Tests(MemCh *gm);

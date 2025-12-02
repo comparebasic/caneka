@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <test.h>
+#include <test_module.h>
 #include "tests.h"
 
 static status Example_log(Step *_st, Task *tsk){
