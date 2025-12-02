@@ -57,9 +57,11 @@ To build and test Caneka run:
 
     clang -o bootstrap bootstrap.c && ./bootstrap 
 
-or:
+and eventually, this will be supported:
 
     gcc -o bootstrap bootstrap.c && ./bootstrap 
+
+Note there is a bug when compling with gcc related to the order of static libs.
 
 This will compile and run the bootstrap program which manages building the rest
 of the modules.
