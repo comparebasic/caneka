@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <cnkcli.h>
+#include <cnkcli_module.h>
 
 Buff *BinSegCli_UnlogBuff(MemCh *m, Str *path){
     Buff *bf = Buff_Make(m, ZERO);

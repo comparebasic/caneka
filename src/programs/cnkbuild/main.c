@@ -804,10 +804,7 @@ i32 main(int argc, char **argv){
 
     build(ctx);
 
-    args[0] = cli->args;
-    args[1] = ctx;
-    args[2] = NULL;
-    Out("^p.Args @\nCtx &^0\n", args);
+    Out("^g.Build succeeded^0\n", NULL);
 
     CliArgs_Free(cli);
 

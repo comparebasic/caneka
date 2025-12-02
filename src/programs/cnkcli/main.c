@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <cnkcli.h>
+#include <cnkcli_module.h>
 
 i32 main(int argc, char **argv){
     void *args[16];
@@ -20,6 +20,8 @@ i32 main(int argc, char **argv){
     Core_Direct(m, 1, 2);
     DebugStack_Push(NULL, 0);
 
+    CliArgs *cli = CliArgs_Make(argc, argv);
+
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
     Str *inFileKey = K(m, "in");
@@ -30,35 +32,34 @@ i32 main(int argc, char **argv){
     Str *licenceKey = K(m, "licence");
     Str *versionKey = K(m, "version");
 
-    Table *resolveArgs = Table_Make(m);
-    Args_Add(resolveArgs, helpKey, NULL, ARG_OPTIONAL);
+    Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, Sv(m, "Show this help message."));
 
-    Args_Add(resolveArgs, noColorKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, inFileKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, outFileKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, configKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, configKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, secretKeyKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, publicKeyKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, licenceKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, versionKey, NULL, ARG_OPTIONAL);
+    Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Skip ansi color sequences in output."));
+    Args_Add(cli, inFileKey, NULL, ARG_OPTIONAL,
+        Sv(m, "File input"));
+    Args_Add(cli, outFileKey, NULL, ARG_OPTIONAL,
+        Sv(m, "File output"));
+    Args_Add(cli, configKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Derive actions to take from a *.config file."));
+    Args_Add(cli, secretKeyKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Secret/private key to use."));
+    Args_Add(cli, publicKeyKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Public key to use."));
+    Args_Add(cli, licenceKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Show the licences used in this software"));
+    Args_Add(cli, versionKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Show the version of this software"));
 
-    Str *fname = S(m, argv[0]);
+    CliArgs_Parse(cli);
 
-    Table *cliArgs = Table_Make(m);
-    CharPtr_ToTbl(m, resolveArgs, argc, argv, cliArgs);
-    if(Table_GetHashed(cliArgs, helpKey) != NULL){
-        CharPtr_ToHelp(m, fname, resolveArgs, argc, argv);
-        return 1;
-    }
-
-    if(Table_GetHashed(cliArgs, noColorKey) != NULL){
+    if(CliArgs_Get(cli, noColorKey) != NULL){
         Ansi_SetColor(FALSE);
     }
 
     i32 code = 0;
 
-    Str *config = Table_Get(cliArgs, configKey);
+    Str *config = CliArgs_Get(cli, configKey);
     NodeObj *configNode = NULL;
     if(config != NULL){
         Str *path = IoUtil_GetAbsPath(m, config);
@@ -109,8 +110,8 @@ i32 main(int argc, char **argv){
     }
 
     if((r & (SUCCESS|ERROR|NOOP)) == 0){
-        Str *inFileArg = Table_Get(cliArgs, inFileKey);
-        Str *outFileArg = Table_Get(cliArgs, outFileKey);
+        Str *inFileArg = CliArgs_Get(cli, inFileKey);
+        Str *outFileArg = CliArgs_Get(cli, outFileKey);
         if(inFileArg != NULL || outFileArg != NULL){
 
             StrVec *headerPath = NULL;
@@ -135,7 +136,7 @@ i32 main(int argc, char **argv){
             StrVec *inExt = Path_Ext(m, inPath);
             StrVec *outExt = Path_Ext(m, outPath);
 
-            args[0] = cliArgs;
+            args[0] = cli;
             args[1] = NULL;
             Out("^p.Args Found &^0\n", args);
 
@@ -186,9 +187,11 @@ i32 main(int argc, char **argv){
         }
     }
 
-    args[0] = cliArgs;
+    args[0] = cli;
     args[1] = NULL;
     Out("^p.Args @^0\n", args);
+
+    CliArgs_Free(cli);
 
     DebugStack_Pop();
     return code;
