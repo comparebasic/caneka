@@ -288,10 +288,9 @@ int main(int argc, char *argv[]){
     }
 
     cmd[0] = "./build/bin/cnkbuild";
-    cmd[1] = "--quiet";
-    cmd[2] = "--src";
-    cmd[3] = "src/programs/test";
-    cmd[4] = NULL;
+    cmd[1] = "--src";
+    cmd[2] = "src/programs/test";
+    cmd[3] = NULL;
 
     if(run("Running cnkbuild", cmd) == -1){
         exit(1);

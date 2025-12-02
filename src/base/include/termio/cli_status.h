@@ -1,5 +1,6 @@
 typedef struct cli_status {
     Type type;
+    microTime tick;
     DoFunc render;
     void *source;
     Span *lines;

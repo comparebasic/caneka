@@ -2,6 +2,7 @@
 #define TIME_MIN (TIME_SEC*60)
 #define TIME_HOUR (TIME_MIN*60)
 #define TIME_DAY (TIME_HOUR*24)
+#define TIME_MILLIS 1000l
 
 Str *MicroTime_ToStr(MemCh *m, microTime t);
 microTime MicroTime_Now();

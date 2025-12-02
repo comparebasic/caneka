@@ -63,14 +63,14 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             return NOOP;
         }
 
-        ctx->input.totalModules->val.value++;
+        ctx->input.totalModules->val.i++;
         Table_Set(ctx->input.dependencies, name, sel);
 
         if(ctx->modified < sel->time){
             ctx->modified = sel->time;
         }
 
-        ctx->input.totalSources->val.value += sel->dest->nvalues;
+        ctx->input.totalSources->val.i += sel->dest->nvalues;
         if(!Equals(key, path)){
             Span *p = NULL;
             Str *meta = S(m, "choice");
@@ -126,7 +126,7 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                         meta->type.state |= BUILD_LINK; 
                     }else if(Equals(label, K(m, "skip"))){
                         meta->type.state |= BUILD_SKIP; 
-                        ctx->input.totalSources->val.value--;
+                        ctx->input.totalSources->val.i--;
                     }else if(Equals(label, K(m, "include"))){
                         meta->type.state |= BUILD_INCLUDE; 
                     }
@@ -457,18 +457,18 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     Table *skip = Table_Get(sel->meta, K(m, "skip"));
     if(skip != NULL){
-        ctx->input.totalModuleSources->val.value = sel->dest->nvalues -= skip->nvalues;
+        ctx->input.totalModuleSources->val.i = sel->dest->nvalues -= skip->nvalues;
     }else{
-        ctx->input.totalModuleSources->val.value = sel->dest->nvalues;
+        ctx->input.totalModuleSources->val.i = sel->dest->nvalues;
     }
 
-    ctx->input.countModuleSources->val.value = 0;
+    ctx->input.countModuleSources->val.i = 0;
 
     Str *libPathStr = StrVec_Str(m , ctx->current.target);
     if(File_PathExists(m, libPathStr) && File_ModTime(m, libPathStr) > sel->time){
         ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library is recent, skipping");
         LogOut(ctx);
-        ctx->input.countSources->val.value += ctx->input.totalModuleSources->val.value;
+        ctx->input.countSources->val.i += ctx->input.totalModuleSources->val.i;
         DebugStack_Pop();
         return ZERO;
     }
@@ -503,8 +503,8 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
             continue;
         }
 
-        ctx->input.countSources->val.value++;
-        ctx->input.countModuleSources->val.value++;
+        ctx->input.countSources->val.i++;
+        ctx->input.countModuleSources->val.i++;
 
         IoUtil_Annotate(m, v);
         StrVec *source = StrVec_Make(m);
@@ -543,8 +543,8 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
             Str *fname = h->value;
 
-            ctx->input.countSources->val.value++;
-            ctx->input.countModuleSources->val.value++;
+            ctx->input.countSources->val.i++;
+            ctx->input.countModuleSources->val.i++;
 
             StrVec *source = StrVec_From(m, fname);
             IoUtil_Annotate(m, source);
@@ -603,13 +603,13 @@ static status build(BuildCtx *ctx){
     }
 
     /* build libs */
-    ctx->input.countModules->val.value = 0;
+    ctx->input.countModules->val.i = 0;
     StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
     Iter_Init(&it, Table_Ordered(m, ctx->input.dependencies));
     while((Iter_Prev(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
-            ctx->input.countModules->val.value = it.p->nvalues - it.idx;
+            ctx->input.countModules->val.i = it.p->nvalues - it.idx;
             if(buildModule(ctx, h) & ERROR){
                 r |= ERROR;
                 break;
@@ -777,9 +777,6 @@ i32 main(int argc, char **argv){
 
     CliArgs_Parse(cli);
 
-    if(CliArgs_Get(cli, quietKey)){
-        _quiet = TRUE;
-    }
 
     BuildCtx *ctx = BuildCtx_Make(m);
 
@@ -792,12 +789,18 @@ i32 main(int argc, char **argv){
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->input.sources = CliArgs_Get(cli, srcKey);
     ctx->input.srcPrefix = prefix;
-    ctx->input.totalSources = I64_Wrapped(m, 0);
-    ctx->input.countSources = I64_Wrapped(m, 0);
-    ctx->input.totalModules = I64_Wrapped(m, 0);
-    ctx->input.countModules = I64_Wrapped(m, 0);
-    ctx->input.totalModuleSources = I64_Wrapped(m, 0);
-    ctx->input.countModuleSources = I64_Wrapped(m, 0);
+    ctx->input.totalSources = I32_Wrapped(m, 0);
+    ctx->input.countSources = I32_Wrapped(m, 0);
+    ctx->input.totalModules = I32_Wrapped(m, 0);
+    ctx->input.countModules = I32_Wrapped(m, 0);
+    ctx->input.totalModuleSources = I32_Wrapped(m, 0);
+    ctx->input.countModuleSources = I32_Wrapped(m, 0);
+
+    if(CliArgs_Get(cli, quietKey)){
+        _quiet = TRUE;
+    }else{
+        BuildCli_SetupStatus(ctx);
+    }
 
     build(ctx);
 

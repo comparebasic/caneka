@@ -30,10 +30,8 @@ typedef struct executable {
 typedef struct build_cli_fields {
     struct {
         Str *name; 
-        Single *count;
-        Single *total;
-        Str *barStart; 
-        Str *barEnd; 
+        Str *barStart;
+        Str *barLead;
     } steps;
     void *current[5];
 } BuildCliFields;

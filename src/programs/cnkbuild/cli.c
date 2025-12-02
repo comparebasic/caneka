@@ -6,13 +6,12 @@ status BuildCli_RenderStatus(MemCh *m, void *a){
     BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
 
     i32 width = ctx->cli.cli->cols;
-    float total = (float)ctx->cli.fields.steps.total->val.i;
-    float count = (float)ctx->cli.fields.steps.count->val.i;
+    float total = (float)ctx->input.totalSources->val.i;
+    float count = (float)ctx->input.countSources->val.i;
     float colsFloat = (float)width;
 
     float progress = ceil((count/total) * colsFloat);
     ctx->cli.fields.steps.barStart->length = (i32)progress;
-    ctx->cli.fields.steps.barEnd->length = width-(i32)progress;
 
     MemBookStats st;
     MemBook_GetStats(m, &st);
@@ -28,6 +27,7 @@ status BuildCli_RenderStatus(MemCh *m, void *a){
         cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
     sg->val.value = st.pageIdx;
 
+
     return SUCCESS;
 }
 
@@ -35,10 +35,10 @@ status BuildCli_SetupComplete(BuildCtx *ctx){
     FmtLine *ln = Span_Get(ctx->cli.cli->lines, 0);
     ln->fmt = "^g.Completed ^D.$^d. sources^0.";
     ln->args = Arr_Make(ctx->m, 2);
-    ln->args[0] = ctx->cli.fields.steps.total;
+    ln->args[0] = ctx->input.totalSources;
 
     ln = Span_Get(ctx->cli.cli->lines, 1);
-    ln->fmt = "^g.Static Library ^D.$^d.^0.";
+    ln->fmt = "^g.Sources ^D.$^d.^0.";
 
     ln = Span_Get(ctx->cli.cli->lines, 2);
     ctx->cli.fields.steps.barStart->length = ctx->cli.cli->cols;
@@ -54,9 +54,6 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     MemCh *m = ctx->m;
     Span *lines = ctx->cli.cli->lines;
     memset(&ctx->cli.fields, 0, sizeof(ctx->cli.fields));
-    ctx->cli.fields.steps.total = I32_Wrapped(m, 0);
-    ctx->cli.fields.steps.count = I32_Wrapped(m, 0);
-    ctx->cli.fields.steps.name = Str_Make(m, STR_DEFAULT);
 
     CliStatus_SetDims(ctx->cli.cli, 0, 0);
     i32 width = ctx->cli.cli->cols;
@@ -65,8 +62,8 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     void **arr = NULL;
 
     arr = Arr_Make(m, 2);
-    arr[0] = ctx->cli.fields.steps.count;
-    arr[1] = ctx->cli.fields.steps.total;
+    arr[0] = ctx->input.countSources;
+    arr[1] = ctx->input.totalSources;
     Span_Add(ctx->cli.cli->lines, 
         FmtLine_Make(m, "^y.Source $ of $^0", arr));
 
@@ -77,12 +74,14 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     ctx->cli.fields.steps.barStart = Str_Make(m, width);
     memset(ctx->cli.fields.steps.barStart->bytes, ' ', width);
     ctx->cli.fields.steps.barStart->length = width;
-    ctx->cli.fields.steps.barEnd = Str_CloneAlloc(m, ctx->cli.fields.steps.barStart, width);
+    ctx->cli.fields.steps.barLead = Str_CloneAlloc(m,
+        ctx->cli.fields.steps.barStart, width);
     ctx->cli.fields.steps.barStart->length = 0;
+    ctx->cli.fields.steps.barLead->length = 0;
     
     arr = Arr_Make(m, 2);
     arr[0] = ctx->cli.fields.steps.barStart; 
-    arr[1] = ctx->cli.fields.steps.barEnd;
+    arr[1] = ctx->cli.fields.steps.barLead; 
     Span_Add(ctx->cli.cli->lines,
         FmtLine_Make(m, "^B.$^0.^Y.$^0", arr));
 
