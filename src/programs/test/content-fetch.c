@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <tests.h>
+#include <test_module.h>
 
 i32 main(int argc, char **argv){
     if(argc > 1){
@@ -30,33 +30,29 @@ i32 main(int argc, char **argv){
     Inter_Init(m);
     DebugStack_Push(NULL, 0);
 
+    CliArgs *cli = CliArgs_Make(argc, argv);
+
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
     Str *sha256Key = K(m, "Sha256");
     Str *urlKey = K(m, "Sha256");
 
-    Table *resolveArgs = Table_Make(m);
-    Args_Add(resolveArgs, helpKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, noColorKey, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, sha256Key, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, sha256Key, NULL, ARG_OPTIONAL);
+    Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, 
+        Sv(m, "Show this help message."));
+    Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Skip ansi color sequences in output."));
+    Args_Add(cli, sha256Key, NULL, ARG_OPTIONAL,
+        Sv(m, "Sha256 sum of content to match."));
 
     StrVec *name = StrVec_From(m, S(m, argv[0]));
     IoUtil_Annotate(m, name);
     Str *fname = IoUtil_FnameStr(m, name);
 
-    Table *cliArgs = Table_Make(m);
-    CharPtr_ToTbl(m, resolveArgs, argc, argv, cliArgs);
-    if(Table_GetHashed(cliArgs, helpKey) != NULL){
-        CharPtr_ToHelp(m, fname, resolveArgs, argc, argv);
-        return 1;
-    }
+    CliArgs_Parse(cli);
 
-    if(Table_GetHashed(cliArgs, noColorKey) != NULL){
+    if(CliArgs_Get(cli, noColorKey)){
         Ansi_SetColor(FALSE);
     }
-
-
 
     DebugStack_Pop();
     return 0;

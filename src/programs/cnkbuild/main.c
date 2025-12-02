@@ -258,7 +258,6 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     status r = READY;
     MemCh *m = ctx->m;
 
-
     DebugStack_SetRef(ctx->current.source, ctx->current.source->type.of);
 
     if(ctx->current.binDest){
@@ -272,7 +271,6 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     }
     LogOut(ctx);
 
-
     Span *cmd = Span_Make(m);
 
     Span_Add(cmd, ctx->tools.cc);
@@ -283,6 +281,7 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         Span_Add(cmd, Str_CstrRef(m, "-o"));
         Span_Add(cmd, StrVec_Str(m, ctx->current.binDest));
         Span_Add(cmd, StrVec_Str(m, ctx->current.source));
+        Span_Add(cmd, StrVec_Str(m, ctx->current.target));
         Span_AddSpan(cmd, ctx->current.staticlibs);
         Span_AddSpan(cmd, ctx->input.libs);
         void *ar[] = {cmd, NULL};
@@ -443,6 +442,17 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
                 if(libTarget){
                     Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
                 }
+                Table *staticDeps = Table_Get(dsel->meta, K(m, "static"));
+                if(staticDeps != NULL){
+                    Iter _it;
+                    Iter_Init(&_it, staticDeps);
+                    while((Iter_Next(&_it) & END) == 0){
+                        Hashed *h = Iter_Get(&_it);
+                        if(h != NULL){
+                            Span_Add(ctx->current.staticlibs, StrVec_Str(m, h->key)); 
+                        }
+                    }
+                }
             }
         }
     }
@@ -530,7 +540,6 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
         StrVec_ReturnToAnchor(ctx->current.source);
     }
 
-
     Iter_Init(&it, execs);
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
@@ -550,8 +559,10 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
             args[4] = NULL;
             StrVec_AddChain(ctx->current.source, args);
 
-            StrVec *bin = IoUtil_SwapExt(m, source, K(m, ".c"), K(m, "")); 
-            if(!Equals(fname, S(m, "main"))){
+            Str *binName = Str_Clone(m, fname);
+            Str_Decr(binName, 2);
+            StrVec *bin = StrVec_From(m, binName);
+            if(Equals(binName, S(m, "main"))){
                 bin = StrVec_From(m, Span_Get(key->p, key->p->max_idx));
             }
 
@@ -574,53 +585,6 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     DebugStack_Pop();
     return r;
-}
-
-
-static status genConfigs(BuildCtx *ctx){
-    /*
-        GenConfig *config = ctx->genConfigs;
-
-        args[0] = ctx->src;
-        args[1] = "/gen/";
-        args[2] = NULL;
-        StrVec *genSrc = IoUtil_AbsPathBuilder(m, args);
-
-        args[0] = ctx->dist;
-        args[1] = "/";
-        args[2] = ctx->libtarget; 
-        args[3] = "/include/gen/"; 
-        args[4] = NULL;
-        StrVec *genDest = IoUtil_AbsPathBuilder(m, args);
-
-        Dir_CheckCreate(m, StrVec_Str(m, genDest));
-
-        while(config->file != NULL){
-
-            StrVec_Add(genSrc, S(m, config->file));
-            StrVec_Add(genDest, S(m, config->file));
-            Str *key = S(m, config->key);
-
-            r |= Generate(m,
-                StrVec_Str(m, genSrc), key, config->args, StrVec_Str(m, genDest));
-            if(r & ERROR){
-                void *args[] = {
-                    genSrc,
-                    genDest,
-                    NULL
-                };
-                Fatal(FUNCNAME, FILENAME, LINENUMBER, 
-                    "Error generating static file: $ -> $", args);
-                return ERROR;
-            }
-
-            StrVec_Pop(genSrc);
-            StrVec_Pop(genDest);
-            config++;
-        }
-    }
-    */
-    return ZERO;
 }
 
 static status build(BuildCtx *ctx){
