@@ -56,7 +56,10 @@ typedef struct buildctx {
         StrVec *version;
         StrVec *source;
         StrVec *dest;
+        StrVec *binDest;
         Hashed *depKv;
+        Span *staticlibs;
+        Span *liblist;
         Span *inc;
     } current;
     struct {
