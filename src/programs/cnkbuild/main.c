@@ -284,16 +284,12 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         Span_Add(cmd, StrVec_Str(m, ctx->current.target));
         Span_AddSpan(cmd, ctx->current.staticlibs);
         Span_AddSpan(cmd, ctx->input.libs);
-        void *ar[] = {cmd, NULL};
-        Out("^c.Exec @^\n", ar);
     }else{
         Span_Add(cmd, Str_CstrRef(m, "-c"));
         Span_Add(cmd, Str_CstrRef(m, "-o"));
         Span_Add(cmd, StrVec_Str(m, ctx->current.dest));
         Span_Add(cmd, StrVec_Str(m, ctx->current.source));
         Span_AddSpan(cmd, ctx->input.libs);
-        void *ar[] = {cmd, NULL};
-        Out("^c.Obj @^\n", ar);
     }
 
     ProcDets pd;
