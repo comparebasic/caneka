@@ -495,11 +495,11 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     StrVec_Add(ctx->current.target, IoUtil_PathSep(m));
     StrVec_Add(ctx->current.target, target);
 
-    StrVec_Anchor(ctx->current.dest);
+    ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     StrVec_Add(ctx->current.dest, IoUtil_PathSep(m));
-
     StrVec_Add(ctx->current.dest, targetName);
     StrVec_Add(ctx->current.dest, IoUtil_PathSep(m));
+    StrVec_Anchor(ctx->current.dest);
 
     void *a_[] = { ctx->current.dest, NULL};
     Out("^c.Making buildidr for library @^0\n", a_);
@@ -526,37 +526,32 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
     StrVec_PopToAnchor(srcIncPath);
 
-    StrVec_Anchor(ctx->input.buildDir);
-    StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
-    StrVec_AddVec(ctx->input.buildDir, ctx->current.targetName);
+    StrVec_ReturnToAnchor(ctx->current.dest);
 
     Table *incMeta = Table_Get(sel->meta, S(m, "include"));
     if(incMeta != NULL){
-        i32 anchor = StrVec_StashAnchor(ctx->input.buildDir);
-        StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
+        StrVec *buildDir = StrVec_Copy(m,ctx->input.buildDir); 
+        StrVec_Add(buildDir, IoUtil_PathSep(m));
         Iter it;
         Iter_Init(&it, incMeta);
+        StrVec_Anchor(buildDir);
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                printf("anchoring buildDir II\n");
-                fflush(stdout);
-                StrVec_Anchor(ctx->input.buildDir);
                 StrVec *path = NULL;
                 if(IoUtil_IsStrAbs(h->key)){
                     path = StrVec_From(m, h->key);
                 }else{
-                    StrVec_AddVec(ctx->input.buildDir, key);
-                    StrVec_Add(ctx->input.buildDir, IoUtil_PathSep(m));
-                    StrVec_Add(ctx->input.buildDir, h->key);
+                    StrVec_AddVec(buildDir, key);
+                    StrVec_Add(buildDir, IoUtil_PathSep(m));
+                    StrVec_Add(buildDir, h->key);
 
-                    path = ctx->input.buildDir;
+                    path = buildDir;
                 }
                 Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), path));
-                StrVec_PopToAnchor(ctx->input.buildDir);
+                StrVec_PopToAnchor(buildDir);
             }
         }
-        StrVec_RestoreAnchor(ctx->input.buildDir, anchor);
     }
 
     Table_Set(sel->meta, S(m, "inc"), moduleInc);
@@ -597,7 +592,6 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
         ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library is recent, skipping");
         LogOut(ctx);
         ctx->input.countSources->val.value += ctx->input.totalModuleSources->val.value;
-        StrVec_PopToAnchor(ctx->input.buildDir);
         DebugStack_Pop();
         return ZERO;
     }
@@ -617,8 +611,9 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
 
-    void *ar2[] ={ ctx->current.source, ctx->current.dest, NULL};
-    Out("^p building dirs @ -> @^0\n", ar2);
+    void *ar2[] ={ ctx->current.source, ctx->current.dest,
+        I32_Wrapped(m, ctx->current.dest->anchor), NULL};
+    Out("^p building dirs @ -> @a$^0\n", ar2);
 
     Iter it;
     Iter_Init(&it, sel->dest);
@@ -642,22 +637,19 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
         StrVec_AddVec(ctx->current.source, source);
 
         StrVec *object = IoUtil_SwapExt(m, source, K(m, ".c"), K(m, ".o")); 
-        i32 dirAnchor = StrVec_StashAnchor(ctx->current.dest);
-
         StrVec_AddVec(ctx->current.dest, object);
 
         Str *outObjDir = StrVec_StrTo(m,
             ctx->current.dest, IoUtil_BasePathAnchor(ctx->current.dest));
-        void *ar2[] ={ outObjDir, ctx->current.dest, NULL};
-        Out("^p making dir @ for &^0\n", ar2);
 
         Dir_CheckCreate(m, outObjDir);
 
         Str *dest = StrVec_Str(m, ctx->current.dest);
+
         if(File_PathExists(m, dest) && File_ModTime(m, dest) > modified){
             linkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
             StrVec_ReturnToAnchor(ctx->current.dest);
-            StrVec_PopToAnchor(ctx->current.source);
+            StrVec_ReturnToAnchor(ctx->current.source);
             continue;
         }
 
@@ -666,6 +658,9 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
         StrVec_ReturnToAnchor(ctx->current.dest);
         StrVec_ReturnToAnchor(ctx->current.source);
+
+        args[0] = ctx->current.dest;
+        Out("^p.dest @^0\n", args);
     }
 
     StrVec_PopToAnchor(ctx->current.dest);
