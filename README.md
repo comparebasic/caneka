@@ -55,10 +55,21 @@ see [caneka.org](https://caneka.org) for more details.
 
 To build and test Caneka run:
 
-    ./scripts/make.sh && ./scripts/test.sh && ./build/bin/tests
+    clang -o bootstrap bootstrap.c && ./bootstrap 
 
-There are other scripts in the [/scripts/](/scripts/) folder provide quick
-commands.
+or:
+
+    gcc -o bootstrap bootstrap.c && ./bootstrap 
+
+This will compile and run the bootstrap program which manages building the rest
+of the modules.
+
+### CnkBuild - source builder
+
+Canka only requires a C compiler to build. A small library is built to manage
+the build configuration(s) (found in the [cnkbuild](./src/programs/cnkbuild/)
+folder). The file [bootstrap.c](./bootstrap.c) in the root directory builds a
+which menu to manage the build process.
 
 Each folder within the [src](/src) artifact folder, have a file in
 them which controls how they are built. Either as one include file such as (in
@@ -66,30 +77,14 @@ the case of [base/inc.c](/src/base/inc.c) or with a more eleborate
 "build.c" file. Every module after the "base" is built using the "build.c"
 file, which is used by "cnkbuild" builder.
 
-### CnkBuild - source builder
-
-Canka only requires a C compile to build. A small library is built to manage
-the build configuration(s) (found in the [builder](./src/builder/)
-folder). Small files named "build.c" are found throughout the codebase which 
-build the objects and executables for the runtime.
-
-Further customization can be found in the [build.c](./src/ext/build.c)
-file, and the "build.c" files for each program, such as the 
-[test program](./src/programs/tests/build.c).
+Further customization can be found in the dependencies.txt files for each
+module. 
 
 ## Build Status
 
 The system is currently being updated to include a new base, all components
 have worked in prototype form at one time or another, but it's currently a
 shit-show.
-
-## Folder Layout
-
-There is a sketch of the CanekaLang syntax for the [Str](./src/base/str.cnk)
-module, but it does not yet parser, it's what I've written as I begin to figure
-out what the high-level syntax will look like.
-
-Other examples of random things can be found in the [examples](/examples/) folder.
 
 ## Licence
 
