@@ -405,10 +405,22 @@ status StrVec_Anchor(StrVec *v){
 }
 
 status StrVec_ReturnToAnchor(StrVec *v){
+    if(v->anchor == -1){
+        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec not anchored @ at $", args);
+        return ERROR;
+    }
     return StrVec_PopTo(v, v->anchor);
 }
 
 status StrVec_PopToAnchor(StrVec *v){
+    if(v->anchor == -1){
+        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec not anchored @ at $", args);
+        return ERROR;
+    }
     status r = StrVec_PopTo(v, v->anchor);
     v->anchor = -1;
     return r;

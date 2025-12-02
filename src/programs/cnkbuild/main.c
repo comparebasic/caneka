@@ -344,14 +344,6 @@ static status linkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         return ERROR;
     }
 
-    void *args[2];
-    args[0] = ctx;
-    args[1] = NULL;
-    Out("^c.Ctx end of link @^0\n", args);
-    if(_count >= 2){
-        exit(1);
-    }
-
     DebugStack_Pop();
     return ZERO;
 }
@@ -453,13 +445,6 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         };
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: $", args);
         return ERROR;
-    }
-
-    args[0] = ctx;
-    args[1] = NULL;
-    Out("^c.Ctx end of build @^0\n", args);
-    if(_count >= 2){
-        exit(1);
     }
 
     DebugStack_Pop();
@@ -607,6 +592,12 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     microTime modified = File_ModTime(m, libPathStr);
 
+    ctx->current.source = IoUtil_AbsVec(m, ctx->input.srcPrefix);
+    StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
+    /*
+    StrVec_AddVec(ctx->current.source, key);
+    StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
+    */
     StrVec_Anchor(ctx->current.source);
 
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
