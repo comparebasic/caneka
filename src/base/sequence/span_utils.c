@@ -183,6 +183,21 @@ status Span_AddSpan(Span *p, Span *add){
     return r;
 }
 
+status Span_AddSpanRev(Span *p, Span *add){
+    if(add == NULL){
+        return NOOP;
+    }
+    status r = READY;
+    Iter _it;
+    Iter_Init(&_it, p);
+    Iter it;
+    Iter_Init(&it, add);
+    while((Iter_Prev(&it) & END) == 0){
+        r |= Iter_Add(&_it, Iter_Get(&it));
+    }
+    return r;
+}
+
 status Span_Add(Span *p, void *t){
     p->type.state &= ~(ERROR|SUCCESS|NOOP);
     if(t == NULL){

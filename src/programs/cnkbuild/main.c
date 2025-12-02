@@ -282,7 +282,7 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         Span_Add(cmd, StrVec_Str(m, ctx->current.binDest));
         Span_Add(cmd, StrVec_Str(m, ctx->current.source));
         Span_Add(cmd, StrVec_Str(m, ctx->current.target));
-        Span_AddSpan(cmd, ctx->current.staticlibs);
+        Span_AddSpanRev(cmd, ctx->current.staticlibs);
         Span_AddSpan(cmd, ctx->input.libs);
     }else{
         Span_Add(cmd, Str_CstrRef(m, "-c"));
@@ -419,7 +419,7 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     ctx->current.staticlibs = Span_Make(m);
     if(deps != NULL){
         Iter it;
-        Iter_Init(&it, deps);
+        Iter_Init(&it, Table_Ordered(m, deps));
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
