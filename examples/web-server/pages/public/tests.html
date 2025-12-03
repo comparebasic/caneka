@@ -1,2 +1,107 @@
 <h1>Status</h1>
-<p>The system presently covers all basic steps of a language runtime and interactive webserver (in essential form).</p>
+
+<p>
+Caneka is a runtime and set of programming langauge tools. Currently targeted for
+interactive web and email software development and products.
+</p>
+
+<h2>How it works</h2>
+<p>Built on the basics of memory allocation, data structures, and network serving, Caneka is a fresh start for interactive software development.</p>
+
+<p>
+The system allocates 16 megabytes at a time, then assigns a page at a time (4k)
+to chapters that reside in the books (16mb sections).  These blocks of memory
+are owned by tasks. The tasks use basic data structures to form parsers,
+queues, and the infrastucture for parsing, transforming, and serving
+interactive content.
+</p>
+
+<p>
+The system builds with only one optional dependency (NaCL for cryptography) and
+builds using a bootstrap file (also written in C). It only relies on the POSIX
+(Linux/Mac/Windows/*BSD) standard, no operating system specific code is
+contained in the system. This makes the system very independent.
+</p>
+
+<h2>What's Done/Whats left</h2>
+<p>All foundational components are done, and the login server/email server is now bing assembled.
+After that, interactive browser based application development beings!</p>
+
+<p>From a time elapsed perspective the system feature list is unbalanced.</p>
+<p>This is good news, because the core components are accelerating development of the newer more advanced features.</p>
+<p>
+Core components have taken 21 months, advanced components such as Dynamic
+Types, BinSeg, WebServer, and a new Build System happend in the last three months (Sept-Nov 2025).
+</p>
+
+<div class="status-section">
+<span class="abs-label">Key</span>
+
+<table>
+<thead><tr><td>Name</td><td>Meaning</td><td>Color</td></tr></thead>
+<tr class="status-done"><td>Done</td><td>Functional/lightly Tested</td><td><span class="color-swatch"></span></td></tr>
+<tr class="status-partial"><td>Partial</td><td>Unfinished, first generation or later complete.</td><td><span class="color-swatch"></span></td></tr>
+<tr class="status-started"><td>Started</td><td>Functional, functioning version exists but is not scalable.</td><td><span class="color-swatch"></span></td></tr>
+<tr class="status-not-started"><td>Not Started</td><td>Planned, no code against it.</td><td><span class="color-swatch"></span></td></tr>
+</table>
+    <article>
+    <h3>Build System</h3>
+    <ul>
+        <li class="status-done">Build System</li>
+    </ul>
+    </article>
+
+    <article>
+    <h3>Base Module</h3>
+    <ul>
+        <li class="status-done">Memory Manager</li>
+        <li class="status-done">Struct Type System</li>
+        <li class="status-done">String/Bytes Handling</li>
+        <li class="status-done">IO Buffers/File Handling</li>
+        <li class="status-done">IO Buffers/File Handling</li>
+    </ul>
+    </article>
+
+    <article>
+    <h3>Ext Module</h3>
+    <ul>
+        <li class="status-done">Roebling Parser</li>
+        <li class="status-done">BinSeg File Database</li>
+        <li class="status-done">Network/Task Server</li>
+        <li class="status-partial">Pencil Format Transpiler</li>
+        <li class="status-partial">Security Passporting/Login</li>
+    </ul>
+    </article>
+
+    <article>
+    <h3>Inter Module</h3>
+    <ul>
+        <li class="status-done">Dynamic Type System</li>
+        <li class="status-done">Templ Language Runtime</li>
+        <li class="status-done">WebServer/Http Server</li>
+        <li class="status-partial">Login Session Manager</li>
+        <li class="status-not-started">Email Send/Recieve</li>
+    </ul>
+    </article>
+
+    <article>
+    <h3>Auth</h3>
+    <ul>
+        <li class="status-partial">Digest/ECC Crypto (third party NaCL)</li>
+        <li class="status-partial">Digest/ECC Crypto (third party OpenSSL)</li>
+        <li class="status-partial">Password/Passport Handling</li>
+        <li class="status-not-started">Content Signing</li>
+    </ul>
+    </article>
+
+    <article>
+    <h3>Lang</h3>
+    <ul>
+        <li class="status-not-started">CanekaLang Syntax for the Templ Runtime</li>
+        <li class="status-started">TempLang Browser Behavior</li>
+    </ul>
+    </article>
+    <div style="clear:both"></div>
+</div>
+</section>
+<section id="test-output">
