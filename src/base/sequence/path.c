@@ -260,6 +260,12 @@ status Path_SpaceAnnotate(MemCh *m, StrVec *v){
 }
 
 status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "IoUtil Annotate - StrVec has NOSHRINK flag but is being asked to shrink",
+                NULL);
+        return ERROR;
+    }
     status r = READY;
     i64 total = v->total;
     if(v == NULL){

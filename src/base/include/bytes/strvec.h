@@ -2,6 +2,7 @@ enum strvec_flags {
     STRVEC_PATH = 1 << 8,
     STRVEC_ALIGNED = 1 << 9,
     STRVEC_NONSTANDARD_SIZES = 1 << 10,
+    STRVEC_NOSHRINK = 1 << 11,
 };
 
 typedef struct strvec {

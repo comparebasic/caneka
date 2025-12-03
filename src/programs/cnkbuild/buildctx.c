@@ -1,0 +1,75 @@
+#include <external.h>
+#include "cnkbuild_module.h"
+
+status BuildCtx_Build(BuildCtx *ctx){
+    DebugStack_Push(NULL, 0);
+    status r = READY;
+    MemCh *m = ctx->m;
+    void *args[5];
+
+    ctx->start = MicroTime_Now();
+
+    BuildCtx_GenAllIncSpan(ctx);
+
+    /* build dependencies */
+    Iter it;
+    Iter_Init(&it, ctx->input.sources);
+    while((Iter_Next(&it) & END) == 0){
+        StrVec *v = StrVec_From(m, Iter_Get(&it));
+        IoUtil_Annotate(m, v);
+        StrVec *key = StrVec_Make(m);
+        StrVec_AddVecAfter(key, v, ctx->input.srcPrefix->p->nvalues+1);
+        BuildCtx_ParseDependencies(ctx, key, v);
+    }
+
+    /* build libs */
+    ctx->input.countModules->val.i = 0;
+    StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
+    Iter_Init(&it, Table_Ordered(m, ctx->input.dependencies));
+    while((Iter_Prev(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            ctx->input.countModules->val.i = it.p->nvalues - it.idx;
+            if(CnkBuild_BuildModule(ctx, h) & ERROR){
+                r |= ERROR;
+                break;
+            }
+        }
+    }
+
+    /* build execs */
+
+    DebugStack_Pop();
+    return r;
+}
+
+BuildCtx *BuildCtx_Make(MemCh *m){
+    BuildCtx *ctx = MemCh_AllocOf(m, sizeof(BuildCtx), TYPE_BUILDCTX);
+    ctx->type.of = TYPE_BUILDCTX;
+    ctx->m = MemCh_Make();
+    ctx->cli.cli = CliStatus_Make(m, BuildCli_RenderStatus, ctx);
+
+    ctx->dir = StrVec_Make(m);
+    ctx->src = StrVec_Make(m);
+
+    ctx->current.target = StrVec_Make(m);
+    ctx->current.targetName = StrVec_Make(m);
+    ctx->current.version = StrVec_Make(m);
+    ctx->current.source = StrVec_Make(m);
+    ctx->current.dest = StrVec_Make(m);
+
+    ctx->input.inc = Span_Make(m);
+    ctx->input.cflags = Span_Make(m);
+    ctx->input.libs = Span_Make(m);
+    ctx->input.staticLibs = Span_Make(m);
+    ctx->input.sources = Span_Make(m);
+    ctx->input.objects = Span_Make(m);
+    ctx->input.gens = Span_Make(m);
+    ctx->input.dependencies = Table_Make(m);
+
+    ctx->tools.cc = S(m, _gen_CC);
+    ctx->tools.ccVersion = Str_FromI64(m, (i64)_gen_CC_VERSION);
+    ctx->tools.ar = S(m, _gen_AR);
+
+    return ctx;
+}

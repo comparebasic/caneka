@@ -1,7 +1,7 @@
 #include <external.h>
 #include "cnkbuild_module.h"
 
-static status BuildCtx_print(Buff *bf, void *a, cls type, word flags){
+status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
     BuildCtx *ctx = (BuildCtx *)as(a, TYPE_BUILDCTX);
     MemCh *m = bf->m;
     if(flags & DEBUG){
@@ -61,6 +61,6 @@ static status BuildCtx_print(Buff *bf, void *a, cls type, word flags){
 
 status BuildCtx_ToSInit(MemCh *m){
     status r = READY;
-    r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILDCTX, (void *)BuildCtx_print);
+    r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILDCTX, (void *)BuildCtx_Print);
     return r;
 }

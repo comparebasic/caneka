@@ -45,10 +45,12 @@ typedef struct gen_config {
 typedef struct buildctx {
     Type type;
     MemCh *m;
-    util modified;
+    microTime start;
+    microTime modified;
     StrVec *dir;
     StrVec *src;
     struct {
+        StrVec *name;
         StrVec *target;
         StrVec *targetName;
         StrVec *version;
@@ -90,14 +92,27 @@ typedef struct buildctx {
     } cli;
 } BuildCtx;
 
-BuildCtx *BuildCtx_Make(MemCh *m);
-status Build(BuildCtx *ctx, i32 argc, char *argv[]);
-status Generate(MemCh *m, Str *path, Str *key, char *varpaths[], Str *outpath);
-status LogOut(BuildCtx *ctx);
+status BuildCtx_LogOut(BuildCtx *ctx);
+void BuildCtx_SetQuiet(boolean quiet);
 
 status BuildCli_RenderStatus(MemCh *m, void *a);
 status BuildCli_SetupComplete(BuildCtx *ctx);
 status BuildCli_SetupStatus(BuildCtx *ctx);
+
+status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path);
+
+status BuildCtx_GenAllIncSpan(BuildCtx *ctx);
+status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist);
+status BuildCtx_GenStrArr(BuildCtx *ctx, Span *files, Str *filter);
+status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter);
+
+status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *key, DirSelector *sel);
+status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel);
+status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel);
+
 status BuildCtx_ToSInit(MemCh *m);
+
+status BuildCtx_Build(BuildCtx *ctx);
+BuildCtx *BuildCtx_Make(MemCh *m);
 
 #endif

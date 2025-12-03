@@ -1,6 +1,182 @@
 #include <external.h>
 #include "base_module.h"
 
+status StrVec_Decr(StrVec *v, i64 amount){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    if(amount > v->total){
+        return ERROR;
+    }
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = (Str *)Iter_Get(&it);
+        if(s->length > amount){
+            s->length -= amount;
+            amount = 0;
+            v->total -= amount;
+        }else if(amount > 0){
+            Iter_Remove(&it);
+            v->total -= s->length;
+            amount -= s->length;
+        }else{
+            break;
+        }
+    }
+    return SUCCESS;
+}
+
+StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    if(orig->type.state & STRVEC_ALIGNED){
+        return orig;
+    }
+    StrVec *v = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, orig->p);
+    Str *s = Str_Make(m, STR_DEFAULT);
+    StrVec_Add(v, s);
+    i64 length = 0;
+    i64 offset = 0;
+    i64 taken = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *os = (Str *)it.value;
+        offset = 0;
+        length = os->length;
+        taken = Str_Add(s, os->bytes+offset, length);
+        offset += taken;
+        length -= taken;
+        v->total += taken;
+        while(length > 0){
+            s = Str_Make(m, STR_DEFAULT);
+            StrVec_Add(v, s);
+            taken = Str_Add(s, os->bytes+offset, length);
+            offset += taken;
+            length -= taken;
+            v->total += taken;
+        }
+    }
+
+    v->type.state |= STRVEC_ALIGNED;
+    return v;
+}
+
+status StrVec_Pop(StrVec *v){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    if(v->total == 0){
+        return NOOP;
+    }
+    Iter it;
+    Iter_Init(&it, v->p);
+    Str *s =  Iter_GetByIdx(&it, it.p->max_idx);
+    Iter_Remove(&it);
+    v->total -= s->length;
+    return SUCCESS;
+}
+
+i32 StrVec_RestoreAnchor(StrVec *v, i32 anchor){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    StrVec_PopTo(v, anchor);
+    return StrVec_Anchor(v);
+}
+
+i32 StrVec_StashAnchor(StrVec *v){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    if(v->anchor == -1){
+        return v->p->max_idx;
+    }
+    i32 anchor = v->anchor;
+    v->anchor = -1;
+    return anchor;
+}
+
+status StrVec_Anchor(StrVec *v){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to potentially shrink", NULL);
+        return ERROR;
+    }
+    if(v->anchor == -1){
+        v->anchor = v->p->max_idx;
+        return ZERO;
+    }else{
+        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec already anchored @ at $", args);
+        return ERROR;
+    }
+}
+
+status StrVec_ReturnToAnchor(StrVec *v){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    if(v->anchor == -1){
+        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec not anchored @ at $", args);
+        return ERROR;
+    }
+    return StrVec_PopTo(v, v->anchor);
+}
+
+status StrVec_PopToAnchor(StrVec *v){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    if(v->anchor == -1){
+        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec not anchored @ at $", args);
+        return ERROR;
+    }
+    status r = StrVec_PopTo(v, v->anchor);
+    v->anchor = -1;
+    return r;
+}
+
+status StrVec_PopTo(StrVec *v, i32 idx){
+    if(v->type.state & STRVEC_NOSHRINK){
+        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
+        return ERROR;
+    }
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = Iter_Get(&it); 
+        if(it.idx <= idx){
+            break;
+        }
+        v->total -= s->length;
+        Iter_Remove(&it);
+    }
+    return SUCCESS;
+}
+
 i32 StrVec_AddChain(StrVec *v, void *args[]){
     i32 anchor = v->p->max_idx;
     Abstract **ptr = (Abstract **)args;
@@ -30,29 +206,6 @@ i32 StrVec_AddChain(StrVec *v, void *args[]){
     }
 
     return anchor;
-}
-
-status StrVec_Decr(StrVec *v, i64 amount){
-    if(amount > v->total){
-        return ERROR;
-    }
-    Iter it;
-    Iter_Init(&it, v->p);
-    while((Iter_Prev(&it) & END) == 0){
-        Str *s = (Str *)Iter_Get(&it);
-        if(s->length > amount){
-            s->length -= amount;
-            amount = 0;
-            v->total -= amount;
-        }else if(amount > 0){
-            Iter_Remove(&it);
-            v->total -= s->length;
-            amount -= s->length;
-        }else{
-            break;
-        }
-    }
-    return SUCCESS;
 }
 
 status Str_AddVec(Str *s, StrVec *v){
@@ -228,40 +381,6 @@ i64 StrVec_FfIter(Iter *it, i64 offset){
     return offset;
 }
 
-StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
-    if(orig->type.state & STRVEC_ALIGNED){
-        return orig;
-    }
-    StrVec *v = StrVec_Make(m);
-    Iter it;
-    Iter_Init(&it, orig->p);
-    Str *s = Str_Make(m, STR_DEFAULT);
-    StrVec_Add(v, s);
-    i64 length = 0;
-    i64 offset = 0;
-    i64 taken = 0;
-    while((Iter_Next(&it) & END) == 0){
-        Str *os = (Str *)it.value;
-        offset = 0;
-        length = os->length;
-        taken = Str_Add(s, os->bytes+offset, length);
-        offset += taken;
-        length -= taken;
-        v->total += taken;
-        while(length > 0){
-            s = Str_Make(m, STR_DEFAULT);
-            StrVec_Add(v, s);
-            taken = Str_Add(s, os->bytes+offset, length);
-            offset += taken;
-            length -= taken;
-            v->total += taken;
-        }
-    }
-
-    v->type.state |= STRVEC_ALIGNED;
-    return v;
-}
-
 status StrVec_NextSlot(StrVec *v, Cursor *curs){
     i64 offset = 0;
     util needed = 8;
@@ -364,80 +483,6 @@ i32 StrVec_AddVecAfter(StrVec *v, StrVec *v2, i32 idx){
         }
     }
     return start;
-}
-
-status StrVec_Pop(StrVec *v){
-    if(v->total == 0){
-        return NOOP;
-    }
-    Iter it;
-    Iter_Init(&it, v->p);
-    Str *s =  Iter_GetByIdx(&it, it.p->max_idx);
-    Iter_Remove(&it);
-    v->total -= s->length;
-    return SUCCESS;
-}
-
-i32 StrVec_RestoreAnchor(StrVec *v, i32 anchor){
-    StrVec_PopTo(v, anchor);
-    return StrVec_Anchor(v);
-}
-
-i32 StrVec_StashAnchor(StrVec *v){
-    if(v->anchor == -1){
-        return v->p->max_idx;
-    }
-    i32 anchor = v->anchor;
-    v->anchor = -1;
-    return anchor;
-}
-
-status StrVec_Anchor(StrVec *v){
-    if(v->anchor == -1){
-        v->anchor = v->p->max_idx;
-        return ZERO;
-    }else{
-        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec already anchored @ at $", args);
-        return ERROR;
-    }
-}
-
-status StrVec_ReturnToAnchor(StrVec *v){
-    if(v->anchor == -1){
-        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec not anchored @ at $", args);
-        return ERROR;
-    }
-    return StrVec_PopTo(v, v->anchor);
-}
-
-status StrVec_PopToAnchor(StrVec *v){
-    if(v->anchor == -1){
-        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec not anchored @ at $", args);
-        return ERROR;
-    }
-    status r = StrVec_PopTo(v, v->anchor);
-    v->anchor = -1;
-    return r;
-}
-
-status StrVec_PopTo(StrVec *v, i32 idx){
-    Iter it;
-    Iter_Init(&it, v->p);
-    while((Iter_Prev(&it) & END) == 0){
-        Str *s = Iter_Get(&it); 
-        if(it.idx <= idx){
-            break;
-        }
-        v->total -= s->length;
-        Iter_Remove(&it);
-    }
-    return SUCCESS;
 }
 
 StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length){
