@@ -37,6 +37,8 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
     Iter_Init(&it, proto->outSpan);
     while((Iter_Next(&it) & END) == 0){
         Buff *bf = Iter_Get(&it);
+
+
         Buff_Pipe(proto->out, bf);
         if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
             close(bf->fd);
@@ -45,6 +47,7 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
 
         if((bf->type.state & ERROR) || (bf->type.state & (SUCCESS|END)) == 0){
             st->type.state |= ERROR;
+            tsk->type.state |= ERROR;
             break;
         }
     }

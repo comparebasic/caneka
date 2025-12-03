@@ -12,7 +12,7 @@ status HttpProto_AddBuff(ProtoCtx *proto, Buff *bf){
 status HttpProto_PrepareResponse(ProtoCtx *proto, Task *tsk){
     DebugStack_Push(NULL, ZERO);
 
-    Buff *bf = Buff_Make(tsk->m, ZERO);
+    Buff *bf = Span_Get(proto->outSpan, 0);
     HttpCtx_WriteHeaders(bf, (HttpCtx *)proto->ctx);
     Buff_Stat(bf);
     Span_Add(proto->outSpan, bf);
@@ -28,5 +28,6 @@ ProtoCtx *HttpProto_Make(MemCh *m){
     ctx->in = Buff_Make(m, ZERO);
     ctx->out = Buff_Make(m, BUFF_UNBUFFERED);
     ctx->ctx = HttpCtx_Make(m); 
+    Span_Set(ctx->outSpan, 0, Buff_Make(m, ZERO));
     return ctx;
 }

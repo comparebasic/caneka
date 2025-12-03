@@ -122,7 +122,8 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
                 Table *routeData = Seel_Get(ctx->route, K(m, "data"));
                 if(routeData != NULL && routeData->nvalues > 0){
-                    Table_Set(ctx->data, S(m, "config"), Table_Get(routeData, K(m, "config")));
+                    Table_Set(ctx->data,
+                        S(m, "config"), Table_Get(routeData, K(m, "config")));
                 }
 
                 Table *error = Table_Make(m);
@@ -148,6 +149,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
         Span_Add(proto->outSpan, bf);
         HttpProto_PrepareResponse(proto, tsk);
+        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, NULL, NULL, ZERO);
 
         st->type.state |= (MORE|SUCCESS);
         DebugStack_Pop();
@@ -194,6 +196,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *header = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
 
         Buff *bf = Buff_Make(m, ZERO);
+        r |= Route_Handle(header, bf, ctx->data, NULL);
         HttpProto_AddBuff(proto, bf);
     }
 
@@ -204,10 +207,10 @@ status WebServer_ServePage(Step *st, Task *tsk){
 
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = Sv(m, "footer");
-        Route *header = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
+        Route *footer = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
 
         Buff *bf = Buff_Make(m, ZERO);
-        r |= Route_Handle(header, bf, ctx->data, NULL);
+        r |= Route_Handle(footer, bf, ctx->data, NULL);
         HttpProto_AddBuff(proto, bf);
     }
 
@@ -216,6 +219,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
     }
 
     HttpProto_PrepareResponse(proto, tsk);
+    Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, NULL, NULL, ZERO);
 
     st->type.state |= (MORE|SUCCESS);
     DebugStack_Pop();
