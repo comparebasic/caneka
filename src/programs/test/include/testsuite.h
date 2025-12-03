@@ -1,3 +1,9 @@
+enum test_types {
+    _TYPE_TEST_START = _TYPE_CANEKA_CORE_END,
+    TYPE_TEST_SUITE,
+};
+
+
 enum test_status {
     SECTION_LABEL = 1 << 8,
     NOT_STARTED = 1 << 9,
@@ -11,6 +17,21 @@ enum test_status {
 
 typedef status (*TestFunc)(MemCh *m);
 
+typedef struct test_set {
+    char *name;
+    TestFunc func; 
+    char *description;
+    word status;
+} TestSet;
+
+typedef struct test_suite {
+    Type type; 
+    Str *name;
+    i32 pass;
+    i32 fail;
+    TestSet *set;
+} TestSuite;
+
 typedef struct req_test_spec {
     int direction;
     char *content;
@@ -20,12 +41,6 @@ typedef struct req_test_spec {
     /* meta */
 } ReqTestSpec;
 
-typedef struct test_set {
-    char *name;
-    TestFunc func; 
-    char *description;
-    word status;
-} TestSet;
 
 
 #define TEST_BUFF_SIZE 1023
@@ -39,6 +54,8 @@ typedef struct test_set {
 
 status Test(boolean condition, char *fmt, void *args[]);
 status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]);
-status Test_Runner(MemCh *gm, char *suiteName, TestSet *tests);
-
+status Test_Runner(MemCh *gm, TestSuite *suite);
 Str *Test_GetStr512(MemCh *m);
+
+TestSuite *TestSuite_Make(MemCh *m, Str *name, TestSet *set);
+

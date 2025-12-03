@@ -98,33 +98,38 @@ i32 main(int argc, char **argv){
     Str *log = S(m, "log");
     Str *foreground = S(m, "foreground");
 
-    Table *resolveArgs = Table_Make(m);
-    Args_Add(resolveArgs, help, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, noColor, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "licence"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, S(m, "version"), NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, foreground, NULL, ARG_OPTIONAL);
-    Args_Add(resolveArgs, log, NULL, ARG_OPTIONAL);
 
-    StrVec *name = StrVec_From(m, S(m, argv[0]));
-    IoUtil_Annotate(m, name);
-    Str *fname = IoUtil_FnameStr(m, name);
+    CliArgs *cli = CliArgs_Make(argc, argv);
 
-    Table *cliArgs = Table_Make(m);
-    CharPtr_ToTbl(m, resolveArgs, argc, argv, cliArgs);
-    if(Table_GetHashed(cliArgs, help) != NULL){
-        CharPtr_ToHelp(m, fname, resolveArgs, argc, argv);
+    Args_Add(cli, help, NULL, ARG_OPTIONAL,
+        Sv(m, "Show this help menu."));
+    Args_Add(cli, noColor, NULL, ARG_OPTIONAL,
+        Sv(m, "Skip ansi color sequences in output."));
+    Args_Add(cli, S(m, "licence"), NULL, ARG_OPTIONAL,
+        Sv(m, "Show the licences used in this software"));
+    Args_Add(cli, S(m, "version"), NULL, ARG_OPTIONAL,
+        Sv(m, "Show the version of this software"));
+    Args_Add(cli, foreground, NULL, ARG_OPTIONAL,
+        Sv(m, "Show messages to the console."));
+        
+    Args_Add(cli, log, NULL, ARG_OPTIONAL,
+        Sv(m, "Direct logs to a file starting with this name."));
+
+    CliArgs_Parse(cli);
+
+    if(CliArgs_Get(cli, help) != NULL){
+        CharPtr_ToHelp(cli);
         return 1;
     }
 
-    if(Table_GetHashed(cliArgs, noColor) != NULL){
+    if(CliArgs_Get(cli, noColor) != NULL){
         Ansi_SetColor(FALSE);
     }
 
-    if(Table_GetHashed(cliArgs, foreground) == NULL &&
-            Table_GetHashed(cliArgs, log) != NULL){
+    if(CliArgs_Get(cli, foreground) == NULL &&
+            CliArgs_Get(cli, log) != NULL){
 
-        Str *logValue = Table_Get(cliArgs, log);
+        Str *logValue = CliArgs_Get(cli, log);
 
         Str *build = Str_Make(m, STR_DEFAULT);
         args[0] = logValue;
@@ -165,7 +170,7 @@ i32 main(int argc, char **argv){
 
         Ansi_SetColor(FALSE);
         Core_Direct(m, outFd, errFd);
-    }else if(Table_GetHashed(cliArgs, noColor) != NULL){
+    }else if(CliArgs_Get(cli, noColor) != NULL){
         Ansi_SetColor(FALSE);
     }
 

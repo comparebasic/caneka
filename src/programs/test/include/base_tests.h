@@ -226,5 +226,11 @@ static TestSet BaseTests[] = {
         Stash_Tests,
         "Mem Stash testing.",
         FEATURE_COMPLETE,
+    },
+    {
+        NULL,
+        NULL,
+        NULL,
+        0,
     }
 };

@@ -7,8 +7,6 @@
 #endif
 
 i32 main(int argc, char **argv){
-    printf("I\n");
-    fflush(stdout);
 
     status r = READY;
     MemBook *cp = MemBook_Make(NULL);
@@ -78,13 +76,39 @@ i32 main(int argc, char **argv){
         Core_Direct(m, outFd, 2);
     }
 
-    printf("II\n");
-    fflush(stdout);
+    i32 pass = 0;
+    i32 fail = 0;
+    TestSuite *suite = NULL;
+    suite = TestSuite_Make(m, S(m, "Caneka base"), BaseTests);
+    r |= Test_Runner(m, suite);
+    pass += suite->pass;
+    fail += suite->fail;
 
-    r |= Test_Runner(m, "Caneka base", BaseTests);
-    r |= Test_Runner(m, "Caneka ext", ExtTests);
-    r |= Test_Runner(m, "Caneka crypto", CryptoTests);
-    r |= Test_Runner(m, "Caneka inter", InterTests);
+    suite = TestSuite_Make(m, S(m, "Caneka ext"), ExtTests);
+    r |= Test_Runner(m, suite);
+    pass += suite->pass;
+    fail += suite->fail;
+
+    suite = TestSuite_Make(m, S(m, "Caneka crypto"), CryptoTests);
+    r |= Test_Runner(m, suite);
+    pass += suite->pass;
+    fail += suite->fail;
+
+    suite = TestSuite_Make(m, S(m, "Caneka inter"), InterTests);
+    r |= Test_Runner(m, suite);
+    pass += suite->pass;
+    fail += suite->fail;
+
+    args[0] = I32_Wrapped(m, pass),
+    args[1] = I32_Wrapped(m, fail),
+    args[2] = NULL;
+    if(!fail){
+        Out("^g", NULL);
+    }else{
+        Out("^r", NULL);
+    }
+    Out("\nAll Suites - pass($) fail($)^0\n", args);
+
 
     if(CliArgs_Get(cli, dist) != NULL){
         File_Close(bf);

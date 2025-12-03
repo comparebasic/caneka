@@ -246,4 +246,10 @@ static TestSet ExtTests[] = {
         "Password tests with variable salt and funny.",
         FEATURE_COMPLETE,
     },
+    {
+        NULL,
+        NULL,
+        NULL,
+        0,
+    }
 };

@@ -12,5 +12,11 @@ static TestSet CryptoTests[] = {
         "Cryptography functionality testing.",
         FEATURE_COMPLETE,
     },
+    {
+        NULL,
+        NULL,
+        NULL,
+        0,
+    }
 };
 

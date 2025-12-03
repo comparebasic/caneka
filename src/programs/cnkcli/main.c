@@ -57,6 +57,11 @@ i32 main(int argc, char **argv){
         Ansi_SetColor(FALSE);
     }
 
+    if(CliArgs_Get(cli, help) != NULL){
+        CharPtr_ToHelp(cli);
+        return 1;
+    }
+
     i32 code = 0;
 
     Str *config = CliArgs_Get(cli, configKey);

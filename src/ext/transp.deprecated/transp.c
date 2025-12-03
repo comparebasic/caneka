@@ -208,7 +208,7 @@ i64 Transp(TranspCtx *ctx){
 
     a = Iter_Get(&ctx->it);
     if((i32)ctx->stackIdx == ctx->it.idx || (a->type.of != TYPE_ITER || (a->type.state & LAST))){
-        if(ctx->type.of & DEBUG){
+        if(ctx->type.state & DEBUG){
             args[0] = I32_Wrapped(m, ctx->stackIdx);
             args[1] = I32_Wrapped(m, ctx->it.idx);
             args[2] = a;

@@ -10,6 +10,44 @@
 #define TRUE 1
 #define FALSE 0
 
+char *buildCaneka[] = {
+    "./build/bin/cnkbuild",
+    "--src",
+    "src/inter",
+    NULL
+};
+
+char *buildTests[] = {
+    "./build/bin/cnkbuild",
+    "--src",
+    "src/programs/test",
+    NULL
+};
+
+char *buildWebServer[] = {
+    "./build/bin/cnkbuild",
+    "--src",
+    "src/programs/webserver",
+    NULL
+};
+
+char *buildCli[] = {
+    "./build/bin/cnkbuild",
+    "--src",
+    "src/programs/cnkcli",
+    NULL
+};
+
+char *runTests[] = {
+    "./build/bin/test",
+    NULL
+};
+
+char *runWebServer[] = {
+    "./build/bin/webserver",
+    NULL
+};
+
 char *menuKeys[] = {
     "run-tests",
     "build-only",
@@ -167,7 +205,7 @@ char *menu(){
 
 int main(int argc, char *argv[]){
     char *cmd[12];
-    char *runcmd[4];
+    char **runcmd[4];
 
     char *choice = menuKeys[0];
     if(argc < 2){
@@ -185,10 +223,12 @@ int main(int argc, char *argv[]){
     }
 
     if(compareCstr("run-tests", choice)){
-        runcmd[0] = "./build/bin/tests";
-        runcmd[1] = NULL;
+        runcmd[0] = buildTests;
+        runcmd[1] = runTests;
+        runcmd[2] = NULL;
     }else if(compareCstr("build-only", choice)){
-        runcmd[0] = NULL;
+        runcmd[0] = buildCaneka;
+        runcmd[1] = NULL;
     }else if(compareCstr("clean", choice)){
         char buff[512];
         memset(buff, 0, 512);
@@ -207,14 +247,15 @@ int main(int argc, char *argv[]){
         }
         exit(0);
     }else if(compareCstr("build-cli", choice)){
-        printf("  Not yet implemented\n");
-        exit(1);
+        runcmd[0] = buildCli;
+        runcmd[1] = NULL;
     }else if(compareCstr("build-webserver", choice)){
-        printf("  Not yet implemented\n");
-        exit(1);
+        runcmd[0] = buildWebServer;
+        runcmd[1] = NULL;
     }else if(compareCstr("build-run-webserver", choice)){
-        printf("  Not yet implemented\n");
-        exit(1);
+        runcmd[0] = buildWebServer;
+        runcmd[1] = runWebServer;
+        runcmd[2] = NULL;
     }else if(compareCstr("read-documentation", choice)){
         printf("  Documentation can be found at https://caneka.org\n");
         exit(1);
@@ -287,13 +328,13 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    cmd[0] = "./build/bin/cnkbuild";
-    cmd[1] = "--src";
-    cmd[2] = "src/programs/test";
-    cmd[3] = NULL;
-
-    if(run("Running cnkbuild", cmd) == -1){
-        exit(1);
+    char ***cmdptr = runcmd;
+    while(*cmdptr != NULL){
+        char **torun = *cmdptr;
+        if(run("Running cmd", torun) == -1){
+            exit(1);
+        }
+        cmdptr++;
     }
 
     return 0;

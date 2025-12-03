@@ -73,10 +73,10 @@ status Test(boolean condition, char *fmt, void *args[]){
     return condition ? SUCCESS : ERROR;
 }
 
-status Test_Runner(MemCh *m, char *suiteName, TestSet *tests){
-    DebugStack_Push(suiteName, TYPE_CSTR); 
+status Test_Runner(MemCh *m, TestSuite *suite){
+    DebugStack_Push(suite->name, suite->name->type.of); 
     m->level++;
-    TestSet *set = tests;
+    TestSet *set = suite->set;
     char *name = NULL;
     i32 pass = 0;
     i32 fail = 0;
@@ -92,9 +92,9 @@ status Test_Runner(MemCh *m, char *suiteName, TestSet *tests){
     i32 threashold = 2;
     i32 maxCeiling = TEST_MEM_MAX_CEILING;
 
-    args[0] = Str_CstrRef(m, suiteName);
+    args[0] = suite->name;
     args[1] = NULL;
-    Out("= Test Suite: _c\n", args);
+    Out("= Test Suite: $\n", args);
 
     args[0] = Str_MemCount(m, st.total * PAGE_SIZE);
     args[1] = I64_Wrapped(m, st.total);
@@ -160,19 +160,19 @@ status Test_Runner(MemCh *m, char *suiteName, TestSet *tests){
             MemCh_FreeTemp(m);
             Buff_Flush(OutStream);
             if((r & ERROR) != 0 || (r & SUCCESS) == 0){
-                fail++;
+                suite->fail++;
                 break;
             }else{
-                pass++;
+                suite->pass++;
             }
         }
 
         set++;
     }
 
-    args[0] = Str_CstrRef(m, suiteName),
-    args[1] = I32_Wrapped(m, pass),
-    args[2] = I32_Wrapped(m, fail),
+    args[0] = suite->name,
+    args[1] = I32_Wrapped(m, suite->pass),
+    args[2] = I32_Wrapped(m, suite->fail),
     args[3] = NULL;
     if(!fail){
         Out("^g", NULL);
@@ -184,5 +184,13 @@ status Test_Runner(MemCh *m, char *suiteName, TestSet *tests){
     m->level--;
     MemCh_FreeTemp(m);
     DebugStack_Pop();
-    return !fail ? SUCCESS : ERROR;
+    return !suite->fail ? SUCCESS : ERROR;
+}
+
+TestSuite *TestSuite_Make(MemCh *m, Str *name, TestSet *set){
+    TestSuite *suite = MemCh_AllocOf(m, sizeof(TestSuite), TYPE_TEST_SUITE);
+    suite->type.of = TYPE_TEST_SUITE;
+    suite->name = name;
+    suite->set = set;
+    return suite;
 }

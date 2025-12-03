@@ -62,6 +62,7 @@ enum inter_range {
     FORMAT_TEMPL_IFNOT,
     _FORMAT_TEMPL_LOGIC_END,
     _TYPE_INTER_END,
+    _TYPE_CANEKA_CORE_END,
 };
 
 enum inter_obj_range {

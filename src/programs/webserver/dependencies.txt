@@ -1,0 +1,5 @@
+exec=main.c
+inter
+ext
+choice=crypto@third/nacl
+base

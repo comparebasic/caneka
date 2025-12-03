@@ -281,7 +281,9 @@ static status buildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         Span_Add(cmd, Str_CstrRef(m, "-o"));
         Span_Add(cmd, StrVec_Str(m, ctx->current.binDest));
         Span_Add(cmd, StrVec_Str(m, ctx->current.source));
-        Span_Add(cmd, StrVec_Str(m, ctx->current.target));
+        if(ctx->current.target != NULL){
+            Span_Add(cmd, StrVec_Str(m, ctx->current.target));
+        }
         Span_AddSpanRev(cmd, ctx->current.staticlibs);
         Span_AddSpan(cmd, ctx->input.libs);
     }else{
@@ -317,7 +319,15 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     StrVec *key = h->key;
     DirSelector *sel = h->value;
 
+    Table *skips = Table_Get(sel->meta, K(m, "skip"));
+    Table *execs = Table_Get(sel->meta, K(m, "exec"));
+
     DebugStack_SetRef(key, key->type.of);
+
+
+    i32 libSourceTotal = sel->dest->nvalues;
+    if(skips != NULL){ libSourceTotal -= skips->nvalues; }
+    if(execs != NULL){ libSourceTotal -= execs->nvalues; }
 
     Str *fname = IoUtil_FnameStr(m, key);
     Str *targetName = Str_Make(m, fname->length+6);
@@ -325,15 +335,21 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     Str_Add(targetName, fname->bytes, fname->length);
     ctx->current.targetName = StrVec_From(m, targetName);
 
-    ctx->current.target = StrVec_Copy(m, ctx->input.buildDir);
-    Str *target = Str_Make(m, targetName->length+2);
-    Str_Add(target, targetName->bytes, targetName->length);
-    Str_Add(target, (byte *)".a", 2);
-    StrVec_Add(ctx->current.target, IoUtil_PathSep(m));
-    StrVec_Add(ctx->current.target, targetName);
-    StrVec_Add(ctx->current.target, IoUtil_PathSep(m));
-    StrVec_Add(ctx->current.target, target);
-    Table_Set(sel->meta, S(m, "target"), StrVec_Copy(m, ctx->current.target));
+    if(libSourceTotal > 0){
+        ctx->current.target = StrVec_Copy(m, ctx->input.buildDir);
+        Str *target = Str_Make(m, targetName->length+2);
+        Str_Add(target, targetName->bytes, targetName->length);
+        Str_Add(target, (byte *)".a", 2);
+        StrVec_Add(ctx->current.target, IoUtil_PathSep(m));
+        StrVec_Add(ctx->current.target, targetName);
+        StrVec_Add(ctx->current.target, IoUtil_PathSep(m));
+        StrVec_Add(ctx->current.target, target);
+
+        Table_Set(sel->meta, S(m, "target"), StrVec_Copy(m, ctx->current.target));
+    }else{
+        ctx->current.targetName = NULL;
+        ctx->current.target = NULL;
+    }
 
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     StrVec_Add(ctx->current.dest, IoUtil_PathSep(m));
@@ -344,7 +360,7 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     Dir_CheckCreate(m, StrVec_Str(m, ctx->current.dest));
 
     ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library build");
-    ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME] = ctx->current.target;
+    ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME] = ctx->current.targetName;
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = h->key;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
     LogOut(ctx);
@@ -417,6 +433,11 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     genInclude(ctx, modlist);
 
     ctx->current.staticlibs = Span_Make(m);
+    StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
+    if(libTarget){
+        Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
+    }
+
     if(deps != NULL){
         Iter it;
         Iter_Init(&it, Table_Ordered(m, deps));
@@ -436,6 +457,7 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
                 }
                 StrVec *libTarget = Table_Get(dsel->meta, K(m, "target"));
                 if(libTarget){
+                    void *ar[] = {libTarget, NULL};
                     Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
                 }
                 Table *staticDeps = Table_Get(dsel->meta, K(m, "static"));
@@ -445,7 +467,8 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
                     while((Iter_Next(&_it) & END) == 0){
                         Hashed *h = Iter_Get(&_it);
                         if(h != NULL){
-                            Span_Add(ctx->current.staticlibs, StrVec_Str(m, h->key)); 
+                            void *ar[] = {h->value, NULL};
+                            Span_Add(ctx->current.staticlibs, StrVec_Str(m, h->value)); 
                         }
                     }
                 }
@@ -464,25 +487,27 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
 
     ctx->input.countModuleSources->val.i = 0;
 
-    Str *libPathStr = StrVec_Str(m , ctx->current.target);
-    if(File_PathExists(m, libPathStr) && File_ModTime(m, libPathStr) > sel->time){
-        ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library is recent, skipping");
-        LogOut(ctx);
-        ctx->input.countSources->val.i += ctx->input.totalModuleSources->val.i;
-        DebugStack_Pop();
-        return ZERO;
+    microTime modified = 0;
+    if(ctx->current.target != NULL){
+        Str *libPathStr = StrVec_Str(m , ctx->current.target);
+        if(File_PathExists(m, libPathStr)){
+            modified = File_ModTime(m, libPathStr);
+            if(modified > sel->time){
+                ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library is recent, skipping");
+                LogOut(ctx);
+                ctx->input.countSources->val.i += ctx->input.totalModuleSources->val.i;
+                DebugStack_Pop();
+                return ZERO;
+            }
+        }
     }
 
     ctx->type.state |= PROCESSING;
 
-    microTime modified = File_ModTime(m, libPathStr);
 
     ctx->current.source = IoUtil_AbsVec(m, ctx->input.srcPrefix);
     StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
     StrVec_Anchor(ctx->current.source);
-
-    Table *skips = Table_Get(sel->meta, K(m, "skip"));
-    Table *execs = Table_Get(sel->meta, K(m, "exec"));
 
     Iter it;
     Iter_Init(&it, sel->dest);
