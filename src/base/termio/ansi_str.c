@@ -13,12 +13,16 @@ Str *ansi_dark = NULL;
 static boolean _AnsiSkip = FALSE;
 
 status Ansi_SetColor(boolean yesno){
-    _AnsiSkip = !yesno;
+    if(_AnsiSkip == TRUE){
+        _AnsiSkip = FALSE;
+    }else{
+        _AnsiSkip = TRUE;
+    }
     return SUCCESS;
 }
 
 boolean Ansi_HasColor(){
-    return !_AnsiSkip;
+    return _AnsiSkip != TRUE;
 }
 
 Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){

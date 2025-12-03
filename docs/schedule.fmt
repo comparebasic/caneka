@@ -1,0 +1,44 @@
+= Schedule
+
+The current focus has been on supporting features. The next phase is to build
+interactive components. Followed by interactive products.
+
+== Pencil
+
+Pencil is our fancy businessy document shorthand. It's used to generate this
+page and the _link=home@/ page.
+
+The next demo will be an interactive page where users can see how simple it can
+be to quickly indicate rich formatting using simple characters for formatting.
+
+== Interactive Stats wit FileDB
+
+The FileDB component, which replaces how web applications use a database, will
+be used for logging visitors and memory statistics on this site. When that
+happens we will build an interactive analysis tool. As a demo of what a
+business/accounting analysis tool could be.
+
+== Phrase Key
+
+Our password and security passporting system allows users to generate asymetric
+public/private key pairs from a paragraph.
+
+== Documentation Videos.
+
+Getting the network server to throttle for serving videos. And the
+documentation for _link=Caneka@https://caneka.org.
+
+== Echo
+
+A small service that you can email Pencil shorthand and it will return rich
+html or business documents including images, 2D barcodes, links, and eventually
+graphs and charts.
+
+== Email2Site
+
+This is a blog engine product that utalizes Pencil, and the rest of
+the _link=Caneka@https://caneka.org for website composition.
+
+== Forc
+
+Desktop data visualization product.

@@ -57,7 +57,7 @@ i32 main(int argc, char **argv){
         Ansi_SetColor(FALSE);
     }
 
-    if(CliArgs_Get(cli, help) != NULL){
+    if(CliArgs_Get(cli, helpKey) != NULL){
         CharPtr_ToHelp(cli);
         return 1;
     }
