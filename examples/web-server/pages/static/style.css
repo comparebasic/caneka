@@ -230,8 +230,21 @@ input[type="checkbox"]:checked + p + ul + p {
     background: rgba(245, 225, 120, 0.9);
 }
 
-.code-box, #page-tests .status-section {
+.code-box, #page-tests .status-section, pre {
     border: 1px solid rgb(100,100,100);
     border-radius: 6px;
     color: black;
+}
+
+pre {
+	padding: 24px;
+	background: white;
+	font-family: monospace, monospace;
+}
+
+.example-highlight {
+	border: 1px solid white;
+	border-radius: 16px;
+	padding: 24px;
+	margin: 16px 0;
 }
