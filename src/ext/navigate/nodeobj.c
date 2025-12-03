@@ -2,11 +2,22 @@
 #include <caneka.h>
 
 void *NodeObj_Att(Inst *nobj, void *key){
+    if(nobj == NULL){
+        return NULL;
+    }
     Table *obj = (Table *)Span_Get(nobj, NODEOBJ_PROPIDX_ATTS);
     if(obj != NULL){
         return Table_Get(obj, key);
     }
     return NULL;
+}
+
+void *NodeObj_GetChild(Inst *nobj, void *key){
+    if(nobj == NULL){
+        return NULL;
+    }
+    Table *children = (Table *)Span_Get(nobj, NODEOBJ_PROPIDX_CHILDREN);
+    return Table_Get(children, key);
 }
 
 status NodeObj_ClsInit(MemCh *m){

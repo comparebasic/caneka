@@ -158,7 +158,10 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
     Table *routeData = Seel_Get(ctx->route, K(m, "data"));
     if(routeData != NULL && routeData->nvalues > 0){
-        Table_Set(ctx->data, S(m, "config"), Table_Get(routeData, K(m, "config")));
+        Table *config = Table_Get(routeData, K(m, "config"));
+        Table_Set(ctx->data, S(m, "config"), config);
+        void *args[] = {config, NULL};
+        Out("^y.Gathering Config @^0\n", args);
     }
 
     Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
@@ -175,7 +178,6 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
 status WebServer_ServePage(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
-    void *args[5];
     MemCh *m = tsk->m;
     status r = READY;
 
@@ -200,10 +202,34 @@ status WebServer_ServePage(Step *st, Task *tsk){
         HttpProto_AddBuff(proto, bf);
     }
 
+    NodeObj *config = Table_Get(ctx->data, K(m, "config"));
+    NodeObj *pageNode = NodeObj_GetChild(config, K(m, "page"));
+    StrVec *preContent = NodeObj_Att(pageNode, K(m, "pre-content"));
+    StrVec *postContent = NodeObj_Att(pageNode, K(m, "post-content"));
+    if(preContent != NULL){
+        Route *route = Inst_ByPath(tcp->inc, preContent, NULL, SPAN_OP_GET);
+        if(route != NULL){
+            Buff *bf = Buff_Make(m, ZERO);
+            r |= Route_Handle(route, bf, ctx->data, NULL);
+            HttpProto_AddBuff(proto, bf);
+        }
+    }
+
     Buff *bf = Buff_Make(m, ZERO);
     r |= Route_Handle(ctx->route, bf, ctx->data, NULL);
     Buff_Stat(bf);
     HttpProto_AddBuff(proto, bf);
+
+    if(postContent != NULL){
+        void *args[] = {postContent, NULL};
+        Out("^p.PostContent @^\n", args);
+        Route *route = Inst_ByPath(tcp->inc, postContent, NULL, SPAN_OP_GET);
+        if(route != NULL){
+            Buff *bf = Buff_Make(m, ZERO);
+            r |= Route_Handle(route, bf, ctx->data, NULL);
+            HttpProto_AddBuff(proto, bf);
+        }
+    }
 
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = Sv(m, "footer");

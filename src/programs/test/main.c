@@ -60,7 +60,7 @@ i32 main(int argc, char **argv){
         Dir_CheckCreate(m, dir);
 
         args[0] = dir;
-        args[1] = S(m, "/tests.fmt");
+        args[1] = S(m, "/test-output.fmt");
         args[2] = NULL;
         Str_AddChain(m, path, args);
 

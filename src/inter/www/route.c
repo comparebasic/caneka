@@ -111,7 +111,6 @@ static status routeFuncFileDb(Buff *bf, void *action, Table *data, void *source)
 
 static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
     MemCh *m = rt->m;
-    void *args[3];
 
     StrVec *path = StrVec_Make(m);
     StrVec_AddVec(path, ctx->path);
@@ -119,6 +118,9 @@ static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
 
     Str *pathS = StrVec_StrCombo(m,
         path, Str_FromCstr(m, ".config", ZERO));
+
+    void *args[] = {pathS, NULL};
+    Out("^c.Looking for config @^0\n", args);
 
     NodeObj *config = Config_FromPath(m, pathS);
     if(config != NULL && config->nvalues > 0){
