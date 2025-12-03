@@ -1,8 +1,5 @@
 (function(){
-    const testsPage = document.getElementById('page-tests');
-    if(testsPage){
-        console.log('wohoo test page', testsPage);
-    }
+    const testsPage = document.getElementById('test-output');
     const h3s = testsPage.getElementsByTagName('H3');
     let length = h3s.length;
     for(let i = 0; i < length; i++){

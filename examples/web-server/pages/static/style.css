@@ -146,10 +146,92 @@ input[type="checkbox"]:checked + p + ul + p {
     display:block;
 }
 
+.abs-label {
+    position: absolute;
+    top: 12px;
+    left 12px;
+}
+
+#page-tests table {
+    border-collapse: collapse;
+    border: 1px solid black;
+    display:block;
+    margin: 18px;
+}
+
+#page-tests .status-section {
+    position: relative;
+    background: white;
+    padding: 20px 16px 16px 16px;
+}
+
+#page-tests article {
+    float: left;
+    width: 48%;
+}
+
+#page-tests .status-section a {
+    color: rgb(0,0,200);
+}
+
+#page-tests table td {
+    padding: 4px 8px;
+}
+
+#page-tests table thead td {
+    text-align: center;
+    font-weight: bold;
+}
+
+#page-tests .status-done {
+    color: rgb(0,140,0);
+    font-weight: bold;
+}
+
+#page-tests .color-swatch {
+    display: block;
+    height: 16px;
+    width: 16px;
+    border-radius: 8px;
+}
+
+#page-tests .status-done .color-swatch {
+    background: rgb(0,140,0);
+}
+
+#page-tests .status-started {
+    color: rgb(180,120,0);
+    font-weight: bold;
+}
+
+#page-tests .status-started .color-swatch {
+    background: rgb(180,120,0);
+}
+
+#page-tests .status-partial {
+    color: rgb(0,0,180);
+    font-weight: bold;
+}
+
+#page-tests .status-partial .color-swatch {
+    background: rgb(0,0,180);
+}
+
+#page-tests .status-not-started {
+    color: rgb(40,40,40);
+    font-weight: bold;
+}
+
+#page-tests .status-not-started .color-swatch {
+    background: rgb(40,40,40);
+}
+
 .code-box {
-    padding: 8px;
+    background: rgba(245, 225, 120, 0.9);
+}
+
+.code-box, #page-tests .status-section {
     border: 1px solid rgb(100,100,100);
     border-radius: 6px;
-    background: rgba(245, 225, 120, 0.9);
     color: black;
 }
