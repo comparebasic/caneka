@@ -15,6 +15,14 @@ microTime MicroTime_FromSpec(struct timespec *ts){
     return (ts->tv_sec * 1000l) + (ts->tv_nsec / 1000l);
 }
 
+microTime MicroTime_FromSec(i64 seconds){
+    return (seconds * 1000l);
+}
+
+i64 MicroTime_ToSec(microTime time){
+    return (1000l / time);
+}
+
 void MicroTime_ToSpec(struct timespec *ts, microTime tm){
     ts->tv_sec = tm / 1000;
     ts->tv_nsec = tm % 1000; 

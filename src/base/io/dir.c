@@ -80,7 +80,7 @@ static status gatherFileSel(MemCh *m, Str *path, Str *file, void *source){
     if(extMatches || (sel->type.state & DIR_SELECTOR_MTIME_ALL)){
         struct stat st;
         File_Stat(m, StrVec_Str(m, v), &st);
-        microTime modified = MicroTime_FromSpec(&st.st_mtimespec);
+        microTime modified = MicroTime_FromSec(st.st_mtime);
         if((sel->type.state & DIR_SELECTOR_MTIME_LOWEST)){
             if(sel->time == 0 || modified < sel->time){
                 sel->time = modified;

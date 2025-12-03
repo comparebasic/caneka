@@ -26,6 +26,7 @@ char *buildTests[] = {
 
 char *buildWebServer[] = {
     "./build/bin/cnkbuild",
+    "--quiet",
     "--src",
     "src/programs/webserver",
     NULL
@@ -303,10 +304,6 @@ int main(int argc, char *argv[]){
     cmd[6] = "./build/libcnkbase/libcnkbase.a";
     cmd[7] = "./src/base/inc.c";
     cmd[8] =  NULL;
-
-    if(run("Building base", cmd) == -1){
-        exit(1);
-    }
 
     if(run("Building base", cmd) == -1){
         exit(1);

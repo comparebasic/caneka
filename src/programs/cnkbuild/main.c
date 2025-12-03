@@ -68,6 +68,7 @@ static status parseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
         if(ctx->modified < sel->time){
             ctx->modified = sel->time;
+            void *ar[] = {MicroTime_ToStr(m, ctx->modified), NULL};
         }
 
         ctx->input.totalSources->val.i += sel->dest->nvalues;
@@ -319,11 +320,14 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     StrVec *key = h->key;
     DirSelector *sel = h->value;
 
+    if(Table_Get(sel->meta, K(m, "completed")) != NULL){
+        return NOOP;
+    }
+
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
     Table *execs = Table_Get(sel->meta, K(m, "exec"));
 
     DebugStack_SetRef(key, key->type.of);
-
 
     i32 libSourceTotal = sel->dest->nvalues;
     if(skips != NULL){ libSourceTotal -= skips->nvalues; }
@@ -433,15 +437,11 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     genInclude(ctx, modlist);
 
     ctx->current.staticlibs = Span_Make(m);
-    StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
-    if(libTarget){
-        Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
-    }
 
     if(deps != NULL){
         Iter it;
         Iter_Init(&it, Table_Ordered(m, deps));
-        while((Iter_Next(&it) & END) == 0){
+        while((Iter_Prev(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
                 DirSelector *dsel = Table_Get(ctx->input.dependencies, h->key); 
@@ -455,11 +455,6 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
                 if(depInc != NULL){
                     Span_AddSpan(inc, depInc);
                 }
-                StrVec *libTarget = Table_Get(dsel->meta, K(m, "target"));
-                if(libTarget){
-                    void *ar[] = {libTarget, NULL};
-                    Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
-                }
                 Table *staticDeps = Table_Get(dsel->meta, K(m, "static"));
                 if(staticDeps != NULL){
                     Iter _it;
@@ -472,8 +467,17 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
                         }
                     }
                 }
+                StrVec *libTarget = Table_Get(dsel->meta, K(m, "target"));
+                if(libTarget){
+                    void *ar[] = {libTarget, NULL};
+                    Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
+                }
             }
         }
+    }
+    StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
+    if(libTarget){
+        Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
     }
 
     ctx->current.inc = inc;
@@ -565,6 +569,8 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
+            void *ar[] = {ctx->current.staticlibs, NULL};
+            Out("^p.static libs &^.\n", ar);
 
             Str *fname = h->value;
 
@@ -603,6 +609,7 @@ static status buildModule(BuildCtx *ctx, Hashed *h){
     }
 
     StrVec_PopToAnchor(ctx->current.dest);
+    Table_Set(sel->meta, S(m, "completed"), I64_Wrapped(m, MicroTime_Now()));
 
     DebugStack_Pop();
     return r;

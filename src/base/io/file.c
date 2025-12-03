@@ -97,7 +97,7 @@ boolean File_PathExists(MemCh *m, Str *path){
 microTime File_ModTime(MemCh *m, Str *path){
     struct stat st;
     if(stat(Str_Cstr(m, path), &st) == 0){
-        return MicroTime_FromSpec(&st.st_mtimespec);
+        return MicroTime_FromSec(st.st_mtime);
     }
     return 0;
 }
