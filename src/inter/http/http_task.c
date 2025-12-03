@@ -9,7 +9,7 @@ status HttpTask_InitResponse(Task *tsk, void *arg, void *source){
 
     TcpCtx *tcp = (TcpCtx *)as(source, TYPE_TCP_CTX);
     if(tcp->defaultData != NULL){
-        HttpCtx *http = (HttpCtx*)proto->data;
+        HttpCtx *http = (HttpCtx*)proto->ctx;
         SourceFunc func = (SourceFunc)tcp->defaultData;
         func(tsk->m, http->data, tcp);
     }

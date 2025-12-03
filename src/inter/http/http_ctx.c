@@ -3,14 +3,6 @@
 
 static Lookup *statusCodeStrings = NULL;
 
-ProtoCtx *HttpProto_Make(MemCh *m){
-    ProtoCtx *ctx = ProtoCtx_Make(m);
-    ctx->in = Buff_Make(m, ZERO);
-    ctx->out = Buff_Make(m, BUFF_UNBUFFERED);
-    ctx->data = (Abstract *)HttpCtx_Make(m); 
-    return ctx;
-}
-
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     status r = READY;
     Str *status = Lookup_Get(statusCodeStrings, ctx->code);
@@ -31,21 +23,6 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
         "Content-Type: $\r\n"
         "Content-Length: $\r\n"
         "\r\n" , args);
-    return r;
-}
-
-status HttpCtx_PrepareResponse(HttpCtx *ctx, Task *tsk){
-    DebugStack_Push(NULL, ZERO);
-
-    Buff *bf = Buff_Make(tsk->m, ZERO);
-    HttpCtx_WriteHeaders(bf, ctx);
-    Buff_Stat(bf);
-
-    status r = Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, bf, NULL, ZERO);
-
-    TcpTask_ExpectSend(NULL, tsk);
-
-    DebugStack_Pop();
     return r;
 }
 

@@ -24,7 +24,7 @@ status Caneka_Init(MemCh *m){
     r |= BinSeg_Init(m);
     r |= Navigate_ClsInit(m);
     r |= Task_Init(m);
-    r |= Serve_ClsInit(m);
+    r |= Serve_TosInit(m);
     r |= NodeObj_ClsInit(m);
 
     return r;

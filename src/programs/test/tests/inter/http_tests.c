@@ -20,7 +20,7 @@ status Http_Tests(MemCh *m){
     Roebling *rbl = HttpRbl_Make(m, curs, proto);
     Roebling_Run(rbl);
 
-    HttpCtx *ctx = (HttpCtx*)as(proto->data, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx*)as(proto->ctx, TYPE_HTTP_CTX);
     args[0] = I32_Wrapped(m, HTTP_METHOD_GET);
     args[1] = NULL;
     r |= Test(ctx->method == HTTP_METHOD_GET, "Method is as expected $", args);

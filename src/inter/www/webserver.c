@@ -8,7 +8,7 @@ static Span *_sepSpan = NULL;
 static status WebServer_logAndClose(Step *_st, Task *tsk){
     DebugStack_Push(_st, _st->type.of);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
 
     MemBookStats st;
     MemBook_GetStats(tsk->m, &st);
@@ -44,7 +44,7 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
     MemCh *m = tsk->m; 
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
 
     StrVec *path = Sv(m, "/system/error");
     IoUtil_Annotate(m, path);
@@ -105,7 +105,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
 
     IoUtil_Annotate(tsk->m, ctx->path);
     ctx->route = Route_GetHandler(tcp->pages, ctx->path);
@@ -146,8 +146,8 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         Buff *bf = Buff_Make(m, ZERO);
         Buff_AddBytes(bf, s->bytes, s->length);
 
-        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
-        HttpCtx_PrepareResponse(ctx, tsk);
+        Span_Add(proto->outSpan, bf);
+        HttpProto_PrepareResponse(proto, tsk);
 
         st->type.state |= (MORE|SUCCESS);
         DebugStack_Pop();
@@ -179,7 +179,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
 
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
 
     DebugStack_SetRef(ctx->path, ctx->path->type.of);
 
@@ -189,45 +189,33 @@ status WebServer_ServePage(Step *st, Task *tsk){
         TYPE_WRAPPED_FUNC
     );
 
-    Buff *headBf = NULL;
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = Sv(m, "header");
         Route *header = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
-        headBf = Buff_Make(m, ZERO);
-        r |= Route_Handle(header, headBf, ctx->data, NULL);
-        Buff_Stat(headBf);
-        ctx->contentLength += headBf->st.st_size;
+
+        Buff *bf = Buff_Make(m, ZERO);
+        HttpProto_AddBuff(proto, bf);
     }
 
     Buff *bf = Buff_Make(m, ZERO);
     r |= Route_Handle(ctx->route, bf, ctx->data, NULL);
     Buff_Stat(bf);
-    ctx->contentLength += bf->st.st_size;
+    HttpProto_AddBuff(proto, bf);
 
-    Buff *footerBf = NULL;
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = Sv(m, "footer");
         Route *header = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
 
-        footerBf = Buff_Make(m, ZERO);
-        r |= Route_Handle(header, footerBf, ctx->data, NULL);
-        Buff_Stat(footerBf);
-        ctx->contentLength += footerBf->st.st_size;
+        Buff *bf = Buff_Make(m, ZERO);
+        r |= Route_Handle(header, bf, ctx->data, NULL);
+        HttpProto_AddBuff(proto, bf);
     }
 
     if(ctx->code == 0){
         ctx->code = 200;
     }
 
-    if(footerBf != NULL){
-        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)footerBf, NULL, ZERO);
-    }
-    Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)bf, NULL, ZERO);
-    if(headBf != NULL){
-        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, (Abstract *)headBf, NULL, ZERO);
-    }
-
-    HttpCtx_PrepareResponse(ctx, tsk);
+    HttpProto_PrepareResponse(proto, tsk);
 
     st->type.state |= (MORE|SUCCESS);
     DebugStack_Pop();

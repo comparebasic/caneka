@@ -3,7 +3,8 @@
 
 i32 main(int argc, char **argv){
     MemBook *cp = MemBook_Make(NULL);
-    void *args[5];
+    void *args[3];
+
     if(cp == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
     }
@@ -73,6 +74,7 @@ i32 main(int argc, char **argv){
 
     BuildCtx *ctx = BuildCtx_Make(m);
 
+
     StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
     IoUtil_Annotate(m, prefix);
     ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
@@ -99,7 +101,10 @@ i32 main(int argc, char **argv){
 
     BuildCtx_Build(ctx);
 
-    Out("^g.Build succeeded^0\n", NULL);
+    args[0] = CliArgs_Get(cli, srcKey);
+    args[1] = CliArgs_Get(cli, dirKey);
+    args[2] = NULL;
+    Out("^g.Build succeeded $ -> ./$^0\n", args);
 
     CliArgs_Free(cli);
 

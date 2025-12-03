@@ -27,18 +27,29 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
 
 status TcpTask_WriteStep(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
+    status r = READY;
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
 
-    Buff *bf = (Buff *)as(st->data, TYPE_BUFF);
     Buff_SetFd(proto->out, pfd->fd);
-    Buff_Pipe(proto->out, bf);
-    if(bf->type.state & BUFF_FD){
-        close(bf->fd);
-        Buff_UnsetFd(bf);
+
+    Iter it;
+    Iter_Init(&it, proto->outSpan);
+    while((Iter_Next(&it) & END) == 0){
+        Buff *bf = Iter_Get(&it);
+        Buff_Pipe(proto->out, bf);
+        if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
+            close(bf->fd);
+            Buff_UnsetFd(bf);
+        }
+
+        if((bf->type.state & ERROR) || (bf->type.state & (SUCCESS|END)) == 0){
+            st->type.state |= ERROR;
+            break;
+        }
     }
 
-    if(bf->type.state & (SUCCESS|ERROR|END)){
+    if((st->type.state & ERROR) == 0){
         st->type.state |= SUCCESS;
     }
     

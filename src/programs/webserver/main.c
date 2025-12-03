@@ -15,7 +15,7 @@ static status getDefaultData(MemCh *m, void *a, void *source){
 static status Load_stats(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
 
     MemCh *m = tsk->m;
 

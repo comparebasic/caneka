@@ -37,7 +37,7 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     args[0] = IoUtil_PathSep(m);
     args[1] = ctx->current.targetName;
     args[2] = IoUtil_PathSep(m);
-    args[4] = NULL;
+    args[3] = NULL;
     StrVec_AddChain(ctx->current.dest, args);
 
     DebugStack_Pop();
@@ -316,9 +316,8 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         return NOOP;
     }
 
-
     setNames(ctx, name, sel);
-    DebugStack_SetRef(ctx->current.targetName, ctx->current.targetName->type.of);
+    DebugStack_SetRef(ctx->current.dest, ctx->current.dest->type.of);
 
     StrVec_Anchor(ctx->current.dest);
     Dir_CheckCreate(m, StrVec_Str(m, ctx->current.dest));

@@ -26,7 +26,6 @@ char *buildTests[] = {
 
 char *buildWebServer[] = {
     "./build/bin/cnkbuild",
-    "--quiet",
     "--src",
     "src/programs/webserver",
     NULL
@@ -57,18 +56,20 @@ char *menuKeys[] = {
     "build-webserver",
     "build-run-webserver",
     "read-documentation",
+    "all",
     "oops",
     NULL
 };
 
 char *menuOptions[] = {
-    "Build and RUN Caneka and it's tests",
-    "Build Caneka only",
-    "Clean the ./build directory",
-    "Build the CnkCli tools",
-    "Build the example WebServer",
-    "Build and RUN the example WebServer",
-    "Read some Documentation for Caneka",
+    "Tests - build and RUN",
+    "Caneka (core) - build",
+    "Clean (the ./build directory)",
+    "CnkCli - build",
+    "Webserver - build",
+    "WebServer - build and RUN",
+    "Documentation - show website url",
+    "All - build core/Tests/Cli/Webserver",
     "Oops, Wrong Command",
     NULL
 };
@@ -193,7 +194,7 @@ char *menu(){
         i++;
     }
 
-    printf("  Type a number or press Enter (default is 1)\n\n");
+    printf("\n  Type a number or press Enter (default is 1)\n\n");
 
     char buff[2];
     read(0, buff, 2);
@@ -260,6 +261,11 @@ int main(int argc, char *argv[]){
     }else if(compareCstr("read-documentation", choice)){
         printf("  Documentation can be found at https://caneka.org\n");
         exit(1);
+    }else if(compareCstr("all", choice)){
+        runcmd[0] = buildTests;
+        runcmd[1] = buildCli;
+        runcmd[2] = buildWebServer;
+        runcmd[3] = NULL;
     }else if(compareCstr("oops", choice)){
         printf("%s%s%s", GREEN, "  Ok, See you next time!\n", NORMAL_COLOR);
         exit(1);
@@ -333,6 +339,23 @@ int main(int argc, char *argv[]){
             exit(1);
         }
         cmdptr++;
+    }
+
+    if(compareCstr("build-only", choice)){
+        printf("Caneka has been built!\n");
+        fflush(stdout);
+    }else if(compareCstr("clean", choice)){
+        printf("Cleaned!\n");
+        fflush(stdout);
+    }else if(compareCstr("build-cli", choice)){
+        printf("The Cli has been built at ./build/bin/cnkcli\n");
+        fflush(stdout);
+    }else if(compareCstr("build-webserver", choice)){
+        printf("The WebServer has been built at ./build/bin/webserver\n");
+        fflush(stdout);
+    }else if(compareCstr("all", choice)){
+        printf("The Test,WebServer and Cli are in the ./build/bin folder\n");
+        fflush(stdout);
     }
 
     return 0;

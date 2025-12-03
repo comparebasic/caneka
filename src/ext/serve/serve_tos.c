@@ -22,7 +22,7 @@ static i64 ProtoCtx_Print(Buff *bf, void *a, cls type, word flags){
         Util_Wrapped(bf->m, ctx->u),
         ctx->in,
         ctx->out,
-        ctx->data,
+        ctx->ctx,
         NULL,
     };
     return Fmt(bf, "Proto<$ u:$ in:@ out:@ data:@>", args);
@@ -76,6 +76,6 @@ status Serve_ToSInit(MemCh *m, Lookup *lk){
     return r;
 }
 
-status Serve_ClsInit(MemCh *m){
+status Serve_TosInit(MemCh *m){
     return Serve_ToSInit(m, ToStreamLookup);
 }

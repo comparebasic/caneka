@@ -4,7 +4,7 @@
 
 static status Example_log(Step *_st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->data, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
     void *args[] = {
         Lookup_Get(HttpMethods, ctx->method),
         ctx->path,
