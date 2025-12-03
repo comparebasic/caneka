@@ -119,9 +119,6 @@ static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
     Str *pathS = StrVec_StrCombo(m,
         path, Str_FromCstr(m, ".config", ZERO));
 
-    void *args[] = {pathS, NULL};
-    Out("^c.Looking for config @^0\n", args);
-
     NodeObj *config = Config_FromPath(m, pathS);
     if(config != NULL && config->nvalues > 0){
         Table *tbl = Seel_Get(rt, S(m, "data"));
