@@ -85,30 +85,6 @@ status StrVec_Pop(StrVec *v){
     return SUCCESS;
 }
 
-i32 StrVec_RestoreAnchor(StrVec *v, i32 anchor){
-    if(v->type.state & STRVEC_NOSHRINK){
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
-        return ERROR;
-    }
-    StrVec_PopTo(v, anchor);
-    return StrVec_Anchor(v);
-}
-
-i32 StrVec_StashAnchor(StrVec *v){
-    if(v->type.state & STRVEC_NOSHRINK){
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
-        return ERROR;
-    }
-    if(v->anchor == -1){
-        return v->p->max_idx;
-    }
-    i32 anchor = v->anchor;
-    v->anchor = -1;
-    return anchor;
-}
-
 status StrVec_Anchor(StrVec *v){
     if(v->type.state & STRVEC_NOSHRINK){
         Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -139,23 +115,6 @@ status StrVec_ReturnToAnchor(StrVec *v){
         return ERROR;
     }
     return StrVec_PopTo(v, v->anchor);
-}
-
-status StrVec_PopToAnchor(StrVec *v){
-    if(v->type.state & STRVEC_NOSHRINK){
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
-        return ERROR;
-    }
-    if(v->anchor == -1){
-        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec not anchored @ at $", args);
-        return ERROR;
-    }
-    status r = StrVec_PopTo(v, v->anchor);
-    v->anchor = -1;
-    return r;
 }
 
 status StrVec_PopTo(StrVec *v, i32 idx){

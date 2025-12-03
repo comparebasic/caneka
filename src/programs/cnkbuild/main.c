@@ -76,12 +76,14 @@ i32 main(int argc, char **argv){
     StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
     IoUtil_Annotate(m, prefix);
     ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
+    ctx->input.buildDir->type.state |= STRVEC_NOSHRINK;
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
     ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->input.sources = CliArgs_Get(cli, srcKey);
     ctx->input.srcPrefix = prefix;
+    ctx->input.srcPrefix->type.state |= STRVEC_NOSHRINK;
     ctx->input.totalSources = I32_Wrapped(m, 0);
     ctx->input.countSources = I32_Wrapped(m, 0);
     ctx->input.totalModules = I32_Wrapped(m, 0);

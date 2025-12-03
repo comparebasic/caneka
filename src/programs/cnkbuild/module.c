@@ -52,9 +52,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     StrVec_Anchor(srcIncPath);
     StrVec_AddChain(srcIncPath, args);
     Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
-    StrVec_PopToAnchor(srcIncPath);
-
-    StrVec_ReturnToAnchor(ctx->current.dest);
+    StrVec_ReturnToAnchor(srcIncPath);
 
     Table *incMeta = Table_Get(sel->meta, S(m, "include"));
     if(incMeta != NULL){
@@ -77,7 +75,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
                     path = buildDir;
                 }
                 Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), path));
-                StrVec_PopToAnchor(buildDir);
+                StrVec_ReturnToAnchor(buildDir);
             }
         }
     }
@@ -251,6 +249,8 @@ static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         if(h != NULL){
             Str *fname = h->value;
 
+            ctx->current.source = IoUtil_AbsVec(m, ctx->input.srcPrefix);
+
             ctx->input.countSources->val.i++;
             ctx->input.countModuleSources->val.i++;
 
@@ -280,8 +280,6 @@ static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
             StrVec_AddChain(ctx->current.binDest, args);
 
             BuildCtx_BuildObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
-
-            StrVec_ReturnToAnchor(ctx->current.source);
         }
     }
 
