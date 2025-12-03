@@ -102,7 +102,7 @@ status StrVec_Anchor(StrVec *v){
     }
 }
 
-status StrVec_ReturnToAnchor(StrVec *v){
+status StrVec_Return(StrVec *v){
     if(v->type.state & STRVEC_NOSHRINK){
         Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
             "StrVec has NOSHRINK flag but is being asked to shrink", NULL);

@@ -52,7 +52,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     StrVec_Anchor(srcIncPath);
     StrVec_AddChain(srcIncPath, args);
     Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
-    StrVec_ReturnToAnchor(srcIncPath);
+    StrVec_Return(srcIncPath);
 
     Table *incMeta = Table_Get(sel->meta, S(m, "include"));
     if(incMeta != NULL){
@@ -75,7 +75,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
                     path = buildDir;
                 }
                 Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), path));
-                StrVec_ReturnToAnchor(buildDir);
+                StrVec_Return(buildDir);
             }
         }
     }
@@ -222,16 +222,16 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
 
         if(File_PathExists(m, dest) && File_ModTime(m, dest) > modified){
             BuildCtx_LinkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
-            StrVec_ReturnToAnchor(ctx->current.dest);
-            StrVec_ReturnToAnchor(ctx->current.source);
+            StrVec_Return(ctx->current.dest);
+            StrVec_Return(ctx->current.source);
             continue;
         }
 
         BuildCtx_BuildObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
         BuildCtx_LinkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
 
-        StrVec_ReturnToAnchor(ctx->current.dest);
-        StrVec_ReturnToAnchor(ctx->current.source);
+        StrVec_Return(ctx->current.dest);
+        StrVec_Return(ctx->current.source);
     }
 
     DebugStack_Pop();
