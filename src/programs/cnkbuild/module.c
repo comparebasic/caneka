@@ -3,12 +3,20 @@
 
 static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
+    MemCh *m = ctx->m;
+    void *args[6];
 
-    ctx->current.name = IoUtil_FnameStr(m, key);
-    ctx->current.targetName = StrVec_Str(m,
+    ctx->current.name = StrVec_From(m, IoUtil_FnameStr(m, key));
+    ctx->current.targetName = StrVec_From(m,
         StrVec_StrPrefixed(m,
             S(m, "libcnk"), ctx->current.name));
 
+    Table *skips = Table_Get(sel->meta, K(m, "skip"));
+    Table *execs = Table_Get(sel->meta, K(m, "exec"));
+
+    i32 libSourceTotal = sel->dest->nvalues;
+    if(skips != NULL){ libSourceTotal -= skips->nvalues; }
+    if(execs != NULL){ libSourceTotal -= execs->nvalues; }
     if(libSourceTotal > 0){
         ctx->current.target = StrVec_Copy(m, ctx->input.buildDir);
         args[0] = IoUtil_PathSep(m);
@@ -27,7 +35,7 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
 
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     args[0] = IoUtil_PathSep(m);
-    args[1] = targetName;
+    args[1] = ctx->current.targetName;
     args[2] = IoUtil_PathSep(m);
     args[4] = NULL;
     StrVec_AddChain(ctx->current.dest, args);
@@ -38,6 +46,9 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
 
 static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
+    status r = READY;
+    MemCh *m = ctx->m;
+    void *args[5];
 
     Span *inc = Span_CloneShallow(m, ctx->input.inc);
     Span *moduleInc = Span_Make(m);
@@ -87,7 +98,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     Table *deps = Table_Get(sel->meta, K(m, "dep"));
 
     Span *modlist = Span_Make(m);
-    Span_Add(modlist, h->key);
+    Span_Add(modlist, key);
     if(deps != NULL){
         Iter it;
         Iter_Init(&it, Table_Ordered(m, deps));
@@ -99,7 +110,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         }
     }
 
-    BuildCtx_GenInclude(ctx, modlist);
+    BuildCtx_GenInclude(ctx, modlist, NULL);
 
     ctx->current.staticlibs = Span_Make(m);
 
@@ -148,12 +159,15 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     ctx->current.inc = inc;
 
     DebugStack_Pop();
-    return ZERO;
+    return r;
 }
 
 static microTime skipRecent(BuildCtx *ctx, 
         StrVec *key, DirSelector *sel, microTime *modified){
     DebugStack_Push(NULL, ZERO);
+    MemCh *m = ctx->m;
+    void *args[5];
+
     if(ctx->current.target != NULL){
         Str *libPathStr = StrVec_Str(m , ctx->current.target);
         if(File_PathExists(m, libPathStr)){
@@ -161,7 +175,7 @@ static microTime skipRecent(BuildCtx *ctx,
             if(*modified > sel->time){
                 ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, 
                     "Library is recent, skipping");
-                LogOut(ctx);
+                BuildCtx_LogOut(ctx);
                 ctx->input.countSources->val.i += ctx->input.totalModuleSources->val.i;
                 return SUCCESS;
             }
@@ -172,8 +186,10 @@ static microTime skipRecent(BuildCtx *ctx,
     return ZERO;
 }
 
-static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
+static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel, microTime modified){
     DebugStack_Push(NULL, ZERO);
+    MemCh *m = ctx->m;
+    void *args[5];
 
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
     Table *execs = Table_Get(sel->meta, K(m, "exec"));
@@ -197,7 +213,7 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
             ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Skipping Object");
             ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = v;
             ctx->cli.fields.current[BUILIDER_CLI_DEST] = NULL;
-            LogOut(ctx);
+            BuildCtx_LogOut(ctx);
             continue;
         }
 
@@ -221,14 +237,14 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         Str *dest = StrVec_Str(m, ctx->current.dest);
 
         if(File_PathExists(m, dest) && File_ModTime(m, dest) > modified){
-            BuildCtx_LinkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
+            BuildCtx_LinkObject(ctx, key, sel);
             StrVec_Return(ctx->current.dest);
             StrVec_Return(ctx->current.source);
             continue;
         }
 
-        BuildCtx_BuildObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
-        BuildCtx_LinkObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
+        BuildCtx_BuildObject(ctx, key, sel);
+        BuildCtx_LinkObject(ctx, key, sel);
 
         StrVec_Return(ctx->current.dest);
         StrVec_Return(ctx->current.source);
@@ -238,11 +254,14 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     return ZERO;
 }
 
-static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
+static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel, microTime modified){
     DebugStack_Push(NULL, ZERO);
+    MemCh *m = ctx->m;
+    void *args[5];
 
     Table *execs = Table_Get(sel->meta, K(m, "exec"));
 
+    Iter it;
     Iter_Init(&it, execs);
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
@@ -287,7 +306,7 @@ static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     return ZERO;
 }
 
-status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *key, DirSelector *sel){
+status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
     status r = READY;
     MemCh *m = ctx->m;
@@ -297,26 +316,20 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         return NOOP;
     }
 
-    Table *skips = Table_Get(sel->meta, K(m, "skip"));
-    Table *execs = Table_Get(sel->meta, K(m, "exec"));
 
-    i32 libSourceTotal = sel->dest->nvalues;
-    if(skips != NULL){ libSourceTotal -= skips->nvalues; }
-    if(execs != NULL){ libSourceTotal -= execs->nvalues; }
-
-    setNames(ctx, key, sel);
-    DebugStack_SetRef(ctx->current.targetName, ctx->current->targetName->type.of);
+    setNames(ctx, name, sel);
+    DebugStack_SetRef(ctx->current.targetName, ctx->current.targetName->type.of);
 
     StrVec_Anchor(ctx->current.dest);
     Dir_CheckCreate(m, StrVec_Str(m, ctx->current.dest));
 
     ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Library build");
     ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME] = ctx->current.targetName;
-    ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = h->key;
+    ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = name;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
-    LogOut(ctx);
+    BuildCtx_LogOut(ctx);
 
-    setDepVars(ctx, key, sel);
+    setDepVars(ctx, name, sel);
 
     Table *skip = Table_Get(sel->meta, K(m, "skip"));
     if(skip != NULL){
@@ -327,7 +340,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     ctx->input.countModuleSources->val.i = 0;
 
     microTime modified = 0;
-    if(skipRecent(ctx, key, sel, &modified) & SUCCESS){
+    if(skipRecent(ctx, name, sel, &modified) & SUCCESS){
         return NOOP;
     }
 
@@ -337,8 +350,8 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *key, DirSelector *sel){
 
     ctx->type.state |= PROCESSING;
 
-    buildSupporting(ctx, key, sel);
-    buildExec(ctx, key, sel);
+    buildSupporting(ctx, name, sel, modified);
+    buildExec(ctx, name, sel, modified);
     Table_Set(sel->meta, S(m, "completed"), I64_Wrapped(m, MicroTime_Now()));
 
     DebugStack_Pop();

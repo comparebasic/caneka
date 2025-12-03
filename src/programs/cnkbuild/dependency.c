@@ -2,6 +2,7 @@
 #include "cnkbuild_module.h"
 
 status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
+    DebugStack_Push(NULL, ZERO);
     void *args[5];
     MemCh *m = ctx->m;
 
@@ -22,6 +23,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         StrVec_AddVecAfter(name, path, ctx->input.srcPrefix->p->nvalues+1);
 
         if(Table_Get(ctx->input.dependencies, name) != NULL){
+            DebugStack_Pop();
             return NOOP;
         }
 
@@ -50,6 +52,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         args[2] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Dependency not found @ for @", args);
+        DebugStack_Pop();
         return ERROR;
     }
 
@@ -59,7 +62,8 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     bf->type.state |= NOOP;
     File_Open(bf, StrVec_Str(m, ctx->current.source), O_RDONLY);
     if(bf->type.state & ERROR){
-       return NOOP; 
+        DebugStack_Pop();
+        return NOOP; 
     }
     Buff_Read(bf);
     File_Close(bf);
@@ -115,7 +119,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                 key = path;
             }
 
-            parseDependencies(ctx, key, path);
+            BuildCtx_ParseDependencies(ctx, key, path);
             label = NULL;
             name = NULL;
             shelf = Str_Make(m, STR_DEFAULT);
@@ -131,5 +135,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     }
 
     StrVec_PopTo(ctx->current.source, anchor);
+    DebugStack_Pop();
     return ZERO;
 }

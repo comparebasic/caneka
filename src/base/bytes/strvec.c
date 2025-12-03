@@ -30,10 +30,10 @@ status StrVec_Decr(StrVec *v, i64 amount){
 }
 
 StrVec *StrVec_ReAlign(MemCh *m, StrVec *orig){
-    if(v->type.state & STRVEC_NOSHRINK){
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
+    if(orig->type.state & STRVEC_NOSHRINK){
+        Error(orig->p->m, FUNCNAME, FILENAME, LINENUMBER,
             "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
-        return ERROR;
+        return NULL;
     }
     if(orig->type.state & STRVEC_ALIGNED){
         return orig;

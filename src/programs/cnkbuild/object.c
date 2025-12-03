@@ -9,7 +9,7 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Link Object");
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
-    LogOut(ctx);
+    BuildCtx_LogOut(ctx);
 
     ProcDets pd;
     ProcDets_Init(&pd);
@@ -52,7 +52,7 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
         ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
     }
-    LogOut(ctx);
+    BuildCtx_LogOut(ctx);
 
     Span *cmd = Span_Make(m);
 

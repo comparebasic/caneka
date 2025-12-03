@@ -30,7 +30,8 @@ status BuildCtx_Build(BuildCtx *ctx){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
             ctx->input.countModules->val.i = it.p->nvalues - it.idx;
-            if(CnkBuild_BuildModule(ctx, h) & ERROR){
+            if(BuildCtx_BuildModule(ctx,
+                    (StrVec *)h->key, (DirSelector *)h->value) & ERROR){
                 r |= ERROR;
                 break;
             }

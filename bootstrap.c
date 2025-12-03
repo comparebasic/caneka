@@ -314,12 +314,13 @@ int main(int argc, char *argv[]){
     cmd[2] = "-Isrc/programs/cnkbuild/include";
     cmd[3] = "-Isrc/base/include";
     cmd[4] = "-Isrc/third/include";
-    cmd[5] = "-o";
-    cmd[6] = "./build/bin/cnkbuild";
-    cmd[7] = "./build/libcnkbase/libcnkbase.a";
-    cmd[8] = "./src/programs/cnkbuild/inc.c";
-    cmd[9] = "-lm";
-    cmd[10] =  NULL;
+    cmd[5] = "-Iprograms/cnkbuild/include";
+    cmd[6] = "-o";
+    cmd[7] = "./build/bin/cnkbuild";
+    cmd[8] = "./build/libcnkbase/libcnkbase.a";
+    cmd[9] = "./src/programs/cnkbuild/inc.c";
+    cmd[10] = "-lm";
+    cmd[11] =  NULL;
 
     if(run("Building cnkbuild", cmd) == -1){
         exit(1);

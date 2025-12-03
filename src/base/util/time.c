@@ -55,7 +55,7 @@ Str *MicroTime_ToStr(MemCh *m, microTime tm){
 
 microTime MicroTime_Now(){
     struct timespec ts;
-    clock_gettime(0, &ts);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
     return MicroTime_FromSpec(&ts);
 }
 

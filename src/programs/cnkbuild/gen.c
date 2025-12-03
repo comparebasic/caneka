@@ -10,17 +10,21 @@ status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter){
 }
 
 status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
+    DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[5];
     Span *p = Span_Make(m);
+
+    StrVec *buildDir = StrVec_Copy(m, ctx->input.buildDir);
+    StrVec_Anchor(buildDir);
     args[0] = IoUtil_PathSep(m);
     args[1] = S(m, "include");
     args[2] = IoUtil_PathSep(m);
     args[3] = NULL;
-    i32 anchor = StrVec_AddChain(ctx->input.buildDir, args);
+    i32 anchor = StrVec_AddChain(buildDir, args);
 
-    Span_Add(p, StrVec_StrPrefixed(m, S(m, "-I"), ctx->input.buildDir));
-    StrVec_PopTo(ctx->input.buildDir, anchor);
+    Span_Add(p, StrVec_StrPrefixed(m, S(m, "-I"), buildDir));
+    StrVec_Return(buildDir);
 
     StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
     args[0] = IoUtil_PathSep(m);
@@ -40,16 +44,19 @@ status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
     srcAnchor = StrVec_AddChain(srcIncPath, args);
 
     Span_Add(p, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
-    StrVec_PopTo(srcIncPath, srcAnchor);
+
     ctx->input.inc = p;
+
+    DebugStack_Pop();
     return ZERO;
 }
 
-status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist, Span *genlist){
-    void *args[5];
+status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist, Table *genlist){
+    DebugStack_Push(NULL, ZERO);
+    void *args[7];
     MemCh *m = ctx->m;
 
-    StrVec *dest = IoUtil_AbsVec(m, ctx->input.buildDir);
+    StrVec *dest = StrVec_Copy(m, ctx->input.buildDir);
     args[0] = IoUtil_PathSep(m);
     args[1] = S(m, "include");
     args[2] = IoUtil_PathSep(m);
@@ -84,43 +91,42 @@ status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist, Span *genlist){
     }
     File_Close(bf);
 
-    StrVec *dest = IoUtil_AbsVec(m, ctx->input.buildDir);
-    args[0] = IoUtil_PathSep(m);
-    args[1] = S(m, "include");
-    args[2] = IoUtil_PathSep(m);
-    args[3] = S(m, "gen_");
-    args[4] = ctx->current.name;
-    args[5] = S(m, ".h");
-    args[6] = NULL;
-    StrVec_AddChain(dest, args);
+    if(genlist != NULL && genlist->nvalues > 0){
+        StrVec *dest = StrVec_Copy(m, ctx->input.buildDir);
+        args[0] = IoUtil_PathSep(m);
+        args[1] = S(m, "include");
+        args[2] = IoUtil_PathSep(m);
+        args[3] = S(m, "gen_");
+        args[4] = ctx->current.name;
+        args[5] = S(m, ".h");
+        args[6] = NULL;
+        StrVec_AddChain(dest, args);
 
-    Str *fname = StrVec_Str(m, dest);
-    Buff *bf = Buff_Make(m, BUFF_CLOBBER|BUFF_UNBUFFERED);
-    File_Open(bf, fname, O_CREAT|O_WRONLY|O_TRUNC);
-    Iter it;
-    Iter_Init(&it, modlist);
-    while((Iter_Prev(&it) & END) == 0){
-        Buffer *key = Iter_Get(&it);
-        if(key->type.of == TYPE_STR){
-            StrVec *v = IoPath_From(m, (Str *)key);
-            key = (Abstract *)v;
+        Str *fname = StrVec_Str(m, dest);
+        Buff *bf = Buff_Make(m, BUFF_CLOBBER|BUFF_UNBUFFERED);
+        File_Open(bf, fname, O_CREAT|O_WRONLY|O_TRUNC);
+        Iter it;
+        Iter_Init(&it, genlist);
+        while((Iter_Prev(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                StrVec *path = h->key;
+                Str *method = h->value;
+                if(0/* gen variable here */){
+                    /*
+                    Fmt(bf, "", args);
+                    */
+                }
+            }
         }
+        File_Close(bf);
 
-        if(key->type.of == TYPE_STRVEC){
-            StrVec *v = (StrVec *)key;
-            key = Span_Get(v->p, v->p->max_idx);
-        }
-        args[0] = key;
-        args[1] = key;
-        args[2] = NULL;
-        Fmt(bf, "\n/* module $ */\n#include <$_module.h>\n", args);
+        ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Writing gen include");
+        ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.name;
+        ctx->cli.fields.current[BUILIDER_CLI_DEST] = fname;
+        BuildCtx_LogOut(ctx);
     }
 
-    ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Writing include");
-    ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = fname;
-    ctx->cli.fields.current[BUILIDER_CLI_DEST] = fname;
-    LogOut(ctx);
-
-    File_Close(bf);
+    DebugStack_Pop();
     return ZERO;
 }
