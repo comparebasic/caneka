@@ -1,3 +1,9 @@
+/* = Base.types.types_tos
+ * 
+ * ErrorFuncs for this module used by ToS
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 

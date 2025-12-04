@@ -1,3 +1,9 @@
+/* = Base.bytes.StrVec
+ * 
+ * Flexible array of Str byte range objects using an underlying Span.
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 

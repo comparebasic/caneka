@@ -1,3 +1,9 @@
+/* = Base.types.map
+ *
+ * Binary mappings used by Base.io.stash and by upper modules for dynamic
+ * langauge management of Struct base objects.
+ *
+ */  
 #include <external.h>
 #include "base_module.h"
 
@@ -5,6 +11,11 @@ static boolean _mapsInitialized = FALSE;
 struct lookup *MapsLookup = NULL;
 
 void *Map_FromOffset(MemCh *m, void *a, i16 offset, cls typeOf){
+    /* 
+     * Used by upper modules to access properties of a struct
+     * using a 16 bit offset number and icrementing the base
+     * address of the struct
+     */
     void *value = NULL;
     if(typeOf == ZERO || typeOf > _TYPE_RAW_END){
         void **ptr = (void **)(((void *)a)+offset);
@@ -58,6 +69,14 @@ Map *Map_Get(cls typeOf){
 }
 
 Table *Map_ToTable(MemCh *m, void *_a){
+    /* 
+     * Return a table composed of the properties of the Struct
+     * 
+     * Raw items such as numbers are wrapped in an Abstract 
+     * type wrapper, suitable for text formatting or storage
+     * in a Span or Table
+     *
+     */
     Abstract *a = (Abstract *)_a;
     Map *map = Lookup_Get(MapsLookup, a->type.of);
     if(map == NULL){

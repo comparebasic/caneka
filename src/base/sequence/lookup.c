@@ -1,3 +1,16 @@
+/* Base.sequence.Lookup
+ *
+ * Integer lookup object set on top of the Span object.
+ *
+ * Used to provide behavior for any typeOf for any object.
+ *
+ * Example implementations provide a way to lookup ToS behaviour for the ToS 
+ * debugging output functions for objects. And a number of different
+ * extensible features throughout the system
+ *
+ * It's the most widely used way of making the system extensible.
+ */
+
 #include <external.h>
 #include "base_module.h"
 

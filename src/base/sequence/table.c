@@ -1,3 +1,29 @@
+/* Base.sequence.Table
+ *
+ * Key/Value lookup object which stores Hashed values in a Span according to 
+ * the HKey algorithm.
+ *
+ * The main purpose is to flatten items into indexes across the span which
+ * can be predictably found using the HKey algorithm that uses bits from the
+ * Parity value stored in *id* value in the Hashed object.
+ *
+ * The HKey algorithm takes sequences of bits according to the max slot
+ * of the span.
+ *
+ * for a 16 slot Span the first few bits are used by running &15 across
+ * the Hashed->id value, until an open slot is found.
+ *
+ * When the span expands to 64 values it will move &63 across the Hashed->id
+ * value and then look at the &15 values.
+ *
+ * If that fails it just walks to the next available slot.
+ *
+ * While this predictably finds Values by a byte Key reliably, it is not
+ * Intended to be efficient, but is intended to be notated with the Hashed->idx
+ * values and refered directly by the index in the Span directly for efficiency
+ * purposes.
+ *
+ */
 #include <external.h>
 #include "base_module.h"
 

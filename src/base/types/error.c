@@ -110,6 +110,14 @@ static void setSigs(){
 }
 
 void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
+    /* Called when an error is unrecoverable
+     *
+     * func: the cstring of the function the error came from.
+     * file: the cstring of the file the error came from.
+     * line: the line number of the file the error came from.
+     * fmt: string passed to ToS for outputting information about the erro
+     * args: void *[] passed to ToS to satisfy the contents in *fmt*
+     */
     if(_crashing){
         Fmt(ErrStream, "\n^r.Fatal called after crashing^0.\n", NULL);
         exit(9);
@@ -209,6 +217,26 @@ err:
 }
 
 void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
+    /* Function called throughout the system to handle errors
+     * 
+     * func: the cstring of the function the error came from.
+     * file: the cstring of the file the error came from.
+     * line: the line number of the file the error came from.
+     * fmt: string passed to ToS for outputting information about the erro
+     * args: void *[] passed to ToS to satisfy the contents in *fmt*
+     *
+     * *m* may be associated with an error handler via it's *owner* propery.
+     * If the Lookup *ErrorHandlers* contains a function pointer for the
+     * *owner*'s typeOf, that function is called.
+     *
+     * The function takes additional actions conditional of the flags returned
+     *
+     * ERROR: use ToS to output the error
+     * ERROR|NOOP: Stop after outputting the error
+     * ZERO: No further action is taken.
+     * 
+     */
+
     if(_error){
         _crashing = TRUE;
         Fatal(func, file, line, fmt, args);

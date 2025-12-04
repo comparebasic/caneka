@@ -1,3 +1,11 @@
+/* = Base.bytes.ToS
+ *
+ * Coordination object which provides a Lookup for any objects typeOf
+ * to output formatted byte or debugging information.
+ *
+ * ToS is an abbreviation for ToString.
+ */
+
 #include <external.h>
 #include "base_module.h"
 

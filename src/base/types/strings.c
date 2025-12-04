@@ -1,3 +1,8 @@
+/* = Base.types.strings
+ *
+ * Debug strings for the type system of the *base* module
+ *
+ */
 #include <external.h>
 #include "base_module.h"
 

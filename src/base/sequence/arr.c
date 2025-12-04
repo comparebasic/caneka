@@ -1,3 +1,11 @@
+/* Base.sequence.Arr
+ *
+ * Utility functions for creating void *[] and Str*[]
+ * 
+ * Used much less frequently than the type-wrapped Span object
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 

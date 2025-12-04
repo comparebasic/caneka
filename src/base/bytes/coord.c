@@ -1,3 +1,9 @@
+/* = Base.bytes.Coord
+ * 
+ * Type wrapped unsigned 16 bit pair of numbers
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 

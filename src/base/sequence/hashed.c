@@ -1,3 +1,10 @@
+/* Base.sequence.Hashed
+ *
+ * Key/Value Struct uses Parity for quick (but non-conclusive) hash comparison.
+ *
+ * Used in the Table object
+ */
+
 #include <external.h>
 #include "base_module.h"
 

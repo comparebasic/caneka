@@ -1,3 +1,14 @@
+/* = Bootstrap Program
+ * 
+ * This is a small bootstrap program, for launching the rest of the build process.
+ *
+ * A small menu displays if no other arguments are given.
+ *
+ * The rest of the build process can be found at src/programs/cnkbuild/
+ *
+ * see ./LICENCE for licene details
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

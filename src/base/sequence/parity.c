@@ -1,3 +1,14 @@
+/* Base.sequence.Parity
+ *
+ * Summary hash of any byte content to quickly identify if it is not a match 
+ * or warrants futher comparison
+ *
+ * Bytes are added together according to the size, HalfParity adds 4 bytes, Parity adds 8.
+ *
+ * At the end the first smallest byte is set to the smallest byte of the content length.
+ * This is intended to give a first take at regularly changing variable byte-length content.
+ *
+ */
 #include <external.h>
 #include "base_module.h"
 

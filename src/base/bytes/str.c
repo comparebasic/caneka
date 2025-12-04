@@ -1,3 +1,12 @@
+/* = Base.bytes.Str
+ *
+ * Simplistic object for tracking byte ranges.
+ *
+ * The byte ranges are expected to be relatively small
+ * with larger byte ranges managed by a series of Str objects
+ * contained in a StrVec object.
+ */
+
 #include <external.h>
 #include "base_module.h"
 

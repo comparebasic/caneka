@@ -1,7 +1,26 @@
+/* Base.bytes.Fmt 
+ *
+ * String formatting output functions
+ *
+ * Uses *_tos files for several components to output a stirng format
+ * for each Struct type.
+ *
+ * Used for debugging and string formatting.
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 
 void *FmtVar_Get(MemCh *m, Str *key, void *arg){
+    /*  
+     * :deprecated
+     *
+     * A place for global variable
+     *
+     * This will likely get replaced by a Lookup and moved out of Base into Ext
+     * where it can take advantage of the Seel Object
+     */
     StrVec *path = StrVec_From(m, key);
     Path_DotAnnotate(m, path);
     Abstract *a = NULL;
@@ -37,6 +56,27 @@ void *FmtVar_Get(MemCh *m, Str *key, void *arg){
 }
 
 status Fmt(Buff *bf, char *fmt, void *args[]){
+    /* 
+     * Format a cstring with an array of void pointers
+     *
+     * Values are templated into strings in one of five ways
+     *
+     * $: Output the content version of the object if available.
+     * throws an error if not available. For this like Str or StrVec or Array
+     * this outputs the object without spaces or commas or debugging information 
+     * kind.
+     *
+     * @: Output a minimal debugging version of the object
+     *
+     * &: Output a maximal debugging version of the object
+     *
+     * ^: Begin an Ansi color and style sequence. See Base.termio.AnsiStr for 
+     * color and style details
+     *
+     * ^{TOKEN}: Output a global token with FmtVar_Get (deprecated)
+     * 
+     *
+     */
     MemCh *m = bf->m;
     char *ptr = fmt;
     char *end = fmt+(strlen(fmt)-1);
@@ -174,6 +214,10 @@ next:
 }
 
 FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
+    /* Hold the details of a Fmt command in a Struct for
+     * later use, starting with a Span argument *p* which is 
+     * converted into a void*[].
+     */
     FmtLine *ln = (FmtLine *)MemCh_Alloc(m, sizeof(FmtLine));
     ln->type.of = TYPE_FMT_LINE;
     ln->fmt = fmt;
@@ -182,12 +226,20 @@ FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){
 }
 
 StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, void **args){
+    /* Convienience function for placing Fmt contents
+     * into a StrVec object by using a temporary Buff
+     * object
+     */
     Buff *bf = Buff_Make(m, ZERO);
     Fmt(bf, fmt, args); 
     return bf->v;
 }
 
 FmtLine *FmtLine_Make(MemCh *m, char *fmt, void **args){
+    /* Hold the details of a Fmt command in a Struct for
+     * later use. Used extensively by Base.termio.Cli
+     * to create interactive console behaviour.
+     */
     FmtLine *ln = (FmtLine *)MemCh_Alloc(m, sizeof(FmtLine));
     ln->type.of = TYPE_FMT_LINE;
     ln->fmt = fmt;

@@ -1,3 +1,27 @@
+/* Base.sequence.Path
+ *
+ * Utility functions to reform a StrVec to be seperated into Str objects that
+ * are flagged and correspond to byte seperates with significance.
+ *
+ * Examples are paths which could start as the Str "/basic/remote/file.fmt"
+ *
+ * To be process into:
+ *
+ * [/,basic,/remove,/file,.,fmt]
+ *
+ * where each '/' character has the flag MORE, and the last '.' character 
+ * has the flag LAST.
+ *
+ * Another path format is for dynamic langauges, where the string
+ * "this.something#prop" becomes
+ *
+ * [this,.,somethin,#,last] 
+ *
+ * Where all '.' characters have the MORE flag and all # characters have 
+ * the LAST flag.
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 

@@ -1,3 +1,13 @@
+/* Base.bytes.Shelf
+ *
+ * Utility functions which set values of an Iter objects *metrics.selected*
+ * attribute.
+ *
+ * It serves the purpose of weather an available slot exists in an Iter managed Span
+ * or if a new slot should be ocupied by the next object.
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 
