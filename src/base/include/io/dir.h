@@ -12,7 +12,7 @@ typedef struct dir_selector {
     Str *ext;
     Span *dest;
     Span *meta; /* Table */
-    microTime time;
+    struct timespec time;
 } DirSelector;
 
 extern Span *FilePathSep;

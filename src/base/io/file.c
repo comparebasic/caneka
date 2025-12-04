@@ -98,12 +98,12 @@ boolean File_PathExists(MemCh *m, Str *path){
     return stat(Str_Cstr(m, path), &st) == 0 ? TRUE : FALSE;
 }
 
-microTime File_ModTime(MemCh *m, Str *path){
+void File_ModTime(MemCh *m, Str *path, struct timespec *ts){
     struct stat st;
     if(stat(Str_Cstr(m, path), &st) == 0){
-        return MicroTime_FromSec(st.st_mtime);
+        ts->tv_sec = st.st_mtime.tv_sec;
+        ts->tv_nsec = st.st_mtime.tv_nsec;
     }
-    return 0;
 }
 
 status File_Stat(MemCh *m, Str *path, struct stat *st){

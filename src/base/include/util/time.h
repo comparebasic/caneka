@@ -1,20 +1,13 @@
-#define TIME_SEC 1000000l
-#define TIME_MIN (TIME_SEC*60)
-#define TIME_HOUR (TIME_MIN*60)
-#define TIME_DAY (TIME_HOUR*24)
-#define TIME_MILLIS 1000l
-
-Str *MicroTime_ToStr(MemCh *m, microTime t);
-microTime MicroTime_Now();
-void MicroTime_ToSpec(struct timespec *ts, microTime tm);
-microTime MicroTime_FromSpec(struct timespec *ts);
-microTime MicroTime_FromMillis(i64 millis);
-i64 MicroTime_ToMillis(microTime tm);
-Single *MicroTime_Wrapped(MemCh *m, microTime n);
+Str *Time_ToStr(MemCh *m, struct timespec *ts);
+void Time_Now(struct timespec *ts);
+void Time_ToSpec(struct timespec *ts, microTime tm);
+void Time_FromMillis(i64 millis, struct timespec *ts);
+i64 Time_ToMillis(struct timespec ts);
+Single *Time_Wrapped(MemCh *m, struct timespec *ts);
 Str *Time_Today(MemCh *m);
-Str *TimeSpec_ToDayStr(MemCh *m, struct timespec *ts);
-microTime Time_Combine(microTime start, microTime add);
-status Time_Delay(microTime tm, microTime *remaining);
-boolean MicroTime_TimeSpecGreater(struct timespec *a, struct timespec *b);
-microTime MicroTime_FromSec(i64 seconds);
-i64 MicroTime_ToSec(microTime time);
+Str *Time_ToDayStr(MemCh *m, struct timespec *ts);
+void Time_Combine(struct timespec *ts, struct timespec *add);
+void Time_Delay(struct timespec *ts, struct timespec *remaining);
+boolean Time_TimeSpecGreater(struct timespec *a, struct timespec *b);
+Time_FromSec(i64 seconds, struct timespec *ts);
+i64 Time_ToSec(struct timespec *ts);

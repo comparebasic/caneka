@@ -19,11 +19,11 @@ typedef struct task {
     struct task *parent;
     Iter chainIt;
     struct {
-        microTime start;
-        microTime consumed;
-        microTime end;
+        struct timespec start;
+        struct timespec consumed;
+        struct timespec end;
     } metrics;
-    microTime timeout;
+    struct timespec timeout;
 } Task;
 
 extern Table *TaskErrorHandlers;

@@ -20,8 +20,6 @@ typedef byte boolean;
 typedef byte flags8;
 typedef quad flags32;
 
-typedef i64 microTime;
-
 #define TRUE 1
 #define FALSE 0
 
