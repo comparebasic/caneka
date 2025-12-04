@@ -1,3 +1,9 @@
+/* Base.io.SubProcess
+ *
+ * Functions for forking a new process, whose details are stored
+ * on a ProcDets object
+ */
+
 #include <external.h>
 #include "base_module.h"
 

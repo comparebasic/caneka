@@ -1,3 +1,17 @@
+/* Base.io.Stash
+ *
+ * Block out the addresse of a MemCh memory context object in a predictible way
+ * and then save/restore it from disk
+ *
+ * Because MemPage objects are always 4k, the relative address in the page
+ * is always &4095. The page number as it appears in the MemCh is then
+ * stored higher up on the otherwise zeroed out addres.
+ *
+ * MemIter is used to climb each page of a MemCh using the Map offsets
+ * in the Lookup object setup by all the _map files for each type.
+ *
+ */
+
 #include <external.h>
 #include "base_module.h"
 

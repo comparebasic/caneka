@@ -1,3 +1,7 @@
+/* Base.io.File
+ *
+ * Utility functions that return file system details or operate on a Buff object
+ */
 #include <external.h>
 #include "base_module.h"
 

@@ -1,3 +1,9 @@
+/* Base.io.sock
+ *
+ * Socket and Inet translation for ip and ipv6 addresses two and from readable strings 
+ *
+ * Also provides a socket connection function.
+ */
 #include <external.h>
 #include "base_module.h"
 

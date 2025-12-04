@@ -1,3 +1,8 @@
+/* Base.io.ProcDets
+ *
+ * Process information for managing a sub-process
+ */
+
 #include <external.h>
 #include "base_module.h"
 

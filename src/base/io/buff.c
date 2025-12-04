@@ -1,3 +1,18 @@
+/* Base.io.Buff
+ *
+ * Wrapper around a StrVec object or file descriptor i32 representing
+ * a file or a socket
+ *
+ * Bytes can be optionally written to the StrVec and sent to the file
+ * descriptor later.
+ *
+ * or grabbed from a file descriptor out into a provided Str object
+ *
+ * Byte content is routinely sent to files, stored in the StrVec *v*
+ * propery, or sent to the file descriptor over the life of a Buff
+ * object.
+ */
+
 #include <external.h>
 #include "base_module.h"
 
@@ -306,6 +321,18 @@ status Buff_Stat(Buff *bf){
 }
 
 status Buff_GetStr(Buff *bf, Str *s){
+    /* Fill the Str with bytes from the StrVec *v* value of the Buff
+    * or draw bytes from the file descripto
+    *
+    * The length of bytes taken is specified by the s->length propery
+    *
+    * the *unsent* attributes are used to track how many bytes have
+    * been taken, making this object behave as an in-memory file
+    * if it has content in it's *v" StrVec property and no
+    * file descriptor. It draws from the file descriptor
+    * only after the *unsent.total* property reacehs zero, making
+    * this a potential buffer, before reading from a socket or file.
+    */
     void *args[5];
     bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
     word remaining = s->alloc - s->length;

@@ -1,3 +1,10 @@
+/* Base.io.Dir
+ *
+ * Functions for managing directories.
+ *
+ * The DirSelector object is used to query and manage files in a directory
+ */
+
 #include <external.h>
 #include "base_module.h"
 
@@ -119,6 +126,13 @@ status Dir_Gather(MemCh *m, Str *path, Span *sp){
 }
 
 status Dir_GatherSel(MemCh *m, Str *path, DirSelector *sel){
+    /* Gather all directories and files with the directory specified in *path
+     *
+     * path: path to climb
+     * sel: object to place files and directory values found, loggin the
+     *   lastest (or least) modified time in the *time* value of the *sel*
+     *   object.
+     */
     if(sel->type.state & DIR_SELECTOR_NODIRS){
         return Dir_Climb(m, path, NULL, gatherFileSel, sel);
     }else{
@@ -139,6 +153,13 @@ status Dir_Exists(MemCh *m, Str *path){
 }
 
 status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
+    /* Dispatch files and directories to function pointers 
+     *
+     * path: directory path, local or absolute to start the directory climb.
+     * dir: function called for each directory found
+     * file: function called for each file found
+     * source: Abstract object passed to each function
+     */
     DebugStack_Push(path, path->type.of); 
     status r = READY;
     struct dirent *ent;
@@ -195,6 +216,14 @@ DirSelector *DirSelector_Make(MemCh *m, Str *ext, Span *dest, word flags){
 }
 
 status Dir_CheckCreate(MemCh *m, Str *path){
+    /* 
+     * :deprecated
+     *
+     * Create a directory and intermediate directories if it does not exist
+     *
+     * Using a subprocess for this is a bit much, it will be replaced
+     * by more minimal POSIX functions at some point
+     */
     DebugStack_Push(path, path->type.of);
     Span *cmd = Span_Make(m);
     char *cstr = "mkdir";
