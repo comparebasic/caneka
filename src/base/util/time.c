@@ -3,48 +3,26 @@
 
 #define TIME_BUFF_LEN 64
 
-boolean MicroTime_TimeSpecGreater(struct timespec *a, struct timespec *b){
-    if(a->tv_sec > b->tv_sec || (a->tv_sec == b->tv_sec && a->tv_nsec > b->tv_nsec)){
-        return TRUE;
-    }else{
-        return FALSE;
+void Time_Combine(struct timespec *ts, struct timespec *add){
+    ts->tv_sec -= add->tv_sec;
+    ts->tv_nsec -= add->tv_nsec;
+    if(ts->nsec < 0){
+        ts->sec--;
+        ts->tv_nsec += 1000000000;
     }
 }
 
-microTime MicroTime_FromSpec(struct timespec *ts){
-    return (ts->tv_sec * 1000l) + (ts->tv_nsec / 1000l);
+void Time_Now(struct timespec *ts){
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts);
 }
 
-microTime MicroTime_FromSec(i64 seconds){
-    return (seconds * 1000l);
-}
-
-i64 MicroTime_ToSec(microTime time){
-    return (1000l / time);
-}
-
-void MicroTime_ToSpec(struct timespec *ts, microTime tm){
-    ts->tv_sec = tm / 1000;
-    ts->tv_nsec = tm % 1000; 
-}
-
-status Time_Delay(microTime tm, microTime *remaining){
-    struct timespec ts;
-    MicroTime_ToSpec(&ts, tm);
-    struct timespec remain;
+void Time_Delay(struct timespec *ts, struct timespec *remaining){
     nanosleep(&ts, &remain);
-    if(remaining != NULL){
-        *remaining = MicroTime_FromSpec(&remain);
-    }
-    return SUCCESS;
 }
 
-Str *MicroTime_ToStr(MemCh *m, microTime tm){
+Str *Time_ToStr(MemCh *m, struct timespec *ts){
     Str *s = Str_Make(m, TIME_BUFF_LEN);
-    struct timespec ts;
     struct tm value;
-    MicroTime_ToSpec(&ts, tm);
-
     gmtime_r(&ts.tv_sec, &value);
     strftime((char *)s->bytes, TIME_BUFF_LEN, "%Y-%m-%dT%H:%M:%S.", &value);
     s->length = strlen((char *)s->bytes);
@@ -53,25 +31,24 @@ Str *MicroTime_ToStr(MemCh *m, microTime tm){
     return s;
 }
 
-microTime MicroTime_Now(){
-    struct timespec ts;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
-    return MicroTime_FromSpec(&ts);
+boolean Time_Greater(struct timespec *ts, struct timespec *add){
+    if(ts->tv_sec > add->tv_sec || ts->tv_sec == add->tv_sec && 
+            ts->tv_nsec > add->tv_nsec){
+        return TRUE;
+    }
+    return FALSE;
 }
 
-microTime MicroTime_FromMillis(i64 millis){
-    return millis * 1000000;
-}
-
-i64 MicroTime_ToMillis(microTime tm){
-    return tm / 1000000;
-}
-
-Single *MicroTime_Wrapped(MemCh *m, microTime tm){
-    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
-    sgl->type.of = TYPE_WRAPPED_TIME64;
-    sgl->val.value = (util)tm;
-    return sgl;
+boolean Time_Beyond(struct timespec *ts, struct timespec *add, struct time *amount){
+    struct timespec _ts;
+    _ts->tv_sec = ts->tv_sec;
+    _ts->tv_nsec = ts->tv_nsec;
+    Time_Combine(&_ts, add);
+    if(_ts.tv_sec > amount->tv_sec || _ts.tv_sec == amount->tv_sec && 
+            _ts.tv_nsec > amount->tv_nsec){
+        return TRUE;
+    }
+    return FALSE;
 }
 
 Str *Time_Today(MemCh *m){
@@ -86,4 +63,58 @@ Str *TimeSpec_ToDayStr(MemCh *m, struct timespec *ts){
     size_t l = strftime((char *)s->bytes, (size_t)STR_DEFAULT, "%Y-%m-%d", t);
     s->length = l; 
     return s;
+}
+
+Single *Time_Wrapped(MemCh *m, struct timespec *ts){
+    return Ptr_Wrapped(m, ts, TYPE_WRAPPED_TIMESPEC); 
+}
+
+status ApproxTime_Beyond(struct timespec *delta, ApproxTime *mt){
+    if((mt->type.state & APPROXTIME_MILLISEC) &&
+            delta->ts_nsec > mt->value * 1000000){
+        return SUCCESS;
+    }else if((mt->type.state & APPROXTIME_SEC) &&
+            delta->ts_sec > mt->value){
+        return SUCCESS;
+    }else if((mt->type.state & APPROXTIME_HOUR) &&
+            delta->ts_sec > mt->value*60*60){
+        return SUCCESS;
+    }else if((mt->type.state & APPROXTIME_DAY) &&
+            delta->ts_sec > mt->value*60*60*24){
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
+status ApproxTime_Set(struct timespec *delta, ApproxTime *at){
+    memset(at, 0, sizeof(ApproxTime));
+    at->type.of = TYPE_APPROXTIME;
+
+    if((mt->type.state & APPROXTIME_DAY) &&
+            delta->ts_sec > mt->value*60*60*24){
+        at->type.state = APPROXTIME_DAY;
+        mt->value = delta->ts_sec / (60*60*24);
+        return SUCCESS;
+    }else if((mt->type.state & APPROXTIME_HOUR) &&
+            delta->ts_sec > mt->value*60*60){
+        at->type.state = APPROXTIME_HOUR;
+        mt->value = delta->ts_sec / (60*60);
+        return SUCCESS;
+    }else if((mt->type.state & APPROXTIME_MIN) &&
+            delta->ts_sec > mt->value){
+        at->type.state = APPROXTIME_MIN;
+        mt->value = delta->ts_sec / 60;
+        return SUCCESS;
+    }else if((mt->type.state & APPROXTIME_SEC) &&
+            delta->ts_sec > mt->value){
+        at->type.state = APPROXTIME_SEC;
+        at->type.value = (i32) ts->tv_sec;
+    }else if((mt->type.state & APPROXTIME_MILLISEC) &&
+            delta->ts_nsec > mt->value * 1000000){
+        at->type.state = APPROXTIME_MILLISEC;
+        at->type.value = (i32) (ts->tv_nsec / 100000;
+        return SUCCESS;
+    }
+
+    return NOOP;
 }
