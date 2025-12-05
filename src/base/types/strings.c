@@ -19,6 +19,7 @@ static char *baseTypeStrings[] = {
     "_TYPE_RAW_END",
     "_TYPE_WRAPPED_START",
     "TYPE_WRAPPED_PTR",
+    "TYPE_WRAPPED_PTR_TIMESPEC",
     "TYPE_WRAPPED_FUNC",
     "TYPE_WRAPPED_DO",
     "TYPE_WRAPPED_MEMCOUNT",

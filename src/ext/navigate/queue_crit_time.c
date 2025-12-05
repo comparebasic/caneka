@@ -8,7 +8,7 @@ gobits QueueCrit_Time(QueueCrit *crit, util *values){
     util base = 1;
     for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
         ApproxTime *t = tp+i;
-        if(t->value > 0 && t->value <= dest->value){
+        if((t->type.state  & UPPER_FLAGS) && t->value <= dest->value){
             util u = (base << i);
             go |= u;
         }

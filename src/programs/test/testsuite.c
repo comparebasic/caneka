@@ -174,7 +174,7 @@ status Test_Runner(MemCh *m, TestSuite *suite){
     args[1] = I32_Wrapped(m, suite->pass),
     args[2] = I32_Wrapped(m, suite->fail),
     args[3] = NULL;
-    if(!fail){
+    if(!suite->fail){
         Out("^g", NULL);
     }else{
         Out("^r", NULL);

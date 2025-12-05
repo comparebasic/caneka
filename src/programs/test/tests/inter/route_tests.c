@@ -36,7 +36,7 @@ static char *cstr = ""
 
 static char *noMemCstr  = ""
     "<h1>Statistics of the Example</h1>\n"
-    "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
+    "<p>Server running since 2025-11-10T23:24:13.127000000000+00</p>\n"
     ;
 
 static char *noMemWHeaderCstr  = ""
@@ -70,7 +70,7 @@ static char *noMemWHeaderCstr  = ""
     "</header>\n"
     "<section id=\"page-page\">\n"
     "<h1>Statistics of the Example</h1>\n"
-    "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
+    "<p>Server running since 2025-11-10T23:24:13.127000000000+00</p>\n"
     "</section>\n"
     "<script type=\"text/javascript\" src=\"/static/ui.js\"></script>\n"
     "<footer>\n"
@@ -124,7 +124,7 @@ static char *memWHeaderCstr  = ""
     "</header>\n"
     "<section id=\"page-page\">\n"
     "<h1>Statistics of the Example</h1>\n"
-    "<p>Server running since 2025-11-10T23:24:13.127+00</p>\n"
+    "<p>Server running since 2025-11-10T23:24:13.127000000000+00</p>\n"
     "<h2>Memory Heap</h2>\n"
     "<p>Total Heap Size: <b>904k</b> of 16m</p>\n"
     "<ul>\n"
@@ -201,8 +201,8 @@ static Table *getGenericData(MemCh *m, Route *rt){
     Table *data = Table_Make(m);
 
     Table *atts = Table_Make(m);
-    Table_Set(atts, K(m "title"), 
-        K(m "Example Title"));
+    Table_Set(atts, K(m, "title"), 
+        K(m, "Example Title"));
 
     Str *path = IoUtil_GetAbsPath(m,
         Str_CstrRef(m, "./examples/test/pages/public/stats.config"));
@@ -210,7 +210,7 @@ static Table *getGenericData(MemCh *m, Route *rt){
     Table_Set(data, Str_CstrRef(m, "config"), config);
 
     StrVec *navPath = IoUtil_GetAbsVec(m,
-        K(m "./examples/test/pages/nav.config"));
+        K(m, "./examples/test/pages/nav.config"));
 
     Span *nav = Nav_TableFromPath(m, rt, navPath);
     Table_Set(data, Str_CstrRef(m, "nav"), nav);
@@ -281,7 +281,6 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     struct timespec now;
     Time_Now(&now);
-    Str *now = Time_ToStr(m, &now);
     Table_Set(data, Str_CstrRef(m, "now"), Time_Wrapped(m, &now));
     StrVec *title = StrVec_From(m, Str_CstrRef(m, "The Title of the Master Page"));
     Table_Set(data, Str_CstrRef(m, "title"), title);
@@ -322,9 +321,9 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     struct timespec fictional = {1762817053, 127000000000};
 
-    Table_Set(stats, K(m "uptime"),
+    Table_Set(stats, K(m, "uptime"),
         Time_ToStr(m, &fictional));
-    Table_Set(data, K(m "stats"), stats);
+    Table_Set(data, K(m, "stats"), stats);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(handler, bf, data, NULL);
@@ -380,16 +379,16 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     data = getGenericData(m, rt);
     stats = Table_Make(m);
-    Table_Set(stats, K(m "uptime"),
+    Table_Set(stats, K(m, "uptime"),
         Time_ToStr(m, &fictional));
 
     Table *mem = Table_Make(m);
-    Table_Set(mem, K(m "mem-used"), Str_MemCount(m, st.pageIdx * PAGE_SIZE));
-    Table_Set(mem, K(m "mem-total"), Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
+    Table_Set(mem, K(m, "mem-used"), Str_MemCount(m, st.pageIdx * PAGE_SIZE));
+    Table_Set(mem, K(m, "mem-total"), Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
 
-    Table_Set(mem, K(m "mem-details"), Map_ToTable(m, &st));
-    Table_Set(stats, K(m "mem"), mem);
-    Table_Set(data, K(m "stats"), stats);
+    Table_Set(mem, K(m, "mem-details"), Map_ToTable(m, &st));
+    Table_Set(stats, K(m, "mem"), mem);
+    Table_Set(data, K(m, "stats"), stats);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
@@ -549,7 +548,7 @@ status WwwRouteMime_Tests(MemCh *m){
     Buff *dest = Buff_Make(m, ZERO);
     Buff_Pipe(dest, bf);
 
-    Str *pathS = IoUtil_GetAbsPath(m, K(m "./examples/test/pages/static/style.css"));
+    Str *pathS = IoUtil_GetAbsPath(m, K(m, "./examples/test/pages/static/style.css"));
     StrVec *expected = File_ToVec(m, pathS);
 
     r |= Test(Equals(dest->v, expected),

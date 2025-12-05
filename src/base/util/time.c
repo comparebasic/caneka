@@ -22,7 +22,7 @@ void Time_Add(struct timespec *ts, struct timespec *add){
 }
 
 void Time_Now(struct timespec *ts){
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts);
+    clock_gettime(0, ts);
 }
 
 void Time_Delay(struct timespec *ts, struct timespec *remaining){
@@ -75,7 +75,9 @@ Str *Time_ToDayStr(MemCh *m, struct timespec *ts){
 }
 
 Single *Time_Wrapped(MemCh *m, struct timespec *ts){
-    return Ptr_Wrapped(m, ts, TYPE_TIMESPEC); 
+    Single *sg = Ptr_Wrapped(m, ts, TYPE_TIMESPEC); 
+    sg->type.of = TYPE_WRAPPED_PTR_TIMESPEC;
+    return sg;
 }
 
 status ApproxTime_Beyond(struct timespec *delta, ApproxTime *mt){
@@ -95,33 +97,32 @@ status ApproxTime_Beyond(struct timespec *delta, ApproxTime *mt){
     return NOOP;
 }
 
-status ApproxTime_Set(struct timespec *delta, ApproxTime *at){
+status ApproxTime_Set(struct timespec *present, struct timespec *start, ApproxTime *at){
     memset(at, 0, sizeof(ApproxTime));
     at->type.of = TYPE_APPROXTIME;
 
-    if((at->type.state & APPROXTIME_DAY) &&
-            delta->tv_sec > at->value*60*60*24){
+    struct timespec ts;
+    ts.tv_sec = present->tv_sec - start->tv_sec;
+    ts.tv_nsec = present->tv_nsec - start->tv_nsec;
+
+    if(ts.tv_sec >= 60*60*24){
         at->type.state = APPROXTIME_DAY;
-        at->value = delta->tv_sec / (60*60*24);
+        at->value = ts.tv_sec / (60*60*24);
         return SUCCESS;
-    }else if((at->type.state & APPROXTIME_HOUR) &&
-            delta->tv_sec > at->value*60*60){
+    }else if(ts.tv_sec >= 60*60){
         at->type.state = APPROXTIME_HOUR;
-        at->value = delta->tv_sec / (60*60);
+        at->value = ts.tv_sec / (60*60);
         return SUCCESS;
-    }else if((at->type.state & APPROXTIME_MIN) &&
-            delta->tv_sec > at->value){
+    }else if(ts.tv_sec >= 60){
         at->type.state = APPROXTIME_MIN;
-        at->value = delta->tv_sec / 60;
+        at->value = ts.tv_sec / 60;
         return SUCCESS;
-    }else if((at->type.state & APPROXTIME_SEC) &&
-            delta->tv_sec > at->value){
+    }else if( ts.tv_sec > 0){
         at->type.state = APPROXTIME_SEC;
-        at->value = (i32) delta->tv_sec;
-    }else if((at->type.state & APPROXTIME_MILLISEC) &&
-            delta->tv_nsec > at->value * 1000000){
+        at->value = (i32) ts.tv_sec;
+    }else if(ts.tv_nsec > at->value * 1000000){
         at->type.state = APPROXTIME_MILLISEC;
-        at->value = (i32) (delta->tv_nsec / 100000);
+        at->value = (i32) (ts.tv_nsec / 1000000);
         return SUCCESS;
     }
 

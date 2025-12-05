@@ -5,6 +5,7 @@
 status Login_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
+    void *args[2];
 
     StrVec *absPath = IoAbsPath(m, "examples/session/open/");
     Str *path = StrVec_Str(m, absPath);

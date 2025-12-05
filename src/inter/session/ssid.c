@@ -31,7 +31,7 @@ Table *Ssid_Open(SsidCtx *ctx, StrVec *ssid, StrVec *ua){
     StrVec *pathV = StrVec_From(ctx->m, ctx->path);
     MemCh *m = ctx->m;
 
-    Str *parityHex = Span_Get(ssid->p, 4);
+    Str *parityHex = Span_Get(ssid->p, 6);
     quad parity = 0;
     Raw_FromHex(m, parityHex, &parity, sizeof(parity));
     if(!HalfParity_Compare(parity, ua)){
@@ -119,7 +119,7 @@ status Ssid_Close(SsidCtx *ctx, StrVec *ssid, StrVec *ua, Table *stashTbl){
 
     StrVec *pathV = StrVec_From(ctx->m, ctx->path);
     MemCh *m = ctx->m;
-    Str *parityHex = Span_Get(ssid->p, 4);
+    Str *parityHex = Span_Get(ssid->p, 6);
     quad parity = 0;
     Raw_FromHex(m, parityHex, &parity, sizeof(parity));
     if(!HalfParity_Compare(parity, ua)){
@@ -148,7 +148,7 @@ status Ssid_Close(SsidCtx *ctx, StrVec *ssid, StrVec *ua, Table *stashTbl){
 status Ssid_Destroy(SsidCtx *ctx, StrVec *ssid, StrVec *ua){
     StrVec *pathV = StrVec_From(ctx->m, ctx->path);
     MemCh *m = ctx->m;
-    Str *parityHex = Span_Get(ssid->p, 4);
+    Str *parityHex = Span_Get(ssid->p, 6);
     quad parity = 0;
     Raw_FromHex(m, parityHex, &parity, sizeof(parity));
     if(!HalfParity_Compare(parity, ua)){

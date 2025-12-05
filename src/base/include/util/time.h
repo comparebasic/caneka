@@ -25,4 +25,4 @@ Str *Time_ToDayStr(MemCh *m, struct timespec *ts);
 Single *Time_Wrapped(MemCh *m, struct timespec *ts);
 
 status ApproxTime_Beyond(struct timespec *delta, ApproxTime *mt);
-status ApproxTime_Set(struct timespec *delta, ApproxTime *at);
+status ApproxTime_Set(struct timespec *present, struct timespec *start, ApproxTime *at);

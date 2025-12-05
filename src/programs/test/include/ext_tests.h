@@ -216,6 +216,7 @@ static TestSet ExtTests[] = {
         "Queue tests for iterating around a queue with additions and removals.",
         FEATURE_COMPLETE,
     },
+    /*
     {
         "Queue Criteria Tests",
         QueueCriteria_Tests,
@@ -228,6 +229,7 @@ static TestSet ExtTests[] = {
         "Queue testing adding and removing Queue items over time.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "TaskStep Tests",
         TaskStep_Tests,

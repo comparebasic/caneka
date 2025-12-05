@@ -19,11 +19,11 @@ status Session_Tests(MemCh *m){
     StrVec *ssid = Ssid_From(ctx, ua, &time);
     args[0] = ssid;
     args[1] = NULL;
-    r |= Test(ssid->total == 34, "Ssid has length of 34, have @", args);
+    r |= Test(ssid->total == 51, "Ssid has length of 51, have @", args);
     quad parity = HalfParity_FromVec(ua);
     args[0] = Str_ToHex(m, 
         Str_Ref(m, (byte *)&parity, sizeof(quad), sizeof(quad), STRING_BINARY));
-    args[1] = Span_Get(ssid->p, 4);
+    args[1] = Span_Get(ssid->p, 6);
     args[2] = NULL;
     r |= Test(Equals(args[0], args[1]),
         "Ssid third seg is parity of User-Agent, expected @, have @", args);
@@ -31,13 +31,16 @@ status Session_Tests(MemCh *m){
     Str *timeSecS = Span_Get(ssid->p, 2);
     Str *timeNsecS = Span_Get(ssid->p, 4);
     struct timespec ssidTime;
-    ssidTime.tv_sec = *((i64 *)Str_FromHex(m, timeSecS)->bytes);
-    ssidTime.tv_nsec = *((i64 *)Str_FromHex(m, timeNsecS)->bytes);
+    i64 *secPtr = (i64 *)Str_FromHex(m, timeSecS)->bytes;
+    i64 *nsecPtr = (i64 *)Str_FromHex(m, timeNsecS)->bytes;
+
+    ssidTime.tv_sec = *secPtr;
+    ssidTime.tv_nsec = *nsecPtr;
 
     args[0] = Str_ToHex(m,
-        Str_Ref(m, (byte *)time.tv_sec, sizeof(time.tv_sec), sizeof(time.tv_sec), STRING_BINARY));
+        Str_Ref(m, (byte *)&time.tv_sec, sizeof(i64), sizeof(i64), STRING_BINARY));
     args[1] = Str_ToHex(m,
-        Str_Ref(m, (byte *)time.tv_nsec, sizeof(time.tv_nsec), sizeof(time.tv_nsec), STRING_BINARY));
+        Str_Ref(m, (byte *)&time.tv_nsec, sizeof(i64), sizeof(i64), STRING_BINARY));
     args[2] = timeSecS;
     args[3] = Time_ToStr(m, &ssidTime);
     args[4] = NULL;
@@ -46,7 +49,9 @@ status Session_Tests(MemCh *m){
 
     ssid = Ssid_Start(ctx, ua, &time);
     
-    r |= Test(ssid != NULL, "Session ssid is not null after Start", NULL);
+    args[0] = ssid;
+    args[1] = NULL;
+    r |= Test(ssid != NULL, "Session ssid is not null after Start @", args);
 
     Table *stashTbl = Ssid_Open(ctx, ssid, ua);
 

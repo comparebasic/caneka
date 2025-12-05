@@ -19,3 +19,4 @@ typedef struct queue_crit {
 } QueueCrit;
 
 QueueCrit *QueueCrit_Make(MemCh *m, QueueFunc func, word flags);
+status QueueCrit_SetTick(QueueCrit *crit, Queue *q);

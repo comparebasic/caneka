@@ -14,6 +14,10 @@ typedef struct queue {
     Iter it;
     Iter availableIt;
     Span/*<QueueCrit>*/ *handlers;
+    struct {
+        struct timespec start;
+        struct timespec now;
+    } metrics;
 } Queue;
 
 #define Queue_GetMem(q) ((q)->itemsIt.p->m)

@@ -13,6 +13,15 @@ static status ApproxTime_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "ApproxTime\\<@ $>", args);
 }
 
+static status WrappedPtrTimeSpec_Print(Buff *bf, void *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR_TIMESPEC);
+    void *args[] = {
+        Time_ToStr(bf->m, sg->val.ptr),
+        NULL
+    };
+    return Fmt(bf, "timespec\\<$>", args);
+}
+
 static status Wrapped_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED);
     if(flags & (MORE|DEBUG)){
@@ -258,7 +267,7 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
         approxTimeLabels[11] = Str_CstrRef(m, "MIN");
         approxTimeLabels[12] = Str_CstrRef(m, "HOUR");
         approxTimeLabels[13] = Str_CstrRef(m, "DAY");
-        Lookup_Add(m, lk, TYPE_APPROXTIME, (void *)approxTimeLabels);
+        Lookup_Add(m, ToSFlagLookup, TYPE_APPROXTIME, (void *)approxTimeLabels);
         r |= SUCCESS;
     }
 
@@ -276,5 +285,7 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_FUNC, (void *)WrappedFunc_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_MEMCOUNT, (void *)WrappedMemCount_Print);
     r |= Lookup_Add(m, lk, TYPE_APPROXTIME, (void *)ApproxTime_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR_TIMESPEC, (void *)WrappedPtrTimeSpec_Print);
+
     return r;
 }
