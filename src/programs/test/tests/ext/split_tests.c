@@ -26,7 +26,7 @@ status StrVecSplit_Tests(MemCh *m){
         p,
         NULL
     };
-    r |= Test(Equals(expected, p), "Split by & @ becomes @.\n", args);
+    r |= Test(Equals(expected, p), "Split by & @ becomes @.", args);
 
     v = (StrVec *)StrVec_Clone(m, orig);
     Match *mt = Match_Make(m, PatChar_FromStr(m, Str_CstrRef(m, ".")), Span_Make(m));
