@@ -335,7 +335,7 @@ status MatchReplace_Tests(MemCh *m){
 
     r |= Test(Equals(newPath,
         Str_CstrRef(m, "/happy/good/fancy/things")),
-        "Match @: Replacing & with & in $ to make &\n", args);
+        "Match @: Replacing & with & in $ to make &", args);
 
     new = Str_CstrRef(m, "it");
     backlog = Span_Make(m);
@@ -356,7 +356,7 @@ status MatchReplace_Tests(MemCh *m){
 
     r |= Test(Equals(newPath, 
         Str_CstrRef(m, "/happy/it/fancy/things")),
-        "Match @: Replacing @ with @ in $ to make &\n", args2);
+        "Match @: Replacing @ with @ in $ to make &", args2);
 
     return r;
 }

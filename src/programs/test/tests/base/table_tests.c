@@ -95,7 +95,7 @@ status TableHKey_Tests(MemCh *m){
         (byte *)&parity, sizeof(util), sizeof(util), STRING_BINARY|MORE|DEBUG);
     args[2] = NULL;
     r |= Test((r & (SUCCESS|ERROR)) == SUCCESS, 
-        "Small key  $, had expected hkeys, bits @^0\n", args);
+        "Small key  $, had expected hkeys, bits @^0", args);
 
     k = K(m, "strange");
     parity = Parity_From(k);
@@ -109,7 +109,7 @@ status TableHKey_Tests(MemCh *m){
         (byte *)&parity, sizeof(util), sizeof(util), STRING_BINARY|MORE|DEBUG);
     args[2] = NULL;
     r |= Test((r & (SUCCESS|ERROR)) == SUCCESS, 
-        "Small key  $, had expected hkeys, bits @^0\n", args);
+        "Small key  $, had expected hkeys, bits @^0", args);
 
     return r;
 }

@@ -42,7 +42,7 @@ status StrVecSplit_Tests(MemCh *m){
         NULL
     };
     r |= Test(Equals(expected, p),
-        "Split by & @ becomes @.\n", args2);
+        "Split by & @ becomes @.", args2);
 
     v = (StrVec *)StrVec_Clone(m, orig);
     split = I8_Wrapped(m, '.');
@@ -56,7 +56,7 @@ status StrVecSplit_Tests(MemCh *m){
         NULL
     };
     r |= Test(Equals(expected, p),
-        "Split by & @ becomes @.\n", args3);
+        "Split by & @ becomes @.", args3);
 
     return r;
 }
