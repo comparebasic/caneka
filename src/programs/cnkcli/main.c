@@ -97,7 +97,7 @@ i32 main(int argc, char **argv){
                 struct timespec taken;
                 struct timespec threshold = {RESPAWN_THRESHOLD_SEC, 0};
                 Time_Now(&last);
-                args[2] = Time_ToStr(m, last);
+                args[2] = Time_ToStr(m, &last);
                 Out("^c.Spawn: logdir=$ cmd=@ time=$^0\n", args);
                 ProcDets_Init(&pd);
                 status r = SubProcess(m, cmd, &pd);
