@@ -16,7 +16,7 @@ static status WebServer_logAndClose(Step *_st, Task *tsk){
     args[0] = Lookup_Get(HttpMethods, ctx->method);
     args[1] = I32_Wrapped(tsk->m, ctx->code);
     args[2] = ctx->path;
-    args[3] = I64_Wrapped(tsk->m, tsk->metrics.consumed),
+    args[3] = Time_Wrapped(tsk->m, &tsk->metrics.consumed),
     args[4] = Str_MemCount(tsk->m, st.total * PAGE_SIZE),
     args[5] = I64_Wrapped(tsk->m, st.total),
     args[6] = I64_Wrapped(tsk->m, st.pageIdx),

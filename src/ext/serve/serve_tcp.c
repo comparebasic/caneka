@@ -106,7 +106,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
             Task *child = Task_Make(Span_Make(tm), tsk);
             child->type.of = TYPE_TCP_TASK;
             child->type.state |= TASK_CHILD;
-            child->timeout = TCP_TIMEOUT;
+            child->timeout.tv_sec = TCP_TIMEOUT;
             child->parent = tsk;
             child->stepGuardMax = TCP_STEP_MAX;
             tm->owner = child;

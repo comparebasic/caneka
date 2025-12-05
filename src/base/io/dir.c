@@ -87,14 +87,15 @@ static status gatherFileSel(MemCh *m, Str *path, Str *file, void *source){
     if(extMatches || (sel->type.state & DIR_SELECTOR_MTIME_ALL)){
         struct stat st;
         File_Stat(m, StrVec_Str(m, v), &st);
-        st.st_mtime
         if((sel->type.state & DIR_SELECTOR_MTIME_LOWEST)){
-            if(Time_TimeSpecGreater(&sel->time, &st.st_mtime)){
-                r |= PROCESSING;
+            if(sel->time.tv_sec > st.st_mtime){
+                sel->time.tv_sec = st.st_mtime;
+                sel->time.tv_nsec = 0;
             }
         }else{
-            if(Time_TimeSpecGreater(&st.st_mtime, &sel->time)){
-                sel->time = modified;
+            if(sel->time.tv_sec < st.st_mtime){
+                sel->time.tv_sec = st.st_mtime;
+                sel->time.tv_nsec = 0;
                 r |= PROCESSING;
             }
         }

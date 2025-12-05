@@ -173,7 +173,7 @@ static status skipRecent(BuildCtx *ctx,
         Str *libPathStr = StrVec_Str(m , ctx->current.target);
         if(File_PathExists(m, libPathStr)){
             File_ModTime(m, libPathStr, &fileTime);
-            if(Time_Greater(&fileTime, sel->time)){
+            if(Time_Greater(&fileTime, &sel->time)){
                 ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, 
                     "Library is recent, skipping");
                 BuildCtx_LogOut(ctx);
@@ -238,8 +238,8 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         Str *dest = StrVec_Str(m, ctx->current.dest);
         struct timespec fileTime;
 
-        File_ModTime(m, des, &fileTimet)
-        if(File_PathExists(m, dest) && Time_Greater(fileTime, sel->time)){
+        File_ModTime(m, dest, &fileTime);
+        if(File_PathExists(m, dest) && Time_Greater(&fileTime, &sel->time)){
             BuildCtx_LinkObject(ctx, key, sel);
             StrVec_Return(ctx->current.dest);
             StrVec_Return(ctx->current.source);

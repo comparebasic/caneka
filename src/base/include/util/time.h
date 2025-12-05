@@ -1,9 +1,9 @@
 enum microtime_units {
-    APPROXTIME_MILLISEC = 1 << 8;
-    APPROXTIME_SEC = 1 << 9;
-    APPROXTIME_MIN = 1 << 10;
-    APPROXTIME_HOUR = 1 << 11;
-    APPROXTIME_DAY = 1 << 12;
+    APPROXTIME_MILLISEC = 1 << 8,
+    APPROXTIME_SEC = 1 << 9,
+    APPROXTIME_MIN = 1 << 10,
+    APPROXTIME_HOUR = 1 << 11,
+    APPROXTIME_DAY = 1 << 12,
 };
 
 typedef struct approx_time {
@@ -18,7 +18,7 @@ void Time_Delay(struct timespec *ts, struct timespec *remaining);
 Str *Time_ToStr(MemCh *m, struct timespec *ts);
 
 boolean Time_Greater(struct timespec *ts, struct timespec *add);
-boolean Time_Beyond(struct timespec *ts, struct timespec *add, struct time *amount);
+boolean Time_Beyond(struct timespec *ts, struct timespec *add, struct timespec *amount);
 
 Str *Time_Today(MemCh *m);
 Str *Time_ToDayStr(MemCh *m, struct timespec *ts);

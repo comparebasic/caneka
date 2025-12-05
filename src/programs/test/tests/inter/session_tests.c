@@ -38,8 +38,8 @@ status Session_Tests(MemCh *m){
         Str_Ref(m, (byte *)time.tv_sec, sizeof(time.tv_sec), sizeof(time.tv_sec), STRING_BINARY));
     args[1] = Str_ToHex(m,
         Str_Ref(m, (byte *)time.tv_nsec, sizeof(time.tv_nsec), sizeof(time.tv_nsec), STRING_BINARY));
-    args[2] = timeS;
-    args[3] = Time_ToStr(m, *timeVal);
+    args[2] = timeSecS;
+    args[3] = Time_ToStr(m, &ssidTime);
     args[4] = NULL;
     r |= Test(ssidTime.tv_sec == time.tv_sec && ssidTime.tv_nsec == time.tv_nsec, "Ssid second seg is time, expected @, have @ ($)", 
         args);
@@ -62,7 +62,9 @@ status Session_Tests(MemCh *m){
     Table_Set(stashTbl, key, value);
     Ssid_Close(ctx, ssid, ua, stashTbl);
 
-    StrVec *newSsid = Ssid_Update(ctx, ssid, ua, Time_Now());
+    struct timespec ts;
+    Time_Now(&ts);
+    StrVec *newSsid = Ssid_Update(ctx, ssid, ua, &ts);
     Table *newTbl = Ssid_Open(ctx, newSsid, ua);
 
     args[0] = S(m, "fredieeee");

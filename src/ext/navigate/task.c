@@ -101,7 +101,7 @@ status Task_Tumble(Task *tsk){
 
     struct timespec end;
     Time_Now(&end);
-    Time_Combine(&end, &now);
+    Time_Sub(&end, &now);
     Time_Add(&tsk->metrics.consumed, &end);
     DebugStack_Pop();
     return tsk->type.state;

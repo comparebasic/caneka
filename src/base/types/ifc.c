@@ -15,7 +15,6 @@ static status setSizeLookup(MemCh *m, Lookup *lk){
     r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED_I32, (i64)sizeof(Single));
     r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED_I16, (i64)sizeof(Single));
     r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED_I8, (i64)sizeof(Single));
-    r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED_TIME64, (i64)sizeof(Single));
     r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED_BOOL, (i64)sizeof(Single));
     r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED_PTR, (i64)sizeof(Single));
     r |= Lookup_AddRaw(m, lk, TYPE_WRAPPED_CSTR, (i64)sizeof(Single));

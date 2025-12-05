@@ -59,10 +59,10 @@ static i64 TcpCtx_Print(Buff *bf, void *a, cls type, word flags){
         I32_Wrapped(bf->m, ctx->port),
         ctx->inet4,
         ctx->inet6,
-        Util_Wrapped(bf->m, (util)ctx->metrics.start),
-        Util_Wrapped(bf->m, (util)ctx->metrics.open),
-        Util_Wrapped(bf->m, (util)ctx->metrics.error),
-        Util_Wrapped(bf->m, (util)ctx->metrics.served),
+        Time_Wrapped(bf->m, &ctx->metrics.start),
+        I64_Wrapped(bf->m, ctx->metrics.open),
+        I64_Wrapped(bf->m, ctx->metrics.error),
+        I64_Wrapped(bf->m, ctx->metrics.served),
         NULL,
     };
     return Fmt(bf, "Tcp<$ $ ^D.$^d.port ^D.$^d.inet4 ^D.$^d.inet6 $start $open $error $served>", args);

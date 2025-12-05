@@ -3,9 +3,15 @@
 
 status Step_Delay(Step *st, Task *tsk){
     st->type.state &= ~(NOOP|SUCCESS);
-    Single *sg = (Single *)as(st->arg, TYPE_WRAPPED_TIMESPEC);
-    struct timespec *ts = sg->value.ptr;
-    Time_Delay(&ts, &remaining);
+    Single *sg = (Single *)as(st->arg, TYPE_WRAPPED_PTR);
+    if(sg->objType.of != TYPE_TIMESPEC){
+        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+            "Error objTypeOf was expected to be a TIMESPEC", NULL);
+        return ERROR;
+    }
+    struct timespec *ts = sg->val.ptr;
+    struct timespec remaining;
+    Time_Delay(ts, &remaining);
     if(tsk->chainIt.idx == tsk->chainIt.p->max_idx){
         st->type.state |= SUCCESS;
     }else{

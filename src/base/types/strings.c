@@ -33,7 +33,6 @@ static char *baseTypeStrings[] = {
     "TYPE_WRAPPED_I8",
     "TYPE_WRAPPED_BOOL",
     "TYPE_WRAPPED_CSTR",
-    "TYPE_WRAPPED_TIMESPEC",
     "_TYPE_WRAPPED_END",
     "TYPE_UNKNOWN",
     "_TYPE_RANGE_TYPE_START",

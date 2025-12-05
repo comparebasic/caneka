@@ -30,7 +30,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         ctx->input.totalModules->val.i++;
         Table_Set(ctx->input.dependencies, name, sel);
 
-        if(ctx->modified < sel->time){
+        if(Time_Greater(&sel->time, &ctx->modified)){
             ctx->modified = sel->time;
             void *ar[] = {Time_ToStr(m, &ctx->modified), NULL};
         }

@@ -101,8 +101,8 @@ boolean File_PathExists(MemCh *m, Str *path){
 void File_ModTime(MemCh *m, Str *path, struct timespec *ts){
     struct stat st;
     if(stat(Str_Cstr(m, path), &st) == 0){
-        ts->tv_sec = st.st_mtime.tv_sec;
-        ts->tv_nsec = st.st_mtime.tv_nsec;
+        ts->tv_sec = st.st_mtime;
+        ts->tv_nsec = 0;
     }
 }
 

@@ -7,7 +7,7 @@ static status ApproxTime_Print(Buff *bf, void *a, cls type, word flags){
     ApproxTime *at = (ApproxTime *)as(a, TYPE_APPROXTIME);
     void *args[] = {
         Type_StateVec(bf->m, at->type.of, at->type.state),
-        I32_Wrapped(m, at->value),
+        I32_Wrapped(bf->m, at->value),
         NULL
     };
     return Fmt(bf, "ApproxTime\\<@ $>", args);
@@ -23,25 +23,6 @@ static status Wrapped_Print(Buff *bf, void *a, cls type, word flags){
         return Fmt(bf, "Wr\\<$>", args);
     }else{
         return ToStream_NotImpl(bf, a, type, flags);
-    }
-}
-
-static status WrappedTimeSpec_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_TIMESPEC);
-    struct timespec *ts = sg->val.ptr;
-    if(flags & (MORE|DEBUG)){
-        void *args[] = {
-            Time_ToStr(bf->m, &ts),
-            NULL
-        };
-        return Fmt(bf, "Time\\<$>", args);
-    }else{
-        StrVec *v = StrVec_Make(m);
-        Span_Add(v, Str_FromI64(m, ts->tv_sec));
-        Span_Add(v, Str_Ref(m, (byte *)".", 1, 1, STRING_CONST|MORE));
-        Span_Add(v, Str_FromI64(m, ts->tv_nsec));
-        void *args[] = {v, NULL};
-        return Fmt(bf, "Time\\<$>", args);
     }
 }
 
@@ -294,7 +275,6 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_FUNC, (void *)WrappedFunc_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_MEMCOUNT, (void *)WrappedMemCount_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIMESPEC, (void *)WrappedTimeSpec_Print);
     r |= Lookup_Add(m, lk, TYPE_APPROXTIME, (void *)ApproxTime_Print);
     return r;
 }

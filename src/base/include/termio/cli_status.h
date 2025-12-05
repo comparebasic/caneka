@@ -1,6 +1,6 @@
 typedef struct cli_status {
     Type type;
-    struct timestamp tick;
+    struct timespec tick;
     DoFunc render;
     void *source;
     Span *lines;
