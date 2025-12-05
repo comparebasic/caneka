@@ -1,6 +1,8 @@
 = About
 
 This is a demo of the _link=Caneka@https://caneka.org  components working together.
+It is a webserver/queue manager from sockets and HTTP handling to templating.
+It's presently behind an Nginx proxy for security reasonns.
 
 == What Is Caneka?
 
