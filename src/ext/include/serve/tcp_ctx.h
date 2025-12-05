@@ -11,7 +11,7 @@ typedef struct tcp_ctx {
     Inst *inc;
     Inst *nav;
     struct {
-        microTime start;
+        struct timestruct start;
         i64 open;
         i64 error;
         i64 served;

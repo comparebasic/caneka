@@ -45,8 +45,8 @@ typedef struct gen_config {
 typedef struct buildctx {
     Type type;
     MemCh *m;
-    microTime start;
-    microTime modified;
+    struct timespec start;
+    struct timespec modified;
     StrVec *dir;
     StrVec *src;
     struct {

@@ -31,7 +31,7 @@ status DirSelector_Print(Buff *bf, void *a, cls type, word flags){
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
-            MicroTime_ToStr(bf->m, sel->time),
+            Time_ToStr(bf->m, &sel->time),
             sel->dest,
             sel->meta,
             NULL
@@ -40,7 +40,7 @@ status DirSelector_Print(Buff *bf, void *a, cls type, word flags){
     }else{
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
-            MicroTime_ToStr(bf->m, sel->time),
+            Time_ToStr(bf->m, &sel->time),
             I32_Wrapped(bf->m, sel->dest->nvalues),
             sel->meta,
             NULL

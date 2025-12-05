@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-StrVec *Ssid_From(SsidCtx *ctx, StrVec *ua, microTime time){
+StrVec *Ssid_From(SsidCtx *ctx, StrVec *ua, struct timespec *ts){
     MemCh *m = ctx->m;
     quad parity = HalfParity_FromVec(ua);
     StrVec *v = StrVec_Make(m);
@@ -12,7 +12,12 @@ StrVec *Ssid_From(SsidCtx *ctx, StrVec *ua, microTime time){
     StrVec_Add(v, Str_FromCstr(m, "-", STRING_COPY|MORE));
     StrVec_Add(v,
         Str_ToHex(m,
-            Str_Ref(m, (byte *)&time, sizeof(time), sizeof(time), STRING_BINARY)));
+            Str_Ref(m, (byte *)&ts->tv_sec, sizeof(ts->tv_sec), sizeof(ts->tv_nsec), STRING_BINARY)));
+
+    StrVec_Add(v, Str_FromCstr(m, ".", STRING_COPY|MORE));
+    StrVec_Add(v,
+        Str_ToHex(m,
+            Str_Ref(m, (byte *)&ts->tv_nsec, sizeof(ts->tv_nsec), sizeof(ts->tv_nsec), STRING_BINARY)));
 
     StrVec_Add(v, Str_FromCstr(m, "-", STRING_COPY|MORE));
     StrVec_Add(v,
@@ -58,7 +63,7 @@ Table *Ssid_Open(SsidCtx *ctx, StrVec *ssid, StrVec *ua){
     return NULL;
 }
 
-StrVec *Ssid_Update(SsidCtx *ctx, StrVec *ssid, StrVec *ua, microTime time){
+StrVec *Ssid_Update(SsidCtx *ctx, StrVec *ssid, StrVec *ua, struct timespec *ts){
     MemCh *m = ctx->m;
     ssid->type.state &= ~(SUCCESS|NOOP);
     Ssid_Open(ctx, ssid, ua);
@@ -67,7 +72,7 @@ StrVec *Ssid_Update(SsidCtx *ctx, StrVec *ssid, StrVec *ua, microTime time){
         StrVec_AddVec(pathV, ssid);
         Str *path = StrVec_Str(m, pathV);
 
-        StrVec *new = Ssid_From(ctx, ua, time); 
+        StrVec *new = Ssid_From(ctx, ua, ts); 
         pathV = StrVec_From(ctx->m, ctx->path);
         StrVec_AddVec(pathV, new);
         Str *newPath = StrVec_Str(m, pathV);
@@ -77,11 +82,11 @@ StrVec *Ssid_Update(SsidCtx *ctx, StrVec *ssid, StrVec *ua, microTime time){
     return NULL;
 }
 
-StrVec *Ssid_Start(SsidCtx *ctx, StrVec *ua, microTime time){
+StrVec *Ssid_Start(SsidCtx *ctx, StrVec *ua, struct timespec *ts){
     MemCh *m = ctx->m;
     StrVec *pathV = StrVec_From(ctx->m, ctx->path);
 
-    StrVec *ssid = Ssid_From(ctx, ua, time); 
+    StrVec *ssid = Ssid_From(ctx, ua, ts); 
     StrVec_AddVec(pathV, ssid);
 
     Str *path = StrVec_Str(m, pathV);

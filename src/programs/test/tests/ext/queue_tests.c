@@ -17,8 +17,9 @@ static status queueScaleTest(MemCh *m, i32 max){
     util pattern[4] = { 3, 2, 1, 7};
     util increase = 4;
     i32 increaseCadance = max / 4;
-    microTime now = 1;
-    microTime timeIncr = max / 5;
+
+    ApproxTime now = {.type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC}, 1};
+    ApproxTime timeIncr = {.type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC}, max /1};
 
     for(i32 i = 0; i < max; i++){
         util time = now + (pattern[patIdx] * increase);
@@ -58,8 +59,9 @@ static status queueScaleTest(MemCh *m, i32 max){
             }
             Queue_Remove(q, q->it.idx);
         }
-        microTime _remaining;
-        Time_Delay(10, &_remaining);
+        struct timesspec delay = {0,10};
+        struct timespec _remaining;
+        Time_Delay(&delay, &_remaining);
     }
 
     args[0] = I32_Wrapped(m, max);
@@ -295,30 +297,35 @@ status QueueCriteria_Tests(MemCh *m){
     QueueCrit *critFds = QueueCrit_Make(m, QueueCrit_Fds, ZERO);
     i32 fdIdx = Queue_AddHandler(q, critFds);
 
-    microTime start = MicroTime_Now();
-    crit->u = (util)start;
+    ApproxTime *current = (ApproxTime *)&crit->u;
+    current->type.state = APPROXTIME_SEC;
+    current->value = 0;
 
     Str *s = Str_FromCstr(m, "Two Days", ZERO);
-    microTime time = start + (TIME_DAY*2);
+    
+    ApproxTime compare = {.type = {TYPE_APPROXTIME, APPROXTIME_SEC}, .value =2};
     i32 idx = Queue_Add(q, s);
-    Queue_SetCriteria(q, hIdx, idx, (util *)&time);
+    Queue_SetCriteria(q, hIdx, idx, (util *)&compare);
 
     s = Str_FromCstr(m, "Three Seconds", ZERO);
-    time = start + (TIME_SEC*3);
+    compare.value = 3
     idx = Queue_Add(q, s);
-    Queue_SetCriteria(q, hIdx, idx, (util *)&time);
+    Queue_SetCriteria(q, hIdx, idx, (util *)&compare);
 
     s = Str_FromCstr(m, "Ten Minutes", ZERO);
-    time = start + (TIME_MIN*10);
+    compare.type.state = APPROXTIME_MIN;
+    compare.type.value = 10;
     idx = Queue_Add(q, s);
-    Queue_SetCriteria(q, hIdx, idx, (util *)&time);
+    Queue_SetCriteria(q, hIdx, idx, (util *)&compare);
 
     status re = Queue_Next(q);
     args[0] = Type_StateVec(m, q->type.of, q->type.state);
     args[1] = NULL;
     r |= Test(q->type.state & END, "No items will run at the presetn time, flags @ ", args);
 
-    crit->u = (util)start+(TIME_SEC*4);
+    ApproxTime *current = (ApproxTime *)&crit->u;
+    current->type.state = APPROXTIME_SEC;
+    current->value = 4;
 
     void *expected[10];
     expected[0] = Str_FromCstr(m, "Three Seconds", ZERO);
@@ -335,12 +342,13 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = I64_Wrapped(m, ((microTime)crit->u - start) / TIME_SEC);
+    args[1] = crit->u - start;
     args[2] = NULL;
     r |= Test(i == 1, "Only one item was available to run, i is $, at $ seconds from start", args);
 
 
-    crit->u = (util)start+(TIME_MIN*15);
+    current->type.state = APPROXTIME_MIN;
+    current->value = 15;
 
     expected[0] = Str_FromCstr(m, "Three Seconds", ZERO);
     expected[1] = Str_FromCstr(m, "Ten Minutes", ZERO);
@@ -357,12 +365,13 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = I64_Wrapped(m, ((microTime)crit->u - start) / TIME_MIN);
+    args[1] = crit->u
     args[2] = NULL;
     r |= Test(i == 2, "Only one item was available to run, i is $, at $ minutes from start", args);
 
 
-    crit->u = (util)start+(TIME_DAY*3);
+    current->type.state = APPROXTIME_DAY;
+    current->value = 3;
 
     expected[0] = Str_FromCstr(m, "Two Days", ZERO);
     expected[1] = Str_FromCstr(m, "Three Seconds", ZERO);
@@ -380,7 +389,7 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = I64_Wrapped(m, ((microTime)crit->u - start) / TIME_DAY);
+    args[1] = crit->u;
     args[2] = NULL;
     r |= Test(i == 3, "Only one item was available to run, i is $, at $ days from start", args);
 
@@ -398,7 +407,8 @@ status QueueCriteria_Tests(MemCh *m){
 
     Queue_Reset(q);
 
-    crit->u = (util)start+(TIME_SEC*10);
+    current->type.state = APPROXTIME_SEC;
+    current->value = 10;
 
     expected[0] = Str_FromCstr(m, "File Descriptor", ZERO);
     expected[1] = Str_FromCstr(m, "Three Seconds", ZERO);
@@ -415,7 +425,7 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = I64_Wrapped(m, ((microTime)crit->u - start) / TIME_SEC);
+    args[1] = crit->u;
     args[2] = NULL;
     r |= Test(i == 2, "PollFd set to Read: two item was available to run, i is $, at $ seconds from start", args);
 
@@ -436,7 +446,7 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = I64_Wrapped(m, ((microTime)crit->u - start) / TIME_SEC);
+    args[1] = crit->u;
     args[2] = NULL;
     r |= Test(i == 1, "No direction set on pollfd: Only one item was available to run, i is $, at $ seconds from start", args);
 

@@ -162,17 +162,18 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     return r;
 }
 
-static microTime skipRecent(BuildCtx *ctx, 
-        StrVec *key, DirSelector *sel, microTime *modified){
+static status skipRecent(BuildCtx *ctx, 
+        StrVec *key, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[5];
 
+    struct timespec fileTime;
     if(ctx->current.target != NULL){
         Str *libPathStr = StrVec_Str(m , ctx->current.target);
         if(File_PathExists(m, libPathStr)){
-            *modified = File_ModTime(m, libPathStr);
-            if(*modified > sel->time){
+            File_ModTime(m, libPathStr, &fileTime);
+            if(Time_Greater(&fileTime, sel->time)){
                 ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, 
                     "Library is recent, skipping");
                 BuildCtx_LogOut(ctx);
@@ -186,7 +187,7 @@ static microTime skipRecent(BuildCtx *ctx,
     return ZERO;
 }
 
-static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel, microTime modified){
+static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[5];
@@ -235,8 +236,10 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel, micr
         Dir_CheckCreate(m, outObjDir);
 
         Str *dest = StrVec_Str(m, ctx->current.dest);
+        struct timespec fileTime;
 
-        if(File_PathExists(m, dest) && File_ModTime(m, dest) > modified){
+        File_ModTime(m, des, &fileTimet)
+        if(File_PathExists(m, dest) && Time_Greater(fileTime, sel->time)){
             BuildCtx_LinkObject(ctx, key, sel);
             StrVec_Return(ctx->current.dest);
             StrVec_Return(ctx->current.source);
@@ -254,7 +257,7 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel, micr
     return ZERO;
 }
 
-static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel, microTime modified){
+static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[5];
@@ -338,8 +341,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     }
     ctx->input.countModuleSources->val.i = 0;
 
-    microTime modified = 0;
-    if(skipRecent(ctx, name, sel, &modified) & SUCCESS){
+    if(skipRecent(ctx, name, sel) & SUCCESS){
         return NOOP;
     }
 
@@ -349,8 +351,8 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
 
     ctx->type.state |= PROCESSING;
 
-    buildSupporting(ctx, name, sel, modified);
-    buildExec(ctx, name, sel, modified);
+    buildSupporting(ctx, name, sel);
+    buildExec(ctx, name, sel);
     Table_Set(sel->meta, S(m, "completed"), I64_Wrapped(m, MicroTime_Now()));
 
     DebugStack_Pop();

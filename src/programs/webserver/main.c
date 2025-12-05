@@ -23,7 +23,7 @@ static status Load_stats(Step *st, Task *tsk){
     MemBook_GetStats(m, &mst);
 
     Table *stats = Table_Make(m);
-    Table_SetByCstr(stats, "uptime", MicroTime_ToStr(m, tcp->metrics.start));
+    Table_SetByCstr(stats, "uptime", Time_ToStr(m, &tcp->metrics.start));
 
     Table *mem = Table_Make(m);
     Table_SetByCstr(mem, "mem-used", Str_MemCount(m, mst.pageIdx * PAGE_SIZE));
@@ -91,7 +91,8 @@ i32 main(int argc, char **argv){
     DebugStack_Push(NULL, 0);
     Core_Direct(m, 1, 2);
 
-    microTime now = MicroTime_Now();
+    struct timespec now;
+    Time_Now(&now);
 
     Str *help = S(m, "help");
     Str *noColor = S(m, "no-color");
@@ -134,9 +135,11 @@ i32 main(int argc, char **argv){
         Str *build = Str_Make(m, STR_DEFAULT);
         args[0] = logValue;
         args[1] = S(m, "_");
-        args[2] = Str_FromI64(m, now);
-        args[3] = S(m, ".out");
-        args[4] = NULL;
+        args[2] = Str_FromI64(m, now.tv_sec);
+        args[3] = S(m, "-");
+        args[4] = Str_FromI64(m, now.tv_nsec);
+        args[5] = S(m, ".out");
+        args[6] = NULL;
         Str_AddChain(m, build, args);
 
         Str *logPath = IoUtil_GetAbsPath(m, build);
@@ -150,9 +153,11 @@ i32 main(int argc, char **argv){
         build = Str_Make(m, STR_DEFAULT);
         args[0] = logValue;
         args[1] = S(m, "_");
-        args[2] = Str_FromI64(m, now);
-        args[3] = S(m, ".err");
-        args[4] = NULL;
+        args[2] = Str_FromI64(m, now.tv_sec);
+        args[3] = S(m, "-");
+        args[4] = Str_FromI64(m, now.tv_nsec);
+        args[5] = S(m, ".err");
+        args[6] = NULL;
         Str_AddChain(m, build, args);
 
         Str *errPath = IoUtil_GetAbsPath(m, build);

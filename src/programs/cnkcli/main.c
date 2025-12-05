@@ -91,21 +91,27 @@ i32 main(int argc, char **argv){
 
             boolean run = TRUE;
             while(run){
-                microTime last = MicroTime_Now();
-                args[2] = MicroTime_ToStr(m, last);
+                struct timespec last;
+                struct timespec taken;
+                struct timespec threshold = {RESPAWN_THRESHOLD_SEC, 0};
+                Time_Now(&last);
+                args[2] = Time_ToStr(m, last);
                 Out("^c.Spawn: logdir=$ cmd=@ time=$^0\n", args);
                 ProcDets_Init(&pd);
                 status r = SubProcess(m, cmd, &pd);
                 if(r & ERROR){
                     codeSg->val.i = pd.code;
-                    Out("^r.SubProcess returned error: logdir=$ cmd=@ time=$ return-code:$^0\n", args);
+                    Out("^r.SubProcess returned error: logdir=$ cmd=@ time=$"
+                        " return-code:$^0\n", args);
                 }
 
-                if((last - MicroTime_Now()) < (TIME_SEC / 2)){
+                Time_Now(&taken);
+                if(Time_Beyond(&last, &taken, &threshold)){
                     Out("^y.ReSpawn within throttle window, delaying:"
                         " logdir=$ cmd=@ time=$^0\n", args);
-                    microTime remaining;
-                    Time_Delay(TIME_SEC, &remaining);
+                    struct timespec delay = {1, 0};
+                    struct timespec remaining;
+                    Time_Delay(&delay, &remaining);
                 }
             }
             if(r == READY){

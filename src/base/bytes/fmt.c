@@ -25,29 +25,36 @@ void *FmtVar_Get(MemCh *m, Str *key, void *arg){
     Path_DotAnnotate(m, path);
     Abstract *a = NULL;
     Str *k = Span_Get(path->p, 0);
-    if(Equals(k, Str_FromCstr(m, "STACK", ZERO))){
+    if(Equals(k, K(, "STACK", ZERO))){
         a = (Abstract *)DebugStack_Get();
         if(path->p->nvalues > 1){
             k = Span_Get(path->p, 2);
             StackEntry *entry = (StackEntry *)as(a, TYPE_DEBUG_STACK_ENTRY);
-            if(Equals(k, Str_FromCstr(m, "name", ZERO))){
-                a = (Abstract *)Str_FromCstr(m, entry->funcName, STRING_COPY);
-            }else if(Equals(k, Str_FromCstr(m, "ref", ZERO))){
+            if(Equals(k, K(, "name"))){
+                a = (Abstract *)S(m, entry->funcName);
+            }else if(Equals(k, K(, "ref", ZERO))){
                 a = (Abstract *)entry->ref;
             }else{
                 a = NULL;
             }
         }
-    }else if(Equals(k, Str_FromCstr(m, "TIME", ZERO))){
+    }else if(Equals(k, K(, "TIME"))){
+        struct timespec now;
+        Time_Now(&now);
         if(path->p->nvalues > 1){
             k = Span_Get(path->p, 2);
-            if(Equals(k, Str_FromCstr(m, "human", ZERO))){
-                a = (Abstract *)MicroTime_ToStr(m, MicroTime_Now());  
+            if(Equals(k, K(, "human"))){
+                a = (Abstract *)Time_ToStr(m, &now);
             }else{
                 a = NULL;
             }
         }else{
-            a = (Abstract *)Str_FromI64(m, MicroTime_Now());  
+            struct timespec 
+            StrVec *v = StrVec_Make(m);
+            Span_Add(v, Str_FromI64(m, now.tv_sec));
+            Span_Add(v, Str_Ref(m, (byte *)".", 1, 1, STRING_CONST|MORE));
+            Span_Add(v, Str_FromI64(m, now.tv_nsec));
+            a = (Abstract *)v;  
         }
     }else if(arg != NULL && ((Abstract *)arg)->type.of == TYPE_TABLE){
         return Table_Get((Table *)arg, key);

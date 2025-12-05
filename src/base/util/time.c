@@ -3,7 +3,25 @@
 
 #define TIME_BUFF_LEN 64
 
-void Time_Combine(struct timespec *ts, struct timespec *add){
+void Time_Sub(struct timespec *ts, struct timespec *sub){
+    ts->tv_sec -= sub->tv_sec;
+    ts->tv_nsec -= sub->tv_nsec;
+    if(ts->nsec < 0){
+        ts->sec--;
+        ts->tv_nsec += 1000000000;
+    }
+}
+
+void Time_Add(struct timespec *ts, struct timespec *add){
+    ts->tv_sec += add->tv_sec;
+    ts->tv_nsec += add->tv_nsec;
+    if(ts->nsec >= 1000000000){
+        ts->sec++;
+        ts->tv_nsec -= 1000000000;
+    }
+}
+
+void Time_Add(struct timespec *ts, struct timespec *add){
     ts->tv_sec -= add->tv_sec;
     ts->tv_nsec -= add->tv_nsec;
     if(ts->nsec < 0){
@@ -43,7 +61,7 @@ boolean Time_Beyond(struct timespec *ts, struct timespec *add, struct time *amou
     struct timespec _ts;
     _ts->tv_sec = ts->tv_sec;
     _ts->tv_nsec = ts->tv_nsec;
-    Time_Combine(&_ts, add);
+    Time_Sub(&_ts, add);
     if(_ts.tv_sec > amount->tv_sec || _ts.tv_sec == amount->tv_sec && 
             _ts.tv_nsec > amount->tv_nsec){
         return TRUE;

@@ -79,7 +79,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     Queue *q = (Queue *)as(tsk->data, TYPE_QUEUE);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);;
 
-    microTime timeout = 0;
+    i64 timeout = 0;
     if(q->it.p->nvalues == 0){
         timeout = TCP_ZERO_REQ_DELAY;
     }

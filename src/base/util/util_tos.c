@@ -1,8 +1,20 @@
 #include <external.h>
 #include "base_module.h" 
 
+static Str **approxTimeLabels = NULL;
+
+static status ApproxTime_Print(Buff *bf, void *a, cls type, word flags){
+    ApproxTime *at = (ApproxTime *)as(a, TYPE_APPROXTIME);
+    void *args[] = {
+        Type_StateVec(bf->m, at->type.of, at->type.state),
+        I32_Wrapped(m, at->value),
+        NULL
+    };
+    return Fmt(bf, "ApproxTime\\<@ $>", args);
+}
+
 static status Wrapped_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)asIfc(a, TYPE_WRAPPED);
+    Single *sg = (Single *)as(a, TYPE_WRAPPED);
     if(flags & (MORE|DEBUG)){
         void *args[] = {
             Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
@@ -11,6 +23,25 @@ static status Wrapped_Print(Buff *bf, void *a, cls type, word flags){
         return Fmt(bf, "Wr\\<$>", args);
     }else{
         return ToStream_NotImpl(bf, a, type, flags);
+    }
+}
+
+static status WrappedTimeSpec_Print(Buff *bf, void *a, cls type, word flags){
+    Single *sg = (Single *)as(a, TYPE_WRAPPED_TIMESPEC);
+    struct timespec *ts = sg->val.ptr;
+    if(flags & (MORE|DEBUG)){
+        void *args[] = {
+            Time_ToStr(bf->m, &ts),
+            NULL
+        };
+        return Fmt(bf, "Time\\<$>", args);
+    }else{
+        StrVec *v = StrVec_Make(m);
+        Span_Add(v, Str_FromI64(m, ts->tv_sec));
+        Span_Add(v, Str_Ref(m, (byte *)".", 1, 1, STRING_CONST|MORE));
+        Span_Add(v, Str_FromI64(m, ts->tv_nsec));
+        void *args[] = {v, NULL};
+        return Fmt(bf, "Time\\<$>", args);
     }
 }
 
@@ -210,21 +241,6 @@ static status WrappedB_Print(Buff *bf, void *a, cls type, word flags){
     return SUCCESS;
 }
 
-static status WrappedMicroTime_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_TIME64);
-    Str *s = MicroTime_ToStr(bf->m, sg->val.value);
-    if(flags & (DEBUG|MORE)){
-        void *args[] = {
-            Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
-            s,
-            NULL
-        };
-        return Fmt(bf, "Wt64\\<$ ^D.@^d.>", args);
-    }else{
-        return ToS(bf, s, 0, flags);
-    }
-}
-
 static status Abstract_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
     if(flags & (DEBUG|MORE)){
@@ -253,6 +269,18 @@ static status Single_Print(Buff *bf, void *a, cls type, word flags){
 
 status Util_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
+
+    if(approxTimeLabels == NULL){
+        approxTimeLabels = (Str **)Arr_Make(m, 17);
+        approxTimeLabels[9] = Str_CstrRef(m, "MILLISEC");
+        approxTimeLabels[10] = Str_CstrRef(m, "SEC");
+        approxTimeLabels[11] = Str_CstrRef(m, "MIN");
+        approxTimeLabels[12] = Str_CstrRef(m, "HOUR");
+        approxTimeLabels[13] = Str_CstrRef(m, "DAY");
+        Lookup_Add(m, lk, TYPE_APPROXTIME, (void *)approxTimeLabels);
+        r |= SUCCESS;
+    }
+
     r |= Lookup_Add(m, lk, TYPE_ABSTRACT, (void *)Abstract_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)WrappedUtil_Print);
@@ -262,10 +290,11 @@ status Util_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)WrappedI16_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_I8, (void *)WrappedI8_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_BYTE, (void *)WrappedB_Print);
-    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIME64, (void *)WrappedMicroTime_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_DO, (void *)WrappedDo_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)WrappedPtr_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_FUNC, (void *)WrappedFunc_Print);
     r |= Lookup_Add(m, lk, TYPE_WRAPPED_MEMCOUNT, (void *)WrappedMemCount_Print);
+    r |= Lookup_Add(m, lk, TYPE_WRAPPED_TIMESPEC, (void *)WrappedTimeSpec_Print);
+    r |= Lookup_Add(m, lk, TYPE_APPROXTIME, (void *)ApproxTime_Print);
     return r;
 }

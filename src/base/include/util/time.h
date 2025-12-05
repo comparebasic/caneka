@@ -1,17 +1,18 @@
 enum microtime_units {
-    APPROXTIME_MILLISEC;
-    APPROXTIME_SEC;
-    APPROXTIME_HOUR;
-    APPROXTIME_MIN;
-    APPROXTIME_DAY;
+    APPROXTIME_MILLISEC = 1 << 8;
+    APPROXTIME_SEC = 1 << 9;
+    APPROXTIME_MIN = 1 << 10;
+    APPROXTIME_HOUR = 1 << 11;
+    APPROXTIME_DAY = 1 << 12;
 };
 
-typedef microTime {
+typedef struct approx_time {
     Type type;
     quad value;
 } ApproxTime;
 
-void Time_Combine(struct timespec *ts, struct timespec *add);
+void Time_Sub(struct timespec *ts, struct timespec *sub);
+void Time_Add(struct timespec *ts, struct timespec *add);
 void Time_Now(struct timespec *ts);
 void Time_Delay(struct timespec *ts, struct timespec *remaining);
 Str *Time_ToStr(MemCh *m, struct timespec *ts);

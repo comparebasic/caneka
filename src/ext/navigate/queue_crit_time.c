@@ -3,12 +3,12 @@
 
 gobits QueueCrit_Time(QueueCrit *crit, util *values){
     gobits go = 0;
-    microTime dest = (microTime)crit->u;
-    microTime *tp = (microTime *)values;
+    ApproxTime *dest = (ApproxTime *)&crit->u;
+    ApproxTime *tp = (ApproxTime *)values;
     util base = 1;
     for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
-        microTime t = tp[i];
-        if(t > 0 && t <= dest){
+        ApproxTime *t = tp+i;
+        if(t->value > 0 && t->value <= dest->value){
             util u = (base << i);
             go |= u;
         }

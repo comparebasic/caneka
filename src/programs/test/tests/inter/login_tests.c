@@ -4,7 +4,6 @@
 
 status Login_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    void *args[5];
     status r = READY;
 
     StrVec *absPath = IoAbsPath(m, "examples/session/open/");
@@ -13,8 +12,9 @@ status Login_Tests(MemCh *m){
     Dir_CheckCreate(m, path);
 
     StrVec *ua = Sv(m, "Firefudge/Aluminum");
-    microTime time = MicroTime_Now();
-    StrVec *ssid = Ssid_From(ctx, ua, time);
+    struct timespec now;
+    MicroTime_Now(&now);
+    StrVec *ssid = Ssid_From(ctx, ua, &now);
     Ssid_Open(ctx, ssid, ua);
 
     absPath = IoAbsPath(m, "examples/session/logins/");

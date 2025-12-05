@@ -22,10 +22,15 @@ status Task_Tumble(Task *tsk){
     DebugStack_Push(tsk, tsk->type.of);
     tsk->type.state &= ~SUCCESS;
     i16 guard = 0;
-    microTime start = MicroTime_Now();
+    struct timespec now;
+    Time_Now(&now);
+    if(tsk->metrics.start.tv_sec == 0){
+        tsk->metrics.start.tv_sec = now.tv_sec;
+        tsk->metrics.start.tv_nsec = now.tv_nsec;
+    }
     do {
         if(tsk->type.state & TASK_CHECK_ELAPSED
-            && MicroTime_Now() - tsk->metrics.start > tsk->timeout){
+            && Time_Beyond(&tsk->metrics.start, &now, &tsk->timeout)){
                 Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER, 
                     "Task timed out", NULL);
             break;
@@ -94,7 +99,10 @@ status Task_Tumble(Task *tsk){
         tsk->type.state |= SUCCESS;
     }
 
-    tsk->metrics.consumed = MicroTime_Now() - start;
+    struct timespec end;
+    Time_Now(&end);
+    Time_Combine(&end, &now);
+    Time_Add(&tsk->metrics.consumed, &end);
     DebugStack_Pop();
     return tsk->type.state;
 }
@@ -130,7 +138,6 @@ Task *Task_Make(Span *chain, void *source){
     Iter_Init(&tsk->chainIt, chain);
     tsk->stepGuardMax = TASK_TUMPLE_MAX;
     tsk->source = source;
-    tsk->metrics.start = MicroTime_Now();
     return tsk;
 }
 

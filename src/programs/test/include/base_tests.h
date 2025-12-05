@@ -206,7 +206,7 @@ static TestSet BaseTests[] = {
     {
         "Time",
         Time_Tests,
-        "Time tests for converstion between unix syscalls and microTime.",
+        "Time tests for converstion between unix syscalls and struct timespec and ApproxTime.",
         FEATURE_COMPLETE,
     },
     {

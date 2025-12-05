@@ -6,6 +6,6 @@
 #define TCP_TIMEOUT (TIME_SEC*6)
 
 #define TCP_LISTEN_BACKLOG 128
-#define TCP_ZERO_REQ_DELAY (60*TIME_SEC)
+#define TCP_ZERO_REQ_DELAY 6000
 
 Task *ServeTcp_Make(TcpCtx *ctx);

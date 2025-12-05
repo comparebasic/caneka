@@ -3,9 +3,9 @@
 
 status Step_Delay(Step *st, Task *tsk){
     st->type.state &= ~(NOOP|SUCCESS);
-    Single *sg = (Single *)as(st->arg, TYPE_WRAPPED_UTIL);
-    microTime remaining;
-    Time_Delay(sg->val.value, &remaining);
+    Single *sg = (Single *)as(st->arg, TYPE_WRAPPED_TIMESPEC);
+    struct timespec *ts = sg->value.ptr;
+    Time_Delay(&ts, &remaining);
     if(tsk->chainIt.idx == tsk->chainIt.p->max_idx){
         st->type.state |= SUCCESS;
     }else{
