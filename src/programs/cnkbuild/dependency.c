@@ -32,7 +32,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
         if(ctx->modified < sel->time){
             ctx->modified = sel->time;
-            void *ar[] = {MicroTime_ToStr(m, ctx->modified), NULL};
+            void *ar[] = {Time_ToStr(m, &ctx->modified), NULL};
         }
 
         ctx->input.totalSources->val.i += sel->dest->nvalues;

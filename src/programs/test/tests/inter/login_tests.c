@@ -13,7 +13,7 @@ status Login_Tests(MemCh *m){
 
     StrVec *ua = Sv(m, "Firefudge/Aluminum");
     struct timespec now;
-    MicroTime_Now(&now);
+    Time_Now(&now);
     StrVec *ssid = Ssid_From(ctx, ua, &now);
     Ssid_Open(ctx, ssid, ua);
 

@@ -201,8 +201,8 @@ static Table *getGenericData(MemCh *m, Route *rt){
     Table *data = Table_Make(m);
 
     Table *atts = Table_Make(m);
-    Table_Set(atts, Str_FromCstr(m, "title", ZERO), 
-        Str_FromCstr(m, "Example Title", ZERO));
+    Table_Set(atts, K(m "title"), 
+        K(m "Example Title"));
 
     Str *path = IoUtil_GetAbsPath(m,
         Str_CstrRef(m, "./examples/test/pages/public/stats.config"));
@@ -210,7 +210,7 @@ static Table *getGenericData(MemCh *m, Route *rt){
     Table_Set(data, Str_CstrRef(m, "config"), config);
 
     StrVec *navPath = IoUtil_GetAbsVec(m,
-        Str_FromCstr(m, "./examples/test/pages/nav.config", ZERO));
+        K(m "./examples/test/pages/nav.config"));
 
     Span *nav = Nav_TableFromPath(m, rt, navPath);
     Table_Set(data, Str_CstrRef(m, "nav"), nav);
@@ -279,8 +279,10 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     Table *data = getGenericData(m, rt);
 
-    Str *now = MicroTime_ToStr(m, MicroTime_Now());
-    Table_Set(data, Str_CstrRef(m, "now"), now);
+    struct timespec now;
+    Time_Now(&now);
+    Str *now = Time_ToStr(m, &now);
+    Table_Set(data, Str_CstrRef(m, "now"), Time_Wrapped(m, &now));
     StrVec *title = StrVec_From(m, Str_CstrRef(m, "The Title of the Master Page"));
     Table_Set(data, Str_CstrRef(m, "title"), title);
 
@@ -317,9 +319,12 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     data = getGenericData(m, rt);
     Table *stats = Table_Make(m);
-    Table_Set(stats, Str_FromCstr(m, "uptime", ZERO),
-        MicroTime_ToStr(m, 1762817053127));
-    Table_Set(data, Str_FromCstr(m, "stats", ZERO), stats);
+
+    struct timespec fictional = {1762817053, 127000000000};
+
+    Table_Set(stats, K(m "uptime"),
+        Time_ToStr(m, &fictional));
+    Table_Set(data, K(m "stats"), stats);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(handler, bf, data, NULL);
@@ -375,18 +380,16 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     data = getGenericData(m, rt);
     stats = Table_Make(m);
-    Table_Set(stats, Str_FromCstr(m, "uptime", ZERO),
-        MicroTime_ToStr(m, 1762817053127));
+    Table_Set(stats, K(m "uptime"),
+        Time_ToStr(m, &fictional));
 
     Table *mem = Table_Make(m);
-    Table_Set(mem, Str_FromCstr(m, "mem-used", ZERO),
-        Str_MemCount(m, st.pageIdx * PAGE_SIZE));
-    Table_Set(mem, Str_FromCstr(m, "mem-total", ZERO),
-        Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
+    Table_Set(mem, K(m "mem-used"), Str_MemCount(m, st.pageIdx * PAGE_SIZE));
+    Table_Set(mem, K(m "mem-total"), Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
 
-    Table_Set(mem, Str_FromCstr(m, "mem-details", ZERO), Map_ToTable(m, &st));
-    Table_Set(stats, Str_FromCstr(m, "mem", ZERO), mem);
-    Table_Set(data, Str_FromCstr(m, "stats", ZERO), stats);
+    Table_Set(mem, K(m "mem-details"), Map_ToTable(m, &st));
+    Table_Set(stats, K(m "mem"), mem);
+    Table_Set(data, K(m "stats"), stats);
 
     bf = Buff_Make(m, ZERO);
     Route_Handle(header, bf, data, NULL);
@@ -494,8 +497,10 @@ status WwwPath_Tests(MemCh *m){
     Route *sys = Route_From(m, IoAbsPath(m, "examples/test/pages/system"));
     Inst_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
 
-    Route *route = Route_GetHandler(pages, IoPath(m, "/static/logo-transparent-white_256.png")); 
-    args[0] = IoAbsPath(m, "examples/test/pages/static/logo-transparent-white_256.png");
+    Route *route = Route_GetHandler(pages,
+        IoPath(m, "/static/logo-transparent-white_256.png")); 
+    args[0] = IoAbsPath(m,
+        "examples/test/pages/static/logo-transparent-white_256.png");
     args[1] = Seel_Get(route, S(m, "file"));
     args[2] = NULL;
     r |= Test(route != NULL && Equals(args[1], args[0]), 
@@ -533,7 +538,8 @@ status WwwRouteMime_Tests(MemCh *m){
     IoUtil_Annotate(m, key);
     Path_JoinBase(m, key);
 
-    Route *subRt = Table_ByPath(Span_Get(rt, ROUTE_PROPIDX_CHILDREN), key, NULL, SPAN_OP_GET);
+    Route *subRt = Table_ByPath(
+        Span_Get(rt, ROUTE_PROPIDX_CHILDREN), key, NULL, SPAN_OP_GET);
 
     r |= Test(subRt != NULL, "Static route is not null", NULL);
 
@@ -543,11 +549,11 @@ status WwwRouteMime_Tests(MemCh *m){
     Buff *dest = Buff_Make(m, ZERO);
     Buff_Pipe(dest, bf);
 
-    Str *pathS = IoUtil_GetAbsPath(m,
-        Str_FromCstr(m, "./examples/test/pages/static/style.css", ZERO));
+    Str *pathS = IoUtil_GetAbsPath(m, K(m "./examples/test/pages/static/style.css"));
     StrVec *expected = File_ToVec(m, pathS);
 
-    r |= Test(Equals(dest->v, expected), "Content from Buff piped from route matches reading file directly", NULL);
+    r |= Test(Equals(dest->v, expected),
+        "Content from Buff piped from route matches reading file directly", NULL);
 
     DebugStack_Pop();
     return r;

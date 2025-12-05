@@ -353,7 +353,9 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
 
     buildSupporting(ctx, name, sel);
     buildExec(ctx, name, sel);
-    Table_Set(sel->meta, S(m, "completed"), I64_Wrapped(m, MicroTime_Now()));
+    struct timespec now;
+    Time_Now(&now);
+    Table_Set(sel->meta, S(m, "completed"), Time_Wrapped(m, &now));
 
     DebugStack_Pop();
     return r;

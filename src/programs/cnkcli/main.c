@@ -82,9 +82,11 @@ i32 main(int argc, char **argv){
 
             Single *codeSg = I32_Wrapped(m, 0);
             ProcDets pd;
+            struct timespec now;
+            Time_Now(&now);
             args[0] = logdir;
             args[1] = cmd;
-            args[2] = MicroTime_ToStr(m, MicroTime_Now());
+            args[2] = Time_ToStr(m, &now);
             args[3] = codeSg;
             args[4] = NULL;
             Out("^c.Forever: logdir=$ cmd=@ time=$^0\n", args);

@@ -5,10 +5,12 @@
 static status Example_log(Step *_st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    struct timespec now;
+    Time_Now(&now);
     void *args[] = {
         Lookup_Get(HttpMethods, ctx->method),
         ctx->path,
-        MicroTime_ToStr(OutStream->m, MicroTime_Now()),
+        Time_ToStr(OutStream->m, &now),
         NULL,
     };
 

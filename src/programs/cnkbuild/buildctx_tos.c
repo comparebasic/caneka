@@ -7,7 +7,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(m, ctx->type.of, ctx->type.state),
-            MicroTime_ToStr(m, ctx->modified),
+            Time_ToStr(m, &ctx->modified),
             ctx->dir,
             ctx->src,
             ctx->tools.cc,
@@ -37,7 +37,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
     }else{
         void *args[] = {
             Type_StateVec(m, ctx->type.of, ctx->type.state),
-            MicroTime_ToStr(m, ctx->modified),
+            Time_ToStr(m, &ctx->modified),
             ctx->dir,
             ctx->src,
             ctx->tools.cc,

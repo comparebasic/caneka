@@ -7,7 +7,7 @@ status BuildCtx_Build(BuildCtx *ctx){
     MemCh *m = ctx->m;
     void *args[5];
 
-    ctx->start = MicroTime_Now();
+    Time_Now(&ctx->start);
 
     BuildCtx_GenAllIncSpan(ctx);
 
