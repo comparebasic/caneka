@@ -24,6 +24,14 @@ static char *interTypeStrings[] = {
     "HTTP_METHOD_DELETE",
     "HTTP_METHOD_PUT",
     "HTTP_PATH",
+    "HTTP_QUERY",
+    "HTTP_QUERY_START",
+    "HTTP_QUERY_NEXT",
+    "HTTP_QUERY_NEXT_VALUE",
+    "HTTP_QUERY_SEG_ESCAPED",
+    "HTTP_QUERY_SEG_KEY",
+    "HTTP_QUERY_SEG_VALUE",
+    "HTTP_QUERY_END",
     "HTTP_VERSION",
     "HTTP_PROTO_END",
     "HTTP_HEADER",
@@ -65,6 +73,7 @@ static char *interTypeStrings[] = {
     "FORMAT_TEMPL_IFNOT",
     "_FORMAT_TEMPL_LOGIC_END",
     "_TYPE_INTER_END",
+    "_TYPE_CANEKA_CORE_END",
     NULL
 };
 

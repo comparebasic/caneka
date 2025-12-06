@@ -40,11 +40,14 @@ static PatCharDef queryNextValueDef[] = {
 };
 
 static PatCharDef queryEscapedDef[] = {
-    {PAT_SINGLE, '%', '%'},{PAT_SINGLE, 'A', 'F'},{PAT_SINGLE, 'a', 'f'},{PAT_SINGLE|PAT_TERM, '0', '9'},
+    {PAT_SINGLE|PAT_TERM, '%', '%'},
+    {PAT_SINGLE, 'A', 'F'},{PAT_SINGLE, 'a', 'f'},{PAT_SINGLE|PAT_TERM, '0', '9'},
+    {PAT_SINGLE, 'A', 'F'},{PAT_SINGLE, 'a', 'f'},{PAT_SINGLE|PAT_TERM, '0', '9'},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef queryKeySegDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '},
     {PAT_KO|PAT_INVERT_CAPTURE, '%', '%'},
     {PAT_KO|PAT_INVERT_CAPTURE, '=', '='},
     {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '&', '&'},
@@ -53,6 +56,7 @@ static PatCharDef queryKeySegDef[] = {
 };
 
 static PatCharDef queryValueSegDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '},
     {PAT_KO|PAT_INVERT_CAPTURE, '=', '='},
     {PAT_KO|PAT_INVERT_CAPTURE, '&', '&'},
     {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '%', '%'},
@@ -96,6 +100,14 @@ static PatCharDef headerValueDef[] = {
     {PAT_KO|PAT_KO_TERM, '\n', '\n'},
     {PAT_MANY|PAT_INVERT_CAPTURE, ' ', ' '},
     patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef headerIntValueDef[] = {
+    {PAT_KO|PAT_KO_TERM, '\r', '\r'},
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    {PAT_MANY|PAT_INVERT_CAPTURE, ' ', ' '},
+    {PAT_MANY|PAT_TERM, '0', '9'},
     {PAT_END, 0, 0}
 };
 
@@ -188,6 +200,8 @@ static status headerValue(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
+        headerIntValueDef, HTTP_HEADER_INT_VALUE, HTTP_HEADER_NAME);
+    r |= Roebling_SetPattern(rbl,
         headerValueDef, HTTP_HEADER_VALUE, HTTP_HEADER_NAME);
 
     return r;
@@ -195,7 +209,7 @@ static status headerValue(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
-    void *args[5];
+    void *args[3];
     ProtoCtx *proto = (ProtoCtx *)as(rbl->source, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
     if(rbl->curs->type.state & DEBUG){
@@ -216,6 +230,10 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         i32 selected = ctx->headersIt.metrics.selected;
         Table_SetValue(&ctx->headersIt, v);
         ctx->headersIt.metrics.selected = selected;
+    }else if(captureKey == HTTP_HEADER_INT_VALUE){
+        i32 selected = ctx->headersIt.metrics.selected;
+        Table_SetValue(&ctx->headersIt, I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v))));
+        ctx->headersIt.metrics.selected = selected;
     }else if(captureKey == HTTP_QUERY_START){
         if(rbl->shelf == NULL){
             rbl->shelf = StrVec_Make(m);
@@ -225,10 +243,15 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             Table_SetValue(&ctx->queryIt, rbl->shelf);
             rbl->shelf = StrVec_Make(m);
         }
-    }else if(captureKey == HTTP_QUERY_NEXT_VALUE){
-        if(rbl->shelf != NULL && rbl->shelf->total > 0){
-            Table_SetKey(&ctx->queryIt, rbl->shelf);
-            rbl->shelf = StrVec_Make(m);
+    }else if(captureKey == HTTP_QUERY_NEXT_VALUE || captureKey == HTTP_QUERY_END){
+        if(rbl->shelf != NULL && rbl->shelf->total){
+            if(ctx->queryIt.metrics.selected == -1){
+                Table_SetKey(&ctx->queryIt, rbl->shelf);
+                rbl->shelf = StrVec_Make(m);
+            }else{
+                Table_SetValue(&ctx->queryIt, rbl->shelf);
+                rbl->shelf = StrVec_Make(m);
+            }
         }
     }else if(captureKey == HTTP_QUERY_SEG_ESCAPED){
         Str *s = StrVec_Str(m, v);

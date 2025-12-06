@@ -196,14 +196,14 @@ status Cursor_Print(Buff *bf, void *a, cls type, word flags){
     
     i64 length = (i64)(curs->end - curs->ptr)+1;
     i64 endPos = 0;
-    StrVec *before = NULL;
-    StrVec *focus = curs->v;
-    StrVec *after = NULL;
+    Abstract *focus = (Abstract *)curs->v;
     if((curs->type.state & PROCESSING) && curs->ptr != NULL){
         endPos = pos+length;
-        before = Cursor_Get(bf->m, curs, min(0, -preview), 0);
-        focus = Cursor_Get(bf->m, curs, 1, 0);
-        after = Cursor_Get(bf->m, curs, min(32, endPos - pos), 1);
+        focus = (Abstract *)Str_Ref(bf->m,
+            curs->ptr,
+            curs->end - curs->ptr + 1,
+            curs->end - curs->ptr + 1,
+            STRING_CONST|DEBUG);
     }
 
     if(flags & DEBUG){
@@ -213,12 +213,10 @@ status Cursor_Print(Buff *bf, void *a, cls type, word flags){
             I64_Wrapped(bf->m, endPos),
             I64_Wrapped(bf->m, length),
             I64_Wrapped(bf->m, curs->v->total),
-            before,
             focus,
-            after,
             NULL
         };
-        return  Fmt(bf, "Curs<$ $..$ $of$ ^d.: \"$^D.$^d.$\">", args); 
+        return  Fmt(bf, "Curs<$ $..$ $of$ ^d.: \"^D.$^d.\">", args); 
     }else{
         i64 length = (i64)(curs->end - curs->ptr)+1;
 
@@ -227,15 +225,13 @@ status Cursor_Print(Buff *bf, void *a, cls type, word flags){
             I64_Wrapped(bf->m, pos),
             I64_Wrapped(bf->m, curs->v->total),
             ((pos >= 8) ? Str_CstrRef(bf->m, "...") : Str_CstrRef(bf->m, "")),
-            before,
             focus,
-            after,
             ((endPos < curs->v->total) ? Str_CstrRef(bf->m, "...") 
                 : Str_CstrRef(bf->m, "")),
             NULL
         };
 
-        return  Fmt(bf, "Curs<$ $/$ ^D.\"$$^EI.$^ei.$$\"^id.>", args);
+        return  Fmt(bf, "Curs<$ $/$ ^D.\"$^EI.$^ei.$\"^id.>", args);
     }
 }
 

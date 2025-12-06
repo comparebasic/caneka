@@ -24,10 +24,11 @@ static i64 HttpCtx_Print(Buff *bf, void *a, cls type, word flags){
         Lookup_Get(HttpMethods, ctx->method),
         ctx->path,
         ctx->headersIt.p,
+        ctx->queryIt.p,
         ctx->body,
         NULL,
     };
-    return Fmt(bf, "Http<$ $ $ headers:@ body:@>", args);
+    return Fmt(bf, "Http<$ $ @ headers:@ query:@ body:@>", args);
 }
 
 status Http_ToSInit(MemCh *m, Lookup *lk){

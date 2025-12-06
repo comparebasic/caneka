@@ -95,10 +95,14 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
     }
     while(length > 0){
         i64 taken = min(curs->end - curs->ptr, length);
-        StrVec_AddBytes(m, v, curs->ptr, taken);
-        length -= taken;
-        curs->ptr += (taken-1);
+        if(taken > 0){
+            StrVec_AddBytes(m, v, curs->ptr, taken);
+            length -= taken;
+            curs->ptr += (taken-1);
+        }
         if((Cursor_NextByte(curs) & END) != 0){
+            taken = 1;
+            StrVec_AddBytes(m, v, curs->ptr, taken);
             break;
         }
 
@@ -249,7 +253,7 @@ status Cursor_Incr(Cursor *curs, i32 length){
     curs->type.state &= ~NOOP;
     i32 remaining = (curs->end - curs->ptr);
     while(length > 0){
-        if(length > remaining){
+        if(length >= remaining){
             length -= remaining;
             if(curs->it.idx == curs->it.p->max_idx){
                 curs->type.state |= END;
@@ -281,6 +285,8 @@ status Cursor_NextByte(Cursor *curs){
         if(curs->it.type.state & LAST){
             curs->type.state |= END;
         }else{
+            printf("curs idx %d\n", curs->it.idx);
+            fflush(stdout);
             curs->it.idx++;
             Iter_Query(&curs->it);
             curs->type.state |= CURSOR_STR_BOUNDRY;

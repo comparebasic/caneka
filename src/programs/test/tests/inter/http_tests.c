@@ -51,6 +51,7 @@ status HttpQuery_Tests(MemCh *m){
     status r = READY;
 
     ProtoCtx *proto = HttpProto_Make(m);
+    HttpCtx *ctx = (HttpCtx*)as(proto->ctx, TYPE_HTTP_CTX);
 
     Str *content = S(m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");
@@ -67,15 +68,27 @@ status HttpQuery_Tests(MemCh *m){
         "\r\n"
         "$", args);
 
-    args[0] = v;
-    args[1] = NULL;
-    Out("^p.Parsing @^0\n", args);
 
     Cursor *curs = Cursor_Make(m, v);
+    curs->type.state |= DEBUG;
     Roebling *rbl = HttpRbl_Make(m, curs, proto);
     Roebling_Run(rbl);
 
-    HttpCtx *ctx = (HttpCtx*)as(proto->ctx, TYPE_HTTP_CTX);
+    args[0] = v;
+    args[1] = curs;
+    args[2] = curs->v;
+    args[3] = NULL;
+    Out("^c.Parsing @ curs &\n   &^0\n", args);
+
+    r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
+
+    Single *sg = Table_Get(ctx->headersIt.p, K(m, "Content-Length"));
+    StrVec *body = Cursor_Get(m, curs, sg->val.value, 1);
+
+    args[0] = body;
+    args[1] = NULL;
+    Out("^c.Body &^0\n", args);
+
     args[0] = ctx;
     args[1] = NULL;
     Out("^p.Request Parsed @^0\n", args);

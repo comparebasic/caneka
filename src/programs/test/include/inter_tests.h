@@ -4,10 +4,17 @@ status WwwRouteFmt_Tests(MemCh *m);
 status WwwRouteMime_Tests(MemCh *gm);
 status WwwPath_Tests(MemCh *gm);
 status Http_Tests(MemCh *m);
+status HttpQuery_Tests(MemCh *m);
 status Session_Tests(MemCh *m);
 status Login_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
+    {
+        "Www Tests",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
     {
         "Http Tests",
         Http_Tests,
@@ -15,10 +22,10 @@ static TestSet InterTests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Www Tests",
-        NULL,
-        NULL,
-        SECTION_LABEL,
+        "HttpQuery Tests",
+        HttpQuery_Tests,
+        "Http query string parsing and header parsing tests.",
+        FEATURE_COMPLETE,
     },
     {
         "Www Route Tests",
