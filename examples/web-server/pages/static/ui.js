@@ -1,4 +1,76 @@
 (function(){
+    if(typeof window.ui == 'undefined'){
+        window.ui = {
+            animCssProp: function(elem, propdefs, duration, cb){
+                /* anim here */
+                console.log(propdefs, elem);
+                if(typeof elem._anim === 'undefined'){
+                    elem._anim = {
+                        timer: setInterval(window.ui.animCssProp.bind(window.ui, elem, propdefs, duration, cb), 100),
+                        duration: duration,
+                        start: Date.now()
+                    }
+                }
+                const elapsed = Date.now() - elem._anim.start;
+                console.log('_anim ' + elapsed + ' of ' + duration, elem._anim);
+                for(let i = 0; i < propdefs.length; i++){
+                    const def = propdefs[i];
+                    let value = 0;
+                    if(def[1] > def[2]){
+                        value = def[1] + ((def[2] - def[1]) * (duration/elapsed));
+                    }else{
+                        value = def[2] + ((def[1] - def[2]) * (duration/elapsed));
+                    }
+                    elem.style[def[0]] = value;
+                    console.log(def[0] + " " + value, elem);
+                }
+
+                if(elapsed >= duration){
+                    console.log("DONE");
+                    clearInterval(elem._anim);
+                    delete elem._anim;
+                    if(cb != null){
+                        cb();
+                    }
+                }
+            },
+            resizeReplace: function(old, newElem){
+                const position = window.getComputedStyle(newElem).getPropertyValue('position') || 'static';
+                        console.log(position);
+                newElem.style.opacity = 0.0;
+                old.style.opacity = 1.0;
+                newElem.style.position = 'relative';
+                newElem.left = - 1024;
+                old.after(newElem);
+
+                const box = old.getBoundingClientRect();
+                const newBox = newElem.getBoundingClientRect();
+
+                const parNode = old.parentNode;
+                if(box.height > newBox.height){
+                    console.log("smaller " + box.height + " vs " + newBox.height);
+                    window.ui.animCssProp(old, [["opacity", 1.0, 0.0],["height", box.height, newBox.height]], 1000, function(){
+                        old.remove();
+                        newElem.style.position = position;
+                        newElem.style.left = 0;
+                        window.ui.animCssProp(newElem, [["opacity", 0.1, 1.0]], 500); 
+                    })
+                }else{
+                    console.log("larger " + newBox.height + " vs " + box.height);
+                    window.ui.animCssProp(old, [["opacity", 1.0, 0.0]], 500, function(){
+                        old.remove();
+                        window.ui.animCssProp(old, [["height", old.height, newElem.height]], 1000, function(){
+                            newElem.style.position = position;
+                            newElem.style.left = 0;
+                            window.ui.animCssProp(newElem, [["opacity", 0.0, 1.0]], 500, null); 
+                        });
+                    })
+                }
+            }
+        };
+    }
+})();
+(function(){
     const testsPage = document.getElementById('test-output');
     if(typeof testPage != 'undefined'){
         const h3s = testsPage.getElementsByTagName('H3');
@@ -19,16 +91,14 @@
 (function(){
     const forms = document.getElementsByTagName('FORM');
     function getSetter(elem){
-        const box = elem.getBoundingClientRect();
         return function setContent(resp){
             console.log(resp);
             const newElem = document.createElement("DIV");
             const d = new TextDecoder('utf-8');
             resp.body.getReader().read().then(content => {
                 newElem.innerHTML = d.decode(content.value);
-                newElem.style.height = box.height + 'px';
-                elem.after(newElem);
-                elem.remove();
+                console.log(window.ui);
+                window.ui.resizeReplace(elem, newElem);
             });
         }
     }
