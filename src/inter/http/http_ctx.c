@@ -19,7 +19,7 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     };
 
     r |= Fmt(bf, "HTTP/1.1 $\r\n"
-        "Server: Caneka\r\n"
+        "Server: caneka/0.1\r\n"
         "Content-Type: $\r\n"
         "Content-Length: $\r\n"
         "\r\n" , args);

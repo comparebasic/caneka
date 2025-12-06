@@ -53,6 +53,7 @@
                 if(Object.keys(formData).length > 0){
                     const headers = new Headers();
                     headers.append("Content-Type", "application/json");
+                    headers.append("Accept", "text/html");
                     fetch(form.getAttribute("action"), {
                         method: "POST",
                         headers: headers,

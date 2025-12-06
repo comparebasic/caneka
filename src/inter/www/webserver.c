@@ -210,13 +210,13 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *route = Inst_ByPath(tcp->inc, preContent, NULL, SPAN_OP_GET);
         if(route != NULL){
             Buff *bf = Buff_Make(m, ZERO);
-            r |= Route_Handle(route, bf, ctx->data, NULL);
+            r |= Route_Handle(route, bf, ctx->data, tsk);
             HttpProto_AddBuff(proto, bf);
         }
     }
 
     Buff *bf = Buff_Make(m, ZERO);
-    r |= Route_Handle(ctx->route, bf, ctx->data, NULL);
+    r |= Route_Handle(ctx->route, bf, ctx->data, tsk);
     Buff_Stat(bf);
     HttpProto_AddBuff(proto, bf);
 
@@ -226,7 +226,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *route = Inst_ByPath(tcp->inc, postContent, NULL, SPAN_OP_GET);
         if(route != NULL){
             Buff *bf = Buff_Make(m, ZERO);
-            r |= Route_Handle(route, bf, ctx->data, NULL);
+            r |= Route_Handle(route, bf, ctx->data, tsk);
             HttpProto_AddBuff(proto, bf);
         }
     }
@@ -236,7 +236,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *footer = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
 
         Buff *bf = Buff_Make(m, ZERO);
-        r |= Route_Handle(footer, bf, ctx->data, NULL);
+        r |= Route_Handle(footer, bf, ctx->data, tsk);
         HttpProto_AddBuff(proto, bf);
     }
 

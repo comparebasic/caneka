@@ -96,14 +96,13 @@ static status routeFuncFmt(Buff *bf, void *action, Table *_data, void *source){
 }
 
 static status routeFuncFileDb(Buff *bf, void *action, Table *data, void *source){
-    StrVec *path = StrVec_From(bf->m, Str_FromCstr(bf->m, "filedb.keys", ZERO));
-    Path_DotAnnotate(bf->m, path);
-    Table *keys = (Table *)Table_ByPath(data, path, NULL, SPAN_OP_GET);
-
+    Task *tsk = (Task *)as(source, TYPE_TASK);
     Buff *fdb = (Buff *)as(action, TYPE_FILEDB);
-    /*
-    Table *tbl = FileDB_ToTbl(fdb, keys);
-    */
+    /* make sure the fdb file descriptor is open */
+    /* process json form data */
+    /* save to filedb */
+    /* set mime type / detect Accept type */
+    /* add response handler from inc */
 
     /* tbl to json */
     return NOOP;
@@ -217,7 +216,11 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_FILEDB){
         Buff *bf = Buff_Make(m, ZERO); 
-        File_Open(bf, pathS, O_RDONLY);
+        if(rt->type.state & ROUTE_MUTABLE){
+            File_Open(bf, pathS, O_RDWR);
+        }else{
+            File_Open(bf, pathS, O_RDONLY);
+        }
         Span_Set(rt, ROUTE_PROPIDX_ACTION, bf);
         DebugStack_Pop();
         return SUCCESS;
@@ -337,7 +340,7 @@ status Route_ClsInit(MemCh *m){
 
         key = Str_CstrRef(m, "js");
         funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_SCRIPT|ROUTE_STATIC|ROUTE_ASSET);
+        funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
             key, Str_CstrRef(m, "text/javascript"));
@@ -375,7 +378,7 @@ status Route_ClsInit(MemCh *m){
         funcW->type.state |= ROUTE_FILEDB;
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "application/json"));
+            key, Str_CstrRef(m, "*/*"));
 
         key = Str_CstrRef(m, "templ");
         funcW = Func_Wrapped(m, routeFuncTempl);
@@ -383,13 +386,6 @@ status Route_ClsInit(MemCh *m){
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
             key, Str_CstrRef(m, "text/html"));
-
-        key = Str_CstrRef(m, "config");
-        funcW = Func_Wrapped(m, NULL);
-        funcW->type.state |= ROUTE_FORBIDDEN;
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/plain"));
     }
 
     return r;

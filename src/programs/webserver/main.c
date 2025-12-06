@@ -12,6 +12,31 @@ static status getDefaultData(MemCh *m, void *a, void *source){
     return SUCCESS;
 }
 
+static status Example_signup(Step *st, Task *tsk){
+    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+
+    MemCh *m = tsk->m;
+
+    MemBookStats mst;
+    MemBook_GetStats(m, &mst);
+
+    Table *stats = Table_Make(m);
+    Table_SetByCstr(stats, "uptime", Time_ToStr(m, &tcp->metrics.start));
+
+    Table *mem = Table_Make(m);
+    Table_SetByCstr(mem, "mem-used", Str_MemCount(m, mst.pageIdx * PAGE_SIZE));
+    Table_SetByCstr(mem, "mem-total", Str_MemCount(m, PAGE_COUNT * PAGE_SIZE));
+    Table_SetByCstr(mem, "mem-details", Map_ToTable(m, &mst));
+    
+    Table_SetByCstr(stats, "mem", mem);
+    Table_SetByCstr(ctx->data, "stats", stats);
+
+    st->type.state |= SUCCESS;
+    return st->type.state;
+}
+
 static status Load_stats(Step *st, Task *tsk){
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
