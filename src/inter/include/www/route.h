@@ -27,7 +27,8 @@ enum route_prop_idx {
     ROUTE_PROPIDX_MIME = 5,
     ROUTE_PROPIDX_TYPE = 6,
     ROUTE_PROPIDX_ACTION = 7,
-    ROUTE_PROPIDX_ADD_STEP = 8,
+    ROUTE_PROPIDX_HEADERS = 8,
+    ROUTE_PROPIDX_ADD_STEP = 9,
 };
 
 extern struct span *RouteFuncTable;
@@ -43,5 +44,8 @@ status Route_Handle(Route *rt, Buff *bf, Inst *data, void *source);
 status Route_Prepare(Route *rt, RouteCtx *ctx);
 Route *Route_GetHandler(Route *rt, StrVec *path);
 Single *Route_MimeFunc(StrVec *path);
+
+status Route_CheckEtag(Route *rt, StrVec *etag);
+status Route_SetEtag(Route *rt, Str *path, StrVec *token, struct timespec *mod);
 
 status Route_ClsInit(MemCh *m);

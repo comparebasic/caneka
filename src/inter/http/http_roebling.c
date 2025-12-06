@@ -19,8 +19,49 @@ static PatCharDef postDef[] = {
 };
 
 static PatCharDef uriDef[] = {
-    {PAT_KO|PAT_KO_TERM, ' ', ' '},
+    {PAT_KO|PAT_INVERT_CAPTURE, '?', '?'},{PAT_KO|PAT_KO_TERM, ' ', ' '},
     patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef queryStartDef[] = {
+    {PAT_TERM, '?', '?'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef queryNextDef[] = {
+    {PAT_TERM, '&', '&'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef queryNextValueDef[] = {
+    {PAT_TERM, '=', '='},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef queryEscapedDef[] = {
+    {PAT_SINGLE, '%', '%'},{PAT_SINGLE, 'A', 'F'},{PAT_SINGLE, 'a', 'f'},{PAT_SINGLE|PAT_TERM, '0', '9'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef queryKeySegDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE, '%', '%'},
+    {PAT_KO|PAT_INVERT_CAPTURE, '=', '='},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '&', '&'},
+    patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef queryValueSegDef[] = {
+    {PAT_KO|PAT_INVERT_CAPTURE, '=', '='},
+    {PAT_KO|PAT_INVERT_CAPTURE, '&', '&'},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '%', '%'},
+    patText,
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef queryEndDef[] = {
+    {PAT_MANY|PAT_TERM, ' ', ' '},
     {PAT_END, 0, 0}
 };
 
@@ -93,7 +134,29 @@ static status version(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
+       queryStartDef, HTTP_QUERY_START, HTTP_QUERY);
+    r |= Roebling_SetPattern(rbl,
         versionDef, HTTP_VERSION, HTTP_PROTO_END);
+    return r;
+}
+
+static status query(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        queryEndDef, HTTP_QUERY_END, HTTP_VERSION);
+    r |= Roebling_SetPattern(rbl,
+        queryNextDef, HTTP_QUERY_NEXT, HTTP_QUERY);
+    r |= Roebling_SetPattern(rbl,
+        queryNextValueDef, HTTP_QUERY_NEXT_VALUE, HTTP_QUERY);
+    r |= Roebling_SetPattern(rbl,
+        queryEscapedDef, HTTP_QUERY_SEG_ESCAPED, HTTP_QUERY);
+    r |= Roebling_SetPattern(rbl,
+        queryKeySegDef, HTTP_QUERY_SEG_KEY, HTTP_QUERY);
+    r |= Roebling_SetPattern(rbl,
+        queryValueSegDef, HTTP_QUERY_SEG_VALUE, HTTP_QUERY);
+
     return r;
 }
 
@@ -131,6 +194,7 @@ static status headerValue(MemCh *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
+    MemCh *m = rbl->m;
     void *args[5];
     ProtoCtx *proto = (ProtoCtx *)as(rbl->source, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
@@ -152,6 +216,26 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         i32 selected = ctx->headersIt.metrics.selected;
         Table_SetValue(&ctx->headersIt, v);
         ctx->headersIt.metrics.selected = selected;
+    }else if(captureKey == HTTP_QUERY_START){
+        if(rbl->shelf == NULL){
+            rbl->shelf = StrVec_Make(m);
+        }
+    }else if(captureKey == HTTP_QUERY_NEXT){
+        if(rbl->shelf != NULL && rbl->shelf->total > 0){
+            Table_SetValue(&ctx->queryIt, rbl->shelf);
+            rbl->shelf = StrVec_Make(m);
+        }
+    }else if(captureKey == HTTP_QUERY_NEXT_VALUE){
+        if(rbl->shelf != NULL && rbl->shelf->total > 0){
+            Table_SetKey(&ctx->queryIt, rbl->shelf);
+            rbl->shelf = StrVec_Make(m);
+        }
+    }else if(captureKey == HTTP_QUERY_SEG_ESCAPED){
+        Str *s = StrVec_Str(m, v);
+        Str_Incr(s, 1);
+        StrVec_Add(rbl->shelf, Str_FromHexFiltered(m, s))
+    }else if(captureKey == HTTP_QUERY_SEG_KEY || captureKey == HTTP_QUERY_SEG_VALUE){
+        StrVec_AddVec(rbl->shelf, v)
     }else if(captureKey == HTTP_HEADER_CONTINUED){
         if(ctx->headersIt.metrics.selected >= 0){
             Hashed *h = Span_Get(ctx->headersIt.p, ctx->headersIt.metrics.selected);
@@ -169,6 +253,8 @@ Roebling *HttpRbl_Make(MemCh *m, Cursor *curs, void *source){
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)method));
     Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_PATH));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)uri));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_QUERY));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)query));
     Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_VERSION));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)version));
     Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_PROTO_END));

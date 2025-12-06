@@ -15,13 +15,16 @@ typedef struct {
     Str *mime;
     StrVec *httpVersion;
     StrVec *path;
-    StrVec *body;
+    Buff *body;
     Route *route;
     Table *data;
     Span *errors;
+    Table *headersOut;
+    Iter *queryIt;
     Iter headersIt;
 } HttpCtx;
 
 HttpCtx *HttpCtx_Make(MemCh *m);
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx);
 status HttpCtx_Init(MemCh *m);
+StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec mod);

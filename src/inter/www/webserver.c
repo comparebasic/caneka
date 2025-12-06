@@ -156,6 +156,17 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         return st->type.state;
     }
 
+    StrVec *etag = Table_Get(ctx->headersIt.p, K(m, "Etag"));
+    if((etag != NULL) && Route_CheckEtag(ctx->route, etag) & SUCCESS){
+        ctx->code = 304;
+        HttpProto_PrepareResponse(proto, tsk);
+        Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, NULL, NULL, ZERO);
+
+        st->type.state |= (MORE|SUCCESS);
+        DebugStack_Pop();
+        return st->type.state;
+    }
+
     Table *routeData = Seel_Get(ctx->route, K(m, "data"));
     if(routeData != NULL && routeData->nvalues > 0){
         Table *config = Table_Get(routeData, K(m, "config"));

@@ -3,26 +3,66 @@
 
 static Lookup *statusCodeStrings = NULL;
 
+StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec mod){
+    StrVec *v = StrVec_Make(m);
+    quad hpar = HalfParity_From(path);
+    Str s = {.type = {TYPE_STR, STRING_BINARY|STRING_CONST}, 
+        .length = sizeof(quad),
+        .alloc = sizeof(quad),
+        .bytes = &hpar
+    }
+
+    StrVec_Add(v, Str_ToHex(m, &s));
+    StrVec_Add(v, Str_Ref(m, (bytes *)"-", 1, 1, STRING_COPY|MORE));
+    StrVec_Add(v, Str_FromI64(m,ts->tv_sec));
+    StrVec_Add(v, Str_FromCstr(m, ".", STRING_COPY|LAST));
+    StrVec_Add(v, Str_FromI64(m,ts->tv_nsec));
+    return v;
+}
+
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     status r = READY;
+    void *args[6];
     Str *status = Lookup_Get(statusCodeStrings, ctx->code);
     if(status == NULL){
         status = Lookup_Get(statusCodeStrings, 500);
         r |= ERROR;
     }
 
-    void *args[] = {
-        status,
-        ctx->mime,
-        I64_Wrapped(bf->m, ctx->contentLength),
-        NULL
-    };
+    struct timespec now;
+    Time_Now(bf->m, &now);
 
+    args[0] = status;
+    args[1] = Time_ToRStr(bf->m, &now);
+    args[2] = ctx->mime;
+    args[3] = NULL;
     r |= Fmt(bf, "HTTP/1.1 $\r\n"
+        "Date: $\r\n",
         "Server: caneka/0.1\r\n"
         "Content-Type: $\r\n"
-        "Content-Length: $\r\n"
         "\r\n" , args);
+
+
+    Iter it;
+    Iter_Init(&it, ctx->headersOut);
+    while((Iter_Init(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);  
+        if(h == NULL){
+            ToS(bf, h->key, 0, ZERO);
+            Buff_AddBytes(bf, (byte *)": ", 2);
+            ToS(bf, h->value, 0, ZERO);
+            Buff_AddBytes(bf, (byte *)"\r\n", 2);
+        }
+    }
+
+    if(ctx->code == 304){
+        return r;
+    }
+
+    args[0] = I64_Wrapped(bf->m, ctx->contentLength),
+    args[1] = NULL;
+    r |= Fmt(bf, "Content-Length: $\r\n", args);
+
     return r;
 }
 
@@ -32,7 +72,10 @@ HttpCtx *HttpCtx_Make(MemCh *m){
     ctx->path = StrVec_Make(m);
     ctx->mime = S(m, "text/plain");
     ctx->data = Table_Make(m);
+    ctx->query = Table_Make(m);
+    ctx->headersOut = Table_Make(m);
     Iter_Init(&ctx->headersIt, Table_Make(m));
+    Iter_Init(&ctx->queryIt, Table_Make(m));
     return ctx;
 }
 
@@ -46,6 +89,8 @@ status HttpCtx_Init(MemCh *m){
             statusCodeStrings, 301, Str_FromCstr(m, "301 Redirect", STRING_COPY));
         r |= Lookup_Add(m,
             statusCodeStrings, 302, Str_FromCstr(m, "301 Temporary Redirect", STRING_COPY));
+        r |= Lookup_Add(m,
+            statusCodeStrings, 304, Str_FromCstr(m, "304 Not Modified", STRING_COPY));
         r |= Lookup_Add(m,
             statusCodeStrings, 404, Str_FromCstr(m, "404 Not Found", STRING_COPY));
         r |= Lookup_Add(m,

@@ -19,6 +19,7 @@ typedef struct roebling {
     i16 _;
     i16 guard;
     MemCh *m;
+    StrVec *shelf;
     Cursor *curs;
     Abstract *source; 
     Abstract *dest;

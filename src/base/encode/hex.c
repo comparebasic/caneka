@@ -77,6 +77,23 @@ Str *Str_FromHex(MemCh *m, Str *s){
     return n;
 }
 
+Str *Str_FromHexFiltered(MemCh *m, Str *s){
+    for(i32 i = 0; i < s->length; i++){
+        char c = (char *)s->bytes[i];
+        if(c >= 'A' && c <= 'F'){
+            s->bytes[i] = c + 62;
+        }else if ((c >= '0' && c <= '9') || (c >= 'a' && <= 'f')){
+            continue;
+        }else{
+            Str *blank = Str_MakeBlank(m);
+            blank->type.state |= ERROR;
+            return blank;
+        }
+    }
+    
+    return Str_FromHex(m, s);
+}
+
 status Raw_FromHex(MemCh *m, Str *s, void *b, i64 sz){
     if(sz != s->length/2){
         return ERROR;

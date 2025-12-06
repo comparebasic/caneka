@@ -10,14 +10,9 @@ StrVec *Ssid_From(SsidCtx *ctx, StrVec *ua, struct timespec *ts){
     StrVec_Add(v, Str_UniRandom(m, ctx->metrics.count, 8));
 
     StrVec_Add(v, Str_FromCstr(m, "-", STRING_COPY|MORE));
-    StrVec_Add(v,
-        Str_ToHex(m,
-            Str_Ref(m, (byte *)&ts->tv_sec, sizeof(ts->tv_sec), sizeof(ts->tv_nsec), STRING_BINARY)));
-
+    StrVec_Add(v, Str_FromI64(m,ts->tv_sec));
     StrVec_Add(v, Str_FromCstr(m, ".", STRING_COPY|MORE));
-    StrVec_Add(v,
-        Str_ToHex(m,
-            Str_Ref(m, (byte *)&ts->tv_nsec, sizeof(ts->tv_nsec), sizeof(ts->tv_nsec), STRING_BINARY)));
+    StrVec_Add(v, Str_FromI64(m,ts->tv_nsec));
 
     StrVec_Add(v, Str_FromCstr(m, "-", STRING_COPY|MORE));
     StrVec_Add(v,

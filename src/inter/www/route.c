@@ -138,6 +138,50 @@ Route *Route_GetNav(Route *rt){
     return nav;
 }
 
+status Route_CheckEtag(Route *rt, StrVec *etag){
+    Single *funcW = Seel_Get(ctx->route, K(m, "func"));
+    if((funcW->type.state & ROUTE_STATIC) == 0){
+        return NOOP;
+    }
+    Table *headers = Seel_Get(ctx->route, K(m, "headers"));
+    StrVec *etagRegistered = Table_Get(headers, K(m, "Etag"));
+    return (etagRegistered != NULL && Equals(eta, etagRegistered)) ? SUCCESS : MORE;
+}
+
+status Route_SetEtag(Route *rt, Str *path, StrVec *token, struct timespec *mod){
+    StrVec *etag = HttpCtx_MakeEtag(rt->m, path, mod);
+
+    StrVec *path = StrVec_Make(m);
+    StrVec_AddVec(path, ctx->path);
+    StrVec_AddVec(path, (StrVec *)token);
+
+    Str *pathS = StrVec_StrCombo(m,
+        path, Str_FromCstr(m, ".etag", ZERO));
+
+    Buff *bf = Buff_Make(m, NOOP);
+    File_Open(bf, pathS, O_RDONLY);
+    if(bf->type.state & ERROR){
+        File_Close(bf);
+        bf->type.state = BUFF_UNBUFFERED;
+        File_Open(bf, pathS, O_CREAT|O_WRONLY);
+        Buff_AddVec(bf, etag);
+        File_Close(bf);
+    }else{
+       Buff_Read(bf); 
+       File_Close(bf);
+       if(!Equals(bf->v, etag)){
+            bf->type.state = BUFF_UNBUFFERED|BUFF_CLOBBER;
+            File_Open(bf, pathS, O_WRONLY|O_TRUNC);
+            Buff_AddVec(bf, etag);
+            File_Close(bf);
+       }
+    }
+    Table *headers = Seel_Get(rt, K(m, "headers"));
+    Table_Set(headers, "Etag", etag);
+
+    return ZERO;
+}
+
 status Route_Prepare(Route *rt, RouteCtx *ctx){
     DebugStack_Push(rt, rt->type.of);
     MemCh *m = rt->m;
@@ -155,13 +199,19 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         TYPE_WRAPPED_FUNC
     );
 
+    Str *pathS = StrVec_Str(m, path);
+    Table *headers = Seel_Get(rt, K(m, "headers"));
+    struct timespec mod;
+    File_ModTime(m, pathS, &mod);
+    Table_Set(headers, K(m, "Last-Modified"), Time_ToRStr(m, &mod));
+
     if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
+        Route_SetEtag(rt, pathS, token, &mod);
         Span_Set(rt, ROUTE_PROPIDX_ACTION, path);
     }
 
     Route_addConfigData(ctx, rt, token);
 
-    Str *pathS = StrVec_Str(m, path);
     if(funcW->type.state & ROUTE_FMT){
         StrVec *content = File_ToVec(m, pathS);
         Cursor *curs = Cursor_Make(m, content); 
@@ -312,6 +362,7 @@ status Route_ClsInit(MemCh *m){
     Table_Set(seel, S(m, "mime"), I16_Wrapped(m, TYPE_STR));
     Table_Set(seel, S(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, S(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
+    Table_Set(seel, S(m, "headers"), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(seel, S(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));
     r |= Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE, h->orderIdx);
 

@@ -16,6 +16,7 @@ void Time_Add(struct timespec *ts, struct timespec *add);
 void Time_Now(struct timespec *ts);
 void Time_Delay(struct timespec *ts, struct timespec *remaining);
 Str *Time_ToStr(MemCh *m, struct timespec *ts);
+Str *Time_ToRStr(MemCh *m, struct timespec *ts);
 
 boolean Time_Greater(struct timespec *ts, struct timespec *add);
 boolean Time_Beyond(struct timespec *ts, struct timespec *add, struct timespec *amount);

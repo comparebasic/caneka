@@ -181,6 +181,13 @@ status Str_Init(Str *s, byte *bytes, word length, word alloc){
     return SUCCESS;
 }
 
+Str *Str_MakeBlank(MemCh *m){
+    Str *s = MemCh_Alloc(m, sizeof(Str));
+    byte *bytes = Bytes_Alloc(m, 1, TYPE_BYTES_POINTER);
+    Str_Init(s, bytes, 0, 1);
+    return s;
+}
+
 Str *Str_Make(MemCh *m, word alloc){
     Str *s = MemCh_Alloc(m, sizeof(Str));
     byte *bytes = Bytes_Alloc(m, alloc, TYPE_BYTES_POINTER);

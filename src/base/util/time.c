@@ -40,6 +40,15 @@ Str *Time_ToStr(MemCh *m, struct timespec *ts){
     return s;
 }
 
+Str *Time_ToRStr(MemCh *m, struct timespec *ts){
+    Str *s = Str_Make(m, TIME_BUFF_LEN);
+    struct tm value;
+    gmtime_r(&ts->tv_sec, &value);
+    strftime((char *)s->bytes, TIME_BUFF_LEN, "%a, %d %b %Y %H:%M:%S %z", &value);
+    s->length = strlen((char *)s->bytes);
+    return s;
+}
+
 boolean Time_Greater(struct timespec *ts, struct timespec *add){
     if(ts->tv_sec > add->tv_sec || ts->tv_sec == add->tv_sec && 
             ts->tv_nsec > add->tv_nsec){
