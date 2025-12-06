@@ -373,7 +373,7 @@ status Route_ClsInit(MemCh *m){
         Table_Set(RouteMimeTable,
             key, Str_CstrRef(m, "text/html"));
 
-        key = Str_CstrRef(m, "d");
+        key = Str_CstrRef(m, "bsg");
         funcW = Func_Wrapped(m, routeFuncFileDb);
         funcW->type.state |= ROUTE_FILEDB;
         Table_Set(RouteFuncTable, key, funcW);
