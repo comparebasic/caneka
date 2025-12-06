@@ -7,8 +7,8 @@ typedef struct tcp_ctx {
     StepFunc finalize; 
     SourceFunc defaultData;
     StrVec *path;
-    Route *pages;
-    Route *inc;
+    Inst *pages;
+    Inst *inc;
     NodeObj *nav;
     struct {
         struct timespec start;

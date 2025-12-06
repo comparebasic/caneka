@@ -16,29 +16,60 @@ boolean IoUtil_IsAbs(StrVec *v){
     return IoUtil_IsStrAbs(s);
 }
 
-StrVec *IoUtil_SwapExt(MemCh *m, StrVec *v, Str *old, Str *new){
-    if(v->total >= old->length || old->length != new->length){
-        StrVec *copy = StrVec_Copy(m, v);
-        i32 max_idx = copy->p->max_idx;
-        word remaining = old->length;
-        while(remaining > 0 && max_idx >= 0){
-            Str *s = Span_Get(copy->p, max_idx);
-            if(s->length >= remaining){
-                Str_Decr(s, old->length);
-                Str_Add(s, new->bytes, new->length);
-                copy->total -= old->length;
-                remaining = 0;
-            }else{
-                word offset = old->length - s->length;
-                memcpy(s->bytes, new->bytes+offset, s->length);
-                remaining -= s->length;
-            }
-            max_idx--;
+status IoUtil_AddExt(MemCh *m, StrVec *path, Str *ext){
+    Iter it;
+    Iter_Init(&it, path->p);
+    word flags = ZERO;
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        flags = s->type.state;
+        if(flags & MORE){
+            break;
+        }else if (s->type.state & LAST){
+            s->type.state = ZERO;
+            s->bytes[0] = '_';
         }
-        return copy;
-    }else{
-        return NULL;
     }
+
+    StrVec_Add(path, Str_Ref(m, (byte *)".", 1, 1, STRING_COPY|LAST));
+    StrVec_Add(path, ext);
+    return SUCCESS;
+}
+
+status IoUtil_SwapExt(MemCh *m, StrVec *path, Str *ext){
+    void *args[3];
+    args[0] = path;
+    args[1] = NULL;
+    args[2] = NULL;
+    Iter it;
+    Iter_Init(&it, path->p);
+    word flags = ZERO;
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        args[1] = s;
+        flags = s->type.state;
+        if(flags & MORE){
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Expected path sep of flag type LAST before path sep of MORE"
+                " in & at @", args);
+            return ERROR;
+        }else if (s->type.state & LAST){
+            break;
+        }else{
+            Iter_Remove(&it);
+            path->total -= s->length;
+        }
+    }
+
+    if((flags & LAST) == 0){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Extension seperator not found in @ at @", args);
+        return ERROR;
+    }
+
+    Iter_Add(&it, ext);
+    path->total += ext->length;
+    return SUCCESS;
 }
 
 Span *IoUtil_AbsCmdArr(MemCh *m, StrVec *v){

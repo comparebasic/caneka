@@ -233,9 +233,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }else if(captureKey == HTTP_QUERY_SEG_ESCAPED){
         Str *s = StrVec_Str(m, v);
         Str_Incr(s, 1);
-        StrVec_Add(rbl->shelf, Str_FromHexFiltered(m, s))
+        StrVec_Add(rbl->shelf, Str_FromHexFiltered(m, s));
     }else if(captureKey == HTTP_QUERY_SEG_KEY || captureKey == HTTP_QUERY_SEG_VALUE){
-        StrVec_AddVec(rbl->shelf, v)
+        StrVec_AddVec(rbl->shelf, v);
     }else if(captureKey == HTTP_HEADER_CONTINUED){
         if(ctx->headersIt.metrics.selected >= 0){
             Hashed *h = Span_Get(ctx->headersIt.p, ctx->headersIt.metrics.selected);

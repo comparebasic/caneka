@@ -407,11 +407,7 @@ StrVec *StrVec_Copy(MemCh *m, StrVec *_v){
 }
 
 void *StrVec_Clone(MemCh *m, void *a){
-    StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
-    StrVec *new = StrVec_Make(m);
-    new->total = v->total;
-    new->p = Span_Clone(m, v->p);
-    return new;
+    return StrVec_Copy(m, a);
 }
 
 i32 StrVec_Add(StrVec *v, Str *s){

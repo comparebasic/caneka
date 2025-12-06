@@ -12,7 +12,7 @@ enum route_flags {
     ROUTE_DYNAMIC = 1 << 9,
     ROUTE_FMT = 1 << 10,
     ROUTE_INDEX = 1 << 13,
-    ROUTE_MUTABLE = 1 << 11,
+    ROUTE_BINSEG = 1 << 11,
     ROUTE_ASSET = 1 << 12,
     ROUTE_ACTION = 1 << 14,
     ROUTE_FORBIDDEN = 1 << 15,
@@ -46,6 +46,6 @@ Route *Route_GetHandler(Route *rt, StrVec *path);
 Single *Route_MimeFunc(StrVec *path);
 
 status Route_CheckEtag(Route *rt, StrVec *etag);
-status Route_SetEtag(Route *rt, Str *path, StrVec *token, struct timespec *mod);
+status Route_SetEtag(Route *rt, Str *path, struct timespec *mod);
 
 status Route_ClsInit(MemCh *m);

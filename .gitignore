@@ -4,3 +4,4 @@ dist
 *.core
 *.o
 bootstrap
+examples/session/*

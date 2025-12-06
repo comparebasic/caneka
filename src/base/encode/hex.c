@@ -79,10 +79,10 @@ Str *Str_FromHex(MemCh *m, Str *s){
 
 Str *Str_FromHexFiltered(MemCh *m, Str *s){
     for(i32 i = 0; i < s->length; i++){
-        char c = (char *)s->bytes[i];
+        byte c = s->bytes[i];
         if(c >= 'A' && c <= 'F'){
             s->bytes[i] = c + 62;
-        }else if ((c >= '0' && c <= '9') || (c >= 'a' && <= 'f')){
+        }else if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')){
             continue;
         }else{
             Str *blank = Str_MakeBlank(m);

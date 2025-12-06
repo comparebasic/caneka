@@ -226,7 +226,8 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         StrVec_AddVecAfter(source, v, ctx->input.srcPrefix->p->nvalues+1);
         StrVec_AddVec(ctx->current.source, source);
 
-        StrVec *object = IoUtil_SwapExt(m, source, K(m, ".c"), K(m, ".o")); 
+        StrVec *object = StrVec_Copy(m, source);
+        IoUtil_SwapExt(m, object, S(m, "o")); 
         StrVec_AddVec(ctx->current.dest, object);
         ctx->current.binDest = NULL;
 

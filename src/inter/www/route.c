@@ -27,9 +27,7 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
             RouteMimeTable,
             NULL
         };
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Mime & not found for this file with ext:@ path:@ file:@ mimeTable:@", args);
-        return ERROR;
+        return NOOP;
     }
 
     if(funcW->type.state & ROUTE_FORBIDDEN){
@@ -97,7 +95,7 @@ static status routeFuncFmt(Buff *bf, void *action, Table *_data, void *source){
 
 static status routeFuncFileDb(Buff *bf, void *action, Table *data, void *source){
     Task *tsk = (Task *)as(source, TYPE_TASK);
-    Buff *fdb = (Buff *)as(action, TYPE_FILEDB);
+    Buff *fdb = (Buff *)as(action, TYPE_BUFF);
     /* make sure the fdb file descriptor is open */
     /* process json form data */
     /* save to filedb */
@@ -139,31 +137,30 @@ Route *Route_GetNav(Route *rt){
 }
 
 status Route_CheckEtag(Route *rt, StrVec *etag){
-    Single *funcW = Seel_Get(ctx->route, K(m, "func"));
+    MemCh *m = rt->m;
+    Single *funcW = Seel_Get(rt, K(m, "func"));
     if((funcW->type.state & ROUTE_STATIC) == 0){
         return NOOP;
     }
-    Table *headers = Seel_Get(ctx->route, K(m, "headers"));
+    Table *headers = Seel_Get(rt, K(m, "headers"));
     StrVec *etagRegistered = Table_Get(headers, K(m, "Etag"));
-    return (etagRegistered != NULL && Equals(eta, etagRegistered)) ? SUCCESS : MORE;
+    return (etagRegistered != NULL && Equals(etag, etagRegistered)) ? SUCCESS : MORE;
 }
 
-status Route_SetEtag(Route *rt, Str *path, StrVec *token, struct timespec *mod){
+status Route_SetEtag(Route *rt, Str *path, struct timespec *mod){
+    MemCh *m = rt->m;
+
     StrVec *etag = HttpCtx_MakeEtag(rt->m, path, mod);
 
-    StrVec *path = StrVec_Make(m);
-    StrVec_AddVec(path, ctx->path);
-    StrVec_AddVec(path, (StrVec *)token);
+    StrVec *etagPath = StrVec_From(m, Str_Clone(m, path));
+    IoUtil_Annotate(m, etagPath);
+    IoUtil_AddExt(m, etagPath, S(m, "etag"));
 
-    Str *pathS = StrVec_StrCombo(m,
-        path, Str_FromCstr(m, ".etag", ZERO));
-
+    Str *etagPathS = StrVec_Str(m, etagPath);
     Buff *bf = Buff_Make(m, NOOP);
-    File_Open(bf, pathS, O_RDONLY);
-    if(bf->type.state & ERROR){
-        File_Close(bf);
+    if(File_Open(bf, etagPathS, O_RDONLY) & ERROR){
         bf->type.state = BUFF_UNBUFFERED;
-        File_Open(bf, pathS, O_CREAT|O_WRONLY);
+        File_Open(bf, etagPathS, O_CREAT|O_WRONLY);
         Buff_AddVec(bf, etag);
         File_Close(bf);
     }else{
@@ -171,7 +168,7 @@ status Route_SetEtag(Route *rt, Str *path, StrVec *token, struct timespec *mod){
        File_Close(bf);
        if(!Equals(bf->v, etag)){
             bf->type.state = BUFF_UNBUFFERED|BUFF_CLOBBER;
-            File_Open(bf, pathS, O_WRONLY|O_TRUNC);
+            File_Open(bf, etagPathS, O_WRONLY|O_TRUNC);
             Buff_AddVec(bf, etag);
             File_Close(bf);
        }
@@ -206,7 +203,7 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
     Table_Set(headers, K(m, "Last-Modified"), Time_ToRStr(m, &mod));
 
     if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
-        Route_SetEtag(rt, pathS, token, &mod);
+        Route_SetEtag(rt, pathS, &mod);
         Span_Set(rt, ROUTE_PROPIDX_ACTION, path);
     }
 
@@ -264,13 +261,13 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         Span_Set(rt, ROUTE_PROPIDX_ACTION, templ);
         DebugStack_Pop();
         return SUCCESS;
-    }else if(funcW->type.state & ROUTE_FILEDB){
+    }else if(funcW->type.state & ROUTE_BINSEG){
         Buff *bf = Buff_Make(m, ZERO); 
-        if(rt->type.state & ROUTE_MUTABLE){
-            File_Open(bf, pathS, O_RDWR);
-        }else{
-            File_Open(bf, pathS, O_RDONLY);
-        }
+
+        /* TODO: make this a binseg reader object with seperate 
+         * descriptors for append/read/modify */
+        File_Open(bf, pathS, O_WRONLY|O_APPEND);
+
         Span_Set(rt, ROUTE_PROPIDX_ACTION, bf);
         DebugStack_Pop();
         return SUCCESS;
@@ -426,7 +423,7 @@ status Route_ClsInit(MemCh *m){
 
         key = Str_CstrRef(m, "rbs");
         funcW = Func_Wrapped(m, routeFuncFileDb);
-        funcW->type.state |= ROUTE_FILEDB;
+        funcW->type.state |= ROUTE_BINSEG;
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
             key, Str_CstrRef(m, "*/*"));

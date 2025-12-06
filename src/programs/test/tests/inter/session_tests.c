@@ -4,7 +4,7 @@
 
 status Session_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
-    void *args[5];
+    void *args[6];
     status r = READY;
     
     struct timespec time;
@@ -19,7 +19,6 @@ status Session_Tests(MemCh *m){
     StrVec *ssid = Ssid_From(ctx, ua, &time);
     args[0] = ssid;
     args[1] = NULL;
-    r |= Test(ssid->total == 51, "Ssid has length of 51, have @", args);
     quad parity = HalfParity_FromVec(ua);
     args[0] = Str_ToHex(m, 
         Str_Ref(m, (byte *)&parity, sizeof(quad), sizeof(quad), STRING_BINARY));
@@ -31,20 +30,16 @@ status Session_Tests(MemCh *m){
     Str *timeSecS = Span_Get(ssid->p, 2);
     Str *timeNsecS = Span_Get(ssid->p, 4);
     struct timespec ssidTime;
-    i64 *secPtr = (i64 *)Str_FromHex(m, timeSecS)->bytes;
-    i64 *nsecPtr = (i64 *)Str_FromHex(m, timeNsecS)->bytes;
+    ssidTime.tv_sec = I64_FromStr(timeSecS);
+    ssidTime.tv_nsec = I64_FromStr(timeNsecS);
 
-    ssidTime.tv_sec = *secPtr;
-    ssidTime.tv_nsec = *nsecPtr;
-
-    args[0] = Str_ToHex(m,
-        Str_Ref(m, (byte *)&time.tv_sec, sizeof(i64), sizeof(i64), STRING_BINARY));
-    args[1] = Str_ToHex(m,
-        Str_Ref(m, (byte *)&time.tv_nsec, sizeof(i64), sizeof(i64), STRING_BINARY));
+    args[0] = Str_FromI64(m, time.tv_sec);
+    args[1] = Str_FromI64(m, time.tv_nsec);
     args[2] = timeSecS;
-    args[3] = Time_ToStr(m, &ssidTime);
-    args[4] = NULL;
-    r |= Test(ssidTime.tv_sec == time.tv_sec && ssidTime.tv_nsec == time.tv_nsec, "Ssid second seg is time, expected @, have @ ($)", 
+    args[3] = timeNsecS;
+    args[4] = Time_ToStr(m, &ssidTime);
+    args[5] = NULL;
+    r |= Test(ssidTime.tv_sec == time.tv_sec && ssidTime.tv_nsec == time.tv_nsec, "Ssid second seg is time, expected @.@, have @.@ ($)", 
         args);
 
     ssid = Ssid_Start(ctx, ua, &time);

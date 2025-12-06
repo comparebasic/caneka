@@ -3,20 +3,18 @@
 
 static Lookup *statusCodeStrings = NULL;
 
-StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec mod){
+StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec *mod){
     StrVec *v = StrVec_Make(m);
     quad hpar = HalfParity_From(path);
     Str s = {.type = {TYPE_STR, STRING_BINARY|STRING_CONST}, 
         .length = sizeof(quad),
         .alloc = sizeof(quad),
-        .bytes = &hpar
-    }
+        .bytes = (byte *)&hpar
+    };
 
     StrVec_Add(v, Str_ToHex(m, &s));
-    StrVec_Add(v, Str_Ref(m, (bytes *)"-", 1, 1, STRING_COPY|MORE));
-    StrVec_Add(v, Str_FromI64(m,ts->tv_sec));
-    StrVec_Add(v, Str_FromCstr(m, ".", STRING_COPY|LAST));
-    StrVec_Add(v, Str_FromI64(m,ts->tv_nsec));
+    StrVec_Add(v, Str_Ref(m, (byte *)"-", 1, 1, STRING_COPY|MORE));
+    StrVec_Add(v, Str_FromI64(m, mod->tv_sec));
     return v;
 }
 
@@ -30,14 +28,14 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     }
 
     struct timespec now;
-    Time_Now(bf->m, &now);
+    Time_Now(&now);
 
     args[0] = status;
     args[1] = Time_ToRStr(bf->m, &now);
     args[2] = ctx->mime;
     args[3] = NULL;
     r |= Fmt(bf, "HTTP/1.1 $\r\n"
-        "Date: $\r\n",
+        "Date: $\r\n"
         "Server: caneka/0.1\r\n"
         "Content-Type: $\r\n"
         "\r\n" , args);
@@ -45,7 +43,7 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
 
     Iter it;
     Iter_Init(&it, ctx->headersOut);
-    while((Iter_Init(&it) & END) == 0){
+    while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);  
         if(h == NULL){
             ToS(bf, h->key, 0, ZERO);
@@ -72,7 +70,6 @@ HttpCtx *HttpCtx_Make(MemCh *m){
     ctx->path = StrVec_Make(m);
     ctx->mime = S(m, "text/plain");
     ctx->data = Table_Make(m);
-    ctx->query = Table_Make(m);
     ctx->headersOut = Table_Make(m);
     Iter_Init(&ctx->headersIt, Table_Make(m));
     Iter_Init(&ctx->queryIt, Table_Make(m));
