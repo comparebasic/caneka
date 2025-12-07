@@ -129,7 +129,7 @@ status Roebling_Print(Buff *bf, void *a, cls type, word flags){
     args[1] = I32_Wrapped(bf->m, rbl->parseIt.idx);
     args[2] = rbl->parseIt.value;
     args[3] = NULL;
-    Fmt(bf, "Rbl<$ idx:$/@ ", args);
+    Fmt(bf, "Rbl<@ idx:$/@ ", args);
     args[0] = rbl->matchIt.value;
     args[1] = NULL;
     Fmt(bf, " @", args);
@@ -166,7 +166,7 @@ status Match_Print(Buff *bf, void *a, cls type, word flags){
         I32_Wrapped(bf->m, mt->jump),
         NULL
     };
-    Fmt(bf, "Mt<$ ", args);
+    Fmt(bf, "Mt<@ ", args);
     if(mt->type.state & MATCH_JUMP){
         void *args[] = {
             I16_Wrapped(bf->m, mt->jump),

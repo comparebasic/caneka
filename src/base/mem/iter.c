@@ -145,7 +145,7 @@ static status Iter_AddWithGaps(Iter *it){
 }
 
 static status Iter_Query(Iter *it){
-    it->type.state &= ~(SUCCESS|NOOP|MORE);
+    it->type.state &= ~(SUCCESS|NOOP|MORE|LAST);
     MemCh *m = it->p->m;
     i16 guard = 0;
 

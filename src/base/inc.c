@@ -40,7 +40,7 @@
 #include "./sequence/table_utils.c"
 #include "./sequence/path.c"
 #include "./bytes/bytes_tos.c"
-#include "./bytes/cursor.deprecated.c"
+#include "./bytes/cursor.c"
 #include "./bytes/str.c"
 #include "./bytes/str_maps.c"
 #include "./bytes/str_equals.c"

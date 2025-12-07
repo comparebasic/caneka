@@ -21,6 +21,23 @@ static status Cursor_SetStr(Cursor *curs){
     return NOOP;
 }
 
+i64 Cursor_Pos(Cursor *curs){
+    i64 pos = 0;
+    Iter it;
+    Iter_Init(&it, curs->v->p);
+    if(curs->ptr != NULL){
+        while((Iter_Next(&it) & END) == 0){
+            Str *s = it.value;
+            if(it.idx == curs->it.idx){
+                pos += (i64)(curs->ptr - s->bytes);
+                break;
+            }
+            pos += (i64)s->length;
+        }
+    }
+    return pos;
+}
+
 status Cursor_End(Cursor *curs){
     Str *s = (Str *)Iter_GetByIdx(&curs->it, curs->it.p->max_idx);   
     if(s != NULL){
@@ -101,8 +118,6 @@ StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
             curs->ptr += (taken-1);
         }
         if((Cursor_NextByte(curs) & END) != 0){
-            taken = 1;
-            StrVec_AddBytes(m, v, curs->ptr, taken);
             break;
         }
 
@@ -285,8 +300,6 @@ status Cursor_NextByte(Cursor *curs){
         if(curs->it.type.state & LAST){
             curs->type.state |= END;
         }else{
-            printf("curs idx %d\n", curs->it.idx);
-            fflush(stdout);
             curs->it.idx++;
             Iter_Query(&curs->it);
             curs->type.state |= CURSOR_STR_BOUNDRY;
@@ -325,10 +338,10 @@ status Cursor_Add(Cursor *curs, Str *s){
     status r =  StrVec_Add(curs->v, s);
     if(curs->type.state & END){
         curs->type.state &= ~END;
-        curs->it.type.state &= ~LAST;
     }else{
         curs->type.state &= ~END;
     }
+    curs->it.type.state &= ~LAST;
     return r;
 }
 

@@ -337,7 +337,7 @@ Roebling *Roebling_Make(MemCh *m, Cursor *curs, RblCaptureFunc capture, void *so
     Span *p = Span_Make(m);
     Iter_Init(&rbl->parseIt, p);
     rbl->marks = Lookup_Make(m, _TYPE_CORE_END); 
-    if(curs != NULL){
+    if(curs != NULL && (curs->type.state & PROCESSING) == 0){
         Cursor_Setup(rbl->curs, curs->v);
     }
 

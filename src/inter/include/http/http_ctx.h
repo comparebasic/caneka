@@ -9,13 +9,14 @@ enum http_status {
 
 typedef struct {
     Type type;
+    MemCh *m;
     i32 method;
     i32 code;
     i64 contentLength;
     Str *mime;
     StrVec *httpVersion;
     StrVec *path;
-    Buff *body;
+    Abstract *body;
     Route *route;
     Table *data;
     Span *errors;
@@ -28,3 +29,4 @@ HttpCtx *HttpCtx_Make(MemCh *m);
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx);
 status HttpCtx_Init(MemCh *m);
 StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec *mod);
+status HttpCtx_ParseBody(HttpCtx *ctx, Cursor *curs);

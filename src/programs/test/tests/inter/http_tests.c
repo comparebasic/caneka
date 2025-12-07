@@ -70,7 +70,6 @@ status HttpQuery_Tests(MemCh *m){
 
 
     Cursor *curs = Cursor_Make(m, v);
-    curs->type.state |= DEBUG;
     Roebling *rbl = HttpRbl_Make(m, curs, proto);
     Roebling_Run(rbl);
 
@@ -82,12 +81,7 @@ status HttpQuery_Tests(MemCh *m){
 
     r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
-    Single *sg = Table_Get(ctx->headersIt.p, K(m, "Content-Length"));
-    StrVec *body = Cursor_Get(m, curs, sg->val.value, 1);
-
-    args[0] = body;
-    args[1] = NULL;
-    Out("^c.Body &^0\n", args);
+    HttpCtx_ParseBody(ctx, curs);
 
     args[0] = ctx;
     args[1] = NULL;

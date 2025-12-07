@@ -18,6 +18,32 @@ StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec *mod){
     return v;
 }
 
+status HttpCtx_ParseBody(HttpCtx *ctx, Cursor *curs){
+    MemCh *m = ctx->m;
+    Single *sg = Table_Get(ctx->headersIt.p, K(m, "Content-Length"));
+    if(sg != NULL){
+        StrVec *contentType = Table_Get(ctx->headersIt.p, K(m, "Content-Type"));
+        if(contentType != NULL && Equals(contentType, K(m, "application/json"))){
+            if(curs->v->total - (Cursor_Pos(curs)+1) != sg->val.value){
+                ctx->type.state |= ERROR;
+                return ctx->type.state;
+            }
+            /* TODO: handle patterns that end with ANY without this hack */
+            Cursor_Add(curs, S(m, "\0"));
+
+            NodeObj *node = Inst_Make(m, TYPE_NODEOBJ);
+            Roebling *rbl = JsonParser_Make(m, curs, node);
+            rbl->dest->type.state |= DEBUG;
+            Roebling_Run(rbl);
+            if(rbl->type.state & SUCCESS){
+                ctx->body = (Abstract *)node;
+            }
+        }
+    }
+
+    return ctx->type.state;
+}
+
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     status r = READY;
     void *args[6];
@@ -39,7 +65,6 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
         "Server: caneka/0.1\r\n"
         "Content-Type: $\r\n"
         "\r\n" , args);
-
 
     Iter it;
     Iter_Init(&it, ctx->headersOut);
@@ -67,6 +92,7 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
 HttpCtx *HttpCtx_Make(MemCh *m){
     HttpCtx *ctx = (HttpCtx *)MemCh_AllocOf(m, sizeof(HttpCtx), TYPE_HTTP_CTX);
     ctx->type.of = TYPE_HTTP_CTX;
+    ctx->m = m;
     ctx->path = StrVec_Make(m);
     ctx->mime = S(m, "text/plain");
     ctx->data = Table_Make(m);

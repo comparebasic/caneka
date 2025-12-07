@@ -4,3 +4,4 @@
 #include "format/xml/tag.h"
 #include "format/config.h"
 #include "format/html.h"
+#include "format/json.h"
