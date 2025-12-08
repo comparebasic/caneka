@@ -171,8 +171,6 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     if(routeData != NULL && routeData->nvalues > 0){
         Table *config = Table_Get(routeData, K(m, "config"));
         Table_Set(ctx->data, S(m, "config"), config);
-        void *args[] = {config, NULL};
-        Out("^y.Gathering Config @^0\n", args);
     }
 
     Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
@@ -232,8 +230,6 @@ status WebServer_ServePage(Step *st, Task *tsk){
     HttpProto_AddBuff(proto, bf);
 
     if(postContent != NULL){
-        void *args[] = {postContent, NULL};
-        Out("^p.PostContent @^\n", args);
         Route *route = Inst_ByPath(tcp->inc, postContent, NULL, SPAN_OP_GET);
         if(route != NULL){
             Buff *bf = Buff_Make(m, ZERO);

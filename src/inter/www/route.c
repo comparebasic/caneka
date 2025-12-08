@@ -138,7 +138,7 @@ Route *Route_GetNav(Route *rt){
 status Route_CheckEtag(Route *rt, StrVec *etag){
     MemCh *m = rt->m;
     Single *funcW = Seel_Get(rt, K(m, "func"));
-    if((funcW->type.state & ROUTE_STATIC) == 0){
+    if((funcW->type.state & ROUTE_ASSET) == 0){
         return NOOP;
     }
     Table *headers = Seel_Get(rt, K(m, "headers"));
@@ -201,8 +201,12 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
     File_ModTime(m, pathS, &mod);
     Table_Set(headers, K(m, "Last-Modified"), Time_ToRStr(m, &mod));
 
-    if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
+    if(funcW != NULL && (funcW->type.state & ROUTE_ASSET)){
+
         Route_SetEtag(rt, pathS, &mod);
+    }
+
+    if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
         Span_Set(rt, ROUTE_PROPIDX_ACTION, path);
     }
 
