@@ -29,4 +29,4 @@ HttpCtx *HttpCtx_Make(MemCh *m);
 status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx);
 status HttpCtx_Init(MemCh *m);
 StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec *mod);
-status HttpCtx_ParseBody(HttpCtx *ctx, Cursor *curs);
+status HttpCtx_ParseBody(HttpCtx *ctx, NodeObj *config, Cursor *curs);

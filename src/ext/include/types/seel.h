@@ -1,7 +1,8 @@
-extern struct lookup *SeelLookup;
-extern struct lookup *SeelOrdLookup;
-extern struct lookup *SeelNameLookup;
-extern struct lookup *SeelChildrenPropLookup;
+extern Lookup *SeelLookup;
+extern Lookup *SeelOrdLookup;
+extern Lookup *SeelNameLookup;
+extern Lookup *SeelChildrenPropLookup;
+extern Table *SeelByName;
 
 typedef cls seelType;
 
@@ -13,3 +14,4 @@ status Seel_Init(MemCh *m);
 void *Seel_Get(Span *inst, void *key);
 status Seel_Set(Span *inst, void *key, void *value);
 status Seel_SetKv(Span *inst, Str *prop, void *key, void *value);
+i32 Seel_TypeByName(void *name);

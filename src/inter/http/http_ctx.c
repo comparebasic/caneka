@@ -18,7 +18,7 @@ StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec *mod){
     return v;
 }
 
-status HttpCtx_ParseBody(HttpCtx *ctx, Cursor *curs){
+status HttpCtx_ParseBody(HttpCtx *ctx, NodeObj *config, Cursor *curs){
     MemCh *m = ctx->m;
     Single *sg = Table_Get(ctx->headersIt.p, K(m, "Content-Length"));
     if(sg != NULL){
@@ -29,14 +29,26 @@ status HttpCtx_ParseBody(HttpCtx *ctx, Cursor *curs){
                 return ctx->type.state;
             }
             /* TODO: handle patterns that end with ANY without this hack */
-            Cursor_Add(curs, S(m, "\0"));
+            Cursor_Add(curs, S(m, " "));
 
-            NodeObj *node = Inst_Make(m, TYPE_NODEOBJ);
-            Roebling *rbl = JsonParser_Make(m, curs, node);
-            rbl->dest->type.state |= DEBUG;
+            NodeObj *binseg = Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET);
+            StrVec *seelName = NULL;
+            cls instTypeOf = TYPE_TABLE;
+            if(binseg != NULL && (seelName = (StrVec *)NodeObj_Att(binseg, K(m, "seel")))
+                        != NULL){
+                instTypeOf = Seel_TypeByName(seelName);
+            }
+
+            Roebling *rbl = JsonParser_Make(m, curs, instTypeOf);
             Roebling_Run(rbl);
-            if(rbl->type.state & SUCCESS){
-                ctx->body = (Abstract *)node;
+            if((rbl->type.state & ERROR) == 0){
+                ctx->body = (Abstract *)JsonParser_GetRoot(rbl);
+            }else{
+                void *args[] = {rbl, NULL};
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Error Parsing Roebling @", args);
+                ctx->type.state |= ERROR;
+                return ctx->type.state;
             }
         }
     }

@@ -68,26 +68,52 @@ status HttpQuery_Tests(MemCh *m){
         "\r\n"
         "$", args);
 
-
     Cursor *curs = Cursor_Make(m, v);
     Roebling *rbl = HttpRbl_Make(m, curs, proto);
     Roebling_Run(rbl);
 
-    args[0] = v;
-    args[1] = curs;
-    args[2] = curs->v;
-    args[3] = NULL;
-    Out("^c.Parsing @ curs &\n   &^0\n", args);
-
     r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
-    HttpCtx_ParseBody(ctx, curs);
+    NodeObj *config = Inst_Make(m, TYPE_NODEOBJ);
+    HttpCtx_ParseBody(ctx, config, curs);
 
-    args[0] = ctx;
-    args[1] = NULL;
-    Out("^p.Request Parsed @^0\n", args);
+    args[0] = K(m, "POST");
+    args[1] = Lookup_Get(HttpMethods, ctx->method);
+    args[2] = NULL;
+    r |= Test(ctx->method == HTTP_METHOD_POST,
+        "HttpCtx method is expected @, have @", args); 
 
-    r |= ERROR;
+    args[0] = K(m, "/forms/signup");
+    args[1] = ctx->path;
+    args[2] = NULL;
+    r |= Test(Equals(args[0],args[1]), 
+        "HttpCtx path is expected @, have @", args); 
+
+    args[0] = K(m, "Firefudge/Aluminum");
+    args[1] = Table_Get(ctx->headersIt.p, K(m, "User-Agent"));
+    args[2] = NULL;
+    r |= Test(Equals(args[0],args[1]), 
+        "HttpCtx User-Agent header is expected @, have @", args); 
+
+    args[0] = K(m, "text/html");
+    args[1] = Table_Get(ctx->headersIt.p, K(m, "Accept"));
+    args[2] = NULL;
+    r |= Test(Equals(args[0],args[1]), 
+        "HttpCtx User-Agent header is expected @, have @", args); 
+
+    Table *bodyData = (Table *)ctx->body;
+
+    args[0] = K(m, "fancy.pantsy@example.com");
+    args[1] = Table_Get(bodyData, K(m, "email"));
+    args[2] = NULL;
+    r |= Test(Equals(args[0],args[1]), 
+        "HttpCtx body#email is expected @, have @", args); 
+
+    args[0] = K(m, "Fantsy");
+    args[1] = Table_Get(bodyData, K(m, "first-name"));
+    args[2] = NULL;
+    r |= Test(Equals(args[0],args[1]), 
+        "HttpCtx body#first-name is expected @, have @", args); 
 
     DebugStack_Pop();
     return r;

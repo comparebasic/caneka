@@ -220,6 +220,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }
     if(captureKey == HTTP_METHOD_GET){
         ctx->method = HTTP_METHOD_GET; 
+    }else if(captureKey == HTTP_METHOD_POST){
+        ctx->method = HTTP_METHOD_POST;
     }else if(captureKey == HTTP_PATH){
         ctx->path = v;
     }else if(captureKey == HTTP_VERSION){

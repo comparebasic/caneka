@@ -89,6 +89,8 @@ static char *extTypeStrings[] = {
     "JSON_VALUE",
     "JSON_SEP",
     "JSON_KEY_SEP",
+    "JSON_KEY_VALUE",
+    "JSON_KEY_VALUE_SEP",
     "JSON_COMMA_SEP",
     "JSON_END",
     "_JSON_END",

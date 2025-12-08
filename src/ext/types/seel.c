@@ -5,6 +5,7 @@ Lookup *SeelLookup = NULL;
 Lookup *SeelOrdLookup = NULL;
 Lookup *SeelNameLookup = NULL;
 Lookup *SeelChildrenPropLookup = NULL;
+Table *SeelByName = NULL;
 
 i32 Seel_GetIdx(Table *seel, void *key){
     Hashed *h = Table_GetHashed(seel, key);
@@ -12,6 +13,14 @@ i32 Seel_GetIdx(Table *seel, void *key){
         return h->orderIdx;
     }
     return -1;
+}
+
+i32 Seel_TypeByName(void *name){
+    Single *sg = Table_Get(SeelByName, name);
+    if(sg != NULL){
+        return sg->val.w;
+    }
+    return ZERO;
 }
 
 status Seel_SetKv(Span *inst, Str *prop, void *key, void *value){
@@ -83,6 +92,7 @@ status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx){
     Lookup_Add(m, SeelLookup, typeOf, seel);
     Lookup_Add(m, SeelOrdLookup, typeOf, Table_Ordered(m, seel));
     Lookup_Add(m, SeelNameLookup, typeOf, name);
+    Table_Set(SeelByName, name, I16_Wrapped(m, typeOf));
     if(childrenIdx >= 0){
         Lookup_Add(m, SeelChildrenPropLookup, typeOf, I32_Wrapped(m, childrenIdx));
     }
@@ -125,6 +135,7 @@ status Seel_Init(MemCh *m){
         SeelNameLookup = Lookup_Make(m, TYPE_INSTANCE);
         SeelOrdLookup = Lookup_Make(m, TYPE_INSTANCE);
         SeelChildrenPropLookup = Lookup_Make(m, TYPE_INSTANCE);
+        SeelByName = Table_Make(m);
         r |= SUCCESS;
     }
     return r;
