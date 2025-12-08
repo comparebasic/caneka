@@ -30,12 +30,11 @@ static status BinSegCtx_Print(Buff *bf, void *a, cls type, word flags){
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         ctx->records,
         ctx->shelves,
-        ctx->bf,
         NULL
     };
 
     if(flags & DEBUG){
-        return Fmt(bf, "BinSegCtx<@ @ @ @>", args);
+        return Fmt(bf, "BinSegCtx<@ @ @>", args);
     }else{
         return Fmt(bf, "BinSegCtx<@ @>", args);
     }
@@ -46,7 +45,9 @@ static status persistInitLabels(MemCh *m, Lookup *lk){
     if(binSegCtxLabels == NULL){
         binSegCtxLabels = (Str **)Arr_Make(m, 17);
         binSegCtxLabels[9] = Str_CstrRef(m, "REVERSED");
-        binSegCtxLabels[10] = Str_CstrRef(m, "VISIBLE");
+        binSegCtxLabels[10] = Str_CstrRef(m, "READ");
+        binSegCtxLabels[11] = Str_CstrRef(m, "ADD");
+        binSegCtxLabels[1] = Str_CstrRef(m, "MODIFY");
         Lookup_Add(m, lk, TYPE_BINSEG_CTX, (void *)binSegCtxLabels);
         r |= SUCCESS;
     }

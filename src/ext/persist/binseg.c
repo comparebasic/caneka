@@ -4,7 +4,7 @@
 Lookup *BinSegLookup = NULL;
 
 static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->m;
     status r = READY;
     Inst *inst = asInst(m, a);
     Span *ord = Seel_OrdSeel(m, inst->type.of);
@@ -33,7 +33,7 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     *ptr = inst->type.of;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     Iter it;
@@ -43,14 +43,14 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     return r;
 }
 
 static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->m;
     Table *tbl = (Span *)as(a, TYPE_TABLE);
     status r = READY;
 
@@ -69,7 +69,7 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     hdr->ident.idx = idx;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     Iter it;
@@ -85,14 +85,14 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     return r;
 }
 
 static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->m;
     m->level++;
     Span *p = (Span *)as(a, TYPE_SPAN);
     status r = READY;
@@ -111,7 +111,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     hdr->ident.idx = idx;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     Iter it;
@@ -121,7 +121,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     return r;
@@ -129,7 +129,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
 static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->m;
     status r = READY;
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_BYTES_COLLECTION, 0);
@@ -147,7 +147,7 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     hdr->ident.idx = idx;
 
     if(ctx->type.state & BINSEG_REVERSED){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     Iter it;
@@ -157,14 +157,14 @@ static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     };
 
     if((ctx->type.state & BINSEG_REVERSED) == 0){
-        r |= Buff_Add(ctx->bf, entry);
+        r |= Buff_Add(ctx->add, entry);
     }
 
     return r;
 }
 
 static status I64_ToBinSeg(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->m;
     Abstract *a = (Abstract *)_a;
     if(a->type.of <= _TYPE_WRAPPED_START || a->type.of >= _TYPE_WRAPPED_END){
        return ERROR;
@@ -194,12 +194,12 @@ static status I64_ToBinSeg(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
     hdr->ident.idx = idx;
     *ptr = Single_ToUtil(sg);
 
-    return Buff_Add(ctx->bf, entry);
+    return Buff_Add(ctx->add, entry);
 }
 
 static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     Str *s = (Str *)as(a, TYPE_STR);
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->m;
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_BYTES, s->length);
 
@@ -224,12 +224,12 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     hdr->ident.idx = idx;
     memcpy(ptr, s->bytes, s->length);
 
-    return Buff_Add(ctx->bf, entry);
+    return Buff_Add(ctx->add, entry);
 }
 
 static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
     DebugStack_Push(ctx, ctx->type.of);
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->m;
 
     void *args[] = {BinSegCtx_KindName(hdr->kind), NULL};
     
@@ -292,17 +292,17 @@ static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
 
     if(hdr->ident.id == 0){
         Span_Add(ctx->records, a);
-        MemCh_FreeTemp(ctx->bf->m);
-        ctx->bf->m++;
+        MemCh_FreeTemp(ctx->m);
+        ctx->m++;
         ctx->shelves = Span_Make(m);
-        ctx->bf->m--;
+        ctx->m--;
     }else {
         word parentId = hdr->ident.id-1;
         shelf = Span_Get(ctx->shelves, parentId);
         if(shelf == NULL){
-            ctx->bf->m++;
+            ctx->m++;
             shelf = Span_Make(m);
-            ctx->bf->m--;
+            ctx->m--;
             Span_Set(ctx->shelves, parentId, shelf);
         }
         Span_Set(shelf, hdr->ident.idx, a);
@@ -315,12 +315,16 @@ static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
 status BinSegCtx_Load(BinSegCtx *ctx){
     DebugStack_Push(ctx, ctx->type.of);
     void *args[4];
-    MemCh *m = ctx->bf->m;
+    MemCh *m = ctx->read->m;
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP|END);
+    if(ctx->read == NULL){
+        return ERROR;
+    }
+
     if(ctx->type.state & BINSEG_REVERSED){
-        Buff_PosEnd(ctx->bf);
+        Buff_PosEnd(ctx->read);
     }else{
-        Buff_PosAbs(ctx->bf, 0);
+        Buff_PosAbs(ctx->read, 0);
     }
 
     i16 guard = 0;
@@ -332,14 +336,14 @@ status BinSegCtx_Load(BinSegCtx *ctx){
         .bytes = _hdrBytes
     };
 
-    while(((ctx->bf->type.state|ctx->type.state) & (SUCCESS|ERROR|NOOP|END)) == 0){
+    while(((ctx->read->type.state|ctx->type.state) & (SUCCESS|ERROR|NOOP|END)) == 0){
         Guard_Incr(m, &guard, BINSEG_SEG_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         hdrS.length = 0;
         if(ctx->type.state & BINSEG_REVERSED){
-            Buff_RevGetStr(ctx->bf, &hdrS);
+            Buff_RevGetStr(ctx->read, &hdrS);
         }else{
-            Buff_GetStr(ctx->bf, &hdrS);
+            Buff_GetStr(ctx->read, &hdrS);
         }
 
         if(hdrS.length != sizeof(BinSegHeader)){
@@ -353,16 +357,16 @@ status BinSegCtx_Load(BinSegCtx *ctx){
         if(sz > 0){
             ftr = Str_Make(m, sz);
             if(ctx->type.state & BINSEG_REVERSED){
-                Buff_RevGetStr(ctx->bf, ftr);
+                Buff_RevGetStr(ctx->read, ftr);
             }else{
-                Buff_GetStr(ctx->bf, ftr);
+                Buff_GetStr(ctx->read, ftr);
             }
         }
 
         BinSegCtx_buildKind(ctx, hdr, ftr);
     }
 
-    ctx->type.state |= (ctx->bf->type.state & (ERROR|END));
+    ctx->type.state |= (ctx->read->type.state & (ERROR|END));
 
     DebugStack_Pop();
     return ctx->type.state;
@@ -392,10 +396,10 @@ status BinSegCtx_SendByIdent(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
         func = Lookup_Get(BinSegLookup, a->type.of);
         if(func == NULL){
             void *args[] = {
-                Type_ToStr(ctx->bf->m, a->type.of),
+                Type_ToStr(ctx->add->m, a->type.of),
                 NULL,
             };
-            Error(ctx->bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            Error(ctx->add->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Unable to find BinSegFunc for type $", args);
             return 0;
         }
@@ -403,17 +407,32 @@ status BinSegCtx_SendByIdent(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
     return func(ctx, a, id, idx);
 }
 
-BinSegCtx *BinSegCtx_Make(Buff *bf, word flags){
-    MemCh *m = bf->m;
+status BinSegCtx_Open(BinSegCtx *ctx, Str *path){
+    MemCh *m = ctx->m;
+    status r = READY;
+    if(ctx->type.state & BINSEG_READ){
+        ctx->read = Buff_Make(m, BUFF_UNBUFFERED);
+        r |= File_Open(ctx->read, path, O_RDONLY);
+    }
+    if(ctx->type.state & BINSEG_ADD){
+        ctx->add = Buff_Make(m, BUFF_UNBUFFERED|BUFF_DATASYNC);
+        r |= File_Open(ctx->add, path, O_WRONLY|O_TRUNC);
+    }
+    if(ctx->type.state & BINSEG_MODIFY){
+        ctx->modify = Buff_Make(m, BUFF_UNBUFFERED|BUFF_DATASYNC);
+        r |= File_Open(ctx->modify, path, O_RDWR);
+    }
+    ctx->type.state |= r;
+    return ctx->type.state;
+}
+
+BinSegCtx *BinSegCtx_Make(MemCh *m, word flags){
     BinSegCtx *ctx = (BinSegCtx *)MemCh_AllocOf(m, sizeof(BinSegCtx), TYPE_BINSEG_CTX);
     ctx->type.of = TYPE_BINSEG_CTX;
     ctx->type.state = flags;
-    bf->type.state |= BUFF_DATASYNC;
-    ctx->bf = bf;
-    ctx->bf->m++;
+    ctx->m = m;
     ctx->shelves = Span_Make(m);
     ctx->records = Span_Make(m);
-    ctx->bf->m--;
     return ctx;
 }
 

@@ -8,7 +8,9 @@ status BinSeg_Tests(MemCh *m){
     void *args[5];
     
     Buff *bf = Buff_Make(m, ZERO);
-    BinSegCtx *ctx = BinSegCtx_Make(bf, ZERO);
+    BinSegCtx *ctx = BinSegCtx_Make(m, ZERO);
+    ctx->read = Buff_Make(m, ZERO);
+    ctx->add = ctx->read;
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     BinSegCtx_Send(ctx, one);
@@ -39,8 +41,9 @@ status BinSegCollection_Tests(MemCh *m){
     status r = READY;
     void *args[5];
     
-    Buff *bf = Buff_Make(m, ZERO);
-    BinSegCtx *ctx = BinSegCtx_Make(bf, ZERO);
+    BinSegCtx *ctx = BinSegCtx_Make(m, ZERO);
+    ctx->read = Buff_Make(m, ZERO);
+    ctx->add = ctx->read;
 
     Str *one = Str_CstrRef(m, "Value Alpha One First Top Rockin!");
     Str *two = Str_CstrRef(m, "Boo Value Two, not as good.");
