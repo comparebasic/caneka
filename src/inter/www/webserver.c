@@ -156,7 +156,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         return st->type.state;
     }
 
-    StrVec *etag = Table_Get(ctx->headersIt.p, K(m, "Etag"));
+    StrVec *etag = Table_Get(ctx->headersIt.p, K(m, "If-None-Match"));
     if((etag != NULL) && Route_CheckEtag(ctx->route, etag) & SUCCESS){
         ctx->code = 304;
         HttpProto_PrepareResponse(proto, tsk);
@@ -209,7 +209,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *header = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
 
         Buff *bf = Buff_Make(m, ZERO);
-        r |= Route_Handle(header, bf, ctx->data, NULL);
+        r |= Route_Handle(header, bf, ctx->data, ctx);
         HttpProto_AddBuff(proto, bf);
     }
 
@@ -221,13 +221,13 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *route = Inst_ByPath(tcp->inc, preContent, NULL, SPAN_OP_GET);
         if(route != NULL){
             Buff *bf = Buff_Make(m, ZERO);
-            r |= Route_Handle(route, bf, ctx->data, tsk);
+            r |= Route_Handle(route, bf, ctx->data, ctx);
             HttpProto_AddBuff(proto, bf);
         }
     }
 
     Buff *bf = Buff_Make(m, ZERO);
-    r |= Route_Handle(ctx->route, bf, ctx->data, tsk);
+    r |= Route_Handle(ctx->route, bf, ctx->data, ctx);
     Buff_Stat(bf);
     HttpProto_AddBuff(proto, bf);
 
@@ -237,7 +237,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *route = Inst_ByPath(tcp->inc, postContent, NULL, SPAN_OP_GET);
         if(route != NULL){
             Buff *bf = Buff_Make(m, ZERO);
-            r |= Route_Handle(route, bf, ctx->data, tsk);
+            r |= Route_Handle(route, bf, ctx->data, ctx);
             HttpProto_AddBuff(proto, bf);
         }
     }
@@ -247,7 +247,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
         Route *footer = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
 
         Buff *bf = Buff_Make(m, ZERO);
-        r |= Route_Handle(footer, bf, ctx->data, tsk);
+        r |= Route_Handle(footer, bf, ctx->data, ctx);
         HttpProto_AddBuff(proto, bf);
     }
 

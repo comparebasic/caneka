@@ -29,8 +29,8 @@ static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     i64 length = Str_I64OnBytes(&b, end, se->line);
     s.alloc = s.length = length;
     s.bytes = b;
-    Buff_AddBytes(ErrStream, (byte *)" line ", 6);
-    ToS(ErrStream, &s, s.type.of, ZERO);
+    Buff_AddBytes(bf, (byte *)" line ", 6);
+    ToS(bf, &s, s.type.of, ZERO);
 
     if(flags & MORE && se->ref != NULL){
         args[0] = se->ref;

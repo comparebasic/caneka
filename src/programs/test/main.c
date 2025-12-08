@@ -64,8 +64,9 @@ i32 main(int argc, char **argv){
         args[2] = NULL;
         Str_AddChain(m, path, args);
 
-        void *ar[] = {path, NULL};
-        Out("^p.Outputting test results to @^\n", ar);
+        args[0] = path;
+        args[1] = NULL;
+        Out("^p.Outputting test results to @^0\n",args);
 
         bf->type.state |= BUFF_CLOBBER;
         File_Open(bf, path, O_WRONLY|O_CREAT|O_TRUNC);
@@ -108,7 +109,6 @@ i32 main(int argc, char **argv){
         Out("^r", NULL);
     }
     Out("\nAll Suites - pass($) fail($)^0\n", args);
-
 
     if(CliArgs_Get(cli, dist) != NULL){
         File_Close(bf);

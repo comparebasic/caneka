@@ -12,13 +12,14 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
         Roebling_Run(rbl);
     }
     
-    st->type.state |= (rbl->type.state & (SUCCESS|ERROR));
-    if(st->type.state & SUCCESS && (tsk->type.state & DEBUG)){
+    st->type.state |= rbl->type.state & (SUCCESS|ERROR);
+    tsk->type.state |= rbl->type.state & ERROR;
+    if((st->type.state & SUCCESS) && (tsk->type.state & DEBUG)){
         void *args[] = {
             tsk->data,
             NULL,
         };
-        Out("^0.Parsed Tcp Initial Request -> ^c.&/@^0\n", args);
+        Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
     }
 
     DebugStack_Pop();

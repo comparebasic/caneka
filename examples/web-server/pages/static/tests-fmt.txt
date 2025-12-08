@@ -1,0 +1,1027 @@
+= Test Suite: Caneka base
+
+Starting Mem at 48k total/maxIdx=12/12 page-size=4096b
+== Basic Features  
+=== Testing: Core
+
+Initializing core system tests
+
+- PASS Test that a test can run
+- PASS Test that the STR_MAX is less than a MemPage with 5 expansions span slabs
+
+Mem ceiling='0b' ceiling/global/max=0/13/14 page-size=4096b
+
+=== Testing: MemCh Tests
+
+Testing the underlying memory manager to ensure leaks have not occured in specific cases..
+
+- PASS MemBook chapters match the start level
+
+Mem ceiling='0b' ceiling/global/max=0/13/26 page-size=4096b
+
+=== Testing: MemCh Level Tests
+
+Testing adding a remove memory on levels of a Memory Chapter
+
+- PASS MemBook chapters match the start level
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Span
+
+Span is the basic data structure for sequential or logorithmic storage access.
+
+- PASS Retrieved item is not null 0
+- PASS Retrieve an object with the same value as the index 0 vs 0
+- PASS Retrieved item is not null 1
+- PASS Retrieve an object with the same value as the index 1 vs 1
+- PASS Retrieved item is not null 2
+- PASS Retrieve an object with the same value as the index 2 vs 2
+- PASS Retrieved item is not null 3
+- PASS Retrieve an object with the same value as the index 3 vs 3
+- PASS Retrieved item is not null 4
+- PASS Retrieve an object with the same value as the index 4 vs 4
+- PASS Retrieved item is not null 5
+- PASS Retrieve an object with the same value as the index 5 vs 5
+- PASS Retrieved item is not null 0
+- PASS Retrieve an object with the same value as the index 0 vs 0
+- PASS Retrieved item is not null 1
+- PASS Retrieve an object with the same value as the index 1 vs 1
+- PASS Retrieved item is not null 2
+- PASS Retrieve an object with the same value as the index 2 vs 2
+- PASS Retrieved item is not null 3
+- PASS Retrieve an object with the same value as the index 3 vs 3
+- PASS Retrieved item is not null 4
+- PASS Retrieve an object with the same value as the index 4 vs 4
+- PASS Retrieved item is not null 5
+- PASS Retrieve an object with the same value as the index 5 vs 5
+- PASS Retrieved item is not null 6
+- PASS Retrieve an object with the same value as the index 6 vs 6
+- PASS Retrieved item is not null 7
+- PASS Retrieve an object with the same value as the index 7 vs 7
+- PASS Retrieved item is not null 8
+- PASS Retrieve an object with the same value as the index 8 vs 8
+- PASS Retrieved item is not null 9
+- PASS Retrieve an object with the same value as the index 9 vs 9
+- PASS Retrieved item is not null 10
+- PASS Retrieve an object with the same value as the index 10 vs 10
+- PASS Retrieved item is not null 11
+- PASS Retrieve an object with the same value as the index 11 vs 11
+- PASS Retrieved item is not null 12
+- PASS Retrieve an object with the same value as the index 12 vs 12
+- PASS Retrieved item is not null 13
+- PASS Retrieve an object with the same value as the index 13 vs 13
+- PASS Retrieved item is not null 14
+- PASS Retrieve an object with the same value as the index 14 vs 14
+- PASS Retrieved item is not null 15
+- PASS Retrieve an object with the same value as the index 15 vs 15
+- PASS Retrieved item is not null 16
+- PASS Retrieve an object with the same value as the index 16 vs 16
+- PASS Span has type span 'TYPE_SPAN' found 'TYPE_SPAN'
+- PASS Span item 0 has type string TYPE_STR found TYPE_STR
+- PASS String 1 equals Hello there found Hello there
+- PASS Span item 2 has type string TYPE_STR found TYPE_STR
+- PASS String 3 equals 'Three' found 'Three'
+- PASS Span item 6 has type string 'TYPE_STR' found 'TYPE_STR'
+- PASS String 7 equals 'Seven' found 'Seven'
+- PASS Span item 7 has type string TYPE_STR found TYPE_STR
+- PASS String 8 equals 'Eight' found 'Eight'
+- PASS After expand, Span item 0 is not null
+- PASS After expand, Span item 0 has type string TYPE_STR found TYPE_STR
+- PASS String 1 equals 'Hello there' found 'Hello there'
+- PASS After expand,Span item 2 has type string "TYPE_STR" found "TYPE_STR"
+- PASS String 3 equals 'Three' found 'Three'
+- PASS After expand,Span item 6 has type string TYPE_STR found TYPE_STR
+- PASS String 7 equals 'Seven' found 'Seven'
+- PASS After expand, Span item 7 has type string TYPE_STR found TYPE_STR
+- PASS String 8 equals 'TYPE_STR' found 'TYPE_STR'
+- PASS Span item 512 has type string TYPE_STR found TYPE_STR
+- PASS String 512 equals "Five Twelve" found "Five Twelve"
+- PASS Span item 4079 has type string TYPE_STR found TYPE_STR
+- PASS String 4079 equals "Four Hundred Seventy Nine" found "Four Hundred Seventy Nine"
+- PASS Span item 513 has type string TYPE_STR found TYPE_STR
+- PASS String 513 equals "Five Thirteen" found "Five Thirteen"
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Iter
+
+Iter tests for iteration and insertion.
+
+- PASS Iter_Next first set of values gives expected, expected "FancyOne", have "FancyOne"
+- PASS Iter_Next first set of values gives expected, expected "FancyTwoA", have "FancyTwoA"
+- PASS Iter_Next first set of values gives expected, expected "FancyThreeA", have "FancyThreeA"
+- PASS Iter_Next first set of values gives expected, expected "FancyFour", have "FancyFour"
+- PASS Iter_Next second set of values gives expected, expected "FancyOne", have "FancyOne"
+- PASS Iter_Next second set of values gives expected, expected "FancyTwoA", have "FancyTwoA"
+- PASS Iter_Next second set of values gives expected, expected "FancyThreeA", have "FancyThreeA"
+- PASS Iter_Next second set of values gives expected, expected "FancyThreeB", have "FancyThreeB"
+- PASS Iter_Next second set of values gives expected, expected "FancyFour", have "FancyFour"
+- PASS Iter_Next third set of values gives expected, expected "FancyOne", have "FancyOne"
+- PASS Iter_Next third set of values gives expected, expected "FancyTwoA", have "FancyTwoA"
+- PASS Iter_Next third set of values gives expected, expected "FancyTwoB", have "FancyTwoB"
+- PASS Iter_Next third set of values gives expected, expected "FancyThreeA", have "FancyThreeA"
+- PASS Iter_Next third set of values gives expected, expected "FancyThreeB", have "FancyThreeB"
+- PASS Iter_Next third set of values gives expected, expected "FancyFour", have "FancyFour"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyOne", have "FancyOne"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyTwoA", have "FancyTwoA"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyThreeA", have "FancyThreeA"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyFour", have "FancyFour"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyFive", have "FancyFive"
+- PASS Iter_Next fourth set of values gives expected, expected "FancySix", have "FancySix"
+- PASS Iter_Next fourth set of values gives expected, expected "FancySixTwo", have "FancySixTwo"
+- PASS Iter_Next fourth set of values gives expected, expected "FancySeven", have "FancySeven"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyEight", have "FancyEight"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyNine", have "FancyNine"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyTen", have "FancyTen"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyEleven", have "FancyEleven"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyTwelve", have "FancyTwelve"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyThirteen", have "FancyThirteen"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyFourteen", have "FancyFourteen"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyFifteen", have "FancyFifteen"
+- PASS Iter_Next fourth set of values gives expected, expected "FancySixteen", have "FancySixteen"
+- PASS Iter_Next fourth set of values gives expected, expected "FancySeventeen", have "FancySeventeen"
+- PASS Iter_Next fourth set of values gives expected, expected "FancyEighteen", have "FancyEighteen"
+- PASS 177 Was added in the middle of 5k values, ended contigous values expected 5128, have 5128
+- PASS Iter_Prev set of values gives expected, expected "FancyEighteen", have "FancyEighteen"
+- PASS Iter_Prev set of values gives expected, expected "FancySeventeen", have "FancySeventeen"
+- PASS Iter_Prev set of values gives expected, expected "FancySixteen", have "FancySixteen"
+- PASS Iter_Prev set of values gives expected, expected "FancyFifteen", have "FancyFifteen"
+- PASS Iter_Prev set of values gives expected, expected "FancyFourteen", have "FancyFourteen"
+- PASS Iter_Prev set of values gives expected, expected "FancyThirteen", have "FancyThirteen"
+- PASS Iter_Prev set of values gives expected, expected "FancyTwelve", have "FancyTwelve"
+- PASS Iter_Prev set of values gives expected, expected "FancyEleven", have "FancyEleven"
+- PASS Iter_Prev set of values gives expected, expected "FancyTen", have "FancyTen"
+- PASS Iter_Prev set of values gives expected, expected "FancyNine", have "FancyNine"
+- PASS Iter_Prev set of values gives expected, expected "FancyEight", have "FancyEight"
+- PASS Iter_Prev set of values gives expected, expected "FancySeven", have "FancySeven"
+- PASS Iter_Prev set of values gives expected, expected "FancySixTwo", have "FancySixTwo"
+- PASS Iter_Prev set of values gives expected, expected "FancySix", have "FancySix"
+- PASS Iter_Prev set of values gives expected, expected "FancyFive", have "FancyFive"
+- PASS Iter_Prev set of values gives expected, expected "FancyFour", have "FancyFour"
+- PASS Iter_Prev set of values gives expected, expected "FancyThreeA", have "FancyThreeA"
+- PASS Iter_Prev set of values gives expected, expected "FancyTwoA", have "FancyTwoA"
+- PASS Iter_Prev set of values gives expected, expected "FancyOne", have "FancyOne"
+- PASS Iter_Prev ends at first value, expected "FancyOne", have "FancyOne"
+
+Mem ceiling='56k' ceiling/global/max=14/13/32 page-size=4096b
+
+=== Testing: Str
+
+Tests for the basic string object and convienience features
+
+- PASS Expect string to have fixed type TYPE_STR found "Hi"
+- PASS Expect string length of 2 found 2
+- PASS Expect string match of "Hi" found "Hi"
+- PASS Expect for i32 value 35072 length of 5 found 5
+- PASS Expect string match of i32 of 35072 to string
+- PASS Expect length 271, have 271
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: StrVec
+
+Testing String Vectors
+
+- PASS Testing StrVec and Str 'hi dude, what a wild ride!' vs 'hi dude, what a wild ride!'
+- PASS Testing ReAligned StrVec and Str 'hi dude, what a wild ride!' vs 'hi dude, what a wild ride!'
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Histo Tests
+
+Text content histogram testing, to prevent code or sql injection.
+
+- PASS Histo passes with content "Yay, Contenty Things!" Histo<[ZERO/READY] 21 11% /a17,n0,w2,p2,c0,u0>
+- PASS Histo sets code flag with content "function(){alert('hi')}" Histo<[CODE] 23 53% /a15,n0,w0,p8,c0,u0>
+- PASS Histo sets code flag with content "click <a href="http://steel.example.com/?poo=my-wallet">here!</a>" Histo<[CODE] 65 40% /a45,n0,w2,p18,c0,u0>
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: String - End Matches
+
+Tests for Matching the end of the string
+
+- PASS file ending in '.c' matches successfully, had "file1.c"
+- PASS file ending in '.cnk' matches successfully, had "file1.cnk"
+- PASS file ending in '.cnk' matches ".c" after String_Trunc successfully, had "file1.c"
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Encoding Tests
+
+Encoding tests for hex.
+
+- PASS Hex str is as expected Str<CONST 68/69:"4869647920486f2c2074686572652c2068657265277320612073686f7274206f6e65">, have Str<ENCODED 68/68:"4869647920486f2c2074686572652c2068657265277320612073686f7274206f6e65">
+- PASS From hex equals original str,  expected Str<CONST 34/35:"Hidy Ho, there, here's a short one">, have Str<ZERO/READY 34/34:"Hidy Ho, there, here's a short one">
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Buff Tests
+
+Testing the buffer add functionality.
+
+- PASS Content is expected in StrVec of Buff
+- PASS Content with a long additional is expected in StrVec of Buff
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Buff Send/Recv Tests
+
+Testing the buffer send and recv components.
+
+- PASS Content is expected in StrVec of Buff, expected "All of the things you want to know are kindof like dandilions.", have [All of the things you want to know are kindof like dandilions.]
+- PASS Content with a long additional is expected in StrVec of Buff
+- PASS Buff_GetStr has populated an equal StrVec
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Buff IO Tests
+
+Testing the buffer send and recv to disk/socket components.
+
+- PASS File opened successfully to create and write have 5fd for [/,basic,/,caneka,/,examples,/,test,/,buffio,.,txt]
+- PASS Buff total is still 0 after sending content through it unbuffered: Buff<[SUCCESS,FD,UNBUFFERED] 4294967295fd unsent/total=0/0>
+- PASS File opened successfully to after write, have 5fd for [/,basic,/,caneka,/,examples,/,test,/,buffio,.,txt]
+- PASS Second file opened successfully to create and write have 6fd for [/,basic,/,caneka,/,examples,/,test,/,buffio-compare,.,txt]
+- PASS Second file opened successfully to create for reading have 5fd for [/,basic,/,caneka,/,examples,/,test,/,buffio-compare,.,txt]
+- PASS File opened successfully to after write, have 5fd for [/,basic,/,caneka,/,examples,/,test,/,buffio-compare,.,txt]
+- PASS After writing, reading, writing somewhere else, and then reading it again, it all equals, expected "Hidy Ho, my friend, this is a nice place to be. where things are peachy and wonderous. Yay woundersous is as good a word as walrus. If you're reading this, then something is probably broken, and your looking at the test. I'm so sorry it's broken. But we believe you can fix it. Yay.", have [Hidy Ho, my friend, this is a nice place to be. where things are peachy and wonderous. Yay woundersous is as good a word as walrus. If you're reading this, then something is probably broken, and your looking at the test. I'm so sorry it's broken. But we believe you can fix it. Yay.]
+- PASS Remove file [/,basic,/,caneka,/,examples,/,test,/,buffio,.,txt]
+- PASS Remove file [/,basic,/,caneka,/,examples,/,test,/,buffio-compare,.,txt]
+
+Mem ceiling='12k' ceiling/global/max=3/15/32 page-size=4096b
+
+=== Testing: Buff Position Tests
+
+Testing the buffer position features of seeking and moving around it.
+
+- PASS Buff: Expected position and unset Buff<[ZERO/READY] 4294967295fd unsent/total=67/67>
+- PASS Buff +10: Expected position and unset Buff<[ZERO/READY] 4294967295fd unsent/total=57/67>
+- PASS Buff -10(abs): Expected position and unset Buff<[ZERO/READY] 4294967295fd unsent/total=10/67>
+- PASS Buff -20: Expected position and unset Buff<[ZERO/READY] 4294967295fd unsent/total=30/67>
+- PASS Buff +3: Expected position and unset Buff<[ZERO/READY] 4294967295fd unsent/total=27/67>
+- PASS Buff 7(abs): Expected position and unset Buff<[ZERO/READY] 4294967295fd unsent/total=60/67>
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Buff Stream Tests
+
+Testing setting up and running multiple stream types and stream chains
+
+- PASS Comparing StrVec built up slowly, and one built all at once 
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Cursor Tests
+
+Cursor tests for adding and navigation the position of a StrVec
+
+- PASS Ptr is not NULL
+- PASS Stops on the first 'n' for and
+- PASS Stops on the second character of the second string in the Cursor's StrVec
+- PASS Stops on the 'y' for sky
+- PASS Stops on the 32nd y in sky of the same, second Cursor's StrVec, have 31
+- PASS Stops on the 'F' for For
+- PASS Stops on the 2nd character of the third Cursor's StrVec, have 1
+- PASS Stops on the 's' for sky
+- PASS Stops on the 29th character of the third Cursor's StrVec, have 29
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: DebugStack Tests
+
+Testing DebugStack crash debugging system
+
+- PASS Stack printout has less characters than before
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Parity Tests
+
+A simple 4 byte sum + 7-bit content length check utility tests.
+
+- PASS HalfParity is non zero, have 3494429748
+- PASS HalfParity matches for, [Once u,pon a time. There was a handsome pot of coffee., Who met a voluptous creamer. Who had a spicy, sidekick.]
+- PASS HalfParity matches for, [O,nce u,pon a time. There was a handsome pot of coffee., Who met a voluptous creamer. Who had a spicy, sidekick.], 3494429748 vs 3494429748
+- PASS HalfParity matches for, [Once upon a time. There was a handsome pot of coffee. Who met a voluptous creamer. Who had a spicy sidekick.], 3494429748 vs 3494429748
+- PASS Str HalfParity matches for, [Once upon a time. There was a handsome pot of coffee. Who met a voluptous creamer. Who had a spicy sidekick.], 3494429748 vs 3494429748
+- PASS Parity is non zero, have 4186861468
+- PASS Parity matches for, [Once u,pon a time. There was a handsome pot of coffee., Who met a voluptous creamer. Who had a spicy, sidekick.]
+- PASS Parity matches for, [O,nce u,pon a time. There was a handsome pot of coffee., Who met a voluptous creamer. Who had a spicy, sidekick.], 4186861468 vs 4186861468
+- PASS Parity matches for, [Once upon a time. There was a handsome pot of coffee. Who met a voluptous creamer. Who had a spicy sidekick.], 4186861468 vs 4186861468
+- PASS Str Parity matches for, [Once upon a time. There was a handsome pot of coffee. Who met a voluptous creamer. Who had a spicy sidekick.], 4186861468 vs 4186861468
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Hash
+
+Tests for the Hash object which used for table storage and comparison of a few Polymorphic data types.
+
+- PASS Expected hash to equal 0101001010010110000000000000000000000000000000000000000000000000/26954, found: 0101001010010110000000000000000000000000000000000000000000000000/26954
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Table HKey Tests
+
+Testing table HKey component which determines the order of indicies to look for an item.
+
+- PASS Test idx mismatch for dim 1 expected 117, have 117, of HKey<idx117 1dim 0pos>
+- PASS Test idx mismatch for dim 1 expected 109, have 109, of HKey<idx109 1dim 1pos>
+- PASS Test idx mismatch for dim 1 expected 97, have 97, of HKey<idx97 1dim 2pos>
+- PASS Test idx mismatch for dim 1 expected 108, have 108, of HKey<idx108 1dim 3pos>
+- PASS Test idx mismatch for dim 0 expected 5, have 5, of HKey<idx5 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 7, have 7, of HKey<idx7 0dim 1pos>
+- PASS Test idx mismatch for dim 0 expected 13, have 13, of HKey<idx13 0dim 2pos>
+- PASS Test idx mismatch for dim 0 expected 6, have 6, of HKey<idx6 0dim 3pos>
+- PASS Test idx mismatch for dim 0 expected 7, have 7, of HKey<idx7 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 8, have 8, of HKey<idx8 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 9, have 9, of HKey<idx9 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 10, have 10, of HKey<idx10 0dim 0pos>
+- PASS Small key  small, had expected hkeys, bits 117=10101110 109=10110110 97=10000110 108=00110110 108=00110110 0=00000000 0=00000000 0=00000000 
+
+- PASS Test idx mismatch for dim 1 expected 116, have 116, of HKey<idx116 1dim 0pos>
+- PASS Test idx mismatch for dim 1 expected 105, have 105, of HKey<idx105 1dim 1pos>
+- PASS Test idx mismatch for dim 1 expected 110, have 110, of HKey<idx110 1dim 2pos>
+- PASS Test idx mismatch for dim 1 expected 121, have 121, of HKey<idx121 1dim 3pos>
+- PASS Test idx mismatch for dim 0 expected 4, have 4, of HKey<idx4 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 7, have 7, of HKey<idx7 0dim 1pos>
+- PASS Test idx mismatch for dim 0 expected 9, have 9, of HKey<idx9 0dim 2pos>
+- PASS Test idx mismatch for dim 0 expected 6, have 6, of HKey<idx6 0dim 3pos>
+- PASS Test idx mismatch for dim 0 expected 7, have 7, of HKey<idx7 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 8, have 8, of HKey<idx8 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 9, have 9, of HKey<idx9 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 10, have 10, of HKey<idx10 0dim 0pos>
+- PASS Small key  tiny, had expected hkeys, bits 116=00101110 105=10010110 110=01110110 121=10011110 0=00000000 0=00000000 0=00000000 0=00000000 
+
+- PASS Test idx mismatch for dim 1 expected 119, have 119, of HKey<idx119 1dim 0pos>
+- PASS Test idx mismatch for dim 1 expected 116, have 116, of HKey<idx116 1dim 1pos>
+- PASS Test idx mismatch for dim 1 expected 114, have 114, of HKey<idx114 1dim 2pos>
+- PASS Test idx mismatch for dim 1 expected 97, have 97, of HKey<idx97 1dim 3pos>
+- PASS Test idx mismatch for dim 0 expected 7, have 7, of HKey<idx7 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 7, have 7, of HKey<idx7 0dim 1pos>
+- PASS Test idx mismatch for dim 0 expected 4, have 4, of HKey<idx4 0dim 2pos>
+- PASS Test idx mismatch for dim 0 expected 7, have 7, of HKey<idx7 0dim 3pos>
+- PASS Test idx mismatch for dim 0 expected 8, have 8, of HKey<idx8 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 9, have 9, of HKey<idx9 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 10, have 10, of HKey<idx10 0dim 0pos>
+- PASS Test idx mismatch for dim 0 expected 11, have 11, of HKey<idx11 0dim 0pos>
+- PASS Small key  strange, had expected hkeys, bits 119=11101110 116=00101110 114=01001110 97=10000110 110=01110110 103=11100110 101=10100110 0=00000000 
+
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Table
+
+Auto-scaling hash-table built on top of the Span object and Hash object.
+
+- PASS Expect strings to not be NULL from key:"Alpha"
+- PASS Expect strings to equal "Apples" from key:"Alpha" found "Apples"
+- PASS Expect strings to not be NULL from key:"Bravo"
+- PASS Expect strings to equal "Bandits" from key:"Bravo" found "Bandits"
+- PASS Expect strings to not be NULL from key:"Charlie"
+- PASS Expect strings to equal "Carrots" from key:"Charlie" found "Carrots"
+- PASS Expect strings to not be NULL from key:"Delta"
+- PASS Expect strings to equal "DeadMan" from key:"Delta" found "DeadMan"
+- PASS Expect strings to not be NULL from key:"Echo"
+- PASS Expect strings to equal "Elevator" from key:"Echo" found "Elevator"
+- PASS Expect strings to not be NULL from key:"Foxtrot"
+- PASS Expect strings to equal "Five Minutes" from key:"Foxtrot" found "Five Minutes"
+- PASS Expect strings to not be NULL from key:"Golf"
+- PASS Expect strings to equal "Gophers Are Cool" from key:"Golf" found "Gophers Are Cool"
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: TableResize
+
+Resize features of the auto-scaling hash-table.
+
+- PASS Expect strings to not be NULL from key:Alpha
+- PASS Expect strings to equal Apples from key:"Alpha" found "Apples"
+- PASS Expect strings to not be NULL from key:Bravo
+- PASS Expect strings to equal Bandits from key:"Bravo" found "Bandits"
+- PASS Expect strings to not be NULL from key:Charlie
+- PASS Expect strings to equal Carrots from key:"Charlie" found "Carrots"
+- PASS Expect strings to not be NULL from key:Delta
+- PASS Expect strings to equal DeadMan from key:"Delta" found "DeadMan"
+- PASS Expect strings to not be NULL from key:Echo
+- PASS Expect strings to equal Elevator from key:"Echo" found "Elevator"
+- PASS Expect strings to not be NULL from key:Foxtrot
+- PASS Expect strings to equal Five Minutes from key:"Foxtrot" found "Five Minutes"
+- PASS Expect strings to not be NULL from key:Golf
+- PASS Expect strings to equal Gophers Are Cool from key:"Golf" found "Gophers Are Cool"
+- PASS Expect strings to not be NULL from key:Hotel
+- PASS Expect strings to equal Happy Go Lucky from key:"Hotel" found "Happy Go Lucky"
+- PASS Expect strings to not be NULL from key:India
+- PASS Expect strings to equal Idio-syncratic from key:"India" found "Idio-syncratic"
+- PASS Expect strings to not be NULL from key:Juliet
+- PASS Expect strings to equal Jockey Rider from key:"Juliet" found "Jockey Rider"
+- PASS Expect strings to not be NULL from key:Kilo
+- PASS Expect strings to equal Kangaroo from key:"Kilo" found "Kangaroo"
+- PASS Expect strings to not be NULL from key:Lima
+- PASS Expect strings to equal Lefties from key:"Lima" found "Lefties"
+- PASS Expect strings to not be NULL from key:Mike
+- PASS Expect strings to equal Mangoes from key:"Mike" found "Mangoes"
+- PASS Expect strings to not be NULL from key:November
+- PASS Expect strings to equal Neighbourhood Villan from key:"November" found "Neighbourhood Villan"
+- PASS Expect strings to not be NULL from key:Oscar
+- PASS Expect strings to equal Oasis of Gems from key:"Oscar" found "Oasis of Gems"
+- PASS Expect strings to not be NULL from key:Pappa
+- PASS Expect strings to equal Pinapple Ham from key:"Pappa" found "Pinapple Ham"
+- PASS Expect strings to not be NULL from key:Quebec
+- PASS Expect strings to equal Quarterly Report from key:"Quebec" found "Quarterly Report"
+- PASS Expect strings to not be NULL from key:Romeo
+- PASS Expect strings to equal Rooty Tooty from key:"Romeo" found "Rooty Tooty"
+- PASS Expect strings to not be NULL from key:Sierra
+- PASS Expect strings to equal Stainless Steel from key:"Sierra" found "Stainless Steel"
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: TableUtilKey
+
+Testing table with a util wrapped instead of string keys.
+
+- PASS Expected 10 items to be added
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Clone
+
+Clone test of cloning basic types.
+
+- PASS Str clone is equal, expected "fancy things" have "fancy things"
+- PASS Span clone is equal, expected [31,"boo bah bing bang!","hi","there",13,27] have [31,"boo bah bing bang!","hi","there",13,27]
+- PASS StrVec clone is equal, expected [And the end is naer, but we will have a hopping good time anyway! yay!] have [And the end is naer, but we will have a hopping good time anyway! yay!]
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Time
+
+Time tests for converstion between unix syscalls and microTime.
+
+- PASS Time equates to four hours and 2k microseconds after January 1st 1970, have 1970-01-01T04:00:00.2+00
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+== Persistance Tests  
+=== Testing: Path Tests
+
+Testing path functions for file and object variable paths.
+
+- PASS Expected length to equal expected for Str<MORE 1/1:"/">
+- PASS Expected content to equal expected for Str<MORE 1/1:"/">
+- PASS Expected flags to equal expected for Str<MORE 1/1:"/">
+- PASS Expected length to equal expected for Str<ZERO/READY 5/5:"fancy">
+- PASS Expected content to equal expected for Str<ZERO/READY 5/5:"fancy">
+- PASS Expected flags to equal expected for Str<ZERO/READY 5/5:"fancy">
+- PASS Expected length to equal expected for Str<MORE 1/1:"/">
+- PASS Expected content to equal expected for Str<MORE 1/1:"/">
+- PASS Expected flags to equal expected for Str<MORE 1/1:"/">
+- PASS Expected length to equal expected for Str<ZERO/READY 4/4:"path">
+- PASS Expected content to equal expected for Str<ZERO/READY 4/4:"path">
+- PASS Expected flags to equal expected for Str<ZERO/READY 4/4:"path">
+- PASS Expected length to equal expected for Str<MORE 1/1:"/">
+- PASS Expected content to equal expected for Str<MORE 1/1:"/">
+- PASS Expected flags to equal expected for Str<MORE 1/1:"/">
+- PASS Expected length to equal expected for Str<ZERO/READY 5/5:"thing">
+- PASS Expected content to equal expected for Str<ZERO/READY 5/5:"thing">
+- PASS Expected flags to equal expected for Str<ZERO/READY 5/5:"thing">
+- PASS Expected length to equal expected for Str<MORE 1/1:"/">
+- PASS Expected content to equal expected for Str<MORE 1/1:"/">
+- PASS Expected flags to equal expected for Str<MORE 1/1:"/">
+- PASS Expected length to equal expected for Str<ZERO/READY 4/4:"file">
+- PASS Expected content to equal expected for Str<ZERO/READY 4/4:"file">
+- PASS Expected flags to equal expected for Str<ZERO/READY 4/4:"file">
+- PASS Expected length to equal expected for Str<LAST 1/1:".">
+- PASS Expected content to equal expected for Str<LAST 1/1:".">
+- PASS Expected flags to equal expected for Str<LAST 1/1:".">
+- PASS Expected length to equal expected for Str<ZERO/READY 3/3:"ext">
+- PASS Expected content to equal expected for Str<ZERO/READY 3/3:"ext">
+- PASS Expected flags to equal expected for Str<ZERO/READY 3/3:"ext">
+- PASS base path is extracted properly
+- PASS file name is extracted properly
+
+Mem ceiling='0b' ceiling/global/max=0/13/32 page-size=4096b
+
+=== Testing: Stash Tests
+
+Mem Stash testing.
+
+- PASS Pointer has been mutated and packed
+- PASS Coord has type of object
+- PASS Coord has idx sent to PackAddr
+- PASS Coord has been restored expected 1001001001100000110001101100010000010000000000000000000000000000, have 1001001001100000110001101100010000010000000000000000000000000000
+- PASS Bytes written equals 1 page + StashHeader, expected 4100, have 4100 - Buff<[SUCCESS,END,FD] 5fd unsent/total=0/4100>
+- PASS Stash From Stream returns non-null
+- PASS loaded is not the original
+- PASS Str is not the original
+- PASS Str has equivilent value, expected Str<CONST 3/4:"One">, have Str<CONSTCOPY 3/4:"One">
+
+Mem ceiling='12k' ceiling/global/max=3/16/32 page-size=4096b
+
+Suite Caneka base pass(27) fail(0)
+= Test Suite: Caneka ext
+
+Starting Mem at 52k total/maxIdx=13/32 page-size=4096b
+=== Testing: Object Tests
+
+Object tests of ordered table of add/get.
+
+- PASS Hashed found for H<11 "One" -> 1>/One
+- PASS Object data lines up with expectations of ordIdx 0, key "One", value, 1, have H<0,11 6647371/"One" -> Wptr<_TYPE_ZERO 34953440792>/TYPE_WRAPPED_I8>
+- PASS Hashed found for H<3 "Two" -> 2>/Two
+- PASS Object data lines up with expectations of ordIdx 1, key "Two", value, 2, have H<1,3 7305043/"Two" -> Wptr<_TYPE_ZERO 34953440720>/TYPE_WRAPPED_I8>
+- PASS Hashed found for H<5 "Three" -> 3>/Three
+- PASS Object data lines up with expectations of ordIdx 2, key "Three", value, 3, have H<2,5 435493693525/"Three" -> Wptr<_TYPE_ZERO 34953440648>/TYPE_WRAPPED_I8>
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: Object Filter Tests
+
+Object filter tests.
+
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+== Basic Features  
+=== Testing: BinSeg Tests
+
+Transactional format encoding capable of representing stream, node, and database content.
+
+- PASS Ctx finished with status END
+- PASS Ctx has two values
+- PASS first value is expected
+- PASS second value is expected
+
+Mem ceiling='8k' ceiling/global/max=2/14/32 page-size=4096b
+
+=== Testing: BinSegCollection Tests
+
+Transactional format storing and reading collection and dictionary data types.
+
+- PASS Ctx finished with status END
+- PASS Ctx records contain a span with 3 values ["Value Alpha One First Top Rockin!","Boo Value Two, not as good.","Maybe Three is a new beginning?"]
+- PASS Ctx records contain a table with 4 values {"D"="Delaware","C"="Casualty","B"="Baking","A"="Alphabet"}
+- PASS Ctx records contain a strvec that matches the expected length [one,+,two,+,three,+,four]
+- PASS Ctx records contain a node obj NodeObj<[ZERO/READY]#"children": {"style"="Fancy Title Here"}, #"atts": {"style"="font-weight: bold"}, #"name": [h1]>
+- PASS Ctx records contain a node with an atts property style that matches "font-weight: bold", have "font-weight: bold"
+
+Mem ceiling='12k' ceiling/global/max=3/16/32 page-size=4096b
+
+== Roebling Parser  
+=== Testing: Pattern Character Tests
+
+Making patterns from strings.
+
+- PASS PatChar basic pattern matches Pat<XG.XE.XT.E> vs Pat<XG.XE.XT.E>
+- PASS PatChar ko pattern matches Pat<KO\r,KO\n,E> vs Pat<KO\r,KO\n,E>
+- PASS PatChar long vec pattern matches Pat<XO.Xn.Xe.XA.Xn.Xd.XT.Xw.Xo.E> vs Pat<XO.Xn.Xe.XA.Xn.Xd.XT.Xw.Xo.E>
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: Match Tests
+
+Matching various patterns.
+
+- PASS Non match has unsuccessful state found "NOOP"
+- PASS Matching string has successful state found [SUCCESS]
+- PASS Matched length of string, less termMatching, expected 14 have 14
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: Match Elastic Tests
+
+Testing matches on ranges that have variable or elastic lengths.
+
+- PASS Has PROCESSING status PROCESSINGCLS_FLAG_ALPHA
+- PASS On second pos, position is 1
+- PASS Tag -Stopped on the fourth character
+- PASS Tag -Found three chars
+- PASS Tag- Found SUCCESS have "SUCCESSCLS_FLAG_CHARLIE"
+- PASS Tag -At end
+- PASS Att - Found 4 chars, count is Wi64<4>
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: Match Knockout Tests
+
+Testing knockout patterns in match definitions.
+
+- PASS Length matches for string that has no escape or closing quote 25
+- PASS Length matches for string minus escape cahrs that has two escapes in it, expecting 34, have 36
+- PASS Length matches for string that has a terminator quote in it, have 33
+- PASS Length matches for string that has a escaped terminator quote in it, have 40
+- PASS It took 10 counts to get to the end, have 9
+- PASS Terminator 'end' is omited from the count expecting 7, have 7
+- PASS terminator 'end' is omited and last punctuation as well, from the count, expecting 32, have 32
+- PASS counted first letter only, have 1
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: Match Replace Tests
+
+Tests for Str replaces with Match
+
+- PASS Match Mt<SUCCESSMATCH_SEARCH Xs.Xa.Xd.E Sns<SNIP_SKIPPED/7,SNIP_CONTENT/3> SNIP_CONTENT/0>: Replacing Str<CONST 3/4:"sad"> with Str<CONST 4/5:"good"> in /happy/sad/fancy/things to make Str<ZERO/READY 24/512:"/happy/good/fancy/things">
+
+- PASS Match Mt<SUCCESSMATCH_SEARCH Xs.Xa.Xd.E Sns<SNIP_SKIPPED/7,SNIP_CONTENT/3> SNIP_CONTENT/0>: Replacing "sad" with "it" in /happy/sad/fancy/things to make Str<ZERO/READY 22/512:"/happy/it/fancy/things">
+
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: StrVecSplit via Match
+
+Testing String Vector Split function
+
+- PASS Split by [StrVec<ZERO/READY 7/18 [0: Str<ZERO/READY 4/19:"this">,1: Str<SEP 1/1:".">,2: Str<ZERO/READY 4/13:"that">,3: Str<SEP 1/1:".">,4: Str<ZERO/READY 6/8:"thingy">,5: Str<SEP 1/1:".">,6: Str<ZERO/READY 1/1:"x">]>] "." becomes ["this","that","thingy","x"].
+
+- PASS Split by [StrVec<ZERO/READY 7/18 [0: Str<ZERO/READY 4/19:"this">,1: Str<SEP 1/1:".">,2: Str<ZERO/READY 4/13:"that">,3: Str<SEP 1/1:".">,4: Str<ZERO/READY 6/8:"thingy">,5: Str<SEP 1/1:".">,6: Str<ZERO/READY 1/1:"x">]>] Mt<MATCH_SEARCH X..E Sns<> SNIP_SKIPPED/1> becomes ["this","that","thingy","x"].
+
+- PASS Split by [StrVec<ZERO/READY 7/18 [0: Str<ZERO/READY 4/19:"this">,1: Str<SEP 1/1:".">,2: Str<ZERO/READY 4/13:"that">,3: Str<SEP 1/1:".">,4: Str<ZERO/READY 6/8:"thingy">,5: Str<SEP 1/1:".">,6: Str<ZERO/READY 1/1:"x">]>] 46 becomes ["this","that","thingy","x"].
+
+
+Mem ceiling='16k' ceiling/global/max=4/17/32 page-size=4096b
+
+=== Testing: Snip Tests
+
+Snip tests for capturing a segment of a cursor
+
+- PASS Found expected keyword "sunshine", have [sunshine] from Sns<SNIP_GAP/9,SNIP_CONTENT/8> of [Rain ,and sunshine, and clouds and sky.]
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: Snip Modify Tests
+
+Snip tests for modifying an existing captur in progress
+
+- PASS Start of line matches, expected [StrVec<ZERO/READY 1/33 [0: Str<ZERO/READY 33/512:"Start with some text, that has a ">]>], have Str<CONST 33/34:"Start with some text, that has a ">
+- PASS SnipSpan now has single value which is a gap that spans the total length, have Sns<Sn<SNIP_GAP/38>>
+
+
+Mem ceiling='0b' ceiling/global/max=0/15/32 page-size=4096b
+
+=== Testing: Roebling Init Test
+
+Roebling tests for adding and running a basic parser.
+
+- PASS Roebling has four match values loaded up, have 4
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+=== Testing: Roebling Run Tests
+
+Roebling basic run tests.
+
+- PASS Roebling has state ROEBLING-NEXT
+- PASS Content equals expected '"TWO"', have [TWO]
+- PASS Match Idx equals expected, have 4294967295
+- PASS Roebling has captured the rest of the line, expected 'for the weekend', have '[for the weekend]'
+- PASS Roebling has state ROEBLING-NEXT
+
+Mem ceiling='8k' ceiling/global/max=2/15/32 page-size=4096b
+
+=== Testing: Roebling Mark Tests
+
+Roebling mark tests.
+
+- PASS Content equals TWO, have [TWO]
+- PASS Roebling has state ROEBLING_NEXT after 'TWO'
+- PASS Roebling has captured the rest of the line: [for the weekend]
+- PASS Roebling has state ROEBLING_NEXT after 'for the weekend'
+- PASS Content equals ONE, have [ONE]
+- PASS Roebling has state ROEBLING_NEXT after 'ONE'
+- PASS Roebling has captured the rest of the line: [for good measure]
+- PASS Roebling has state ROEBLING_NEXT
+- PASS Content equals THREE, have [THREE]
+- PASS Roebling has state ROEBLING_NEXT
+- PASS Roebling has captured the rest of the line: [for all!]
+- PASS Roebling has state ROEBLING_NEXT
+- PASS Roebling has state SUCCESS, have SUCCESS
+
+Mem ceiling='20k' ceiling/global/max=5/18/32 page-size=4096b
+
+=== Testing: Roebling Start Stop Tests
+
+Roebling start and stop in the middle of recieving input tests.
+
+- PASS String equals 'Hi how are you today?', have '[Hi how are you today?]' for Rbl<PROCESSING idx:0/Wdo<TYPE_WRAPPED_DO *2248976>  Mt<MATCH_JUMP  0jump XNG .K\n,XMI\{0}-\{31}.E Sns<> ZERO/READY/0>>
+
+Mem ceiling='0b' ceiling/global/max=0/14/32 page-size=4096b
+
+== Formats  
+=== Testing: Mess Tests
+
+From a basic Fmt Roebling parser into the Mess data structures.
+
+- PASS Mess has been built as expected
+
+Mem ceiling='148k' ceiling/global/max=37/50/51 page-size=4096b
+
+=== Testing: FmtHtml Tests
+
+Format FMT -> HTML tests.
+
+- PASS Fmt to HTML has status SUCCESS
+- PASS Fmt to HTML has expected html content
+
+Mem ceiling='176k' ceiling/global/max=44/57/58 page-size=4096b
+
+=== Testing: NodeObj Tests
+
+Node Object nested path tests.
+
+- PASS Children table has been automatically populated
+- PASS After setting and requesting ByPath NodeObjs match and has expected property [/,one] -> name:"one" -> NodeObj<[ZERO/READY]#"children": {}, #"atts": {}, #"name": [one]>
+- PASS After setting and requesting ByPath NodeObjs match and has expected property [/,two] -> name:"two" -> NodeObj<[ZERO/READY]#"children": {}, #"atts": {}, #"name": [two]>
+- PASS After setting and requesting ByPath NodeObjs match and has expected property [/,three] -> name:"three" -> NodeObj<[ZERO/READY]#"children": {}, #"atts": {}, #"name": [three]>
+- PASS After setting and requesting ByPath NodeObjs match and has expected property [/,four] -> name:"four" -> NodeObj<[ZERO/READY]#"children": {}, #"atts": {}, #"name": [four]>
+- PASS After setting and requesting ByPath NodeObjs match and has expected property [/,two,/,secondary,/,stuff-two] -> name:"two-nested" -> NodeObj<[ZERO/READY]#"children": {}, #"atts": {}, #"name": [two-nested]>
+- PASS After setting and requesting ByPath NodeObjs match and has expected property [/,six,/,new-root,/,stuff-three] -> name:"fresh-three" -> NodeObj<[ZERO/READY]#"children": {}, #"atts": {}, #"name": [fresh-three]>
+- PASS After setting and requesting ByPath NodeObjs match and has expected property [/,two,/,and,/,nested,/,stuff-one] -> name:"two-nested-one" -> NodeObj<[ZERO/READY]#"children": {}, #"atts": {}, #"name": [two-nested-one]>
+- PASS Missing path should be NULL
+
+Mem ceiling='20k' ceiling/global/max=5/18/58 page-size=4096b
+
+=== Testing: Config Tests
+
+Config tests that turn a basic configuration format into an object
+
+- PASS Doc node is not NULL: [doc] -> NodeObj<[ZERO/READY]#"children": {0={"list"=[[one],[two],[three]]},"tag"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"att-two"=[two],"att-one"=[one]}, #"name": [tag]>,"footer"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"content"=[A secondary view of things.]}, #"name": [footer]>}, #"atts": {"start"=Wi64<3>,"alpha"=[apple],"bravo"=[bannanna],"charlie"=[carrot]}, #"name": [doc]>
+- PASS NodeObj NodeObj<[ZERO/READY]#"children": {0={"list"=[[one],[two],[three]]},"tag"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"att-two"=[two],"att-one"=[one]}, #"name": [tag]>,"footer"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"content"=[A secondary view of things.]}, #"name": [footer]>}, #"atts": {"start"=Wi64<3>,"alpha"=[apple],"bravo"=[bannanna],"charlie"=[carrot]}, #"name": [doc]> att "alpha" has expected value "apple": [apple]
+- PASS NodeObj NodeObj<[ZERO/READY]#"children": {0={"list"=[[one],[two],[three]]},"tag"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"att-two"=[two],"att-one"=[one]}, #"name": [tag]>,"footer"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"content"=[A secondary view of things.]}, #"name": [footer]>}, #"atts": {"start"=Wi64<3>,"alpha"=[apple],"bravo"=[bannanna],"charlie"=[carrot]}, #"name": [doc]> att "bravo" has expected value "bannanna": [bannanna]
+- PASS NodeObj NodeObj<[ZERO/READY]#"children": {0={"list"=[[one],[two],[three]]},"tag"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"att-two"=[two],"att-one"=[one]}, #"name": [tag]>,"footer"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"content"=[A secondary view of things.]}, #"name": [footer]>}, #"atts": {"start"=Wi64<3>,"alpha"=[apple],"bravo"=[bannanna],"charlie"=[carrot]}, #"name": [doc]> att "charlie" has expected value "carrot": [carrot]
+- PASS NodeObj NodeObj<[ZERO/READY]#"children": {0={"list"=[[one],[two],[three]]},"tag"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"att-two"=[two],"att-one"=[one]}, #"name": [tag]>,"footer"=NodeObj<[ZERO/READY]#"children": {}, #"atts": {"content"=[A secondary view of things.]}, #"name": [footer]>}, #"atts": {"start"=Wi64<3>,"alpha"=[apple],"bravo"=[bannanna],"charlie"=[carrot]}, #"name": [doc]> att "start" has expected value 3: Wi64<3>
+- PASS Tag node is not NULL: [doc,.,tag]
+- PASS NodeObj [doc,.,tag] att "att-one" has expected value "one": [one]
+- PASS NodeObj [doc,.,tag] att "att-two" has expected value "two": [two]
+- PASS Footer node is not NULL: [doc,.,footer]
+- PASS NodeObj [doc,.,tag] att "content" has expected value "A secondary view of things.": [A secondary view of things.]
+
+Mem ceiling='184k' ceiling/global/max=46/59/61 page-size=4096b
+
+=== Testing: TemplCtx Tests
+
+TemplCtx tests of basic value templating.
+
+- PASS Roebling finished with state SUCCESS with keys
+- PASS Expected content found in example templ
+
+Mem ceiling='140k' ceiling/global/max=35/48/61 page-size=4096b
+
+=== Testing: Templ Tests
+
+Testing templating with a few variables.
+
+- PASS Templ: Roebling finished with state SUCCESS with keys
+- PASS Templ_Prepare has result PROCESSING
+- PASS Templ key value test has expected content
+
+Mem ceiling='144k' ceiling/global/max=36/50/61 page-size=4096b
+
+== Task/Serve Tests  
+=== Testing: Queue Tests
+
+Queue tests for file descriptors.
+
+- PASS Queue idx is on added item, expected 3, have 3 for Queue<[SUCCESS] 0001000000000000000000000000000000000000000000000000000000000000 1nvalues>
+- PASS Queue item is first item, expected Str<CONST 7/8:"ItemOne">, have Str<CONST 7/8:"ItemOne">
+
+Mem ceiling='0b' ceiling/global/max=0/15/61 page-size=4096b
+
+=== Testing: Queue Add Remove Tests
+
+Queue tests for adding and removing items.
+
+- PASS Queue has the 0th item available
+- PASS No items after first item is removed
+- PASS first item is in the first slot
+- PASS first item is in the first slot, expected "Alpha", have "Alpha"
+- PASS Expected "Alpha" = "Alpha", "Bravo" = "Bravo", "Charlie" = "Charlie"
+- PASS Expected "Alpha" = "Alpha", null(NULL) = null(NULL), "Charlie" = "Charlie"
+- PASS Expected "Alpha" = "Alpha", "Bravo-two" = "Bravo-two", "Charlie" = "Charlie"
+
+Mem ceiling='0b' ceiling/global/max=0/15/61 page-size=4096b
+
+=== Testing: Queue Iter Tests
+
+Queue tests for iterating around a queue with additions and removals.
+
+- PASS Empty Queue_Next returns END flag
+- PASS Queue item matches, expected "One", have "One"
+- PASS Queue runs for the number of items in it, have 1, for Queue<[END] 0000000000000000000000000000000000000000000000000000000000000000 1nvalues>
+- PASS Queue item matches, expected "One", have "One"
+- PASS Queue item matches, expected "Two", have "Two"
+- PASS Queue item matches, expected "Three", have "Three"
+- PASS Queue item matches, expected "Four", have "Four"
+- PASS Queue item matches, expected "Five", have "Five"
+- PASS Queue runs for the number of items in it, have 5, for Queue<[END] 0000000000000000000000000000000000000000000000000000000000000000 5nvalues>
+- PASS Queue item matches, expected "One", have "One"
+- PASS Queue item matches, expected "Two", have "Two"
+- PASS Queue item matches, expected "Three", have "Three"
+- PASS Queue item matches, expected NULL, have NULL
+- PASS Queue item matches, expected "Five", have "Five"
+- PASS Queue item matches, expected "One", have "One"
+- PASS Queue item matches, expected "Two", have "Two"
+- PASS Queue item matches, expected "Three", have "Three"
+- PASS Queue item matches, expected "Four-two", have "Four-two"
+- PASS Queue item matches, expected "Five", have "Five"
+- PASS Queue runs for the number of items in it, have 5, for Queue<[END] 0000000000000000000000000000000000000000000000000000000000000000 5nvalues>
+
+Mem ceiling='0b' ceiling/global/max=0/15/61 page-size=4096b
+
+=== Testing: Queue Criteria Tests
+
+Queue tests for multi-critiria items (time/file descriptor).
+
+- PASS No items will run at the presetn time, flags [END] 
+- PASS Queue item matches, expected "Three Seconds", have "Three Seconds"
+- PASS Only one item was available to run, i is 1, at 4 seconds from start
+- PASS Queue item matches, expected "Three Seconds", have "Three Seconds"
+- PASS Queue item matches, expected "Ten Minutes", have "Ten Minutes"
+- PASS Only one item was available to run, i is 2, at 15 minutes from start
+- PASS Queue item matches, expected "Two Days", have "Two Days"
+- PASS Queue item matches, expected "Three Seconds", have "Three Seconds"
+- PASS Queue item matches, expected "Ten Minutes", have "Ten Minutes"
+- PASS Only one item was available to run, i is 3, at 3 days from start
+- PASS Queue item matches, expected "File Descriptor", have "File Descriptor"
+- PASS Queue item matches, expected "Three Seconds", have "Three Seconds"
+- PASS PollFd set to Read: two item was available to run, i is 2, at 10 seconds from start
+- PASS Queue item matches, expected "Three Seconds", have "Three Seconds"
+- PASS No direction set on pollfd: Only one item was available to run, i is 1, at 10 seconds from start
+
+Mem ceiling='8k' ceiling/global/max=2/16/61 page-size=4096b
+
+=== Testing: Queue Scale Tests
+
+Queue testing adding and removing Queue items over time.
+
+- PASS Expected q->go to be set to binary 0000000000000000100000001000000000000000000000000000000000000001 of 16,24, and 63, have 0000000000000000100000001000000000000000000000000000000000000001
+- PASS Expected value above first slab found, have "Not Cool...", in Queue<[SUCCESS] 0000000000000000100000001000000000000000000000000000000000000001 5nvalues>
+- PASS Expected q->go to be set to binary 0000000000000000100000001000000000000000000000000000000000000001 of 1 << 16
+- PASS Expected value above first slab found, have "Hidy Ho!", in Queue<[SUCCESS] 0000000000000000100000001000000000000000000000000000000000000001 5nvalues>
+- PASS Expected q->go to be set to binary 0000000000000000100000001000000000000000000000000000000000000001 of 1 << 24
+- PASS Expected value above first slab found, have "Livin on the Edge!", in Queue<[SUCCESS] 0000000000000000100000001000000000000000000000000000000000000001 5nvalues>
+- PASS Expected q->go to be set to binary 0000000000000000100000001000000000000000000000000000000000000001 of 1 << 63
+- PASS Expected value above first slab found, have "XjfoaiwuerZduio", in Queue<[SUCCESS] 1100000000000000000000000000000000000000000000000000000000000000 5nvalues>
+- PASS Expected q->go to be set to binary 1100000000000000000000000000000000000000000000000000000000000000 of 1 << 64
+- PASS Expected value above first slab found, have "SixyFivey", in Queue<[SUCCESS] 1100000000000000000000000000000000000000000000000000000000000000 5nvalues>
+- PASS Expected q->go to be set to binary 1100000000000000000000000000000000000000000000000000000000000000 of 1 << 65
+- PASS All 10 Queue items were handled
+- PASS Max 10 scale tests finish with SUCCESS
+- PASS All 57 Queue items were handled
+- PASS Max 57 scale tests finish with SUCCESS
+- PASS All 66 Queue items were handled
+- PASS Max 66 scale tests finish with SUCCESS
+- PASS All 432 Queue items were handled
+- PASS Max 432 scale tests finish with SUCCESS
+- PASS All 777 Queue items were handled
+- PASS Max 777 scale tests finish with SUCCESS
+
+Mem ceiling='152k' ceiling/global/max=38/52/61 page-size=4096b
+
+=== Testing: TaskStep Tests
+
+Task/Step and Task_Tumble tests.
+
+- PASS Source str equals tsk->source with expected count 0
+- PASS Source str equals tsk->source with expected count 1
+- PASS Source str equals tsk->source with expected count 2
+- PASS Task finishes successfully
+
+Mem ceiling='0b' ceiling/global/max=0/15/61 page-size=4096b
+
+=== Testing: Inet Tests
+
+Inet address translation tests.
+
+- PASS From Str to quad and back matches, expected 10.1.255.7, have 10.1.255.7
+- PASS From quad to Str matches, expected 01010000100000001111111111100000, have 01010000100000001111111111100000
+- PASS From four sepeate bytes to quad matches, expected 01010000100000001111111111100000, have 01010000100000001111111111100000
+
+Mem ceiling='0b' ceiling/global/max=0/15/61 page-size=4096b
+
+=== Testing: Password Tests
+
+Password tests with variable salt and funny.
+
+- PASS Password bytes are expected "4e732bfa69b00e0dfc60ff488786b723f27d640f72598ba3b8b1adb579cfdf69", have "4e732bfa69b00e0dfc60ff488786b723f27d640f72598ba3b8b1adb579cfdf69"
+- PASS Password bytes are expected "b32465d79219a499a6abc69060d63fc03262354727cf7ad16df667185247eeff", have "b32465d79219a499a6abc69060d63fc03262354727cf7ad16df667185247eeff"
+
+Mem ceiling='0b' ceiling/global/max=0/15/61 page-size=4096b
+
+Suite Caneka ext pass(30) fail(0)
+= Test Suite: Caneka crypto
+
+Starting Mem at 56k total/maxIdx=14/61 page-size=4096b
+== ThirdParty/Api  
+=== Testing: Crypto Tests
+
+Cryptography functionality testing.
+
+- PASS Str Sha256 Matches, expected "Yay test string!" -> 8a87db5fb3a1e4491a04644396437064375c00bdaf7fea33bd4645ba138539b5, have 8a87db5fb3a1e4491a04644396437064375c00bdaf7fea33bd4645ba138539b5
+- PASS StrVec and Str text are identical: Str<CONST 16/17:"Yay test string!"> vs Str<CONST 64/65:"8a87db5fb3a1e4491a04644396437064375c00bdaf7fea33bd4645ba138539b5">
+- PASS StrVec Sha256 Matches Str<CONST 16/17:"Yay test string!"> -> "8a87db5fb3a1e4491a04644396437064375c00bdaf7fea33bd4645ba138539b5"
+- PASS longstr Str Sha256 matches, expected "da43c4b3c5e3667dcaf17f184880241908c2ab1f9e8d2f5bbf62825df6303ab6", have "da43c4b3c5e3667dcaf17f184880241908c2ab1f9e8d2f5bbf62825df6303ab6"
+- PASS StrVec Sha256 matches, expected "da43c4b3c5e3667dcaf17f184880241908c2ab1f9e8d2f5bbf62825df6303ab6", have "da43c4b3c5e3667dcaf17f184880241908c2ab1f9e8d2f5bbf62825df6303ab6"
+- PASS Salted StrVec Sha256 matches, expected "466b336b19f46a9684b4515f43ac4b3a06e080369f99394434e4b8d4f4cbc9de", have "466b336b19f46a9684b4515f43ac4b3a06e080369f99394434e4b8d4f4cbc9de"
+- PASS Public and public second generation are equals
+- PASS Secret and secret second generation are equals
+- PASS Message validates: "I super-master person, do hereby sign some cool, super-fancy stuff, that totally needed to be signed, like yesterday (sorry)" -> sig:"f126e753fd6eaf6b18ced120f0fabb810ec5a5a6bd874df5f35fc6bec533de942f6357f2bed47ccf5fcd592c20156066fedfd5d245998f5620fab1d56430e76547a8ce9530c0a58225cdcaaa387ca3faeb90123efa609f8b3efff0c611b23e04"
+
+Mem ceiling='12k' ceiling/global/max=3/17/61 page-size=4096b
+
+Suite Caneka crypto pass(1) fail(0)
+= Test Suite: Caneka inter
+
+Starting Mem at 56k total/maxIdx=14/61 page-size=4096b
+=== Testing: Http Tests
+
+Http Protocol and header parsing tests.
+
+- PASS Method is as expected 216
+- PASS Path is as expected /fancy.html
+- PASS Header is as expected for User-Agent, Firefudge/Aluminum
+- PASS Header is as expected for Broken-Header, One,Two,Three,Four
+
+Mem ceiling='20k' ceiling/global/max=5/20/61 page-size=4096b
+
+== Www Tests  
+=== Testing: Www Route Tests
+
+Testing an object that gathers and caches routes for web servers.
+
+- PASS Route for [/,tests] is not NULL
+- PASS account tests page is mime type html, have "text/html"
+- PASS account tests page is type fmt, have [fmt]
+- PASS profile stat page is mime type text/html
+- PASS profile stat page is mime type templ, have "text/html"
+
+Mem ceiling='428k' ceiling/global/max=107/121/122 page-size=4096b
+
+=== Testing: Www Route Template Tests
+
+Example route templating test.
+
+- PASS Templ from Route has expected output
+- PASS Handler: Expected template value with no header and mem details
+- PASS Footer: Expected template value with no mem object and a header
+- PASS Expected mem details in template
+
+Mem ceiling='996k' ceiling/global/max=249/262/263 page-size=4096b
+
+=== Testing: Www Route Template Tests
+
+Example route templating Pencil Format test.
+
+- PASS Default / handler is not null
+- PASS Expected fmt value
+
+Mem ceiling='680k' ceiling/global/max=170/186/263 page-size=4096b
+
+=== Testing: Www Path Tests
+
+Example route path templating test.
+
+- PASS Route has expected file expected [/,basic,/,caneka,/,examples,/,test,/,pages,/,static,/,logo-transparent-white_256,.,png], found [/basic/caneka/examples/test/pages/static,/,logo-transparent-white_256,.,png]
+- PASS Route has expected file expected [/,basic,/,caneka,/,examples,/,test,/,pages,/,public,/,index,.,fmt], found [/basic/caneka/examples/test/pages/public,/,index,.,fmt]
+- PASS Route has expected file expected [/,basic,/,caneka,/,examples,/,test,/,pages,/,system,/,not-found,.,templ], found [/basic/caneka/examples/test/pages/system,/,not-found,.,templ]
+
+Mem ceiling='804k' ceiling/global/max=201/217/263 page-size=4096b
+
+=== Testing: Www Route Mime Tests
+
+Example route mime handling tests using Route_Handle.
+
+- PASS Static route is not null
+- PASS Content from Buff piped from route matches reading file directly
+
+Mem ceiling='36k' ceiling/global/max=9/25/263 page-size=4096b
+
+=== Testing: Session Tests
+
+Session Open/Close tests.
+
+- PASS Ssid has length of 34, have [890016u1,-,81d1afe19a010000,-,fae8ea15]
+- PASS Ssid third seg is parity of User-Agent, expected "fae8ea15", have "fae8ea15"
+- PASS Ssid second seg is time, expected "81d1afe19a010000", have "81d1afe19a010000" (2025-12-03T00:49:47.393+00)
+- PASS Session ssid is not null after Start
+- PASS Session data is not NULL {"orig-ssid"="621930u2-81d1afe19a010000-fae8ea15","user-agent"="Firefudge/Aluminum"}
+- PASS Orig Ssid from stash equals ssid
+- PASS Username from updated session equals "fredieeee", have "fredieeee"
+- PASS Succsesfully closed session
+
+Mem ceiling='28k' ceiling/global/max=7/26/263 page-size=4096b
+
+=== Testing: Login Tests
+
+User login tests.
+
+- PASS Login created without error
+- PASS User dir exists "/basic/caneka/examples/session/logins/user-one"
+- PASS User dir exists "/basic/caneka/examples/session/logins/user-one/auth/"
+
+Mem ceiling='12k' ceiling/global/max=3/21/263 page-size=4096b
+
+Suite Caneka inter pass(8) fail(0)
+
+All Suites - pass(66) fail(0)

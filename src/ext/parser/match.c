@@ -235,7 +235,8 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
             }else if((def->flags & (PAT_MANY)) != 0){
                 unclaimed = TRUE;
                 if((def->flags & PAT_TERM) != 0){
-                    if((mt->type.state & MATCH_TERM_FOUND) != 0){
+                    if((mt->type.state & MATCH_TERM_FOUND) != 0
+                            && (def->flags & PAT_REQUIRE_KO) == 0){
                         match_NextTerm(mt);
                         continue;
                     }else{

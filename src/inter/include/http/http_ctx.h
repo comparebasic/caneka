@@ -17,7 +17,7 @@ typedef struct {
     StrVec *httpVersion;
     StrVec *path;
     Abstract *body;
-    Route *route;
+    Inst *route;
     Table *data;
     Span *errors;
     Table *headersOut;

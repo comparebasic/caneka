@@ -107,7 +107,7 @@ static PatCharDef headerIntValueDef[] = {
     {PAT_KO|PAT_KO_TERM, '\r', '\r'},
     {PAT_KO|PAT_KO_TERM, '\n', '\n'},
     {PAT_MANY|PAT_INVERT_CAPTURE, ' ', ' '},
-    {PAT_MANY|PAT_TERM, '0', '9'},
+    {PAT_MANY|PAT_TERM|PAT_REQUIRE_KO, '0', '9'},
     {PAT_END, 0, 0}
 };
 

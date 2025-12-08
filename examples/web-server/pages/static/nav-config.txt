@@ -1,0 +1,4 @@
+About: /
+Stats: /stats
+Status: /tests
+Features: /schedule

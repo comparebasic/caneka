@@ -14,6 +14,7 @@ enum pat_flags {
     PAT_DROPOUT = 1 << 11, /* D */
     PAT_GO_ON_FAIL = 1 << 12, /* T */
     PAT_CONSUME = 1 << 13, /* U */
+    PAT_REQUIRE_KO = 1 << 14 /* R */
 };
 
 typedef struct patchardef {

@@ -74,27 +74,26 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
     return SUCCESS;
 }
 
-static status routeFuncStatic(Buff *bf, void *action, Table *_data, void *_source){
+static status routeFuncStatic(Buff *bf, void *action, Table *_data, HttpCtx *ctx){
     Str *pathS = StrVec_Str(bf->m, (StrVec *)as(action, TYPE_STRVEC));
     bf->type.state |= BUFF_UNBUFFERED;
     return File_Open(bf, pathS, O_RDONLY);
 }
 
-static status routeFuncTempl(Buff *bf, void *action, Table *data, void *source){
+static status routeFuncTempl(Buff *bf, void *action, Table *data, HttpCtx *ctx){
     Templ *templ = (Templ *)as(action, TYPE_TEMPL);
 
     Templ_Reset(templ);
     templ->type.state |= bf->type.state;
-    status r = Templ_ToS(templ, bf, data, source);
+    status r = Templ_ToS(templ, bf, data, NULL);
     return r;
 }
 
-static status routeFuncFmt(Buff *bf, void *action, Table *_data, void *source){
+static status routeFuncFmt(Buff *bf, void *action, Table *_data, HttpCtx *ctx){
     return Fmt_ToHtml(bf, (Mess *)as(action, TYPE_MESS));
 }
 
-static status routeFuncFileDb(Buff *bf, void *action, Table *data, void *source){
-    Task *tsk = (Task *)as(source, TYPE_TASK);
+static status routeFuncFileDb(Buff *bf, void *action, Table *data, HttpCtx *ctx){
     Buff *fdb = (Buff *)as(action, TYPE_BUFF);
     /* make sure the fdb file descriptor is open */
     /* process json form data */
@@ -174,7 +173,7 @@ status Route_SetEtag(Route *rt, Str *path, struct timespec *mod){
        }
     }
     Table *headers = Seel_Get(rt, K(m, "headers"));
-    Table_Set(headers, "Etag", etag);
+    Table_Set(headers, S(m, "Etag"), etag);
 
     return ZERO;
 }
@@ -299,7 +298,7 @@ Route *Route_GetHandler(Route *rt, StrVec *_path){
     return handler;
 }
 
-status Route_Handle(Route *rt, Buff *bf, Table *data, void *source){
+status Route_Handle(Route *rt, Buff *bf, Table *data, HttpCtx *ctx){
     DebugStack_Push(rt, rt->type.of);
     StrVec *path = (StrVec *)Seel_Get(rt, S(bf->m, "file"));
     MemCh *m = bf->m;
@@ -312,8 +311,20 @@ status Route_Handle(Route *rt, Buff *bf, Table *data, void *source){
     Abstract *action = Seel_Get(rt, S(m, "action"));
     Single *funcW = (Single *)as(Seel_Get(rt, S(m, "func")), TYPE_WRAPPED_FUNC);
 
+    Table *headers = Seel_Get(rt, K(bf->m, "headers"));
+    if(ctx != NULL && headers != NULL){
+        Iter it;
+        Iter_Init(&it, headers);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                Table_Set(ctx->headersOut, h->key, h->value);
+            }
+        }
+    }
+
     RouteFunc func = (RouteFunc)funcW->val.ptr;
-    status r = func(bf, action, data, source);
+    status r = func(bf, action, data, ctx);
 
     DebugStack_Pop();
     return r;

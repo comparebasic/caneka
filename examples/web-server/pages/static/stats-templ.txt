@@ -1,0 +1,25 @@
+<h1>Statistics of the Example</h1>
+<p>Server running since {stats#uptime}</p>
+; stats.mem ?
+<h2>Memory Heap</h2>
+<p>Total Heap Size: <b>{mem-used}</b> of {mem-total}</p>
+<ul>
+;   mem-details...
+    <li>
+        <p><b>{*key}</b>: {*value}</p>
+    </li>
+;
+</ul>
+;
+
+<h2>What Is This?</h2>
+<p>Above you will see details about the custom memory manager.</p>
+<ul>
+    <li><b>Total Heap Size</b>: Is the amount of memory used from a 16m allocation (via mmap).</li>
+    <li><b>recycled</b>: Number of 4k pages that have been used, wiped, and are available again.</li>
+    <li><b>total</b>: Number of 4k pages in use.</li>
+    <li><b>bookIdx</b>: The index of the book being used (16m allocation).</li>
+    <li><b>pageIdx</b>: The highest index of pages ever used in this book.</li>
+</ul>
+<p>It's hard to explain the difference between a webserver and a webserver on an entirely basic stack. But this is a small window into how deep the <a href="https://caneka.org">Caneka</a> system goes.</p>
+<p>You will also notice a few memory leaks if you load a few pages :). The temporary memory level system is in place but implementation is not yet a priority.</p>

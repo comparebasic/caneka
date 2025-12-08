@@ -75,14 +75,13 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     r |= Fmt(bf, "HTTP/1.1 $\r\n"
         "Date: $\r\n"
         "Server: caneka/0.1\r\n"
-        "Content-Type: $\r\n"
-        "\r\n" , args);
+        "Content-Type: $\r\n", args);
 
     Iter it;
     Iter_Init(&it, ctx->headersOut);
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);  
-        if(h == NULL){
+        if(h != NULL){
             ToS(bf, h->key, 0, ZERO);
             Buff_AddBytes(bf, (byte *)": ", 2);
             ToS(bf, h->value, 0, ZERO);
@@ -91,12 +90,13 @@ status HttpCtx_WriteHeaders(Buff *bf, HttpCtx *ctx){
     }
 
     if(ctx->code == 304){
+        r |= Buff_AddBytes(bf, (byte *)"\r\n", 2);
         return r;
     }
 
     args[0] = I64_Wrapped(bf->m, ctx->contentLength),
     args[1] = NULL;
-    r |= Fmt(bf, "Content-Length: $\r\n", args);
+    r |= Fmt(bf, "Content-Length: $\r\n\r\n", args);
 
     return r;
 }
