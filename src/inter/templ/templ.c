@@ -431,6 +431,7 @@ status Templ_Prepare(Templ *templ){
 }
 
 i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
+    templ->type.state &= ~SUCCESS;
     templ->m->level++; 
     DebugStack_Push(templ, templ->type.of);
     i64 total = 0;
@@ -452,6 +453,7 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     DebugStack_Pop();
     templ->m->level--; 
     Templ_Reset(templ);
+    templ->type.state |= SUCCESS;
     return total;
 
 }

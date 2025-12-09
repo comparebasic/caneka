@@ -30,7 +30,7 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     word *ptr = NULL;
     if(ctx->type.state & BINSEG_REVERSED){
         ptr = (word *)entry->bytes;
-        hdr = (BinSegHeader *)entry->bytes+sizeof(word);
+        hdr = (BinSegHeader *)(entry->bytes+sizeof(word));
     }else{
         hdr = (BinSegHeader *)entry->bytes;
         ptr = (word *)(entry->bytes+sizeof(BinSegHeader));
@@ -192,7 +192,7 @@ static status I64_ToBinSeg(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
     i64 *ptr = NULL;
     if(ctx->type.state & BINSEG_REVERSED){
         ptr = (i64 *)entry->bytes;
-        hdr = (BinSegHeader *)entry->bytes+sizeof(i64);
+        hdr = (BinSegHeader *)(entry->bytes+sizeof(i64));
     }else{
         hdr = (BinSegHeader *)entry->bytes;
         ptr = (i64 *)(entry->bytes+sizeof(BinSegHeader));
@@ -222,7 +222,7 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     byte *ptr = NULL;
     if(ctx->type.state & BINSEG_REVERSED){
         ptr = entry->bytes;
-        hdr = (BinSegHeader *)entry->bytes+s->length;
+        hdr = (BinSegHeader *)(entry->bytes+s->length);
     }else{
         hdr = (BinSegHeader *)entry->bytes;
         ptr = (entry->bytes+sizeof(BinSegHeader));
@@ -240,8 +240,6 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
     DebugStack_Push(ctx, ctx->type.of);
     MemCh *m = ctx->m;
-
-    void *args[] = {BinSegCtx_KindName(hdr->kind), NULL};
     
     Iter it;
     Span *shelf = Span_Get(ctx->shelves, hdr->ident.id);
@@ -346,14 +344,21 @@ status BinSegCtx_Load(BinSegCtx *ctx){
         .bytes = _hdrBytes
     };
 
-    while(((ctx->read->type.state|ctx->type.state) & (SUCCESS|ERROR|NOOP|END)) == 0){
+    while((((ctx->read->type.state&(ERROR|END))|ctx->type.state) &
+            (SUCCESS|ERROR|NOOP|END)) == 0){
         Guard_Incr(m, &guard, BINSEG_SEG_MAX, FUNCNAME, FILENAME, LINENUMBER);
+
 
         hdrS.length = 0;
         if(ctx->type.state & BINSEG_REVERSED){
             Buff_RevGetStr(ctx->read, &hdrS);
         }else{
             Buff_GetStr(ctx->read, &hdrS);
+        }
+
+        if(ctx->read->type.state & END){
+            ctx->read->type.state &= ~ERROR;
+            break;
         }
 
         if(hdrS.length != sizeof(BinSegHeader)){
@@ -426,11 +431,27 @@ status BinSegCtx_Open(BinSegCtx *ctx, Str *path){
     }
     if(ctx->type.state & BINSEG_ADD){
         ctx->add = Buff_Make(m, BUFF_UNBUFFERED|BUFF_DATASYNC);
-        r |= File_Open(ctx->add, path, O_WRONLY|O_TRUNC);
+        r |= File_Open(ctx->add, path, O_WRONLY|O_APPEND);
     }
     if(ctx->type.state & BINSEG_MODIFY){
         ctx->modify = Buff_Make(m, BUFF_UNBUFFERED|BUFF_DATASYNC);
         r |= File_Open(ctx->modify, path, O_RDWR);
+    }
+    ctx->type.state |= r;
+    return ctx->type.state;
+}
+
+status BinSegCtx_Close(BinSegCtx *ctx){
+    MemCh *m = ctx->m;
+    status r = READY;
+    if(ctx->type.state & BINSEG_READ){
+        r |= File_Close(ctx->read);
+    }
+    if(ctx->type.state & BINSEG_ADD){
+        r |= File_Close(ctx->add);
+    }
+    if(ctx->type.state & BINSEG_MODIFY){
+        r |= File_Close(ctx->modify);
     }
     ctx->type.state |= r;
     return ctx->type.state;

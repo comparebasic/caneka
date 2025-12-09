@@ -592,6 +592,12 @@ status WwwRouteRbs_Tests(MemCh *m){
 
     StrVec *rbsPath = IoAbsPath(m, "examples/test/pages/forms");
 
+    StrVec *rbsFilePath = StrVec_Copy(m, rbsPath);
+    StrVec_Add(rbsFilePath, S(m, "/signup.rbs"));
+    Buff *wiper = Buff_Make(m, BUFF_CLOBBER);
+    File_Open(wiper, StrVec_Str(m, rbsFilePath), O_CREAT|O_WRONLY|O_TRUNC);
+    File_Close(wiper);
+
     Route *root = Route_Make(m);
     Route_Collect(root, rbsPath);
 
@@ -604,15 +610,36 @@ status WwwRouteRbs_Tests(MemCh *m){
 
     Buff *bf = Buff_Make(m, ZERO);
     status re = Route_Handle(rt, bf, data, ctx);
+    args[0] = Type_StateVec(m, ZERO, re);
+    args[1] = NULL;
     r |= Test((re & (SUCCESS|ERROR)) == SUCCESS,
-        "Route to persist binseg data has status SUCCESS", NULL);
+        "Route to persist binseg data has status SUCCESS, have @", args);
 
-    args[0] = ctx;
-    args[1] = rt;
-    args[2] = bf->v;
-    Out("^p.Ctx @\n\nRoute @ -> @^0\n", args);
+    Str *expected = S(m, "<p>Thank you Fantsy, We will send you updates about the"
+        " cool stuff we are working on!</p>\n");
+    expected->type.state |= DEBUG;
+    args[0] = expected;
+    args[1] = NULL;
+    r |= Test(Equals(bf->v, args[0]), 
+        "Expected content is place in response buffer, have @", args);
 
-    r |= ERROR;
+    BinSegCtx *bsCtx = BinSegCtx_Make(m, BINSEG_READ|BINSEG_ADD|BINSEG_REVERSED);
+    BinSegCtx_Open(bsCtx, StrVec_Str(m, rbsFilePath));
+
+    struct timespec delay = {0, 5000000};
+    struct timespec remaining;
+    Time_Delay(&delay, &remaining);
+
+    BinSegCtx_Load(bsCtx);
+    Table *tbl = Span_Get(bsCtx->records, 0);
+    args[0] = Table_Get(tbl, K(m, "first-name"));
+    args[1] = Table_Get(tbl, K(m, "email"));
+    args[2] = tbl;
+    args[3] = NULL;
+    r |= Test(Equals(args[0], K(m, "Fantsy")) &&
+            Equals(args[1], K(m, "fancy.pantsy@example.com")), 
+        "Expected content from binseg, have @ and @ from @", args);
+    BinSegCtx_Close(bsCtx);
 
     DebugStack_Pop();
     return r;

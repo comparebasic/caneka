@@ -158,14 +158,8 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
     i64 pos = lseek(bf->fd, offset, whence);
     if(pos < 0){
         Buff_Stat(bf);
-        args[0] = I64_Wrapped(bf->m, pos);
-        args[1] = I32_Wrapped(bf->m, offset);
-        args[2] = bf;
-        args[3] = Str_CstrRef(bf->m, Buff_WhenceChars(whence));
-        args[6] = NULL;
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error seek failed with pos $ for offset $ on @ whence $", args);
-        return ERROR;
+        bf->type.state |= (ERROR|END);
+        return bf->type.state;
     }else if(pos > 0){
         bf->type.state |= PROCESSING;
     }

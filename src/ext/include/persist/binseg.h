@@ -53,6 +53,7 @@ extern struct lookup *BinSegLookup;
 extern Table *BinSegActionNames;
 
 status BinSegCtx_Open(BinSegCtx *ctx, Str *path);
+status BinSegCtx_Close(BinSegCtx *ctx);
 BinSegCtx *BinSegCtx_Make(MemCh *m, word flags);
 status BinSegCtx_SendByIdent(BinSegCtx *ctx, void *_a, i16 id, i16 idx);
 status BinSegCtx_Load(BinSegCtx *ctx);

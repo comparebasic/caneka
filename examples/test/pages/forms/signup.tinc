@@ -1,1 +1,1 @@
-<p>Thank you {forms.signup#first-name}, We will send you updates about the cool stuff we are working on!</p>
+<p>Thank you {form#first-name}, We will send you updates about the cool stuff we are working on!</p>

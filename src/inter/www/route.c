@@ -90,8 +90,8 @@ static status routeFuncTempl(Buff *bf,
 
     Templ_Reset(templ);
     templ->type.state |= bf->type.state;
-    status r = Templ_ToS(templ, bf, data, NULL);
-    return r;
+    Templ_ToS(templ, bf, data, NULL);
+    return templ->type.state;
 }
 
 static status routeFuncFmt(Buff *bf,
@@ -105,7 +105,7 @@ static status routeFuncFileDb(Buff *bf,
         Route *rt, Table *data, HttpCtx *ctx){
     MemCh *m = bf->m;
     BinSegCtx *bsCtx = (BinSegCtx *)as(Seel_Get(rt, K(m, "action")), TYPE_BINSEG_CTX);
-    Abstract *action = Table_Get(ctx->headersIt.p, K(m, "action"));
+    Abstract *action = Table_Get(ctx->queryIt.p, K(m, "action"));
     status r = READY;
     if(action == NULL){
         ctx->code = 403;
@@ -327,9 +327,6 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
             StrVec *incPath = StrVec_Copy(m, path);
             IoUtil_SwapExt(m, incPath, S(m, "tinc"));
 
-            void *args[] = {path, incPath, NULL};
-            Out("^p.path @/@^0\n", args);
-
             if(File_PathExists(m, StrVec_Str(m, incPath))){
                 Templ *templ = prepareTempl(rt, incPath);
                 if(templ != NULL){
@@ -339,10 +336,8 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         }
 
         BinSegCtx *ctx = BinSegCtx_Make(m, flags);
+        BinSegCtx_Open(ctx, StrVec_Str(m, path));
         ctx->seel = seel;
-
-        void *ar[] = {config, ctx, NULL};
-        Out("^y.Config @\nRbs @ do @^0\n", ar);
 
         Span_Set(rt, ROUTE_PROPIDX_ACTION, ctx);
         DebugStack_Pop();
