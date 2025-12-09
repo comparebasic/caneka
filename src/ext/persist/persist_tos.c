@@ -47,7 +47,7 @@ static status persistInitLabels(MemCh *m, Lookup *lk){
         binSegCtxLabels[9] = Str_CstrRef(m, "REVERSED");
         binSegCtxLabels[10] = Str_CstrRef(m, "READ");
         binSegCtxLabels[11] = Str_CstrRef(m, "ADD");
-        binSegCtxLabels[1] = Str_CstrRef(m, "MODIFY");
+        binSegCtxLabels[12] = Str_CstrRef(m, "MODIFY");
         Lookup_Add(m, lk, TYPE_BINSEG_CTX, (void *)binSegCtxLabels);
         r |= SUCCESS;
     }

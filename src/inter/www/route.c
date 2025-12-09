@@ -105,7 +105,7 @@ static status routeFuncFileDb(Buff *bf, void *action, Table *data, HttpCtx *ctx)
     return NOOP;
 }
 
-static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
+static NodeObj *Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
     MemCh *m = rt->m;
 
     StrVec *path = StrVec_Make(m);
@@ -119,9 +119,9 @@ static status Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
     if(config != NULL && config->nvalues > 0){
         Table *tbl = Seel_Get(rt, S(m, "data"));
         Table_SetByCstr(tbl, "config", config);
-        return SUCCESS;
+        return config;
     }
-    return NOOP;
+    return NULL;
 }
 
 Single *Route_MimeFunc(StrVec *path){
@@ -210,7 +210,7 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         Span_Set(rt, ROUTE_PROPIDX_ACTION, path);
     }
 
-    Route_addConfigData(ctx, rt, token);
+    NodeObj *config = Route_addConfigData(ctx, rt, token);
 
     if(funcW->type.state & ROUTE_FMT){
         StrVec *content = File_ToVec(m, pathS);
@@ -265,13 +265,26 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_BINSEG){
-        Buff *bf = Buff_Make(m, ZERO); 
+        word flags = BINSEG_REVERSED;
 
-        /* TODO: make this a binseg reader object with seperate 
-         * descriptors for append/read/modify */
-        File_Open(bf, pathS, O_WRONLY|O_APPEND);
+        if(config != NULL){
+            NodeObj *rbsConfig = Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET);
+            StrVec *actionV = NodeObj_Att(rbsConfig, K(m, "action"));
+            Span *actions = Config_Sequence(m, actionV);
+            Iter it;
+            Iter_Init(&it, actions);
+            while((Iter_Next(&it) & END) == 0){
+                Abstract *a = Iter_Get(&it);
+                flags |= BinSeg_ActionByStr(a);
+            }
+        }
 
-        Span_Set(rt, ROUTE_PROPIDX_ACTION, bf);
+        BinSegCtx *ctx = BinSegCtx_Make(m, flags);
+
+        void *ar[] = {config, ctx, NULL};
+        Out("^y.Config @\nRbs @ do @^0\n", ar);
+
+        Span_Set(rt, ROUTE_PROPIDX_ACTION, ctx);
         DebugStack_Pop();
         return SUCCESS;
     }

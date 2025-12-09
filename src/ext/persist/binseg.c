@@ -2,6 +2,16 @@
 #include <caneka.h>
 
 Lookup *BinSegLookup = NULL;
+Table *BinSegActionNames;
+
+word BinSeg_ActionByStr(void *a){
+    Single *sg = Table_Get(BinSegActionNames, a);
+    if(sg == NULL){
+        return ZERO; 
+    }else{
+        return sg->val.w;
+    }
+}
 
 static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     MemCh *m = ctx->m;
@@ -451,6 +461,12 @@ status BinSeg_Init(MemCh *m){
         r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_I32, (void *)I64_ToBinSeg);
         r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_WORD, (void *)I64_ToBinSeg);
         r |= Lookup_Add(m, BinSegLookup, TYPE_WRAPPED_I16, (void *)I64_ToBinSeg);
+    }
+    if(BinSegActionNames == NULL){
+        BinSegActionNames = Table_Make(m);
+        Table_Set(BinSegActionNames, S(m, "add"), I16_Wrapped(m, BINSEG_ADD));
+        Table_Set(BinSegActionNames, S(m, "read"), I16_Wrapped(m, BINSEG_READ));
+        Table_Set(BinSegActionNames, S(m, "modify"), I16_Wrapped(m, BINSEG_MODIFY));
     }
     return r;
 }

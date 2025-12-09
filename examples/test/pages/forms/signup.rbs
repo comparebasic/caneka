@@ -1,0 +1,3 @@
+binseg {
+    action: add, read, modify
+}

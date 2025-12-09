@@ -2,6 +2,7 @@ status WwwRoute_Tests(MemCh *gm);
 status WwwRouteTempl_Tests(MemCh *gm);
 status WwwRouteFmt_Tests(MemCh *m);
 status WwwRouteMime_Tests(MemCh *gm);
+status WwwRouteRbs_Tests(MemCh *m);
 status WwwPath_Tests(MemCh *gm);
 status Http_Tests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
@@ -43,6 +44,12 @@ static TestSet InterTests[] = {
         "Www Route Template Tests",
         WwwRouteFmt_Tests,
         "Example route templating Pencil Format test.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Www Route RevBinSeg Tests",
+        WwwRouteRbs_Tests,
+        "Testing submission to an RevBinSeg DB",
         FEATURE_COMPLETE,
     },
     {

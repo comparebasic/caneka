@@ -49,12 +49,14 @@ typedef struct binseg_hdr {
 } BinSegHeader;
 
 extern struct lookup *BinSegLookup;
+extern Table *BinSegActionNames;
 
 status BinSegCtx_Open(BinSegCtx *ctx, Str *path);
 BinSegCtx *BinSegCtx_Make(MemCh *m, word flags);
 status BinSegCtx_SendByIdent(BinSegCtx *ctx, void *_a, i16 id, i16 idx);
 status BinSegCtx_Load(BinSegCtx *ctx);
 word BinSegCtx_HeaderSize(word kind, word length);
+word BinSeg_ActionByStr(void *a);
 
 #define BinSegCtx_Send(ctx, a) BinSegCtx_SendByIdent((ctx), (a), 0, 0)
 

@@ -8,6 +8,18 @@ Inst *Config_FromVec(MemCh *m, StrVec *v){
     return FormatConfig_GetRoot(rbl);
 }
 
+Span *Config_Sequence(MemCh *m, StrVec *v){
+    PatCharDef def[] = {
+        {PAT_MANY|PAT_TERM, ' ', ' '},
+        {PAT_END, 0, 0}
+    };
+    Match *mt = Match_Make(m, (PatCharDef *)&def, Span_Make(m));
+    mt->type.state |= MATCH_SEARCH;
+    StrVec *_v = StrVec_Make(m);
+    StrVec_Split(v, mt);
+    return v->p;
+}
+
 Inst *Config_FromPath(MemCh *m, Str *path){
     Buff *bf = Buff_Make(m, ZERO);
     if(File_Exists(bf, path)){

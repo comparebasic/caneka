@@ -557,3 +557,54 @@ status WwwRouteMime_Tests(MemCh *m){
     DebugStack_Pop();
     return r;
 }
+
+status WwwRouteRbs_Tests(MemCh *m){
+    DebugStack_Push(NULL, 0);
+    void *args[5];
+    status r = READY;
+
+    ProtoCtx *proto = HttpProto_Make(m);
+    HttpCtx *ctx = (HttpCtx*)as(proto->ctx, TYPE_HTTP_CTX);
+
+    Str *content = S(m, 
+        "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");
+
+    args[0] = Str_FromI64(m, content->length);
+    args[1] = content;
+    args[2] = NULL;
+    StrVec *v = Fmt_ToStrVec(m, 
+        "POST /forms/signup?action=add HTTP/1.1\r\n"
+        "User-Agent: Firefudge/Aluminum\r\n"
+        "Content-Type: application/json\r\n"
+        "Accept: text/html\r\n"
+        "Content-Length: $\r\n"
+        "\r\n"
+        "$", args);
+
+    Cursor *curs = Cursor_Make(m, v);
+    Roebling *rbl = HttpRbl_Make(m, curs, proto);
+    Roebling_Run(rbl);
+
+    r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
+
+    NodeObj *config = Inst_Make(m, TYPE_NODEOBJ);
+    HttpCtx_ParseBody(ctx, config, curs);
+
+    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED); 
+    StrVec *rbsPath = IoAbsPath(m, "examples/test/pages/forms/");
+
+    Route *root = Route_Make(m);
+    Route_Collect(root, rbsPath);
+
+    StrVec *url = IoPath(m, "/signup"); 
+    Route *rt = Route_GetHandler(root, url);
+
+    args[0] = ctx;
+    args[1] = rt;
+    Out("^p.Ctx @\n\nRoute @^0\n", args);
+
+    r |= ERROR;
+
+    DebugStack_Pop();
+    return r;
+}

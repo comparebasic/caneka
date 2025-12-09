@@ -70,6 +70,7 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         Span_AddSpanRev(cmd, ctx->current.staticlibs);
         Span_AddSpan(cmd, ctx->input.libs);
     }else{
+        Span_Add(cmd, Str_CstrRef(m, "-g"));
         Span_Add(cmd, Str_CstrRef(m, "-c"));
         Span_Add(cmd, Str_CstrRef(m, "-o"));
         Span_Add(cmd, StrVec_Str(m, ctx->current.dest));
