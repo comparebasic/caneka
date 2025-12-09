@@ -74,14 +74,19 @@ static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
     return SUCCESS;
 }
 
-static status routeFuncStatic(Buff *bf, void *action, Table *_data, HttpCtx *ctx){
-    Str *pathS = StrVec_Str(bf->m, (StrVec *)as(action, TYPE_STRVEC));
+static status routeFuncStatic(Buff *bf,
+        Route *rt, Table *_data, HttpCtx *ctx){
+    MemCh *m = bf->m;
+    Str *pathS = StrVec_Str(bf->m,
+        (StrVec *)as(Seel_Get(rt, K(m, "action")), TYPE_STRVEC));
     bf->type.state |= BUFF_UNBUFFERED;
     return File_Open(bf, pathS, O_RDONLY);
 }
 
-static status routeFuncTempl(Buff *bf, void *action, Table *data, HttpCtx *ctx){
-    Templ *templ = (Templ *)as(action, TYPE_TEMPL);
+static status routeFuncTempl(Buff *bf,
+        Route *rt, Table *data, HttpCtx *ctx){
+    MemCh *m = bf->m;
+    Templ *templ = (Templ *)as(Seel_Get(rt, K(m, "templ")), TYPE_TEMPL);
 
     Templ_Reset(templ);
     templ->type.state |= bf->type.state;
@@ -89,19 +94,48 @@ static status routeFuncTempl(Buff *bf, void *action, Table *data, HttpCtx *ctx){
     return r;
 }
 
-static status routeFuncFmt(Buff *bf, void *action, Table *_data, HttpCtx *ctx){
-    return Fmt_ToHtml(bf, (Mess *)as(action, TYPE_MESS));
+static status routeFuncFmt(Buff *bf,
+        Route *rt, Table *_data, HttpCtx *ctx){
+    MemCh *m = bf->m;
+    return Fmt_ToHtml(bf,
+        (Mess *)as(Seel_Get(rt, K(m, "action")), TYPE_MESS));
 }
 
-static status routeFuncFileDb(Buff *bf, void *action, Table *data, HttpCtx *ctx){
-    Buff *fdb = (Buff *)as(action, TYPE_BUFF);
-    /* make sure the fdb file descriptor is open */
-    /* process json form data */
-    /* save to filedb */
-    /* set mime type / detect Accept type */
-    /* add response handler from inc */
+static status routeFuncFileDb(Buff *bf,
+        Route *rt, Table *data, HttpCtx *ctx){
+    MemCh *m = bf->m;
+    BinSegCtx *bsCtx = (BinSegCtx *)as(Seel_Get(rt, K(m, "action")), TYPE_BINSEG_CTX);
+    Abstract *action = Table_Get(ctx->headersIt.p, K(m, "action"));
+    status r = READY;
+    if(action == NULL){
+        ctx->code = 403;
+        ctx->type.state |= ERROR;
+        return ctx->type.state;
+    }
+    if(Equals(action, K(m, "add")) && ctx->body != NULL &&
+            ctx->body->type.of == TYPE_TABLE || 
+            ctx->body->type.of == TYPE_SPAN || 
+            (ctx->body->type.of & TYPE_INSTANCE) 
+        ){
+        BinSegCtx_Send(bsCtx, ctx->body);
+    }else if(Equals(action, K(m, "modify"))){
+        /* modify and existing binseg record */;
+    }else if(Equals(action, K(m, "read"))){
+        /* read from binseg */;
+    }else{
+        ctx->code = 403;
+        ctx->type.state |= ERROR;
+        return ctx->type.state;
+    }
 
-    /* tbl to json */
+    StrVec *acceptHeader = Table_Get(ctx->headersIt.p, K(m, "Accept"));
+    if(acceptHeader != NULL && Equals(acceptHeader, K(m, "text/html"))){
+        Table_Set(data, K(m, "form"), ctx->body);
+        return routeFuncTempl(bf, rt, data, ctx);
+    }else{
+        /* handle json response here */;
+    }
+
     return NOOP;
 }
 
@@ -122,6 +156,39 @@ static NodeObj *Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
         return config;
     }
     return NULL;
+}
+
+static Templ *prepareTempl(Route *rt, StrVec *path){
+    void *args[3];
+    MemCh *m = rt->m;
+    StrVec *content = File_ToVec(m, StrVec_Str(m, path));
+
+    if(content == NULL || content->total == 0){
+        args[0] = path;
+        args[1] = content;
+        args[2] = NULL;
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error path for Templ has no content for: $ -> @", args);
+        rt->type.state |= ERROR;
+        return NULL;
+    }
+
+    Buff *bf = Buff_Make(m, ZERO);
+
+    Cursor *curs = Cursor_Make(m, content);
+    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+
+    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    if((Templ_Prepare(templ) & PROCESSING) == 0){
+        args[0] = path;
+        args[1] = NULL;
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error preparing template for $", args);
+        rt->type.state |= ERROR;
+        Templ_Reset(templ);
+        return NULL;
+    }
+    return templ;
 }
 
 Single *Route_MimeFunc(StrVec *path){
@@ -231,42 +298,16 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_DYNAMIC){
-        StrVec *content = File_ToVec(m, pathS);
-
-        if(content == NULL || content->total == 0){
-            args[0] = path;
-            args[1] = content;
-            args[2] = NULL;
-            Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error path for Templ has no content for: $ -> @", args);
-            rt->type.state |= ERROR;
-            DebugStack_Pop();
-            return rt->type.state;
+        Templ *templ = prepareTempl(rt, path);
+        if(templ != NULL){
+            Span_Set(rt, ROUTE_PROPIDX_TEMPL, templ);
         }
-
-        Buff *bf = Buff_Make(m, ZERO);
-
-        Cursor *curs = Cursor_Make(m, content);
-        TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-
-        Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-        if((Templ_Prepare(templ) & PROCESSING) == 0){
-            args[0] = path;
-            args[1] = NULL;
-            Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error preparing template for $", args);
-            rt->type.state |= ERROR;
-            Templ_Reset(templ);
-            DebugStack_Pop();
-            return rt->type.state;
-        }
-
-        Span_Set(rt, ROUTE_PROPIDX_ACTION, templ);
         DebugStack_Pop();
         return SUCCESS;
     }else if(funcW->type.state & ROUTE_BINSEG){
         word flags = BINSEG_REVERSED;
-
+        
+        Table *seel = NULL;
         if(config != NULL){
             NodeObj *rbsConfig = Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET);
             StrVec *actionV = NodeObj_Att(rbsConfig, K(m, "action"));
@@ -277,9 +318,28 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
                 Abstract *a = Iter_Get(&it);
                 flags |= BinSeg_ActionByStr(a);
             }
+
+            StrVec *seelName = NodeObj_Att(rbsConfig, K(m, "seel"));
+            if(seelName != NULL){
+                seel = Table_Get(SeelByName, seelName);
+            }
+
+            StrVec *incPath = StrVec_Copy(m, path);
+            IoUtil_SwapExt(m, incPath, S(m, "tinc"));
+
+            void *args[] = {path, incPath, NULL};
+            Out("^p.path @/@^0\n", args);
+
+            if(File_PathExists(m, StrVec_Str(m, incPath))){
+                Templ *templ = prepareTempl(rt, incPath);
+                if(templ != NULL){
+                    Span_Set(rt, ROUTE_PROPIDX_TEMPL, templ);
+                }
+            }
         }
 
         BinSegCtx *ctx = BinSegCtx_Make(m, flags);
+        ctx->seel = seel;
 
         void *ar[] = {config, ctx, NULL};
         Out("^y.Config @\nRbs @ do @^0\n", ar);
@@ -341,7 +401,7 @@ status Route_Handle(Route *rt, Buff *bf, Table *data, HttpCtx *ctx){
     }
 
     RouteFunc func = (RouteFunc)funcW->val.ptr;
-    status r = func(bf, action, data, ctx);
+    status r = func(bf, rt, data, ctx);
 
     DebugStack_Pop();
     return r;
@@ -361,7 +421,9 @@ status Route_Collect(Route *rt, StrVec *path){
     ctx.root = rt;
     ctx.path = path;
 
-    return Dir_Climb(m, StrVec_Str(m, path), NULL, fileFunc, &ctx);
+    status r = Dir_Climb(m, StrVec_Str(m, path), NULL, fileFunc, &ctx);
+    MemCh_FreeTemp(m);
+    return r;
 }
 
 Route *Route_Make(MemCh *m){
@@ -388,6 +450,7 @@ status Route_ClsInit(MemCh *m){
     Table_Set(seel, S(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, S(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
     Table_Set(seel, S(m, "headers"), I16_Wrapped(m, TYPE_TABLE));
+    Table_Set(seel, S(m, "templ"), I16_Wrapped(m, TYPE_TEMPL));
     Table_Set(seel, S(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));
     r |= Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE, h->orderIdx);
 

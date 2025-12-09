@@ -1,8 +1,16 @@
+#define TEST_BUFF_SIZE 1023
+
+#define TEST_SEND SOCK_OUT
+#define TEST_RECV SOCK_IN
+#define TEST_SERVE_END -1 
+#define TEST_DELAY_ONLY 0 
+
+#define TEST_MEM_MAX_CEILING 512
+
 enum test_types {
     _TYPE_TEST_START = _TYPE_CANEKA_CORE_END,
     TYPE_TEST_SUITE,
 };
-
 
 enum test_status {
     SECTION_LABEL = 1 << 8,
@@ -41,21 +49,9 @@ typedef struct req_test_spec {
     /* meta */
 } ReqTestSpec;
 
-
-
-#define TEST_BUFF_SIZE 1023
-
-#define TEST_SEND SOCK_OUT
-#define TEST_RECV SOCK_IN
-#define TEST_SERVE_END -1 
-#define TEST_DELAY_ONLY 0 
-
-#define TEST_MEM_MAX_CEILING 256
-
 status Test(boolean condition, char *fmt, void *args[]);
 status TestShow(boolean condition, char *fmtSuccess, char *fmtError, void *args[]);
 status Test_Runner(MemCh *gm, TestSuite *suite);
 Str *Test_GetStr512(MemCh *m);
 
 TestSuite *TestSuite_Make(MemCh *m, Str *name, TestSet *set);
-

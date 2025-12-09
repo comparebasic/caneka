@@ -590,8 +590,7 @@ status WwwRouteRbs_Tests(MemCh *m){
     NodeObj *config = Inst_Make(m, TYPE_NODEOBJ);
     HttpCtx_ParseBody(ctx, config, curs);
 
-    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED); 
-    StrVec *rbsPath = IoAbsPath(m, "examples/test/pages/forms/");
+    StrVec *rbsPath = IoAbsPath(m, "examples/test/pages/forms");
 
     Route *root = Route_Make(m);
     Route_Collect(root, rbsPath);
@@ -599,9 +598,19 @@ status WwwRouteRbs_Tests(MemCh *m){
     StrVec *url = IoPath(m, "/signup"); 
     Route *rt = Route_GetHandler(root, url);
 
+    Table *data = Table_Make(m);
+    Table *rtData = Seel_Get(rt, K(m, "data"));
+    Table_Set(data, S(m, "config"), Table_Get(rtData, K(m, "config")));
+
+    Buff *bf = Buff_Make(m, ZERO);
+    status re = Route_Handle(rt, bf, data, ctx);
+    r |= Test((re & (SUCCESS|ERROR)) == SUCCESS,
+        "Route to persist binseg data has status SUCCESS", NULL);
+
     args[0] = ctx;
     args[1] = rt;
-    Out("^p.Ctx @\n\nRoute @^0\n", args);
+    args[2] = bf->v;
+    Out("^p.Ctx @\n\nRoute @ -> @^0\n", args);
 
     r |= ERROR;
 

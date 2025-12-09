@@ -30,6 +30,7 @@ typedef status (*BinSegFunc)(struct binseg_ctx *ctx, void *a, i16 id, i16 idx);
 typedef struct binseg_ctx {
     Type type;
     MemCh *m;
+    Table *seel;
     Buff *read;
     Buff *add;
     Buff *modify;

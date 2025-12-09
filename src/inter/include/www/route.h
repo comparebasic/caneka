@@ -28,13 +28,14 @@ enum route_prop_idx {
     ROUTE_PROPIDX_TYPE = 6,
     ROUTE_PROPIDX_ACTION = 7,
     ROUTE_PROPIDX_HEADERS = 8,
-    ROUTE_PROPIDX_ADD_STEP = 9,
+    ROUTE_PROPIDX_TEMPL = 9,
+    ROUTE_PROPIDX_ADD_STEP = 10,
 };
 
 extern struct span *RouteFuncTable;
 extern struct span *RouteMimeTable;
 
-typedef status (*RouteFunc)(Buff *bf, void *action, Inst *data, HttpCtx *ctx);
+typedef status (*RouteFunc)(Buff *bf, Route *rt, Inst *data, HttpCtx *ctx);
 
 Route *Route_Make(MemCh *m);
 Route *Route_From(MemCh *m, StrVec *dir);
