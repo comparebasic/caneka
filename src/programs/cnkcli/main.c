@@ -125,7 +125,24 @@ i32 main(int argc, char **argv){
     if((r & (SUCCESS|ERROR|NOOP)) == 0){
         Str *inFileArg = CliArgs_Get(cli, inFileKey);
         Str *outFileArg = CliArgs_Get(cli, outFileKey);
-        if(inFileArg != NULL || outFileArg != NULL){
+        if(inFileArg != NULL || outFileArg == NULL){
+            StrVec *path = StrVec_From(m, inFileArg);
+            IoUtil_Annotate(m, path);
+            StrVec *inExt = Path_Ext(m, path);
+            if(Equals(inExt, K(m, "rbs"))){
+                BinSegCtx *bsCtx = BinSegCtx_Make(m, BINSEG_READ|BINSEG_REVERSED);
+                BinSegCtx_Open(bsCtx, StrVec_Str(m, path));
+
+                Out("^y.RevBinSeg Records:^0\n", args);
+                BinSegCtx_Load(bsCtx);
+                Iter it;
+                Iter_Init(&it, bsCtx->records);
+                while((Iter_Next(&it) & END) == 0){
+                    void *args[] = {Iter_Get(&it), NULL};
+                    Out("^y.@^0\n", args);
+                }
+            }
+        }else if(inFileArg != NULL || outFileArg != NULL){
 
             StrVec *headerPath = NULL;
             StrVec *footerPath = NULL;
@@ -199,10 +216,6 @@ i32 main(int argc, char **argv){
             }
         }
     }
-
-    args[0] = cli;
-    args[1] = NULL;
-    Out("^p.Args @^0\n", args);
 
     CliArgs_Free(cli);
 
