@@ -19,6 +19,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         }
 
         byte c = *(rbl->curs->ptr);
+        /*
         if(rbl->type.state & DEBUG){
             void *args[] = {
                 Str_Ref(rbl->m, &c, 1, 1, DEBUG),
@@ -26,12 +27,14 @@ static inline status Roebling_RunMatches(Roebling *rbl){
             };
             Out("^pE. $ ^0.\n", args);
         }
+        */
         i32 noopCount = 0;
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)Iter_Current(&rbl->matchIt);
             DebugStack_SetRef(mt, mt->type.of);
 
             status success = Match_Feed(rbl->m, mt, c) & SUCCESS;
+            /*
             if(rbl->type.state & DEBUG){
                 void *args[] = {
                     Str_Ref(rbl->m, &c, 1, 1, DEBUG),
@@ -40,6 +43,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 };
                 Out("^p.$ - &^0.\n", args);
             }
+            */
             if(success){
                 DebugStack_Pop();
                 return Roebling_Dispatch(rbl, mt);

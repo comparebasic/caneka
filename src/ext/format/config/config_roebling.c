@@ -30,7 +30,9 @@ static PatCharDef tokenDef[] = {
 static PatCharDef lineDef[] = {
     {PAT_KO|PAT_KO_TERM, '\n', '\n'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
     {PAT_KO|PAT_INVERT_CAPTURE, '{', '{'},{PAT_KO|PAT_INVERT_CAPTURE, '}', '}'}, {PAT_KO|PAT_KO_TERM, '\n', '\n'},
-    patText,
+
+    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '},
+    {PAT_OPTIONAL|PAT_MANY, '\t', '\t'}, {PAT_OPTIONAL|PAT_MANY, '\r', '\r'}, {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31},
     {PAT_END, 0, 0}
 };
 
@@ -274,6 +276,11 @@ Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, void *source){
     rbl->capture = Capture;
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
+
+    /*
+    rbl->dest->type.state |= DEBUG;
+    */
+    rbl->type.state |= DEBUG;
 
     DebugStack_Pop();
     return rbl;

@@ -3,6 +3,7 @@
 
 Inst *Config_FromVec(MemCh *m, StrVec *v){
     Cursor *curs = Cursor_Make(m, v);
+    curs->type.state |= DEBUG;
     Roebling *rbl = FormatConfig_Make(m, curs, NULL);
     Roebling_Run(rbl);
     return FormatConfig_GetRoot(rbl);

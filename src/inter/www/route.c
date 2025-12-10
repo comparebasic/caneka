@@ -128,6 +128,8 @@ Single *Route_MimeFunc(StrVec *path){
 }
 
 Route *Route_BuildRoute(MemCh *m, StrVec *name, StrVec *path, Table *configAtts){
+    void *args[] = {name, path, configAtts, NULL};
+    Out("^y.  Building path @\n  @ from @^0\n", args);
 
     /*
     RouteCtx *rctx = (RouteCtx *)source;
@@ -212,6 +214,12 @@ status Route_CollectConfig(Route *root, StrVec *name, StrVec *path, Table *confi
 
     void *args[] = {name, path, configAtts, p, NULL};
     Out("^p.Building routes for @ \\@@ \n  atts: @^0\n  files:@^0\n", args);
+    Iter it;
+    Iter_Init(&it, p);
+    while((Iter_Next(&it) & END) == 0){
+        StrVec *path = Iter_Get(&it);
+        Route *rt = Route_BuildRoute(m, name, path, configAtts);
+    }
 
     /* build route */
 
