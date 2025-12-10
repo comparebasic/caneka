@@ -70,9 +70,10 @@ static status routeFuncFileDb(Buff *bf,
     return NOOP;
 }
 
-static NodeObj *Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
+static NodeObj *Route_addConfigData(Route *rt, StrVec *token){
     MemCh *m = rt->m;
 
+    /*
     StrVec *path = StrVec_Make(m);
     StrVec_AddVec(path, ctx->path);
     StrVec_AddVec(path, (StrVec *)token);
@@ -86,6 +87,7 @@ static NodeObj *Route_addConfigData(RouteCtx *ctx, Route *rt, StrVec *token){
         Table_SetByCstr(tbl, "config", config);
         return config;
     }
+    */
     return NULL;
 }
 
@@ -127,74 +129,54 @@ Single *Route_MimeFunc(StrVec *path){
     return (Single *)Table_Get(RouteFuncTable, ext);
 }
 
-Route *Route_BuildRoute(MemCh *m, StrVec *name, StrVec *path, Table *configAtts){
-    void *args[] = {name, path, configAtts, NULL};
-    Out("^y.  Building path @\n  @ from @^0\n", args);
+Route *Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAtts){
+    MemCh *m = root->m;
 
-    /*
-    RouteCtx *rctx = (RouteCtx *)source;
+    Route *route = NULL;
 
-    StrVec *abs = IoUtil_AbsVec(m, StrVec_From(m, path));
-    IoUtil_AddVec(m, abs, StrVec_From(m, file));
-
-    StrVec *name = Path_Name(m, abs);
-    StrVec *ext = Path_Ext(m, abs);
-
+    StrVec *ext = IoUtil_GetExt(m, path);
     Str *mime = (Str *)Table_Get(RouteMimeTable, ext);
     Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
 
     if(mime == NULL || funcW == NULL){
-        void *args[] = {
-            mime,
-            ext,
-            path,
-            file,
-            RouteMimeTable,
-            NULL
-        };
-        return NOOP;
+        return NULL;
     }
 
     if(funcW->type.state & ROUTE_FORBIDDEN){
-        return NOOP;
+        return NULL;
     }
     
-    StrVec *objPath = IoPath_From(m, path);
-    IoUtil_AddVec(m, objPath, IoPath(m, "/"));
-    IoUtil_AddVec(m, objPath, StrVec_From(m, file));
-
-    StrVec_Incr(objPath, rctx->path->total);
+    Route *rt = Inst_Make(m, TYPE_WWW_ROUTE);
 
     Str *index = Str_FromCstr(m, "index", ZERO);
     word flags = ZERO;
-    Route *subRt = NULL;
     if(Equals(name, index)){
         flags |= ROUTE_INDEX;
-        StrVec_Decr(objPath, ext->total+1);
-        StrVec_Decr(objPath, index->length);
-        subRt = Inst_ByPath(rctx->root, objPath, NULL, SPAN_OP_GET);
-        if(subRt == NULL){
-            subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-            Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
+        route = Inst_ByPath(root, name, NULL, SPAN_OP_GET);
+        if(route == NULL){
+            route = Inst_Make(m, TYPE_WWW_ROUTE);
         }
     }else{
-        if(funcW->type.state & ROUTE_ASSET){
-            Path_JoinBase(m, objPath);
+        if((funcW->type.state & ROUTE_ASSET) == 0){
+            IoUtil_SwapExt(m, name, NULL);
         }else{
-            StrVec_Decr(objPath, ext->total+1);
+            name = Path_ReJoinExt(m, name);
         }
-        subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-        Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
+        route = Inst_Make(m, TYPE_WWW_ROUTE);
     }
 
+    Inst_ByPath(root, name, rt, SPAN_OP_SET);
+
+    void *args[] = {name, path, configAtts, mime, ext, NULL};
+    Out("^y.  Building path ^0.@^y.\n  @ from @\nmime @ ext @\n^0", args);
+
+    /*
     Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
     Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
     Span_Set(subRt, ROUTE_PROPIDX_FUNC, funcW);
     Span_Set(subRt, ROUTE_PROPIDX_MIME, mime);
     Span_Set(subRt, ROUTE_PROPIDX_TYPE, ext);
     subRt->type.state |= (funcW->type.state|flags);
-
-    Route_Prepare(subRt, rctx);
     */
 
     return NULL;
@@ -212,14 +194,24 @@ status Route_CollectConfig(Route *root, StrVec *name, StrVec *path, Table *confi
     Span *p = Span_Make(m);
     Dir_GatherByExt(m, StrVec_Str(m, path), p, ext);
 
-    void *args[] = {name, path, configAtts, p, NULL};
-    Out("^p.Building routes for @ \\@@ \n  atts: @^0\n  files:@^0\n", args);
     Iter it;
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
-        StrVec *path = Iter_Get(&it);
-        Route *rt = Route_BuildRoute(m, name, path, configAtts);
+        StrVec *fpath = Iter_Get(&it);
+
+        name = StrVec_Copy(m, fpath);
+        StrVec_Incr(name, path->total);
+        IoUtil_Annotate(m, name);
+        IoUtil_Annotate(m, fpath);
+
+        Route *rt = Route_BuildRoute(root, name, fpath, configAtts);
+        /*
+        Route_Prepare(rt);
+        */
     }
+
+    void *args[] = {name, root, NULL};
+    Out("^p.Built @ -> @^0\n", args);
 
     /* build route */
 
@@ -269,7 +261,7 @@ status Route_SetEtag(Route *rt, Str *path, struct timespec *mod){
     return ZERO;
 }
 
-status Route_Prepare(Route *rt, RouteCtx *ctx){
+status Route_Prepare(Route *rt){
     DebugStack_Push(rt, rt->type.of);
     MemCh *m = rt->m;
     void *args[3];

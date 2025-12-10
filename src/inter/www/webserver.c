@@ -279,13 +279,20 @@ status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *hand
         Hashed *h = Iter_Get(&it);
         StrVec *pagePath = StrVec_Copy(m, path);
         if(h != NULL){
-            StrVec *name = h->key;
+            Route *section = Route_Make(m);
+            StrVec *name = StrVec_From(m, h->key);
+            IoUtil_Annotate(m, name);
             NodeObj *node = h->value;
             Table *atts = Seel_Get(node, K(m, "atts"));
             IoUtil_AddVec(m, pagePath, Table_Get(atts, K(m, "path")));
-            r |= Route_CollectConfig(root, name, pagePath, atts);
+            r |= Route_CollectConfig(section, name, pagePath, atts);
+            void *args[] = {root, name, section, NULL};
+            Inst_ByPath(root, name, section, SPAN_OP_SET);
         }
     }
+
+    void *ar[] = {root, NULL};
+    Out("^c.SetConfig root @^0\n", ar);
 
     return r;
 }

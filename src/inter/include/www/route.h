@@ -1,12 +1,5 @@
 typedef Inst Route;
 
-typedef struct route_ctx {
-    Type type;
-    MemCh *m;
-    Route *root;
-    StrVec *path;
-} RouteCtx;
-
 enum route_flags {
     ROUTE_STATIC = 1 << 8,
     ROUTE_DYNAMIC = 1 << 9,
@@ -35,7 +28,7 @@ Route *Route_Make(MemCh *m);
 Route *Route_From(MemCh *m, StrVec *dir);
 status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
 status Route_Handle(Route *rt, Span *dest, Inst *data, HttpCtx *ctx);
-status Route_Prepare(Route *rt, RouteCtx *ctx);
+status Route_Prepare(Route *rt);
 Route *Route_Get(Route *rt, StrVec *path);
 Single *Route_MimeFunc(StrVec *path);
 

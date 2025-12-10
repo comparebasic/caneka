@@ -190,13 +190,15 @@ status StrVec_Incr(StrVec *v, i64 amount){
     if(amount > v->total){
         return ERROR;
     }
+    i64 origAmount = amount;
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
         if(s->length > amount){
-            Str_Incr(s, amount);
-            Span_Add(p, s);
+            Str *n = Str_Clone(v->p->m, s);
+            Str_Incr(n, amount);
+            Span_Add(p, n);
             amount = 0;
         }else if(amount == 0){
             Span_Add(p, s);
@@ -205,7 +207,7 @@ status StrVec_Incr(StrVec *v, i64 amount){
         }
     }
     v->p = p;
-    v->total = v->total - amount;
+    v->total = v->total - origAmount;
     return SUCCESS;
 }
 

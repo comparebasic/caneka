@@ -354,9 +354,11 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     }
 
     if(v->total != total){
+        void *args[] = {v, I32_Wrapped(m, v->total), p, I32_Wrapped(m, total), NULL};
         Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Annotate somehow adjusted the total which was expected to be equivilent",
-             NULL);
+            "Annotate somehow adjusted the total which was expected to be equivilent"
+            " &/@ vs @/@",
+             args);
         r |= ERROR;
     }
 

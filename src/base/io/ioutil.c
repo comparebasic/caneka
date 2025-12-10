@@ -16,6 +16,26 @@ boolean IoUtil_IsAbs(StrVec *v){
     return IoUtil_IsStrAbs(s);
 }
 
+StrVec *IoUtil_GetExt(MemCh *m, StrVec *path){
+    StrVec *v = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if(s->type.state & MORE){
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error found path sep before exte sep", NULL);
+            return NULL;
+        }else if (s->type.state & LAST){
+            break;
+        }else{
+            StrVec_Add(v, s);
+        }
+    }
+
+    return v;
+}
+
 status IoUtil_AddExt(MemCh *m, StrVec *path, Str *ext){
     Iter it;
     Iter_Init(&it, path->p);
@@ -56,6 +76,7 @@ status IoUtil_SwapExt(MemCh *m, StrVec *path, Str *ext){
         }else if (s->type.state & LAST){
             break;
         }else{
+            Str *s = Iter_Get(&it);
             Iter_Remove(&it);
             path->total -= s->length;
         }
@@ -67,8 +88,14 @@ status IoUtil_SwapExt(MemCh *m, StrVec *path, Str *ext){
         return ERROR;
     }
 
-    Iter_Add(&it, ext);
-    path->total += ext->length;
+    if(ext != NULL){
+        Iter_Add(&it, ext);
+        path->total += ext->length;
+    }else{
+        Str *s = Iter_Get(&it);
+        path->total -= s->length;
+        Iter_Remove(&it);
+    }
     return SUCCESS;
 }
 
