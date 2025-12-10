@@ -85,6 +85,9 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
     Route *stat = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
     Inst_ByPath(ctx->pages, IoPath(m, "/static/"), stat, SPAN_OP_SET);
 
+    Route *forms = Route_From(m, IoAbsPath(m, "examples/web-server/pages/forms"));
+    Inst_ByPath(ctx->pages, IoPath(m, "/forms/"), forms, SPAN_OP_SET);
+
     Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/system"));
     Inst_ByPath(ctx->pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
 
