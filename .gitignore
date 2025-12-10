@@ -7,3 +7,4 @@ bootstrap
 examples/session/*
 examples/web-server/pages/inc/*.etag
 examples/web-server/pages/static/*.etag
+examples/web-server/pages/forms/*.rbs
