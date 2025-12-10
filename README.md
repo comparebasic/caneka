@@ -71,6 +71,9 @@ It also increases portability to keep the C compilation step in place
 so that it can build and run on a variety of architectures.
 
 
+It also increases portability to keep the C compilation step in place
+so that it can build and run on a variety of architectures.
+
 ## The Parser
 
 Think of it like "a regular expression engine that can generate and run data
