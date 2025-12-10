@@ -1,6 +1,17 @@
 # Caneka
 
-## The Anti-Syntax Runtime
+The Glass-Bottom-Boat of Programming Language Runtimes 
+
+## Overview
+
+What could you do if you know what happened between your programming
+language and the hardware?
+
+Caneka is a full-stack + web-server + database replacement for a web
+development runtime. Based entirely on simplistic components written
+from scratch in C.
+
+## Purpose
 
 Caneka was born from the idea that customized syntaxes can unlock the true
 potential of humans using computers.
@@ -43,8 +54,8 @@ Components:
   beginings of the [serve](/src/ext/serve/) folder. The server heavily
   leverages components in the [navigate](/src/ext/navigate/) module.
   To see how a session is componsed, view the
-  [test](/src/programs/tests/tests/session_tests.c) file as a good
-  reference.
+  [inter](/src/inter) Higher level components such as HTTP handling
+  an HTTP Webserver including session handling and user management.
 - [programs](/src/programs/): Any programs that ship with the source
   will be in this folder, presently [tests](src/programs/tests) is the
   only meaningful program in this folder.
