@@ -64,6 +64,7 @@ static status Load_stats(Step *st, Task *tsk){
 
 static status routeInit(MemCh *m, TcpCtx *ctx){
     status r = READY;
+    /*
 
     ctx->defaultData = getDefaultData;
 
@@ -91,6 +92,7 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
     Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/system"));
     Inst_ByPath(ctx->pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
 
+    */
     return r;
 }
 
@@ -122,43 +124,58 @@ i32 main(int argc, char **argv){
     struct timespec now;
     Time_Now(&now);
 
-    Str *help = S(m, "help");
-    Str *noColor = S(m, "no-color");
-    Str *log = S(m, "log");
-    Str *foreground = S(m, "foreground");
-
+    Str *helpKey = S(m, "help");
+    Str *noColorKey = S(m, "no-color");
+    Str *logKey = S(m, "log");
+    Str *foregroundKey = S(m, "foreground");
+    Str *configKey = S(m, "config");
+    Str *licenceKey = S(m, "licence");
+    Str *versionKey = S(m, "licence");
 
     CliArgs *cli = CliArgs_Make(argc, argv);
 
-    Args_Add(cli, help, NULL, ARG_OPTIONAL,
+    Args_Add(cli, helpKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show this help menu."));
-    Args_Add(cli, noColor, NULL, ARG_OPTIONAL,
+    Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
         Sv(m, "Skip ansi color sequences in output."));
-    Args_Add(cli, S(m, "licence"), NULL, ARG_OPTIONAL,
+    Args_Add(cli, configKey, NULL, ZERO,
+        Sv(m, "Config to use with defined routes and auth details."));
+    Args_Add(cli, licenceKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show the licences used in this software"));
-    Args_Add(cli, S(m, "version"), NULL, ARG_OPTIONAL,
+    Args_Add(cli, versionKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show the version of this software"));
-    Args_Add(cli, foreground, NULL, ARG_OPTIONAL,
+    Args_Add(cli, foregroundKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show messages to the console."));
-        
-    Args_Add(cli, log, NULL, ARG_OPTIONAL,
+    Args_Add(cli, logKey, NULL, ARG_OPTIONAL,
         Sv(m, "Direct logs to a file starting with this name."));
 
     CliArgs_Parse(cli);
 
-    if(CliArgs_Get(cli, help) != NULL){
+    if(CliArgs_Get(cli, helpKey) != NULL){
         CharPtr_ToHelp(cli);
         return 1;
     }
 
-    if(CliArgs_Get(cli, noColor) != NULL){
+    if(CliArgs_Get(cli, noColorKey) != NULL){
         Ansi_SetColor(FALSE);
     }
 
-    if(CliArgs_Get(cli, foreground) == NULL &&
-            CliArgs_Get(cli, log) != NULL){
+    StrVec *configPath = CliArgs_GetAbsPath(cli, configKey);
+    StrVec *configDir = IoUtil_BasePath(m, configPath);
 
-        Str *logValue = CliArgs_Get(cli, log);
+    NodeObj *config = Config_FromPath(m, StrVec_Str(m, configPath));
+    if(config == NULL){
+        void *args[] = {configPath, NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Config file not found @", args);
+        exit(13);
+        return 13;
+    }
+
+    if(CliArgs_Get(cli, foregroundKey) == NULL &&
+            CliArgs_Get(cli, logKey) != NULL){
+
+        Str *logValue = CliArgs_Get(cli, logKey);
 
         Str *build = Str_Make(m, STR_DEFAULT);
         args[0] = logValue;
@@ -203,12 +220,15 @@ i32 main(int argc, char **argv){
 
         Ansi_SetColor(FALSE);
         Core_Direct(m, outFd, errFd);
-    }else if(CliArgs_Get(cli, noColor) != NULL){
+    }else if(CliArgs_Get(cli, noColorKey) != NULL){
         Ansi_SetColor(FALSE);
     }
 
     util ip6[2] = {0, 0};
     Task *srv = WebServer_Make(3000, 0, ip6);
+    WebServer_SetConfig(srv, configDir, config, NULL);
+    exit(1);
+
     routeInit(m, (TcpCtx *)srv->source);
     Task_Tumble(srv);
 

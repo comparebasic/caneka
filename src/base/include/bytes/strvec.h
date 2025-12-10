@@ -35,6 +35,7 @@ Str *StrVec_StrTo(MemCh *m, StrVec *v, i32 anchor);
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length);
 StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length);
 StrVec *StrVec_Copy(MemCh *m, StrVec *v);
+StrVec *StrVec_CopyTo(MemCh *m, StrVec *_v, i32 anchor);
 StrVec *StrVec_StrVec(MemCh *m, void *a);
 Str *StrVec_StrCombo(MemCh *m, void *a, void *b);
 status Str_AddVec(Str *s, StrVec *v);

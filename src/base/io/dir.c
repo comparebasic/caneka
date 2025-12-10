@@ -13,6 +13,21 @@ static byte _buff[STR_DEFAULT];
 
 Span *FilePathSep = NULL;
 
+static status fileHasExt(MemCh *m, void *_file, void *source){
+    Str *file = _file;
+    Span *exts = (Span *)as(source, TYPE_SPAN);
+    Iter it;
+    Iter_Init(&it, exts);
+    while((Iter_Next(&it) & END) == 0){
+        Str *e = Iter_Get(&it); 
+        if(file->length >= e->length+1 &&
+                file->bytes[file->length-(e->length+1)] == '.' && Str_EndMatch(file, e)){
+            return SUCCESS;
+        }
+    }
+    return NOOP;
+}
+
 static status fnameStr(MemCh *m, Str *s, Str *path, Str *file){
     Str_Add(s, path->bytes, path->length);
     if(path->length > 0 && path->bytes[path->length-1] != '/'){
@@ -51,6 +66,21 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
     }
     StrVec_Add(v, file);
     return Span_Add(p, v);
+}
+
+static status gatherFileFiltered(MemCh *m, Str *path, Str *file, void *source){
+    DirSelector *sel = (DirSelector *)source;
+    if(sel->func(m, file, sel->source) & SUCCESS){
+        Span *p = (Span *)asIfc(sel->dest, TYPE_SPAN);
+        StrVec *v = StrVec_Make(m);
+        StrVec_Add(v, path);
+        if(path->bytes[path->length-1] != '/'){
+            StrVec_Add(v, Str_Ref(m, (byte *)"/", 1, 1, 0));
+        }
+        StrVec_Add(v, file);
+        return Span_Add(p, v);
+    }
+    return NOOP;
 }
 
 static status gatherDirSel(MemCh *m, Str *path, void *source){
@@ -123,6 +153,18 @@ status Dir_Destroy(MemCh *m, Str *path){
 
 status Dir_Gather(MemCh *m, Str *path, Span *sp){
     return Dir_Climb(m, path, gatherDir, gatherFile, sp);
+}
+
+DirSelector *Dir_GatherByExt(MemCh *m, Str *path, Span *sp, Span *exts){
+    DirSelector *sel = DirSelector_Make(m,
+        NULL, sp, DIR_SELECTOR_NODIRS|DIR_SELECTOR_FILTER);
+    sel->func = fileHasExt;
+    sel->source = exts;
+
+    if((Dir_Climb(m, path, NULL, gatherFileFiltered, sel) & ERROR) == 0){
+        return sel;
+    }
+    return NULL;
 }
 
 status Dir_GatherSel(MemCh *m, Str *path, DirSelector *sel){

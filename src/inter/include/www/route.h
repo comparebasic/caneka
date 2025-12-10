@@ -22,14 +22,8 @@ enum route_prop_idx {
     ROUTE_PROPIDX_PATH = 0,
     ROUTE_PROPIDX_DATA = 1,
     ROUTE_PROPIDX_CHILDREN = 2,
-    ROUTE_PROPIDX_FILE = 3,
-    ROUTE_PROPIDX_FUNC = 4,
-    ROUTE_PROPIDX_MIME = 5,
-    ROUTE_PROPIDX_TYPE = 6,
-    ROUTE_PROPIDX_ACTION = 7,
-    ROUTE_PROPIDX_HEADERS = 8,
-    ROUTE_PROPIDX_TEMPL = 9,
-    ROUTE_PROPIDX_ADD_STEP = 10,
+    /* NodeObj end */
+    ROUTE_ROUTE_GENS = 3,
 };
 
 extern struct span *RouteFuncTable;
@@ -39,14 +33,14 @@ typedef status (*RouteFunc)(Buff *bf, Route *rt, Inst *data, HttpCtx *ctx);
 
 Route *Route_Make(MemCh *m);
 Route *Route_From(MemCh *m, StrVec *dir);
-status Route_Collect(Route *rt, StrVec *path);
 status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
-status Route_Handle(Route *rt, Buff *bf, Inst *data, HttpCtx *ctx);
+status Route_Handle(Route *rt, Span *dest, Inst *data, HttpCtx *ctx);
 status Route_Prepare(Route *rt, RouteCtx *ctx);
-Route *Route_GetHandler(Route *rt, StrVec *path);
+Route *Route_Get(Route *rt, StrVec *path);
 Single *Route_MimeFunc(StrVec *path);
 
 status Route_CheckEtag(Route *rt, StrVec *etag);
 status Route_SetEtag(Route *rt, Str *path, struct timespec *mod);
+status Route_CollectConfig(Route *root, StrVec *name, StrVec *path, Table *configAtts);
 
-status Route_ClsInit(MemCh *m);
+status Route_Init(MemCh *m);

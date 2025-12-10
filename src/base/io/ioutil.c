@@ -148,7 +148,12 @@ StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v){
     return path;
 }
 
-status IoUtil_Add(MemCh *m, StrVec *path, StrVec *v){
+status IoUtil_AddVec(MemCh *m, StrVec *path, StrVec *v){
+    Str *last = Span_Get(path->p, path->p->max_idx);
+    if(last != NULL && last->length > 0 && last->bytes[last->length-1] != '/'){
+        StrVec_Add(path, Str_Ref(m, (byte *)"/", 1, 2, MORE));
+    }
+
     IoUtil_Annotate(m, v);
     return StrVec_AddVec(path, v);
 }
@@ -311,11 +316,7 @@ Str *IoUtil_FnameStr(MemCh *m, StrVec *path){
 }
 
 StrVec *IoUtil_BasePath(MemCh *m, StrVec *path){
-    Coord cr;
-    if(Path_RangeOf(m, path, MORE, &cr) & SUCCESS){
-        return StrVec_CoordCopy(m, path, &cr);
-    }
-    return NULL;
+    return StrVec_CopyTo(m, path, IoUtil_BasePathAnchor(path));
 }
 
 status IoUtils_Init(MemCh *m){

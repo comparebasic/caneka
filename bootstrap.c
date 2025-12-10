@@ -56,6 +56,8 @@ char *runTests[] = {
 
 char *runWebServer[] = {
     "./build/bin/webserver",
+    "--config",
+    "examples/web-server/default.config",
     NULL
 };
 

@@ -127,7 +127,7 @@ status BuffIo_Tests(MemCh *m){
     StrVec *pathOne = StrVec_Copy(m, path);
 
     StrVec *fname = StrVec_From(m, Str_CstrRef(m, "buffio.txt"));
-    IoUtil_Add(m, pathOne, fname);
+    IoUtil_AddVec(m, pathOne, fname);
 
     i32 fd = open(Str_Cstr(m, StrVec_Str(m, pathOne)), (O_CREAT|O_WRONLY|O_TRUNC), 0644);
     args[0] = I32_Wrapped(m, fd);
@@ -164,7 +164,7 @@ status BuffIo_Tests(MemCh *m){
 
     StrVec *pathTwo = StrVec_Copy(m, path);
     fname = StrVec_From(m, Str_CstrRef(m, "buffio-compare.txt"));
-    IoUtil_Add(m, pathTwo, fname);
+    IoUtil_AddVec(m, pathTwo, fname);
 
     i32 ofd = open(Str_Cstr(m, StrVec_Str(m, pathTwo)), (O_CREAT|O_WRONLY|O_TRUNC), 0644);
     args[0] = I32_Wrapped(m, ofd);

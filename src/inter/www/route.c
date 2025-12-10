@@ -1,78 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-struct span *RouteFuncTable = NULL;
-struct span *RouteMimeTable = NULL;
-
-static status fileFunc(MemCh *m, Str *path, Str *file, void *source){
-    void *args[5];
-    RouteCtx *rctx = (RouteCtx *)source;
-
-    StrVec *abs = IoUtil_AbsVec(m, StrVec_From(m, path));
-    IoUtil_Add(m, abs, IoPath(m, "/"));
-    IoUtil_Add(m, abs, StrVec_From(m, file));
-
-    StrVec *name = Path_Name(m, abs);
-    StrVec *ext = Path_Ext(m, abs);
-
-    Str *mime = (Str *)Table_Get(RouteMimeTable, ext);
-    Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
-
-    if(mime == NULL || funcW == NULL){
-        void *args[] = {
-            mime,
-            ext,
-            path,
-            file,
-            RouteMimeTable,
-            NULL
-        };
-        return NOOP;
-    }
-
-    if(funcW->type.state & ROUTE_FORBIDDEN){
-        return NOOP;
-    }
-    
-    StrVec *objPath = IoPath_From(m, path);
-    IoUtil_Add(m, objPath, IoPath(m, "/"));
-    IoUtil_Add(m, objPath, StrVec_From(m, file));
-
-    StrVec_Incr(objPath, rctx->path->total);
-
-    Str *index = Str_FromCstr(m, "index", ZERO);
-    word flags = ZERO;
-    Route *subRt = NULL;
-    if(Equals(name, index)){
-        flags |= ROUTE_INDEX;
-        StrVec_Decr(objPath, ext->total+1);
-        StrVec_Decr(objPath, index->length);
-        subRt = Inst_ByPath(rctx->root, objPath, NULL, SPAN_OP_GET);
-        if(subRt == NULL){
-            subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-            Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
-        }
-    }else{
-        if(funcW->type.state & ROUTE_ASSET){
-            Path_JoinBase(m, objPath);
-        }else{
-            StrVec_Decr(objPath, ext->total+1);
-        }
-        subRt = Inst_Make(m, TYPE_WWW_ROUTE);
-        Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
-    }
-
-    Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
-    Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
-    Span_Set(subRt, ROUTE_PROPIDX_FUNC, funcW);
-    Span_Set(subRt, ROUTE_PROPIDX_MIME, mime);
-    Span_Set(subRt, ROUTE_PROPIDX_TYPE, ext);
-    subRt->type.state |= (funcW->type.state|flags);
-
-    Route_Prepare(subRt, rctx);
-
-    return SUCCESS;
-}
+static Span *AllExtSpan = NULL;
+Span *RouteFuncTable = NULL;
+Span *RouteMimeTable = NULL;
 
 static status routeFuncStatic(Buff *bf,
         Route *rt, Table *_data, HttpCtx *ctx){
@@ -196,10 +127,95 @@ Single *Route_MimeFunc(StrVec *path){
     return (Single *)Table_Get(RouteFuncTable, ext);
 }
 
-Route *Route_GetNav(Route *rt){
-    MemCh *m = rt->m;
-    Route *nav = Route_Make(m);
-    return nav;
+Route *Route_BuildRoute(MemCh *m, StrVec *name, StrVec *path, Table *configAtts){
+
+    /*
+    RouteCtx *rctx = (RouteCtx *)source;
+
+    StrVec *abs = IoUtil_AbsVec(m, StrVec_From(m, path));
+    IoUtil_AddVec(m, abs, StrVec_From(m, file));
+
+    StrVec *name = Path_Name(m, abs);
+    StrVec *ext = Path_Ext(m, abs);
+
+    Str *mime = (Str *)Table_Get(RouteMimeTable, ext);
+    Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
+
+    if(mime == NULL || funcW == NULL){
+        void *args[] = {
+            mime,
+            ext,
+            path,
+            file,
+            RouteMimeTable,
+            NULL
+        };
+        return NOOP;
+    }
+
+    if(funcW->type.state & ROUTE_FORBIDDEN){
+        return NOOP;
+    }
+    
+    StrVec *objPath = IoPath_From(m, path);
+    IoUtil_AddVec(m, objPath, IoPath(m, "/"));
+    IoUtil_AddVec(m, objPath, StrVec_From(m, file));
+
+    StrVec_Incr(objPath, rctx->path->total);
+
+    Str *index = Str_FromCstr(m, "index", ZERO);
+    word flags = ZERO;
+    Route *subRt = NULL;
+    if(Equals(name, index)){
+        flags |= ROUTE_INDEX;
+        StrVec_Decr(objPath, ext->total+1);
+        StrVec_Decr(objPath, index->length);
+        subRt = Inst_ByPath(rctx->root, objPath, NULL, SPAN_OP_GET);
+        if(subRt == NULL){
+            subRt = Inst_Make(m, TYPE_WWW_ROUTE);
+            Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
+        }
+    }else{
+        if(funcW->type.state & ROUTE_ASSET){
+            Path_JoinBase(m, objPath);
+        }else{
+            StrVec_Decr(objPath, ext->total+1);
+        }
+        subRt = Inst_Make(m, TYPE_WWW_ROUTE);
+        Inst_ByPath(rctx->root, objPath, subRt, SPAN_OP_SET);
+    }
+
+    Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
+    Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
+    Span_Set(subRt, ROUTE_PROPIDX_FUNC, funcW);
+    Span_Set(subRt, ROUTE_PROPIDX_MIME, mime);
+    Span_Set(subRt, ROUTE_PROPIDX_TYPE, ext);
+    subRt->type.state |= (funcW->type.state|flags);
+
+    Route_Prepare(subRt, rctx);
+    */
+
+    return NULL;
+}
+
+status Route_CollectConfig(Route *root, StrVec *name, StrVec *path, Table *configAtts){
+    MemCh *m = root->m;
+    Route *rt = Route_Make(m);
+
+    Span *ext = Config_Sequence(m, Table_Get(configAtts, K(m, "ext")));
+    if(ext != NULL){
+        ext = AllExtSpan;
+    }
+
+    Span *p = Span_Make(m);
+    Dir_GatherByExt(m, StrVec_Str(m, path), p, ext);
+
+    void *args[] = {name, path, configAtts, p, NULL};
+    Out("^p.Building routes for @ \\@@ \n  atts: @^0\n  files:@^0\n", args);
+
+    /* build route */
+
+    return ZERO;
 }
 
 status Route_CheckEtag(Route *rt, StrVec *etag){
@@ -250,6 +266,7 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
     MemCh *m = rt->m;
     void *args[3];
 
+    /*
     StrVec *path = (StrVec *)Seel_Get(rt, S(m, "file"));
     StrVec *type = (StrVec *)Seel_Get(rt, S(m, "type"));
     StrVec *token = StrVec_Make(m);
@@ -343,35 +360,20 @@ status Route_Prepare(Route *rt, RouteCtx *ctx){
         DebugStack_Pop();
         return SUCCESS;
     }
+    */
 
     DebugStack_Pop();
     return NOOP;
 }
 
-Route *Route_GetHandler(Route *rt, StrVec *_path){
-    MemCh *m = rt->m;
-    StrVec *ext = Path_Ext(m, _path);
-    Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
-
-    StrVec *path = NULL;
-    if(funcW != NULL){
-        if(funcW->type.state & ROUTE_ASSET){
-            path = Path_ReJoinExt(m, _path);
-        }else{
-            void *args[2];
-            path = Path_WithoutExt(m, _path);
-        }
-    }else{
-        path = _path;
-    }
-
-    Route *handler = (Route *)Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
-
-    return handler;
+Route *Route_Get(Route *root, StrVec *path){
+    return Inst_ByPath(root, path, NULL, SPAN_OP_GET);
 }
 
-status Route_Handle(Route *rt, Buff *bf, Table *data, HttpCtx *ctx){
+status Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){
     DebugStack_Push(rt, rt->type.of);
+    status r = READY;
+    /*
     StrVec *path = (StrVec *)Seel_Get(rt, S(bf->m, "file"));
     MemCh *m = bf->m;
 
@@ -397,27 +399,9 @@ status Route_Handle(Route *rt, Buff *bf, Table *data, HttpCtx *ctx){
 
     RouteFunc func = (RouteFunc)funcW->val.ptr;
     status r = func(bf, rt, data, ctx);
+    */
 
     DebugStack_Pop();
-    return r;
-}
-
-status Route_Collect(Route *rt, StrVec *path){
-    MemCh *m = rt->m;
-    IoUtil_Annotate(m, path);
-
-    StrVec *root = StrVec_From(m, Str_CstrRef(m, "/"));
-    IoUtil_Annotate(m, root);
-    Span_Set(rt, ROUTE_PROPIDX_PATH, root);
-
-    RouteCtx ctx;
-    ctx.type.of = TYPE_ROUTE_CTX;
-    ctx.type.state = ZERO;
-    ctx.root = rt;
-    ctx.path = path;
-
-    status r = Dir_Climb(m, StrVec_Str(m, path), NULL, fileFunc, &ctx);
-    MemCh_FreeTemp(m);
     return r;
 }
 
@@ -425,13 +409,7 @@ Route *Route_Make(MemCh *m){
     return Inst_Make(m, TYPE_WWW_ROUTE);
 }
 
-Route *Route_From(MemCh *m, StrVec *dir){
-    Route *rt = (Route *)Route_Make(m);
-    Route_Collect(rt, dir);
-    return rt;
-}
-
-status Route_ClsInit(MemCh *m){
+status Route_Init(MemCh *m){
     status r = READY;
 
     Table *seel = Table_Make(m);
@@ -439,87 +417,91 @@ status Route_ClsInit(MemCh *m){
     Table_Set(seel, S(m, "data"), I16_Wrapped(m, TYPE_TABLE));
     Hashed *h = Table_SetHashed(seel, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
     /* Node End */
-    Table_Set(seel, S(m, "file"), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(seel, S(m, "func"), I16_Wrapped(m, TYPE_WRAPPED_FUNC));
-    Table_Set(seel, S(m, "mime"), I16_Wrapped(m, TYPE_STR));
-    Table_Set(seel, S(m, "type"), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(seel, S(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
-    Table_Set(seel, S(m, "headers"), I16_Wrapped(m, TYPE_TABLE));
-    Table_Set(seel, S(m, "templ"), I16_Wrapped(m, TYPE_TEMPL));
-    Table_Set(seel, S(m, "addStep"), I16_Wrapped(m, TYPE_WRAPPED_PTR));
+    Table_Set(seel, S(m, "gens"), I16_Wrapped(m, TYPE_SPAN));
     r |= Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE, h->orderIdx);
 
     if(RouteFuncTable == NULL){
         RouteFuncTable = Table_Make(m);
         RouteMimeTable = Table_Make(m);
+        AllExtSpan = Span_Make(m);
 
-        Str *key = Str_CstrRef(m, "html");
+        Str *key = S(m, "html");
+        Span_Add(AllExtSpan, key);
         Single *funcW = Func_Wrapped(m, routeFuncStatic);
         funcW->type.state |= (ROUTE_STATIC);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/html"));
+            key, S(m, "text/html"));
 
-        key = Str_CstrRef(m, "png");
+        key = S(m, "png");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncStatic);
         funcW->type.state |= (ROUTE_ASSET|ROUTE_STATIC);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "image/png"));
+            key, S(m, "image/png"));
 
-        key = Str_CstrRef(m, "jpg");
+        key = S(m, "jpg");
+        Span_Add(AllExtSpan, key);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "image/jpeg"));
+            key, S(m, "image/jpeg"));
 
-        key = Str_CstrRef(m, "js");
+        key = S(m, "js");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncStatic);
         funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/javascript"));
+            key, S(m, "text/javascript"));
 
-        key = Str_CstrRef(m, "css");
+        key = S(m, "css");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncStatic);
         funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/css"));
+            key, S(m, "text/css"));
 
-        key = Str_CstrRef(m, "body");
+        key = S(m, "body");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncStatic);
         funcW->type.state |= (ROUTE_STATIC);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/html"));
+            key, S(m, "text/html"));
 
-        key = Str_CstrRef(m, "txt");
+        key = S(m, "txt");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncStatic);
         funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/plain"));
+            key, S(m, "text/plain"));
 
-        key = Str_CstrRef(m, "fmt");
+        key = S(m, "fmt");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncFmt);
         funcW->type.state |= ROUTE_FMT;
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/html"));
+            key, S(m, "text/html"));
 
-        key = Str_CstrRef(m, "rbs");
+        key = S(m, "rbs");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncFileDb);
         funcW->type.state |= ROUTE_BINSEG;
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "*/*"));
+            key, S(m, "*/*"));
 
-        key = Str_CstrRef(m, "templ");
+        key = S(m, "templ");
+        Span_Add(AllExtSpan, key);
         funcW = Func_Wrapped(m, routeFuncTempl);
         funcW->type.state |= ROUTE_DYNAMIC;
         Table_Set(RouteFuncTable, key, funcW);
         Table_Set(RouteMimeTable,
-            key, Str_CstrRef(m, "text/html"));
+            key, S(m, "text/html"));
     }
 
     return r;

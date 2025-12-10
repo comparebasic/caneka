@@ -108,7 +108,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
     HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
 
     IoUtil_Annotate(tsk->m, ctx->path);
-    ctx->route = Route_GetHandler(tcp->pages, ctx->path);
+    ctx->route = Route_Get(tcp->pages, ctx->path);
 
     if(ctx->route == NULL){
         ctx->code = 404;
@@ -117,7 +117,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         Single *funcW = Route_MimeFunc(ctx->path);
 
         if(funcW != NULL && (funcW->type.state & ROUTE_ASSET) == 0){
-            ctx->route = Route_GetHandler(tcp->pages, IoPath(m, "/system/not-found"));
+            ctx->route = Route_Get(tcp->pages, IoPath(m, "/system/not-found"));
             if(ctx->route != NULL){
 
                 Table *routeData = Seel_Get(ctx->route, K(m, "data"));
@@ -189,6 +189,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     MemCh *m = tsk->m;
     status r = READY;
+    /*
 
     ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
@@ -255,8 +256,38 @@ status WebServer_ServePage(Step *st, Task *tsk){
     Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, NULL, NULL, ZERO);
 
     st->type.state |= (MORE|SUCCESS);
+    */
     DebugStack_Pop();
     return st->type.state;
+}
+
+status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *handlers){
+    status r = READY;
+    MemCh *m = tsk->m;
+    /* bootstrap paths */
+    /* assign handlers */
+    Route *root = Route_Make(m);
+
+    NodeObj *routes = Inst_ByPath(config, Sv(m, "routes"), NULL, SPAN_OP_GET);
+
+    void *args[] = {routes, path, handlers, NULL};
+    Out("^p.SetConfig @ Path @ handlers^0\n", args);
+
+    Iter it;
+    Iter_Init(&it, Seel_Get(routes, K(m, "children")));
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        StrVec *pagePath = StrVec_Copy(m, path);
+        if(h != NULL){
+            StrVec *name = h->key;
+            NodeObj *node = h->value;
+            Table *atts = Seel_Get(node, K(m, "atts"));
+            IoUtil_AddVec(m, pagePath, Table_Get(atts, K(m, "path")));
+            r |= Route_CollectConfig(root, name, pagePath, atts);
+        }
+    }
+
+    return r;
 }
 
 Task *WebServer_Make(i32 port, quad ip4, util *ip6){

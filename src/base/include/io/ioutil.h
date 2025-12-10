@@ -11,7 +11,7 @@ status IoUtil_Annotate(MemCh *m, StrVec *path);
 StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path);
 status IoUtil_RemoveSeps(MemCh *m, StrVec *path);
 StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v);
-status IoUtil_Add(MemCh *m, StrVec *path, StrVec *v);
+status IoUtil_AddVec(MemCh *m, StrVec *path, StrVec *v);
 StrVec *IoAbsPath(MemCh *m, char *cstr);
 StrVec *IoPath(MemCh *m, char *cstr);
 StrVec *IoPath_From(MemCh *m, Str *s);

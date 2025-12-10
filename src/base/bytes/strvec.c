@@ -392,6 +392,20 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
     return -1;
 }
 
+StrVec *StrVec_CopyTo(MemCh *m, StrVec *_v, i32 anchor){
+    StrVec *v = (StrVec *)as(_v, TYPE_STRVEC);
+    StrVec *new = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0 && it.idx <= anchor){
+        Str *_s = (Str *)Iter_Get(&it);
+        Str *s = Str_Clone(m, _s);
+        s->type.state = _s->type.state;
+        StrVec_Add(new, s);
+    }
+    return new;
+}
+
 StrVec *StrVec_Copy(MemCh *m, StrVec *_v){
     StrVec *v = (StrVec *)as(_v, TYPE_STRVEC);
     StrVec *new = StrVec_Make(m);
