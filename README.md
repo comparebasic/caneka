@@ -13,18 +13,24 @@ from scratch in C.
 
 ## Purpose
 
-Caneka was born from the idea that programming langauges had evolved
-somewhat haphazardly
+Caneka was born from the idea that productivity in sofware engineering
+was in need of new tooling. To us, the evolution seamed to stall after
+the OOP languages.
 
 - Level 1 Assembly
 - Level 2 Types (C)
 - Level 3 Objects (C++, Java, JavaScript, Python, Etc.)
 - Level 4 Composition/Implicit Handling (?)
 
-It seams like we never got to that Level 4. A place where composition,
-Lisp, Scala, Rust, C# all come close with pattern matching features,
-but it feels to us like configuration and composition have remained 
-outside of all major languages thus far. 
+It seams like we never got to that Level 4 set of languages.
+A place where developers spend more time on composition than
+repetitive details.
+
+Lisp, Scala, Rust, and C# all came close with pattern matching and
+routing features, but there is more power that developers could wield
+(mwuahahaha... :);
+
+## Why Start From Scratch-ish (POSIX/C)
 
 The determination to start from scratch is an effort to accomplish a
 syntax-agnostic runtime while building transparency and reliability at
@@ -38,6 +44,9 @@ a C compiler.
 Components are linked as necissary for features such as crypto and 
 network handling (such as NaCL and eventually SSL). And the build system
 is design for extensability with other software sources.
+
+It also increases portability to keep the C compilation step in place
+so that it can build and run on a variety of architectures.
 
 ## The Parser
 
