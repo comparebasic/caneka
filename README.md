@@ -2,6 +2,17 @@
 
 The Glass-Bottom-Boat of Programming Language Runtimes.
 
+## Overview
+
+What could you do if you know what happened between your programming
+language and the hardware?
+
+Caneka is a full-stack + web-server + database replacement for a web
+development runtime. Based entirely on simplistic components written
+from scratch in C.
+
+## Purpose
+
 
 ## Overview
 
