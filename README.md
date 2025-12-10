@@ -21,10 +21,14 @@ somewhat haphazardly
 - Level 3 Objects (C++, Java, JavaScript, Python, Etc.)
 - Level 4 Composition/Implicit Handling (?)
 
-It seams like we never got to that Level 4. A place where composition,
-Lisp, Scala, Rust, C# all come close with pattern matching features,
-but it feels to us like configuration and composition have remained 
-outside of all major languages thus far. 
+It seams like we never got to that Level 4. A place where composition
+and configuration play a key role in letting programmers combine
+concepts instead of being bogged down by defining details all
+the time.
+
+Lisp, Scala, Rust, and C# all came close with pattern matching and
+routing features, but it feels to us like there is more  power that
+developers could wield (mwuahahaha...);
 
 The determination to start from scratch is an effort to accomplish a
 syntax-agnostic runtime while building transparency and reliability at
