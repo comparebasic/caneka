@@ -103,7 +103,7 @@ Components:
 - [inter](/src/inter) Higher level components such as HTTP handling
   an HTTP Webserver including session handling and user management.
 - [programs](/src/programs/): Any programs that ship with the source
-  will be in this folder, presently [tests](src/programs/tests), a webserver, 
+  will be in this folder, presently [test](src/programs/test/), a webserver, 
   and basic cli are in this folder.
 
 see [caneka.org](https://caneka.org) for more details.
