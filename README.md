@@ -2,9 +2,10 @@
 
 The Glass-Bottom-Boat of Programming Language Runtimes.
 
+
 ## Overview
 
-What could you do if you know what happened between your programming
+What could you do if you knew what happened between your programming
 language and the hardware?
 
 Caneka is a full-stack + web-server + database replacement for a web
@@ -74,6 +75,7 @@ so that it can build and run on a variety of architectures.
 It also increases portability to keep the C compilation step in place
 so that it can build and run on a variety of architectures.
 
+
 ## The Parser
 
 Think of it like "a regular expression engine that can generate and run data
@@ -138,6 +140,7 @@ there is a bug when compling with gcc related to the order of static libs.
 
 This will compile and run the bootstrap program which will present a menu
 to guide you through the rest of the build process.
+
 
 ### CnkBuild - source builder
 
