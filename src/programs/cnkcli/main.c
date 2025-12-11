@@ -125,7 +125,7 @@ i32 main(int argc, char **argv){
     if((r & (SUCCESS|ERROR|NOOP)) == 0){
         Str *inFileArg = CliArgs_Get(cli, inFileKey);
         Str *outFileArg = CliArgs_Get(cli, outFileKey);
-        if(inFileArg != NULL || outFileArg == NULL){
+        if(inFileArg != NULL && outFileArg == NULL){
             StrVec *path = StrVec_From(m, inFileArg);
             IoUtil_Annotate(m, path);
             StrVec *inExt = Path_Ext(m, path);
