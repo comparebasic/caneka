@@ -52,9 +52,9 @@ essential feature of a software application in one place. Caneka does not
 require any features outside of a POSIX compliant operating system and
 a C compiler.
 
-Components are linked as necissary for features such as crypto and 
+Components are linked as necessary for features such as crypto and 
 network handling (such as NaCL and eventually SSL). And the build system
-is design for extensability with other software sources.
+is designed for extensibility with other software sources.
 
 It also increases portability to keep the C compilation step in place
 so that it can build and run on a variety of architectures.
