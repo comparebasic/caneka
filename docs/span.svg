@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg" height="1024" width="1024">
+     <style>
+        .label {
+            font: 14px monospace;
+            fill: #000;
+        }
+        .label.title {
+            font: 16px sans-serif;
+            font-weight: bold;
+        }
+        .label.focus {
+            fill: #fff;
+        }
+        .line {
+            stroke: #000;
+            fill: transparent;
+        }
+        .line.hl {
+            fill: #888;
+        }
+        .line.focus {
+            fill: #000;
+        }
+     </style>
+     <text  x="280" y="20" class="label title">Span with 2 elements #0 and #1</text>
+     <g transform="translate(200,60)">
+         <g transform="translate(20,120)">
+            <path d="M 0 0 L 320 0 320 20 L 0 20 L 0 0" class="line" />
+            <path d="M 20 0 L 20 20" class="line" />
+            <path d="M 40 0 L 40 20" class="line" />
+            <path d="M 60 0 L 60 20" class="line" />
+            <path d="M 80 0 L 80 20" class="line" />
+            <path d="M 100 0 L 100 20" class="line" />
+            <path d="M 120 0 L 120 20" class="line" />
+            <path d="M 140 0 L 140 20" class="line" />
+            <path d="M 160 0 L 160 20" class="line" />
+            <path d="M 180 0 L 180 20" class="line" />
+            <path d="M 200 0 L 200 20" class="line" />
+            <path d="M 220 0 L 220 20" class="line" />
+            <path d="M 240 0 L 240 20" class="line" />
+            <path d="M 260 0 L 260 20" class="line" />
+            <path d="M 280 0 L 280 20" class="line" />
+            <path d="M 300 0 L 300 20" class="line" />
+             <text x="5" y="16" class="label">0</text>
+             <text x="65" y="16" class="label">3</text>
+         </g>
+         <path d="M 30 120 L 50 80" class="line" />
+         <text x="55" y="80" class="label">Str&lt; &quot;Hello There&quot;&gt;</text>
+         <path d="M 90 120 L 115 100" class="line" />
+         <text x="120" y="100" class="label">Str&lt; &quot;Jammy&quot;&gt;</text>
+     </g>
+     <text x="280" y="250" class="label title">Span with 2 elements #0, #1 and #17</text>
+     <g transform="translate(20,250)">
+         <g transform="translate(20,120)">
+            <path d="M 0 0 L 320 0 320 20 L 0 20 L 0 0" class="line" />
+            <path d="M 20 0 L 20 20" class="line" />
+            <path d="M 40 0 L 40 20" class="line" />
+            <path d="M 60 0 L 60 20" class="line" />
+            <path d="M 80 0 L 80 20" class="line" />
+            <path d="M 100 0 L 100 20" class="line" />
+            <path d="M 120 0 L 120 20" class="line" />
+            <path d="M 140 0 L 140 20" class="line" />
+            <path d="M 160 0 L 160 20" class="line" />
+            <path d="M 180 0 L 180 20" class="line" />
+            <path d="M 200 0 L 200 20" class="line" />
+            <path d="M 220 0 L 220 20" class="line" />
+            <path d="M 240 0 L 240 20" class="line" />
+            <path d="M 260 0 L 260 20" class="line" />
+            <path d="M 280 0 L 280 20" class="line" />
+            <path d="M 300 0 L 300 20" class="line" />
+             <text x="5" y="16" class="label">0</text>
+             <text x="65" y="16" class="label">3</text>
+         </g>
+         <path d="M 30 120 L 50 80" class="line" />
+         <text x="55" y="80" class="label">Str&lt; &quot;Hello There&quot;&gt;</text>
+         <path d="M 90 120 L 115 100" class="line" />
+         <text x="120" y="100" class="label">Str&lt; &quot;Jammy&quot;&gt;</text>
+
+         <g transform="translate(420,130)">
+            <path d="M 0 0 L 320 0 320 20 L 0 20 L 0 0" class="line" />
+            <path d="M 20 0 L 20 20" class="line" />
+            <path d="M 40 0 L 40 20" class="line" />
+            <path d="M 60 0 L 60 20" class="line" />
+            <path d="M 80 0 L 80 20" class="line" />
+            <path d="M 100 0 L 100 20" class="line" />
+            <path d="M 120 0 L 120 20" class="line" />
+            <path d="M 140 0 L 140 20" class="line" />
+            <path d="M 160 0 L 160 20" class="line" />
+            <path d="M 180 0 L 180 20" class="line" />
+            <path d="M 200 0 L 200 20" class="line" />
+            <path d="M 220 0 L 220 20" class="line" />
+            <path d="M 240 0 L 240 20" class="line" />
+            <path d="M 260 0 L 260 20" class="line" />
+            <path d="M 280 0 L 280 20" class="line" />
+            <path d="M 300 0 L 300 20" class="line" />
+             <text x="21" y="16" class="label">17</text>
+         </g>
+         <path d="M 450 130 L 460 95" class="line" />
+         <text x="460" y="90" class="label">Str&lt; &quot;Sunshine&quot;&gt;</text>
+
+         <g transform="translate(100,220)">
+            <path d="M 0 0 L 320 0 320 20 L 0 20 L 0 0" class="line" />
+            <path d="M 20 0 L 20 20" class="line" />
+            <path d="M 40 0 L 40 20" class="line" />
+            <path d="M 60 0 L 60 20" class="line" />
+            <path d="M 80 0 L 80 20" class="line" />
+            <path d="M 100 0 L 100 20" class="line" />
+            <path d="M 120 0 L 120 20" class="line" />
+            <path d="M 140 0 L 140 20" class="line" />
+            <path d="M 160 0 L 160 20" class="line" />
+            <path d="M 180 0 L 180 20" class="line" />
+            <path d="M 200 0 L 200 20" class="line" />
+            <path d="M 220 0 L 220 20" class="line" />
+            <path d="M 240 0 L 240 20" class="line" />
+            <path d="M 260 0 L 260 20" class="line" />
+            <path d="M 280 0 L 280 20" class="line" />
+            <path d="M 300 0 L 300 20" class="line" />
+             <text x="5" y="16" class="label">0</text>
+             <text x="25" y="16" class="label">1</text>
+         </g>
+
+         <path d="M 110 220 L 30 140" class="line" />
+         <path d="M 130 220 L 430 150" class="line" />
+     </g>
+</svg>
