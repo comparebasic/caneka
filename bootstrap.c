@@ -63,6 +63,7 @@ char *runWebServer[] = {
 
 char *menuKeys[] = {
     "run-tests",
+    "cnkbuild-only",
     "build-only",
     "clean",
     "build-cli",
@@ -76,6 +77,7 @@ char *menuKeys[] = {
 
 char *menuOptions[] = {
     "Tests - build and RUN",
+    "CnkBuild - build the CnkBuild program only",
     "Caneka (core) - build",
     "Clean (the ./build directory)",
     "CnkCli - build",
@@ -237,7 +239,9 @@ int main(int argc, char *argv[]){
         }
     }
 
-    if(compareCstr("run-tests", choice)){
+    if(compareCstr("cnkbuild-only", choice)){
+        runcmd[0] = NULL;
+    }else if(compareCstr("run-tests", choice)){
         runcmd[0] = buildTests;
         runcmd[1] = runTests;
         runcmd[2] = NULL;

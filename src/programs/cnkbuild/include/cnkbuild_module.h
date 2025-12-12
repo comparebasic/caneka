@@ -69,6 +69,7 @@ typedef struct buildctx {
         Span *libs;
         Span *staticLibs;
         Span *sources;
+        Span *options;
         Span *objects;
         Span *gens;
         StrVec *srcPrefix;

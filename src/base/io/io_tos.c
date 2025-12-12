@@ -2,6 +2,7 @@
 #include "base_module.h"
 
 static Str **buffLabels = NULL;
+static Str **dirSelLabels = NULL;
 
 char *Buff_WhenceChars(i64 whence){
     if(whence == SEEK_SET){
@@ -113,6 +114,16 @@ status Io_InitLabels(MemCh *m, Lookup *lk){
         buffLabels[14] = Str_CstrRef(m, "UNBUFFERED");
         buffLabels[15] = Str_CstrRef(m, "SLURP");
         Lookup_Add(m, lk, TYPE_BUFF, (void *)buffLabels);
+        r |= SUCCESS;
+    }
+    if(dirSelLabels == NULL){
+        dirSelLabels = (Str **)Arr_Make(m, 17);
+        dirSelLabels[9] = Str_CstrRef(m, "MTIME_ALL");
+        dirSelLabels[10] = Str_CstrRef(m, "MTIME_LOWEST");
+        dirSelLabels[11] = Str_CstrRef(m, "NODIRS");
+        dirSelLabels[12] = Str_CstrRef(m, "FILTER");
+        dirSelLabels[13] = Str_CstrRef(m, "FILTER_DIRS");
+        Lookup_Add(m, lk, TYPE_DIR_SELECTOR, (void *)dirSelLabels);
         r |= SUCCESS;
     }
     return r;

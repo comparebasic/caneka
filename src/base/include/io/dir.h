@@ -6,6 +6,7 @@ enum dir_selector_flags {
     DIR_SELECTOR_MTIME_LOWEST = 1 << 9,
     DIR_SELECTOR_NODIRS = 1 << 10,
     DIR_SELECTOR_FILTER = 1 << 11,
+    DIR_SELECTOR_FILTER_DIRS = 1 << 12,
 };
 
 typedef struct dir_selector {
@@ -26,6 +27,7 @@ typedef status (*FileFunc)(MemCh *m, Str *path, Str *file, void *source);
 status Dir_Destroy(MemCh *m, Str *path);
 status Dir_Gather(MemCh *m, Str *path, Span *sp);
 status Dir_GatherSel(MemCh *m, Str *path, DirSelector *sel);
+status Dir_GatherFilterDir(MemCh *m, Str *path, DirSelector *sel);
 DirSelector *Dir_GatherByExt(MemCh *m, Str *path, Span *sp, Span *exts);
 status Dir_Exists(MemCh *m, Str *path);
 status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source);

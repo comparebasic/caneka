@@ -56,6 +56,7 @@
 #include "./termio/cli_status.c"
 #include "./termio/rawmode.c"
 #include "./termio/args.c"
+#include "./termio/termio_tos.c"
 #include "./types/error.c"
 #include "./types/error_msg.c"
 #include "./types/guard.c"

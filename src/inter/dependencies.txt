@@ -1,2 +1,2 @@
-choice=crypto@third/nacl
+option=crypto@third/nacl
 ext

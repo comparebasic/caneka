@@ -25,6 +25,7 @@ i32 main(int argc, char **argv){
     Str *quietKey = K(m, "quiet");
     Str *runKey = K(m, "run");
     Str *modulesKey = K(m, "module");
+    Str *optionsKey = K(m, "option");
     Str *licenceKey = K(m, "licence");
     Str *versionKey = K(m, "version");
     Str *srcKey = K(m, "src");
@@ -42,6 +43,9 @@ i32 main(int argc, char **argv){
 
     Args_Add(cli, srcPrefixKey, S(m, "src"), ARG_DEFAULT,
         Sv(m, "Source code files prefix. The path before the module names."));
+
+    Args_Add(cli, optionsKey, NULL, ARG_MULTIPLE|ARG_OPTIONAL,
+        Sv(m, "Optional dependency source modules to include."));
 
     Span *libDirs = Span_Make(m);
     Span_Add(libDirs, S(m, "/usr/lib64"));
@@ -92,6 +96,7 @@ i32 main(int argc, char **argv){
     ctx->input.countModules = I32_Wrapped(m, 0);
     ctx->input.totalModuleSources = I32_Wrapped(m, 0);
     ctx->input.countModuleSources = I32_Wrapped(m, 0);
+    ctx->input.options = CliArgs_Get(cli, optionsKey);
 
     if(CliArgs_Get(cli, quietKey)){
         BuildCtx_SetQuiet(TRUE);

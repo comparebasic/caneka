@@ -22,6 +22,7 @@ status Caneka_InitBase(MemCh *m){
     r |= StreamTo_Init(md);
     r |= AnsiStr_Init(md);
     r |= DebugStack_Init(m);
+    r |= Termio_ToSInit(m);
     r |= Args_Init(m);
     r |= Clone_Init(m);
     r |= Equals_Init(m);

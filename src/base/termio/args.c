@@ -31,7 +31,8 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
                     Table_SetKey(&it, key);
                     if(current->type.state & ARG_MULTIPLE){
                         i32 selected = it.metrics.selected;
-                        Table_SetValue(&it, Span_Make(m));
+                        Span *p = Span_Make(m);
+                        Table_SetValue(&it, p);
                         it.metrics.selected = selected;
                     }
                 }else{
@@ -47,6 +48,7 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
                     Hashed *h = Iter_GetSelected(&it);
                     Span *p = h->value;
                     Span_Add(p, s);
+                    it.metrics.selected = -1;
                 }else{
                     Table_SetValue(&it, s);
                 }

@@ -18,7 +18,21 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     if(Dir_Exists(m, pathS) & SUCCESS){
         sel = DirSelector_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
-        Dir_GatherSel(m, pathS, sel);
+        if(ctx->input.options != NULL && ctx->input.options->nvalues > 0){
+            printf("Fancy dir gather\n");
+            fflush(stdout);
+            exit(1);
+            sel->source = ctx->input.options;
+            Dir_GatherFilterDir(m, pathS, sel);
+        }else{
+            Dir_GatherSel(m, pathS, sel);
+        }
+
+        args[0] = pathS;
+        args[1] = sel->dest;
+        args[2] = NULL;
+        Out("^p.DirSelector @ -> @^0\n", args);
+
         StrVec *name = StrVec_Make(m);
         StrVec_AddVecAfter(name, path, ctx->input.srcPrefix->p->nvalues+1);
 
@@ -38,7 +52,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         ctx->input.totalSources->val.i += sel->dest->nvalues;
         if(!Equals(key, path)){
             Span *p = NULL;
-            Str *meta = S(m, "choice");
+            Str *meta = S(m, "option");
             if((p = Table_Get(sel->meta, meta)) == NULL){
                 p = Span_Make(m);
                 Table_Set(sel->meta, meta, p);
@@ -78,7 +92,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         if(*curs->ptr == '\n'){
             if(label != NULL && label->length > 0 ||
                     name != NULL && name->length > 0){
-                if(Equals(label, K(m, "choice"))){
+                if(Equals(label, K(m, "option"))){
                     if(name != NULL && name->length > 0){
                         key = StrVec_From(m, Str_Clone(m, name));
                         Table_SetInTable(sel->meta, S(m, "provides"), key, key);

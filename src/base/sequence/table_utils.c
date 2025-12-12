@@ -5,6 +5,17 @@ i32 Table_SetByCstr(Table *tbl, char *cstr, void *value){
     return Table_Set(tbl, Str_FromCstr(tbl->m, cstr, STRING_COPY), value);
 }
 
+Table *Table_FromSpan(MemCh *m, Span *p){
+    Table *tbl = Table_Make(m);
+    Iter it;
+    Iter_Init(&it, p);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        Table_Set(tbl, a, a);
+    }
+    return tbl;
+}
+
 Span *Table_Ordered(MemCh *m, Table *tbl){
     Span *p = Span_Make(m);
     Iter it;

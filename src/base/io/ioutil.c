@@ -121,8 +121,48 @@ StrVec *IoPath(MemCh *m, char *cstr){
     return IoPath_From(m, Str_FromCstr(m, cstr, STRING_COPY));
 }
 
+/* deprecated use IoPath_FromStr */
 StrVec *IoPath_From(MemCh *m, Str *s){
     StrVec *v = StrVec_From(m, s);
+    IoUtil_Annotate(m, v);
+    return v;
+}
+
+StrVec *IoPath_FromStr(MemCh *m, Str *s){
+    StrVec *v = StrVec_From(m, s);
+    IoUtil_Annotate(m, v);
+    return v;
+}
+
+status IoPath_Descendent(StrVec *orig, StrVec *compare){
+    if(compare->p->nvalues < orig->p->nvalues){
+        return NOOP;
+    }
+
+    Iter itO;
+    Iter_Init(&itO, orig->p);
+    Iter itC;
+    Iter_Init(&itC, compare->p);
+    while(((Iter_Next(&itO)|Iter_Next(&itC)) & END) == 0){
+        Str *o = Iter_Get(&itO);
+        Str *c = Iter_Get(&itC);
+        if(!Equals(o, c)){
+            break;
+        }
+    }
+
+    if(itO.type.state & END){
+        return SUCCESS;
+    }else if(itO.idx > 0){
+        return MORE;
+    }else{
+        return NOOP;
+    }
+
+}
+
+StrVec *IoPath_FromVec(MemCh *m, StrVec *_v){
+    StrVec *v = StrVec_Copy(m, _v);
     IoUtil_Annotate(m, v);
     return v;
 }

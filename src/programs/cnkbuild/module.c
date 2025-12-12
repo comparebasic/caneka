@@ -125,6 +125,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
                     void *args[] = {h->key, NULL};
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Dependency expected but not resolved @", args);
+                    DebugStack_Pop();
                     return r|ERROR;
                 }
                 Span *depInc = Table_Get(dsel->meta, K(m, "inc"));
@@ -178,6 +179,7 @@ static status skipRecent(BuildCtx *ctx,
                     "Library is recent, skipping");
                 BuildCtx_LogOut(ctx);
                 ctx->input.countSources->val.i += ctx->input.totalModuleSources->val.i;
+                DebugStack_Pop();
                 return SUCCESS;
             }
         }
@@ -317,6 +319,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     void *args[5];
 
     if(Table_Get(sel->meta, K(m, "completed")) != NULL){
+        DebugStack_Pop();
         return NOOP;
     }
 
@@ -343,6 +346,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     ctx->input.countModuleSources->val.i = 0;
 
     if(skipRecent(ctx, name, sel) & SUCCESS){
+        DebugStack_Pop();
         return NOOP;
     }
 

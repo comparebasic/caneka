@@ -3,3 +3,4 @@
 #include "termio/cli_status.h"
 #include "termio/rawmode.h"
 #include "termio/args.h"
+#include "termio/termio_tos.h"
