@@ -1,1 +1,2 @@
+choice=crypto@third/nacl
 ext
