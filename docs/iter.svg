@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg" height="1024" width="1024">
+     <style>
+        .label {
+            font: 14px monospace;
+            fill: #000;
+        }
+        .label.title {
+            font: 16px sans-serif;
+            font-weight: bold;
+        }
+        .label.focus {
+            fill: #fff;
+        }
+        .line {
+            stroke: #000;
+            fill: transparent;
+        }
+        .line.hl {
+            fill: #888;
+        }
+        .line.focus {
+            fill: #000;
+        }
+     </style>
+     <text x="280" y="20" class="label title">Iter&lt;&gt; pattern for 32 elements (2 slabs)</text>
+     <text x="540" y="160" class="label">flags:</text>
+     <text x="600" y="160" class="label" id="flags">ZERO</text>
+     <g transform="translate(20,-60)">
+         <g transform="translate(20,120)">
+            <path d="M 0 0 L 320 0 320 20 L 0 20 L 0 0" class="line" />
+            <path d="M 20 0 L 20 20" class="line" />
+            <path d="M 40 0 L 40 20" class="line" />
+            <path d="M 60 0 L 60 20" class="line" />
+            <path d="M 80 0 L 80 20" class="line" />
+            <path d="M 100 0 L 100 20" class="line" />
+            <path d="M 120 0 L 120 20" class="line" />
+            <path d="M 140 0 L 140 20" class="line" />
+            <path d="M 160 0 L 160 20" class="line" />
+            <path d="M 180 0 L 180 20" class="line" />
+            <path d="M 200 0 L 200 20" class="line" />
+            <path d="M 220 0 L 220 20" class="line" />
+            <path d="M 240 0 L 240 20" class="line" />
+            <path d="M 260 0 L 260 20" class="line" />
+            <path d="M 280 0 L 280 20" class="line" />
+            <path d="M 300 0 L 300 20" class="line" />
+             <text x="5" y="16" class="label" id="cursor-1-0"></text>
+         </g>
+         <g transform="translate(420,130)">
+            <path d="M 0 0 L 320 0 320 20 L 0 20 L 0 0" class="line" />
+            <path d="M 20 0 L 20 20" class="line" />
+            <path d="M 40 0 L 40 20" class="line" />
+            <path d="M 60 0 L 60 20" class="line" />
+            <path d="M 80 0 L 80 20" class="line" />
+            <path d="M 100 0 L 100 20" class="line" />
+            <path d="M 120 0 L 120 20" class="line" />
+            <path d="M 140 0 L 140 20" class="line" />
+            <path d="M 160 0 L 160 20" class="line" />
+            <path d="M 180 0 L 180 20" class="line" />
+            <path d="M 200 0 L 200 20" class="line" />
+            <path d="M 220 0 L 220 20" class="line" />
+            <path d="M 240 0 L 240 20" class="line" />
+            <path d="M 260 0 L 260 20" class="line" />
+            <path d="M 280 0 L 280 20" class="line" />
+            <path d="M 300 0 L 300 20" class="line" />
+             <text x="2" y="16" class="label" id="cursor-1-1"></text>
+         </g>
+         <g transform="translate(100,220)">
+            <path d="M 0 0 L 320 0 320 20 L 0 20 L 0 0" class="line" />
+            <path d="M 20 0 L 20 20" class="line" />
+            <path d="M 40 0 L 40 20" class="line" />
+            <path d="M 60 0 L 60 20" class="line" />
+            <path d="M 80 0 L 80 20" class="line" />
+            <path d="M 100 0 L 100 20" class="line" />
+            <path d="M 120 0 L 120 20" class="line" />
+            <path d="M 140 0 L 140 20" class="line" />
+            <path d="M 160 0 L 160 20" class="line" />
+            <path d="M 180 0 L 180 20" class="line" />
+            <path d="M 200 0 L 200 20" class="line" />
+            <path d="M 220 0 L 220 20" class="line" />
+            <path d="M 240 0 L 240 20" class="line" />
+            <path d="M 260 0 L 260 20" class="line" />
+            <path d="M 280 0 L 280 20" class="line" />
+            <path d="M 300 0 L 300 20" class="line" />
+             <text x="5" y="16" class="label" id="cursor-0">0</text>
+         </g>
+
+         <path d="M 110 220 L 30 140" id="line-1-0" class="line" stroke-width="0" />
+         <path d="M 130 220 L 430 150" id="line-1-1" class="line" stroke-width="0" />
+     </g>
+     <script type="text/javascript"><![CDATA[
+        (function(){
+            const curs0 = document.getElementById("cursor-0");
+            const curs1_0 = document.getElementById("cursor-1-0");
+            const curs1_1 = document.getElementById("cursor-1-1");
+            const line1_0 = document.getElementById("line-1-0");
+            const line1_1 = document.getElementById("line-1-1");
+            const flags = document.getElementById("flags");
+            const max = 31;
+            let frame = 0;
+            let dim0 = 0;
+            let dim1_0 = 0;
+            let dim1_1 = 0;
+            let offset = 0;
+            let gap = 0;
+            let interval = setInterval(function(){
+                if(frame == max){
+                    if(gap++ < 3){
+                        flags.textContent = "END";
+                        return;
+                    }else{
+                        gap = 0;
+                        frame = 0;
+                        return;
+                    }
+                }else if(frame < max){
+                    frame++
+                }else{
+                    frame = 0;
+                }
+
+                if(frame == 0){
+                    flags.textContent = "ZERO";
+                }else if(frame == 31){
+                    flags.textContent = "PROCESSING|LAST";
+                }else{
+                    flags.textContent = "PROCESSING";
+                }
+
+
+                if(frame < 16){
+                    dim0 = 0;
+                    dim1_0 = frame;
+                }else{
+                    dim0 = 1;
+                    dim1_1 = frame - 16;
+                }
+
+                if(frame < 10){
+                    offset = 5;
+                }else{
+                    offset = 2;
+                }
+
+                curs0.textContent = dim0;
+                curs0.setAttribute("x", (dim0 *20) + 5);
+                if(dim0 == 0){
+                    curs1_1.textContent = "";
+                    curs1_0.textContent = frame;
+                    curs1_0.setAttribute("x", (dim1_0 *20) + offset);
+                    line1_0.setAttribute("stroke-width", 1);
+                    line1_1.setAttribute("stroke-width", 0);
+                }else if (dim0 == 1){
+                    curs1_0.textContent = "";
+                    curs1_1.textContent = frame;
+                    curs1_1.setAttribute("x", (dim1_1 *20) + offset);
+                    line1_0.setAttribute("stroke-width", 0);
+                    line1_1.setAttribute("stroke-width", 1);
+                }
+            }, 360);
+        })();
+     ]]></script>
+</svg>
