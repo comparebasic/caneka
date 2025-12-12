@@ -64,6 +64,8 @@ static void match_NextKoTerm(Match *mt){
 static void addCount(MemCh *m, Match *mt, word flags, i32 length){
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
+    }else if(mt->snip.type.state == SNIP_NOTAIL){
+        mt->snip.type.state = SNIP_CONTENT;
     }
 
     if((mt->snip.type.state & flags) == flags){
@@ -185,6 +187,8 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                 snipFlag = SNIP_UNCLAIMED;
             }else if((def->flags & PAT_CONSUME) != 0){
                 snipFlag = SNIP_GAP;
+            }else if((def->flags & NO_TAIL) == NO_TAIL){
+                snipFlag = SNIP_NOTAIL;
             }else if((def->flags & PAT_INVERT_CAPTURE) != 0){
                 snipFlag = SNIP_UNCLAIMED;
             }else{

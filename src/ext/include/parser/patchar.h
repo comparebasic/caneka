@@ -17,6 +17,8 @@ enum pat_flags {
     PAT_REQUIRE_KO = 1 << 14 /* R */
 };
 
+#define NO_TAIL (PAT_ANY|PAT_SINGLE|PAT_INVERT_CAPTURE)
+
 typedef struct patchardef {
     word flags;
     byte from;

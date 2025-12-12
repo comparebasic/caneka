@@ -14,13 +14,13 @@ enum test_types {
 
 enum test_status {
     SECTION_LABEL = 1 << 8,
-    NOT_STARTED = 1 << 9,
-    PREVIOUSLY_WORKING = 1 << 10,
-    PARTIAL_FEATURE = 1 << 11,
-    FEATURE_COMPLETE = 1 << 12,
-    PRE_PRODUCTION = 1 << 13,
-    PRODUCTION = 1 << 14,
-    PERMANCE_TESTED = 1 << 15,
+    SKIP_TEST = 1 << 9,
+    NOT_STARTED = 1 << 10,
+    PREVIOUSLY_WORKING = 1 << 11,
+    PARTIAL_FEATURE = 1 << 12,
+    FEATURE_COMPLETE = 1 << 13,
+    PRE_PRODUCTION = 1 << 14,
+    PRODUCTION = 1 << 15,
 };
 
 typedef status (*TestFunc)(MemCh *m);

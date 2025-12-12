@@ -14,8 +14,6 @@ static char *statusCstr(word status){
         return "pre production";
     } else if(status == PRODUCTION){
         return "production";
-    } else if(status == PERMANCE_TESTED){
-        return "performance tuned";
     }else{
         return "unknown";
     }
@@ -108,6 +106,12 @@ status Test_Runner(MemCh *m, TestSuite *suite){
         args[0] = Str_CstrRef(m, set->name);
         if(set->status == SECTION_LABEL){
             Out("^E.== $  ^e.\n", args);
+            set++;
+            continue;
+        }
+
+        if(set->status & SKIP_TEST){
+            Out("^y.=== Skipping $  ^0.\n", args);
             set++;
             continue;
         }

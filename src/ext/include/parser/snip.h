@@ -3,8 +3,9 @@ enum strvec_snip {
     SNIP_GAP = 1 << 9, /* G */
     SNIP_STR_BOUNDRY = 1 << 10, /* B */
     SNIP_UNCLAIMED = 1 << 11, /* U */
-    SNIP_SKIPPED = 1 << 12, /* U */
-    SNIP_SEP = 1 << 13, /* U */
+    SNIP_SKIPPED = 1 << 12, /* K */
+    SNIP_SEP = 1 << 13, /* S */
+    SNIP_NOTAIL = 1 << 14, /*T */
 };
 
 typedef struct snip {

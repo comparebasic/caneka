@@ -31,7 +31,7 @@ static PatCharDef lineDef[] = {
     {PAT_KO|PAT_KO_TERM, '\n', '\n'},{PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
     {PAT_KO|PAT_INVERT_CAPTURE, '{', '{'},{PAT_KO|PAT_INVERT_CAPTURE, '}', '}'}, {PAT_KO|PAT_KO_TERM, '\n', '\n'},
 
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '},
+    {NO_TAIL, ' ', ' '},
     {PAT_OPTIONAL|PAT_MANY, '\t', '\t'}, {PAT_OPTIONAL|PAT_MANY, '\r', '\r'}, {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31},
     {PAT_END, 0, 0}
 };
@@ -171,7 +171,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         args[3] = data;
         args[4] = it->p;
         args[5] = NULL;
-        Out("^c.Config Capture ^E0.$^ec. -> ^0y.@\n    current: @\n    data:@\n    Iter:^b.&^0\n", args);
+        Out("^c.Config Capture ^E0.$^ec. -> ^0y.@\n    current: @\n    data:@\n    Iter:^b.@^0\n", args);
     }
 
     if(captureKey == CONFIG_LEAD){

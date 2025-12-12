@@ -3,7 +3,7 @@
 
 static char *matchFlagChars = "EXPMNICGKOSLDTU__";
 
-static char *snipChars = "_________CGBU_____";
+static char *snipChars = "_________CGBUKST__";
 
 static Str **snipLabels = NULL;
 static Str **roeblingLabels = NULL;
