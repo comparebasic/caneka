@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg" height="1024" width="1024">
+     <style>
+        .label {
+            font: 16px monospace;
+            fill: #000;
+        }
+        .label.title {
+            font: 16px sans-serif;
+            font-weight: bold;
+        }
+        .label.blue {
+            fill: #00f;
+        }
+        .label.green {
+            fill: #090;
+        }
+        .label.focus {
+            fill: #fff;
+        }
+        .line.blue {
+            stroke: #00f;
+            stroke-width: 2;
+        }
+        .line.blue-box {
+            fill: #bfbfff;
+        }
+        .line.green-box {
+            fill: #bfffbf;
+        }
+        .line.green {
+            stroke: #090;
+            stroke-width: 2;
+        }
+        .line {
+            stroke: #000;
+            fill: transparent;
+        }
+        .dash-line {
+            stroke: #000;
+            fill: transparent;
+            stroke-dasharray: 5, 5;
+        }
+        .dash-line.blue {
+            stroke: #00f;
+            stroke-width: 2;
+        }
+        .dash-line.green {
+            stroke: #090;
+            stroke-width: 2;
+        }
+        .line.hl {
+            fill: #888;
+        }
+        .line.focus {
+            fill: #000;
+        }
+     </style>
+     <text x="80" y="20" class="label title">Memory Book</text>
+     <text x="380" y="20" class="label title">Two Tasks</text>
+     <g transform="translate(20,60)">
+     <!-- mem book line -->
+     <path d="M 20 0 L 0 0 L 0 580" class="line" />
+     <text x="0" y="600" class="label">... up to 16 megabytes</text>
+     <path d="M 0 620 L 0 630 L 40 630" class="line" />
+
+     <text x="47" y="0" class="label">4 kilobyte pages</text>
+     <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line blue-box" />
+     <path d="M 120 25 L 120 50 L 210 50 L 210 25 L 120 25" class="dash-line" />
+     <text x="136" y="42" class="label">MCtx #1</text>
+
+     <g transform="translate(0,50)">
+     <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line blue-box" />
+     </g>
+     <g transform="translate(0,100)">
+         <text x="75" y="40" class="label">Recycled</text>
+     </g>
+     <g transform="translate(0,150)">
+         <path d="M 10 10 L 220 10" class="line" />
+             <text x="75" y="40" class="label">Recycled</text>
+         </g>
+         <g transform="translate(0,200)">
+         <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line green-box" />
+         </g>
+         <g transform="translate(0,250)">
+         <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line blue-box" />
+         </g>
+         <g transform="translate(0,300)">
+         <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line green-box" />
+         </g>
+         <g transform="translate(0,350)">
+         <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line green-box" />
+         <path d="M 120 25 L 120 50 L 210 50 L 210 25 L 120 25" class="dash-line" />
+         <text x="136" y="42" class="label">MCtx #2</text>
+         </g>
+         <g transform="translate(0,400)">
+         <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line green-box" />
+         </g>
+         <g transform="translate(0,450)">
+         <path d="M 10 10 L 220 10" class="line" />
+         <text x="75" y="40" class="label">Recycled</text>
+         </g>
+         <g transform="translate(0,500)">
+         <path d="M 10 10 L 220 10 L 220 60 L 10 60 L 10 10" class="line green-box" />
+         </g>
+         <g transform="translate(300,100)" >
+             <path d="M 100 0 A 100 50 0 0 1 100 100" class="line blue-box" />
+             <path d="M 100 0 A 100 -50 0 0 0 100 100" class="line blue-box" />
+             <text x="32" y="50" class="label">Task&lt; MCtx #1 &gt;</text>
+             <text x="60" y="130" class="label">Pages: 3</text>
+             <text x="60" y="150" class="label">Total: 12k</text>
+         </g>
+
+         <g transform="translate(350,400)" >
+             <path d="M 100 0 A 100 50 0 0 1 100 100" class="line green-box" />
+             <path d="M 100 0 A 100 -50 0 0 0 100 100" class="line green-box" />
+             <text x="32" y="50" class="label">Task&lt; MCtx #2 &gt;</text>
+             <text x="60" y="130" class="label">Pages: 5</text>
+             <text x="60" y="150" class="label">Total: 20k</text>
+         </g>
+     </g>
+</svg>
