@@ -1,2 +1,2 @@
-option=crypto@third/nacl
+api=crypto
 ext

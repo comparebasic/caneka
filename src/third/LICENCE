@@ -1,6 +1,28 @@
-The code in this folder and subfolders is public domain if not otherwise specified.
+The code in this folder is under a different licence per folder.
+The folder names do not contain the sources of the libraries that bear
+the names of the folders. For example nacl is not he NaCl library, and
+openssl is not the openssl library, it is bridge code between Caneka
+and those respective libraries.
 
-These files are integrations with other software, in some case files may have thier own licence.
+src/third/nacl: Public Domain see src/third//nacl/LICENCE 
+    note this is not the NaCL library it is just wrapper/bridge code with caneka.
+
+Planned but not included yet:
+
+src/third/openssl: Open SSL licence see src/third/openssl/LICENCE 
+    (when it exists)
+
+src/third/libdatachannel: LibDataChannel MPL-2.0 see src/third/libdatachannel/LICENCE
+    (when it exists)
+
+src/third/sdl2: Sdl2 ? src/third/sdl2/LICENCE 
+    (when it exists)
+
+src/third/libwebsockets: ? see src/third/libwebsockets/LICENCE 
+    (when it exists)
+
+src/third/libpng: LibPNG Licence  see src/third/libpng/LICENCE 
+    (when it exists)
 
 Firecrow Silvernight
 Compare Basic Incorporated

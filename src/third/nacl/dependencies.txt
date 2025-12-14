@@ -1,3 +1,4 @@
+privides=crypto
 skip=crypto_sign-edwards25519sha512batch-ref-sign.orig.c
 skip=crypto_hash-sha256-ref-hash.orig.c
 static=libnacl@/external/lib/libnacl.a
