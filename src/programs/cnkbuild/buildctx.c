@@ -5,7 +5,6 @@ status BuildCtx_Build(BuildCtx *ctx){
     DebugStack_Push(NULL, 0);
     status r = READY;
     MemCh *m = ctx->m;
-    void *args[5];
 
     Time_Now(&ctx->start);
 
@@ -21,6 +20,13 @@ status BuildCtx_Build(BuildCtx *ctx){
         StrVec_AddVecAfter(key, v, ctx->input.srcPrefix->p->nvalues+1);
         BuildCtx_ParseDependencies(ctx, key, v);
     }
+
+    void *args[] = {
+        ctx, NULL   
+    };
+    Out("^p.Ctx after Depenencies:\n@^0\n", args);
+    
+    exit(1);
 
     /* build libs */
     ctx->input.countModules->val.i = 0;

@@ -19,11 +19,15 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         sel = DirSelector_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
         if(ctx->input.options != NULL && ctx->input.options->nvalues > 0){
-            printf("Fancy dir gather\n");
-            fflush(stdout);
-            exit(1);
+            args[0] = ctx;
+            args[1] = ctx->input.options;
+            args[2] = NULL;
+            Out("^y.Fancy Dir Gather @\n^c.options @^0\n", args);
+            /* gather non-option sources */
             sel->source = ctx->input.options;
             Dir_GatherFilterDir(m, pathS, sel);
+            /* gather option sources */
+            exit(1);
         }else{
             Dir_GatherSel(m, pathS, sel);
         }
