@@ -7,6 +7,7 @@ enum dir_selector_flags {
     DIR_SELECTOR_NODIRS = 1 << 10,
     DIR_SELECTOR_FILTER = 1 << 11,
     DIR_SELECTOR_FILTER_DIRS = 1 << 12,
+    DIR_SELECTOR_INVERT = 1 << 13,
 };
 
 typedef struct dir_selector {

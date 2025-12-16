@@ -32,6 +32,8 @@ char *buildTests[] = {
     "./build/bin/cnkbuild",
     "--src",
     "src/programs/test",
+    "--option",
+    "base",
     NULL
 };
 
@@ -45,7 +47,7 @@ char *buildWebServer[] = {
 char *buildCli[] = {
     "./build/bin/cnkbuild",
     "--src",
-    "src/programs/cnkcli",
+    "src/programs/clineka",
     NULL
 };
 
@@ -321,7 +323,7 @@ int main(int argc, char *argv[]){
     cmd[0] = _gen_CC;
     cmd[1] = "-g";
     cmd[2] = "-Isrc/base/include";
-    cmd[3] = "-Isrc/third/include";
+    cmd[3] = "-Isrc/api/include";
     cmd[4] = "-c";
     cmd[5] = "-o";
     cmd[6] = "./build/libcnkbase/libcnkbase.a";
@@ -336,7 +338,7 @@ int main(int argc, char *argv[]){
     cmd[1] = "-g";
     cmd[2] = "-Isrc/programs/cnkbuild/include";
     cmd[3] = "-Isrc/base/include";
-    cmd[4] = "-Isrc/third/include";
+    cmd[4] = "-Isrc/api/include";
     cmd[5] = "-Iprograms/cnkbuild/include";
     cmd[6] = "-o";
     cmd[7] = "./build/bin/cnkbuild";
@@ -365,7 +367,7 @@ int main(int argc, char *argv[]){
         printf("Cleaned!\n");
         fflush(stdout);
     }else if(compareCstr("build-cli", choice)){
-        printf("The Cli has been built at ./build/bin/cnkcli\n");
+        printf("The Cli has been built at ./build/bin/clineka\n");
         fflush(stdout);
     }else if(compareCstr("build-webserver", choice)){
         printf("The WebServer has been built at ./build/bin/webserver\n");

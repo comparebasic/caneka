@@ -28,18 +28,36 @@ static status fileHasExt(MemCh *m, void *_file, void *source){
     return NOOP;
 }
 
-static status fileIsDescendedOrNot(MemCh *m, void *path, void *source){
-    Table *tbl = (Table *)as(source, TYPE_TABLE);
-    StrVec *pathV = IoPath_FromStr(m, (Str *)as(path, TYPE_STR));
+static status fileIsDescendedOrNot(MemCh *m, void *_path, void *source){
+    Str *path = _path;
+    DirSelector *sel = (DirSelector *)as(source, TYPE_DIR_SELECTOR);
+    Span *filter = (Span *)as(sel->source, TYPE_SPAN);
     Iter it;
-    Iter_Init(&it, tbl);
+    Iter_Init(&it, filter);
     while((Iter_Next(&it) & END) == 0){
-        StrVec *v = (StrVec *)as(Iter_Get(&it), TYPE_STRVEC);
-        if(IoPath_Descendent(pathV, v) & MORE){
-            return NOOP;
+        Str *s = (Str *)as(Iter_Get(&it), TYPE_STR);
+        if(Str_StartMatch(s, path, min(path->length, s->length))){
+            if(sel->type.state & DIR_SELECTOR_INVERT){
+                void *args[] = {path, s, NULL};
+                Out("^c.NotAdding @ filter @^0.\n", args);
+                return NOOP;
+            }else{
+                void *args[] = {path, s, NULL};
+                Out("^c.Adding @ filter @^0.\n", args);
+                return SUCCESS;
+            }
         }
     }
-    return SUCCESS;
+
+    if(sel->type.state & DIR_SELECTOR_INVERT){
+        void *args[] = {path, filter, NULL};
+        Out("^c.AddingBelow @ filter @^0.\n", args);
+        return SUCCESS;
+    }else{
+        void *args[] = {path, filter, NULL};
+        Out("^c.NotAddingBelow @ filter @^0.\n", args);
+        return NOOP;
+    }
 }
 
 static status fnameStr(MemCh *m, Str *s, Str *path, Str *file){
@@ -67,9 +85,11 @@ static status rmFile(MemCh *m, Str *path, Str *file, void *source){
 static status gatherDir(MemCh *m, Str *path, void *source){
     Span *p = NULL;
     if(source != NULL && ((Abstract *)source)->type.of == TYPE_DIR_SELECTOR){
+        void *args[] = {path, source, NULL};
+        Out("^p.gatherDir @ @^0.\n", args);
         DirSelector *sel = (DirSelector *)source;
-        if((sel->type.of & DIR_SELECTOR_FILTER_DIRS) &&
-                (sel->func(m, path, sel->source) & NOOP)){
+        if((sel->type.state & DIR_SELECTOR_FILTER_DIRS) &&
+                (sel->func(m, path, sel) & NOOP)){
             return NOOP;
         }
 
@@ -82,6 +102,8 @@ static status gatherDir(MemCh *m, Str *path, void *source){
         p = (Span *)as(source, TYPE_SPAN);
     }
     StrVec *v = StrVec_From(m, path);
+    printf("\nadding dir\n");
+    fflush(stdout);
     Span_Add(p, v);
     return SUCCESS;
 }
@@ -99,7 +121,7 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
 
 static status gatherFileFiltered(MemCh *m, Str *path, Str *file, void *source){
     DirSelector *sel = (DirSelector *)source;
-    if(sel->func(m, file, sel->source) & SUCCESS){
+    if(sel->func(m, file, sel) & SUCCESS){
         Span *p = (Span *)asIfc(sel->dest, TYPE_SPAN);
         StrVec *v = StrVec_Make(m);
         StrVec_Add(v, path);
@@ -232,6 +254,7 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
      * file: function called for each file found
      * source: Abstract object passed to each function
      */
+
     DebugStack_Push(path, path->type.of); 
     status r = READY;
     struct dirent *ent;
@@ -249,10 +272,6 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
                 if(dir != NULL){
                     if((dir(m, s, source) & NOOP) == 0){
                         Dir_Climb(m, s, dir, file, source);
-                    }else{
-                        printf("DIR NOOP\n");
-                        fflush(stdout);
-                        exit(1);
                     }
                 }else{
                     Dir_Climb(m, s, dir, file, source);

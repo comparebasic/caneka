@@ -64,7 +64,7 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
                 current = NULL;
             }
         }
-        /* verify completeness  */
+        /* verify completeness */
         Iter it;
         Iter_Init(&it, Table_Ordered(m, resolve));
         while((Iter_Next(&it) & END) == 0){

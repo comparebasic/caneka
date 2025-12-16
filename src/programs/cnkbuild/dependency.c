@@ -19,14 +19,41 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         sel = DirSelector_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
         if(ctx->input.options != NULL && ctx->input.options->nvalues > 0){
-            args[0] = ctx;
-            args[1] = ctx->input.options;
-            args[2] = NULL;
-            Out("^y.Fancy Dir Gather @\n^c.options @^0\n", args);
-            /* gather non-option sources */
-            sel->source = ctx->input.options;
+            StrVec *base = StrVec_Clone(m, path);
+            StrVec_Add(base, IoUtil_PathSep(m));
+            StrVec_Add(base, S(m, "option"));
+
+            printf("Hi\n");
+            fflush(stdout);
+
+            Span *filter = Span_Make(m);
+            Span_Add(filter, StrVec_Str(m, base));
+            sel->type.state |= DIR_SELECTOR_INVERT;
+            sel->source = filter;
+
             Dir_GatherFilterDir(m, pathS, sel);
-            /* gather option sources */
+
+            filter = Span_Make(m);
+            Iter it;
+            Iter_Init(&it, ctx->input.options);
+            while((Iter_Next(&it) & END) == 0){
+                StrVec *opt = StrVec_From(m, Iter_Get(&it));
+                StrVec *v = StrVec_Copy(m, base);
+                IoUtil_Annotate(m, opt);
+                StrVec_Add(v, IoUtil_PathSep(m));
+                StrVec_AddVec(v, opt);
+                Span_Add(filter, StrVec_Str(m, v));
+            }
+
+            sel->type.state &= ~DIR_SELECTOR_INVERT;
+            sel->source = filter;
+            Dir_GatherFilterDir(m, pathS, sel);
+
+            args[0] = sel;
+            args[1] = filter;
+            args[2] = ctx->input.options;
+            args[3] = NULL;
+            Out("^y.Fancy Dir Gather &\n^c.options @ opt @^0\n", args);
             exit(1);
         }else{
             Dir_GatherSel(m, pathS, sel);
