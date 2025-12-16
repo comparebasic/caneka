@@ -8,7 +8,6 @@ static boolean argHasFlag(Hashed *h, word flag){
 
 static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Table *dest){
     status r = READY;
-    Str *key = NULL;
     Iter it;
     Iter_Init(&it, dest);
     if(argc < 1){
@@ -16,6 +15,7 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
     }else{
         /* build args pass */
         Single *current = NULL;
+        Span *target = NULL;
         for(i32 i = 1; i < argc; i++){
             Str *s = S(m, argv[i]);
             if(s->length > 1 && s->bytes[0] == '-' && s->bytes[1] == '-'){
@@ -27,13 +27,12 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
                 Str_Incr(s, 2);
                 current = Table_Get(resolve, s);
                 if(current != NULL){
-                    key = s;
-                    Table_SetKey(&it, key);
+                    Table_SetKey(&it, s);
                     if(current->type.state & ARG_MULTIPLE){
-                        i32 selected = it.metrics.selected;
-                        Span *p = Span_Make(m);
-                        Table_SetValue(&it, p);
-                        it.metrics.selected = selected;
+                        target = Span_Make(m);
+                        Table_SetValue(&it, target);
+                    }else{
+                        target = NULL;
                     }
                 }else{
                     void *args[] = {
@@ -43,25 +42,14 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Unable to find resolve for arg @", args);
                 }
+            }else if(current->type.state & ARG_MULTIPLE && target != NULL){
+                    Span_Add(target, s);
             }else if(it.metrics.selected != -1){
-                if(current != NULL && current->type.state & ARG_MULTIPLE){
-                    Hashed *h = Iter_GetSelected(&it);
-                    Span *p = h->value;
-                    Span_Add(p, s);
-                    it.metrics.selected = -1;
-                }else{
-                    Table_SetValue(&it, s);
-                }
-
-                key = NULL;
-                current = NULL;
+                Table_SetValue(&it, s);
                 r |= SUCCESS;
             }else{
-                if(it.metrics.selected == -1){
-                    Table_SetKey(&it, I32_Wrapped(m, i));
-                }
+                Table_SetKey(&it, I32_Wrapped(m, i));
                 Table_SetValue(&it, s);
-                current = NULL;
             }
         }
         /* verify completeness */
@@ -160,10 +148,9 @@ status Args_Add(CliArgs *cli, Str *key, void *_value, word flags, StrVec *explai
 
 status CharPtr_ToHelp(CliArgs *cli){
     MemCh *m = cli->m;
-    void *args[] = {
-        cli->name,
-        NULL
-    };
+    void *args[3];
+    args[0] = cli->name;
+    args[1] = NULL;
 
     Str *noColorKey = K(m, "no-color");
     if(Table_GetHashed(cli->args, noColorKey) != NULL){
@@ -229,7 +216,13 @@ status CharPtr_ToHelp(CliArgs *cli){
             }
         }
     }
-    Out("\n", NULL);
+
+    args[0] = Ptr_Wrapped(m, cli->argv, TYPE_CSTR_ARRAY);
+    args[1] = cli->args;
+    args[2] = NULL;
+
+    Out("\n^y.Command line arguments recieved: @, gathered: @^0\n", args);
+    exit(1);
     return ZERO;
 }
 
