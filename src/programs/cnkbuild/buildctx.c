@@ -21,11 +21,8 @@ status BuildCtx_Build(BuildCtx *ctx){
         BuildCtx_ParseDependencies(ctx, key, v);
     }
 
-    void *args[] = {
-        ctx, NULL   
-    };
-    Out("^p.Ctx after Depenencies:\n@^0\n", args);
-    
+    void *args[] = {ctx, NULL};
+    Out("^p.Ctx after dependencies &^0\n", args);
     exit(1);
 
     /* build libs */

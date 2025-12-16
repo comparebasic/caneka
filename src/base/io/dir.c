@@ -38,24 +38,16 @@ static status fileIsDescendedOrNot(MemCh *m, void *_path, void *source){
         Str *s = (Str *)as(Iter_Get(&it), TYPE_STR);
         if(Str_StartMatch(s, path, min(path->length, s->length))){
             if(sel->type.state & DIR_SELECTOR_INVERT){
-                void *args[] = {path, s, NULL};
-                Out("^c.NotAdding @ filter @^0.\n", args);
                 return NOOP;
             }else{
-                void *args[] = {path, s, NULL};
-                Out("^c.Adding @ filter @^0.\n", args);
                 return SUCCESS;
             }
         }
     }
 
     if(sel->type.state & DIR_SELECTOR_INVERT){
-        void *args[] = {path, filter, NULL};
-        Out("^c.AddingBelow @ filter @^0.\n", args);
         return SUCCESS;
     }else{
-        void *args[] = {path, filter, NULL};
-        Out("^c.NotAddingBelow @ filter @^0.\n", args);
         return NOOP;
     }
 }
@@ -85,8 +77,6 @@ static status rmFile(MemCh *m, Str *path, Str *file, void *source){
 static status gatherDir(MemCh *m, Str *path, void *source){
     Span *p = NULL;
     if(source != NULL && ((Abstract *)source)->type.of == TYPE_DIR_SELECTOR){
-        void *args[] = {path, source, NULL};
-        Out("^p.gatherDir @ @^0.\n", args);
         DirSelector *sel = (DirSelector *)source;
         if((sel->type.state & DIR_SELECTOR_FILTER_DIRS) &&
                 (sel->func(m, path, sel) & NOOP)){
@@ -102,8 +92,6 @@ static status gatherDir(MemCh *m, Str *path, void *source){
         p = (Span *)as(source, TYPE_SPAN);
     }
     StrVec *v = StrVec_From(m, path);
-    printf("\nadding dir\n");
-    fflush(stdout);
     Span_Add(p, v);
     return SUCCESS;
 }
