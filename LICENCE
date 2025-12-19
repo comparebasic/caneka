@@ -5,7 +5,7 @@ bootstrap.c: 3-ClauseBSD see src/base/LICENCE
 src/base: 3-ClauseBSD see src/base/LICENCE
 src/ext: 3-ClauseBSD see src/ext/LICENCE
 src/inter: 3-ClauseBSD see src/inter/LICENCE
-src/programs/cnkbuild: 3-ClauseBSD see src/programs/cnkbuild/LICENCE
+src/programs/buildeka: 3-ClauseBSD see src/programs/buildeka/LICENCE
 src/programs/cnkcli: 3-ClauseBSD see src/programs/cnkcli/LICENCE
 src/programs/webserver: 3-ClauseBSD see src/programs/cnkcli/LICENCE
 src/third: public domain see src/third/LICENCE

@@ -1,5 +1,5 @@
 #include <external.h>
-#include "cnkbuild_module.h"
+#include "buildeka_module.h"
 
 status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);

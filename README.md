@@ -128,7 +128,7 @@ of the modules.
 ### CnkBuild - source builder
 
 Canka only requires a C compiler to build. A small library is built to manage
-the build configuration(s) (found in the [cnkbuild](./src/programs/cnkbuild/)
+the build configuration(s) (found in the [buildeka](./src/programs/buildeka/)
 folder). The file [bootstrap.c](./bootstrap.c) in the root directory builds a
 which menu to manage the build process.
 
@@ -136,7 +136,7 @@ Each folder within the [src](/src) artifact folder, have a file in
 them which controls how they are built. Either as one include file such as (in
 the case of [base/inc.c](/src/base/inc.c) or with a more eleborate
 "build.c" file. Every module after the "base" is built using the "build.c"
-file, which is used by "cnkbuild" builder.
+file, which is used by "buildeka" builder.
 
 Further customization can be found in the dependencies.txt files for each
 module. 

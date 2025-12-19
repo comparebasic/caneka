@@ -4,7 +4,7 @@
  *
  * A small menu displays if no other arguments are given.
  *
- * The rest of the build process can be found at src/programs/cnkbuild/
+ * The rest of the build process can be found at src/programs/buildeka/
  *
  * see ./LICENCE for licene details
  *
@@ -16,20 +16,20 @@
 #include <time.h>
 #include <string.h>
 #include <dirent.h>
-#include "src/programs/cnkbuild/include/detect.h"
+#include "src/programs/buildeka/include/detect.h"
 
 #define TRUE 1
 #define FALSE 0
 
 char *buildCaneka[] = {
-    "./build/bin/cnkbuild",
+    "./build/bin/buildeka",
     "--src",
     "src/inter",
     NULL
 };
 
 char *buildTests[] = {
-    "./build/bin/cnkbuild",
+    "./build/bin/buildeka",
     "--src",
     "src/programs/test",
     "--option",
@@ -38,14 +38,14 @@ char *buildTests[] = {
 };
 
 char *buildWebServer[] = {
-    "./build/bin/cnkbuild",
+    "./build/bin/buildeka",
     "--src",
     "src/programs/webserver",
     NULL
 };
 
 char *buildCli[] = {
-    "./build/bin/cnkbuild",
+    "./build/bin/buildeka",
     "--src",
     "src/programs/clineka",
     NULL
@@ -65,7 +65,7 @@ char *runWebServer[] = {
 
 char *menuKeys[] = {
     "run-tests",
-    "cnkbuild-only",
+    "buildeka-only",
     "build-only",
     "clean",
     "build-cli",
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]){
         }
     }
 
-    if(compareCstr("cnkbuild-only", choice)){
+    if(compareCstr("buildeka-only", choice)){
         runcmd[0] = NULL;
     }else if(compareCstr("run-tests", choice)){
         runcmd[0] = buildTests;
@@ -336,18 +336,18 @@ int main(int argc, char *argv[]){
 
     cmd[0] = _gen_CC;
     cmd[1] = "-g";
-    cmd[2] = "-Isrc/programs/cnkbuild/include";
+    cmd[2] = "-Isrc/programs/buildeka/include";
     cmd[3] = "-Isrc/base/include";
     cmd[4] = "-Isrc/api/include";
-    cmd[5] = "-Iprograms/cnkbuild/include";
+    cmd[5] = "-Iprograms/buildeka/include";
     cmd[6] = "-o";
-    cmd[7] = "./build/bin/cnkbuild";
+    cmd[7] = "./build/bin/buildeka";
     cmd[8] = "./build/libcnkbase/libcnkbase.a";
-    cmd[9] = "./src/programs/cnkbuild/inc.c";
+    cmd[9] = "./src/programs/buildeka/inc.c";
     cmd[10] = "-lm";
     cmd[11] =  NULL;
 
-    if(run("Building cnkbuild", cmd) == -1){
+    if(run("Building buildeka", cmd) == -1){
         exit(1);
     }
 

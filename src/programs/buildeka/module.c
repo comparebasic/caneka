@@ -1,5 +1,5 @@
 #include <external.h>
-#include "cnkbuild_module.h"
+#include "buildeka_module.h"
 
 static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     DebugStack_Push(NULL, ZERO);

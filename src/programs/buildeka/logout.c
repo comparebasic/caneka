@@ -1,5 +1,5 @@
 #include <external.h>
-#include "cnkbuild_module.h"
+#include "buildeka_module.h"
 
 boolean _quiet = FALSE;
 
