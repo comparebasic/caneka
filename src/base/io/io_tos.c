@@ -123,6 +123,7 @@ status Io_InitLabels(MemCh *m, Lookup *lk){
         dirSelLabels[11] = Str_CstrRef(m, "NODIRS");
         dirSelLabels[12] = Str_CstrRef(m, "FILTER");
         dirSelLabels[13] = Str_CstrRef(m, "FILTER_DIRS");
+        dirSelLabels[14] = Str_CstrRef(m, "INVERT");
         Lookup_Add(m, lk, TYPE_DIR_SELECTOR, (void *)dirSelLabels);
         r |= SUCCESS;
     }

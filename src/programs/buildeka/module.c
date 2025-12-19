@@ -28,7 +28,18 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         StrVec_AddChain(ctx->current.target, args);
 
         Table_Set(sel->meta, S(m, "target"), StrVec_Copy(m, ctx->current.target));
+
+        args[0] = key;
+        args[1] = ctx->current.target;
+        args[2] = I32_Wrapped(m, libSourceTotal);
+        args[3] = sel->dest;
+        args[4] = NULL;
+        Out("^y.libSources >= 0 for @ making @ found $ sel:@^0.\n\n\n\n\n", args);
     }else{
+        args[0] = key;
+        args[1] = NULL;
+        Out("^y.libSources <= 0 for @^0.\n", args);
+        exit(1);
         ctx->current.targetName = NULL;
         ctx->current.target = NULL;
     }

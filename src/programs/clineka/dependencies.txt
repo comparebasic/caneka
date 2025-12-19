@@ -1,5 +1,5 @@
 exec=main.c
 inter
-choice=crypto@third/nacl
+option=crypto@third/nacl
 ext
 base

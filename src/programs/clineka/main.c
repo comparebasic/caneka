@@ -1,6 +1,6 @@
 #include <external.h>
 #include <caneka.h>
-#include <cnkcli_module.h>
+#include <clineka_module.h>
 
 i32 main(int argc, char **argv){
     void *args[16];
