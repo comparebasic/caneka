@@ -36,10 +36,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             sel->source = filter;
 
             Dir_GatherFilterDir(m, pathS, sel);
-            args[0] = sel;
-            args[1] = sel->dest;
-            args[2] = NULL;
-            Out("^c. sel @ sel->dest after gather @^0\n", args);
 
             filter = Span_Make(m);
             Iter it;
@@ -56,10 +52,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             sel->type.state &= ~DIR_SELECTOR_INVERT;
             sel->source = filter;
             Dir_GatherFilterDir(m, pathS, sel);
-            args[0] = sel;
-            args[1] = sel->dest;
-            args[2] = NULL;
-            Out("^y. sel @ sel->dest after gather @^0\n", args);
         }else{
             Dir_GatherSel(m, pathS, sel);
         }

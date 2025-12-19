@@ -84,6 +84,7 @@ char *menuKeys[] = {
     "read-documentation",
     "all",
     "oops",
+    "invalid",
     NULL
 };
 
@@ -223,13 +224,26 @@ char *menu(){
 
     printf("\n  Type a number or press Enter (default is 1)\n\n");
 
-    char buff[2];
-    read(0, buff, 2);
-    int choice = atoi(buff);
-    if(choice > 0 && choice < i-1){
-        return menuKeys[choice-1];
+    char buff[3] = {0, 0, 0};
+    char *b = buff;
+    int j;
+    for(j = 0; j < 3; j++, b++){
+        read(0, b, 1);
+        if(*b == '\n'){
+            break;
+        }
     }
-    return NULL;
+
+    if(j == 0 || buff[0] == '\n'){
+        return NULL;
+    }
+
+    int choice = atoi(buff);
+    if(choice <= 0 || choice >= i){
+        return menuKeys[i-1];
+    }
+
+    return menuKeys[choice-1];
 }
 
 int main(int argc, char *argv[]){

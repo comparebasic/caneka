@@ -78,11 +78,6 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         }
         Span_AddSpanRev(cmd, ctx->current.staticlibs);
         Span_AddSpan(cmd, ctx->input.libs);
-        args[0] = cmd;
-        args[1] = NULL;
-        Out("^p.c.cmd @^0\n", args);
-        exit(1);
-
     }else{
         Span_Add(cmd, Str_CstrRef(m, "-g"));
         Span_Add(cmd, Str_CstrRef(m, "-c"));

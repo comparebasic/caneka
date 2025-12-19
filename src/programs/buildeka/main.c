@@ -109,7 +109,7 @@ i32 main(int argc, char **argv){
     args[0] = CliArgs_Get(cli, srcKey);
     args[1] = CliArgs_Get(cli, dirKey);
     args[2] = NULL;
-    Out("^g.Build succeeded $ -> ./$^0\n", args);
+    Out("^g.Build succeeded $ -> ./$/bin/^0\n", args);
 
     CliArgs_Free(cli);
 

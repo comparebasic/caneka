@@ -255,16 +255,18 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
             i64 len = strlen(ent->d_name);
             Str *e = Str_Ref(m, (byte *)ent->d_name, len, len+1, STRING_COPY);
             if(ent->d_type == IS_DIR){
+                r &= ~NOOP;
                 Str *s = Str_Make(m, STR_DEFAULT);
                 fnameStr(m, s, path, e);
                 if(dir != NULL){
-                    if((dir(m, s, source) & NOOP) == 0){
+                    r |= dir(m, s, source);
+                    if((r & NOOP) == 0){
                         Dir_Climb(m, s, dir, file, source);
                     }
                 }else{
                     Dir_Climb(m, s, dir, file, source);
                 }
-            }else{
+            }else if((r & NOOP) == 0){
                 r |= file(m, path, e, source);
             }
         }
