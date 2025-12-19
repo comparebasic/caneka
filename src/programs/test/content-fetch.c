@@ -25,9 +25,16 @@ i32 main(int argc, char **argv){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully", NULL);
     }
 
+#ifdef CNKOPT_EXT
     Caneka_Init(m);
+#else
+    Caneka_InitBase(m);
+#endif
+
     Core_Direct(m, 1, 2);
+#ifdef CNKOPT_INTER
     Inter_Init(m);
+#endif
     DebugStack_Push(NULL, 0);
 
     CliArgs *cli = CliArgs_Make(argc, argv);

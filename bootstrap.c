@@ -34,6 +34,8 @@ char *buildTests[] = {
     "src/programs/test",
     "--option",
     "base",
+    "ext",
+    "inter",
     NULL
 };
 
@@ -41,6 +43,10 @@ char *buildWebServer[] = {
     "./build/bin/buildeka",
     "--src",
     "src/programs/webserver",
+    "--option",
+    "base",
+    "ext",
+    "inter",
     NULL
 };
 
@@ -48,6 +54,10 @@ char *buildCli[] = {
     "./build/bin/buildeka",
     "--src",
     "src/programs/clineka",
+    "--option",
+    "base",
+    "ext",
+    "inter",
     NULL
 };
 

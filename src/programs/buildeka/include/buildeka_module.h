@@ -61,6 +61,7 @@ typedef struct buildctx {
         Span *staticlibs;
         Span *liblist;
         Span *inc;
+        Span *flags;
     } current;
     struct {
         StrVec *buildDir;
@@ -93,7 +94,7 @@ typedef struct buildctx {
     } cli;
 } BuildCtx;
 
-status BuildCtx_LogOut(BuildCtx *ctx);
+status BuildCtx_Log(BuildCtx *ctx);
 void BuildCtx_SetQuiet(boolean quiet);
 
 status BuildCli_RenderStatus(MemCh *m, void *a);
@@ -103,7 +104,7 @@ status BuildCli_SetupStatus(BuildCtx *ctx);
 status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path);
 
 status BuildCtx_GenAllIncSpan(BuildCtx *ctx);
-status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist, Span *genlist);
+status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Span *genlist);
 status BuildCtx_GenStrArr(BuildCtx *ctx, Span *files, Str *filter);
 status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter);
 

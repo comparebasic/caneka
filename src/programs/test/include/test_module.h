@@ -4,9 +4,17 @@
 #include "testsuite.h"
 #include "mock_109strings.h"
 
-#include "base_tests.h"
-#include "cryto_tests.h"
-#include "ext_tests.h"
-#include "inter_tests.h"
+#ifdef CNKOPT_BASE
+    #include "base_tests.h"
+#endif
+#ifdef CNKOPT_EXT
+    #include "ext_tests.h"
+#endif
+#ifdef CNKOPT_INTER
+    #include "inter_tests.h"
+#endif
+#ifdef CNKOPT_CRYPTO
+    #include "cryto_tests.h"
+#endif
 
 #endif

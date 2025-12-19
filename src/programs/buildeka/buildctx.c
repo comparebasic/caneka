@@ -21,9 +21,10 @@ status BuildCtx_Build(BuildCtx *ctx){
         BuildCtx_ParseDependencies(ctx, key, v);
     }
 
-    void *args[] = {ctx, NULL};
-    Out("^p.Ctx after dependencies &^0\n", args);
-    exit(1);
+    if(ctx->type.state & DEBUG){
+        void *args[] = {ctx, NULL};
+        Out("^p.Ctx after dependencies &^0\n", args);
+    }
 
     /* build libs */
     ctx->input.countModules->val.i = 0;

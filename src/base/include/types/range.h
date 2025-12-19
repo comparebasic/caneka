@@ -83,4 +83,5 @@ enum types {
     TYPE_CLI_ARGS,
     TYPE_FMT_LINE,
     _TYPE_BASE_END,
+    _TYPE_CANEKA_CORE_END = 1 << 11,
 };

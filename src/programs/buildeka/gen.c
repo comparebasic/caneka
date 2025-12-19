@@ -28,7 +28,7 @@ status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
 
     StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
     args[0] = IoUtil_PathSep(m);
-    args[1] = S(m, "third");
+    args[1] = S(m, "api");
     args[2] = IoUtil_PathSep(m);
     args[3] = S(m, "include");
     args[4] = NULL;
@@ -51,7 +51,7 @@ status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
     return ZERO;
 }
 
-status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist, Table *genlist){
+status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Table *genlist){
     DebugStack_Push(NULL, ZERO);
     void *args[7];
     MemCh *m = ctx->m;
@@ -91,6 +91,21 @@ status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist, Table *genlist){
     }
     File_Close(bf);
 
+    ctx->current.flags = Span_Make(m);
+    Iter_Init(&it, ctx->input.options);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *opt = Iter_Get(&it);
+        StrVec *v = Sv(m, "-DCNKOPT_");
+        StrVec_Add(v,Str_ToUpper(m, opt));
+        Span_Add(ctx->current.flags, StrVec_Str(m, v));
+    }
+
+    if(ctx->type.state & DEBUG){
+        args[0] = ctx->current.flags;
+        args[1] = NULL;
+        Out("^y.Flags @^0\n", args);
+    }
+
     if(genlist != NULL && genlist->nvalues > 0){
         StrVec *dest = StrVec_Copy(m, ctx->input.buildDir);
         args[0] = IoUtil_PathSep(m);
@@ -124,7 +139,7 @@ status BuildCtx_GenInclude(BuildCtx *ctx, Span *modlist, Table *genlist){
         ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Writing gen include");
         ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.name;
         ctx->cli.fields.current[BUILIDER_CLI_DEST] = fname;
-        BuildCtx_LogOut(ctx);
+        BuildCtx_Log(ctx);
     }
 
     DebugStack_Pop();

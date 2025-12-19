@@ -110,7 +110,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         }
     }
 
-    BuildCtx_GenInclude(ctx, modlist, NULL);
+    BuildCtx_GenIncFlags(ctx, modlist, NULL);
 
     ctx->current.staticlibs = Span_Make(m);
 
@@ -177,7 +177,7 @@ static status skipRecent(BuildCtx *ctx,
             if(Time_Greater(&fileTime, &sel->time)){
                 ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, 
                     "Library is recent, skipping");
-                BuildCtx_LogOut(ctx);
+                BuildCtx_Log(ctx);
                 ctx->input.countSources->val.i += ctx->input.totalModuleSources->val.i;
                 DebugStack_Pop();
                 return SUCCESS;
@@ -216,7 +216,7 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
             ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Skipping Object");
             ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = v;
             ctx->cli.fields.current[BUILIDER_CLI_DEST] = NULL;
-            BuildCtx_LogOut(ctx);
+            BuildCtx_Log(ctx);
             continue;
         }
 
@@ -333,7 +333,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME] = ctx->current.targetName;
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = name;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
-    BuildCtx_LogOut(ctx);
+    BuildCtx_Log(ctx);
 
     setDepVars(ctx, name, sel);
 

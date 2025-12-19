@@ -9,7 +9,7 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Link Object");
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
-    BuildCtx_LogOut(ctx);
+    BuildCtx_Log(ctx);
 
     ProcDets pd;
     ProcDets_Init(&pd);
@@ -40,6 +40,14 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
 
     status r = READY;
     MemCh *m = ctx->m;
+    if(ctx->type.state & DEBUG){
+        args[0] = name;
+        args[1] = ctx->current.source;
+        args[2] = ctx->current.dest;
+        args[3] = sel;
+        args[4] = NULL;
+        Out("^y.BuildObject name:@\n    source:@ ->\n    dest:@ sel:@^0\n", args);
+    }
 
     DebugStack_SetRef(ctx->current.source, ctx->current.source->type.of);
 
@@ -52,13 +60,14 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
         ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
     }
-    BuildCtx_LogOut(ctx);
+    BuildCtx_Log(ctx);
 
     Span *cmd = Span_Make(m);
 
     Span_Add(cmd, ctx->tools.cc);
     Span_AddSpan(cmd, ctx->input.cflags);
     Span_AddSpan(cmd, ctx->current.inc);
+    Span_AddSpan(cmd, ctx->current.flags);
 
     if(ctx->current.binDest){
         Span_Add(cmd, Str_CstrRef(m, "-o"));

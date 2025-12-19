@@ -4,15 +4,10 @@ status BinSegV_Tests(MemCh *gm);
 status BinSegReversedV_Tests(MemCh *gm);
 status Config_Tests(MemCh *gm);
 status TaskStep_Tests(MemCh *gm);
-status Templ_Tests(MemCh *gm);
-status TemplCtx_Tests(MemCh *gm);
 status NodeObj_Tests(MemCh *gm);
 status StrVecSplit_Tests(MemCh *gm);
-status ServeTcp_Tests(MemCh *gm);
 status Snip_Tests(MemCh *gm);
 status SnipModify_Tests(MemCh *gm);
-status Inet_Tests(MemCh *gm);
-status Password_Tests(MemCh *m);
 status QueueIter_Tests(MemCh *gm);
 status QueueCriteria_Tests(MemCh *gm);
 status QueueScale_Tests(MemCh *gm);
@@ -181,24 +176,6 @@ static TestSet ExtTests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "TemplCtx Tests",
-        TemplCtx_Tests,
-        "TemplCtx tests of basic value templating.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Templ Tests",
-        Templ_Tests,
-        "Testing templating with a few variables.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Task/Serve Tests",
-        NULL,
-        NULL,
-        SECTION_LABEL,
-    },
-    {
         "Queue Tests",
         Queue_Tests,
         "Queue tests for file descriptors.",
@@ -234,18 +211,6 @@ static TestSet ExtTests[] = {
         "TaskStep Tests",
         TaskStep_Tests,
         "Task/Step and Task_Tumble tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Inet Tests",
-        Inet_Tests,
-        "Inet address translation tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Password Tests",
-        Password_Tests,
-        "Password tests with variable salt and funny.",
         FEATURE_COMPLETE,
     },
     {

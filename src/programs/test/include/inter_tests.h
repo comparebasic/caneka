@@ -6,10 +6,36 @@ status WwwRouteRbs_Tests(MemCh *m);
 status WwwPath_Tests(MemCh *gm);
 status Http_Tests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
-status Session_Tests(MemCh *m);
-status Login_Tests(MemCh *m);
+status Inet_Tests(MemCh *gm);
+status ServeTcp_Tests(MemCh *gm);
+status Templ_Tests(MemCh *gm);
+status TemplCtx_Tests(MemCh *gm);
 
 static TestSet InterTests[] = {
+    {
+        "TemplCtx Tests",
+        TemplCtx_Tests,
+        "TemplCtx tests of basic value templating.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Templ Tests",
+        Templ_Tests,
+        "Testing templating with a few variables.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Inet Tests",
+        Inet_Tests,
+        "Inet address translation tests.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Task/Serve Tests",
+        NULL,
+        NULL,
+        SECTION_LABEL,
+    },
     {
         "Www Tests",
         NULL,
@@ -65,22 +91,9 @@ static TestSet InterTests[] = {
         FEATURE_COMPLETE|SKIP_TEST,
     },
     {
-        "Session Tests",
-        Session_Tests,
-        "Session Open/Close tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Login Tests",
-        Login_Tests,
-        "User login tests.",
-        FEATURE_COMPLETE,
-    },
-    {
         NULL,
         NULL,
         NULL,
         0,
     }
-
 };

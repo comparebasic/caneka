@@ -6,8 +6,10 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     void *args[5];
     MemCh *m = ctx->m;
 
-    void *ar[] = {key, NULL}; 
-    Out("^b.Parsing Key @^0.\n", ar);
+    if(ctx->type.state & DEBUG){
+        void *ar[] = {key, NULL}; 
+        Out("^b.Parsing Key @^0.\n", ar);
+    }
 
     Table *options = Table_FromSpan(m, ctx->input.options);
 

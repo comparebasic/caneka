@@ -7,3 +7,6 @@ i64 Str_AddMemCount(Str *s, i64 mem);
 Str *Str_Prefixed(MemCh *m, Str *s, Str *prefix);
 Str *Str_BuffFromCstr(MemCh *m, char *cstr);
 status Str_AddChain(MemCh *m, Str *s, void *args[]);
+Str *Str_ToUpper(MemCh *m, Str *s);
+Str *Str_ToTitle(MemCh *m, Str *s);
+Str *Str_ToUpper(MemCh *m, Str *s);

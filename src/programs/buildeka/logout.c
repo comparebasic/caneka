@@ -7,7 +7,7 @@ void BuildCtx_SetQuiet(boolean quiet){
     _quiet = quiet;
 }
 
-status BuildCtx_LogOut(BuildCtx *ctx){
+status BuildCtx_Log(BuildCtx *ctx){
     if(_quiet){
         void *args[7];
         if(ctx->type.state & SUCCESS){

@@ -3,10 +3,8 @@
 
 #include "types.h"
 #include "init.h"
-#include "auth.h"
 #include "templ.h"
 #include "http.h"
 #include "www.h"
-#include "session.h"
 
 #endif
