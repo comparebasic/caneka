@@ -95,7 +95,7 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
             cmd,
             NULL
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: $", args);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: @", args);
         return ERROR;
     }
 

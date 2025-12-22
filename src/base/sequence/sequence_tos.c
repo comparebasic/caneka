@@ -17,6 +17,8 @@ status HKey_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status CstrArray_Print(Buff *bf, void *a, cls type, word flags){
+    printf("CstrArray Print\n");
+    fflush(stdout);
     byte **arr = (byte **)a;
     boolean first = TRUE;
     Str s = {
@@ -40,6 +42,8 @@ status CstrArray_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Array_Print(Buff *bf, void *a, cls type, word flags){
+    printf("Array Print\n");
+    fflush(stdout);
     void **arr = (void **)a;
     boolean first = TRUE;
     while(*arr != NULL){

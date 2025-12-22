@@ -96,7 +96,9 @@ i32 main(int argc, char **argv){
     ctx->input.countModules = I32_Wrapped(m, 0);
     ctx->input.totalModuleSources = I32_Wrapped(m, 0);
     ctx->input.countModuleSources = I32_Wrapped(m, 0);
-    ctx->input.options = CliArgs_Get(cli, optionsKey);
+    Table *options = BuildCtx_GenOptionsTable(ctx, CliArgs_Get(cli, optionsKey));
+    ctx->input.options = options;
+
 
     if(CliArgs_Get(cli, quietKey)){
         BuildCtx_SetQuiet(TRUE);

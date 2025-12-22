@@ -94,10 +94,13 @@ status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Table *genlist){
     ctx->current.flags = Span_Make(m);
     Iter_Init(&it, ctx->input.options);
     while((Iter_Prev(&it) & END) == 0){
-        Str *opt = Iter_Get(&it);
-        StrVec *v = Sv(m, "-DCNKOPT_");
-        StrVec_Add(v,Str_ToUpper(m, opt));
-        Span_Add(ctx->current.flags, StrVec_Str(m, v));
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            Str *opt = h->key;
+            StrVec *v = Sv(m, "-DCNKOPT_");
+            StrVec_Add(v,Str_ToUpper(m, opt));
+            Span_Add(ctx->current.flags, StrVec_Str(m, v));
+        }
     }
 
     if(ctx->type.state & DEBUG){

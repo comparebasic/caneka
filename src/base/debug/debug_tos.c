@@ -35,7 +35,7 @@ static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
     if(flags & MORE && se->ref != NULL){
         args[0] = se->ref;
         args[1] = NULL;
-        Fmt(bf, " - ^0@", args);
+        Fmt(bf, " - ^0.@", args);
     }
 
     return Fmt(bf, "^0.\n", NULL);

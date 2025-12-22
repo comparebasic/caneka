@@ -13,6 +13,12 @@ enum cli_name_idx {
     BUILIDER_CLI_DEST,
 };
 
+enum mod_declare_idx {
+    BUILD_MOD_DECLARE_TAG = 0,
+    BUILD_MOD_DECLARE_LABEL = 1,
+    BUILD_MOD_DECLARE_VALUE = 2,
+};
+
 enum build_types {
     BUILD_EXEC = 1 << 8,
     BUILD_STATIC = 1 << 9,
@@ -70,7 +76,7 @@ typedef struct buildctx {
         Span *libs;
         Span *staticLibs;
         Span *sources;
-        Span *options;
+        Table *options;
         Span *objects;
         Span *gens;
         StrVec *srcPrefix;

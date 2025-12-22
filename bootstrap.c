@@ -58,6 +58,7 @@ char *buildCli[] = {
     "base",
     "ext",
     "inter",
+    "crypto@third/nacl",
     NULL
 };
 

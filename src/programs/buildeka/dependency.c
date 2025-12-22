@@ -1,6 +1,52 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+Span *BuildCtx_ToModDeclare(MemCh *m, Str *s){
+    Span *declare = Span_Make(m);
+    byte *b = s->bytes;
+    byte *end = s->bytes+s->length-1;
+    Str *shelf = Str_Make(m, STR_DEFAULT);
+    while(b <= end){
+        byte c = *b;
+        if(c == '@'){
+            Span_Set(declare, BUILD_MOD_DECLARE_LABEL, Str_Clone(m, shelf));
+            Str_Wipe(shelf);
+        }else if(c == '='){
+            Span_Set(declare, BUILD_MOD_DECLARE_TAG, Str_Clone(m, shelf));
+            Str_Wipe(shelf);
+        }else{
+            Str_Add(shelf, b, 1);
+        }
+
+        b++;
+    }
+
+    if(shelf->length > 0){
+        if(Span_Get(declare, BUILD_MOD_DECLARE_TAG) == NULL){
+            Span_Set(declare, BUILD_MOD_DECLARE_TAG, S(m, "dep"));
+        }
+        while(declare->max_idx < BUILD_MOD_DECLARE_VALUE){
+            Span_Add(declare, shelf);
+        }
+    }
+
+    return declare;
+}
+
+Table *BuildCtx_GenOptionsTable(BuildCtx *ctx, Span *p){
+    Table *tbl = Table_Make(ctx->m);
+    Iter it;
+    Iter_Init(&it, p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        Span *p = BuildCtx_ToModDeclare(ctx->m, s);
+        Str *label = Span_Get(p, BUILD_MOD_DECLARE_LABEL);
+        Str *value = Span_Get(p, BUILD_MOD_DECLARE_VALUE);
+        Table_Set(tbl, label, value);
+    }
+    return tbl;
+}
+
 status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     DebugStack_Push(NULL, ZERO);
     void *args[5];
@@ -10,8 +56,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         void *ar[] = {key, NULL}; 
         Out("^b.Parsing Key @^0.\n", ar);
     }
-
-    Table *options = Table_FromSpan(m, ctx->input.options);
 
     i32 anchor = StrVec_AddVecAfter(   
         ctx->current.source,
@@ -41,12 +85,15 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             Iter it;
             Iter_Init(&it, ctx->input.options);
             while((Iter_Next(&it) & END) == 0){
-                StrVec *opt = StrVec_From(m, Iter_Get(&it));
-                StrVec *v = StrVec_Copy(m, base);
-                IoUtil_Annotate(m, opt);
-                StrVec_Add(v, IoUtil_PathSep(m));
-                StrVec_AddVec(v, opt);
-                Span_Add(filter, StrVec_Str(m, v));
+                Hashed *h = Iter_Get(&it);
+                if(h != NULL){
+                    StrVec *opt = StrVec_From(m, h->value);
+                    StrVec *v = StrVec_Copy(m, base);
+                    IoUtil_Annotate(m, opt);
+                    StrVec_Add(v, IoUtil_PathSep(m));
+                    StrVec_AddVec(v, opt);
+                    Span_Add(filter, StrVec_Str(m, v));
+                }
             }
 
             sel->type.state &= ~DIR_SELECTOR_INVERT;
@@ -83,7 +130,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         return ERROR;
     }
 
-
     StrVec_Add(ctx->current.source, K(m, "dependencies.txt"));
 
     Buff *bf = Buff_Make(m, ZERO|BUFF_SLURP);
@@ -100,65 +146,53 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
     Str *shelf = Str_Make(m, STR_DEFAULT);
     Cursor *curs = Cursor_Make(m, bf->v);
-    Str *tag = NULL;
-    Str *name = NULL;
+    Str *dep = NULL;
     while((Cursor_NextByte(curs) & END) == 0){
+        dep = NULL;
         if(*curs->ptr == '\n'){
-            if(tag != NULL){
-                if(Equals(tag, K(m, "option"))){
-                    if(name != NULL){
-                        if(Table_Get(options, name) != NULL){
-                            Table_SetInTable(sel->meta, tag, name, shelf);
-                            name = shelf;
-                            Table_SetInTable(sel->meta, S(m, "api"), name, shelf);
-                            goto dep;
-                        }else{
-                            goto next;
-                        }
-                    }else if(Table_Get(options, shelf) != NULL){
-                        Table_SetInTable(sel->meta, tag, shelf, shelf);
-                        name = shelf;
-                        goto dep;
-                    }else{
-                        goto next;
-                    }
+            Span *declare = BuildCtx_ToModDeclare(ctx->m, shelf);
+            Str_Wipe(shelf);
+
+            Str *tag = Span_Get(declare, BUILD_MOD_DECLARE_TAG);
+            Str *label = Span_Get(declare, BUILD_MOD_DECLARE_LABEL);
+            Str *value = Span_Get(declare, BUILD_MOD_DECLARE_VALUE);
+            Table_SetInTable(sel->meta, tag, label, value);
+
+            if(Equals(tag, K(m, "option"))){
+                Hashed *h = Table_GetHashed(ctx->input.options, label);
+                if(h != NULL && Equals(h->value, value)){
+                    Table_SetInTable(sel->meta, S(m, "api"), label, value);
+                    dep = value;
                 }else{
-                    Table_SetInTable(sel->meta, tag, shelf, shelf);
-                    goto next;
+                    continue;
                 }
-            }else{
-                name = shelf;
+            } else if(Equals(tag, K(m, "dep"))){
+                dep = Span_Get(declare, BUILD_MOD_DECLARE_VALUE);
             }
-dep:
-            Table_SetInTable(sel->meta, S(m, "dep"), name, shelf);
+            Table_SetInTable(sel->meta, tag, label, value);
 
-            StrVec *dep = StrVec_From(m, name);
-            IoUtil_Annotate(m, dep);
+            if(dep != NULL){
+                Table_SetInTable(sel->meta, S(m, "dep"), label, value);
 
-            path = StrVec_Copy(m, ctx->input.srcPrefix);
-            StrVec_Add(path, IoUtil_PathSep(m));
-            StrVec_AddVec(path, dep);
-            IoUtil_Annotate(ctx->m, path);
+                StrVec *depV = StrVec_From(m, dep);
+                IoUtil_Annotate(m, depV);
 
-            BuildCtx_ParseDependencies(ctx, dep, path);
+                path = StrVec_Copy(m, ctx->input.srcPrefix);
+                StrVec_Add(path, IoUtil_PathSep(m));
+                StrVec_AddVec(path, depV);
+                IoUtil_Annotate(ctx->m, path);
 
-            tag = NULL;
-            name = NULL;
-            shelf = Str_Make(m, STR_DEFAULT);
-        }else if(*curs->ptr == '@'){
-            name = shelf;
-            shelf = Str_Make(m, STR_DEFAULT);
-        }else if(*curs->ptr == '='){
-            tag = shelf;
-            shelf = Str_Make(m, STR_DEFAULT);
+                BuildCtx_ParseDependencies(ctx, depV, path);
+            }
         }else{
             Str_Add(shelf, curs->ptr, 1);
         }
-        continue;
-next:        
-        tag = NULL;
-        name = NULL;
-        shelf = Str_Make(m, STR_DEFAULT);
+    }
+
+    if(ctx->type.state & DEBUG){
+        args[0] = sel;
+        args[1] = NULL;
+        Out("^p.Sel @^0\n", args);
     }
 
     StrVec_PopTo(ctx->current.source, anchor);
