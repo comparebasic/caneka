@@ -4,13 +4,13 @@ the names of the folders. For example nacl is not he NaCl library, and
 openssl is not the openssl library, it is bridge code between Caneka
 and those respective libraries.
 
-src/third/nacl: Public Domain see src/third//nacl/LICENCE 
-    note this is not the NaCL library it is just wrapper/bridge code with caneka.
+src/third/nacl: Public Domain see src/third/nacl/LICENCE 
+    note this is not the NaCL library it is just a wrapper/bridge back to caneka.
 
 Planned but not included yet:
 
-src/third/openssl: Open SSL licence see src/third/openssl/LICENCE 
-    (when it exists)
+src/third/openssl: Public Domain see src/third/openssl/LICENCE 
+    note: this is not the OpenSsl library it is just a wrapper/bridge back to caneka.
 
 src/third/libdatachannel: LibDataChannel MPL-2.0 see src/third/libdatachannel/LICENCE
     (when it exists)
