@@ -2,10 +2,10 @@
 #define CRYPTO_PUBLICKEYBYTES 32
 #define CRYPTO_BYTES 64
 
-#include <nacl/crypto_sign.h>
-#include <nacl/crypto_hash_sha512.h>
-#include <nacl/randombytes.h>
-#include <nacl/crypto_verify_32.h>
+#include <crypto_sign.h>
+#include <crypto_hash_sha512.h>
+#include <randombytes.h>
+#include <crypto_verify_32.h>
 
 #include <external.h>
 #include <caneka.h>

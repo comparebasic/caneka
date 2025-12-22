@@ -105,7 +105,10 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                Span_Add(modlist, h->key);
+                StrVec *v = StrVec_From(m, h->value);
+                IoUtil_Annotate(m, v);
+                Str *modName = IoUtil_FnameStr(m, v);
+                Span_Add(modlist, modName);
             }
         }
     }
@@ -120,7 +123,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         while((Iter_Prev(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                DirSelector *dsel = Table_Get(ctx->input.dependencies, h->key); 
+                DirSelector *dsel = Table_Get(ctx->input.dependencies, h->value);
                 if(dsel == NULL){
                     void *args[] = {h->key, NULL};
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,

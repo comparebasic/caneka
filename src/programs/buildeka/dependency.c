@@ -87,7 +87,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             while((Iter_Next(&it) & END) == 0){
                 Hashed *h = Iter_Get(&it);
                 if(h != NULL){
-                    StrVec *opt = StrVec_From(m, h->value);
+                    StrVec *opt = StrVec_From(m, h->key);
                     StrVec *v = StrVec_Copy(m, base);
                     IoUtil_Annotate(m, opt);
                     StrVec_Add(v, IoUtil_PathSep(m));

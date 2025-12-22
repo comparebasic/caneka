@@ -9,8 +9,8 @@ See crypto_hash-sha256-ref-hash.orig.c for DJB's original version.
 These modifications are also public domain.
 */
 
-#include <nacl/crypto_hashblocks_sha256.h>
-#include <nacl/crypto_hash.h>
+#include <crypto_hashblocks_sha256.h>
+#include <crypto_hash.h>
 #include <caneka.h>
 #include <nacl_module.h>
 

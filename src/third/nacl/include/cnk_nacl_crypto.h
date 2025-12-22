@@ -1,10 +1,10 @@
 #ifndef CNK_NACL_H
 #define CNK_NACL_H
-#include <nacl/crypto_hash_sha256.h>
-#include <nacl/crypto_hash_sha256.h>
-#include <nacl/crypto_auth_hmacsha256.h>
-#include <nacl/crypto_sign.h>
-#include <nacl/crypto_box.h>
+#include <crypto_hash_sha256.h>
+#include <crypto_hash_sha256.h>
+#include <crypto_auth_hmacsha256.h>
+#include <crypto_sign.h>
+#include <crypto_box.h>
 
 #ifndef crypto_uint16_h
 #define crypto_uint16_h
