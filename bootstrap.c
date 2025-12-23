@@ -21,6 +21,42 @@
 #define TRUE 1
 #define FALSE 0
 
+char *buildekaExamples = ""
+    "\x1b[32mBuildeka has been built at \x1b[1m./build/bin/buildeka\x1b[22m!\n\x1b[0m"
+    "\n"
+    "  Example build commands are:\n"
+    "\n"
+    "    Build the \x1b[1mTest Program\x1b[22m\n"
+    "\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/test --option base ext inter\x1b[0m\n"
+    "\n"
+    "    With NaCl for crypto:\n"
+    "\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/test --option base ext inter crypto@third/nacl\x1b[0m\n"
+    "\n"
+    "    With OpenSsl for crypto (experimental):\n"
+    "\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/test --option base ext inter crypto@third/openssl\x1b[0m\n"
+    "\n"
+    "    Build the \x1b[1mClineka\x1b[22m command line tool\n"
+    "\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/clineka --option [crypto@third/openssl, crypto@third/nacl]\x1b[0m\n"
+    "\n"
+    "    Build the \x1b[1mWebServer\x1b[22m\n"
+    "\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/webserver\x1b[0m\n"
+    "\n"
+    "  Each program, once built, will be placed in the \x1b[1m./build/bin/\x1b[22m directory, help is availabile\n"
+    "  by passing a \x1b[1m--help\x1b[22m argument, for example:\n"
+    "\n"
+    "    \x1b[1m$\x1b[22m ./build/bin/webserver \x1b[1m--help\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m ./build/bin/test \x1b[1m--help\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m ./build/bin/clineka \x1b[1m--help\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m ./build/bin/buildeka \x1b[1m--help\x1b[0m\n"
+    "\n"
+    ;
+
+
 char *buildCaneka[] = {
     "./build/bin/buildeka",
     "--src",
@@ -75,8 +111,8 @@ char *runWebServer[] = {
 };
 
 char *menuKeys[] = {
-    "run-tests",
     "buildeka-only",
+    "run-tests",
     "build-only",
     "clean",
     "build-cli",
@@ -90,15 +126,15 @@ char *menuKeys[] = {
 };
 
 char *menuOptions[] = {
+    "Buildeka - build the builder program only",
     "Tests - build and RUN",
-    "CnkBuild - build the CnkBuild program only",
-    "Caneka (core) - build",
+    "Caneka (core) - build the core modules for caneka",
     "Clean (the ./build directory)",
-    "CnkCli - build",
+    "Clineka - build the command line tool",
     "Webserver - build",
     "WebServer - build and RUN",
     "Documentation - show website url",
-    "All - build core/Tests/Cli/Webserver",
+    "All - build Tests/Clineka/Webserver",
     "Oops, Wrong Command",
     NULL
 };
@@ -236,7 +272,7 @@ char *menu(){
     }
 
     if(j == 0 || buff[0] == '\n'){
-        return NULL;
+        return menuKeys[0];
     }
 
     int choice = atoi(buff);
@@ -252,18 +288,19 @@ int main(int argc, char *argv[]){
     char **runcmd[4];
 
     char *choice = menuKeys[0];
-    if(argc < 2){
-        choice = menu();
-        if(choice == NULL){
-            choice = menuKeys[0];
-        }
-    }else{
+    if(argc > 1){
         for(int i = 1; i < argc; i++){
             if(compareCstr("--clean", argv[i])){
                 setNoColor();
                 choice = "clean";
+            }else if(compareCstr("--menu", argv[i])){
+                choice = NULL;
             }
         }
+    }
+
+    if(choice == NULL){
+        choice = menu();
     }
 
     if(compareCstr("buildeka-only", choice)){
@@ -385,7 +422,10 @@ int main(int argc, char *argv[]){
         cmdptr++;
     }
 
-    if(compareCstr("build-only", choice)){
+    if(compareCstr("buildeka-only", choice)){
+        printf("%s", buildekaExamples);
+        fflush(stdout);
+    }else if(compareCstr("build-only", choice)){
         printf("Caneka has been built!\n");
         fflush(stdout);
     }else if(compareCstr("clean", choice)){

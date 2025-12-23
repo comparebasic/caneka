@@ -14,12 +14,12 @@ status MemCh_ExtFree(MemCh *m){
     if(m->extFree != NULL){
         status r = READY;
         Iter it;
-        Iter_Init(m->extFree);
+        Iter_Init(&it, m->extFree);
         word typeOf = ZERO;
         while((Iter_Next(&it) & END) != 0){
             Abstract *a = Iter_Get(&it);
             if(a->type.of != typeOf){
-                DoFunc *func = Lookup_Get(ExtFreeLookup, a->type.of);
+                DoFunc func = Lookup_Get(ExtFreeLookup, a->type.of);
                 if(func == NULL){
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Error with extFree func not found", NULL);

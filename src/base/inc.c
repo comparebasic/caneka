@@ -14,7 +14,7 @@
 #include "./io/stash_coord.c"
 #include "./io/stash_item.c"
 #include "./io/stash.c"
-#include "./mem/ext_free.c"
+#include "./mem/extfree.c"
 #include "./mem/span.c"
 #include "./mem/iter.c"
 #include "./mem/byteslit.c"
