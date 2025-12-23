@@ -34,14 +34,45 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
     return ERROR;
 }
 
-status StrVec_SaltedDigest(MemCh *m, StrVec *orig, Str *salt, digest *hash){
-    StrVec *v = (StrVec *)StrVec_Clone(m, orig);
-    StrVec_AddBytes(m, v, salt->bytes, salt->length);
+status StrVec_SaltedDigest(MemCh *m,
+        StrVec *v, Str *salt, digest *hash, util nonce){
+    StrVec *copy = StrVec_Copy(m, v);
+    
+    i32 sep = 1;
+    i32 next = sep;
+    while((next = (next << 1)) <= salt->length){
+        sep = next;
+    }
+    sep--;
+
+    word div = util & sep;
+
+    Str *salt1 = Str_Copy(m, salt);
+    salt->length = div;
+
+    StrVec_Add(m, copy, slat1);
+
+    Str *salt2 = Str_Copy(m, salt);
+    salt->length = salt->length - div;
+    StrVec_Add(m, copy, slat2);
+
     return StrVec_ToSha256(m, v, hash);
 }
 
 Str *Str_DigestAlloc(MemCh *m){
     return Str_Make(m, DIGEST_SIZE);
+}
+
+status SignPair_PublicFromPem(Buff *bf, Str *public){
+    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+        "Not Implemented", NULL);
+    return ERROR;
+}
+
+status SignPair_PrivateFromPem(Buff *bf, Str *secret){
+    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+        "Not Implemented", NULL);
+    return ERROR;
 }
 
 status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
@@ -78,21 +109,35 @@ status SignPair_Verify(MemCh *m, Str *content, Str *sig, Str *public){
 }
 
 status BoxPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
-    return NOOP;
+    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+        "Not Implemented", NULL);
+    return ERROR;
 }
 
 status BoxPair_Enc(MemCh *m, Str *secret, StrVec *content){
-    return NOOP;
+    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+        "Not Implemented", NULL);
+    return ERROR;
 }
 
 status BoxPair_Dec(MemCh *m, Str *public, StrVec *content){
-    return NOOP;
+    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+        "Not Implemented", NULL);
+    return ERROR;
 }
 
 status Str_HmacEnc(MemCh *m, Str *s, Str *hmac){
-    return NOOP;
+    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+        "Not Implemented", NULL);
+    return ERROR;
 }
 
 status Str_HmacDec(MemCh *m, Str *s, Str *hmac){
-    return NOOP;
+    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+        "Not Implemented", NULL);
+    return ERROR;
+}
+
+status Crypto_Init(MemCh *m){
+    return SUCCESS;
 }

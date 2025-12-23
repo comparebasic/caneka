@@ -70,7 +70,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         sel = DirSelector_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
         if(ctx->input.options != NULL && ctx->input.options->nvalues > 0){
-            StrVec *base = StrVec_Clone(m, path);
+            StrVec *base = StrVec_Copy(m, path);
             StrVec_Add(base, IoUtil_PathSep(m));
             StrVec_Add(base, S(m, "option"));
 

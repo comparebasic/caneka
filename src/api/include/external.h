@@ -26,12 +26,12 @@
 #include <netinet/in.h>
 #include <sys/random.h>
 
-#ifdef OPENSSL
-    #include <openssl/evp.h>
-    #include <openssl/pem.h>
-    #include <openssl/ecdsa.h>
-    #include <openssl/err.h>
-    #include <openssl/conf.h>
+#ifdef CNKOPT_OPENSSL
+    #include <evp.h>
+    #include <pem.h>
+    #include <ecdsa.h>
+    #include <err.h>
+    #include <conf.h>
 #endif
 
 #endif

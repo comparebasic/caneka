@@ -98,6 +98,12 @@ char *Str_Cstr(MemCh *m, Str *s){
     return NULL;
 }
 
+Str *Str_Copy(MemCh *m, Str *_s){
+    Str *s = MemCh_AllocOf(m, sizeof(Str), TYPE_STR);
+    memcpy(s, _s, sizeof(Str));
+    return s;
+}
+
 Str *Str_Clone(MemCh *m, Str *s){
     return Str_CloneAlloc(m, s, s->alloc);
 }
