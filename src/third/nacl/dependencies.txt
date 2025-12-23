@@ -2,3 +2,6 @@ skip=crypto_sign-edwards25519sha512batch-ref-sign.orig.c
 skip=crypto_hash-sha256-ref-hash.orig.c
 static=libnacl@/usr/local/lib/libnacl.a
 include=/usr/local/include/nacl/
+inter
+ext
+base

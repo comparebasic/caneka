@@ -93,10 +93,9 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
 
     Table_Set(sel->meta, S(m, "inc"), moduleInc);
 
-    Span_AddSpan(inc, moduleInc);
-
     Table *deps = Table_Get(sel->meta, K(m, "dep"));
 
+    ctx->current.staticlibs = Span_Make(m);
     Span *modlist = Span_Make(m);
     Span_Add(modlist, key);
     if(deps != NULL){
@@ -111,14 +110,25 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
                 Span_Add(modlist, modName);
             }
         }
-    }
 
-    BuildCtx_GenIncFlags(ctx, modlist, NULL);
+        StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
+        StrVec_Add(srcIncPath, IoUtil_PathSep(m));
+        StrVec_Anchor(srcIncPath);
+        Iter_Init(&it, Table_Ordered(m, deps));
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                StrVec_Add(srcIncPath, h->value);
+                StrVec_Add(srcIncPath, IoUtil_PathSep(m));
+                StrVec_Add(srcIncPath, S(m, "include"));
+                StrVec_Add(srcIncPath, IoUtil_PathSep(m));
 
-    ctx->current.staticlibs = Span_Make(m);
+                Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
 
-    if(deps != NULL){
-        Iter it;
+                StrVec_Return(srcIncPath);
+            }
+        }
+
         Iter_Init(&it, Table_Ordered(m, deps));
         while((Iter_Prev(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
@@ -154,12 +164,18 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
                 }
             }
         }
+
     }
+
+    BuildCtx_GenIncFlags(ctx, modlist, NULL);
+
+
     StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
     if(libTarget){
         Span_Add(ctx->current.staticlibs, StrVec_Str(m, libTarget)); 
     }
 
+    Span_AddSpan(inc, moduleInc);
     ctx->current.inc = inc;
 
     DebugStack_Pop();

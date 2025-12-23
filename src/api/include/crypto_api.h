@@ -1,3 +1,6 @@
+#ifndef CRYPTO_API_H
+#define CRYPTO_API_H
+
 #define DIGEST_SIZE 32
 #define KEY_SIZE 2048
 #define SIG_FOOTER_SIZE 64
@@ -9,8 +12,6 @@ enum crypto_range {
     TYPE_ECKEY_PUB,
     _TYPE_CRYPTO_END,
 };
-
-
 
 typedef byte digest[DIGEST_SIZE];
 
@@ -33,3 +34,4 @@ status SignPair_PrivateFromPem(Buff *bf, Str *secret);
 status SignPair_PublicFromPem(Buff *bf, Str *public);
 
 status Crypto_Init(MemCh *m);
+#endif

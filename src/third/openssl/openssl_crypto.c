@@ -83,13 +83,12 @@ status StrVec_SaltedDigest(MemCh *m,
     word div = util & sep;
 
     Str *salt1 = Str_Copy(m, salt);
-    salt->length = div;
-
-    StrVec_Add(m, copy, slat1);
-
+    salt1->length = div;
+    StrVec *v = StrVec_From(m, salt1);
+    StrVec_AddVec(v, _v);
     Str *salt2 = Str_Copy(m, salt);
     salt->length = salt->length - div;
-    StrVec_Add(m, copy, slat2);
+    StrVec_Add(v, salt2);
 
     return StrVec_ToSha256(m, v, hash);
 }

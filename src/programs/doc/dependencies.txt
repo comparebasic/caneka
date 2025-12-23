@@ -1,0 +1,4 @@
+exec=main.c
+inter
+ext
+base

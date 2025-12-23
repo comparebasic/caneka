@@ -35,8 +35,7 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
 }
 
 status StrVec_SaltedDigest(MemCh *m,
-        StrVec *v, Str *salt, digest *hash, util nonce){
-    StrVec *copy = StrVec_Copy(m, v);
+        StrVec *_v, Str *salt, digest *hash, util nonce){
     
     i32 sep = 1;
     i32 next = sep;
@@ -45,16 +44,15 @@ status StrVec_SaltedDigest(MemCh *m,
     }
     sep--;
 
-    word div = util & sep;
+    word div = nonce & sep;
 
     Str *salt1 = Str_Copy(m, salt);
-    salt->length = div;
-
-    StrVec_Add(m, copy, slat1);
-
+    salt1->length = div;
+    StrVec *v = StrVec_From(m, salt1);
+    StrVec_AddVec(v, _v);
     Str *salt2 = Str_Copy(m, salt);
     salt->length = salt->length - div;
-    StrVec_Add(m, copy, slat2);
+    StrVec_Add(v, salt2);
 
     return StrVec_ToSha256(m, v, hash);
 }
@@ -109,31 +107,31 @@ status SignPair_Verify(MemCh *m, Str *content, Str *sig, Str *public){
 }
 
 status BoxPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
-    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, 
         "Not Implemented", NULL);
     return ERROR;
 }
 
 status BoxPair_Enc(MemCh *m, Str *secret, StrVec *content){
-    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, 
         "Not Implemented", NULL);
     return ERROR;
 }
 
 status BoxPair_Dec(MemCh *m, Str *public, StrVec *content){
-    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, 
         "Not Implemented", NULL);
     return ERROR;
 }
 
 status Str_HmacEnc(MemCh *m, Str *s, Str *hmac){
-    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, 
         "Not Implemented", NULL);
     return ERROR;
 }
 
 status Str_HmacDec(MemCh *m, Str *s, Str *hmac){
-    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, 
         "Not Implemented", NULL);
     return ERROR;
 }

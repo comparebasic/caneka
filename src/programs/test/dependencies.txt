@@ -1,6 +1,6 @@
 exec=main.c
 exec=content-fetch.c
-option=inter
 option=crypto@third/nacl
+option=inter
 option=ext
 option=base

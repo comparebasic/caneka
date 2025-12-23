@@ -89,7 +89,8 @@ status Crypto_Tests(MemCh *m){
     Str *salt = Str_CstrRef(m, "French fries, and potato chips, and curry, "
     "and garlic break, and oceans, and taffy, and lots o things have salt!");
 
-    StrVec_SaltedDigest(m, v, salt, (digest *)hash->bytes);
+    word nonce = 37;
+    StrVec_SaltedDigest(m, v, salt, (digest *)hash->bytes, nonce);
     hex = Str_ToHex(m, hash);
     expected = Str_CstrRef(m,
         "466b336b19f46a9684b4515f43ac4b3a06e080369f99394434e4b8d4f4cbc9de");
