@@ -16,10 +16,21 @@
 #include <time.h>
 #include <string.h>
 #include <dirent.h>
+#include <termios.h>
+#include <signal.h>
 #include "src/programs/buildeka/include/detect.h"
+
+void SetOriginalTios();
+
+static int change = 0;
+static struct termios orig_tios;
+static struct termios current_tios;
 
 #define TRUE 1
 #define FALSE 0
+
+int selected = 0;
+int height = 0;
 
 char *buildekaExamples = ""
     "\x1b[32mBuildeka has been built at \x1b[1m./build/bin/buildeka\x1b[22m!\n\x1b[0m"
@@ -120,7 +131,6 @@ char *menuKeys[] = {
     "build-run-webserver",
     "read-documentation",
     "all",
-    "oops",
     "invalid",
     NULL
 };
@@ -135,7 +145,6 @@ char *menuOptions[] = {
     "WebServer - build and RUN",
     "Documentation - show website url",
     "All - build Tests/Clineka/Webserver",
-    "Oops, Wrong Command",
     NULL
 };
 
@@ -144,12 +153,59 @@ static char *GREEN = "\x1b[32m";
 static char *YELLOW = "\x1b[33m";
 static char *RED = "\x1b[31m";
 
+static struct sigaction _a;
+static struct sigaction _b;
+
+static void cleanup(int sig, siginfo_t *info, void *ptr){
+    SetOriginalTios();
+    exit(1);
+}
+
+static void setSigs(){
+    memset(&_a, 0, sizeof(struct sigaction));
+    _a.sa_flags = SA_NODEFER;
+    _a.sa_sigaction = cleanup;
+    sigaction(SIGSEGV, &_a, NULL);
+
+    memset(&_b, 0, sizeof(struct sigaction));
+    _b.sa_flags = SA_NODEFER;
+    _b.sa_sigaction = cleanup;
+    sigaction(SIGINT, &_b, NULL);
+}
+
 static void setNoColor(){
     NORMAL_COLOR = GREEN = YELLOW = RED = "";
 }
 
 static int compareCstr(const char *choice, char *content){
     return strncmp(choice, content, strlen(choice)) == 0;
+}
+
+void SetOriginalTios(){
+   int r = tcgetattr(STDIN_FILENO, &current_tios);
+   if(r != -1){
+       memcpy(&orig_tios, &current_tios, sizeof(struct termios));
+   }
+}
+
+void RawMode(int enable){
+    if(enable){
+       int r = tcgetattr(STDIN_FILENO, &current_tios);
+       if(r != -1){
+           current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
+           current_tios.c_cc[VMIN] = 1;
+           current_tios.c_cc[VTIME] = 0;
+       }
+   }else{
+       if(!change){
+            return;
+       }
+       memcpy(&current_tios, &orig_tios, sizeof(struct termios));
+       current_tios.c_lflag |= ECHO;
+   }
+
+   change = TRUE;
+   tcsetattr(STDIN_FILENO, TCSAFLUSH, &current_tios);
 }
 
 int cleanDir(char *path){
@@ -248,39 +304,69 @@ pid_t run(char *msg, char *args[]){
 }
 
 char *menu(){
+
+start:
+    if(height > 0){
+        printf("\x1b[%dA", height);
+    }
+
     printf("%s%s%s", YELLOW,"\n  Hello, and welcome to the Caneka Build Helper\n", NORMAL_COLOR);
     printf("  What would you like to do?\n\n");
+    height = 4;
 
-    int i = 1;
+    int i = 0;
+    int max = 0;
     char **opt = menuOptions;
     while(*opt != NULL){
-        printf("    %d %s\n", i, *opt);
+        if(i == selected){
+            printf("   \x1b[1;7m %d %s \x1b[0m\n", i+1, *opt);
+        }else{
+            printf("    %d %s  \n", i+1, *opt);
+        }
+
+        height++;
         opt++; 
         i++;
     }
+    max = i;
 
-    printf("\n  Type a number or press Enter (default is 1)\n\n");
+    printf("\n  Type a number or use arrow/vi keys to make a selection, press Enter to build/run\n\n");
+    height += 3;
 
     char buff[3] = {0, 0, 0};
     char *b = buff;
-    int j;
-    for(j = 0; j < 3; j++, b++){
-        read(0, b, 1);
-        if(*b == '\n'){
-            break;
+
+read:
+    read(0, b, 1);
+    char c = *b;
+    if(c == 3 || c == 4){ /* ^c ^d */
+        cleanup(0, NULL, NULL);
+        return NULL;
+    }else if(c == '\n'){
+        SetOriginalTios();
+        if(selected >= 0 && selected <= i){
+            return menuKeys[selected];
         }
-    }
-
-    if(j == 0 || buff[0] == '\n'){
-        return menuKeys[0];
-    }
-
-    int choice = atoi(buff);
-    if(choice <= 0 || choice >= i){
         return menuKeys[i-1];
+    }else if(c == 'k' || c == 65){ /* arrow-up */
+        selected--;
+        if(selected < 0){
+            selected = 0;
+        }
+        goto start;
+    }else if(c == 'j' || c == 66){ /* arrow-down */
+        selected++;
+        if(selected > i){
+            selected = i;
+        }
+        goto start;
+    }else if(c >= '1' && c <= '9'){
+        selected = c-'0'-1;
+        goto start;
     }
 
-    return menuKeys[choice-1];
+    goto read;
+    return NULL;
 }
 
 int main(int argc, char *argv[]){
@@ -300,7 +386,9 @@ int main(int argc, char *argv[]){
     }
 
     if(choice == NULL){
+        RawMode(1);
         choice = menu();
+        RawMode(0);
     }
 
     if(compareCstr("buildeka-only", choice)){
