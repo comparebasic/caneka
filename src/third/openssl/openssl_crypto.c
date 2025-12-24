@@ -102,75 +102,34 @@ Str *Str_DigestAlloc(MemCh *m){
 }
 
 status SignPair_Make(MemCh *m, Single *public, Single *secret){
-    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_X25519, NULL);
-    if(ctx == NULL){
+    EVP_PKEY *key = EVP_EC_gen("P-256");
+
+    if(key == NULL){
+        OpenSsl_Error(ErrStream);
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error secret ctx not allocated", NULL);
-       return ERROR;
-    }
-
-    EVP_PKEY *key = NULL;
-    if(!(1 == EVP_PKEY_keygen_init(ctx) &&
-            1 == EVP_PKEY_keygen(ctx, &key))){
-       Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error generating secret key", NULL);
-       return ERROR;
-
+        return ERROR;
     }
     secret->val.ptr = key;
     secret->objType.of = TYPE_ECKEY;
 
-    EVP_PKEY_CTX_free(ctx);
-    
-    EVP_PKEY *pubKey = EVP_PKEY_new();
-    EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new(key, NULL);
-
-    util length;
-    if(!(1 == EVP_PKEY_derive_init(pctx)  &&
-            1 == EVP_PKEY_derive_set_peer(pctx, pubKey) /* &&
-            1 == EVP_PKEY_derive(pctx, NULL, &length)*/)){
-        OpenSsl_Error(ErrStream);
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error generating public key - derive", NULL);
-        return ERROR;
-    }
-
+    util sz = 0;
     Str *s = Str_MakeBlank(m);
-    s->bytes = OPENSSL_malloc(length);
-    if(s->bytes == NULL){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error allocating public key", NULL);
-        return ERROR;
-    }
-    s->alloc = length;
-    if(1 != EVP_PKEY_derive(pctx, s->bytes, &length)){
+    EVP_PKEY_get_octet_string_param(key, "pub", NULL, 0, &sz);
+    s->bytes = OPENSSL_malloc(sz);
+
+    if(1 != EVP_PKEY_get_octet_string_param(key, "pub", s->bytes, sz, &sz)){
         OpenSsl_Error(ErrStream);
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error deriving public key", NULL);
+            "Error generating public key", NULL);
         return ERROR;
     }
 
-    s->length = length;
-
-    secret->val.ptr = s;
-    secret->objType.of = TYPE_STR;
+    s->length = sz;
+    public->val.ptr = s;
+    public->objType.of = TYPE_STR;
     MemCh_AddExtFree(m, Ptr_Wrapped(m, s->bytes, TYPE_BYTES_POINTER));
-    EVP_PKEY_CTX_free(pctx);
 
-    return SUCCESS;
-}
-
-status SignPair_PrivateFromPem(Buff *bf, Single *secret){
-    secret->val.ptr = EVP_PKEY_new();
-    secret->objType.of = TYPE_ECKEY_PUB;
-    MemCh_AddExtFree(bf->m, secret);
-
-    FILE *f = fdopen(bf->fd, "r");
-    if(d2i_PrivateKey_fp(f, (EVP_PKEY **)&secret->val.ptr) == NULL){
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to read secret key", NULL);
-        return ERROR;
-    }
     return SUCCESS;
 }
 
@@ -208,7 +167,9 @@ Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
         return NULL;
     }
 
-    if(1 != EVP_DigestSignInit(mdctx, NULL, EVP_sha256(), NULL, key)){
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC,NULL);
+    if(1 != EVP_DigestSignInit(mdctx, &ctx, EVP_sha256(), NULL, key)){
+        OpenSsl_Error(ErrStream);
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Error initializing digest verify", NULL);
         return NULL;
@@ -217,7 +178,7 @@ Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
     Iter it;
     Iter_Init(&it, content->p);
     while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)it.value;
+        Str *s = (Str *)Iter_Get(&it);
         if(1 != EVP_DigestSignUpdate(mdctx, s->bytes, s->length)){
             Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error updating digest verify", NULL);
             return NULL;
@@ -250,15 +211,27 @@ Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
 
 status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
     status r = READY;
+    Str *s = public->val.ptr;
+
+    EVP_PKEY *key = EVP_PKEY_new();
+    OSSL_PARAM *params;
+    OSSL_PARAM_BLD *param_bld = OSSL_PARAM_BLD_new();
+    OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", "P-256", 0);
+    OSSL_PARAM_BLD_push_octet_string(param_bld, "pub", s->bytes, s->length);
+    params = OSSL_PARAM_BLD_to_param(param_bld);
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL);
+    if(ctx == NULL || 
+            !EVP_PKEY_fromdata_init(ctx) || 
+            !EVP_PKEY_fromdata(ctx, &key, EVP_PKEY_PUBLIC_KEY, params)
+        ){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error creating public key from octets", NULL);
+        return ERROR;
+    }
+
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
-        return ERROR;
-    }
-    EVP_PKEY *key = public->val.ptr;
-    if(key == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
-            "Error allocating private key for use", NULL);
         return ERROR;
     }
 
@@ -271,7 +244,7 @@ status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
     Iter it;
     Iter_Init(&it, content->p);
     while((Iter_Next(&it) & END) == 0){
-        Str *s = it.value;
+        Str *s = Iter_Get(&it);
         if(1 != EVP_DigestVerifyUpdate(mdctx, s->bytes, s->length)){
             Fatal(FUNCNAME, FILENAME, LINENUMBER,
                 "Error updating digest verify", NULL);
@@ -279,7 +252,8 @@ status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
         }
     }
 
-	if(1 != EVP_DigestVerifyFinal(mdctx, sig->bytes, sig->alloc)){
+	if(1 != EVP_DigestVerifyFinal(mdctx, sig->bytes, sig->length)){
+        printf("Invalid!\n");
         return NOOP;
     }
 

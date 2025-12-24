@@ -5,6 +5,7 @@
 #include <pem.h>
 #include <ecdsa.h>
 #include <err.h>
+#include <param_build.h>
 #include <conf.h>
 
 status OpenSsl_ExtFreeInit(MemCh *m);

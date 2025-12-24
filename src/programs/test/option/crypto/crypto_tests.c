@@ -107,18 +107,18 @@ status Crypto_Tests(MemCh *m){
 
     r |= Test(secret->objType.of == TYPE_ECKEY,
         "Secret key has type ECKEY", NULL);
-    args[0] = Str_ToHex(m, (Str *)secret->val.ptr);
+    args[0] = Str_ToHex(m, (Str *)public->val.ptr);
     args[1] = NULL;
     r |= Test(public->objType.of == TYPE_STR,
         "Public has type STR @", args);
 
-    Str *message = Str_CstrRef(m, "I super-master person, do hereby sign some cool,"
+    StrVec *message = Sv(m, "I super-master person, do hereby sign some cool,"
         " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");
-    Str *sig = SignPair_Sign(m, StrVec_From(m, message), secret);
+    Str *sig = SignPair_Sign(m, message, secret);
 
     Str *sigHex = Str_ToHex(m, sig);
 
-    status valid = SignPair_Verify(m, StrVec_From(m, hash), sig, public);
+    status valid = SignPair_Verify(m, message, sig, public);
 
     args[0] = message;
     args[1] = sigHex;
