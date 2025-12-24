@@ -157,6 +157,23 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
                         }
                     }
                 }
+
+                Table *linkDeps = Table_Get(dsel->meta, K(m, "link"));
+                if(linkDeps != NULL){
+                    Iter _it;
+                    Iter_Init(&_it, linkDeps);
+                    while((Iter_Next(&_it) & END) == 0){
+                        Hashed *h = Iter_Get(&_it);
+                        if(h != NULL){
+                            Str *value = h->value;
+                            Str *s = Str_Make(m, value->length+3);
+                            Str_Add(s, (byte *)"-l", 2);
+                            Str_Add(s, value->bytes, value->length);
+                            Span_Add(ctx->current.liblist, s);
+                        }
+                    }
+                }
+
                 StrVec *libTarget = Table_Get(dsel->meta, K(m, "target"));
                 if(libTarget){
                     void *ar[] = {libTarget, NULL};
@@ -168,7 +185,6 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     }
 
     BuildCtx_GenIncFlags(ctx, modlist, NULL);
-
 
     StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
     if(libTarget){

@@ -76,6 +76,9 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
         if(ctx->current.target != NULL){
             Span_Add(cmd, StrVec_Str(m, ctx->current.target));
         }
+        if(ctx->current.liblist != NULL && ctx->current.liblist->nvalues > 0){
+            Span_AddSpan(cmd, ctx->current.liblist);
+        }
         Span_AddSpanRev(cmd, ctx->current.staticlibs);
         Span_AddSpan(cmd, ctx->input.libs);
     }else{

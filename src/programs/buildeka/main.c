@@ -87,6 +87,7 @@ i32 main(int argc, char **argv){
     ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
     ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
+    ctx->current.liblist = Span_Make(m);
     ctx->input.sources = CliArgs_Get(cli, srcKey);
     ctx->input.srcPrefix = prefix;
     ctx->input.srcPrefix->type.state |= STRVEC_NOSHRINK;
@@ -98,7 +99,6 @@ i32 main(int argc, char **argv){
     ctx->input.countModuleSources = I32_Wrapped(m, 0);
     Table *options = BuildCtx_GenOptionsTable(ctx, CliArgs_Get(cli, optionsKey));
     ctx->input.options = options;
-
 
     if(CliArgs_Get(cli, quietKey)){
         BuildCtx_SetQuiet(TRUE);

@@ -93,7 +93,7 @@ status Crypto_Tests(MemCh *m){
     StrVec_SaltedDigest(m, v, salt, (digest *)hash->bytes, nonce);
     hex = Str_ToHex(m, hash);
     expected = Str_CstrRef(m,
-        "a18e3510a65a4125d5012ec2ce600f6ed14c908d0219c43a8347ff32a1348dc7");
+        "b797cc5b4d1a08c9ab7ec358e6d714152bc51de1faa51a72d2fbb88c10d937b0");
 
     args[0] = expected;
     args[1] = hex;
@@ -101,19 +101,15 @@ status Crypto_Tests(MemCh *m){
     r |= Test(Equals(hex, expected), 
         "Salted StrVec Sha256 matches, expected @, have @", args);
 
-    StrVec *phrase = StrVec_From(m, Str_CstrRef(m, "My favorite book is the one "
-        "about a dog and a cat and a bannana, and a car."));
+    Single *public = Ptr_Wrapped(m, NULL, ZERO);
+    Single *secret = Ptr_Wrapped(m, NULL, ZERO);
+    SignPair_Make(m, public, secret);
 
-    Str *public = Str_DigestAlloc(m);
-    Str *secret = Str_DigestAlloc(m);
-    SignPair_Make(m, public, secret, phrase);
+    Str *pubHex = Str_ToHex(m, (Str *)secret->val.ptr);
 
-    Str *pubHex = Str_ToHex(m, public);
-    Str *secretHex = Str_ToHex(m, secret);
-
-    Str *publicB = Str_DigestAlloc(m);
-    Str *secretB = Str_DigestAlloc(m);
-    SignPair_Make(m, publicB, secretB, phrase);
+    Single *publicB = Ptr_Wrapped(m, NULL, ZERO);
+    Single *secretB = Ptr_Wrapped(m, NULL, ZERO);
+    SignPair_Make(m, publicB, secretB);
 
     r |= Test(Equals(publicB, public),
         "Public and public second generation are equals", NULL);
@@ -122,12 +118,11 @@ status Crypto_Tests(MemCh *m){
 
     Str *message = Str_CstrRef(m, "I super-master person, do hereby sign some cool,"
         " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");
-    Str_ToSha256(m, message, (digest *)hash->bytes);
-    Str *sig = SignPair_Sign(m, hash, secret);
+    Str *sig = SignPair_Sign(m, StrVec_From(m, message), secret);
 
     Str *sigHex = Str_ToHex(m, sig);
 
-    status valid = SignPair_Verify(m, hash, sig, public);
+    status valid = SignPair_Verify(m, StrVec_From(m, hash), sig, public);
 
     args[0] = message;
     args[1] = sigHex;

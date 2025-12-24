@@ -21,7 +21,8 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash);
 status StrVec_SaltedDigest(MemCh *m,
     StrVec *v, Str *salt, digest *hash, util nonce);
 
-status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase);
+status SignPair_Make(MemCh *m, Single *public, Single *secret);
+status SignPair_FromPhrase(MemCh *m, Single *public, Single *secret, StrVec *phrase);
 Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret);
 status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public);
 status BoxPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase);

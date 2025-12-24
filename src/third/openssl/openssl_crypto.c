@@ -101,14 +101,7 @@ Str *Str_DigestAlloc(MemCh *m){
     return Str_Make(m, DIGEST_SIZE);
 }
 
-status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
-    if(phrase != NULL){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Not implemented, OpenSSL Caneka bindings presently only generate"
-            " random keys.", NULL);
-        return ERROR;
-    }
-
+status SignPair_Make(MemCh *m, Single *public, Single *secret){
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
     if(ctx == NULL){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -116,42 +109,42 @@ status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
         return ERROR;
     }
 
-    EVP_PKEY *key;
-    if(1 != EVP_PKEY_keygen_init(ctx) || 1 != EVP_PKEY_keygen(ctx, &key)){
+    secret->val.ptr = EVP_PKEY_new();
+    secret->objType.of = TYPE_ECKEY;
+    if(!(1 == EVP_PKEY_keygen_init(ctx) &&
+            1 == EVP_PKEY_keygen(ctx, (EVP_PKEY **)&secret->val.ptr))){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error generating key", NULL);
         return ERROR;
     }
 
-    size_t len = 0;
-    EVP_PKEY_get_raw_private_key(key, NULL, &len);
-    if(secret->alloc < len){
+    ctx = EVP_PKEY_CTX_new((EVP_PKEY *)secret->val.ptr, NULL);
+    EVP_PKEY *pubKey;
+    util length;
+    if(!(1 == EVP_PKEY_derive_init(ctx) &&
+            1 == EVP_PKEY_derive_set_peer(ctx, pubKey) &&
+            1 == EVP_PKEY_derive(ctx, NULL, &length))){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error secret key length too short to fill", NULL);
+            "Error generating key - derive", NULL);
         return ERROR;
     }
 
-    len = secret->alloc;
-    if(1 != EVP_PKEY_get_raw_private_key(key, secret->bytes, &len)){
+    Str *s = Str_MakeBlank(m);
+    s->bytes = OPENSSL_malloc(length);
+    if(s->bytes == NULL){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error creating new private key", NULL);
+            "Error allocating public key", NULL);
         return ERROR;
     }
-    secret->length = len;
-
-    len = 0;
-    EVP_PKEY_get_raw_public_key(key, NULL, &len);
-    if(public->alloc < len){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error public key length too short to fill", NULL);
-        return ERROR;
+    s->alloc = length;
+    if(1 == EVP_PKEY_derive(ctx, s->bytes, &length)){
+        s->length = length;
     }
 
-    len = public->alloc;
-    if(1 != EVP_PKEY_get_raw_public_key(key, public->bytes, &len)){
-        return ERROR;
-    }
-    public->length = len;
+    secret->val.ptr = s;
+    secret->objType.of = TYPE_STR;
+    MemCh_AddExtFree(m, Ptr_Wrapped(m, s->bytes, TYPE_BYTES_POINTER));
+
     return SUCCESS;
 }
 
