@@ -1,2 +1,5 @@
 include=/usr/include/openssl/
 link=openssl@crypto
+inter
+ext
+base

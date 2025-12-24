@@ -26,12 +26,4 @@
 #include <netinet/in.h>
 #include <sys/random.h>
 
-#ifdef CNKOPT_OPENSSL
-    #include <evp.h>
-    #include <pem.h>
-    #include <ecdsa.h>
-    #include <err.h>
-    #include <conf.h>
-#endif
-
 #endif

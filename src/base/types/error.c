@@ -174,19 +174,6 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     }
     */
 
-#ifdef OPENSSL
-    char _buff[256];
-    unsigned long e = ERR_get_error();
-    if(e != 0){
-        char *openssl_err = ERR_error_string(e, _buff);
-        void *args[] = {
-            Str_CstrRef(ErrStream->m, openssl_err),
-            NULL
-        };
-        Fmt(ErrStream, "  OpenSslError: ^rD.$^0", args);
-    }
-#endif
-
     Fmt(ErrStream, "^0.\n", NULL);
     DebugStack_Print(ErrStream, MORE);
     exit(13);

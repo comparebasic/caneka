@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static status Free_OpenSsl(MemCh *m, void *_a){
-    Single *ptr = a; 
+    Single *ptr = _a; 
     OPENSSL_free(ptr->val.ptr); 
     return SUCCESS;
 }

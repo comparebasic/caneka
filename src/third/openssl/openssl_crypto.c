@@ -14,12 +14,12 @@ status Str_ToSha256(MemCh *m, Str *s, digest *hash){
     }
 
     if(1 != EVP_DigestUpdate(mdctx, s->bytes, s->length)){
-        Fatal(0, FUNCNAME, FILENAME, LINENUMBER, "Error updating sha256");
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error updating sha256", NULL);
         return ERROR;
     }
 
-    unsigned int len;
-	if(1 != EVP_DigestFinal(mdctx, hash, &len)){
+    unsigned int len = DIGEST_SIZE;
+	if(1 != EVP_DigestFinal(mdctx, (byte *)hash, &len)){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error finalizing sha256 digest", NULL);
         return ERROR;
     }
@@ -54,8 +54,8 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
         }
     }
 
-    unsigned int len;
-	if(1 != EVP_DigestFinal(mdctx, hash, &len)){
+    unsigned int len = DIGEST_SIZE;
+	if(1 != EVP_DigestFinal(mdctx, (byte *)hash, &len)){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error finalizing sha256 digest", NULL);
         return ERROR;
     }
@@ -69,9 +69,7 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
 }
 
 status StrVec_SaltedDigest(MemCh *m,
-        StrVec *v, Str *salt, digest *hash, util nonce){
-
-    StrVec *copy = StrVec_Copy(m, v);
+        StrVec *_v, Str *salt, digest *hash, util nonce){
     
     i32 sep = 1;
     i32 next = sep;
@@ -80,12 +78,18 @@ status StrVec_SaltedDigest(MemCh *m,
     }
     sep--;
 
-    word div = util & sep;
+    word div = nonce & sep;
 
     Str *salt1 = Str_Copy(m, salt);
     salt1->length = div;
     StrVec *v = StrVec_From(m, salt1);
+
+    Str *ns = Str_Ref(m,
+        (byte *)&nonce, sizeof(util), sizeof(util), STRING_BINARY|STRING_COPY);
+    StrVec_Add(v, ns);
+
     StrVec_AddVec(v, _v);
+
     Str *salt2 = Str_Copy(m, salt);
     salt->length = salt->length - div;
     StrVec_Add(v, salt2);
@@ -112,9 +116,8 @@ status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
         return ERROR;
     }
 
-    EVP_KEY *key = EVP_PKEY_new();
-    
-    if(1 != EVP_PKEY_keygen_init(ctx) || 1 != EVP_PKEY_keygen(ctx, key)){
+    EVP_PKEY *key;
+    if(1 != EVP_PKEY_keygen_init(ctx) || 1 != EVP_PKEY_keygen(ctx, &key)){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error generating key", NULL);
         return ERROR;
@@ -152,62 +155,48 @@ status SignPair_Make(MemCh *m, Str *public, Str *secret, StrVec *phrase){
     return SUCCESS;
 }
 
-status SignPair_PublicFromPem(Buff *bf, Str *public){
-    Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
-        "Not Implemented", NULL);
-    return ERROR;
-}
+status SignPair_PrivateFromPem(Buff *bf, Single *secret){
+    secret->val.ptr = EVP_PKEY_new();
+    secret->objType.of = TYPE_ECKEY_PUB;
+    MemCh_AddExtFree(bf->m, secret);
 
-status SignPair_PrivateFromPem(Buff *bf, Str *secret){
-    Str *s = StrVec_Str(bf->m, bf->v);
-    BIO *bio = BIO_new_mem_buff(s->bytes, s->length);
-    if(bio == NULL){
+    FILE *f = fdopen(bf->fd, "r");
+    if(d2i_PrivateKey_fp(f, (EVP_PKEY **)&secret->val.ptr) == NULL){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to allocate bio to read private key pem", NULL);
+            "Unable to read secret key", NULL);
         return ERROR;
     }
-    char *name = NULL;
-    char *header = NULL;
-    util datalen = 0;
-    if(PEM_read_bio(bio, &name, &header, &secret->bytes, &datalen) == 1){
-        secret->length = secret->alloc = datalen;
-        MemCh_AddExtFree(m, Ptr_Wrapped(m, secret->bytes, TYPE_ECKEY));
-        if(name != NULL) OPENSSL_free(name);
-        if(header != NULL) OPENSSL_free(header);
-        return SUCCESS;
-    }
-    return ERROR;
+    return SUCCESS;
 }
 
-status SignPair_PublicFromPem(Buff *bf, Str *public){
+status SignPair_PublicFromPem(Buff *bf, Single *public){
+    public->val.ptr = EVP_PKEY_new();
+    public->objType.of = TYPE_ECKEY_PUB;
+    MemCh_AddExtFree(bf->m, public);
+
+    Buff_Read(bf);
     Str *s = StrVec_Str(bf->m, bf->v);
-    BIO *bio = BIO_new_mem_buff(s->bytes, s->length);
-    if(bio == NULL){
+
+    if(d2i_PublicKey(EVP_PKEY_ED25519,
+                (EVP_PKEY **)public->val.ptr,
+                (const unsigned char **)&s->bytes,
+                s->length)
+            == NULL){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to allocate bio to read private key pem", NULL);
+            "Unable to read public key", NULL);
         return ERROR;
     }
-    char *name = NULL;
-    char *header = NULL;
-    util datalen = 0;
-    if(PEM_read_bio(bio, &name, &header, &secret->bytes, &datalen) == 1){
-        secret->length = secret->alloc = datalen;
-        MemCh_AddExtFree(m, Ptr_Wrapped(m, secret->bytes, TYPE_ECKEY));
-        if(name != NULL) OPENSSL_free(name);
-        if(header != NULL) OPENSSL_free(header);
-        return SUCCESS;
-    }
-    return ERROR;
+    return SUCCESS;
 }
 
-Str *SignPair_Sign(MemCh *m, Str *content, Single *secret){
+Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
     status r = READY;
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
         return NULL;
     }
-    EVP_KEY *key = d2i_AutoPrivateKey(NULL, secret->bytes, secret->length);
+    EVP_PKEY *key = secret->val.ptr;
     if(key == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Error allocating private key for use", NULL);
@@ -221,7 +210,7 @@ Str *SignPair_Sign(MemCh *m, Str *content, Single *secret){
     }
 
     Iter it;
-    Iter_Init(&it, v->p);
+    Iter_Init(&it, content->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)it.value;
         if(1 != EVP_DigestSignUpdate(mdctx, s->bytes, s->length)){
@@ -254,14 +243,14 @@ Str *SignPair_Sign(MemCh *m, Str *content, Single *secret){
     return ret;
 }
 
-status SignPair_Verify(MemCh *m, Str *content, Str *sig, Str *public){
+status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
     status r = READY;
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
         return ERROR;
     }
-    EVP_KEY *key = i2d_PublicKey(NULL, public->bytes, public->length);
+    EVP_PKEY *key = public->val.ptr;
     if(key == NULL){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Error allocating private key for use", NULL);
@@ -269,16 +258,18 @@ status SignPair_Verify(MemCh *m, Str *content, Str *sig, Str *public){
     }
 
     if(1 != EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, key)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error initializing digest verify", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+            "Error initializing digest verify", NULL);
         return NOOP;
     }
 
     Iter it;
-    Iter_Init(&it, v->p);
+    Iter_Init(&it, content->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = it.value;
         if(1 != EVP_DigestVerifyUpdate(mdctx, s->bytes, s->length)){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error updating digest verify", NULL);
+            Fatal(FUNCNAME, FILENAME, LINENUMBER,
+                "Error updating digest verify", NULL);
             return NOOP;
         }
     }

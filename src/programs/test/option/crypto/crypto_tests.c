@@ -93,7 +93,7 @@ status Crypto_Tests(MemCh *m){
     StrVec_SaltedDigest(m, v, salt, (digest *)hash->bytes, nonce);
     hex = Str_ToHex(m, hash);
     expected = Str_CstrRef(m,
-        "466b336b19f46a9684b4515f43ac4b3a06e080369f99394434e4b8d4f4cbc9de");
+        "a18e3510a65a4125d5012ec2ce600f6ed14c908d0219c43a8347ff32a1348dc7");
 
     args[0] = expected;
     args[1] = hex;

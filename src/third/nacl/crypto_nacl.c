@@ -36,6 +36,33 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
 
 status StrVec_SaltedDigest(MemCh *m,
         StrVec *_v, Str *salt, digest *hash, util nonce){
+    /* This places the nonce and value inside the salt
+     * positioned by the highest power of two from the
+     * nonce
+     *
+     * For example: 
+     * nonce = 95438134
+     * salt-length = 512
+     * 
+     * The first 134 bytes of the salt, will be followed by
+     * the nonce, the value of v, and then the remaining
+     * 378 bytes of the salt. 
+     *
+     * To find a position within the salt length it tries
+     * powers of two by shifting a bit. The subtracts 1 from
+     * that to make all 1s below the maximum position.
+     *
+     * For example:
+     *    0 = 0
+     *    100 = 11 = 3
+     *    1000 = 111 = 7
+     *    1000000000 = 111111111 = 511
+     *
+     * For the above nonce, 95438134 & 511 = 134, which is then
+     * used as the position.
+     *
+     * That is then sent through Sha256 to create the digest.
+     */
     
     i32 sep = 1;
     i32 next = sep;
@@ -49,6 +76,9 @@ status StrVec_SaltedDigest(MemCh *m,
     Str *salt1 = Str_Copy(m, salt);
     salt1->length = div;
     StrVec *v = StrVec_From(m, salt1);
+    Str *ns = Str_Ref(m,
+        &nonce, sizeof(util), sizeof(util), STRING_BINARY|STRING_COPY);
+    StrVec_Add(v, ns);
     StrVec_AddVec(v, _v);
     Str *salt2 = Str_Copy(m, salt);
     salt->length = salt->length - div;
