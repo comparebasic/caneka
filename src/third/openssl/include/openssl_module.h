@@ -8,3 +8,4 @@
 #include <conf.h>
 
 status OpenSsl_ExtFreeInit(MemCh *m);
+status OpenSsl_Error(Buff *bf);

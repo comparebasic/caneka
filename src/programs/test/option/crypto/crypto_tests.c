@@ -105,16 +105,12 @@ status Crypto_Tests(MemCh *m){
     Single *secret = Ptr_Wrapped(m, NULL, ZERO);
     SignPair_Make(m, public, secret);
 
-    Str *pubHex = Str_ToHex(m, (Str *)secret->val.ptr);
-
-    Single *publicB = Ptr_Wrapped(m, NULL, ZERO);
-    Single *secretB = Ptr_Wrapped(m, NULL, ZERO);
-    SignPair_Make(m, publicB, secretB);
-
-    r |= Test(Equals(publicB, public),
-        "Public and public second generation are equals", NULL);
-    r |= Test(Equals(secretB, secret),
-        "Secret and secret second generation are equals", NULL);
+    r |= Test(secret->objType.of == TYPE_ECKEY,
+        "Secret key has type ECKEY", NULL);
+    args[0] = Str_ToHex(m, (Str *)secret->val.ptr);
+    args[1] = NULL;
+    r |= Test(public->objType.of == TYPE_STR,
+        "Public has type STR @", args);
 
     Str *message = Str_CstrRef(m, "I super-master person, do hereby sign some cool,"
         " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");

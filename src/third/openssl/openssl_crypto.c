@@ -102,30 +102,35 @@ Str *Str_DigestAlloc(MemCh *m){
 }
 
 status SignPair_Make(MemCh *m, Single *public, Single *secret){
-    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_X25519, NULL);
     if(ctx == NULL){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error secret ctx not allocated", NULL);
-        return ERROR;
+       return ERROR;
     }
 
-    secret->val.ptr = EVP_PKEY_new();
-    secret->objType.of = TYPE_ECKEY;
+    EVP_PKEY *key = NULL;
     if(!(1 == EVP_PKEY_keygen_init(ctx) &&
-            1 == EVP_PKEY_keygen(ctx, (EVP_PKEY **)&secret->val.ptr))){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error generating key", NULL);
-        return ERROR;
-    }
+            1 == EVP_PKEY_keygen(ctx, &key))){
+       Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error generating secret key", NULL);
+       return ERROR;
 
-    ctx = EVP_PKEY_CTX_new((EVP_PKEY *)secret->val.ptr, NULL);
-    EVP_PKEY *pubKey;
+    }
+    secret->val.ptr = key;
+    secret->objType.of = TYPE_ECKEY;
+
+    EVP_PKEY_CTX_free(ctx);
+    
+    EVP_PKEY *pubKey = EVP_PKEY_new();
+    EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new(key, NULL);
     util length;
-    if(!(1 == EVP_PKEY_derive_init(ctx) &&
-            1 == EVP_PKEY_derive_set_peer(ctx, pubKey) &&
-            1 == EVP_PKEY_derive(ctx, NULL, &length))){
+    if(!(1 == EVP_PKEY_derive_init(pctx) &&
+            1 == EVP_PKEY_derive_set_peer(pctx, pubKey) &&
+            1 == EVP_PKEY_derive(pctx, NULL, &length))){
+        OpenSsl_Error(ErrStream);
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error generating key - derive", NULL);
+            "Error generating public key - derive", NULL);
         return ERROR;
     }
 
@@ -137,13 +142,19 @@ status SignPair_Make(MemCh *m, Single *public, Single *secret){
         return ERROR;
     }
     s->alloc = length;
-    if(1 == EVP_PKEY_derive(ctx, s->bytes, &length)){
-        s->length = length;
+    if(1 != EVP_PKEY_derive(pctx, s->bytes, &length)){
+        OpenSsl_Error(ErrStream);
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error deriving public key", NULL);
+        return ERROR;
     }
+
+    s->length = length;
 
     secret->val.ptr = s;
     secret->objType.of = TYPE_STR;
     MemCh_AddExtFree(m, Ptr_Wrapped(m, s->bytes, TYPE_BYTES_POINTER));
+    EVP_PKEY_CTX_free(pctx);
 
     return SUCCESS;
 }
