@@ -124,10 +124,11 @@ status SignPair_Make(MemCh *m, Single *public, Single *secret){
     
     EVP_PKEY *pubKey = EVP_PKEY_new();
     EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new(key, NULL);
+
     util length;
-    if(!(1 == EVP_PKEY_derive_init(pctx) &&
-            1 == EVP_PKEY_derive_set_peer(pctx, pubKey) &&
-            1 == EVP_PKEY_derive(pctx, NULL, &length))){
+    if(!(1 == EVP_PKEY_derive_init(pctx)  &&
+            1 == EVP_PKEY_derive_set_peer(pctx, pubKey) /* &&
+            1 == EVP_PKEY_derive(pctx, NULL, &length)*/)){
         OpenSsl_Error(ErrStream);
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error generating public key - derive", NULL);
