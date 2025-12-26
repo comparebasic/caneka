@@ -13,9 +13,12 @@ status Doc_Tests(MemCh *m){
     Str *path = StrVec_Str(m, NodeObj_Att(dobj, K(m, "src")));
     StrVec *content = File_ToVec(m, path);
 
+
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = Doc_MakeRoebling(m, curs, NULL);
+    /*
     rbl->type.state |= DEBUG;
+    */
     Roebling_Run(rbl);
 
     args[0] = dobj;

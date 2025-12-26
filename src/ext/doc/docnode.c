@@ -4,6 +4,8 @@
 NodeObj *DocNode_FromStr(MemCh *m, StrVec *src, Str *s){
     StrVec *v = StrVec_From(m, s);
     Path_DotAnnotate(m, v);
+    Str *first = Span_Get(v->p, 0);
+    Str_ToTitle(m, first);
     NodeObj *dobj = Inst_Make(m, TYPE_NODEOBJ);
     Seel_Set(dobj, K(m, "name"), v);
     StrVec *path = StrVec_Copy(m, src);

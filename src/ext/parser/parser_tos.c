@@ -178,21 +178,17 @@ status Match_Print(Buff *bf, void *a, cls type, word flags){
     if(flags & (DEBUG|MORE)){
         PatCharDef *pd = mt->pat.startDef;
         while(pd <= mt->pat.endDef){
-            /*
             char *_color = "E.";
             if(pd == mt->pat.curDef){
                 Str *color = Str_FromAnsi(bf->m, &_color, _color+1);
                 Buff_AddBytes(bf, color->bytes, color->length); 
             }
-            */
             ToS(bf, pd, TYPE_PATCHAR, MORE); 
-            /*
             _color = "e.";
             if(pd == mt->pat.curDef){
                 Str *color = Str_FromAnsi(bf->m, &_color, _color+1);
                 Buff_AddBytes(bf, color->bytes, color->length); 
             }
-            */
             pd++;
         }
         if(flags & MORE){

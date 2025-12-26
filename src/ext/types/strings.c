@@ -148,6 +148,8 @@ static char *extTypeStrings[] = {
     "DOC_FUNC_END",
     "DOC_LINE",
     "DOC_COMMENT",
+    "DOC_INCLUDE_LOCAL",
+    "DOC_INCLUDE_PATH",
     "DOC_END",
     "_DOC_END",
     "_TYPE_EXT_END",

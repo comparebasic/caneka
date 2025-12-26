@@ -38,13 +38,16 @@ Str *Str_ToLower(MemCh *m, Str *s){
 }
 
 Str *Str_ToTitle(MemCh *m, Str *s){
-    Str *upper = Str_Clone(m, s);
-    byte *ptr = upper->bytes;
-    byte *end = upper->bytes+(upper->length-1);
+    Str *title = s;
+    if(s->type.state & STRING_COPY){
+        title = Str_Clone(m, s);
+    }
+    byte *ptr = title->bytes;
+    byte *end = title->bytes+(title->length-1);
     i32 delta = 'a' - 'A';
     while(ptr <= end){
         byte b = *ptr;
-        if(ptr == upper->bytes || 
+        if(ptr == title->bytes || 
                 (!(*(ptr-1) >= 'A' && *(ptr-1) <= 'Z')) &&
                 (!(*(ptr-1) >= 'a' && *(ptr-1) <= 'z')) &&
                 (b >= 'a' && b <= 'z')
@@ -53,7 +56,7 @@ Str *Str_ToTitle(MemCh *m, Str *s){
         }
         ptr++;
     }
-    return upper;
+    return title;
 }
 
 status Str_AddChain(MemCh *m, Str *s, void *args[]){
