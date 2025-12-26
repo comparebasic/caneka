@@ -18,7 +18,7 @@
 #include <dirent.h>
 #include <termios.h>
 #include <signal.h>
-#include "src/programs/buildeka/include/detect.h"
+#include "detect.h"
 
 void SetOriginalTios();
 
