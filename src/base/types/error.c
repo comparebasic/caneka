@@ -164,16 +164,6 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     Buff_AddBytes(ErrStream, (byte *)" - ", 3);
     Fmt(ErrStream, fmt, args);
 
-    /*
-    if(errno != 0){
-        void *args[] = {
-            S(ErrStream->m, strerror(errno)),
-            NULL
-        };
-        Fmt(ErrStream, "\n  IoError: ^D.$^d.", args);
-    }
-    */
-
     Fmt(ErrStream, "^0.\n", NULL);
     DebugStack_Print(ErrStream, MORE);
     exit(13);
@@ -201,6 +191,16 @@ boolean IsZeroed(MemCh *m, byte *b, size_t sz, char *func, char *file, int line)
 err:
     Error(m, func, file, line, "Memory not Zeroed", NULL);
     return FALSE;
+}
+
+void ErrNoError(Buff *bf){
+    if(errno != 0){
+        void *args[] = {
+            S(ErrStream->m, strerror(errno)),
+            NULL
+        };
+        Fmt(bf, "\n  IoError: ^D.$^d.", args);
+    }
 }
 
 void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){

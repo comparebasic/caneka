@@ -33,29 +33,29 @@ int selected = 0;
 int height = 0;
 
 char *buildekaExamples = ""
-    "\x1b[32mBuildeka has been built at \x1b[1m./build/bin/buildeka\x1b[22m!\n\x1b[0m"
+    "\x1b[32mBuildeka has been built at \x1b[1m./dist/bin/buildeka\x1b[22m!\n\x1b[0m"
     "\n"
     "  Example build commands are:\n"
     "\n"
     "    Build the \x1b[1mTest Program\x1b[22m\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/test --option base ext inter\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter\x1b[0m\n"
     "\n"
     "    With NaCl for crypto:\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/test --option base ext inter crypto@third/nacl\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter crypto@third/nacl\x1b[0m\n"
     "\n"
     "    With OpenSsl for crypto (experimental):\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/test --option base ext inter crypto@third/openssl\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter crypto@third/openssl\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mClineka\x1b[22m command line tool\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/clineka --option [crypto@third/openssl, crypto@third/nacl]\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/clineka --option [crypto@third/openssl, crypto@third/nacl]\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mWebServer\x1b[22m\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./build/bin/buildeka --src src/programs/webserver\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/webserver\x1b[0m\n"
     "\n"
     "  Each program, once built, will be placed in the \x1b[1m./build/bin/\x1b[22m directory, help is availabile\n"
     "  by passing a \x1b[1m--help\x1b[22m argument, for example:\n"
@@ -63,20 +63,20 @@ char *buildekaExamples = ""
     "    \x1b[1m$\x1b[22m ./build/bin/webserver \x1b[1m--help\x1b[0m\n"
     "    \x1b[1m$\x1b[22m ./build/bin/test \x1b[1m--help\x1b[0m\n"
     "    \x1b[1m$\x1b[22m ./build/bin/clineka \x1b[1m--help\x1b[0m\n"
-    "    \x1b[1m$\x1b[22m ./build/bin/buildeka \x1b[1m--help\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m ./dist/bin/buildeka \x1b[1m--help\x1b[0m\n"
     "\n"
     ;
 
 
 char *buildCaneka[] = {
-    "./build/bin/buildeka",
+    "./dist/bin/buildeka",
     "--src",
     "src/inter",
     NULL
 };
 
 char *buildTests[] = {
-    "./build/bin/buildeka",
+    "./dist/bin/buildeka",
     "--src",
     "src/programs/test",
     "--option",
@@ -87,7 +87,7 @@ char *buildTests[] = {
 };
 
 char *buildWebServer[] = {
-    "./build/bin/buildeka",
+    "./dist/bin/buildeka",
     "--src",
     "src/programs/webserver",
     "--option",
@@ -98,7 +98,7 @@ char *buildWebServer[] = {
 };
 
 char *buildCli[] = {
-    "./build/bin/buildeka",
+    "./dist/bin/buildeka",
     "--src",
     "src/programs/clineka",
     "--option",
@@ -491,7 +491,7 @@ int main(int argc, char *argv[]){
     cmd[4] = "-Isrc/api/include";
     cmd[5] = "-Iprograms/buildeka/include";
     cmd[6] = "-o";
-    cmd[7] = "./build/bin/buildeka";
+    cmd[7] = "./dist/bin/buildeka";
     cmd[8] = "./build/libcnkbase/libcnkbase.a";
     cmd[9] = "./src/programs/buildeka/inc.c";
     cmd[10] = "-lm";

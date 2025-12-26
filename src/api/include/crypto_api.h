@@ -33,6 +33,8 @@ status Str_HmacDec(MemCh *m, Str *s, Str *hmac);
 Str *Str_DigestAlloc(MemCh *m);
 status SignPair_PrivateFromPem(Buff *bf, Single *secret);
 status SignPair_PublicFromPem(Buff *bf, Single *public);
+status SignPair_PrivateToPem(Buff *bf, Single *secret);
+status SignPair_PublicToPem(Buff *bf, Single *public);
 
 status Crypto_Init(MemCh *m);
 #endif

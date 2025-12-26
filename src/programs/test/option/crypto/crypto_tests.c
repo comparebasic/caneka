@@ -125,6 +125,20 @@ status Crypto_Tests(MemCh *m){
     args[2] = NULL;
     r |= Test(valid & SUCCESS, "Message validates: @ -> sig:@", args);
 
+    Dir_CheckCreate(m, S(m, "./examples/crypto"));
+    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
+    File_Open(bf, S(m, "./examples/crypto/key.pem"), O_CREAT|O_TRUNC|O_WRONLY);
+
+    status re = SignPair_PrivateToPem(bf, secret);
+    r |= Test(re & SUCCESS,
+        "Pem written for private key has status SUCCESS", NULL);
+
+    bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
+    File_Open(bf, S(m, "./examples/crypto/pub.pem"), O_CREAT|O_TRUNC|O_WRONLY);
+    re = SignPair_PublicToPem(bf, public);
+    r |= Test(re & SUCCESS,
+        "Pem written for public key has status SUCCESS", NULL);
+
     DebugStack_Pop();
     return r;
 }

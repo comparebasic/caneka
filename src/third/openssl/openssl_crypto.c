@@ -1,6 +1,27 @@
 #include <external.h>
 #include <caneka.h>
 
+static EVP_PKEY *pubKey_FromOctetSingle(MemCh *m, Single *public){
+    Str *s = public->val.ptr;
+    EVP_PKEY *key = EVP_PKEY_new();
+    OSSL_PARAM *params;
+    OSSL_PARAM_BLD *param_bld = OSSL_PARAM_BLD_new();
+    OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", "P-256", 0);
+    OSSL_PARAM_BLD_push_octet_string(param_bld, "pub", s->bytes, s->length);
+    params = OSSL_PARAM_BLD_to_param(param_bld);
+
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL);
+    if(ctx == NULL || 
+            !EVP_PKEY_fromdata_init(ctx) || 
+            !EVP_PKEY_fromdata(ctx, &key, EVP_PKEY_PUBLIC_KEY, params)
+        ){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error creating public key from octets", NULL);
+        return NULL;
+    }
+    return key;
+}
+
 status Str_ToSha256(MemCh *m, Str *s, digest *hash){
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
@@ -148,8 +169,10 @@ status SignPair_PublicFromPem(Buff *bf, Single *public){
             == NULL){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to read public key", NULL);
+
         return ERROR;
     }
+
     return SUCCESS;
 }
 
@@ -204,30 +227,99 @@ Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
     ret->length = len;
     ret->type.state |= STRING_BINARY;
 
-    EVP_PKEY_free(key);
     EVP_MD_CTX_destroy(mdctx);
     return ret;
 }
 
-status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
-    status r = READY;
-    Str *s = public->val.ptr;
-
-    EVP_PKEY *key = EVP_PKEY_new();
-    OSSL_PARAM *params;
-    OSSL_PARAM_BLD *param_bld = OSSL_PARAM_BLD_new();
-    OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", "P-256", 0);
-    OSSL_PARAM_BLD_push_octet_string(param_bld, "pub", s->bytes, s->length);
-    params = OSSL_PARAM_BLD_to_param(param_bld);
-    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL);
-    if(ctx == NULL || 
-            !EVP_PKEY_fromdata_init(ctx) || 
-            !EVP_PKEY_fromdata(ctx, &key, EVP_PKEY_PUBLIC_KEY, params)
-        ){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error creating public key from octets", NULL);
+status SignPair_PrivateToPem(Buff *bf, Single *secret){
+    if(secret->objType.of != TYPE_ECKEY){
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Expected type ECKEY", NULL);
         return ERROR;
     }
+    EVP_PKEY *key = secret->val.ptr;
+    FILE *f = fdopen(bf->fd, "wb");
+
+    if(f == NULL){
+        ErrNoError(ErrStream);
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error opening file to write pem to", NULL);
+        return ERROR;
+    }
+
+    OSSL_ENCODER_CTX *ctx = OSSL_ENCODER_CTX_new_for_pkey(key,
+        OSSL_KEYMGMT_SELECT_KEYPAIR | OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS,
+        "PEM", "PrivateKeyInfo", NULL);
+
+    if(ctx == NULL || OSSL_ENCODER_CTX_get_num_encoders(ctx) == 0){
+        OpenSsl_Error(ErrStream);
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error setting up for writing private key PEM", NULL);
+        return ERROR;
+    }
+
+    if(1 != OSSL_ENCODER_to_fp(ctx, f)){
+        fclose(f);
+        OSSL_ENCODER_CTX_free(ctx);
+        OpenSsl_Error(ErrStream);
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error writing private key PEM", NULL);
+        return ERROR;
+    }
+
+    fclose(f);
+    OSSL_ENCODER_CTX_free(ctx);
+
+    return SUCCESS;
+}
+
+status SignPair_PublicToPem(Buff *bf, Single *public){
+    MemCh *m = bf->m;
+    if(public->objType.of != TYPE_STR){
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Expected type STR", NULL);
+        return ERROR;
+    }
+
+    EVP_PKEY *key = pubKey_FromOctetSingle(m, public);
+    FILE *f = fdopen(bf->fd, "wb");
+
+    if(f == NULL){
+        ErrNoError(ErrStream);
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error opening file to write public pem", NULL);
+        return ERROR;
+    }
+
+    OSSL_ENCODER_CTX *ctx = OSSL_ENCODER_CTX_new_for_pkey(key,
+        EVP_PKEY_PUBLIC_KEY, "PEM", NULL, NULL);
+
+    if(ctx == NULL || OSSL_ENCODER_CTX_get_num_encoders(ctx) == 0){
+        OpenSsl_Error(ErrStream);
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error setting up for writing public key DER", NULL);
+        return ERROR;
+    }
+
+    if(1 != OSSL_ENCODER_to_fp(ctx, f)){
+        fclose(f);
+        OpenSsl_Error(ErrStream);
+        OSSL_ENCODER_CTX_free(ctx);
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error writing public key DER", NULL);
+        return ERROR;
+    }
+
+    fclose(f);
+    OSSL_ENCODER_CTX_free(ctx);
+
+    return SUCCESS;
+}
+
+status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
+    status r = READY;
+
+    EVP_PKEY *key = pubKey_FromOctetSingle(m, public);;
 
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){

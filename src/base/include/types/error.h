@@ -16,3 +16,4 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]);
 void Error(struct mem_ctx *m,
     char *func, char *file, int line, char *fmt, void *args[]);
 boolean IsZeroed(struct mem_ctx *m, byte *b, size_t sz, char *func, char *file, int line);
+void ErrNoError(struct buff *bf);

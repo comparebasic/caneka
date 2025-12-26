@@ -7,6 +7,7 @@
 #include <err.h>
 #include <param_build.h>
 #include <conf.h>
+#include <encoder.h>
 
 status OpenSsl_ExtFreeInit(MemCh *m);
 status OpenSsl_Error(Buff *bf);
