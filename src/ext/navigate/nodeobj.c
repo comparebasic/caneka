@@ -12,6 +12,17 @@ void *NodeObj_Att(Inst *nobj, void *key){
     return NULL;
 }
 
+status NodeObj_SetAtt(Inst *nobj, void *key, void *value){
+    if(nobj == NULL){
+        return ERROR;
+    }
+    Table *obj = (Table *)Span_Get(nobj, NODEOBJ_PROPIDX_ATTS);
+    if(obj != NULL){
+        return Table_Set(obj, key, value);
+    }
+    return ERROR;
+}
+
 void *NodeObj_GetChild(Inst *nobj, void *key){
     if(nobj == NULL){
         return NULL;

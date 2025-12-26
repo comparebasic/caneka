@@ -1,32 +1,33 @@
-status BinSeg_Tests(MemCh *gm);
-status BinSegCollection_Tests(MemCh *gm);
-status BinSegV_Tests(MemCh *gm);
-status BinSegReversedV_Tests(MemCh *gm);
-status Config_Tests(MemCh *gm);
-status TaskStep_Tests(MemCh *gm);
-status NodeObj_Tests(MemCh *gm);
-status StrVecSplit_Tests(MemCh *gm);
-status Snip_Tests(MemCh *gm);
-status SnipModify_Tests(MemCh *gm);
-status QueueIter_Tests(MemCh *gm);
-status QueueCriteria_Tests(MemCh *gm);
-status QueueScale_Tests(MemCh *gm);
-status Queue_Tests(MemCh *gm);
-status QueueAddRemove_Tests(MemCh *gm);
-status Relation_Tests(MemCh *gm);
-status Object_Tests(MemCh *gm);
-status ObjectFilter_Tests(MemCh *gm);
-status Mess_Tests(MemCh *gm);
-status PatChar_Tests(MemCh *gm);
-status Roebling_Tests(MemCh *gm);
-status RoeblingRun_Tests(MemCh *gm);
-status RoeblingMark_Tests(MemCh *gm);
-status RoeblingStartStop_Tests(MemCh *gm);
-status Match_Tests(MemCh *gm);
-status MatchElastic_Tests(MemCh *gm);
-status MatchKo_Tests(MemCh *gm);
-status MatchReplace_Tests(MemCh *gm);
-status FmtHtml_Tests(MemCh *gm);
+status BinSeg_Tests(MemCh *m);
+status BinSegCollection_Tests(MemCh *m);
+status BinSegV_Tests(MemCh *m);
+status BinSegReversedV_Tests(MemCh *m);
+status Config_Tests(MemCh *m);
+status TaskStep_Tests(MemCh *m);
+status NodeObj_Tests(MemCh *m);
+status StrVecSplit_Tests(MemCh *m);
+status Snip_Tests(MemCh *m);
+status SnipModify_Tests(MemCh *m);
+status QueueIter_Tests(MemCh *m);
+status QueueCriteria_Tests(MemCh *m);
+status QueueScale_Tests(MemCh *m);
+status Queue_Tests(MemCh *m);
+status QueueAddRemove_Tests(MemCh *m);
+status Relation_Tests(MemCh *m);
+status Object_Tests(MemCh *m);
+status ObjectFilter_Tests(MemCh *m);
+status Mess_Tests(MemCh *m);
+status PatChar_Tests(MemCh *m);
+status Roebling_Tests(MemCh *m);
+status RoeblingRun_Tests(MemCh *m);
+status RoeblingMark_Tests(MemCh *m);
+status RoeblingStartStop_Tests(MemCh *m);
+status Match_Tests(MemCh *m);
+status MatchElastic_Tests(MemCh *m);
+status MatchKo_Tests(MemCh *m);
+status MatchReplace_Tests(MemCh *m);
+status FmtHtml_Tests(MemCh *m);
+status Doc_Tests(MemCh *m);
 
 static TestSet ExtTests[] = {
     {
@@ -211,6 +212,12 @@ static TestSet ExtTests[] = {
         "TaskStep Tests",
         TaskStep_Tests,
         "Task/Step and Task_Tumble tests.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Doc Tests",
+        Doc_Tests,
+        "Documentation generator tests.",
         FEATURE_COMPLETE,
     },
     {

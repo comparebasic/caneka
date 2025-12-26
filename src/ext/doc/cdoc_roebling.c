@@ -77,7 +77,6 @@ static status start(MemCh *m, Roebling *rbl){
     return r;
 }
 
-
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     void *args[5];
     if(1){
@@ -97,6 +96,12 @@ Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
     Roebling_AddStep(rbl, I16_Wrapped(m, DOC_END));
     Roebling_Start(rbl);
+
+    void *args[] = {
+        rbl,
+        NULL
+    };
+    Out("^p.Rbl @^0\n", args);
 
     rbl->capture = Capture;
     rbl->source = source;

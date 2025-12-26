@@ -7,6 +7,10 @@ Str *IoUtil_PathSep(MemCh *m){
     return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
 }
 
+Str *IoUtil_ExtSep(MemCh *m){
+    return Str_Ref(m, (byte *)".", 1, 1, STRING_COPY|LAST);
+}
+
 boolean IoUtil_IsStrAbs(Str *s){
     return s->bytes[0] == '/';
 }
@@ -384,6 +388,35 @@ Str *IoUtil_FnameStr(MemCh *m, StrVec *path){
 
 StrVec *IoUtil_BasePath(MemCh *m, StrVec *path){
     return StrVec_CopyTo(m, path, IoUtil_BasePathAnchor(path));
+}
+
+status IoUtil_AddDotPath(StrVec *path, StrVec *dot, Str *ext){
+    if(path == NULL){
+        return ERROR;
+    }
+
+    MemCh *m = path->p->m;
+
+    Str *last = Span_Get(path->p, path->p->max_idx);
+    if(last != NULL && (last->type.state & MORE) == 0){
+        StrVec_Add(path, IoUtil_PathSep(m));
+    }
+
+    Iter it;
+    Iter_Init(&it, dot->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if(s->type.state & MORE){
+            StrVec_Add(path, IoUtil_PathSep(m));
+        }else{
+            StrVec_Add(path, Str_ToLower(m, s));
+        }
+    }
+
+    StrVec_Add(path, IoUtil_ExtSep(m));
+    StrVec_Add(path, ext);
+
+    return SUCCESS;
 }
 
 status IoUtils_Init(MemCh *m){

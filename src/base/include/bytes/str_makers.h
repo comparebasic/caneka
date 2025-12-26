@@ -10,3 +10,4 @@ status Str_AddChain(MemCh *m, Str *s, void *args[]);
 Str *Str_ToUpper(MemCh *m, Str *s);
 Str *Str_ToTitle(MemCh *m, Str *s);
 Str *Str_ToUpper(MemCh *m, Str *s);
+Str *Str_ToLower(MemCh *m, Str *s);

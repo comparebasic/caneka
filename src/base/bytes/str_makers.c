@@ -2,7 +2,10 @@
 #include "base_module.h"
 
 Str *Str_ToUpper(MemCh *m, Str *s){
-    Str *upper = Str_Clone(m, s);
+    Str *upper = s;
+    if(s->type.state & STRING_COPY){
+        upper = Str_Clone(m, s);
+    }
     byte *ptr = upper->bytes;
     byte *end = upper->bytes+(upper->length-1);
     i32 delta = 'a' - 'A';
@@ -17,18 +20,21 @@ Str *Str_ToUpper(MemCh *m, Str *s){
 }
 
 Str *Str_ToLower(MemCh *m, Str *s){
-    Str *upper = Str_Clone(m, s);
-    byte *ptr = upper->bytes;
-    byte *end = upper->bytes+(upper->length-1);
-    i32 delta = 'a' + 'A';
+    Str *lower = s;
+    if(s->type.state & STRING_COPY){
+        lower = Str_Clone(m, s);
+    }
+    byte *ptr = lower->bytes;
+    byte *end = lower->bytes+(lower->length-1);
+    i32 delta = 'a' - 'A';
     while(ptr <= end){
         byte b = *ptr;
-        if(b >= 'a' && b <= 'z'){
+        if(b >= 'A' && b <= 'Z'){
             *ptr = b+delta;
         }
         ptr++;
     }
-    return upper;
+    return lower;
 }
 
 Str *Str_ToTitle(MemCh *m, Str *s){

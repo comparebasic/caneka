@@ -17,8 +17,6 @@ status HKey_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status CstrArray_Print(Buff *bf, void *a, cls type, word flags){
-    printf("CstrArray Print\n");
-    fflush(stdout);
     byte **arr = (byte **)a;
     boolean first = TRUE;
     Str s = {
@@ -42,8 +40,6 @@ status CstrArray_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Array_Print(Buff *bf, void *a, cls type, word flags){
-    printf("Array Print\n");
-    fflush(stdout);
     void **arr = (void **)a;
     boolean first = TRUE;
     while(*arr != NULL){
@@ -92,9 +88,10 @@ status Lookup_Print(Buff *bf, void *a, cls type, word flags){
     if(flags & (MORE|DEBUG)){
         void *args[] = {
             I32_Wrapped(bf->m, lk->offset),
+            I32_Wrapped(bf->m, lk->values->nvalues),
             NULL,
         };
-        Fmt(bf, "Lk<^D.$^d.offset values[", args);
+        Fmt(bf, "Lk<^D.$^d.offset ^D.$^d.nvalues values[", args);
         Iter it;
         Iter_Init(&it, lk->values);
         while((Iter_Next(&it) & END) == 0){

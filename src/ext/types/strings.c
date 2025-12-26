@@ -141,6 +141,15 @@ static char *extTypeStrings[] = {
     "KVE_CONTENT",
     "KVE_END",
     "_KVE_END",
+    "_DOC_START",
+    "DOC_START",
+    "DOC_FUNC",
+    "DOC_FUNC_MULTILINE",
+    "DOC_FUNC_END",
+    "DOC_LINE",
+    "DOC_COMMENT",
+    "DOC_END",
+    "_DOC_END",
     "_TYPE_EXT_END",
     NULL
 };
