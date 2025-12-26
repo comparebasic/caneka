@@ -155,23 +155,52 @@ status SignPair_Make(MemCh *m, Single *public, Single *secret){
 }
 
 status SignPair_PublicFromPem(Buff *bf, Single *public){
-    public->val.ptr = EVP_PKEY_new();
-    public->objType.of = TYPE_ECKEY_PUB;
-    MemCh_AddExtFree(bf->m, public);
+    MemCh *m = bf->m;
 
-    Buff_Read(bf);
-    Str *s = StrVec_Str(bf->m, bf->v);
-
-    if(d2i_PublicKey(EVP_PKEY_ED25519,
-                (EVP_PKEY **)public->val.ptr,
-                (const unsigned char **)&s->bytes,
-                s->length)
-            == NULL){
+    FILE *f = fdopen(bf->fd, "rb");
+    if(f == NULL){
+        OpenSsl_Error(ErrStream);
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to read public key", NULL);
-
+            "Error opening file to read public pem", NULL);
         return ERROR;
     }
+
+    EVP_PKEY *key = EVP_PKEY_new();
+    key = PEM_read_PUBKEY(f, &key, NULL, NULL);
+
+    util sz = 0;
+    Str *s = Str_MakeBlank(m);
+    EVP_PKEY_get_octet_string_param(key, "pub", NULL, 0, &sz);
+    s->bytes = OPENSSL_malloc(sz);
+
+    if(1 != EVP_PKEY_get_octet_string_param(key, "pub", s->bytes, sz, &sz)){
+        OpenSsl_Error(ErrStream);
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error generating public key", NULL);
+        return ERROR;
+    }
+
+    if(key == NULL){
+        OpenSsl_Error(ErrStream);
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error reading public pem", NULL);
+        return ERROR;
+
+    }
+
+    EVP_PKEY_get_octet_string_param(key, "pub", NULL, 0, &sz);
+    s->bytes = OPENSSL_malloc(sz);
+
+    if(1 != EVP_PKEY_get_octet_string_param(key, "pub", s->bytes, sz, &sz)){
+        OpenSsl_Error(ErrStream);
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error generating public key", NULL);
+        return ERROR;
+    }
+
+    s->length = sz;
+    public->val.ptr = s;
+    public->objType.of = TYPE_STR;
 
     return SUCCESS;
 }

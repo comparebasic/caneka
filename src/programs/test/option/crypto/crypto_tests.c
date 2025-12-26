@@ -112,19 +112,6 @@ status Crypto_Tests(MemCh *m){
     r |= Test(public->objType.of == TYPE_STR,
         "Public has type STR @", args);
 
-    StrVec *message = Sv(m, "I super-master person, do hereby sign some cool,"
-        " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");
-    Str *sig = SignPair_Sign(m, message, secret);
-
-    Str *sigHex = Str_ToHex(m, sig);
-
-    status valid = SignPair_Verify(m, message, sig, public);
-
-    args[0] = message;
-    args[1] = sigHex;
-    args[2] = NULL;
-    r |= Test(valid & SUCCESS, "Message validates: @ -> sig:@", args);
-
     Dir_CheckCreate(m, S(m, "./examples/crypto"));
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
     File_Open(bf, S(m, "./examples/crypto/key.pem"), O_CREAT|O_TRUNC|O_WRONLY);
@@ -138,6 +125,28 @@ status Crypto_Tests(MemCh *m){
     re = SignPair_PublicToPem(bf, public);
     r |= Test(re & SUCCESS,
         "Pem written for public key has status SUCCESS", NULL);
+
+    StrVec *message = Sv(m, "I super-master person, do hereby sign some cool,"
+        " super-fancy stuff, that totally needed to be signed, like yesterday (sorry)");
+    Str *sig = SignPair_Sign(m, message, secret);
+
+    Str *sigHex = Str_ToHex(m, sig);
+
+    Single *public2 = Ptr_Wrapped(m, NULL, ZERO);
+    bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
+    File_Open(bf, S(m, "./examples/crypto/pub.pem"), O_RDONLY);
+    SignPair_PublicFromPem(bf, public2);
+
+    r |= Test(public2->objType.of == TYPE_STR, 
+        "Pem from disk creates public of type STR", NULL);
+
+    status valid = SignPair_Verify(m, message, sig, public2);
+
+    args[0] = message;
+    args[1] = sigHex;
+    args[2] = NULL;
+    r |= Test(valid & SUCCESS, "Message validates: @ -> sig:@", args);
+
 
     DebugStack_Pop();
     return r;
