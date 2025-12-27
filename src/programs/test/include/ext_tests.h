@@ -217,12 +217,14 @@ static TestSet ExtTests[] = {
         "Task/Step and Task_Tumble tests.",
         FEATURE_COMPLETE,
     },
+#ifdef CNKOPT_FREEBSD
     {
         "SysQuery Tests",
         SysQuery_Tests,
         "System Queries for Information such as Memory and CPU Performance.",
         FEATURE_COMPLETE,
     },
+#endif
     {
         "Doc Tests",
         Doc_Tests,
