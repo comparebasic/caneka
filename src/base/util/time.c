@@ -3,6 +3,8 @@
 
 #define TIME_BUFF_LEN 64
 
+static struct timespec _throttle = {0, 1000000};
+
 void Time_Sub(struct timespec *ts, struct timespec *sub){
     ts->tv_sec -= sub->tv_sec;
     ts->tv_nsec -= sub->tv_nsec;
@@ -19,6 +21,24 @@ void Time_Add(struct timespec *ts, struct timespec *add){
         ts->tv_sec++;
         ts->tv_nsec -= 1000000000;
     }
+}
+
+void Time_Throttle(struct timespec *ts){
+    if(ts->tv_sec == 0 && ts->tv_nsec == 0){
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts);
+        return;
+    }
+    struct timespec _ts = {ts->tv_sec, ts->tv_nsec};
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts);
+    Time_Sub(&_ts, ts);
+    if(Time_Greater(&_ts, &_throttle)){
+        struct timespec remaining;
+        Time_Delay(&_ts, &remaining);
+    }
+}
+
+void Time_ProcTime(struct timespec *ts){
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts);
 }
 
 void Time_Now(struct timespec *ts){

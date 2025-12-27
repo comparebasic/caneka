@@ -9,6 +9,7 @@ typedef struct cursor {
     util slot;
     byte *ptr;
     byte *end;
+    byte *start;
     Iter it;
 } Cursor;
 

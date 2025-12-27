@@ -267,6 +267,14 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
 status Buff_SetFd(Buff *bf, i32 fd){
     bf->fd = fd;
     bf->type.state |= BUFF_FD;
+    if(bf->type.state & BUFF_ASYNC){
+        if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
+            Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Buff setting nonblock", NULL);
+            return ERROR;
+        }
+    }
+
     return SUCCESS;
 }
 
@@ -591,7 +599,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
         }
 
         if(recieved < 0){
-            if(bf->type.state & BUFF_FD){
+            if((bf->type.state & (BUFF_FD|BUFF_ASYNC)) == BUFF_FD){
                 void *args[] = {
                     I32_Wrapped(bf->m, bf->fd),
                     Str_CstrRef(bf->m, strerror(errno)),

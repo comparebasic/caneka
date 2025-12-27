@@ -41,10 +41,12 @@ i64 Cursor_Pos(Cursor *curs){
 status Cursor_End(Cursor *curs){
     Str *s = (Str *)Iter_GetByIdx(&curs->it, curs->it.p->max_idx);   
     if(s != NULL){
+        curs->start = s->bytes;
         curs->end = s->bytes+(s->length-1);
         curs->ptr = curs->end;
         curs->type.state |= (PROCESSING|END);
     }else{
+        curs->start = NULL;
         curs->ptr = NULL;
         curs->end = NULL;
         curs->type.state |= END;
@@ -288,6 +290,37 @@ status Cursor_Incr(Cursor *curs, i32 length){
         }
     }
     DebugStack_Pop();
+    return curs->type.state;
+}
+
+status Cursor_PrevByte(Cursor *curs){
+    curs->type.state &= ~CURSOR_STR_BOUNDRY;
+    if((curs->type.state & PROCESSING) == 0){
+        Cursor_End(curs);
+        if(curs->ptr != NULL){
+            curs->type.state &= ~END;
+        }
+    }else if(curs->ptr > curs->start){
+        curs->ptr--;
+    }else{
+        if(curs->it.idx == 0){
+            curs->it.type.state |= END;
+            curs->type.state |= END;
+        }else{
+            Iter_GetByIdx(&curs->it, curs->it.idx--);
+            Str *s = Iter_Get(&curs->it);
+            if(s != NULL){
+                curs->start = s->bytes;
+                curs->end = s->bytes+(s->length-1);
+                curs->ptr = curs->end;
+            }else{
+                curs->start = NULL;
+                curs->ptr = NULL;
+                curs->end = NULL;
+                curs->type.state |= (END|ERROR);
+            }
+        }
+    }
     return curs->type.state;
 }
 

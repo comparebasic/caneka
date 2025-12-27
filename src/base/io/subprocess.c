@@ -146,3 +146,36 @@ status SubProcess(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Pop();
     return ERROR;
 }
+
+status SubProcToBuff(MemCh *m, Span *cmd, Buff *out, Buff *err){
+    ProcDets pd = {
+        .type = {TYPE_PROCDETS, PROCDETS_PIPES|PROCDETS_ASYNC}, 
+        0,
+        -1,-1,-1,-1
+    };
+
+    status r = SubCall(m, cmd, &pd);
+    if((r & SUCCESS) == 0){
+        return ERROR;
+    }
+
+    if(out != NULL){
+        out->type.state |= BUFF_ASYNC;
+        Buff_SetFd(out, pd.outFd);
+    }
+
+    if(err != NULL){
+        err->type.state |= BUFF_ASYNC;
+        Buff_SetFd(err, pd.errFd);
+    }
+
+    struct timespec current = {0, 0};
+    r = ZERO;
+    while((r & (ERROR|SUCCESS)) == 0){
+        r |= SubStatus(&pd);
+        if(out != NULL) Buff_Read(out);
+        if(err != NULL) Buff_Read(err);
+        Time_Throttle(&current);
+    }
+    return r;
+}

@@ -15,6 +15,7 @@ void Time_Sub(struct timespec *ts, struct timespec *sub);
 void Time_Add(struct timespec *ts, struct timespec *add);
 void Time_Now(struct timespec *ts);
 void Time_Delay(struct timespec *ts, struct timespec *remaining);
+void Time_Throttle(struct timespec *ts);
 Str *Time_ToStr(MemCh *m, struct timespec *ts);
 Str *Time_ToRStr(MemCh *m, struct timespec *ts);
 
