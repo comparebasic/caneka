@@ -13,15 +13,16 @@ status Doc_Tests(MemCh *m){
     Str *path = StrVec_Str(m, Inst_Att(comp, K(m, "src")));
     StrVec *content = File_ToVec(m, path);
 
-
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = Doc_MakeRoebling(m, curs, comp);
     Roebling_Run(rbl);
 
+    Buff *bf = Buff_Make(m, ZERO);
+    Doc_To(bf, comp, Doc_ToHtmlToS, NULL, NULL);
     args[0] = comp;
-    args[1] = path;
+    args[1] = bf->v;
     args[2] = NULL;
-    Out("^p.doc object @\n@^0\n", args);
+    Out("^p.doc object @\n^y.@^0\n", args);
 
     DebugStack_Pop();
     return r;
