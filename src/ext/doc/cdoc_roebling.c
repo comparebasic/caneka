@@ -102,10 +102,11 @@ static PatCharDef lineDef[] = {
 
 static PatCharDef commentLineStartDef[] = {
     {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
-    {PAT_ANY|PAT_TERM, '*', '*'},
-    {PAT_INVERT, '/', '/'},
+    {PAT_SINGLE|PAT_TERM, '*', '*'},
+    {PAT_DROPOUT, '/', '/'},
+    {PAT_ANY|PAT_TERM, ' ', ' '},
     {PAT_END, 0, 0}
-}
+};
 
 static PatCharDef commentLineDef[] = {
     {PAT_KO|PAT_KO_TERM, '\n', '\n'},
@@ -217,6 +218,42 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Seel_Set(funcObj, K(m, "name"), v);
     }else if(captureKey == DOC_FUNC || captureKey == DOC_FUNC_MULTILINE){
         Seel_Set(funcObj, K(m, "args"), v);
+    }else if(captureKey == DOC_LINE){
+        StrVec *body = NULL;
+        if(funcObj != NULL){
+            body = Seel_Get(funcObj, K(m, "body"));
+        }else{
+            body = Seel_Get(comp, K(m, "body"));
+        }
+        if(body != NULL){
+            StrVec_AddBytes(v->p->m, v, (byte *)"\n", 1);
+            StrVec_AddVec(body, v);
+        }
+    }else if(captureKey == DOC_COMMENT_END){
+        if(commentObj != NULL){
+            Iter_Remove(it);
+            Iter_Prev(it);
+        }
+    }else if(captureKey == DOC_FUNC_END){
+        if(funcObj != NULL){
+            Iter_Remove(it);
+            Iter_Prev(it);
+        }
+    }else if(captureKey == DOC_COMMENT_LINE){
+        if(commentObj == NULL){
+            commentObj = Inst_Make(m, TYPE_DOC_COMMENT);
+            Iter_Add(it, commentObj);
+            if(funcObj != NULL){
+                Span *p = Seel_Get(funcObj, K(m, "comments"));
+                Span_Add(p, commentObj);
+            }else{
+                Span *p = Seel_Get(comp, K(m, "comments"));
+                Span_Add(p, commentObj);
+            }
+        }
+        StrVec *body = Seel_Get(commentObj, K(m, "body"));
+        StrVec_AddBytes(v->p->m, v, (byte *)"\n", 1);
+        StrVec_AddVec(body, v);
     }
 
     return SUCCESS;
@@ -239,8 +276,6 @@ Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
     rbl->capture = Capture;
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
-
-    rbl->dest->type.state |= DEBUG;
 
     DebugStack_Pop();
     return rbl;

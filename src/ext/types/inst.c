@@ -188,6 +188,8 @@ Span *Inst_Make(MemCh *m, cls typeOf){
                 Span_Set(inst, h->orderIdx, Span_Make(m));
             }else if(sg->val.w == TYPE_TABLE){
                 Span_Set(inst, h->orderIdx, Table_Make(m));
+            }else if(sg->val.w == TYPE_STRVEC){
+                Span_Set(inst, h->orderIdx, StrVec_Make(m));
             }else if(sg->val.w & TYPE_INSTANCE){
                 Span_Set(inst, h->orderIdx, Inst_Make(m, sg->val.w));
             }
