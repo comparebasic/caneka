@@ -34,7 +34,7 @@ status HttpCtx_ParseBody(HttpCtx *ctx, NodeObj *config, Cursor *curs){
             NodeObj *binseg = Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET);
             StrVec *seelName = NULL;
             cls instTypeOf = TYPE_TABLE;
-            if(binseg != NULL && (seelName = (StrVec *)NodeObj_Att(binseg, K(m, "seel")))
+            if(binseg != NULL && (seelName = (StrVec *)Inst_Att(binseg, K(m, "seel")))
                         != NULL){
                 instTypeOf = Seel_TypeByName(seelName);
             }

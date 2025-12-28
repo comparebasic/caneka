@@ -10,6 +10,7 @@ status Inet_Tests(MemCh *gm);
 status ServeTcp_Tests(MemCh *gm);
 status Templ_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
+status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
     {
@@ -89,6 +90,12 @@ static TestSet InterTests[] = {
         WwwRouteMime_Tests,
         "Example route mime handling tests using Route_Handle.",
         FEATURE_COMPLETE|SKIP_TEST,
+    },
+    {
+        "Doc Tests",
+        Doc_Tests,
+        "Documentation generator tests.",
+        FEATURE_COMPLETE,
     },
     {
         NULL,

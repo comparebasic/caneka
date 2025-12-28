@@ -4,6 +4,7 @@
 #include "types.h"
 #include "init.h"
 #include "templ.h"
+#include "doc.h"
 #include "http.h"
 #include "www.h"
 

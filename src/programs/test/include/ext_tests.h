@@ -27,7 +27,6 @@ status MatchElastic_Tests(MemCh *m);
 status MatchKo_Tests(MemCh *m);
 status MatchReplace_Tests(MemCh *m);
 status FmtHtml_Tests(MemCh *m);
-status Doc_Tests(MemCh *m);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
 #endif
@@ -225,12 +224,6 @@ static TestSet ExtTests[] = {
         FEATURE_COMPLETE,
     },
 #endif
-    {
-        "Doc Tests",
-        Doc_Tests,
-        "Documentation generator tests.",
-        FEATURE_COMPLETE,
-    },
 
 
     {

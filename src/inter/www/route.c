@@ -418,7 +418,7 @@ status Route_Init(MemCh *m){
     Hashed *h = Table_SetHashed(seel, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
     /* Node End */
     Table_Set(seel, S(m, "gens"), I16_Wrapped(m, TYPE_SPAN));
-    r |= Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE, h->orderIdx);
+    r |= Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE);
 
     if(RouteFuncTable == NULL){
         RouteFuncTable = Table_Make(m);

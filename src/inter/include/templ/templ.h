@@ -12,3 +12,4 @@ status Templ_Prepare(Templ *templ);
 status Templ_Reset(Templ *templ);
 i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source);
 i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source);
+status Templ_SetData(Templ *templ, void *data);

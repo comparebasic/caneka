@@ -430,6 +430,14 @@ status Templ_Prepare(Templ *templ){
     return NOOP;
 }
 
+status Templ_SetData(Templ *templ, void *data){
+    Span *p = Span_Make(templ->m);
+    Span_Add(p, data);
+    Iter_Init(&templ->data, p);
+    Iter_Next(&templ->data);
+    return ZERO;
+}
+
 i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     templ->type.state &= ~SUCCESS;
     templ->m->level++; 
@@ -442,10 +450,10 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
         return 0;
     }
 
-    Span *p = Span_Make(bf->m);
-    Span_Add(p, data);
-    Iter_Init(&templ->data, p);
-    Iter_Next(&templ->data);
+    if(data != NULL){
+        Templ_SetData(templ, data);
+    }
+
     while((total = Templ_ToSCycle(templ, bf, total, source)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);

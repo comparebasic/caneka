@@ -25,9 +25,6 @@ status Caneka_Init(MemCh *m){
     r |= Task_Init(m);
     r |= Serve_TosInit(m);
     r |= NodeObj_ClsInit(m);
-    r |= DocFunc_Init(m);
-    r |= DocComment_Init(m);
-    r |= DocComp_Init(m);
 
     return r;
 }

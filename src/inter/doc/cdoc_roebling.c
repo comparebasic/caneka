@@ -177,6 +177,8 @@ static status start(MemCh *m, Roebling *rbl){
         lineDef, DOC_LINE, DOC_START);
     r |= Roebling_SetPattern(rbl,
         commentStartDef, DOC_COMMENT_START, DOC_COMMENT);
+    Match *mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_SEARCH;
 
     return r;
 }
@@ -276,6 +278,7 @@ Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
     rbl->capture = Capture;
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
+    rbl->dest->type.state |= DEBUG;
 
     DebugStack_Pop();
     return rbl;

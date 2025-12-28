@@ -11,6 +11,7 @@
 #include "base_module.h"
 
 boolean TextCharFilter(byte *b, i64 length){
+    /* Ensure text is within safe characters */
     byte *end = b+(length-1);
     while(TRUE){
         if(*b < 32 && ( *b != '\r' && *b != '\n' && *b != '\t')){
@@ -195,6 +196,7 @@ Str *Str_MakeBlank(MemCh *m){
 }
 
 Str *Str_Make(MemCh *m, word alloc){
+    /* Constructor */
     Str *s = MemCh_Alloc(m, sizeof(Str));
     byte *bytes = Bytes_Alloc(m, alloc, TYPE_BYTES_POINTER);
     Str_Init(s, bytes, 0, alloc);

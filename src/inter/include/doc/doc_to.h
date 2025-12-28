@@ -1,5 +1,7 @@
 enum doc_html_tag_idx {
     DOC_HTML_OPEN = 1,
+    DOC_HTML_HEADER,
+    DOC_HTML_FOOTER,
     DOC_HTML_TITLE,
     DOC_HTML_MOD_COMMENT,
     DOC_HTML_DESC,

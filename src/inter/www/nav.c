@@ -10,7 +10,7 @@ Span *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
     Table *tbl = Table_Make(m);
 
     Iter it;
-    NodeObj *atts = Span_Get(navObj, NODEOBJ_PROPIDX_ATTS);
+    NodeObj *atts = Span_Get(navObj, INST_PROPIDX_ATTS);
     Span *p = Table_Ordered(m, atts);
 
     Iter_Init(&it, p); 
