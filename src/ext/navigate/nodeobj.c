@@ -12,6 +12,19 @@ void *NodeObj_Att(Inst *nobj, void *key){
     return NULL;
 }
 
+Table *NodeObj_GetTblOfAtt(Inst *nobj, void *key){
+    if(nobj == NULL){
+        return NULL;
+    }
+
+    Table *tbl = NodeObj_Att(nobj, key);
+    if(tbl == NULL){
+        tbl = Table_Make(nobj->m);
+        NodeObj_SetAtt(nobj, key, tbl);
+    }
+    return tbl;
+}
+
 status NodeObj_SetAtt(Inst *nobj, void *key, void *value){
     if(nobj == NULL){
         return ERROR;

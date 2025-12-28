@@ -12,6 +12,49 @@ Inst *asInst(MemCh *m, void *a){
     return (Inst *)a;
 }
 
+void *Inst_Att(Inst *inst, void *key){
+    if(inst == NULL){
+        return NULL;
+    }
+    Table *obj = (Table *)Span_Get(inst, INST_PROPIDX_ATTS);
+    if(obj != NULL){
+        return Table_Get(obj, key);
+    }
+    return NULL;
+}
+
+Table *Inst_GetTblOfAtt(Inst *inst, void *key){
+    if(inst == NULL){
+        return NULL;
+    }
+
+    Table *tbl = Inst_Att(inst, key);
+    if(tbl == NULL){
+        tbl = Table_Make(inst->m);
+        Inst_SetAtt(inst, key, tbl);
+    }
+    return tbl;
+}
+
+status Inst_SetAtt(Inst *inst, void *key, void *value){
+    if(inst == NULL){
+        return ERROR;
+    }
+    Table *obj = (Table *)Span_Get(inst, INST_PROPIDX_ATTS);
+    if(obj != NULL){
+        return Table_Set(obj, key, value);
+    }
+    return ERROR;
+}
+
+void *Inst_GetChild(Inst *inst, void *key){
+    if(inst == NULL){
+        return NULL;
+    }
+    Table *children = (Table *)Span_Get(inst, INST_PROPIDX_CHILDREN);
+    return Table_Get(children, key);
+}
+
 void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
     DebugStack_Push(inst, inst->type.state);
     void *args[5];
@@ -32,7 +75,7 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
     if((path->type.state & STRVEC_PATH) == 0 && path->p->nvalues > 1){
         void *args[] = {inst, NULL};
         Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error NodeObj_ByPath requires a strvec path", args);
+            "Error Inst_ByPath requires a strvec path", args);
         return NULL;
     }
 

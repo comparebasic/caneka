@@ -1,3 +1,9 @@
+enum nodeobj_prop_idx {
+    INST_PROPIDX_NAME = 0,
+    INST_PROPIDX_ATTS = 1,
+    INST_PROPIDX_CHILDREN = 2,
+};
+
 Inst *asInst(MemCh *m, void *a);
 i32 Inst_Set(Span *inst, Table *seal, void *key, void *value);
 Span *Inst_Make(MemCh *m, cls typeOf);

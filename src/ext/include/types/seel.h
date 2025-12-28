@@ -7,7 +7,7 @@ extern Table *SeelByName;
 typedef cls seelType;
 
 i32 Seel_GetIdx(Table *seel, void *key);
-status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf, i32 childrenIdx);
+status Seel_Seel(MemCh *m, Table *seel, Str *name, cls typeOf);
 Span *Seel_OrdSeel(MemCh *m, seelType instOf);
 Table *Seel_GetSeel(MemCh *m, cls instType);
 status Seel_Init(MemCh *m);

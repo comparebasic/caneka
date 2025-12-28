@@ -142,6 +142,8 @@ enum ext_types {
     DOC_START,
     DOC_FUNC,
     DOC_FUNC_MULTILINE,
+    DOC_FUNC_NAME,
+    DOC_FUNC_RET,
     DOC_FUNC_END,
     DOC_LINE,
     DOC_COMMENT,
@@ -152,5 +154,8 @@ enum ext_types {
     _TYPE_EXT_END,
     TYPE_INSTANCE = 1 << 14,
     TYPE_NODEOBJ,
+    TYPE_DOC_COMMENT,
+    TYPE_DOC_COMPONENT,
+    TYPE_DOC_FUNC,
     _EXT_OBJECT_END,
 };

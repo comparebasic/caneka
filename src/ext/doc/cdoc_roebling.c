@@ -1,13 +1,27 @@
 #include <external.h>
 #include <caneka.h>
 
-static PatCharDef funcDef[] = {
+static PatCharDef retDef[] = {
     {PAT_SINGLE, 'a', 'z'},
     {PAT_SINGLE|PAT_TERM, 'A', 'Z'},
     {PAT_MANY, 'a', 'z'},
     {PAT_MANY, '0', '9'},
     {PAT_MANY|PAT_TERM, 'A', 'Z'},
     {PAT_MANY|PAT_TERM, ' ', ' '},
+    {PAT_ANY|PAT_TERM, '*', '*'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef funcNameDef[] = {
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '(', '('},
+    {PAT_MANY, 'a', 'z'},
+    {PAT_MANY, '0', '9'},
+    {PAT_MANY, 'A', 'Z'},
+    {PAT_MANY, '_', '_'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef funcDef[] = {
     {PAT_KO|PAT_KO_TERM, '{', '{'},
     {PAT_MANY, 'a', 'z'},
     {PAT_MANY, '0', '9'},
@@ -20,12 +34,6 @@ static PatCharDef funcDef[] = {
 };
 
 static PatCharDef funcMultiLineDef[] = {
-    {PAT_SINGLE, 'a', 'z'},
-    {PAT_SINGLE|PAT_TERM, 'A', 'Z'},
-    {PAT_MANY, 'a', 'z'},
-    {PAT_MANY, '0', '9'},
-    {PAT_MANY|PAT_TERM, 'A', 'Z'},
-    {PAT_MANY|PAT_TERM, ' ', ' '},
     {PAT_KO|PAT_KO_TERM, '{', '{'},
     {PAT_MANY, 'a', 'z'},
     {PAT_MANY, '0', '9'},
@@ -101,15 +109,29 @@ static PatCharDef commentDef[] = {
     {PAT_END, 0, 0}
 };
 
-static status start(MemCh *m, Roebling *rbl){
+static status funcDecl(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
     r |= Roebling_SetPattern(rbl,
         funcDef, DOC_FUNC, DOC_START);
     r |= Roebling_SetPattern(rbl,
-        funcDef, DOC_FUNC, DOC_START);
-    r |= Roebling_SetPattern(rbl,
         funcMultiLineDef, DOC_FUNC_MULTILINE, DOC_START);
+    return r;
+}
+
+static status funcName(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+    r |= Roebling_SetPattern(rbl,
+        funcNameDef, DOC_FUNC_NAME, DOC_FUNC);
+    return r;
+}
+
+static status start(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+    r |= Roebling_SetPattern(rbl,
+        retDef, DOC_FUNC_RET, DOC_FUNC_NAME);
     r |= Roebling_SetPattern(rbl,
         includeLocalDef, DOC_INCLUDE_LOCAL, DOC_START);
     r |= Roebling_SetPattern(rbl,
@@ -128,11 +150,38 @@ static status start(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     void *args[5];
-    if(1){
+    MemCh *m = rbl->m;
+
+    Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
+    NodeObj *dobj = (NodeObj *)rbl->source;
+    NodeObj *node = Iter_Get(it);
+    NodeObj funcObj = NULL;
+    NodeObj commentObj = NULL;
+    if(node !== NULL){
+        Str *type = Node_Att(node, K(m, "type"));
+        if(type != NULL){
+            if( 
+        }
+    }
+
+    if(rbl->dest->type.state & DEBUG){
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v,
         args[2] = NULL;
         Out("^c.Doc Capture ^E0.$^ec. -> ^0y.@^0.\n", args);
+    }
+
+    if(captureKey == DOC_INCLUDE_PATH || captureKey == DOC_INCLUDE_LOCAL){
+        Table *tbl = NodeObj_GetTblOfAtt(dobj, K(m, "include"));
+        Table_Set(tbl, v, v);
+    }else if(captureKey == DOC_RET){
+        NodeObj *funcObj = Inst_Make(m, TYPE_NODEOBJ);
+        NodeObj_SetAtt(funcObj, S(m, "ret"), v);
+        Iter_Add(it, funcObj);
+    }else if(captureKey == DOC_FUNC || captureKey == DOC_FUNC_MULTILINE){
+        NodeObj *funcObj = Inst_Make(m, TYPE_NODEOBJ);
+        Table *tbl = NodeObj_GetTblOfAtt(dobj, K(m, "func"));
+        Table_Set(tbl, v, v);
     }
 
     return SUCCESS;
@@ -143,18 +192,17 @@ Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, DOC_START));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
+    Roebling_AddStep(rbl, I16_Wrapped(m, DOC_FUNC_NAME));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)funcName));
+    Roebling_AddStep(rbl, I16_Wrapped(m, DOC_FUNC));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)funcDecl));
     Roebling_AddStep(rbl, I16_Wrapped(m, DOC_END));
     Roebling_Start(rbl);
-
-    void *args[] = {
-        rbl,
-        NULL
-    };
-    Out("^p.Rbl @^0\n", args);
 
     rbl->capture = Capture;
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
+    rbl->dest->type.state |= DEBUG;
 
     DebugStack_Pop();
     return rbl;

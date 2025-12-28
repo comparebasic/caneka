@@ -8,17 +8,14 @@ status Doc_Tests(MemCh *m){
     void *args[5];
 
     StrVec *src = IoAbsPath(m, "src");
-    NodeObj *dobj = DocNode_FromStr(m, src, S(m, "base.bytes.Str"));
+    DocComp *comp = DocComp_FromStr(m, src, S(m, "base.bytes.Str"));
 
     Str *path = StrVec_Str(m, NodeObj_Att(dobj, K(m, "src")));
     StrVec *content = File_ToVec(m, path);
 
 
     Cursor *curs = Cursor_Make(m, content);
-    Roebling *rbl = Doc_MakeRoebling(m, curs, NULL);
-    /*
-    rbl->type.state |= DEBUG;
-    */
+    Roebling *rbl = Doc_MakeRoebling(m, curs, dobj);
     Roebling_Run(rbl);
 
     args[0] = dobj;
