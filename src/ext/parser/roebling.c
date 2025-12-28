@@ -169,6 +169,7 @@ status Roebling_RunCycle(Roebling *rbl){
         if(mt != NULL && (mt->type.state & MATCH_JUMP)){
             rbl->parseIt.idx = mt->jump;
         }else{
+            printf("no jump just proceed\n");
             rbl->parseIt.idx++;
         }
         rbl->type.state &= ~ROEBLING_NEXT;

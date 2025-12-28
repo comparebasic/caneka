@@ -100,12 +100,28 @@ static PatCharDef lineDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef commentDef[] = {
-    {PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM, '/', '/'},
-    {PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM, '*', '*'},
-    {PAT_KO|PAT_KO_TERM, '*', '*'},
-    {PAT_KO|PAT_KO_TERM, '/', '/'},
-    patText,
+static PatCharDef commentLineStartDef[] = {
+    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
+    {PAT_ANY|PAT_TERM, '*', '*'},
+    {PAT_INVERT, '/', '/'},
+    {PAT_END, 0, 0}
+}
+
+static PatCharDef commentLineDef[] = {
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    {PAT_MANY, '\t', '\t'}, {PAT_MANY, '\r', '\r'}, {PAT_INVERT|PAT_MANY|PAT_TERM, 0, 31},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef commentStartDef[] = {
+    {PAT_SINGLE|PAT_TERM, '/', '/'},
+    {PAT_SINGLE|PAT_TERM, '*', '*'},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef commentEndDef[] = {
+    {PAT_SINGLE|PAT_TERM, '*', '*'},
+    {PAT_SINGLE|PAT_TERM, '/', '/'},
     {PAT_END, 0, 0}
 };
 
@@ -127,6 +143,22 @@ static status funcName(MemCh *m, Roebling *rbl){
     return r;
 }
 
+static status comment(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+    r |= Roebling_SetPattern(rbl,
+        commentEndDef, DOC_COMMENT_END, DOC_START);
+    Match *mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_SEARCH;
+    r |= Roebling_SetPattern(rbl,
+        commentLineStartDef, DOC_COMMENT_LINE_START, DOC_COMMENT);
+    r |= Roebling_SetPattern(rbl,
+        commentLineDef, DOC_COMMENT_LINE, DOC_COMMENT);
+    mt = Roebling_GetMatch(rbl);
+    mt->type.state |= MATCH_ACCEPT_EMPTY;
+    return r;
+}
+
 static status start(MemCh *m, Roebling *rbl){
     status r = READY;
     Roebling_ResetPatterns(rbl);
@@ -143,7 +175,7 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         lineDef, DOC_LINE, DOC_START);
     r |= Roebling_SetPattern(rbl,
-        commentDef, DOC_COMMENT, DOC_START);
+        commentStartDef, DOC_COMMENT_START, DOC_COMMENT);
 
     return r;
 }
@@ -153,14 +185,15 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
 
     Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
-    NodeObj *dobj = (NodeObj *)rbl->source;
-    NodeObj *node = Iter_Get(it);
-    NodeObj funcObj = NULL;
-    NodeObj commentObj = NULL;
-    if(node !== NULL){
-        Str *type = Node_Att(node, K(m, "type"));
-        if(type != NULL){
-            if( 
+    DocComp *comp = (DocComp *)rbl->source;
+    Inst *inst = Iter_Get(it);
+    DocFunc *funcObj = NULL;
+    DocComment *commentObj = NULL;
+    if(inst != NULL){
+        if(inst->type.of == TYPE_DOC_FUNC){
+            funcObj = inst;
+        }else if(inst->type.of == TYPE_DOC_COMMENT){
+            commentObj = inst;
         }
     }
 
@@ -172,16 +205,18 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }
 
     if(captureKey == DOC_INCLUDE_PATH || captureKey == DOC_INCLUDE_LOCAL){
-        Table *tbl = NodeObj_GetTblOfAtt(dobj, K(m, "include"));
+        Table *tbl = Inst_GetTblOfAtt(comp, K(m, "include"));
         Table_Set(tbl, v, v);
-    }else if(captureKey == DOC_RET){
-        NodeObj *funcObj = Inst_Make(m, TYPE_NODEOBJ);
-        NodeObj_SetAtt(funcObj, S(m, "ret"), v);
+    }else if(captureKey == DOC_FUNC_RET){
+        DocFunc *funcObj = Inst_Make(m, TYPE_DOC_FUNC);
+        Seel_Set(funcObj, K(m, "ret"), v);
         Iter_Add(it, funcObj);
+    }else if(captureKey == DOC_FUNC_NAME){
+        Table *tbl = Inst_GetTblOfAtt(comp, K(m, "functions"));
+        Table_Set(tbl, v, funcObj);
+        Seel_Set(funcObj, K(m, "name"), v);
     }else if(captureKey == DOC_FUNC || captureKey == DOC_FUNC_MULTILINE){
-        NodeObj *funcObj = Inst_Make(m, TYPE_NODEOBJ);
-        Table *tbl = NodeObj_GetTblOfAtt(dobj, K(m, "func"));
-        Table_Set(tbl, v, v);
+        Seel_Set(funcObj, K(m, "args"), v);
     }
 
     return SUCCESS;
@@ -196,12 +231,15 @@ Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)funcName));
     Roebling_AddStep(rbl, I16_Wrapped(m, DOC_FUNC));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)funcDecl));
+    Roebling_AddStep(rbl, I16_Wrapped(m, DOC_COMMENT));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)comment));
     Roebling_AddStep(rbl, I16_Wrapped(m, DOC_END));
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
+
     rbl->dest->type.state |= DEBUG;
 
     DebugStack_Pop();

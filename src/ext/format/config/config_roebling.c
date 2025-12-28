@@ -183,7 +183,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         }
         Inst *obj = Inst_Make(rbl->m, TYPE_NODEOBJ);
         if(token != NULL){
-            Span_Set(obj, NODEOBJ_PROPIDX_NAME, token);
+            Span_Set(obj, INST_PROPIDX_NAME, token);
             Inst_ByPath(current, token, obj, SPAN_OP_SET);  
             Iter_Remove(it);
             Iter_Prev(it);
@@ -191,18 +191,18 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Iter_Add(it, obj);
         return rbl->type.state;
     }else if(captureKey == CONFIG_KEY){
-        Table *atts = Span_Get(current, NODEOBJ_PROPIDX_ATTS);
+        Table *atts = Span_Get(current, INST_PROPIDX_ATTS);
         if(atts == NULL || atts->nvalues == 0){
             Table *attObj = Table_Make(m);
             Iter *itn = Iter_Make(m, attObj);
             Table_SetKey(itn, StrVec_Str(m, v));
-            Span_Set(current, NODEOBJ_PROPIDX_ATTS, attObj);
+            Span_Set(current, INST_PROPIDX_ATTS, attObj);
             Iter_Add(it, itn);
         }else if(data == NULL){
             Table *tbl = Table_Make(m);
             Iter *itn = Iter_Make(m, tbl);
             Table_SetKey(itn, StrVec_Str(m, v));
-            Table *children = Span_Get(current, NODEOBJ_PROPIDX_CHILDREN);
+            Table *children = Span_Get(current, INST_PROPIDX_CHILDREN);
             Table_Set(children, I32_Wrapped(m, children->nvalues), tbl);
             Iter_Add(it, itn);
         }else if(data->p->type.of == TYPE_TABLE){
@@ -223,7 +223,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             Span *p = Span_Make(m);
             Iter *itn = Iter_Make(m, p);
             Span_Add(p, v);
-            Table *children = Span_Get(current, NODEOBJ_PROPIDX_CHILDREN);
+            Table *children = Span_Get(current, INST_PROPIDX_CHILDREN);
             Table_Set(children, I32_Wrapped(m, children->nvalues), p);
             Iter_Add(it, itn);
         }else if(data->p->type.of == TYPE_SPAN){

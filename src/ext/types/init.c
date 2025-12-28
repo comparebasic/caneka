@@ -16,7 +16,6 @@ status Caneka_Init(MemCh *m){
     r |= ExtTypes_ToSInit(m);
     r |= Seel_Init(m);
     r |= ExtTypeStrings_Init(m);
-    r |= Caneka_LicenceInit(m);
     r |= Parser_Init(m);
     r |= Persist_Init(m);
     r |= Format_Init(m);
@@ -28,7 +27,7 @@ status Caneka_Init(MemCh *m){
     r |= NodeObj_ClsInit(m);
     r |= DocFunc_Init(m);
     r |= DocComment_Init(m);
-    r |= DocComponent_Init(m);
+    r |= DocComp_Init(m);
 
     return r;
 }

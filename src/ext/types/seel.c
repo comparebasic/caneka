@@ -130,8 +130,6 @@ status Seel_Init(MemCh *m){
         SeelLookup = Lookup_Make(m, TYPE_INSTANCE);
         SeelNameLookup = Lookup_Make(m, TYPE_INSTANCE);
         SeelOrdLookup = Lookup_Make(m, TYPE_INSTANCE);
-        SeelChildrenPropLookup = Lookup_Make(m, TYPE_INSTANCE);
-        SeelAttPropLookup = Lookup_Make(m, TYPE_INSTANCE);
         SeelByName = Table_Make(m);
         r |= SUCCESS;
     }

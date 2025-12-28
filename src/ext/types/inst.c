@@ -61,17 +61,6 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
 
     cls typeOf = inst->type.of;
 
-    Single *sg = Lookup_Get(SeelChildrenPropLookup, inst->type.of);
-    if(sg == NULL){
-        args[0] = Type_ToStr(inst->m, typeOf);
-        args[1] = NULL;
-        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error Seel Instance childrenIdx not found in lookup for $", args);
-        return NULL;
-    }
-
-    i32 childrenIdx = sg->val.i;
-
     if((path->type.state & STRVEC_PATH) == 0 && path->p->nvalues > 1){
         void *args[] = {inst, NULL};
         Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -88,7 +77,7 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
         Abstract *token = Iter_Get(&it);
         if(it.type.state & LAST){
             Abstract *key = ((token->type.state & MORE) && it.idx > 0) ? prev : token;
-            Table *children = Span_Get(current, childrenIdx);
+            Table *children = Span_Get(current, INST_PROPIDX_CHILDREN);
             Abstract *child = Table_Get(children, key);
 
             if(op == SPAN_OP_SET){
@@ -101,7 +90,7 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
             }
         }else if(token->type.state & MORE){
             if(prev){
-                Table *children = Span_Get(current, childrenIdx);
+                Table *children = Span_Get(current, INST_PROPIDX_CHILDREN);
                 Abstract *child = Table_Get(children, prev);
                 if(op == SPAN_OP_SET){
                     if(child == NULL){
@@ -136,8 +125,8 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
 }
 
 
-status Inst_ShowKeys(Buff *bf, Inst *inst, i32 childrenIdx, i32 indent){
-    Table *tbl = Span_Get(inst, childrenIdx);
+status Inst_ShowKeys(Buff *bf, Inst *inst, i32 indent){
+    Table *tbl = Span_Get(inst, INST_PROPIDX_CHILDREN);
     Iter it;
     void *args[3];
     status r = READY;
@@ -156,7 +145,7 @@ status Inst_ShowKeys(Buff *bf, Inst *inst, i32 childrenIdx, i32 indent){
             args[2] = NULL;
             Fmt(bf, " -> @=$\n", args);
             if(h->value != NULL && ((Abstract *)h->value)->type.of == inst->type.of){
-                Inst_ShowKeys(bf, h->value, childrenIdx, indent+1);
+                Inst_ShowKeys(bf, h->value, indent+1);
             }
         }
     }

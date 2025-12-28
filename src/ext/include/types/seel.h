@@ -1,7 +1,6 @@
 extern Lookup *SeelLookup;
 extern Lookup *SeelOrdLookup;
 extern Lookup *SeelNameLookup;
-extern Lookup *SeelChildrenPropLookup;
 extern Table *SeelByName;
 
 typedef cls seelType;

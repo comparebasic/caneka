@@ -10,7 +10,7 @@ NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, Str *s){
     Seel_Set(dobj, K(m, "name"), v);
     StrVec *path = StrVec_Copy(m, src);
     IoUtil_AddDotPath(path, StrVec_Clone(m, v), S(m, "c"));
-    Seel_SetAtt(dobj, K(m, "src"), path);
+    Inst_SetAtt(dobj, K(m, "src"), path);
     return dobj;
 }
 
@@ -20,6 +20,6 @@ status DocComp_Init(MemCh *m){
     Table_Set(tbl, S(m, "name"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(tbl, S(m, "atts"), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(tbl, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
-    r |= Seel_Seel(m, tbl, S(m, "DocComp"), TYPE_DOC_COMPONENT, h->orderIdx);
+    r |= Seel_Seel(m, tbl, S(m, "DocComp"), TYPE_DOC_COMPONENT);
     return r;
 }
