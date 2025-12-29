@@ -57,6 +57,15 @@ status Doc_Tests(MemCh *m){
     args[2] = NULL;
     Out("^p.doc object @\n^y.@^0\n", args);
 
+    Buff *dist = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
+    path = IoAbsPath(m, "dist/doc/html/");
+    StrVec_AddVec(path, Inst_Att(comp, K(m, "url")));
+    IoUtil_AddExt(m, path, S(m, "html"));
+
+    File_Open(dist, StrVec_Str(m, path), O_CREAT|O_TRUNC|O_WRONLY);
+    Buff_Pipe(dist, bf);
+    File_Close(dist);
+
     DebugStack_Pop();
     return r;
 }

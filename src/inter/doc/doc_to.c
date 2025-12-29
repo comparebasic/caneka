@@ -39,7 +39,7 @@ status Doc_ToHtmlToS(Buff *bf, void *_a, word tagIdx, word flags){
     }else if(tagIdx == DOC_HTML_FUNC_NAME){
         args[0] = a;
         args[1] = NULL;
-        Fmt(bf, "<h3>$</h3>\n", args);
+        Fmt(bf, "<h4>$</h4>\n", args);
     }else if(tagIdx == DOC_HTML_FUNC_COMMENT){
         args[0] = a;
         args[1] = NULL;
@@ -51,13 +51,18 @@ status Doc_ToHtmlToS(Buff *bf, void *_a, word tagIdx, word flags){
     }else if(tagIdx == DOC_HTML_FUNC_END){
         Fmt(bf, "</article>\n", NULL);
     }else if(tagIdx == DOC_HTML_TITLE){
-        args[0] = a;
-        args[1] = NULL;
-        Fmt(bf, "<h1>$</h1>\n", args);
+        StrVec *v = StrVec_Copy(bf->m, (StrVec *)a);
+        Str *name = Span_Get(v->p, v->p->max_idx);
+        StrVec_Pop(v);
+        StrVec_Pop(v);
+        args[0] = name;
+        args[1] = v;
+        args[2] = NULL;
+        Fmt(bf, "<hgroup><h1>$</h1><span class=\"module-path\">$</span></hgroup>\n", args);
     }else if(tagIdx == DOC_HTML_MOD_COMMENT){
         args[0] = a;
         args[1] = NULL;
-        Fmt(bf, "<div>@</h1>\n", args);
+        Fmt(bf, "<div>$</h1>\n", args);
     }
     return ZERO;
 }

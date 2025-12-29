@@ -1,5 +1,4 @@
-/* = Base.bytes.Str
- *
+/* 
  * Simplistic object for tracking byte ranges.
  *
  * The byte ranges are expected to be relatively small
