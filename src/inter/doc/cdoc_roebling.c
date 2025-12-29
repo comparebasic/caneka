@@ -215,7 +215,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Seel_Set(funcObj, K(m, "ret"), v);
         Iter_Add(it, funcObj);
     }else if(captureKey == DOC_FUNC_NAME){
-        Table *tbl = Inst_GetTblOfAtt(comp, K(m, "functions"));
+        Table *tbl = Seel_Get(comp, K(m, "functions"));
         Table_Set(tbl, v, funcObj);
         Seel_Set(funcObj, K(m, "name"), v);
     }else if(captureKey == DOC_FUNC || captureKey == DOC_FUNC_MULTILINE){
@@ -278,7 +278,6 @@ Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
     rbl->capture = Capture;
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
-    rbl->dest->type.state |= DEBUG;
 
     DebugStack_Pop();
     return rbl;

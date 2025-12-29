@@ -78,5 +78,8 @@ enum inter_obj_range {
     TYPE_HTML_PAGE,
     TYPE_WWW_ROUTE,
     TYPE_LOGIN,
+    TYPE_DOC_COMMENT,
+    TYPE_DOC_COMPONENT,
+    TYPE_DOC_FUNC,
     _TYPE_INTER_OBJ_END,
 };

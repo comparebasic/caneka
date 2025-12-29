@@ -2,15 +2,17 @@
 #include <caneka.h>
 
 NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, Str *s){
-    StrVec *v = StrVec_From(m, s);
-    Path_DotAnnotate(m, v);
-    Str *first = Span_Get(v->p, 0);
+    StrVec *name = StrVec_From(m, s);
+    Path_DotAnnotate(m, name);
+    Str *first = Span_Get(name->p, 0);
     Str_ToTitle(m, first);
     DocComp *dobj = Inst_Make(m, TYPE_DOC_COMPONENT);
-    Seel_Set(dobj, K(m, "name"), v);
+    Seel_Set(dobj, K(m, "name"), name);
     StrVec *path = StrVec_Copy(m, src);
-    IoUtil_AddDotPath(path, StrVec_Clone(m, v), S(m, "c"));
+    IoUtil_AddDotPath(path, StrVec_Clone(m, name), S(m, "c"));
     Inst_SetAtt(dobj, K(m, "src"), path);
+    StrVec *url = WwwUtils_UrlSeg(m, StrVec_Copy(m, name));
+    Inst_SetAtt(dobj, K(m, "url"), url);
     return dobj;
 }
 
@@ -22,6 +24,8 @@ status DocComp_Init(MemCh *m){
     Table_Set(tbl, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(tbl, S(m, "comments"), I16_Wrapped(m, TYPE_SPAN));
     Table_Set(tbl, S(m, "body"), I16_Wrapped(m, TYPE_STRVEC));
+    Table_Set(tbl, S(m, "functions"), I16_Wrapped(m, TYPE_TABLE));
+    Table_Set(tbl, S(m, "page"), I16_Wrapped(m, TYPE_NODEOBJ));
     r |= Seel_Seel(m, tbl, S(m, "DocComp"), TYPE_DOC_COMPONENT);
     return r;
 }

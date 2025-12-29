@@ -158,8 +158,5 @@ enum ext_types {
     _TYPE_EXT_END,
     TYPE_INSTANCE = 1 << 14,
     TYPE_NODEOBJ,
-    TYPE_DOC_COMMENT,
-    TYPE_DOC_COMPONENT,
-    TYPE_DOC_FUNC,
     _EXT_OBJECT_END,
 };

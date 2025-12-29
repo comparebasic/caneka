@@ -2,47 +2,53 @@
 #include <caneka.h>
 #include <test_module.h>
 
+static NodeObj *getPage(MemCh *m){
+    NodeObj *page = Inst_Make(m, TYPE_NODEOBJ);
+    StrVec *path = IoAbsPath(m, "examples/doc/header.templ");
+    StrVec *content = File_ToVec(m, StrVec_Str(m, path));
+    if(content == NULL){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "header content is NULL", NULL);
+        return NULL;
+    }
+
+    Cursor *curs = Cursor_Make(m, content);
+    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+
+    Inst_SetAtt(page, K(m, "header"), templ); 
+    Inst_SetAtt(page, K(m, "footer"), IoAbsPath(m, "examples/doc/footer.html")); 
+    Table *nav = Table_Make(m);
+    Inst_SetAtt(page, K(m, "nav"), nav);
+
+    return page;
+}
+
 status Doc_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
 
+    NodeObj *page = getPage(m);
+    Table *nav = Inst_Att(page, K(m, "nav"));
+
     StrVec *src = IoAbsPath(m, "src");
     DocComp *comp = DocComp_FromStr(m, src, S(m, "base.bytes.Str"));
 
-    Str *path = StrVec_Str(m, Inst_Att(comp, K(m, "src")));
-    StrVec *content = File_ToVec(m, path);
+    StrVec *name = Seel_Get(comp, K(m, "name"));
+    Table_Set(nav, name, Seel_Get(comp, K(m, "atts")));
+
+    args[0] = Seel_Get(comp, K(m, "atts"));
+    args[1] = NULL;
+
+    Seel_Set(comp, K(m, "page"), page);
+
+    StrVec *path = Inst_Att(comp, K(m, "src"));
+    StrVec *content = File_ToVec(m, StrVec_Str(m, path));
 
     Cursor *curs = Cursor_Make(m, content);
     Roebling *rbl = Doc_MakeRoebling(m, curs, comp);
     Roebling_Run(rbl);
-
-
-    StrVec *path = IoAbsPath(bf->m, "examples/doc/header.templ");
-    StrVec *content = File_ToVec(bf->m, StrVec_Str(bf->m, path));
-    if(content == NULL){
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "header content is NULL", NULL);
-        return ERROR;
-    }
-
-    Cursor *curs = Cursor_Make(bf->m, content);
-    TemplCtx *ctx = TemplCtx_FromCurs(bf->m, curs, NULL);
-    Templ *templ = (Templ *)Templ_Make(bf->m, ctx->it.p);
-    templ->type.state |= DEBUG;
-    if((Templ_Prepare(templ) & PROCESSING) == 0){
-        void *args[2];
-        args[0] = path;
-        args[1] = NULL;
-        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error preparing template for $", args);
-        return ERROR;
-    }
-
-    Templ_Reset(templ);
-
-    Inst_SetAtt(comp, K(m, "header"), templ); 
-    Inst_SetAtt(comp, K(m, "footer"), StrVec *path = IoAbsPath(bf->m, "examples/doc/footer.html")); 
 
     Buff *bf = Buff_Make(m, ZERO);
     Doc_To(bf, comp, Doc_ToHtmlToS);

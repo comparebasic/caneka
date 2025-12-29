@@ -123,7 +123,7 @@ status Test_Runner(MemCh *m, TestSuite *suite){
         Out("\n$\n\n", args);
 
         status r = READY;
-        DebugStack_SetRef(set->name, TYPE_CSTR);
+        DebugStack_SetRef(K(m, set->name), TYPE_STR);
         if(set->func != NULL){
             m->level++;
             MemCh *tm = MemCh_Make();

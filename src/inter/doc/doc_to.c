@@ -67,18 +67,13 @@ status Doc_To(Buff *bf, DocComp *comp, ToSFunc func){
 
     StrVec *name = Seel_Get(comp, K(m, "name"));
 
-    Abstract *header = Inst_Att(comp, K(m, "header"));
+    NodeObj *page = Seel_Get(comp, K(m, "page"));
+
+    Abstract *header = Inst_Att(page, K(m, "header"));
     if(header != NULL){
         if(header->type.of == TYPE_TEMPL){
             Templ *templ = (Templ *)header;
-            Table *data = Table_Make(m);
-            Table *nav = Table_Make(m);
-            Table_Set(nav, K(m, "url"), S(m, "/documentation/base-bytes-str/"));
-            Table_Set(nav, K(m, "name"), name);
-            Table_Set(data, K(m, "nav"), nav);
-            Table_Set(data, K(m, "component"), comp);
-
-            Templ_SetData(templ, data);
+            Templ_SetData(templ, comp);
         }
 
         func(bf, header, DOC_HTML_HEADER, ZERO);
@@ -93,7 +88,7 @@ status Doc_To(Buff *bf, DocComp *comp, ToSFunc func){
         func(bf, desc, DOC_HTML_MOD_COMMENT, ZERO);
     }
 
-    Table *tbl = Inst_GetTblOfAtt(comp, K(m, "functions"));
+    Table *tbl = Seel_Get(comp, K(m, "functions"));
     if(tbl != NULL && tbl->nvalues > 0){
         func(bf, NULL, DOC_HTML_FUNC_SECTION, ZERO);
         Iter it;
@@ -126,7 +121,7 @@ status Doc_To(Buff *bf, DocComp *comp, ToSFunc func){
         }
     }
     func(bf, NULL, DOC_HTML_CLOSE, ZERO);
-    Abstract *footer = Inst_Att(comp, K(m, "footer"));
+    Abstract *footer = Inst_Att(page, K(m, "footer"));
     if(footer != NULL){
         func(bf, footer, DOC_HTML_FOOTER, ZERO);
     }

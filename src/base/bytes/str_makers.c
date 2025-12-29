@@ -19,6 +19,31 @@ Str *Str_ToUpper(MemCh *m, Str *s){
     return upper;
 }
 
+Str *Str_ToLowerFiltered(MemCh *m, Str *s, Str *filter, byte replace){
+    Str *lower = s;
+    if(s->type.state & STRING_COPY){
+        lower = Str_Clone(m, s);
+    }
+    byte *ptr = lower->bytes;
+    byte *end = lower->bytes+(lower->length-1);
+    i32 delta = 'a' - 'A';
+    while(ptr <= end){
+        byte b = *ptr;
+        if(b >= 'A' && b <= 'Z'){
+            *ptr = b+delta;
+        }else{
+            for(i32 i = 0; i < filter->length; i += 2){
+                if(b >= filter->bytes[i] && b <= filter->bytes[i+1]){
+                    *ptr = replace;
+                }
+            }
+        }
+        ptr++;
+    }
+    return lower;
+}
+
+
 Str *Str_ToLower(MemCh *m, Str *s){
     Str *lower = s;
     if(s->type.state & STRING_COPY){
