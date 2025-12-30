@@ -1,1 +1,2 @@
-Span *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path);
+typedef Inst WwwNav;
+status WwwNav_Init(MemCh *m);

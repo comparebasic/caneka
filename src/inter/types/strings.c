@@ -79,9 +79,9 @@ static char *interTypeStrings[] = {
 
 static char *interTypeObjectStrings[] = {
     "_TYPE_INTER_OBJ_START",
-    "TYPE_HTML_NAV",
-    "TYPE_HTML_PAGE",
+    "TYPE_WWW_NAV",
     "TYPE_WWW_ROUTE",
+    "TYPE_WWW_PAGE",
     "TYPE_LOGIN",
     "TYPE_DOC_COMMENT",
     "TYPE_DOC_COMPONENT",

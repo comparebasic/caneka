@@ -11,5 +11,7 @@ status Inter_Init(MemCh *m){
     r |= Http_ClsInit(m);
     r |= HttpCtx_Init(m);
     r |= Route_Init(m);
+    r |= WwwPage_Init(m);
+    r |= WwwNav_Init(m);
     return r;
 }

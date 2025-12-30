@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 static NodeObj *getPage(MemCh *m){
-    PageObj *page = Inst_Make(m, TYPE_WWW_PAGE);
+    WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
     StrVec *path = IoAbsPath(m, "examples/doc/header.templ");
     StrVec *content = File_ToVec(m, StrVec_Str(m, path));
     if(content == NULL){
@@ -18,7 +18,7 @@ static NodeObj *getPage(MemCh *m){
 
     Seel_Set(page, K(m, "header"), templ); 
     Seel_Set(page, K(m, "footer"), IoAbsPath(m, "examples/doc/footer.html")); 
-    Table *nav = Table_Make(m);
+    NodeObj *nav = Inst_Make(m, TYPE_NODEOBJ);
     Seel_Set(page, K(m, "nav"), nav);
     return page;
 }
@@ -29,13 +29,13 @@ status Doc_Tests(MemCh *m){
     void *args[5];
 
     NodeObj *page = getPage(m);
-    Table *nav = Inst_Att(page, K(m, "nav"));
+    NodeObj *nav = Seel_Get(page, K(m, "nav"));
 
     StrVec *src = IoAbsPath(m, "src");
     DocComp *comp = DocComp_FromStr(m, src, S(m, "base.bytes.Str"));
 
     StrVec *name = Seel_Get(comp, K(m, "name"));
-    Table_Set(nav, name, Seel_Get(comp, K(m, "atts")));
+    Inst_ByPath(nav, name, Seel_Get(comp, K(m, "atts")), SPAN_OP_SET);
 
     args[0] = Seel_Get(comp, K(m, "atts"));
     args[1] = NULL;
@@ -51,10 +51,9 @@ status Doc_Tests(MemCh *m){
 
     Buff *bf = Buff_Make(m, ZERO);
     Doc_To(bf, comp, Doc_ToHtmlToS);
-    args[0] = comp;
-    args[1] = bf->v;
-    args[2] = NULL;
-    Out("^p.doc object @\n^y.@^0\n", args);
+
+    r |= Test(bf->v->total > 0 && (bf->type.state & ERROR) == 0,
+        "Content from doc engine exists without errot", NULL);
 
     Buff *dist = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
     path = IoAbsPath(m, "dist/doc/html/");

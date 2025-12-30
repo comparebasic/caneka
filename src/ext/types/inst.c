@@ -55,7 +55,11 @@ void *Inst_GetChild(Inst *inst, void *key){
     return Table_Get(children, key);
 }
 
-void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
+status Inst_SetSelected(Span *inst, Span *coords){
+    return ZERO;
+}
+
+void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
     DebugStack_Push(inst, inst->type.state);
     void *args[5];
 
@@ -68,6 +72,10 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
         return NULL;
     }
 
+    if(coords != NULL){
+        Span_Wipe(coords);
+    }
+    i32 coordIdx = 0;
     Inst *current = inst;
     Abstract *prev = NULL;
 
@@ -81,6 +89,10 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
             Abstract *child = Table_Get(children, key);
 
             if(op == SPAN_OP_SET){
+                if(coords != NULL){
+                    Span_Set(coords, coordIdx, I32_Wrapped(m, children->nvalues));
+                    coordIdx++;
+                }
                 Table_Set(children, key, value); 
                 DebugStack_Pop();
                 return value;
@@ -103,8 +115,14 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op){
                         args[0] = prev;
                         args[1] = NULL;
                         Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
-                            "The key slot is occupied by a different type, conflict, cannot insert into $", args);
+                            "The key slot is occupied by a different type,"
+                            " conflict, cannot insert into $", args);
                         break;
+                    }
+                    if(coords != NULL){
+                        Span_Set(coords,
+                            coordIdx, I32_Wrapped(m, children->nvalues));
+                        coordIdx++;
                     }
                 }else{
                     if(child == NULL){

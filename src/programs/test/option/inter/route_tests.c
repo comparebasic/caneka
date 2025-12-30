@@ -212,8 +212,10 @@ static Table *getGenericData(MemCh *m, Route *rt){
     StrVec *navPath = IoUtil_GetAbsVec(m,
         K(m, "./examples/test/pages/nav.config"));
 
+    /*
     Span *nav = Nav_TableFromPath(m, rt, navPath);
     Table_Set(data, Str_CstrRef(m, "nav"), nav);
+    */
     return data;
 }
 
