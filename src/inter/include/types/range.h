@@ -75,8 +75,8 @@ enum inter_range {
 enum inter_obj_range {
     _TYPE_INTER_OBJ_START = _EXT_OBJECT_END,
     TYPE_HTML_NAV,
-    TYPE_HTML_PAGE,
     TYPE_WWW_ROUTE,
+    TYPE_WWW_PAGE,
     TYPE_LOGIN,
     TYPE_DOC_COMMENT,
     TYPE_DOC_COMPONENT,

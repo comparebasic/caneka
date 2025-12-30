@@ -1,6 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
+Span *Nav_GetCrumbs(WwwPage *page){
+    return NULL;
+}
+
 Span *Nav_TableFromPath(MemCh *m, Route *pages, StrVec *path){
     NodeObj *navObj = Config_FromPath(m, StrVec_Str(m, path));
     if(navObj == NULL){

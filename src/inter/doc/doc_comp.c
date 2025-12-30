@@ -1,6 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
+NodeObj *DocComp_Gather(MemCh *m, StrVec *src, Str *s){
+    return NULL;
+}
+
 NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, Str *s){
     StrVec *name = StrVec_From(m, s);
     Path_DotAnnotate(m, name);
@@ -25,7 +29,7 @@ status DocComp_Init(MemCh *m){
     Table_Set(tbl, S(m, "comments"), I16_Wrapped(m, TYPE_SPAN));
     Table_Set(tbl, S(m, "body"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(tbl, S(m, "functions"), I16_Wrapped(m, TYPE_TABLE));
-    Table_Set(tbl, S(m, "page"), I16_Wrapped(m, TYPE_NODEOBJ));
+    Table_Set(tbl, S(m, "page"), I16_Wrapped(m, TYPE_WWW_PAGE));
     r |= Seel_Seel(m, tbl, S(m, "DocComp"), TYPE_DOC_COMPONENT);
     return r;
 }

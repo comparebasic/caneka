@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 static NodeObj *getPage(MemCh *m){
-    NodeObj *page = Inst_Make(m, TYPE_NODEOBJ);
+    PageObj *page = Inst_Make(m, TYPE_WWW_PAGE);
     StrVec *path = IoAbsPath(m, "examples/doc/header.templ");
     StrVec *content = File_ToVec(m, StrVec_Str(m, path));
     if(content == NULL){
@@ -16,11 +16,10 @@ static NodeObj *getPage(MemCh *m){
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
 
-    Inst_SetAtt(page, K(m, "header"), templ); 
-    Inst_SetAtt(page, K(m, "footer"), IoAbsPath(m, "examples/doc/footer.html")); 
+    Seel_Set(page, K(m, "header"), templ); 
+    Seel_Set(page, K(m, "footer"), IoAbsPath(m, "examples/doc/footer.html")); 
     Table *nav = Table_Make(m);
-    Inst_SetAtt(page, K(m, "nav"), nav);
-
+    Seel_Set(page, K(m, "nav"), nav);
     return page;
 }
 
