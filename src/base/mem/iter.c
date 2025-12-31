@@ -435,7 +435,7 @@ status Iter_Next(Iter *it){
         }else if(it->idx >= 0){
             idx = it->idx;
         }
-        Iter_Setup(it, it->p, fl, idx);
+        Iter_Start(it, idx, fl);
         it->type.state |= (fl|PROCESSING);
         Iter_Query(it);
         goto end;
@@ -677,6 +677,15 @@ void Iter_Init(Iter *it, Span *p){
     memset(it->stack, 0, sizeof(void *)*SPAN_MAX_DIMS);
     memset(it->stackIdx, 0, sizeof(i32)*SPAN_MAX_DIMS);
     it->value = NULL;
+}
+
+void Iter_Start(Iter *it, i32 idx, status op){
+    it->type.state = op;
+    it->idx = idx;
+    memset(it->stack, 0, sizeof(void *)*SPAN_MAX_DIMS);
+    memset(it->stackIdx, 0, sizeof(i32)*SPAN_MAX_DIMS);
+    it->value = NULL;
+    return;
 }
 
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx){

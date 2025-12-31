@@ -65,11 +65,16 @@ status WwwNav_Tests(MemCh *m){
     Out("^p.Str @\nCrd @^0\n", args);
 
     while((NestSel_Next(it) & END) == 0){
-        Abstract *a = NestSel_Get(it);
-        args[0] = a;
-        args[1] = I32_Wrapped(m, it->idx);
-        args[2] = NULL;
-        Out("^p.  Item @ level @^0\n", args);
+        Hashed *h = NestSel_Get(it);
+        if(h != NULL){
+            args[0] = h != NULL ? h->key : NULL;
+            args[1] = I32_Wrapped(m, it->idx);
+            args[2] = NULL;
+            Out("^p.  Item @ level @^0\n", args);
+        }else{
+            printf("NULL\n");
+            fflush(stdout);
+        }
     }
 
     DebugStack_Pop();

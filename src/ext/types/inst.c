@@ -88,7 +88,7 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
                 Hashed *h = Table_SetHashed(children, key, value); 
                 if(coords != NULL){
                     Span_Set(coords,
-                        coordIdx, I32_Wrapped(coords->m, h->idx));
+                        coordIdx, I32_Wrapped(coords->m, h->orderIdx));
                     coordIdx++;
                 }
                 DebugStack_Pop();
@@ -119,7 +119,7 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
                     }
                     if(coords != NULL){
                         Span_Set(coords,
-                            coordIdx, I32_Wrapped(coords->m, h->idx));
+                            coordIdx, I32_Wrapped(coords->m, h->orderIdx));
                         coordIdx++;
                     }
                 }else{

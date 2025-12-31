@@ -16,7 +16,7 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
 
         Iter *cur = Iter_GetByIdx(it, _it.idx);
         if(cur == NULL){
-            cur = Iter_Make(inst->m, children);
+            cur = Iter_Make(inst->m, Table_Ordered(inst->m, children));
             Iter_Add(it, cur);
         }
         cur->metrics.selected = sg->val.i;
@@ -45,6 +45,8 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
 void *NestSel_Get(Iter *_it){
     Iter *it = Iter_Get(_it);
     if(it == NULL){
+        printf("it is null\n");
+        fflush(stdout);
         return NULL;
     }
     return it->value;
@@ -54,28 +56,30 @@ status NestSel_Next(Iter *_it){
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
     }
+    Iter *it = NULL;
     if((_it->type.state & PROCESSING) == 0){
         Iter_Next(_it);
-    }
-
-    void *args[] = {
-        Type_StateVec(_it->p->m, _it->type.of, _it->type.state),
-        I32_Wrapped(_it->p->m, _it->idx),
-        NULL
-    };
-    Out("^y.State @ Idx @^0\n", args);
-
-    Iter *it = Iter_Get(_it);
-    if(it->type.state & END){
-        Iter_Prev(_it);
         it = Iter_Get(_it);
-    }else if(it->metrics.selected == it->idx){
-        if(_it->type.state & END){
+    }else{
+        it = Iter_Get(_it);
+
+        void *args[] = {it, NULL};
+        Out("^y. Args @^0\n", args);
+
+        if((_it->idx < _it->p->max_idx) && it->metrics.selected == it->idx){
+            it->metrics.selected = -1;
+            Iter_Next(_it);
+            it = Iter_Get(_it);
+        }else if(it->type.state & END){
             return END;
         }
-        Iter_Next(_it);
-        it = Iter_Get(_it);
     }
 
-    return Iter_Next(it);
+    Iter_Next(it);
+
+    if(_it->idx == 0 && (_it->type.state & END)){
+        return END;
+    }
+
+    return ZERO;
 }
