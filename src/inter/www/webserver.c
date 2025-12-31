@@ -205,7 +205,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
 
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = Sv(m, "header");
-        Route *header = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
+        Route *header = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET, NULL);
 
         Buff *bf = Buff_Make(m, ZERO);
         r |= Route_Handle(header, bf, ctx->data, ctx);
@@ -217,7 +217,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
     StrVec *preContent = NodeObj_Att(pageNode, K(m, "pre-content"));
     StrVec *postContent = NodeObj_Att(pageNode, K(m, "post-content"));
     if(preContent != NULL){
-        Route *route = Inst_ByPath(tcp->inc, preContent, NULL, SPAN_OP_GET);
+        Route *route = Inst_ByPath(tcp->inc, preContent, NULL, SPAN_OP_GET, NULL);
         if(route != NULL){
             Buff *bf = Buff_Make(m, ZERO);
             r |= Route_Handle(route, bf, ctx->data, ctx);
@@ -231,7 +231,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
     HttpProto_AddBuff(proto, bf);
 
     if(postContent != NULL){
-        Route *route = Inst_ByPath(tcp->inc, postContent, NULL, SPAN_OP_GET);
+        Route *route = Inst_ByPath(tcp->inc, postContent, NULL, SPAN_OP_GET, NULL);
         if(route != NULL){
             Buff *bf = Buff_Make(m, ZERO);
             r |= Route_Handle(route, bf, ctx->data, ctx);
@@ -241,7 +241,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
 
     if((funcW->type.state & ROUTE_ASSET) == 0){
         StrVec *path = Sv(m, "footer");
-        Route *footer = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET);
+        Route *footer = Inst_ByPath(tcp->inc, path, NULL, SPAN_OP_GET, NULL);
 
         Buff *bf = Buff_Make(m, ZERO);
         r |= Route_Handle(footer, bf, ctx->data, ctx);
@@ -268,7 +268,7 @@ status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *hand
     /* assign handlers */
     Route *root = Route_Make(m);
 
-    NodeObj *routes = Inst_ByPath(config, Sv(m, "routes"), NULL, SPAN_OP_GET);
+    NodeObj *routes = Inst_ByPath(config, Sv(m, "routes"), NULL, SPAN_OP_GET, NULL);
 
     void *args[] = {routes, path, handlers, NULL};
     Out("^p.SetConfig @ Path @ handlers^0\n", args);
@@ -287,7 +287,7 @@ status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *hand
             IoUtil_AddVec(m, pagePath, Table_Get(atts, K(m, "path")));
             r |= Route_CollectConfig(section, name, pagePath, atts);
             void *args[] = {root, name, section, NULL};
-            Inst_ByPath(root, name, section, SPAN_OP_SET);
+            Inst_ByPath(root, name, section, SPAN_OP_SET, NULL);
         }
     }
 

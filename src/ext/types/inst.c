@@ -55,10 +55,6 @@ void *Inst_GetChild(Inst *inst, void *key){
     return Table_Get(children, key);
 }
 
-status Inst_SetSelected(Span *inst, Span *coords){
-    return ZERO;
-}
-
 void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
     DebugStack_Push(inst, inst->type.state);
     void *args[5];
@@ -72,10 +68,10 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
         return NULL;
     }
 
-    if(coords != NULL){
+    i32 coordIdx = 0;
+    if(op == SPAN_OP_SET && coords != NULL){
         Span_Wipe(coords);
     }
-    i32 coordIdx = 0;
     Inst *current = inst;
     Abstract *prev = NULL;
 
@@ -89,11 +85,12 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
             Abstract *child = Table_Get(children, key);
 
             if(op == SPAN_OP_SET){
+                Hashed *h = Table_SetHashed(children, key, value); 
                 if(coords != NULL){
-                    Span_Set(coords, coordIdx, I32_Wrapped(m, children->nvalues));
+                    Span_Set(coords,
+                        coordIdx, I32_Wrapped(coords->m, h->idx));
                     coordIdx++;
                 }
-                Table_Set(children, key, value); 
                 DebugStack_Pop();
                 return value;
             }else{
@@ -103,11 +100,12 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
         }else if(token->type.state & MORE){
             if(prev){
                 Table *children = Span_Get(current, INST_PROPIDX_CHILDREN);
-                Abstract *child = Table_Get(children, prev);
+                Hashed *h = Table_GetHashed(children, prev);
+                Abstract *child = h != NULL ? h->value : NULL;
                 if(op == SPAN_OP_SET){
                     if(child == NULL){
                         Inst *new = Inst_Make(inst->m, typeOf);
-                        Table_Set(children, prev, new); 
+                        h = Table_SetHashed(children, prev, new); 
                         current = new;
                     }else if(child->type.of == typeOf){
                         current = (Inst *)child;
@@ -121,7 +119,7 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
                     }
                     if(coords != NULL){
                         Span_Set(coords,
-                            coordIdx, I32_Wrapped(m, children->nvalues));
+                            coordIdx, I32_Wrapped(coords->m, h->idx));
                         coordIdx++;
                     }
                 }else{

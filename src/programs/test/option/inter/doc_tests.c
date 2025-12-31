@@ -35,7 +35,7 @@ status Doc_Tests(MemCh *m){
     DocComp *comp = DocComp_FromStr(m, src, S(m, "base.bytes.Str"));
 
     StrVec *name = Seel_Get(comp, K(m, "name"));
-    Inst_ByPath(nav, name, Seel_Get(comp, K(m, "atts")), SPAN_OP_SET);
+    Inst_ByPath(nav, name, Seel_Get(comp, K(m, "atts")), SPAN_OP_SET, NULL);
 
     args[0] = Seel_Get(comp, K(m, "atts"));
     args[1] = NULL;

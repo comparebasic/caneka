@@ -152,7 +152,7 @@ Route *Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAt
     word flags = ZERO;
     if(Equals(name, index)){
         flags |= ROUTE_INDEX;
-        route = Inst_ByPath(root, name, NULL, SPAN_OP_GET);
+        route = Inst_ByPath(root, name, NULL, SPAN_OP_GET, NULL);
         if(route == NULL){
             route = Inst_Make(m, TYPE_WWW_ROUTE);
         }
@@ -165,7 +165,7 @@ Route *Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAt
         route = Inst_Make(m, TYPE_WWW_ROUTE);
     }
 
-    Inst_ByPath(root, name, rt, SPAN_OP_SET);
+    Inst_ByPath(root, name, rt, SPAN_OP_SET, NULL);
 
     void *args[] = {name, path, configAtts, mime, ext, NULL};
     Out("^y.  Building path ^0.@^y.\n  @ from @\nmime @ ext @\n^0", args);
@@ -367,7 +367,7 @@ status Route_Prepare(Route *rt){
 }
 
 Route *Route_Get(Route *root, StrVec *path){
-    return Inst_ByPath(root, path, NULL, SPAN_OP_GET);
+    return Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
 }
 
 status Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){

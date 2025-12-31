@@ -1,6 +1,7 @@
 enum ext_types {
     _TYPE_EXT_START = _TYPE_BASE_END,
     TYPE_SEAL,
+    TYPE_NEST_SEL,
     TYPE_AUTH_CRED,
     TYPE_AUTH_TARGET,
     TYPE_SALT,

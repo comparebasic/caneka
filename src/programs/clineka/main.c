@@ -71,7 +71,7 @@ i32 main(int argc, char **argv){
         configNode = Config_FromPath(m, path);
 
         NodeObj *forever = Inst_ByPath(configNode,
-            IoPath(m, "forever"), NULL, SPAN_OP_GET);
+            IoPath(m, "forever"), NULL, SPAN_OP_GET, NULL);
         if(forever != NULL){
             Table *atts = Seel_Get(forever, K(m, "atts"));
             StrVec *logdir = Table_Get(atts, K(m, "logdir"));
@@ -153,7 +153,7 @@ i32 main(int argc, char **argv){
                 Out("^y.config @^0\n", args);
 
                 NodeObj *html = Inst_ByPath(configNode, IoPath(m, "html"),
-                    NULL, SPAN_OP_GET);
+                    NULL, SPAN_OP_GET, NULL);
                 if(html != NULL){
                     Table *atts = Seel_Get(html, K(m, "atts"));
                     headerPath = Table_Get(atts, K(m, "header"));

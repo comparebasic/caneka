@@ -229,7 +229,7 @@ status WwwRoute_Tests(MemCh *m){
     Route *rt = Route_From(m, path);
 
     path = IoPath(m, "/tests");
-    Route *tests = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *tests = Inst_ByPath(rt, path, NULL, SPAN_OP_GET, NULL);
 
     args[0] = path;
     args[1] = NULL;
@@ -249,7 +249,7 @@ status WwwRoute_Tests(MemCh *m){
 
     path = StrVec_From(m, K(m, "/stats"));
     IoUtil_Annotate(m, path);
-    Route *profile = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *profile = Inst_ByPath(rt, path, NULL, SPAN_OP_GET, NULL);
     mime = Seel_Get(profile, K(m, "mime"));
     r |= Test(Equals(mime, K(m, "text/html")),
         "profile stat page is mime type text/html", NULL);
@@ -318,7 +318,7 @@ status WwwRouteTempl_Tests(MemCh *m){
     DebugStack_SetRef("stats.templ no mem details", TYPE_CSTR);
 
     path = IoPath(m, "/stats");
-    Route *handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET, NULL);
 
     data = getGenericData(m, rt);
     Table *stats = Table_Make(m);
@@ -343,9 +343,9 @@ status WwwRouteTempl_Tests(MemCh *m){
     DebugStack_SetRef("stats.templ no mem details + header", TYPE_CSTR);
 
     StrVec *hv = IoPath(bf->m, "header");
-    Route *header = Inst_ByPath(inc, hv, NULL, SPAN_OP_GET);
+    Route *header = Inst_ByPath(inc, hv, NULL, SPAN_OP_GET, NULL);
     StrVec *fv = IoPath(bf->m, "footer");
-    Route *footer = Inst_ByPath(inc, fv, NULL, SPAN_OP_GET);
+    Route *footer = Inst_ByPath(inc, fv, NULL, SPAN_OP_GET, NULL);
 
     Buff *dest = Buff_Make(m, ZERO);
 
@@ -399,7 +399,7 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     path = StrVec_From(m, Str_CstrRef(m, "/stats"));
     IoUtil_Annotate(m, path);
-    handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
+    handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET, NULL);
 
     Route_Handle(handler, bf, data, NULL);
     dest = Buff_Make(m, ZERO);
@@ -435,9 +435,9 @@ status WwwRouteFmt_Tests(MemCh *m){
     Route_Collect(inc, incAbs);
 
     StrVec *hv = IoPath(m, "header");
-    Route *header = Inst_ByPath(inc, hv, NULL, SPAN_OP_GET);
+    Route *header = Inst_ByPath(inc, hv, NULL, SPAN_OP_GET, NULL);
     StrVec *fv = IoPath(m, "footer");
-    Route *footer = Inst_ByPath(inc, fv, NULL, SPAN_OP_GET);
+    Route *footer = Inst_ByPath(inc, fv, NULL, SPAN_OP_GET, NULL);
 
     Table *data = getGenericData(m, rt);
     Buff *bf = Buff_Make(m, ZERO);
@@ -445,7 +445,7 @@ status WwwRouteFmt_Tests(MemCh *m){
 
     path = StrVec_From(m, Str_CstrRef(m, "/"));
     IoUtil_Annotate(m, path);
-    Route *handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET);
+    Route *handler = Inst_ByPath(rt, path, NULL, SPAN_OP_GET, NULL);
 
     r |= Test(handler != NULL, "Default / handler is not null", args);
 
@@ -488,7 +488,7 @@ status WwwPath_Tests(MemCh *m){
 
     StrVec *name = IoPath(m, "/stats");
 
-    Route *statHandler = Inst_ByPath(pages, name, NULL, SPAN_OP_GET);
+    Route *statHandler = Inst_ByPath(pages, name, NULL, SPAN_OP_GET, NULL);
     Single *funcW = Ptr_Wrapped(m, fakeStep, TYPE_STEP_FUNC);
     Span_Set(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
 
@@ -499,10 +499,10 @@ status WwwPath_Tests(MemCh *m){
     r |= Route_Collect(inc, IoAbsPath(m, "examples/test/pages/inc"));
 
     Route *stat = Route_From(m, IoAbsPath(m, "examples/test/pages/static"));
-    Inst_ByPath(pages, IoPath(m, "/static/"), stat, SPAN_OP_SET);
+    Inst_ByPath(pages, IoPath(m, "/static/"), stat, SPAN_OP_SET, NULL);
 
     Route *sys = Route_From(m, IoAbsPath(m, "examples/test/pages/system"));
-    Inst_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
+    Inst_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET, NULL);
 
     Route *route = Route_GetHandler(pages,
         IoPath(m, "/static/logo-transparent-white_256.png")); 

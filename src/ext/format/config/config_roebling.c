@@ -184,7 +184,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Inst *obj = Inst_Make(rbl->m, TYPE_NODEOBJ);
         if(token != NULL){
             Span_Set(obj, INST_PROPIDX_NAME, token);
-            Inst_ByPath(current, token, obj, SPAN_OP_SET);  
+            Inst_ByPath(current, token, obj, SPAN_OP_SET, NULL);
             Iter_Remove(it);
             Iter_Prev(it);
         }

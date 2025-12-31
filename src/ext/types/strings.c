@@ -4,6 +4,7 @@
 static char *extTypeStrings[] = {
     "_TYPE_EXT_START",
     "TYPE_SEAL",
+    "TYPE_NEST_SEL",
     "TYPE_AUTH_CRED",
     "TYPE_AUTH_TARGET",
     "TYPE_SALT",

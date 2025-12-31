@@ -22,11 +22,9 @@ status Config_Tests(MemCh *m){
     StrVec *footerKey = StrVec_From(m, Str_FromCstr(m, "doc.footer", ZERO));
     Path_DotAnnotate(m, footerKey);
 
-    NodeObj *doc = Inst_ByPath(root, docKey, NULL, SPAN_OP_GET);
-
-    NodeObj *tag = Inst_ByPath(root, tagKey, NULL, SPAN_OP_GET);
-
-    NodeObj *footer = Inst_ByPath(root, footerKey, NULL, SPAN_OP_GET);
+    NodeObj *doc = Inst_GetByPath(root, docKey);
+    NodeObj *tag = Inst_GetByPath(root, tagKey);
+    NodeObj *footer = Inst_GetByPath(root, footerKey);
 
     args[0] = docKey;
     args[1] = doc;
