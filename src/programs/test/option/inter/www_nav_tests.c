@@ -54,10 +54,23 @@ status WwwNav_Tests(MemCh *m){
     Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
     Table_Set(coordTbl, name, coords);
 
-    args[0] = node;
-    args[1] = coordTbl;
+    Str *s = S(m, "Fmt");
+    Span *crd = Table_Get(coordTbl, s);
+    Iter *it = Iter_Make(m, NULL);
+    NestSel_Init(it, node, crd);
+
+    args[0] = s;
+    args[1] = crd;
     args[2] = NULL;
-    Out("^p.Node @\nCoords @^0\n", args);
+    Out("^p.Str @\nCrd @^0\n", args);
+
+    while((NestSel_Next(it) & END) == 0){
+        Abstract *a = NestSel_Get(it);
+        args[0] = a;
+        args[1] = I32_Wrapped(m, it->idx);
+        args[2] = NULL;
+        Out("^p.  Item @ level @^0\n", args);
+    }
 
     DebugStack_Pop();
     return r;

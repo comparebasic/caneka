@@ -207,7 +207,6 @@ static status Iter_Query(Iter *it){
         it->type.state |= MORE;
     }
 
-
     i8 dim = p->dims;
     i32 offset = it->idx;
     void **ptr = NULL;
@@ -643,6 +642,14 @@ void *Iter_GetSelected(Iter *it){
 
 void *Iter_Get(Iter *it){
     return it->value;
+}
+
+status Iter_First(Iter *it){
+    word flags = NORMAL_FLAGS & ~(END|PROCESSING);
+    it->type.state = (it->type.state & flags) | SPAN_OP_GET;
+    it->idx = 0;
+    status r = Iter_Query(it);
+    return it->type.state;
 }
 
 status Iter_Reset(Iter *it){

@@ -12,3 +12,4 @@
 #include "navigate/navigate_tos.h"
 #include "navigate/navigate_cls.h"
 #include "navigate/nodeobj.h"
+#include "navigate/nestsel.h"
