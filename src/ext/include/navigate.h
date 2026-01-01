@@ -13,3 +13,4 @@
 #include "navigate/navigate_cls.h"
 #include "navigate/nodeobj.h"
 #include "navigate/nestsel.h"
+#include "navigate/inst_iter.h"

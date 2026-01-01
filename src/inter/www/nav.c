@@ -9,5 +9,7 @@ status WwwNav_Init(MemCh *m){
     Table_Set(tbl, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(tbl, S(m, "url"), I16_Wrapped(m, TYPE_STRVEC));
     r |= Seel_Seel(m, tbl, S(m, "WwwNav"), TYPE_WWW_NAV);
+
+    Lookup_Add(m, InstIterFuncLookup, TYPE_WWW_NAV, (void *)NestSel_Next);
     return r;
 }

@@ -38,6 +38,64 @@ static char *logicTestContent = ""
 "</div>\n"
 "";
 
+static NodeObj *navMake(MemCh *m){
+
+    NodeObj *node = Inst_Make(m, TYPE_NODEOBJ);
+    Table *coordTbl = Table_Make(m);
+
+    StrVec *path = IoPath_From(m, S(m, "/docs/base/bytes/str"));
+    Span *coords = Span_Make(m);
+    WwwNav *item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    StrVec *name = Sv(m, "Str");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base/bytes/fmt"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "Fmt");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base/bytes/tos"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "ToS");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base/mem/span"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "Span");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base/mem/memch"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "MemCh");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    Str *s = S(m, "Fmt");
+    Span *crd = Table_Get(coordTbl, s);
+    Iter *it = Iter_Make(m, NULL);
+    NestSel_Init(it, node, crd);
+
+    return node;
+}
+
 status TemplCtx_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
@@ -248,6 +306,50 @@ status Templ_Tests(MemCh *m){
         "Templ key value test has expected content", 
         "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n&", 
         args);
+
+    DebugStack_Pop();
+    return r;
+}
+
+status TemplNav_Tests(MemCh *m){
+    DebugStack_Push(NULL, 0);
+    void *args[5];
+    status r = READY;
+    TranspFile *tp = NULL;
+
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/doc/nav.templ"));
+    StrVec *content = File_ToVec(m, path);
+
+    Cursor *curs = Cursor_Make(m, content);
+    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    
+    r |= Test(ctx->type.state & SUCCESS,
+            "Templ: Roebling finished with state SUCCESS with keys", 
+        NULL);
+
+    if(r & ERROR){
+        DebugStack_Pop();
+        return r;
+    }
+
+    NodeObj *nav = navMake(m);
+    Inst *page = Inst_Make(m, TYPE_WWW_PAGE);
+    Seel_Set(page, S(m, "nav"), nav); 
+    Table *data = Table_Make(m);
+    Table_Set(data, S(m, "page"), page);
+    Buff *bf = Buff_Make(m, ZERO);
+
+    status result = Templ_Prepare(templ);
+    i64 total = Templ_ToS(templ, bf, data, NULL);
+
+    args[0] = templ->content.p;
+    args[1] = nav;
+    args[2] = bf->v;
+    args[3] = NULL;
+    Out("^y.Templ->v &\n^c.@\n^p.$^0\n", args);
+
+    r |= ERROR;
 
     DebugStack_Pop();
     return r;

@@ -11,6 +11,7 @@ status Inet_Tests(MemCh *gm);
 status ServeTcp_Tests(MemCh *gm);
 status Templ_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
+status TemplNav_Tests(MemCh *gm);
 status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
@@ -24,6 +25,12 @@ static TestSet InterTests[] = {
         "Templ Tests",
         Templ_Tests,
         "Testing templating with a few variables.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Templ Navigation Tests",
+        TemplNav_Tests,
+        "Testing a nested navitaion templating test.",
         FEATURE_COMPLETE,
     },
     {

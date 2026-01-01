@@ -28,6 +28,8 @@ typedef struct iter {
     } metrics;
 } Iter;
 
+typedef status (*NextFunc)(Iter *it);
+
 status Iter_Next(Iter *it);
 status Iter_Prev(Iter *it);
 status Iter_PrevRemove(Iter *it);

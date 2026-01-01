@@ -10,7 +10,12 @@ static void *Fetch_byKey(MemCh *m, FetchTarget *tg, void *data){
 }
 
 static void *Fetch_getIter(MemCh *m, FetchTarget *tg, void *data){
-    return Iter_Make(m, data);
+    Abstract *a = (Abstract *)data;
+    if(a->type.of & TYPE_INSTANCE){
+        return InstIter_From(m, data);
+    }else{
+        return Iter_Make(m, data);
+    }
 }
 
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
@@ -26,7 +31,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
             goto err;
         }
 
-        if((tg->type.state & FETCH_TARGET_PROP) &&
+        if((tg->type.state & (FETCH_TARGET_PROP|FETCH_TARGET_KEY)) &&
             ((tg->idx = Seel_GetIdx(seel, tg->key)) != -1)
         ){
             /* all set */
