@@ -62,23 +62,28 @@ status NestSel_Next(Iter *_it){
         it = Iter_Get(_it);
     }else{
         it = Iter_Get(_it);
-
-        void *args[] = {it, NULL};
-        Out("^y. Args @^0\n", args);
-
-        if((_it->idx < _it->p->max_idx) && it->metrics.selected == it->idx){
+        if((_it->type.state & (LAST|END)) == 0 && it->metrics.selected == it->idx){
             it->metrics.selected = -1;
             Iter_Next(_it);
             it = Iter_Get(_it);
+            if(_it->type.state & LAST){
+                Iter_First(it);
+            }
         }else if(it->type.state & END){
             return END;
         }
     }
 
     Iter_Next(it);
-
-    if(_it->idx == 0 && (_it->type.state & END)){
-        return END;
+    if(_it->type.state & LAST){
+        if(it->metrics.selected == it->idx){
+            _it->type.state |= MORE;
+        }else{
+            _it->type.state &= ~MORE;
+        }
+        if(it->type.state & END){
+            return END;
+        }
     }
 
     return ZERO;
