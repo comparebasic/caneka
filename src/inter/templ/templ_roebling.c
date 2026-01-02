@@ -92,29 +92,22 @@ static PatCharDef iterDef[] = {
     {PAT_TERM, '.' ,'.'},
     {PAT_TERM, '.' ,'.'},
     {PAT_TERM, '.' ,'.'},
-    {PAT_ANY,' ',' '},
+    {PAT_ANY|PAT_TERM,' ',' '},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef levelDef[] = {
-    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
-    {PAT_TERM, '.' ,'.'},
-    {PAT_TERM, '.' ,'.'},
-    {PAT_ANY,' ',' '},
+static PatCharDef greaterDef[] = {
+    {PAT_TERM, '>' ,'>'},
     {PAT_END, 0, 0}
 };
 
-static PatCharDef currentDef[] = {
-    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
-    {PAT_TERM, '.' ,'.'},
-    {PAT_ANY,' ',' '},
+static PatCharDef equalDef[] = {
+    {PAT_TERM, '=' ,'='},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef activeDef[] = {
-    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
     {PAT_TERM, '_' ,'_'},
-    {PAT_ANY,' ',' '},
     {PAT_END, 0, 0}
 };
 
@@ -141,14 +134,6 @@ static PatCharDef varTokenDef[] = {
     {PAT_KO|PAT_INVERT_CAPTURE, '*', '*'},
         {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '}', '}'},
     patText,
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef impliedDef[] = {
-    {PAT_KO|PAT_INVERT_CAPTURE, '#', '#'}, {PAT_KO|PAT_INVERT_CAPTURE, '.', '.'},
-    {PAT_KO|PAT_INVERT_CAPTURE, '*', '*'},
-        {PAT_KO|PAT_INVERT_CAPTURE|PAT_KO_TERM, '}', '}'},
-    {PAT_TERM, '_', '_'},
     {PAT_END, 0, 0}
 };
 
@@ -185,8 +170,6 @@ static status templ(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
-        impliedDef, FORMAT_TEMPL_IMPLIED, FORMAT_TEMPL_TEMPL);
-    r |= Roebling_SetPattern(rbl,
         templTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         templContinueDef, FORMAT_TEMPL_CONTINUED, FORMAT_TEMPL_TEMPL);
@@ -203,9 +186,9 @@ static status templ(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         activeDef, FORMAT_TEMPL_ACTIVE, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
-        currentDef, FORMAT_TEMPL_CURRENT, FORMAT_TEMPL_TEMPL);
+        equalDef, FORMAT_TEMPL_CURRENT, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
-        levelDef, FORMAT_TEMPL_LEVEL, FORMAT_TEMPL_TEMPL);
+        greaterDef, FORMAT_TEMPL_LEVEL, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         iterDef, FORMAT_TEMPL_FOR, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
@@ -233,8 +216,6 @@ static status var(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
-        impliedDef, FORMAT_TEMPL_IMPLIED, FORMAT_TEMPL_VAR);
-    r |= Roebling_SetPattern(rbl,
         varTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
         varEndDef, FORMAT_TEMPL_VAR_END, FORMAT_TEMPL_TEXT);
@@ -257,12 +238,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 
     if(captureKey == FORMAT_TEMPL_TEXT){
         Iter_Add(&ctx->it, v);
-    }else if(captureKey == FORMAT_TEMPL_IMPLIED){
-        Fetcher *fch = (Fetcher *)as(Iter_Current(&ctx->it), TYPE_FETCHER);
-        fch->type.state |= FETCHER_COMMAND;
-        FetchTarget *tg = FetchTarget_Make(m);
-        tg->objType.of = captureKey;
-        Span_Add(fch->val.targets, tg);
     }else if(captureKey == FORMAT_TEMPL_VAR){
         Fetcher *fch = Fetcher_Make(m);
         fch->type.state |= FETCHER_VAR;
@@ -270,7 +245,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }else if(captureKey == FORMAT_TEMPL_VAR_END){
         Abstract *a = Iter_Current(&ctx->it);
         if(((Fetcher *)a)->val.targets->nvalues == 0){
-            a->type.state = (a->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
+            a->type.state = (a->type.state & NORMAL_FLAGS) | FETCHER_END;
         }
     }else if(captureKey == FORMAT_TEMPL_TEMPL){
         Abstract *a = Iter_Current(&ctx->it);
@@ -326,19 +301,12 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_FOR;
             FetchTarget *tg = FetchTarget_MakeIter(m);
             Span_Add(fch->val.targets, tg);
-        }else if(captureKey == FORMAT_TEMPL_LEVEL){
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
-            FetchTarget *tg = FetchTarget_MakeIter(m);
-            tg->objType.of = captureKey;
-            Span_Add(fch->val.targets, tg);
-        }else if(captureKey == FORMAT_TEMPL_ACTIVE){
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
-            FetchTarget *tg = FetchTarget_MakeIter(m);
-            tg->objType.of = captureKey;
-            Span_Add(fch->val.targets, tg);
-        }else if(captureKey == FORMAT_TEMPL_CURRENT){
-            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
-            FetchTarget *tg = FetchTarget_MakeIter(m);
+        }else if(captureKey == FORMAT_TEMPL_ACTIVE ||
+                captureKey == FORMAT_TEMPL_LEVEL ||
+                captureKey == FORMAT_TEMPL_CURRENT
+            ){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_CONDITION;
+            FetchTarget *tg = FetchTarget_MakeCommand(m);
             tg->objType.of = captureKey;
             Span_Add(fch->val.targets, tg);
         }else if(captureKey == FORMAT_TEMPL_IF){

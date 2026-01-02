@@ -342,6 +342,7 @@ status TemplNav_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
 
     status result = Templ_Prepare(templ);
+
     args[0] = templ->content.p;
     args[1] = NULL;
     Out("^c.Templ->content.p &^0\n", args);

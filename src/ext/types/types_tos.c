@@ -199,7 +199,7 @@ status ExtTypes_ToSInit(MemCh *m){
     fetcherLabels[12] = Str_CstrRef(m, "IF");
     fetcherLabels[13] = Str_CstrRef(m, "IFNOT");
     fetcherLabels[14] = Str_CstrRef(m, "END");
-    fetcherLabels[15] = Str_CstrRef(m, "COMMAND");
+    fetcherLabels[15] = Str_CstrRef(m, "COND");
     fetcherLabels[16] = Str_CstrRef(m, "TEMPL");
     r |= Lookup_Add(m, ToSFlagLookup, TYPE_FETCHER, (void *)fetcherLabels);
 
@@ -210,8 +210,8 @@ status ExtTypes_ToSInit(MemCh *m){
     fetchTargetLabels[12] = Str_CstrRef(m, "ITER");
     fetchTargetLabels[13] = Str_CstrRef(m, "PROP");
     fetchTargetLabels[14] = Str_CstrRef(m, "FUNC");
-    fetchTargetLabels[15] = Str_CstrRef(m, "RESOLVED");
-    fetchTargetLabels[16] = Str_CstrRef(m, "HASH");
+    fetchTargetLabels[15] = Str_CstrRef(m, "COMMAND");
+    fetchTargetLabels[16] = Str_CstrRef(m, "RESOLVED");
     r |= Lookup_Add(m, ToSFlagLookup, TYPE_FETCH_TARGET, (void *)fetchTargetLabels);
 
     /* ToS */

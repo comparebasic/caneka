@@ -192,6 +192,12 @@ FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx){
     return tg;
 }
 
+FetchTarget *FetchTarget_MakeCommand(MemCh *m){
+    FetchTarget *tg = FetchTarget_Make(m);
+    tg->type.state = FETCH_TARGET_COMMAND;
+    return tg;
+}
+
 FetchTarget *FetchTarget_MakeProp(MemCh *m, Str *prop){
     FetchTarget *tg = FetchTarget_Make(m);
     tg->type.state = FETCH_TARGET_PROP;

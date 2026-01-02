@@ -6,6 +6,15 @@ static i32 Templ_FindStart(Templ *templ, word flags){
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
+    if(flags == ZERO){
+        flags = (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT);
+    }
+    word latest = ZERO;
+
+    Abstract *self = Iter_Get(&it);
+    void *args[] = {self, NULL};
+    Out("\n^y.Comparing Start for targetCount++ self@^0\n", args);
+
     i32 targetCount = 1;
     while((Iter_Prev(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
@@ -14,14 +23,28 @@ static i32 Templ_FindStart(Templ *templ, word flags){
             TemplJump *prevJump = (TemplJump *)a;
             if(prevJump->fch->type.state & FETCHER_END){
                 targetCount++;
-            }else if(((prevJump->fch->type.state & 
-                        (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT)) &&
-                        flags == ZERO ||
-                        (prevJump->fch->type.state & flags)) &&
-                    --targetCount == 0
-                ){
-                DebugStack_Pop();
-                return it.idx;
+                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
+                Out("^y.    End++ for targetCount++ @ count$^0\n", args);
+            }else if((prevJump->fch->type.state & flags) == 0){
+                if(a->type.state != latest && targetCount > 0){
+                    --targetCount;
+                }
+                latest = a->type.state;
+                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
+                Out("^y.    NonFlag match for --targetCount @ count$^0\n", args);
+            }else if(prevJump->fch->type.state & flags){
+                if(a->type.state != latest && targetCount > 0){
+                    --targetCount;
+                }
+                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
+                Out("^y.    Flag match for --targetCount @ count$^0\n", args);
+                latest = a->type.state;
+                if(targetCount == 0){
+                    void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
+                    Out("^y.    Start Found @ count$^0\n", args);
+                    DebugStack_Pop();
+                    return it.idx;
+                }
             }
         }
     }
@@ -34,14 +57,29 @@ static i32 Templ_FindEnd(Templ *templ){
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
+
+    Abstract *self = Iter_Get(&it);
+    word latest = self->type.state;
+    void *args[] = {self, NULL};
+    Out("\n^y.Comparing for targetCount++ self@^0\n", args);
+
     i32 targetCount = 1;
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
 
         if(a->type.of == TYPE_FETCHER){
-            if((a->type.state & (FETCHER_END|FETCHER_VAR)) == 0){
-                targetCount++;
+            if(a->type.state & FETCHER_VAR){
+                continue;
+            }else if((a->type.state & FETCHER_END) == 0){
+                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
+                Out("^y.    Comparing for targetCount++ @ count$^0\n", args);
+                if(a->type.state != latest && a->type.state != self->type.state){
+                    targetCount++;
+                }
+                latest = a->type.state;
             }else if((a->type.state & FETCHER_END) && --targetCount == 0){
+                void *args[] = {a, NULL};
+                Out("^y.    Found End @^0\n", args);
                 DebugStack_Pop();
                 return it.idx; 
             }
@@ -168,7 +206,7 @@ static status Templ_handleJump(Templ *templ){
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         Iter_Add(&templ->data, value);
         r |= PROCESSING;
-    }else if(fch->type.state & FETCHER_COMMAND){
+    }else if(fch->type.state & FETCHER_CONDITION){
         if(templ->type.state & DEBUG){
             void *args[] = {
                 fch,
@@ -218,7 +256,7 @@ static status Templ_PrepareCycle(Templ *templ){
         Out("^c.^{STACK.name}: Templ:&\n    item:&^0\n", args);
     }
 
-    word unregJumpFl = (FETCHER_FOR|FETCHER_COMMAND|FETCHER_END|FETCHER_WITH|FETCHER_IF);
+    word unregJumpFl = (FETCHER_FOR|FETCHER_CONDITION|FETCHER_END|FETCHER_WITH|FETCHER_IF);
     if(item->type.of == TYPE_FETCHER && (((Fetcher *)item)->type.state & unregJumpFl)){
         Fetcher *fch = (Fetcher*)item;
 
@@ -232,15 +270,12 @@ static status Templ_PrepareCycle(Templ *templ){
             jump->skipIdx = Templ_FindEnd(templ);
         }else if(fch->type.state & (FETCHER_WITH|FETCHER_IF)){
             jump->skipIdx = Templ_FindEnd(templ); 
-        }else if((fch->type.state & (FETCHER_COMMAND|FETCHER_TEMPL)) == 
-                (FETCHER_COMMAND|FETCHER_TEMPL)){
+        }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_TEMPL)) == 
+                (FETCHER_CONDITION|FETCHER_TEMPL)){
             jump->skipIdx = Templ_FindEnd(templ);
-        }else if(fch->type.state & (FETCHER_COMMAND)){
-            jump->destIdx = Templ_FindStart(templ, FETCHER_FOR); 
-            i32 idx = templ->content.idx;
-            Iter_GetByIdx(&templ->content, jump->destIdx);
-            jump->skipIdx = Templ_FindEnd(templ); 
-            Iter_GetByIdx(&templ->content, idx);
+        }else if(fch->type.state & (FETCHER_CONDITION)){
+            jump->skipIdx = Templ_FindEnd(templ);
+            jump->destIdx = Templ_FindStart(templ, ZERO);
         }else if(fch->type.state & FETCHER_END){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){
@@ -258,9 +293,10 @@ static status Templ_PrepareCycle(Templ *templ){
                 jump->destIdx == NEGATIVE && jump->skipIdx == NEGATIVE &&
                 jump->tempIdx == NEGATIVE){
             args[0] = jump;
-            args[1] = NULL;
+            args[1] = I32_Wrapped(m, templ->content.idx);
+            args[2] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Unable to find source or ending for Jump in Templ content: @", 
+                "Unable to find source or ending for Jump in Templ content: @ \\@$", 
                 args);
 
             templ->type.state |= ERROR;

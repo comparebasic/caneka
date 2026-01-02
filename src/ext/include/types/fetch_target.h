@@ -5,7 +5,8 @@ enum fetch_target_flags {
     FETCH_TARGET_ITER = 1 << 11,
     FETCH_TARGET_PROP = 1 << 12,
     FETCH_TARGET_FUNC = 1 << 13,
-    FETCH_TARGET_RESOLVED = 1 << 14,
+    FETCH_TARGET_COMMAND = 1 << 14,
+    FETCH_TARGET_RESOLVED = 1 << 15,
 };
 
 typedef void *(*FetchFunc)(MemCh *m, struct fetch_target *target, void *data);
@@ -27,6 +28,7 @@ FetchTarget *FetchTarget_MakeFunc(MemCh *m, Str *key);
 FetchTarget *FetchTarget_MakeIdx(MemCh *m, i32 idx);
 FetchTarget *FetchTarget_MakeIter(MemCh *m);
 FetchTarget *FetchTarget_MakeProp(MemCh *m, Str *method);
+FetchTarget *FetchTarget_MakeCommand(MemCh *m);
 
 
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf);
