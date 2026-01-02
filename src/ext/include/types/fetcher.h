@@ -14,6 +14,7 @@ typedef struct fetcher {
     union {
         Span *targets;
     } val;
+    IterApi *api;
 } Fetcher;
 
 void *Fetch(MemCh *m, Fetcher *fch, void *data, void *source);

@@ -92,48 +92,34 @@ static PatCharDef iterDef[] = {
     {PAT_TERM, '.' ,'.'},
     {PAT_TERM, '.' ,'.'},
     {PAT_TERM, '.' ,'.'},
+    {PAT_ANY,' ',' '},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef levelDef[] = {
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    {PAT_TERM, '.' ,'.'},
+    {PAT_TERM, '.' ,'.'},
+    {PAT_ANY,' ',' '},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef currentDef[] = {
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    {PAT_TERM, '.' ,'.'},
+    {PAT_ANY,' ',' '},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef activeDef[] = {
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
+    {PAT_TERM, '_' ,'_'},
+    {PAT_ANY,' ',' '},
     {PAT_END, 0, 0}
 };
 
 static PatCharDef withDef[] = {
     {PAT_TERM, ':' ,':'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef levelDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '^' ,'^'},
-    {PAT_MANY|PAT_TERM, '0' ,'9'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef levelSpreadDef[] = {
-    {PAT_TERM|PAT_INVERT_CAPTURE, '^' ,'^'},
-    {PAT_MANY|PAT_TERM, '0' ,'9'},
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '.' ,'.'},
-    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '.' ,'.'},
-    {PAT_INVERT|PAT_INVERT_CAPTURE|PAT_TERM, '.' ,'.'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef betweenLevelDef[] = {
-    {PAT_TERM, '.' ,'.'},
-    {PAT_TERM, '.' ,'.'},
-    {PAT_ANY|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_ANY|PAT_TERM|PAT_INVERT_CAPTURE, '\t', '\t'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef itemLevelDef[] = {
-    {PAT_TERM, '.' ,'.'},
-    {PAT_ANY|PAT_INVERT_CAPTURE|PAT_CONSUME, ' ', ' '},
-        {PAT_ANY|PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, '\t', '\t'},
-    {PAT_TERM|PAT_INVERT_CAPTURE, '\n', '\n'},
-    {PAT_END, 0, 0}
-};
-
-static PatCharDef nestDef[] = {
-    {PAT_TERM, '-' ,'-'},
-    {PAT_TERM, '>' ,'>'},
     {PAT_END, 0, 0}
 };
 
@@ -199,16 +185,6 @@ static status templ(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         wsDef, FORMAT_TEMPL_WHITESPACE, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
-        levelDef, FORMAT_TEMPL_LEVEL, FORMAT_TEMPL_TEMPL);
-    r |= Roebling_SetPattern(rbl,
-        levelSpreadDef, FORMAT_TEMPL_LEVEL_SPREAD, FORMAT_TEMPL_TEMPL);
-    r |= Roebling_SetPattern(rbl,
-        itemLevelDef, FORMAT_TEMPL_LEVEL_ITEM, FORMAT_TEMPL_TEMPL);
-    r |= Roebling_SetPattern(rbl,
-        betweenLevelDef, FORMAT_TEMPL_LEVEL_BETWEEN, FORMAT_TEMPL_TEMPL);
-    r |= Roebling_SetPattern(rbl,
-        nestDef, FORMAT_TEMPL_LEVEL_NEST, FORMAT_TEMPL_TEMPL);
-    r |= Roebling_SetPattern(rbl,
         impliedDef, FORMAT_TEMPL_IMPLIED, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         templTokenDef, FORMAT_TEMPL_TOKEN, FORMAT_TEMPL_TEMPL);
@@ -224,6 +200,12 @@ static status templ(MemCh *m, Roebling *rbl){
         keyDef, FORMAT_TEMPL_KEY_SEP, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         pathSepDef, FORMAT_TEMPL_PATH_SEP, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        activeDef, FORMAT_TEMPL_ACTIVE, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        currentDef, FORMAT_TEMPL_CURRENT, FORMAT_TEMPL_TEMPL);
+    r |= Roebling_SetPattern(rbl,
+        levelDef, FORMAT_TEMPL_LEVEL, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
         iterDef, FORMAT_TEMPL_FOR, FORMAT_TEMPL_TEMPL);
     r |= Roebling_SetPattern(rbl,
@@ -309,16 +291,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             fch->type.state |= FETCHER_TEMPL;
             Iter_Add(&ctx->it, fch);
         }
-    }else if(captureKey > _FORMAT_TEMPL_LEVEL_START &&
-            captureKey < _FORMAT_TEMPL_LEVEL_END){
-        Fetcher *fch = (Fetcher *)as(Iter_Current(&ctx->it), TYPE_FETCHER);
-        fch->type.state |= FETCHER_COMMAND;
-        FetchTarget *tg = FetchTarget_Make(m);
-        tg->objType.of = captureKey;
-        if(captureKey == FORMAT_TEMPL_LEVEL){
-            tg->idx = Int_FromStr(StrVec_Str(m, v));
-        }
-        Span_Add(fch->val.targets, tg);
     }else if(captureKey > _FORMAT_TEMPL_VAR_ANNOTE_START &&
             captureKey < _FORMAT_TEMPL_VAR_ANNOTE_END){
         Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
@@ -353,6 +325,21 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(captureKey == FORMAT_TEMPL_FOR){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_FOR;
             FetchTarget *tg = FetchTarget_MakeIter(m);
+            Span_Add(fch->val.targets, tg);
+        }else if(captureKey == FORMAT_TEMPL_LEVEL){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
+            FetchTarget *tg = FetchTarget_MakeIter(m);
+            tg->objType.of = captureKey;
+            Span_Add(fch->val.targets, tg);
+        }else if(captureKey == FORMAT_TEMPL_ACTIVE){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
+            FetchTarget *tg = FetchTarget_MakeIter(m);
+            tg->objType.of = captureKey;
+            Span_Add(fch->val.targets, tg);
+        }else if(captureKey == FORMAT_TEMPL_CURRENT){
+            fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_COMMAND;
+            FetchTarget *tg = FetchTarget_MakeIter(m);
+            tg->objType.of = captureKey;
             Span_Add(fch->val.targets, tg);
         }else if(captureKey == FORMAT_TEMPL_IF){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_IF;

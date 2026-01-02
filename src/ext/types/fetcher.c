@@ -32,6 +32,13 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
         }
 
         tg->type.state |= (fch->type.state & PROCESSING);
+        if((tg->type.state & FETCH_TARGET_ITER) && fch->api == NULL){
+            IterApi *api = Lookup_Get(IterApiLookup, value->type.of);
+            if(api == NULL){
+                api = BaseIterApi;
+            }
+            fch->api = api;
+        }
         value = Fetch_Target(m, tg, value, source);
     }
 

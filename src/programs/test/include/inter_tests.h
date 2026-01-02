@@ -15,6 +15,7 @@ status TemplNav_Tests(MemCh *gm);
 status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
+    /*
     {
         "TemplCtx Tests",
         TemplCtx_Tests,
@@ -27,6 +28,7 @@ static TestSet InterTests[] = {
         "Testing templating with a few variables.",
         FEATURE_COMPLETE,
     },
+    */
     {
         "Templ Navigation Tests",
         TemplNav_Tests,

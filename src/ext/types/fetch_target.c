@@ -10,12 +10,7 @@ static void *Fetch_byKey(MemCh *m, FetchTarget *tg, void *data){
 }
 
 static void *Fetch_getIter(MemCh *m, FetchTarget *tg, void *data){
-    Abstract *a = (Abstract *)data;
-    if(a->type.of & TYPE_INSTANCE){
-        return InstIter_From(m, data);
-    }else{
-        return Iter_Make(m, data);
-    }
+    return Iter_Make(m, data);
 }
 
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){

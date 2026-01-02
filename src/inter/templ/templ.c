@@ -181,45 +181,10 @@ static status Templ_handleJump(Templ *templ){
             r |= PROCESSING;
         }else{
             FetchTarget *tg = Span_Get(fch->val.targets, 0);
-            if(
-                (tg->idx == jump->level && tg->objType.of == FORMAT_TEMPL_LEVEL) ||
-                (tg->idx == jump->depth && tg->objType.of == FORMAT_TEMPL_LEVEL_ITEM) ||
-                (tg->objType.of == FORMAT_TEMPL_LEVEL_BETWEEN && jump->level < jump->depth)
-                ){
-                void *args[] = {
-                    tg,
-                    I32_Wrapped(templ->m, tg->idx),
-                    I32_Wrapped(templ->m, jump->level),
-                    I32_Wrapped(templ->m, jump->depth),
-                    NULL
-                };
-                Out("^c.      Proceed: & tg$ level$ depth$^0.\n", args);
-            }else if(tg->objType.of == FORMAT_TEMPL_LEVEL_NEST){
-                Iter *it = (Iter *)Iter_Get(&templ->data);
-                if(it != NULL && it->idx < it->p->max_idx){
-                    void *args[] = {
-                        tg,
-                        NULL
-                    };
-                    Out("^c.      Nest: &^0.\n", args);
-                    Iter_Add(&templ->data, Iter_Get(it));
-                    r |= PROCESSING;
-                }else{
-                    void *args[] = {
-                        tg,
-                        NULL
-                    };
-                    Out("^c.      SkipNest: &^0.\n", args);
-                    Iter_GetByIdx(&templ->content, jump->skipIdx);
-                    r |= PROCESSING;
-                }
+            if(tg->objType.of == FORMAT_TEMPL_LEVEL){
+            }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
+            }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
             }else{
-                void *args[] = {
-                    tg,
-                    NULL
-                };
-                Out("^c.      Skipping: &^0.\n", args);
-
                 Iter_GetByIdx(&templ->content, jump->skipIdx);
                 r |= PROCESSING;
             }
@@ -280,7 +245,8 @@ static status Templ_PrepareCycle(Templ *templ){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){
                 TemplJump *dest = Span_Get(templ->content.p, destIdx);
-                if(dest != NULL && (dest->fch->type.state & FETCHER_WITH|FETCHER_FOR)){
+                if(dest != NULL && 
+                        (dest->fch->type.state & FETCHER_WITH|FETCHER_FOR)){
                     jump->destIdx = destIdx;
                 }else{
                     jump->fch->type.state |= NOOP;
@@ -294,7 +260,8 @@ static status Templ_PrepareCycle(Templ *templ){
             args[0] = jump;
             args[1] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Unable to find source or ending for Jump in Templ content: @", args);
+                "Unable to find source or ending for Jump in Templ content: @", 
+                args);
 
             templ->type.state |= ERROR;
             DebugStack_Pop();
