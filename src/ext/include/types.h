@@ -3,6 +3,7 @@
 #include "types/strings.h"
 #include "types/init.h"
 #include "types/equals.h"
+#include "types/iter_api.h"
 #include "types/fetcher.h"
 #include "types/fetch_target.h"
 #include "types/types_cls.h"

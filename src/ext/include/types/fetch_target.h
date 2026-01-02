@@ -18,8 +18,8 @@ typedef struct fetch_target {
     util id;
     Str *key;
     FetchFunc func;
+    IterApi *api;
 } FetchTarget;
-
 
 FetchTarget *FetchTarget_Make(MemCh *m);
 FetchTarget *FetchTarget_MakeKey(MemCh *m, Str *key);

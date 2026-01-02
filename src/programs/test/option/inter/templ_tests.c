@@ -291,6 +291,7 @@ status Templ_Tests(MemCh *m){
         "Templ_Prepare did not finish properly @ & -> &", args);
 
     if(r & ERROR){
+        r |= Test((r & ERROR) == 0, "Error found returning", NULL);
         DebugStack_Pop();
         return r;
     }

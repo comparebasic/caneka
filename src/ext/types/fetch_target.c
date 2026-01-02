@@ -103,7 +103,8 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
     Table *seel = NULL;
     word typeOf = value->type.of;
 
-    if(value->type.of != tg->objType.of || (tg->type.state & FETCH_TARGET_RESOLVED) == 0){
+    if(value->type.of != tg->objType.of ||
+            (tg->type.state & FETCH_TARGET_RESOLVED) == 0){
         if(FetchTarget_Resolve(m, tg, typeOf) & SUCCESS){
             return Fetch_Target(m, tg, value, source);
         }else{
@@ -111,24 +112,33 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
             goto err;
         }
     }else{
-        if(typeOf == TYPE_TABLE && (tg->type.state & FETCH_TARGET_PROP)){
-            return tg->func(m, tg, value);
-        }else if(tg->type.state & FETCH_TARGET_PROP){
+        if(typeOf & TYPE_INSTANCE){
             Inst *obj = (Inst *)value;
-            if(obj == NULL || (obj->type.of & TYPE_INSTANCE) == 0){
-                args[4] = value;
-                goto err;
+            if(tg->type.state & (FETCH_TARGET_PROP|FETCH_TARGET_KEY)){
+                void *a = Span_Get(obj, tg->idx);
+                if(a == NULL){
+                    args[4] = value;
+                    goto err;
+                }
+                return a;
+            }else if(tg->type.state & FETCH_TARGET_ATT){
+                Table *atts = Span_Get(obj, INST_PROPIDX_ATTS);
+                void *a = Span_Get(obj, tg->idx);
+                if(a == NULL){
+                    args[4] = value;
+                    goto err;
+                }
+                return a;
+            }else{
+                return tg->func(m, tg, value);
             }
-            void *a = Span_Get(obj, tg->idx);
-            if(a == NULL){
-                args[4] = value;
-                goto err;
-            }
-            return a;
-        }else if(tg->type.state & FETCH_TARGET_ATT){
-            return Map_FromOffset(m, value, tg->offsetType->range, tg->offsetType->of);
         }else{
-            return tg->func(m, tg, value);
+            if(tg->type.state & FETCH_TARGET_ATT){
+                return Map_FromOffset(m,
+                    value, tg->offsetType->range, tg->offsetType->of);
+            }else{
+                return tg->func(m, tg, value);
+            }
         }
     }
 err:

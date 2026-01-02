@@ -25,7 +25,7 @@ status Caneka_Init(MemCh *m){
     r |= Task_Init(m);
     r |= Serve_TosInit(m);
     r |= NodeObj_ClsInit(m);
-    r |= InstIter_Init(m);
+    r |= IterApi_Init(m);
 
     return r;
 }

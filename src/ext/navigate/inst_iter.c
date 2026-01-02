@@ -1,8 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-Lookup *IterApiLookup = NULL;
-
 InstIter *InstIter_From(MemCh *m, Inst *inst){
     IterApi *api = Lookup_Get(IterApiLookup, inst->type.of);
     if(api == NULL){
@@ -19,22 +17,4 @@ InstIter *InstIter_Make(MemCh *m, Inst *inst, Iter *it, IterApi *api){
     itn->it = it;
     itn->api = api;
     return itn;
-}
-
-IterApi *IterApi_Make(MemCh *m, IterFunc next, IterFunc prev, IterGetFunc get){
-    IterApi *api = MemCh_AllocOf(m, sizeof(IterApi), TYPE_ITER_API);
-    api->type.of = TYPE_ITER_API;
-    api->next = next;
-    api->prev = prev;
-    api->get = get;
-    return api;
-}
-
-status InstIter_Init(MemCh *m){
-    status r = READY;
-    if(IterApiLookup == NULL){
-        IterApiLookup = Lookup_Make(m, TYPE_INSTANCE);
-        r |= SUCCESS;
-    }
-    return r;
 }
