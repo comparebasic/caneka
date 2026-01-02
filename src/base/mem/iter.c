@@ -41,7 +41,7 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
     it->stack[dim] = ptr;
     it->stackIdx[dim] = localIdx;
     if(dim > 0 && *ptr == NULL){
-        word fl = (SPAN_OP_SET|SPAN_OP_RESIZE|SPAN_OP_RESERVE|SPAN_OP_ADD);
+        word fl = (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD);
         if((it->type.state & fl) == 0){
             it->type.state |= FLAG_ITER_CONTINUE;
             return 0;
@@ -170,7 +170,7 @@ static status Iter_Query(Iter *it){
     Span *p = it->p;
     if(dimsNeeded > p->dims){
         if((it->type.state &
-                (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD|SPAN_OP_RESIZE)) == 0){
+                (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD)) == 0){
             it->type.state |= NOOP;
             return it->type.state;
         }

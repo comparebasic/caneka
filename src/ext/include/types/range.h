@@ -3,6 +3,7 @@ enum ext_types {
     TYPE_SEAL,
     TYPE_NEST_SEL,
     TYPE_INST_ITER,
+    TYPE_ITER_API,
     TYPE_AUTH_CRED,
     TYPE_AUTH_TARGET,
     TYPE_SALT,

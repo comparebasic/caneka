@@ -3,8 +3,8 @@ enum span_ops {
     SPAN_OP_SET = 1 << 9,
     SPAN_OP_REMOVE = 1 << 10,
     SPAN_OP_RESERVE = 1 << 11,
-    SPAN_OP_RESIZE = 1 << 12,
-    SPAN_OP_ADD = 1 << 13,
+    SPAN_OP_ADD = 1 << 12,
+    FLAG_ITER_SELECTED = 1 << 13,
     FLAG_ITER_CONTINUE = 1 << 14,
     FLAG_ITER_REVERSE = 1 << 15,
 };
@@ -28,7 +28,8 @@ typedef struct iter {
     } metrics;
 } Iter;
 
-typedef status (*NextFunc)(Iter *it);
+typedef status (*IterFunc)(Iter *it);
+typedef void *(*IterGetFunc)(Iter *it);
 
 status Iter_Next(Iter *it);
 status Iter_Prev(Iter *it);
