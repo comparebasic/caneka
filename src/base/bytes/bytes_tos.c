@@ -276,6 +276,16 @@ status Str_InitLabels(MemCh *m, Lookup *lk){
     return r;
 }
 
+boolean Str_Empty(void *_a){
+    Str *s = (Str *)_a;
+    return s->length == 0;
+}
+
+boolean StrVec_Empty(void *_a){
+    StrVec *v = (StrVec *)_a;
+    return v->total == 0;
+}
+
 status Str_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Print);
@@ -285,5 +295,9 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)BytesLit_Print);
     r |= Lookup_Add(m, lk, TYPE_HISTO, (void *)Histo_Print);
     r |= Str_InitLabels(m, ToSFlagLookup);
+
+    r |= Lookup_Add(m, EmptyLookup, TYPE_STR, (void *)Str_Empty);
+    r |= Lookup_Add(m, EmptyLookup, TYPE_STRVEC, (void *)StrVec_Empty);
+
     return r;
 }

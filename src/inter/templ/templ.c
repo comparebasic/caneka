@@ -12,8 +12,6 @@ static i32 Templ_FindStart(Templ *templ, word flags){
 
     Abstract *self = Iter_Get(&it);
     status latest = ((TemplJump *)self)->fch->type.state;
-    void *args[] = {self, NULL};
-    Out("\n^y.Comparing Start for targetCount++ self@^0\n", args);
 
     i32 targetCount = 1;
     while((Iter_Prev(&it) & END) == 0){
@@ -24,26 +22,18 @@ static i32 Templ_FindStart(Templ *templ, word flags){
                 continue;
             }else if(prevJump->fch->type.state & FETCHER_END){
                 targetCount++;
-                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
-                Out("^y.    End++ for targetCount++ @ count$^0\n", args);
                 latest = a->type.state;
             }else if((prevJump->fch->type.state & flags) == 0){
                 if(prevJump->fch->type.state != latest && targetCount > 0){
                     --targetCount;
                 }
                 latest = prevJump->fch->type.state;
-                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
-                Out("^y.    NonFlag match for --targetCount @ count$^0\n", args);
             }else if(prevJump->fch->type.state & flags){
                 if(prevJump->fch->type.state != latest && targetCount > 0){
                     --targetCount;
                 }
-                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
-                Out("^y.    Flag match for --targetCount @ count$^0\n", args);
                 latest = prevJump->fch->type.state;
                 if(targetCount == 0){
-                    void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
-                    Out("^g.    Start Found @ count$^0\n", args);
                     DebugStack_Pop();
                     return it.idx;
                 }
@@ -83,8 +73,6 @@ static i32 Templ_FindEnd(Templ *templ){
     Abstract *self = Iter_Get(&it);
     status latest = ((TemplJump *)self)->fch->type.state;
     void *args[] = {self, NULL};
-    Out("\n^y.Comparing for targetCount++ self@^0\n", args);
-    printf("Start latest %d\n", latest);
 
     i32 targetCount = 1;
     while((Iter_Next(&it) & END) == 0){
@@ -95,15 +83,11 @@ static i32 Templ_FindEnd(Templ *templ){
                 continue;
             }else if((a->type.state & FETCHER_END) == 0){
                 void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
-                Out("^y.    Comparing for targetCount++ @ count$^0\n", args);
-                printf("%d vs %d\n", a->type.state, latest);
                 if(a->type.state != latest){
                     targetCount++;
                 }
                 latest = a->type.state;
             }else if((a->type.state & FETCHER_END) && --targetCount == 0){
-                void *args[] = {a, NULL};
-                Out("^y.    Found End @^0\n", args);
                 DebugStack_Pop();
                 return it.idx; 
             }
@@ -367,15 +351,6 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     Abstract *item = Iter_Get(&templ->content);
     DebugStack_SetRef(item, item->type.of);
 
-    if(templ->type.state & DEBUG){
-        void *args[] = {
-            NULL,
-            item,
-            NULL
-        };
-        Out("^yE.^{STACK.name}^e.(item:@)^0.\n", args);
-    }
-
     if(item->type.of == TYPE_TEMPL_JUMP){
         if(Templ_handleJump(templ) & (PROCESSING|SUCCESS)){
             item = Iter_Get(&templ->content);
@@ -383,6 +358,19 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     }
 
     Abstract *data = Iter_Get(&templ->data);
+
+
+    if(1 || (templ->type.state & DEBUG)){
+        void *args[] = {
+            NULL,
+            item,
+            Type_ToStr(templ->m, data->type.of),
+            data,
+            NULL
+        };
+        Out("^0.^{STACK.name}^y.\n  (item:@)\n  (data-typeOf/@: @)^0.\n", args);
+    }
+
 
     if(item->type.of == TYPE_STRVEC){
         templ->m->level--;
@@ -441,6 +429,10 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
 
 status Templ_Prepare(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
+
+    printf("prepare\n");
+    fflush(stdout);
+
     if((templ->type.state & PROCESSING) == 0){
         i16 g = 0;
         templ->type.state &= ~(ERROR|SUCCESS);
@@ -483,6 +475,9 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
         DebugStack_Pop();
         return 0;
     }
+
+    printf("ToS\n");
+    fflush(stdout);
 
     if(data != NULL){
         Templ_SetData(templ, data);

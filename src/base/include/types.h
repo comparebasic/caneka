@@ -12,4 +12,5 @@
 #include "types/ifc.h"
 #include "types/init.h"
 #include "types/combine.h"
+#include "types/empty.h"
 #include "types/types_tos.h"

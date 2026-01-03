@@ -134,7 +134,7 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
             Type_StateVec(bf->m, obj->type.of, obj->type.state),
             NULL,
         };
-        Fmt(bf, "$<@", args);
+        Fmt(bf, "$<@ ", args);
         Iter it;
         Iter_Init(&it, seel);
         while((Iter_Next(&it) & END) == 0){
@@ -143,7 +143,8 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
                 Buff_AddBytes(bf, (byte *)"#", 1);
                 ToS(bf, h->key, ZERO, flags); 
                 Buff_AddBytes(bf, (byte *)": ", 2);
-                ToS(bf, Span_Get(obj, h->orderIdx), ZERO, flags); 
+                Abstract *value = Span_Get(obj, h->orderIdx);
+                ToS(bf, value, ZERO, flags); 
                 if((it.type.state & LAST) == 0){
                     Buff_AddBytes(bf, (byte *)", ", 2);
                 }
@@ -157,16 +158,19 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
             Type_StateVec(bf->m, obj->type.of, obj->type.state),
             NULL,
         };
-        Fmt(bf, "$<@", args);
+        Fmt(bf, "$<@ ", args);
         Iter it;
         Iter_Init(&it, seel);
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);;
             if(h != NULL){
+                Abstract *value = Span_Get(obj, h->orderIdx);
+                if(Empty(value)){
+                    continue;
+                }
                 Buff_AddBytes(bf, (byte *)"#", 1);
                 ToS(bf, h->key, ZERO, flags); 
                 Buff_AddBytes(bf, (byte *)": ", 2);
-                Abstract *value = Span_Get(obj, h->orderIdx);
                 ToS(bf, value, ZERO, flags); 
                 if((it.type.state & LAST) == 0){
                     Buff_AddBytes(bf, (byte *)", ", 2);

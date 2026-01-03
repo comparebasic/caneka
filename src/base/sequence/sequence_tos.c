@@ -1,6 +1,11 @@
 #include <external.h>
 #include "base_module.h"
 
+static boolean Table_Empty(void *_a){
+    Table *tbl = (Table *)_a;
+    return tbl->nvalues == 0;
+}
+
 status HKey_Print(Buff *bf, void *a, cls type, word flags){
     HKey *hk = (HKey *)as(a, TYPE_HKEY);
     if(flags & (MORE|DEBUG)){
@@ -163,5 +168,7 @@ status Sequence_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     r |= Lookup_Add(m, lk, TYPE_ARRAY, (void *)Array_Print);
     r |= Lookup_Add(m, lk, TYPE_CSTR_ARRAY, (void *)CstrArray_Print);
+
+    r |= Lookup_Add(m, EmptyLookup, TYPE_TABLE, (void *)Table_Empty);
     return r;
 }

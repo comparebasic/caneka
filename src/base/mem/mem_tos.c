@@ -11,6 +11,11 @@ static inline status wsOut(Buff *bf, i8 dim){
     return SUCCESS;
 }
 
+static boolean Span_Empty(void *_a){
+    Span *p = (Span *)_a;
+    return p->nvalues == 0;
+}
+
 status Addr_ToS(Buff *bf, void *a, word flags){
     if(flags & DEBUG){
         Fmt(bf, "^D.", NULL);
@@ -312,5 +317,7 @@ status Mem_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
+
+    r |= Lookup_Add(m, EmptyLookup, TYPE_SPAN, (void *)Span_Empty);
     return r;
 }

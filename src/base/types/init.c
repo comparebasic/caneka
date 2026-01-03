@@ -16,6 +16,7 @@ status Caneka_InitBase(MemCh *m){
     r |= Core_Init(m);
     r |= Error_Init(m);
     r |= Ifc_Init(md);
+    r |= Empty_Init(m);
     r |= Hash_Init(m);
     r |= Maps_Init(md);
     r |= Debug_Init(md);
