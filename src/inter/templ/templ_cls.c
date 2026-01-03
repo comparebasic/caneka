@@ -29,11 +29,10 @@ static i64 TemplJump_Print(Buff *bf, void *a, cls type, word flags){
         I32_Wrapped(bf->m, jump->idx),
         I32_Wrapped(bf->m, jump->destIdx),
         I32_Wrapped(bf->m, jump->skipIdx),
-        I32_Wrapped(bf->m, jump->tempIdx),
         jump->fch,
         NULL
     };
-    return Fmt(bf, "TemplJump:<@ @/dest^D.@^d./skip^D@^d./temp^D@^d. &>", args);
+    return Fmt(bf, "TemplJump:<@ @/dest^D.@^d./skip^D@^d. &>", args);
 }
 
 static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){

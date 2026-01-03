@@ -20,6 +20,11 @@ static PatCharDef toTemplDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef indentDef[] = {
+    {PAT_TERM, '^' ,'^'},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef templTokenDef[] = {
     {PAT_KO|PAT_INVERT_CAPTURE, ' ', ' '}, {PAT_KO|PAT_INVERT_CAPTURE, '\n', '\n'}, 
     {PAT_KO|PAT_INVERT_CAPTURE, '\t', '\t'}, {PAT_KO|PAT_INVERT_CAPTURE, '!', '!'},
@@ -210,6 +215,8 @@ static status var(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         propSepDef, FORMAT_TEMPL_PROP_SEP, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
+        indentDef, FORMAT_TEMPL_INDENT, FORMAT_TEMPL_VAR);
+    r |= Roebling_SetPattern(rbl,
         attSepDef, FORMAT_TEMPL_ATT_SEP, FORMAT_TEMPL_VAR);
     r |= Roebling_SetPattern(rbl,
         keyDef, FORMAT_TEMPL_KEY_SEP, FORMAT_TEMPL_VAR);
@@ -303,9 +310,13 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             Span_Add(fch->val.targets, tg);
         }else if(captureKey == FORMAT_TEMPL_ACTIVE ||
                 captureKey == FORMAT_TEMPL_LEVEL ||
-                captureKey == FORMAT_TEMPL_CURRENT
+                captureKey == FORMAT_TEMPL_CURRENT ||
+                captureKey == FORMAT_TEMPL_INDENT
             ){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_CONDITION;
+            if(captureKey == FORMAT_TEMPL_INDENT){
+                fch->type.state |= FETCHER_VAR;
+            }
             FetchTarget *tg = FetchTarget_MakeCommand(m);
             tg->objType.of = captureKey;
             Span_Add(fch->val.targets, tg);

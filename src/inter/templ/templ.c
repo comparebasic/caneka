@@ -20,7 +20,9 @@ static i32 Templ_FindStart(Templ *templ, word flags){
         Abstract *a = Iter_Get(&it);
         if(a->type.of == TYPE_TEMPL_JUMP){
             TemplJump *prevJump = (TemplJump *)a;
-            if(prevJump->fch->type.state & FETCHER_END){
+            if(prevJump->fch->type.state & FETCHER_VAR){
+                continue;
+            }else if(prevJump->fch->type.state & FETCHER_END){
                 targetCount++;
                 void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
                 Out("^y.    End++ for targetCount++ @ count$^0\n", args);
@@ -51,6 +53,26 @@ static i32 Templ_FindStart(Templ *templ, word flags){
     DebugStack_Pop();
     return -1;
 }
+
+static i32 Templ_FindNext(Templ *templ, status flags){
+    DebugStack_Push(templ, templ->type.of);
+    Iter it;
+    memcpy(&it, &templ->content, sizeof(Iter));
+
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        if(a->type.of == TYPE_FETCHER){
+            if(a->type.state & FETCHER_VAR){
+                continue;
+            }else if(a->type.state & flags){
+                return it.idx; 
+            }
+        }
+    }
+    DebugStack_Pop();
+    return -1;
+}
+
 
 static i32 Templ_FindEnd(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
@@ -270,14 +292,21 @@ static status Templ_PrepareCycle(Templ *templ){
         if(fch->type.state & FETCHER_FOR){
             jump->level = 0;
             jump->skipIdx = Templ_FindEnd(templ);
+            jump->destIdx = Templ_FindNext(templ, FETCHER_CONDITION);
         }else if(fch->type.state & (FETCHER_WITH|FETCHER_IF)){
             jump->skipIdx = Templ_FindEnd(templ); 
         }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_TEMPL)) == 
                 (FETCHER_CONDITION|FETCHER_TEMPL)){
             jump->skipIdx = Templ_FindEnd(templ);
-        }else if(fch->type.state & (FETCHER_CONDITION)){
-            jump->skipIdx = Templ_FindEnd(templ);
             jump->destIdx = Templ_FindStart(templ, ZERO);
+        }else if(fch->type.state & (FETCHER_CONDITION)){
+            FetchTarget *tg = Span_Get(jump->fch->val.targets, 0); 
+            if(tg != NULL && tg->objType.of == FORMAT_TEMPL_INDENT){
+                jump->destIdx = Templ_FindStart(templ, ZERO);
+            }else{
+                jump->destIdx = Templ_FindEnd(templ);
+            }
+            jump->skipIdx = Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));
         }else if(fch->type.state & FETCHER_END){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){
@@ -292,8 +321,8 @@ static status Templ_PrepareCycle(Templ *templ){
         }
 
         if((jump->fch->type.state & (NOOP|FETCHER_FOR|FETCHER_WITH)) == 0 &&
-                jump->destIdx == NEGATIVE && jump->skipIdx == NEGATIVE &&
-                jump->tempIdx == NEGATIVE){
+                jump->destIdx == NEGATIVE && jump->skipIdx == NEGATIVE
+            ){
             args[0] = jump;
             args[1] = I32_Wrapped(m, templ->content.idx);
             args[2] = NULL;

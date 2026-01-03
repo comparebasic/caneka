@@ -61,6 +61,7 @@ static char *interTypeStrings[] = {
     "FORMAT_TEMPL_WITH",
     "FORMAT_TEMPL_FOR",
     "FORMAT_TEMPL_FOR_KV",
+    "FORMAT_TEMPL_INDENT",
     "FORMAT_TEMPL_LEVEL",
     "FORMAT_TEMPL_CURRENT",
     "FORMAT_TEMPL_ACTIVE",
