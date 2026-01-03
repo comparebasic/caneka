@@ -9,39 +9,39 @@ static i32 Templ_FindStart(Templ *templ, word flags){
     if(flags == ZERO){
         flags = (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT);
     }
-    word latest = ZERO;
 
     Abstract *self = Iter_Get(&it);
+    status latest = ((TemplJump *)self)->fch->type.state;
     void *args[] = {self, NULL};
     Out("\n^y.Comparing Start for targetCount++ self@^0\n", args);
 
     i32 targetCount = 1;
     while((Iter_Prev(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
-
         if(a->type.of == TYPE_TEMPL_JUMP){
             TemplJump *prevJump = (TemplJump *)a;
             if(prevJump->fch->type.state & FETCHER_END){
                 targetCount++;
                 void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
                 Out("^y.    End++ for targetCount++ @ count$^0\n", args);
+                latest = a->type.state;
             }else if((prevJump->fch->type.state & flags) == 0){
-                if(a->type.state != latest && targetCount > 0){
+                if(prevJump->fch->type.state != latest && targetCount > 0){
                     --targetCount;
                 }
-                latest = a->type.state;
+                latest = prevJump->fch->type.state;
                 void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
                 Out("^y.    NonFlag match for --targetCount @ count$^0\n", args);
             }else if(prevJump->fch->type.state & flags){
-                if(a->type.state != latest && targetCount > 0){
+                if(prevJump->fch->type.state != latest && targetCount > 0){
                     --targetCount;
                 }
                 void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
                 Out("^y.    Flag match for --targetCount @ count$^0\n", args);
-                latest = a->type.state;
+                latest = prevJump->fch->type.state;
                 if(targetCount == 0){
                     void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
-                    Out("^y.    Start Found @ count$^0\n", args);
+                    Out("^g.    Start Found @ count$^0\n", args);
                     DebugStack_Pop();
                     return it.idx;
                 }
@@ -59,9 +59,10 @@ static i32 Templ_FindEnd(Templ *templ){
 
 
     Abstract *self = Iter_Get(&it);
-    word latest = self->type.state;
+    status latest = ((TemplJump *)self)->fch->type.state;
     void *args[] = {self, NULL};
     Out("\n^y.Comparing for targetCount++ self@^0\n", args);
+    printf("Start latest %d\n", latest);
 
     i32 targetCount = 1;
     while((Iter_Next(&it) & END) == 0){
@@ -73,7 +74,8 @@ static i32 Templ_FindEnd(Templ *templ){
             }else if((a->type.state & FETCHER_END) == 0){
                 void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
                 Out("^y.    Comparing for targetCount++ @ count$^0\n", args);
-                if(a->type.state != latest && a->type.state != self->type.state){
+                printf("%d vs %d\n", a->type.state, latest);
+                if(a->type.state != latest){
                     targetCount++;
                 }
                 latest = a->type.state;
