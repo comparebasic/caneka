@@ -53,6 +53,8 @@ void *NestSel_Get(Iter *_it){
 }
 
 status NestSel_Next(Iter *_it){
+    printf("NestSel_Next\n");
+    fflush(stdout);
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
     }

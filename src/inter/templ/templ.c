@@ -120,7 +120,7 @@ static status Templ_handleJump(Templ *templ){
         }
     }
 
-    if(templ->type.state & DEBUG){
+    if(1 || templ->type.state & DEBUG){
         void *args[] = {
             jump,
             fch,
@@ -149,8 +149,10 @@ static status Templ_handleJump(Templ *templ){
             return templ->type.state;
         }
 
-        while((Iter_Next(it) & END) == 0){
-            void *a = Iter_Get(it);
+        while((fch->api->next(it) & END) == 0){
+            void *a = fch->api->get(it);
+            void *ar[] = {a, it->p, NULL};
+            Out("^p.api->get @ @^0\n", ar);
             if(a != NULL){
                 Iter_Add(&templ->data, a);
                 break;
