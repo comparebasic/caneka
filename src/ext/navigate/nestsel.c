@@ -6,6 +6,7 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
     if(it->p == NULL){
         Iter_Init(it, Span_Make(inst->m));
     }
+    it->objType.of = inst->type.of;
     
     Table *children = Span_Get(inst, INST_PROPIDX_CHILDREN);
 
@@ -62,17 +63,36 @@ status NestSel_Next(Iter *_it){
     if((_it->type.state & PROCESSING) == 0){
         Iter_Next(_it);
         it = Iter_Get(_it);
+        if((_it->type.state & (LAST|END)) == 0){
+            _it->objType.state |= MORE;
+        }else if(_it->type.state & LAST){
+            _it->objType.state &= ~MORE;
+            if(it->idx == it->metrics.selected){
+                it->objType.state |= SUCCESS;
+            }else{
+                it->objType.state &= ~SUCCESS;
+            }
+        }
     }else{
         it = Iter_Get(_it);
-        if((_it->type.state & (LAST|END)) == 0 && it->metrics.selected == it->idx){
+        if((_it->type.state & (LAST|END)) == 0 &&
+                it->metrics.selected == it->idx){
             it->metrics.selected = -1;
             Iter_Next(_it);
             it = Iter_Get(_it);
             if(_it->type.state & LAST){
                 Iter_First(it);
             }
+            _it->objType.state |= MORE;
         }else if(it->type.state & END){
             return END;
+        }else if(it->type.state & LAST){
+            _it->objType.state &= ~MORE;
+            if(it->idx == it->metrics.selected){
+                it->objType.state |= SUCCESS;
+            }else{
+                it->objType.state &= ~SUCCESS;
+            }
         }
     }
 

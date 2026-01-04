@@ -10,12 +10,20 @@ static void *Fetch_byKey(MemCh *m, FetchTarget *tg, void *data){
 }
 
 static void *Fetch_getIter(MemCh *m, FetchTarget *tg, void *data){
+    Abstract *a = (Abstract *)data;
+    if(a != NULL && a->type.of == TYPE_ITER){
+        return a;
+    }
     return Iter_Make(m, data);
 }
 
 status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
     void *args[4];
-    Str s = {.type = {TYPE_STR, STRING_CONST}, .length = 0, .alloc = 0, .bytes = NULL};
+    Str s = {.type = {TYPE_STR, STRING_CONST},
+        .length = 0,
+        .alloc = 0,
+        .bytes = NULL
+    };
     args[0] = &s;
     if(typeOf & TYPE_INSTANCE){
         Table *seel = Lookup_Get(SeelLookup, typeOf);
@@ -67,7 +75,7 @@ status FetchTarget_Resolve(MemCh *m, FetchTarget *tg, cls typeOf){
                 tg->offsetType = att;
            }
         }else if(tg->type.state & FETCH_TARGET_ITER && 
-            (typeOf == TYPE_TABLE || typeOf == TYPE_SPAN)
+            (typeOf == TYPE_TABLE || typeOf == TYPE_SPAN || typeOf == TYPE_ITER)
         ){
             tg->func = Fetch_getIter;
         }else{

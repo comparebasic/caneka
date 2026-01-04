@@ -15,6 +15,7 @@ extern i32 _modulos[SPAN_MAX_DIMS+1];
 
 typedef struct iter {
     Type type;
+    Type objType;
     i32 idx;
     struct span *p;
     void *value;

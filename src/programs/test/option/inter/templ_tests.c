@@ -38,10 +38,9 @@ static char *logicTestContent = ""
 "</div>\n"
 "";
 
-static WwwNav *navMake(MemCh *m){
+static WwwNav *navMake(MemCh *m, Table *coordTbl){
 
     WwwNav *node = Inst_Make(m, TYPE_WWW_NAV);
-    Table *coordTbl = Table_Make(m);
 
     StrVec *path = IoPath_From(m, S(m, "/docs/base/bytes/str"));
     Span *coords = Span_Make(m);
@@ -334,9 +333,16 @@ status TemplNav_Tests(MemCh *m){
         return r;
     }
 
-    WwwNav *nav = navMake(m);
+    Table *coordTbl = Table_Make(m);
+    WwwNav *nav = navMake(m, coordTbl);
     Inst *page = Inst_Make(m, TYPE_WWW_PAGE);
-    Seel_Set(page, S(m, "nav"), nav); 
+
+    Iter *navIt = Iter_Make(m, NULL);
+    Str *s = S(m, "Fmt");
+    Span *crd = Table_Get(coordTbl, s);
+    NestSel_Init(navIt, nav, crd);
+
+    Seel_Set(page, S(m, "nav"), navIt); 
     Table *data = Table_Make(m);
     Table_Set(data, S(m, "page"), page);
     Buff *bf = Buff_Make(m, ZERO);

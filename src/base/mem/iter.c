@@ -672,6 +672,7 @@ status Iter_Prev(Iter *it){
 void Iter_Init(Iter *it, Span *p){
     memset(it, 0, sizeof(Iter));
     it->type.of = TYPE_ITER;
+    it->objType.of = p != NULL ? p->type.of : ZERO;
     it->p = p;
     it->metrics.get = it->metrics.set = it->metrics.selected = it->metrics.available = -1;
     memset(it->stack, 0, sizeof(void *)*SPAN_MAX_DIMS);
@@ -691,6 +692,7 @@ void Iter_Start(Iter *it, i32 idx, status op){
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx){
     it->type.of = TYPE_ITER;
     it->type.state = op;
+    it->objType.of = p != NULL ? p->type.of : ZERO;
     it->p = p;
     it->idx = idx;
     it->metrics.get = it->metrics.set = it->metrics.selected = it->metrics.available = -1;
