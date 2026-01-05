@@ -7,7 +7,8 @@ static i32 Templ_FindStart(Templ *templ, word flags){
     memcpy(&it, &templ->content, sizeof(Iter));
 
     if(flags == ZERO){
-        flags = (FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT);
+        flags = (
+            FETCHER_WITH|FETCHER_FOR|FETCHER_IF|FETCHER_IFNOT|FETCHER_CONDITION);
     }
 
     Abstract *self = Iter_Get(&it);
@@ -146,12 +147,23 @@ status Templ_PrepareCycle(Templ *templ){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){
                 TemplJump *dest = Span_Get(templ->content.p, destIdx);
-                if(dest != NULL && 
-                        (dest->fch->type.state & FETCHER_WITH|FETCHER_FOR)){
-                    jump->destIdx = destIdx;
-                }else{
-                    jump->fch->type.state |= NOOP;
+                if(dest != NULL){
+                    if(dest->fch->type.state & (FETCHER_WITH|FETCHER_FOR)){
+                        jump->destIdx = destIdx;
+                        void *ar[] = {fch, dest, I32_Wrapped(m, destIdx), NULL};
+                        Out("^p.For/With \\@$ @\n   @^0\n", ar);
+                    }else if(dest->fch->type.state & (FETCHER_CONDITION)){
+                        jump->destIdx = destIdx;
+                        jump->skipIdx = Templ_FindEnd(templ);
+                        void *ar[] = {fch, dest, NULL};
+                        Out("^p.Other @\n   @^0\n", ar);
+                    }else{
+                        jump->fch->type.state |= NOOP;
+                    }
                 }
+            }else{
+                void *ar[] = {fch, NULL};
+                Out("^p.NoJumpIdx @^0\n", ar);
             }
         }
 
@@ -193,9 +205,6 @@ status Templ_PrepareCycle(Templ *templ){
 
 status Templ_Prepare(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
-
-    printf("prepare\n");
-    fflush(stdout);
 
     if((templ->type.state & PROCESSING) == 0){
         i16 g = 0;

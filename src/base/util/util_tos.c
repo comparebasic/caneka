@@ -146,7 +146,8 @@ static status WrappedU32_Print(Buff *bf, void *a, cls type, word flags){
 
 static status WrappedI32_Print(Buff *bf, void *a, cls type, word flags){
     Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
-    Str *s = Str_FromI64(bf->m, (i64)sg->val.i);
+    i64 n = (i32)sg->val.i;
+    Str *s = Str_FromI64(bf->m, n);
     if(flags & DEBUG){
         void *args[] = {
             s,

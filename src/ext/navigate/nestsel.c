@@ -108,6 +108,6 @@ status NestSel_Next(Iter *_it){
         }
     }
 
-    _it->objType.state |= (_it->type.state & LAST);
+    _it->objType.state |= (it->type.state & LAST);
     return ZERO;
 }

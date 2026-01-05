@@ -59,6 +59,7 @@ i64 Str_I64OnBytes(byte **_b, byte *end, i64 i){
     if(negative){
         i = labs(i);
     }
+
     *b = '0';
     while(i > 0 && b > start){
         val = i % base;

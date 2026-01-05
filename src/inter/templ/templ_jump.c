@@ -9,18 +9,30 @@ status Templ_HandleJump(Templ *templ){
     Abstract *data = Iter_Get(&templ->data);
 
     Fetcher *fch = jump->fch;
-    i32 skipIdx = -1;
+    i32 curIdx = -1;
     if(fch->type.state & FETCHER_END){
-        skipIdx = templ->content.idx;
+        curIdx = templ->content.idx;
+        Iter *it = Span_Get(templ->data.p, templ->data.idx-1);
         TemplJump *dest = (TemplJump *)Span_Get(templ->content.p, jump->destIdx);
         if(dest->fch->type.state & FETCHER_WITH){
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
-        }
-        if(dest->fch->type.state & FETCHER_FOR){
+        }else if(dest->fch->type.state & FETCHER_FOR){
             Iter_GetByIdx(&templ->content, jump->destIdx);
             jump = (TemplJump *)Iter_Get(&templ->content);
             fch = jump->fch;
+        }else if(dest->fch->type.state & FETCHER_CONDITION){
+            printf("Condition\n");
+            exit(1);
+            if(jump->skipIdx != -1 && it != NULL &&
+                    (it->objType.state & LAST) == 0){
+                printf("LAST item\n");
+                fflush(stdout);
+                exit(1);
+                Iter_GetByIdx(&templ->content, jump->skipIdx);
+                jump = (TemplJump *)Iter_Get(&templ->content);
+                fch = jump->fch;
+            }
         }
     }
 
@@ -62,7 +74,7 @@ status Templ_HandleJump(Templ *templ){
         }
 
         if(it->type.state & END){
-            i32 idx = jump->skipIdx != NEGATIVE ? jump->skipIdx : skipIdx;
+            i32 idx = jump->skipIdx != NEGATIVE ? jump->skipIdx : curIdx;
             if(idx != NEGATIVE){
                 Iter_GetByIdx(&templ->content, idx);
                 Iter_Remove(&templ->data);
@@ -139,7 +151,7 @@ status Templ_HandleJump(Templ *templ){
                 Iter_GetByIdx(&templ->content, jump->skipIdx);
                 r |= PROCESSING;
             }else if(tg->objType.of == FORMAT_TEMPL_LEVEL  &&
-                it != NULL && (it->objType.state & LAST) == 0
+                it != NULL && (it->type.state & LAST) == 0
             ){
                 void *args[] = {
                     fch,
@@ -161,7 +173,9 @@ status Templ_HandleJump(Templ *templ){
                 Iter_GetByIdx(&templ->content, jump->destIdx);
                 r |= PROCESSING;
             }else if(tg->objType.of == FORMAT_TEMPL_CURRENT  &&
-                it != NULL && (it->objType.state & LAST)
+                it != NULL &&
+                    (it->objType.state & FLAG_ITER_SELECTED) == 0 &&
+                    (it->type.state & LAST)
             ){
                 void *args[] = {
                     fch,
@@ -171,8 +185,8 @@ status Templ_HandleJump(Templ *templ){
                 Out("^0.  Running Command: & @^0.\n", args);
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE  &&
                 it != NULL &&
-                ((it->objType.state & (LAST|FLAG_ITER_SELECTED)) ==
-                    (LAST|FLAG_ITER_SELECTED))
+                (it->objType.state & FLAG_ITER_SELECTED) &&
+                (it->type.state & LAST)
             ){
                 void *args[] = {
                     fch,
