@@ -74,9 +74,10 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
     FetchTarget *tg = (FetchTarget *)as(a, TYPE_FETCH_TARGET);
     void *args[] = {
         Type_StateVec(bf->m, tg->type.of, tg->type.state),
+        Type_ToStr(bf->m, tg->objType.of),
         NULL,
     };
-    Fmt(bf, "FT<@", args);
+    Fmt(bf, "FT<@ @", args);
     if(tg->type.of != ZERO){
         void *args[] = {
             Type_ToStr(bf->m, tg->type.of),

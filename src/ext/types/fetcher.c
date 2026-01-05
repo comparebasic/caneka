@@ -24,8 +24,9 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
 
     Iter it;
     Iter_Init(&it, fch->val.targets);
+    FetchTarget *tg = NULL;
     while(value != NULL && (Iter_Next(&it) & END) == 0){
-        FetchTarget *tg = (FetchTarget *)Iter_Get(&it);
+        tg = (FetchTarget *)Iter_Get(&it);
         if(value->type.of == TYPE_HASHED && 
                 (tg->type.state & FETCH_TARGET_ATT) == 0){
             value = ((Hashed *)value)->value;
@@ -39,15 +40,14 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
             }
             IterApi *api = Lookup_Get(IterApiLookup, typeOf);
             if(api == NULL){
-                void *args[] = {Type_ToStr(m, typeOf), NULL};
-                Out("^c.Basic Api for @^0\n", args);
                 api = BaseIterApi;
-            }else{
-                void *args[] = {Type_ToStr(m, typeOf), NULL};
-                Out("^c.Fancy Api for @^0\n", args);
             }
             fch->api = api;
         }
+
+        void *ar[] = {Type_ToStr(m, value->type.of), NULL};
+        Out("^b.Fetch From @^0\n", ar);
+
         value = Fetch_Target(m, tg, value, source);
     }
 
@@ -61,6 +61,10 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
     }
 
     if(it.type.state & END){
+        if(value->type.of == TYPE_HASHED && 
+                (tg->type.state & FETCH_TARGET_ATT) == 0){
+            value = ((Hashed *)value)->value;
+        }
         DebugStack_Pop();
         return value;
     }else if((fch->type.state & FETCHER_IF) == 0){

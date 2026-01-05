@@ -46,16 +46,12 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
 void *NestSel_Get(Iter *_it){
     Iter *it = Iter_Get(_it);
     if(it == NULL){
-        printf("it is null\n");
-        fflush(stdout);
         return NULL;
     }
     return it->value;
 }
 
 status NestSel_Next(Iter *_it){
-    printf("NestSel_Next\n");
-    fflush(stdout);
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
     }

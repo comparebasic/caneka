@@ -42,11 +42,38 @@ static WwwNav *navMake(MemCh *m, Table *coordTbl){
 
     WwwNav *node = Inst_Make(m, TYPE_WWW_NAV);
 
-    StrVec *path = IoPath_From(m, S(m, "/docs/base/bytes/str"));
+    StrVec *path = IoPath_From(m, S(m, "/docs"));
     Span *coords = Span_Make(m);
     WwwNav *item = Inst_Make(m, TYPE_WWW_NAV);
     Seel_Set(item, K(m, "url"), path);
-    StrVec *name = Sv(m, "Str");
+    StrVec *name = Sv(m, "Docs");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "Base");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base/bytes"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "bytes");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base/bytes/str"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "Str");
     Seel_Set(item, K(m, "name"), name);
     Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
     Table_Set(coordTbl, name, coords);
@@ -65,6 +92,15 @@ static WwwNav *navMake(MemCh *m, Table *coordTbl){
     item = Inst_Make(m, TYPE_WWW_NAV);
     Seel_Set(item, K(m, "url"), path);
     name = Sv(m, "ToS");
+    Seel_Set(item, K(m, "name"), name);
+    Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
+    Table_Set(coordTbl, name, coords);
+
+    path = IoPath_From(m, S(m, "/docs/base/mem"));
+    coords = Span_Make(m);
+    item = Inst_Make(m, TYPE_WWW_NAV);
+    Seel_Set(item, K(m, "url"), path);
+    name = Sv(m, "mem");
     Seel_Set(item, K(m, "name"), name);
     Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
     Table_Set(coordTbl, name, coords);

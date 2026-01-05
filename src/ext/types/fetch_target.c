@@ -123,6 +123,10 @@ void *Fetch_Target(MemCh *m, FetchTarget *tg, void *_value, void *source){
                     args[4] = value;
                     goto err;
                 }
+
+                void *ar[] = {a, I32_Wrapped(m, tg->idx), obj, NULL};
+                Out("^p ----- Return Fetch inst prop/key @/$ from @^0\n", ar);
+
                 return a;
             }else if(tg->type.state & FETCH_TARGET_ATT){
                 Table *atts = Span_Get(obj, INST_PROPIDX_ATTS);

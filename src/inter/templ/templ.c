@@ -151,8 +151,6 @@ static status Templ_handleJump(Templ *templ){
 
         while((fch->api->next(it) & END) == 0){
             void *a = fch->api->get(it);
-            void *ar[] = {a, it->p, NULL};
-            Out("^p.api->get @ @^0\n", ar);
             if(a != NULL){
                 Iter_Add(&templ->data, a);
                 break;
@@ -222,36 +220,48 @@ static status Templ_handleJump(Templ *templ){
             r |= PROCESSING;
         }else{
             FetchTarget *tg = Span_Get(fch->val.targets, 0);
+            Iter *it = Span_Get(templ->data.p, templ->data.idx-1);
             void *args[] = {
                 fch,
+                Type_ToStr(templ->m, tg->objType.of),
                 data,
                 NULL
             };
-            Out("^c.  Command: & @^0.\n", args);
+            Out("^c.  Command: & ^E.@^e. @^0.\n", args);
             if(tg == NULL){
                 Iter_GetByIdx(&templ->content, jump->skipIdx);
                 r |= PROCESSING;
-            }else if(tg->objType.of == FORMAT_TEMPL_LEVEL /* &&
-                (it->objType.state & MORE)
-                */
+            }else if(tg->objType.of == FORMAT_TEMPL_LEVEL  &&
+                it != NULL && (it->objType.state & MORE)
             ){
                 void *args[] = {
                     fch,
                     Type_ToStr(templ->m, tg->objType.of),
                     NULL
                 };
-                Out("^c.  Running Command: & @^0.\n", args);
-            }else if(tg->objType.of == FORMAT_TEMPL_CURRENT /* &&
-                (it->objType.state & MORE) == 0
-                */
+                Out("^0.  Running Command: & @^0.\n", args);
+            }else if(tg->objType.of == FORMAT_TEMPL_CURRENT  &&
+                it != NULL && (it->objType.state & MORE) == 0
             ){
                 void *args[] = {
                     fch,
                     Type_ToStr(templ->m, tg->objType.of),
                     NULL
                 };
-                Out("^c.  Running Command: & @^0.\n", args);
-            }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE /* &&
+                Out("^0.  Running Command: & @^0.\n", args);
+            }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE  &&
+                it != NULL &&
+                (it->objType.state & MORE) == 0 &&
+                (it->objType.state & SUCCESS)
+            ){
+                void *args[] = {
+                    fch,
+                    Type_ToStr(templ->m, tg->objType.of),
+                    NULL
+                };
+                Out("^0.  Running Command: & @^0.\n", args);
+            }else if(tg->objType.of == FORMAT_TEMPL_INDENT/*
+                it != NULL &&
                 (it->objType.state & MORE) == 0 &&
                 (it->objType.state & SUCCESS)
                 */
@@ -259,9 +269,12 @@ static status Templ_handleJump(Templ *templ){
                 void *args[] = {
                     fch,
                     Type_ToStr(templ->m, tg->objType.of),
+                    I32_Wrapped(templ->m, jump->destIdx),
                     NULL
                 };
-                Out("^c.  Running Command: & @^0.\n", args);
+                Out("^0.  Running Command: & @ to @^0.\n", args);
+                Iter_GetByIdx(&templ->content, jump->destIdx);
+                r |= PROCESSING;
             }else{
                 Iter_GetByIdx(&templ->content, jump->skipIdx);
                 r |= PROCESSING;
@@ -383,9 +396,13 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     Abstract *item = Iter_Get(&templ->content);
     DebugStack_SetRef(item, item->type.of);
 
-    if(item->type.of == TYPE_TEMPL_JUMP){
+    Abstract *prev = NULL;
+    while(prev != item && item->type.of == TYPE_TEMPL_JUMP){
         if(Templ_handleJump(templ) & (PROCESSING|SUCCESS)){
+            prev = item;
             item = Iter_Get(&templ->content);
+        }else{
+            break;
         }
     }
 
@@ -396,16 +413,18 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
             item,
             Type_ToStr(templ->m, data->type.of),
             data,
-            bf->v,
             NULL
         };
-        Out("^0.^{STACK.name}^y.\n  (item:@)\n  (data-typeOf/@: @)"
-            "\n  -> ^0.@\n", args);
+        Out("^0.^{STACK.name}^y.\n  (item:@)\n  (data-typeOf/@: @)\n", args);
     }
 
     if(item->type.of == TYPE_STRVEC){
         templ->m->level--;
         total += ToS(bf, item, 0, ZERO); 
+
+        void *ar[] = {bf->v, NULL};
+        Out("\n^p.VecAdded @^0\n", ar);
+
         templ->m->level++;
     }else if(item->type.of == TYPE_FETCHER && item->type.state & FETCHER_VAR){
         Fetcher *fch = (Fetcher *)item;
@@ -439,6 +458,10 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
         }
         templ->m->level--;
         total += ToS(bf, value, 0, ZERO); 
+
+        void *ar[] = {bf->v, value, NULL};
+        Out("\n^p.VarAdded @\n    ^0&^0\n", ar);
+
         templ->m->level++;
     }
 
