@@ -39,6 +39,7 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
     }
 
     Iter_First(it);
+    it->objType.state |= MORE;
 
     return r;
 }
@@ -52,6 +53,7 @@ void *NestSel_Get(Iter *_it){
 }
 
 status NestSel_Next(Iter *_it){
+    _it->objType.state &= ~MORE;
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
     }
@@ -60,15 +62,16 @@ status NestSel_Next(Iter *_it){
         Iter_Next(_it);
         it = Iter_Get(_it);
         if((_it->type.state & (LAST|END)) == 0){
-            _it->objType.state |= MORE;
+            _it->objType.state |= FLAG_ITER_SELECTED;
         }else if(_it->type.state & LAST){
-            _it->objType.state &= ~MORE;
+            _it->objType.state &= ~FLAG_ITER_SELECTED;
             if(it->idx == it->metrics.selected){
-                it->objType.state |= SUCCESS;
+                it->objType.state |= FLAG_ITER_SELECTED;
             }else{
                 it->objType.state &= ~SUCCESS;
             }
         }
+        _it->objType.state |= MORE;
     }else{
         it = Iter_Get(_it);
         if((_it->type.state & (LAST|END)) == 0 &&
@@ -79,11 +82,12 @@ status NestSel_Next(Iter *_it){
             if(_it->type.state & LAST){
                 Iter_First(it);
             }
-            _it->objType.state |= MORE;
+            _it->objType.state |= (FLAG_ITER_SELECTED|MORE);
         }else if(it->type.state & END){
             return END;
         }else if(it->type.state & LAST){
-            _it->objType.state &= ~MORE;
+            _it->objType.state &= ~FLAG_ITER_SELECTED;
+            _it->objType.state |= LAST;
             if(it->idx == it->metrics.selected){
                 it->objType.state |= SUCCESS;
             }else{
@@ -95,14 +99,15 @@ status NestSel_Next(Iter *_it){
     Iter_Next(it);
     if(_it->type.state & LAST){
         if(it->metrics.selected == it->idx){
-            _it->type.state |= MORE;
+            _it->objType.state |= FLAG_ITER_SELECTED;
         }else{
-            _it->type.state &= ~MORE;
+            _it->objType.state &= ~FLAG_ITER_SELECTED;
         }
         if(it->type.state & END){
             return END;
         }
     }
 
+    _it->objType.state |= (_it->type.state & LAST);
     return ZERO;
 }
