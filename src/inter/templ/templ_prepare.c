@@ -137,11 +137,7 @@ status Templ_PrepareCycle(Templ *templ){
             jump->destIdx = Templ_FindStart(templ, ZERO);
         }else if(fch->type.state & (FETCHER_CONDITION)){
             FetchTarget *tg = Span_Get(jump->fch->val.targets, 0); 
-            if(tg != NULL && tg->objType.of == FORMAT_TEMPL_INDENT){
-                jump->destIdx = Templ_FindStart(templ, FETCHER_FOR);
-            }else{
-                jump->destIdx = Templ_FindEnd(templ);
-            }
+            jump->destIdx = Templ_FindNext(templ, FETCHER_END);
             jump->skipIdx = Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));
         }else if(fch->type.state & FETCHER_END){
             i32 destIdx = Templ_FindStart(templ, ZERO);

@@ -96,7 +96,6 @@ status NestSel_Next(Iter *_it){
                 break;
             }else if(it->type.state & END){
                 if(Iter_Prev(_it) & END){
-                    printf("End\n");
                     return END;
                 }
             }else{
@@ -114,7 +113,6 @@ status NestSel_Next(Iter *_it){
         }
         if(it->type.state & END){
             _it->type.state |= END;
-            printf("End II\n");
             return END;
         }
     }
