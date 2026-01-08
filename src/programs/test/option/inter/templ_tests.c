@@ -391,11 +391,9 @@ status TemplNav_Tests(MemCh *m){
 
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
-    args[0] = templ->content.p;
-    args[1] = nav;
-    args[2] = bf->v;
-    args[3] = NULL;
-    Out("^y.Templ->v &\n^c.@\n^p.$^0\n", args);
+    args[0] = bf->v;
+    args[1] = NULL;
+    Out("^p.bf->v @^0\n", args);
 
     r |= ERROR;
 

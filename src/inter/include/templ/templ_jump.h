@@ -4,6 +4,7 @@ typedef struct templ_jump {
     Type type;
     Type sourceType;
     Fetcher *fch;
+    status jumpFlags;
     i16 incr;
     i32 idx;
     i32 destIdx;

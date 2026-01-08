@@ -49,6 +49,10 @@ void *NestSel_Get(Iter *_it){
     if(it == NULL){
         return NULL;
     }
+
+    void *ar[] = {it->value, NULL};
+    Out("^b.NestSel_Get(@)^0\n", ar);
+
     return it->value;
 }
 
