@@ -2,6 +2,7 @@
 
 typedef struct templ_jump {
     Type type;
+    Type sourceType;
     Fetcher *fch;
     i16 incr;
     i32 idx;

@@ -138,7 +138,7 @@ status Templ_PrepareCycle(Templ *templ){
         }else if(fch->type.state & (FETCHER_CONDITION)){
             FetchTarget *tg = Span_Get(jump->fch->val.targets, 0); 
             if(tg != NULL && tg->objType.of == FORMAT_TEMPL_INDENT){
-                jump->destIdx = Templ_FindStart(templ, ZERO);
+                jump->destIdx = Templ_FindStart(templ, FETCHER_FOR);
             }else{
                 jump->destIdx = Templ_FindEnd(templ);
             }
@@ -147,23 +147,16 @@ status Templ_PrepareCycle(Templ *templ){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){
                 TemplJump *dest = Span_Get(templ->content.p, destIdx);
+                jump->sourceType.state = dest->fch->type.state;
                 if(dest != NULL){
                     if(dest->fch->type.state & (FETCHER_WITH|FETCHER_FOR)){
                         jump->destIdx = destIdx;
-                        void *ar[] = {fch, dest, I32_Wrapped(m, destIdx), NULL};
-                        Out("^p.For/With \\@$ @\n   @^0\n", ar);
                     }else if(dest->fch->type.state & (FETCHER_CONDITION)){
-                        jump->destIdx = destIdx;
                         jump->skipIdx = Templ_FindEnd(templ);
-                        void *ar[] = {fch, dest, NULL};
-                        Out("^p.Other @\n   @^0\n", ar);
                     }else{
                         jump->fch->type.state |= NOOP;
                     }
                 }
-            }else{
-                void *ar[] = {fch, NULL};
-                Out("^p.NoJumpIdx @^0\n", ar);
             }
         }
 
@@ -181,22 +174,6 @@ status Templ_PrepareCycle(Templ *templ){
             DebugStack_Pop();
             return templ->type.state;
         }
-
-        if(templ->type.state & DEBUG){
-            void *args[] = {
-                jump,
-                NULL,
-            };
-            Out("^c.  Making a Jump &^0.\n", args);
-        }
-    }
-
-    if(templ->type.state & DEBUG){
-        void *args[] = {
-            Iter_Get(&templ->content),
-            NULL
-        };
-        Out("^y.Templ_Prepare end\n  ^E.content:^e.&^0.\n", args);
     }
 
     DebugStack_Pop();

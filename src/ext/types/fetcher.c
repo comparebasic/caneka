@@ -44,10 +44,6 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
             }
             fch->api = api;
         }
-
-        void *ar[] = {Type_ToStr(m, value->type.of), NULL};
-        Out("^b.Fetch From @^0\n", ar);
-
         value = Fetch_Target(m, tg, value, source);
     }
 

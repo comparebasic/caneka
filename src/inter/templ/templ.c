@@ -28,30 +28,17 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
             NULL,
             item,
             Type_ToStr(templ->m, data->type.of),
-            data,
             NULL
         };
-        Out("^0.^{STACK.name}^y.\n  (item:@)\n  (data-typeOf/@: @)\n", args);
+        Out("^0.^{STACK.name}^y.\n  (item:@)\n  (data-typeOf/@)\n", args);
     }
 
     if(item->type.of == TYPE_STRVEC){
         templ->m->level--;
         total += ToS(bf, item, 0, ZERO); 
-
-        void *ar[] = {bf->v, NULL};
-        Out("\n^p.VecAdded @^0\n", ar);
-
         templ->m->level++;
     }else if(item->type.of == TYPE_FETCHER && item->type.state & FETCHER_VAR){
         Fetcher *fch = (Fetcher *)item;
-        if(templ->type.state & DEBUG){
-            void *args[] = {
-                fch,
-                NULL
-            };
-            Out("^c.  Fetcher: &^0.\n", args);
-        }
-
         DebugStack_SetRef(fch, fch->type.of);
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
@@ -65,32 +52,13 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
             DebugStack_Pop();
             return total;
         }
-        if(templ->type.state & DEBUG){
-            void *args[] = {
-                value,
-                NULL
-            };
-            Out("^c.  VarValue: &^0.\n", args);
-        }
         templ->m->level--;
         total += ToS(bf, value, 0, ZERO); 
-
-        void *ar[] = {bf->v, value, NULL};
-        Out("\n^p.VarAdded @\n    ^0&^0\n", ar);
-
         templ->m->level++;
     }
 
     if(templ->content.type.state & END){
         templ->type.state |= SUCCESS;
-    }
-
-    if(templ->type.state & DEBUG){
-        void *args[] = {
-            bf->v,
-            NULL
-        };
-        Out("^yE.>> Out:^e. @^0.\n", args);
     }
 
     DebugStack_Pop();
@@ -116,9 +84,6 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
         DebugStack_Pop();
         return 0;
     }
-
-    printf("ToS\n");
-    fflush(stdout);
 
     if(data != NULL){
         Templ_SetData(templ, data);

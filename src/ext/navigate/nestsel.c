@@ -73,25 +73,34 @@ status NestSel_Next(Iter *_it){
         }
         _it->objType.state |= MORE;
     }else{
-        it = Iter_Get(_it);
-        if((_it->type.state & (LAST|END)) == 0 &&
-                it->metrics.selected == it->idx){
-            it->metrics.selected = -1;
-            Iter_Next(_it);
+        while(1){
             it = Iter_Get(_it);
-            if(_it->type.state & LAST){
-                Iter_First(it);
-            }
-            _it->objType.state |= (FLAG_ITER_SELECTED|MORE);
-        }else if(it->type.state & END){
-            return END;
-        }else if(it->type.state & LAST){
-            _it->objType.state &= ~FLAG_ITER_SELECTED;
-            _it->objType.state |= LAST;
-            if(it->idx == it->metrics.selected){
-                it->objType.state |= SUCCESS;
+            if((_it->type.state & (LAST|END)) == 0 &&
+                    it->metrics.selected == it->idx){
+                it->metrics.selected = -1;
+                Iter_Next(_it);
+                it = Iter_Get(_it);
+                if(_it->type.state & LAST){
+                    Iter_First(it);
+                }
+                _it->objType.state |= (FLAG_ITER_SELECTED|MORE);
+                break;
+            }else if(it->type.state & LAST){
+                _it->objType.state &= ~FLAG_ITER_SELECTED;
+                _it->objType.state |= LAST;
+                if(it->idx == it->metrics.selected){
+                    it->objType.state |= SUCCESS;
+                }else{
+                    it->objType.state &= ~SUCCESS;
+                }
+                break;
+            }else if(it->type.state & END){
+                if(Iter_Prev(_it) & END){
+                    printf("End\n");
+                    return END;
+                }
             }else{
-                it->objType.state &= ~SUCCESS;
+                break;
             }
         }
     }
@@ -104,6 +113,8 @@ status NestSel_Next(Iter *_it){
             _it->objType.state &= ~FLAG_ITER_SELECTED;
         }
         if(it->type.state & END){
+            _it->type.state |= END;
+            printf("End II\n");
             return END;
         }
     }

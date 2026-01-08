@@ -13,36 +13,30 @@ status Templ_HandleJump(Templ *templ){
     if(fch->type.state & FETCHER_END){
         curIdx = templ->content.idx;
         Iter *it = Span_Get(templ->data.p, templ->data.idx-1);
-        TemplJump *dest = (TemplJump *)Span_Get(templ->content.p, jump->destIdx);
-        if(dest->fch->type.state & FETCHER_WITH){
+        if(jump->sourceType.state & FETCHER_WITH){
+            Out("^gU. With Remove^0\n", NULL);
+
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
-        }else if(dest->fch->type.state & FETCHER_FOR){
+        }else if(jump->sourceType.state & FETCHER_FOR){
+            void *ar[] = {I32_Wrapped(templ->m, jump->destIdx), NULL};
+            Out("^gU. -> Jump To Dest $ ->^0\n", ar);
+
             Iter_GetByIdx(&templ->content, jump->destIdx);
             jump = (TemplJump *)Iter_Get(&templ->content);
             fch = jump->fch;
-        }else if(dest->fch->type.state & FETCHER_CONDITION){
-            printf("Condition\n");
-            exit(1);
+        }else if(jump->sourceType.state & FETCHER_CONDITION){
             if(jump->skipIdx != -1 && it != NULL &&
                     (it->objType.state & LAST) == 0){
-                printf("LAST item\n");
-                fflush(stdout);
-                exit(1);
+                    
+                void *ar[] = {I32_Wrapped(templ->m, jump->skipIdx), NULL};
+                Out("^gU. -> Jump To Skip $ ->^0\n", ar);
+
                 Iter_GetByIdx(&templ->content, jump->skipIdx);
                 jump = (TemplJump *)Iter_Get(&templ->content);
                 fch = jump->fch;
             }
         }
-    }
-
-    if(1 || templ->type.state & DEBUG){
-        void *args[] = {
-            jump,
-            fch,
-            NULL
-        };
-        Out("^b.  Jump: & \n  of &^0.\n", args);
     }
 
     if(fch->type.state & FETCHER_FOR){
@@ -52,9 +46,12 @@ status Templ_HandleJump(Templ *templ){
             Iter_Add(&templ->data, value);
             fch->type.state |= PROCESSING;
         }else{
+            void *ar[] = {I32_Wrapped(templ->m, jump->skipIdx), NULL};
+            Out("   ^gU. -> For Remove $ ->^0\n", ar);
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
         }
+
         Iter *it = (Iter *)Iter_Get(&templ->data);
         if(it->type.of != TYPE_ITER){
             void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
@@ -74,67 +71,51 @@ status Templ_HandleJump(Templ *templ){
         }
 
         if(it->type.state & END){
+            Out("^gU. -> End ->^0\n", NULL);
+
             i32 idx = jump->skipIdx != NEGATIVE ? jump->skipIdx : curIdx;
             if(idx != NEGATIVE){
+
+                void *ar[] = {I32_Wrapped(templ->m, idx), NULL};
+                Out("^gU. -> Jump To Skip $/End Remove ->^0\n", ar);
+
                 Iter_GetByIdx(&templ->content, idx);
                 Iter_Remove(&templ->data);
                 Iter_Prev(&templ->data);
             }
-        }
-        if((it->objType.state & MORE) == 0){
+        }else if((it->objType.state & MORE) == 0){
+            void *ar[] = {I32_Wrapped(templ->m, jump->destIdx), NULL};
+            Out("^gU. -> Jump To Skip $ ->^0\n", ar);
+
             Iter_GetByIdx(&templ->content, jump->destIdx);
         }
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_IF){
-        if(templ->type.state & DEBUG){
-            void *args[] = {
-                fch,
-                data,
-                NULL
-            };
-            Out("^c.  If: & of @^0.\n", args);
-        }
         fch->type.state |= PROCESSING;
         DebugStack_SetRef(fch, fch->type.of);
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
-            if(templ->type.state & DEBUG){
-                void *args[] = {
-                    fch,
-                    data,
-                    NULL
-                };
-                Out("^c.  If is null: & of @^0.\n", args);
-            }
+
+            void *ar[] = {I32_Wrapped(templ->m, jump->skipIdx), NULL};
+            Out("^gU. -> Jump To Skip $ ->^0\n", ar);
+
             Iter_GetByIdx(&templ->content, jump->skipIdx);
             r |= PROCESSING;
         }else{
             Iter_Add(&templ->data, value);
-            if(templ->type.state & DEBUG){
-                void *args[] = {
-                    fch,
-                    Iter_Get(&templ->data),
-                    NULL
-                };
-                Out("^c.  If nesting/found: & of @^0.\n", args);
-            }
         }
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_WITH){
-        if(templ->type.state & DEBUG){
-            void *args[] = {
-                fch,
-                data,
-                NULL
-            };
-            Out("^c.  With: & of @^0.\n", args);
-        }
         DebugStack_SetRef(fch, fch->type.of);
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         Iter_Add(&templ->data, value);
         r |= PROCESSING;
     }else if(fch->type.state & FETCHER_CONDITION){
         if(fch->val.targets->nvalues == 0){
+
+            void *ar[] = {I32_Wrapped(templ->m, jump->destIdx), NULL};
+            Out("^gU. -> Jump To Skip $ ->^0\n", ar);
+
             Iter_GetByIdx(&templ->content, jump->destIdx);
             r |= PROCESSING;
         }else{
@@ -143,11 +124,14 @@ status Templ_HandleJump(Templ *templ){
             void *args[] = {
                 fch,
                 Type_ToStr(templ->m, tg->objType.of),
-                data,
                 NULL
             };
-            Out("^c.  Command: & ^E.@^e. @^0.\n", args);
+            Out("^c.  Command: & ^E.@^e.^0.\n", args);
             if(tg == NULL){
+
+                void *ar[] = {I32_Wrapped(templ->m, jump->skipIdx), NULL};
+                Out("^gU. -> Jump To Skip $ ->^0\n", ar);
+
                 Iter_GetByIdx(&templ->content, jump->skipIdx);
                 r |= PROCESSING;
             }else if(tg->objType.of == FORMAT_TEMPL_LEVEL  &&
@@ -158,7 +142,7 @@ status Templ_HandleJump(Templ *templ){
                     Type_ToStr(templ->m, tg->objType.of),
                     NULL
                 };
-                Out("^0.  Running Command: & @^0.\n", args);
+                Out("^0.    Running Command: & @^0.\n", args);
             }else if(tg->objType.of == FORMAT_TEMPL_INDENT &&
                 it != NULL &&
                 (it->objType.state & FLAG_ITER_SELECTED)
@@ -169,7 +153,10 @@ status Templ_HandleJump(Templ *templ){
                     I32_Wrapped(templ->m, jump->destIdx),
                     NULL
                 };
-                Out("^0.  Running Command: & @ to @^0.\n", args);
+                Out("^0.    Running Command: & @ to @^0.\n", args);
+                void *ar[] = {I32_Wrapped(templ->m, jump->destIdx), NULL};
+                Out("^gU. -> Jump To Dest $ ->^0\n", ar);
+
                 Iter_GetByIdx(&templ->content, jump->destIdx);
                 r |= PROCESSING;
             }else if(tg->objType.of == FORMAT_TEMPL_CURRENT  &&
@@ -182,7 +169,7 @@ status Templ_HandleJump(Templ *templ){
                     Type_ToStr(templ->m, tg->objType.of),
                     NULL
                 };
-                Out("^0.  Running Command: & @^0.\n", args);
+                Out("^0.    Running Command: & @^0.\n", args);
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE  &&
                 it != NULL &&
                 (it->objType.state & FLAG_ITER_SELECTED) &&
@@ -193,8 +180,10 @@ status Templ_HandleJump(Templ *templ){
                     Type_ToStr(templ->m, tg->objType.of),
                     NULL
                 };
-                Out("^0.  Running Command: & @^0.\n", args);
+                Out("^0.    Running Command: & @^0.\n", args);
             }else{
+                void *ar[] = {I32_Wrapped(templ->m, jump->skipIdx), NULL};
+                Out("^gU. -> Jump To Skip $ ->^0\n", ar);
                 Iter_GetByIdx(&templ->content, jump->skipIdx);
                 r |= PROCESSING;
             }
