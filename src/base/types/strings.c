@@ -76,6 +76,7 @@ static char *baseTypeStrings[] = {
     "TYPE_HASHED",
     "TYPE_LOOKUP",
     "TYPE_ITER",
+    "TYPE_ITER_UPPER",
     "TYPE_GUARD",
     "TYPE_HKEY",
     "TYPE_PROCDETS",

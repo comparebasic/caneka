@@ -30,6 +30,13 @@ status Templ_HandleJump(Templ *templ){
             jump = (TemplJump *)Iter_Get(&templ->content);
             fch = jump->fch;
         }else if(jump->sourceType.state & FETCHER_CONDITION){
+
+            void *ar[] = {
+                Type_StateVec(templ->m, TYPE_ITER_UPPER, it->objType.state),
+                NULL
+            };
+            Out("^c.ConditionEnd UpperIterFlags @^0\n", ar);
+
             if(it != NULL){
                 if(jump->skipIdx != -1 && 
                         jump->proceedFlags != ZERO && 
@@ -74,6 +81,12 @@ status Templ_HandleJump(Templ *templ){
         }
 
         status upperFlags = it->objType.state;
+        void *ar[] = {
+            Type_StateVec(templ->m, TYPE_ITER_UPPER, upperFlags),
+            NULL
+        };
+        Out("^c.UpperIterFlags @^0\n", ar);
+
         while((fch->api->next(it) & END) == 0){
             void *a = fch->api->get(it);
             if(a != NULL){
@@ -186,7 +199,7 @@ status Templ_HandleJump(Templ *templ){
                 r |= PROCESSING;
             }else if(tg->objType.of == FORMAT_TEMPL_CURRENT  &&
                 it != NULL &&
-                    (it->objType.state & FLAG_ITER_SELECTED) == 0 &&
+                    (it->objType.state & UFLAG_ITER_SELECTED) == 0 &&
                     (it->type.state & LAST)
             ){
                 void *args[] = {
@@ -197,7 +210,7 @@ status Templ_HandleJump(Templ *templ){
                 Out("^0.    Running Command: & @^0.\n", args);
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE  &&
                 it != NULL &&
-                (it->objType.state & FLAG_ITER_SELECTED) &&
+                (it->objType.state & UFLAG_ITER_SELECTED) &&
                 (it->type.state & LAST)
             ){
                 void *args[] = {

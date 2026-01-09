@@ -4,15 +4,15 @@ enum span_ops {
     SPAN_OP_REMOVE = 1 << 10,
     SPAN_OP_RESERVE = 1 << 11,
     SPAN_OP_ADD = 1 << 12,
-    FLAG_ITER_SELECTED = 1 << 13,
-    FLAG_ITER_CONTINUE = 1 << 14,
-    FLAG_ITER_REVERSE = 1 << 15,
+    FLAG_ITER_CONTINUE = 1 << 13,
+    FLAG_ITER_REVERSE = 1 << 14,
 };
 
 enum iter_higher_flags {
-    UFLAG_ITER_INDENT = 1 << 8,
-    UFLAG_ITER_OUTDENT = 1 << 9,
-    UFLAG_ITER_LEAF = 1 << 10,
+    UFLAG_ITER_SELECTED = 1 << 8,
+    UFLAG_ITER_INDENT = 1 << 9,
+    UFLAG_ITER_OUTDENT = 1 << 10,
+    UFLAG_ITER_LEAF = 1 << 11,
 };
 
 extern i32 _increments[SPAN_MAX_DIMS+2];

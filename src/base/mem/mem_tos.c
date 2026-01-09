@@ -2,6 +2,7 @@
 #include "base_module.h"
 
 static Str **iterLabels = NULL;
+static Str **iterUpperLabels = NULL;
 static Str **spanLabels = NULL;
 
 static inline status wsOut(Buff *bf, i8 dim){
@@ -306,6 +307,15 @@ status Mem_InitLabels(MemCh *m, Lookup *lk){
         iterLabels[15] = Str_CstrRef(m, "LAST");
         iterLabels[16] = Str_CstrRef(m, "REVERSE");
         Lookup_Add(m, lk, TYPE_ITER, (void *)iterLabels);
+        r |= SUCCESS;
+    }
+    if(iterUpperLabels == NULL){
+        iterUpperLabels = (Str **)Arr_Make(m, 17);
+        iterUpperLabels[9] = Str_CstrRef(m, "SELECTED");
+        iterUpperLabels[10] = Str_CstrRef(m, "INDENT");
+        iterUpperLabels[11] = Str_CstrRef(m, "OUTDENT");
+        iterUpperLabels[12] = Str_CstrRef(m, "LEAF");
+        Lookup_Add(m, lk, TYPE_ITER_UPPER, (void *)iterUpperLabels);
         r |= SUCCESS;
     }
     return r;
