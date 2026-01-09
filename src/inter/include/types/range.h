@@ -7,6 +7,7 @@ enum inter_range {
     TYPE_TEMPL,
     TYPE_TEMPL_CTX,
     TYPE_TEMPL_JUMP,
+    TYPE_TEMPL_JUMP_CRIT,
     TYPE_HTTP_CTX,
     _TEMPL_START,
     TEMPL_MARK_START,

@@ -9,10 +9,11 @@ enum span_ops {
 };
 
 enum iter_higher_flags {
-    UFLAG_ITER_SELECTED = 1 << 8,
-    UFLAG_ITER_INDENT = 1 << 9,
-    UFLAG_ITER_OUTDENT = 1 << 10,
-    UFLAG_ITER_LEAF = 1 << 11,
+    UFLAG_ITER_INVERT = 1 << 8,
+    UFLAG_ITER_SELECTED = 1 << 9,
+    UFLAG_ITER_INDENT = 1 << 10,
+    UFLAG_ITER_OUTDENT = 1 << 11,
+    UFLAG_ITER_LEAF = 1 << 12,
 };
 
 extern i32 _increments[SPAN_MAX_DIMS+2];

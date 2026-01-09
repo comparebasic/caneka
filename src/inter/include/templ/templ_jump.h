@@ -1,17 +1,21 @@
 /* usese fetcher op flags */
 
+typedef struct jump_crit {
+    Type type;
+    i32 incr;
+    i32 idx;
+} JumpCrit;
+
 typedef struct templ_jump {
     Type type;
     Type sourceType;
     Fetcher *fch;
-    status jumpFlags;
-    status proceedFlags;
-    status destFlags;
-    i16 incr;
     i32 idx;
-    i32 destIdx;
-    i32 skipIdx;
-    i32 tempIdx;
+    struct {
+        JumpCrit dest;
+        JumpCrit skip;
+        JumpCrit ret;
+    } crit;
 } TemplJump;
 
 TemplJump *TemplJump_Make(MemCh *m, i32 idx, Fetcher *fch);

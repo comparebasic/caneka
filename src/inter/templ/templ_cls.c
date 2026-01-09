@@ -27,12 +27,16 @@ static i64 TemplJump_Print(Buff *bf, void *a, cls type, word flags){
     void *args[] = {
         Type_StateVec(bf->m, jump->type.of, jump->type.state),
         I32_Wrapped(bf->m, jump->idx),
-        I32_Wrapped(bf->m, jump->destIdx),
-        I32_Wrapped(bf->m, jump->skipIdx),
+        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.dest.type.state),
+        I32_Wrapped(bf->m, jump->crit.dest.idx),
+        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.skip.type.state),
+        I32_Wrapped(bf->m, jump->crit.skip.idx),
+        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.ret.type.state),
+        I32_Wrapped(bf->m, jump->crit.ret.idx),
         jump->fch,
         NULL
     };
-    return Fmt(bf, "TemplJump:<@ @/dest^D.@^d./skip^D@^d. &>", args);
+    return Fmt(bf, "TemplJump:<@ \\@@/dest@^D.@^d./skip@^D@^d./ret@^D@^d. fch:&>", args);
 }
 
 static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){
