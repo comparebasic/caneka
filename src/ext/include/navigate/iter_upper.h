@@ -7,4 +7,4 @@ enum iter_higher_flags {
     UFLAG_ITER_LEAF = 1 << 13,
 };
 
-boolean IterUpper_FlagCombine(status base, status compare);
+status IterUpper_FlagCombine(status base, status compare);

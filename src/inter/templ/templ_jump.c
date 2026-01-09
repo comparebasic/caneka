@@ -42,7 +42,7 @@ status Templ_HandleJump(Templ *templ){
             if(it != NULL){
                 if(jump->crit.skip.type.state != ZERO){
                     if(IterUpper_FlagCombine(jump->crit.skip.type.state, 
-                            it->objType.state)){
+                            it->objType.state) & SUCCESS){
                         if(jump->crit.skip.idx != -1){
                             jump->crit.skip.incr++;
                             Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
@@ -116,7 +116,7 @@ status Templ_HandleJump(Templ *templ){
                 Iter_Prev(&templ->data);
             }
         }else if(jump->crit.dest.idx != -1 && 
-                    IterUpper_FlagCombine(jump->crit.dest.type.state, upperFlags)){
+                    IterUpper_FlagCombine(jump->crit.dest.type.state, upperFlags) & SUCCESS){
             void *ar[] = {
                 I32_Wrapped(templ->m, jump->idx),
                 I32_Wrapped(templ->m, jump->crit.dest.idx),
