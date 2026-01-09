@@ -4,9 +4,6 @@
 status Templ_HandleJump(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
 
-    printf("HandleJump\n");
-    fflush(stdout);
-
     status r = READY;
     void *args[5];
     TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
@@ -37,29 +34,27 @@ status Templ_HandleJump(Templ *templ){
 
             void *ar[] = {
                 Type_StateVec(templ->m, TYPE_ITER_UPPER, it->objType.state),
+                Type_StateVec(templ->m, TYPE_ITER_UPPER, jump->crit.skip.type.state),
                 NULL
             };
-            Out("^c.ConditionEnd UpperIterFlags @^0\n", ar);
+            Out("^c.ConditionEnd UpperIterFlags obj@ vs skip.state@^0\n", ar);
 
             if(it != NULL){
                 if(jump->crit.skip.type.state != ZERO){
-                    if((it->objType.state & jump->crit.skip.type.state) ==
-                            jump->crit.skip.type.state){
-                        jump->crit.ret.incr++;
+                    if(IterUpper_FlagCombine(jump->crit.skip.type.state, 
+                            it->objType.state)){
                         if(jump->crit.skip.idx != -1){
+                            jump->crit.skip.incr++;
                             Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
                             r |= PROCESSING;
+                            void *ar[] = {
+                                I32_Wrapped(templ->m, jump->idx),
+                                I32_Wrapped(templ->m, jump->crit.skip.idx),
+                                NULL
+                            };
+                            Out("^gU. -> \\@$ Cond Skip To $ ->^0\n", ar);
                         }
                     }
-
-                    void *ar[] = {
-                        I32_Wrapped(templ->m, jump->idx),
-                        I32_Wrapped(templ->m, jump->crit.skip.idx),
-                        NULL
-                    };
-                    Out("^gU. -> \\@$ Cond Skip To $ ->^0\n", ar);
-                }else{
-                    printf("Content %d times\n", jump->crit.ret.incr);
                 }
             }
 
@@ -93,9 +88,10 @@ status Templ_HandleJump(Templ *templ){
         status upperFlags = it->objType.state;
         void *ar[] = {
             Type_StateVec(templ->m, TYPE_ITER_UPPER, upperFlags),
+            Type_StateVec(templ->m, TYPE_ITER_UPPER, jump->crit.dest.type.state),
             NULL
         };
-        Out("^c.UpperIterFlags @^0\n", ar);
+        Out("^c.Prev UpperIterFlags prev@ vs dest@^0\n", ar);
 
         while((fch->api->next(it) & END) == 0){
             void *a = fch->api->get(it);
@@ -119,8 +115,7 @@ status Templ_HandleJump(Templ *templ){
                 Iter_Prev(&templ->data);
             }
         }else if(jump->crit.dest.idx != -1 && 
-                jump->crit.skip.type.state != ZERO &&
-                (upperFlags & jump->crit.skip.type.state) == 0){
+                    IterUpper_FlagCombine(jump->crit.dest.type.state, upperFlags)){
             void *ar[] = {
                 I32_Wrapped(templ->m, jump->idx),
                 I32_Wrapped(templ->m, jump->crit.dest.idx),

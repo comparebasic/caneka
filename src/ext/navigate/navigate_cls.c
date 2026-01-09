@@ -7,6 +7,7 @@ static Str **messLabels = NULL;
 static Str **stepLabels = NULL;
 static Str **taskLabels = NULL;
 static Str **queueLabels = NULL;
+static Str **iterUpperLabels = NULL;
 
 static status indentStream(Buff *bf, i32 indent){
     while(--indent >= 0){
@@ -330,6 +331,18 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
         queueLabels[9] = Str_CstrRef(m, "SINGLE_IDX");
         queueLabels[16] = Str_CstrRef(m, "REVERSE");
         Lookup_Add(m, lk, TYPE_QUEUE, (void *)queueLabels);
+        r |= SUCCESS;
+    }
+
+    if(iterUpperLabels == NULL){
+        iterUpperLabels = (Str **)Arr_Make(m, 17);
+        iterUpperLabels[9] = Str_CstrRef(m, "INVERT");
+        iterUpperLabels[10] = Str_CstrRef(m, "STRICT");
+        iterUpperLabels[11] = Str_CstrRef(m, "SELECTED");
+        iterUpperLabels[12] = Str_CstrRef(m, "INDENT");
+        iterUpperLabels[13] = Str_CstrRef(m, "OUTDENT");
+        iterUpperLabels[14] = Str_CstrRef(m, "LEAF");
+        Lookup_Add(m, lk, TYPE_ITER_UPPER, (void *)iterUpperLabels);
         r |= SUCCESS;
     }
 

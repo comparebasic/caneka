@@ -143,7 +143,8 @@ status Templ_PrepareCycle(Templ *templ){
             if(enclosingIdx != -1){
                 TemplJump *enclosing = Span_Get(templ->content.p, enclosingIdx);
                 if(enclosing != NULL){
-                    enclosing->crit.dest.type.state = UFLAG_ITER_INDENT;
+                    enclosing->crit.dest.type.state =
+                        (UFLAG_ITER_INDENT|UFLAG_ITER_INVERT);
                 }
             }
         }else if(fch->type.state & FETCHER_END){
