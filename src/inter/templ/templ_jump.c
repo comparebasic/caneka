@@ -87,11 +87,12 @@ status Templ_HandleJump(Templ *templ){
 
         status upperFlags = it->objType.state;
         void *ar[] = {
+            I32_Wrapped(templ->m, jump->idx),
             Type_StateVec(templ->m, TYPE_ITER_UPPER, upperFlags),
             Type_StateVec(templ->m, TYPE_ITER_UPPER, jump->crit.dest.type.state),
             NULL
         };
-        Out("^c.Prev UpperIterFlags prev@ vs dest@^0\n", ar);
+        Out("^c.Prev \\@$ UpperIterFlags prev@ vs dest@^0\n", ar);
 
         while((fch->api->next(it) & END) == 0){
             void *a = fch->api->get(it);
@@ -121,7 +122,7 @@ status Templ_HandleJump(Templ *templ){
                 I32_Wrapped(templ->m, jump->crit.dest.idx),
                 NULL
             };
-            Out("^gU. -> \\@$ Jump To Skip $ ->^0\n", ar);
+            Out("^gU. -> \\@$ Jump To Dest $ ->^0\n", ar);
 
             Iter_GetByIdx(&templ->content, jump->crit.dest.idx);
             r |= PROCESSING;

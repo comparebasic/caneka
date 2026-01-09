@@ -158,7 +158,7 @@ status Templ_PrepareCycle(Templ *templ){
                     }else if(dest->fch->type.state & (FETCHER_CONDITION)){
                         jump->crit.skip.idx = Templ_FindEnd(templ);
                         jump->crit.skip.type.state = 
-                            (UFLAG_ITER_OUTDENT|UFLAG_ITER_INVERT);
+                            (UFLAG_ITER_OUTDENT|UFLAG_ITER_STRICT);
                     }else{
                         jump->fch->type.state |= NOOP;
                     }
