@@ -57,7 +57,8 @@ void *NestSel_Get(Iter *_it){
 }
 
 status NestSel_Next(Iter *_it){
-    _it->objType.state &= ~MORE;
+    _it->objType.state &= ~(
+        FLAG_ITER_SELECTED|UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT|UFLAG_ITER_LEAF);
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
     }
@@ -65,51 +66,36 @@ status NestSel_Next(Iter *_it){
     if((_it->type.state & PROCESSING) == 0){
         Iter_Next(_it);
         it = Iter_Get(_it);
-        if((_it->type.state & (LAST|END)) == 0){
-            _it->objType.state |= FLAG_ITER_SELECTED;
-        }else if(_it->type.state & LAST){
-            _it->objType.state &= ~FLAG_ITER_SELECTED;
-            if(it->idx == it->metrics.selected){
-                it->objType.state |= FLAG_ITER_SELECTED;
-            }else{
-                it->objType.state &= ~SUCCESS;
-            }
-        }
-        _it->objType.state |= MORE;
+        _it->objType.state |= UFLAG_ITER_INDENT;
     }else{
         while(1){
             it = Iter_Get(_it);
-            if((_it->type.state & (LAST|END)) == 0 &&
-                    it->metrics.selected == it->idx){
+            if(it->type.state & END){
+                if(Iter_Prev(_it) & END){
+                    return END;
+                }
+                _it->objType.state |= UFLAG_ITER_OUTDENT;
+                continue;
+            }
+
+            if(it->metrics.selected == it->idx &&
+                    (_it->type.state & (LAST|END)) == 0){
                 it->metrics.selected = -1;
                 Iter_Next(_it);
                 it = Iter_Get(_it);
                 if(_it->type.state & LAST){
                     Iter_First(it);
                 }
-                _it->objType.state |= (FLAG_ITER_SELECTED|MORE);
-                break;
-            }else if(it->type.state & LAST){
-                _it->objType.state &= ~FLAG_ITER_SELECTED;
-                _it->objType.state |= LAST;
-                if(it->idx == it->metrics.selected){
-                    it->objType.state |= SUCCESS;
-                }else{
-                    it->objType.state &= ~SUCCESS;
-                }
-                break;
-            }else if(it->type.state & END){
-                if(Iter_Prev(_it) & END){
-                    return END;
-                }
-            }else{
-                break;
+                _it->objType.state |= (FLAG_ITER_SELECTED|UFLAG_ITER_INDENT);
             }
+
+            break;
         }
     }
 
     Iter_Next(it);
     if(_it->type.state & LAST){
+        _it->objType.state |= UFLAG_ITER_LEAF;
         if(it->metrics.selected == it->idx){
             _it->objType.state |= FLAG_ITER_SELECTED;
         }else{
@@ -121,6 +107,5 @@ status NestSel_Next(Iter *_it){
         }
     }
 
-    _it->objType.state |= (it->type.state & LAST);
     return ZERO;
 }

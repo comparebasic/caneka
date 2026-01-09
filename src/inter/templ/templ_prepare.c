@@ -139,6 +139,13 @@ status Templ_PrepareCycle(Templ *templ){
             FetchTarget *tg = Span_Get(jump->fch->val.targets, 0); 
             jump->destIdx = Templ_FindNext(templ, FETCHER_END);
             jump->skipIdx = Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));
+            i32 enclosingIdx = Templ_FindStart(templ, FETCHER_FOR);
+            if(enclosingIdx != -1){
+                TemplJump *enclosing = Span_Get(templ->content.p, enclosingIdx);
+                if(enclosing != NULL){
+                    enclosing->proceedFlags |= UFLAG_ITER_INDENT;
+                }
+            }
         }else if(fch->type.state & FETCHER_END){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){
@@ -149,6 +156,7 @@ status Templ_PrepareCycle(Templ *templ){
                         jump->destIdx = destIdx;
                     }else if(dest->fch->type.state & (FETCHER_CONDITION)){
                         jump->skipIdx = Templ_FindEnd(templ);
+                        jump->proceedFlags |= UFLAG_ITER_OUTDENT;
                     }else{
                         jump->fch->type.state |= NOOP;
                     }

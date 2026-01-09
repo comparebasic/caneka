@@ -23,14 +23,17 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     }
 
     Abstract *data = Iter_Get(&templ->data);
+    Str *soFar = StrVec_Str(templ->m, bf->v);
+    soFar->type.state |= DEBUG;
     if(1 || (templ->type.state & DEBUG)){
         void *args[] = {
             NULL,
             item,
             Type_ToStr(templ->m, data->type.of),
+            soFar,
             NULL
         };
-        Out("^0.^{STACK.name}^y.\n  (item:@)\n  (data-typeOf/@)\n", args);
+        Out("^0.^{STACK.name}^y.\n  (item:@)\n  (data-typeOf/@)\n^g.    @^0\n", args);
     }
 
     if(item->type.of == TYPE_STRVEC){

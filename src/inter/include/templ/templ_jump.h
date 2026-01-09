@@ -5,6 +5,8 @@ typedef struct templ_jump {
     Type sourceType;
     Fetcher *fch;
     status jumpFlags;
+    status proceedFlags;
+    status destFlags;
     i16 incr;
     i32 idx;
     i32 destIdx;

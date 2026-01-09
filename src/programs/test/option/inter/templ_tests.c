@@ -60,6 +60,7 @@ static WwwNav *navMake(MemCh *m, Table *coordTbl){
     Inst_ByPath(node, path, item, SPAN_OP_SET, coords);
     Table_Set(coordTbl, name, coords);
 
+    /*
     path = IoPath_From(m, S(m, "/docs/base/bytes"));
     coords = Span_Make(m);
     item = Inst_Make(m, TYPE_WWW_NAV);
@@ -127,6 +128,7 @@ static WwwNav *navMake(MemCh *m, Table *coordTbl){
     Span *crd = Table_Get(coordTbl, s);
     Iter *it = Iter_Make(m, NULL);
     NestSel_Init(it, node, crd);
+    */
 
     return node;
 }
@@ -374,7 +376,7 @@ status TemplNav_Tests(MemCh *m){
     Inst *page = Inst_Make(m, TYPE_WWW_PAGE);
 
     Iter *navIt = Iter_Make(m, NULL);
-    Str *s = S(m, "Fmt");
+    Str *s = S(m, "Base");
     Span *crd = Table_Get(coordTbl, s);
     NestSel_Init(navIt, nav, crd);
 
