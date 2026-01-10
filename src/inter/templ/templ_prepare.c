@@ -145,6 +145,7 @@ status Templ_PrepareCycle(Templ *templ){
                 if(enclosing != NULL){
                     enclosing->crit.dest.type.state =
                         (UFLAG_ITER_INDENT|UFLAG_ITER_INVERT);
+                    enclosing->crit.ret.idx = jump->crit.skip.idx;
                 }
             }
         }else if(fch->type.state & FETCHER_END){
@@ -157,8 +158,7 @@ status Templ_PrepareCycle(Templ *templ){
                         jump->crit.dest.idx = destIdx;
                     }else if(dest->fch->type.state & (FETCHER_CONDITION)){
                         jump->crit.skip.idx = Templ_FindEnd(templ);
-                        jump->crit.skip.type.state = 
-                            (UFLAG_ITER_OUTDENT|UFLAG_ITER_STRICT);
+                        jump->crit.skip.type.state = UFLAG_ITER_OUTDENT;
                     }else{
                         jump->fch->type.state |= NOOP;
                     }

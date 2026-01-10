@@ -33,27 +33,35 @@ status Templ_HandleJump(Templ *templ){
         }else if(jump->sourceType.state & FETCHER_CONDITION){
 
             void *ar[] = {
+                I32_Wrapped(templ->m, jump->idx),
                 Type_StateVec(templ->m, TYPE_ITER_UPPER, it->objType.state),
                 Type_StateVec(templ->m, TYPE_ITER_UPPER, jump->crit.skip.type.state),
                 NULL
             };
-            Out("^c.ConditionEnd UpperIterFlags obj@ vs skip.state@^0\n", ar);
+            Out("^c.ConditionEnd \\@$ UpperIterFlags obj@ vs skip.state@^0\n", ar);
 
             if(it != NULL){
                 if(jump->crit.skip.type.state != ZERO){
-                    if(IterUpper_FlagCombine(jump->crit.skip.type.state, 
-                            it->objType.state) & SUCCESS){
-                        if(jump->crit.skip.idx != -1){
+                    status fl = IterUpper_FlagCombine(jump->crit.skip.type.state, 
+                            it->objType.state);
+                    if((fl & NOOP) && jump->crit.skip.idx != -1){
+                        if(it->objType.state & UFLAG_ITER_INDENT){
                             jump->crit.skip.incr++;
-                            Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
-                            r |= PROCESSING;
                             void *ar[] = {
                                 I32_Wrapped(templ->m, jump->idx),
                                 I32_Wrapped(templ->m, jump->crit.skip.idx),
                                 NULL
                             };
-                            Out("^gU. -> \\@$ Cond Skip To $ ->^0\n", ar);
+                            Out("^gU.    -> \\@$ Incr for later Skip To $ ->^0\n", ar);
                         }
+                        Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
+                        r |= PROCESSING;
+                        void *ar[] = {
+                            I32_Wrapped(templ->m, jump->idx),
+                            I32_Wrapped(templ->m, jump->crit.skip.idx),
+                            NULL
+                        };
+                        Out("^gU. -> \\@$ Cond Skip To $ ->^0\n", ar);
                     }
                 }
             }
@@ -69,7 +77,11 @@ status Templ_HandleJump(Templ *templ){
             Iter_Add(&templ->data, value);
             fch->type.state |= PROCESSING;
         }else{
-            void *ar[] = {I32_Wrapped(templ->m, jump->idx), I32_Wrapped(templ->m, jump->crit.skip.idx), NULL};
+            void *ar[] = {
+                I32_Wrapped(templ->m, jump->idx),
+                I32_Wrapped(templ->m, jump->crit.skip.idx),
+                NULL
+            };
             Out("   ^gU. -> \\@$ For Remove $ ->^0\n", ar);
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
@@ -90,9 +102,15 @@ status Templ_HandleJump(Templ *templ){
             I32_Wrapped(templ->m, jump->idx),
             Type_StateVec(templ->m, TYPE_ITER_UPPER, upperFlags),
             Type_StateVec(templ->m, TYPE_ITER_UPPER, jump->crit.dest.type.state),
+            jump,
             NULL
         };
-        Out("^c.Prev \\@$ UpperIterFlags prev@ vs dest@^0\n", ar);
+
+        Out("^c.Prev \\@$ UpperIterFlags prev@ vs dest@\n    @^0\n", ar);
+        if(upperFlags & UFLAG_ITER_OUTDENT){
+            printf("OUTDENT! go to ret!\n");
+            exit(1);
+        }
 
         while((fch->api->next(it) & END) == 0){
             void *a = fch->api->get(it);
@@ -103,7 +121,8 @@ status Templ_HandleJump(Templ *templ){
         }
 
         if(it->type.state & END){
-            Out("^gU. -> End ->^0\n", NULL);
+            void *ar[] = {I32_Wrapped(templ->m, jump->idx), NULL};
+            Out("^gU. -> It End \\@$ ->^0\n", ar);
 
             i32 idx = jump->crit.skip.idx != NEGATIVE ? jump->crit.skip.idx : curIdx;
             if(idx != NEGATIVE){

@@ -59,14 +59,23 @@ void *NestSel_Get(Iter *_it){
 status NestSel_Next(Iter *_it){
     _it->objType.state &= ~(
         UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT|UFLAG_ITER_LEAF);
+
+    void *ar[] = {
+        Type_StateVec(ErrStream->m, TYPE_ITER_UPPER, _it->objType.state), NULL};
+    Out("^y.     Starting NestSelNext Fl @^0\n", ar);
+
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
+        printf("END WIPING PROCESSING\n");
+        fflush(stdout);
     }
     Iter *it = NULL;
     if((_it->type.state & PROCESSING) == 0){
         Iter_Next(_it);
         it = Iter_Get(_it);
         _it->objType.state |= UFLAG_ITER_INDENT;
+        printf("INDENT START\n");
+        fflush(stdout);
     }else{
         while(1){
             it = Iter_Get(_it);
@@ -85,7 +94,11 @@ status NestSel_Next(Iter *_it){
                 if(_it->type.state & LAST){
                     Iter_First(it);
                 }
-                _it->objType.state |= (UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT);
+                if((_it->objType.state & UFLAG_ITER_OUTDENT) == 0){
+                    _it->objType.state |= (UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT);
+                }
+                printf("INDENT SELECTED\n");
+                fflush(stdout);
             }
 
             break;
@@ -100,10 +113,11 @@ status NestSel_Next(Iter *_it){
         }else{
             _it->objType.state &= ~UFLAG_ITER_SELECTED;
         }
-        if(it->type.state & END){
-            _it->type.state |= END;
-            return END;
-        }
+    }
+
+    if(_it->idx == 0&& (it->type.state & END)){
+        _it->type.state |= END;
+        return END;
     }
 
     if(it->type.state & LAST){
