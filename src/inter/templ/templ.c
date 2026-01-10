@@ -25,7 +25,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     Abstract *data = Iter_Get(&templ->data);
     Str *soFar = StrVec_Str(templ->m, bf->v);
     soFar->type.state |= DEBUG;
-    if(1 || (templ->type.state & DEBUG)){
+    if((templ->type.state & DEBUG)){
         void *args[] = {
             NULL,
             item,

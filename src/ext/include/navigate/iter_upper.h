@@ -5,6 +5,7 @@ enum iter_higher_flags {
     UFLAG_ITER_INDENT = 1 << 11,
     UFLAG_ITER_OUTDENT = 1 << 12,
     UFLAG_ITER_LEAF = 1 << 13,
+    UFLAG_ITER_REPEAT = 1 << 14,
 };
 
 status IterUpper_FlagCombine(status base, status compare);
