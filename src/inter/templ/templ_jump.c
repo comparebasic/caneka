@@ -22,21 +22,14 @@ status Templ_HandleJump(Templ *templ){
             jump = (TemplJump *)Iter_Get(&templ->content);
             fch = jump->fch;
         }else if(jump->sourceType.state & FETCHER_CONDITION){
-            if(it != NULL){
-                if(jump->crit.skip.type.state != ZERO){
-                    status fl = IterUpper_FlagCombine(jump->crit.skip.type.state, 
-                            it->objType.state);
-                    if((fl & NOOP) && jump->crit.skip.idx != -1){
-                        if(it->objType.state & UFLAG_ITER_INDENT){
-                            jump->crit.skip.incr++;
-                        }
-                        Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
-                        r |= PROCESSING;
-                    }
-                }
+            if(jump->crit.skip.idx != -1 &&
+                    jump->crit.skip.incr > 0 &&
+                    jump->crit.skip.incr-- > 0){
+                /* show content */
+            }else{
+                Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
+                r |= PROCESSING;
             }
-
-            return r;
         }
     }
 
@@ -47,8 +40,10 @@ status Templ_HandleJump(Templ *templ){
             Iter_Add(&templ->data, value);
             fch->type.state |= PROCESSING;
         }else{
-            Iter_Remove(&templ->data);
-            Iter_Prev(&templ->data);
+            if((fch->type.state & MORE) == 0){
+                Iter_Remove(&templ->data);
+                Iter_Prev(&templ->data);
+            }
         }
 
         Iter *it = (Iter *)Iter_Get(&templ->data);
@@ -61,26 +56,52 @@ status Templ_HandleJump(Templ *templ){
             return templ->type.state;
         }
 
-        if(it->objType.state & UFLAG_ITER_OUTDENT){
-            it->objType.state &= ~UFLAG_ITER_INDENT;
-            void *ar[] = {Type_StateVec(templ->m, TYPE_ITER_UPPER, it->objType.state), jump, NULL};
-            Out("OutDent @ for @^0\n", ar);
+        void *ar[] = {Type_StateVec(templ->m, TYPE_ITER_UPPER, it->objType.state), NULL};
+        Out("^p.PrevState @^0\n", ar);
+
+        if((it->objType.state & (UFLAG_ITER_OUTDENT|UFLAG_ITER_INDENT)) ==
+                (UFLAG_ITER_OUTDENT|UFLAG_ITER_INDENT)){
+            TemplJump *close = Span_Get(templ->content.p, jump->crit.ret.idx);
+            printf("incr %d\n", close->crit.skip.incr);
+            close->crit.skip.incr++;
+        }else if(it->objType.state & UFLAG_ITER_OUTDENT){
+            if(fch->type.state & MORE){
+                fch->type.state &= ~MORE;
+            }else{
+                i32 idx = templ->content.idx;
+                TemplJump *close = Iter_GetByIdx(&templ->content,
+                    jump->crit.ret.idx);
+                close->crit.skip.incr++;
+                fch->type.state |= MORE;
+                DebugStack_Pop();
+                return r;
+            }
         }
 
         while((fch->api->next(it) & END) == 0){
             void *a = fch->api->get(it);
             if(a != NULL){
+                void *ar[] = {a, NULL};
+                Out("^p.Item @^0\n", ar);
                 Iter_Add(&templ->data, a);
                 break;
             }
         }
 
         if((it->type.state & (END|MORE)) == END){
-            i32 idx = jump->crit.skip.idx != NEGATIVE ? jump->crit.skip.idx : curIdx;
-            if(idx != NEGATIVE){
-                Iter_GetByIdx(&templ->content, idx);
-                Iter_Remove(&templ->data);
-                Iter_Prev(&templ->data);
+            TemplJump *close = Span_Get(templ->content.p, jump->crit.ret.idx);
+            printf("skip incr %d\n", close->crit.skip.incr);
+            exit(1);
+            if(close->crit.skip.incr > 0){
+                Iter_GetByIdx(&templ->content, jump->crit.ret.idx);
+                fch->type.state |= MORE;
+            }else{
+                i32 idx = jump->crit.skip.idx != NEGATIVE ? jump->crit.skip.idx : curIdx;
+                if(idx != NEGATIVE){
+                    Iter_GetByIdx(&templ->content, idx);
+                    Iter_Remove(&templ->data);
+                    Iter_Prev(&templ->data);
+                }
             }
         }
     }else if(fch->type.state & FETCHER_IF){
