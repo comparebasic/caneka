@@ -52,7 +52,7 @@ status Templ_HandleJump(Templ *templ){
         }
 
         Iter *it = (Iter *)Iter_Get(&templ->data);
-        if(it->type.of != TYPE_ITER){
+        if(it != NULL && it->type.of != TYPE_ITER){
             void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
             Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error ^{STACK.name}, expected Iter have @ from Iter_Get(@) instead^0\n", 
@@ -61,10 +61,10 @@ status Templ_HandleJump(Templ *templ){
             return templ->type.state;
         }
 
-        status upperFlags = it->objType.state;
-        if(upperFlags & UFLAG_ITER_OUTDENT){
-            printf("OUTDENT! go to ret!\n");
-            exit(1);
+        if(it->objType.state & UFLAG_ITER_OUTDENT){
+            it->objType.state &= ~UFLAG_ITER_INDENT;
+            void *ar[] = {Type_StateVec(templ->m, TYPE_ITER_UPPER, it->objType.state), jump, NULL};
+            Out("OutDent @ for @^0\n", ar);
         }
 
         while((fch->api->next(it) & END) == 0){
@@ -75,17 +75,13 @@ status Templ_HandleJump(Templ *templ){
             }
         }
 
-        if(it->type.state & END){
+        if((it->type.state & (END|MORE)) == END){
             i32 idx = jump->crit.skip.idx != NEGATIVE ? jump->crit.skip.idx : curIdx;
             if(idx != NEGATIVE){
                 Iter_GetByIdx(&templ->content, idx);
                 Iter_Remove(&templ->data);
                 Iter_Prev(&templ->data);
             }
-        }else if(jump->crit.dest.idx != -1 && 
-                    IterUpper_FlagCombine(jump->crit.dest.type.state, upperFlags) & SUCCESS){
-            Iter_GetByIdx(&templ->content, jump->crit.dest.idx);
-            r |= PROCESSING;
         }
     }else if(fch->type.state & FETCHER_IF){
         fch->type.state |= PROCESSING;
