@@ -12,28 +12,33 @@ status ServeTcp_Tests(MemCh *gm);
 status Templ_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
 status TemplNav_Tests(MemCh *gm);
+status TemplNavNested_Tests(MemCh *m);
 status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
-    /*
     {
         "TemplCtx Tests",
         TemplCtx_Tests,
         "TemplCtx tests of basic value templating.",
-        FEATURE_COMPLETE,
+        FEATURE_COMPLETE|SKIP_TEST,
     },
     {
         "Templ Tests",
         Templ_Tests,
         "Testing templating with a few variables.",
-        FEATURE_COMPLETE,
+        FEATURE_COMPLETE|SKIP_TEST,
     },
-    */
     {
         "Templ Navigation Tests",
         TemplNav_Tests,
-        "Testing a nested navitaion templating test.",
+        "Testing a navitaion template.",
         FEATURE_COMPLETE,
+    },
+    {
+        "Templ Nested Navigation Tests",
+        TemplNavNested_Tests,
+        "Testing a nested navitaion template.",
+        FEATURE_COMPLETE|SKIP_TEST,
     },
     {
         "Inet Tests",
