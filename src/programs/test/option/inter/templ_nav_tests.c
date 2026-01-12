@@ -7,6 +7,7 @@ char *navTwo = ""
 "    <li><a href=\"/docs\">Docs</a><ul>\n"
 "    <li><span class=\"active\">Base</span></li>\n"
 "</ul>\n"
+"</li>\n"
 "</ul>\n"
 "</nav>\n"
 ;
