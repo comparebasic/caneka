@@ -20,13 +20,13 @@ static TestSet InterTests[] = {
         "TemplCtx Tests",
         TemplCtx_Tests,
         "TemplCtx tests of basic value templating.",
-        FEATURE_COMPLETE|SKIP_TEST,
+        FEATURE_COMPLETE,
     },
     {
         "Templ Tests",
         Templ_Tests,
         "Testing templating with a few variables.",
-        FEATURE_COMPLETE|SKIP_TEST,
+        FEATURE_COMPLETE,
     },
     {
         "Templ Navigation Tests",
@@ -38,7 +38,7 @@ static TestSet InterTests[] = {
         "Templ Nested Navigation Tests",
         TemplNavNested_Tests,
         "Testing a nested navitaion template.",
-        FEATURE_COMPLETE|SKIP_TEST,
+        FEATURE_COMPLETE,
     },
     {
         "Inet Tests",

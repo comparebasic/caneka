@@ -94,7 +94,7 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
 
     while((total = Templ_ToSCycle(templ, bf, total, source)) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
-        Guard_Incr(templ->m, &g, 64, FUNCNAME, FILENAME, LINENUMBER);
+        Guard_Incr(templ->m, &g, 128, FUNCNAME, FILENAME, LINENUMBER);
     }
     DebugStack_Pop();
     templ->m->level--; 

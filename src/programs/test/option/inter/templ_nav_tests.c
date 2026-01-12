@@ -176,6 +176,9 @@ status TemplNav_Tests(MemCh *m){
     r |= Test(Equals(bf->v, expected), 
         "Nav template for two items is as expected, have:@", args);
 
+    printf("NavMake\n");
+    fflush(stdout);
+
     DebugStack_Pop();
     return r;
 }
@@ -207,7 +210,7 @@ status TemplNavNested_Tests(MemCh *m){
     Inst *page = Inst_Make(m, TYPE_WWW_PAGE);
 
     Iter *navIt = Iter_Make(m, NULL);
-    Str *s = S(m, "Base");
+    Str *s = S(m, "Fmt");
     Span *crd = Table_Get(coordTbl, s);
     NestSel_Init(navIt, nav, crd);
 
@@ -219,8 +222,9 @@ status TemplNavNested_Tests(MemCh *m){
     status result = Templ_Prepare(templ);
 
     args[0] = templ->content.p;
-    args[1] = NULL;
-    Out("^c.Templ->content.p &^0\n", args);
+    args[1] = nav;
+    args[2] = NULL;
+    Out("^c.Templ->content.p &^0@\n", args);
 
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
