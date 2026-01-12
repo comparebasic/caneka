@@ -80,6 +80,10 @@ static status Templ_handleForJump(Templ *templ, TemplJump *jump, Abstract *data)
             DebugStack_Pop();
             return r;
         }
+    }else if(jump->crit.dest.idx != NEGATIVE &&
+            (IterUpper_FlagCombine(jump->crit.dest.type.state, it->objType.state) & NOOP)){
+        Iter_GetByIdx(&templ->content, jump->crit.dest.idx);
+        r |= PROCESSING;
     }
 
     if((fch->type.state & MORE) == 0){
@@ -107,14 +111,14 @@ static status Templ_handleForJump(Templ *templ, TemplJump *jump, Abstract *data)
             r |= PROCESSING;
             fch->type.state |= MORE;
         }else{
-            i32 idx = jump->crit.skip.idx != NEGATIVE ? jump->crit.skip.idx : curIdx;
-            if(idx != NEGATIVE){
-                Iter_GetByIdx(&templ->content, idx);
+            if(jump->crit.skip.idx != NEGATIVE){
+                Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
                 Iter_Remove(&templ->data);
                 Iter_Prev(&templ->data);
             }
         }
     }
+
     return r;
 }
 
