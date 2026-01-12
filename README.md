@@ -85,6 +85,10 @@ For this analogy, here are examples from each category:
 The comonality between items within each category speaks to the value of
 customizaton, and also highlights the challenges of conformity.
 
+Parser sources can be found in the [parser](/src/ext/parser/) folder or any
+file that ends in \_roebling.c which is the naming convention for a `Roebling`
+object source file.
+
 
 ## Caneka Components
 
@@ -111,19 +115,15 @@ see [caneka.org](https://caneka.org) for more details.
 
 ## Build Instructions
 
-To build and test Caneka run:
+To build and test Caneka run using the helper script using *clang*:
 
-    clang -o bootstrap bootstrap.c && ./bootstrap 
+    ./build.sh
 
-and eventually, this will be supported:
+and eventually, this will be support gcc and other compilers as well. Note:
+there is a bug when compling with gcc related to the order of static libs.
 
-    gcc -o bootstrap bootstrap.c && ./bootstrap 
-
-Note: there is a bug when compling with gcc related to the order of static libs.
-
-This will compile and run the bootstrap program which manages building the rest
-of the modules.
-
+This will compile and run the bootstrap program which will present a menu
+to guide you through the rest of the build process.
 
 ### CnkBuild - source builder
 
@@ -165,7 +165,7 @@ in order to run on desktop and mobile targets).
 ## Build Status
 
 The core components run pretty well and have been lightly tested, you
-can see the status of the system at [caneka.org](https://caneka.ort)
+can see the status of the system at [caneka.org](https://caneka.org)
 or by building and running the tests through the `bootstrap` program
 option (see Build Steps above).
 
