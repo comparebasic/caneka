@@ -58,6 +58,7 @@ status WwwNav_Tests(MemCh *m){
     Span *crd = Table_Get(coordTbl, s);
     Iter *it = Iter_Make(m, NULL);
     NestSel_Init(it, node, crd);
+    it->type.state |= DEBUG;
 
     void *expected[] = {
         S(m, "docs"), I32_Wrapped(m, 0), I16_Wrapped(m, UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT),
@@ -66,6 +67,9 @@ status WwwNav_Tests(MemCh *m){
         S(m, "str"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_INDENT),
         S(m, "fmt"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_SELECTED),
         S(m, "tos"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
+        S(m, "mem"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
+        S(m, "span"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
+        S(m, "memch"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
         NULL, NULL,
     };
 
@@ -74,7 +78,9 @@ status WwwNav_Tests(MemCh *m){
     while((NestSel_Next(it) & END) == 0){
         Hashed *h = NestSel_Get(it);
         if(h == NULL){
-            r |= Test(FALSE, "Item found", NULL);
+            args[0] = I32_Wrapped(m, it->idx);
+            args[1] = NULL;
+            r |= Test(FALSE, "Item found \\@$", args);
             break;
         }
         args[0] = expected[idx*3];

@@ -47,6 +47,8 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
 void *NestSel_Get(Iter *_it){
     Iter *it = Iter_Get(_it);
     if(it == NULL){
+        printf("it null\n");
+        fflush(stdout);
         return NULL;
     }
     return it->value;
@@ -68,6 +70,8 @@ status NestSel_Next(Iter *_it){
         while(1){
             it = Iter_Get(_it);
             if(it->type.state & END){
+                printf("Prev\n");
+                fflush(stdout);
                 if(Iter_Prev(_it) & END){
                     return END;
                 }
@@ -92,6 +96,14 @@ status NestSel_Next(Iter *_it){
     }
 
     Iter_Next(it);
+    if(_it->type.state & DEBUG){
+        void *ar[] = {it, Iter_Get(it), NULL};
+        Out("^c.Next @ @^0\n", ar);
+    }
+    if(it->type.state & END){
+        return NestSel_Next(_it);
+    }
+
     if(_it->type.state & LAST){
         _it->objType.state |= UFLAG_ITER_LEAF;
         if(it->metrics.selected == it->idx){
@@ -101,7 +113,7 @@ status NestSel_Next(Iter *_it){
         }
     }
 
-    if(_it->idx == 0&& (it->type.state & END)){
+    if(_it->idx == 0 && (it->type.state & END)){
         _it->type.state |= END;
         return END;
     }
