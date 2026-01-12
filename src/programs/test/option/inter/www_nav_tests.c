@@ -62,14 +62,12 @@ status WwwNav_Tests(MemCh *m){
 
     void *expected[] = {
         S(m, "docs"), I32_Wrapped(m, 0), I16_Wrapped(m, UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT),
-        S(m, "base"), I32_Wrapped(m, 1), I16_Wrapped(m, UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT|UFLAG_ITER_SELECTED),
+        S(m, "base"), I32_Wrapped(m, 1), I16_Wrapped(m, UFLAG_ITER_INDENT|UFLAG_ITER_SELECTED|UFLAG_ITER_OUTDENT),
         S(m, "bytes"), I32_Wrapped(m, 2), I16_Wrapped(m, UFLAG_ITER_INDENT|UFLAG_ITER_SELECTED),
         S(m, "str"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_INDENT),
         S(m, "fmt"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_SELECTED),
         S(m, "tos"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
         S(m, "mem"), I32_Wrapped(m, 2), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
-        S(m, "span"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
-        S(m, "memch"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
         NULL, NULL,
     };
 

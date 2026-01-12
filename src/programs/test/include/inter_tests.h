@@ -34,6 +34,12 @@ static TestSet InterTests[] = {
         "Testing a navitaion template.",
         FEATURE_COMPLETE,
     },
+        {
+            "Www Nav Tests",
+            WwwNav_Tests,
+            "Example navigation generation tests.",
+            FEATURE_COMPLETE,
+        },
     {
         "Templ Nested Navigation Tests",
         TemplNavNested_Tests,
