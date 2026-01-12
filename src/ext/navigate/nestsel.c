@@ -70,8 +70,6 @@ status NestSel_Next(Iter *_it){
         while(1){
             it = Iter_Get(_it);
             if(it->type.state & END){
-                printf("Prev\n");
-                fflush(stdout);
                 if(Iter_Prev(_it) & END){
                     return END;
                 }
@@ -95,12 +93,15 @@ status NestSel_Next(Iter *_it){
         }
     }
 
-    Iter_Next(it);
-    if(_it->type.state & DEBUG){
-        void *ar[] = {it, Iter_Get(it), NULL};
-        Out("^c.Next @ @^0\n", ar);
+    if((it->type.state & END) == 0){
+        Iter_Next(it);
     }
+
     if(it->type.state & END){
+        if(_it->idx <= 0){
+            _it->type.state |= END;
+            return END;
+        }
         return NestSel_Next(_it);
     }
 
@@ -111,11 +112,6 @@ status NestSel_Next(Iter *_it){
         }else{
             _it->objType.state &= ~UFLAG_ITER_SELECTED;
         }
-    }
-
-    if(_it->idx == 0 && (it->type.state & END)){
-        _it->type.state |= END;
-        return END;
     }
 
     if(it->type.state & LAST){

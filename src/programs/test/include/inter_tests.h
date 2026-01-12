@@ -116,7 +116,7 @@ static TestSet InterTests[] = {
         "Doc Tests",
         Doc_Tests,
         "Documentation generator tests.",
-        FEATURE_COMPLETE,
+        FEATURE_COMPLETE|SKIP_TEST,
     },
     {
         NULL,

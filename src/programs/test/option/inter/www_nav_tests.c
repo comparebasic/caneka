@@ -67,7 +67,7 @@ status WwwNav_Tests(MemCh *m){
         S(m, "str"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_INDENT),
         S(m, "fmt"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_SELECTED),
         S(m, "tos"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
-        S(m, "mem"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
+        S(m, "mem"), I32_Wrapped(m, 2), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
         S(m, "span"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
         S(m, "memch"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_OUTDENT),
         NULL, NULL,
@@ -97,7 +97,7 @@ status WwwNav_Tests(MemCh *m){
 
         r |= Test(it->idx == ((Single *)args[0])->val.i &&
             ((it->objType.state & relevantFl) == flagSg->val.w),
-            "Idx matches, $/@, found $/@",
+            "Selected Fmt Idx matches, $/@, found $/@",
             args);
         idx++;
     }
@@ -108,11 +108,15 @@ status WwwNav_Tests(MemCh *m){
     NestSel_Init(it, node, crd);
 
     void *memChExpected[] = {
-        S(m, "docs"), I32_Wrapped(m, 0), I16_Wrapped(m, ZERO),
-        S(m, "base"), I32_Wrapped(m, 1), I16_Wrapped(m, ZERO),
-        S(m, "mem"), I32_Wrapped(m, 2), I16_Wrapped(m, ZERO),
-        S(m, "span"), I32_Wrapped(m, 3), I16_Wrapped(m, ZERO),
-        S(m, "memch"), I32_Wrapped(m, 3), I16_Wrapped(m, MORE),
+        S(m, "docs"), I32_Wrapped(m, 0),
+            I16_Wrapped(m, UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT),
+        S(m, "base"), I32_Wrapped(m, 1), I16_Wrapped(m,
+                UFLAG_ITER_INDENT|UFLAG_ITER_SELECTED|UFLAG_ITER_OUTDENT),
+        S(m, "mem"), I32_Wrapped(m, 2), I16_Wrapped(m,
+                UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT),
+        S(m, "span"), I32_Wrapped(m, 3), I16_Wrapped(m, UFLAG_ITER_INDENT),
+        S(m, "memch"), I32_Wrapped(m, 3), I16_Wrapped(m,
+            UFLAG_ITER_SELECTED|UFLAG_ITER_OUTDENT),
         NULL, NULL,
     };
 
@@ -127,12 +131,18 @@ status WwwNav_Tests(MemCh *m){
         args[1] = h->key;
         args[2] = NULL;
         r |= Test(Equals(args[0], h->key), "Key matches, expected @, found @", args);
+
+        Single *flagSg = memChExpected[idx*3+2];
         args[0] = memChExpected[idx*3+1];
-        args[1] = I32_Wrapped(m, it->idx);
-        args[2] = Type_StateVec(m, TYPE_ITER, it->type.state & MORE);
-        args[3] = NULL;
-        Single *flagSg = expected[idx*3+2];
-        r |= Test(((Single *)args[0])->val.i == ((Single *)args[1])->val.i && ((it->type.state & MORE) == flagSg->val.w), "Idx matches, @, found @ @", args);
+        args[1] = Type_StateVec(m, TYPE_ITER_UPPER, flagSg->val.w);
+        args[2] = I32_Wrapped(m, it->idx);
+        args[3] = Type_StateVec(m, TYPE_ITER_UPPER, it->objType.state & relevantFl);
+        args[4] = NULL;
+        r |= Test(it->idx == ((Single *)args[0])->val.i &&
+            ((it->objType.state & relevantFl) == flagSg->val.w),
+            "Selected MemCh Idx matches, $/@, found $/@",
+            args);
+
         idx++;
     }
 
