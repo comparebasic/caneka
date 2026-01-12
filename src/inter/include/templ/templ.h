@@ -1,5 +1,6 @@
 typedef struct templ {
     Type type;
+    Type objType;
     MemCh *m;
     i32 indent;
     i16 level;

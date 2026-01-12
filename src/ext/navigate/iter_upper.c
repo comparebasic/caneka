@@ -14,8 +14,8 @@ status IterUpper_FlagCombine(status base, status compare){
 
     status useful = UPPER_FLAGS & ~(UFLAG_ITER_STRICT|UFLAG_ITER_INVERT);
     status overlap = (useful & compare & base);
-    
-    boolean strict = overlap == (compare & useful);
+    boolean strict = (base & useful) == (compare & useful);
+
     boolean match = (base & UFLAG_ITER_STRICT) ?
         strict:
         overlap != 0;

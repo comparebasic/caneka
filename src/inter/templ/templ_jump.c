@@ -22,10 +22,18 @@ status Templ_HandleJump(Templ *templ){
             jump = (TemplJump *)Iter_Get(&templ->content);
             fch = jump->fch;
         }else if(jump->sourceType.state & FETCHER_CONDITION){
-            if(jump->crit.skip.idx != -1 &&
-                    jump->crit.skip.incr > 0 &&
-                    jump->crit.skip.incr-- > 0){
-                /* show content */
+            status fl = IterUpper_FlagCombine(
+                (UFLAG_ITER_OUTDENT|UFLAG_ITER_STRICT),
+                templ->objType.state);
+            if(fl & SUCCESS){
+                if(jump->crit.skip.idx != -1 && jump->crit.skip.incr > 0 &&
+                        jump->crit.skip.incr-- <= 0){
+                    Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
+                    r |= PROCESSING;
+                }else{
+                    DebugStack_Pop();
+                    return ZERO;
+                }
             }else{
                 Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
                 r |= PROCESSING;
@@ -56,13 +64,14 @@ status Templ_HandleJump(Templ *templ){
             return templ->type.state;
         }
 
+        /*
         void *ar[] = {Type_StateVec(templ->m, TYPE_ITER_UPPER, it->objType.state), NULL};
         Out("^p.PrevState @^0\n", ar);
+        */
 
         if((it->objType.state & (UFLAG_ITER_OUTDENT|UFLAG_ITER_INDENT)) ==
                 (UFLAG_ITER_OUTDENT|UFLAG_ITER_INDENT)){
             TemplJump *close = Span_Get(templ->content.p, jump->crit.ret.idx);
-            printf("incr %d\n", close->crit.skip.incr);
             close->crit.skip.incr++;
         }else if(it->objType.state & UFLAG_ITER_OUTDENT){
             if(fch->type.state & MORE){
@@ -78,22 +87,29 @@ status Templ_HandleJump(Templ *templ){
             }
         }
 
-        while((fch->api->next(it) & END) == 0){
-            void *a = fch->api->get(it);
-            if(a != NULL){
-                void *ar[] = {a, NULL};
-                Out("^p.Item @^0\n", ar);
-                Iter_Add(&templ->data, a);
-                break;
+        if((fch->type.state & MORE) == 0){
+            while((fch->api->next(it) & END) == 0){
+                void *a = fch->api->get(it);
+                if(a != NULL){
+                    templ->objType.state = it->objType.state;
+                    /*
+                    void *ar[] = {a, NULL};
+                    Out("^p.Item @^0\n", ar);
+                    */
+                    Iter_Add(&templ->data, a);
+                    break;
+                }
             }
         }
 
-        if((it->type.state & (END|MORE)) == END){
+        if(it->type.state & END){
             TemplJump *close = Span_Get(templ->content.p, jump->crit.ret.idx);
-            printf("skip incr %d\n", close->crit.skip.incr);
-            exit(1);
-            if(close->crit.skip.incr > 0){
+            if(close != NULL && close->crit.skip.incr > 0){
+                if(close->sourceType.state & FETCHER_CONDITION){
+                    templ->objType.state = UFLAG_ITER_OUTDENT;
+                }
                 Iter_GetByIdx(&templ->content, jump->crit.ret.idx);
+                r |= PROCESSING;
                 fch->type.state |= MORE;
             }else{
                 i32 idx = jump->crit.skip.idx != NEGATIVE ? jump->crit.skip.idx : curIdx;
