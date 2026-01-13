@@ -170,9 +170,14 @@ status TemplNav_Tests(MemCh *m){
     status result = Templ_Prepare(templ);
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
+    args[0] = templ->content.p;
+    args[1] = bf->v;
+    args[2] = NULL;
+    Out("^c.TemplContent &^0\n@\n", args);
+
     Str *expected = S(m, navTwo);
     expected->type.state |= DEBUG;
-    args[0] = expected;
+    args[0] = bf->v;
     args[1] = NULL;
     r |= Test(Equals(bf->v, expected), 
         "Nav template for two items is as expected, have:@", args);

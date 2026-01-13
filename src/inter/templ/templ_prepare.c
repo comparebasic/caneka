@@ -139,9 +139,11 @@ status Templ_PrepareCycle(Templ *templ){
             FetchTarget *tg = Span_Get(jump->fch->val.targets, 0); 
             jump->crit.dest.idx = Templ_FindNext(templ, FETCHER_END);
             jump->crit.skip.idx = Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));
-            i32 enclosingIdx = Templ_FindStart(templ, FETCHER_FOR);
-            if(enclosingIdx != -1){
-                TemplJump *enclosing = Span_Get(templ->content.p, enclosingIdx);
+
+            jump->crit.enclose.idx = Templ_FindStart(templ, FETCHER_FOR);
+            if(jump->crit.enclose.idx != -1){
+                TemplJump *enclosing = Span_Get(templ->content.p,
+                    jump->crit.enclose.idx);
                 if(enclosing != NULL){
                     enclosing->crit.dest.type.state = UFLAG_ITER_INDENT;
                     enclosing->crit.ret.idx = jump->crit.skip.idx;

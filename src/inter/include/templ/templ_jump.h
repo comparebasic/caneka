@@ -15,6 +15,7 @@ typedef struct templ_jump {
         JumpCrit dest;
         JumpCrit skip;
         JumpCrit ret;
+        JumpCrit enclose;
     } crit;
 } TemplJump;
 
