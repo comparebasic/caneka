@@ -1,6 +1,7 @@
 #include "templ/templ.h"
 #include "templ/templ_ctx.h"
 #include "templ/templ_filter.h"
+#include "templ/templ_crit.h"
 #include "templ/templ_jump.h"
 #include "templ/templ_roebling.h"
 #include "templ/templ_prepare.h"

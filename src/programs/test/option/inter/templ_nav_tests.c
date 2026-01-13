@@ -168,12 +168,12 @@ status TemplNav_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
 
     status result = Templ_Prepare(templ);
-    i64 total = Templ_ToS(templ, bf, data, NULL);
-
     args[0] = templ->content.p;
     args[1] = bf->v;
     args[2] = NULL;
     Out("^c.TemplContent &^0\n@\n", args);
+
+    i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = S(m, navTwo);
     expected->type.state |= DEBUG;

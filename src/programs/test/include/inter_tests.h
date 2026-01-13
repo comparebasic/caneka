@@ -16,6 +16,12 @@ status TemplNavNested_Tests(MemCh *m);
 status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
+        {
+            "Www Nav Tests",
+            WwwNav_Tests,
+            "Example navigation generation tests.",
+            FEATURE_COMPLETE,
+        },
     {
         "TemplCtx Tests",
         TemplCtx_Tests,
@@ -34,12 +40,6 @@ static TestSet InterTests[] = {
         "Testing a navitaion template.",
         FEATURE_COMPLETE,
     },
-        {
-            "Www Nav Tests",
-            WwwNav_Tests,
-            "Example navigation generation tests.",
-            FEATURE_COMPLETE,
-        },
     {
         "Templ Nested Navigation Tests",
         TemplNavNested_Tests,

@@ -1,10 +1,4 @@
-/* usese fetcher op flags */
-
-typedef struct jump_crit {
-    Type type;
-    i32 incr;
-    i32 idx;
-} JumpCrit;
+/* uses fetcher op flags */
 
 typedef struct templ_jump {
     Type type;
@@ -12,10 +6,10 @@ typedef struct templ_jump {
     Fetcher *fch;
     i32 idx;
     struct {
-        JumpCrit dest;
-        JumpCrit skip;
-        JumpCrit ret;
-        JumpCrit enclose;
+        TemplCrit dest;
+        TemplCrit skip;
+        TemplCrit ret;
+        TemplCrit enclose;
     } crit;
 } TemplJump;
 

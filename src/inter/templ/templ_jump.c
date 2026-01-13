@@ -10,18 +10,6 @@ static status Templ_handleEndJump(Templ *templ, TemplJump **jumpPtr){
         Iter_Remove(&templ->data);
         Iter_Prev(&templ->data);
     }else if(jump->sourceType.state & FETCHER_FOR){
-        if(jump->crit.ret.idx != -1 && 
-                (IterUpper_FlagCombine(jump->crit.ret.type.state,
-                    it->objType.state) & SUCCESS)){
-            TemplJump *ret = Span_Get(templ->content.p, jump->crit.ret.idx);
-            if(ret->crit.skip.idx != -1){
-                ret = Span_Get(templ->content.p, ret->crit.skip.idx);
-            }
-            ret->crit.ret.idx = jump->idx;
-            void *args[] = {ret, NULL};
-            Out("^b.For has a ret @^0\n", args);
-            exit(1);
-        }
         Iter_GetByIdx(&templ->content, jump->crit.dest.idx);
         *jumpPtr = (TemplJump *)Iter_Get(&templ->content);
     }else if(jump->sourceType.state & FETCHER_CONDITION){
@@ -79,15 +67,14 @@ static status Templ_handleForJump(Templ *templ, TemplJump *jump, Abstract *data)
     if((it->objType.state & (UFLAG_ITER_OUTDENT|UFLAG_ITER_INDENT)) ==
             (UFLAG_ITER_OUTDENT|UFLAG_ITER_INDENT)){
         TemplJump *close = Span_Get(templ->content.p, jump->crit.ret.idx);
-        close->crit.skip.incr++;
+        TemplCrit_Add(templ, close->crit.skip.idx, UFLAG_ITER_OUTDENT);
     }else if(it->objType.state & UFLAG_ITER_OUTDENT){
         if(fch->type.state & MORE){
             fch->type.state &= ~MORE;
         }else{
             i32 idx = templ->content.idx;
-            TemplJump *close = Iter_GetByIdx(&templ->content,
-                jump->crit.ret.idx);
-            close->crit.skip.incr++;
+            TemplJump *close = Iter_GetByIdx(&templ->content, jump->crit.ret.idx);
+            TemplCrit_Add(templ, close->crit.skip.idx, UFLAG_ITER_OUTDENT);
             fch->type.state |= MORE;
             DebugStack_Pop();
             return r;
@@ -114,14 +101,12 @@ static status Templ_handleForJump(Templ *templ, TemplJump *jump, Abstract *data)
     }
 
     if(it->type.state & END){
-        TemplJump *close = Span_Get(templ->content.p, jump->crit.ret.idx);
-        if(close != NULL && close->crit.skip.incr > 0){
-            if(close->sourceType.state & FETCHER_CONDITION){
-                templ->objType.state = UFLAG_ITER_OUTDENT;
+        if(templ->ret.p->max_idx >= 0){
+            i32 idx = TemplCrit_Decr(templ, it->objType.state);
+            if(idx > -1){
+                Iter_GetByIdx(&templ->content, idx);
+                r |= PROCESSING;
             }
-            Iter_GetByIdx(&templ->content, jump->crit.ret.idx);
-            r |= PROCESSING;
-            fch->type.state |= MORE;
         }else{
             if(jump->crit.skip.idx != NEGATIVE){
                 Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
