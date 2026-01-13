@@ -6,7 +6,16 @@ typedef struct templ {
     i16 level;
     Iter content;
     Iter data;
-    Iter ret;
+    struct {
+        Span *p;
+        i32 idx;
+        i32 incr;
+    } indent;
+    struct {
+        Span *p;
+        i32 idx;
+        i32 incr;
+    } outdent;
 } Templ;
 
 Templ *Templ_Make(MemCh *m, Span *content);

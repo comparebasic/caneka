@@ -146,6 +146,13 @@ status Templ_PrepareCycle(Templ *templ){
         if(fch->type.state & FETCHER_FOR){
             jump->crit.skip.idx = Templ_FindEnd(templ);
             jump->crit.dest.idx = Templ_FindNext(templ, FETCHER_CONDITION|FETCHER_END);
+            if(jump->crit.dest.idx != -1 &&
+                    jump->crit.dest.idx < jump->crit.skip.idx){
+                jump->crit.dest.type.state |= 
+                    (UFLAG_ITER_INDENT|UFLAG_ITER_INVERT);
+            }else{
+                jump->crit.dest.idx = -1;
+            }
         }else if(fch->type.state & (FETCHER_WITH|FETCHER_IF)){
             jump->crit.skip.idx = Templ_FindEnd(templ); 
         }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_TEMPL)) == 
@@ -173,6 +180,8 @@ status Templ_PrepareCycle(Templ *templ){
                                 Span_Get(templ->content.p, dest->crit.enclose.idx);
                                 if(enclose != NULL){
                                     jump->crit.skip.idx = enclose->crit.skip.idx;
+                                    jump->crit.skip.type.state =
+                                        (UFLAG_ITER_OUTDENT|UFLAG_ITER_STRICT);
                                 }
                         }
                     }else{
@@ -228,4 +237,3 @@ status Templ_Prepare(Templ *templ){
     DebugStack_Pop();
     return NOOP;
 }
-
