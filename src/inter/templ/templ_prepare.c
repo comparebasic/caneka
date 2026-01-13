@@ -145,16 +145,10 @@ status Templ_PrepareCycle(Templ *templ){
 
         if(fch->type.state & FETCHER_FOR){
             jump->crit.skip.idx = Templ_FindEnd(templ);
-            jump->crit.dest.idx = Templ_FindNext(templ, FETCHER_CONDITION|FETCHER_END);
+            jump->crit.dest.idx = Templ_FindNext(templ, FETCHER_CONDITION|FETCHER_FOR|FETCHER_WITH);
             if(jump->crit.dest.idx != -1 &&
                     jump->crit.dest.idx < jump->crit.skip.idx){
-                jump->crit.dest.type.state |= 
-                    (UFLAG_ITER_INDENT|UFLAG_ITER_INVERT);
-                TemplJump *dest = Span_Get(templ->m, jump->crit.dest.idx);
-                if(dest != NULL){
-                    dest->crit.ret.idx = jump->idx;
-                    dest->crit.ret.type.state = UFLAG_ITER_INDENT;
-                }
+                    jump->crit.dest.type.state = UFLAG_ITER_INDENT;
             }else{
                 jump->crit.dest.idx = -1;
             }
@@ -171,8 +165,11 @@ status Templ_PrepareCycle(Templ *templ){
             FetchTarget *tg = Span_Get(jump->fch->val.targets, 0); 
             jump->crit.dest.idx = Templ_FindNext(templ, FETCHER_END);
             jump->crit.skip.idx = Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));
-            jump->crit.enclose.idx = Templ_FindStart(templ, FETCHER_FOR);
-
+            jump->crit.enclose.idx = Templ_FindStart(templ, FETCHER_FOR|FETCHER_WITH);
+            jump->crit.ret.idx = jump->crit.enclose.idx;
+            if(jump->crit.ret.idx != -1){
+                jump->crit.ret.type.state = UFLAG_ITER_INDENT;
+            }
         }else if(fch->type.state & FETCHER_END){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){

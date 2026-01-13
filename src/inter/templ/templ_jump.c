@@ -1,118 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Templ_handleEndJump(Templ *templ, TemplJump **jumpPtr){
-    status r = READY;
-    TemplJump *jump = *jumpPtr;
-    i32 curIdx = -1;
-    Iter *it = Span_Get(templ->data.p, templ->data.idx-1);
-    if(jump->sourceType.state & FETCHER_WITH){
-        Iter_Remove(&templ->data);
-        Iter_Prev(&templ->data);
-    }else if(jump->sourceType.state & FETCHER_FOR){
-        Iter_GetByIdx(&templ->content, jump->crit.dest.idx);
-        *jumpPtr = (TemplJump *)Iter_Get(&templ->content);
-    }else if(jump->sourceType.state & FETCHER_CONDITION){
-
-        void *args[] = {
-            Type_StateVec(templ->m, TYPE_ITER_UPPER, jump->crit.skip.type.state),
-            Type_StateVec(templ->m, TYPE_ITER_UPPER, templ->objType.state),
-            I32_Wrapped(templ->m, jump->crit.skip.idx),
-            NULL
-        };
-        Out("^y.End Condition @ <- @ - skip $^0\n", args);
-
-        if(IterUpper_FlagCombine(jump->crit.skip.type.state,
-                templ->objType.state) & NOOP){
-            Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
-            r |= PROCESSING;
-        }
-    }
-    return r;
-}
-
-static status Templ_handleForJump(Templ *templ, TemplJump *jump, Abstract *data){
-    i32 curIdx = templ->content.idx;
-    Fetcher *fch = jump->fch;
-    status r = READY;
-
-    Iter *it = NULL;
-    if(templ->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)){
-        if(templ->objType.state & UFLAG_ITER_INDENT){
-            Iter *itp = Span_Get(templ->indent.p, templ->indent.idx);
-            if(itp != NULL && itp->p->nvalues > 0){
-                Single *sg = Iter_Get(itp);
-                Iter_Remove(itp);
-                Iter_Prev(itp);
-                if(itp->idx < 0){
-                    templ->objType.state &= ~UFLAG_ITER_OUTDENT;
-                }
-                Iter_GetByIdx(&templ->content, sg->val.i);
-                r |= PROCESSING;
-            }
-        }else if(templ->objType.state & UFLAG_ITER_OUTDENT){
-            Iter *itp = Span_Get(templ->indent.p, templ->outdent.idx);
-            if(itp != NULL && itp->p->nvalues > 0){
-                Single *sg = Iter_Get(itp);
-                Iter_Remove(itp);
-                Iter_Prev(itp);
-                if(itp->idx < 0){
-                    templ->objType.state &= ~UFLAG_ITER_OUTDENT;
-                }
-                Iter_GetByIdx(&templ->content, sg->val.i);
-                r |= PROCESSING;
-            }
-        }
-    }else if(templ->objType.state & UFLAG_ITER_NEXT){
-        if((fch->type.state & PROCESSING) == 0){
-            DebugStack_SetRef(fch, fch->type.of);
-            void *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
-            Iter_Add(&templ->data, value);
-            fch->type.state |= PROCESSING;
-        }else{
-            Iter_Remove(&templ->data);
-            Iter_Prev(&templ->data);
-        }
-
-        it = (Iter *)Iter_Get(&templ->data);
-        if(it != NULL && it->type.of != TYPE_ITER){
-            void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
-            Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error ^{STACK.name}, expected Iter have @ from"
-                " Iter_Get(@) instead^0\n", 
-                args);
-            templ->type.state |= ERROR;
-            return templ->type.state;
-        }
-
-        i32 idx = it->idx;
-        if(fch->api->next(it) & END){
-            Iter_Remove(&templ->data);
-            Iter_Prev(&templ->data);
-            templ->objType.state |= UFLAG_ITER_OUTDENT;
-        }else{
-            templ->objType.state = it->objType.state;
-            Iter_Add(&templ->data, fch->api->get(it));
-            if(it->idx > idx){
-                templ->indent.idx = it->idx;
-                templ->indent.incr++;
-                templ->objType.state |= UFLAG_ITER_INDENT;
-            } else if(it->idx < idx){
-                templ->outdent.idx = it->idx;
-                templ->outdent.incr++;
-                templ->objType.state |= UFLAG_ITER_OUTDENT;
-            }
-        }
-
-        if(jump->crit.dest.idx){
-            Iter_GetByIdx(&templ->content, jump->crit.dest.idx);
-            r |= PROCESSING;
-        }
-    }
-
-    return r;
-}
-
 static status Templ_handleConditionJump(Templ *templ, TemplJump *jump, Abstract *data){
     status r = READY;
     Fetcher *fch = jump->fch;
@@ -187,55 +75,133 @@ static status Templ_handleConditionJump(Templ *templ, TemplJump *jump, Abstract 
 
 status Templ_HandleJump(Templ *templ){
     DebugStack_Push(templ, templ->type.of);
+    temp->objType.state = ZERO;
 
-    status r = READY;
-    void *args[5];
     TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
 
-    if(jump->crit.ret.idx != -1 && 
-            (jump->crit.ret.type.state & templ->objType.state)){
-        Iter_GetByIdx(&templ->content, jump->crit.ret.idx);
-        r |= PROCESSING;
-        DebugStack_Pop();
-        return r;
+    i32 idx = templ->content.idx;
+    if(templ->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)){
+        if(templ->objType.state & UFLAG_ITER_INDENT){
+            Iter *itp = Span_Get(templ->indent.p, templ->indent.idx);
+            if(itp != NULL && itp->p->nvalues > 0){
+                Single *sg = Iter_Get(itp);
+                Iter_Remove(itp);
+                Iter_Prev(itp);
+                if(itp->idx < 0){
+                    templ->objType.state &= ~UFLAG_ITER_INDENT;
+                }
+                Iter_GetByIdx(&templ->content, sg->val.i);
+                r |= PROCESSING;
+            }
+        }else if(templ->objType.state & UFLAG_ITER_OUTDENT){
+            Iter *itp = Span_Get(templ->indent.p, templ->outdent.idx);
+            if(itp != NULL && itp->p->nvalues > 0){
+                Single *sg = Iter_Get(itp);
+                Iter_Remove(itp);
+                Iter_Prev(itp);
+                if(itp->idx < 0){
+                    templ->objType.state &= ~UFLAG_ITER_OUTDENT;
+                }
+                Iter_GetByIdx(&templ->content, sg->val.i);
+                r |= PROCESSING;
+            }
+        }
     }
 
-    i32 curIdx = -1;
+
+    if(idx != templ->content.idx){
+        Iter_GetByIdx(&templ->content, idx);
+        DebugStack_Pop();
+        return PROCESSING;
+    }
+
+
     Fetcher *fch = jump->fch;
     if(fch->type.state & FETCHER_END){
-        r |= Templ_handleEndJump(templ, &jump);
-    }
-    fch = jump->fch;
-
-    if(fch->type.state & FETCHER_FOR){
-        r |= Templ_handleForJump(templ, jump, data);
-    }else if(fch->type.state & FETCHER_IF){
-        fch->type.state |= PROCESSING;
-        DebugStack_SetRef(fch, fch->type.of);
+        if(jump->sourceType.state & (FETCHER_WITH|FETCHER_FOR)){
+            Iter_Remove(&templ->data);
+            Iter_Prev(&templ->data);
+        }
+    }else if(fch->type.state & FETCHER_FOR){
+        if((temp->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)) == 0){
+            templ->objType.state |= UFLAG_ITER_NEXT;
+        }
+    }else if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
-            Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
-            r |= PROCESSING;
+            temp->objType.state |= UFLAG_ITER_SKIP;
         }else{
-            Iter_Add(&templ->data, value);
+            if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
+                Iter_Add(&templ->data, value);
+            }
         }
-    }else if(fch->type.state & FETCHER_WITH){
-        DebugStack_SetRef(fch, fch->type.of);
-        Abstract *value = Fetch(templ->m, fch, data, NULL);
-        Iter_Add(&templ->data, value);
     }else if(fch->type.state & FETCHER_CONDITION){
-        r |= Templ_handleConditionJump(templ, jump, data);
+        Templ_handleConditionJump(templ, jump, data);
     }
 
-    if(r == READY){
-        r |= NOOP;
+    if(templ->objType.state & UFLAG_ITER_NEXT){
+        if((fch->type.state & PROCESSING) == 0){
+            DebugStack_SetRef(fch, fch->type.of);
+            void *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
+            Iter_Add(&templ->data, value);
+            fch->type.state |= PROCESSING;
+        }else{
+            Iter_Remove(&templ->data);
+            Iter_Prev(&templ->data);
+        }
+
+        Iter *it = (Iter *)Iter_Get(&templ->data);
+        if(it != NULL && it->type.of != TYPE_ITER){
+            void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
+            Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error ^{STACK.name}, expected Iter have @ from"
+                " Iter_Get(@) instead^0\n", 
+                args);
+            templ->type.state |= ERROR;
+            return templ->type.state;
+        }
+
+        if(fch->api->next(it) & END){
+            Iter_Remove(&templ->data);
+            Iter_Prev(&templ->data);
+            templ->objType.state |= UFLAG_ITER_OUTDENT;
+        }else{
+            templ->objType.state = it->objType.state;
+            Iter_Add(&templ->data, fch->api->get(it));
+            if(it->idx > idx){
+                templ->indent.idx = it->idx;
+                templ->indent.incr++;
+                templ->objType.state |= UFLAG_ITER_INDENT;
+            } else if(it->idx < idx){
+                templ->outdent.idx = it->idx;
+                templ->outdent.incr++;
+                templ->objType.state |= UFLAG_ITER_OUTDENT;
+            }
+        }
+    }
+
+
+    if(jump->crit.ret.idx != -1 && jump->crit.dest.type.state == ZERO
+            (jump->crit.ret.type.state & templ->objType.state)){
+        idx = jump->crit.ret.idx;
+    }else if(jump->crit.dest.idx != -1 && jump->crit.dest.type.state == ZERO ||
+            (jump->crit.dest.type.state & templ->objType.state)){
+        idx = jump->crit.dest.idx;
+    }else if(jump->crit.skip.idx != -1 && jump->crit.dest.type.state == ZERO ||
+            (jump->crit.skip.type.state & templ->objType.state) == 0){
+        idx = jump->crit.skip.idx;
+    }
+
+    if(idx != templ->content.idx){
+        Iter_GetByIdx(&templ->content, idx);
+        DebugStack_Pop();
+        return PROCESSING;
     }
 
     DebugStack_Pop();
-    return r;
+    return ZERO;
 }
-
 
 TemplJump *TemplJump_Make(MemCh *m, i32 idx, Fetcher *fch){
     TemplJump *jump = (TemplJump *)MemCh_Alloc(m, sizeof(TemplJump));
