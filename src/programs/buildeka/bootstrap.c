@@ -20,11 +20,11 @@
 #include <signal.h>
 #include "detect.h"
 
-void SetOriginalTios();
-
 static int change = 0;
 static struct termios orig_tios;
 static struct termios current_tios;
+
+void RawMode(int enable);
 
 #define TRUE 1
 #define FALSE 0
@@ -157,7 +157,7 @@ static struct sigaction _a;
 static struct sigaction _b;
 
 static void cleanup(int sig, siginfo_t *info, void *ptr){
-    SetOriginalTios();
+    RawMode(0);
     exit(1);
 }
 
@@ -181,22 +181,19 @@ static int compareCstr(const char *choice, char *content){
     return strncmp(choice, content, strlen(choice)) == 0;
 }
 
-void SetOriginalTios(){
-   int r = tcgetattr(STDIN_FILENO, &current_tios);
-   if(r != -1){
-       memcpy(&orig_tios, &current_tios, sizeof(struct termios));
-   }
-}
-
 void RawMode(int enable){
     if(enable){
        int r = tcgetattr(STDIN_FILENO, &current_tios);
        if(r != -1){
+           if(!change){
+               memcpy(&orig_tios, &current_tios, sizeof(struct termios));
+           }
            current_tios.c_lflag &= ~(ICANON|ISIG|ECHO);
            current_tios.c_cc[VMIN] = 1;
            current_tios.c_cc[VTIME] = 0;
        }
    }else{
+       printf("RAW MODE FALSE\n");
        if(!change){
             return;
        }
@@ -343,7 +340,6 @@ read:
         cleanup(0, NULL, NULL);
         return NULL;
     }else if(c == '\n'){
-        SetOriginalTios();
         if(selected >= 0 && selected <= i){
             return menuKeys[selected];
         }

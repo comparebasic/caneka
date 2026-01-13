@@ -101,7 +101,6 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
 
 status Templ_Reset(Templ *templ){
     templ->level = 0;
-    templ->indent = 0;
     templ->type.state &= DEBUG;
     templ->content.type.state |= END;
     MemCh_FreeTemp(templ->m);
