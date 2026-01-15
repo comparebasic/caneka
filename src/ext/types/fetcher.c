@@ -38,11 +38,15 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
             IterApi *api = NULL;
             if(typeOf == TYPE_ITER && ((Iter *)value)->itin != NULL){
                 typeOf = ((Iter *)value)->itin->objType.of;
-                IterApi *api = Lookup_Get(IterApiLookup, typeOf);
+                api = Lookup_Get(IterApiLookup, typeOf);
             }
             if(api == NULL){
                 api = BaseIterApi;
+            }else{
+                void *ar[] = {Type_ToStr(m, typeOf), api, NULL};
+                Out("^y.Looking for Iter of $ found @^0\n", ar);
             }
+
             fch->api = api;
         }
         value = Fetch_Target(m, tg, value, source);

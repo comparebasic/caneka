@@ -4,6 +4,10 @@
 status Itin_IterAdd(Iter *it, void *value){
     Abstract *a = (Abstract *)value;
     status r = Iter_Add(it, a);
+
+    void *args[] = {value, NULL};
+    Out("^p.Itin adding @^0\n", args);
+
     Single *sg = Lookup_Get(it->itin->positions, a->type.of);
     if(sg == NULL){
         sg = I32_Wrapped(it->p->m, it->idx);
