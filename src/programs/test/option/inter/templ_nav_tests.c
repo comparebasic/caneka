@@ -172,7 +172,6 @@ status TemplNav_Tests(MemCh *m){
     args[1] = bf->v;
     args[2] = NULL;
     Out("^c.TemplContent &^0\n@\n", args);
-    exit(1);
 
     i64 total = Templ_ToS(templ, bf, data, NULL);
 

@@ -70,6 +70,7 @@ enum types {
     TYPE_HASHED,
     TYPE_LOOKUP,
     TYPE_ITER,
+    TYPE_ITINERARY,
     TYPE_GUARD,
     TYPE_HKEY,
     TYPE_PROCDETS,

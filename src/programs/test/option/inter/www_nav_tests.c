@@ -90,11 +90,11 @@ status WwwNav_Tests(MemCh *m){
         args[0] = expected[idx*3+1];
         args[1] = Type_StateVec(m, TYPE_ITER_UPPER, flagSg->val.w);
         args[2] = I32_Wrapped(m, it->idx);
-        args[3] = Type_StateVec(m, TYPE_ITER_UPPER, it->objType.state & relevantFl);
+        args[3] = Type_StateVec(m, TYPE_ITER_UPPER, it->itin->objType.state & relevantFl);
         args[4] = NULL;
 
         r |= Test(it->idx == ((Single *)args[0])->val.i &&
-            ((it->objType.state & relevantFl) == flagSg->val.w),
+            ((it->itin->objType.state & relevantFl) == flagSg->val.w),
             "Selected Fmt Idx matches, $/@, found $/@",
             args);
         idx++;
@@ -134,10 +134,10 @@ status WwwNav_Tests(MemCh *m){
         args[0] = memChExpected[idx*3+1];
         args[1] = Type_StateVec(m, TYPE_ITER_UPPER, flagSg->val.w);
         args[2] = I32_Wrapped(m, it->idx);
-        args[3] = Type_StateVec(m, TYPE_ITER_UPPER, it->objType.state & relevantFl);
+        args[3] = Type_StateVec(m, TYPE_ITER_UPPER, it->itin->objType.state & relevantFl);
         args[4] = NULL;
         r |= Test(it->idx == ((Single *)args[0])->val.i &&
-            ((it->objType.state & relevantFl) == flagSg->val.w),
+            ((it->itin->objType.state & relevantFl) == flagSg->val.w),
             "Selected MemCh Idx matches, $/@, found $/@",
             args);
 

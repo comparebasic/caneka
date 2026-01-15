@@ -21,6 +21,11 @@ cmd="$CC -o ./dist/bin/bootstrap -I src/programs/buildeka/include/ src/programs/
 echo "building bootstrap: $cmd"
 $cmd
 
-cmd="./dist/bin/bootstrap --menu"
+if [ ! $1 ] ; then
+    cmd="./dist/bin/bootstrap --menu"
+else
+    cmd="./dist/bin/bootstrap $1"
+fi
+
 echo "running bootstrap: $cmd"
 $cmd

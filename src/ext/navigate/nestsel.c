@@ -6,7 +6,10 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
     if(it->p == NULL){
         Iter_Init(it, Span_Make(inst->m));
     }
-    it->objType.of = inst->type.of;
+
+    if(it->itin == NULL){
+        it->itin = Itin_Make(inst->m, inst->type.of);
+    }
     
     Table *children = Span_Get(inst, INST_PROPIDX_CHILDREN);
 
@@ -17,7 +20,7 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
 
         Iter *cur = Iter_GetByIdx(it, _it.idx);
         if(cur == NULL){
-            cur = Iter_Make(inst->m, Table_Ordered(inst->m, children));
+            cur = ItinIt_Make(inst->m, Table_Ordered(inst->m, children));
             Iter_Add(it, cur);
         }
         cur->metrics.selected = sg->val.i;
@@ -39,7 +42,7 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
     }
 
     Iter_First(it);
-    it->objType.state |= UFLAG_ITER_INDENT;
+    it->itin->objType.state |= UFLAG_ITER_INDENT;
 
     return r;
 }
@@ -55,7 +58,7 @@ void *NestSel_Get(Iter *_it){
 }
 
 status NestSel_Next(Iter *_it){
-    _it->objType.state &= ~(
+    _it->itin->objType.state &= ~(
         UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT|UFLAG_ITER_LEAF);
 
     if(_it->type.state & END){
@@ -65,7 +68,7 @@ status NestSel_Next(Iter *_it){
     if((_it->type.state & PROCESSING) == 0){
         Iter_Next(_it);
         it = Iter_Get(_it);
-        _it->objType.state |= UFLAG_ITER_INDENT;
+        _it->itin->objType.state |= UFLAG_ITER_INDENT;
     }else{
         while(1){
             it = Iter_Get(_it);
@@ -84,8 +87,8 @@ status NestSel_Next(Iter *_it){
                 if(_it->type.state & LAST){
                     Iter_First(it);
                 }
-                if((_it->objType.state & UFLAG_ITER_OUTDENT) == 0){
-                    _it->objType.state |= (UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT);
+                if((_it->itin->objType.state & UFLAG_ITER_OUTDENT) == 0){
+                    _it->itin->objType.state |= (UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT);
                 }
             }
 
@@ -106,16 +109,16 @@ status NestSel_Next(Iter *_it){
     }
 
     if(_it->type.state & LAST){
-        _it->objType.state |= UFLAG_ITER_LEAF;
+        _it->itin->objType.state |= UFLAG_ITER_LEAF;
         if(it->metrics.selected == it->idx){
-            _it->objType.state |= UFLAG_ITER_SELECTED;
+            _it->itin->objType.state |= UFLAG_ITER_SELECTED;
         }else{
-            _it->objType.state &= ~UFLAG_ITER_SELECTED;
+            _it->itin->objType.state &= ~UFLAG_ITER_SELECTED;
         }
     }
 
     if(it->type.state & LAST){
-        _it->objType.state |= UFLAG_ITER_OUTDENT;
+        _it->itin->objType.state |= UFLAG_ITER_OUTDENT;
     }
 
     return ZERO;

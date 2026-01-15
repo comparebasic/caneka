@@ -35,10 +35,11 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
         tg->type.state |= (fch->type.state & PROCESSING);
         if((tg->type.state & FETCH_TARGET_ITER) && fch->api == NULL){
             cls typeOf = value->type.of;
-            if(typeOf == TYPE_ITER){
-                typeOf = ((Iter *)value)->objType.of;
+            IterApi *api = NULL;
+            if(typeOf == TYPE_ITER && ((Iter *)value)->itin != NULL){
+                typeOf = ((Iter *)value)->itin->objType.of;
+                IterApi *api = Lookup_Get(IterApiLookup, typeOf);
             }
-            IterApi *api = Lookup_Get(IterApiLookup, typeOf);
             if(api == NULL){
                 api = BaseIterApi;
             }

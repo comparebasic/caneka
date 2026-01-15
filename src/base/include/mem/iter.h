@@ -14,7 +14,6 @@ extern i32 _modulos[SPAN_MAX_DIMS+1];
 
 typedef struct iter {
     Type type;
-    Type objType;
     i32 idx;
     struct span *p;
     void *value;
@@ -26,6 +25,7 @@ typedef struct iter {
         i32 selected;
         i32 available;
     } metrics;
+    struct itinerary *itin;
 } Iter;
 
 typedef status (*IterFunc)(Iter *it);

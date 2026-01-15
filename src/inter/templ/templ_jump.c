@@ -22,7 +22,7 @@ static status Templ_handleConditionJump(Templ *templ, TemplJump *jump, Abstract 
             /* proceed w content */
         }else if(tg->objType.of == FORMAT_TEMPL_INDENT &&
             it != NULL &&
-            (it->objType.state & UFLAG_ITER_INDENT)
+            (it->itin->objType.state & UFLAG_ITER_INDENT)
         ){
             if(jump->type.state & PROCESSING){
                 jump->type.state &= ~PROCESSING;
@@ -55,13 +55,13 @@ static status Templ_handleConditionJump(Templ *templ, TemplJump *jump, Abstract 
             }
         }else if(tg->objType.of == FORMAT_TEMPL_CURRENT  &&
             it != NULL &&
-                (it->objType.state & UFLAG_ITER_SELECTED) == 0 &&
+                (it->itin->objType.state & UFLAG_ITER_SELECTED) == 0 &&
                 (it->type.state & LAST)
         ){
             /* proceed with content */
         }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE  &&
             it != NULL &&
-            (it->objType.state & UFLAG_ITER_SELECTED) &&
+            (it->itin->objType.state & UFLAG_ITER_SELECTED) &&
             (it->type.state & LAST)
         ){
             /* proceed with content */
@@ -74,8 +74,9 @@ static status Templ_handleConditionJump(Templ *templ, TemplJump *jump, Abstract 
 }
 
 status Templ_HandleJump(Templ *templ){
+    status r = READY;
     DebugStack_Push(templ, templ->type.of);
-    temp->objType.state = ZERO;
+    templ->objType.state = ZERO;
 
     TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
@@ -116,7 +117,6 @@ status Templ_HandleJump(Templ *templ){
         return PROCESSING;
     }
 
-
     Fetcher *fch = jump->fch;
     if(fch->type.state & FETCHER_END){
         if(jump->sourceType.state & (FETCHER_WITH|FETCHER_FOR)){
@@ -124,13 +124,13 @@ status Templ_HandleJump(Templ *templ){
             Iter_Prev(&templ->data);
         }
     }else if(fch->type.state & FETCHER_FOR){
-        if((temp->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)) == 0){
+        if((templ->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)) == 0){
             templ->objType.state |= UFLAG_ITER_NEXT;
         }
     }else if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
-            temp->objType.state |= UFLAG_ITER_SKIP;
+            templ->objType.state |= UFLAG_ITER_SKIP;
         }else{
             if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
                 Iter_Add(&templ->data, value);
@@ -167,7 +167,7 @@ status Templ_HandleJump(Templ *templ){
             Iter_Prev(&templ->data);
             templ->objType.state |= UFLAG_ITER_OUTDENT;
         }else{
-            templ->objType.state = it->objType.state;
+            templ->objType.state = it->itin->objType.state;
             Iter_Add(&templ->data, fch->api->get(it));
             if(it->idx > idx){
                 templ->indent.idx = it->idx;
@@ -181,8 +181,7 @@ status Templ_HandleJump(Templ *templ){
         }
     }
 
-
-    if(jump->crit.ret.idx != -1 && jump->crit.dest.type.state == ZERO
+    if(jump->crit.ret.idx != -1 && jump->crit.dest.type.state == ZERO &&
             (jump->crit.ret.type.state & templ->objType.state)){
         idx = jump->crit.ret.idx;
     }else if(jump->crit.dest.idx != -1 && jump->crit.dest.type.state == ZERO ||
