@@ -133,7 +133,7 @@ status Templ_HandleJump(Templ *templ){
             templ->objType.state |= UFLAG_ITER_SKIP;
         }else{
             if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
-                Iter_Add(&templ->data, value);
+                Itin_IterAdd(&templ->data, value);
             }
         }
     }else if(fch->type.state & FETCHER_CONDITION){
@@ -144,7 +144,7 @@ status Templ_HandleJump(Templ *templ){
         if((fch->type.state & PROCESSING) == 0){
             DebugStack_SetRef(fch, fch->type.of);
             void *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
-            Iter_Add(&templ->data, value);
+            Itin_IterAdd(&templ->data, value);
             fch->type.state |= PROCESSING;
         }else{
             Iter_Remove(&templ->data);
@@ -168,7 +168,7 @@ status Templ_HandleJump(Templ *templ){
             templ->objType.state |= UFLAG_ITER_OUTDENT;
         }else{
             templ->objType.state = it->itin->objType.state;
-            Iter_Add(&templ->data, fch->api->get(it));
+            Itin_IterAdd(&templ->data, fch->api->get(it));
             if(it->idx > idx){
                 templ->indent.idx = it->idx;
                 templ->indent.incr++;

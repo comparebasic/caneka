@@ -66,7 +66,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
 status Templ_SetData(Templ *templ, void *data){
     Span *p = Span_Make(templ->m);
     Span_Add(p, data);
-    Iter_Init(&templ->data, p);
+    ItinIt_Init(&templ->data, p);
     Iter_Next(&templ->data);
     return ZERO;
 }
@@ -124,7 +124,7 @@ Templ *Templ_Make(MemCh *m, Span *content){
     Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
     templ->type.of = TYPE_TEMPL;
     templ->m = m;
-    Iter_Init(&templ->content, content);
-    Iter_Init(&templ->ret, Span_Make(m));
+    ItinIt_Init(&templ->content, content);
+    ItinIt_Init(&templ->ret, Span_Make(m));
     return templ;
 }
