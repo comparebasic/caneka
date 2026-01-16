@@ -1,78 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Templ_handleConditionJump(Templ *templ, TemplJump *jump, Abstract *data){
-    status r = READY;
-    Fetcher *fch = jump->fch;
-    if(fch->val.targets->nvalues == 0){
-        Iter_GetByIdx(&templ->content, jump->crit.dest.idx);
-        r |= PROCESSING;
-    }else if(jump->crit.ret.idx != -1){
-        Iter_GetByIdx(&templ->content, jump->crit.ret.idx);
-        r |= PROCESSING;
-    }else{
-        FetchTarget *tg = Span_Get(fch->val.targets, 0);
-        Iter *it = Span_Get(templ->data.p, templ->data.idx-1);
-        if(tg == NULL){
-            Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
-            r |= PROCESSING;
-        }else if(tg->objType.of == FORMAT_TEMPL_LEVEL  &&
-            it != NULL && (it->type.state & LAST) == 0
-        ){
-            /* proceed w content */
-        }else if(tg->objType.of == FORMAT_TEMPL_INDENT &&
-            it != NULL &&
-            (it->itin->objType.state & UFLAG_ITER_INDENT)
-        ){
-            if(jump->type.state & PROCESSING){
-                jump->type.state &= ~PROCESSING;
-                /* continue to content */
-            }else{
-                TemplJump *dest = Span_Get(templ->content.p, jump->crit.dest.idx);
-                if(dest != NULL){
-                    dest->crit.ret.type.state = UFLAG_ITER_OUTDENT;
-                    dest->crit.ret.incr = 2;
-                    dest->crit.ret.idx = templ->content.idx+1;
-                }
-
-                i32 idx = jump->crit.dest.idx;
-
-                printf("idx %d\n", idx);
-                fflush(stdout);
-
-                TemplJump *end = Span_Get(templ->content.p,
-                    dest->crit.skip.idx);
-                if(end != NULL){
-                    printf("end %d -> ret outdent %d\n", end->idx, jump->idx);
-                    fflush(stdout);
-                    end->crit.ret.idx = jump->idx;
-                    end->crit.ret.type.state = (UFLAG_ITER_OUTDENT|UFLAG_ITER_STRICT);
-                }
-
-                jump->crit.dest.idx = -1;
-                Iter_GetByIdx(&templ->content, idx);
-                r |= PROCESSING;
-            }
-        }else if(tg->objType.of == FORMAT_TEMPL_CURRENT  &&
-            it != NULL &&
-                (it->itin->objType.state & UFLAG_ITER_SELECTED) == 0 &&
-                (it->type.state & LAST)
-        ){
-            /* proceed with content */
-        }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE  &&
-            it != NULL &&
-            (it->itin->objType.state & UFLAG_ITER_SELECTED) &&
-            (it->type.state & LAST)
-        ){
-            /* proceed with content */
-        }else{
-            Iter_GetByIdx(&templ->content, jump->crit.skip.idx);
-            r |= PROCESSING;
-        }
-    }
-    return r;
-}
-
 status Templ_HandleJump(Templ *templ){
     status r = READY;
     DebugStack_Push(templ, templ->type.of);
@@ -138,7 +66,24 @@ status Templ_HandleJump(Templ *templ){
             }
         }
     }else if(fch->type.state & FETCHER_CONDITION){
-        Templ_handleConditionJump(templ, jump, data);
+        Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
+        FetchTarget *tg = Span_Get(fch->val.targets, 0);
+        if(it != NULL){
+            if(it->type.state & LAST){
+                if(
+                    (tg->objType.of == FORMAT_TEMPL_CURRENT && 
+                        (templ->objType.state & UFLAG_ITER_SELECTED)) ||
+                    (tg->objType.of == FORMAT_TEMPL_LEVEL)
+                ){
+                    templ->objType.state |= UFLAG_ITER_SKIP;
+                }
+            }else if(tg->objType.of != FORMAT_TEMPL_LEVEL){
+                templ->objType.state |= UFLAG_ITER_SKIP;
+            }
+        }
+
+        void *args[] = {fch, Type_StateVec(templ->m, TYPE_ITER_UPPER, templ->objType.state), NULL};
+        Out("Condition @ @^0\n", args);
     }
 
     if(templ->objType.state & UFLAG_ITER_NEXT){
@@ -156,7 +101,7 @@ status Templ_HandleJump(Templ *templ){
             Iter_Prev(&templ->data);
         }
 
-        Iter *it = (Iter *)Iter_Get(&templ->data);
+        Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         if(it == NULL || it->type.of != TYPE_ITER){
             void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
             Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -173,7 +118,7 @@ status Templ_HandleJump(Templ *templ){
 
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
-            templ->objType.state = UFLAG_ITER_OUTDENT;
+            templ->objType.state &= ~PROCESSING;
         }else{
             templ->objType.state = it->itin->objType.state|PROCESSING;
             Itin_IterAdd(&templ->data, fch->api->get(it));
@@ -193,19 +138,19 @@ status Templ_HandleJump(Templ *templ){
         }
     }
 
-    if(jump->crit.ret.idx != -1 && jump->crit.ret.type.state == ZERO &&
-            (jump->crit.ret.type.state & templ->objType.state)){
+    if(jump->crit.ret.idx != -1 && (jump->crit.ret.type.state & templ->objType.state)){
         idx = jump->crit.ret.idx;
-    }else if(jump->crit.skip.idx != -1 && jump->crit.skip.type.state != ZERO && 
-            (jump->crit.skip.type.state & templ->objType.state) == 0){
+    }else if(jump->crit.skip.idx != -1 && ((templ->objType.state & UFLAG_ITER_SKIP) ||
+            (jump->crit.skip.type.state != ZERO && 
+                (jump->crit.skip.type.state & templ->objType.state) == 0))){
+        templ->objType.state &= ~UFLAG_ITER_SKIP;
         idx = jump->crit.skip.idx;
         printf("skip to %d\n", idx);
         fflush(stdout);
-    }else if(jump->crit.dest.idx != -1 && jump->crit.dest.type.state == ZERO ||
-            (jump->crit.dest.type.state & templ->objType.state)){
+    }else if(jump->crit.dest.idx != -1 && (jump->crit.dest.type.state & templ->objType.state)){
         idx = jump->crit.dest.idx;
-        printf("dest %d\n", idx);
-        fflush(stdout);
+        void *args[] = {I32_Wrapped(templ->m, idx), jump, NULL};
+        Out("dest @ jump @\n", args);
     }
 
     if(idx != templ->content.idx){

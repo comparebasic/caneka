@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
-    DebugStack_Push(templ, templ->type.of);
+    DebugStack_Push(NULL, ZERO);
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         DebugStack_Pop();

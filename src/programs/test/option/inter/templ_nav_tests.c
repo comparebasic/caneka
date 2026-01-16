@@ -167,6 +167,7 @@ status TemplNav_Tests(MemCh *m){
     Table_Set(data, S(m, "page"), page);
     Buff *bf = Buff_Make(m, ZERO);
 
+    DebugStack_SetRef(bf->v, bf->v->type.of);
     status result = Templ_Prepare(templ);
     args[0] = templ->content.p;
     args[1] = bf->v;
