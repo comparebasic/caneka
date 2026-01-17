@@ -95,12 +95,10 @@ static i32 Templ_FindEnd(Templ *templ){
     i32 targetCount = 1;
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
-
         if(a->type.of == TYPE_FETCHER){
             if(a->type.state & FETCHER_VAR){
                 continue;
             }else if((a->type.state & FETCHER_END) == 0){
-                void *args[] = {a, I32_Wrapped(templ->m, targetCount), NULL};
                 if(a->type.state != latest){
                     targetCount++;
                 }
@@ -183,15 +181,6 @@ status Templ_PrepareCycle(Templ *templ){
                         dest->crit.ret.idx = Templ_FindPrev(templ, FETCHER_END);
                     }else if(dest->fch->type.state & (FETCHER_CONDITION)){
                         jump->crit.enclose.idx = destIdx;
-                        if(dest->crit.enclose.idx){
-                            TemplJump *enclose =
-                                Span_Get(templ->content.p, dest->crit.enclose.idx);
-                                if(enclose != NULL){
-                                    jump->crit.skip.idx = enclose->crit.skip.idx;
-                                    jump->crit.skip.type.state =
-                                        (UFLAG_ITER_OUTDENT|UFLAG_ITER_STRICT);
-                                }
-                        }
                     }else{
                         jump->fch->type.state |= NOOP;
                     }

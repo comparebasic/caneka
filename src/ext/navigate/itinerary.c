@@ -8,10 +8,15 @@ status Itin_IterAdd(Iter *it, void *value){
     void *args[] = {value, NULL};
     Out("^p.Itin adding @^0\n", args);
 
-    Single *sg = Lookup_Get(it->itin->positions, a->type.of);
+    cls typeOf = a->type.of;
+    if(Single_IsObj(a)){
+        typeOf = ((Single *)a)->objType.of;
+    }
+
+    Single *sg = Lookup_Get(it->itin->positions, typeOf);
     if(sg == NULL){
         sg = I32_Wrapped(it->p->m, it->idx);
-        Lookup_Add(it->p->m, it->itin->positions, a->type.of, sg);
+        Lookup_Add(it->p->m, it->itin->positions, typeOf, sg);
     }else{
         sg->val.i = it->idx;
     }

@@ -65,6 +65,14 @@ status Templ_HandleJump(Templ *templ){
                 Itin_IterAdd(&templ->data, value);
             }
         }
+    }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_VAR)) ==
+        (FETCHER_CONDITION|FETCHER_VAR)){
+        Single *ret = I32_Wrapped(templ->m, templ->content.idx);
+        ret->objType.of = TYPE_TEMPL_JUMP_RET;
+        /* handle value remove before this somehow */
+        Itin_IterAdd(&templ->data, ret);
+        printf("IndentCondition\n");
+        exit(1);
     }else if(fch->type.state & FETCHER_CONDITION){
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         FetchTarget *tg = Span_Get(fch->val.targets, 0);
@@ -113,12 +121,13 @@ status Templ_HandleJump(Templ *templ){
         }
 
         if(fch->api->next(it) & END){
-            void *args[] = {Iter_Get(&templ->data), NULL};
-            Out("^p.End Removing^0\n", args);
+            void *args[] = {Iter_Get(&templ->data), I32_Wrapped(templ->m, templ->content.idx), jump, NULL};
+            Out("^p.End Removing @ \\@$ - @^0\n", args);
 
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
-            templ->objType.state &= ~PROCESSING;
+            templ->objType.state &= ~(PROCESSING|UFLAG_ITER_NEXT);
+            templ->objType.state |= UFLAG_ITER_SKIP;
         }else{
             templ->objType.state = it->itin->objType.state|PROCESSING;
             Itin_IterAdd(&templ->data, fch->api->get(it));
@@ -154,6 +163,8 @@ status Templ_HandleJump(Templ *templ){
     }
 
     if(idx != templ->content.idx){
+        printf("jump %d\n", idx);
+        fflush(stdout);
         Iter_GetByIdx(&templ->content, idx);
         DebugStack_Pop();
         return PROCESSING;

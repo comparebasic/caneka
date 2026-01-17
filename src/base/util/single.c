@@ -1,6 +1,12 @@
 #include <external.h>
 #include "base_module.h" 
 
+boolean Single_IsObj(void *_a){
+    Abstract *a = (Abstract *)_a;
+    return a->type.of > _TYPE_WRAPPED_START && a->type.of < _TYPE_WRAPPED_END &&
+        ((Single *)a)->objType.of != ZERO;
+}
+
 util Single_ToUtil(Single *sg){
     util u = 0;
     if(sg->type.of == TYPE_WRAPPED_I16 || sg->type.of == TYPE_WRAPPED_WORD){
