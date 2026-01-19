@@ -104,17 +104,23 @@ status Templ_HandleJump(Templ *templ){
     }
 
     if(idx == templ->content.idx && (templ->objType.state & UFLAG_ITER_NEXT)){
+        Iter *it = NULL;
         if((fch->type.state & PROCESSING) == 0){
             DebugStack_SetRef(fch, fch->type.of);
             void *value = as(Fetch(m, fch, data, NULL), TYPE_ITER);
             Itin_IterAdd(&templ->data, value);
             fch->type.state |= PROCESSING;
+            it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         }else{
-            Iter_Remove(&templ->data);
-            Iter_Prev(&templ->data);
+            it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
+            if((it->type.state & END) == 0){
+                printf("Remove start next\n");
+                fflush(stdout);
+                Iter_Remove(&templ->data);
+                Iter_Prev(&templ->data);
+            }
         }
 
-        Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         if(it == NULL || it->type.of != TYPE_ITER){
             void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -126,8 +132,8 @@ status Templ_HandleJump(Templ *templ){
         }
 
         if(fch->api->next(it) & END){
-            Iter_Remove(&templ->data);
-            Iter_Prev(&templ->data);
+            printf("Remove next\n");
+            fflush(stdout);
             templ->objType.state &= ~(PROCESSING|UFLAG_ITER_NEXT);
             templ->objType.state |= UFLAG_ITER_SKIP;
         }else{
