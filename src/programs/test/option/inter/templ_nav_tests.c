@@ -183,8 +183,9 @@ status TemplNav_Tests(MemCh *m){
     r |= Test(Equals(bf->v, expected), 
         "Nav template for two items is as expected, have:@", args);
 
-    printf("NavMake\n");
-    fflush(stdout);
+    args[0] = templ;
+    args[1] = NULL;
+    Out("^p.Templ &^0\n", args);
 
     DebugStack_Pop();
     return r;

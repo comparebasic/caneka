@@ -4,6 +4,7 @@
 status Templ_HandleJump(Templ *templ){
     status r = READY;
     DebugStack_Push(templ, templ->type.of);
+    MemCh *m = templ->m;
 
     TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
@@ -57,7 +58,7 @@ status Templ_HandleJump(Templ *templ){
             templ->objType.state |= UFLAG_ITER_NEXT;
         }
     }else if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
-        Abstract *value = Fetch(templ->m, fch, data, NULL);
+        Abstract *value = Fetch(m, fch, data, NULL);
         if(value == NULL){
             templ->objType.state |= UFLAG_ITER_SKIP;
         }else{
@@ -66,13 +67,13 @@ status Templ_HandleJump(Templ *templ){
             }
         }
     }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_VAR)) ==
-        (FETCHER_CONDITION|FETCHER_VAR)){
-        Single *ret = I32_Wrapped(templ->m, templ->content.idx);
-        ret->objType.of = TYPE_TEMPL_JUMP_RET;
-        /* handle value remove before this somehow */
-        Itin_IterAdd(&templ->data, ret);
-        printf("IndentCondition\n");
-        exit(1);
+            (FETCHER_CONDITION|FETCHER_VAR)){
+        TemplCrit *crit = TemplCrit_Make(m,
+            templ->content.idx, UFLAG_ITER_OUTDENT);
+        Iter_Add(&templ->ret, crit);
+        templ->objType.state |= UFLAG_ITER_SKIP;
+        printf("Ret Add %d\n", crit->idx);
+        fflush(stdout);
     }else if(fch->type.state & FETCHER_CONDITION){
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         FetchTarget *tg = Span_Get(fch->val.targets, 0);
@@ -89,22 +90,15 @@ status Templ_HandleJump(Templ *templ){
                 templ->objType.state |= UFLAG_ITER_SKIP;
             }
         }
-
-        void *args[] = {fch, Type_StateVec(templ->m, TYPE_ITER_UPPER, templ->objType.state), NULL};
-        Out("Condition @ @^0\n", args);
     }
 
     if(templ->objType.state & UFLAG_ITER_NEXT){
         if((fch->type.state & PROCESSING) == 0){
             DebugStack_SetRef(fch, fch->type.of);
-            void *value = as(Fetch(templ->m, fch, data, NULL), TYPE_ITER);
+            void *value = as(Fetch(m, fch, data, NULL), TYPE_ITER);
             Itin_IterAdd(&templ->data, value);
             fch->type.state |= PROCESSING;
-            printf("Fetch Iter\n");
-            fflush(stdout);
         }else{
-            void *args[] = {Iter_Get(&templ->data), NULL};
-            Out("^y.Removing @^0\n", args);
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
         }
@@ -112,7 +106,7 @@ status Templ_HandleJump(Templ *templ){
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         if(it == NULL || it->type.of != TYPE_ITER){
             void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
-            Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error ^{STACK.name}, expected Iter have @ from"
                 " Iter_Get(@) instead^0\n", 
                 args);
@@ -121,19 +115,14 @@ status Templ_HandleJump(Templ *templ){
         }
 
         if(fch->api->next(it) & END){
-            void *args[] = {Iter_Get(&templ->data), I32_Wrapped(templ->m, templ->content.idx), jump, NULL};
-            Out("^p.End Removing @ \\@$ - @^0\n", args);
-
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
             templ->objType.state &= ~(PROCESSING|UFLAG_ITER_NEXT);
             templ->objType.state |= UFLAG_ITER_SKIP;
         }else{
-            templ->objType.state = it->itin->objType.state|PROCESSING;
+            templ->objType.state = ((templ->objType.state & UFLAG_ITER_SKIP) |
+                (it->itin->objType.state|PROCESSING));
             Itin_IterAdd(&templ->data, fch->api->get(it));
-
-            void *args[] = {Iter_Get(&templ->data), NULL};
-            Out("^p.NextItem @^0\n", args);
 
             if(it->idx > idx){
                 templ->indent.idx = it->idx;
@@ -147,23 +136,44 @@ status Templ_HandleJump(Templ *templ){
         }
     }
 
-    if(jump->crit.ret.idx != -1 && (jump->crit.ret.type.state & templ->objType.state)){
-        idx = jump->crit.ret.idx;
-    }else if(jump->crit.skip.idx != -1 && ((templ->objType.state & UFLAG_ITER_SKIP) ||
-            (jump->crit.skip.type.state != ZERO && 
-                (jump->crit.skip.type.state & templ->objType.state) == 0))){
-        templ->objType.state &= ~UFLAG_ITER_SKIP;
-        idx = jump->crit.skip.idx;
-        printf("skip to %d\n", idx);
-        fflush(stdout);
-    }else if(jump->crit.dest.idx != -1 && (jump->crit.dest.type.state & templ->objType.state)){
-        idx = jump->crit.dest.idx;
-        void *args[] = {I32_Wrapped(templ->m, idx), jump, NULL};
-        Out("dest @ jump @\n", args);
+    if(fch->type.state & FETCHER_FOR){
+        void *args[2];
+        args[0] = Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state);
+        args[1] = NULL;
+        Out("^y.For objType.state @^0\n", args);
+    }
+
+    TemplCrit *crit = NULL;
+    if(templ->ret.p->nvalues > 0 && ((crit = Iter_Get(&templ->ret)) != NULL) &&
+        ((crit->type.state & templ->objType.state) ||
+            ((templ->objType.state & PROCESSING) == 0)
+        )){
+        if(templ->objType.state & UFLAG_ITER_INDENT){
+            crit->incr++;
+            printf("Ret Incr to \\@%d\n", templ->content.idx);
+        }else if(--crit->incr <= 1){
+            idx = crit->idx;
+            printf("RetCondition to %d \\@%d\n", idx, templ->content.idx);
+            Iter_Remove(&templ->ret);
+            Iter_Prev(&templ->ret);
+        }
+    }
+
+    if(idx == templ->content.idx){
+        if(jump->crit.skip.idx != -1 &&
+                ((templ->objType.state & UFLAG_ITER_SKIP) ||
+                (jump->crit.skip.type.state != ZERO && 
+                    (jump->crit.skip.type.state & templ->objType.state) == 0))){
+            templ->objType.state &= ~UFLAG_ITER_SKIP;
+            idx = jump->crit.skip.idx;
+        }else if(jump->crit.dest.idx != -1 &&
+                (jump->crit.dest.type.state & templ->objType.state)){
+            idx = jump->crit.dest.idx;
+        }
     }
 
     if(idx != templ->content.idx){
-        printf("jump %d\n", idx);
+        printf("Jump To %d \\@%d\n", idx, templ->content.idx);
         fflush(stdout);
         Iter_GetByIdx(&templ->content, idx);
         DebugStack_Pop();
@@ -179,11 +189,7 @@ TemplJump *TemplJump_Make(MemCh *m, i32 idx, Fetcher *fch){
     jump->type.of = TYPE_TEMPL_JUMP;
     jump->idx = idx;
     jump->fch = fch;
-    jump->crit.dest.idx = jump->crit.skip.idx = jump->crit.ret.idx = NEGATIVE;
-    jump->crit.dest.type.of =
-        jump->crit.skip.type.of =
-        jump->crit.ret.type.of =
-        TYPE_TEMPL_JUMP_CRIT
-        ;
+    jump->crit.dest.idx = jump->crit.skip.idx = NEGATIVE;
+    jump->crit.dest.type.of = jump->crit.skip.type.of = TYPE_TEMPL_JUMP_CRIT;
     return jump;
 }

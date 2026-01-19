@@ -31,14 +31,12 @@ static i64 TemplJump_Print(Buff *bf, void *a, cls type, word flags){
         I32_Wrapped(bf->m, jump->crit.dest.idx),
         Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.skip.type.state),
         I32_Wrapped(bf->m, jump->crit.skip.idx),
-        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.ret.type.state),
-        I32_Wrapped(bf->m, jump->crit.ret.idx),
         Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.enclose.type.state),
         I32_Wrapped(bf->m, jump->crit.enclose.idx),
         jump->fch,
         NULL
     };
-    return Fmt(bf, "TemplJump:<@ \\@@/dest@^D.@^d./skip@^D@^d./ret@^D@^d./enclose@^D@^d. fch:&>", args);
+    return Fmt(bf, "TemplJump:<@ \\@@/dest@^D.@^d./skip@^D@^d./enclose@^D@^d. fch:&>", args);
 }
 
 static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){
@@ -50,9 +48,14 @@ static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){
             Type_StateVec(bf->m, templ->type.of, templ->type.state),
             &templ->content,
             &templ->data,
+            &templ->ret,
             NULL
         };
-        return Fmt(bf, "Templ<@\n  ^E.content^e.:@\n  ^E.data^e.:@>", args);
+        return Fmt(bf, "Templ<@\n"
+            "  ^E.content^e.:@\n"
+            "  ^E.data^e.:@\n"
+            "  ^E.ret^e.:@>"
+            , args);
     }else{
         void *args[] = {
             Type_StateVec(bf->m, templ->type.of, templ->type.state),

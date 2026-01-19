@@ -5,9 +5,6 @@ status Itin_IterAdd(Iter *it, void *value){
     Abstract *a = (Abstract *)value;
     status r = Iter_Add(it, a);
 
-    void *args[] = {value, NULL};
-    Out("^p.Itin adding @^0\n", args);
-
     cls typeOf = a->type.of;
     if(Single_IsObj(a)){
         typeOf = ((Single *)a)->objType.of;

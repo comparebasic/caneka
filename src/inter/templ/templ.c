@@ -125,5 +125,6 @@ Templ *Templ_Make(MemCh *m, Span *content){
     templ->type.of = TYPE_TEMPL;
     templ->m = m;
     ItinIt_Init(&templ->content, content);
+    ItinIt_Init(&templ->ret, Span_Make(m));
     return templ;
 }

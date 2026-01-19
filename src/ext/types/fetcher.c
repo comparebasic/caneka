@@ -42,9 +42,6 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
             }
             if(api == NULL){
                 api = BaseIterApi;
-            }else{
-                void *ar[] = {Type_ToStr(m, typeOf), api, NULL};
-                Out("^y.Looking for Iter of $ found @^0\n", ar);
             }
 
             fch->api = api;

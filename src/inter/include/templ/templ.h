@@ -15,6 +15,7 @@ typedef struct templ {
     } outdent;
     Iter content;
     Iter data;
+    Iter ret;
 } Templ;
 
 Templ *Templ_Make(MemCh *m, Span *content);
