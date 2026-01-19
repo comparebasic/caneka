@@ -11,6 +11,7 @@ static char *interTypeStrings[] = {
     "TYPE_TEMPL_CTX",
     "TYPE_TEMPL_JUMP",
     "TYPE_TEMPL_JUMP_CRIT",
+    "TYPE_TEMPL_JUMP_RET",
     "TYPE_HTTP_CTX",
     "_TEMPL_START",
     "TEMPL_MARK_START",
@@ -71,7 +72,6 @@ static char *interTypeStrings[] = {
     "FORMAT_TEMPL_IFNOT",
     "_FORMAT_TEMPL_LOGIC_END",
     "_TYPE_INTER_END",
-    "_TYPE_CANEKA_CORE_END",
     NULL
 };
 

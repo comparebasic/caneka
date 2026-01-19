@@ -342,6 +342,8 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
         iterUpperLabels[12] = Str_CstrRef(m, "INDENT");
         iterUpperLabels[13] = Str_CstrRef(m, "OUTDENT");
         iterUpperLabels[14] = Str_CstrRef(m, "LEAF");
+        iterUpperLabels[15] = Str_CstrRef(m, "NEXT");
+        iterUpperLabels[16] = Str_CstrRef(m, "SKIP");
         Lookup_Add(m, lk, TYPE_ITER_UPPER, (void *)iterUpperLabels);
         r |= SUCCESS;
     }

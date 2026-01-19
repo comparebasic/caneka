@@ -70,10 +70,20 @@ status Templ_HandleJump(Templ *templ){
             (FETCHER_CONDITION|FETCHER_VAR)){
         TemplCrit *crit = TemplCrit_Make(m,
             templ->content.idx, UFLAG_ITER_OUTDENT);
-        Iter_Add(&templ->ret, crit);
-        templ->objType.state |= UFLAG_ITER_SKIP;
-        printf("Ret Add %d\n", crit->idx);
-        fflush(stdout);
+        if(jump->type.state & PROCESSING){
+            jump->type.state &= PROCESSING;
+            printf("Ret Continue @%d\n", templ->content.idx);
+            fflush(stdout);
+            TemplJump *dest = Span_Get(templ->content.p, jump->crit.skip.idx);
+            dest->type.state |= END;
+            idx = templ->content.idx + 1;
+        }else{
+            Iter_Add(&templ->ret, crit);
+            templ->objType.state |= UFLAG_ITER_SKIP;
+            jump->type.state |= PROCESSING;
+            printf("Ret Add %d\n", crit->idx);
+            fflush(stdout);
+        }
     }else if(fch->type.state & FETCHER_CONDITION){
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         FetchTarget *tg = Span_Get(fch->val.targets, 0);
@@ -92,7 +102,7 @@ status Templ_HandleJump(Templ *templ){
         }
     }
 
-    if(templ->objType.state & UFLAG_ITER_NEXT){
+    if(idx == templ->content.idx && (templ->objType.state & UFLAG_ITER_NEXT)){
         if((fch->type.state & PROCESSING) == 0){
             DebugStack_SetRef(fch, fch->type.of);
             void *value = as(Fetch(m, fch, data, NULL), TYPE_ITER);
@@ -153,7 +163,7 @@ status Templ_HandleJump(Templ *templ){
             printf("Ret Incr to \\@%d\n", templ->content.idx);
         }else if(--crit->incr <= 1){
             idx = crit->idx;
-            printf("RetCondition to %d \\@%d\n", idx, templ->content.idx);
+            printf("Ret Condition to %d \\@%d\n", idx, templ->content.idx);
             Iter_Remove(&templ->ret);
             Iter_Prev(&templ->ret);
         }
@@ -164,6 +174,12 @@ status Templ_HandleJump(Templ *templ){
                 ((templ->objType.state & UFLAG_ITER_SKIP) ||
                 (jump->crit.skip.type.state != ZERO && 
                     (jump->crit.skip.type.state & templ->objType.state) == 0))){
+
+            /* jump to end after indent */
+            if(jump->crit.skip.type.state & END){
+                printf("Skip to enclose end");
+                exit(1);
+            }
             templ->objType.state &= ~UFLAG_ITER_SKIP;
             idx = jump->crit.skip.idx;
         }else if(jump->crit.dest.idx != -1 &&
