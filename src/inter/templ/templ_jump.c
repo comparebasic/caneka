@@ -74,16 +74,11 @@ status Templ_HandleJump(Templ *templ){
             jump->type.state &= PROCESSING;
             TemplJump *dest = Span_Get(templ->content.p, jump->crit.skip.idx);
             dest->crit.skip.type.state |= END;
-            printf("Ret Continue @%d placing END at %d\n", templ->content.idx,
-                dest->idx);
-            fflush(stdout);
             idx = templ->content.idx + 1;
         }else{
             Iter_Add(&templ->ret, crit);
             templ->objType.state |= UFLAG_ITER_SKIP;
             jump->type.state |= PROCESSING;
-            printf("Ret Add %d\n", crit->idx);
-            fflush(stdout);
         }
     }else if(fch->type.state & FETCHER_CONDITION){
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
@@ -114,8 +109,6 @@ status Templ_HandleJump(Templ *templ){
         }else{
             it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
             if((it->type.state & END) == 0){
-                printf("Remove start next\n");
-                fflush(stdout);
                 Iter_Remove(&templ->data);
                 Iter_Prev(&templ->data);
             }
@@ -132,8 +125,6 @@ status Templ_HandleJump(Templ *templ){
         }
 
         if(fch->api->next(it) & END){
-            printf("Remove next\n");
-            fflush(stdout);
             templ->objType.state &= ~(PROCESSING|UFLAG_ITER_NEXT);
             templ->objType.state |= UFLAG_ITER_SKIP;
         }else{
@@ -167,10 +158,8 @@ status Templ_HandleJump(Templ *templ){
         )){
         if(templ->objType.state & UFLAG_ITER_INDENT){
             crit->incr++;
-            printf("Ret Incr to \\@%d\n", templ->content.idx);
         }else if(--crit->incr <= 1){
             idx = crit->idx;
-            printf("Ret Condition to %d \\@%d\n", idx, templ->content.idx);
             Iter_Remove(&templ->ret);
             Iter_Prev(&templ->ret);
         }
@@ -201,8 +190,6 @@ status Templ_HandleJump(Templ *templ){
     }
 
     if(idx != templ->content.idx){
-        printf("Jump To %d \\@%d\n", idx, templ->content.idx);
-        fflush(stdout);
         Iter_GetByIdx(&templ->content, idx);
         DebugStack_Pop();
         return PROCESSING;
