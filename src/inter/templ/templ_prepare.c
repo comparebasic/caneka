@@ -147,7 +147,8 @@ status Templ_PrepareCycle(Templ *templ){
                 Templ_FindNext(templ, FETCHER_CONDITION|FETCHER_FOR|FETCHER_WITH);
             if(jump->crit.dest.idx != -1 &&
                     jump->crit.dest.idx < jump->crit.skip.idx){
-                    jump->crit.dest.type.state = UFLAG_ITER_INDENT;
+                    jump->crit.dest.type.state = 
+                        (UFLAG_ITER_INDENT|UFLAG_ITER_INVERT);
             }else{
                 jump->crit.dest.idx = -1;
             }
