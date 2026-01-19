@@ -165,14 +165,8 @@ status Templ_PrepareCycle(Templ *templ){
             jump->crit.dest.idx = Templ_FindNext(templ, FETCHER_END);
             jump->crit.enclose.idx =
                 Templ_FindStart(templ, FETCHER_FOR|FETCHER_WITH);
-            if(fch->type.state & FETCHER_VAR){
-                jump->crit.skip.idx =
-                    Templ_FindNext(templ, FETCHER_END);
-            }else{
-                jump->crit.skip.idx =
-                    Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));
-
-            }
+            jump->crit.skip.idx =
+                Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));
         }else if(fch->type.state & FETCHER_END){
             i32 destIdx = Templ_FindStart(templ, ZERO);
             if(destIdx > -1){

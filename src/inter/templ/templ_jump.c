@@ -72,10 +72,11 @@ status Templ_HandleJump(Templ *templ){
             templ->content.idx, UFLAG_ITER_OUTDENT);
         if(jump->type.state & PROCESSING){
             jump->type.state &= PROCESSING;
-            printf("Ret Continue @%d\n", templ->content.idx);
-            fflush(stdout);
             TemplJump *dest = Span_Get(templ->content.p, jump->crit.skip.idx);
-            dest->type.state |= END;
+            dest->crit.skip.type.state |= END;
+            printf("Ret Continue @%d placing END at %d\n", templ->content.idx,
+                dest->idx);
+            fflush(stdout);
             idx = templ->content.idx + 1;
         }else{
             Iter_Add(&templ->ret, crit);
@@ -176,12 +177,17 @@ status Templ_HandleJump(Templ *templ){
                     (jump->crit.skip.type.state & templ->objType.state) == 0))){
 
             /* jump to end after indent */
-            if(jump->crit.skip.type.state & END){
-                printf("Skip to enclose end");
-                exit(1);
+            TemplJump *enclose = NULL;
+            if((jump->crit.skip.type.state & END) &&
+                    ((enclose = Span_Get(templ->content.p, jump->crit.enclose.idx))
+                    != NULL)
+            ){
+                jump->crit.skip.type.state &= ~END;
+                idx = enclose->idx;
+            }else{
+                idx = jump->crit.skip.idx;
             }
             templ->objType.state &= ~UFLAG_ITER_SKIP;
-            idx = jump->crit.skip.idx;
         }else if(jump->crit.dest.idx != -1 &&
                 (jump->crit.dest.type.state & templ->objType.state)){
             idx = jump->crit.dest.idx;
