@@ -177,8 +177,11 @@ status Templ_PrepareCycle(Templ *templ){
                     if(dest->fch->type.state & (FETCHER_WITH|FETCHER_FOR)){
                         jump->crit.dest.idx = destIdx;
                         jump->crit.dest.type.state = PROCESSING;
+                        dest->crit.out.idx = Templ_FindPrev(templ, 
+                            (FETCHER_CONDITION|FETCHER_IF|FETCHER_WITH|FETCHER_END));
                     }else if(dest->fch->type.state & (FETCHER_CONDITION)){
                         jump->crit.enclose.idx = destIdx;
+                        jump->crit.skip.idx = Templ_FindNext(templ, FETCHER_END);
                     }else{
                         jump->fch->type.state |= NOOP;
                     }

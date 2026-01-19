@@ -12,39 +12,6 @@ status Templ_HandleJump(Templ *templ){
     i32 idx = templ->content.idx;
     if(templ->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)){
         templ->objType.state &= ~(UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT);
-        /*
-        if(templ->objType.state & UFLAG_ITER_INDENT){
-            Iter *itp = Span_Get(templ->indent.p, templ->indent.idx);
-            if(itp != NULL && itp->p->nvalues > 0){
-                Single *sg = Iter_Get(itp);
-                Iter_Remove(itp);
-                Iter_Prev(itp);
-                if(itp->idx < 0){
-                    templ->objType.state &= ~UFLAG_ITER_INDENT;
-                }
-                Iter_GetByIdx(&templ->content, sg->val.i);
-                r |= PROCESSING;
-            }
-        }else if(templ->objType.state & UFLAG_ITER_OUTDENT){
-            Iter *itp = Span_Get(templ->indent.p, templ->outdent.idx);
-            if(itp != NULL && itp->p->nvalues > 0){
-                Single *sg = Iter_Get(itp);
-                Iter_Remove(itp);
-                Iter_Prev(itp);
-                if(itp->idx < 0){
-                    templ->objType.state &= ~UFLAG_ITER_OUTDENT;
-                }
-                Iter_GetByIdx(&templ->content, sg->val.i);
-                r |= PROCESSING;
-            }
-        }
-        */
-    }
-
-    if(idx != templ->content.idx){
-        Iter_GetByIdx(&templ->content, idx);
-        DebugStack_Pop();
-        return PROCESSING;
     }
 
     Fetcher *fch = jump->fch;
@@ -144,6 +111,13 @@ status Templ_HandleJump(Templ *templ){
         }
     }
 
+    if(templ->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)){
+        TemplJump *out = Span_Get(templ->content.p, jump->crit.out.idx);
+        if(out != NULL){
+            out->crit.skip.incr++;
+        }
+    }
+
     if(fch->type.state & FETCHER_FOR){
         void *args[3];
         args[0] = Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state);
@@ -174,17 +148,32 @@ status Templ_HandleJump(Templ *templ){
     }
 
     if(idx == templ->content.idx){
-        if(jump->crit.skip.idx != -1 &&
-                ((templ->objType.state & UFLAG_ITER_SKIP) ||
-                (jump->crit.skip.type.state != ZERO && 
-                    (jump->crit.skip.type.state & templ->objType.state) == 0))){
+        boolean skipMatch = ((templ->objType.state & UFLAG_ITER_SKIP) ||
+                    (jump->crit.skip.type.state != ZERO && 
+                        (jump->crit.skip.type.state & templ->objType.state) == 0));
+        if(jump->crit.skip.idx != -1 && (jump->crit.skip.incr > 0 || skipMatch)){
             TemplJump *enclose = NULL;
+
+            if(jump->crit.skip.incr && skipMatch){
+                jump->crit.skip.incr--;
+                /*
+                TemplCrit *crit = TemplCrit_Make(m,
+                    jump->crit.out.idx, UFLAG_ITER_OUTDENT);
+                Iter_Add(&templ->ret, crit);
+                */
+            }
+
             if((jump->crit.skip.type.state & END) &&
                     ((enclose = Span_Get(templ->content.p, jump->crit.enclose.idx))
                     != NULL)
             ){
                 jump->crit.skip.type.state &= ~END;
-                idx = enclose->idx;
+                if(enclose->crit.out.idx != -1){
+                    idx = enclose->crit.out.idx;
+                    templ->objType.state |= UFLAG_ITER_OUTDENT;
+                }else{
+                    idx = enclose->idx;
+                }
                 void *args[] = {
                     I32_Wrapped(m, idx),
                     I32_Wrapped(m, templ->content.idx),
@@ -195,10 +184,13 @@ status Templ_HandleJump(Templ *templ){
                 idx = jump->crit.skip.idx;
                 void *args[] = {
                     I32_Wrapped(m, idx),
+                    I32_Wrapped(m, jump->crit.skip.incr),
                     I32_Wrapped(m, templ->content.idx),
+                    skipMatch ? S(m, "match") : S(m, "no-match"),
+                    jump,
                     NULL
                 };
-                Out("^c.  Skip to @ \\@$^0\n", args);
+                Out("^c.  Skip to @/$ \\@$ - @ - @^0\n", args);
             }
             templ->objType.state &= ~UFLAG_ITER_SKIP;
         }else if(jump->crit.dest.idx != -1 && 
@@ -238,7 +230,10 @@ TemplJump *TemplJump_Make(MemCh *m, i32 idx, Fetcher *fch){
     jump->type.of = TYPE_TEMPL_JUMP;
     jump->idx = idx;
     jump->fch = fch;
-    jump->crit.dest.idx = jump->crit.skip.idx = NEGATIVE;
-    jump->crit.dest.type.of = jump->crit.skip.type.of = TYPE_TEMPL_JUMP_CRIT;
+    jump->crit.dest.idx = jump->crit.skip.idx =
+        jump->crit.enclose.idx = jump->crit.out.idx = NEGATIVE;
+    jump->crit.dest.type.of = jump->crit.skip.type.of =
+        jump->crit.enclose.type.of = jump->crit.out.type.of =
+        TYPE_TEMPL_JUMP_CRIT;
     return jump;
 }

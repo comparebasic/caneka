@@ -33,10 +33,13 @@ static i64 TemplJump_Print(Buff *bf, void *a, cls type, word flags){
         I32_Wrapped(bf->m, jump->crit.skip.idx),
         Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.enclose.type.state),
         I32_Wrapped(bf->m, jump->crit.enclose.idx),
+        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.out.type.state),
+        I32_Wrapped(bf->m, jump->crit.out.idx),
         jump->fch,
         NULL
     };
-    return Fmt(bf, "TemplJump:<@ \\@@/dest@^D.@^d./skip@^D@^d./enclose@^D@^d. fch:&>", args);
+    return Fmt(bf, "TemplJump:<@ "
+        "\\@@/dest@^D.@^d./skip@^D@^d./enclose@^D@^d./out@^D@^d.fch:&>", args);
 }
 
 static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){
