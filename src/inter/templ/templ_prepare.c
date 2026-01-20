@@ -113,15 +113,15 @@ static i32 Templ_FindEnd(Templ *templ){
     return -1;
 }
 
-status Templ_AddJump(MemCh *m, Jumps **_js, i32 idx, i32 destIdx, i32 flagIdx){
-    word one = 1;
-    status flag = one << (flagIdx+8);
+status Templ_AddJump(MemCh *m,
+        Jumps **_js, i32 idx, i32 destIdx, i32 flagIdx, status flags){
     Jumps *js = *_js;
     if(js == NULL){
         *_js = js = Jumps_Make(m, idx);
     }
-    js->crit[flagIdx] = TemplCrit_Make(m, destIdx, flag);
-    js->type.state |= flag;
+    js->crit[flagIdx] = TemplCrit_Make(m, destIdx, flags);
+    word one = 1;
+    js->type.state |= one << (flagIdx+8);
     return ZERO;
 }
 
@@ -152,13 +152,14 @@ status Templ_PrepareCycle(Templ *templ){
         if(fch->type.state & FETCHER_FOR){
             i32 skipIdx = -1;
             if((skipIdx = Templ_FindEnd(templ)) != -1){
-                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX);
+                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
                 Iter_GetByIdx(&templ->content, skipIdx);
 
                 i32 finIdx = -1;
                 if((finIdx = Templ_FindPrev(templ, FETCHER_END)) != -1){
                     if(finIdx != idx){ 
-                        Templ_AddJump(m, &js, idx, finIdx, UFLAG_ITER_FINISH_IDX);
+                        Templ_AddJump(m,
+                            &js, idx, finIdx, UFLAG_ITER_FINISH_IDX, ZERO);
                     }
                 }
                 Iter_GetByIdx(&templ->content, idx);
@@ -167,42 +168,45 @@ status Templ_PrepareCycle(Templ *templ){
             cls typeOfs = (FETCHER_CONDITION|FETCHER_FOR|FETCHER_WITH);
             i32 sibIdx = -1;
             if((sibIdx = Templ_FindNext(templ, typeOfs)) != -1){
-                Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_SIBLING_IDX);
+                Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_SIBLING_IDX, ZERO);
             }
         }else if(fch->type.state & (FETCHER_WITH|FETCHER_IF)){
             i32 skipIdx = -1;
             if((skipIdx = Templ_FindEnd(templ)) != -1){
-                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX);
+                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
             }
         }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_TEMPL)) == 
                 (FETCHER_CONDITION|FETCHER_TEMPL)){
             i32 skipIdx = -1;
             if((skipIdx = Templ_FindEnd(templ)) != -1){
-                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX);
+                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
             }
             i32 sibIdx = -1;
             if((sibIdx = Templ_FindStart(templ, ZERO)) != -1){
-                Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_SIBLING_IDX);
+                Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_SIBLING_IDX, ZERO);
             }
         }else if(fch->type.state & (FETCHER_CONDITION)){
             i32 encloseIdx = -1;
             if((encloseIdx =
                     Templ_FindStart(templ, FETCHER_FOR|FETCHER_WITH)) != -1){
-                Templ_AddJump(m, &js, idx, encloseIdx, UFLAG_ITER_ENCLOSE_IDX);
+                Templ_AddJump(m,
+                    &js, idx, encloseIdx, UFLAG_ITER_ENCLOSE_IDX, ZERO);
             }
             i32 skipIdx = -1;
             if((skipIdx =
                     Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END))) != -1){
-                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX);
+                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
                 FetchTarget *tg = Span_Get(fch->val.targets, 0);
                 if(tg->objType.of == FORMAT_TEMPL_LEVEL){
-                    Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_LEAF_IDX);
-                    Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_ACTIVE_IDX);
+                    Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_LEAF_IDX, ZERO);
+                    Templ_AddJump(m,
+                        &js, idx, skipIdx, UFLAG_ITER_FOCUS_IDX, ZERO);
                 }else if(tg->objType.of == FORMAT_TEMPL_INDENT){
-                    Templ_AddJump(m, &js, idx, encloseIdx, UFLAG_ITER_LEAF_IDX);
+                    Templ_AddJump(m,
+                        &js, idx, encloseIdx, UFLAG_ITER_LEAF_IDX, ZERO);
                 }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-                    Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_LEAF_IDX);
-                    /* add noop */
+                    Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, 
+                        UFLAG_ITER_LEAF|NOOP);
                 }
             }
         }else if(fch->type.state & FETCHER_END){
@@ -211,15 +215,18 @@ status Templ_PrepareCycle(Templ *templ){
                 Fetcher *dest = Span_Get(templ->content.p, sibIdx);
                 if(dest != NULL){
                     if(dest->type.state & (FETCHER_WITH|FETCHER_FOR)){
-                        Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_NEXT);
+                        Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_NEXT, ZERO);
                         status flags = 
                             (FETCHER_CONDITION|FETCHER_IF|FETCHER_WITH|FETCHER_END);
                         i32 finIdx = Templ_FindPrev(templ, flags);
-                        Templ_AddJump(m, &js, idx, finIdx, UFLAG_ITER_FINISH);
+                        Templ_AddJump(m,
+                            &js, idx, finIdx, UFLAG_ITER_FINISH, ZERO);
                     }else if(dest->type.state & (FETCHER_CONDITION)){
-                        Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_ENCLOSE_IDX);
+                        Templ_AddJump(m,
+                            &js, idx, sibIdx, UFLAG_ITER_ENCLOSE_IDX, ZERO);
                         i32 outIdx = Templ_FindNext(templ, FETCHER_END);
-                        Templ_AddJump(m, &js, idx, outIdx, UFLAG_ITER_FINISH_IDX);
+                        Templ_AddJump(m,
+                            &js, idx, outIdx, UFLAG_ITER_FINISH_IDX, ZERO);
                     }else{
                         fch->type.state |= NOOP;
                     }

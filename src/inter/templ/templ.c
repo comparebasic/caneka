@@ -14,7 +14,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
 
     Abstract *prev = NULL;
     while(prev != item && item->type.of == TYPE_FETCHER){
-        if(Templ_HandleJump(templ) & (PROCESSING|SUCCESS)){
+        if(Templ_HandleJump(templ) & PROCESSING){
             prev = item;
             item = Iter_Get(&templ->content);
         }else{
