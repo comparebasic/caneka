@@ -182,6 +182,7 @@ status Templ_PrepareCycle(Templ *templ){
                     }else if(dest->fch->type.state & (FETCHER_CONDITION)){
                         jump->crit.enclose.idx = destIdx;
                         jump->crit.skip.idx = Templ_FindNext(templ, FETCHER_END);
+                        jump->crit.skip.type.state |= UFLAG_ITER_OUTDENT;
                     }else{
                         jump->fch->type.state |= NOOP;
                     }

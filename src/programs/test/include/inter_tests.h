@@ -17,12 +17,6 @@ status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
         {
-            "Www Nav Tests",
-            WwwNav_Tests,
-            "Example navigation generation tests.",
-            FEATURE_COMPLETE,
-        },
-        {
             "Templ Navigation Tests",
             TemplNav_Tests,
             "Testing a navitaion template.",

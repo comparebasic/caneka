@@ -42,8 +42,6 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
     }
 
     Iter_First(it);
-    it->itin->objType.state |= UFLAG_ITER_INDENT;
-
     return r;
 }
 
@@ -58,8 +56,7 @@ void *NestSel_Get(Iter *_it){
 }
 
 status NestSel_Next(Iter *_it){
-    _it->itin->objType.state &= ~(
-        UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT|UFLAG_ITER_LEAF);
+    _it->itin->objType.state &= ~(UFLAG_ITER_SELECTED|UFLAG_ITER_LEAF);
 
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
@@ -68,7 +65,6 @@ status NestSel_Next(Iter *_it){
     if((_it->type.state & PROCESSING) == 0){
         Iter_Next(_it);
         it = Iter_Get(_it);
-        _it->itin->objType.state |= UFLAG_ITER_INDENT;
     }else{
         while(1){
             it = Iter_Get(_it);
@@ -86,9 +82,6 @@ status NestSel_Next(Iter *_it){
                 it = Iter_Get(_it);
                 if(_it->type.state & LAST){
                     Iter_First(it);
-                }
-                if((_it->itin->objType.state & UFLAG_ITER_OUTDENT) == 0){
-                    _it->itin->objType.state |= (UFLAG_ITER_SELECTED|UFLAG_ITER_INDENT);
                 }
             }
 
@@ -115,10 +108,6 @@ status NestSel_Next(Iter *_it){
         }else{
             _it->itin->objType.state &= ~UFLAG_ITER_SELECTED;
         }
-    }
-
-    if(it->type.state & LAST){
-        _it->itin->objType.state |= UFLAG_ITER_OUTDENT;
     }
 
     return ZERO;
