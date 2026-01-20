@@ -24,6 +24,9 @@ status Templ_HandleJump(Templ *templ){
         if((templ->objType.state & (UFLAG_ITER_INDENT|UFLAG_ITER_OUTDENT)) == 0){
             templ->objType.state |= UFLAG_ITER_NEXT;
         }
+        if(templ->objType.state & UFLAG_ITER_AGAIN){
+            templ->objType.state &= ~UFLAG_ITER_AGAIN;
+        }
     }else if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
         Abstract *value = Fetch(m, fch, data, NULL);
         if(value == NULL){
@@ -91,7 +94,11 @@ status Templ_HandleJump(Templ *templ){
             return templ->type.state;
         }
 
-        if(fch->api->next(it) & END){
+        if(it->type.state & END){
+            idx = jump->crit.out.idx;
+            printf("END\n");
+            exit(1);
+        }else if(fch->api->next(it) & END){
             templ->objType.state &= ~(PROCESSING|UFLAG_ITER_NEXT);
             templ->objType.state |= UFLAG_ITER_OUTDENT;
             idx = jump->crit.out.idx;
@@ -127,6 +134,7 @@ status Templ_HandleJump(Templ *templ){
             crit->incr++;
             printf("crit incr %d for %d\n", crit->incr, crit->idx);
         }else if(--crit->incr <= 1){
+            templ->objType.state |= UFLAG_ITER_AGAIN;
             idx = crit->idx;
             Iter_Remove(&templ->ret);
             Iter_Prev(&templ->ret);
@@ -165,9 +173,10 @@ status Templ_HandleJump(Templ *templ){
                 void *args[] = {
                     I32_Wrapped(m, idx),
                     I32_Wrapped(m, templ->content.idx),
+                    Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
                     NULL
                 };
-                Out("^c.  Skip to end @ \\@$^0\n", args);
+                Out("^c.  Skip to end @ \\@$ - @^0\n", args);
             }else{
                 idx = jump->crit.skip.idx;
                 void *args[] = {

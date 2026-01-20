@@ -70,6 +70,7 @@ status NestSel_Next(Iter *_it){
             it = Iter_Get(_it);
             if(it->type.state & END){
                 if(Iter_Prev(_it) & END){
+                    _it->type.state |= END;
                     return END;
                 }
                 continue;

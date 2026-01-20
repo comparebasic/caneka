@@ -337,7 +337,7 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
     if(iterUpperLabels == NULL){
         iterUpperLabels = (Str **)Arr_Make(m, 17);
         iterUpperLabels[9] = Str_CstrRef(m, "INVERT");
-        iterUpperLabels[10] = Str_CstrRef(m, "STRICT");
+        iterUpperLabels[10] = Str_CstrRef(m, "AGAIN");
         iterUpperLabels[11] = Str_CstrRef(m, "SELECTED");
         iterUpperLabels[12] = Str_CstrRef(m, "INDENT");
         iterUpperLabels[13] = Str_CstrRef(m, "OUTDENT");
