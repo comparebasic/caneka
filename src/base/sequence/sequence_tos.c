@@ -90,6 +90,7 @@ status Hashed_Print(Buff *bf, void *a, cls type, word flags){
 
 status Lookup_Print(Buff *bf, void *a, cls type, word flags){
     Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
+    void *args[3];
     if(flags & (MORE|DEBUG)){
         void *args[] = {
             I32_Wrapped(bf->m, lk->offset),
@@ -100,13 +101,21 @@ status Lookup_Print(Buff *bf, void *a, cls type, word flags){
         Iter it;
         Iter_Init(&it, lk->values);
         while((Iter_Next(&it) & END) == 0){
-            if(it.value != NULL){
-                void *args[] = {
-                    I32_Wrapped(bf->m, it.idx+lk->offset),
-                    Type_ToStr(bf->m, it.idx+lk->offset),
-                    NULL
-                };
-                Fmt(bf, "$/$", args);
+            void *a = Iter_Get(&it);
+            if(a != NULL){
+                args[0] = I32_Wrapped(bf->m, it.idx+lk->offset);
+                if(flags & DEBUG){
+                    args[1] = a;
+                }else{
+                    args[1] = Type_ToStr(bf->m, it.idx+lk->offset);
+                }
+                args[2] = NULL;
+
+                if(flags & DEBUG){
+                    Fmt(bf, "^D.$^d. -> @", args);
+                }else{
+                    Fmt(bf, "$/$", args);
+                }
                 if((it.type.state & LAST) == 0){
                     Buff_AddBytes(bf, (byte *)", ", 2);
                 }

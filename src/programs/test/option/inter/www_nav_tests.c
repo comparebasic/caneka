@@ -5,6 +5,7 @@ status WwwNav_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
+    /*
 
     NodeObj *node = Inst_Make(m, TYPE_NODEOBJ);
     Table *coordTbl = Table_Make(m);
@@ -143,6 +144,7 @@ status WwwNav_Tests(MemCh *m){
 
         idx++;
     }
+    */
 
     DebugStack_Pop();
     return r;

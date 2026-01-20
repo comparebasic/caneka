@@ -13,7 +13,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     DebugStack_SetRef(item, item->type.of);
 
     Abstract *prev = NULL;
-    while(prev != item && item->type.of == TYPE_TEMPL_JUMP){
+    while(prev != item && item->type.of == TYPE_FETCHER){
         if(Templ_HandleJump(templ) & (PROCESSING|SUCCESS)){
             prev = item;
             item = Iter_Get(&templ->content);
@@ -63,14 +63,6 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     return total;
 }
 
-status Templ_SetData(Templ *templ, void *data){
-    Span *p = Span_Make(templ->m);
-    Span_Add(p, data);
-    ItinIt_Init(&templ->data, p);
-    Iter_Next(&templ->data);
-    return ZERO;
-}
-
 i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     templ->type.state &= ~SUCCESS;
     templ->m->level++; 
@@ -100,16 +92,13 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
 }
 
 status Templ_Reset(Templ *templ){
-    templ->level = 0;
     templ->type.state &= DEBUG;
     templ->content.type.state |= END;
     MemCh_FreeTemp(templ->m);
     while((Iter_Next(&templ->content) & END) == 0){
         Fetcher *fch = NULL;
         Abstract *a = Iter_Get(&templ->content);
-        if(a->type.of == TYPE_TEMPL_JUMP){
-            fch = ((TemplJump *)a)->fch;
-        }else if (a->type.of == TYPE_FETCHER){
+        if(a->type.of == TYPE_FETCHER){
             fch = (Fetcher *)fch;
         }
         if(fch != NULL){
@@ -120,12 +109,19 @@ status Templ_Reset(Templ *templ){
     return SUCCESS;
 }
 
+status Templ_SetData(Templ *templ, void *data){
+    Span *p = Span_Make(templ->m);
+    Span_Add(p, data);
+    ItinIt_Init(&templ->data, p);
+    Iter_Next(&templ->data);
+    return ZERO;
+}
+
 Templ *Templ_Make(MemCh *m, Span *content){
     Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
     templ->type.of = TYPE_TEMPL;
     templ->m = m;
-    templ->indent.idx = -1;
     ItinIt_Init(&templ->content, content);
-    ItinIt_Init(&templ->ret, Span_Make(m));
+    templ->jumps = Lookup_Make(m, 0);
     return templ;
 }

@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static i64 TemplCtx_Print(Buff *bf, void *a, cls type, word flags){
+static status TemplCtx_Print(Buff *bf, void *a, cls type, word flags){
     TemplCtx *ctx = (TemplCtx *)as(a, TYPE_TEMPL_CTX);
     void *args[] = {
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
@@ -11,7 +11,7 @@ static i64 TemplCtx_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "TemplCtx:<@ @>", args);
 }
 
-static i64 TemplItem_Print(Buff *bf, void *a, cls type, word flags){
+static status TemplItem_Print(Buff *bf, void *a, cls type, word flags){
     void *args[] = {
         Type_ToStr(bf->m, type),
         a,
@@ -20,29 +20,40 @@ static i64 TemplItem_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "TemplItem:$<@>", args);
 }
 
-static i64 TemplJump_Print(Buff *bf, void *a, cls type, word flags){
+static status Jumps_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
+    Jumps *js = (Jumps*)a;
+    Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
+    void *args[3];
 
-    TemplJump *jump = (TemplJump *)as(a, TYPE_TEMPL_JUMP);
-    void *args[] = {
-        Type_StateVec(bf->m, jump->type.of, jump->type.state),
-        I32_Wrapped(bf->m, jump->idx),
-        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.dest.type.state),
-        I32_Wrapped(bf->m, jump->crit.dest.idx),
-        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.skip.type.state),
-        I32_Wrapped(bf->m, jump->crit.skip.idx),
-        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.enclose.type.state),
-        I32_Wrapped(bf->m, jump->crit.enclose.idx),
-        Type_StateVec(bf->m, TYPE_ITER_UPPER, jump->crit.out.type.state),
-        I32_Wrapped(bf->m, jump->crit.out.idx),
-        jump->fch,
-        NULL
-    };
-    return Fmt(bf, "TemplJump:<@ "
-        "\\@@/dest@^D.@^d./skip@^D@^d./enclose@^D@^d./out@^D@^d.fch:&>", args);
+    StrVec *v = StrVec_Make(bf->m);
+    args[0] = Type_StateVec(bf->m, TYPE_ITER_UPPER, js->type.state),
+    args[1] = I32_Wrapped(bf->m, js->idx),
+    args[2] = NULL;
+
+    r |= Fmt(bf, "Jumps<@\\@$ ", args);
+    boolean first = TRUE;
+    word one = 1;
+    for(i32 i = 0; i < 8; i++){
+        if(js->crit[i] != NULL){
+            TemplCrit *crit = js->crit[i];
+            args[0] = labels[i+9];
+            args[1] = I16_Wrapped(bf->m, crit->contentIdx);
+            args[2] = NULL;
+            if(first){
+                first = FALSE;
+            }else{
+                r |= Buff_AddBytes(bf, (byte *)",", 1);
+            }
+            r |= Fmt(bf, "$/$", args);
+        }
+    }
+    r |= Buff_AddBytes(bf, (byte *)">", 1);
+
+    return r;
 }
 
-static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){
+static status Templ_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
 
     Templ *templ = (Templ *)as(a, TYPE_TEMPL);
@@ -51,13 +62,13 @@ static i64 Templ_Print(Buff *bf, void *a, cls type, word flags){
             Type_StateVec(bf->m, templ->type.of, templ->type.state),
             &templ->content,
             &templ->data,
-            &templ->ret,
+            templ->jumps,
             NULL
         };
         return Fmt(bf, "Templ<@\n"
             "  ^E.content^e.:@\n"
             "  ^E.data^e.:@\n"
-            "  ^E.ret^e.:@>"
+            "  ^E.jumps^e.:&>"
             , args);
     }else{
         void *args[] = {
@@ -74,7 +85,7 @@ status Templ_ClsInit(MemCh *m){
     Lookup *lk = ToStreamLookup;
     r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL_CTX, (void *)TemplCtx_Print);
-    r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMP, (void *)TemplJump_Print);
+    r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMPS, (void *)Jumps_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_TEMPL, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_FOR, (void *)TemplItem_Print);

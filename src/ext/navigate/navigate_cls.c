@@ -336,14 +336,14 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
 
     if(iterUpperLabels == NULL){
         iterUpperLabels = (Str **)Arr_Make(m, 17);
-        iterUpperLabels[9] = Str_CstrRef(m, "INVERT");
-        iterUpperLabels[10] = Str_CstrRef(m, "AGAIN");
-        iterUpperLabels[11] = Str_CstrRef(m, "SELECTED");
-        iterUpperLabels[12] = Str_CstrRef(m, "INDENT");
-        iterUpperLabels[13] = Str_CstrRef(m, "OUTDENT");
-        iterUpperLabels[14] = Str_CstrRef(m, "LEAF");
-        iterUpperLabels[15] = Str_CstrRef(m, "NEXT");
-        iterUpperLabels[16] = Str_CstrRef(m, "SKIP");
+        iterUpperLabels[9] = Str_CstrRef(m, "DATA");
+        iterUpperLabels[10] = Str_CstrRef(m, "NEXT");
+        iterUpperLabels[11] = Str_CstrRef(m, "SKIP");
+        iterUpperLabels[12] = Str_CstrRef(m, "FOCUS");
+        iterUpperLabels[13] = Str_CstrRef(m, "SIBLING");
+        iterUpperLabels[14] = Str_CstrRef(m, "FINISH");
+        iterUpperLabels[15] = Str_CstrRef(m, "LEAF");
+        iterUpperLabels[16] = Str_CstrRef(m, "ENCLOSE");
         Lookup_Add(m, lk, TYPE_ITER_UPPER, (void *)iterUpperLabels);
         r |= SUCCESS;
     }

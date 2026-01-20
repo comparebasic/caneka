@@ -5,6 +5,7 @@ status Templ_HandleJump(Templ *templ){
     status r = READY;
     DebugStack_Push(templ, templ->type.of);
     MemCh *m = templ->m;
+    /*
 
     TemplJump *jump = (TemplJump *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
@@ -216,20 +217,15 @@ status Templ_HandleJump(Templ *templ){
         DebugStack_Pop();
         return PROCESSING;
     }
+    */
 
     DebugStack_Pop();
     return ZERO;
 }
 
-TemplJump *TemplJump_Make(MemCh *m, i32 idx, Fetcher *fch){
-    TemplJump *jump = (TemplJump *)MemCh_Alloc(m, sizeof(TemplJump));
-    jump->type.of = TYPE_TEMPL_JUMP;
-    jump->idx = idx;
-    jump->fch = fch;
-    jump->crit.dest.idx = jump->crit.skip.idx =
-        jump->crit.enclose.idx = jump->crit.out.idx = NEGATIVE;
-    jump->crit.dest.type.of = jump->crit.skip.type.of =
-        jump->crit.enclose.type.of = jump->crit.out.type.of =
-        TYPE_TEMPL_JUMP_CRIT;
-    return jump;
+Jumps *Jumps_Make(MemCh *m, i32 idx){
+    Jumps *js = MemCh_AllocOf(m, sizeof(Jumps), TYPE_TEMPL_JUMPS);
+    js->type.of = TYPE_TEMPL_JUMPS;
+    js->idx = idx;
+    return js;
 }

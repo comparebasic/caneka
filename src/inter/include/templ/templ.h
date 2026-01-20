@@ -2,20 +2,9 @@ typedef struct templ {
     Type type;
     Type objType;
     MemCh *m;
-    i32 level;
-    struct {
-        Span *p; /*<it>*/
-        i32 idx;
-        i32 incr;
-    } indent;
-    struct {
-        Span *p; /*<it>*/
-        i32 idx;
-        i32 incr;
-    } outdent;
+    Lookup *jumps;
     Iter content;
     Iter data;
-    Iter ret;
 } Templ;
 
 Templ *Templ_Make(MemCh *m, Span *content);

@@ -56,7 +56,7 @@ void *NestSel_Get(Iter *_it){
 }
 
 status NestSel_Next(Iter *_it){
-    _it->itin->objType.state &= ~(UFLAG_ITER_SELECTED|UFLAG_ITER_LEAF);
+    _it->itin->objType.state &= ~(UFLAG_ITER_FOCUS|UFLAG_ITER_LEAF);
 
     if(_it->type.state & END){
         _it->type.state &= ~(END|PROCESSING);
@@ -105,9 +105,9 @@ status NestSel_Next(Iter *_it){
     if(_it->type.state & LAST){
         _it->itin->objType.state |= UFLAG_ITER_LEAF;
         if(it->metrics.selected == it->idx){
-            _it->itin->objType.state |= UFLAG_ITER_SELECTED;
+            _it->itin->objType.state |= UFLAG_ITER_FOCUS;
         }else{
-            _it->itin->objType.state &= ~UFLAG_ITER_SELECTED;
+            _it->itin->objType.state &= ~UFLAG_ITER_FOCUS;
         }
     }
 
