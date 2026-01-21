@@ -60,12 +60,6 @@ status Templ_HandleJump(Templ *templ){
                 templ->objType.state |= UFLAG_ITER_SKIP;
             }
         }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
-            void *args[] = {
-                Type_StateVec(m, TYPE_ITER_UPPER,
-                    templ->objType.state & (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS)),
-                    NULL
-                };
-            Out("^b.Current @^0\n", args);
             if((templ->objType.state & (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS)) !=
                     UFLAG_ITER_LEAF){
                 templ->objType.state |= UFLAG_ITER_SKIP;
@@ -115,12 +109,6 @@ status Templ_HandleJump(Templ *templ){
             if(it->idx < indentIdx){
                 templ->objType.state |= UFLAG_ITER_FINISH;
             }
-            void *args[] = {
-                Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
-                a,
-                NULL,
-            };
-            Out("^g.Item: @ templ->objType.state=@^0\n", args);
         }
     }
 
@@ -147,13 +135,6 @@ paths:
                 TemplCrit *crit = NULL;
                 if((flag & js->type.state & templ->objType.state)){
                     Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
-                    void *args[] = {
-                        labels[i+9],
-                        I32_Wrapped(m, templ->content.idx),
-                        a, 
-                        NULL
-                    };
-                    Out("^p.Jump Found @/\\@$ @^0\n", args);
 take:
                     if(a != NULL){
                         if(a->type.of == TYPE_ITER){
@@ -162,8 +143,6 @@ take:
                             if(critIt->idx > 0){
                                 Iter_Remove(critIt);
                                 Iter_Prev(critIt);
-                                printf("critIt->idx %d\n", critIt->idx);
-                                fflush(stdout);
                             }else if(flag == UFLAG_ITER_FINISH){
                                 templ->objType.state &= ~UFLAG_ITER_NEXT; 
                             }
