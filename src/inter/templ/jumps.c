@@ -33,6 +33,15 @@ status Templ_HandleJump(Templ *templ){
                 templ->objType.state |= UFLAG_ITER_SKIP;
             }else{
                 templ->objType.state |= UFLAG_ITER_ENCLOSE;
+                Jumps *js = Lookup_Get(templ->jumps, templ->content.idx);
+                TemplCrit *crit = js->crit[UFLAG_ITER_ENCLOSE_IDX];
+                js = Lookup_Get(templ->jumps, crit->contentIdx);
+                crit = js->crit[UFLAG_ITER_FINISH_IDX];
+                void *args[] = {
+                    crit,
+                    NULL
+                };
+                Out("^b.Enclose to Enclose crit @^0\n", args);
             }
         }else if(tg->objType.of == FORMAT_TEMPL_LEVEL){
             if(templ->objType.state & UFLAG_ITER_LEAF){
@@ -153,8 +162,20 @@ paths:
                         js->crit[i], 
                         NULL
                     };
+                    Abstract *a = (Abstract *)js->crit[i];
+                    TemplCrit *crit = NULL;
+                    if(a->type.of == TYPE_ITER){
+                        Iter *critIt = (Iter *)a;
+                        crit = Iter_Get(critIt);
+                        if(critIt->idx > 0){
+                            Iter_Remove(critIt);
+                            Iter_Prev(critIt);
+                        }
+                    }else{
+                        crit = (TemplCrit *)a;
+                    }
                     Out("^p.Jump Found @/\\@$ @^0\n", args);
-                    idx = js->crit[i]->contentIdx;
+                    idx = crit->contentIdx;
                     templ->objType.state &= ~flag;
                 }
                 i++;

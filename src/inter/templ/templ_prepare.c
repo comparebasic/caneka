@@ -120,7 +120,20 @@ status Templ_AddJump(MemCh *m,
     if(js == NULL){
         *_js = js = Jumps_Make(m, idx);
     }
-    js->crit[flagIdx] = TemplCrit_Make(m, destIdx, flags);
+    TemplCrit *crit = TemplCrit_Make(m, destIdx, flags);
+    if(js->crit[flagIdx] != NULL){
+        Abstract *a = (Abstract *)js->crit[flagIdx];
+        if(a->type.of == TYPE_ITER){
+            Iter *it = (Iter *)a;
+            Iter_Add(it, crit);
+        }else{
+            Iter *it = (Iter *)Iter_Make(m, Span_Make(m));
+            Iter_Add(it, js->crit[flagIdx]);
+            Iter_Add(it, crit);
+        }
+    }else{
+        js->crit[flagIdx] = crit;
+    }
     word one = 1;
     js->type.state |= one << (flagIdx+8);
     return ZERO;
