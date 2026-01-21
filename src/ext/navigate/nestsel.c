@@ -104,11 +104,12 @@ status NestSel_Next(Iter *_it){
 
     if(_it->type.state & LAST){
         _it->itin->objType.state |= UFLAG_ITER_LEAF;
-        if(it->metrics.selected == it->idx){
-            _it->itin->objType.state |= UFLAG_ITER_FOCUS;
-        }else{
-            _it->itin->objType.state &= ~UFLAG_ITER_FOCUS;
-        }
+    }
+
+    if(it->metrics.selected == it->idx){
+        _it->itin->objType.state |= UFLAG_ITER_FOCUS;
+    }else{
+        _it->itin->objType.state &= ~UFLAG_ITER_FOCUS;
     }
 
     return ZERO;

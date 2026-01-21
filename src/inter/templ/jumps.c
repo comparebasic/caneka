@@ -8,40 +8,48 @@ status Templ_HandleJump(Templ *templ){
 
     Fetcher *fch = (Fetcher *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
+    i32 idx = templ->content.idx;
     void *args[] = {
-       fch,
-       data,
-       NULL
+        I32_Wrapped(m, templ->content.idx),
+        Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+        fch,
+        data,
+        NULL
     };
-    Out("^y.HandleJump @/@^0\n", args);
-
-    if(templ->objType.state & UPPER_FLAGS){
-        Jumps *js = Lookup_Get(templ->jumps, templ->content.idx);
-        if(js != NULL){
-            status fl = 1 << 8;
-            i32 i = 0;
-            while(TRUE){
-                if((fl & js->type.state & templ->objType.state)){
-                    void *args[] = {
-                        I32_Wrapped(m, templ->content.idx),
-                        js->crit[i], 
-                        NULL
-                    };
-                    Out("^p.Jump Found \\@$ @^0\n", args);
-                }
-                fl << 1;
-                i++;
-            }
-        }
+    Out("^y.HandleJump \\@$ @ - fch/data=@/@^0\n", args);
+    if(templ->objType.state & (UPPER_FLAGS & ~UFLAG_ITER_FOCUS)){
+        goto paths;
     }
 
-    i32 idx = templ->content.idx;
-
-    Fetcher *fch = jump->fch;
     if(fch->type.state & FETCHER_END){
         
     }else if(fch->type.state & FETCHER_FOR){
         templ->objType.state |= UFLAG_ITER_NEXT;
+    }else if(fch->type.state & FETCHER_CONDITION){
+        FetchTarget *tg = Span_Get(fch->val.targets, 0);
+        if(tg->objType.of == FORMAT_TEMPL_INDENT){
+            if((templ->objType.state & UFLAG_ITER_FOCUS) == 0 ||
+               (templ->objType.state & UFLAG_ITER_LEAF)){
+                templ->objType.state |= UFLAG_ITER_SKIP;
+            }else{
+                templ->objType.state |= UFLAG_ITER_ENCLOSE;
+            }
+        }else if(tg->objType.of == FORMAT_TEMPL_LEVEL){
+            if(templ->objType.state & UFLAG_ITER_LEAF){
+                templ->objType.state |= UFLAG_ITER_SKIP;
+            }
+        }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
+            if((templ->objType.state & (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS))
+                != UFLAG_ITER_LEAF){
+                templ->objType.state |= UFLAG_ITER_SKIP;
+            }
+        }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
+            if((templ->objType.state & (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS))
+                != (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS)){
+                templ->objType.state |= UFLAG_ITER_SKIP;
+            }
+        }
+
     /*
     }else if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
         Abstract *value = Fetch(m, fch, data, NULL);
@@ -66,30 +74,14 @@ status Templ_HandleJump(Templ *templ){
             templ->objType.state |= UFLAG_ITER_SKIP;
             jump->type.state |= PROCESSING;
         }
-    }else if(fch->type.state & FETCHER_CONDITION){
-        Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
-        FetchTarget *tg = Span_Get(fch->val.targets, 0);
-        if(it != NULL){
-            if(it->type.state & LAST){
-                if(
-                    (tg->objType.of == FORMAT_TEMPL_CURRENT && 
-                        (templ->objType.state & UFLAG_ITER_SELECTED)) ||
-                    (tg->objType.of == FORMAT_TEMPL_LEVEL)
-                ){
-                    templ->objType.state |= UFLAG_ITER_SKIP;
-                }
-            }else if(tg->objType.of != FORMAT_TEMPL_LEVEL){
-                templ->objType.state |= UFLAG_ITER_SKIP;
-            }
-        }
-    }
     */
+    }
 
     if(idx == templ->content.idx && (templ->objType.state & UFLAG_ITER_NEXT)){
+        templ->objType.state &= ~UFLAG_ITER_NEXT;
         Iter *it = NULL;
         if((fch->type.state & PROCESSING) == 0){
-            DebugStack_SetRef(fch, fch->type.of);
-            void *value = as(Fetch(m, fch, data, NULL), TYPE_ITER);
+            Iter *value = as(Fetch(m, fch, data, NULL), TYPE_ITER);
             Itin_IterAdd(&templ->data, value);
             fch->type.state |= PROCESSING;
             it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
@@ -108,31 +100,76 @@ status Templ_HandleJump(Templ *templ){
                 " Iter_Get(@) instead^0\n", 
                 args);
             templ->type.state |= ERROR;
+            DebugStack_Pop();
             return templ->type.state;
         }
+
 
         i32 indentIdx = it->idx;
         if(fch->api->next(it) & END){
             templ->objType.state &= UFLAG_ITER_NEXT;
-            templ->objType.state |= UFLAG_ITER_OUTDENT;
+            templ->objType.state |= UFLAG_ITER_FINISH;
         }else{
-            Itin_IterAdd(&templ->data, fch->api->get(it));
-            templ->objType.state |= (it->objType.state & (
+            Abstract *a = fch->api->get(it);
+            Itin_IterAdd(&templ->data, a);
+            templ->objType.state |= (it->itin->objType.state & (
                UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING 
             ));
-            if(it->idx < indentIdx){
+            if(it->idx > indentIdx){
+                templ->objType.state |= UFLAG_ITER_JUMPIN;
+            }else if(it->idx < indentIdx){
                 templ->objType.state |= UFLAG_ITER_FINISH;
             }
-            templ->indent.idx = it->idx;
-            return PROCESSING;
+            void *args[] = {
+                Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+                a,
+                NULL,
+            };
+            Out("^p.Item: @ templ->objType.state=@^0\n", args);
         }
     }
+
+paths:
+    if(templ->objType.state & UPPER_FLAGS){
+        Jumps *js = Lookup_Get(templ->jumps, templ->content.idx);
+        if(js != NULL){
+            status fl = 1 << 8;
+            i32 i = 0;
+            while(i < 8){
+                void *args[] = {
+                    I32_Wrapped(m, i), 
+                    Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
+                    Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+                    Type_StateVec(m, TYPE_ITER_UPPER, fl),
+                    NULL
+                };
+                Out("^Ep. Stuff^e. @ @ @ @^0\n", args);
+                status flag = fl << i;
+                if((flag & js->type.state & templ->objType.state)){
+                    Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
+                    void *args[] = {
+                        labels[i+9],
+                        I32_Wrapped(m, templ->content.idx),
+                        js->crit[i], 
+                        NULL
+                    };
+                    Out("^p.Jump Found @/\\@$ @^0\n", args);
+                    idx = js->crit[i]->contentIdx;
+                    templ->objType.state &= ~flag;
+                }
+                i++;
+            }
+        }
+    }
+
+    Abstract *debug = Iter_Get(&templ->data);
+    DebugStack_SetRef(debug, debug->type.of);
 
     if(idx != templ->content.idx){
         void *args[] = {
             I32_Wrapped(m, idx),
             I32_Wrapped(m, templ->content.idx),
-            jump,
+            fch,
             NULL
         };
         Out("^c.Jump to @ \\@$ - @^0\n", args);

@@ -20,6 +20,15 @@ static status TemplItem_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "TemplItem:$<@>", args);
 }
 
+static status TemplCrit_Print(Buff *bf, void *a, cls type, word flags){
+    TemplCrit *crit = (TemplCrit *)a;
+    void *args[3];
+    args[0] = Type_StateVec(bf->m, TYPE_ITER_UPPER, crit->type.state);
+    args[1] = I16_Wrapped(bf->m, crit->contentIdx);
+    args[2] = NULL;
+    return Fmt(bf, "TCrit<@/$>", args);
+}
+
 static status Jumps_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
     Jumps *js = (Jumps*)a;
@@ -86,6 +95,7 @@ status Templ_ClsInit(MemCh *m){
     r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL_CTX, (void *)TemplCtx_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMPS, (void *)Jumps_Print);
+    r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMP_CRIT, (void *)TemplCrit_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_TEMPL, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_FOR, (void *)TemplItem_Print);

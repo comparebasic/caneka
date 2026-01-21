@@ -336,7 +336,7 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
 
     if(iterUpperLabels == NULL){
         iterUpperLabels = (Str **)Arr_Make(m, 17);
-        iterUpperLabels[9] = Str_CstrRef(m, "DATA");
+        iterUpperLabels[9] = Str_CstrRef(m, "JUMPIN");
         iterUpperLabels[10] = Str_CstrRef(m, "NEXT");
         iterUpperLabels[11] = Str_CstrRef(m, "SKIP");
         iterUpperLabels[12] = Str_CstrRef(m, "FOCUS");

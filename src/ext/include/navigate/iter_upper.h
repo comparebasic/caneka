@@ -1,5 +1,5 @@
 enum iter_higher_flags {
-    UFLAG_ITER_DATA = 1 << 8,
+    UFLAG_ITER_JUMPIN = 1 << 8,
     UFLAG_ITER_NEXT = 1 << 9,
     UFLAG_ITER_SKIP = 1 << 10,
     UFLAG_ITER_FOCUS = 1 << 11,
@@ -10,7 +10,7 @@ enum iter_higher_flags {
 };
 
 enum iter_higher_flags_idx {
-    UFLAG_ITER_DATA_IDX = 0,
+    UFLAG_ITER_JUMPIN_IDX = 0,
     UFLAG_ITER_NEXT_IDX = 1,
     UFLAG_ITER_SKIP_IDX = 2,
     UFLAG_ITER_FOCUS_IDX = 3,

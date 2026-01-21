@@ -56,6 +56,7 @@ static i32 Templ_FindNext(Templ *templ, status flags){
             if(a->type.state & FETCHER_VAR){
                 continue;
             }else if(a->type.state & flags){
+                DebugStack_Pop();
                 return it.idx; 
             }
         }
@@ -175,16 +176,6 @@ status Templ_PrepareCycle(Templ *templ){
             if((skipIdx = Templ_FindEnd(templ)) != -1){
                 Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
             }
-        }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_TEMPL)) == 
-                (FETCHER_CONDITION|FETCHER_TEMPL)){
-            i32 skipIdx = -1;
-            if((skipIdx = Templ_FindEnd(templ)) != -1){
-                Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
-            }
-            i32 sibIdx = -1;
-            if((sibIdx = Templ_FindStart(templ, ZERO)) != -1){
-                Templ_AddJump(m, &js, idx, sibIdx, UFLAG_ITER_SIBLING_IDX, ZERO);
-            }
         }else if(fch->type.state & (FETCHER_CONDITION)){
             i32 encloseIdx = -1;
             if((encloseIdx =
@@ -196,18 +187,6 @@ status Templ_PrepareCycle(Templ *templ){
             if((skipIdx =
                     Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END))) != -1){
                 Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
-                FetchTarget *tg = Span_Get(fch->val.targets, 0);
-                if(tg->objType.of == FORMAT_TEMPL_LEVEL){
-                    Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_LEAF_IDX, ZERO);
-                    Templ_AddJump(m,
-                        &js, idx, skipIdx, UFLAG_ITER_FOCUS_IDX, ZERO);
-                }else if(tg->objType.of == FORMAT_TEMPL_INDENT){
-                    Templ_AddJump(m,
-                        &js, idx, encloseIdx, UFLAG_ITER_LEAF_IDX, ZERO);
-                }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-                    Templ_AddJump(m, &js, idx, skipIdx, UFLAG_ITER_SKIP_IDX, 
-                        UFLAG_ITER_LEAF|NOOP);
-                }
             }
         }else if(fch->type.state & FETCHER_END){
             i32 sibIdx = Templ_FindStart(templ, ZERO);

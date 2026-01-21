@@ -77,7 +77,7 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
         Type_ToStr(bf->m, tg->objType.of),
         NULL,
     };
-    Fmt(bf, "FT<@ @", args);
+    Fmt(bf, "FTarg<@ @", args);
     if(tg->type.of != ZERO){
         void *args[] = {
             Type_ToStr(bf->m, tg->type.of),
