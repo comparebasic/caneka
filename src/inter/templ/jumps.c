@@ -185,8 +185,8 @@ paths:
                         NULL
                     };
                     Out("^p.Jump Found @/\\@$ @^0\n", args);
-                    if(a != NULL){
 take:
+                    if(a != NULL){
                         if(a->type.of == TYPE_ITER){
                             Iter *critIt = (Iter *)a;
                             crit = Iter_Get(critIt);
