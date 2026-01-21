@@ -16,6 +16,14 @@ static boolean Span_Empty(void *_a){
     return p->nvalues == 0;
 }
 
+static boolean Iter_Empty(void *_a){
+    Iter *it = (Iter *)_a;
+    if(it->type.of != TYPE_ITER){
+        return FALSE;
+    }
+    return Span_Empty(it->p);
+}
+
 status Addr_ToS(Buff *bf, void *a, word flags){
     if(flags & DEBUG){
         Fmt(bf, "^D.", NULL);
@@ -319,5 +327,6 @@ status Mem_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
 
     r |= Lookup_Add(m, EmptyLookup, TYPE_SPAN, (void *)Span_Empty);
+    r |= Lookup_Add(m, EmptyLookup, TYPE_ITER, (void *)Iter_Empty);
     return r;
 }

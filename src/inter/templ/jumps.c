@@ -18,25 +18,18 @@ status Templ_HandleJump(Templ *templ){
     };
     Out("^y.HandleJump \\@$ @ - fch/data=@/@^0\n", args);
 
-
     if(templ->objType.state & (
             UFLAG_ITER_ENCLOSE|UFLAG_ITER_JUMPIN|UFLAG_ITER_FINISH)){
         if(templ->objType.state & NOOP){
             templ->objType.state &= ~NOOP;
         }else{
-            printf("skip next on flags\n");
-            fflush(stdout);
             goto paths;
         }
     } 
 
-    if(fch->type.state & FETCHER_FOR){
-        templ->objType.state |= UFLAG_ITER_NEXT;
-    }else if(fch->type.state & FETCHER_END){
+    if(fch->type.state & FETCHER_END){
 
     }else if(fch->type.state & FETCHER_CONDITION){
-        printf("condition\n");
-        fflush(stdout);
         FetchTarget *tg = Span_Get(fch->val.targets, 0);
         if(tg->objType.of == FORMAT_TEMPL_INDENT){
             if((templ->objType.state & UFLAG_ITER_FOCUS) == 0 ||
@@ -45,14 +38,22 @@ status Templ_HandleJump(Templ *templ){
             }else{
                 templ->objType.state |= UFLAG_ITER_ENCLOSE;
                 Jumps *js = Lookup_Get(templ->jumps, templ->content.idx);
-                TemplCrit *crit = js->crit[UFLAG_ITER_ENCLOSE_IDX];
-                js = Lookup_Get(templ->jumps, crit->contentIdx);
-                crit = js->crit[UFLAG_ITER_FINISH_IDX];
+                TemplCrit *loop = js->crit[UFLAG_ITER_ENCLOSE_IDX];
+                js = Lookup_Get(templ->jumps, loop->contentIdx);
+                TemplCrit *finish = js->crit[UFLAG_ITER_FINISH_IDX];
+                Templ_AddJump(templ,
+                    loop->contentIdx, idx, UFLAG_ITER_FINISH_IDX, MORE|UFLAG_ITER_NEXT);
+                Templ_AddJump(templ,
+                    loop->contentIdx,
+                    finish->contentIdx,
+                    UFLAG_ITER_FINISH_IDX,
+                    MORE|UFLAG_ITER_NEXT);
                 void *args[] = {
-                    crit,
+                    finish,
+                    templ->jumps,
                     NULL
                 };
-                Out("^b.Enclose to Enclose crit @^0\n", args);
+                Out("^b.Enclose to Enclose crit @ - jumps &^0\n", args);
             }
         }else if(tg->objType.of == FORMAT_TEMPL_LEVEL){
             if(templ->objType.state & UFLAG_ITER_LEAF){
@@ -75,36 +76,7 @@ status Templ_HandleJump(Templ *templ){
                 templ->objType.state |= UFLAG_ITER_SKIP;
             }
         }
-    }
-
-    /*
-    }else if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
-        Abstract *value = Fetch(m, fch, data, NULL);
-        if(value == NULL){
-            templ->objType.state |= UFLAG_ITER_SKIP;
-        }else{
-            if(fch->type.state & (FETCHER_IF|FETCHER_WITH)){
-                Itin_IterAdd(&templ->data, value);
-            }
-        }
-    }else if((fch->type.state & (FETCHER_CONDITION|FETCHER_VAR)) ==
-            (FETCHER_CONDITION|FETCHER_VAR)){
-        TemplCrit *crit = TemplCrit_Make(m,
-            templ->content.idx, UFLAG_ITER_OUTDENT);
-        if(jump->type.state & PROCESSING){
-            jump->type.state &= PROCESSING;
-            TemplJump *dest = Span_Get(templ->content.p, jump->crit.skip.idx);
-            dest->crit.skip.type.state |= END;
-            idx = templ->content.idx + 1;
-        }else{
-            Iter_Add(&templ->ret, crit);
-            templ->objType.state |= UFLAG_ITER_SKIP;
-            jump->type.state |= PROCESSING;
-        }
-    */
-
-    if(idx == templ->content.idx && (templ->objType.state & UFLAG_ITER_NEXT)){
-        templ->objType.state &= ~UFLAG_ITER_NEXT;
+    }else if(fch->type.state & FETCHER_FOR){
         Iter *it = NULL;
         if((fch->type.state & PROCESSING) == 0){
             Iter *value = as(Fetch(m, fch, data, NULL), TYPE_ITER);
@@ -131,18 +103,15 @@ status Templ_HandleJump(Templ *templ){
         }
 
         i32 indentIdx = it->idx;
-        if(fch->api->next(it) & END){
-            templ->objType.state &= UFLAG_ITER_NEXT;
+        if((it->type.state & END) || (fch->api->next(it) & END)){
+            templ->objType.state &= ~UFLAG_ITER_NEXT;
             templ->objType.state |= UFLAG_ITER_FINISH;
-            printf("end\n");
-            fflush(stdout);
-            exit(1);
         }else{
             Abstract *a = fch->api->get(it);
             Itin_IterAdd(&templ->data, a);
             templ->objType.state |= (it->itin->objType.state & (
                UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING|UFLAG_ITER_LEAF
-            ));
+            ) | UFLAG_ITER_NEXT);
             if(it->idx < indentIdx){
                 templ->objType.state |= UFLAG_ITER_FINISH;
             }
@@ -151,7 +120,7 @@ status Templ_HandleJump(Templ *templ){
                 a,
                 NULL,
             };
-            Out("^p.Item: @ templ->objType.state=@^0\n", args);
+            Out("^g.Item: @ templ->objType.state=@^0\n", args);
         }
     }
 
@@ -181,7 +150,7 @@ paths:
                     void *args[] = {
                         labels[i+9],
                         I32_Wrapped(m, templ->content.idx),
-                        js->crit[i], 
+                        a, 
                         NULL
                     };
                     Out("^p.Jump Found @/\\@$ @^0\n", args);
@@ -193,12 +162,19 @@ take:
                             if(critIt->idx > 0){
                                 Iter_Remove(critIt);
                                 Iter_Prev(critIt);
+                                printf("critIt->idx %d\n", critIt->idx);
+                                fflush(stdout);
+                            }else if(flag == UFLAG_ITER_FINISH){
+                                templ->objType.state &= ~UFLAG_ITER_NEXT; 
                             }
                         }else{
                             crit = (TemplCrit *)a;
                         }
                         idx = crit->contentIdx;
-                        if((templ->objType.state & MORE) == 0){
+                        if(crit->type.state & MORE){
+                            templ->objType.state |= (
+                                crit->type.state & UPPER_FLAGS);
+                        }else{
                             templ->objType.state &= ~flag;
                         }
                         noop &= ~NOOP;
@@ -210,6 +186,12 @@ take:
             }
             if((noop & NOOP & js->type.state)){
                 a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
+                void *args[] = {
+                    I32_Wrapped(m, templ->content.idx),
+                    a, 
+                    NULL
+                };
+                Out("^p.Skip \\@$ @^0\n", args);
                 goto take;
             }else{
                 templ->objType.state |= noop;

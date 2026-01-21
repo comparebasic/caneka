@@ -45,16 +45,24 @@ static status Jumps_Print(Buff *bf, void *a, cls type, word flags){
     word one = 1;
     for(i32 i = 0; i < 8; i++){
         if(js->crit[i] != NULL){
-            TemplCrit *crit = js->crit[i];
-            args[0] = labels[i+9];
-            args[1] = I16_Wrapped(bf->m, crit->contentIdx);
-            args[2] = NULL;
             if(first){
                 first = FALSE;
             }else{
                 r |= Buff_AddBytes(bf, (byte *)",", 1);
             }
-            r |= Fmt(bf, "$/$", args);
+            args[0] = labels[i+9];
+            args[2] = NULL;
+            Abstract *a = (Abstract *)js->crit[i];
+            if(a->type.of == TYPE_TEMPL_JUMP_CRIT){
+                TemplCrit *crit = (TemplCrit *)a;
+                args[1] = I16_Wrapped(bf->m, crit->contentIdx);
+                r |= Fmt(bf, "$/$", args);
+            }else if(a->type.of == TYPE_ITER){
+                Iter *it = (Iter *)a;
+                args[1] = it->p;
+                r |= Fmt(bf, "$/@", args);
+            }
+
         }
     }
     r |= Buff_AddBytes(bf, (byte *)">", 1);
