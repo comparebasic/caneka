@@ -315,7 +315,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             ){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_CONDITION;
             if(captureKey == FORMAT_TEMPL_INDENT){
-                fch->type.state |= FETCHER_VAR;
+                fch->type.state |= FETCHER_TEMPL;
             }
             FetchTarget *tg = FetchTarget_MakeCommand(m);
             tg->objType.of = captureKey;
