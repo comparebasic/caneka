@@ -9,14 +9,16 @@ status Templ_HandleJump(Templ *templ){
     Fetcher *fch = (Fetcher *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
     i32 idx = templ->content.idx;
-    void *args[] = {
-        I32_Wrapped(m, templ->content.idx),
-        Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
-        fch,
-        data,
-        NULL
-    };
-    Out("^y.HandleJump \\@$ @ - fch/data=@/@^0\n", args);
+    if(templ->type.state & DEBUG){
+        void *args[] = {
+            I32_Wrapped(m, templ->content.idx),
+            Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+            fch,
+            data,
+            NULL
+        };
+        Out("^y.HandleJump \\@$ @ - fch/data=@/@^0\n", args);
+    }
 
     if(templ->objType.state & (
             UFLAG_ITER_ENCLOSE|UFLAG_ITER_JUMPIN|UFLAG_ITER_FINISH)){
@@ -48,12 +50,14 @@ status Templ_HandleJump(Templ *templ){
                     finish->contentIdx,
                     UFLAG_ITER_FINISH_IDX,
                     MORE|UFLAG_ITER_NEXT);
-                void *args[] = {
-                    finish,
-                    templ->jumps,
-                    NULL
-                };
-                Out("^b.Enclose to Enclose crit @ - jumps &^0\n", args);
+                if(templ->type.state & DEBUG){
+                    void *args[] = {
+                        finish,
+                        templ->jumps,
+                        NULL
+                    };
+                    Out("^b.Enclose to Enclose crit @ - jumps &^0\n", args);
+                }
             }
         }else if(tg->objType.of == FORMAT_TEMPL_LEVEL){
             if(templ->objType.state & UFLAG_ITER_LEAF){
@@ -103,9 +107,22 @@ status Templ_HandleJump(Templ *templ){
         }else{
             Abstract *a = fch->api->get(it);
             Itin_IterAdd(&templ->data, a);
-            templ->objType.state |= (it->itin->objType.state & (
-               UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING|UFLAG_ITER_LEAF
-            ) | UFLAG_ITER_NEXT);
+            templ->objType.state |= UFLAG_ITER_NEXT;
+
+            if(it->itin != NULL){
+                templ->objType.state |= (it->itin->objType.state & (
+                   UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING|UFLAG_ITER_LEAF
+                ));
+            }else{
+                templ->objType.state |= UFLAG_ITER_LEAF;
+                if(it->idx > 0){
+                    templ->objType.state |= UFLAG_ITER_SIBLING;
+                }
+                if(it->idx == it->metrics.selected){
+                    templ->objType.state |= UFLAG_ITER_FOCUS;
+                }
+            }
+
             if(it->idx < indentIdx){
                 templ->objType.state |= UFLAG_ITER_FINISH;
             }
@@ -123,14 +140,16 @@ paths:
             Abstract *a = NULL;
             while(i < 8){
                 status flag = fl << i;
-                void *args[] = {
-                    I32_Wrapped(m, i), 
-                    Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
-                    Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
-                    Type_StateVec(m, TYPE_ITER_UPPER, flag),
-                    NULL
-                };
-                Out("^Ep. Stuff^e. js/templ/fl@ @ @ @^0\n", args);
+                if(templ->type.state & DEBUG){
+                    void *args[] = {
+                        I32_Wrapped(m, i), 
+                        Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
+                        Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+                        Type_StateVec(m, TYPE_ITER_UPPER, flag),
+                        NULL
+                    };
+                    Out("^Ep. Stuff^e. js/templ/fl@ @ @ @^0\n", args);
+                }
                 a = (Abstract *)js->crit[i];
                 TemplCrit *crit = NULL;
                 if((flag & js->type.state & templ->objType.state)){
@@ -165,12 +184,14 @@ take:
             }
             if((noop & NOOP & js->type.state)){
                 a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
-                void *args[] = {
-                    I32_Wrapped(m, templ->content.idx),
-                    a, 
-                    NULL
-                };
-                Out("^p.Skip \\@$ @^0\n", args);
+                if(templ->type.state & DEBUG){
+                    void *args[] = {
+                        I32_Wrapped(m, templ->content.idx),
+                        a, 
+                        NULL
+                    };
+                    Out("^p.Skip \\@$ @^0\n", args);
+                }
                 goto take;
             }else{
                 templ->objType.state |= noop;
@@ -182,13 +203,15 @@ take:
     DebugStack_SetRef(debug, debug->type.of);
 
     if(idx != templ->content.idx){
-        void *args[] = {
-            I32_Wrapped(m, idx),
-            I32_Wrapped(m, templ->content.idx),
-            fch,
-            NULL
-        };
-        Out("^c.Jump to @ \\@$ - @^0\n", args);
+        if(templ->type.state & DEBUG){
+            void *args[] = {
+                I32_Wrapped(m, idx),
+                I32_Wrapped(m, templ->content.idx),
+                fch,
+                NULL
+            };
+            Out("^c.Jump to @ \\@$ - @^0\n", args);
+        }
         Iter_GetByIdx(&templ->content, idx);
         DebugStack_Pop();
         return PROCESSING;

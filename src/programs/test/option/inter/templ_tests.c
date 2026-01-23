@@ -81,7 +81,7 @@ status TemplCtx_Tests(MemCh *m){
     Span_Add(fch->val.targets, tg);
     Span_Add(expected, fch);
 
-    cstr = "</p>\n<ul>\n";
+    cstr = "</p>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, v);
@@ -100,6 +100,11 @@ status TemplCtx_Tests(MemCh *m){
     Span_Add(fch->val.targets, tg);
     Span_Add(expected, fch);
 
+    cstr = "<ul>\n";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    v = StrVec_From(m, s);
+    Span_Add(expected, v);
+
     fch = Fetcher_Make(m);
     fch->type.state |= FETCHER_WITH;
     cstr = "value";
@@ -115,6 +120,10 @@ status TemplCtx_Tests(MemCh *m){
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_VAR;
+    cstr = "value";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    tg = FetchTarget_MakeAtt(m, s);
+    Span_Add(fch->val.targets, tg);
     cstr = "local";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeAtt(m, s);
@@ -128,7 +137,10 @@ status TemplCtx_Tests(MemCh *m){
 
     fch = Fetcher_Make(m);
     fch->type.state = FETCHER_VAR;
-    cstr = "local";
+    cstr = "value";
+    s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
+    tg = FetchTarget_MakeAtt(m, s);
+    Span_Add(fch->val.targets, tg);
     cstr = "name";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     tg = FetchTarget_MakeAtt(m, s);
@@ -144,14 +156,14 @@ status TemplCtx_Tests(MemCh *m){
     fch->type.state = FETCHER_END;
     Span_Add(expected, fch);
 
-    fch = Fetcher_Make(m);
-    fch->type.state = FETCHER_END;
-    Span_Add(expected, fch);
-
     cstr = "</ul>\n";
     s = Str_Ref(m, (byte *)cstr, strlen(cstr), strlen(cstr)+1, ZERO);
     v = StrVec_From(m, s);
     Span_Add(expected, v);
+
+    fch = Fetcher_Make(m);
+    fch->type.state = FETCHER_END;
+    Span_Add(expected, fch);
 
     args[0] = expected,
     args[1] = ctx->it.p,
@@ -160,8 +172,6 @@ status TemplCtx_Tests(MemCh *m){
     r |= TestShow(Exact(expected, ctx->it.p), 
         "Expected content found in example templ", 
         "Mismatch in content found in example templ, expected:\n&\nhave:\n &", args);
-
-    r &= ~ERROR;
 
     DebugStack_Pop();
     return r;
@@ -240,13 +250,14 @@ status Templ_Tests(MemCh *m){
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = Str_CstrRef(m, keyTestContent);
+    expected->type.state |= DEBUG;
     args[0] = expected;
     args[1] = bf->v;
     args[2] = NULL;
 
     r |= TestShow(Equals(expected, bf->v), 
         "Templ key value test has expected content", 
-        "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n&", 
+        "Templ key value mismatch test has expected content, expected:\n&\n\nhave:\n$", 
         args);
 
     DebugStack_Pop();

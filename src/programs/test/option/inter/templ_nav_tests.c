@@ -169,10 +169,6 @@ status TemplNav_Tests(MemCh *m){
 
     DebugStack_SetRef(bf->v, bf->v->type.of);
     status result = Templ_Prepare(templ);
-    args[0] = templ->content.p;
-    args[1] = templ;
-    args[2] = NULL;
-    Out("^c.TemplContent &^0\n&\n", args);
 
     i64 total = Templ_ToS(templ, bf, data, NULL);
 

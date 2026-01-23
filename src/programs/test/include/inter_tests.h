@@ -16,12 +16,6 @@ status TemplNavNested_Tests(MemCh *m);
 status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
-        {
-            "Templ Navigation Tests",
-            TemplNav_Tests,
-            "Testing a navitaion template.",
-            FEATURE_COMPLETE,
-        },
     {
         "TemplCtx Tests",
         TemplCtx_Tests,
@@ -32,6 +26,12 @@ static TestSet InterTests[] = {
         "Templ Tests",
         Templ_Tests,
         "Testing templating with a few variables.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Templ Navigation Tests",
+        TemplNav_Tests,
+        "Testing a navitaion template.",
         FEATURE_COMPLETE,
     },
     {

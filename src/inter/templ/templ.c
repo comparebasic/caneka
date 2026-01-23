@@ -27,8 +27,10 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
         templ->m->level--;
         total += ToS(bf, item, 0, ZERO); 
 
-        void *ar[] = {item, NULL};
-        Out("^p.OutVec: @^0\n", ar);
+        if(templ->type.state & DEBUG){
+            void *ar[] = {item, NULL};
+            Out("^p.OutVec: @^0\n", ar);
+        }
 
         templ->m->level++;
     }else if(item->type.of == TYPE_FETCHER && item->type.state & FETCHER_VAR){
@@ -48,8 +50,10 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
         }
         templ->m->level--;
 
-        void *ar[] = {value, NULL};
-        Out("^p.OutVar: @^0\n", ar);
+        if(templ->type.state & DEBUG){
+            void *ar[] = {value, NULL};
+            Out("^p.OutVar: @^0\n", ar);
+        }
 
         total += ToS(bf, value, 0, ZERO); 
         templ->m->level++;

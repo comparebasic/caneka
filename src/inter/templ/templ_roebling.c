@@ -243,10 +243,11 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Out("^c. Templ Capture ^0.$/^y.@^0.\n", args);
     }
 
+    Fetcher *fch = NULL;
     if(captureKey == FORMAT_TEMPL_TEXT){
         Iter_Add(&ctx->it, v);
     }else if(captureKey == FORMAT_TEMPL_VAR){
-        Fetcher *fch = Fetcher_Make(m);
+        fch = Fetcher_Make(m);
         fch->type.state |= FETCHER_VAR;
         Iter_Add(&ctx->it, fch);
     }else if(captureKey == FORMAT_TEMPL_VAR_END){
@@ -259,23 +260,23 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         if(a->type.of == TYPE_STRVEC){
             StrVec_AddBytes(m, (StrVec *)a, (byte *)"\n", 1);
         }
-        Fetcher *fch = Fetcher_Make(m);
+        fch = Fetcher_Make(m);
         fch->type.state |= FETCHER_TEMPL;
         Iter_Add(&ctx->it, fch);
     }else if(captureKey == FORMAT_TEMPL_TEMPL_END || 
             captureKey == FORMAT_TEMPL_CONTINUED){
         Abstract *a = Iter_Current(&ctx->it);
         if(((Fetcher *)a)->val.targets->nvalues == 0){
-            a->type.state = (a->type.state & NORMAL_FLAGS) | FETCHER_END;
-        }
-        if(captureKey == FORMAT_TEMPL_CONTINUED){
-            Fetcher *fch = Fetcher_Make(m);
+            fch = (Fetcher *)a;
+            fch->type.state = (a->type.state & NORMAL_FLAGS) | FETCHER_END;
+        }else if(captureKey == FORMAT_TEMPL_CONTINUED){
+            fch = Fetcher_Make(m);
             fch->type.state |= FETCHER_TEMPL;
             Iter_Add(&ctx->it, fch);
         }
     }else if(captureKey > _FORMAT_TEMPL_VAR_ANNOTE_START &&
             captureKey < _FORMAT_TEMPL_VAR_ANNOTE_END){
-        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
+        fch = (Fetcher *)Iter_Current(&ctx->it);
 
         if(captureKey == FORMAT_TEMPL_PROP_SEP){
             ctx->next.state = FETCH_TARGET_PROP;
@@ -303,7 +304,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         }
     }else if(captureKey > _FORMAT_TEMPL_LOGIC_START && 
             captureKey < _FORMAT_TEMPL_LOGIC_END){
-        Fetcher *fch = (Fetcher *)Iter_Current(&ctx->it);
+        fch = (Fetcher *)Iter_Current(&ctx->it);
         if(captureKey == FORMAT_TEMPL_FOR){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_FOR;
             FetchTarget *tg = FetchTarget_MakeIter(m);
@@ -328,6 +329,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_WITH;
         }
     }
+
     return SUCCESS;
 }
 
