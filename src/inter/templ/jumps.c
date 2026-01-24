@@ -113,7 +113,24 @@ status Templ_HandleJump(Templ *templ){
                 templ->objType.state |= (it->itin->objType.state & (
                    UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING|UFLAG_ITER_LEAF
                 ));
+
+                if(templ->type.state & DEBUG){
+                    void *ar[] = {
+                        Type_StateVec(m, TYPE_ITER_UPPER, it->itin->objType.state),
+                        a,
+                        NULL
+                    };
+                    Out("^b.Item itin @ @^0\n", ar);
+                }
             }else{
+                if(templ->type.state & DEBUG){
+                    void *ar[] = {
+                        a,
+                        Type_StateVec(m, TYPE_ITER, it->type.state),
+                        NULL
+                    };
+                    Out("^b.Item @ @^0\n", ar);
+                }
                 templ->objType.state |= UFLAG_ITER_LEAF;
                 if(it->idx > 0){
                     templ->objType.state |= UFLAG_ITER_SIBLING;
@@ -136,7 +153,8 @@ paths:
         if(js != NULL){
             status fl = 1 << 8;
             i32 i = 0;
-            status noop = NOOP;
+            status local = NOOP;
+            status clean = READY;
             Abstract *a = NULL;
             while(i < 8){
                 status flag = fl << i;
@@ -169,20 +187,23 @@ take:
                             crit = (TemplCrit *)a;
                         }
                         idx = crit->contentIdx;
+                        local &= ~NOOP;
                         if(crit->type.state & MORE){
                             templ->objType.state |= (
                                 crit->type.state & UPPER_FLAGS);
                         }else{
                             templ->objType.state &= ~flag;
                         }
-                        noop &= ~NOOP;
                         break;
+                    }else{
+                        if(flag != UFLAG_ITER_SKIP){
+                            clean |= flag;
+                        }
                     }
-
                 }
                 i++;
             }
-            if((noop & NOOP & js->type.state)){
+            if((local & NOOP & js->type.state)){
                 a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
                 if(templ->type.state & DEBUG){
                     void *args[] = {
@@ -194,7 +215,15 @@ take:
                 }
                 goto take;
             }else{
-                templ->objType.state |= noop;
+                templ->objType.state |= (local & ~UFLAG_ITER_SKIP);
+                templ->objType.state &= ~clean;
+                if((templ->type.state & DEBUG) && (clean != ZERO)){
+                    void *args[] = {
+                        Type_StateVec(m, TYPE_ITER_UPPER, clean),
+                        NULL
+                    };
+                    Out("^b. Removing flag @^0\n", args);
+                }
             }
         }
     }

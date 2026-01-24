@@ -4,15 +4,6 @@
 status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
     status r = READY;
     DebugStack_Push(NULL, ZERO);
-
-    if(templ->type.state & DEBUG){
-        void *ar[] = {
-            templ->content.p,
-            templ,
-            NULL,
-        };
-        Out("^c.Templ() content: @\n^y.@ ^0\n", ar);
-    }
     
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
@@ -88,6 +79,16 @@ status Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     DebugStack_Push(templ, templ->type.of);
     status r = READY;
     i16 g = 0;
+
+    if(templ->type.state & DEBUG){
+        void *ar[] = {
+            templ->content.p,
+            templ,
+            data,
+            NULL,
+        };
+        Out("^c.Templ() content: &\nTempl: ^y.&^0\nData: @\n", ar);
+    }
 
     if(Templ_Prepare(templ) & ERROR){
         DebugStack_Pop();

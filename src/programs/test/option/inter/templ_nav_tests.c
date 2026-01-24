@@ -173,15 +173,12 @@ status TemplNav_Tests(MemCh *m){
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = S(m, navTwo);
-    expected->type.state |= DEBUG;
-    args[0] = bf->v;
+    Str *output = StrVec_Str(m, bf->v);
+    output->type.state |= DEBUG;
+    args[0] = output;
     args[1] = NULL;
     r |= Test(Equals(bf->v, expected), 
-        "Nav template for two items is as expected, have:@", args);
-
-    args[0] = templ;
-    args[1] = NULL;
-    Out("^p.Templ &^0\n", args);
+        "Nav template for two items is as expected, have:&", args);
 
     DebugStack_Pop();
     return r;
@@ -225,16 +222,15 @@ status TemplNavNested_Tests(MemCh *m){
 
     status result = Templ_Prepare(templ);
 
-    args[0] = templ->content.p;
-    args[1] = nav;
-    args[2] = NULL;
-    Out("^c.Templ->content.p &^0@\n", args);
+    templ->type.state |= DEBUG;
 
-    i64 total = Templ_ToS(templ, bf, data, NULL);
+    status re = Templ_ToS(templ, bf, data, NULL);
 
-    args[0] = bf->v;
-    args[1] = NULL;
-    Out("^p.bf->v @^0\n", args);
+    args[0] = Type_StateVec(m, TYPE_ITER_UPPER, re);
+    args[1] = bf->v;
+    args[2] = s;
+    args[3] = NULL;
+    Out("^p.@ bf->v @\nFocus: @^0\n", args);
 
     r |= ERROR;
 
