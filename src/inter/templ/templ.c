@@ -1,12 +1,23 @@
 #include <external.h>
 #include <caneka.h>
 
-i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
+status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
+    status r = READY;
     DebugStack_Push(NULL, ZERO);
+
+    if(templ->type.state & DEBUG){
+        void *ar[] = {
+            templ->content.p,
+            templ,
+            NULL,
+        };
+        Out("^c.Templ() content: @\n^y.@ ^0\n", ar);
+    }
+    
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
         DebugStack_Pop();
-        return total;
+        return r;
     }
 
     Abstract *item = Iter_Get(&templ->content);
@@ -25,7 +36,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
     Abstract *data = Iter_Get(&templ->data);
     if(item->type.of == TYPE_STRVEC){
         templ->m->level--;
-        total += ToS(bf, item, 0, ZERO); 
+        r |= ToS(bf, item, 0, ZERO); 
 
         if(templ->type.state & DEBUG){
             void *ar[] = {item, NULL};
@@ -46,7 +57,7 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error finding value using @ in data @\n",args);
             DebugStack_Pop();
-            return total;
+            return (r|ERROR);
         }
         templ->m->level--;
 
@@ -55,35 +66,39 @@ i64 Templ_ToSCycle(Templ *templ, Buff *bf, i64 total, void *source){
             Out("^p.OutVar: @^0\n", ar);
         }
 
-        total += ToS(bf, value, 0, ZERO); 
+        r |= ToS(bf, value, 0, ZERO); 
         templ->m->level++;
     }
 
     if(templ->content.type.state & END){
         templ->type.state |= SUCCESS;
     }
+    
+    if(r == READY){
+        r |= NOOP;
+    }
 
     DebugStack_Pop();
-    return total;
+    return r;
 }
 
-i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
+status Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     templ->type.state &= ~SUCCESS;
     templ->m->level++; 
     DebugStack_Push(templ, templ->type.of);
-    i64 total = 0;
+    status r = READY;
     i16 g = 0;
 
     if(Templ_Prepare(templ) & ERROR){
         DebugStack_Pop();
-        return 0;
+        return (r|ERROR);
     }
 
     if(data != NULL){
         Templ_SetData(templ, data);
     }
 
-    while((total = Templ_ToSCycle(templ, bf, total, source)) && 
+    while((r |= Templ_ToSCycle(templ, bf, source) != NOOP) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(templ->m, &g, 128, FUNCNAME, FILENAME, LINENUMBER);
     }
@@ -91,8 +106,7 @@ i64 Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     templ->m->level--; 
     Templ_Reset(templ);
     templ->type.state |= SUCCESS;
-    return total;
-
+    return r;
 }
 
 status Templ_Reset(Templ *templ){
