@@ -100,6 +100,12 @@ status NestSel_Next(Iter *_it){
         _it->itin->objType.state &= ~UFLAG_ITER_FOCUS;
     }
 
+    if(it->idx == 0){
+        _it->itin->objType.state &= ~UFLAG_ITER_SIBLING;
+    }else{
+        _it->itin->objType.state |= UFLAG_ITER_SIBLING;
+    }
+
     if(it->type.state & END){
         if(_it->idx <= 0){
             _it->type.state |= END;

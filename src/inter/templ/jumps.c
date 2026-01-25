@@ -119,6 +119,7 @@ status Templ_HandleJump(Templ *templ){
         if((it->type.state & END) || (fch->api->next(it) & END)){
             templ->objType.state &= ~UFLAG_ITER_NEXT;
             templ->objType.state |= UFLAG_ITER_FINISH;
+            templ->level = 0;
         }else{
             Abstract *a = fch->api->get(it);
             Itin_IterAdd(&templ->data, a);
@@ -183,12 +184,19 @@ take:
                         if(a->type.of == TYPE_ITER){
                             Iter *critIt = (Iter *)a;
                             crit = Iter_Get(critIt);
+                            TemplCrit *prev = Span_Get(critIt->p, critIt->idx-1);
+
                             void *args[] = {
                                 I32_Wrapped(templ->m, crit->dataIdx),
                                 I32_Wrapped(templ->m, templ->level),
+                                critIt->p,
                                 NULL
                             };
-                            Out("^b.dataIdx @ vs level @^0\n", args);
+                            Out("^b.dataIdx @ vs level @ critIt @^0\n", args);
+                            if(crit != NULL && crit->dataIdx < templ->level-1){
+                                crit->type.state &= ~MORE;
+                            }
+
                             if(critIt->p->nvalues > 1){
                                 Iter_Remove(critIt);
                                 Iter_Prev(critIt);
