@@ -21,6 +21,9 @@ status Itin_IterAdd(Iter *it, void *value){
 }
 
 void *Itin_GetByType(Iter *it, cls typeOf){
+    if(it->itin == NULL){
+        return NULL;
+    }
     i32 idx = it->idx;
     Single *sg = Lookup_Get(it->itin->positions, typeOf);
     void *value = NULL;

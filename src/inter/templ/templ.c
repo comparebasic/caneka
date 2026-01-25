@@ -31,7 +31,7 @@ status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
 
         if(templ->type.state & DEBUG){
             void *ar[] = {item, NULL};
-            Out("^p.OutVec: @^0\n", ar);
+            Out("^g.OutVec: @^0\n", ar);
         }
 
         templ->m->level++;
@@ -54,7 +54,7 @@ status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
 
         if(templ->type.state & DEBUG){
             void *ar[] = {value, NULL};
-            Out("^p.OutVar: @^0\n", ar);
+            Out("^g.OutVar: @^0\n", ar);
         }
 
         r |= ToS(bf, value, 0, ZERO); 

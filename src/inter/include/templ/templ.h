@@ -2,6 +2,7 @@ typedef struct templ {
     Type type;
     Type objType;
     MemCh *m;
+    i32 level;
     Lookup *jumps;
     Iter content;
     Iter data;

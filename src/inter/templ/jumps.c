@@ -1,6 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
+static status Jump_NextSetFl =
+    UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING|UFLAG_ITER_LEAF;
+
 status Templ_HandleJump(Templ *templ){
     status r = READY;
     DebugStack_Push(templ, templ->type.of);
@@ -17,7 +20,10 @@ status Templ_HandleJump(Templ *templ){
             data,
             NULL
         };
+        /*
         Out("^y.HandleJump \\@$ @ - fch/data=@/@^0\n", args);
+        */
+        Out("^y.HandleJump \\@$ @^0\n", args);
     }
 
     if(templ->objType.state & (
@@ -39,24 +45,33 @@ status Templ_HandleJump(Templ *templ){
                 templ->objType.state |= UFLAG_ITER_SKIP;
             }else{
                 templ->objType.state |= UFLAG_ITER_ENCLOSE;
-                Jumps *js = Lookup_Get(templ->jumps, templ->content.idx);
-                TemplCrit *loop = js->crit[UFLAG_ITER_ENCLOSE_IDX];
-                js = Lookup_Get(templ->jumps, loop->contentIdx);
-                TemplCrit *finish = js->crit[UFLAG_ITER_FINISH_IDX];
+                TemplCrit *loop = Templ_LastJumpAt(templ, templ->content.idx,
+                    UFLAG_ITER_ENCLOSE_IDX);
+                TemplCrit *finish = Templ_LastJumpAt(templ, loop->contentIdx,
+                    UFLAG_ITER_FINISH_IDX);
                 Templ_AddJump(templ,
-                    loop->contentIdx, idx, UFLAG_ITER_FINISH_IDX, MORE|UFLAG_ITER_NEXT);
+                    loop->contentIdx,
+                    templ->content.idx,
+                    UFLAG_ITER_FINISH_IDX,
+                    MORE|UFLAG_ITER_NEXT);
                 Templ_AddJump(templ,
                     loop->contentIdx,
                     finish->contentIdx,
                     UFLAG_ITER_FINISH_IDX,
                     MORE|UFLAG_ITER_NEXT);
+
                 if(templ->type.state & DEBUG){
+                    Jumps *js = Lookup_Get(templ->jumps, loop->contentIdx);
+                    Abstract *a = (Abstract *)js->crit[UFLAG_ITER_FINISH_IDX];
+                    if(a->type.of == TYPE_ITER){
+                        a = (Abstract*)((Iter *)a)->p;
+                    }
                     void *args[] = {
-                        finish,
-                        templ->jumps,
+                        a,
+                        loop,
                         NULL
                     };
-                    Out("^b.Enclose to Enclose crit @ - jumps &^0\n", args);
+                    Out("^b.Enclose to Enclose finish @ - loop @^0\n", args);
                 }
             }
         }else if(tg->objType.of == FORMAT_TEMPL_LEVEL){
@@ -110,9 +125,9 @@ status Templ_HandleJump(Templ *templ){
             templ->objType.state |= UFLAG_ITER_NEXT;
 
             if(it->itin != NULL){
-                templ->objType.state |= (it->itin->objType.state & (
-                   UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING|UFLAG_ITER_LEAF
-                ));
+                templ->level = it->idx;
+                templ->objType.state = ((templ->objType.state & ~Jump_NextSetFl) |
+                    (it->itin->objType.state & Jump_NextSetFl));
 
                 if(templ->type.state & DEBUG){
                     void *ar[] = {
@@ -131,7 +146,8 @@ status Templ_HandleJump(Templ *templ){
                     };
                     Out("^b.Item @ @^0\n", ar);
                 }
-                templ->objType.state |= UFLAG_ITER_LEAF;
+                templ->objType.state = ((templ->objType.state & ~Jump_NextSetFl) |
+                    UFLAG_ITER_LEAF);
                 if(it->idx > 0){
                     templ->objType.state |= UFLAG_ITER_SIBLING;
                 }
@@ -158,16 +174,6 @@ paths:
             Abstract *a = NULL;
             while(i < 8){
                 status flag = fl << i;
-                if(templ->type.state & DEBUG){
-                    void *args[] = {
-                        I32_Wrapped(m, i), 
-                        Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
-                        Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
-                        Type_StateVec(m, TYPE_ITER_UPPER, flag),
-                        NULL
-                    };
-                    Out("^Ep. Stuff^e. js/templ/fl@ @ @ @^0\n", args);
-                }
                 a = (Abstract *)js->crit[i];
                 TemplCrit *crit = NULL;
                 if((flag & js->type.state & templ->objType.state)){
@@ -177,11 +183,20 @@ take:
                         if(a->type.of == TYPE_ITER){
                             Iter *critIt = (Iter *)a;
                             crit = Iter_Get(critIt);
-                            if(critIt->idx > 0){
+                            void *args[] = {
+                                I32_Wrapped(templ->m, crit->dataIdx),
+                                I32_Wrapped(templ->m, templ->level),
+                                NULL
+                            };
+                            Out("^b.dataIdx @ vs level @^0\n", args);
+                            if(critIt->p->nvalues > 1){
                                 Iter_Remove(critIt);
                                 Iter_Prev(critIt);
                             }else if(flag == UFLAG_ITER_FINISH){
-                                templ->objType.state &= ~UFLAG_ITER_NEXT; 
+                                Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
+                                if(it != NULL && (it->type.state & END)){
+                                    templ->objType.state &= ~UFLAG_ITER_NEXT; 
+                                }
                             }
                         }else{
                             crit = (TemplCrit *)a;
@@ -194,6 +209,18 @@ take:
                         }else{
                             templ->objType.state &= ~flag;
                         }
+
+                        if(templ->type.state & DEBUG){
+                            void *args[] = {
+                                I32_Wrapped(m, i), 
+                                Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
+                                Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+                                Type_StateVec(m, TYPE_ITER_UPPER, flag),
+                                NULL
+                            };
+                            Out("^Ep. FlagFound^e. js/templ/fl@ @ @ @^0\n", args);
+                        }
+
                         break;
                     }else{
                         if(flag != UFLAG_ITER_SKIP){
@@ -239,7 +266,10 @@ take:
                 fch,
                 NULL
             };
+            /*
             Out("^c.Jump to @ \\@$ - @^0\n", args);
+            */
+            Out("^c.Jump to @ \\@$^0\n", args);
         }
         Iter_GetByIdx(&templ->content, idx);
         DebugStack_Pop();

@@ -22,11 +22,12 @@ static status TemplItem_Print(Buff *bf, void *a, cls type, word flags){
 
 static status TemplCrit_Print(Buff *bf, void *a, cls type, word flags){
     TemplCrit *crit = (TemplCrit *)a;
-    void *args[3];
+    void *args[4];
     args[0] = Type_StateVec(bf->m, TYPE_ITER_UPPER, crit->type.state);
     args[1] = I16_Wrapped(bf->m, crit->contentIdx);
-    args[2] = NULL;
-    return Fmt(bf, "TCrit<@/$>", args);
+    args[2] = I16_Wrapped(bf->m, crit->dataIdx);
+    args[3] = NULL;
+    return Fmt(bf, "TCrit<@/^D.$^d/data$>", args);
 }
 
 static status Jumps_Print(Buff *bf, void *a, cls type, word flags){

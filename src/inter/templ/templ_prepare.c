@@ -114,6 +114,31 @@ static i32 Templ_FindEnd(Templ *templ){
     return -1;
 }
 
+TemplCrit *Templ_LastJumpAt(Templ *templ, i32 idx, i32 flagIdx){
+    Jumps *js = (Jumps *)Lookup_Get(templ->jumps, idx);
+    Abstract *a = NULL;
+    if(js != NULL){
+        a = (Abstract *)js->crit[flagIdx];
+        if(a != NULL && a->type.of == TYPE_ITER){
+            Iter *it = (Iter *)a;
+            a = Span_Get(it->p, it->p->max_idx);
+        }
+    }
+    if(a == NULL){
+        Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Last Jump is NULL", NULL);
+        return NULL;
+    }
+
+    void *args[] = {
+        a,
+        NULL
+    };
+    Out("^E.Last Jump ^0@\n", args);
+
+    return (TemplCrit *)a;
+}
+
 status Templ_AddJump(Templ *templ,
         i32 idx, i32 destIdx, i32 flagIdx, status flags){
     MemCh *m = templ->m;
@@ -124,6 +149,10 @@ status Templ_AddJump(Templ *templ,
     }
     if(destIdx != -1){
         TemplCrit *crit = TemplCrit_Make(m, destIdx, flags);
+        Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
+        if(it != NULL){
+            crit->dataIdx = it->idx;
+        }
         if(js->crit[flagIdx] != NULL){
             Abstract *a = (Abstract *)js->crit[flagIdx];
             if(a->type.of == TYPE_ITER){
@@ -220,10 +249,6 @@ status Templ_PrepareCycle(Templ *templ){
                         r |= Templ_AddJump(templ,
                             idx, finish->contentIdx, UFLAG_ITER_FINISH_IDX, MORE);
                     }
-                }
-                if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-                    r |= Templ_AddJump(templ,
-                        idx, -1, UFLAG_ITER_FOCUS_IDX, ZERO);
                 }
             }
             i32 skipIdx = -1;
