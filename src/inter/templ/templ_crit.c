@@ -6,5 +6,6 @@ TemplCrit *TemplCrit_Make(MemCh *m, i32 idx, status flags){
     crit->type.of = TYPE_TEMPL_JUMP_CRIT;
     crit->type.state = flags;
     crit->contentIdx = idx;
+    crit->dataIdx = -1;
     return crit;
 }

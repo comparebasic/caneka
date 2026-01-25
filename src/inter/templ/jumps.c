@@ -89,6 +89,10 @@ status Templ_HandleJump(Templ *templ){
                 templ->objType.state |= UFLAG_ITER_SKIP;
             }
         }
+
+        if(templ->objType.state & UFLAG_ITER_FINISH){
+            templ->objType.state &= ~UFLAG_ITER_SKIP;
+        }
     }else if(fch->type.state & FETCHER_FOR){
         Iter *it = NULL;
         if((fch->type.state & PROCESSING) == 0){
@@ -181,21 +185,17 @@ paths:
                     Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
 take:
                     if(a != NULL){
+                        TemplCrit *prev = NULL;
                         if(a->type.of == TYPE_ITER){
                             Iter *critIt = (Iter *)a;
                             crit = Iter_Get(critIt);
-                            TemplCrit *prev = Span_Get(critIt->p, critIt->idx-1);
+                            prev = Span_Get(critIt->p, critIt->idx-1);
 
                             void *args[] = {
-                                I32_Wrapped(templ->m, crit->dataIdx),
-                                I32_Wrapped(templ->m, templ->level),
                                 critIt->p,
                                 NULL
                             };
-                            Out("^b.dataIdx @ vs level @ critIt @^0\n", args);
-                            if(crit != NULL && crit->dataIdx < templ->level-1){
-                                crit->type.state &= ~MORE;
-                            }
+                            Out("^b.From stack @^0\n", args);
 
                             if(critIt->p->nvalues > 1){
                                 Iter_Remove(critIt);
@@ -211,10 +211,27 @@ take:
                         }
                         idx = crit->contentIdx;
                         local &= ~NOOP;
-                        if(crit->type.state & MORE){
+
+                        void *args[] = {
+                            I32_Wrapped(templ->m, crit->dataIdx),
+                            I32_Wrapped(templ->m, templ->level),
+                            crit,
+                            NULL
+                        };
+                        Out("^b.dataIdx @ vs level @ crit @^0\n", args);
+
+                        if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
+                            if(prev != NULL){
+                                printf("MORE %d %d %d\n", prev == NULL, prev->dataIdx == -1, prev->dataIdx >= templ->level);
+                                fflush(stdout);
+                            }
                             templ->objType.state |= (
                                 crit->type.state & UPPER_FLAGS);
                         }else{
+                            if(prev != NULL){
+                                printf("noMORE %d %d %d\n", prev == NULL, prev->dataIdx == -1, prev->dataIdx < templ->level);
+                                fflush(stdout);
+                            }
                             templ->objType.state &= ~flag;
                         }
 
