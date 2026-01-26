@@ -215,7 +215,10 @@ status Templ_PrepareCycle(Templ *templ){
                         r |= Templ_AddJump(templ,
                             finIdx, finIdx+1, UFLAG_ITER_FINISH_IDX, MORE);
                         r |= Templ_AddJump(templ,
-                            finIdx, skipIdx, UFLAG_ITER_SKIP_IDX, NOOP);
+                            finIdx,
+                            skipIdx,
+                            UFLAG_ITER_SKIP_IDX,
+                            UFLAG_ITER_INVERT);
                     }
                 }
                 Fetcher *end = Iter_Get(&templ->content);

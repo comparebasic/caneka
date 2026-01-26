@@ -27,7 +27,7 @@ status Templ_HandleJump(Templ *templ){
     }
 
     if(templ->objType.state & (
-            UFLAG_ITER_ENCLOSE|UFLAG_ITER_JUMPIN|UFLAG_ITER_FINISH)){
+            UFLAG_ITER_ENCLOSE|UFLAG_ITER_FINISH)){
         if(templ->objType.state & NOOP){
             templ->objType.state &= ~NOOP;
         }else{
@@ -177,86 +177,16 @@ paths:
             status local = NOOP;
             status clean = READY;
             Abstract *a = NULL;
-            while(i < 8){
-                status flag = fl << i;
-                a = (Abstract *)js->crit[i];
-                TemplCrit *crit = NULL;
-                if((flag & js->type.state & templ->objType.state)){
-                    Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
-take:
-                    if(a != NULL){
-                        TemplCrit *prev = NULL;
-                        if(a->type.of == TYPE_ITER){
-                            Iter *critIt = (Iter *)a;
-                            crit = Iter_Get(critIt);
-                            prev = Span_Get(critIt->p, critIt->idx-1);
+            status flag = ZERO;
 
-                            void *args[] = {
-                                critIt->p,
-                                NULL
-                            };
-                            Out("^b.From stack @^0\n", args);
-
-                            if(critIt->p->nvalues > 1){
-                                Iter_Remove(critIt);
-                                Iter_Prev(critIt);
-                            }else if(flag == UFLAG_ITER_FINISH){
-                                Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
-                                if(it != NULL && (it->type.state & END)){
-                                    templ->objType.state &= ~UFLAG_ITER_NEXT; 
-                                }
-                            }
-                        }else{
-                            crit = (TemplCrit *)a;
-                        }
-                        idx = crit->contentIdx;
-                        local &= ~NOOP;
-
-                        void *args[] = {
-                            I32_Wrapped(templ->m, crit->dataIdx),
-                            I32_Wrapped(templ->m, templ->level),
-                            crit,
-                            NULL
-                        };
-                        Out("^b.dataIdx @ vs level @ crit @^0\n", args);
-
-                        if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
-                            if(prev != NULL){
-                                printf("MORE %d %d %d\n", prev == NULL, prev->dataIdx == -1, prev->dataIdx >= templ->level);
-                                fflush(stdout);
-                            }
-                            templ->objType.state |= (
-                                crit->type.state & UPPER_FLAGS);
-                        }else{
-                            if(prev != NULL){
-                                printf("noMORE %d %d %d\n", prev == NULL, prev->dataIdx == -1, prev->dataIdx < templ->level);
-                                fflush(stdout);
-                            }
-                            templ->objType.state &= ~flag;
-                        }
-
-                        if(templ->type.state & DEBUG){
-                            void *args[] = {
-                                I32_Wrapped(m, i), 
-                                Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
-                                Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
-                                Type_StateVec(m, TYPE_ITER_UPPER, flag),
-                                NULL
-                            };
-                            Out("^Ep. FlagFound^e. js/templ/fl@ @ @ @^0\n", args);
-                        }
-
-                        break;
-                    }else{
-                        if(flag != UFLAG_ITER_SKIP){
-                            clean |= flag;
-                        }
-                    }
-                }
-                i++;
-            }
-            if((local & NOOP & js->type.state)){
+            if(js->type.state & UFLAG_ITER_INVERT){
+                flag = UFLAG_ITER_SKIP;
+                local |= UFLAG_ITER_SKIP;
                 a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
+                printf("Invert set\n");
+                fflush(stdout);
+                exit(1);
+
                 if(templ->type.state & DEBUG){
                     void *args[] = {
                         I32_Wrapped(m, templ->content.idx),
@@ -265,8 +195,80 @@ take:
                     };
                     Out("^p.Skip \\@$ @^0\n", args);
                 }
-                goto take;
             }else{
+                while(i < 8){
+                    flag = fl << i;
+                    a = (Abstract *)js->crit[i];
+                    if((flag & js->type.state & templ->objType.state)){
+                        Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
+                        break;
+                    }else{
+                        if(flag != UFLAG_ITER_SKIP){
+                            clean |= flag;
+                        }
+                        a = NULL;
+                    }
+                    i++;
+                }
+            }
+
+            if(a != NULL){
+                TemplCrit *crit = NULL;
+                TemplCrit *prev = NULL;
+                if(a->type.of == TYPE_ITER){
+                    Iter *critIt = (Iter *)a;
+                    crit = Iter_Get(critIt);
+                    prev = Span_Get(critIt->p, critIt->idx-1);
+
+                    void *args[] = {
+                        critIt->p,
+                        NULL
+                    };
+                    Out("^b.From stack @^0\n", args);
+
+                    if(critIt->p->nvalues > 1){
+                        Iter_Remove(critIt);
+                        Iter_Prev(critIt);
+                    }else if(flag == UFLAG_ITER_FINISH){
+                        Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
+                        if(it != NULL && (it->type.state & END)){
+                            templ->objType.state &= ~UFLAG_ITER_NEXT; 
+                        }
+                    }
+                }else{
+                    crit = (TemplCrit *)a;
+                }
+                idx = crit->contentIdx;
+                local &= ~NOOP;
+
+                void *args[] = {
+                    I32_Wrapped(templ->m, crit->dataIdx),
+                    I32_Wrapped(templ->m, templ->level),
+                    crit,
+                    NULL
+                };
+                Out("^b.dataIdx @ vs level @ crit @^0\n", args);
+
+                if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
+                    templ->objType.state |= (
+                        crit->type.state & UPPER_FLAGS);
+                }else{
+                    templ->objType.state &= ~flag;
+                }
+
+                if(templ->type.state & DEBUG){
+                    void *args[] = {
+                        I32_Wrapped(m, i), 
+                        Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
+                        Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+                        Type_StateVec(m, TYPE_ITER_UPPER, flag),
+                        NULL
+                    };
+                    Out("^Ep. FlagFound^e. js/templ/fl@ @ @ @^0\n", args);
+                }
+            }
+
+            if((local & UFLAG_ITER_INVERT) == 0){
                 templ->objType.state |= (local & ~UFLAG_ITER_SKIP);
                 templ->objType.state &= ~clean;
                 if((templ->type.state & DEBUG) && (clean != ZERO)){
