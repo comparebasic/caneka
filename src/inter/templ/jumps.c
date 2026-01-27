@@ -179,13 +179,14 @@ paths:
             status flag = ZERO;
             i32 i = 0;
 
-            if(js->type.state & UFLAG_ITER_INVERT){
+            if((js->type.state & UFLAG_ITER_INVERT) &&
+                    (templ->objType.state & js->type.state &
+                        ~(UFLAG_ITER_SKIP|UFLAG_ITER_INVERT)) == 0){
                 flag = UFLAG_ITER_SKIP;
                 local |= UFLAG_ITER_SKIP;
                 a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
                 printf("Invert set\n");
                 fflush(stdout);
-                exit(1);
 
                 if(templ->type.state & DEBUG){
                     void *args[] = {
@@ -203,9 +204,6 @@ paths:
                         Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
                         break;
                     }else{
-                        if(flag != UFLAG_ITER_SKIP){
-                            clean |= flag;
-                        }
                         a = NULL;
                     }
                     i++;
@@ -256,7 +254,7 @@ paths:
                     templ->objType.state &= ~flag;
                 }
 
-                if(1 || templ->type.state & DEBUG){
+                if(templ->type.state & DEBUG){
                     void *args[] = {
                         I32_Wrapped(m, i), 
                         Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),
@@ -266,9 +264,13 @@ paths:
                     };
                     Out("^Ep. FlagFound^e. js/templ/fl@ @ @ @^0\n", args);
                 }
+            }else{
+                if(flag != UFLAG_ITER_SKIP){
+                    clean |= flag;
+                }
             }
 
-            if((local & UFLAG_ITER_INVERT) == 0){
+            if((local & NOOP) == 0 && (js->type.state & UFLAG_ITER_INVERT) == 0){
                 templ->objType.state |= (local & ~UFLAG_ITER_SKIP);
                 templ->objType.state &= ~clean;
                 if((templ->type.state & DEBUG) && (clean != ZERO)){
