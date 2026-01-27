@@ -173,11 +173,11 @@ paths:
         Jumps *js = Lookup_Get(templ->jumps, templ->content.idx);
         if(js != NULL){
             status fl = 1 << 8;
-            i32 i = 0;
             status local = NOOP;
             status clean = READY;
             Abstract *a = NULL;
             status flag = ZERO;
+            i32 i = 0;
 
             if(js->type.state & UFLAG_ITER_INVERT){
                 flag = UFLAG_ITER_SKIP;
@@ -256,7 +256,7 @@ paths:
                     templ->objType.state &= ~flag;
                 }
 
-                if(templ->type.state & DEBUG){
+                if(1 || templ->type.state & DEBUG){
                     void *args[] = {
                         I32_Wrapped(m, i), 
                         Type_StateVec(m, TYPE_ITER_UPPER, js->type.state),

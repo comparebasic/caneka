@@ -173,7 +173,7 @@ status Templ_AddJump(Templ *templ,
         word one = 1;
         fl |= (one << (flagIdx+8));
     }
-    js->type.state |= (fl | (flags & (NOOP|MORE)));
+    js->type.state |= (fl | (flags & (NOOP|MORE|UFLAG_ITER_INVERT)));
     return SUCCESS;
 }
 
