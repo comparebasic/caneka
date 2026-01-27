@@ -53,12 +53,12 @@ status Templ_HandleJump(Templ *templ){
                     loop->contentIdx,
                     templ->content.idx,
                     UFLAG_ITER_FINISH_IDX,
-                    MORE|UFLAG_ITER_NEXT);
+                    MORE|UFLAG_ITER_ACTION);
                 Templ_AddJump(templ,
                     loop->contentIdx,
                     finish->contentIdx,
                     UFLAG_ITER_FINISH_IDX,
-                    MORE|UFLAG_ITER_NEXT);
+                    MORE|UFLAG_ITER_ACTION);
 
                 if(templ->type.state & DEBUG){
                     Jumps *js = Lookup_Get(templ->jumps, loop->contentIdx);
@@ -121,13 +121,13 @@ status Templ_HandleJump(Templ *templ){
 
         i32 indentIdx = it->idx;
         if((it->type.state & END) || (fch->api->next(it) & END)){
-            templ->objType.state &= ~UFLAG_ITER_NEXT;
+            templ->objType.state &= ~UFLAG_ITER_ACTION;
             templ->objType.state |= UFLAG_ITER_FINISH;
             templ->level = 0;
         }else{
             Abstract *a = fch->api->get(it);
             Itin_IterAdd(&templ->data, a);
-            templ->objType.state |= UFLAG_ITER_NEXT;
+            templ->objType.state |= UFLAG_ITER_ACTION;
 
             if(it->itin != NULL){
                 templ->level = it->idx;
@@ -185,8 +185,6 @@ paths:
                 flag = UFLAG_ITER_SKIP;
                 local |= UFLAG_ITER_SKIP;
                 a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
-                printf("Invert set\n");
-                fflush(stdout);
 
                 if(templ->type.state & DEBUG){
                     void *args[] = {
@@ -230,7 +228,7 @@ paths:
                     }else if(flag == UFLAG_ITER_FINISH){
                         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
                         if(it != NULL && (it->type.state & END)){
-                            templ->objType.state &= ~UFLAG_ITER_NEXT; 
+                            templ->objType.state &= ~UFLAG_ITER_ACTION; 
                         }
                     }
                 }else{

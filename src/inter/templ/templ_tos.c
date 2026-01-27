@@ -100,6 +100,7 @@ static status Templ_Print(Buff *bf, void *a, cls type, word flags){
 
 status Templ_ClsInit(MemCh *m){
     status r = READY;
+    r |= Templ_FuncInit(m);
     Lookup *lk = ToStreamLookup;
     r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL_CTX, (void *)TemplCtx_Print);

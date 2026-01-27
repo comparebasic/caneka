@@ -139,6 +139,15 @@ TemplCrit *Templ_LastJumpAt(Templ *templ, i32 idx, i32 flagIdx){
     return (TemplCrit *)a;
 }
 
+status Templ_AddFunc(Templ *templ, i32 idx, Func *func, status flags){
+    MemCh *m = templ->m;
+    Abstract *fs = Lookup_Get(templ->jumps, idx);
+    TemplFunc *tfunc = TemplFunc_Make(m, func, flags);
+    fs = IterUpper_Combine(m, fs, tfunc);
+    Lookup_Add(templ->m, templ->funcs, idx, fs);
+    return SUCCESS;
+}
+
 status Templ_AddJump(Templ *templ,
         i32 idx, i32 destIdx, i32 flagIdx, status flags){
     MemCh *m = templ->m;
@@ -153,20 +162,8 @@ status Templ_AddJump(Templ *templ,
         if(it != NULL){
             crit->dataIdx = it->idx;
         }
-        if(js->crit[flagIdx] != NULL){
-            Abstract *a = (Abstract *)js->crit[flagIdx];
-            if(a->type.of == TYPE_ITER){
-                Iter *it = (Iter *)a;
-                Iter_Add(it, crit);
-            }else{
-                Iter *it = (Iter *)Iter_Make(m, Span_Make(m));
-                Iter_Add(it, js->crit[flagIdx]);
-                Iter_Add(it, crit);
-                js->crit[flagIdx] = (TemplCrit *)it;
-            }
-        }else{
-            js->crit[flagIdx] = crit;
-        }
+        void *existing = js->crit[flagIdx];
+        js->crit[flagIdx] = IterUpper_Combine(m, existing, crit);
     }
     word fl = ZERO;
     if(flagIdx > -1){
@@ -204,6 +201,8 @@ status Templ_PrepareCycle(Templ *templ){
         if(fch->type.state & FETCHER_FOR){
             i32 skipIdx = -1;
             if((skipIdx = Templ_FindEnd(templ)) != -1){
+                Func *func = Lookup_Get(TemplFuncLookup, TYPE_ITER);
+                r |= Templ_AddFunc(templ, idx, func, ZERO);
                 r |= Templ_AddJump(templ, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
 
                 Iter_GetByIdx(&templ->content, skipIdx);
@@ -223,7 +222,7 @@ status Templ_PrepareCycle(Templ *templ){
                 }
                 Fetcher *end = Iter_Get(&templ->content);
                 r |= Templ_AddJump(templ,
-                    templ->content.idx, idx, UFLAG_ITER_NEXT_IDX, ZERO);
+                    templ->content.idx, idx, UFLAG_ITER_ACTION_IDX, ZERO);
 
                 Iter_GetByIdx(&templ->content, idx);
             }

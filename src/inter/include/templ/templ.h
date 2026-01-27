@@ -4,6 +4,7 @@ typedef struct templ {
     MemCh *m;
     i32 level;
     Lookup *jumps;
+    Lookup *funcs;
     Iter content;
     Iter data;
 } Templ;

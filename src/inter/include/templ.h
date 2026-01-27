@@ -1,5 +1,7 @@
 #include "templ/templ.h"
 #include "templ/templ_crit.h"
+#include "templ/templ_func.h"
+#include "templ/templ_funcs.h"
 #include "templ/jumps.h"
 #include "templ/templ_ctx.h"
 #include "templ/templ_filter.h"

@@ -11,6 +11,7 @@ static char *interTypeStrings[] = {
     "TYPE_TEMPL_CTX",
     "TYPE_TEMPL_JUMP",
     "TYPE_TEMPL_JUMP_CRIT",
+    "TYPE_TEMPL_JUMP_FUNC",
     "TYPE_TEMPL_JUMP_RET",
     "TYPE_HTTP_CTX",
     "_TEMPL_START",
