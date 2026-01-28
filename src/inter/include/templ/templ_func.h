@@ -9,4 +9,4 @@ typedef struct jump_func {
     TFunc func;
 } TemplFunc;
 
-TemplFunc *TemplFunc_Make(MemCh *m, TFunc *, status flags);
+TemplFunc *TemplFunc_Make(MemCh *m, TFunc func, status flags);

@@ -49,8 +49,8 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
 
         if(it->itin != NULL){
             templ->level = it->idx;
-            tfunc->dflag.negative = Jump_NextSetFl;
-            tfunc->dflag.positive = (it->itin->objType.state & Jump_NextSetFl);
+            tfunc->dflag.negative |= Jump_NextSetFl;
+            tfunc->dflag.positive |= (it->itin->objType.state & Jump_NextSetFl);
 
             if(templ->type.state & DEBUG){
                 void *ar[] = {
@@ -70,8 +70,8 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
                 Out("^b.Item @ @^0\n", ar);
             }
 
-            tfunc->dflag.positive = UFLAG_ITER_LEAF;
-            tfunc->dflag.negative = Jump_NextSetFl;
+            tfunc->dflag.negative |= Jump_NextSetFl;
+            tfunc->dflag.positive |= UFLAG_ITER_LEAF;
             if(it->idx > 0){
                 tfunc->dflag.positive |= UFLAG_ITER_SIBLING;
             }

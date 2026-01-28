@@ -98,8 +98,17 @@ status Templ_HandleJump(Templ *templ){
             return ERROR;
         }
         fs->func(templ, fs);
-        templ->type.state &= ~fs->dflag.negative;
-        templ->type.state |= fs->dflag.positive;
+        templ->objType.state &= ~fs->dflag.negative;
+        templ->objType.state |= fs->dflag.positive;
+        
+        void *args[] = {
+            Type_StateVec(m, TYPE_ITER_UPPER, fs->dflag.negative),
+            Type_StateVec(m, TYPE_ITER_UPPER, fs->dflag.positive),
+            Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+            NULL
+        };
+        Out("^p.For func Flags\n    negative: @\n    posative: @\n    templ->objType: @\n", args);
+
     }
 
 paths:
