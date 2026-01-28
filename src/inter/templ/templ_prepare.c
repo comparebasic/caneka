@@ -139,7 +139,7 @@ TemplCrit *Templ_LastJumpAt(Templ *templ, i32 idx, i32 flagIdx){
     return (TemplCrit *)a;
 }
 
-status Templ_AddFunc(Templ *templ, i32 idx, Func *func, status flags){
+status Templ_AddFunc(Templ *templ, i32 idx, TemplFunc *func, status flags){
     MemCh *m = templ->m;
     Abstract *fs = Lookup_Get(templ->jumps, idx);
     TemplFunc *tfunc = TemplFunc_Make(m, func, flags);
@@ -201,8 +201,8 @@ status Templ_PrepareCycle(Templ *templ){
         if(fch->type.state & FETCHER_FOR){
             i32 skipIdx = -1;
             if((skipIdx = Templ_FindEnd(templ)) != -1){
-                Func *func = Lookup_Get(TemplFuncLookup, TYPE_ITER);
-                r |= Templ_AddFunc(templ, idx, func, ZERO);
+                TemplFunc *tfunc = Lookup_Get(TemplFuncLookup, TYPE_ITER);
+                r |= Templ_AddFunc(templ, idx, tfunc, ZERO);
                 r |= Templ_AddJump(templ, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
 
                 Iter_GetByIdx(&templ->content, skipIdx);

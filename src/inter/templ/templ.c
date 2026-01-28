@@ -143,5 +143,6 @@ Templ *Templ_Make(MemCh *m, Span *content){
     ItinIt_Init(&templ->content, content);
     templ->jumps = Lookup_Make(m, 0);
     templ->funcs = Lookup_Make(m, 0);
+    templ->funcs->type.state = LOOKUP_RAW_TYPES;
     return templ;
 }

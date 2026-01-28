@@ -16,3 +16,4 @@
 #include "navigate/nestsel.h"
 #include "navigate/inst_iter.h"
 #include "navigate/iter_upper.h"
+#include "navigate/double_flag.h"

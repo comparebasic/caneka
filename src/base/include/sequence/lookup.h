@@ -1,3 +1,7 @@
+enum lookup_flags {
+    LOOKUP_RAW_TYPES = 1 << 8,
+};
+
 typedef struct lookup {
     Type type;
     word offset;

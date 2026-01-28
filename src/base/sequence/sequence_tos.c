@@ -104,10 +104,14 @@ status Lookup_Print(Buff *bf, void *a, cls type, word flags){
             void *a = Iter_Get(&it);
             if(a != NULL){
                 args[0] = I32_Wrapped(bf->m, it.idx+lk->offset);
-                if(flags & DEBUG){
-                    args[1] = a;
+                if(lk->type.state & LOOKUP_RAW_TYPES){
+                    args[1] = Util_Wrapped(bf->m, (util)a);
                 }else{
-                    args[1] = Type_ToStr(bf->m, it.idx+lk->offset);
+                    if(flags & DEBUG){
+                        args[1] = a;
+                    }else{
+                        args[1] = Type_ToStr(bf->m, it.idx+lk->offset);
+                    }
                 }
                 args[2] = NULL;
 

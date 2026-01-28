@@ -1,9 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static status Jump_NextSetFl =
-    UFLAG_ITER_FOCUS|UFLAG_ITER_SIBLING|UFLAG_ITER_LEAF;
-
 status Templ_HandleJump(Templ *templ){
     status r = READY;
     DebugStack_Push(templ, templ->type.of);
@@ -12,6 +9,7 @@ status Templ_HandleJump(Templ *templ){
     Fetcher *fch = (Fetcher *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
     i32 idx = templ->content.idx;
+    TemplFunc *fs = Lookup_Get(templ->funcs, idx);
     if(templ->type.state & DEBUG){
         void *args[] = {
             I32_Wrapped(m, templ->content.idx),
@@ -94,79 +92,15 @@ status Templ_HandleJump(Templ *templ){
             templ->objType.state &= ~UFLAG_ITER_SKIP;
         }
     }else if(fch->type.state & FETCHER_FOR){
-        Iter *it = NULL;
-        if((fch->type.state & PROCESSING) == 0){
-            Iter *value = as(Fetch(m, fch, data, NULL), TYPE_ITER);
-            Itin_IterAdd(&templ->data, value);
-            fch->type.state |= PROCESSING;
-            it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
-        }else{
-            it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
-            if((it->type.state & END) == 0){
-                Iter_Remove(&templ->data);
-                Iter_Prev(&templ->data);
-            }
-        }
-
-        if(it == NULL || it->type.of != TYPE_ITER){
-            void *args[] = { NULL, it, Iter_Get(&templ->data), NULL };
+        if(fs == NULL){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error ^{STACK.name}, expected Iter have @ from"
-                " Iter_Get(@) instead^0\n", 
-                args);
-            templ->type.state |= ERROR;
-            DebugStack_Pop();
-            return templ->type.state;
+                "Error expected TemplFunc for For Loop", NULL);
+            return ERROR;
         }
-
-        i32 indentIdx = it->idx;
-        if((it->type.state & END) || (fch->api->next(it) & END)){
-            templ->objType.state &= ~UFLAG_ITER_ACTION;
-            templ->objType.state |= UFLAG_ITER_FINISH;
-            templ->level = 0;
-        }else{
-            Abstract *a = fch->api->get(it);
-            Itin_IterAdd(&templ->data, a);
-            templ->objType.state |= UFLAG_ITER_ACTION;
-
-            if(it->itin != NULL){
-                templ->level = it->idx;
-                templ->objType.state = ((templ->objType.state & ~Jump_NextSetFl) |
-                    (it->itin->objType.state & Jump_NextSetFl));
-
-                if(templ->type.state & DEBUG){
-                    void *ar[] = {
-                        Type_StateVec(m, TYPE_ITER_UPPER, it->itin->objType.state),
-                        a,
-                        NULL
-                    };
-                    Out("^b.Item itin @ @^0\n", ar);
-                }
-            }else{
-                if(templ->type.state & DEBUG){
-                    void *ar[] = {
-                        a,
-                        Type_StateVec(m, TYPE_ITER, it->type.state),
-                        NULL
-                    };
-                    Out("^b.Item @ @^0\n", ar);
-                }
-                templ->objType.state = ((templ->objType.state & ~Jump_NextSetFl) |
-                    UFLAG_ITER_LEAF);
-                if(it->idx > 0){
-                    templ->objType.state |= UFLAG_ITER_SIBLING;
-                }
-                if(it->idx == it->metrics.selected){
-                    templ->objType.state |= UFLAG_ITER_FOCUS;
-                }
-            }
-
-            if(it->idx < indentIdx){
-                templ->objType.state |= UFLAG_ITER_FINISH;
-            }
-        }
+        fs->func(templ, fs);
+        templ->type.state &= ~fs->dflag.negative;
+        templ->type.state |= fs->dflag.positive;
     }
-
 
 paths:
     if(templ->objType.state & UPPER_FLAGS){

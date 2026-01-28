@@ -81,12 +81,14 @@ static status Templ_Print(Buff *bf, void *a, cls type, word flags){
             &templ->content,
             &templ->data,
             templ->jumps,
+            templ->funcs,
             NULL
         };
         return Fmt(bf, "Templ<@\n"
             "  ^E.content^e.:@\n"
             "  ^E.data^e.:@\n"
-            "  ^E.jumps^e.:&>"
+            "  ^E.jumps^e.:&\n"
+            "  ^E.funcs^e.:@>"
             , args);
     }else{
         void *args[] = {
@@ -98,7 +100,7 @@ static status Templ_Print(Buff *bf, void *a, cls type, word flags){
     }
 }
 
-status Templ_ClsInit(MemCh *m){
+status Templ_Init(MemCh *m){
     status r = READY;
     r |= Templ_FuncInit(m);
     Lookup *lk = ToStreamLookup;
