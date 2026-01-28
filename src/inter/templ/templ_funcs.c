@@ -86,8 +86,43 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
     }
 }
 
-status Templ_Indent(Templ *templ){
-    return NOOP;
+void Templ_Indent(Templ *templ, TemplFunc *tfunc){
+    tfunc->dflag.positive = ZERO;
+    tfunc->dflag.negative = ZERO;
+    if((templ->objType.state & UFLAG_ITER_FOCUS) == 0 ||
+       (templ->objType.state & UFLAG_ITER_LEAF)){
+        tfunc->dflag.positive |= UFLAG_ITER_SKIP;
+    }else{
+        tfunc->dflag.positive |= UFLAG_ITER_ENCLOSE;
+        TemplCrit *loop = Templ_LastJumpAt(templ, templ->content.idx,
+            UFLAG_ITER_ENCLOSE_IDX);
+        TemplCrit *finish = Templ_LastJumpAt(templ, loop->contentIdx,
+            UFLAG_ITER_FINISH_IDX);
+        Templ_AddJump(templ,
+            loop->contentIdx,
+            templ->content.idx,
+            UFLAG_ITER_FINISH_IDX,
+            MORE|UFLAG_ITER_ACTION);
+        Templ_AddJump(templ,
+            loop->contentIdx,
+            finish->contentIdx,
+            UFLAG_ITER_FINISH_IDX,
+            MORE|UFLAG_ITER_ACTION);
+
+        if(templ->type.state & DEBUG){
+            Jumps *js = Span_Get(templ->jumps, loop->contentIdx);
+            Abstract *a = (Abstract *)js->crit[UFLAG_ITER_FINISH_IDX];
+            if(a->type.of == TYPE_ITER){
+                a = (Abstract*)((Iter *)a)->p;
+            }
+            void *args[] = {
+                a,
+                loop,
+                NULL
+            };
+            Out("^b.Enclose to Enclose finish @ - loop @^0\n", args);
+        }
+    }
 }
 
 Func *Templ_GetFunc(cls typeOf){

@@ -141,8 +141,8 @@ Templ *Templ_Make(MemCh *m, Span *content){
     templ->type.of = TYPE_TEMPL;
     templ->m = m;
     ItinIt_Init(&templ->content, content);
-    templ->jumps = Lookup_Make(m, 0);
-    templ->funcs = Lookup_Make(m, 0);
-    templ->funcs->type.state = LOOKUP_RAW_TYPES;
+    templ->jumps = Span_Make(m);
+    templ->funcs = Span_Make(m);
+    templ->funcs->type.state = FLAG_SPAN_RAW;
     return templ;
 }

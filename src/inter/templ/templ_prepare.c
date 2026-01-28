@@ -115,7 +115,7 @@ static i32 Templ_FindEnd(Templ *templ){
 }
 
 TemplCrit *Templ_LastJumpAt(Templ *templ, i32 idx, i32 flagIdx){
-    Jumps *js = (Jumps *)Lookup_Get(templ->jumps, idx);
+    Jumps *js = (Jumps *)Span_Get(templ->jumps, idx);
     Abstract *a = NULL;
     if(js != NULL){
         a = (Abstract *)js->crit[flagIdx];
@@ -141,20 +141,21 @@ TemplCrit *Templ_LastJumpAt(Templ *templ, i32 idx, i32 flagIdx){
 
 status Templ_AddFunc(Templ *templ, i32 idx, TFunc func, status flags){
     MemCh *m = templ->m;
-    Abstract *fs = Lookup_Get(templ->jumps, idx);
+    Abstract *fs = Span_Get(templ->jumps, idx);
     TemplFunc *tfunc = TemplFunc_Make(m, func, flags);
     fs = IterUpper_Combine(m, fs, tfunc);
-    Lookup_Add(templ->m, templ->funcs, idx, fs);
+    printf("Func %p\n", func);
+    Span_Set(templ->funcs, idx, fs);
     return SUCCESS;
 }
 
 status Templ_AddJump(Templ *templ,
         i32 idx, i32 destIdx, i32 flagIdx, status flags){
     MemCh *m = templ->m;
-    Jumps *js = Lookup_Get(templ->jumps, idx);
+    Jumps *js = Span_Get(templ->jumps, idx);
     if(js == NULL){
         js = Jumps_Make(m, idx);
-        Lookup_Add(templ->m, templ->jumps, idx, js);
+        Span_Set(templ->jumps, idx, js);
     }
     if(destIdx != -1){
         TemplCrit *crit = TemplCrit_Make(m, destIdx, flags);
@@ -245,8 +246,11 @@ status Templ_PrepareCycle(Templ *templ){
                     idx, encloseIdx, UFLAG_ITER_ENCLOSE_IDX, ZERO);
                 FetchTarget *tg = Span_Get(fch->val.targets, 0);
 
-                if(tg->objType.of != FORMAT_TEMPL_INDENT){
-                    TemplCrit *finish = Lookup_Get(templ->jumps, encloseIdx);
+                if(tg->objType.of == FORMAT_TEMPL_INDENT){
+                    TFunc func = Lookup_Get(TemplFuncLookup, FORMAT_TEMPL_INDENT);
+                    r |= Templ_AddFunc(templ, idx, func, ZERO);
+                }else{
+                    TemplCrit *finish = Span_Get(templ->jumps, encloseIdx);
                     if(finish != NULL){
                         r |= Templ_AddJump(templ,
                             idx, finish->contentIdx, UFLAG_ITER_FINISH_IDX, MORE);

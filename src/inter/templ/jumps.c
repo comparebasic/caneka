@@ -9,7 +9,7 @@ status Templ_HandleJump(Templ *templ){
     Fetcher *fch = (Fetcher *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
     i32 idx = templ->content.idx;
-    TemplFunc *fs = Lookup_Get(templ->funcs, idx);
+    TemplFunc *fs = Span_Get(templ->funcs, idx);
     if(templ->type.state & DEBUG){
         void *args[] = {
             I32_Wrapped(m, templ->content.idx),
@@ -38,40 +38,19 @@ status Templ_HandleJump(Templ *templ){
     }else if(fch->type.state & FETCHER_CONDITION){
         FetchTarget *tg = Span_Get(fch->val.targets, 0);
         if(tg->objType.of == FORMAT_TEMPL_INDENT){
-            if((templ->objType.state & UFLAG_ITER_FOCUS) == 0 ||
-               (templ->objType.state & UFLAG_ITER_LEAF)){
-                templ->objType.state |= UFLAG_ITER_SKIP;
-            }else{
-                templ->objType.state |= UFLAG_ITER_ENCLOSE;
-                TemplCrit *loop = Templ_LastJumpAt(templ, templ->content.idx,
-                    UFLAG_ITER_ENCLOSE_IDX);
-                TemplCrit *finish = Templ_LastJumpAt(templ, loop->contentIdx,
-                    UFLAG_ITER_FINISH_IDX);
-                Templ_AddJump(templ,
-                    loop->contentIdx,
-                    templ->content.idx,
-                    UFLAG_ITER_FINISH_IDX,
-                    MORE|UFLAG_ITER_ACTION);
-                Templ_AddJump(templ,
-                    loop->contentIdx,
-                    finish->contentIdx,
-                    UFLAG_ITER_FINISH_IDX,
-                    MORE|UFLAG_ITER_ACTION);
-
-                if(templ->type.state & DEBUG){
-                    Jumps *js = Lookup_Get(templ->jumps, loop->contentIdx);
-                    Abstract *a = (Abstract *)js->crit[UFLAG_ITER_FINISH_IDX];
-                    if(a->type.of == TYPE_ITER){
-                        a = (Abstract*)((Iter *)a)->p;
-                    }
-                    void *args[] = {
-                        a,
-                        loop,
-                        NULL
-                    };
-                    Out("^b.Enclose to Enclose finish @ - loop @^0\n", args);
-                }
+            void *ar[] = {templ, NULL};
+            Out("Templ &\n", ar);
+            if(fs == NULL || fs->func == NULL){
+                void *ar[] = {templ, NULL};
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Error expected TemplFunc for For INDENT &", ar);
+                return ERROR;
             }
+            printf("Func %p %d\n", fs->func, idx);
+            fflush(stdout);
+            fs->func(templ, fs);
+            templ->objType.state &= ~fs->dflag.negative;
+            templ->objType.state |= fs->dflag.positive;
         }else if(tg->objType.of == FORMAT_TEMPL_LEVEL){
             if(templ->objType.state & UFLAG_ITER_LEAF){
                 templ->objType.state |= UFLAG_ITER_SKIP;
@@ -92,7 +71,7 @@ status Templ_HandleJump(Templ *templ){
             templ->objType.state &= ~UFLAG_ITER_SKIP;
         }
     }else if(fch->type.state & FETCHER_FOR){
-        if(fs == NULL){
+        if(fs == NULL || fs->func == NULL){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error expected TemplFunc for For Loop", NULL);
             return ERROR;
@@ -101,19 +80,22 @@ status Templ_HandleJump(Templ *templ){
         templ->objType.state &= ~fs->dflag.negative;
         templ->objType.state |= fs->dflag.positive;
         
+    }
+
+    if((templ->type.state & DEBUG) && fs != NULL){
         void *args[] = {
             Type_StateVec(m, TYPE_ITER_UPPER, fs->dflag.negative),
             Type_StateVec(m, TYPE_ITER_UPPER, fs->dflag.positive),
             Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
             NULL
         };
-        Out("^p.For func Flags\n    negative: @\n    posative: @\n    templ->objType: @\n", args);
-
+        Out("^p.For func Flags\n    negative: @\n    posative: @\n"
+            "    templ->objType: @\n", args);
     }
 
 paths:
     if(templ->objType.state & UPPER_FLAGS){
-        Jumps *js = Lookup_Get(templ->jumps, templ->content.idx);
+        Jumps *js = Span_Get(templ->jumps, templ->content.idx);
         if(js != NULL){
             status fl = 1 << 8;
             status local = NOOP;

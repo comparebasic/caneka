@@ -3,8 +3,8 @@ typedef struct templ {
     Type objType;
     MemCh *m;
     i32 level;
-    Lookup *jumps;
-    Lookup *funcs;
+    Span *jumps;
+    Span *funcs;
     Iter content;
     Iter data;
 } Templ;
