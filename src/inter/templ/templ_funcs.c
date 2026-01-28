@@ -136,5 +136,7 @@ status Templ_FuncInit(MemCh *m){
     }
     r |= Lookup_Add(m, TemplFuncLookup, TYPE_ITER, (void *)Templ_IterNext);
     r |= Lookup_Add(m, TemplFuncLookup, FORMAT_TEMPL_INDENT, (void *)Templ_Indent);
+    void *ar[] = {Util_Wrapped(m, (util)Templ_Indent), NULL};
+    Out("^y. Templ_Indent @^0\n", ar);
     return r;
 }

@@ -10,6 +10,10 @@ status Templ_HandleJump(Templ *templ){
     Abstract *data = Iter_Get(&templ->data);
     i32 idx = templ->content.idx;
     TemplFunc *fs = Span_Get(templ->funcs, idx);
+    if(fs != NULL){
+        void *ar[] = {fs, NULL};
+        Out("^y.FS @^0\n", ar);
+    }
     if(templ->type.state & DEBUG){
         void *args[] = {
             I32_Wrapped(m, templ->content.idx),
@@ -38,16 +42,12 @@ status Templ_HandleJump(Templ *templ){
     }else if(fch->type.state & FETCHER_CONDITION){
         FetchTarget *tg = Span_Get(fch->val.targets, 0);
         if(tg->objType.of == FORMAT_TEMPL_INDENT){
-            void *ar[] = {templ, NULL};
-            Out("Templ &\n", ar);
             if(fs == NULL || fs->func == NULL){
                 void *ar[] = {templ, NULL};
                 Error(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Error expected TemplFunc for For INDENT &", ar);
                 return ERROR;
             }
-            printf("Func %p %d\n", fs->func, idx);
-            fflush(stdout);
             fs->func(templ, fs);
             templ->objType.state &= ~fs->dflag.negative;
             templ->objType.state |= fs->dflag.positive;
@@ -104,22 +104,33 @@ paths:
             status flag = ZERO;
             i32 i = 0;
 
-            if((js->type.state & UFLAG_ITER_INVERT) &&
-                    (templ->objType.state & js->type.state &
-                        ~(UFLAG_ITER_SKIP|UFLAG_ITER_INVERT)) == 0){
-                flag = UFLAG_ITER_SKIP;
-                local |= UFLAG_ITER_SKIP;
-                a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
 
-                if(templ->type.state & DEBUG){
-                    void *args[] = {
-                        I32_Wrapped(m, templ->content.idx),
-                        a, 
-                        NULL
-                    };
-                    Out("^p.Skip \\@$ @^0\n", args);
+            if(js->type.state & UFLAG_ITER_SKIP){
+                a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
+                TemplCrit *crit = Templ_LastJumpAt(templ,
+                    templ->content.idx, UFLAG_ITER_SKIP_IDX);
+                exit(1);
+
+                if((js->type.state & UFLAG_ITER_REQUIRED) &&
+                        (templ->objType.state & js->type.state &
+                            ~(UFLAG_ITER_SKIP|UFLAG_ITER_REQUIRED)) == 0){
+                    flag = UFLAG_ITER_SKIP;
+                    local |= UFLAG_ITER_SKIP;
+
+                    if(templ->type.state & DEBUG){
+                        void *args[] = {
+                            I32_Wrapped(m, templ->content.idx),
+                            a, 
+                            NULL
+                        };
+                        Out("^p.Skip \\@$ @^0\n", args);
+                    }
+                }else{
+                    a = NULL;
                 }
-            }else{
+            }
+
+            if(a == NULL){
                 while(i < 8){
                     flag = fl << i;
                     a = (Abstract *)js->crit[i];
@@ -193,7 +204,7 @@ paths:
                 }
             }
 
-            if((local & NOOP) == 0 && (js->type.state & UFLAG_ITER_INVERT) == 0){
+            if((local & NOOP) == 0 && (js->type.state & UFLAG_ITER_REQUIRED) == 0){
                 templ->objType.state |= (local & ~UFLAG_ITER_SKIP);
                 templ->objType.state &= ~clean;
                 if((templ->type.state & DEBUG) && (clean != ZERO)){

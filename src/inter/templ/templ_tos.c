@@ -30,6 +30,17 @@ static status TemplCrit_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "TCrit<@/^D.$^d/data$>", args);
 }
 
+static status TemplFunc_Print(Buff *bf, void *a, cls type, word flags){
+    TemplFunc *tfunc = (TemplFunc *)a;
+    void *args[5];
+    args[0] = Type_StateVec(bf->m, TYPE_ITER_UPPER, tfunc->type.state);
+    args[1] = Type_StateVec(bf->m, TYPE_ITER_UPPER, tfunc->dflag.positive);
+    args[2] = Type_StateVec(bf->m, TYPE_ITER_UPPER, tfunc->dflag.negative);
+    args[3] = Util_Wrapped(bf->m, (util)tfunc->func);
+    args[4] = NULL;
+    return Fmt(bf, "TFunc<@ +@/-@ func(@)>", args);
+}
+
 static status Jumps_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
     Jumps *js = (Jumps*)a;
@@ -108,6 +119,7 @@ status Templ_Init(MemCh *m){
     r |= Lookup_Add(m, lk, TYPE_TEMPL_CTX, (void *)TemplCtx_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMPS, (void *)Jumps_Print);
     r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMP_CRIT, (void *)TemplCrit_Print);
+    r |= Lookup_Add(m, lk, TYPE_TEMPL_JUMP_FUNC, (void *)TemplFunc_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_VAR, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_TEMPL, (void *)TemplItem_Print);
     r |= Lookup_Add(m, lk, FORMAT_TEMPL_FOR, (void *)TemplItem_Print);

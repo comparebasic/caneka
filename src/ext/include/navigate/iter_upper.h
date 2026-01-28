@@ -1,5 +1,5 @@
 enum iter_higher_flags {
-    UFLAG_ITER_INVERT = 1 << 8,
+    UFLAG_ITER_REQUIRED = 1 << 8,
     UFLAG_ITER_FOCUS = 1 << 9,
     UFLAG_ITER_ACTION = 1 << 10,
     UFLAG_ITER_FINISH = 1 << 11,
@@ -10,7 +10,7 @@ enum iter_higher_flags {
 };
 
 enum iter_higher_flags_idx {
-    UFLAG_ITER_INVERT_IDX = 0,
+    UFLAG_ITER_REQUIRED_IDX = 0,
     UFLAG_ITER_FOCUS_IDX = 1,
     UFLAG_ITER_ACTION_IDX = 2,
     UFLAG_ITER_FINISH_IDX = 3,
