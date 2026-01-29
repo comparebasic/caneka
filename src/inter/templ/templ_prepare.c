@@ -148,6 +148,10 @@ status Templ_AddJump(Templ *templ,
         js = Jumps_Make(m, idx);
         Span_Set(templ->jumps, idx, js);
     }
+
+    printf("idx %d -> destIdx %d flag %d\n", idx, destIdx, flagIdx);
+    fflush(stdout);
+
     if(destIdx != -1){
         TemplCrit *crit = TemplCrit_Make(m, destIdx, flags, ZERO);
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
@@ -243,7 +247,11 @@ status Templ_PrepareCycle(Templ *templ){
                     r |= Templ_AddFunc(templ, idx, func, ZERO);
                     skipFlags = UFLAG_ITER_FOCUS;
                 }else{
-                    TemplCrit *finish = Span_Get(templ->jumps, encloseIdx);
+                    TemplCrit *finish = Templ_LastJumpAt(templ, encloseIdx, UFLAG_ITER_FINISH_IDX);
+
+                    void *ar[] = {finish, NULL};
+                    Out("finish @\n", ar);
+
                     if(finish != NULL){
                         r |= Templ_AddJump(templ,
                             idx, finish->contentIdx, UFLAG_ITER_FINISH_IDX, MORE);

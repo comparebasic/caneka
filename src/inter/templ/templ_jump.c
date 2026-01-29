@@ -186,6 +186,11 @@ paths:
                         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
                         if(it != NULL && (it->type.state & END)){
                             templ->objType.state &= ~UFLAG_ITER_ACTION; 
+                            printf("compareing finish - removing flag\n");
+                            fflush(stdout);
+                        }else{
+                            printf("compareing finish - not yet\n");
+                            fflush(stdout);
                         }
                     }
                 }else{
@@ -204,7 +209,7 @@ paths:
                     Out("^b.dataIdx @ vs level @ crit @^0\n", args);
                 }
 
-                if((crit->dflag.positive & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
+                if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
                     templ->objType.state |= (
                         crit->dflag.positive & UPPER_FLAGS);
                 }else{
