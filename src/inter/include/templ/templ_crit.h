@@ -1,8 +1,8 @@
 typedef struct jump_crit {
     Type type;
-    i16 contentIdx;
-    status flags;
+    DoubleFlag dflag;
+    i32 contentIdx;
     i32 dataIdx;
 } TemplCrit;
 
-TemplCrit *TemplCrit_Make(MemCh *m, i32 idx, status flags);
+TemplCrit *TemplCrit_Make(MemCh *m, i32 idx, status positive, status negative);

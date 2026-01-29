@@ -22,12 +22,25 @@ static status TemplItem_Print(Buff *bf, void *a, cls type, word flags){
 
 static status TemplCrit_Print(Buff *bf, void *a, cls type, word flags){
     TemplCrit *crit = (TemplCrit *)a;
-    void *args[4];
-    args[0] = Type_StateVec(bf->m, TYPE_ITER_UPPER, crit->type.state);
-    args[1] = I16_Wrapped(bf->m, crit->contentIdx);
-    args[2] = I16_Wrapped(bf->m, crit->dataIdx);
-    args[3] = NULL;
-    return Fmt(bf, "TCrit<@/^D.$^d/data$>", args);
+    status r = READY;
+    void *args[6];
+    r |= Fmt(bf, "TCrit<", args);
+    if(crit->type.state){
+        args[0] = Type_StateVec(bf->m, TYPE_ITER_UPPER, crit->type.state);
+        args[1] = NULL;
+        r |= Fmt(bf, "@ ", args);
+    }
+    if(crit->dflag.positive || crit->dflag.negative){
+        args[0] = Type_StateVec(bf->m, TYPE_ITER_UPPER, crit->dflag.positive);
+        args[1] = Type_StateVec(bf->m, TYPE_ITER_UPPER, crit->dflag.negative);
+        args[2] = NULL;
+        r |= Fmt(bf, "+@/-@ ", args);
+    }
+    args[0] = I32_Wrapped(bf->m, crit->contentIdx);
+    args[1] = I32_Wrapped(bf->m, crit->dataIdx);
+    args[2] = NULL;
+    r |= Fmt(bf, "^D.$^d./data$>", args);
+    return r;
 }
 
 static status TemplFunc_Print(Buff *bf, void *a, cls type, word flags){
@@ -66,9 +79,8 @@ static status Jumps_Print(Buff *bf, void *a, cls type, word flags){
             args[2] = NULL;
             Abstract *a = (Abstract *)js->crit[i];
             if(a->type.of == TYPE_TEMPL_JUMP_CRIT){
-                TemplCrit *crit = (TemplCrit *)a;
-                args[1] = I16_Wrapped(bf->m, crit->contentIdx);
-                r |= Fmt(bf, "$/$", args);
+                args[1] = a;
+                r |= Fmt(bf, "$/@", args);
             }else if(a->type.of == TYPE_ITER){
                 Iter *it = (Iter *)a;
                 args[1] = it->p;

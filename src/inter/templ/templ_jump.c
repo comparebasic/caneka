@@ -111,18 +111,18 @@ paths:
                 TemplCrit *crit = Templ_LastJumpAt(templ,
                     templ->content.idx, UFLAG_ITER_SKIP_IDX);
 
-                boolean skip = (crit->type.state != 0) &&
-                    ((crit->type.state & UFLAG_ITER_REQUIRED) &&
-                     (crit->type.state & ~UFLAG_ITER_REQUIRED) &&
-                     (templ->objType.state & crit->type.state) == 
-                        (crit->type.state & ~UFLAG_ITER_REQUIRED)) || 
-                        ((crit->type.state & UFLAG_ITER_REQUIRED) == 0 && 
-                            (templ->objType.state & crit->type.state) != 0);
+                boolean skip = (crit->dflag.positive != 0) &&
+                    ((crit->dflag.positive & UFLAG_ITER_REQUIRED) &&
+                     (crit->dflag.positive & ~UFLAG_ITER_REQUIRED) &&
+                     (templ->objType.state & crit->dflag.positive) == 
+                        (crit->dflag.positive & ~UFLAG_ITER_REQUIRED)) || 
+                        ((crit->dflag.positive & UFLAG_ITER_REQUIRED) == 0 && 
+                            (templ->objType.state & crit->dflag.positive) != 0);
 
                 if(templ->type.state & DEBUG){
                     void *ar[] = {
                         I32_Wrapped(m, templ->content.idx),
-                        Type_StateVec(m, TYPE_ITER_UPPER, crit->type.state),
+                        Type_StateVec(m, TYPE_ITER_UPPER, crit->dflag.positive),
                         Type_StateVec(m, TYPE_ITER_UPPER,  templ->objType.state),
                         Boolean_ToStr(m, skip),
                         NULL
@@ -204,9 +204,9 @@ paths:
                     Out("^b.dataIdx @ vs level @ crit @^0\n", args);
                 }
 
-                if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
+                if((crit->dflag.positive & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
                     templ->objType.state |= (
-                        crit->type.state & UPPER_FLAGS);
+                        crit->dflag.positive & UPPER_FLAGS);
                 }else{
                     templ->objType.state &= ~flag;
                 }

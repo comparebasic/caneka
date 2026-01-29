@@ -149,7 +149,7 @@ status Templ_AddJump(Templ *templ,
         Span_Set(templ->jumps, idx, js);
     }
     if(destIdx != -1){
-        TemplCrit *crit = TemplCrit_Make(m, destIdx, flags);
+        TemplCrit *crit = TemplCrit_Make(m, destIdx, flags, ZERO);
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         if(it != NULL){
             crit->dataIdx = it->idx;
@@ -251,6 +251,7 @@ status Templ_PrepareCycle(Templ *templ){
                 }
             }
 
+            /*
             if(tg->objType.of == FORMAT_TEMPL_LEVEL){
                 skipFlags = (UFLAG_ITER_SKIP|UFLAG_ITER_LEAF);
             }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
@@ -258,6 +259,7 @@ status Templ_PrepareCycle(Templ *templ){
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
                 skipFlags = (UFLAG_ITER_REQUIRED|UFLAG_ITER_LEAF);
             }
+            */
 
             i32 skipIdx = -1;
             if((skipIdx =
