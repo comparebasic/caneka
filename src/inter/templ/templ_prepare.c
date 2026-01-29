@@ -252,17 +252,11 @@ status Templ_PrepareCycle(Templ *templ){
             }
 
             if(tg->objType.of == FORMAT_TEMPL_LEVEL){
-                /*
                 skipFlags = (UFLAG_ITER_SKIP|UFLAG_ITER_LEAF);
-                */
             }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
-                /*
                 skipFlags = (UFLAG_ITER_SKIP|UFLAG_ITER_FOCUS);
-                */
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-                /*
                 skipFlags = (UFLAG_ITER_REQUIRED|UFLAG_ITER_LEAF);
-                */
             }
 
             i32 skipIdx = -1;

@@ -19,6 +19,10 @@ static status ErrorMsg_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, (char *)msg->fmt->bytes, msg->args);
 }
 
+Str *Boolean_ToStr(MemCh *m, boolean t){
+    return t ? S(m, "TRUE") : S(m, "FALSE");
+}
+
 StrVec *Type_StateVec(MemCh *m, cls typeOf, word flags){
     Str **labels = Lookup_Get(ToSFlagLookup, typeOf);
     StrVec *v = StrVec_Make(m);

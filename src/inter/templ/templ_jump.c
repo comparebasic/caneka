@@ -10,9 +10,11 @@ status Templ_HandleJump(Templ *templ){
     Abstract *data = Iter_Get(&templ->data);
     i32 idx = templ->content.idx;
     TemplFunc *fs = Span_Get(templ->funcs, idx);
-    if(fs != NULL){
-        void *ar[] = {fs, NULL};
-        Out("^y.FS @^0\n", ar);
+    if(templ->type.state & DEBUG){
+        if(fs != NULL){
+            void *ar[] = {fs, NULL};
+            Out("^y.FS @^0\n", ar);
+        }
     }
     if(templ->type.state & DEBUG){
         void *args[] = {
@@ -104,12 +106,29 @@ paths:
             status flag = ZERO;
             i32 i = 0;
 
-
             if(js->type.state & UFLAG_ITER_SKIP){
                 a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
                 TemplCrit *crit = Templ_LastJumpAt(templ,
                     templ->content.idx, UFLAG_ITER_SKIP_IDX);
-                exit(1);
+
+                boolean skip = (crit->type.state != 0) &&
+                    ((crit->type.state & UFLAG_ITER_REQUIRED) &&
+                     (crit->type.state & ~UFLAG_ITER_REQUIRED) &&
+                     (templ->objType.state & crit->type.state) == 
+                        (crit->type.state & ~UFLAG_ITER_REQUIRED)) || 
+                        ((crit->type.state & UFLAG_ITER_REQUIRED) == 0 && 
+                            (templ->objType.state & crit->type.state) != 0);
+
+                if(templ->type.state & DEBUG){
+                    void *ar[] = {
+                        I32_Wrapped(m, templ->content.idx),
+                        Type_StateVec(m, TYPE_ITER_UPPER, crit->type.state),
+                        Type_StateVec(m, TYPE_ITER_UPPER,  templ->objType.state),
+                        Boolean_ToStr(m, skip),
+                        NULL
+                    };
+                    Out("^c.Skip \\@$ crit @ objType @ skip? @^0\n", ar);
+                }
 
                 if((js->type.state & UFLAG_ITER_REQUIRED) &&
                         (templ->objType.state & js->type.state &
@@ -152,11 +171,13 @@ paths:
                     crit = Iter_Get(critIt);
                     prev = Span_Get(critIt->p, critIt->idx-1);
 
-                    void *args[] = {
-                        critIt->p,
-                        NULL
-                    };
-                    Out("^b.From stack @^0\n", args);
+                    if(templ->type.state & DEBUG){
+                        void *args[] = {
+                            critIt->p,
+                            NULL
+                        };
+                        Out("^b.From stack @^0\n", args);
+                    }
 
                     if(critIt->p->nvalues > 1){
                         Iter_Remove(critIt);
@@ -173,13 +194,15 @@ paths:
                 idx = crit->contentIdx;
                 local &= ~NOOP;
 
-                void *args[] = {
-                    I32_Wrapped(templ->m, crit->dataIdx),
-                    I32_Wrapped(templ->m, templ->level),
-                    crit,
-                    NULL
-                };
-                Out("^b.dataIdx @ vs level @ crit @^0\n", args);
+                if(templ->type.state & DEBUG){
+                    void *args[] = {
+                        I32_Wrapped(templ->m, crit->dataIdx),
+                        I32_Wrapped(templ->m, templ->level),
+                        crit,
+                        NULL
+                    };
+                    Out("^b.dataIdx @ vs level @ crit @^0\n", args);
+                }
 
                 if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
                     templ->objType.state |= (

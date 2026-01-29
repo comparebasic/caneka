@@ -170,6 +170,7 @@ status TemplNav_Tests(MemCh *m){
     DebugStack_SetRef(bf->v, bf->v->type.of);
     status result = Templ_Prepare(templ);
 
+    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = S(m, navTwo);
