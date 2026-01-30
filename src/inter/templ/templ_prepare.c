@@ -141,7 +141,7 @@ status Templ_AddFunc(Templ *templ, i32 idx, TFunc func, status flags){
 }
 
 status Templ_AddJump(Templ *templ,
-        i32 idx, i32 destIdx, i32 flagIdx, status flags){
+        i32 idx, i32 destIdx, i32 flagIdx, status flags, status negative){
     MemCh *m = templ->m;
     Jumps *js = Span_Get(templ->jumps, idx);
     if(js == NULL){
@@ -149,11 +149,8 @@ status Templ_AddJump(Templ *templ,
         Span_Set(templ->jumps, idx, js);
     }
 
-    printf("idx %d -> destIdx %d flag %d\n", idx, destIdx, flagIdx);
-    fflush(stdout);
-
     if(destIdx != -1){
-        TemplCrit *crit = TemplCrit_Make(m, destIdx, flags, ZERO);
+        TemplCrit *crit = TemplCrit_Make(m, destIdx, flags, negative);
         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
         if(it != NULL){
             crit->dataIdx = it->idx;
@@ -199,26 +196,28 @@ status Templ_PrepareCycle(Templ *templ){
             if((skipIdx = Templ_FindEnd(templ)) != -1){
                 TFunc func = Lookup_Get(TemplFuncLookup, TYPE_ITER);
                 r |= Templ_AddFunc(templ, idx, func, ZERO);
-                r |= Templ_AddJump(templ, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
+                r |= Templ_AddJump(templ,
+                    idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO, ZERO);
 
                 Iter_GetByIdx(&templ->content, skipIdx);
                 i32 finIdx = -1;
                 if((finIdx = Templ_FindPrev(templ, FETCHER_END)) != -1){
                     if(finIdx != idx){ 
                         r |= Templ_AddJump(templ,
-                            idx, finIdx, UFLAG_ITER_FINISH_IDX, MORE);
+                            idx, finIdx, UFLAG_ITER_FINISH_IDX, MORE, ZERO);
                         r |= Templ_AddJump(templ,
-                            finIdx, finIdx+1, UFLAG_ITER_FINISH_IDX, MORE);
+                            finIdx, finIdx+1, UFLAG_ITER_FINISH_IDX, MORE, ZERO);
                         r |= Templ_AddJump(templ,
                             finIdx,
                             skipIdx,
                             UFLAG_ITER_SKIP_IDX,
-                            UFLAG_ITER_REQUIRED);
+                            ZERO,
+                            UFLAG_ITER_FINISH);
                     }
                 }
                 Fetcher *end = Iter_Get(&templ->content);
                 r |= Templ_AddJump(templ,
-                    templ->content.idx, idx, UFLAG_ITER_ACTION_IDX, ZERO);
+                    templ->content.idx, idx, UFLAG_ITER_ACTION_IDX, ZERO, ZERO);
 
                 Iter_GetByIdx(&templ->content, idx);
             }
@@ -226,22 +225,24 @@ status Templ_PrepareCycle(Templ *templ){
             cls typeOfs = (FETCHER_CONDITION|FETCHER_FOR|FETCHER_WITH);
             i32 sibIdx = -1;
             if((sibIdx = Templ_FindNext(templ, typeOfs)) != -1){
-                r |= Templ_AddJump(templ, idx, sibIdx, UFLAG_ITER_SIBLING_IDX, ZERO);
+                r |= Templ_AddJump(templ,
+                    idx, sibIdx, UFLAG_ITER_SIBLING_IDX, ZERO, ZERO);
             }
         }else if(fch->type.state & (FETCHER_WITH|FETCHER_IF)){
             i32 skipIdx = -1;
             if((skipIdx = Templ_FindEnd(templ)) != -1){
-                r |= Templ_AddJump(templ, idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO);
+                r |= Templ_AddJump(templ,
+                    idx, skipIdx, UFLAG_ITER_SKIP_IDX, ZERO, ZERO);
             }
         }else if(fch->type.state & (FETCHER_CONDITION)){
             status skipFlags = ZERO;
-            status skipNegativeFlags = ZERO;
+            status skipNFlags = ZERO;
             FetchTarget *tg = Span_Get(fch->val.targets, 0);
             i32 encloseIdx = -1;
             if((encloseIdx =
                     Templ_FindStart(templ, FETCHER_FOR|FETCHER_WITH)) != -1){
                 r |= Templ_AddJump(templ,
-                    idx, encloseIdx, UFLAG_ITER_ENCLOSE_IDX, ZERO);
+                    idx, encloseIdx, UFLAG_ITER_ENCLOSE_IDX, ZERO, ZERO);
 
                 if(tg->objType.of == FORMAT_TEMPL_INDENT){
                     TFunc func = Lookup_Get(TemplFuncLookup, FORMAT_TEMPL_INDENT);
@@ -249,7 +250,7 @@ status Templ_PrepareCycle(Templ *templ){
                     skipFlags = UFLAG_ITER_FOCUS;
                 }else{
                     r |= Templ_AddJump(templ,
-                        idx, encloseIdx, UFLAG_ITER_FINISH_IDX, MORE);
+                        idx, encloseIdx, UFLAG_ITER_FINISH_IDX, MORE, ZERO);
                 }
             }
 
@@ -257,9 +258,9 @@ status Templ_PrepareCycle(Templ *templ){
                 skipFlags = UFLAG_ITER_LEAF;
             }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
                 skipFlags = UFLAG_ITER_FOCUS;
-                skipNegativeFlags = UFLAG_ITER_LEAF;
+                skipNFlags = UFLAG_ITER_LEAF;
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-                skipNegativeFlags = UFLAG_ITER_LEAF;
+                skipNFlags = UFLAG_ITER_LEAF;
             }
 
             i32 skipIdx = -1;
@@ -267,7 +268,7 @@ status Templ_PrepareCycle(Templ *templ){
                     Templ_FindNext(templ,
                         (FETCHER_CONDITION|FETCHER_END))) != -1){
                 r |= Templ_AddJump(templ,
-                    idx, skipIdx, UFLAG_ITER_SKIP_IDX, skipFlags);
+                    idx, skipIdx, UFLAG_ITER_SKIP_IDX, skipFlags, skipNFlags);
             }
         }else if(fch->type.state & FETCHER_END){
             i32 sibIdx = Templ_FindStart(templ, ZERO);
@@ -276,7 +277,7 @@ status Templ_PrepareCycle(Templ *templ){
                 if(dest != NULL){
                     if(dest->type.state & (FETCHER_CONDITION)){
                         r |= Templ_AddJump(templ,
-                            idx, sibIdx, UFLAG_ITER_ENCLOSE_IDX, ZERO);
+                            idx, sibIdx, UFLAG_ITER_ENCLOSE_IDX, ZERO, ZERO);
                         i32 outIdx = Templ_FindNext(templ, FETCHER_END);
                     }else{
                         fch->type.state |= NOOP;

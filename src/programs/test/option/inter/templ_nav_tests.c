@@ -173,6 +173,7 @@ status TemplNav_Tests(MemCh *m){
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = S(m, navTwo);
+    expected->type.state |= DEBUG;
     Str *output = StrVec_Str(m, bf->v);
     output->type.state |= DEBUG;
     args[0] = output;

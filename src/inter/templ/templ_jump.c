@@ -53,24 +53,6 @@ status Templ_HandleJump(Templ *templ){
             fs->func(templ, fs);
             templ->objType.state &= ~fs->dflag.negative;
             templ->objType.state |= fs->dflag.positive;
-        }else if(tg->objType.of == FORMAT_TEMPL_LEVEL){
-            if(templ->objType.state & UFLAG_ITER_LEAF){
-                templ->objType.state |= UFLAG_ITER_SKIP;
-            }
-        }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
-            if((templ->objType.state & (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS)) !=
-                    UFLAG_ITER_LEAF){
-                templ->objType.state |= UFLAG_ITER_SKIP;
-            }
-        }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-            if((templ->objType.state & (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS)) !=
-                    (UFLAG_ITER_LEAF|UFLAG_ITER_FOCUS)){
-                templ->objType.state |= UFLAG_ITER_SKIP;
-            }
-        }
-
-        if(templ->objType.state & UFLAG_ITER_FINISH){
-            templ->objType.state &= ~UFLAG_ITER_SKIP;
         }
     }else if(fch->type.state & FETCHER_FOR){
         if(fs == NULL || fs->func == NULL){
@@ -81,7 +63,6 @@ status Templ_HandleJump(Templ *templ){
         fs->func(templ, fs);
         templ->objType.state &= ~fs->dflag.negative;
         templ->objType.state |= fs->dflag.positive;
-        
     }
 
     if((templ->type.state & DEBUG) && fs != NULL){
@@ -107,37 +88,37 @@ paths:
             i32 i = 0;
 
             if(js->type.state & UFLAG_ITER_SKIP){
-
-                if((js->type.state & UFLAG_ITER_REQUIRED) &&
-                        (templ->objType.state & js->type.state &
-                            ~(UFLAG_ITER_SKIP|UFLAG_ITER_REQUIRED)) == 0){
-                    flag = UFLAG_ITER_SKIP;
-                    local |= UFLAG_ITER_SKIP;
-
-                    if(templ->type.state & DEBUG){
-                        void *args[] = {
-                            I32_Wrapped(m, templ->content.idx),
-                            a, 
-                            NULL
-                        };
-                        Out("^p.Skip \\@$ @^0\n", args);
-                    }
-                    a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
-                }
-
-
-
                 TemplCrit *crit = Templ_LastJumpAt(templ,
                     templ->content.idx, UFLAG_ITER_SKIP_IDX);
 
-                if((crit->dflag.positive & templ->objType.state) ==
-                        crit->dflag.positive){
-                    printf("new skip TRUE\n");
-                    fflush(stdout);
-                }else if((crit->dflag.negative & templ->objType.state) !=
-                        crit->dflag.negative){
-                    printf("new skip FALSE\n");
-                    fflush(stdout);
+                if(crit->dflag.positive != ZERO && 
+                        (crit->dflag.positive & templ->objType.state) ==
+                            crit->dflag.positive){
+
+                    void *ar[] = {
+                        I32_Wrapped(m, templ->content.idx),
+                        Type_StateVec(m, TYPE_ITER_UPPER, crit->dflag.positive),
+                        NULL
+                    };
+                    Out("new skip TRUE \\@$ dflag.positive@^0\n", ar);
+
+                    flag = UFLAG_ITER_SKIP;
+                    local |= UFLAG_ITER_SKIP;
+                    a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
+                }else if(crit->dflag.negative != ZERO &&
+                        (crit->dflag.negative & templ->objType.state) !=
+                            crit->dflag.negative){
+
+                    void *ar[] = {
+                        I32_Wrapped(m, templ->content.idx),
+                        Type_StateVec(m, TYPE_ITER_UPPER, crit->dflag.negative),
+                        NULL
+                    };
+                    Out("new skip TRUE \\@$ dflag.negative@^0\n", ar);
+
+                    flag = UFLAG_ITER_SKIP;
+                    local |= UFLAG_ITER_SKIP;
+                    a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
                 }
             }
 

@@ -102,12 +102,14 @@ void Templ_Indent(Templ *templ, TemplFunc *tfunc){
             loop->contentIdx,
             templ->content.idx,
             UFLAG_ITER_FINISH_IDX,
-            MORE|UFLAG_ITER_ACTION);
+            MORE|UFLAG_ITER_ACTION,
+            ZERO);
         Templ_AddJump(templ,
             loop->contentIdx,
             finish->contentIdx,
             UFLAG_ITER_FINISH_IDX,
-            MORE|UFLAG_ITER_ACTION);
+            MORE|UFLAG_ITER_ACTION,
+            ZERO);
 
         if(templ->type.state & DEBUG){
             Jumps *js = Span_Get(templ->jumps, loop->contentIdx);

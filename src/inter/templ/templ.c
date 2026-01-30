@@ -15,7 +15,9 @@ status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
     DebugStack_SetRef(item, item->type.of);
 
     Abstract *prev = NULL;
-    while(prev != item && item->type.of == TYPE_FETCHER){
+    while(prev != item && (
+            item->type.of == TYPE_FETCHER &&
+            (item->type.state & (FETCHER_FOR|FETCHER_END|FETCHER_CONDITION)))){
         if(Templ_HandleJump(templ) & PROCESSING){
             prev = item;
             item = Iter_Get(&templ->content);
@@ -118,7 +120,7 @@ status Templ_Reset(Templ *templ){
         Fetcher *fch = NULL;
         Abstract *a = Iter_Get(&templ->content);
         if(a->type.of == TYPE_FETCHER){
-            fch = (Fetcher *)fch;
+            fch = (Fetcher *)a;
         }
         if(fch != NULL){
             fch->type.state &= ~PROCESSING;
