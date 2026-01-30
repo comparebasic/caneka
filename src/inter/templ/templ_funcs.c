@@ -55,9 +55,17 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
             tfunc->dflag.positive |= UFLAG_ITER_SKIP;
         }
     }else if(templ->objType.state & MORE){
-        templ->type.state &= ~MORE;
+        templ->objType.state &= ~MORE;
         printf("Clearing MORE\n");
         fflush(stdout);
+        if(it->itin != NULL){
+            tfunc->dflag.negative |= Jump_NextSetFl;
+            tfunc->dflag.positive |= (it->itin->objType.state & Jump_NextSetFl);
+        }else{
+            tfunc->dflag.negative |= Jump_NextSetFl;
+            tfunc->dflag.positive |= UFLAG_ITER_LEAF;
+        }
+        tfunc->dflag.positive |= UFLAG_ITER_ACTION;
     }else if(fch->api->next(it) & END){
 
         void *ar[] = {
