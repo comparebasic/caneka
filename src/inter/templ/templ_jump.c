@@ -172,11 +172,17 @@ paths:
                 }
 
                 if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
+
+                    void *ar[] = {Type_StateVec(m, TYPE_ITER_UPPER, flag), NULL};
+                    Out("^b.Not Consuming Flag @^0\n", ar);
+
                     templ->objType.state |= (
                         crit->dflag.positive & UPPER_FLAGS);
                 }else{
+
                     void *ar[] = {Type_StateVec(m, TYPE_ITER_UPPER, flag), NULL};
                     Out("^b.Consuming Flag @^0\n", ar);
+
                     templ->objType.state &= ~flag;
                 }
 

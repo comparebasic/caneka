@@ -24,7 +24,7 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
         it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
     }else{
         it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
-        if((it->type.state & END) == 0){
+        if((templ->objType.state & MORE) == 0 && (it->type.state & END) == 0){
             Iter_Remove(&templ->data);
             Iter_Prev(&templ->data);
         }
@@ -46,11 +46,26 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
         i32 level = Templ_JumpLevel(templ,
                 templ->content.idx, UFLAG_ITER_FINISH_IDX);
         if(level > 0){
+            printf("ALMOST END %d\n", level);
+            fflush(stdout);
             tfunc->dflag.positive |= UFLAG_ITER_FINISH;
         }else{
+            printf("END %d\n", level);
+            fflush(stdout);
             tfunc->dflag.positive |= UFLAG_ITER_SKIP;
         }
+    }else if(templ->objType.state & MORE){
+        templ->type.state &= ~MORE;
+        printf("Clearing MORE\n");
+        fflush(stdout);
     }else if(fch->api->next(it) & END){
+
+        void *ar[] = {
+            Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
+            NULL
+        };
+        Out("^Ey.Arrived at End @ ^0\n", ar);
+
         tfunc->dflag.positive |= UFLAG_ITER_FINISH;
         tfunc->dflag.negative |= UFLAG_ITER_ACTION;
         templ->level = 0;
@@ -93,7 +108,7 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
         }
 
         if(it->idx < indentIdx){
-            tfunc->dflag.positive |= UFLAG_ITER_FINISH;
+            tfunc->dflag.positive |= (MORE|UFLAG_ITER_FINISH);
         }
     }
 }
