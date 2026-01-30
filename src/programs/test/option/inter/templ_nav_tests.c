@@ -175,11 +175,10 @@ status TemplNav_Tests(MemCh *m){
     Str *expected = S(m, navTwo);
     expected->type.state |= DEBUG;
     Str *output = StrVec_Str(m, bf->v);
-    output->type.state |= DEBUG;
     args[0] = output;
     args[1] = NULL;
     r |= Test(Equals(bf->v, expected), 
-        "Nav template for two items is as expected, have:&", args);
+        "Nav template for two items is as expected, have:$", args);
 
     DebugStack_Pop();
     return r;

@@ -11,12 +11,6 @@ status Templ_HandleJump(Templ *templ){
     i32 idx = templ->content.idx;
     TemplFunc *fs = Span_Get(templ->funcs, idx);
     if(templ->type.state & DEBUG){
-        if(fs != NULL){
-            void *ar[] = {fs, NULL};
-            Out("^y.FS @^0\n", ar);
-        }
-    }
-    if(templ->type.state & DEBUG){
         void *args[] = {
             I32_Wrapped(m, templ->content.idx),
             Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
@@ -29,15 +23,12 @@ status Templ_HandleJump(Templ *templ){
         */
         Out("^y.HandleJump \\@$ @^0\n", args);
     }
-
-    if(templ->objType.state & (
-            UFLAG_ITER_ENCLOSE|UFLAG_ITER_FINISH)){
-        if(templ->objType.state & NOOP){
-            templ->objType.state &= ~NOOP;
-        }else{
-            goto paths;
+    if(templ->type.state & DEBUG){
+        if(fs != NULL){
+            void *ar[] = {fs, NULL};
+            Out("^y.FS @^0\n", ar);
         }
-    } 
+    }
 
     if(fch->type.state & FETCHER_END){
 
@@ -125,12 +116,10 @@ paths:
             if(a == NULL){
                 while(i < 8){
                     flag = fl << i;
-                    a = (Abstract *)js->crit[i];
                     if((flag & js->type.state & templ->objType.state)){
                         Str **labels = Lookup_Get(ToSFlagLookup, TYPE_ITER_UPPER);
+                        a = (Abstract *)js->crit[i];
                         break;
-                    }else{
-                        a = NULL;
                     }
                     i++;
                 }
@@ -186,6 +175,8 @@ paths:
                     templ->objType.state |= (
                         crit->dflag.positive & UPPER_FLAGS);
                 }else{
+                    void *ar[] = {Type_StateVec(m, TYPE_ITER_UPPER, flag), NULL};
+                    Out("^b.Consuming Flag @^0\n", ar);
                     templ->objType.state &= ~flag;
                 }
 

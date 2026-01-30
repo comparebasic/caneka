@@ -7,8 +7,12 @@ static status Jump_NextSetFl =
 Lookup *TemplFuncLookup = NULL;
 
 void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
+    printf("Templ_IterNext\n");
+    fflush(stdout);
+
     MemCh *m = templ->m;
     Fetcher *fch = (Fetcher *)Iter_Get(&templ->content);
+    TemplFunc *fs = Span_Get(templ->funcs, templ->content.idx);
     Abstract *data = Iter_Get(&templ->data);
     Iter *it = NULL;
     tfunc->dflag.positive = ZERO;
@@ -38,7 +42,15 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
     }
 
     i32 indentIdx = it->idx;
-    if((it->type.state & END) || (fch->api->next(it) & END)){
+    if((it->type.state & END)){
+        i32 level = Templ_JumpLevel(templ,
+                templ->content.idx, UFLAG_ITER_FINISH_IDX);
+        if(level > 0){
+            tfunc->dflag.positive |= UFLAG_ITER_FINISH;
+        }else{
+            tfunc->dflag.positive |= UFLAG_ITER_SKIP;
+        }
+    }else if(fch->api->next(it) & END){
         tfunc->dflag.positive |= UFLAG_ITER_FINISH;
         tfunc->dflag.negative |= UFLAG_ITER_ACTION;
         templ->level = 0;
@@ -58,7 +70,7 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
                     a,
                     NULL
                 };
-                Out("^b.Item itin @ @^0\n", ar);
+                Out("^Dc.Item^dc. itin @ @^0\n", ar);
             }
         }else{
             if(templ->type.state & DEBUG){
@@ -89,10 +101,7 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
 void Templ_Indent(Templ *templ, TemplFunc *tfunc){
     tfunc->dflag.positive = ZERO;
     tfunc->dflag.negative = ZERO;
-    if((templ->objType.state & UFLAG_ITER_FOCUS) == 0 ||
-       (templ->objType.state & UFLAG_ITER_LEAF)){
-        tfunc->dflag.positive |= UFLAG_ITER_SKIP;
-    }else{
+    if((templ->objType.state & UFLAG_ITER_FINISH) == 0){
         tfunc->dflag.positive |= UFLAG_ITER_ENCLOSE;
         TemplCrit *loop = Templ_LastJumpAt(templ, templ->content.idx,
             UFLAG_ITER_ENCLOSE_IDX);
