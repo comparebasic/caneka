@@ -33,7 +33,11 @@ status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
 
         if(templ->type.state & DEBUG){
             void *ar[] = {item, NULL};
-            Out("^g.OutVec: @^0\n", ar);
+            if(templ->content.idx == 22){
+                Out("^gE.OutVec: @^0\n", ar);
+            }else{
+                Out("^g.OutVec: @^0\n", ar);
+            }
         }
 
         templ->m->level++;
