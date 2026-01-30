@@ -170,18 +170,15 @@ status TemplNav_Tests(MemCh *m){
     DebugStack_SetRef(bf->v, bf->v->type.of);
     status result = Templ_Prepare(templ);
 
-    templ->type.state |= DEBUG;
     i64 total = Templ_ToS(templ, bf, data, NULL);
 
     Str *expected = S(m, navTwo);
     Str *output = StrVec_Str(m, bf->v);
-    /*
     output->type.state |= DEBUG;
-    */
     args[0] = output;
     args[1] = NULL;
     r |= Test(Equals(bf->v, expected), 
-        "Nav template for two items is as expected, have:$", args);
+        "Nav template for two items is as expected, have:&", args);
 
     DebugStack_Pop();
     return r;

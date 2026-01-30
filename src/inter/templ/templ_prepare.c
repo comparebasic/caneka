@@ -235,6 +235,7 @@ status Templ_PrepareCycle(Templ *templ){
             }
         }else if(fch->type.state & (FETCHER_CONDITION)){
             status skipFlags = ZERO;
+            status skipNegativeFlags = ZERO;
             FetchTarget *tg = Span_Get(fch->val.targets, 0);
             i32 encloseIdx = -1;
             if((encloseIdx =
@@ -247,27 +248,19 @@ status Templ_PrepareCycle(Templ *templ){
                     r |= Templ_AddFunc(templ, idx, func, ZERO);
                     skipFlags = UFLAG_ITER_FOCUS;
                 }else{
-                    TemplCrit *finish = Templ_LastJumpAt(templ, encloseIdx, UFLAG_ITER_FINISH_IDX);
-
-                    void *ar[] = {finish, NULL};
-                    Out("finish @\n", ar);
-
-                    if(finish != NULL){
-                        r |= Templ_AddJump(templ,
-                            idx, finish->contentIdx, UFLAG_ITER_FINISH_IDX, MORE);
-                    }
+                    r |= Templ_AddJump(templ,
+                        idx, encloseIdx, UFLAG_ITER_FINISH_IDX, MORE);
                 }
             }
 
-            /*
             if(tg->objType.of == FORMAT_TEMPL_LEVEL){
-                skipFlags = (UFLAG_ITER_SKIP|UFLAG_ITER_LEAF);
+                skipFlags = UFLAG_ITER_LEAF;
             }else if(tg->objType.of == FORMAT_TEMPL_CURRENT){
-                skipFlags = (UFLAG_ITER_SKIP|UFLAG_ITER_FOCUS);
+                skipFlags = UFLAG_ITER_FOCUS;
+                skipNegativeFlags = UFLAG_ITER_LEAF;
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-                skipFlags = (UFLAG_ITER_REQUIRED|UFLAG_ITER_LEAF);
+                skipNegativeFlags = UFLAG_ITER_LEAF;
             }
-            */
 
             i32 skipIdx = -1;
             if((skipIdx =

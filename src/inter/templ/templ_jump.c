@@ -107,28 +107,6 @@ paths:
             i32 i = 0;
 
             if(js->type.state & UFLAG_ITER_SKIP){
-                a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
-                TemplCrit *crit = Templ_LastJumpAt(templ,
-                    templ->content.idx, UFLAG_ITER_SKIP_IDX);
-
-                boolean skip = (crit->dflag.positive != 0) &&
-                    ((crit->dflag.positive & UFLAG_ITER_REQUIRED) &&
-                     (crit->dflag.positive & ~UFLAG_ITER_REQUIRED) &&
-                     (templ->objType.state & crit->dflag.positive) == 
-                        (crit->dflag.positive & ~UFLAG_ITER_REQUIRED)) || 
-                        ((crit->dflag.positive & UFLAG_ITER_REQUIRED) == 0 && 
-                            (templ->objType.state & crit->dflag.positive) != 0);
-
-                if(templ->type.state & DEBUG){
-                    void *ar[] = {
-                        I32_Wrapped(m, templ->content.idx),
-                        Type_StateVec(m, TYPE_ITER_UPPER, crit->dflag.positive),
-                        Type_StateVec(m, TYPE_ITER_UPPER,  templ->objType.state),
-                        Boolean_ToStr(m, skip),
-                        NULL
-                    };
-                    Out("^c.Skip \\@$ crit @ objType @ skip? @^0\n", ar);
-                }
 
                 if((js->type.state & UFLAG_ITER_REQUIRED) &&
                         (templ->objType.state & js->type.state &
@@ -144,8 +122,22 @@ paths:
                         };
                         Out("^p.Skip \\@$ @^0\n", args);
                     }
-                }else{
-                    a = NULL;
+                    a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
+                }
+
+
+
+                TemplCrit *crit = Templ_LastJumpAt(templ,
+                    templ->content.idx, UFLAG_ITER_SKIP_IDX);
+
+                if((crit->dflag.positive & templ->objType.state) ==
+                        crit->dflag.positive){
+                    printf("new skip TRUE\n");
+                    fflush(stdout);
+                }else if((crit->dflag.negative & templ->objType.state) !=
+                        crit->dflag.negative){
+                    printf("new skip FALSE\n");
+                    fflush(stdout);
                 }
             }
 
