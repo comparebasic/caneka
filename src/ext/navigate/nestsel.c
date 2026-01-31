@@ -7,11 +7,15 @@ status NestSel_Init(Iter *it, Inst *inst, Span *coords){
         Iter_Init(it, Span_Make(inst->m));
     }
 
-    if(it->itin == NULL){
-        it->itin = Itin_Make(inst->m, inst->type.of);
-    }
+    it->itin = Itin_Make(inst->m, inst->type.of);
     
     Table *children = Span_Get(inst, INST_PROPIDX_CHILDREN);
+
+    if(coords == NULL){
+        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Coords is NULL", NULL);
+        return ERROR;
+    }
 
     Iter _it;
     Iter_Init(&_it, coords);

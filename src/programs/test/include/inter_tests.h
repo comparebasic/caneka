@@ -4,7 +4,6 @@ status WwwRouteFmt_Tests(MemCh *m);
 status WwwRouteMime_Tests(MemCh *gm);
 status WwwRouteRbs_Tests(MemCh *m);
 status WwwPath_Tests(MemCh *gm);
-status WwwNav_Tests(MemCh *m);
 status Http_Tests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
 status Inet_Tests(MemCh *gm);
@@ -107,16 +106,10 @@ static TestSet InterTests[] = {
         FEATURE_COMPLETE|SKIP_TEST,
     },
     {
-        "Www Nav Tests",
-        WwwNav_Tests,
-        "Example navigation generation tests.",
-        FEATURE_COMPLETE,
-    },
-    {
         "Doc Tests",
         Doc_Tests,
         "Documentation generator tests.",
-        FEATURE_COMPLETE|SKIP_TEST,
+        FEATURE_COMPLETE,
     },
     {
         NULL,

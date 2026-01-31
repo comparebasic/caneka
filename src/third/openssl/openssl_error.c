@@ -12,4 +12,5 @@ status OpenSsl_Error(Buff *bf){
         };
         Fmt(bf, "  OpenSslError: ^rD.$^0", args);
     }
+    return ZERO;
 }

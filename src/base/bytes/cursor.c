@@ -378,6 +378,10 @@ status Cursor_Add(Cursor *curs, Str *s){
     return r;
 }
 
+status Cursor_Reset(Cursor *curs){
+    return Cursor_Setup(curs, curs->v);
+}
+
 status Cursor_Setup(Cursor *curs, StrVec *v){
     curs->type.of = TYPE_CURSOR;
     curs->type.state &= DEBUG;

@@ -30,3 +30,4 @@ status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max);
 status Cursor_FillStr(Cursor *curs, Str *s);
 status Cursor_RFillStr(Cursor *curs, Str *s);
 i64 Cursor_Pos(Cursor *curs);
+status Cursor_Reset(Cursor *curs);

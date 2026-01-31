@@ -156,7 +156,6 @@ status TemplNav_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    TranspFile *tp = NULL;
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/doc/nav.templ"));
     StrVec *content = File_ToVec(m, path);
@@ -209,7 +208,6 @@ status TemplNavNested_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     void *args[5];
     status r = READY;
-    TranspFile *tp = NULL;
 
     Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/doc/nav.templ"));
     StrVec *content = File_ToVec(m, path);

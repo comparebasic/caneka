@@ -135,11 +135,6 @@ paths:
                         Iter *it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);
                         if(it != NULL && (it->type.state & END)){
                             templ->objType.state &= ~UFLAG_ITER_ACTION; 
-                            printf("compareing finish - removing flag\n");
-                            fflush(stdout);
-                        }else{
-                            printf("compareing finish - not yet\n");
-                            fflush(stdout);
                         }
                     }
                 }else{

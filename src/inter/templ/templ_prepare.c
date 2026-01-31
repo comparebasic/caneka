@@ -130,6 +130,7 @@ i32 Templ_JumpLevel(Templ *templ, i32 idx, i32 flagIdx){
             return 0;
         }
     }
+    return 0;
 }
 
 TemplCrit *Templ_LastJumpAt(Templ *templ, i32 idx, i32 flagIdx){
