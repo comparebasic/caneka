@@ -276,7 +276,7 @@ status Templ_PrepareCycle(Templ *templ){
                 skipFlags = UFLAG_ITER_FOCUS;
                 skipNFlags = UFLAG_ITER_LEAF;
             }else if(tg->objType.of == FORMAT_TEMPL_ACTIVE){
-                skipNFlags = UFLAG_ITER_LEAF;
+                skipNFlags = UFLAG_ITER_FOCUS|UFLAG_ITER_LEAF;
             }
 
             i32 skipIdx = Templ_FindNext(templ, (FETCHER_CONDITION|FETCHER_END));

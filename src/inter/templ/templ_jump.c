@@ -96,9 +96,11 @@ paths:
                     flag = UFLAG_ITER_SKIP;
                     local |= UFLAG_ITER_SKIP;
                     a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
-                }else if(crit->dflag.negative != ZERO &&
+                }
+
+                if(a == NULL && (crit->dflag.negative != ZERO &&
                         (crit->dflag.negative & templ->objType.state) !=
-                            crit->dflag.negative){
+                            crit->dflag.negative)){
 
                     void *ar[] = {
                         I32_Wrapped(m, templ->content.idx),

@@ -12,6 +12,27 @@ char *navTwo = ""
 "</nav>\n"
 ;
 
+char *nestedNav = ""
+    "<nav>\n"
+    "<ul>\n"
+    "    <li><a href=\"/docs\">Docs</a><ul>\n"
+    "    <li><a href=\"/docs/base\">Base</a><ul>\n"
+    "    <li><a href=\"/docs/base/bytes\">bytes</a><ul>\n"
+    "    <li><a href=\"/docs/base/bytes/str\">Str</a></li>\n"
+    "    <li><span class=\"active\">Fmt</span></li>\n"
+    "    <li><a href=\"/docs/base/bytes/tos\">ToS</a></li>\n"
+    "</ul>\n"
+    "</li>\n"
+    "    <li><a href=\"/docs/base/mem\">mem</a></li>\n"
+    "</ul>\n"
+    "</li>\n"
+    "</ul>\n"
+    "</li>\n"
+    "</ul>\n"
+    "</nav>\n"
+    ""
+    ;
+
 static WwwNav *navMakeTwo(MemCh *m, Table *coordTbl){
 
     WwwNav *node = Inst_Make(m, TYPE_WWW_NAV);
@@ -227,13 +248,16 @@ status TemplNavNested_Tests(MemCh *m){
 
     status re = Templ_ToS(templ, bf, data, NULL);
 
-    args[0] = Type_StateVec(m, TYPE_ITER_UPPER, re);
-    args[1] = bf->v;
-    args[2] = s;
-    args[3] = NULL;
-    Out("^p.@ bf->v @\nFocus: @^0\n", args);
+    Str *expected = S(m, nestedNav); 
+    Str *out = StrVec_Str(m, bf->v);
+    out->type.state |= DEBUG;
+    expected->type.state |= DEBUG;
 
-    r |= ERROR;
+    args[0] = s; 
+    args[1] = expected;
+    args[2] = bf->v;
+    args[3] = NULL;
+    r |= Test(Equals(expected, bf->v), "Nested Nav for focus @ is expected, have $", args);
 
     DebugStack_Pop();
     return r;
