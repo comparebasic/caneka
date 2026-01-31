@@ -4,8 +4,8 @@ dist
 *.core
 *.o
 bootstrap
-examples/session/*
-examples/web-server/pages/inc/*.etag
-examples/web-server/pages/static/*.etag
-examples/web-server/pages/forms/*.rbs
-examples/crypto/*
+fixtures/session/*
+fixtures/web-server/pages/inc/*.etag
+fixtures/web-server/pages/static/*.etag
+fixtures/web-server/pages/forms/*.rbs
+fixtures/crypto/*

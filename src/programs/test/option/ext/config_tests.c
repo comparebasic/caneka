@@ -7,7 +7,7 @@ status Config_Tests(MemCh *m){
     void *args[5];
     status r = READY;
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/object.config"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./fixtures/object.config"));
     StrVec *content = File_ToVec(m, path);
 
     Cursor *curs = Cursor_Make(m, content);

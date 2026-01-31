@@ -121,7 +121,7 @@ status BuffIo_Tests(MemCh *m){
     status r = READY;
     void *args[5];
 
-    StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, Str_CstrRef(m, "examples/test/")));
+    StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, Str_CstrRef(m, "fixtures/test/")));
     Dir_CheckCreate(m, StrVec_Str(m, path));
 
     StrVec *pathOne = StrVec_Copy(m, path);

@@ -30,7 +30,7 @@ status FmtHtml_Tests(MemCh *m){
     status r = READY;
     Str *s = NULL; 
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.fmt"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./fixtures/example.fmt"));
     StrVec *content = File_ToVec(m, path);
 
     Cursor *curs = Cursor_Make(m, content); 

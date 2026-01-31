@@ -7,7 +7,7 @@ status Login_Tests(MemCh *m){
     status r = READY;
     void *args[2];
 
-    StrVec *absPath = IoAbsPath(m, "examples/session/open/");
+    StrVec *absPath = IoAbsPath(m, "fixtures/session/open/");
     Str *path = StrVec_Str(m, absPath);
     SsidCtx *ctx = SsidCtx_Make(m, path);
     Dir_CheckCreate(m, path);
@@ -18,7 +18,7 @@ status Login_Tests(MemCh *m){
     StrVec *ssid = Ssid_From(ctx, ua, &now);
     Ssid_Open(ctx, ssid, ua);
 
-    absPath = IoAbsPath(m, "examples/session/logins/");
+    absPath = IoAbsPath(m, "fixtures/session/logins/");
     path = StrVec_Str(m, absPath);
     Dir_CheckCreate(m, path);
 

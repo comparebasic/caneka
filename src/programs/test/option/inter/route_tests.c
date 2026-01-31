@@ -205,12 +205,12 @@ static Table *getGenericData(MemCh *m, Route *rt){
         K(m, "Example Title"));
 
     Str *path = IoUtil_GetAbsPath(m,
-        Str_CstrRef(m, "./examples/test/pages/public/stats.config"));
+        Str_CstrRef(m, "./fixtures/test/pages/public/stats.config"));
     Inst *config = Config_FromPath(m, path);
     Table_Set(data, Str_CstrRef(m, "config"), config);
 
     StrVec *navPath = IoUtil_GetAbsVec(m,
-        K(m, "./examples/test/pages/nav.config"));
+        K(m, "./fixtures/test/pages/nav.config"));
 
     /*
     Span *nav = Nav_TableFromPath(m, rt, navPath);
@@ -225,7 +225,7 @@ status WwwRoute_Tests(MemCh *m){
     status r = READY;
     /*
 
-    StrVec *path = IoPath(m, "examples/test/pages/public");
+    StrVec *path = IoPath(m, "fixtures/test/pages/public");
     Route *rt = Route_From(m, path);
 
     path = IoPath(m, "/tests");
@@ -273,12 +273,12 @@ status WwwRouteTempl_Tests(MemCh *m){
 
     DebugStack_SetRef("header.templ", TYPE_CSTR);
 
-    StrVec *path = IoPath(m, "examples/test/pages/public");
+    StrVec *path = IoPath(m, "fixtures/test/pages/public");
     Route *rt = Route_From(m, path);
 
     Route *inc = Route_Make(m);
     StrVec *incPath = IoUtil_GetAbsVec(m,
-        Str_CstrRef(m, "./examples/test/pages/inc"));
+        Str_CstrRef(m, "./fixtures/test/pages/inc"));
     StrVec *incAbs = IoUtil_AbsVec(m, incPath);
     Route_Collect(inc, incAbs);
 
@@ -291,7 +291,7 @@ status WwwRouteTempl_Tests(MemCh *m){
     Table_Set(data, Str_CstrRef(m, "title"), title);
 
     path = StrVec_From(m, Str_CstrRef(m,
-        "./examples/test/pages/inc/header.templ"));
+        "./fixtures/test/pages/inc/header.templ"));
     StrVec *abs = IoUtil_AbsVec(m, path);
 
     StrVec *v = File_ToVec(m, StrVec_Str(m, abs));
@@ -425,12 +425,12 @@ status WwwRouteFmt_Tests(MemCh *m){
     /*
     DebugStack_SetRef("fmt value", TYPE_CSTR);
 
-    StrVec *path = IoPath(m, "examples/test/pages/public");
+    StrVec *path = IoPath(m, "fixtures/test/pages/public");
     Route *rt = Route_From(m, path);
 
     Route *inc = Route_Make(m);
     StrVec *incPath = IoUtil_GetAbsVec(m,
-        Str_CstrRef(m, "./examples/test/pages/inc"));
+        Str_CstrRef(m, "./fixtures/test/pages/inc"));
     StrVec *incAbs = IoUtil_AbsVec(m, incPath);
     Route_Collect(inc, incAbs);
 
@@ -484,7 +484,7 @@ status WwwPath_Tests(MemCh *m){
     /*
 
     Route *pages = Route_Make(m);
-    r |= Route_Collect(pages, IoAbsPath(m, "examples/test/pages/public"));
+    r |= Route_Collect(pages, IoAbsPath(m, "fixtures/test/pages/public"));
 
     StrVec *name = IoPath(m, "/stats");
 
@@ -492,36 +492,36 @@ status WwwPath_Tests(MemCh *m){
     Single *funcW = Ptr_Wrapped(m, fakeStep, TYPE_STEP_FUNC);
     Span_Set(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
 
-    StrVec *navPath = IoAbsPath(m,"examples/test/pages/nav.config");
+    StrVec *navPath = IoAbsPath(m,"fixtures/test/pages/nav.config");
     Span *nav = Nav_TableFromPath(m, pages, navPath);
 
     Route *inc = Route_Make(m);
-    r |= Route_Collect(inc, IoAbsPath(m, "examples/test/pages/inc"));
+    r |= Route_Collect(inc, IoAbsPath(m, "fixtures/test/pages/inc"));
 
-    Route *stat = Route_From(m, IoAbsPath(m, "examples/test/pages/static"));
+    Route *stat = Route_From(m, IoAbsPath(m, "fixtures/test/pages/static"));
     Inst_ByPath(pages, IoPath(m, "/static/"), stat, SPAN_OP_SET, NULL);
 
-    Route *sys = Route_From(m, IoAbsPath(m, "examples/test/pages/system"));
+    Route *sys = Route_From(m, IoAbsPath(m, "fixtures/test/pages/system"));
     Inst_ByPath(pages, IoPath(m, "/system/"), sys, SPAN_OP_SET, NULL);
 
     Route *route = Route_GetHandler(pages,
         IoPath(m, "/static/logo-transparent-white_256.png")); 
     args[0] = IoAbsPath(m,
-        "examples/test/pages/static/logo-transparent-white_256.png");
+        "fixtures/test/pages/static/logo-transparent-white_256.png");
     args[1] = Seel_Get(route, S(m, "file"));
     args[2] = NULL;
     r |= Test(route != NULL && Equals(args[1], args[0]), 
         "Route has expected file expected @, found @", args);
 
     route = Route_GetHandler(pages, IoPath(m, "/")); 
-    args[0] = IoAbsPath(m, "examples/test/pages/public/index.fmt");
+    args[0] = IoAbsPath(m, "fixtures/test/pages/public/index.fmt");
     args[1] = Seel_Get(route, S(m, "file"));
     args[2] = NULL;
     r |= Test(route != NULL && Equals(args[1], args[0]), 
         "Route has expected file expected @, found @", args);
 
     route = Route_GetHandler(pages, IoPath(m, "/system/not-found")); 
-    args[0] = IoAbsPath(m, "examples/test/pages/system/not-found.templ");
+    args[0] = IoAbsPath(m, "fixtures/test/pages/system/not-found.templ");
     args[1] = Seel_Get(route, S(m, "file"));
     args[2] = NULL;
     r |= Test(route != NULL && Equals(args[1], args[0]), 
@@ -540,7 +540,7 @@ status WwwRouteMime_Tests(MemCh *m){
 
     Route *rt = Route_Make(m);
 
-    StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./examples/test/pages/static"));
+    StrVec *path = IoUtil_GetAbsVec(m, Str_CstrRef(m, "./fixtures/test/pages/static"));
     Route_Collect(rt, path);
 
     StrVec *key = StrVec_From(m, Str_FromCstr(m, "/style.css", STRING_COPY));
@@ -558,7 +558,7 @@ status WwwRouteMime_Tests(MemCh *m){
     Buff *dest = Buff_Make(m, ZERO);
     Buff_Pipe(dest, bf);
 
-    Str *pathS = IoUtil_GetAbsPath(m, K(m, "./examples/test/pages/static/style.css"));
+    Str *pathS = IoUtil_GetAbsPath(m, K(m, "./fixtures/test/pages/static/style.css"));
     StrVec *expected = File_ToVec(m, pathS);
 
     r |= Test(Equals(dest->v, expected),
@@ -602,7 +602,7 @@ status WwwRouteRbs_Tests(MemCh *m){
     NodeObj *config = Inst_Make(m, TYPE_NODEOBJ);
     HttpCtx_ParseBody(ctx, config, curs);
 
-    StrVec *rbsPath = IoAbsPath(m, "examples/test/pages/forms");
+    StrVec *rbsPath = IoAbsPath(m, "fixtures/test/pages/forms");
 
     StrVec *rbsFilePath = StrVec_Copy(m, rbsPath);
     StrVec_Add(rbsFilePath, S(m, "/signup.rbs"));

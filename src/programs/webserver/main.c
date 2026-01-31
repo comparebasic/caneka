@@ -69,7 +69,7 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
     ctx->defaultData = getDefaultData;
 
     ctx->pages = Route_Make(m);
-    r |= Route_Collect(ctx->pages, IoAbsPath(m, "examples/web-server/pages/public"));
+    r |= Route_Collect(ctx->pages, IoAbsPath(m, "fixtures/web-server/pages/public"));
 
     StrVec *name = IoPath(m, "/stats");
 
@@ -77,19 +77,19 @@ static status routeInit(MemCh *m, TcpCtx *ctx){
     Single *funcW = Ptr_Wrapped(m, Load_stats, TYPE_STEP_FUNC);
     Span_Set(statHandler, ROUTE_PROPIDX_ADD_STEP, funcW);
 
-    StrVec *navPath = IoAbsPath(m,"examples/web-server/pages/nav.config");
+    StrVec *navPath = IoAbsPath(m,"fixtures/web-server/pages/nav.config");
     ctx->nav = Nav_TableFromPath(m, ctx->pages, navPath);
 
     ctx->inc = Route_Make(m);
-    r |= Route_Collect(ctx->inc, IoAbsPath(m, "examples/web-server/pages/inc"));
+    r |= Route_Collect(ctx->inc, IoAbsPath(m, "fixtures/web-server/pages/inc"));
 
-    Route *stat = Route_From(m, IoAbsPath(m, "examples/web-server/pages/static"));
+    Route *stat = Route_From(m, IoAbsPath(m, "fixtures/web-server/pages/static"));
     Inst_ByPath(ctx->pages, IoPath(m, "/static/"), stat, SPAN_OP_SET);
 
-    Route *forms = Route_From(m, IoAbsPath(m, "examples/web-server/pages/forms"));
+    Route *forms = Route_From(m, IoAbsPath(m, "fixtures/web-server/pages/forms"));
     Inst_ByPath(ctx->pages, IoPath(m, "/forms/"), forms, SPAN_OP_SET);
 
-    Route *sys = Route_From(m, IoAbsPath(m, "examples/web-server/pages/system"));
+    Route *sys = Route_From(m, IoAbsPath(m, "fixtures/web-server/pages/system"));
     Inst_ByPath(ctx->pages, IoPath(m, "/system/"), sys, SPAN_OP_SET);
 
     */

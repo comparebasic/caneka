@@ -112,16 +112,16 @@ status Crypto_Tests(MemCh *m){
     r |= Test(public->objType.of == TYPE_STR,
         "Public has type STR @", args);
 
-    Dir_CheckCreate(m, S(m, "./examples/crypto"));
+    Dir_CheckCreate(m, S(m, "./fixtures/crypto"));
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
-    File_Open(bf, S(m, "./examples/crypto/key.pem"), O_CREAT|O_TRUNC|O_WRONLY);
+    File_Open(bf, S(m, "./fixtures/crypto/key.pem"), O_CREAT|O_TRUNC|O_WRONLY);
 
     status re = SignPair_PrivateToPem(bf, secret);
     r |= Test(re & SUCCESS,
         "Pem written for private key has status SUCCESS", NULL);
 
     bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
-    File_Open(bf, S(m, "./examples/crypto/pub.pem"), O_CREAT|O_TRUNC|O_WRONLY);
+    File_Open(bf, S(m, "./fixtures/crypto/pub.pem"), O_CREAT|O_TRUNC|O_WRONLY);
     re = SignPair_PublicToPem(bf, public);
     r |= Test(re & SUCCESS,
         "Pem written for public key has status SUCCESS", NULL);
@@ -134,7 +134,7 @@ status Crypto_Tests(MemCh *m){
 
     Single *public2 = Ptr_Wrapped(m, NULL, ZERO);
     bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
-    File_Open(bf, S(m, "./examples/crypto/pub.pem"), O_RDONLY);
+    File_Open(bf, S(m, "./fixtures/crypto/pub.pem"), O_RDONLY);
     SignPair_PublicFromPem(bf, public2);
 
     r |= Test(public2->objType.of == TYPE_STR, 

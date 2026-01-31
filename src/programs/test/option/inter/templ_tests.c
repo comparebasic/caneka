@@ -45,7 +45,7 @@ status TemplCtx_Tests(MemCh *m){
     Fetcher *fch = NULL;
     FetchTarget *tg = NULL;
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "examples/example.templ"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "fixtures/example.templ"));
     StrVec *content = File_ToVec(m, path);
 
     Cursor *curs = Cursor_Make(m, content);
@@ -183,7 +183,7 @@ status Templ_Tests(MemCh *m){
     status r = READY;
     TranspFile *tp = NULL;
 
-    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./examples/example.templ"));
+    Str *path = IoUtil_GetAbsPath(m, Str_CstrRef(m, "./fixtures/example.templ"));
     StrVec *content = File_ToVec(m, path);
 
     Cursor *curs = Cursor_Make(m, content);
