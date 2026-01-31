@@ -2,15 +2,15 @@
 #include <caneka.h>
 
 char *navTwo = ""
-"<nav>\n"
-"<ul>\n"
-"    <li><a href=\"/docs\">Docs</a><ul>\n"
-"    <li><span class=\"active\">Base</span></li>\n"
-"</ul>\n"
-"</li>\n"
-"</ul>\n"
-"</nav>\n"
-;
+    "<nav>\n"
+    "<ul>\n"
+    "    <li><a href=\"/docs\">Docs</a><ul>\n"
+    "    <li><span class=\"active\">Base</span></li>\n"
+    "</ul>\n"
+    "</li>\n"
+    "</ul>\n"
+    "</nav>\n"
+    ;
 
 char *nestedNav = ""
     "<nav>\n"
@@ -243,8 +243,6 @@ status TemplNavNested_Tests(MemCh *m){
 
     DebugStack_SetRef(bf->v, bf->v->type.of);
     status result = Templ_Prepare(templ);
-
-    templ->type.state |= DEBUG;
 
     status re = Templ_ToS(templ, bf, data, NULL);
 

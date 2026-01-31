@@ -7,9 +7,6 @@ static status Jump_NextSetFl =
 Lookup *TemplFuncLookup = NULL;
 
 void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
-    printf("Templ_IterNext\n");
-    fflush(stdout);
-
     MemCh *m = templ->m;
     Fetcher *fch = (Fetcher *)Iter_Get(&templ->content);
     TemplFunc *fs = Span_Get(templ->funcs, templ->content.idx);
@@ -48,16 +45,12 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
     i32 indentIdx = it->idx;
     if((it->type.state & END)){
         if(level > 0){
-            printf("ALMOST END %d\n", level);
-            fflush(stdout);
             tfunc->dflag.positive |= UFLAG_ITER_FINISH;
         }else{
             tfunc->dflag.positive |= UFLAG_ITER_SKIP;
         }
     }else if(templ->objType.state & MORE){
-        printf("level %d %d\n", crit->dataIdx, templ->level);
         if(crit->dataIdx < templ->level){
-            printf("Clearing MORE\n");
             templ->objType.state &= ~(MORE|UFLAG_ITER_FINISH);
             if(it->itin != NULL){
                 tfunc->dflag.negative |= Jump_NextSetFl;
@@ -69,13 +62,6 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
             tfunc->dflag.positive |= UFLAG_ITER_ACTION;
         }
     }else if(fch->api->next(it) & END){
-
-        void *ar[] = {
-            Type_StateVec(m, TYPE_ITER_UPPER, templ->objType.state),
-            NULL
-        };
-        Out("^Ey.Arrived at End @ ^0\n", ar);
-
         tfunc->dflag.positive |= UFLAG_ITER_FINISH;
         tfunc->dflag.negative |= UFLAG_ITER_ACTION;
         templ->level = 0;
@@ -132,9 +118,6 @@ void Templ_Indent(Templ *templ, TemplFunc *tfunc){
             UFLAG_ITER_ENCLOSE_IDX);
         TemplCrit *finish = Templ_LastJumpAt(templ, loop->contentIdx,
             UFLAG_ITER_FINISH_IDX);
-        
-        void *ar[] = {Type_StateVec(templ->m, TYPE_ITER_UPPER, templ->objType.state), NULL};
-        Out("^Er.Indent @^0\n", ar);
 
         Templ_AddJump(templ,
             loop->contentIdx,
@@ -142,6 +125,7 @@ void Templ_Indent(Templ *templ, TemplFunc *tfunc){
             UFLAG_ITER_FINISH_IDX,
             MORE|UFLAG_ITER_ACTION,
             ZERO);
+
         if(templ->objType.state & UFLAG_ITER_FOCUS){
             Templ_AddJump(templ,
                 loop->contentIdx,
@@ -178,7 +162,5 @@ status Templ_FuncInit(MemCh *m){
     }
     r |= Lookup_Add(m, TemplFuncLookup, TYPE_ITER, (void *)Templ_IterNext);
     r |= Lookup_Add(m, TemplFuncLookup, FORMAT_TEMPL_INDENT, (void *)Templ_Indent);
-    void *ar[] = {Util_Wrapped(m, (util)Templ_Indent), NULL};
-    Out("^y. Templ_Indent @^0\n", ar);
     return r;
 }

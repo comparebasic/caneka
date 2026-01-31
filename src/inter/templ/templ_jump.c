@@ -86,13 +86,6 @@ paths:
                         (crit->dflag.positive & templ->objType.state) ==
                             crit->dflag.positive){
 
-                    void *ar[] = {
-                        I32_Wrapped(m, templ->content.idx),
-                        Type_StateVec(m, TYPE_ITER_UPPER, crit->dflag.positive),
-                        NULL
-                    };
-                    Out("new skip TRUE \\@$ dflag.positive@^0\n", ar);
-
                     flag = UFLAG_ITER_SKIP;
                     local |= UFLAG_ITER_SKIP;
                     a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
@@ -101,14 +94,6 @@ paths:
                 if(a == NULL && (crit->dflag.negative != ZERO &&
                         (crit->dflag.negative & templ->objType.state) !=
                             crit->dflag.negative)){
-
-                    void *ar[] = {
-                        I32_Wrapped(m, templ->content.idx),
-                        Type_StateVec(m, TYPE_ITER_UPPER, crit->dflag.negative),
-                        NULL
-                    };
-                    Out("new skip TRUE \\@$ dflag.negative@^0\n", ar);
-
                     flag = UFLAG_ITER_SKIP;
                     local |= UFLAG_ITER_SKIP;
                     a = (Abstract *)js->crit[UFLAG_ITER_SKIP_IDX];
@@ -175,17 +160,9 @@ paths:
                 }
 
                 if((crit->type.state & MORE) && (crit->dataIdx == -1 || (crit->dataIdx >= templ->level))){
-
-                    void *ar[] = {Type_StateVec(m, TYPE_ITER_UPPER, flag), NULL};
-                    Out("^b.Not Consuming Flag @^0\n", ar);
-
                     templ->objType.state |= (
                         crit->dflag.positive & UPPER_FLAGS);
                 }else{
-
-                    void *ar[] = {Type_StateVec(m, TYPE_ITER_UPPER, flag), NULL};
-                    Out("^b.Consuming Flag @^0\n", ar);
-
                     templ->objType.state &= ~flag;
                 }
 
