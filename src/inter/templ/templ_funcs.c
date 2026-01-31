@@ -41,31 +41,33 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
         return;
     }
 
+    i32 level = Templ_JumpLevel(templ,
+            templ->content.idx, UFLAG_ITER_FINISH_IDX);
+    TemplCrit *crit = Templ_LastJumpAt(templ, templ->content.idx, UFLAG_ITER_FINISH_IDX);
+
     i32 indentIdx = it->idx;
     if((it->type.state & END)){
-        i32 level = Templ_JumpLevel(templ,
-                templ->content.idx, UFLAG_ITER_FINISH_IDX);
         if(level > 0){
             printf("ALMOST END %d\n", level);
             fflush(stdout);
             tfunc->dflag.positive |= UFLAG_ITER_FINISH;
         }else{
-            printf("END %d\n", level);
-            fflush(stdout);
             tfunc->dflag.positive |= UFLAG_ITER_SKIP;
         }
     }else if(templ->objType.state & MORE){
-        templ->objType.state &= ~MORE;
-        printf("Clearing MORE\n");
-        fflush(stdout);
-        if(it->itin != NULL){
-            tfunc->dflag.negative |= Jump_NextSetFl;
-            tfunc->dflag.positive |= (it->itin->objType.state & Jump_NextSetFl);
-        }else{
-            tfunc->dflag.negative |= Jump_NextSetFl;
-            tfunc->dflag.positive |= UFLAG_ITER_LEAF;
+        printf("level %d %d\n", crit->dataIdx, templ->level);
+        if(crit->dataIdx < templ->level){
+            printf("Clearing MORE\n");
+            templ->objType.state &= ~(MORE|UFLAG_ITER_FINISH);
+            if(it->itin != NULL){
+                tfunc->dflag.negative |= Jump_NextSetFl;
+                tfunc->dflag.positive |= (it->itin->objType.state & Jump_NextSetFl);
+            }else{
+                tfunc->dflag.negative |= Jump_NextSetFl;
+                tfunc->dflag.positive |= UFLAG_ITER_LEAF;
+            }
+            tfunc->dflag.positive |= UFLAG_ITER_ACTION;
         }
-        tfunc->dflag.positive |= UFLAG_ITER_ACTION;
     }else if(fch->api->next(it) & END){
 
         void *ar[] = {

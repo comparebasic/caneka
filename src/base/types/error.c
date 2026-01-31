@@ -273,6 +273,11 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
     return;
 }
 
+void Exit(MemCh *m, Str *s){
+    void *args[] = {s, NULL};
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, "Exit $", args);
+}
+
 status Error_Init(MemCh *m){
     status r = READY;
     setSigs();

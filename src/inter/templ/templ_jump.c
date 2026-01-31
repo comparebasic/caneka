@@ -158,6 +158,7 @@ paths:
                 }else{
                     crit = (TemplCrit *)a;
                 }
+
                 idx = crit->contentIdx;
                 local &= ~NOOP;
 
