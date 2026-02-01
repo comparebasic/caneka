@@ -85,17 +85,17 @@ to guide you through the rest of the build process.
 
 Canka only requires a C compiler to build. A small library is built to manage
 the build configuration(s) (found in the [buildeka](./src/programs/buildeka/)
-folder). The file [bootstrap.c](./programs/buileka/bootstrap.c) builds a
+folder). The file [bootstrap.c](./programs/buildeka/bootstrap.c) builds a
 command-line menu that can be used to manage the build process.
 
 Further customization can be found in the dependencies.txt files for each
 sub-folder. 
 
 
-## Licence
+## License
 
 The system is licenced under a *3-Clause BSD Licence*. See the
-[LICENCE](./LICENCE) file in the root directory for details about the source
+[LICENCE](./LICENSE) file in the root directory for details about the source
 code licence(s) in other directories.
 
 
