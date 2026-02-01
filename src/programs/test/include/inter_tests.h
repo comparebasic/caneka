@@ -4,6 +4,7 @@ status WwwRouteFmt_Tests(MemCh *m);
 status WwwRouteMime_Tests(MemCh *gm);
 status WwwRouteRbs_Tests(MemCh *m);
 status WwwPath_Tests(MemCh *gm);
+status WwwNav_Tests(MemCh *gm);
 status Http_Tests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
 status Inet_Tests(MemCh *gm);
@@ -12,7 +13,6 @@ status Templ_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
 status TemplNav_Tests(MemCh *gm);
 status TemplNavNested_Tests(MemCh *m);
-status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
     {
@@ -106,10 +106,10 @@ static TestSet InterTests[] = {
         FEATURE_COMPLETE|SKIP_TEST,
     },
     {
-        "Doc Tests",
-        Doc_Tests,
-        "Documentation generator tests.",
-        FEATURE_COMPLETE,
+        "Www Nav Tests",
+        WwwNav_Tests,
+        "Testing that an expected set of navigation HTML snipits are generated.",
+        FEATURE_COMPLETE|SKIP_TEST,
     },
     {
         NULL,

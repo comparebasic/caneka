@@ -63,25 +63,10 @@ static WwwNav *getNav(MemCh *m, Table *coordTbl){
 
 
 static WwwPage *getPage(MemCh *m){
-    WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
-    StrVec *path = IoAbsPath(m, "fixtures/doc/header.templ");
-    StrVec *content = File_ToVec(m, StrVec_Str(m, path));
-    if(content == NULL){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "header content is NULL", NULL);
-        return NULL;
-    }
-
-    Cursor *curs = Cursor_Make(m, content);
-    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-
-    Seel_Set(page, K(m, "header"), templ); 
-    Seel_Set(page, K(m, "footer"), IoAbsPath(m, "fixtures/doc/footer.html")); 
-    return page;
+    return Inst_Make(m, TYPE_WWW_PAGE);
 }
 
-status Doc_Tests(MemCh *m){
+status WwwNav_Tests(MemCh *m){
     DebugStack_Push(NULL, 0);
     status r = READY;
     void *args[5];
