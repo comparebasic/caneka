@@ -5,18 +5,9 @@ positioning, and transparency.
 
 ## Overview
 
-What could you do if you knew what happened between your programming
-language and the hardware?
-
-Caneka is a programming language tools runtime, presently providing a
-full-stack + web-server + database replacement written with these tools.
-The tools are simplistic components written in the C Language.
-
-## Overview
-
 Caneka aims to redefine programming as a series of stacks/queues and patterns
 while de-emphasizing the conventional "argument call return" model of
-conventional programming langauges.
+all descendants of the C Programming langauges.
 
 If computers are patterns of pattern machines, human creativity can have more
 direct access to problem solving when tools are based on spactial or visual
