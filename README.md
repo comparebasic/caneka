@@ -3,51 +3,24 @@
 Spatial Oriented Programming Language. Runtime and tools. Avoids reduction by utalizing context,
 positioning, and transparency.
 
+
 ## Overview
 
-Caneka aims to redefine programming as a series of stacks/queues and patterns
-while de-emphasizing the conventional "argument call return" model of
-all descendants of the C Programming langauges.
+Caneka aims to redefine programming as a pattern-definition excercise rather
+than pattern-breakdown excercise. This replaces the "argument call return" model
+of all descendants of the C Programming langauge, with pattern definitions instead.
 
-If computers are patterns of pattern machines, human creativity can have more
-direct access to problem solving when tools are based on spactial or visual
-input.
+Unlike the appeal of functions and behavioral objects, which has captivated the
+software industry for nearly 30 years, spatial oriented programming systems
+rely on stacks, queues, and patterns to provide data-transformations.
 
-This is a direction software programming has been going for a while, Caneka
-aims to be a new way to build software and programming languages to this end.
+This relies heavily on the assumption that computers are essentially
+data-transformation systems.
 
-It is also increadably transparent, with each component being based on
-simplistic and (hopefully) understandable sub-components. What could you do if
-you knew what happened between your programming language and the hardware?
-
-## Licence
-
-The system is licenced under a *3-Clause BSD Licence* from [Compare
-Basic](https://comparebasic.com). See [LICENCE](./LICENCE) file in the root
-directory for details about the source code licence(s) in other directories.
-
-
-## Purpose
-
-Caneka was born from the idea that productivity in sofware engineering
-was in need of new tooling. To us, the evolution seamed to stall after
-the OOP languages.
-
-Caneka was born from the idea that programming langauges had evolved
-somewhat haphazardly
-
-- Level 1 Assembly
-- Level 2 Types (C)
-- Level 3 Objects (C++, Java, JavaScript, Python, Etc.)
-- Level 4 Composition/Implicit Handling (?)
-
-It seams like we never got to that Level 4 set of languages.
-A place where developers spend more time on composition than
-repetitive details.
-
-Lisp, Scala, Rust, and C# all came close with pattern matching and
-routing features, but there is more power that developers could wield
-(mwuahahaha... :);
+The system is currently implemented in C and will likely be that way for a long
+time. It utilizes almost every aspect of the C Langauge while avoiding one very
+common pattern: In most cases, functions do not return any valuable
+information, this information is stored on one of the arguments.
 
 
 ## What is Spacial Oriented Programming?
@@ -67,25 +40,6 @@ in an unrelated variable.
 
 Behaviour is rarely associated with objects. Configuration is commonly used to
 string together a pipeline that generates output from any given input.
-
-
-## Why Start From Scratch(ish... built on top of POSIX, C and LibC)
-
-The determination to start from scratch is an effort to accomplish a
-syntax-agnostic runtime while building transparency and reliability at
-the same time.
-
-This also solves the "many dependencies" problem, by encompasing every
-essential feature of a software application in one place. Caneka does not 
-require any features outside of a POSIX compliant operating system and
-a C compiler.
-
-Components are linked as necessary for features such as crypto and 
-network handling (such as NaCL and eventually SSL). And the build system
-is designed for extensibility with other software sources.
-
-It also increases portability to keep the C compilation step in place
-so that it can build and run on a variety of architectures.
 
 
 ## The Parser
@@ -118,29 +72,6 @@ file that ends in \_roebling.c which is the naming convention for a `Roebling`
 object source file.
 
 
-## Caneka Components
-
-Caneka has three main components including a parser with no prefered syntax, a
-network server, and a memory manager for data storage and data structures.
-
-Components:
-
-- [base](src/base/): includes virtual memory segmented strings,
-  scalable arrays, a key-value lookup, and the memory manager.
-- [ext](/src/ext/): All other features, including the Seel class system
-  found in [types](/src/ext/types). This includes the
-  [parser](/src/ext/parser/) and the network server [serve](/src/ext/serve/) 
-  which relies heavily on the Task/Step components in the
-  [navigate](/src/ext/navigate/) sub-module.
-- [inter](/src/inter) Higher level components such as HTTP handling
-  an HTTP Webserver including session handling and user management.
-- [programs](/src/programs/): Any programs that ship with the source
-  will be in this folder, presently [test](src/programs/test/), a webserver, 
-  and basic cli are in this folder.
-
-see [caneka.org](https://caneka.org) for more details.
-
-
 ## Build Instructions
 
 To build and test Caneka run using the helper script using *clang*:
@@ -170,39 +101,58 @@ file, which is used by "buildeka" builder.
 Further customization can be found in the dependencies.txt files for each
 module. 
 
+
 ### Programs included in the sources
 
 [Buildeka](./src/programs/buildeka/): This is the build program which builds the rest of the sources.
 [Clineka](./src/programs/clineka/): This is command-line-interface with a few quick tools to do useful things.
 [Test](./src/programs/test/): This is the test suite for testing various parts of the system.
 
-## Why is it So Hard To Read this Source Code? 
 
-In it's present form, Caneka is not intended to be modified by human authors.
+## Caneka Components
 
-What you see now is inteneded to be generated by a transpiler which has
-not yet been written. You will notice that a lot of rudimentary calls such as
-`Table_Set`, `MemCh_AllocOf` and `StrVec_AddVec` are increadibly verbose
-and unfriendly to read. This is by design with the intention of a cleaner
-syntax sitting on top of this.
+Caneka has three main components including a parser with no prefered syntax, a
+network server, and a memory manager for data storage and data structures.
 
-Preserving the ability to debug and perform all necissary tasks simplisticly
-has been the focus this far. The system will round the corder into readability
-in the near future.
+Components:
 
-Some of the code sit's between C and Assembly and will probably end up
-being written in Assembly. [Iter](src/base/mem/iter.c) and
-[Span](src/base/mem/span.c) in particular has a lot of `void *` casting
-to implement the offset math that could be cleaner (and will have to be
-in order to run on desktop and mobile targets).
+- [base](src/base/): includes virtual memory segmented strings,
+  scalable arrays, a key-value lookup, and the memory manager.
+- [ext](/src/ext/): All other features, including the Seel class system
+  found in [types](/src/ext/types). This includes the
+  [parser](/src/ext/parser/) and the network server [serve](/src/ext/serve/) 
+  which relies heavily on the Task/Step components in the
+  [navigate](/src/ext/navigate/) sub-module.
+- [inter](/src/inter) Higher level components such as HTTP handling
+  an HTTP Webserver including session handling and user management.
+- [programs](/src/programs/): Any programs that ship with the source
+  will be in this folder, presently [test](src/programs/test/), a webserver, 
+  and basic cli are in this folder.
+
+see [caneka.org](https://caneka.org) for more details.
+
+
+# A Note on Data-Science
+
+There is no AI or Data-Science in Caneka at this time. Classical data-science
+is planned using methodologies such as co-occurence, n-gram trees, or
+map-reduce. Large-Langauge-Model methodologies have been completely avoided
+because they rely on impersonation which makes them unreliable.
 
 
 ## Build Status
 
-The core components run pretty well and have been lightly tested, you
-can see the status of the system at [caneka.org](https://caneka.org)
-or by building and running the tests through the `bootstrap` program
-option (see Build Steps above).
+The core components run and have been lightly tested.
+The status of the system is available at [caneka.org](https://caneka.org)
+or by building and running the [Test](./src/programs/test) program.
+
+
+## Licence
+
+The system is licenced under a *3-Clause BSD Licence* from [Compare
+Basic](https://comparebasic.com). See [LICENCE](./LICENCE) file in the root
+directory for details about the source code licence(s) in other directories.
+
 
 Caneka is a brand of Compare Basic, read more at
 [comparebasic.com](https://comparebasic.com)
