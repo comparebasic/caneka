@@ -14,3 +14,4 @@
 #include "types/combine.h"
 #include "types/empty.h"
 #include "types/types_tos.h"
+#include "types/tos.h"

@@ -41,26 +41,31 @@ or by building and running the [Test](./src/programs/test) program.
 
 ### Programs included in the sources
 
-[Buildeka](./src/programs/buildeka/): This is the build program which builds the rest of the sources.
-[Clineka](./src/programs/clineka/): This is command-line-interface with a few quick tools to do useful things.
-[Test](./src/programs/test/): This is the test suite for testing various parts of the system.
+- [Buildeka](./src/programs/buildeka/): This is the build program which builds the rest of the sources.
+- [Clineka](./src/programs/clineka/): This is command-line-interface with a few quick tools to do useful things.
+- [Test](./src/programs/test/): This is the test suite for testing various parts of the system.
 
 #### Core Components
 
-The core system, including the memory manager, are complete. The higher-object
-system and content templater are near their final generation but still
-experimental.
+The core system, including the [memory manager](./src/base/mem/),
+[parser](./src/ext/parser/), [network server](./src/inter/serve/),
+[type](./src/base/types/), and [higher-object](./src/ext/types/) are complete yet
+minimally tested.
 
 #### Utility Components
 
-Utility components such as a network server, parser, and basic
-input-output features are working but lightly tested.
+Utility components such as the [templater](./src/inter/templ/), and [website
+components](./src/inter/www/) are working but still experimental.
 
 #### Syntax
 
 The syntax for writing the Caneka langauge has not been started, and is not
 anticipated to be completed until after several products are created using the
 C Language calls directly.
+
+This is partly because Compare Basic needs revenue, and partly because the
+syntax will greatly benefit from greater experience using these tools in
+real-world applications.
 
 
 ## Build Instructions
