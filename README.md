@@ -12,9 +12,8 @@ of all descendants of the C Programming langauge, with pattern definitions inste
 
 Unlike the appeal of functions and behavioral objects, which has captivated the
 software industry for nearly 30 years, spatial oriented programming systems
-rely on stacks, queues, and patterns to provide data-transformations.
-
-This relies heavily on the assumption that computers are essentially
+rely on stacks, queues, and patterns to provide data-transformations. This
+relies heavily on the assumption that computers are essentially
 data-transformation systems.
 
 The system is currently implemented in C and will likely be that way for a long
