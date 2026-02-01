@@ -1,8 +1,8 @@
 # Caneka
 
-Spatial Oriented Programming Language. Runtime and tools. Avoids reduction by utalizing context,
-positioning, and transparency.
+Spatial Oriented Programming Language runtime and tools.
 
+Avoid reduction by utalizing context, positioning, and transparency.
 
 ## Overview
 
