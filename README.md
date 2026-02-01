@@ -1,33 +1,39 @@
 # Caneka
 
-The Glass-Bottom-Boat of Programming Language Runtimes.
-
-
-## Overview
-
-What could you do if you knew what happened between your programming
-language and the hardware?
-
-Caneka is a full-stack + web-server + database replacement for a web
-development runtime. Based entirely on simplistic components written
-from scratch in C.
+Spatial Oriented Programming Language. Runtime and tools. Avoids reduction by utalizing context,
+positioning, and transparency.
 
 ## Overview
 
 What could you do if you knew what happened between your programming
 language and the hardware?
 
-Caneka is a full-stack + web-server + database replacement for a web
-development runtime. Based entirely on simplistic components written
-from scratch in C.
+Caneka is a programming language tools runtime, presently providing a
+full-stack + web-server + database replacement written with these tools.
+The tools are simplistic components written in the C Language.
 
+## Overview
 
-## Licence(s)
+Caneka aims to redefine programming as a series of stacks/queues and patterns
+while de-emphasizing the conventional "argument call return" model of
+conventional programming langauges.
 
-Most of the system is licenced under a *3-Clause BSD Licence* from
-[Compare Basic](https://comparebasic.com) with a few folders shared 
-as public domain.  see [LICENCE](./LICENCE) file in the root directory 
-for details about the source code licence(s) in other directories.
+If computers are patterns of pattern machines, human creativity can have more
+direct access to problem solving when tools are based on spactial or visual
+input.
+
+This is a direction software programming has been going for a while, Caneka
+aims to be a new way to build software and programming languages to this end.
+
+It is also increadably transparent, with each component being based on
+simplistic and (hopefully) understandable sub-components. What could you do if
+you knew what happened between your programming language and the hardware?
+
+## Licence
+
+The system is licenced under a *3-Clause BSD Licence* from [Compare
+Basic](https://comparebasic.com). See [LICENCE](./LICENCE) file in the root
+directory for details about the source code licence(s) in other directories.
 
 
 ## Purpose
@@ -51,6 +57,25 @@ repetitive details.
 Lisp, Scala, Rust, and C# all came close with pattern matching and
 routing features, but there is more power that developers could wield
 (mwuahahaha... :);
+
+
+## What is Spacial Oriented Programming?
+
+It is an effort to model a programming language as close as possible in two
+ways. Firstly, what people need from computers. Secondly, how problems can be 
+conceptualized among engineers, technology professionals, and designers.
+
+Programming is done by specifying stacks, queues, and patterns, rather than
+functions with arguments.
+
+Programs tend to maintain contextual information througout a given task, rather
+than consolidating and returning small pieces of informaton.
+
+Status tends to be implicitly stored on a contextual object rather than returned
+in an unrelated variable.
+
+Behaviour is rarely associated with objects. Configuration is commonly used to
+string together a pipeline that generates output from any given input.
 
 
 ## Why Start From Scratch(ish... built on top of POSIX, C and LibC)
@@ -154,6 +179,11 @@ file, which is used by "buildeka" builder.
 Further customization can be found in the dependencies.txt files for each
 module. 
 
+### Programs included in the sources
+
+[Buildeka](./src/programs/buildeka/): This is the build program which builds the rest of the sources.
+[Clineka](./src/programs/clineka/): This is command-line-interface with a few quick tools to do useful things.
+[Test](./src/programs/test/): This is the test suite for testing various parts of the system.
 
 ## Why is it So Hard To Read this Source Code? 
 
