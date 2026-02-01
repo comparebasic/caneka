@@ -18,9 +18,9 @@ This relies heavily on the assumption that computers are essentially
 data-transformation systems.
 
 The system is currently implemented in C and will likely be that way for a long
-time. It utilizes almost every aspect of the C Langauge while avoiding one very
-common pattern: In most cases, functions do not return any valuable
-information, this information is stored on one of the arguments.
+time. The return-value feature of the C Langauge is rarely used. In most cases,
+functions do not return any valuable information, this information is stored on
+one of the arguments.
 
 
 ## What is Spacial Oriented Programming?
