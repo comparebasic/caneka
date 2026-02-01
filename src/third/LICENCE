@@ -1,29 +1,7 @@
-The code in this folder is under a different licence per folder.
-The folder names do not contain the sources of the libraries that bear
-the names of the folders. For example nacl is not he NaCl library, and
-openssl is not the openssl library, it is bridge code between Caneka
-and those respective libraries.
+The code in this folder is under the same licence as the rest of Caneka.
 
-src/third/nacl: Public Domain see src/third/nacl/LICENCE 
-    note this is not the NaCL library it is just a wrapper/bridge back to caneka.
+See the 3-clause BSD licence from Compare Basic at ../../LICENCE.
 
-Planned but not included yet:
-
-src/third/openssl: Public Domain see src/third/openssl/LICENCE 
-    note: this is not the OpenSsl library it is just a wrapper/bridge back to caneka.
-
-src/third/libdatachannel: LibDataChannel MPL-2.0 see src/third/libdatachannel/LICENCE
-    (when it exists)
-
-src/third/sdl2: Sdl2 ? src/third/sdl2/LICENCE 
-    (when it exists)
-
-src/third/libwebsockets: ? see src/third/libwebsockets/LICENCE 
-    (when it exists)
-
-src/third/libpng: LibPNG Licence  see src/third/libpng/LICENCE 
-    (when it exists)
-
-Firecrow Silvernight
-Compare Basic Incorporated
-2025
+The subsequent folder names do not contain the sources of the libraries that
+bear the names of the folders. For example OpenSSL is not he OpenSSL library,
+it is bridge code between Caneka and those respective libraries.

@@ -41,17 +41,13 @@ char *buildekaExamples = ""
     "\n"
     "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter\x1b[0m\n"
     "\n"
-    "    With NaCl for crypto:\n"
-    "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter crypto@third/nacl\x1b[0m\n"
-    "\n"
     "    With OpenSsl for crypto (experimental):\n"
     "\n"
     "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter crypto@third/openssl\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mClineka\x1b[22m command line tool\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/clineka --option [crypto@third/openssl, crypto@third/nacl]\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/clineka --option crypto@third/openssl\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mWebServer\x1b[22m\n"
     "\n"
@@ -105,7 +101,7 @@ char *buildCli[] = {
     "base",
     "ext",
     "inter",
-    "crypto@third/nacl",
+    "crypto@third/openssl",
     NULL
 };
 

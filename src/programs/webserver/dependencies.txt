@@ -1,5 +1,5 @@
 exec=main.c
 inter
-option=crypto@third/nacl
+option=crypto@third/openssl
 ext
 base
