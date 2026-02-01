@@ -48,7 +48,7 @@ or by building and running the [Test](./src/programs/test) program.
 #### Core Components
 
 The core system, including the [memory manager](./src/base/mem/),
-[parser](./src/ext/parser/), [network server](./src/inter/serve/),
+[parser](./src/ext/parser/), [network server](./src/ext/serve/),
 [type](./src/base/types/), and [higher-object](./src/ext/types/) are complete yet
 minimally tested.
 
@@ -85,17 +85,11 @@ to guide you through the rest of the build process.
 
 Canka only requires a C compiler to build. A small library is built to manage
 the build configuration(s) (found in the [buildeka](./src/programs/buildeka/)
-folder). The file [bootstrap.c](./bootstrap.c) in the root directory builds a
-which menu to manage the build process.
-
-Each folder within the [src](/src) artifact folder, have a file in
-them which controls how they are built. Either as one include file such as (in
-the case of [base/inc.c](/src/base/inc.c) or with a more eleborate
-"build.c" file. Every module after the "base" is built using the "build.c"
-file, which is used by "buildeka" builder.
+folder). The file [bootstrap.c](./programs/buileka/bootstrap.c) builds a
+command-line menu that can be used to manage the build process.
 
 Further customization can be found in the dependencies.txt files for each
-module. 
+sub-folder. 
 
 
 ## Licence
