@@ -22,18 +22,14 @@ static NodeObj *Route_addConfigData(Route *rt, StrVec *token){
     return NULL;
 }
 
-Single *Route_MimeFunc(StrVec *path){
-    StrVec *ext = Path_Ext(path->p->m, path);
-    return (Single *)Table_Get(RouteFuncTable, ext);
-}
-
-Route *Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAtts){
+void Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAtts){
+    /*
     MemCh *m = root->m;
 
     Route *route = NULL;
 
     StrVec *ext = IoUtil_GetExt(m, path);
-    Str *mime = (Str *)Table_Get(RouteMimeTable, ext);
+    Str *mime = (Str *)Table_Get(MimeLookup, ext);
     Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
 
     if(mime == NULL || funcW == NULL){
@@ -68,7 +64,6 @@ Route *Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAt
     void *args[] = {name, path, configAtts, mime, ext, NULL};
     Out("^y.  Building path ^0.@^y.\n  @ from @\nmime @ ext @\n^0", args);
 
-    /*
     Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
     Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
     Span_Set(subRt, ROUTE_PROPIDX_FUNC, funcW);
@@ -77,16 +72,20 @@ Route *Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAt
     subRt->type.state |= (funcW->type.state|flags);
     */
 
-    return NULL;
+    /*
+    Route_Prepare(rt);
+    */
 }
 
-status Route_CollectConfig(Route *root, StrVec *name, StrVec *path, Table *configAtts){
+void Route_CollectConfig(Route *root,
+        StrVec *name, StrVec *path, Table *configAtts){
     MemCh *m = root->m;
-    Route *rt = Route_Make(m);
+    Route *rt = Inst_Make(m, TYPE_WWW_ROUTE);
 
     Span *ext = Config_Sequence(m, Table_Get(configAtts, K(m, "ext")));
-    if(ext != NULL){
-        ext = AllExtSpan;
+    if(ext == NULL){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Missing extension in configAtts", NULL);
     }
 
     Span *p = Span_Make(m);
@@ -102,37 +101,29 @@ status Route_CollectConfig(Route *root, StrVec *name, StrVec *path, Table *confi
         IoUtil_Annotate(m, name);
         IoUtil_Annotate(m, fpath);
 
-        Route *rt = Route_BuildRoute(root, name, fpath, configAtts);
-        /*
-        Route_Prepare(rt);
-        */
+        Route_BuildRoute(root, name, fpath, configAtts);
     }
 
     void *args[] = {name, root, NULL};
     Out("^p.Built @ -> @^0\n", args);
 
     /* build route */
-
-    return ZERO;
 }
 
-status Route_CheckEtag(Route *rt, StrVec *etag){
-    MemCh *m = rt->m;
-    Single *funcW = Seel_Get(rt, K(m, "func"));
-    if((funcW->type.state & ROUTE_ASSET) == 0){
-        return NOOP;
+void Route_CheckGenEtag(Gen *gen, StrVec *etag, Table *headers){
+    if((gen->objType.state & ROUTE_ASSET) == 0){
+        return;
     }
-    Table *headers = Seel_Get(rt, K(m, "headers"));
-    StrVec *etagRegistered = Table_Get(headers, K(m, "Etag"));
-    return (etagRegistered != NULL && Equals(etag, etagRegistered)) ? SUCCESS : MORE;
+    StrVec *etagRegistered = Table_Get(headers, K(headers->m, "Etag"));
+    gen->type.state |= (
+        etagRegistered != NULL &&
+            Equals(etag, etagRegistered)) ? SUCCESS : MORE;
 }
 
-status Route_SetEtag(Route *rt, Str *path, struct timespec *mod){
-    MemCh *m = rt->m;
+void Route_SetGenEtag(MemCh *m, Gen *gen, struct timespec *mod, Table *headers){
+    StrVec *etag = HttpCtx_MakeEtag(m, StrVec_Str(m, gen->path), mod);
 
-    StrVec *etag = HttpCtx_MakeEtag(rt->m, path, mod);
-
-    StrVec *etagPath = StrVec_From(m, Str_Clone(m, path));
+    StrVec *etagPath = StrVec_Clone(m, gen->path);
     IoUtil_Annotate(m, etagPath);
     IoUtil_AddExt(m, etagPath, S(m, "etag"));
 
@@ -153,18 +144,15 @@ status Route_SetEtag(Route *rt, Str *path, struct timespec *mod){
             File_Close(bf);
        }
     }
-    Table *headers = Seel_Get(rt, K(m, "headers"));
     Table_Set(headers, S(m, "Etag"), etag);
-
-    return ZERO;
 }
 
-status Route_Prepare(Route *rt){
+void Route_Prepare(Route *rt){
     DebugStack_Push(rt, rt->type.of);
+    /*
     MemCh *m = rt->m;
     void *args[3];
 
-    /*
     StrVec *path = (StrVec *)Seel_Get(rt, S(m, "file"));
     StrVec *type = (StrVec *)Seel_Get(rt, S(m, "type"));
     StrVec *token = StrVec_Make(m);
@@ -198,16 +186,15 @@ status Route_Prepare(Route *rt){
     /* setup Gen(s) */
 
     DebugStack_Pop();
-    return NOOP;
+    return;
 }
 
 Route *Route_Get(Route *root, StrVec *path){
     return Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
 }
 
-status Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){
+void Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){
     DebugStack_Push(rt, rt->type.of);
-    status r = READY;
     /*
     StrVec *path = (StrVec *)Seel_Get(rt, S(bf->m, "file"));
     MemCh *m = bf->m;
@@ -237,22 +224,13 @@ status Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){
     */
 
     DebugStack_Pop();
-    return r;
 }
 
-Route *Route_Make(MemCh *m){
-    return Inst_Make(m, TYPE_WWW_ROUTE);
-}
-
-status Route_Init(MemCh *m){
-    status r = READY;
-
+void Route_Init(MemCh *m){
     Table *seel = Table_Make(m);
     Table_Set(seel, S(m, "path"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(seel, S(m, "data"), I16_Wrapped(m, TYPE_TABLE));
     Hashed *h = Table_SetHashed(seel, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(seel, S(m, "gens"), I16_Wrapped(m, TYPE_SPAN));
-    r |= Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE);
-
-    return r;
+    Seel_Seel(m, seel, S(m, "Route"), TYPE_WWW_ROUTE);
 }

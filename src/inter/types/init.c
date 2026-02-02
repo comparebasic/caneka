@@ -3,15 +3,15 @@
 
 status Inter_Init(MemCh *m){
     status r = READY;
-    r |= InterTypeStrings_Init(m);
-    r |= Templ_Init(m);
-    r |= DocFunc_Init(m);
-    r |= DocComment_Init(m);
-    r |= DocComp_Init(m);
-    r |= Http_ClsInit(m);
-    r |= HttpCtx_Init(m);
-    r |= Route_Init(m);
-    r |= WwwPage_Init(m);
-    r |= WwwNav_Init(m);
+    InterTypeStrings_Init(m);
+    Templ_Init(m);
+    DocFunc_Init(m);
+    DocComment_Init(m);
+    DocComp_Init(m);
+    Http_ClsInit(m);
+    HttpCtx_Init(m);
+    Route_Init(m);
+    WwwPage_Init(m);
+    WwwNav_Init(m);
     return r;
 }

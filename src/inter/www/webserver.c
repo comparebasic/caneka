@@ -99,6 +99,7 @@ static TcpCtx *tcpCtx_Make(MemCh *m, i32 port, quad ip4, util ip6[2]){
 
 status WebServer_GatherPage(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
+    /*
     void *args[5];
 
     MemCh *m = tsk->m;
@@ -182,6 +183,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
     st->type.state |= (MORE|SUCCESS);
     DebugStack_Pop();
+    */
     return st->type.state;
 }
 
@@ -263,9 +265,8 @@ status WebServer_ServePage(Step *st, Task *tsk){
 
 status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *handlers){
     status r = READY;
+    /*
     MemCh *m = tsk->m;
-    /* bootstrap paths */
-    /* assign handlers */
     Route *root = Route_Make(m);
 
     NodeObj *routes = Inst_ByPath(config, Sv(m, "routes"), NULL, SPAN_OP_GET, NULL);
@@ -294,6 +295,7 @@ status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *hand
     void *ar[] = {root, NULL};
     Out("^c.SetConfig root @^0\n", ar);
 
+    */
     return r;
 }
 

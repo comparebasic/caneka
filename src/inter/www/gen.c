@@ -1,157 +1,125 @@
 #include <external.h>
 #include <caneka.h>
 
-static Span *AllExtSpan = NULL;
-Span *RouteFuncTable = NULL;
-Span *RouteMimeTable = NULL;
+Span *GenMimeTable = NULL;
+Lookup *MimeLookup = NULL;
 
-static status routeFuncStatic(Buff *bf,
-        Route *rt, Table *_data, HttpCtx *ctx){
+static void routeFuncStatic(Gen *gen, Buff *bf, Table *_data){
     MemCh *m = bf->m;
-    Str *pathS = StrVec_Str(bf->m,
-        (StrVec *)as(Seel_Get(rt, K(m, "action")), TYPE_STRVEC));
+    Str *pathS = StrVec_Str(bf->m, (StrVec *)as(gen->action, TYPE_STRVEC));
     bf->type.state |= BUFF_UNBUFFERED;
-    return File_Open(bf, pathS, O_RDONLY);
+    File_Open(bf, pathS, O_RDONLY);
 }
 
-static status routeFuncTempl(Buff *bf,
-        Route *rt, Table *data, HttpCtx *ctx){
+static void routeFuncTempl(Gen *gen, Buff *bf, Table *data){
     MemCh *m = bf->m;
-    Templ *templ = (Templ *)as(Seel_Get(rt, K(m, "templ")), TYPE_TEMPL);
+    Templ *templ = (Templ *)as(gen->action, TYPE_TEMPL);
 
     Templ_Reset(templ);
     templ->type.state |= bf->type.state;
     Templ_ToS(templ, bf, data, NULL);
-    return templ->type.state;
 }
 
-static status routeFuncFmt(Buff *bf,
-        Route *rt, Table *_data, HttpCtx *ctx){
+static void routeFuncFmt(Gen *gen, Buff *bf, Table *_data){
     MemCh *m = bf->m;
-    return Fmt_ToHtml(bf,
-        (Mess *)as(Seel_Get(rt, K(m, "action")), TYPE_MESS));
+    Fmt_ToHtml(bf, (Mess *)as(gen->action, TYPE_MESS));
 }
 
-static status routeFuncFileDb(Buff *bf,
-        Route *rt, Table *data, HttpCtx *ctx){
+static void routeFuncFileDb(Gen *gen, Buff *bf, Table *data){
     MemCh *m = bf->m;
-    BinSegCtx *bsCtx = (BinSegCtx *)as(Seel_Get(rt, K(m, "action")), TYPE_BINSEG_CTX);
-    Abstract *action = Table_Get(ctx->queryIt.p, K(m, "action"));
+    BinSegCtx *bsCtx = (BinSegCtx *)as(gen->action, TYPE_BINSEG_CTX);
     status r = READY;
+    /*
     if(action == NULL){
-        ctx->code = 403;
-        ctx->type.state |= ERROR;
-        return ctx->type.state;
-    }
-    if(Equals(action, K(m, "add")) && ctx->body != NULL &&
-            ctx->body->type.of == TYPE_TABLE || 
-            ctx->body->type.of == TYPE_SPAN || 
-            (ctx->body->type.of & TYPE_INSTANCE) 
-        ){
-        BinSegCtx_Send(bsCtx, ctx->body);
-    }else if(Equals(action, K(m, "modify"))){
-        /* modify and existing binseg record */;
-    }else if(Equals(action, K(m, "read"))){
-        /* read from binseg */;
-    }else{
-        ctx->code = 403;
-        ctx->type.state |= ERROR;
-        return ctx->type.state;
+        gen->type.state |= ERROR;
+        return;
     }
 
+    if(Equals(action, K(m, "add")) && bf != NULL){
+        BinSegCtx_Send(bsCtx, bf);
+    }else if(Equals(action, K(m, "modify"))){
+    }else if(Equals(action, K(m, "read"))){
+    }else{
+        gen->type.state |= ERROR;
+        return;
+    }
+    */
+
+    /*
     StrVec *acceptHeader = Table_Get(ctx->headersIt.p, K(m, "Accept"));
     if(acceptHeader != NULL && Equals(acceptHeader, K(m, "text/html"))){
         Table_Set(data, K(m, "form"), ctx->body);
         return routeFuncTempl(bf, rt, data, ctx);
     }else{
-        /* handle json response here */;
+        / * handle json response here * /;
     }
-
-    return NOOP;
+    */
 }
 
-static Templ *prepareTempl(Route *rt, StrVec *path){
-    void *args[3];
-    MemCh *m = rt->m;
-    StrVec *content = File_ToVec(m, StrVec_Str(m, path));
-
-    if(content == NULL || content->total == 0){
-        args[0] = path;
-        args[1] = content;
-        args[2] = NULL;
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error path for Templ has no content for: $ -> @", args);
-        rt->type.state |= ERROR;
-        return NULL;
-    }
-
-    Buff *bf = Buff_Make(m, ZERO);
-
-    Cursor *curs = Cursor_Make(m, content);
-    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    if((Templ_Prepare(templ) & PROCESSING) == 0){
-        args[0] = path;
-        args[1] = NULL;
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error preparing template for $", args);
-        rt->type.state |= ERROR;
-        Templ_Reset(templ);
-        return NULL;
-    }
-    return templ;
-}
-
-Abstract *Gen_FromPath(MemCh *m, StrVec *path, NodeObj *config){
-    StrVec *ext = IoUtil_GetExt(m, path);
-    Str *mime = (Str *)Table_Get(RouteMimeTable, ext);
-    Single *funcW = (Single *)Table_Get(RouteFuncTable, ext);
-    Gen_Setup(gen, path, mime, funcW, config);
-    return gen;
-}
-
-void Gen_Setup(Inst *gen, StrVec *path, Str *mime, Single *funcW, NodeObj *config){
-
-    Seel_Set(gen, K(m, "path"), path);
-    Seel_Set(gen, K(m, "mime"), mime);
-    Seel_Set(gen, K(m, "func"), funcW);
-    void *action = NULL;
-
-    if(funcW == NULL || (funcW->type.state & ROUTE_FORBIDDEN)){
+void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
+    if(gen->objType.state & ROUTE_FORBIDDEN){
+        gen->type.state |= (ERROR|NOOP);
+    }else if(gen->objType.state & ROUTE_STATIC){
         /* no action */
-    }else if(funcW->type.state & ROUTE_STATIC){
-        /* no action */
-        action = path;
-    }else if(funcW->type.state & ROUTE_FMT){
-        StrVec *content = File_ToVec(m, path);
+    }else if(gen->objType.state & ROUTE_FMT){
+        StrVec *content = File_ToVec(m, StrVec_Str(m, gen->path));
         Cursor *curs = Cursor_Make(m, content); 
         Roebling *rbl = FormatFmt_Make(m, curs, NULL);
         Roebling_Run(rbl);
         if(rbl->type.state & ERROR){
-            args[0] = path;
+            void *args[2];
+            args[0] = gen->path;
             args[1] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing template for $", args);
-            rt->type.state |= ERROR;
+            gen->type.state |= ERROR;
             DebugStack_Pop();
-            return NULL;
+            return;
         }
 
-        action = rbl->dest;
-    }else if(funcW->type.state & ROUTE_DYNAMIC){
-        Templ *templ = prepareTempl(rt, path);
-        if(templ != NULL){
-            Span_Set(rt, ROUTE_PROPIDX_TEMPL, templ);
+        gen->action = (Abstract *)rbl->dest;
+        gen->type.state |= PROCESSING;
+    }else if(gen->objType.state & ROUTE_DYNAMIC){
+        StrVec *content = File_ToVec(m, StrVec_Str(m, gen->path));
+
+        if(content == NULL || content->total == 0){
+            void *args[3];
+            args[0] = gen->path;
+            args[1] = content;
+            args[2] = NULL;
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error path for Templ has no content for: $ -> @", args);
+            gen->type.state |= ERROR;
+            return;
         }
-        action = templ;
-    }else if(funcW->type.state & ROUTE_BINSEG){
+
+        Buff *bf = Buff_Make(m, ZERO);
+
+        Cursor *curs = Cursor_Make(m, content);
+        TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+
+        Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+        if((Templ_Prepare(templ) & PROCESSING) == 0){
+            void *args[2];
+            args[0] = gen->path;
+            args[1] = NULL;
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Error preparing template for $", args);
+            gen->type.state |= ERROR;
+            Templ_Reset(templ);
+            return;
+        }
+
+        gen->action = (Abstract *)templ;
+        gen->type.state |= PROCESSING;
+    }else if(gen->objType.state & ROUTE_BINSEG){
         word flags = BINSEG_REVERSED;
         
         Table *seel = NULL;
         if(config != NULL){
-            NodeObj *rbsConfig = Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET);
-            StrVec *actionV = NodeObj_Att(rbsConfig, K(m, "action"));
+            NodeObj *rbsConfig =
+                Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET, NULL);
+            StrVec *actionV = Inst_Att(rbsConfig, K(m, "action"));
             Span *actions = Config_Sequence(m, actionV);
             Iter it;
             Iter_Init(&it, actions);
@@ -160,125 +128,120 @@ void Gen_Setup(Inst *gen, StrVec *path, Str *mime, Single *funcW, NodeObj *confi
                 flags |= BinSeg_ActionByStr(a);
             }
 
-            StrVec *seelName = NodeObj_Att(rbsConfig, K(m, "seel"));
+            StrVec *seelName = Inst_Att(rbsConfig, K(m, "seel"));
             if(seelName != NULL){
                 seel = Table_Get(SeelByName, seelName);
-            }
-
-            StrVec *incPath = StrVec_Copy(m, path);
-            IoUtil_SwapExt(m, incPath, S(m, "tinc"));
-
-            if(File_PathExists(m, StrVec_Str(m, incPath))){
-                Templ *templ = prepareTempl(rt, incPath);
-                if(templ != NULL){
-                    Span_Set(rt, ROUTE_PROPIDX_TEMPL, templ);
-                }
             }
         }
 
         BinSegCtx *ctx = BinSegCtx_Make(m, flags);
-        BinSegCtx_Open(ctx, StrVec_Str(m, path));
+        BinSegCtx_Open(ctx, StrVec_Str(m, gen->path));
         ctx->seel = seel;
-        action = ctx;
-    }
-
-    if(action != NULL){
-        Seel_Set(gen, K(m, "action"), action);
+        gen->action = (Abstract *)ctx;
+        gen->type.state |= PROCESSING;
     }
 }
 
-status Gen_Init(MemCh *m){
+Gen *Gen_FromPath(MemCh *m, StrVec *path, NodeObj *config){
+    StrVec *ext = IoUtil_GetExt(m, path);
+    Gen *def = (Gen *)Table_Get(GenMimeTable, ext);
+    Gen *gen = Gen_Copy(m, def);
+    gen->path = path;
+    gen->source = (Abstract *)config;
+    return gen;
+}
 
-    Table *seel = Table_Make(m);
-    Table_Set(seel, S(m, "path"), I16_Wrapped(m, TYPE_STRVEC));
-    Table_Set(seel, S(m, "atts"), I16_Wrapped(m, TYPE_TABLE));
-    Table_Set(seel, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
-    Table_Set(seel, S(m, "mime"), I16_Wrapped(m, TYPE_STR));
-    Table_Set(seel, S(m, "func"), I16_Wrapped(m, TYPE_SINGLE));
-    Table_Set(seel, S(m, "action"), I16_Wrapped(m, TYPE_ABSTRACT));
-    Seel_Seel(m, seel, S(m, "Gen"), TYPE_WWW_GEN);
+Gen *Gen_Make(MemCh *m){
+    Gen *gen = MemCh_AllocOf(m, sizeof(Gen), TYPE_GEN);
+    gen->type.of = TYPE_GEN;
+    return gen;
+}
 
-    if(RouteFuncTable == NULL){
-        RouteFuncTable = Table_Make(m);
-        RouteMimeTable = Table_Make(m);
-        AllExtSpan = Span_Make(m);
+Gen *Gen_Copy(MemCh *m, Gen *_gen){
+    Gen *gen = MemCh_AllocOf(m, sizeof(Gen), TYPE_GEN);
+    gen->type.of = TYPE_GEN;
+    gen->objType.of = _gen->objType.of;
+    gen->objType.state = _gen->objType.state;
+    gen->func = _gen->func;
+    return gen;
+}
 
-        Str *key = S(m, "html");
-        Span_Add(AllExtSpan, key);
-        Single *funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_STATIC);
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "text/html"));
+void Gen_Init(MemCh *m){
+    if(GenMimeTable == NULL){
+        GenMimeTable = Table_Make(m);
+        MimeLookup = Lookup_Make(m, _MIME_START);
 
-        key = S(m, "png");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_ASSET|ROUTE_STATIC);
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "image/png"));
+        Gen *gen = Gen_Make(m);
+        gen->path = Sv(m, "html");
+        gen->objType.of = MIME_HTML;
+        gen->objType.state = ROUTE_STATIC;
+        gen->func = routeFuncStatic;
+        Table_Set(GenMimeTable, gen->path, gen);
 
-        key = S(m, "jpg");
-        Span_Add(AllExtSpan, key);
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "image/jpeg"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "png");
+        gen->objType.of = MIME_PNG;
+        gen->objType.state = (ROUTE_ASSET|ROUTE_STATIC);
+        gen->func = routeFuncStatic;
+        Table_Set(GenMimeTable, gen->path, gen);
+        Lookup_Add(m, MimeLookup, MIME_HTML, S(m, "image/png"));
 
-        key = S(m, "js");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "text/javascript"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "jpg");
+        gen->objType.of = MIME_JPEG;
+        gen->objType.state = (ROUTE_ASSET|ROUTE_STATIC);
+        gen->func = routeFuncStatic;
+        Table_Set(GenMimeTable, gen->path, gen);
 
-        key = S(m, "css");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "text/css"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "js");
+        gen->objType.of = MIME_JAVASCRIPT;
+        gen->objType.state = (ROUTE_ASSET|ROUTE_STATIC);
+        gen->func = routeFuncStatic;
+        Table_Set(GenMimeTable, gen->path, gen);
 
-        key = S(m, "body");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_STATIC);
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "text/html"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "css");
+        gen->objType.of = MIME_CSS;
+        gen->objType.state = (ROUTE_ASSET|ROUTE_STATIC);
+        gen->func = routeFuncStatic;
+        Table_Set(GenMimeTable, gen->path, gen);
 
-        key = S(m, "txt");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncStatic);
-        funcW->type.state |= (ROUTE_STATIC|ROUTE_ASSET);
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "text/plain"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "txt");
+        gen->objType.of = MIME_TEXT;
+        gen->objType.state = (ROUTE_ASSET|ROUTE_STATIC);
+        gen->func = routeFuncStatic;
+        Table_Set(GenMimeTable, gen->path, gen);
 
-        key = S(m, "fmt");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncFmt);
-        funcW->type.state |= ROUTE_FMT;
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "text/html"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "fmt");
+        gen->objType.of = MIME_HTML;
+        gen->objType.state = ROUTE_FMT;
+        gen->func = routeFuncFmt;
+        Table_Set(GenMimeTable, gen->path, gen);
 
-        key = S(m, "rbs");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncFileDb);
-        funcW->type.state |= ROUTE_BINSEG;
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "*/*"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "rbs");
+        gen->objType.of = MIME_JSON;
+        gen->objType.state = ROUTE_BINSEG;
+        gen->func = routeFuncFileDb;
+        Table_Set(GenMimeTable, gen->path, gen);
 
-        key = S(m, "templ");
-        Span_Add(AllExtSpan, key);
-        funcW = Func_Wrapped(m, routeFuncTempl);
-        funcW->type.state |= ROUTE_DYNAMIC;
-        Table_Set(RouteFuncTable, key, funcW);
-        Table_Set(RouteMimeTable,
-            key, S(m, "text/html"));
+        gen = Gen_Make(m);
+        gen->path = Sv(m, "templ");
+        gen->objType.of = MIME_HTML;
+        gen->objType.state = ROUTE_DYNAMIC;
+        gen->func = routeFuncTempl;
+        Table_Set(GenMimeTable, gen->path, gen);
+
+        Lookup_Add(m, MimeLookup, MIME_HTML, S(m, "text/html"));
+        Lookup_Add(m, MimeLookup, MIME_CSS, S(m, "image/css"));
+        Lookup_Add(m, MimeLookup, MIME_TEXT, S(m, "text/plain"));
+        Lookup_Add(m, MimeLookup, MIME_PNG, S(m, "image/png"));
+        Lookup_Add(m, MimeLookup, MIME_JPEG, S(m, "image/jpeg"));
+        Lookup_Add(m, MimeLookup, MIME_JAVASCRIPT, S(m, "text/javascript"));
+        Lookup_Add(m, MimeLookup, MIME_JSON, S(m, "application/json"));
+
     }
 }

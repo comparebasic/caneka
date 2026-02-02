@@ -19,21 +19,13 @@ enum route_prop_idx {
     ROUTE_ROUTE_GENS = 3,
 };
 
-extern struct span *RouteFuncTable;
-extern struct span *RouteMimeTable;
+void Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAtts);
+void Route_CollectConfig(Route *root,
+        StrVec *name, StrVec *path, Table *configAtts);
+void Route_CheckGenEtag(Gen *gen, StrVec *etag, Table *headers);
+void Route_SetGenEtag(MemCh *m, Gen *gen, struct timespec *mod, Table *headers);
+void Route_Prepare(Route *rt);
+void Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx);
+Route *Route_Get(Route *root, StrVec *path);
 
-typedef status (*RouteFunc)(Buff *bf, Route *rt, Inst *data, HttpCtx *ctx);
-
-Route *Route_Make(MemCh *m);
-Route *Route_From(MemCh *m, StrVec *dir);
-status Route_SetTargetFile(Route *rt, Str *ext, Str *absPath);
-status Route_Handle(Route *rt, Span *dest, Inst *data, HttpCtx *ctx);
-status Route_Prepare(Route *rt);
-Route *Route_Get(Route *rt, StrVec *path);
-Single *Route_MimeFunc(StrVec *path);
-
-status Route_CheckEtag(Route *rt, StrVec *etag);
-status Route_SetEtag(Route *rt, Str *path, struct timespec *mod);
-status Route_CollectConfig(Route *root, StrVec *name, StrVec *path, Table *configAtts);
-
-status Route_Init(MemCh *m);
+void Route_Init(MemCh *m);

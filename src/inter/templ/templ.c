@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-Templ *Templ_ForFile(MemCh *m,, StrVec *path){
-    StrVec *content = File_ToVec(m, path);
+Templ *Templ_ForFile(MemCh *m, StrVec *path){
+    StrVec *content = File_ToVec(m, StrVec_Str(m, path));
     Cursor *curs = Cursor_Make(m, content);
     TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
     if((ctx->type.state & SUCCESS) == 0){

@@ -1,6 +1,6 @@
+#include "www/gen.h"
 #include "www/route.h"
 #include "www/nav.h"
 #include "www/webserver.h"
 #include "www/utils.h"
-#include "www/gen.h"
 #include "www/page.h"
