@@ -79,24 +79,33 @@ i32 main(int argc, char **argv){
             Sv(m, "out"), NULL, SPAN_OP_GET, NULL);
 
         outDir = Inst_Att(out, K(m, "dir"));
-        NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page"));
-        page = Inst_Make(m, TYPE_WWW_PAGE);
+        NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page"), NULL, SPAN_OP_GET, NULL);
+        WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
         Seel_Set(page, K(m, "name"), Sv(m, "docPage"));
 
         /* header */
+        StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
+        Gen *headerGen = Gen_FromPath(m, headerPath, NULL);
         /* footer */
-        /* content */
+        StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
+        Gen *footerGen = Gen_FromPath(m, footerPath, NULL);
+        /* nav */
+        StrVec *navPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "nav")));
+        Gen *navGen = Gen_FromPath(m, navPath, NULL);
+
+        NodeObj *in = Inst_ByPath(configNode,
+            Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
 
         void *args[] = {
             in,
             outDir,
             page,
+            footerGen,
+            headerGen,
+            navGen,
             NULL
         };
-        Out("^y.in @\nout @\n page @^0\n", args);
-
-        NodeObj *in = Inst_ByPath(configNode,
-            Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
+        Out("^y.in @\nout @\n page @^0\nheader @\nfooter @\nnav @\n", args);
     }
 
     CliArgs_Free(cli);

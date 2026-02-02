@@ -1,16 +1,5 @@
 typedef Inst Route;
 
-enum route_flags {
-    ROUTE_STATIC = 1 << 8,
-    ROUTE_DYNAMIC = 1 << 9,
-    ROUTE_FMT = 1 << 10,
-    ROUTE_INDEX = 1 << 13,
-    ROUTE_BINSEG = 1 << 11,
-    ROUTE_ASSET = 1 << 12,
-    ROUTE_ACTION = 1 << 14,
-    ROUTE_FORBIDDEN = 1 << 15,
-};
-
 enum route_prop_idx {
     ROUTE_PROPIDX_PATH = 0,
     ROUTE_PROPIDX_DATA = 1,

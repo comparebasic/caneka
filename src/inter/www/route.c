@@ -36,7 +36,7 @@ void Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAtts
         return NULL;
     }
 
-    if(funcW->type.state & ROUTE_FORBIDDEN){
+    if(funcW->type.state & GEN_FORBIDDEN){
         return NULL;
     }
     
@@ -45,13 +45,13 @@ void Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAtts
     Str *index = Str_FromCstr(m, "index", ZERO);
     word flags = ZERO;
     if(Equals(name, index)){
-        flags |= ROUTE_INDEX;
+        flags |= GEN_INDEX;
         route = Inst_ByPath(root, name, NULL, SPAN_OP_GET, NULL);
         if(route == NULL){
             route = Inst_Make(m, TYPE_WWW_ROUTE);
         }
     }else{
-        if((funcW->type.state & ROUTE_ASSET) == 0){
+        if((funcW->type.state & GEN_ASSET) == 0){
             IoUtil_SwapExt(m, name, NULL);
         }else{
             name = Path_ReJoinExt(m, name);
@@ -64,11 +64,11 @@ void Route_BuildRoute(Route *root, StrVec *name, StrVec *path, Table *configAtts
     void *args[] = {name, path, configAtts, mime, ext, NULL};
     Out("^y.  Building path ^0.@^y.\n  @ from @\nmime @ ext @\n^0", args);
 
-    Span_Set(subRt, ROUTE_PROPIDX_PATH, objPath);
-    Span_Set(subRt, ROUTE_PROPIDX_FILE, abs);
-    Span_Set(subRt, ROUTE_PROPIDX_FUNC, funcW);
-    Span_Set(subRt, ROUTE_PROPIDX_MIME, mime);
-    Span_Set(subRt, ROUTE_PROPIDX_TYPE, ext);
+    Span_Set(subRt, GEN_PROPIDX_PATH, objPath);
+    Span_Set(subRt, GEN_PROPIDX_FILE, abs);
+    Span_Set(subRt, GEN_PROPIDX_FUNC, funcW);
+    Span_Set(subRt, GEN_PROPIDX_MIME, mime);
+    Span_Set(subRt, GEN_PROPIDX_TYPE, ext);
     subRt->type.state |= (funcW->type.state|flags);
     */
 
@@ -111,7 +111,7 @@ void Route_CollectConfig(Route *root,
 }
 
 void Route_CheckGenEtag(Gen *gen, StrVec *etag, Table *headers){
-    if((gen->objType.state & ROUTE_ASSET) == 0){
+    if((gen->objType.state & GEN_ASSET) == 0){
         return;
     }
     StrVec *etagRegistered = Table_Get(headers, K(headers->m, "Etag"));
@@ -157,7 +157,7 @@ void Route_Prepare(Route *rt){
     StrVec *type = (StrVec *)Seel_Get(rt, S(m, "type"));
     StrVec *token = StrVec_Make(m);
     StrVec_AddVec(token, (StrVec *)Seel_Get(rt, S(m, "path")));
-    if(rt->type.state & ROUTE_INDEX){
+    if(rt->type.state & GEN_INDEX){
         StrVec_Add(token, Str_FromCstr(m, "index", ZERO));
     }
     Single *funcW = (Single *)as(
@@ -171,13 +171,13 @@ void Route_Prepare(Route *rt){
     File_ModTime(m, pathS, &mod);
     Table_Set(headers, K(m, "Last-Modified"), Time_ToRStr(m, &mod));
 
-    if(funcW != NULL && (funcW->type.state & ROUTE_ASSET)){
+    if(funcW != NULL && (funcW->type.state & GEN_ASSET)){
 
         Route_SetEtag(rt, pathS, &mod);
     }
 
-    if(funcW == NULL || (funcW->type.state & ROUTE_STATIC)){
-        Span_Set(rt, ROUTE_PROPIDX_ACTION, path);
+    if(funcW == NULL || (funcW->type.state & GEN_STATIC)){
+        Span_Set(rt, GEN_PROPIDX_ACTION, path);
     }
 
     NodeObj *config = Route_addConfigData(ctx, rt, token);
