@@ -85,13 +85,20 @@ i32 main(int argc, char **argv){
 
         /* header */
         StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
+
+        void *ar[] = {headerPath, NULL};
+        Out("^c. headerPath @^0\n", ar);
+
         Gen *headerGen = Gen_FromPath(m, headerPath, NULL);
+        Gen_Setup(m, headerGen, NULL);
         /* footer */
         StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
         Gen *footerGen = Gen_FromPath(m, footerPath, NULL);
+        Gen_Setup(m, footerGen, NULL);
         /* nav */
         StrVec *navPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "nav")));
         Gen *navGen = Gen_FromPath(m, navPath, NULL);
+        Gen_Setup(m, navGen, NULL);
 
         NodeObj *in = Inst_ByPath(configNode,
             Sv(m, "in"), NULL, SPAN_OP_GET, NULL);

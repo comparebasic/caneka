@@ -196,12 +196,6 @@ StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v){
         if(first != NULL && first->bytes[0] == '/'){
             return StrVec_Copy(m, v);
         }
-
-        if(first->length >= 2 && first->bytes[0] == '.' && first->bytes[1] == '/'){
-            first = Str_Clone(m, first);
-            Str_Incr(first, 2);
-            v->total -= 2;
-        }
     }
 
     StrVec *path = StrVec_Make(m);
@@ -209,11 +203,22 @@ StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v){
     char *cstr = getcwd((char *)s->bytes, STR_DEFAULT);
     s->length = strlen(cstr);
     StrVec_Add(path, s);
-    if(s->length > 0 && s->bytes[s->length-1] != '/' &&
-            first->length > 0 && first->bytes[0] != '/'){
-        StrVec_Add(path, Str_Ref(m, (byte *)"/", 1, 2, MORE));
+
+    Iter it;
+    Iter_Init(&it, v->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+
+        if(it.idx == 0 && s->length > 1 && s->bytes[0] == '.' &&
+                s->bytes[1] == '/'){
+            s = Str_Copy(m, s);
+            Str_Incr(s, 1);
+        }else{
+            StrVec_Add(path, S(m, "/"));
+        }
+
+        StrVec_Add(path, s);
     }
-    StrVec_AddVec(path, v);
     
     IoUtil_Annotate(m, path);
     return path;

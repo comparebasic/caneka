@@ -11,7 +11,7 @@ status WwwPage_Init(MemCh *m){
     Table_Set(tbl, S(m, "name"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(tbl, S(m, "atts"), I16_Wrapped(m, TYPE_TABLE));
     Table_Set(tbl, S(m, "children"), I16_Wrapped(m, TYPE_TABLE));
-    Table_Set(tbl, S(m, "nav"), I16_Wrapped(m, TYPE_WWW_NAV));
+    Table_Set(tbl, S(m, "nav"), I16_Wrapped(m, TYPE_ITER));
     Table_Set(tbl, S(m, "coords"), I16_Wrapped(m, TYPE_SPAN));
     Table_Set(tbl, S(m, "url"), I16_Wrapped(m, TYPE_STRVEC));
     Table_Set(tbl, S(m, "gens"), I16_Wrapped(m, TYPE_SPAN));

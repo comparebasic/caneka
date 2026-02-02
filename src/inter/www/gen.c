@@ -57,11 +57,13 @@ static void routeFuncFileDb(Gen *gen, Buff *bf, Table *data){
 }
 
 void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
-    if(gen->objType.state & GEN_FORBIDDEN){
+    printf("Gen Setup\n");
+    fflush(stdout);
+    if(gen->type.state & GEN_FORBIDDEN){
         gen->type.state |= (ERROR|NOOP);
-    }else if(gen->objType.state & GEN_STATIC){
+    }else if(gen->type.state & GEN_STATIC){
         /* no action */
-    }else if(gen->objType.state & GEN_FMT){
+    }else if(gen->type.state & GEN_FMT){
         StrVec *content = File_ToVec(m, StrVec_Str(m, gen->path));
         Cursor *curs = Cursor_Make(m, content); 
         Roebling *rbl = FormatFmt_Make(m, curs, NULL);
@@ -79,7 +81,7 @@ void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
 
         gen->action = (Abstract *)rbl->dest;
         gen->type.state |= PROCESSING;
-    }else if(gen->objType.state & GEN_DYNAMIC){
+    }else if(gen->type.state & GEN_DYNAMIC){
         StrVec *content = File_ToVec(m, StrVec_Str(m, gen->path));
 
         if(content == NULL || content->total == 0){
@@ -112,7 +114,7 @@ void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
 
         gen->action = (Abstract *)templ;
         gen->type.state |= PROCESSING;
-    }else if(gen->objType.state & GEN_BINSEG){
+    }else if(gen->type.state & GEN_BINSEG){
         word flags = BINSEG_REVERSED;
         
         Table *seel = NULL;
