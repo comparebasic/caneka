@@ -15,3 +15,4 @@ status Templ_Reset(Templ *templ);
 status Templ_ToSCycle(Templ *templ, Buff *bf, void *source);
 status Templ_ToS(Templ *templ, Buff *bf, void *data, void *source);
 status Templ_SetData(Templ *templ, void *data);
+Templ *Templ_ForFile(MemCh *m, StrVec *path);

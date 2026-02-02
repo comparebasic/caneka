@@ -114,9 +114,9 @@ status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Span *genlist);
 status BuildCtx_GenStrArr(BuildCtx *ctx, Span *files, Str *filter);
 status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter);
 
-status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel);
-status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel);
-status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel);
+status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel);
+status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel);
+status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel);
 
 status BuildCtx_ToSInit(MemCh *m);
 

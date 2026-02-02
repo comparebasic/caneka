@@ -1,18 +1,20 @@
 #include <external.h>
 #include <caneka.h>
-#include <clineka_module.h>
+#include <doc_module.h>
 
 i32 main(int argc, char **argv){
-    void *args[16];
     status r = READY;
     MemBook *cp = MemBook_Make(NULL);
+    i32 code = 0;
     if(cp == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            "MemBook created successfully", NULL);
     }
 
     MemCh *m = MemCh_Make();
     if(m == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh created successfully", NULL);
+        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            "MemCh created successfully", NULL);
     }
 
     Caneka_Init(m);
@@ -58,9 +60,43 @@ i32 main(int argc, char **argv){
 
     Str *config = CliArgs_Get(cli, configKey);
     NodeObj *configNode = NULL;
-    if(config != NULL){
+    if(config == NULL){
+        Out("^y.No config specified, exiting.^0\n", NULL);
+        code = 1;
+    }else{
         Str *path = IoUtil_GetAbsPath(m, config);
         configNode = Config_FromPath(m, path);
+
+        StrVec *root = NULL;
+        StrVec *fmtRoot = NULL;
+        StrVec *cRoot = NULL;
+        StrVec *outDir = NULL;
+        WwwPage *srcPage = NULL;
+        WwwPage *fmtPage = NULL;
+        WwwNav *nav = NULL;
+
+        NodeObj *out = Inst_ByPath(configNode,
+            Sv(m, "out"), NULL, SPAN_OP_GET, NULL);
+
+        outDir = Inst_Att(out, K(m, "dir"));
+        NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page"));
+        page = Inst_Make(m, TYPE_WWW_PAGE);
+        Seel_Set(page, K(m, "name"), Sv(m, "docPage"));
+
+        /* header */
+        /* footer */
+        /* content */
+
+        void *args[] = {
+            in,
+            outDir,
+            page,
+            NULL
+        };
+        Out("^y.in @\nout @\n page @^0\n", args);
+
+        NodeObj *in = Inst_ByPath(configNode,
+            Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
     }
 
     CliArgs_Free(cli);

@@ -1,7 +1,7 @@
 #include <external.h>
 #include "buildeka_module.h"
 
-status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
+status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     DebugStack_SetRef(ctx->current.dest, ctx->current.dest->type.of);
     MemCh *m = ctx->m;
@@ -34,7 +34,7 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
     return ZERO;
 }
 
-status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSelector *sel){
+status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     void *args[8];
 

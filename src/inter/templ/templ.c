@@ -1,6 +1,19 @@
 #include <external.h>
 #include <caneka.h>
 
+Templ *Templ_ForFile(MemCh *m,, StrVec *path){
+    StrVec *content = File_ToVec(m, path);
+    Cursor *curs = Cursor_Make(m, content);
+    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
+    if((ctx->type.state & SUCCESS) == 0){
+        return NULL;
+    }
+
+    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
+    Templ_Prepare(templ);
+    return templ;
+}
+
 status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
     status r = READY;
     DebugStack_Push(NULL, ZERO);

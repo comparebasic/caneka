@@ -1,7 +1,7 @@
 #include <external.h>
 #include "buildeka_module.h"
 
-static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
+static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[6];
@@ -44,7 +44,7 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     return ZERO;
 }
 
-static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
+static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     status r = READY;
     MemCh *m = ctx->m;
@@ -133,7 +133,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
         while((Iter_Prev(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                DirSelector *dsel = Table_Get(ctx->input.dependencies, h->value);
+                DirSel *dsel = Table_Get(ctx->input.dependencies, h->value);
                 if(dsel == NULL){
                     void *args[] = {h->key, NULL};
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -199,7 +199,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSelector *sel){
 }
 
 static status skipRecent(BuildCtx *ctx, 
-        StrVec *key, DirSelector *sel){
+        StrVec *key, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[5];
@@ -224,7 +224,7 @@ static status skipRecent(BuildCtx *ctx,
     return ZERO;
 }
 
-static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
+static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[5];
@@ -295,7 +295,7 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     return ZERO;
 }
 
-static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
+static status buildExec(BuildCtx *ctx, StrVec *key, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[5];
@@ -339,7 +339,7 @@ static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
             args[4] = NULL;
             StrVec_AddChain(ctx->current.binDest, args);
 
-            BuildCtx_BuildObject(ctx, (StrVec *)h->key, (DirSelector *)h->value);
+            BuildCtx_BuildObject(ctx, (StrVec *)h->key, (DirSel *)h->value);
         }
     }
 
@@ -347,7 +347,7 @@ static status buildExec(BuildCtx *ctx, StrVec *key, DirSelector *sel){
     return ZERO;
 }
 
-status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSelector *sel){
+status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     status r = READY;
     MemCh *m = ctx->m;

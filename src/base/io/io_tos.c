@@ -27,8 +27,8 @@ status StashCoords_Print(Buff *bf, StashCoord *coord, word flags){
     return Buff_AddBytes(bf, (byte *)"]", 1);
 }
 
-status DirSelector_Print(Buff *bf, void *a, cls type, word flags){
-    DirSelector *sel = (DirSelector *)as(a, TYPE_DIR_SELECTOR);
+status DirSel_Print(Buff *bf, void *a, cls type, word flags){
+    DirSel *sel = (DirSel *)as(a, TYPE_DIR_SELECTOR);
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
@@ -135,7 +135,7 @@ status IoTos_Init(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PROCDETS, (void *)ProcDets_Print);
     r |= Lookup_Add(m, lk, TYPE_STASH_ITEM, (void *)StashItem_Print);
     r |= Lookup_Add(m, lk, TYPE_BUFF, (void *)Buff_Print);
-    r |= Lookup_Add(m, lk, TYPE_DIR_SELECTOR, (void *)DirSelector_Print);
+    r |= Lookup_Add(m, lk, TYPE_DIR_SELECTOR, (void *)DirSel_Print);
     r |= Io_InitLabels(m, ToSFlagLookup);
     return r;
 }

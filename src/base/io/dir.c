@@ -2,7 +2,7 @@
  *
  * Functions for managing directories.
  *
- * The DirSelector object is used to query and manage files in a directory
+ * The DirSel object is used to query and manage files in a directory
  */
 
 #include <external.h>
@@ -30,7 +30,7 @@ static status fileHasExt(MemCh *m, void *_file, void *source){
 
 static status fileIsDescendedOrNot(MemCh *m, void *_path, void *source){
     Str *path = _path;
-    DirSelector *sel = (DirSelector *)as(source, TYPE_DIR_SELECTOR);
+    DirSel *sel = (DirSel *)as(source, TYPE_DIR_SELECTOR);
     Span *filter = (Span *)as(sel->source, TYPE_SPAN);
     Iter it;
     Iter_Init(&it, filter);
@@ -77,7 +77,7 @@ static status rmFile(MemCh *m, Str *path, Str *file, void *source){
 static status gatherDir(MemCh *m, Str *path, void *source){
     Span *p = NULL;
     if(source != NULL && ((Abstract *)source)->type.of == TYPE_DIR_SELECTOR){
-        DirSelector *sel = (DirSelector *)source;
+        DirSel *sel = (DirSel *)source;
         if((sel->type.state & DIR_SELECTOR_FILTER_DIRS) &&
                 (sel->func(m, path, sel) & NOOP)){
             return NOOP;
@@ -108,7 +108,7 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
 }
 
 static status gatherFileFiltered(MemCh *m, Str *path, Str *file, void *source){
-    DirSelector *sel = (DirSelector *)source;
+    DirSel *sel = (DirSel *)source;
     if(sel->func(m, file, sel) & SUCCESS){
         Span *p = (Span *)asIfc(sel->dest, TYPE_SPAN);
         StrVec *v = StrVec_Make(m);
@@ -123,7 +123,7 @@ static status gatherFileFiltered(MemCh *m, Str *path, Str *file, void *source){
 }
 
 static status gatherFileSel(MemCh *m, Str *path, Str *file, void *source){
-    DirSelector *sel = (DirSelector *)as(source, TYPE_DIR_SELECTOR);
+    DirSel *sel = (DirSel *)as(source, TYPE_DIR_SELECTOR);
     status r = READY;
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, path);
@@ -186,8 +186,8 @@ status Dir_Gather(MemCh *m, Str *path, Span *sp){
     return Dir_Climb(m, path, gatherDir, gatherFile, sp);
 }
 
-DirSelector *Dir_GatherByExt(MemCh *m, Str *path, Span *sp, Span *exts){
-    DirSelector *sel = DirSelector_Make(m,
+DirSel *Dir_GatherByExt(MemCh *m, Str *path, Span *sp, Span *exts){
+    DirSel *sel = DirSel_Make(m,
         NULL, sp, DIR_SELECTOR_NODIRS|DIR_SELECTOR_FILTER);
     sel->func = fileHasExt;
     sel->source = exts;
@@ -198,7 +198,7 @@ DirSelector *Dir_GatherByExt(MemCh *m, Str *path, Span *sp, Span *exts){
     return NULL;
 }
 
-status Dir_GatherSel(MemCh *m, Str *path, DirSelector *sel){
+status Dir_GatherSel(MemCh *m, Str *path, DirSel *sel){
     /* Gather all directories and files with the directory specified in *path
      *
      * path: path to climb
@@ -209,7 +209,7 @@ status Dir_GatherSel(MemCh *m, Str *path, DirSelector *sel){
     return Dir_Climb(m, path, gatherDir, gatherFileSel, sel);
 }
 
-status Dir_GatherFilterDir(MemCh *m, Str *path, DirSelector *sel){
+status Dir_GatherFilterDir(MemCh *m, Str *path, DirSel *sel){
     /* Gather all directories and files with the directory specified in *path
      *
      * path: path to climb
@@ -290,8 +290,8 @@ status Dir_Mk(MemCh *m, Str *path){
     }
 }
 
-DirSelector *DirSelector_Make(MemCh *m, Str *ext, Span *dest, word flags){
-    DirSelector *sel = MemCh_AllocOf(m, sizeof(DirSelector), TYPE_DIR_SELECTOR);
+DirSel *DirSel_Make(MemCh *m, Str *ext, Span *dest, word flags){
+    DirSel *sel = MemCh_AllocOf(m, sizeof(DirSel), TYPE_DIR_SELECTOR);
     sel->type.of = TYPE_DIR_SELECTOR;
     sel->type.state = flags;
     if(dest == NULL){
