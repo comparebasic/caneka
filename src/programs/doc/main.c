@@ -103,6 +103,9 @@ i32 main(int argc, char **argv){
         NodeObj *in = Inst_ByPath(configNode,
             Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
 
+        Table *dirTbl = Table_Make(m);
+        Inst_ChAttsAdd(in, K(m, "dir"), dirTbl);
+
         void *args[] = {
             in,
             outDir,
@@ -110,9 +113,10 @@ i32 main(int argc, char **argv){
             footerGen,
             headerGen,
             navGen,
+            dirTbl,
             NULL
         };
-        Out("^y.in @\nout @\n page @^0\nheader @\nfooter @\nnav @\n", args);
+        Out("^y.in @\nout @\n page @^0\nheader @\nfooter @\nnav @\n dirs @\n", args);
     }
 
     CliArgs_Free(cli);

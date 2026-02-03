@@ -69,17 +69,17 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     if(Dir_Exists(m, pathS) & SUCCESS){
         sel = DirSel_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
+        StrVec *base = StrVec_Copy(m, path);
+        StrVec_Add(base, IoUtil_PathSep(m));
+        StrVec_Add(base, S(m, "option"));
+
+        Span *filter = Span_Make(m);
+        Span_Add(filter, StrVec_Str(m, base));
+        sel->type.state |= DIR_SELECTOR_INVERT;
+        sel->source = filter;
+
+        Dir_GatherFilterDir(m, pathS, sel);
         if(ctx->input.options != NULL && ctx->input.options->nvalues > 0){
-            StrVec *base = StrVec_Copy(m, path);
-            StrVec_Add(base, IoUtil_PathSep(m));
-            StrVec_Add(base, S(m, "option"));
-
-            Span *filter = Span_Make(m);
-            Span_Add(filter, StrVec_Str(m, base));
-            sel->type.state |= DIR_SELECTOR_INVERT;
-            sel->source = filter;
-
-            Dir_GatherFilterDir(m, pathS, sel);
 
             filter = Span_Make(m);
             Iter it;
@@ -99,8 +99,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             sel->type.state &= ~DIR_SELECTOR_INVERT;
             sel->source = filter;
             Dir_GatherFilterDir(m, pathS, sel);
-        }else{
-            Dir_GatherSel(m, pathS, sel);
         }
 
         StrVec *name = StrVec_Make(m);

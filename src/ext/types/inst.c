@@ -1,6 +1,18 @@
 #include <external.h>
 #include <caneka.h>
 
+void Inst_ChAttsAdd(Inst *inst, void *att, Table *tbl){
+    Iter it;
+    Iter_Init(&it, Seel_Get(inst, K(inst->m, "children")));
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            StrVec *key = Inst_Att(h->value, att);
+            Table_Set(tbl, key, h->value);
+        }
+    }
+}
+
 Inst *asInst(MemCh *m, void *a){
     if(a == NULL){
         return NULL;

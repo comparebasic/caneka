@@ -132,6 +132,19 @@ status Table_Merge(Table *dest, Table *src){
     return Table_Lay(dest, src, TRUE);
 }
 
+Span *Table_Keys(Table *tbl){
+    Span *p = Span_Make(tbl->m);
+    Iter it;
+    Iter_Init(&it, tbl);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            Span_Add(p, h->key);
+        }
+    }
+    return p;
+}
+
 Table *Table_GetOrMake(Table *tbl, void *key, word op){
     Abstract *a = (Abstract *)Table_Get(tbl, key);
     if(a == NULL){

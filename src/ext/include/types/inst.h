@@ -15,3 +15,4 @@ Table *Inst_GetTblOfAtt(Inst *nobj, void *key);
 void *Inst_Att(Inst *nobj, void *key);
 status Inst_SetAtt(Inst *nobj, void *key, void *value);
 void *Inst_GetChild(Inst *nobj, void *key);
+void Inst_ChAttsAdd(Inst *inst, void *att, Table *tbl);
