@@ -365,6 +365,18 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     return r;
 }
 
+i32 Path_FlagIdx(StrVec *path, status flags){
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if((s->type.state & flags) == flags){
+            return it.idx;
+        }
+    }
+    return -1;
+}
+
 status Path_Init(MemCh *m){
     status r = READY;
     if(dotPathSeps == NULL){

@@ -58,14 +58,14 @@ i32 main(int argc, char **argv){
         return 1;
     }
 
-    Str *config = CliArgs_Get(cli, configKey);
-    NodeObj *configNode = NULL;
-    if(config == NULL){
+    Str *configPath = CliArgs_Get(cli, configKey);
+    NodeObj *config = NULL;
+    if(configPath == NULL){
         Out("^y.No config specified, exiting.^0\n", NULL);
         code = 1;
     }else{
-        Str *path = IoUtil_GetAbsPath(m, config);
-        configNode = Config_FromPath(m, path);
+        Str *path = IoUtil_GetAbsPath(m, configPath);
+        config = Config_FromPath(m, path);
 
         StrVec *root = NULL;
         StrVec *fmtRoot = NULL;
@@ -75,7 +75,7 @@ i32 main(int argc, char **argv){
         WwwPage *fmtPage = NULL;
         WwwNav *nav = NULL;
 
-        NodeObj *out = Inst_ByPath(configNode,
+        NodeObj *out = Inst_ByPath(config,
             Sv(m, "out"), NULL, SPAN_OP_GET, NULL);
 
         outDir = Inst_Att(out, K(m, "dir"));
@@ -100,11 +100,16 @@ i32 main(int argc, char **argv){
         Gen *navGen = Gen_FromPath(m, navPath, NULL);
         Gen_Setup(m, navGen, NULL);
 
-        NodeObj *in = Inst_ByPath(configNode,
-            Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
+        NodeObj *in = Inst_ByPath(config, Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
 
         Table *dirTbl = Table_Make(m);
         Inst_ChAttsAdd(in, K(m, "dir"), dirTbl);
+        Span *files = Span_Make(m);
+        Doc_Gather(dirTbl, files);
+
+        nav = Inst_Make(m, TYPE_WWW_NAV);
+        Inst_SetAtt(nav, K(m, "coords"), Table_Make(m));
+        Doc_GenNav(config, files, nav);
 
         void *args[] = {
             in,
@@ -113,10 +118,20 @@ i32 main(int argc, char **argv){
             footerGen,
             headerGen,
             navGen,
-            dirTbl,
+            nav,
             NULL
         };
-        Out("^y.in @\nout @\n page @^0\nheader @\nfooter @\nnav @\n dirs @\n", args);
+        Out("^y.in @\nout @\n page @^0\nheader @\nfooter @\nnav @\nfiles @\n",
+            args);
+
+        /*
+        Iter it;
+        Iter_Init(&it, sel->dest);
+        while((config->type.state & ERROR) == 0 && (Iter_Next(&it) & END) == 0){
+            StrVec *path = Iter_Get(&it);
+            Doc_FileOut(config, path, outDir);
+        
+        */
     }
 
     CliArgs_Free(cli);

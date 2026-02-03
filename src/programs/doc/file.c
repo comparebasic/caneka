@@ -3,6 +3,8 @@
 #include <doc_module.h>
 
 void Doc_FileOut(NodeObj *config, StrVec *src, StrVec *dest){
+    void *ar[] = {src, dest, NULL};
+    Out("^c. FileOut @ -> @^0\n", ar);
     /*
     StrVec *src = IoAbsPath(m, "src");
     DocComp *comp = DocComp_FromStr(m, src, S(m, "base.bytes.Str"));

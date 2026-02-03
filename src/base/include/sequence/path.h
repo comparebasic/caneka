@@ -18,3 +18,4 @@ status Path_SpaceAnnotate(MemCh *m, StrVec *v);
 status Path_JoinBase(MemCh *m, StrVec *path);
 StrVec *Path_ReJoinExt(MemCh *m, StrVec *v);
 StrVec *Path_WithoutExt(MemCh *m, StrVec *path);
+i32 Path_FlagIdx(StrVec *path, status flags);

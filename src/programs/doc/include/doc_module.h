@@ -1,3 +1,3 @@
-#include "nav.h"
-#include "file.h"
-#include "gather.h"
+#include "doc_nav.h"
+#include "doc_file.h"
+#include "doc_gather.h"

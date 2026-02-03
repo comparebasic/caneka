@@ -33,11 +33,13 @@ status DirSel_Print(Buff *bf, void *a, cls type, word flags){
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
             Time_ToStr(bf->m, &sel->time),
+            sel->ext,
+            sel->source,
             sel->dest,
             sel->meta,
             NULL
         };
-        return Fmt(bf, "DirSel<@ @ @ meta:@>", args);
+        return Fmt(bf, "DirSel<@ @ ext:@ source:@ files:@ meta:@>", args);
     }else{
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),

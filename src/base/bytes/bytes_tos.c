@@ -126,6 +126,13 @@ status StrVec_Print(Buff *bf, void *a, cls type, word flags){
                 };
                 Fmt(bf, "$: ", args); 
                 Str_Print(bf, s, type, flags|DEBUG);
+            }else if((flags & MORE) && s->type.state){
+                void *args[] = {s, NULL};
+                if(s->type.state & NOOP){
+                    Fmt(bf, "^I.$^i.", args); 
+                }else{
+                    Fmt(bf, "^D.$^d.", args); 
+                }
             }else{
                 Buff_AddBytes(bf, s->bytes, s->length);
             }

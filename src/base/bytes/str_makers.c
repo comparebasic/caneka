@@ -79,6 +79,9 @@ Str *Str_ToTitle(MemCh *m, Str *s){
             ){
             *ptr = b-delta;
         }
+        if(*ptr == '_'){
+            *ptr = ' ';
+        }
         ptr++;
     }
     return title;

@@ -510,6 +510,20 @@ StrVec *StrVec_StrVec(MemCh *m, void *_a){
     }
 }
 
+StrVec *StrVec_SubVec(MemCh *m, StrVec *_v, i32 startIdx, i32 endIdx){
+    StrVec *v = StrVec_Make(m);
+    Iter it;
+    Iter_Init(&it, _v->p);
+    while((Iter_Next(&it) & END) == 0){
+        if(endIdx != -1 && it.idx > endIdx){
+            break;
+        }else if(it.idx >= startIdx){
+            StrVec_Add(v, Iter_Get(&it));
+        }
+    }
+    return v;
+}
+
 StrVec *StrVec_From(MemCh *m, Str *s){
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, s);
