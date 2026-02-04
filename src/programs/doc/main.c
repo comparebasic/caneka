@@ -117,21 +117,12 @@ i32 main(int argc, char **argv){
             page,
             footerGen,
             headerGen,
-            navGen,
             nav,
+            files,
             NULL
         };
         Out("^y.in @\nout @\n page @^0\nheader @\nfooter @\nnav @\nfiles @\n",
             args);
-
-        /*
-        Iter it;
-        Iter_Init(&it, sel->dest);
-        while((config->type.state & ERROR) == 0 && (Iter_Next(&it) & END) == 0){
-            StrVec *path = Iter_Get(&it);
-            Doc_FileOut(config, path, outDir);
-        
-        */
     }
 
     CliArgs_Free(cli);
