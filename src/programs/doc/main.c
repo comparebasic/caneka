@@ -123,10 +123,20 @@ i32 main(int argc, char **argv){
             args);
 
         Iter it;
-        Iter_Init(&it, nav);
-        while((Iter_Next(&it) & END) == 0){
-            StrVec *fname = Iter_Get(&it);
-            void *ar[] = {fname, };
+        Iter2d_InstInit(m, nav, &it);
+        while((it.type.state & END) == 0){
+            Iter2d_InstNext(&it);
+            Abstract *a = Iter2d_Get(&it);
+            if(a != NULL){
+                if(a->type.of == TYPE_WWW_NAV){
+                    void *ar[] = {
+                        Seel_Get((Inst *)a, K(m, "name")),
+                        a,
+                        NULL
+                    };
+                    Out("^y.Nav Item @ -> @^0\n", ar);
+                }
+            }
         }
     }
 
