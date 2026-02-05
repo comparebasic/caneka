@@ -117,12 +117,17 @@ i32 main(int argc, char **argv){
             page,
             footerGen,
             headerGen,
-            nav,
-            files,
             NULL
         };
-        Out("^y.in @\nout @\n page @^0\nheader @\nfooter @\nnav @\nfiles @\n",
+        Out("^y.in @\nout @\n page @^0\nheader @\nfooter \n",
             args);
+
+        Iter it;
+        Iter_Init(&it, nav);
+        while((Iter_Next(&it) & END) == 0){
+            StrVec *fname = Iter_Get(&it);
+            void *ar[] = {fname, };
+        }
     }
 
     CliArgs_Free(cli);
