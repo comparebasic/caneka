@@ -434,7 +434,7 @@ status Iter_Next(Iter *it){
         it->type.state &= ~END;
     }
 
-    if((it->type.state & END) || !(it->type.state & PROCESSING)){
+    if((it->type.state & END) || (it->type.state & PROCESSING) == 0){
         word fl = it->type.state & ~(END|LAST);
         if(it->type.state & END){
             idx = 0;
@@ -582,7 +582,7 @@ status Iter_SetByIdx(Iter *it, i32 idx, void *value){
 }
 
 status Iter_ExpandTo(Iter *it, i32 idx){
-    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_RESERVE|SPAN_OP_SET);
+    it->type.state = (it->type.state & PROCESSING) | (SPAN_OP_RESERVE|SPAN_OP_SET);
     it->idx = idx;
     it->value = NULL;
     status r = Iter_Query(it);
@@ -591,7 +591,7 @@ status Iter_ExpandTo(Iter *it, i32 idx){
 }
 
 status Iter_Push(Iter *it, void *value){
-    it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
+    it->type.state = (it->type.state & (NORMAL_FLAGS|PROCESSING)) | SPAN_OP_ADD;
     it->idx = it->p->max_idx;
     it->value = value;
     status r = Iter_Query(it);
@@ -603,7 +603,6 @@ status Iter_Add(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
     it->value = value;
     status r = Iter_Query(it);
-    it->type.state &= ~PROCESSING;
     return r;
 }
 

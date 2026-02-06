@@ -111,6 +111,7 @@ i32 main(int argc, char **argv){
         Inst_SetAtt(nav, K(m, "coords"), Table_Make(m));
         Doc_GenNav(config, files, nav);
 
+        /*
         void *args[] = {
             in,
             outDir,
@@ -121,6 +122,7 @@ i32 main(int argc, char **argv){
         };
         Out("^y.in @\nout @\n page @^0\nheader @\nfooter \n",
             args);
+        */
 
         Iter it;
         Iter2d_InstInit(m, nav, &it);
@@ -131,10 +133,15 @@ i32 main(int argc, char **argv){
                 if(a->type.of == TYPE_WWW_NAV){
                     void *ar[] = {
                         Seel_Get((Inst *)a, K(m, "name")),
+                        NULL
+                    };
+                    Out("^y.Nav Item @^0\n", ar);
+                }else{
+                    void *ar[] = {
                         a,
                         NULL
                     };
-                    Out("^y.Nav Item @ -> @^0\n", ar);
+                    Out("^y.? @^0\n", ar);
                 }
             }
         }
