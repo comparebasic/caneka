@@ -57,8 +57,6 @@ static void routeFuncFileDb(Gen *gen, Buff *bf, Table *data){
 }
 
 void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
-    printf("Gen Setup\n");
-    fflush(stdout);
     if(gen->type.state & GEN_FORBIDDEN){
         gen->type.state |= (ERROR|NOOP);
     }else if(gen->type.state & GEN_STATIC){

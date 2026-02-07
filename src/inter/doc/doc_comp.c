@@ -5,8 +5,7 @@ NodeObj *DocComp_Gather(MemCh *m, StrVec *src, Str *s){
     return NULL;
 }
 
-NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, Str *s){
-    StrVec *name = StrVec_From(m, s);
+NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, StrVec *name){
     Path_DotAnnotate(m, name);
     Str *first = Span_Get(name->p, 0);
     Str_ToTitle(m, first);

@@ -227,9 +227,11 @@ static status Iter_Query(Iter *it){
                 ptr = (void **)it->stack[0];
                 it->type.state |= SUCCESS;
                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
+                    if(*ptr == NULL){
+                        p->nvalues++;
+                    }
                     *ptr = it->value;
                     it->metrics.set = it->idx;
-                    p->nvalues++;
                     if(it->idx > p->max_idx){
                         p->max_idx = it->idx;
                     }
@@ -281,6 +283,7 @@ static status _Iter_Prev(Iter *it){
     }
 
     if(it->p == NULL || it->p->nvalues == 0){
+        idx = -1;
         it->type.state |= END; 
         goto end;
     }

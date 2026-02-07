@@ -72,10 +72,10 @@ Str *Str_ToTitle(MemCh *m, Str *s){
     i32 delta = 'a' - 'A';
     while(ptr <= end){
         byte b = *ptr;
-        if(ptr == title->bytes || 
+        if((ptr == title->bytes && (*ptr >= 'a' && *ptr <= 'z')) || (
                 (!(*(ptr-1) >= 'A' && *(ptr-1) <= 'Z')) &&
-                (!(*(ptr-1) >= 'a' && *(ptr-1) <= 'z')) &&
-                (b >= 'a' && b <= 'z')
+                    (!(*(ptr-1) >= 'a' && *(ptr-1) <= 'z')) &&
+                        (b >= 'a' && b <= 'z'))
             ){
             *ptr = b-delta;
         }

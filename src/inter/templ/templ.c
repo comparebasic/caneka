@@ -120,7 +120,7 @@ status Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
 
     while((r |= Templ_ToSCycle(templ, bf, source) != NOOP) && 
         (templ->type.state & OUTCOME_FLAGS) == 0){
-        Guard_Incr(templ->m, &g, 128, FUNCNAME, FILENAME, LINENUMBER);
+        Guard_Incr(templ->m, &g, 1024, FUNCNAME, FILENAME, LINENUMBER);
     }
     DebugStack_Pop();
     templ->m->level--; 

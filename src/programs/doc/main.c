@@ -86,9 +86,6 @@ i32 main(int argc, char **argv){
         /* header */
         StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
 
-        void *ar[] = {headerPath, NULL};
-        Out("^c. headerPath @^0\n", ar);
-
         Gen *headerGen = Gen_FromPath(m, headerPath, NULL);
         Gen_Setup(m, headerGen, NULL);
         /* footer */
@@ -125,17 +122,27 @@ i32 main(int argc, char **argv){
         */
 
         Iter it;
-        Iter2d_InstInit(m, nav, &it);
-        while((it.type.state & END) == 0){
-            Iter2d_InstNext(&it);
+        for(Iter2d_InstInit(m, nav, &it); (it.type.state & END) == 0;
+                Iter2d_InstNext(&it)){
             Abstract *a = Iter2d_Get(&it);
             if(a != NULL){
                 if(a->type.of == TYPE_WWW_NAV){
-                    void *ar[] = {
-                        Seel_Get((Inst *)a, K(m, "name")),
-                        NULL
-                    };
-                    Out("^y.Nav Item @^0\n", ar);
+                    StrVec *name = Seel_Get((Inst *)a, K(m, "name"));
+                    if(!Empty(name) && !Equals(name, S(m, "README"))
+                             && !Equals(name, S(m, "Inc"))){
+
+                        Inst *page = Inst_Make(m, TYPE_WWW_PAGE);
+
+                        Table *coordTbl = Inst_Att(nav, K(m, "coords"));
+                        Iter *navIt = Iter_Make(m, NULL);
+                        Span *crd = Table_Get(coordTbl, name);
+                        NestSel_Init(navIt, nav, crd);
+                        Seel_Set(page, S(m, "nav"), navIt); 
+
+                        StrVec *dest = NULL;
+                        Doc_FileOut(page, (WwwNav *)a, dest);
+                        exit(1);
+                    }
                 }else{
                     void *ar[] = {
                         a,

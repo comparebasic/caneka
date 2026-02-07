@@ -25,8 +25,12 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
         WwwNav *item = WwwNav_Make(m, route, StrVec_From(m, name));
         Inst_SetAtt(item, K(m, "fpath"), file);
 
-        void *ar[] = {item, NULL};
-        Out("^p.Item @^0\n", ar);
+        StrVec *display = StrVec_SubVec(m,
+            file,
+            Path_FlagIdx(file, (MORE|NOOP))+1,
+            Path_FlagIdx(file, (LAST))-2);
+
+        Inst_SetAtt(item, K(m, "display-path"), display);
 
         WwwNav_Add(nav, item, coords);
     }
