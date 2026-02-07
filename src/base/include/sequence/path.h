@@ -19,3 +19,5 @@ status Path_JoinBase(MemCh *m, StrVec *path);
 StrVec *Path_ReJoinExt(MemCh *m, StrVec *v);
 StrVec *Path_WithoutExt(MemCh *m, StrVec *path);
 i32 Path_FlagIdx(StrVec *path, status flags);
+i32 Path_FlagLastIdx(StrVec *path, status flags);
+void Path_SwapSep(StrVec *path, Str *s, status flags);

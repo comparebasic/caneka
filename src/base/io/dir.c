@@ -303,6 +303,11 @@ DirSel *DirSel_Make(MemCh *m, Str *ext, Span *dest, word flags){
     return sel;
 }
 
+status Dir_CheckCreateFor(MemCh *m, StrVec *fpath){
+    StrVec *dpath = StrVec_SubVec(m, fpath, 0, Path_FlagLastIdx(fpath, MORE));
+    return Dir_CheckCreate(m, StrVec_Str(m, dpath));
+}
+
 status Dir_CheckCreate(MemCh *m, Str *path){
     /* 
      * :deprecated

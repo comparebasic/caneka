@@ -4,7 +4,9 @@
 
 void Doc_FileOut(WwwPage *page, WwwNav *item, StrVec *dest){
     MemCh *m = page->m;
-    Buff *bf = Buff_Make(m, ZERO);
+    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
+    Dir_CheckCreateFor(m, dest);
+    File_Open(bf, StrVec_Str(m, dest), O_WRONLY|O_CREAT);
 
     Table *data = Table_Make(m);
     Table_Set(data, S(m, "page"), page);
@@ -21,7 +23,6 @@ void Doc_FileOut(WwwPage *page, WwwNav *item, StrVec *dest){
 
     StrVec *fpath = Inst_Att(item, K(m, "fpath"));
 
-
     content = File_ToVec(m, StrVec_Str(m, fpath));
     void *_ar[] = {fpath, NULL};
     Out("^p.Fpath @^0\n", _ar);
@@ -37,10 +38,11 @@ void Doc_FileOut(WwwPage *page, WwwNav *item, StrVec *dest){
     void *ar[] = {
         item,
         bf->v,
+        dest,
         NULL
     };
 
-    Out("^y.Nav Item @ navHtml @^0\n", ar);
+    Out("^y.Nav Item @ navHtml @^0 -> @\n", ar);
 
     return;
 }

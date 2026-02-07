@@ -78,7 +78,7 @@ i32 main(int argc, char **argv){
         NodeObj *out = Inst_ByPath(config,
             Sv(m, "out"), NULL, SPAN_OP_GET, NULL);
 
-        outDir = Inst_Att(out, K(m, "dir"));
+        outDir = IoUtil_AbsVec(m, Inst_Att(out, K(m, "dir")));
         NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page"), NULL, SPAN_OP_GET, NULL);
         WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
         Seel_Set(page, K(m, "name"), Sv(m, "docPage"));
@@ -127,7 +127,8 @@ i32 main(int argc, char **argv){
             Abstract *a = Iter2d_Get(&it);
             if(a != NULL){
                 if(a->type.of == TYPE_WWW_NAV){
-                    StrVec *name = Seel_Get((Inst *)a, K(m, "name"));
+                    WwwNav *item = (WwwNav *)a;
+                    StrVec *name = Seel_Get(item, K(m, "name"));
                     if(!Empty(name) && !Equals(name, S(m, "README"))
                              && !Equals(name, S(m, "Inc"))){
 
@@ -139,16 +140,18 @@ i32 main(int argc, char **argv){
                         NestSel_Init(navIt, nav, crd);
                         Seel_Set(page, S(m, "nav"), navIt); 
 
-                        StrVec *dest = NULL;
-                        Doc_FileOut(page, (WwwNav *)a, dest);
+                        StrVec *out = StrVec_Copy(m, outDir);
+                        StrVec_AddVec(out, Inst_Att(item, K(m, "out-path")));
+                        Doc_FileOut(page, item, out);
                         exit(1);
                     }
                 }else{
                     void *ar[] = {
                         a,
+                        outDir,
                         NULL
                     };
-                    Out("^y.? @^0\n", ar);
+                    Out("^y.? @^0\noutDir @\n", ar);
                 }
             }
         }

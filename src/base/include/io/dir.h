@@ -33,6 +33,7 @@ DirSel *Dir_GatherByExt(MemCh *m, Str *path, Span *sp, Span *exts);
 status Dir_Exists(MemCh *m, Str *path);
 status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source);
 status Dir_CheckCreate(MemCh *m, Str *path);
+status Dir_CheckCreateFor(MemCh *m, StrVec *fpath);
 status Dir_Mk(MemCh *m, Str *path);
 status Dir_Rm(MemCh *m, Str *path);
 

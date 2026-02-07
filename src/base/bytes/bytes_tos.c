@@ -1,3 +1,7 @@
+/*
+ * ToStream and state label functions for Bytes component 
+ */
+
 #include <external.h>
 #include "base_module.h"
 

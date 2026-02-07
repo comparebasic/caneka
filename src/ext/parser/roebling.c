@@ -158,6 +158,7 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
 
 status Roebling_RunCycle(Roebling *rbl){
     DebugStack_Push(rbl, rbl->type.of);
+    DebugStack_SetRef(rbl->curs, rbl->curs->type.of);
     if(rbl->parseIt.p->nvalues == 0){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Roebling parsers not set", NULL);
