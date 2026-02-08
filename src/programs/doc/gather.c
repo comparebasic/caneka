@@ -13,8 +13,7 @@ void Doc_Gather(Table *tbl, Span *files){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
 
-            DirSel *sel = DirSel_Make(m, NULL, NULL,
-                (DIR_SELECTOR_NODIRS));
+            DirSel *sel = DirSel_Make(m, NULL, NULL, DIR_SELECTOR_NODIRS);
             sel->source = Span_Make(m);
 
             NodeObj *node = h->value;

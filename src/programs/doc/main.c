@@ -108,23 +108,25 @@ i32 main(int argc, char **argv){
                     if(!Empty(name) && !Equals(name, S(m, "README"))
                              && !Equals(name, S(m, "Inc"))){
 
-
-                        WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
+                        MemCh *tm = MemCh_Make();
+                        WwwPage *page = Inst_Make(tm, TYPE_WWW_PAGE);
                         Doc_GenPage(page, headerPath, footerPath);
 
-                        Iter *navIt = Iter_Make(m, NULL);
+                        Iter *navIt = Iter_Make(tm, NULL);
                         Span *crd = Table_Get(coordTbl, name);
                         NestSel_Init(navIt, nav, crd);
-                        Seel_Set(page, S(m, "nav"), navIt); 
+                        Seel_Set(page, S(tm, "nav"), navIt); 
 
-                        StrVec *out = StrVec_Copy(m, outDir);
-                        StrVec_AddVec(out, Inst_Att(item, K(m, "out-path")));
+                        StrVec *out = StrVec_Copy(tm, outDir);
+                        StrVec_AddVec(out, Inst_Att(item, K(tm, "out-path")));
 
-                        Seel_Set(page, K(m, "name"), name);
+                        Seel_Set(page, K(tm, "name"), name);
 
                         void *ar[] = {name, out, NULL};
                         Out("^p.Generating $ -> $^0\n", ar);
                         Doc_FileOut(page, item, out);
+
+                        MemCh_Free(tm);
                     }
                 }else{
                     void *ar[] = {

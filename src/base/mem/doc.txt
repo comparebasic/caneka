@@ -1,0 +1,1 @@
+The memory management infrastructure is here, along with the core data structures that it uses such as the Span.

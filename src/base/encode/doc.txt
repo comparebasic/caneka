@@ -1,0 +1,2 @@
+Encoding for various byte formats, presently a fairly small number, things like
+Base64, and Unicode will eventually live here.

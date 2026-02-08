@@ -1,8 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
-NodeObj *DocComp_Gather(MemCh *m, StrVec *src, Str *s){
-    return NULL;
+void DocComp_FillFolder(DocComp *comp, StrVec *path){
+    MemCh *m = comp->m;
+    StrVec *txt = StrVec_Copy(m, path);
+    IoUtil_AddVec(m, txt, IoPath(m, "doc.txt"));
+    StrVec *name = StrVec_SubVec(m, path, 
+        Path_FlagLastIdx(path, MORE), 
+        Path_FlagLastIdx(path, MORE)-2);
+
+    Seel_Set(comp, K(m, "name"), name);
+    Seel_Set(comp, K(m, "src"), txt);
 }
 
 NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, StrVec *name){

@@ -14,6 +14,8 @@ typedef byte boolean;
 typedef byte flags8;
 typedef quad flags32;
 
+#define I16_MAX 32767
+
 #define TRUE 1
 #define FALSE 0
 

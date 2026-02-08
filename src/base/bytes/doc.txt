@@ -1,0 +1,2 @@
+Everything about bytes, strings, multi string vectors, formatting and the
+ToStream convention for serializing objects/components for output or debugging.

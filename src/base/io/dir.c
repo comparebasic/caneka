@@ -92,6 +92,7 @@ static status gatherDir(MemCh *m, Str *path, void *source){
         p = (Span *)as(source, TYPE_SPAN);
     }
     StrVec *v = StrVec_From(m, path);
+    StrVec_Add(v, S(m, "/"));
     Span_Add(p, v);
     return SUCCESS;
 }

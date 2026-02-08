@@ -14,6 +14,8 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
     Iter_Init(&it, files);
     while((Iter_Next(&it) & END) == 0){
         StrVec *file = Iter_Get(&it);
+
+        Str *last = Span_Get(file->p, file->p->max_idx);
         StrVec *route = StrVec_SubVec(m,
             file,
             Path_FlagIdx(file, (MORE|NOOP)),
@@ -49,6 +51,35 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
         Inst_SetAtt(item, K(m, "display-path"), display);
 
         WwwNav_Add(nav, item, coords);
+    }
+
+    for(Iter2d_InstInit(m, nav, &it); (it.type.state & END) == 0;
+            Iter2d_InstNext(&it)){
+        Abstract *a = Iter2d_Get(&it);
+        if(a->type.of == TYPE_WWW_NAV){
+            WwwNav *nav = (WwwNav *)a;
+            if(Empty(Seel_Get(nav, K(m, "name")))){
+                void *ar[] = {nav, NULL};
+                Out("^c.Nav Item @^0\n", ar);
+            }
+        }else{
+            void *ar[] = {a, NULL};
+            Out("^c.Non Nav Item @^0\n", ar);
+        }
+
+        /*
+        route = StrVec_SubVec(m,
+            file,
+            Path_FlagIdx(file, (MORE|NOOP))+1,
+            file->p->max_idx);
+
+        outPath = StrVec_SubVec(m,
+            file,
+            Path_FlagIdx(file, (MORE|NOOP))+1,
+            file->p->max_idx);
+        IoUtil_AddVec(m, file, IoPath(m, "index.html"));
+        */
+
     }
 
     return;
