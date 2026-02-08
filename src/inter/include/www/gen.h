@@ -30,3 +30,4 @@ Gen *Gen_Copy(MemCh *m, Gen *gen);
 Gen *Gen_FromPath(MemCh *m, StrVec *path, NodeObj *config);
 void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config);
 void Gen_Init(MemCh *m);
+void Gen_Run(Gen *gen, Buff *bf, Table *data);

@@ -2,32 +2,38 @@
 #include <caneka.h>
 #include <doc_module.h>
 
+void Doc_GenPage(WwwPage *page, StrVec *header, StrVec *footer){
+    MemCh *m = page->m;
+
+    Seel_Set(page, K(m, "name"), Sv(m, "docPage"));
+
+    Gen *headerGen = Gen_FromPath(m, header, NULL);
+    Gen_Setup(m, headerGen, NULL);
+
+    Gen *footerGen = Gen_FromPath(m, footer, NULL);
+    Gen_Setup(m, footerGen, NULL);
+
+    Span *gens = Seel_Get(page, K(m, "gens"));
+    Span_Add(gens, headerGen);
+    Span_Add(gens, footerGen);
+}
+
 void Doc_FileOut(WwwPage *page, WwwNav *item, StrVec *dest){
     MemCh *m = page->m;
+
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED|BUFF_CLOBBER);
     Dir_CheckCreateFor(m, dest);
     File_Open(bf, StrVec_Str(m, dest), O_WRONLY|O_CREAT);
 
+    Span *gens = Seel_Get(page, K(m, "gens")); 
     Table *data = Table_Make(m);
     Table_Set(data, S(m, "page"), page);
 
-    Str *path = IoUtil_GetAbsPath(m,
-        Str_CstrRef(m, "./fixtures/doc/nav.templ"));
-    StrVec *content = File_ToVec(m, path);
-
-    Cursor *curs = Cursor_Make(m, content);
-    TemplCtx *ctx = TemplCtx_FromCurs(m, curs, NULL);
-    Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
-    status result = Templ_Prepare(templ);
-    status re = Templ_ToS(templ, bf, data, NULL);
+    Gen_Run(Span_Get(gens, 0), bf, data);
 
     StrVec *fpath = Inst_Att(item, K(m, "fpath"));
-
-    content = File_ToVec(m, StrVec_Str(m, fpath));
-    void *_ar[] = {fpath, NULL};
-    Out("^p.Fpath @^0\n", _ar);
-    curs = Cursor_Make(m, content);
-
+    StrVec *content = File_ToVec(m, StrVec_Str(m, fpath));
+    Cursor *curs = Cursor_Make(m, content);
     DocComp *comp = DocComp_FromStr(m,
         fpath, Inst_Att(item, K(m, "display-path")));
 
@@ -35,14 +41,6 @@ void Doc_FileOut(WwwPage *page, WwwNav *item, StrVec *dest){
     Roebling_Run(rbl);
     Doc_To(bf, comp, Doc_ToHtmlToS);
 
-    void *ar[] = {
-        item,
-        bf->v,
-        dest,
-        NULL
-    };
-
-    Out("^y.Nav Item @ navHtml @^0 -> @\n", ar);
-
+    Gen_Run(Span_Get(gens, 1), bf, data);
     return;
 }

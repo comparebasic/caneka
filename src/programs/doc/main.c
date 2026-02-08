@@ -80,22 +80,12 @@ i32 main(int argc, char **argv){
 
         outDir = IoUtil_AbsVec(m, Inst_Att(out, K(m, "dir")));
         NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page"), NULL, SPAN_OP_GET, NULL);
-        WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
-        Seel_Set(page, K(m, "name"), Sv(m, "docPage"));
 
-        /* header */
         StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
-
-        Gen *headerGen = Gen_FromPath(m, headerPath, NULL);
-        Gen_Setup(m, headerGen, NULL);
-        /* footer */
         StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
-        Gen *footerGen = Gen_FromPath(m, footerPath, NULL);
-        Gen_Setup(m, footerGen, NULL);
-        /* nav */
-        StrVec *navPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "nav")));
-        Gen *navGen = Gen_FromPath(m, navPath, NULL);
-        Gen_Setup(m, navGen, NULL);
+
+        WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
+        Doc_GenPage(page, headerPath, footerPath);
 
         NodeObj *in = Inst_ByPath(config, Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
 
@@ -105,21 +95,12 @@ i32 main(int argc, char **argv){
         Doc_Gather(dirTbl, files);
 
         nav = Inst_Make(m, TYPE_WWW_NAV);
-        Inst_SetAtt(nav, K(m, "coords"), Table_Make(m));
+        Table *coordTbl = Table_Make(m);
+        Inst_SetAtt(nav, K(m, "coords"), coordTbl);
         Doc_GenNav(config, files, nav);
 
-        /*
-        void *args[] = {
-            in,
-            outDir,
-            page,
-            footerGen,
-            headerGen,
-            NULL
-        };
-        Out("^y.in @\nout @\n page @^0\nheader @\nfooter \n",
-            args);
-        */
+        Iter *navIt = Iter_Make(m, NULL);
+        Seel_Set(page, S(m, "nav"), navIt); 
 
         Iter it;
         for(Iter2d_InstInit(m, nav, &it); (it.type.state & END) == 0;
@@ -132,16 +113,13 @@ i32 main(int argc, char **argv){
                     if(!Empty(name) && !Equals(name, S(m, "README"))
                              && !Equals(name, S(m, "Inc"))){
 
-                        Inst *page = Inst_Make(m, TYPE_WWW_PAGE);
-
-                        Table *coordTbl = Inst_Att(nav, K(m, "coords"));
-                        Iter *navIt = Iter_Make(m, NULL);
                         Span *crd = Table_Get(coordTbl, name);
                         NestSel_Init(navIt, nav, crd);
-                        Seel_Set(page, S(m, "nav"), navIt); 
 
                         StrVec *out = StrVec_Copy(m, outDir);
                         StrVec_AddVec(out, Inst_Att(item, K(m, "out-path")));
+
+                        Seel_Set(page, K(m, "name"), name);
                         Doc_FileOut(page, item, out);
                         exit(1);
                     }

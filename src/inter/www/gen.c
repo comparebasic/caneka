@@ -6,9 +6,11 @@ Lookup *MimeLookup = NULL;
 
 static void routeFuncStatic(Gen *gen, Buff *bf, Table *_data){
     MemCh *m = bf->m;
-    Str *pathS = StrVec_Str(bf->m, (StrVec *)as(gen->action, TYPE_STRVEC));
-    bf->type.state |= BUFF_UNBUFFERED;
-    File_Open(bf, pathS, O_RDONLY);
+    Str *pathS = StrVec_Str(bf->m, (StrVec *)as(gen->path, TYPE_STRVEC));
+    Buff *inBf = (Buff *)as(gen->action, TYPE_BUFF);
+    Buff_UnsetFd(inBf);
+    File_Open(inBf, pathS, O_RDONLY);
+    Buff_Pipe(bf, inBf);
 }
 
 static void routeFuncTempl(Gen *gen, Buff *bf, Table *data){
@@ -56,11 +58,18 @@ static void routeFuncFileDb(Gen *gen, Buff *bf, Table *data){
     */
 }
 
+void Gen_Run(Gen *gen, Buff *bf, Table *data){
+    void *ar[] = {gen, NULL};
+    Out("^c. Gen @^0\n", ar);
+    gen->func(gen, bf, data);
+}
+
 void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
     if(gen->type.state & GEN_FORBIDDEN){
         gen->type.state |= (ERROR|NOOP);
     }else if(gen->type.state & GEN_STATIC){
         /* no action */
+        gen->action = (Abstract *)Buff_Make(m, BUFF_UNBUFFERED);
     }else if(gen->type.state & GEN_FMT){
         StrVec *content = File_ToVec(m, StrVec_Str(m, gen->path));
         Cursor *curs = Cursor_Make(m, content); 

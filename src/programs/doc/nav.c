@@ -46,16 +46,7 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
         StrVec_Add(display, name);
         Path_SwapSep(display, sep, MORE); 
 
-        void *_ar[] = {file, route, display, NULL};
-        Out("^c.File @\n  Route @^0\nDisplay &\n", _ar);
-
-
         Inst_SetAtt(item, K(m, "display-path"), display);
-
-        /*
-        void *ar[] = {display, file, NULL};
-        Out("^p.Name @ File &^0\n", ar);
-        */
 
         WwwNav_Add(nav, item, coords);
     }

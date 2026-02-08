@@ -1,10 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-void WwwPage_AddPath(WwwPage *page, StrVec *path){
-    return;
-}
-
 status WwwPage_Init(MemCh *m){
     status r = READY;
     Table *tbl = Table_Make(m);
