@@ -53,9 +53,9 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
         WwwNav_Add(nav, item, coords);
     }
 
-    for(Iter2d_InstInit(m, nav, &it); (it.type.state & END) == 0;
-            Iter2d_InstNext(&it)){
-        Abstract *a = Iter2d_Get(&it);
+    Iter2d *it2d = Iter2d_Make(m, nav);
+    for(;(Iter2d_State(it2d) & END) == 0; Iter2d_InstNext(it2d)){
+        Abstract *a = Iter2d_Get(it2d);
         if(a->type.of == TYPE_WWW_NAV){
             WwwNav *nav = (WwwNav *)a;
             if(Empty(Seel_Get(nav, K(m, "name")))){

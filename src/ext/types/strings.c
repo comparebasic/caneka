@@ -5,6 +5,7 @@ static char *extTypeStrings[] = {
     "_TYPE_EXT_START",
     "TYPE_SEAL",
     "TYPE_NEST_SEL",
+    "TYPE_ITER2D",
     "TYPE_INST_ITER",
     "TYPE_ITER_API",
     "TYPE_ITER_UPPER",
