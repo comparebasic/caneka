@@ -9,26 +9,22 @@
     content="width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=1.0,user-scalable=yes,shrink-to-fit=no"
   >
 </head>
-<body>
+<body class="docs">
 <header>
     <a class="anchor" name="top"></a>
     <div class="inner">
         <span id="hamburger"><object id="hamburger-svg" type="text/svg+xml" data="/images/hamburger_attack.svg"></object></span>
         <br />
+        <nav id="menu">
+            <ul>
+                <li><a href="#top">Top</a>
+                <li><a href="#so-far">System So Far</a>
+                <li><a href="#parser">Parser</a>
+                <li><a href="#components">Components</a>
+                <li><a href="#what-does-it-do">What Does It Do?</a>
+            </ul>
+        </nav>
 
-<nav>
-;  page.nav...
-<ul>
-;  >
-    <li><a href="{#url}">{#name}</a>{^}</li>
-;  = 
-    <li><a href="{#url}">{#name}</a></li>
-;  _
-    <li><span class="active">{#name}</span></li>
-;
-</ul>
-;
-</nav>
 
     </div>
     <section class="start">
@@ -40,3 +36,18 @@
     </section>
     <script type="text/javascript" src="/menu.js"></script>
 </header>
+<section id="doc-menu">
+<nav id="menu">
+;  page.nav...
+<ul>
+;  >
+    <li><a href="/docs/{#url}.html">{#name}</a>{^}</li>
+;  = 
+    <li><a href="/docs/{#url}.html">{#name}</a></li>
+;  _
+    <li><span class="active">{#name}</span></li>
+;
+</ul>
+;
+</nav>
+</section>

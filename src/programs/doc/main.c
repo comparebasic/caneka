@@ -84,8 +84,6 @@ i32 main(int argc, char **argv){
         StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
         StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
 
-        WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
-        Doc_GenPage(page, headerPath, footerPath);
 
         NodeObj *in = Inst_ByPath(config, Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
 
@@ -99,12 +97,6 @@ i32 main(int argc, char **argv){
         Inst_SetAtt(nav, K(m, "coords"), coordTbl);
         Doc_GenNav(config, files, nav);
 
-        Iter *navIt = Iter_Make(m, NULL);
-        Seel_Set(page, S(m, "nav"), navIt); 
-
-        i32 cutOff = 3;
-        i32 cutOffI = 0;
-
         Iter it;
         for(Iter2d_InstInit(m, nav, &it); (it.type.state & END) == 0;
                 Iter2d_InstNext(&it)){
@@ -116,21 +108,23 @@ i32 main(int argc, char **argv){
                     if(!Empty(name) && !Equals(name, S(m, "README"))
                              && !Equals(name, S(m, "Inc"))){
 
-                        void *ar[] = {name, out, NULL};
-                        Out("^p.Generating @ -> @^0\n", ar);
 
+                        WwwPage *page = Inst_Make(m, TYPE_WWW_PAGE);
+                        Doc_GenPage(page, headerPath, footerPath);
+
+                        Iter *navIt = Iter_Make(m, NULL);
                         Span *crd = Table_Get(coordTbl, name);
                         NestSel_Init(navIt, nav, crd);
+                        Seel_Set(page, S(m, "nav"), navIt); 
 
                         StrVec *out = StrVec_Copy(m, outDir);
                         StrVec_AddVec(out, Inst_Att(item, K(m, "out-path")));
 
                         Seel_Set(page, K(m, "name"), name);
-                        Doc_FileOut(page, item, out);
 
-                        if(cutOffI++ >= cutOff){
-                            exit(1);
-                        }
+                        void *ar[] = {name, out, NULL};
+                        Out("^p.Generating $ -> $^0\n", ar);
+                        Doc_FileOut(page, item, out);
                     }
                 }else{
                     void *ar[] = {
