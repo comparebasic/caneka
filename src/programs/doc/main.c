@@ -102,6 +102,9 @@ i32 main(int argc, char **argv){
         Iter *navIt = Iter_Make(m, NULL);
         Seel_Set(page, S(m, "nav"), navIt); 
 
+        i32 cutOff = 3;
+        i32 cutOffI = 0;
+
         Iter it;
         for(Iter2d_InstInit(m, nav, &it); (it.type.state & END) == 0;
                 Iter2d_InstNext(&it)){
@@ -113,6 +116,9 @@ i32 main(int argc, char **argv){
                     if(!Empty(name) && !Equals(name, S(m, "README"))
                              && !Equals(name, S(m, "Inc"))){
 
+                        void *ar[] = {name, out, NULL};
+                        Out("^p.Generating @ -> @^0\n", ar);
+
                         Span *crd = Table_Get(coordTbl, name);
                         NestSel_Init(navIt, nav, crd);
 
@@ -121,7 +127,10 @@ i32 main(int argc, char **argv){
 
                         Seel_Set(page, K(m, "name"), name);
                         Doc_FileOut(page, item, out);
-                        exit(1);
+
+                        if(cutOffI++ >= cutOff){
+                            exit(1);
+                        }
                     }
                 }else{
                     void *ar[] = {

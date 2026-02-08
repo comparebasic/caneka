@@ -59,8 +59,6 @@ static void routeFuncFileDb(Gen *gen, Buff *bf, Table *data){
 }
 
 void Gen_Run(Gen *gen, Buff *bf, Table *data){
-    void *ar[] = {gen, NULL};
-    Out("^c. Gen @^0\n", ar);
     gen->func(gen, bf, data);
 }
 
