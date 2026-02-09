@@ -71,8 +71,6 @@ i32 main(int argc, char **argv){
         StrVec *fmtRoot = NULL;
         StrVec *cRoot = NULL;
         StrVec *outDir = NULL;
-        WwwPage *srcPage = NULL;
-        WwwPage *fmtPage = NULL;
         WwwNav *nav = NULL;
 
         NodeObj *out = Inst_ByPath(config,
@@ -83,7 +81,6 @@ i32 main(int argc, char **argv){
 
         StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
         StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
-
 
         NodeObj *in = Inst_ByPath(config, Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
 
@@ -119,10 +116,15 @@ i32 main(int argc, char **argv){
                         StrVec *out = StrVec_Copy(tm, outDir);
                         StrVec_AddVec(out, Inst_Att(item, K(tm, "out-path")));
 
-                        Seel_Set(page, K(tm, "name"), name);
+                        Seel_Set(page, S(tm, "name"), name);
 
-                        void *ar[] = {name, out, NULL};
-                        Out("^p.Generating $ -> $^0\n", ar);
+                        void *ar[] = {
+                            name,
+                            Inst_Att(item, K(tm, "fpath")),
+                            out, 
+                            NULL
+                        };
+                        Out("^p.Generating @ $ -> $^0\n", ar);
                         Doc_FileOut(page, item, out);
 
                         MemCh_Free(tm);

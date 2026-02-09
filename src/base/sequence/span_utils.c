@@ -1,6 +1,15 @@
 #include <external.h>
 #include "base_module.h"
 
+void Span_GetSetI32(Span *p, i32 idx, i32 value){
+    Single *sg = Span_Get(p, idx);
+    if(sg == NULL){
+        Span_Set(p, idx, I32_Wrapped(p->m, value));
+    }else{
+        sg->val.i = value;
+    }
+}
+
 Span *Span_CopyRange(MemCh *m, Span *p, Coord *cr){
     Span *ret = Span_Make(m);
     Iter it;

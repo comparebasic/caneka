@@ -12,6 +12,7 @@ StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path);
 status IoUtil_RemoveSeps(MemCh *m, StrVec *path);
 StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v);
 status IoUtil_AddVec(MemCh *m, StrVec *path, StrVec *v);
+status IoUtil_AddStr(MemCh *m, StrVec *path, Str *s);
 StrVec *IoUtil_GetExt(MemCh *m, StrVec *path);
 StrVec *IoAbsPath(MemCh *m, char *cstr);
 StrVec *IoPath(MemCh *m, char *cstr);

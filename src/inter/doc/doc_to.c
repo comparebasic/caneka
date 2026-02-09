@@ -89,8 +89,10 @@ status Doc_To(Buff *bf, DocComp *comp, ToSFunc func){
     Span *comments = Seel_Get(comp, K(m, "comments"));
     if(comments != NULL){
         DocComment *comm = Span_Get(comments, 0);
-        StrVec *desc = Seel_Get(comm, K(m, "body"));
-        func(bf, desc, DOC_HTML_MOD_COMMENT, ZERO);
+        if(comm != NULL){
+            StrVec *desc = Seel_Get(comm, K(m, "body"));
+            func(bf, desc, DOC_HTML_MOD_COMMENT, ZERO);
+        }
     }
 
     Table *tbl = Seel_Get(comp, K(m, "functions"));

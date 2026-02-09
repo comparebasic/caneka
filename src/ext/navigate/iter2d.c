@@ -5,6 +5,7 @@ void Iter2d_InstNext(Iter2d *it2d){
     MemCh *m = it2d->m;
     if((it2d->it.type.state & PROCESSING) == 0){
         Iter_Next(&it2d->it);
+        Span_GetSetI32(it2d->coord, 0, it2d->it.idx);
         return;
     }else{
 item:
@@ -20,17 +21,22 @@ item:
             if(Iter_Next(it2) & END){
                 Iter_Remove(&it2d->it);
                 Iter_Prev(&it2d->it);
+                StrVec_Pop(it2d->path);
+                StrVec_Pop(it2d->path);
+                Span_Cull(it2d->coord, 1);
 
                 goto item;
             }else{
                 a = Iter_Get(it2);
-                if(a == NULL){
+                if(a == NULL || a->type.of != TYPE_HASHED){
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Found null Item", NULL);
-                }else if(a->type.of == TYPE_HASHED){
-                    Iter_Push(&it2d->it, ((Hashed *)a)->value);
                 }else{
-                    void *ar[] = {a, NULL};
+                    Hashed *h = (Hashed *)a;
+                    Iter_Push(&it2d->it, h->value);
+                    IoUtil_AddStr(m, it2d->path, h->key); 
+                    Span_GetSetI32(it2d->coord,
+                        it2d->coord->max_idx, it2->idx);
                 }
                 return;
             }
@@ -42,14 +48,21 @@ item:
 
             Iter_Next(it2);
             a = Iter_Get(it2);
-            if(a != NULL && a->type.of == TYPE_HASHED){
-                Iter_Push(&it2d->it, ((Hashed *)a)->value);
+            if(a == NULL || a->type.of != TYPE_HASHED){
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Found null Item", NULL);
             }else{
-                Iter_Push(&it2d->it, a);
+                Hashed *h = (Hashed *)a;
+                Iter_Push(&it2d->it, h->value);
+                IoUtil_AddStr(m, it2d->path, h->key); 
+                Span_GetSetI32(it2d->coord,
+                    it2d->coord->max_idx+1, it2->idx);
             }
         }else{
             Iter_Remove(&it2d->it);
             Iter_Prev(&it2d->it);
+            StrVec_Pop(it2d->path);
+            StrVec_Pop(it2d->path);
 
             goto item;
         }

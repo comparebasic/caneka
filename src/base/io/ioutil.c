@@ -234,6 +234,15 @@ status IoUtil_AddVec(MemCh *m, StrVec *path, StrVec *v){
     return StrVec_AddVec(path, v);
 }
 
+status IoUtil_AddStr(MemCh *m, StrVec *path, Str *s){
+    Str *last = Span_Get(path->p, path->p->max_idx);
+    if(last != NULL && last->length > 0 && last->bytes[last->length-1] != '/'){
+        StrVec_Add(path, Str_Ref(m, (byte *)"/", 1, 2, MORE));
+    }
+
+    return StrVec_Add(path, s);
+}
+
 status IoUtil_RemoveSeps(MemCh *m, StrVec *path){
     i32 idx = 0;
     Iter it;

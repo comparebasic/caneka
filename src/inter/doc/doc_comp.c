@@ -1,20 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
-void DocComp_FillFolder(DocComp *comp, StrVec *path){
-    MemCh *m = comp->m;
-    StrVec *txt = StrVec_Copy(m, path);
-    IoUtil_AddVec(m, txt, IoPath(m, "doc.txt"));
-    StrVec *name = StrVec_SubVec(m, path, 
-        Path_FlagLastIdx(path, MORE), 
-        Path_FlagLastIdx(path, MORE)-2);
-
-    Seel_Set(comp, K(m, "name"), name);
-    Seel_Set(comp, K(m, "src"), txt);
+NodeObj *DocComp_DocOnly(MemCh *m, StrVec *name){
+    DocComp *dobj = Inst_Make(m, TYPE_DOC_COMPONENT);
+    Seel_Set(dobj, K(m, "name"), name);
+    return dobj;
 }
 
 NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, StrVec *name){
+    /*
     Path_DotAnnotate(m, name);
+    */
     Str *first = Span_Get(name->p, 0);
     Str_ToTitle(m, first);
     DocComp *dobj = Inst_Make(m, TYPE_DOC_COMPONENT);

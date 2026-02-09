@@ -13,3 +13,4 @@ status Span_Wipe(Span *p);
 i32 Span_Has(Span *p, void *a);
 status Span_AddRaw(Span *p, util *u);
 status Span_AddSpanRev(Span *p, Span *add);
+void Span_GetSetI32(Span *p, i32 idx, i32 value);
