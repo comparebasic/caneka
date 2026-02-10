@@ -127,6 +127,17 @@ i32 main(int argc, char **argv){
                         Out("^p.Generating @ $ -> $^0\n", ar);
                         Doc_FileOut(page, item, out);
 
+                        MemBookStats st;
+                        MemBook_GetStats(tm, &st);
+
+                        void *args[5];
+                        args[0] = Str_MemCount(tm, st.total * PAGE_SIZE);
+                        args[1] = I64_Wrapped(tm, st.total);
+                        args[2] = I64_Wrapped(tm, st.pageIdx);
+                        args[3] = I64_Wrapped(tm, PAGE_SIZE);
+                        args[4] = NULL;
+
+                        Out("\nMem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args);
                         MemCh_Free(tm);
                     }
                 }else{

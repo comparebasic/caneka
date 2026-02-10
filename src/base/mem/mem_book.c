@@ -115,10 +115,23 @@ status MemBook_WipePages(void *addr){
     if(book == NULL){
         book = MemBook_get(NULL);
     }
-    while((Iter_PrevRemove(&book->retired) & (END|NOOP)) == 0){
+    while((Iter_Prev(&book->retired) & END) == 0){
+        printf("Retired.idx %d of %d\n", book->retired.idx, book->retired.p->nvalues);
+        fflush(stdout);
         void *page = Iter_Get(&book->retired);
+        if(page == NULL){
+            void *ar[] = {
+                Type_StateVec(
+                    ErrStream->m, TYPE_ITER, book->retired.type.state),
+                NULL
+            };
+            Error(NULL, FUNCNAME, FILENAME, LINENUMBER,
+                "Found blank page expecting to wipe @", ar);
+            return ERROR;
+        }
         memset(page, 0, PAGE_SIZE);
         r |= Iter_Add(&book->recycled, page);
+        Iter_Remove(&book->retired);
     }
     return r;
 }

@@ -283,6 +283,8 @@ static status _Iter_Prev(Iter *it){
     }
 
     if(it->p == NULL || it->p->nvalues == 0){
+        printf("Prev/END %d\n");
+        fflush(stdout);
         idx = -1;
         it->type.state |= END; 
         goto end;
@@ -386,6 +388,23 @@ end:
     return it->type.state;
 }
 
+void Iter_Start(Iter *it){
+    it->type.state &= ~(END|LAST);
+    it->type.state |= (PROCESSING|SPAN_OP_GET);
+
+    if(it->type.state & FLAG_ITER_REVERSE){
+        it->idx = it->p->max_idx;
+    }else{
+        it->idx = 0;
+    }
+
+    memset(it->stack, 0, sizeof(void *)*SPAN_MAX_DIMS);
+    memset(it->stackIdx, 0, sizeof(i32)*SPAN_MAX_DIMS);
+    it->value = NULL;
+
+    Iter_Query(it);
+}
+
 status Iter_Set(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_SET;
     it->value = value;
@@ -444,7 +463,7 @@ status Iter_Next(Iter *it){
         }else if(it->idx >= 0){
             idx = it->idx;
         }
-        Iter_Start(it, idx, fl);
+        Iter_ResetStack(it, idx, fl);
         it->type.state |= (fl|PROCESSING);
         Iter_Query(it);
         goto end;
@@ -552,21 +571,6 @@ status Iter_Pop(Iter *it){
     it->type.state = ((it->type.state & NORMAL_FLAGS) & ~(LAST|END)) | 
         (SPAN_OP_GET|SPAN_OP_REMOVE|FLAG_ITER_REVERSE|PROCESSING);
     _Iter_Prev(it);
-    return it->type.state;
-}
-
-status Iter_PrevRemove(Iter *it){
-    it->type.state &= ~(LAST|END|NOOP);
-    it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|FLAG_ITER_REVERSE);
-    _Iter_Prev(it);
-
-    if((it->type.state & END) == 0){
-        void **ptr = (void **)it->stack[0];
-        *ptr = NULL;
-        it->p->nvalues--;
-        it->p->max_idx--;
-    }
-
     return it->type.state;
 }
 
@@ -687,7 +691,7 @@ void Iter_Init(Iter *it, Span *p){
     it->value = NULL;
 }
 
-void Iter_Start(Iter *it, i32 idx, status op){
+void Iter_ResetStack(Iter *it, i32 idx, status op){
     it->type.state = op;
     it->idx = idx;
     memset(it->stack, 0, sizeof(void *)*SPAN_MAX_DIMS);

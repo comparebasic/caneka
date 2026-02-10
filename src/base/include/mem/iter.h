@@ -33,13 +33,12 @@ typedef void *(*IterGetFunc)(Iter *it);
 
 status Iter_Next(Iter *it);
 status Iter_Prev(Iter *it);
-status Iter_PrevRemove(Iter *it);
 status Iter_Pop(Iter *it);
 status Iter_Reset(Iter *it);
 status Iter_Push(Iter *it, void *value);
 void Iter_Init(Iter *it, Span *p);
 void Iter_Setup(Iter *it, Span *p, status op, i32 idx);
-void Iter_Start(Iter *it, i32 idx, status op);
+void Iter_ResetStack(Iter *it, i32 idx, status op);
 Iter *Iter_Make(struct mem_ctx *m, Span *p);
 status Iter_Set(Iter *it, void *value);
 status Iter_Add(Iter *it, void *value);
@@ -54,4 +53,4 @@ void *Iter_GetByIdx(Iter *it, i32 idx);
 void *Iter_GetSelected(Iter *it);
 status Iter_GoToIdx(Iter *it, i32 idx);
 status Iter_ExpandTo(Iter *it, i32 idx);
-
+void Iter_Start(Iter *it);
