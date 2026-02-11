@@ -80,6 +80,7 @@ i32 main(int argc, char **argv){
         NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page"), NULL, SPAN_OP_GET, NULL);
 
         StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
+        StrVec *childrenPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "children")));
         StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
 
         NodeObj *in = Inst_ByPath(config, Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
@@ -106,7 +107,7 @@ i32 main(int argc, char **argv){
 
                         MemCh *tm = MemCh_Make();
                         WwwPage *page = Inst_Make(tm, TYPE_WWW_PAGE);
-                        Doc_GenPage(page, headerPath, footerPath);
+                        Doc_GenPage(page, headerPath, childrenPath, footerPath);
 
                         Iter *navIt = Iter_Make(tm, NULL);
                         Span *crd = Table_Get(coordTbl, name);
@@ -127,17 +128,6 @@ i32 main(int argc, char **argv){
                         Out("^p.Generating @ $ -> $^0\n", ar);
                         Doc_FileOut(page, item, out);
 
-                        MemBookStats st;
-                        MemBook_GetStats(tm, &st);
-
-                        void *args[5];
-                        args[0] = Str_MemCount(tm, st.total * PAGE_SIZE);
-                        args[1] = I64_Wrapped(tm, st.total);
-                        args[2] = I64_Wrapped(tm, st.pageIdx);
-                        args[3] = I64_Wrapped(tm, PAGE_SIZE);
-                        args[4] = NULL;
-
-                        Out("\nMem at $ total/maxIdx=^D.$/$^d. page-size=$b\n", args);
                         MemCh_Free(tm);
                     }
                 }else{

@@ -1,2 +1,2 @@
 void Doc_FileOut(WwwPage *page, WwwNav *item, StrVec *dest);
-void Doc_GenPage(WwwPage *page, StrVec *header, StrVec *footer);
+void Doc_GenPage(WwwPage *page, StrVec *header, StrVec *children, StrVec *footer);

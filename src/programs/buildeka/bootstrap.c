@@ -122,6 +122,7 @@ char *menuKeys[] = {
     "run-tests",
     "build-only",
     "clean",
+    "clean-doc",
     "build-cli",
     "build-webserver",
     "build-run-webserver",
@@ -136,6 +137,7 @@ char *menuOptions[] = {
     "Tests - build and RUN",
     "Caneka (core) - build the core modules for caneka",
     "Clean (the ./build directory)",
+    "Clean Docs (the docs ./dist/doc/html/ directory)",
     "Clineka - build the command line tool",
     "Webserver - build",
     "WebServer - build and RUN",
@@ -369,8 +371,13 @@ int main(int argc, char *argv[]){
     if(argc > 1){
         for(int i = 1; i < argc; i++){
             if(compareCstr("--clean", argv[i])){
-                setNoColor();
-                choice = "clean";
+                if(compareCstr("--clean-doc", argv[i])){
+                    setNoColor();
+                    choice = "clean-doc";
+                }else{
+                    setNoColor();
+                    choice = "clean";
+                }
             }else if(compareCstr("--menu", argv[i])){
                 choice = NULL;
             }
@@ -392,6 +399,23 @@ int main(int argc, char *argv[]){
     }else if(compareCstr("build-only", choice)){
         runcmd[0] = buildCaneka;
         runcmd[1] = NULL;
+    }else if(compareCstr("clean-doc", choice)){
+        char buff[512];
+        memset(buff, 0, 512);
+        char *cstr = getcwd((char *)buff, 512);
+        char *dirname = "dist/doc/html/";
+        ssize_t length = strlen(cstr);
+        ssize_t dirlength = strlen(dirname);
+        if(length + dirlength + 1 <  512 ){
+            memcpy(buff+length, "/", 1);
+            memcpy(buff+length+1, dirname, dirlength);
+        }
+        printf("%sRemoving files in docs dir %s%s\n",YELLOW, buff, NORMAL_COLOR);
+        if(!cleanDir(buff)){
+            printf("%sError Removing files in docs dir %s%s\n", RED, buff, NORMAL_COLOR);
+            exit(1);
+        }
+        exit(0);
     }else if(compareCstr("clean", choice)){
         char buff[512];
         memset(buff, 0, 512);

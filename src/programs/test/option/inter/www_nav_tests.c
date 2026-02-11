@@ -6,57 +6,59 @@ static WwwNav *getNav(MemCh *m, Table *coordTbl){
     WwwNav *nav = Inst_Make(m, TYPE_WWW_NAV);
     WwwNav *item = NULL;
 
-    item = WwwNav_Make(m, Sv(m, "/docs"), Sv(m, "Docs"));
+    StrVec *prefix = IoPath(m, "/");
+
+    item = WwwNav_Make(m, Sv(m, "/docs"), Sv(m, "Docs"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
-    item = WwwNav_Make(m, Sv(m, "/docs/base"), Sv(m, "Base"));
+    item = WwwNav_Make(m, Sv(m, "/docs/base"), Sv(m, "Base"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
-    item = WwwNav_Make(m, Sv(m, "/docs/base/bytes"), Sv(m, "Bytes"));
-    WwwNav_Add(nav, item, coordTbl); 
-
-    item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/types/error"), Sv(m, "Error"));
-    WwwNav_Add(nav, item, coordTbl); 
-
-    item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/bytes/str"), Sv(m, "Str"));
+    item = WwwNav_Make(m, Sv(m, "/docs/base/bytes"), Sv(m, "Bytes"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/bytes/strvec"), Sv(m, "StrVec"));
+        WwwNav_Make(m, Sv(m, "/docs/base/types/error"), Sv(m, "Error"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/bytes/fmt"), Sv(m, "Fmt"));
+        WwwNav_Make(m, Sv(m, "/docs/base/bytes/str"), Sv(m, "Str"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/bytes/tos"), Sv(m, "ToS"));
+        WwwNav_Make(m, Sv(m, "/docs/base/bytes/strvec"), Sv(m, "StrVec"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/mem"), Sv(m, "Mem"));
+        WwwNav_Make(m, Sv(m, "/docs/base/bytes/fmt"), Sv(m, "Fmt"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/mem/membook"), Sv(m, "MemBook"));
+        WwwNav_Make(m, Sv(m, "/docs/base/bytes/tos"), Sv(m, "ToS"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/mem/memch"), Sv(m, "MemCh"));
+        WwwNav_Make(m, Sv(m, "/docs/base/mem"), Sv(m, "Mem"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/mem/mempage"), Sv(m, "MemPage"));
+        WwwNav_Make(m, Sv(m, "/docs/base/mem/membook"), Sv(m, "MemBook"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/mem/span"), Sv(m, "Span"));
+        WwwNav_Make(m, Sv(m, "/docs/base/mem/memch"), Sv(m, "MemCh"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
 
     item = 
-        WwwNav_Make(m, Sv(m, "/docs/base/mem/iter"), Sv(m, "Iter"));
+        WwwNav_Make(m, Sv(m, "/docs/base/mem/mempage"), Sv(m, "MemPage"), prefix);
+    WwwNav_Add(nav, item, coordTbl); 
+
+    item = 
+        WwwNav_Make(m, Sv(m, "/docs/base/mem/span"), Sv(m, "Span"), prefix);
+    WwwNav_Add(nav, item, coordTbl); 
+
+    item = 
+        WwwNav_Make(m, Sv(m, "/docs/base/mem/iter"), Sv(m, "Iter"), prefix);
     WwwNav_Add(nav, item, coordTbl); 
     return nav;
 }

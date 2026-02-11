@@ -2,7 +2,8 @@
 #include <caneka.h>
 #include <doc_module.h>
 
-void Doc_GenPage(WwwPage *page, StrVec *header, StrVec *footer){
+void Doc_GenPage(WwwPage *page,
+        StrVec *header, StrVec *children, StrVec *footer){
     MemCh *m = page->m;
 
     Seel_Set(page, S(m, "name"), Sv(m, "docPage"));
@@ -10,11 +11,15 @@ void Doc_GenPage(WwwPage *page, StrVec *header, StrVec *footer){
     Gen *headerGen = Gen_FromPath(m, header, NULL);
     Gen_Setup(m, headerGen, NULL);
 
+    Gen *childrenGen = Gen_FromPath(m, children, NULL);
+    Gen_Setup(m, childrenGen, NULL);
+
     Gen *footerGen = Gen_FromPath(m, footer, NULL);
     Gen_Setup(m, footerGen, NULL);
 
     Span *gens = Seel_Get(page, K(m, "gens"));
     Span_Add(gens, headerGen);
+    Span_Add(gens, childrenGen);
     Span_Add(gens, footerGen);
 }
 
@@ -53,8 +58,17 @@ void Doc_FileOut(WwwPage *page, WwwNav *item, StrVec *dest){
         }
         Seel_Set(comp, S(m, "comments"), comments);
         Doc_To(bf, comp, Doc_ToHtmlToS);
+        Table *children = Seel_Get(item, K(m, "children"));
+        if(!Empty(children)){
+            /*
+            Table *data = Table_Make(m);
+            Table_Set(data, S(m, "name"), Seel_Get(item, K(m, "name")));
+            Table_Set(data, S(m, "subComps"), children);
+            Gen_Run(Span_Get(gens, 1), bf, data);
+            */
+        }
     }
 
-    Gen_Run(Span_Get(gens, 1), bf, data);
+    Gen_Run(Span_Get(gens, 2), bf, data);
     return;
 }

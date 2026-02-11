@@ -1,10 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-WwwNav *WwwNav_Make(MemCh *m, StrVec *_path, StrVec *name){
+WwwNav *WwwNav_Make(MemCh *m, StrVec *_path, StrVec *name, StrVec *prefix){
     WwwNav *item = Inst_Make(m, TYPE_WWW_NAV);
     StrVec *path = IoPath_FromVec(m, _path);
-    Seel_Set(item, K(m, "url"), path);
+    Inst_SetAtt(item, K(m, "path"), path);
+    StrVec *url = StrVec_Copy(m, prefix);
+    StrVec_AddVec(url, path);
+    Seel_Set(item, K(m, "url"), url);
     Seel_Set(item, K(m, "name"), name);
     return item;
 }
@@ -12,9 +15,9 @@ WwwNav *WwwNav_Make(MemCh *m, StrVec *_path, StrVec *name){
 status WwwNav_Add(WwwNav *root, WwwNav *item, Table *coordTbl){
     MemCh *m = root->m;
     Span *coords = Span_Make(m);
-    StrVec *url = Seel_Get(item, K(m, "url"));
+    StrVec *path = Inst_Att(item, K(m, "path"));
     StrVec *name = Seel_Get(item, K(m, "name"));
-    Inst_ByPath(root, url, item, SPAN_OP_SET, coords);
+    Inst_ByPath(root, path, item, SPAN_OP_SET, coords);
     Table_Set(coordTbl, name, coords);
     return ZERO;
 }

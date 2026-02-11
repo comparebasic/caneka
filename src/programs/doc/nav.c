@@ -5,14 +5,16 @@
 void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
     MemCh *m = config->m;
 
+
     NodeObj *out = Inst_ByPath(config,
         Sv(m, "out"), NULL, SPAN_OP_GET, NULL);
+
+    StrVec *prefix = Inst_Att(out, K(m, "prefix"));
+    IoUtil_Annotate(m, prefix);
 
     NodeObj *src = Inst_ByPath(config, IoPath(m, "/in/src"), NULL, SPAN_OP_GET, NULL);
 
     StrVec *inDir = IoUtil_AbsVec(m, Inst_Att(src, K(m, "dir")));
-
-    StrVec *rootPath = IoPath(m, "/");
 
     StrVec *outDir = IoUtil_AbsVec(m, Inst_Att(out, K(m, "dir")));
     Table *coordTbl = Inst_Att(nav, K(m, "coords"));
@@ -23,11 +25,10 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
         StrVec *file = Iter_Get(&it);
 
         Str *last = Span_Get(file->p, file->p->max_idx);
-        StrVec *route = StrVec_Copy(m, rootPath);
-        StrVec_AddVec(route, StrVec_SubVec(m,
+        StrVec *route = StrVec_SubVec(m,
             file,
             Path_FlagIdx(file, (MORE|NOOP)),
-            Path_FlagIdx(file, (LAST))-1));
+            Path_FlagIdx(file, (LAST))-1);
 
         StrVec *outPath = StrVec_SubVec(m,
             file,
@@ -43,7 +44,7 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
 
         Str *name = Str_Clone(m, Span_Get(route->p, route->p->max_idx)); 
         Str_ToTitle(m, name);
-        WwwNav *item = WwwNav_Make(m, route, StrVec_From(m, name));
+        WwwNav *item = WwwNav_Make(m, route, StrVec_From(m, name), prefix);
 
         Table *coords = Inst_Att(nav, K(m, "coords"));
 
@@ -80,7 +81,9 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
                 Str_ToTitle(m, s);
                 name = StrVec_From(m, s);
                 Seel_Set(item, S(m, "name"), name);
-                StrVec *url = StrVec_Copy(m, it2d->path);
+                StrVec *url = StrVec_Copy(m, prefix);
+                StrVec_Add(url, IoUtil_PathSep(m));
+                StrVec_AddVec(url, it2d->path);
                 IoUtil_AddVec(m, url, IoPath(m, "index"));
                 Seel_Set(item, S(m, "url"), url);
                 Table_Set(coordTbl, name, it2d->coord);
