@@ -126,7 +126,8 @@ status Path_JoinBase(MemCh *m, StrVec *path){
     }
 
     while(it.idx >= idx){
-        Iter_PrevRemove(&it);
+        Iter_Remove(&it);
+        Iter_Prev(&it);
         r |= SUCCESS;
     }
 

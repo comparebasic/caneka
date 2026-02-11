@@ -43,12 +43,13 @@ static status makeAndIterPrevRemoveItems(MemCh *m, i64 max){
     Iter it;
     Iter_Init(&it, p);
     i32 maxIdx = p->max_idx;
-    while((Iter_PrevRemove(&it) & END) == 0){
+    while((Iter_Prev(&it) & END) == 0){
         Single *sg = (Single *)Iter_Get(&it);
         if(sg->val.i != maxIdx || p->nvalues != maxIdx){
             r |= ERROR;
             break;
         }
+        Iter_Remove(&it);
         maxIdx--;
     }
 
@@ -359,91 +360,109 @@ status IterMax_Tests(MemCh *m){
     args[1] = NULL;
     r |= Test(p->nvalues == 17, "Span has 17 values to start, have $", args);
 
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 16 && Equals(Iter_Get(&it), Str_CstrRef(m, "seventeen")), "Span has 17 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 15 && Equals(Iter_Get(&it), Str_CstrRef(m, "sixteen")), "Span has 16 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 14 && Equals(Iter_Get(&it), Str_CstrRef(m, "fifteen")), "Span has 15 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 13 && Equals(Iter_Get(&it), Str_CstrRef(m, "fourteen")), "Span has 15 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 12 && Equals(Iter_Get(&it), Str_CstrRef(m, "thirteen")), "Span has 13 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 11 && Equals(Iter_Get(&it), Str_CstrRef(m, "twelve")), "Span has 12 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 10 && Equals(Iter_Get(&it), Str_CstrRef(m, "eleven")), "Span has 11 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 9 && Equals(Iter_Get(&it), Str_CstrRef(m, "ten")), "Span has 10 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 8 && Equals(Iter_Get(&it), Str_CstrRef(m, "nine")), "Span has 9 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = Iter_Get(&it);
     args[1] = NULL;
     r |= Test(p->nvalues == 7 && Equals(Iter_Get(&it), Str_CstrRef(m, "eight")), "Span has 8 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 6 && Equals(Iter_Get(&it), Str_CstrRef(m, "seven")), "Span has 7 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 5 && Equals(Iter_Get(&it), Str_CstrRef(m, "six")), "Span has 6 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 4 && Equals(Iter_Get(&it), Str_CstrRef(m, "five")), "Span has 5 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 3 && Equals(Iter_Get(&it), Str_CstrRef(m, "four")), "Span has 4 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 2 && Equals(Iter_Get(&it), Str_CstrRef(m, "three")), "Span has 3 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 1 && Equals(Iter_Get(&it), Str_CstrRef(m, "two")), "Span has 2 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
     r |= Test(p->nvalues == 0 && Equals(Iter_Get(&it), Str_CstrRef(m, "one")), "Span has 1 values to start, have $, item: $", args);
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);;
     args[1] = Iter_Get(&it);
     args[2] = NULL;
@@ -463,7 +482,8 @@ status IterMax_Tests(MemCh *m){
         Equals(Iter_Current(&it), Str_CstrRef(m, "one")), 
         "Span has 1 values to after add, have $, item: &", args);
 
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     args[0] = I32_Wrapped(m, p->nvalues);
     args[1] = Iter_Get(&it);
     args[2] = NULL;
@@ -472,7 +492,8 @@ status IterMax_Tests(MemCh *m){
         Equals(Iter_Get(&it), Str_CstrRef(m, "one")), 
         "Span has 1 values to after first remove, have $, item: &", args);
 
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     Iter_Add(&it, Str_CstrRef(m, "two"));
     args[0] = I32_Wrapped(m, p->nvalues);
     args[1] = Iter_Current(&it);
@@ -481,7 +502,8 @@ status IterMax_Tests(MemCh *m){
         Equals(Iter_Current(&it), Str_CstrRef(m, "two")), 
         "Span has 1 values to after PrevRemove/Add, have $, item: &", args);
 
-    Iter_PrevRemove(&it);
+    Iter_Remove(&it);
+    Iter_Prev(&it);
     Iter_Add(&it, Str_CstrRef(m, "three"));
     args[0] = I32_Wrapped(m, p->nvalues);
     args[1] = Iter_Current(&it);

@@ -283,8 +283,6 @@ static status _Iter_Prev(Iter *it){
     }
 
     if(it->p == NULL || it->p->nvalues == 0){
-        printf("Prev/END %d\n");
-        fflush(stdout);
         idx = -1;
         it->type.state |= END; 
         goto end;
