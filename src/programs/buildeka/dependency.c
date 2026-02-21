@@ -63,6 +63,8 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         ctx->input.srcPrefix->p->nvalues);
 
     StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
+    StrVec_Add(ctx->current.source, S(m, "mod"));
+    StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
 
     Str *pathS = StrVec_Str(m, path);
     DirSel *sel = NULL;
@@ -177,6 +179,8 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
                 path = StrVec_Copy(m, ctx->input.srcPrefix);
                 StrVec_Add(path, IoUtil_PathSep(m));
+                StrVec_Add(ctx->current.source, S(m, "mod"));
+                StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
                 StrVec_AddVec(path, depV);
                 IoUtil_Annotate(ctx->m, path);
 

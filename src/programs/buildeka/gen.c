@@ -37,10 +37,12 @@ status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
 
     srcIncPath = StrVec_Copy(m, ctx->src);
     args[0] = IoUtil_PathSep(m);
-    args[1] = S(m, "base");
+    args[1] = S(m, "mod");
     args[2] = IoUtil_PathSep(m);
-    args[3] = S(m, "include");
-    args[4] = NULL;
+    args[3] = S(m, "base");
+    args[4] = IoUtil_PathSep(m);
+    args[5] = S(m, "include");
+    args[6] = NULL;
     srcAnchor = StrVec_AddChain(srcIncPath, args);
 
     Span_Add(p, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));

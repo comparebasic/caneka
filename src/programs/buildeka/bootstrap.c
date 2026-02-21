@@ -488,12 +488,12 @@ int main(int argc, char *argv[]){
 
     cmd[0] = _gen_CC;
     cmd[1] = "-g";
-    cmd[2] = "-Isrc/base/include";
+    cmd[2] = "-Isrc/mod/base/include";
     cmd[3] = "-Isrc/api/include";
     cmd[4] = "-c";
     cmd[5] = "-o";
     cmd[6] = "./build/libcnkbase/libcnkbase.a";
-    cmd[7] = "./src/base/inc.c";
+    cmd[7] = "./src/mod/base/inc.c";
     cmd[8] =  NULL;
 
     if(run("Building base", cmd) == -1){
@@ -503,7 +503,7 @@ int main(int argc, char *argv[]){
     cmd[0] = _gen_CC;
     cmd[1] = "-g";
     cmd[2] = "-Isrc/programs/buildeka/include";
-    cmd[3] = "-Isrc/base/include";
+    cmd[3] = "-Isrc/mod/base/include";
     cmd[4] = "-Isrc/api/include";
     cmd[5] = "-Iprograms/buildeka/include";
     cmd[6] = "-o";

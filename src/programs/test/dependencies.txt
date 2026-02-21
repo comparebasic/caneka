@@ -1,6 +1,7 @@
 exec=main.c
 exec=content-fetch.c
 option=crypto@third/openssl
+option=runtime@third/python
 option=inter
 option=ext
 option=base

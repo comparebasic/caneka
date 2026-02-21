@@ -118,6 +118,8 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
+                StrVec_Add(srcIncPath, S(m, "mod"));
+                StrVec_Add(srcIncPath, IoUtil_PathSep(m));
                 StrVec_Add(srcIncPath, h->value);
                 StrVec_Add(srcIncPath, IoUtil_PathSep(m));
                 StrVec_Add(srcIncPath, S(m, "include"));
