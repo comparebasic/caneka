@@ -100,6 +100,11 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
             sel->type.state &= ~DIR_SELECTOR_INVERT;
             sel->source = filter;
+
+            void *args[] = {sel, pathS, NULL};
+            Out("^y.Gathering @ @^0.",  args);
+            exit(1);
+
             Dir_GatherFilterDir(m, pathS, sel);
         }
 
