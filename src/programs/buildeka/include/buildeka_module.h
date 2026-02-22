@@ -118,6 +118,9 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel);
 status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel);
 status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel);
 status BuildCtx_SharedFromObjects(BuildCtx *ctx, StrVec *name, Span *objs);
+status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag);
+StrVec *BuildCtx_DestFromSrc(BuildCtx *ctx,
+        StrVec *path, StrVec *src, StrVec *dest);
 
 status BuildCtx_ToSInit(MemCh *m);
 

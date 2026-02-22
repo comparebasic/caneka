@@ -65,6 +65,7 @@ char **Span_ToCharArr(MemCh *m, Span *p){
     Iter_Init(&it, p);
     int i = 0;
     while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
         Str *s = (Str *)asIfc(it.value, TYPE_STR);
         if(s != NULL){
             arr[i++] = Str_Cstr(m, s);

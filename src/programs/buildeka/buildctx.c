@@ -1,6 +1,14 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
+    if(Span_Has(ctx->input.cflags, flag) == -1){
+        Span_Add(ctx->input.cflags, flag);
+        return SUCCESS;
+    }
+    return NOOP;
+}
+
 status BuildCtx_Build(BuildCtx *ctx){
     DebugStack_Push(NULL, 0);
     status r = READY;

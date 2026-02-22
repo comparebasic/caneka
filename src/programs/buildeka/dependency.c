@@ -168,6 +168,9 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             } else if(Equals(tag, K(m, "dep"))){
                 dep = Span_Get(declare, BUILD_MOD_DECLARE_VALUE);
             } else if(Equals(tag, K(m, "type"))){
+                if(Equals(value, K(m, "shared"))){
+                    BuildCtx_SetFlag(ctx, Sv(m, "-fPIC"));
+                }
                 value = label;
             }
             Table_SetInTable(sel->meta, tag, label, value);
