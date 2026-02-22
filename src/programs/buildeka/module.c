@@ -106,9 +106,8 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                StrVec *v = StrVec_From(m, h->value);
-                IoUtil_Annotate(m, v);
-                Str *modName = IoUtil_FnameStr(m, v);
+                IoUtil_Annotate(m, h->value);
+                Str *modName = IoUtil_FnameStr(m, h->value);
                 Span_Add(modlist, modName);
             }
         }
@@ -122,7 +121,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
             if(h != NULL){
                 StrVec_Add(srcIncPath, S(m, "mod"));
                 StrVec_Add(srcIncPath, IoUtil_PathSep(m));
-                StrVec_Add(srcIncPath, h->value);
+                StrVec_AddVec(srcIncPath, h->value);
                 StrVec_Add(srcIncPath, IoUtil_PathSep(m));
                 StrVec_Add(srcIncPath, S(m, "include"));
                 StrVec_Add(srcIncPath, IoUtil_PathSep(m));
@@ -223,6 +222,39 @@ static status skipRecent(BuildCtx *ctx,
                 return SUCCESS;
             }
         }
+    }
+
+    DebugStack_Pop();
+    return ZERO;
+}
+
+static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
+    DebugStack_Push(NULL, ZERO);
+    MemCh *m = ctx->m;
+
+    Table *tbl = Table_Get(sel->meta, K(m, "type"));
+    if(tbl != NULL && Table_Get(tbl, K(m, "shared")) != NULL){
+        Span *objs = Span_Make(m);
+        Span_AddSpan(objs, sel->dest);
+        Table *deps = Table_Get(sel->meta, K(m, "dep"));
+        void *ar[] = {key, deps, NULL};
+        Out("^p.Building shared for @ deps @\n", ar);
+        Iter it;
+        Iter_Init(&it, Table_Ordered(m, deps));
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            DirSel *dsel = Table_Get(ctx->input.dependencies, h->value);
+            void *ar[] = {h->key, I32_Wrapped(m, dsel->dest->nvalues), NULL};
+            Out("^p.Add sources for @ total@\n", ar);
+            /*
+            Transform the paths here 
+            */
+            Span_AddSpan(objs, dsel->dest);
+        }
+
+        /*
+        BuildCtx_SharedFromObjects(ctx, key, objs);
+        */
     }
 
     DebugStack_Pop();
@@ -397,6 +429,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     ctx->type.state |= PROCESSING;
 
     buildSupporting(ctx, name, sel);
+    buildShared(ctx, name, sel);
     buildExec(ctx, name, sel);
     struct timespec now;
     Time_Now(&now);

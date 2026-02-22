@@ -1,0 +1,6 @@
+type=shared
+include=/usr/local/src/Python-3.13.12/
+include=/usr/local/src/Python-3.13.12/Include
+inter
+ext
+base

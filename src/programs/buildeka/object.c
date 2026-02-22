@@ -1,6 +1,17 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+status BuildCtx_SharedFromObjects(BuildCtx *ctx, StrVec *name, Span *objs){
+    DebugStack_Push(NULL, ZERO);
+    DebugStack_SetRef(objs, objs->type.of);
+    
+    void *ar[] = {name, objs, NULL};
+    Out("^c.Build Shared @ for objects @^0\n", ar);
+
+    DebugStack_Pop();
+    return ZERO;
+}
+
 status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     DebugStack_SetRef(ctx->current.dest, ctx->current.dest->type.of);

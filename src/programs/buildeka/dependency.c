@@ -110,9 +110,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             return NOOP;
         }
 
-        void *args[] = {key, path, NULL};
-        Out("^y.Gathering @ @^0.",  args);
-
         ctx->input.totalModules->val.i++;
         Table_Set(ctx->input.dependencies, name, sel);
 
@@ -170,11 +167,15 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                 }
             } else if(Equals(tag, K(m, "dep"))){
                 dep = Span_Get(declare, BUILD_MOD_DECLARE_VALUE);
+            } else if(Equals(tag, K(m, "type"))){
+                value = label;
             }
             Table_SetInTable(sel->meta, tag, label, value);
 
             if(dep != NULL){
-                Table_SetInTable(sel->meta, S(m, "dep"), label, value);
+                StrVec *v = IoPath(m, "mod/");
+                StrVec_Add(v, value);
+                Table_SetInTable(sel->meta, S(m, "dep"), label, v);
 
                 StrVec *depV = StrVec_From(m, dep);
                 IoUtil_Annotate(m, depV);
@@ -186,8 +187,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                 StrVec_AddVec(path, depV);
                 IoUtil_Annotate(ctx->m, path);
 
-                void *args[] = {path, NULL};
-                Out("^y.Calling ParseDep @^0\n", args);
                 BuildCtx_ParseDependencies(ctx, depV, path);
             }
         }else{

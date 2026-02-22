@@ -1,5 +1,0 @@
-include=/usr/local/src/Python-3.13.12/Include/
-include=/usr/local/src/Python-3.13.12/
-inter
-ext
-base
