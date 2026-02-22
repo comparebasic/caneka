@@ -1,6 +1,11 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+StrVec *BuildCtx_DestFromSrc(BuildCtx *ctx,
+        StrVec *path, StrVec *src, StrVec *dest){
+    return NULL;
+}
+
 status BuildCtx_SharedFromObjects(BuildCtx *ctx, StrVec *name, Span *objs){
     DebugStack_Push(NULL, ZERO);
     DebugStack_SetRef(objs, objs->type.of);
