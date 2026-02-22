@@ -46,6 +46,8 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
 static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
+    DebugStack_SetRef(key, key->type.of);
+
     status r = READY;
     MemCh *m = ctx->m;
     void *args[5];
@@ -135,11 +137,12 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
         while((Iter_Prev(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
+
                 DirSel *dsel = Table_Get(ctx->input.dependencies, h->value);
                 if(dsel == NULL){
-                    void *args[] = {h->key, NULL};
+                    void *args[] = {h, Table_Keys(ctx->input.dependencies), NULL};
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                        "Dependency expected but not resolved @", args);
+                        "Dependency expected but not resolved @ of @", args);
                     DebugStack_Pop();
                     return r|ERROR;
                 }

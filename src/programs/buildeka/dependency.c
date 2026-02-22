@@ -49,6 +49,7 @@ Table *BuildCtx_GenOptionsTable(BuildCtx *ctx, Span *p){
 
 status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     DebugStack_Push(NULL, ZERO);
+    DebugStack_SetRef(path, path->type.of);
     void *args[5];
     MemCh *m = ctx->m;
 
@@ -61,9 +62,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         ctx->current.source,
         path,
         ctx->input.srcPrefix->p->nvalues);
-
-    StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
-    StrVec_Add(ctx->current.source, S(m, "mod"));
     StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
 
     Str *pathS = StrVec_Str(m, path);
@@ -101,10 +99,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             sel->type.state &= ~DIR_SELECTOR_INVERT;
             sel->source = filter;
 
-            void *args[] = {sel, pathS, NULL};
-            Out("^y.Gathering @ @^0.",  args);
-            exit(1);
-
             Dir_GatherFilterDir(m, pathS, sel);
         }
 
@@ -115,6 +109,9 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             DebugStack_Pop();
             return NOOP;
         }
+
+        void *args[] = {key, path, NULL};
+        Out("^y.Gathering @ @^0.",  args);
 
         ctx->input.totalModules->val.i++;
         Table_Set(ctx->input.dependencies, name, sel);
@@ -184,11 +181,13 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
                 path = StrVec_Copy(m, ctx->input.srcPrefix);
                 StrVec_Add(path, IoUtil_PathSep(m));
-                StrVec_Add(ctx->current.source, S(m, "mod"));
-                StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
+                StrVec_Add(path, S(m, "mod"));
+                StrVec_Add(path, IoUtil_PathSep(m));
                 StrVec_AddVec(path, depV);
                 IoUtil_Annotate(ctx->m, path);
 
+                void *args[] = {path, NULL};
+                Out("^y.Calling ParseDep @^0\n", args);
                 BuildCtx_ParseDependencies(ctx, depV, path);
             }
         }else{
