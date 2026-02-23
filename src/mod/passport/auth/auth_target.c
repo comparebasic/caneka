@@ -68,7 +68,7 @@ status AuthFuncU(MemCh *m, AuthTarget *target, digest *hash){
 
 
 status AuthFuncVec(MemCh *m, AuthTarget *target, digest *hash){
-    as(target->bin.text, TYPE_STRVEC);
+    Ifc(m, target->bin.text, TYPE_STRVEC);
     if(target->bin.text->total == 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Cannot authenticate a null or zero length text body", NULL);

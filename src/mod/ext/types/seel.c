@@ -80,7 +80,7 @@ void *Seel_Get(Span *inst, void *key){
     }else{
         Abstract *value = Span_Get(inst, h->orderIdx);
         if(value != NULL){
-            as(value, sg->val.w);
+            Ifc(inst->m, value, sg->val.w);
         }
         return value;
     }

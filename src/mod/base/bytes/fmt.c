@@ -29,7 +29,7 @@ void *FmtVar_Get(MemCh *m, Str *key, void *arg){
         a = (Abstract *)DebugStack_Get();
         if(path->p->nvalues > 1){
             k = Span_Get(path->p, 2);
-            StackEntry *entry = (StackEntry *)as(a, TYPE_DEBUG_STACK_ENTRY);
+            StackEntry *entry = (StackEntry *)Ifc(m, a, TYPE_DEBUG_STACK_ENTRY);
             if(Equals(k, K(m, "name"))){
                 a = (Abstract *)S(m, entry->funcName);
             }else if(Equals(k, K(m, "ref"))){

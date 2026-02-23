@@ -15,7 +15,7 @@ Span *FilePathSep = NULL;
 
 static status fileHasExt(MemCh *m, void *_file, void *source){
     Str *file = _file;
-    Span *exts = (Span *)as(source, TYPE_SPAN);
+    Span *exts = (Span *)Ifc(m, source, TYPE_SPAN);
     Iter it;
     Iter_Init(&it, exts);
     while((Iter_Next(&it) & END) == 0){
@@ -30,12 +30,12 @@ static status fileHasExt(MemCh *m, void *_file, void *source){
 
 static status fileIsDescendedOrNot(MemCh *m, void *_path, void *source){
     Str *path = _path;
-    DirSel *sel = (DirSel *)as(source, TYPE_DIR_SELECTOR);
-    Span *filter = (Span *)as(sel->source, TYPE_SPAN);
+    DirSel *sel = (DirSel *)Ifc(m, source, TYPE_DIR_SELECTOR);
+    Span *filter = (Span *)Ifc(m, sel->source, TYPE_SPAN);
     Iter it;
     Iter_Init(&it, filter);
     while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)as(Iter_Get(&it), TYPE_STR);
+        Str *s = (Str *)Ifc(m, Iter_Get(&it), TYPE_STR);
         if(Str_StartMatch(s, path, min(path->length, s->length))){
             if(sel->type.state & DIR_SELECTOR_INVERT){
                 return NOOP;
@@ -89,7 +89,7 @@ static status gatherDir(MemCh *m, Str *path, void *source){
             p = sel->dest;
         }
     }else{
-        p = (Span *)as(source, TYPE_SPAN);
+        p = (Span *)Ifc(m, source, TYPE_SPAN);
     }
     StrVec *v = StrVec_From(m, path);
     StrVec_Add(v, S(m, "/"));
@@ -124,7 +124,7 @@ static status gatherFileFiltered(MemCh *m, Str *path, Str *file, void *source){
 }
 
 static status gatherFileSel(MemCh *m, Str *path, Str *file, void *source){
-    DirSel *sel = (DirSel *)as(source, TYPE_DIR_SELECTOR);
+    DirSel *sel = (DirSel *)Ifc(m, source, TYPE_DIR_SELECTOR);
     status r = READY;
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, path);

@@ -16,7 +16,7 @@ static StrVec *getPollFlagVec(MemCh *m, struct pollfd *pfd){
 }
 
 static i64 ProtoCtx_Print(Buff *bf, void *a, cls type, word flags){
-    ProtoCtx *ctx = (ProtoCtx*)as(a, TYPE_PROTO_CTX);
+    ProtoCtx *ctx = (ProtoCtx*)Ifc(bf->m, a, TYPE_PROTO_CTX);
     void *args[] = {
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         Util_Wrapped(bf->m, ctx->u),
@@ -29,7 +29,7 @@ static i64 ProtoCtx_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
-    Task *tsk = (Task *)as(a, TYPE_TCP_TASK);
+    Task *tsk = (Task *)Ifc(bf->m, a, TYPE_TCP_TASK);
     void *args[8];
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     args[0] = Type_StateVec(bf->m, TYPE_TASK, tsk->type.state);
@@ -52,7 +52,7 @@ static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static i64 TcpCtx_Print(Buff *bf, void *a, cls type, word flags){
-    TcpCtx *ctx = (TcpCtx*)as(a, TYPE_TCP_CTX);
+    TcpCtx *ctx = (TcpCtx*)Ifc(bf->m, a, TYPE_TCP_CTX);
     void *args[] = {
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         ctx->path,

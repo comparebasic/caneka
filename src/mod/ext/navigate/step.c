@@ -3,7 +3,7 @@
 
 status Step_Delay(Step *st, Task *tsk){
     st->type.state &= ~(NOOP|SUCCESS);
-    Single *sg = (Single *)as(st->arg, TYPE_WRAPPED_PTR);
+    Single *sg = (Single *)Ifc(tsk->m, st->arg, TYPE_WRAPPED_PTR);
     if(sg->objType.of != TYPE_TIMESPEC){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Error objTypeOf was expected to be a TIMESPEC", NULL);

@@ -61,7 +61,7 @@ static status Inst_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 
 static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     MemCh *m = ctx->m;
-    Table *tbl = (Span *)as(a, TYPE_TABLE);
+    Table *tbl = (Span *)Ifc(m, a, TYPE_TABLE);
     status r = READY;
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_DICTIONARY, 0);
@@ -104,7 +104,7 @@ static status Table_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
     MemCh *m = ctx->m;
     m->level++;
-    Span *p = (Span *)as(a, TYPE_SPAN);
+    Span *p = (Span *)Ifc(m, a, TYPE_SPAN);
     status r = READY;
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_COLLECTION, 0);
@@ -138,7 +138,7 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 }
 
 static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    StrVec *v = (StrVec *)as(a, TYPE_STRVEC);
+    StrVec *v = (StrVec *)Ifc(m, a, TYPE_STRVEC);
     MemCh *m = ctx->m;
     status r = READY;
 
@@ -208,7 +208,7 @@ static status I64_ToBinSeg(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
 }
 
 static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    Str *s = (Str *)as(a, TYPE_STR);
+    Str *s = (Str *)Ifc(m, a, TYPE_STR);
     MemCh *m = ctx->m;
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_BYTES, s->length);

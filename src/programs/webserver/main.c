@@ -2,8 +2,8 @@
 #include <caneka.h>
 
 static status getDefaultData(MemCh *m, void *a, void *source){
-    Table *data = (Table *)as(a, TYPE_TABLE);
-    TcpCtx *tcp = (TcpCtx *)as(source, TYPE_TCP_CTX);
+    Table *data = (Table *)Ifc(m, a, TYPE_TABLE);
+    TcpCtx *tcp = (TcpCtx *)Ifc(m, source, TYPE_TCP_CTX);
     Table *error = Table_Make(m);
     Table_Set(data, S(m, "nav"), tcp->nav);
     Table_Set(error, S(m, "name"), S(m, "None"));
@@ -13,9 +13,9 @@ static status getDefaultData(MemCh *m, void *a, void *source){
 }
 
 static status Example_signup(Step *st, Task *tsk){
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
 
     MemCh *m = tsk->m;
 
@@ -38,9 +38,9 @@ static status Example_signup(Step *st, Task *tsk){
 }
 
 static status Load_stats(Step *st, Task *tsk){
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
 
     MemCh *m = tsk->m;
 

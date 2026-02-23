@@ -40,7 +40,7 @@ status Bytes_Debug(Buff *bf, byte *start, byte *end){
 }
 
 status BytesLit_Print(Buff *bf, void *a, cls type, word flags){
-    BytesLit *sl = (BytesLit*)as(a, TYPE_BYTES_POINTER); 
+    BytesLit *sl = (BytesLit*)Ifc(bf->m, a, TYPE_BYTES_POINTER); 
     if(flags & (MORE|DEBUG)){
         Buff_AddBytes(bf, (byte *)"BytesLit<", 7);
     }
@@ -74,7 +74,7 @@ status Cstr_Print(Buff *bf, void *a, cls type, word flags){
 
 status Str_Print(Buff *bf, void *a, cls type, word flags){
     void *args[5];
-    Str *s = (Str*)as(a, TYPE_STR); 
+    Str *s = (Str*)Ifc(bf->m, a, TYPE_STR); 
 
     if((flags & (MORE|DEBUG)) == 0){
         return Buff_AddBytes(bf, s->bytes, s->length);
@@ -103,7 +103,7 @@ status Str_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status StrVec_Print(Buff *bf, void *a, cls type, word flags){
-    StrVec *vObj = (StrVec *)as(a, TYPE_STRVEC);
+    StrVec *vObj = (StrVec *)Ifc(bf->m, a, TYPE_STRVEC);
     if(flags & MORE){
         Buff_AddBytes(bf, (byte *)"[", 1); 
     }
@@ -159,7 +159,7 @@ status StrVec_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Histo_Print(Buff *bf, void *a, cls type, word flags){
-    Histo *hst = (Histo *)as(a, TYPE_HISTO);
+    Histo *hst = (Histo *)Ifc(bf->m, a, TYPE_HISTO);
     MemCh *m = bf->m;
     void *args[] = {
         Type_StateVec(m, hst->type.of, hst->type.state),
@@ -177,7 +177,7 @@ status Histo_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Cursor_Print(Buff *bf, void *a, cls type, word flags){
-    Cursor *curs = (Cursor *)as(a, TYPE_CURSOR);
+    Cursor *curs = (Cursor *)Ifc(bf->m, a, TYPE_CURSOR);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }

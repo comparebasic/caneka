@@ -7,7 +7,7 @@ Table *TaskErrorHandlers = NULL; /* TaskPopulate */
 
 static status _taskErrorHandler(MemCh *m, void *_tsk, void *msg){
     void *args[5];
-    Task *tsk = (Task *)as(_tsk, TYPE_TASK);
+    Task *tsk = (Task *)Ifc(m, _tsk, TYPE_TASK);
     Single *key = Util_Wrapped(m, (util)tsk->parent);
     Single *funcW = (Single *)Table_Get(TaskErrorHandlers, key);
     if(funcW != NULL){

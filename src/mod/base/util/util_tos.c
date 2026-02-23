@@ -4,7 +4,7 @@
 static Str **approxTimeLabels = NULL;
 
 static status ApproxTime_Print(Buff *bf, void *a, cls type, word flags){
-    ApproxTime *at = (ApproxTime *)as(a, TYPE_APPROXTIME);
+    ApproxTime *at = (ApproxTime *)Ifc(bf->m, a, TYPE_APPROXTIME);
     void *args[] = {
         Type_StateVec(bf->m, at->type.of, at->type.state),
         I32_Wrapped(bf->m, at->value),
@@ -14,7 +14,7 @@ static status ApproxTime_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedPtrTimeSpec_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR_TIMESPEC);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_PTR_TIMESPEC);
     void *args[] = {
         Time_ToStr(bf->m, sg->val.ptr),
         NULL
@@ -23,7 +23,7 @@ static status WrappedPtrTimeSpec_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Wrapped_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED);
     if(flags & (MORE|DEBUG)){
         void *args[] = {
             Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
@@ -36,7 +36,7 @@ static status Wrapped_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedDo_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_DO);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_DO);
     if(flags & (DEBUG|MORE)){
         void *args[] = {
             Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
@@ -50,7 +50,7 @@ static status WrappedDo_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedFunc_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_FUNC);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_FUNC);
     void *args[] = {
         Type_StateVec(bf->m, sg->type.of, sg->type.state),
         Util_Wrapped(bf->m, (util)sg->val.ptr),
@@ -64,7 +64,7 @@ static status WrappedFunc_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedPtr_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_PTR);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_PTR);
     word fl = (DEBUG|MORE);
     void *args[] = {
         Str_CstrRef(bf->m, Type_ToChars(sg->objType.of)),
@@ -85,7 +85,7 @@ static status WrappedPtr_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedUtil_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_UTIL);
     Str *s = Str_FromI64(bf->m, sg->val.value);
     if(flags & MORE){
         void *args[] = {
@@ -105,13 +105,13 @@ static status WrappedUtil_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedMemCount_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_MEMCOUNT);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_MEMCOUNT);
     Str *s = Str_MemCount(bf->m, sg->val.value);
     return Buff_AddBytes(bf, s->bytes, s->length);
 }
 
 static status WrappedI64_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_I64);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_I64);
     Str *s = Str_FromI64(bf->m, sg->val.value);
     if(flags & MORE){
         void *args[] = {
@@ -125,7 +125,7 @@ static status WrappedI64_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedU32_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_U32);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_U32);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.i);
     if(flags & DEBUG){
         void *args[] = {
@@ -145,7 +145,7 @@ static status WrappedU32_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedI32_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_I32);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_I32);
     i64 n = (i32)sg->val.i;
     Str *s = Str_FromI64(bf->m, n);
     if(flags & DEBUG){
@@ -166,7 +166,7 @@ static status WrappedI32_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedI16_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_I16);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_I16);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.w);
     if(flags & MORE){
         if(sg->objType.of != ZERO){
@@ -189,7 +189,7 @@ static status WrappedI16_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedI8_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_I8);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_I8);
     Str *s = Str_FromI64(bf->m, (i64)sg->val.b);
     if(flags & DEBUG){
         void *args[] = {
@@ -209,7 +209,7 @@ static status WrappedI8_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status WrappedB_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_BYTE);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_BYTE);
     if((flags & DEBUG)){
         Fmt(bf, "Wb<^E.", NULL);
         Bytes_Debug(bf, &sg->val.b, &sg->val.b);
@@ -233,7 +233,7 @@ static status WrappedB_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Abstract_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED_UTIL);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED_UTIL);
     if(flags & (DEBUG|MORE)){
         void *args[] = {
             Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),
@@ -246,7 +246,7 @@ static status Abstract_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Single_Print(Buff *bf, void *a, cls type, word flags){
-    Single *sg = (Single *)as(a, TYPE_WRAPPED);
+    Single *sg = (Single *)Ifc(bf->m, a, TYPE_WRAPPED);
     if(flags & (DEBUG|MORE)){
         void *args[] = {
             Str_CstrRef(bf->m, Type_ToChars(sg->type.of)),

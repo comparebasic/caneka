@@ -55,7 +55,7 @@ static PatCharDef threeDef[] = {
 
 status SetWord1(MemCh *m, void *a){
     status r = READY;
-    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
+    Roebling *rbl = (Roebling *) Ifc(m, a, TYPE_ROEBLING);
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl, dbl_nl, 0, RBL_TEST_END);
@@ -88,7 +88,7 @@ status Roebling_Tests(MemCh *m){
     Roebling_Start(rbl);
     rbl->type.state |= ROEBLING_REPEAT;
 
-    Single *dof = (Single *)as(Span_Get(rbl->parseIt.p, 0), TYPE_WRAPPED_DO);
+    Single *dof = (Single *)Ifc(m, Span_Get(rbl->parseIt.p, 0), TYPE_WRAPPED_DO);
     ((RblFunc)dof->val.dof)(rbl->m, rbl);
 
     void *args[] = {

@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static status TemplCtx_Print(Buff *bf, void *a, cls type, word flags){
-    TemplCtx *ctx = (TemplCtx *)as(a, TYPE_TEMPL_CTX);
+    TemplCtx *ctx = (TemplCtx *)Ifc(bf->m, a, TYPE_TEMPL_CTX);
     void *args[] = {
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         ctx->it.p,
@@ -97,7 +97,7 @@ static status Jumps_Print(Buff *bf, void *a, cls type, word flags){
 static status Templ_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
 
-    Templ *templ = (Templ *)as(a, TYPE_TEMPL);
+    Templ *templ = (Templ *)Ifc(bf->m, a, TYPE_TEMPL);
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(bf->m, templ->type.of, templ->type.state),

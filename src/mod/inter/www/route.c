@@ -160,7 +160,7 @@ void Route_Prepare(Route *rt){
     if(rt->type.state & GEN_INDEX){
         StrVec_Add(token, Str_FromCstr(m, "index", ZERO));
     }
-    Single *funcW = (Single *)as(
+    Single *funcW = (Single *)Ifc(ft->m, 
         Seel_Get(rt, S(m, "func")),
         TYPE_WRAPPED_FUNC
     );
@@ -205,7 +205,7 @@ void Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){
     bf->m->type.state = fl;
 
     Abstract *action = Seel_Get(rt, S(m, "action"));
-    Single *funcW = (Single *)as(Seel_Get(rt, S(m, "func")), TYPE_WRAPPED_FUNC);
+    Single *funcW = (Single *)Ifc(ft->m, Seel_Get(rt, S(m, "func")), TYPE_WRAPPED_FUNC);
 
     Table *headers = Seel_Get(rt, K(bf->m, "headers"));
     if(ctx != NULL && headers != NULL){

@@ -2,7 +2,7 @@
 #include "base_module.h"
 
 static status StackEntry_Print(Buff *bf, Abstract *a, cls type, word flags){
-    StackEntry *se = (StackEntry*)as(a, TYPE_DEBUG_STACK_ENTRY); 
+    StackEntry *se = (StackEntry*)Ifc(m, a, TYPE_DEBUG_STACK_ENTRY); 
     void *args[2];
     Str s = {
         .type = {TYPE_STR, STRING_CONST},

@@ -20,7 +20,7 @@ status Http_Tests(MemCh *m){
     Roebling *rbl = HttpRbl_Make(m, curs, proto);
     Roebling_Run(rbl);
 
-    HttpCtx *ctx = (HttpCtx*)as(proto->ctx, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx*)Ifc(m, proto->ctx, TYPE_HTTP_CTX);
     args[0] = I32_Wrapped(m, HTTP_METHOD_GET);
     args[1] = NULL;
     r |= Test(ctx->method == HTTP_METHOD_GET, "Method is as expected $", args);
@@ -51,7 +51,7 @@ status HttpQuery_Tests(MemCh *m){
     status r = READY;
 
     ProtoCtx *proto = HttpProto_Make(m);
-    HttpCtx *ctx = (HttpCtx*)as(proto->ctx, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx*)Ifc(m, proto->ctx, TYPE_HTTP_CTX);
 
     Str *content = S(m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");

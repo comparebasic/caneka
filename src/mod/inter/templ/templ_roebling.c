@@ -232,8 +232,8 @@ static status var(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
-    Mess *mess = (Mess *)as(rbl->dest, TYPE_MESS);
-    TemplCtx *ctx = (TemplCtx*)as(rbl->source, TYPE_TEMPL_CTX);
+    Mess *mess = (Mess *)Ifc(rbl->m, rbl->dest, TYPE_MESS);
+    TemplCtx *ctx = (TemplCtx*)Ifc(rbl->m, rbl->source, TYPE_TEMPL_CTX);
     if(mess->type.state & DEBUG){
         void *args[] = {
             Type_ToStr(OutStream->m, captureKey),

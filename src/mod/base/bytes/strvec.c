@@ -395,7 +395,7 @@ i32 StrVec_GetIdx(StrVec *v, Str *s){
 }
 
 StrVec *StrVec_CopyTo(MemCh *m, StrVec *_v, i32 anchor){
-    StrVec *v = (StrVec *)as(_v, TYPE_STRVEC);
+    StrVec *v = (StrVec *)Ifc(m, _v, TYPE_STRVEC);
     StrVec *new = StrVec_Make(m);
     Iter it;
     Iter_Init(&it, v->p);
@@ -409,7 +409,7 @@ StrVec *StrVec_CopyTo(MemCh *m, StrVec *_v, i32 anchor){
 }
 
 StrVec *StrVec_Copy(MemCh *m, StrVec *_v){
-    StrVec *v = (StrVec *)as(_v, TYPE_STRVEC);
+    StrVec *v = (StrVec *)Ifc(m, _v, TYPE_STRVEC);
     StrVec *new = StrVec_Make(m);
     Iter it;
     Iter_Init(&it, v->p);
@@ -428,7 +428,7 @@ void *StrVec_Clone(MemCh *m, void *a){
 
 i32 StrVec_Add(StrVec *v, Str *s){
     i32 anchor = v->p->max_idx;
-    s = (Str *)as(s, TYPE_STR);
+    s = (Str *)Ifc(m, s, TYPE_STR);
     status r = Span_Add(v->p, s);
     v->total += s->length;
     return anchor;

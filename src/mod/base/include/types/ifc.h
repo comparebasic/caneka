@@ -15,4 +15,8 @@ typedef struct ifc_map {
     SourceMakerFunc func;
 } IfcMap;
 
-IfcMap *IfcMap_Make(MemCh *m, cls typeOf, i16 start, i16 end, i64 size);
+void Type_SetFlag(void *_a, word flags);
+IfcMap *IfcMap_Make(struct mem_ctx *m, 
+    cls typeOf, i16 start, i16 end, i64 size);
+void *Ifc(struct mem_ctx *m, void *_a, cls typeOf);
+void Ifc_Init(struct mem_ctx *m);

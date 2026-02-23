@@ -7,7 +7,7 @@ static boolean Table_Empty(void *_a){
 }
 
 status HKey_Print(Buff *bf, void *a, cls type, word flags){
-    HKey *hk = (HKey *)as(a, TYPE_HKEY);
+    HKey *hk = (HKey *)Ifc(bf->m, a, TYPE_HKEY);
     if(flags & (MORE|DEBUG)){
         void *args[] = {
             I32_Wrapped(bf->m, hk->idx), 
@@ -60,7 +60,7 @@ status Array_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Hashed_Print(Buff *bf, void *a, cls type, word flags){
-    Hashed *h = (Hashed *)as(a, TYPE_HASHED);
+    Hashed *h = (Hashed *)Ifc(bf->m, a, TYPE_HASHED);
     if(flags & DEBUG){
         Single *wid = I64_Wrapped(bf->m, h->id);
         wid->type.state |= FMT_TYPE_BITS;
@@ -89,7 +89,7 @@ status Hashed_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Lookup_Print(Buff *bf, void *a, cls type, word flags){
-    Lookup *lk = (Lookup *)as(a, TYPE_LOOKUP);
+    Lookup *lk = (Lookup *)Ifc(bf->m, a, TYPE_LOOKUP);
     void *args[3];
     if(flags & (MORE|DEBUG)){
         void *args[] = {

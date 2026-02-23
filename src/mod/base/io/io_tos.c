@@ -28,7 +28,7 @@ status StashCoords_Print(Buff *bf, StashCoord *coord, word flags){
 }
 
 status DirSel_Print(Buff *bf, void *a, cls type, word flags){
-    DirSel *sel = (DirSel *)as(a, TYPE_DIR_SELECTOR);
+    DirSel *sel = (DirSel *)Ifc(m, a, TYPE_DIR_SELECTOR);
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(bf->m, sel->type.of, sel->type.state),
@@ -53,7 +53,7 @@ status DirSel_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Buff_Print(Buff *bf, void *a, cls type, word flags){
-    Buff *bfObj = (Buff *)as(a, TYPE_BUFF);
+    Buff *bfObj = (Buff *)Ifc(m, a, TYPE_BUFF);
 
     void *args[9];
     args[0] = Type_StateVec(bf->m, bfObj->type.of, bfObj->type.state);
@@ -79,7 +79,7 @@ status Buff_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status StashItem_Print(Buff *bf, void *a, cls type, word flags){
-    StashItem *item = (StashItem *)as(a, TYPE_STASH_ITEM);
+    StashItem *item = (StashItem *)Ifc(m, a, TYPE_STASH_ITEM);
     void *args[] = {
         Util_Wrapped(bf->m, (util)item->ptr),
         NULL
@@ -90,7 +90,7 @@ status StashItem_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status ProcDets_Print(Buff *bf, void *a, cls type, word flags){
-    ProcDets *pd = (ProcDets *)as(a, TYPE_PROCDETS);
+    ProcDets *pd = (ProcDets *)Ifc(m, a, TYPE_PROCDETS);
     void *args[] = {
         State_ToStr(bf->m, pd->type.state),
         I32_Wrapped(bf->m, pd->pid), 

@@ -15,7 +15,7 @@ static i64 tableFunc(TranspCtx *ctx, word flags){
         Str *thead = Str_CstrRef(ctx->m, "THEAD");
         Str *tr = Str_CstrRef(ctx->m, "TR");
         Str *td = Str_CstrRef(ctx->m, "TD");
-        Relation *rel = (Relation *)as(a, TYPE_RELATION);
+        Relation *rel = (Relation *)Ifc(ctx->m, a, TYPE_RELATION);
         Relation_ResetIter(rel);
 
         Buff_AddBytes(ctx->bf, (byte *)"  ", 2);
@@ -114,7 +114,7 @@ static i64 headerFunc(TranspCtx *ctx, word flags){
 
 static i64 linkFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Node *nd = (Node *)as(ctx->it.value, TYPE_NODE);
+    Node *nd = (Node *)Ifc(ctx->m, ctx->it.value, TYPE_NODE);
 
     StrVec *text = (StrVec *)Table_Get(nd->atts, 
         I16_Wrapped(ctx->m, FORMATTER_LABEL));
@@ -130,7 +130,7 @@ static i64 linkFunc(TranspCtx *ctx, word flags){
 
 static i64 imageFunc(TranspCtx *ctx, word flags){
     i64 total = 0;
-    Node *nd = (Node *)as(ctx->it.value, TYPE_NODE);
+    Node *nd = (Node *)Ifc(ctx->m, ctx->it.value, TYPE_NODE);
 
     StrVec *label = (StrVec *)Table_Get(nd->atts, 
         I16_Wrapped(ctx->m, FORMATTER_LABEL));
@@ -168,7 +168,7 @@ static i64 paragraphFunc(TranspCtx *ctx, word flags){
 
 static i64 tagFunc(TranspCtx *ctx, word flags){
     if((flags & TRANSP_CLOSE) == 0){
-        Node *nd = (Node *)as(ctx->it.value, TYPE_NODE);
+        Node *nd = (Node *)Ifc(ctx->m, ctx->it.value, TYPE_NODE);
         StrVec *tag = (StrVec *)Table_Get(nd->atts, 
             I16_Wrapped(ctx->m, FORMATTER_TAG));
         if(Equals(tag, Str_CstrRef(ctx->m, "link"))){

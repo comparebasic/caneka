@@ -83,7 +83,7 @@ static status PatCharDef_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Snip_Print(Buff *bf, void *a, cls type, word flags){
-    Snip *sn = (Snip *)as(a, TYPE_SNIP);
+    Snip *sn = (Snip *)Ifc(bf->m, a, TYPE_SNIP);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }
@@ -103,7 +103,7 @@ static status Snip_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status SnipSpan_Print(Buff *bf, void *a, cls type, word flags){
-    Span *sns = (Span *)as(a, TYPE_SPAN);
+    Span *sns = (Span *)Ifc(bf->m, a, TYPE_SPAN);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }
@@ -120,7 +120,7 @@ static status SnipSpan_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Roebling_Print(Buff *bf, void *a, cls type, word flags){
-    Roebling *rbl = (Roebling *) as(a, TYPE_ROEBLING);
+    Roebling *rbl = (Roebling *) Ifc(bf->m, a, TYPE_ROEBLING);
     void *args[4];
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
@@ -157,7 +157,7 @@ status Roebling_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Match_Print(Buff *bf, void *a, cls type, word flags){
-    Match *mt = (Match *)as(a, TYPE_PATMATCH);
+    Match *mt = (Match *)Ifc(bf->m, a, TYPE_PATMATCH);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }
@@ -266,7 +266,7 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
 }
 
 static status Tokenize_Print(Buff *bf, void *a, cls type, word flags){
-    Tokenize *tk = (Tokenize *)as(a, TYPE_TOKENIZE); 
+    Tokenize *tk = (Tokenize *)Ifc(bf->m, a, TYPE_TOKENIZE); 
     if((flags & (DEBUG|MORE)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }else{

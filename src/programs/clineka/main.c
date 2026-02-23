@@ -196,7 +196,7 @@ i32 main(int argc, char **argv){
                     }
 
                     if((r & ERROR) == 0){
-                        r |= Fmt_ToHtml(bf, (Mess *)as(rbl->dest, TYPE_MESS));
+                        r |= Fmt_ToHtml(bf, (Mess *)Ifc(bf->m, rbl->dest, TYPE_MESS));
                     }
 
                     if((r & ERROR) == 0 && footerPath != NULL){

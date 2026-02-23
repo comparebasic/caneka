@@ -4,7 +4,7 @@
 static boolean _init = FALSE;
 
 static i64 Hashed_Print(Buff *bf, void *a, cls type, word flags){
-    Hashed *h = (Hashed *)as(a, TYPE_HASHED);
+    Hashed *h = (Hashed *)Ifc(bf->m, a, TYPE_HASHED);
     if(flags & DEBUG){
         Single *wid = I64_Wrapped(bf->m, h->id);
         wid->type.state |= FMT_TYPE_BITS;
@@ -53,7 +53,7 @@ static boolean Fetcher_Exact(Fetcher *a, Fetcher *b){
 }
 
 static status Fetcher_Print(Buff *bf, void *a, cls type, word flags){
-    Fetcher *fch = (Fetcher *)as(a, TYPE_FETCHER);
+    Fetcher *fch = (Fetcher *)Ifc(bf->m, a, TYPE_FETCHER);
     void *args[] = {
         Type_StateVec(bf->m, fch->type.of, fch->type.state),
         NULL,
@@ -71,7 +71,7 @@ static status FetchTargetFunc_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
-    FetchTarget *tg = (FetchTarget *)as(a, TYPE_FETCH_TARGET);
+    FetchTarget *tg = (FetchTarget *)Ifc(bf->m, a, TYPE_FETCH_TARGET);
     void *args[] = {
         Type_StateVec(bf->m, tg->type.of, tg->type.state),
         Type_ToStr(bf->m, tg->objType.of),
@@ -125,7 +125,7 @@ status Inst_Print(Buff *bf, void *a, cls type, word flags){
     if(((Abstract *)a)->type.of & TYPE_INSTANCE){
         obj = (Inst *)a;
     }else{
-        as(a, TYPE_INSTANCE);
+        Ifc(bf->m, a, TYPE_INSTANCE);
     }
     Table *seel = Lookup_Get(SeelLookup, obj->type.of);
     Str *name = Lookup_Get(SeelNameLookup, obj->type.of);

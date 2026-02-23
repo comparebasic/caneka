@@ -2,8 +2,8 @@
 #include "buildeka_module.h"
 
 status BuildCli_RenderStatus(MemCh *m, void *a){
-    CliStatus *cli = (CliStatus *)as(a, TYPE_CLI_STATUS);
-    BuildCtx *ctx = (BuildCtx *)as(cli->source, TYPE_BUILDCTX);
+    CliStatus *cli = (CliStatus *)Ifc(m, a, TYPE_CLI_STATUS);
+    BuildCtx *ctx = (BuildCtx *)Ifc(m, cli->source, TYPE_BUILDCTX);
 
     i32 width = ctx->cli.cli->cols;
     float total = (float)ctx->input.totalSources->val.i;
@@ -19,11 +19,11 @@ status BuildCli_RenderStatus(MemCh *m, void *a){
     CliStatus_SetByKey(m, cli, Str_CstrRef(m, "memTotal"),
         Str_MemCount(ctx->m, st.total*PAGE_SIZE));
 
-    Single *sg = (Single *)as(CliStatus_GetByKey(m, 
+    Single *sg = (Single *)Ifc(m, CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chapters")), TYPE_WRAPPED_I64);
     sg->val.value = st.total;
 
-    sg = (Single *)as(CliStatus_GetByKey(m, 
+    sg = (Single *)Ifc(m, CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
     sg->val.value = st.pageIdx;
 

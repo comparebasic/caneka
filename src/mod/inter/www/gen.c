@@ -6,8 +6,8 @@ Lookup *MimeLookup = NULL;
 
 static void routeFuncStatic(Gen *gen, Buff *bf, Table *_data){
     MemCh *m = bf->m;
-    Str *pathS = StrVec_Str(bf->m, (StrVec *)as(gen->path, TYPE_STRVEC));
-    Buff *inBf = (Buff *)as(gen->action, TYPE_BUFF);
+    Str *pathS = StrVec_Str(bf->m, (StrVec *)Ifc(m, gen->path, TYPE_STRVEC));
+    Buff *inBf = (Buff *)Ifc(m, gen->action, TYPE_BUFF);
     Buff_UnsetFd(inBf);
     File_Open(inBf, pathS, O_RDONLY);
     Buff_Pipe(bf, inBf);
@@ -15,7 +15,7 @@ static void routeFuncStatic(Gen *gen, Buff *bf, Table *_data){
 
 static void routeFuncTempl(Gen *gen, Buff *bf, Table *data){
     MemCh *m = bf->m;
-    Templ *templ = (Templ *)as(gen->action, TYPE_TEMPL);
+    Templ *templ = (Templ *)Ifc(m, gen->action, TYPE_TEMPL);
 
     Templ_Reset(templ);
     templ->type.state |= bf->type.state;
@@ -24,12 +24,12 @@ static void routeFuncTempl(Gen *gen, Buff *bf, Table *data){
 
 static void routeFuncFmt(Gen *gen, Buff *bf, Table *_data){
     MemCh *m = bf->m;
-    Fmt_ToHtml(bf, (Mess *)as(gen->action, TYPE_MESS));
+    Fmt_ToHtml(bf, (Mess *)Ifc(m, gen->action, TYPE_MESS));
 }
 
 static void routeFuncFileDb(Gen *gen, Buff *bf, Table *data){
     MemCh *m = bf->m;
-    BinSegCtx *bsCtx = (BinSegCtx *)as(gen->action, TYPE_BINSEG_CTX);
+    BinSegCtx *bsCtx = (BinSegCtx *)Ifc(m, gen->action, TYPE_BINSEG_CTX);
     status r = READY;
     /*
     if(action == NULL){

@@ -25,7 +25,7 @@ static status BinSegHeader_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status BinSegCtx_Print(Buff *bf, void *a, cls type, word flags){
-    BinSegCtx *ctx = (BinSegCtx *)as(a, TYPE_BINSEG_CTX);
+    BinSegCtx *ctx = (BinSegCtx *)Ifc(bf->m, a, TYPE_BINSEG_CTX);
     void *args[] = {
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         ctx->records,

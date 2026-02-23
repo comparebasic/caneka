@@ -17,7 +17,7 @@ static status indentStream(Buff *bf, i32 indent){
 }
 
 static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
-    CompResult *cr = (CompResult*)as(a, TYPE_COMPRESULT);
+    CompResult *cr = (CompResult*)Ifc(bf->m, a, TYPE_COMPRESULT);
     void *args[] = {
         Type_StateVec(bf->m, cr->type.of, cr->type.state),
         cr->a,
@@ -32,7 +32,7 @@ static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
-    QueueCrit *crit = (QueueCrit *)as(a, TYPE_QUEUE_CRIT);
+    QueueCrit *crit = (QueueCrit *)Ifc(bf->m, a, TYPE_QUEUE_CRIT);
     void *args[2];
     if(flags & MORE){
         Table *tbl = Table_Make(bf->m);
@@ -65,7 +65,7 @@ static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Queue_Print(Buff *bf, void *a, cls type, word flags){
-    Queue *q = (Queue *)as(a, TYPE_QUEUE);
+    Queue *q = (Queue *)Ifc(bf->m, a, TYPE_QUEUE);
     status r = READY;
     void *args[7];
     args[0] = Type_StateVec(bf->m, q->type.of, q->type.state);
@@ -91,7 +91,7 @@ static status Queue_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Comp_Print(Buff *bf, void *a, cls type, word flags){
-    Comp *comp = (Comp*)as(a, TYPE_COMP);
+    Comp *comp = (Comp*)Ifc(bf->m, a, TYPE_COMP);
     void *args[] = {
         Type_StateVec(bf->m, comp->type.of, comp->type.state),
         &comp->it,
@@ -109,7 +109,7 @@ static status Comp_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Node_Print(Buff *bf, void *a, cls type, word flags){
-    Node *nd = (Node*)as(a, TYPE_NODE);
+    Node *nd = (Node*)Ifc(bf->m, a, TYPE_NODE);
     void *args[9];
     args[0] = Type_StateVec(bf->m, nd->type.of, nd->type.state);
     args[1] = Type_ToStr(bf->m, nd->typeOfChild);
@@ -135,7 +135,7 @@ static status Node_Print(Buff *bf, void *a, cls type, word flags){
 
 static status Relation_Print(Buff *bf, void *a, cls type, word flags){
     status r = READY;
-    Relation *rel = (Relation*)as(a, TYPE_RELATION);
+    Relation *rel = (Relation*)Ifc(bf->m, a, TYPE_RELATION);
     void *args[] = {
         I16_Wrapped(bf->m, rel->stride),
         I32_Wrapped(bf->m, Relation_RowCount(rel)),
@@ -210,7 +210,7 @@ static status MessClimber_PrintItems(Buff *bf, MessClimber *climber, word flags)
 }
 
 static status Mess_Print(Buff *bf, void *a, cls type, word flags){
-    Mess *ms = (Mess *)as(a, TYPE_MESS);
+    Mess *ms = (Mess *)Ifc(bf->m, a, TYPE_MESS);
     if((flags & (DEBUG|MORE)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }else{
@@ -241,7 +241,7 @@ static status Mess_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Step_Print(Buff *bf, void *a, cls type, word flags){
-    Step *st = (Step *)as(a, TYPE_STEP);
+    Step *st = (Step *)Ifc(bf->m, a, TYPE_STEP);
     void *args[5];
     args[0] = Type_StateVec(bf->m, st->type.of, st->type.state);
     args[1] = Util_Wrapped(bf->m, (util)st->func);
@@ -260,7 +260,7 @@ static status Step_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Task_Print(Buff *bf, void *a, cls type, word flags){
-    Task *tsk = (Task *)as(a, TYPE_TASK);
+    Task *tsk = (Task *)Ifc(bf->m, a, TYPE_TASK);
     void *args[6];
     args[0] = Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
     args[1] = I32_Wrapped(bf->m, tsk->chainIt.idx);
@@ -278,7 +278,7 @@ static status Task_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Frame_Print(Buff *bf, void *a, cls type, word flags){
-    Frame *fm = (Frame *)as(a, TYPE_FRAME);
+    Frame *fm = (Frame *)Ifc(bf->m, a, TYPE_FRAME);
     void *args[] = {
         I32_Wrapped(bf->m, fm->originIdx),
         fm->originKey,

@@ -576,7 +576,7 @@ status WwwRouteRbs_Tests(MemCh *m){
     /*
 
     ProtoCtx *proto = HttpProto_Make(m);
-    HttpCtx *ctx = (HttpCtx*)as(proto->ctx, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx*)Ifc(m, proto->ctx, TYPE_HTTP_CTX);
 
     Str *content = S(m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");

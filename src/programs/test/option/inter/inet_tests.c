@@ -9,8 +9,8 @@ static status InetExample_finalize(Step *_st, Task *tsk){
 }
 
 static status InetExample_send(Step *st, Task *tsk){
-    Buff *content = as(st->data, TYPE_BUFF);
-    StrVec *expected = as(st->arg, TYPE_STRVEC);
+    Buff *content = Ifc(tsk->m, st->data, TYPE_BUFF);
+    StrVec *expected = Ifc(tsk->m, st->arg, TYPE_STRVEC);
     MemCh *m = tsk->m;
 
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
@@ -24,8 +24,8 @@ static status InetExample_send(Step *st, Task *tsk){
 }
 
 static status InetExample_read(Step *st, Task *tsk){
-    Buff *in = as(st->data, TYPE_BUFF);
-    StrVec *expected = as(st->arg, TYPE_STRVEC);
+    Buff *in = Ifc(tsk->m, st->data, TYPE_BUFF);
+    StrVec *expected = Ifc(tsk->m, st->arg, TYPE_STRVEC);
     Buff_ReadAmount(in, 1024);
     MemCh *m = tsk->m;
 
@@ -42,7 +42,7 @@ static status InetExample_read(Step *st, Task *tsk){
 static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
+    Single *fdw = (Single *)Ifc(m, arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
 
     HttpTask_InitResponse(tsk, NULL, source);

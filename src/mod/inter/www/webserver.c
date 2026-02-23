@@ -7,8 +7,8 @@ static Span *_sepSpan = NULL;
 
 static status WebServer_logAndClose(Step *_st, Task *tsk){
     DebugStack_Push(_st, _st->type.of);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
 
     MemBookStats st;
     MemBook_GetStats(tsk->m, &st);
@@ -42,9 +42,9 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
     DebugStack_Push(tsk, tsk->type.of);
     
     MemCh *m = tsk->m; 
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
 
     StrVec *path = Sv(m, "/system/error");
     IoUtil_Annotate(m, path);
@@ -53,7 +53,7 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
 
     Table *error = Table_Get(ctx->data, K(m, "error"));
     if(arg != NULL && ((Abstract *)arg)->type.of == TYPE_ERROR_MSG){
-        ErrorMsg *msg = (ErrorMsg *)as(arg, TYPE_ERROR_MSG);
+        ErrorMsg *msg = (ErrorMsg *)Ifc(tsk->m, arg, TYPE_ERROR_MSG);
         Table_Set(error, S(m, "name"), msg->lineInfo[0]);
         Buff *bf = Buff_Make(m, ZERO);
         Fmt(bf, (char *)msg->fmt->bytes, msg->args);
@@ -72,7 +72,7 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
 static status WebServer_populate(MemCh *m, Task *tsk, void *arg, void *source){
     DebugStack_Push(tsk, tsk->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
+    Single *fdw = (Single *)Ifc(tsk->m, arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
 
     HttpTask_InitResponse(tsk, NULL, source);
@@ -104,9 +104,9 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 
     MemCh *m = tsk->m;
 
-    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    TcpCtx *tcp = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
 
     IoUtil_Annotate(tsk->m, ctx->path);
     ctx->route = Route_Get(tcp->pages, ctx->path);
@@ -193,14 +193,14 @@ status WebServer_ServePage(Step *st, Task *tsk){
     status r = READY;
     /*
 
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    TcpCtx *tcp = (TcpCtx *)as(tsk->source, TYPE_TCP_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    TcpCtx *tcp = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
 
     DebugStack_SetRef(ctx->path, ctx->path->type.of);
 
     ctx->mime = (Str *)Seel_Get(ctx->route, K(m, "mime"));
-    Single *funcW = (Single *)as(
+    Single *funcW = (Single *)Ifc(tsk->m, 
         Span_Get(ctx->route, ROUTE_PROPIDX_FUNC),
         TYPE_WRAPPED_FUNC
     );

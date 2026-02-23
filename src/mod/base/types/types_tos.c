@@ -12,7 +12,7 @@ static status ErrorMsg_Print(Buff *bf, void *a, cls type, word flags){
         Str *s = Str_CstrRef(bf->m, "Error");
         return Buff_AddBytes(bf, s->bytes, s->length);
     }
-    ErrorMsg *msg = (ErrorMsg *)as(a, TYPE_ERROR_MSG);
+    ErrorMsg *msg = (ErrorMsg *)Ifc(bf->m, a, TYPE_ERROR_MSG);
     if(flags & (MORE|DEBUG)){
         Fmt(bf, "Error $:$:$ - ", msg->lineInfo);
     }

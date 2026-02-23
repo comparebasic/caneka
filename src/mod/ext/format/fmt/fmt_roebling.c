@@ -164,7 +164,7 @@ static status tagValue(MemCh *m, Roebling *rbl){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    Mess *mess = (Mess *)as(rbl->dest, TYPE_MESS);
+    Mess *mess = (Mess *)Ifc(rbl->m, rbl->dest, TYPE_MESS);
     Tokenize *tk = Lookup_Get(mess->tokenizer, captureKey);
     if(mess->type.state & DEBUG){
         void *args[] = {

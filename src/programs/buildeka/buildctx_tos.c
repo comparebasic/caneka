@@ -2,7 +2,7 @@
 #include "buildeka_module.h"
 
 status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
-    BuildCtx *ctx = (BuildCtx *)as(a, TYPE_BUILDCTX);
+    BuildCtx *ctx = (BuildCtx *)Ifc(bf->m, a, TYPE_BUILDCTX);
     MemCh *m = bf->m;
     if(flags & DEBUG){
         void *args[] = {

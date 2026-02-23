@@ -4,8 +4,8 @@
 status TcpTask_ReadToRbl(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    Roebling *rbl = (Roebling *)as(st->arg, TYPE_ROEBLING);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    Roebling *rbl = (Roebling *)Ifc(tsk->m, st->arg, TYPE_ROEBLING);
 
     Buff_SetSocket(proto->in, pfd->fd);
     if((Buff_ReadAmount(proto->in, SERV_READ_SIZE) & NOOP) == 0){
@@ -30,7 +30,7 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
     DebugStack_Push(st, st->type.of);
     status r = READY;
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
 
     Buff_SetFd(proto->out, pfd->fd);
 

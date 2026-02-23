@@ -210,8 +210,8 @@ static status headerValue(MemCh *m, Roebling *rbl){
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
     void *args[3];
-    ProtoCtx *proto = (ProtoCtx *)as(rbl->source, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(rbl->m, rbl->source, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(rbl->m, proto->ctx, TYPE_HTTP_CTX);
     if(rbl->curs->type.state & DEBUG){
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v;

@@ -81,7 +81,7 @@ static status CharPtr_ToTbl(MemCh *m, Table *resolve, i32 argc, char **argv, Tab
                 }
 
                 if(argHasFlag(h, ARG_CHOICE) && value != NULL && sg != NULL){
-                    Span *p = (Span *)as(sg->val.ptr, TYPE_SPAN);
+                    Span *p = (Span *)Ifc(m, sg->val.ptr, TYPE_SPAN);
                     if(Span_Has(p, value) == -1){
                         if(argHasFlag(h, ARG_DEFAULT)){
                              Table_Set(dest, h->key, Span_Get(p, 0));
@@ -134,7 +134,7 @@ status Args_Add(CliArgs *cli, Str *key, void *_value, word flags, StrVec *explai
         value = (Abstract *)Ptr_Wrapped(cli->m, NULL, ZERO);
     }else{
         if(flags & ARG_CHOICE){
-            as(value, TYPE_SPAN); 
+            Ifc(cli->m, value, TYPE_SPAN); 
         }
         value = (Abstract *)Ptr_Wrapped(cli->m, value, value->type.of); 
     }
@@ -253,7 +253,7 @@ void *CliArgs_Get(CliArgs *cli, void *key){
 }
 
 StrVec *CliArgs_GetAbsPath(CliArgs *cli, void *key){
-    Str *path = (Str *)as(CliArgs_Get(cli, key), TYPE_STR);
+    Str *path = (Str *)Ifc(cli->m, CliArgs_Get(cli, key), TYPE_STR);
     return IoUtil_AbsVec(cli->m, StrVec_From(cli->m, path));
 }
 

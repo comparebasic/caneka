@@ -135,7 +135,7 @@ static status removeObj(Iter *it, i32 idx){
 }
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
-    Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
+    Iter *it = (Iter *)Ifc(rbl->m, rbl->dest, TYPE_ITER);
     void *args[7];
     MemCh *m = rbl->m;
 

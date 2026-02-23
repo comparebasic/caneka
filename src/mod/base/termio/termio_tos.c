@@ -5,7 +5,7 @@ static Str **cliLabels = NULL;
 
 status CliArgs_Print(Buff *bf, void *a, cls type, word flags){
     MemCh *m = bf->m;
-    CliArgs *cli = (CliArgs *)as(a, TYPE_CLI_ARGS);
+    CliArgs *cli = (CliArgs *)Ifc(bf->m, a, TYPE_CLI_ARGS);
     Span *p = Span_Make(m);
     Iter it;
     Iter_Init(&it, p);

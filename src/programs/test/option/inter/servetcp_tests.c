@@ -3,8 +3,8 @@
 #include <test_module.h>
 
 static status Example_log(Step *_st, Task *tsk){
-    ProtoCtx *proto = (ProtoCtx *)as(tsk->data, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)as(proto->ctx, TYPE_HTTP_CTX);
+    ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
+    HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
     struct timespec now;
     Time_Now(&now);
     void *args[] = {
@@ -19,7 +19,7 @@ static status Example_log(Step *_st, Task *tsk){
 
 static status Example_populate(MemCh *m, Task *tsk, void *arg, void *source){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    Single *fdw = (Single *)as(arg, TYPE_WRAPPED_I32);
+    Single *fdw = (Single *)Ifc(tsk->m, arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
 
     HttpTask_InitResponse(tsk, arg, source);

@@ -151,11 +151,11 @@ static status arrSep(MemCh *m, Roebling *rbl){
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
 
-    Iter *seelIt = (Iter *)as(rbl->source, TYPE_ITER);
+    Iter *seelIt = (Iter *)Ifc(rbl->m, rbl->source, TYPE_ITER);
     Single *seelSg = Iter_Get(seelIt);
     cls instTypeOf = seelSg->val.w;
 
-    Iter *it = (Iter *)as(rbl->dest, TYPE_ITER);
+    Iter *it = (Iter *)Ifc(rbl->m, rbl->dest, TYPE_ITER);
     Iter *nodeIt = Iter_Get(it);
     Span *p = NULL;
     if(nodeIt != NULL){

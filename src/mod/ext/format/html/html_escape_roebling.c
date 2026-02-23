@@ -56,7 +56,7 @@ static status start(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     void *args[3];
-    StrVec *content = as(rbl->dest, TYPE_STRVEC);
+    StrVec *content = Ifc(rbl->m, rbl->dest, TYPE_STRVEC);
     if(rbl->curs->type.state & DEBUG){
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v;

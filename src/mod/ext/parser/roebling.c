@@ -185,7 +185,7 @@ status Roebling_RunCycle(Roebling *rbl){
         }
     }else{
         if((rbl->type.state & PROCESSING) == 0){
-            wdof = (Single *)as(wdof, TYPE_WRAPPED_DO);
+            wdof = (Single *)Ifc(rbl->m, wdof, TYPE_WRAPPED_DO);
             ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
             rbl->type.state |= PROCESSING;
         }

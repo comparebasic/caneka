@@ -306,7 +306,7 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     Iter_Init(&sepIt, sep);
     Iter_Init(&it, p);
     while((Iter_Next(&it) & END) == 0){
-        Str *s = (Str *)as(Iter_Get(&it), TYPE_STR);
+        Str *s = (Str *)Ifc(m, Iter_Get(&it), TYPE_STR);
         if(s->length == 0){
             continue;
         }

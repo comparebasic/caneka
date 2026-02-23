@@ -17,8 +17,9 @@ static status HttpInit(MemCh *m){
     }
     return NOOP; 
 }
+
 static i64 HttpCtx_Print(Buff *bf, void *a, cls type, word flags){
-    HttpCtx *ctx = (HttpCtx*)as(a, TYPE_HTTP_CTX);
+    HttpCtx *ctx = (HttpCtx*)Ifc(bf->m, a, TYPE_HTTP_CTX);
     void *args[] = {
         Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
         Lookup_Get(HttpMethods, ctx->method),

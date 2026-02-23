@@ -6,7 +6,7 @@ static boolean _init = FALSE;
 static Str **transpFileLabels = NULL;
 
 static i64 TranspFile_Print(Buff *bf, void *a, cls type, word flags){
-    TranspFile *tfile = (TranspFile*)as(a, TYPE_TRANSP_FILE);
+    TranspFile *tfile = (TranspFile*)Ifc(bf->m, a, TYPE_TRANSP_FILE);
     void *args[] = {
         Type_StateVec(bf->m, tfile->type.of, tfile->type.state),
         tfile->name,
@@ -19,7 +19,7 @@ static i64 TranspFile_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static i64 TranspCtx_Print(Buff *bf, void *a, cls type, word flags){
-    TranspCtx *tp = (TranspCtx*)as(a, TYPE_TRANSP_CTX);
+    TranspCtx *tp = (TranspCtx*)Ifc(bf->m, a, TYPE_TRANSP_CTX);
     i64 total = 0;
 
     if((flags & (MORE|DEBUG)) == 0){
