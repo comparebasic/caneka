@@ -26,7 +26,7 @@ static util Hash_Ptr(void *ptr){
 }
 
 static util Hash_Str(void *a){
-    Str *s = (Str *)asIfc(a, TYPE_STR);
+    Str *s = (Str *)s;
     return Parity_From(s);
 }
 

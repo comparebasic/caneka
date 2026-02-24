@@ -428,7 +428,7 @@ void *StrVec_Clone(MemCh *m, void *a){
 
 i32 StrVec_Add(StrVec *v, Str *s){
     i32 anchor = v->p->max_idx;
-    s = (Str *)Ifc(m, s, TYPE_STR);
+    s = (Str *)Ifc(v->p->m, s, TYPE_STR);
     status r = Span_Add(v->p, s);
     v->total += s->length;
     return anchor;

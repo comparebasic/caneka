@@ -49,7 +49,7 @@ status Addr_ToS(Buff *bf, void *a, word flags){
 }
 
 status MemCh_Print(Buff *bf, void *a, cls type, word flags){
-    MemCh *m = (MemCh*)Ifc(m, a, TYPE_MEMCTX); 
+    MemCh *m = (MemCh*)Ifc(bf->m, a, TYPE_MEMCTX); 
     void *args[5];
     args[0] = I64_Wrapped(bf->m, m->it.p->nvalues);
     args[1] = MemCount_Wrapped(bf->m,  MemCh_Used(m, 0));
@@ -184,12 +184,12 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status MemBook_Print(Buff *bf, void *a, cls type, word flags){
-    MemBook *cp = (MemBook*)Ifc(m, a, TYPE_BOOK); 
+    MemBook *cp = (MemBook*)Ifc(bf->m, a, TYPE_BOOK); 
     return 0;
 }
 
 status Span_Print(Buff *bf, void *a, cls type, word flags){
-    Span *p = (Span*)Ifc(m, a, TYPE_SPAN); 
+    Span *p = (Span*)Ifc(bf->m, a, TYPE_SPAN); 
 
     if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
         void *args[] = {
@@ -241,7 +241,7 @@ status Span_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Iter_Print(Buff *bf, void *a, cls type, word flags){
-    Iter *it = (Iter *)Ifc(m, a, TYPE_ITER);
+    Iter *it = (Iter *)Ifc(bf->m, a, TYPE_ITER);
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(bf->m, it->type.of, it->type.state),

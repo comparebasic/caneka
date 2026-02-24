@@ -1,7 +1,6 @@
 void Type_SetFlag(void *a, word flags);
 cls Ifc_Get(cls inst);
 boolean Ifc_Match(cls inst, cls ifc);
-status Ifc_Init(struct mem_ctx *m);
 extern struct lookup *IfcLookup;
 
 typedef struct ifc_map {

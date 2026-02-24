@@ -98,7 +98,7 @@ static status gatherDir(MemCh *m, Str *path, void *source){
 }
 
 static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
-    Span *p = (Span *)asIfc(source, TYPE_SPAN);
+    Span *p = (Span *)Ifc(m, source, TYPE_SPAN);
     StrVec *v = StrVec_Make(m);
     StrVec_Add(v, path);
     if(path->bytes[path->length-1] != '/'){
@@ -111,7 +111,7 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
 static status gatherFileFiltered(MemCh *m, Str *path, Str *file, void *source){
     DirSel *sel = (DirSel *)source;
     if(sel->func(m, file, sel) & SUCCESS){
-        Span *p = (Span *)asIfc(sel->dest, TYPE_SPAN);
+        Span *p = (Span *)Ifc(m, sel->dest, TYPE_SPAN);
         StrVec *v = StrVec_Make(m);
         StrVec_Add(v, path);
         if(path->bytes[path->length-1] != '/'){
