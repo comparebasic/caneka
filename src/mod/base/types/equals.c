@@ -72,8 +72,8 @@ boolean Equals(void *_a, void *_b){
 
         return au == bu;
     }else{
-        cls aTypeOf = Ifc_Get(a->type.of);
-        cls bTypeOf = Ifc_Get(b->type.of);
+        cls aTypeOf = Ifc_GetRoot(a->type.of);
+        cls bTypeOf = Ifc_GetRoot(b->type.of);
         if(aTypeOf != bTypeOf){
             void *args[] = {
                 Type_ToStr(ErrStream->m, aTypeOf),
@@ -103,9 +103,9 @@ boolean Caneka_Truthy(void *_a){
     Abstract *a = (Abstract *)_a;
     if(a == NULL){
         return FALSE;
-    }else if(Ifc_Match(a->type.of, TYPE_WRAPPED_I64)){
+    }else if(Ifc_GetRoot(a->type.of) == TYPE_WRAPPED){
         return ((Single *)a)->val.value != 0;
-    }else if(Ifc_Match(a->type.of, TYPE_STR)){
+    }else if(Ifc_GetRoot(a->type.of) == TYPE_STR){
         return ((Str *)a)->length > 1;
     }else{
         return FALSE;

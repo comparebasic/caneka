@@ -11,26 +11,26 @@ static status archChecks(){
 
 status Caneka_InitBase(MemCh *m){
     status r = READY;
-    r |= archChecks();
+    archChecks();
     MemCh *md = MemCh_Make();
-    r |= Core_Init(m);
-    r |= Error_Init(m);
-    r |= Ifc_Init(md);
-    r |= Empty_Init(m);
-    r |= Hash_Init(m);
-    r |= Maps_Init(md);
-    r |= Debug_Init(md);
-    r |= StreamTo_Init(md);
-    r |= AnsiStr_Init(md);
-    r |= DebugStack_Init(m);
-    r |= Termio_ToSInit(m);
-    r |= Args_Init(m);
-    r |= Clone_Init(m);
-    r |= Equals_Init(m);
-    r |= Path_Init(md);
-    r |= IoUtils_Init(m);
-    r |= Exact_Init(m);
-    r |= Stash_Init(m);
+    Core_Init(m);
+    Error_Init(m);
+    Ifc_Init(md);
+    Empty_Init(m);
+    Hash_Init(m);
+    Maps_Init(md);
+    Debug_Init(md);
+    StreamTo_Init(md);
+    AnsiStr_Init(md);
+    DebugStack_Init(m);
+    Termio_ToSInit(m);
+    Args_Init(m);
+    Clone_Init(m);
+    Equals_Init(m);
+    Path_Init(md);
+    IoUtils_Init(m);
+    Exact_Init(m);
+    Stash_Init(m);
     Core_Direct(m, 1, 2);
     return r;
 }

@@ -4,6 +4,7 @@ enum mem_ite_flags {
 
 typedef struct mem_iter {
     Type type;
+    MemCh *m;
     struct {
         MemCh *target;
         void **arr;

@@ -8,7 +8,14 @@ static void setLastFlag(MemIter *mit){
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
             sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
         }else{
-            sz = Lookup_GetRaw(SizeLookup, a->type.of);
+            IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
+            if(imap == NULL){
+                void *ar[] = {Type_ToStr(mit->m, a->type.of), NULL};
+                Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
+                    "IfcMap not found for type @", ar);
+                return;
+            }
+            sz = imap->size;
         }
     }
     if(sz > 0 && mit->ptr+sz-1 == mit->end){
@@ -51,7 +58,14 @@ status MemIter_Next(MemIter *mit){
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
             sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
         }else{
-            sz = Lookup_GetRaw(SizeLookup, a->type.of);
+            IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
+            if(imap == NULL){
+                void *ar[] = {Type_ToStr(mit->m, a->type.of), NULL};
+                Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
+                    "IfcMap not found for type @", ar);
+                return ERROR;
+            }
+            sz = imap->size;
         }
         if(sz <= 0){
             void *args[] = {
@@ -112,6 +126,7 @@ void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx){
 
 MemIter *MemIter_Make(MemCh *m, MemCh *target){
     MemIter *mit = (MemIter *)MemCh_AllocOf(m, sizeof(MemIter), TYPE_MEM_ITER);
+    mit->m = m;
     mit->type.of = TYPE_MEM_ITER;
     mit->type.state = MORE;
     mit->input.target = target;
@@ -121,6 +136,7 @@ MemIter *MemIter_Make(MemCh *m, MemCh *target){
 
 MemIter *MemIter_MakeFromArr(MemCh *m, void **arr, i32 maxSlIdx){
     MemIter *mit = (MemIter *)MemCh_AllocOf(m, sizeof(MemIter), TYPE_MEM_ITER);
+    mit->m = m;
     mit->type.of = TYPE_MEM_ITER;
     mit->type.state = MORE|MEM_ITER_STREAM;
     mit->input.arr = arr;

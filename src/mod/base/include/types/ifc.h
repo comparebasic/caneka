@@ -1,21 +1,22 @@
 void Type_SetFlag(void *a, word flags);
-cls Ifc_Get(cls inst);
-boolean Ifc_Match(cls inst, cls ifc);
 extern struct lookup *IfcLookup;
 
 typedef struct ifc_map {
     Type type;
-    Type objType;
+    cls typeOf;
+    i16 size;
     struct {
         i16 start;
         i16 end;
     } offset;
-    i64 size;
     SourceMakerFunc func;
+    struct ifc_map *next;
 } IfcMap;
 
 void Type_SetFlag(void *_a, word flags);
-IfcMap *IfcMap_Make(struct mem_ctx *m, 
-    cls typeOf, i16 start, i16 end, i64 size);
+IfcMap *Ifc_Get(Abstract *a, cls typeOf);
+cls Ifc_GetRoot(cls typeOf);
+IfcMap *IfcMap_Make(struct mem_ctx *m,
+        cls typeOf, i16 start, i16 end, i16 size, SourceMakerFunc func);
 void *Ifc(struct mem_ctx *m, void *_a, cls typeOf);
 void Ifc_Init(struct mem_ctx *m);
