@@ -187,7 +187,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     void *args[5];
     MemCh *m = rbl->m;
 
-    Iter *it = (Iter *)Ifc(bf->m, rbl->dest, TYPE_ITER);
+    Iter *it = (Iter *)Ifc(m, rbl->dest, TYPE_ITER);
     DocComp *comp = (DocComp *)rbl->source;
     Inst *inst = Iter_Get(it);
     DocFunc *funcObj = NULL;

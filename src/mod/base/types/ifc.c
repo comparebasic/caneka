@@ -9,7 +9,7 @@ void Type_SetFlag(void *_a, word flags){
 }
 
 IfcMap *Ifc_Get(Abstract *a, cls typeOf){
-    IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
+    IfcMap *imap = Lookup_Get(IfcLookup, typeOf);
     if(imap != NULL && (typeOf <= (imap->typeOf + imap->offset.end) &&
             typeOf >= (imap->typeOf + imap->offset.start))){
         return imap;
@@ -44,14 +44,15 @@ void *Ifc(MemCh *m, void *_a, cls typeOf){
         }
     }
 
-    void *ar[] = {Type_ToStr(m, a->type.of), imap, NULL};
+    void *ar[] = {Type_ToStr(m, typeOf), imap, a, NULL};
     Error(m, FUNCNAME, FILENAME, LINENUMBER,
-        "Ifc mismatch no imap found to coorce type @, found @", ar);
+        "Ifc mismatch no imap found to coorce type @, found @, for @", ar);
     return NULL;
 }
 
 IfcMap *IfcMap_Make(MemCh *m,
         cls typeOf, i16 start, i16 end, i16 size, IfcMapFunc func){
+
     IfcMap *imap = MemCh_AllocOf(m, sizeof(IfcMap), TYPE_IFC_MAP);
     imap->type.of = TYPE_IFC_MAP;
     imap->typeOf = typeOf;

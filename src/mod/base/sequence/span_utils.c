@@ -58,6 +58,7 @@ boolean Span_Equals(Span *a, Span *b){
 }
 
 char **Span_ToCharArr(MemCh *m, Span *p){
+
     size_t sz = sizeof(char *)*(p->nvalues+1);
     char **arr = (char **)Bytes_Alloc(m, sz, TYPE_POINTER_ARRAY);
 
@@ -66,7 +67,7 @@ char **Span_ToCharArr(MemCh *m, Span *p){
     int i = 0;
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
-        Str *s = (Str *)Ifc(m, it.value, TYPE_STR);
+        Str *s = (Str *)Ifc(m, a, TYPE_STR);
         if(s != NULL){
             arr[i++] = Str_Cstr(m, s);
         }

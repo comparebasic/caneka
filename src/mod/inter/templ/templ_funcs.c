@@ -15,7 +15,7 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
     tfunc->dflag.positive = ZERO;
     tfunc->dflag.negative = ZERO;
     if((fch->type.state & PROCESSING) == 0){
-        Iter *value = Ifc(m, (Fetch(m, fch, data, NULL), TYPE_ITER);
+        Iter *value = Ifc(m, Fetch(m, fch, data, NULL), TYPE_ITER);
         Itin_IterAdd(&templ->data, value);
         fch->type.state |= PROCESSING;
         it = (Iter *)Itin_GetByType(&templ->data, TYPE_ITER);

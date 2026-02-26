@@ -138,9 +138,9 @@ static status Span_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 }
 
 static status StrVec_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    StrVec *v = (StrVec *)Ifc(m, a, TYPE_STRVEC);
     MemCh *m = ctx->m;
     status r = READY;
+    StrVec *v = (StrVec *)Ifc(m, a, TYPE_STRVEC);
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_BYTES_COLLECTION, 0);
 
@@ -208,8 +208,8 @@ static status I64_ToBinSeg(BinSegCtx *ctx, void *_a, i16 id, i16 idx){
 }
 
 static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
-    Str *s = (Str *)Ifc(m, a, TYPE_STR);
     MemCh *m = ctx->m;
+    Str *s = (Str *)Ifc(m, a, TYPE_STR);
 
     word sz = BinSegCtx_HeaderSize(BINSEG_TYPE_BYTES, s->length);
 
