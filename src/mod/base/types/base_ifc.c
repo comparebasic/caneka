@@ -3,16 +3,20 @@
 
 static void *Str_Conv(MemCh *m, void *_a, IfcMap *imap){
     Abstract *a = (Abstract *)_a;
-    if(a->type.of == TYPE_STRVEC){
-        return StrVec_Str(m, a);
+    if(a->type.of == TYPE_STR){
+        return (Str *)a;
+    }else if(a->type.of == TYPE_STRVEC){
+        return StrVec_Str(m, (StrVec *)a);
     }
     return NULL;
 }
 
 static void *StrVec_Conv(MemCh *m, void *_a, IfcMap *imap){
     Abstract *a = (Abstract *)_a;
-    if(a->type.of == TYPE_STR){
-        return StrVec_From(m, a);
+    if(a->type.of == TYPE_STRVEC){
+        return (StrVec *)a;
+    }else if(a->type.of == TYPE_STR){
+        return StrVec_From(m, (Str *)a);
     }
     return NULL;
 }
@@ -20,14 +24,14 @@ static void *StrVec_Conv(MemCh *m, void *_a, IfcMap *imap){
 static void *CStr_Conv(MemCh *m, void *_a, IfcMap *imap){
     Abstract *a = (Abstract *)_a;
     if(a->type.of == TYPE_STRVEC){
-       a = StrVec_Str(m, a); 
+       a = (Abstract *)StrVec_Str(m, (StrVec *)a); 
     }
 
     if(a->type.of != TYPE_STR){
         return NULL;
     }
 
-    return Str_Cstr(m, a);
+    return Str_Cstr(m, (Str *)a);
 }
 
 void Base_IfcInit(MemCh *m){
@@ -40,7 +44,7 @@ void Base_IfcInit(MemCh *m){
             Str_Conv));
     Lookup_Add(m, IfcLookup, TYPE_STRVEC,
         IfcMap_Make(m,
-            TYPE_STR,
+            TYPE_STRVEC,
             TYPE_STR - TYPE_STRVEC,
             TYPE_STR - TYPE_STRVEC,
             sizeof(StrVec),

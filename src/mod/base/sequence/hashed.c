@@ -26,7 +26,7 @@ static util Hash_Ptr(void *ptr){
 }
 
 static util Hash_Str(void *a){
-    Str *s = (Str *)s;
+    Str *s = (Str *)a;
     return Parity_From(s);
 }
 

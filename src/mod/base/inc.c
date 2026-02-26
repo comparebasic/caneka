@@ -70,6 +70,7 @@
 #include "./types/ifc.c"
 #include "./types/init.c"
 #include "./types/types_tos.c"
+#include "./types/base_ifc.c"
 #include "./util/int.c"
 #include "./util/single.c"
 #include "./util/time.c"

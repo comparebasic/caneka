@@ -51,7 +51,7 @@ void *Ifc(MemCh *m, void *_a, cls typeOf){
 }
 
 IfcMap *IfcMap_Make(MemCh *m,
-        cls typeOf, i16 start, i16 end, i16 size, SourceMakerFunc func){
+        cls typeOf, i16 start, i16 end, i16 size, IfcMapFunc func){
     IfcMap *imap = MemCh_AllocOf(m, sizeof(IfcMap), TYPE_IFC_MAP);
     imap->type.of = TYPE_IFC_MAP;
     imap->typeOf = typeOf;
