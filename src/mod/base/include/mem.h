@@ -6,6 +6,7 @@
 #include "mem/mem_book.h"
 #include "mem/mem_iter.h"
 #include "mem/mem_tos.h"
+#include "mem/mem_eq.h"
 #include "mem/mem_maps.h"
 #include "mem/extfree.h"
 #include "mem/byteslit.h"

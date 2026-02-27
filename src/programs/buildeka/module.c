@@ -5,6 +5,16 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
     void *args[6];
+    
+    Table *deps = Table_Get(ctx->input.dependencies, K(m, "dep"));
+    if(deps != NULL){
+        Abstract *a = Table_Get(deps, key);
+        void *ar[] = {key, a, NULL};
+        Out("^y.key @ dep @^0\n", ar);
+    }else{
+        void *ar[] = {key, ctx->input.dependencies, NULL};
+        Out("^y.key @ dependencies @^0\n", ar);
+    }
 
     ctx->current.name = StrVec_From(m, IoUtil_FnameStr(m, key));
     ctx->current.targetName = StrVec_From(m,
@@ -13,6 +23,11 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
     Table *execs = Table_Get(sel->meta, K(m, "exec"));
+
+    Str *ext = S(m, ".a");
+    if(ctx->type.state & BUILD_SHARED){
+       ext = S(m, ".pic-a"); 
+    }
 
     i32 libSourceTotal = sel->dest->nvalues;
     if(skips != NULL){ libSourceTotal -= skips->nvalues; }
@@ -23,7 +38,7 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
         args[1] = ctx->current.targetName;
         args[2] = IoUtil_PathSep(m);
         args[3] = ctx->current.targetName;
-        args[4] = S(m, ".a");
+        args[4] = ext;
         args[5] = NULL;
         StrVec_AddChain(ctx->current.target, args);
 
@@ -64,6 +79,10 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     StrVec_Anchor(srcIncPath);
     StrVec_AddChain(srcIncPath, args);
+
+    void *ar[] = {srcIncPath, sel, NULL};
+    Out("^c.Include Main @ of sel@^0\n", ar);
+
     Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
     StrVec_Return(srcIncPath);
 
@@ -119,13 +138,10 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
-                StrVec_Add(srcIncPath, S(m, "mod"));
-                StrVec_Add(srcIncPath, IoUtil_PathSep(m));
                 StrVec_AddVec(srcIncPath, h->value);
                 StrVec_Add(srcIncPath, IoUtil_PathSep(m));
                 StrVec_Add(srcIncPath, S(m, "include"));
                 StrVec_Add(srcIncPath, IoUtil_PathSep(m));
-
                 Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
 
                 StrVec_Return(srcIncPath);
@@ -137,7 +153,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
 
-                DirSel *dsel = Table_Get(ctx->input.dependencies, h->value);
+                DirSel *dsel = Table_Get(ctx->input.dependencies, h->key);
                 if(dsel == NULL){
                     void *args[] = {h, Table_Keys(ctx->input.dependencies), NULL};
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -301,7 +317,13 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
         StrVec_AddVec(ctx->current.source, source);
 
         StrVec *object = StrVec_Copy(m, source);
-        IoUtil_SwapExt(m, object, S(m, "o")); 
+    
+        if(ctx->type.state & BUILD_SHARED){
+            IoUtil_SwapExt(m, object, S(m, "pic-o")); 
+        }else{
+            IoUtil_SwapExt(m, object, S(m, "o")); 
+        }
+
         StrVec_AddVec(ctx->current.dest, object);
         ctx->current.binDest = NULL;
 

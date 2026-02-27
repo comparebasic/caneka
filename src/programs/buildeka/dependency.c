@@ -69,6 +69,8 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     if(Dir_Exists(m, pathS) & SUCCESS){
         sel = DirSel_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
+        Table_Set(sel->meta, S(m, "path"), path);
+
         StrVec *base = StrVec_Copy(m, path);
         StrVec_Add(base, IoUtil_PathSep(m));
         StrVec_Add(base, S(m, "option"));
@@ -111,7 +113,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         }
 
         ctx->input.totalModules->val.i++;
-        Table_Set(ctx->input.dependencies, name, sel);
+        Table_Set(ctx->input.dependencies, key, sel);
 
         if(Time_Greater(&sel->time, &ctx->modified)){
             ctx->modified = sel->time;
@@ -170,6 +172,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             } else if(Equals(tag, K(m, "type"))){
                 if(Equals(value, K(m, "shared"))){
                     BuildCtx_SetFlag(ctx, Sv(m, "-fPIC"));
+                    ctx->type.state |= BUILD_SHARED;
                 }
                 value = label;
             }

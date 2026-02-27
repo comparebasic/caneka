@@ -5,7 +5,7 @@
 #include "bytes/str_equals.h"
 #include "bytes/str_exact.h"
 #include "bytes/fmt.h"
-#include "bytes/str_tos.h"
+#include "bytes/bytes_tos.h"
 #include "bytes/str_maps.h"
 #include "bytes/coord.h"
 #include "bytes/histo.h"

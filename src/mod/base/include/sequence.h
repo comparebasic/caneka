@@ -8,4 +8,6 @@
 #include "sequence/arr.h"
 #include "sequence/path.h"
 #include "sequence/sequence_exact.h"
+#include "sequence/sequence_maps.h"
+#include "sequence/sequence_eq.h"
 #include "sequence/shelf.h"

@@ -12,7 +12,7 @@ status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter){
 status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
     DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
-    void *args[5];
+    void *args[7];
     Span *p = Span_Make(m);
 
     StrVec *buildDir = StrVec_Copy(m, ctx->input.buildDir);

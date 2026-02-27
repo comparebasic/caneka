@@ -1,5 +1,5 @@
 #include <external.h>
-#include "base_module.h" 
+#include "base_module.h"
 
 boolean CanCombine(void *_a, void *_b){
     Abstract *a = (Abstract *)_a;
@@ -37,8 +37,8 @@ boolean Combine(void *_a, void *_b){
         if(b->type.of != TYPE_SPAN){
             Iter it;
             Iter_Setup(&it, p, SPAN_OP_ADD, p->max_idx);
-            it.value = b;
-            return (Iter_Query(&it) & SUCCESS) != 0;
+            Iter_Add(&it, b);
+            return (it.type.state & SUCCESS) != 0;
         }
     }
     return FALSE;

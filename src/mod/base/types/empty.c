@@ -1,3 +1,6 @@
+#include <external.h>
+#include "base_module.h"
+
 Lookup *EmptyLookup = NULL;
 
 boolean Empty(void *_a){

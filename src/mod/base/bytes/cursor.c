@@ -333,8 +333,7 @@ status Cursor_NextByte(Cursor *curs){
         if(curs->it.type.state & LAST){
             curs->type.state |= END;
         }else{
-            curs->it.idx++;
-            Iter_Query(&curs->it);
+            Iter_GetByIdx(&curs->it, curs->it.idx+1);
             curs->type.state |= CURSOR_STR_BOUNDRY;
             Cursor_SetStr(curs);
         }
