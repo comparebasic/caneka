@@ -356,7 +356,7 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b){
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, "Source not found @", args);
-        exit(1);
+        return FALSE;
     }
     r = stat(Str_Cstr(m, b), &build_stat);
     time_t build_mtime = 0;

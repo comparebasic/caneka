@@ -78,7 +78,6 @@ i32 main(int argc, char **argv){
 
     BuildCtx *ctx = BuildCtx_Make(m);
 
-
     StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
     IoUtil_Annotate(m, prefix);
     ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);

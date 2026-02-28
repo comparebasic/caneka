@@ -13,9 +13,6 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     ctx->current.name = StrVec_From(m, IoUtil_FnameStr(m, key));
 
-    void *ar[] = {ctx->current.name, key, IoUtil_FnameStr(m, key), NULL};
-    Out("^p.Fname name @ from @ Fname @^0\n", ar);
-
     ctx->current.targetName = StrVec_From(m,
         StrVec_StrPrefixed(m,
             S(m, "libcnk"), ctx->current.name));
@@ -40,9 +37,6 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
         args[4] = ext;
         args[5] = NULL;
         StrVec_AddChain(ctx->current.target, args);
-
-        void *ar[] = {ctx->current.target, NULL};
-        Out("^g.Target @^0\n", ar);
 
         Table_Set(sel->meta, S(m, "target"), StrVec_Copy(m, ctx->current.target));
     }else{
@@ -256,24 +250,16 @@ static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
         Iter it;
         Iter_Init(&it, Table_Ordered(m, deps));
 
-        void *_ar2[] = {Table_Ordered(m, deps), NULL};
-        Out("^p.Deps? @^0\n", _ar2);
-
         i32 count = 0;
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
             DirSel *dsel = Table_Get(ctx->input.dependencies, h->key);
             Span_AddSpan(objs, Table_Get(dsel->meta, K(m, "destObjs")));
-            void *ar[] = {Table_Get(dsel->meta, K(m, "target")), Table_Get(dsel->meta, K(m, "destObjs")), NULL};
-            Out("Adding ^p. at @ -> &^0\n", ar);
         }
 
         StrVec *target = IoUtil_BasePath(m, Table_Get(sel->meta, K(m, "target")));
         StrVec_Add(target, IoUtil_FnameStr(m, key));
         StrVec_AddVec(target, IoPath(m, ".so"));
-
-        void *_ar[] = {target, key, NULL};
-        Out("^p. Shared Target @ of key @^0\n", _ar);
         
         Span *cmd = Span_Make(m);
         Span_Add(cmd, ctx->tools.cc);
@@ -283,25 +269,20 @@ static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
         Span_Add(cmd, target);
         Span_AddSpan(cmd, objs);
 
-        void *ar[] = {cmd, NULL};
-        Out("^p. Shared cmd @^0\n", ar);
-
         ProcDets pd;
         ProcDets_Init(&pd);
         status re = SubProcess(m, cmd, &pd);
         if(re & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
-            printf("Error\n");
-            fflush(stdout);
-            exit(1);
-            /*
             void *ar[] = {target, cmd, NULL};
             Fatal(FUNCNAME, FILENAME, LINENUMBER, 
                 "Build error for making shared object object @ from cmd @", ar);
             DebugStack_Pop();
-            */
             return ERROR;
         }
+
+        void *ar[] = {target, NULL};
+        Out("Shared object built $^0\n", ar);
     }
 
     DebugStack_Pop();

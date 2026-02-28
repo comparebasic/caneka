@@ -114,10 +114,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         Table_Set(ctx->input.dependencies, key, sel);
         Table_Set(sel->meta, S(m, "path"), name);
 
-        void *ar[] = {ctx->src, path, NULL};
-        Out("^c.Src @ Path @^0\n", ar);
-
-
         if(Time_Greater(&sel->time, &ctx->modified)){
             ctx->modified = sel->time;
             void *ar[] = {Time_ToStr(m, &ctx->modified), NULL};

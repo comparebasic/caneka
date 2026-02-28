@@ -43,11 +43,6 @@ status BuildCtx_Build(BuildCtx *ctx){
         if(h != NULL){
             ctx->input.countModules->val.i = it.p->nvalues - it.idx;
 
-            void *ar[] = {
-                h, NULL
-            };
-            Out("^c.About to Build Module @^0\n", ar);
-
             IoUtil_TrimDir(m, h->key);
             if(BuildCtx_BuildModule(ctx,
                 (StrVec *)h->key, (DirSel *)h->value) & ERROR){
