@@ -178,6 +178,10 @@ status MemBook_GetStats(void *addr, MemBookStats *st){
     return st->type.state;
 }
 
+void MemBook_Free(MemBook *book){
+    munmap(book->start, BOOK_SIZE);
+}
+
 MemBook *MemBook_Make(MemBook *prev){
     bookIdx++;
     if(bookIdx >= BOOK_MAX){

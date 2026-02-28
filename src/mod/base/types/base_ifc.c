@@ -52,8 +52,8 @@ void Base_IfcInit(MemCh *m){
     Lookup_Add(m, IfcLookup, TYPE_CSTR,
         IfcMap_Make(m,
             TYPE_CSTR,
-            TYPE_CSTR - TYPE_STR,
-            TYPE_CSTR - TYPE_STRVEC,
+            ZERO,
+            TYPE_STRVEC - TYPE_CSTR,
             -1,
             CStr_Conv));
     

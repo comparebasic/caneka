@@ -29,3 +29,4 @@ status MemBook_FreePage(MemCh *m, MemPage *pg);
 status MemBook_WipePages(void *addr);
 void *MemBook_GetPage(void *addr);
 MemBook *MemBook_Make(MemBook *prev);
+void MemBook_Free(MemBook *book);

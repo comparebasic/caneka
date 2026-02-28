@@ -33,17 +33,38 @@ serves as a context.
 The status of the system is available at [caneka.org](https://caneka.org)
 or by building and running the [Test](./src/programs/test) program.
 
-### Components
-
-- Core: Done ([Base](./src/base)/[Ext](./src/ext/))
-- Utilities: Experimental ([Inter](./src/inter/))
-- Syntax: Not Started
-
 ### Programs included in the sources
 
 - [Buildeka](./src/programs/buildeka/): This is the build program which builds the rest of the sources.
 - [Clineka](./src/programs/clineka/): This is command-line-interface with a few quick tools to do useful things.
 - [Test](./src/programs/test/): This is the test suite for testing various parts of the system.
+
+### Python Module
+
+There is a small wrapper to create a Caneka runtime inside of a Python 3
+runtime. It only verifies that the internals are functioning for now.
+
+The intended purpose is to use Caneka features such as the Roebling parser and
+other modules that add value to an existing Python eco-system. Similar to
+the way that SciPy extends python with a multi-dimensional array mechanism
+using a different memory structure than python, Pyneka aims to provide a 
+different matching and parsing function that natively found in Python.
+
+To build this module select the menu option from `build.sh`. This will
+build Pyneka and run the [install.py](./src/lib/pyneka/install.py) script.
+
+example python cli session:
+
+    >>> import pyneka
+    >>> ctx = pyneka.PynekaCtx()
+    >>> ctx.memstats()
+    'MemStat<44k total/maxIdx=11/11 page-size=4096b>'
+
+### Components
+
+- Core: Done ([Base](./src/base)/[Ext](./src/ext/))
+- Utilities: Experimental ([Inter](./src/inter/))
+- Syntax: Not Started
 
 #### Core Components
 

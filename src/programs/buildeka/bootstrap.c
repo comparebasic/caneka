@@ -53,6 +53,10 @@ char *buildekaExamples = ""
     "\n"
     "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/webserver\x1b[0m\n"
     "\n"
+    "    Build the \x1b[1mPyneka\x1b[22m Python module\n"
+    "\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/lib/pyneka\x1b[0m\n"
+    "\n"
     "  Each program, once built, will be placed in the \x1b[1m./build/bin/\x1b[22m directory, help is availabile\n"
     "  by passing a \x1b[1m--help\x1b[22m argument, for example:\n"
     "\n"
@@ -105,6 +109,18 @@ char *buildCli[] = {
     NULL
 };
 
+char *buildPyneka[] = {
+    "./dist/bin/buildeka",
+    "--src",
+    "src/lib/pyneka",
+    NULL
+};
+
+char *installPyneka[] = {
+    "./src/lib/pyneka/install.py",
+    NULL
+};
+
 char *runTests[] = {
     "./build/bin/test",
     NULL
@@ -124,6 +140,7 @@ char *menuKeys[] = {
     "clean",
     "clean-doc",
     "build-cli",
+    "build-pyneka",
     "build-webserver",
     "build-run-webserver",
     "read-documentation",
@@ -139,6 +156,7 @@ char *menuOptions[] = {
     "Clean (the ./build directory)",
     "Clean Docs (the docs ./dist/doc/html/ directory)",
     "Clineka - build the command line tool",
+    "Pyneka - build the python module",
     "Webserver - build",
     "WebServer - build and RUN",
     "Documentation - show website url",
@@ -436,6 +454,10 @@ int main(int argc, char *argv[]){
     }else if(compareCstr("build-cli", choice)){
         runcmd[0] = buildCli;
         runcmd[1] = NULL;
+    }else if(compareCstr("build-pyneka", choice)){
+        runcmd[0] = buildPyneka;
+        runcmd[1] = installPyneka;
+        runcmd[2] = NULL;
     }else if(compareCstr("build-webserver", choice)){
         runcmd[0] = buildWebServer;
         runcmd[1] = NULL;
