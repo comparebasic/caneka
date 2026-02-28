@@ -5,7 +5,7 @@ so = "build/libcnkpyneka/pyneka.so"
 if not os.path.exists(so):
     raise ValueError("Error pyneka module not found, looking at {}, did it build correctly?", so)
 
-print("Choose a location to place the module in one of the values of \x1b[1m;sys.path\x1b[22m\n");
+print("Choose a location to place the module in one of the values of the following \x1b[1msys.path\x1b[22m options:\n");
 for i, path in enumerate(sys.path):
     print("  [{}] {}".format(i, path))
 
