@@ -4,6 +4,7 @@
 #include <gen/salt.h>
 
 status AuthFuncI(MemCh *m, AuthTarget *target, digest *hash){
+    /*
     if(target->bin.i == 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Cannot authenticate a zero util", NULL);
@@ -32,9 +33,12 @@ status AuthFuncI(MemCh *m, AuthTarget *target, digest *hash){
     memcpy(ptr, _salt.salt512, offset);
     
     return Str_ToSha256(m, &s, hash);
+    */
+    return ZERO;
 }
 
 status AuthFuncU(MemCh *m, AuthTarget *target, digest *hash){
+    /*
     if(target->bin.u == 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Cannot authenticate a zero util", NULL);
@@ -135,7 +139,8 @@ status AuthFuncIp6(MemCh *m, AuthTarget *target, digest *hash){
     memcpy(ptr, &_salt.salt512, offset);
     
     return Str_ToSha256(m, &s, hash);
-
+    */
+    return ZERO;
 }
 
 AuthTarget *AuthTarget_Make(MemCh *m, word flags){

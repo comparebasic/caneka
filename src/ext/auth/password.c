@@ -5,6 +5,7 @@
 #include <gen/funny.h>
 
 status Password_OnStr(MemCh *m, Str *dest, Str *pw, Str *salt){
+    /*
     if(pw->length < 2 || pw->length > PASSWORD_UNIT_LENGTH ||
             dest->alloc != DIGEST_SIZE ||
             salt->length != PASSWORD_UNIT_LENGTH){ 
@@ -59,6 +60,7 @@ status Password_OnStr(MemCh *m, Str *dest, Str *pw, Str *salt){
         dest->length = DIGEST_SIZE;
         return SUCCESS;
     }
+    */
     return ERROR|NOOP;
 }
 
