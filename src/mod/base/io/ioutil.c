@@ -11,6 +11,13 @@ Str *IoUtil_ExtSep(MemCh *m){
     return Str_Ref(m, (byte *)".", 1, 1, STRING_COPY|LAST);
 }
 
+void IoUtil_TrimDir(MemCh *m, StrVec *v){
+    Str *s = Span_Get(v->p, v->p->max_idx);
+    if(s != NULL && s->type.state & MORE){
+        StrVec_Pop(v);
+    }
+}
+
 boolean IoUtil_IsStrAbs(Str *s){
     return s->bytes[0] == '/';
 }

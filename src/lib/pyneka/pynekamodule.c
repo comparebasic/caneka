@@ -47,8 +47,7 @@ static struct PyModuleDef spam_module = {
     .m_slots = spam_module_slots,
 };
 
-PyMODINIT_FUNC
-PyInit_caneka(void)
+PyMODINIT_FUNC PyInit_pyneka(void)
 {
     return PyModuleDef_Init(&spam_module);
 }

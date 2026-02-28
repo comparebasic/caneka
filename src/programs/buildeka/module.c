@@ -9,14 +9,13 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
     Table *deps = Table_Get(ctx->input.dependencies, K(m, "dep"));
     if(deps != NULL){
         Abstract *a = Table_Get(deps, key);
-        void *ar[] = {key, a, NULL};
-        Out("^y.key @ dep @^0\n", ar);
-    }else{
-        void *ar[] = {key, ctx->input.dependencies, NULL};
-        Out("^y.key @ dependencies @^0\n", ar);
     }
 
     ctx->current.name = StrVec_From(m, IoUtil_FnameStr(m, key));
+
+    void *ar[] = {ctx->current.name, key, IoUtil_FnameStr(m, key), NULL};
+    Out("^p.Fname name @ from @ Fname @^0\n", ar);
+
     ctx->current.targetName = StrVec_From(m,
         StrVec_StrPrefixed(m,
             S(m, "libcnk"), ctx->current.name));
@@ -24,9 +23,9 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
     Table *execs = Table_Get(sel->meta, K(m, "exec"));
 
-    Str *ext = S(m, ".a");
+    StrVec *ext = IoPath(m, ".a");
     if(ctx->type.state & BUILD_SHARED){
-       ext = S(m, ".pic-a"); 
+       ext = IoPath(m, ".pic-a"); 
     }
 
     i32 libSourceTotal = sel->dest->nvalues;
@@ -41,6 +40,9 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
         args[4] = ext;
         args[5] = NULL;
         StrVec_AddChain(ctx->current.target, args);
+
+        void *ar[] = {ctx->current.target, NULL};
+        Out("^g.Target @^0\n", ar);
 
         Table_Set(sel->meta, S(m, "target"), StrVec_Copy(m, ctx->current.target));
     }else{
@@ -69,20 +71,17 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     Span *inc = Span_CloneShallow(m, ctx->input.inc);
     Span *moduleInc = Span_Make(m);
+    StrVec *path = Table_Get(sel->meta, K(m, "path"));
 
     StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
     args[0] = IoUtil_PathSep(m);
-    args[1] = key;
+    args[1] = path;
     args[2] = IoUtil_PathSep(m);
     args[3] = S(m, "include");
     args[4] = NULL;
 
     StrVec_Anchor(srcIncPath);
     StrVec_AddChain(srcIncPath, args);
-
-    void *ar[] = {srcIncPath, sel, NULL};
-    Out("^c.Include Main @ of sel@^0\n", ar);
-
     Span_Add(moduleInc, StrVec_StrPrefixed(m, S(m, "-I"), srcIncPath));
     StrVec_Return(srcIncPath);
 
@@ -118,6 +117,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     ctx->current.staticlibs = Span_Make(m);
     Span *modlist = Span_Make(m);
+
     Span_Add(modlist, key);
     if(deps != NULL){
         Iter it;
@@ -251,26 +251,57 @@ static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
     Table *tbl = Table_Get(sel->meta, K(m, "type"));
     if(tbl != NULL && Table_Get(tbl, K(m, "shared")) != NULL){
         Span *objs = Span_Make(m);
-        Span_AddSpan(objs, sel->dest);
+        Span_AddSpan(objs, Table_Get(sel->meta, K(m, "destObjs")));
         Table *deps = Table_Get(sel->meta, K(m, "dep"));
-        void *ar[] = {key, deps, NULL};
-        Out("^p.Building shared for @ deps @\n", ar);
         Iter it;
         Iter_Init(&it, Table_Ordered(m, deps));
+
+        void *_ar2[] = {Table_Ordered(m, deps), NULL};
+        Out("^p.Deps? @^0\n", _ar2);
+
+        i32 count = 0;
         while((Iter_Next(&it) & END) == 0){
             Hashed *h = Iter_Get(&it);
-            DirSel *dsel = Table_Get(ctx->input.dependencies, h->value);
-            void *ar[] = {h->key, I32_Wrapped(m, dsel->dest->nvalues), NULL};
-            Out("^p.Add sources for @ total@\n", ar);
-            /*
-            Transform the paths here 
-            */
-            Span_AddSpan(objs, dsel->dest);
+            DirSel *dsel = Table_Get(ctx->input.dependencies, h->key);
+            Span_AddSpan(objs, Table_Get(dsel->meta, K(m, "destObjs")));
+            void *ar[] = {Table_Get(dsel->meta, K(m, "target")), Table_Get(dsel->meta, K(m, "destObjs")), NULL};
+            Out("Adding ^p. at @ -> &^0\n", ar);
         }
 
-        /*
-        BuildCtx_SharedFromObjects(ctx, key, objs);
-        */
+        StrVec *target = IoUtil_BasePath(m, Table_Get(sel->meta, K(m, "target")));
+        StrVec_Add(target, IoUtil_FnameStr(m, key));
+        StrVec_AddVec(target, IoPath(m, ".so"));
+
+        void *_ar[] = {target, key, NULL};
+        Out("^p. Shared Target @ of key @^0\n", _ar);
+        
+        Span *cmd = Span_Make(m);
+        Span_Add(cmd, ctx->tools.cc);
+        Span_Add(cmd, S(m, "-shared"));
+        Span_Add(cmd, S(m, "-fPIC"));
+        Span_Add(cmd, S(m, "-o"));
+        Span_Add(cmd, target);
+        Span_AddSpan(cmd, objs);
+
+        void *ar[] = {cmd, NULL};
+        Out("^p. Shared cmd @^0\n", ar);
+
+        ProcDets pd;
+        ProcDets_Init(&pd);
+        status re = SubProcess(m, cmd, &pd);
+        if(re & ERROR){
+            DebugStack_SetRef(cmd, cmd->type.of);
+            printf("Error\n");
+            fflush(stdout);
+            exit(1);
+            /*
+            void *ar[] = {target, cmd, NULL};
+            Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+                "Build error for making shared object object @ from cmd @", ar);
+            DebugStack_Pop();
+            */
+            return ERROR;
+        }
     }
 
     DebugStack_Pop();
@@ -284,6 +315,8 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
     Table *execs = Table_Get(sel->meta, K(m, "exec"));
+    Span *destObjs = Span_Make(m);
+    Table_Set(sel->meta, K(m, "destObjs"), destObjs);
 
     ctx->current.source = IoUtil_AbsVec(m, ctx->input.srcPrefix);
     StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
@@ -317,6 +350,12 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
         StrVec_AddVec(ctx->current.source, source);
 
         StrVec *object = StrVec_Copy(m, source);
+
+        if(Equals(IoUtil_FnameStr(m, object), K(m, "inc.c"))){
+            StrVec_Return(ctx->current.dest);
+            StrVec_Return(ctx->current.source);
+            continue;
+        }
     
         if(ctx->type.state & BUILD_SHARED){
             IoUtil_SwapExt(m, object, S(m, "pic-o")); 
@@ -342,7 +381,8 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
             StrVec_Return(ctx->current.source);
             continue;
         }
-
+        
+        Span_Add(destObjs, dest);
         BuildCtx_BuildObject(ctx, key, sel);
         BuildCtx_LinkObject(ctx, key, sel);
 

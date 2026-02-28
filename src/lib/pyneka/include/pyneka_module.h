@@ -1,3 +1,3 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-PyMODINIT_FUNC PyInit_caneka(void);
+PyMODINIT_FUNC PyInit_pyneka(void);

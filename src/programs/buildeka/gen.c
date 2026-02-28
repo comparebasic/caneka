@@ -90,6 +90,9 @@ status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Table *genlist){
         args[1] = key;
         args[2] = NULL;
         Fmt(bf, "\n/* module $ */\n#include <$_module.h>\n", args);
+
+        void *ar[] = {key, NULL};
+        Out("^p.Key for include generation @^0\n", ar);
     }
     File_Close(bf);
 

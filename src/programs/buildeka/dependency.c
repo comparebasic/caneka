@@ -69,8 +69,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     if(Dir_Exists(m, pathS) & SUCCESS){
         sel = DirSel_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
-        Table_Set(sel->meta, S(m, "path"), path);
-
         StrVec *base = StrVec_Copy(m, path);
         StrVec_Add(base, IoUtil_PathSep(m));
         StrVec_Add(base, S(m, "option"));
@@ -114,6 +112,11 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
         ctx->input.totalModules->val.i++;
         Table_Set(ctx->input.dependencies, key, sel);
+        Table_Set(sel->meta, S(m, "path"), name);
+
+        void *ar[] = {ctx->src, path, NULL};
+        Out("^c.Src @ Path @^0\n", ar);
+
 
         if(Time_Greater(&sel->time, &ctx->modified)){
             ctx->modified = sel->time;
