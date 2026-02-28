@@ -39,7 +39,39 @@ or by building and running the [Test](./src/programs/test) program.
 - [Clineka](./src/programs/clineka/): This is command-line-interface with a few quick tools to do useful things.
 - [Test](./src/programs/test/): This is the test suite for testing various parts of the system.
 
-### Python Module
+
+### Components
+
+- Core: Done ([Base](./src/mod/base)/[Ext](./src/mod/ext/))
+- Utilities: Experimental ([Inter](./src/mod/inter/))
+- Passport: Initial Development ([Passport](./src/mod/passport/))
+- Syntax: Not Started
+- Python Module: Build Only ([Pyneka](./src/lib/pyneka))
+- OpenSsl Bindings: Experimental ([third/OpenSsl](./src/mod/third/openssl))
+
+#### Core Components
+
+The core system, including the [memory manager](./src/mod/base/mem/),
+[parser](./src/mod/ext/parser/), [network server](./src/mod/ext/serve/),
+[type](./src/mod/base/types/), and [higher-object](./src/mod/ext/types/) are complete yet
+minimally tested.
+
+#### Utility Components
+
+Utility components such as the [templater](./src/mod/inter/templ/), and [website
+components](./src/mod/inter/www/) are working but still experimental.
+
+#### Syntax
+
+The syntax for writing the Caneka langauge has not been started, and is not
+anticipated to be completed until after several products are created using the
+C Language calls directly.
+
+This is partly because Compare Basic needs revenue, and partly because the
+syntax will greatly benefit from greater experience using these tools in
+real-world applications.
+
+#### Python Module
 
 There is a small wrapper to create a Caneka runtime inside of a Python 3
 runtime. It only verifies that the internals are functioning for now.
@@ -60,34 +92,10 @@ example python cli session:
     >>> ctx.memstats()
     'MemStat<44k total/maxIdx=11/11 page-size=4096b>'
 
-### Components
+#### OpenSSL Bindings
 
-- Core: Done ([Base](./src/base)/[Ext](./src/ext/))
-- Utilities: Experimental ([Inter](./src/inter/))
-- Syntax: Not Started
-
-#### Core Components
-
-The core system, including the [memory manager](./src/base/mem/),
-[parser](./src/ext/parser/), [network server](./src/ext/serve/),
-[type](./src/base/types/), and [higher-object](./src/ext/types/) are complete yet
-minimally tested.
-
-#### Utility Components
-
-Utility components such as the [templater](./src/inter/templ/), and [website
-components](./src/inter/www/) are working but still experimental.
-
-#### Syntax
-
-The syntax for writing the Caneka langauge has not been started, and is not
-anticipated to be completed until after several products are created using the
-C Language calls directly.
-
-This is partly because Compare Basic needs revenue, and partly because the
-syntax will greatly benefit from greater experience using these tools in
-real-world applications.
-
+The OpenSSL bindings are in place to do simpler crypto operations such as
+evaluate signatures from key pairs and create cryptographic hashes. 
 
 ## Build Instructions
 
