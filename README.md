@@ -6,7 +6,7 @@ Avoid reduction by utalizing context, positioning, and transparency.
 
 ## Overview
 
-Spacial Oriented Programming provides programming languages that focus on 
+Spatial Oriented Programming provides programming languages that focus on 
 two main things:
 
 - What computers do for people.
