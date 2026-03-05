@@ -13,6 +13,7 @@ status Templ_Tests(MemCh *gm);
 status TemplCtx_Tests(MemCh *gm);
 status TemplNav_Tests(MemCh *gm);
 status TemplNavNested_Tests(MemCh *m);
+status Doc_Tests(MemCh *m);
 
 static TestSet InterTests[] = {
     {
@@ -110,6 +111,12 @@ static TestSet InterTests[] = {
         WwwNav_Tests,
         "Testing that an expected set of navigation HTML snipits are generated.",
         FEATURE_COMPLETE|SKIP_TEST,
+    },
+    {
+        "Doc Tests",
+        Doc_Tests,
+        "Test of the documentation engine with mock source files.",
+        FEATURE_COMPLETE,
     },
     {
         NULL,

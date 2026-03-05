@@ -105,7 +105,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         StrVec *name = StrVec_Make(m);
         StrVec_AddVecAfter(name, path, ctx->input.srcPrefix->p->nvalues+1);
 
-        if(Table_Get(ctx->input.dependencies, name) != NULL){
+        if(Table_Get(ctx->input.dependencies, key) != NULL){
             DebugStack_Pop();
             return NOOP;
         }

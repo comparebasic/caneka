@@ -32,6 +32,7 @@ static status fileIsDescendedOrNot(MemCh *m, void *_path, void *source){
     Str *path = _path;
     DirSel *sel = (DirSel *)Ifc(m, source, TYPE_DIR_SELECTOR);
     Span *filter = (Span *)Ifc(m, sel->source, TYPE_SPAN);
+
     Iter it;
     Iter_Init(&it, filter);
     while((Iter_Next(&it) & END) == 0){
