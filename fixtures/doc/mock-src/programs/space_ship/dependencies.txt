@@ -1,0 +1,3 @@
+exec=main.c
+option=animals
+life
