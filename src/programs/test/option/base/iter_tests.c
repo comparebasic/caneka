@@ -205,6 +205,7 @@ status Iter_Tests(MemCh *m){
     Iter_Insert(&it, 6, arr5[6]);
 
     i = 0;
+    it.type.state |= DEBUG;
     Iter_Reset(&it);
     while((Iter_Next(&it) & END) == 0){
         void *args[] = {
@@ -215,6 +216,9 @@ status Iter_Tests(MemCh *m){
         r |= Test(Equals(arr5[i], it.value), 
             "Iter_Next fourth set of values gives expected, expected @, have @", args);
         i++;
+        if(r & ERROR){
+            exit(1);
+        }
     }
 
     MemCh_FreeTemp(m);
@@ -262,8 +266,6 @@ status Iter_Tests(MemCh *m){
     };
     r |= Test(exp == endExpected,
         "177 Was added in the middle of 5k values, ended contigous values expected $, have $", args3);
-
-
 
     void *arr6[20] = {
         Str_CstrRef(m, "FancyOne"),

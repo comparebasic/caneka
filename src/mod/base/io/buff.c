@@ -169,7 +169,7 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
 
 static status Buff_bytesToFd(Buff *bf, i32 fd, byte *bytes, i64 length, i64 *offset){
     MemCh *m = bf->m;
-    bf->type.state &= ~(SUCCESS|MORE|PROCESSING);
+    bf->type.state &= ~(DONE|MORE|PROCESSING);
     if(length > IO_SEND_MAX || length < 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "length of send unbuff is larger than IO_SEND_MAX or less than 0", NULL);
@@ -190,7 +190,7 @@ static status Buff_bytesToFd(Buff *bf, i32 fd, byte *bytes, i64 length, i64 *off
             "Error sending str", NULL);
         bf->type.state |= ERROR;
     }else if(sent == length){
-        bf->type.state |= SUCCESS;
+        bf->type.state |= DONE;
     }else if(sent == 0 && length > 0){
         bf->type.state |= MORE;
     }else{
@@ -200,7 +200,7 @@ static status Buff_bytesToFd(Buff *bf, i32 fd, byte *bytes, i64 length, i64 *off
 }
 
 static status Buff_sendToFd(Buff *bf, i32 fd){
-    bf->type.state &= ~(MORE|SUCCESS|NOOP|PROCESSING);
+    bf->type.state &= ~(MORE|DONE|NOOP|PROCESSING);
     void *args[5];
     if(bf->unsent.total > 0){
         if(bf->unsent.s == NULL){
@@ -213,12 +213,12 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
         i64 length = s->length;
         i64 offset = 0;
         i16 guard = 0;
-        while((bf->type.state & (SUCCESS|ERROR|MORE)) == 0){
+        while((bf->type.state & (DONE|ERROR|MORE)) == 0){
             Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
             Buff_bytesToFd(bf, fd, bytes+offset, length-offset, &offset);
         }
 
-        bf->type.state &= ~(SUCCESS|MORE);
+        bf->type.state &= ~(DONE|MORE);
 
         if(bf->type.state & ERROR){
             return bf->type.state;
@@ -259,7 +259,7 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
             bf->type.state |= NOOP;
         }
     }else{
-        bf->type.state |= (SUCCESS|END);
+        bf->type.state |= DONE;
     }
     return bf->type.state;
 }
@@ -275,25 +275,25 @@ status Buff_SetFd(Buff *bf, i32 fd){
         }
     }
 
-    return SUCCESS;
+    return ZERO;
 }
 
 status Buff_SetSocket(Buff *bf, i32 fd){
     bf->fd = fd;
     bf->type.state |= BUFF_SOCKET;
-    return SUCCESS;
+    return ZERO;
 }
 
 status Buff_UnsetFd(Buff *bf){
     bf->fd = -1;
     bf->type.state &= ~BUFF_SOCKET;
-    return SUCCESS;
+    return ZERO;
 }
 
 status Buff_UnsetSocket(Buff *bf){
     bf->fd = -1;
     bf->type.state &= ~BUFF_SOCKET;
-    return SUCCESS;
+    return ZERO;
 }
 
 boolean Buff_IsEmpty(Buff *bf){
@@ -336,7 +336,7 @@ status Buff_GetStr(Buff *bf, Str *s){
     * this a potential buffer, before reading from a socket or file.
     */
     void *args[5];
-    bf->type.state &= ~(MORE|SUCCESS|ERROR|NOOP|PROCESSING|LAST);
+    bf->type.state &= ~(MORE|DONE|ERROR|NOOP|PROCESSING|LAST);
     word remaining = s->alloc - s->length;
 
     if(bf->unsent.total > 0){
@@ -346,7 +346,7 @@ status Buff_GetStr(Buff *bf, Str *s){
         }
         i16 g = 0;
 
-        while((bf->type.state & (MORE|SUCCESS|ERROR)) == 0 &&
+        while((bf->type.state & (MORE|DONE|ERROR)) == 0 &&
                 bf->unsent.total > 0 && remaining > 0){
             Guard_Incr(bf->m, &g, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
             if(bf->unsent.s->length > remaining){
@@ -374,7 +374,7 @@ status Buff_GetStr(Buff *bf, Str *s){
         if(bf->type.state & (BUFF_FD|BUFF_SOCKET) && remaining > 0){
             Buff_ReadToStr(bf, s); 
         }else{
-            bf->type.state |= (SUCCESS|END);
+            bf->type.state |= DONE;
         }
     }
 
@@ -382,7 +382,7 @@ status Buff_GetStr(Buff *bf, Str *s){
         bf->type.state |= LAST;
     }
 
-    return bf->type.state | (s->length == s->alloc ? SUCCESS : ZERO);
+    return bf->type.state | (s->length == s->alloc ? DONE : ZERO);
 }
 
 status Buff_RevGetStr(Buff *bf, Str *s){
@@ -439,7 +439,7 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
         return bf->type.state;
     }
 
-    bf->type.state &= ~SUCCESS|NOOP;
+    bf->type.state &= ~(DONE|NOOP);
 
     if(length > IO_SEND_MAX){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -465,7 +465,7 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
 
         i16 guard = 0;
         i64 offset = 0;
-        while((bf->type.state & (SUCCESS|ERROR|MORE)) == 0){
+        while((bf->type.state & (DONE|ERROR|MORE)) == 0){
             Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
             Buff_bytesToFd(bf,
                 bf->fd, bytes+offset, length-offset, &offset);
@@ -489,7 +489,7 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
             bf->unsent.total += length;
             bf->v->total += length;
             length -= length;
-            r |= SUCCESS;
+            r |= DONE;
         }else{
             Str_Add(bf->tail.s, bytes, remaining);
             bf->unsent.total += remaining;
@@ -515,7 +515,7 @@ status Buff_Flush(Buff *bf){
         Out("^pFlushing @\n", args);
     }
     if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-        while((Buff_sendToFd(bf, bf->fd) & (SUCCESS|ERROR|NOOP|END)) == 0){
+        while((Buff_sendToFd(bf, bf->fd) & (DONE|ERROR|NOOP|END)) == 0){
             if(bf->type.state & DEBUG){
                 void *args[2];
                 args[0] = bf;
@@ -567,14 +567,14 @@ status Buff_CompareToVec(Buff *bf, StrVec *v){
 
     Buff_Stat(bf);
     if((it.type.state & END) && (bf->type.state & END)){
-        return SUCCESS;
+        return DONE;
     }
 
     return NOOP;
 }
 
 status Buff_ReadAmount(Buff *bf, i64 amount){
-    bf->type.state &= ~(SUCCESS|PROCESSING|MORE|NOOP);
+    bf->type.state &= ~(DONE|PROCESSING|MORE|NOOP);
 
     if(amount > IO_SEND_MAX){
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
@@ -616,7 +616,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
             amount -= recieved;
             bf->type.state |= PROCESSING;
             if(recieved == 0 || amount == 0){
-                bf->type.state |= SUCCESS;
+                bf->type.state |= DONE;
                 break;
             }
         }
@@ -633,7 +633,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
 }
 
 status Buff_ReadToStr(Buff *bf, Str *s){
-    bf->type.state &= ~(SUCCESS|PROCESSING);
+    bf->type.state &= ~(DONE|PROCESSING);
     i16 amount = s->alloc - s->length;
     byte *bytes = s->bytes+s->length;
     while(amount > 0){
@@ -668,7 +668,7 @@ status Buff_ReadToStr(Buff *bf, Str *s){
                 Buff_Stat(bf);
             }
             if(amount == 0){
-                bf->type.state |= SUCCESS;
+                bf->type.state |= DONE;
             }
             break;
         }

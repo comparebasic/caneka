@@ -67,6 +67,9 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
 }
 
 static status Iter_AddWithGaps(Iter *it){
+    void *ar[] = {it->value, NULL};
+    Out("^p.AddWithGaps @^0\n", ar);
+
     void *value = it->value;
     i32 idx = it->idx;
     i8 dimP = it->p->dims+1;
@@ -426,6 +429,11 @@ status Iter_RemoveByIdx(Iter *it, i32 idx){
 }
 
 status Iter_Next(Iter *it){
+    if(it->type.state & DEBUG){
+        void *ar[] = {I32_Wrapped(it->p->m, it->idx), NULL};
+        Out("^p.Iter Next @^0\n", ar);
+    }
+
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
     if(it->p == NULL || it->p->nvalues == 0){
         it->type.state |= END;
