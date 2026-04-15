@@ -302,7 +302,7 @@ static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
         if(re & ERROR){
             DebugStack_SetRef(cmd, cmd->type.of);
             void *ar[] = {target, cmd, NULL};
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Build error for making shared object object @ from cmd @", ar);
             DebugStack_Pop();
             return ERROR;

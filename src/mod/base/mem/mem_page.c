@@ -19,7 +19,7 @@ MemPage *MemPage_Attach(MemCh *m, i16 level){
 MemPage *MemPage_Make(MemCh *m, i16 level){
     void *bytes = MemBook_GetPage(m);
     if(bytes == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER,
             "Error allocating page bytes are null", NULL);
         return NULL;
     }

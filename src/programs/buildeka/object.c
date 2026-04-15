@@ -29,7 +29,7 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     status re = SubProcess(m, cmd, &pd);
     if(re & ERROR){
         DebugStack_SetRef(cmd, cmd->type.of);
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Build error for adding object to lib", NULL);
         DebugStack_Pop();
         return ERROR;
@@ -103,7 +103,7 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
             cmd,
             NULL
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: @", args);
+        Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: @", args);
         return ERROR;
     }
 

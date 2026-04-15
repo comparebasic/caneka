@@ -29,7 +29,7 @@ void **Span_ToArr(MemCh *m, Span *p){
     i32 i = 0;
     while((Iter_Next(&it) & END) == 0){
         if(i > p->nvalues){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            Fatal(m, FUNCNAME, FILENAME, LINENUMBER, 
                 "nvalue mismatch", NULL); 
             return NULL;
         }

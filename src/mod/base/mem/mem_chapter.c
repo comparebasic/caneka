@@ -16,19 +16,19 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
     if(m == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
     }
     if(m->type.of != TYPE_MEMCTX){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemCh is missing type.of", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemCh is missing type.of", NULL);
         return NULL;
     }
     if(sz > MEM_SLAB_SIZE){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
     }
 
     if(m->it.p == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Whaaaaat m->it.p is NULL?", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Whaaaaat m->it.p is NULL?", NULL);
     }
 
     if(!Guard(&m->guard, MEM_GUARD_MAX, "MemCh_Alloc", FILENAME, LINENUMBER)){
@@ -40,7 +40,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         s.alloc = 128;
         Str_AddCstr(&s, "Guard Error allocating ");
         Str_AddCstr(&s, Type_ToChars(typeOf));
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, (char *)s.bytes, NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, (char *)s.bytes, NULL);
         return NULL;
     }
 
@@ -80,7 +80,7 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
 void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
     if(s > origsize){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Asking to copy more than newly allocated", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Asking to copy more than newly allocated", NULL);
         return NULL;
     }
     void *p = MemCh_Alloc(m, s);

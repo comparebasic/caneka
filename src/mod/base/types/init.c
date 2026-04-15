@@ -4,7 +4,7 @@
 static status archChecks(){
     size_t sec = sizeof(i64);
     if(sec != 8){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unkown architecture with less than 8 bytes for a util", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Unkown architecture with less than 8 bytes for a util", NULL);
     }
     return ERROR; 
 }

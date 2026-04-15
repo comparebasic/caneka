@@ -156,7 +156,7 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
 status Roebling_RunCycle(Roebling *rbl){
     Debug_Push(rbl->m, rbl->curs);
     if(rbl->parseIt.p->nvalues == 0){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(rbl->m, FUNCNAME, FILENAME, LINENUMBER,
             "Roebling parsers not set", NULL);
     }
     rbl->type.state &= ~END;
@@ -246,7 +246,7 @@ status Roebling_SetPattern(Roebling *rbl, PatCharDef *def, word captureKey, i16 
                 rbl,
                 NULL,
             };
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Jump not found in marks, jump $ not found in @\n", args); 
+            Fatal(rbl->m, FUNCNAME, FILENAME, LINENUMBER, "Jump not found in marks, jump $ not found in @\n", args); 
             return ERROR;
         }
     }
@@ -295,7 +295,7 @@ status Roebling_AddStep(Roebling *rbl, void *_step){
             step,
             NULL
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Expected I16 or Do, have $", args);
+        Fatal(rbl->m, FUNCNAME, FILENAME, LINENUMBER, "Expected I16 or Do, have $", args);
         return ERROR;
     }
 

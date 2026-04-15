@@ -184,7 +184,7 @@ status Fmt_ToHtml(Buff *bf, Mess *mess){
     DebugStack_Push(mess, mess->type.of);
     MemCh *m = bf->m;
     if(fmtToHtmlLookup == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "FmtToHtml no initialized", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "FmtToHtml no initialized", NULL);
         DebugStack_Pop();
         return ERROR;
     }

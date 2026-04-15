@@ -7,13 +7,13 @@ i32 main(int argc, char **argv){
     MemBook *cp = MemBook_Make(NULL);
     i32 code = 0;
     if(cp == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, 
             "MemBook created successfully", NULL);
     }
 
     MemCh *m = MemCh_Make();
     if(m == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, 
             "MemCh created successfully", NULL);
     }
 

@@ -348,7 +348,7 @@ Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
     while(def->flags != PAT_END){
        def++;
        if(++count > PAT_CHAR_MAX_LENGTH){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER,
+            Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
                 "PatCharDef: PAT_END not found before max", NULL);
        }
        if(termStart && def->flags != PAT_END){
@@ -362,7 +362,7 @@ Match *Match_Make(MemCh *m, PatCharDef *def, Span *backlog){
     if(def->flags == PAT_END){
         mt->pat.endDef = def;
     }else{
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
             "PatCharDef: end not found", NULL);
     }
     mt->remaining = -1;

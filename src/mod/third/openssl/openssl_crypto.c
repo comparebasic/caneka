@@ -25,23 +25,23 @@ static EVP_PKEY *pubKey_FromOctetSingle(MemCh *m, Single *public){
 status Str_ToSha256(MemCh *m, Str *s, digest *hash){
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
         return ERROR;
     }
 
     if(1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error initializing sha256", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error initializing sha256", NULL);
         return ERROR;
     }
 
     if(1 != EVP_DigestUpdate(mdctx, s->bytes, s->length)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error updating sha256", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error updating sha256", NULL);
         return ERROR;
     }
 
     unsigned int len = DIGEST_SIZE;
 	if(1 != EVP_DigestFinal(mdctx, (byte *)hash, &len)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error finalizing sha256 digest", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error finalizing sha256 digest", NULL);
         return ERROR;
     }
 
@@ -56,12 +56,12 @@ status Str_ToSha256(MemCh *m, Str *s, digest *hash){
 status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
         return ERROR;
     }
 
     if(1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error initializing sha256", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error initializing sha256", NULL);
         return ERROR;
     }
 
@@ -70,14 +70,14 @@ status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash){
     while((Iter_Next(&it) & END) == 0){
         Str *s = Iter_Get(&it);
         if(1 != EVP_DigestUpdate(mdctx, s->bytes, s->length)){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error updating sha256", NULL);
+            Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error updating sha256", NULL);
             return ERROR;
         }
     }
 
     unsigned int len = DIGEST_SIZE;
 	if(1 != EVP_DigestFinal(mdctx, (byte *)hash, &len)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error finalizing sha256 digest", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error finalizing sha256 digest", NULL);
         return ERROR;
     }
 
@@ -209,12 +209,12 @@ Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
     status r = READY;
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
         return NULL;
     }
     EVP_PKEY *key = secret->val.ptr;
     if(key == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error allocating private key for use", NULL);
         return NULL;
     }
@@ -222,7 +222,7 @@ Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC,NULL);
     if(1 != EVP_DigestSignInit(mdctx, &ctx, EVP_sha256(), NULL, key)){
         OpenSsl_Error(ErrStream);
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error initializing digest verify", NULL);
         return NULL;
     }
@@ -232,25 +232,25 @@ Str *SignPair_Sign(MemCh *m, StrVec *content, Single *secret){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
         if(1 != EVP_DigestSignUpdate(mdctx, s->bytes, s->length)){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error updating digest verify", NULL);
+            Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error updating digest verify", NULL);
             return NULL;
         }
     }
 
     size_t len;
 	if(1 != EVP_DigestSignFinal(mdctx, NULL, &len)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error finalizing digest verify", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error finalizing digest verify", NULL);
         return NULL;
     }
     if(len > STR_DEFAULT){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error allocating digest verify, longer than string", NULL);
         return NULL;
     }
 
     Str *ret = Str_Make(m, len);
 	if(1 != EVP_DigestSignFinal(mdctx, ret->bytes, &len)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error finalizing copying digest verify", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error finalizing copying digest verify", NULL);
         return NULL;
     }
     ret->length = len;
@@ -352,12 +352,12 @@ status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
 
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if(mdctx == NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "Error allocating evp_md_ctx", NULL);
         return ERROR;
     }
 
     if(1 != EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, key)){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER,
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error initializing digest verify", NULL);
         return NOOP;
     }
@@ -367,7 +367,7 @@ status SignPair_Verify(MemCh *m, StrVec *content, Str *sig, Single *public){
     while((Iter_Next(&it) & END) == 0){
         Str *s = Iter_Get(&it);
         if(1 != EVP_DigestVerifyUpdate(mdctx, s->bytes, s->length)){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER,
+            Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error updating digest verify", NULL);
             return NOOP;
         }

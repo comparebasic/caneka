@@ -20,7 +20,7 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
             I32_Wrapped(m, localIdx), 
             NULL
         };
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Error localIdx larger than span stride $", args);
         return -1;
     }
@@ -30,7 +30,7 @@ static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
         it->stackIdx[dim] = 0;
     }else{
         if(it->stack[dim+1] == NULL){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+            Fatal(m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Error expected ptr to span in SetStack", NULL);
         }
         ptr = *((void **)it->stack[dim+1]); 

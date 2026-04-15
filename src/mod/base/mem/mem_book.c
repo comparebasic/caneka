@@ -33,7 +33,7 @@ static MemBook *MemBook_get(void *addr){
         Util_Wrapped(ErrStream->m, (util)addr),
         NULL
     };
-    Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemBook not found for \\@@", args);
+    Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemBook not found for \\@@", args);
     return NULL;
 }
 
@@ -61,7 +61,7 @@ void _insecureMemError(void *addr){
         Ptr_Wrapped(ErrStream->m, addr, 0),
         NULL
     };
-    Fatal(FUNCNAME, FILENAME, LINENUMBER, 
+    Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, 
         "MemBook is private unless otherwise specified at compile time, $", args);
 }
 
@@ -142,7 +142,7 @@ void *MemBook_GetPage(void *addr){
         void *page = Iter_Get(&book->recycled);
         i32 idx = ((void *)page - book->start) / PAGE_SIZE;
         if(page == NULL){
-            Fatal(FUNCNAME, FILENAME, LINENUMBER, "MemPage from recycled is null", NULL);
+            Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemPage from recycled is null", NULL);
         }
         Iter_Remove(&book->recycled);
         Iter_Prev(&book->recycled);
@@ -156,13 +156,13 @@ void *MemBook_GetPage(void *addr){
     }
 
     /* make new chapter here as all chapters are full */
-    Fatal(FUNCNAME, FILENAME, LINENUMBER, "Next MemBook not implemented", NULL);
+    Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Next MemBook not implemented", NULL);
 
     if((book = MemBook_Make(book)) != NULL){
         return MemBook_GetPage(book);
     }
 
-    Fatal(FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook", NULL);
+    Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Error making another MemBook", NULL);
     return NULL;
 }
 
@@ -185,12 +185,12 @@ void MemBook_Free(MemBook *book){
 MemBook *MemBook_Make(MemBook *prev){
     bookIdx++;
     if(bookIdx >= BOOK_MAX){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Book idx greater than book max", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Book idx greater than book max", NULL);
         return NULL;
     }
     MemBook *mb = _books[bookIdx];
     if(mb != NULL){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Book already taken", NULL);
         return NULL;
     }
 
@@ -198,12 +198,12 @@ MemBook *MemBook_Make(MemBook *prev){
         BOOK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
     if(((util)start) & MEM_STASH_MASK){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Mempersist requires pages aligned by the first 11 bits", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Mempersist requires pages aligned by the first 11 bits", NULL);
         return NULL;
     }
 
     if(start == MAP_FAILED){
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Unable to map memory", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Unable to map memory", NULL);
         return NULL;
     }
 
