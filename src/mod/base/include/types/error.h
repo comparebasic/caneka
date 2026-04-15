@@ -2,9 +2,7 @@
 #define FILENAME __FILE__
 #define LINENUMBER __LINE__
 
-/*
 #define SIGH_CATCH
-*/
 
 extern struct lookup *ErrorHandlers;
 extern boolean _crashing;

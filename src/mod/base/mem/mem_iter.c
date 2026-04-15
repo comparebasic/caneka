@@ -10,7 +10,7 @@ static void setLastFlag(MemIter *mit){
         }else{
             IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
             if(imap == NULL){
-                void *ar[] = {Type_ToStr(mit->m, a->type.of), NULL};
+                void *ar[] = {Type_ToStr(ErrStream->m, a->type.of), NULL};
                 Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
                     "IfcMap not found for type @", ar);
                 return;

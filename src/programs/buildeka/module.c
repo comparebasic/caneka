@@ -105,6 +105,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
         }
     }
 
+
     Table_Set(sel->meta, S(m, "inc"), moduleInc);
 
     Table *deps = Table_Get(sel->meta, K(m, "dep"));
@@ -174,6 +175,32 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
                 Table *linkDeps = Table_Get(dsel->meta, K(m, "link"));
                 if(linkDeps != NULL){
+                    Table *libMeta = Table_Get(dsel->meta, K(m, "lib"));
+                    if(libMeta != NULL){
+                        Iter it;
+                        Iter_Init(&it, libMeta);
+                        while((Iter_Next(&it) & END) == 0){
+                            Hashed *h = Iter_Get(&it);
+                            if(h != NULL){
+                                if(IoUtil_IsStrAbs(h->key)){
+                                    path = StrVec_From(m, h->key);
+                                }else{
+                                    void *ar[] = {
+                                        path,
+                                        NULL
+                                    };
+                                    Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                                        "Expected absolute path for libdir @", args);
+
+                                    DebugStack_Pop();
+                                    return ERROR;
+                                }
+                                Span_Add(ctx->current.liblist, StrVec_StrPrefixed(m, S(m, "-L"), path));
+                            }
+                        }
+                    }
+
+
                     Iter _it;
                     Iter_Init(&_it, linkDeps);
                     while((Iter_Next(&_it) & END) == 0){

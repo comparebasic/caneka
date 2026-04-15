@@ -56,6 +56,22 @@ void Base_IfcInit(MemCh *m){
             TYPE_STRVEC - TYPE_CSTR,
             -1,
             CStr_Conv));
+
+    Lookup_Add(m, IfcLookup, TYPE_SPAN,
+        IfcMap_Make(m,
+            TYPE_SPAN,
+            ZERO,
+            ZERO,
+            sizeof(Span),
+            NULL));
+
+    Lookup_Add(m, IfcLookup, TYPE_MEMCTX,
+        IfcMap_Make(m,
+            TYPE_MEMCTX,
+            ZERO,
+            ZERO,
+            sizeof(MemCh),
+            NULL));
     
     /*
     Lookup_Add(m, IfcLookup, TYPE_WRAPPED, (i64)sizeof(Single));

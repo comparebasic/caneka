@@ -1,4 +1,5 @@
-include=/usr/include/openssl/
+include=/usr/local/include/
+lib=/usr/local/lib/
 link=openssl@crypto
 inter
 ext

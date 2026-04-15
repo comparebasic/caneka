@@ -176,7 +176,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             }
         }
 
-         Buff_AddBytes(bf, (byte *)"]>", 2);
+        Buff_AddBytes(bf, (byte *)"]>", 2);
     }else{
         return  Fmt(bf, "MemCh<used:$>", args);
     }

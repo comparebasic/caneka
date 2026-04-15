@@ -175,12 +175,13 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                 }
                 value = label;
             }
+
             Table_SetInTable(sel->meta, tag, label, value);
 
             if(dep != NULL){
                 StrVec *v = IoPath(m, "mod/");
                 StrVec_Add(v, value);
-                Table_SetInTable(sel->meta, S(m, "dep"), label, v);
+                Table_SetInTable(sel->meta, S(m, "dep"), value, v);
 
                 StrVec *depV = StrVec_From(m, dep);
                 IoUtil_Annotate(m, depV);
