@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static inline status Roebling_RunMatches(Roebling *rbl){
-    DebugStack_Push(rbl, rbl->type.of);
+    Debug_Push(rbl->m, rbl);
     while((Cursor_NextByte(rbl->curs) & END) == 0){
         Guard_Incr(rbl->m, &rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
@@ -29,7 +29,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
         i32 noopCount = 0;
         while((Iter_Next(&rbl->matchIt) & END) == 0){
             Match *mt = (Match *)Iter_Current(&rbl->matchIt);
-            DebugStack_SetRef(mt, mt->type.of);
+            Debug_SetRef(rbl->m, mt);
 
             status success = Match_Feed(rbl->m, mt, c) & SUCCESS;
             if(rbl->type.state & DEBUG){
@@ -41,8 +41,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                 Out("^p.$ - &^0.\n", args);
             }
             if(success){
-                DebugStack_Pop();
-                return Roebling_Dispatch(rbl, mt);
+                Return(rbl->m, Roebling_Dispatch(rbl, mt));
             }
 
             if((mt->type.state & NOOP) != 0){
@@ -50,7 +49,6 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                     rbl->type.state |= (NOOP|END|ERROR);
                     Guard_Reset(&rbl->guard);
 
-                    DebugStack_Pop();
                     if(mt->type.state & DEBUG){
                         void *args[] = {
                             Str_Ref(rbl->m, &c, 1, 1, DEBUG),
@@ -59,7 +57,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
                         };
                         Out("^p.Match Run -> ALL NOOPs (^D.$^d.): @^0.\n", args);
                     }
-                    return rbl->type.state;
+                    Return(rbl->m, rbl->type.state);
                 }
             }
             if(mt->type.state & DEBUG){
@@ -76,8 +74,7 @@ static inline status Roebling_RunMatches(Roebling *rbl){
     rbl->type.state |= (rbl->curs->type.state & END);
     Guard_Reset(&rbl->guard);
 
-    DebugStack_Pop();
-    return rbl->type.state;
+    Return(rbl->m, rbl->type.state);
 }
 
 status Roebling_Finalize(Roebling *rbl, Match *mt, i64 total){
@@ -157,8 +154,7 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
 }
 
 status Roebling_RunCycle(Roebling *rbl){
-    DebugStack_Push(rbl, rbl->type.of);
-    DebugStack_SetRef(rbl->curs, rbl->curs->type.of);
+    Debug_Push(rbl->m, rbl->curs);
     if(rbl->parseIt.p->nvalues == 0){
         Fatal(FUNCNAME, FILENAME, LINENUMBER,
             "Roebling parsers not set", NULL);
@@ -192,8 +188,7 @@ status Roebling_RunCycle(Roebling *rbl){
         Roebling_RunMatches(rbl);
     }
 
-    DebugStack_Pop();
-    return rbl->type.state;
+    Return(rbl->m, rbl->type.state);
 }
 
 status Roebling_JumpTo(Roebling *rbl, i32 mark){

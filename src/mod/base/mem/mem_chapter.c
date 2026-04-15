@@ -140,5 +140,8 @@ MemCh *MemCh_OnPage(){
 
 MemCh *MemCh_Make(){
     MemCh *m = MemCh_OnPage();
+#ifdef DEBUGSTACK
+    Iter_Init(&m->debugIt, Span_Make(m));
+#endif
     return m;
 }

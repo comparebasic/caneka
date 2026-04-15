@@ -15,6 +15,9 @@ typedef struct mem_ctx {
         i32 totalCeiling;
     } metrics;
     Span *extFree;
+#ifdef DEBUGSTACK
+    Iter debugIt
+#endif
 } MemCh;
 
 void *MemCh_Alloc(MemCh *m, size_t sz);

@@ -12,7 +12,7 @@ static boolean _fuse = TRUE;
 static void sigH(i32 sig, siginfo_t *info, void *ptr){
     if(_fuse){
         _fuse = FALSE;
-        Fatal(FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
     }else{
         if(ErrStream->fd > 0){
             write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
@@ -109,7 +109,7 @@ static void setSigs(){
     sigaction(SIGPIPE, &_c, NULL);
 }
 
-void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
+void Fatal(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
     /* Called when an error is unrecoverable
      *
      * func: the cstring of the function the error came from.
@@ -165,7 +165,10 @@ void Fatal(char *func, char *file, int line, char *fmt, void *args[]){
     Fmt(ErrStream, fmt, args);
 
     Fmt(ErrStream, "^0.\n", NULL);
-    DebugStack_Print(ErrStream, MORE);
+    if(m != NULL){
+        m = ErrStream->m;
+    }
+    DebugStack_Print(m, ErrStream, MORE);
     exit(13);
 }
 
@@ -226,7 +229,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
 
     if(_error){
         _crashing = TRUE;
-        Fatal(func, file, line, fmt, args);
+        Fatal(m, func, file, line, fmt, args);
         return;
     }
     _error = TRUE;
@@ -265,7 +268,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
             }
             */
         }else{
-            Fatal(func, file, line, fmt, args);
+            Fatal(m, func, file, line, fmt, args);
         }
     }
 
