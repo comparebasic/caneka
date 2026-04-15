@@ -88,8 +88,7 @@ static status Iter_AddWithGaps(Iter *it){
     void **last = NULL;
     void **ptr = NULL;
     i64 openSlots = -1;
-    if(it->type.state & SUCCESS){
-        it->type.state &= ~SUCCESS;
+    if((it->type.state & NOOP) == 0){
 
         if(it->p->dims == 0){
             i32 localIdx = it->stackIdx[dim];
@@ -97,7 +96,7 @@ static status Iter_AddWithGaps(Iter *it){
             last = ptr+((_capacity[0]-1)-localIdx);
             openSlots = (it->p->max_idx+1) - it->idx;
         }else{
-            while((it->type.state & SUCCESS) == 0){
+            while(it->type.state & NOOP){
                 i32 localIdx = it->stackIdx[dim];
                 ptr = it->stack[dim];
                 last = ptr+((_capacity[0]-1)-localIdx);
@@ -123,7 +122,7 @@ static status Iter_AddWithGaps(Iter *it){
             *ptr = NULL;
             it->p->max_idx += _increments[dim];
             prevIdx = it->idx + _increments[dim];
-            it->type.state |= SUCCESS;
+            it->type.state &= ~NOOP;
         }
     }
 
@@ -134,7 +133,7 @@ static status Iter_AddWithGaps(Iter *it){
     if(prevIdx != -1){
         Iter_Setup(&prevIt, it->p, SPAN_OP_GET, prevIdx);
         Iter_Query(&prevIt);
-        while(dim > 0 && (it->type.state & SUCCESS)){
+        while(dim > 0 && (it->type.state & NOOP) == 0){
             sl = *((void **)prevIt.stack[dim]);
             openSlots = it->stackIdx[dim-1];
             if(sl != NULL && openSlots > 0){
@@ -150,7 +149,7 @@ static status Iter_AddWithGaps(Iter *it){
 }
 
 static status Iter_Query(Iter *it){
-    it->type.state &= ~(SUCCESS|NOOP|MORE|LAST);
+    it->type.state &= ~(NOOP|MORE|LAST);
     MemCh *m = it->p->m;
     i16 guard = 0;
 
@@ -225,7 +224,6 @@ static status Iter_Query(Iter *it){
         if(dim == 0){
             if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE|SPAN_OP_ADD)){
                 ptr = (void **)it->stack[0];
-                it->type.state |= SUCCESS;
                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                     if(*ptr == NULL){
                         p->nvalues++;
@@ -246,7 +244,6 @@ static status Iter_Query(Iter *it){
                 ptr = (void **)it->stack[dim];
                 if(ptr != NULL){
                     it->value = *ptr;
-                    it->type.state |= SUCCESS;
                     it->metrics.get = it->idx;
                 }else{
                     it->value = NULL;
@@ -377,10 +374,8 @@ end:
 
     if(((it->type.state & SPAN_OP_GET) && it->value != NULL)){
         it->type.state &= ~NOOP;
-        it->type.state |= SUCCESS;
     }else{
         it->type.state |= NOOP;
-        it->type.state &= ~SUCCESS;
     }
 
     return it->type.state;
@@ -556,10 +551,8 @@ end:
     if(((it->type.state & SPAN_OP_GET) && it->value != NULL) ||
             it->type.state & (SPAN_OP_RESERVE|SPAN_OP_ADD)){
         it->type.state &= ~NOOP;
-        it->type.state |= SUCCESS;
     }else{
         it->type.state |= NOOP;
-        it->type.state &= ~SUCCESS;
     }
 
     return it->type.state;
@@ -624,11 +617,10 @@ void *Iter_Current(Iter *it){
     if(it->idx < 0){
         return NULL;
     }
-    it->type.state &= ~(SUCCESS|NOOP);
+    it->type.state &= ~NOOP;
     void **ptr = (void **)it->stack[0];
     if(ptr != NULL){
         it->value = *ptr;
-        it->type.state |= SUCCESS;
     }else{
         it->value = NULL;
         it->type.state |= NOOP;
@@ -640,7 +632,7 @@ void *Iter_GetByIdx(Iter *it, i32 idx){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_GET;
     it->idx = idx;
     status r = Iter_Query(it);
-    if(it->type.state & SUCCESS){
+    if((it->type.state & NOOP) == 0){
         return it->value;
     }
     return NULL;
@@ -665,7 +657,7 @@ status Iter_First(Iter *it){
 status Iter_Reset(Iter *it){
     it->type.state &= DEBUG;
     it->idx = 0;
-    return SUCCESS;
+    return ZERO;
 }
 
 status Iter_Prev(Iter *it){

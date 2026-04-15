@@ -3,6 +3,9 @@ extern word UPPER_FLAGS;
 extern word GLOBAL_flags;
 extern word OUTCOME_FLAGS;
 
+/*#define SUCCESS DONE*/
+#define END DONE
+
 enum status_types {
     READY = 0,
     SUCCESS = 1,
@@ -11,7 +14,7 @@ enum status_types {
     DEBUG = 1 << 3,
     MORE = 1 << 4,
     LAST = 1 << 5,
-    END = 1 << 6,
+    DONE = 1 << 6,
     PROCESSING = 1 << 7,
     /* class speciric */
     CLS_FLAG_ALPHA = 1 << 8,

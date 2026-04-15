@@ -22,7 +22,7 @@ static status fileHasExt(MemCh *m, void *_file, void *source){
         Str *e = Iter_Get(&it); 
         if(file->length >= e->length+1 &&
                 file->bytes[file->length-(e->length+1)] == '.' && Str_EndMatch(file, e)){
-            return SUCCESS;
+            return ZERO;
         }
     }
     return NOOP;
@@ -41,13 +41,13 @@ static status fileIsDescendedOrNot(MemCh *m, void *_path, void *source){
             if(sel->type.state & DIR_SELECTOR_INVERT){
                 return NOOP;
             }else{
-                return SUCCESS;
+                return ZERO;
             }
         }
     }
 
     if(sel->type.state & DIR_SELECTOR_INVERT){
-        return SUCCESS;
+        return ZERO;
     }else{
         return NOOP;
     }
@@ -59,12 +59,12 @@ static status fnameStr(MemCh *m, Str *s, Str *path, Str *file){
         Str_Add(s, (byte *)"/", 1);
     }
     Str_Add(s, file->bytes, file->length);
-    return SUCCESS;
+    return ZERO;
 }
 
 static status rmDir(MemCh *m, Str *path, void *source){
     char *dirPath = Str_Cstr(m, path);
-    return rmdir(dirPath) == 0 ? SUCCESS : ERROR;
+    return rmdir(dirPath) == 0 ? ZERO : ERROR;
 }
 
 static status rmFile(MemCh *m, Str *path, Str *file, void *source){
@@ -72,7 +72,7 @@ static status rmFile(MemCh *m, Str *path, Str *file, void *source){
     Str_Init(s, _buff, STR_DEFAULT, STR_DEFAULT);
     fnameStr(m, s, path, file);
     char *rmPath = Str_Cstr(m, s);
-    return unlink(rmPath) == 0 ? SUCCESS : ERROR;
+    return unlink(rmPath) == 0 ? ZERO : ERROR;
 }
 
 static status gatherDir(MemCh *m, Str *path, void *source){
@@ -95,7 +95,7 @@ static status gatherDir(MemCh *m, Str *path, void *source){
     StrVec *v = StrVec_From(m, path);
     StrVec_Add(v, S(m, "/"));
     Span_Add(p, v);
-    return SUCCESS;
+    return ZERO;
 }
 
 static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
@@ -111,7 +111,7 @@ static status gatherFile(MemCh *m, Str *path, Str *file, void *source){
 
 static status gatherFileFiltered(MemCh *m, Str *path, Str *file, void *source){
     DirSel *sel = (DirSel *)source;
-    if(sel->func(m, file, sel) & SUCCESS){
+    if((sel->func(m, file, sel) & NOOP) == 0){
         Span *p = (Span *)Ifc(m, sel->dest, TYPE_SPAN);
         StrVec *v = StrVec_Make(m);
         StrVec_Add(v, path);
@@ -166,7 +166,7 @@ static status gatherFileSel(MemCh *m, Str *path, Str *file, void *source){
 
     if(extMatches){
         Span_Add(sel->dest, v);
-        r |= SUCCESS;
+        r &= ~NOOP;
     }
 
     return r;
@@ -174,7 +174,7 @@ static status gatherFileSel(MemCh *m, Str *path, Str *file, void *source){
 
 status Dir_Rm(MemCh *m, Str *path){
     char *dirPath = Str_Cstr(m, path);
-    return rmdir(dirPath) == 0 ? SUCCESS : ERROR;
+    return rmdir(dirPath) == 0 ? ZERO : ERROR;
 }
 
 status Dir_Destroy(MemCh *m, Str *path){
@@ -229,7 +229,7 @@ status Dir_Exists(MemCh *m, Str *path){
     DIR* dir = opendir(path_cstr);
     if(dir){
         closedir(dir);
-        return SUCCESS;
+        return DONE;
     }else if(ENOENT == errno){
         return NOOP;
     }
@@ -274,7 +274,7 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
         }
         closedir(d);
         DebugStack_Pop();
-        return r|SUCCESS;
+        return r & ~NOOP;
     }else{
         void *args[] = {path, NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -286,7 +286,7 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
 
 status Dir_Mk(MemCh *m, Str *path){
     if(mkdir(Str_Cstr(m, path), 0766) == 0){
-        return SUCCESS;
+        return ZERO;
     }else{
         return ERROR;
     }

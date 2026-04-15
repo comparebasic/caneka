@@ -216,7 +216,15 @@ status ToS(Buff *bf, void *_a, cls type, word flags){
 
     ToSFunc func = (ToSFunc)Lookup_Get(ToStreamLookup, type);
     if(func != NULL){
-        return func(bf, a, type, flags);
+#ifdef EXTENSIVE_DEBUG_STACK
+        DebugStack_Push(NULL, ZERO);
+        DebugStack_SetRef(_a, type);
+#endif
+        status r = func(bf, a, type, flags);
+#ifdef EXTENSIVE_DEBUG_STACK
+        DebugStack_Pop();
+#endif
+        return r;
     }else{
         void *args[] = {
             Type_ToStr(bf->m, type),

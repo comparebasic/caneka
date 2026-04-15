@@ -90,7 +90,7 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
     pd->pid = child;
 
     DebugStack_Pop();
-    return SUCCESS;
+    return DONE;
 }
 
 status SubStatus(ProcDets *pd){
@@ -126,7 +126,7 @@ status SubStatus(ProcDets *pd){
 
     pd->code = WEXITSTATUS(r);    
     if(pd->code == 0){
-        pd->type.state |= SUCCESS;
+        pd->type.state |= DONE;
     }else{
         pd->type.state |= ERROR;
     }
@@ -138,7 +138,7 @@ status SubStatus(ProcDets *pd){
 status SubProcess(MemCh *m, Span *cmd_p, ProcDets *pd){
     DebugStack_Push(cmd_p, cmd_p->type.of);
     status r = SubCall(m, cmd_p, pd);
-    if(r & SUCCESS){
+    if(r & DONE){
         status r = SubStatus(pd);
         DebugStack_Pop();
         return r;
@@ -155,7 +155,7 @@ status SubProcToBuff(MemCh *m, Span *cmd, Buff *out, Buff *err){
     };
 
     status r = SubCall(m, cmd, &pd);
-    if((r & SUCCESS) == 0){
+    if((r & DONE) == 0){
         return ERROR;
     }
 
@@ -171,7 +171,7 @@ status SubProcToBuff(MemCh *m, Span *cmd, Buff *out, Buff *err){
 
     struct timespec current = {0, 0};
     r = ZERO;
-    while((r & (ERROR|SUCCESS)) == 0){
+    while((r & (ERROR|DONE)) == 0){
         r |= SubStatus(&pd);
         if(out != NULL) Buff_Read(out);
         if(err != NULL) Buff_Read(err);

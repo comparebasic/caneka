@@ -66,7 +66,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
     Str *pathS = StrVec_Str(m, path);
     DirSel *sel = NULL;
-    if(Dir_Exists(m, pathS) & SUCCESS){
+    if(Dir_Exists(m, pathS) & DONE){
         sel = DirSel_Make(m,
             S(m, ".c"), NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
         StrVec *base = StrVec_Copy(m, path);

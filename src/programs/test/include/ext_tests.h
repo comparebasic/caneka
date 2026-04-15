@@ -16,7 +16,6 @@ status QueueAddRemove_Tests(MemCh *m);
 status Relation_Tests(MemCh *m);
 status Object_Tests(MemCh *m);
 status ObjectFilter_Tests(MemCh *m);
-status Mess_Tests(MemCh *m);
 status PatChar_Tests(MemCh *m);
 status Roebling_Tests(MemCh *m);
 status RoeblingRun_Tests(MemCh *m);
@@ -27,6 +26,7 @@ status MatchElastic_Tests(MemCh *m);
 status MatchKo_Tests(MemCh *m);
 status MatchReplace_Tests(MemCh *m);
 status FmtHtml_Tests(MemCh *m);
+status Cash_Tests(MemCh *m);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
 #endif
@@ -155,12 +155,6 @@ static TestSet ExtTests[] = {
         SECTION_LABEL,
     },
     {
-        "Mess Tests",
-        Mess_Tests,
-        "From a basic Fmt Roebling parser into the Mess data structures.",
-        FEATURE_COMPLETE,
-    },
-    {
         "FmtHtml Tests",
         FmtHtml_Tests,
         "Format FMT -> HTML tests.",
@@ -215,6 +209,12 @@ static TestSet ExtTests[] = {
         TaskStep_Tests,
         "Task/Step and Task_Tumble tests.",
         FEATURE_COMPLETE,
+    },
+    {
+        "Cash Tests",
+        Cash_Tests,
+        "Cash templater testing.",
+        SKIP_TEST,
     },
 #ifdef CNKOPT_FREEBSD
     {
