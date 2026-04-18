@@ -17,7 +17,7 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     BuildCtx_Log(ctx);
 
     ProcDets pd;
-    ProcDets_Init(&pd);
+    ProcDets_Init(m, &pd);
 
     Span *cmd = Span_Make(m);
     Span_Add(cmd, ctx->tools.ar);
@@ -25,7 +25,7 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     Span_Add(cmd, StrVec_Str(m, ctx->current.target));
     Span_Add(cmd, StrVec_Str(m, ctx->current.dest));
 
-    ProcDets_Init(&pd);
+    ProcDets_Init(m, &pd);
     status re = SubProcess(m, cmd, &pd);
     if(re & ERROR){
         DebugStack_SetRef(cmd, cmd->type.of);
@@ -96,7 +96,7 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     }
 
     ProcDets pd;
-    ProcDets_Init(&pd);
+    ProcDets_Init(m, &pd);
     r |= SubProcess(m, cmd, &pd);
     if(r & ERROR){
         void *args[] = {

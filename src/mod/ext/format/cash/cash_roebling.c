@@ -38,7 +38,8 @@ static status text(MemCh *m, Roebling *rbl){
 }
 
 Roebling *CashParser_Make(MemCh *m, Cursor *curs, cls instTypeOf){
-    DebugStack_Push(curs, curs->type.of);
+    Debug_Stack(m, curs);
+
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, CASH_TEXT));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)text));
@@ -50,6 +51,5 @@ Roebling *CashParser_Make(MemCh *m, Cursor *curs, cls instTypeOf){
     Iter_Add((Iter *)rbl->source, I16_Wrapped(m, instTypeOf));
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
 
-    DebugStack_Pop();
-    return rbl;
+    Return(m, rbl);
 }

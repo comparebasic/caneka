@@ -15,14 +15,14 @@ typedef struct debug_stack {
     Type type;
     word typeOf;
     word _;
-    char *funcName;
-    char *fname;
+    const char *funcName;
+    const char *fname;
     void *ref;
     i32 line;
     i32 pos;
 } StackEntry;
 
-void DebugStack_SetRef(MemCh *m, void *a, char *func, char *file, i32 lineno);
-void DebugStack_Push(MemCh *m, void *a, char *func, char *file, i32 lineno);
+void DebugStack_SetRef(MemCh *m, void *a, const char *funcName, const char *fname, i32 lineno);
+void DebugStack_Push(MemCh *m, void *a, const char *funcName, const char *fname, i32 lineno);
 void DebugStack_Pop(MemCh *m);
-void DebugStack_Print(Iter *it, struct buff *bf, word flags);
+void DebugStack_Print(MemCh *m, struct buff *bf, word flags);

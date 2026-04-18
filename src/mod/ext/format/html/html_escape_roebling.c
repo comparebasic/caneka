@@ -88,7 +88,8 @@ status HtmlEnt_IntoVec(MemCh *m, Roebling *rbl, StrVec *v){
 }
 
 Roebling *HtmlEntRbl_Make(MemCh *m, Cursor *curs, void *source){
-    DebugStack_Push(curs, curs->type.of);
+    Debug_Stack(m, curs);
+
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, HTML_ENT_CONTENT));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
@@ -97,6 +98,6 @@ Roebling *HtmlEntRbl_Make(MemCh *m, Cursor *curs, void *source){
 
     rbl->capture = Capture;
     rbl->source = source;
-    DebugStack_Pop();
-    return rbl;
+
+    Return(m, rbl);
 }

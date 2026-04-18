@@ -48,8 +48,8 @@ Table *BuildCtx_GenOptionsTable(BuildCtx *ctx, Span *p){
 }
 
 status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
-    DebugStack_Push(NULL, ZERO);
-    DebugStack_SetRef(path, path->type.of);
+    Debug_Push(ctx->m, path);
+
     void *args[5];
     MemCh *m = ctx->m;
 
@@ -106,8 +106,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         StrVec_AddVecAfter(name, path, ctx->input.srcPrefix->p->nvalues+1);
 
         if(Table_Get(ctx->input.dependencies, key) != NULL){
-            DebugStack_Pop();
-            return NOOP;
+            Return(ctx->m, NOOP);
         }
 
         ctx->input.totalModules->val.i++;
@@ -126,8 +125,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         args[2] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Dependency not found @ for @", args);
-        DebugStack_Pop();
-        return ERROR;
+        Return(ctx->m, ERROR);
     }
 
     StrVec_Add(ctx->current.source, K(m, "dependencies.txt"));
@@ -136,8 +134,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     bf->type.state |= NOOP;
     File_Open(bf, StrVec_Str(m, ctx->current.source), O_RDONLY);
     if(bf->type.state & ERROR){
-        DebugStack_Pop();
-        return NOOP; 
+        Return(ctx->m, NOOP); 
     }
     Buff_Read(bf);
     File_Close(bf);
@@ -207,6 +204,5 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     }
 
     StrVec_PopTo(ctx->current.source, anchor);
-    DebugStack_Pop();
-    return ZERO;
+    Return(ctx->m, ZERO);
 }

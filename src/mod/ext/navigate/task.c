@@ -19,7 +19,8 @@ static status _taskErrorHandler(MemCh *m, void *_tsk, void *msg){
 }
 
 status Task_Tumble(Task *tsk){
-    DebugStack_Push(tsk, tsk->type.of);
+    Debug_Push(tsk->m, tsk);
+
     tsk->type.state &= ~SUCCESS;
     i16 guard = 0;
     struct timespec now;
@@ -103,8 +104,8 @@ status Task_Tumble(Task *tsk){
     Time_Now(&end);
     Time_Sub(&end, &now);
     Time_Add(&tsk->metrics.consumed, &end);
-    DebugStack_Pop();
-    return tsk->type.state;
+
+    Return(m, tsk->type.state);
 }
 
 status Task_ResetChain(Task *tsk){

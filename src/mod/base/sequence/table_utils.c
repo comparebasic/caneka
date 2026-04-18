@@ -171,7 +171,8 @@ Table *Table_GetOrMake(Table *tbl, void *key, word op){
 }
 
 void *Table_ByPath(Table *tbl, StrVec *path, void *value, word op){
-    DebugStack_Push(tbl, tbl->type.state);
+    MemCh *m = tbl->m;
+    Debug_Push(m, tbl);
 
     Iter keysIt;
     Iter_Init(&keysIt, path->p);
@@ -183,8 +184,7 @@ void *Table_ByPath(Table *tbl, StrVec *path, void *value, word op){
         if((item->type.state & MORE) && key != NULL){
             current = Table_GetOrMake(current, key, op);
             if(current == NULL){
-                DebugStack_Pop();
-                return NULL;
+                Return(m, NULL);
             }
             key = NULL;
         }else{
@@ -198,11 +198,9 @@ void *Table_ByPath(Table *tbl, StrVec *path, void *value, word op){
     if(key != NULL && path->p->nvalues > 1 && (key->type.state & (LAST|MORE)) == 0){
         current = Table_GetOrMake(current, key, op);
         if(current == NULL){
-            DebugStack_Pop();
-            return NULL;
+            Return(m, NULL);
         }
     }
 
-    DebugStack_Pop();
-    return current;
+    Return(m, current);
 }

@@ -2,14 +2,15 @@
 #include <caneka.h>
 
 void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
-    DebugStack_Push(fch, fch->type.of);
+    Debug_Push(m, fch);
+
     Abstract *value = (Abstract *)_value;
     if(value != NULL){
         if(value->type.of == TYPE_ITER){
             Iter *it = (Iter *)value;
-            DebugStack_SetRef(it->p, it->p->type.of);
+            Debug_SetRef(m, it->p);
         }else{
-            DebugStack_SetRef(value, value->type.of);
+            Debug_SetRef(m, value);
         }
     }
     Abstract *orig = value;
@@ -63,8 +64,8 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
                 (tg->type.state & FETCH_TARGET_ATT) == 0){
             value = ((Hashed *)value)->value;
         }
-        DebugStack_Pop();
-        return value;
+
+        Return(m, value);
     }else if((fch->type.state & FETCHER_IF) == 0){
         void *args[] = {
             fch,
@@ -73,11 +74,11 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Fetch @ value not found on @\n", args);
-        DebugStack_Pop();
-        return NULL;
+
+        Return(m, NULL);
     }
-    DebugStack_Pop();
-    return NULL;
+
+    Return(m, NULL);
 }
 
 Fetcher *Fetcher_Make(MemCh *m){

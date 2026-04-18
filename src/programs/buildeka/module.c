@@ -2,8 +2,10 @@
 #include "buildeka_module.h"
 
 static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
+
     MemCh *m = ctx->m;
+    Debug_Push(m, key);
+
     void *args[6];
     
     Table *deps = Table_Get(ctx->input.dependencies, K(m, "dep"));
@@ -51,13 +53,11 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
     args[3] = NULL;
     StrVec_AddChain(ctx->current.dest, args);
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
-    DebugStack_SetRef(key, key->type.of);
+    Debug_Push(ctx->m, key);
 
     status r = READY;
     MemCh *m = ctx->m;
@@ -153,8 +153,8 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
                     void *args[] = {h, Table_Keys(ctx->input.dependencies), NULL};
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Dependency expected but not resolved @ of @", args);
-                    DebugStack_Pop();
-                    return r|ERROR;
+
+                    Return(m, r|ERROR);
                 }
                 Span *depInc = Table_Get(dsel->meta, K(m, "inc"));
                 if(depInc != NULL){
@@ -192,8 +192,7 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
                                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                                         "Expected absolute path for libdir @", args);
 
-                                    DebugStack_Pop();
-                                    return ERROR;
+                                    Return(m, ERROR);
                                 }
                                 Span_Add(ctx->current.liblist, StrVec_StrPrefixed(m, S(m, "-L"), path));
                             }
@@ -235,13 +234,13 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     Span_AddSpan(inc, moduleInc);
     ctx->current.inc = inc;
 
-    DebugStack_Pop();
-    return r;
+    Return(ctx->m, r);
 }
 
 static status skipRecent(BuildCtx *ctx, 
         StrVec *key, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
+    Debug_Push(ctx->m, key);
+
     MemCh *m = ctx->m;
     void *args[5];
 
@@ -255,19 +254,18 @@ static status skipRecent(BuildCtx *ctx,
                     "Library is recent, skipping");
                 BuildCtx_Log(ctx);
                 ctx->input.countSources->val.i += ctx->input.totalModuleSources->val.i;
-                DebugStack_Pop();
-                return SUCCESS;
+
+                Return(ctx->m, SUCCESS);
             }
         }
     }
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(ctx->m, ZERO);
 }
 
 static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
+    Debug_Push(m, key);
 
     Table *tbl = Table_Get(sel->meta, K(m, "type"));
     if(tbl != NULL && Table_Get(tbl, K(m, "shared")) != NULL){
@@ -297,28 +295,28 @@ static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
         Span_AddSpan(cmd, objs);
 
         ProcDets pd;
-        ProcDets_Init(&pd);
+        ProcDets_Init(m, &pd);
         status re = SubProcess(m, cmd, &pd);
         if(re & ERROR){
-            DebugStack_SetRef(cmd, cmd->type.of);
+            Debug_SetRef(m, cmd);
             void *ar[] = {target, cmd, NULL};
             Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Build error for making shared object object @ from cmd @", ar);
-            DebugStack_Pop();
-            return ERROR;
+
+            Return(m, ERROR);
         }
 
         void *ar[] = {target, NULL};
         Out("Shared object built $^0\n", ar);
     }
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
+    Debug_Push(m, key);
+
     void *args[5];
 
     Table *skips = Table_Get(sel->meta, K(m, "skip"));
@@ -398,13 +396,13 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
         StrVec_Return(ctx->current.source);
     }
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 static status buildExec(BuildCtx *ctx, StrVec *key, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
+    Debug_Push(m, ZERO);
+
     void *args[5];
 
     Table *execs = Table_Get(sel->meta, K(m, "exec"));
@@ -450,19 +448,18 @@ static status buildExec(BuildCtx *ctx, StrVec *key, DirSel *sel){
         }
     }
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
     status r = READY;
     MemCh *m = ctx->m;
+    Debug_Push(m, name);
+
     void *args[5];
 
     if(Table_Get(sel->meta, K(m, "completed")) != NULL){
-        DebugStack_Pop();
-        return NOOP;
+        Return(m, NOOP);
     }
 
     setNames(ctx, name, sel);
@@ -488,8 +485,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     ctx->input.countModuleSources->val.i = 0;
 
     if(skipRecent(ctx, name, sel) & SUCCESS){
-        DebugStack_Pop();
-        return NOOP;
+        Return(m, NOOP);
     }
 
     if(ctx->current.target != NULL){
@@ -505,7 +501,6 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     Time_Now(&now);
     Table_Set(sel->meta, S(m, "completed"), Time_Wrapped(m, &now));
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 

@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
-    DebugStack_Push(sns, TYPE_SPAN);
+    Debug_Push(m, sns);
 
     StrVec *v = StrVec_Make(m);
     Cursor *curs = Cursor_Copy(m, _curs);
@@ -32,8 +32,7 @@ StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
         }
     }
 
-    DebugStack_Pop();
-    return v;
+    Return(m, v);
 }
 
 status SnipSpan_SetAll(Span *sns, word flags){

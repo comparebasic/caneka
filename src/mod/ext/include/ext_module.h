@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "persist.h"
 #include "navigate.h"
-#include "transp.h"
 #include "format.h"
 #include "serve.h"
 

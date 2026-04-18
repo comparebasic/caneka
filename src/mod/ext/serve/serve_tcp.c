@@ -70,7 +70,8 @@ static status ServeTcp_OpenTcp(Step *st, Task *tsk){
 }
 
 static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
-    DebugStack_Push(st, st->type.of);
+    Debug_Push(tsk->m, st);
+
     status r = READY;
     st->type.state &= ~SUCCESS;
     void *args[5];
@@ -171,8 +172,7 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
         Out("^c.    No more Reqs @^0\n", args);
     }
 
-    DebugStack_Pop();
-    return st->type.state;
+    Return(m, st->type.state);
 }
 
 static status ServeTcp_SetupQueue(Step *st, Task *tsk){

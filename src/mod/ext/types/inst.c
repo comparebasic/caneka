@@ -68,7 +68,8 @@ void *Inst_GetChild(Inst *inst, void *key){
 }
 
 void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
-    DebugStack_Push(inst, inst->type.state);
+    Debug_Push(inst->m, inst);
+
     void *args[5];
 
     cls typeOf = inst->type.of;
@@ -103,11 +104,9 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
                         coordIdx, I32_Wrapped(coords->m, h->orderIdx));
                     coordIdx++;
                 }
-                DebugStack_Pop();
-                return value;
+                Return(inst->m, value);
             }else{
-                DebugStack_Pop();
-                return child;
+                Return(inst->m, child);
             }
         }else if(token->type.state & MORE){
             if(prev){
@@ -148,8 +147,7 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
         prev = token;
     }
 
-    DebugStack_Pop();
-    return NULL;
+    Return(m, NULL);
 }
 
 

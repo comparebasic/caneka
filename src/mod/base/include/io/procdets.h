@@ -7,10 +7,11 @@ enum procdets_flags {
 typedef struct procdets {
     Type type;
     pid_t pid;
+    MemCh *m;
     i32 inFd;
     i32 outFd;
     i32 errFd;
     i32 code;
 } ProcDets;
 
-status ProcDets_Init(ProcDets *pd);
+status ProcDets_Init(struct mem_ctx *m, ProcDets *pd);

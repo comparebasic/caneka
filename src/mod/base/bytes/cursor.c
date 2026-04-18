@@ -2,7 +2,9 @@
 #include "base_module.h"
 
 static status Cursor_SetStr(Cursor *curs){
-    DebugStack_Push(curs, curs->type.of);
+    MemCh *m = curs->v->p->m;
+    Debug_Push(m, curs);
+
     Iter_GetByIdx(&curs->it, curs->it.idx);
     if((curs->it.type.state & NOOP) == 0){
         Str *s = (Str *)curs->it.value;
@@ -10,15 +12,14 @@ static status Cursor_SetStr(Cursor *curs){
             curs->ptr = s->bytes;
             curs->end = s->bytes+(s->length-1);
             curs->type.state |= PROCESSING;
-            DebugStack_Pop();
-            return ZERO;
+
+            Return(m, ZERO);
         }else{
             curs->ptr = NULL;
             curs->end = NULL;
         }
     }
-    DebugStack_Pop();
-    return NOOP;
+    Return(m, NOOP);
 }
 
 i64 Cursor_Pos(Cursor *curs){
@@ -55,14 +56,15 @@ status Cursor_End(Cursor *curs){
 }
 
 status Cursor_Decr(Cursor *curs, i32 length){
-    DebugStack_Push(curs, curs->type.of);
-    void *args[3];
     MemCh *m = curs->v->p->m;
+    Debug_Push(m, curs);
+
+    void *args[3];
     if((curs->type.state & PROCESSING) == 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to decr cursor that is not in PROCESSING", NULL);
-        DebugStack_Pop();
-        return ERROR;
+
+        Return(m, ERROR);
     }
     curs->type.state &= ~NOOP;
     Str *s = curs->it.value;
@@ -91,12 +93,12 @@ status Cursor_Decr(Cursor *curs, i32 length){
             }
         }else{
             curs->ptr -= length;
-            DebugStack_Pop();
-            return curs->type.state;
+
+            Return(m, curs->type.state);
         }
     }
-    DebugStack_Pop();
-    return curs->type.state;
+
+    Return(m, curs->type.state);
 }
 
 StrVec *Cursor_Get(MemCh *m, Cursor *_curs, i32 length, i32 offset){
@@ -262,7 +264,9 @@ status Cursor_SetStrBytes(Cursor *curs, Str *s, i32 max){
 }
 
 status Cursor_Incr(Cursor *curs, i32 length){
-    DebugStack_Push(curs, curs->type.of);
+    MemCh *m = curs->v->p->m;
+    Debug_Push(m, curs);
+
     i32 origDebug = length;
     if(curs->ptr == NULL){
         Cursor_SetStr(curs);
@@ -289,8 +293,8 @@ status Cursor_Incr(Cursor *curs, i32 length){
             break;
         }
     }
-    DebugStack_Pop();
-    return curs->type.state;
+
+    Return(m, curs->type.state);
 }
 
 status Cursor_PrevByte(Cursor *curs){
@@ -347,11 +351,12 @@ status Cursor_NextByte(Cursor *curs){
 }
 
 Cursor *Cursor_Copy(MemCh *m, Cursor *_curs){
-    DebugStack_Push(_curs, _curs->type.of);
+    Debug_Push(m, _curs);
+
     Cursor *curs = MemCh_Alloc(m, sizeof(Cursor));
     memcpy(curs, _curs, sizeof(Cursor));
-    DebugStack_Pop();
-    return curs;
+
+    Return(m, curs);
 }
 
 status Cursor_AddVec(Cursor *curs, StrVec *v){

@@ -16,7 +16,7 @@ typedef struct mem_ctx {
     } metrics;
     Span *extFree;
 #ifdef DEBUGSTACK
-    Iter debugIt
+    Iter debugIt;
 #endif
 } MemCh;
 

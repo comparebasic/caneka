@@ -264,7 +264,8 @@ Inst *FormatConfig_GetRoot(Roebling *rbl){
 }
 
 Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, void *source){
-    DebugStack_Push(curs, curs->type.of);
+    Debug_Stack(m, curs);
+
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, CONFIG_START));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
@@ -277,6 +278,5 @@ Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, void *source){
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
 
-    DebugStack_Pop();
-    return rbl;
+    Return(m, rbl);
 }

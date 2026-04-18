@@ -99,7 +99,7 @@ i32 main(int argc, char **argv){
                 Time_Now(&last);
                 args[2] = Time_ToStr(m, &last);
                 Out("^c.Spawn: logdir=$ cmd=@ time=$^0\n", args);
-                ProcDets_Init(&pd);
+                ProcDets_Init(m, &pd);
                 status r = SubProcess(m, cmd, &pd);
                 if(r & ERROR){
                     codeSg->val.i = pd.code;

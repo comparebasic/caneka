@@ -343,7 +343,8 @@ Str *IoUtil_GetAbsPath(MemCh *m, Str *path){
 }
 
 boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b){
-    DebugStack_Push(a, a->type.of);
+    Debug_Push(m, a);
+
     struct stat source_stat;
     struct stat build_stat;
     int r = 0;
@@ -356,7 +357,8 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b){
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, "Source not found @", args);
-        return FALSE;
+
+        Return(m, FALSE);
     }
     r = stat(Str_Cstr(m, b), &build_stat);
     time_t build_mtime = 0;
@@ -365,11 +367,9 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b){
     }
 
     if(source_stat.st_mtime > build_mtime){
-        DebugStack_Pop();
-        return TRUE;
+        Return(m, TRUE);
     }else{
-        DebugStack_Pop();
-        return FALSE;
+        Return(m, FALSE);
     }
 }
 

@@ -23,7 +23,6 @@ status Caneka_InitBase(MemCh *m){
     Debug_Init(md);
     StreamTo_Init(md);
     AnsiStr_Init(md);
-    DebugStack_Init(m);
     Termio_ToSInit(m);
     Args_Init(m);
     Clone_Init(m);

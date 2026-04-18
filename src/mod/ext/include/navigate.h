@@ -1,6 +1,4 @@
 #include "navigate/node.h"
-#include "navigate/mess.h"
-#include "navigate/relation.h"
 #include "navigate/compare.h"
 #include "navigate/frame.h"
 #include "navigate/queue.h"

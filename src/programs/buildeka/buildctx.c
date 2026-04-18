@@ -10,9 +10,10 @@ status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
 }
 
 status BuildCtx_Build(BuildCtx *ctx){
-    DebugStack_Push(NULL, 0);
+
     status r = READY;
     MemCh *m = ctx->m;
+    Debug_Push(m, ctx);
 
     Time_Now(&ctx->start);
 
@@ -54,8 +55,7 @@ status BuildCtx_Build(BuildCtx *ctx){
 
     /* build execs */
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 BuildCtx *BuildCtx_Make(MemCh *m){

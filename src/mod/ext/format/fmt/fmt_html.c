@@ -181,12 +181,13 @@ static i64 tagFunc(TranspCtx *ctx, word flags){
 }
 
 status Fmt_ToHtml(Buff *bf, Mess *mess){
-    DebugStack_Push(mess, mess->type.of);
+    Debug_Stack(bf->m, mess);
+
     MemCh *m = bf->m;
     if(fmtToHtmlLookup == NULL){
         Fatal(m, FUNCNAME, FILENAME, LINENUMBER, "FmtToHtml no initialized", NULL);
-        DebugStack_Pop();
-        return ERROR;
+
+        Return(bf->m, ERROR);
     }
 
     if(mess->type.state & DEBUG){
@@ -215,8 +216,7 @@ status Fmt_ToHtml(Buff *bf, Mess *mess){
         Out("^y.Fmt_ToHtml(ctx:&)\n", args);
     }
 
-    DebugStack_Pop();
-    return total;
+    Return(bf->m, total);
 }
 
 status FmtToHtml_Init(MemCh *m){

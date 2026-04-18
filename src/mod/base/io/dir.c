@@ -245,7 +245,8 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
      * source: Abstract object passed to each function
      */
 
-    DebugStack_Push(path, path->type.of); 
+    Debug_Push(m, path);
+
     status r = READY;
     struct dirent *ent;
     DIR *d = opendir((char *)path->bytes);
@@ -273,14 +274,14 @@ status Dir_Climb(MemCh *m, Str *path, DirFunc dir, FileFunc file, void *source){
             }
         }
         closedir(d);
-        DebugStack_Pop();
-        return r & ~NOOP;
+
+        Return(m, r & ~NOOP);
     }else{
         void *args[] = {path, NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to open Direcotry: @", args);
-        DebugStack_Pop();
-        return r|ERROR;
+
+        Return(m, r|ERROR);
     }
 }
 
@@ -319,7 +320,8 @@ status Dir_CheckCreate(MemCh *m, Str *path){
      * Using a subprocess for this is a bit much, it will be replaced
      * by more minimal POSIX functions at some point
      */
-    DebugStack_Push(path, path->type.of);
+    Debug_Push(m, path);
+
     Span *cmd = Span_Make(m);
     char *cstr = "mkdir";
     i64 len = strlen(cstr);
@@ -330,11 +332,11 @@ status Dir_CheckCreate(MemCh *m, Str *path){
     Span_Add(cmd, path);
 
     ProcDets pd;
-    ProcDets_Init(&pd);
+    ProcDets_Init(m, &pd);
     if(path->type.state & DEBUG){
         cmd->type.state |= DEBUG;
     }
     status r = SubProcess(m, cmd, &pd);
-    DebugStack_Pop();
-    return r;
+
+    Return(m, r);
 }

@@ -238,8 +238,8 @@ static status Str_ToBinSeg(BinSegCtx *ctx, void *a, i16 id, i16 idx){
 }
 
 static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
-    DebugStack_Push(ctx, ctx->type.of);
     MemCh *m = ctx->m;
+    Debug_Push(m, ctx);
     
     Iter it;
     Span *shelf = Span_Get(ctx->shelves, hdr->ident.id);
@@ -316,14 +316,14 @@ static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
         Span_Set(shelf, hdr->ident.idx, a);
     }
 
-    DebugStack_Pop();
-    return ctx->type.state;
+    Return(m, ctx->type.state);
 }
 
 status BinSegCtx_Load(BinSegCtx *ctx){
-    DebugStack_Push(ctx, ctx->type.of);
     void *args[4];
     MemCh *m = ctx->read->m;
+    Debug_Stack(m, ctx);
+
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP|END);
     if(ctx->read == NULL){
         return ERROR;
@@ -383,8 +383,7 @@ status BinSegCtx_Load(BinSegCtx *ctx){
 
     ctx->type.state |= (ctx->read->type.state & (ERROR|END));
 
-    DebugStack_Pop();
-    return ctx->type.state;
+    Return(m, ctx->type.state);
 }
 
 word BinSegCtx_HeaderSize(word kind, word length){

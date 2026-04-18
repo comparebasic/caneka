@@ -135,14 +135,15 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
 }
 
 status Stash_FlushFree(Buff *bf, MemCh *persist){
-    DebugStack_Push(persist, persist->type.of);
+    MemCh *m = bf->m;
+    Debug_Push(m, persist);
+
     status r = READY;
     SourceFunc func = NULL;
     void *a = NULL;
     void *args[5];
     Iter it;
 
-    MemCh *m = bf->m;
     Table *tbl = Table_Make(m);
 
     MemIter mit;
@@ -195,12 +196,12 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
         r |= MemBook_FreePage(m, (MemPage *)Iter_Get(&it));
     }
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 MemCh *Stash_FromStream(Buff *bf){
-    DebugStack_Push(bf, bf->type.of);
+    Debug_Push(bf->m, bf);
+
     status r = READY;
 
     void *args[5];
@@ -239,8 +240,8 @@ MemCh *Stash_FromStream(Buff *bf){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error allocating page", NULL);
             r |= ERROR;
-            DebugStack_Pop();
-            return NULL;
+
+            Return(m, NULL);
         }
 
         s.alloc = PAGE_SIZE;
@@ -280,12 +281,10 @@ MemCh *Stash_FromStream(Buff *bf){
     }
 
     if((r & (SUCCESS|ERROR)) == SUCCESS){
-        DebugStack_Pop();
-        return persist;
+        Return(m, persist);
     }
     
-    DebugStack_Pop();
-    return persist;
+    Return(m, persist);
 }
 
 status Stash_Init(MemCh *m){

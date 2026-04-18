@@ -8,7 +8,8 @@
 #include "base_module.h"
 
 status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
-    DebugStack_Push(pd, pd->type.of);
+    Debug_Push(m, pd);
+
     char **cmd = Span_ToCharArr(m, cmd_p);
     char *msg = "";
 
@@ -29,8 +30,7 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             )
 
         ){
-            DebugStack_Pop();
-            return ERROR;
+            Return(m, ERROR);
         }
     }else if(pd->type.state & PROCDETS_IN_PIPE){
         if((pipe(p0) != 0)
@@ -41,8 +41,7 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             )
 
         ){
-            DebugStack_Pop();
-            return ERROR;
+            Return(m, ERROR);
         }
 
     }
@@ -52,8 +51,7 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
 
     child = vfork();
     if(child == (pid_t)-1){
-        DebugStack_Pop();
-        return ERROR;
+        Return(m, ERROR);
     }else if(!child){
         if(pd->type.state & PROCDETS_PIPES){
             close(0);
@@ -71,9 +69,9 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
             close(p0[1]);
         }
         execvp(cmd[0], cmd);
-        DebugStack_Pop();
         exit(1);
-        return ERROR;
+
+        Return(m, ERROR);
     }
 
     if(pd->type.state & PROCDETS_PIPES){
@@ -89,12 +87,13 @@ status SubCall(MemCh *m, Span *cmd_p, ProcDets *pd){
     }
     pd->pid = child;
 
-    DebugStack_Pop();
-    return DONE;
+    Return(m, DONE);
 }
 
 status SubStatus(ProcDets *pd){
-    DebugStack_Push(pd, pd->type.of);
+    MemCh *m = pd->m;
+    Debug_Push(m, pd);
+
     int r;
     pid_t p;
 
@@ -113,15 +112,14 @@ status SubStatus(ProcDets *pd){
                 "subProcess wait failed for SubProcess", NULL); 
             return ERROR;
         }
-        DebugStack_Pop();
-        return NOOP;
+        Return(m, NOOP);
     }
 
     if(!WIFEXITED(r)){
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
             "subProcess failed for SubProcess process did not exit propery", NULL);
-        DebugStack_Pop();
-        return ERROR;
+
+        Return(m, ERROR);
     }
 
     pd->code = WEXITSTATUS(r);    
@@ -131,26 +129,27 @@ status SubStatus(ProcDets *pd){
         pd->type.state |= ERROR;
     }
 
-    DebugStack_Pop();
-    return pd->type.state;
+    Return(m, pd->type.state);
 }
 
 status SubProcess(MemCh *m, Span *cmd_p, ProcDets *pd){
-    DebugStack_Push(cmd_p, cmd_p->type.of);
+    Debug_Push(m, cmd_p);
+
     status r = SubCall(m, cmd_p, pd);
     if(r & DONE){
         status r = SubStatus(pd);
-        DebugStack_Pop();
-        return r;
+
+        Return(m, r);
     }
-    DebugStack_Pop();
-    return ERROR;
+    
+    Return(m, ERROR);
 }
 
 status SubProcToBuff(MemCh *m, Span *cmd, Buff *out, Buff *err){
     ProcDets pd = {
         .type = {TYPE_PROCDETS, PROCDETS_PIPES|PROCDETS_ASYNC}, 
         0,
+        m,
         -1,-1,-1,-1
     };
 

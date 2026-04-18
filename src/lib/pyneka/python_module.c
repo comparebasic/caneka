@@ -46,8 +46,6 @@ static int PynekaCtx_init(PyObject *op, PyObject *args, PyObject *kwds)
 {
     PynekaCtx *self = (PynekaCtx *) op;
 
-
-    DebugStack_Push(NULL, 0);
     return 0;
 }
 
