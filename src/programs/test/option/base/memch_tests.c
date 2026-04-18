@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status MemCh_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
 
     MemBook *cp = NULL;
@@ -45,12 +45,11 @@ status MemCh_Tests(MemCh *m){
     MemBook_GetStats(m, &st);
     r |= Test(st.total == start, "MemBook chapters match the start level", NULL);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status MemChLevel_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
 
     MemBook *cp = NULL;
@@ -95,6 +94,5 @@ status MemChLevel_Tests(MemCh *m){
     MemBook_GetStats(m, &st);
     r |= Test(st.total == start, "MemBook chapters match the start level", NULL);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

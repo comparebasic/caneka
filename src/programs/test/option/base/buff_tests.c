@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status Buff_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
 
@@ -62,13 +62,11 @@ status Buff_Tests(MemCh *m){
     r |= Test(Equals(bf->v, expectedVec),
         "Content with a long additional is expected in StrVec of Buff", NULL);
 
-    DebugStack_Pop();
-
-    return r;
+    Return(m, r);
 }
 
 status BuffSendRecv_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
 
@@ -112,12 +110,11 @@ status BuffSendRecv_Tests(MemCh *m){
     r |= Test(Equals(bf->v, expectedVec),
         "Buff_GetStr has populated an equal StrVec", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status BuffIo_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
 
@@ -215,13 +212,11 @@ status BuffIo_Tests(MemCh *m){
     r |= Test(IoUtil_Unlink(StrVec_Str(m, pathTwo)) & SUCCESS, 
         "Remove file @", args);
 
-    DebugStack_Pop();
-
-    return r;
+    Return(m, r);
 }
 
 status BuffPos_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
     Buff *bf = Buff_Make(m, ZERO);
@@ -249,6 +244,5 @@ status BuffPos_Tests(MemCh *m){
     Buff_PosAbs(bf, 7);
     r |= Test(bf->unsent.total == 60, "Buff 7(abs): Expected position and unset $", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

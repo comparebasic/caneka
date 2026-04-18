@@ -463,7 +463,7 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     }
 
     setNames(ctx, name, sel);
-    DebugStack_SetRef(sel, sel->type.of);
+    Debug_SetRef(m, sel);
 
     StrVec_Anchor(ctx->current.dest);
     Dir_CheckCreate(m, StrVec_Str(m, ctx->current.dest));

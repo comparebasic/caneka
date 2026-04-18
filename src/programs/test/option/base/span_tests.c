@@ -44,7 +44,7 @@ static status testDims(MemCh *m, i32 idx, i8 expectedDim){
 }
 
 status Span_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     Span *p;
     status r = READY;
     Str *s;
@@ -282,8 +282,7 @@ status Span_Tests(MemCh *m){
     };
     r |= Test(Equals(s513, s), "String 513 equals @ found @", args27);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status SpanClone_Tests(MemCh *m){

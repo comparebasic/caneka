@@ -63,7 +63,7 @@ static status makeAndIterPrevRemoveItems(MemCh *m, i64 max){
 
 
 status Iter_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     Span *p;
     Str *s;
     status r = READY;
@@ -329,8 +329,7 @@ status Iter_Tests(MemCh *m){
 
     m->level--;
     MemCh_FreeTemp(m);
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status IterMax_Tests(MemCh *m){

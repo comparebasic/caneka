@@ -171,6 +171,7 @@ i32 main(int argc, char **argv){
             Out("^p.Args Found &^0\n", args);
 
             if(Equals(inExt, K(m, "fmt")) && Equals(outExt, K(m, "html"))){
+                /*
                 args[0] = inFileArg;
                 args[1] = outFileArg;
                 args[2] = NULL;
@@ -213,6 +214,7 @@ i32 main(int argc, char **argv){
                         code = 7; 
                     }
                 }
+                */
             }
         }
     }

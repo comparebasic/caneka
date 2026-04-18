@@ -4,7 +4,7 @@ enum route_prop_idx {
     ROUTE_PROPIDX_PATH = 0,
     ROUTE_PROPIDX_DATA = 1,
     ROUTE_PROPIDX_CHILDREN = 2,
-    /* NodeObj end */
+    /* Node end */
     ROUTE_ROUTE_GENS = 3,
 };
 

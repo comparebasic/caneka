@@ -221,6 +221,7 @@ status Dir_GatherFilterDir(MemCh *m, Str *path, DirSel *sel){
      */
     sel->type.state |= DIR_SELECTOR_FILTER_DIRS;
     sel->func = fileIsDescendedOrNot;
+
     return Dir_Climb(m, path, gatherDir, gatherFileSel, sel);
 }
 

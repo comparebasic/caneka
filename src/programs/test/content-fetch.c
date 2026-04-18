@@ -35,9 +35,9 @@ i32 main(int argc, char **argv){
 #ifdef CNKOPT_INTER
     Inter_Init(m);
 #endif
-    DebugStack_Push(NULL, 0);
 
     CliArgs *cli = CliArgs_Make(argc, argv);
+    Debug_Push(m, cli);
 
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
@@ -61,6 +61,5 @@ i32 main(int argc, char **argv){
         Ansi_SetColor(FALSE);
     }
 
-    DebugStack_Pop();
-    return 0;
+    Return(m, 0);
 }

@@ -101,7 +101,7 @@ status Roebling_Tests(MemCh *m){
 }
 
 status RoeblingRun_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
 
     Str *s = NULL; 
@@ -156,8 +156,7 @@ status RoeblingRun_Tests(MemCh *m){
         "Roebling has captured the rest of the line, expected '$', have '@'", args3);
     r |= Test((rbl->type.state & ROEBLING_NEXT) != 0, "Roebling has state ROEBLING-NEXT", NULL);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status RoeblingMark_Tests(MemCh *m){

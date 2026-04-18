@@ -45,7 +45,7 @@ static status funcOne(Step *st, Task *tsk){
 }
 
 status TaskStep_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[2];
 
@@ -59,6 +59,5 @@ status TaskStep_Tests(MemCh *m){
     args[1] = NULL;
     r |= Test(tsk->type.state & SUCCESS, "Task finishes successfully", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

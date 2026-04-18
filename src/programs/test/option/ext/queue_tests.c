@@ -75,7 +75,7 @@ static status queueScaleTest(MemCh *m, i32 max){
 }
 
 status Queue_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
 
@@ -110,12 +110,11 @@ status Queue_Tests(MemCh *m){
     r |= Test((Str *)item == one,
         "Queue item is first item, expected &, have &", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status QueueAddRemove_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[8];
 
@@ -178,12 +177,11 @@ status QueueAddRemove_Tests(MemCh *m){
 
     r |= Test(Equals(args[0], args[1]) && Equals(args[2], args[3]) && Equals(args[4], args[5]), "Expected @ = @, @ = @, @ = @", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status QueueIter_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[8];
 
@@ -284,12 +282,11 @@ status QueueIter_Tests(MemCh *m){
     args[2] = NULL;
     r |= Test(i == 5, "Queue runs for the number of items in it, have $, for @", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status QueueCriteria_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[8];
     i32 i = 0;
@@ -456,12 +453,11 @@ status QueueCriteria_Tests(MemCh *m){
 
     File_Close(bf);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status QueueScale_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[6];
 
@@ -601,6 +597,5 @@ status QueueScale_Tests(MemCh *m){
     r |= Test((queueScaleTest(m, 777) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 777 scale tests finish with SUCCESS", NULL);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

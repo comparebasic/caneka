@@ -2,7 +2,8 @@
 #include <caneka.h>
 
 status TcpTask_ReadToRbl(Step *st, Task *tsk){
-    Debug_Push(tsk->m, st);
+    MemCh *m = tsk->m;
+    Debug_Push(m, st);
 
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
@@ -27,7 +28,8 @@ status TcpTask_ReadToRbl(Step *st, Task *tsk){
 }
 
 status TcpTask_WriteStep(Step *st, Task *tsk){
-    Debug_Push(tsk->m, st);
+    MemCh *m = tsk->m;
+    Debug_Push(m, st);
 
     status r = READY;
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
@@ -58,7 +60,7 @@ status TcpTask_WriteStep(Step *st, Task *tsk){
         st->type.state |= SUCCESS;
     }
     
-    Return(tsk->m, st->type.state);
+    Return(m, st->type.state);
 }
 
 status TcpTask_ExpectRecv(Step *st, Task *tsk){

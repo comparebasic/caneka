@@ -1,13 +1,13 @@
 #include <external.h>
 #include <caneka.h>
 
-NodeObj *DocComp_DocOnly(MemCh *m, StrVec *name){
+Node *DocComp_DocOnly(MemCh *m, StrVec *name){
     DocComp *dobj = Inst_Make(m, TYPE_DOC_COMPONENT);
     Seel_Set(dobj, K(m, "name"), name);
     return dobj;
 }
 
-NodeObj *DocComp_FromStr(MemCh *m, StrVec *src, StrVec *name){
+Node *DocComp_FromStr(MemCh *m, StrVec *src, StrVec *name){
     /*
     Path_DotAnnotate(m, name);
     */

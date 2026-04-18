@@ -8,16 +8,18 @@ status DebugStack_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
     Buff *bfAfter = Buff_Make(m, ZERO);
 
-    DebugStack_Push(NULL, 0);
-    DebugStack_Print(bf, 0);
+    Debug_Push(m, NULL);
+    DebugStack_Print(m, bf, 0);
 
-    DebugStack_Pop();
-    DebugStack_Print(bfAfter, 0);
+    DebugStack_Pop(m);
+    DebugStack_Print(m, bfAfter, 0);
+
+    void *ar[] = {bfAfter->v, NULL};
+    Out("DebugStack: @^0\n", ar);
 
     i64 total = bf->v->total;
     i64 totalAfter = bfAfter->v->total;
     r |= Test(total > totalAfter, "Stack printout has less characters than before", NULL); 
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

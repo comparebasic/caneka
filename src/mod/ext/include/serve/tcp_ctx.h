@@ -9,7 +9,7 @@ typedef struct tcp_ctx {
     StrVec *path;
     Inst *pages;
     Inst *inc;
-    NodeObj *nav;
+    Node *nav;
     struct {
         struct timespec start;
         i64 open;

@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status Config_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     void *args[5];
     status r = READY;
 
@@ -22,9 +22,9 @@ status Config_Tests(MemCh *m){
     StrVec *footerKey = StrVec_From(m, Str_FromCstr(m, "doc.footer", ZERO));
     Path_DotAnnotate(m, footerKey);
 
-    NodeObj *doc = Inst_GetByPath(root, docKey);
-    NodeObj *tag = Inst_GetByPath(root, tagKey);
-    NodeObj *footer = Inst_GetByPath(root, footerKey);
+    Node *doc = Inst_GetByPath(root, docKey);
+    Node *tag = Inst_GetByPath(root, tagKey);
+    Node *footer = Inst_GetByPath(root, footerKey);
 
     args[0] = docKey;
     args[1] = doc;
@@ -54,7 +54,7 @@ status Config_Tests(MemCh *m){
         args[3] = value;
         args[4] = NULL;
         r |= Test(Equals(expected, value),
-            "NodeObj @ att @ has expected value @: @", args);
+            "Node @ att @ has expected value @: @", args);
     }
 
     args[0] = tagKey;
@@ -78,7 +78,7 @@ status Config_Tests(MemCh *m){
         args[3] = value;
         args[4] = NULL;
         r |= Test(Equals(expected, value),
-            "NodeObj @ att @ has expected value @: @", args);
+            "Node @ att @ has expected value @: @", args);
     }
 
     args[0] = footerKey;
@@ -101,9 +101,8 @@ status Config_Tests(MemCh *m){
         args[3] = value;
         args[4] = NULL;
         r |= Test(Equals(expected, value),
-            "NodeObj @ att @ has expected value @: @", args);
+            "Node @ att @ has expected value @: @", args);
     }
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

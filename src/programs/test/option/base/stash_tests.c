@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status Stash_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     void *args[5];
     Span *p;
     status r = READY;
@@ -91,6 +91,5 @@ status Stash_Tests(MemCh *m){
     args[1] = s;
     r |= Test(Equals(s, expected), "Str has equivilent value, expected &, have &", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

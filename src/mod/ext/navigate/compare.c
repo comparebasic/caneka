@@ -51,97 +51,19 @@ status Compare(Comp *comp){
                 /* skip to bottom */
             }else{
                 cr->type.state |= PROCESSING;
-                if(a->type.of == TYPE_NODE){
-                    Node *na = (Node *)a;
-                    Node *nb = (Node *)b;
-                    if(na->typeOfChild != nb->typeOfChild){
-                        comp->type.state |= NOOP;
-                        if(comp->type.state & DEBUG){
-                            void *args[] = {
-                                Type_ToStr(comp->m, na->typeOfChild),
-                                Type_ToStr(comp->m, nb->typeOfChild),
-                                comp,
-                                NULL
-                            };
-                            Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
-                                "typeOfChild mismatch $ vs $ &", args);
-                        }
-                        return comp->type.state;
+                a->type.state |= DEBUG;
+                if(!Equals(a, b)){
+                    if(comp->type.state & DEBUG){
+                        void *args[] = {
+                            comp,
+                            a,
+                            b,
+                            NULL
+                        };
+                        Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
+                            "mismatch & - ^p.&^r. vs ^p.&^r.", args);
                     }
-                    if(na->value != NULL && na->value != nb->value){
-                        Compare_Push(comp, na->value, nb->value);
-                        if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
-                            if(comp->type.state & DEBUG){
-                                void *args[] = {
-                                    comp,
-                                    NULL
-                                };
-                                Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
-                                    "value mismatch &", args);
-                            }
-                            return comp->type.state;
-                        }
-                    }
-                    if(na->atts != NULL && na->atts != nb->atts){
-                        Compare_Push(comp, na->atts, nb->atts);
-                        if(Compare(comp) & (SUCCESS|ERROR|NOOP)){
-                            if(comp->type.state & DEBUG){
-                                void *args[] = {
-                                    comp,
-                                    NULL
-                                };
-                                Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
-                                    "atts mismatch &", args);
-                            }
-                            return comp->type.state;
-                        }
-                    }else if(nb->atts != NULL){
-                        if(comp->type.state & DEBUG){
-                            void *args[] = {
-                                comp,
-                                NULL
-                            };
-                            Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
-                                "atts of B mismatch &", args);
-                        }
-                        comp->type.state |= NOOP;
-                        return comp->type.state;
-                    }
-                    if(na->child != NULL && na->child != nb->child){
-                        if(nb->child->type.of == TYPE_RELATION){
-                            Relation *ra = (Relation *)na->child;
-                            Relation *rb = (Relation *)nb->child;
-                            Iter_Setup(&ra->it, ra->it.p, SPAN_OP_GET, 0);
-                            Iter_Setup(&rb->it, rb->it.p, SPAN_OP_GET, 0);
-                            Compare_Push(comp,
-                                &ra->it, 
-                                &rb->it);
-                        }else if(nb->child->type.of == TYPE_SPAN){
-                            Compare_Push(comp,
-                                Iter_Make(comp->m, (Span *)na->child), 
-                                Iter_Make(comp->m, (Span *)na->child));
-                        }else{
-                            Compare_Push(comp,
-                                na->child, 
-                                nb->child);
-                        }
-                        Compare(comp);
-                    }
-                }else{
-                    a->type.state |= DEBUG;
-                    if(!Equals(a, b)){
-                        if(comp->type.state & DEBUG){
-                            void *args[] = {
-                                comp,
-                                a,
-                                b,
-                                NULL
-                            };
-                            Error(comp->m, FILENAME, FUNCNAME, LINENUMBER,
-                                "mismatch & - ^p.&^r. vs ^p.&^r.", args);
-                        }
-                        comp->type.state |= NOOP;
-                    }
+                    comp->type.state |= NOOP;
                 }
             }
         }

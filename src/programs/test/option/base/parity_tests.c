@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status Parity_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[4];
 
@@ -107,6 +107,5 @@ status Parity_Tests(MemCh *m){
     args[3] = NULL;
     r |= Test(new == parity, "Str Parity matches for, @, $ vs $", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

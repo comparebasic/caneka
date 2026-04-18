@@ -232,6 +232,7 @@ static status var(MemCh *m, Roebling *rbl){
 
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
+    /*
     Mess *mess = (Mess *)Ifc(rbl->m, rbl->dest, TYPE_MESS);
     TemplCtx *ctx = (TemplCtx*)Ifc(rbl->m, rbl->source, TYPE_TEMPL_CTX);
     if(mess->type.state & DEBUG){
@@ -329,6 +330,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             fch->type.state = (fch->type.state & NORMAL_FLAGS) | FETCHER_WITH;
         }
     }
+    */
 
     return SUCCESS;
 }
@@ -344,9 +346,9 @@ Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, void *source){
     Roebling_Start(rbl);
 
     rbl->capture = Capture;
-    Mess *mess = Mess_Make(m);
+    Inst *inst = Inst_Make(m, TYPE_NODE);
     mess->tokenizer = Lookup_Make(m, _TEMPL_START);
-    rbl->dest = (Abstract *)mess;
+    rbl->dest = (Abstract *)inst;
     rbl->source = source;
     return rbl;
 }

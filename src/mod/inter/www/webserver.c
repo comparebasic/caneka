@@ -214,10 +214,10 @@ status WebServer_ServePage(Step *st, Task *tsk){
         HttpProto_AddBuff(proto, bf);
     }
 
-    NodeObj *config = Table_Get(ctx->data, K(m, "config"));
-    NodeObj *pageNode = NodeObj_GetChild(config, K(m, "page"));
-    StrVec *preContent = NodeObj_Att(pageNode, K(m, "pre-content"));
-    StrVec *postContent = NodeObj_Att(pageNode, K(m, "post-content"));
+    Node *config = Table_Get(ctx->data, K(m, "config"));
+    Node *pageNode = Node_GetChild(config, K(m, "page"));
+    StrVec *preContent = Node_Att(pageNode, K(m, "pre-content"));
+    StrVec *postContent = Node_Att(pageNode, K(m, "post-content"));
     if(preContent != NULL){
         Route *route = Inst_ByPath(tcp->inc, preContent, NULL, SPAN_OP_GET, NULL);
         if(route != NULL){
@@ -263,13 +263,13 @@ status WebServer_ServePage(Step *st, Task *tsk){
     return st->type.state;
 }
 
-status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *handlers){
+status WebServer_SetConfig(Task *tsk, StrVec *path, Node *config, Table *handlers){
     status r = READY;
     /*
     MemCh *m = tsk->m;
     Route *root = Route_Make(m);
 
-    NodeObj *routes = Inst_ByPath(config, Sv(m, "routes"), NULL, SPAN_OP_GET, NULL);
+    Node *routes = Inst_ByPath(config, Sv(m, "routes"), NULL, SPAN_OP_GET, NULL);
 
     void *args[] = {routes, path, handlers, NULL};
     Out("^p.SetConfig @ Path @ handlers^0\n", args);
@@ -283,7 +283,7 @@ status WebServer_SetConfig(Task *tsk, StrVec *path, NodeObj *config, Table *hand
             Route *section = Route_Make(m);
             StrVec *name = StrVec_From(m, h->key);
             IoUtil_Annotate(m, name);
-            NodeObj *node = h->value;
+            Node *node = h->value;
             Table *atts = Seel_Get(node, K(m, "atts"));
             IoUtil_AddVec(m, pagePath, Table_Get(atts, K(m, "path")));
             r |= Route_CollectConfig(section, name, pagePath, atts);

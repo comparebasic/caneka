@@ -80,7 +80,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
         Dir_GatherFilterDir(m, pathS, sel);
         if(ctx->input.options != NULL && ctx->input.options->nvalues > 0){
-
+            
             filter = Span_Make(m);
             Iter it;
             Iter_Init(&it, ctx->input.options);

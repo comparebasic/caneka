@@ -21,3 +21,5 @@ StrVec *Path_WithoutExt(MemCh *m, StrVec *path);
 i32 Path_FlagIdx(StrVec *path, status flags);
 i32 Path_FlagLastIdx(StrVec *path, status flags);
 void Path_SwapSep(StrVec *path, Str *s, status flags);
+status Path_RmTrailingSlash(MemCh *m, StrVec *path);
+status Path_StrRmTrailingSlash(MemCh *m, Str *s);

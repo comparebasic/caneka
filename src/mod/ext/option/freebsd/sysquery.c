@@ -18,7 +18,7 @@ static addLinesToTable(MemCh *m, Curs *curs, Table *tbl){
     }
 }
 
-status SysQuery(MemCh *m, NodeObj *dest, word flags){
+status SysQuery(MemCh *m, Node *dest, word flags){
     Span *cmd = Span_Make(m);
     Iter it;
     Iter_Init(&it, cmd);

@@ -16,9 +16,9 @@ i32 main(int argc, char **argv){
 
     Caneka_InitBase(m);
     BuildCtx_ToSInit(m);
-    DebugStack_Push(NULL, 0);
 
     CliArgs *cli = CliArgs_Make(argc, argv);
+    Debug_Push(m, cli);
 
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
@@ -80,6 +80,7 @@ i32 main(int argc, char **argv){
 
     StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
     IoUtil_Annotate(m, prefix);
+
     ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
     ctx->input.buildDir->type.state |= STRVEC_NOSHRINK;
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
@@ -99,6 +100,12 @@ i32 main(int argc, char **argv){
     Table *options = BuildCtx_GenOptionsTable(ctx, CliArgs_Get(cli, optionsKey));
     ctx->input.options = options;
 
+    Iter it;
+    Iter_Init(&it, ctx->input.sources);
+    while((Iter_Next(&it) & END) == 0){
+        Path_StrRmTrailingSlash(m, it.value);
+    }
+
     if(CliArgs_Get(cli, quietKey)){
         BuildCtx_SetQuiet(TRUE);
     }else{
@@ -114,6 +121,5 @@ i32 main(int argc, char **argv){
 
     CliArgs_Free(cli);
 
-    DebugStack_Pop();
-    return 0;
+    Return(m, 0);
 }

@@ -242,7 +242,7 @@ void *JsonParser_GetRoot(Roebling *rbl){
 }
 
 Roebling *JsonParser_Make(MemCh *m, Cursor *curs, cls instTypeOf){
-    Debug_Stack(m, curs);
+    Debug_Push(m, curs);
 
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, JSON_START));

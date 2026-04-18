@@ -10,8 +10,8 @@ status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter){
 }
 
 status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
-    DebugStack_Push(NULL, ZERO);
     MemCh *m = ctx->m;
+    Debug_Push(m, ctx);
     void *args[7];
     Span *p = Span_Make(m);
 
@@ -49,14 +49,14 @@ status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
 
     ctx->input.inc = p;
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Table *genlist){
-    DebugStack_Push(NULL, ZERO);
-    void *args[7];
     MemCh *m = ctx->m;
+    Debug_Push(m, ctx);
+
+    void *args[7];
 
     StrVec *dest = StrVec_Copy(m, ctx->input.buildDir);
     args[0] = IoUtil_PathSep(m);
@@ -147,6 +147,5 @@ status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Table *genlist){
         BuildCtx_Log(ctx);
     }
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }

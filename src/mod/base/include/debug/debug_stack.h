@@ -3,7 +3,7 @@ extern i32 DEBUG_STACK_COLOR;
 
 #ifdef DEBUGSTACK
     #define Debug_Push(m, a) DebugStack_Push((m), (a), __func__, __FILE__, __LINE__)
-    #define Debug_SetRef(m, a) DebugStack_Push((m), (a), __func__, __FILE__, __LINE__)
+    #define Debug_SetRef(m, a) DebugStack_SetRef((m), (a), __func__, __FILE__, __LINE__)
     #define Return(m, x) DebugStack_Pop((m)); return (x)
 #else
     #define Debug_Push(m, a)  

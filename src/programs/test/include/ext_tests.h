@@ -4,7 +4,7 @@ status BinSegV_Tests(MemCh *m);
 status BinSegReversedV_Tests(MemCh *m);
 status Config_Tests(MemCh *m);
 status TaskStep_Tests(MemCh *m);
-status NodeObj_Tests(MemCh *m);
+status Node_Tests(MemCh *m);
 status StrVecSplit_Tests(MemCh *m);
 status Snip_Tests(MemCh *m);
 status SnipModify_Tests(MemCh *m);
@@ -25,7 +25,6 @@ status Match_Tests(MemCh *m);
 status MatchElastic_Tests(MemCh *m);
 status MatchKo_Tests(MemCh *m);
 status MatchReplace_Tests(MemCh *m);
-status FmtHtml_Tests(MemCh *m);
 status Cash_Tests(MemCh *m);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
@@ -140,14 +139,6 @@ static TestSet ExtTests[] = {
         "Roebling start and stop in the middle of recieving input tests.",
         FEATURE_COMPLETE,
     },
-    /*
-    {
-        "Relation Tests",
-        Relation_Tests,
-        "Tests for the relation structure.",
-        FEATURE_COMPLETE,
-    },
-    */
     {
         "Formats",
         NULL,
@@ -155,14 +146,8 @@ static TestSet ExtTests[] = {
         SECTION_LABEL,
     },
     {
-        "FmtHtml Tests",
-        FmtHtml_Tests,
-        "Format FMT -> HTML tests.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "NodeObj Tests",
-        NodeObj_Tests,
+        "Node Tests",
+        Node_Tests,
         "Node Object nested path tests.",
         FEATURE_COMPLETE,
     },
@@ -190,20 +175,18 @@ static TestSet ExtTests[] = {
         "Queue tests for iterating around a queue with additions and removals.",
         FEATURE_COMPLETE,
     },
-    /*
     {
         "Queue Criteria Tests",
         QueueCriteria_Tests,
         "Queue tests for multi-critiria items (time/file descriptor).",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Queue Scale Tests",
         QueueScale_Tests,
         "Queue testing adding and removing Queue items over time.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
-    */
     {
         "TaskStep Tests",
         TaskStep_Tests,

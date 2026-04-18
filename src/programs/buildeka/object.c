@@ -7,9 +7,8 @@ StrVec *BuildCtx_DestFromSrc(BuildCtx *ctx,
 }
 
 status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
-    DebugStack_SetRef(ctx->current.dest, ctx->current.dest->type.of);
     MemCh *m = ctx->m;
+    Debug_Push(m, ctx->current.dest);
 
     ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Link Object");
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
@@ -28,23 +27,21 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     ProcDets_Init(m, &pd);
     status re = SubProcess(m, cmd, &pd);
     if(re & ERROR){
-        DebugStack_SetRef(cmd, cmd->type.of);
+        Debug_SetRef(m, cmd);
         Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, 
             "Build error for adding object to lib", NULL);
-        DebugStack_Pop();
-        return ERROR;
+        Return(m, ERROR);
     }
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
-    DebugStack_Push(NULL, ZERO);
-    void *args[8];
-
-    status r = READY;
     MemCh *m = ctx->m;
+    Debug_Push(m, ctx->current.source);
+    void *args[8];
+    status r = READY;
+
     if(ctx->type.state & DEBUG){
         args[0] = name;
         args[1] = ctx->current.source;
@@ -53,8 +50,6 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
         args[4] = NULL;
         Out("^y.BuildObject name:@\n    source:@ ->\n    dest:@ sel:@^0\n", args);
     }
-
-    DebugStack_SetRef(ctx->current.source, ctx->current.source->type.of);
 
     if(ctx->current.binDest){
         ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Build Exec");
@@ -104,9 +99,8 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
             NULL
         };
         Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: @", args);
-        return ERROR;
+        Return(m, ERROR);
     }
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

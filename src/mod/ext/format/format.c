@@ -3,6 +3,5 @@
 
 status Format_Init(MemCh *m){
     status r = READY;
-    r |= FmtToHtml_Init(m);
     return r;
 }

@@ -9,9 +9,6 @@ enum ext_types {
     TYPE_AUTH_CRED,
     TYPE_AUTH_TARGET,
     TYPE_SALT,
-    TYPE_MESS,
-    TYPE_MESS_CLIMBER,
-    TYPE_NODE,
     TYPE_FETCHER,
     TYPE_FETCH_TARGET,
     TYPE_FETCH_FUNC,
@@ -168,6 +165,6 @@ enum ext_types {
     _CASH_END,
     _TYPE_EXT_END,
     TYPE_INSTANCE = 1 << 14,
-    TYPE_NODEOBJ,
+    TYPE_NODE,
     _EXT_OBJECT_END,
 };

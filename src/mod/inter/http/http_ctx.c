@@ -18,7 +18,7 @@ StrVec *HttpCtx_MakeEtag(MemCh *m, Str *path, struct timespec *mod){
     return v;
 }
 
-status HttpCtx_ParseBody(HttpCtx *ctx, NodeObj *config, Cursor *curs){
+status HttpCtx_ParseBody(HttpCtx *ctx, Node *config, Cursor *curs){
     MemCh *m = ctx->m;
     Single *sg = Table_Get(ctx->headersIt.p, K(m, "Content-Length"));
     if(sg != NULL){
@@ -31,7 +31,7 @@ status HttpCtx_ParseBody(HttpCtx *ctx, NodeObj *config, Cursor *curs){
             /* TODO: handle patterns that end with ANY without this hack */
             Cursor_Add(curs, S(m, " "));
 
-            NodeObj *binseg = Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET, NULL);
+            Node *binseg = Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET, NULL);
             StrVec *seelName = NULL;
             cls instTypeOf = TYPE_TABLE;
             if(binseg != NULL && (seelName = (StrVec *)Inst_Att(binseg, K(m, "seel")))

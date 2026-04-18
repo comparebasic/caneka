@@ -68,7 +68,8 @@ void *Inst_GetChild(Inst *inst, void *key){
 }
 
 void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
-    Debug_Push(inst->m, inst);
+    MemCh *m = inst->m;
+    Debug_Push(m, inst);
 
     void *args[5];
 

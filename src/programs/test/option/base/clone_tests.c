@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status Clone_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     Abstract *a = NULL;
     Abstract *b = NULL;
@@ -37,5 +37,5 @@ status Clone_Tests(MemCh *m){
     args[1] = b;
     r |= Test(Equals(a, b), "StrVec clone is equal, expected @ have @", args);
 
-    return r;
+    Return(m, r);
 }

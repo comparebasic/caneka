@@ -24,7 +24,9 @@ static void routeFuncTempl(Gen *gen, Buff *bf, Table *data){
 
 static void routeFuncFmt(Gen *gen, Buff *bf, Table *_data){
     MemCh *m = bf->m;
+    /*
     Fmt_ToHtml(bf, (Mess *)Ifc(m, gen->action, TYPE_MESS));
+    */
 }
 
 static void routeFuncFileDb(Gen *gen, Buff *bf, Table *data){
@@ -62,7 +64,7 @@ void Gen_Run(Gen *gen, Buff *bf, Table *data){
     gen->func(gen, bf, data);
 }
 
-void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
+void Gen_Setup(MemCh *m, Gen *gen, Node *config){
     if(gen->type.state & GEN_FORBIDDEN){
         gen->type.state |= (ERROR|NOOP);
     }else if(gen->type.state & GEN_STATIC){
@@ -124,7 +126,7 @@ void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
         
         Table *seel = NULL;
         if(config != NULL){
-            NodeObj *rbsConfig =
+            Node *rbsConfig =
                 Inst_ByPath(config, Sv(m, "binseg"), NULL, SPAN_OP_GET, NULL);
             StrVec *actionV = Inst_Att(rbsConfig, K(m, "action"));
             Span *actions = Config_Sequence(m, actionV);
@@ -149,7 +151,7 @@ void Gen_Setup(MemCh *m, Gen *gen, NodeObj *config){
     }
 }
 
-Gen *Gen_FromPath(MemCh *m, StrVec *path, NodeObj *config){
+Gen *Gen_FromPath(MemCh *m, StrVec *path, Node *config){
     StrVec *ext = IoUtil_GetExt(m, path);
     Gen *def = (Gen *)Table_Get(GenMimeTable, ext);
     if(def == NULL){

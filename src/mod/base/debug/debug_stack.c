@@ -8,7 +8,11 @@ void DebugStack_SetRef(MemCh *m, void *_a, const char *funcName, const char *fna
     entry->funcName = funcName;
     entry->fname = fname;
     entry->ref = a;
-    entry->typeOf = a->type.of;
+    if(a == NULL){
+        entry->typeOf = ZERO;
+    }else{
+        entry->typeOf = a->type.of;
+    }
     entry->line = lineno;
 }
 
@@ -28,7 +32,11 @@ void DebugStack_Push(MemCh *m, void *_a, const char *funcName, const char *fname
     entry->funcName = funcName;
     entry->fname = fname;
     entry->ref = a;
-    entry->typeOf = a->type.of;
+    if(a == NULL){
+        entry->typeOf = ZERO;
+    }else{
+        entry->typeOf = a->type.of;
+    }
     entry->line = lineno;
 }
 

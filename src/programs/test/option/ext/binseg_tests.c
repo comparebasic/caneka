@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status BinSeg_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
     
@@ -32,12 +32,11 @@ status BinSeg_Tests(MemCh *m){
     r |= Test(Equals(Span_Get(ctx->records, 1), two), 
         "second value is expected", NULL);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status BinSegCollection_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
     
@@ -78,7 +77,7 @@ status BinSegCollection_Tests(MemCh *m){
     StrVec_Add(v, Str_FromCstr(m, "four", ZERO));
     BinSegCtx_Send(ctx, v);
 
-    NodeObj *node = Inst_Make(m, TYPE_NODEOBJ); 
+    Node *node = Inst_Make(m, TYPE_NODE); 
     Seel_Set(node, K(m, "name"), Sv(m, "h1"));
     Table *atts = Table_Make(m);
     Table_Set(atts, K(m, "style"), K(m, "font-weight: bold"));
@@ -111,10 +110,10 @@ status BinSegCollection_Tests(MemCh *m){
     r |= Test(vP->type.of == TYPE_STRVEC && vP->total == v->total,
         "Ctx records contain a strvec that matches the expected length @", args);
 
-    NodeObj *expNode = Span_Get(ctx->records, 3);
+    Node *expNode = Span_Get(ctx->records, 3);
     args[0] = expNode;
     args[1] = NULL;
-    r |= Test(expNode->type.of == TYPE_NODEOBJ,
+    r |= Test(expNode->type.of == TYPE_NODE,
         "Ctx records contain a node obj @", args);
 
     args[0] = K(m, "font-weight: bold");
@@ -123,6 +122,5 @@ status BinSegCollection_Tests(MemCh *m){
     r |= Test(Equals(args[0], args[1]),
         "Ctx records contain a node with an atts property style that matches @, have @", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status Encoding_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
     
@@ -34,6 +34,5 @@ status Encoding_Tests(MemCh *m){
     r |= Test(Equals(s2, s), 
         "From hex equals original str,  expected &, have &", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

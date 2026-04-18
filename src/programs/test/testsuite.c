@@ -72,7 +72,7 @@ status Test(boolean condition, char *fmt, void *args[]){
 }
 
 status Test_Runner(MemCh *m, TestSuite *suite){
-    DebugStack_Push(suite->name, suite->name->type.of); 
+    Debug_Push(m, suite->name);
     m->level++;
     TestSet *set = suite->set;
     char *name = NULL;
@@ -123,7 +123,7 @@ status Test_Runner(MemCh *m, TestSuite *suite){
         Out("\n$\n\n", args);
 
         status r = READY;
-        DebugStack_SetRef(K(m, set->name), TYPE_STR);
+        Debug_SetRef(m, S(m, set->name));
         if(set->func != NULL){
             m->level++;
             MemCh *tm = MemCh_Make();
@@ -187,8 +187,7 @@ status Test_Runner(MemCh *m, TestSuite *suite){
 
     m->level--;
     MemCh_FreeTemp(m);
-    DebugStack_Pop();
-    return !suite->fail ? SUCCESS : ERROR;
+    Return(m,  !suite->fail ? SUCCESS : ERROR);
 }
 
 TestSuite *TestSuite_Make(MemCh *m, Str *name, TestSet *set){

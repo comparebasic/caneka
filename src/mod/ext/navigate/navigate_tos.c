@@ -2,8 +2,6 @@
 #include <caneka.h>
 
 static boolean _init = FALSE;
-static Str **nodeLabels = NULL;
-static Str **messLabels = NULL;
 static Str **stepLabels = NULL;
 static Str **taskLabels = NULL;
 static Str **queueLabels = NULL;
@@ -108,138 +106,6 @@ static status Comp_Print(Buff *bf, void *a, cls type, word flags){
     return Buff_AddBytes(bf, (byte *)">", 1);
 }
 
-static status Node_Print(Buff *bf, void *a, cls type, word flags){
-    Node *nd = (Node*)Ifc(bf->m, a, TYPE_NODE);
-    void *args[9];
-    args[0] = Type_StateVec(bf->m, nd->type.of, nd->type.state);
-    args[1] = Type_ToStr(bf->m, nd->typeOfChild);
-    args[2] = Type_ToStr(bf->m, nd->captureKey);
-    args[3] = (nd->parent != NULL ?
-                  Type_ToStr(bf->m, nd->parent->captureKey) : NULL);
-    args[4] = nd->atts;
-    args[5] = Type_ToStr(bf->m,
-                 (nd->value != NULL ? nd->value->type.of : _TYPE_ZERO));
-    args[6] = nd->value;
-    args[7] = Type_ToStr(bf->m,
-                 (nd->child != NULL ? nd->child->type.of : _TYPE_ZERO));
-    args[8] =  NULL;
-    if(flags & DEBUG){
-        return Fmt(bf, "N<$/$ captureKey($) parent(@) atts:& valueTypeOf:$/@ childTypeOf:$>", args);
-    }else{
-        args[4] = args[5];
-        args[5] = nd->value;
-        args[6] = NULL;
-        return Fmt(bf, "N<$/$ captureKey($) parent(@) value:$/@>", args);
-    }
-}
-
-static status Relation_Print(Buff *bf, void *a, cls type, word flags){
-    status r = READY;
-    Relation *rel = (Relation*)Ifc(bf->m, a, TYPE_RELATION);
-    void *args[] = {
-        I16_Wrapped(bf->m, rel->stride),
-        I32_Wrapped(bf->m, Relation_RowCount(rel)),
-        (rel->headers != NULL ?
-            Ptr_Wrapped(bf->m, rel->headers, TYPE_ARRAY): NULL),
-        NULL
-    };
-     Fmt(bf, "Rel<$x$ @ [", args);
-    if(rel->it.p->max_idx >= 0){
-        Buff_AddBytes(bf, (byte *)"\n", 1);
-    }
-
-    while((Relation_Next(rel) & END) == 0){
-        if(rel->type.state & RELATION_ROW_START){
-            Buff_AddBytes(bf, (byte *)"  ", 2);
-        }
-        ToS(bf, rel->it.value, 0, flags);
-        if(rel->type.state & RELATION_ROW_END){
-            Buff_AddBytes(bf, (byte *)",\n", 2);
-        }else{
-            Buff_AddBytes(bf, (byte *)",", 1);
-        }
-    }
-
-    return Buff_AddBytes(bf, (byte *)"]>", 2);
-}
-
-static status MessClimber_PrintItems(Buff *bf, MessClimber *climber, word flags){
-    i32 nested = ++climber->nested;
-    if(climber->current != NULL){
-        Abstract *current = climber->current;
-        Buff_AddBytes(bf, (byte *)"\n", 1);
-        while(nested--){
-            Buff_AddBytes(bf, (byte *)"  ", 2);
-        }
-        if(current->type.of == TYPE_NODE){
-            Node *nd = (Node *)climber->current;
-            ToS(bf, nd, 0, flags);
-            if(nd->typeOfChild == TYPE_SPAN){
-                Buff_AddBytes(bf, (byte *)"[", 1);
-                Iter it;
-                Iter_Init(&it, (Span *)nd->child);
-                while((Iter_Next(&it) & END) == 0){
-                    climber->current = it.value;
-                    MessClimber_PrintItems(bf, climber, flags);
-                }
-                Buff_AddBytes(bf, (byte *)"]", 1);
-            }else if(nd->typeOfChild == TYPE_NODE){
-                climber->current = nd->child;
-                Buff_AddBytes(bf, (byte *)"<", 2);
-                MessClimber_PrintItems(bf, climber, flags);
-                Buff_AddBytes(bf, (byte *)">", 1);
-            }else{
-                climber->current = nd->child;
-                MessClimber_PrintItems(bf, climber, flags);
-            }
-        }else if(current->type.of == TYPE_SPAN){
-            Iter it;
-            Iter_Init(&it, (Span *)current);
-            while((Iter_Next(&it) & END) == 0){
-                climber->current = it.value;
-                MessClimber_PrintItems(bf, climber, flags);
-            }
-        }else{
-            ToS(bf, current, 0, MORE|DEBUG);
-        }
-        climber->current = current;
-    }
-
-    climber->nested--;
-    return SUCCESS;
-}
-
-static status Mess_Print(Buff *bf, void *a, cls type, word flags){
-    Mess *ms = (Mess *)Ifc(bf->m, a, TYPE_MESS);
-    if((flags & (DEBUG|MORE)) == 0){
-        return ToStream_NotImpl(bf, a, type, flags);
-    }else{
-        void *args[] = {
-            Type_StateVec(bf->m, ms->type.of, ms->type.state),
-            NULL
-        };
-        Fmt(bf, "Mess<$", args);
-        if(flags & DEBUG){
-            void *args[] = {
-                ms->current,
-                ms->currentValue,
-                NULL
-            };
-            Fmt(bf, " current:$ value:@ [", args);
-        }else{
-            Buff_AddBytes(bf, (byte *)" [", 2);
-        }
-        MessClimber climber = {
-            .type = {TYPE_MESS_CLIMBER, 0},
-            .nested = 1,
-            .mess = ms,
-            .current = ms->root,
-        };
-        MessClimber_PrintItems(bf, &climber, flags|DEBUG);
-        return Buff_AddBytes(bf, (byte *)"\n]>", 3);
-    }
-}
-
 static status Step_Print(Buff *bf, void *a, cls type, word flags){
     Step *st = (Step *)Ifc(bf->m, a, TYPE_STEP);
     void *args[5];
@@ -299,13 +165,6 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
         r |= SUCCESS;
     }
     */
-    if(nodeLabels == NULL){
-        nodeLabels = (Str **)Arr_Make(m, 17);
-        nodeLabels[9] = Str_CstrRef(m, "FLAG_CHILDREN");
-        nodeLabels[10] = Str_CstrRef(m, "FLAG_CHILD");
-        Lookup_Add(m, lk, TYPE_NODE, (void *)nodeLabels);
-        r |= SUCCESS;
-    }
 
     if(stepLabels == NULL){
         stepLabels = (Str **)Arr_Make(m, 17);
@@ -357,9 +216,7 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
 
 status Navigate_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_MESS, (void *)Mess_Print);
-    r |= Lookup_Add(m, lk, TYPE_NODE, (void *)Node_Print);
-    r |= Lookup_Add(m, lk, TYPE_RELATION, (void *)Relation_Print);
+    r |= Navigate_InitLabels(m, ToSFlagLookup);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
     r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
@@ -367,12 +224,5 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STEP, (void *)Step_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE_CRIT, (void *)QueueCrit_Print);
-    return r;
-}
-
-status Navigate_ClsInit(MemCh *m){
-    status r = READY;
-    r |= Navigate_ToSInit(m, ToStreamLookup);
-    r |= Navigate_InitLabels(m, ToSFlagLookup);
     return r;
 }

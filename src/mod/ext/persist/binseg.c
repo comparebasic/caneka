@@ -322,7 +322,7 @@ static status BinSegCtx_buildKind(BinSegCtx *ctx, BinSegHeader *hdr, Str *ftr){
 status BinSegCtx_Load(BinSegCtx *ctx){
     void *args[4];
     MemCh *m = ctx->read->m;
-    Debug_Stack(m, ctx);
+    Debug_Push(m, ctx);
 
     ctx->type.state &= ~(SUCCESS|ERROR|NOOP|END);
     if(ctx->read == NULL){

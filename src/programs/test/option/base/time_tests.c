@@ -3,7 +3,7 @@
 #include <test_module.h>
 
 status Time_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
     void *args[5];
 
@@ -31,6 +31,5 @@ status Time_Tests(MemCh *m){
     r |= Test(at.type.state == APPROXTIME_MILLISEC && at.value == 50,
         "Time delta set to 50 millis @", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

@@ -5,16 +5,13 @@ static char *extTypeStrings[] = {
     "_TYPE_EXT_START",
     "TYPE_SEAL",
     "TYPE_NEST_SEL",
-    "TYPE_ITER2D",
     "TYPE_INST_ITER",
+    "TYPE_ITER2D",
     "TYPE_ITER_API",
     "TYPE_ITER_UPPER",
     "TYPE_AUTH_CRED",
     "TYPE_AUTH_TARGET",
     "TYPE_SALT",
-    "TYPE_MESS",
-    "TYPE_MESS_CLIMBER",
-    "TYPE_NODE",
     "TYPE_FETCHER",
     "TYPE_FETCH_TARGET",
     "TYPE_FETCH_FUNC",
@@ -163,13 +160,19 @@ static char *extTypeStrings[] = {
     "DOC_INCLUDE_PATH",
     "DOC_END",
     "_DOC_END",
+    "_CASH_START",
+    "CASH_TEXT",
+    "CASH_VAR",
+    "CASH_CLOSE",
+    "CASH_END",
+    "_CASH_END",
     "_TYPE_EXT_END",
     NULL
 };
 
 static char *extTypeInstectStrings[] = {
     "TYPE_INSTANCE",
-    "TYPE_NODEOBJ",
+    "TYPE_NODE",
     "_EXT_OBJECT_END",
     NULL
 };

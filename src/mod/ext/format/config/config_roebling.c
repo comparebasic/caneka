@@ -143,7 +143,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     i32 zero = 0;
     i32 currentIdx = 0;
     Inst *current = (Inst *)findRecentOf(it,
-        TYPE_NODEOBJ, NULL, &currentIdx);
+        TYPE_NODE, NULL, &currentIdx);
 
     i32 dataIdx = 0;
     Iter *data = (Iter *)findRecentOf(it,
@@ -159,7 +159,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }
 
     if(prev == NULL && it->p->nvalues == 0){
-        Inst *obj = Inst_Make(rbl->m, TYPE_NODEOBJ);
+        Inst *obj = Inst_Make(rbl->m, TYPE_NODE);
         Iter_Add(it, obj);
         current = obj;
     }
@@ -181,7 +181,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             removeObj(it, currentIdx+1);
             data = NULL;
         }
-        Inst *obj = Inst_Make(rbl->m, TYPE_NODEOBJ);
+        Inst *obj = Inst_Make(rbl->m, TYPE_NODE);
         if(token != NULL){
             Span_Set(obj, INST_PROPIDX_NAME, token);
             Inst_ByPath(current, token, obj, SPAN_OP_SET, NULL);
@@ -264,7 +264,7 @@ Inst *FormatConfig_GetRoot(Roebling *rbl){
 }
 
 Roebling *FormatConfig_Make(MemCh *m, Cursor *curs, void *source){
-    Debug_Stack(m, curs);
+    Debug_Push(m, curs);
 
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, CONFIG_START));

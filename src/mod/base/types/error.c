@@ -165,10 +165,14 @@ void Fatal(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
     Fmt(ErrStream, fmt, args);
 
     Fmt(ErrStream, "^0.\n", NULL);
-    if(m != NULL){
+    if(m == NULL){
         m = ErrStream->m;
+    }else{
     }
+    fflush(stdout);
     DebugStack_Print(m, ErrStream, MORE);
+    Buff_AddBytes(ErrStream, (byte *)"\nErrStream:\n", 12);
+    DebugStack_Print(ErrStream->m, ErrStream, MORE);
     exit(13);
 }
 

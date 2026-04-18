@@ -70,7 +70,8 @@ static status ServeTcp_OpenTcp(Step *st, Task *tsk){
 }
 
 static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
-    Debug_Push(tsk->m, st);
+    MemCh *m = tsk->m;
+    Debug_Push(m, st);
 
     status r = READY;
     st->type.state &= ~SUCCESS;
