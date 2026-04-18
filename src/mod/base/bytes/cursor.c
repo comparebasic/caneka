@@ -6,14 +6,14 @@ static status Cursor_SetStr(Cursor *curs){
     Debug_Push(m, curs);
 
     Iter_GetByIdx(&curs->it, curs->it.idx);
-    if((curs->it.type.state & NOOP) == 0){
+    if(curs->it.type.state & SUCCESS){
         Str *s = (Str *)curs->it.value;
         if(s != NULL){
             curs->ptr = s->bytes;
             curs->end = s->bytes+(s->length-1);
             curs->type.state |= PROCESSING;
 
-            Return(m, ZERO);
+            Return(m, SUCCESS);
         }else{
             curs->ptr = NULL;
             curs->end = NULL;
@@ -343,7 +343,7 @@ status Cursor_NextByte(Cursor *curs){
         }
     }else if(curs->ptr < curs->end){
         curs->ptr++;
-        curs->type.state &= ~NOOP;
+        curs->type.state |= SUCCESS;
     }else{
         curs->type.state |= NOOP;
     }
@@ -366,8 +366,9 @@ status Cursor_AddVec(Cursor *curs, StrVec *v){
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
         Cursor_Add(curs, s);
+        r |= SUCCESS;
     }
-    return ZERO;
+    return r;
 }
 
 status Cursor_Add(Cursor *curs, Str *s){

@@ -39,7 +39,7 @@ status Path_AddSlash(MemCh *m, StrVec *path){
 status Path_StrRmTrailingSlash(MemCh *m, Str *s){
     if(s->bytes[s->length-1] == '/'){
         Str_Decr(s, 1);
-        return DONE;
+        return SUCCESS;
     }
     return ZERO;
 }
@@ -47,7 +47,7 @@ status Path_StrRmTrailingSlash(MemCh *m, Str *s){
 status Path_RmTrailingSlash(MemCh *m, StrVec *path){
     Str *s = Span_Get(path->p, path->p->max_idx);
     if(s != NULL){
-        if(Path_StrRmTrailingSlash(m, s) & DONE){
+        if(Path_StrRmTrailingSlash(m, s) & SUCCESS){
             path->total--;
         }
     }
