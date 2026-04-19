@@ -40,7 +40,8 @@ static status InetExample_read(Step *st, Task *tsk){
 }
 
 static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source){
-    DebugStack_Push(tsk, tsk->type.of);
+    Debug_Push(m, tsk);
+
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Single *fdw = (Single *)Ifc(m, arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
@@ -54,12 +55,12 @@ static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source)
 
     Task_AddDataStep(tsk, InetExample_read, Sv(m, "Hidy!"), bf, NULL, ZERO);
 
-    DebugStack_Pop();
-    return SUCCESS;
+    Return(m, SUCCESS);
 }
 
 status Inet_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     status r = READY;
     void *args[5];
 
@@ -106,6 +107,5 @@ status Inet_Tests(MemCh *m){
 
     /* add spawn tasks to spawn processes to hit the network server */
     
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

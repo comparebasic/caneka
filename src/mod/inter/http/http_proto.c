@@ -10,7 +10,8 @@ status HttpProto_AddBuff(ProtoCtx *proto, Buff *bf){
 }
 
 status HttpProto_PrepareResponse(ProtoCtx *proto, Task *tsk){
-    DebugStack_Push(NULL, ZERO);
+    MemCh *m = tsk->m;
+    Debug_Push(m, proto);
 
     Buff *bf = Span_Get(proto->outSpan, 0);
     HttpCtx_WriteHeaders(bf, (HttpCtx *)proto->ctx);
@@ -19,8 +20,7 @@ status HttpProto_PrepareResponse(ProtoCtx *proto, Task *tsk){
 
     TcpTask_ExpectSend(NULL, tsk);
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 ProtoCtx *HttpProto_Make(MemCh *m){

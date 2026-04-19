@@ -347,7 +347,6 @@ Roebling *Templ_RoeblingMake(MemCh *m, Cursor *curs, void *source){
 
     rbl->capture = Capture;
     Inst *inst = Inst_Make(m, TYPE_NODE);
-    mess->tokenizer = Lookup_Make(m, _TEMPL_START);
     rbl->dest = (Abstract *)inst;
     rbl->source = source;
     return rbl;

@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-static NodeObj *Route_addConfigData(Route *rt, StrVec *token){
+static Node *Route_addConfigData(Route *rt, StrVec *token){
     MemCh *m = rt->m;
 
     /*
@@ -12,7 +12,7 @@ static NodeObj *Route_addConfigData(Route *rt, StrVec *token){
     Str *pathS = StrVec_StrCombo(m,
         path, Str_FromCstr(m, ".config", ZERO));
 
-    NodeObj *config = Config_FromPath(m, pathS);
+    Node *config = Config_FromPath(m, pathS);
     if(config != NULL && config->nvalues > 0){
         Table *tbl = Seel_Get(rt, S(m, "data"));
         Table_SetByCstr(tbl, "config", config);
@@ -148,7 +148,8 @@ void Route_SetGenEtag(MemCh *m, Gen *gen, struct timespec *mod, Table *headers){
 }
 
 void Route_Prepare(Route *rt){
-    DebugStack_Push(rt, rt->type.of);
+    MemCh *m = rt->m;
+    Debug_Push(m, rt);
     /*
     MemCh *m = rt->m;
     void *args[3];
@@ -180,13 +181,12 @@ void Route_Prepare(Route *rt){
         Span_Set(rt, GEN_PROPIDX_ACTION, path);
     }
 
-    NodeObj *config = Route_addConfigData(ctx, rt, token);
+    Node *config = Route_addConfigData(ctx, rt, token);
 
     */
     /* setup Gen(s) */
 
-    DebugStack_Pop();
-    return;
+    Debug_Pop(m);
 }
 
 Route *Route_Get(Route *root, StrVec *path){
@@ -194,7 +194,8 @@ Route *Route_Get(Route *root, StrVec *path){
 }
 
 void Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){
-    DebugStack_Push(rt, rt->type.of);
+    MemCh *m = rt->m;
+    Debug_Push(m, rt);
     /*
     StrVec *path = (StrVec *)Seel_Get(rt, S(bf->m, "file"));
     MemCh *m = bf->m;
@@ -223,7 +224,7 @@ void Route_Handle(Route *rt, Span *dest, Table *data, HttpCtx *ctx){
     status r = func(bf, rt, data, ctx);
     */
 
-    DebugStack_Pop();
+    Debug_Pop(m);
 }
 
 void Route_Init(MemCh *m){

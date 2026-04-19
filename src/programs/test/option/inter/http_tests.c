@@ -3,7 +3,8 @@
 #include <test_module.h>
 
 status Http_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     void *args[5];
     status r = READY;
 
@@ -41,12 +42,12 @@ status Http_Tests(MemCh *m){
     r |= Test(Equals(Table_Get(ctx->headersIt.p, args[0]), args[1]),
         "Header is as expected for $, $", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status HttpQuery_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     void *args[5];
     status r = READY;
 
@@ -74,7 +75,7 @@ status HttpQuery_Tests(MemCh *m){
 
     r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
-    NodeObj *config = Inst_Make(m, TYPE_NODEOBJ);
+    Node *config = Inst_Make(m, TYPE_NODE);
     HttpCtx_ParseBody(ctx, config, curs);
 
     args[0] = K(m, "POST");
@@ -115,6 +116,5 @@ status HttpQuery_Tests(MemCh *m){
     r |= Test(Equals(args[0],args[1]), 
         "HttpCtx body#first-name is expected @, have @", args); 
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

@@ -220,7 +220,8 @@ static Table *getGenericData(MemCh *m, Route *rt){
 }
 
 status WwwRoute_Tests(MemCh *m){
-    DebugStack_Push(NULL, ZERO);
+    Debug_Push(m, NULL);
+
     void *args[5];
     status r = READY;
     /*
@@ -261,12 +262,12 @@ status WwwRoute_Tests(MemCh *m){
         "profile stat page is mime type templ, have @", args);
 
     */
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status WwwRouteTempl_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     void *args[5];
     status r = READY;
     /*
@@ -414,12 +415,12 @@ status WwwRouteTempl_Tests(MemCh *m){
         "Expected mem details in template $", args);
 
     */
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status WwwRouteFmt_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     void *args[5];
     status r = READY;
     /*
@@ -466,8 +467,7 @@ status WwwRouteFmt_Tests(MemCh *m){
         "Expected fmt value $", args);
 
     */
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 static boolean _fired = FALSE;
@@ -478,7 +478,8 @@ static status fakeStep(Step *st, Task *tsk){
 }
 
 status WwwPath_Tests(MemCh *m){
-    DebugStack_Push(NULL, ZERO);
+    Debug_Push(NULL, ZERO);
+
     void *args[6];
     status r = READY;
     /*
@@ -528,12 +529,12 @@ status WwwPath_Tests(MemCh *m){
         "Route has expected file expected @, found @", args);
 
     */
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status WwwRouteMime_Tests(MemCh *m){
-    DebugStack_Push(NULL, ZERO);
+    Debug_Push(m, NULL);
+
     void *args[6];
     status r = READY;
     /*
@@ -565,12 +566,11 @@ status WwwRouteMime_Tests(MemCh *m){
         "Content from Buff piped from route matches reading file directly", NULL);
 
     */
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status WwwRouteRbs_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     void *args[5];
     status r = READY;
     /*
@@ -599,7 +599,7 @@ status WwwRouteRbs_Tests(MemCh *m){
 
     r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
-    NodeObj *config = Inst_Make(m, TYPE_NODEOBJ);
+    Node *config = Inst_Make(m, TYPE_NODEOBJ);
     HttpCtx_ParseBody(ctx, config, curs);
 
     StrVec *rbsPath = IoAbsPath(m, "fixtures/test/pages/forms");
@@ -654,6 +654,5 @@ status WwwRouteRbs_Tests(MemCh *m){
     BinSegCtx_Close(bsCtx);
     */
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

@@ -262,7 +262,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 }
 
 Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
-    DebugStack_Push(curs, curs->type.of);
+    Debug_Push(m, curs);
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, DOC_START));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
@@ -279,6 +279,5 @@ Roebling *Doc_MakeRoebling(MemCh *m, Cursor *curs, void *source){
     rbl->source = source;
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
 
-    DebugStack_Pop();
-    return rbl;
+    Return(m, rbl);
 }

@@ -72,7 +72,7 @@ status Doc_To(Buff *bf, DocComp *comp, ToSFunc func){
 
     StrVec *name = Seel_Get(comp, K(m, "name"));
 
-    NodeObj *page = Seel_Get(comp, K(m, "page"));
+    Node *page = Seel_Get(comp, K(m, "page"));
 
     Abstract *header = Inst_Att(page, K(m, "header"));
     if(header != NULL){

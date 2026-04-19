@@ -6,7 +6,9 @@ static StrVec *footerPath = NULL;
 static Span *_sepSpan = NULL;
 
 static status WebServer_logAndClose(Step *_st, Task *tsk){
-    DebugStack_Push(_st, _st->type.of);
+    MemCh *m = tsk->m;
+    Debug_Push(m, _st);
+
     ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
     HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
 
@@ -34,14 +36,13 @@ static status WebServer_logAndClose(Step *_st, Task *tsk){
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     close(pfd->fd);
 
-    DebugStack_Pop();
-    return SUCCESS;
+    Return(m, SUCCESS);
 }
 
 static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *source){
-    DebugStack_Push(tsk, tsk->type.of);
-    
     MemCh *m = tsk->m; 
+    Debug_Push(m, tsk);
+    
     ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
     TcpCtx *tcp = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
     HttpCtx *ctx = (HttpCtx *)Ifc(tsk->m, proto->ctx, TYPE_HTTP_CTX);
@@ -65,12 +66,12 @@ static status WebServer_errorPopulate(MemCh *_m, Task *tsk, void *arg, void *sou
     HttpTask_InitResponse(tsk, NULL, source);
     Task_AddStep(tsk, WebServer_GatherPage, NULL, NULL, ZERO);
 
-    DebugStack_Pop();
-    return SUCCESS;
+    Return(m, SUCCESS);
 }
 
 static status WebServer_populate(MemCh *m, Task *tsk, void *arg, void *source){
-    DebugStack_Push(tsk, tsk->type.of);
+    Debug_Push(m, tsk);
+
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Single *fdw = (Single *)Ifc(tsk->m, arg, TYPE_WRAPPED_I32);
     pfd->fd = fdw->val.i;
@@ -79,8 +80,7 @@ static status WebServer_populate(MemCh *m, Task *tsk, void *arg, void *source){
     Task_AddStep(tsk, WebServer_GatherPage, NULL, NULL, ZERO);
     HttpTask_AddRecieve(tsk, NULL, NULL);
 
-    DebugStack_Pop();
-    return SUCCESS;
+    Return(m, SUCCESS);
 }
 
 static status setErrorHandler(MemCh *m, Task *tsk){
@@ -98,7 +98,8 @@ static TcpCtx *tcpCtx_Make(MemCh *m, i32 port, quad ip4, util ip6[2]){
 }
 
 status WebServer_GatherPage(Step *st, Task *tsk){
-    DebugStack_Push(st, st->type.of);
+    MemCh *m = tsk->m;
+    Debug_Push(m, st);
     /*
     void *args[5];
 
@@ -135,8 +136,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
                 Task_AddStep(tsk, WebServer_ServePage, NULL, NULL, ZERO);
 
                 st->type.state |= (MORE|SUCCESS);
-                DebugStack_Pop();
-                return st->type.state;
+                Return(m, st->type.state);
             }
         }
 
@@ -153,8 +153,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, NULL, NULL, ZERO);
 
         st->type.state |= (MORE|SUCCESS);
-        DebugStack_Pop();
-        return st->type.state;
+        Return(m, st->type.state);
     }
 
     StrVec *etag = Table_Get(ctx->headersIt.p, K(m, "If-None-Match"));
@@ -164,8 +163,7 @@ status WebServer_GatherPage(Step *st, Task *tsk){
         Task_AddDataStep(tsk, TcpTask_WriteStep, NULL, NULL, NULL, ZERO);
 
         st->type.state |= (MORE|SUCCESS);
-        DebugStack_Pop();
-        return st->type.state;
+        Return(m, st->type.state);
     }
 
     Table *routeData = Seel_Get(ctx->route, K(m, "data"));
@@ -188,8 +186,8 @@ status WebServer_GatherPage(Step *st, Task *tsk){
 }
 
 status WebServer_ServePage(Step *st, Task *tsk){
-    DebugStack_Push(st, st->type.of);
     MemCh *m = tsk->m;
+    Debug_Push(m, st);
     status r = READY;
     /*
 
@@ -259,8 +257,7 @@ status WebServer_ServePage(Step *st, Task *tsk){
 
     st->type.state |= (MORE|SUCCESS);
     */
-    DebugStack_Pop();
-    return st->type.state;
+    Return(m, st->type.state);
 }
 
 status WebServer_SetConfig(Task *tsk, StrVec *path, Node *config, Table *handlers){
@@ -300,7 +297,6 @@ status WebServer_SetConfig(Task *tsk, StrVec *path, Node *config, Table *handler
 }
 
 Task *WebServer_Make(i32 port, quad ip4, util *ip6){
-    DebugStack_Push(NULL, 0);
     status r = READY;
 
     Task *tsk = ServeTcp_Make(NULL);
@@ -309,6 +305,5 @@ Task *WebServer_Make(i32 port, quad ip4, util *ip6){
     setErrorHandler(tsk->m, tsk);
     */
 
-    DebugStack_Pop();
     return tsk;
 }

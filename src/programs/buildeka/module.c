@@ -224,7 +224,11 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     }
 
-    BuildCtx_GenIncFlags(ctx, modlist, NULL);
+    void *ar[] = {modlist, sel->dest, NULL};
+    Out("^p.@ for @^0\n", ar);
+    exit(1);
+
+    BuildCtx_GenIncFlags(ctx, modlist, Table_Get(sel->meta, K(m, "api")), NULL);
 
     StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
     if(libTarget){

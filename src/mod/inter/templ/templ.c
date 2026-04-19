@@ -15,17 +15,17 @@ Templ *Templ_ForFile(MemCh *m, StrVec *path){
 }
 
 status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
+    MemCh *m = templ->m;
+
     status r = READY;
-    DebugStack_Push(NULL, ZERO);
     
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= SUCCESS;
-        DebugStack_Pop();
-        return r;
+        Return(m, r);
     }
 
     Abstract *item = Iter_Get(&templ->content);
-    DebugStack_SetRef(item, item->type.of);
+    Debug_Push(m, item);
 
     Abstract *prev = NULL;
     while(prev != item && (
@@ -56,7 +56,7 @@ status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
         templ->m->level++;
     }else if(item->type.of == TYPE_FETCHER && item->type.state & FETCHER_VAR){
         Fetcher *fch = (Fetcher *)item;
-        DebugStack_SetRef(fch, fch->type.of);
+        Debug_SetRef(m, fch);
         Abstract *value = Fetch(templ->m, fch, data, NULL);
         if(value == NULL){
             void *args[] = {
@@ -66,8 +66,7 @@ status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
             };
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error finding value using @ in data @\n",args);
-            DebugStack_Pop();
-            return (r|ERROR);
+            Return(m, (r|ERROR));
         }
         templ->m->level--;
 
@@ -88,14 +87,16 @@ status Templ_ToSCycle(Templ *templ, Buff *bf, void *source){
         r |= NOOP;
     }
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
+    MemCh *m = templ->m;
+
     templ->type.state &= ~SUCCESS;
     templ->m->level++; 
-    DebugStack_Push(templ, templ->type.of);
+    Debug_Push(m, templ);
+
     status r = READY;
     i16 g = 0;
 
@@ -110,8 +111,7 @@ status Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
     }
 
     if(Templ_Prepare(templ) & ERROR){
-        DebugStack_Pop();
-        return (r|ERROR);
+        Return(m, (r|ERROR));
     }
 
     if(data != NULL){
@@ -122,11 +122,10 @@ status Templ_ToS(Templ *templ, Buff *bf, void *data, void *source){
         (templ->type.state & OUTCOME_FLAGS) == 0){
         Guard_Incr(templ->m, &g, 1024, FUNCNAME, FILENAME, LINENUMBER);
     }
-    DebugStack_Pop();
     templ->m->level--; 
     Templ_Reset(templ);
     templ->type.state |= SUCCESS;
-    return r;
+    Return(m, r);
 }
 
 status Templ_Reset(Templ *templ){

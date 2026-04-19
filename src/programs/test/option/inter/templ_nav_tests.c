@@ -153,7 +153,8 @@ static WwwNav *navMake(MemCh *m, Table *coordTbl){
 
 
 status TemplNav_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     void *args[5];
     status r = READY;
 
@@ -169,8 +170,7 @@ status TemplNav_Tests(MemCh *m){
         NULL);
 
     if(r & ERROR){
-        DebugStack_Pop();
-        return r;
+        Return(m, r);
     }
 
     Table *coordTbl = Table_Make(m);
@@ -187,7 +187,6 @@ status TemplNav_Tests(MemCh *m){
     Table_Set(data, S(m, "page"), page);
     Buff *bf = Buff_Make(m, ZERO);
 
-    DebugStack_SetRef(bf->v, bf->v->type.of);
     status result = Templ_Prepare(templ);
 
     i64 total = Templ_ToS(templ, bf, data, NULL);
@@ -200,12 +199,11 @@ status TemplNav_Tests(MemCh *m){
     r |= Test(Equals(bf->v, expected), 
         "Nav template for two items is as expected, have:$", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status TemplNavNested_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     void *args[5];
     status r = READY;
 
@@ -221,8 +219,7 @@ status TemplNavNested_Tests(MemCh *m){
         NULL);
 
     if(r & ERROR){
-        DebugStack_Pop();
-        return r;
+        Return(m, r);
     }
 
     Table *coordTbl = Table_Make(m);
@@ -239,7 +236,7 @@ status TemplNavNested_Tests(MemCh *m){
     Table_Set(data, S(m, "page"), page);
     Buff *bf = Buff_Make(m, ZERO);
 
-    DebugStack_SetRef(bf->v, bf->v->type.of);
+    Debug_SetRef(m, bf);
     status result = Templ_Prepare(templ);
 
     status re = Templ_ToS(templ, bf, data, NULL);
@@ -255,7 +252,6 @@ status TemplNavNested_Tests(MemCh *m){
     args[3] = NULL;
     r |= Test(Equals(expected, bf->v), "Nested Nav for focus @ is expected, have $", args);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 

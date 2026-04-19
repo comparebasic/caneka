@@ -2,9 +2,10 @@
 #include <caneka.h>
 
 status Templ_HandleJump(Templ *templ){
-    status r = READY;
-    DebugStack_Push(templ, templ->type.of);
     MemCh *m = templ->m;
+    Debug_Push(m, templ);
+
+    status r = READY;
 
     Fetcher *fch = (Fetcher *)Iter_Get(&templ->content);
     Abstract *data = Iter_Get(&templ->data);
@@ -192,7 +193,7 @@ paths:
     }
 
     Abstract *debug = Iter_Get(&templ->data);
-    DebugStack_SetRef(debug, debug->type.of);
+    Debug_SetRef(m, debug);
 
     if(idx != templ->content.idx){
         if(templ->type.state & DEBUG){
@@ -208,12 +209,10 @@ paths:
             Out("^c.Jump to @ \\@$^0\n", args);
         }
         Iter_GetByIdx(&templ->content, idx);
-        DebugStack_Pop();
-        return PROCESSING;
+        Return(m, PROCESSING);
     }
 
-    DebugStack_Pop();
-    return ZERO;
+    Return(m, ZERO);
 }
 
 Jumps *Jumps_Make(MemCh *m, i32 idx){

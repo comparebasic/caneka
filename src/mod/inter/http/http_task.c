@@ -2,7 +2,8 @@
 #include <caneka.h>
 
 status HttpTask_InitResponse(Task *tsk, void *arg, void *source){
-    DebugStack_Push(tsk, tsk->type.of);
+    MemCh *m = tsk->m;
+    Debug_Push(m, tsk);
     status r = READY;
 
     ProtoCtx *proto = HttpProto_Make(tsk->m);
@@ -18,12 +19,13 @@ status HttpTask_InitResponse(Task *tsk, void *arg, void *source){
     tsk->source = (Abstract *)tcp;
 
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }
 
 status HttpTask_AddRecieve(Task *tsk, void *arg, void *source){
-    DebugStack_Push(tsk, tsk->type.of);
+    MemCh *m = tsk->m;
+    Debug_Push(m, tsk);
+
     ProtoCtx *proto = (ProtoCtx *)Ifc(tsk->m, tsk->data, TYPE_PROTO_CTX);
     Cursor *curs = Cursor_Make(tsk->m, proto->in->v);
     Roebling *rbl = HttpRbl_Make(tsk->m, curs, proto);
@@ -31,6 +33,5 @@ status HttpTask_AddRecieve(Task *tsk, void *arg, void *source){
 
     TcpTask_ExpectRecv(NULL, tsk);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

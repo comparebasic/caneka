@@ -65,10 +65,10 @@ void Gen_Run(Gen *gen, Buff *bf, Table *data){
 }
 
 void Gen_Setup(MemCh *m, Gen *gen, Node *config){
+    /*
     if(gen->type.state & GEN_FORBIDDEN){
         gen->type.state |= (ERROR|NOOP);
     }else if(gen->type.state & GEN_STATIC){
-        /* no action */
         gen->action = (Abstract *)Buff_Make(m, BUFF_UNBUFFERED);
     }else if(gen->type.state & GEN_FMT){
         StrVec *content = File_ToVec(m, StrVec_Str(m, gen->path));
@@ -82,7 +82,6 @@ void Gen_Setup(MemCh *m, Gen *gen, Node *config){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing template for $", args);
             gen->type.state |= ERROR;
-            DebugStack_Pop();
             return;
         }
 
@@ -149,6 +148,7 @@ void Gen_Setup(MemCh *m, Gen *gen, Node *config){
         gen->action = (Abstract *)ctx;
         gen->type.state |= PROCESSING;
     }
+    */
 }
 
 Gen *Gen_FromPath(MemCh *m, StrVec *path, Node *config){

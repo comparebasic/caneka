@@ -69,7 +69,8 @@ static WwwPage *getPage(MemCh *m){
 }
 
 status WwwNav_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     status r = READY;
     void *args[5];
 
@@ -118,8 +119,7 @@ status WwwNav_Tests(MemCh *m){
             NULL);
 
         if(r & ERROR){
-            DebugStack_Pop();
-            return r;
+            Return(m, r);
         }
 
         Templ *templ = (Templ *)Templ_Make(m, ctx->it.p);
@@ -174,6 +174,5 @@ status WwwNav_Tests(MemCh *m){
 
     r |= ERROR;
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

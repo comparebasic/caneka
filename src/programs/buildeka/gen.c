@@ -52,7 +52,7 @@ status BuildCtx_GenAllIncSpan(BuildCtx *ctx){
     Return(m, ZERO);
 }
 
-status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Table *genlist){
+status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Span *apis, Table *genlist){
     MemCh *m = ctx->m;
     Debug_Push(m, ctx);
 
@@ -90,6 +90,18 @@ status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Table *genlist){
         args[1] = key;
         args[2] = NULL;
         Fmt(bf, "\n/* module $ */\n#include <$_module.h>\n", args);
+    }
+
+    if(apis && apis->nvalues){
+        Iter_Init(&it, apis);
+        while((Iter_Prev(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                args[0] = h->key;
+                args[1] = NULL;
+                Fmt(bf, "\n/* api */\n#include <$_api.h>\n", args);
+            }
+        }
     }
     File_Close(bf);
 

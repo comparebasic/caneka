@@ -157,9 +157,9 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
             if(Equals(tag, K(m, "option"))){
                 Hashed *h = Table_GetHashed(ctx->input.options, label);
-                if(h != NULL && Equals(h->value, value)){
+
+                if(h != NULL && !Equals(h->value, value)){
                     Table_SetInTable(sel->meta, S(m, "api"), label, value);
-                    dep = value;
                 }else{
                     continue;
                 }

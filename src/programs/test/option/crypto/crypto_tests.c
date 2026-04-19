@@ -3,7 +3,8 @@
 #include <test_module.h>
 
 status Crypto_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
+
     status r = READY;
     void *args[5];
 
@@ -148,6 +149,5 @@ status Crypto_Tests(MemCh *m){
     r |= Test(valid & SUCCESS, "Message validates: @ -> sig:@", args);
 
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

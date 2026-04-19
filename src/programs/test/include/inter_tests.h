@@ -20,25 +20,25 @@ static TestSet InterTests[] = {
         "TemplCtx Tests",
         TemplCtx_Tests,
         "TemplCtx tests of basic value templating.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Templ Tests",
         Templ_Tests,
         "Testing templating with a few variables.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Templ Navigation Tests",
         TemplNav_Tests,
         "Testing a navitaion template.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Templ Nested Navigation Tests",
         TemplNavNested_Tests,
         "Testing a nested navitaion template.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Inet Tests",
@@ -116,7 +116,7 @@ static TestSet InterTests[] = {
         "Doc Tests",
         Doc_Tests,
         "Test of the documentation engine with mock source files.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         NULL,

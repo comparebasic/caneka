@@ -2,7 +2,9 @@
 #include <caneka.h>
 
 static i32 Templ_FindStart(Templ *templ, word flags){
-    DebugStack_Push(templ, templ->type.of);
+    MemCh *m = templ->m;
+    Debug_Push(m, templ);
+
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
@@ -35,18 +37,18 @@ static i32 Templ_FindStart(Templ *templ, word flags){
                 }
                 latest = prev->type.state;
                 if(targetCount == 0){
-                    DebugStack_Pop();
-                    return it.idx;
+                    Return(m, it.idx);
                 }
             }
         }
     }
-    DebugStack_Pop();
-    return -1;
+    Return(m, -1);
 }
 
 static i32 Templ_FindNext(Templ *templ, status flags){
-    DebugStack_Push(templ, templ->type.of);
+    MemCh *m = templ->m;
+    Debug_Push(m, templ);
+
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
@@ -56,17 +58,17 @@ static i32 Templ_FindNext(Templ *templ, status flags){
             if(a->type.state & (FETCHER_VAR|FETCHER_TEMPL)){
                 continue;
             }else if(a->type.state & flags){
-                DebugStack_Pop();
-                return it.idx; 
+                Return(m, it.idx); 
             }
         }
     }
-    DebugStack_Pop();
-    return -1;
+    Return(m, -1);
 }
 
 static i32 Templ_FindPrev(Templ *templ, status flags){
-    DebugStack_Push(templ, templ->type.of);
+    MemCh *m = templ->m;
+    Debug_Push(m, templ);
+
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
     while((Iter_Prev(&it) & END) == 0){
@@ -74,17 +76,17 @@ static i32 Templ_FindPrev(Templ *templ, status flags){
         if(a->type.of == TYPE_FETCHER){
             Fetcher *fch = (Fetcher *)a;
             if(fch->type.state & flags){
-                DebugStack_Pop();
-                return it.idx; 
+                Return(m, it.idx); 
             }
         }
     }
-    DebugStack_Pop();
-    return -1;
+    Return(m, -1);
 }
 
 static i32 Templ_FindEnd(Templ *templ){
-    DebugStack_Push(templ, templ->type.of);
+    MemCh *m = templ->m;
+    Debug_Push(m, templ);
+
     Iter it;
     memcpy(&it, &templ->content, sizeof(Iter));
 
@@ -105,13 +107,11 @@ static i32 Templ_FindEnd(Templ *templ){
                 }
                 latest = a->type.state;
             }else if((a->type.state & FETCHER_END) && --targetCount == 0){
-                DebugStack_Pop();
-                return it.idx; 
+                Return(m, it.idx); 
             }
         }
     }
-    DebugStack_Pop();
-    return -1;
+    Return(m, -1);
 }
 
 i32 Templ_JumpLevel(Templ *templ, i32 idx, i32 flagIdx){
@@ -189,13 +189,14 @@ status Templ_AddJump(Templ *templ,
 }
 
 status Templ_PrepareCycle(Templ *templ){
-    DebugStack_Push(templ, templ->type.of);
-    status r = READY;
+    
     MemCh *m = templ->m;
+    Debug_Push(m, templ);
+
+    status r = READY;
     if(Iter_Next(&templ->content) & END){
         templ->type.state |= PROCESSING;
-        DebugStack_Pop();
-        return templ->type.state;
+        Return(m, templ->type.state);
     }
 
     Abstract *item = Iter_Get(&templ->content);
@@ -317,17 +318,16 @@ status Templ_PrepareCycle(Templ *templ){
                 args);
 
             templ->type.state |= ERROR;
-            DebugStack_Pop();
-            return templ->type.state;
+            Return(m, templ->type.state);
         }
     }
 
-    DebugStack_Pop();
-    return templ->type.state;
+    Return(m, templ->type.state);
 }
 
 status Templ_Prepare(Templ *templ){
-    DebugStack_Push(templ, templ->type.of);
+    MemCh *m = templ->m;
+    Debug_Push(m, templ);
 
     if((templ->type.state & PROCESSING) == 0){
         i16 g = 0;
@@ -342,12 +342,9 @@ status Templ_Prepare(Templ *templ){
             };
             Error(templ->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error preparing Templ, &", args);
-            DebugStack_Pop();
-            return ERROR;
+            Return(m, ERROR);
         }
-        DebugStack_Pop();
-        return (templ->type.state|SUCCESS);
+        Return(m, (templ->type.state|SUCCESS));
     }
-    DebugStack_Pop();
-    return NOOP;
+    Return(m, NOOP);
 }

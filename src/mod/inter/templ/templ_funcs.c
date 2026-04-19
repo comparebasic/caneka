@@ -34,7 +34,6 @@ void Templ_IterNext(Templ *templ, TemplFunc *tfunc){
             " Iter_Get(@) instead^0\n", 
             args);
         templ->type.state |= ERROR;
-        DebugStack_Pop();
         return;
     }
 

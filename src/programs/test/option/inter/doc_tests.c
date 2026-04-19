@@ -32,10 +32,9 @@ static Span *gather(MemCh *m){
 }
 
 status Doc_Tests(MemCh *m){
-    DebugStack_Push(NULL, 0);
+    Debug_Push(m, NULL);
     status r = READY;
 
-    DebugStack_Push(NULL, 0);
     void *args[5];
 
     Span *files = gather(m);
@@ -43,6 +42,5 @@ status Doc_Tests(MemCh *m){
     void *ar[] = {files, NULL};
     Out("^p.Files @^0\n", ar);
 
-    DebugStack_Pop();
-    return r;
+    Return(m, r);
 }

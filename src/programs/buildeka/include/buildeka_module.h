@@ -111,7 +111,7 @@ status BuildCli_SetupStatus(BuildCtx *ctx);
 status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path);
 
 status BuildCtx_GenAllIncSpan(BuildCtx *ctx);
-status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Span *genlist);
+status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Span *apis, Table *genlist);
 status BuildCtx_GenStrArr(BuildCtx *ctx, Span *files, Str *filter);
 status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter);
 
