@@ -105,27 +105,23 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
         }
     }
 
-
     Table_Set(sel->meta, S(m, "inc"), moduleInc);
 
     Table *deps = Table_Get(sel->meta, K(m, "dep"));
 
     ctx->current.staticlibs = Span_Make(m);
-    Span *modlist = Span_Make(m);
+    Table *modlist = Table_Make(m);
 
-    Span_Add(modlist, key);
+    Iter it;
+    Iter_Init(&it, Table_Ordered(m, deps));
+    while((Iter_Prev(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        Table_Set(modlist, h->key, h->value);
+    }
+
+    Table_Set(modlist, key, Table_Get(sel->meta, K(m, "path")));
     if(deps != NULL){
         Iter it;
-        Iter_Init(&it, Table_Ordered(m, deps));
-        while((Iter_Next(&it) & END) == 0){
-            Hashed *h = Iter_Get(&it);
-            if(h != NULL){
-                IoUtil_Annotate(m, h->value);
-                Str *modName = IoUtil_FnameStr(m, h->value);
-                Span_Add(modlist, modName);
-            }
-        }
-
         StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
         StrVec_Add(srcIncPath, IoUtil_PathSep(m));
         StrVec_Anchor(srcIncPath);
@@ -224,9 +220,8 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     }
 
-    void *ar[] = {modlist, sel->dest, NULL};
-    Out("^p.@ for @^0\n", ar);
-    exit(1);
+    void *ar[] = {modlist, sel->meta, NULL};
+    Out("^c. Modlist: ^p.@ ^c.Deps: ^p@^0\n", ar);
 
     BuildCtx_GenIncFlags(ctx, modlist, Table_Get(sel->meta, K(m, "api")), NULL);
 
@@ -477,6 +472,9 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = name;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
     BuildCtx_Log(ctx);
+
+    void *ar[] = {name, ctx->input.dependencies, NULL};
+    Out("^p.Building Module @ -> Deps: @^0\n", ar);
 
     setDepVars(ctx, name, sel);
 
