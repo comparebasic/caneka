@@ -8,9 +8,9 @@ static PatCharDef textDef[] = {
 };
 
 static PatCharDef varDef[] = {
-    {PAT_KO, '}', '}'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '$', '$'},
     {PAT_TERM|PAT_INVERT_CAPTURE, '{', '}'},
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '}', '}'},
     patText,
     {PAT_END, 0, 0}
 };
@@ -24,6 +24,15 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         args[1] = v,
         args[2] = NULL;
         Out("^c.Cash Capture ^E0.$^ec. -> ^0y.@\n", args);
+    }
+
+    Iter *it = (Iter *)rbl->dest;
+    if(captureKey == CASH_TEXT){
+        Iter_Add(it, v);
+    }else if(captureKey == CASH_VAR){
+        Fetcher *fch = Fetcher_Make(m);
+        Span_Add(fch->val.targets, FetchTarget_MakeKey(m, Ifc(m, v, TYPE_STR)));
+        Iter_Add(it, fch);
     }
 
     return ZERO;

@@ -197,7 +197,7 @@ static TestSet ExtTests[] = {
         "Cash Tests",
         Cash_Tests,
         "Cash templater testing.",
-        SKIP_TEST,
+        FEATURE_COMPLETE,
     },
 #ifdef CNKOPT_FREEBSD
     {

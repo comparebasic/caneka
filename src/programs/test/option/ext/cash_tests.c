@@ -2,7 +2,7 @@
 #include <caneka.h>
 #include <test_module.h>
 
-char *oneCstr = "Hi there ${name}"
+char *oneCstr = "Hi there ${name}!"
     ;
 
 char *twoCstr = "Hi there ${name}${show}, The temperature is "
@@ -17,14 +17,19 @@ status Cash_Tests(MemCh *m){
     Cursor *one = Cursor_Make(m, Sv(m, oneCstr));
     Cursor *two = Cursor_Make(m, Sv(m, twoCstr));
 
-    void *ar[] = {
-        one, two, NULL
-    };
-    Out("^p.One @\nTwo @\n", ar);
+    Span *cash = Cash_Prepare(m, one);
 
-    Roebling *parser = CashParser_Make(m, one, ZERO);
-    parser->type.state |= DEBUG;
-    Roebling_Run(parser);
+
+    Table *tbl = Table_Make(m);
+    Table_Set(tbl, K(m, "name"), S(m, "Gerry"));
+
+    Buff *bf = Buff_Make(m, ZERO);
+    Cash_Out(cash, bf, tbl);
+
+    void *ar[] = {
+       cash, bf->v,
+    };
+    Out("^p.First @ -> @\n", ar);
 
     return r;
 }

@@ -158,13 +158,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             if(Equals(tag, K(m, "option"))){
                 Hashed *h = Table_GetHashed(ctx->input.options, label);
 
-                void *ar[] = {h, path, NULL};
-                Out("^y.Possible Option @/@^0\n", ar);
-
                 if(h != NULL){
-                    void *ar[] = {h, key, ctx->input.options, NULL};
-                    Out("^c.Option @/@ of Options @^0\n", ar);
-
                     if(!Equals(label, value)){
                         Table_SetInTable(sel->meta, S(m, "api"), label, value);
                     }
@@ -188,8 +182,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
             if(dep != NULL){
                 StrVec *v = IoPath(m, "mod/");
                 StrVec_Add(v, value);
-                void *ar[] = {value, sel->meta, NULL};
-                Out("^y.Setting dep @ in @^0\n", ar);
 
                 Table_SetInTable(sel->meta, S(m, "dep"), value, v);
 

@@ -220,9 +220,6 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     }
 
-    void *ar[] = {modlist, sel->meta, NULL};
-    Out("^c. Modlist: ^p.@ ^c.Deps: ^p@^0\n", ar);
-
     BuildCtx_GenIncFlags(ctx, modlist, Table_Get(sel->meta, K(m, "api")), NULL);
 
     StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
@@ -472,9 +469,6 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = name;
     ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
     BuildCtx_Log(ctx);
-
-    void *ar[] = {name, ctx->input.dependencies, NULL};
-    Out("^p.Building Module @ -> Deps: @^0\n", ar);
 
     setDepVars(ctx, name, sel);
 
