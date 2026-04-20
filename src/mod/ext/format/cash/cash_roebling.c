@@ -50,20 +50,25 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     Iter *it = (Iter *)rbl->dest;
     if(captureKey == CASH_TEXT){
         Iter_Add(it, v);
-    }else if(captureKey == CASH_KEY && Equals(v, K(m, "/"))){
-        Out("^p.END^0\n", NULL);
     }else if(captureKey == CASH_KEY || captureKey == CASH_IF){
-        Abstract *a = Iter_Get(it);
-        if(a->type.of != TYPE_FETCHER){
-            a = (Abstract *)Fetcher_Make(m);
-            Iter_Add(it, a);
-        }
-        Fetcher *fch = (Fetcher *)a;
+        if(captureKey == CASH_KEY && Equals(v, K(m, "/"))){
+            Jump *end = Jump_Make(m, CASH_END);
+            Iter_Add(it, end);
+            Jump_FindSource(end, it);
+        }else{
+            Abstract *a = Iter_Get(it);
+            if(a->type.of != TYPE_FETCHER){
+                a = (Abstract *)Fetcher_Make(m);
+                Iter_Add(it, a);
+            }
+            Fetcher *fch = (Fetcher *)a;
 
-        if(captureKey == CASH_KEY){
-            Span_Add(fch->val.targets, FetchTarget_MakeKey(m, Ifc(m, v, TYPE_STR)));
-        }else if(captureKey == CASH_IF){
-            Span_Add(fch->val.targets, S(m, "IF"));
+
+            if(captureKey == CASH_KEY){
+                Span_Add(fch->val.targets, FetchTarget_MakeKey(m, Ifc(m, v, TYPE_STR)));
+            }else if(captureKey == CASH_IF){
+                Span_Add(fch->val.targets, Jump_Make(m, CASH_IF));
+            }
         }
     }
 

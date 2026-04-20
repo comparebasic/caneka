@@ -18,7 +18,7 @@ void Cash_Out(Span *cash, Buff *bf, void *data){
         if(a->type.of == TYPE_FETCHER){
             a = Fetch(m, (Fetcher *)a, data, NULL);
         }
-        if(a != NULL){
+        if(a != NULL && a->type.of != TYPE_CASH_JUMP){
             ToS(bf, a, a->type.of, ZERO);
         }
     }

@@ -54,6 +54,7 @@ static char *extTypeStrings[] = {
     "TYPE_FRAME",
     "TYPE_ENC_PAIR",
     "TYPE_FMT_HTML",
+    "TYPE_CASH_JUMP",
     "_APPS_TYPE_START",
     "_FORMATTER_START",
     "FORMATTER_START",

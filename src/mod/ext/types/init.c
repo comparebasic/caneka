@@ -25,6 +25,7 @@ status Caneka_Init(MemCh *m){
     r |= Serve_TosInit(m);
     r |= Node_ClsInit(m);
     r |= IterApi_Init(m);
+    r |= Cash_ToSInit(m, ToStreamLookup);
 
     return r;
 }

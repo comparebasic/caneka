@@ -41,7 +41,7 @@ status Cash_Tests(MemCh *m){
     args[0] = cash;
     args[1] = bf->v;
     args[2] = NULL;
-    Out("^p.Second @ -> @\n", args);
+    Out("^p.Second &\n    -> @\n", args);
 
     return r;
 }
