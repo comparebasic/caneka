@@ -67,14 +67,6 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
 
         Return(m, value);
     }else if((fch->type.state & FETCHER_IF) == 0){
-        void *args[] = {
-            fch,
-            orig,
-            NULL
-        };
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Fetch @ value not found on @\n", args);
-
         Return(m, NULL);
     }
 
