@@ -65,9 +65,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
 
 
             if(captureKey == CASH_KEY){
-                Span_Add(fch->val.targets, FetchTarget_MakeKey(m, Ifc(m, v, TYPE_STR)));
+                Iter_Add(&fch->targets, FetchTarget_MakeKey(m, Ifc(m, v, TYPE_STR)));
             }else if(captureKey == CASH_IF){
-                Span_Add(fch->val.targets, Jump_Make(m, CASH_IF));
+                Iter_Add(&fch->targets, Jump_Make(m, CASH_IF));
             }
         }
     }

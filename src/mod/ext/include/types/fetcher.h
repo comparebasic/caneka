@@ -11,12 +11,11 @@ enum fetcher_flags {
 
 typedef struct fetcher {
     Type type;
-    union {
-        Span *targets;
-    } val;
+    Iter targets;
     IterApi *api;
+    void *value;
 } Fetcher;
 
-void *Fetch(MemCh *m, Fetcher *fch, void *data, void *source);
+void Fetch(MemCh *m, Fetcher *fch, void *data, void *source);
 Fetcher *Fetcher_Make(MemCh *m);
 void *Fetch_FromPath(Fetcher *fch, void *data, void *source);

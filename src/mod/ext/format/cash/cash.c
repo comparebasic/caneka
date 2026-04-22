@@ -3,7 +3,6 @@
 
 Span *Cash_Prepare(MemCh *m, Cursor *curs){
     Roebling *rbl = CashParser_Make(m, curs, ZERO);
-    curs->type.state |= DEBUG;
     Roebling_Run(rbl);
     Roebling_Finalize(rbl, NULL, 0);
     return ((Iter *)rbl->dest)->p;
@@ -16,10 +15,31 @@ void Cash_Out(Span *cash, Buff *bf, void *data){
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
         if(a->type.of == TYPE_FETCHER){
-            a = Fetch(m, (Fetcher *)a, data, NULL);
+            Fetcher *fch = (Fetcher *)a;
+            fch->type.state |= DEBUG;
+            Fetch(m, fch, data, NULL);
+            a = fch->value;
+            void *ar[] = {
+                a,
+                data,
+                NULL
+            };
+            Out("^c.A @ from @^0\n", ar);
+            if(a == NULL){
+                Abstract *tg = Iter_GetByIdx(&fch->targets, fch->targets.p->max_idx);
+                if(tg->type.of == TYPE_CASH_JUMP){
+                    Jump *jmp = (Jump *)tg; 
+                    if(jmp->objType.of == CASH_IF && jmp->idx != -1){
+                        Iter_GetByIdx(&it, jmp->idx-1);
+                        continue;
+                    }
+                }
+            }
         }
+
         if(a != NULL && a->type.of != TYPE_CASH_JUMP){
             ToS(bf, a, a->type.of, ZERO);
+
         }
     }
 }

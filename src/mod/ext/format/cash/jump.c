@@ -8,11 +8,11 @@ void Jump_FindSource(Jump *jmp, Iter *it){
     i32 jumpIdx = temp.idx;
     while((Iter_Prev(&temp) & END) == 0){
         Abstract *a = Iter_Get(&temp);
-        if(a != jmp && a->type.of == TYPE_CASH_JUMP && ((Jump *)a)->objType.of == CASH_END){
+        if(a != (Abstract *)jmp && a->type.of == TYPE_CASH_JUMP && ((Jump *)a)->objType.of == CASH_END){
             skip++;
         }else if(a->type.of == TYPE_FETCHER){
             Fetcher *fch = (Fetcher *)a;
-            Abstract *tail = Span_Get(fch->val.targets, fch->val.targets->max_idx);
+            Abstract *tail = Span_Get(fch->targets.p, fch->targets.p->max_idx);
 
             if(tail != NULL && tail->type.of == TYPE_CASH_JUMP && --skip == 0){
                 Jump *origin = (Jump *)tail;

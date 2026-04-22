@@ -1,8 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
-void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
+void Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
     Debug_Push(m, fch);
+    fch->value = NULL;
 
     Abstract *value = (Abstract *)_value;
     if(value != NULL){
@@ -23,11 +24,14 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
         Out("^c.Fetch & from @^0.\n", args);
     }
 
-    Iter it;
-    Iter_Init(&it, fch->val.targets);
+    Iter_Restart(&fch->targets);
+
     FetchTarget *tg = NULL;
-    while(value != NULL && (Iter_Next(&it) & END) == 0){
-        tg = (FetchTarget *)Iter_Get(&it);
+    while(value != NULL && (Iter_Next(&fch->targets) & END) == 0){
+        tg = (FetchTarget *)Iter_Get(&fch->targets);
+        if(tg->type.of != TYPE_FETCH_TARGET){
+            break;
+        }
         if(value->type.of == TYPE_HASHED && 
                 (tg->type.state & FETCH_TARGET_ATT) == 0){
             value = ((Hashed *)value)->value;
@@ -48,6 +52,15 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
             fch->api = api;
         }
         value = Fetch_Target(m, tg, value, source);
+        if(fch->type.state & DEBUG){
+            void *args[] = {
+                value,
+                tg,
+                orig,
+                NULL,
+            };
+            Out("^p.    Fetch value = ^y.@ from @/@^0.\n", args);
+        }
     }
 
     if(fch->type.state & DEBUG){
@@ -59,23 +72,22 @@ void *Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
         Out("^c.after Fetch & value = ^y.@^0.\n", args);
     }
 
-    if(it.type.state & END){
+    if(fch->targets.type.state & END){
         if(value->type.of == TYPE_HASHED && 
                 (tg->type.state & FETCH_TARGET_ATT) == 0){
             value = ((Hashed *)value)->value;
         }
-
-        Return(m, value);
-    }else if((fch->type.state & FETCHER_IF) == 0){
-        Return(m, NULL);
     }
 
-    Return(m, NULL);
+    if(value != orig){
+        fch->value = value;
+    }
+    Debug_Pop(m);
 }
 
 Fetcher *Fetcher_Make(MemCh *m){
     Fetcher *fch = (Fetcher *)MemCh_Alloc(m, sizeof(Fetcher));
     fch->type.of = TYPE_FETCHER;
-    fch->val.targets = Span_Make(m);
+    Iter_Init(&fch->targets,Span_Make(m));
     return fch;
 }

@@ -49,7 +49,7 @@ static boolean Fetcher_Exact(Fetcher *a, Fetcher *b){
     if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS)){
         return FALSE;
     }
-    return Exact(a->val.targets, b->val.targets);
+    return Exact(a->targets.p, b->targets.p);
 }
 
 static status Fetcher_Print(Buff *bf, void *a, cls type, word flags){
@@ -60,7 +60,7 @@ static status Fetcher_Print(Buff *bf, void *a, cls type, word flags){
     };
     Fmt(bf, "Fetcher<@ ", args);
     void *args1[] = {
-        fch->val.targets,
+        fch->targets.p,
         NULL,
     };
     return Fmt(bf, "@>", args1);

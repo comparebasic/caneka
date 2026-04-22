@@ -710,6 +710,11 @@ void Iter_Setup(Iter *it, Span *p, status op, i32 idx){
     return;
 }
 
+void Iter_Restart(Iter *it){
+    it->type.state &= ~PROCESSING;
+    it->idx = 0;
+}
+
 Iter *Iter_Make(MemCh *m, Span *p){
     Iter *it = MemCh_Alloc(m, sizeof(Iter));
     if(p != NULL){

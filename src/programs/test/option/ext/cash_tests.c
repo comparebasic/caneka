@@ -5,9 +5,8 @@
 char *oneCstr = "Hi there ${name}!"
     ;
 
-char *twoCstr = "Hi there, ${name}. ${details.temp?}The temperature is "
-    "${details.temp}${details.unit}${/}"
-    "."
+char *twoCstr = "Hi there, ${name}.${details.temp?} The temperature is "
+    "${details.temp}${details.unit}.${/}"
     ;
 
 status Cash_Tests(MemCh *m){
@@ -25,10 +24,9 @@ status Cash_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
     Cash_Out(cash, bf, tbl);
 
-    args[0] = cash;
-    args[1] = bf->v;
-    args[2] = NULL;
-    Out("^y.First @ -> @\n", args);
+    args[0] = bf->v;
+    args[1] = NULL;
+    Out("^y.First @\n", args);
 
     cash = Cash_Prepare(m, two);
 
@@ -39,9 +37,25 @@ status Cash_Tests(MemCh *m){
     Cash_Out(cash, bf, tbl);
 
     args[0] = cash;
-    args[1] = bf->v;
-    args[2] = NULL;
-    Out("^p.Second &\n    -> @\n", args);
+    args[1] = NULL;
+    Out("^p.Second &\n", args);
+
+    args[0] = bf->v;
+    args[1] = NULL;
+    Out("^y.Second @\n", args);
+
+    Table *details = Table_Make(m);
+    Table_Set(details, K(m, "temp"), I32_Wrapped(m, 31));
+    Table_Set(details, K(m, "unit"), S(m, "F"));
+    Table_Set(tbl, K(m, "details"), details);
+
+    bf = Buff_Make(m, ZERO);
+    Cash_Out(cash, bf, tbl);
+
+    args[0] = bf->v;
+    args[1] = NULL;
+    Out("^y.Third @\n", args);
+
 
     return r;
 }

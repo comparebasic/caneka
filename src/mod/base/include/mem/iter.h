@@ -54,3 +54,4 @@ void *Iter_GetSelected(Iter *it);
 status Iter_GoToIdx(Iter *it, i32 idx);
 status Iter_ExpandTo(Iter *it, i32 idx);
 void Iter_Start(Iter *it);
+void Iter_Restart(Iter *it);
