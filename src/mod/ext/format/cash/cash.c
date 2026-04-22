@@ -16,24 +16,15 @@ void Cash_Out(Span *cash, Buff *bf, void *data){
         Abstract *a = Iter_Get(&it);
         if(a->type.of == TYPE_FETCHER){
             Fetcher *fch = (Fetcher *)a;
-            fch->type.state |= DEBUG;
             Fetch(m, fch, data, NULL);
             a = fch->value;
-            void *ar[] = {
-                a,
-                data,
-                NULL
-            };
-            Out("^c.A @ from @^0\n", ar);
-            if(a == NULL){
-                Abstract *tg = Iter_GetByIdx(&fch->targets, fch->targets.p->max_idx);
-                if(tg->type.of == TYPE_CASH_JUMP){
-                    Jump *jmp = (Jump *)tg; 
-                    if(jmp->objType.of == CASH_IF && jmp->idx != -1){
-                        Iter_GetByIdx(&it, jmp->idx-1);
-                        continue;
-                    }
+            Abstract *tg = Iter_GetByIdx(&fch->targets, fch->targets.p->max_idx);
+            if(tg->type.of == TYPE_CASH_JUMP){
+                Jump *jmp = (Jump *)tg; 
+                if(jmp->objType.of == CASH_IF && a == NULL && jmp->idx != -1){
+                    Iter_GetByIdx(&it, jmp->idx-1);
                 }
+                continue;
             }
         }
 

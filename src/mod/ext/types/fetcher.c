@@ -52,15 +52,6 @@ void Fetch(MemCh *m, Fetcher *fch, void *_value, void *source){
             fch->api = api;
         }
         value = Fetch_Target(m, tg, value, source);
-        if(fch->type.state & DEBUG){
-            void *args[] = {
-                value,
-                tg,
-                orig,
-                NULL,
-            };
-            Out("^p.    Fetch value = ^y.@ from @/@^0.\n", args);
-        }
     }
 
     if(fch->type.state & DEBUG){

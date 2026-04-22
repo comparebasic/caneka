@@ -24,9 +24,12 @@ status Cash_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
     Cash_Out(cash, bf, tbl);
 
-    args[0] = bf->v;
-    args[1] = NULL;
-    Out("^y.First @\n", args);
+    args[0] = S(m, "Hi there Gerry!");
+    args[1] = bf->v;
+    args[2] = NULL;
+
+    r |= Test(Equals(args[1], args[0]),
+        "Simple variable template matches @, have @", args);
 
     cash = Cash_Prepare(m, two);
 
@@ -36,13 +39,11 @@ status Cash_Tests(MemCh *m){
     bf = Buff_Make(m, ZERO);
     Cash_Out(cash, bf, tbl);
 
-    args[0] = cash;
-    args[1] = NULL;
-    Out("^p.Second &\n", args);
-
-    args[0] = bf->v;
-    args[1] = NULL;
-    Out("^y.Second @\n", args);
+    args[0] = S(m, "Hi there, Gerry.");
+    args[1] = bf->v;
+    args[2] = NULL;
+    r |= Test(Equals(args[1], args[0]),
+        "Complex with false if statement matches @, have @", args);
 
     Table *details = Table_Make(m);
     Table_Set(details, K(m, "temp"), I32_Wrapped(m, 31));
@@ -52,10 +53,11 @@ status Cash_Tests(MemCh *m){
     bf = Buff_Make(m, ZERO);
     Cash_Out(cash, bf, tbl);
 
-    args[0] = bf->v;
-    args[1] = NULL;
-    Out("^y.Third @\n", args);
-
+    args[0] = S(m, "Hi there, Gerry. The temperature is 31F.");
+    args[1] = bf->v;
+    args[2] = NULL;
+    r |= Test(Equals(args[1], args[0]),
+        "Complex with details inside true if statement matches @, have @", args);
 
     return r;
 }
