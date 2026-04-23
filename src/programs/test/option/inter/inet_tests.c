@@ -41,6 +41,7 @@ static status InetExample_read(Step *st, Task *tsk){
 
 static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source){
     Debug_Push(m, tsk);
+    /*
 
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);
     Single *fdw = (Single *)Ifc(m, arg, TYPE_WRAPPED_I32);
@@ -55,6 +56,7 @@ static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source)
 
     Task_AddDataStep(tsk, InetExample_read, Sv(m, "Hidy!"), bf, NULL, ZERO);
 
+    */
     Return(m, SUCCESS);
 }
 

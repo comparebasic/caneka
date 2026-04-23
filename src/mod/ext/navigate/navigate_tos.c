@@ -106,56 +106,6 @@ static status Comp_Print(Buff *bf, void *a, cls type, word flags){
     return Buff_AddBytes(bf, (byte *)">", 1);
 }
 
-static status Step_Print(Buff *bf, void *a, cls type, word flags){
-    Step *st = (Step *)Ifc(bf->m, a, TYPE_STEP);
-    void *args[5];
-    args[0] = Type_StateVec(bf->m, st->type.of, st->type.state);
-    args[1] = Util_Wrapped(bf->m, (util)st->func);
-    args[4] = NULL;
-    if(flags & DEBUG){
-        args[2] = st->arg;
-        args[3] = st->source;
-        return Fmt(bf, "Step<$ ^D.$^d.func arg:@ source:@>", args);
-    }else{
-        args[2] = Type_ToStr(bf->m,
-            st->arg != NULL ? st->arg->type.of : ZERO);
-        args[3] = Type_ToStr(bf->m,
-            st->source != NULL ? st->source->type.of : ZERO);
-        return Fmt(bf, "Step<$ ^D.$^d.func arg:$ source:$>", args);
-    }
-}
-
-static status Task_Print(Buff *bf, void *a, cls type, word flags){
-    Task *tsk = (Task *)Ifc(bf->m, a, TYPE_TASK);
-    void *args[6];
-    args[0] = Type_StateVec(bf->m, tsk->type.of, tsk->type.state);
-    args[1] = I32_Wrapped(bf->m, tsk->chainIt.idx);
-    args[2] = I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
-    args[3] = Iter_Current(&tsk->chainIt);
-    args[5] = NULL;
-    if(flags & DEBUG){
-        args[4] = tsk->data;
-        return Fmt(bf, "Task<@ $ of $ \\@& data:@>", args);
-    }else{
-        args[1] = tsk->data;
-        args[2] = NULL;
-        return Fmt(bf, "Task<@ @>", args);
-    }
-}
-
-static status Frame_Print(Buff *bf, void *a, cls type, word flags){
-    Frame *fm = (Frame *)Ifc(bf->m, a, TYPE_FRAME);
-    void *args[] = {
-        I32_Wrapped(bf->m, fm->originIdx),
-        fm->originKey,
-        (fm->value != NULL ? Type_ToStr(bf->m, fm->value->type.of): NULL),
-        I32_Wrapped(bf->m, fm->it.idx),
-        Iter_Current(&fm->it),
-        NULL,
-    };
-    return Fmt(bf, "Frame<from:@/@ @[@]>", args);
-}
-
 status Navigate_InitLabels(MemCh *m, Lookup *lk){
     status r = READY;
     /*
@@ -219,9 +169,6 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Navigate_InitLabels(m, ToSFlagLookup);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
-    r |= Lookup_Add(m, lk, TYPE_FRAME, (void *)Frame_Print);
-    r |= Lookup_Add(m, lk, TYPE_TASK, (void *)Task_Print);
-    r |= Lookup_Add(m, lk, TYPE_STEP, (void *)Step_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
     r |= Lookup_Add(m, lk, TYPE_QUEUE_CRIT, (void *)QueueCrit_Print);
     return r;

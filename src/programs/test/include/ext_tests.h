@@ -3,7 +3,6 @@ status BinSegCollection_Tests(MemCh *m);
 status BinSegV_Tests(MemCh *m);
 status BinSegReversedV_Tests(MemCh *m);
 status Config_Tests(MemCh *m);
-status TaskStep_Tests(MemCh *m);
 status Node_Tests(MemCh *m);
 status StrVecSplit_Tests(MemCh *m);
 status Snip_Tests(MemCh *m);
@@ -186,12 +185,6 @@ static TestSet ExtTests[] = {
         QueueScale_Tests,
         "Queue testing adding and removing Queue items over time.",
         SKIP_TEST,
-    },
-    {
-        "TaskStep Tests",
-        TaskStep_Tests,
-        "Task/Step and Task_Tumble tests.",
-        FEATURE_COMPLETE,
     },
     {
         "Cash Tests",

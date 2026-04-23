@@ -45,8 +45,8 @@ static i32 openPortToFd(i32 port){
     return fd;
 }
 
-static status ServeTcp_OpenTcp(Step *st, Task *tsk){
-    TcpCtx *ctx = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
+static status ServeTcp_OpenTcp(Server *srv){
+    TcpCtx *ctx = (TcpCtx *)Ifc(tsk->m, srv->ctx->source, TYPE_TCP_CTX);
     i32 fd = openPortToFd(ctx->port);
     void *args[4];
 
@@ -176,8 +176,8 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     Return(m, st->type.state);
 }
 
-static status ServeTcp_SetupQueue(Step *st, Task *tsk){
-    Queue *q = Queue_Make(tsk->m);
+static status ServeTcp_SetupQueue(Server *srv){
+    Queue *q = srv->q;
 
     QueueCrit *crit = QueueCrit_Make(tsk->m, QueueCrit_Fds, ZERO);
     Queue_AddHandler(q, crit);
@@ -189,11 +189,10 @@ static status ServeTcp_SetupQueue(Step *st, Task *tsk){
     return st->type.state;
 }
 
-Task *ServeTcp_Make(TcpCtx *ctx){
-    Task *tsk = Task_Make(NULL, ctx);
-    tsk->stepGuardMax = -1;
-    Task_AddStep(tsk, ServeTcp_AcceptPoll, ctx, NULL, STEP_LOOP);
-    Task_AddStep(tsk, ServeTcp_OpenTcp, ctx, NULL, ZERO);
-    Task_AddStep(tsk, ServeTcp_SetupQueue, ctx, NULL, ZERO);
-    return tsk;
+Server *ServeTcp_Make(MemCh *m, TcpCtx *ctx){
+    Server *srv = Server_Make(m, ctx);
+    ServeTcp_SetupQueue(srv);
+    ServeTcp_OpenTcp(srv);
+    ServeTcp_AcceptPoll(srv);
+    return srv;
 }

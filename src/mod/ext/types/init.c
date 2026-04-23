@@ -21,7 +21,6 @@ status Caneka_Init(MemCh *m){
     r |= Format_Init(m);
     r |= BinSeg_Init(m);
     r |= Navigate_ToSInit(m, ToStreamLookup);
-    r |= Task_Init(m);
     r |= Serve_TosInit(m);
     r |= Node_ClsInit(m);
     r |= IterApi_Init(m);
