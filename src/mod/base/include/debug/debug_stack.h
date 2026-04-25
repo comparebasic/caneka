@@ -5,11 +5,13 @@ extern i32 DEBUG_STACK_COLOR;
     #define Debug_Push(m, a) DebugStack_Push((m), (a), __func__, __FILE__, __LINE__)
     #define Debug_SetRef(m, a) DebugStack_SetRef((m), (a), __func__, __FILE__, __LINE__)
     #define Return(m, x) DebugStack_Pop((m)); return (x)
+    #define ReturnVoid(m) DebugStack_Pop((m)); return
     #define Debug_Pop(m) DebugStack_Pop((m))
 #else
     #define Debug_Push(m, a)  
     #define Debug_SetRef(m, a)
     #define Return(m, x) return (x)
+    #define ReturnVoid(m) return
     #define Debug_Pop(m)
 #endif
 

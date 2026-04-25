@@ -1,11 +1,4 @@
-#define TCP_STEP_MAX 16000
-#define SERV_READ_SIZE 1024
-#define SERV_SEND_SIZE 1024
-#define TCP_POLL_DELAY 10
-#define ACCEPT_AT_ONEC_MAX 192
-#define TCP_TIMEOUT 6
-
-#define TCP_LISTEN_BACKLOG 128
-#define TCP_ZERO_REQ_DELAY 6000
-
-Task *ServeTcp_Make(TcpCtx *ctx);
+#define TCP_LISTEN_BACKLOG 192
+#define TCP_ZERO_REQ_DELAY 5000
+struct pollfd *Server_TcpGetPollFd(Req *req);
+void Server_ServeTcp(Server *srv);

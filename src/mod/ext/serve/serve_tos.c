@@ -15,67 +15,35 @@ static StrVec *getPollFlagVec(MemCh *m, struct pollfd *pfd){
     return v;
 }
 
-static i64 ProtoCtx_Print(Buff *bf, void *a, cls type, word flags){
-    ProtoCtx *ctx = (ProtoCtx*)Ifc(bf->m, a, TYPE_PROTO_CTX);
+static status IoCtx_Print(Buff *bf, void *a, cls type, word flags){
+    IoCtx *ctx = (IoCtx*)a;
     void *args[] = {
-        Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        Util_Wrapped(bf->m, ctx->u),
-        ctx->in,
-        ctx->out,
-        ctx->ctx,
         NULL,
     };
-    return Fmt(bf, "Proto<$ u:$ in:@ out:@ data:@>", args);
+    return Fmt(bf, "IoCtx<>", args);
 }
 
-static status TcpTask_Print(Buff *bf, void *a, cls type, word flags){
-    Task *tsk = (Task *)Ifc(bf->m, a, TYPE_TCP_TASK);
-    void *args[8];
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    args[0] = Type_StateVec(bf->m, TYPE_TASK, tsk->type.state);
-    args[1] = I32_Wrapped(bf->m, tsk->idx);
-    args[2] = I32_Wrapped(bf->m, pfd->fd);
-    args[3] = getPollFlagVec(bf->m, pfd);
-    args[4] = NULL;
-
-    Fmt(bf, "TcpTask<@ ^D.@^d.idx ^D$^d.fd @", args);
-    if(flags & DEBUG){
-        args[0] = I32_Wrapped(bf->m, tsk->chainIt.idx);
-        args[1] = I32_Wrapped(bf->m, tsk->chainIt.p->max_idx);
-        args[2] = Iter_Get(&tsk->chainIt);
-        args[3] = NULL;
-        Fmt(bf, "$of$ \\@@>", args);
-    }else{
-        Buff_AddBytes(bf, (byte *)">", 1);
-    }
-    return SUCCESS;
-}
-
-static i64 TcpCtx_Print(Buff *bf, void *a, cls type, word flags){
-    TcpCtx *ctx = (TcpCtx*)Ifc(bf->m, a, TYPE_TCP_CTX);
+static status Server_Print(Buff *bf, void *a, cls type, word flags){
+    Server *ctx = (Server*)a;
     void *args[] = {
-        Type_StateVec(bf->m, ctx->type.of, ctx->type.state),
-        ctx->path,
-        I32_Wrapped(bf->m, ctx->port),
-        ctx->inet4,
-        ctx->inet6,
-        Time_Wrapped(bf->m, &ctx->metrics.start),
-        I64_Wrapped(bf->m, ctx->metrics.open),
-        I64_Wrapped(bf->m, ctx->metrics.error),
-        I64_Wrapped(bf->m, ctx->metrics.served),
         NULL,
     };
-    return Fmt(bf, "Tcp<$ $ ^D.$^d.port ^D.$^d.inet4 ^D.$^d.inet6 $start $open $error $served>", args);
+    return Fmt(bf, "Server<>", args);
 }
 
-status Serve_ToSInit(MemCh *m, Lookup *lk){
-    status r = READY;
-    r |= Lookup_Add(m, lk, TYPE_TCP_CTX, (void *)TcpCtx_Print);
-    r |= Lookup_Add(m, lk, TYPE_TCP_TASK, (void *)TcpTask_Print);
-    r |= Lookup_Add(m, lk, TYPE_PROTO_CTX, (void *)ProtoCtx_Print);
-    return r;
+static status Req_Print(Buff *bf, void *a, cls type, word flags){
+    Server *ctx = (Server*)a;
+    void *args[] = {
+        NULL,
+    };
+    return Fmt(bf, "Server<>", args);
 }
 
 status Serve_TosInit(MemCh *m){
-    return Serve_ToSInit(m, ToStreamLookup);
+    status r = READY;
+    Lookup *lk = ToStreamLookup;
+    r |= Lookup_Add(m, lk, TYPE_IO_CTX, (void *)IoCtx_Print);
+    r |= Lookup_Add(m, lk, TYPE_SERVER, (void *)Server_Print);
+    r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
+    return r;
 }

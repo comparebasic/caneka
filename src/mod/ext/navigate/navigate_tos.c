@@ -116,25 +116,6 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
     }
     */
 
-    if(stepLabels == NULL){
-        stepLabels = (Str **)Arr_Make(m, 17);
-        stepLabels[9] = Str_CstrRef(m, "IO_IN");
-        stepLabels[10] = Str_CstrRef(m, "IO_OUT");
-        stepLabels[11] = Str_CstrRef(m, "LOOP");
-        Lookup_Add(m, lk, TYPE_STEP, (void *)stepLabels);
-        r |= SUCCESS;
-    }
-
-    if(taskLabels == NULL){
-        taskLabels = (Str **)Arr_Make(m, 17);
-        taskLabels[9] = Str_CstrRef(m, "UPDATE_CRIT");
-        taskLabels[10] = Str_CstrRef(m, "QUEUE");
-        taskLabels[11] = Str_CstrRef(m, "CHILD");
-        taskLabels[12] = Str_CstrRef(m, "CHECK_ELAPSED");
-        Lookup_Add(m, lk, TYPE_TASK, (void *)taskLabels);
-        r |= SUCCESS;
-    }
-
     if(queueLabels == NULL){
         queueLabels = (Str **)Arr_Make(m, 17);
         queueLabels[9] = Str_CstrRef(m, "SINGLE_IDX");

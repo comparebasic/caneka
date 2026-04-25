@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
+
 static i32 openPortToFd(i32 port){
     i32 fd = 0;
 	struct sockaddr_in serv_addr;
@@ -45,44 +46,36 @@ static i32 openPortToFd(i32 port){
     return fd;
 }
 
-static status ServeTcp_OpenTcp(Server *srv){
-    TcpCtx *ctx = (TcpCtx *)Ifc(tsk->m, srv->ctx->source, TYPE_TCP_CTX);
-    i32 fd = openPortToFd(ctx->port);
+static void ServeTcp_OpenTcp(Server *srv){
+    i32 fd = openPortToFd(srv->ctx->address.ip.port);
     void *args[4];
 
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+    struct pollfd *pfd = (struct pollfd *)&srv->u;
     if(fd > 0){
         pfd->fd = fd;
         pfd->events = POLLIN;
         pfd->revents = 0;
-        st->type.state |= SUCCESS;
     }else{
-        st->type.state |= ERROR;
+        srv->type.state |= ERROR;
     }
 
     args[0] = I32_Wrapped(OutStream->m, fd);
-    args[1] = st;
-    args[2] = tsk;
-    args[3] = NULL;
-    Out("^c.Opened Socket ^D.$^d.fd for @ of @ Ready to Serve^0\n", args);
-
-    return st->type.state;
+    args[1] = srv;
+    args[0] = NULL;
+    Out("^c.Opened Socket ^D.$^d.fd for @. Ready to Serve^0\n", args);
 }
 
-static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
-    MemCh *m = tsk->m;
-    Debug_Push(m, st);
+static void ServeTcp_AcceptPoll(Server *srv){
+    MemCh *m = srv->m;
+    Debug_Push(m, srv);
 
-    status r = READY;
-    st->type.state &= ~SUCCESS;
+    srv->type.state &= ~SUCCESS;
     void *args[5];
 
-    TcpCtx *ctx = (TcpCtx *)Ifc(tsk->m, tsk->source, TYPE_TCP_CTX);
-    Queue *q = (Queue *)Ifc(tsk->m, tsk->data, TYPE_QUEUE);
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk);;
+    struct pollfd *pfd = (struct pollfd *)&srv->u;
 
     i64 timeout = 0;
-    if(q->it.p->nvalues == 0){
+    if(srv->q->it.p->nvalues == 0){
         timeout = TCP_ZERO_REQ_DELAY;
     }
 
@@ -90,109 +83,68 @@ static status ServeTcp_AcceptPoll(Step *st, Task *tsk){
     if(available == -1){
         args[0] = Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
-        Error(tsk->m, FUNCNAME, FILENAME, LINENUMBER,
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error connecting to test socket: $\n", args);
-        st->type.state |= ERROR;
-        return st->type.state;
+        srv->type.state |= ERROR;
+
+        ReturnVoid(m);
     }
 
     i32 accepted = 0;
     while(available-- > 0){
         i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
-            ctx->metrics.open++;
+            srv->metrics.open++;
 
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
-            MemCh *tm = MemCh_Make();
-            Task *child = Task_Make(Span_Make(tm), tsk);
-            child->type.of = TYPE_TCP_TASK;
-            child->type.state |= TASK_CHILD;
-            child->timeout.tv_sec = TCP_TIMEOUT;
-            child->parent = tsk;
-            child->stepGuardMax = TCP_STEP_MAX;
-            tm->owner = child;
-            ctx->populate(tm, child, I32_Wrapped(tm, new_fd), tsk->source);
+            Req *req = srv->ctx->mk(srv->ctx);
+            req->idx = Queue_Add(srv->q, req);
 
-            if(tsk->type.state & DEBUG){
-                args[0] = child;
-                args[1] = I32_Wrapped(child->m, pfd->fd);
-                args[2] = NULL;
-                Out("^c.    Adding Child & fd$^0\n", args);
-            }
-
-            child->idx = Queue_Add(q, child);
-            if(child->type.state & TASK_UPDATE_CRIT){
-                
-                struct pollfd *pfd = (struct pollfd *)&child->u;
-                Queue_SetCriteria(q, 0, child->idx, &child->u);
-                child->type.state &= ~TASK_UPDATE_CRIT;
-            }else{
-                exit(1);
-            }
-
-            util upfd = Queue_GetCriteria(q, 0, child->idx);
-            struct pollfd *pfd = (struct pollfd *)&upfd;
-            if(pfd->fd == -1){
-                exit(1);
-            }
-
-            accepted++;
-            r |= tsk->type.state;
+            struct pollfd *pfd = (struct pollfd *)&req->u;
+            Queue_SetCriteria(srv->q, 0, req->idx, &req->u);
         }else{
             break;
         }
     }
 
-    tsk->type.state |= (NOOP|PROCESSING);
-    while((Queue_Next(q) & END) == 0){
-        tsk->type.state &= ~(NOOP|PROCESSING);
-        if(tsk->type.state & DEBUG){
-            args[0] = q;
-            args[1] = NULL;
-            Out("^c.    Getting next @^0\n", args);
-        }
-        Task *child = (Task *)Queue_Get(q);
-        if(tsk->type.state & DEBUG){
-            args[0] = child;
-            args[1] = NULL;
-            Out("^c.    Tumbling @^0\n", args);
-        }
-        child->parent = tsk;
-        Task_Tumble(child);
-        if(child->type.state & (SUCCESS|ERROR)){
-            Queue_Remove(q, child->idx);
-            ctx->finalize(NULL, child);    
-            MemCh_Free(child->m);
+    srv->type.state |= (NOOP|PROCESSING);
+    while((Queue_Next(srv->q) & END) == 0){
+        srv->type.state &= ~(NOOP|PROCESSING);
+        Req *req = (Req *)Queue_Get(srv->q);
+
+        srv->ctx->handle(m, req);
+        if(req->type.state & (SUCCESS|ERROR)){
+            Queue_Remove(srv->q, req->idx);
+            srv->ctx->finalize(m, req);    
+            MemCh_Free(req->m);
+            if(req->type.state & ERROR){
+                srv->metrics.error++;
+            }
+            srv->metrics.served++;
+            srv->metrics.open--;
         }
     }
 
-    if((tsk->type.state & DEBUG) && q->type.state & END){
-        args[0] = tsk;
+    if((srv->type.state & DEBUG) && srv->q->type.state & END){
+        args[0] = srv;
         args[1] = NULL;
         Out("^c.    No more Reqs @^0\n", args);
     }
 
-    Return(m, st->type.state);
+    ReturnVoid(m);
 }
 
-static status ServeTcp_SetupQueue(Server *srv){
-    Queue *q = srv->q;
-
-    QueueCrit *crit = QueueCrit_Make(tsk->m, QueueCrit_Fds, ZERO);
-    Queue_AddHandler(q, crit);
-
-    tsk->data = (Abstract *)q;
-    tsk->type.state |= TASK_QUEUE;
-
-    st->type.state |= SUCCESS;
-    return st->type.state;
+struct pollfd *Server_TcpGetPollFd(Req *req){
+     return (struct pollfd *)&req->u;
 }
 
-Server *ServeTcp_Make(MemCh *m, TcpCtx *ctx){
-    Server *srv = Server_Make(m, ctx);
-    ServeTcp_SetupQueue(srv);
+void Server_ServeTcp(Server *srv){
+    QueueCrit *crit = QueueCrit_Make(srv->m, QueueCrit_Fds, ZERO);
+    Queue_AddHandler(srv->q, crit);
+
     ServeTcp_OpenTcp(srv);
     ServeTcp_AcceptPoll(srv);
-    return srv;
+
+    return;
 }

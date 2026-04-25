@@ -3,6 +3,5 @@
 
 #include "types.h"
 #include "init.h"
-#include "http.h"
 
 #endif

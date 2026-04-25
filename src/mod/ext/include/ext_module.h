@@ -6,6 +6,7 @@
 #include "persist.h"
 #include "navigate.h"
 #include "format.h"
+#include "http.h"
 #include "serve.h"
 
 #endif
